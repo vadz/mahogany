@@ -115,10 +115,11 @@ wxNotebookWithImages::~wxNotebookWithImages()
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
 void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
-                                         wxControl *last)
+                                          wxControl *last,
+                                          size_t extraSpace)
 {
    if ( last == NULL )
-      c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
+      c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN + extraSpace);
    else {
       size_t margin = LAYOUT_Y_MARGIN;
       if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
@@ -126,7 +127,7 @@ void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
          margin *= 2;
       }
 
-      c->top.Below(last, margin);
+      c->top.Below(last, margin + extraSpace);
    }
 }
 
@@ -148,7 +149,7 @@ wxTextCtrl *wxNotebookPageBase::CreateFileEntry(const char *label,
    // and also create a button for browsing for file
    wxFileBrowseButton *btn = new wxFileBrowseButton(text, this);
    wxLayoutConstraints *c = new wxLayoutConstraints;
-   SetTopConstraint(c, last);
+   c->centreY.SameAs(text, wxCentreY);
    c->left.RightOf(text, LAYOUT_X_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
    c->height.SameAs(text, wxHeight);
@@ -166,14 +167,15 @@ wxTextCtrl *wxNotebookPageBase::CreateFileEntry(const char *label,
 wxTextCtrl *wxNotebookPageBase::CreateTextWithLabel(const char *label,
                                                     long widthMax,
                                                     wxControl *last,
-                                                    size_t nRightMargin)
+                                                    size_t nRightMargin,
+                                                    int style)
 {
    wxLayoutConstraints *c;
 
    // for the label
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   SetTopConstraint(c, last);
+   SetTopConstraint(c, last, 3); // FIXME shouldn't hardcode this!
    c->width.Absolute(widthMax);
    c->height.AsIs();
    wxStaticText *pLabel = new wxStaticText(this, -1, label,
@@ -183,14 +185,35 @@ wxTextCtrl *wxNotebookPageBase::CreateTextWithLabel(const char *label,
 
    // for the text control
    c = new wxLayoutConstraints;
-   SetTopConstraint(c, last);
+   c->centreY.SameAs(pLabel, wxCentreY);
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(this, -1, "");
+   wxTextCtrl *pText = new wxTextCtrl(this, -1, "",wxDefaultPosition,
+                                      wxDefaultSize, style);
    pText->SetConstraints(c);
 
    return pText;
+}
+
+
+// create just some text
+wxStaticText *wxNotebookPageBase::CreateMessage(const char *label,
+                                                wxControl *last)
+{
+   wxLayoutConstraints *c;
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   SetTopConstraint(c, last);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_LEFT);
+   pLabel->SetConstraints(c);
+
+   return pLabel;
 }
 
 // create a checkbox
@@ -218,6 +241,56 @@ wxCheckBox *wxNotebookPageBase::CreateCheckBox(const char *label,
    checkbox->SetConstraints(c);
 
    return checkbox;
+}
+
+// create a radiobox control with 3 choices and a label for it
+wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
+                                                   long widthMax,
+                                                   wxControl *last,
+                                                   size_t nRightMargin)
+{
+   wxLayoutConstraints *c;
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   // we need some extra space because a radiobox is bigger than a text zone
+   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   // for the radiobox
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(pLabel, wxCentreY);
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+#ifdef __WXGTK__
+   c->height.PercentOf(pLabel, wxHeight, 300);
+#else
+   c->height.PercentOf(pLabel, wxHeight, 150);
+   //c->height.AsIs();
+#endif
+
+   // FIXME we assume that if there other controls dependent on this one in
+   //       the options dialog, then only the first choice ("No") means that
+   //       they should be disabled
+   wxString choices[3];
+   choices[0] = _("No");
+   choices[1] = _("Ask");
+   choices[2] = _("Yes");
+   wxRadioBox *radiobox = new wxRadioBox(this, -1, "",
+                                         wxDefaultPosition, wxDefaultSize,
+                                         3,
+                                         choices,
+                                         1,wxRA_SPECIFY_ROWS);
+
+   radiobox->SetConstraints(c);
+
+   return radiobox;
 }
 
 // create a listbox and the buttons to work with it
@@ -287,7 +360,9 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
 // -----------------------------------------------------------------------------
 
 wxNotebookDialog::wxNotebookDialog(wxFrame *parent, const wxString& title)
-                : wxDialog(parent, -1, title)
+                : wxDialog(parent, -1, title,
+                           wxDefaultPosition, wxDefaultSize,
+                           wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    SetAutoLayout(TRUE);
 

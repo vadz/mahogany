@@ -25,8 +25,11 @@
 #   include "MApplication.h"
 #   include "Profile.h"
 #   include "guidef.h"
+
+#   include <wx/wx.h>
 #endif
 
+#include <wx/dynarray.h>
 #include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
@@ -52,6 +55,11 @@ class wxFolderBaseDialog : public wxNotebookDialog
 {
 public:
    wxFolderBaseDialog(wxWindow *parent, const wxString& title);
+   ~wxFolderBaseDialog()
+   {
+      SafeDecRef(m_newFolder);
+      SafeDecRef(m_parentFolder);
+   }
 
    // initialization (should be called before the dialog is shown)
       // set folder we're working with
@@ -63,7 +71,7 @@ public:
 
    // after the dialog is closed, retrieve the folder which was created or
    // NULL if the user cancelled us without creating anything
-   MFolder *GetFolder() const { return m_newFolder; }
+   MFolder *GetFolder() const { SafeIncRef(m_newFolder); return m_newFolder; }
 
    // override control creation functions
    virtual wxControl *CreateControlsAbove(wxPanel *panel);
@@ -75,10 +83,25 @@ public:
       Folder_Name = 0x1000
    };
 
+   // called by the pages
+   void SetMayEnableOk(bool may)
+   {
+      m_mayEnableOk = may;
+
+      DoUpdateButtons();
+   }
+
+   // set the folder name
+   void SetFolderName(const String& name) { m_folderName->SetValue(name); }
+
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxFolderBaseDialog() { }
 
 protected:
+   // enable or disable [Ok] and [Apply] buttons
+   void DoUpdateButtons()
+      { EnableButtons(m_mayEnableOk && !m_folderName->GetValue().IsEmpty()); }
+
    wxTextCtrl  *m_folderName,
                *m_parentName;
 
@@ -86,9 +109,23 @@ protected:
 
    MFolder     *m_parentFolder,
                *m_newFolder;
+
+   // FALSE if at least one of the pages contains incorrect information, if
+   // it's TRUE it doesn't mean that the buttons are enabled - the global
+   // dialog settings (folder name and parent) must be correct too
+   bool m_mayEnableOk;
+
+private:
+   DECLARE_DYNAMIC_CLASS(wxFolderBaseDialog)
 };
 
 // folder creation dialog
+//
+// FIXME this dialog is also used for showing the folder properties, hence the
+//       ugly hack with the 3rd parameter to the ctor (and which is passed
+//       further to the pages too) - instead we should have a common base
+//       class to the both kinds of notebooks and separate properties/creation
+//       functionality for moving into derived classes
 class wxFolderCreateDialog : public wxFolderBaseDialog
 {
 public:
@@ -103,6 +140,9 @@ public:
 
    // callbacks
    void OnFolderNameChange(wxEvent&);
+
+   // override control creation functions
+   virtual void CreateNotebook(wxPanel *panel);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxFolderCreateDialog() { }
@@ -127,10 +167,9 @@ public:
 class wxFolderPropertiesPage : public wxNotebookPageBase
 {
 public:
-   wxFolderPropertiesPage(wxNotebook *notebook, ProfileBase *profile);
-
-   // enable additional fields for "Create" dialog
-   void EnableAllFields();
+   wxFolderPropertiesPage(wxNotebook *notebook,
+                          ProfileBase *profile,
+                          wxFolderCreateDialog *dlg = NULL);
 
    // set the profile path to copy the default values from
    void SetDefaults(const String& profilePath)
@@ -140,10 +179,16 @@ public:
    virtual bool TransferDataFromWindow(void);
 
    /// update controls
-   void UpdateUI(void);
+   void UpdateUI(int selection = -1);
    void OnEvent(wxCommandEvent& event);
+   void OnChange(wxKeyEvent& event);
 
 protected:
+   // fill the fields with the default value for the given folder type
+   // (the current value of the type radiobox) either when the page is created
+   // or when the type of the folder chosen changes
+   void SetDefaultValues(bool firstTime = false);
+
    bool m_isCreating;
 
    wxNotebook * m_notebook;
@@ -171,6 +216,9 @@ protected:
    // the path to the profile section with the defautl values
    wxString m_defaultsPath;
 
+   // the "create folder dialog" or NULL if we're showing folder properties
+   wxFolderCreateDialog *m_dlgCreate;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -183,7 +231,8 @@ public:
    // icon names
    static const char *s_aszImages[];
 
-   wxFolderCreateNotebook(wxWindow *parent);
+   wxFolderCreateNotebook(wxWindow *parent,
+                          wxFolderCreateDialog *dlg = NULL);
 };
 
 // folder selection dialog: contains the folder tree inside it
@@ -191,13 +240,14 @@ class wxFolderSelectionDialog : public wxDialog
 {
 public:
    wxFolderSelectionDialog(wxWindow *parent, MFolder *folder);
+   ~wxFolderSelectionDialog() { SafeDecRef(m_folder); }
 
    // callbacks
    void OnOK(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
 
    // get the chosen folder
-   MFolder *GetFolder() const { return m_folder; }
+   MFolder *GetFolder() const { SafeIncRef(m_folder); return m_folder; }
 
 private:
    MFolder *m_folder;
@@ -214,7 +264,8 @@ private:
 // event tables
 // -----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxNotebookDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxNotebookDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
 
 BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,
@@ -223,6 +274,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnEvent)
+   EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
@@ -241,6 +293,7 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
 {
    m_parentFolder = NULL;
    m_newFolder = NULL;
+   m_mayEnableOk = false;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
@@ -270,7 +323,7 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
    if ( m_newFolder )
    {
       // a folder specified from the very beginning, can't be changed
-      m_folderName = new wxTextCtrl(panel, Folder_Name, 
+      m_folderName = new wxTextCtrl(panel, Folder_Name,
                                     m_newFolder->GetFullName(),
                                     wxDefaultPosition, wxDefaultSize,
                                     wxTE_READONLY);
@@ -362,6 +415,12 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolder::Type typeFolder)
       m_parentFolder = m_btnParentFolder->GetFolder();
    }
 
+   if ( !m_parentFolder )
+   {
+      // take the root by default
+      m_parentFolder = MFolder::Get("");
+   }
+
    m_newFolder = m_parentFolder->CreateSubfolder(m_folderName->GetValue(),
                                                  typeFolder);
 
@@ -372,7 +431,7 @@ void wxFolderCreateDialog::OnFolderNameChange(wxEvent& event)
 {
    SetDirty();
 
-   EnableButtons(!m_folderName->GetValue().IsEmpty());
+   DoUpdateButtons();
 
    event.Skip();
 }
@@ -384,14 +443,11 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    // initialize our pages
    wxFolderPropertiesPage *page = (wxFolderPropertiesPage *)(m_notebook->
                                     GetPage(FolderCreatePage_Folder));
-   page->EnableAllFields();
 
    // by default, take the same values as for the parent
    if ( m_parentFolder )
    {
-      wxString profilePath;
-      profilePath << M_FOLDER_CONFIG_SECTION << m_parentFolder->GetName();
-      page->SetDefaults(profilePath);
+      page->SetDefaults(m_parentFolder->GetFullName());
    }
 
    if ( !m_parentFolder )
@@ -406,34 +462,51 @@ bool wxFolderCreateDialog::TransferDataToWindow()
 
 bool wxFolderCreateDialog::TransferDataFromWindow()
 {
+   wxString folderName = m_folderName->GetValue();
+
    // for the creation of a folder we don't use the toplevel config
    // section but create a profile of that name first
    ProfileBase *profile = ProfileBase::CreateProfile
                            (
-                            m_folderName->GetValue(),
+                            folderName,
                             mApplication->GetProfile()
                            );
-   profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
 
-   // tell the pages to use this profile instead of the global one
-   ((wxOptionsPage *)m_notebook->GetPage(FolderCreatePage_Compose))
-      ->SetProfile(profile);
+   bool ok = TRUE;
 
-   if ( !wxNotebookDialog::TransferDataFromWindow() )
-      return FALSE;
+   // we must restore the path before the profile is released with DecRef(),
+   // so take all this in a block
+   {
+       FolderPathChanger changePath(profile, folderName);
+       profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+
+       // tell the pages to use this profile instead of the global one
+       ((wxOptionsPage *)m_notebook->GetPage(FolderCreatePage_Compose))
+          ->SetProfile(profile);
+
+       if ( wxNotebookDialog::TransferDataFromWindow() )
+       {
+           // do create the new folder
+           CHECK( m_parentFolder, false, "should have created parent folder" );
+
+           m_newFolder = m_parentFolder->GetSubfolder(m_folderName->GetValue());
+
+           CHECK( m_newFolder, false, "new folder not created" );
+       }
+       else
+       {
+           ok = false;
+       }
+   }
 
    profile->DecRef();
 
-   // do create the new folder
-   CHECK( m_parentFolder, FALSE, "should have created parent folder" );
+   return ok;
+}
 
-   int index = m_parentFolder->GetSubfolder(m_folderName->GetValue());
-
-   CHECK( index != -1, FALSE, "new folder not created" );
-
-   m_newFolder = m_parentFolder->GetSubfolder((size_t)index);
-
-   return TRUE;
+void wxFolderCreateDialog::CreateNotebook(wxPanel *panel)
+{
+   m_notebook = new wxFolderCreateNotebook(panel, this);
 }
 
 // -----------------------------------------------------------------------------
@@ -449,18 +522,21 @@ wxFolderPropertiesDialog::wxFolderPropertiesDialog(wxWindow *frame,
 
 bool wxFolderPropertiesDialog::TransferDataToWindow()
 {
-   CHECK( m_newFolder, FALSE, "no folder i folder properties dialog" );
+   CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
 
-   return TRUE;
+   // lame hack: use SetDefaults() so the page will read its data from the
+   // profile section corresponding to our folder
+   ((wxFolderPropertiesPage *)m_notebook->GetPage(FolderCreatePage_Folder))
+      ->SetDefaults(m_newFolder->GetFullName());
+
+   return wxFolderBaseDialog::TransferDataToWindow();
 }
 
 bool wxFolderPropertiesDialog::TransferDataFromWindow()
 {
-   CHECK( m_newFolder, FALSE, "no folder i folder properties dialog" );
+   CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
 
-   // FIXME must change m_newFolder if something changed!
-
-   return TRUE;
+   return wxFolderBaseDialog::TransferDataFromWindow();
 }
 
 // -----------------------------------------------------------------------------
@@ -468,12 +544,15 @@ bool wxFolderPropertiesDialog::TransferDataFromWindow()
 // -----------------------------------------------------------------------------
 
 wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
-                                               ProfileBase *profile)
+                                               ProfileBase *profile,
+                                               wxFolderCreateDialog *dlg)
                       : wxNotebookPageBase(notebook)
 {
    // add us to the notebook
    int image = notebook->GetPageCount();
    notebook->AddPage(this, _("Access"), FALSE /* don't select */, image);
+
+   m_dlgCreate = dlg;
 
    // init members
    // ------------
@@ -491,7 +570,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    radioChoices[1] = _("File");
    radioChoices[2] = _("POP3");
    radioChoices[3] = _("IMAP");
-   radioChoices[4] = _("Newsgroup");
+   radioChoices[4] = _("News");
 
    m_radio = new wxRadioBox(this,-1,_("Folder Type"),
                             wxDefaultPosition,wxDefaultSize,
@@ -504,7 +583,11 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+#ifdef __WXGTK__
    c->height.Absolute(40); // FIXME: AsIs() doesn't work for wxGTK
+#else
+   c->height.AsIs();
+#endif
    m_radio->SetConstraints(c);
 
    // text entries
@@ -539,37 +622,103 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    long widthMax = GetMaxLabelWidth(labels, this);
 
    m_login = CreateTextWithLabel(labels[Label_Login], widthMax, m_radio);
-   m_password = CreateTextWithLabel(labels[Label_Password], widthMax, m_login);
+   m_password = CreateTextWithLabel(labels[Label_Password], widthMax, m_login,
+                                    0, wxPASSWORD);
    m_server = CreateTextWithLabel(labels[Label_Server], widthMax, m_password);
    m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_server);
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
 
-   // by default, we're in "view properties" mode
-   m_radio->Enable(FALSE);
-   m_isCreating = FALSE;
+   // are we in "view properties" or "create" mode?
+   m_isCreating = m_dlgCreate != NULL;
+   m_radio->Enable(m_isCreating);
 
-   UpdateUI();
-}
-
-void
-wxFolderPropertiesPage::EnableAllFields()
-{
-   m_radio->Enable(TRUE);
-   m_isCreating = TRUE;
    UpdateUI();
 }
 
 void
 wxFolderPropertiesPage::OnEvent(wxCommandEvent& event)
 {
-   UpdateUI();
+   int sel = -1;
+   if ( event.GetEventObject() == m_radio )
+   {
+      // tell UpdateUI() about the new selection
+      sel = event.GetInt();
+   }
+
+   UpdateUI(sel);
 }
 
 void
-wxFolderPropertiesPage::UpdateUI(void)
+wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 {
-   switch(m_radio->GetSelection())
+   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+
+   CHECK_RET( dlg, "folder page should be in folder dialog!" );
+
+   dlg->SetDirty();
+
+   // the rest doesn't make any sense for the "properties" dialog because the
+   // text in the path field can't change anyhow
+   if ( !m_isCreating )
+      return;
+
+   // if the path text changed, try to set the folder name
+   wxObject *objEvent = event.GetEventObject();
+   if ( objEvent == m_path || objEvent == m_newsgroup )
+   {
+      switch ( m_radio->GetSelection() )
+      {
+         case MFolder::File:
+            // set the file name as the default folder name
+            {
+               wxString name;
+               wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
+
+               dlg->SetFolderName(name);
+            }
+            break;
+
+         case MFolder::News:
+            // set the newsgroup name as the default folder name
+            dlg->SetFolderName(m_newsgroup->GetValue());
+            break;
+
+         default:
+            // nothing
+            ;
+      }
+   }
+}
+
+void
+wxFolderPropertiesPage::UpdateUI(int sel)
+{
+   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+   CHECK_RET( dlg, "wxFolderPropertiesPage without parent dialog?" );
+
+   bool enableOk = true;
+
+   static int s_selection = -1;
+
+   int selection = sel == -1 ? m_radio->GetSelection() : sel;
+
+   if ( selection != s_selection )
+   {
+      // clear all fields because some of them won't make sense for new
+      // selection unless the selection didn't change
+      m_newsgroup->SetValue("");
+      m_path->SetValue("");
+      m_login->SetValue("");
+      m_password->SetValue("");
+      m_server->SetValue("");
+
+      s_selection = selection;
+   }
+
+   SetDefaultValues();
+
+   switch ( selection )
    {
       case MailFolder::MF_POP:
       case MailFolder::MF_IMAP:
@@ -607,25 +756,73 @@ wxFolderPropertiesPage::UpdateUI(void)
          m_newsgroup->Enable(FALSE);
 
          m_browsePath->Enable(FALSE);
+         if ( m_isCreating )
+         {
+            // INBOX folder can't be created by the user
+            enableOk = false;
+         }
          break;
 
       default:
          wxFAIL_MSG("Unexpected folder type.");
    }
+
+   dlg->SetMayEnableOk(enableOk);
 }
 
+void
+wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
+{
+   // we want to read settings from the default section under
+   // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
+   // is empty (i.e. we have no parent folder)
+   String profilePath = !m_defaultsPath ? String(M_PROFILE_CONFIG_SECTION)
+                        : String(M_FOLDER_CONFIG_SECTION) + m_defaultsPath;
+   ProfilePathChanger fpc(m_profile, profilePath);
+
+   MFolder::Type typeFolder;
+   if ( firstTime )
+   {
+      typeFolder = (MFolder::Type)READ_CONFIG(m_profile, MP_FOLDER_TYPE);
+
+      m_radio->SetSelection(typeFolder);
+   }
+   else
+   {
+      typeFolder = (MFolder::Type)m_radio->GetSelection();
+   }
+
+   if ( MFolder::TypeHasUserName(typeFolder) )
+   {
+      String value = READ_CONFIG(m_profile,MP_POP_LOGIN);
+      if ( !value )
+         value = READ_APPCONFIG(MP_USERNAME);
+      m_login->SetValue(value);
+
+      m_password->SetValue(READ_CONFIG(m_profile,MP_POP_PASSWORD));
+
+      if ( typeFolder == MFolder::POP || typeFolder == MFolder::IMAP )
+         value = READ_CONFIG(m_profile, MP_POP_HOST);
+      else if ( typeFolder == MFolder::News )
+         value = READ_CONFIG(m_profile, MP_NNTPHOST);
+      else
+         value.Empty();
+      m_server->SetValue(value);
+   }
+
+   if ( typeFolder == MFolder::File && !m_isCreating )
+      m_path->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
+   else if ( typeFolder == MFolder::News )
+      m_newsgroup->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
+
+   if ( !m_isCreating )
+      m_comment->SetValue(READ_CONFIG(m_profile, MP_FOLDER_COMMENT));
+}
 
 bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
-   ProfilePathChanger pathChanger(m_profile, m_defaultsPath);
-
-   m_login->SetValue(READ_CONFIG(m_profile,MP_POP_LOGIN));
-   m_password->SetValue(READ_CONFIG(m_profile,MP_POP_PASSWORD));
-   m_server->SetValue(READ_CONFIG(m_profile,MP_POP_HOST));
-   m_path->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
-   m_newsgroup->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
-   m_comment->SetValue(READ_CONFIG(m_profile, MP_FOLDER_COMMENT));
+   SetDefaultValues(true);
 
    return TRUE;
 }
@@ -633,27 +830,48 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 bool
 wxFolderPropertiesPage::TransferDataFromWindow(void)
 {
+   // even though we propose the choice of INBOX it can't be created currently
+   // FIXME may be should remove it from the radiobox then?
+   MFolder::Type typeFolder = (MFolder::Type)m_radio->GetSelection();
+
+   // ... but its properties (comment) may still be changed, so check for this
+   // only if we're creating it
+   CHECK( !m_dlgCreate || typeFolder != MFolder::Inbox, false,
+          "Ok button should be disabled" );
+
    // 1st step: create the folder in the MFolder sense. For this we need only
    // the name and the type
-   MFolder::Type typeFolder = (MFolder::Type)m_radio->GetSelection();
-   wxFolderCreateDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
+   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
-   CHECK( dlg, FALSE, "folder properties page should be in a folder dlg" );
+   CHECK( dlg, false, "folder page should be in folder dialog!" );
 
-   MFolder *newFolder = dlg->DoCreateFolder(typeFolder);
-   if ( !newFolder )
+   // FIXME instead of this `if' we should have a virtual function in the
+   //       base class to either create or return the folder object
+   MFolder *folder;
+   if ( m_dlgCreate )
    {
-      return FALSE;
+      ASSERT_MSG( m_dlgCreate == dlg, "GET_PARENT_OF_CLASS broken?" );
+
+      folder = m_dlgCreate->DoCreateFolder(typeFolder);
+      if ( !folder )
+      {
+         return false;
+      }
+   }
+   else
+   {
+      folder = dlg->GetFolder();
    }
 
+   CHECK( folder, false, "must have folder by this point" );
+
    // 2nd step: put what we can in MFolder
-   newFolder->SetComment(m_comment->GetValue());
+   folder->SetComment(m_comment->GetValue());
 
    // 3rd step: store additional data about the newly created folder directly
    // in the profile
-   wxString profilePath;
-   profilePath << M_FOLDER_CONFIG_SECTION << newFolder->GetName();
-   ProfilePathChanger pathChanger(m_profile, profilePath);
+   String fullname = folder->GetFullName();
+   FolderPathChanger changePath(m_profile, fullname);
    switch ( typeFolder )
    {
       case MFolder::POP:
@@ -669,17 +887,28 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          break;
 
       case MFolder::File:
-         m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
+         m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
          break;
 
       case MFolder::Inbox:
-         // FIXME VZ: this doesn't make any sense, does it?
-         m_path->SetValue("INBOX");
-         break;
+         if ( !m_dlgCreate )
+            break;
+         //else: can't create INBOX folder!
 
       default:
          wxFAIL_MSG("Unexpected folder type.");
    }
+
+   if ( m_dlgCreate )
+   {
+      // generate an event notifying everybody that a new folder has been
+      // created
+      EventFolderTreeChangeData event(fullname,
+                                      EventFolderTreeChangeData::Create);
+      EventManager::Send(event);
+   }
+
+   folder->DecRef();
 
    return true;
 }
@@ -697,7 +926,8 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
 };
 
 // create the control and add pages too
-wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
+wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
+                                               wxFolderCreateDialog *dlg)
                       : wxNotebookWithImages("FolderCreateNotebook",
                                              parent,
                                              s_aszImages)
@@ -709,7 +939,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
 
    // create and add the pages
    (void)new wxOptionsPageCompose(this, profile);
-   (void)new wxFolderPropertiesPage(this, profile);
+   (void)new wxFolderPropertiesPage(this, profile, dlg);
 }
 
 // -----------------------------------------------------------------------------
@@ -785,6 +1015,8 @@ void wxFolderSelectionDialog::OnCancel(wxCommandEvent& event)
 
 // helper function: common part of ShowFolderCreateDialog and
 // ShowFolderPropertiesDialog
+//
+// the caller should DecRef() the returned pointer
 static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
                                    FolderCreatePage page)
 {
@@ -792,7 +1024,11 @@ static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
    dlg.SetNotebookPage(page);
 
    if ( dlg.ShowModal() )
-      return dlg.GetFolder();
+   {
+      MFolder *folder = dlg.GetFolder();
+
+      return folder;
+   }
    else
       return (MFolder *)NULL;
 }
@@ -810,7 +1046,17 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);
 
-   return DoShowFolderDialog(dlg, FolderCreatePage_Folder) ? TRUE : FALSE;
+   MFolder *newfolder = DoShowFolderDialog(dlg, FolderCreatePage_Folder);
+   if ( newfolder )
+   {
+      newfolder->DecRef();
+
+      return TRUE;
+   }
+   else
+   {
+      return FALSE;
+   }
 }
 
 MFolder *ShowFolderSelectionDialog(MFolder *folder, wxWindow *parent)
@@ -819,5 +1065,7 @@ MFolder *ShowFolderSelectionDialog(MFolder *folder, wxWindow *parent)
 
    (void)dlg.ShowModal();
 
-   return dlg.GetFolder();
+   MFolder *newfolder = dlg.GetFolder();
+
+   return newfolder;
 }

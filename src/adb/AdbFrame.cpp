@@ -1727,9 +1727,6 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
                       this
                      );
 
-        if ( dialog.ShowModal() != wxID_OK )
-          return FALSE;
-
         if ( strAdbName.IsEmpty() ) {
            // cancelled by user
            return FALSE;

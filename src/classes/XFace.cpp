@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * XFace.cc -  a class encapsulating XFace handling                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)              *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$           *
+ * $Id$                 *
  *******************************************************************/
 
 #ifdef __GNUG__

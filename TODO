@@ -221,6 +221,8 @@ $Id$
   (for being controlled from xbiff like programs)
   idea: listen() on a socket and write socket number to a file ~/.M/socket
 
+********************* long-term projects ***********************
+
 - Support for different charsets (Unicode/utf-7/8?)
 
 - LDAP -- possibly using python ldap module or OpenLDAP.

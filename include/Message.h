@@ -23,15 +23,6 @@
 #  define   TEXT_DATA_CAST(x)    ((char *)x)
 #endif
 
-// -----------------------------------------------------------------------------
-// constants
-// -----------------------------------------------------------------------------
-
-// symbolic names for GetHeaderLine() first parameter (feel free to add more!)
-#define MSG_HEADER_DATE          "Date"
-#define MSG_HEADER_SUBJECT       "Subject"
-#define MSG_HEADER_MSGID         "Message-Id"
-
 // ----------------------------------------------------------------------------
 // Message class
 // ----------------------------------------------------------------------------

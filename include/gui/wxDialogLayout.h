@@ -56,11 +56,11 @@ public:
    // populate the dialog
       // create the controls above the main notebook, return the last control
       // created (in the top-to-bottom order)
-   virtual wxControl *CreateControlsAbove(wxPanel * /* panel */) { return NULL; }
+   virtual wxControl *CreateControlsAbove(wxPanel *panel) { return NULL; }
       // create the notebook itself (assign the pointer to m_notebook)
-   virtual void CreateNotebook(wxPanel * panel) = 0;
+   virtual void CreateNotebook(wxPanel *panel) = 0;
       // create the controls below the main notebook
-   virtual void CreateControlsBelow(wxPanel * /* panel */) { }
+   virtual void CreateControlsBelow(wxPanel *panel) { }
       // create the notebook and the standard Ok/Cancel/Apply buttons, calls
       // CreateControlsAbove/Below() and CreateNotebook() which may be
       // overriden in the derived classes

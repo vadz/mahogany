@@ -124,7 +124,7 @@ private:
 // rather as a (single line) text entry, as its name suggests. In particular,
 // you shouldn't add/remove strings from this combobox manually (but using
 // SetValue (and, of course, GetValue) is perfectly ok).
-class wxPTextEntry : public wxComboBox
+class WXDLLEXPORT wxPTextEntry : public wxComboBox
 {
 public:
     // ctors

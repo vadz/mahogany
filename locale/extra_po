@@ -1,16 +1,16 @@
 #MDialogs.h
 
-#msgid "Error"
-#msgstr "Fehler"
+msgid "Error"
+msgstr "Fehler"
 
-#msgid "System Error"
-#msgstr "Systemfehler"
+msgid "System Error"
+msgstr "Systemfehler"
 
-#msgid "Fatal Error"
-#msgstr "Nicht behebbarer Fehler"
+msgid "Fatal Error"
+msgstr "Nicht behebbarer Fehler"
 
-#msgid "Information"
-#msgstr ""
+msgid "Information"
+msgstr "Information"
 
 msgid "Please choose"
 msgstr "Bitte wählen Sie"

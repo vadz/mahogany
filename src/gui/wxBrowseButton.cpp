@@ -68,15 +68,38 @@ void wxFileBrowseButton::DoBrowse()
 // wxFolderBrowseButton
 // ----------------------------------------------------------------------------
 
+wxFolderBrowseButton::wxFolderBrowseButton(wxTextCtrl *text,
+                                           wxWindow *parent,
+                                           MFolder *folder)
+                    : wxBrowseButton(text, parent)
+{
+   m_folder = folder;
+
+   SafeIncRef(m_folder);
+}
+
 void wxFolderBrowseButton::DoBrowse()
 {
    MFolder *folder = ShowFolderSelectionDialog(m_folder, this);
 
    if ( folder )
    {
+      SafeDecRef(m_folder);
+
       m_folder = folder;
       SetText(m_folder->GetFullName());
    }
    //else: nothing changed, user cancelled the dialog
 }
 
+MFolder *wxFolderBrowseButton::GetFolder() const
+{
+   SafeIncRef(m_folder);
+
+   return m_folder;
+}
+
+wxFolderBrowseButton::~wxFolderBrowseButton()
+{
+   SafeDecRef(m_folder);
+}

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M
 // File name:   MFolderDialogs.h - functions to invoke dialogs dealing with
 //              folder management, such as folder creation, changing folder
@@ -10,7 +10,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// // //// //// //// //// //// //// //// //// //// //// //// //// //// //// ///
 
 #ifndef _MFOLDERDIALOGS_H
 #define _MFOLDERDIALOGS_H
@@ -43,6 +43,8 @@ enum FolderCreatePage
 
   @param if parentFolder is NULL, any parent folder may be chosen, otherwise
          the new folder can only be created under parentFolder.
+
+  @return the returned folder object must be DecRef()d by the caller (if !NULL)
 */
 extern MFolder *ShowFolderCreateDialog
                 (
@@ -63,6 +65,8 @@ extern bool ShowFolderPropertiesDialog(MFolder *folder,
   allows the user to choose a folder from all existing ones, returns the
   pointer to the folder chosen if the user closes the dialog with [Ok] or
   NULL if it was closed with [Cancel] button.
+
+  @return the returned folder object must be DecRef()d by the caller (if !NULL)
 */
 extern MFolder *ShowFolderSelectionDialog(MFolder *folder,
                                           wxWindow *parent = NULL);

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M
 // File name:   gui/wxBrowseButton.h - button for browsing for text field
 //              contents
@@ -9,7 +9,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef _GUI_WXBROWSEBUTTON_H_
 #define _GUI_WXBROWSEBUTTON_H_
@@ -83,17 +83,15 @@ class wxFolderBrowseButton : public wxBrowseButton
 public:
    // we may be optionally given a default folder
    wxFolderBrowseButton(wxTextCtrl *text, wxWindow *parent,
-                        MFolder *folder = NULL)
-      : wxBrowseButton(text, parent)
-      {
-         m_folder = folder;
-      }
+                        MFolder *folder = NULL);
+
+   virtual ~wxFolderBrowseButton();
 
    // show the folder selection dialog
    virtual void DoBrowse();
 
    // get the folder chosen by user (may be NULL)
-   MFolder *GetFolder() const { return m_folder; }
+   MFolder *GetFolder() const;
 
 private:
    MFolder *m_folder;

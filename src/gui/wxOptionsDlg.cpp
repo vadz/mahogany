@@ -540,8 +540,8 @@ void wxOptionsPage::CreateControls()
          last = CreateMessage(_(ms_aFields[n].label), last);
          break;
 
-         default:
-            wxFAIL_MSG("unknown field type in CreateControls");
+      default:
+         wxFAIL_MSG("unknown field type in CreateControls");
       }
 
       wxCHECK_RET( last, "control creation failed" );
@@ -634,34 +634,33 @@ void wxOptionsPage::UpdateUI()
             long id = control->GetId() + 1;
             wxWindow *win = FindWindow(id);
 
-               if ( win == NULL ) {
-                  wxFAIL_MSG("can't find browse button for the file entry zone");
-               }
-               else {
+            if ( win == NULL ) {
+               wxFAIL_MSG("can't find browse button for the file entry zone");
+            }
+            else {
+               win->Enable(bEnable);
+            }
+         }
+         // fall through
+
+         case Field_Text:
+            // not only enable/disable it, but also make (un)editable because
+            // it gives visual feedback
+            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+            ((wxTextCtrl *)control)->SetEditable(bEnable);
+            break;
+
+         case Field_List:
+            // also disable the buttons
+         {
+            long i;
+            for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
+               wxWindow *win = FindWindow(i);
+               if ( win ) {
                   win->Enable(bEnable);
                }
-            }
-            // fall through
-
-            case Field_Text:
-               // not only enable/disable it, but also make (un)editable because
-               // it gives visual feedback
-               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-               ((wxTextCtrl *)control)->SetEditable(bEnable);
-               break;
-
-            case Field_List:
-               // also disable the buttons
-            {
-               long i;
-               for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
-                  wxWindow *win = FindWindow(i);
-                  if ( win ) {
-                     win->Enable(bEnable);
-                  }
-                  else {
-                     wxFAIL_MSG("can't find listbox buttons by id");
-                  }
+               else {
+                  wxFAIL_MSG("can't find listbox buttons by id");
                }
             }
          }
@@ -709,14 +708,13 @@ bool wxOptionsPage::TransferDataToWindow()
       case Field_Number:
          if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
-            ((wxCheckBox *)control)->SetValue(lValue != 0);
-            break;
-
-         case Field_List:
+            strValue.Printf("%ld", lValue);
+         }
+         else {
             wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+         }
+         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
          ((wxTextCtrl *)control)->SetValue(strValue);
          break;
@@ -743,13 +741,12 @@ bool wxOptionsPage::TransferDataToWindow()
                      ((wxListBox *)control)->Append(str);
                      str.Empty();
                   }
+                  //else: nothing to do, two ';' one after another
                }
-
-               if ( !str.IsEmpty() ) {
-                  ((wxListBox *)control)->Append(str);
+               else {
+                  str << strValue[m];
                }
             }
-            break;
 
             if ( !str.IsEmpty() ) {
                ((wxListBox *)control)->Append(str);
@@ -778,33 +775,22 @@ bool wxOptionsPage::TransferDataFromWindow()
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) )
       {
-         case Field_Text:
-         case Field_File:
-         case Field_Number:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+      case Field_Text:
+      case Field_File:
+      case Field_Number:
+         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-            strValue = ((wxTextCtrl *)control)->GetValue();
-
-            if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-
-               lValue = atol(strValue);
-            }
-            else {
-               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-            }
-            break;
+         strValue = ((wxTextCtrl *)control)->GetValue();
 
          if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
-            lValue = ((wxCheckBox *)control)->GetValue();
-            break;
-
-         case Field_List:
+            lValue = atol(strValue);
+         }
+         else {
             wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+         }
+         break;
 
       case Field_Bool:
          wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
@@ -823,10 +809,13 @@ bool wxOptionsPage::TransferDataFromWindow()
          wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
          wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-                  strValue << listbox->GetString(m);
+         // join it (FIXME @@@ what if it contains ';'?)
+         {
+            wxListBox *listbox = (wxListBox *)control;
+            for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
+               if ( !strValue.IsEmpty() ) {
+                  strValue << ';';
                }
-            }
-            break;
 
                strValue << listbox->GetString(m);
             }

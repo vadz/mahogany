@@ -29,7 +29,6 @@ WX_DEFINE_ARRAY(AdbEntryGroup *, ArrayAdbGroups);
 WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 WX_DEFINE_ARRAY(AdbElement *, ArrayAdbElements);
 
-
 /**
   A book corresponds to a physical medium (disk file, database...), the
   manager provides methods to access all the books used as well as methods for
