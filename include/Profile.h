@@ -50,6 +50,11 @@ class wxConfigBase;
 class ProfileBase : public MObject
 {
 public:
+   /// Create a normal Profile object
+   static ProfileBase * CreateProfile(String const &classname, ProfileBase const *parent);
+   /// Create a global configuration profile object
+   static ProfileBase * CreateGlobalConfig(String const & filename);
+   
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -75,13 +80,23 @@ public:
    /// Write back the int value.
    virtual bool writeEntry(String const &key, int Value)
       { return writeEntry(key, (long)Value); }
-/// Write back the bool value.
+   /// Write back the bool value.
    virtual bool writeEntry(String const &key, bool Value) = 0;
    //@}
+   /// set the path within the profile,just like cd
    virtual void   SetPath(String const &path) = 0;
+   /// query the current path
    virtual String GetPath(void) const = 0;
+   /// return true if the entry is defined
    virtual bool HasEntry(String const &key) const = 0;
+   /// delete the entry group specified by path
    virtual void DeleteGroup(String const &path) = 0;
+private:
+   /// forbid copy construction
+   ProfileBase(ProfileBase const &);
+   /// forbid assignments
+   ProfileBase & operator=(const ProfileBase & );
+
 };
 
 

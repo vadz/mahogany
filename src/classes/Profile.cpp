@@ -55,15 +55,21 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// a tiny utility class which is used to temporary change the config path, for
-// example:
-//    {
-//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
-//       profile->WriteEntry("x", 400);
-//       ...
-//       // path automatically restored here
-//    }
+// ProfileBase
 // ----------------------------------------------------------------------------
+
+static ProfileBase *
+ProfileBase::CreateProfile(String const &classname, ProfileBase const *parent)
+{
+   return new Profile(name, parent);
+}
+
+static ProfileBase *
+ProfileBase::CreateGlobalConfig(String const &filename)
+{
+   return new wxConfigProfile(filename);
+}
+
 // ----------------------------------------------------------------------------
 // wxConfigProfile
 // ----------------------------------------------------------------------------
@@ -341,6 +347,7 @@ ConfigFileManager::~ConfigFileManager()
       FCData *data = *i;
       wxConfigBase *fcp = data->fileConfig;
       fcp->Flush();
+      //FIXME: this must be a DecRef()
       delete fcp;
       delete data;
    }
@@ -426,6 +433,17 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const &key)
 
    conf.SetPath("..");
 }
+
+// ----------------------------------------------------------------------------
+// a tiny utility class which is used to temporary change the config path, for
+// example:
+//    {
+//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
+//       profile->WriteEntry("x", 400);
+//       ...
+//       // path automatically restored here
+//    }
+// ----------------------------------------------------------------------------
 
 ProfilePathChanger::ProfilePathChanger(ProfileBase *config, const String& path)
 {
