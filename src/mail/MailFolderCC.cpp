@@ -2961,7 +2961,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    char *dateptr = NULL;
    char datebuf[128];
    MESSAGECACHE mc;
-   if ( mail_parse_date(&mc, (char *) date.c_str()) == T )
+   if ( mail_parse_date(&mc, (char *) date.c_str()) )
    {
      mail_date(datebuf, &mc);
      dateptr = datebuf;

@@ -53,6 +53,9 @@ extern "C"
 #  undef   LoadAccelerators
 #  undef   SendMessage
 #  undef   StartDoc
+
+   // finally it also defines the name commonly used as C++ template parameter!
+#  undef T
 }
 
 #endif  //MCCLIENT_H

@@ -1849,7 +1849,7 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    // install our output routine temporarily
    Rfc822OutputRedirector redirect(true /* with bcc */, this);
 
-   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL) == T;
+   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL) != NIL;
 }
 
 bool
@@ -1942,7 +1942,7 @@ static long write_stream_output(void *stream, char *string)
    if ( o->fail() )
       return NIL;
 
-   return T;
+   return 1;
 }
 
 // rfc822_output() callback for writing to a string
@@ -1950,7 +1950,7 @@ static long write_str_output(void *stream, char *string)
 {
    String *o = (String *)stream;
    *o << string;
-   return T;
+   return 1;
 }
 
 // ----------------------------------------------------------------------------
@@ -2052,6 +2052,6 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   if ( body && !rfc822_output_body(body, writer, stream) )
      return NIL;
 
-  return T;
+  return 1;
 }
 
