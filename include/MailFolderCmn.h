@@ -209,6 +209,9 @@ protected:
    /// really count messages
    virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
 
+   /// cache the last count messages
+   void CacheLastMessages(MsgnoType count);
+
    /** @name Config management */
    //@{
    struct MFCmnOptions

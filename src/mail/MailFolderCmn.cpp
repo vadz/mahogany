@@ -553,6 +553,20 @@ HeaderInfoList *MailFolderCmn::GetHeaders(void) const
    return m_headers;
 }
 
+void MailFolderCmn::CacheLastMessages(MsgnoType count)
+{
+   if ( count > 1 )
+   {
+      HeaderInfoList_obj hil = GetHeaders();
+
+      CHECK_RET( hil, "Failed to cache messages because there are no headers" );
+
+      MsgnoType total = GetMessageCount();
+
+      hil->CacheMsgnos(total - count + 1, total);
+   }
+}
+
 // ----------------------------------------------------------------------------
 // MailFolderCmn message saving
 // ----------------------------------------------------------------------------
@@ -1317,6 +1331,10 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::FilterNewMail(%u msgs)",
               GetName().c_str(), uidsNew.GetCount());
 
+   // we're almost surely going to look at all new messages, so pre-cache them
+   // all at once
+   CacheLastMessages(uidsNew.GetCount());
+
    // apply the filters finally
    int rc = filterRule->Apply(this, uidsNew);
 
@@ -1573,6 +1591,10 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
 bool
 MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
 {
+   // should we do this here or, knowing that we'll download all message bodies
+   // and not just the headers anyhow, it would be superfluous?
+   //CacheLastMessages(uidsNew.GetCount());
+
    bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
 
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::CollectNewMail(%u msgs) (%s)",

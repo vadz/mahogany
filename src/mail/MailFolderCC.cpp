@@ -3544,7 +3544,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
       // only search among the messages after this one
       SEARCHSET *set = mail_newsearchset();
       set->first = last + 1;
-      set->last = LONG_MAX - 1; // bug in c-client? it uses "%ld", not "%lu"!
+      set->last = mail_uid(m_MailStream, m_nMessages);
 
       if ( flags & SEARCH_UID )
          pgm->uid = set;
@@ -4774,13 +4774,6 @@ void MailFolderCC::OnNewMail()
             HeaderInfoList_obj hil = GetHeaders();
             if ( hil )
             {
-               // we're almost surely going to look at all new messages, so
-               // pre-cache them all at once
-               if ( count > 1 )
-               {
-                  hil->CacheMsgnos(m_nMessages - count + 1, m_nMessages);
-               }
-
                // process the new mail, whatever it means (collecting,
                // filtering, just reporting, ...)
                if ( ProcessNewMail(*uidsNew) && !uidsNew->IsEmpty() )
