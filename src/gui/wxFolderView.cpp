@@ -3505,13 +3505,11 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
       itemsDeleted.Add(item);
    }
 
-   // update the listctrl item count
-   count = itemsDeleted.GetCount();
-   m_FolderCtrl->SetItemCount(m_FolderCtrl->GetItemCount() - count);
-
    // really delete the items: do it from end to avoid changing the indices
    // while we are doing it
    itemsDeleted.Sort(compareLongsReverse);
+
+   count = itemsDeleted.GetCount();
    for ( n = 0; n < count; n++ )
    {
       m_FolderCtrl->DeleteItem(itemsDeleted[n]);
