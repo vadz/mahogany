@@ -3794,14 +3794,16 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
 
    wxBeginBusyCursor();
 
+   DoClear(false /* keep the viewer */);
+
    MailFolder *mf = MailFolder::OpenFolder(folder,
                                            readonly ? MailFolder::ReadOnly
                                                     : MailFolder::Normal,
                                            m_Frame);
-   SetFolder(mf);
-
    if ( mf )
    {
+      ShowFolder(mf);
+
       mf->DecRef();
    }
 

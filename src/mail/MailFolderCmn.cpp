@@ -385,8 +385,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
 
 void MfCloser::OnTimer(void)
 {
-   MfList::iterator i;
-   for( i = m_MfList.begin(); i != m_MfList.end();)
+   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end();)
    {
       if ( i->HasExpired() )
       {
@@ -402,6 +401,10 @@ void MfCloser::OnTimer(void)
          ++i;
       }
    }
+
+   // FIXME: this is just a temp hack
+   extern void CheckConnectionsTimeout();
+   CheckConnectionsTimeout();
 }
 
 void MfCloser::CleanUp(void)
@@ -480,6 +483,9 @@ void MailFolderCmn::Close(void)
 bool
 MailFolderCmn::DecRef()
 {
+   // FIXME: revise this code taking into account connection caching we now do
+   //        in MailFolderCC, it can't work without changes probably
+#if 0
    // don't keep folders alive artificially if we're going to terminate soon
    // anyhow - or if we didn't start up fully yet and gs_MailFolderCloser
    // hadn't been created
@@ -521,6 +527,7 @@ MailFolderCmn::DecRef()
          }
       }
    }
+#endif // 0
 
    return RealDecRef();
 }

@@ -40,33 +40,6 @@ class MailFolderCC;
 // helper classes
 // ----------------------------------------------------------------------------
 
-/// structure to hold MailFolder pointer and associated mailstream pointer
-class StreamConnection
-{
-public:
-   /// pointer to a MailFolderCC object
-   MailFolderCC    *folder;
-   /// pointer to the associated MAILSTREAM
-   MAILSTREAM   const *stream;
-   /// name of the MailFolderCC object
-   String name;
-   /// for POP3/IMAP/NNTP: login or newsgroup
-   String login;
-
-   StreamConnection()
-   {
-      folder = NULL;
-      stream = NULL;
-   }
-
-#ifdef DEBUG
-   virtual ~StreamConnection();
-#endif // DEBUG
-};
-
-KBLIST_DEFINE(StreamConnectionList, StreamConnection);
-
-
 /**
    MailFolder class, implemented with the C-client library.
 
@@ -288,12 +261,15 @@ public:
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return ms_CClientInitialisedFlag; }
 
+   // unused for now
+#if 0
    /**
       check whether a folder can have subfolders
    */
    static bool HasInferiors(const String &imapSpec,
                             const String &user,
                             const String &pw);
+#endif // 0
 
    /** @name Functions used by MessageCC for read progress. */
    //@{
@@ -650,9 +626,6 @@ private:
 
    /// a pointer to the object to use as default if lookup fails
    static MailFolderCC *ms_StreamListDefaultObj;
-
-   /// mapping MAILSTREAM* to objects of this class and their names
-   static StreamConnectionList ms_StreamList;
 
    /// adds this object to Map
    void AddToMap(const MAILSTREAM *stream, const String& login) const;

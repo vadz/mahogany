@@ -134,6 +134,7 @@ extern "C"
 
 extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
+extern const MOption MP_FOLDER_CLOSE_DELAY;
 extern const MOption MP_FOLDER_FILE_DRIVER;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
@@ -176,8 +177,11 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 // correpsonding kind of messages)
 // ----------------------------------------------------------------------------
 
-// turn on to get messages about using the mail folder cache (ms_StreamList)
+// turn on to get messages about using the mail folder cache (gs_StreamList)
 #define TRACE_MF_CACHE  "mfcache"
+
+// turn on to get messages about caching MAILSTREAMs
+#define TRACE_CONN_CACHE  "conncache"
 
 // turn on to log [almost] all cclient callbacks
 #define TRACE_MF_CALLBACK "cccback"
@@ -219,12 +223,18 @@ typedef void (*mm_status_handler)(MAILSTREAM *stream,
                                   const char *mailbox,
                                   MAILSTATUS *status);
 
+// return the c-client "{...}" string for the given folder
+static wxString GetImapSpec(const MFolder *folder);
+
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
 
 /// object used to reflect some events back to MailFolderCC
 static class CCEventReflector *gs_CCEventReflector = NULL;
+
+/// mapping MAILSTREAM* to objects of this class and their names
+static class StreamConnectionList *gs_StreamList;
 
 #ifdef USE_DIALUP
 /// object used to close the streams if it can't be done when closing folder
@@ -256,6 +266,256 @@ static int cc_loglevel = wxLOG_Error;
 // ============================================================================
 // private classes
 // ============================================================================
+
+/// a list of MAILSTREAM pointers
+M_LIST_PTR(StreamList, MAILSTREAM);
+
+/// structure to hold MailFolder pointer and associated mailstream pointer
+class StreamConnection
+{
+public:
+   /// pointer to a MailFolderCC object
+   MailFolderCC *folder;
+
+   /// pointer to the associated MAILSTREAM
+   MAILSTREAM   *stream;
+
+   /// name of the MailFolderCC object
+   String name;
+
+   /// for POP3/IMAP/NNTP: login or newsgroup
+   String login;
+
+   StreamConnection()
+   {
+      folder = NULL;
+      stream = NULL;
+   }
+
+#ifdef DEBUG
+   ~StreamConnection();
+#endif // DEBUG
+};
+
+M_LIST_PTR(StreamConnectionList, StreamConnection);
+
+/**
+   Whenever we need to establish a connection with a remote server, we try to
+   reuse an existing ServerInfoEntry for it (and create a new one if none was
+   found). This allows us to reuse the authentification information and the
+   network connections.
+
+   For the former, it's simple: we remember the name and the password after
+   connection to the server successfully and use them for any new connections.
+   This allows the users who don't want to store their logins/passwords in the
+   profile to only enter them once and they will be reused until the end of the
+   session (notice that they may explicitly choose to not store sensitive
+   information even in memory - then this isn't done).
+
+   For the latter, we do the following:
+
+   a) when opening a folder, check if we have an existing connection to its
+      server and use it instead of NULL when calling mail_open()
+
+   b) when closing the folder, don't close the connection with mail_close()
+      but give it back to the folders server entry, it will close it later (if
+      it's not reused)
+ */
+
+M_LIST(TimeList, time_t);
+
+class ServerInfoEntry
+{
+public:
+   /**
+     @name Server managing
+
+     Functions for iterating over the entire list of servers, finding the
+     servers in it and adding the new ones.
+    */
+   //@{
+
+   /**
+     Find the server entry for the specified folder and return it or NULL if
+     not found.
+    */
+   static ServerInfoEntry *Get(const MFolder *folder);
+
+   /**
+     Find the server entry for the specified folder creating one if we hadn't
+     had it yet and return it.
+
+     Unlike Get(), this method only returns NULL if folder doesn't refer to a
+     remote mailbox which is an error in the caller.
+    */
+   static ServerInfoEntry *GetOrCreate(const MFolder *folder);
+
+   /// return true if this server can be used with the given NETMBX
+   bool IsSameAs(const NETMBX& netmbx) const;
+
+   /// check for the timed out connections for all servers
+   static void CheckTimeoutAll();
+
+   /// delete all server entries
+   static void DeleteAll();
+
+   //@}
+
+
+   /**
+     @name Auth info
+
+     We keep the account information for this server so that normally we don't
+     ask the user more than once about it and thus SetAuthInfo() is supposed to
+     be called only once while GetAuthInfo() may be called many times after it.
+    */
+   //@{
+
+   /// set the login and password to use with this server
+   void SetAuthInfo(const String& login, const String& password)
+   {
+      CHECK_RET( !login.empty(), "empty login not allowed" );
+
+      ASSERT_MSG( !m_hasAuthInfo, "overriding auth info for the server?" );
+
+      m_hasAuthInfo = true;
+      m_login = login;
+      m_password = password;
+   }
+
+   /**
+     Retrieve the auth info for the server in the provided variables. If it
+     returns false the values of login and password are not modified.
+
+     @param login receives the user name
+     @param password receives the password
+     @return false if won't have auth info, true if ok
+    */
+   bool GetAuthInfo(String& login, String& password) const
+   {
+      if ( !m_hasAuthInfo )
+         return false;
+
+      login = m_login;
+      password = m_password;
+
+      return true;
+   }
+
+   //@}
+
+
+   /**
+     @name Connection pooling
+    */
+   //@{
+
+   /// return an existing connection to this server or NULL if none
+   MAILSTREAM *GetStream();
+
+   /// give us a stream to reuse later (or close if nobody wants it)
+   void KeepStream(MAILSTREAM *stream, const MFolder *folder);
+
+   /// close those of our connections which have timed out
+   void CheckTimeout();
+
+   //@}
+
+   // dtor must be public in order to use M_LIST_OWN() but nobody should delete
+   // us directly!
+   ~ServerInfoEntry();
+
+private:
+   // ctor is private, nobody except GetFolderServer() can create us
+   ServerInfoEntry(const MFolder *folder, const NETMBX& netmbx);
+
+   // this struct contains the server hostname, port, username &c
+   NETMBX m_netmbx;
+
+   // the pool of connections to this server which may be reused (may be empty,
+   // of course)
+   //
+   // this list is used as a FIFO queue, in fact
+   StreamList m_connections;
+
+   // the timeouts for each of the connections, i.e. the moment when we should
+   // close them
+   TimeList m_timeouts;
+
+   // login and password for this server if we need it and if we're allowed to
+   // store it
+   String m_login,
+          m_password;
+
+   // if true, we have valid m_login and m_password
+   //
+   // note that we need this flag because in principle empty passwords are
+   // allowed and login could be non empty because it is stored in the config
+   // file
+   bool m_hasAuthInfo;
+
+   // the lists of all servers
+   M_LIST_OWN(ServerInfoList, ServerInfoEntry);
+   static ServerInfoList ms_servers;
+
+   GCC_DTOR_WARN_OFF
+};
+
+/**
+  Close a stream: these functions either really close it or put it to the
+  server connection pool for those folders for which it makes sense, i.e. IMAP
+  and NNTP (POP connections cannot and shouldn't be reused).
+
+  Having two versions is only useful because it avoids calling
+  ServerInfoEntry::Get() again unnecessarily if the caller already has the
+  server.
+*/
+
+/// is this a reusable folder?
+static bool IsReusableFolder(const MFolder *folder)
+{
+   CHECK( folder, false, "NULL folder in IsReusableFolder" );
+
+   MFolderType folderType = folder->GetType();
+   return folderType == MF_IMAP || folderType == MF_NNTP;
+}
+
+/// close the stream associated with the given folder and server
+static void CloseOrKeepStream(MAILSTREAM *stream,
+                              const MFolder *folder,
+                              ServerInfoEntry *server)
+{
+   // don't cache the connections if we're going to shutdown (and hence close
+   // them all) soon anyhow
+   if ( server && IsReusableFolder(folder) && !mApplication->IsShuttingDown() )
+   {
+      server->KeepStream(stream, folder);
+   }
+   else
+   {
+      mail_close(stream);
+   }
+}
+
+/// close the stream associated with the given folder
+static void CloseOrKeepStream(MAILSTREAM *stream,
+                              const MFolder *folder)
+{
+   if ( IsReusableFolder(folder) )
+   {
+      // do look for the server
+      CloseOrKeepStream(stream, folder, ServerInfoEntry::GetOrCreate(folder));
+   }
+   else // no need
+   {
+      mail_close(stream);
+   }
+}
+
+/**
+  The function called to close the connections which had timed out.
+ */
+extern void CheckConnectionsTimeout() { ServerInfoEntry::CheckTimeoutAll(); }
 
 /**
    The idea behind CCEventReflector is to allow postponing some actions in
@@ -369,8 +629,6 @@ private:
 /** This is a list of all mailstreams which were left open because the
     dialup connection broke before we could close them.
     We remember them and try to close them at program exit. */
-KBLIST_DEFINE(StreamList, MAILSTREAM);
-
 class CCStreamCleaner
 {
 public:
@@ -938,35 +1196,6 @@ private:
 } *gs_readProgressInfo = NULL;
 
 #endif // USE_READ_PROGRESS
-
-// ----------------------------------------------------------------------------
-// AuthInfoList: stores the login/password pairs for the folders which don't
-//               store this info in the config - this allows to ask the user
-//               only once for them during the same session
-// ----------------------------------------------------------------------------
-
-struct AuthInfoEntry
-{
-   AuthInfoEntry(const String& folderName,
-                 const String& login,
-                 const String& password)
-      : m_folderName(folderName),
-        m_login(login),
-        m_password(password)
-   {
-   }
-
-   // the full folder name in the tree
-   String m_folderName;
-
-   // the login and password for it, both non empty
-   String m_login,
-          m_password;
-};
-
-M_LIST_OWN(AuthInfoList, AuthInfoEntry);
-
-static AuthInfoList gs_authInfoList;
 
 // ----------------------------------------------------------------------------
 // LastNewUIDList: stores the UID of the last seen new message permanently,
@@ -1613,7 +1842,7 @@ void MailFolderCC::Init()
 
    m_expungedMsgnos =
    m_expungedPositions =
-   m_statusChangedMsgnos = 
+   m_statusChangedMsgnos =
    m_statusChangedOld =
    m_statusChangedNew = NULL;
 
@@ -1736,9 +1965,10 @@ void MailFolderCC::SavePasswordForSession()
 {
    if ( HasLogin() )
    {
-      gs_authInfoList.push_front(new AuthInfoEntry(m_mfolder->GetFullName(),
-                                                   m_login,
-                                                   m_password));
+      ServerInfoEntry *server = ServerInfoEntry::GetOrCreate(m_mfolder);
+      CHECK_RET( server, "folder which has login must have server as well!" );
+
+      server->SetAuthInfo(m_login, m_password);
    }
 }
 
@@ -1759,23 +1989,11 @@ bool MailFolderCC::GetAuthInfoForFolder(const MFolder *mfolder,
 
    if ( login.empty() || password.empty() )
    {
-      String folderName = mfolder->GetFullName();
-      if ( !folderName.empty() )
+      // do we already have login/password for this folder?
+      ServerInfoEntry *server = ServerInfoEntry::Get(mfolder);
+      if ( server && server->GetAuthInfo(login, password) )
       {
-         // try to find login/password in the list of the previously entered
-         // ones
-         for ( AuthInfoList::iterator i = gs_authInfoList.begin();
-               i != gs_authInfoList.end();
-               i++ )
-         {
-            if ( i->m_folderName == folderName )
-            {
-               login = i->m_login;
-               password = i->m_password;
-
-               return true;
-            }
-         }
+         return true;
       }
 
       // we don't have password for this folder, ask the user about it
@@ -1847,7 +2065,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       stream = mail_open(NULL, (char *)imapspec.c_str(),
                          mm_show_debug ? OP_DEBUG : NIL);
    }
-   
+
    // login data was reset by mm_login() called from mail_open(), set it once
    // again
    if ( !login.empty() )
@@ -1885,8 +2103,8 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       }
       else // successfully opened
       {
-         // either keep the stream for the caller or close it if we don't need it
-         // any more
+         // either keep the stream for the caller or close it if we don't need
+         // it any more
          if ( pStream )
             *pStream = stream;
          else
@@ -2266,7 +2484,11 @@ MailFolderCC::Open(OpenMode openmode)
       // it wasn't, open it here
       if ( !m_MailStream && tryOpen )
       {
-         m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(), ccOptions);
+         // try to reuse an existing stream if possible
+         ServerInfoEntry *server = ServerInfoEntry::Get(m_mfolder);
+
+         m_MailStream = mail_open(server ? server->GetStream() : NIL,
+                                  (char *)m_ImapSpec.c_str(), ccOptions);
       }
    } // end of cclient lock block
 
@@ -2293,7 +2515,7 @@ MailFolderCC::Open(OpenMode openmode)
       CCDefaultFolder def(this);
       MAILSTREAM *msHalfOpened = mail_open
                                  (
-                                  NIL,
+                                  m_MailStream,
                                   (char *)m_ImapSpec.c_str(),
                                   (mm_show_debug ? OP_DEBUG : 0) | OP_HALFOPEN
                                  );
@@ -2317,7 +2539,6 @@ MailFolderCC::Open(OpenMode openmode)
       }
       //else: it can't be opened at all
 
-      mail_close(m_MailStream);
       m_MailStream = NIL;
    }
 
@@ -2454,7 +2675,8 @@ MailFolderCC::Close()
          }
 #endif // 0
 
-         mail_close(m_MailStream);
+         // don't close the stream immediately, reuse it later
+         CloseOrKeepStream(m_MailStream, m_mfolder);
       }
 
       m_MailStream = NIL;
@@ -2552,18 +2774,17 @@ MailFolderCC::GetAllOpened()
 {
    CHECK_STREAM_LIST();
 
-   size_t count = ms_StreamList.size();
+   size_t count = gs_StreamList->size();
    MailFolder **mfOpened = new MailFolder *[count + 1];
 
    size_t n = 0;
-   for ( StreamConnectionList::iterator i = ms_StreamList.begin();
-         i != ms_StreamList.end();
+   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+         i != gs_StreamList->end();
          i++ )
    {
-      StreamConnection *conn = *i;
-      if ( conn->stream && !conn->stream->halfopen )
+      if ( i->stream && !i->stream->halfopen )
       {
-         mfOpened[n++] = conn->folder;
+         mfOpened[n++] = i->folder;
       }
    }
 
@@ -2630,8 +2851,6 @@ MailFolderCC::UpdateTimeoutValues(void)
 // Working with the list of all open mailboxes
 // ----------------------------------------------------------------------------
 
-StreamConnectionList MailFolderCC::ms_StreamList(FALSE);
-
 bool MailFolderCC::ms_CClientInitialisedFlag = false;
 
 MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
@@ -2650,14 +2869,11 @@ MailFolderCC::AddToMap(const MAILSTREAM *stream, const String& login) const
 #ifdef DEBUG
    // check that the folder is not already in the list
    StreamConnectionList::iterator i;
-   for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
+   for ( i = gs_StreamList->begin(); i != gs_StreamList->end(); i++ )
    {
-      StreamConnection *conn = *i;
-      if ( conn->folder == this )
+      if ( i->folder == this )
       {
          FAIL_MSG("adding a folder to the stream list twice");
-
-         return;
       }
    }
 #endif // DEBUG
@@ -2665,10 +2881,10 @@ MailFolderCC::AddToMap(const MAILSTREAM *stream, const String& login) const
    // add it now
    StreamConnection  *conn = new StreamConnection;
    conn->folder = (MailFolderCC *) this;
-   conn->stream = stream;
+   conn->stream = (MAILSTREAM *)stream;
    conn->name = m_ImapSpec;
    conn->login = login;
-   ms_StreamList.push_front(conn);
+   gs_StreamList->push_front(conn);
 
    CHECK_STREAM_LIST();
 }
@@ -2683,12 +2899,12 @@ MailFolderCC::CanExit(String *which)
 
    bool canExit = true;
    StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   for(i = gs_StreamList->begin(); i != gs_StreamList->end(); i++)
    {
-      if( (*i)->folder->InCritical() )
+      if( i->folder->InCritical() )
       {
          canExit = false;
-         *which << (*i)->folder->GetName() << '\n';
+         *which << i->folder->GetName() << '\n';
       }
    }
 
@@ -2701,12 +2917,12 @@ MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 {
    CHECK_STREAM_LIST();
 
-   StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+         i != gs_StreamList->end();
+         i++ )
    {
-      StreamConnection *conn = *i;
-      if ( conn->stream == stream )
-         return conn->folder;
+      if ( i->stream == stream )
+         return i->folder;
    }
 
    return NULL;
@@ -2723,12 +2939,12 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream, const char *name)
 
    if ( name )
    {
-      StreamConnectionList::iterator i;
-      for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+      for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+            i != gs_StreamList->end();
+            i++ )
       {
-         StreamConnection *conn = *i;
-         if( conn->name == name )
-            return conn->folder;
+         if ( i->name == name )
+            return i->folder;
       }
    }
 
@@ -2777,19 +2993,19 @@ MailFolderCC::FindFolder(String const &path, String const &login)
 {
    CHECK_STREAM_LIST();
 
-   StreamConnectionList::iterator i;
    wxLogTrace(TRACE_MF_CACHE, "Looking for folder to re-use: '%s',login '%s'",
               path.c_str(), login.c_str());
 
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+         i != gs_StreamList->end();
+         i++ )
    {
-      StreamConnection *conn = *i;
-      if( conn->name == path && conn->login == login)
+      if( i->name == path && i->login == login)
       {
          wxLogTrace(TRACE_MF_CACHE, "  Re-using entry: '%s',login '%s'",
-                    conn->name.c_str(), conn->login.c_str());
+                    i->name.c_str(), i->login.c_str());
 
-         MailFolderCC *mf = conn->folder;
+         MailFolderCC *mf = i->folder;
          mf->IncRef();
 
          return mf;
@@ -2809,14 +3025,16 @@ MailFolderCC::RemoveFromMap(void) const
               GetName().c_str());
    CHECK_STREAM_LIST();
 
-   StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+         i != gs_StreamList->end();
+         ++i )
    {
-      if( (*i)->folder == this )
+      StreamConnection *conn = *i;
+
+      if ( conn->folder == this )
       {
-         StreamConnection *conn = *i;
          delete conn;
-         ms_StreamList.erase(i);
+         gs_StreamList->erase(i);
 
          break;
       }
@@ -2824,7 +3042,7 @@ MailFolderCC::RemoveFromMap(void) const
 
    CHECK_STREAM_LIST();
 
-   if( ms_StreamListDefaultObj == this )
+   if ( ms_StreamListDefaultObj == this )
    {
       // no more
       ms_StreamListDefaultObj = NULL;
@@ -4097,21 +4315,12 @@ MailFolderCC::DebugStreams(void)
 #ifdef DEBUG_STREAMS
    wxLogDebug("--list of streams and objects--");
 
-   StreamConnection *conn;
-   StreamConnectionList::iterator i;
-
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+         i != gs_StreamList->end();
+         i++ )
    {
-      conn = *i;
-
-      if ( !conn )
-      {
-         FAIL_MSG( "NULL stream in the list" );
-         continue;
-      }
-
       wxLogDebug("\t%p -> %p \"%s\"",
-                 conn->stream, conn->folder, conn->folder->GetName().c_str());
+                 i->stream, i->folder, i->folder->GetName().c_str());
    }
    wxLogDebug("--end of list--");
 #endif // DEBUG_STREAMS
@@ -5042,6 +5251,9 @@ MailFolderCC::CClientInit(void)
    }
 #endif // OS_UNIX
 
+   // create the map MAILSTREAM -> MailFolder
+   gs_StreamList = new StreamConnectionList;
+
    ms_CClientInitialisedFlag = true;
 
 #ifdef USE_DIALUP
@@ -5062,15 +5274,24 @@ CCStreamCleaner::~CCStreamCleaner()
    // don't send us any notifications any more
    delete gs_CCEventReflector;
 
-   if(! mApplication->IsOnline())
+   bool isOnline = mApplication->IsOnline();
+
+   for ( StreamList::iterator i = m_List.begin(); i != m_List.end(); ++i )
    {
-      // brutally free all memory without closing stream:
-      MAILSTREAM *stream;
-      StreamList::iterator i;
-      for(i = m_List.begin(); i != m_List.end(); i++)
+      MAILSTREAM *stream = *i;
+
+      if ( isOnline )
       {
+         // we are online, so we can close it properly:
+         DBGMESSAGE(("CCStreamCleaner: closing stream"));
+
+         mail_close(stream);
+      }
+      else // !online
+      {
+         // brutally free all memory without closing stream:
          DBGMESSAGE(("CCStreamCleaner: freeing stream offline"));
-         stream = *i;
+
          // copied from c-client mail.c:
          if (stream->mailbox) fs_give ((void **) &stream->mailbox);
          stream->sequence++;  /* invalidate sequence */
@@ -5079,16 +5300,6 @@ CCStreamCleaner::~CCStreamCleaner()
             if (stream->user_flags[n]) fs_give ((void **) &stream->user_flags[n]);
          mail_free_cache (stream);  /* finally free the stream's storage */
          /*if (!stream->use)*/ fs_give ((void **) &stream);
-      }
-   }
-   else
-   {
-      // we are online, so we can close it properly:
-      StreamList::iterator i;
-      for(i = m_List.begin(); i != m_List.end(); i++)
-      {
-         DBGMESSAGE(("CCStreamCleaner: closing stream"));
-         mail_close(*i);
       }
    }
 }
@@ -5108,6 +5319,8 @@ extern bool MailFolderCCInit(void)
 
 extern void MailFolderCCCleanup(void)
 {
+   ServerInfoEntry::DeleteAll();
+
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
    //
@@ -5123,15 +5336,21 @@ extern void MailFolderCCCleanup(void)
    }
 #endif // USE_DIALUP
 
-   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
-
-   // FIXME: we really need to clean up these entries, so we just
-   //        decrement the reference count until they go away.
-   while ( !MailFolderCC::ms_StreamList.empty() )
+   if ( gs_StreamList )
    {
-      MailFolderCC *folder = MailFolderCC::ms_StreamList.front()->folder;
-      wxLogDebug("\tFolder '%s' leaked", folder->GetName().c_str());
-      folder->DecRef();
+      ASSERT_MSG( gs_StreamList->empty(), "some folder objects leaked" );
+
+      // FIXME: we really need to clean up these entries, so we just
+      //        decrement the reference count until they go away.
+      while ( !gs_StreamList->empty() )
+      {
+         MailFolderCC *folder = gs_StreamList->front()->folder;
+         wxLogDebug("\tFolder '%s' leaked", folder->GetName().c_str());
+         folder->DecRef();
+      }
+
+      delete gs_StreamList;
+      gs_StreamList = NULL;
    }
 }
 
@@ -5751,6 +5970,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    MAILSTREAM *stream;
    unsigned long nmsgs;
    CCCallbackDisabler *noCCC;
+   ServerInfoEntry *server;
 
    MailFolderCC *mf = FindFolder(mboxpath, login);
    if ( mf )
@@ -5762,6 +5982,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       nmsgs = mf->GetMessageCount();
 
       noCCC = NULL;
+      server = NULL;
    }
    else // this folder is not opened
    {
@@ -5775,9 +5996,13 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       // we don't want any notifications
       noCCC = new CCCallbackDisabler;
 
+      // try to reuse an existing connection, if any
+      server = ServerInfoEntry::Get(mfolder);
+      stream = server ? server->GetStream() : NIL;
+
       // open the folder: although we don't need to do it to get its status, we
       // have to do it anyhow below, so better do it right now
-      stream = mail_open(NIL, (char *)mboxpath.c_str(),
+      stream = mail_open(stream, (char *)mboxpath.c_str(),
                          mm_show_debug ? OP_DEBUG : NIL);
 
       if ( !stream )
@@ -5826,6 +6051,11 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    }
    //else: no messages to delete
 
+   if ( stream )
+   {
+      CloseOrKeepStream(stream, mfolder, server);
+   }
+
    if ( mf )
       mf->DecRef();
 
@@ -5867,6 +6097,9 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
 // HasInferiors() function: check if the folder has subfolders
 // ----------------------------------------------------------------------------
 
+// currently unused
+#if 0
+
 /*
   Small function to check if the mailstream has \inferiors flag set or
   not, i.e. if it is a mailbox or a directory on the server.
@@ -5879,14 +6112,14 @@ static void HasInferiorsMMList(MAILSTREAM *stream,
                                String name,
                                long attrib)
 {
-   gs_HasInferiorsFlag = ((attrib & LATT_NOINFERIORS) == 0);
+   gs_HasInferiorsFlag = !(attrib & LATT_NOINFERIORS);
 }
 
 /* static */
 bool
-MailFolderCC::HasInferiors(const String &imapSpec,
-                           const String &login,
-                           const String &passwd)
+MailFolderCC::HasInferiors(const String& imapSpec,
+                           const String& login,
+                           const String& passwd)
 {
    // We lock the complete c-client code as we need to immediately
    // redirect the mm_list() callback to tell us what we want to know.
@@ -5901,25 +6134,30 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    SetLoginData(login, passwd);
    gs_HasInferiorsFlag = -1;
 
-   MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
-                                      (mm_show_debug ? OP_DEBUG : NIL) |
-                                      OP_HALFOPEN);
+   ServerInfoEntry *server = ServerInfoEntry::Get(mfolder);
+   MAILSTREAM *stream = server ? server->GetStream() : NIL;
 
-   if(mailStream != NIL)
+   stream = mail_open(stream, (char *)imapSpec.c_str(),
+                      (mm_show_debug ? OP_DEBUG : NIL) | OP_HALFOPEN);
+
+   if ( stream != NIL )
    {
-     MMListRedirector redirect(HasInferiorsMMList);
-     mail_list (mailStream, NULL, (char *) imapSpec.c_str());
+      MMListRedirector redirect(HasInferiorsMMList);
+      mail_list (stream, NULL, (char *) imapSpec.c_str());
 
-     /* This does happen for for folders where the server does not know
-        if they have inferiors, i.e. if they don't exist yet.
-        I.e. -1 is an unknown/undefined status
-        ASSERT(gs_HasInferiorsFlag != -1);
-     */
-     mail_close(mailStream);
+      /* This does happen for for folders where the server does not know
+         if they have inferiors, i.e. if they don't exist yet.
+         I.e. -1 is an unknown/undefined status
+         ASSERT(gs_HasInferiorsFlag != -1);
+       */
+
+      CloseOrKeepStream(stream, mfolder, server);
    }
 
    return gs_HasInferiorsFlag == 1;
 }
+
+#endif // 0
 
 // ----------------------------------------------------------------------------
 // network operations progress
@@ -6234,4 +6472,184 @@ void mahogany_read_progress(GETS_DATA *md, unsigned long count)
 #endif // USE_READ_PROGRESS
 
 } // extern "C"
+
+// ============================================================================
+// ServerInfoEntry implementation
+// ============================================================================
+
+ServerInfoEntry::ServerInfoList ServerInfoEntry::ms_servers;
+
+// ----------------------------------------------------------------------------
+// creation
+// ----------------------------------------------------------------------------
+
+ServerInfoEntry::ServerInfoEntry(const MFolder *folder, const NETMBX& netmbx)
+               : m_netmbx(netmbx)
+{
+   m_login = folder->GetLogin();
+   m_password = folder->GetPassword();
+
+   m_hasAuthInfo = !m_login.empty() && !m_password.empty();
+
+   wxLogTrace(TRACE_CONN_CACHE,
+              "Created server entry for %s(%s).",
+              folder->GetFullName().c_str(), m_login.c_str());
+}
+
+ServerInfoEntry::~ServerInfoEntry()
+{
+   wxLogTrace(TRACE_CONN_CACHE,
+              "Deleting server entry for %s(%s).",
+              m_netmbx.host, m_netmbx.user);
+
+   // close all connections we may still have
+   for ( StreamList::iterator i = m_connections.begin();
+         i != m_connections.end();
+         ++i )
+   {
+      mail_close(*i);
+   }
+}
+
+bool ServerInfoEntry::IsSameAs(const NETMBX& netmbx) const
+{
+   return strcmp(m_netmbx.host, netmbx.host) == 0 &&
+          strcmp(m_netmbx.service, netmbx.service) == 0 &&
+          (!m_netmbx.port || (m_netmbx.port == netmbx.port)) &&
+          (m_netmbx.anoflag == netmbx.anoflag) &&
+          (!m_netmbx.user[0] || (strcmp(m_netmbx.user, netmbx.user) == 0));
+}
+
+/* static */
+ServerInfoEntry *ServerInfoEntry::Get(const MFolder *folder)
+{
+   String spec = GetImapSpec(folder);
+
+   NETMBX mbx;
+   if ( !mail_valid_net_parse((char *)spec.c_str(), &mbx) )
+   {
+      // invalid remote spec?
+      return NULL;
+   }
+
+   // look among the existing ones
+   for ( ServerInfoList::iterator i = ms_servers.begin();
+         i != ms_servers.end();
+         ++i )
+   {
+      if ( i->IsSameAs(mbx) )
+         return *i;
+   }
+
+   // not found
+   return NULL;
+}
+
+/* static */
+ServerInfoEntry *ServerInfoEntry::GetOrCreate(const MFolder *folder)
+{
+   NETMBX mbx;
+   if ( !mail_valid_net_parse((char *)GetImapSpec(folder).c_str(), &mbx) )
+   {
+      // invalid remote spec?
+      return NULL;
+   }
+
+   // look among the existing ones first
+   ServerInfoEntry *serverInfo = Get(folder);
+
+   if ( !serverInfo )
+   {
+      // not found: create a new entry and add it to the list
+      serverInfo = new ServerInfoEntry(folder, mbx);
+      ms_servers.push_back(serverInfo);
+   }
+
+   return serverInfo;
+}
+
+/* static */
+void ServerInfoEntry::DeleteAll()
+{
+   ms_servers.clear();
+}
+
+// ----------------------------------------------------------------------------
+// ServerInfoEntry connection caching
+// ----------------------------------------------------------------------------
+
+MAILSTREAM *ServerInfoEntry::GetStream()
+{
+   if ( m_connections.empty() )
+      return NULL;
+
+   MAILSTREAM *stream = *m_connections.begin();
+   m_connections.pop_front();
+   m_timeouts.pop_front();
+
+   wxLogTrace(TRACE_CONN_CACHE,
+              "Reusing connection to %s.", stream->mailbox);
+
+   return stream;
+}
+
+void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
+{
+   m_connections.push_back(stream);
+
+   Profile_obj profile(folder->GetProfile());
+   time_t t = time(NULL);
+   time_t delay = READ_CONFIG(profile, MP_FOLDER_CLOSE_DELAY);
+
+   wxLogTrace(TRACE_CONN_CACHE,
+              "Keeping connection to %s alive for %d seconds.",
+              stream->mailbox, delay);
+
+   m_timeouts.push_back(t + delay);
+}
+
+void ServerInfoEntry::CheckTimeout()
+{
+   time_t t = time(NULL);
+
+   // iterate in parallel over both lists
+   StreamList::iterator i = m_connections.begin();
+   TimeList::iterator j = m_timeouts.begin();
+   while ( i != m_connections.end() )
+   {
+      if ( *j < t )
+      {
+         // timed out
+         MAILSTREAM *stream = *i;
+
+         wxLogTrace(TRACE_CONN_CACHE,
+                    "Connection to %s timed out, closing.", stream->mailbox);
+
+         mail_close(stream);
+
+         i = m_connections.erase(i);
+         j = m_timeouts.erase(j);
+      }
+      else
+      {
+         ++i;
+         ++j;
+      }
+   }
+}
+
+/* static */
+void ServerInfoEntry::CheckTimeoutAll()
+{
+   for ( ServerInfoList::iterator i = ms_servers.begin();
+         i != ms_servers.end();
+         ++i )
+   {
+      // micro optimization
+      if ( !i->m_connections.empty() )
+      {
+         i->CheckTimeout();
+      }
+   }
+}
 
