@@ -13,10 +13,35 @@ $Id$
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
 
-7	KB	wxLayout:
+9	KB	wxLayout:
 		- reduce the scrollbar flickering somehow
+		- editing seems a bit slow (related to scrollbar flicker?)
+		- selections: do not exchange end/start while
+		  selecting but only at end, so moving selection
+		  across start behaves correctly
+		- selection mit cursor a bit funny
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
+
+		XFace dialog complains *twice* about non-existing
+		file, test for it!
+
+	KB	 > Nachvollziehbarer Absturz: Nach dem Starten Preferences aufrufen,
+		 > Register Message Viewer und dann "Configure Format for displaying dates"
+		 > und sofort OK drücken führt zu einem Segmentation fault. 
+
+
+		MessageView should show cursor only on demand
+		properties/access shows wrong help
+		properties/custom headers/more shows corrupted title
+		main window hides about-splash - not nice
+
+	VZ	templates need "First Name" field
+	VZ	icons in icons-dialog are scaled --> ugly
+	VZ	Properties dialog: OK disabled
+
+	KB	msg sorting dialog needs to be higher
+
 9	KB	changing any properties, etc crashes immediately
 		in non-DEBUG for Micky
 9	KB	add xface button to composeview
@@ -111,6 +136,11 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+		configure "From" format
+		align headers in messageview (separation line?)
+		colour settings for listctrl/treectrl
+		optional thin-cursor for message editor
+
 5		highlight messages in listing in different colours
 		based on filters?
 
