@@ -94,3 +94,13 @@ MModule::LoadModule(const String & name)
    }
 }
 
+/** Function to resolve main program symbols from modules.
+ */
+extern "C"
+{
+   void * MModule_GetSymbol(const char *name)
+   {
+      wxDllType prog = wxDllLoader::GetProgramHandle();
+      return (void *) wxDllLoader::GetSymbol(prog, name);
+   }
+}

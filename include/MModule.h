@@ -71,11 +71,7 @@ extern "C"
  */
 extern "C"
 {
-   void * MModule_GetSymbol(const char *name)
-   {
-      wxDllType prog = wxDllLoader::GetProgramHandle();
-      return (void *) wxDllLoader::GetSymbol(prog, name);
-   }
+   extern void * MModule_GetSymbol(const char *name);
 }
    
 

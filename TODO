@@ -16,8 +16,6 @@ $Id$
 - Templates/style-sheets for message composition and flexible reply
   handling 
 - Messages sorting, threading, scoring and searching
-- fine tune printing to remove occasional printing of too many lines
-  around page breaks
 - multi-threading to avoid delays and timeouts
 - GPG/PGP support
 - built-in HTML viewer
@@ -69,6 +67,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** VZ:
 *********************************************************************
 
+- properties dialog forgets IMAP mailbox name
 - All Folder create dialog pages have no HelpIDs set, why?
 - help button for first folder create page nees a help id
   KB: couldn't even find out where you create the button :-(
@@ -114,9 +113,9 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - why does Message/Find no longer work?
 - implement listing of folders on remote servers!!
 - for NNTP only count unread/new messages
-
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
+- write tutorial bit in Manual.lyx
 
 -HTML mail
 -------------------------
