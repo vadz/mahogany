@@ -50,6 +50,7 @@ public:
       m_imagelist = imagelist;
 
       CreateAllControls();
+      Fit();
       Layout();
    }
 
