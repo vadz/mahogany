@@ -99,11 +99,12 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
+- test if root test works.
+- create profile entry for SentMail folder by default
+
 - foldername in password prompt
 - URL highlighting in Headers
 - fix printing overlap
-- test whether dialog for collecting from INBOX works
-
 - document new configure system for wxGTK in HackersGuide
 
 - add goto_next_unread to folderview
@@ -145,6 +146,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** Miscellaneous Todo:
 *********************************************************************
 
+- obtain a full IMAP tree as part of subscription management
 - move to scandoc instead of doc++??
 - add calendar tool/plugin
 - if exists, use /etc/M.conf or /etc/Mahogany.conf instead of
