@@ -1246,6 +1246,9 @@ ParserImpl::Error(const String &error)
    tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s<error> %s"),
               pos, error.c_str(), before.c_str(), after.c_str());
 
+   // FIXME: this should be wxLogError() call as otherwise we get several
+   //        message boxes for each error instead of only one combining all
+   //        messages!
    m_MInterface->MessageDialog(tmp,NULL,_("Parse error!"));
 }
 
@@ -1314,11 +1317,11 @@ ParserImpl::GetToken(bool remove)
          opType = Operator_Plus + (p - ARITHM_OPERATORS);
          (void)CharInc();
       }
-      else if ( Char() == '|' >> Char() == '&' )
+      else if ( Char() == '|' || Char() == '&' )
       {
          opType = CharInc() == '|' ? Operator_Or : Operator_And;
       }
-      else if ( Char() == '<' >> Char() == '>' )
+      else if ( Char() == '<' || Char() == '>' )
       {
          opType = CharInc() == '<' ? Operator_Less : Operator_Greater;
          if ( Char() == '=' )
