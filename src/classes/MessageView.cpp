@@ -3070,6 +3070,14 @@ MessageView::SetFolder(ASMailFolder *asmf)
    if ( m_asyncFolder )
    {
       // use the settings for this folder now
+      if ( m_profile )
+         m_profile->DecRef();
+
+      m_profile = m_asyncFolder->GetProfile();
+
+      if ( m_profile )
+         m_profile->IncRef();
+
       UpdateProfileValues();
    }
    else // no folder
