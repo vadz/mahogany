@@ -857,11 +857,14 @@ MailFolderCC::ProcessEventQueue(void)
          delete evptr->m_args[1].m_str;
          break;
       case Status:
+         ASSERT(0); // we should never reach here
+#if 0
          MailFolderCC::mm_status(evptr->m_stream,
                                  *(evptr->m_args[0].m_str),
                                  evptr->m_args[1].m_status);
          delete evptr->m_args[0].m_str;
          delete evptr->m_args[1].m_status;
+#endif
          break;
       case Log:
          MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
@@ -949,12 +952,21 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+/* All we are using so far is the message about the change in the
+   number of messages, so we just call mm_exists() here which does the 
+   job for us. */
+   if(status->flags & SA_MESSAGES)
+      mm_exists(stream,status->messages);
+/* Handling status changes is non-trivial as the number of messages
+   can have changed when the event is processed. */
+#if 0
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
    evptr->m_args[0].m_str = new String(mailbox);
    evptr->m_args[1].m_status = new MAILSTATUS;
    memcpy(evptr->m_args[1].m_status, status, sizeof (MAILSTATUS));
    MailFolderCC::QueueEvent(evptr);
 //   MailFolderCC::mm_status(stream, mailbox, status);
+#endif
 }
 
 void
