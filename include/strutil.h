@@ -6,9 +6,9 @@
  * $Id$                *
  *******************************************************************/
 #ifndef STRUTIL_H
-#define	STRUTIL_H
+#define STRUTIL_H
 
-#include	"Mpch.h"
+#include  "Mpch.h"
 
 /**@name String class helper functions */
 //@{
@@ -112,8 +112,8 @@ char *strutil_strdup(String const &in);
 
 /**
    
-  */
 void strutil_splitlist(String const &str, std::map<String,String> &table);
+  */
 
 /**
    This takes the string and splits it into tokens delimited by the
@@ -123,7 +123,7 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
    @param delim		character array holding the delimiters
    @param tlist		reference to an STL String list to append the tokens to
   */
-void strutil_tokenise(char *string, const char *delim, std::list<String> &tlist);
+void strutil_tokenise(char *string, const char *delim, STL_LIST<String> &tlist);
 
 #ifndef	HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

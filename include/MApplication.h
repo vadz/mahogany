@@ -34,7 +34,10 @@ class Adb;
    Application class, doing all non-GUI application specific stuff
 */
 
-class MApplication : public CommonBase, public AppConfig
+class MApplication : public CommonBase
+#ifndef  USE_WXWINDOWS2
+                   , public AppConfig
+#endif
 {
 private:
    /// is application initialised?
@@ -179,6 +182,46 @@ public:
    */
    void Log(int level, String const &message);
    CB_DECLARE_CLASS(MApplication, CommonBase)
+
+#ifdef   USE_WXWINDOWS2
+   // AppConf functions are implemented using built-in wxConfig class in wxWin2
+   inline
+   const char *readEntry(const char *szKey, const char *szDefault = NULL) const
+   {
+      // FIXME @@@ static buffer will be overwritten each time we're called!
+      static char s_szBuffer[1024];
+      wxString str;
+      wxConfig::Get()->Read(&str, szKey, szDefault);
+      strncpy(s_szBuffer, str, SIZEOF(s_szBuffer));
+      return s_szBuffer;
+   }
+   inline int readEntry(const char *szKey, int Default = 0) const
+   {
+      long lVal;
+      wxConfig::Get()->Read(&lVal, szKey, (long)Default);
+      return (int)lVal;
+   }
+   inline bool readEntry(const char *szKey, bool Default = false) const
+      { return readEntry(szKey, (int)Default) != 0; }
+
+   inline bool writeEntry(const char *szKey, const char *szValue)
+      { return wxConfig::Get()->Write(szKey, szValue) != 0; }
+   inline bool writeEntry(const char *szKey, long lValue)
+      { return wxConfig::Get()->Write(szKey, lValue) != 0; }
+
+   inline const char *getCurrentPath() const
+      { return wxConfig::Get()->GetPath(); }
+   inline void setCurrentPath(const char *szPath)
+      { wxConfig::Get()->SetPath("/");wxConfig::Get()->SetPath(szPath); }
+   inline void changeCurrentPath(const char *szPath)
+      { wxConfig::Get()->SetPath(szPath); }
+   inline void flush()
+      { wxConfig::Get()->Flush(); }
+
+   // FIXME @@@
+   bool doesExpandVariables() const { return true; }
+   void expandVariables(bool /* bDoExpand */) { }
+#endif
 };
 
 extern MApplication	mApplication;

@@ -31,35 +31,34 @@
 
 // hide differences between wxWin versions
 #ifdef  USE_WXWINDOWS2
-  // screen coordinates type
-  typedef int coord_t;
+   // screen coordinates type
+   typedef int coord_t;
 
-#   ifdef USE_WXGTK
-    // @@: at least in wxGTK both 'long' and 'int' are used!
-    typedef long int lcoord_t;
-#   else
-    typedef coord_t lcoord_t;
-#   endif
+   // @@: in both wxGTK/wxMSW 'long' and 'int' are used for the same things in
+   //     different contexts
+   typedef long int lcoord_t;
   
-  // @@@ wxGTK alpha 10 doesn't have validators (yet)
-#   ifdef  USE_WXGTK
-#      define DEFAULT_VALIDATOR
-#   else
-#      define DEFAULT_VALIDATOR wxDefaultValidator, 
-#   endif //GTK
+   // @@@ wxGTK alpha 10 doesn't have validators (yet)
+#  ifdef  USE_WXGTK
+#     define DEFAULT_VALIDATOR
+#  else
+#     define DEFAULT_VALIDATOR wxDefaultValidator, 
+#  endif //GTK
     
-  // @@@ wxFrame::SetIcon doesn't exist in wxGTK
+   // @@@ wxFrame::SetIcon doesn't exist in wxGTK
 #   ifdef  USE_WXGTK  
 #      define SetIcon(x)
 #   endif  //GTK
     
-  // @@@ is this really the same thing
+   // @@@ is this really the same thing
 #   define wxMessage   wxStaticText
 #   define wxCanvas    wxWindow
 #   define wxItem      wxControl
 #   define wxDialogBox wxDialog
 
+    // the same function sometimes have different return types in wxWin1 and 2
 #   define ON_CLOSE_TYPE    bool
+#   define SHOW_TYPE        bool
 
 #   define PanelNewLine(panel)
 
@@ -91,6 +90,7 @@
   typedef coord_t lcoord_t;
   
 #   define ON_CLOSE_TYPE     Bool
+#   define SHOW_TYPE         void
 
 #   define PanelNewLine(panel)    panel->NewLine()
 
@@ -126,9 +126,10 @@
 // LOG_INFO defined in yunchanc-client/.h
 #undef  LOG_INFO
 
-#if   0	//FIXME: does not work for wxGTK, use internal logging    USE_WXWINDOWS2
-  // wxWindows 2 has built in logging capabilities
-#	include  <wx/log.h>
+// wxWindows 2 has built in logging capabilities
+#ifdef   USE_WXWINDOWS2
+#  include <wx/intl.h>
+#	include <wx/log.h>
 
 #	define LOG_DEBUG   wxLog::Debug
 #	define LOG_NOISE   wxLog::Verbose
@@ -136,12 +137,12 @@
 #	define LOG_INFO    wxLog::Message
 #	define LOG_ERROR   wxLog::Warning 
 #	define LOG_URGENT  wxLog::Error
-
+    
 #	define	ERRORMESSAGE(arg)   wxLogError arg
 #	define	SYSERRMESSAGE(arg)  wxLogError arg
 #	define	FATALERROR(arg)     wxLogFatalError arg
 #	define	INFOMESSAGE(arg)    wxLogInfo arg
-#	define	LOGMESSAGE(arg)	    wxLogGeneric arg
+#	define	LOGMESSAGE(arg)	  wxLogGeneric arg
 #	ifdef NDEBUG
     // just log the error
 #		define	INTERNALERROR(arg) wxLogError arg
@@ -161,6 +162,9 @@
     LOG_URGENT 
   };
 
+  // @@
+#  define   wxLogDebug
+  
   /// variable argument macro to do error messages, call ERRORMESSAGE((argument))
 #	define	ERRORMESSAGE(arg) MDialog_ErrorMessage arg
   /// variable argument macro to do system error messages, call SYSERRMESSAGE((argument))
@@ -184,7 +188,6 @@
 #elif   defined(OS_WIN)
 #	include "Mwin.h"
 #endif
-
 
 #define	ABOUTMESSAGE \
 "M Copyright (C) 1998 by \n"\

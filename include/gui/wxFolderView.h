@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/11 20:29:40  VZ
+ * compiles under Windows again + option USE_WXCONFIG added
+ *
  * Revision 1.2  1998/03/26 23:05:38  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -40,11 +43,7 @@ public:
    */
    void OnCommand(wxWindow &win, wxCommandEvent &ev);
 
-#ifdef  USE_WXWINDOWS2
-   void OnDefaultAction(wxControl *item);
-#else   // wxWin 1
    void OnDefaultAction(wxItem *item);
-#endif  // wxWin version
 };
 
 /** a timer class for the FolderView */

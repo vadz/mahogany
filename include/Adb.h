@@ -101,11 +101,11 @@ public:
 };
 
 
-typedef	std::list<AdbEntry *>		AdbEntryListType;
-typedef AdbEntryListType::iterator	AdbEntryIterator;
+typedef  STL_LIST<AdbEntry *>          AdbEntryListType;
+typedef  AdbEntryListType::iterator    AdbEntryIterator;
 
-typedef	std::list<AdbEntry *> 		AdbExpandListType;
-typedef	AdbExpandListType::iterator 	AdbExpandListIterator;
+typedef  STL_LIST<AdbEntry *>          AdbExpandListType;
+typedef  AdbExpandListType::iterator   AdbExpandListIterator;
 
 /**
    Adb: an address database class

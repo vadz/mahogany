@@ -60,7 +60,7 @@ public:
    MimeList - mapping of Mime types to icons and handlers
 */
 
-class MimeList : public list<MimeEntry>, public CommonBase
+class MimeList : public std::list<MimeEntry>, public CommonBase
 {
 //   DECLARE_CLASS(MimeList)
    

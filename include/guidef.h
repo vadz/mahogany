@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/11 20:29:37  VZ
+ * compiles under Windows again + option USE_WXCONFIG added
+ *
  * Revision 1.3  1998/04/22 19:54:48  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -53,6 +56,12 @@
 #	define	Uses_wxDialog
 #	include	<wx/wx.h>
 #	include	"gui/wxMenuDefs.h"
+
+#ifdef    __WINDOWS__
+  // FIXME would be better change it in wx/wx.h
+  #undef  USE_IPC
+#endif
+
 /// how much space to leave in frame around other items
 #	define	WXFRAME_WIDTH_DELTA	16
 /// how much space to leave in frame around other items

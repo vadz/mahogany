@@ -19,7 +19,7 @@
 #ifdef unix
 #	define	OS_UNIX		1
 #	define	OS_TYPE		"unix"
-#elif defined(__WIN__) || defined (__WIN32__)
+#elif defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
 #	define	OS_WIN		1
 #	define	OS_TYPE		"windows"
 # 	ifndef  __WINDOWS__
@@ -28,10 +28,6 @@
 #else
   // this reminder is important, it won't compile without it anyhow...
 # error   "Unknown platform (forgot to #define unix?)"
-#endif
-
-#ifdef	__WINDOWS__
-#   error windows
 #endif
 
 // Are we using GCC?
@@ -55,8 +51,6 @@
                 /// are we using precompiled headers?
 #		ifndef USE_PCH
 # 			define USE_PCH        1
-#		else
-#			undef	USE_PCH
 #		endif
 #endif
 
@@ -125,24 +119,21 @@
 #define NULL    0
 
 
+// you can't mix iostream.h and iostream, the former doesn't compile
+// with "using namespace std", the latter doesn't compile with wxWin
+// make your choice...
+#ifndef USE_IOSTREAMH
+# define USE_IOSTREAMH   1
+#endif
+
 // Microsoft Visual C++
 #ifdef  CC_MSC
-  // suppress the warning "identifier was truncated to 255 characters 
-  // in the debug information"
-#	pragma warning(disable: 4786)
-
-  // you can't mix iostream.h and iostream, the former doesn't compile
-  // with "using namespace std", the latter doesn't compile with wxWin
-  // make your choice...
-#	ifndef USE_IOSTREAMH
-#		define USE_IOSTREAMH   1
-#	error !use_iostream
-#else
-#	error use_iostream
-#	endif
+   // suppress the warning "identifier was truncated to 255 characters 
+   // in the debug information"
+#  pragma warning(disable: 4786)
 
   // <string> includes <istream> (Grrr...)
-#	if     USE_IOSTREAMH
+#	ifdef USE_IOSTREAMH
 #		undef  USE_WXSTRING
 #		define USE_WXSTRING    1
 #	endif
@@ -156,9 +147,6 @@
 #       include <fstream>
 #endif
 
-#include        <list>
-#include        <map>
-
 #ifdef           USE_IOSTREAMH
   // can't use namespace std because old iostream doesn't compile with it
   // and can't use std::list because it's a template class
@@ -166,25 +154,32 @@
   using namespace std;
 #endif
 
-#ifdef	USE_WXWINDOWS
-#       ifdef        USE_WXWINDOWS2
-#               define  WXCPTR  	/**/
-#		define	WXSTR(str)	str
-#       else
-#               define  WXCPTR  	(char *)
-#    		define	WXSTR(str)	((char *)str.c_str())
-#       endif
+#ifdef  USE_WXWINDOWS
+# ifdef   USE_WXWINDOWS2
+# define  WXCPTR      /**/
+# define  WXSTR(str)  str
+#else
+# define  WXCPTR      (char *)
+# define  WXSTR(str)  ((char *)str.c_str())
 #endif
 
+#endif
 
 // set the proper STL class names
-#ifdef	CC_MSC
-#	define	STL_LIST	std::list
-#else
-#	define	STL_LIST	list
+#ifdef  CC_MSC
+# define  STL_LIST  std::list
+#else //!Visual C++
+# define  STL_LIST  list
 #endif
 
 
 #define Bool    int
+
+// use builtin wxConfig by default in wxWin2 and appconf otherwise
+#ifndef  USE_WXCONFIG
+#  ifdef USE_WXWINDOWS2
+#     define  USE_WXCONFIG
+#  endif
+#endif
 
 #endif

@@ -15,8 +15,8 @@
 #endif
 
 #ifndef	USE_PCH
-#	include	"Message.h"
-#	include "MailFolderCC.h"
+#	include  "Message.h"
+#	include  "MailFolderCC.h"
 #endif
 
 /** Message class, containing the most commonly used message headers.
@@ -147,7 +147,7 @@ public:
        @return address entry
    */
    virtual const String Address(String &name,
-				MessageAddressType type = MAT_FROM) const;
+                                MessageAddressType type = MAT_FROM) const;
 
    /** get From line
        @return From entry

@@ -11,43 +11,51 @@
 #ifndef   MPCH_H
 #define   MPCH_H
 
-#include        "Mconfig.h"
+#include  "Mconfig.h"
 
-#ifdef	USE_PCH
+#ifdef    USE_PCH
 
 // includes for c-client library
 
-#include	<stdio.h>
+#include  <stdio.h>
+#include  <time.h>
+
+#include  <list>
+#include  <map>
 
 extern "C"
 {
-#	include      <mail.h>
-#	include      <osdep.h>
-#	include      <rfc822.h>
-#	include      <smtp.h>
-#	include      <nntp.h>
+#	include <mail.h>
+#	include <osdep.h>
+#	include <rfc822.h>
+#	include <smtp.h>
+#	include <nntp.h>
 
   // windows.h included from osdep.h #defines all these
-#	undef    GetMessage
-#	undef    FindWindow
-#	undef    GetCharWidth
-#	undef    LoadAccelerators
+#	undef   GetMessage
+#	undef   FindWindow
+#	undef   GetCharWidth
+#	undef   LoadAccelerators
 }
 
+#include  "guidef.h"
+#include  "strutil.h"
 
-#include        <guidef.h>
-#include        <strutil.h>
-#include        <appconf.h>
-#include	<time.h>
+#ifdef   USE_WXCONFIG
+   #include "wx/config.h"
+#else  //standalone appconf
+   #include "appconf.h"
+#endif
 
-#include	<Mcommon.h>
-#include	<MimeList.h>
-#include	<MimeTypes.h>
-#include	<MFrame.h>
-#include	<MLogFrame.h>
-#include	<Profile.h>
-#include	<MApplication.h>
-#include	"Mdefaults.h"
+#include  "Mcommon.h"
+#include  "MimeList.h"
+#include  "MimeTypes.h"
+#include  "MFrame.h"
+#include  "gui/wxMFrame.h"
+#include  "MLogFrame.h"
+#include  "Profile.h"
+#include  "MApplication.h"
+#include  "Mdefaults.h"
 
-#endif	// USE_PCH
+#endif  //USE_PCH
 #endif  //MPCH_H

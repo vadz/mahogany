@@ -31,10 +31,8 @@ public:
    /// used to set the title of the window class
    virtual void	SetTitle(String const & name = String("M")) = 0;
 
-#ifdef USE_WXWINDOWS2    // wxMFrame shouldn't have 2 virtual Show()
    /// make it visible or invisible
-   virtual void Show(bool visible = true) = 0;
-#endif  // wxWin 2
+   virtual SHOW_TYPE Show(bool visible = true) = 0;
 };
 
 #endif
