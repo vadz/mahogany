@@ -36,6 +36,7 @@ ODIR=.
 
 ifdef HAVE_LIBMAL
 LIBMAL_DIR=$(BUILDDIR)/extra/src/libmal
+PISOCK_LIB:=$(PISOCK_LIB) -L$(LIBMAL_DIR)/.libs -lmal
 endif
 
 # libraries needed by the modules, linked against individually in the modules
