@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat May  2 16:37:50 1998
+#This file was created by <karsten> Thu May 14 19:47:36 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -305,6 +305,19 @@ mApplication
  is a variable name.
 \layout Itemize
 
+Class method names are capitalised, i.e.
+ 
+\family typewriter 
+MyClass::MyMethod()
+\family default 
+, but function names always start with a lowercase letter, i.e.
+ 
+\family typewriter 
+void exitFunc()
+\family default 
+.
+\layout Itemize
+
 Do not use 
 \family typewriter 
 hungarian
@@ -546,18 +559,20 @@ $Id$
  and the 
 \family typewriter 
 $Log$
-Revision 1.5  1998/05/02 18:29:51  KB
-After many problems, Python integration is eventually taking off -
-works.
+Revision 1.6  1998/05/14 18:49:07  KB
+Extended naming conventions, added postscript versions.
+Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
+ Python integration is eventually taking off -works.
 
 \family default 
  tags.
  Including the 
 \family typewriter 
 $Log$
-Revision 1.5  1998/05/02 18:29:51  KB
-After many problems, Python integration is eventually taking off -
-works.
+Revision 1.6  1998/05/14 18:49:07  KB
+Extended naming conventions, added postscript versions.
+Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
+ Python integration is eventually taking off -works.
 
 \family default 
  information in each file somehow inflates the code, but as the CVS archive

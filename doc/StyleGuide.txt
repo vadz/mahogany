@@ -98,6 +98,9 @@ Example:
   with lower case letters, i.e. MApplication is a class name, mApplication
   is a variable name.
 
+* Class method names are capitalised, i.e. MyClass::MyMethod(), but
+  function names always start with a lowercase letter, i.e. void exitFunc().
+
 * Do not use hungarian notation.
 
 * When using names consisting of several words, use mixed capitalisation,
@@ -186,15 +189,17 @@ or mSIZE(x).
 
 The sources are managed by the CVS version control system. For easy
 identification, each file should start with a comment, including at
-least the $Id$ and the $Log$
-least the $Id$ and the Revision 1.4  1998/05/02 18:29:51  KB
-least the $Id$ and the After many problems, Python integration is eventually taking off -
-least the $Id$ and the works.
-least the $Id$ and the tags. Including the $Log$
-least the $Id$ and the $Log$ tags. Including the Revision 1.4  1998/05/02 18:29:51  KB
-least the $Id$ and the $Log$ tags. Including the After many problems, Python integration is eventually taking off -
-least the $Id$ and the $Log$ tags. Including the works.
-least the $Id$ and the $Log$ tags. Including the information
-in each file somehow inflates the code, but as the CVS archive might
-only be accessible through a dial-up internet connection, it provides
-valuable information.
+least the $Id$ and
+the $Log$
+the Revision 1.5  1998/05/14 18:49:08  KB
+the Extended naming conventions, added postscript versions.
+theRevision 1.5  1998/05/02 18:29:51  KBAfter
+many problems, Python integration is eventually taking off -works.
+tags. Including the $Log$
+tags. Including the Revision 1.5  1998/05/14 18:49:08  KB
+tags. Including the Extended naming conventions, added postscript versions.
+tags. Including theRevision 1.5  1998/05/02
+18:29:51  KBAfter many problems, Python integration is eventually
+taking off -works. information in each file somehow inflates the code,
+but as the CVS archive might only be accessible through a dial-up
+internet connection, it provides valuable information.
