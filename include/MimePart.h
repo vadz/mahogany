@@ -307,7 +307,7 @@ public:
    //@{
 
    /// get the decoded contents of this part
-   virtual const char *GetContent(unsigned long *len = NULL) const = 0;
+   virtual const void *GetContent(unsigned long *len = NULL) const = 0;
 
    /// get the encoding of the part
    virtual MimeXferEncoding GetTransferEncoding() const = 0;

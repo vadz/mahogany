@@ -107,7 +107,7 @@ public:
        @param enc the text encoding (only for TEXT parts)
    */
    virtual void AddPart(MimeType::Primary type,
-                        const char *buf, size_t len,
+                        const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
                         const String &disposition = "INLINE",
                         MessageParameterList const *dlist = NULL,

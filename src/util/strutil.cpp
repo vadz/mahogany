@@ -1398,14 +1398,14 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
 }
 
 /// Check if text is 7bit only:
-bool strutil_is7bit(const char *text)
+bool strutil_is7bit(const unsigned char *text)
 {
    if ( !text )
       return TRUE;
 
-   for( unsigned char *utext = (unsigned char *)text; *utext; utext++ )
+   while ( *text )
    {
-      if( !isascii(*utext) )
+      if ( !isascii(*text++) )
          return FALSE;
    }
 

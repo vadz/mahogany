@@ -214,7 +214,7 @@ public:
        @param  len a pointer to a variable where to store length of data returned
        @return pointer to the content
    */
-   const char *GetPartContent(int n, unsigned long *len = NULL) const
+   const void *GetPartContent(int n, unsigned long *len = NULL) const
       { return GetMimePart(n)->GetContent(len); }
 
    /** Query the type of the content.

@@ -197,8 +197,11 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
 MessageCC::~MessageCC()
 {
    delete m_mimePartTop;
-   delete [] m_partContentPtr;
+
+   fs_give(&m_partContentPtr);
+
    delete [] m_msgText;
+
    SafeDecRef(m_folder);
    SafeDecRef(m_Profile);
 }
@@ -277,7 +280,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    for(int i = 0; i < CountParts(); i++)
    {
       unsigned long len;
-      const char *data = GetPartContent(i, &len);
+      const void *data = GetPartContent(i, &len);
       String dispType;
       MessageParameterList const &dlist = GetDisposition(i, &dispType);
       MessageParameterList const &plist = GetParameters(i);
@@ -929,7 +932,7 @@ const MimePart *MessageCC::GetMimePart(int n) const
    return mimepart;
 }
 
-const char *
+const void *
 MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 {
    CHECK( m_folder, NULL, "MessageCC::GetPartData() without folder?" );
@@ -959,6 +962,7 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
    const String& sp = mimepart.GetPartSpec();
    unsigned long len = 0;
 
+   // NB: this pointer shouldn't be freed
    char *cptr = mail_fetchbody_full(stream,
                                     m_uid,
                                     (char *)sp.c_str(),
@@ -967,65 +971,52 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 
    m_folder->UnLock();
 
-   if(lenptr == NULL)
-      lenptr  = &len;   // so to give c-client lib a place where to write to
+   // ensure that lenptr is always valid
+   if ( lenptr == NULL )
+   {
+      lenptr  = &len;
+   }
 
-   if(len == 0)
+   // have we succeeded in retrieveing anything?
+   if ( len == 0 )
    {
       *lenptr = 0;
+
       return NULL;
    }
 
-   if(m_partContentPtr)
-      delete [] m_partContentPtr;
-   m_partContentPtr = new char[len+1];
-   strncpy(m_partContentPtr, cptr, len);
-   m_partContentPtr[len] = '\0';
-   //fs_give(&cptr); // c-client's free() function
+   // free old text
+   fs_give(&m_partContentPtr);
 
-   /* This bit is a bit suspicious, it fails sometimes in
-      rfc822_qprint() when HTML code is fed into it and while Mahogany
-      has long done all this, it seems to be not significantly worse
-      if I comment it all out. So what I do now, is to just return the
-      plain text if the decoding failed.
-      FIXME I should really find out whether this is correct :-)
-   */
-
-   unsigned char *data = (unsigned char *)m_partContentPtr; // cast for cclient
-   const char * returnVal = NULL;
-   switch( mimepart.GetTransferEncoding() )
+   switch ( mimepart.GetTransferEncoding() )
    {
       case ENCBASE64:      // base-64 encoded data
-         returnVal = (const char *) rfc822_base64(data, size, lenptr);
+         m_partContentPtr = rfc822_base64((unsigned char *)cptr, size, lenptr);
          break;
-      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-         returnVal = (const char *) rfc822_qprint(data, size, lenptr);
-         break;
-      case  ENCBINARY:     // 8 bit binary data
-         *lenptr = size;
-         return m_partContentPtr;
 
-      case ENC7BIT:     // 7 bit SMTP semantic data
+      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
+         m_partContentPtr = rfc822_qprint((unsigned char *)cptr, size, lenptr);
+         break;
+
+      case  ENCBINARY:     // 8 bit binary data
+         // don't use string functions, string may contain NULs
+         *lenptr = size;
+         m_partContentPtr = fs_get(size);
+         memcpy(m_partContentPtr, cptr, size);
+         break;
+
+      case ENC7BIT:        // 7 bit SMTP semantic data
       case ENC8BIT:        // 8 bit SMTP semantic data
-      case ENCOTHER:    //unknown
+      case ENCOTHER:       //unknown
       default:
-         *lenptr = strlen(m_partContentPtr);
-         returnVal = m_partContentPtr;
+         *lenptr = strlen(cptr);
+         m_partContentPtr = cpystr(cptr);
    }
-   if(returnVal == NULL)
-      return m_partContentPtr;
-   else if(returnVal != m_partContentPtr)
-   { // we need to copy it over
-      if(m_partContentPtr) delete [] m_partContentPtr;
-      m_partContentPtr = new char [(*lenptr)+1];
-      memcpy(m_partContentPtr, returnVal, *lenptr);
-      m_partContentPtr[(*lenptr)] = '\0';
-      fs_give((void **)&returnVal);
-   }
+
    return m_partContentPtr;
 }
 
-const char *MimePartCC::GetContent(unsigned long *len) const
+const void *MimePartCC::GetContent(unsigned long *len) const
 {
    return GetMessage()->GetPartData(*this, len);
 }

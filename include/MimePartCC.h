@@ -46,7 +46,7 @@ public:
    virtual const MimeParameterList& GetDispositionParameters() const;
 
    // data access
-   virtual const char *GetContent(unsigned long *len = NULL) const;
+   virtual const void *GetContent(unsigned long *len = NULL) const;
    virtual MimeXferEncoding GetTransferEncoding() const;
    virtual size_t GetSize() const;
 

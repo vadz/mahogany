@@ -1044,9 +1044,12 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
                         lastWasPlainText = mimeType == "text/plain";
 
-                        ExpandOriginalText(m_msg->GetPartContent(nPart),
-                                           prefix,
-                                           value);
+                        ExpandOriginalText
+                        (
+                           (const char *)m_msg->GetPartContent(nPart),
+                           prefix,
+                           value
+                        );
                      }
                      else
                      {

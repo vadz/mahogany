@@ -342,7 +342,7 @@ String
 strutil_escapeString(const String &string);
 
 /// Check if text is 7bit only:
-bool strutil_is7bit(const char *text);
+bool strutil_is7bit(const unsigned char *text);
 
 /** @name regular expression matching */
 //@{

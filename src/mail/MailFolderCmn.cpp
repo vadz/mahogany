@@ -703,7 +703,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
             if ( (partType == Message::MSG_TYPETEXT) ||
                  (partType == Message::MSG_TYPEMESSAGE ))
             {
-               const char *cptr = msg->GetPartContent(part);
+               // it is always "char *", not "void *" for these types
+               const char *cptr = (const char *)msg->GetPartContent(part);
                if( !cptr )
                {
                   FAIL_MSG( "failed to get the content of a text psrt?" );

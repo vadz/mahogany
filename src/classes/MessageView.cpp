@@ -1124,7 +1124,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       return;
    }
 
-   String textPart = mimepart->GetContent();
+   // cast is ok - it's a text part
+   String textPart = (const char *)mimepart->GetContent();
 
    // get the encoding of the text
    wxFontEncoding encPart;
@@ -1356,7 +1357,7 @@ void MessageView::ShowImage(const MimePart *mimepart)
    if ( showInline )
    {
       unsigned long len;
-      const char *data = mimepart->GetContent(&len);
+      const void *data = mimepart->GetContent(&len);
 
       if ( !data )
       {
@@ -1522,7 +1523,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       // if it is not too big before doing this
       if ( CheckMessagePartSize(mimepart) )
       {
-         String data = mimepart->GetContent();
+         const void *data = mimepart->GetContent();
 
          if ( !data )
          {
@@ -1530,7 +1531,9 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            m_viewer->InsertRawContents(data);
+            String s(data, (const char *)data + partSize);
+
+            m_viewer->InsertRawContents(s);
          }
       }
       //else: skip this part
@@ -2149,7 +2152,7 @@ MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
    }
 
    unsigned long len;
-   const char *content = mimepart->GetContent(&len);
+   const void *content = mimepart->GetContent(&len);
    if( !content )
    {
       wxLogError(_("Cannot get attachment content."));
@@ -2169,7 +2172,7 @@ MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
             String fromLine = "From ";
 
             // find the from address
-            const char *p = strstr(content, "From: ");
+            const char *p = strstr((const char *)content, "From: ");
             if ( !p )
             {
                // this shouldn't normally happen, but if it does just make it
@@ -2226,7 +2229,7 @@ MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
 void
 MessageView::MimeViewText(const MimePart *mimepart)
 {
-   const char *content = mimepart->GetContent();
+   const void *content = mimepart->GetContent();
    if ( content )
    {
       String title;
@@ -2239,7 +2242,8 @@ MessageView::MimeViewText(const MimePart *mimepart)
          title << " ('" << filename << "')";
       }
 
-      MDialog_ShowText(GetParentFrame(), title, content, "MimeView");
+      MDialog_ShowText(GetParentFrame(), title,
+                       (const char *)content, "MimeView");
    }
    else
    {

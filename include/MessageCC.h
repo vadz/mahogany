@@ -80,8 +80,7 @@ public:
 
    /** get the decoded part text
     */
-   const char *GetPartData(const MimePart& mimepart,
-                           unsigned long *len = NULL);
+   const void *GetPartData(const MimePart& mimepart, unsigned long *len = NULL);
 
    virtual const MimePart *GetTopMimePart() const;
 
@@ -230,7 +229,7 @@ private:
        It holds the information returned by that function and is only
        valid until its next call.
    */
-   char *m_partContentPtr;
+   void *m_partContentPtr;
 
    /// pointer to the main message MIME part, it links to all others
    MimePartCC *m_mimePartTop;

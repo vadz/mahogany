@@ -900,7 +900,7 @@ SendMessageCC::Build(bool forStorage)
 
 void
 SendMessageCC::AddPart(MimeType::Primary type,
-                       const char *buf, size_t len,
+                       const void *buf, size_t len,
                        String const &subtype_given,
                        String const &disposition,
                        MessageParameterList const *dlist,
@@ -959,7 +959,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( strutil_is7bit(buf) )
+         if ( strutil_is7bit(data) )
          {
             bdy->encoding = ENC7BIT;
          }
