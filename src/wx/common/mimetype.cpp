@@ -771,20 +771,22 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
         while ( isspace(*pc) )
             pc++;
 
-        // comment?
-        if ( *pc == '#' )
+        // comment or empty string?
+        if ( *pc == '#' || *pc == '\0' )
             continue;
 
         // no, do parse
 
-        // what field are we currently in? Invalid means that we went beyond the
-        // last known one and there is some garbage (at least for us) left on
-        // the line
+        // what field are we currently in? The first 2 are fixed and there may
+        // be an arbitrary number of other fields -- currently, we are not
+        // interested in any of them, but we should parse them as well...
+        //
+        // TODO must support test field (pretty tricky unfortunately)
         enum
         {
             Token_Type,
             Token_Command,
-            Token_Flags,
+            Token_Ignore,
             Token_Invalid
         } currentToken = Token_Type;
 
@@ -793,17 +795,33 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
         int nIndex = NOT_FOUND;
 
         wxString strCurrentToken; // accumulator
-        for ( ; *pc != '\0'; pc++ ) {
+        for ( bool cont = TRUE; cont; pc++ ) {
             switch ( *pc ) {
                 case '\\':
                     // interpret the next character literally
                     strCurrentToken += *++pc;
                     break;
 
+                case '\0':
+                    // backslash can be used for line continuation
+                    if ( *(pc - 1) == '\\' ) {
+                        // pc currently points to nowhere, but after the next
+                        // pc++ in the for line it will point to the beginning
+                        // of the next line in the file
+                        pc = file[++nLine].c_str() - 1;
+                    }
+                    else {
+                        cont = FALSE;   // end of line reached
+                    }
+
+                    // fall through
+
                 case ';':
                     // store this token and start looking for the next one
                     {
-                        strCurrentToken.Trim(); // whitespaces
+                        // trim whitespaces from both sides
+                        strCurrentToken.Trim(TRUE).Trim(FALSE);
+
                         switch ( currentToken ) {
                             case Token_Type:
                                 // try to find it first
@@ -811,6 +829,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                 if ( nIndex == NOT_FOUND ) {
                                     m_aTypes.Add(strCurrentToken);
                                     m_aExtensions.Add("");
+                                    m_aDescriptions.Add("");
                                 }
                                 //else: nothing, modify other fields later
 
@@ -827,19 +846,18 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                     m_aCommands[nIndex] = strCurrentToken;
                                 }
 
-                                currentToken = Token_Flags;
+                                currentToken = Token_Ignore;
                                 break;
 
-                            case Token_Flags:
-                                // we ignore the flags
-
-                                currentToken = Token_Invalid;
+                            case Token_Ignore:
+                                // we ignore this field
+                                currentToken = Token_Ignore;
                                 break;
 
                             case Token_Invalid:
                                 wxLogWarning
                                 (
-                                  _("Mailcap file %s, line %d: extra fields "
+                                  _("Mailcap file %s, line %d: unknown field "
                                     "for the MIME type '%s' ignored."),
                                   strFileName.c_str(),
                                   nLine,
@@ -862,12 +880,12 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                     strCurrentToken += *pc;
             }
         }
-    }
 
-    // check our data integriry
-    wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
-              m_aTypes.Count() == m_aExtensions.Count() &&
-              m_aTypes.Count() == m_aDescriptions.Count() );
+        // check our data integriry
+        wxASSERT( m_aTypes.Count() == m_aCommands.Count() &&
+                  m_aTypes.Count() == m_aExtensions.Count() &&
+                  m_aTypes.Count() == m_aDescriptions.Count() );
+    }
 }
 
 #endif // OS type
