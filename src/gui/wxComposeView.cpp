@@ -722,8 +722,11 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    // in an URL from the web browser
    if ( text.StartsWith("mailto:", &text) )
    {
-      // in case we return below
       SetValue(text);
+      SetInsertionPointEnd();
+
+      // don't try to expand it, the address is already complete
+      return TRUE;
    }
 
    // check for the lone '"' simplifies the code for finding the starting
