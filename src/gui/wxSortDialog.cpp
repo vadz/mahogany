@@ -250,7 +250,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    c->height.AsIs();
    m_checkReSortOnChange->SetConstraints(c);
 
-   SetDefaultSize(7*wBtn, 60*hBtn);
+   SetDefaultSize(7*wBtn, 18*hBtn);
 
    m_wasChanged = false;
 }
