@@ -948,6 +948,11 @@ case "$USE_CCOSTYPE" in
 		yes)	CCOSTYPE=gof ;;
 		*)	CCOSTYPE=osf ;;
 		esac ;;
+	IRIX*)
+		case "$GXX" in
+		yes)	CCOSTYPE=gsg ;;
+		*)	CCOSTYPE=sg6 ;;
+		esac ;;
 	*)
 		AC_MSG_RESULT(unknown)
 		AC_MSG_ERROR([cannot determine c-client OS type for $OSTYPE])
