@@ -402,12 +402,6 @@ dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
 
-dnl Check if we have the pi-sock library and headers for PalmOS support.
-AC_CHECK_HEADERS(pi-source.h, ,
-  AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled."))
-AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
-AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
-
 dnl libresolv or libbind
 USE_RBL=1
 AC_CHECK_LIB(resolv,res_init,,
@@ -628,6 +622,22 @@ if test "x$CCOSTYPE" = "x" ; then
 	AC_MSG_ERROR("Cannot determine OS type for c-client library for your OS: ${OSTYPE}.")
 fi
 AC_SUBST(CCOSTYPE)
+
+dnl this must come after we checked for wxGTK and network libraries
+dnl Check if we have the pi-sock library and headers for PalmOS support.
+MAKE_PISOCKLIB=
+AC_CHECK_HEADERS(pi-source.h,
+ AC_CHECK_LIB(pisock, main,
+  [ AC_DEFINE(USE_PISOCK)
+    MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
+    AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
+     AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
+  ],
+  AC_MSG_WARN("Cannot find pisock library - support for PalmOS disabled.")
+ ),
+ AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled.")
+)
+AC_SUBST(MAKE_PISOCKLIB)    
 
 
 dnl --------------------------------------------------------------------------

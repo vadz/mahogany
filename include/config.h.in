@@ -61,13 +61,7 @@
 #undef HAVE_UNISTD_H
 
 /** Do we have the pisock library and headers?
- Use the USE_PISOCK define in the source, not the HAVE_ !*/
-#undef HAVE_PI_SOURCE_H
-#ifdef HAVE_PI_SOURCE_H
-#   define USE_PISOCK 1
-#else
-#   undef USE_PISOCK
-#endif
+#undef USE_PISOCK
 
 /** Do we have a pisock library with setmaxspeed? */
 #undef HAVE_PI_SETMAXSPEED
