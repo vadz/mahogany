@@ -133,15 +133,22 @@ String AdbExpand(const String& what, wxFrame *frame)
     
     if ( rc != -1 )
     {
+      wxString name, email;
+
       AdbEntry *pEntry = aEntries[rc];
-      pEntry->GetField(AdbField_EMail, &result);
-      
-      wxString str;
-      pEntry->GetField(AdbField_NickName, &str);
+      pEntry->GetField(AdbField_FullName, &name);
+      pEntry->GetField(AdbField_EMail, &email);
+
+      // the full form is "FullName <email>", but if the "fullname" is empty,
+      // we take "nickname" instead (it can not be empty normally)
+      if ( name.IsEmpty() )
+        pEntry->GetField(AdbField_NickName, &name);
+
+      result << name << " <" << email << '>';
       if ( frame )
       {
         wxLogStatus(frame, _("Expanded '%s' using entry '%s'"),
-                    what.c_str(), str.c_str());
+                    what.c_str(), name.c_str());
       }
     }
     

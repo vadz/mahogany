@@ -19,7 +19,7 @@
 #include   "wxMessageView.h"
 #include   <wx/listctrl.h>
 #include   <wx/dynarray.h>
-
+#include   <wx/splitter.h>
 class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;

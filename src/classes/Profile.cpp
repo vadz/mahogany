@@ -375,7 +375,7 @@ bool
 wxConfigProfile::HasEntry(const String & key) const
 {
    MOcheck();
-   return m_config->HasEntry(key);
+   return m_config->HasEntry(key) || m_config->HasGroup(key);
 }
 
 void

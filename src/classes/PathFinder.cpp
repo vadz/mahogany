@@ -32,6 +32,8 @@
 
 #include   "PathFinder.h"
 
+#include   <wx/filefn.h>
+
 PathFinder::PathFinder(STRINGARG ipathlist, bool recursive)
 {
    pathList = new kbStringList(FALSE);

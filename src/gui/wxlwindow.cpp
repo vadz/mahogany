@@ -16,6 +16,7 @@
 #   ifndef USE_PCH
 #     include "Mcommon.h"
 #     include "gui/wxMenuDefs.h"
+#     include "gui/wxMApp.h"
 #   endif // USE_PCH
 #   include "gui/wxlwindow.h"
 #else
@@ -30,7 +31,7 @@
 #   include "wxlwindow.h"
 #   define TRACEMESSAGE(x)
 #endif
-#  define   WXL_VAR(x)           cerr << #x " = " << x ;
+#  define   WXL_VAR(x)           { wxString s; s << #x " = " << x; wxLogDebug(s); }
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_PAINT    (wxLayoutWindow::OnPaint)
@@ -71,7 +72,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 long
 wxLayoutWindow::MSWGetDlgCode()
 {
-   // if we don't return this, we won't get OnChar() events
+   // if we don't return this, we won't get OnChar() events for TABs and ENTER
    return DLGC_WANTCHARS | DLGC_WANTARROWS | DLGC_WANTMESSAGE;
 }
 #endif //MSW

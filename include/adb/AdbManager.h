@@ -17,13 +17,11 @@
 
 #include "adb/AdbEntry.h"   // for AdbLookup_xxx constants
 
+#include <wx/dynarray.h>
+
 // forward declaration for classes we use
 class AdbBook;
 class AdbDataProvider;
-//KB: at least the Entries array is needed for using the Lookup
-//    function.
-//class ArrayAdbEntries;
-//class ArrayAdbBooks;
 
 // arrays
 WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);

@@ -3,7 +3,7 @@ static char *access[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32        5            1",
 /* colors */
-". c #000000",
+". c none",
 "# c #fefefe",
 "a c #fefe3f",
 "b c #007f7f",

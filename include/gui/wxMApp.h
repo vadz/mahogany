@@ -61,6 +61,8 @@ private:
    wxIconManager *m_IconManager;
    /// a help controller instance
    wxHelpController *m_HelpController;
+   /// a locale for translation
+   class wxLocale *m_Locale;
 };
 
 // ----------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 // functions
 // ----------------------------------------------------------------------------
 
-// Upgrade from specified version to the current one, return TRUE on success.
+/// Upgrade from specified version to the current one, return TRUE on success.
 extern bool Upgrade(const String& fromVersion);
 
 /// Set up initial Profile settings if non-existent, return true on success.
@@ -25,5 +25,8 @@ extern bool SetupInitialConfig(void);
 
 /// Verify whether the mail configuration works, return true on success.
 extern bool VerifyMailConfig(void);
+
+/// Verify whether the INBOX profile exists, return false if it was created.
+extern bool VerifyInbox(void);
 
 #endif  //M_MUPGRADE_H

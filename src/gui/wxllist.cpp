@@ -720,7 +720,12 @@ wxLayoutList::MoveCursor(int dx, int dy)
    else
       direction = up;
 
-   wxASSERT(m_CursorObject);
+   if ( !m_CursorObject )
+   {
+      // list is empty
+       return FALSE;
+   }
+
    // now move cursor forwards until at the new position:
 
    // first, go to the right line:

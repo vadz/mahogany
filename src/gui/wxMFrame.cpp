@@ -27,6 +27,8 @@
 #   include "gui/wxMApp.h"
 #   include "MailFolder.h"
 #   include "Message.h"
+
+#   include "wx/confbase.h"
 #endif
 
 #ifdef USE_PYTHON
@@ -38,6 +40,8 @@
 
 #include "FolderView.h"
 #include "MDialogs.h"
+
+#include "MFolderDialogs.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
@@ -192,33 +196,34 @@ wxMFrame::OnMenuCommand(int id)
    switch(id)
    {
    case WXMENU_FILE_OPEN:
-   {
-      wxString name;
-      if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
-                     this, "OpenFolderName", "INBOX") )
-               (void) wxFolderViewFrame::Create(name, this);
-            break;
-   }
+      {
+         wxString name;
+         if ( MInputBox(&name, _("Folder Open"), _("Name of the folder?"),
+                        this, "OpenFolderName", "INBOX") )
+         {
+            (void) wxFolderViewFrame::Create(name, this);
+         }
+      }
+      break;
+
    case WXMENU_FILE_OPENANY:
       MDialog_FolderOpen(this);
       break;
+
    case WXMENU_FILE_CLOSE:
-   {
       Close();
       break;
-   }
+
    case WXMENU_FILE_CREATE:
-   {
-      ShowFolderCreateDialog(this);
-      //MDialog_FolderCreate(this);
+      (void)ShowFolderCreateDialog(this);
       break;
-   }
+
    case WXMENU_FILE_COMPOSE:
-   {
-      wxComposeView *composeView = new wxComposeView("ComposeView", this);
-      composeView->Show();
+      {
+         wxComposeView *composeView = new wxComposeView("ComposeView", this);
+         composeView->Show();
+      }
       break;
-   }
 
 #ifdef USE_PYTHON
    case WXMENU_FILE_SCRIPT:
@@ -261,7 +266,18 @@ wxMFrame::OnMenuCommand(int id)
       break;
 
    case WXMENU_EDIT_SAVE_PREF:
-      MDialog_Message(_("Not implemented yet."),this,_("Sorry"));
+      {
+         // FIXME any proper way to flush all profiles at once?
+         wxConfigBase *config = mApplication->GetProfile()->GetConfig();
+         bool ok = config != NULL;
+         if ( ok )
+            ok = config->Flush();
+
+         if ( ok )
+            wxLogStatus(this, _("Program preferences successfully saved."));
+         else
+            ERRORMESSAGE((_("Couldn't save preferences.")));
+      }
       break;
 
    case WXMENU_HELP_ABOUT:

@@ -13,7 +13,7 @@
 #define   _WX_PWINDOW_H_
 
 #ifdef    __GNUG__
-    #pragma interface "persctrl.h"
+#   pragma interface "persctrl.h"
 #endif
 
 // forward declarations
@@ -22,8 +22,8 @@ class wxPHelper;
 
 // the headers we really need
 #include <wx/notebook.h>
-#include <wx/combobox.h>
-
+//#include <wx/combobox.h>
+#include <wx/wx.h>
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
 // ----------------------------------------------------------------------------
@@ -122,7 +122,7 @@ private:
 // rather as a (single line) text entry, as its name suggests. In particular,
 // you shouldn't add/remove strings from this combobox manually (but using
 // SetValue (and, of course, GetValue) is perfectly ok).
-class WXDLLEXPORT wxPTextEntry : public wxComboBox
+class wxPTextEntry : public wxComboBox
 {
 public:
     // ctors

@@ -74,6 +74,7 @@ install_all: install install_doc
 
 msgcat:
 	$(MAKE) -C src msgcat
+	$(MAKE) -C include msgcat
 
 locales:
 	$(MAKE) -C locale all

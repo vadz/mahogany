@@ -22,7 +22,7 @@
 // otherwise Profile.cpp will get broken!
 
 /** The section in the global configuration file used for storing
-    profiles (trailing '/' required). FIXME where is it?
+    profiles (trailing '/' required).
 */
 #ifndef M_PROFILE_CONFIG_SECTION
 #  ifdef OS_WIN
@@ -119,6 +119,8 @@
 #   define   MC_ETCPATH         "ConfigPath"
 #endif //Unix
 
+/// the locale for translation to national languages
+#define   MC_LOCALE               "Locale"
 /// the default icon for frames
 #define   MC_ICON_MFRAME         "MFrameIcon"
 /// the icon for the main frame
@@ -229,8 +231,10 @@
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
 /// Name from where to read XFace
 #define   MP_COMPOSE_XFACE_FILE   "XFace"
-/// the folder type for a mailbox (see FolderType enum)
+/// the folder type for a mailbox (see enum in MFolder class)
 #define   MP_FOLDER_TYPE         "Type"
+/// the folder flags (see MFolder)
+#define   MP_FOLDER_FLAGS        "Flags"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
 /// comment
@@ -353,6 +357,8 @@
 #define   MC_ETCPATH_D "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
 #endif // Unix
 
+/// the locale for translation to national languages
+#define   MC_LOCALE_D               ""
 /// the default icon for frames
 #define   MC_ICON_MFRAME_D      "mframe.xpm"
 /// the icon for the main frame

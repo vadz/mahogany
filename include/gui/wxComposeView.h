@@ -141,9 +141,6 @@ public:
       /// called when text zone contents changes
    void OnTextChange(wxCommandEvent &event);
 
-      /// called when TAB is pressed
-   void OnNavigationKey(wxNavigationKeyEvent&);
-
       /// called on Menu selection
    void OnMenuCommand(int id);
 
@@ -166,6 +163,10 @@ public:
 
    // for wxAddressTextCtrl usage
    void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
+
+protected:
+   /// verify that the message can be sent
+   bool IsReadyToSend() const;
 
 private:
    /// a profile

@@ -317,6 +317,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
       return;
    }
 
+#if USE_PYTHON
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
 
    if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
@@ -327,6 +328,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
       else
          mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
    }
+#endif // USE_PYTHON
 }
 
 void

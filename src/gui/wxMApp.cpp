@@ -50,7 +50,7 @@
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
-
+#include   <wx/intl.h>
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -129,9 +129,20 @@ wxMApp::OnAbnormalTermination()
 bool
 wxMApp::OnInit()
 {
+   // Set up locale first, so everything is in the right language.
+   const char * locale = getenv("LANG");
+   if(locale)
+   {
+      m_Locale = new wxLocale("configured language", locale, "");
+      m_Locale->AddCatalog(M_APPLICATIONNAME);
+   }
+   else
+      m_Locale = NULL;
+   
    m_IconManager = new wxIconManager();
    
-   if ( OnStartup() ) {
+   if ( OnStartup() )
+   {
       // now we can create the log window
       if ( READ_APPCONFIG(MC_SHOWLOG) ) {
          (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
@@ -168,7 +179,8 @@ int wxMApp::OnExit()
    MAppBase::OnShutDown();
 
    delete m_IconManager;
-
+   if(m_Locale) delete m_Locale;
+   
    MObjectRC::CheckLeaks();
 
    // delete the previously active log target (it's the one we had set before

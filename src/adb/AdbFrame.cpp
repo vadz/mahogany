@@ -39,9 +39,9 @@
 #   include "kbList.h"
 #endif //USE_PCH
 
-#include   "MDialogs.h"
-#include   "gui/wxMenuDefs.h"
-#include   "gui/wxIconManager.h"
+#include "MDialogs.h"
+#include "gui/wxMenuDefs.h"
+#include "gui/wxIconManager.h"
 
 #undef   CreateListBox
 
@@ -369,7 +369,6 @@ public:
 
 // many compilers (VC++ for example) don't allow initializing of static
 // member variables inside the class, that's why we must initialize it here
-// @@@@ they're not translated currently!
 AdbTreeEntry::FieldInfo AdbTreeEntry::ms_aFields[] =
 {
   { "Nick &Name",         FieldText },
@@ -781,6 +780,7 @@ protected:
   // helpers
   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
 
+  // all the functions should be given translated label!
   wxTextCtrl *CreateMultiLineText(const char *label, wxControl *last);
   wxListBox  *CreateListBox(const char *label, wxControl *last);
   wxCheckBox *CreateCheckBox(const char *label, wxControl *last);
@@ -911,9 +911,9 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
   EVT_BUTTON(AdbView_Cancel, wxAdbEditFrame::OnMenuCommand)
   EVT_BUTTON(AdbView_Delete, wxAdbEditFrame::OnMenuCommand)
 
-  // lookup text entry
+  // lookup combobox
   EVT_TEXT(AdbView_Lookup, wxAdbEditFrame::OnTextLookupChange)
-  EVT_TEXT_ENTER(AdbView_Lookup, wxAdbEditFrame::OnTextLookupEnter)
+  EVT_COMBOBOX(AdbView_Lookup, wxAdbEditFrame::OnTextLookupEnter)
 
   // update UI events
     // enable/disbale anything that can be done only when an entry is
@@ -2928,7 +2928,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
         continue;
     }
 
-    dc.GetTextExtent(fields[n].label, &width, NULL);
+    dc.GetTextExtent(_(fields[n].label), &width, NULL);
     if ( width > widthMax )
       widthMax = width;
   }
@@ -2943,19 +2943,19 @@ void wxAdbPage::LayoutControls(size_t nCount,
       case AdbTreeEntry::FieldNum:
         // fall through -- for now they're the same as text
       case AdbTreeEntry::FieldText:
-        last = CreateTextWithLabel(fields[n].label, widthMax, last);
+        last = CreateTextWithLabel(_(fields[n].label), widthMax, last);
         break;
 
       case AdbTreeEntry::FieldMemo:
-        last = CreateMultiLineText(fields[n].label, last);
+        last = CreateMultiLineText(_(fields[n].label), last);
         break;
 
       case AdbTreeEntry::FieldList:
-        last = CreateListBox(fields[n].label, last);
+        last = CreateListBox(_(fields[n].label), last);
         break;
 
       case AdbTreeEntry::FieldBool:
-        last = CreateCheckBox(fields[n].label, last);
+        last = CreateCheckBox(_(fields[n].label), last);
         break;
 
       default:
@@ -3349,7 +3349,8 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
   }
   //else: do nothing for address books (could delete the file...)
 
-  delete child;
+  // don't do this, the tree will delete the item itself
+  //delete child;
 }
 
 AdbTreeElement *AdbTreeNode::FindChild(const char *szName)

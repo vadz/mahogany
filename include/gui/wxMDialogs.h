@@ -37,7 +37,7 @@ class MFolder;
        @param modal   true to make messagebox modal
    */
 void   MDialog_ErrorMessage(char const *message,
-                            MWindow *parent = NULL,
+                            const MWindow *parent = NULL,
                             char const *title = MDIALOG_ERRTITLE,
                             bool modal = false);
 
@@ -48,7 +48,7 @@ void   MDialog_ErrorMessage(char const *message,
        @param modal   true to make messagebox modal
    */
 void   MDialog_SystemErrorMessage(char const *message,
-                                  MWindow *parent = NULL,
+                                  const MWindow *parent = NULL,
                                   char const *title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
 
@@ -58,7 +58,7 @@ void   MDialog_SystemErrorMessage(char const *message,
        @param parent   the parent frame
    */
 void   MDialog_FatalErrorMessage(char const *message,
-                                 MWindow *parent = NULL,
+                                 const MWindow *parent = NULL,
                                  char const *title = MDIALOG_FATALERRTITLE);
 
 /** display normal message and, if configPath != NULL, give a user a checkbox
@@ -70,7 +70,7 @@ void   MDialog_FatalErrorMessage(char const *message,
        @param configPath the profile path to use (doesn't use profile if NULL)
    */
 void   MDialog_Message(char const *message,
-                       MWindow *parent = NULL,
+                       const MWindow *parent = NULL,
                        char const *title = MDIALOG_MSGTITLE,
                        const char *configPath = NULL);
 
@@ -86,7 +86,7 @@ void   MDialog_Message(char const *message,
        @return true if Yes was selected
    */
 bool   MDialog_YesNoDialog(char const *message,
-                           MWindow *parent = NULL,
+                           const MWindow *parent = NULL,
                            char const *title = MDIALOG_YESNOTITLE,
                            bool YesDefault = true,
                            const char *configPath = NULL);
@@ -104,7 +104,7 @@ bool   MDialog_YesNoDialog(char const *message,
    */
 #if 0
 const char *MDialog_FileRequester(char const *message,
-                                  MWindow *parent = NULL,
+                                  const MWindow *parent = NULL,
                                   char const *path = NULL,
                                   char const *filename = NULL,
                                   char const *extension = NULL,
@@ -114,7 +114,7 @@ const char *MDialog_FileRequester(char const *message,
 #endif
 
 const char *MDialog_FileRequester(String const &message,
-                                  MWindow *parent = NULL,
+                                  const MWindow *parent = NULL,
                                   String path = NULLstring,
                                   String filename = NULLstring,
                                   String extension = NULLstring,
@@ -148,7 +148,7 @@ const char *MDialog_FileRequester(String const &message,
 bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
-               MWindow *parent = NULL,
+               const MWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL);
 
@@ -160,11 +160,11 @@ bool MInputBox(wxString *pstr,
  in this case -1 is returned. Otherwise, it's the index of selected item.
 */
 int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
-                          MWindow *parent = NULL);
+                          const MWindow *parent = NULL);
 
 /// simple AboutDialog to be displayed at startup
 void
-MDialog_AboutDialog( MWindow *parent, bool bCloseOnTimeout = true);
+MDialog_AboutDialog( const MWindow *parent, bool bCloseOnTimeout = true);
 
 // @@@@ it is the only way I see right now...
 extern class MFrame *g_pSplashScreen;
@@ -174,34 +174,18 @@ extern void CloseSplash();
 
 /// dialog to creat a new folder
 void
-MDialog_FolderCreate(MWindow *parent);
+MDialog_FolderCreate(const MWindow *parent);
 
 /// edit an existing folder profile
 void
-MDialog_FolderProfile(MWindow *parent, ProfileBase *profile);
+MDialog_FolderProfile(const MWindow *parent, ProfileBase *profile);
 
 /// choose a folder from the list of all folders, returns NULL if cancelled
 // TODO store the last folder in config
 MFolder *
-MDialog_FolderChoose(MWindow *parent);
+MDialog_FolderChoose(const MWindow *parent);
 
 /// test
 void MDialog_FolderOpen(class wxMFrame *parent);
-
-// these soefficients are used to calculate the size of the controls in
-// character height units (which we retrieve with wxGetCharHeight).
-// @@@ the coeffecients are purely empirical...
-
-inline long AdjustCharHeight(long h)
-{
-#  ifdef OS_WIN
-      return h - 3;
-#  else  // !Win
-      return h;
-#  endif // OS_WIN
-}
-
-#define TEXT_HEIGHT_FROM_LABEL(h)      (23*(h)/13)
-#define BUTTON_WIDTH_FROM_HEIGHT(w)    (75*(w)/23)
 
 #endif  //WXMDIALOGS_H

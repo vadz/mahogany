@@ -1,4 +1,3 @@
-TODO list for M   
 $Id$
 
 
@@ -11,8 +10,11 @@ $Id$
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
      2. for some reasons ProcessEvents() does not call any event handler...why?
+
 - wxLayout: --- working on this, KB ---
   + cut&paste, different cursor for focus/no focus
+  + Bug: in a clear window type "a", <Backspace> - cursor doesn't return
+    to the position (0, 0)
 
 - reply/forward buttons for messageview/folderview
 - only quote the selected text in reply/forward if there is any selection
@@ -43,15 +45,19 @@ $Id$
 
 - announce M and bbdb2adb on bbdb mailing list
 
-KB: Vadim, could you check the following ADB-wxOptionsDlg please?
-
 - ADB:
-  make AdbEdit textctrl accept pasted text
-  make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
-  add Picture field to Adb
+  + make AdbEdit textctrl accept pasted text
+    VZ: I don't have any problems with this (Win/GTK)?
+
+  + make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
+  + add Picture field to Adb
+    VZ: what should it contain? a file name?
   + implement "internal clipboard" for
     - cut-&-paste
     - drag-&-drop
+
+  + <Enter> in "Lookup" combo doesn't work
+  + some fields are sometimes created disabled under Windows - very mysterious...
 
 - UI things
   + we should somehow merge the toolbars into the main frame toolbar if it

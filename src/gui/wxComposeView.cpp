@@ -51,6 +51,7 @@
 #include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
+#include "gui/wxOptionsDlg.h"
 #include "gui/wxComposeView.h"
 
 #include <wx/textfile.h>
@@ -129,7 +130,10 @@ private:
 
 // specialized text control which processes TABs to expand the text it
 // contains and also notifies parent (i.e. wxComposeView) when it is
-// modified
+// modified.
+//
+// NB: use <Enter> to change the current control when wxAddressTextCtrl
+//     has focus (TAB won't work!)
 class wxAddressTextCtrl : public wxTextCtrl
 {
 public:
@@ -137,7 +141,9 @@ public:
    wxAddressTextCtrl(wxComposeView *composeView,
                      wxComposeView::AddressField id,
                      wxWindow *parent)
-      : wxTextCtrl(parent, -1, "")
+      : wxTextCtrl(parent, -1, "",
+                   wxDefaultPosition, wxDefaultSize,
+                   wxTE_PROCESS_ENTER)
    {
       m_composeView = composeView;
       m_id = id;
@@ -145,11 +151,12 @@ public:
 
    // callbacks
    void OnChar(wxKeyEvent& event);
+   void OnEnter(wxCommandEvent& event);
 
    #ifdef __WXMSW__
       // if we don't return this, we won't get TABs in OnChar() events
       long wxAddressTextCtrl::MSWGetDlgCode()
-         { return DLGC_WANTTAB | DLGC_WANTCHARS; }
+        { return DLGC_WANTTAB | wxTextCtrl::MSWGetDlgCode(); }
    #endif //MSW
 
 private:
@@ -171,9 +178,6 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
    EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
 
-   // and we also want to intercept TABs
-   EVT_NAVIGATION_KEY(wxComposeView::OnNavigationKey)
-
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
@@ -182,8 +186,8 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
-   // we wish to process TAB
    EVT_CHAR(wxAddressTextCtrl::OnChar)
+   EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -239,13 +243,27 @@ void MimeContent::SetFile(const String& filename)
 // wxAddressTextCtrl
 // ----------------------------------------------------------------------------
 
+// pass to the next control when <Enter> is pressed
+void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
+{
+    wxNavigationKeyEvent event;
+    event.SetDirection(TRUE);       // forward
+    event.SetWindowChange(FALSE);   // control change
+    event.SetEventObject(this);
+    
+    GetEventHandler()->ProcessEvent(event);
+}
+
+// expand the address when <TAB> is pressed
 void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 {
    ASSERT( event.GetEventObject() == this ); // how can we get anything else?
 
    m_composeView->SetLastAddressEntry(m_id);
 
-   if ( event.KeyCode() == WXK_TAB )
+   // we're only interested in TABs
+   if ( event.KeyCode() == WXK_TAB && !event.ControlDown() && 
+        !event.ShiftDown() && !event.AltDown() )
    {
       // try to expand the last component
       String text = GetValue();
@@ -277,6 +295,12 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
       {
          // find the end of the previous address
          size_t nPrevAddrEnd;
+         if ( nLastAddr > 0 )
+         {
+            // undo "++" above
+            nLastAddr--;
+         }
+
          for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
          {
             char c = text[nPrevAddrEnd];
@@ -285,7 +309,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          }
          
          // take what was there before...
-         wxString newText(text, nPrevAddrEnd);
+         wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
          if ( !newText.IsEmpty() )
          {
             // there was something before, add separator
@@ -296,6 +320,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          newText += expansion;
 
          SetValue(newText);
+         SetInsertionPointEnd();
       }
       //else
       //  don't change the text
@@ -588,14 +613,6 @@ wxComposeView::~wxComposeView()
 // wxComposeView callbacks
 // ----------------------------------------------------------------------------
 
-void
-wxComposeView::OnNavigationKey(wxNavigationKeyEvent& event)
-{
-   // FIXME just to see what goes on there...
-   wxLogDebug("Got %s navigation event.",
-              event.GetDirection() ? "forward" : "backward");
-}
-
 // expand (using the address books) the value of the last active text zone
 void
 wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
@@ -705,9 +722,12 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_SEND:
-      if(Send())
-         m_LayoutWindow->ResetDirty();
-      Close();
+      if ( IsReadyToSend() )
+      {
+         if ( Send() )
+            m_LayoutWindow->ResetDirty();
+         Close();
+      }
       break;
 
    case WXMENU_COMPOSE_PRINT:
@@ -944,6 +964,10 @@ wxComposeView::Send(void)
    return success;
 }
 
+// -----------------------------------------------------------------------------
+// simple GUI accessors
+// -----------------------------------------------------------------------------
+
 /// sets To field
 void
 wxComposeView::SetTo(const String &to)
@@ -974,9 +998,81 @@ wxComposeView::InsertText(const String &txt)
    m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
 }
 
-
+/// print the message
 void
 wxComposeView::Print(void)
 {
    m_LayoutWindow->Print();
+}
+
+// -----------------------------------------------------------------------------
+// helper functions
+// -----------------------------------------------------------------------------
+
+/// verify that the message is ready to be sent
+bool
+wxComposeView::IsReadyToSend() const
+{
+   // verify that the network is configured
+   bool networkSettingsOk = false;
+   while ( !networkSettingsOk )
+   {
+      String host = READ_CONFIG(mApplication->GetProfile(), MP_SMTPHOST);
+      if ( host.IsEmpty() )
+      {
+         if ( MDialog_YesNoDialog(
+                  _("The message can not be sent because the network settings "
+                    "are either not configured or incorrect. Would you like to "
+                    "change them now?"),
+                  this,
+                  MDIALOG_YESNOTITLE,
+                  true /* yes is default */,
+                  "ConfigNetFromCompose") )
+         {
+            ShowOptionsDialog((wxComposeView *)this, OptionPage_Network);
+         }
+         else
+         {
+            wxLogError(_("Can not send message - network is not configured."));
+
+            return FALSE;
+         }
+      }
+      else
+      {
+         // TODO any other vital settings to check?
+         networkSettingsOk = true;
+      }
+   }
+
+   // did we forget the recipients?
+   if ( m_txtFields[Field_To]->GetValue().IsEmpty() )
+   {
+      wxLogError(_("Please specify at least one recipient in the \"To:\" "
+                   "field!"));
+
+      return false;
+   }
+   
+   // did we forget the subject?
+   if ( m_txtFields[Field_Subject]->GetValue().IsEmpty() )
+   {
+      // this one is not strictly speaking mandatory, so just ask the user
+      // about it (giving him a chance to get rid of annoying msg box)
+      if ( MDialog_YesNoDialog(
+               _("The subject of your message is empty, would you like "
+                 "to change it?"),
+               this,
+               MDIALOG_YESNOTITLE,
+               true /* yes is default */,
+               "SendemptySubject") )
+      {
+         m_txtFields[Field_Subject]->SetFocus();
+
+         return false;
+      }
+   }
+
+   // everything is ok
+   return true;
 }

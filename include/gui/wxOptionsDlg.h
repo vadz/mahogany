@@ -13,9 +13,36 @@
 #ifndef   _WXOPTIONSDLG_H
 #define   _WXOPTIONSDLG_H
 
-/// creates and shows the options dialog, returns a pointer to it
-void ShowOptionsDialog(wxFrame *parent = NULL);
-/// creates and shows the folder creation dialog, returns a pointer to it
-void ShowFolderCreateDialog(wxFrame *parent = NULL);
+// -----------------------------------------------------------------------------
+// fwd decls
+// -----------------------------------------------------------------------------
+class wxFrame;
+
+// -----------------------------------------------------------------------------
+// constants
+// -----------------------------------------------------------------------------
+
+/// the ids of option dialogs pages
+enum OptionPage
+{
+   OptionPage_Default = -1,     // open at default page, must be -1
+   OptionPage_Ident,
+   OptionPage_Network = OptionPage_Ident, // so far...
+   OptionPage_Compose,
+   OptionPage_Folders,
+#ifdef USE_PYTHON
+   OptionPage_Python,
+#endif
+   OptionPage_Misc,
+   OptionPage_Max
+};
+
+// -----------------------------------------------------------------------------
+// functions
+// -----------------------------------------------------------------------------
+
+/// creates and shows the options dialog (dialog is modal)
+void ShowOptionsDialog(wxFrame *parent = NULL,
+                       OptionPage page = OptionPage_Default);
 
 #endif  //_WXOPTIONSDLG_H

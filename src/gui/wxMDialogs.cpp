@@ -53,6 +53,7 @@
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxFolderView.h"
+#include "gui/wxDialogLayout.h"
 
 #ifdef    OS_WIN
 #  define M_32x32         "Micon"
@@ -127,9 +128,9 @@ private:
 // ----------------------------------------------------------------------------
 
 /// returns the argument if it's !NULL of the top-level application frame
-static inline wxWindow *GetParent(wxWindow *parent)
+static inline wxWindow *GetParent(const wxWindow *parent)
 {
-  return parent == NULL ? mApplication->TopLevelFrame() : parent;
+  return parent == NULL ? mApplication->TopLevelFrame() : (wxWindow *)parent;
 }
 
 // under Windows we don't use wxCENTRE style which uses the generic message box
@@ -236,7 +237,7 @@ bool MTextInputDialog::TransferDataFromWindow()
 bool MInputBox(wxString *pstr,
                const wxString& strCaption,
                const wxString& strPrompt,
-               wxWindow *parent,
+               const wxWindow *parent,
                const char *szKey,
                const char *def)
 {
@@ -261,7 +262,7 @@ bool MInputBox(wxString *pstr,
 // ----------------------------------------------------------------------------
 void
 MDialog_ErrorMessage(const char *msg,
-                     MWindow *parent,
+                     const MWindow *parent,
                      const char *title,
                      bool /* modal */)
 {
@@ -278,7 +279,7 @@ MDialog_ErrorMessage(const char *msg,
    */
 void
 MDialog_SystemErrorMessage(const char *message,
-               MWindow *parent,
+               const MWindow *parent,
                const char *title,
                bool modal)
 {
@@ -299,7 +300,7 @@ MDialog_SystemErrorMessage(const char *message,
    */
 void
 MDialog_FatalErrorMessage(const char *message,
-              MWindow *parent,
+              const MWindow *parent,
               const char *title)
 {
    String msg = String(message) + _("\nExiting application...");
@@ -317,7 +318,7 @@ MDialog_FatalErrorMessage(const char *message,
    */
 void
 MDialog_Message(const char *message,
-                MWindow *parent,
+                const MWindow *parent,
                 const char *title,
                 const char *configPath)
 {
@@ -349,7 +350,7 @@ MDialog_Message(const char *message,
    */
 bool
 MDialog_YesNoDialog(const char *message,
-                    MWindow *parent,
+                    const MWindow *parent,
                     const char *title,
                     bool /* YesDefault */,
                     const char *configPath)
@@ -384,7 +385,7 @@ MDialog_YesNoDialog(const char *message,
    */
 const char *
 MDialog_FileRequester(String const & message,
-                      MWindow *parent,
+                      const MWindow *parent,
                       String path,
                       String filename,
                       String extension,
@@ -415,12 +416,13 @@ MDialog_FileRequester(String const & message,
    if(parent == NULL)
       parent = mApplication->TopLevelFrame();
 
-   return wxFileSelector(message, path, filename, extension, wildcard, 0, parent);
+   return wxFileSelector(message, path, filename, extension, wildcard, 0,
+                         (wxWindow *)parent);
 }
 
 int
 MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
-                      MWindow *parent)
+                      const MWindow *parent)
 {
    wxArrayString aChoices;
    wxString strName, strEMail;
@@ -457,7 +459,7 @@ MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
                _("Expansion options"),
                nEntryCount,
                &aChoices[0],
-               parent,
+               (wxWindow *)parent,
                -1, -1, // x,y
                TRUE,   //centre
                w, h
@@ -580,7 +582,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 }
 
 void
-MDialog_AboutDialog( MWindow * /* parent */, bool bCloseOnTimeout)
+MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 {
    (void)new wxAboutFrame(bCloseOnTimeout);
 }
@@ -714,7 +716,8 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
                                           wxPoint(xRadio, 2*LAYOUT_Y_MARGIN),
                                           wxSize(-1,-1),
                                           5, m_choices,
-                                          1, wxRA_HORIZONTAL );
+                                          // vertical radiobox
+                                          1, wxRA_SPECIFY_COLS );
 
    int widthRadio, heightRadio;
    m_FolderTypeRadioBox->GetSize(&widthRadio, &heightRadio);
@@ -804,7 +807,7 @@ wxPEP_Folder::TransferDataToWindow(void)
 }
 
 void
-MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
+MDialog_FolderProfile(const MWindow *parent, ProfileBase *profile)
 {
    // show a modal dialog
    wxPEP_Folder dlg(profile, NULL);
@@ -814,7 +817,7 @@ MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
 
 
 void
-MDialog_FolderCreate(MWindow *parent)
+MDialog_FolderCreate(const MWindow *parent)
 {
    wxString name = "NewFolder";
 
@@ -835,7 +838,7 @@ MDialog_FolderCreate(MWindow *parent)
 
 #if 0   // there is already Karstens version...
 void
-MDialog_FolderOpen(MWindow *parent)
+MDialog_FolderOpen(const MWindow *parent)
 {
    MFolder *folder = MDialog_FolderChoose(parent);
    if ( folder != NULL )
@@ -930,9 +933,9 @@ bool MFolderDialog::TransferDataFromWindow()
 }
 
 MFolder *
-MDialog_FolderChoose(MWindow *parent)
+MDialog_FolderChoose(const MWindow *parent)
 {
-   MFolderDialog dlg(parent);
+   MFolderDialog dlg((wxWindow *)parent);
    if ( dlg.ShowModal() == wxID_OK )
       return dlg.GetFolder();
    else

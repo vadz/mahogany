@@ -256,6 +256,11 @@ if test "$USE_DEBUG" = 1; then
 fi
 
 
+dnl precompiled headers
+if test "$USE_PCH" = 1; then
+	AC_DEFINE(USE_PCH)
+fi
+
 dnl kdoc/docxx have their own section further down
 
 dnl --------------------------------------------------------------------------
@@ -275,15 +280,6 @@ AC_CHECK_LIB(c,crypt,,
 dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
-
-dnl Gettext() support, if we have libintl.h check for the existence of 
-dnl the gettext() function in either libc or libintl and set LIBS and
-dnl define accordingly.
-AC_CHECK_HEADERS(libintl.h,
-	AC_CHECK_LIB(c,gettext,AC_DEFINE(HAVE_GETTEXT),
-		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT) LIBS="$LIBS -lintl")
-	)
-)
 
 
 dnl --------------------------------------------------------------------------
@@ -402,7 +398,7 @@ AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
 dnl they are not installed, the test for wx_gtk will fail anyway.
 
-AC_CHECK_LIB(wx_gtk_1_0,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+AC_CHECK_LIB(wx_gtk2,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables

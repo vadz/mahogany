@@ -137,6 +137,9 @@ MAppBase::VerifySettings(void)
          if ( ! Upgrade(version) )
             return false;
 
+         if(! SetupInitialConfig())
+            ERRORMESSAGE((_("Failed to set up initial configuration.")));
+
          // next time won't be the first one any more
          m_profile->writeEntry(MC_FIRSTRUN, 0);
 
@@ -144,10 +147,10 @@ MAppBase::VerifySettings(void)
          m_profile->writeEntry(MC_VERSION, M_VERSION);
       }
    }
-   // This will only do anything if required.
-   if(! SetupInitialConfig())
-      ERRORMESSAGE((_("Failed to set up INBOX profile.")));
-   
+
+   if ( !VerifyInbox() )
+      wxLogDebug("Evil user removed his /Profiles/INBOX - restored.");
+
    return true;
 }
 
@@ -163,45 +166,16 @@ MAppBase::OnStartup()
    // do we have gettext()?
    // ---------------------
 #  ifdef  USE_GETTEXT
-      setlocale (LC_ALL, "");
-      //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
-      textdomain (M_APPLICATIONNAME);
+   char *locale;
+   wxString ldir = M_BASEDIR;
+   ldir += "/locale";
+   locale = setlocale (LC_ALL, "");
+   locale = bindtextdomain (M_APPLICATIONNAME, ldir.c_str());
+   locale = bindtextdomain (M_APPLICATIONNAME, NULL); //LOCALEDIR);
+   textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
 
-
-   // find our directories (has to be done first!)
-   String tmp;
-#ifdef OS_UNIX
-   bool   found;
-   if(PathFinder::IsDir(M_BASEDIR))
-      m_globalDir = M_BASEDIR;
-   else
-   {
-      PathFinder pf(MC_ETCPATH_D);
-      pf.AddPaths(M_PREFIX,false,true); 
-      m_globalDir = pf.FindDir(MC_ROOTDIRNAME_D, &found);
-      if(!found)
-      {
-         // TODO instead of insulting the user it would be better to propose
-         //      to find it right now or even create one
-         String msg = _("Cannot find global directory \"");
-         msg << MC_ROOTDIRNAME_D << _("\" in\n \"") << MC_ETCPATH_D << ':' << M_BASEDIR; 
-         ERRORMESSAGE((Str(msg)));
-      }
-   }
-#else  //Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
-
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
-#endif //Unix
-
-      // initialise the profile(s)
+   // initialise the profile(s)
    // -------------------------
 
    String strConfFile;
@@ -241,7 +215,48 @@ MAppBase::OnStartup()
    // also set the path for persistent controls to save their state to
    wxPControls::SetSettingsPath("/Settings/");
 
-   // FIXME where is MC_USERDIR defined?
+   // find our directories
+   // --------------------
+   String tmp;
+#ifdef OS_UNIX
+   bool   found;
+   if(PathFinder::IsDir(M_BASEDIR))
+      m_globalDir = M_BASEDIR;
+   else
+   {
+      PathFinder pf(MC_ETCPATH_D);
+      pf.AddPaths(M_PREFIX,false,true); 
+      m_globalDir = pf.FindDir(MC_ROOTDIRNAME_D, &found);
+      if(!found)
+      {
+         String msg;
+         msg.Printf(_("Cannot find global directory \"%s\" in\n"
+                      "\"%s\"\n"
+                      "Would you like to specify its location now?"),
+                     MC_ROOTDIRNAME_D, MC_ETCPATH_D);
+         if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                  TRUE /* yes default */, "AskSpecifyDir") )
+         {
+            wxDirDialog dlg(NULL, _("Specify global directory for M"));
+            if ( dlg.ShowModal() )
+            {
+               m_globalDir = dlg.GetPath();
+            }
+         }
+      }
+   }
+#else  //Windows
+   // under Windows our directory is always the one where the executable is
+   // located. At least we're sure that it exists this way...
+   wxString strPath;
+   ::GetModuleFileName(::GetModuleHandle(NULL),
+                       strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+   strPath.UngetWriteBuf();
+
+   // extract the dir name
+   wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+#endif //Unix
+
 #ifdef OS_UNIX
    m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #endif

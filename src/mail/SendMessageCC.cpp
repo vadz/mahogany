@@ -311,25 +311,36 @@ SendMessageCC::Build(void)
 
 #ifdef HAVE_XFACES
    // add an XFace?
+   char **xpmarray = NULL;
+   String xpmdata;
    if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
    {
-      String xpmdata;
-      char **xpmarray =
+      xpmarray =
          wxIconManager::LoadImage(profile->readEntry(MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
-      if(xpmarray)
+   }
+   else
+   {
+      bool found;
+      PathFinder pf(READ_APPCONFIG(MC_ICONPATH), true);
+      pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
+      pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
+      String name = pf.FindFile("xface.xpm", &found);
+      if(found)
+         xpmarray = wxIconManager::LoadImage(name);
+   }
+   if(xpmarray)
+   {
+      XFace xface;
+      for(int i = 0; xpmarray[i]; i++)
       {
-         XFace xface;
-         for(int i = 0; xpmarray[i]; i++)
-         {
-            xpmdata += xpmarray[i];
-            xpmdata += '\n';
-         }
-         wxIconManager::FreeImage(xpmarray);
-         if(xface.CreateFromXpm(xpmdata.c_str()))
-         {
-            m_headerNames[j] = strutil_strdup("X-Face");
-            m_headerValues[j++] = strutil_strdup(xface.GetHeaderLine());
-         }
+         xpmdata += xpmarray[i];
+         xpmdata += '\n';
+      }
+      wxIconManager::FreeImage(xpmarray);
+      if(xface.CreateFromXpm(xpmdata.c_str()))
+      {
+         m_headerNames[j] = strutil_strdup("X-Face");
+         m_headerValues[j++] = strutil_strdup(xface.GetHeaderLine());
       }
    }
 #endif

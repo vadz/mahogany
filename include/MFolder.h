@@ -83,8 +83,16 @@ public:
       // the folder name must be unique among its siblings
    const String& GetName() const { return m_name; }
 
+      // full folder name has the same form as a full path name
+   wxString GetFullName() const;
+
       // folder type can't be changed once it's created
    Type GetType() const { return m_type; }
+
+      // folder may have an arbitrary comment associated with it - get it
+   const String& GetComment() const { return m_comment; }
+      // chaneg the comment
+   void SetComment(const String& comment) { m_comment = comment; }
 
       // get the folder flags (see Flags enum)
    unsigned int GetFlags() const { return m_flags; }
@@ -126,7 +134,8 @@ protected:
    virtual void OnRename(const String& /* name */) { }
 
    // folder characterstics
-   String          m_name;
+   String          m_name,
+                   m_comment;
    Type            m_type;
    unsigned int    m_flags;
 

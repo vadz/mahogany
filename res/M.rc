@@ -56,19 +56,16 @@ tb_mail_forward	BITMAP	"tb_mail_forward.bmp"
 tb_mail_reply	BITMAP	"tb_mail_reply.bmp"
 tb_mail_send	BITMAP	"tb_mail_send.bmp"
 
-open		BITMAP "open.bmp"
-new		BITMAP "new.bmp"
-delete		BITMAP "delete.bmp"
-undo		BITMAP "undo.bmp"
-lookup		BITMAP "lookup.bmp"
-help		BITMAP "help.bmp"
+tb_delete	BITMAP "delete.bmp"
+tb_undo		BITMAP "undo.bmp"
+tb_lookup	BITMAP "lookup.bmp"
 
 // ADB tree ctrl image list (16x16) bitmaps
-address		BITMAP "address.bmp"
-book		BITMAP "book.bmp"
-library		BITMAP "library.bmp"
-closed		BITMAP "closed.bmp"
-opened		BITMAP "opened.bmp"		
+adb_address	BITMAP "address.bmp"
+adb_book	BITMAP "book.bmp"
+adb_library	BITMAP "library.bmp"
+adb_closed	BITMAP "closed.bmp"
+adb_opened	BITMAP "opened.bmp"		
 
 // ADB notebook image list (32x32)
 general		BITMAP "general.bmp"
@@ -82,6 +79,7 @@ compose		BITMAP "compose.bmp"
 python		BITMAP "python.bmp"
 folders		BITMAP "folders.bmp"
 miscopt		BITMAP "miscopt.bmp"
+access		BITMAP "access.bmp"
 
 // Folder tree bitmaps
 folder_inbox	BITMAP "folder_inbox.bmp"

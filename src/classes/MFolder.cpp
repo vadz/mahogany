@@ -90,6 +90,7 @@ private:
    // the value names we use to store our info
    static const char *ms_keyType;
    static const char *ms_keyFlags;
+   static const char *ms_keyComment;
 };
 
 // this class loads everything from config when created and writes it back
@@ -207,12 +208,25 @@ void MFolder::Rename(const String& name)
    m_name = name;
 }
 
+wxString MFolder::GetFullName() const
+{
+   wxString fullname;
+   MFolder *parent = GetParent();
+   if ( parent )
+   {
+      fullname << parent->GetFullName() << '/' << GetName();
+   }
+
+   return fullname;
+}
+
 // ----------------------------------------------------------------------------
 // MStorableFolder
 // ----------------------------------------------------------------------------
 
-const char *MStorableFolder::ms_keyType = "Type";
-const char *MStorableFolder::ms_keyFlags = "Flags";
+const char *MStorableFolder::ms_keyType = MP_FOLDER_TYPE;
+const char *MStorableFolder::ms_keyFlags = MP_FOLDER_FLAGS;
+const char *MStorableFolder::ms_keyComment = MP_FOLDER_COMMENT;
 
 String MStorableFolder::GetPath() const
 {
@@ -253,12 +267,15 @@ void MStorableFolder::SaveSelf(ProfileBase *profile)
 {
    profile->writeEntry(ms_keyType, (long)m_type);
    profile->writeEntry(ms_keyFlags, (long)m_flags);
+   if ( !m_comment.IsEmpty() )
+      profile->writeEntry(ms_keyComment, m_comment);
 }
 
 void MStorableFolder::LoadSelf(ProfileBase *profile)
 {
    m_type = (MFolder::Type)profile->readEntry(ms_keyType, 0l);
    m_flags = (unsigned int)profile->readEntry(ms_keyFlags, 0l);
+   m_comment = profile->readEntry(ms_keyComment, "");
 }
 
 void MStorableFolder::SaveChildren(ProfileBase *profile)

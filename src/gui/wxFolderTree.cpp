@@ -37,6 +37,8 @@
 #include "MDialogs.h"
 
 #include "MFolder.h"
+#include "MFolderDialogs.h"
+
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
@@ -108,8 +110,7 @@ public:
 
    void OnDoubleClick(wxMouseEvent&)
       { DoFolderOpen(); }
-   void OnRightDown(wxMouseEvent& event)
-      { DoPopupMenu(event.GetPosition());  }
+   void OnRightDown(wxMouseEvent& event);
 
    void OnMenuCommand(wxCommandEvent&);
 
@@ -236,26 +237,55 @@ void wxFolderTree::OnOpen(MFolder *folder)
 // bring up the properties dialog for this profile
 void wxFolderTree::OnProperties(MFolder *folder)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(folder->GetName());
-   CHECK_RET( profile, "can't create profile" );
-
-   MDialog_FolderProfile(GetWindow(), profile);
-
-   profile->DecRef();
+   (void)ShowFolderPropertiesDialog(folder, m_tree);
 }
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
-   FAIL_MSG("not implemented");
-
-   return NULL;
+   return ShowFolderCreateDialog(NULL, FolderCreatePage_Default, parent);
 }
 
 bool wxFolderTree::OnDelete(MFolder *folder)
 {
-   FAIL_MSG("not implemented");
+   wxCHECK_MSG( folder, FALSE, "can't delete NULL folder" );
 
-   return FALSE;
+   switch ( folder->GetType() )
+   {
+      case MFolder::Inbox:
+         // TODO what about explaining why...
+         wxLogError(_("You should not delete the INBOx folder."));
+         return FALSE;
+
+      case MFolder::Root:
+         wxLogError(_("The root folder can not be deleted."));
+         return FALSE;
+
+      default:
+         // no check
+         break;
+   }
+
+   const char *configPath;
+   wxString msg;
+   if ( folder->GetSubfolderCount() > 0 )
+   {
+      configPath = NULL; // this question can't be suppressed
+      msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
+                   "subfolders? You will permanently lose all the settings\n"
+                   "for the deleted folders!"), folder->GetName().c_str());
+   }
+   else
+   {
+      configPath = "ConfirmFolderDelete";
+      msg.Printf(_("Do you really want to delete folder '%s'?"),
+                 folder->GetName().c_str());
+   }
+
+   return MDialog_YesNoDialog(msg,
+                              m_tree->wxWindow::GetParent(),
+                              MDIALOG_YESNOTITLE,
+                              FALSE /* 'no' default */,
+                              configPath);
 }
 
 // ----------------------------------------------------------------------------
@@ -367,16 +397,15 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       {
          // create our popup menu if not done yet
          m_menu = new FolderMenu(folder->GetName());
-
-         // disable the items which don't make sense for some kinds of folders
-         if ( folder->GetType() == MFolder::Root )
-         {
-            // you can't open nor delete the root folder and it has no properties
-            m_menu->Enable(FolderMenu::Open, FALSE);
-            m_menu->Enable(FolderMenu::Delete, FALSE);
-            m_menu->Enable(FolderMenu::Properties, FALSE);
-         }
       }
+
+      // disable the items which don't make sense for some kinds of folders
+      bool isRoot = folder->GetType() == MFolder::Root;
+
+      // you can't open nor delete the root folder and it has no properties
+      m_menu->Enable(FolderMenu::Open, !isRoot);
+      m_menu->Enable(FolderMenu::Delete, !isRoot);
+      m_menu->Enable(FolderMenu::Properties, !isRoot);
 
       PopupMenu(m_menu, pos.x, pos.y);
    }
@@ -388,16 +417,28 @@ void wxFolderTreeImpl::DoFolderCreate()
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
    if ( folderNew != NULL )
    {
-      FAIL_MSG("not implemented");
+     wxTreeItemId idCurrent = wxTreeCtrl::GetSelection();
+     wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(idCurrent);
+
+     wxASSERT_MSG( parent, "can't get the parent of current tree item" );
+
+     (void)new wxFolderTreeNode(this, folderNew, parent);
    }
    //else: cancelled by user
 }
 
 void wxFolderTreeImpl::DoFolderDelete()
 {
-   if ( m_sink->OnDelete(m_sink->GetSelection()) )
+   MFolder *folder = m_sink->GetSelection();
+   if ( !folder )
    {
-      FAIL_MSG("not implemented");
+      wxLogError(_("Please select the folder to delete first."));
+   }
+   else if ( m_sink->OnDelete(folder) )
+   {
+     Delete(wxTreeCtrl::GetSelection()); 
+
+     wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
    }
 }
 
@@ -455,6 +496,19 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    m_current = newCurrent;
 }
 
+void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
+{
+   wxPoint pt = event.GetPosition();
+   wxTreeItemId item = HitTest(pt);
+   if ( item.IsOk() )
+   {
+      SelectItem(item);
+   }
+
+   // show menu in any case
+   DoPopupMenu(pt);
+}
+
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 {
    switch ( event.GetId() )
@@ -469,6 +523,10 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 
       case FolderMenu::Delete:
          DoFolderDelete();
+         break;
+
+      case FolderMenu::Rename:
+         FAIL_MSG("renaming folders not yet implemented");
          break;
 
       case FolderMenu::Properties:

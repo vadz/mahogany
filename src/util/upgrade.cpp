@@ -43,7 +43,7 @@
 
 #include <wx/log.h>
 
-#include "gui/wxOptionsDlg.h"
+#include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
 #include "gui/wxMDialogs.h"   // for CloseSplash()
 #include "Mupgrade.h"
 
@@ -67,7 +67,6 @@ enum MVersion
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
-
 
 static bool
 UpgradeFromNone()
@@ -147,10 +146,11 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_Alpha002:
-         // nothing to do, this is the current version
          wxLogMessage(_("Configuration information and program files were "
                         "successfully upgraded from the version '%s'."),
                       fromVersion.c_str());
+
+         // this is the current version, nothing to do
          break;
 
       case Version_Unknown:
@@ -165,24 +165,41 @@ Upgrade(const String& fromVersion)
    return TRUE;
 }
 
-/** Make sure we have /Profiles/INBOX set up. */
+/** Make sure we have /Profiles/INBOX set up.
+ 
+    Returns TRUE if the profile already existed, FALSE if it was just created
+ */
 extern bool
-SetupInitialConfig(void)
+VerifyInbox(void)
 {
    ProfileBase *parent = mApplication->GetProfile();
 
-   ProfilePathChanger pathChanger(parent, M_PROFILE_CONFIG_SECTION);
+   ProfilePathChanger pathChanger(parent, M_FOLDER_CONFIG_SECTION);
 
    // Do we need to create the INBOX (special folder for incoming mail)?
-   if(! parent->HasEntry("INBOX"))
+   if ( parent->HasEntry("INBOX") )
    {
-      ProfileBase *ibp = ProfileBase::CreateProfile("INBOX", parent);
+      // already ok
+      return TRUE;
+   }
+   else
+   {
+      ProfileBase *ibp = ProfileBase::CreateFolderProfile("INBOX", parent);
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, MailFolder::MF_INBOX);
+      ibp->writeEntry(MP_FOLDER_TYPE, MFolder::Inbox);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail.")); 
       ibp->DecRef();
+
+      return FALSE;
    }
+}
+
+/** Make sure we have all "vital" things set up. */
+extern bool
+SetupInitialConfig(void)
+{
+   (void)VerifyInbox();
 
 #if 0
 #if defined ( USE_PYTHON )
@@ -204,6 +221,9 @@ VerifyMailConfig(void)
    String me;
    me << READ_APPCONFIG(MP_USERNAME) << '@' << READ_APPCONFIG(MP_HOSTNAME);
 
+   // FIXME we should make sure that hostname can be resolved - otherwise this
+   // message will stay in sendmail queue _forever_ (at least it does happen
+   // here with sendmail 8.8.8 running under Solaris 2.6)
    String nil;
    SendMessageCC  sm(mApplication->GetProfile(),
                      String(_("M test message")),
@@ -215,7 +235,7 @@ VerifyMailConfig(void)
    msg.Empty();
    msg << _("Sent email message to:\n")
        << me
-       << _("\nPlease check whether it arrives.");
+       << _("\n\nPlease check whether it arrives.");
    MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
 
    return true; // till we know something better
