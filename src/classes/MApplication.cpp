@@ -166,7 +166,7 @@ MAppBase::OnStartup()
    else
    {
       PathFinder pf(MC_ETCPATH_D);
-      pf.AddPaths(M_PREFIX,true,true); 
+      pf.AddPaths(M_PREFIX,false,true); 
       m_globalDir = pf.FindDir(MC_ROOTDIRNAME_D, &found);
       if(!found)
       {
