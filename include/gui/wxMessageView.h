@@ -198,7 +198,7 @@ protected:
    struct AllProfileValues
    {
       /// Background and foreground colours, colours for URLs and headers
-      wxColour BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
+      wxColour BgCol, FgCol, UrlCol, QuotedCol, Quoted2Col, HeaderNameCol, HeaderValueCol;
       /// font attributes
       int font, size;
       /// show headers?

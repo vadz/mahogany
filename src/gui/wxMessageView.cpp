@@ -325,6 +325,7 @@ bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
    #define CMP(x) (x == other.x)
 
    return CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
+          CMP(QuotedCol) && CMP(Quoted2Col) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(font) && CMP(size) &&
           CMP(showHeaders) && CMP(rfc822isText) &&
@@ -516,6 +517,8 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
    GET_COLOUR_FROM_PROFILE(FgCol, FGCOLOUR);
    GET_COLOUR_FROM_PROFILE(BgCol, BGCOLOUR);
    GET_COLOUR_FROM_PROFILE(UrlCol, URLCOLOUR);
+   GET_COLOUR_FROM_PROFILE(QuotedCol, QUOTEDCOLOUR);
+   GET_COLOUR_FROM_PROFILE(Quoted2Col, QUOTED2COLOUR);
    GET_COLOUR_FROM_PROFILE(HeaderNameCol, HEADER_NAMES_COLOUR);
    GET_COLOUR_FROM_PROFILE(HeaderValueCol, HEADER_VALUES_COLOUR);
 
@@ -811,12 +814,58 @@ wxMessageView::Update(void)
          {
             tmp = cptr;
             String url;
-            String before;
+            String before;          
+
+            int last_mode, new_mode;
+            size_t line_pos, line_lng, line_from;
 
             do
             {
-               before =  strutil_findurl(tmp, url);
-               wxLayoutImportText(llist, before, encPart);
+               before = strutil_findurl(tmp, url);
+               
+               last_mode = 0;
+               line_from = 0;
+               line_lng = before.Length();
+               for (line_pos = 0; line_pos < line_lng; line_pos++)
+               {
+                  if (before[line_pos] == '\n')
+                  {
+                     new_mode = 0;
+                     for (size_t i = line_pos + 1; i < line_pos + 6; i++)
+                     {
+                        if (line_lng > i && 
+                               (before[i] == '>' || before[i] == '|')) 
+                           new_mode++;
+                     }
+                     if (new_mode > 2) new_mode = 2;
+
+                     if (new_mode != last_mode || new_mode != 0)
+                     {
+                        wxLayoutImportText(llist, 
+                                 before.Mid(line_from, line_pos - line_from + 1),
+                                 encPart);
+                        switch (new_mode)
+                        {
+                           case 0 : 
+                              llist->SetFontColour(& m_ProfileValues.FgCol);
+                              break;
+                           case 1 : 
+                              llist->SetFontColour(& m_ProfileValues.QuotedCol);
+                              break;
+                           case 2 : 
+                              llist->SetFontColour(& m_ProfileValues.Quoted2Col);
+                              break;
+                        }
+                        last_mode = new_mode;
+                        line_from = line_pos + 1;
+                     }
+                  }
+               }             
+               if (line_from < line_lng-1)
+                  wxLayoutImportText(llist, 
+                                 before.Mid(line_from, line_lng - line_from),
+                                 encPart);
+                   
                if(!strutil_isempty(url))
                {
                   ci = new ClickableInfo(url);

@@ -488,6 +488,10 @@
 #define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
+// which colour for quoted text
+#define   MP_MVIEW_QUOTEDCOLOUR      "MViewQuotedColour"
+// which colour for quoted text, second level
+#define   MP_MVIEW_QUOTED2COLOUR      "MViewQuoted2Colour"
 /// the colour for header names in the message view
 #define   MP_MVIEW_HEADER_NAMES_COLOUR  "MViewHeaderNamesColour"
 /// the colour for header values in the message view
@@ -1005,6 +1009,10 @@
 #define   MP_MVIEW_BGCOLOUR_D      "white"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_D     "blue"
+// which colour for quoted text
+#define   MP_MVIEW_QUOTEDCOLOUR_D     "gray"
+// which colour for quoted text, seconds level
+#define   MP_MVIEW_QUOTED2COLOUR_D     "gray"
 /// the colour for header names in the message view
 #define   MP_MVIEW_HEADER_NAMES_COLOUR_D  "blue"
 /// the colour for header values in the message view
