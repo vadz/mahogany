@@ -528,6 +528,7 @@ PGPEngine::ExecCommand(const String& options,
                   status = OK;
                   wxLogStatus(_("Valid signature for public key \"%s\""), pc);
                }
+
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
@@ -649,6 +650,14 @@ PGPEngine::ExecCommand(const String& options,
                wxLogWarning(_("Ignoring unexpected GnuPG status line: \"%s\""),
                             line.c_str());
             }
+            // Extract user id used to sign
+            if ( log &&
+                 ( code == _T("GOODSIG") ||
+                   code == _T("BADSIG") ) )
+            {
+               String userId = String(pc).AfterFirst(' ');
+               log->SetUserID(userId);
+            }
          }
          else // normal (free form) gpg output
          {
@@ -744,9 +753,63 @@ PGPEngine::VerifyDetachedSignature(const String& message,
                                    const String& signature,
                                    MCryptoEngineOutputLog *log)
 {
-   FAIL_MSG( _T("TODO") );
+   PGPEngine::Status status = MAX_ERROR;
+   // Create a temporary file to store the signature
+   wxString sigFilename, textFilename;
+   if ( wxGetTempFileName("Mtemp", sigFilename) )
+   {
+      bool ok;
+      {
+         wxFile out(sigFilename, wxFile::write);
+         ok = out.IsOpened();
 
-   return NOT_IMPLEMENTED_ERROR;
+         if ( ok )
+         {
+            // write the signature
+            unsigned long len = signature.Length();
+            ok = out.Write(signature, len) == len;
+         }
+      }
+      if ( ok ) 
+      {
+         ok = wxGetTempFileName("Mtemp", textFilename);
+      }
+      else
+      {
+         (void)wxRemoveFile(sigFilename);
+      }
+      if ( ok )
+      {
+         wxFile out(textFilename, wxFile::write);
+         ok = out.IsOpened();
+
+         if ( ok )
+         {
+            // write the signature
+            unsigned long len = message.Length();
+            ok = out.Write(message, len) == len;
+         }
+      }
+      else
+      {
+         (void)wxRemoveFile(sigFilename);
+         (void)wxRemoveFile(textFilename);
+      }
+
+      String messageIn = _T("");
+      String messageOut = _T("");
+      if ( ok )
+      {
+         status = ExecCommand(_T("--verify ") + sigFilename + _T(" ") + textFilename, messageIn, messageOut, log);
+      }
+      ok = wxRemoveFile(sigFilename);
+      ok |= wxRemoveFile(textFilename);
+   }
+
+
+   //FAIL_MSG( _T("TODO") );
+
+   return status;
 }
 
 // ============================================================================

@@ -181,8 +181,12 @@ public:
    size_t GetMessageCount() const { return m_messages.GetCount(); }
    const String& GetMessage(size_t n) const { return m_messages[n]; }
 
+   const String& GetUserID() const { return m_userID; }
+   void  SetUserID(const String& userID) { m_userID = userID; }
+
 private:
    wxArrayString m_messages;
+   String        m_userID;
 };
 
 // ----------------------------------------------------------------------------

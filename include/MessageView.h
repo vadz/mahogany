@@ -307,6 +307,9 @@ protected:
    /// show a text part
    void ShowTextPart(const MimePart *part);
 
+   /// show a text
+   void ShowText(String textPart, wxFontEncoding textEnc = wxFONTENCODING_SYSTEM);
+
    /// show an attachment
    void ShowAttachment(const MimePart *part);
 

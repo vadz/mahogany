@@ -66,6 +66,9 @@
 #include "MessageTemplate.h"
 #include "Composer.h"
 
+#include "modules/MCrypt.h"
+#include "PGPClickInfo.h"
+
 #include "ClickAtt.h"
 
 #include "gui/wxIconManager.h"
@@ -1470,6 +1473,11 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    // cast is ok - it's a text part
    String textPart = (const char *)mimepart->GetContent();
 
+   ShowText(textPart, mimepart->GetTextEncoding());
+}
+
+void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
+{
    // get the encoding of the text
    wxFontEncoding encPart;
    if ( m_encodingUser != wxFONTENCODING_SYSTEM )
@@ -1479,7 +1487,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    }
    else if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
    {
-      encPart = mimepart->GetTextEncoding();
+      encPart = textEnc;
 
       if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7 )
       {
@@ -1852,7 +1860,6 @@ MessageView::ProcessPart(const MimePart *mimepart)
                String protocol = mimepart->GetParam("protocol");
                if ( protocol == _T("application/pgp-signature") )
                {
-                  //wxLogWarning("There is a PGP/MIME signed part");
                   MimePart *signedPart = mimepart->GetNested();
                   CHECK_RET( signedPart != 0, _T("Should have a signed part") );
                   CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
@@ -1869,11 +1876,69 @@ MessageView::ProcessPart(const MimePart *mimepart)
                              _T("Signature does not have a \"application/pgp-signature\" type"));
 
                   // Get the raw content (with headers) of the signed part
-                  String signedText = (const char *)signedPart->GetRawContent();
-                  String signature = (const char *)signaturePart->GetContent();
+                  unsigned long signedTextLength = 0;
+                  const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
+                  String signedText(c, signedTextLength);
+                  unsigned long signatureLength = 0;
+                  c = (const char *)signaturePart->GetContent(&signatureLength);
+                  String signature(c, signatureLength);
                   
-                  // XNOTODO: Call GPG, instead of doing as usual.
-                  ProcessAllNestedParts(mimepart);
+                  MCryptoEngineFactory * const factory
+                     = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
+                  if ( factory )
+                  {
+                     MCryptoEngine* pgpEngine = factory->Get();
+                     
+                     MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
+
+                     MCryptoEngine::Status status = pgpEngine->VerifyDetachedSignature(
+                        signedText, signature, log);
+
+                     ClickablePGPInfo *pgpInfo = NULL;
+                     switch ( status ) 
+                     {
+                        case MCryptoEngine::OK:
+                           // create an icon for the sig just to show that it was there
+                           pgpInfo = new PGPInfoGoodSig(this, log->GetUserID());
+                           break;
+
+                        case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
+                           pgpInfo = new PGPInfoExpiredSig(this, log->GetUserID());
+                           break;
+
+                        case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
+                           pgpInfo = new PGPInfoUntrustedSig(this, log->GetUserID());
+                           break;
+
+                        default:
+                           pgpInfo = new PGPInfoBadSig(this, log->GetUserID());
+                     }
+
+                     ProcessPart(signedPart);
+
+                     if ( pgpInfo )
+                     {
+                        pgpInfo->SetLog(log);
+                        ShowText(_T("\r\n"));
+
+                        m_viewer->InsertClickable(pgpInfo->GetBitmap(),
+                                                pgpInfo,
+                                                pgpInfo->GetColour());
+
+                        ShowText(_T("\r\n"));
+                     }
+                     else
+                     {
+                        delete log;
+                     }
+
+                     factory->DecRef();
+                  }
+                  else
+                  {
+                     FAIL_MSG( _T("failed to create PGPEngineFactory") );
+                     ProcessPart(signedPart);
+                  }
 
                } 
                else

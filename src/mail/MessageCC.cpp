@@ -901,7 +901,7 @@ MessageCC::GetRawPartData(const MimePart& mimepart, unsigned long *lenptr)
 
       return NULL;
    } else {
-      *lenptr = len;
+      *lenptr = len+size;
    }
 
    // free old text

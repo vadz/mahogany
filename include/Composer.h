@@ -231,11 +231,13 @@ public:
        @param data pointer to data (we will free() it later)
        @param len length of data
        @param mimetype mimetype to use
+       @param name optional name to add in the content-type
        @param filename optional filename to add to list of parameters
     */
    virtual void InsertData(void *data,
                            size_t length,
                            const wxChar *mimetype = NULL,
+                           const wxChar *name     = NULL,
                            const wxChar *filename = NULL) = 0;
 
    /// inserts a text
