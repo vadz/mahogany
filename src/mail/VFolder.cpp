@@ -166,7 +166,10 @@ MailFolderVirt::GetFullImapSpec(const MFolder *folder, const String& login)
 {
    CHECK( folder, "", "NULL folder in MailFolderVirt::GetFullImapSpec" );
 
-   return folder->GetFullName();
+   String spec;
+   spec << folder->GetFullName() << ';' << folder->GetPath();
+
+   return spec;
 }
 
 // ----------------------------------------------------------------------------

@@ -5038,12 +5038,17 @@ bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame)
    MFolder_obj folder = MFolder::CreateTemp
                         (
                            "virtual",
-                           "Search results",
+                           _("Search results"),
                            MF_FILE,
                            mf->GetProfile()
                         );
    if ( !folder )
       return false;
+
+   // FIXME: a hack to prevent the same search results folder from being reused
+   //        all the time
+   static unsigned int s_countSearch = 0;
+   folder->SetPath(String::Format("(%u)", ++s_countSearch));
 
    MailFolder_obj mfVirt = MailFolder::OpenFolder(folder);
    if ( !mfVirt )
