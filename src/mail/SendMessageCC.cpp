@@ -1059,7 +1059,7 @@ SendMessageCC::SendOrQueue(bool send)
       }
    }
    // make copy to "Sent" folder?
-   if ( success && m_SentMailName.Length() )
+   if ( success && m_SentMailName.Length() && send_directly )
    {
       WriteToFolder(m_SentMailName);
    }
