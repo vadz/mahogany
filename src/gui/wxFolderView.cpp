@@ -4546,8 +4546,13 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
 
       case WXK_UP:
       case WXK_DOWN:
-      default:
          event.Skip();
+         // fall through
+
+      default:
+         // for the same reasons as above, eat the character and don't allow
+         // it to be processed by the control itself lest it starts an
+         // incremental search, so don't call event.Skip()
          return false;
    }
 
