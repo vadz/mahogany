@@ -1318,7 +1318,7 @@ SendMessageCC::Send(void)
             const char *filename = tmpnam(NULL);
 #endif
 
-            bool success;
+            bool success = false;
             if ( filename )
             {
                wxFile out;
@@ -1343,15 +1343,13 @@ SendMessageCC::Send(void)
                      argv[1] = (char *)"-c";
                      argv[2] = (char *)command.c_str();
                      argv[3] = 0;  // NULL
-                     success = (wxExecute(argv) != 0);
+                     success = wxExecute(argv) != 0;
                   }
                }
             }
             else
             {
                ERRORMESSAGE((_("Failed to get a temporary file name")));
-
-               success = false;
             }
             
             if ( success )
