@@ -313,6 +313,9 @@ protected:
    /// this is true as long as we have exactly one selection
    bool m_selIsUnique;
 
+   /// HACK: this is set to true to force m_selIsUnique update if needed
+   bool m_selMaybeChanged;
+
    /// the profile used for storing columns widths
    Profile *m_profile;
 
@@ -1104,10 +1107,16 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
       case WXK_NEXT:
       case WXK_HOME:
       case WXK_END:
-      case WXK_SPACE:
          // update the unique selection flag as we can lose it now (the keys
          // above can change the focus/selection)
          UpdateUniqueSelFlag();
+         break;
+
+      case WXK_SPACE:
+         // selection may change if this is Ctrl-Space, for example, so check
+         // it a bit later
+         m_selMaybeChanged = true;
+         break;
    }
 
    event.Skip();
@@ -1115,6 +1124,15 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
 
 void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 {
+   // if we suspect that the state of the selection may change without notifying
+   // us about it, we set this flag
+   if ( m_selMaybeChanged )
+   {
+      UpdateUniqueSelFlag();
+
+      m_selMaybeChanged = false;
+   }
+
    // there is no "focus change" event in wxListCtrl so we have to track it
    // ourselves
    UpdateFocus();
@@ -1146,6 +1164,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // no selection at all
    m_selIsUnique = false;
+
+   // and it didn't change yet
+   m_selMaybeChanged = false;
 
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
