@@ -265,103 +265,97 @@ END_EVENT_TABLE()
 wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 {
    // network config and identity
-   { "The user and host names are used to compose the return address, unless\n"
-     "a differenent return address is explicitly specified.",
+   { gettext_noop("The user and host names are used to compose the return address, unless\n"
+                  "a differenent return address is explicitly specified."),
      Field_Message, -1},
-   { "&Username",                    Field_Text,    -1,                        },
-   { "The host name is also used as a default host name for local mail addresses.",
+   { gettext_noop("&Username"),                    Field_Text,    -1,                        },
+   { gettext_noop("The host name is also used as a default host name for local mail addresses."),
      Field_Message, -1},
-   { "&Hostname",                    Field_Text |
+   { gettext_noop("&Hostname"),                    Field_Text |
      Field_Vital,   -1,                        },
-   { "&Return address",              Field_Text |
+   { gettext_noop("&Return address"),              Field_Text |
      Field_Vital,   -1,                        },
-   { "SMTP (&mail) server",          Field_Text |
+   { gettext_noop("SMTP (&mail) server"),          Field_Text |
      Field_Vital,   -1,                        },
-   { "NNTP (&news) server",          Field_Text,    -1,                        },
-   { "&Personal name",               Field_Text,    -1,                        },
+   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
+   { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
 
    // compose
-   { "&To field default value",              Field_Text,    -1,                        },
-   { "Show &CC field",               Field_Bool,    -1,                        },
-   { "CC field &default value",              Field_Text,    ConfigField_ShowCC         },
-   { "Show &BCC field",              Field_Bool,    -1,                        },
-   { "BCC field d&efault value",             Field_Text,    ConfigField_ShowBCC        },
+   { gettext_noop("&To field default value"),              Field_Text,    -1,                        },
+   { gettext_noop("Show &CC field"),               Field_Bool,    -1,                        },
+   { gettext_noop("CC field &default value"),              Field_Text,    ConfigField_ShowCC         },
+   { gettext_noop("Show &BCC field"),              Field_Bool,    -1,                        },
+   { gettext_noop("BCC field d&efault value"),             Field_Text,    ConfigField_ShowBCC        },
 
-   { "Sa&ve sent mesasges", Field_Bool,    -1,                        },
-   { "&Folder file for sent messages",   Field_File,    ConfigField_UseOutgoingFolder        },
-   { "&Wrap margin",                 Field_Number,  -1,                        },
-   { "&Reply character",             Field_Text,    -1,                        },
+   { gettext_noop("Sa&ve sent mesasges"), Field_Bool,    -1,                        },
+   { gettext_noop("&Folder file for sent messages"),   Field_File,    ConfigField_UseOutgoingFolder        },
+   { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
+   { gettext_noop("&Reply character"),             Field_Text,    -1,                        },
 
-   { "&Use signature",               Field_Bool,    -1,                        },
-   { "&Signature file",              Field_File,    ConfigField_Signature      },
-   { "Use signature se&parator",     Field_Bool,    ConfigField_Signature      },
-   { "Us&e XFace",                   Field_Bool,    -1,                        },
-   { "&XFace file",                  Field_File,    ConfigField_XFace          },
+   { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
+   { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
+   { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
+   { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
+   { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
 
    // folders
-   { "Folders to open on &startup",  Field_List |
+   { gettext_noop("Folders to open on &startup"),  Field_List |
      Field_Restart, -1,                        },
-   { "&Folder opened in main frame", Field_Text,    -1,                        },
+   { gettext_noop("&Folder opened in main frame"), Field_Text,    -1,                        },
 
 
 #ifdef USE_PYTHON
    // python
-   {"Python is the built-in scripting language which can be\n"
-    "used to extend M's functionality. It is not essential\n"
-    "for the program's normal operation.", Field_Message, -1},
-   { "&Enable Python",               Field_Bool,    -1,                        },
-   { "Python &Path",                 Field_Text,    ConfigField_EnablePython   },
-   { "&Startup script",              Field_File,    ConfigField_EnablePython   },
-   { "&Folder open callback",        Field_Text,    ConfigField_EnablePython   },
-   { "Folder &update callback",      Field_Text,    ConfigField_EnablePython   },
-   { "Folder e&xpunge callback",     Field_Text,    ConfigField_EnablePython   },
-   { "Flag &set callback",           Field_Text,    ConfigField_EnablePython   },
-   { "Flag &clear callback",         Field_Text,    ConfigField_EnablePython   },
+   {gettext_noop("Python is the built-in scripting language which can be\n")
+    gettext_noop("used to extend M's functionality. It is not essential\n")
+    gettext_noop("for the program's normal operation."), Field_Message, -1},
+   { gettext_noop("&Enable Python"),               Field_Bool,    -1,                        },
+   { gettext_noop("Python &Path"),                 Field_Text,    ConfigField_EnablePython   },
+   { gettext_noop("&Startup script"),              Field_File,    ConfigField_EnablePython   },
+   { gettext_noop("&Folder open callback"),        Field_Text,    ConfigField_EnablePython   },
+   { gettext_noop("Folder &update callback"),      Field_Text,    ConfigField_EnablePython   },
+   { gettext_noop("Folder e&xpunge callback"),     Field_Text,    ConfigField_EnablePython   },
+   { gettext_noop("Flag &set callback"),           Field_Text,    ConfigField_EnablePython   },
+   { gettext_noop("Flag &clear callback"),         Field_Text,    ConfigField_EnablePython   },
 #endif // USE_PYTHON
 
    // adb: autocollect and bbdb options
-   { "M may automatically remember all e-mail addresses in the messages you "
-     "receive in a special addresss book. This is called 'address "
-     "autocollection' and may be turned on or off from this page",
+   { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
+                  "receive in a special addresss book. This is called 'address "
+                  "autocollection' and may be turned on or off from this page"),
                                      Field_Message, -1                     },
-   { "&Autocollect addresses",       Field_Action,  -1,                    },
-   { "Address &book to use",         Field_Text, ConfigField_AutoCollect   },
-   { "Ignore addresses without &names", Field_Bool, ConfigField_AutoCollect},
-   {"Thes following settings configure the support of the Big Brother\n"
-    "addressbook (BBDB) format. This is supported only for compatibility\n"
-    "with other software. The normal addressbook is unaffected by these\n"
-    "settings.", Field_Message, -1},
-   {"&Ignore entries without names", Field_Bool, -1 },
-   {"&Generate unique aliases",      Field_Bool, -1 },
-   {"&Name for nameless entries",    Field_Text, ConfigField_Bbdb_GenerateUnique },
-   {"&Save on exit",                 Field_Action, -1 },
+   { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
+   { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
+   { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
+   { gettext_noop("Thes following settings configure the support of the Big Brother\n"
+                  "addressbook (BBDB) format. This is supported only for compatibility\n"
+                  "with other software. The normal addressbook is unaffected by these\n"
+                  "settings."), Field_Message, -1},
+   { gettext_noop("&Ignore entries without names"), Field_Bool, -1 },
+   { gettext_noop("&Generate unique aliases"),      Field_Bool, -1 },
+   { gettext_noop("&Name for nameless entries"),    Field_Text, ConfigField_Bbdb_GenerateUnique },
+   { gettext_noop("&Save on exit"),                 Field_Action, -1 },
 
    // helper programs
-   { "The following program will be used to open URLs "
-     "embedded in messages:",       Field_Message, -1                      },
-   { "Open &URLs with",             Field_File,    -1                      },
-   { "URL &browser is Netscape",    Field_Bool,    -1                      },
-   { "The following program will be used to view "
-     "the online help system:",     Field_Message, -1                      },
-   { "&Help viewer",                Field_File,    -1                      },
-   { "Help &viewer is Netscape",    Field_Bool,    -1                      },
-   { "&External editor",            Field_Text,    -1                      },
-   { "The following line will be executed each time "
-     "new mail is received:",       Field_Message, -1                      },
-   { "&New Mail Command",           Field_File,    -1                      },
+   { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
+   { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
+   { gettext_noop("URL &browser is Netscape"),    Field_Bool,    -1                      },
+   { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
+   { gettext_noop("&Help viewer"),                Field_File,    -1                      },
+   { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
+   { gettext_noop("&External editor"),            Field_Text,    -1                      },
+   { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
+   { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
 
    // other options
-   { "Show &log window",             Field_Bool,    -1,                    },
-   { "&Splash screen at startup",    Field_Bool |
-                                     Field_Restart, -1,                    },
-   { "Splash screen &delay",         Field_Number,  ConfigField_Splash     },
-   { "&Autosave delay",              Field_Number |
-                                     Field_Restart, -1                     },
-   { "Confirm &exit",                Field_Bool |
-                                     Field_Restart, -1                     },
-   { "&Click folder to open",        Field_Bool,    -1                     },
-   { "&Format for the date",         Field_Text,    -1                     },
-   { "Show new mail &notifications", Field_Bool,    -1                     },
+   { gettext_noop("Show &log window"),             Field_Bool,    -1,                    },
+   { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
+   { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
+   { gettext_noop("&Autosave delay"),              Field_Number | Field_Restart, -1                     },
+   { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
+   { gettext_noop("&Click folder to open"),        Field_Bool,    -1                     },
+   { gettext_noop("&Format for the date"),         Field_Text,    -1                     },
+   { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 };
 
 // @@@ ugly, ugly, ugly... config settings should be living in an array from
@@ -1225,3 +1219,4 @@ void ShowOptionsDialog(wxFrame *parent, OptionPage page)
    (void)dlg.ShowModal();
 }
 
+/* vi: se tw=0 */

@@ -195,7 +195,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strPrompt,
                                    const wxString& strConfigPath,
                                    const wxString& strDefault)
-   : wxDialog(parent, -1, wxString("M:")+strCaption,
+   : wxDialog(parent, -1, wxString("M: ") + strCaption,
               wxDefaultPosition,
               wxDefaultSize,
               wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
@@ -304,7 +304,7 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
-   wxMessageBox(msg, wxString("M:")+title, Style(wxOK|wxICON_EXCLAMATION),
+   wxMessageBox(msg, wxString("M: ") + title, Style(wxOK|wxICON_EXCLAMATION),
                 GetParent(parent));
 }
 
@@ -324,10 +324,10 @@ MDialog_SystemErrorMessage(const char *message,
    String
       msg;
 
-   msg = String(message) + String(("\nSystem error: "))
+   msg = String(message) + String(_("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M:")+title, modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M: ")+title, modal);
 }
 
 
@@ -343,7 +343,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString("M:")+title,true);
+   MDialog_ErrorMessage(message,parent, wxString("M: ")+title,true);
    mApplication->Exit(true);
 }
 
@@ -496,7 +496,7 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
    else {
       return wxGetSingleChoiceIndex
              (
-               wxString("M:")+_("Please choose an entry:"),
+               wxString("M: ")+_("Please choose an entry:"),
                _("Expansion options"),
                nEntryCount,
                &aChoices[0],
@@ -572,9 +572,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.LineBreak();
    ll.LineBreak();
 
-   ll.Insert("   Welcome");
+   ll.Insert(_("   Welcome"));
    ll.LineBreak();
-   ll.Insert("         to");
+   ll.Insert(_("         to"));
    ll.LineBreak();
    ll.Insert("         ");
    ll.Insert(new wxLayoutObjectIcon(wxIcon(M_32x32)));
@@ -585,16 +585,19 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.LineBreak();
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("    Version: " M_VERSION_STRING);
+
+   String version = _("    Version: ");
+   version += M_VERSION_STRING;
+   ll.Insert(version);
    ll.LineBreak();
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("  Copyright (c) 1999 by Karsten Ballüder");
+   ll.Insert(_("  Copyright (c) 1999 by Karsten Ballüder"));
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("          Written by Karsten Ballüder");
+   ll.Insert(_("          Written by Karsten Ballüder"));
    ll.LineBreak();
-   ll.Insert("                      and Vadim Zeitlin");
+   ll.Insert(_("                      and Vadim Zeitlin"));
    ll.LineBreak();
    ll.SetEditable(false);
    DoPaint();
@@ -1079,14 +1082,14 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
    switch(win->GetSelection())
    {
    case 0: // INBOX
-      HostLabel->SetLabel(_("Foldername"));
+      HostLabel->SetLabel(_("Folder Name"));
       Hostname->SetValue(_("INBOX"));
       Hostname->Enable(false);
       UserID->Enable(false);
       Password->Enable(false);
       break;
    case 1: // mbox
-      HostLabel->SetLabel(_("Foldername"));
+      HostLabel->SetLabel(_("Folder Name"));
       UserID->Enable(false);
       Password->Enable(false);
       Hostname->Enable(true);

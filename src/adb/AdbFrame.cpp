@@ -173,6 +173,8 @@ public:
   bool IsBook() const { return m_kind == TreeElement_Book; }
     // group is anything that can contain entries, not just TreeElement_Group
   bool IsGroup() const { return m_kind != TreeElement_Entry; }
+    // just get the kind - useful for switch()es
+  TreeElement GetKind() const { return m_kind; }
 
   // operations
     // insert the item into the given tree control (under it's parent)
@@ -304,6 +306,10 @@ public:
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
+  // operations
+    // flush
+  bool Flush() const { return m_pBook->Flush(); }
+  
 protected:
   AdbBook   *m_pBook;
 };
@@ -1635,6 +1641,22 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       }
       break;
 
+#ifdef DEBUG
+    case WXMENU_ADBBOOK_FLUSH:
+      if ( m_current->IsBook() ) {
+         AdbTreeBook *book = (AdbTreeBook *)m_current;
+         wxString name = book->GetFileName();
+         if ( !book->Flush() )
+            wxLogError("Couldn't flush book '%s'!", name.c_str());
+         else
+            wxLogStatus(this, "Book '%s' flushed.", name.c_str());
+      }
+      else {
+         wxLogError("Select a book to flush");
+      }
+      break;
+#endif // debug
+
     default:
       wxMFrame::OnMenuCommand(event.GetId());
   }
@@ -1748,11 +1770,30 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   AdbDataProvider *pProvider = info->CreateProvider();
 
-  bool bRc = OpenAdb(strAdbName, pProvider, info->szName);
-
+  bool ok = OpenAdb(strAdbName, pProvider, info->szName);
   SafeDecRef(pProvider);
 
-  return bRc;
+  if ( ok ) {
+     // the book is in the cache, it won't be really recreated
+     AdbManager_obj adbManager;
+
+     AdbBook *book = adbManager->CreateBook(strAdbName);
+
+     if ( book ) {
+        if ( !book->Flush() ) {
+           wxLogWarning(_("Address book '%s' was created, but couldn't "
+                          "be flushed. It might be unaccessible until "
+                          "the program is restarted."), strAdbName.c_str());
+        }
+
+        book->DecRef();
+     }
+     else {
+        wxFAIL_MSG("book should be in the cache if it was created");
+     }
+  }
+
+  return ok;
 }
 
 void wxAdbEditFrame::DoShowAdbProperties()
@@ -3315,7 +3356,7 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
 {
   wxCHECK_MSG( !IsRoot(), NULL, "only address books can be created at root");
 
-  wxString strWhat = wxGetTranslation(bGroup ? "Group" : "Entry");
+  wxString strWhat = bGroup ? _("Group") : _("Entry");
 
   EnsureHasGroup();
 
@@ -3359,13 +3400,33 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
   EnsureHasGroup();
 
   m_children.Remove(child);
-  if ( !child->IsBook() ) {
-    if ( child->IsGroup() )
-      m_pGroup->DeleteGroup(child->GetName());
-    else
+
+  switch ( child->GetKind() ) {
+    case TreeElement_Entry:
       m_pGroup->DeleteEntry(child->GetName());
+      break;
+
+    case TreeElement_Group:
+      m_pGroup->DeleteGroup(child->GetName());
+
+      // fall through - for m_idLastGroup processing
+
+    case TreeElement_Book:
+      // there is a big problem with deleting the last group: our m_idLastGroup
+      // must be changed because it corresponds to a non-existing tree item.
+      if ( child->GetId() == m_idLastGroup ) {
+        // unfortunately, we don't have the old valu any more, so we must search
+        // for it ourselves - TODO. For now we will just insert it in the
+        // beginning...
+        m_idLastGroup = 0l;
+      }
+
+      // do nothing for address books (could delete the file...)
+      break;
+      
+    default:
+      wxFAIL_MSG("something weird in our ADB tree");
   }
-  //else: do nothing for address books (could delete the file...)
 
   // don't do this, the tree will delete the item itself
   //delete child;

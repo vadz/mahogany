@@ -238,6 +238,8 @@ public:
   virtual bool IsLocal() const { return TRUE; }
   virtual bool IsReadOnly() const;
 
+  virtual bool Flush();
+
   MOBJECT_DEBUG
 
 private:
@@ -478,7 +480,10 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
 
   if ( bNew ) {
     // force creation of the group
-    if ( !m_pConfig->Write(GetPath(), wxString("")) ) {
+    String path = GetPath();
+    if ( !path || path.Last() != '/' )
+       path += '/';
+    if ( !m_pConfig->Write(path, wxString("")) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
       m_pConfig = NULL;
@@ -628,7 +633,9 @@ String FCBook::GetFullAdbPath(const String& filename)
 FCBook::FCBook(const String& filename)
       : m_strFile(GetFullAdbPath(filename))
 {
-  m_strFileName = strutil_getfilename(filename).BeforeLast('.');
+  String file = strutil_getfilename(filename);
+  String fileBaseName = file.BeforeLast('.');
+  m_strFileName = fileBaseName.IsEmpty() ? file : fileBaseName;
 
   // we must load the file here because we need the ADB's name and description
   m_pConfig = new wxFileConfig(wxGetEmptyString(), wxGetEmptyString(),
@@ -685,6 +692,28 @@ size_t FCBook::GetNumberOfEntries() const
 bool FCBook::IsReadOnly() const
 {
   return !wxFile::Access(m_strFile, wxFile::write);
+}
+
+bool FCBook::Flush()
+{
+   // force wxConfig::Flush() do something (the tests will be true if they
+   // return the default value, yet actually writing these entries to the
+   // config ensures that they will get dirty and be written to the file when
+   // we call Flush).
+   if ( GetDescription() == m_strFile )
+      SetDescription(m_strFile);
+   if ( GetUserName() == m_strFileName )
+      SetUserName(m_strFileName);
+
+   if ( !m_pConfig->Flush() )
+   {
+      wxLogError(_("Couldn't create or write address book file '%s'."),
+                 m_strFile.c_str());
+
+      return false;
+   }
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -615,8 +615,8 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
          static const size_t nMaxSigLines = 4;
          if ( nLineCount > nMaxSigLines ) {
             wxLogWarning(_("Your signature is %stoo long: it should "
-                           "not be more than %d lines"),
-                         nLineCount > 10 ? "way " : "", nMaxSigLines);
+                           "not be more than %d lines."),
+                         nLineCount > 10 ? _("way ") : "", nMaxSigLines);
          }
 
          layoutList.SetCursor(wxPoint(0,0));
@@ -784,7 +784,7 @@ wxComposeView::CanClose() const
    if ( m_procExtEdit )
    {
       wxLogError(_("Please terminate the external editor (pid %d) before "
-                   "closign this window."), m_pidEditor);
+                   "closing this window."), m_pidEditor);
 
       canClose = false;
    }

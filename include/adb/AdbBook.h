@@ -57,6 +57,10 @@ public:
 
     // can we edit it?
   virtual bool IsReadOnly() const = 0;
+
+  // operations
+    // flush changes to the persistent storage
+  virtual bool Flush() { return true; }
 };
 
 #endif  //_ADBBOOK_H
