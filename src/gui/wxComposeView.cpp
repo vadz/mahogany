@@ -3146,7 +3146,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    if ( !wxPMessageBoxIsDisabled(configPath) )
    {
       bool dontShowAgain = false;
-      if ( ShowAttachmentDialog(m_editor->GetWindow(), &props, &dontShowAgain) )
+      (void)ShowAttachmentDialog(m_editor->GetWindow(), &props, &dontShowAgain);
       {
          mc->SetName(props.name);
          mc->SetDisposition(props.GetDisposition());
