@@ -28,6 +28,13 @@
 
 #include "MimePartVirtual.h"
 
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// strlen("\r\n")
+static const size_t lenEOL = 2;
+
 // ============================================================================
 // MimePartVirtual implementation
 // ============================================================================
@@ -36,22 +43,94 @@
 // ctor/dtor
 // ----------------------------------------------------------------------------
 
+// ctor for top level part
 MimePartVirtual::MimePartVirtual(const String& msgText)
                : m_msgText(msgText)
 {
-   m_lenHeader = 0;
+   m_pStart = m_msgText;
+
+   m_env = NULL;
+
+   m_lenHeader =
+   m_lenBody = 0;
 
    if ( !CclientParseMessage(msgText, &m_env, &m_body, &m_lenHeader) )
    {
       // no idea what is user supposed to make out of this message...
       wxLogError(_("Failed to create a virtual MIME part."));
+
+      return;
+   }
+
+   m_lenBody = m_msgText.length() - m_lenHeader - lenEOL;
+
+   CreateSubParts();
+}
+
+MimePartVirtual::MimePartVirtual(BODY *body,
+                                 MimePartVirtual *parent,
+                                 size_t nPart,
+                                 const char *pHeader)
+{
+   m_env = NULL;
+
+   Create(body, parent, nPart);
+
+   m_pStart = pHeader + body->mime.offset;
+   m_lenHeader = body->mime.text.size - lenEOL;
+   m_lenBody = body->contents.text.size;
+
+   CreateSubParts();
+}
+
+void MimePartVirtual::CreateSubParts()
+{
+   // set up the nested parts, if any
+   switch ( m_body->type )
+   {
+      case TYPEMULTIPART:
+         {
+            // NB: message parts are counted from 1
+            size_t n = 1;
+            MimePartCCBase **prev = &m_nested;
+            const char *pStart = GetBodyStart();
+            for ( PART *part = m_body->nested.part; part; part = part->next )
+            {
+               *prev = new MimePartVirtual(&part->body, this, n++, pStart);
+
+               // static_cast<> needed to access protected member
+               prev = &(static_cast<MimePartVirtual *>(*prev)->m_next);
+            }
+         }
+         break;
+
+      case TYPEMESSAGE:
+         {
+            mail_body_message *msg = m_body->nested.msg;
+            if ( !msg )
+            {
+               wxLogError(_("Corrupted nested message."));
+               break;
+            }
+
+            m_nested = new MimePartVirtual(msg->body, this, 1, GetBodyStart());
+         }
+         break;
+
+      default:
+         // a simple part, nothing to do
+         ;
    }
 }
 
 MimePartVirtual::~MimePartVirtual()
 {
-   mail_free_envelope(&m_env);
-   mail_free_body(&m_body);
+   // only the top level part frees the cclient structures
+   if ( !m_parent )
+   {
+      mail_free_envelope(&m_env);
+      mail_free_body(&m_body);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -60,16 +139,14 @@ MimePartVirtual::~MimePartVirtual()
 
 String MimePartVirtual::GetHeaders() const
 {
-   return String(m_msgText, m_lenHeader);
+   return String(m_pStart, m_lenHeader);
 }
 
 const void *MimePartVirtual::GetRawContent(unsigned long *len) const
 {
-   size_t lenHeader = m_lenHeader + 2; // +2 for "\r\n"
-
    if ( len )
-      *len = m_msgText.length() - lenHeader;
+      *len = m_lenBody;
 
-   return m_msgText.c_str() + lenHeader;
+   return GetBodyStart();
 }
 

@@ -32,20 +32,49 @@ public:
       Construct a MIME part from the entire part text (body + header).
     */
    MimePartVirtual(const String& msgText);
+
+   /**
+      Construct a nested MIME part.
+
+      Note that pStart points directly into the (grand) parents buffer.
+
+      @param body structure of this part
+      @param parent the parent MIME part
+      @param nPart the 1-based number of this part among its siblings
+      @param pHeader start of the header
+    */
+   MimePartVirtual(struct mail_bodystruct *body,
+                   MimePartVirtual *parent,
+                   size_t nPart,
+                   const char *pHeader);
+
    virtual ~MimePartVirtual();
 
    virtual const void *GetRawContent(unsigned long *len = NULL) const;
    virtual String GetHeaders() const;
 
 private:
-   // the entire text of the message
+   // create all nested subparts
+   void CreateSubParts();
+
+   // get pointer to the start of the body (+2 is for "\r\n")
+   const char *GetBodyStart() const { return m_pStart + m_lenHeader + 2; }
+
+
+   // the entire text of the message, only non empty for the top level part
    String m_msgText;
 
-   // message envelope (base class already ahs the body)
-   struct mail_envelope *m_env;
+   // pointer to the start of headers of this part
+   const char *m_pStart;
 
-   // the length of the header (at the start of m_msgText)
+   // the length of the header (offset of the start of the body at m_pStart)
    size_t m_lenHeader;
+
+   // the length of (just) the body
+   size_t m_lenBody;
+
+   // message envelope (base class already has the body)
+   struct mail_envelope *m_env;
 };
 
 #endif // _M_MIMEPARTRAW_H_
