@@ -443,9 +443,9 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       if(m_ModulePopup)
       {
          int xpos, ypos;
-         int fxpos, fypos;
+         int fxpos=0, fypos=0;
          wxGetMousePosition(&xpos,&ypos);
-         GetPosition(&fxpos,&fypos);
+         ClientToScreen(&fxpos,&fypos); // get client area offset
          PopupMenu(m_ModulePopup, xpos-fxpos, ypos-fypos);
       }
    }
