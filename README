@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.64 "Sparc"
+README file for Mahogany 0.64 "Sparc"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -10,7 +10,7 @@ More detailed information about Mahogany, how to get support for it,
 how to contribute it, and last not least, how to use it, can be
 found in the user manual, included in HTML and PostScript format, or
 the online help system. All the information, including the full
-online docs, are also available on the Mahogany web page:
+online documentation, are also available on the Mahogany web page:
 
                   http://mahogany.sourceforge.net/
 
@@ -18,7 +18,7 @@ Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
 
 Please note that in places where this file contradicts the manual,
-it should be considered correct.
+the information here should be considered correct.
 
 --------------------------------------------------------------------
 Internet resources
@@ -54,48 +54,91 @@ users.
 Unix compilation instructions
 --------------------------------------------------------------------
 
-Required software
+0. Prerequisites
+----------------
+
+Required software:
 
    - wxGTK (GTK+ port of wxWindows) 2.3.2 or above
      (2.3.2 is the latest released version as of this writing)
 
-   - GTK+ 1.2.3 or above, at least 1.2.10 recommended
+   - GTK+ 1.2.3 or above, 1.2.10 recommended
 
-If you want to compile Mahogany with SSL support, you must also
-have OpenSSL libraries and headers, see http://www.openssl.org/.
+   - GNU make: both wxWindows and Mahogany may be compiled with many
+     different C++ compilers (i.e. not only g++) but they both
+     require GNU make, please install it if you don't have it yet
+     (it might be available as gmake on some systems)
 
-If you want to compile Mahogany with Python support, you need Python
-libraries and headers installed. Python 1.5x, 2.0 and 2.1 are
-currently supported.
+In addition:
 
-- Before you can compile Mahogany, you will need to have installed
-  wxWindows compiled for the GTK library (wxGTK).
+   - If you want to compile Mahogany with SSL support, you must also
+     have OpenSSL libraries and headers, see http://www.openssl.org/.
+     If you already have them installed but in a non-standard
+     location where Mahogany doesn't find them, use --with-ssl=dir
+     configure option.
 
-  NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
-        affecting Mahogany which were fixed immediately after 2.3.2
-        release. If, by the time you are reading it, 2.3.3 is not
-        released yet please download wxWindows source distribution
-        from our download page instead of using the official 2.3.2
-        release!
+   - If you want to compile Mahogany with Python support, you need
+     Python libraries and headers installed. Python 1.5x, 2.0 and
+     2.1 are currently supported. You should run configure with
+     --with-python option as well.
 
-  Please refer to wxWindows documentation for the detailed
-  installation instructions. The simple "configure; make; make
-  install" should work in most cases, be sure to specify
-  "--with-gtk" configure switch when compiling on a commercial Unix
-  system with Motif installed.
+   - To build with Palm support you need pisock library and headers.
 
-- To compile and install Mahogany itself:
+   - To rebuild the documentation from sources you need Perl, LaTeX,
+     makeindex, dvips, ps2pdf and latex2html - however you may just
+     use the prebuilt documentation instead of installing all these
+     tools if you don't have them, please see below
 
-     ./configure --help
-     cd /some/build/dir
-     sh /the/source/dir/configure "with your appropriate options"
-     make    # or "make all" to try to build message catalogs as well
-     make doc
-     make install
+   - If you want AvantGo/MAL synchronisation for the PalmOS module,
+     you will need to get the libmal.tar.gz library source from the
+     Mahogany ftp server and unpack it in the extra/src directory.
 
-  Depending on whether you have installed all required programs in the
-  right versions, "make doc" and "make install" might
-  fail. Instead, you can do the following:
+1. Compilation
+--------------
+
+a) wxWindows
+
+Before you can compile Mahogany, you will need to have installed
+wxWindows compiled for the GTK library (wxGTK).
+
+NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
+      affecting Mahogany which were fixed immediately after 2.3.2
+      release. If, by the time you are reading it, 2.3.3 is not
+      released yet please download wxWindows source distribution
+      from our download page instead of using the official 2.3.2
+      release!
+
+The recommended switches for wxWindows compilation are:
+
+      ./configure --disable-threads --no-recursion --with-gtk
+
+After running configure, do "make" (or "gmake" if your make is not the GNU
+make) and "make install".
+
+b) Mahogany
+
+Mahogany uses the standard configure script as well, so the simplest
+way to compile it is to just type "./configure && make && make
+install".
+
+The recommended way to build it is to do the following from the
+Mahogany directory:
+
+      mkdir build_dir   # name is arbitrary
+      cd build_dir
+      ../configure
+      make    # or "make all" to try to build message catalogs as well
+      make doc
+      make install
+
+Depending on whether you have installed all required programs in the
+right versions, "make doc" and "make install" might fail. Please
+download the file Mdocs-0.64.tar.gz from the SourceForge download
+server and put it in the build_dir/doc directory, then retry.
+
+If you don't want to install the documentation at all, you may do the
+following:
+
     make install_bin     # this will install the program and other
                          # required files
     make install_locale  # this tries to build and install the message
@@ -103,15 +146,20 @@ currently supported.
     make install_doc     # this should install the documentation and
                          # online help
 
-Also, if you change into the src directory, the additional targets
-"make static" and "make semistatic" are available, to produce binaries
-with less dependencies on external libraries.
+2. What's next?
+---------------
 
-If you built wxWindows with debug enabled, specify the --with-debug
-and  --with-wxdebug options when configuring Mahogany.
+You should be able to use Mahogany by now. The next thing to do is
+probably to configure it to suit your needs better - you will find a
+lot of possibilities for this in the programs options dialog which
+is accessed via the "Preferences..." item of the "Edit" menu.
 
-If you want AvantGo/MAL synchronisation for the PalmOS module, you will
-need to get the libmal.tar.gz library source from the mahogany ftp server
-and unpack it in the extra/src directory.
+Please post any questions you may have to the Mahogany users mailing
+list. If you are reporting a bug, don't forget to specify the
+version of Mahogany you are using and also the platform you are
+running it under - thank you in advance!
 
-$Id$
+We hope you will enjoy Mahogany!
+
+                                                             M-Team
+
