@@ -6,7 +6,7 @@ Standards-Version: 2.5.0
 
 Package: mahogany
 Architecture: any
-Depends: libc6, xlib6g (>= 3.3.5-1), (libstdc++2.9, libstdc++2.10), (libgtk >= 1.2.8)
+Depends: libc6, xlib6g (>= 3.3.5-1), (libstdc++2.9|libstdc++2.10), (libgtk >= 1.2.8)
 Suggests: openssl, python
 Description: Mahogany, powerful and user-friendly mail/news client for X11.
  Mahogany is a mail and news client for X11, using the gtk toolkit. It
