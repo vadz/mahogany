@@ -8,6 +8,10 @@ $Id$
     just continue to remove bugs from this list as they are 
     fixed.
 
+bad bugs:
+
+1. filtering msg into a folder opening which is cancelled LOSES the msg!!
+
 ************ Small features before release
 
 ************ Translations
