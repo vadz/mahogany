@@ -2079,6 +2079,7 @@ VerifyInbox(void)
     * Is the newmail folder properly configured?
     */
    MFolder_obj folderRoot("");
+#ifndef EXPERIMENTAL_newnewmail
    NewMailFolderTraversal traverse(folderRoot);
    traverse.Traverse(true); // ignore result
    String foldername = traverse.GetNewMailFolder();
@@ -2093,7 +2094,12 @@ VerifyInbox(void)
 
    static const long flagsNewMail = MF_FLAGS_NEWMAILFOLDER |
                                     MF_FLAGS_DONTDELETE;
-
+#else
+   String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+   if(foldername.IsEmpty()) // this must not be
+      foldername = _("New Mail");
+   static const long flagsNewMail = MF_FLAGS_DEFAULT;
+#endif
    // Do we need to create the NewMailFolder?
    Profile *ibp = Profile::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
