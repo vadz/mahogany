@@ -422,10 +422,10 @@ OneCritControl::TranslateToString(wxString & criterium)
    switch(logical)
    {
    case 0: // OR:
-      program << "||";
+      program << "|";
       break;
    case 1: // AND:
-      program << "&&";
+      program << "&";
       break;
    case -1: // none:
       break;

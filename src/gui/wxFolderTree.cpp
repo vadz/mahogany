@@ -530,12 +530,11 @@ void wxFolderTree::OnProperties(MFolder *folder)
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
-#if 0 //def EXPERIMENTAL
+#ifdef EXPERIMENTAL
    RunCreateFolderWizard(NULL);
-#else
+#endif
    return ShowFolderCreateDialog(NULL, FolderCreatePage_Default,
                                  parent);
-#endif
 }
 
 bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)

@@ -601,6 +601,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
    // If we don't check, we could get called recursively from within a 
    // wxYield()...
+   ASSERT_MSG(m_SetFolderSemaphore == false, "DEBUG: SetFolder() called recursively, shouldn't happen.");
 //   if(m_SetFolderSemaphore)
 //      return;
    m_SetFolderSemaphore = true;
@@ -657,7 +658,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
-   m_SetFolderSemaphore = false;
    m_MailFolder = mf;
    m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
    m_Profile = NULL;
@@ -727,6 +727,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
 {
    int x,y;
    m_InDeletion = false;
+   m_UpdateSemaphore = false;
+   m_SetFolderSemaphore = false;
    m_Parent = parent;
    m_MailFolder = NULL;
    m_ASMailFolder = NULL;

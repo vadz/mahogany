@@ -1020,7 +1020,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_mailboxname);
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax,
-                                 m_comment, &m_browsePath,
+                                 m_comment, NULL,
                                  TRUE,    // open
                                  FALSE);  // allow non existing files
 

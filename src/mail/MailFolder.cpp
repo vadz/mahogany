@@ -614,7 +614,7 @@ MailFolderCmn::PreClose(void)
 
 bool
 MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
-                               String const & fileName0)
+                                  String const & fileName0)
 {
    int
       n = selections->Count(),

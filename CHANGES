@@ -1,5 +1,6 @@
 (next release) on (date of next release)
-
+22.03.00 KB: Filters config dialog extended. BBDB ADB supports read-only status.
+	     Folder creation wizard work.
 14.03.00 VZ: added changing folder colours depending on whether they have
              new/recent messages
 08.03.00 VZ: browsing IMAP/NNTP servers and subscribing to them works

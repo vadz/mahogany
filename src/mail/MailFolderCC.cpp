@@ -2083,6 +2083,10 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
    case MF_NEWS:
    {
       int startIndex = wxNOT_FOUND;
+
+      // Why this code? The spec is {hostname/nntp} not
+      // {nntp/hostname}, I leave it in for now, but add correct(?)
+      // code underneath:
       if ( specification[0u] == '{' )
       {
          wxString protocol(specification.c_str() + 1, 4);
@@ -2093,7 +2097,17 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
          }
          //else: leave it to be wxNOT_FOUND
       }
-
+      if ( startIndex == wxNOT_FOUND )
+      {
+         wxString lowercase = specification;
+         lowercase.MakeLower();
+         if( lowercase.Contains("/nntp") ||
+             lowercase.Contains("/news") )
+         {
+            startIndex = specification.Find('}');
+         }
+      }
+      
       if ( startIndex == wxNOT_FOUND )
       {
          FAIL_MSG("invalid folder specification - no {nntp/...}");

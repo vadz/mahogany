@@ -51,6 +51,7 @@
 #include <wx/app.h>
 #include <wx/utils.h>
 #include <wx/minifram.h>
+#include <wx/file.h>
 #include "kbList.h"
 #include <fstream.h>
 
@@ -1015,7 +1016,7 @@ bool
 BbdbBook::IsReadOnly() const
 {
    MOcheck();
-   return FALSE;
+   return !wxFile::Access(m_strName, wxFile::write);
 }
 
 // ----------------------------------------------------------------------------
