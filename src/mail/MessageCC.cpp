@@ -40,6 +40,8 @@
 #include "Message.h"
 #include "MessageCC.h"
 
+#include <ctype.h>
+
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
@@ -158,13 +160,20 @@ MessageCC::From(void) const
    return Address(tmp, MAT_FROM);
 }
 
+const char *
+MessageCC::GetHeader(void) const
+{
+   return mail_fetchheader_full(folder->Stream(), uid,
+                                NULL, NIL, FT_UID);
+}
+
 void
 MessageCC::GetHeaderLine(const String &line, String &value)
 {
    STRINGLIST  slist;
    slist.next = NULL;
    slist.text.size = line.length();
-   slist.text.data = TEXT_DATA_CAST(strutil_strdup(line));
+   slist.text.data = (unsigned char *)strutil_strdup(line);
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),

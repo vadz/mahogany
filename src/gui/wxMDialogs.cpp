@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$            *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 #include "Mcommon.h"
 
@@ -159,6 +160,7 @@ MDialog_YesNoDialog(const char *message,
        @param save   if true, for saving a file
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
+#if 0
 const char *
 MDialog_FileRequester(const char *message,
           MWindow *parent,
@@ -168,6 +170,16 @@ MDialog_FileRequester(const char *message,
             const char *wildcard,
             bool save,
             ProfileBase *profile)
+#endif
+const char *
+MDialog_FileRequester(String const & message,
+                      MWindow *parent,
+                      String path,
+                      String filename,
+                      String extension,
+                      String wildcard,
+                      bool save,
+                      ProfileBase *profile)
 {
    if(! profile)
       profile = mApplication.GetProfile();

@@ -44,6 +44,16 @@ String MailFolderCC::MF_pwd;
 
 //IMPLEMENT_CLASS2(MailFolderCC, MailFolder, CommonBase)
 
+
+// a variable telling c-client to shut up
+static bool mm_ignore_errors = false;
+
+// be quiet
+static void CCQuiet(void) { mm_ignore_errors = true; }
+// normal logging
+static void CCVerbose(void) { mm_ignore_errors = false; }
+
+
 bool
 MailFolderCC::Open(String const & filename)
 {
@@ -54,17 +64,25 @@ MailFolderCC::Open(String const & filename)
       MF_pwd = READ_CONFIG(profile, MP_POP_PASSWORD);
    }
 
-   // this will fail if file already exists, but it makes sure we can open it
-   if(GetType() == MF_FILE)      
-      mail_create(NIL, (char *)filename.c_str());
-   
    SetDefaultObj();
+   CCQuiet(); // first try, don't log errors
    mailstream = mail_open(mailstream,(char *)realName.c_str(),
            debugFlag ? OP_DEBUG : NIL);
    SetDefaultObj(false);
+   CCVerbose();
    if(mailstream == NIL)
-      return false;  // failed
-
+   {
+      // this will fail if file already exists, but it makes sure we can open it
+      // try again:
+      // if this fails, we want to know it, so no CCQuiet()
+      mail_create(NIL, (char *)filename.c_str());
+      SetDefaultObj();
+      mailstream = mail_open(mailstream,(char *)realName.c_str(),
+                             debugFlag ? OP_DEBUG : NIL);
+      SetDefaultObj(false);
+   }
+   if(mailstream == NIL)
+      return false; 
    AddToMap(mailstream);
 
    mail_status(mailstream, (char *)realName.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
@@ -141,7 +159,7 @@ MailFolderCC::Create(String const & iname)
       if(strutil_isempty(filename)) // assume we are a file
       {
          SetType(MF_FILE);
-         if(iname != DIR_SEPARATOR)
+         if(iname[0] != DIR_SEPARATOR)
          {
             String tmp;
             tmp = READ_CONFIG(profile,MP_MBOXDIR);
@@ -542,6 +560,8 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 void
 MailFolderCC::mm_log(const char *str, long errflg)
 {
+   if(mm_ignore_errors)
+      return;   
    String   msg = (String) "c-client " + (String) str;
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
 }

@@ -399,7 +399,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
       filename =
       MDialog_FileRequester(NULLstring, parent, NULLstring,
                             NULLstring, NULLstring, NULLstring, true,
-                            mailFolder->GetProfile()); 
+                            mailFolder->GetProfile());   
 
    // truncate the file
    wxFile file(filename, wxFile::write);

@@ -70,7 +70,7 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 {
    wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
 
-   wxLogWindow::OnFrameDelete(frame);
+//FIXME for old wxWindows   wxLogWindow::OnFrameDelete(frame);
 }
 
 // ----------------------------------------------------------------------------
