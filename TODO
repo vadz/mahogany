@@ -6,7 +6,7 @@ $Id$
 
 (I've sorted them a bit by "responsible person". :-) )
 
-- fix Python problems
+- fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
 - fix Adb auto-collection
 
 - wxLayout mouse clicks don't work, for two reasons:

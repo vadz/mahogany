@@ -214,6 +214,8 @@
 #define   MP_FOLDER_TYPE         "Type"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
+/// comment
+#define   MP_FOLDER_COMMENT      "Comment"
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL      "UpdateInterval"
 /// wrapmargin for composition view (set to -1 to disable it)
@@ -437,6 +439,8 @@
 #define   MP_FOLDER_TYPE_D         MFolder::File
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
+/// comment
+#define   MP_FOLDER_COMMENT_D      ""
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_D      60
 /// wrapmargin for composition view (set to -1 to disable it)

@@ -45,6 +45,7 @@
 #include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
 
 #include "Mversion.h"
+#include "Mupgrade.h"
 
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
@@ -79,6 +80,11 @@ MAppBase::MAppBase()
    m_topLevelFrame = NULL;
 }
 
+/* The code in VerifySettings somehow overlaps with the purpose of
+   upgrade.cpp where we set up the INBOX profile and possibly other
+   things. I just can't be bothered now, but this should go there,
+   too.
+*/
 bool
 MAppBase::VerifySettings(void)
 {
@@ -134,7 +140,10 @@ MAppBase::VerifySettings(void)
          m_profile->writeEntry(MC_VERSION, M_VERSION);
       }
    }
-
+   // This will only do anything if required.
+   if(! SetupInitialConfig())
+      ERRORMESSAGE((_("Failed to set up INBOX profile.")));
+   
    return true;
 }
 

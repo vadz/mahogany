@@ -19,6 +19,7 @@
 #include   "MApplication.h"
 #include   "gui/wxMApp.h"
 #include   "MDialogs.h"
+#include   "Profile.h"
 #include   <wx/mimetype.h>
 
 // SWIG bug: it generates code which assignes the default argument to "char *"

@@ -29,11 +29,4 @@
 /// full version string
 #define   M_VERSION_STRING  "pre-alpha 0.02 \042unnamed\042"
 
-// ----------------------------------------------------------------------------
-// functions
-// ----------------------------------------------------------------------------
-
-// upgrade from specified version to the current one, return TRUE on success
-extern bool Upgrade(const String& fromVersion);
-
 #endif  //_M_VERSION_H

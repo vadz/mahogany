@@ -35,7 +35,7 @@
 
 #include   "MDialogs.h"
 #include   "Mdefaults.h"
-
+#include   "Mupgrade.h"
 #include   "gui/wxIconManager.h"
 
 #define MCB_FOLDEROPEN_D            ""
@@ -177,7 +177,10 @@ public:
   void OnOK(wxCommandEvent& event);
   void OnApply(wxCommandEvent& event);
   void OnCancel(wxCommandEvent& event);
-
+protected:
+   /// ask for test
+   void DoTest(void);
+   
 private:
   wxPNotebook *m_notebook;
   wxButton    *m_btnOk,
@@ -1251,11 +1254,22 @@ bool wxOptionsDialog::TransferDataFromWindow()
   return TRUE;
 }
 
+void
+wxOptionsDialog::DoTest(void)
+{
+   if(MDialog_YesNoDialog(_("Test new setup?"),
+                          this, true, _("Test setup?"),true))
+      VerifyMailConfig();
+
+}
+   
 void wxOptionsDialog::OnOK(wxCommandEvent& /* event */)
 {
-  if ( !m_bDirty || TransferDataFromWindow() ) {
-    Close();
-  }
+   if ( !m_bDirty || TransferDataFromWindow() )
+   {
+      DoTest();
+      Close();
+   }
 }
 
 void wxOptionsDialog::OnApply(wxCommandEvent& /* event */)
