@@ -160,6 +160,8 @@ dnl where to find Python source
 PYTHON_PATH="/usr/local/src/Python-1.5"
 dnl name of the python library, omit "lib" and ".a" or ".so"
 PYTHON_LIB="python1.5"
+dnl which extra compiler flags to use
+MYCXXFLAGS="-pedantic -Wall"
 dnl ================ do not edit below here ============================
 
 
@@ -339,6 +341,7 @@ AC_PROG_CXXCPP
 dnl   defines CXXCPP with the C++-preprocessor
 
 CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g//g'`
+CXXFLAGS="$CXXFLAGS $MYCXXFLAGS"
 
 AC_LANG_RESTORE
 
