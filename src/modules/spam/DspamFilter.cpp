@@ -52,7 +52,6 @@ public:
    // destroy the context
    ~DspamCtx()
    {
-      _ds_destroy_message(m_ctx->message);
       if ( dspam_destroy(m_ctx) != 0 )
       {
          wxLogDebug(_T("dspam_destroy() failed"));
@@ -276,11 +275,7 @@ DSPAM_CTX *DspamFilter::GetCtx() const
 
 bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
 {
-#if 0
-   DSPAM_CTX& ctx = *GetCtx();
-#else
    DspamProcessCtx ctx;
-#endif
    if ( !ctx )
       return false;
 
