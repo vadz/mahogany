@@ -828,15 +828,22 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
      path << dir << DIR_SEPARATOR << name;
      dirFldName = name.BeforeLast('.');
 
-     // TODO: determine if this is a system folder (probably just by name, i.e.
-     //       compare with Inbox, Outbox, Drafts, ...) and process it
-     //       accordingly to the flags [DONE?]
+     // if directory empty,skip it to avoid creating empty folders
+     // for instance a folder containing a empty Misc could be created
+     // only group folders which contain 'real' folders should be created
+     wxDir tmpDir(path);
+     wxString tmpStr;
+     if ( (! tmpDir.IsOpened()) ||
+          (! tmpDir.GetFirst(&tmpStr,"*",wxDIR_FILES | wxDIR_DIRS)) ||
+          (tmpStr.IsEmpty()) )
+       continue;
+
      folder = CreateFolderTreeEntry (tmpParent,    // parent may be NULL
-                                     dirFldName,      // the folder name
-                                     MF_GROUP,   //            type
-                                     0,         //            flags
-                                     path,      //            path
-                                     FALSE      // don't notify
+                                     dirFldName,   // the folder name
+                                     MF_GROUP,     //            type
+                                     0,            //            flags
+                                     path,         //            path
+                                     FALSE         // don't notify
                                      );
 
      if ( folder )
@@ -957,35 +964,33 @@ bool MNetscapeImporter::ImportSettings()
    wxLogMessage(_("Couldn't import the global preferences file: %s."),
              filename.c_str());
 
-  // user own preference file
+  // user own preference files
   // entries here will override the global settings
-  // TODO
-  // - check which one is more recent
-  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile;
+  // Two files 'liprefs.js' and 'preferences.js' exist
+  // mostly the latter is the most recent, but I don't know
+  // the strategy beyond them. Moreover the contents overlap
 
+  // usually 'liprefs' is older, process it first.
+  // It doesn't matter if it fails
+  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile2;
+  ImportSettingsFromFileIfExists(filename);
+
+  // 'preferences.js' is the main one
+  // if it doesn't exist, bail out
+  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile;
   if (! wxFile::Exists(filename.c_str()) )
    {
      // TODO
      // - ask user if he knows where the prefs file is
-
      return FALSE;
    }
 
-
-  // TODO
-  // - check if g_PrefFile2 is younger or older than g_PrefFile
-  //   (use wxFileModificationTime)
   bool status = ImportSettingsFromFileIfExists(filename);
   if ( !status )
   {
      wxLogMessage(_("Couldn't import the user preferences file: %s."),
                   filename.c_str());
   }
-
-  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile2;
-  if (status)
-   status = ImportSettingsFromFileIfExists(filename);
-  //else: hmm, what message should we give here?
 
   return status;
 }
