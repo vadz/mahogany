@@ -17,6 +17,8 @@
 
 #include "MimePart.h"
 
+#include "FolderType.h"    // for Protocol enum
+
 class WXDLLEXPORT wxArrayString;
 class MailFolder;
 class Profile;

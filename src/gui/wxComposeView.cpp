@@ -1887,7 +1887,7 @@ void wxComposeView::SetEncodingToSameAs(Message *msg)
    int count = msg->CountParts();
    for ( int part = 0; part < count; part++ )
    {
-      if ( msg->GetPartType(part) == Message::MSG_TYPETEXT )
+      if ( msg->GetPartType(part) == MimeType::TEXT )
       {
          wxFontEncoding enc = msg->GetTextPartEncoding(part);
          if ( enc != wxFONTENCODING_SYSTEM )

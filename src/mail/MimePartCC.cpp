@@ -25,11 +25,14 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
+   #include "Mcommon.h"
 #endif // USE_PCH
 
 #include <wx/fontmap.h>
 
 #include "MimePartCC.h"
+
+#include "Mcclient.h" // for body_types
 
 // ============================================================================
 // MimeType implementation

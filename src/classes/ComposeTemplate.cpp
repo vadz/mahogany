@@ -951,7 +951,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                int nParts = m_msg->CountParts();
                for ( int nPart = 0; nPart < nParts; nPart++ )
                {
-                  if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
+                  if ( m_msg->GetPartType(nPart) == MimeType::TEXT )
                   {
                      // FIXME: we lack propert multipart/alternative support -
                      //        until we have it we can at least avoid

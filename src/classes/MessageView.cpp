@@ -1844,8 +1844,9 @@ MessageView::MimeHandle(const MimePart *mimepart)
          mimetype = "application/postscript";
          if(fileType) delete fileType;
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
+
          // proceed as usual
-         MailMessageParameters new_params(filename, mimetype, part);
+         MailMessageParameters new_params(filename, mimetype, mimepart);
          params = new_params;
          already_saved = true; // use this file instead!
       }
