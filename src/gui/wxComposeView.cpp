@@ -142,7 +142,7 @@ extern const MPersMsgBox *M_MSGBOX_DRAFT_SAVED;
 extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
 extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
 extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
-extern const MPersMsgBox *M_MSGBOX_UNSAVED_PROMPT;
+extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -2565,6 +2565,10 @@ wxComposeView::CanClose() const
 {
    bool canClose = true;
 
+   // if the msg is not empty, we're going to show a msg box to the user
+   String msg;
+   const MPersMsgBox *persMsgBox = NULL;
+
    // we can't close while the external editor is running (I think it will
    // lead to a nice crash later)
    if ( m_procExtEdit )
@@ -2576,20 +2580,46 @@ wxComposeView::CanClose() const
    }
    else if ( IsModified() )
    {
+      // the text of the new message has been modified, ask the user before
+      // closing -- this message box can't be suppressed
+      msg = _("There are unsaved changes, would you like to save the "
+              "message as a draft?");
+   }
+   else if ( m_txtSubject->IsModified() ||
+               (m_txtFrom && m_txtFrom->IsModified()) ||
+                  m_rcptMain->GetText()->IsModified() )
+   {
+      // the headers of the new message have been modified -- ask the user if
+      // he wants to save but let him disable this msg box
+      msg = _("You have modified some of the headers of this message,\n"
+              "would you like to save the message as a draft?");
+
+      persMsgBox = M_MSGBOX_ASK_SAVE_HEADERS;
+   }
+   else // nothing changed at all
+   {
+      canClose = true;
+   }
+
+   if ( !msg.empty() )
+   {
       // bring the frame to the top to show user which window are we asking him
       // about
       wxComposeView *self = (wxComposeView *)this;
       self->GetFrame()->Raise();
 
       // ask the user if he wants to save the changes
+      msg << _T("\n\n")
+          << _("You may also choose \"Cancel\" to not close this "
+               "window at all.");
+
       MDlgResult rc = MDialog_YesNoCancel
                       (
-                        _("There are unsaved changes, would you like to save the "
-                          "message as a draft?\n"
-                          "\n"
-                          "You may also choose \"Cancel\" to not close this "
-                          "window at all."),
-                        this  // parent
+                        msg,
+                        this,                // parent
+                        MDIALOG_YESNOTITLE,
+                        M_DLG_YES_DEFAULT,
+                        persMsgBox
                       );
 
       switch ( rc )
@@ -2606,10 +2636,6 @@ wxComposeView::CanClose() const
          case MDlg_Cancel:
             canClose = false;
       }
-   }
-   else
-   {
-      canClose = true;
    }
 
    return canClose;
@@ -3763,7 +3789,14 @@ wxComposeView::SetSubject(const String &subj)
 
 void wxComposeView::ResetDirty()
 {
+   // ensure that CanClose() returns true now
    m_editor->ResetDirty();
+
+   m_txtSubject->DiscardEdits();
+   if ( m_txtFrom )
+      m_txtFrom->DiscardEdits();
+   m_rcptMain->GetText()->DiscardEdits();
+
    m_isModified = false;
 }
 
