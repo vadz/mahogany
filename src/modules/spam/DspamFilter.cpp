@@ -24,6 +24,8 @@
    #include "Mcommon.h"
 
    #include "MApplication.h"
+
+   #include <wx/msgdlg.h>        // for wxMessageBox
 #endif //USE_PCH
 
 #include "MFolder.h"
