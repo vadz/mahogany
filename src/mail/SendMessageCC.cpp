@@ -6,6 +6,24 @@
  * $Id$ *
  *                                                                  *
  * $Log$
+ * Revision 1.8  1998/06/05 16:56:34  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.7  1998/05/24 08:23:31  KB
  * changed the creation/destruction of MailFolders, now done through
  * MailFolder::Open/CloseFolder, made constructor/destructor private,
@@ -21,34 +39,40 @@
 #   pragma implementation "SendMessageCC.h"
 #endif
 
-#include    "Mpch.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
 #ifndef  USE_PCH
-#   include   "Mcommon.h"
-#   include   "kbList.h"
-#   include   "Profile.h"
-#   include   "Mdefaults.h"
-#   include   "strutil.h"
-#   include   <strings.h>
-#   include   "SendMessageCC.h"
-#   include   "MApplication.h"
-#   include   "MDialogs.h"
-// includes for c-client library
-extern "C"
-{
-#   include <stdio.h>
-#   include <osdep.h>
-#   include <rfc822.h>
-#   include <smtp.h>
-#   include <nntp.h>
-#   include <misc.h>
-}
-#endif
+#  include "Profile.h"
+#  include "strutil.h"
+#  include "strings.h"
+#  include "MDialogs.h"
+
+#  include <strings.h>
+
+   // includes for c-client library
+   extern "C"
+   {
+#     include <stdio.h>
+#     include <mail.h>      
+#     include <osdep.h>
+#     include <rfc822.h>
+#     include <smtp.h>
+#     include <nntp.h>
+#     include <misc.h>
+   }
+
+#endif // USE_PCH
+
+#include "Mdefaults.h"
+#include "MApplication.h"
+#include "Message.h"
+#include "SendMessageCC.h"
 
 extern "C"
 {
-#include <misc.h>
-
+#  include <misc.h>
+   
    void rfc822_setextraheaders(const char **names, const char **values);
 }
 
@@ -61,7 +85,6 @@ extern "C"
 #endif
 
 #define   StringCast(iterator)   ((String *)*i)
-
 
 SendMessageCC::SendMessageCC(ProfileBase *iprof)
 {
@@ -226,8 +249,11 @@ SendMessageCC::Send(void)
    else
       ERRORMESSAGE (("[Can't open connection to any server]"));
 
-   for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++)
-      delete [] headerNames;
+   for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++) {
+      // @ const cast
+      delete [] (char *)headerNames[j];
+   }
+
    delete [] headerNames;
    delete [] headerValues;
    delete [] headers;

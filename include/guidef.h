@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/06/05 16:56:50  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.4  1998/05/11 20:29:37  VZ
  * compiles under Windows again + option USE_WXCONFIG added
  *
@@ -56,11 +74,6 @@
 #	define	Uses_wxDialog
 #	include	<wx/wx.h>
 #	include	"gui/wxMenuDefs.h"
-
-#ifdef    __WINDOWS__
-  // FIXME would be better change it in wx/wx.h
-  #undef  USE_IPC
-#endif
 
 /// how much space to leave in frame around other items
 #	define	WXFRAME_WIDTH_DELTA	16

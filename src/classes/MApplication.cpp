@@ -1,11 +1,29 @@
 /*-*- c++ -*-********************************************************
- * MApplication class: all non GUI specific application stuff       *
+ * MAppBase class: all non GUI specific application stuff       *
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.17  1998/06/05 16:56:10  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.16  1998/05/24 08:22:41  KB
  * changed the creation/destruction of MailFolders, now done through
  * MailFolder::Open/CloseFolder, made constructor/destructor private,
@@ -33,169 +51,159 @@
 #   pragma implementation "MApplication.h"
 #endif
 
-#include     "Mpch.h"
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+#include "Mpch.h"
 
 #ifndef   USE_PCH
-#   include   "Mcommon.h"
-#   include   "strutil.h"
-#   include   "Profile.h"
-#   include   "MFrame.h"
-#   include   "MLogFrame.h"
-#   include   "MimeList.h"
-#   include   "MimeTypes.h"
-#   include   "Mdefaults.h"
-#   include   "MApplication.h"
-#   include   "kbList.h"
-#endif
-
+#  include   "Mcommon.h"
+#  include   "strutil.h"
+#  include   "Profile.h"
+#  include   "MimeList.h"
+#  include   "MimeTypes.h"
+#  include   "kbList.h"
+#endif   // USE_PCH
 
 #include   <locale.h>
 #include   <errno.h>
 
-#include   "PathFinder.h"
-#include   "FolderView.h"
-#include   "Adb.h"
-#include   "Script.h"
-#include   "MailFolder.h"
-#include   "MailFolderCC.h"
-#include   "gui/wxFolderView.h"
-#include   "gui/wxMainFrame.h"
+#include "Mdefaults.h"
+
+#include "FolderView.h"
+#include "Adb.h"
+#include "Script.h"
+#include "MailFolder.h"
+#include "MailFolderCC.h"
+
+#include "gui/wxFolderView.h"
+#include "gui/wxMainFrame.h"
+#include "gui/wxMLogFrame.h"
+
+#include "MDialogs.h"
+
+#include "MApplication.h"
+
+#ifdef USE_WXCONFIG
+#  include  <wx/file.h>
+#  include  <wx/textfile.h>
+#  include  <wx/fileconf.h>
+#endif
+
+// ----------------------------------------------------------------------------
+// functions
+// ----------------------------------------------------------------------------
 
 #ifdef  USE_PYTHON
   // only used here
   extern void InitPython(void);
 #endif //Python
 
-// AppConf must be initialized with different args under Unix and Windows
-// and if we're using wxWin2 we don't inherit from it at all
-// @@@ all this looks quite horrible
-#ifdef USE_WXCONFIG
-#  include  <wx/file.h>
-#  include  <wx/textfile.h>
-#  include  <wx/fileconf.h>
+// ============================================================================
+// implementation
+// ============================================================================
 
-#  define   CALL_APPCONF_CTOR
-#else
-#  ifdef OS_UNIX
-#     define   CALL_APPCONF_CTOR : AppConfig(M_APPLICATIONNAME,\
-                                             FALSE, FALSE, TRUE)
-#  else
-#     define   CALL_APPCONF_CTOR : AppConfig(M_APPLICATIONNAME)
-#  endif
-#endif
-
-MApplication::MApplication(void) CALL_APPCONF_CTOR
+// ----------------------------------------------------------------------------
+// MAppBase - the class which defines the "application object" interface
+// ----------------------------------------------------------------------------
+MAppBase::MAppBase()
 {
-   initialisedFlag = false;
    logFrame = NULL;
-   
-#  ifdef USE_WXCONFIG
-      wxConfig::Set(GLOBAL_NEW wxFileConfig(
-                    wxFileConfig::GetLocalFileName(M_APPLICATIONNAME)));
-      // TODO: recordDefaults & expandVariables
-#  else
-      //  activate recording of configuration entries
-      if(readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
-         recordDefaults(TRUE);
-
-      // activate variable expansion as default
-      expandVariables(TRUE);
-#  endif
-
-   // set the default path for configuration entries
-   setCurrentPath(M_APPLICATIONNAME);
-   VAR(readEntry("TestEntry","DefaultValue"));
-
-   // initialise the profile
-#ifdef   USE_WXCONFIG
-      profile = GLOBAL_NEW ProfileAppConfig();
-#else
-      profile = GLOBAL_NEW ProfileAppConfig(this);
-#endif
-
    adb = NULL;
-   // do we have gettext() ?
-#if   USE_GETTEXT
-   setlocale (LC_ALL, "");
-   //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
-   textdomain (M_APPLICATIONNAME);
-#endif
-
-
 }
 
 void
-MApplication::VerifySettings(void)
+MAppBase::VerifySettings(void)
 {
    const char *val;
-   const size_t   bufsize = 200;
-   char   buffer[bufsize];
+   const size_t bufsize = 200;
+   char  buffer[bufsize];
    
-   val = readEntry(MP_USERNAME,MP_USERNAME_D);
+   val = READ_APPCONFIG(MP_USERNAME);
    if(! *val)
    {
       wxGetUserId(buffer,bufsize);
-      writeEntry(MP_USERNAME,buffer);
+      Profile::GetAppConfig()->WRITE_ENTRY(MP_USERNAME, buffer);
    }
 
-   val = readEntry(MP_PERSONALNAME,MP_PERSONALNAME_D);
+   val = READ_APPCONFIG(MP_PERSONALNAME);
    if(! *val)
    {
       wxGetUserName(buffer,bufsize);
-      writeEntry(MP_PERSONALNAME,buffer);
+      Profile::GetAppConfig()->WRITE_ENTRY(MP_PERSONALNAME, buffer);
    }
 
-   val = readEntry(MC_USERDIR,MC_USERDIR_D);
+   val = READ_APPCONFIG(MC_USERDIR);
    if(! *val)
    {
       wxGetHomeDir(buffer);
       strcat(buffer,"/");
-      strcat(buffer,readEntry(MC_USER_MDIR,MC_USER_MDIR_D));
-      writeEntry(MC_USERDIR,buffer);
+      strcat(buffer, READ_APPCONFIG(MC_USER_MDIR));
+      Profile::GetAppConfig()->WRITE_ENTRY(MC_USERDIR, buffer);
    }
    
-   val = readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+   val = READ_APPCONFIG(MP_HOSTNAME);
    if(! *val)
    {
       wxGetHostName(buffer,bufsize);
-      writeEntry(MP_HOSTNAME,buffer);
+      Profile::GetAppConfig()->WRITE_ENTRY(MP_HOSTNAME, buffer);
    }
   
 }
 
-MApplication::~MApplication()
+MAppBase::~MAppBase()
 {
-   if(! initialisedFlag)
-      return;
    GLOBAL_DELETE mimeList;
    GLOBAL_DELETE mimeTypes;
-   GLOBAL_DELETE profile;
-   if(adb)
-      GLOBAL_DELETE adb;
-
-   flush();
-
-   #ifdef USE_WXCONFIG
-      GLOBAL_DELETE wxConfig::Set(NULL);
-   #endif
+   GLOBAL_DELETE logFrame;
+   GLOBAL_DELETE adb;
 }
 
-MFrame *
-MApplication::OnInit(void)
+bool
+MAppBase::OnStartup()
 {
+   // initialise the profile
+#  if USE_WXCONFIG
+      profile = GLOBAL_NEW Profile(
+                  wxFileConfig::GetLocalFileName(M_APPLICATIONNAME)
+                );
+
+      // FIXME @@@@ do something about recordDefaults
+#  else
+      // FIXME @@@@ config file location?
+      profile = GLOBAL_NEW Profile(M_APPLICATIONNAME);
+
+      //  activate recording of configuration entries
+      if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
+         Profile::GetAppConfig()->recordDefaults(TRUE);
+#  endif
+
+   // set the default path for configuration entries
+   profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
+   VAR( profile->GetConfig()->READ_ENTRY("TestEntry", "DefaultValue") );
+
+   // do we have gettext() ?
+#  ifdef  USE_GETTEXT
+      setlocale (LC_ALL, "");
+      //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
+      textdomain (M_APPLICATIONNAME);
+#  endif // USE_GETTEXT
+
+   // create log window
+   logFrame = new wxMLogFrame;
+
+   // create and show the main program window
+   CreateTopLevelFrame();
+
    // this is being called from the GUI's initialisation function
    String   tmp;
-   topLevelFrame = GLOBAL_NEW MainFrame();
-   if(topLevelFrame)
-   {
-      initialisedFlag = true;
-      topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
-      topLevelFrame->Show(true);
-   }
-
    bool   found;
-   String strRootDir = readEntry(MC_ROOTDIRNAME,MC_ROOTDIRNAME_D);
-   PathFinder   pf(readEntry(MC_PATHLIST,MC_PATHLIST_D));
+   String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
+   PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
    globalDir = pf.FindDir(strRootDir, &found);
 
    VerifySettings();
@@ -205,24 +213,24 @@ MApplication::OnInit(void)
       String msg = _("Cannot find global directory \"");
       msg += strRootDir;
       msg += _("\" in\n \"");
-      msg += String(readEntry(MC_PATHLIST,MC_PATHLIST_D));
-      ErrorMessage(msg,topLevelFrame,true);
+      msg += String(READ_APPCONFIG(MC_PATHLIST));
+      ERRORMESSAGE((msg));
 
       // we should either abort immediately or continue without returning
       // or vital initializations are skipped!
       //return NULL;
    }
 
-   #ifdef   USE_WXCONFIG
-      localDir = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
-   #else
-      char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
+#  ifdef   USE_WXCONFIG
+      localDir = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+#  else
+      char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
       localDir = String(cptr);
       GLOBAL_DELETE [] cptr;
-   #endif
+#  endif
 
    // extend path for commands, look in M's dirs first
-   tmp="";
+   tmp = "";
    tmp += GetLocalDir();
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
@@ -231,11 +239,11 @@ MApplication::OnInit(void)
    tmp += PATH_SEPARATOR;
    if(getenv("PATH"))
       tmp += getenv("PATH");
-   #  ifdef  __WINDOWS__
+#  ifdef  __WINDOWS__
       // FIXME @@@@ what are setenv() params? can putenv be used instead?
-   #else
+#  else
       setenv("PATH", tmp.c_str(), 1);
-   #endif
+#  endif
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
@@ -247,23 +255,18 @@ MApplication::OnInit(void)
       cout << echo.GetOutput() << endl;
 #  endif //Python
 
-   // now the icon is available, so do this again:
-   topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
-
-   ShowConsole(readEntry(MC_SHOWCONSOLE,(long int)MC_SHOWCONSOLE_D) != 0);
-
    mimeList = GLOBAL_NEW MimeList();
    mimeTypes = GLOBAL_NEW MimeTypes();
 
    // load address database
    PathFinder lpf(localDir);
-   String adbName = lpf.FindFile(readEntry(MC_ADBFILE,MC_ADBFILE_D), &found);
+   String adbName = lpf.FindFile(READ_APPCONFIG(MC_ADBFILE), &found);
    if(! found)
-      adbName = localDir + '/' + readEntry(MC_ADBFILE,MC_ADBFILE_D);
+      adbName = localDir + '/' + READ_APPCONFIG(MC_ADBFILE);
    adb = GLOBAL_NEW Adb(adbName);
 
-   // Open all default mailboxes:
-   char *folders = strutil_strdup(readEntry(MC_OPENFOLDERS,MC_OPENFOLDERS_D));
+   // open all default mailboxes:
+   char *folders = strutil_strdup(READ_APPCONFIG(MC_OPENFOLDERS));
    kbStringList openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
    GLOBAL_DELETE [] folders;
@@ -281,46 +284,58 @@ MApplication::OnInit(void)
          mf->CloseFolder();
    }
    
-   return topLevelFrame;
+   return TRUE;
 }
 
 const char *
-MApplication::GetText(const char *in)
+MAppBase::GetText(const char *in)
 {
-#if   USE_GETTEXT
-   return   gettext(in);
-#else
-   return   in;
-#endif
+#  ifdef   USE_GETTEXT
+      return   gettext(in);
+#  else
+      return   in;
+#  endif
 }
 
 void
-MApplication::Exit(bool force)
+MAppBase::Exit(bool force)
 {
-   if(force || YesNoDialog(_("Really exit M?"),topLevelFrame))
+   if(force || MDialog_YesNoDialog(_("Really exit M?")))
    {
-      logFrame = NULL; // avoid any more output being printed
-      if(topLevelFrame)
+      // avoid any more output being printed
+      GLOBAL_DELETE logFrame;
+      logFrame = NULL;
+
+      // FIXME @@@@ this doesn't terminate the application in wxWin2
+      // (other frames are still left on screen)
+      if ( topLevelFrame != NULL ) {
          GLOBAL_DELETE topLevelFrame;
+         topLevelFrame = NULL;
+      }
       else
          exit(0);
    }
 }
 
+// ----------------------------------------------------------------------------
+// !wxWindows2 part
+// ----------------------------------------------------------------------------
+#ifndef USE_WXWINDOWS2
+
 void
-MApplication::ErrorMessage(String const &message, MFrame *parent, bool
+MAppBase::ErrorMessage(String const &message, MFrame *parent, bool
             modal)
 {
 #ifdef   USE_WXWINDOWS
    wxMessageBox((char *)message.c_str(), _("Error"),
       wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
 #else
-#   error MApplication::ErrorMessage() not implemented
+#   error MAppBase::ErrorMessage() not implemented
 #endif 
 }
 
 void
-MApplication::SystemErrorMessage(String const &message, MFrame *parent, bool
+MAppBase::SystemErrorMessage(String const &message, MFrame *parent, bool
             modal)
 {
    String
@@ -332,12 +347,12 @@ MApplication::SystemErrorMessage(String const &message, MFrame *parent, bool
    wxMessageBox((char *)msg.c_str(), _("System Error"),
       wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
 #else
-#   error MApplication::ErrorMessage() not implemented
+#   error MAppBase::ErrorMessage() not implemented
 #endif 
 }
 
 void
-MApplication::FatalErrorMessage(String const &message,
+MAppBase::FatalErrorMessage(String const &message,
            MFrame *parent)
 {   
    String msg = message + _("\nExiting application...");
@@ -347,40 +362,19 @@ MApplication::FatalErrorMessage(String const &message,
 
 
 void
-MApplication::Message(String const &message, MFrame *parent, bool
+MAppBase::Message(String const &message, MFrame *parent, bool
             modal)
 {
 #ifdef   USE_WXWINDOWS
    wxMessageBox((char *)message.c_str(), _("Information"),
       wxOK|wxCENTRE|wxICON_INFORMATION, parent);
 #else
-#   error MApplication::Message() not implemented
+#   error MAppBase::Message() not implemented
 #endif 
 }
 
 void
-MApplication::ShowConsole(bool display)
-{
-   if(display)
-   {
-      if(logFrame == NULL)
-    logFrame = GLOBAL_NEW MLogFrame();
-      logFrame->Show(TRUE);
-   }
-
-   // wxWin uses the frame after calling OnClose() from which we're
-   // called, so don't delete it!
-   #ifndef  USE_WXWINDOWS2
-      else if(logFrame)
-      {
-         GLOBAL_DELETE logFrame;
-         logFrame = NULL;
-      }
-   #endif
-}
-   
-void
-MApplication::Log(int level, String const &message)
+MAppBase::Log(int level, String const &message)
 {
    if(! logFrame)
       return;
@@ -391,23 +385,5 @@ MApplication::Log(int level, String const &message)
    }
 }
 
-bool
-MApplication::YesNoDialog(String const &message,
-           MFrame *parent,
-           bool modal,
-           bool YesDefault)
-{
-#ifdef   USE_WXWINDOWS
-   return (bool) (wxYES == wxMessageBox(
-      (char *)message.c_str(),
-      _("Decision"),
-      wxYES_NO|wxCENTRE|wxICON_QUESTION,
-      parent));
-#else
-#   error MApplication::YesNoDialog() not implemented
-#endif 
-}
+#endif
 
-
-/// this creates the one and only application object
-MApplication mApplication;

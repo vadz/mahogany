@@ -6,6 +6,24 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/05 16:56:16  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.6  1998/05/24 14:48:14  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -34,27 +52,39 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#   pragma  implementation "wxAdbEdit.h"
+#pragma  implementation "wxAdbEdit.h"
 #endif
 
 #include "Mpch.h"
 #include "Mcommon.h"
 
-#include "MFrame.h"
-#include "MLogFrame.h"
+#ifndef  USE_PCH
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+
+#  include "kbList.h"
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
+
+#  include "kbList.h"
+#endif // USE_PCH
 
 #include "Mdefaults.h"
 
-#include   "kbList.h"
-#include "PathFinder.h"
-#include "Profile.h"
-
 #include "MApplication.h"
+#include "gui/wxMApp.h"
 
 #include "Adb.h"
 
-#include "gui/wxtab.h"
 #include "gui/wxAdbEdit.h"
+
+#ifdef   USE_WXWINDOWS2
+#  include <wx/tab.h>
+#else    // wxWin1
+#  include "gui/wxtab.h"
+#endif   // wxWin1/2
 
 // control ids
 enum
@@ -550,7 +580,11 @@ wxAdbEditPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
    
 
 wxAdbEditPanel::wxAdbEditPanel(wxAdbEditFrame *parent, int x, int y, int w, int h)
+#ifdef USE_WXWINDOWS2
+      : wxTabbedPanel(parent,-1)
+#else  // wxWin1
       : wxTabbedPanel(parent,x,y,w,h)
+#endif // wxWin1/2
 {
   frame = parent;
 
@@ -568,10 +602,11 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
 {
    if(initialised)
       return; // ERROR!
-
+#ifdef USE_WXWINDOWS2
+   // @@@@ FIXME: wxTab in wxWin2
+   return;
+#else
    view = NULL;
-   
-   wxMFrame::Create(ADBEDITFRAME_NAME,parent);
    
    profile = iprofile;
    eptr = NULL;
@@ -624,7 +659,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    
    // Panel 1 - personal Name   
    wxPanel *panel1 = CreatePanel(panel, rect.x + 20, rect.y + 10, 
-                                 pwidth, pheight);
+                                 pwidth, pheight, "");
    CreateLabel(panel1, "Formatted Name:");
    formattedName = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
@@ -661,7 +696,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
 
    // Panel 2 - home address
    wxPanel *panel2 = CreatePanel(panel, rect.x + 20, rect.y + 10, 
-                                 pwidth, pheight);
+                                 pwidth, pheight, "");
    wxMessage *hApbLabel = CreateLabel(panel2, "PO Box:");
    hApb = CreateText(panel2, fieldpos, -1,fieldwidth,-1, "");
 
@@ -703,7 +738,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
 
    // Panel 3 - work address
    wxPanel *panel3 = CreatePanel(panel, rect.x + 20, rect.y + 10,
-                                     pwidth, pheight);
+                                     pwidth, pheight, "");
    wxMessage *wApbLabel = CreateLabel(panel3,"PO Box:");
    wApb = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
@@ -744,7 +779,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    
    // Panel 4 - email
    wxPanel *panel4 = CreatePanel(panel, rect.x + 20, rect.y + 10,
-                                     pwidth, pheight);
+                                     pwidth, pheight, "");
    wxMessage *emailLabel = CreateLabel(panel4,"e-mail:");
    email = CreateText(panel4,fieldpos, -1,fieldwidth,-1, "");
 
@@ -780,6 +815,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    
    initialised = true;
    Show(TRUE);
+#endif // wxWin1/2
 }
 
 void
@@ -802,11 +838,13 @@ wxAdbEditFrame::OnSize(int  w, int h)
    // Calculate the tab width for 2 tabs, based on a view width of 326 and
    // the current horizontal spacing. Adjust the view width to exactly fit
    // the tabs.
+#ifndef USE_WXWINDOWS2
    view->CalculateTabWidth(2, TRUE);
+#endif // wxWin2
 }
 
-wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent,
-                ProfileBase *iprofile)
+wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent, ProfileBase *iprofile)
+              : wxMFrame(ADBEDITFRAME_NAME, parent)
 {
    initialised = false;
    Create(parent,iprofile);

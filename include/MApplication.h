@@ -15,7 +15,6 @@
 
 #ifndef   USE_PCH
 #   include   <Mcommon.h>
-#   include   <appconf.h>
 #   include   <Mdefaults.h>
 #   include   <Adb.h>
 #   include   <MFrame.h>
@@ -28,35 +27,63 @@
 #   include   "kbList.h"
 #endif
 
-class MApplication;
 class Adb;
 
 /**
    Application class, doing all non-GUI application specific stuff
 */
 
-class MApplication : public CommonBase
-#ifndef  USE_WXCONFIG
-, public AppConfig
-#endif
+class MAppBase : public CommonBase
 {
-public:
-   MApplication(void);
-   ~MApplication();
+protected:
+   /// the application's toplevel window
+   MFrame *topLevelFrame;
+   /// the directory of the M global data tree
+   String   globalDir;
+   /// the directory of the User's M data files
+   String   localDir;
+   /// a list of all known mime types
+   MimeList *mimeList;
+   /// a list mapping extensions to mime types
+   MimeTypes  *mimeTypes;
+   /// a window for logging messages
+   MLogFrameBase *logFrame;
+   
+   /// a profile wrapper object for this object
+   Profile *profile;
+   /// the address database
+   Adb *adb;
+   /** Checks some global configuration settings and makes sure they
+       have sensible values. Especially important when M is run for
+       the first time.
+   */
+   void VerifySettings(void);
 
-   /** initialise application
+public:
+   MAppBase(void);
+   ~MAppBase();
+
+   /** create the main application window
        This function gets called after the windowing toolkit has been
        initialised. When using wxWindows, it is called from the
        wxApp::OnInit() callback.
        @return the toplevel window of the application
-   */
-   MFrame *OnInit(void);
+       */
+   virtual MFrame *CreateTopLevelFrame() = 0;
+
+   /** called by GUI framework to give us a chance to do all sort of
+       initialization stuff. It's called before the main window is
+       created.
+
+       @return false => application aborts immediately
+     */
+   virtual bool OnStartup();
 
    /** ends the application
        prompting before whether user really wants to exit.
        @param force force exit, do not ask user whether to exit or not
-   */
-   void   Exit(bool force = false);
+     */
+   void  Exit(bool force = false);
 
    /** gets toplevel frame
        @return the toplevel window of the application
@@ -69,55 +96,6 @@ public:
    */
    const char *GetText(const char *in);
    
-   /// is object initialised ?
-   bool IsInitialised(void) const { return initialisedFlag; }
-
-   /** display error message:
-       @param message the text to display
-       @param parent   the parent frame
-       @param modal   true to make messagebox modal
-   */
-   void   ErrorMessage(String const &message,
-                       MFrame *parent = NULL,
-                       bool modal = false);
-
-   /** display system error message:
-       @param message the text to display
-       @param parent   the parent frame
-       @param modal   true to make messagebox modal
-   */
-   void   SystemErrorMessage(String const &message,
-                             MFrame *parent = NULL,
-                             bool modal = false);
-   
-   /** display error message and exit application
-       @param message the text to display
-       @param parent   the parent frame
-   */
-   void   FatalErrorMessage(String const &message,
-                            MFrame *parent = NULL);
-   
-   /** display normal message:
-       @param message the text to display
-       @param parent   the parent frame
-       @param modal   true to make messagebox modal
-   */
-   void   Message(String const &message,
-                  MFrame *parent = NULL,
-                  bool modal = false);
-
-   /** simple Yes/No dialog
-       @param message the text to display
-       @param parent   the parent frame
-       @param modal   true to make messagebox modal
-       @param YesDefault true if Yes button is default, false for No as default
-       @return true if Yes was selected
-   */
-   bool   YesNoDialog(String const &message,
-                      MFrame *parent = NULL,
-                      bool modal = false,
-                      bool YesDefault = true);
-
    /** return the global directory
        @return the path to the global M data files
    */
@@ -152,84 +130,50 @@ public:
        @param display true to show it
    */
    void   ShowConsole(bool display = true);
+
+   // !wxWindows2 from here on
+#ifndef  USE_WXWINDOWS2
+   /** display error message:
+       @param message the text to display
+       @param parent the parent frame
+       @param modal  true to make messagebox modal
+     */
+   void  ErrorMessage(String const &message,
+           MFrame *parent = NULL,
+           bool modal = false);
+
+   /** display system error message:
+       @param message the text to display
+       @param parent the parent frame
+       @param modal  true to make messagebox modal
+     */
+   void  SystemErrorMessage(String const &message,
+           MFrame *parent = NULL,
+         bool modal = false);
+   
+   /** display error message and exit application
+       @param message the text to display
+       @param parent the parent frame
+     */
+   void  FatalErrorMessage(String const &message,
+         MFrame *parent = NULL);
+   
+   /** display normal message:
+       @param message the text to display
+       @param parent the parent frame
+       @param modal  true to make messagebox modal
+     */
+   void  Message(String const &message,
+      MFrame *parent = NULL,
+      bool modal = false);
+
    /** Write a message to the console.
        @param message the message  itself
        @param level urgency of message (errorlevel)
    */
    void Log(int level, String const &message);
-   CB_DECLARE_CLASS(MApplication, CommonBase)
-
-   /// return class name
-   const char *GetClassName(void) const
-      { return "MailFolder"; }
-   
-
-#ifdef   USE_WXCONFIG
-      // AppConf functions are implemented using built-in wxConfig class in wxWin2
-      inline
-   const char *readEntry(const char *szKey, const char *szDefault = NULL) const
-      {
-         // FIXME @@@ static buffer will be overwritten each time we're called!
-         static char s_szBuffer[1024];
-         wxString str;
-         wxConfig::Get()->Read(&str, szKey, szDefault);
-         strncpy(s_szBuffer, str, SIZEOF(s_szBuffer));
-         return s_szBuffer;
-      }
-   inline int readEntry(const char *szKey, int Default = 0) const
-      {
-         long lVal;
-         wxConfig::Get()->Read(&lVal, szKey, (long)Default);
-         return (int)lVal;
-      }
-   inline bool readEntry(const char *szKey, bool Default = false) const
-      { return readEntry(szKey, (int)Default) != 0; }
-
-   inline bool writeEntry(const char *szKey, const char *szValue)
-      { return wxConfig::Get()->Write(szKey, szValue) != 0; }
-   inline bool writeEntry(const char *szKey, long lValue)
-      { return wxConfig::Get()->Write(szKey, lValue) != 0; }
-
-   inline const char *getCurrentPath() const
-      { return wxConfig::Get()->GetPath(); }
-   inline void setCurrentPath(const char *szPath)
-      { wxConfig::Get()->SetPath("/");wxConfig::Get()->SetPath(szPath); }
-   inline void changeCurrentPath(const char *szPath)
-      { wxConfig::Get()->SetPath(szPath); }
-   inline void flush()
-      { wxConfig::Get()->Flush(); }
-
-   // FIXME @@@
-   bool doesExpandVariables() const { return true; }
-   void expandVariables(bool /* bDoExpand */) { }
 #endif
-private:
-   /// is application initialised?
-   bool   initialisedFlag;
-   /// the application's toplevel window
-   MFrame *topLevelFrame;
-   /// the directory of the M global data tree
-   String   globalDir;
-   /// the directory of the User's M data files
-   String   localDir;
-   /// a list of all known mime types
-   MimeList   *mimeList;
-   /// a list mapping extensions to mime types
-   MimeTypes   *mimeTypes;
-   /// a window for logging messages
-   MLogFrame   *logFrame;
-   
-   /// a profile wrapper object for this object
-   ProfileAppConfig   *profile;
-   /// the address database
-   Adb         *adb;
-   /** Checks some global configuration settings and makes sure they
-       have sensible values. Especially important when M is run for
-       the first time.
-   */
-   void VerifySettings(void);
+
+   CB_DECLARE_CLASS(MApplication, CommonBase)
 };
-
-extern MApplication   mApplication;
-
 #endif

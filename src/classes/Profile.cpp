@@ -6,6 +6,24 @@
  * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/05 16:56:13  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.7  1998/05/24 14:47:59  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -35,24 +53,50 @@
 #   pragma implementation "Profile.h"
 #endif
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 #include  "Mpch.h"
 #include  "Mcommon.h"
 
-#ifndef   USE_PCH
-#   include   "strutil.h"
-#   include   "kbList.h"
-#   include "MApplication.h"
-#   include "Mdefaults.h"
-#   include "Profile.h"
+#ifndef USE_PCH
+#  include "strutil.h"
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
+
+#  include "kbList.h"
 #endif
 
-#include "PathFinder.h"
+#include "Mdefaults.h"
+
+#include "MApplication.h"
+#include "gui/wxMApp.h"
 
 #ifdef  USE_WXCONFIG
-#   include "wx/file.h"
-#   include "wx/textfile.h"
-#   include "wx/fileconf.h"
+#  include "wx/file.h"
+#  include "wx/textfile.h"
+#  include "wx/fileconf.h"
 #endif
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Profile
+// ----------------------------------------------------------------------------
+
+// static member variables
+FileConfig *Profile::appConfig = NULL;
 
 /**
    Profile class, managing configuration options on a per class basis.
@@ -63,101 +107,93 @@
    profile. Thus, an inheriting profile structure is created.
 */
 
-
-Profile::Profile(String const &iClassName, ProfileBase const *Parent)
+Profile::Profile(const String& appConfigFile)
 {
-   isOk = false;
-   fileConfig = NULL;
+   // we shouldn't be called twice normally
+   ASSERT( appConfig == NULL );
+
    parentProfile = NULL;
 
-   profileName = iClassName;
+   fileConfig = cfManager.GetConfig(appConfigFile);
+   isOk = fileConfig != NULL;
+   if ( isOk )
+      appConfig = fileConfig;
+}
 
-   String
-      fileName, fullFileName,
-      tmp = mApplication.readEntry(MC_PROFILE_PATH,MC_PROFILE_PATH_D);
-   PathFinder
-      pf(tmp);
+Profile::Profile(String const &iClassName, ProfileBase const *Parent)
+       : profileName(iClassName)
+{
+   fileConfig = NULL;   // set it before using CHECK()
 
-   fileName = iClassName +
-      String(mApplication.readEntry(MC_PROFILE_EXTENSION,MC_PROFILE_EXTENSION_D));
+   // the top entry should already exist and we must have a parent
+   CHECK( appConfig != NULL );
+
+   parentProfile = Parent;
+
+   // find our config file
+   String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
+   PathFinder pf(tmp);
+
+   String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
+   String fullFileName = pf.FindFile(fileName, &isOk);
    
-   fullFileName = pf.FindFile(fileName, &isOk);
-   
-   if(! isOk)
+   if( !isOk )
       fullFileName = mApplication.GetLocalDir() + DIR_SEPARATOR + fileName;
 
-   fileConfig = cfManager.GetConfig(fullFileName);   //new FileConfig();
+   fileConfig = cfManager.GetConfig(fullFileName);
    
-   if(Parent)
-   {
-      parentProfile = Parent;
-      isOk = true;
-   }
+   isOk = fileConfig != NULL;
 }
 
 
 Profile::~Profile()
 {
-   if(fileConfig)
-      delete fileConfig;
+   if ( appConfig == fileConfig )
+      appConfig = NULL;
+
+   GLOBAL_DELETE fileConfig;
 }
 
 
 const char *
 Profile::readEntry(const char *szKey, const char *szDefault) const
 {
-#ifdef   USE_WXCONFIG
-   static char s_szBuffer[1024];  // @@ static buffer
-   String rc;
-#else
-   const char *rc = NULL;
-#endif
+   // config object must be created
+   CHECK2( fileConfig != NULL, return NULL );
 
-   DBGLOG("Profile(" << profileName << ")::readEntry(" << szKey 
-          << ",(const char *)" << szDefault << ')'
-          << " name: " << profileName);
-   if(fileConfig)
-   {
-      DBGLOG("   looking in fileConfig");
-#ifdef   USE_WXCONFIG
-      fileConfig->Read(&rc, szKey, NULL);
-#else
-      rc = fileConfig->readEntry(szKey, (const char *)NULL);
-#endif
-   }
+   const char *rc = NULL;
+
+   rc = fileConfig->READ_ENTRY(szKey, (const char *)NULL);
+
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
-      DBGLOG("   looking in parentProfile");
       rc = parentProfile->readEntry(szKey, (const char *)NULL);
    }
-   if( strutil_isempty(rc) )
+
+   if( strutil_isempty(rc) && appConfig != NULL )
    {
-      DBGLOG("   looking in mApplication");
-      String tmp = mApplication.getCurrentPath();
-      mApplication.setCurrentPath(M_PROFILE_CONFIG_SECTION);
-      mApplication.changeCurrentPath(profileName.c_str());
-      rc = mApplication.readEntry(szKey, (const char *)NULL);
-      mApplication.setCurrentPath(tmp.c_str());
+      String tmp = appConfig->GET_PATH();
+      appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
+      appConfig->CHANGE_PATH(profileName.c_str());
+      rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
+      appConfig->SET_PATH(tmp.c_str());
    }
+
    if( strutil_isempty(rc) )
    {
-      DBGLOG("   writing entry back");
       fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
       rc = szDefault;
    }
 
-   DBGLOG("Profile::readEntry() returned: " << rc);
+   DBGLOG("Profile(" << profileName << ")::readEntry(" << szKey << ") "
+          "returned: " << (rc == NULL ? (String(szDefault) + " (default)")
+                                      : String(rc)));
 
-#ifdef   USE_WXCONFIG
-   strncpy(s_szBuffer, rc, SIZEOF(s_szBuffer));
-   return s_szBuffer;
-#else
-   return rc;
-#endif
+   return rc == NULL ? szDefault : rc;
 }
 
 int
-Profile::readEntry(const char *szKey,  int Default) const
+Profile::readEntry(const char *szKey, int Default) const
 {
    int
       rc = Default;
@@ -166,35 +202,33 @@ Profile::readEntry(const char *szKey,  int Default) const
    char const
       * tmp;
    
-   //DBGLOG("Profile::readEntry(" << szKey << ',' << Default << ')' << " name: " << profileName);
    tmp = readEntry(szKey,buf);
    rc = tmp ? atoi(tmp) : 0;
    
    delete [] buf;
-   //DBGLOG("Profile::readEntry() returned: " << rc);
+
    return rc;
 }
 
 bool
 Profile::readEntry(const char *szKey, bool Default) const
 {
-   //DBGLOG("Profile::readEntry(" << szKey << ',' << Default << ')' << " name: " << profileName);
    return readEntry(szKey, (int) Default) != 0;
 }
 
 bool
 Profile::writeEntry(const char *szKey, int Value)
 {
-   if(! fileConfig)
-      return false;
+   CHECK2( fileConfig != NULL, return FALSE );
+
    return fileConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
 }
 
 bool
 Profile::writeEntry(const char *szKey, const char *szValue)
 {
-   if(! fileConfig)
-      return false;
+   CHECK2( fileConfig != NULL, return FALSE );
+
    return fileConfig->WRITE_ENTRY(szKey, szValue) != 0;
 }
 
@@ -203,6 +237,10 @@ Profile::writeEntry(const char *szKey, bool Value)
 {
    return writeEntry(szKey, (int) Value);
 }
+
+// ----------------------------------------------------------------------------
+// ConfigFileManager
+// ----------------------------------------------------------------------------
 
 ConfigFileManager Profile::cfManager;
 
@@ -216,9 +254,10 @@ ConfigFileManager::~ConfigFileManager()
    FCDataList::iterator i;
    FileConfig *fcp;
    
-#ifdef DEBUG
-   Debug();
-#endif
+#  ifdef DEBUG
+      Debug();
+#  endif
+
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       fcp = (*i)->fileConfig;
@@ -233,9 +272,7 @@ ConfigFileManager::GetConfig(String const &fileName)
 {
    FCDataList::iterator i;
 
-#ifdef DEBUG
-   cerr << "ConfigFileManager.GetConfig(" << fileName << ")" << endl;
-#endif
+   DBGLOG("ConfigFileManager.GetConfig(" << fileName << ")");
    
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
@@ -245,33 +282,36 @@ ConfigFileManager::GetConfig(String const &fileName)
    FCData   *newEntry = new FCData;
    newEntry->fileName = fileName;
 
-#ifdef  USE_WXCONFIG
-   newEntry->fileConfig = new wxFileConfig(newEntry.fileName);
-#else
-   newEntry->fileConfig = new FileConfig;
-   newEntry->fileConfig->readFile(newEntry->fileName.c_str());
-   newEntry->fileConfig->expandVariables(M_PROFILE_VAREXPAND);
+#  ifdef  USE_WXCONFIG
+      newEntry->fileConfig = GLOBAL_NEW wxFileConfig(newEntry->fileName);
+#  else
+      newEntry->fileConfig = GLOBAL_NEW FileConfig;
+      newEntry->fileConfig->readFile(newEntry->fileName->c_str());
+      newEntry->fileConfig->expandVariables(M_PROFILE_VAREXPAND);
 
-   //  activate recording of configuration entries
-   if(mApplication.readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
-      newEntry->fileConfig->recordDefaults(TRUE);
-#endif
+      //  activate recording of configuration entries
+      if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
+         newEntry.fileConfig->recordDefaults(TRUE);
+#  endif
 
    fcList->push_front(newEntry);
-
+   
    return newEntry->fileConfig;
 }
 
 #ifdef DEBUG
 void
-ConfigFileManager::Debug(void)
+ConfigFileManager::Debug() const
 {
    FCDataList::iterator i;
 
-   cerr << "------ConfigFileManager------" << endl;
-   for(i = fcList->begin(); i != fcList->end(); i++)
-      cerr << '"' << kbListICast(FCData,i)->fileName << '"' << '\t'
-           << kbListICast(FCData,i)->fileConfig << endl;
-   cerr << "-----------------------------" << endl;
+   DBGLOG("------ConfigFileManager------\n");
+   for(i = fcList->begin(); i != fcList->end(); i++) {
+      // @@ where is operator<<(fileConfig)?
+#     if 0
+         DBGLOG('"' << (*i).fileName << '"' << '\t' << (*i).fileConfig << '\n');
+#     endif
+   }
+   DBGLOG("-----------------------------\n");
 }
 #endif

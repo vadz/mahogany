@@ -13,26 +13,53 @@
 #   pragma interface "Profile.h"
 #endif
 
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 #ifndef  USE_PCH
 #  include  "kbList.h"
 #endif
 
-#ifndef   USE_WXCONFIG
-#   include   "appconf.h"
-#endif
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
 
+// the classes in this file can use either the (old) standalone appconf,
+// or wxConfig included in wxWindows 2
 #ifdef   USE_WXCONFIG
+#  define   READ_ENTRY     Read
 #  define   WRITE_ENTRY    Write
 #  define   FLUSH          Flush
+#  define   SET_PATH       SetPath
+#  define   CHANGE_PATH    SetPath
+#  define   GET_PATH       GetPath
 
-// use built-in appconf implementation
-typedef  wxConfig FileConfig;
-typedef  wxConfig AppConfig;
+#  ifndef   USE_PCH
+#     include <wx/config.h>
+#  endif
 
+   // both types are mapped just on wxConfig
+   typedef  wxConfig       FileConfig;
+   typedef  wxConfig       AppConfig;
 #else
+#  include  "appconf.h"
+
+#  define   READ_ENTRY     readEntry
 #  define   WRITE_ENTRY    writeEntry
 #  define   FLUSH          flush
+#  define   SET_PATH       setCurrentPath
+#  define   CHANGE_PATH    changeCurrentPath
+#  define   GET_PATH       getCurrentPath
 #endif
+
+// this macro enforces the convention that for config entry FOO the default
+// value is FOO_D(EFAULT).
+#define READ_APPCONFIG(key) (Profile::GetAppConfig()->READ_ENTRY(key, key##_D))
+#define READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
+
+// ----------------------------------------------------------------------------
+// classes
+// ----------------------------------------------------------------------------
 
 /**@name Profile management classes. */
 //@{
@@ -46,7 +73,7 @@ typedef  wxConfig AppConfig;
     @see ProfileAppConfig
     @see AppConfig
 */
-class ProfileBase
+class ProfileBase : public CommonBase
 {
 public:
    /**@name Reading and writing entries.
@@ -54,8 +81,8 @@ public:
    */
    //@{
    /// Read a character entry.
-   virtual const char *readEntry(const char *szKey, const char *szDefault =
-                                 NULL) const = 0;
+   virtual const char *readEntry(const char *szKey,
+                                 const char *szDefault = NULL) const = 0;
    /// Read an integer value.
    virtual int readEntry(const char *szKey, int Default = 0) const = 0;
    /// Read a bool value.
@@ -77,20 +104,22 @@ public:
 /** A structure holding name and FileConfig pointer.
    This is the element of the list.
 */
-struct   FCData
+struct FCData
 {
-   String   fileName;
-   FileConfig   *fileConfig;
+  String      fileName;
+  FileConfig *fileConfig;
+
+  IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
 };
 
-/** A list of all known icons.
+/** A list of all loaded FileConfigs
    @see FCData
 */
-
 KBLIST_DEFINE(FCDataList, FCData);
 
 class ConfigFileManager : public CommonBase
 {
+private:
    FCDataList *fcList;
    
 public:
@@ -107,118 +136,12 @@ public:
        @param fileName name of configuration file
        @return the FileConfig object
    */
-   FileConfig * GetConfig(String const &fileName);
+   FileConfig *GetConfig(String const &fileName);
 
-#ifdef DEBUG
    /// Prints a list of all entries.
-   void Debug(void);
-#endif
-   /** This class is always initialised.
-       @return true 
-   */
-   bool IsInitialised(void) const
-      { return true; }
+   DEBUG_DEF
 
    CB_DECLARE_CLASS(ConfigFileManager, CommonBase);
-};
-
-/** A Profile class which wraps an existing AppConfig object.
-    This class provides the same functionality as a profile class but
-    is linked to an AppConfig object passed to its constructor on
-    creation. Therefor it allows an AppConfig object to serve as the
-    root of a Profile inheritance tree.
-    @see AppConfig
-    @see ProfileBase
-  */
-class ProfileAppConfig : public ProfileBase, public CommonBase
-{
-   /// The AppConfig object.
-   AppConfig   *appConfig;
-   /// Is Profile ready to use?
-   bool   isOk;
-protected:
-public:
-   /** Constructor.
-       @param ac The existing AppConfig object to wrap.
-   */
-#ifdef  USE_WXCONFIG
-   ProfileAppConfig() { appConfig = wxConfig::Get(); }
-#else
-   ProfileAppConfig(AppConfig *ac) { appConfig = ac; }
-#endif
-
-   /** Query if Profile has been initialised successfully.
-       @return true = This object is considered to be always initialised.
-   */
-   bool IsInitialised(void) const
-      { return true; }
-   
-   /**@name Reading and writing entries.
-      All these functions are just identical to the FileConfig ones.
-   */
-   //@{
-   /// Read a character entry.
-   inline
-   const char *readEntry(const char *szKey, const char *szDefault = NULL) const
-      {
-         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << szDefault << ')');
-#ifdef   USE_WXCONFIG
-         // FIXME @@@ static buffer will be overwritten each time we're called!
-         static char s_szBuffer[1024];
-         wxString str;
-         appConfig->Read(&str, szKey, szDefault);
-         strncpy(s_szBuffer, str, SIZEOF(s_szBuffer));
-         return s_szBuffer;
-#else
-         return appConfig->readEntry(szKey, szDefault);
-#endif
-      }
-   /// Read an integer value.
-   inline
-   int readEntry(const char *szKey, int Default = 0) const
-      {
-         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
-#ifdef   USE_WXCONFIG
-         long lVal;
-         appConfig->Read(&lVal, szKey, (long)Default);
-         return (int)lVal;
-#else
-         return appConfig->readEntry(szKey, (long) Default);
-#endif
-      }
-   /// Read a bool value.
-   inline
-   bool readEntry(const char *szKey, bool Default = false) const
-      {
-         DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
-#ifdef   USE_WXCONFIG
-         long lVal;
-         appConfig->Read(&lVal, szKey, (long)Default);
-         return lVal != 0;
-#else
-         return appConfig->readEntry(szKey, (long)Default);
-#endif
-      }
-   /// Write back the character value.
-   inline
-   bool writeEntry(const char *szKey, const char *szValue)
-      {
-         return appConfig->WRITE_ENTRY(szKey, szValue) != 0;
-      }
-   /// Write back the int value.
-   inline
-   bool writeEntry(const char *szKey, int Value)
-      {
-         return appConfig->WRITE_ENTRY(szKey, (long) Value) != 0;
-      }
-   /// Write back the bool value.
-   inline
-   bool writeEntry(const char *szKey, bool Value)
-      {
-         return appConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
-      }
-   //@}
-   CB_DECLARE_CLASS(ProfileAppConfig, CommonBase);
 };
 
 /**
@@ -232,30 +155,47 @@ public:
    @see FileConfig
 */
 
-class Profile : public ProfileBase, public CommonBase
+class Profile : public ProfileBase
 {
+private:
    /// The FileConfig object.
-   FileConfig   *fileConfig;
+   FileConfig  *fileConfig;
    /// The parent profile.
    ProfileBase const *parentProfile;
    /// Name of this profile
    String   profileName;
-   /// Is Profile ready to use?
-   bool   isOk;
+   // true if the object was successfully initialized
+   bool isOk;
+
    /** Common to all Profile objects: a manager class taking care of
        allocating the FileConfig objects.
    */
-   static ConfigFileManager   cfManager;
+   static ConfigFileManager cfManager;
+
+   /** This static member variable contains the global (application-level)
+       config object where the entries are searched if not found everywhere
+       else.
+   */
+   static FileConfig *appConfig;
+
 public:
+   /// get the top level config object
+   static FileConfig *GetAppConfig() { return appConfig; }
+
+   /** Constructor for the appConfig entry 
+       @param appConfigFile - the full file name of app config file
+   */
+   Profile(const String& appConfigFile);
+
    /** Constructor.
        @param iClassName the name of this profile
        @param iParent the parent profile
        This will try to load the configuration file given by
        iClassName".profile" and look for it in all the paths specified
-       by mApplication.readEntry(MC_PROFILEPATH).
+       by GetAppConfig()->readEntry(MC_PROFILEPATH).
        
    */
-   Profile(String const &iClassName, ProfileBase const *Parent = NULL);
+   Profile(String const &iClassName, ProfileBase const *Parent);
 
    /** Destructor, writes back those entries that got changed.
    */
@@ -264,23 +204,26 @@ public:
    /** Query if Profile has been initialised successfully.
        @return true if everything is fine
    */
-   bool IsInitialised(void) const
-      { return isOk; }
+   bool IsInitialised(void) const { return isOk; }
+
+   /// get the associated config object
+   FileConfig *GetConfig() const { return fileConfig; }
+
    /**@name Reading and writing entries.
       All these functions are just identical to the FileConfig ones.
    */
    //@{
-   /// Read a character entry.
+      /// Read a character entry.
    const char *readEntry(const char *szKey, const char *szDefault = NULL) const;
-   /// Read an integer value.
+      /// Read an integer value.
    int readEntry(const char *szKey, int Default = 0) const;
-   /// Read a bool value.
+      /// Read a bool value.
    bool readEntry(const char *szKey, bool Default = false) const;
-   /// Write back the character value.
+      /// Write back the character value.
    bool writeEntry(const char *szKey, const char *szValue);
-   /// Write back the int value.
+      /// Write back the int value.
    bool writeEntry(const char *szKey, int Value);
-   /// Write back the bool value.
+      /// Write back the bool value.
    bool writeEntry(const char *szKey, bool Value);
    //@}
 
@@ -292,4 +235,4 @@ public:
 };
 //@}
 
-#endif
+#endif // PROFILE_H

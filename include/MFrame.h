@@ -22,17 +22,24 @@
 class MFrameBase
 {   
 private:
-   /// used to set the name of the window class
-   virtual void	SetName(String const & name = String("MFrame")) = 0;
-public:
-   /// virtual destructor
-   virtual ~MFrameBase() {};
+   /// each frame has a unique name used to identify it
+   String name;
 
-   /// used to set the title of the window class
-   virtual void	SetTitle(String const & name = String("M")) = 0;
+public:
+   /// ctor takes the name of the frame class
+   MFrameBase(const String& str) : name(str) { }
+
+   /// retrieve the name of the window class
+   const char *GetName() const { return name.c_str(); }
+
+   /// used to set the title of the window
+   virtual void SetTitle(String const & name) = 0;
 
    /// make it visible or invisible
    virtual SHOW_TYPE Show(bool visible = true) = 0;
+
+   /// virtual destructor
+   virtual ~MFrameBase() {};
 };
 
 #endif

@@ -1,11 +1,11 @@
 /*-*- c++ -*-********************************************************
- * wxFTCanvas: a canvas for editing formatted text		    *
+ * wxFTCanvas: a canvas for editing formatted text                  *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$             *
  *******************************************************************/
-#ifndef	WXFTCANVAS_H
+#ifndef WXFTCANVAS_H
 #define WXFTCANVAS_H
 
 #ifdef __GNUG__
@@ -23,31 +23,33 @@ class wxFTOList;
 */
 class wxFTCanvas : public wxCanvas
 {
+private:
    DECLARE_CLASS(wxFTCanvas)
       
    /// the list of FTObject's
-   wxFTOList 		* ftoList;
+   wxFTOList      * ftoList;
    /// the margin at which to wrap
-   int	wrapMargin;
+   int   wrapMargin;
+
 public:
    /** Constructor.
-       @param iparent	parent panel to be placed in
-       @param ix	x position
-       @param iy	y position
-       @param iwidth	width
-       @param iheight	height
-       @param style	style
+       @param iparent   parent panel to be placed in
+       @param ix  x position
+       @param iy  y position
+       @param iwidth width
+       @param iheight   height
+       @param style  style
    */
    wxFTCanvas(wxPanel *iparent, int ix = -1, int iy = -1,
-	      int iwidth = -1, int iheight = -1, long style = 0,
-	      ProfileBase *profile = NULL);
+              int iwidth = -1, int iheight = -1, long style = 0,
+              ProfileBase *profile = NULL);
    /// Destructor.
    ~wxFTCanvas();
 
    /** Enable/Disable editing.
        @param enable if true, editing is enabled
    */
-   void	AllowEditing(bool enable = true);
+   void  AllowEditing(bool enable = true);
 
    /** Extract information from canvas.
        @param ftoType A pointer to an object type variable to hold the
@@ -56,13 +58,14 @@ public:
        @return String holding the data of the object.
    */
    String const * GetContent(FTObjectType *ftoType, bool restart = false);
-   
+
    /// Redraw callback.
    void OnPaint(void);
    /// Mouse event handler.
    void OnEvent(wxMouseEvent &event);
    /// Character Event handler.
    void OnChar(wxKeyEvent &event);
+
    /// Insert text with formatting tags.
    void AddFormattedText(String const &str);
    /// add formatted/non formatted text
@@ -86,7 +89,9 @@ public:
    void AddIcon(String const &iconName, IconResourceType data)
       { ftoList->AddIcon(iconName, data); }
 
+#ifdef USE_WXWINDOWS2
+   DECLARE_EVENT_TABLE()
+#endif // wxWin 2
 };
 
-#endif
-
+#endif // WXFTCANVAS_H

@@ -16,32 +16,25 @@
 #include "Message.h"
 
 #ifndef USE_PCH
-  #include <strutil.h>
+#  include <strutil.h>
 
-  // @@@@ for testing only
-  #include <MessageCC.h>
-  extern "C"
-  {
-    #include <rfc822.h>
-  }
-#endif
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
 
-#include "MFrame.h"
-#include "MLogFrame.h"
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+#endif //USE_PCH
 
 #include "Mdefaults.h"
 
-#include "PathFinder.h"
-#include "MimeList.h"
-#include "MimeTypes.h"
-#include "Profile.h"
-
 #include "MApplication.h"
+#include "gui/wxMApp.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h"
-#include "Message.h"
 
 #include "Adb.h"
 #include "MDialogs.h"
@@ -58,6 +51,15 @@
 
 #include <ctype.h>  // for isspace
  
+// @@@@ for testing only
+#ifndef USE_PCH
+   extern "C"
+   {
+#     include <rfc822.h>
+   }
+#  include <MessageCC.h>
+#endif //USE_PCH
+   
 #if !USE_WXWINDOWS2
   static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 #endif // wxWin 1/2
@@ -161,6 +163,7 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
 }
 
 wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
+             : wxMFrame(iname)
 {
    initialised = false;
    folder = NULL;
@@ -169,9 +172,10 @@ wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
 }
 
 wxMessageView::wxMessageView(MailFolder *ifolder,
-                              long num,
-                              const String &iname,
-                              wxFrame *parent)
+                             long num,
+                             const String &iname,
+                             wxFrame *parent)
+             : wxMFrame(iname)
 {
    initialised = false;
    folder = ifolder;
@@ -366,9 +370,9 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
       {
         String cmd;
         if(folder)
-          cmd = folder->GetProfile()->readEntry(MP_BROWSER,MP_BROWSER_D);
+          cmd = READ_CONFIG(folder->GetProfile(), MP_BROWSER);
         else
-          cmd = mApplication.readEntry(MP_BROWSER,MP_BROWSER_D);
+          cmd = READ_APPCONFIG(MP_BROWSER);
         cmd += ' ';
         cmd += obj->GetText();
         wxExecute(WXCPTR cmd.c_str());
@@ -384,7 +388,7 @@ wxMessageView::Print(void)
 {
   #ifdef  OS_UNIX
     // set AFM path (recursive!)
-    PathFinder pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D), true);
+    PathFinder pf(READ_APPCONFIG(MC_AFMPATH), true);
     pf.AddPaths(mApplication.GetGlobalDir(), true);
     pf.AddPaths(mApplication.GetLocalDir(), true);
 

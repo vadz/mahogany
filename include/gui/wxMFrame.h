@@ -6,6 +6,24 @@
  * $Id$               *
  *
  * $Log$
+ * Revision 1.10  1998/06/05 16:57:00  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.9  1998/05/14 09:48:40  KB
  * added IsEmpty() to strutil, minor changes
  *
@@ -17,16 +35,16 @@
  *
  *
  *******************************************************************/
-#ifndef	WXMFRAME_H
+#ifndef  WXMFRAME_H
 #define WXMFRAME_H
 
 #ifdef __GNUG__
 #pragma interface "wxMFrame.h"
 #endif
 
-#ifndef	USE_PCH
-#	include	"MFrame.h"
-#	include	"guidef.h"
+#ifndef  USE_PCH
+#  include  "MFrame.h"
+#  include  "guidef.h"
 #endif
 
 /**
@@ -38,35 +56,33 @@ class wxMFrame : public wxFrame, public MFrameBase
    DECLARE_DYNAMIC_CLASS(wxMFrame)
 
 private:
-   /// each frame has a unique name used to identify it
-   String	name;
-   /// used to set the name of the window class
-   virtual void	SetName(String const &name);
    /// is it initialised?
-   bool 	initialised;
+   bool  initialised;
+
 protected:
    /// the menuBar:
-   wxMenuBar	*menuBar;
+   wxMenuBar   *menuBar;
    /// the File menu:
-   wxMenu	*fileMenu;
+   wxMenu   *fileMenu;
    /// the Help menu:
-   wxMenu	*helpMenu;
+   wxMenu   *helpMenu;
+
    void AddMenuBar(void);
    void AddFileMenu(void);
    void AddHelpMenu(void);
+
 public:
+   /// dummy ctor for DECLARE_DYNAMIC_CLASS
+   wxMFrame() : MFrameBase("") { FAIL; }
    /// Constructor
-   wxMFrame(const String &iname,
-	    wxFrame *parent = NULL);
-   /// Constructor
-   wxMFrame() { initialised = false; }
+   wxMFrame(const String &iname, wxFrame *parent = NULL);
    /// Creates an object
    void Create(const String &iname, wxFrame *parent = NULL);
    /// Destructor
    ~wxMFrame();
 
    /// return true if initialised
-   bool	IsInitialised(void) const { return initialised; }
+   bool  IsInitialised(void) const { return initialised; }
 
    /// make it visible or invisible
 #ifdef     USE_WXWINDOWS2
@@ -78,9 +94,7 @@ public:
    /// to be called on closing of window
    ON_CLOSE_TYPE OnClose(void);
    /// used to set the title of the window class
-   void	SetTitle(String const & name);
-   /// get name of this frame:
-   virtual String const & GetFrameName(void) const { return name; }
+   void  SetTitle(String const & name);
    /// handle basic menu callbacks
    void OnMenuCommand(int id);
 
@@ -108,7 +122,7 @@ public:
 
 private:
    ///  try to save the window position and size in config file
-   void	SavePosition(void);
+   void  SavePosition(void);
 };
 
 #endif

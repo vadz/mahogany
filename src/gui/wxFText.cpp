@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/05 16:56:20  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.9  1998/05/18 17:48:39  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -44,28 +62,28 @@
 #include   "Mpch.h"
 #include   "Mcommon.h"
 
-#ifndef       USE_PCH
-#   include   <strutil.h>
-#   include   <guidef.h>
+#ifndef USE_PCH
+#  include "strutil.h"
+#  include "guidef.h"
+
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
+
+#  include "MFrame.h"
+#  include "MLogFrame.h"
 #endif
 
-#include   "MFrame.h"
-#include   "MLogFrame.h"
+#include "Mdefaults.h"
 
-#include   "Mdefaults.h"
+#include "MApplication.h"
+#include "MDialogs.h"
 
-#include   "PathFinder.h"
-#include   "MimeList.h"
-#include   "MimeTypes.h"
-#include   "Profile.h"
+#include "gui/wxFontManager.h"
+#include "gui/wxIconManager.h"
 
-#include  "MApplication.h"
-#include  "MDialogs.h"
-
-#include   "gui/wxFontManager.h"
-#include   "gui/wxIconManager.h"
-
-#include   "gui/wxFText.h"
+#include "gui/wxFText.h"
 
 #ifdef   USE_WXWINDOWS2
 // ----------------------------------------------------------------------------
@@ -357,10 +375,10 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
    switch(type)
    {
    case LI_TEXT:
-#ifndef USE_WXWINDOWS2
-      if(!GET_DC->IsExposed(posX, posY, posX2, posY2))
-         return;
-#endif  
+#     ifndef USE_WXWINDOWS2
+         if(!GET_DC->IsExposed(posX, posY, posX2, posY2))
+            return;
+#     endif  
 
       //dc->DrawRectangle(posX,posY,posX2-posX, posY2-posY);
       if ( font == NULL ) {
@@ -402,7 +420,7 @@ wxFTOList::DrawInfo::DrawInfo(int size,
    FontWeight(weight);
    fontUnderline = underlined;
 
-   SetFont(NULL);
+   textHeight = 0;
 }
 
 wxFTOList::DrawInfo::~DrawInfo()
@@ -413,24 +431,19 @@ wxFTOList::DrawInfo::~DrawInfo()
 wxFont *
 wxFTOList::DrawInfo::SetFont(wxDC *dc)
 {
-   font =
-      fontManager.GetFont(fontSize,fontFamily,fontStyle,fontWeight,fontUnderline);
+   CHECK2( dc != NULL, return NULL );
 
-   if(dc)
-   {
-      dc->SetFont(font);
-      coord_t w, h, leading;
-      dc->GetTextExtent("Mg", (lcoord_t *)&w, (lcoord_t *)&h,
-                        (lcoord_t *)&fontDescent, (lcoord_t *)&leading);
-      textHeight = fontDescent+leading+h;
-      textHeight *= 6; // @@ why 1.2?
-      textHeight /= 5;
-   }
-   else
-   {
-      textHeight = 0;
-      fontDescent = 0;
-   }
+   font = fontManager.GetFont(fontSize, fontFamily, fontStyle,
+                              fontWeight, fontUnderline);
+
+   dc->SetFont(font);
+   coord_t w, h, leading;
+   dc->GetTextExtent("Mg", (lcoord_t *)&w, (lcoord_t *)&h,
+                     (lcoord_t *)&fontDescent, (lcoord_t *)&leading);
+   textHeight = fontDescent+leading+h;
+   textHeight *= 6; // @@ why 1.2?
+   textHeight /= 5;
+
    return font;
 }
 
@@ -588,15 +601,18 @@ wxFTOList::SetDC(wxDC *idc, bool isPostScriptflag)
 void
 wxFTOList::SetCanvas(wxCanvas *ic)
 {
-   coord_t width, height;
+   canvas = ic;
 
 #  ifdef  USE_WXWINDOWS2
-      // @@@@ GetDC
+   {
+      CREATE_DC(this);
+      drawInfo.Apply(GET_DC);
+   }
 #  else
       SetDC(ic->GetDC(), false);
 #  endif
 
-   canvas = ic;
+   coord_t width, height;
    ReCalculateLines(&width, &height);
 
    scrollPixelsX = (int) drawInfo.TextHeight();
@@ -623,6 +639,7 @@ wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
    listOfLines = NULL;
    listOfClickables = NULL;
    editable = false;
+   dc = NULL;
    Clear();
 
    if(profile)
@@ -685,7 +702,22 @@ wxFTOList::Clear()
 }
 
 void
-wxFTOList::Draw(void)
+wxFTOList::Draw(wxDC *dc_)
+{
+   ASSERT( dc_ != NULL );
+
+   // @@@@ hack inside a hack: make TempDC created by CREATE_DC in Draw() 
+   //      use this dc_ (used to pass wxPaintDC to Draw())
+   wxDC *dcOld = dc;
+   dc = dc_;
+
+   Draw();
+
+   dc = dcOld;
+}
+
+void
+wxFTOList::Draw()
 {
    CREATE_DC(this);
    
@@ -1217,6 +1249,7 @@ wxFTOList::InsertText(String const &str, bool format)
       return;
    }
 #endif
+
    formatFlag = format;
    
    if(canvas)
@@ -1328,8 +1361,7 @@ wxFTOList::InsertText(String const &str, bool format)
 
    SimplifyLine(i);
 
-   if(dc)
-      GET_DC->Clear();
+   GET_DC->Clear();
 
    contentChanged = true;
    Draw();
@@ -1341,7 +1373,7 @@ wxFTOList::DrawCursor(void)
 {
    CREATE_DC(this);
 
-   if(! dc || ! editable)
+   if ( !editable )  // @@ VZ: what does this mean?
       return;
 
    coord_t width, height, x = 0, y = 0;
@@ -1358,20 +1390,22 @@ wxFTOList::DrawCursor(void)
          y = (*i).GetYPos();
          height = (*i).GetHeight();
          break;
+
       case LI_TEXT:
       {
          x = (*i).GetXPos();
          y = (*i).GetYPos();
          height = (*i).GetHeight();
          String tmp = (*i).GetText().substr(0,xoffset);
-#if USE_WXWINDOWS2
-         GET_DC->GetTextExtent(tmp, (lcoord_t *)&width, (lcoord_t *)&height);
-#else  // wxWin 1
-         GET_DC->GetTextExtent(tmp.c_str(), &width, &height);
-#endif // wxWin 1/2                               
+#        ifdef USE_WXWINDOWS2
+            GET_DC->GetTextExtent(tmp, (lcoord_t *)&width, (lcoord_t *)&height);
+#        else  // wxWin 1
+            GET_DC->GetTextExtent(tmp.c_str(), &width, &height);
+#        endif // wxWin 1/2                               
          x += width;
       }
       break;
+
       default:
          break;
       }
@@ -1399,12 +1433,11 @@ wxFTOList::ScrollToCursor(void)
       return;
 
    int x1, x2, y1, y2, w, h;
-#ifdef  USE_WXWINDOWS2
-   // @@@@ ViewStart
-   x1 = y1 = 0;
-#else
-   canvas->ViewStart(&x1,&y1);
-#endif
+#  ifdef  USE_WXWINDOWS2
+      x1 = y1 = 0; // @@@@ ViewStart
+#  else
+      canvas->ViewStart(&x1,&y1);
+#  endif
 
    canvas->GetClientSize(&w,&h);
 
@@ -1427,18 +1460,18 @@ wxFTOList::ScrollToCursor(void)
    if(ypos >= scrollLengthY)
       scrollLengthY += scrollLengthY / 2;
 
-#ifdef USE_WXWINDOWS2
-   canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
-   canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
-   canvas->SetScrollPos(wxHORIZONTAL, xpos);
-   canvas->SetScrollPos(wxVERTICAL,   ypos);
-#else  // wxWin 1
-   canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
-                         scrollLengthX, scrollLengthY,
-                         WXFTEXT_SCROLLSTEPS_PER_PAGE,
-                         WXFTEXT_SCROLLSTEPS_PER_PAGE);
-   canvas->Scroll(xpos, ypos);
-#endif // wxWin ver
+#  ifdef USE_WXWINDOWS2
+      canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
+      canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
+      canvas->SetScrollPos(wxHORIZONTAL, xpos);
+      canvas->SetScrollPos(wxVERTICAL,   ypos);
+#  else  // wxWin 1
+      canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
+                            scrollLengthX, scrollLengthY,
+                            WXFTEXT_SCROLLSTEPS_PER_PAGE,
+                            WXFTEXT_SCROLLSTEPS_PER_PAGE);
+      canvas->Scroll(xpos, ypos);
+#  endif // wxWin ver
 }
 
 void

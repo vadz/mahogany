@@ -6,6 +6,24 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/06/05 16:56:26  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.8  1998/05/24 14:48:16  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -44,17 +62,21 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#   include   "kbList.h"
-#   include <guidef.h>
-#   include "MFrame.h"
-#   include "MLogFrame.h"
-#   include "Mdefaults.h"
-#   include "PathFinder.h"
-#   include "MimeList.h"
-#   include "MimeTypes.h"
-#   include "Profile.h"
-#   include "MApplication.h"
+#  include <guidef.h>
+
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+
+#  include "kbList.h"
+
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
 #endif
+
+#include "MApplication.h"
+#include "gui/wxMApp.h"
 
 // VZ: please don't change the order of headers, "Adb.h" must be the first one
 //     or it doesn't compile under VC++ (don't yet know why @@@)
@@ -67,6 +89,7 @@
 
 #include "MDialogs.h"
 
+#include "Mdefaults.h"
 
 // test:
 #include   "SendMessageCC.h"
@@ -78,25 +101,26 @@
 #include   "gui/wxAdbEdit.h"
 
 #ifdef    OS_WIN
-#define   MFrame_xpm    "MFrame"
+#  define   MFrame_xpm    "MFrame"
 #else
-#include   "../src/icons/MFrame.xpm"
+#  include   "../src/icons/MFrame.xpm"
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #ifdef  USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-   EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-   EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-   EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
-   EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-   EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-   EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
+      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
+      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
+      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
+      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
+      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
    END_EVENT_TABLE()
 #endif
 
-   wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
+wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
+        : MFrameBase(iname)
 {
    initialised = false;
    Create(iname,parent);
@@ -105,27 +129,31 @@ IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 void
 wxMFrame::Create(const String &iname, wxFrame *parent)
 {
-   int xpos, ypos, width, height;
+   CHECK( !initialised );
 
-   if(initialised)
-   {
-      INTERNALERROR((_("wxMFrame::Create() called on already initialised object.")));
-      return; // ERROR!
-   }
-   
+   int xpos = MC_XPOS_D,
+       ypos = MC_YPOS_D,
+       width = MC_WIDTH_D,
+       height = MC_HEIGHT_D;
+
    SetName(iname);
 
-   String tmp = mApplication.getCurrentPath();
-   mApplication.setCurrentPath(M_FRAMES_CONFIG_SECTION);
-   mApplication.changeCurrentPath(GetFrameName().c_str());
-   xpos = mApplication.readEntry(MC_XPOS, MC_XPOS_D);
-   ypos = mApplication.readEntry(MC_YPOS, MC_YPOS_D);
-   width = mApplication.readEntry(MC_WIDTH, MC_WIDTH_D);
-   height = mApplication.readEntry(MC_HEIGHT, MC_HEIGHT_D);
-   mApplication.setCurrentPath(tmp.c_str());
+   FileConfig *pConf = Profile::GetAppConfig();
+   if ( pConf != NULL ) {
+      String tmp = pConf->GET_PATH();
+      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
+      pConf->CHANGE_PATH(MFrameBase::GetName());
+
+      xpos = READ_APPCONFIG(MC_XPOS);
+      ypos = READ_APPCONFIG(MC_YPOS);
+      width = READ_APPCONFIG(MC_WIDTH);
+      height = READ_APPCONFIG(MC_HEIGHT);
+
+      pConf->SET_PATH(tmp.c_str());
+   }
    
    // use name as default title
-   wxFrame::CreateFrame(parent, GetFrameName().c_str(), xpos, ypos, width, height);
+   wxFrame::CreateFrame(parent, MFrameBase::GetName(), xpos, ypos, width, height);
    //Show(true);
 
 #if   defined(USE_WXWINDOWS2) && defined(USE_WXGTK)
@@ -190,12 +218,6 @@ ON_CLOSE_TYPE wxMFrame::OnClose(void)
 }
 
 void
-wxMFrame::SetName(String const & iname)
-{
-   name = iname;
-}
-
-void
 wxMFrame::SetTitle(String const &title)
 {
    // the following (char *) is required to avoid a warning
@@ -207,19 +229,22 @@ wxMFrame::SavePosition(void)
 {
    int x,y;
 
-   String tmp = mApplication.getCurrentPath();
-   mApplication.setCurrentPath(M_FRAMES_CONFIG_SECTION);
-   mApplication.changeCurrentPath(GetFrameName().c_str());
+   FileConfig *pConf = Profile::GetAppConfig();
+   if ( pConf != NULL ) {
+      String tmp = pConf->GET_PATH();
+      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
+      pConf->CHANGE_PATH(MFrameBase::GetName());
    
-   GetPosition(&x,&y);
-   mApplication.writeEntry(MC_XPOS, (long int) x);
-   mApplication.writeEntry(MC_YPOS, (long int) y);
+      GetPosition(&x,&y);
+      pConf->WRITE_ENTRY(MC_XPOS, (long int) x);
+      pConf->WRITE_ENTRY(MC_YPOS, (long int) y);
 
-   GetSize(&x,&y);
-   mApplication.writeEntry(MC_WIDTH, (long int) x);
-   mApplication.writeEntry(MC_HEIGHT, (long int) y);
+      GetSize(&x,&y);
+      pConf->WRITE_ENTRY(MC_WIDTH, (long int) x);
+      pConf->WRITE_ENTRY(MC_HEIGHT, (long int) y);
 
-   mApplication.setCurrentPath(tmp.c_str());
+      pConf->SET_PATH(tmp.c_str());
+   }
 }
 
 void

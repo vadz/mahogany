@@ -481,8 +481,11 @@ public:
    /// Destroys the list, leaves an empty one.
    void Clear(void);
 
-   /** Draws/redraws the list of strings on dc. */
-   void Draw(void);
+   /// Draws/redraws the list of strings on current dc.
+   void Draw();
+
+   /// Draws/redraws the list of strings on given dc.
+   void Draw(wxDC *dc);
 
    /** Adds an object to the list of clickables
        @param obj the object

@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/05 16:56:32  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.9  1998/05/30 17:52:43  KB
  * addes some more classes to python interface
  *
@@ -51,25 +69,25 @@
 #include  "Mpch.h"
 
 #ifndef  USE_PCH
-
-#include <strutil.h>
-#include <MApplication.h>
-#include <MailFolderCC.h>
-#include <MessageCC.h>
-#include <MDialogs.h>
+#  include <strutil.h>
+#  include <MApplication.h>
+#  include <MailFolderCC.h>
+#  include <MessageCC.h>
+#  include <MDialogs.h>
 
 // includes for c-client library
 extern "C"
 {
-#include <osdep.h>
-#include <rfc822.h>
-#include <smtp.h>
-#include <nntp.h>
+#  include <osdep.h>
+#  include <rfc822.h>
+#  include <smtp.h>
+#  include <nntp.h>
 }
 
-#include   "MPython.h"
+#endif // USE_PCH
 
-#endif
+#include  "Mdefaults.h"
+#include   "MPython.h"
 
 #include  "FolderView.h"
 #include  "MailFolder.h"
@@ -88,13 +106,13 @@ MailFolderCC::Open(String const & filename)
    realName = filename;
    if(GetType() == MF_POP || GetType() == MF_IMAP)
    {
-      MF_user = profile->readEntry(MP_POP_LOGIN,MP_POP_LOGIN_D);
-      MF_pwd = profile->readEntry(MP_POP_PASSWORD,MP_POP_PASSWORD_D);
+      MF_user = READ_CONFIG(profile, MP_POP_LOGIN);
+      MF_pwd = READ_CONFIG(profile, MP_POP_PASSWORD);
    }
 
-   if(GetType() == MF_FILE)      // this will fail if file already
-      mail_create(NIL, (char *)filename.c_str());  // exists, but it makes sure we can
-               // open it
+   // this will fail if file already exists, but it makes sure we can open it
+   if(GetType() == MF_FILE)      
+      mail_create(NIL, (char *)filename.c_str());
    
    SetDefaultObj();
    mailstream = mail_open(mailstream,(char *)realName.c_str(),
@@ -153,7 +171,7 @@ MailFolderCC::Create(String const & iname)
    mailstream = NIL;
    symbolicName = iname;
 
-   profile = new Profile(iname);
+   profile = new Profile(iname, NULL);
 
    // make sure we can use the library
    if(! cclientInitialisedFlag)
@@ -166,16 +184,16 @@ MailFolderCC::Create(String const & iname)
    }
    else
    {
-      const char *filename = profile->readEntry(MP_FOLDER_PATH,MP_FOLDER_PATH_D);
+      const char *filename = READ_CONFIG(profile, MP_FOLDER_PATH);
       if(filename == NULL) // assume we are a file
       {
-    SetType(MF_FILE);
-    Open(iname);
+         SetType(MF_FILE);
+         Open(iname);
       }
       else
       {
-    SetType((FolderType)profile->readEntry(MP_FOLDER_TYPE,MP_FOLDER_TYPE_D));
-    Open(filename);
+         SetType((FolderType)READ_CONFIG(profile, MP_FOLDER_TYPE));
+         Open(filename);
       }
    }
 }
@@ -223,11 +241,11 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
    else  
       for(i = viewList.begin(); i != viewList.end(); i++)
       {
-    if((*i) == view)
-    {
-       viewList.erase(i);
-       return;
-    }
+         if((*i) == view)
+         {
+            viewList.erase(i);
+            return;
+         }
       }
 }
 
@@ -616,7 +634,7 @@ bool
 MailFolderPopCC::Open(void)
 {
    String mboxname = "{";
-   mboxname += (profile->readEntry(MP_POP_HOST, MP_POP_HOST_D));
+   mboxname += READ_CONFIG(profile, MP_POP_HOST);
    mboxname +="/pop3}";
    
    return MailFolderCC::Open(mboxname.c_str());

@@ -9,7 +9,7 @@
 #ifndef MLOGFRAME_H
 #define MLOGFRAME_H
 
-#include	"Mconfig.h"
+#include "Mconfig.h"
 
 /**
    MLogFrameBase virtual base class, defining the interface for a
@@ -19,19 +19,25 @@
 class MLogFrameBase
 {   
 public:
-   /// virtual destructor
-   virtual ~MLogFrameBase() {};
-   /// output a line of text
-   virtual void Write(String const &str) = 0;
+   // show/hide the log window (@@ can't call it just Show() - name conflict)
+   virtual void ShowLog(bool bShow = true) = 0;
+
+   /// clear the current log content
+   virtual void Clear() = 0;
+
+   /// save the log contents to file (ask user for file name if !filename)
+   virtual bool Save(const char *filename = NULL) = 0;
+
+   // use standard log function in wxWin2 instead
+#ifndef  USE_WXWINDOWS2
    /// output a line of text
    virtual void Write(const char *str) = 0;
-};
+   /// output a line of text
+   void Write(String const &str) { Write(str.c_str()); }
+#endif // wxWin1
 
-#ifdef USE_WXWINDOWS
-#	include	"gui/wxMLogFrame.h"
-#	define	MLogFrame	wxMLogFrame
-#else
-#	error "No MLogFrame class defined!"
-#endif
+   /// make the dtor virtual for all derived classes
+   virtual ~MLogFrameBase() { }
+};
 
 #endif

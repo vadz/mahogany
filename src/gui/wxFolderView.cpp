@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/05 16:56:22  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.7  1998/05/24 08:22:58  KB
  * changed the creation/destruction of MailFolders, now done through
  * MailFolder::Open/CloseFolder, made constructor/destructor private,
@@ -34,41 +52,41 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma	implementation "wxFolderView.h"
+#pragma  implementation "wxFolderView.h"
 #endif
 
-#include  "Mpch.h"
-#include	"Mcommon.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#if       !USE_PCH
-  #include	<strutil.h>
+#ifndef USE_PCH
+#  include "strutil.h"
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
 #endif
 
-#include  <XFace.h>
+#include <XFace.h>
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include "Mdefaults.h"
 
-#include	"Mdefaults.h"
+#include "MApplication.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "FolderView.h"
+#include "MailFolder.h"
+#include "MailFolderCC.h"
+#include "MessageView.h"
 
-#include  "MApplication.h"
+#include "gui/wxFolderView.h"
+#include "gui/wxMessageView.h"
+#include "gui/wxComposeView.h"
 
-#include  "FolderView.h"
-#include	"MailFolder.h"
-#include	"MailFolderCC.h"
-#include	"MessageView.h"
-
-#include	"gui/wxFolderView.h"
-#include	"gui/wxMessageView.h"
-#include	"gui/wxComposeView.h"
-
-wxFolderView::wxFolderView(MailFolder *iMailFolder, const String
-			   &iname, wxFrame *parent, bool ownsFolderi)
+wxFolderView::wxFolderView(MailFolder *iMailFolder,
+                           const String &iname,
+                           wxFrame *parent,
+                           bool ownsFolderi)
    : wxMFrame(iname, parent)
 {
 
@@ -93,7 +111,7 @@ wxFolderView::wxFolderView(MailFolder *iMailFolder, const String
 void
 wxFolderView::Build(int x, int y)
 {
-   wxMenu	*messageMenu;
+   wxMenu   *messageMenu;
 
    AddMenuBar();
    AddFileMenu();
@@ -113,7 +131,6 @@ wxFolderView::Build(int x, int y)
    AddHelpMenu();
    SetMenuBar(menuBar);
 
-   
    width = x; height = y;
    x = (int) x - WXFRAME_WIDTH_DELTA;
    y = (int) y - WXFRAME_HEIGHT_DELTA;
@@ -126,18 +143,25 @@ wxFolderView::Update(void)
 {
    long i;
    
-   Message	*mptr;
-   String	line;
-   int	status;
+   Message  *mptr;
+   String   line;
+   int   status;
    unsigned long size;
    unsigned day, month, year;
-   char	buffer[200];
+   char  buffer[200];
    const char *format;
    
-   bool doesExpand = mApplication.doesExpandVariables() != 0;
-   mApplication.expandVariables(false);
-   format = mApplication.readEntry(MC_DATE_FMT,MC_DATE_FMT_D);
-   mApplication.expandVariables(doesExpand);
+#  ifdef USE_APPCONF
+      bool doesExpand = Profile::GetAppConfig()->doesExpandVariables() != 0;
+      Profile::GetAppConfig()->expandVariables(false);
+#  endif
+
+   format = READ_APPCONFIG(MC_DATE_FMT);
+
+#  ifdef USE_APPCONF
+      Profile::GetAppConfig()->expandVariables(doesExpand);
+#  endif
+
    listBox->Clear();
    listBoxEntriesCount = mailFolder->CountMessages();
    for(i = 0; i < listBoxEntriesCount; i++)
@@ -145,10 +169,10 @@ wxFolderView::Update(void)
       mptr = mailFolder->GetMessage(i+1);
       status = mailFolder->GetMessageStatus(i+1,&size,&day,&month,&year);
       line = "";
-      if(status & MSG_STAT_UNREAD)	line += 'U';
-      if(status & MSG_STAT_DELETED)	line += 'D';
-      if(status & MSG_STAT_REPLIED)	line += 'R';
-      if(status & MSG_STAT_RECENT)	line += 'N';
+      if(status & MSG_STAT_UNREAD)  line += 'U';
+      if(status & MSG_STAT_DELETED) line += 'D';
+      if(status & MSG_STAT_REPLIED) line += 'R';
+      if(status & MSG_STAT_RECENT)  line += 'N';
       line += " - ";
       line += mptr->Subject() + " - " + mptr->From();
       sprintf(buffer,format, day, month, year);
@@ -168,7 +192,7 @@ wxFolderView::~wxFolderView()
       GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
       if(ownsFolder)
-	 GLOBAL_DELETE mailFolder;
+    GLOBAL_DELETE mailFolder;
    }
 }
 
@@ -182,7 +206,7 @@ wxFolderView::OnMenuCommand(int id)
    
    switch(id)
    {
-   case	WXMENU_MSG_EXPUNGE:
+   case  WXMENU_MSG_EXPUNGE:
       mailFolder->ExpungeMessages();
       Update();
       break;
@@ -209,11 +233,11 @@ wxFolderView::OnMenuCommand(int id)
       break;
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < listBox->Number(); n++)
-	 listBox->SetSelection(n);
+    listBox->SetSelection(n);
       break;
    case WXMENU_MSG_DESELECTALL:
       for(n = 0; n < listBox->Number(); n++)
-	 listBox->Deselect(n);
+    listBox->Deselect(n);
       break;
    default:
       wxMFrame::OnMenuCommand(id);
@@ -240,8 +264,8 @@ wxFolderView::OpenMessages(int n, int *selections)
       mptr = mailFolder->GetMessage(selections[i]+1);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageView(mailFolder,selections[i]+1,
-			     "wxMessageView",
-			     this);
+              "wxMessageView",
+              this);
       mv->SetTitle(title);
    }
 }
@@ -260,16 +284,14 @@ wxFolderView::SaveMessages(int n, int *selections)
    int i;
    String str;
 
-#ifdef  USE_WXWINDOWS2
-    wxString 
+#  ifdef  USE_WXWINDOWS2
+      wxString 
+#  else
+      char *
+#  endif
    folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
-                                _("Save Message"),"",this);
-#else
-    char *
-   folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
-	                                _("Save Message"),"",this);
-#endif
-   MailFolderCC	*mf;
+                                  _("Save Message"),"",this);
+   MailFolderCC   *mf;
    
    if(! folderName || strlen(folderName) == 0)
       return;
@@ -301,26 +323,26 @@ wxFolderView::ReplyMessages(int n, int *selections)
       msg = mailFolder->GetMessage(selections[i]+1);
       msg->WriteToString(str, false);
       cv = GLOBAL_NEW wxComposeView(_("Reply"), this,
-			     mailFolder->GetProfile());
+              mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
       while(*cptr)
       {
-	 str2 += *cptr;
-	 if(*cptr == '\n')
-	    str2 += prefix;
-	 cptr++;
+    str2 += *cptr;
+    if(*cptr == '\n')
+       str2 += prefix;
+    cptr++;
       }
       cv->InsertText(str2);
       cv->Show(TRUE);
       String
-	 name, email;
+    name, email;
       email = msg->Address(name, MAT_REPLYTO);
       if(name.length() > 0)
-	 email = name + String(" <") + email + String(">");
+    email = name + String(" <") + email + String(">");
       cv->SetTo(email);
       cv->SetSubject(mailFolder->GetProfile()
-		     ->readEntry(MP_REPLY_PREFIX,MP_REPLY_PREFIX_D) + msg->Subject());
+           ->readEntry(MP_REPLY_PREFIX,MP_REPLY_PREFIX_D) + msg->Subject());
    }
 }
 

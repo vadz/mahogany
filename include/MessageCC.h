@@ -14,10 +14,10 @@
 #pragma interface "MessageCC.h"
 #endif
 
-#ifndef	USE_PCH
-#	include  "Message.h"
-#	include  "MailFolderCC.h"
-#endif
+#include "Message.h"
+
+// fwd decl
+class MailFolderCC;
 
 /** Message class, containing the most commonly used message headers.
    */
@@ -25,27 +25,27 @@ class MessageCC : public Message, public CommonBase
 {
 private:
    /// reference to the folder this mail is stored in
-   const MailFolderCC	*folder;
+   const MailFolderCC   *folder;
    /// text of the mail if not linked to a folder
    char *text; 
    /// sequence number in folder
-   unsigned long	seq_no;
+   unsigned long  seq_no;
    /// unique message id
-   unsigned long	uid;
+   unsigned long  uid;
    /// holds the pointer to a text buffer allocated by cclient lib
    char *mailText;
    /// refresh information in this structure
-   void	Refresh(void);
+   void  Refresh(void);
    /// Subject line
-   String	hdr_subject;
+   String   hdr_subject;
    /// date line
-   String	hdr_date;
+   String   hdr_date;
    /// number of parts
-   int	numOfParts;
+   int   numOfParts;
    /// has it been initialised?
-   bool		initialisedFlag;
+   bool     initialisedFlag;
    /// body of message
-   BODY	*body;
+   BODY  *body;
    /// envelope for messages to be sent
    ENVELOPE *envelope;
    /** Get the body information and update body variable.
@@ -54,7 +54,7 @@ private:
    BODY * GetBody(void);
 
    /// a profile:
-   Profile	*profile;
+   Profile  *profile;
    
    /** A temporarily allocated buffer for GetPartContent().
        It holds the information returned by that function and is only
@@ -67,50 +67,50 @@ private:
    struct PartInfo
    {
       /// MIME/IMAP4 part id
-      String	mimeId;
+      String   mimeId;
       /// string describing the MIME type
-      String	type;
+      String   type;
       /// numerical type id as used by c-client lib
-      int	numericalType;
+      int   numericalType;
       /// numerical encoding id as used by c-client lib
-      int	numericalEncoding;
+      int   numericalEncoding;
       /// string containing the paramter settings
-      String	params;
+      String   params;
       /// description
-      String	description;
+      String   description;
       /// id
-      String	id;
+      String   id;
       /// size, either in lines or bytes, depending on type
-      long	size_lines;
+      long  size_lines;
       /// size, either in lines or bytes, depending on type
-      long 	size_bytes;
+      long  size_bytes;
    };
  
    /// a vector of all the body part information
-   PartInfo	*partInfos;
+   PartInfo *partInfos;
    
    /** A function to recursively collect information about all the
        body parts. It is taken from the IMAP/mtest example.
-       @param	body the body part to look at
+       @param  body the body part to look at
        @param   pfx  the prefix part of the spec
-       @param	i    the running index ??
+       @param  i    the running index ??
        @param   count an integer variable to be used for indexing the partInfos array
-       @param	write whether to write data to the partInfos structure or just count the parts
-       @param	firsttime an internal flag used to decide if to use prefix
+       @param  write whether to write data to the partInfos structure or just count the parts
+       @param  firsttime an internal flag used to decide if to use prefix
        
    */
    void decode_body(BODY *body, String &pfx,long i, int *count,
-		    bool write, bool firsttime = true);
+          bool write, bool firsttime = true);
 public:
    /**@name Constructors and Destructors */
    //@{
    /** constructor, required associated folder reference
-       @param	folder where this mail is stored
-       @param	num	sequence number of the message
-       @param	uid	unique message id
+       @param  folder where this mail is stored
+       @param  num   sequence number of the message
+       @param  uid   unique message id
    */
    MessageCC(MailFolderCC *folder, unsigned long num, unsigned
-	     long uid);
+        long uid);
 
    /** Constructor, creating an unitialised object.
      */
@@ -139,7 +139,7 @@ public:
    /** get Subject line
        @return Subject entry
    */
-   const String	& Subject(void) const;
+   const String   & Subject(void) const;
 
    /** get an address line
        @param name where to store personal name if available
@@ -152,7 +152,7 @@ public:
    /** get From line
        @return From entry
    */
-   virtual const String	From(void) const;
+   virtual const String From(void) const;
 
    /** get Date line
        @return Date when message was sent
@@ -204,7 +204,7 @@ public:
        @param forceBytes force size to be reported in bytes, even if TYPETEXT/TYPEMESSAGE
        @return size
    */
-   size_t	GetPartSize(int n = 0, bool forceBytes = false);
+   size_t   GetPartSize(int n = 0, bool forceBytes = false);
 
    /** Query the MimeType of the content.
        @param  n part number
@@ -232,16 +232,16 @@ public:
    
    //@}
    /** check if it is ok to use
-       @param	true if it is ok
+       @param  true if it is ok
    */
-   bool		IsInitialised(void) const { return initialisedFlag; }
+   bool     IsInitialised(void) const { return initialisedFlag; }
 
    CB_DECLARE_CLASS(MessageCC, Message);
 };
 
-#ifndef	MESSAGECC_FROMLEN
-///	the width of the  From: field 
-#	define	MESSAGECC_FROMLEN	40
+#ifndef  MESSAGECC_FROMLEN
+///   the width of the  From: field 
+#  define   MESSAGECC_FROMLEN 40
 #endif
 
 

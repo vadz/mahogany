@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/06/05 16:56:25  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.5  1998/05/24 14:48:15  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -33,53 +51,63 @@
 #pragma implementation "wxMDialogs.h"
 #endif
 
-#include	"Mpch.h"
-#include  "Mcommon.h"
+// ============================================================================
+// declarations
+// ============================================================================
 
-#include	<errno.h>
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#if       !USE_PCH
-  #include	<guidef.h>
-  #include	<strutil.h>
+#include <errno.h>
+
+#ifndef USE_PCH
+#  include <guidef.h>
+#  include <strutil.h>
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include "Mdefaults.h"
 
-#include	"Mdefaults.h"
+#include "MApplication.h"
+#include "gui/wxMApp.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "Adb.h"
+#include "MDialogs.h"
 
-#include  "MApplication.h"
+// ============================================================================
+// implementation
+// ============================================================================
 
-#include  "Adb.h"
-#include  "MDialogs.h"
-
-void	
+void  
 MDialog_ErrorMessage(const char *message,
-			 MFrame *parent,
-			 const char *title,
-			 bool modal)
+          MFrame *parent,
+          const char *title,
+          bool modal)
 {
    wxMessageBox((char *)message, title,
-		wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
+      wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
 }
 
 
 /** display system error message:
     @param message the text to display
-    @param parent	the parent frame
-    @param title	title for message box window
-    @param modal	true to make messagebox modal
+    @param parent the parent frame
+    @param title  title for message box window
+    @param modal  true to make messagebox modal
    */
 void
 MDialog_SystemErrorMessage(const char *message,
-			      MFrame *parent,
-			      const char *title,
-			      bool modal)
+               MFrame *parent,
+               const char *title,
+               bool modal)
 {
    String
       msg;
@@ -93,13 +121,13 @@ MDialog_SystemErrorMessage(const char *message,
    
 /** display error message and exit application
        @param message the text to display
-       @param title	title for message box window
-       @param parent	the parent frame
+       @param title  title for message box window
+       @param parent the parent frame
    */
 void
 MDialog_FatalErrorMessage(const char *message,
-			     MFrame *parent,
-			     const char *title)
+              MFrame *parent,
+              const char *title)
 {
    String msg = String(message) + _("\nExiting application...");
    MDialog_ErrorMessage(message,parent,title,true);
@@ -109,35 +137,35 @@ MDialog_FatalErrorMessage(const char *message,
    
 /** display normal message:
        @param message the text to display
-       @param parent	the parent frame
-       @param title	title for message box window
-       @param modal	true to make messagebox modal
+       @param parent the parent frame
+       @param title  title for message box window
+       @param modal  true to make messagebox modal
    */
 void
 MDialog_Message(const char *message,
-		   MFrame *parent,
-		   const char *title,
-		   bool modal)
+         MFrame *parent,
+         const char *title,
+         bool modal)
 {
    wxMessageBox((char *)message, title,
-		wxOK|wxCENTRE|wxICON_INFORMATION, parent);
+      wxOK|wxCENTRE|wxICON_INFORMATION, parent);
 }
 
 
 /** simple Yes/No dialog
        @param message the text to display
-       @param parent	the parent frame
-       @param title	title for message box window
-       @param modal	true to make messagebox modal
+       @param parent the parent frame
+       @param title  title for message box window
+       @param modal  true to make messagebox modal
        @param YesDefault true if Yes button is default, false for No as default
        @return true if Yes was selected
    */
 bool
 MDialog_YesNoDialog(const char *message,
-		       MFrame *parent,
-		       bool modal,
-		       const char *title,
-		       bool YesDefault)
+             MFrame *parent,
+             bool modal,
+             const char *title,
+             bool YesDefault)
 {
    return (bool) (wxYES == wxMessageBox(
       (char *)message,title,
@@ -148,45 +176,64 @@ MDialog_YesNoDialog(const char *message,
 
 /** Filerequester
        @param message the text to display
-       @param parent	the parent frame
-       @param path	default path
-       @param filename	default filename
-       @param extension	default extension
-       @param wildcard	pattern matching expression
-       @param save	if true, for saving a file
+       @param parent the parent frame
+       @param path   default path
+       @param filename  default filename
+       @param extension default extension
+       @param wildcard  pattern matching expression
+       @param save   if true, for saving a file
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
 const char *
 MDialog_FileRequester(const char *message,
-			 MFrame *parent,
-			 const char *path,
-			 const char *filename,
-			 const char *extension,
-		      const char *wildcard,
-		      bool save,
-		      ProfileBase *profile)
+          MFrame *parent,
+          const char *path,
+          const char *filename,
+          const char *extension,
+            const char *wildcard,
+            bool save,
+            ProfileBase *profile)
 {
    if(! profile)
       profile = mApplication.GetProfile();
    
    if(! path)
       path = save ?
-	 profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
-	 : profile->readEntry(MP_DEFAULT_LOAD_PATH,MP_DEFAULT_LOAD_PATH_D);
+    profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
+    : profile->readEntry(MP_DEFAULT_LOAD_PATH,MP_DEFAULT_LOAD_PATH_D);
    if(! filename)
       filename = save ?
-	 profile->readEntry(MP_DEFAULT_SAVE_FILENAME,MP_DEFAULT_SAVE_FILENAME_D)
-	 : profile->readEntry(MP_DEFAULT_LOAD_FILENAME,MP_DEFAULT_LOAD_FILENAME_D);
+    profile->readEntry(MP_DEFAULT_SAVE_FILENAME,MP_DEFAULT_SAVE_FILENAME_D)
+    : profile->readEntry(MP_DEFAULT_LOAD_FILENAME,MP_DEFAULT_LOAD_FILENAME_D);
    if(! extension)
       extension = save ?
-	 profile->readEntry(MP_DEFAULT_SAVE_EXTENSION,MP_DEFAULT_SAVE_EXTENSION_D)
-	 : profile->readEntry(MP_DEFAULT_LOAD_EXTENSION,MP_DEFAULT_LOAD_EXTENSION_D);
+    profile->readEntry(MP_DEFAULT_SAVE_EXTENSION,MP_DEFAULT_SAVE_EXTENSION_D)
+    : profile->readEntry(MP_DEFAULT_LOAD_EXTENSION,MP_DEFAULT_LOAD_EXTENSION_D);
       if(! wildcard)
-	 wildcard = save ?
-	    profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
-	    : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
+    wildcard = save ?
+       profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
+       : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
    return wxFileSelector(
       message, path, filename, extension, wildcard, 0, parent);
+}
+
+// simple "Yes/No" dialog (@@ we'd surely need one with [Cancel] also)
+bool
+MDialog_YesNoDialog(String const &message,
+                    MFrame *parent,
+                    bool modal,
+                    bool YesDefault)
+{
+#  ifdef  OS_WIN
+      const long styleMsgBox = wxYES_NO|wxICON_QUESTION;
+#  else
+      const long styleMsgBox = wxYES_NO|wxCENTRE|wxICON_QUESTION;
+#  endif
+
+   return wxMessageBox((char *)message.c_str(), _("Decision"),
+                       styleMsgBox,
+                       parent == NULL ? mApplication.TopLevelFrame() 
+                                      : parent) == wxYES;
 }
 
 AdbEntry *
@@ -224,7 +271,7 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
    {
       w = 200;
       h = 250;
-   }	
+   }  
    val = wxGetSingleChoiceIndex(
       _("Please choose an entry:"),
       _("Expansion options"),
@@ -246,4 +293,3 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
   
    return result;
 }
-

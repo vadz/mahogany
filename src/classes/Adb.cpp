@@ -6,6 +6,24 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/06/05 16:56:09  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.5  1998/05/24 14:47:55  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -33,14 +51,19 @@
 #  pragma implementation "Adb.h"
 #endif
 
-#include  "Mpch.h"
+#include "Mpch.h"
 #include "Mcommon.h"
 
+#ifndef  USE_PCH
+#  include "Adb.h"
+#  include "strutil.h"
+
+#  include "wx/log.h"
+#endif // USE_PCH
+
 #include "MFrame.h"
-#include "Adb.h"
 #include "MApplication.h"
 #include "MDialogs.h"
-#include "strutil.h"
 
 void
 AdbNameStruct::parse(String const &in)

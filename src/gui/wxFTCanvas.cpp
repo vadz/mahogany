@@ -6,6 +6,24 @@
  * $Id$            *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/05 16:56:19  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.6  1998/05/18 17:48:38  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -32,51 +50,81 @@
 #pragma   implementation "wxFTCanvas.h"
 #endif
 
-#include   "Mpch.h"
-#include   "Mcommon.h"
+// ============================================================================
+// declarations
+// ============================================================================
 
-#include   "MFrame.h"
-#include   "MLogFrame.h"
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#include   "Mdefaults.h"
-#include   "kbList.h"
-#include   "PathFinder.h"
-#include   "MimeList.h"
-#include   "MimeTypes.h"
-#include   "Profile.h"
+#ifndef  USE_PCH
+#  include "kbList.h"
 
-#include  "MApplication.h"
+#  include "PathFinder.h"
 
-#include   "gui/wxFontManager.h"
-#include   "gui/wxIconManager.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
 
-#include   "gui/wxFText.h"
-#include   "gui/wxFTCanvas.h"
+#  include "Profile.h"
+
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+#endif // USE_PCH
+
+#include "Mdefaults.h"
+#include "MApplication.h"
+
+#include "gui/wxFontManager.h"
+#include "gui/wxIconManager.h"
+
+#include "gui/wxFText.h"
+#include "gui/wxFTCanvas.h"
 
 #include  <ctype.h>   // for isspace()
 
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
 IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
+#ifdef USE_WXWINDOWS2
+   BEGIN_EVENT_TABLE(wxFTCanvas, wxCanvas)
+      EVT_PAINT(wxFTCanvas::OnPaint)
+      EVT_CHAR(wxFTCanvas::OnChar)
 
-   wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
-                          int iheight, long style,
-                          ProfileBase *profile)
+      // @@ VZ: I believe wxFTCanvas::OnEvent is not yet used
+      //EVT_MOUSE_EVENTS(wxFTCanvas::OnEvent)
+   END_EVENT_TABLE() 
+#endif // wxWin 2
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxFTCanvas
+// ----------------------------------------------------------------------------
+wxFTCanvas::wxFTCanvas(wxPanel *iparent,
+                       int ix, int iy, int iwidth, int iheight,
+                       long style, ProfileBase *profile)
 {
-#if  USE_WXWINDOWS2
-#define parent GetParent()
-#if USE_WXGTK
-   // @@@ this will probably change in next alpha(s)
-   m_parent = iparent;
-#else
-   SetParent(iparent);
-#endif
-
-   wxCanvas::Create(parent, -1, wxPoint(ix, iy),
-                    wxSize(iwidth, iheight), style);
-#else
-   parent = iparent;
-   wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
-#endif
+#  ifdef USE_WXWINDOWS2
+#     define parent GetParent()
+#     ifdef USE_WXGTK
+         // @@@ this will probably change in next alpha(s)
+         m_parent = iparent;
+#     else
+         SetParent(iparent);
+#  endif
+      wxCanvas::Create(parent, -1, wxPoint(ix, iy),
+                       wxSize(iwidth, iheight), style);
+#  else  // wxWin 1
+      parent = iparent;
+      wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
+#  endif // wxWin 1/2
 
    ftoList = GLOBAL_NEW wxFTOList(this, profile);
    wrapMargin = -1;
@@ -84,7 +132,7 @@ IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
 wxFTCanvas::~wxFTCanvas()
 {
-   GLOBAL_DELETE  ftoList;
+   GLOBAL_DELETE ftoList;
 }
 
 
@@ -100,53 +148,60 @@ wxFTCanvas::AllowEditing(bool enable)
    ftoList->SetEditable(enable);
 }
 
+// ----------------------------------------------------------------------------
+// wxFTCanvas callbacks
+// ----------------------------------------------------------------------------
 void
 wxFTCanvas::OnPaint(void)
 {
-   ftoList->Draw();
+#  ifdef USE_WXWINDOWS2
+      wxPaintDC dc(this);
+      ftoList->Draw(&dc);
+#  else // wxWin 1
+      ftoList->Draw();
+#  endif
 }
 
 void
 wxFTCanvas::OnEvent(wxMouseEvent &event)
 {
-   if(parent)
-#ifdef  USE_WXWINDOWS2
-      // @@@@ wxWindow::OnEvent
-      ;
-#else
-   parent->OnEvent(event);
-#endif
+#  ifdef  USE_WXWINDOWS2
+      // @@ wxWindow::OnMouseEvent not called - is it correct?
+#  else
+      if(parent)
+         parent->OnEvent(event);
+#  endif
 }
 
 void
 wxFTCanvas::Print(void)
 {
-#ifdef  USE_WXWINDOWS2
-   // @@@@ postscript printing...
-#else
-   // set AFM path
-   PathFinder pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D),
-                 true);// recursive!
-   pf.AddPaths(mApplication.GetGlobalDir(), true);
-   pf.AddPaths(mApplication.GetLocalDir(), true);
+#  ifdef  USE_WXWINDOWS2
+      // @@@@ postscript printing...
+#  else
+      // set AFM path
+      PathFinder pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D),
+                    true);// recursive!
+      pf.AddPaths(mApplication.GetGlobalDir(), true);
+      pf.AddPaths(mApplication.GetLocalDir(), true);
 
-   String afmpath = pf.FindDirFile("Cour.afm");
-   wxSetAFMPath((char *) afmpath.c_str());
+      String afmpath = pf.FindDirFile("Cour.afm");
+      wxSetAFMPath((char *) afmpath.c_str());
 
-   wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
-   if (dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
-   {
-      dc->SetUserScale(1.0, 1.0);
-      dc->ScaleGDIClasses(TRUE);
-      ftoList->SetDC(dc,true); // enable pageing!
+      wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
+      if (dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
+      {
+         dc->SetUserScale(1.0, 1.0);
+         dc->ScaleGDIClasses(TRUE);
+         ftoList->SetDC(dc,true); // enable pageing!
+         ftoList->ReCalculateLines();
+         ftoList->Draw();
+         dc->EndDoc();
+      }
+      GLOBAL_DELETE  dc;
+      ftoList->SetCanvas(this);
       ftoList->ReCalculateLines();
-      ftoList->Draw();
-      dc->EndDoc();
-   }
-   GLOBAL_DELETE  dc;
-   ftoList->SetCanvas(this);
-   ftoList->ReCalculateLines();
-#endif
+#  endif
 }
 
 void
@@ -242,12 +297,12 @@ wxFTCanvas::OnChar(wxKeyEvent &event)
          if(wrapMargin > 0 && isspace(keyCode))
             ftoList->Wrap(wrapMargin);
       }
-#if USE_WXWINDOWS2
-      // @@@ normally it's not necessary in wxWin2, but I'm not sure about it
-#else  // wxWin 1
-      else if(parent)
-         parent->OnChar(event);
-#endif // wxWin 1/2
+#     ifdef USE_WXWINDOWS2
+         // @@@ do we have to call parent->OnChar() in wxWin2?
+#     else  // wxWin 1
+         else if(parent)
+            parent->OnChar(event);
+#     endif // wxWin 1/2
       break;
    }
 }

@@ -35,6 +35,8 @@ extern "C"
 #	undef   LoadAccelerators
 }
 
+#include "kbList.h"
+
 #include  "guidef.h"
 #include  "strutil.h"
 
@@ -44,15 +46,18 @@ extern "C"
    #include "appconf.h"
 #endif
 
-#include  "Mcommon.h"
-#include  "MimeList.h"
-#include  "MimeTypes.h"
-#include  "MFrame.h"
-#include  "gui/wxMFrame.h"
-#include  "MLogFrame.h"
-#include  "Profile.h"
-#include  "MApplication.h"
-#include  "Mdefaults.h"
+#include "Mcommon.h"
+
+#include "PathFinder.h"
+
+#include "MimeList.h"
+#include "MimeTypes.h"
+
+#include "MFrame.h"
+#include "gui/wxMFrame.h"
+#include "MLogFrame.h"
+
+#include "Profile.h"
 
 #endif  //USE_PCH
 #endif  //MPCH_H

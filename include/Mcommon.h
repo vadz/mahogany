@@ -6,15 +6,15 @@
  * $Id$           *
  *******************************************************************/
 #ifndef MCOMMON_H
-#define	MCOMMON_H
+#define  MCOMMON_H
 
-#include	"Mconfig.h"
+#include "Mconfig.h"
 
-#ifdef	HAVE_LIBINTL_H
-#	define 	USE_GETTEXT	1
-#	include	<libintl.h>
+#ifdef   HAVE_LIBINTL_H
+#  define   USE_GETTEXT 1
+#  include  <libintl.h>
 #else
-#	define	USE_GETTEXT	0
+#  undef    USE_GETTEXT
 #endif
 
 /// macro which defines compare operators needed for std::list
@@ -26,7 +26,7 @@
 
 // wxWindows 2 has/will have native gettext support
 #ifndef     USE_WXWINDOWS2
-#   define	_(string)	mApplication.GetText(string)
+#   define  _(string)   mApplication.GetText(string)
 #endif  // wxWin 2
 
 // hide differences between wxWin versions
@@ -46,44 +46,43 @@
 #  endif //GTK
     
    // @@@ wxFrame::SetIcon doesn't exist in wxGTK
-#   ifdef  USE_WXGTK  
-#      define SetIcon(x)
-#   endif  //GTK
+#  ifdef  USE_WXGTK  
+#     define SetIcon(x)
+#  endif  //GTK
     
    // @@@ is this really the same thing
-#   define wxMessage   wxStaticText
-#   define wxCanvas    wxWindow
-#   define wxItem      wxControl
-#   define wxDialogBox wxDialog
+#  define wxMessage   wxStaticText
+#  define wxCanvas    wxWindow
+#  define wxItem      wxControl
+#  define wxDialogBox wxDialog
 
-    // the same function sometimes have different return types in wxWin1 and 2
-#   define ON_CLOSE_TYPE    bool
-#   define SHOW_TYPE        bool
+   // the same function sometimes have different return types in wxWin1 and 2
+#  define ON_CLOSE_TYPE    bool
+#  define SHOW_TYPE        bool
 
-#   define PanelNewLine(panel)
+#  define PanelNewLine(panel)
 
-#   define CreateNamedPanel(parent, x, y, w, h, name)                          \
-    GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h), 0, name)
-#   define CreatePanel(parent, x, y, w, h)                                     \
-    GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h))
+#  define CreatePanel(parent, x, y, w, h, name)                               \
+   GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h),                \
+                      wxTAB_TRAVERSAL, name)
 
-#   define CreateLabel(parent, title)                                          \
-    GLOBAL_NEW wxStaticText(parent, -1, _(title))
+#  define CreateLabel(parent, title)                                          \
+   GLOBAL_NEW wxStaticText(parent, -1, _(title))
 
-#   define CreateButton(parent, title, name, id)                              \
-    GLOBAL_NEW wxButton(parent, id, _(title), wxDefaultPosition,              \
+#  define CreateButton(parent, title, name, id)                               \
+   GLOBAL_NEW wxButton(parent, id, _(title), wxDefaultPosition,               \
                         wxDefaultSize, 0, DEFAULT_VALIDATOR name)
 
-#   define CreateText(parent, x, y, w, h, name)                               \
-    GLOBAL_NEW wxTextCtrl(parent, -1, "", wxPoint(x, y), wxSize(w, h),        \
-                          0, DEFAULT_VALIDATOR name)
+#  define CreateText(parent, x, y, w, h, name)                                \
+   GLOBAL_NEW wxTextCtrl(parent, -1, "", wxPoint(x, y), wxSize(w, h),         \
+                         0, DEFAULT_VALIDATOR name)
 
-#   define CreateListBox(parent, x, y, w, h)                                   \
-    GLOBAL_NEW wxListBox(parent, -1, wxPoint(x, y), wxSize(w, h),             \
-                         0, NULL, wxLB_SINGLE | wxLB_ALWAYS_SB)
+#  define CreateListBox(parent, x, y, w, h)                                   \
+   GLOBAL_NEW wxListBox(parent, -1, wxPoint(x, y), wxSize(w, h),              \
+                        0, NULL, wxLB_SINGLE | wxLB_ALWAYS_SB)
 
-#   define CreateFrame(parent, title, x, y, w, h)                              \
-    Create(parent, -1, title, wxPoint(x, y), wxSize(w, h))
+#  define CreateFrame(parent, title, x, y, w, h)                              \
+   Create(parent, -1, title, wxPoint(x, y), wxSize(w, h))
 #else   // wxWin 1.xx
   // screen coordinates type
   typedef float coord_t;
@@ -94,34 +93,58 @@
 
 #   define PanelNewLine(panel)    panel->NewLine()
 
-#   define CreateNamedPanel(p, x, y, w, h, n)  GLOBAL_NEW wxPanel(p, x, y,     \
-                                                                 w, h, 0, n)
-#   define CreatePanel(p, x, y, w, h)  GLOBAL_NEW wxPanel(p, x, y, w, h)
-#   define CreateLabel(p, t)           GLOBAL_NEW wxMessage(p, _(t))
-#   define CreateButton(p, t, n, id)   GLOBAL_NEW wxButton(p, NULL, _(t),      \
-                                                          -1, -1, -1, -1,     \
+#   define CreatePanel(p, x, y, w, h, n)  GLOBAL_NEW wxPanel(p,x,y,w,h,0,n)
+#   define CreateLabel(p, t)              GLOBAL_NEW wxMessage(p, _(t))
+#   define CreateButton(p, t, n, id)      GLOBAL_NEW wxButton(p, NULL, _(t),   \
+                                                          -1, -1, -1, -1,      \
                                                           0, n)
 #   define CreateText(p, x, y, w, h, name)   GLOBAL_NEW wxText(p, NULL, NULL,  \
                                                        "", x, y, w, h, 0, name)
 
 #   define CreateListBox(parent, x, y, w, h)                                   \
-    GLOBAL_NEW wxListBox(parent, (wxFunction) NULL, (const char *)"", \
-			 0, x, y, w, h,           \
+    GLOBAL_NEW wxListBox(parent, (wxFunction) NULL, (const char *)"",          \
+                         0, x, y, w, h,                                        \
                          0, NULL, wxALWAYS_SB)
 #   define CreateFrame(p, t, x, y, w, h) Create(p, t, x, y, w, h)
 #endif
 
+// ----------------------------------------------------------------------------
+// debugging macros
+// ----------------------------------------------------------------------------
+#ifdef NDEBUG
+#  define   DEBUG_DEF
 
-#ifndef NDEBUG
-/// macro to define debug method
-#	define DEBUG_DEF		void Debug(void) const;
-#	define	DBGLOG(x)		cerr << x << endl;
+   // these macros do nothing in release build
+#  define ASSERT(x)
+#  define FAIL
 #else
-#	define	DEBUG_DEF
-#	define	DBGLOG(x)		
+#  define   DEBUG_DEF     void Debug(void) const;
+#  ifdef USE_WXWINDOWS2
+#     define ASSERT(x)     wxASSERT(x)
+#     define FAIL          wxFAIL
+#     define CHECK(x)      wxCHECK(x)
+#     define CHECK2(x, op) wxCHECK2(x, op)
+#  else  // !wxWin2
+#     include <assert.h>
+#     define ASSERT(x)     assert(x)
+#     define FAIL          assert(0)
+#     define CHECK(x)      if (!(x)) {FAIL; return; }
+#     define CHECK2(x, op) if (!(x)) {FAIL; op;     }
+#  endif // wxWin2
 #endif
 
-#define	LogMsg(x) 	cerr << x << endl;
+// these definitions work in both modes (debug and release)
+#  ifdef USE_WXWINDOWS2
+#     define CHECK(x)      wxCHECK(x)
+#     define CHECK2(x, op) wxCHECK2(x, op)
+#  else  // !wxWin2
+#     define CHECK(x)      if (!(x)) {FAIL; return; }
+#     define CHECK2(x, op) if (!(x)) {FAIL; op;     }
+#  endif // wxWin2
+
+// ----------------------------------------------------------------------------
+// message logging macros
+// ----------------------------------------------------------------------------
 
 // LOG_INFO defined in yunchanc-client/.h
 #undef  LOG_INFO
@@ -129,27 +152,32 @@
 #ifdef   USE_WXWINDOWS2
    // wxWindows 2 has built in logging capabilities
 #  include <wx/intl.h>
-#	include <wx/log.h>
+#  include <wx/log.h>
 
-#	define LOG_DEBUG   wxLog::Debug
-#	define LOG_NOISE   wxLog::Verbose
-#	define LOG_DEFAULT wxLog::Message
-#	define LOG_INFO    wxLog::Message
-#	define LOG_ERROR   wxLog::Warning 
-#	define LOG_URGENT  wxLog::Error
+#  define LOG_DEBUG   wxLOG_Debug
+#  define LOG_NOISE   wxLOG_Verbose
+#  define LOG_DEFAULT wxLOG_Message
+#  define LOG_INFO    wxLOG_Message
+#  define LOG_ERROR   wxLOG_Warning 
+#  define LOG_URGENT  wxLOG_Error
     
-#	define	ERRORMESSAGE(arg)   wxLogError arg
-#	define	SYSERRMESSAGE(arg)  wxLogError arg
-#	define	FATALERROR(arg)     wxLogFatalError arg
-#	define	INFOMESSAGE(arg)    wxLogInfo arg
-#	define	LOGMESSAGE(arg)	  wxLogGeneric arg
-#	ifdef NDEBUG
-    // just log the error
-#		define	INTERNALERROR(arg) wxLogError arg
-#	else
-    // aborts
-#		define	INTERNALERROR(arg) wxLogFatalError arg
-#	endif
+#  define ERRORMESSAGE(arg)   wxLogError arg
+#  define SYSERRMESSAGE(arg)  wxLogSysError arg
+#  define FATALERROR(arg)     wxLogFatalError arg
+#  define INFOMESSAGE(arg)    wxLogInfo arg
+#  define LOGMESSAGE(arg)     wxLogGeneric arg
+
+#  ifdef NDEBUG
+#     define   DBGMESSAGE(arg)
+#     define   TRACEMESSAGE(arg)
+#     define   DBGLOG(arg)
+#     define   INTERNALERROR(arg) wxLogError arg         // just log the error
+#  else
+#     define   DBGMESSAGE(arg)    wxLogDebug arg
+#     define   TRACEMESSAGE(arg)  wxLogTrace arg
+#     define   DBGLOG(arg)        wxLogTrace(wxString("") << arg)
+#     define   INTERNALERROR(arg) wxLogFatalError arg    // aborts
+#  endif
 #else
   /// define log levels
   enum 
@@ -162,34 +190,41 @@
     LOG_URGENT 
   };
 
-  // @@
-#  define   wxLogDebug
+  // @@ no debug messages in wxWin1
+#  define   DBGMESSAGE(arg)
+#  define   TRACEMESSAGE(arg)
   
   /// variable argument macro to do error messages, call ERRORMESSAGE((argument))
-#	define	ERRORMESSAGE(arg) MDialog_ErrorMessage arg
+#  define   ERRORMESSAGE(arg) MDialog_ErrorMessage arg
   /// variable argument macro to do system error messages, call SYSERRMESSAGE((argument))
-#	define	SYSERRMESSAGE(arg) MDialog_SystemErrorMessage arg
+#  define   SYSERRMESSAGE(arg) MDialog_SystemErrorMessage arg
   /// variable argument macro to do error messages, call ERRORMESSAGE((argument))
-#	define	FATALERROR(arg) MDialog_FatalErrorMessage arg
+#  define   FATALERROR(arg) MDialog_FatalErrorMessage arg
   /// variable argument macro to do information messages, call INFOMESSAGE((argument))
-#	define	INFOMESSAGE(arg) MDialog_Message arg
+#  define   INFOMESSAGE(arg) MDialog_Message arg
   /// for logging messages
-#	define	LOGMESSAGE(arg)	mApplication.Log arg
+#  define   LOGMESSAGE(arg)   mApplication.Log arg
   /// for internal errors, core dumps or gives message for NDBEGU set
-#	ifdef NDEBUG
-#		define	INTERNALERROR(arg) MDialog_FatalErrorMessage arg
-#	else
-#		define	INTERNALERROR(arg) { MDialog_ErrorMessage arg ; abort(); }
-#	endif
+#  ifdef NDEBUG
+#     define   INTERNALERROR(arg) MDialog_FatalErrorMessage arg
+#     define   DEBUG_DEF
+#     define   DBGLOG(x)
+#  else
+#     define   INTERNALERROR(arg) { MDialog_ErrorMessage arg ; abort(); }
+#     define   DEBUG_DEF     void Debug(void) const;
+#     define   DBGLOG(x)     cerr << x << endl;
+#  endif
+
+#  define  LogMsg(x) cerr << x << endl;
 #endif
 
 #ifdef   OS_UNIX
-#	include	"Munix.h"
+#  include  "Munix.h"
 #elif   defined(OS_WIN)
-#	include "Mwin.h"
+#  include "Mwin.h"
 #endif
 
-#define	ABOUTMESSAGE \
+#define  ABOUTMESSAGE \
 "M Copyright (C) 1998 by \n"\
 "  Karsten Ballüder\n"\
 "  11 (2F3) Yeaman Place\n" \
@@ -206,7 +241,7 @@
 "for more information."\
 "\n"
 
-#include	"CommonBase.h"
+#include "CommonBase.h"
 
 /**@name Macros for calling callback functions.
 
@@ -236,9 +271,10 @@
 */
 #   define   CALLBACKVA(arg,default)            PythonCallback arg
 #else
-#   define   CALLBACK(name)       PythonCallback((int)default)
-    inline int PythonCallBack(int def) { return def; }
+#   define   CALLBACK(name, profile, default)   PythonCallback((int)default)
+    inline int PythonCallback(int def) { return def; }
 #   define   CALLBACKVA(arg,default)      PythonCallback((int)default)
 #endif
 //@}
+
 #endif	// MCOMMON_H

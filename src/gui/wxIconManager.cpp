@@ -3,9 +3,27 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$ *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/05 16:56:23  VZ
+ * many changes among which:
+ *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
+ *     i.e. there is wxMApp inheriting from AppBse and wxApp
+ *  2) wxMLogFrame changed (but will probably change again because I wrote a
+ *     generic wxLogFrame for wxWin2 - we can as well use it instead)
+ *  3) Profile stuff simplified (but still seems to work :-), at least with
+ *     wxConfig), no more AppProfile separate class.
+ *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
+ *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
+ *     Classes
+ *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
+ *  6) constraints in wxComposeView changed to work under both wxGTK and
+ *     wxMSW (but there is an annoying warning about unsatisfied constraints
+ *     coming from I don't know where)
+ *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
+ *  8) many other minor changes I completely forgot about.
+ *
  * Revision 1.7  1998/05/11 20:57:31  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -32,38 +50,38 @@
 #pragma implementation "wxIconManager.h"
 #endif
 
-#include	"Mpch.h"
+#include "Mpch.h"
 
-#ifndef	USE_PCH
-#	include  "Mcommon.h"
-#	include	<CommonBase.h> // vAR() macro
-#	include	<Mdefaults.h>
-#	include	"gui/wxIconManager.h"
-#	include "strutil.h"
+#ifndef  USE_PCH
+#  include  "Mcommon.h"
+#  include  "CommonBase.h"   // VAR() macro
+#  include  "strutil.h"
 #endif
 
+#include "Mdefaults.h"
+
 #ifdef    OS_WIN
-#	define   unknown_xpm     "unknown"
-#	define   txt_xpm         "txt"
-#	define   audio_xpm       "audio"
-#	define   application_xpm "application"
-#	define   image_xpm       "image"
-#	define   video_xpm       "video"
-#	define   postscript_xpm  "postscript"
-#	define   dvi_xpm         "dvi"
-#	define   hlink_xpm	"hlink"
-#	define   ftplink_xpm	"ftplink"
+#  define   unknown_xpm     "unknown"
+#  define   txt_xpm         "txt"
+#  define   audio_xpm       "audio"
+#  define   application_xpm "application"
+#  define   image_xpm       "image"
+#  define   video_xpm       "video"
+#  define   postscript_xpm  "postscript"
+#  define   dvi_xpm         "dvi"
+#  define   hlink_xpm   "hlink"
+#  define   ftplink_xpm "ftplink"
 #else   //real XPMs
-#	include  "../src/icons/unknown.xpm"
-#	include  "../src/icons/txt.xpm"
-#	include  "../src/icons/audio.xpm"
-#	include  "../src/icons/application.xpm"
-#	include  "../src/icons/image.xpm"
-#	include  "../src/icons/video.xpm"
-#	include  "../src/icons/postscript.xpm"
-#	include  "../src/icons/dvi.xpm"
-#	include  "../src/icons/hlink.xpm"
-#	include  "../src/icons/ftplink.xpm"
+#  include  "../src/icons/unknown.xpm"
+#  include  "../src/icons/txt.xpm"
+#  include  "../src/icons/audio.xpm"
+#  include  "../src/icons/application.xpm"
+#  include  "../src/icons/image.xpm"
+#  include  "../src/icons/video.xpm"
+#  include  "../src/icons/postscript.xpm"
+#  include  "../src/icons/dvi.xpm"
+#  include  "../src/icons/hlink.xpm"
+#  include  "../src/icons/ftplink.xpm"
 #endif  //Win/Unix
 
 #include    "gui/wxIconManager.h"

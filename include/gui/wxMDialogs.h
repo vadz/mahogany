@@ -101,7 +101,7 @@ bool	MDialog_YesNoDialog(char const *message,
        @param profile	the profile to use
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
-const char *	MDialog_FileRequester(char const *message,
+const char *MDialog_FileRequester(char const *message,
 				      MFrame *parent = NULL,
 				      char const *path = NULL,
 				      char const *filename = NULL,
@@ -110,6 +110,19 @@ const char *	MDialog_FileRequester(char const *message,
 				      bool save = false,
 				      ProfileBase *profile = NULL
    );
+
+/** simple Yes/No dialog
+    @param message the text to display
+    @param parent the parent frame (NULL => main app window)
+    @param modal  true to make messagebox modal
+    @param YesDefault true if Yes button is default, false for No as default
+    @return true if Yes was selected
+  */
+bool MDialog_YesNoDialog(String const &message,
+                         MFrame *parent = NULL,
+                         bool modal = false,
+                         bool YesDefault = true);
+
 
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,

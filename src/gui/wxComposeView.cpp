@@ -7,24 +7,35 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma	implementation "wxComposeView.h"
+#pragma  implementation "wxComposeView.h"
 #endif
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 #include "Mpch.h"
 #include "Mcommon.h"
 
-#include <wx/wx.h>
-#include "MFrame.h"
-#include "MLogFrame.h"
+#ifndef USE_PCH
+#  include "strutil.h"
+
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
+
+#  include "MFrame.h"
+#  include "MLogFrame.h"
+#endif
 
 #include "Mdefaults.h"
-#include   "kbList.h"
-#include "PathFinder.h"
-#include "MimeList.h"
-#include "MimeTypes.h"
-#include "Profile.h"
 
 #include "MApplication.h"
+#include "gui/wxMApp.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -34,15 +45,17 @@
 #include "SendMessageCC.h"
 #include "Adb.h"
 #include "MDialogs.h"
-#include "strutil.h"
 
 #include "gui/wxFontManager.h"
-#undef T //FIXME STL list
 #include "gui/wxIconManager.h"
 #include "gui/wxFText.h"
 #include "gui/wxFTCanvas.h"
 #include "gui/wxComposeView.h"
 #include "gui/wxAdbEdit.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
 
 // control ids
 enum
@@ -50,6 +63,12 @@ enum
    IDB_EXPAND = 100
 };
 
+// margin between controls on the panel
+#define LAYOUT_MARGIN 5
+
+// ----------------------------------------------------------------------------
+// event tables &c
+// ----------------------------------------------------------------------------
 IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 #ifdef USE_WXWINDOWS2
@@ -68,39 +87,34 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
    END_EVENT_TABLE() 
 #endif
 
+// ============================================================================
+// implementation
+// ============================================================================
 void
 wxComposeView::Create(const String &iname, wxFrame *parent,
                       ProfileBase *parentProfile,
-                      String const &to, String const &cc, String const &bcc, 
+                      String const &to, String const &cc, String const &bcc,
                       bool hide)
 {
-  if(initialised)
-    return; // ERROR!
-
-  const char *cto  = NULL,
-             *ccc  = NULL,
-             *cbcc = NULL;
+  CHECK( !initialised );
 
   ftCanvas = NULL;
   nextFileID = 0;
-
-  wxMFrame::Create(iname, parent);
 
   if(!parentProfile)
     parentProfile = mApplication.GetProfile();
   profile = new Profile(iname,parentProfile);
 
-  cto = profile->readEntry(MP_COMPOSE_TO, MP_COMPOSE_TO_D);
-  ccc = profile->readEntry(MP_COMPOSE_CC, MP_COMPOSE_CC_D);
-  cbcc = profile->readEntry(MP_COMPOSE_BCC, MP_COMPOSE_BCC_D);
+  // use default values for address fields if none explicitly specified
+  const char *cto = strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) 
+                                        : to.c_str();
+  const char *ccc = strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) 
+                                        : cc.c_str();
+  const char *cbcc = strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC)
+                                          : bcc.c_str();
 
-  if(to.length())
-    cto = to.c_str();
-  if(cc.length())
-    ccc = cc.c_str();
-  if(bcc.length())
-    cbcc = bcc.c_str();
-
+  // build menu
+  // ----------
   AddMenuBar();
   AddFileMenu();
 
@@ -115,63 +129,71 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
   AddHelpMenu();
   SetMenuBar(menuBar);
 
-  SetAutoLayout(TRUE);
-
-  wxItem *last;
-  wxLayoutConstraints *c;
-
-  panel = CreateNamedPanel(this, 0, 0, 1000, 500, "MyPanel");
+  // create panel with items
+  // -----------------------
+  panel = new wxPanel(this);
 
   #ifdef USE_WXWINDOWS2
-    // @@ ??
+    // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
   #else
     panel->SetLabelPosition(wxVERTICAL);
   #endif
 
-  // Create some panel items
   txtToLabel = CreateLabel(panel, "To:");
   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
   aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
 
-  if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
+  if( READ_CONFIG(profile, MP_SHOWCC) )
   {
-    txtCCLabel = CreateLabel(panel,"CC:");
+    txtCCLabel = CreateLabel(panel, "CC:");
     txtCC = CreateText(panel, -1, -1, -1, -1, "");
   }
-  if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
+  if( READ_CONFIG(profile, MP_SHOWBCC) )
   {
-    txtBCCLabel = CreateLabel(panel,"BCC:");
+    txtBCCLabel = CreateLabel(panel, "BCC:");
     txtBCC = CreateText(panel, -1, -1, -1, -1, "");
   }
-  txtSubjectLabel = CreateLabel(panel,"Subject:");
+  txtSubjectLabel = CreateLabel(panel, "Subject:");
   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
 
+  // fix the constraints
+  // -------------------
+  wxLayoutConstraints *c;
+  SetAutoLayout(TRUE);
+  panel->SetAutoLayout(TRUE);
+
   // with the constraints, I assume that "Subject" is the longest label
+  // and all labels are right justified to the right edge of "Subject" label
+
+  // first row: "To" fields (label and text entry) and the "Expand" button
   c = new wxLayoutConstraints;
-  c->top.SameAs        (panel, wxTop, 5);
+  c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
   c->right.SameAs(txtSubjectLabel, wxRight);
   c->height.AsIs();
   c->width.AsIs();
   txtToLabel->SetConstraints(c);
 
   c = new wxLayoutConstraints;
-  c->top.SameAs        (panel, wxTop, 5);
-  c->left.SameAs(txtSubjectLabel, wxRight, 5);
-  c->right.SameAs(aliasButton, wxLeft, 5);
+  c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
+  c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+  c->right.SameAs(aliasButton, wxLeft, LAYOUT_MARGIN);
   c->height.AsIs(); 
   txtTo->SetConstraints(c);
 
   c = new wxLayoutConstraints;
-  c->top.SameAs        (panel, wxTop, 5);
-  c->right.SameAs(panel, wxRight, 25);
+  c->top.SameAs        (panel, wxTop, LAYOUT_MARGIN);
+  c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
   c->width.AsIs();
   c->height.AsIs(); 
   aliasButton->SetConstraints(c);
 
-  last = txtTo;
-  // optional CC line
-  if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
+  // second row: optional "CC" label and text entry
+
+  // the last control we set the constraints for
+  wxItem *last = txtTo;
+
+  if( READ_CONFIG(profile, MP_SHOWCC) )
   {
     c = new wxLayoutConstraints;
     c->top.Below(txtToLabel);
@@ -182,15 +204,15 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 
     c = new wxLayoutConstraints;
     c->top.Below(txtToLabel);
-    c->left.SameAs(txtSubjectLabel, wxRight, 5);
-    c->right.SameAs(panel, wxRight, 5);
+    c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+    c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
     c->height.AsIs(); 
     txtCC->SetConstraints(c);
     last = txtCC;
   }
 
-  // optional BCC line
-  if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
+  // third row: optional "BCC" label and text entry
+  if( READ_CONFIG(profile, MP_SHOWBCC) )
   {
     c = new wxLayoutConstraints;
     c = new wxLayoutConstraints;
@@ -202,24 +224,25 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 
     c = new wxLayoutConstraints;
     c->top.Below(last);
-    c->left.SameAs(txtSubjectLabel, wxRight, 5);
-    c->right.SameAs(panel, wxRight, 5);
+    c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+    c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
     c->height.AsIs(); 
     txtBCC->SetConstraints(c);
     last = txtBCC;
   }
 
-  // Subject line
+  // fourth row: subject line
   c = new wxLayoutConstraints;
-  c->top.SameAs(last, wxBottom, 5); //Below  (last);
-  c->left.SameAs(panel, wxLeft, 5);
+  c->top.SameAs(last, wxBottom, LAYOUT_MARGIN); //Below  (last);
+  c->left.SameAs(panel, wxLeft, LAYOUT_MARGIN);
   c->height.AsIs();
   c->width.AsIs();
   txtSubjectLabel->SetConstraints(c);
+
   c = new wxLayoutConstraints;
   c->top.Below(last);
-  c->left.SameAs(txtSubjectLabel, wxRight, 5);
-  c->right.SameAs(panel, wxRight, 5);
+  c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+  c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
   c->height.AsIs(); 
   txtSubject->SetConstraints(c);
   last = txtSubjectLabel;
@@ -234,18 +257,18 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 
   CreateFTCanvas();
 
-  if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE,MP_COMPOSE_USE_SIGNATURE_D))
+  if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
   {
     size_t size;
     ifstream istr;
     char *buffer;
-    istr.open(profile->readEntry(MP_COMPOSE_SIGNATURE,MP_COMPOSE_SIGNATURE_D));
+    istr.open(READ_CONFIG(profile, MP_COMPOSE_SIGNATURE));
     if(istr)
     {
       istr.seekg(0,ios::end);
       size = istr.tellg();
       buffer = new char [size+1];
-      if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE_SEPARATOR,MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D))
+      if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
         ftCanvas->AddFormattedText("--\n");
       istr.seekg(0,ios::beg);
       istr.read(buffer, size);
@@ -270,23 +293,26 @@ wxComposeView::CreateFTCanvas(void)
    ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
-   c->left.SameAs       (panel, wxLeft);
-   c->top.SameAs	(txtSubjectLabel, wxBottom, 10);
-   c->right.SameAs      (panel, wxRight);
-   c->bottom.SameAs	(panel, wxBottom);
+   c->left.SameAs  (panel, wxLeft);
+   c->top.SameAs   (txtSubjectLabel, wxBottom, LAYOUT_MARGIN);
+   c->right.SameAs (panel, wxRight);
+   c->bottom.SameAs(panel, wxBottom);
    ftCanvas->SetConstraints(c);
    ftCanvas->AllowEditing(true);
-   ftCanvas->SetWrapMargin(
-      profile->readEntry(MP_COMPOSE_WRAPMARGIN,MP_COMPOSE_WRAPMARGIN_D));
+   ftCanvas->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }
 
-#ifdef   USE_WXWINDOWS2
+#ifdef USE_WXWINDOWS2
 void
-wxComposeView::OnSize(wxSizeEvent& /* event */)
+wxComposeView::OnSize(wxSizeEvent& event)
 {
-   Layout();
+#  ifdef USE_WXGTK
+      Layout();
+#  else  // MSW
+      wxMFrame::OnSize(event);
+#  endif // GTK
 }
-#else  //wxWin1
+#else //wxWin1
 void
 wxComposeView::OnSize(int  w, int h)
 {
@@ -294,8 +320,11 @@ wxComposeView::OnSize(int  w, int h)
 }
 #endif //wxWin1/2
 
-wxComposeView::wxComposeView(const String &iname, wxFrame *parent,
-			     ProfileBase *parentProfile, bool hide)
+wxComposeView::wxComposeView(const String &iname,
+                             wxFrame *parent,
+                             ProfileBase *parentProfile,
+                             bool hide)
+             : wxMFrame(iname)
 {
    initialised = false;
    Create(iname,parent,parentProfile, "","","",hide);
@@ -320,7 +349,7 @@ wxComposeView::OnExpand(wxCommandEvent &event)
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
-   String	tmp = txtTo->GetValue();
+   String   tmp = txtTo->GetValue();
    int l = tmp.length();
    
    // FIXME @@@ VZ: I don't know what this test does, so I disabled it
@@ -453,53 +482,60 @@ wxComposeView::Send(void)
    int
       numMimeType;
    
-   SendMessageCC sm( mApplication.GetProfile(),
-		     (const char *)txtSubject->GetValue(),
-		     (const char *)txtTo->GetValue(),
-		     profile->readEntry(MP_SHOWCC,MP_SHOWCC_D) ? 
-         (const char *)txtCC->GetValue() : NULL,
-		     profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D) ?
-		     (const char *)txtBCC->GetValue() : NULL);
+   SendMessageCC sm
+      (
+       mApplication.GetProfile(),
+       (const char *)txtSubject->GetValue(),
+       (const char *)txtTo->GetValue(),
+       READ_CONFIG(profile, MP_SHOWCC) ? txtCC->GetValue().c_str()
+                                       : (const char *)NULL,
+       READ_CONFIG(profile, MP_SHOWBCC) ? txtBCC->GetValue().c_str() 
+                                        : (const char *)NULL
+      );
    tmp = ftCanvas->GetContent(&ftoType, true);
    while(ftoType != LI_ILLEGAL)
    {
       switch(ftoType)
       {
       case LI_TEXT:
-	 sm.AddPart(TYPETEXT,tmp->c_str(),tmp->size());
-	 break;
+         sm.AddPart(TYPETEXT,tmp->c_str(),tmp->size());
+         break;
+
       case LI_ICON:
-	 cptr = ocptr = strutil_strdup(tmp->c_str()); // <IMG SRC="xxx"; mimetype; numMimeType;fileID >
-	 cptr = strtok(cptr,";"); // IMG
-	 cptr = strtok(NULL,";"); // mimetype
-	 mimeType = cptr;
-	 mimeSubType = strutil_after(mimeType,'/');
-	 mimeType = strutil_before(mimeType, '/');
-	 cptr = strtok(NULL,";"); // numericMimeType
-	 numMimeType = atoi(cptr);
-	 cptr = strtok(NULL,";"); // fileID
-	 istr.open(fileMap[atol(cptr)].c_str());
-	 if(istr)
-	 {
- 	    istr.seekg(0,ios::end);
-	    size = istr.tellg();
-	    buffer = new char [size];
- 	    istr.seekg(0,ios::beg);
-	    istr.read(buffer, size);
-	    
-	    if(! istr.fail())
-	       sm.AddPart(numMimeType, buffer, size, mimeSubType);
-	    else
-	       SYSERRMESSAGE((_("Cannot read file."),this));
-	    delete [] buffer;
-	    istr.close();
-	 }
-	 delete [] ocptr;
-	 break;
+         // <IMG SRC="xxx"; mimetype; numMimeType;fileID >
+         cptr = ocptr = strutil_strdup(tmp->c_str());
+         cptr = strtok(cptr,";"); // IMG
+         cptr = strtok(NULL,";"); // mimetype
+         mimeType = cptr;
+         mimeSubType = strutil_after(mimeType,'/');
+         mimeType = strutil_before(mimeType, '/');
+         cptr = strtok(NULL,";"); // numericMimeType
+         numMimeType = atoi(cptr);
+         cptr = strtok(NULL,";"); // fileID
+         istr.open(fileMap[atol(cptr)].c_str());
+         if(istr)
+         {
+          istr.seekg(0,ios::end);
+          size = istr.tellg();
+          buffer = new char [size];
+          istr.seekg(0,ios::beg);
+          istr.read(buffer, size);
+ 
+          if(! istr.fail())
+             sm.AddPart(numMimeType, buffer, size, mimeSubType);
+          else
+             SYSERRMESSAGE((_("Cannot read file."),this));
+          delete [] buffer;
+          istr.close();
+         }
+         delete [] ocptr;
+         break;
+
       case LI_ILLEGAL:
-	 break;
+         break;
+
       default:
-	 break;
+         break;
       }
       tmp = ftCanvas->GetContent(&ftoType, false);
    }
