@@ -123,6 +123,10 @@ TODO:
 - are mail contens exported/imported in wrong order in reply?
   attachments appear before text.
 
+- MailFolderCC: keep m_MailStream around after error and mark dead
+  stream otherwise, OR, really completely reopen the folder.
+  Like it is now, MessageCC might access it.
+
 for release:
 
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
