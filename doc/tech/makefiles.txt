@@ -1,0 +1,13 @@
+Mahogany build system
+=====================
+
+How to add file
+---------------
+Linux makefiles take new files into account automatically. Visual C++
+makefiles must be updated. Add following snippet to "appropriate" place
+in M.DSP. Replace <folder> and <file> with your file.
+
+# Begin Source File
+
+SOURCE=.\src\<folder>\<file>.cpp
+# End Source File
