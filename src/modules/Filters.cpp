@@ -735,7 +735,7 @@ public:
          MOcheck();
          Value v = m_Sn->Evaluate();
          return -(v.GetType() == Type_Number ?
-            v.GetNumber() : v.GetString().Length());
+            v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
    virtual String Debug(void) const
@@ -953,7 +953,7 @@ Value operator oper(const Value &left, const Value &right) \
    else if(left.GetType() == Type_Number) \
       return Value(left.GetNumber() oper right.GetNumber()); \
    else if(left.GetType() == Type_String) \
-      return Value(left.GetString()string oper right.GetString()string); \
+      return Value(left.string oper right.string); \
    else \
    { \
       ASSERT(0); \
@@ -988,20 +988,21 @@ public: \
 } Oper_##name
 #endif
 
-IMPLEMENT_OP(Plus,+,);
-IMPLEMENT_OP(Minus,-,.Length());
-IMPLEMENT_OP(Times,*,.Length());
-IMPLEMENT_OP(Divide,/,.Length());
-IMPLEMENT_OP(Mod,%,.Length());
+IMPLEMENT_OP(Plus,+,GetString());
+IMPLEMENT_OP(Minus,-,GetString().Length());
+IMPLEMENT_OP(Times,*,GetString().Length());
+IMPLEMENT_OP(Divide,/,GetString().Length());
+IMPLEMENT_OP(Mod,%,GetString().Length());
 
-IMPLEMENT_OP(Less, <,);
-IMPLEMENT_OP(Leq, <=,);
-IMPLEMENT_OP(Greater, >,);
-IMPLEMENT_OP(Geq, >=,);
-IMPLEMENT_OP(Equal, ==,);
-IMPLEMENT_OP(Neq, !=,);
+IMPLEMENT_OP(Less, <, GetString());
+IMPLEMENT_OP(Leq, <=, GetString());
+IMPLEMENT_OP(Greater, >, GetString());
+IMPLEMENT_OP(Geq, >=, GetString());
+IMPLEMENT_OP(Equal, ==, GetString());
+IMPLEMENT_OP(Neq, !=, GetString());
 
-IMPLEMENT_VALUE_OP(&&,.Length());
+IMPLEMENT_VALUE_OP(&&, GetString().Length());
+
 static class OperatorAnd : public Operator
 {
 public:
@@ -1020,7 +1021,8 @@ public:
 #endif
 } Oper_And;
 
-IMPLEMENT_VALUE_OP(||,.Length());
+IMPLEMENT_VALUE_OP(||, GetString().Length());
+
 static class OperatorOr : public Operator
 {
 public:
