@@ -2627,7 +2627,13 @@ MailFolderCC::BuildListing(void)
    // folders (loading headers from them is quick)
    if ( !IsLocalQuickFolder(GetType()) && m_FirstListing )
    {
-      unsigned long retrLimit = wxMin(m_RetrievalLimitHard, m_RetrievalLimit);
+      unsigned long retrLimit = m_RetrievalLimit;
+      if ( m_RetrievalLimitHard > 0 && m_RetrievalLimitHard < retrLimit )
+      {
+         // hard limit takes precedence over the soft one
+         retrLimit = m_RetrievalLimitHard;
+      }
+            
       if ( (retrLimit > 0) && (m_nMessages > retrLimit) )
       {
          // too many messages: if we exceeded hard limit, just use it instead
