@@ -3228,14 +3228,26 @@ public:
 
    virtual int DoAppend(const wxString& item)
    {
-      // sync all other combos with this one
-      size_t count = ms_allIdentCombos.GetCount();
-      for ( size_t n = 0; n < count; n++ )
+      // sync all other comboboxes with the one on which Append() had been
+      // called: be careful to avoid reentrancy which would result in the
+      // infinite recursion
+      if ( ms_indexOfAppend == wxNOT_FOUND )
       {
-         if ( ms_allIdentCombos[n] != this )
+         ms_indexOfAppend = ms_allIdentCombos.Index(this);
+
+         CHECK( ms_indexOfAppend != wxNOT_FOUND, -1,
+                "all wxIdentCombos should be in the array!" );
+
+         size_t count = ms_allIdentCombos.GetCount();
+         for ( size_t n = 0; n < count; n++ )
          {
-            ms_allIdentCombos[n]->Append(item);
+            if ( ms_allIdentCombos[n] != this )
+            {
+               ms_allIdentCombos[n]->Append(item);
+            }
          }
+
+         ms_indexOfAppend = wxNOT_FOUND;
       }
 
       return wxChoice::DoAppend(item);
@@ -3244,9 +3256,13 @@ public:
 private:
    // the array of all existing identity comboboxes
    static wxIdentComboArray ms_allIdentCombos;
+
+   // the index of the control on which Append() was called in the array above
+   static int ms_indexOfAppend;
 };
 
 wxIdentComboArray wxIdentCombo::ms_allIdentCombos;
+int wxIdentCombo::ms_indexOfAppend = wxNOT_FOUND;
 
 extern wxChoice *CreateIdentCombo(wxWindow *parent)
 {
@@ -3267,8 +3283,9 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
    delete [] choices;
 
    wxString identity = READ_APPCONFIG(MP_CURRENT_IDENTITY);
-   if ( !!identity )
+   if ( !identity.empty() )
       combo->SetStringSelection(identity);
+
    combo->SetToolTip(_("Change the identity"));
 
    return combo;
