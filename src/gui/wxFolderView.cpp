@@ -510,12 +510,15 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
 
    if(strutil_isempty(folderName))
       return;
-
+   Message *msg;
+   
    int n = selections.Count();
    for(i = 0; i < n; i++)
    {
       mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
-      mf->AppendMessage(*(m_MailFolder->GetMessage(selections[i]+1)));
+      msg = m_MailFolder->GetMessage(selections[i]+1);
+      mf->AppendMessage(*msg);
+      delete msg;
       mf->DecRef();
    }
 
@@ -614,6 +617,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       cv->SetTo(email);
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
+      delete msg;
    }
 }
 
@@ -638,8 +642,10 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
                                  + msg->Subject());
 
-      m_MailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
+      msg->WriteToString(str);
+      cv->InsertData(strutil_strdup(str), str.Length(),
+                     "MESSAGE/RFC822");
+      delete msg;
    }
 
    wxLogStatus(GetFrame(m_Parent), _("%d messages forwarded"), n);

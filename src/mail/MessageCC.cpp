@@ -372,7 +372,7 @@ BODY *
 MessageCC::GetBody(void)
 {
    if(body == NULL && folder)
-      envelope = mail_fetchstructure_full(folder->Stream(),uid,&body, FT_UID);
+      envelope = mail_fetchstructure_full(folder->Stream(),uid, &body, FT_UID);
    return body;
 }
 
@@ -541,7 +541,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
    {
       if(headerFlag)
       {
-         char *headerPart = mail_fetchheader_full(folder->Stream(),seq_no,NIL,&len,FT_UID);
+         char *headerPart = mail_fetchheader_full(folder->Stream(),uid,NIL,&len,FT_UID);
          str += headerPart;
          fulllen += len;
       }
@@ -549,7 +549,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
       //rfc822_output(headerBuffer, envelope, body,
       //MessageCCWriteToString, par, 0);
 
-      char *bodyPart = mail_fetchtext_full(folder->Stream(),seq_no,&len,FT_UID);
+      char *bodyPart = mail_fetchtext_full(folder->Stream(),uid,&len,FT_UID);
       str += bodyPart;
       fulllen += len;
    }
@@ -564,20 +564,4 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 }
 
 
-static long write_output(void *stream, char *string)
-{
-   String *o = (String *)stream;
-   *o << string;
-   return T;
-}
-
-void
-MessageCC::WriteString(String &str) const
-{
-   char *buffer = new char[HEADERBUFFERSIZE];
-
-   if(! rfc822_output(buffer, envelope, body, write_output,&str,NIL))
-      ERRORMESSAGE (("[Can't write message to string.]"));
-   delete [] buffer;
-}
 

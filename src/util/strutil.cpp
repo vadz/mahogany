@@ -257,7 +257,8 @@ strutil_findurl(String &str, String &url)
       for(i = 0; urlnames[i]; i++)
       {
          if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0
-               && (i > 0 || ((cptr != str.c_str() && isspace(*(cptr-1)))))
+            && strutil_isurlchar(cptr[strlen(urlnames[i])])
+            && (i > 0 || ((cptr != str.c_str() && isspace(*(cptr-1)))))
            )
          {
             while(strutil_isurlchar(*cptr))

@@ -281,7 +281,7 @@ MailFolderCC::AppendMessage(Message const &msg)
 {
    String tmp;
 
-   msg.WriteString(tmp);
+   msg.WriteToString(tmp);
    AppendMessage(tmp);
 }
 

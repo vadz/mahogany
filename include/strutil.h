@@ -193,7 +193,8 @@ String strutil_extract_formatspec(const char *format);
    (isalnum(c)  || c == '.' || c == '/' || c == ':' \
     || c == '_' || c == '&' || c == '#' || c == '-' \
     || c == '%' || c == '~' || c == '!' || c == '?' \
-    || c == '*' || c == '+' || c == '$' || c == '@' )
+    || c == '*' || c == '+' || c == '$' || c == '@' \
+    || c == '=' || c == ',')
 
 /// If path is an absolute path, return true.
 bool strutil_isabsolutepath(const String &path);

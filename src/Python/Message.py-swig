@@ -114,9 +114,6 @@ class MessagePtr :
         val = apply(Messagec.Message_GetPartSpec,(self.this,)+args)
         val = StringPtr(val)
         return val
-    def WriteString(self,arg0):
-        val = Messagec.Message_WriteString(self.this,arg0.this)
-        return val
     def WriteToString(self,arg0,*args):
         val = apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
         return val

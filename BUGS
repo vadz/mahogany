@@ -6,10 +6,8 @@ $Id$
 ** ID ***********************************************************************
 
 0003  KB can't open autocollect.adb in AdbEditor if already opened
-
 0005  KB Profile readEntry() needs interface extension to allow a boolean success
          value, remove hacks like 17 or "illegal value"!
-
 0006  KB Memory leaks whenever using wxMessageView (there are some from cclient)
 0007  KB add remaining translation strings from include files
 0008  KB handle "truncated mailfolder" more gracefully (i.e. close and
@@ -17,20 +15,24 @@ $Id$
       VZ when 2 mail clients are running simultaneously and the message is deleted
          from the spool M crashes with meaningless backtrace.
 0010  KB Using a global /etc/M.conf file leads to lots of strange results.
-0011  KB message/save to file does not work but produces empty files
-         and creates two files /path/xxx and $HOME/.M/path/xxx
 0012  KB MIME popup at wrong position again
-0013  KB Copying message to other folder sometimes only writes
-         headers, no content, same for save to file.
 0014  KB Sometimes program doesn't react to Exit button/menu. 
 0015  KB POP mail folders are a bit broken: "large" messages don't
          show up or corrupt other message contents --> are we really fetching
          all the required data from the server?
+0016  KB "Show raw message text" broken: only gets called from message 
+         view and then only shows empty window
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
 ** ID ** date fixed ** comment **********************************************
 
+0011  KB message/save to file does not work but produces empty files
+         and creates two files /path/xxx and $HOME/.M/path/xxx
+
+0013  KB Copying message to other folder sometimes only writes
+         headers, no content, same for save to file. Now even
+         causes segfaults.
 
 *****************************************************************************
 ** Fixed   (only move entries here when tested)                            **
@@ -40,5 +42,4 @@ $Id$
 0002  KB lock file checking for INBOX:
          needs to check for xxx.lock.* not just xxx.lock !
 0004  KB help fails to find copyright
-0009  KB Sending messages with XFace can cause segfault. Thought to be 
-         fixed, but persistent.
+0009  KB Sending messages with XFace can cause segfault. 

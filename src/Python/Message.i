@@ -162,12 +162,7 @@ public:
    */
    virtual const String & GetPartSpec(int n = 0);
 
-   /** Append the message to a String.
-       @param str the string to write message text to
-   */
-   virtual void WriteString(String &str) ;
-
-   /** Append the message to a String.
+   /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header
    */

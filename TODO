@@ -11,22 +11,38 @@ $Id$
  - mAppBase::OnExit() gets called twice
  - creating new folder and immediately after doing a message/copy to
    folder caused crash
+ - sometimes M is very slow sending a message, why?
+ - when calling netscape to view URL, M locked up (after writing
+   "done"), top showed two M processes and after a while it terminated
+   with an IO trap 
 
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+ - forwarding messages broken, no content
+ - sending messages takes ages - why? Vadim: can you do some profiling
+   on that?  --> Local network problem? Verify again later.
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).
  - Is POP3 really that slow or are we transferring more than needed?
- - copying to other folder only writes headers, no content 
  - folderview listctrl has extra Subject column behind Size field ???
- - message save to file doesn't work
  - add message/move to folder
  - wxlwindow: MIME menu appears at wrong position again
- - allow '=' in urls and don't allow ' '
  - when inserting filetype of unknown MIME type, prompt for it,
    possibly have a MIME types editor (similar to netscape's?)
+ - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+   SendMessageCC::AddPart()
 
+ - make Message class use reference counting !
+ - new mail dialog:
+   + sometimes From: is empty
+   + if more than one new mail, info for one of them is duplicated
+
+ - wxLayout:
+   + printing needs better scaling how does sample do it?
+   + use smaller fonts for printing.
+   \--> works well like now, but setting the printer scale smaller
+        reduces page size, just rescale fonts instead
  - wxLayout:
   + Refresh!!
   + undo?
@@ -34,6 +50,7 @@ $Id$
 
  - integrate new c-client lib 4.5
  - save and restore printer settings in profile
+ - M takes ages to send a message
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
  - add some progress messages when opening folders (looks like it's
    hung when accessing POP folders)
@@ -50,14 +67,33 @@ $Id$
        Didn't happen to me but c-client produced an error message and deactivated
        the mail stream.
 
- - OptionsPanels: add a help button which calls a help id depending on which page we're on
+ - document scripts in extra/scripts
+
+ - move some functionality from wxFolderView to MailFolder?
+
+ 
+ - Profile fixes/rewrite:
+   - Current wxFolderView::SaveMessages() relies on
+     MailFolder::OpenFolder() profile/file behaviour 
+
+
+ - somehow allow different configs for different hosts, maybe a
+   [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
+
+ - OptionsPanels:
+   -add a help button which calls a help id depending on which page we're on
+   - confirm exit button does have no effect and should be Yes No Ask
+     Radiobox anyway
 
  - GUI problems:
   - configuration panels way too large!
   - log window occasionally doesn't layout menu correctly (here too, no idea)
-
-- add (simple) keyboard interface to folder view (?)
-  (at least d,n,p or something like that)
+  - replace the ugly "Insert File" icon with one looking more like the 
+    other icons
+  - folder tree control should (configurable on a per-folder basis)
+    highlight and count the number of new messages
+  - add (simple) keyboard interface to folder view (?)
+    (at least d,n,p or something like that)
 
 - ADB:
   + make AdbEdit auto-generate a formatted name from first/family-name
@@ -65,16 +101,23 @@ $Id$
   + for names without entries, use the same method for name generation 
     as ProvBBDB for consistency
   + config entry names should allow  ',' (needed for mail names which
-    might contain it, just received one from "john doe, archeology")  
-  + autocollect.adb should be flashed as soon as it is created to allow
+    might contain it, just received one from "john doe, archeology"),
+    the same for apostrophes  
+  + autocollect.adb should be flushed as soon as it is created to allow
     opening it from the editor
   + add "add current address to ADB" to compose view
   + should be updated when new entries are created (can't be deleted from
     elsewhere for now...), add an event for this
   - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
     any more)
-  - ADB: does not use substring??? (Joen_Doedoe no expansion for
+  - ADB: does not use substring??? (Joen_Doe no expansion for
     "doe" or "Doe")
+  - closing adb editor while entries are selected somewhere (at least
+    in bbdb) causes error messages when opened the next time because
+    it cannot select the entry again
+  - copying between address books and groups
+  - BBDB: sort entries by surname
+
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app
@@ -85,6 +128,7 @@ $Id$
  - lock file checking for INBOX:
    + it does locking under Windows too, but the lock file names are different
      Testing for FOLDER.lock* now, is that fine?
+
 
 *********************************************************************
 *** things to fix/implement next ***
@@ -164,8 +208,6 @@ $Id$
 
 - DND with gmc (dead easy, see dnd example :-) )
 
-- merge messages.po with locale/*.po
-- when installing M.po files, create links to @prefix@/locale/...
 
 - announce M on bbdb mailing list
 
@@ -274,17 +316,16 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
- - help fails to find copyright
- - dirty flag in composeview
  - sometimes mailfolders/messages seem empty
- - .mo files should be found in M_BASEDIR/locale
- - wxLayout:
-   + printing needs better scaling how does sample do it?
-   + use smaller fonts for printing.
+ - copying to other folder only writes headers, no content 
+ - allow '=' in urls and don't allow ' '
 
 
+*********************************************************************
 *** Fixed and tested:
 *********************************************************************
+ - help fails to find copyright
+ - .mo files should be found in M_BASEDIR/locale
  - toolbars need to be a bit higher
  - crash when switching off header display in messageview
  - forwarding message triggers assert in wxComposeView:119
