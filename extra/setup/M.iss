@@ -74,6 +74,9 @@ Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 
 ; --- python support
 
+; we always need Python DLL as the app wouldn't start without it :-(
+Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"
+
 Source: "src\Python\MailFolder.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\MAppBase.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\Message.py"; DestDir: "{app}\Python"; Components: python
@@ -98,5 +101,5 @@ Name: "{group}\Report a Bug"; Filename: "{app}\Bug.url"; Components: misc
 [Registry]
 Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M"; ValueType: none; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"; Components: python
+Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"
 Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python

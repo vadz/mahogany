@@ -835,15 +835,9 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
       "You can receive e-mail from remote mail\n"
-      "servers, or through the local mail spool.\n"
-      "\n"
-      "Mail servers may use POP3 or IMAP4 access,\n"
+      "servers using either POP3 or IMAP4 protocols\n"
       "but you usually need only one of them\n"
-      "(IMAP4 is much better and faster, so use it if you can).\n"
-      "\n"
-      "To read Usenet discussion groups, you need to\n"
-      "specify the NNTP (news) server and to be able\n"
-      "to send e-mail, an SMTP server is required.\n"
+      "(IMAP is more secure and efficient, so use it if you can).\n"
       "\n"
       "All of these fields may be filled later as well\n"
       "(and you will be able to specify multiple servers too).\n"
@@ -868,10 +862,8 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 
    wxStaticText *imapMsg = panel->CreateMessage(_(
       "Mahogany can search the IMAP server to\n"
-      "find all folders on it. On some setups\n"
-      "this can take very long. If you only use\n"
-      "the default folder on the server, disable\n"
-      "this option."), m_nntp);
+      "find all folders on it (warning: this may\n"
+      "take a long time over slow connection)."), m_nntp);
    labels.Empty();
    labels.Add(_("&Search for all IMAP folders:"));
    widthMax = GetMaxLabelWidth(labels, panel);
@@ -1069,25 +1061,11 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       "Congratulations!\n"
       "You have successfully configured\n"
       "Mahogany and may now start using it.\n"
-/* VZ: this message is too long, there is no place for checkbox below
       "\n"
-      "Please remember to consult the online help\n"
-      "and the documentaion files included.\n"
-      "\n"
-      "You may want to have a look at the\n"
-      "full set of program options, too.\n"
-      "\n"
-*/
       "In case of a problem, consult the help\n"
       "system and, if you cannot resolve it,\n"
-      "please visit our web site at\n"
-      "http://mahogany.home.dhs.org/ or\n"
+      "subscribe to m-users mailing list at\n"
       "http://mahogany.sourceforge.net/\n"
-      "\n"
-      "You might also want to join the Mahogany\n"
-      "mailing lists, which you can access via\n"
-      "the web page."
-      "\n"
       "\n"
       "We hope you will enjoy using Mahogany!\n"
       "                    The M-Team"
