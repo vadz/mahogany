@@ -642,7 +642,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -651,7 +650,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -663,7 +661,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -672,7 +669,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -684,7 +680,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -693,7 +688,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -705,7 +699,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -714,7 +707,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -726,7 +718,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -735,7 +726,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -747,7 +737,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -756,7 +745,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -768,7 +756,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -777,7 +764,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -789,7 +775,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
-									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -798,7 +783,6 @@
 								<Tool
 									Name="VCCLCompilerTool"
 									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
-									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
 							</FileConfiguration>
@@ -1174,19 +1158,24 @@
 					Name="spam"
 					Filter="">
 					<File
-						RelativePath=".\src\modules\spam\dspam.cpp">
+						RelativePath=".\src\modules\spam\DspamFilter.cpp">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories="lib/dspam"/>
+								AdditionalIncludeDirectories="lib/dspam"
+								PreprocessorDefinitions="HAVE_CONFIG_H"/>
 						</FileConfiguration>
 						<FileConfiguration
 							Name="Release|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
-								AdditionalIncludeDirectories="lib/dspam"/>
+								AdditionalIncludeDirectories="lib/dspam"
+								PreprocessorDefinitions="HAVE_CONFIG_H"/>
 						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\src\modules\spam\HeadersFilter.cpp">
 					</File>
 				</Filter>
 			</Filter>

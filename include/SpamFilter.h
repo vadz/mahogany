@@ -38,44 +38,67 @@ public:
    /**
       Mark the message as spam.
 
-      This method is used for training the spam filter and also for correcting
-      its mistakes.
+      This method is used for correcting spam filter mistakes, see Train() for
+      training the spam filter.
 
       @param msg the spam message
     */
    static void ClassifyAsSpam(const Message& msg)
-      { ReclassifyAsSpam(msg, true); }
+      { Reclassify(msg, true); }
 
    /**
       Mark the message as non-spam.
 
-      Unlike ClassifyAsSpam() this is normally only used to correct mistakes,
+      Like ClassifyAsSpam() this is normally only used to correct mistakes,
       i.e. for reclassifying a false positive.
 
       @param msg the ham (i.e. non-spam) message
     */
    static void ClassifyAsHam(const Message& msg)
-      { ReclassifyAsSpam(msg, false); }
+      { Reclassify(msg, false); }
 
    /**
       Reclassify the message as either spam or ham.
 
-      Common part of ClassifyAsSpam/Ham()
+      Common part of ClassifyAsSpam/Ham().
+
+      Note that this should only be used if the spam filter had accidentally
+      detected that the message was a spam, not to train it.
+
 
       @param msg the message to reclassify
       @param isSpam if true, reclassify as spam, otherwise as ham
     */
-   static void ReclassifyAsSpam(const Message& msg, bool isSpam);
+   static void Reclassify(const Message& msg, bool isSpam);
+
+   /**
+      Train the spam filter using the specified spam or ham message.
+
+      Unlike Reclassify() which should only be used for the messages
+      which had been mistakenly misclassified by the filter, this method should
+      be used for the messages which had never been seen by the spam filter
+      before.
+
+      @param msg the message to train the filter with
+      @param isSpam if true, this as a spam, otherwise -- ham
+    */
+   static void Train(const Message& msg, bool isSpam);
 
    /**
       Check if the message is a spam.
 
       @param msg the message to check
-      @param probability if non NULL, return the probability of this message
-                         being a spam, may be NULL if caller not interested
+      @param params array containing the stringified options for the filters
+                    (each element is of the form "name=options" where "name" is
+                    the name of the filter and options depend on filter)
+      @param result place holder for the message explaining why the message was
+                    deemed to be spam, if the filter can tell it, ignored if
+                    the return value is false
       @return true if the message is deemed to be a spam, false otherwise
     */
-   static bool CheckIfSpam(const Message& msg, float *probability = NULL);
+   static bool CheckIfSpam(const Message& msg,
+                           const wxArrayString& params,
+                           String *result);
 
    /**
       Unload all loaded spam filters.
@@ -83,7 +106,7 @@ public:
       This should be called at least before the program termination to free
       memory used by the spam filters but can also be called during the program
       execution to force reloading of the spam filters during the next call to
-      ReclassifyAsSpam() or CheckIfSpam().
+      Reclassify() or CheckIfSpam().
     */
    static void UnloadAll();
 
@@ -96,7 +119,7 @@ protected:
    /**
       Loads all available spam filters.
 
-      This is called as needed by ReclassifyAsSpam()/CheckIfSpam(), no need to
+      This is called as needed by Reclassify()/CheckIfSpam(), no need to
       call it explicitly.
     */
    static inline void LoadAll()
@@ -115,11 +138,37 @@ protected:
     */
    //@{
 
-   /// Reclassify a message as either spam or ham
-   virtual void Reclassify(const Message& msg, bool isSpam) = 0;
+   /**
+      Reclassify a message as either spam or ham.
 
-   /// Process a message and return whether it is a spam
-   virtual bool Process(const Message& msg, float *probability) = 0;
+      This is used by the public Reclassify().
+    */
+   virtual void DoReclassify(const Message& msg, bool isSpam) = 0;
+
+   /**
+      Train filter using this message.
+
+      This is used by the public Train().
+    */
+   virtual void DoTrain(const Message& msg, bool isSpam) = 0;
+
+   /**
+      Process a message and return whether it is a spam.
+
+      This is used by the public CheckIfSpam(). The parameter passed to it is
+      the RHS of the element in the params array passed to CheckIfSpam() having
+      the same name as this spam filter.
+    */
+   virtual bool DoCheckIfSpam(const Message& msg,
+                              const String& param,
+                              String *result) = 0;
+
+   /**
+      Return the internal name of this spam filter.
+
+      This method is implemented by DECLARE_SPAM_FILTER() macro below.
+    */
+   virtual const wxChar *GetName() const = 0;
 
    //@}
 
@@ -154,6 +203,17 @@ public:
 
 // the spam filter module interface name
 #define SPAM_FILTER_INTERFACE _T("SpamFilter")
+
+/**
+  This macro must be used in SpamFilter-derived class declaration.
+
+  It defines GetName() which returns the parameter of the macro.
+
+  There should be no semicolon after this macro.
+ */
+#define DECLARE_SPAM_FILTER(name)                                             \
+   public:                                                                    \
+      virtual const wxChar *GetName() const { return _T(name); }
 
 /**
   This macro must be used in the .cpp file containing the implementation of a

@@ -1000,7 +1000,7 @@ void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
          continue;
       }
 
-      SpamFilter::ReclassifyAsSpam(*msg, isSpam);
+      SpamFilter::Reclassify(*msg, isSpam);
    }
 
    wxLogStatus(GetFrame(), msg + _("done"));
@@ -1042,18 +1042,20 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
          continue;
       }
 
-      float prob = 1.;
       String str(_("The message with subject \"%s\" from \"%s\"\n"));
-      if ( SpamFilter::CheckIfSpam(*msg, &prob) )
+
+      wxArrayString params;
+      String result;
+      if ( SpamFilter::CheckIfSpam(*msg, params, &result) )
       {
-         wxLogWarning(str + _("seems to be a spam (probability: %0.3f)"),
+         wxLogWarning(str + _("seems to be a spam (%s)."),
                       msg->Subject().c_str(),
                       msg->From().c_str(),
-                      prob);
+                      result.c_str());
       }
       else // !spam
       {
-         wxLogMessage(str + _("doesn't seem to be a spam"),
+         wxLogMessage(str + _("doesn't seem to be a spam."),
                       msg->Subject().c_str(),
                       msg->From().c_str());
       }

@@ -48,25 +48,73 @@ bool SpamFilter::ms_loaded = false;
 // ----------------------------------------------------------------------------
 
 /* static */
-void SpamFilter::ReclassifyAsSpam(const Message& msg, bool isSpam)
+void SpamFilter::Reclassify(const Message& msg, bool isSpam)
 {
    LoadAll();
 
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      p->Reclassify(msg, isSpam);
+      p->DoReclassify(msg, isSpam);
    }
 }
 
 /* static */
-bool SpamFilter::CheckIfSpam(const Message& msg, float *probability)
+void SpamFilter::Train(const Message& msg, bool isSpam)
 {
    LoadAll();
 
    for ( SpamFilter *p = ms_first; p; p = p->m_next )
    {
-      if ( p->Process(msg, probability) )
+      p->DoTrain(msg, isSpam);
+   }
+}
+
+/* static */
+bool
+SpamFilter::CheckIfSpam(const Message& msg,
+                        const wxArrayString& params,
+                        String *result)
+{
+   LoadAll();
+
+   // break down the parameters into names and parameters
+   wxSortedArrayString names;
+   wxArrayString values;
+   const size_t count = params.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const wxString& param = params[n];
+      int pos = param.Find(_T('='));
+      if ( pos == wxNOT_FOUND )
+      {
+         wxLogDebug(_T("Invalid spam filter parameter \"%s\""), param.c_str());
+         continue;
+      }
+
+      // insert the value in the same position in values array as name is going
+      // to have in the names one (as it's sorted we don't know where will it
+      // be)
+      values.Insert(param.c_str() + pos + 1, names.Add(wxString(param, pos)));
+   }
+
+
+   // now try all filters in turn until one of them returns true
+   for ( SpamFilter *p = ms_first; p; p = p->m_next )
+   {
+      const String& name(p->GetName());
+
+      int n = names.Index(name);
+      String param;
+      if ( n != wxNOT_FOUND )
+         param = values[(size_t)n];
+
+      if ( p->DoCheckIfSpam(msg, param, result) )
+      {
+         if ( result )
+            *result = name + _T(": ") + *result;
+
          return true;
+      }
    }
 
    return false;
