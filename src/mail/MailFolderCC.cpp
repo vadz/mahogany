@@ -4107,7 +4107,10 @@ static void ThreadMessagesHelper(THREADNODE *thr,
 
 static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 {
+   CHECK( stream, false, _T("MailStreamHasThreader: folder is closed") );
+
    IMAPLOCAL *imapLocal = (IMAPLOCAL *)stream->local;
+
    THREADER *thr;
    for ( thr = imapLocal->cap.threader;
          thr && compare_cstring(thr->name, (char *)thrName);
@@ -4140,20 +4143,15 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
         READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD) )
    {
-      const char *threadingAlgo;
+      const char *threadingAlgo = NULL;
 
       // it does, but maybe we want only threading by references (best) and it
       // only provides dumb threading by subject?
       if ( !MailStreamHasThreader(m_MailStream, "REFERENCES") )
       {
-         if ( READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD_REF_ONLY) )
+         if ( !READ_CONFIG(m_Profile, MP_MSGS_SERVER_THREAD_REF_ONLY) )
          {
-            // don't use server side threading at all if it only provides the
-            // dumb way to do it
-            threadingAlgo = NULL;
-         }
-         else // we are allowed to fall back to subject threading
-         {
+            // we are allowed to fall back to subject threading
             if ( MailStreamHasThreader(m_MailStream, "ORDEREDSUBJECT") )
             {
                threadingAlgo = "ORDEREDSUBJECT";
@@ -4164,9 +4162,14 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
                // threading support in its CAPABILITY reply, so just use the
                // first threading method available
                IMAPLOCAL *imapLocal = (IMAPLOCAL *)m_MailStream->local;
-               threadingAlgo = imapLocal->cap.threader->name;
+               if ( imapLocal->cap.threader )
+               {
+                  threadingAlgo = imapLocal->cap.threader->name;
+               }
             }
          }
+         //else: don't use server side threading at all if it only provides the
+         //      dumb (subject-based) way to do it
       }
       else // have REFERENCES threading
       {
