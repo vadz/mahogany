@@ -2487,7 +2487,7 @@ bool wxOptionsPage::TransferDataToWindow()
             // except ConfigField_OpenFolders where it is ';' for config
             // backwards compatibility
             char ch = n == ConfigField_OpenFolders ? ';' : ':';
-            wxArrayString entries = strutil_restore_array(ch, strValue);
+            wxArrayString entries = strutil_restore_array(strValue, ch);
 
             size_t count = entries.GetCount();
             for ( size_t m = 0; m < count; m++ )

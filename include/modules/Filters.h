@@ -16,7 +16,7 @@ class FilterRule;
 class MailFolder;
 
 /// The name of the interface provided.
-#define MMODULE_INTERFACE_FILTERS   "Filters"
+#define MMODULE_INTERFACE_FILTERS   _T("Filters")
 
 /** Filtering Module class. */
 class MModule_Filters : public MModule

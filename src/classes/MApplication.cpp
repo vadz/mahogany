@@ -362,7 +362,7 @@ MAppBase::OnStartup()
 #ifdef DEBUG
    // enable tracing of the specified kinds of messages
    wxArrayString
-      masks = strutil_restore_array(_T(':'), m_profile->readEntry(_T("DebugTrace"), _T("")));
+      masks = strutil_restore_array(m_profile->readEntry(_T("DebugTrace"), _T("")));
    size_t nMasks = masks.GetCount();
    for ( size_t nMask = 0; nMask < nMasks; nMask++ )
    {
@@ -1003,7 +1003,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
             msg = mf->GetMessage(hi->GetUId());
             ASSERT(msg);
             String newsgroups;
-            msg->GetHeaderLine("Newsgroups", newsgroups);
+            msg->GetHeaderLine(_T("Newsgroups"), newsgroups);
             if(newsgroups.Length() > 0)
                nntp++;
             else
@@ -1108,7 +1108,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          String msgText;
          String target;
          bool alreadyCounted = false;
-         msg->GetHeaderLine("To", target);
+         msg->GetHeaderLine(_T("To"), target);
          Protocol protocol = Prot_Illegal;
          if(target.Length() > 0)
          {
@@ -1137,7 +1137,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                ++i;
             }
          }
-         msg->GetHeaderLine("Newsgroups", target);
+         msg->GetHeaderLine(_T("Newsgroups"), target);
          protocol = Prot_NNTP; // default
          if(target.Length() > 0)
          {
@@ -1276,7 +1276,7 @@ String MAppBase::GetDataDir() const
       if ( !dir.empty() )
          dir += '/';
 
-      dir += "src";
+      dir += _T("src");
    }
 
    return dir;
@@ -1292,10 +1292,10 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
 #if 0 // we don't provide any mailcaps so far
         // attempt to load the extra information supplied with M:
 
-        if(wxFileExists(GetGlobalDir()+"/mailcap"))
-            m_mimeManager->ReadMailcap(GetGlobalDir()+"/mailcap");
-        if(wxFileExists(GetGlobalDir()+"/mime.types"))
-            m_mimeManager->ReadMimeTypes(GetGlobalDir()+"/mime.types");
+        if(wxFileExists(GetGlobalDir()+_T("/mailcap")))
+            m_mimeManager->ReadMailcap(GetGlobalDir()+_T("/mailcap"));
+        if(wxFileExists(GetGlobalDir()+_T("/mime.types")))
+            m_mimeManager->ReadMimeTypes(GetGlobalDir()+_T("/mime.types"));
 #endif // 0
 
     }

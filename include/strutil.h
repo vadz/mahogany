@@ -341,10 +341,8 @@ strutil_freeRegEx(class strutil_RegEx *regex);
 //@}
 
 // convert a string array to/from 'ch' separated string
-extern wxArrayString strutil_restore_array(wxChar ch, const String& str);
-inline wxArrayString strutil_restore_array(const String& str, wxChar ch = ':')
-   { return strutil_restore_array(ch, str); }
-extern String strutil_flatten_array(const wxArrayString& array, wxChar ch = ':');
+extern wxArrayString strutil_restore_array(const String& str, wxChar ch = _T(':'));
+extern String strutil_flatten_array(const wxArrayString& array, wxChar ch = _T(':'));
 
 // return an array containing unique strings from sorted array
 extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);

@@ -981,7 +981,7 @@ static String ReadColumnWidths(Profile *profile)
 //     case if we have incorrect profile entry
 static wxArrayString UnpackWidths(const wxString& s)
 {
-   return strutil_restore_array(COLUMNS_WIDTHS_SEP, s);
+   return strutil_restore_array(s, COLUMNS_WIDTHS_SEP);
 }
 
 // return the array of width which always have the right number of elements
@@ -3531,7 +3531,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
          returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
       }
 
-      settings->returnAddresses = strutil_restore_array(':', returnAddrs);
+      settings->returnAddresses = strutil_restore_array(returnAddrs);
    }
 
    settings->previewOnSingleClick =

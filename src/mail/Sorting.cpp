@@ -70,7 +70,7 @@ void SortParams::Read(Profile *profile)
          returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
       }
 
-      ownAddresses = strutil_restore_array(':', returnAddrs);
+      ownAddresses = strutil_restore_array(returnAddrs);
    }
 }
 

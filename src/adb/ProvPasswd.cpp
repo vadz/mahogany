@@ -317,8 +317,8 @@ void PasswdEntryGroup::ReadPasswdDb()
    struct passwd *pwd;
    while ( (pwd = getpwent()) != NULL )
    {
-      size_t index = m_names.Add(wxChar(pwd->pw_name));
-      m_gecos.Insert(wxChar(pwd->pw_gecos), index);
+      size_t index = m_names.Add(wxConvertMB2WX(pwd->pw_name));
+      m_gecos.Insert(wxConvertMB2WX(pwd->pw_gecos), index);
    }
 
    endpwent();

@@ -142,17 +142,17 @@ AC_CANONICAL_HOST
 dnl setting the OS type for information
 AC_DEFINE_UNQUOTED(M_CANONICAL_HOST,"$host")
 AC_DEFINE_UNQUOTED(M_OSINFO,"`uname -s -r -m`")
-AC_DEFINE_UNQUOTED(M_PREFIX,"$prefix")
+AC_DEFINE_UNQUOTED(M_PREFIX,_T("$prefix"))
 
 dnl set the top level directories
 dnl use "exec pwd" to avoid shell built-in
 dnl use "cd ." so FreeBSD shell will fork subshell
 SOURCEDIR=`cd $srcdir; exec pwd`
 AC_SUBST(SOURCEDIR)
-AC_DEFINE_UNQUOTED(M_TOP_SOURCEDIR, "$SOURCEDIR")
+AC_DEFINE_UNQUOTED(M_TOP_SOURCEDIR, _T("$SOURCEDIR"))
 BUILDDIR=`cd .; exec pwd`
 AC_SUBST(BUILDDIR)
-AC_DEFINE_UNQUOTED(M_TOP_BUILDDIR, "$BUILDDIR")
+AC_DEFINE_UNQUOTED(M_TOP_BUILDDIR, _T("$BUILDDIR"))
 
 dnl instead of invoking subsidary configures, we accumulate the flags
 dnl here for some third-party sources, since they would otherwise have

@@ -320,7 +320,7 @@ String GetFileNameForMIME(Message *message, int partNo)
 
 // common part of GetAllAvailableViewers() and GetAllAvailableFilters()
 static
-size_t GetAllAvailablePlugins(const char *iface,
+size_t GetAllAvailablePlugins(const wxChar *iface,
                               wxArrayString *names,
                               wxArrayString *descs,
                               wxArrayInt *states = NULL)
@@ -493,7 +493,7 @@ wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
                     wxFONTSTYLE_NORMAL,
                     wxFONTWEIGHT_NORMAL,
                     FALSE,   // not underlined
-                    "",      // no specific face name
+                    _T(""),  // no specific face name
                     encoding);
    }
 
@@ -1053,13 +1053,13 @@ MessageView::ShowHeaders()
 
    // all the headers the user configured
    wxArrayString headersUser =
-      strutil_restore_array(':', READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS));
+      strutil_restore_array(READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS));
 
    // X-Face is handled separately
 #ifdef HAVE_XFACES
    if ( m_ProfileValues.showFaces )
    {
-      headersUser.Insert("X-Face", 0);
+      headersUser.Insert(_T("X-Face"), 0);
    }
 #endif // HAVE_XFACES
 
@@ -1471,7 +1471,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    }
 
    // cast is ok - it's a text part
-   String textPart = (const char *)mimepart->GetContent();
+   String textPart = (const wxChar *)mimepart->GetContent();
 
    ShowText(textPart, mimepart->GetTextEncoding());
 }
@@ -1712,7 +1712,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    {
       wxString typeName = type.GetType();
 
-      if ( typeName == "OCTET" )
+      if ( typeName == _T("OCTET") )
       {
          // I have messages with "Content-Type: OCTET/STREAM", convert them
          // to "APPLICATION/OCTET-STREAM"
@@ -1740,11 +1740,11 @@ MessageView::ShowPart(const MimePart *mimepart)
             ft->GetMimeType(&mt);
             delete ft;
 
-            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
+            if(wxMimeTypesManager::IsOfType(mt,_T("image/*")))
                primaryType = MimeType::IMAGE;
-            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
+            else if(wxMimeTypesManager::IsOfType(mt,_T("audio/*")))
                primaryType = MimeType::AUDIO;
-            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
+            else if(wxMimeTypesManager::IsOfType(mt,_T("video/*")))
                primaryType = MimeType::VIDEO;
          }
       }
@@ -1782,7 +1782,7 @@ MessageView::ShowPart(const MimePart *mimepart)
       //else: skip this part
    }
    else if ( !isAttachment &&
-             ((mimeType == "TEXT/PLAIN" &&
+             ((mimeType == _T("TEXT/PLAIN") &&
                (fileName.empty() || m_ProfileValues.inlinePlainText)) ||
               (primaryType == MimeType::MESSAGE &&
                 m_ProfileValues.inlineRFC822)) )
@@ -1826,7 +1826,7 @@ MessageView::ProcessPart(const MimePart *mimepart)
             String subtype = type.GetSubType();
 
             // TODO: support for DIGEST, RELATED and SIGNED
-            if ( subtype == "ALTERNATIVE" )
+            if ( subtype == _T("ALTERNATIVE") )
             {
                // find the best subpart we can show
                //
@@ -1841,7 +1841,7 @@ MessageView::ProcessPart(const MimePart *mimepart)
                {
                   String mimetype = partChild->GetType().GetFull();
 
-                  if ( mimetype == "TEXT/PLAIN" ||
+                  if ( mimetype == _T("TEXT/PLAIN") ||
                         m_viewer->CanProcess(mimetype) )
                   {
                      // remember this one as the best so far
@@ -1857,9 +1857,9 @@ MessageView::ProcessPart(const MimePart *mimepart)
                // So process it as well.
                ProcessPart(partBest);
             }
-            else if ( subtype == "SIGNED" )
+            else if ( subtype == _T("SIGNED") )
             {
-               String protocol = mimepart->GetParam("protocol");
+               String protocol = mimepart->GetParam(_T("protocol"));
                if ( protocol == _T("application/pgp-signature") )
                {
                   MimePart *signedPart = mimepart->GetNested();
@@ -1881,10 +1881,10 @@ MessageView::ProcessPart(const MimePart *mimepart)
                   // Get the raw content (with headers) of the signed part
                   unsigned long signedTextLength = 0;
                   const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
-                  String signedText(c, signedTextLength);
+                  String signedText(wxConvertMB2WX(c), signedTextLength);
                   unsigned long signatureLength = 0;
                   c = (const char *)signaturePart->GetContent(&signatureLength);
-                  String signature(c, signatureLength);
+                  String signature(wxConvertMB2WX(c), signatureLength);
                   
                   MCryptoEngineFactory * const factory
                      = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
@@ -2083,7 +2083,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
       for ( plist_it = plist.begin(); plist_it != plist.end(); plist_it++ )
       {
          name = plist_it->name;
-         message << NormalizeString(name) << ": ";
+         message << NormalizeString(name) << _T(": ");
 
          // filenames are case-sensitive, don't modify them
          value = plist_it->value;
@@ -2109,7 +2109,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
       for ( plist_it = dlist.begin(); plist_it != dlist.end(); plist_it++ )
       {
          name = plist_it->name;
-         message << NormalizeString(name) << ": ";
+         message << NormalizeString(name) << _T(": ");
 
          value = plist_it->value;
          if ( name.CmpNoCase(_T("filename")) != 0 )
@@ -2140,7 +2140,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
    wxFileType *fileType = NULL;
-   if ( wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM") )
+   if ( wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM")) )
    {
       // special handling of "APPLICATION/OCTET-STREAM": this is the default
       // MIME type for all binary attachments and many e-mail clients don't
@@ -2167,7 +2167,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    // First, we check for those contents that we handle in M itself:
 
    // handle internally MESSAGE/*
-   if ( wxMimeTypesManager::IsOfType(mimetype, "MESSAGE/*") )
+   if ( wxMimeTypesManager::IsOfType(mimetype, _T("MESSAGE/*")) )
    {
 #if 0
       // It's a pity, but creating a MessageCC from a string doesn't
@@ -2185,7 +2185,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
 #else // 1
       bool ok = false;
       wxString filename;
-      if ( wxGetTempFileName("Mtemp", filename) )
+      if ( wxGetTempFileName(_T("Mtemp"), filename) )
       {
          if ( MimeSave(mimepart, filename) )
          {
@@ -2227,7 +2227,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    }
 
    String filename;
-   if ( !wxGetTempFileName("Mtemp", filename) )
+   if ( !wxGetTempFileName(_T("Mtemp"), filename) )
    {
       wxLogError(_("Failed to open the attachment."));
 
@@ -2279,8 +2279,8 @@ MessageView::MimeHandle(const MimePart *mimepart)
       proceed in the usual fashion. This allows the use of a special
       image/tiff-g3 mailcap entry. */
    if ( READ_CONFIG(profile,MP_INCFAX_SUPPORT) &&
-        (wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF")
-         || wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM")))
+        (wxMimeTypesManager::IsOfType(mimetype, _T("IMAGE/TIFF"))
+         || wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM"))))
    {
       kbStringList faxdomains;
       char *faxlisting = strutil_strdup(READ_CONFIG(profile,
@@ -2307,7 +2307,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          wxLogDebug(_T("Detected image/tiff fax content."));
          // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
-         String filenamePS = filename.BeforeLast('.') + ".ps";
+         String filenamePS = filename.BeforeLast('.') + _T(".ps");
          String command;
          command.Printf(READ_CONFIG_TEXT(profile,MP_TIFF2PS),
                         filename.c_str(), filenamePS.c_str());
@@ -2323,7 +2323,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
 
          wxRemoveFile(filename);
          filename = filenamePS;
-         mimetype = "application/postscript";
+         mimetype = _T("application/postscript");
          if(fileType) delete fileType;
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
@@ -2375,7 +2375,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          if ( specs.empty() )
          {
             // at least the filename should be there!
-            command += " %s";
+            command += _T(" %s");
          }
 
          // do expand it
@@ -2411,7 +2411,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    wxFileType *fileType = NULL;
    fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
 
-   String filename = wxGetTempFileName("Mtemp");
+   String filename = wxGetTempFileName(_T("Mtemp"));
 
    wxString ext;
    wxSplitPath(filenameOrig, NULL, NULL, &ext);
@@ -2469,7 +2469,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       if ( specs.empty() )
       {
          // at least the filename should be there!
-         command += " %s";
+         command += _T(" %s");
       }
 
       // do expand it
@@ -2501,7 +2501,7 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       wxString path, name, ext;
       wxSplitPath(filename, &path, &name, &ext);
 
-      filename = wxPFileSelector("MimeSave",_("Save attachment as:"),
+      filename = wxPFileSelector(_T("MimeSave"),_("Save attachment as:"),
                                  NULL, // no default path
                                  name, ext,
                                  NULL,
@@ -2577,7 +2577,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
       String filename = mimepart->GetFilename();
       if ( !filename.empty() )
       {
-         title << " ('" << filename << "')";
+         title << _T(" ('") << filename << _T("')");
       }
 
       MDialog_ShowText(GetParentFrame(), title,

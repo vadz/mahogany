@@ -182,7 +182,7 @@ public:
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = ""
+                        String argument = _T("")
       ) = 0;
 
    /// sets the action and its argument

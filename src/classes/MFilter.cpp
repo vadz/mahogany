@@ -42,9 +42,9 @@
 // profile entries names
 //
 // NB: don't forget to modify MFilter::Copy() when adding more entries here
-#define MP_FILTER_NAME     "Name"
-#define MP_FILTER_RULE     "Rule"
-#define MP_FILTER_GUIDESC  "Settings"
+#define MP_FILTER_NAME     _T("Name")
+#define MP_FILTER_RULE     _T("Rule")
+#define MP_FILTER_GUIDESC  _T("Settings")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -118,7 +118,7 @@ MFDialogComponent::ReadSettings(String *str)
 String
 MFDialogComponent::WriteSettings(void)
 {
-   return wxString::Format("%d %d %d \"%s\" %d",
+   return wxString::Format(_T("%d %d %d \"%s\" %d"),
                            (int) m_Logical,
                            (int) m_Inverted,
                            (int) m_Test,
@@ -127,27 +127,27 @@ MFDialogComponent::WriteSettings(void)
 }
 
 static
-const char * ORC_T_Names[] =
+const wxChar * ORC_T_Names[] =
 {
    // NB: if the string is terminated with a '(' a matching ')' will be
    //     automatically added when constructing the filter expression
-   "1",                 // ORC_T_Always
-   "matchi(",           // ORC_T_Match
-   "containsi(",        // ORC_T_Contains
-   "match(",            // ORC_T_MatchC
-   "contains(",         // ORC_T_ContainsC
-   "matchregex(",       // ORC_T_MatchRegExC
-   "size() > ",         // ORC_T_LargerThan
-   "size() < ",         // ORC_T_SmallerThan
-   "(now()-date()) > ", // ORC_T_OlderThan
-   "(now()-date()) < ", // ORC_T_NewerThan
-   "isspam(",           // ORC_T_IsSpam
-   "python(",           // ORC_T_Python
-   "matchregexi(",      // ORC_T_MatchRegEx
-   "score() > ",        // ORC_T_ScoreAbove
-   "score() < ",        // ORC_T_ScoreBelow
-   "istome()",          // ORC_T_IsToMe
-   "hasflag(",          // ORC_T_HasFlag
+   _T("1"),                 // ORC_T_Always
+   _T("matchi("),           // ORC_T_Match
+   _T("containsi("),        // ORC_T_Contains
+   _T("match("),            // ORC_T_MatchC
+   _T("contains("),         // ORC_T_ContainsC
+   _T("matchregex("),       // ORC_T_MatchRegExC
+   _T("size() > "),         // ORC_T_LargerThan
+   _T("size() < "),         // ORC_T_SmallerThan
+   _T("(now()-date()) > "), // ORC_T_OlderThan
+   _T("(now()-date()) < "), // ORC_T_NewerThan
+   _T("isspam("),           // ORC_T_IsSpam
+   _T("python("),           // ORC_T_Python
+   _T("matchregexi("),      // ORC_T_MatchRegEx
+   _T("score() > "),        // ORC_T_ScoreAbove
+   _T("score() < "),        // ORC_T_ScoreBelow
+   _T("istome()"),          // ORC_T_IsToMe
+   _T("hasflag("),          // ORC_T_HasFlag
    NULL
 };
 
@@ -211,35 +211,35 @@ bool FilterTestImplemented(MFDialogTest test)
 }
 
 static
-const char * ORC_W_Names[] =
+const wxChar * ORC_W_Names[] =
 {
-   "subject()",             // ORC_W_Subject
-   "header()",              // ORC_W_Header
-   "from()",                // ORC_W_From
-   "body()",                // ORC_W_Body
-   "message()",             // ORC_W_Message
-   "to()",                  // ORC_W_To
-   "header(\"Sender\")",    // ORC_W_Sender
-   "recipients()",          // ORC_W_Recipients
+   _T("subject()"),             // ORC_W_Subject
+   _T("header()"),              // ORC_W_Header
+   _T("from()"),                // ORC_W_From
+   _T("body()"),                // ORC_W_Body
+   _T("message()"),             // ORC_W_Message
+   _T("to()"),                  // ORC_W_To
+   _T("header(\"Sender\")"),    // ORC_W_Sender
+   _T("recipients()"),          // ORC_W_Recipients
    NULL
 };
 
-static const char * OAC_T_Names[] =
+static const wxChar * OAC_T_Names[] =
 {
-   "delete(",       // OAC_T_Delete
-   "copy(",         // OAC_T_CopyTo
-   "move(",         // OAC_T_MoveTo
-   "expunge(",      // OAC_T_Expunge
-   "message(",      // OAC_T_MessageBox
-   "log(",          // OAC_T_LogEntry
-   "python(",       // OAC_T_Python
-   "addscore(",     // OAC_T_AddScore
-   "setcolour(",    // OAC_T_SetColour
-   "zap(",          // OAC_T_Zap
-   "print(",        // OAC_T_Print
-   "setflag(",      // OAC_T_SetFlag
-   "clearflag(",    // OAC_T_ClearFlag
-   "setscore(",     // OAC_T_SetScore
+   _T("delete("),       // OAC_T_Delete
+   _T("copy("),         // OAC_T_CopyTo
+   _T("move("),         // OAC_T_MoveTo
+   _T("expunge("),      // OAC_T_Expunge
+   _T("message("),      // OAC_T_MessageBox
+   _T("log("),          // OAC_T_LogEntry
+   _T("python("),       // OAC_T_Python
+   _T("addscore("),     // OAC_T_AddScore
+   _T("setcolour("),    // OAC_T_SetColour
+   _T("zap("),          // OAC_T_Zap
+   _T("print("),        // OAC_T_Print
+   _T("setflag("),      // OAC_T_SetFlag
+   _T("clearflag("),    // OAC_T_ClearFlag
+   _T("setscore("),     // OAC_T_SetScore
    NULL
 };
 
@@ -368,7 +368,7 @@ MFDialogComponent::WriteTest(void)
       else
       {
          FAIL_MSG(_T("This must not happen!"));
-         return "";
+         return _T("");
       }
    }
 
@@ -391,7 +391,7 @@ MFDialogComponent::WriteTest(void)
 bool
 MFDialogComponent::ReadSettingsFromRule(String & rule)
 {
-   const char *cptr = rule.c_str();
+   const wxChar *cptr = rule.c_str();
 
    if(*cptr == '|')
    {
@@ -419,9 +419,9 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    // now we need to find the test to be applied:
    m_Test = ORC_T_Illegal;
    for(size_t i = 0; ORC_T_Names[i]; i++)
-      if(strncmp(cptr, ORC_T_Names[i], strlen(ORC_T_Names[i])) == 0)
+      if(wxStrncmp(cptr, ORC_T_Names[i], wxStrlen(ORC_T_Names[i])) == 0)
       {
-         cptr += strlen(ORC_T_Names[i]);
+         cptr += wxStrlen(ORC_T_Names[i]);
          m_Test = (MFDialogTest) i;
          break;
       }
@@ -433,7 +433,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    if(needsTarget)
    {
       for(size_t i = 0; ORC_W_Names[i]; i++)
-         if(strncmp(cptr, ORC_W_Names[i], strlen(ORC_W_Names[i])) == 0)
+         if(wxStrncmp(cptr, ORC_W_Names[i], wxStrlen(ORC_W_Names[i])) == 0)
          {
             m_Target = (MFDialogTarget) i;
             break;
@@ -446,7 +446,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       && *cptr++ != ',')
       return FALSE;
 
-   m_Argument = "";
+   m_Argument = _T("");
    if(needsArgument)
    {
       if(*cptr != '"') return FALSE;
@@ -528,7 +528,7 @@ public:
                         bool isInverted,
                         MFDialogTest test,
                         MFDialogTarget target,
-                        String argument = ""
+                        String argument = _T("")
       )
       {
          MOcheck();
@@ -589,8 +589,8 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
 }
 
 #define MATCH_FAIL(what) \
-   if( strncmp(cptr, what, strlen(what)) == 0) \
-     cptr += strlen(what); \
+   if( wxStrncmp(cptr, what, wxStrlen(what)) == 0) \
+     cptr += wxStrlen(what); \
    else \
      return FALSE \
 
@@ -601,23 +601,23 @@ MFDialogSettingsImpl::WriteAction(void) const
    if(m_Action < 0 || m_Action >= OAC_T_Max)
    {
       ASSERT_MSG(0, _T("illegal action - must not happen"));
-      return "";
+      return _T("");
    }
    bool needsArgument = FilterActionNeedsArg(m_Action);
    program << OAC_T_Names[m_Action];
    if(needsArgument)
       program << '"' << m_ActionArgument << '"';
-   program << ");";
+   program << _T(");");
    return program;
 }
 
 bool
 MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
 {
-   const char *cptr = rule.c_str();
+   const wxChar *cptr = rule.c_str();
    bool rc;
 
-   MATCH_FAIL("if("); // now inside first test
+   MATCH_FAIL(_T("if(")); // now inside first test
 
    String tmp = cptr;
    do
@@ -631,12 +631,12 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
       return FALSE; // could not find any test
    cptr = tmp.c_str();
 
-   MATCH_FAIL("){");
+   MATCH_FAIL(_T("){"));
 
    for(size_t i = 0; OAC_T_Names[i] ; i++)
-      if(strncmp(cptr, OAC_T_Names[i], strlen(OAC_T_Names[i])) == 0)
+      if(wxStrncmp(cptr, OAC_T_Names[i], wxStrlen(OAC_T_Names[i])) == 0)
       {
-         cptr += strlen(OAC_T_Names[i]);
+         cptr += wxStrlen(OAC_T_Names[i]);
          m_Action = (MFDialogAction) i;
          break;
       }
@@ -650,7 +650,7 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
          return FALSE;
    }
    else
-      m_ActionArgument = "";
+      m_ActionArgument = _T("");
    return TRUE; // we    made it
 }
 
@@ -693,7 +693,7 @@ MFDialogSettingsImpl::WriteSettings(void) const
 String
 MFDialogSettingsImpl::WriteActionSettings(void) const
 {
-   return String::Format("%d \"%s\"",
+   return String::Format(_T("%d \"%s\""),
                          (int) m_Action,
                          strutil_escapeString(m_ActionArgument).c_str());
 }
@@ -702,7 +702,7 @@ String
 MFDialogSettingsImpl::WriteRule(void) const
 {
    ASSERT(m_Tests.Count() > 0);
-   String program = "if(";
+   String program = _T("if(");
 
    for(size_t i = 0; i < m_Tests.Count(); i++)
       program << m_Tests[i].WriteTest();
@@ -772,11 +772,11 @@ protected:
    MFilterFromProfile(Profile *p)
       {
          m_Profile = p;
-         m_Name = p->readEntry(MP_FILTER_NAME, "");
+         m_Name = p->readEntry(MP_FILTER_NAME, _T(""));
          m_Settings = NULL;
 
          // use the filter program if we have it
-         m_Rule = p->readEntry(MP_FILTER_RULE, "");
+         m_Rule = p->readEntry(MP_FILTER_RULE, _T(""));
          if( !m_Rule.empty() )
          {
             // try to parse the rule
@@ -794,7 +794,7 @@ protected:
          if ( m_Rule.empty() )
          {
             // use the GUI settings if no rule
-            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
+            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, _T(""));
          }
 
          m_dirty = false;
@@ -877,7 +877,7 @@ bool
 MFilter::DeleteFromProfile(const String& name)
 {
    // get parent of all filters
-   Profile_obj p(Profile::CreateFilterProfile(""));
+   Profile_obj p(Profile::CreateFilterProfile(_T("")));
 
    bool rc;
    if ( p )
@@ -898,7 +898,7 @@ static bool CopyFilterEntry(Profile *profileSrc,
                             Profile *profileDst,
                             const String& entry)
 {
-   String value = profileSrc->readEntry(entry, "");
+   String value = profileSrc->readEntry(entry, _T(""));
    if ( !value.empty() )
    {
       if ( !profileDst->writeEntry(entry, value) )
@@ -962,7 +962,7 @@ MFDialogSettingsImpl::DebugDump() const
 String
 MFilterFromProfile::DebugDump() const
 {
-   return MObjectRC::DebugDump() + " name " + m_Name;
+   return MObjectRC::DebugDump() + _T(" name ") + m_Name;
 }
 
 #endif // DEBUG

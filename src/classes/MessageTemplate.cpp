@@ -42,7 +42,7 @@
 // ----------------------------------------------------------------------------
 
 // the name of the standard template - i.e. the one which is used by default
-#define STANDARD_TEMPLATE_NAME "Standard"
+#define STANDARD_TEMPLATE_NAME _T("Standard")
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -107,13 +107,13 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
       case '\'': // this one is kept for compatibility only, it was a typo...
       case '`':
          bracketClose = bracketOpen;
-         category = "cmd";
+         category = _T("cmd");
          quoted = true;
          break;
 
       case '<':
          bracketClose = '<';
-         category = "file";
+         category = _T("file");
          quoted = true;
          break;
 
@@ -561,7 +561,7 @@ static String GetTemplateKindPath(MessageTemplateKind kind)
 static String GetTemplateNamePath(MessageTemplateKind kind)
 {
    String path;
-   path << "Template_" << GetTemplateKindPath(kind);
+   path << _T("Template_") << GetTemplateKindPath(kind);
 
    return path;
 }
@@ -611,7 +611,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
 
    wxConfigBase *config = profile->GetConfig();
 
-   String value = config->Read(GetTemplateValuePath(kind, name), "");
+   String value = config->Read(GetTemplateValuePath(kind, name), _T(""));
    if ( value.empty() )
    {
       // we have the default templates for reply, follow-up and forward
@@ -645,11 +645,11 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
          case MessageTemplate_NewMessage:
          case MessageTemplate_NewArticle:
             // put the cursor before the signature
-            value = "$CURSOR";
+            value = _T("$CURSOR");
       }
 
       // all default templates include the signature
-      value += "\n$SIGNATURE";
+      value += _T("\n$SIGNATURE");
    }
 
    return value;

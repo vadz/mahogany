@@ -113,21 +113,21 @@
 #define   USE_CLASSINFO      1
 
 /// name of the application, has to remain "M" for compatibility reasons
-#define   M_APPLICATIONNAME   "M"
+#define   M_APPLICATIONNAME   _T("M")
 /// name of the vendor
-#define   M_VENDORNAME   "Mahogany-Team"
+#define   M_VENDORNAME   _T("Mahogany-Team")
 
 /// name of global config file
-#define   M_GLOBAL_CONFIG_NAME   "Mahogany.conf"
+#define   M_GLOBAL_CONFIG_NAME   _T("Mahogany.conf")
 
 /// path for etc directories
-#define   M_ETC_PATH   "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc"
+#define   M_ETC_PATH   _T("/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc")
 
 /// basic M installation directory
 #ifdef OS_UNIX
-#   define   M_BASEDIR M_PREFIX"/share/Mahogany"
+#   define   M_BASEDIR M_PREFIX _T("/share/Mahogany")
 #else
-#   define   M_BASEDIR M_PREFIX"\\Mahogany"
+#   define   M_BASEDIR M_PREFIX _T("\\Mahogany")
 #endif
 
 #ifdef   HAVE_COMPFACE_H

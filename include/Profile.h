@@ -132,7 +132,7 @@ public:
                             bool *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,
-                    const char *defaultvalue = NULL,
+                    const wxChar *defaultvalue = NULL,
                     bool *found = NULL) const;
    /// Read an integer value.
    virtual long readEntry(const String & key,

@@ -1197,20 +1197,20 @@ cat >> confdefs.h <<EOF
 EOF
 
 cat >> confdefs.h <<EOF
-#define M_PREFIX "$prefix"
+#define M_PREFIX _T("$prefix")
 EOF
 
 
 SOURCEDIR=`cd $srcdir; exec pwd`
 
 cat >> confdefs.h <<EOF
-#define M_TOP_SOURCEDIR "$SOURCEDIR"
+#define M_TOP_SOURCEDIR _T("$SOURCEDIR")
 EOF
 
 BUILDDIR=`cd .; exec pwd`
 
 cat >> confdefs.h <<EOF
-#define M_TOP_BUILDDIR "$BUILDDIR"
+#define M_TOP_BUILDDIR _T("$BUILDDIR")
 EOF
 
 

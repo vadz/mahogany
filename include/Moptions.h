@@ -1272,22 +1272,22 @@ extern const MOption MP_AWAY_STATUS;
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory
-#  define   MP_PATHLIST_DEFVAL M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+#  define   MP_PATHLIST_DEFVAL M_PREFIX _T(":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt")
 /// the complete path to the glocal M directory
 #  define   MP_GLOBALDIR_DEFVAL      M_BASEDIR
 /// the name of M's root directory
-#  define   MP_ROOTDIRNAME_DEFVAL   "Mahogany"
+#  define   MP_ROOTDIRNAME_DEFVAL   _T("Mahogany")
 /// the name of the M directory
-#  define   MP_USER_MDIR_DEFVAL         ".M"
+#  define   MP_USER_MDIR_DEFVAL         _T(".M")
 /// the path where to find .afm files
-#  define   MP_AFMPATH_DEFVAL M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+#  define   MP_AFMPATH_DEFVAL M_BASEDIR _T("/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript")
 /// the path to the /etc directories (configuration files)
-#  define   MP_ETCPATH_DEFVAL "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
+#  define   MP_ETCPATH_DEFVAL _T("/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc")
 /// the path to the m directory
-#  define   MP_PREFIXPATH_DEFVAL "/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp"
+#  define   MP_PREFIXPATH_DEFVAL _T("/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp")
 #else // !Unix
 /// the complete path to the glocal M directory
-#  define   MP_GLOBALDIR_DEFVAL  ""
+#  define   MP_GLOBALDIR_DEFVAL  _T("")
 #endif // Unix/!Unix
 
 /// the directory containing the help files

@@ -847,7 +847,7 @@ void MFolderFromProfile::SetTreeIndex(int pos)
 
 wxArrayString MFolderFromProfile::GetFilters() const
 {
-   return strutil_restore_array(':', READ_CONFIG(m_profile, MP_FOLDER_FILTERS));
+   return strutil_restore_array(READ_CONFIG(m_profile, MP_FOLDER_FILTERS));
 }
 
 void MFolderFromProfile::SetFilters(const wxArrayString& filters)
