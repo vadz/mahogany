@@ -6243,32 +6243,39 @@ void MailFolderCC::EndReading()
    }
 
    #define TRACE_CALLBACK0(name) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s)", \
-                 #name, GetStreamMailbox(stream))
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s)%s", \
+                 #name, GetStreamMailbox(stream), \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK1(name, fmt, parm) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, GetStreamMailbox(stream), parm)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+                 #name, GetStreamMailbox(stream), parm, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, GetStreamMailbox(stream), parm1, parm2)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+                 #name, GetStreamMailbox(stream), parm1, parm2, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, GetStreamMailbox(stream), parm1, parm2, parm3)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")%s", \
+                 #name, GetStreamMailbox(stream), parm1, parm2, parm3, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
-                 #name, parm1)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+                 #name, parm1, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, parm1, parm2) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
-                 #name, parm1, parm2)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+                 #name, parm1, parm2, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 
    #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
-      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
-                 #name, parm1, parm2, parm3, parm4, parm5)
+      wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")%s", \
+                 #name, parm1, parm2, parm3, parm4, parm5, \
+                 mm_disable_callbacks ? " [disabled]" : "")
 #else // !EXPERIMENTAL_log_callbacks
    #define TRACE_CALLBACK0(name)
    #define TRACE_CALLBACK0(name)
@@ -6288,10 +6295,10 @@ extern "C"
 void
 mm_searched(MAILSTREAM *stream, unsigned long msgno)
 {
+   TRACE_CALLBACK1(mm_searched, "%lu", msgno);
+
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_searched, "%lu", msgno);
-
       MailFolderCC::mm_searched(stream,  msgno);
    }
 }
@@ -6299,10 +6306,10 @@ mm_searched(MAILSTREAM *stream, unsigned long msgno)
 void
 mm_expunged(MAILSTREAM *stream, unsigned long msgno)
 {
+   TRACE_CALLBACK1(mm_expunged, "%lu", msgno);
+
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_expunged, "%lu", msgno);
-
       MailFolderCC::mm_expunged(stream, msgno);
    }
 }
@@ -6310,10 +6317,10 @@ mm_expunged(MAILSTREAM *stream, unsigned long msgno)
 void
 mm_flags(MAILSTREAM *stream, unsigned long msgno)
 {
+   TRACE_CALLBACK1(mm_flags, "%lu", msgno);
+
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_flags, "%lu", msgno);
-
       MailFolderCC::mm_flags(stream, msgno);
    }
 }
@@ -6321,10 +6328,10 @@ mm_flags(MAILSTREAM *stream, unsigned long msgno)
 void
 mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
+   TRACE_CALLBACK2(mm_notify, "%s (%s)", str, GetErrorLevel(errflg));
+
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK2(mm_notify, "%s (%s)", str, GetErrorLevel(errflg));
-
       MailFolderCC::mm_notify(stream, str, errflg);
    }
 }
@@ -6348,10 +6355,10 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_exists(MAILSTREAM *stream, unsigned long msgno)
 {
+   TRACE_CALLBACK1(mm_exists, "%lu", msgno);
+
    if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_exists, "%lu", msgno);
-
       MailFolderCC::mm_exists(stream, msgno);
    }
 }
@@ -6359,6 +6366,8 @@ mm_exists(MAILSTREAM *stream, unsigned long msgno)
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+   TRACE_CALLBACK1(mm_status, "%s", mailbox);
+
    // allow redirected callbacks even while all others are disabled
    if ( gs_mmStatusRedirect )
    {
@@ -6366,8 +6375,6 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
    }
    else if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK1(mm_status, "%s", mailbox);
-
       MailFolderCC::mm_status(stream, mailbox, status);
    }
 }
@@ -6375,10 +6382,10 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
+   TRACE_CALLBACK_NOSTREAM_2(mm_log, "%s (%s)", str, GetErrorLevel(errflg));
+
    if ( mm_disable_callbacks || mm_ignore_errors )
       return;
-
-   TRACE_CALLBACK_NOSTREAM_2(mm_log, "%s (%s)", str, GetErrorLevel(errflg));
 
    String msg(str);
 
@@ -6395,13 +6402,13 @@ mm_log(char *str, long errflg)
 void
 mm_dlog(char *str)
 {
+   TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s", str);
+
    // always show debug logs, even if other callbacks are disabled - this
    // makes it easier to understand what's going on
 
    // if ( !mm_disable_callbacks )
    {
-      TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s", str);
-
       MailFolderCC::mm_dlog(str);
    }
 }
@@ -6664,6 +6671,9 @@ void ServerInfoEntry::CheckTimeout()
 
          wxLogTrace(TRACE_CONN_CACHE,
                     "Connection to %s timed out, closing.", stream->mailbox);
+
+         // we're not interested in getting mail_close() babble
+         CCCallbackDisabler cc;
 
          mail_close(stream);
 
