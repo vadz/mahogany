@@ -1,0 +1,21 @@
+#!/bin/zsh
+
+## FIXME: why read below doesn't work with sh (== bash) is beyond me
+
+for i in *.po; do
+	output=`${MSGFMT-msgfmt} -v -o /dev/null $i 2>&1`
+	if [ $? ]; then
+		# analyze output to extract the number of translated,
+		# untranslated and fuzzy messages
+		echo $output |
+		sed 's/^\([0-9]\+\) translated messages, \([0-9]\+\) fuzzy translations, \([0-9]\+\) untranslated messages.$/\1 \2 \3/' |
+		read trans fuzzy untrans
+
+		# echo "trans=$trans, fuzzy=$fuzzy, untrans=$untrans"
+
+		total=$(($trans + $fuzzy + $untrans))
+		echo "$i: $total total, $((($trans*100)/$total))% done"
+	else
+		echo "ERROR: $i failed to compile!"
+	fi
+done
