@@ -2914,7 +2914,7 @@ msgstr "ou implicite, y compris, sans limitation, les garanties implicites"
 
 #: wxMDialogs.cpp:787 wxMDialogs.cpp:789
 msgid "of merchantibility and fitness for a particular purpose."
-msgstr "de @@@@"
+msgstr "d'être adapté à aucune tâche spécifique."
 
 #: wxMDialogs.cpp:790 wxMDialogs.cpp:792
 msgid "This is OpenSource(TM) software."
