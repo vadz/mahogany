@@ -453,6 +453,8 @@ ConfigSourceLocal::~ConfigSourceLocal()
 {
    // don't try to recreate us
    wxConfig::Set(NULL);
+
+   delete m_config;
 }
 
 // ----------------------------------------------------------------------------
