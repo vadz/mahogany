@@ -1017,7 +1017,10 @@ MessageView::ShowHeaders()
    if ( m_ProfileValues.showFaces )
    {
       wxString xfaceString = headerValues[n++];
-      if ( xfaceString.length() > 2 )   //\r\n
+      if ( xfaceString.length() > 20 )
+      // FIXME it was > 2, i.e. \r\n. Although if(uncompface(data) < 0) in
+      // XFace.cpp should catch illegal data, it is not the case. For example,
+      // for "X-Face: nope" some nonsense was displayed. So we use 20 for now.
       {
          XFace *xface = new XFace;
          xface->CreateFromXFace(xfaceString.c_str());
