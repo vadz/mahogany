@@ -748,10 +748,10 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    GetColourByName(&settings->BgCol, READ_CONFIG(m_Profile,
                                                  MP_FVIEW_BGCOLOUR),
                    MP_FVIEW_BGCOLOUR_D);
-   settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
+   settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
    settings->font = wxFonts[settings->font];
-   settings->size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
+   settings->size = READ_CONFIG(m_Profile,MP_FVIEW_FONT_SIZE);
 
 
 }
