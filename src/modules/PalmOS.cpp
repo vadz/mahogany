@@ -43,6 +43,8 @@
 #   include "gui/wxMenuDefs.h"
 #   include "MMainFrame.h"
 #   include "HeaderInfo.h"
+
+#   include "wx/stattext.h"
 #endif
 
 // we can't compile an empty library as it was done before as then you get
@@ -1666,7 +1668,7 @@ PalmOSModule::SendEMails(void)
          smsg->AddHeaderEntry("Reply-To",mail.replyTo);
       if(mail.sentTo)
          smsg->AddHeaderEntry("Sent-To",mail.sentTo);
-      smsg->AddPart(Message::MSG_TYPETEXT,
+      smsg->AddPart(MimeType::TEXT,
                     mail.body, strlen(mail.body));
       if(smsg->SendOrQueue())
       {
@@ -1791,7 +1793,7 @@ PalmOSModule::StoreEMails(void)
          t.subject = strutil_strdup(msg->Subject());
          msg->GetHeaderLine("To",content);
          t.to = strutil_strdup(content);
-         msg->Address(content, MAT_REPLYTO);
+         content = msg->GetAddressesString(MAT_REPLYTO);
          t.replyTo = strutil_strdup(content);
          t.dated = 1;
          time_t tt;
@@ -1801,15 +1803,13 @@ PalmOSModule::StoreEMails(void)
          content = "";
          for(int partNo = 0; partNo < msg->CountParts(); partNo++)
          {
-            if(msg->GetPartType(partNo) == Message::MSG_TYPETEXT
-               && ( msg->GetPartMimeType(partNo) == "TEXT/PLAIN"
-                    || msg->GetPartMimeType(partNo) == "TEXT/plain"
-                  )
-               )
-               content << msg->GetPartContent(partNo);
+            String mimeType = msg->GetPartMimeType(partNo);
+
+            if ( msg->GetPartType(partNo) == Message::MSG_TYPETEXT &&
+                  mimeType.Upper() == "TEXT/PLAIN" )
+               content << (char *)msg->GetPartContent(partNo);
             else
-               content << '[' << msg->GetPartMimeType(partNo) <<
-                  ']' << '\n';
+               content << '[' << mimeType << ']' << '\n';
          }
          // msg->WriteToString(content, false /* headers */);
          String content2;
