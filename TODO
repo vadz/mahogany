@@ -7,7 +7,6 @@ $Id$
 - tons of cclient lib errors (mainly "invalid sequence") whatever I do under
   Windows - I have no clue :-(
 - sequence invalid bug on close of folder
-
 - test sl5/slx abiguity in c-client: use -lshadow on libc5 and -lcrypt on glibc2?
 - SentMail folder path should be relative - broken
 - reply mail does not quote original mail but inserts junk
@@ -41,58 +40,37 @@ $Id$
     (already works in standalone folder view, but not for main frame)
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
-
-- Profile/wxMDialogs
-  + fix usage of readEntry to use String objects
-  + who cleans up CPYSTR() generated strings?
-  + find path to global configuration file and use it?
+  + session management
 
 - Python
-  + in src/Python: improve rules to always redo .cpp/.py
   + add remaining (important) interface definitions
-  + add an InputBox dialog
   + user/global Minit files, security issues
   + add OnNewMail callback by counting messages in mailbox
     + add sample callback showing new messages
-  + update interface files
 
 - DND with gmc (dead easy, see dnd example :-) )
-
-- new mail callback
 
 *** to implement in near future ***
 
 - !!! non-blocking message retrieval !!!
 
-- add support for popping window open and reading a folder of one's choice
+- REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
   (for being controlled from xbiff like programs)
   idea: listen() on a socket and write socket number to a file ~/.M/socket 
 
 - threading of messages via MessageId/References header lines
   Follow examples in SunExpert journal.
 
-- drag and drop interaction with gmc and kfm
-
-- full URL parsing according to specs (have the BNF now)
-- cut and paste for wxllist, wxhtmlwindow, wxHtmlImport()
-
-- when run for the first time, should display "Mail" configuration dialog
-  with reasonable defaults (add a top-level profile option "ConfigDone"
-  and do it if it's not found) including import of XFace from file
-
-- lots of dialogs for profile settings required
-
 - support for external editor (WHAT!? KB)
-  + I want vim
+  + I want vim ....I'm getting sick.
 
 - fix non-ASCII characters in header lines
-
 
 *** long-term projects ***
 
 - Support for different charsets (Unicode/utf-7/8?)
 
-- LDAP -- possibly using python ldap module?
+- LDAP -- possibly using python ldap module or OpenLDAP.
 
 - automatic (but optional) mail compactification (to save disk space)?
   -> this could be done using scripts?
@@ -111,9 +89,6 @@ Create a module to deal with all kinds of pathname lookups and
 expansions. 
 
 ********************* known wxWindows bugs **********************
-
-- drawing of transparent icons on wxDC gives undefined background (wxGTK)
-  --> can be fixed by setting a parameter. Is fixed now?
 
 - wxDC::GetTextExtent() does not set descent value (wxGTK)
 - font mess (wxGTK)
