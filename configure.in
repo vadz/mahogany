@@ -146,6 +146,7 @@ DEFAULT_USE_WXSTRING=1
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_APPCONF=0
 DEFAULT_USE_EFENCE=0
+DEFAULT_USE_DEBUG=1
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
@@ -264,6 +265,11 @@ USE_EFENCE)
 AC_OVERRIDES(threads,threads,
 --with-threads            link with libpthread,
 USE_THREADS)
+
+AC_OVERRIDES(debug,debug,
+--with-debug              use debug info/code,
+USE_DEBUG)
+
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
@@ -623,6 +629,18 @@ if test "$USE_THREADS" = 1; then
 fi
 
 AC_SUBST(EXTRA_LINK)
+
+dnl set debug/optimisation flags
+dnl we don't use CFLAGS/CXXFLAGS from autoconf
+DBGFLAGS=
+OPTFLAGS=$CXXFLAGS
+if test "$USE_DEBUG" = 1; then
+	DBGFLAGS="-g2 -DDEBUG"
+	OPTFLAGS="$CXXFLAGS -O0" # turn off all optimisations
+fi
+
+AC_SUBST(OPTFLAGS)
+AC_SUBST(DBGFLAGS)
 
 BUILDDIR=`pwd`
 AC_SUBST(BUILDDIR)

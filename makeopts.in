@@ -4,6 +4,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.12  1998/07/07 12:41:13  KB
+# No longer mixes debug and optimisation flags.
+# New option (on by default) --with-debug for configure.
+#
 # Revision 1.11  1998/07/05 12:20:02  KB
 # wxMessageView works and handles mime (segfault on deletion)
 # wsIconManager loads files
@@ -50,8 +54,8 @@ ICONDIR=$(BUILDDIR)/src/icons
 EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@ @EXTRA_LINK@
 
 # compiler flags
-OPT = 
-DBG = -g2 -DDEBUG
+OPT = @OPTFLAGS@
+DBG = @DBGFLAGS@ 
 
 GUI_SLINK=@WX_SLINK@ 
 GUI_INCLUDE=@WX_INCLUDE@ -I$(ICONDIR)
@@ -133,8 +137,8 @@ LINK = $(CXX)
 DEF = $(GUI_DEFS)
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
       $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC)
-CFLAGS = @CFLAGS@ $(OPT) $(DBG) $(DEF) $(INC)
-CXXFLAGS = @CFLAGS@ $(OPT) $(DBG) $(DEF) $(INC)
+CFLAGS   = $(OPT) $(DBG) $(DEF) $(INC)
+CXXFLAGS = $(OPT) $(DBG) $(DEF) $(INC)
 LDFLAGS  = $(OPT) $(GUI_LDFLAGS) 
 
 LIBS= \
