@@ -154,6 +154,8 @@
 // Recommended setting: 0 (unless you only plan to use Windows NT/2000)
 #define wxUSE_UNICODE 0
 
+#define wxUSE_UNICODE_MSLU 0
+
 // Setting wxUSE_WCHAR_T to 1 gives you some degree of Unicode support without
 // compiling the program in Unicode mode. More precisely, it will be possible
 // to construct wxString from a wide (Unicode) string and convert any wxString
@@ -234,6 +236,9 @@
 #define wxUSE_FILE          1
 #define wxUSE_FFILE         1
 
+// use wxTextBuffer class: required by wxTextFile
+#define wxUSE_TEXTBUFFER    1
+
 // use wxTextFile class: requires wxFile, required by wxFileConfig
 #define wxUSE_TEXTFILE      1
 
@@ -310,6 +315,7 @@
 //
 // Recommended setting: 1
 #define wxUSE_DYNLIB_CLASS  1
+#define wxUSE_DYNAMIC_LOADER  1
 
 // Set to 1 to use socket classes
 #define wxUSE_SOCKETS       1
@@ -350,6 +356,12 @@
 // wxMimeTypesManager class
 #define wxUSE_MIMETYPE 1
 
+#define wxUSE_PROTOCOL 1
+#define wxUSE_PROTOCOL_FILE 1
+#define wxUSE_PROTOCOL_FTP 1
+#define wxUSE_PROTOCOL_HTTP 1
+#define wxUSE_URL 1
+
 // ----------------------------------------------------------------------------
 // Individual GUI controls
 // ----------------------------------------------------------------------------
@@ -367,7 +379,8 @@
 // Default is 0
 //
 // Recommended setting: 0
-#define wxUSE_POPUPWIN     0
+#define wxUSE_POPUPWIN     1
+#define wxUSE_TIPWINDOW    1
 
 // Each of the settings below corresponds to one wxWindows control. They are
 // all switched on by default but may be disabled if you are sure that your
@@ -604,6 +617,7 @@
 // support for startup tips (wxShowTip &c)
 #define wxUSE_STARTUP_TIPS 1
 
+#define wxUSE_SPLASH 1
 #define wxUSE_WIZARDDLG 1
 
 // ----------------------------------------------------------------------------
@@ -822,6 +836,11 @@
 
 // Set to 1 for XPM format support
 #define wxUSE_XPM           1
+
+// Set to 1 for MS Icons and Cursors format support
+#define wxUSE_ICO_CUR       1
+
+#define wxUSE_PALETTE       1
 
 // ----------------------------------------------------------------------------
 // Windows-only settings

@@ -58,7 +58,10 @@ WX_2_2_BRANCH" as described above).
 
    Mahogany now uses the standard wxWindows project files so just build
 wxWindows using the provided src/wxWindows.dsp project. You will need to point
-MSDEV to this file when you open M.dsw workspace for the first time.
+MSDEV to this file when you open M.dsw workspace for the first time. You also
+can build wxWindows with the standard include\wx\msw\setup.h but the preferred
+solution is still to use the one from extra\scripts\wxmsw_setup.h (just copy it
+over wxWindows setup.h)
 
 2. Build process
 ----------------
