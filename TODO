@@ -8,6 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	add some error detection, online detection to
+		SendOutbox()
+
 9		exiting program does not call auto-expunge
 		functionality in main folder
 

@@ -113,6 +113,8 @@ public:
 protected:
    /** Builds the message, i.e. prepare to send it. */
    void Build(void);
+   /// Checks for existence of a header entry
+   bool HasHeaderEntry(const String &entry);
 private:
    /// 2nd stage constructor, see constructor
    void	Create(Protocol protocol, ProfileBase *iprof);

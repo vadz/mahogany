@@ -231,6 +231,18 @@ SendMessageCC::ExtractFccFolders(String &addresses)
    }
 }
 
+bool
+SendMessageCC::HasHeaderEntry(const String &entry)
+{
+   kbStringList::iterator i;
+   for(i = m_ExtraHeaderLinesNames.begin();
+       i != m_ExtraHeaderLinesNames.end();
+       i++)
+      if(**i == entry)
+         return true;
+   return false;
+}
+
 /** Adds an extra header line.
     @param entry name of header entry
     @param value value of header entry
@@ -243,8 +255,41 @@ SendMessageCC::AddHeaderEntry(String const &entry, String const
       *name = new String(),
       *value = new String();
    *name = entry; *value = ivalue;
-   m_ExtraHeaderLinesNames.push_back(name);
-   m_ExtraHeaderLinesValues.push_back(value);
+   strutil_delwhitespace(*name);
+   strutil_delwhitespace(*value);
+   if(entry == "To")
+      ; //TODO: Fix this?SetAddresses(*value);
+   else if(entry == "CC")
+      ; //SetAddresses("",*value);
+   else if(entry == "BCC")
+      ; //SetAddresses("","",*value);
+   else if(entry == "MIME-Version"
+           || entry == "Content-Type"
+           || entry == "Content-Disposition"
+           || entry == "Content-Transfer-Encoding"
+      )
+      ;  // ignore
+   else if(entry == "Subject")
+      SetSubject(*value);
+   else
+   {
+      kbStringList::iterator i, j;
+      for(i = m_ExtraHeaderLinesNames.begin(),
+             j = m_ExtraHeaderLinesValues.begin();
+          i != m_ExtraHeaderLinesNames.end();
+          i++, j++)
+      {
+         if(**i == entry)
+         {
+            // change existing list entry
+            **j = *value;
+            return;
+         }
+      }
+      // new entry
+      m_ExtraHeaderLinesNames.push_back(name);
+      m_ExtraHeaderLinesValues.push_back(value);
+   }
 }
 
 
@@ -299,30 +344,34 @@ SendMessageCC::Build(void)
    }
 
    //always add mailer header:
-   m_headerNames[h] = strutil_strdup("X-Mailer");
-   String version;
-
+   if(! HasHeaderEntry("X-Mailer"))
+   {
+      m_headerNames[h] = strutil_strdup("X-Mailer");
+      String version;
 #ifdef OS_UNIX
-   version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
+      version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << M_OSINFO;
 #else // Windows
-   // TODO put Windows version info here
-   version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
+      // TODO put Windows version info here
+      version << "Mahogany, " << M_VERSION_STRING << _(" , compiled for ") << "Windows";
 #endif // Unix/Windows
-
-   m_headerValues[h++] = strutil_strdup(version);
-   //always add reply-to header:
+      m_headerValues[h++] = strutil_strdup(version);
+   }
    if(! replyToSet)
    {
-      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-      if(!strutil_isempty(tmpstr))
+      if(! HasHeaderEntry("Reply-To"))
       {
-         m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(tmpstr);
+         //always add reply-to header:
+         tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+         if(!strutil_isempty(tmpstr))
+         {
+            m_headerNames[h] = strutil_strdup("Reply-To");
+            m_headerValues[h++] = strutil_strdup(tmpstr);
+         }
       }
    }
 #ifdef HAVE_XFACES
    // add an XFace?
-   if(READ_CONFIG(m_Profile,MP_COMPOSE_USE_XFACE))
+   if(READ_CONFIG(m_Profile,MP_COMPOSE_USE_XFACE) && ! HasHeaderEntry("X-Face"))
    {
       XFace xface;
       xface.CreateFromFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
