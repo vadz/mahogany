@@ -2384,6 +2384,8 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
          m_headersToGet.Empty();
 
+         // we might have nothing to retrieve at all
+         if ( seq.GetCount() )
          {
             MLocker lockHeaders(m_mutexHeaders);
 
@@ -4803,7 +4805,8 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
          MsgnoType msgno = event.GetMsgno(n);
          if ( msgno > hil->Count() )
          {
-            // FIXME: message was expunged, what to do??
+            FAIL_MSG( _T("got status change notification for expunged msg?") );
+
             continue;
          }
 
@@ -4825,7 +4828,12 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
                            - (statusOld & MailFolder::MSG_STAT_DELETED);
          if ( deletedChange )
          {
-            m_nDeleted = GetDeletedCount() + deletedChange;
+            if ( m_nDeleted != UID_ILLEGAL )
+            {
+               // we may update it cheaply
+               m_nDeleted += deletedChange;
+            }
+            //else: will need to recalculate the number of deleted msgs later
          }
 
          // remember the items to update
