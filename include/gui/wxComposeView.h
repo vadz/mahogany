@@ -259,8 +259,21 @@ protected:
    /// clear the window
    void DoClear();
 
-   /// InitText() helper
-   void DoInitText(Message *msg, const MessageView *msgview = NULL);
+   /**
+      InitText() helper called when we can evaluate the template.
+
+      This is needed because if the template refers to the headers values we
+      want to let the user to fill in the headers first and to evaluate the
+      template later, however this should happen compeltely transparently for
+      the code outside of wxComposeView so we check whether we can evaluate the
+      template or not inside the public InitText() and either call DoInitText()
+      from there immediately or postpone it until later.
+
+      The parameter is used only if it is not NULL (which only happens when
+      we're called directly from InitText()), otherwise the previously
+      remembered (by InitText() itself) m_msgviewOrig is used.
+    */
+   void DoInitText(Message *msgOrig = NULL);
 
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const char *mimetype);
@@ -427,7 +440,7 @@ private:
    /// Have we been modified since the last save?
    bool m_isModified;
 
-   /// If replying, this is the original message
+   /// If replying, this is the original message (may be NULL)
    Message *m_OriginalMessage;
 
    /// if we're continuing to edit a draft, the original draft message
@@ -441,6 +454,9 @@ private:
 
    /// the (main) encoding (== charset) to use for the message
    wxFontEncoding m_encoding;
+
+   /// the message view of the original message when replying/forwarding
+   const MessageView *m_msgviewOrig;
 
    /**
      @name external editor support

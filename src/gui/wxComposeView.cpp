@@ -2234,9 +2234,9 @@ String wxComposeView::GetSubject() const
 // ----------------------------------------------------------------------------
 
 void
-wxComposeView::InitText(Message * /* msg */, const MessageView *msgview)
+wxComposeView::InitText(Message *msg, const MessageView *msgview)
 {
-   // store it for the future use
+   // store it for the future use in DoInitText()
    m_msgviewOrig = msgview;
 
    if ( m_kind == Message_New )
@@ -2270,7 +2270,7 @@ wxComposeView::InitText(Message * /* msg */, const MessageView *msgview)
    {
       ASSERT_MSG( m_OriginalMessage, _T("what do we reply to?") );
 
-      DoInitText();
+      DoInitText(msg);
    }
 }
 
@@ -2303,7 +2303,7 @@ void wxComposeView::Launch()
 }
 
 void
-wxComposeView::DoInitText()
+wxComposeView::DoInitText(Message *msgOrig)
 {
    // position the cursor correctly and separate us from the previous message
    // if we're replying to several messages at once
@@ -2400,8 +2400,14 @@ wxComposeView::DoInitText()
       templateChanged = FALSE;
 
       // do parse the template
-      if ( !ExpandTemplate(*this, m_Profile, templateValue,
-                           m_OriginalMessage, m_msgviewOrig) )
+      if ( !ExpandTemplate
+            (
+               *this,
+               m_Profile,
+               templateValue,
+               msgOrig ? msgOrig : m_OriginalMessage,
+               m_msgviewOrig
+            ) )
       {
          // first show any errors which the call to Parse() above could
          // generate
