@@ -1015,8 +1015,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Methods NOT to use"),           Field_Text |
                                                    Field_Advanced, ConfigField_MailServerLogin },
 #ifdef USE_SSL
-   { "\n\n"
-     gettext_noop("\n"
+   { gettext_noop("\n"
                   "Mahogany can attempt to use either SSL or TLS to send\n"
                   "mail or news. TLS is used by default if available but\n"
                   "you may disable it if you experience problems because\n"
@@ -1348,7 +1347,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Python &DLL"),                  Field_File |
                                                    Field_AppWide, ConfigField_EnablePython   },
 #endif // USE_PYTHON_DYNAMIC
-   { gettext_noop("The option below determines where we should look for\n"
+   { gettext_noop("The option below determines where Mahogany should look for\n"
                   "Python modules (in addition to standard places)"),                  Field_Message |
                                                    Field_AppWide, ConfigField_EnablePython   },
    { gettext_noop("Python &path"),                 Field_Text |
