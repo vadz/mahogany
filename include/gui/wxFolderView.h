@@ -161,6 +161,9 @@ public:
       { m_MessagePreview->ShowMessage(m_MailFolder,messageno+1); }
    void SetSize(const int x, const int y, const int width, int height);
 
+   /// return full folder name
+   const String& GetFullName() { return m_folderName; }
+
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
    /// return a profile pointer:

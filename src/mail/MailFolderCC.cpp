@@ -513,7 +513,6 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 void
 MailFolderCC::UpdateCount(void)
 {
-   unsigned long oldnum = m_numOfMessages;
 
    UpdateViews();
 

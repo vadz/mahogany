@@ -265,29 +265,12 @@ wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
 {
    wxLayoutConstraints *c;
 
-   // for the label
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   // we need some extra space because a radiobox is bigger than a text zone
-   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
-   c->width.Absolute(widthMax);
-   c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(this, -1, label,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_RIGHT);
-   pLabel->SetConstraints(c);
-
    // for the radiobox
    c = new wxLayoutConstraints;
-   c->centreY.SameAs(pLabel, wxCentreY);
-   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
+   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN + widthMax );
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
-#ifdef __WXGTK__
-   c->height.PercentOf(pLabel, wxHeight, 300);
-#else
-   c->height.PercentOf(pLabel, wxHeight, 150);
-   //c->height.AsIs();
-#endif
+   c->height.AsIs();
 
    // FIXME we assume that if there other controls dependent on this one in
    //       the options dialog, then only the first choice ("No") means that
@@ -303,6 +286,17 @@ wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
                                          1,wxRA_SPECIFY_ROWS);
 
    radiobox->SetConstraints(c);
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->centreY.SameAs(radiobox, wxCentreY);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
 
    return radiobox;
 }
