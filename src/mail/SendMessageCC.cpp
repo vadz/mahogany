@@ -193,29 +193,34 @@ private:
 // SendMessage
 // ----------------------------------------------------------------------------
 
-SendMessage *SendMessage::Create(Profile *prof, Protocol protocol)
+/* static */
+SendMessage *
+SendMessage::Create(Profile *prof, Protocol protocol, wxFrame *frame)
 {
-   return new SendMessageCC(prof, protocol);
+   return new SendMessageCC(prof, protocol, frame);
 }
 
 SendMessage::~SendMessage()
 {
 }
 
-SendMessageCC::SendMessageCC(Profile *prof,
-                             Protocol protocol)
-{
-   Create(protocol, prof);
-}
-
 // ----------------------------------------------------------------------------
 // SendMessageCC creation and destruction
 // ----------------------------------------------------------------------------
 
+SendMessageCC::SendMessageCC(Profile *prof,
+                             Protocol protocol,
+                             wxFrame *frame)
+{
+   Create(protocol, prof, frame);
+}
+
 void
 SendMessageCC::Create(Protocol protocol,
-                      Profile *prof)
+                      Profile *prof,
+                      wxFrame *frame)
 {
+   m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
 
    m_headerNames =
@@ -316,7 +321,8 @@ SendMessageCC::Create(Protocol protocol,
    // check that we have password if we use it
    if ( !m_UserName.empty() && m_Password.empty() )
    {
-      MDialog_GetPassword(protocol, m_ServerHost, &m_Password, &m_UserName);
+      MDialog_GetPassword(protocol, m_ServerHost,
+                          &m_Password, &m_UserName, m_frame);
    }
    else // we do have it stored
    {
@@ -1253,7 +1259,7 @@ SendMessageCC::SendOrQueue(int flags)
                _("No network connection available at present,"
                  "message sending will probably fail.\n"
                  "Do you still want to send it?"),
-               NULL,
+               m_frame,
                MDIALOG_MSGTITLE,
                false, // [No] default
                GetPersMsgBoxName(M_MSGBOX_SEND_OFFLINE)
@@ -1314,6 +1320,16 @@ SendMessageCC::SendOrQueue(int flags)
    }
 
    return success;
+}
+
+void SendMessageCC::Preview(String *text)
+{
+   String textTmp;
+   WriteToString(textTmp);
+   MDialog_ShowText(m_frame, "Outgoing message text", textTmp, "SendPreview");
+
+   if ( text )
+      *text = textTmp;
 }
 
 bool
@@ -1381,8 +1397,7 @@ SendMessageCC::Send(int flags)
    bool confirmSend;
    if ( READ_CONFIG(m_profile, MP_PREVIEW_SEND) )
    {
-      WriteToString(msgText);
-      MDialog_ShowText(NULL, "Outgoing message text", msgText, "SendPreview");
+      Preview(&msgText);
 
       // if we preview it, we want to confirm it too
       confirmSend = true;
@@ -1394,7 +1409,7 @@ SendMessageCC::Send(int flags)
 
    if ( confirmSend )
    {
-      if ( !MDialog_YesNoDialog(_("Send this message?")) )
+      if ( !MDialog_YesNoDialog(_("Send this message?"), m_frame) )
       {
          mApplication->SetLastError(M_ERROR_CANCEL);
 
@@ -1489,7 +1504,7 @@ SendMessageCC::Send(int flags)
                if ( !(flags & Silent) )
                {
                   MDialog_Message(_("Message sent."),
-                                  NULL, // parent window
+                                  m_frame, // parent window
                                   MDIALOG_MSGTITLE,
                                   "MailSentMessage");
                }
@@ -1542,7 +1557,7 @@ SendMessageCC::Send(int flags)
          {
             MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
                                                     : _("Article posted."),
-                            NULL, // parent window
+                            m_frame, // parent window
                             MDIALOG_MSGTITLE,
                          "MailSentMessage");
          }

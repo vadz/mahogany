@@ -250,16 +250,25 @@ protected:
    /// save the first text part of the message to the given file
    bool SaveMsgTextToFile(const String& filename) const;
 
+   /// Launch the external editor
+   bool StartExternalEditor();
+
+   /**
+     Return a SendMessage object filled with all data we have. It must be
+     deleted by the caller (presumably after calling its Send() or
+     WriteToString()).
+
+     @return msg SendMessage object to be deleted by the caller
+   */
+   SendMessage *BuildMessage() const;
+
+   /// Destructor
+   ~wxComposeView();
+
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesNames;
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesValues;
-
-   /// Launch the external editor
-   bool StartExternalEditor();
-
-   /// Destructor
-   ~wxComposeView();
 
 private:
    /// initialize the menubar

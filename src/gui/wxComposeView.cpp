@@ -2063,20 +2063,31 @@ wxComposeView::OnMenuCommand(int id)
 
 
       case WXMENU_COMPOSE_SEND:
+      case WXMENU_COMPOSE_SEND_KEEP_OPEN:
       case WXMENU_COMPOSE_SEND_LATER:
          if ( IsReadyToSend() )
-         {
             if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
             {
-               Close();
+               if ( id != WXMENU_COMPOSE_SEND_KEEP_OPEN )
+               {
+                  Close();
+               }
             }
-         }
          break;
 
-      case WXMENU_COMPOSE_SEND_KEEP_OPEN:
-         if ( IsReadyToSend() )
+      case WXMENU_COMPOSE_PREVIEW:
          {
-            (void)Send();
+            SendMessage *msg = BuildMessage();
+            if ( !msg )
+            {
+               wxLogError(_("Failed to create the message to preview."));
+            }
+            else
+            {
+               msg->Preview();
+
+               delete msg;
+            }
          }
          break;
 
@@ -2794,12 +2805,11 @@ wxComposeView::IsReadyToSend() const
    return true;
 }
 
-bool
-wxComposeView::Send(bool schedule)
+SendMessage *
+wxComposeView::BuildMessage() const
 {
-   CHECK( !m_sending, false, "wxComposeView::Send() reentered" );
-
-   m_sending = true;
+   // create the message object
+   // -------------------------
 
    Protocol proto;
    switch ( m_mode )
@@ -2830,20 +2840,16 @@ wxComposeView::Send(bool schedule)
    }
 
    // Create the message to be composed
-   SendMessage *msg = SendMessage::Create(m_Profile, proto);
+   SendMessage *msg = SendMessage::Create(m_Profile, proto, ::GetFrame(this));
    if ( !msg )
    {
-      // this shouldn't ever happen, but who knows...
-      wxLogError(_("Failed to create the message to send."));
-
-      return false;
+      // can't do anything more
+      return NULL;
    }
 
-   wxBusyCursor bc;
-   wxLogStatus(this, _("Sending message..."));
-   Disable();
-
    // compose the body
+   // ----------------
+
    wxLayoutObject *lo = NULL;
    MimeContent *mc = NULL;
    wxLayoutExportObject *exp;
@@ -2962,6 +2968,7 @@ wxComposeView::Send(bool schedule)
    }
 
    // setup the headers
+   // -----------------
 
    if ( m_encoding != wxFONTENCODING_DEFAULT )
    {
@@ -3007,6 +3014,28 @@ wxComposeView::Send(bool schedule)
    for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
    {
       msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
+   }
+
+   return msg;
+}
+
+bool
+wxComposeView::Send(bool schedule)
+{
+   CHECK( !m_sending, false, "wxComposeView::Send() reentered" );
+
+   m_sending = true;
+
+   wxBusyCursor bc;
+   wxLogStatus(this, _("Sending message..."));
+   Disable();
+
+   SendMessage *msg = BuildMessage();
+   if ( !msg )
+   {
+      wxLogError(_("Failed to create the message to send."));
+
+      return false;
    }
 
    // and now do send the message
@@ -3055,7 +3084,10 @@ wxComposeView::Send(bool schedule)
       //
       // NB: don't show BCC as the message might be saved in the log file
       String msg;
-      msg.Printf(_("Message has been sent to %s"), rcptTo.c_str());
+      msg.Printf(_("Message has been sent to %s"),
+                 GetRecipients(Recipient_To).c_str());
+
+      String rcptCC = GetRecipients(Recipient_Cc);
       if ( !rcptCC.empty() )
       {
          msg += String::Format(_(" (with courtesy copy sent to %s)"),

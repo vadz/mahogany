@@ -35,11 +35,14 @@ public:
    };
 
    /** Creates an empty object, setting some initial values.
-       @param iprof optional pointer for a parent profile
+
+       @param prof pointer to the profile to use
        @param protocol which protocol to use for sending
+       @param frame the parent window for dialogs, may be NULL
    */
-   static SendMessage *Create(Profile *iprof,
-                              Protocol protocol = Prot_Default);
+   static SendMessage *Create(Profile *prof,
+                              Protocol protocol = Prot_Default,
+                              wxFrame *frame = NULL);
 
    /** @name Standard headers */
    //@{
@@ -149,6 +152,15 @@ public:
        @return true on success
    */
    virtual bool SendOrQueue(int flags = 0) = 0;
+
+   /**
+     A simple wrapper for WriteToString(): this writes the message contents
+     into the provided string (if not NULL) and shows it in a standard text
+     view dialog to the user.
+
+     @param text the pointer to the string receiving the text, may be NULL
+   */
+   virtual void Preview(String *text = NULL) = 0;
 
    /// virtual destructor
    virtual ~SendMessage();

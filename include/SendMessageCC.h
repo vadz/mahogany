@@ -45,12 +45,8 @@ M_LIST_OWN(MessageHeadersList, MessageHeader);
 class SendMessageCC : public SendMessage
 {
 public:
-   /** Creates an empty object, setting some initial values.
-       @param profile optional pointer for a parent profile
-       @param protocol which protocol to use for sending
-   */
-   SendMessageCC(Profile *profile,
-                 Protocol protocol = Prot_Default);
+   // ctor for base class static Create()
+   SendMessageCC(Profile *profile, Protocol protocol, wxFrame *frame);
 
    // implement the base class pure virtuals
 
@@ -100,6 +96,8 @@ public:
    virtual void WriteToFolder(const String &foldername);
 
    virtual bool SendOrQueue(int flags = 0);
+
+   virtual void Preview(String *text = NULL);
 
    /// destructor
    virtual ~SendMessageCC();
@@ -225,7 +223,7 @@ private:
    wxFontEncoding m_encHeaders;
 
    /// 2nd stage constructor, see constructor
-   void Create(Protocol protocol, Profile *iprof);
+   void Create(Protocol protocol, Profile *prof, wxFrame *frame);
 
    /// Protocol used for sending
    Protocol m_Protocol;
@@ -251,6 +249,9 @@ private:
    kbStringList m_FccList;
 
    //@}
+
+   /// the parent frame (only used for the dialogs)
+   wxFrame *m_frame;
 
    // give it access to m_headerNames nad m_headerValues
    friend class Rfc822OutputRedirector;

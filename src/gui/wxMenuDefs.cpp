@@ -414,6 +414,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SUBMENU,       "", "", FALSE },
 
    // compose
+
+   // the available accelerators for this menu:
+   // ABDFGJMOQRUXYZ
    { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
                                 gettext_noop("Attach a file to the message")            , FALSE },
    { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
@@ -424,6 +427,7 @@ static const MenuItemInfo g_aMenuItems[] =
                                     gettext_noop("Send the message now and keep the editor open")     , FALSE },
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_COMPOSE_PREVIEW, gettext_noop("Previe&w..."),   gettext_noop("View the message as it would be sent"), FALSE },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
    { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , FALSE },
    { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , FALSE },
