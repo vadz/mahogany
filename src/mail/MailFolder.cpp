@@ -92,7 +92,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    {
       case MF_NNTP:
          if(strutil_isempty(i_server))
-            server = READ_CONFIG(profile, MP_FOLDER_HOST);
+            server = READ_CONFIG(profile, MP_NNTP_HOST);
          break;
 
       case MF_FILE:
