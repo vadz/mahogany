@@ -80,6 +80,21 @@ extern const MOption MP_SHOWBUSY_DURING_SORT;
 #endif
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// wrapper for compatibility with the old SearchByFlag()
+static inline MsgnoArray *SearchFolderByFlag(MailFolder *mf,
+                                             MailFolder::MessageStatus flag,
+                                             bool set)
+{
+   return mf->SearchByFlag(flag,
+                           MailFolder::SEARCH_UNDELETED |
+                           (set ? MailFolder::SEARCH_SET :
+                                  MailFolder::SEARCH_UNSET));
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -90,9 +105,7 @@ class FindHeaderHelper
 public:
    FindHeaderHelper(MailFolder *mf, MailFolder::MessageStatus flag, bool set)
    {
-      m_msgnosFound = mf->SearchByFlag(flag,
-                                       SEARCH_UNDELETED |
-                                       (set ? SEARCH_SET : SEARCH_UNSET));
+      m_msgnosFound = SearchFolderByFlag(mf, flag, set);
    }
 
    const MsgnoArray *GetResults() const { return m_msgnosFound; }
@@ -1097,8 +1110,7 @@ MsgnoArray *
 HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                         bool set)
 {
-   return m_mf->SearchByFlag(flag,
-                             set ? SEARCH_SET : SEARCH_UNSET);
+   return SearchFolderByFlag(m_mf, flag, set);
 }
 
 // ----------------------------------------------------------------------------
