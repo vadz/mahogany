@@ -416,11 +416,15 @@ bool DummyDataProvider::EnumBooks(wxArrayString& aNames)
 
 bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
+#ifdef EXPERIMENTAL_adbtest
   String str;
   str.Printf("Return TRUE from DummyDataProvider::TestBookAccess(%d) "
              " for '%s'?",
              test, name.c_str());
   return MDialog_YesNoDialog(str);
+#else
+  return TRUE;
+#fi
 }
 
 bool DummyDataProvider::DeleteBook(AdbBook *book)
