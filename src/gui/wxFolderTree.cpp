@@ -1860,9 +1860,7 @@ void wxFolderTreeImpl::SetOpenFolderName(const String& name)
    {
       // yes, visually emphasize it
       m_idOpenedHere = wxTreeCtrl::GetSelection();
-#ifndef __WXGTK__ // FIXME for unknown reason bold is much bigger in wxGTK
       SetItemBold(m_idOpenedHere, true);
-#endif // !__WXGTK__
    }
 }
 
