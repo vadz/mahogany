@@ -211,6 +211,15 @@ public:
    /// view attachment as text
    void MimeViewText(const MimePart *part);
 
+   /// opens a MIME part as MESSAGE/RFC822
+   void MimeOpenAsMessage(const MimePart *part);
+
+   /// helper of MimeOpen() and MimeOpenWith()
+   void MimeDoOpen(const String& command, const String& filename);
+
+   /// another helper (of MimeOpenAsMessage() and MimeSave())
+   bool MimeSaveAsMessage(const MimePart *part, const wxChar *filename);
+
    //@}
 
    /** @name wxFolderView helpers

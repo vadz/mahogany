@@ -72,6 +72,7 @@
 #include "PGPClickInfo.h"
 
 #include "ClickAtt.h"
+#include "MimeDialog.h"
 
 #include <wx/file.h>            // for wxFile
 #include <wx/mimetype.h>      // for wxFileType::MessageParameters
@@ -2437,6 +2438,79 @@ MessageView::MimeInfo(const MimePart *mimepart)
    MDialog_Message(message, GetParentFrame(), title);
 }
 
+// open as an embedded mail message
+void MessageView::MimeOpenAsMessage(const MimePart *mimepart)
+{
+#if 0
+   // It's a pity, but creating a MessageCC from a string doesn't
+   // quite work yet. :-(
+   unsigned long len;
+   char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+   if( !content )
+   {
+      wxLogError(_("Cannot get attachment content."));
+      return;
+   }
+   Message *msg = Message::Create(content, 1);
+   ...
+   msg->DecRef();
+#else // 1
+   bool ok = false;
+   wxString filename;
+   if ( wxGetTempFileName(_T("Mtemp"), filename) )
+   {
+      if ( MimeSaveAsMessage(mimepart, filename) )
+      {
+         wxString name;
+         name.Printf(_("Attached message '%s'"),
+                     mimepart->GetFilename().c_str());
+
+         MFolder_obj mfolder(MFolder::CreateTempFile(name, filename));
+
+         if ( mfolder )
+         {
+            ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
+            if ( asmf )
+            {
+               // FIXME: assume UID of the first message in a new MBX folder
+               //        is always 1
+               ShowMessageViewFrame(GetParentFrame(), asmf, 1);
+
+               ok = true;
+
+               asmf->DecRef();
+            }
+         }
+         else
+         {
+            // note that if we succeeded with folder creation, it will
+            // delete the file itself (because of MF_FLAGS_TEMPORARY)
+            wxRemoveFile(filename);
+         }
+      }
+   }
+
+   if ( !ok )
+   {
+      wxLogError(_("Failed to open attached message."));
+   }
+#endif // 0/1
+}
+
+void MessageView::MimeDoOpen(const String& command, const String& filename)
+{
+   if ( command.empty() )
+   {
+      wxLogWarning(_("No command to open file \"%s\"."), filename.c_str());
+      return;
+   }
+
+   wxString errmsg;
+   errmsg.Printf(_("Error opening attachment: command '%s' failed"),
+                 command.c_str());
+   (void)LaunchProcess(command, errmsg, filename);
+}
+
 // open (execute) a message attachment
 void
 MessageView::MimeHandle(const MimePart *mimepart)
@@ -2479,59 +2553,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
    // handle internally MESSAGE/*
    if ( wxMimeTypesManager::IsOfType(mimetype, _T("MESSAGE/*")) )
    {
-#if 0
-      // It's a pity, but creating a MessageCC from a string doesn't
-      // quite work yet. :-(
-      unsigned long len;
-      char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
-      if( !content )
-      {
-         wxLogError(_("Cannot get attachment content."));
-         return;
-      }
-      Message *msg = Message::Create(content, 1);
-      ...
-      msg->DecRef();
-#else // 1
-      bool ok = false;
-      wxString filename;
-      if ( wxGetTempFileName(_T("Mtemp"), filename) )
-      {
-         if ( MimeSave(mimepart, filename) )
-         {
-            wxString name;
-            name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
-
-            MFolder_obj mfolder(MFolder::CreateTempFile(name, filename));
-
-            if ( mfolder )
-            {
-               ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
-               if ( asmf )
-               {
-                  // FIXME: assume UID of the first message in a new MBX folder
-                  //        is always 1
-                  ShowMessageViewFrame(GetParentFrame(), asmf, 1);
-
-                  ok = true;
-
-                  asmf->DecRef();
-               }
-            }
-            else
-            {
-               // note that if we succeeded with folder creation, it will
-               // delete the file itself (because of MF_FLAGS_TEMPORARY)
-               wxRemoveFile(filename);
-            }
-         }
-      }
-
-      if ( !ok )
-      {
-         wxLogError(_("Failed to open attached message."));
-      }
-#endif // 0/1
+      MimeOpenAsMessage(mimepart);
 
       return;
    }
@@ -2672,48 +2694,14 @@ MessageView::MimeHandle(const MimePart *mimepart)
    if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) )
    {
       // unknown MIME type, ask the user for the command to use
-      String prompt;
-      prompt.Printf(_("Please enter the command to handle '%s' data:"),
-                    mimetype.c_str());
-      if ( !MInputBox(&command, _("Unknown MIME type"), prompt,
-                      GetParentFrame(), _T("MimeHandler")) )
-      {
-         // cancelled by user
-         return;
-      }
-
-      if ( command.empty() )
-      {
-         wxLogWarning(_("Do not know how to handle data of type '%s'."),
-                      mimetype.c_str());
-      }
-      else
-      {
-         // the command must contain exactly one '%s' format specificator!
-         String specs = strutil_extract_formatspec(command);
-         if ( specs.empty() )
-         {
-            // at least the filename should be there!
-            command += _T(" %s");
-         }
-
-         // do expand it
-         command = wxFileType::ExpandCommand(command, params);
-
-         // TODO save this command to mailcap!
-      }
-      //else: empty command means try to handle it internally
+      MimeOpenWith(mimepart);
+   }
+   else // got the command to use
+   {
+      MimeDoOpen(command, filename);
    }
 
    delete fileType;
-
-   if ( !command.empty() )
-   {
-      wxString errmsg;
-      errmsg.Printf(_("Error opening attachment: command '%s' failed"),
-                    command.c_str());
-      (void)LaunchProcess(command, errmsg, filename);
-   }
 }
 
 void
@@ -2762,50 +2750,52 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
       filename << '.' << ext;
    }
 
-   MailMessageParameters params(filename, mimetype, mimepart);
-
-   String command;
-   // ask the user for the command to use
-   String prompt;
-   prompt.Printf(_("Please enter the command to handle '%s' data:"),
-                 mimetype.c_str());
-   if ( !MInputBox(&command, _("Open with"), prompt,
-                   GetParentFrame(), _T("MimeHandler")) )
+   // get the command to open this attachment
+   bool openAsMsg = false;
+   String command = GetCommandForMimeType(GetWindow(), mimetype, &openAsMsg);
+   if ( command.empty() )
    {
       // cancelled by user
       return;
    }
 
-   if ( command.empty() )
+   if ( openAsMsg )
    {
-      wxLogWarning(_("Do not know how to handle data of type '%s'."),
-                   mimetype.c_str());
+      MimeOpenAsMessage(mimepart);
    }
-   else
-   {
-      // the command must contain exactly one '%s' format specificator!
-      String specs = strutil_extract_formatspec(command);
-      if ( specs.empty() )
-      {
-         // at least the filename should be there!
-         command += _T(" %s");
-      }
-
-      // do expand it
-      command = wxFileType::ExpandCommand(command, params);
-
-   }
-
-   if ( ! command.empty() )
+   else // open using external command
    {
       if ( MimeSave(mimepart, filename) )
       {
-         wxString errmsg;
-         errmsg.Printf(_("Error opening attachment: command '%s' failed"),
-                       command.c_str());
-         (void)LaunchProcess(command, errmsg, filename);
+         // expand the command and use it
+         MailMessageParameters params(filename, mimetype, mimepart);
+         command = wxFileType::ExpandCommand(command, params);
+
+         MimeDoOpen(command, filename);
       }
    }
+}
+
+bool
+MessageView::MimeSaveAsMessage(const MimePart *mimepart, const wxChar *filename)
+{
+   unsigned long len;
+   const void *content = mimepart->GetContent(&len);
+   if ( !content )
+   {
+      wxLogError(_("Cannot get embedded message content."));
+
+      return false;
+   }
+
+   if ( !MailFolder::SaveMessageAsMBOX(filename, content, len) )
+   {
+      wxLogError(_("Failed to save embedded message to a temporary file."));
+
+      return false;
+   }
+
+   return true;
 }
 
 bool
@@ -2838,31 +2828,28 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       return false;
    }
 
+   if ( mimepart->GetType().GetPrimary() == MimeType::MESSAGE )
+   {
+      // saving the messages is special, we have a separate function for
+      // this as it's also done from elsewhere
+      return MimeSaveAsMessage(mimepart, filename);
+   }
+
    unsigned long len;
    const void *content = mimepart->GetContent(&len);
-   if( !content )
+   if ( !content )
    {
       wxLogError(_("Cannot get attachment content."));
    }
    else
    {
-      bool ok;
-      if ( mimepart->GetType().GetPrimary() == MimeType::MESSAGE )
-      {
-         // saving the messages is special, we have a separate function for
-         // this as it's also done from elsewhere
-         ok = MailFolder::SaveMessageAsMBOX(filename, content, len);
-      }
-      else // not a message
-      {
-         wxFile out(filename, wxFile::write);
-         ok = out.IsOpened();
+      wxFile out(filename, wxFile::write);
+      bool ok = out.IsOpened();
 
-         if ( ok )
-         {
-            // write the body
-            ok = out.Write(content, len) == len;
-         }
+      if ( ok )
+      {
+         // write the body
+         ok = out.Write(content, len) == len;
       }
 
       if ( ok )
