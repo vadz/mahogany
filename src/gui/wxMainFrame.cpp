@@ -99,12 +99,9 @@ public:
 
    virtual bool OnClose(MFolder *folder)
    {
-      if ( !wxFolderTree::OnClose(folder) )
-         return false;
-
       m_frame->CloseFolder(folder);
 
-      return true;
+      return wxFolderTree::OnClose(folder);
    }
 
 private:

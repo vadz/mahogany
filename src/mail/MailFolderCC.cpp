@@ -1113,6 +1113,7 @@ void
 MailFolderCC::Create(int typeAndFlags)
 {
    m_MailStream = NIL;
+   m_Listing = NULL;
 
    UpdateTimeoutValues();
 
@@ -1143,7 +1144,6 @@ void MailFolderCC::Init()
    m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
-   m_Listing = NULL;
    m_expungedIndices = NULL;
 
    m_statusNew = NULL;
@@ -1590,6 +1590,15 @@ MailFolderCC::CloseFolder(const MFolder *folder)
    }
 
    mf->Close();
+
+   if ( mf->m_Listing )
+   {
+      mf->m_Listing->DecRef();
+      mf->m_Listing = NULL;
+   }
+
+   // show the progress again when opening the folder the next time
+   mf->m_ProgressDialog = NULL;
 
    mf->Init();
 
