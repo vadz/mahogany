@@ -275,6 +275,15 @@ extern bool InitPythonDll()
    String pathDLL = READ_APPCONFIG(MP_PYTHONDLL);
    if ( !pathDLL.empty() )
    {
+#if defined(OS_WIN) && defined(DEBUG)
+      // we must use debug version of Python DLL
+      wxString path, name, ext;
+      wxSplitPath(pathDLL, &path, &name, &ext);
+      if ( name.Right(2).Lower() != _T("_d") )
+         name += _T("_d");
+      pathDLL = path + wxFILE_SEP_PATH + name + wxFILE_SEP_EXT + ext;
+#endif // Win debug
+
       dllPython.Load(pathDLL);
    }
    else // try to find the DLL ourselves
@@ -292,7 +301,7 @@ extern bool InitPythonDll()
          // debug version of M should only use debug Python version under
          // Windows, otherwise the CRTs they use mismatch and bad things happen
          name += _T("_d");
-#endif // OS_WIN
+#endif // Win debug
 
          if ( dllPython.Load(name + ext) )
             break;
