@@ -1367,10 +1367,6 @@ strutil_getMailAddress(const String &inputline,
  *  Regular expression matching, using wxRegEx class
  * *********************************************************/
 
-
-#ifdef __GNUG__
-#   pragma implementation <wx/regex.h>
-#endif
 #include <wx/regex.h>
 
 #ifdef WX_HAVE_REGEX
