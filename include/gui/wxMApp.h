@@ -52,7 +52,7 @@ public:
    wxMApp();
 
    /// implement base class virtuals
-   virtual MFrame *CreateTopLevelFrame();
+   virtual wxMFrame *CreateTopLevelFrame();
    virtual void OnFatalException() { OnAbnormalTermination(); }
    virtual void OnAbnormalTermination();
 

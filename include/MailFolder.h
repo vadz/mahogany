@@ -100,11 +100,12 @@ class FolderView;
 class HeaderInfo;
 class Profile;
 class MFolder;
-class MFrame;
-class MWindow;
 class Message;
 class MessageView;
 class Sequence;
+
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindow;
 
 struct SortParams;
 struct ThreadData;
@@ -392,7 +393,7 @@ public:
    static void ForwardMessage(Message *msg,
                               const Params& params,
                               Profile *profile = NULL,
-                              MWindow *parent = NULL);
+                              wxWindow *parent = NULL);
 
    /** Reply to one message.
        @param message message to reply to
@@ -403,7 +404,7 @@ public:
    static void ReplyMessage(Message *msg,
                             const Params& params,
                             Profile *profile = NULL,
-                            MWindow *parent = NULL);
+                            wxWindow *parent = NULL);
 
    /**@name Subscription management */
    //@{
@@ -676,7 +677,7 @@ public:
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    const String& filename,
-                                   MWindow *parent = NULL) = 0;
+                                   wxWindow *parent = NULL) = 0;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -705,7 +706,7 @@ public:
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const Params& params,
-                              MWindow *parent = NULL) = 0;
+                              wxWindow *parent = NULL) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -714,7 +715,7 @@ public:
    */
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
-                                MWindow *parent = NULL) = 0;
+                                wxWindow *parent = NULL) = 0;
 
    /** Sort messages: returns the array containing the msgnos of the messages
        in sorted order.
@@ -854,7 +855,7 @@ public:
       @param frame the window where the status messages should go (may be NULL)
       @param foldername the folder for which we set this frame
    */
-   static void SetInteractive(MFrame *frame, const String& foldername);
+   static void SetInteractive(wxFrame *frame, const String& foldername);
 
    /**
       Undo SetInteractive()
@@ -867,12 +868,12 @@ public:
 
       @return the old interactive frame for this folder
    */
-   virtual MFrame *SetInteractiveFrame(MFrame *frame) = 0;
+   virtual wxFrame *SetInteractiveFrame(wxFrame *frame) = 0;
 
    /**
       Get the frame to use for interactive messages. May return NULL.
    */
-   virtual MFrame *GetInteractiveFrame() const = 0;
+   virtual wxFrame *GetInteractiveFrame() const = 0;
 
    /// Returns the shared log circle object used for error analysis
    static MLogCircle& GetLogCircle(void) { return ms_LogCircle; }
@@ -909,7 +910,7 @@ protected:
    static String ms_interactiveFolder;
 
    /// the frame to which interactive messages for ms_interactiveFolder go
-   static MFrame *ms_interactiveFrame;
+   static wxFrame *ms_interactiveFrame;
 
 private:
    /// this is the only class which can call our GetHeaderInfo()
@@ -929,7 +930,7 @@ class MFInteractiveLock
 public:
    // we will DecRef() the mail folder which must be !NULL - but the frame may
    // be NULL, although it's probably not very useful
-   MFInteractiveLock(MailFolder *mf, MFrame *frame)
+   MFInteractiveLock(MailFolder *mf, wxFrame *frame)
    {
       m_mf = mf;
       if ( m_mf )
@@ -954,7 +955,7 @@ public:
 
 private:
    MailFolder *m_mf;
-   MFrame *m_frameOld;
+   wxFrame *m_frameOld;
 };
 
 // ----------------------------------------------------------------------------

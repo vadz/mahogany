@@ -289,7 +289,7 @@ void
 MMailFolder::ForwardMessage(class Message *msg,
                             const MailFolder::Params& params,
                             Profile *profile = NULL,
-                            MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
+                            wxWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
 /** Reply to one message.
     @param message message to reply to
     @param params reply parameters
@@ -301,7 +301,7 @@ void
 MMailFolder::ReplyMessage(class Message *msg,
                           const MailFolder::Params& params,
                           Profile *profile = NULL,
-                          MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
+                          wxWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
 
 /**@name Subscription management */
 //@{

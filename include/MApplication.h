@@ -61,7 +61,7 @@ public:
        wxApp::OnInit() callback.
        @return the toplevel window of the application
        */
-   virtual MFrame *CreateTopLevelFrame() = 0;
+   virtual wxMFrame *CreateTopLevelFrame() = 0;
 
    /** called by GUI framework to give us a chance to do all sort of
        initialization stuff. It's called before the main window is
@@ -122,12 +122,12 @@ public:
        @param id help id from MHelp.h
        @param parent parent window pointer
    */
-   virtual void Help(int id, MWindow *parent = NULL) = 0;
+   virtual void Help(int id, wxWindow *parent = NULL) = 0;
 
    /** gets toplevel frame
        @return the toplevel window of the application
    */
-   MFrame *TopLevelFrame(void) const { return m_topLevelFrame; }
+   wxMFrame *TopLevelFrame(void) const { return m_topLevelFrame; }
 
    /** set the last error (see the error codes in Merror.h)
        @param error the error code of the last failed operation
@@ -360,7 +360,7 @@ protected:
    // -------------------------------------------------
 
    /// the application's toplevel window
-   MFrame *m_topLevelFrame;
+   wxMFrame *m_topLevelFrame;
 
    /// the directory of the M global data tree
    String m_globalDir;

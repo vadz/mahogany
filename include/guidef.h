@@ -10,12 +10,6 @@
 #ifndef GUIDEF_H
 #define GUIDEF_H
 
-/// define the class to use for implementing MFrame objects
-#define   MFrame        wxMFrame
-#define   MWindow       wxWindow
-#define   MainFrame     wxMainFrame
-#define   MDialogs      wxMDialogs
-
 #include <wx/defs.h>
 #include <wx/frame.h>
 #include <wx/button.h>

@@ -874,7 +874,7 @@ void
 MailFolder::ReplyMessage(Message *msg,
                          const MailFolder::Params& params,
                          Profile *profile,
-                         MWindow *parent)
+                         wxWindow *parent)
 {
    CHECK_RET(msg, "no message to reply to");
 
@@ -1053,7 +1053,7 @@ void
 MailFolder::ForwardMessage(Message *msg,
                            const MailFolder::Params& params,
                            Profile *profile,
-                           MWindow *parent)
+                           wxWindow *parent)
 {
    CHECK_RET(msg, "no message to forward");
 
@@ -1145,10 +1145,10 @@ MailFolder::CleanUp(void)
 // ----------------------------------------------------------------------------
 
 String MailFolder::ms_interactiveFolder;
-MFrame *MailFolder::ms_interactiveFrame = NULL;
+wxFrame *MailFolder::ms_interactiveFrame = NULL;
 
 /* static */
-void MailFolder::SetInteractive(MFrame *frame, const String& foldername)
+void MailFolder::SetInteractive(wxFrame *frame, const String& foldername)
 {
    ms_interactiveFolder = foldername;
    ms_interactiveFrame = frame;

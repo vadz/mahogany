@@ -118,7 +118,7 @@ public:
    static void ForwardMessage(class Message *msg,
                               const Params& params,
                               Profile *profile = NULL,
-                              MWindow *parent = NULL);
+                              wxWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
        @param params reply parameters
@@ -128,7 +128,7 @@ public:
    static void ReplyMessage(class Message *msg,
                             const Params& params,
                             Profile *profile = NULL,
-                            MWindow *parent = NULL);
+                            wxWindow *parent = NULL);
    /**@name Subscription management */
    //@{
    /** Subscribe to a given mailbox (related to the

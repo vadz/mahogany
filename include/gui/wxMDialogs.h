@@ -103,7 +103,7 @@ extern "C"
        @param modal   true to make messagebox modal
    */
 void   MDialog_ErrorMessage(char const *message,
-                            const MWindow *parent = NULL,
+                            const wxWindow *parent = NULL,
                             char const *title = MDIALOG_ERRTITLE,
                             bool modal = false);
 
@@ -114,7 +114,7 @@ void   MDialog_ErrorMessage(char const *message,
        @param modal   true to make messagebox modal
    */
 void   MDialog_SystemErrorMessage(char const *message,
-                                  const MWindow *parent = NULL,
+                                  const wxWindow *parent = NULL,
                                   char const *title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
 
@@ -124,7 +124,7 @@ void   MDialog_SystemErrorMessage(char const *message,
        @param parent   the parent frame
    */
 void   MDialog_FatalErrorMessage(char const *message,
-                                 const MWindow *parent = NULL,
+                                 const wxWindow *parent = NULL,
                                  char const *title = MDIALOG_FATALERRTITLE);
 
 /** display normal message and, if configPath != NULL, give a user a checkbox
@@ -136,7 +136,7 @@ void   MDialog_FatalErrorMessage(char const *message,
        @param configPath the profile path to use (doesn't use profile if NULL)
    */
 void   MDialog_Message(char const *message,
-                       const MWindow *parent = NULL,
+                       const wxWindow *parent = NULL,
                        char const *title = MDIALOG_MSGTITLE,
                        const char *configPath = NULL);
 
@@ -152,7 +152,7 @@ void   MDialog_Message(char const *message,
        @return true if Yes was selected
    */
 bool   MDialog_YesNoDialog(char const *message,
-                           const MWindow *parent = NULL,
+                           const wxWindow *parent = NULL,
                            char const *title = MDIALOG_YESNOTITLE,
                            bool YesDefault = true,
                            const char *configPath = NULL);
@@ -169,7 +169,7 @@ bool   MDialog_YesNoDialog(char const *message,
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
 const char *MDialog_FileRequester(const String &message,
-                                  const MWindow *parent = NULL,
+                                  const wxWindow *parent = NULL,
                                   String path = NULLstring,
                                   String filename = NULLstring,
                                   String extension = NULLstring,
@@ -184,7 +184,7 @@ const char *MDialog_FileRequester(const String &message,
     @param configPath is the path in the config used to save dialog position
            and size and may be NULL
 */
-void MDialog_ShowText(MWindow *parent,
+void MDialog_ShowText(wxWindow *parent,
                       const char *title,
                       const char *text,
                       const char *configPath = NULL);
@@ -202,7 +202,7 @@ void MDialog_ShowText(MWindow *parent,
  */
 String MDialog_DirRequester(const String& message,
                             const String& path = NULLstring,
-                            MWindow *parent = NULL,
+                            wxWindow *parent = NULL,
                             const char *configPath = NULL);
 
 /**
@@ -231,7 +231,7 @@ String MDialog_DirRequester(const String& message,
 bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
-               const MWindow *parent = NULL,
+               const wxWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL,
                bool passwordflag = false);
@@ -265,25 +265,25 @@ MGetNumberFromUser(const wxString& message,
  in this case -1 is returned. Otherwise, it's the index of selected item.
 */
 int MDialog_AdbLookupList(ArrayAdbElements& aEntries,
-                          const MWindow *parent = NULL);
+                          const wxWindow *parent = NULL);
 
 /// simple AboutDialog to be displayed at startup
 void
-MDialog_AboutDialog( const MWindow *parent, bool bCloseOnTimeout = true);
+MDialog_AboutDialog( const wxWindow *parent, bool bCloseOnTimeout = true);
 
 /// a tip dialog which will show some (random) tip
 void
-MDialog_ShowTip(const MWindow *parent);
+MDialog_ShowTip(const wxWindow *parent);
 
 // the global pointer to the splash screen (NULL if there is no flash screen)
-extern class MFrame *g_pSplashScreen;
+extern class wxFrame *g_pSplashScreen;
 
 /// function which will close the splash screen if it's (still) opened
 extern void CloseSplash();
 
 /// edit an existing folder profile (wrapper around ShowFolderPropertiesDialog)
 void
-MDialog_FolderProfile(const MWindow *parent, const String& folderName);
+MDialog_FolderProfile(const wxWindow *parent, const String& folderName);
 
 /** choose a folder from the list of all folders, returns NULL if cancelled
 
@@ -291,12 +291,12 @@ MDialog_FolderProfile(const MWindow *parent, const String& folderName);
   @param folder the default folder to use
   @param open true if the folder is going to be opened (used for file dialog)
  */
-MFolder *MDialog_FolderChoose(const MWindow *parent,
+MFolder *MDialog_FolderChoose(const wxWindow *parent,
                               MFolder *folder = NULL,
                               bool open = false);
 
 /// choose a folder and open a view on it
-void MDialog_FolderOpen(const MWindow *parent);
+void MDialog_FolderOpen(const wxWindow *parent);
 
 /// Configure modules, in wxModulesDialog.cpp:
 extern

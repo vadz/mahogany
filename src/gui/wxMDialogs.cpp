@@ -625,7 +625,7 @@ bool MInputBox(wxString *pstr,
 // ----------------------------------------------------------------------------
 void
 MDialog_ErrorMessage(const char *msg,
-                     const MWindow *parent,
+                     const wxWindow *parent,
                      const char *title,
                      bool /* modal */)
 {
@@ -646,7 +646,7 @@ MDialog_ErrorMessage(const char *msg,
    */
 void
 MDialog_SystemErrorMessage(const char *message,
-               const MWindow *parent,
+               const wxWindow *parent,
                const char *title,
                bool modal)
 {
@@ -667,7 +667,7 @@ MDialog_SystemErrorMessage(const char *message,
    */
 void
 MDialog_FatalErrorMessage(const char *message,
-              const MWindow *parent,
+              const wxWindow *parent,
               const char *title)
 {
    String msg = String(message) + _("\nExiting application...");
@@ -685,7 +685,7 @@ MDialog_FatalErrorMessage(const char *message,
    */
 void
 MDialog_Message(const char *message,
-                const MWindow *parent,
+                const wxWindow *parent,
                 const char *title,
                 const char *configPath)
 {
@@ -716,7 +716,7 @@ MDialog_Message(const char *message,
    */
 bool
 MDialog_YesNoDialog(const char *message,
-                    const MWindow *parent,
+                    const wxWindow *parent,
                     const char *title,
                     bool yesDefault,
                     const char *configPath)
@@ -762,7 +762,7 @@ MDialog_YesNoDialog(const char *message,
    */
 const char *
 MDialog_FileRequester(String const & message,
-                      const MWindow *parent,
+                      const wxWindow *parent,
                       String path,
                       String filename,
                       String extension,
@@ -787,7 +787,7 @@ MDialog_FileRequester(String const & message,
 
 String MDialog_DirRequester(const String& message,
                             const String& pathOrig,
-                            MWindow *parent,
+                            wxWindow *parent,
                             const char *confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
@@ -795,7 +795,7 @@ String MDialog_DirRequester(const String& message,
 
 int
 MDialog_AdbLookupList(ArrayAdbElements& aEntries,
-                      const MWindow *parent)
+                      const wxWindow *parent)
 {
    //MGuiLocker lock;
    CloseSplash();
@@ -1174,7 +1174,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 // Splash screen stuff
 // ----------------------------------------------------------------------------
 
-class wxMFrame *g_pSplashScreen = NULL;
+wxFrame *g_pSplashScreen = NULL;
 
 extern void CloseSplash()
 {
@@ -1188,7 +1188,7 @@ extern void CloseSplash()
 }
 
 void
-MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
+MDialog_AboutDialog( const wxWindow * /* parent */, bool bCloseOnTimeout)
 {
    if(g_pSplashScreen == NULL)
       (void)new wxAboutFrame(bCloseOnTimeout);
@@ -1196,7 +1196,7 @@ MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 }
 
 void
-MDialog_ShowTip(const MWindow *parent)
+MDialog_ShowTip(const wxWindow *parent)
 {
    String dir, filename;
 
@@ -1247,7 +1247,7 @@ MDialog_ShowTip(const MWindow *parent)
 }
 
 void
-MDialog_FolderProfile(const MWindow *parent, const String& folderName)
+MDialog_FolderProfile(const wxWindow *parent, const String& folderName)
 {
    MFolder_obj folder(MFolder::Get(folderName));
 
@@ -1258,7 +1258,7 @@ MDialog_FolderProfile(const MWindow *parent, const String& folderName)
 }
 
 void
-MDialog_FolderOpen(const MWindow *parent)
+MDialog_FolderOpen(const wxWindow *parent)
 {
    MFolder *folder = MDialog_FolderChoose(parent, NULL, true /* open */);
    if ( folder != NULL )
@@ -1439,7 +1439,7 @@ bool MFolderDialog::TransferDataFromWindow()
 }
 
 MFolder *
-MDialog_FolderChoose(const MWindow *parent, MFolder *folder, bool open)
+MDialog_FolderChoose(const wxWindow *parent, MFolder *folder, bool open)
 {
    // TODO store the last folder in config
    MFolderDialog dlg((wxWindow *)parent, folder, open);
@@ -1448,7 +1448,7 @@ MDialog_FolderChoose(const MWindow *parent, MFolder *folder, bool open)
 }
 
 
-void MDialog_ShowText(MWindow *parent,
+void MDialog_ShowText(wxWindow *parent,
                       const char *title,
                       const char *text,
                       const char *configPath)
@@ -2954,7 +2954,7 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxString& caption,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
-                             MWindow *parent,
+                             wxWindow *parent,
                              const wxString& confpathOrig,
                              const wxSize& sizeDef)
 {

@@ -1102,7 +1102,7 @@ CalendarModule::RegisterWithMainFrame()
 
    MAppBase *mapp = m_MInterface->GetMApplication();
 
-   MFrame *mframe = mapp->TopLevelFrame();
+   wxMFrame *mframe = mapp->TopLevelFrame();
    CHECK( mframe, false, "can't init calendar module - no main window" );
 
    ((wxMainFrame *)mframe)->AddModulesMenu

@@ -40,6 +40,8 @@
 
 #include "Sequence.h"
 
+#include "MDialogs.h"         // for MProgressInfo
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -106,7 +108,7 @@ class StatusIndicator
 public:
    // show the status message specified by the remaining arguments if frame is
    // not NULL
-   StatusIndicator(MFrame *frame, const char *fmt, ...);
+   StatusIndicator(wxFrame *frame, const char *fmt, ...);
 
    // append "done" to the message given by the ctor if Fail() hadn't been
    // called
@@ -118,6 +120,9 @@ public:
 private:
    // our frame - may be NULL!
    wxFrame *m_frame;
+
+   // the busy info screen we show if !NULL
+   MProgressInfo *m_progInfo;
 
    // the message given in the ctor
    String m_msgInitial;
@@ -260,22 +265,27 @@ static void DumpTransTables(MsgnoType count,
 // StatusIndicator
 // ----------------------------------------------------------------------------
 
-StatusIndicator::StatusIndicator(MFrame *frame, const char *fmt, ...)
+StatusIndicator::StatusIndicator(wxFrame *frame, const char *fmt, ...)
 {
+   va_list argptr;
+   va_start(argptr, fmt);
+   m_msgInitial.PrintfV(fmt, argptr);
+   va_end(argptr);
+
    m_frame = (wxFrame *)frame;
    if ( m_frame )
    {
-      va_list argptr;
-      va_start(argptr, fmt);
-      m_msgInitial.PrintfV(fmt, argptr);
-      va_end(argptr);
-
       wxLogStatus(m_frame, m_msgInitial);
    }
+
+   m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
+   wxYield();
 }
 
 StatusIndicator::~StatusIndicator()
 {
+   delete m_progInfo;
+
    if ( m_frame )
    {
       if ( m_msgFinal.empty() )

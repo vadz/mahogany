@@ -68,7 +68,7 @@ public:
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    const String& fileName,
-                                   MWindow *parent = NULL);
+                                   wxWindow *parent = NULL);
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -126,7 +126,7 @@ public:
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const Params& params,
-                              MWindow *parent = NULL);
+                              wxWindow *parent = NULL);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -135,7 +135,7 @@ public:
    */
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
-                                MWindow *parent = NULL);
+                                wxWindow *parent = NULL);
 
    virtual bool ThreadMessages(const ThreadParams& thrParams,
                                ThreadData *thrData);
@@ -162,8 +162,8 @@ public:
    /// VZ: adding this decl as it doesn't compile otherwise
    virtual void Checkpoint(void) = 0;
 
-   virtual MFrame *SetInteractiveFrame(MFrame *frame);
-   virtual MFrame *GetInteractiveFrame() const;
+   virtual wxFrame *SetInteractiveFrame(wxFrame *frame);
+   virtual wxFrame *GetInteractiveFrame() const;
 
    virtual void SuspendUpdates() { m_suspendUpdates++; }
    virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
@@ -270,7 +270,7 @@ private:
    size_t m_suspendUpdates;
 
    /// the frame to which messages for this folder go by default
-   MFrame *m_frame;
+   wxFrame *m_frame;
 
    friend class MfCloseEntry;
    friend class MFCmnEventReceiver;

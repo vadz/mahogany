@@ -23,7 +23,7 @@ public:
    // while this ctor is not needed, strictly speaking, let's put it
    // to silent gcc warnings
    MainFrameBase(const String& s) : MFrameBase(s) { }
-   
+
    /// virtual destructor
    virtual ~MainFrameBase() {};
 

@@ -30,7 +30,6 @@ class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;
 class wxFolderMsgWindow;
-class wxMFrame;
 class MailFolder;
 class MessageView;
 class MsgCmdProc;
@@ -60,7 +59,7 @@ public:
    /** Constructor
        @param parent   the parent window
    */
-   static wxFolderView *Create(MWindow *parent = NULL);
+   static wxFolderView *Create(wxWindow *parent = NULL);
 
    /// first time constructor
    wxFolderView(wxWindow *parent);
@@ -129,7 +128,7 @@ public:
    void SelectAllByStatus(MailFolder::MessageStatus status, bool isSet = true);
 
    /// return the parent window
-   MWindow *GetWindow(void) const { return m_SplitterWindow; }
+   wxWindow *GetWindow(void) const { return m_SplitterWindow; }
 
    /// event processing
    virtual bool OnMEvent(MEventData& event)
@@ -173,7 +172,7 @@ public:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
    /// get the parent frame of the folder view
-   MFrame *GetParentFrame() const { return m_Frame; }
+   wxFrame *GetParentFrame() const { return m_Frame; }
 
    /// process a keyboard event, return true if processed
    bool HandleCharEvent(wxKeyEvent& event);
@@ -214,10 +213,10 @@ private:
    unsigned long m_nDeleted;
 
    /// the parent window
-   MWindow *m_Parent;
+   wxWindow *m_Parent;
 
    /// and the parent frame
-   MFrame *m_Frame;
+   wxFrame *m_Frame;
 
    /// a splitter window: it contains m_FolderCtrl and m_MessageWindow
    wxSplitterWindow *m_SplitterWindow;

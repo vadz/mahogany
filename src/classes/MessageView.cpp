@@ -2753,7 +2753,7 @@ MessageView::DoShowMessage(Message *mailMessage)
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,
                               folderName,
-                              (MFrame *)GetParentFrame());
+                              GetParentFrame());
       }
    }
 

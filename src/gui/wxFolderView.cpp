@@ -1644,8 +1644,7 @@ long wxFolderListCtrl::GetPosFromUID(UIdType uid)
 {
    MLocker lockHeaders(m_mutexHeaders);
 
-   MFInteractiveLock lock(m_FolderView->GetMailFolder(),
-                          (MFrame *)GetFrame(this));
+   MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
 
    size_t idx = m_headers->GetIdxFromUId(uid);
 
@@ -1842,8 +1841,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       {
          MLocker lockHeaders(m_mutexHeaders);
 
-         MFInteractiveLock lock(m_FolderView->GetMailFolder(),
-                                (MFrame *)GetFrame(this));
+         MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
 
          m_headers->CachePositions(seq);
       }
@@ -2541,7 +2539,7 @@ wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
 // ----------------------------------------------------------------------------
 
 wxFolderView *
-wxFolderView::Create(MWindow *parent)
+wxFolderView::Create(wxWindow *parent)
 {
    wxCHECK_MSG(parent, NULL, "NULL parent frame in wxFolderView ctor");
    wxFolderView *fv = new wxFolderView(parent);
@@ -2553,8 +2551,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_Profile = NULL;
    m_Parent = parent;
 
-   // cast is harmless as we can only have MFrames in this application
-   m_Frame = (MFrame *)GetFrame(m_Parent);
+   m_Frame = GetFrame(m_Parent);
 
    m_ASMailFolder = NULL;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
@@ -3039,8 +3036,6 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
 {
    CHECK( folder, false, "NULL folder in wxFolderView::OpenFolder" );
 
-   // just a cast
-   wxFrame *frame = m_Frame;
    m_fullname = folder->GetFullName();
 
    int flags = folder->GetFlags();
@@ -3071,7 +3066,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                "to create in the tree from there. If you reply [Yes],\n"
                "all existing mailboxes on the server will be created in\n"
                "the folder tree unconditionally."),
-             frame,
+             m_Frame,
              MDIALOG_YESNOTITLE,
              true,
              GetFullPersistentKey(M_MSGBOX_BROWSE_IMAP_SERVERS)
@@ -3113,7 +3108,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                  "will probably fail again)?"),
                m_fullname.c_str()
             ),
-            frame,
+            m_Frame,
             MDIALOG_YESNOTITLE,
             false, // [No] default
             GetPersMsgBoxName(M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER)
@@ -3128,17 +3123,17 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
            (
             _("Would you like to change folder "
               "settings before trying to open it?"),
-            frame,
+            m_Frame,
             MDIALOG_YESNOTITLE,
             false,
             GetPersMsgBoxName(M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS)
          ) )
       {
          // invoke the folder properties dialog
-         if ( !ShowFolderPropertiesDialog(folder, frame) )
+         if ( !ShowFolderPropertiesDialog(folder, m_Frame) )
          {
             // the dialog was cancelled
-            wxLogStatus(frame, _("Opening the folder '%s' cancelled."),
+            wxLogStatus(m_Frame, _("Opening the folder '%s' cancelled."),
                         m_fullname.c_str());
 
             mApplication->SetLastError(M_ERROR_CANCEL);

@@ -867,7 +867,7 @@ wxMApp::OnInit()
    }
 }
 
-MFrame *wxMApp::CreateTopLevelFrame()
+wxMFrame *wxMApp::CreateTopLevelFrame()
 {
    m_topLevelFrame = new wxMainFrame();
    m_topLevelFrame->Show(true);

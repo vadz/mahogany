@@ -1903,7 +1903,7 @@ MailFolderCC::Open(OpenMode openmode)
    wxLogTrace(TRACE_MF_CALLS, "%s \"'%s'\"",
               GetOperationName(openmode).c_str(), GetName().c_str());
 
-   MFrame *frame = GetInteractiveFrame();
+   wxFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
       STATUSMESSAGE((frame, _("%s mailbox \"%s\"..."),
@@ -2583,7 +2583,7 @@ MailFolderCC::PingReopen(void)
       if ( !m_MailStream || !mail_ping(m_MailStream) )
       {
          RemoveFromMap(); // will be added again by Open()
-         MFrame *frame = GetInteractiveFrame();
+         wxFrame *frame = GetInteractiveFrame();
          if ( frame )
          {
             STATUSMESSAGE((frame,

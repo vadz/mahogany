@@ -505,7 +505,7 @@ public:
                                  UserData ud,
                                  ASMailFolder::OperationId op,
                                  const UIdArray *selections,
-                                 MWindow *parent,
+                                 wxWindow *parent,
                                  MFolder *folder = NULL)
       : MailThreadSeq(mf, ud, selections)
       {
@@ -529,7 +529,7 @@ public:
 #endif
       }
 private:
-   MWindow *m_Parent;
+   wxWindow *m_Parent;
    MFolder *m_Folder;
    ASMailFolder::OperationId m_Op;
 };
@@ -540,7 +540,7 @@ public:
    MT_ReplyForwardMessages(ASMailFolder *mf, UserData ud,
                            ASMailFolder::OperationId op,
                            const UIdArray *selections,
-                           MWindow *parent,
+                           wxWindow *parent,
                            const MailFolder::Params& params)
       : MailThreadSeq(mf, ud, selections), m_Params(params)
       {
@@ -562,7 +562,7 @@ public:
       }
 private:
    ASMailFolder::OperationId m_Op;
-   MWindow *m_Parent;
+   wxWindow *m_Parent;
    MailFolder::Params m_Params;
 };
 
@@ -585,7 +585,7 @@ public:
       }
 private:
    ASMailFolder::OperationId m_Op;
-   MWindow *m_Parent;
+   wxWindow *m_Parent;
    int m_Flags;
 };
 
@@ -876,7 +876,7 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket SaveMessagesToFile(const UIdArray *messages,
-                                     MWindow *parent, UserData ud)
+                                     wxWindow *parent, UserData ud)
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
                                                    Op_SaveMessagesToFile,
@@ -890,7 +890,7 @@ public:
        @return true if messages got saved
    */
    virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
-                                       MWindow *parent,
+                                       wxWindow *parent,
                                        MFolder *folder,
                                        UserData ud)
       {
@@ -907,7 +907,7 @@ public:
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
                                 const MailFolder::Params& params,
-                                MWindow *parent,
+                                wxWindow *parent,
                                 UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,
@@ -923,7 +923,7 @@ public:
    */
    virtual Ticket ForwardMessages(const UIdArray *messages,
                                   const MailFolder::Params& params,
-                                  MWindow *parent,
+                                  wxWindow *parent,
                                   UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,

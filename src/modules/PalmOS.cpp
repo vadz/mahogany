@@ -663,7 +663,7 @@ PalmOSModule::RegisterWithMainFrame()
 
    MAppBase *mapp = m_MInterface->GetMApplication();
 
-   MFrame *mframe = mapp->TopLevelFrame();
+   wxMFrame *mframe = mapp->TopLevelFrame();
    CHECK( mframe, false, "can't init PalmOS module - no main window" );
 
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&PalmOS Module"),

@@ -69,7 +69,7 @@ ARG(Profile *, profile, =NULL)
 ')
 
 FUNCTION(MessageDialog, void , (
-ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
+ARG(STRING, message), ARG(const wxWindow *, parent, =NULL),
 ARG(STRING, title, =MDIALOG_MSGTITLE),
 ARG(STRING, configPath, =NULL) )
 ,
@@ -87,7 +87,7 @@ ARG(STRING, message)
 ')
 
 FUNCTION(YesNoDialog, bool , (
-ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
+ARG(STRING, message), ARG(const wxWindow *, parent, =NULL),
 ARG(STRING, title, =MDIALOG_YESNOTITLE),
 ARG(bool, yesdefault, =true),
 ARG(STRING, configPath, =NULL) )

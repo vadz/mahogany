@@ -558,7 +558,7 @@ HeaderInfoList *MailFolderCmn::GetHeaders(void) const
 bool
 MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
                                   const String& fileName0,
-                                  MWindow *parent)
+                                  wxWindow *parent)
 {
    String fileName = fileName0;
 
@@ -802,7 +802,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 void
 MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
-                             MWindow *parent)
+                             wxWindow *parent)
 {
    int n = selections->Count();
    for( int i = 0; i < n; i++ )
@@ -820,7 +820,7 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
 void
 MailFolderCmn::ForwardMessages(const UIdArray *selections,
                                const MailFolder::Params& params,
-                               MWindow *parent)
+                               wxWindow *parent)
 {
    int i;
    Message *msg;
@@ -1725,14 +1725,14 @@ bool MailFolderCmn::CountAllMessages(MailFolderStatus *status) const
 // MailFolderCmn interactive frame functions
 // ----------------------------------------------------------------------------
 
-MFrame *MailFolderCmn::SetInteractiveFrame(MFrame *frame)
+wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
 {
-   MFrame *frameOld = m_frame;
+   wxFrame *frameOld = m_frame;
    m_frame = frame;
    return frameOld;
 }
 
-MFrame *MailFolderCmn::GetInteractiveFrame() const
+wxFrame *MailFolderCmn::GetInteractiveFrame() const
 {
    if ( !mApplication->IsInAwayMode() )
    {
