@@ -142,7 +142,7 @@ inline bool HeaderInfoListImpl::IsSorting() const
    return m_tableMsgno != NULL || m_reverseOrder;
 }
 
-inline bool HeaderInfoListImpl::IsHeaderValid(size_t n) const
+inline bool HeaderInfoListImpl::IsHeaderValid(MsgnoType n) const
 {
    return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
 }
@@ -171,7 +171,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_lastMod = 0;
 
    // preallocate the memory for headers
-   m_count = (size_t)mf->GetMessageCount();
+   m_count = mf->GetMessageCount();
    m_headers.Alloc(m_count);
 
    // no sorting/threading yet
@@ -179,8 +179,6 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_tablePos = NULL;
 
    m_reverseOrder = false;
-   m_sortOrder = 0;
-   m_detectOwnAddresses = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -216,12 +214,12 @@ HeaderInfoListImpl::~HeaderInfoListImpl()
 // HeaderInfoListImpl item access
 // ----------------------------------------------------------------------------
 
-size_t HeaderInfoListImpl::Count(void) const
+MsgnoType HeaderInfoListImpl::Count(void) const
 {
    return m_count;
 }
 
-HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
+HeaderInfo *HeaderInfoListImpl::GetItemByIndex(MsgnoType n) const
 {
    CHECK( n < m_count, NULL, "invalid index in HeaderInfoList::GetItemByIndex" );
 
@@ -249,7 +247,7 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
 // HeaderInfoListImpl UID to index
 // ----------------------------------------------------------------------------
 
-size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
+MsgnoType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 {
    MsgnoType msgno = m_mf->GetMsgnoFromUID(uid);
 
@@ -261,7 +259,7 @@ size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 // HeaderInfoListImpl index to/from position mapping
 // ----------------------------------------------------------------------------
 
-MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(size_t pos) const
+MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 {
    if ( m_reverseOrder )
    {
@@ -283,16 +281,16 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(size_t pos) const
    }
 }
 
-size_t HeaderInfoListImpl::GetIdxFromPos(size_t pos) const
+MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 {
-   CHECK( pos < m_count, (size_t)-1, "invalid position in GetIdxFromPos" );
+   CHECK( pos < m_count, INDEX_ILLEGAL, "invalid position in GetIdxFromPos" );
 
    return IsSorting() ? GetMsgnoFromPos(pos) - 1 : pos;
 }
 
-size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
+MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 {
-   CHECK( n < m_count, (size_t)-1, "invalid index in GetPosFromIdx" );
+   CHECK( n < m_count, INDEX_ILLEGAL, "invalid index in GetPosFromIdx" );
 
    if ( m_reverseOrder )
    {
@@ -317,7 +315,7 @@ size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 
 // TODO: OnRemove() is very inefficient for array!
 
-void HeaderInfoListImpl::OnRemove(size_t n)
+void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
    ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
 
@@ -337,7 +335,7 @@ void HeaderInfoListImpl::OnRemove(size_t n)
    m_count--;
 }
 
-void HeaderInfoListImpl::OnAdd(size_t countNew)
+void HeaderInfoListImpl::OnAdd(MsgnoType countNew)
 {
    ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
 
@@ -358,7 +356,7 @@ void HeaderInfoListImpl::OnClose()
 // HeaderInfoListImpl apperance parameters
 // ----------------------------------------------------------------------------
 
-size_t HeaderInfoListImpl::GetIndentation(size_t n) const
+size_t HeaderInfoListImpl::GetIndentation(MsgnoType n) const
 {
    // TODO: where to store it? we might either have a hash containing the
    //       indent (assuming few messages are indented...) or store it in
@@ -374,16 +372,16 @@ size_t HeaderInfoListImpl::GetIndentation(size_t n) const
 
 // return the first position between from and to at which an element from the
 // array appears
-size_t
+MsgnoType
 HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
-                                     size_t posFrom, size_t posTo) const
+                                     MsgnoType posFrom, MsgnoType posTo) const
 {
-   size_t posFirst = UID_ILLEGAL;
+   MsgnoType posFirst = UID_ILLEGAL;
 
    size_t count = array.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      size_t pos = GetPosFromIdx(array[n] - 1);
+      MsgnoType pos = GetPosFromIdx(array[n] - 1);
       if ( pos >= posFrom && pos <= posTo && pos < posFirst )
       {
          posFirst = pos;
@@ -405,7 +403,7 @@ HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
    return posFirst;
 }
 
-size_t
+MsgnoType
 HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
                                      bool set,
                                      long posFrom)
@@ -419,7 +417,7 @@ HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
    return FindFirstInRange(*results, posFrom + 1, m_count);
 }
 
-size_t
+MsgnoType
 HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
                                          bool set,
                                          long posFrom)
@@ -430,7 +428,7 @@ HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
    if ( !results )
       return INDEX_ILLEGAL;
 
-   size_t pos = FindFirstInRange(*results, posFrom + 1, m_count);
+   MsgnoType pos = FindFirstInRange(*results, posFrom + 1, m_count);
    if ( pos == UID_ILLEGAL )
       pos = FindFirstInRange(*results, 0, posFrom);
 
@@ -452,20 +450,22 @@ HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
 void HeaderInfoListImpl::Sort()
 {
    // easy case: don't sort at all
-   if ( GetSortCritDirect(m_sortOrder) == MSO_NONE )
+   if ( GetSortCritDirect(m_sortParams.sortOrder) == MSO_NONE )
    {
       // we may still need to reverse the messages order
-      m_reverseOrder = GetSortCrit(m_sortOrder) == MSO_NONE_REV;
+      m_reverseOrder = GetSortCrit(m_sortParams.sortOrder) == MSO_NONE_REV;
 
       FreeSortTables();
    }
    else // we do need to sort messages
    {
-#if 0 // testing code
-      m_tableMsgno = (size_t *)malloc(m_count * sizeof(size_t));
-      m_tablePos = (size_t *)malloc(m_count * sizeof(size_t));
+      // not yet
+#if 0
+      m_tableMsgno = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
+      m_tablePos = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
 
-      if ( m_sortOrder & 1 )
+#if 0 // testing code
+      if ( m_sortParams.sortOrder & 1 )
       {
          // reverse
          for ( size_t n = 0; n < m_count; n++ )
@@ -482,7 +482,21 @@ void HeaderInfoListImpl::Sort()
             m_tablePos[n] = n;
          }
       }
-#endif
+#else
+      if ( m_mf->SortMessages((MsgnoType *)m_tableMsgno, m_sortParams) )
+      {
+         // build the inverse table
+         for ( MsgnoType n = 0; n < m_count; n++ )
+         {
+            m_tablePos[m_tableMsgno[n] - 1] = n;
+         }
+      }
+      else // sort failed
+      {
+         FreeSortTables();
+      }
+#endif // 0/1
+#endif // 0
    }
 }
 
@@ -493,7 +507,7 @@ bool HeaderInfoListImpl::SetSortOrder(long sortOrder,
 {
    // we are only called if some of the sorting parameters changed, but make
    // sure this change will really affect us
-   if ( sortOrder == m_sortOrder )
+   if ( sortOrder == m_sortParams.sortOrder )
    {
       // something related to detectOwnAddresses changed, do we use this at
       // all?
@@ -516,10 +530,13 @@ bool HeaderInfoListImpl::SetSortOrder(long sortOrder,
       }
    }
 
+   // TODO: check if the new sort order is just the old one inversed, then
+   //       we can avoid calling Sort() but just flip the current tables!
+
    // remember new sort order
-   m_sortOrder = sortOrder;
-   m_detectOwnAddresses = detectOwnAddresses;
-   m_ownAddresses = ownAddresses;
+   m_sortParams.sortOrder = sortOrder;
+   m_sortParams.detectOwnAddresses = detectOwnAddresses;
+   m_sortParams.ownAddresses = ownAddresses;
 
    // sorting order can hardly change the listing if we have less than 2
    // elements
@@ -555,7 +572,7 @@ bool HeaderInfoListImpl::HasChanged(const HeaderInfoList::LastMod since) const
 // HeaderInfoListImpl cache control
 // ----------------------------------------------------------------------------
 
-void HeaderInfoListImpl::ExpandToMakeIndexValid(size_t n)
+void HeaderInfoListImpl::ExpandToMakeIndexValid(MsgnoType n)
 {
    // we need to make n a valid index into array and we do this by filling
    // it up to n with NULLs
@@ -592,7 +609,7 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
    size_t n;
    for ( UIdType i = seq.GetFirst(n); i != UID_ILLEGAL; i = seq.GetNext(i, n) )
    {
-      size_t idx = GetIdxFromMsgno(i);
+      MsgnoType idx = GetIdxFromMsgno(i);
 
       if ( !m_headers[idx] )
       {
@@ -656,9 +673,9 @@ void HeaderInfoListImpl::CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo)
    Cache(seq);
 }
 
-bool HeaderInfoListImpl::IsInCache(size_t pos) const
+bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
 {
-   size_t idx = GetIdxFromPos(pos);
+   MsgnoType idx = GetIdxFromPos(pos);
 
    CHECK( idx < m_count, false,
           "HeaderInfoListImpl::IsInCache(): invalid position" );

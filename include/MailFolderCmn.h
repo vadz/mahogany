@@ -134,6 +134,8 @@ public:
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
                                 MWindow *parent = NULL);
+
+   virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
    //@}
 
 

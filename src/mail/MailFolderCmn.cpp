@@ -847,18 +847,6 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 // MailFolderCmn sorting
 // ----------------------------------------------------------------------------
 
-struct SortParams
-{
-   // the sort order to use
-   long order;
-
-   // replace From addresses with To for messages from oneself?
-   bool replaceFromWithTo;
-
-   // if replaceFromWithTo, the pointer to our own addresses
-   wxArrayString *ownAddresses;
-};
-
 // we can only sort one listing at a time currently as we use global data to
 // pass information to the C callback used by qsort() - if this proves to be a
 // significant limitation, we should reimplement sorting ourselves
@@ -935,7 +923,7 @@ extern "C"
                  *i2 = gs_SortData.hil->GetItemByIndex(n2);
 
       // copy it as we're going to modify it while processing
-      long sortOrder = gs_SortData.sortParams.order;
+      long sortOrder = gs_SortData.sortParams.sortOrder;
 
       int result = 0;
       while ( result == 0 && sortOrder != 0 )
@@ -973,16 +961,16 @@ extern "C"
                   (void)HeaderInfo::GetFromOrTo
                                     (
                                        i1,
-                                       gs_SortData.sortParams.replaceFromWithTo,
-                                       *gs_SortData.sortParams.ownAddresses,
+                                       gs_SortData.sortParams.detectOwnAddresses,
+                                       gs_SortData.sortParams.ownAddresses,
                                        &value1
                                     );
 
                   (void)HeaderInfo::GetFromOrTo
                                     (
                                        i2,
-                                       gs_SortData.sortParams.replaceFromWithTo,
-                                       *gs_SortData.sortParams.ownAddresses,
+                                       gs_SortData.sortParams.detectOwnAddresses,
+                                       gs_SortData.sortParams.ownAddresses,
                                        &value2
                                     );
 
@@ -1026,6 +1014,14 @@ extern "C"
 
       return result;
    }
+}
+
+bool
+MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
+{
+   FAIL_MSG( "TODO" );
+
+   return false;
 }
 
 // sorting/threading is going to be done by HeaderInfoList itself now
@@ -2798,7 +2794,7 @@ static void SortListing(MailFolder *mf,
 
    // don't sort the listing if we don't have any sort criterium (so sorting
    // "by arrival order" will be much faster!)
-   if ( sortParams.order != 0 )
+   if ( sortParams.sortOrder != 0 )
    {
       size_t count = hil->Count();
       if ( count > 1 )
@@ -2849,12 +2845,10 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    hilp->IncRef();
 
    SortParams sortParams;
-   sortParams.order = m_Config.m_ListingSortOrder;
-   sortParams.replaceFromWithTo = m_Config.m_replaceFromWithTo;
-   if ( sortParams.replaceFromWithTo )
-      sortParams.ownAddresses = &m_Config.m_ownAddresses;
-   else
-      sortParams.ownAddresses = NULL;
+   sortParams.sortOrder = m_Config.m_ListingSortOrder;
+   sortParams.detectOwnAddresses = m_Config.m_replaceFromWithTo;
+   if ( sortParams.detectOwnAddresses )
+      sortParams.ownAddresses = m_Config.m_ownAddresses;
 
    SortListing(this, hilp, sortParams);
 

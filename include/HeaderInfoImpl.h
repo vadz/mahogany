@@ -18,6 +18,10 @@
 #   pragma interface "HeaderInfoImpl.h"
 #endif
 
+#ifndef  USE_PCH
+   #include "Sorting.h"
+#endif // USE_PCH
+
 #include "HeaderInfo.h"
 
 #include <wx/dynarray.h>
@@ -58,24 +62,24 @@ WX_DEFINE_ARRAY(HeaderInfo *, ArrayHeaderInfo);
 class HeaderInfoListImpl : public HeaderInfoList
 {
 public:
-   virtual size_t Count(void) const;
+   virtual MsgnoType Count(void) const;
 
-   virtual HeaderInfo *GetItemByIndex(size_t n) const;
-   virtual size_t GetIdxFromUId(UIdType uid) const;
+   virtual HeaderInfo *GetItemByIndex(MsgnoType n) const;
+   virtual MsgnoType GetIdxFromUId(UIdType uid) const;
 
-   virtual size_t GetIdxFromPos(size_t pos) const;
-   virtual size_t GetPosFromIdx(size_t n) const;
+   virtual MsgnoType GetIdxFromPos(MsgnoType pos) const;
+   virtual MsgnoType GetPosFromIdx(MsgnoType n) const;
 
-   virtual void OnRemove(size_t n);
-   virtual void OnAdd(size_t countNew);
+   virtual void OnRemove(MsgnoType n);
+   virtual void OnAdd(MsgnoType countNew);
    virtual void OnClose();
 
-   virtual size_t GetIndentation(size_t n) const;
+   virtual size_t GetIndentation(MsgnoType n) const;
 
-   virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
-                                   bool set, long posFrom);
-   virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
-                                       bool set, long posFrom);
+   virtual MsgnoType FindHeaderByFlag(MailFolder::MessageStatus flag,
+                                      bool set, long posFrom);
+   virtual MsgnoType FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
+                                          bool set, long posFrom);
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set);
 
@@ -88,7 +92,7 @@ public:
 
    virtual void CachePositions(const Sequence& seq);
    virtual void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo);
-   virtual bool IsInCache(size_t pos) const;
+   virtual bool IsInCache(MsgnoType pos) const;
 
    virtual ~HeaderInfoListImpl();
 
@@ -109,16 +113,16 @@ private:
    void FreeSortTables();
 
    /// is the given entry valid (i.e. already cached)?
-   inline bool IsHeaderValid(size_t n) const;
+   inline bool IsHeaderValid(MsgnoType n) const;
 
    /// do we sort messages at all?
    inline bool IsSorting() const;
 
    /// get the msgno which should appear at the given display position
-   MsgnoType GetMsgnoFromPos(size_t pos) const;
+   MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
 
    /// expand m_headers array so that the given index is valid
-   void ExpandToMakeIndexValid(size_t n);
+   void ExpandToMakeIndexValid(MsgnoType n);
 
    /// cache the sequence of msgnos
    void Cache(const Sequence& seqmMsgnos);
@@ -130,8 +134,8 @@ private:
       Find first position in the given range containing a msgno from array
       @return position or UID_ILLEGAL
    */
-   size_t FindFirstInRange(const MsgnoArray& array,
-                           size_t posFrom, size_t posTo) const;
+   MsgnoType FindFirstInRange(const MsgnoArray& array,
+                              MsgnoType posFrom, MsgnoType posTo) const;
 
    /// the folder we contain the listinf for
    MailFolder *m_mf;
@@ -140,7 +144,7 @@ private:
    ArrayHeaderInfo m_headers;
 
    /// the number of messages in the folder
-   size_t m_count;
+   MsgnoType m_count;
 
    /**
      @name Sorting/threading data
@@ -159,29 +163,16 @@ private:
    //@{
 
    /// the translation table allowing to get msgno (index) from position
-   size_t *m_tableMsgno;
+   MsgnoType *m_tableMsgno;
 
    /// the translation table allowing to get position from msgno (index)
-   size_t *m_tablePos;
+   MsgnoType *m_tablePos;
 
    /// should we reverse the order of messages in the folder?
    bool m_reverseOrder;
 
-   //@}
-
-   /**
-     @name Sorting parameters
-    */
-   //@{
-
-   /// the sort order (composed of MSO_XXX values)
-   long m_sortOrder;
-
-   /// use "To" instead of "From" for addresses from oneself?
-   bool m_detectOwnAddresses;
-
-   /// the array of our own addresses (only used if m_detectOwnAddresses)
-   wxArrayString m_ownAddresses;
+   /// sorting parameters
+   SortParams m_sortParams;
 
    //@}
 

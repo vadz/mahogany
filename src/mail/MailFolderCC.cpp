@@ -3461,7 +3461,7 @@ MailFolderCC::DebugDump() const
 #endif // DEBUG
 
 // ----------------------------------------------------------------------------
-// MailFolderCC capabilities
+// MailFolderCC sorting/threading
 // ----------------------------------------------------------------------------
 
 bool MailFolderCC::CanSort() const
@@ -3476,6 +3476,24 @@ bool MailFolderCC::CanThread() const
    CHECK( m_MailStream, false, "MailFolderCC::CanThread(): folder closed" );
 
    return GetType() == MF_IMAP && LEVELTHREAD(m_MailStream);
+}
+
+bool
+MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
+{
+   FAIL_MSG( "TODO" );
+
+   /*
+      if the server supports sorting at all
+         if it can sort with the criteria from sortParams
+            call mail_sort() to do server side sorting
+            if ok
+               return
+
+      call base class version to do local sorting
+    */
+
+   return false;
 }
 
 // ----------------------------------------------------------------------------

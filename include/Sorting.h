@@ -54,6 +54,21 @@ enum MessageSortOrder
    MSO_AUTHOR_REV = MSO_SENDER_REV
 };
 
+/// struct holding all sorting parameters
+struct SortParams
+{
+   /// how to sort the list of messages
+   long sortOrder;
+
+   /// do we use "To" instead of "From" for messages from oneself?
+   bool detectOwnAddresses;
+
+   /// if detectOwnAddresses, the list of the addresses for "oneself"
+   wxArrayString ownAddresses;
+
+   SortParams() { sortOrder = MSO_NONE; detectOwnAddresses = false; }
+};
+
 /// get a single sorting criterium from the sort order
 inline MessageSortOrder GetSortCrit(long sortOrder)
 {
@@ -71,6 +86,12 @@ inline long GetSortNextCriterium(long sortOrder)
 {
     return sortOrder >> 4;
 }
+
+/// split a long value (as read from profile) into (several) sort orders
+extern wxArrayInt SplitSortOrder(long sortOrder);
+
+/// combine several (max 8) sort orders into one value
+extern long BuildSortOrder(const wxArrayInt& sortOrders);
 
 #endif // _SORTING_H_
 

@@ -26,7 +26,8 @@
 class WXDLLEXPORT wxArrayString;
 class Sequence;
 
-#define INDEX_ILLEGAL ((size_t)-1)
+/// illegal value of the message index (it nicely corresponds to 0 msgno)
+#define INDEX_ILLEGAL UID_ILLEGAL
 
 /**
    This class contains all the information from message header
@@ -190,27 +191,27 @@ public:
    /** @name Elements access */
    //@{
    /// Count the number of messages in listing.
-   virtual size_t Count(void) const = 0;
+   virtual MsgnoType Count(void) const = 0;
 
    /// Returns the entry for the given internal index
-   virtual HeaderInfo *GetItemByIndex(size_t n) const = 0;
+   virtual HeaderInfo *GetItemByIndex(MsgnoType n) const = 0;
 
    /// Returns the entry for the n-th msgno (msgnos are counted from 1)
    HeaderInfo *GetItemByMsgno(MsgnoType msgno) const
       { return GetItemByIndex(GetIdxFromMsgno(msgno)); }
 
    /// Returns the entry which should be shown in the given position.
-   HeaderInfo *GetItem(size_t pos) const
+   HeaderInfo *GetItem(MsgnoType pos) const
       { return GetItemByIndex(GetIdxFromPos(pos)); }
 
    /// Operator version of GetItem()
-   HeaderInfo *operator[](size_t pos) const { return GetItem(pos); }
+   HeaderInfo *operator[](MsgnoType pos) const { return GetItem(pos); }
    //@}
 
    /** @name UID/msgno to index mapping */
    //@{
    /** Returns the (internal) index for this UID or INDEX_ILLEGAL */
-   virtual size_t GetIdxFromUId(UIdType uid) const = 0;
+   virtual MsgnoType GetIdxFromUId(UIdType uid) const = 0;
 
    /// Returns pointer to entry with this UId
    virtual HeaderInfo *GetEntryUId(UIdType uid) const
@@ -219,22 +220,22 @@ public:
    }
 
    /** Returns the (internal) index for the given msgno. */
-   size_t GetIdxFromMsgno(MsgnoType msgno) const { return msgno - 1; }
+   MsgnoType GetIdxFromMsgno(MsgnoType msgno) const { return msgno - 1; }
    //@}
 
    /** @name Position to/from index mapping */
    //@{
    /** Returns the (internal) index for the given display position. */
-   virtual size_t GetIdxFromPos(size_t pos) const = 0;
+   virtual MsgnoType GetIdxFromPos(MsgnoType pos) const = 0;
 
    /** Returns the position at which this item should be displayed. */
-   virtual size_t GetPosFromIdx(size_t n) const = 0;
+   virtual MsgnoType GetPosFromIdx(MsgnoType n) const = 0;
    //@}
 
    /** @name Appearance parameters */
    //@{
    /// get the indentation level of this message in thread (0 for root)
-   virtual size_t GetIndentation(size_t n) const = 0;
+   virtual size_t GetIndentation(MsgnoType n) const = 0;
 
    // TODO: possible score and colour settings for individual messages should
    //       be kept here as well
@@ -243,10 +244,10 @@ public:
    /** @name Functions called by MailFolder */
    //@{
    /// Called when the given (by index) message is expunged
-   virtual void OnRemove(size_t n) = 0;
+   virtual void OnRemove(MsgnoType n) = 0;
 
    /// Called when the number of messages in the folder increases
-   virtual void OnAdd(size_t countNew) = 0;
+   virtual void OnAdd(MsgnoType countNew) = 0;
 
    /// Called when the underlying folder is closed
    virtual void OnClose() = 0;
@@ -268,17 +269,17 @@ public:
 
        @return the position or INDEX_ILLEGAL if none found
     */
-   virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
-                                   bool set = true,
-                                   long posFrom = -1) = 0;
+   virtual MsgnoType FindHeaderByFlag(MailFolder::MessageStatus flag,
+                                      bool set = true,
+                                      long posFrom = -1) = 0;
 
    /**
        Same as GetHeaderByFlag() but wraps to the start if the header is not
        found between indexFrom and the end of the listing
     */
-   virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
-                                       bool set = true,
-                                       long posFrom = -1) = 0;
+   virtual MsgnoType FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
+                                          bool set = true,
+                                          long posFrom = -1) = 0;
 
    /**
        Return the array containing all headers with[out] the given flag.
@@ -358,7 +359,7 @@ public:
       If it is, calling GetItem() for it is fast, otherwise it may involve a
       trip to server and so should be done asynchronously.
     */
-   virtual bool IsInCache(size_t pos) const = 0;
+   virtual bool IsInCache(MsgnoType pos) const = 0;
    //@}
 
    MOBJECT_NAME(HeaderInfoList)
@@ -367,8 +368,8 @@ public:
 // declare an auto ptr class for HeaderInfoList which adds an operator[]
 BEGIN_DECLARE_AUTOPTR(HeaderInfoList)
 public:
-   const HeaderInfo *operator[](size_t n) const { return (*m_ptr)[n]; }
-   HeaderInfo *operator[](size_t n) { return (*m_ptr)[n]; }
+   const HeaderInfo *operator[](MsgnoType n) const { return (*m_ptr)[n]; }
+   HeaderInfo *operator[](MsgnoType n) { return (*m_ptr)[n]; }
 END_DECLARE_AUTOPTR();
 
 #endif // HEADERINFO_H

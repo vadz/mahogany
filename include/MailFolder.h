@@ -105,6 +105,7 @@ class MWindow;
 class Message;
 class MessageView;
 class Sequence;
+class SortParams;
 
 // ----------------------------------------------------------------------------
 // MLogCircle
@@ -489,11 +490,6 @@ public:
       return FolderNeedsNetwork(GetType(), GetFlags());
    }
 
-   /// can we sort messages on server?
-   virtual bool CanSort() const = 0;
-
-   /// can we thread messages on server?
-   virtual bool CanThread() const = 0;
    //@}
 
    /** @name Functions working with message headers */
@@ -733,6 +729,17 @@ public:
    virtual void ForwardMessages(const UIdArray *messages,
                                 const Params& params,
                                 MWindow *parent = NULL) = 0;
+
+   /** Sort messages: returns the array containing the msgnos of the messages
+       in sorted order.
+
+       @param the array where to put the sorted msgnos (must be big enough!)
+       @param sortParams indicates how to sort the messages
+       @return true on success, false if msgs couldn't be sorted
+    */
+   virtual bool SortMessages(MsgnoType *msgnos,
+                             const SortParams& sortParams) = 0;
+
    //@}
 
    /**@name Access control */
@@ -968,12 +975,6 @@ public:
    GetNextEntry(FolderListing::iterator &i) const = 0;
    virtual ~FolderListing() {}
 };
-
-/// split a long value (as read from profile) into (several) sort orders
-extern wxArrayInt SplitSortOrder(long sortOrder);
-
-/// combine several (max 8) sort orders into one value
-extern long BuildSortOrder(const wxArrayInt& sortOrders);
 
 /** Search criterium for searching folder for certain messages. */
 class SearchCriterium

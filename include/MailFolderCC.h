@@ -150,9 +150,11 @@ public:
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
 
-   // capabilities
-   virtual bool CanSort() const;
-   virtual bool CanThread() const;
+   /// can we do server side sorting?
+   bool CanSort() const;
+
+   /// can we do server side threading?
+   bool CanThread() const;
 
    /** Get the profile.
        @return Pointer to the profile.
@@ -228,6 +230,8 @@ public:
        @return UIdArray with UIds of matching messages
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
+
+   virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
 
    /** Get a string uniquely identifying the message in this folder, will be
        empty if not supported by this folder type
