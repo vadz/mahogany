@@ -316,8 +316,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
-   { WXMENU_EDIT_EXPORT_PREF,gettext_noop("E&xport preferences..."), gettext_noop("Save options")             , wxITEM_NORMAL },
-   { WXMENU_EDIT_IMPORT_PREF,gettext_noop("&Import preferences..."), gettext_noop("Save options")             , wxITEM_NORMAL },
+   { WXMENU_EDIT_EXPORT_PREF,gettext_noop("E&xport preferences..."), gettext_noop("Export options")             , wxITEM_NORMAL },
+   { WXMENU_EDIT_IMPORT_PREF,gettext_noop("&Import preferences..."), gettext_noop("Import options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , wxITEM_NORMAL },
 
