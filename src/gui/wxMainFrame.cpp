@@ -564,6 +564,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 {
    // init members
    m_searchData = NULL;
+   m_FolderTree = NULL;
+   m_FolderView = NULL;
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
