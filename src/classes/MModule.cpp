@@ -833,59 +833,78 @@ static wxArrayString BuildListOfModulesDirs()
 {
    wxArrayString dirs;
 
-   // make it possible to use modules without installing them
-#ifdef M_TOP_BUILDDIR
-   wxString path0;
-   path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << _T("src")
-         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
-   dirs.Add(path0);
+   // 1. look in user directory
 
-   path0.clear();
-   path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << _T("src")
-         << DIR_SEPARATOR << _T("adb") << DIR_SEPARATOR;
-   dirs.Add(path0);
+   const String localDir = mApplication->GetLocalDir();
 
-   path0.clear();
-   path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << _T("src")
-         << DIR_SEPARATOR << _T("modules")
-         << DIR_SEPARATOR << _T("crypt") << DIR_SEPARATOR;
-   dirs.Add(path0);
+   String pathUser;
 
-   path0.clear();
-   path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << _T("src")
-         << DIR_SEPARATOR << _T("modules")
-         << DIR_SEPARATOR << _T("viewflt") << DIR_SEPARATOR;
-   dirs.Add(path0);
-#endif // Unix
-
-   // look under extra M_CANONICAL_HOST directory under Unix, but not for other
-   // platforms (doesn't make much sense under Windows)
-
-   wxString path1;
-   path1 << mApplication->GetGlobalDir()
 #ifdef OS_UNIX
-         << DIR_SEPARATOR << M_CANONICAL_HOST
+   // look first under extra M_CANONICAL_HOST directory under Unix, this
+   // allows to have arch-dependent modules which is handy when your home
+   // directory is shared between multiple machines (via NFS for example)
+
+   pathUser << localDir
+            << DIR_SEPARATOR << M_CANONICAL_HOST
+            << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
+
+   dirs.Add(pathUser);
+
+   pathUser.clear();
 #endif // Unix
-         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
 
-   dirs.Add(path1);
+   pathUser << localDir << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
 
-   wxString path2;
-   path2 << mApplication->GetLocalDir()
-#ifdef OS_UNIX
-         << DIR_SEPARATOR << M_CANONICAL_HOST
-#endif // Unix
-         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
+   dirs.Add(pathUser);
 
-   // under Windows, the global and local dirs might be the same
-   if ( path2 != path1 )
+   // 2. look in global directory
+
+   // look in $prefix/lib/mahogany modules but just in modules under the
+   // program/bundle directory elsewhere (not that it mattered anyhow as
+   // dynamic modules are not supported neither under Windows nor under Mac
+   // right now...)
+   const String globalDir = mApplication->GetGlobalDir();
+   if ( globalDir != localDir )
    {
-      dirs.Add(path2);
+      String pathSystem;
+      pathSystem << globalDir << DIR_SEPARATOR
+#ifdef OS_UNIX
+                 << _T("lib/mahogany/")
+#endif // Unix
+                 << _T("modules") << DIR_SEPARATOR;
+
+      dirs.Add(pathSystem);
    }
+
+   // 3. finally, also make it possible to use modules without installing them
+   //    so look in the source tree
+#ifdef M_TOP_BUILDDIR
+   wxString pathSrcTree;
+   pathSrcTree << M_TOP_BUILDDIR
+               << DIR_SEPARATOR << _T("src")
+               << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
+   dirs.Add(pathSrcTree);
+
+   pathSrcTree.clear();
+   pathSrcTree << M_TOP_BUILDDIR
+               << DIR_SEPARATOR << _T("src")
+               << DIR_SEPARATOR << _T("adb") << DIR_SEPARATOR;
+   dirs.Add(pathSrcTree);
+
+   pathSrcTree.clear();
+   pathSrcTree << M_TOP_BUILDDIR
+               << DIR_SEPARATOR << _T("src")
+               << DIR_SEPARATOR << _T("modules")
+               << DIR_SEPARATOR << _T("crypt") << DIR_SEPARATOR;
+   dirs.Add(pathSrcTree);
+
+   pathSrcTree.clear();
+   pathSrcTree << M_TOP_BUILDDIR
+               << DIR_SEPARATOR << _T("src")
+               << DIR_SEPARATOR << _T("modules")
+               << DIR_SEPARATOR << _T("viewflt") << DIR_SEPARATOR;
+   dirs.Add(pathSrcTree);
+#endif // Unix
 
    return dirs;
 }

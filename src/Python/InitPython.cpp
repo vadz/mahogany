@@ -71,62 +71,66 @@ InitPython(void)
    }
 #endif // USE_PYTHON_DYNAMIC
 
-   // set PYTHONPATH correctly to find our modules
-   String tmp = _T("PYTHONPATH=");
+   // set PYTHONPATH correctly to find our modules and scripts
+   String pythonPathNew = _T("PYTHONPATH=");
 
    String path = READ_APPCONFIG(MP_PYTHONPATH);
-   bool didntHavePath = path.empty();
+   const bool didntHavePath = path.empty();
    if ( didntHavePath )
    {
-      String pythondir;
-      String globaldir = mApplication->GetGlobalDir();
-      if ( globaldir.empty() )
-      {
-         // not installed
-         pythondir << mApplication->GetDataDir() << DIR_SEPARATOR << _T("Python");
-      }
-      else
-      {
-         pythondir = globaldir;
-      }
-
-      // note that "scripts" has small 's'
-      path << pythondir << PATH_SEPARATOR
-           << pythondir << DIR_SEPARATOR << _T("Python") << PATH_SEPARATOR
-           << pythondir << DIR_SEPARATOR << _T("scripts")
-           // add also the uninstalled locations
-#ifdef M_TOP_BUILDDIR
-           // but "Python/Scripts" has a capital 'S'!
-           << PATH_SEPARATOR << M_TOP_BUILDDIR << _T("/src/Python")
-           << PATH_SEPARATOR << M_TOP_BUILDDIR << _T("/src/Python/Scripts")
-#endif
-           ;
-
+      // first, use user files
       String localdir = mApplication->GetLocalDir();
-      if ( localdir != globaldir )
+      if ( !localdir.empty() )
       {
-         path << PATH_SEPARATOR
-              << localdir << DIR_SEPARATOR << _T("Scripts") << PATH_SEPARATOR;
+         path                   << localdir << DIR_SEPARATOR << _T("scripts")
+              << PATH_SEPARATOR << localdir << DIR_SEPARATOR << _T("python");
       }
+
+      // next, use the program files
+      String globaldir = mApplication->GetDataDir();
+      if ( !globaldir.empty() && globaldir != localdir )
+      {
+          // note that both "python" and "scripts" directories are not
+          // capitalized after installation (as used here) but are capitalized
+          // in the source tree (below) -- this is a historical accident...
+          path << PATH_SEPARATOR << globaldir << DIR_SEPARATOR << _T("scripts")
+               << PATH_SEPARATOR << globaldir << DIR_SEPARATOR << _T("python");
+      }
+
+      // finally, also add the uninstalled locations: this makes it possible
+      // to use the program without installing it which is handy
+#ifdef M_TOP_BUILDDIR
+      path << PATH_SEPARATOR << M_TOP_BUILDDIR << _T("/src/Python");
+#endif // M_TOP_BUILDDIR
+
+#ifdef M_TOP_SOURCEDIR
+      path << PATH_SEPARATOR << M_TOP_SOURCEDIR << _T("/src/Python/Scripts");
+#endif // M_TOP_SOURCEDIR
    }
 
-   tmp += path;
+   wxLogTrace(_T("Python"), "Adding \"%s\" to PYTHONPATH", path.c_str());
 
-   const char *pathOld = getenv("PYTHONPATH");
-   if ( pathOld )
+   pythonPathNew += path;
+
+   // also keep the old path but after our directories
+   const char *pythonPathOld = getenv("PYTHONPATH");
+   if ( pythonPathOld )
    {
-      tmp << PATH_SEPARATOR << pathOld;
+      pythonPathNew << PATH_SEPARATOR << pythonPathOld;
    }
 
    // on some systems putenv() takes "char *", cast silents the warnings but
    // should be harmless otherwise
-   putenv((char *)tmp.c_str());
+   putenv((char *)pythonPathNew.c_str());
 
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();
 
-   if( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
-      return true; // it is not an error to have it disabled
+   if ( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
+   {
+      // it is not an error to have it disabled
+      return true;
+   }
 
    // initialise the modules
    init_HeaderInfo();
@@ -151,8 +155,7 @@ InitPython(void)
    else
    {
       Py_INCREF(Python_MinitModule); // keep it in memory
-      PyObject *minit = PyObject_GetAttrString(Python_MinitModule,
-                                               "Minit");
+      PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
       if(minit)
       {
          Py_INCREF(minit);

@@ -61,7 +61,6 @@ inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_CONVERTPROGRAM;
-extern const MOption MP_CONVERTPROGRAM_D;
 extern const MOption MP_ICONPATH;
 extern const MOption MP_TMPGFXFORMAT;
 
@@ -421,8 +420,22 @@ wxIconManager::wxIconManager(wxString sub_dir)
 {
    m_iconList = new IconDataList;
 
-   m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << _T("icons");
-   m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << _T("icons");
+   const String localDir(mApplication->GetLocalDir());
+
+   m_GlobalDir = mApplication->GetDataDir();
+
+   // look in the source directory if there is no global one
+#ifdef M_TOP_SOURCEDIR
+   if ( m_GlobalDir == localDir )
+   {
+      m_GlobalDir.clear();
+      m_GlobalDir << M_TOP_SOURCEDIR << DIR_SEPARATOR << _T("src");
+   }
+#endif // defined(M_TOP_SOURCEDIR)
+
+   m_GlobalDir << DIR_SEPARATOR << _T("icons");
+
+   m_LocalDir << localDir << DIR_SEPARATOR << _T("icons");
 
    if(sub_dir == _T("default") || sub_dir == _("default"))
       sub_dir.clear();
@@ -550,7 +563,12 @@ wxIconManager::GetIcon(const String &iconNameOrig)
    bool found = false;
    if(m_GlobalDir.Length())
    {
-      PathFinder pf(READ_APPCONFIG(MP_ICONPATH), false /* non-recursive */);
+      PathFinder pf(READ_APPCONFIG(MP_ICONPATH));
+
+#ifdef M_TOP_SOURCEDIR
+      pf.AddPaths(String(M_TOP_SOURCEDIR) + _T("/src/icons"));
+#endif // M_TOP_SOURCEDIR
+
       pf.AddPaths(m_GlobalDir, false);
       if(ms_IconPath.Length() > 0)
          pf.AddPaths(ms_IconPath,false, true /*prepend */);

@@ -63,6 +63,10 @@
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
+#ifdef OS_MAC
+   #include <CoreServices/CoreServices.h>
+#endif // OS_MAC
+
 #ifdef OS_WIN
    #include <shlobj.h>
    #include <wx/msw/winundef.h>
@@ -102,9 +106,6 @@ extern const MOption MP_USERDIR;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 #ifdef OS_UNIX
-extern const MOption MP_ETCPATH;
-extern const MOption MP_PREFIXPATH;
-extern const MOption MP_ROOTDIRNAME;
 extern const MOption MP_USE_SENDMAIL;
 #endif // OS_UNIX
 
@@ -124,6 +125,12 @@ extern const MPersMsgBox *M_MSGBOX_SEND_OUTBOX_ON_EXIT;
 // ----------------------------------------------------------------------------
 
 WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+static const wxChar *MAHOGANY_DATADIR = _T("share/mahogany");
 
 // ----------------------------------------------------------------------------
 // functions
@@ -972,35 +979,49 @@ MAppBase::InitDirectories()
    m_globalDir = READ_APPCONFIG_TEXT(MP_GLOBALDIR);
    if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
-      // under Unix we try to find our directory in some standard locations
-#ifdef OS_UNIX
+      // [try to] find the global directory
+
+#if defined(OS_MAC)
+      // use the bundle directory under Mac OS X
+      CFBundleRef bundle = CFBundleGetMainBundle();
+      if ( bundle )
+      {
+         CFURLRef url = CFBundleCopyBundleURL(bundle);
+         if ( url )
+         {
+            CFStringRef path = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
+            if ( path )
+            {
+               // hmm, do we need to use CFStringGetCString() here instead?
+               m_globalDir = CFStringGetCStringPtr(path, CFStringGetSystemEncoding);
+
+               CFRelease(path);
+            }
+
+            CFRelease(url);
+         }
+      }
+#elif defined(OS_UNIX)
+      // under Unix we try to find our directory first in compiled-in location
+      // and then in some standard ones
+
+      static const wxChar *
+         stdPrefixes = _T("/usr:/usr/local:/opt:/usr/local/opt:/tmp");
+      PathFinder pf(stdPrefixes);
+      pf.AddPaths(M_PREFIX,false,true /* prepend */);
+
       bool found;
-      if ( PathFinder::IsDir(M_BASEDIR) )
-      {
-         m_globalDir = M_BASEDIR;
+      m_globalDir = pf.FindDir(MAHOGANY_DATADIR, &found);
 
-         found = true;
-      }
-      else
-      {
-         PathFinder pf(GetStringDefault(MP_PREFIXPATH));
-         pf.AddPaths(M_PREFIX,false,true);
-         m_globalDir = pf.FindDir(GetStringDefault(MP_ROOTDIRNAME), &found);
-      }
-
+      // if failed, give up and ask the user
       if ( !found )
       {
          String msg;
          msg.Printf(_("Cannot find global directory \"%s\" in\n"
                       "\"%s\"\n"
                       "Would you like to specify its location now?"),
-                    GetStringDefault(MP_ROOTDIRNAME),
-                    GetStringDefault(MP_ETCPATH));
-#else
-         String msg = _("Cannot find global program directory.\n"
-                        "\n"
-                        "Would you like to specify its location now?");
-#endif // OS_UNIX
+                    MAHOGANY_DATADIR,
+                    stdPrefixes);
          if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                   M_DLG_YES_DEFAULT,
                                   M_MSGBOX_ASK_SPECIFY_DIR) )
@@ -1011,17 +1032,31 @@ MAppBase::InitDirectories()
                m_globalDir = dlg.GetPath();
             }
          }
-#ifdef OS_WIN
-         else // under Windows, use the same directory as the local one
-         {
-            m_globalDir = m_localDir;
-         }
-#endif // OS_WIN
-#ifdef OS_UNIX
       }
-#endif // OS_UNIX
+      else // found in a std location
+      {
+         // we want just the DESTDIR, not DESTDIR/share/mahogany, so
+         // truncate (-1 for slash)
+         m_globalDir.resize(m_globalDir.length() - strlen(MAHOGANY_DATADIR) - 1);
+      }
+#elif defined(OS_WIN)
+      // use the program installation directory under Windows
+      wxString path;
+      if ( ::GetModuleFileName(NULL, wxStringBuffer(path, MAX_PATH), MAX_PATH) )
+      {
+         // get just the directory
+         wxSplitPath(path, &m_globalDir, NULL, NULL);
+      }
+#else
+      #error "Don't know how to find program directory on this platform!"
+#endif // OS_MAC/OS_UNIX/OS_WIN
 
-      if ( !m_globalDir.empty() )
+      if ( m_globalDir.empty() )
+      {
+         // use the user directory by default -- what else can we do?
+         m_globalDir = m_localDir;
+      }
+      else // got valid global directory, save it for subequent runs
       {
          m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
       }
@@ -1344,18 +1379,13 @@ extern "C"
 String MAppBase::GetDataDir() const
 {
    String dir = GetGlobalDir();
-   if ( dir.empty() )
-   {
-      // M_TOP_SOURCEDIR is defined by configure
-#ifdef M_TOP_SOURCEDIR
-      dir = M_TOP_SOURCEDIR;
-#endif
 
-      if ( !dir.empty() )
-         dir += '/';
-
-      dir += _T("src");
-   }
+#ifdef OS_UNIX
+   // if we used local directory as fall back for the global one because we
+   // couldn't find the latter, there is no sense to append "share/..." to it
+   if ( dir != GetLocalDir() )
+      dir << _T('/') << MAHOGANY_DATADIR;
+#endif // OS_UNIX
 
    return dir;
 }
@@ -1370,10 +1400,10 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
 #if 0 // we don't provide any mailcaps so far
         // attempt to load the extra information supplied with M:
 
-        if(wxFileExists(GetGlobalDir()+_T("/mailcap")))
-            m_mimeManager->ReadMailcap(GetGlobalDir()+_T("/mailcap"));
-        if(wxFileExists(GetGlobalDir()+_T("/mime.types")))
-            m_mimeManager->ReadMimeTypes(GetGlobalDir()+_T("/mime.types"));
+        if(wxFileExists(GetDataDir()+_T("/mailcap")))
+            m_mimeManager->ReadMailcap(GetDataDir()+_T("/mailcap"));
+        if(wxFileExists(GetDataDir()+_T("/mime.types")))
+            m_mimeManager->ReadMimeTypes(GetDataDir()+_T("/mime.types"));
 #endif // 0
 
     }

@@ -76,9 +76,6 @@ install_bin:
 	set -e; for i in \
 	   $(BINDIR) \
 	   $(DATADIR) \
-	   $(DATADIR)/$(CANONICAL_HOST) \
-	   $(DATADIR)/$(CANONICAL_HOST)/bin \
-	   $(DATADIR)/$(CANONICAL_HOST)/lib \
 	   $(DOCDIR) \
 	   $(DOCDIR)/Tips \
 	;do \
@@ -122,7 +119,6 @@ install_rpm:
 	@echo "$(DATADIR)/newmail.wav" >> filelist
 	@echo "$(DATADIR)/kylemail.wav" >> filelist
 	@echo "$(DATADIR)/afm" >> filelist
-	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
 	@echo "$(DATADIR)/icons" >> filelist
 	@echo "$(DATADIR)/locale" >> filelist
 	@echo "$(BINDIR)/M" >> filelist

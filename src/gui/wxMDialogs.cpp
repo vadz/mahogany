@@ -1252,8 +1252,8 @@ MDialog_ShowTip(const wxWindow *parent)
 {
    String dir, filename;
 
-   // Tips files are in @prefix@/share/Mahogany/doc/Tips/
-   dir = mApplication->GetGlobalDir();
+   // Tips files are in $prefix/share/mahogany/doc/Tips/
+   dir = mApplication->GetDataDir();
    if ( !dir )
    {
       // like this, it will work in an uninstalled copy of M too

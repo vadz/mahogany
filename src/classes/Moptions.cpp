@@ -129,11 +129,7 @@ const MOption MP_USE_CONFIG_FILE;
 const MOption MP_TBARIMAGES;
 
 #ifdef OS_UNIX
-const MOption MP_PATHLIST;
-const MOption MP_ROOTDIRNAME;
 const MOption MP_AFMPATH;
-const MOption MP_ETCPATH;
-const MOption MP_PREFIXPATH;
 #endif // OS_UNIX
 
 const MOption MP_HELPDIR;
@@ -542,11 +538,7 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_TBARIMAGES),
 
 #ifdef OS_UNIX
-    DEFINE_OPTION(MP_PATHLIST),
-    DEFINE_OPTION(MP_ROOTDIRNAME),
     DEFINE_OPTION(MP_AFMPATH),
-    DEFINE_OPTION(MP_ETCPATH),
-    DEFINE_OPTION(MP_PREFIXPATH),
 #endif // OS_UNIX
 
     DEFINE_OPTION(MP_HELPDIR),

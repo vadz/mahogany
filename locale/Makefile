@@ -18,10 +18,10 @@ vpath %.po .src
 all:	$(FILES_MO)
 
 install: all
-	$(INSTALL) -d $(DATADIR)/locale
+	$(INSTALL) -d $(LOCALEDIR)
 	set -e; for i in $(FILES_MO); \
-	do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; \
-	$(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/M.mo; \
+	do $(INSTALL) -d $(LOCALEDIR)/`basename $$i .mo`/LC_MESSAGES; \
+	$(INSTALL_DATA) $$i $(LOCALEDIR)/`basename $$i .mo`/LC_MESSAGES/M.mo; \
 	done
 
 check:

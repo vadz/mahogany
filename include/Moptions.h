@@ -66,11 +66,7 @@ extern const MOption MP_USE_CONFIG_FILE;
 extern const MOption MP_TBARIMAGES;
 
 #ifdef OS_UNIX
-extern const MOption MP_PATHLIST;
-extern const MOption MP_ROOTDIRNAME;
 extern const MOption MP_AFMPATH;
-extern const MOption MP_ETCPATH;
-extern const MOption MP_PREFIXPATH;
 #endif // OS_UNIX
 
 extern const MOption MP_HELPDIR;
@@ -520,16 +516,8 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 // Unix-only entries
 #ifdef OS_UNIX
-/// search paths for M's directory
-#   define   MP_PATHLIST_NAME         _T("PathList")
-/// the name of M's root directory
-#   define   MP_ROOTDIRNAME_NAME         _T("RootDirectoryName")
 /// the path where to find .afm files
 #   define   MP_AFMPATH_NAME         _T("AfmPath")
-/// the path to the /etc directories (configuration files)
-#   define   MP_ETCPATH_NAME         _T("ConfigPath")
-/// the path to the M directory, e.g. /usr/
-#   define   MP_PREFIXPATH_NAME         _T("PrefixPath")
 #endif //Unix
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
@@ -1357,18 +1345,10 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 // Unix-only entries
 #ifdef OS_UNIX
-/// path list for M's directory
-#  define   MP_PATHLIST_DEFVAL M_PREFIX _T(":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt")
 /// the complete path to the glocal M directory
 #  define   MP_GLOBALDIR_DEFVAL      M_BASEDIR
-/// the name of M's root directory
-#  define   MP_ROOTDIRNAME_DEFVAL   _T("Mahogany")
 /// the path where to find .afm files
 #  define   MP_AFMPATH_DEFVAL M_BASEDIR _T("/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript")
-/// the path to the /etc directories (configuration files)
-#  define   MP_ETCPATH_DEFVAL _T("/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc")
-/// the path to the m directory
-#  define   MP_PREFIXPATH_DEFVAL _T("/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp")
 #else // !Unix
 /// the complete path to the glocal M directory
 #  define   MP_GLOBALDIR_DEFVAL  wxEmptyString

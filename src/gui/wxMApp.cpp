@@ -1250,7 +1250,7 @@ const wxPrintData *wxMApp::GetPrintData()
       wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
       // set AFM path
-      PathFinder pf(mApplication->GetGlobalDir() + _T("/afm"), false);
+      PathFinder pf(mApplication->GetDataDir() + _T("/afm"), false);
       pf.AddPaths(READ_APPCONFIG_TEXT(MP_AFMPATH), false);
       pf.AddPaths(mApplication->GetLocalDir(), true);
 
@@ -1354,7 +1354,7 @@ wxString wxMApp::BuildHelpInitString(const wxString& dir)
 /* static */
 wxString wxMApp::GetHelpDir()
 {
-   wxString helpdir = mApplication->GetGlobalDir();
+   wxString helpdir = mApplication->GetDataDir();
    if ( !helpdir.empty() )
       helpdir += wxFILE_SEP_PATH;
 

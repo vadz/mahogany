@@ -251,10 +251,11 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
    }
 
    // we also need to update the viewers menu to indicate the currently
-   // selected one
-   if ( viewerNew )
+   // selected one (if we do have a viewer, i.e. are not using the dummy one)
+   const String& nameViewer = GetProfileValues().msgViewer;
+   if ( viewerNew && !nameViewer.empty() )
    {
-      int n = m_namesViewers.Index(GetProfileValues().msgViewer);
+      int n = m_namesViewers.Index(nameViewer);
       CHECK_RET( n != wxNOT_FOUND, _T("non existing viewer selected?") );
 
       wxFrame *frame = GetFrame(viewerNew->GetWindow());

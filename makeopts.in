@@ -103,16 +103,18 @@ INSTALL_DATA	:= @INSTALL_DATA@
 INSTALL_OPTIONS := -m 755
 
 DESTDIR = @prefix@
-# Directory in which to install scripts.
+# Directory in which to install binaries and scripts
 BINDIR = $(DESTDIR)/bin
-# Directory in which to install library files.
-DATADIR = $(DESTDIR)/share/Mahogany
+# Directory in which to install loadable modules
+LIBDIR = $(DESTDIR)/lib/mahogany
+# Directory in which to install loadable modules
+MODULEDIR = $(LIBDIR)/modules
+# Directory in which to install message catalogs
+LOCALEDIR = $(DESTDIR)/share/locale
+# Directory in which to install arch-independent data files
+DATADIR = $(DESTDIR)/share/mahogany
 # where to install docs
 DOCDIR = $(DATADIR)/doc
-
-# for the dynamic linker, better than using -rpath
-LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
-MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/modules
 
 LINK = $(CXX)
 

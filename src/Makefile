@@ -138,14 +138,12 @@ clean:
 	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
 
 install:
-	$(INSTALL_PROGRAM) $(INSTALL_OPTIONS) M $(DATADIR)/$(CANONICAL_HOST)/bin
-	if test -f libM.so; \
-	then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; \
-	fi
-	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
-	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/M
+	$(INSTALL_PROGRAM) $(INSTALL_OPTIONS) M $(BINDIR)
 	$(RM) $(BINDIR)/mahogany
-	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
+	ln -s M $(BINDIR)/mahogany
+	if test -f libM.so; \
+	then $(INSTALL_PROGRAM) libM.so $(LIBDIR); \
+	fi
 ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	set -e $(MSOS); while test $$# -ge 1; \
@@ -156,8 +154,12 @@ endif
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
 ifdef USE_PYTHON
+	$(INSTALL) -d $(DATADIR)/python
+	for i in Python/*.py; \
+		do $(INSTALL_DATA) $$i $(DATADIR)/python; \
+	done
 	$(INSTALL) -d $(DATADIR)/scripts
-	for i in Python/*.py Python/.src/Scripts/*.py; \
+	for i in Python/.src/Scripts/*.py; \
 		do $(INSTALL_DATA) $$i $(DATADIR)/scripts; \
 	done
 endif
@@ -166,7 +168,6 @@ endif
 msgcat:
 ifeq "$(TRANSLATIONS)" "yes"
 	cd .src; exec $(XGETTEXT) -C -k_ -o $(BUILDDIR)/messages.po $(MSGSRC)
-# Yes, there really are some translatable strings in ../include
 	$(MAKE) -C ../include msgcat
 else
 	false translation tools are not installed

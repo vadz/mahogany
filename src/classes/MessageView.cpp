@@ -586,6 +586,10 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
       ASSERT_MSG( viewer, _T("must have default viewer, will crash without it!") );
 
       m_usingDefViewer = true;
+
+      // make sure that the viewer name is empty if we're using the dummy one:
+      // this is how we can determine whether we have a real viewer or not
+      m_ProfileValues.msgViewer.clear();
    }
    else // we have a real viewer now
    {
@@ -609,10 +613,15 @@ MessageView::CreateViewer(wxWindow *parent)
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
 
-   if ( !listing  )
+   if ( !listing || !listing->Count() )
    {
       wxLogError(_("No message viewer plugins found. It will be "
-                   "impossible to view any messages."));
+                   "impossible to view any messages.\n"
+                   "\n"
+                   "Please check that Mahogany plugins are available."));
+
+      if ( listing )
+          listing->DecRef();
    }
    else // have at least one viewer, load it
    {

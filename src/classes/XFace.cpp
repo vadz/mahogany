@@ -209,7 +209,7 @@ XFace::GetXFaceImg(const String& filename,
    {
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
       pf.AddPaths(mApplication->GetLocalDir() + DIR_SEPARATOR + _T("icons"), true);
-      pf.AddPaths(mApplication->GetGlobalDir() + DIR_SEPARATOR + _T("icons"), true);
+      pf.AddPaths(mApplication->GetDataDir() + DIR_SEPARATOR + _T("icons"), true);
       String name = pf.FindFile(_T("xface.xpm"), &success);
       if(success)
          img = wxIconManager::LoadImage(name, &success);

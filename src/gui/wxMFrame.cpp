@@ -578,7 +578,7 @@ wxMFrame::OnMenuCommand(int id)
 #ifdef USE_PYTHON
       case WXMENU_FILE_RUN_PYSCRIPT:
          {
-            wxString path = mApplication->GetGlobalDir();
+            wxString path = mApplication->GetDataDir();
             if ( !path.empty() )
                path += DIR_SEPARATOR;
             path += _T("scripts");

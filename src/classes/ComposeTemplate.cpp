@@ -948,7 +948,7 @@ VarExpander::GetAbsFilename(const String& name)
          // try the global dir
          String path = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_GLOBAL);
          if ( path.empty() )
-            path = mApplication->GetGlobalDir();
+            path = mApplication->GetDataDir();
          if ( !path.empty() || path.Last() != '/' )
          {
             path += '/';

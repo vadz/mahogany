@@ -50,7 +50,7 @@ endif
 
 install: test
 	if [ -f $(MDOCS_TGZ) ]; \
-	then gzip -dc < $(MDOCS_TGZ) | (cd $(DOCDIR) && tar xvf -); \
+	then $(INSTALL) =d $(DOCDIR); gzip -dc < $(MDOCS_TGZ) | (cd $(DOCDIR) && tar xvf -); \
 	else $(MAKE) install2; \
 	fi
 
