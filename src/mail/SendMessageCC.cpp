@@ -1730,7 +1730,7 @@ SendMessageCC::Send(int flags)
                      String command;
                      command.Printf(_T("%s < '%s'; exec /bin/rm -f '%s'"),
                                     m_SendmailCmd.c_str(),
-                                    filename, filename);
+                                    filename.c_str(), filename.c_str());
                      // HORRIBLE HACK: this should be `const char *' but wxExecute's
                      // prototype doesn't allow it...
                      wxChar *argv[4];
