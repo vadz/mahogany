@@ -4,14 +4,18 @@ $Id$
 
 Here is the rough plan for the future of the M development:
 
-* 0.67:
+* 0.68:
+
+   + spell checker
+
+* 0.69:
 
    + implement smart config file synchronization: Mahogany main advantage
      is its cross-platform nature however it's not very useful if you can't
      keep the same (but not exactly the same!) options on all machines you use,
      we must do something about it.
 
-* 0.68:
+* 0.70:
 
    + ADB lift up:
 
@@ -27,11 +31,7 @@ Here is the rough plan for the future of the M development:
 
    + store ADB on IMAP server and sync it
 
-* 0.69:
-
-   + spell checker
-
-* 0.70:
+* 0.75:
 
    + support for encrypting/signing messages with PGP
 
