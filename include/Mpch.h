@@ -58,6 +58,7 @@
 
 #include "FolderType.h"
 #include "Sorting.h"
+#include "Threading.h"
 
 #include "MApplication.h"
 #include "gui/wxMApp.h"
