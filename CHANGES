@@ -7,6 +7,8 @@ Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
 24.01.02 VZ: fixed crash in Win32 install wizard if user chose to use dialup
+23.01.02 TF: fixed "Preview message on select" bug when setting is off
+23.01.02 NB: fixed toggling of anonymous access in folder properties
 
 Release 0.64 'Sparc' January 14, 2002
 -------------------------------------------------------------------------------
