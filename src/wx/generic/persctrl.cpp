@@ -985,7 +985,8 @@ wxPListBox::wxPListBox(const wxString& configPath,
                        long style,
                        const wxValidator& validator,
                        wxConfigBase *config)
-           : wxListBox(parent, id, pos, size, n, items, style, validator)
+           : wxListBox(parent, id, pos, size, n, items,
+                       style | wxLB_HSCROLL, validator)
 {
     m_bFirstTime = true;
     m_persist = new wxPHelper(configPath, ms_path, config);
