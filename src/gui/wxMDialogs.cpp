@@ -182,6 +182,7 @@ MProgressDialog::EnableDisableEvents(bool enable)
           node=node->GetNext())
          ((wxWindow*)node->GetData())->Enable(enable);
    }
+  this->Enable(true);
 }
 
 MProgressDialog::~MProgressDialog()
