@@ -376,12 +376,24 @@ void HeaderInfoListImpl::Cache(size_t idxFrom, size_t idxTo)
    // cache all messages in this range
    ExpandToMakeIndexValid(idxTo);
 
+   size_t countNotInCache = 0;
    for ( size_t idx = idxFrom; idx <= idxTo; idx++ )
    {
-      m_headers[idx] = new HeaderInfo;
+      if ( !m_headers[idx] )
+      {
+         countNotInCache++;
+
+         m_headers[idx] = new HeaderInfo;
+      }
    }
 
-   m_mf->GetHeaderInfo(&m_headers[idxFrom], idxFrom + 1, idxTo + 1);
+   // trying to minimize the number of headers we're asking for is probably not
+   // worth it as c-client caches them anyhow internally, so getting them is
+   // quick the second time
+   if ( countNotInCache > 1 )
+   {
+      m_mf->GetHeaderInfo(&m_headers[idxFrom], idxFrom + 1, idxTo + 1);
+   }
 }
 
 void HeaderInfoListImpl::HintCache(size_t posFrom, size_t posTo)
