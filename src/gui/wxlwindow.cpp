@@ -56,6 +56,9 @@
 
 #include <ctype.h>
 
+/** shall we copy formatting to the clipboard? For now: NO (either
+    true or false) */
+#define WXLO_COPY_FMT FALSE
 
 // ----------------------------------------------------------------------------
 // macros
@@ -414,13 +417,18 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          // current mouse position, but don´t move cursor there.
          m_llist->EndSelection(cursorPos,m_ClickPosition);
          m_Selecting = false;
+         // copy selected text to primary selection without
+         // invalidating it:
+         Copy(FALSE,FALSE,TRUE);
 
          RequestUpdate();     // TODO: we don't have to redraw everything!
       }
       break;
 
    case WXLOWIN_MENU_MDOWN:
-      Paste(TRUE);
+      // paste selected text from primary selection without
+      // invalidating it:
+      Paste(FALSE, TRUE); 
       break;
 
    case WXLOWIN_MENU_DBLCLICK:
@@ -643,13 +651,13 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                SetDirty();
                break;
             case 'c':
-               Copy(TRUE, TRUE);
+               Copy(WXLO_COPY_FORMAT, FALSE);
                break;
             case 'v':
-               Paste( TRUE );
+               Paste( WXLO_COPY_FORMAT, FALSE );
                break;
             case 'x':
-               Cut();
+               Cut( WXLO_COPY_FORMAT, FALSE );
                break;
             case 'w':
                if(m_WrapMargin > 0)
@@ -698,7 +706,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
             case WXK_DELETE :
                if(event.ShiftDown())
-                  Cut();
+                  Cut(WXLO_PRIVATE_FMT, FALSE);
                else
                   if(! deletedSelection)
                   {

@@ -1759,15 +1759,15 @@ wxComposeView::OnMenuCommand(int id)
          MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
       break;
    case WXMENU_EDIT_PASTE:
-      m_LayoutWindow->Paste();
+      m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
       m_LayoutWindow->Refresh();
       break;
    case WXMENU_EDIT_COPY:
-      m_LayoutWindow->Copy();
+      m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
       m_LayoutWindow->Refresh();
       break;
    case WXMENU_EDIT_CUT:
-      m_LayoutWindow->Cut();
+      m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
       m_LayoutWindow->Refresh();
       break;
    default:
