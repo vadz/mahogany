@@ -310,25 +310,28 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
                                   const String& groupNameOrig,
                                   wxFrame *parent)
 {
-   // by default, select all addresses
+    // by default, select all addresses
     wxArrayInt selections;
-    size_t n,
-           count = addresses.GetCount();
-    for ( n = 0; n < count; n++ )
+    size_t count = addresses.GetCount();
+    for ( size_t n = 0; n < count; n++ )
     {
        selections.Add(n);
     }
 
-    // now ask the user which ones does he really want
-    count = MDialog_GetSelections
-                   (
-                    _("Please select the addresses to save"),
-                    _("Save addresses"),
-                    addresses,
-                    &selections,
-                    parent,
-                    "AddrExtract"
-                   );
+    if ( count > 1 )
+    {
+       // now ask the user which ones does he really want
+       count = MDialog_GetSelections
+                      (
+                       _("Please select the addresses to save"),
+                       _("Save addresses"),
+                       addresses,
+                       &selections,
+                       parent,
+                       "AddrExtract"
+                      );
+    }
+    //else: don't ask the user to choose when there is one address only
 
     if ( count > 0 )
     {
@@ -373,7 +376,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          }
 
          // create all entries in this group
-         for ( n = 0; n < count; n++ )
+         for ( size_t n = 0; n < count; n++ )
          {
             wxString addr = addresses[selections[n]];
             wxString name = Message::GetNameFromAddress(addr),
