@@ -143,6 +143,9 @@ private:
    // create m_printText if necessary
    void InitPrinting();
 
+   // flush the contents of m_textToAppend if it is not empty
+   void FlushText();
+
 
    // the viewer window
    TextViewerWindow *m_window;
@@ -152,6 +155,10 @@ private:
 
    // the text we're searched for the last time
    wxString m_textFind;
+
+   // calling AppendText() each time is too slow, so we collect all text with
+   // the same style in this variable and then FlushText() it all at once
+   wxString m_textToAppend;
 
 #if wxUSE_PRINTING_ARCHITECTURE
    // the object which does the printing
@@ -555,6 +562,15 @@ void TextViewer::UpdateOptions()
    // TODO: support for line wrap
 }
 
+void TextViewer::FlushText()
+{
+   if ( !m_textToAppend.empty() )
+   {
+      m_window->AppendText(m_textToAppend);
+      m_textToAppend.clear();
+   }
+}
+
 // ----------------------------------------------------------------------------
 // TextViewer operations
 // ----------------------------------------------------------------------------
@@ -669,16 +685,22 @@ void TextViewer::ShowRawHeaders(const String& header)
 
 void TextViewer::ShowHeaderName(const String& name)
 {
+   // flush previous text before the style change
+   FlushText();
+
    const ProfileValues& profileValues = GetOptions();
 
+   // change the style for the header name
    MTextStyle attr(profileValues.HeaderNameCol);
    wxFont font = m_window->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    attr.SetFont(font);
+   m_window->SetDefaultStyle(attr);
 
-   InsertText(name + _T(": "), attr);
+   // do show it
+   m_window->AppendText(name + _T(": "));
 
-   // restore the non bold font
+   // and restore the non bold font for the header value which will follow
    attr.SetFont(m_window->GetFont());
    m_window->SetDefaultStyle(attr);
 }
@@ -734,11 +756,13 @@ void TextViewer::StartPart()
 {
    // put a blank line before each part start - including the very first one to
    // separate it from the headers
-   m_window->AppendText(_T("\n"));
+   InsertText(_T("\n"), MTextStyle());
 }
 
 void TextViewer::InsertAttachment(const wxBitmap& /* icon */, ClickableInfo *ci)
 {
+   FlushText();
+
    String str;
    str << _("[Attachment: ") << ci->GetLabel() << _T(']');
 
@@ -749,6 +773,8 @@ void TextViewer::InsertClickable(const wxBitmap& /* icon */,
                                  ClickableInfo *ci,
                                  const wxColour& col)
 {
+   FlushText();
+
    String str;
    str << _T('[') << ci->GetLabel() << _T(']');
 
@@ -772,17 +798,28 @@ void TextViewer::InsertRawContents(const String& /* data */)
 
 void TextViewer::InsertText(const String& text, const MTextStyle& style)
 {
-   m_window->SetDefaultStyle(style);
+   // check if we need to change style
+   wxTextAttr old = m_window->GetDefaultStyle();
+   if ( (style.HasTextColour() &&
+            style.GetTextColour() != old.GetTextColour()) ||
+        (style.HasBackgroundColour() &&
+            style.GetBackgroundColour() != old.GetBackgroundColour()) ||
+        (style.HasFont() && style.GetFont() != old.GetFont()) )
+   {
+      // we do, flush the text in old style
+      FlushText();
 
-#ifdef OS_WIN
-   m_window->AppendText(text);
-#else
-   m_window->AppendText(wxTextBuffer::Translate(text, wxTextFileType_Unix));
-#endif
+      // and set the new one
+      m_window->SetDefaultStyle(style);
+   }
+
+   m_textToAppend += text;
 }
 
 void TextViewer::InsertURL(const String& text, const String& url)
 {
+   FlushText();
+
    m_window->InsertClickable(text,
                              new ClickableURL(m_msgView, url),
                              GetOptions().UrlCol);
@@ -790,7 +827,7 @@ void TextViewer::InsertURL(const String& text, const String& url)
 
 void TextViewer::EndPart()
 {
-   // this function intentionally left (almost) blank
+   FlushText();
 }
 
 void TextViewer::EndBody()
