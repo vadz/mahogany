@@ -1,0 +1,103 @@
+# This file was created automatically by SWIG.
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _Message
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+import MString
+import MProfile
+import MObject
+class MessageParameter(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MessageParameter, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, MessageParameter, name)
+    __swig_setmethods__["name"] = _Message.MessageParameter_name_set
+    __swig_getmethods__["name"] = _Message.MessageParameter_name_get
+    if _newclass:name = property(_Message.MessageParameter_name_get,_Message.MessageParameter_name_set)
+    __swig_setmethods__["value"] = _Message.MessageParameter_value_set
+    __swig_getmethods__["value"] = _Message.MessageParameter_value_get
+    if _newclass:value = property(_Message.MessageParameter_value_get,_Message.MessageParameter_value_set)
+    def __init__(self,*args):
+        _swig_setattr(self, MessageParameter, 'this', apply(_Message.new_MessageParameter,args))
+        _swig_setattr(self, MessageParameter, 'thisown', 1)
+    def __del__(self, destroy= _Message.delete_MessageParameter):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C MessageParameter instance at %s>" % (self.this,)
+
+class MessageParameterPtr(MessageParameter):
+    def __init__(self,this):
+        _swig_setattr(self, MessageParameter, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MessageParameter, 'thisown', 0)
+        _swig_setattr(self, MessageParameter,self.__class__,MessageParameter)
+_Message.MessageParameter_swigregister(MessageParameterPtr)
+
+class Message(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Message, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, Message, name)
+    def GetHeaderLine(*args): return apply(_Message.Message_GetHeaderLine,args)
+    def GetHeader(*args): return apply(_Message.Message_GetHeader,args)
+    def Subject(*args): return apply(_Message.Message_Subject,args)
+    def From(*args): return apply(_Message.Message_From,args)
+    def Date(*args): return apply(_Message.Message_Date,args)
+    def FetchText(*args): return apply(_Message.Message_FetchText,args)
+    def CountParts(*args): return apply(_Message.Message_CountParts,args)
+    def GetPartContent(*args): return apply(_Message.Message_GetPartContent,args)
+    def GetPartType(*args): return apply(_Message.Message_GetPartType,args)
+    def GetTextPartEncoding(*args): return apply(_Message.Message_GetTextPartEncoding,args)
+    def GetPartSize(*args): return apply(_Message.Message_GetPartSize,args)
+    def GetParameters(*args): return apply(_Message.Message_GetParameters,args)
+    def GetDisposition(*args): return apply(_Message.Message_GetDisposition,args)
+    def GetPartMimeType(*args): return apply(_Message.Message_GetPartMimeType,args)
+    def GetPartDesc(*args): return apply(_Message.Message_GetPartDesc,args)
+    def GetPartSpec(*args): return apply(_Message.Message_GetPartSpec,args)
+    def GetStatus(*args): return apply(_Message.Message_GetStatus,args)
+    def GetSize(*args): return apply(_Message.Message_GetSize,args)
+    def GetDate(*args): return apply(_Message.Message_GetDate,args)
+    def WriteToString(*args): return apply(_Message.Message_WriteToString,args)
+    def __init__(self,*args):
+        _swig_setattr(self, Message, 'this', apply(_Message.new_Message,args))
+        _swig_setattr(self, Message, 'thisown', 1)
+    def __del__(self, destroy= _Message.delete_Message):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C Message instance at %s>" % (self.this,)
+
+class MessagePtr(Message):
+    def __init__(self,this):
+        _swig_setattr(self, Message, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, Message, 'thisown', 0)
+        _swig_setattr(self, Message,self.__class__,Message)
+_Message.Message_swigregister(MessagePtr)
+
+

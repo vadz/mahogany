@@ -1,28 +1,53 @@
 # This file was created automatically by SWIG.
-import MStringc
-class String:
-    def __init__(self,*args):
-        self.this = apply(MStringc.new_String,args)
-        self.thisown = 1
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _MString
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
 
-    def c_str(*args):
-        val = apply(MStringc.String_c_str,args)
-        return val
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+class String(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, String, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, String, name)
+    def __init__(self,*args):
+        _swig_setattr(self, String, 'this', apply(_MString.new_String,args))
+        _swig_setattr(self, String, 'thisown', 1)
+    def c_str(*args): return apply(_MString.String_c_str,args)
+    def __del__(self, destroy= _MString.delete_String):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
     def __repr__(self):
         return "<C String instance at %s>" % (self.this,)
+
 class StringPtr(String):
     def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-        self.__class__ = String
+        _swig_setattr(self, String, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, String, 'thisown', 0)
+        _swig_setattr(self, String,self.__class__,String)
+_MString.String_swigregister(StringPtr)
 
-
-
-
-
-#-------------- FUNCTION WRAPPERS ------------------
-
-
-
-#-------------- VARIABLE WRAPPERS ------------------
 

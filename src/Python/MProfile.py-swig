@@ -1,81 +1,82 @@
 # This file was created automatically by SWIG.
-import MProfilec
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _MProfile
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
 import MObject
 import MString
 class Profile(MObject.MObjectRC):
-    def __init__(self,this):
-        self.this = this
-
-    def readEntry(*args):
-        val = apply(MProfilec.Profile_readEntry,args)
-        if val: val = MString.StringPtr(val) ; val.thisown = 1
-        return val
-    def writeEntry(*args):
-        val = apply(MProfilec.Profile_writeEntry,args)
-        return val
-    def SetPath(*args):
-        val = apply(MProfilec.Profile_SetPath,args)
-        return val
-    def HasEntry(*args):
-        val = apply(MProfilec.Profile_HasEntry,args)
-        return val
-    def DeleteGroup(*args):
-        val = apply(MProfilec.Profile_DeleteGroup,args)
-        return val
-    def GetName(*args):
-        val = apply(MProfilec.Profile_GetName,args)
-        if val: val = MString.StringPtr(val) ; val.thisown = 1
-        return val
-    def IsExpandingEnvVars(*args):
-        val = apply(MProfilec.Profile_IsExpandingEnvVars,args)
-        return val
-    def SetExpandEnvVars(*args):
-        val = apply(MProfilec.Profile_SetExpandEnvVars,args)
-        return val
-    def __del__(self,MProfilec=MProfilec):
-        if getattr(self,'thisown',0):
-            MProfilec.delete_Profile(self)
-    __setmethods__ = {}
-    for _s in [MObject.MObjectRC]: __setmethods__.update(_s.__setmethods__)
-    __getmethods__ = {}
-    for _s in [MObject.MObjectRC]: __getmethods__.update(_s.__getmethods__)
+    __swig_setmethods__ = {}
+    for _s in [MObject.MObjectRC]: __swig_setmethods__.update(_s.__swig_setmethods__)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Profile, name, value)
+    __swig_getmethods__ = {}
+    for _s in [MObject.MObjectRC]: __swig_getmethods__.update(_s.__swig_getmethods__)
+    __getattr__ = lambda self, name: _swig_getattr(self, Profile, name)
+    __swig_getmethods__["CreateGlobalConfig"] = lambda x: _MProfile.Profile_CreateGlobalConfig
+    if _newclass:CreateGlobalConfig = staticmethod(_MProfile.Profile_CreateGlobalConfig)
+    __swig_getmethods__["CreateProfile"] = lambda x: _MProfile.Profile_CreateProfile
+    if _newclass:CreateProfile = staticmethod(_MProfile.Profile_CreateProfile)
+    __swig_getmethods__["CreateModuleProfile"] = lambda x: _MProfile.Profile_CreateModuleProfile
+    if _newclass:CreateModuleProfile = staticmethod(_MProfile.Profile_CreateModuleProfile)
+    __swig_getmethods__["CreateEmptyProfile"] = lambda x: _MProfile.Profile_CreateEmptyProfile
+    if _newclass:CreateEmptyProfile = staticmethod(_MProfile.Profile_CreateEmptyProfile)
+    __swig_getmethods__["DeleteGlobalConfig"] = lambda x: _MProfile.Profile_DeleteGlobalConfig
+    if _newclass:DeleteGlobalConfig = staticmethod(_MProfile.Profile_DeleteGlobalConfig)
+    def readEntry(*args): return apply(_MProfile.Profile_readEntry,args)
+    def writeEntry(*args): return apply(_MProfile.Profile_writeEntry,args)
+    def SetPath(*args): return apply(_MProfile.Profile_SetPath,args)
+    def HasEntry(*args): return apply(_MProfile.Profile_HasEntry,args)
+    def DeleteGroup(*args): return apply(_MProfile.Profile_DeleteGroup,args)
+    def GetName(*args): return apply(_MProfile.Profile_GetName,args)
+    def IsExpandingEnvVars(*args): return apply(_MProfile.Profile_IsExpandingEnvVars,args)
+    def SetExpandEnvVars(*args): return apply(_MProfile.Profile_SetExpandEnvVars,args)
+    def __del__(self, destroy= _MProfile.delete_Profile):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C Profile instance at %s>" % (self.this,)
+
 class ProfilePtr(Profile):
     def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-        self.__class__ = Profile
+        _swig_setattr(self, Profile, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, Profile, 'thisown', 0)
+        _swig_setattr(self, Profile,self.__class__,Profile)
+_MProfile.Profile_swigregister(ProfilePtr)
+Profile_CreateGlobalConfig = _MProfile.Profile_CreateGlobalConfig
+
+Profile_CreateProfile = _MProfile.Profile_CreateProfile
+
+Profile_CreateModuleProfile = _MProfile.Profile_CreateModuleProfile
+
+Profile_CreateEmptyProfile = _MProfile.Profile_CreateEmptyProfile
+
+Profile_DeleteGlobalConfig = _MProfile.Profile_DeleteGlobalConfig
 
 
-
-
-
-#-------------- FUNCTION WRAPPERS ------------------
-
-def Profile_CreateGlobalConfig(*args, **kwargs):
-    val = apply(MProfilec.Profile_CreateGlobalConfig,args,kwargs)
-    if val: val = ProfilePtr(val)
-    return val
-
-def Profile_CreateProfile(*args, **kwargs):
-    val = apply(MProfilec.Profile_CreateProfile,args,kwargs)
-    if val: val = ProfilePtr(val)
-    return val
-
-def Profile_CreateModuleProfile(*args, **kwargs):
-    val = apply(MProfilec.Profile_CreateModuleProfile,args,kwargs)
-    if val: val = ProfilePtr(val)
-    return val
-
-def Profile_CreateEmptyProfile(*args, **kwargs):
-    val = apply(MProfilec.Profile_CreateEmptyProfile,args,kwargs)
-    if val: val = ProfilePtr(val)
-    return val
-
-Profile_DeleteGlobalConfig = MProfilec.Profile_DeleteGlobalConfig
-
-
-
-#-------------- VARIABLE WRAPPERS ------------------
 

@@ -1,55 +1,83 @@
 # This file was created automatically by SWIG.
-import MObjectc
-import MString
-class MObject:
-    def __init__(self,this):
-        self.this = this
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _MObject
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
 
-    __setmethods__ = {}
-    for _s in []: __setmethods__.update(_s.__setmethods__)
-    __getmethods__ = {}
-    for _s in []: __getmethods__.update(_s.__getmethods__)
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+import MString
+class MObject(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MObject, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, MObject, name)
+    __swig_getmethods__["CheckLeaks"] = lambda x: _MObject.MObject_CheckLeaks
+    if _newclass:CheckLeaks = staticmethod(_MObject.MObject_CheckLeaks)
+    def __init__(self,*args):
+        _swig_setattr(self, MObject, 'this', apply(_MObject.new_MObject,args))
+        _swig_setattr(self, MObject, 'thisown', 1)
+    def __del__(self, destroy= _MObject.delete_MObject):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
     def __repr__(self):
         return "<C MObject instance at %s>" % (self.this,)
+
 class MObjectPtr(MObject):
     def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-        self.__class__ = MObject
-
+        _swig_setattr(self, MObject, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MObject, 'thisown', 0)
+        _swig_setattr(self, MObject,self.__class__,MObject)
+_MObject.MObject_swigregister(MObjectPtr)
+MObject_CheckLeaks = _MObject.MObject_CheckLeaks
 
 
 class MObjectRC(MObject):
-    def __init__(self,this):
-        self.this = this
-
-    def IncRef(*args):
-        val = apply(MObjectc.MObjectRC_IncRef,args)
-        return val
-    def DecRef(*args):
-        val = apply(MObjectc.MObjectRC_DecRef,args)
-        return val
-    __setmethods__ = {}
-    for _s in [MObject]: __setmethods__.update(_s.__setmethods__)
-    __getmethods__ = {}
-    for _s in [MObject]: __getmethods__.update(_s.__getmethods__)
+    __swig_setmethods__ = {}
+    for _s in [MObject]: __swig_setmethods__.update(_s.__swig_setmethods__)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MObjectRC, name, value)
+    __swig_getmethods__ = {}
+    for _s in [MObject]: __swig_getmethods__.update(_s.__swig_getmethods__)
+    __getattr__ = lambda self, name: _swig_getattr(self, MObjectRC, name)
+    def IncRef(*args): return apply(_MObject.MObjectRC_IncRef,args)
+    def DecRef(*args): return apply(_MObject.MObjectRC_DecRef,args)
+    def __init__(self,*args):
+        _swig_setattr(self, MObjectRC, 'this', apply(_MObject.new_MObjectRC,args))
+        _swig_setattr(self, MObjectRC, 'thisown', 1)
+    def __del__(self, destroy= _MObject.delete_MObjectRC):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
     def __repr__(self):
         return "<C MObjectRC instance at %s>" % (self.this,)
+
 class MObjectRCPtr(MObjectRC):
     def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-        self.__class__ = MObjectRC
+        _swig_setattr(self, MObjectRC, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MObjectRC, 'thisown', 0)
+        _swig_setattr(self, MObjectRC,self.__class__,MObjectRC)
+_MObject.MObjectRC_swigregister(MObjectRCPtr)
 
-
-
-
-
-#-------------- FUNCTION WRAPPERS ------------------
-
-MObject_CheckLeaks = MObjectc.MObject_CheckLeaks
-
-
-
-#-------------- VARIABLE WRAPPERS ------------------
 
