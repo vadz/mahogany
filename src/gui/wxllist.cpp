@@ -336,7 +336,9 @@ wxLayoutObjectText::GetOffsetScreen(wxDC &dc, CoordType xpos) const
       one because we don't want to position the cursor behind the
       object what we clicked on, but before - otherwise it looks
       funny. */
-   return (xpos > 2) ? offs-2 : 0;
+   CoordType ret = (offs > 2) ? offs-2 : 0;
+   wxASSERT(ret >= 0);
+   return ret;
 }
 
 void
@@ -846,6 +848,8 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, wxLayoutList *llist,
       if( x <= xpos && xpos <= x + width )
       {
          *cxpos = cx + obj->GetOffsetScreen(dc, xpos-x);
+         wxASSERT(*cxpos>=0);
+         wxASSERT(xpos>=0);
 
          if ( found )
              *found = true;
@@ -1937,6 +1941,7 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
       {
          CoordType len = line->GetLength();
          m_CursorPos.x = (len >= p.x) ? p.x : len;
+         wxASSERT(m_CursorPos.x >= 0);
          m_CursorPos.y = p.y;
          m_CursorLine = line;
          break;
@@ -1983,6 +1988,7 @@ wxLayoutList::MoveCursorVertically(int n)
          if (next == NULL)
          {
             m_CursorPos.x = m_CursorLine->GetLength();
+            wxASSERT(m_CursorPos.x >= 0);
             rc = false;
             break;
          }
@@ -2019,6 +2025,7 @@ wxLayoutList::MoveCursorHorizontally(int n)
       move = -n;
       if(move > m_CursorPos.x) move = m_CursorPos.x;
       m_CursorPos.x -= move; n += move;
+      wxASSERT(m_CursorPos.x >= 0);
    }
 
    while(n > 0)
@@ -2036,6 +2043,7 @@ wxLayoutList::MoveCursorHorizontally(int n)
       if( move >= len-m_CursorPos.x) move = len-m_CursorPos.x;
       m_CursorPos.x += move;
       n -= move;
+      wxASSERT(m_CursorPos.x >= 0);
    }
 
    m_movedCursor = m_CursorPos != cursorPosOld;
@@ -2671,6 +2679,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
                                     pos.x,
                                     &cx,
                                     &foundinline);
+     wxASSERT(cx >= 0);
      cursorPos->x = cx;
    }
    else
@@ -2748,6 +2757,7 @@ wxLayoutList::DrawCursor(wxDC& UNUSED_IF_USE_CARET(dc),
                (long)m_CursorLine->GetLength()));
 
    wxLogStatus(_T("Cursor is at (%d, %d)"), m_CursorPos.x, m_CursorPos.y);
+   wxASSERT(m_CursorPos.x >= 0);
 #endif
 
 #ifdef WXLAYOUT_USE_CARET
