@@ -1063,9 +1063,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxMemoryFSHandler::AddFile("pythonpowered" MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
 #endif // USE_PYTHON
 
-   top->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
-                "</center>");
+#define HTML_IMAGE(name) \
+   "<center><img src=\"memory:" #name MEMORY_FS_FILE_EXT "\"></center><br>"
+
+   top->SetPage("<body text=#000000 bgcolor=#ffffff>" HTML_IMAGE(splash));
 
 #define HTML_WARNING "<font color=#ff0000><b>WARNING: </b></font>"
 
@@ -1115,7 +1116,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
                    "</font>"
                    "<hr>"
-                   "<img src=\"memory:wxlogo" MEMORY_FS_FILE_EXT "\"><br>"
+                   HTML_IMAGE(wxlogo)
                    "Mahogany is built on the cross-platform C++ framework "
                    "wxWindows (http://www.wxwindows.org/)."
                    "<p>"
@@ -1123,7 +1124,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "by the University of Washington written by Mark Crispin."
 #ifdef USE_SSL
                    "<p>"
-                   "<img src=\"memory:ssllogo" MEMORY_FS_FILE_EXT "\"><br>"
+                   HTML_IMAGE(ssllogo)
                    "This product includes software developed by the OpenSSL Project "
                    "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
                    "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
@@ -1132,7 +1133,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 #ifdef USE_PYTHON
                    "<p>"
-                   "<img src=\"memory:pythonpowered" MEMORY_FS_FILE_EXT "\"><br>"
+                   HTML_IMAGE(pythonpowered)
                    "This program contains an embedded Python interpreter."
 #endif // USE_PYTHON
                    "<hr>"
@@ -1150,9 +1151,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "and SuSE GmbH."
                   );
 
+#undef HTML_IMAGE
 #undef HTML_WARNING
 
    wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
+   wxMemoryFSHandler::RemoveFile("wxlogo" MEMORY_FS_FILE_EXT);
+#ifdef USE_SSL
+   wxMemoryFSHandler::RemoveFile("ssllogo" MEMORY_FS_FILE_EXT);
+#endif // USE_SSL
 #ifdef USE_PYTHON
    wxMemoryFSHandler::RemoveFile("pythonpowered" MEMORY_FS_FILE_EXT);
 #endif
