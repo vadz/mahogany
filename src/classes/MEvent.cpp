@@ -314,9 +314,8 @@ bool MEventManager::DeregisterAll(void **pHandle, ...)
 // different MEvent derivations
 // ----------------------------------------------------------------------------
 
-MEventOptionsChangeData::MEventOptionsChangeData(class Profile
-                                                 *profile, ChangeKind
-                                                 what)
+MEventOptionsChangeData::MEventOptionsChangeData(Profile *profile,
+                                                 ChangeKind what)
 
                        : MEventData(MEventId_OptionsChange)
 {

@@ -23,6 +23,8 @@
 
 #include "MObject.h"
 
+class Profile;
+
 /**
    MEvent ids for all kinds of events used in M. The name in the comment is the
    MEventData-derived class which is used with this event
@@ -349,8 +351,7 @@ public:
    };
 
    // ctor
-   MEventOptionsChangeData(class Profile *profile,
-                           ChangeKind what);
+   MEventOptionsChangeData(Profile *profile, ChangeKind what);
 
    // what happened?
    ChangeKind GetChangeKind() const { return m_what; }
