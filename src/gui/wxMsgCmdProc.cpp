@@ -1696,25 +1696,37 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   {
                      // delete right now
 
-                     // don't copy the messages to the trash, they had been
-                     // already copied somewhere
-                     Ticket t = m_asmf
-                                 ? m_asmf->DeleteOrTrashMessages
-                                   (
-                                    seq,
-                                    MailFolder::DELETE_NO_TRASH,
-                                    this
-                                   )
-                                 : ILLEGAL_TICKET;
-
-                     if ( t != ILLEGAL_TICKET )
                      {
-                        m_TicketList->Add(t);
-                     }
-                     else // failed to delete?
-                     {
-                        wxLogError(_("Failed to delete messages after "
-                                     "moving them."));
+                        // Reentrancy hotfix. This function can be called
+                        // recursively from idle loop. IMO, locking should
+                        // go to MEventManager::DispatchPending to prevent
+                        // nesting of any event. However there are about ten
+                        // calls to DispatchPending, that won't like it right
+                        // now. These calls can and should be replaced with
+                        // cleaner alternatives. Then we can lock
+                        // DispatchPending itself and remove this line.
+                        MEventManagerSuspender eventSuspender;
+                        
+                        // don't copy the messages to the trash, they
+                        // had been already copied somewhere
+                        Ticket t = m_asmf
+                                    ? m_asmf->DeleteOrTrashMessages
+                                      (
+                                       seq,
+                                       MailFolder::DELETE_NO_TRASH,
+                                       this
+                                      )
+                                    : ILLEGAL_TICKET;
+   
+                        if ( t != ILLEGAL_TICKET )
+                        {
+                           m_TicketList->Add(t);
+                        }
+                        else // failed to delete?
+                        {
+                           wxLogError(_("Failed to delete messages after "
+                                        "moving them."));
+                        }
                      }
 
                      if ( !wasDropped )
