@@ -9,9 +9,6 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-9	KB	Add hackerguide.lyx and LeakTracer to cvs.
-9	KB	Fix MModule.		
-
 9	KB	Crash from ~PathFinder() in wxMessageView::Print()
 		when printing more than one page
 9	KB	wxLayout:

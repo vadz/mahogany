@@ -77,7 +77,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
 {
    SetDefaultSize(380,400);
 
-   m_Listing = MModule::GetListing();
+   m_Listing = MModule::ListAvailableModules();
 
    // get list of configured modules
    wxString modules = READ_APPCONFIG(MP_MODULES);

@@ -26,24 +26,49 @@
 ///------------------------------
 /// MModule interface:
 ///------------------------------
-static int UnloadDummy(void);
-static int DummyFunc(MInterface *minterface);
 
-/** This line does everything.
-    If you want to do something more sophisticated, like accepting
-    non-matching Mahogany version numbers, etc, you need to copy the
-    code from MModule.h, or better, provide another macro and use that 
-    here. But this should do the job in 90% of the cases and
-    transparently handles static and dynamic linkage. (KB) */
+class DummyModule : public MModule
+{
+   MMODULE_DEFINE(DummyModule)
+private:
+   /** Dummy constructor.
+       As the class has no usable interface, this doesn´t do much, but 
+       it displays a small dialog to say hello.
+       A real module would store the MInterface pointer for later
+       reference and check if everything is set up properly.
+   */
+   DummyModule(MInterface *interface);
+};
 
-MMODULE_DEFINE_MODULE("Mdummy", "none", "This module demonstrates the MModule plugin interface.", "0.00", DummyFunc, UnloadDummy)
+
+MMODULE_IMPLEMENT(DummyModule,
+                  "Mdummy",
+                  "none",
+                  "This module demonstrates the MModule plugin interface.",
+                  "0.00")
+
 
 ///------------------------------
 /// Own functionality:
 ///------------------------------
 
-static int
-DummyFunc(MInterface *minterface)
+/* static */
+MModule *
+DummyModule::Init(int version_major, int version_minor, 
+                  int version_release, MInterface *interface,
+                  int *errorCode)
+{
+   if(! MMODULE_SAME_VERSION(version_major, version_minor,
+                             version_release))
+   {
+      if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
+      return NULL;
+   }
+   return new DummyModule(interface);
+}
+
+
+DummyModule::DummyModule(MInterface *minterface)
 {
    minterface->Message(
       "This message is created by the DummyModule plugin\n"
@@ -51,10 +76,4 @@ DummyFunc(MInterface *minterface)
       "and is not part of the normal Mahogany executable.",
       NULL,
       "Welcome from DummyModule!");
-   return MMODULE_ERR_NONE;
-}
-
-static int UnloadDummy(void)
-{
-   return 1; // success
 }

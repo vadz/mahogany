@@ -56,6 +56,14 @@ struct ModuleEntry
    String m_Interface;
    /// Module pointer.
    MModule *m_Module;
+#ifdef USE_MODULES_STATIC
+   /// Description
+   String m_Description;
+   /// Version
+   String m_Version;
+   /// The init function to call.
+   MModule_InitModuleFuncType m_InitFunc;
+#endif
 };
 
 /// A list of all loaded modules.
@@ -79,207 +87,69 @@ void MModule_Cleanup(void)
    gs_ModuleList = NULL;
 }
 
-class MModuleImpl : public MModule
-{
-public:
-#ifdef USE_MODULES_STATIC
-   /// Create an MModuleImpl.
-   static MModule *Create(MModule_InitModuleFuncType init,
-                          MModule_GetNameFuncType gn,
-                          MModule_GetInterfaceFuncType gi,
-                          MModule_GetDescriptionFuncType gs,
-                          MModule_GetVersionFuncType gv,
-                          MModule_GetMVersionFuncType gmv,
-                          MModule_UnLoadModuleFuncType unl)
-      { ASSERT(init); return new MModuleImpl(init,gn, gi, gs, gv, gmv, unl); }
-   bool Init(void)
-      {
-         if(m_Init)
-         {
-            bool rc = (*m_Init)(M_VERSION_MAJOR,
-                                M_VERSION_MINOR,
-                                M_VERSION_RELEASE,
-                                &gs_MInterface) == MMODULE_ERR_NONE;
-            m_Init = NULL;
-            return rc;
-         }
-         else
-            return true;
-      }
-#else
-   /// Create an MModuleImpl from a Dll handle
-   static MModule *Create(wxDllType);
-#endif
-
-   /// Returns the Module's name as used in LoadModule().
-   virtual const char * GetName(void)
-      { return m_GetName ? (*m_GetName)() : _("unknown"); }
-   virtual const char * GetDescription(void)
-      { return m_GetDescription ? (*m_GetDescription)() : _("no description"); }
-   /// Returns a textual representation of the particular version of the module.
-   virtual const char * GetVersion(void)
-      { return m_GetVersion ? (*m_GetVersion)() : "0"; }
-   virtual const char * GetInterface(void)
-      { return m_GetInterface ? (*m_GetInterface)() : _("unknown"); }
-   /// Returns the Mahogany version this module was compiled for.
-   virtual void GetMVersion(int *version_major, int *version_minor,
-                            int *version_release)
-      {
-         if(m_GetMVersion)
-            (*m_GetMVersion)(version_major, version_minor,
-                             version_release);
-         else
-         {
-            *version_major = M_VERSION_MAJOR;
-            *version_minor = M_VERSION_MINOR;
-            *version_release = M_VERSION_RELEASE;
-         }
-      }
-
-private:
-   MModule_GetNameFuncType m_GetName;
-   MModule_GetInterfaceFuncType m_GetInterface;
-   MModule_GetDescriptionFuncType m_GetDescription;
-   MModule_GetVersionFuncType m_GetVersion;
-   MModule_GetMVersionFuncType m_GetMVersion;
-
-   ~MModuleImpl();
-
-#ifdef USE_MODULES_STATIC
-   MModule_InitModuleFuncType m_Init;
-   MModule_UnLoadModuleFuncType m_Unload;
-
-   MModuleImpl(MModule_InitModuleFuncType init,
-               MModule_GetNameFuncType gn,
-               MModule_GetInterfaceFuncType gi,
-               MModule_GetDescriptionFuncType gd,
-               MModule_GetVersionFuncType gv,
-               MModule_GetMVersionFuncType gmv,
-               MModule_UnLoadModuleFuncType unl)
-      {
-         m_Init = init;
-         m_GetName = gn; m_GetInterface = gi;
-         m_GetDescription = gd; m_GetVersion = gv;
-         m_GetMVersion = gmv; m_Unload = unl;
-      }
-#else
-   MModuleImpl(wxDllType dll);
-   wxDllType m_Dll;
-#endif
-
-   GCC_DTOR_WARN_OFF();
-};
-
-#ifndef USE_MODULES_STATIC
-MModule *
-MModuleImpl::Create(wxDllType dll)
-{
-   MModule_InitModuleFuncType
-      initModuleFunc = (MModule_InitModuleFuncType)
-      wxDllLoader::GetSymbol(dll, "InitMModule");
-   if(! initModuleFunc)
-   {
-      wxDllLoader::UnloadLibrary(dll);
-      return NULL;
-   }
-   if( (*initModuleFunc)(M_VERSION_MAJOR,
-                         M_VERSION_MINOR,
-                         M_VERSION_RELEASE,
-                         &gs_MInterface) == MMODULE_ERR_NONE)
-   {
-      return new MModuleImpl(dll);
-   }
-   else
-      return NULL;
-}
-
-MModuleImpl::MModuleImpl(wxDllType dll)
-{
-   m_Dll = dll;
-   m_GetName = (MModule_GetNameFuncType)
-      wxDllLoader::GetSymbol(dll, "GetName");
-   m_GetInterface = (MModule_GetInterfaceFuncType)
-      wxDllLoader::GetSymbol(dll, "GetInterface");
-   m_GetDescription  = (MModule_GetDescriptionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetDescription");
-   m_GetVersion = (MModule_GetVersionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetModuleVersion");
-   m_GetMVersion = (MModule_GetMVersionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetMVersion");
-}
-#endif
-
-MModuleImpl::~MModuleImpl()
-{
-#ifdef USE_MODULES_STATIC
-   MModule_UnLoadModuleFuncType unLoadModuleFunc = m_Unload;
-#else
-   MModule_UnLoadModuleFuncType
-      unLoadModuleFunc = (MModule_UnLoadModuleFuncType)
-      wxDllLoader::GetSymbol(m_Dll, "UnLoadMModule");
-#endif
-   ASSERT(unLoadModuleFunc);
-   if(! unLoadModuleFunc)
-      return; // be careful
-
-   // Remove our entry in the list:
-#ifdef DEBUG
-   bool found = false;
-#endif
-   ModuleList::iterator i;
-   for(i = GetModuleList()->begin();
-       i != GetModuleList()->end();
-       i++)
-      if( (**i).m_Name == GetName() )
-      {
-         GetModuleList()->erase(i);
-#ifdef DEBUG
-         found = true;
-#endif
-         break;
-      }
-   ASSERT(found == true);
-
-#ifndef USE_MODULES_STATIC
-   if(unLoadModuleFunc()) // check if we can safely unload it
-      wxDllLoader::UnloadLibrary(m_Dll);
-#endif
-}
-
 static
 MModule *FindModule(const String & name)
 {
    ModuleList::iterator i;
+   
    for(i = GetModuleList()->begin();
        i != GetModuleList()->end();
        i++)
       if( (**i).m_Name == name )
       {
-#ifndef USE_MODULES_STATIC
-         return (**i).m_Module;
-#else
+#ifdef USE_MODULES_STATIC
+         int errorCode = 0; //for now we ignore it
          // on the fly initialisation for static modules:
-         if( ((MModuleImpl *)(**i).m_Module)->Init())
-            return (**i).m_Module;
+         if( ! (**i).m_Module )
+            (**i).m_Module = (*((**i).m_InitFunc))(
+               M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
+               &gs_MInterface, &errorCode);
          else
-            return NULL;
+            (**i).m_Module->IncRef();
 #endif
+         return (**i).m_Module;
       }
-
    return NULL; // not found
 }
 
 
-#ifndef USE_MODULES_STATIC
+#ifdef USE_MODULES_STATIC
+extern
+int MModule_AddStaticModule(const char *Name,
+                             const char *Interface,
+                             const char *Description,
+                             const char *Version,
+                             MModule_InitModuleFuncType init)
+{
+   ModuleEntry *me = new ModuleEntry;
+   me->m_Name = Name;
+   me->m_Version = Version;
+   me->m_Description = Description;
+   me->m_Interface = Interface;
+   me->m_Module = NULL;
+   me->m_InitFunc = init;
+   GetModuleList()->push_back(me);
+   return 1;
+}
+#else
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
-   // No, load it:
    bool success = false;
    wxDllType dll = wxDllLoader::LoadLibrary(pathname, &success);
    if(! success) return NULL;
 
-   MModule *module = MModuleImpl::Create(dll);
+   MModule_InitModuleFuncType initFunc =
+      (MModule_InitModuleFuncType)
+      wxDllLoader::GetSymbol(dll, MMODULE_INITMODULE_FUNCTION);
+
+
+      
+   int errorCode = 0;
+   MModule *module = (*initFunc)(
+      M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
+      &gs_MInterface, &errorCode);
+   
    if(module)
    {
       ModuleEntry *me = new ModuleEntry;
@@ -289,29 +159,14 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       GetModuleList()->push_back(me);
    }
    else
+   {
+      String msg;
+      msg.Printf(_("Cannot initialise module '%s', error code %d."),
+                 pathname.c_str(), errorCode);
+      MDialog_ErrorMessage(msg);
       wxDllLoader::UnloadLibrary(dll);
+   }
    return module;
-}
-#else
-extern
-int MModule_AddStaticModule(MModule_InitModuleFuncType init,
-                            MModule_GetNameFuncType gn,
-                            MModule_GetInterfaceFuncType gi,
-                            MModule_GetDescriptionFuncType gd,
-                            MModule_GetVersionFuncType gv,
-                            MModule_GetMVersionFuncType gmv,
-                            MModule_UnLoadModuleFuncType unl)
-{
-  MModule *module = MModuleImpl::Create(init,gn,gi,gd,gv,gmv,unl);
-  if(module)
-  {
-     ModuleEntry *me = new ModuleEntry;
-     me->m_Name = module->GetName();
-     me->m_Interface = module->GetInterface();
-     me->m_Module = module;
-     GetModuleList()->push_back(me);
-  }
-  return 1;
 }
 #endif
 
@@ -324,8 +179,7 @@ MModule::LoadModule(const String & name)
    MModule *module = FindModule(name);
    if(module)
    {
-      // Yes, just return it:
-      module->IncRef();
+      // Yes, just return it (incref happens in FindModule()):
       return module;
    }
    else
@@ -389,24 +243,6 @@ MModule::GetProvider(const wxString &interfaceName)
       }
    return NULL; // not found
 }
-
-
-
-
-#if 0
-/** Function to resolve main program symbols from modules.
- */
-extern "C"
-{
-   void * MModule_GetSymbol(const char *name)
-   {
-      wxDllType prog = wxDllLoader::GetProgramHandle();
-      return (void *) wxDllLoader::GetSymbol(prog, name);
-   }
-}
-#endif
-
-
 
 class MModuleListingEntryImpl : public MModuleListingEntry
 {
@@ -482,7 +318,7 @@ private:
 };
 
 /* static */
-MModuleListing *MModule::GetListing(void)
+MModuleListing *MModule::ListAvailableModules(void)
 {
 #ifdef USE_MODULES_STATIC
 
@@ -494,11 +330,11 @@ MModuleListing *MModule::GetListing(void)
        i++)
    {
       MModuleListingEntryImpl entry(
-         (**i).m_Module->GetName(), // module name
-         (**i).m_Module->GetInterface(),
-         (**i).m_Module->GetDescription(),
+         (**i).m_Name, // module name
+         (**i).m_Interface,
+         (**i).m_Description,
          "", // long description
-         String((**i).m_Module->GetVersion())+_(" (builtin)"),
+         String((**i).m_Version)+ _(" (builtin)"),
          "m-developers@groups.com");
       (*listing)[count++] = entry;
    }

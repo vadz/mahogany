@@ -12,6 +12,27 @@
 #include "MModule.h"
 #include "Mcommon.h"
 
+/// The name of the interface provided.
+#define MMODULE_INTERFACE_FILTERS   "Filters"
+
+/** Filtering Module class. */
+class MModule_Filters : public MModule
+{
+public:
+   /** Takes a string representation of a filterrule and compiles it
+       into a class FilterRule object.
+   */
+   virtual class FilterRule * GetFilter(const String &filterrule)
+      const = 0;
+
+   /** To easily obtain a filter module: */
+   static MModule_Filters *GetModule(void)
+      {
+         return (MModule_Filters *)
+           MModule::GetProvider(MMODULE_INTERFACE_FILTERS);
+      }
+};
+
 /** Parsed representation of a filtering rule to be applied to a
     message.
 */
@@ -28,18 +49,5 @@ public:
    virtual int Apply(class MailFolder *folder, bool NewOnly = true) const = 0;
 };
 
-/**
-   This is the interface for the Mahogany Filters module.
-*/
-class MModule_Filters : public MModule
-{
-public:
-   /** Takes a string representation of a filterrule and compiles it
-       into a class FilterRule object.
-   */
-   virtual FilterRule * GetFilter(const String &filterrule) = 0;
-};
-
-#define MMODULE_INTERFACE_FILTERS   "Filters"
 
 #endif // FILTERSMODULE_H

@@ -30,6 +30,7 @@ M_OVERRIDES_PREPARE
 DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=0
 DEFAULT_USE_DEBUG=0
+DEFAULT_USE_DEBUG_FLAG=0
 DEFAULT_USE_WXDEBUG=0
 DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=0
@@ -63,8 +64,12 @@ M_OVERRIDES(efence,efence,
 USE_EFENCE)
 
 M_OVERRIDES(debug,debug,
---with-debug    use debug info/code,
+--with-debug    use debug code,
 USE_DEBUG)
+
+M_OVERRIDES(debuginfo, debuginfo,
+--with-debuginfo    use debug info from compiler,
+USE_DEBUG_FLAG)
 
 M_OVERRIDES(wxdebug,wxdebug,
 --with-wxdebug    force use of __WXDEBUG__ define,
@@ -312,15 +317,20 @@ if test "$USE_WXDEBUG" = 1; then
 fi
 
 if test "$USE_DEBUG" = 1; then
-	if test "$GCC" = "yes"
-	then
-		DBGFLAGS="$DBGFLAGS -O0 -g3 -DDEBUG"
-	else
-		DBGFLAGS="$DBGFLAGS -g -DDEBUG"
-	fi
+	DBGFLAGS="$DBGFLAGS -DDEBUG"
 	MAKE_DEBUG="DEBUG=yes"
+	USE_DEBUG_FLAG=1
 fi
 AC_SUBST(MAKE_DEBUG)
+
+if test "$USE_DEBUG_FLAG" = 1; then
+	if test "$GCC" = "yes"
+	then
+		DBGFLAGS="$DBGFLAGS -O0 -g3"
+	else
+		DBGFLAGS="$DBGFLAGS -g"
+	fi
+fi
 
 dnl experimental code (unstable!)
 MAKE_EXPERIMENTAL=
@@ -572,12 +582,12 @@ if test "x$USE_MODULES" != "x"; then
        ;;
      dynamic|Dynamic|DYNAMIC)
        USE_MODULES=1
-       USE_MODULES-STATIC=
+       USE_MODULES_STATIC=
        MAKE_USE_MODULES="USE_MODULES=dynamic"
        ;;
      static|Static|STATIC)
        USE_MODULES=1
-       USE_MODULES-STATIC=1
+       USE_MODULES_STATIC=1
        MAKE_USE_MODULES="USE_MODULES=static"
        AC_DEFINE(USE_MODULES_STATIC)
        ;;

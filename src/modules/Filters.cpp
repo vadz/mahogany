@@ -27,21 +27,6 @@
 
 #include "modules/Filters.h"
 
-///------------------------------
-/// MModule interface:
-///------------------------------
-// defined further down, our entry function
-static int FilterTest(MInterface *interface);
-
-static int UnloadFilters(void)
-{
-   return 1;
-}
-
-MMODULE_DEFINE_MODULE("Filters", "Filters", "This module provides a filtering language for Mahogany.", "0.00", FilterTest, UnloadFilters)
-
-
-
 /** Parsed representation of a filtering rule to be applied to a
     message.
 */
@@ -61,45 +46,17 @@ public:
          return 0;
       }
    static FilterRule * Create(const String &filterrule,
-                              MInterface *interface)
-      {
-         return new FilterRuleImpl(filterrule, interface);
-      }
+                              MInterface *interface, MModule_Filters *mod)
+      { return new FilterRuleImpl(filterrule, interface, mod); }
 protected:
    FilterRuleImpl(const String &filterrule,
-                  MInterface *interface);
+                  MInterface *interface,
+                  MModule_Filters *fmodule);
    ~FilterRuleImpl();
 private:
    class Parser     *m_Parser;
    class SyntaxNode *m_Program;
-};
-
-/**
-   This is the interface for the Mahogany Filters module.
-*/
-class MModule_FiltersImpl : public MModule_Filters
-{
-public:
-   const char * GetName() { return ::GetName(); }
-   const char * GetInterface() { return ::GetInterface(); }
-   const char * GetDescription() { return ::GetDescription(); }
-   const char * GetVersion() { return ::GetModuleVersion(); }
-   void GetMVersion(int *a, int *b, int *c){ ::GetMVersion(a,b,c); }
-   
-   /** Takes a string representation of a filterrule and compiles it
-       into a class FilterRule object.
-   */
-   virtual FilterRule * GetFilter(const String &filterrule);
-
-   /** This module contains exactly one member variable, the pointer
-       to the MInterface. */
-   MModule_FiltersImpl * Create(MInterface *interface)
-      { return new MModule_FiltersImpl(interface); }
-   MModule_FiltersImpl(MInterface *interface)
-      { ASSERT(interface); m_Interface = interface; }
-   MInterface *GetMInterface(void) { return m_Interface; }
-private:
-   MInterface *m_Interface;
+   MModule_Filters *m_FilterModule;
 };
 
 
@@ -1260,36 +1217,11 @@ ParserImpl::ParseTerm(void)
    return factor;
 }
 
-/***************************************************************************/
-
-int FilterRuleImpl::Apply(class Message *msg) const
-{
-   ASSERT(msg);
-//   m_Parser->SetMessage(msg);
-   Value rc = m_Program->Evaluate();
-//   m_Parser->SetMessage(NULL);
-   return 1; //FIXME
-}
-
-FilterRuleImpl::FilterRuleImpl(const String &filterrule,
-                              MInterface *interface) 
-{
-   m_Parser = new ParserImpl(filterrule, interface);
-   m_Program = m_Parser->Parse();
-}
-
-FilterRuleImpl::~FilterRuleImpl()
-{
-   m_Parser->DecRef();
-   if(m_Program) delete m_Program;
-}
-
-FilterRule *
-MModule_FiltersImpl::GetFilter(const String &filterrule)
-{
-   return FilterRuleImpl::Create(filterrule, m_Interface);
-}
-
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * Built-in functions
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 extern "C"
 {
@@ -1316,6 +1248,48 @@ extern "C"
 };
 
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * FilterRuleImpl - the class representing a program
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+int FilterRuleImpl::Apply(class Message *msg) const
+{
+   ASSERT(msg);
+//   m_Parser->SetMessage(msg);
+   Value rc = m_Program->Evaluate();
+//   m_Parser->SetMessage(NULL);
+   return 1; //FIXME
+}
+
+FilterRuleImpl::FilterRuleImpl(const String &filterrule,
+                               MInterface *interface,
+                               MModule_Filters *mod) 
+{
+   m_Parser = new ParserImpl(filterrule, interface);
+   m_Program = m_Parser->Parse();
+   ASSERT(mod);
+   m_FilterModule = mod;
+   // we cannot allow the module to disappear while we exist
+   m_FilterModule->IncRef();
+}
+
+FilterRuleImpl::~FilterRuleImpl()
+{
+   if(m_Program) delete m_Program;
+   m_Parser->DecRef();
+   m_FilterModule->DecRef();
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ * MModule_FiltersImpl - the module
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifdef DEBUG
+
+/** A small test for the filter module. */
 static
 int FilterTest(MInterface *interface)
 {
@@ -1333,10 +1307,8 @@ int FilterTest(MInterface *interface)
       SyntaxNode *sn = p->Parse();
       if(sn)
       {
-#ifdef DEBUG
          String str = sn->Debug();
          msg << str << '\n';
-#endif
          Value v = sn->Evaluate();
          msg << '\n' << program + String(" = ")+v.ToString();
          delete sn;
@@ -1349,3 +1321,59 @@ int FilterTest(MInterface *interface)
    }
    return MMODULE_ERR_NONE;
 }
+#endif
+
+
+
+/** Filtering Module class. */
+class MModule_FiltersImpl : public MModule_Filters
+{
+   /// standard MModule functions
+   MMODULE_DEFINE(MModule_FiltersImpl)
+
+   /** Takes a string representation of a filterrule and compiles it
+       into a class FilterRule object.
+   */
+   virtual class FilterRule * GetFilter(const String &filterrule) const;
+protected:
+   MModule_FiltersImpl(MInterface *interface)
+      {
+         m_Interface = interface;
+#ifdef DEBUG
+         FilterTest(m_Interface);
+#endif
+      }
+
+   /// the MInterface
+   MInterface *m_Interface;
+};
+
+MMODULE_IMPLEMENT(MModule_FiltersImpl,
+                  "Filters",
+                  MMODULE_INTERFACE_FILTERS,
+                  _("This plug-in provides a filtering language for Mahogany."),
+                  "0.00")
+
+FilterRule *
+MModule_FiltersImpl::GetFilter(const String &filterrule) const
+{
+   return FilterRuleImpl::Create(filterrule, m_Interface,
+                                 (MModule_FiltersImpl * /* non-const
+                                                         */)this); 
+}
+
+/* static */
+MModule *
+MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
+                      MInterface *interface, int *errorCode)
+{
+   if(! MMODULE_SAME_VERSION(vmajor, vminor, vrelease))
+   {
+      if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
+      return NULL;
+   }
+   return new MModule_FiltersImpl(interface);
+}
+
+
+
