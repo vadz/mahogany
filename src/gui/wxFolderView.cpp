@@ -96,13 +96,16 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       long nselected = m_FolderView->GetSelections(selections);
       // there is exactly one item with the focus on  it:
       long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+      long nMsgs = m_FolderView->GetFolder()->CountMessages();
       if(focused == -1)
       {
-         if(m_FolderView->GetFolder()->CountMessages() > 0)
+         if( nMsgs > 0)
             focused = 0;
          else
             return;
       }
+      if(focused > nMsgs)
+         focused = nMsgs-1;
       // in this case we operate on the highlighted  message
       const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
       if(nselected == 0 && hi)
