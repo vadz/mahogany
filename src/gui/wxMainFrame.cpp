@@ -567,7 +567,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // set frame icon/title, create status bar
    SetIcon(ICON(_T("MainFrame")));
-   SetTitle(_("Copyright (C) 1997-2003 The Mahogany Developers Team"));
+   SetTitle(_("Copyright (C) 1997-2004 The Mahogany Developers Team"));
 
    CreateStatusBar();
 
