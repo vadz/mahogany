@@ -79,6 +79,8 @@ class wxFolderTree
    virtual MFolder *OnCreate(MFolder *parent);
       // user wants to delete this folder, return TRUE to allow this
    virtual bool OnDelete(MFolder *folder, bool removeOnly);
+      // user wants to rename this folder to folderNewName, return TRUE to allow
+   virtual bool OnRename(MFolder *folder, const String& folderNewName);
       // the folder must be closed, return FALSE to prevent it from closing
    virtual bool OnClose(MFolder *folder);
 

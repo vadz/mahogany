@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+02.05.00 VZ: folder renaming implemented
 02.05.00 VZ: the log window can be shown/hidden, closing it hides it permanently
 01.05.00 VZ: initial wizard small fixes: don't create servers not specified
              possibility to remember the password entered interactively

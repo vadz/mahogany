@@ -677,20 +677,18 @@ bool MFolderFromProfile::Rename(const String& newName)
 {
    CHECK( !m_folderName.IsEmpty(), FALSE, "can't rename the root pseudo-folder" );
 
-   if ( GetType() == Inbox )
-   {
-      wxLogError(_("INBOX folder is a special folder used by the mail "
-                   "system and can not be renamed."));
-
-      return FALSE;
-   }
-
    String path = m_folderName.BeforeLast('/'),
           name = m_folderName.AfterLast('/');
 
-   String newFullName;
-   newFullName << path << '/' << newName;
+   String newFullName = path;
+   if ( !!path )
+      newFullName += '/';
+   newFullName += newName;
 
+   // we can't use Exists() here as it tries to read a value from the config
+   // group newFullName and, as a side effect of this, creates this group, so
+   // Profile::Rename() below will then fail!
+#if 0
    if ( Exists(newFullName) )
    {
       wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
@@ -699,7 +697,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 
       return FALSE;
    }
-
+#endif // 0
 
    Profile_obj profile(path);
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
@@ -711,6 +709,9 @@ bool MFolderFromProfile::Rename(const String& newName)
    }
    else
    {
+      wxLogError(_("Cannot rename folder '%s' to '%s': the folder with "
+                   "the new name already exists."),
+                   m_folderName.c_str(), newName.c_str());
 
       return FALSE;
    }

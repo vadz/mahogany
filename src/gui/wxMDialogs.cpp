@@ -730,6 +730,12 @@ public:
       }
    }
 
+   virtual void Flush()
+   {
+      if ( m_logOld )
+         m_logOld->Flush();
+   }
+
 private:
    wxLog *m_logOld;
 };

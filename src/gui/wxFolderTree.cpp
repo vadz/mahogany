@@ -193,6 +193,7 @@ public:
 
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
+   void OnEndLabelEdit(wxTreeEvent&);
 
    // event processing function
    virtual bool OnMEvent(MEventData& event);
@@ -236,7 +237,6 @@ protected:
 
    void DoFolderCreate();
    void DoFolderDelete(bool removeOnly = TRUE);
-   void DoFolderRename();
 
    void DoBrowseSubfolders();
 
@@ -395,6 +395,7 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    // (except our owns) anyhow
    EVT_TREE_SEL_CHANGED(-1,    wxFolderTreeImpl::OnTreeSelect)
    EVT_TREE_ITEM_EXPANDING(-1, wxFolderTreeImpl::OnTreeExpanding)
+   EVT_TREE_END_LABEL_EDIT(-1, wxFolderTreeImpl::OnEndLabelEdit)
 
    EVT_LEFT_DCLICK(wxFolderTreeImpl::OnDoubleClickHandler)
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
@@ -656,6 +657,34 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    return ok;
 }
 
+bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
+{
+   CHECK( folder, FALSE, "can't rename NULL folder" );
+
+   if ( folder->GetType() == MF_INBOX )
+   {
+      wxLogError(_("INBOX folder is a special folder used by the mail "
+                   "system and can not be renamed."));
+
+      return FALSE;
+   }
+
+   if ( folder->GetType() == MF_ROOT )
+   {
+      wxLogError(_("The root folder can not be renamed."));
+      return FALSE;
+   }
+
+   if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
+   {
+      wxLogError(_("The folder '%s' is used by Mahogany and cannot be renamed."),
+                 folder->GetName().c_str());
+      return FALSE;
+   }
+
+   return folder->Rename(folderNewName);
+}
+
 bool wxFolderTree::OnClose(MFolder *folder)
 {
    // we can't close it from here
@@ -681,7 +710,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    // add this item to the tree
    if ( folder->GetType() == MF_ROOT )
    {
-      SetId(tree->AddRoot(wxString(_("All folders")), image, image, this));
+      SetId(tree->AddRoot(_("All folders"), image, image, this));
    }
    else
    {
@@ -703,7 +732,8 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
 wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                    wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos, const wxSize& size)
-                : wxPTreeCtrl("FolderTree", parent, id, pos, size)
+                : wxPTreeCtrl("FolderTree", parent, id, pos, size,
+                              wxTR_HAS_BUTTONS | wxTR_EDIT_LABELS)
 {
    // init member vars
    m_current = NULL;
@@ -911,11 +941,6 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
    folder->DecRef();
 }
 
-void wxFolderTreeImpl::DoFolderRename()
-{
-   FAIL_MSG("folder renaming not implemented"); // TODO
-}
-
 void wxFolderTreeImpl::DoBrowseSubfolders()
 {
    m_sink->OnBrowseSubfolders(m_sink->GetSelection());
@@ -933,6 +958,26 @@ void wxFolderTreeImpl::DoToggleHidden()
    mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, m_showHidden);
 
    ReopenBranch(GetRootItem());
+}
+
+void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
+{
+   MFolder *folder = m_sink->GetSelection();
+   if ( !folder )
+   {
+      wxFAIL_MSG( "how can we edit a label without folder?" );
+
+      event.Veto();
+   }
+   else
+   {
+      if ( !m_sink->OnRename(folder, event.GetLabel()) )
+      {
+         event.Veto();
+      }
+
+      folder->DecRef();
+   }
 }
 
 // add all subfolders of the folder being expanded
@@ -1104,7 +1149,48 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
          break;
 
       case FolderMenu::Rename:
-         FAIL_MSG("renaming folders not yet implemented");
+         {
+            MFolder *folder = m_sink->GetSelection();
+            if ( !folder )
+            {
+               wxLogError(_("Please select the folder to rename first."));
+            }
+            else
+            {
+               wxFrame *frame = GetFrame(this);
+               wxString folderName = folder->GetName();
+
+               folderName = wxGetTextFromUser
+                            (
+                              wxString::Format
+                              (
+                                _("Enter the new folder name for '%s'"),
+                                folderName.c_str()
+                              ),
+                              _("Mahogany - rename folder"),
+                              folderName,
+                              frame
+                            );
+
+               if ( !folderName )
+               {
+                  wxLogStatus(frame, _("Folder renaming cancelled."));
+               }
+               else // we have got the new name
+               {
+                  // try to rename
+                  if ( m_sink->OnRename(folder, folderName) )
+                  {
+                     // update the label in the tree too
+                     wxTreeItemId id = wxTreeCtrl::GetSelection();
+                     SetItemText(id, folderName);
+                  }
+                  //else: renaming failed
+               }
+
+               folder->DecRef();
+            }
+         }
          break;
 
       case FolderMenu::BrowseSub:
