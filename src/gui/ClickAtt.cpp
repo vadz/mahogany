@@ -23,6 +23,8 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "gui/wxMenuDefs.h"
+   #include "strutil.h"
 
    #include <wx/menu.h>
 #endif //USE_PCH
@@ -30,8 +32,6 @@
 #include "MessageView.h"
 
 #include "ClickAtt.h"
-#include "gui/wxMenuDefs.h"
-#include "strutil.h"
 
 // ----------------------------------------------------------------------------
 // MimePopup: the popup menu invoked by clicking on an attachment

@@ -23,6 +23,9 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "gui/wxMenuDefs.h"
+   #include "MDialogs.h"
+   #include "gui/wxOptionsDlg.h"
 
    #include <wx/menu.h>
 #endif //USE_PCH
@@ -36,10 +39,6 @@
 #include "Collect.h"
 
 #include <wx/clipbrd.h>
-
-#include "gui/wxMenuDefs.h"
-#include "gui/wxOptionsDlg.h"
-#include "MDialogs.h"
 
 #ifdef OS_UNIX
    #include <sys/stat.h>
