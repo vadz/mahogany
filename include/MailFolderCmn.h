@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCmn class: common code for all MailFolder classes      *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)      *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -59,9 +59,10 @@ public:
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
+       @param expunge expunge messages after deletion
        @return true on success
    */
-   virtual bool DeleteMessages(const INTARRAY *messages);
+   virtual bool DeleteMessages(const INTARRAY *messages, bool expunge);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
