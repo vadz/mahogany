@@ -3,3 +3,5 @@
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
 - paths for PATH and PYTHONPATH get set wrongly in MApplication::OnInit(), why?
+
+testing cvs loginfo
