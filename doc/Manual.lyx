@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Feb 15 23:30:35 2000
+#This file was created by <dseifert> Wed Mar 22 21:45:45 2000
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -58,7 +58,7 @@ Copyright 1997-2000 by Karsten Ballüder
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents
+\begin_inset LatexCommand \tableofcontents{}
 
 \end_inset 
 
@@ -3979,6 +3979,55 @@ Work
 \shape italic 
 Therefore, reading a BBDB file and saving it back to disk may lead to a
  loss of information!
+\layout Subsection
+
+Support for Palm Address Books
+\layout Standard
+
+
+\begin_inset LatexCommand \label{PalmADB}
+
+\end_inset 
+
+
+\emph on 
+Mahogany
+\emph default 
+ does currently support reading of Palm Addressbooks (refering to a 
+\begin_inset Quotes eld
+\end_inset 
+
+Palm
+\begin_inset Quotes erd
+\end_inset 
+
+ we mean the handheld organizer Palm Pilot running PalmOS).
+ For being able to do that it is required to include the PalmOS-Module (see
+ below).
+ The support of Palm Addressbooks is not yet fully implemented, as so far
+ it is only possible to download the addresses from the Palm and to display
+ them.
+ Changing and uploading changed/new addresses to the Palm is something we
+ plan to add in the next release.
+\layout Standard
+
+To display the Palm addressbook, create a new addressbook of type 
+\begin_inset Quotes eld
+\end_inset 
+
+PalmOS
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ You will be asked to put your Palm into the cradle and to push the HotSync-butt
+on.
+ After the download the addressbook is accessible in read-only mode.
+ Restarting 
+\emph on 
+Mahogany
+\emph default 
+ requires to download the addressbook again.
 \layout Chapter
 
 Scripting and Extending 
@@ -3990,6 +4039,9 @@ Mahogany
 
 
 \layout Section
+
+Python Scripting
+\layout Subsection
 
 Introduction
 \layout Standard
@@ -4028,7 +4080,7 @@ Currently the scripting support is quite basic.
 Mahogany
 \shape default 
 , please get in touch with the developers who will be happy to add it.
-\layout Section
+\layout Subsection
 
 Initialisation 
 \layout Standard
@@ -4046,7 +4098,7 @@ Minit.py
 Minit()
 \family default 
  function defined in there, without any arguments.
-\layout Section
+\layout Subsection
 
 Callback Functions (Hooks)
 \layout Standard
@@ -4113,7 +4165,7 @@ mf = MailFolder.MailFolder(arg)
 
 Some callbacks have a third argument.
  This is either a single value or a tuple holding several values.
-\layout Section
+\layout Subsection
 
 Namespaces
 \layout Standard
@@ -4143,7 +4195,7 @@ import
 .
  By default modules are not imported into the global namespace and must
  be explicitly named.
-\layout Section
+\layout Subsection
 
 List of Callbacks
 \layout Standard
@@ -4331,7 +4383,7 @@ Called when new mail arrived anywhere.
 
 \newline 
 
-\layout Section
+\layout Subsection
 
 Supported Classes
 \layout Standard
@@ -4359,6 +4411,223 @@ htmladdnormallinkfoot{doc/Python directory}{../Python/}
 htmladdnormallinkfoot{doc/classes directory}{../classes/}
 \latex default 
 .
+\layout Section
+
+Plugins
+\layout Subsection
+
+Introduction
+\layout Standard
+
+Starting with release 0.5, 
+\emph on 
+Mahogany
+\emph default 
+ allows the use of plugins (modules).
+ This allows for an easy and comfortable way to enlarge 
+\emph on 
+Mahogany
+\emph default 
+´s functionality.
+\layout Subsection
+
+The PalmOS Module
+\layout Standard
+
+When 3Com released its first PalmPilots several years ago, many people did
+ not believe in a success.
+ But they were proven wrong, the Palm Pilot (or short: Palm) is today the
+ most used handheld organizer.
+ 
+\layout Standard
+
+For all the people possessing one of those´s little helpers, the PalmOS
+ Module allows (or will allow) for an easy integration of the Palm´s data
+ in Mahogany.
+ In future releases there will be full support for addressbook synching,
+ schedules etc.
+ As of today, it is only possible to view the Palm´s addressbook in 
+\emph on 
+Mahogany 
+\emph default 
+(see above).
+\layout Subsubsection
+
+Desktop functionality
+\layout Standard
+
+As there is not really a common Palm desktop in the Unix/Linux environment
+ (not like under MS Windows), we thought it a nice idea to include the desktop
+ into Mahogany.
+ Therefore 
+\emph on 
+Mahogany
+\emph default 
+ does allow to
+\layout Itemize
+
+create backups of the Palm´s databases
+\layout Itemize
+
+restore the previously backup-ed databases
+\layout Itemize
+
+install new files to the Palm
+\layout Standard
+
+To use this functionality, you must of course have the PalmOS module enabled.
+ You can access the functions via the Plugin menu.
+\layout Subsubsection
+
+The configuration dialog_10011_
+\layout Standard
+
+You can configure the PalmOS module via the Plugin menu.
+ You will be presented a set of options of what should be done when doing
+ a general hotsync (menu point 
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronise
+\begin_inset Quotes erd
+\end_inset 
+
+):
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronise mails
+\begin_inset Quotes erd
+\end_inset 
+
+ for storing/sending mails: When you have this enabled, you can specify
+ a mailbox which will be used as place of exchange for mails.
+ Mails in this folder will be transfered to the Palm at the next hotsync
+ and the outbox of the Palm´s mail program will be send.
+\begin_deeper 
+\begin_deeper 
+\layout Standard
+
+The 
+\begin_inset Quotes eld
+\end_inset 
+
+Mail disposal mode
+\begin_inset Quotes erd
+\end_inset 
+
+ specifies, ...
+ ???
+\end_deeper 
+\end_deeper 
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronise Addressbook
+\begin_inset Quotes erd
+\end_inset 
+
+ for downloading the Palm´s addressbook and uploading changed entries (not
+ yet supported)
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+Always do backup
+\begin_inset Quotes erd
+\end_inset 
+
+ will mean that a backup will take place every time you hotsync.
+ You can specify
+\begin_deeper 
+\layout Itemize
+
+a directory where the backup files will be stored
+\layout Itemize
+
+whether you want files to be deleted on the PC, that are residing in the
+ backup directory but are not any longer on the Palm.
+ This makes it possible to really keep the backup identical to the Palm,
+ but has the disadvantage that you might loose data if you (accidently?)
+ delete important data on the Palm and do a backup, as the backup-ed databases
+ will be deleted too.
+ So think carefully whether you do really want to do this.
+\layout Itemize
+
+whether you only want to make an incremental backup.
+ Using this features will speed the backup process up, as only changed or
+ new databases are downloaded from the Palm.
+\end_deeper 
+\layout Standard
+
+Besides that, some general options are available:
+\layout Itemize
+
+You can specify the device where the Pilot is residing (this ought to be
+ /dev/pilot under Unix/Linux and Com1: or Com2: under MS Windows (not yet
+ supported)).
+\layout Itemize
+
+You have the choice beetween different hotsync speeds (
+\begin_inset Quotes eld
+\end_inset 
+
+connection speed
+\begin_inset Quotes erd
+\end_inset 
+
+), measured in baud.
+ 
+\layout Itemize
+
+You can force a lock of the above set device by enabling 
+\begin_inset Quotes eld
+\end_inset 
+
+Try to lock device
+\begin_inset Quotes erd
+\end_inset 
+
+
+\layout Subsubsection
+
+Accessing the Palms
+\layout Standard
+
+There is the 
+\begin_inset Quotes eld
+\end_inset 
+
+general
+\begin_inset Quotes erd
+\end_inset 
+
+ approach to get the Palm databases on your computer and the more selective
+ one.
+ For the first one, just use the 
+\begin_inset Quotes eld
+\end_inset 
+
+Synchronize
+\begin_inset Quotes erd
+\end_inset 
+
+ menu point in the plugin menu.
+ Depending on what you have enabled in the configuration dialog (see above),
+ different actions will be taken (backup, mail exchange, ...).
+\layout Standard
+
+If you only want to update your backup or to install a file or to restore
+ your Palm´s contents, you can access these functions individually by using
+ the corresponding menu points in the plugin menu.
 \layout Chapter
 
 Getting Help and Support
