@@ -2909,6 +2909,10 @@ MailFolderCC::Ping(void)
       {
          rc = PingOpenedFolder();
       }
+      else
+      {
+         rc = false;
+      }
    }
    else // failed to lock folder?
    {
