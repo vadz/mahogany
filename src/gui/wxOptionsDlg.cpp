@@ -109,8 +109,6 @@ enum ConfigFields
 
    // compose
    ConfigField_ComposeFirst = ConfigField_NetworkLast,
-   ConfigField_UseOutbox,
-   ConfigField_OutboxName,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
@@ -142,7 +140,11 @@ enum ConfigFields
    ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
    ConfigField_AutoShowFirstMessage,
-   ConfigField_FoldersLast = ConfigField_AutoShowFirstMessage,
+   ConfigField_UseOutbox,
+   ConfigField_OutboxName,
+   ConfigField_UseTrash,
+   ConfigField_TrashName,
+   ConfigField_FoldersLast = ConfigField_TrashName,
 
 #ifdef USE_PYTHON
    // python
@@ -433,10 +435,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
 
    // compose
-   { gettext_noop("Store outgoing messages and send only when asked to"), 
-     Field_Bool, -1 },
-   { gettext_noop("Folder where to store outgoing messages"),
-     Field_Text, ConfigField_UseOutbox },
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
@@ -471,6 +469,12 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
+   { gettext_noop("Store outgoing messages and send only when asked to"), 
+     Field_Bool, -1 },
+   { gettext_noop("Folder where to store &outgoing messages"),
+     Field_Text, ConfigField_UseOutbox },
+   { gettext_noop("Move &deleted messages to Trash folder"), Field_Bool, -1},
+   { gettext_noop("&Trash folder name"), Field_Text, ConfigField_UseTrash},
 
 
 #ifdef USE_PYTHON
@@ -614,9 +618,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 
    // compose
-   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before
-                                // sending them
-   CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
                                        // messages send 
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
@@ -645,6 +646,11 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
+   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before
+                                // sending them
+   CONFIG_ENTRY(MP_OUTBOX_NAME),
+   CONFIG_ENTRY(MP_USE_TRASH_FOLDER), 
+   CONFIG_ENTRY(MP_TRASH_FOLDER),
 
    // python
 #ifdef USE_PYTHON
