@@ -1402,7 +1402,8 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       // folder only)
       if ( READ_CONFIG(profile, MP_FTREE_PROPAGATE) )
       {
-         GetParent()->OnChildStatusChange(tree, statusShownBefore, statusShown);
+         if ( GetParent() )
+            GetParent()->OnChildStatusChange(tree, statusShownBefore, statusShown);
       }
    }
 }
