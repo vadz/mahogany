@@ -947,7 +947,7 @@
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_D      180
 /// close of folders delayed by
-#define MP_FOLDER_CLOSE_DELAY_D    180
+#define MP_FOLDER_CLOSE_DELAY_D    30
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition/message view (set to -1 to disable it)
