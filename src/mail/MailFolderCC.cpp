@@ -1653,8 +1653,18 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             text = (char *)rfc822_qprint(start, lenEncWord, &len);
          }
 
-         String word(wxConvertMB2WX(text), (size_t)len);
-         fs_give((void **)&text);
+         String textDecoded;
+         if ( !text )
+         {
+            // if QP decoding failed it is probably better to show undecoded
+            // text than nothing at all
+            textDecoded = String(pEncTextStart, p + 1);
+         }
+         else // decoded ok
+         {
+            textDecoded = String(wxConvertMB2WX(text), (size_t)len);
+            fs_give((void **)&text);
+         }
 
          // normally we leave the (8 bit) string as is and remember its
          // encoding so that we may choose the font for displaying it
@@ -1665,10 +1675,10 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          if ( encoding == wxFONTENCODING_UTF7 ||
                   encoding == wxFONTENCODING_UTF8 )
          {
-            encoding = ConvertUnicodeToSystem(&word, encoding);
+            encoding = ConvertUnicodeToSystem(&textDecoded, encoding);
          }
-#endif
-         out += word;
+#endif // !wxUSE_UNICODE
+         out += textDecoded;
       }
       else
       {
