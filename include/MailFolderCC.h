@@ -505,8 +505,8 @@ public:
             m_stream = stream; m_type = type;
             m_caller.Printf("line %d", line);
             m_folderName = stream ? stream->mailbox : "no mailbox";
-#endif
          }
+#endif
       /// The type.
       EventType   m_type;
       /// The stream it relates to.
