@@ -49,6 +49,27 @@ extern "C"
 class DspamCtx
 {
 public:
+   // create the context
+   DspamCtx(int mode, unsigned flags)
+   {
+      m_ctx = dspam_create
+              (
+                  "mahogany", // user
+                  NULL,       // no group
+                  mApplication->GetLocalDir().ToAscii(),
+                  mode,
+                  flags
+              );
+
+      // this is unsafe as it means that the database could become corrupted if
+      // the system crashes at a bad moment but it is about 10 times faster
+      // than the default "synchronous = NORMAL" so well worth it for non
+      // critical data such as spam database
+      dspam_addattribute(m_ctx, "SQLitePragma", "synchronous = OFF");
+
+      dspam_attach(m_ctx, NULL);
+   }
+
    // destroy the context
    ~DspamCtx()
    {
@@ -61,19 +82,6 @@ public:
    operator DSPAM_CTX *() const { return m_ctx; }
    DSPAM_CTX *operator->() const { return m_ctx; }
 
-protected:
-   // take ownership of the specified context
-   DspamCtx(DSPAM_CTX *ctx) : m_ctx(ctx) { }
-
-   // currently we always use the same user name...
-   static const char *GetUser() { return "mahogany"; }
-
-   // return the base dir for dspam files
-   static wxCharBuffer GetHome()
-   {
-      return mApplication->GetLocalDir().ToAscii();
-   }
-
 private:
    DSPAM_CTX *m_ctx;
 
@@ -85,16 +93,7 @@ class DspamProcessCtx : public DspamCtx
 {
 public:
    DspamProcessCtx()
-      :  DspamCtx(dspam_init
-                  (
-                     GetUser(),
-                     NULL,             // no group
-                     GetHome(),
-                     DSM_PROCESS,
-                     DSF_CHAINED |
-                     DSF_NOISE |
-                     DSF_WHITELIST
-                  ))
+      :  DspamCtx(DSM_PROCESS, DSF_CHAINED | DSF_NOISE | DSF_WHITELIST)
    {
    }
 
@@ -106,7 +105,7 @@ class DspamClassifyCtx : public DspamCtx
 {
 public:
    DspamClassifyCtx()
-      : DspamCtx(dspam_init(GetUser(), NULL, GetHome(), DSM_CLASSIFY, 0))
+      : DspamCtx(DSM_CLASSIFY, 0)
    {
    }
 
