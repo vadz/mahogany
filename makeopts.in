@@ -89,13 +89,11 @@ SWIG	:= @SWIG@
 # other stuff
 RM	:= rm -f
 M4	:= @M4@ 
-# currently broken in configure:
-#INSTALL	:= @INSTALL@
-#INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
-#INSTALL_DATA	:= @INSTALL_DATA@
-INSTALL	:= $(SOURCEDIR)/extra/scripts/install-sh -c
-INSTALL_PROGRAM	:= $(INSTALL) -s
-INSTALL_DATA	:= $(INSTALL) -c -m 644
+
+# install stuff
+INSTALL	:= @INSTALL@
+INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
+INSTALL_DATA	:= @INSTALL_DATA@
 
 DESTDIR = @prefix@
 # Directory in which to install scripts.
@@ -109,8 +107,7 @@ DOCDIR = $(DATADIR)/doc
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/modules
 
-LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
-#-Wl-export-dynamic 
+LINK = $(CXX) #-Wl-r$(LD_RUN_PATH) #-Wl-export-dynamic 
 
 CFLAGS   = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@
