@@ -197,8 +197,8 @@ typedef void (*mm_status_handler)(MAILSTREAM *stream,
 // globals
 // ----------------------------------------------------------------------------
 
-/// forward new mail notification back to the folder itself
-static class CCNewMailProcessor *gs_CCNewMailProcessor = NULL;
+/// object used to reflect some events back to MailFolderCC
+static class CCEventReflector *gs_CCEventReflector = NULL;
 
 /// object used to close the streams if it can't be done when closing folder
 static class CCStreamCleaner *gs_CCStreamCleaner = NULL;
@@ -217,9 +217,9 @@ static bool mm_disable_callbacks = false;
 
 /// show cclient debug output
 #ifdef DEBUG
-static bool mm_show_debug = true;
+   static bool mm_show_debug = true;
 #else
-static bool mm_show_debug = false;
+   static bool mm_show_debug = false;
 #endif
 
 // loglevel for cclient error messages:
@@ -229,37 +229,107 @@ static int cc_loglevel = wxLOG_Error;
 // private classes
 // ============================================================================
 
+/**
+   The idea behind CCEventReflector is to allow postponing some actions in
+   MailFolderCC code, i.e. instead of doing something immediately after getting
+   c-client notification, we generate and send a helper event which is
+   processed by gs_CCEventReflector later (== during the next idle handler
+   iteration) and which calls back the corresponding MailFolderCC method on the
+   object which got the c-client notification in the first place.
+
+   This is necessary in some cases and very convenient in the others: necessary
+   for new mail handling as we want to filter it which can (and will) result in
+   more c-client calls but this can't be done from inside c-client handler
+   (such as mm_exists()) because c-client is not reentrant. Convenient for
+   batching together several notifications: for example, we often receive a lot
+   of mm_flags at once (when the status of a selection consisting of many
+   messages is changed) and forwarding all of them to the GUI immediately
+   would result in horrible flicker - so, instead, we just accumulate them in
+   internal arrays and generate a single MsgStatus event for them when
+   OnMsgStatusChanged() is called.
+
+   The same technique should be used to batch process other notifications as
+   well if it's worth it.
+ */
+
 // ----------------------------------------------------------------------------
-// CCNewMailProcessor
+// private event classes used together with CCEventReflector to reflect
+// some events back to MailFolderCC
+// ----------------------------------------------------------------------------
+
+/// MEventFolderOnNewMailData - used by MailFolderCC to update itself
+class MEventFolderOnNewMailData : public MEventWithFolderData
+{
+public:
+   MEventFolderOnNewMailData(MailFolder *folder)
+      : MEventWithFolderData(MEventId_MailFolder_OnNewMail, folder) { }
+};
+
+/// MEventFolderOnMsgStatusData - used by MailFolderCC to send MsgStatus events
+class MEventFolderOnMsgStatusData : public MEventWithFolderData
+{
+public:
+   MEventFolderOnMsgStatusData(MailFolder *folder)
+      : MEventWithFolderData(MEventId_MailFolder_OnMsgStatus, folder) { }
+};
+
+// ----------------------------------------------------------------------------
+// CCEventReflector
 // ----------------------------------------------------------------------------
 
 // this class processes MEventFolderOnNewMail events by just calling
 // MailFolderCC::OnNewMail()
-class CCNewMailProcessor : public MEventReceiver
+class CCEventReflector : public MEventReceiver
 {
 public:
-   CCNewMailProcessor()
+   CCEventReflector()
    {
-      m_handle = MEventManager::Register(*this, MEventId_FolderOnNewMail);
+      MEventManager::RegisterAll
+      (
+         this,
+         MEventId_MailFolder_OnNewMail,   &m_cookieNewMail,
+         MEventId_MailFolder_OnMsgStatus, &m_cookieMsgStatus,
+         MEventId_Null
+      );
    }
 
    virtual bool OnMEvent(MEventData& ev)
    {
-      MEventFolderOnNewMailData& event = (MEventFolderOnNewMailData &)ev;
+      MEventWithFolderData& event = (MEventWithFolderData &)ev;
+      MailFolderCC *mfCC = (MailFolderCC *)event.GetFolder();
 
-      ((MailFolderCC *)event.GetFolder())->OnNewMail();
+      switch ( ev.GetId() )
+      {
+         case MEventId_MailFolder_OnNewMail:
+            mfCC->OnNewMail();
+            break;
+
+         case MEventId_MailFolder_OnMsgStatus:
+            mfCC->OnMsgStatusChanged();
+            break;
+
+         default:
+            FAIL_MSG( "unexpected event in CCEventReflector!" );
+            return true;
+      }
 
       // no need to search further, only we process these events
       return false;
    }
 
-   virtual ~CCNewMailProcessor()
+   virtual ~CCEventReflector()
    {
-      MEventManager::Deregister(m_handle);
+      MEventManager::DeregisterAll
+      (
+         &m_cookieNewMail,
+         &m_cookieMsgStatus,
+         NULL
+      );
    }
 
 private:
-   void *m_handle;
+   void *m_cookieNewMail,
+        *m_cookieMsgStatus;
 };
 
 // ----------------------------------------------------------------------------
@@ -1322,7 +1392,10 @@ void MailFolderCC::Init()
    m_LastUId = UID_ILLEGAL;
 
    m_expungedMsgnos =
-   m_expungedPositions = NULL;
+   m_expungedPositions =
+   m_statusChangedMsgnos = 
+   m_statusChangedOld =
+   m_statusChangedNew = NULL;
 
    m_InCritical = false;
 
@@ -1338,8 +1411,13 @@ MailFolderCC::~MailFolderCC()
       Close();
    }
 
-   // these should have been deleted before
-   ASSERT(m_SearchMessagesFound == NULL);
+   // check that our temporary data isn't hanging around
+   if ( m_SearchMessagesFound )
+   {
+      FAIL_MSG( "m_SearchMessagesFound unexpectedly != NULL" );
+
+      delete m_SearchMessagesFound;
+   }
 
    // normally this one should be deleted as well but POP3 server never sends
    // us mm_expunged() (well, because it never expunges the messages until we
@@ -1351,6 +1429,16 @@ MailFolderCC::~MailFolderCC()
 
       delete m_expungedMsgnos;
       delete m_expungedPositions;
+   }
+
+   // these arrays must have been cleared by OnMsgStatusChanged() earlier
+   if ( m_statusChangedMsgnos )
+   {
+      FAIL_MSG( "m_statusChangedMsgnos unexpectedly != NULL" );
+
+      delete m_statusChangedMsgnos;
+      delete m_statusChangedOld;
+      delete m_statusChangedNew;
    }
 
    // we might still be listed, so we better remove ourselves from the
@@ -1920,13 +2008,27 @@ MailFolderCC::Close()
       m_MailStream = NIL;
    }
 
+   // we could be closing before we had time to process all events
+   //
+   // FIXME: is this really true, i.e. does it ever happen?
    if ( m_expungedMsgnos )
    {
       delete m_expungedMsgnos;
-      m_expungedMsgnos = NULL;
-
       delete m_expungedPositions;
+
+      m_expungedMsgnos = NULL;
       m_expungedPositions = NULL;
+   }
+
+   if ( m_statusChangedMsgnos )
+   {
+      delete m_statusChangedMsgnos;
+      delete m_statusChangedOld;
+      delete m_statusChangedNew;
+
+      m_statusChangedMsgnos =
+      m_statusChangedOld =
+      m_statusChangedNew = NULL;
    }
 
    // normally the folder won't be reused any more but reset them just in case
@@ -3355,46 +3457,23 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 }
 
 void
-MailFolderCC::UpdateMessageStatus(unsigned long msgno)
+MailFolderCC::OnMsgStatusChanged()
 {
-   // if we're retrieving the headers right now, we can't use
-   // headers->GetItemByIndex() below as this risks to reenter c-client which
-   // is a fatal error
-   //
-   // besides, we don't need to do it neither as mm_exists() will follow soon
-   // which will invalidate the current status anyhow
-   if ( IsLocked() )
-      return;
+   // we only send MEventId_MailFolder_OnMsgStatus events if something really
+   // changed, so this is not suposed to happen
+   CHECK_RET( m_statusChangedMsgnos, "unexpected OnMsgStatusChanged() call" );
 
-   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
-   CHECK_RET( elt, "UpdateMessageStatus: no elt for the given msgno?" );
-
-   HeaderInfoList_obj headers = GetHeaders();
-   CHECK_RET( headers, "UpdateMessageStatus: couldn't get headers" );
-
-   size_t idx = headers->GetIdxFromMsgno(msgno);
-
-   HeaderInfo *hi = headers->GetItemByIndex(idx);
-   CHECK_RET( hi, "UpdateMessageStatus: no header info for the given msgno?" );
-
-   // now unneeded because of the test in the beginning
-#if 0
-   // it may happen that we get mm_flags notification exactly for the header
-   // we're building right now - in this case it doesn't have valid status yet,
-   // so don't do anything
-   if ( !hi->IsValid() )
-      return;
-#endif // 0
-
-   int statusNew = GetMsgStatus(elt),
-       statusOld = hi->GetStatus();
-   if ( statusNew != statusOld )
+   // first update the cached status
+   MailFolderStatus status;
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   if ( mfStatusCache->GetStatus(GetName(), &status) )
    {
-      // update the cached status
-      MailFolderStatus status;
-      MfStatusCache *mfStatusCache = MfStatusCache::Get();
-      if ( mfStatusCache->GetStatus(GetName(), &status) )
+      size_t count = m_statusChangedMsgnos->GetCount();
+      for ( size_t n = 0; n < count; n++ )
       {
+         int statusNew = m_statusChangedNew->Item(n),
+             statusOld = m_statusChangedOld->Item(n);
+
          bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
               isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
 
@@ -3423,22 +3502,80 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          UPDATE_NUM_OF(searched);
 
          #undef UPDATE_NUM_OF
-
-         mfStatusCache->UpdateStatus(GetName(), status);
       }
 
+      mfStatusCache->UpdateStatus(GetName(), status);
+   }
+
+   // next notify everyone else about the status change
+   wxLogTrace(TRACE_MF_EVENTS,
+              "Sending MsgStatus event for %u msgs in folder '%s'",
+              m_statusChangedMsgnos->GetCount(), GetName().c_str());
+
+   MEventManager::Send(new MEventMsgStatusData(this,
+                                               m_statusChangedMsgnos,
+                                               m_statusChangedOld,
+                                               m_statusChangedNew));
+
+   // MEventMsgStatusData will delete them
+   m_statusChangedMsgnos =
+   m_statusChangedOld =
+   m_statusChangedNew = NULL;
+}
+
+void
+MailFolderCC::UpdateMessageStatus(unsigned long msgno)
+{
+   // if we're retrieving the headers right now, we can't use
+   // headers->GetItemByIndex() below as this risks to reenter c-client which
+   // is a fatal error
+   //
+   // besides, we don't need to do it neither as mm_exists() will follow soon
+   // which will invalidate the current status anyhow
+   if ( IsLocked() )
+      return;
+
+   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
+   CHECK_RET( elt, "UpdateMessageStatus: no elt for the given msgno?" );
+
+   HeaderInfoList_obj headers = GetHeaders();
+   CHECK_RET( headers, "UpdateMessageStatus: couldn't get headers" );
+
+   HeaderInfo *hi = headers->GetItemByMsgno(msgno);
+   CHECK_RET( hi, "UpdateMessageStatus: no header info for the given msgno?" );
+
+   int statusNew = GetMsgStatus(elt),
+       statusOld = hi->GetStatus();
+   if ( statusNew != statusOld )
+   {
       hi->m_Status = statusNew;
 
-      // tell all interested that status changed unless we're inside the
-      // filtering code: in this case we stay silent as the listing is
-      // not completely built yet and so we risk sending wrong info to the GUI
-      // code
-      if ( !m_InFilterCode->IsLocked() )
+      // we send the event telling us that we have some messages with the
+      // changed status only once, when we get the first notification - and
+      // also when we allocate the arrays for msg status change data
+      bool sendEvent;
+      if ( !m_statusChangedMsgnos )
       {
-         wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
-                    GetName().c_str());
+         m_statusChangedMsgnos = new wxArrayInt;
+         m_statusChangedOld = new wxArrayInt;
+         m_statusChangedNew = new wxArrayInt;
 
-         MEventManager::Send(new MEventMsgStatusData(this, idx, *hi));
+         sendEvent = true;
+      }
+      else
+      {
+         sendEvent = false;
+      }
+
+      // remember who changed and how
+      m_statusChangedMsgnos->Add(msgno);
+      m_statusChangedOld->Add(statusOld);
+      m_statusChangedNew->Add(statusNew);
+
+      // and schedule call to our OnMsgStatusChanged() if not done yet
+      if ( sendEvent )
+      {
+         MEventManager::Send(new MEventFolderOnMsgStatusData(this));
       }
    }
    //else: flags didn't really change
@@ -4283,16 +4420,16 @@ MailFolderCC::CClientInit(void)
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();
 
-   ASSERT_MSG( !gs_CCNewMailProcessor, "couldn't be created yet" );
-   gs_CCNewMailProcessor = new CCNewMailProcessor;
+   ASSERT_MSG( !gs_CCEventReflector, "couldn't be created yet" );
+   gs_CCEventReflector = new CCEventReflector;
 }
 
 CCStreamCleaner::~CCStreamCleaner()
 {
    wxLogTrace(TRACE_MF_CALLS, "CCStreamCleaner: checking for left-over streams");
 
-   // no new mail notifications any more
-   delete gs_CCNewMailProcessor;
+   // don't send us any notifications any more
+   delete gs_CCEventReflector;
 
    if(! mApplication->IsOnline())
    {

@@ -3849,37 +3849,51 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 
       CHECK_RET( hil, "no headers but msg status changed?" );
 
-      size_t index = event.GetIndex();
-      if ( index >= hil->Count() )
+      size_t posMin = (size_t)-1,
+             posMax = 0;
+
+      size_t count = event.GetCount();
+      for ( size_t n = 0; n < count; n++ )
       {
-         // FIXME: message was expunged, what to do??
-         return;
-      }
-
-      size_t pos = hil->GetPosFromIdx(index);
-      if ( pos < (size_t)m_FolderCtrl->GetItemCount() )
-      {
-         const HeaderInfo *hi = event.GetHeaderInfo();
-         int status = hi->GetStatus();
-
-         // FIXME: we must decrement m_nDeleted if the message became
-         //        undeleted, but how to do it if we don't have the previous
-         //        message status here?
-
-         if ( status & MailFolder::MSG_STAT_DELETED )
+         MsgnoType msgno = event.GetMsgno(n);
+         if ( msgno > hil->Count() )
          {
-            // remember that we have another deleted message
-            m_nDeleted++;
+            // FIXME: message was expunged, what to do??
+            continue;
          }
 
-         m_FolderCtrl->RefreshItem(pos);
+         size_t pos = hil->GetPosFromIdx(hil->GetIdxFromMsgno(msgno));
+         if ( pos >= (size_t)m_FolderCtrl->GetItemCount() )
+         {
+            // this can happen if we didn't have to update the control yet,
+            // just ignore the event then as we will get the message with the
+            // correct status when we retrieve it from Update() anyhow
+            continue;
+         }
 
-         // TODO: should do it only once, after all status changes
-         UpdateTitleAndStatusBars("", "", m_Frame, mf);
+         // update m_nDeleted counter
+         int statusOld = event.GetStatusOld(n),
+             statusNew = event.GetStatusNew(n);
+
+         // what we do here is "+= isDeleted - wasDeleted"
+         m_nDeleted += (statusNew & MailFolder::MSG_STAT_DELETED)
+                    -  (statusOld & MailFolder::MSG_STAT_DELETED);
+
+         // remember the items to update
+         if ( pos < posMin )
+            posMin = pos;
+         if ( pos > posMax )
+            posMax = pos;
       }
-      //else: this can happen if we didn't have to update the control yet, just
-      //      ignore the event then as we will get the message with the
-      //      correct status when we retrieve it from Update() anyhow
+
+      // update the affected item appearance
+      if ( posMin != (size_t)-1 )
+      {
+         m_FolderCtrl->RefreshItems(posMin, posMax);
+      }
+
+      // update the number of unread messages showin in the title/status bars
+      UpdateTitleAndStatusBars("", "", m_Frame, mf);
    }
 }
 

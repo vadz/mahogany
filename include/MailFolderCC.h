@@ -347,9 +347,19 @@ public:
    */
    MAILSTREAM *Stream(void) const { return m_MailStream; }
 
-   /** For use by CCNewMailProcessor only
+   /**
+     Methods for use by CCEventReflector only: see the comment in
+     MailFolderCC.cpp for more details.
    */
+   //@{
+
+   /// called to process new mail in the folder (filter it, ...)
    void OnNewMail();
+
+   /// called to generate MsgStatus event for many messages at once
+   void OnMsgStatusChanged();
+
+   //@}
 
 private:
    /** @name Constructors and such */
@@ -547,6 +557,22 @@ private:
 
    /// the array containing the positions of expunged messages or NULL
    wxArrayInt *m_expungedPositions;
+
+   //@}
+
+   /**
+     The elements are added to these arrays from mm_flags() handler
+     (i.e. UpdateMessageStatus()) and they are cleared later in
+     OnMsgStatusChanged()
+    */
+   //@{
+
+   /// the array containing the msgnos of the messages whose status changed
+   wxArrayInt *m_statusChangedMsgnos;
+
+   /// the arrays containing the old and new status of these messages
+   wxArrayInt *m_statusChangedOld,
+              *m_statusChangedNew;
 
    //@}
 

@@ -29,8 +29,6 @@ enum MEventId
    MEventId_Null = -1,
    /// MEventMailData
    MEventId_NewMail = 100,
-   /// MEventFolderOnNewMailData - used by MailFolderCC for private purposes
-   MEventId_FolderOnNewMail = 110,
    /// MEventFolderTreeChangeData - a change in folder tree
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData - there's a new folder listing
@@ -53,6 +51,11 @@ enum MEventId
    MEventId_NewADB,
    /// MEventData (no special data) - notifies everybody that the app closes
    MEventId_AppExit = 1000,
+
+   /// the events used by MailFolderCC for private purposes
+   MEventId_MailFolder_OnNewMail = 1100,
+   MEventId_MailFolder_OnMsgStatus,
+
    /// (invalid id for an event)
    MEventId_Max
 };
@@ -112,14 +115,6 @@ public:
 
 private:
    MailFolder *m_Folder;
-};
-
-/// MEventFolderOnNewMailData - used by MailFolderCC to update itself
-class MEventFolderOnNewMailData : public MEventWithFolderData
-{
-public:
-   MEventFolderOnNewMailData(MailFolder *folder)
-      : MEventWithFolderData(MEventId_FolderOnNewMail, folder) { }
 };
 
 /// MEventPingData - the event asking the folders to ping
@@ -200,7 +195,7 @@ public:
 class MEventFolderExpungeData : public MEventWithFolderData
 {
 public:
-   // ctor takes the array of deleted msgnos which will be deleted by us
+   /// ctor takes the array of deleted msgnos which will be deleted by us
    MEventFolderExpungeData(MailFolder *folder,
                            wxArrayInt *delMsgnos,
                            wxArrayInt *delPositions)
@@ -210,20 +205,20 @@ public:
          m_delPositions = delPositions;
       }
 
-   // free msgno array
+   /// free msgno array
    virtual ~MEventFolderExpungeData()
    {
       delete m_delMsgnos;
       delete m_delPositions;
    }
 
-   // return the number of messages deleted
+   /// return the number of messages deleted
    size_t GetCount() const { return m_delMsgnos ? m_delMsgnos->GetCount() : 0; }
 
-   // return the msgno of n-th deleted item
+   /// return the msgno of n-th deleted item
    size_t GetItem(size_t n) const { return m_delMsgnos->Item(n); }
 
-   // return the position in the listing of the n-th deleted item
+   /// return the position in the listing of the n-th deleted item
    size_t GetItemPos(size_t n) const { return m_delPositions->Item(n); }
 
 private:
@@ -237,7 +232,7 @@ private:
 class MEventFolderClosedData : public MEventWithFolderData
 {
 public:
-   // ctor takes the array of deleted msgnos which will be deleted by us
+   /// ctor takes the array of deleted msgnos which will be deleted by us
    MEventFolderClosedData(MailFolder *folder)
       : MEventWithFolderData(MEventId_FolderClosed, folder)
       {
@@ -253,23 +248,50 @@ class HeaderInfo;
 class MEventMsgStatusData : public MEventWithFolderData
 {
 public:
-   // ctor
+   /// ctor takes ownership of the arrays passed to it
    MEventMsgStatusData(MailFolder *folder,
-                       size_t index,
-                       const HeaderInfo& hi);
+                       wxArrayInt *msgnos,
+                       wxArrayInt *statusOld,
+                       wxArrayInt *statusNew)
+      : MEventWithFolderData(MEventId_MsgStatus, folder)
+   {
+      ASSERT_MSG( msgnos && statusNew && statusOld &&
+                  msgnos->GetCount() == statusNew->GetCount() &&
+                  msgnos->GetCount() == statusOld->GetCount(),
+                  "invalid parameters for MEventMsgStatus event" );
 
-   ~MEventMsgStatusData();
+      m_msgnos = msgnos;
+      m_statusNew = statusNew;
+      m_statusOld = statusOld;
+   }
 
-   /// Get the changed header info
-   const HeaderInfo *GetHeaderInfo() const { return m_hi; }
+   /// dtor frees the arrays
+   ~MEventMsgStatusData()
+   {
+      delete m_msgnos;
+      delete m_statusNew;
+      delete m_statusOld;
+   }
 
-   /// Get the index of the changed header in the listing
-   size_t GetIndex() const { return m_index; }
+   /// return the number of messages affected
+   size_t GetCount() const { return m_msgnos ? m_msgnos->GetCount() : 0; }
+
+   /// get the msgno of the n-th changed header
+   MsgnoType GetMsgno(size_t n) const { return m_msgnos->Item(n); }
+
+   /// get the new status of the n-th changed header
+   int GetStatusNew(MsgnoType n) const { return m_statusNew->Item(n); }
+
+   /// get the old status of the n-th changed header
+   int GetStatusOld(MsgnoType n) const { return m_statusOld->Item(n); }
 
 private:
-   size_t m_index;
+   /// the array containing the msgnos of messages whose status changed
+   wxArrayInt *m_msgnos;
 
-   class HeaderInfo *m_hi;
+   /// the new and previous values of the message status
+   wxArrayInt *m_statusNew,
+              *m_statusOld;
 };
 
 /**

@@ -328,16 +328,3 @@ MEventNewMailData::~MEventNewMailData()
    delete [] m_messageIDs;
 }
 
-MEventMsgStatusData::MEventMsgStatusData(MailFolder *folder,
-                                         size_t index,
-                                         const HeaderInfo& hi)
-                   : MEventWithFolderData(MEventId_MsgStatus, folder)
-{
-   m_index = index;
-   m_hi = new HeaderInfo(hi);
-}
-
-MEventMsgStatusData::~MEventMsgStatusData()
-{
-   delete m_hi;
-}
