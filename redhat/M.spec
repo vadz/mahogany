@@ -2,7 +2,7 @@
 # Version:  $Id$
 
 # version and release
-%define VERSION 0.65
+%define VERSION 0.66
 %define RELEASE 0
 
 # default installation directory
@@ -23,7 +23,7 @@ Summary: Mahogany email and news client
 Name: mahogany
 Version: %{VERSION}
 Release: %{RELEASE}
-Copyright: GPL
+License: GPL
 Group: X11/Applications/Networking
 Source: ftp://ftp.sourceforge.net/pub/sourceforge/mahogany/mahogany-%{VERSION}.tar.bz2
 URL: http://mahogany.sourceforge.net/
