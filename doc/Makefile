@@ -64,8 +64,9 @@ install2: makemap
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
 
 clean:
+	$(MAKE) -C HtmlHlp clean
 	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab *.ps *.toc *.pdf tmp.*
-	$(RM) -r $(SUB_DIRS) classes classes.tex wxhelp.map
+	$(RM) -r $(SUB_DIRS) classes.tex wxhelp.map
 
 install_classdoc: classdoc
 	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/ClassDoc
