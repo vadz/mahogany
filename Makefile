@@ -10,16 +10,7 @@
 # Licence:     M license
 ###############################################################################
 
-# define it first to avoid building secondary targets by default accidentally
-all_real: all
-
 include makeopts
-
-# extract the version information from the central version file
-makeversion: .src/include/Mversion.h
-	grep "^#define M_VERSION_[MR]" $< | \
-         sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/' > $@
-
 include makeversion
 
 M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
@@ -142,5 +133,5 @@ install_rpm:
 	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
 
-.PHONY: all all_real clean bak backup config program doc install install_doc \
+.PHONY: all clean bak backup config program doc install install_doc \
         locales scandoc install_locale install_rpm classdoc
