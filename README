@@ -1,5 +1,5 @@
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.62 "Mars"
+README file for Mahogany, Release 0.63 "Saugus"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -50,7 +50,8 @@ also view it online at http://mahogany.sourceforge.net/docs.html
 
 Required software
 
-   - wxGTK (GTK port of wxWindows) 2.2.1 or above, 2.2.6 recommended
+   - wxGTK (GTK port of wxWindows) 2.2.1 or above, 2.2.7 recommended
+     (2.3.0 is also known to work)
    - GTK+ 1.2.3 or above, 1.2.9 recommended
 
 If you want to compile Mahogany with SSL support, you must have OpenSSL

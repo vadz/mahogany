@@ -1004,7 +1004,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
                    "<h4>Mahogany information</h4>"
                    "Version " M_VERSION_STRING
-                   "  (built with " wxVERSION_STRING ")<br>"
+                   "  built with " wxVERSION_STRING "<br>"
 #ifdef DEBUG
                    HTML_WARNING "This is a debug build<br>"
 #else

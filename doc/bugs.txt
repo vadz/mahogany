@@ -1,6 +1,4 @@
-Known issues with Mahogany 0.62a (alpha) 'Mars'
-===============================================
+Known issues with Mahogany 0.63a (alpha) 'Saugus'
+=================================================
 
-There are no Windows-specific bugs known right now. Please
-consult http://mahogany.sourceforge.net/bugz/ for the full
-list of open bugs an/or if you wish to report a new one.
+- printing margins are wrong

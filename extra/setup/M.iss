@@ -14,10 +14,10 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany alpha 0.62 'Mars'
+AppVerName=Mahogany alpha 0.63 'Saugus'
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.62a
+OutputBaseFilename=Mahogany-0.63a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
@@ -31,7 +31,7 @@ OutputDir=extra\setup\output
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.62
+AppVersion=0.63
 
 ; --- appearance parameters
 
@@ -58,6 +58,10 @@ Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 Source: "Release\M.EXE"; DestDir: "{app}"
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
+; do we need to include VC++ run time?
+;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
+;Source: "w:\winnt40\system32\msvcrt.dll"; DestDir: "{sys}"
+
 ; --- misc stuff
 Source: "extra\setup\autocollect.adb"; DestDir: "{app}"
 Source: "extra\setup\Mahogany.url"; DestDir: "{app}"; Components: misc
@@ -78,8 +82,7 @@ Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 
 ; --- python support
 
-; we always need Python DLL as the app wouldn't start without it :-(
-Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"
+Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"; Components: python
 
 Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\MAppBase.py-swig"; DestName: "MAppBase.py"; DestDir: "{app}\Python"; Components: python
