@@ -26,6 +26,8 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+
+   #include "lists.h"
 #endif // USE_PCH
 
 #include "MFolder.h"

@@ -35,6 +35,8 @@
    #include "Threading.h"
 
    #include "Mcclient.h"         // for hash_table
+
+   #include "kbList.h"
 #endif // USE_PCH
 
 #include "HeaderInfo.h"
