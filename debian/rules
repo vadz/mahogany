@@ -8,7 +8,7 @@ build:
 	$(checkdir)
 	autoconf
 	./configure --prefix=/usr
-	make depend
+	make depend || true
 	make doc
 	$(MAKE) all CFLAGS="-O2 -g -Wall"
 # If we are on Debian Slink, we need to build a semistatic binary:
