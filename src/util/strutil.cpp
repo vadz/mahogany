@@ -545,6 +545,44 @@ strutil_enforceCRLF(String const &in)
 }
 
 
+/** Enforces LF '\n' newline convention.
+
+    @param in string to copy
+    @return the UNIXified string
+*/
+String
+strutil_enforceLF(String const &in)
+{
+   String out;
+   size_t cursor = 0;
+   
+   while ( cursor < in.size() )
+   {
+      wxChar one = in[cursor];
+      if ( one != _T('\r') )
+      {
+         out += one;
+         cursor++;
+      }
+      else
+      {
+         out += '\n';
+         if ( cursor + 1 < in.size() )
+         {
+            if ( in[cursor + 1] == '\n' )
+               cursor += 2;
+            else
+               cursor++;
+         }
+         else
+            cursor++;
+      }
+   }
+   
+   return out;
+}
+
+
 String
 strutil_enforceNativeCRLF(String const &in)
 {

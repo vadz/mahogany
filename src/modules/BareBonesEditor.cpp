@@ -23,6 +23,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "strutil.h"
 
    #include <wx/textctrl.h>
    #include <wx/panel.h>
@@ -124,9 +125,6 @@ private:
    wxBareBonesEditorNotebook *m_notebook;
    wxTextCtrl *m_textControl;
    wxListCtrl *m_attachments;
-
-   wxFont m_originalFont;
-   bool m_originalFontValid;
 
    int m_getNextAttachement;
 };
@@ -714,7 +712,6 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 BareBonesEditor::BareBonesEditor()
 {
    m_textControl = NULL;
-   m_originalFontValid = false;
    m_getNextAttachement = -1;
 }
 
@@ -746,6 +743,13 @@ void BareBonesEditor::Create(Composer *composer, wxWindow *parent)
    m_textControl = m_notebook->GetTextControl();
    m_attachments = m_notebook->GetList();
 
+   if ( !GetOptions().m_font.empty() )
+   {
+      wxFont font(GetOptions().GetFont());
+      if ( font.Ok() )
+         m_textControl->SetFont(font);
+   }
+   
    Enable(true);
    Clear();
 }
@@ -852,23 +856,23 @@ void BareBonesEditor::ResetDirty()
 
 void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
 {
-   if(!m_originalFontValid)
-   {
-      m_originalFont = m_textControl->GetFont();
-      m_originalFontValid = true;
-   }
-
+   const wxFont& previous = m_textControl->GetFont();
+#if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
+   wxFont next(previous);
+   next.SetEncoding(encoding);
+#else
    wxFont next(
-      m_originalFont.GetPointSize(),
-      m_originalFont.GetFamily(),
-      wxNORMAL, // Italic off
-      wxNORMAL, // Bold off
-      false, // Underline off
-      m_originalFont.GetFaceName(),
+      previous.GetPointSize(),
+      previous.GetFamily(),
+      previous.GetStyle(),
+      previous.GetWeight(),
+      previous.GetUnderlined(),
+      previous.GetFaceName(),
       encoding
    );
-
-   m_textControl->SetFont(next);
+#endif
+   if ( next.Ok() )
+      m_textControl->SetFont(next);
 }
 
 void BareBonesEditor::MoveCursorTo(unsigned long x, unsigned long y)
@@ -962,7 +966,7 @@ void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
    if(insMode == Insert_Replace)
       m_textControl->Clear();
    m_textControl->Freeze();
-   m_textControl->WriteText(text);
+   m_textControl->WriteText(strutil_enforceLF(text));
    m_textControl->Thaw();
 }
 
@@ -973,7 +977,8 @@ void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
 EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
-   return new EditorContentPart(m_textControl->GetValue());
+   return new EditorContentPart(strutil_enforceCRLF(
+      m_textControl->GetValue()));
 }
 
 EditorContentPart *BareBonesEditor::GetNextPart()

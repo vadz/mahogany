@@ -239,6 +239,14 @@ strutil_compare_filenames(const String& path1, const String& path2);
 String
 strutil_enforceCRLF(String const &in);
 
+/** Enforces LF '\n' newline convention.
+
+    @param in string to copy
+    @return the UNIXified string
+*/
+String
+strutil_enforceLF(String const &in);
+
 /** Enforces native CR/LF newline convention for this platform.
 
     @param in string to copy
