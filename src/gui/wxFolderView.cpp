@@ -492,7 +492,8 @@ wxFolderView::Update(void)
    }
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxSafeYield();
-   focusWindow->SetFocus();
+   if(focusWindow)
+      focusWindow->SetFocus();
    m_UpdateSemaphore = false;
 }
 
