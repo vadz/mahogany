@@ -1337,7 +1337,7 @@ wxString wxMApp::BuildHelpInitString(const wxString& dir)
    wxString helpfile = dir;
 
 #ifdef OS_WIN
-   helpfile += "\\Manual.chm";
+   helpfile += _T("\\Manual.chm");
 #else // !Windows
    if ( !READ_APPCONFIG(MP_HELPBROWSER_KIND) )
    {
