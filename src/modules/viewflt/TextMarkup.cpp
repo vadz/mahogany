@@ -171,6 +171,11 @@ TextMarkupFilter::DoProcess(String& text,
             }
             break;
 
+         case _T('\0'):
+            // do not append an extra NUL to the text, strings with embedded
+            // NULs confuse the code elsewhere
+            break;
+
          default:
             if ( state != Normal )
             {
