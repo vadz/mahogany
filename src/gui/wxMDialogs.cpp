@@ -1171,7 +1171,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
          m_FileName = wxPFileSelector("FolderDialogFile",
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
-                                      wxSAVE | wxOVERWRITE_PROMPT, this);
+                                      wxSAVE, this);
          if ( !!m_FileName )
          {
             // folder (file) chosen
