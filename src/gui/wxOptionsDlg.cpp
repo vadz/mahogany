@@ -1470,8 +1470,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
-                  "save all unsaved information which reduces the risk of loss\n"
-                  "of information"),               Field_Message, -1                     },
+                  "save all unsaved information (settings, contents of the\n"
+                  "opened compose windows, ...) which reduces the risk of loss\n"
+                  "of it in case of a crash"),     Field_Message, -1                     },
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Directory with the help files"), Field_Dir, -1 },
