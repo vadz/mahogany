@@ -508,7 +508,6 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
                   : wxMFrame(_("Mahogany: Message View"), parent)
 {
    m_MessageView = MessageView::Create(this);
-   m_MessageView->SetFolder(asmf);
 
    m_msgCmdProc = MsgCmdProc::Create(m_MessageView);
    m_msgCmdProc->SetFolder(asmf);
@@ -583,6 +582,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
 
    // do it after creating the menu as it access the "Toggle headers" item in
    // it
+   m_MessageView->SetFolder(asmf);
    m_MessageView->ShowMessage(uid);
 
    Show(true);
