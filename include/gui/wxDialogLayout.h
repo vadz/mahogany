@@ -28,6 +28,8 @@ class wxStaticText;
 class wxRadioBox;
 class wxComboBox;
 
+#undef CreateButton
+
 // -----------------------------------------------------------------------------
 // classes
 // -----------------------------------------------------------------------------
@@ -181,6 +183,11 @@ protected:
                               long widthMax,
                               wxControl *last,
                               size_t nRightMargin = 0);
+
+   // a button: the label string is "label:id" where id is the id for the
+   // button
+   wxButton *CreateButton(const wxString& label, wxControl *last);
+
    // if ppButton != NULL, it's filled with the pointer to the ">>" browse
    // button created by this function
    wxTextCtrl *CreateFileEntry(const char *label,

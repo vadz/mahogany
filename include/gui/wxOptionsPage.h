@@ -52,6 +52,7 @@ public:
       Field_Action = 0x0040, // offering the 0,1,2 No,Ask,Yes radiobox
       Field_Combo  = 0x0080, // offering 0,1,2,..n, from a combobox
       Field_Color  = 0x0100, // a text entry with a "Browse for colour" button
+      Field_SubDlg = 0x0200, // a button invoking another dialog
       Field_Type   = 0x0fff  // bit mask selecting the type
    };
 
@@ -129,8 +130,8 @@ protected:
       { return m_aDirtyFlags[n- m_nFirst]; }
 
    // reset the dirty flag for the control with index n
-   bool ClearDirty(size_t n) const
-      { m_aDirtyFlags[n- m_nFirst] = false; }
+   void ClearDirty(size_t n) const
+      { m_aDirtyFlags[n - m_nFirst] = false; }
 
    // type safe access to the control text
    wxString GetControlText(size_t /* ConfigFields */ n) const
@@ -166,6 +167,11 @@ class wxOptionsPageCompose : public wxOptionsPage
 {
 public:
    wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile);
+
+   void OnButton(wxCommandEvent&);
+
+private:
+   DECLARE_EVENT_TABLE()
 };
 
 // settings concerning the message view window

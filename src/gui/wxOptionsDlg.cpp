@@ -20,38 +20,41 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include   "Mcommon.h"
-#   include   "MApplication.h"
-#   include   "Profile.h"
-#   include   "guidef.h"
-#   include   "MHelp.h"
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "guidef.h"
+#  include "MHelp.h"
+
+#  include <wx/checkbox.h>
+#  include <wx/listbox.h>
+#  include <wx/radiobox.h>
+#  include <wx/stattext.h>
+#  include <wx/dynarray.h>
+#  include <wx/stattext.h>
+#  include <wx/textctrl.h>
 #endif
 
-#include   <wx/log.h>
-#include   <wx/imaglist.h>
-#include   <wx/notebook.h>
-#include   <wx/dynarray.h>
-#include   <wx/resource.h>
-#include   <wx/persctrl.h>
-#include   <wx/confbase.h>
-#include   <wx/checkbox.h>
-#include   <wx/listbox.h>
-#include   <wx/radiobox.h>
-#include   <wx/stattext.h>
-#include   <wx/dynarray.h>
-#include   <wx/stattext.h>
-#include   <wx/textctrl.h>
+#include <wx/log.h>
+#include <wx/imaglist.h>
+#include <wx/notebook.h>
+#include <wx/dynarray.h>
+#include <wx/resource.h>
+#include <wx/confbase.h>
 
-#include   "MDialogs.h"
-#include   "Mdefaults.h"
-#include   "Mupgrade.h"
-#include   "Mcallbacks.h"
+#include <wx/persctrl.h>
 
-#include   "gui/wxIconManager.h"
-#include   "gui/wxDialogLayout.h"
-#include   "gui/wxOptionsDlg.h"
-#include   "gui/wxOptionsPage.h"
+#include "MDialogs.h"
+#include "Mdefaults.h"
+#include "Mupgrade.h"
+#include "Mcallbacks.h"
 
+#include "gui/wxIconManager.h"
+#include "gui/wxDialogLayout.h"
+#include "gui/wxOptionsDlg.h"
+#include "gui/wxOptionsPage.h"
+
+#include "HeadersDialogs.h"
 
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
 // is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
@@ -77,11 +80,6 @@ enum ConfigFields
 
    // compose
    ConfigField_ComposeFirst = ConfigField_IdentLast,
-   ConfigField_ToDefault,
-   ConfigField_ShowCC,
-   ConfigField_CCDefault,
-   ConfigField_ShowBCC,
-   ConfigField_BCCDefault,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
@@ -97,7 +95,10 @@ enum ConfigFields
    ConfigField_ComposeViewFontSize,
    ConfigField_CopmposViewFGColour,
    ConfigField_ComposeViewBGColour,
-   ConfigField_ComposeLast = ConfigField_ComposeViewBGColour,
+
+   ConfigField_ComposeHeaders,
+
+   ConfigField_ComposeLast = ConfigField_ComposeHeaders,
 
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
@@ -282,6 +283,11 @@ BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    EVT_TEXT(-1, wxOptionsPage::OnChange)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxOptionsPageCompose, wxOptionsPage)
+   // buttons invoke subdialogs
+   EVT_BUTTON(-1, wxOptionsPageCompose::OnButton)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
    EVT_BUTTON(wxOptionsPage_BtnNew,    wxOptionsPageFolders::OnNewFolder)
    EVT_BUTTON(wxOptionsPage_BtnModify, wxOptionsPageFolders::OnModifyFolder)
@@ -319,12 +325,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
 
    // compose
-   { gettext_noop("&To field default value"),              Field_Text,    -1,                        },
-   { gettext_noop("Show &CC field"),               Field_Bool,    -1,                        },
-   { gettext_noop("CC field &default value"),              Field_Text,    ConfigField_ShowCC         },
-   { gettext_noop("Show &BCC field"),              Field_Bool,    -1,                        },
-   { gettext_noop("BCC field d&efault value"),             Field_Text,    ConfigField_ShowBCC        },
-
    { gettext_noop("Sa&ve sent messages"), Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),   Field_File,    ConfigField_UseOutgoingFolder        },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
@@ -336,24 +336,27 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
    { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
    { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,    -1,                        },
-   { gettext_noop("Font famil&y:default:decorative:roman:script:swiss:modern:teletype"),
-                                                     Field_Combo,  -1},
-   { gettext_noop("Font si&ze"),                   Field_Number,     -1},
+   { gettext_noop("Font famil&y"
+                  ":default:decorative:roman:script:swiss:modern:teletype"),
+                                                   Field_Combo,  -1},
+   { gettext_noop("Font si&ze"),                   Field_Number,   -1},
    { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
    { gettext_noop("Back&ground colour"),           Field_Color,    -1},
 
+   { gettext_noop("Configure &headers..."),        Field_SubDlg,   -1},
+
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
-     Field_Restart, -1,                        },
+                                                   Field_Restart, -1,                        },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
 
 
 #ifdef USE_PYTHON
    // python
-   {gettext_noop("Python is the built-in scripting language which can be\n")
-    gettext_noop("used to extend M's functionality. It is not essential\n")
-    gettext_noop("for the program's normal operation."), Field_Message, -1},
+   { gettext_noop("Python is the built-in scripting language which can be\n")
+     gettext_noop("used to extend M's functionality. It is not essential\n")
+     gettext_noop("for the program's normal operation."), Field_Message, -1},
    { gettext_noop("&Enable Python"),               Field_Bool,    -1,                        },
    { gettext_noop("Python &Path"),                 Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("&Startup script"),              Field_File,    ConfigField_EnablePython   },
@@ -367,17 +370,17 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    // message views:
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
-     Field_Combo,    -1 },
-   { gettext_noop("Font &size"),                   Field_Number, -1 },
-   { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
-   { gettext_noop("Back&ground colour"),           Field_Color,    -1},
+                                                   Field_Combo,   -1 },
+   { gettext_noop("Font &size"),                   Field_Number,  -1 },
+   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
+   { gettext_noop("Back&ground colour"),           Field_Color,   -1},
    { gettext_noop("Colour for &URLs"),             Field_Color,    -1},
-   { gettext_noop("&Inline graphics"),             Field_Bool, -1 },
+   { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
 #ifdef OS_UNIX
-   { gettext_noop("Conversion &graphics format:XPM:PNG:BMP:JPG"), Field_Combo, ConfigField_MessageViewInlineGraphics },
-   { gettext_noop("Support special &fax mailers"), Field_Bool, -1},
-   { gettext_noop("&Domains sending faxes"), Field_Text,
-     ConfigField_MessageViewFaxSupport},
+   { gettext_noop("Conversion &graphics format"
+                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
+   { gettext_noop("Support special &fax mailers"), Field_Bool,    -1},
+   { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
 #endif
 
 
@@ -445,11 +448,13 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_PERSONALNAME),
 
    // compose
+#if 0
    CONFIG_ENTRY(MP_COMPOSE_TO),
    CONFIG_ENTRY(MP_SHOWCC),
    CONFIG_ENTRY(MP_COMPOSE_CC),
    CONFIG_ENTRY(MP_SHOWBCC),
    CONFIG_ENTRY(MP_COMPOSE_BCC),
+#endif
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
@@ -465,6 +470,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
+   CONFIG_NONE(),
 
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
@@ -633,6 +639,10 @@ void wxOptionsPage::CreateControls()
 
       case Field_Message:
          last = CreateMessage(_(ms_aFields[n].label), last);
+         break;
+
+      case Field_SubDlg:
+         last = CreateButton(_(ms_aFields[n].label), last);
          break;
 
       default:
@@ -874,6 +884,7 @@ bool wxOptionsPage::TransferDataToWindow()
             break;
 
          case Field_Message:
+         case Field_SubDlg:      // these settings will be read later
             break;
 
          default:
@@ -890,8 +901,6 @@ bool wxOptionsPage::TransferDataToWindow()
 // write the data to config
 bool wxOptionsPage::TransferDataFromWindow()
 {
-   // TODO should only write the entries which really changed
-
    String strValue;
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
@@ -960,6 +969,7 @@ bool wxOptionsPage::TransferDataFromWindow()
             break;
 
          case Field_Message:
+         case Field_SubDlg:      // already done
             break;
 
          default:
@@ -994,6 +1004,25 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
                                     ConfigField_ComposeLast,
                                     MH_OPAGE_COMPOSE)
 {
+}
+
+void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
+{
+   // FIXME there is only one button for now, but if we had several of them,
+   //       how would we know which one was clicked?
+   wxASSERT_MSG( event.GetEventObject() ==
+                 GetControl(ConfigField_ComposeHeaders), "alien button" );
+
+   // create and show the "outgoing headers" config dialog
+   if ( ConfigureComposeHeaders(m_Profile, this) )
+   {
+      // something changed - make us dirty
+      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+
+      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+
+      dialog->SetDirty();
+   }
 }
 
 // ----------------------------------------------------------------------------

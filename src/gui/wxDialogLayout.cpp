@@ -243,7 +243,6 @@ wxTextCtrl *wxNotebookPageBase::CreateTextWithLabel(const char *label,
    return pText;
 }
 
-
 // create just some text
 wxStaticText *wxNotebookPageBase::CreateMessage(const char *label,
                                                 wxControl *last)
@@ -261,6 +260,31 @@ wxStaticText *wxNotebookPageBase::CreateMessage(const char *label,
    pLabel->SetConstraints(c);
 
    return pLabel;
+}
+
+// create a button
+wxButton *wxNotebookPageBase::CreateButton(const wxString& labelAndId,
+                                           wxControl *last)
+{
+   wxLayoutConstraints *c;
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   SetTopConstraint(c, last);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->height.AsIs();
+
+   // split the label into the real label and the button id
+   wxString label(labelAndId.BeforeFirst(':')),
+            strId(labelAndId.AfterFirst(':'));
+   int id;
+   if ( !strId || !sscanf(strId, "%d", &id) )
+      id = -1;
+
+   wxButton *btn = new wxButton(this, id, label);
+   btn->SetConstraints(c);
+
+   return btn;
 }
 
 // create a checkbox
@@ -481,7 +505,7 @@ void wxNotebookDialog::CreateAllControls()
 
    // FIXME these are more or less arbitrary numbers
    const int wDlg = 6*wBtn;
-   const int hDlg = 31*hBtn;
+   const int hDlg = 27*hBtn;
 
    // create the panel
    // ----------------
