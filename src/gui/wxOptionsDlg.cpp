@@ -2920,6 +2920,10 @@ bool wxOptionsPageOthers::TransferDataToWindow()
 
 bool wxOptionsPageOthers::TransferDataFromWindow()
 {
+   // read the old value before calling the base class TransferDataFromWindow()
+   // whieh may change it
+   wxString logfileOld = READ_CONFIG(m_Profile, MP_LOGFILE);
+
    bool rc = wxOptionsPage::TransferDataFromWindow();
    if ( rc )
    {
@@ -2959,7 +2963,13 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
          mApplication->ShowLog(showLog);
       }
 
-      mApplication->SetLogFile(READ_CONFIG(m_Profile, MP_LOGFILE));
+      // has the logfile value changed?
+      wxString logfileNew = READ_CONFIG(m_Profile, MP_LOGFILE);
+      if ( logfileNew != logfileOld )
+      {
+         // yes, redirect the logging to the new logfile
+         mApplication->SetLogFile(logfileNew);
+      }
    }
 
    return rc;
