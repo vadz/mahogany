@@ -22,27 +22,52 @@ $Id$
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 
-		XFace dialog complains *twice* about non-existing
-		file, test for it!
-
-		MessageView:
+	KB	MessageView:
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
-		properties/access shows wrong help
-		properties/custom headers/more shows corrupted title
+
+	KB	properties/access shows wrong help
+	KB	properties/custom headers/more shows corrupted title
+
 		main window hides about-splash - not nice
+		--> 2nd timer to bring it to top and run wxYield() to
+		    update it?
+
+7		After setting date format and closing date fmt dialog, 
+		main config dialog remains completely disabled under
+		KDE and must be closed with window-close button
+
+9		APPLY button doesn't work and no config change event
+		gets sent anymmmore
+
+9		create folder group demands password and sets server
+		name
+
+9		file browse button for folder creation demands an
+		existing file name -> makes little sense when creating
+		a new folder  
+
+9		Option to set central new mail folder is missing -
+		changing option manually in config file does not work
+
+7	KB	adbframe: unknown icon
+
+6	VZ	Adbframe: when creating new entry, the selection
+		should move to that, so it is displayed and can be
+		filled with data immediately. The current behaviour is
+		unintuitive and confusing. 
+
+6	VZ	Adbframe: When listing addressbooktypes, show native
+		format first.
+
 
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
 
-	KB	msg sorting dialog needs to be higher
-
-9	KB	changing any properties, etc crashes immediately
-		in non-DEBUG for Micky
-
 9	KB	Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
+		-->failure counter in Ping() ?
 
 9	KB	check new mail after startup -- should be done already
 		--> seems problem with first folder listing not
@@ -51,9 +76,6 @@ $Id$
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
 
-5	KB	double click on message header should open message in
-		separate viewer if pref. setting is suitable
-        KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
 4	KB	Nicer icons for some tabs and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
@@ -65,7 +87,6 @@ $Id$
 
 4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
-
 
 		When MailFolderCC is called from wxSubfolderDialog, it 
 		has no username in the IMAP spec. WHY??
@@ -131,7 +152,9 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-		MFrame classname obsolete?
+        KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
+
+MFrame classname obsolete?
 
 9	KB	add xface button to composeview
 
