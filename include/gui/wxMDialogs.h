@@ -38,13 +38,17 @@ class WXDLLEXPORT wxStaticText;
 
 /**
   Flags for MDialog_YesNoDialog()
+
+  NB: M_DLG_DISABLE and M_DLG_NOT_ON_NO must be equal to the corresponding
+      wxPMSBOX_XXX flags
 */
 enum
 {
    M_DLG_YES_DEFAULT = 0,        // default
    M_DLG_NO_DEFAULT  = 0x1000,
    M_DLG_DISABLE     = 0x2000,   // pre-check the "Don't ask again" checkbox
-   M_DLG_NOT_ON_NO   = 0x4000    // don't allow disabling on "No"
+   M_DLG_NOT_ON_NO   = 0x4000,   // don't allow disabling on "No"
+   M_DLG_ALLOW_CANCEL= 0x8000    // add "Cancel" button to MDialog_Message
 };
 
 /**
@@ -162,8 +166,10 @@ void   MDialog_FatalErrorMessage(char const *message,
        @param parent   the parent frame
        @param title   title for message box window
        @param configPath the profile path to use (doesn't use profile if NULL)
+
+       @return TRUE if Ok was pressed, FALSE if Cancel
    */
-void   MDialog_Message(char const *message,
+bool   MDialog_Message(char const *message,
                        const wxWindow *parent = NULL,
                        char const *title = MDIALOG_MSGTITLE,
                        const char *configPath = NULL,
@@ -249,8 +255,10 @@ void MDialog_ShowText(wxWindow *parent,
   @param parent the parent frame
   @param persMsg the profile path to use (doesn't use profile if NULL)
   @param title title for message box window
+
+  @return TRUE if Ok was pressed, FALSE if Cancel
  */
-void MDialog_Message(char const *message,
+bool MDialog_Message(char const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags = 0,

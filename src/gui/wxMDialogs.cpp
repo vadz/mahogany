@@ -733,7 +733,7 @@ MDialog_FatalErrorMessage(const char *message,
        @param title  title for message box window
        @param modal  true to make messagebox modal
    */
-void
+bool
 MDialog_Message(const char *message,
                 const wxWindow *parent,
                 const char *title,
@@ -743,22 +743,28 @@ MDialog_Message(const char *message,
    // if the msg box is disabled, don't make the splash disappear, return
    // immediately
    if ( wxPMessageBoxIsDisabled(configPath) )
-      return;
+      return true;
 
    CloseSplash();
    NoBusyCursor noBC;
 
-   wxPMessageBox
-   (
-      configPath,
-      message,
-      String(M_TITLE_PREFIX) + title,
-      GetMsgBoxStyle(wxOK | wxICON_INFORMATION) | (flags & M_DLG_DISABLE),
-      GetDialogParent(parent)
-   );
+   long style = GetMsgBoxStyle(wxOK | wxICON_INFORMATION);
+   if ( flags & M_DLG_DISABLE )
+      style |= wxPMSGBOX_DISABLE;
+   if ( flags & M_DLG_ALLOW_CANCEL )
+      style |= wxCANCEL;
+
+   return wxPMessageBox
+          (
+            configPath,
+            message,
+            String(M_TITLE_PREFIX) + title,
+            style,
+            GetDialogParent(parent)
+          ) != wxCANCEL;
 }
 
-void MDialog_Message(char const *message,
+bool MDialog_Message(char const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags,
@@ -768,8 +774,8 @@ void MDialog_Message(char const *message,
    if ( persMsg )
       configPath = GetPersMsgBoxName(persMsg);
 
-   MDialog_Message(message, parent, title,
-                   persMsg ? configPath.c_str() : NULL, flags);
+   return MDialog_Message(message, parent, title,
+                          persMsg ? configPath.c_str() : NULL, flags);
 }
 
 MDlgResult MDialog_YesNoCancel(char const *message,
