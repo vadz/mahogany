@@ -13,11 +13,12 @@
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
 
-#   include   "Mdefaults.h"
 #   include   "MApplication.h"
 #   include   "gui/wxMApp.h"
 #   include   "strutil.h"
 #endif
+
+#include   "Mdefaults.h"
 
 #include   "Python.h"
 #include   "PythonHelp.h"
@@ -92,8 +93,7 @@ InitPython(void)
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();
 
-   if(mApplication->GetProfile()->readEntry(MC_USEPYTHON,
-                                            MC_USEPYTHON_D) == false)
+   if( !READ_CONFIG(mApplication->GetProfile(), MC_USEPYTHON) )
       return true; // it is not an error to have it disabled
    
    // initialise the modules

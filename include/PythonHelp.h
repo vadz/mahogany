@@ -82,7 +82,7 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     @param filename just for debugging purposes
 */
 void
-PyH_RunScript(struct FILE *file, const char *filename);
+PyH_RunScript(FILE *file, const char *filename);
 
 
 /// macro to run an expression

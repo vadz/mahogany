@@ -351,7 +351,7 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
 }
 
 void
-PyH_RunScript(struct FILE *file, const char *filename)
+PyH_RunScript(FILE *file, const char *filename)
 {
    // first check if Python is not disabled
    if ( READ_APPCONFIG(MC_USEPYTHON) )
