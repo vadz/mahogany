@@ -1513,7 +1513,12 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
    // finally, notify the user about it
    // ---------------------------------
 
-   ReportNewMail(folder, uidsNew, countNew, mfNew);
+   // we don't notify about the new mail in the folder the user has just opened
+   // himself: he'd see it there anyhow
+   if ( !mf || !mf->GetInteractiveFrame() )
+   {
+      ReportNewMail(folder, uidsNew, countNew, mfNew);
+   }
 
    return true;
 }
@@ -1540,7 +1545,17 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    {
       folderWithNewMail = MFolder::Get(GetName());
 
-      CHECK( folderWithNewMail, false, "ProcessNewMail: no MFolder?" );
+      // this may happen when opening a folder not from tree: for example, we
+      // create a temp folder when viewing the attachments in a message and
+      // then this happens as the (only) message in this temp folder is always
+      // new
+      //
+      // the right thing to do is, of course, to ignore it completely as we
+      // know that we're never going to monitor in the background a folder not
+      // in the tree anyhow (there is no way to configure this neither at the
+      // GUI level nor in FolderMonitor API)
+      if ( !folderWithNewMail )
+         return true;
    }
 
    MFolder_obj folder = folderWithNewMail;
