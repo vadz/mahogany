@@ -13,7 +13,7 @@
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/spam/*.cpp))
 
 ifdef USE_DSPAM
-DSPAM_CPPFLAGS=-DHAVE_CONFIG_H -I../lib/dspam -I../lib/dspam/.src
+DSPAM_CPPFLAGS=-DHAVE_CONFIG_H -DCONFIG_DEFAULT=NULL -I../lib/dspam -I../lib/dspam/.src
 
 ifeq ($(USE_MODULES),static)
 CPPFLAGS_modules_spam_DspamFilter_o := $(DSPAM_CPPFLAGS)
