@@ -7,6 +7,10 @@
 # Created: 21.12.01
 # Version: $Id$
 
+# allow using it without running configure
+#include makeopts
+SOURCEDIR := "../.."
+
 all: dox.complete
 
 # document only non-private non-static members, omit some less useful sections
@@ -23,7 +27,7 @@ dox.diagram:
 
 dox.phony:
 	cd $(SOURCEDIR); \
-	doxygen doxyfile.$(TYPE); \
+	doxygen doc/doxygen/doxyfile.$(TYPE); \
 	echo ""; \
 	echo "The class documentation is available in M-API/html.$(TYPE)/index.html"; \
 	echo ""; \
