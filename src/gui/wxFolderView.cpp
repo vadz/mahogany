@@ -1814,6 +1814,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       wxFontEncoding encoding = hi->GetEncoding();
 
       // optionally convert from UTF-8 to environment's default encoding
+      // FIXME it won't be needed when full Unicode support is available
       if ( encoding == wxFONTENCODING_UTF8 )
       {
          text = wxString(text.wc_str(wxConvUTF8), wxConvLocal);
@@ -1929,6 +1930,13 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    // cache the last used encoding as creating new font is an expensive
    // operation
    wxFontEncoding enc = hi->GetEncoding();
+
+   if ( enc == wxFONTENCODING_UTF8 )
+   {
+      // As we converted text to environment's default encoding above, encoding
+      // is no longer wxFONTENCODING_UTF8, but wxLocale::GetSystemEncoding().
+      enc = wxLocale::GetSystemEncoding();
+   }
 
    if ( enc != wxFONTENCODING_SYSTEM )
    {
