@@ -154,14 +154,22 @@ endif
 	done
 ifdef USE_PYTHON
 	$(INSTALL) -d $(DATADIR)/python
+ifdef SWIG
+	# install the swig-generated files
 	for i in Python/*.py; \
 		do $(INSTALL_DATA) $$i $(DATADIR)/python; \
 	done
+else # !SWIG
+	# install the precompiled files stripping their -swig extension
+	for i in Python/.src/*.py-swig; \
+		do $(INSTALL_DATA) $$i $(DATADIR)/python/`basename $$i -swig`; \
+	done
+endif # SWIG/!SWIG
 	$(INSTALL) -d $(DATADIR)/scripts
 	for i in Python/.src/Scripts/*.py; \
 		do $(INSTALL_DATA) $$i $(DATADIR)/scripts; \
 	done
-endif
+endif # USE_PYTHON
 
 # invoked from locale to build message catalog
 msgcat:
