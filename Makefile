@@ -81,6 +81,12 @@ install_bin:
 	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done
 
+install_strip:
+	$(MAKE) install INSTALL_OPTIONS="-s $(INSTALL_OPTIONS)"
+
+install_bin_strip:
+	$(MAKE) install_bin INSTALL_OPTIONS="-s $(INSTALL_OPTIONS)"
+
 install_locale:
 	$(MAKE) -C locale install
 

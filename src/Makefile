@@ -80,7 +80,7 @@ clean:
 	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
 
 install:
-	$(INSTALL_PROGRAM) -s -m 755 M $(DATADIR)/$(CANONICAL_HOST)/bin
+	$(INSTALL_PROGRAM) $(INSTALL_OPTIONS) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	if test -f libM.so; \
 	then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; \
 	fi
