@@ -364,6 +364,11 @@ MAppBase::OnStartup()
    }
 #endif // DEBUG
 
+   // set the mail debugging flag: as it soon will be possible to open mail
+   // folders and it should be set before IsMailDebuggingEnabled() can be
+   // called
+   m_debugMail = m_cmdLineOptions->debugMail;
+
    // safe mode disables remote calls
    if ( !m_cmdLineOptions->safe )
    {
@@ -470,9 +475,6 @@ MAppBase::OnStartup()
 
       return false;
    }
-
-   // set the mail debugging flag: from now it's possible to open mail folders
-   m_debugMail = m_cmdLineOptions->debugMail;
 
    // extend path for commands, look in M's dirs first
    String pathEnv;
