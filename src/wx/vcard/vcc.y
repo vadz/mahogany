@@ -101,13 +101,8 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 /* give function prototypes to suppress warnings from gcc */
 int yylex();
 
-/* undef below if compile with MFC */
-/* #define INCLUDEMFC 1 */
-
 #if defined(WIN32) || defined(_WIN32)
-#ifdef INCLUDEMFC
-#include <afx.h>
-#endif
+#define snprintf _snprintf
 #endif
 
 #include <string.h>
