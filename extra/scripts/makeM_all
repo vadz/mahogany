@@ -130,7 +130,7 @@ then
   LDFLAGS="$LDFLAGS -L/opt/FSFstdc++/lib -L/opt/lib -L/home/karsten/arch/SunOS/lib"
   CPPFLAGS="-I/opt/include -I/opt/FSFstdc++/include/g++ -I/home/karsten/arch/SunOS/include -I$HOME/opt/include" # -I/scratch/karsten/Python/include/python1.5"
   MAKE="gmake -s"
-  PATH=/usr/ucb:/sbin:/usr/openwin/bin:/usr/bin:/usr/sbin:/opt/bin:/opt/SUNWspro/bin:/opt/hostsA:/usr/ccs/bin:$PATH
+  PATH=/usr/ucb:/sbin:/usr/openwin/bin:/usr/bin:/usr/sbin:/opt/bin:/opt/SUNWspro/bin:/opt/hostsA:/usr/ccs/bin:$PATH:/usr/local/bin
   PATH=$HOME/arch/`uname`/bin:/opt/bin:$PATH
   BISON_SIMPLE=$HOME/arch/SunOS/lib/bison.simple 
   BISON_HAIRY=$HOME/arch/SunOS/lib/bison.hairy 
@@ -147,6 +147,7 @@ then
   OSTYPE_ADDON="-sparc"
   CC=gcc
   CXX=c++
+  SCP=/usr/local/bin/ssh1/scp
 fi
 
 if [ `hostname` = ronnie ]
