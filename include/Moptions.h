@@ -93,7 +93,7 @@ extern const MOption MP_MAINFOLDER;
 extern const MOption MP_PYTHONPATH;
 extern const MOption MP_PYTHONDLL;
 extern const MOption MP_USEPYTHON;
-extern const MOption MP_STARTUPSCRIPT;
+extern const MOption MP_PYTHONMODULE_TO_LOAD;
 extern const MOption MP_SHOWSPLASH;
 extern const MOption MP_SPLASHDELAY;
 extern const MOption MP_AUTOSAVEDELAY;
@@ -589,7 +589,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// is Python enabled (this is a run-time option)?
 #define   MP_USEPYTHON_NAME         _T("UsePython")
 /// start-up script to run
-#define   MP_STARTUPSCRIPT_NAME     _T("StartupScript")
+#define   MP_PYTHONMODULE_TO_LOAD_NAME     _T("StartupScript")
 /// show splash screen on startup?
 #define   MP_SHOWSPLASH_NAME        _T("ShowSplash")
 /// how long should splash screen stay (0 disables timeout)?
@@ -1431,7 +1431,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_USEPYTHON_DEFVAL         1
 #endif
 /// start-up script to run
-#define     MP_STARTUPSCRIPT_DEFVAL   wxEmptyString
+#define     MP_PYTHONMODULE_TO_LOAD_DEFVAL   _T("Minit")
 /// show splash screen on startup?
 #define     MP_SHOWSPLASH_DEFVAL      1
 /// how long should splash screen stay (0 disables timeout)?

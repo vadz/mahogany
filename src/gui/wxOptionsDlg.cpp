@@ -327,7 +327,8 @@ enum ConfigFields
 #endif // USE_PYTHON_DYNAMIC
    ConfigField_PythonPath_Help,
    ConfigField_PythonPath,
-   ConfigField_StartupScript,
+   ConfigField_PythonModuleToLoad_Help,
+   ConfigField_PythonModuleToLoad,
    ConfigField_CallbackHelp,
    ConfigField_CallbackFolderOpen,
    ConfigField_CallbackFolderUpdate,
@@ -1360,7 +1361,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_AppWide, ConfigField_EnablePython   },
    { gettext_noop("Python &path"),                 Field_Text |
                                                    Field_AppWide, ConfigField_EnablePython   },
-   { gettext_noop("&Startup script"),              Field_File |
+   { gettext_noop("Mahogany may load a Python module containing functions\n"
+                  "you use on stratup, you will be able to later refer to these\n"
+                  "functions without \"module.\" part. Also, if this module\n"
+                  "contains a special Init() function, it will be called."),
+                                                   Field_Message |
+                                                   Field_AppWide, ConfigField_EnablePython   },
+   { gettext_noop("Module to load on &startup"),   Field_File |
                                                    Field_AppWide, ConfigField_EnablePython   },
 
    { gettext_noop("You may define below the Python function which will be\n"
@@ -1963,7 +1970,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON_DYNAMIC
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_PYTHONPATH),
-   CONFIG_ENTRY(MP_STARTUPSCRIPT),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_PYTHONMODULE_TO_LOAD),
    CONFIG_NONE(),
    ConfigValueDefault(MCB_FOLDEROPEN, ""),
    ConfigValueDefault(MCB_FOLDERUPDATE, ""),
