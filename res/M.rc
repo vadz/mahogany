@@ -136,7 +136,10 @@ access		BITMAP "access.bmp"
 #ifdef USE_MODULES
 calendar	BITMAP "calendar.bmp"
 #endif
+
+// these shouldn't be there but loaded from modules... (TODO)
 spam		BITMAP "spam.bmp"
+dspam		BITMAP "../lib/dspam/dspam.bmp"
 
 // Folder tree bitmaps (16x16)
 folder_inbox		BITMAP "folder_inbox.bmp"
