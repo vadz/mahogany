@@ -323,7 +323,8 @@ UUDecodeFilter::DoProcess(String& text,
          // Let's get a mimeType from the extention
          wxFileType *fileType = mApplication->GetMimeManager().GetFileTypeFromExtension(fileName.AfterLast('.'));
          String mimeType;
-         if (!fileType->GetMimeType(&mimeType)) {
+         if ( !fileType || !fileType->GetMimeType(&mimeType) )
+         {
             mimeType = _T("APPLICATION/OCTET-STREAM");
          }
          delete fileType;
