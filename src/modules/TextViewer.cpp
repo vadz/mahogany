@@ -236,6 +236,10 @@ void TextViewerWindow::Clear()
 {
    wxTextCtrl::Clear();
 
+   // reset the default style because it could have font with an encoding which
+   // we shouldn't use for the next message we'll show
+   SetDefaultStyle(wxTextAttr());
+
    WX_CLEAR_ARRAY(m_clickables);
 }
 
