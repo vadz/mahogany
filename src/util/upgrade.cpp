@@ -2513,6 +2513,12 @@ bool RetrieveRemoteConfigSettings(void)
    if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
       return TRUE; // nothing to do
 
+   if (! MDialog_YesNoDialog(
+      _("Retrieve remote configuration settings now?"), NULL,
+      _("Retrieve remote settings?"), true,
+            GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
+	return TRUE;
+
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
 
@@ -2603,6 +2609,12 @@ bool SaveRemoteConfigSettings(void)
 {
    if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
       return TRUE; // nothing to do
+
+   if (! MDialog_YesNoDialog(
+      _("Store remote configuration settings now?"), NULL,
+      _("Store remote settings?"), true,
+            GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
+	return TRUE;
 
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
