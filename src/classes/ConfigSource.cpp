@@ -28,17 +28,19 @@
    #include "Mcommon.h"
    #include "Mdefaults.h"
 
-   #include <wx/utils.h>        // for wxGetHomeDir
+   #include <wx/utils.h>               // for wxGetHomeDir
+
+   #include "Profiles.h"               // for M_PROFILE_CONFIG_SECTION
 #endif // USE_PCH
 
 #ifdef  OS_WIN
    #include <wx/msw/regconf.h>
 #else
-   #include <wx/confbase.h>          // for wxConfigBase
+   #include <wx/confbase.h>            // for wxConfigBase
 #endif
 
 #include <wx/dir.h>
-#include <wx/fileconf.h>                // for wxFileConfig
+#include <wx/fileconf.h>               // for wxFileConfig
 
 #ifdef OS_UNIX
    #include <sys/types.h>
@@ -77,6 +79,17 @@ public:
 
 extern const MOption MP_CONFIG_SOURCE_TYPE;
 
+#ifdef OS_WIN
+extern const MOption MP_USE_CONFIG_FILE;
+#endif // OS_WIN
+
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+// the main config source
+static ConfigSource *gs_configSourceGlobal = NULL;
+
 // ============================================================================
 // ConfigSource implementation
 // ============================================================================
@@ -88,7 +101,17 @@ extern const MOption MP_CONFIG_SOURCE_TYPE;
 /* static */ ConfigSource *
 ConfigSource::CreateDefault(const String& filename)
 {
-   return new ConfigSourceLocal(filename);
+   // FIXME-MT
+   if ( !gs_configSourceGlobal )
+   {
+      gs_configSourceGlobal = ConfigSourceLocal::CreateDefault(filename);
+   }
+   else
+   {
+      gs_configSourceGlobal->IncRef();
+   }
+
+   return gs_configSourceGlobal;
 }
 
 /* static */ ConfigSource *
@@ -127,6 +150,50 @@ ConfigSource::Create(const ConfigSource& config, const String& name)
 ConfigSource::~ConfigSource()
 {
    // nothing to do here
+}
+
+/* static */ bool
+ConfigSource::Copy(ConfigSource& configDst,
+                   const ConfigSource& configSrc,
+                   const String& pathDst,
+                   const String& pathSrc)
+{
+   ConfigSource::EnumData cookie;
+   String name;
+
+   const String pathSrcSlash(pathSrc + _T('/')),
+                pathDstSlash(pathDst + _T('/'));
+
+   // first copy all the entries
+   bool cont = configSrc.GetFirstEntry(pathSrc, name, cookie);
+   while ( cont )
+   {
+      // const_cast is ok because we don't copy to ourselves but to a different
+      // configDst
+      if ( !((ConfigSource&)configSrc).CopyEntry(pathSrcSlash + name,
+                                                 pathDstSlash + name,
+                                                 &configDst) )
+      {
+         return false;
+      }
+
+      cont = configSrc.GetNextEntry(name, cookie);
+   }
+
+   // and then (recursively) copy all subgroups
+   cont = configSrc.GetFirstGroup(pathSrc, name, cookie);
+   while ( cont )
+   {
+      if ( !Copy(configDst, configSrc,
+                 pathSrcSlash + name, pathDstSlash + name) )
+      {
+         return false;
+      }
+
+      cont = configSrc.GetNextGroup(name, cookie);
+   }
+
+   return true;
 }
 
 // ============================================================================
@@ -246,9 +313,19 @@ ConfigSourceFactory::Find(const String& type)
 // ConfigSourceLocal creation
 // ----------------------------------------------------------------------------
 
-ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
-                 : ConfigSource(name), m_config(NULL)
+ConfigSourceLocal::ConfigSourceLocal(wxConfigBase *config, const String& name)
+                 : ConfigSource(name)
 {
+   ASSERT_MSG( config, _T("NULL config in ConfigSourceLocal?") );
+
+   m_config = config;
+}
+
+
+ConfigSourceLocal *ConfigSourceLocal::CreateDefault(const String& filename)
+{
+   wxConfigBase *config = NULL;
+
    String localFilePath, globalFilePath;
 
 #ifdef OS_UNIX
@@ -411,25 +488,42 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
    }
 #elif defined(OS_WIN)
    // under Windows we just use the registry if the filename is not specified
-   if ( filename.empty() )
+   localFilePath = filename;
+   if ( localFilePath.empty() )
    {
-      // don't give explicit name, but rather use the default logic (it's
-      // perfectly ok, for the registry case our keys are under vendor\appname)
-      m_config = new wxRegConfig
-                     (
-                        M_APPLICATIONNAME,
-                        M_VENDORNAME,
-                        _T(""),
-                        _T(""),
-                        wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE
-                     );
+      config = CreateRegConfig();
 
-      // skip wxFileConfig creation below
-      return;
+      // one extra complication: the user wants to always want to use config
+      // file instead of the registry, this is indicated by the presence of
+      String key(M_PROFILE_CONFIG_SECTION);
+      key << _T('/') << GetOptionName(MP_USE_CONFIG_FILE);
+      if ( config->Read(key, &localFilePath) )
+      {
+         // we want to use wxFileConfig finally...
+         delete config;
+         config = NULL; // not needed now, but safer if code is changed later
+      }
+      //else: do use wxRegConfig created above
    }
 #else  // !Windows, !Unix
    #error "Don't know default config file location for this platform"
 #endif // OS
+
+   if ( !config )
+   {
+      config = CreateFileConfig(localFilePath, globalFilePath);
+   }
+
+   return new ConfigSourceLocal(config, _T(""));
+}
+
+/* static */
+wxConfigBase *
+ConfigSourceLocal::CreateFileConfig(const String& localFilePath,
+                                    const String& globalFilePath)
+{
+   ASSERT_MSG( !localFilePath.empty(),
+               _T("invalid file path in CreateFileConfig") );
 
    wxFileConfig *fileconf = new wxFileConfig
                                 (
@@ -446,13 +540,40 @@ ConfigSourceLocal::ConfigSourceLocal(const String& filename, const String& name)
    // among other things, the passwords
    fileconf->SetUmask(0077);
 
-   m_config = fileconf;
+   return fileconf;
 }
+
+
+#ifdef OS_WIN
+
+/* static */
+wxConfigBase *
+ConfigSourceLocal::CreateRegConfig()
+{
+   // don't give explicit name, but rather use the default logic (it's
+   // perfectly ok, for the registry case our keys are under vendor\appname)
+   return new wxRegConfig
+              (
+                  M_APPLICATIONNAME,
+                  M_VENDORNAME,
+                  _T(""),
+                  _T(""),
+                  wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE
+              );
+}
+
+#endif // OS_WIN
 
 ConfigSourceLocal::~ConfigSourceLocal()
 {
-   // don't try to recreate us
-   wxConfig::Set(NULL);
+   if ( this == gs_configSourceGlobal )
+   {
+      gs_configSourceGlobal = NULL;
+
+      // we must have been set as global wxConfig object too, don't try to
+      // recreate it any more now
+      wxConfig::Set(NULL);
+   }
 
    delete m_config;
 }
@@ -558,8 +679,13 @@ bool ConfigSourceLocal::DeleteGroup(const String& name)
    return m_config->DeleteGroup(name);
 }
 
-bool ConfigSourceLocal::CopyEntry(const String& nameSrc, const String& nameDst)
+bool
+ConfigSourceLocal::CopyEntry(const String& nameSrc,
+                             const String& nameDst,
+                             ConfigSource *configDstOrig)
 {
+   ConfigSource *configDst = configDstOrig ? configDstOrig : this;
+
    bool rc = true;
 
    if ( m_config->HasEntry(nameSrc) )
@@ -581,9 +707,9 @@ bool ConfigSourceLocal::CopyEntry(const String& nameSrc, const String& nameDst)
                {
                   long l;
                   if ( val.ToLong(&l) )
-                     rc = m_config->Write(nameDst, l);
+                     rc = configDst->Write(nameDst, l);
                   else
-                     rc = m_config->Write(nameDst, val);
+                     rc = configDst->Write(nameDst, val);
                }
             }
             break;
@@ -591,7 +717,7 @@ bool ConfigSourceLocal::CopyEntry(const String& nameSrc, const String& nameDst)
          case wxConfigBase::Type_Integer:
             {
                long l;
-               rc = m_config->Read(nameSrc, &l) && m_config->Write(nameDst, l);
+               rc = m_config->Read(nameSrc, &l) && configDst->Write(nameDst, l);
             }
             break;
       }
@@ -621,7 +747,7 @@ ConfigSourceLocalFactory::Create(const ConfigSource& config, const String& name)
       return NULL;
    }
 
-   ConfigSource *configNew = new ConfigSourceLocal(filename, name);
+   ConfigSource *configNew = ConfigSourceLocal::CreateFile(filename, name);
    if ( !configNew->IsOk() )
    {
       configNew->DecRef();

@@ -100,6 +100,7 @@ public:
       file at all) under Windows.
 
       @param filename the name of config file or empty
+      @param default config source to be DecRef()d by caller or NULL
     */
    static ConfigSource *CreateDefault(const String& filename);
 
@@ -111,10 +112,30 @@ public:
 
       @param config the config containing the parameters
       @param name its section name, without the trailing slash
+      @param new config source to be DecRef()d by caller or NULL
     */
    static ConfigSource *Create(const ConfigSource& config, const String& name);
 
    //@}
+
+
+   /**
+      Copy contents of one config source to another.
+
+      By default this function copies everything from the source config to the
+      destination one, irrecoverably overwriting the old contents of the
+      destination.
+
+      @param configDst where to copy
+      @param configSrc what to copy
+      @param pathDst path under which we write in configDst (root by default)
+      @param pathSrc path where we start from in configSrc (root by default)
+      @return true if copy was successful, false otherwise
+    */
+   static bool Copy(ConfigSource& configDst,
+                    const ConfigSource& configSrc,
+                    const String& pathDst = _T(""),
+                    const String& pathSrc = _T(""));
 
 
    /**
@@ -265,8 +286,14 @@ public:
 
    /**
       Copy the given entry (maybe to another group).
+
+      @param nameSrc the full name of the entry to copy
+      @param nameDst the full name to copy to (possibly in configDst)
+      @param configDst config object to copy to, if NULL, same as this one
     */
-   virtual bool CopyEntry(const String& nameSrc, const String& nameDst) = 0;
+   virtual bool CopyEntry(const String& nameSrc,
+                          const String& nameDst,
+                          ConfigSource *configDst = NULL) = 0;
 
    /**
       Rename a group.
@@ -292,6 +319,7 @@ private:
    const String m_name;
 };
 
+DECLARE_AUTOPTR(ConfigSource);
 
 /**
    ConfigSourceLocal uses wxConfig to implement ConfigSource.
@@ -305,16 +333,42 @@ class ConfigSourceLocal : public ConfigSource
 {
 public:
    /**
+      Create the default local config.
+
+      @sa ConfigSource::CreateDefault
+
+      @param filename the name of config file or empty to use the default one
+    */
+   static ConfigSourceLocal *CreateDefault(const String& filename = _T(""));
+
+   /**
+      Create the config source associated with the given file.
+
+      Unlike CreateDefault() above, this method never uses registry. Also, the
+      file name must not be empty here.
+    */
+   static ConfigSourceLocal *CreateFile(const String& filename,
+                                 const String& name = _T(""))
+      { return new ConfigSourceLocal(CreateFileConfig(filename), name); }
+
+#ifdef OS_WIN
+   /**
+      Create the registry config source.
+
+      This shouldn't be normally used explicitly, use CreateDefault() instead.
+    */
+   static ConfigSourceLocal *CreateRegistry()
+      { return new ConfigSourceLocal(CreateRegConfig(), _T("")); }
+#endif // OS_WIN
+
+
+   /**
       Create a local config source.
 
-      If the filename parameter is empty, the default location is used.
-
-      @sa ConfigSource::CreateDefault()
-
-      @param filename the name of config file or empty
+      @param config wxConfig object this config source is associated with
       @param name the name for the ConfigSource object
     */
-   ConfigSourceLocal(const String& filename, const String& name = _T(""));
+   ConfigSourceLocal(wxConfigBase *config, const String& name);
    virtual ~ConfigSourceLocal();
 
    // implement base class pure virtuals
@@ -335,13 +389,25 @@ public:
    virtual bool HasEntry(const String& path) const;
    virtual bool DeleteEntry(const String& name);
    virtual bool DeleteGroup(const String& name);
-   virtual bool CopyEntry(const String& nameSrc, const String& nameDst);
+   virtual bool CopyEntry(const String& nameSrc,
+                          const String& nameDst,
+                          ConfigSource *configDst);
    virtual bool RenameGroup(const String& nameOld, const String& nameNew);
 
    // for internal use by ProfileImpl only, don't use elsewhere
    wxConfigBase *GetConfig() const { return m_config; }
 
 private:
+#ifdef OS_WIN
+   // create wxRegConfig we use under Windows
+   static wxConfigBase *CreateRegConfig();
+#endif // OS_WIN
+
+   // create wxFileConfig
+   static wxConfigBase *CreateFileConfig(const String& fnameLocal,
+                                         const String& fnameGlobal = _T(""));
+
+
    // the config object we use
    wxConfigBase *m_config;
 };
