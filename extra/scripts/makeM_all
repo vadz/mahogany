@@ -141,7 +141,6 @@ export DESTDIR
 USESTABLE=no
 
 FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
-LIBMALLOCATION="ballueder@mahogany.sourceforge.net:FTP/Libraries/libmal.tar.gz"
 WWWDOCLOCATION="ballueder@mahogany.sourceforge.net:WWW/doc/"
 WXCVSROOT=":pserver:anonymous@cvs.wxwindows.sourceforge.net:/cvsroot/wxwindows"
 MCVSROOT=":pserver:anonymous@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
@@ -505,7 +504,7 @@ else # build from cvs
   then
     echo "$NAME-$VERSION directory does not exist. Doing fresh checkout. $MTAG"
     rm -rf M
-    (HOME=$REALHOME; $CVS -d "$MCVSROOT" -q checkout $MTAG M 2>&1) && \
+    (HOME=$REALHOME; $CVS -d "$MCVSROOT" -q checkout $MTAG M libmal 2>&1) && \
     mv M $NAME-$VERSION
   else
     echo "Updating Mahogany sources. $MTAG"
@@ -517,15 +516,6 @@ else # build from cvs
     exit 2
   fi
 fi
-
-# get libmal to be able to build AvantGO/MAL support
-
-echo "Copying libmal.tar.gz to $BUILDDIR/$NAME-$VERSION/extra/src"
-  rm -f $BUILDDIR/$NAME-$VERSION/extra/src/libmal.tar.gz
-  $SCP $LIBMALLOCATION $BUILDDIR/$NAME-$VERSION/extra/src/libmal.tar.gz && \
-  (cd $BUILDDIR/$NAME-$VERSION/extra/src && \
-   gzip -d -f libmal.tar.gz && tar xf libmal.tar && \
-   rm libmal.tar* )
 
 PATH="/sbin:/usr/sbin:$PATH:$WXPREFIX/bin"
 export PATH
