@@ -1,0 +1,93 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   adb/AdbDataProvider.h - data provider public interface
+// Purpose:     a data provider is a class which creates/deletes the address
+//              books of given type
+// Author:      Vadim Zeitlin
+// Modified by: 
+// Created:     09.08.98
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef   _ADBDATAPROVIDER_H
+#define   _ADBDATAPROVIDER_H
+
+#include "MObject.h"    // the base class declaration
+
+// forward declaration for classes we use
+class wxArrayString;
+
+/**
+  The object of this class are created by AdbManager when it need to manipulate
+  the address books. As there can be an arbitrary number of (simultaneously
+  used) implementations of AdbDataProvider, there is a special mechanism for
+  creation of objects of this class: in declaration of each AdbDataProvider
+  derived class the macro DECLARE_ADB_PROVIDER() should be used and the macro
+  IMPLEMENET_ADB_PROVIDER() must be put in the implementation file. These
+  macros add the static object describing this provider to the linked list of
+  all data providers managed by AdbManager.
+
+  This class derives from MObject and uses reference counting, see the comments
+  in MObject.h for more details about it.
+*/
+
+class AdbDataProvider : public MObject
+{
+public:
+  typedef AdbDataProvider *(*Constructor)();
+
+  enum AdbNameFormat
+  {
+    Name_No,      // this provider supports only one address book
+    Name_File,    // address books are files (the most common case)
+    Name_String   // anything else
+  };
+    
+  // list holding descriptions of all data providers
+  static struct AdbProviderInfo
+  {
+    const char *szName;     // internal name
+
+    bool bSupportsCreation;   // do we support creating new address books?
+    AdbNameFormat nameFormat; // to know what ask the user for...
+    const char *szFmtName;    // NB: this name is shown to the user
+
+    Constructor CreateProvider;
+        
+    AdbProviderInfo *pNext;
+
+    AdbProviderInfo(const char *name, Constructor ctor,
+                    bool canCreate, const char *formatName,
+                    AdbNameFormat adbFormat);
+  } *ms_listProviders;
+
+  // create the book by "name" (in fact, it can be anything at all: a file name
+  // or an URL or ...); if the book doesn't exist it's created and NULL is
+  // returned if the function fails.
+  virtual AdbBook *CreateBook(const String& name) = 0;
+
+  // enumerate all books known to this provider; may be unsupported in which
+  // case it just returns FALSE, otherwise it fills the array passed in with
+  // the names of all known address books
+  virtual bool EnumBooks(wxArrayString& aNames) = 0;
+
+  // delete the physical support of the book (i.e. the file in the most common
+  // case); if not supported (can't delete www.yahoo.com...) just return FALSE
+  virtual bool DeleteBook(AdbBook *book) = 0;
+
+  // this function is only for file-based data providers, all the others should
+  // return FALSE here. TRUE means that the file is in our format
+  virtual bool IsSupportedFormat(const String& name) = 0;
+};
+
+/// dynamic object creation helpers
+#define DECLARE_ADB_PROVIDER(name)    static AdbProviderInfo ms_info
+#define IMPLEMENET_ADB_PROVIDER(name, bCanCreate, userName, fmt)              \
+  AdbDataProvider *ConstructorFor##name() { return new name; }                \
+  AdbDataProvider::AdbProviderInfo name::ms_info(#name, ConstructorFor##name, \
+                                                 bCanCreate, userName,        \
+                                                 AdbDataProvider::fmt)
+
+#endif  //_ADBDATAPROVIDER_H
