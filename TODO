@@ -14,6 +14,7 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+
 - retrieve messages starting from last one
 - folderview listctrl has extra Subject column behind Size field ???
 - reimplement some form of IsDirty() / HasBeenModified() for
@@ -72,7 +73,6 @@ $Id$
 - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
- - wxLayout: UNDERGOING REWRITE
  
 - save and restore printer settings in profile
  - M takes ages to send a message
@@ -344,12 +344,15 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
- - ReplyTo flag should work now
- - Fix occacions "Sequence invalid" (when marking/replying message)
+ - wxLayout:
+   + clicking before begin of line (wrongly) gives assert
+  
 
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+- ReplyTo flag should work now
+- Fix occacions "Sequence invalid" (when marking/replying message)
 -  new mail dialog getting stuck?
 - sometimes M is very slow sending a message, why? (was server)
 - fix status flag indicators (N/U seem to be wrong)

@@ -1281,7 +1281,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos, wxPoint *cursorPos)
    if(line == NULL) return NULL; // not found
    if(cursorPos) cursorPos->y = line->GetLineNumber();
    // Now, find the object in the line:
-   wxLOiterator i = line->FindObjectScreen(dc, pos.x, & cursorPos->x);
+   wxLOiterator i = line->FindObjectScreen(dc, pos.x < 0 ? 0 : pos.x, & cursorPos->x);
    return (i == NULLIT) ? NULL : *i;
    
 }
