@@ -86,7 +86,7 @@ M4	:= @M4@
 #INSTALL_DATA	:= @INSTALL_DATA@
 INSTALL	:= $(BUILDDIR)/extra/scripts/install-sh -c
 INSTALL_PROGRAM	:= $(INSTALL) -s
-INSTALL_DATA	:= $(INSTALL) -c
+INSTALL_DATA	:= $(INSTALL) -c -m r
 
 DESTDIR = @prefix@
 # Directory in which to install scripts.
