@@ -386,9 +386,9 @@ void TextViewer::Create(MessageView *msgView, wxWindow *parent)
 
 void TextViewer::Clear()
 {
-   m_window->Freeze();
-
    m_window->Clear();
+
+   m_window->Freeze();
 
    const ProfileValues& profileValues = GetOptions();
 
