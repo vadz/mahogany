@@ -62,8 +62,7 @@ DOWNLOAD
 NEXT 
 ===================================================================== 
 
-We have another release planned for the beginning of June. For this we
-are currently working on the following:
+For the next release we are currently working on the following:
 
      completion of filtering rules/scoring code 
      subscription management for NNTP/IMAP/newsspool 
