@@ -907,7 +907,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
             needsServer = true;
          }
 
-         // NNTP may have authentification, but it is an advanced setting, don't
+         // NNTP may have authentication, but it is an advanced setting, don't
          // present it here
          needsUserId = false;
          needsPath = true;

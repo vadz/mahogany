@@ -259,7 +259,7 @@ inline bool FolderTypeHasServer(MFolderType type)
 {
    // currently it's the same as FolderTypeHasUserName(), but it's not
    // impossible that there are some protocols which don't have
-   // authentification, yet may have the server name associated with them -
+   // authentication, yet may have the server name associated with them -
    // this will have to be changed then
    return FolderTypeHasUserName(type);
 }

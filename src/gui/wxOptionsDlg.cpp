@@ -904,7 +904,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "informational purposes and so you may give them any\n"
                   "values at all or even leave them empty, while the\n"
                   "user name is used as the default login for the servers\n"
-                  "which require authentification and should be set to\n"
+                  "which require authentication and should be set to\n"
                   "the value they expect."),       Field_Message, -1 },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("&Organization"),                Field_Text,    -1,                        },
@@ -928,7 +928,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("And add personal &name if needed"), Field_Bool | Field_Advanced, ConfigField_SetFromFromTo },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
-      "to all outoing messages. In this case you will need to specify\n"
+      "to all outgoing messages. In this case you will need to specify\n"
       "a file containing it.\n"
       "Notice that such file can be created by exporting an address\n"
       "book entry in the vCard format."), Field_Message, -1 },
@@ -996,7 +996,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 
    { gettext_noop("\n"
-                  "If you use SMTP authentification, you may also\n"
+                  "If you use SMTP authentication, you may also\n"
                   "have to specify a \"Sender:\" header.\n"
                   "Mahogany tries to guess it, but if it doesn't work\n"
                   "you can try to override it."),  Field_Message, ConfigField_MailServerLogin },
@@ -1004,9 +1004,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 
    { gettext_noop("\n"
-                  "Final complication with SMTP authentification is that\n"
+                  "Final complication with SMTP authentication is that\n"
                   "some servers (notably qmail and Exim 3) advertise the\n"
-                  "authentification mechanisms which they don't support.\n"
+                  "authentication mechanisms which they don't support.\n"
                   "To use such broken servers you need to explicitly disable\n"
                   "the incorrectly implemented methods by entering them below\n"
                   "(you may enter \"PLAIN\" or \"PLAIN;CRAM-MD5\", for example)"),
@@ -1498,7 +1498,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Font si&ze"),                   Field_Number,  -1},
 #endif // USE_FONT_DESC/!USE_FONT_DESC
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
-   { gettext_noop("&Backgroud colour"),            Field_Color,   -1},
+   { gettext_noop("&Background colour"),            Field_Color,   -1},
    { gettext_noop("Colour for &new message"),      Field_Color,   -1},
    { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
    { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
@@ -1522,7 +1522,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "quickly browse through the list of messages without\n"
                   "waiting for them to be previewed. Set it to 0 to disable\n"
                   "this feature."),                Field_Message | Field_Advanced, -1 },
-   { gettext_noop("Delay in miliseconds"),        Field_Number | Field_Advanced, -1 },
+   { gettext_noop("Delay in milliseconds"),        Field_Number | Field_Advanced, -1 },
    { gettext_noop("You can choose to show the information about\n"
                   "the currently selected message in the status bar.\n"
                   "You can use the same macros as in the template\n"

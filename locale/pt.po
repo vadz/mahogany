@@ -8021,7 +8021,7 @@ msgid ""
 "informational purposes and so you may give them any\n"
 "values at all or even leave them empty, while the\n"
 "user name is used as the default login for the servers\n"
-"which require authentification and should be set to\n"
+"which require authentication and should be set to\n"
 "the value they expect."
 msgstr ""
 
@@ -8080,7 +8080,7 @@ msgstr ""
 #: gui/wxOptionsDlg.cpp:931
 msgid ""
 "You may want to attach your personal information card (vCard)\n"
-"to all outoing messages. In this case you will need to specify\n"
+"to all outgoing messages. In this case you will need to specify\n"
 "a file containing it.\n"
 "Notice that such file can be created by exporting an address\n"
 "book entry in the vCard format."
@@ -8188,7 +8188,7 @@ msgstr "Senha para o servidor NNTP"
 #: gui/wxOptionsDlg.cpp:999
 msgid ""
 "\n"
-"If you use SMTP authentification, you may also\n"
+"If you use SMTP authentication, you may also\n"
 "have to specify a \"Sender:\" header.\n"
 "Mahogany tries to guess it, but if it doesn't work\n"
 "you can try to override it."
@@ -8207,9 +8207,9 @@ msgstr "Cabeçalho do remetente SMTP"
 #: gui/wxOptionsDlg.cpp:1007
 msgid ""
 "\n"
-"Final complication with SMTP authentification is that\n"
+"Final complication with SMTP authentication is that\n"
 "some servers (notably qmail and Exim 3) advertise the\n"
-"authentification mechanisms which they don't support.\n"
+"authentication mechanisms which they don't support.\n"
 "To use such broken servers you need to explicitly disable\n"
 "the incorrectly implemented methods by entering them below\n"
 "(you may enter \"PLAIN\" or \"PLAIN;CRAM-MD5\", for example)"
@@ -9154,7 +9154,7 @@ msgstr "Mostrar \"Para\" "
 
 #: gui/wxOptionsDlg.cpp:1486
 #, fuzzy
-msgid "&Backgroud colour"
+msgid "&Background colour"
 msgstr "Cor de segundo plano"
 
 #: gui/wxOptionsDlg.cpp:1487
@@ -9216,7 +9216,7 @@ msgid ""
 msgstr ""
 
 #: gui/wxOptionsDlg.cpp:1510
-msgid "Delay in miliseconds"
+msgid "Delay in milliseconds"
 msgstr ""
 
 #: gui/wxOptionsDlg.cpp:1511
@@ -11246,7 +11246,7 @@ msgstr "Guardando %d mensagens no ficheiro '%s'..."
 
 #: mail/MailFolderCmn.cpp:759
 #, fuzzy
-msgid "Failed to get the text of the mesage to save."
+msgid "Failed to get the text of the message to save."
 msgstr "Não foi possível mostrar o texto não formatado da mensagem."
 
 #: mail/MailFolderCmn.cpp:785
@@ -13189,7 +13189,7 @@ msgstr "Tentando carregar '%s' e '%s'..."
 #: util/ssl.cpp:236
 #, fuzzy, c-format
 msgid ""
-"Successfully loaded '%s' and '%s' - SSL authentification is now available."
+"Successfully loaded '%s' and '%s' - SSL authentication is now available."
 msgstr "Autenticação SSL não está desponível."
 
 #: util/ssl.cpp:248
@@ -13205,7 +13205,7 @@ msgid ""
 msgstr ""
 
 #: util/ssl.cpp:292
-msgid "This version of the program doesn't support SSL authentification."
+msgid "This version of the program doesn't support SSL authentication."
 msgstr ""
 
 #: util/strutil.cpp:731
@@ -13359,7 +13359,7 @@ msgstr "Por favor escreva um endereço de correio electrónico válido."
 #: util/upgrade.cpp:1019
 msgid ""
 "You need an IMAP4 (preferred) or a POP3 server\n"
-"to be able to receieve email and an SMTP server\n"
+"to be able to receive email and an SMTP server\n"
 "to be able to send it.\n"
 "\n"
 "All of these fields may be filled later as well\n"

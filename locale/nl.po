@@ -9233,7 +9233,7 @@ msgid ""
 "informational purposes and so you may give them any\n"
 "values at all or even leave them empty, while the\n"
 "user name is used as the default login for the servers\n"
-"which require authentification and should be set to\n"
+"which require authentication and should be set to\n"
 "the value they expect."
 msgstr ""
 
@@ -9304,7 +9304,7 @@ msgstr ""
 #: gui/wxOptionsDlg.cpp:931
 msgid ""
 "You may want to attach your personal information card (vCard)\n"
-"to all outoing messages. In this case you will need to specify\n"
+"to all outgoing messages. In this case you will need to specify\n"
 "a file containing it.\n"
 "Notice that such file can be created by exporting an address\n"
 "book entry in the vCard format."
@@ -9413,7 +9413,7 @@ msgstr "&NNTP server:"
 #: gui/wxOptionsDlg.cpp:999
 msgid ""
 "\n"
-"If you use SMTP authentification, you may also\n"
+"If you use SMTP authentication, you may also\n"
 "have to specify a \"Sender:\" header.\n"
 "Mahogany tries to guess it, but if it doesn't work\n"
 "you can try to override it."
@@ -9432,9 +9432,9 @@ msgstr "&SMTP server: "
 #: gui/wxOptionsDlg.cpp:1007
 msgid ""
 "\n"
-"Final complication with SMTP authentification is that\n"
+"Final complication with SMTP authentication is that\n"
 "some servers (notably qmail and Exim 3) advertise the\n"
-"authentification mechanisms which they don't support.\n"
+"authentication mechanisms which they don't support.\n"
 "To use such broken servers you need to explicitly disable\n"
 "the incorrectly implemented methods by entering them below\n"
 "(you may enter \"PLAIN\" or \"PLAIN;CRAM-MD5\", for example)"
@@ -10464,7 +10464,7 @@ msgstr ""
 # wxOptionsDlg.cpp:475 wxOptionsDlg.cpp:520 wxOptionsDlg.cpp:536
 #: gui/wxOptionsDlg.cpp:1486
 #, fuzzy
-msgid "&Backgroud colour"
+msgid "&Background colour"
 msgstr "Achter&grondkleur"
 
 # wxMenuDefs.cpp:93
@@ -10536,7 +10536,7 @@ msgid ""
 msgstr ""
 
 #: gui/wxOptionsDlg.cpp:1510
-msgid "Delay in miliseconds"
+msgid "Delay in milliseconds"
 msgstr ""
 
 #: gui/wxOptionsDlg.cpp:1511
@@ -12751,7 +12751,7 @@ msgstr "Bewaren van %d berichten..."
 # wxMessageView.cpp:1343
 #: mail/MailFolderCmn.cpp:759
 #, fuzzy
-msgid "Failed to get the text of the mesage to save."
+msgid "Failed to get the text of the message to save."
 msgstr "Kon de ruwe tekst van het bericht niet openen."
 
 #: mail/MailFolderCmn.cpp:785
@@ -15011,7 +15011,7 @@ msgstr "Onmogelijk om MH map '%s' te maken."
 #: util/ssl.cpp:236
 #, fuzzy, c-format
 msgid ""
-"Successfully loaded '%s' and '%s' - SSL authentification is now available."
+"Successfully loaded '%s' and '%s' - SSL authentication is now available."
 msgstr "Sorry, ondersteuning voor MH mappen is uitgezet."
 
 # MailFolderCC.cpp:1748
@@ -15029,7 +15029,7 @@ msgid ""
 msgstr ""
 
 #: util/ssl.cpp:292
-msgid "This version of the program doesn't support SSL authentification."
+msgid "This version of the program doesn't support SSL authentication."
 msgstr ""
 
 #: util/strutil.cpp:731
@@ -15217,7 +15217,7 @@ msgstr "Geef de bestandsnaam!"
 #, fuzzy
 msgid ""
 "You need an IMAP4 (preferred) or a POP3 server\n"
-"to be able to receieve email and an SMTP server\n"
+"to be able to receive email and an SMTP server\n"
 "to be able to send it.\n"
 "\n"
 "All of these fields may be filled later as well\n"

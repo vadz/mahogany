@@ -7832,15 +7832,13 @@ msgstr "%lu Nachricht(en) kopiert."
 msgid "Settings for identity '%s'"
 msgstr "Einstellungen für Identität '%s'"
 
-# origbug (report 3.2.03)
-# authentication
 #: gui/wxOptionsDlg.cpp:903
 msgid ""
 "Your personal name and organization are used only for\n"
 "informational purposes and so you may give them any\n"
 "values at all or even leave them empty, while the\n"
 "user name is used as the default login for the servers\n"
-"which require authentification and should be set to\n"
+"which require authentication and should be set to\n"
 "the value they expect."
 msgstr ""
 "Ihr Name und die Organisation werden nur für informelle Zwecke\n"
@@ -7902,12 +7900,10 @@ msgstr "\"From\"-Kopfzeile vom \"To\" Feld setzten"
 msgid "And add personal &name if needed"
 msgstr "Und ggf. einen persönlichen Namen hinzufügen"
 
-# origbug (report 3.2.03)
-# out_g_oing
 #: gui/wxOptionsDlg.cpp:930
 msgid ""
 "You may want to attach your personal information card (vCard)\n"
-"to all outoing messages. In this case you will need to specify\n"
+"to all outgoing messages. In this case you will need to specify\n"
 "a file containing it.\n"
 "Notice that such file can be created by exporting an address\n"
 "book entry in the vCard format."
@@ -8019,7 +8015,7 @@ msgstr "NNTP-Server P&asswort"
 #: gui/wxOptionsDlg.cpp:998
 msgid ""
 "\n"
-"If you use SMTP authentification, you may also\n"
+"If you use SMTP authentication, you may also\n"
 "have to specify a \"Sender:\" header.\n"
 "Mahogany tries to guess it, but if it doesn't work\n"
 "you can try to override it."
@@ -8043,9 +8039,9 @@ msgstr "Kopfzeile &SMTP Server:"
 #: gui/wxOptionsDlg.cpp:1006
 msgid ""
 "\n"
-"Final complication with SMTP authentification is that\n"
+"Final complication with SMTP authentication is that\n"
 "some servers (notably qmail and Exim 3) advertise the\n"
-"authentification mechanisms which they don't support.\n"
+"authentication mechanisms which they don't support.\n"
 "To use such broken servers you need to explicitly disable\n"
 "the incorrectly implemented methods by entering them below\n"
 "(you may enter \"PLAIN\" or \"PLAIN;CRAM-MD5\", for example)"
@@ -9096,10 +9092,8 @@ msgstr "Nur Namen der Absender anzeigen, nicht die &E-Mail-Adresse"
 msgid "Show \"&To\" for messages from oneself"
 msgstr "Für selbst gesendete Nachrichten \"An:\" anzeigen"
 
-# origbug (report 3.2.03)
-# backgrou_n_d
 #: gui/wxOptionsDlg.cpp:1502
-msgid "&Backgroud colour"
+msgid "&Background colour"
 msgstr "&Hintergrund-Farbe"
 
 #: gui/wxOptionsDlg.cpp:1503
@@ -9165,10 +9159,8 @@ msgstr ""
 "Nachrichten zu überfliegen, ohne auf die Vorschau zu warten. \n"
 "Setzen Sie den Wert auf 0, um dies abzuschalten."
 
-# origbug (report 3.2.03)
-# mil_l_iseconds
 #: gui/wxOptionsDlg.cpp:1526
-msgid "Delay in miliseconds"
+msgid "Delay in milliseconds"
 msgstr "Verzögerung in Millisekunden"
 
 #: gui/wxOptionsDlg.cpp:1527
@@ -11010,10 +11002,8 @@ msgstr "Konnte bestehende Datei nicht verkürzen."
 msgid "Saving %d messages to the file '%s'..."
 msgstr "Speichere %d Nachrichten in die Datei '%s'..."
 
-# origbug (report 3.2.03)
-# mes_s_age
 #: mail/MailFolderCmn.cpp:759
-msgid "Failed to get the text of the mesage to save."
+msgid "Failed to get the text of the message to save."
 msgstr "Konnte den Text der Nachricht nicht zum Speichern erhalten."
 
 #: mail/MailFolderCmn.cpp:785
@@ -13011,11 +13001,9 @@ msgstr "Kann keine Farbe mit Namen '%s' finden, verwende Voreinstellung. (Bitte 
 msgid "Trying to load SSL libraries '%s' and '%s'..."
 msgstr "Versuche die SSL-Bibliotheken '%s' und '%s' zu laden..."
 
-# origbug (report 3.2.03)
-# authentication
 #: util/ssl.cpp:236
 #, c-format
-msgid "Successfully loaded '%s' and '%s' - SSL authentification is now available."
+msgid "Successfully loaded '%s' and '%s' - SSL authentication is now available."
 msgstr "Erfolgreich geladen: '%s' und '%s' - SSL Authentifizierung ist jetzt verfügbar."
 
 #: util/ssl.cpp:248
@@ -13033,7 +13021,7 @@ msgstr ""
 # origbug (report 3.2.03)
 # authentication
 #: util/ssl.cpp:292
-msgid "This version of the program doesn't support SSL authentification."
+msgid "This version of the program doesn't support SSL authentication."
 msgstr "Diese Version des Programms unterstützt keine SSL-Authentifizierung"
 
 #: util/strutil.cpp:737
@@ -13247,14 +13235,13 @@ msgid "Please specify a valid email address."
 msgstr "Bitte geben Sie eine gültige E-Mailadresse an."
 
 # origbug (report 3.2.03)
-# recieve
 # origsize
 # The entry-fields for the servers are pushed to the right
 # (without obvious reason) and thus _very_ small !!
 #: util/upgrade.cpp:1019
 msgid ""
 "You need an IMAP4 (preferred) or a POP3 server\n"
-"to be able to receieve email and an SMTP server\n"
+"to be able to receive email and an SMTP server\n"
 "to be able to send it.\n"
 "\n"
 "All of these fields may be filled later as well\n"

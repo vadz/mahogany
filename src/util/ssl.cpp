@@ -234,7 +234,7 @@ bool InitSSL(void) /* FIXME: MT */
    gs_SSL_loaded = true;
 
    STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
-                    "SSL authentification is now available."),
+                    "SSL authentication is now available."),
                   crypto_dll.c_str(),
                   ssl_dll.c_str()));
 
@@ -290,7 +290,7 @@ bool InitSSL(void)
       s_errMsgGiven = true;
 
       ERRORMESSAGE((_("This version of the program doesn't support SSL "
-                      "authentification.")));
+                      "authentication.")));
    }
 
    return false;

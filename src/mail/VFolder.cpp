@@ -201,7 +201,7 @@ bool MailFolderVirt::IsInCriticalSection() const
 ServerInfoEntry *MailFolderVirt::CreateServerInfo(const MFolder *folder) const
 {
     // we use the trivial server info implementation as we never reuse them and
-    // don't use authentification neither
+    // don't use authentication neither
     return new VirtualServerInfo(folder);
 }
 

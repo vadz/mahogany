@@ -166,7 +166,7 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
    if ( !driver )
       return NULL;
 
-   // ensure that we have the authentification information for this folder
+   // ensure that we have the authentication information for this folder
    // before trying to open it
    bool userEnteredPwd = false;
    String login, password;

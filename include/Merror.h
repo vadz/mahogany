@@ -39,7 +39,7 @@ enum MError
 {
    M_ERROR_CANCEL = -1,          // the operation was cancelled by user
    M_ERROR_OK     = 0,           // no error
-   M_ERROR_AUTH,                 // authentification error (missing/wrong pwd)
+   M_ERROR_AUTH,                 // authentication error (missing/wrong pwd)
    M_ERROR_CCLIENT,              // c-client library error
    M_ERROR_HALFOPENED_ONLY,      // folder could only be half opened, not opened
    M_ERROR_UNEXPECTED            // unknown/unexpected error (bug)

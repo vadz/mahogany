@@ -1747,7 +1747,7 @@ SendMessageCC::Send(int flags)
    // construct the server string for c-client
    String server = m_ServerHost;
 
-   // use authentification if the user name is specified
+   // use authentication if the user name is specified
    if ( !m_UserName.empty() )
    {
       server << _T("/user=\"") << m_UserName << _T('"');

@@ -388,7 +388,7 @@ Release 0.60 'Redmond' November 9, 2000
 2000-06-02 VZ: creating MH folders with the wizard finally works
                  "d&d"ing messages to group or root folder won't delete them
 2000-06-02 VZ: improved highlighting in the folder tree
-2000-06-02 KB: authentification for SMTP and NNTP
+2000-06-02 KB: authentication for SMTP and NNTP
 2000-05-30 KB: Split part of MessageView functionality into a separate class
                   to be shared with ComposeView.
                  Replaced several mail_check() calls with mail_ping() in

@@ -28,7 +28,7 @@
 /**
    Whenever we need to establish a connection with a remote server, we try to
    reuse an existing ServerInfoEntry for it (and create a new one if none was
-   found). This allows us to reuse the authentification information and the
+   found). This allows us to reuse the authentication information and the
    network connections.
 
    For the former, it's simple: we remember the name and the password after

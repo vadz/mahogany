@@ -1017,7 +1017,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
       "You need an IMAP4 (preferred) or a POP3 server\n"
-      "to be able to receieve email and an SMTP server\n"
+      "to be able to receive email and an SMTP server\n"
       "to be able to send it.\n"
       "\n"
       "All of these fields may be filled later as well\n"

@@ -1363,7 +1363,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
             Profile_obj profile(folder->GetProfile());
             if ( READ_CONFIG(profile, MP_POP_NO_AUTH) )
             {
-               // turn authentification off forcefully
+               // turn authentication off forcefully
                spec << _T("/loser");
             }
          }
