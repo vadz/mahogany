@@ -848,8 +848,6 @@ wxOneFilterDialog::TransferDataToWindow()
       m_textProgram->SetValue(settings->WriteRule());
       settings->DecRef();
 
-      m_initializing = false;
-
       LayoutControls();
    }
    else if ( m_FilterData->IsEmpty() )
@@ -866,7 +864,6 @@ wxOneFilterDialog::TransferDataToWindow()
       m_DoThis->Hide();
 
       m_isSimple = false;
-      m_initializing = false;
 
       wxWindow *canvas = m_Panel->GetCanvas();
       m_msgCantEdit = new wxStaticText(canvas, -1,
@@ -884,6 +881,9 @@ wxOneFilterDialog::TransferDataToWindow()
 
       m_textProgram->SetValue(m_FilterData->GetProgram());
    }
+
+   // now any updates come from user, not from program
+   m_initializing = false;
 
    return TRUE;
 }
@@ -1171,6 +1171,10 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+protected:
+   // event handlers
+   void OnButton(wxCommandEvent& event);
+
 private:
    // construct the caption for the dialog
    static String GetCaption(MFolder *folder)
@@ -1186,7 +1190,16 @@ private:
    // dialog is dismissed the new ones, use HasChanges() to determine if they
    // are different from the old settings
    wxArrayString m_filters;
+
+   // the button to add a new filter
+   wxButton *m_btnAdd;
+
+   DECLARE_EVENT_TABLE();
 };
+
+BEGIN_EVENT_TABLE(wxFolderFiltersDialog, wxSelectionsOrderDialog)
+   EVT_BUTTON(-1, wxFolderFiltersDialog::OnButton)
+END_EVENT_TABLE()
 
 wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
                      : wxSelectionsOrderDialog(parent,
@@ -1196,6 +1209,56 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
 {
    m_folder = folder;
    m_folder->IncRef();
+
+   // we hijack the dialog layout here by inserting some additional controls
+   // into it
+   wxLayoutConstraints *c;
+
+   // assume there is only one of them
+   wxWindow *boxTop = FindWindow(wxStaticBoxNameStr);
+   wxCHECK_RET( boxTop, "can't find static box in wxFolderFiltersDialog" );
+
+   wxWindow *btnOk = FindWindow(wxID_OK);
+   wxCHECK_RET( btnOk, "can't find ok button in wxFolderFiltersDialog" );
+
+   // create additional pane below the check list box with existing filters
+   wxStaticBox *boxBottom = new wxStaticBox(this, -1, _("Instructions:"));
+   c = new wxLayoutConstraints();
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->height.Absolute(4*hBtn);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, 4*LAYOUT_Y_MARGIN);
+   boxBottom->SetConstraints(c);
+
+   // change the top panes constraint
+   c = new wxLayoutConstraints(*(boxTop->GetConstraints()));
+   c->bottom.SameAs(boxBottom, wxTop, 4*LAYOUT_Y_MARGIN);
+   boxTop->SetConstraints(c);
+
+   // create controls inside the bottom static box
+   wxStaticText *statText = new wxStaticText(this, -1,
+         _("You may check the filters you want to use in\n"
+           "the list above. Additionally, use the buttons\n"
+           "to the right of it to choose the filter priority.\n"
+           "Finally, click the \"Add\" button to create a\n"
+           "new filter."));
+   c = new wxLayoutConstraints();
+   c->left.SameAs(boxBottom, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(boxBottom, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(boxBottom, wxBottom, 2*LAYOUT_Y_MARGIN);
+   statText->SetConstraints(c);
+
+   m_btnAdd = new wxButton(this, -1, _("&Add..."));
+   c = new wxLayoutConstraints();
+   c->right.SameAs(boxBottom, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   c->centreY.SameAs(boxBottom, wxCentreY);
+   m_btnAdd->SetConstraints(c);
+
+   // increase min horz size
+   SetDefaultSize(5*wBtn, 10*hBtn);
 }
 
 wxFolderFiltersDialog::~wxFolderFiltersDialog()
@@ -1254,6 +1317,32 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
    }
 
    return TRUE;
+}
+
+void wxFolderFiltersDialog::OnButton(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() == m_btnAdd )
+   {
+      wxArrayString allFiltersOld = Profile::GetAllFilters();
+      if ( ConfigureAllFilters(this) )
+      {
+         // update list of available filters
+         wxArrayString allFiltersNew = Profile::GetAllFilters();
+         size_t count = allFiltersNew.GetCount();
+         for ( size_t n = 0; n < count; n++ )
+         {
+            const wxString& f = allFiltersNew[n];
+            if ( allFiltersOld.Index(f) == wxNOT_FOUND )
+               m_checklstBox->Append(f);
+            //else: we already had it
+         }
+      }
+   }
+   else
+   {
+      // not our event
+      event.Skip();
+   }
 }
 
 // ----------------------------------------------------------------------------
