@@ -35,7 +35,6 @@
 #   include "MHelp.h"
 
 #   include <wx/sizer.h>
-#   include <wx/minifram.h>
 #endif
 
 #include "Mpers.h"
@@ -68,6 +67,7 @@
 #include <wx/tipdlg.h>
 #include <wx/checklst.h>
 #include <wx/statline.h>
+#include <wx/minifram.h>
 #include <wx/fs_mem.h> // memory filesystem for startup screen
 
 #include "MFolderDialogs.h"

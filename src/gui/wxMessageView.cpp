@@ -6,8 +6,6 @@
  * $Id$
  *******************************************************************/
 
-#ifndef EXPERIMENTAL_karsten
-
 #ifdef __GNUG__
 #   pragma implementation "wxMessageView.h"
 #endif
@@ -21,6 +19,8 @@
 // ----------------------------------------------------------------------------
 
 #include "Mpch.h"
+
+#ifndef EXPERIMENTAL_karsten
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
@@ -539,9 +539,9 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 
    #undef GET_COLOUR_FROM_PROFILE
 
-   settings->quotedColourize = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_COLOURIZE);
-   settings->quotedCycleColours = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_CYCLE_COLOURS);
-   settings->quotedMaxWhitespace = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_MAXWHITESPACE);
+   settings->quotedColourize = READ_CONFIG(m_Profile, MP_MVIEW_QUOTED_COLOURIZE) != 0;
+   settings->quotedCycleColours = READ_CONFIG(m_Profile, MP_MVIEW_QUOTED_CYCLE_COLOURS) != 0;
+   settings->quotedMaxWhitespace = READ_CONFIG(m_Profile, MP_MVIEW_QUOTED_MAXWHITESPACE) != 0;
    settings->quotedMaxAlpha = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_MAXALPHA);
 
    settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);

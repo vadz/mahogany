@@ -349,7 +349,7 @@ public:
    /// Discard changes from suspended mode.
    virtual void Discard(void);
    /// Is the profile currently suspended?
-   virtual bool IsSuspended(void) const { return m_Suspended; }
+   virtual bool IsSuspended(void) const { return m_Suspended != 0; }
 
    /** This temporarily overloads this profile with another Identity,
        i.e. the name of an Identity profile. */
