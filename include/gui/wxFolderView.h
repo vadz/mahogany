@@ -276,6 +276,9 @@ public:
 
    void EnableSelectionCallbacks(bool enabledisable = true)
       { m_SelectionCallbacks = enabledisable; }
+
+   void GrabFocus(wxMouseEvent &event)       { SetFocus(); }
+
    DECLARE_EVENT_TABLE()
 
 protected:

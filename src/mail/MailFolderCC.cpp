@@ -423,7 +423,7 @@ MailFolderCC::Ping(void)
 MailFolderCC::~MailFolderCC()
 {
    CCQuiet(true); // disable all callbacks!
-   mail_check(m_MailStream); // update flags, etc, .newsrc
+//   mail_check(m_MailStream); // update flags, etc, .newsrc
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
@@ -1492,7 +1492,7 @@ long
 mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 {
    if(mm_disable_callbacks)
-      return;
+      return 1;
    return MailFolderCC::mm_diskerror(stream,  errorcode, serious);
 }
 

@@ -52,6 +52,7 @@
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnKey)
+   EVT_MOTION (wxFolderListCtrl::GrabFocus)
 END_EVENT_TABLE()
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
