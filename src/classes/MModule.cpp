@@ -674,7 +674,6 @@ MModule::ListAvailableModules(const String& interfaceName)
          interfaceModule = GetMModuleProperty(props,
                                               MMODULE_INTERFACE_PROP);
 
-         const String name = GetMModuleProperty(props, MMODULE_NAME_PROP);
          if ( !interfaceName.empty() )
          {
             if ( interfaceName != interfaceModule )
@@ -685,6 +684,7 @@ MModule::ListAvailableModules(const String& interfaceName)
 
             // note that this check is only done for a specific interface, if
             // all modules are requested, then return really all of them
+            const String name = GetMModuleProperty(props, MMODULE_NAME_PROP);
             if ( modulesNot.Index(name) != wxNOT_FOUND )
             {
                // this module was excluded by user
@@ -692,6 +692,10 @@ MModule::ListAvailableModules(const String& interfaceName)
             }
          }
 
+         // use the file name, not MMODULE_NAME_PROP, so that we can
+         // LoadModule() it later
+         String name;
+         wxSplitPath(filename, NULL, &name, NULL),
          MModuleListingEntryImpl entry(
             name,
             interfaceModule,
