@@ -720,8 +720,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                      // don´t insert space as first thing in line
                      // after wrapping:
                      if(! wrapped || m_llist->GetCursorPos().x != 0)
-                        m_llist->Insert('X');
-//                        m_llist->Insert((char)keyCode);
+//                       m_llist->Insert('X');
+                        m_llist->Insert((char)keyCode);
                   }
                   else
                      m_llist->Insert((char)keyCode);
