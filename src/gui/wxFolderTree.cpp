@@ -430,10 +430,6 @@ protected:
    // are we editing an item in place?
    bool IsEditingInPlace() const;
 
-   // restore the suffix showing the number of messages after we're done with
-   // editing the item
-   void RestoreLabel(const wxString& label);
-
    // reexpand branch - called when something in the tree changes
    void ReopenBranch(wxTreeItemId parent);
 
@@ -2271,9 +2267,10 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
       wxString label = GetItemText(item);
       wxString name = node->GetName();
 
+      // remember m_suffix (containing the number of messages in the folder &c)
+      // so that we can tackle it back on to the new name later
       if ( label.StartsWith(name, &m_suffix) )
       {
-         // remember m_suffix for OnEndLabelEdit()
          SetItemText(item, name);
       }
       else
@@ -2289,54 +2286,49 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
 {
-   MFolder *folder = m_sink->GetSelection();
-   if ( !folder )
-   {
-      wxFAIL_MSG( _T("how can we edit a label without folder?") );
+   MFolder_obj folder(m_sink->GetSelection());
+   CHECK_RET( folder, _T("how can we edit a label without folder?") );
 
-      event.Veto();
-   }
-   else
-   {
-      wxTreeItemId id = event.GetItem();
+   wxString label = event.GetLabel();
 
-      wxString label = event.GetLabel();
+   if ( !label.empty() )
+   {
       if ( !m_sink->OnRename(folder, label) )
       {
+         wxTreeItemId id = event.GetItem();
          label = GetItemText(id);
 
          event.Veto();
       }
-
-      // restore the suffix anyhow
-      RestoreLabel(label);
-
-      folder->DecRef();
+      //else: renamed ok, leave m_idEditedInPlace non null because
+      //      we can't restore the suffix part of the label right now as it is
+      //      going to be overwritten after we return (at least under MSW), and
+      //      this will be done in OnIdle() later if m_idEditedInPlace != 0
    }
-}
-
-void wxFolderTreeImpl::RestoreLabel(const wxString& label)
-{
-   if ( !m_suffix.empty() )
+   else // empty new label or renaming cancelled, don't do anything
    {
-      SetItemText(m_idEditedInPlace, label + m_suffix);
-      m_suffix.clear();
+      event.Veto();
    }
-
-   m_idEditedInPlace = 0l;
 }
 
 void wxFolderTreeImpl::OnIdle(wxIdleEvent& event)
 {
    if ( m_idEditedInPlace )
    {
-      // check if the editing wasn't cancelled - unfortunately we don't get
-      // OnEndLabelEdit() notification in this case, but we need to know about
-      // it to be able to restore the label
+      // check if the user finished editing the label
       if ( !IsEditingInPlace() )
       {
-         // editing was cancelled
-         RestoreLabel(GetItemText(m_idEditedInPlace));
+         String label = GetItemText(m_idEditedInPlace);
+
+         if ( !m_suffix.empty() )
+         {
+            label += m_suffix;
+            m_suffix.clear();
+         }
+
+         SetItemText(m_idEditedInPlace, label);
+
+         m_idEditedInPlace = 0l;
       }
    }
 
