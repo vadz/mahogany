@@ -1016,7 +1016,12 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
          // not showing it at all
          if ( m_partContentPtr )
             break;
-         //else: fall through and treat it as plain text
+         //else: treat it as plain text
+
+         // len was overwritten by rfc822_qprint() above
+         len = size;
+
+         // fall through
 
       case ENC7BIT:        // 7 bit SMTP semantic data
       case ENC8BIT:        // 8 bit SMTP semantic data
