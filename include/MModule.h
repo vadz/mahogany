@@ -362,7 +362,7 @@ void MModule_AddStaticModule(const wxChar *Name,
 #  define MMODULE_CLEANUP(func) \
    extern "C" \
    { \
-      MDLLEXPORT void CleanupMModule() { (func)(); }
+      MDLLEXPORT void CleanupMModule() { (func)(); } \
    }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
