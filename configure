@@ -2376,7 +2376,7 @@ echo "configure:2375: checking for wxWindows(wxGTK) libraries" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/wxGTK/include/wx/wx.h" || test -L "$ac_dir/libwxGTK/include/wx/wx.h.$ac_extension"; then
+    if test -f "$ac_dir/wxWindows/include/wx/wx.h" || test -L "$ac_dir/libwxWindows/include/wx/wx.h.$ac_extension"; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2420,7 +2420,7 @@ for ac_dir in $SEARCH_LIB;
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
       WX_LINK="$ac_path_to_link -lwx_gtk"
-      WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
+      WX_INCLUDE="$ac_path_to_include/wxWindows/include $ac_path_to_include/wxWindows/setup/${OSTYPE}"
       WX_DEFS=-D__GTK__
       echo "$ac_t""yes" 1>&6
       WX_DEFS=-D__GTK__

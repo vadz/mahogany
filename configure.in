@@ -352,7 +352,7 @@ if test "$USE_WXGTK" = 1; then
   AC_DEFINE(USE_WXSTRING)
   WX_LINK=
   AC_MSG_CHECKING(for wxWindows(wxGTK) libraries)
-  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxGTK/include/wx/wx.h)
+  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxWindows/include/wx/wx.h)
   if test "$ac_find_includes" != "" ; then
     AC_PATH_FIND_LIBRARIES($SEARCH_LIB,wx_gtk)
     if test "$ac_find_libraries" != "" ; then
@@ -361,7 +361,7 @@ if test "$USE_WXGTK" = 1; then
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
       WX_LINK="$ac_path_to_link -lwx_gtk"
-      WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
+      WX_INCLUDE="$ac_path_to_include/wxWindows/include $ac_path_to_include/wxWindows/setup/${OSTYPE}"
       WX_DEFS=-D__GTK__
       AC_MSG_RESULT(yes)
       WX_DEFS=-D__GTK__
