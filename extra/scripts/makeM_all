@@ -507,7 +507,7 @@ then
   if [ `hostname` = $DOCHOST ]
   then
     echo "Building and packaging documentation..."
-    ( cd $BUILDDIR/$NAME-$VERSION && $MAKE doc && $MAKE install_all DESTDIR=$DESTDIR ) >/dev/null
+    ( cd $BUILDDIR/$NAME-$VERSION && $MAKE doc && $MAKE install DESTDIR=$DESTDIR ) >/dev/null
     echo "Copying docs in $DESTDIR/share/Mahogany/doc to WWW..."
     ( cd $DESTDIR/share/Mahogany/doc &&  $SCP -r * $WWWDOCLOCATION )
     echo "Packing docs in $DESTDIR/share/Mahogany/doc..."
@@ -519,7 +519,7 @@ then
     $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc/
   fi
 
-  cd $BUILDDIR/$NAME-$VERSION && $MAKE install_all DESTDIR=$DESTDIR  >/dev/null && \
+  cd $BUILDDIR/$NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR  >/dev/null && \
   cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar * && \
   gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar
 

@@ -68,15 +68,15 @@ the header files and libraries on your system.
   make depend
   make             # or "make all" to try to build message catalogs as well
   make doc
-  make install_all
+  make install
 
   If you built wxWindows with debug enabled, specify the --with-debug option
   when configuring Mahogany. 
 
   Depending on whether you have installed all required programs in the
-  right versions, "make doc" and "make install_all" might
+  right versions, "make doc" and "make install" might
   fail. Instead, you can do the following:
-    make install         # this will install the program and required files
+    make install_bin     # this will install the program and required files
     make install_doc     # this should install the documentation and
                          # online help
     make install_locale  # this tries to build and install the message

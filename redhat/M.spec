@@ -61,7 +61,7 @@ fi
 
 %install
 export PATH=/sbin:$PATH
-make -k install_all
+make -k install
 make install_rpm
 
 %clean

@@ -64,43 +64,43 @@ bak backup:
 #
 # probably the most complicated target:
 #
-install:
-	@echo "Installing M in " $(BINDIR)
-	@echo "        data in " $(DATADIR)
-	@echo "        docs in " $(DOCDIR)
-	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
-	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -d $(DATADIR)/bin
-	$(INSTALL) -d $(DATADIR)/lib
-	$(INSTALL) -d $(DATADIR)/doc
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
+install_bin:
+@echo "Installing M in " $(BINDIR)
+@echo "        data in " $(DATADIR)
+@echo "        docs in " $(DOCDIR)
+$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
+$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
+$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
+$(INSTALL) -d $(BINDIR)
+$(INSTALL) -d $(DATADIR)/bin
+$(INSTALL) -d $(DATADIR)/lib
+$(INSTALL) -d $(DATADIR)/doc
+set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 
 install_doc:
-	$(MAKE) -C doc install
-	$(INSTALL_DATA) TODO README $(DOCDIR)
+$(MAKE) -C doc install
+$(INSTALL_DATA) TODO README $(DOCDIR)
 
 # create the file list for the RPM installation
 install_rpm:
-	@echo "Creating the list of files for the RPM"
-	@echo "%doc $(DOCDIR)" > filelist
-	@echo "%config $(DATADIR)/M.conf" >> filelist
-	@echo "$(DATADIR)/scripts" >> filelist
-	@echo "$(DATADIR)/newmail.wav" >> filelist
-	@echo "$(DATADIR)/kylemail.wav" >> filelist
-	@echo "$(DATADIR)/afm" >> filelist
-	@echo "$(DATADIR)/bin" >> filelist
-	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
-	@echo "$(DATADIR)/icons" >> filelist
-	@echo "$(DATADIR)/lib" >> filelist
-	@echo "$(DATADIR)/locale" >> filelist
-	@echo "$(BINDIR)/M" >> filelist
-	@echo "$(BINDIR)/mahogany" >> filelist
-	@# the second subsitution takes care of RPM_BUILD_ROOT
-	@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
+@echo "Creating the list of files for the RPM"
+@echo "%doc $(DOCDIR)" > filelist
+@echo "%config $(DATADIR)/M.conf" >> filelist
+@echo "$(DATADIR)/scripts" >> filelist
+@echo "$(DATADIR)/newmail.wav" >> filelist
+@echo "$(DATADIR)/kylemail.wav" >> filelist
+@echo "$(DATADIR)/afm" >> filelist
+@echo "$(DATADIR)/bin" >> filelist
+@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
+@echo "$(DATADIR)/icons" >> filelist
+@echo "$(DATADIR)/lib" >> filelist
+@echo "$(DATADIR)/locale" >> filelist
+@echo "$(BINDIR)/M" >> filelist
+@echo "$(BINDIR)/mahogany" >> filelist
+@# the second subsitution takes care of RPM_BUILD_ROOT
+@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
-install_all: install install_doc install_locale
+install: install_bin install_doc install_locale
 
 install_locale:
 	$(MAKE) -C locale install
