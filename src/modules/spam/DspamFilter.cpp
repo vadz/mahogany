@@ -39,27 +39,16 @@
 extern "C"
 {
    #include <libdspam.h>
-
-   extern void dspam_set_home(const char *home);
 }
 
 // ----------------------------------------------------------------------------
-// constants
+// wrappers around DSPAM_CTX
 // ----------------------------------------------------------------------------
 
-// currently we always use the same user name...
-static const char *M_DSPAM_USER = "mahogany";
-
-// ----------------------------------------------------------------------------
-// DspamCtx simple wrapper around DSPAM_CTX
-// ----------------------------------------------------------------------------
-
+// base class used by DspamProcess/ClassifyCtx
 class DspamCtx
 {
 public:
-   // take ownership of the specified context
-   DspamCtx(DSPAM_CTX *ctx) : m_ctx(ctx) { }
-
    // destroy the context
    ~DspamCtx()
    {
@@ -73,10 +62,56 @@ public:
    operator DSPAM_CTX *() const { return m_ctx; }
    DSPAM_CTX *operator->() const { return m_ctx; }
 
+protected:
+   // take ownership of the specified context
+   DspamCtx(DSPAM_CTX *ctx) : m_ctx(ctx) { }
+
+   // currently we always use the same user name...
+   static const char *GetUser() { return "mahogany"; }
+
+   // return the base dir for dspam files
+   static wxCharBuffer GetHome()
+   {
+      return mApplication->GetLocalDir().ToAscii();
+   }
+
 private:
    DSPAM_CTX *m_ctx;
 
    DECLARE_NO_COPY_CLASS(DspamCtx);
+};
+
+// normal DSPAM context
+class DspamProcessCtx : public DspamCtx
+{
+public:
+   DspamProcessCtx()
+      :  DspamCtx(dspam_init
+                  (
+                     GetUser(),
+                     NULL,             // no group
+                     GetHome(),
+                     DSM_PROCESS,
+                     DSF_CHAINED |
+                     DSF_NOISE |
+                     DSF_WHITELIST
+                  ))
+   {
+   }
+
+   DECLARE_NO_COPY_CLASS(DspamProcessCtx);
+};
+
+// context for classification only
+class DspamClassifyCtx : public DspamCtx
+{
+public:
+   DspamClassifyCtx()
+      : DspamCtx(dspam_init(GetUser(), NULL, GetHome(), DSM_CLASSIFY, 0))
+   {
+   }
+
+   DECLARE_NO_COPY_CLASS(DspamClassifyCtx);
 };
 
 // ----------------------------------------------------------------------------
@@ -212,8 +247,6 @@ END_EVENT_TABLE()
 
 DspamFilter::DspamFilter()
 {
-   dspam_set_home(mApplication->GetLocalDir());
-
    dspam_init_driver();
 
    m_ctx = NULL;
@@ -228,14 +261,7 @@ DSPAM_CTX *DspamFilter::GetCtx() const
 {
    if ( !m_ctx )
    {
-      const_cast<DspamFilter *>(this)->
-         m_ctx = new DspamCtx(dspam_init
-                              (
-                                 M_DSPAM_USER,
-                                 NULL,
-                                 DSM_PROCESS,
-                                 DSF_CHAINED | DSF_NOISE
-                              ));
+      const_cast<DspamFilter *>(this)->m_ctx = new DspamProcessCtx();
    }
 
    if ( !*m_ctx )
@@ -251,15 +277,9 @@ DSPAM_CTX *DspamFilter::GetCtx() const
 bool DspamFilter::DoProcess(const Message& msg, ContextHandler& handler)
 {
 #if 0
-   DSPAM_CTX *ctx = GetCtx();
+   DSPAM_CTX& ctx = *GetCtx();
 #else
-   DspamCtx ctx(dspam_init
-                (
-                  M_DSPAM_USER,
-                  NULL,
-                  DSM_PROCESS,
-                  DSF_CHAINED | DSF_NOISE
-                ));
+   DspamProcessCtx ctx;
 #endif
    if ( !ctx )
       return false;
@@ -347,7 +367,7 @@ DspamFilter::DoCheckIfSpam(const Message& msg,
 
 void DspamFilter::ShowStats(wxWindow *parent)
 {
-   DspamCtx ctx(dspam_init(M_DSPAM_USER, NULL, DSM_CLASSIFY, 0));
+   DspamClassifyCtx ctx;
 
    if ( !ctx )
    {
