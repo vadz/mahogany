@@ -25,3 +25,35 @@ class MObjectRC { };
 #define DECLARE_AUTOPTR_WITH_CONVERSION(x)
 #define DECLARE_AUTOPTR_NO_REF(x)
 
+// define typemaps for mapping our String (same as std::string) to Python
+// string
+%typemap(in) String {
+   char * temps; int templ;
+   if (PyString_AsStringAndSize($input, &temps, &templ)) return NULL;
+   $1 = $1_ltype (temps, templ);
+}
+%typemap(in) const String& (String tempstr) {
+   char * temps; int templ;
+   if (PyString_AsStringAndSize($input, &temps, &templ)) return NULL;
+   tempstr = String(temps, templ);
+   $1 = &tempstr;
+}
+
+// this is for setting string structure members:
+%typemap(in) String* ($*1_ltype tempstr) {
+   char * temps; int templ;
+   if (PyString_AsStringAndSize($input, &temps, &templ)) return NULL;
+   tempstr = $*1_ltype(temps, templ);
+   $1 = &tempstr;
+}
+
+%typemap(out) String "$result = PyString_FromStringAndSize($1.data(), $1.length());";
+%typemap(out) const String& "$result = PyString_FromStringAndSize($1->data(), $1->length());";
+%typemap(out) String* "$result = PyString_FromStringAndSize($1->data(), $1->length());";
+
+%typemap(varin) String {
+   char *temps; int templ;
+   if (PyString_AsStringAndSize($input, &temps, &templ)) return NULL;
+   $1 = $1_ltype(temps, templ);
+}
+%typemap(varout) String "$result = PyString_FromStringAndSize($1.data(), $1.length());";
