@@ -239,8 +239,10 @@
 #include "CommonBase.h"
 
 /// for convenience, get an icon:
-
 #define   ICON(name) (mApplication.GetIconManager()->GetIcon(name))
+
+/// the same thing for a bitmap
+#define   BMP(name) (mApplication.GetIconManager()->GetBitmap(name))
 
 /**@name Macros for calling callback functions.
 
