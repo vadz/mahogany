@@ -1013,7 +1013,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Newsgroup: "),
       gettext_noop("&Comment: "),
       gettext_noop("C&ollect all mail from this folder: "),
-      gettext_noop("&Keep folder always open: "),
+      gettext_noop("&Keep server connection when idle: "),
       gettext_noop("Force &re-open on ping: "),
       gettext_noop("Anon&ymous access: "),
 #ifdef USE_SSL
