@@ -468,10 +468,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   if ( m_btnMore )
-      c->right.LeftOf(m_btnMore, LAYOUT_X_MARGIN);
-   else
-      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_btnDelete, LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
