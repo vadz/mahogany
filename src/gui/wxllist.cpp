@@ -3413,7 +3413,7 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 #ifdef __WXMSW__
    wxPrinterDC *psdc = new wxPrinterDC("","",WXLLIST_TEMPFILE,false);
 #else
-   wxPostScriptDC *psdc = new wxPostScriptDC(WXLLIST_TEMPFILE,false);
+   wxPostScriptDC *psdc = new wxPostScriptDC();//WXLLIST_TEMPFILE,false);
 #endif
 
    psdc->StartDoc(m_title);
