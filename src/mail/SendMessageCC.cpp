@@ -107,6 +107,21 @@ extern const MOption MP_SENDMAILCMD;
 #endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the encodings defined by RFC 2047
+//
+// NB: don't change the values of the enum elements, EncodeHeaderString() relies
+//     on them being what they are!
+enum MimeEncoding
+{
+   MimeEncoding_Unknown,
+   MimeEncoding_Base64 = 'B',
+   MimeEncoding_QuotedPrintable = 'Q'
+};
+
+// ----------------------------------------------------------------------------
 // prototypes
 // ----------------------------------------------------------------------------
 
@@ -301,6 +316,60 @@ SendMessageCC::~SendMessageCC()
 }
 
 // ----------------------------------------------------------------------------
+// SendMessageCC encodings
+// ----------------------------------------------------------------------------
+
+static MimeEncoding GetMimeEncodingForFontEncoding(wxFontEncoding enc)
+{
+   // QP should be used for the encodings which mostly overlap with US_ASCII,
+   // Base64 for the others - choose the encoding method
+   switch ( enc )
+   {
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_12:
+      case wxFONTENCODING_ISO8859_13:
+      case wxFONTENCODING_ISO8859_14:
+      case wxFONTENCODING_ISO8859_15:
+
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1257:
+
+#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF8:
+#endif // 2.3.0
+
+         return MimeEncoding_QuotedPrintable;
+
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_11:
+
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+
+      case wxFONTENCODING_KOI8:
+         return MimeEncoding_Base64;
+
+      default:
+         FAIL_MSG( "unknown encoding" );
+
+      case wxFONTENCODING_SYSTEM:
+         return MimeEncoding_Unknown;
+   }
+}
+
+// ----------------------------------------------------------------------------
 // SendMessageCC header stuff
 // ----------------------------------------------------------------------------
 
@@ -329,79 +398,24 @@ SendMessageCC::EncodeHeaderString(const String& header)
    }
 
    // get the encoding in RFC 2047 sense
-   enum
-   {
-      Encoding_Unknown,
-      Encoding_Base64 = 'B',           // the values should be like this!
-      Encoding_QuotedPrintable = 'Q'
-   } enc2047;
-
-   // QP should be used for the encodings which mostly overlap with US_ASCII,
-   // Base64 for the others - choose the encoding method
-   switch ( m_encHeaders )
-   {
-      case wxFONTENCODING_ISO8859_1:
-      case wxFONTENCODING_ISO8859_2:
-      case wxFONTENCODING_ISO8859_3:
-      case wxFONTENCODING_ISO8859_4:
-      case wxFONTENCODING_ISO8859_10:
-      case wxFONTENCODING_ISO8859_12:
-      case wxFONTENCODING_ISO8859_13:
-      case wxFONTENCODING_ISO8859_14:
-      case wxFONTENCODING_ISO8859_15:
-
-      case wxFONTENCODING_CP1250:
-      case wxFONTENCODING_CP1252:
-      case wxFONTENCODING_CP1257:
-
-#if wxCHECK_VERSION(2, 3, 0)
-      case wxFONTENCODING_UTF8:
-#endif // 2.3.0
-
-         enc2047 = Encoding_QuotedPrintable;
-         break;
-
-      case wxFONTENCODING_ISO8859_5:
-      case wxFONTENCODING_ISO8859_6:
-      case wxFONTENCODING_ISO8859_7:
-      case wxFONTENCODING_ISO8859_8:
-      case wxFONTENCODING_ISO8859_9:
-      case wxFONTENCODING_ISO8859_11:
-
-      case wxFONTENCODING_CP1251:
-      case wxFONTENCODING_CP1253:
-      case wxFONTENCODING_CP1254:
-      case wxFONTENCODING_CP1255:
-      case wxFONTENCODING_CP1256:
-
-      case wxFONTENCODING_KOI8:
-         enc2047 = Encoding_Base64;
-         break;
-
-      default:
-         FAIL_MSG( "unknown encoding" );
-
-      case wxFONTENCODING_SYSTEM:
-         enc2047 = Encoding_Unknown;
-         break;
-   }
+   MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(m_encHeaders);
 
    String headerEnc;
-   if ( enc2047 == Encoding_Unknown )
+   if ( enc2047 == MimeEncoding_Unknown )
    {
       // nothing to do
       headerEnc = header;
    }
-   else
+   else // do encode the header
    {
       unsigned long len; // length of the encoded text
       unsigned char *text = (unsigned char *)header.c_str(); // cast for cclient
       unsigned char *textEnc;
-      if ( enc2047 == Encoding_QuotedPrintable )
+      if ( enc2047 == MimeEncoding_QuotedPrintable )
       {
             textEnc = rfc822_8bit(text, header.length(), &len);
       }
-      else // Encoding_Base64
+      else // MimeEncoding_Base64
       {
             textEnc = rfc822_binary(text, header.length(), &len);
             if ( textEnc[len - 2] == '\r' && textEnc[len - 1] == '\n' )
@@ -420,7 +434,7 @@ SendMessageCC::EncodeHeaderString(const String& header)
       // do it inside the headers
       //
       // FIXME: what about TABs and other NLs?
-      if ( enc2047 == Encoding_QuotedPrintable )
+      if ( enc2047 == MimeEncoding_QuotedPrintable )
       {
          encword.Replace(" ", "=20");
       }
@@ -883,16 +897,42 @@ SendMessageCC::AddPart(MimeType::Primary type,
    switch ( type )
    {
       case TYPEMESSAGE:
-         // FIXME: leads to empty body?
+         // FIXME:
+         //    1. leads to empty body?
+         //    2. why do we use ENC7BIT for TYPEMESSAGE?
          bdy->nested.msg = mail_newmsg();
-
-         // fall through
+         bdy->encoding = ENC7BIT;
 
       case TYPETEXT:
-         // FIXME: why do we use ENC7BIT for TYPEMESSAGE?
-         bdy->encoding = (type == TYPETEXT) && !strutil_is7bit(buf)
-                           ? ENC8BIT  // auto converted to QP by cclient
-                           : ENC7BIT; // either ASCII text or something else
+         // if the actual message text is in 7 bit, avoid encoding it even if
+         // some charset which we would have normally encoded was used
+         if ( strutil_is7bit(buf) )
+         {
+            bdy->encoding = ENC7BIT;
+         }
+         else // we have 8 bit chars, need to encode them
+         {
+            // some encodings should be encoded in QP as they typically contain
+            // only a small number of non printable characters while others
+            // should be incoded in Base64 as almost all characters used in them
+            // are outside basic Ascii set
+            switch ( GetMimeEncodingForFontEncoding(enc) )
+            {
+               case MimeEncoding_Unknown:
+               case MimeEncoding_QuotedPrintable:
+                  // automatically translated to QP by c-client
+                  bdy->encoding = ENC8BIT;
+                  break;
+
+               default:
+                  FAIL_MSG( "unknown MIME encoding" );
+                  // fall through
+
+               case MimeEncoding_Base64:
+                  // automatically translated to Base64 by c-client
+                  bdy->encoding = ENCBINARY;
+            }
+         }
          break;
 
       default:
