@@ -1023,7 +1023,10 @@ public:
    virtual void Remove(Ticket t)
       {
          ASSERT(Contains(t));
-         m_Tickets.Remove( (size_t) t);
+
+         // be careful to cast to int to invoke the "Remove-by-value" version,
+         // not RemoveAt()
+         m_Tickets.Remove( (int) t);
       }
    virtual void Clear(void)
       {
