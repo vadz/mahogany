@@ -101,6 +101,7 @@ magnitude faster and startup time has been reduced too (especially under
 Windows). Several fatal buttons which had unfortunately crept into Win32
 release were fixed as well.
 
+\layout Standard
 The new features this time include
 \layout Itemize
 Showing the total number and the number of unread messages directly in the
@@ -115,6 +116,7 @@ A few new commands such as "Clear folder" to delete all messages in a folder
 without even opening it (handy for emptying the trash folder) and "Close" and
 "Close all" folder(s).
 
+\layout Standard
 There are several more minor improvements as well:
 \layout Itemize
 New URL popup menu in the message viewer and "Open URL in new browser window"
@@ -126,6 +128,7 @@ A new option to automatically select the units for message size (kb/mb)
 \layout Itemize
 Python 2.x is now supported and not only 1.5 (Unix)
 
+\layout Standard
 Some of non fatal but annoying bugs fixed in this release are:
 \layout Itemize
 Fixed server side searching (IMAP only)
