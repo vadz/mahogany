@@ -22,6 +22,18 @@ class Profile;
 class SendMessage
 {
 public:
+   /**
+     Flags for SendOrQueue()
+    */
+   enum
+   {
+      /// always send the message directly immediately, never queue it
+      NeverQueue = 1,
+
+      /// don't give any messages
+      Silent = 2
+   };
+
    /** Creates an empty object, setting some initial values.
        @param iprof optional pointer for a parent profile
        @param protocol which protocol to use for sending
@@ -133,10 +145,10 @@ public:
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
 
-       @param sendAlways overrides the config settings if true
+       @param flags is the combination of NeverQueue and Silent or 0
        @return true on success
    */
-   virtual bool SendOrQueue(bool sendAlways = false) = 0;
+   virtual bool SendOrQueue(int flags = 0) = 0;
 
    /// virtual destructor
    virtual ~SendMessage();

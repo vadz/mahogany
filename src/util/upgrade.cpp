@@ -1598,15 +1598,17 @@ bool RunInstallWizard()
    // case we assume he is so advanced that he doesn't need this stuff)
    if ( wizardDone )
    {
-      MProgressInfo proginfo(NULL, _("Sending the test message..."));
-
       // send a test message unless disabled
       //
       // NB: we can't send email if we don't have SMTP server configured
       if ( gs_installWizardData.sendTestMsg &&
             !gs_installWizardData.smtp.empty() )
       {
-         VerifyEMailSendingWorks();
+         VerifyEMailSendingWorks(new MProgressInfo
+                                     (
+                                        NULL,
+                                        _("Sending the test message...")
+                                     ));
       }
 
       // and create the welcome message in the new mail folder
@@ -1618,7 +1620,7 @@ bool RunInstallWizard()
       {
          // this might take a long time if the new mail folder already exists
          // and has a lot of messages
-         proginfo.SetLabel(_("Creating the welcome message..."));
+         MProgressInfo proginfo(NULL, _("Creating the welcome message..."));
 
          // make the lines short enough to ensure they're not wrapped with the
          // default line wrap setting (60 columns)
@@ -2963,7 +2965,7 @@ VerifyStdFolders(void)
 }
 
 extern bool
-VerifyEMailSendingWorks(void)
+VerifyEMailSendingWorks(MProgressInfo *proginfo)
 {
    // we send a mail to ourself
    Profile *p = mApplication->GetProfile();
@@ -2976,8 +2978,12 @@ VerifyEMailSendingWorks(void)
       _("If you have received this mail, your Mahogany configuration works.\r\n"
         "You should also try to reply to this mail and check that your reply arrives.");
    sm->AddPart(MimeType::TEXT, msg.c_str(), msg.length());
-   bool ok = sm->SendOrQueue();
+   bool ok = sm->SendOrQueue(SendMessage::Silent);
    delete sm;
+
+   // delete the progress frame, we don't need it any more and it would hide
+   // the message dialogs we pop up below
+   delete proginfo;
 
    if ( ok )
    {

@@ -99,7 +99,7 @@ public:
 
    virtual void WriteToFolder(const String &foldername);
 
-   virtual bool SendOrQueue(bool sendAlways = false);
+   virtual bool SendOrQueue(int flags = 0);
 
    /// destructor
    virtual ~SendMessageCC();
@@ -108,9 +108,11 @@ public:
 
 protected:
    /** Sends the message.
+
+       @param flags are the same as for SendOrQueue()
        @return true on success
    */
-   bool Send(void);
+   bool Send(int flags);
 
    /// set sender address fields
    void SetupFromAddresses(void);

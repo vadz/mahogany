@@ -1222,11 +1222,11 @@ SendMessageCC::AddPart(MimeType::Primary type,
 // ----------------------------------------------------------------------------
 
 bool
-SendMessageCC::SendOrQueue(bool sendNow)
+SendMessageCC::SendOrQueue(int flags)
 {
    // send directly either if we're told to do it (e.g. when sending the
    // messages already from Outbox) or if there is no Outbox configured at all
-   bool send = sendNow || m_OutboxName.empty();
+   bool send = (flags & NeverQueue) || m_OutboxName.empty();
 
 #ifdef USE_DIALUP
    if ( send && !mApplication->IsOnline() )
@@ -1265,7 +1265,7 @@ SendMessageCC::SendOrQueue(bool sendNow)
    bool success;
    if ( send )
    {
-      success = Send();
+      success = Send(flags);
 
       // make copy in the "SentMail" folder?
       if ( success )
@@ -1311,7 +1311,7 @@ SendMessageCC::SendOrQueue(bool sendNow)
 }
 
 bool
-SendMessageCC::Send(void)
+SendMessageCC::Send(int flags)
 {
    ASSERT_MSG(m_headerNames != NULL, "Build() must have been called!");
 
@@ -1480,10 +1480,13 @@ SendMessageCC::Send(void)
 
             if ( success )
             {
-               MDialog_Message(_("Message sent."),
-                               NULL, // parent window
-                               MDIALOG_MSGTITLE,
-                               "MailSentMessage");
+               if ( !(flags & Silent) )
+               {
+                  MDialog_Message(_("Message sent."),
+                                  NULL, // parent window
+                                  MDIALOG_MSGTITLE,
+                                  "MailSentMessage");
+               }
             }
             else
             {
@@ -1529,11 +1532,14 @@ SendMessageCC::Send(void)
 
       if ( success )
       {
-         MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
-                                                 : _("Article posted."),
-                         NULL, // parent window
-                         MDIALOG_MSGTITLE,
+         if ( !(flags & Silent) )
+         {
+            MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
+                                                    : _("Article posted."),
+                            NULL, // parent window
+                            MDIALOG_MSGTITLE,
                          "MailSentMessage");
+         }
       }
       else // failed to send/post
       {

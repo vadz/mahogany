@@ -13,6 +13,8 @@
 #ifndef   M_MUPGRADE_H
 #define   M_MUPGRADE_H
 
+class MProgressInfo;
+
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
@@ -24,7 +26,7 @@ extern bool Upgrade(const String& fromVersion);
 extern bool SetupInitialConfig(void);
 
 /// Verify whether the mail configuration works, return true on success.
-extern bool VerifyEMailSendingWorks(void);
+extern bool VerifyEMailSendingWorks(MProgressInfo *proginfo = NULL);
 
 /// Verify whether the INBOX profile exists, return false if it was created.
 extern bool VerifyInbox(void);
