@@ -201,9 +201,26 @@ UUDecodeFilter::DoProcess(String& text,
       {
          // check that we're either at the start of the text or after a blank
          // line
-         if ( start >= text.c_str() + 2 )
+         switch ( start - text.c_str() )
          {
-            hasBegin = start[-1] == _T('\n') && start[-2] == _T('\r');
+            case 0:
+               // leave hasBegin at true
+               break;
+
+            case 1:
+            case 3:
+               // some garbage before "begin": can't be one or 2 EOLs
+               hasBegin = false;
+               break;
+
+               // 2 or 4 and more characters after the start
+            default:
+               // only blank line allowed before
+               if ( start[-1] != _T('\n') || start[-2] != _T('\r') )
+                  hasBegin = false;
+               if ( start - text.c_str() > 2 &&
+                        (start[-3] != _T('\n') || start[-4] != _T('\r')) )
+                  hasBegin = false;
          }
       }
 
