@@ -1661,9 +1661,11 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
    // there is exactly one item with the focus on it
    long focused = GetFocusedItem();
-
-   // this would be a wxWin bug
-   CHECK_RET( focused != -1, "activated unfocused item?" );
+   if ( focused == -1 )
+   {
+      // this may happen if there are no items at all
+      return;
+   }
 
    // show the focused message
    UIdType uid = GetUIdFromIndex(focused);
