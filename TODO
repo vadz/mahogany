@@ -254,6 +254,10 @@ $Id$
   + propose to get only some articles when there are more than some number of
     them (opening a never-read newsgroup takes _ages_)
   + "catch up" command
+  + filtering of cross posted articles - would be very nice if this could be
+    also used to filter the copies of received mail messages (i.e. if a
+    message is sent to the mailing list and cc'd to me I'd like to read it
+    only once)
 
 - wxFolderView assumes that msg numbers are 1...n - change this to use uids instead.
 
@@ -395,3 +399,4 @@ classes in the hierarchy.
  - documentation system should support pictures
  - wxComposeView::Print() fails, wxMessageView::Print() works, why?
 
+ vi: set si tw=80:
