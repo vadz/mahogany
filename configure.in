@@ -974,9 +974,13 @@ case "$USE_CCOSTYPE" in
 		esac ;;
 	darwin*)
 		CCOSTYPE=osx ;;
+	OpenBSD*)
+		CCOSTYPE=bso ;;
 	*)
 		AC_MSG_RESULT(unknown)
-		AC_MSG_ERROR([cannot determine c-client OS type for $OSTYPE])
+		AC_MSG_ERROR([cannot guess c-client OS type for $OSTYPE,
+please have a look at extra/src/c-client/Makefile and use --with-ccostype=xxx
+with xxx being the most appropriate system type from this file.])
 		;;
 	esac
 	dnl cache it to be picked up as a parameter next time
