@@ -15,8 +15,8 @@ $Id$
 		later say that there are M-N new messages :-(
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
-9		Problems with python support?
-9		Mahogany no longer reacts to exit request
+7	KB	skip all unprocessed character events in folderview
+		and messageview to make menu accelerators work
 7 gtk	VZ?	message boxes have broken icons under wxGTK
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
@@ -57,10 +57,10 @@ $Id$
 9	KB	Profile: add enumeration of entries for profile and
 		its subgroups
 
-9??? not sure anymore, wait:
-		MEvents need handlers with different priorities --
-		needed to get Filtering and ASMailFolder to work
-		properly 
+7	KB	Find all possible MT problems in MailFolder.cpp and
+		put mutexes around them.
+7	VZ	document the new properties dialog entries/pages, please
+7	KB	write more on tutorial bit in Manual.lyx
 6		simple HTML import for wxLayout
 6		threading via References header
 5		integrate wxHTML for help and HTML viewing
@@ -70,29 +70,16 @@ $Id$
 		folder name was selected?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
-
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
-
-7	KB	Find all possible MT problems in MailFolder.cpp and
-		put mutexes around them.
 6	KB	implement temporary/fake Profile mode
+5		add goto_next_unread to folderview
+5		add more buttons to folderview, such as
+		next/previous/goto_next_unread
 5	VZ?	Add DND for messages between folders
 5	?	Add DND for MIME content from composeView/messageView
                 to file managers
-2	KB	add sub-directories support for different icon sets to 
-		wxIconManager, e.g. small/large style
-		More icons needed: INBOX, PopServer, IMAPServer,
-		FolderGroup, NewMail, SentMail, small icons (16x16) for the
-		custom headers dialog, AdbImport.
-
-7	VZ	document the new properties dialog entries/pages, please
-3	VZ	XFaces under Windows?
-		KB: no problem if you can read XPMs, use the lib included
-
-7	KB	write tutorial bit in Manual.lyx
-7	KB	finish ASMailFolder classes
 6	KB	completion of filtering rules/scoring code
 6	KB	implement listing of folders on remote
 		servers/subscription API
@@ -108,11 +95,17 @@ $Id$
 4	VZ	add wxWizard for the first time run
 3	VZ	add tips on startup (a wxTipDialog class?)
 
-5		add goto_next_unread to folderview
-5		add more buttons to folderview, such as
-		next/previous/goto_next_unread
 4		improve key bindings for message editor, page up/down
 		whole page
+2	KB	add sub-directories support for different icon sets to 
+		wxIconManager, e.g. small/large style
+		More icons needed: INBOX, PopServer, IMAPServer,
+		FolderGroup, NewMail, SentMail, small icons (16x16) for the
+		custom headers dialog, AdbImport.
+
+3	VZ	XFaces under Windows?
+		KB: no problem if you can read XPMs, use the lib included
+
 2		different icon for activity log frame
 2	VZ?	make activity log frame appear on demand only
 
