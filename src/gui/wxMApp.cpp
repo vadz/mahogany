@@ -1096,7 +1096,8 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 void
 wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 {
-   ASSERT(m_topLevelFrame);
+   if(! m_topLevelFrame) // called when flushing events at program end?
+      return;
 
    UIdType nNNTP, nSMTP;
    bool enable = CheckOutbox(&nSMTP, &nNNTP, mf);
