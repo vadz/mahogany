@@ -75,6 +75,9 @@ $Id$
 		happened? --> doesn't do it here, please explain how to
 		reproduce.
 
+7		unknown folder type in config file provokes a crash => should
+		just ignore the folder!
+
 	VZ	Clicking on "header dialog/More button" produces
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.

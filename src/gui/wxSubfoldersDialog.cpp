@@ -29,10 +29,11 @@
 #  include "strutil.h"
 
 #  include <wx/app.h>
-#  include <wx/treectrl.h>
 #  include <wx/statbox.h>
 #  include <wx/layout.h>
 #endif
+
+#include <wx/treectrl.h>
 
 #include "MFolder.h"
 
@@ -253,17 +254,19 @@ void wxSubscriptionDialog::OnNoMoreFolders()
    EmptyStack();
 }
 
+// needed to be able to use DECLARE_AUTOREF() macro
+typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
+DECLARE_AUTOPTR(ASFolderExistsResult);
+
 bool wxSubscriptionDialog::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
    CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
           "unexpected event type" );
 
-   // needed to be able to use DECLARE_AUTOREF() macro
-   typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-   DECLARE_AUTOPTR(ASFolderExistsResult)
-      result((ASFolderExistsResult *)data.GetResult());
+   
+   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
 
    // is this message really for us?
    if ( result->GetUserData() != this )

@@ -1406,7 +1406,7 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
 {
    CHECK( pName, FALSE, "NULL name in MailFolderCC::SpecToFolderName" );
 
-   String& name(*pName);
+   String& name = *pName;
    switch ( folderType )
    {
       case MF_MH:
