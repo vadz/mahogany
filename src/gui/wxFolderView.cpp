@@ -441,7 +441,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
-// wxFolderListCtrl
+// wxFolderListCtrl char handling
 // ----------------------------------------------------------------------------
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
@@ -609,27 +609,12 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             // don't move focus
             newFocus = -1;
          }
-         else // no trash, the message stays here
-         {
-            // if we had exactly one selected message and we delete it, the
-            // message should be unselected to either preview the next message
-            // immediately or allow previewing it simply by pressing space on
-            // the keyboard - if we don't unselect it, we can't preview the
-            // next message as the preview is only shown when we select the
-            // first message...
-            long item = GetNextSelected(-1);
-            if ( item != -1 && GetNextSelected(item) == -1 )
-            {
-               // there is exactly one item selected, unselect it
-               Select(item, false);
-            }
-         }
-
          break;
 
       case 'U': // undelete
-         m_FolderView->GetTicketList()->Add(
-            m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
+         m_FolderView->GetTicketList()->
+            Add(m_FolderView->GetFolder()->UnDeleteMessages(&selections,
+                                                            m_FolderView));
          break;
 
       case 'X': // expunge
@@ -681,19 +666,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          newFocus = -1;
          break;
 
-      case ' ': // mark:
-         // should just be the default behaviour
-         /* I would like it to mark the current entry and then
-            move to the next one, but it doesn't work.
-            I don't know what funny things wxWindows does here,
-            but for now I leave it as it is.
-
-          event.Skip();
-          MoveFocus(newFocus);
-          return;
-         */
-         ;
-
       default:
          // don't move focus
          newFocus = -1;
@@ -703,6 +675,18 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
    if ( newFocus != -1 )
    {
+      // if we had exactly one selected message and we did something with it,
+      // the message should be unselected to either preview the next message
+      // immediately or allow previewing it simply by pressing space on the
+      // keyboard - if we don't unselect it, we can't preview the next message
+      // as the preview is only shown when we select the first message...
+      long item = GetNextSelected(-1);
+      if ( item != -1 && GetNextSelected(item) == -1 )
+      {
+         // there is exactly one item selected, unselect it
+         Select(item, false);
+      }
+
       // move focus
       Focus(newFocus);
       EnsureVisible(newFocus);
@@ -1039,7 +1023,7 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
       if ( hil )
       {
          long count = hil->Count();
-         while( (item = GetNextSelected(item) != -1) && item < count )
+         while( ((item = GetNextSelected(item)) != -1) && item < count )
          {
             hi = hil[item];
             if ( hi )

@@ -21,7 +21,7 @@
 
 // fwd decl
 class WXDLLEXPORT wxLog;
-class WXDLLEXPORT wxHelpController;
+class WXDLLEXPORT wxHelpControllerBase;
 class WXDLLEXPORT wxPrintData;
 class wxIconManager;
 
@@ -101,7 +101,7 @@ public:
    virtual void ThrLeave(SectionId what, bool testing) { ThrEnterLeave(FALSE, what, testing); }
    //@}
 
-   wxHelpController *GetHelpController(void)
+   wxHelpControllerBase *GetHelpController(void) const
       { return m_HelpController; }
 
    virtual bool IsOnline(void) const;
@@ -138,7 +138,7 @@ private:
    /// an iconmanager instance
    wxIconManager *m_IconManager;
    /// a help controller instance
-   wxHelpController *m_HelpController;
+   wxHelpControllerBase *m_HelpController;
    /// a locale for translation
    class wxLocale *m_Locale;
    /// data for printing

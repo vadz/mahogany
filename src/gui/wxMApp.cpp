@@ -63,6 +63,8 @@
 
 #ifdef OS_WIN
 #   include <winnls.h>
+
+#   include "wx/html/helpctrl.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -814,76 +816,78 @@ int wxMApp::OnExit()
 void
 wxMApp::Help(int id, wxWindow *parent)
 {
-   // store help key used in search
-   static wxString last_key;
-
    // first thing: close splash if it's still there
    CloseSplash();
 
    if(! m_HelpController)
    {
-      bool ok;
-      m_HelpController = new wxHelpController;
-      wxString helpfile;
+      wxString helpfile = GetGlobalDir();
+      if ( !helpfile.empty() )
+         helpfile += '/';
+
 #ifdef OS_UNIX
-#if ! wxUSE_HTML
+      m_HelpController = new wxHelpController;
+#if !wxUSE_HTML
       ((wxExtHelpController *)m_HelpController)->SetBrowser(
          READ_APPCONFIG(MP_HELPBROWSER),
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));
-#endif
-      helpfile = GetGlobalDir()+"/doc";
+#endif // !wxUSE_HTML
+
+      helpfile += "doc";
 #else // Windows
-      helpfile = GetGlobalDir()+"\\doc\\Mahogany.hlp";
+      m_HelpController = new wxHtmlHelpController;
+      helpfile += "doc/html/Manual.hhp";
 #endif // Unix/Windows
+
       // initialise the help system
-      ok = m_HelpController->Initialize(helpfile);
-      if(! ok)
+      if ( !m_HelpController->Initialize(helpfile) )
       {
          wxString msg = _("Cannot initialise help system.\n");
          msg << _("Help file '") << helpfile << _("' not found.");
          wxLogError(msg);
-         return ;
+         delete m_HelpController;
+         m_HelpController = NULL;
+         return;
       }
-      wxSize size = wxSize(
-         READ_APPCONFIG(MP_HELPFRAME_WIDTH),
-         READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
-      wxPoint pos = wxPoint(
-         READ_APPCONFIG(MP_HELPFRAME_XPOS),
-         READ_APPCONFIG(MP_HELPFRAME_YPOS));
+
+      wxSize size = wxSize(READ_APPCONFIG(MP_HELPFRAME_WIDTH),
+                           READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
+      wxPoint pos = wxPoint(READ_APPCONFIG(MP_HELPFRAME_XPOS),
+                            READ_APPCONFIG(MP_HELPFRAME_YPOS));
+
       m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
    }
+
    switch(id)
    {
-      // look up contents:
-   case   MH_CONTENTS:
-      m_HelpController->DisplayContents();
-      break;
-      // implement a search:
-   case MH_SEARCH:
-      if( MInputBox(&last_key,
-                     _("Search for?"),
-                     _("Search help for keyword"),
-                    parent ? parent : TopLevelFrame())
-                    && ! last_key.IsEmpty())
-         m_HelpController->KeywordSearch(last_key);
-      break;
-      // all other help ids, just look them up:
-   default:
-#ifdef OS_WIN
-      // context-sensitive help doesn't work currently, try to at least do
-      // something in response to the commands from the program "Help menu"
-      if ( id == MH_CONTENTS )
+         // look up contents:
+      case MH_CONTENTS:
          m_HelpController->DisplayContents();
-      else
-#endif // OS_WIN
+         break;
 
-      if(! m_HelpController->DisplaySection(id))
-      {
-         wxString str;
-         str.Printf(_("No help found for current context (%d)."), id);
-         MDialog_Message(str,NULL,_("Sorry"));
-      }
-      break;
+         // implement a search:
+      case MH_SEARCH:
+         {
+            // store help key used in search
+            static wxString s_lastSearchKey;
+
+            if ( MInputBox(&s_lastSearchKey,
+                           _("Search for?"),
+                           _("Search help for keyword"),
+                           parent ? parent : TopLevelFrame())
+                 && !s_lastSearchKey.IsEmpty() )
+            {
+               m_HelpController->KeywordSearch(s_lastSearchKey);
+            }
+         }
+         break;
+
+         // all other help ids, just look them up:
+      default:
+         if ( !m_HelpController->DisplaySection(id) )
+         {
+            wxLogWarning(_("No help found for current context (%d)."), id);
+         }
    }
 }
 

@@ -4,10 +4,7 @@ $Id$
 
 *** going back to using this file temporarily until bug tracker is back online
 
-1. why folder is opened and its listing is built when a message is appended to
-   it? very time consuming, can we avoid it?
-   
---> because of CountInterestingMessages() call - should cache it
+1. TABs in msg view?
 
 3. problems with calling wxYield() multiple times (under wxGTK) - what to do?
 
