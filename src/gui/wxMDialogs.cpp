@@ -661,12 +661,20 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
       aChoices.Add(aEntries[nEntry]->GetDescription());
    }
 
-   int w,h;
-   parent = GetParent(parent);
-   parent->GetClientSize(&w,&h);
-   w = (w * 8) / 10;
-   h = (h * 8) / 10;
-
+   int
+      w = 400,
+      h = 400;
+   if(parent)
+   {
+      parent = GetFrame(parent);
+      if(parent)
+      {
+         parent->GetClientSize(&w,&h);
+         w = (w * 8) / 10;
+         h = (h * 8) / 10;
+      }
+   }
+   
    if ( nEntryCount == 0 ) {
      // no matches at all
      return -1;
