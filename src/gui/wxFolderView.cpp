@@ -4116,12 +4116,12 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
       case 'D': // delete
          if ( event.ControlDown() )
          {
-            if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE,
-                                               selections) )
-            {
-               // don't move focus, messages were not expunged
-               newFocus = -1;
-            }
+            m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE, selections);
+
+            // don't move focus: either the messages were not expunged at all
+            // or they were but then we shouldn't move to the next message as
+            // the indices have been invalidated
+            newFocus = -1;
          }
          else // normal delete
          {
