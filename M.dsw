@@ -21,9 +21,6 @@ Package=<4>
     Project_Dep_Name compface
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name wxWindows
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name versit
     End Project Dependency
     Begin Project Dependency
@@ -40,6 +37,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name tiff
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxWindows
     End Project Dependency
 }}}
 
@@ -69,33 +69,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "jpeg"=M:\wxWindows\wxWindows\src\jpeg\jpeg.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name zlib
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "png"=M:\wxWindows\wxWindows\src\png\png.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "python15"=m:\wxWindows\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
 
 Package=<5>
@@ -104,36 +77,6 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "regex"=M:\wxWindows\wxWindows\src\regex\regex.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name tiff
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "tiff"=M:\wxWindows\wxWindows\src\tiff\tiff.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name jpeg
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -150,19 +93,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWindows"=m:\wxWindows\wxWindows\wxWindows.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "zlib"=M:\wxWindows\wxWindows\src\zlib\zlib.dsp - Package Owner=<4>
+Project: "wxWindows"=M:\wxWindows\wxWindows\src\wxWindows.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -55,7 +55,7 @@ don't forget to "cvs up -A" if you had previously used "cvs up -r
 WX_2_2_BRANCH" as described above).
 
    Mahogany now uses the standard wxWindows project files so just build
-wxWindows using the provided src/wx.dsp project. You will need to point
+wxWindows using the provided src/wxWindows.dsp project. You will need to point
 MSDEV to this file when you open M.dsw workspace for the first time.
 
 2. Build process
