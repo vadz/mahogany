@@ -1,15 +1,24 @@
-/*-*- c++ -*-********************************************************
- * Mconfig.h: configuration for M                                   *
- *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
- *                                                                  *
- * $Id$               *
- *******************************************************************/
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   Mconfig.h: common compilation configuration settings
+// Purpose:     config.h is edited by the user, this one detects the rest
+//              automatically
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (C) 1999-2004 by M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MCONFIG_H
 #define MCONFIG_H
 
 #include  "config.h"
+
+// ----------------------------------------------------------------------------
+// detect the OS
+// ----------------------------------------------------------------------------
 
 #undef   OS_SOLARIS
 #undef   OS_LINUX
@@ -47,17 +56,6 @@
 #if defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32) || defined(__CYGWIN__)
 #  define  OS_WIN    1
 #  define  OS_TYPE    "windows"
-#  ifndef  __WINDOWS__
-#       define  __WINDOWS__     // for wxWindows 2.x
-#  endif
-#endif
-
-/// Test for MacOS:
-#if defined( __POWERPC__ ) && ( defined( __MWERKS__ ) || defined ( THINK_C ))
-#   define   OS_MAC   1
-#   define   OS_TYPE      "MacOS"
-#   undef    OS_SUBTYPE
-#   define   OS_SUBTYPE   ""
 #endif
 
 /// Test for MacOS X
@@ -74,6 +72,10 @@
     // this reminder is important!
 #   error   "Unknown platform (forgot to #define unix?)"
 #endif
+
+// ----------------------------------------------------------------------------
+// detect the compiler
+// ----------------------------------------------------------------------------
 
 // Are we using GCC?
 #ifdef  __GNUG__
@@ -95,7 +97,16 @@
 #ifdef   _MSC_VER
 #   define   CC_MSC   1
 #   define   CC_TYPE  "Visual C++"
+
+    // no reason not to use precompiled headers with VC++
+#   ifndef USE_PCH
+#       define USE_PCH
+#   endif
 #endif
+
+// ----------------------------------------------------------------------------
+// miscellaneous other stuff
+// ----------------------------------------------------------------------------
 
 /// debug allocator
 #undef   USE_DEBUGNEW
