@@ -49,7 +49,6 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
 #include "gui/wxSelectionDlg.h"
-#include "gui/wxSpamOptions.h"
 
 class WXDLLEXPORT wxWindow;
 

@@ -636,10 +636,6 @@ SOURCE=.\src\gui\wxSortDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\wxSpamOptions.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\gui\wxSubfoldersDialog.cpp
 # End Source File
 # Begin Source File

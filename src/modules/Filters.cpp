@@ -39,7 +39,6 @@
 #endif // USE_PCH
 
 #include "modules/Filters.h"
-#include "MFilterLang.h"
 #include "MInterface.h"
 #include "SpamFilter.h"
 

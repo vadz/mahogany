@@ -33,7 +33,6 @@
 
 #include "MailFolder.h"
 #include "Message.h"
-#include "MFilterLang.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"

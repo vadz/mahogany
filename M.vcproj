@@ -310,9 +310,6 @@
 					RelativePath=".\src\gui\wxSortDialog.cpp">
 				</File>
 				<File
-					RelativePath=".\src\gui\wxSpamOptions.cpp">
-				</File>
-				<File
 					RelativePath=".\src\gui\wxSubfoldersDialog.cpp">
 				</File>
 				<File
@@ -1355,9 +1352,6 @@
 			</File>
 			<File
 				RelativePath=".\include\MFilter.h">
-			</File>
-			<File
-				RelativePath=".\include\MFilterLang.h">
 			</File>
 			<File
 				RelativePath=".\include\MFolder.h">
