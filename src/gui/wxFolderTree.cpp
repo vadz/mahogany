@@ -482,12 +482,10 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
    //      default 'All folders' label for it, but for now we don't
    menu->Enable(WXMENU_FOLDER_RENAME, !isRoot && folderType != MF_INBOX);
 
-   // the root folder can't be removed, all others can be
-   menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
-
-   // but only some folder types can be deleted
-   menu->Enable(WXMENU_FOLDER_DELETE, !isRoot &&
-                                      CanDeleteFolderOfType(folderType));
+   if ( !isRoot )
+   {
+      menu->Enable(WXMENU_FOLDER_DELETE, CanDeleteFolderOfType(folderType));
+   }
 
    // browsing subfolders only makes sense if we have any and not for the
    // simple groups which can contain anything - so browsing is impossible
@@ -495,9 +493,6 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
                               ? FALSE
                               : CanHaveSubfolders(folderType, folderFlags);
    menu->Enable(WXMENU_FOLDER_BROWSESUB, mayHaveSubfolders);
-
-   // only root folder doesn't have properties
-   menu->Enable(WXMENU_FOLDER_PROP, !isRoot);
 }
 
 MFolder *wxFolderTree::GetSelection() const

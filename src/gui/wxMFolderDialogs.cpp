@@ -2100,28 +2100,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    m_profile->writeEntry(MP_FOLDER_TYPE, folderType | flags);
 
    String server = m_server->GetValue();
-   if ( FolderTypeHasServer(folderType) )
-   {
-      FolderProperty serverType;
-      switch(folderType)
-      {
-      case MF_NNTP:
-         serverType = ServerNews;
-         break;
-      case MF_POP:
-         serverType = ServerPop;
-         break;
-      case MF_IMAP:
-         serverType = ServerImap;
-         break;
-      case MF_GROUP:
-         break;
-      default:
-         ASSERT_MSG(0,"new foldertype with server added");
-      }
-      WriteEntryIfChanged(serverType, server);
-   }
-   else if ( folderType == MF_GROUP )
+   if ( folderType == MF_GROUP )
    {
       // the right thing to do is to write the server value into both profile
       // entries: for POP/IMAP server and for NNTP one because like this
@@ -2129,6 +2108,29 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       WriteEntryIfChanged(ServerNews, server);
       WriteEntryIfChanged(ServerPop, server);
       WriteEntryIfChanged(ServerImap, server);
+   }
+   else if ( FolderTypeHasServer(folderType) )
+   {
+      FolderProperty serverType;
+      switch(folderType)
+      {
+         default:
+            FAIL_MSG( "new foldertype with server added" );
+            // fall through, otherwise we will crash with uninit serverType
+            // anyhow
+
+         case MF_NNTP:
+            serverType = ServerNews;
+            break;
+         case MF_POP:
+            serverType = ServerPop;
+            break;
+         case MF_IMAP:
+            serverType = ServerImap;
+            break;
+      }
+
+      WriteEntryIfChanged(serverType, server);
    }
 
    switch ( folderType )
