@@ -335,7 +335,8 @@ MessageCC::Address(String &name, MessageAddressType type) const
          name = String(addr->personal);
       else
       {
-         if(m_Envelope->from->personal &&
+         if(m_Envelope->from &&
+            m_Envelope->from->personal &&
             strlen(m_Envelope->from->personal))
             name = String(m_Envelope->from->personal);
       }
