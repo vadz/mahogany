@@ -10,13 +10,9 @@ $Id$
 
 ************ HeaderInfo reorganization
 
-1. sorting/threading
-
-2. score/colour setting per message basis: grep for USE_HEADER_SCORE/COLOUR
+score/colour setting per message basis: grep for USE_HEADER_SCORE/COLOUR
 
 ************ bugs
-
-1. find in message view doesn't work, use the new wxWin find dialogs
 
 ************ optimize
 
