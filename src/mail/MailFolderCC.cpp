@@ -5183,7 +5183,7 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
    String msg = _("Mail log");
    if( mf )
       msg << " (" << mf->GetName() << ')';
-   msg << ':' << str
+   msg << ": " << str
 #ifdef DEBUG
        << _(", error level: ") << strutil_ultoa(errflg)
 #endif

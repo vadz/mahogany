@@ -2829,7 +2829,7 @@ VerifyEMailSendingWorks(void)
    }
    else
    {
-      MDialog_ErrorMessage(_("Send the test message failed, please recheck "
+      MDialog_ErrorMessage(_("Sending the test message failed, please recheck "
                              "your configuration settings"));
 
       return false;
