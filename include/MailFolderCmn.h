@@ -62,7 +62,7 @@ public:
        @param expunge expunge messages after deletion
        @return true on success
    */
-   virtual bool DeleteMessages(const INTARRAY *messages, bool expunge);
+   virtual bool DeleteMessages(const INTARRAY *messages, bool expunge=false);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

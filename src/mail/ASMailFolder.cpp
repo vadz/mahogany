@@ -665,7 +665,7 @@ public:
       {
          INTARRAY uids;
          uids.Add(uid);
-         return DeleteMessages(&uids, NULL);
+         return DeleteMessages(&uids, false, NULL);
       }
 
    /** UnDelete a message.
