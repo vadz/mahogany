@@ -188,9 +188,9 @@ public:
    /// sets Subject field
    void SetSubject(const String &subj);
 
-   /// adds recipients from addr (Recipient_None means to reuse the last)
+   /// adds recepients from addr (Recepient_Max means to reuse the last)
    void AddRecipients(const String& addr,
-                      RecipientType rcptType = Recipient_None);
+                      RecepientType rcptType = Recepient_Max);
 
    /// adds a "To" recipient
    void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }
