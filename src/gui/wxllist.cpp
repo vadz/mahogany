@@ -2284,7 +2284,7 @@ wxLayoutList::Delete(CoordType npos)
          if(m_CursorLine->GetLength() == 0)
          {
             // in this case, updating could probably be optimised
-#ifdef WXLO_DEBUG
+#ifdef WXLAYOUT_DEBUG
             wxASSERT(DeleteLines(1) == 0);
 #else
             DeleteLines(1);
@@ -3126,6 +3126,9 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
    // force a full layout of the list:
    m_llist->ForceTotalLayout();
    // layout  is called in ScaleDC() when we have a DC
+#if defined(__UNIX__) && wxCHECK_VERSION(2,2,1)
+   wxPostScriptDC::SetResolution(72);
+#endif
 }
 
 wxLayoutPrintout::~wxLayoutPrintout()
@@ -3182,12 +3185,13 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
   return scale;
 }
 
+
 bool wxLayoutPrintout::OnPrintPage(int page)
 {
    wxDC *dc = GetDC();
 
    ScaleDC(dc);
-
+   
    if (dc)
    {
       int top, bottom;
@@ -3198,7 +3202,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
                   bottom));
       // SetDeviceOrigin() doesn't work here, so we need to manually
       // translate all coordinates.
-      wxPoint translate(m_Offset.x,m_Offset.y-top);
+      wxPoint translate(m_Offset.x,m_Offset.y - top);
       m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly 
                                                        */);
       return true;
