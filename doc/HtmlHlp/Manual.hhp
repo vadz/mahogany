@@ -6,11 +6,14 @@ Default topic=Manual.html
 Display compile progress=No
 Index file=Manual.hhk
 Language=0x409 English (United States)
-Title=Mahogany Manual
+Title=Mahogany User Manual
 
 
 [FILES]
 Manual.html
+
+[MAP]
+#include ..\..\include\mhelp.h
 
 [INFOTYPES]
 
