@@ -1320,6 +1320,17 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
    int ppiPrinterX, ppiPrinterY;
    GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
 
+   if(ppiScreenX == 0) // not yet set, need to guess
+   {
+      ppiScreenX = 100;
+      ppiScreenY = 100;
+   }
+   if(ppiPrinterX == 0) // not yet set, need to guess
+   {
+      ppiPrinterX = 72;
+      ppiPrinterY = 72;
+   }
+  
   // This scales the DC so that the printout roughly represents the
   // the screen scaling. The text point size _should_ be the right size
   // but in fact is too small for some reason. This is a detail that will
