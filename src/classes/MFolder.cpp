@@ -1082,12 +1082,11 @@ bool MFolderFromProfile::Rename(const String& newName)
 
 bool MFolderFromProfile::Move(MFolder *newParent)
 {
-
-   // This does not really 'move' the folder, but it creates a new one 
-   // with the correct parent and name, and copies all the profile information
-   // from the old one to the new one. It then calls Delete on itself, so that
-   // the old folder is removed from the tree. Last thing is to notify everyone
-   // that a new folder has been created.
+   // This does not really 'move' the folder, but it creates a new one with the
+   // correct parent and name, and copies all the profile information from the
+   // old one to the new one. It then calls Delete on itself, so that the old
+   // folder is removed from the tree. Last thing is to notify everyone that a
+   // new folder has been created.
 
    // There are things that do not make sense at all
    CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, _T("How did you manage to try to move an MF_ILLEGAL folder ?") );
