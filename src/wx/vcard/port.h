@@ -59,7 +59,7 @@ For example:
 #define vCardMimeType		"text/x-vCard"
 #define vCalendarMimeType	"text/x-vCalendar"
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(_WIN32)
 #define DLLEXPORT(t) __declspec(dllexport) t
 #define stricmp _stricmp
 #else
