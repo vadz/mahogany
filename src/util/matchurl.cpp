@@ -553,6 +553,7 @@ strutil_findurl(String& str, String& url)
       // no URLs found
       str.swap(before);
       str.clear();
+      url.clear();
    }
    else // found an URL
    {
