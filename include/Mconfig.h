@@ -11,10 +11,11 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _MCONFIG_H_
-#define _MCONFIG_H_
+#ifndef MCONFIG_H
+#define MCONFIG_H
 
 #include  "config.h"
+#include  <wx/defs.h>
 
 // ----------------------------------------------------------------------------
 // detect the OS
@@ -104,6 +105,39 @@
 #   endif
 #endif
 
+// MSVC defines _DEBUG in debug builds, set DEBUG accordingly
+#if defined(_DEBUG) && !defined(DEBUG)
+   #define DEBUG
+#endif
+
+// ----------------------------------------------------------------------------
+// wxWindows stuff
+// ----------------------------------------------------------------------------
+
+#if !wxCHECK_VERSION(2, 5, 1)
+#  error "This version of Mahogany requires wxWindows 2.5.1 or higher."
+#endif
+
+#ifdef USE_THREADS
+#   if !wxUSE_THREADS
+#      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
+#   endif
+#endif
+
+// make sure that wxWin and M settings are in sync: although in theory it
+// should be possible to use mismatching settings, in practice this more often
+// doesn't work than does, so please don't do it unless you really know what
+// you're doing
+#ifdef DEBUG
+#   ifndef __WXDEBUG__
+#      error "Please use debug version of wxWindows with debug Mahogany build."
+#   endif
+#else // Release
+#   ifdef __WXDEBUG__
+#      error "Please don't use debug version of wxWindows with non-debug Mahogany build."
+#   endif
+#endif // Debug/Release
+
 // ----------------------------------------------------------------------------
 // miscellaneous other stuff
 // ----------------------------------------------------------------------------
@@ -154,25 +188,11 @@
 # define  STL_LIST  list
 #endif
 
-#ifdef USE_THREADS
-#   if !  wxUSE_THREADS
-#      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
-#   endif
-#endif
-
 // although this is not necessary, including this header allows to have more
 // info in the logs
 #ifdef USE_DMALLOC
 #   include <dmalloc.h>
 #endif // USE_DMALLOC
 
-// missing macro in 2.4.x headers
-#include <wx/object.h>
-#ifndef DECLARE_DYNAMIC_CLASS_NO_COPY
-#  define DECLARE_DYNAMIC_CLASS_NO_COPY(name)                                 \
-    DECLARE_NO_COPY_CLASS(name)                                               \
-    DECLARE_DYNAMIC_CLASS(name)
-#endif
-
-#endif // _MCONFIG_H_
+#endif // MCONFIG_H
 
