@@ -224,7 +224,7 @@ bool MEventManager::Deregister(void *handle)
 
    size_t n = (size_t)index;
    delete gs_receivers[n];
-   gs_receivers.Remove(n);
+   gs_receivers.RemoveAt(n);
 
    return true;
 }

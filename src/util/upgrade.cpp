@@ -28,6 +28,7 @@
 #  include "strutil.h"
 #  include "Mpers.h"
 #  include "gui/wxMApp.h"  // for wxMApp::GetDialUpManager()
+#  include <wx/stattext.h>
 #endif  //USE_PCH
 
 // use wizard and not the old (and probably broken) dialog-based code

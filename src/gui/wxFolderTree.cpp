@@ -2471,7 +2471,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
       size_t n;
       if ( FindItemWithChangedIcon(item, &n) )
       {
-         m_itemsWithChangedIcons.Remove(n);
+         m_itemsWithChangedIcons.RemoveAt(n);
       }
    }
 
@@ -2491,7 +2491,7 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
       SetItemImage(item, m_itemsWithChangedIcons[n].image);
 
       // and delete the record - can't cancel the same action more than once
-      m_itemsWithChangedIcons.Remove(n);
+      m_itemsWithChangedIcons.RemoveAt(n);
    }
    //else: the icon wasn't changed, so nothing to do
 }

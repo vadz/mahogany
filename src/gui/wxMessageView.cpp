@@ -2560,7 +2560,7 @@ wxMessageView::OnProcessTermination(wxProcessEvent& event)
    }
 #endif
 
-   m_processes.Remove(n);
+   m_processes.RemoveAt(n);
    delete info;
 }
 

@@ -55,6 +55,7 @@
 #   include <wx/layout.h>
 #   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
+#   include <wx/stattext.h>
 #endif // USE_PCH
 
 #include <wx/notebook.h>

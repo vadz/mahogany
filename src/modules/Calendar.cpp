@@ -19,6 +19,7 @@
 #   include "Mdefaults.h"
 #   include "gui/wxMenuDefs.h"
 #   include "MMainFrame.h"
+#   include <wx/stattext.h>
 #endif
 
 
