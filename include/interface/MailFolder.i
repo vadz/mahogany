@@ -15,11 +15,9 @@
 #include "Mcommon.h"
 #include "MailFolder.h"
 
-// SWIG doesn't work with nested classes/constants, this hack at least makes
-// the generated C code compile -- but probably not work...
+// SWIG doesn't supported nested classes, this hack at least makes the
+// generated C code compile -- but probably not work...
 #define Params MailFolder::Params
-#define SEARCH_SET MailFolder::SEARCH_SET
-#define SEARCH_UNDELETED MailFolder::SEARCH_UNDELETED
 %}
 
 %import "swigcmn.i"
