@@ -129,17 +129,6 @@ ARG(STRING , path)
  return ASMailFolder::OpenFolder(MFolder_obj(path));
 ')
 
-FUNCTION(CreateMailFolder, bool, (
-ARG(STRING, name),
-ARG(INT, type, =MF_FILE),
-ARG(INT, flags, = MF_FLAGS_DEFAULT),
-ARG(STRING, path, = ""),
-ARG(STRING, comment, = "")
-),
-` return MailFolder::CreateFolder(name,(MFolderType)type,flags,path,comment); ')
-
-
-
 FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `::strutil_tolower(str);')
 
 FUNCTION(strutil_compileRegEx, class strutil_RegEx *, (

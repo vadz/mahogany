@@ -205,21 +205,6 @@ const char *  path
 
 
 
-virtual bool CreateMailFolder (
-const char * name,
-long int type,
-long int flags,
-const char * path,
-const char * comment
-)
-{
- return MailFolder::CreateFolder(name,(MFolderType)type,flags,path,comment); 
-}
-
-
-
-
-
 virtual void strutil_tolower ( String & str)
 {
 ::strutil_tolower(str);

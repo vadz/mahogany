@@ -137,18 +137,6 @@ const char *  path
 
 
 
-virtual bool CreateMailFolder (
-const char * name ,
-long int type =MF_FILE,
-long int flags = MF_FLAGS_DEFAULT,
-const char * path = "",
-const char * comment = ""
-) = 0;
-
-
-
-
-
 virtual void strutil_tolower ( String & str ) = 0;
 
 
