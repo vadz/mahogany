@@ -67,6 +67,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 
+export MCONF_FILE=%prefix/share/Mahogany/M.conf
+echo "# added by rpm installation" >> $MCONF_FILE
+echo "GlobalDir=$MCONF_FILE" >> $MCONF_FILE
+
 %postun
 
 %files -f filelist
