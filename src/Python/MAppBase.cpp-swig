@@ -517,13 +517,24 @@ static swig_type_info *swig_types[7];
 #define MDIALOG_FATALERRTITLE_C (char *)MDIALOG_FATALERRTITLE
 #define MDIALOG_MSGTITLE_C (char *)MDIALOG_MSGTITLE
 #define MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
-
-// it's not really a dialog, but is useful too
-inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
-  { wxLogStatus(frame, message); }
 #ifdef __cplusplus
 extern "C" {
 #endif
+static PyObject *_wrap_MDialog_StatusMessage(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    char *arg0 ;
+    MFrame *arg1 = NULL ;
+    PyObject * argo1 =0 ;
+    
+    if(!PyArg_ParseTuple(args,"s|O:MDialog_StatusMessage",&arg0,&argo1)) return NULL;
+    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_MFrame,1)) == -1) return NULL;
+    MDialog_StatusMessage((char const *)arg0,arg1);
+    Py_INCREF(Py_None);
+    resultobj = Py_None;
+    return resultobj;
+}
+
+
 static PyObject *_wrap_wxGetApp(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MAppBase *result ;
@@ -600,21 +611,6 @@ static PyObject *_wrap_MDialog_Message(PyObject *self, PyObject *args) {
     if(!PyArg_ParseTuple(args,"s|Os:MDialog_Message",&arg0,&argo1,&arg2)) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_MFrame,1)) == -1) return NULL;
     MDialog_Message((char const *)arg0,arg1,(char const *)arg2);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
-    return resultobj;
-}
-
-
-static PyObject *_wrap_MDialog_StatusMessage(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    char *arg0 ;
-    MFrame *arg1 = NULL ;
-    PyObject * argo1 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"s|O:MDialog_StatusMessage",&arg0,&argo1)) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_MFrame,1)) == -1) return NULL;
-    MDialog_StatusMessage((char const *)arg0,arg1);
     Py_INCREF(Py_None);
     resultobj = Py_None;
     return resultobj;
@@ -796,12 +792,12 @@ static PyObject *_wrap_MAppBase_GetProfile(PyObject *self, PyObject *args) {
 
 
 static PyMethodDef MAppBasecMethods[] = {
+	 { "MDialog_StatusMessage", _wrap_MDialog_StatusMessage, METH_VARARGS },
 	 { "wxGetApp", _wrap_wxGetApp, METH_VARARGS },
 	 { "MDialog_ErrorMessage", _wrap_MDialog_ErrorMessage, METH_VARARGS },
 	 { "MDialog_SystemErrorMessage", _wrap_MDialog_SystemErrorMessage, METH_VARARGS },
 	 { "MDialog_FatalErrorMessage", _wrap_MDialog_FatalErrorMessage, METH_VARARGS },
 	 { "MDialog_Message", _wrap_MDialog_Message, METH_VARARGS },
-	 { "MDialog_StatusMessage", _wrap_MDialog_StatusMessage, METH_VARARGS },
 	 { "MDialog_YesNoDialog", _wrap_MDialog_YesNoDialog, METH_VARARGS },
 	 { "MDialog_FileRequester", _wrap_MDialog_FileRequester, METH_VARARGS },
 	 { "MInputBox", _wrap_MInputBox, METH_VARARGS },
