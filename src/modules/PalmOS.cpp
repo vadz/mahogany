@@ -53,6 +53,8 @@ class PalmBook;
 #define MP_MOD_PALMOS_SYNCMAIL_D 1l
 #define MP_MOD_PALMOS_SYNCADDR   "SyncAddr"
 #define MP_MOD_PALMOS_SYNCADDR_D 1l
+#define MP_MOD_PALMOS_BACKUP     "Backup"       // experimental
+#define MP_MOD_PALMOS_BACKUP_D   0l             // experimental
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -80,8 +82,11 @@ class PalmBook;
 #include <pi-mail.h>        // for the mailbox
 #include <pi-dlp.h>
 
+#include <adb/AdbManager.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -91,6 +96,7 @@ class PalmBook;
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <utime.h>
 
 #include <wx/log.h>
 #include <wx/textfile.h>
@@ -206,6 +212,10 @@ private:
    void SendEMails(void);
    void StoreEMails(void);
 
+#if EXPERIMENTAL
+   void Backup(void);
+#endif
+
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
    inline void Message(const String &msg)
@@ -218,6 +228,7 @@ private:
 
 #if EXPERIMENTAL
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
+   void RemoveFromList(char *name, char **list, int max);
 #endif
 
    int m_PiSocket;
@@ -226,7 +237,7 @@ private:
    ProfileBase *m_Profile;
 
    int m_Dispose;
-   bool m_SyncMail, m_SyncAddr, m_LockPort;
+   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
    int m_Speed;
    class wxDeviceLock *m_Lock;
@@ -251,14 +262,17 @@ PalmOSModule::Entry(int arg, ...)
       // GetFlags():
    case 0:
       return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
+
       // Main():
    case 1:
       Synchronise(NULL);
       return 0;
+
       // Configure():
    case 2:
       Configure();
       return 0;
+
       // module specific functions:
       // MMOD_FUNC_USER : Synchronise ADB
    case MMOD_FUNC_USER:
@@ -287,7 +301,8 @@ PalmOSModule::GetConfig(void)
 
    // all other values get read from the module profile:
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
-   
+
+   m_Backup   = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
    m_SyncMail = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
    m_SyncAddr = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
    m_LockPort = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
@@ -457,6 +472,7 @@ PalmOSModule::Disconnect(void)
 
 void PalmOSModule::Synchronise(PalmBook *p_Book)
 {
+  // TODO: add option to skip question 
   if(m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
   {
      GetConfig();
@@ -481,9 +497,6 @@ void PalmOSModule::Synchronise(PalmBook *p_Book)
 
      if(m_SyncAddr)
      {
-        // this does read the PalmADB and stores
-        // the entries to the PalmBook
-
         GetAddresses(p_Book);
         
         // close the database again
@@ -491,12 +504,193 @@ void PalmOSModule::Synchronise(PalmBook *p_Book)
             dlp_CloseDB(m_PiSocket, m_AddrDB);
         }
      }
-     
+
+#ifdef EXPERIMENTAL
+     if(m_Backup)
+     {
+        Backup();
+     }
+#endif
      Disconnect();
      m_Profile->DecRef();
      m_Profile=NULL;
   }
 }
+
+
+#ifdef EXPERIMENTAL
+/* Protect = and / in filenames */
+static void protect_name(char *d, char *s)
+{
+    while(*s) {
+      switch(*s) {
+          case '/': *(d++) = '=';
+                    *(d++) = '2';
+                    *(d++) = 'F';
+                    break;
+          case '=': *(d++) = '=';
+                    *(d++) = '3';
+                    *(d++) = 'D';
+                    break;
+          case '\x0A':
+                    *(d++) = '=';
+                    *(d++) = '0';
+                    *(d++) = 'A';
+                    break;
+          case '\x0D': 
+                    *(d++) = '=';
+                    *(d++) = '0';
+                    *(d++) = 'D';
+                    break;
+          default: *(d++) = *s;
+      }
+      s++;
+    }
+    *d = '\0';
+}
+
+void
+PalmOSModule::RemoveFromList(char *name, char **list, int max)
+{
+  int i;
+
+  for (i = 0; i < max; i++) {
+    if (list[i] != NULL && strcmp(name, list[i]) == 0) {
+      free(list[i]);
+      list[i] = NULL;
+    }
+  }
+}
+
+void
+PalmOSModule::Backup(void) 
+{
+   /* This is a first attempt to add backup functionality to Mahogany. It
+   ** is currently not ready for daily-use but shouldn´t put any danger to
+   ** your data either as it currently only reads from but does not write
+   ** to the Palm.
+   */
+   
+   /* It will be necessary to add several options to the PalmOSModule
+   ** configuration dialog, like ...
+   */
+   bool removeDeleted = FALSE;     // really delete deleted entries on the Palm
+   bool onlyChanged   = FALSE;     // backup only changed files or always all?
+
+   // we are backing up to /tmp/palmbackup for now, a "real" directory would have
+   // to be specified in the configuration dialog
+   char *dirname = "/tmp/palmbackup";   // TODO: Read value from configuration
+   mkdir(dirname, 0700);
+   
+   // Read original list of files in the backup dir
+   int i, ofile_total, ofile_len;
+   DIR * dir;
+   struct dirent * dirent;
+   char ** orig_files = 0;
+
+   ofile_total = 0;
+   ofile_len = 0;
+
+   if (onlyChanged) {
+      dir = opendir(dirname);
+      while( (dirent = readdir(dir)) ) {
+         char name[256];
+         if (dirent->d_name[0] == '.')
+            continue;
+
+         if (!orig_files) {
+            ofile_len += 256;
+            orig_files = malloc(sizeof(char*) * ofile_len);
+         } else if (ofile_total >= ofile_len) {
+            ofile_len += 256;
+            orig_files = realloc(orig_files, sizeof(char*) * ofile_len);
+         }
+
+         sprintf(name, "%s/%s", dirname, dirent->d_name);
+         orig_files[ofile_total++] = strdup(name);
+      }
+      closedir(dir);
+   }
+
+   i = 0;
+   while (true) {
+      struct DBInfo   info;
+      struct pi_file *f;
+      struct utimbuf  times;
+      struct stat     statb;
+      char            name[256];
+
+      if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
+         break;
+         
+      i = info.index + 1;
+      
+      if (dlp_OpenConduit(m_PiSocket) < 0) {
+         ErrorMessage(_("Exiting on cancel, backup process incomplete!"));
+         return;
+      }
+      
+      strcpy(name, dirname);
+      strcat(name, "/");
+      protect_name(strlen(name) + name, info.name);
+      if (info.flags & dlpDBFlagResource)
+         strcat(name, ".prc");
+      else
+         strcat(name, ".pdb");
+         
+      if (onlyChanged) {
+         if (stat(name, &statb) == 0) {
+            if (info.modifyDate == statb.st_mtime) {
+               RemoveFromList(name, orig_files, ofile_total);
+               continue;
+            }
+         }
+      }
+      
+      // don´t keep DB_open flag
+      info.flags &= 0xff;
+      
+      // create file
+      f = pi_file_create(name, &info);
+      if (f == 0) {
+         ErrorMessage(_("Unable to create file!"));
+         break;
+      }
+      
+      if (pi_file_retrieve(f, m_PiSocket, 0) < 0)
+         ErrorMessage(_("Unable to back up database!"));
+      
+      pi_file_close(f);
+      
+      /* Note: This is no guarantee that the times on the host syst
+         actually match the GMT times on the Pilot. We only check to
+         see whether they are the same or different, and do not treat
+         them as real times. */
+
+      times.actime = info.createDate;
+      times.modtime = info.modifyDate;
+      utime(name, &times);
+
+      RemoveFromList(name, orig_files, ofile_total);
+   }
+   
+   // All files are backed up now. 
+   if (orig_files) {
+      for (i = 0; i < ofile_total; i++)
+        if (orig_files[i] != NULL) {
+          if (removeDeleted)
+             unlink(orig_files[i]);
+          free(orig_files[i]);
+        }
+      if (orig_files)
+        free(orig_files);
+   }
+   
+   
+}
+
+#endif
+
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
@@ -506,13 +700,18 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    char   buf[0xffff];
    struct AddressAppInfo aai;
    PalmEntryGroup *rootGroup;
-   
+
+/*   
    if (!palmbook) {
-      ErrorMessage(_("No PalmBook specified."));
-      // TODO: Check for already existing PalmADB and update it, or
-      // create one ourselves!
-      return;
-   }
+      AdbManager_obj adbManager;
+      adbManager->LoadAll();
+      
+      // There is no PalmBook, create a new one if possible
+      palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook");
+*/      
+      if (!palmbook) {
+        return;
+      }
 
    /* Open the Address database, store access handle in db */
    if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
@@ -541,6 +740,7 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
   struct Address a;
   char buf[0xffff];
   int category, attribute;
+  int addrCount;
 
   // the categories of the Palm addressbook
   struct CategoryAppInfo cats = aai->category;
@@ -554,6 +754,14 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
       catGroups[i] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[i]);
 
   // read every single address
+  dlp_ReadOpenDBInfo(m_PiSocket, db, &addrCount);
+  
+  /* TODO
+  ** addrCount does now contain the number of addresses we are going
+  ** to read. This should make it possible to display a statusbar
+  ** so the user can see the progress of the db import.
+  */
+  
   int l, j;
   for(int i = 0;
      (j = dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
