@@ -29,6 +29,8 @@
 #include "MInterface.h"
 #include "Message.h"
 
+#include "Mdnd.h"
+
 #include "ASMailFolder.h"
 #include "Message.h"
 
@@ -161,7 +163,7 @@ public:
       { m_started = TRUE; return wxTimer::Start(60*60*1000, TRUE); }
 
    virtual void Notify(void);
-   
+
     virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
 
@@ -184,7 +186,7 @@ class CalendarModule : public MModule_Calendar
    MMODULE_DEFINE();
 
    virtual bool ScheduleMessage(class SendMessageCC *msg);
-   
+
    void OnTimer(void);
    bool OnASFolderResultEvent(MEventASFolderResultData & ev );
    bool OnFolderUpdateEvent(MEventFolderUpdateData &ev );
@@ -206,7 +208,7 @@ private:
    bool OnMEvent(MEventData &event);
    class CalEventReceiver *m_EventReceiver;
    friend class CalEventReceiver;
-   
+
    void CreateFrame(void);
    void TellDeleteFrame(void)
       {
@@ -324,9 +326,9 @@ public:
          m_TextCtrl->SetValue(tmp);
       }
    void OnSpinUp(wxCommandEvent & WXUNUSED(event) ) { OnSpin(+1); }
-   
+
    void OnSpinDown(wxCommandEvent & WXUNUSED(event) ) { OnSpin(-1); }
-   
+
    wxDateTimeWithRepeat GetDate() { return m_Date; }
 protected:
    wxDateTimeWithRepeat     m_Date;
@@ -437,7 +439,7 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    c->height.AsIs();
    m_EndsOn->SetConstraints(c);
    m_EndsOn->SetValue(TRUE);
-   
+
    m_CalCtrlEnd = new wxCalendarCtrl(this,-1, dt,
                                      wxDefaultPosition,
                                      wxDefaultSize,
@@ -484,7 +486,7 @@ public:
                     ActionEnum action = CAL_ACTION_REMIND,
                     const wxDateTimeWithRepeat &when = wxDefaultDateTime);
    bool ScheduleMessage(SendMessageCC *msg);
-   
+
    /** checks if anything needs to be done:
        @param mf if non-NULL, react to change in this folder if is ours
    */
@@ -503,7 +505,7 @@ protected:
                         Message *msg,
                         const wxDateTimeWithRepeat &dt,
                         ActionEnum action);
-   
+
 
 private:
    MInterface * m_MInterface;
@@ -583,7 +585,7 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    c->width.SameAs(this, wxWidth);
    c->height.SameAs(this, wxHeight);
    panel->SetConstraints(c);
-   
+
    m_CalCtrl = new wxCalendarCtrl(panel,-1, wxDefaultDateTime,
                                   wxDefaultPosition,
                                   wxDefaultSize,
@@ -607,6 +609,8 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
 
    panel->SetAutoLayout(TRUE);
    SetAutoLayout(TRUE);
+
+   new MMessagesDropTarget(NULL, this); // TODO
 
    CreateStatusBar();
    GetConfig();
@@ -651,7 +655,7 @@ CalendarFrame::GetConfig(void)
 
    // settings read from normal module profile:
    m_FolderName = m_Profile->readEntry(MP_MOD_CALENDAR_BOX,
-                                       MP_MOD_CALENDAR_BOX_D); 
+                                       MP_MOD_CALENDAR_BOX_D);
    m_Show = m_Profile->readEntry(MP_MOD_CALENDAR_SHOWONSTARTUP,
                                  MP_MOD_CALENDAR_SHOWONSTARTUP_D);
 
@@ -832,7 +836,7 @@ CalendarFrame::DeleteOrRewrite(MailFolder *mf,
                                const wxDateTimeWithRepeat &dt,
                                ActionEnum action)
 {
-   if(dt.IsRepeating() && dt.GetEndDate() > wxDateTime::Now()) 
+   if(dt.IsRepeating() && dt.GetEndDate() > wxDateTime::Now())
    {
       /* We need to change the first date and re-store
          it in folder. */
@@ -840,7 +844,7 @@ CalendarFrame::DeleteOrRewrite(MailFolder *mf,
 
       // we now calculate the new start date:
       wxDateTime::Tm tm = dt.GetTm();
-      
+
       if(dt.GetDayRepeat())
          tm.AddDays(dt.GetDayRepeat());
       else if(dt.GetMonthRepeat())
@@ -920,9 +924,9 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
    }
    if(deleted)
       mf->ExpungeMessages();
-   mf->DecRef(); 
+   mf->DecRef();
 }
-   
+
 void
 CalendarFrame::AddReminder(const wxString &itext,
                            ActionEnum action,
@@ -1103,7 +1107,7 @@ CalendarModule::ScheduleMessage(class SendMessageCC *msg)
    return m_Frame->ScheduleMessage(msg);
 }
 
-   
+
 
 void
 CalendarModule::CreateFrame(void)

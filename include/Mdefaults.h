@@ -334,6 +334,11 @@
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT   "DialUpNetSupport"
 
+/// should we attach vCard to outgoing messages?
+#define MP_USEVCARD "UseVCard"
+/// the vCard to use
+#define MP_VCARD "VCard"
+
 #if defined(OS_WIN)
 /// the RAS connection to use
 #define MP_NET_CONNECTION "RasConnection"
@@ -802,6 +807,11 @@
 #define   MP_BEACONHOST_D      ""
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_D   0L
+
+/// should we attach vCard to outgoing messages?
+#define MP_USEVCARD_D 0l
+/// the vCard to use
+#define MP_VCARD_D "vcard.vcf"
 
 #if defined(OS_WIN)
 /// the RAS connection to use

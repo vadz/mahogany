@@ -46,13 +46,12 @@
 
 #include "wx/vcard.h"
 
-
 // - required by vcard parser:
 extern "C" {
 void Parse_Debug(const char *s)
 {
 #ifdef DEBUG
-	wxLogDebug(s);
+    wxLogDebug(s);
 #endif
 }
 };
@@ -407,6 +406,11 @@ bool wxVCard::GetVersion(wxString *version) const
     return GetNamedPropValue(VCVersionProp, version);
 }
 
+bool wxVCard::GetBirthDayString(wxString *birthday) const
+{
+    return GetNamedPropValue(VCBirthDateProp, birthday);
+}
+
 // ----------------------------------------------------------------------------
 // composite properties
 // ----------------------------------------------------------------------------
@@ -453,10 +457,10 @@ bool wxVCard::GetOrganization(wxString *name, wxString *unit) const
 // other (non string) std properties
 // ----------------------------------------------------------------------------
 
-bool wxVCard::GetBirthDay(wxDateTime *datetime)
+bool wxVCard::GetBirthDay(wxDateTime *datetime) const
 {
     wxString value;
-    if ( !GetNamedPropValue(VCBirthDateProp, &value) )
+    if ( !GetBirthDayString(&value) )
         return FALSE;
 
     if ( !datetime->ParseDate(value) )

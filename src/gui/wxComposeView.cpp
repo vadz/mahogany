@@ -426,7 +426,7 @@ protected:
 
    // Expand determines the category and then calls one of these functions
    bool ExpandMisc(const String& name, String *value) const;
-   bool ExpandFile(const String& name, 
+   bool ExpandFile(const String& name,
                    const wxArrayString& arguments,
                    String *value) const;
    bool ExpandAttach(const String& name,
@@ -483,6 +483,8 @@ private:
 static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 {
    TemplatePopupMenuItem(_("Put &cursor here"), "$cursor"),
+   TemplatePopupMenuItem(),
+   TemplatePopupMenuItem(_("Insert current &date"), "$date"),
    TemplatePopupMenuItem(),
    TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
    TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
@@ -1027,7 +1029,7 @@ wxComposeView::DoInitText(Message *msg)
             MDialog_Message(msg, m_LayoutWindow,
                             _("Signature is too long"),
                             GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
-   
+
          }
 
          layoutList->MoveCursorTo(wxPoint(0,0));
@@ -1132,6 +1134,71 @@ wxComposeView::DoInitText(Message *msg)
          }
       }
    } while ( templateChanged );
+
+   // finally, attach a vCard if requested
+   if ( READ_CONFIG(m_Profile, MP_USEVCARD) )
+   {
+      // read the vCard from the file specified in config
+      wxString vcard,
+               filename = READ_CONFIG(m_Profile, MP_VCARD);
+
+      bool hasCard = false;
+      while ( !hasCard )
+      {
+         wxString msg;
+         if ( !filename )
+         {
+            msg = _("You haven't configured your vCard file.");
+         }
+         else // have file name
+         {
+            wxFFile file(filename);
+            if ( file.IsOpened() && file.ReadAll(&vcard) )
+            {
+               hasCard = true;
+            }
+            else
+            {
+               wxLog::FlushActive();
+
+               msg = _("Couldn't read vCard file '%s'.");
+            }
+         }
+
+         if ( !hasCard )
+         {
+            msg += _("\n\nWould you like to choose your vCard now?");
+            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                     true, "AskForVCard") )
+            {
+               wxString pattern;
+               pattern << _("vCard files (*.vcf)|*.vcf") << '|' << wxALL_FILES;
+               filename = wxPFileSelector("vcard",
+                                          _("Choose vCard file"),
+                                          NULL, "vcard.vcf", NULL,
+                                          pattern,
+                                          0, this);
+            }
+            else
+            {
+               // user doesn't want to use signature file
+               break;
+            }
+
+            if ( !filename )
+            {
+               // the file selection dialog was cancelled
+               break;
+            }
+         }
+      }
+
+      // now do attach it
+      if ( hasCard )
+      {
+         InsertData(vcard.c_str(), vcard.length(), "text/x-vcard", filename);
+      }
+   }
 
    m_LayoutWindow->Refresh();
 }
@@ -1378,7 +1445,7 @@ wxComposeView::CreateFTCanvas(void)
    m_LayoutWindow->SetFocusFollowMode(
       READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
-   
+
    EnableEditing(true);
    DoClear();
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
@@ -2073,7 +2140,7 @@ wxComposeView::Send(bool schedule)
          mf->SetMessageFlag(m_OriginalMessage->GetUId(),
                             MailFolder::MSG_STAT_ANSWERED, true);
    }
-   
+
    return success;
 }
 
@@ -2836,7 +2903,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          break;
 
       default:
-         CHECK( header <= MessageHeader_LastControl, FALSE, 
+         CHECK( header <= MessageHeader_LastControl, FALSE,
                 "unexpected macro in message category" );
 
          // the MessageHeader enum values are the same as AddressField ones, so no

@@ -211,7 +211,7 @@ public:
          if(f) f->DecRef();
          return true;
       }
-   
+
 private:
    MFolder *m_folder;
    MailCollectorFolderList *m_list;
@@ -271,10 +271,10 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_Message = "";
    m_Count = 0;
    bool rc = true;
-   
+
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
-   UpdateFolderList(); 
+   UpdateFolderList();
 
    int updateFlags = m_NewMailFolder->GetUpdateFlags();
    if(mf == NULL)
@@ -285,7 +285,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
          // set flags each time because they get reset by SaveMessages()
          m_NewMailFolder->SetUpdateFlags(0 /* no updates, no new mail
                                               detection */);
-	 if ((*i)->m_folder)
+            if ((*i)->m_folder)
              rc &= CollectOneFolder((*i)->m_folder);
       }
    }
@@ -334,7 +334,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    int updateFlags = mf->GetUpdateFlags();
    mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
    UIdArray selections;
-   
+
    const HeaderInfo *hi;
    size_t i;
    HeaderInfoList *hil = mf->GetHeaders();
@@ -376,7 +376,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    }
    else
       rc = true;
-   
+
    mf->SetUpdateFlags(updateFlags);
    mf->Ping(); //update it
 
@@ -426,8 +426,8 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
    {
       if((**i).m_name == name)
       {
-         if ((**i).m_folder) 
-	     (**i).m_folder->DecRef();
+         if ((**i).m_folder)
+            (**i).m_folder->DecRef();
          m_list->erase(i);
          return true;
       }
@@ -455,18 +455,18 @@ MailCollectorImpl::UpdateFolderList(void)
       for(i = m_list->begin();i != m_list->end();i++)
       {
          if((**i).m_folder == NULL) // try to open:
-	 {
+         {
             (**i).m_folder = MailFolder::OpenFolder((**i).m_name);
             if((**i).m_folder == NULL) // folder inaccessible:
             {
                ERRORMESSAGE((_("Cannot open incoming folder '%s'."),
                              (**i).m_name.c_str()));
                wxString msg;
-               msg.Print(_("Accessing the incoming folder\n"
-                           "'%s' failed.\n\n"
-                           "Do you want to stop collecting\n"
-                           "mail from it in this session?"),
-                         (**i).m_name.c_str());
+               msg.Printf(_("Accessing the incoming folder\n"
+                            "'%s' failed.\n\n"
+                            "Do you want to stop collecting\n"
+                            "mail from it in this session?"),
+                          (**i).m_name.c_str());
                if(MDialog_YesNoDialog(
                   msg, NULL, _("Mail collection failed"),
                   TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))

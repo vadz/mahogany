@@ -306,12 +306,13 @@ public:
 
     bool GetFullName(wxString *fullName) const;
     bool GetName(wxString *familyName,
-                 wxString *givenName,
-                 wxString *additionalNames,
-                 wxString *namePrefix,
-                 wxString *nameSuffix) const;
-    bool GetPhoto(wxVCardImage *image);
-    bool GetBirthDay(wxDateTime *datetime);
+                 wxString *givenName = NULL,
+                 wxString *additionalNames = NULL,
+                 wxString *namePrefix = NULL,
+                 wxString *nameSuffix = NULL) const;
+    bool GetPhoto(wxVCardImage *image) const;
+    bool GetBirthDay(wxDateTime *birthday) const;
+    bool GetBirthDayString(wxString *birthday) const;
 
     bool GetEMail(wxString *email) const; // convenience function, see below
     bool GetMailer(wxString *mailer) const;

@@ -1171,6 +1171,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          askForTemplate = TRUE;
          break;
 
+      case WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_FOLLOWUP;
+         askForTemplate = TRUE;
+         break;
+
       default:
          askForTemplate = FALSE;
    }

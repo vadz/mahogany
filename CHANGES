@@ -1,10 +1,12 @@
 (next release) on (date of next release)
+17.05.00 VZ: added possibility to attach vCards to outgoing messages
+             added vCard import module for the address book editor
 16.05.00 KB: Calendar module does repeating events (minor glitches still)
 15.05.00 KB: Mahogany now runs as "root", too. Fixes to MailCollector and invocation
              of filters. de.po is up to date.
 12.05.00 VZ: added "compose with template" and "edit templates"
-09.05.00 VZ: implemented reply/forward with template menu commands
-09.05.00 VZ: version number bumped to 0.60a
+09.05.00 VZ: implemented reply/forward/followup with template menu commands
+09.05.00 VZ: version number bumped to 0.60
 03.05.00 KB: Started work on a small calendar plugin
 02.05.00 VZ: folder renaming implemented
 02.05.00 VZ: the log window can be shown/hidden, closing it hides it permanently

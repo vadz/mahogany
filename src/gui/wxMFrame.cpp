@@ -271,8 +271,8 @@ wxMFrame::OnMenuCommand(int id)
       break;
 
    case WXMENU_FILE_COLLECT:
-//      MEventManager::Send( new MEventPingData );
-	mApplication->GetMailCollector()->Collect();
+      //MEventManager::Send( new MEventPingData );
+      mApplication->GetMailCollector()->Collect();
       break;
 
 #ifdef USE_PYTHON

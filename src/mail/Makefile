@@ -1,13 +1,14 @@
 # Makefile for src/mail directory
 
-CWD = mail 
+CWD = mail
 SRC = MailFolder.cpp Message.cpp MailFolderCC.cpp MessageCC.cpp \
 SendMessageCC.cpp ASMailFolder.cpp MailMH.cpp
 
 include ../../makeopts
 
 ifdef EXPERIMENTAL
-SRC += MMailFolder.cpp
+#commenting out for now as it doesn't do anything and gives tons of warnings
+#SRC += MMailFolder.cpp
 endif
 
 HDR = $(SRC:.cpp=.h)
