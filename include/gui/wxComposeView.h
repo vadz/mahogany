@@ -300,6 +300,8 @@ private:
    wxLayoutWindow *m_LayoutWindow;
       /// the alias expand button
    wxButton *aliasButton;
+   /// the button showing the xface
+   class wxXFaceButton *m_XFaceButton;
    //@}
 
    int m_font, m_size;

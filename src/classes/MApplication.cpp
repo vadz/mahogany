@@ -44,7 +44,7 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
-#include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
+#include "MDialogs.h"   // MDialog_YesNoDialog
 #include "gui/wxIconManager.h"
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
@@ -432,6 +432,10 @@ MAppBase::OnStartup()
 
       m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
+   // We need to set this before wxWindows has a chance to process
+   // idle events (splash screen), in case there was any problem with
+   // the config file, or it will show the unknown icon.
+   GetIconManager()->SetSubDirectory(READ_APPCONFIG(MP_ICONSTYLE));
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from)
@@ -450,8 +454,6 @@ MAppBase::OnStartup()
 
       return false;
    }
-
-   GetIconManager()->SetSubDirectory(READ_APPCONFIG(MP_ICONSTYLE));
 
 #ifdef OS_WIN
    // cclient extra initialization under Windows
@@ -553,14 +555,6 @@ MAppBase::OnStartup()
    // should never fail...
    CHECK( m_eventReg, FALSE,
           "failed to register event handler for new mail event " );
-
-
-#ifdef EXPERIMENTAL
-   /* Test the Filtering subsystem. Completely disabled in release
-      build. */
-   extern void FilterTest(const String &program);
-   FilterTest(m_profile->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print(); "));
-#endif
 
    return TRUE;
 }

@@ -1969,6 +1969,7 @@ wxComposeView::InsertText(const String &txt)
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
    m_LayoutWindow->ResizeScrollbars(true);
    m_LayoutWindow->SetModified();
+   m_LayoutWindow->GetLayoutList()->ForceTotalLayout();
 }
 
 /// print the message

@@ -136,12 +136,12 @@ public:
    /** Get this object's profile, not reference counted.
        @return a pointer to the profile.
    */
-   ProfileBase *GetProfile(void) const { return m_profile; }
+   virtual ProfileBase *GetProfile(void) const { return m_profile; }
 
    /** Get the MailCollector object, not reference counted.
        @return reference to the mailcollector object.
    */
-   class MailCollector *GetMailCollector(void) const { return m_MailCollector; }
+   virtual class MailCollector *GetMailCollector(void) const { return m_MailCollector; }
    /** Toggle display of log output window
        @param display true to show it
    */

@@ -488,6 +488,45 @@ wxButton *wxEnhancedPanel::CreateButton(const wxString& labelAndId,
    return btn;
 }
 
+
+// create a button
+wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
+                                                  labelAndId,
+                                                  long widthMax,
+                                                  wxControl *last)
+{
+   wxLayoutConstraints *c;
+
+   // split the label into the real label and the button id
+   wxString label(labelAndId.BeforeFirst(':')),
+            strId(labelAndId.AfterFirst(':'));
+   int id;
+   if ( !strId || !sscanf(strId, "%d", &id) )
+      id = -1;
+
+   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, wxString(""));
+
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
+   c->centreY.SameAs(btn, wxCentreY);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+   pLabel->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   btn->SetConstraints(c);
+
+   return btn;
+}
 // create a checkbox
 wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
                                               long widthMax,

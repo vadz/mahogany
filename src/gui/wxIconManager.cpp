@@ -27,11 +27,11 @@
 #  include "Profile.h"
 #  include "PathFinder.h"
 #  include "MApplication.h"
+#  include "Mdefaults.h"
 #endif
 
-#include "Mdefaults.h"
 #include "gui/wxIconManager.h"
-#include "gui/wxMDialogs.h"
+#include "MDialogs.h"
 
 #include <wx/mimetype.h>
 #include <wx/file.h>

@@ -717,8 +717,9 @@ wxMessageView::Update(void)
    }
    llist->LineBreak();
    llist->MoveCursorTo(wxPoint(0,0));
+   llist->ForceTotalLayout();
    Refresh(FALSE);
-   ResizeScrollbars(true);
+   ScrollToCursor();
 }
 
 String

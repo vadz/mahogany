@@ -26,6 +26,7 @@
 #   include "guidef.h"
 #   include "strutil.h"
 #   include "MFrame.h"
+#   include "MDialogs.h"
 #   include "Profile.h"
 #   include "MApplication.h"
 #   include "MailFolder.h"
@@ -43,7 +44,6 @@
 #include "gui/wxMIds.h"
 
 #include "MFolder.h"
-#include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
 #include "gui/wxIconManager.h"
@@ -59,7 +59,6 @@
 #include <wx/choice.h>
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
-#include <wx/bmpbuttn.h>
 
 #include <wx/help.h>
 
@@ -1592,6 +1591,30 @@ bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent)
    }
 }
 
+void
+wxXFaceButton::SetFile(const wxString &filename)
+{
+   wxBitmap bmp;
+   if(filename.Length() != 0)
+   {
+      bool success;
+      bmp = XFace::GetXFaceImg(filename, &success, m_Parent).ConvertToBitmap();
+      if(! success)
+      {
+         bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("msg_error");
+         m_XFace = "";
+      }
+      else
+         m_XFace = filename;
+   }
+   else
+      bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("noxface");
+
+   SetBitmapLabel(bmp);
+   SetBitmapFocus(bmp);
+   SetBitmapSelected(bmp);
+}
+
 
 class wxXFaceDialog : public wxOptionsPageSubdialog
 {
@@ -1601,23 +1624,27 @@ public:
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
-   bool WasChanged(void) { return m_XFace != m_OldXFace;};
+   bool WasChanged(void)
+      {
+         return
+            m_Button->GetFile() != m_OldXFace
+            || m_Checkbox->GetValue() != m_OldUseXFace;
+      };
 
    void OnButton(wxCommandEvent & event );
 protected:
-
-   void UpdateButton(void);
-   
-   wxString     m_XFace;
    wxString     m_OldXFace;
+   bool          m_OldUseXFace;
    
-   wxBitmapButton *m_Button;
+   wxXFaceButton *m_Button;
+   wxCheckBox    *m_Checkbox;
    bool m_Changed;
    DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxXFaceDialog, wxOptionsPageSubdialog)
    EVT_BUTTON(-1, wxXFaceDialog::OnButton)
+   EVT_CHECKBOX(-1, wxXFaceDialog::OnButton)
 END_EVENT_TABLE()
 
 
@@ -1641,22 +1668,28 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
    stattext->SetConstraints(c);
 
 
-   wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("xxx");
-
-   m_Button = new wxBitmapButton(this, -1, bmp,
-                                 wxDefaultPosition);
+   m_Button = new wxXFaceButton(this, -1, "");
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
-   c->width.Absolute(64);
-   c->height.Absolute(64);
+   c->width.AsIs();
+   c->height.AsIs();
    m_Button->SetConstraints(c);
+
+   m_Checkbox = new wxCheckBox(this, -1, _("Use XFace."));
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Button, 4*LAYOUT_X_MARGIN);
+   c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_Checkbox->SetConstraints(c);
 
    m_Changed = FALSE;
    
-   SetDefaultSize(380, 220, FALSE /* not minimal */);
+   SetDefaultSize(280, 220, FALSE /* not minimal */);
    TransferDataToWindow();
-   m_OldXFace = m_XFace;
+   m_OldXFace = m_Button->GetFile();
+   m_OldUseXFace = m_Checkbox->GetValue();
 }
 
 
@@ -1664,50 +1697,42 @@ void
 wxXFaceDialog::OnButton(wxCommandEvent & event )
 {
    wxObject *obj = event.GetEventObject();
-   if ( obj != m_Button)
+   if ( obj != m_Button && obj != m_Checkbox)
    {
       event.Skip();
       return;
    }
 
-   wxString path, file;
-   path = m_XFace.BeforeLast('/');
-   file = m_XFace.AfterLast('/');
-   
-   wxString newface = wxPFileSelector(GetProfile()->GetName()+"/xfacefilerequester",
-                                      _("Please pick an image file"),
-                                      path, file, NULL,
-                                      NULL, 0, this);
-   if(newface.Length())
-      m_XFace = newface;
-   UpdateButton();
+   if(obj == m_Button)
+   {
+      wxString path, file, xface;
+      String newface;
+      xface = m_Button->GetFile();
+      path = xface.BeforeLast('/');
+      file = xface.AfterLast('/');
+      newface = wxPFileSelector(GetProfile()->GetName()+"/xfacefilerequester",
+                                _("Please pick an image file"),
+                                path, file, NULL,
+                                NULL, 0, this);
+      m_Button->SetFile(newface);
+   }
+   m_Button->Enable(m_Checkbox->GetValue() != 0);
 }
 
 bool
 wxXFaceDialog::TransferDataToWindow()
 {
-   m_XFace = READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE);
-   UpdateButton();
+   m_Button->SetFile(READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE));
+   m_Checkbox->SetValue( READ_CONFIG(GetProfile(), MP_COMPOSE_USE_XFACE) != 0);
+   m_Button->Enable(m_Checkbox->GetValue() != 0);
    return TRUE;
-}
-
-void
-wxXFaceDialog::UpdateButton(void)
-{
-   bool success;
-
-   wxBitmap bmp = XFace::GetXFaceImg(m_XFace, &success, this).ConvertToBitmap();
-   if(! success)
-      bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("msg_error");
-   m_Button->SetBitmapLabel(bmp);
-   m_Button->SetBitmapFocus(bmp);
-   m_Button->SetBitmapSelected(bmp);
 }
 
 bool
 wxXFaceDialog::TransferDataFromWindow()
 {
-   GetProfile()->writeEntry(MP_COMPOSE_XFACE_FILE, m_XFace);
+   GetProfile()->writeEntry(MP_COMPOSE_XFACE_FILE, m_Button->GetFile());
+   GetProfile()->writeEntry(MP_COMPOSE_USE_XFACE, m_Checkbox->GetValue());
    return TRUE;
 }
 

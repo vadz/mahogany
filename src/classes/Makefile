@@ -13,10 +13,6 @@ DEP = $(SRC:.cpp=.d)
 
 TARGETS = $(SRC:.cpp=.o)
 
-ifdef EXPERIMENTAL
-TARGETS += Filters.o
-endif
-
 all: $(TARGETS)
 
 CommonBase.o:

@@ -53,6 +53,7 @@ public:
       Field_Combo  = 0x0080, // offering 0,1,2,..n, from a combobox
       Field_Color  = 0x0100, // a text entry with a "Browse for colour" button
       Field_SubDlg = 0x0200, // a button invoking another dialog
+      Field_XFace  = 0x0400, // a wxXFaceButton invoking another dialog
       Field_Type   = 0x0fff  // bit mask selecting the type
    };
 

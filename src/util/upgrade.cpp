@@ -45,7 +45,7 @@
 #include <wx/utils.h>         // wxGetFullHostName()
 
 #include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
-#include "gui/wxMDialogs.h"   // for CloseSplash()
+#include "MDialogs.h"   // for CloseSplash()
 #include "Mupgrade.h"
 
 // ----------------------------------------------------------------------------

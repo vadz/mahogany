@@ -19,7 +19,7 @@
 // -----------------------------------------------------------------------------
 
 #include <wx/persctrl.h>
-#include "gui/wxMDialogs.h"
+#include "MDialogs.h"
 
 // -----------------------------------------------------------------------------
 // forward declarations
@@ -351,7 +351,12 @@ public:
       // button
    wxButton *CreateButton(const wxString& label, wxControl *last);
 
-      // if ppButton != NULL, it's filled with the pointer to the ">>" browse
+      // a button: the label string is "label:id" where id is the id for the
+      // button
+   wxXFaceButton *CreateXFaceButton(const wxString& label, long
+                                    widthMax, wxControl *last);
+
+   // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function (it will be a wxFileBrowseButton)
    wxTextCtrl *CreateFileEntry(const char *label,
                                long widthMax,

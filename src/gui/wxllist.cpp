@@ -1079,7 +1079,6 @@ wxLayoutLine::Layout(wxDC &dc,
 
    bool cursorFound = false;
 
-
    RecalculatePosition(llist);
    
    if(cursorPos)
@@ -1507,6 +1506,7 @@ wxLayoutList::wxLayoutList()
    m_numLines = 0;
    m_FirstLine = NULL;
    SetAutoFormatting(TRUE);
+   ForceTotalLayout(TRUE);  // for the first time, do all
    InvalidateUpdateRect();
    Clear();
 }
@@ -2190,7 +2190,7 @@ wxLayoutList::Recalculate(wxDC &dc, CoordType bottom)
 }
 
 wxPoint
-wxLayoutList::GetCursorScreenPos(wxDC &dc)
+wxLayoutList::GetCursorScreenPos(void) const
 {
    return m_CursorScreenPos;
 }
@@ -2207,9 +2207,12 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    // needed, optimise it later
    ApplyStyle(m_DefaultStyleInfo, dc);
 
-   // This one we always Layout() to get the current cursor
-   // coordinates on the screen:
-   m_CursorLine->MarkDirty();
+   
+   if(m_ReLayoutAll)
+      forceAll = TRUE;
+   ForceTotalLayout(FALSE);
+   
+
    // If one line was dirty, we need to re-calculate all
    // following lines, too.
    bool wasDirty = forceAll;
@@ -2218,12 +2221,21 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    {
       if(! wasDirty)
          ApplyStyle(line->GetStyleInfo(), dc);
-      if( wasDirty
-          || line->IsDirty()
-          // layout the cursor line:
-          || (cpos && line->GetLineNumber() == cpos->y) 
+      if(
+         // if any previous line was dirty, we need to layout all
+         // following lines:   
+         wasDirty
+         // layout dirty lines:
+         || line->IsDirty()
+         // always layout the cursor line toupdate the cursor
+         // position and size:
+         || line == m_CursorLine
+         // or if it's the line we are asked to look for:
+         || (cpos && line->GetLineNumber() == cpos->y) 
          )
       {
+         if(line->IsDirty())
+            wasDirty = true;
          
          // The following Layout() calls will update our
          // m_CurrentStyleInfo if needed.
@@ -2252,7 +2264,6 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
          // little condition to speed up redrawing:
          if(bottom != -1 && line->GetPosition().y > bottom)
             break;
-         wasDirty = true;
       }
       line = line->GetNextLine();
    }
@@ -2301,29 +2312,24 @@ wxLayoutList::Draw(wxDC &dc,
    /* This call to Layout() will re-calculate and update all lines
       marked as dirty.
    */
-   Layout(dc); 
+   Layout(dc, bottom+offset.y); 
 
    ApplyStyle(m_DefaultStyleInfo, dc);
    wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);
    dc.SetBrush(brush);
    dc.SetBackgroundMode(wxTRANSPARENT);
 
-   bool style_set = false;
    while(line)
    {
       // only draw if between top and bottom:
       if((top == -1 ||
           line->GetPosition().y + line->GetHeight() > top))
       {
-//         if(! style_set)
-         {
-            ApplyStyle(line->GetStyleInfo(), dc);
-            style_set = true;
-         }
+         ApplyStyle(line->GetStyleInfo(), dc);
          // little condition to speed up redrawing:
-
-         if(clipStrictly && bottom != -1
-            && line->GetPosition().y+line->GetHeight() >= bottom)
+         if( bottom != -1
+             && line->GetPosition().y
+                +(clipStrictly ? line->GetHeight() : 0) >= bottom)
             break;
          line->Draw(dc, this, offset);
       }

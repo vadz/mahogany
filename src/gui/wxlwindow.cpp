@@ -105,6 +105,8 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
 
    EVT_SET_FOCUS(wxLayoutWindow::OnSetFocus)
    EVT_KILL_FOCUS(wxLayoutWindow::OnKillFocus)
+
+   EVT_IDLE(wxLayoutWindow::ResizeScrollbars)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -213,9 +215,6 @@ wxLayoutWindow::Clear(int family,
 void wxLayoutWindow::Refresh(bool eraseBackground, const wxRect *rect)
 {
    wxScrolledWindow::Refresh(eraseBackground, rect);
-
-   ResizeScrollbars();
-//FIXME is this needed? It causes problems...   ScrollToCursor();
 }
 
 void
@@ -455,6 +454,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    {
       m_llist->DeleteSelection();
       deletedSelection = true;
+      SetModified();
    }
    
    // <Shift>+<arrow> starts selection
@@ -641,7 +641,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
             }
          }
-         SetDirty();
          SetModified();
       }// if(IsEditable())
    }// first switch()
@@ -652,11 +651,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       m_llist->ContinueSelection();
    }
 
-   // we must call ResizeScrollbars() before ScrollToCursor(), otherwise the
-   // ne cursor position might be outside the current scrolllbar range
-   ResizeScrollbars();
+   SetDirty();
    ScrollToCursor();
-
    // refresh the screen
    DoPaint(m_llist->GetUpdateRect());
 }
@@ -677,8 +673,6 @@ wxLayoutWindow::OnKeyUp(wxKeyEvent& event)
 void
 wxLayoutWindow::ScrollToCursor(void)
 {
-   wxClientDC dc( this );
-   PrepareDC( dc );
 
    int x0,y0,x1,y1, dx, dy;
 
@@ -693,12 +687,14 @@ wxLayoutWindow::ScrollToCursor(void)
    GetClientSize(&x1, &y1);
 
    // update the cursor screen position
-   m_llist->Layout(dc);
+//   wxClientDC dc( this );
+//   PrepareDC( dc );
+//FIXME   m_llist->Layout(dc);
 
    // Make sure that the scrollbars are at a position so that the cursor is
    // visible if we are editing
    WXLO_DEBUG(("m_ScrollToCursor = %d", (int) m_ScrollToCursor));
-   wxPoint cc = m_llist->GetCursorScreenPos(dc);
+   wxPoint cc = m_llist->GetCursorScreenPos();
 
    // the cursor should be completely visible in both directions
    wxPoint cs(m_llist->GetCursorSize());
@@ -779,12 +775,14 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                   updateRect->x+updateRect->width,
                   updateRect->y+updateRect->height));
    }
+#if 0
    if(IsDirty())
    {
       m_llist->Layout(dc);
       ResizeScrollbars();
    }
-
+#endif
+   
    /* Check whether the window has grown, if so, we need to reallocate
       the bitmap to be larger. */
    if(x1 > m_bitmapSize.x || y1 > m_bitmapSize.y)
@@ -904,9 +902,7 @@ void
 wxLayoutWindow::OnSize(wxSizeEvent &event)
 {
    if ( m_llist )
-   {
       ResizeScrollbars();
-   }
 
    event.Skip();
 }
@@ -915,6 +911,17 @@ wxLayoutWindow::OnSize(wxSizeEvent &event)
 void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
+
+   if(IsModified())
+   {
+      wxClientDC dc( this );
+      PrepareDC( dc );
+      m_llist->ForceTotalLayout();
+      m_llist->Layout(dc);
+      SetModified(FALSE);
+      DoPaint();
+   }
+   
    wxPoint max = m_llist->GetSize();
    wxSize size = GetClientSize();
 

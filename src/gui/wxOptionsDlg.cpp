@@ -114,7 +114,6 @@ enum ConfigFields
    ConfigField_Signature,
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
-   ConfigField_XFace,
    ConfigField_XFaceFile,
    ConfigField_AdbSubstring,
    ConfigField_ComposeViewFontFamily,
@@ -425,8 +424,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
-   { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
-   { gettext_noop("&XFace file"),                  Field_SubDlg,  ConfigField_XFace          },
+   { gettext_noop("Configure &XFace..."),                  Field_XFace,  -1          },
    { gettext_noop("Mail alias substring ex&pansion"),
                                                    Field_Bool,    -1,                        },
    { gettext_noop("Font famil&y"
@@ -522,7 +520,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #ifdef OS_UNIX
    { gettext_noop("&Image format converter"),     Field_File,    -1                      },
    { gettext_noop("Conversion &graphics format"
-                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
+                  ":XPM:PNG:BMP:JPG"),             Field_Combo,   -1 },
 #endif
    { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
    { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
@@ -595,7 +593,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
-   CONFIG_ENTRY(MP_COMPOSE_USE_XFACE),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
    CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
    CONFIG_ENTRY(MP_CVIEW_FONT),
@@ -800,6 +797,10 @@ void wxOptionsPage::CreateControls()
          last = CreateButton(_(ms_aFields[n].label), last);
          break;
 
+      case Field_XFace:
+         last = CreateXFaceButton(_(ms_aFields[n].label), widthMax, last);
+         break;
+         
       default:
          wxFAIL_MSG("unknown field type in CreateControls");
       }
@@ -1023,6 +1024,12 @@ bool wxOptionsPage::TransferDataToWindow()
 
          case Field_Message:
          case Field_SubDlg:      // these settings will be read later
+         case Field_XFace:
+            if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
+               ((wxXFaceButton*)control)->SetFile(
+                  READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
+               else
+               ((wxXFaceButton *)control)->SetFile("");
             break;
 
          default:
@@ -1108,6 +1115,7 @@ bool wxOptionsPage::TransferDataFromWindow()
 
          case Field_Message:
          case Field_SubDlg:      // already done
+         case Field_XFace:      // already done
             break;
 
          default:
@@ -1702,7 +1710,11 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
             // TODO inject in the checklistbox the settings of subdlg
             continue;
 
-         default:
+         case wxOptionsPage::Field_XFace:
+            // TODO inject the settings of subdlg
+            continue;
+
+      default:
             break;
       }
 

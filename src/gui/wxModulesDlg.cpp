@@ -24,7 +24,7 @@
 #include "Mdefaults.h"
 
 #include "MModule.h"
-#include "gui/wxMDialogs.h"
+#include "MDialogs.h"
 
 #include <wx/defs.h>
 #include <wx/event.h>

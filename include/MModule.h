@@ -20,9 +20,26 @@
 // ----------------------------------------------------------------------------
 
 #include <wx/dynlib.h>
+
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
+// this is compiler dependent
+#ifdef USE_MODULES_STATIC
+#   define MDLLEXPORT static
+#else
+#   ifdef OS_WIN
+#      ifdef _MSC_VER
+#            define MDLLEXPORT __declspec( dllexport )
+#   else
+#         error "don't know how export functions from DLL with this compiler"
+#      endif
+#   else
+#      define MDLLEXPORT extern
+#   endif
+#endif
+
 
 /**@name Mahogany Module management classes. */
 //@{
@@ -186,5 +203,79 @@ void MModule_Cleanup(void);
                                       version_minor >= M_VERSION_MINOR)
 
 //@}
+
+
+/** Used by modules to register themselves statically. */
+/*    Return code is always 1. */
+#ifdef USE_MODULES_STATIC 
+#define MMODULE_INITIALISE static int dummy = \
+MModule_AddStaticModule(InitMModule,GetName, GetInterface, \
+                        GetDescription, GetModuleVersion, GetMVersion, UnLoadMModule);
+#else
+#   define MMODULE_INTIALISE
+#endif   
+
+/** This macro does all the module definition, greatly simplifying
+    most modules' source code.
+    @param ModuleName name of the module file
+    @param InterfaceName name of the module interface
+    @param ShortDescription short description string for module
+    @param InitFunction name of the function to initialise module
+    @param codeForUnload name of a function for unloadint the module
+*/
+#define MMODULE_DEFINE_MODULE(ModuleName, InterfaceName, \
+                              ShortDescription, ModuleVersion, \
+                              InitFunction, codeForUnload) \
+extern "C" \
+{ \
+   /* Gets called to initialise module: */ \
+   MDLLEXPORT int InitMModule(int version_major, \
+                              int version_minor, \
+                              int version_release, \
+                              MInterface *minterface) \
+   { \
+      /* This test is done here rather than in the MModule.cpp loading \
+         code, as a module can be more flexible in accepting certain\
+         versions as compatible than Mahogany.\
+         I.e. the module knows Mahogany, but Mahogany doesn't\\
+         necesarily know the module.\
+      */\
+   if(! MMODULE_VERSION_COMPATIBLE() )\
+       return MMODULE_ERR_INCOMPATIBLE_VERSIONS;\
+      return InitFunction(minterface);\
+   }\
+   /* Gets called before module gets unloaded, return 0 to veto dll unloading:*/\
+   MDLLEXPORT int UnLoadMModule(void){ return codeForUnload(); }\
+\
+   /* Return module name, must be identical to filename without extension:*/\
+   MDLLEXPORT const char * GetName(void) { return ModuleName; }\
+\
+   /* Return name of the interface implemented. */\
+   MDLLEXPORT const char * GetInterface(void){ return InterfaceName; }\
+\
+   /* Return a short description (one line):*/\
+   MDLLEXPORT const char *\
+   GetDescription(void)   { return ShortDescription; }\
+\
+/* Return module version as a string:*/ \
+   MDLLEXPORT const char * GetModuleVersion(void)   { return ModuleVersion; }\
+\
+/* Return the Mahogany version this module was compiled for: */\
+   MDLLEXPORT void \
+   GetMVersion(int *version_major, int *version_minor,\
+               int *version_release)\
+   {\
+      ASSERT(version_major);\
+      ASSERT(version_minor);\
+      ASSERT(version_release);\
+      *version_major = M_VERSION_MAJOR;\
+      *version_minor = M_VERSION_MINOR;\
+      *version_release = M_VERSION_RELEASE;\
+   }\
+} /* extern "C" */ \
+MMODULE_INITIALISE
+
+
+
 //@}
 #endif // MMODULE_H

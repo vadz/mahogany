@@ -980,6 +980,13 @@ public:
                wxPoint *cpos = NULL,
                wxPoint *csize = NULL);
 
+   /** Ensure that the whole list will be recalculate on the next call 
+       to Layout() or Draw().
+       @param redrawAll TRUE or FALSE to reset it
+   */
+   void ForceTotalLayout(bool redrawAll = TRUE)
+      { m_ReLayoutAll = redrawAll; }
+   
    /** Returns the screen coordinates relating to a given cursor
        position and the size of the cursor at that position.
        @param dc for which to calculate it
@@ -1005,9 +1012,8 @@ public:
    wxPoint GetSize(void) const;
 
    /** Returns the cursor position on the screen.
-       @return cursor position in pixels
    */
-   wxPoint GetCursorScreenPos(wxDC &dc);
+   wxPoint GetCursorScreenPos(void) const;
 
    /** Draws the cursor.
        @param active If true, draw a bold cursor to mark window as
@@ -1142,6 +1148,8 @@ private:
 
    /// Shall we auto-format?
    bool    m_AutoFormat;
+   /// Shall we re-layout everything?
+   bool    m_ReLayoutAll;
    /**@name Cursor Management */
    //@{
    /// Where the text cursor (column,line) is.

@@ -6,7 +6,7 @@
 include(M4FILE)
 
 INCLUDE(`"MApplication.h"')
-INCLUDE(`"gui/wxMDialogs.h"')
+INCLUDE(`"MDialogs.h"')
 FILE_HEADER
 
 INTERFACE(MInterface,`

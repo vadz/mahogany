@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxMDialogs.h : wxWindows version of dialog boxes                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-1999 by Karsten Ballüder (ballueder@bmx.net)            *
  *                                                                  *
- * $Id$             *
+ * $Id$
  *******************************************************************/
 
 #ifndef WXMDIALOGS_H
@@ -14,21 +14,24 @@
 #endif
 
 #ifndef     USE_PCH
-#   include   "MFrame.h"
+#   include "Mcommon.h"
+#   include "Mdefaults.h"
+#   include "guidef.h"
+#   include "MFrame.h"
+#   include "gui/wxIconManager.h"
+#   include "MApplication.h"
 #endif
-
-#include "MDialogs.h"
 
 #include <wx/icon.h>
 #include <wx/frame.h>
 #include <wx/progdlg.h>
 #include <wx/dialog.h>
+#include <wx/bmpbuttn.h>
 
 // fwd decl
 class ProfileBase;
 class ArrayAdbElements;
 class wxString;
-class MWindow;
 class MFolder;
 class wxButtonEvent;
 class wxCloseEvent;
@@ -292,6 +295,25 @@ public:
    wxSMDialog() : wxDialog() {}
    virtual int ShowModal();
    virtual void EndModal(int rc);
+};
+
+
+class wxXFaceButton : public wxBitmapButton
+{
+public:
+   wxXFaceButton(wxWindow *parent, int id,  wxString filename)
+      {
+         m_Parent = parent;
+         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("unknown");
+         wxBitmapButton::Create(parent,id, bmp, wxDefaultPosition,
+                                wxSize(64,64));
+         SetFile(filename);
+      }
+   void SetFile(const wxString &filename);
+   wxString GetFile(void) const { return m_XFace; }
+private:
+   wxString m_XFace;
+   wxWindow *m_Parent;
 };
 
 #endif  //WXMDIALOGS_H

@@ -36,7 +36,7 @@
 
 #include "MailCollector.h"
 
-#include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
+#include "MDialogs.h"   // MDialog_YesNoDialog
 
 // instead of writing our own wrapper for wxExecute()
 #include  <wx/utils.h>
