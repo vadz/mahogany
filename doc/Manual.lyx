@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Jan 17 16:19:21 2000
+#This file was created by <karsten> Tue Jan 18 11:14:31 2000
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -4830,6 +4830,79 @@ advanced
 
  in the main configuration dialog, otherwise only a small subset of configuratio
 n options is available.
+\layout Subsection
+
+Can I run Mahogany as root?
+\layout Standard
+
+
+\shape italic 
+Very simple question: can I run Mahogany on a unix system as the superuser
+ (root)?
+\layout Standard
+
+Not directly.
+ There are two problems with it:
+\layout Enumerate
+
+It is not a good idea for security reasons.
+ In fact, you should not even run X11 as root.
+ Though, we would not dare to impose that on you, if you want to, that is
+ your problem.
+\layout Enumerate
+
+The technical reason, and this is why Mahogany does not allow it: The c-client
+ library that we use for accessing mail folders and servers uses the user-Id
+ 0 (root) internally and does not work when called as root.
+ When inquiring why this is so, c-client's author told us that it was bad
+ to read mail as root - he thinks he knows what is good for you.
+ Unless we find an easy way to circumvene that problem, you will not be
+ able to run Mahogany as root as we have no time and desire to re-write
+ the c-client library just for this.
+\layout Standard
+
+There is a workaround however:
+\layout Standard
+
+You can forward your email to another user, say 
+\begin_inset Quotes eld
+\end_inset 
+
+user1
+\begin_inset Quotes erd
+\end_inset 
+
+, by setting up a /root/.forward file containing that user's name.
+ Then, run Mahogany through the 
+\begin_inset Quotes eld
+\end_inset 
+
+su
+\begin_inset Quotes erd
+\end_inset 
+
+ command: 
+\begin_inset Quotes eld
+\end_inset 
+
+su user1 -c mahogany
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ This will work just fine.
+ If you cannot get an error message about it being unable to access your
+ X11 display, do a 
+\begin_inset Quotes eld
+\end_inset 
+
+xhost localhost
+\begin_inset Quotes erd
+\end_inset 
+
+ before, which will allow all local users to access your display.
+ All this is not very safe from a security point of view if you don't trust
+ your local machine, but perfectly fine for standalone or dialup boxes.
 \layout Subsection
 
 How can I set which language to use?
