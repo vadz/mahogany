@@ -756,13 +756,35 @@ wxMFrame::OnMenuCommand(int id)
             {
                ShowIdentityDialog(ident, this);
 
-               // update the identity combo in the toolbar if any
-               wxWindow *win = GetToolBar()->FindWindow(IDC_IDENT_COMBO);
-               if ( win )
+               // update the identity combo in the toolbar of the main frame if
+               // any (note that this will update all the other existing
+               // identity combo boxes as they keep themselves in sync
+               // internally)
+               //
+               // TODO: we really should have a virtual wxMFrame::GetIdentCombo
+               //       as we might not always create the main frame in the
+               //       future but other frames (e.g. composer) may have the
+               //       ident combo as well
+               wxMFrame *frameTop = mApplication->TopLevelFrame();
+               if ( frameTop )
                {
-                  wxChoice *combo = wxDynamicCast(win, wxChoice);
-                  combo->Append(ident);
+                  wxToolBar *tbar = frameTop->GetToolBar();
+                  if ( tbar )
+                  {
+                     wxWindow *win = tbar->FindWindow(IDC_IDENT_COMBO);
+                     if ( win )
+                     {
+                        wxChoice *combo = wxDynamicCast(win, wxChoice);
+                        combo->Append(ident);
+                     }
+                  }
+                  else
+                  {
+                     FAIL_MSG("where is the main frames toolbar?");
+                  }
                }
+
+               wxLogStatus(this, _("Created new identity '%s'."), ident.c_str());
             }
          }
          break;
@@ -875,18 +897,21 @@ wxMFrame::OnMenuCommand(int id)
                //else: cancelled
             }
 
-            if ( !!ident )
+            if ( !ident.empty() )
             {
+               Profile *profile = mApplication->GetProfile();
+
                if ( ident == READ_APPCONFIG(MP_CURRENT_IDENTITY) )
                {
                   // can't keep this one
+                  profile->writeEntry(MP_CURRENT_IDENTITY, "");
                }
 
                // FIXME: will this really work? if there are objects which
                //        use this identity the section will be recreated...
                String identSection;
                identSection << M_IDENTITY_CONFIG_SECTION << '/' << ident;
-               mApplication->GetProfile()->DeleteGroup(identSection);
+               profile->DeleteGroup(identSection);
 
                // update the identity combo in the toolbar if any
                wxWindow *win = GetToolBar()->FindWindow(IDC_IDENT_COMBO);
@@ -896,7 +921,7 @@ wxMFrame::OnMenuCommand(int id)
                   combo->Delete(combo->FindString(ident));
                }
 
-               wxLogStatus(_("Identity '%s' deleted."), ident.c_str());
+               wxLogStatus(this, _("Identity '%s' deleted."), ident.c_str());
             }
          }
          break;
