@@ -14,6 +14,8 @@ b) makeversion.in
 
 c) in the future we should also have version in configure.in
 
+d) Manual.lyx and the files generated from it
+
 2. Updating the files
 ---------------------
 
