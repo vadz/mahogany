@@ -2084,7 +2084,7 @@ void wxOptionsPage::CreateControls()
    long widthMax = GetMaxLabelWidth(aLabels, this);
 
    // now create the controls
-   int styleText = wxALIGN_RIGHT;
+   int styleText = wxTE_LEFT;
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       int flags = GetFieldFlags(n);
@@ -2144,7 +2144,7 @@ void wxOptionsPage::CreateControls()
                                        0, styleText);
 
             // reset
-            styleText = wxALIGN_RIGHT;
+            styleText = wxTE_LEFT;
             break;
 
          case Field_List:
