@@ -452,13 +452,12 @@ case "$USE_SSL" in
 	case "$USE_SSL" in
 	/*/include) ssl_inc="$USE_SSL" ;;
 	/*)	ssl_inc="$USE_SSL $USE_SSL/include" ;;
-	*)	ssl_inc="" ;;
+	*)	ssl_inc="$prefix/include" ;;
 	esac
 
 	M_CHECK_MYHEADER(openssl/ssl.h,
 	[ \
 		$ssl_inc \
-		$prefix/include \
 		/include \
 		/usr/ssl/include \
 		/usr/local/include \
@@ -468,7 +467,7 @@ case "$USE_SSL" in
 	],
         [
 	   ssl_option=yes
-           ssl_inc=m_cv_header_dir_openssl_ssl_h
+           ssl_inc=$m_cv_header_openssl_ssl_h
         ],
 	   ssl_option=no
 	)
@@ -535,13 +534,14 @@ if test "$ssl_option" = "yes"; then
 	IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
 
         dnl have to give the location of SSL headers to cclient if it is in a
-        dnl non standard place
+	dnl non standard place: note that imap2000 includes <ssl.h> and not
+	dnl <openssl/ssl.h> but SSL headers themselves use the second form, so
+	dnl we need both
 	case "$ssl_inc" in
 	    /usr/include)
+		IMAP_CPPFLAGS="-I/usr/include/openssl $IMAP_CPPFLAGS"
 	        ;;
 	    *)
-	    	dnl imap2000 includes <ssl.h> and not <openssl/ssl.h> but SSL
-		dnl headers themselves use the second form, so we need both
 		IMAP_CPPFLAGS="-I$ssl_inc -I$ssl_inc/openssl $IMAP_CPPFLAGS"
 	esac
 

@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+09.04.01 VZ: Mahogany now uses imap2000b which fixes several mail related bugs
 08.04.01 VZ: use the charset of the original message when replying/forwarding
 04.04.01 VZ: huge speed up in messages copying between IMAP folders
 03.04.01 VZ: folder status is now persistent
