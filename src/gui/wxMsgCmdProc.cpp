@@ -53,6 +53,8 @@
 #include <wx/imaglist.h>
 #include <wx/treectrl.h>
 
+#include "modules/Filters.h"    // for FilterRule::Error
+
 class AsyncStatusHandler;
 
 #include <wx/dynarray.h>
@@ -442,7 +444,6 @@ AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
 
    wxLogStatus(GetFrame(), m_msgInitial);
    wxBeginBusyCursor();
-   wxLog::Suspend();
 }
 
 bool AsyncStatusHandler::Monitor(Ticket ticket, const char *fmt, ...)
@@ -480,8 +481,6 @@ void AsyncStatusHandler::SetSuccessMsg(const char *fmt, ...)
 
 AsyncStatusHandler::~AsyncStatusHandler()
 {
-   wxLog::Resume();
-
    if ( m_ticket == ILLEGAL_TICKET )
    {
       // also put it into the status bar to overwrite the previous message
@@ -1318,7 +1317,18 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
       m_TicketList->Remove(t);
 
-      int ok = ((ASMailFolder::ResultInt *)result)->GetValue() != 0;
+      ASMailFolder::OperationId operation = result->GetOperation();
+
+      int resval = ((ASMailFolder::ResultInt *)result)->GetValue();
+
+      // the result is normally 0 if an error occured except for the apply
+      // filter case where it can be 0 if no messages were filtered (which is
+      // not an error)
+      bool ok;
+      if ( operation == ASMailFolder::Op_ApplyFilterRules )
+         ok = resval != FilterRule::Error;
+      else
+         ok = resval != 0;
 
       // find the corresponding AsyncStatusHandler object, if any
       bool hadStatusObject = false;
@@ -1343,7 +1353,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
          }
       }
 
-      switch ( result->GetOperation() )
+      switch ( operation )
       {
          case ASMailFolder::Op_SaveMessagesToFolder:
             // we may have to do a few extra things here:
