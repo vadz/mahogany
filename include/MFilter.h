@@ -53,6 +53,7 @@ enum MFDialogTarget
    ORC_W_Message,
    ORC_W_To,
    ORC_W_Sender,
+   ORC_W_Recipients,
    ORC_W_Max
 };
 

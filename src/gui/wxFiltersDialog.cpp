@@ -110,7 +110,8 @@ wxString ORC_Where[] =
    gettext_noop("in body"),
    gettext_noop("in message"),
    gettext_noop("in to"),
-   gettext_noop("in sender")
+   gettext_noop("in sender"),
+   gettext_noop("in any recipient")
 };
 
 static const

@@ -149,8 +149,9 @@ static
 const char * ORC_W_Names[] =
 {
    "subject()", "header()", "from()", "body()",
-      "message()", "to()", "header(\"Sender\")",
-      NULL
+   "message()", "to()", "header(\"Sender\")",
+   "recipients()",
+   NULL
 };
 
 static const char * OAC_T_Names[] = 

@@ -2044,6 +2044,31 @@ extern "C"
       return Value(tostr);
    }
 
+   static Value func_recipients(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String result;
+      static const char *headers[] =
+      {
+         "To", "CC", "Bcc",
+         "Resent-To", "Resent-Cc", "Resent-Bcc",
+         NULL
+      };
+      String tmp;
+      for(int i = 0; headers[i]; i++)
+      {
+         msg->GetHeaderLine(headers[i], tmp);
+         if(tmp[0] && result[0])
+            result << ',' << tmp;
+      }
+      msg->DecRef();
+      return Value(result);
+   }
+
    static Value func_header(ArgList *args, Parser *p)
    {
       if(args->Count() != 0)
@@ -2272,6 +2297,8 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("matchregex", func_matchregex);
    DefineFunction("subject", func_subject);
    DefineFunction("to", func_to);
+   DefineFunction("recipients", func_recipients);
+   DefineFunction("headerline", func_headerline);
    DefineFunction("from", func_from);
    DefineFunction("header", func_header);
    DefineFunction("body", func_body);
