@@ -1262,6 +1262,6 @@ bool MAppBase::IsMailDebuggingEnabled() const
 {
    ASSERT_MSG( m_debugMail != -1, "command line not parsed yet!" );
 
-   return m_debugMail == TRUE;
+   return m_debugMail == 1; // don't use TRUE to avoid VC++ warning
 }
 
