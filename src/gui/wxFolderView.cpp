@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.11  1998/06/12 16:18:47  VZ
+ * wxArrayInt used instead of "int **" everywhere (because of GetSelections()
+ * change in wxListbox)
+ *
  * Revision 1.10  1998/06/12 16:07:00  KB
  * updated
  *
@@ -92,6 +96,8 @@
 #include "gui/wxComposeView.h"
 
 #ifdef USE_WXWINDOWS2
+#  include <wx/dynarray.h>
+
    BEGIN_EVENT_TABLE(wxFolderView, wxMFrame)
       EVT_MENU(WXMENU_MSG_PRINT,       wxFolderView::OnPrint)
       EVT_MENU(WXMENU_MSG_DELETE,      wxFolderView::OnDelete)
@@ -222,9 +228,8 @@ wxFolderView::~wxFolderView()
 void
 wxFolderView::OnMenuCommand(int id)
 {
-   int
-      n,
-      *selections;
+   int n;
+   wxArrayInt selections;
    
    switch(id)
    {
@@ -233,24 +238,24 @@ wxFolderView::OnMenuCommand(int id)
       Update();
       break;
    case WXMENU_MSG_OPEN:
-      n = GetSelections(&selections);
-      OpenMessages(n, selections);
+      GetSelections(selections);
+      OpenMessages(selections);
       break;
    case WXMENU_MSG_SAVE:
-      n = GetSelections(&selections);
-      SaveMessages(n, selections);
+      GetSelections(selections);
+      SaveMessages(selections);
       break;
    case WXMENU_MSG_REPLY:
-      n = GetSelections(&selections);
-      ReplyMessages(n, selections);
+      GetSelections(selections);
+      ReplyMessages(selections);
       break;
    case WXMENU_MSG_FORWARD:
-      //n = GetSelections(&selections);
+      //n = GetSelections(selections);
       //SaveMessages(n, selections);
       break;
    case WXMENU_MSG_DELETE:
-      n = GetSelections(&selections);
-      DeleteMessages(n, selections);
+      GetSelections(selections);
+      DeleteMessages(selections);
       Update();
       break;
    case WXMENU_MSG_SELECTALL:
@@ -259,7 +264,7 @@ wxFolderView::OnMenuCommand(int id)
       break;
    case WXMENU_MSG_DESELECTALL:
       for(n = 0; n < listBox->Number(); n++)
-    listBox->Deselect(n);
+         listBox->Deselect(n);
       break;
    default:
       wxMFrame::OnMenuCommand(id);
@@ -267,20 +272,19 @@ wxFolderView::OnMenuCommand(int id)
 }
 
 int
-wxFolderView::GetSelections(int **selections)
+wxFolderView::GetSelections(wxArrayInt& selections)
 {
-   int n = listBox->GetSelections(selections);
-   VAR(n);
-   return n;
+   return listBox->GetSelections(selections);
 }
 
 void
-wxFolderView::OpenMessages(int n, int *selections)
+wxFolderView::OpenMessages(const wxArrayInt& selections)
 {
    String title;
    Message *mptr;
    wxMessageView *mv;
 
+   int n = selections.Count();
    int i;
    for(i = 0; i < n; i++)
    {
@@ -294,15 +298,16 @@ wxFolderView::OpenMessages(int n, int *selections)
 }
 
 void
-wxFolderView::DeleteMessages(int n, int *selections)
+wxFolderView::DeleteMessages(const wxArrayInt& selections)
 {
+   int n = selections.Count();
    int i;
    for(i = 0; i < n; i++)
       mailFolder->DeleteMessage(selections[i]+1);
 }
 
 void
-wxFolderView::SaveMessages(int n, int *selections)
+wxFolderView::SaveMessages(const wxArrayInt& selections)
 {
    int i;
    String str;
@@ -319,6 +324,7 @@ wxFolderView::SaveMessages(int n, int *selections)
    if(! folderName || strlen(folderName) == 0)
       return;
    
+   int n = selections.Count();
    for(i = 0; i < n; i++)
    {
       str = "";
@@ -330,7 +336,7 @@ wxFolderView::SaveMessages(int n, int *selections)
 }
 
 void
-wxFolderView::ReplyMessages(int n, int *selections)
+wxFolderView::ReplyMessages(const wxArrayInt& selections)
 {
    int i;
    String str;
@@ -339,6 +345,7 @@ wxFolderView::ReplyMessages(int n, int *selections)
    wxComposeView *cv;
    Message *msg;
 
+   int n = selections.Count();
    prefix = mailFolder->GetProfile()->readEntry(MP_REPLY_MSGPREFIX,MP_REPLY_MSGPREFIX_D);
    for(i = 0; i < n; i++)
    {
@@ -383,10 +390,9 @@ wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
 void
 wxFolderViewPanel::OnDefaultAction(wxItem *item)
 {
-   int
-      n, *selections;
-   n = folderView->GetSelections(&selections);
-   folderView->OpenMessages(n, selections);
+   wxArrayInt selections;
+   folderView->GetSelections(selections);
+   folderView->OpenMessages(selections);
 }
 
 #ifdef USE_WXWINDOWS2
