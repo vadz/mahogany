@@ -3,8 +3,9 @@
 ;; File name:   M.iss - Mahogany installation script for Inno Setup
 ;; Purpose:     Inno Setup Script for M
 ;; Author:      Vadim Zeitlin
-;; Modified by: VZ at 20.06.99 for InnoSetup 1.1
-;;              VZ at 09.03.01 for InnoSetup 2.0
+;; Modified by: 20.06.99 for InnoSetup 1.1
+;;              09.03.01 for InnoSetup 2.0
+;;              02.03.03 for InnoSetup 3.0
 ;; Created:     23.08.98
 ;; CVS-ID:      $Id$
 ;; Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -14,16 +15,16 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany alpha 0.64 'Sparc'
+AppVerName=Mahogany 0.64.2 'Claire'
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.64a
+OutputBaseFilename=Mahogany-0.64.2a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
 AllowNoIcons=1
 
-SourceDir=f:\Progs\M
+SourceDir=P:\Progs\M
 OutputDir=extra\setup\Output
 
 ; bzip is smaller than zip even if slightly slower
@@ -34,13 +35,13 @@ Compression=bzip/3
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.64
+AppVersion=0.64.2
 
 ; --- appearance parameters
 
 ; hmm... what's RGB value of mahogany?
 BackColor=$037ebd
-AppCopyright=Copyright © 1997-2001 Karsten Ballüder and Vadim Zeitlin
+AppCopyright=Copyright © 1997-2003 Vadim Zeitlin and Karsten Ballüder
 WizardImageFile=res\wizard.bmp
 WizardSmallImageFile=res\install_small.bmp
 
@@ -55,22 +56,23 @@ Name: "help"; Description: "Help Files"; Types: full
 Name: "ssl"; Description: "SSL Support"; Types: full
 ;Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
+Name: "i18n"; Description: "Translations to other languages"; Types: full
 
 [Files]
 
 ; --- EXEs and DLLs
-Source: "Release\M.EXE"; DestDir: "{app}"; CopyMode: alwaysoverwrite
+Source: "Release\M.EXE"; DestDir: "{app}";
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
-Source: "m:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{app}"; Components: ssl
-Source: "m:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{app}"; Components: ssl
+Source: "k:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{app}"; Components: ssl
+Source: "k:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{app}"; Components: ssl
 
 ; do we need to include VC++ run time?
 ;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
 ;Source: "w:\winnt40\system32\msvcrt.dll"; DestDir: "{sys}"
 
 ; --- misc stuff
-Source: "extra\setup\autocollect.adb"; CopyMode: dontoverwrite; DestDir: "{app}"
+Source: "extra\setup\autocollect.adb"; DestDir: "{app}"; Flags: onlyifdoesntexist
 Source: "extra\setup\Mahogany.url"; DestDir: "{app}"; Components: misc
 Source: "extra\setup\Bug.url"; DestDir: "{app}"; Components: misc
 
@@ -101,6 +103,16 @@ Source: "doc\HtmlHlp\Manual.chm"; DestDir: "{app}\help"; Components: help
 
 ; case is important (should be Minit) or Python complains!!
 ;Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
+
+; --- translations
+Source: "locale\de.mo"; DestDir: "{app}\German"; DestName: "M.mo"; Components: i18n
+Source: "locale\es.mo"; DestDir: "{app}\Spanish"; DestName: "M.mo"; Components: i18n
+Source: "locale\fi.mo"; DestDir: "{app}\Finnish"; DestName: "M.mo"; Components: i18n
+Source: "locale\fr.mo"; DestDir: "{app}\French"; DestName: "M.mo"; Components: i18n
+Source: "locale\it.mo"; DestDir: "{app}\Italian"; DestName: "M.mo"; Components: i18n
+Source: "locale\nl.mo"; DestDir: "{app}\Dutch"; DestName: "M.mo"; Components: i18n
+Source: "locale\pt.mo"; DestDir: "{app}\Portuguese"; DestName: "M.mo"; Components: i18n
+Source: "locale\pt_br.mo"; DestDir: "{app}\Portuguese-Brazil"; DestName: "M.mo"; Components: i18n
 
 [UninstallDelete]
 ; delete all precompiled python files
