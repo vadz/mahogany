@@ -778,7 +778,10 @@ MDialog_YesNoDialog(const char *message,
       // disabled just for this folder
       if ( !storedValue && folderName )
       {
-         pathLocal << Profile::FilterProfileName(folderName) << '/' << pathGlobal;
+         pathLocal << '/'
+                   << Profile::FilterProfileName(folderName)
+                   << '/'
+                   << pathGlobal;
 
          storedValue = wxPMessageBoxIsDisabled(pathLocal);
       }
