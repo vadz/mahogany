@@ -339,6 +339,8 @@ MAppBase::OnStartup()
 
       m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
+#if 0
+   // KB: we no longer use different subdirs:
    // We need to set this before wxWindows has a chance to process
    // idle events (splash screen), in case there was any problem with
    // the config file, or it will show the unknown icon.
@@ -347,6 +349,7 @@ MAppBase::OnStartup()
       if(idx < sizeof gs_IconSubDirs)
          GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
    }
+#endif
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from)
@@ -748,11 +751,13 @@ MAppBase::OnMEvent(MEventData& event)
    {
       m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
       SetupOnlineManager(); // make options change effective
-      {
+#if 0
+     {
          unsigned long idx = (unsigned long)  READ_APPCONFIG(MP_ICONSTYLE);
          if(idx < sizeof gs_IconSubDirs)
             GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
       }
+#endif
       // re-generate the mailcollector object:
       m_MailCollector->DecRef();;
       m_MailCollector = MailCollector::Create();
