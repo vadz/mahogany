@@ -11,11 +11,9 @@
 #ifndef STRUTIL_H
 #define STRUTIL_H
 
-#ifndef  USE_PCH
-#  include "miscutil.h"
-#endif
+#include "miscutil.h"      // for BOUND_POINTER
 
-#include <time.h>               // for time_t
+#include <time.h>          // for time_t
 
 #include "FolderType.h"    // for strutil_expandfoldername
 
