@@ -1106,7 +1106,7 @@ bool RunInstallWizard()
 
          String msgString = wxString::Format(msgFmt, timeStr.c_str());
 
-         strutil_enforceCRLF(msgString);
+         msgString = strutil_enforceCRLF(msgString);
          mf->AppendMessage(msgString);
          mf->DecRef();
       }
