@@ -73,13 +73,12 @@ public:
    String name;
    /// for POP3/IMAP/NNTP: login or newsgroup
    String login;
-   /// this is a flag used only by PingReOpenAll():
-   bool m_PROAflag;
 
    StreamConnection()
       : MObject()
       {
-         folder = NULL; stream = NULL; m_PROAflag = FALSE;
+         folder = NULL;
+         stream = NULL;
       }
 };
 

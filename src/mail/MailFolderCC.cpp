@@ -78,6 +78,12 @@ static void sigpipe_handler(int)
 #define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
 #define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
 
+#ifdef DEBUG
+   #define CHECK_STREAM_LIST() DebugStreams()
+#else // !DEBUG
+   #define CHECK_STREAM_LIST()
+#endif // DEBUG/!DEBUG
+
 // ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
@@ -1217,19 +1223,20 @@ MailFolderCC::Open(void)
 MailFolderCC *
 MailFolderCC::FindFolder(String const &path, String const &login)
 {
+   CHECK_STREAM_LIST();
+
    StreamConnectionList::iterator i;
    DBGMESSAGE(("Looking for folder to re-use: '%s',login '%s'",
                path.c_str(), login.c_str()));
 
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
-      DBGMESSAGE(("  Comparing to entry: '%s',login '%s'",
-                  (**i).name.c_str(), (**i).login.c_str()));
-      if( (*i)->name == path && (*i)->login == login)
+      StreamConnection *conn = *i;
+      if( conn->name == path && conn->login == login)
       {
          DBGMESSAGE(("  Re-using entry: '%s',login '%s'",
-                     (**i).name.c_str(), (**i).login.c_str()));
-         return (*i)->folder;
+                     conn->name.c_str(), conn->login.c_str()));
+         return conn->folder;
       }
    }
    DBGMESSAGE(("  No matching entry found."));
@@ -1327,43 +1334,24 @@ MailFolderCC::PingReopenAll(bool fullPing)
 
    /* We cannot simply traverse the list of mailfolders here, as they
       might get closed/reopened by Ping(), which invalidates the
-      iterators into the list. Instead, we use the m_PROAflag on the
-      entry which exists solely for this function's use. */
+      iterators into the list. Instead, we traverse a copy of the list */
+   CHECK_STREAM_LIST();
+
+   StreamConnectionList streamListCopy;
    StreamConnectionList::iterator i;
-   // First, set the flag to TRUE on all entries:
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
-      (**i).m_PROAflag = TRUE;
-   /* Now we keep fetching the first entry and pinging it, until we
-      find an entry that we already treated. */
-   StreamConnection *scp;
-   for(;;)
+   for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
    {
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
-      scp = ms_StreamList.pop_front();
-      // If no entries or this entry has been processed already, then
-      // abort. Newly created (re-opened) entries have the flag set to
-      // FALSE, too.
-      if(scp == NULL || scp->m_PROAflag == FALSE)
-      {
-         ms_StreamList.push_front(scp); // put it back
-         break;
-      }
-      MailFolderCC *mf = scp->folder;
-      scp->m_PROAflag = FALSE;
-      ms_StreamList.push_back(scp);
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
-      if(fullPing)
-         rc &= mf->Ping();
-      else
-         rc &= mf->PingReopen();
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+      streamListCopy.push_back(*i);
    }
+
+   for ( i = streamListCopy.begin(); i != streamListCopy.end(); i++ )
+   {
+      StreamConnection *conn = *i;
+      MailFolderCC *mf = conn->folder;
+
+      rc &= fullPing ? mf->PingReopen() : mf->Ping();
+   }
+
    return rc;
 }
 
@@ -2026,21 +2014,26 @@ MailFolderCC::Debug(void) const
 void
 MailFolderCC::DebugStreams(void) 
 {
-   char buffer[1024];
+   wxLogDebug("--list of streams and objects--");
 
-   DBGLOG("--list of streams and objects--");
-
-   StreamConnectionList::iterator
-      i;
+   StreamConnection *conn;
+   StreamConnectionList::iterator i;
 
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
-      (*i)->MOcheck(); // integrity check on StreamConnection pointer
-      sprintf(buffer,"\t%p -> %p \"%s\"",
-              (*i)->stream, (*i)->folder, (*i)->folder->GetName().c_str());
-      DBGLOG(buffer);
+      conn = *i;
+
+      if ( !conn )
+      {
+         FAIL_MSG( "NULL stream in the list" );
+         continue;
+      }
+
+      conn->MOcheck(); // integrity check on StreamConnection pointer
+      wxLogDebug("\t%p -> %p \"%s\"",
+                 conn->stream, conn->folder, conn->folder->GetName().c_str());
    }
-   DBGLOG("--end of list--");
+   wxLogDebug("--end of list--");
 }
 
 String
@@ -2059,9 +2052,8 @@ void
 MailFolderCC::RemoveFromMap(void) const
 {
    DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+   CHECK_STREAM_LIST();
+
    StreamConnectionList::iterator i;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
@@ -2074,9 +2066,8 @@ MailFolderCC::RemoveFromMap(void) const
          break;
       }
    }
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+
+   CHECK_STREAM_LIST();
 
    if(ms_StreamListDefaultObj == this)
       SetDefaultObj(false);
@@ -2088,6 +2079,8 @@ MailFolderCC::RemoveFromMap(void) const
 MailFolderCC *
 MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
 {
+   CHECK_STREAM_LIST();
+
    i = ms_StreamList.begin();
    if( i != ms_StreamList.end())
       return (**i).folder;
@@ -2100,6 +2093,8 @@ MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
 MailFolderCC *
 MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 {
+   CHECK_STREAM_LIST();
+
    ASSERT( i != ms_StreamList.end());
    DBGMESSAGE(( i.Debug() ));
    i++;
@@ -2643,9 +2638,8 @@ void
 MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
    DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+   CHECK_STREAM_LIST();
+
    StreamConnection  *conn = new StreamConnection;
    conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
@@ -2657,9 +2651,8 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
        to the list, not pre-pended.
    */
    ms_StreamList.push_back(conn);
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
+
+   CHECK_STREAM_LIST();
 }
 
 
@@ -2692,15 +2685,20 @@ MailFolderCC::UpdateStatus(void)
 bool
 MailFolderCC::CanExit(String *which)
 {
+   CHECK_STREAM_LIST();
+
    bool canExit = true;
    *which = "";
    StreamConnectionList::iterator i;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   {
       if( (*i)->folder->InCritical() )
       {
          canExit = false;
          *which << (*i)->folder->GetName() << '\n';
       }
+   }
+
    return canExit;
 }
 
@@ -2708,6 +2706,8 @@ MailFolderCC::CanExit(String *which)
 /* static */ MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
+   CHECK_STREAM_LIST();
+
    StreamConnectionList::iterator i;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
@@ -3204,6 +3204,8 @@ MailFolderCC::ProcessEventQueue(void)
    }
 
    /* Now we check all folders if we need to send update events: */
+   CHECK_STREAM_LIST();
+
    StreamConnectionList::iterator i;
    MailFolderCC *mf;
    for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
