@@ -2571,26 +2571,10 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       }
    }
 
-   // do we need to update the destination folder?
-   bool needsUpdate;
-   if ( didServerSideCopy )
-   {
-      // yes because it might not get the mm_exists until later and we want to
-      // refresh it immediately if it's opened
-      needsUpdate = true;
-   }
-   else // didn't do server side copy
+   if ( !didServerSideCopy )
    {
       // use the inefficient retrieve-append way
-      if ( !MailFolderCmn::SaveMessages(selections, folder) )
-      {
-         // oops, this failed too
-         return false;
-      }
-
-      // no need to update the destination folder as the base class version
-      // uses AppendMessage() and so the folder is already updated
-      needsUpdate = false;
+      return MailFolderCmn::SaveMessages(selections, folder);
    }
 
    // update status of the target folder

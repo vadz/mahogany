@@ -746,6 +746,12 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       mf->ResumeUpdates();
    }
 
+   // force the folder status update as the number of messages in it changed
+   // (CountAllMessages() will call UpdateStatus() internally which sends out an
+   // event notifying the GUI about the update)
+   MailFolderStatus status;
+   (void)mf->CountAllMessages(&status);
+
    mf->DecRef();
 
    delete pd;
