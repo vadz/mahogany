@@ -218,9 +218,20 @@ public:
 
    //@}
 
+   /** @name wxFolderView helpers
+    */
+   //@{
+
    /// get the info about all available viewers
    static size_t GetAllAvailableViewers(wxArrayString *names,
                                         wxArrayString *descs);
+
+   /// get the info about all available filters
+   static size_t GetAllAvailableFilters(wxArrayString *names,
+                                        wxArrayString *labels,
+                                        wxArrayInt *states);
+
+   //@}
 
    /// return a descriptive label for this MIME part
    static String GetLabelFor(const MimePart *mimepart);
@@ -617,8 +628,25 @@ private:
 
    /// is it the default one?
    bool m_usingDefViewer;
+
    //@}
 
+   /// @name View filters stuff
+   //@{
+
+   /// should be called exactly once to load all filters
+   void InitializeViewFilters();
+
+   /// update the state (enabled/disabled) of the filters from profile
+   void UpdateViewFiltersState();
+
+   /// linked list of the filters
+   class ViewFilterNode *m_filters;
+
+   //@}
+
+
+   /// the obejct to which we delegate the menu command processing
    MsgCmdProc *m_msgCmdProc;
 
    friend class ProcessEvtHandler;

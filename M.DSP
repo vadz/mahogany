@@ -1850,6 +1850,10 @@ SOURCE=.\src\modules\Migrate.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\modules\Rot13Filter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\modules\TextViewer.cpp
 # End Source File
 # End Group

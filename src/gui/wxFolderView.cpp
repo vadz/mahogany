@@ -57,6 +57,7 @@
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
 #include <wx/fontutil.h>
+#include <wx/tglbtn.h>
 
 #include "wx/persctrl.h"
 
@@ -331,6 +332,7 @@ protected:
    void OnSize(wxSizeEvent& event);
    void OnButton(wxCommandEvent& event);
    void OnChoice(wxCommandEvent& event);
+   void OnToggleButton(wxCommandEvent& event);
 
    // resize our own child to fill the entire window
    void Resize();
@@ -355,6 +357,9 @@ private:
    // the array containing the names of all the existing viewers
    wxArrayString m_namesViewers;
 
+   // the array containing the names of all the existing filters
+   wxArrayString m_namesFilters;
+
    // the event handler to hook the kbd input (NULL initially, !NULL later)
    class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
 
@@ -362,7 +367,8 @@ private:
    enum
    {
       Button_Close = 100,
-      Choice_Viewer
+      TglButton_First = 200,
+      Choice_Viewer = 300
    };
 
    DECLARE_EVENT_TABLE()
@@ -1037,6 +1043,7 @@ BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
 
    EVT_BUTTON(wxFolderMsgWindow::Button_Close, wxFolderMsgWindow::OnButton)
    EVT_CHOICE(wxFolderMsgWindow::Choice_Viewer, wxFolderMsgWindow::OnChoice)
+   EVT_TOGGLEBUTTON(-1, wxFolderMsgWindow::OnToggleButton)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1135,12 +1142,12 @@ void wxFolderMsgWindow::CreateViewerBar()
    wxChoice *choice = new wxChoice(m_winBar, Choice_Viewer);
 
    wxArrayString descViewers;
-   size_t count = MessageView::GetAllAvailableViewers(&m_namesViewers,
-                                                      &descViewers);
+   size_t countViewers = MessageView::GetAllAvailableViewers(&m_namesViewers,
+                                                             &descViewers);
 
-   for ( size_t n = 0; n < count; n++ )
+   for ( size_t nViewer = 0; nViewer < countViewers; nViewer++ )
    {
-      choice->Append(descViewers[n]);
+      choice->Append(descViewers[nViewer]);
    }
 
    choice->SetSize(choice->GetBestSize());
@@ -1148,6 +1155,36 @@ void wxFolderMsgWindow::CreateViewerBar()
    UpdateViewerBar();
 
    sizer->Add(choice, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
+
+   // add the controls for the view filters
+   wxArrayString labelsFilters;
+   wxArrayInt statesFilters;
+   size_t countFilters = MessageView::GetAllAvailableFilters(&m_namesFilters,
+                                                             &labelsFilters,
+                                                             &statesFilters);
+   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+   {
+      if ( !nFilter )
+      {
+         // add a spacer in the beginning
+         sizer->Add(10, 10);
+      }
+
+      wxToggleButton *btn = new wxToggleButton
+                                (
+                                    m_winBar,
+                                    TglButton_First + nFilter,
+                                    labelsFilters[nFilter],
+                                    wxDefaultPosition,
+                                    wxDefaultSize,
+                                    wxNO_BORDER
+                                );
+
+      btn->SetValue(statesFilters[nFilter] != 0);
+
+      sizer->Add(btn, 0,
+                 wxTOP | wxBOTTOM | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
+   }
 
    // add the spacer and the button at the far right to close this bar
    sizer->Add(5, 0, 1); // expandable
@@ -1295,6 +1332,24 @@ void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
    Profile_obj profile(m_folderView->GetFolderProfile());
 
    profile->writeEntry(MP_MSGVIEW_VIEWER, m_namesViewers[n]);
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            profile,
+                            MEventOptionsChangeData::Ok
+                           ));
+}
+
+void wxFolderMsgWindow::OnToggleButton(wxCommandEvent& event)
+{
+   const int n = event.GetId() - TglButton_First;
+
+   CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
+              _T("invalid filter toggled?") );
+
+   Profile_obj profile(m_folderView->GetFolderProfile());
+
+   profile->writeEntry(m_namesFilters[n], event.IsChecked());
 
    MEventManager::Send(new MEventOptionsChangeData
                            (

@@ -48,6 +48,7 @@
 
 #include "MessageView.h"
 #include "MessageViewer.h"
+#include "ViewFilter.h"
 
 #include "Message.h"
 #include "FolderView.h"
@@ -255,6 +256,61 @@ private:
    const MimePart *m_mimepart;
 };
 
+// ----------------------------------------------------------------------------
+// TransparentFilter: the filter which doesn't filter anything but simply
+//                    shows the text in the viewer.
+// ----------------------------------------------------------------------------
+
+class TransparentFilter : public ViewFilter
+{
+public:
+   TransparentFilter() : ViewFilter(NULL, true) { }
+
+protected:
+   virtual void DoProcess(String& text,
+                          MessageViewer *viewer,
+                          const MTextStyle& style)
+   {
+      viewer->InsertText(text, style);
+   }
+};
+
+// ----------------------------------------------------------------------------
+// ViewFilterNode: a node in the linked list of all the filters we use
+// ----------------------------------------------------------------------------
+
+class ViewFilterNode
+{
+public:
+   ViewFilterNode(ViewFilter *filter,
+                  ViewFilter::Priority prio,
+                  const String& name,
+                  ViewFilterNode *next)
+      : m_name(name)
+   {
+      m_filter = filter;
+      m_prio = prio;
+      m_next = next;
+   }
+
+   ~ViewFilterNode()
+   {
+      delete m_filter;
+      delete m_next;
+   }
+
+   ViewFilter *GetFilter() const { return m_filter; }
+   ViewFilter::Priority GetPriority() const { return m_prio; }
+   const String& GetName() const { return m_name; }
+   ViewFilterNode *GetNext() const { return m_next; }
+
+private:
+   ViewFilter *m_filter;
+   ViewFilter::Priority m_prio;
+   String m_name;
+   ViewFilterNode *m_next;
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -267,6 +323,55 @@ static inline
 String GetFileNameForMIME(Message *message, int partNo)
 {
    return message->GetMimePart(partNo)->GetFilename();
+}
+
+// common part of GetAllAvailableViewers() and GetAllAvailableFilters()
+static
+size_t GetAllAvailablePlugins(const char *iface,
+                              wxArrayString *names,
+                              wxArrayString *descs,
+                              wxArrayInt *states = NULL)
+{
+   CHECK( names && descs, 0, _T("NULL pointer in GetAllAvailablePlugins()") );
+
+   MModuleListing *listing = MModule::ListAvailableModules(iface);
+   if ( !listing )
+   {
+      return 0;
+   }
+
+   // found some plugins
+   const size_t count = listing->Count();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MModuleListingEntry& entry = (*listing)[n];
+
+      names->Add(entry.GetName());
+      descs->Add(entry.GetShortDescription());
+
+      // dirty hack: if we have states != NULL we know we're called from
+      // GetAllAvailableFilters()
+      if ( states )
+      {
+         ViewFilterFactory * const filterFactory
+            = (ViewFilterFactory *)MModule::LoadModule(entry.GetName());
+         if ( filterFactory )
+         {
+            states->Add(filterFactory->GetDefaultState());
+            filterFactory->DecRef();
+         }
+         else
+         {
+            FAIL_MSG( _T("failed to create ViewFilterFactory") );
+
+            states->Add(false);
+         }
+      }
+   }
+
+   listing->DecRef();
+
+   return count;
 }
 
 // ----------------------------------------------------------------------------
@@ -419,8 +524,6 @@ wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
 MessageView::MessageView()
 {
    Init();
-
-   m_viewer = NULL;
 }
 
 void
@@ -438,6 +541,7 @@ MessageView::Init()
    m_asyncFolder = NULL;
    m_mailMessage = NULL;
    m_viewer = NULL;
+   m_filters = NULL;
 
    m_uid = UID_ILLEGAL;
    m_encodingUser =
@@ -448,36 +552,29 @@ MessageView::Init()
    RegisterForEvents();
 }
 
+MessageView::~MessageView()
+{
+   UnregisterForEvents();
+
+   DetachAllProcesses();
+   delete m_evtHandlerProc;
+
+   SafeDecRef(m_mailMessage);
+   SafeDecRef(m_asyncFolder);
+
+   delete m_filters;
+   delete m_viewer;
+}
+
 // ----------------------------------------------------------------------------
-// viewer loading &c
+// loading and managing the viewers
 // ----------------------------------------------------------------------------
 
 /* static */
 size_t MessageView::GetAllAvailableViewers(wxArrayString *names,
                                            wxArrayString *descs)
 {
-   CHECK( names && descs, 0, _T("NULL pointer in GetAllAvailableViewers") );
-
-   MModuleListing *listing =
-      MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
-   if ( !listing )
-   {
-      return 0;
-   }
-
-   // found some viewers
-   size_t count = listing->Count();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      const MModuleListingEntry& entry = (*listing)[n];
-
-      names->Add(entry.GetName());
-      descs->Add(entry.GetShortDescription());
-   }
-
-   listing->DecRef();
-
-   return count;
+   return GetAllAvailablePlugins(MESSAGE_VIEWER_INTERFACE, names, descs);
 }
 
 void
@@ -569,17 +666,130 @@ MessageView::CreateViewer(wxWindow *parent)
    SetViewer(viewer, parent);
 }
 
-MessageView::~MessageView()
+// ----------------------------------------------------------------------------
+// view filters
+// ----------------------------------------------------------------------------
+
+/* static */
+size_t
+MessageView::GetAllAvailableFilters(wxArrayString *names,
+                                    wxArrayString *labels,
+                                    wxArrayInt *states)
 {
-   UnregisterForEvents();
+   return GetAllAvailablePlugins(VIEW_FILTER_INTERFACE, names, labels, states);
+}
 
-   DetachAllProcesses();
-   delete m_evtHandlerProc;
+void
+MessageView::InitializeViewFilters()
+{
+   CHECK_RET( !m_filters, _T("InitializeViewFilters() called twice?") );
 
-   SafeDecRef(m_mailMessage);
-   SafeDecRef(m_asyncFolder);
+   // always insert the terminating, "do nothing", filter at the end
+   m_filters = new ViewFilterNode
+                   (
+                     new TransparentFilter,
+                     ViewFilter::Priority_Lowest,
+                     _T(""),
+                     NULL
+                   );
 
-   delete m_viewer;
+   MModuleListing *listing =
+      MModule::ListAvailableModules(VIEW_FILTER_INTERFACE);
+
+   if ( listing  )
+   {
+      const size_t count = listing->Count();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const MModuleListingEntry& entry = (*listing)[n];
+
+         const String& name = entry.GetName();
+         ViewFilterFactory * const filterFactory
+            = (ViewFilterFactory *)MModule::LoadModule(name);
+         if ( filterFactory )
+         {
+            // create the node for the new filter
+            ViewFilter::Priority prio = filterFactory->GetPriority();
+
+            if ( prio < ViewFilter::Priority_Lowest )
+            {
+               ERRORMESSAGE(( _("Incorrect message view filter priority %d "
+                                "for the filter \"%s\""),
+                              (int)prio, name.c_str() ));
+
+               prio = ViewFilter::Priority_Lowest;
+            }
+
+            // find the right place to insert the new filter into
+            ViewFilterNode **prevNode = &m_filters;
+            for ( ViewFilterNode *node = m_filters;
+                  node;
+                  prevNode = &node, node = node->GetNext() )
+            {
+               if ( prio >= node->GetPriority() )
+               {
+                  // create the new filter
+                  ViewFilter *filter = filterFactory->Create(node->GetFilter());
+
+                  // and insert it here
+                  ViewFilterNode *nodeNew = new ViewFilterNode
+                                                (
+                                                   filter,
+                                                   prio,
+                                                   name,
+                                                   node
+                                                );
+
+                  *prevNode = nodeNew;
+
+                  // finally, enable/disable it initially as configured
+                  Profile *profile = GetProfile();
+                  CHECK_RET( profile, _T("no profile in InitializeViewFilters?") );
+
+                  bool found;
+                  bool enable = profile->readEntry(name, false, &found);
+                  if ( found )
+                  {
+                     filter->Enable(enable);
+                  }
+
+                  break;
+               }
+            }
+
+            filterFactory->DecRef();
+         }
+      }
+
+      listing->DecRef();
+   }
+}
+
+void
+MessageView::UpdateViewFiltersState()
+{
+   if ( !m_filters )
+   {
+      // no filters loaded yet
+      return;
+   }
+
+   Profile *profile = GetProfile();
+   CHECK_RET( profile, _T("no profile in UpdateViewFiltersState?") );
+
+   // we never change the status of the last filter (transparent one), so stop
+   // at one before last
+   for ( ViewFilterNode *node = m_filters;
+         node->GetNext();
+         node = node->GetNext() )
+   {
+      bool found;
+      bool enable = profile->readEntry(node->GetName(), false, &found);
+      if ( found )
+      {
+         node->GetFilter()->Enable(enable);
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -846,6 +1056,9 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    UpdateShowHeadersInMenu();
 
    m_viewer->UpdateOptions();
+
+   // update the filters state
+   UpdateViewFiltersState();
 }
 
 // ----------------------------------------------------------------------------
@@ -1373,7 +1586,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       encPart = wxFONTENCODING_SYSTEM;
    }
 
-
+   // init the style we're going to use
+   bool fontSet = false;
    MTextStyle style;
    if ( encPart != wxFONTENCODING_SYSTEM )
    {
@@ -1382,10 +1596,20 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          wxFont font = m_ProfileValues.GetFont(encPart);
 
          style.SetFont(font);
+
+         fontSet = true;
       }
-      //else: don't change font - no such encoding anyhow
+      //else: don't change font -- no such encoding anyhow
    }
 
+   // we need to reset the font and the colour because they may have been
+   // changed by the headers
+   if ( !fontSet )
+      style.SetFont(m_ProfileValues.GetFont());
+
+   style.SetTextColour(m_ProfileValues.FgCol);
+
+#if 0
    String url,
           before;
 
@@ -1553,6 +1777,14 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       }
    }
    while ( !textPart.empty() );
+#else
+   if ( !m_filters )
+   {
+      InitializeViewFilters();
+   }
+
+   m_filters->GetFilter()->Process(textPart, m_viewer, style);
+#endif // 0/1
 }
 
 // ----------------------------------------------------------------------------

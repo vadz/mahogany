@@ -22,7 +22,9 @@ class ClickableInfo;
 
 // use the standard wxWin class: even if it is not really intended for this, it
 // just what we need here as it combines text colours and font info
-typedef wxTextAttr MTextStyle;
+class MTextStyle : public wxTextAttr
+{
+};
 
 #include "MModule.h"
 

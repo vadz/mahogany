@@ -1,0 +1,28 @@
+--- TODO: edit this
+
+ Just some quick news: I introduced a new abstraction in the message viewer
+code called "view filters". Now MessageView doesn't put the stuff into the
+viewer directly as it used to, but passes it to the registered filters
+which can process the text (including changing it) and only then output it.
+There is always at least one filter: TransparentFilter defined in
+MessageView.cpp itself which simply passes the strings to the viewer
+withotu changing them. It exists simply to avoid having to check for NULL
+everywhere, we can be sure that in all the other filters the next pointer
+is !NULL.
+
+ I forgot to mention that the filters are organized in a linked list.
+They're ordered by their priority (higher the priority -- sooner the filter
+is applied) and the transparent filter is always the last one.
+
+ The interesting thing is, of course, that you can have other filters as
+well. For example, I intend to move the URL and quote level detection code
+to a separate filter. Currently the only example of the filter is a
+Rot13Filter (in src/modules). It isn't very interesting but it at least
+shows that the filters work.
+
+ Of course, the real plan is to have a PGP filter (with a very high
+priority, so it will be applied first) which will decode the message text
+on the fly and/or check (and remove) the signature. It should be also
+possible to have UUdecode filter -- it will be probably easier to do it at
+this level even if ideally it should have been done at c-client one.
+
