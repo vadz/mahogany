@@ -1,0 +1,33 @@
+# This file was created automatically by SWIG.
+import MTestc
+class MTestPtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def __del__(self):
+        if self.thisown == 1 :
+            MTestc.delete_MTest(self.this)
+    def SetValue(self,arg0):
+        val = MTestc.MTest_SetValue(self.this,arg0)
+        return val
+    def GetValue(self):
+        val = MTestc.MTest_GetValue(self.this)
+        return val
+    def __repr__(self):
+        return "<C MTest instance>"
+class MTest(MTestPtr):
+    def __init__(self) :
+        self.this = MTestc.new_MTest()
+        self.thisown = 1
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+

@@ -1,19 +1,31 @@
 # Makefile for src/classes directory
+#
+# $Id$
+#
+# $Log$
+# Revision 1.2  1998/05/02 18:31:38  KB
+# Python integration works.
+#
+#
 
 CWD = Python
-SRC = MApplication.i Profile.i
-HDR = $(SRC:.cc=.h)
-DEP = $(SRC:.cc=.d)
 
-TARGETS = $(SRC:.i=.o)
+SWIGSRC = MTest.i MApplication.i Profile.i 
+CXXSRC = InitPython.cc
+HDR = $(CXXSRC:.cc=.h)
+DEP = $(CXXSRC:.cc=.d)
 
-all:	$(TARGETS)
+CXXTARGETS= $(CXXSRC:.cc=.o)
+SWIGTARGETS = $(SWIGSRC:.i=.o)
+SOTARGETS	=$(OTARGETS:.o=cmodule.so)
 
-
+all:	$(CXXTARGETS) $(SWIGTARGETS)
 
 
 .PHONY: mkswig all
 
+include ../../makerules 
 include ../../makeopts
-include ../../makerules
+clean:
+	$(RM) *.o *.so *.pyc *.py *.doc
 
