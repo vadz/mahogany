@@ -499,7 +499,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   );
                }
             }
-
+            break;
 
          case WXMENU_FOLDER_CREATE:
             {
