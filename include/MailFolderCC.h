@@ -80,6 +80,13 @@ KBLIST_DEFINE(FolderViewList, FolderView);
 class MailFolderCC : public MailFolderCmn
 {
 public:
+   /// flags for DoSetSequenceFlag()
+   enum SequenceKind
+   {
+      SEQ_UID,
+      SEQ_MSGNO
+   };
+
    /** @name Constructors and destructor */
    //@{
    static MailFolderCC * OpenFolder(const MFolder *mfolder,
@@ -177,43 +184,24 @@ public:
    /// override base class SaveMessages() to do server side copy if possible
    virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
 
-   /** Appends the message to this folder.
-       @param msg the message to append
-       @param update update mailbox status
-       @return true on success
-   */
    virtual bool AppendMessage(const Message & msg);
 
-   /** Appends the message to this folder.
-       @param msg text of the  message to append
-       @param update update mailbox status
-       @return true on success
-   */
    virtual bool AppendMessage(const String& msg);
-
-   /** Expunge messages.
-     */
    virtual void ExpungeMessages(void);
 
-   virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    bool set = true,
-                                    bool undeletedOnly = true) const;
 
-   /** Search Messages for certain criteria.
-       @return UIdArray with UIds of matching messages
-   */
+   virtual MsgnoArray *SearchByFlag(MessageStatus flag,
+                                    int flags = SEARCH_SET |
+                                                SEARCH_UNDELETED) const;
+
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
+
 
    virtual bool ThreadMessages(const ThreadParams& thrParams,
                                ThreadData *thrData);
 
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
 
-   enum SequenceKind
-   {
-      SEQ_UID,
-      SEQ_MSGNO
-   };
 
    /** Set a flag for all messages in this sequence which may contain either
        UIDs or msgnos
@@ -389,11 +377,16 @@ private:
 
    //@}
 
-   /// called to notify everybody that its listing changed
+   /** @name Mailbox update helpers */
+   //@{
+
+   /// call to notify everybody that its listing changed
    virtual void RequestUpdate(void);
 
-   /// called to notify everybody that some messages were expunged
+   /// call to notify everybody that some messages were expunged
    void RequestUpdateAfterExpunge();
+
+   //@}
 
    /** @name Message counting */
    //@{
@@ -412,9 +405,6 @@ private:
 
    /// apply all timeout values
    void ApplyTimeoutValues(void);
-
-   /// Check if this message is a "New Message":
-   virtual bool IsNewMessage(const HeaderInfo * hi);
 
    /// helper of OverviewHeader
    static String ParseAddress(struct mail_address *adr);
@@ -448,6 +438,9 @@ private:
    void UpdateAfterAppend();
 
    virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+
+   /// clear m_expungedMsgnos and m_expungedPositions arrays
+   void DiscardExpungeData();
 
    /** @name Notification handlers */
    //@{

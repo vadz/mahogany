@@ -316,19 +316,3 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
    SafeDecRef(m_profile);
 }
 
-MEventNewMailData::MEventNewMailData(MailFolder *folder,
-                                     unsigned long n,
-                                     UIdType *messageIDs)
-                 : MEventWithFolderData(MEventId_NewMail, folder)
-{
-   m_number = n;
-   m_messageIDs = new UIdType [n];
-   for(size_t i = 0; i < n; i++)
-      m_messageIDs[i] = messageIDs[i];
-}
-
-MEventNewMailData::~MEventNewMailData()
-{
-   delete [] m_messageIDs;
-}
-

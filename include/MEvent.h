@@ -27,8 +27,6 @@ enum MEventId
 {
    /// (invalid id for an event)
    MEventId_Null = -1,
-   /// MEventMailData
-   MEventId_NewMail = 100,
    /// MEventFolderTreeChangeData - a change in folder tree
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData - there's a new folder listing
@@ -141,37 +139,6 @@ public:
 private:
    String m_adbname, m_provname;
 };
-
-/// MEventNewMailData - the event notifying the app about "new mail"
-class MEventNewMailData : public MEventWithFolderData
-{
-public:
-   /** Constructor.
-       @param folder the mail folder where the new mail was detected
-       @param n number of new messages
-       @param messageIDs points to an array of the sequence numbers of
-       the new messages in that folder, freed by the caller
-   */
-   MEventNewMailData(MailFolder *folder,
-                     unsigned long n,
-                     UIdType *messageIDs);
-   ~MEventNewMailData();
-
-   /**@name accessors */
-   //@{
-   /// get the number of new messages
-   unsigned long GetNumber(void) const { return m_number; }
-   /// get the index of the Nth new message (for calling GetMessage)
-   UIdType GetNewMessageIndex(unsigned long n) const
-      {
-         return m_messageIDs[n];
-      }
-   //@}
-private:
-   UIdType *m_messageIDs;
-   unsigned long  m_number;
-};
-
 
 /** MEventFolderUpdate Data - Does not carry any data apart from pointer to
     mailfolder.

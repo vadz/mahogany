@@ -55,6 +55,8 @@
 
 #include "wx/persctrl.h"      // for wxPFileSelector
 
+#include  <wx/utils.h>        // for wxExecute()
+
 #include "MailFolderCmn.h"
 
 // ----------------------------------------------------------------------------
@@ -65,10 +67,14 @@ extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
 extern const MOption MP_FOLDER_CLOSE_DELAY;
 extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
+extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_SAFE_FILTERS;
+extern const MOption MP_SHOW_NEWMAILINFO;
+extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_UPDATEINTERVAL;
+extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_USE_TRASH_FOLDER;
 
 // ----------------------------------------------------------------------------
@@ -249,8 +255,10 @@ static MfCloser *gs_MailFolderCloser = NULL;
 MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 {
    wxLogTrace(TRACE_MF_CLOSE,
-              "Delaying closing of folder '%s' (%d refs) for %d seconds.",
-              mf->GetName().c_str(), mf->GetNRef(), secs);
+              "Delaying closing of '%s' (%d refs) for %d seconds.",
+              mf->GetName().c_str(),
+              mf->GetNRef(),
+              secs == NEVER_EXPIRES ? -1 : secs);
 
    m_mf = mf;
 
@@ -1094,77 +1102,6 @@ bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
 }
 
 // ----------------------------------------------------------------------------
-// MailFolderCmn new mail check
-// ----------------------------------------------------------------------------
-
-/*
-  This function is called by GetHeaders() immediately after building a
-  new folder listing. It checks for new mails and, if required, sends
-  out new mail events.
-*/
-void
-MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
-{
-   CHECK_RET( hilp, "no listing in CheckForNewMail" );
-
-   UIdType n = hilp->Count();
-   if ( !n )
-      return;
-
-   UIdType *messageIDs = new UIdType[n];
-
-   wxLogTrace(TRACE_NEWMAIL,
-              "CheckForNewMail(): folder: %s highest seen uid: %lu.",
-              GetName().c_str(), (unsigned long) m_LastNewMsgUId);
-
-   // new messages are supposed to have UIDs greater than the last new message
-   // seen, but not all messages with greater UID are new, so we have to first
-   // find all messages with such UIDs and then check if they're really new
-
-   // when we check for the new mail the first time, m_LastNewMsgUId is still
-   // invalid and so we must reset it before comparing with it
-   bool firstTime = m_LastNewMsgUId == UID_ILLEGAL;
-   if ( firstTime )
-      m_LastNewMsgUId = 0;
-
-   // Find the new messages:
-   UIdType nextIdx = 0;
-   UIdType highestId = m_LastNewMsgUId;
-   for ( UIdType i = 0; i < n; i++ )
-   {
-      HeaderInfo *hi = hilp->GetItemByIndex(i);
-      UIdType uid = hi->GetUId();
-      if ( uid > m_LastNewMsgUId )
-      {
-         if ( IsNewMessage(hi) )
-         {
-            messageIDs[nextIdx++] = uid;
-         }
-
-         if ( uid > highestId )
-            highestId = uid;
-      }
-   }
-
-   ASSERT_MSG( nextIdx <= n, "more new messages than total?" );
-
-   if ( nextIdx != 0)
-   {
-      MEventManager::Send(new MEventNewMailData(this, nextIdx, messageIDs));
-   }
-   //else: no new messages found
-
-   m_LastNewMsgUId = highestId;
-
-   wxLogTrace(TRACE_NEWMAIL,
-              "CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
-              GetName().c_str(), (unsigned long) highestId);
-
-
-   delete [] messageIDs;
-}
-
-// ----------------------------------------------------------------------------
 // MFCmnOptions
 // ----------------------------------------------------------------------------
 
@@ -1346,7 +1283,7 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 
 /// apply the filters to the selected messages
 int
-MailFolderCmn::ApplyFilterRules(UIdArray msgs)
+MailFolderCmn::ApplyFilterRules(const UIdArray& msgs)
 {
    // Has the folder got any filter rules set? Concat all its filters together
    String filterString;
@@ -1410,17 +1347,11 @@ MailFolderCmn::ApplyFilterRules(UIdArray msgs)
 DECLARE_AUTOPTR(MModule_Filters);
 DECLARE_AUTOPTR(FilterRule);
 
-// Checks for new mail and filters if necessary.
+// apply filters to the new mail, return true only if all new messages were
+// deleted as the result of the filters action
 bool
-MailFolderCmn::FilterNewMail()
+MailFolderCmn::FilterNewMail(const UIdArray& uidsNew)
 {
-   // Maybe we are lucky and have nothing to do?
-   if ( CountRecentMessages() == 0 )
-   {
-      // true as no error
-      return true;
-   }
-
    // Obtain pointer to the filtering module:
    MModule_Filters_obj filterModule = MModule_Filters::GetModule();
    if ( !filterModule )
@@ -1453,58 +1384,8 @@ MailFolderCmn::FilterNewMail()
    if ( !filterRule )
       return false;
 
-   HeaderInfoList_obj hil = GetHeaders();
-   CHECK( hil, false, "FilterNewMail: no headers" );
-
-   // Build an array of NEW message UIds to apply the filters to:
-   MsgnoArray *messages = SearchByFlag(MSG_STAT_NEW);
-   if ( !messages )
-   {
-      // no new messages
-      return true;
-   }
-
-   size_t count = messages->GetCount();
-   if ( !count )
-   {
-      delete messages;
-
-      return true;
-   }
-
-   // convert msgnos we got from SearchByFlag() into UIDs
-   //
-   // notice that it isn't really important that we force retrieving all these
-   // headers now (instead of getting UIDs directly from server) as they will
-   // be needed for Apply() below soon anyhow
-
-   // it is very common to have a range of new messages, so cache all of them
-   // at once - if it's worth it
-   MsgnoType msgnoFirstNew = messages->Item(0),
-             msgnoLastNew = messages->Item(count - 1);
-
-   if ( msgnoFirstNew < msgnoLastNew )
-   {
-      hil->CacheMsgnos(msgnoFirstNew, msgnoLastNew);
-   }
-
-   for ( size_t n = 0; n < count; n++ )
-   {
-      HeaderInfo *hi = hil->GetItemByMsgno(messages->Item(n));
-      if ( !hi )
-      {
-         FAIL_MSG( "failed to get header for a new message" );
-
-         messages->Item(n) = UID_ILLEGAL;
-      }
-      else
-      {
-         messages->Item(n) = hi->GetUId();
-      }
-   }
-
-   // do apply the filters finally
-   int rc = filterRule->Apply(this, *messages, true /* ignore deleted */);
+   // apply the filters finally
+   int rc = filterRule->Apply(this, uidsNew, true /* ignore deleted */);
 
    // avoid doing anything harsh (like expunging the messages) if an
    // error occurs
@@ -1532,25 +1413,67 @@ MailFolderCmn::FilterNewMail()
 
       if ( expunge )
       {
-         // so be it
+         // we want to know if the filters expunged all new messages and for
+         // this we simply compare the number of messages expunged with the
+         // number of the new ones - of course, this is wrong in general as the
+         // filters may expunge other messages as well but should work well in
+         // practice and doesn't lead to catastrophic consequences when this
+         // assumption is wrong
+         MsgnoType numOld = GetMessageCount();
+
          ExpungeMessages();
+
+         if ( GetMessageCount() <= numOld - uidsNew.Count() )
+         {
+            // suppose that all new messages were expunged
+            return true;
+         }
       }
    }
 
-   delete messages;
-
-   return true;
+   // we didn't expunge everything
+   return false;
 }
 
-bool MailFolderCmn::CollectNewMail()
+// ----------------------------------------------------------------------------
+// MailFolderCmn new mail processing
+// ----------------------------------------------------------------------------
+
+// remember that this function return TRUE only if all new mail was deleted in
+// the result of processing it
+bool MailFolderCmn::ProcessNewMail(const UIdArray& uidsNew)
 {
-   if ( !(GetFlags() & MF_FLAGS_INCOMING) )
+   // first filter the messages
+   if ( FilterNewMail(uidsNew) )
    {
-      // we don't collect messages from this folder
+      // all new mail was deleted by the filters
       return true;
    }
 
-   // where to we move the mails?
+   // next copy/move all new mail to the central new mail folder if needed
+   if ( CollectNewMail(uidsNew) )
+   {
+      // we moved everything elsewhere, nothing left
+      return true;
+   }
+
+   // finally, notify the user about it
+   ReportNewMail(uidsNew);
+
+   // some new mail is left in the folder
+   return false;
+}
+
+bool MailFolderCmn::CollectNewMail(const UIdArray& uidsNew)
+{
+   // do we collect messages from this folder at all?
+   if ( !(GetFlags() & MF_FLAGS_INCOMING) )
+   {
+      // no, messages not moved - hence "false"
+      return false;
+   }
+
+   // where to we collect the mail?
    String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
    if ( newMailFolder == GetName() )
    {
@@ -1570,58 +1493,113 @@ bool MailFolderCmn::CollectNewMail()
       return false;
    }
 
-   // do we have any messages at all?
-   unsigned long count = GetMessageCount();
-   if ( count > 0 )
+   bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
+
+   if ( !SaveMessages(&uidsNew, newMailFolder) )
    {
-      HeaderInfoList_obj hil = GetHeaders();
-      CHECK( hil, false, "CollectNewMail: no headers" );
+      // don't delete them if we failed to save them
+      ERRORMESSAGE((_("Cannot %s new mail from folder '%s' to '%s'."),
+                    move ? _("move") : _("copy"),
+                    GetName().c_str(),
+                    newMailFolder.c_str()));
 
-      // get all undeleted messages
-      UIdArray messages;
-      for ( unsigned long idx = 0; idx < count; idx++ )
+      return false;
+   }
+
+   if ( move )
+   {
+      // delete and expunge
+      DeleteMessages(&uidsNew, true);
+
+      // no new mail left here
+      return true;
+   }
+
+   // we did copy it to the new mail folder but it was left here as well
+   return false;
+}
+
+void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
+{
+   // first of all, do nothing at all in the away mode
+   if ( mApplication->IsInAwayMode() )
+   {
+      // avoid any interaction with the user
+      return;
+   }
+
+   // step 1: execute external command if it's configured
+   Profile *profile = GetProfile();
+   if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
+   {
+      String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
+      if ( !command.empty() )
       {
-         HeaderInfo *hi = hil->GetItemByIndex(idx);
-         int status = hi->GetStatus();
-
-         // note that we also check that the message isn't deleted - avoids
-         // getting 2 (or more!) copies of the same "new" message (first normal,
-         // subsequent deleted) if, for whatever reason, we failed to expunge
-         // the messages the last time we collected mail from here
-         if ( (status & MSG_STAT_RECENT) &&
-               !(status & (MSG_STAT_SEEN | MSG_STAT_DELETED)) )
+         if ( !wxExecute(command, false /* async */) )
          {
-            messages.Add(hi->GetUId());
-         }
-      }
-
-      // it is possible that all new messages had MSG_STAT_DELETED flag
-      // set and so we have nothing to copy
-      if ( !messages.IsEmpty() )
-      {
-         bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
-
-         if ( SaveMessages(&messages, newMailFolder) )
-         {
-            if ( move )
-            {
-               // delete and expunge
-               DeleteMessages(&messages, true);
-            }
-         }
-         else // don't delete them if we failed to move
-         {
-            ERRORMESSAGE((_("Cannot %s new mail from folder '%s' to '%s'."),
-                          move ? _("move") : _("copy"),
-                          GetName().c_str(),
-                          newMailFolder.c_str()));
-
-            return false;
+            // TODO ask whether the user wants to disable it
+            wxLogError(_("Command '%s' (to execute on new mail reception)"
+                         " failed."), command.c_str());
          }
       }
    }
 
-   return true;
+#ifdef USE_PYTHON
+   // step 2: folder specific Python callback
+   if ( !PythonCallback(MCB_FOLDER_NEWMAIL, 0, this, GetClassName(), profile) )
+
+      // step 3: global python callback
+      if ( !PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0,
+                           mApplication, "MApplication",
+                           mApplication->GetProfile()) )
+#endif //USE_PYTHON
+      {
+         if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
+         {
+            String message;
+
+            unsigned long number = uidsNew.GetCount();
+
+            // we give the detailed new mail information when there are few new
+            // mail messages, otherwise we just give a brief message with their
+            // number
+            //
+            // the threshold may be set to -1 to always give the detailed
+            // message
+            long detailsThreshold = READ_CONFIG(profile, MP_SHOW_NEWMAILINFO);
+            if ( detailsThreshold == -1 ||
+                 number < (unsigned long)detailsThreshold )
+            {
+               message = _("You have received new mail:");
+               for( unsigned long i = 0; i < number; i++)
+               {
+                  Message *msg = GetMessage(uidsNew[i]);
+                  if ( msg )
+                  {
+                     message << '\n'
+                             << _("\tIn folder '") << GetName() << "'\n"
+                             << _("\tFrom: '") << msg->From()
+                             << _("' with subject: ") << msg->Subject();
+
+                     msg->DecRef();
+                  }
+                  //else: this may happen if another session deleted it
+               }
+            }
+            else // too many new messages
+            {
+               // it seems like a better idea to give this brief message in case
+               // of several messages
+               message.Printf(_("You have received %lu new messages "
+                                "in the folder '%s'."),
+                              number, GetName().c_str());
+            }
+
+            LOGMESSAGE((M_LOG_WINONLY, message));
+         }
+      }
+
+   //else: new mail reported by the Python code
 }
 
 // ----------------------------------------------------------------------------

@@ -381,7 +381,6 @@ protected:
    MailCollector *m_MailCollector;
 
    /// registration seed for EventManager
-   void *m_eventNewMailReg;
    void *m_eventOptChangeReg;
    void *m_eventFolderUpdateReg;
 

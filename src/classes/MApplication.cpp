@@ -69,10 +69,6 @@
 #  include <fcntl.h>
 #endif //Unix
 
-// instead of writing our own wrapper for wxExecute()
-#include  <wx/utils.h>
-#define   SYSTEM(command) wxExecute(command, FALSE)
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -89,18 +85,14 @@ extern const MOption MP_GLOBALDIR;
 extern const MOption MP_ICONSTYLE;
 extern const MOption MP_LOGFILE;
 extern const MOption MP_MAINFOLDER;
-extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_REOPENLASTFOLDER;
 extern const MOption MP_SHOWADBEDITOR;
 extern const MOption MP_SHOWLOG;
 extern const MOption MP_SHOWSPLASH;
-extern const MOption MP_SHOW_NEWMAILINFO;
-extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_USEPYTHON;
-extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 
@@ -154,7 +146,6 @@ MAppBase *mApplication = NULL;
 
 MAppBase::MAppBase()
 {
-   m_eventNewMailReg = NULL;
    m_eventOptChangeReg = NULL;
    m_eventFolderUpdateReg = NULL;
 
@@ -460,11 +451,7 @@ MAppBase::OnStartup()
    // register with the event subsystem
    // ---------------------------------
 
-   m_eventNewMailReg = MEventManager::Register(*this, MEventId_NewMail);
-
    // should never fail...
-   CHECK( m_eventNewMailReg, FALSE,
-          "failed to register event handler for new mail event " );
    m_eventOptChangeReg = MEventManager::Register(*this,
                                                  MEventId_OptionsChange);
    CHECK( m_eventOptChangeReg, FALSE,
@@ -600,11 +587,6 @@ MAppBase::OnShutDown()
                    "be stored remotely."));
 
    // don't want events any more
-   if ( m_eventNewMailReg )
-   {
-      MEventManager::Deregister(m_eventNewMailReg);
-      m_eventNewMailReg = NULL;
-   }
    if ( m_eventOptChangeReg )
    {
       MEventManager::Deregister(m_eventOptChangeReg);
@@ -786,93 +768,7 @@ void MAppBase::UpdateAwayMode()
 bool
 MAppBase::OnMEvent(MEventData& event)
 {
-   if(event.GetId() == MEventId_NewMail)
-   {
-      // first of all, do nothing at all in the away mode
-      if ( IsInAwayMode() )
-      {
-         // avoid any interaction with the user
-         return TRUE;
-      }
-
-      // get the folder in which the new mail arrived
-      MEventNewMailData& mailevent = (MEventNewMailData &)event;
-      MailFolder *folder = mailevent.GetFolder();
-
-      // step 1: execute external command if it's configured
-      Profile *profile = folder->GetProfile();
-      if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
-      {
-         String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
-         if(! command.empty())
-         {
-            if ( ! SYSTEM(command) )
-            {
-               // TODO ask whether the user wants to disable it
-               wxLogError(_("Command '%s' (to execute on new mail reception)"
-                            " failed."), command.c_str());
-            }
-         }
-      }
-
-#ifdef   USE_PYTHON
-      // step 2: folder specific Python callback
-      if(! PythonCallback(MCB_FOLDER_NEWMAIL, 0, folder, folder->GetClassName(),
-                          profile))
-
-         // step 3: global python callback
-         if(! PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0, this, "MApplication",
-                             GetProfile()))
-#endif //USE_PYTHON
-         {
-            if(READ_CONFIG(profile, MP_SHOW_NEWMAILMSG))
-            {
-               String message;
-
-               unsigned long number = mailevent.GetNumber();
-               unsigned long found = 0;
-               if ( number <= (unsigned long) READ_CONFIG(profile,
-                                                          MP_SHOW_NEWMAILINFO))
-               {
-                  message = _("You have received new mail:");
-                  for( unsigned long i = 0; i < number; i++)
-                  {
-                     Message *msg =
-                        folder->GetMessage(mailevent.GetNewMessageIndex(i));
-                     if ( msg )
-                     {
-                        message << '\n'
-                                << _("\tIn folder '") << folder->GetName() << "'\n"
-                                << _("\tFrom: '") << msg->From()
-                                << _("' with subject: ") << msg->Subject();
-
-                        msg->DecRef();
-                        found++;
-                     }
-                     else
-                     {
-                        FAIL_MSG("new mail received but no new message?");
-                     }
-                  }
-               }
-               else // too many new messages
-               {
-                  // it seems like a better idea to give this brief message in case
-                  // of several messages
-                  message.Printf(_("You have received %lu new messages "
-                                   "in folder '%s'."),
-                                 number, folder->GetName().c_str());
-                  found = number;
-               }
-
-               // This test is there as the messages might have gone in the
-               // meantime, as happens when filtering.
-               if ( found > 0 )
-                  LOGMESSAGE((M_LOG_WINONLY, message));
-            }
-         }
-   }
-   else if (event.GetId() == MEventId_OptionsChange)
+   if (event.GetId() == MEventId_OptionsChange)
    {
       SetupOnlineManager(); // make options change effective
 #ifdef USE_ICON_SUBDIRS

@@ -253,6 +253,22 @@ public:
       HalfOpen
    };
 
+   /// flags for SearchByFlag()
+   enum
+   {
+      /// search messages with the given flag set (default)
+      SEARCH_SET = 0,
+
+      /// search messages without the given flag
+      SEARCH_UNSET = 1,
+
+      /// search among undeleted messages only
+      SEARCH_UNDELETED = 2,
+
+      /// return the UIDs, not msgnos, of the found messages
+      SEARCH_UID = 4
+   };
+
    /**
      The structure containing the parameters for Forward/ReplyMessage(s)
      methods.
@@ -458,8 +474,8 @@ public:
    /// return the folder flags
    virtual int GetFlags(void) const = 0;
 
-   /** Get the profile used by this folder
-       @return Pointer to the profile.
+   /** Get the profile used by this folder WITHOUT IncRef()ing IT!
+       @return pointer to the profile (DO NOT DecRef() IT)
    */
    virtual Profile *GetProfile(void) const = 0;
 
@@ -627,17 +643,28 @@ public:
     */
    virtual void ExpungeMessages(void) = 0;
 
-   /** Find messages with given flags.
+   /**
+     Find messages with given flags. It returns either msgnos (default) or
+     UIDs if flags has SEARCH_UID bit set.
 
-       @param flag one of MSG_STAT_xxx constants
-       @param set if true, find all messages with this flag, false - without
-       @param undeletedOnly if true, don't included deleted messages
-       @param return array with msgnos (not UIDs!) of messages found to be
-              freed by caller
+     @param status one of MSG_STAT_xxx constants
+     @param flags the combination of SEARCH_XXX bits
+     @param return array with msgnos or UIDs of messages found
+              (to be freed by caller)
    */
    virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    bool set = true,
-                                    bool undeletedOnly = true) const = 0;
+                                    int flags = SEARCH_SET |
+                                                SEARCH_UNDELETED) const = 0;
+
+   /// compatibility wrapper, don't use
+   MsgnoArray *SearchByFlag(MessageStatus flag, bool set)
+   {
+      return SearchByFlag
+             (
+               flag,
+               SEARCH_UNDELETED | (set ? SEARCH_SET : SEARCH_UNSET)
+             );
+   }
 
    /** Search messages for certain criteria.
        @return UIdArray with UIds of matching messages, caller must
@@ -756,11 +783,26 @@ public:
    virtual bool IsLocked(void) const = 0;
    //@}
 
+   /** @name New mail processing */
+   //@{
+
+   /**
+     Process the new mail in this folder: this may involve collecting it (==
+     copying or moving to another folder), filtering it or just reporting it
+     depending on the folder options.
+
+     @param uidsNew the array containing UIDs of the new messages
+     @return TRUE if all new mail was moved away or deleted, FALSE if any left
+   */
+   virtual bool ProcessNewMail(const UIdArray& uidsNew) = 0;
+
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
    */
-   virtual int ApplyFilterRules(UIdArray msgs) = 0;
+   virtual int ApplyFilterRules(const UIdArray& msgs) = 0;
+
+   //@}
 
    /** @name Various static functions
 

@@ -146,11 +146,9 @@ public:
 
    virtual HeaderInfoList *GetHeaders(void) const;
 
-   /** Apply any filter rules to the folder.
-       Applies the rule to all messages listed in msgs.
-       @return -1 if no filter module exists, return code otherwise
-   */
-   virtual int ApplyFilterRules(UIdArray msgs);
+   virtual bool ProcessNewMail(const UIdArray& uidsNew);
+
+   virtual int ApplyFilterRules(const UIdArray& msgs);
 
    /** Update the folder to correspond to the new parameters: called from
        Options_Change MEvent handler.
@@ -188,12 +186,6 @@ protected:
 
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
-
-   /// apply filters to all new mail messages
-   virtual bool FilterNewMail();
-
-   /// move new mail to the incoming folder if necessary
-   virtual bool CollectNewMail();
 
    /// really count messages
    virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
@@ -239,16 +231,6 @@ protected:
 
    /// Destructor
    ~MailFolderCmn();
-   /**@name All used to build listings */
-   //@{
-
-   /// generate NewMail messages if needed
-   void CheckForNewMail(HeaderInfoList *hilp);
-
-   /** Check if this message is a "New Message" for generating new
-       mail event. */
-   virtual bool IsNewMessage(const HeaderInfo * hi) = 0;
-   //@}
 
    /** @name The listing information */
    //@{
@@ -263,6 +245,15 @@ protected:
    class MailFolderTimer *m_Timer;
 
 private:
+   /// apply filters to all new mail messages
+   bool FilterNewMail(const UIdArray& uidsNew);
+
+   /// copy/move new mail to the incoming folder, return true if moved (only!)
+   bool CollectNewMail(const UIdArray& uidsNew);
+
+   /// report new mail to the user
+   void ReportNewMail(const UIdArray& uidsNew);
+
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
 

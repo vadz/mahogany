@@ -2119,6 +2119,21 @@ MailFolderCC::Open(OpenMode openmode)
 // MailFolderCC closing
 // ----------------------------------------------------------------------------
 
+void MailFolderCC::DiscardExpungeData()
+{
+   if ( m_expungedMsgnos )
+   {
+      // harmless but not supposed to happen
+      ASSERT_MSG( m_expungedPositions, "can't be NULL if m_expungedMsgnos!" );
+
+      delete m_expungedMsgnos;
+      delete m_expungedPositions;
+
+      m_expungedMsgnos = NULL;
+      m_expungedPositions = NULL;
+   }
+}
+
 void
 MailFolderCC::Close()
 {
@@ -2165,14 +2180,7 @@ MailFolderCC::Close()
    // we could be closing before we had time to process all events
    //
    // FIXME: is this really true, i.e. does it ever happen?
-   if ( m_expungedMsgnos )
-   {
-      delete m_expungedMsgnos;
-      delete m_expungedPositions;
-
-      m_expungedMsgnos = NULL;
-      m_expungedPositions = NULL;
-   }
+   DiscardExpungeData();
 
    if ( m_statusChangedMsgnos )
    {
@@ -3162,13 +3170,14 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    return count;
 }
 
-MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
-                                       bool set,
-                                       bool undeletedOnly) const
+MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, int flags) const
 {
    CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
 
    SEARCHPGM *pgm = mail_newsearchpgm();
+
+   // do we look for messages with this flag or without?
+   bool set = !(flags & SEARCH_UNSET);
 
    switch ( flag )
    {
@@ -3183,7 +3192,8 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
          if ( set )
          {
             // we don't risk finding many messages like this!
-            ASSERT_MSG( !undeletedOnly, "deleted and undeleted at once?" );
+            ASSERT_MSG( !(flags & SEARCH_UNDELETED),
+                        "deleted and undeleted at once?" );
 
             pgm->deleted = 1;
          }
@@ -3234,7 +3244,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
          return NULL;
    }
 
-   if ( undeletedOnly )
+   if ( flags & SEARCH_UNDELETED )
    {
       pgm->undeleted = 1;
    }
@@ -3506,24 +3516,6 @@ MailFolderCC::SetFlagForAll(int flag, bool set)
    sequence.AddRange(1, m_nMessages);
 
    return DoSetSequenceFlag(SEQ_MSGNO, sequence.GetString(), flag, set);
-}
-
-bool
-MailFolderCC::IsNewMessage(const HeaderInfo *hi)
-{
-   UIdType msgId = hi->GetUId();
-   bool isNew = false;
-   int status = hi->GetStatus();
-
-   if( (status & MSG_STAT_SEEN) == 0
-       && ( status & MSG_STAT_RECENT)
-       && ! ( status & MSG_STAT_DELETED) )
-      isNew = true;
-   if(m_LastNewMsgUId != UID_ILLEGAL
-      && m_LastNewMsgUId >= msgId)
-      isNew = false;
-
-   return isNew;
 }
 
 void
@@ -4228,6 +4220,27 @@ void MailFolderCC::RequestUpdateAfterExpunge()
    // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
    //        what to do?
 
+   // we can update the status faster here as we have decremented the
+   // number of recent/unseen/... when the messages were deleted (before
+   // being expunged), so we just have to update the total now
+   //
+   // NB: although this has all chances to break down with manual expunge
+   //     or even with automatic one due to race condition (if the
+   //     message status changed from outside...) - but this is so much
+   //     faster and the problem is not really fatal that I still prefer
+   //     to do it like this
+   MailFolderStatus status;
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   if ( mfStatusCache->GetStatus(GetName(), &status) )
+   {
+      // caller is supposed to check for this!
+      CHECK_RET( m_MailStream, "UpdateStatusAfterExpunge(): dead stream" );
+
+      status.total = m_MailStream->nmsgs;
+
+      mfStatusCache->UpdateStatus(GetName(), status);
+   }
+
    // tell GUI to update
    wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
               GetName().c_str());
@@ -4294,63 +4307,18 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // use server side sorting and/or threading
       m_gotUnprocessedNewMail = true;
 
-      // we also may safely throw away any pending expunge notifications as
-      // we're going to send FolderUpdate event soon anyhow
-      if ( m_expungedMsgnos )
-      {
-         delete m_expungedMsgnos;
-         delete m_expungedPositions;
-
-         m_expungedMsgnos =
-         m_expungedPositions = NULL;
-      }
+      // NB: if we have m_expungedMsgnos, leave them for now and don't discard
+      //     them as we used to do because if all new mail is filtered away,
+      //     we'd still have to notify the GUI about these expunged messages
 
       // our cached idea of the number of messages we have doesn't correspond
-      // to reality any more
-      MfStatusCache *mfStatusCache = MfStatusCache::Get();
+      // to reality any more but don't invalidate it from here - we will call
+      // MfStatusCache::UpdateStatus() soon from OnNewMail() anyhow
 
-      // the code inside "#if 0" doesn't work because some dumb IMAP servers
-      // (IMAPd 12.264 to not name it) generate two untagged EXISTS in a row
-      // when you open a folder which used to be empty but later got a message
-      // into it, i.e. it says:
-      //
-      //    2 SELECT wxWindows/CVS
-      //    * 0 EXISTS
-      //    * 1 EXISTS
-      //    * 1 RECENT
-      //
-      // and then the first event triggers an assert failure elsewhere (in
-      // wxFolderTree) because when it is processed there is no cached status
-      // for it because we invalidate it immediately after sending the event!
-      //
-      // so we can't be smart, unfortunately, and have to always invalidate the
-      // cache
-#if 0
-      if ( msgnoMax )
-      {
-         // flushing it like we do here is a bit dumb, so maybe we could
-         // analyze the status of only the new messages? i.e. add "range"
-         // parameters to DoCountMessages() and call it from here?
-         mfStatusCache->InvalidateStatus(GetName());
-      }
-
-      else // no messages
-      {
-         // for an empty folder, we know the status
-         MailFolderStatus status;
-
-         // all other members are already set to 0
-         status.total = 0;
-         mfStatusCache->UpdateStatus(GetName(), status);
-      }
-#else
-      mfStatusCache->InvalidateStatus(GetName());
-#endif // 0
-
-      // update to use in the enclosing "if" test the next time
+      // do update the number of messages: it should always be in sync
       m_nMessages = msgnoMax;
 
-      // we may need to apply the filtering code but we can't do it from here
+      // we want to apply the filtering code but we can't do it from here
       // because we're inside c-client now and it is not reentrant, so we
       // send an event to ourselves to do it slightly later
       if ( msgnoMax )
@@ -4360,42 +4328,26 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    }
    else // same number of messages
    {
+      // anything expunged?
       if ( m_expungedMsgnos )
       {
-         // we can update the status faster here as we have decremented the
-         // number of recent/unseen/... when the messages were deleted (before
-         // being expunged), so we just have to update the total now
-         //
-         // FIXME: this has all chances to break down with manual expunge or
-         //        even with automatic one due to race condition (if the
-         //        message status changed from outside...) - but this is so
-         //        much faster and the problem is not really fatal that I
-         //        still prefer to do it like this
-         MailFolderStatus status;
-         MfStatusCache *mfStatusCache = MfStatusCache::Get();
-         if ( mfStatusCache->GetStatus(GetName(), &status) )
-         {
-            status.total = m_MailStream->nmsgs;
-
-            mfStatusCache->UpdateStatus(GetName(), status);
-         }
-
          RequestUpdateAfterExpunge();
       }
-      //else: nothing at all
+      //else: nothing at all (this does happen although, again, shouldn't)
    }
 
+   // update it so that it won't be UID_ILLEGAL the next time and the test
+   // above works as expected
    m_LastUId = stream->uid_last;
 }
 
 void MailFolderCC::OnMailExpunge(MsgnoType msgno)
 {
-   size_t idx = msgno - 1;
-
    // remove the message from the header info list if we have headers
    // (it would be wasteful to create them just to do it)
    if ( m_headers )
    {
+      size_t idx = msgno - 1;
       if ( idx < m_headers->Count() )
       {
          // if we'll send a FolderUpdate later, there is no need to send a
@@ -4432,6 +4384,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
          FAIL_MSG( "invalid msgno in mm_expunged" );
       }
    }
+   //else: no headers, nothing to do
 
    // update the total number of messages
    ASSERT_MSG( m_nMessages > 0, "expunged message from an empty folder?" );
@@ -4439,7 +4392,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    m_nMessages--;
 
    // we don't change the cached status here as it will be done in
-   // OnMailExists() later
+   // RequestUpdateAfterExpunge() later
 }
 
 // ----------------------------------------------------------------------------
@@ -4454,20 +4407,18 @@ void MailFolderCC::OnNewMail()
    // when we are not inside any c-client call!
    CHECK_RET( !m_MailStream->lock, "OnNewMail: folder is locked" );
 
+   // OnMailExists() sets this before calling us, so how could it have been
+   // reset?
+   ASSERT_MSG( m_gotUnprocessedNewMail, "OnNewMail: why are we called?" );
+
    wxLogTrace(TRACE_MF_EVENTS, "Got new mail notification for '%s'",
               GetName().c_str());
 
+   // should we notify the GUI about the new mail in the folder? initially we
+   // don't need to do it as we are not even sure we actually have any new mail
+   bool shouldNotify = false;
+
    // see if we have any new messages
-   //
-   // FIXME: having recent messages doesn't mean having new ones and although
-   //        FilterNewMail() does count new messages before doing anything,
-   //        this is still not very efficient - we'd better try to determine if
-   //        we have any really new new messages. The trouble is that it just
-   //        remembering stream->recent in some m_nRecent and comparing it here
-   //        doesn't work as some recent messages could be expunged and new
-   //        arrived without changing the total stream->recent. So then we'd
-   //        have to check in OnMailExpunge() if we're expunging a recent
-   //        message...
    if ( m_MailStream->recent )
    {
       // we don't want to process any events while we're filtering mail as
@@ -4477,18 +4428,72 @@ void MailFolderCC::OnNewMail()
       // don't allow changing the folder while we're filtering it
       MLocker filterLock(m_mutexNewMail);
 
-      FilterNewMail();
+      UIdArray *uidsNew = SearchByFlag(MSG_STAT_NEW,
+                                       SEARCH_SET |
+                                       SEARCH_UNDELETED |
+                                       SEARCH_UID);
 
-      CollectNewMail();
+      if ( uidsNew )
+      {
+         size_t count = uidsNew->GetCount();
+         if ( count )
+         {
+            HeaderInfoList_obj hil = GetHeaders();
+            if ( hil )
+            {
+               // we're almost surely going to look at all new messages, so
+               // pre-cache them all at once
+               if ( count > 1 )
+               {
+                  hil->CacheMsgnos(m_nMessages - count + 1, m_nMessages);
+               }
+
+               // process the new mail, whatever it means (collecting,
+               // filtering, just reporting, ...)
+               if ( !ProcessNewMail(*uidsNew) )
+               {
+                  // ProcessNewMail() returns TRUE only if all new mail was
+                  // deleted (presumably after moving it to another folder),
+                  // but it returns FALSE, some of the new messages are left
+                  // here: notify the GUI about them
+                  shouldNotify = true;
+               }
+               //else: no, all new messages were deleted
+            }
+            else
+            {
+               FAIL_MSG( "no headers in OnNewMail()?" );
+            }
+         }
+
+         delete uidsNew;
+      }
+      //else: this can possibly happen if they were deleted by another client
    }
 
    // no more
    m_gotUnprocessedNewMail = false;
 
    // we delayed sending the update notification in OnMailExists() because we
-   // wanted to filter the new messages first - now we can notify the GUI
-   // about the change
-   RequestUpdate();
+   // wanted to filter the new messages first - now it is done and we can notify
+   // the GUI about the changes, if there were any
+   if ( shouldNotify )
+   {
+      // we got some new mail: ignore the previously expunged messages (if we
+      // have any) as the listing is going to be updated anyhow
+      DiscardExpungeData();
+
+      // and update everything
+      RequestUpdate();
+   }
+   else // no new mail
+   {
+      // we might want to notify about the delayed message expunging
+      if ( m_expungedMsgnos )
+      {
+         RequestUpdateAfterExpunge();
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------
