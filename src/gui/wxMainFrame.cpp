@@ -768,8 +768,10 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    // we don't want to block further event propagation in any case
    event.Skip();
 
-   wxMenuBar *mbar = GetMenuBar();
-   if ( !mbar )
+   // we may be called from ctor before m_FolderView is created under wxGTK
+   // (because wxTreeCtrl ctor implicitly calls wxYield() which results in an
+   // idle dispatch), ignore calls that early
+   if ( !m_FolderView )
       return;
 
    // although we don't have a preview yet, the menus are created enabled by
@@ -778,7 +780,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    static bool s_hasPreview = true;
    static bool s_hasFolder = true;
 
-   bool hasFolder = m_FolderView && m_FolderView->GetFolder();
+   bool hasFolder = m_FolderView->GetFolder();
    if ( hasFolder != s_hasFolder )
    {
       EnableMMenu(MMenu_Message, this, hasFolder);
