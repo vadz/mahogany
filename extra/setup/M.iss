@@ -15,10 +15,10 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany 0.65 "Claire"
+AppVerName=Mahogany 0.66 "Clio"
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.65.0a
+OutputBaseFilename=Mahogany-0.66.0a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
@@ -35,13 +35,13 @@ Compression=bzip/3
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.65.0
+AppVersion=0.66.0
 
 ; --- appearance parameters
 
 ; hmm... what's RGB value of mahogany?
 BackColor=$037ebd
-AppCopyright=Copyright © 1997-2003 Vadim Zeitlin and Karsten Ballüder
+AppCopyright=Copyright © 1997-2004 Vadim Zeitlin and Karsten Ballüder
 WizardImageFile=res\wizard.bmp
 WizardSmallImageFile=res\install_small.bmp
 
@@ -53,7 +53,7 @@ InfoAfterFile=extra\setup\postread.txt
 [Components]
 Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
 Name: "help"; Description: "Help Files"; Types: full
-;Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
+Name: "python"; Description: "Python Scripting Support"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 Name: "i18n"; Description: "Translations to other languages"; Types: full
 
@@ -89,16 +89,16 @@ Source: "doc\HtmlHlp\Manual.chm"; DestDir: "{app}\help"; Components: help
 
 ;Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"; Components: python
 ;
-;Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\MAppBase.py-swig"; DestName: "MAppBase.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\MObject.py-swig"; DestName: "MObject.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\MProfile.py-swig"; DestName: "MProfile.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
-;Source: "src\Python\MTest.py-swig"; DestName: "MTest.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\HeaderInfo.py-swig"; DestName: "HeaderInfo.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MDialogs.py-swig"; DestName: "MDialogs.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MimePart.py-swig"; DestName: "MimePart.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MSendMessage.py-swig"; DestName: "MSendMessage.py"; DestDir: "{app}\Python"; Components: python
 
 ; case is important (should be Minit) or Python complains!!
-;Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
+Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
 
 ; --- translations
 Source: "locale\de.mo"; DestDir: "{app}\locale\de"; DestName: "M.mo"; Components: i18n
@@ -112,7 +112,7 @@ Source: "locale\pt_br.mo"; DestDir: "{app}\locale\pt_BR"; DestName: "M.mo"; Comp
 
 [UninstallDelete]
 ; delete all precompiled python files
-;Type: files; Name: "{app}\Python\*.pyc"; Components: python
+Type: files; Name: "{app}\Python\*.pyc"; Components: python
 
 [Icons]
 Name: "{group}\Mahogany"; Filename: "{app}\M.EXE"; WorkingDir: "{app}"
@@ -124,5 +124,5 @@ Name: "{group}\Report a Bug"; Filename: "{app}\Bug.url"; Components: misc
 Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"
-;Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
+Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
 
