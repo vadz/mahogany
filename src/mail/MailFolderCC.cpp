@@ -1977,7 +1977,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
    // set user data (retrieved by mm_list)
    m_UserData = ud;
-
+   m_Ticket = ticket;
    m_ASMailFolder = asmf;
    m_ASMailFolder->IncRef();
    char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
@@ -1994,11 +1994,11 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    ASMailFolder::ResultFolderExists *result =
       ASMailFolder::ResultFolderExists::Create
       (
-         mf->m_ASMailFolder,
-         mf->m_Ticket,
+         m_ASMailFolder,
+         m_Ticket,
          "",  // empty name == no more entries
          0,   // delim == 0 ==> no more entries
-         mf->m_UserData
+         m_UserData
       );
 
    // and send it

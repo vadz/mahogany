@@ -397,7 +397,10 @@ void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
    if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
    {
       // don't even try to open the root folder
-      if ( newsel && newsel->GetType() != FolderRoot )
+      // don't try to open groups either
+      if ( newsel
+           && newsel->GetType() != FolderRoot
+           && newsel->GetType() != FolderGroup )
       {
          newsel->IncRef(); // before returning it to the outside world
          OnOpenHere(newsel);
@@ -428,7 +431,8 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
 // open a new folder view on this folder
 void wxFolderTree::OnOpen(MFolder *folder)
 {
-   if ( folder->GetType() != FolderRoot )
+   if ( folder->GetType() != FolderRoot
+        && folder->GetType() != FolderGroup )
    {
       (void)wxFolderViewFrame::Create(
          // we need to pass relative names (profile names) into

@@ -39,7 +39,7 @@ enum FolderType
    MF_NNTP = 4,                  // newsgroup
    MF_NEWS = 5,                  // newsgroup in local newsspool
    MF_PROFILE = 10,              // read type etc from profile
-   MF_MH,                        // MH folder (directory/files)
+   MF_MH = 6,                    // MH folder (directory/files)
    MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
 
    // real folder types
@@ -51,7 +51,7 @@ enum FolderType
    News  = MF_NEWS,
 
    // pseudo types
-   MF_GROUP,
+   MF_GROUP = 50,
    FolderGroup = MF_GROUP,     // doesn't contain mail, but other folders
    FolderInvalid = MF_ILLEGAL, // folder not initialized properly
    FolderRoot,                 // this is the the special pseudo-folder
