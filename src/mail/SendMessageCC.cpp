@@ -558,10 +558,10 @@ SendMessageCC::Build(void)
 #endif // Unix/Windows
       m_headerValues[h++] = strutil_strdup(version);
    }
-   if(! replyToSet)
-   {
-      if(! HasHeaderEntry("Reply-To"))
-      {
+//   if(! replyToSet)
+//   {
+//      if(! HasHeaderEntry("Reply-To"))
+//      {
          //(always add reply-to header) add only if not empty:
          if(m_ReplyTo.Length() > 0)
          {
@@ -572,8 +572,8 @@ SendMessageCC::Build(void)
                m_headerValues[h++] = strutil_strdup(tmpstr);
             }
          }
-      }
-   }
+//      }
+//   }
 #ifdef HAVE_XFACES
    // add an XFace?
    if(! HasHeaderEntry("X-Face") && m_XFaceFile.Length() > 0)
