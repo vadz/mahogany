@@ -73,6 +73,11 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
    if(! event.ControlDown())
    {
       long keyCode = event.KeyCode();
+      if(keyCode == WXK_F1) // help
+      {
+         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
+         return;
+      }
       wxArrayInt selections;
       long nselected = m_FolderView->GetSelections(selections);
       // there is exactly one item with the focus on  it:
@@ -97,7 +102,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
       // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
-   
+    
       switch(keycodes_en[idx])
       {
       case 'D':

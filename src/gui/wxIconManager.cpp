@@ -351,8 +351,8 @@ wxIcon
 wxIconManager::GetIcon(String const &_iconName)
 {
    IconDataList::iterator i;
-   String key;
    String iconName = _iconName;
+   String key;
 
    strutil_tolower(iconName);
    wxLogTrace(wxTraceIconLoading,
@@ -362,9 +362,9 @@ wxIconManager::GetIcon(String const &_iconName)
    // first always look in the cache
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
-      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0) {
+      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
+      {
         wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
-
         return (*i)->iconRef;
       }
    }
@@ -439,7 +439,7 @@ wxIconManager::GetIcon(String const &_iconName)
 #endif   
             id = new IconData;
             id->iconRef = icn;
-            id->iconName = key;
+            id->iconName = iconName;
             wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
                        name.c_str());
             m_iconList->push_front(id);

@@ -39,6 +39,7 @@ $Id$
   >>> Finish this
 
 - check in new options panels
+  - add help button in notebook, linked to help ids in panels
 
 - once this works, make mailfolders collectable:
   - have a "collect" flag
@@ -55,6 +56,9 @@ $Id$
   possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
+
+- modify wxIconManager to recycle last found path for icons first, to
+  avoid unnecessary filesystem traversals
 
 ---> simplify Profiles on separate branch
 **************** end of KB priorities :-) *********************
