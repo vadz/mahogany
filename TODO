@@ -25,11 +25,7 @@ $Id$
 		2. add a [Cancel] button to abort retrieval
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
-<<<<<<< TODO
-7	KB	skip all unprocessed character events in folderview
-		and messageview to make menu accelerators work
-=======
->>>>>>> 1.289
+
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 6	VZ	All Folder create dialog pages have no HelpIDs set.
