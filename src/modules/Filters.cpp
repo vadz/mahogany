@@ -2745,7 +2745,9 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 
       bool doExpunge = false;
 
-      String textPD;
+      // the text for the progress dialog (verbose) and for the log (terse)
+      String textPD,
+             textLog;
       size_t idx;
       for ( idx = 0; idx < count; idx++ )
       {
@@ -2782,37 +2784,37 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          String subject = MailFolder::DecodeHeader(m_MailMessage->Subject()),
                 from = MailFolder::DecodeHeader(m_MailMessage->From());
 
-         textPD.Printf(_("Filtering message %u/%u"), idx + 1, count);
+         textLog.Printf(_("Filtering message %u/%u"), idx + 1, count);
 
          // make a multiline label for the progress dialog and a more concise
          // one for the status bar
          if ( pd )
          {
-            textPD << '\n'
+            textPD.clear();
+            textPD << textLog << '\n'
                    << _("From: ") << from << '\n'
                    << _("Subject: ") << subject;
          }
-         else // no progress dialog, text goes to the status bar
+
+         textLog << " (";
+
+         if ( !from.empty() )
          {
-            textPD << " (";
-
-            if ( !from.empty() )
-            {
-               textPD << _("from ") << from << ' ';
-            }
-
-            if ( !subject.empty() )
-            {
-               textPD << _("about '") << subject << '\'';
-            }
-            else
-            {
-               textPD << _("without subject");
-            }
-
-            textPD << ')';
+            textLog << _("from ") << from << ' ';
          }
 
+         if ( !subject.empty() )
+         {
+            textLog << _("about '") << subject << '\'';
+         }
+         else
+         {
+            textLog << _("without subject");
+         }
+
+         textLog << ')';
+
+         // and use both of them
          if ( pd )
          {
             if ( !pd->Update(idx, textPD) )
@@ -2827,7 +2829,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          {
             // don't pass it as the first argument because the string might
             // contain '%' characters!
-            wxLogStatus("%s", textPD.c_str());
+            wxLogStatus("%s", textLog.c_str());
          }
 
          // do some heuristic optimizations: if our program contains requests
@@ -2870,11 +2872,11 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          }
 
          // and show the result in the progress dialog
-         textPD << " - ";
+         String textExtra = " - ";
 
          if ( !retval.IsNumber() )
          {
-            textPD << _("error!");
+            textExtra << _("error!");
 
             rc |= FilterRule::Error;
          }
@@ -2883,35 +2885,44 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
             bool wasDeleted = (m_operation & Deleted) != 0;
             if ( !m_copiedTo.empty() )
             {
-               textPD << (wasDeleted ? _("moved to ") : _("copied to "))
+               textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
                       << m_copiedTo;
 
                m_copiedTo.clear();
             }
             else if ( wasDeleted )
             {
-               textPD << _("deleted");
+               textExtra << _("deleted");
             }
             else // not moved/copied/deleted
             {
-               textPD << _("done");
+               textExtra << _("done");
             }
          }
+
+         textLog += textExtra;
 
          m_MailMessage->DecRef();
 
          if ( pd )
          {
-            if ( !pd->Update(idx, textPD) )
+            if ( !pd->Update(idx, textPD + textExtra) )
             {
                // cancelled by user
                break;
             }
+
+            // show it in the log window so that the user knows what has
+            // happened to the messages
+            //
+            // NB: textLog may contain '%'s itself, so don't let it be
+            //     interpreted as a format string
+            wxLogGeneric(M_LOG_WINONLY, "%s", textLog.c_str());
          }
          else // no progress dialog
          {
             // see comment above
-            wxLogStatus("%s", textPD.c_str());
+            wxLogStatus("%s", textLog.c_str());
          }
       }
 
