@@ -797,7 +797,7 @@ void TextViewer::EndBody()
 {
    m_window->SetInsertionPoint(0);
 
-   m_window->Thaw();
+   Update();
 }
 
 // ----------------------------------------------------------------------------
