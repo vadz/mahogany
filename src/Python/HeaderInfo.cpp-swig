@@ -659,8 +659,8 @@ SWIG_InstallConstants(PyObject *d, swig_const_info constants[]) {
 #define  SWIGTYPE_p_ThreadParams swig_types[2] 
 #define  SWIGTYPE_p_SortParams swig_types[3] 
 #define  SWIGTYPE_p_time_t swig_types[4] 
-#define  SWIGTYPE_p_wxArrayString swig_types[5] 
-#define  SWIGTYPE_p_String swig_types[6] 
+#define  SWIGTYPE_p_String swig_types[5] 
+#define  SWIGTYPE_p_wxArrayString swig_types[6] 
 #define  SWIGTYPE_p_wxFontEncoding swig_types[7] 
 #define  SWIGTYPE_p_MsgnoArray swig_types[8] 
 #define  SWIGTYPE_p_UIdType swig_types[9] 
@@ -714,7 +714,7 @@ static PyObject *_wrap_HeaderInfo_GetSubject(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -734,7 +734,7 @@ static PyObject *_wrap_HeaderInfo_GetFrom(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -754,7 +754,7 @@ static PyObject *_wrap_HeaderInfo_GetTo(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -774,7 +774,7 @@ static PyObject *_wrap_HeaderInfo_GetNewsgroups(PyObject *self, PyObject *args) 
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -815,7 +815,7 @@ static PyObject *_wrap_HeaderInfo_GetId(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -856,7 +856,7 @@ static PyObject *_wrap_HeaderInfo_GetReferences(PyObject *self, PyObject *args) 
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -876,7 +876,7 @@ static PyObject *_wrap_HeaderInfo_GetInReplyTo(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -1017,6 +1017,7 @@ static PyObject *_wrap_HeaderInfo_GetFromOrTo(PyObject *self, PyObject *args) {
     wxArrayString *arg3 = 0 ;
     String *arg4 = (String *) 0 ;
     int result;
+    String tempstr4 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -1030,7 +1031,12 @@ static PyObject *_wrap_HeaderInfo_GetFromOrTo(PyObject *self, PyObject *args) {
     if (arg3 == NULL) {
         PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj3, &temps, &templ)) return NULL;
+        tempstr4 = String(temps, templ);
+        arg4 = &tempstr4;
+    }
     result = (int)HeaderInfo::GetFromOrTo((HeaderInfo const *)arg1,arg2,(wxArrayString const &)*arg3,arg4);
     
     resultobj = PyInt_FromLong((long)result);
@@ -1776,8 +1782,8 @@ static swig_type_info _swigt__p_HeaderInfoList[] = {{"_p_HeaderInfoList", 0, "He
 static swig_type_info _swigt__p_ThreadParams[] = {{"_p_ThreadParams", 0, "ThreadParams *", 0},{"_p_ThreadParams"},{0}};
 static swig_type_info _swigt__p_SortParams[] = {{"_p_SortParams", 0, "SortParams *", 0},{"_p_SortParams"},{0}};
 static swig_type_info _swigt__p_time_t[] = {{"_p_time_t", 0, "time_t *", 0},{"_p_time_t"},{0}};
-static swig_type_info _swigt__p_wxArrayString[] = {{"_p_wxArrayString", 0, "wxArrayString *", 0},{"_p_wxArrayString"},{0}};
 static swig_type_info _swigt__p_String[] = {{"_p_String", 0, "String *", 0},{"_p_String"},{0}};
+static swig_type_info _swigt__p_wxArrayString[] = {{"_p_wxArrayString", 0, "wxArrayString *", 0},{"_p_wxArrayString"},{0}};
 static swig_type_info _swigt__p_wxFontEncoding[] = {{"_p_wxFontEncoding", 0, "wxFontEncoding *", 0},{"_p_wxFontEncoding"},{0}};
 static swig_type_info _swigt__p_MsgnoArray[] = {{"_p_MsgnoArray", 0, "MsgnoArray *", 0},{"_p_MsgnoArray"},{0}};
 static swig_type_info _swigt__p_UIdType[] = {{"_p_UIdType", 0, "UIdType *", 0},{"_p_UIdType"},{0}};
@@ -1793,8 +1799,8 @@ _swigt__p_HeaderInfoList,
 _swigt__p_ThreadParams, 
 _swigt__p_SortParams, 
 _swigt__p_time_t, 
-_swigt__p_wxArrayString, 
 _swigt__p_String, 
+_swigt__p_wxArrayString, 
 _swigt__p_wxFontEncoding, 
 _swigt__p_MsgnoArray, 
 _swigt__p_UIdType, 

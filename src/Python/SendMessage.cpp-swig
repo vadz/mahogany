@@ -772,14 +772,17 @@ static PyObject *_wrap_SendMessage_SetSubject(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_SetSubject",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     (arg1)->SetSubject((String const &)*arg2);
     
@@ -798,6 +801,9 @@ static PyObject *_wrap_SendMessage_SetAddresses(PyObject *self, PyObject *args) 
     String *arg3 = (String *) &arg3_defvalue ;
     String const &arg4_defvalue = _T("") ;
     String *arg4 = (String *) &arg4_defvalue ;
+    String tempstr2 ;
+    String tempstr3 ;
+    String tempstr4 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -805,20 +811,26 @@ static PyObject *_wrap_SendMessage_SetAddresses(PyObject *self, PyObject *args) 
     
     if(!PyArg_ParseTuple(args,(char *)"OO|OO:SendMessage_SetAddresses",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     if (obj2) {
-        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg3 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+            tempstr3 = String(temps, templ);
+            arg3 = &tempstr3;
         }
     }
     if (obj3) {
-        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg4 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj3, &temps, &templ)) return NULL;
+            tempstr4 = String(temps, templ);
+            arg4 = &tempstr4;
         }
     }
     (arg1)->SetAddresses((String const &)*arg2,(String const &)*arg3,(String const &)*arg4);
@@ -838,6 +850,9 @@ static PyObject *_wrap_SendMessage_SetFrom(PyObject *self, PyObject *args) {
     String *arg3 = (String *) &arg3_defvalue ;
     String const &arg4_defvalue = _T("") ;
     String *arg4 = (String *) &arg4_defvalue ;
+    String tempstr2 ;
+    String tempstr3 ;
+    String tempstr4 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -845,20 +860,26 @@ static PyObject *_wrap_SendMessage_SetFrom(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,(char *)"OO|OO:SendMessage_SetFrom",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     if (obj2) {
-        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg3 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+            tempstr3 = String(temps, templ);
+            arg3 = &tempstr3;
         }
     }
     if (obj3) {
-        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg4 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj3, &temps, &templ)) return NULL;
+            tempstr4 = String(temps, templ);
+            arg4 = &tempstr4;
         }
     }
     (arg1)->SetFrom((String const &)*arg2,(String const &)*arg3,(String const &)*arg4);
@@ -874,14 +895,17 @@ static PyObject *_wrap_SendMessage_SetNewsgroups(PyObject *self, PyObject *args)
     PyObject *resultobj;
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_SetNewsgroups",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     (arg1)->SetNewsgroups((String const &)*arg2);
     
@@ -897,14 +921,17 @@ static PyObject *_wrap_SendMessage_SetFcc(PyObject *self, PyObject *args) {
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_SetFcc",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)(arg1)->SetFcc((String const &)*arg2);
     
@@ -941,19 +968,25 @@ static PyObject *_wrap_SendMessage_AddHeaderEntry(PyObject *self, PyObject *args
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
     String *arg3 = 0 ;
+    String tempstr2 ;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OOO:SendMessage_AddHeaderEntry",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg3 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
     }
     (arg1)->AddHeaderEntry((String const &)*arg2,(String const &)*arg3);
     
@@ -968,14 +1001,17 @@ static PyObject *_wrap_SendMessage_RemoveHeaderEntry(PyObject *self, PyObject *a
     PyObject *resultobj;
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_RemoveHeaderEntry",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     (arg1)->RemoveHeaderEntry((String const &)*arg2);
     
@@ -991,14 +1027,17 @@ static PyObject *_wrap_SendMessage_HasHeaderEntry(PyObject *self, PyObject *args
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_HasHeaderEntry",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)((SendMessage const *)arg1)->HasHeaderEntry((String const &)*arg2);
     
@@ -1014,22 +1053,21 @@ static PyObject *_wrap_SendMessage_GetHeaderEntry(PyObject *self, PyObject *args
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
     String result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_GetHeaderEntry",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = ((SendMessage const *)arg1)->GetHeaderEntry((String const &)*arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1050,6 +1088,8 @@ static PyObject *_wrap_SendMessage_AddPart(PyObject *self, PyObject *args) {
     MessageParameterList *arg8 = (MessageParameterList *) NULL ;
     wxFontEncoding arg9 = (wxFontEncoding) wxFONTENCODING_SYSTEM ;
     MimeType::Primary *argp2 ;
+    String tempstr5 ;
+    String tempstr6 ;
     wxFontEncoding *argp9 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
@@ -1069,15 +1109,19 @@ static PyObject *_wrap_SendMessage_AddPart(PyObject *self, PyObject *args) {
     arg4 = (size_t) PyInt_AsLong(obj3);
     if (PyErr_Occurred()) SWIG_fail;
     if (obj4) {
-        if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg5 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj4, &temps, &templ)) return NULL;
+            tempstr5 = String(temps, templ);
+            arg5 = &tempstr5;
         }
     }
     if (obj5) {
-        if ((SWIG_ConvertPtr(obj5,(void **) &arg6, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg6 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj5, &temps, &templ)) return NULL;
+            tempstr6 = String(temps, templ);
+            arg6 = &tempstr6;
         }
     }
     if (obj6) {
@@ -1128,15 +1172,18 @@ static PyObject *_wrap_SendMessage_WriteToFile(PyObject *self, PyObject *args) {
     String *arg2 = 0 ;
     bool arg3 = (bool) true ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO|O:SendMessage_WriteToFile",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     if (obj2) {
         arg3 = PyInt_AsLong(obj2) ? true : false;
@@ -1156,14 +1203,17 @@ static PyObject *_wrap_SendMessage_WriteToFolder(PyObject *self, PyObject *args)
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:SendMessage_WriteToFolder",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)(arg1)->WriteToFolder((String const &)*arg2);
     
@@ -1196,13 +1246,19 @@ static PyObject *_wrap_SendMessage_Preview(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     SendMessage *arg1 = (SendMessage *) 0 ;
     String *arg2 = (String *) NULL ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O|O:SendMessage_Preview",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SendMessage,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (obj1) {
-        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+            tempstr2 = String(temps, templ);
+            arg2 = &tempstr2;
+        }
     }
     (arg1)->Preview(arg2);
     

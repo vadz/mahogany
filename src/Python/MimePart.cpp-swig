@@ -685,17 +685,23 @@ static PyObject *_wrap_new_MimeParameter(PyObject *self, PyObject *args) {
     String *arg1 = 0 ;
     String *arg2 = 0 ;
     MimeParameter *result;
+    String tempstr1 ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:new_MimeParameter",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (MimeParameter *)new MimeParameter((String const &)*arg1,(String const &)*arg2);
     
@@ -710,14 +716,16 @@ static PyObject *_wrap_MimeParameter_name_set(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MimeParameter *arg1 = (MimeParameter *) 0 ;
     String arg2 ;
-    String *argp2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MimeParameter_name_set",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimeParameter,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
-    arg2 = *argp2; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        arg2 = String (temps, templ);
+    }
     if (arg1) (arg1)->name = arg2;
     
     Py_INCREF(Py_None); resultobj = Py_None;
@@ -737,11 +745,7 @@ static PyObject *_wrap_MimeParameter_name_get(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimeParameter,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result =  ((arg1)->name);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -752,14 +756,16 @@ static PyObject *_wrap_MimeParameter_value_set(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MimeParameter *arg1 = (MimeParameter *) 0 ;
     String arg2 ;
-    String *argp2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MimeParameter_value_set",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimeParameter,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
-    arg2 = *argp2; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        arg2 = String (temps, templ);
+    }
     if (arg1) (arg1)->value = arg2;
     
     Py_INCREF(Py_None); resultobj = Py_None;
@@ -779,11 +785,7 @@ static PyObject *_wrap_MimeParameter_value_get(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimeParameter,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result =  ((arg1)->value);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -895,11 +897,7 @@ static PyObject *_wrap_MimePart_GetDescription(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetDescription();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -916,11 +914,7 @@ static PyObject *_wrap_MimePart_GetFilename(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetFilename();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -937,11 +931,7 @@ static PyObject *_wrap_MimePart_GetDisposition(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetDisposition();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -958,11 +948,7 @@ static PyObject *_wrap_MimePart_GetPartSpec(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetPartSpec();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -974,22 +960,21 @@ static PyObject *_wrap_MimePart_GetParam(PyObject *self, PyObject *args) {
     MimePart *arg1 = (MimePart *) 0 ;
     String *arg2 = 0 ;
     String result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MimePart_GetParam",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = ((MimePart const *)arg1)->GetParam((String const &)*arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1001,22 +986,21 @@ static PyObject *_wrap_MimePart_GetDispositionParam(PyObject *self, PyObject *ar
     MimePart *arg1 = (MimePart *) 0 ;
     String *arg2 = 0 ;
     String result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MimePart_GetDispositionParam",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = ((MimePart const *)arg1)->GetDispositionParam((String const &)*arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1115,11 +1099,7 @@ static PyObject *_wrap_MimePart_GetTextContent(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetTextContent();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1136,11 +1116,7 @@ static PyObject *_wrap_MimePart_GetHeaders(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MimePart,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MimePart const *)arg1)->GetHeaders();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;

@@ -695,12 +695,15 @@ static PyObject *_wrap_new_HeaderIterator(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     String *arg1 = 0 ;
     HeaderIterator *result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:new_HeaderIterator",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     result = (HeaderIterator *)new HeaderIterator((String const &)*arg1);
     
@@ -717,14 +720,26 @@ static PyObject *_wrap_HeaderIterator_GetNext(PyObject *self, PyObject *args) {
     String *arg2 = (String *) 0 ;
     String *arg3 = (String *) 0 ;
     bool result;
+    String tempstr2 ;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OOO:HeaderIterator_GetNext",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderIterator,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
+    }
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
+    }
     result = (bool)(arg1)->GetNext(arg2,arg3);
     
     resultobj = PyInt_FromLong((long)result);
@@ -830,6 +845,7 @@ static PyObject *_wrap_Message_GetHeaderLine(PyObject *self, PyObject *args) {
     String *arg3 = 0 ;
     wxFontEncoding *arg4 = (wxFontEncoding *) NULL ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -837,9 +853,11 @@ static PyObject *_wrap_Message_GetHeaderLine(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,(char *)"OOO|O:Message_GetHeaderLine",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (arg3 == NULL) {
@@ -940,11 +958,7 @@ static PyObject *_wrap_Message_GetHeader(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetHeader();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1004,11 +1018,7 @@ static PyObject *_wrap_Message_GetAddressesString(PyObject *self, PyObject *args
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetAddressesString((MessageAddressType )arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1048,11 +1058,7 @@ static PyObject *_wrap_Message_Subject(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->Subject();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1069,11 +1075,7 @@ static PyObject *_wrap_Message_From(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->From();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1090,11 +1092,7 @@ static PyObject *_wrap_Message_Date(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->Date();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1111,11 +1109,7 @@ static PyObject *_wrap_Message_GetId(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetId();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1132,11 +1126,7 @@ static PyObject *_wrap_Message_GetReferences(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetReferences();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1153,11 +1143,7 @@ static PyObject *_wrap_Message_GetInReplyTo(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetInReplyTo();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1174,11 +1160,7 @@ static PyObject *_wrap_Message_GetNewsgroups(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetNewsgroups();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1454,11 +1436,7 @@ static PyObject *_wrap_Message_GetPartMimeType(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetPartMimeType(arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1476,11 +1454,7 @@ static PyObject *_wrap_Message_GetPartDesc(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetPartDesc(arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1498,11 +1472,7 @@ static PyObject *_wrap_Message_GetPartSpec(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->GetPartSpec(arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1536,13 +1506,19 @@ static PyObject *_wrap_Message_GetDisposition(PyObject *self, PyObject *args) {
     int arg2 ;
     String *arg3 = (String *) NULL ;
     MimeParameterList *result;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj2 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"Oi|O:Message_GetDisposition",&obj0,&arg2,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (obj2) {
-        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+            tempstr3 = String(temps, templ);
+            arg3 = &tempstr3;
+        }
     }
     {
         MimeParameterList const &_result_ref = ((Message const *)arg1)->GetDisposition(arg2,arg3);
@@ -1566,11 +1542,7 @@ static PyObject *_wrap_Message_FetchText(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((Message const *)arg1)->FetchText();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1610,20 +1582,19 @@ static PyObject *_wrap_Message_GetFirstNameFromAddress(PyObject *self, PyObject 
     PyObject *resultobj;
     String *arg1 = 0 ;
     String result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:Message_GetFirstNameFromAddress",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     result = Message::GetFirstNameFromAddress((String const &)*arg1);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1634,20 +1605,19 @@ static PyObject *_wrap_Message_GetLastNameFromAddress(PyObject *self, PyObject *
     PyObject *resultobj;
     String *arg1 = 0 ;
     String result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:Message_GetLastNameFromAddress",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     result = Message::GetLastNameFromAddress((String const &)*arg1);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1658,20 +1628,19 @@ static PyObject *_wrap_Message_GetNameFromAddress(PyObject *self, PyObject *args
     PyObject *resultobj;
     String *arg1 = 0 ;
     String result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:Message_GetNameFromAddress",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     result = Message::GetNameFromAddress((String const &)*arg1);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1682,20 +1651,19 @@ static PyObject *_wrap_Message_GetEMailFromAddress(PyObject *self, PyObject *arg
     PyObject *resultobj;
     String *arg1 = 0 ;
     String result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:Message_GetEMailFromAddress",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     result = Message::GetEMailFromAddress((String const &)*arg1);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1707,17 +1675,23 @@ static PyObject *_wrap_Message_CompareAddresses(PyObject *self, PyObject *args) 
     String *arg1 = 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr1 ;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:Message_CompareAddresses",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)Message::CompareAddresses((String const &)*arg1,(String const &)*arg2);
     
@@ -1733,6 +1707,7 @@ static PyObject *_wrap_Message_FindAddress(PyObject *self, PyObject *args) {
     wxArrayString *arg1 = 0 ;
     String *arg2 = 0 ;
     int result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
@@ -1741,9 +1716,11 @@ static PyObject *_wrap_Message_FindAddress(PyObject *self, PyObject *args) {
     if (arg1 == NULL) {
         PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (int)Message::FindAddress((wxArrayString const &)*arg1,(String const &)*arg2);
     

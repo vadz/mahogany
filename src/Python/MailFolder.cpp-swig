@@ -868,14 +868,17 @@ static PyObject *_wrap_MailFolder_Rename(PyObject *self, PyObject *args) {
     MFolder *arg1 = (MFolder *) 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_Rename",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)MailFolder::Rename((MFolder const *)arg1,(String const &)*arg2);
     
@@ -907,10 +910,16 @@ static PyObject *_wrap_MailFolder_CanExit(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     String *arg1 = (String *) 0 ;
     bool result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_CanExit",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
+    }
     result = (bool)MailFolder::CanExit(arg1);
     
     resultobj = PyInt_FromLong((long)result);
@@ -925,13 +934,16 @@ static PyObject *_wrap_MailFolder_SaveMessageAsMBOX(PyObject *self, PyObject *ar
     String *arg1 = 0 ;
     wxChar *arg2 = (wxChar *) 0 ;
     bool result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_SaveMessageAsMBOX",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxChar,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = (bool)MailFolder::SaveMessageAsMBOX((String const &)*arg1,(wxChar const *)arg2);
@@ -1026,22 +1038,28 @@ static PyObject *_wrap_MailFolder_Subscribe(PyObject *self, PyObject *args) {
     String *arg3 = 0 ;
     bool arg4 = (bool) true ;
     bool result;
+    String tempstr1 ;
     MFolderType *argp2 ;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     PyObject * obj3 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_Subscribe",&obj0,&obj1,&obj2,&obj3)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_MFolderType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
     arg2 = *argp2; 
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg3 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
     }
     if (obj3) {
         arg4 = PyInt_AsLong(obj3) ? true : false;
@@ -1067,6 +1085,8 @@ static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
     String *arg5 = (String *) &arg5_defvalue ;
     UserData arg6 = (UserData) 0 ;
     Ticket arg7 = (Ticket) ILLEGAL_TICKET ;
+    String tempstr3 ;
+    String tempstr5 ;
     UserData *argp6 ;
     Ticket *argp7 ;
     PyObject * obj0 = 0 ;
@@ -1081,9 +1101,11 @@ static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_ASMailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (obj2) {
-        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg3 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+            tempstr3 = String(temps, templ);
+            arg3 = &tempstr3;
         }
     }
     if (obj3) {
@@ -1091,9 +1113,11 @@ static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
         if (PyErr_Occurred()) SWIG_fail;
     }
     if (obj4) {
-        if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg5 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj4, &temps, &templ)) return NULL;
+            tempstr5 = String(temps, templ);
+            arg5 = &tempstr5;
         }
     }
     if (obj5) {
@@ -1175,11 +1199,7 @@ static PyObject *_wrap_MailFolder_GetName(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MailFolder const *)arg1)->GetName();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1196,11 +1216,7 @@ static PyObject *_wrap_MailFolder_GetImapSpec__SWIG_0(PyObject *self, PyObject *
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = ((MailFolder const *)arg1)->GetImapSpec();
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -1972,14 +1988,17 @@ static PyObject *_wrap_MailFolder_AppendMessage__SWIG_1(PyObject *self, PyObject
     MailFolder *arg1 = (MailFolder *) 0 ;
     String *arg2 = 0 ;
     bool result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_AppendMessage",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg2 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+        tempstr2 = String(temps, templ);
+        arg2 = &tempstr2;
     }
     result = (bool)(arg1)->AppendMessage((String const &)*arg2);
     
@@ -2149,6 +2168,7 @@ static PyObject *_wrap_MailFolder_SaveMessages__SWIG_1(PyObject *self, PyObject 
     UIdArray *arg2 = (UIdArray *) 0 ;
     String *arg3 = 0 ;
     bool result;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -2156,9 +2176,11 @@ static PyObject *_wrap_MailFolder_SaveMessages__SWIG_1(PyObject *self, PyObject 
     if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_SaveMessages",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg3 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
     }
     result = (bool)(arg1)->SaveMessages((UIdArray const *)arg2,(String const &)*arg3);
     
@@ -2265,6 +2287,7 @@ static PyObject *_wrap_MailFolder_SaveMessagesToFile(PyObject *self, PyObject *a
     String *arg3 = 0 ;
     wxWindow *arg4 = (wxWindow *) NULL ;
     bool result;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
@@ -2273,9 +2296,11 @@ static PyObject *_wrap_MailFolder_SaveMessagesToFile(PyObject *self, PyObject *a
     if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_SaveMessagesToFile",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg3 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
     }
     if (obj3) {
         if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
@@ -2588,7 +2613,7 @@ static PyObject *_wrap_MailFolder_InitializeMH(PyObject *self, PyObject *args) {
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -2605,7 +2630,7 @@ static PyObject *_wrap_MailFolder_InitializeNewsSpool(PyObject *self, PyObject *
         result = (String *) &_result_ref;
     }
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = PyString_FromStringAndSize(result->data(), result->length());
     return resultobj;
     fail:
     return NULL;
@@ -2618,24 +2643,23 @@ static PyObject *_wrap_MailFolder_GetImapSpec__SWIG_1(PyObject *self, PyObject *
     String const &arg2_defvalue = _T("") ;
     String *arg2 = (String *) &arg2_defvalue ;
     String result;
+    String tempstr2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_GetImapSpec",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (obj1) {
-        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-        if (arg2 == NULL) {
-            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        {
+            char * temps; int templ;
+            if (PyString_AsStringAndSize(obj1, &temps, &templ)) return NULL;
+            tempstr2 = String(temps, templ);
+            arg2 = &tempstr2;
         }
     }
     result = MailFolder::GetImapSpec((MFolder const *)arg1,(String const &)*arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
@@ -2707,19 +2731,28 @@ static PyObject *_wrap_MailFolder_SpecToFolderName(PyObject *self, PyObject *arg
     MFolderType arg2 ;
     String *arg3 = (String *) 0 ;
     bool result;
+    String tempstr1 ;
     MFolderType *argp2 ;
+    String tempstr3 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_SpecToFolderName",&obj0,&obj1,&obj2)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_MFolderType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
     arg2 = *argp2; 
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj2, &temps, &templ)) return NULL;
+        tempstr3 = String(temps, templ);
+        arg3 = &tempstr3;
+    }
     result = (bool)MailFolder::SpecToFolderName((String const &)*arg1,arg2,arg3);
     
     resultobj = PyInt_FromLong((long)result);
@@ -2733,10 +2766,16 @@ static PyObject *_wrap_MailFolder_GetMHFolderName(PyObject *self, PyObject *args
     PyObject *resultobj;
     String *arg1 = (String *) 0 ;
     bool result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetMHFolderName",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
+    }
     result = (bool)MailFolder::GetMHFolderName(arg1);
     
     resultobj = PyInt_FromLong((long)result);
@@ -2751,13 +2790,16 @@ static PyObject *_wrap_MailFolder_ImportFoldersMH(PyObject *self, PyObject *args
     String *arg1 = 0 ;
     bool arg2 = (bool) true ;
     bool result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_ImportFoldersMH",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     if (obj1) {
         arg2 = PyInt_AsLong(obj1) ? true : false;
@@ -2777,24 +2819,23 @@ static PyObject *_wrap_MailFolder_DecodeHeader(PyObject *self, PyObject *args) {
     String *arg1 = 0 ;
     wxFontEncoding *arg2 = (wxFontEncoding *) NULL ;
     String result;
+    String tempstr1 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_DecodeHeader",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg1 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    {
+        char * temps; int templ;
+        if (PyString_AsStringAndSize(obj0, &temps, &templ)) return NULL;
+        tempstr1 = String(temps, templ);
+        arg1 = &tempstr1;
     }
     if (obj1) {
         if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxFontEncoding,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     }
     result = MailFolder::DecodeHeader((String const &)*arg1,arg2);
     
-    {
-        String * resultptr;
-        resultptr = new String((String &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
-    }
+    resultobj = PyString_FromStringAndSize((&result)->data(), (&result)->length());
     return resultobj;
     fail:
     return NULL;
