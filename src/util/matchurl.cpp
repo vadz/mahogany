@@ -759,41 +759,45 @@ match:
    while ( strchr(".:,)!?", *(p - 1)) )
       p--;
 
-   // '@' matches may result in false positives, as not every '@' character
-   // is inside a mailto URL so try to weed them out by requiring that the
-   // mail address has a reasonable minimal length ("ab@foo.com" and
-   // "www.xyz.fr" are probably the shortest ones we can have, hence 10) which
-   // at least avoids matching the bare '@'s
-   bool good = (p - start) >= 10;
-
-   if ( good )
+   // additional checks for the matches which didn't have an explicit scheme
+   if ( isMail || text[pos + len - 1] != _T(':') )
    {
-      // also check that we have at least one dot in the domain part for the
-      // mail addresses
-      const char *
-         pDot = (char *)memchr(text + pos + 1, '.', p - text - pos - 1);
-      if ( !pDot )
-      {
-         good = false;
-      }
-      else if ( !isMail )
-      {
-         // and has either two dots or at least a slash the other URLs,
-         // otherwise it probably isn't an address/URL neither (stuff like
-         // "... using ftp.If you ... " shouldn't be recognized as an URL)
-         good = memchr(pDot + 1, '.', p - pDot - 1) != NULL ||
-                  memchr(pDot + 1, '/', p - pDot - 1) != NULL;
-      }
-   }
+      // '@' matches may result in false positives, as not every '@' character
+      // is inside a mailto URL so try to weed them out by requiring that the
+      // mail address has a reasonable minimal length ("ab@foo.com" and
+      // "www.xyz.fr" are probably the shortest ones we can have, hence 10)
+      // which at least avoids matching the bare '@'s
+      bool good = (p - start) >= 10;
 
-   if ( !good )
-   {
-      int offDiff = pos + len + 1;
-      offset += offDiff;
-      text += offDiff;
+      if ( good )
+      {
+         // also check that we have at least one dot in the domain part for the
+         // mail addresses
+         const char *
+            pDot = (char *)memchr(text + pos + 1, '.', p - text - pos - 1);
+         if ( !pDot )
+         {
+            good = false;
+         }
+         else if ( !isMail )
+         {
+            // and has either two dots or at least a slash the other URLs,
+            // otherwise it probably isn't an address/URL neither (stuff like
+            // "... using ftp.If you ... " shouldn't be recognized as an URL)
+            good = memchr(pDot + 1, '.', p - pDot - 1) != NULL ||
+                     memchr(pDot + 1, '/', p - pDot - 1) != NULL;
+         }
+      }
 
-      // slightly more efficient than recursion...
-      goto match;
+      if ( !good )
+      {
+         const int offDiff = pos + len;
+         offset += offDiff;
+         text += offDiff;
+
+         // slightly more efficient than recursion...
+         goto match;
+      }
    }
 
    // return the length of the match
