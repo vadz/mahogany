@@ -81,7 +81,6 @@ String MailFolderCC::MF_pwd;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
-static bool mm_ignore_logs = false;
 
 // be quiet
 static inline void CCQuiet(void) { mm_ignore_errors = true; }
@@ -355,9 +354,9 @@ MailFolderCC::Ping(void)
       else
          m_MailStream = NIL;
    }
-   mm_ignore_logs = true;
+   CCQuiet();
    mail_check(m_MailStream); // update flags, etc, .newsrc
-   mm_ignore_logs = false;
+   CCVerbose();
    ProcessEventQueue();
 }
 
@@ -591,6 +590,32 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
    if(streamListDefaultObj == this)
       SetDefaultObj(false);
 }
+
+
+/// Gets first mailfolder in map.
+/* static */
+MailFolderCC *
+MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
+{
+   i = streamList.begin();
+   if( i != streamList.end())
+      return (**i).folder;
+   else
+      return NULL;
+}
+
+/// Gets next mailfolder in map.
+/* static */
+MailFolderCC *
+MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
+{
+   i++;
+   if( i != streamList.end())
+      return (**i).folder;
+   else
+      return NULL;
+}
+
 
 extern "C"
 {
@@ -950,8 +975,20 @@ MailFolderCC::mm_log(String str, long /* errflg */)
 {
    String  msg = _("c-client log: ");
    msg += str;
-
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
+   const char *unexpected = "Unexpected change";
+   if(strncmp(str,unexpected, strlen(unexpected)) == 0)
+   {
+      // try to reopen the stream
+      // Problem: we don't know the stream, so we need to ping them
+      // all
+      StreamConnectionList::iterator i;
+      MailFolderCC *mf;
+      for(mf = MailFolderCC::GetFirstMapEntry(i);
+          mf;
+          mf = MailFolderCC::GetNextMapEntry(i))
+         mf->Ping();
+   }
 }
 
 /** log a debugging message
@@ -1265,7 +1302,7 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
-   if(mm_ignore_errors || mm_ignore_logs)
+   if(mm_ignore_errors)
       return;
    
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);

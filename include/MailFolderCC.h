@@ -296,6 +296,11 @@ private:
    /// remove this object from Map
    void   RemoveFromMap(MAILSTREAM const *stream);
 
+   /// Gets first mailfolder in map or NULL.
+   static MailFolderCC * GetFirstMapEntry(StreamConnectionList::iterator &i);
+   /// Gets next mailfolder in map or NULL
+   static MailFolderCC * GetNextMapEntry(StreamConnectionList::iterator &i);
+   
    /** set the default object in Map
        @param setit if false, erase default object
    */

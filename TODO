@@ -126,6 +126,8 @@ for release:
 - update the list of folders to poll for new mail when the folder
   properties are changed, tricky.
 
+- When mm_log reports a "Unexpected change", do a Ping(), trying to
+  reopen the stream.
 - config panels are too small/too full, move font settings somewhere
   else, i.e. have a "layout" page?
 
