@@ -159,7 +159,7 @@ MModule *FindModule(const String & name)
                &gs_MInterface, &errorCode);
          }
 #endif
-         (**i).m_Module->IncRef();
+         SafeIncRef((**i).m_Module);
          return (**i).m_Module;
       }
    return NULL; // not found
