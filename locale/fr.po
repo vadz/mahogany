@@ -6,14 +6,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: M\n"
-"POT-Creation-Date: 1999-05-08 17:07+0100\n"
+"POT-Creation-Date: 1999-05-09 18:19+0100\n"
 "Last-Translator: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>\n"
 "Language-Team: M-developers <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: upgrade.cpp:273
+#: upgrade.cpp:273 upgrade.cpp:274
 msgid "Deleted illegal folder profile: '"
 msgstr ""
 
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Converting information for folder '%s'."
 msgstr "Impossible d'ouvrir le répertoire '%s'."
 
-#: upgrade.cpp:496
+#: upgrade.cpp:388 upgrade.cpp:496
 #, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
@@ -31,7 +31,7 @@ msgstr ""
 "Les options du programme et votre configuration one été mises à jour à "
 "partir de la version '%s' avec succès."
 
-#: upgrade.cpp:500
+#: upgrade.cpp:392 upgrade.cpp:500
 #, c-format
 msgid ""
 "Configuration information and program files could not be upgraded from "
@@ -41,7 +41,7 @@ msgid ""
 "it."
 msgstr ""
 
-#: upgrade.cpp:514
+#: upgrade.cpp:407 upgrade.cpp:514
 #, fuzzy
 msgid ""
 "The previously installed version of Mahogany was probably newer than this "
@@ -50,26 +50,26 @@ msgstr ""
 "Il semble que la version de M installée précédemment ait été plus à jour que "
 "la version utilisée maintenant. La mise à jour n'a pas pu être faite."
 
-#: upgrade.cpp:543 upgrade.cpp:560
+#: upgrade.cpp:436 upgrade.cpp:453 upgrade.cpp:543 upgrade.cpp:560
 msgid "Default system folder for incoming mail."
 msgstr "Répertoire pour le courier entrant."
 
-#: upgrade.cpp:600
+#: upgrade.cpp:493 upgrade.cpp:600
 #, fuzzy
 msgid "Mahogany Test Message"
 msgstr "Message de test de M"
 
-#: upgrade.cpp:603
+#: upgrade.cpp:496 upgrade.cpp:603
 msgid ""
 "If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
 msgstr ""
 
-#: upgrade.cpp:609
+#: upgrade.cpp:502 upgrade.cpp:609
 msgid "Sent email message to:\n"
 msgstr "Le message a été envoyé à:\n"
 
-#: upgrade.cpp:611
+#: upgrade.cpp:504 upgrade.cpp:611
 msgid ""
 "\n"
 "\n"
@@ -79,7 +79,7 @@ msgstr ""
 "\n"
 "Veuillez vérifier que le message sera bien reçu s'il vous plaît."
 
-#: upgrade.cpp:612
+#: upgrade.cpp:505 upgrade.cpp:612
 msgid "Testing your configuration"
 msgstr "Vérification de la configuration en cours"
 
@@ -233,7 +233,7 @@ msgstr ""
 msgid "Could not collect mail from incoming folder '%s'."
 msgstr ""
 
-#: MApplication.cpp:583 MailCollector.cpp:158
+#: MApplication.cpp:583 MailCollector.cpp:158 MailCollector.cpp:160
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr ""
@@ -259,7 +259,7 @@ msgid ""
 "in folder '%s'."
 msgstr "Vous avez reçu %lu nouveaux messages."
 
-#: MApplication.cpp:632 MailCollector.cpp:182
+#: MApplication.cpp:632 MailCollector.cpp:182 MailCollector.cpp:183
 msgid "New Mail"
 msgstr "Nouveau courier"
 
@@ -314,27 +314,27 @@ msgstr ""
 msgid "Cannot collect mail without New Mail folder."
 msgstr "Impossible d'ouvrir ce répertoire."
 
-#: MailCollector.cpp:177
+#: MailCollector.cpp:177 MailCollector.cpp:178
 #, fuzzy, c-format
 msgid "You have %lu new messages in folder '%s'.\n"
 msgstr "Vous avez reçu %lu nouveaux messages."
 
-#: MailCollector.cpp:194
+#: MailCollector.cpp:194 MailCollector.cpp:204
 #, fuzzy, c-format
 msgid "Auto-collecting mail from incoming folder '%s'."
 msgstr "Impossible d'ouvrir le répertoire '%s'."
 
-#: MailCollector.cpp:207
+#: MailCollector.cpp:207 MailCollector.cpp:217
 #, fuzzy
 msgid "From folder '"
 msgstr "Répertoire '"
 
-#: MailCollector.cpp:214
+#: MailCollector.cpp:214 MailCollector.cpp:224
 #, fuzzy
 msgid "  Subject: "
 msgstr "Sujet: "
 
-#: MailCollector.cpp:215
+#: MailCollector.cpp:215 MailCollector.cpp:225
 #, fuzzy
 msgid "  From: "
 msgstr "De: "
@@ -1011,17 +1011,18 @@ msgstr ""
 
 #: AdbFrame.cpp:2428 AdbFrame.cpp:2547 generic/persctrl.cpp:819
 #: wxDialogLayout.cpp:611 wxMDialogs.cpp:205 wxMDialogs.cpp:400
-#: wxMDialogs.cpp:1117 wxMFolderDialogs.cpp:1257
+#: wxMDialogs.cpp:401 wxMDialogs.cpp:1117 wxMDialogs.cpp:1118
+#: wxMFolderDialogs.cpp:1257
 msgid "Cancel"
 msgstr "Annuler"
 
 #: AdbFrame.cpp:2424 AdbFrame.cpp:2543 generic/persctrl.cpp:812
-#: wxDialogLayout.cpp:602 wxMDialogs.cpp:396 wxMDialogs.cpp:1127
-#: wxMFolderDialogs.cpp:1248
+#: wxDialogLayout.cpp:602 wxMDialogs.cpp:396 wxMDialogs.cpp:397
+#: wxMDialogs.cpp:1127 wxMDialogs.cpp:1128 wxMFolderDialogs.cpp:1248
 msgid "OK"
 msgstr "OK"
 
-#: wxMDialogs.cpp:501
+#: wxMDialogs.cpp:501 wxMDialogs.cpp:502
 #, fuzzy
 msgid ""
 "\n"
@@ -1030,7 +1031,7 @@ msgstr ""
 "\n"
 "Erreur système: "
 
-#: wxMDialogs.cpp:518
+#: wxMDialogs.cpp:518 wxMDialogs.cpp:519
 msgid ""
 "\n"
 "Exiting application..."
@@ -1038,122 +1039,124 @@ msgstr ""
 "\n"
 "Le programme se termine..."
 
-#: wxMDialogs.cpp:673
+#: wxMDialogs.cpp:673 wxMDialogs.cpp:674
 msgid "Please choose an entry:"
 msgstr "Veuillez choisir une entrée:"
 
-#: wxMDialogs.cpp:674
+#: wxMDialogs.cpp:674 wxMDialogs.cpp:675
 msgid "Expansion options"
 msgstr "Les options de completion"
 
-#: wxMDialogs.cpp:752
+#: wxMDialogs.cpp:752 wxMDialogs.cpp:753
 msgid "    Version: "
 msgstr "       Version: "
 
-#: wxMDialogs.cpp:756
+#: wxMDialogs.cpp:756 wxMDialogs.cpp:757
 #, fuzzy
 msgid "        compiled for: "
 msgstr "           à"
 
-#: wxMDialogs.cpp:768
+#: wxMDialogs.cpp:768 wxMDialogs.cpp:769
 msgid "  Copyright (c) 1999 by Karsten Ballüder"
 msgstr "  Copyright (c) 1999 Karsten Ballüder"
 
-#: wxMDialogs.cpp:771
+#: wxMDialogs.cpp:771 wxMDialogs.cpp:772
 msgid "          Written by Karsten Ballüder"
 msgstr " \t  Ecrit par Karsten Ballüder"
 
-#: wxMDialogs.cpp:773
+#: wxMDialogs.cpp:773 wxMDialogs.cpp:774
 msgid "                      and Vadim Zeitlin"
 msgstr "\t\t\tet Vadim Zeitlin"
 
-#: wxMDialogs.cpp:777
+#: wxMDialogs.cpp:777 wxMDialogs.cpp:778
 msgid "This software is provied 'as is' and without any express or implied"
 msgstr ""
 
-#: wxMDialogs.cpp:780
+#: wxMDialogs.cpp:780 wxMDialogs.cpp:781
 msgid "warranties, including, without limitation, the implied warranties"
 msgstr ""
 
-#: wxMDialogs.cpp:783
+#: wxMDialogs.cpp:783 wxMDialogs.cpp:784
 msgid "of merchantibility and fitness for a particular purpose."
 msgstr ""
 
-#: wxMDialogs.cpp:786
+#: wxMDialogs.cpp:786 wxMDialogs.cpp:787
 msgid "This is OpenSource(TM) software."
 msgstr ""
 
-#: wxMDialogs.cpp:807
+#: wxMDialogs.cpp:807 wxMDialogs.cpp:808
 msgid "Welcome"
 msgstr "Bienvenu"
 
-#: wxMDialogs.cpp:916 wxMFolderDialogs.cpp:552
+#: wxMDialogs.cpp:916 wxMDialogs.cpp:917 wxMFolderDialogs.cpp:552
 msgid "Folder properties"
 msgstr "Propriétés du répertoire"
 
-#: wxMDialogs.cpp:945 wxMDialogs.cpp:1319 wxMFolderDialogs.cpp:612
+#: wxMDialogs.cpp:945 wxMDialogs.cpp:946 wxMDialogs.cpp:1319
+#: wxMDialogs.cpp:1320 wxMFolderDialogs.cpp:612
 msgid "INBOX"
 msgstr "INBOX"
 
-#: wxMDialogs.cpp:946
+#: wxMDialogs.cpp:946 wxMDialogs.cpp:947
 #, fuzzy
 msgid "Message box file"
 msgstr "Sauvegarder le message dans un fichier"
 
-#: wxMDialogs.cpp:947 wxMFolderDialogs.cpp:614
+#: wxMDialogs.cpp:947 wxMDialogs.cpp:948 wxMFolderDialogs.cpp:614
 msgid "POP3"
 msgstr "POP3"
 
-#: wxMDialogs.cpp:948 wxMFolderDialogs.cpp:615
+#: wxMDialogs.cpp:948 wxMDialogs.cpp:949 wxMFolderDialogs.cpp:615
 #, fuzzy
 msgid "IMAP"
 msgstr "IMAP"
 
-#: wxMDialogs.cpp:949 wxMFolderDialogs.cpp:617
+#: wxMDialogs.cpp:949 wxMDialogs.cpp:950 wxMFolderDialogs.cpp:617
 #, fuzzy
 msgid "News"
 msgstr "Usenet"
 
-#: wxMDialogs.cpp:952 wxMFolderDialogs.cpp:622
+#: wxMDialogs.cpp:952 wxMDialogs.cpp:953 wxMFolderDialogs.cpp:622
 msgid "Folder Type"
 msgstr "Type du répertoire"
 
-#: wxMDialogs.cpp:987
+#: wxMDialogs.cpp:987 wxMDialogs.cpp:988
 #, fuzzy
 msgid "Hostname"
 msgstr "Nom de la &machine"
 
-#: wxMDialogs.cpp:993
+#: wxMDialogs.cpp:993 wxMDialogs.cpp:994
 msgid "Pathname or name of folder"
 msgstr "Nom du fichier"
 
-#: wxMDialogs.cpp:1063
+#: wxMDialogs.cpp:1063 wxMDialogs.cpp:1064
 #, fuzzy
 msgid "New Folder"
 msgstr "M - Nouveau répertoire"
 
-#: wxMDialogs.cpp:1064
+#: wxMDialogs.cpp:1064 wxMDialogs.cpp:1065
 msgid "Symbolic name for the new folder"
 msgstr "Nom symbolic pour le nouveau répertoire"
 
-#: wxMDialogs.cpp:1099
+#: wxMDialogs.cpp:1099 wxMDialogs.cpp:1100
 msgid "Choose folder"
 msgstr "Veuillez choisir un répertoire"
 
-#: wxMDialogs.cpp:1318 wxMDialogs.cpp:1325
+#: wxMDialogs.cpp:1318 wxMDialogs.cpp:1319 wxMDialogs.cpp:1325
+#: wxMDialogs.cpp:1326
 msgid "Folder Name"
 msgstr "Nom du répertoire"
 
-#: wxMDialogs.cpp:1331
+#: wxMDialogs.cpp:1331 wxMDialogs.cpp:1332
 #, fuzzy
 msgid "Mailhost"
 msgstr "Serveur du courier"
 
-#: wxMDialogs.cpp:1338
+#: wxMDialogs.cpp:1338 wxMDialogs.cpp:1339
 msgid "Newsserver"
 msgstr "Serveur NNTP"
 
-#: wxMDialogs.cpp:1340
+#: wxMDialogs.cpp:1340 wxMDialogs.cpp:1341
 msgid "Newsgroup"
 msgstr "Groupe de discussion"
 
@@ -2531,7 +2534,7 @@ msgstr ""
 msgid "re"
 msgstr ""
 
-#: MailFolderCC.cpp:312
+#: MailFolderCC.cpp:312 MailFolderCC.cpp:314
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -2540,34 +2543,34 @@ msgid ""
 "Shall I forcefully override the lock?"
 msgstr ""
 
-#: MailFolderCC.cpp:322
+#: MailFolderCC.cpp:322 MailFolderCC.cpp:324
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
 "Will try to continue as normal."
 msgstr ""
 
-#: MailFolderCC.cpp:328
+#: MailFolderCC.cpp:328 MailFolderCC.cpp:330
 #, fuzzy
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Impossible de créer le répertoire '%s' car il existe déjà."
 
-#: MailFolderCC.cpp:423
+#: MailFolderCC.cpp:423 MailFolderCC.cpp:425
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr ""
 
-#: MailFolderCC.cpp:428
+#: MailFolderCC.cpp:428 MailFolderCC.cpp:430
 #, fuzzy, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Ouverture de l'URL '%s' a échoué."
 
-#: MailFolderCC.cpp:436
+#: MailFolderCC.cpp:436 MailFolderCC.cpp:438
 #, fuzzy, c-format
 msgid "Folder '%s' is alive."
 msgstr "Le répertoire '%s' a été effacé."
 
-#: MailFolderCC.cpp:802
+#: MailFolderCC.cpp:802 MailFolderCC.cpp:811
 #, c-format
 msgid ""
 "This folder (%s) contains %lu messages, which is greater than the current "
@@ -2577,34 +2580,34 @@ msgid ""
 "(selecting [No] will retrieve all messages)"
 msgstr ""
 
-#: MailFolderCC.cpp:823
+#: MailFolderCC.cpp:823 MailFolderCC.cpp:832
 #, fuzzy, c-format
 msgid "Reading %lu message headers..."
 msgstr "Montrer ou cacher les en-têtes du message"
 
-#: MailFolderCC.cpp:939
+#: MailFolderCC.cpp:939 MailFolderCC.cpp:950
 msgid "<address missing>"
 msgstr ""
 
-#: MailFolderCC.cpp:1169
+#: MailFolderCC.cpp:1169 MailFolderCC.cpp:1180
 #, fuzzy, c-format
 msgid "Folder '%s' : "
 msgstr "Répertoire '"
 
-#: MailFolderCC.cpp:1171
+#: MailFolderCC.cpp:1171 MailFolderCC.cpp:1182
 #, fuzzy
 msgid "Folder Log: "
 msgstr "Nom du répertoire: "
 
-#: MailFolderCC.cpp:1174
+#: MailFolderCC.cpp:1174 MailFolderCC.cpp:1185
 msgid ", error level: "
 msgstr ""
 
-#: MailFolderCC.cpp:1188
+#: MailFolderCC.cpp:1188 MailFolderCC.cpp:1199
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:1512
+#: MailFolderCC.cpp:1512 MailFolderCC.cpp:1523
 #, fuzzy
 msgid ""
 "\n"
@@ -3151,6 +3154,12 @@ msgstr "Répertoire '"
 #, fuzzy, c-format
 msgid "Opened folder '%s'"
 msgstr "Répertoire '%s' sélectionné."
+
+#: MailCollector.cpp:199
+msgid ""
+"You are trying to collect mail from your central New Mail folder.\n"
+"This makes no sense. Please correct its settings."
+msgstr ""
 
 # MDialogs.h
 msgid "Error"
