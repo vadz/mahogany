@@ -118,7 +118,7 @@ rpm_prep:
 	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
 		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
-		--exclude="Python" --exclude="*.mo" --exclude="*.a" \
+		--exclude="*.mo" --exclude="*.a" \
 		--exclude=".sniffdir" --exclude=".depend" \
 		$(M)/README $(M)/TODO $(M)/INSTALL $(M)/Makefile \
 		$(M)/aclocal.m4 $(M)/config.status $(M)/configure.* \

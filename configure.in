@@ -324,7 +324,6 @@ case "$USE_DEBUG" in
 		CPPFLAGS="$CPPFLAGS -DDEBUG_$i"
 	done  
 	USE_DEBUG_INFO=1
-        USE_WXDEBUG=1
 	MAKE_DEBUG="DEBUG=yes" ;;
 *)	MAKE_DEBUG='' ;;
 esac
@@ -573,12 +572,20 @@ dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
 
+LIB_PAM=
 dnl we need to set the target for c-client library
 case "$USE_CCOSTYPE" in
 ''|0|1)	AC_MSG_CHECKING(for c-client library OS type)
 	case "$OSTYPE" in
 	linux* | Linux*)
-		CCOSTYPE=slx ;;
+		AC_CHECK_LIB(pam, pam_end,
+		[
+			CCOSTYPE=lnp
+			LIB_PAM="-lpam"
+		],
+		[
+			CCOSTYPE=slx
+		]) ;;
 	Solaris* | solaris* | SunOS*)
 		case "$GXX" in
 		yes)	CCOSTYPE=gso ;;
@@ -765,7 +772,7 @@ esac
 dnl add other flags
 CFLAGS="$CFLAGS $MYFLAGS"
 CXXFLAGS="$CXXFLAGS $MYFLAGS"
-LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC"
+LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOCi $LIB_PAM"
 
 dnl Python code produces warnings at present, so don't break compilation:
 CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
