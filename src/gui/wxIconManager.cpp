@@ -673,6 +673,11 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
          (void)fileType->GetIcon(&icon);
 #endif
 
+         if ( !icon.Ok() )
+         {
+            icon = m_unknownIcon;
+         }
+
          delete fileType;
       }
    }
