@@ -206,110 +206,105 @@ MailCollectorImpl::Collect(MailFolder *mf)
    ReCreate();
 
    MOcheck();
-   bool rc = true;
 
-   // first thing to do is to ping all currently opened folders as we want to
-   // do it anyhow - even if we don't use "new mail" folder - as checking for
-   // new mail should update them
+   // first thing to do is to ping all currently opened folders
+   // as we want to do it anyhow - even if we don't use "new mail"
+   // folder - as checking for new mail should update them
    MailFolder::PingAllOpened();
 
+   // first case, collect from only one folder:
+   if ( mf != NULL )
+      return CollectOneFolder(mf);
+
+   // second case, mf==NULL, collect from all incoming folders:
    // maybe we've got nothing to do?
-   if(mf == NULL && m_list->size() == 0)
+   if(m_list->empty())
       return TRUE;
 
-   // first case, mf==NULL, collect from all incoming folders:
-   if ( mf == NULL )
-   {
-      // VZ: I don't know if it should be here or if this can lead to some
-      //     nasty recursion/reentrancy problems - what to do?
+   // VZ: I don't know if it should be here or if this can lead to some
+   //     nasty recursion/reentrancy problems - what to do?
 #if 0
-      // before scanning the list, make sure that all deleted folders are
-      // expunged from it
-      MEventManager::DispatchPending();
+   // before scanning the list, make sure that all deleted folders are
+   // expunged from it
+   MEventManager::DispatchPending();
 #endif // 0
 
-      // make a copy of the list to iterate over as we can't modify the list
-      // we're iterating over (we call RemoveIncomingFolder() inside the loop)
-      MailCollectorFolderList::iterator i;
-      MailCollectorFolderList list(false /* doesn't own entries */);
-      for ( i = m_list->begin(); i != m_list->end(); i++ )
+   // we can call RemoveIncomingFolder() inside the loop which
+   // would invalidate our cursor, so we iterate using a fake
+   // cursor that always points to the subsequent element
+   bool rc = true;
+   for (MailCollectorFolderList::iterator i_fake = m_list->begin();
+            i_fake != m_list->end(); )
+   {
+      MailCollectorFolderList::iterator i = i_fake;
+      ++i_fake;
+      MFolder *mfolder = MFolder::Get( (**i).m_name );
+      if(! mfolder)
       {
-         list.push_back(*i);
+         ERRORMESSAGE((_("Cannot find incoming folder '%s'."),
+                       (**i).m_name.c_str()));
+         RemoveIncomingFolder((**i).m_name);
+         continue; // skip this one
       }
 
-      for ( i = list.begin();i != list.end(); i++ )
+      // has online status changed?
+      if( (**i).m_failcount < 0 // failed previously
+          && mfolder->NeedsNetwork()
+          && mApplication->IsOnline())
+         (**i).m_failcount = 0; // try again
+
+      if(mfolder->NeedsNetwork()
+         && ! mApplication->IsOnline()
+         && (**i).m_failcount != -1)
       {
-         MFolder *mfolder = MFolder::Get( (**i).m_name );
-         if(! mfolder)
-         {
-            ERRORMESSAGE((_("Cannot find incoming folder '%s'."),
-                          (**i).m_name.c_str()));
-            RemoveIncomingFolder((**i).m_name);
-            continue; // skip this one
-         }
+         ERRORMESSAGE((_("Cannot collect from incoming mailbox '%s'"
+                       " while network is offline."),
+                       (**i).m_name.c_str()));
+         (**i).m_failcount = -1; // shut up
+      }
 
-         // has online status changed?
-         if( (**i).m_failcount < 0 // failed previously
-             && mfolder->NeedsNetwork()
-             && mApplication->IsOnline())
-            (**i).m_failcount = 0; // try again
-
-         if(mfolder->NeedsNetwork()
-            && ! mApplication->IsOnline()
-            && (**i).m_failcount != -1)
-         {
-            ERRORMESSAGE((_("Cannot collect from incoming mailbox '%s'"
-                          " while network is offline."),
-                          (**i).m_name.c_str()));
-            (**i).m_failcount = -1; // shut up
-         }
-
-         if( (**i).m_failcount == -1 )
-         {
-            mfolder->DecRef();
-            continue; // skip to next in list
-         }
-
-         MailFolder *imf = MailFolder::OpenFolder( mfolder );
+      if( (**i).m_failcount == -1 )
+      {
          mfolder->DecRef();
-         if(imf)
+         continue; // skip to next in list
+      }
+
+      MailFolder *imf = MailFolder::OpenFolder( mfolder );
+      mfolder->DecRef();
+      if(imf)
+      {
+         rc &= (imf && CollectOneFolder(imf));
+         imf->DecRef();
+         (**i).m_failcount = 0;
+      }
+      else
+      {
+         ASSERT( (**i).m_failcount >= 0);
+         (**i).m_failcount ++;
+         if((**i).m_failcount > MC_MAX_FAIL)
          {
-            rc &= (imf && CollectOneFolder(imf));
-            imf->DecRef();
-            (**i).m_failcount = 0;
-         }
-         else
-         {
-            ASSERT( (**i).m_failcount >= 0);
-            (**i).m_failcount ++;
-            if((**i).m_failcount > MC_MAX_FAIL)
+            ERRORMESSAGE((_("Cannot open incoming mailbox '%s'."),
+                          (**i).m_name.c_str()));
+            wxString msg;
+            msg.Printf(_("Accessing the incoming folder\n"
+                         "'%s' failed.\n\n"
+                         "Do you want to stop collecting\n"
+                         "mail from it in this session?"),
+                       (**i).m_name.c_str());
+            if(MDialog_YesNoDialog(
+               msg, NULL, _("Mail collection failed"),
+               TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
             {
-               ERRORMESSAGE((_("Cannot open incoming mailbox '%s'."),
-                             (**i).m_name.c_str()));
-               wxString msg;
-               msg.Printf(_("Accessing the incoming folder\n"
-                            "'%s' failed.\n\n"
-                            "Do you want to stop collecting\n"
-                            "mail from it in this session?"),
-                          (**i).m_name.c_str());
-               if(MDialog_YesNoDialog(
-                  msg, NULL, _("Mail collection failed"),
-                  TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
-               {
-                  RemoveIncomingFolder((**i).m_name);
-               }
-               else
-               {
-                  // reset failure count for new tries
-                  (**i).m_failcount = 0;
-               }
+               RemoveIncomingFolder((**i).m_name);
+            }
+            else
+            {
+               // reset failure count for new tries
+               (**i).m_failcount = 0;
             }
          }
       }
    }
-   else
-      // second case, collect from only one folder:
-      rc = CollectOneFolder(mf);
    return rc;
 }
 
@@ -348,7 +343,7 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
    ReCreate();
    MOcheck();
    MailCollectorFolderList::iterator i;
-   for(i = m_list->begin();i != m_list->end();i++)
+   for(i = m_list->begin();i != m_list->end();++i)
    {
       if((**i).m_name == name)
       {
@@ -357,8 +352,8 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
       }
    }
 
-   // it's not an error - may be the folder couldn't be opened during this
-   // even though it does have "autocollect" flag set
+   // it's not an error - maybe the folder couldn't be opened during
+   // this cycle even though it does have "autocollect" flag set
 
    return false;
 }
