@@ -5066,49 +5066,8 @@ MailFolderCC::mm_dlog(const String& str)
 
    GetLogCircle().Add(str);
 
-   // replace the passwords in the log window output (which can be seen by
-   // others or be cut-and-pasted to show some problems) with stars if plain
-   // text authentification is used: PASS for POP or LOGIN for IMAP
-   if ( mm_show_debug )
-   {
-      String msg, username, password;
-      unsigned long seq;
-
-      // the max len of username/password
-      size_t len = str.length();
-
-      bool isPopLogin = sscanf(str, "PASS %s", password.GetWriteBuf(len)) == 1;
-      password.UngetWriteBuf();
-
-      if ( isPopLogin )
-      {
-         msg << "PASS " << wxString('*', password.length());
-      }
-      else
-      {
-         bool isImapLogin = sscanf(str, "%08lx LOGIN %s %s",
-                                   &seq,
-                                   username.GetWriteBuf(len),
-                                   password.GetWriteBuf(len)) == 3;
-         username.UngetWriteBuf();
-         password.UngetWriteBuf();
-
-         if ( isImapLogin )
-         {
-            msg.Printf("%08lx LOGIN %s %s",
-                       seq,
-                       username.c_str(),
-                       wxString('*', password.length()).c_str());
-         }
-         else
-         {
-            msg = str;
-         }
-      }
-
-      // send it to the window
-      wxLogGeneric(M_LOG_WINONLY, _("Mail log: %s"), msg.c_str());
-   }
+   // send it to the window
+   wxLogGeneric(M_LOG_WINONLY, _("Mail log: %s"), str.c_str());
 }
 
 /** get user name and password
