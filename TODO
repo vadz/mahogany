@@ -16,6 +16,8 @@ $Id$
 - wxFolderView:
    + complete ForwardMessages
    + add other functionality such as undelete messages or stripMime
+   + delete and forward don't work properly
+   + NEW flag must be reset
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
@@ -30,6 +32,8 @@ $Id$
   + fix usage of readEntry to use String objects
   + wxMDialogs completely broken as it is now
   + who cleans up CPYSTR() generated strings?
+
+- make saving of window positions optional
 
 - configure: USE_WXCONFIG does not get defined!
 

@@ -317,10 +317,11 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
                                     mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
+      str2 += prefix;
       while(*cptr)
       {
          str2 += *cptr;
-         if(*cptr == '\n')
+         if(*cptr == '\n' && *(cptr+1))
             str2 += prefix;
          cptr++;
       }

@@ -52,6 +52,7 @@
 #include   "gui/wxllist.h"
 #include   "gui/wxlwindow.h"
 #include   "gui/wxlparser.h"
+#include   "gui/wxlparser.h"
 #include   "gui/wxComposeView.h"
 #include   "gui/wxAdbEdit.h"
 
@@ -184,7 +185,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // layout the labels and text fields: label at the left of the field
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
-   bDoShow[Field_Subject] = TRUE;  // To and subject always there
+      bDoShow[Field_Subject] = TRUE;  // To and subject always there
    bDoShow[Field_Cc] = READ_CONFIG(profile, MP_SHOWCC);
    bDoShow[Field_Bcc] = READ_CONFIG(profile, MP_SHOWBCC);
 
@@ -196,7 +197,8 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    wxClientDC dc(this);
    long width, widthMax = 0;
    uint n;
-   for ( n = 0; n < WXSIZEOF(aszLabels); n++ ) {
+   for ( n = 0; n < WXSIZEOF(aszLabels); n++ )
+   {
       if ( !bDoShow[n] )
          continue;
 
@@ -208,8 +210,10 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
 
    wxStaticText *label;
    wxWindow  *last = NULL;
-   for ( n = 0; n < Field_Max; n++ ) {
-      if ( bDoShow[n] ) {
+   for ( n = 0; n < Field_Max; n++ )
+   {
+      if ( bDoShow[n] )
+      {
          // text entry goes from right border of the label to the right border
          // of the box except for the first one where we must also leave space
          // for the button
@@ -250,7 +254,8 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
          c->height.AsIs();
          label->SetConstraints(c);
       }
-      else { // not shown
+      else
+      { // not shown
          m_txtFields[n] = NULL;
       }
    }
@@ -262,12 +267,15 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // -----------------------
 
    // set def values for the headers
-   m_txtFields[Field_To]->SetValue(
-      strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) : to.c_str());
-   m_txtFields[Field_Cc]->SetValue(
-      strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) : cc.c_str());
-   m_txtFields[Field_Bcc]->SetValue(
-      strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC) : bcc.c_str());
+   if(m_txtFields[Field_To])
+      m_txtFields[Field_To]->SetValue(
+         strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) : to.c_str());
+   if(m_txtFields[Field_Cc])
+      m_txtFields[Field_Cc]->SetValue(
+         strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) : cc.c_str());
+   if(m_txtFields[Field_Bcc])
+      m_txtFields[Field_Bcc]->SetValue(
+         strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC) : bcc.c_str());
 
    // append signature
    if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
@@ -427,9 +435,9 @@ wxComposeView::OnMenuCommand(int id)
 
 void
 wxComposeView::InsertData(const char *data,
-                         size_t length,
-                         const char *mimetype,
-                         int num_mimetype)
+                          size_t length,
+                          const char *mimetype,
+                          int num_mimetype)
 {
    MimeContent *mc = new MimeContent();
 
@@ -553,7 +561,7 @@ wxComposeView::Send(void)
             case MimeContent::MIMECONTENT_DATA:
                sm.AddPart(mc->m_NumericMimeType, mc->m_Data, mc->m_Length,
                           strutil_after(mc->m_MimeType,'/')  //subtype
-                        );
+                  );
                break;
             }
          }
@@ -589,7 +597,7 @@ void
 wxComposeView::InsertText(const String &txt)
 {
    m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
-   m_LayoutWindow->GetLayoutList().Insert(txt);
+   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
    m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
 }
 
