@@ -23,6 +23,7 @@
 
 #include "MObject.h"
 
+#include "FolderType.h"         // for MFolderType
 #include <wx/fontenc.h>         // for wxFontEncoding
 
 // forward declarations
