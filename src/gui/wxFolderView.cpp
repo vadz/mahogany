@@ -4893,21 +4893,9 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 
       colNames.Add(GetColumnName(col));
       status.Add(true);
-   }
-
-   // all columns which are shown are already in colNames array, add all the
-   // ones which are not shown to the end of it too
-   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )     // loop over columns
-   {
-      wxString colName = GetColumnName(n);
-      if ( colNames.Index(colName) == wxNOT_FOUND )
-      {
-         colNames.Add(colName);
-         status.Add(false);
-      }
 
       unsigned long w;
-      if ( !strWidths[n].ToULong(&w) )
+      if ( !strWidths[col].ToULong(&w) )
       {
          wxLogDebug("Invalid width for the column %d", n);
 
@@ -4915,6 +4903,19 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
       }
 
       widths.Add((int)w);
+   }
+
+   // all columns which are shown are already in colNames array, add all the
+   // ones which are not shown to the end of it too
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )     // loop over columns
+   {
+      if ( columns[n] == WXFLC_NONE )
+      {
+         colNames.Add(GetColumnName(n));
+         status.Add(false);
+         widths.Add(-1);
+      }
+      //else: this column is shown and has already been handled above
    }
 
    // do show the dialog
