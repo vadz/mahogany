@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLwindow.h : a scrolled Window for displaying/entering rich text*
  *                                                                  *
- * (C) 1998, 1999 by Karsten Ballüder (Ballueder@usa.net)           * 
+ * (C) 1998, 1999 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -109,11 +109,18 @@ wxLayoutWindow::MSWGetDlgCode()
 void
 wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 {
+#ifdef WXLAYOUT_DEBUG
+   if ( 0 )
+      wxLog::AddTraceMask("wxlwindow");
+   if ( 0 )
+      wxLog::RemoveTraceMask("wxlwindow");
+#endif
+
    wxPaintDC dc( this );
-   PrepareDC( dc );     
+   PrepareDC( dc );
    SetFocus();
 
-   
+
    wxPoint findPos;
    findPos.x = dc.DeviceToLogicalX(event.GetX());
    findPos.y = dc.DeviceToLogicalY(event.GetY());
@@ -126,7 +133,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 
    m_ClickPosition = wxPoint(event.GetX(), event.GetY());
 #ifdef WXLAYOUT_DEBUG
-   wxLogDebug("wxLayoutWindow::OnMouse: (%d, %d) -> (%d, %d)",
+   wxLogTrace("wxlwindow", "wxLayoutWindow::OnMouse: (%d, %d) -> (%d, %d)",
               event.GetX(), event.GetY(), findPos.x, findPos.y);
 #endif
 
@@ -135,10 +142,10 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 
 #ifdef WXLAYOUT_DEBUG
    if(obj)
-      wxLogDebug("wxLayoutWindow::OnMouse: Found object of type %d.",
+      wxLogTrace("wxlwindow", "wxLayoutWindow::OnMouse: Found object of type %d.",
                  obj->GetType());
    else
-      wxLogDebug("wxLayoutWindow::OnMouse: Found no object.");
+      wxLogTrace("wxlwindow", "wxLayoutWindow::OnMouse: Found no object.");
 #endif
    //has the mouse only been moved?
    if(eventId == WXLOWIN_MENU_MOUSEMOVE)
@@ -157,12 +164,12 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       }
       return;
    }
-   
+
    // always move cursor to mouse click:
    if(obj && eventId == WXLOWIN_MENU_LCLICK)
    {
       m_llist->MoveCursorTo(cursorPos);
-      DoPaint(false); 
+      DoPaint(false);
    }
    if(!m_doSendEvents) // nothing to do
       return;
@@ -197,7 +204,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       event.Skip();
       return;
    }
-   
+
    long keyCode = event.KeyCode();
 
    /* First, handle control keys */
@@ -339,7 +346,7 @@ wxLayoutWindow::InternalPaint(void)
    wxASSERT(y1 > 0);
    // As we have the values anyway, use them to avoid unnecessary
    // scrollbar updates.
-   if(x1 > m_maxx) m_maxx = x1;  
+   if(x1 > m_maxx) m_maxx = x1;
    if(y1 > m_maxy) m_maxy = y1;
 
    // Maybe we need to change the scrollbar sizes or positions,
@@ -348,10 +355,10 @@ wxLayoutWindow::InternalPaint(void)
       m_llist->Layout(dc);
    // this is needed even when only the cursor moved
    m_llist->Layout(dc,y0+y1);
-   
+
    if(IsDirty())
       ResizeScrollbars();
-   
+
    /* Make sure that the scrollbars are at a position so that the
       cursor is visible if we are editing. */
       /** Scroll so that cursor is visible! */
@@ -368,14 +375,14 @@ wxLayoutWindow::InternalPaint(void)
          x0 = nx; y0 = ny;
       }
    }
-   
-   /* Check whether the window has grown, if so, we need to reallocate 
+
+   /* Check whether the window has grown, if so, we need to reallocate
       the bitmap to be larger. */
    if(x1 > m_bitmapSize.x || y1 > m_bitmapSize.y)
    {
       wxASSERT(m_bitmapSize.x > 0);
       wxASSERT(m_bitmapSize.y > 0);
-      
+
       m_memDC->SelectObject(wxNullBitmap);
       delete m_bitmap;
       m_bitmapSize = wxPoint(x1,y1);
@@ -386,8 +393,8 @@ wxLayoutWindow::InternalPaint(void)
    // with the translate parameter of Draw().
    m_memDC->SetDeviceOrigin(0,0);
    m_memDC->SetBackgroundMode(wxTRANSPARENT);
-   m_memDC->SetBrush(wxBrush(m_llist->GetDefaults()->GetBGColour(), wxSOLID));                                  
-   m_memDC->SetPen(wxPen(m_llist->GetDefaults()->GetBGColour(),0,wxTRANSPARENT));                               
+   m_memDC->SetBrush(wxBrush(m_llist->GetDefaults()->GetBGColour(), wxSOLID));
+   m_memDC->SetPen(wxPen(m_llist->GetDefaults()->GetBGColour(),0,wxTRANSPARENT));
    m_memDC->SetLogicalFunction(wxCOPY);
    if(m_BGbitmap)
    {
@@ -426,7 +433,7 @@ wxLayoutWindow::InternalPaint(void)
          ri++;
       }
    else
-      // If there are no update rectangles, we got called to reflect 
+      // If there are no update rectangles, we got called to reflect
       // a change in the list. Currently there is no mechanism to
       // easily find out which bits need updating, so we update
       // all. The wxLayoutList could handle this, creating a list or
@@ -441,15 +448,15 @@ void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
    wxPoint max = m_llist->GetSize();
-   
+
    if(max.x > m_maxx || max.y > m_maxy
       || max.x > m_maxx-WXLO_ROFFSET || max.y > m_maxy-WXLO_BOFFSET
       || exact)
    {
-      if(! exact) 
+      if(! exact)
       {
          // add an extra bit to the sizes to avoid future updates
-         max.x = max.x+WXLO_ROFFSET;  
+         max.x = max.x+WXLO_ROFFSET;
          max.y = max.y+WXLO_BOFFSET;
       }
       ViewStart(&m_ViewStartX, &m_ViewStartY);
@@ -469,7 +476,7 @@ wxLayoutWindow::Paste(void)
       {
          wxTheClipboard->GetData(&data);
          wxLayoutImportText( m_llist, data.GetText());
-      }  
+      }
       wxTheClipboard->Close();
    }
 }
