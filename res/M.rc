@@ -67,6 +67,7 @@ unknown 	ICON	"unknown.ico"
 // toolbar bitmaps (32x32)
 tb_adrbook	BITMAP	"tb_adrbook.bmp"
 tb_book_open	BITMAP	"tb_book_open.bmp"
+tb_check_mail		BITMAP	"tb_check_mail.bmp"
 tb_open		BITMAP	"tb_open.bmp"
 tb_attach	BITMAP	"tb_attach.bmp"
 tb_help		BITMAP	"tb_help.bmp"
