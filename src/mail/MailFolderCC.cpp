@@ -1141,7 +1141,8 @@ MailFolderCC::BuildListing(void)
    unsigned long oldNum = m_OldNumOfMessages;
    if(m_UpdateMsgCount) // this will suppress more new mail events
       m_OldNumOfMessages = m_NumOfMessages;
-   
+
+   m_Listing->SetCount(m_NumOfMessages);
    // now we sent an update event to update folderviews etc
    MEventManager::Send( new MEventFolderUpdateData (this) );
 
