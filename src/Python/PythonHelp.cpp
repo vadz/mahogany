@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.2  1998/05/30 17:59:34  KB
+ * some more python
+ *
  * Revision 1.1  1998/05/24 14:47:34  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -13,11 +16,214 @@
  *
  *******************************************************************/
 
-#include   "Mconfig.h"  // for correct evaluation of Python.h
+#include   "Mpch.h"  // config.h for correct evaluation of Python.h
+#include   "Mcommon.h"
+#include   "Profile.h"
+#include   "MApplication.h"
 #include   "Python.h"
 #include   "PythonHelp.h"
+#include   "strutil.h"
+#include   <string.h>
 
-static
+// from InitPython.cc:
+extern PyObject *Python_MinitModule;
+
+PyObject *PyH_LoadModule(const char *modname);            /* returns module object */
+
+extern "C"
+{
+   void SWIG_MakePtr(char *_c, const void *_ptr, char *type);
+}
+
+#ifndef HAVE_SWIGLIB
+extern "C"
+{
+   void
+SWIG_MakePtr(char *_c, const void *_ptr, char *type)
+{
+   static char _hex[16] =
+   {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f'};
+   unsigned long _p, _s;
+   char _result[20], *_r;    /* Note : a 64-bit hex number = 16 digits */
+   _r = _result;
+   _p = (unsigned long) _ptr;
+   if (_p > 0)
+   {
+      while (_p > 0)
+      {
+         _s = _p & 0xf;
+         *(_r++) = _hex[_s];
+         _p = _p >> 4;
+      }
+      *_r = '_';
+      while (_r >= _result)
+         *(_c++) = *(_r--);
+   } else
+      strcpy (_c, "NULL");
+   if (_ptr)
+      strcpy (_c, type);
+}
+}
+#endif
+
+int
+PythonCallback(const char *name, void *obj, const char *classname,
+               ProfileBase *profile = NULL, const char *argfmt = NULL,
+               ...)
+{
+   const char
+      *realname;
+   int
+      result = 0;
+   PyObject
+      *parg;
+   
+   va_list argslist;
+
+   if(argfmt && *argfmt != '\0')
+   {
+      va_start(argslist, argfmt);
+      parg = Py_VaBuildValue(argfmt, argslist);     /* input: C->Python */
+      if (parg == NULL) 
+         return 0;
+   }
+   else
+      parg = NULL;
+
+   if(profile)
+      realname = profile->readEntry(name,NULL);
+   if(! profile || realname == NULL)
+      realname = mApplication.readEntry(name,NULL);
+
+   if(strutil_isempty(realname))
+      return 0;    // no callback called, default value 0
+
+   PyH_CallFunction(realname,
+                    name,
+                    obj, classname,
+                    "i",&result, parg);
+   return result;
+}
+
+PyObject *
+PyH_makeObjectFromPointer(void *ptr,const char *classname)
+{
+   char ptemp[256];
+   String ptrtype;
+
+   ptrtype = "_";
+   ptrtype += classname;
+   ptrtype += "_p";
+
+   SWIG_MakePtr(ptemp,ptr,(char *)ptrtype.c_str());  // it doesn't get
+                                                     // changed
+   return Py_BuildValue("s",ptemp);
+}
+
+bool PyH_CallFunction(const char *func,
+                      const char *name,
+                      void *obj, const char *classname,
+                      const char *resultfmt, void *result,
+                      PyObject *parg
+   )
+{
+   PyObject
+      *module,
+      *function,
+      *object,
+      *presult;
+
+   String
+      functionName = func;
+   
+   if(index(func,'.'))  // function name contains module name
+   {
+      String modname;
+      const char *cptr = func;
+      while(*cptr != '.')
+         modname += *cptr++;
+      functionName = "";
+      cptr++;
+      while(*cptr)
+         functionName += *cptr++;
+      module = PyH_LoadModule(modname.c_str());             /* get module, init python */
+   }
+   else
+   {
+      module = Python_MinitModule;
+      functionName = func;
+   }
+
+   if (module == NULL)     
+      return 0;  // failure
+
+   function = PyObject_GetAttrString(module, (char *)functionName.c_str());
+   if(! function)
+      return 0; // failure
+
+   // now build object reference argument:
+   
+   object = PyH_makeObjectFromPointer(obj, classname);
+   if(parg)
+      presult =
+         PyObject_CallFunction(function,"sOO",name,object,parg);
+   else
+      presult =
+         PyObject_CallFunction(function,"sO",name,object);
+      
+   return PyH_ConvertResult(presult, resultfmt, result);     /* expr val to C */
+}
+
+bool PyH_CallFunctionVa(const char *func,
+                      const char *name,
+                      void *obj, const char *classname,
+                        const char *resultfmt, void *result,
+                        const char *argfmt, ...
+   )
+{
+   PyObject
+      *module,
+      *function,
+      *object,
+      *presult;
+
+   String
+      functionName = func;
+   
+   if(index(func,'.'))  // function name contains module name
+   {
+      String modname;
+      const char *cptr = func;
+      while(*cptr != '.')
+         modname += *cptr++;
+      functionName = "";
+      cptr++;
+      while(*cptr)
+         functionName += *cptr++;
+      module = PyH_LoadModule(modname.c_str());             /* get module, init python */
+   }
+   else
+   {
+      module = Python_MinitModule;
+      functionName = func;
+   }
+
+   if (module == NULL)     
+      return 0;  // failure
+
+   function = PyObject_GetAttrString(module, (char *)functionName.c_str());
+   if(! function)
+      return 0; // failure
+
+   // now build object reference argument:
+   
+   object = PyH_makeObjectFromPointer(obj, classname);
+   presult = PyObject_CallFunction(function,"sO",name,object);   
+   return PyH_ConvertResult(presult, resultfmt, result);     /* expr val to C */
+}
+
+
 PyObject *
 PyH_LoadModule(const char *modname)            /* returns module object */
 {
@@ -27,7 +233,7 @@ PyH_LoadModule(const char *modname)            /* returns module object */
      * 3) reload set and already loaded (on sys.modules): "reload()" before use
      * 4) not loaded yet, or loaded but reload off: "import" to fetch or load */
 
-   PyObject *module, *result;                  
+   PyObject *module;                  
    module  = PyDict_GetItemString(                 /* in sys.modules dict? */
       PyImport_GetModuleDict(), (char *)modname);
 
@@ -55,9 +261,9 @@ PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget)
 {
    if (presult == NULL)            /* error when run? */
       return 0;
-   if (resTarget == NULL) {        /* NULL: ignore result */
+   if (resTarget == NULL || resFormat == NULL || *resFormat == '\0') {        /* NULL: ignore result */
       Py_DECREF(presult);         /* procedures return None */
-      return 1;
+      return 0;
    }
    if (! PyArg_Parse(presult, (char *)resFormat, resTarget)) { /* convert Python->C */
       Py_DECREF(presult);                             /* may not be a tuple */
@@ -65,8 +271,8 @@ PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget)
    }
    if (strcmp(resFormat, "O") != 0)       /* free object unless passed-out */
       Py_DECREF(presult);
-   return 1;                              /* 0=success, -1=failure */
-}                                          /* if 0: result in *resTarget  */
+   return 1;                              /* 1=success, 0=failure */
+}                                          /* if 1: result in *resTarget  */
 
 int
 PyH_RunCodestr(enum PyH_RunModes mode, const char *code,      /* expr or stmt string */
@@ -128,3 +334,4 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     Py_DECREF(args);                                  /* result may be None */
     return PyH_ConvertResult(presult, resfmt, cresult);  /* convert result to C */
 }
+
