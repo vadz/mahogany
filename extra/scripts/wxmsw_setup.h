@@ -840,6 +840,9 @@
 // Set to 1 for MS Icons and Cursors format support
 #define wxUSE_ICO_CUR       1
 
+// Set to 1 for IFF (AMIGA) image format support
+#define wxUSE_IFF           0
+
 #define wxUSE_PALETTE       1
 
 // ----------------------------------------------------------------------------
