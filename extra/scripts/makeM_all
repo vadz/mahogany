@@ -143,14 +143,14 @@ WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
 MCVSROOT=":pserver:KB@mcvs.dhs.org:/var/cvs/Mahogany"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
-if [ "$UID" = 0 ]
-then
+#if [ "$UID" = 0 ]
+#then
+#  REALHOME=$HOME
+#  KBHOME=/home/karsten
+#  HOME=$KBHOME
+#else
   REALHOME=$HOME
-  KBHOME=/home/karsten
-  HOME=$KBHOME
-else
-  REALHOME=$HOME
-fi
+#fi
 WWWDIR=$HOME/WWW/Mahogany/daily
 LOGNAME="karsten"
 export LOGNAME
