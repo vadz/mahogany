@@ -193,6 +193,7 @@ extern const MOption MP_DEFAULT_LOAD_EXTENSION;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_BCC;
+extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_DEFAULT_REPLY_KIND;
 extern const MOption MP_LIST_ADDRESSES;
 extern const MOption MP_REPLY_PREFIX;
@@ -752,6 +753,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_COMPOSE_CC_NAME         "ComposeCcDefault"
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_NAME         "ComposeBccDefault"
+/// show "From:" field in composer?
+#define   MP_COMPOSE_SHOW_FROM_NAME "ComposeShowFrom"
 
 /// default reply kind
 #define   MP_DEFAULT_REPLY_KIND_NAME "ReplyDefault"
@@ -1549,6 +1552,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_COMPOSE_CC_DEFVAL         M_EMPTYSTRING
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_DEFVAL      M_EMPTYSTRING
+/// show "From:" field in composer?
+#define   MP_COMPOSE_SHOW_FROM_DEFVAL 0l
 
 /// default reply kind
 #define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER

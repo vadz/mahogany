@@ -112,7 +112,6 @@ extern const MOption MP_IMAPHOST;
 extern const MOption MP_LAST_CREATED_FOLDER_TYPE;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
-extern const MOption MP_USERLEVEL;
 extern const MOption MP_USERNAME;
 
 // ----------------------------------------------------------------------------
@@ -545,9 +544,7 @@ public:
    static const char *s_aszImages[];
    static const char *s_aszImagesAdvanced[];
 
-   wxFolderCreateNotebook(bool isAdvancedUser,
-                          wxWindow *parent,
-                          wxFolderCreateDialog *dlg = NULL);
+   wxFolderCreateNotebook(wxWindow *parent, wxFolderCreateDialog *dlg = NULL);
 };
 
 // ----------------------------------------------------------------------------
@@ -707,17 +704,8 @@ wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
 
 void wxFolderBaseDialog::CreateNotebook(wxPanel *panel)
 {
-   // TODO let the user select himself which pages he wants to see... It's not
-   //      as simple as it seems because currently the image list must be known
-   //      statically, so it involves changing wxOptionsPage code (currently,
-   //      it adds itself with the icon corresponding to the position of the
-   //      page in the notebook instead of the fixed number)
-   bool isAdvancedUser =
-       READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_ADVANCED;
-
    m_notebook = new wxFolderCreateNotebook
                     (
-                     isAdvancedUser,
                      panel,
                      wxDynamicCast(this, wxFolderCreateDialog)
                     );
@@ -2676,17 +2664,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 const char *wxFolderCreateNotebook::s_aszImages[] =
 {
    "access",
-   "newmail",
-   "compose",
-   "msgview",
-   "folderview",
-   "foldertree",
-   NULL
-};
-
-const char *wxFolderCreateNotebook::s_aszImagesAdvanced[] =
-{
-   "access",
    "ident",
    "network",
    "newmail",
@@ -2701,46 +2678,31 @@ const char *wxFolderCreateNotebook::s_aszImagesAdvanced[] =
 };
 
 // create the control and add pages too
-wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
-                                               wxWindow *parent,
+wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
                                                wxFolderCreateDialog *dlg)
                       : wxNotebookWithImages
                         (
                          "FolderCreateNotebook",
                          parent,
-                         isAdvancedUser ? s_aszImagesAdvanced : s_aszImages
+                         s_aszImages
                         )
 {
-   // don't forget to update both the array above and the enum!
-   ASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
-
    // use the parent profile for the default values if we have any
    Profile_obj profile(dlg ? dlg->GetParentFolderName() : String(""));
    CHECK_RET( profile, _T("failed to create profile in wxFolderCreateNotebook") );
 
-   // create and add the pages: some are always present, others are only shown
-   // to "advanced" users (because they're not generally useful and may confuse
-   // the novices)
+   // create and add the pages
    (void)new wxFolderPropertiesPage(this, profile, dlg);
-   if ( isAdvancedUser )
-   {
-      (void)new wxOptionsPageIdent(this, profile);
-      (void)new wxOptionsPageNetwork(this, profile);
-   }
+   (void)new wxOptionsPageIdent(this, profile);
+   (void)new wxOptionsPageNetwork(this, profile);
    (void)new wxOptionsPageNewMail(this, profile);
    (void)new wxOptionsPageCompose(this, profile);
-   if ( isAdvancedUser )
-   {
-      (void)new wxOptionsPageFolders(this, profile);
-   }
+   (void)new wxOptionsPageFolders(this, profile);
    (void)new wxOptionsPageMessageView(this, profile);
    (void)new wxOptionsPageFolderView(this, profile);
    (void)new wxOptionsPageFolderTree(this, profile);
-   if ( isAdvancedUser )
-   {
-      (void)new wxOptionsPageAdb(this, profile);
-      (void)new wxOptionsPageHelpers(this, profile);
-   }
+   (void)new wxOptionsPageAdb(this, profile);
+   (void)new wxOptionsPageHelpers(this, profile);
 }
 
 // ----------------------------------------------------------------------------

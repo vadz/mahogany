@@ -82,7 +82,6 @@ extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_ORGANIZATION;
-extern const MOption MP_USERLEVEL;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -371,21 +370,17 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
       labelBox.Printf(_("Default headers"));
    wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
 
-   // for advanced users only: a button to invoke the dialog for configuring
-   // other headers
-   if ( READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_ADVANCED )
-   {
-      wxButton *btnEditCustom = new wxButton(this, Button_EditCustom,
-                                             _("&More..."));
+   // and a button to invoke the dialog for configuring other headers
+   wxButton *btnEditCustom = new wxButton(this, Button_EditCustom,
+                                          _("&More..."));
 
-      wxWindow *btnOk = FindWindow(wxID_OK);
-      c = new wxLayoutConstraints();
-      c->right.LeftOf(btnOk, 2*LAYOUT_X_MARGIN);
-      c->top.SameAs(btnOk, wxTop);
-      c->width.Absolute(wBtn);
-      c->height.Absolute(hBtn);
-      btnEditCustom->SetConstraints(c);
-   }
+   wxWindow *btnOk = FindWindow(wxID_OK);
+   c = new wxLayoutConstraints();
+   c->right.LeftOf(btnOk, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(btnOk, wxTop);
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   btnEditCustom->SetConstraints(c);
 
    // a static message telling where is what
    wxStaticText *msg1 = new wxStaticText(this, -1, _("Recipient"));

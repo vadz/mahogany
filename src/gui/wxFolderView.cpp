@@ -145,7 +145,6 @@ extern const MOption MP_MSGS_USE_THREADING;
 extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_PREVIEW_ON_SELECT;
-extern const MOption MP_USERLEVEL;
 extern const MOption MP_USE_TRASH_FOLDER;
 
 // ----------------------------------------------------------------------------
@@ -1940,41 +1939,11 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       return;
    }
 
-   // we're going to change the sort order either for this profile in the
-   // advanced mode but the global sort order in the novice mode: otherwise,
-   // it would be surprizing for the novice user as he'd see one thing in the
-   // options dialog and another thing on the screen (the sorting page is not
-   // shown in the folder dialog in this mode)
-   Profile *profile;
-   bool usingGlobalProfile;
-   if ( READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_NOVICE )
-   {
-      profile = mApplication->GetProfile();
-      profile->IncRef();
-
-      usingGlobalProfile = true;
-   }
-   else
-   {
-      profile = m_FolderView->GetFolderProfile();
-
-      usingGlobalProfile = false;
-   }
+   Profile_obj profile = m_FolderView->GetFolderProfile();
 
    // sort by this column: if we already do this, then toggle the sort
    // direction
    long sortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
-   if ( usingGlobalProfile )
-   {
-      Profile *profileFolder = m_FolderView->GetProfile();
-      if ( profileFolder &&
-            READ_CONFIG(profileFolder, MP_MSGS_SORTBY) != sortOrder )
-      {
-         // as we're going to change the global one but this profiles settings
-         // will override it!
-         wxLogDebug(_T("Changing the sort order won't take effect."));
-      }
-   }
 
    // There are 2 possibilities when the column Y is clicked and we currently
    // use the column X for sorting: either we resort using just Y or we sort
@@ -2037,8 +2006,6 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 #endif // USE_COMPLEX_SORT/!USE_COMPLEX_SORT
 
    SetSortOrder(profile, sortOrder, col, GetSortCrit(sortOrder) != orderCol);
-
-   profile->DecRef();
 }
 
 void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)

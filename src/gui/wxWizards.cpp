@@ -73,7 +73,6 @@ extern const MOption MP_IMAPHOST;
 extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
-extern const MOption MP_USERLEVEL;
 extern const MOption MP_USERNAME;
 
 // ----------------------------------------------------------------------------
@@ -1387,14 +1386,6 @@ MWizard::GetPageById(MWizardPageId id)
 MFolder *
 RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 {
-   // Never show the wizard for advanced users:
-   if(READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED)
-   {
-      if ( wantsDialog )
-         *wantsDialog = true;
-      return NULL;
-   }
-
    CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
    MFolder *newfolder = NULL;
    if ( wantsDialog )

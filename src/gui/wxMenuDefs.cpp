@@ -56,7 +56,6 @@
 
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_TBARIMAGES;
-extern const MOption MP_USERLEVEL;
 
 // ----------------------------------------------------------------------------
 // local data
@@ -717,8 +716,7 @@ void CreateMToolbar(wxFrame *parent, wxFrameId frameId)
    }
 
    // show the identity combo in the main frame
-   if ( frameId == WXFRAME_MAIN &&
-        READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED )
+   if ( frameId == WXFRAME_MAIN )
    {
       wxControl *combo = CreateIdentCombo(toolbar);
       if (combo) toolbar->AddControl(combo);

@@ -146,8 +146,6 @@ enum ConfigFields
    ConfigField_VCardHelp,
    ConfigField_UseVCard,
    ConfigField_VCardFile,
-   ConfigField_UserLevelHelp,
-   ConfigField_UserLevel,
    ConfigField_SetPassword,
    ConfigField_IdentLast = ConfigField_SetPassword,
 
@@ -280,6 +278,7 @@ enum ConfigFields
    ConfigField_ComposePreview,
    ConfigField_ComposeConfirm,
 
+   ConfigField_ComposeShowFrom,
    ConfigField_ComposeHeaders,
    ConfigField_ComposeTemplates,
 
@@ -857,11 +856,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
       "book entry in the vCard format."), Field_Message, -1 },
    { gettext_noop("Attach a v&Card to outgoing messages"), Field_Bool,    -1,                        },
    { gettext_noop("&vCard file"),                  Field_File, ConfigField_UseVCard,                        },
-   { gettext_noop("Some more rarely used and less obvious program\n"
-                  "features are only accessible in the so-called\n"
-                  "`advanced' user mode which may be set here."),
-                                                   Field_Message | Field_Global,   -1,                        },
-   { gettext_noop("User &level:novice:advanced"),  Field_Combo | Field_Global,   -1,                        },
    { gettext_noop("Set &global password"),  Field_SubDlg | Field_Global, -1,},
 
    // network
@@ -1152,6 +1146,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
+   { gettext_noop("\nShow \"&From\" field:"),        Field_Bool |
+                                                   Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
 
@@ -1603,8 +1599,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEVCARD),
    CONFIG_ENTRY(MP_VCARD),
    CONFIG_NONE(),
-   CONFIG_ENTRY(MP_USERLEVEL),
-   CONFIG_NONE(),
 
    // network
    CONFIG_NONE(),
@@ -1735,8 +1729,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_PREVIEW_SEND),
    CONFIG_ENTRY(MP_CONFIRM_SEND),
 
-   CONFIG_NONE(),
-   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_COMPOSE_SHOW_FROM),
+   CONFIG_NONE(), // headers button
+   CONFIG_NONE(), // templates button
 
    // folders
    CONFIG_NONE(),
@@ -2038,7 +2033,12 @@ void wxOptionsPage::CreateControls()
    size_t n;
 
    // some fields are only shown in 'advanced' mode, so check if we're in it
-   bool isAdvanced = READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
+   //
+   // update: now we don't have 2 modes any more but I still keep
+   // Field_Advanced for now, maybe we're going to emphasize them somehow or
+   // warn the user that he needs to understand what he is doing when changing
+   // them or something like this in the future
+   bool isAdvanced = true;
 
    // some others are not shown when we're inside an identity or folder dialog
    // but only in the global one

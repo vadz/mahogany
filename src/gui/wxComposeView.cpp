@@ -106,6 +106,7 @@ extern const MOption MP_ADB_SUBSTRINGEXPANSION;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
+extern const MOption MP_COMPOSE_SHOW_FROM;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
@@ -123,7 +124,6 @@ extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_SENDMAILCMD;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_USEOUTGOINGFOLDER;
-extern const MOption MP_USERLEVEL;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VCARD;
@@ -1555,8 +1555,8 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
    sizerHeaders->AddGrowableCol(1);
 
-   // add from line but only if user level is advanced
-   if ( READ_CONFIG(m_Profile, MP_USERLEVEL) >= M_USERLEVEL_ADVANCED )
+   // add "From" header if configured to show it
+   if ( READ_CONFIG(m_Profile, MP_COMPOSE_SHOW_FROM) )
    {
       sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&From:")),
                         0, wxALIGN_CENTRE_VERTICAL);

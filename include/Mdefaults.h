@@ -25,21 +25,6 @@
 #  define DEFAULT_FONT_SIZE 12l
 #endif
 
-/** @name User level: novice, intermidiate, expert */
-//@{
-enum
-{
-   /// minimal user level, prefer simplicity over flexibility
-   M_USERLEVEL_NOVICE,
-   /// advanced user, more configurability features available
-   M_USERLEVEL_ADVANCED,
-   /// expert user, all features available
-   M_USERLEVEL_EXPERT,
-   /// for the developers themselves
-   M_USERLEVEL_WIZARD
-};
-//@}
-
 /** @name Levels of  interaction, do something or not?
 
     NB: these values can't be changed as they are written to (and read from)
