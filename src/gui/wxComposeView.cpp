@@ -413,14 +413,15 @@ wxComposeView::OnMenuCommand(int id)
       Print();
       break;
    case WXMENU_COMPOSE_CLEAR:
-      delete m_LayoutWindow;
-      CreateFTCanvas();
-      Layout();
+      m_LayoutWindow->Clear();
+/*
+  Layout();
 #ifdef  USE_WXWINDOWS2
       Refresh();
 #else //wxWin1
       OnPaint();
 #endif
+*/
       break;
    default:
       wxMFrame::OnMenuCommand(id);

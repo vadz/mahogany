@@ -83,7 +83,7 @@ wxMApp::OnInit()
       log->Show();
 
       // we want it to be above the log frame
-      topLevelFrame->Raise();
+//FIXME      topLevelFrame->Raise();
 
 #     ifdef  USE_WXWINDOWS2
          return true;
@@ -111,7 +111,8 @@ int wxMApp::OnExit()
 {
    // save log window position
    wxFrame *frame = ((wxLogWindow *)wxLog::GetActiveTarget())->GetFrame();
-   wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
+   if(frame)
+      wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
 
    return 0;
 }

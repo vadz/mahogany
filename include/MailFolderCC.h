@@ -16,12 +16,12 @@
 
 #ifndef   USE_PCH
 #   include  "kbList.h"
-#   include   "MailFolder.h"
+#   include  "MailFolder.h"
 
 // includes for c-client library
 extern "C"
 {
-#      include   <mail.h>
+#   include   <mail.h>
 }
 #endif
 
