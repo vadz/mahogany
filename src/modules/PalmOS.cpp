@@ -45,7 +45,7 @@
 #ifdef HAVE_LIBMAL
  extern "C"
  {
-#   include "mal/libmal.h"
+#   include "libmal.h"
  }
 #endif
 
