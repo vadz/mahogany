@@ -63,7 +63,9 @@
 #include <wx/treectrl.h>
 #include <wx/utils.h>
 #include <wx/help.h>
+#include "wx/tipdlg.h"
 #include <wx/fs_mem.h> // memory filesystem for startup screen
+
 #include "MFolderDialogs.h"
 
 #include "adb/AdbEntry.h"
@@ -953,6 +955,24 @@ MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
    wxYield();
 }
 
+void
+MDialog_ShowTip(const MWindow *parent)
+{
+   wxTipProvider *tipProvider =
+      wxCreateFileTipProvider("tips.txt", READ_APPCONFIG(MP_LASTTIP));
+
+   bool showOnStarup = wxShowTip((wxWindow *)parent, tipProvider);
+
+   ProfileBase *profile = mApplication->GetProfile();
+   if ( showOnStarup != READ_APPCONFIG(MP_SHOWTIPS) )
+   {
+      profile->writeEntry(MP_SHOWTIPS, showOnStarup);
+   }
+
+   profile->writeEntry(MP_LASTTIP, tipProvider->GetCurrentTip());
+
+   delete tipProvider;
+}
 
 void
 MDialog_FolderProfile(const MWindow *parent, const String& folderName)

@@ -114,7 +114,7 @@ enum ConfigFields
    ConfigField_NetworkLast = ConfigField_RshTimeout,
 #endif
    ConfigField_NetworkLast = ConfigField_OpenTimeout,
-   
+
    // compose
    ConfigField_ComposeFirst = ConfigField_NetworkLast,
    ConfigField_UseOutgoingFolder,
@@ -239,6 +239,7 @@ enum ConfigFields
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
    ConfigField_ShowLog,
+   ConfigField_ShowTips,
    ConfigField_Splash,
    ConfigField_SplashDelay,
    ConfigField_AutosaveHelp,
@@ -449,7 +450,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
-#ifdef USE_SSL   
+#ifdef USE_SSL
    { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
@@ -475,7 +476,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
 #endif
-   
+
    // compose
 #if 0
    { gettext_noop("Store outgoing messages and send only when asked to"),
@@ -564,7 +565,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1},
    { gettext_noop("Font si&ze"),                   Field_Number,  -1},
-   { gettext_noop("Show only sender's name, not &e-mail"), 
+   { gettext_noop("Show only sender's name, not &e-mail"),
                                                    Field_Bool,    -1 },
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
    { gettext_noop("&Backgroud colour"),            Field_Color,   -1},
@@ -619,6 +620,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    // other options
    { gettext_noop("Show &log window"),             Field_Bool,    -1,                    },
+   { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
@@ -684,7 +686,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 #endif
-   
+
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
                                        // messages send
@@ -794,6 +796,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // other
    CONFIG_ENTRY(MP_SHOWLOG),
+   CONFIG_ENTRY(MP_SHOWTIPS),
    CONFIG_ENTRY(MP_SHOWSPLASH),
    CONFIG_ENTRY(MP_SPLASHDELAY),
    CONFIG_NONE(),
@@ -1841,7 +1844,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
       profile->IncRef();
    else
       profile = ProfileBase::CreateProfile("");
-   
+
 
    // the page ctor will add it to the notebook
    wxOptionsPageDynamic *page = new wxOptionsPageDynamic(

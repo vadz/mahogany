@@ -340,6 +340,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // help
    { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  , FALSE },
+   { WXMENU_HELP_TIP,      gettext_noop("Show a &tip..."),    gettext_noop("Show a tip about using Mahogany")  , FALSE },
    { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , FALSE },
    { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , FALSE },
 #ifdef DEBUG

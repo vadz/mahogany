@@ -128,9 +128,9 @@ wxMFrame::AddFileMenu(void)
 {
 #ifndef wxMENU_TEAROFF
    // FIXME WXWIN-COMPATIBILITY
-   wxMenu *fileMenu = new wxMenu(); 
+   wxMenu *fileMenu = new wxMenu();
 #else
-   wxMenu *fileMenu = new wxMenu("", wxMENU_TEAROFF); 
+   wxMenu *fileMenu = new wxMenu("", wxMENU_TEAROFF);
 #endif
 
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
@@ -322,21 +322,31 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_HELP_ABOUT:
       MDialog_AboutDialog(this, false /* don't timeout */);
       break;
+
+   case WXMENU_HELP_TIP:
+      MDialog_ShowTip(this);
+      break;
+
    case WXMENU_HELP_CONTEXT:
       MDialog_Message(_("Help not implemented for current context, yet."),this,_("Sorry"));
       break;
+
    case WXMENU_HELP_CONTENTS:
       mApplication->Help(MH_CONTENTS,this);
       break;
+
    case WXMENU_HELP_RELEASE_NOTES:
       mApplication->Help(MH_RELEASE_NOTES,this);
       break;
+
    case WXMENU_HELP_FAQ:
       mApplication->Help(MH_FAQ,this);
       break;
+
    case WXMENU_HELP_SEARCH:
       mApplication->Help(MH_SEARCH,this);
       break;
+
    case WXMENU_HELP_COPYRIGHT:
       mApplication->Help(MH_COPYRIGHT,this);
       break;

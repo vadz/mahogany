@@ -601,7 +601,7 @@ wxMApp::OnInit()
 
       // restore our favourite preferred printer settings
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
-    (*m_PrintData) = * wxThePrintSetupData;
+      (*m_PrintData) = * wxThePrintSetupData;
 #endif
 
 #if wxUSE_POSTSCRIPT
@@ -639,6 +639,12 @@ wxMApp::OnInit()
 
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
+
+      // show tip dialog unless disabled
+      if ( READ_APPCONFIG(MP_SHOWTIPS) )
+      {
+         MDialog_ShowTip(GetTopWindow());
+      }
 
       return true;
    }

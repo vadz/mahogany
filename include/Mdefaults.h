@@ -135,6 +135,11 @@
 /// open ADB editor on startup?
 #define   MP_SHOWADBEDITOR    "ShowAdb"
 
+/// show tips at startup?
+#define MP_SHOWTIPS "ShowTips"
+/// the index of the last tip which was shown
+#define MP_LASTTIP "LastTip"
+
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL   "ExpandTreeControl"
 /// focus follows mouse?
@@ -604,6 +609,10 @@
 #define   MP_SHOWLOG_D  1
 /// open ADB editor on startup?
 #define   MP_SHOWADBEDITOR_D 0L
+/// show tips at startup?
+#define MP_SHOWTIPS_D 1L
+/// the index of the last tip which was shown
+#define MP_LASTTIP_D 0L
 /// help browser name
 #define   MP_HELPBROWSER_D   "netscape"
 /// is help browser of netscape type?

@@ -227,6 +227,10 @@ int MDialog_AdbLookupList(ArrayAdbElements& aEntries,
 void
 MDialog_AboutDialog( const MWindow *parent, bool bCloseOnTimeout = true);
 
+/// a tip dialog which will show some (random) tip
+void
+MDialog_ShowTip(const MWindow *parent);
+
 // the global pointer to the splash screen (NULL if there is no flash screen)
 extern class MFrame *g_pSplashScreen;
 
