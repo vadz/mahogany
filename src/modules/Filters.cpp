@@ -52,11 +52,7 @@ public:
        @param NewOnly - if true, apply it only to new messages
        @return 0 on success
    */
-   virtual int Apply(class MailFolder *folder, bool NewOnly = true) const
-      {
-         ASSERT(0);
-         return 0;
-      }
+   virtual int Apply(class MailFolder *folder, bool NewOnly = true) const;
    static FilterRule * Create(const String &filterrule,
                               MInterface *interface, MModule_Filters *mod)
       { return new FilterRuleImpl(filterrule, interface, mod); }
@@ -161,16 +157,25 @@ public:
       }
    String ToString(void) const
       {
+         MOcheck();
          if(m_Type == Type_String)
             return m_String;
          String str; str.Printf("%ld", m_Num);
          return str;
+      }
+   long ToNumber(void) const
+      {
+         MOcheck();
+         if(m_Type == Type_String)
+            return m_String.Length();
+         return GetNumber();
       }
 private:
    Type m_Type;
    // Can't use union here because m_String needs constructor.
    long   m_Num;
    String m_String;
+   MOBJECT_NAME(Value)
 };
 
 
@@ -215,6 +220,8 @@ public:
    virtual class MailFolder * GetFolder(void) = 0;
    /// Obtain the message UId to operate on:
    virtual UIdType GetMessageUId(void) = 0;
+   /// Obtain the message itself:
+   virtual class Message * GetMessage(void) = 0;
    //@}
 
    /// virtual destructor
@@ -223,6 +230,7 @@ public:
        @param input the input string holding the text to parse
    */
    static Parser * Create(const String &input, MInterface *interface);
+   MOBJECT_NAME(Parser)
 };
 
 
@@ -357,6 +365,9 @@ public:
    virtual class MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
    /// Obtain the message UId to operate on:
    virtual UIdType GetMessageUId(void) { return m_MessageUId; }
+   /// Obtain the message itself:
+   virtual class Message * GetMessage(void)
+      { return m_MailFolder->GetMessage(m_MessageUId); }
    //@}
 
 protected:
@@ -369,6 +380,7 @@ protected:
    ParserImpl(const String &input, MInterface *interface);
    ~ParserImpl();
 
+   void AddBuiltinFunctions(void);
    friend class Parser;
 private:
    String m_Input;
@@ -390,12 +402,11 @@ private:
 class Operator : public MObject
 {
 public:
-   virtual Value Evaluate(Value left, Value right) const = 0;
-   /// for logical operators, shall we continue parsing the right?
-   virtual bool TestLeft(Value left) const = 0;
+   virtual Value Evaluate(class SyntaxNode *left, class SyntaxNode * right) const = 0;
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
+   MOBJECT_NAME(Operator)
 };
 
 // ----------------------------------------------------------------------------
@@ -416,6 +427,7 @@ public:
 #endif
 private:
    Parser *m_Parser;
+   MOBJECT_NAME(SyntaxNode)
 };
 
 
@@ -460,6 +472,7 @@ private:
    SyntaxNodePtr *m_Args;
    size_t m_MaxArgs;
    size_t m_NArgs;
+   MOBJECT_NAME(ArgList)
 };
    
 
@@ -497,6 +510,7 @@ public:
 #endif    
 private:
    NodeList  m_Nodes;
+   MOBJECT_NAME(Block)
 };
 
 
@@ -513,6 +527,7 @@ public:
 #endif    
 private:
    long m_value;
+   MOBJECT_NAME(Number)
 };
 
 class StringConstant : public SyntaxNode
@@ -533,6 +548,7 @@ public:
 #endif    
 private:
    String m_String;
+   MOBJECT_NAME(StringConstant)
 };
 
 class Negation : public SyntaxNode
@@ -560,6 +576,7 @@ public:
 #endif    
 private:
    SyntaxNode *m_Sn;
+   MOBJECT_NAME(Negation)
 };
 
 /** Functioncall handling */
@@ -609,8 +626,8 @@ private:
    int             m_UseCount;
    String          m_Name;
    FunctionPointer m_FunctionPtr;
+   MOBJECT_NAME(FunctionDefinition)
 };
-
 
 KBLIST_DEFINE(FunctionList, FunctionDefinition);
 
@@ -637,6 +654,7 @@ private:
    FunctionDefinition *m_fd;
    ArgList *m_args;
    String  m_name;
+   MOBJECT_NAME(FunctionCall)
 };
 
 FunctionCall::FunctionCall(const String &name, ArgList *args,
@@ -673,8 +691,10 @@ public:
       {
          MOcheck();
          if(m_Op)
-            return m_Op->Evaluate(m_Left->Evaluate(),
-                                   m_Right->Evaluate());
+         {
+            ASSERT(m_Left); ASSERT(m_Right);
+            return m_Op->Evaluate(m_Left, m_Right);
+         }
          else
          {
             ASSERT(m_Right == NULL);
@@ -713,6 +733,7 @@ public:
 private:
    SyntaxNode *m_Left, *m_Right;
    class Operator *m_Op;
+   MOBJECT_NAME(Expression)
 };
 
 /* The following macros use Value() as an error type to indicate that
@@ -740,13 +761,11 @@ Value operator oper(const Value &left, const Value &right) \
 class Operator##name : public Operator \
 { \
 public: \
-   virtual Value Evaluate(Value left, Value right) const \
-      { MOcheck(); return left oper right; } \
-   virtual bool TestLeft(Value left) const \
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const \
       { \
-         MOcheck(); \
-         return (bool) ((left.GetType() == Type_Number) ? \
-                       left.GetNumber() : left.GetString().Length())!= 0; } \
+         MOcheck(); ASSERT(left); ASSERT(right); \
+         return left->Evaluate() oper right->Evaluate(); \
+      } \
    virtual String Debug(void) const \
       { MOcheck(); return #oper; } \
 }
@@ -756,13 +775,8 @@ public: \
 class Operator##name : public Operator \
 { \
 public: \
-   virtual Value Evaluate(Value left, Value right) const \
-      { MOcheck(); return left oper right; } \
-   virtual bool TestLeft(Value left) const \
-      { \
-         MOcheck(); \
-         return (bool) ((left.GetType() == Type_Number) ? \
-                       left.GetNumber() : left.GetString().Length())!= 0; } \
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const \
+      { MOcheck(); return left->Evaluate() oper right->Evaluate(); } \
 } 
 #endif
 
@@ -773,13 +787,46 @@ IMPLEMENT_VALUE_OP(-, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(*, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(/, left.GetString().Length(),right.GetString().Length());
 
-IMPLEMENT_OP(Or,||);
-IMPLEMENT_OP(And,&&);
 IMPLEMENT_OP(Plus,+);
 IMPLEMENT_OP(Minus,-);
 IMPLEMENT_OP(Times,*);
 IMPLEMENT_OP(Divide,/);
 
+class OperatorAnd : public Operator
+{ 
+public: 
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const 
+      { 
+         MOcheck(); ASSERT(left); ASSERT(right); 
+         Value lv = left->Evaluate();
+         if(lv.ToNumber())
+            return lv && right->Evaluate();
+         else
+            return lv;
+      } 
+#ifdef DEBUG
+   virtual String Debug(void) const 
+      { MOcheck(); return "And"; } 
+#endif
+};
+
+class OperatorOr : public Operator
+{ 
+public: 
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const 
+      { 
+         MOcheck(); ASSERT(left); ASSERT(right); 
+         Value lv = left->Evaluate();
+         if(! lv.ToNumber())
+            return lv || right->Evaluate(); 
+         else
+            return lv;
+      } 
+#ifdef DEBUG
+   virtual String Debug(void) const 
+      { MOcheck(); return "Or"; } 
+#endif
+};
 
 /* static */
 Parser *
@@ -797,6 +844,8 @@ ParserImpl::ParserImpl(const String &input, MInterface *interface)
    m_FunctionList = new FunctionList(false); // must clean up manually
    m_MailFolder = NULL;
    m_MessageUId = UID_ILLEGAL;
+
+   AddBuiltinFunctions();
 }
 
 ParserImpl::~ParserImpl()
@@ -805,11 +854,10 @@ ParserImpl::~ParserImpl()
       refcounted, so the kbList cannot clean them up properly and
       would trigger asserts if it tried. */
    FunctionList *fl = GetFunctionList();
-   for(FunctionList::iterator i = fl->begin();
-       i != fl->end();
-       i++)
+   FunctionList::iterator i = fl->begin();
+   while(i != fl->end())
    {
-      ASSERT( (*i)->DecRef() == true );
+      (*i)->DecRef();
       fl->erase(i);
    }
    delete m_FunctionList;
@@ -842,7 +890,10 @@ ParserImpl::FindFunction(const String &name)
        i != fl->end();
        i++)
       if(name == (**i).GetName())
+      {
+         (**i).IncRef();
          return *i;
+      }
    return NULL;
 }
 
@@ -1329,27 +1380,66 @@ ParserImpl::ParseTerm(void)
 
 extern "C"
 {
-   static Value echo_func(ArgList *args, Parser *p)
+   static Value func_print(ArgList *args, Parser *p)
    {
       SyntaxNode *sn;
       Value v;
       ASSERT(args);
-      String msg = "Echo_Function: ";
+      String msg;
       for(size_t i = 0; i < args->Count(); i++)
       {
          sn = args->GetArg(i);
          v= sn->Evaluate();
          msg << v.ToString();
-         if(i < args->Count()-1)
-            msg << ',';
       }
       p->Output(msg);
-      return 1;
+      return 0;
    }
-   
-   static Value func_rFive(ArgList *args, Parser *p)
-   {  return 5; }
+
+/* * * * * * * * * * * * * * *
+ *
+ * Tests for message contents
+ *
+ * * * * * * * * * * * * * */
+   static Value func_matchi(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 2)
+         return 0;
+      Value v1 = args->GetArg(0)->Evaluate();
+      Value v2 = args->GetArg(1)->Evaluate();
+      String haystack = v1.ToString();
+      String needle = v2.ToString();
+      strutil_tolower(haystack); strutil_tolower(needle);
+      return haystack.Find(needle) != -1;
+   }
+
+
+/* * * * * * * * * * * * * * *
+ *
+ * Access to message contents
+ *
+ * * * * * * * * * * * * * */
+   static Value func_subject(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String subj = msg->Subject();
+      msg->DecRef();
+      return Value(subj);
+   }
+
 };
+
+void
+ParserImpl::AddBuiltinFunctions(void)
+{
+   ASSERT(DefineFunction("print", func_print) != NULL);
+   ASSERT(DefineFunction("matchi", func_matchi) != NULL);
+   ASSERT(DefineFunction("subject", func_subject) != NULL);
+}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1359,27 +1449,68 @@ extern "C"
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
 {
+   if(! m_Program || ! m_Parser)
+      return 0;
    ASSERT(mf);
    ASSERT(uid != UID_ILLEGAL);
+   mf->IncRef();
    if(mf->Lock())
    {
       m_Parser->SetMessage(mf, uid);
       Value rc = m_Program->Evaluate();
       m_Parser->SetMessage(NULL);
+      mf->UnLock();
+      mf->DecRef();
       return (int) rc.GetNumber();
    }
    else
+   {
+      mf->DecRef();
       return 0; //FIXME: error message?
+   }
+}
+
+int
+FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
+{
+   if(! m_Program || ! m_Parser)
+      return 0;
+   int rc = -1;
+   ASSERT(mf);
+   mf->IncRef();
+   HeaderInfoList *hil = mf->GetHeaders();
+   if(hil)
+   {
+      rc = 0; // no error so far
+      for(size_t i = 0; i < hil->Count() && rc == 0; i++)
+      {
+         const HeaderInfo * hi = (*hil)[i];
+         if( ! NewOnly || // handle all or only new ones:
+             (
+                (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
+                && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
+                ) // new == recent and not seen
+            )
+         {
+            rc = Apply(mf, hi->GetUId());
+         }
+      }
+      hil->DecRef();
+   }
+   mf->DecRef();
+   return rc;
 }
 
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *interface,
-                               MModule_Filters *mod) 
+                               MModule_Filters *mod
+   ) 
 {
+
+   m_FilterModule = mod;
    m_Parser = Parser::Create(filterrule, interface);
    m_Program = m_Parser->Parse();
    ASSERT(mod);
-   m_FilterModule = mod;
    // we cannot allow the module to disappear while we exist
    m_FilterModule->IncRef();
 }
@@ -1401,34 +1532,27 @@ FilterRuleImpl::~FilterRuleImpl()
 
 /** A small test for the filter module. */
 static
-int FilterTest(MInterface *interface)
+int FilterTest(MInterface *interface, MModule_Filters *that)
 {
 
    String program = interface->GetMApplication()->
-      GetProfile()->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print(); ");
-   
+      GetProfile()->readEntry("FilterTest","matchi(subject(),\"html\")&print(\"Message: '\", subject(), \"'\");");
 
-   Parser_obj p(program, interface);
-   ASSERT(p->DefineFunction("print", echo_func) != NULL);
-   ASSERT(p->DefineFunction("Five", func_rFive) != NULL);
-   String msg;
-   if(p)
+   FilterRule * fr = that->GetFilter(program);
+
+   String folderName =
+      interface->GetMApplication()->GetProfile()->
+      readEntry(MP_NEWMAIL_FOLDER,MP_NEWMAIL_FOLDER_D);
+
+   MailFolder * mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, folderName); 
+
+   if(mf)
    {
-      SyntaxNode *sn = p->Parse();
-      if(sn)
-      {
-         String str = sn->Debug();
-         msg << str << '\n';
-         Value v = sn->Evaluate();
-         msg << '\n' << program + String(" = ")+v.ToString();
-         delete sn;
-      }
-      else
-      {
-         msg << '\n' << "Parsing " << program.c_str() << " failed.";
-      }
-      interface->Message(msg);
+      // apply this rule to all messages
+      int rc = fr->Apply(mf, false);
+      mf->DecRef();
    }
+   fr->DecRef();
    return MMODULE_ERR_NONE;
 }
 #endif
@@ -1451,7 +1575,7 @@ protected:
       {
          m_Interface = interface;
 #ifdef DEBUG
-         FilterTest(m_Interface);
+         FilterTest(m_Interface, this);
 #endif
       }
 
@@ -1469,8 +1593,7 @@ FilterRule *
 MModule_FiltersImpl::GetFilter(const String &filterrule) const
 {
    return FilterRuleImpl::Create(filterrule, m_Interface,
-                                 (MModule_FiltersImpl * /* non-const
-                                                         */)this); 
+                                 (MModule_FiltersImpl *) this); 
 }
 
 /* static */

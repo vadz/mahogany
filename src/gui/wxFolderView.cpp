@@ -84,6 +84,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
    if(! m_FolderView || ! m_FolderView->m_MessagePreview
       || event.AltDown() || event.ControlDown()
+      || ! m_FolderView->GetFolder()
       )
    {
       event.Skip();

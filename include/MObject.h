@@ -172,7 +172,7 @@ public:
 
 protected:
   //// dtor is protected because only DecRef() can delete us
-  virtual ~MObjectRC() {}
+  virtual ~MObjectRC() { MOcheck(); wxASSERT(m_nRef == 0); }
    //// return the reference count:
    size_t GetNRef(void) const { return m_nRef; }
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions

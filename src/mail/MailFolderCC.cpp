@@ -439,7 +439,10 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    if(! cclientInitialisedFlag)
       CClientInit();
    Create(typeAndFlags);
-   m_MailboxPath = path;
+   if(GetType() == MF_FILE)
+      m_MailboxPath = strutil_expandpath(path);
+   else
+         m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
 }
@@ -677,7 +680,7 @@ MailFolderCC::Open(void)
       {
          String lockfile;
          if(GetType() == MF_FILE)
-            lockfile = strutil_expandpath(m_MailboxPath);
+            lockfile = m_MailboxPath;
 #ifdef OS_UNIX
          else // INBOX
          {

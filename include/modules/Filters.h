@@ -31,6 +31,7 @@ public:
          return (MModule_Filters *)
            MModule::GetProvider(MMODULE_INTERFACE_FILTERS);
       }
+   MOBJECT_NAME(MModule_Filters)
 };
 
 /** Parsed representation of a filtering rule to be applied to a
@@ -47,6 +48,7 @@ public:
        @return 0 on success
    */
    virtual int Apply(class MailFolder *folder, bool NewOnly = true) const = 0;
+   MOBJECT_NAME(FilterRule)
 };
 
 
