@@ -58,6 +58,12 @@
 
 #include "MailFolderCmn.h"
 
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+#ifndef   MCCLIENT_H
+#include "Mcclient.h"         // for hash_table
+#endif
+#endif
+
 // ----------------------------------------------------------------------------
 // trace masks
 // ----------------------------------------------------------------------------
@@ -1031,10 +1037,1227 @@ extern "C"
       efficient!
  */
 
+
 #define MFCMN_INDENT1_MARKER   ((size_t)-1)
 #define MFCMN_INDENT2_MARKER   ((size_t)-2)
 
 KBLIST_DEFINE(SizeTList, size_t);
+
+
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+
+//---------------
+// JWZ algorithm
+//---------------
+
+/// Used for wxLogTrace calls
+#define TRACE_JWZ "jwz"
+
+/** If JWZ_NO_MISSING_INDENT is defined, then the children of a
+    missing message (dummy node) will not be indented: they would
+    appear as being part of the preceding thread.
+    */
+#define JWZ_NO_MISSING_INDENT
+
+/** If JWZ_THREADABLE_CACHE is defined, some results computed about
+    a message are saved. Saves some time but consumes a little more
+    memory.
+    */
+#define JWZ_THREADABLE_CACHE
+
+
+M_LIST(StringList, String);
+
+
+
+// --------------------------------------------------------------------
+// Threadable 
+// --------------------------------------------------------------------
+
+/** This class is used as an interface to threadable object. In our
+    case, some HeaderInfo. The result of the JWZ algorithm will be to
+    compute the index that the message will have in the display, and
+    its indentation.
+    */
+class Threadable {
+private:
+   /// The message that this instance abstracts
+   HeaderInfo *m_hi;            
+   /** Sequence number of the messages in the sorted list that is
+       the input of the algorithm.
+       */
+   size_t      m_indexInHilp;
+   /// Resulting sequence number of the messages 
+   size_t      m_threadedIndex;
+   /// Resulting indentation of the message
+   size_t      m_indent;
+   /// Is this a dummy message
+   bool        m_dummy;
+   /// Next brother of the message
+   Threadable *m_next;
+   /// First child of the message
+   Threadable *m_child;
+#if defined(DEBUG)
+   String      m_subject;
+   String      m_refs;
+   String      m_id;
+#endif
+#if defined(JWZ_THREADABLE_CACHE)
+   String     *m_simplifiedSubject;
+   int         m_isReply;
+#endif
+public:
+   Threadable(HeaderInfo *hi, size_t index = 0, bool dummy = false);
+   ~Threadable();
+   
+   void destroy();
+   
+   Threadable *makeDummy() {
+      return new Threadable(m_hi, m_indexInHilp, true);
+   }
+   int isDummy() const { return m_dummy; }
+   size_t getIndex() { return m_indexInHilp; }
+   size_t getThreadedIndex() { return m_threadedIndex; }
+   size_t getIndent() { return m_indent; }
+   void setThreadedIndex(size_t i) { m_threadedIndex = i; }
+   void setIndent(size_t i) { m_indent = i; }
+   
+   Threadable *getNext() const { return m_next; }
+   Threadable *getChild() const { return m_child; }
+   void setNext(Threadable* x) { m_next = x; }
+   void setChild(Threadable* x) { m_child = x; }
+   
+   String messageThreadID() const;
+   kbStringList *messageThreadReferences() const;
+   String getSimplifiedSubject() const;
+   bool subjectIsReply() const;
+   
+};
+
+inline
+Threadable::Threadable(HeaderInfo *hi, size_t index, bool dummy)
+   : m_hi(hi)
+   , m_indexInHilp(index)
+   , m_threadedIndex(0)
+   , m_indent(0)
+   , m_dummy(dummy)
+   , m_next(0)
+   , m_child(0)
+#if defined(JWZ_THREADABLE_CACHE)
+   , m_simplifiedSubject(0)
+   , m_isReply(-1)
+#endif
+{
+#if defined(DEBUG)
+   m_subject = hi->GetSubject();
+   m_refs = hi->GetReferences();
+   m_id = hi->GetId();
+#endif
+}
+
+inline
+Threadable::~Threadable()
+{
+#if defined(JWZ_THREADABLE_CACHE)
+   delete m_simplifiedSubject;
+#endif
+}
+
+
+void Threadable::destroy() {
+   static size_t depth = 0;
+   CHECK_RET(depth < 1000, "Deep recursion in Threadable::destroy()");
+   if (m_child != 0)
+   {
+      depth++;
+      m_child->destroy();
+      depth--;
+      CHECK_RET(depth >= 0, "Negative recursion depth in Threadable::destroy()");
+   }
+   delete m_child;
+   m_child = 0;
+   if (m_next != 0)
+      m_next->destroy();
+   delete m_next;
+   m_next = 0;
+}
+
+String Threadable::messageThreadID() const 
+{
+   String id = m_hi->GetId();
+   if (!id.empty())
+      return id;
+   else
+      return String("<emptyId:") << (int)this << ">";
+}
+
+
+// --------------------------------------------------------------------
+// Computing the list of references to use
+// --------------------------------------------------------------------
+
+kbStringList *Threadable::messageThreadReferences() const 
+{
+   // To build a seemingly correct list of references would be
+   // quite easy if the References header could be trusted blindly.
+   // But this is real life...
+   //
+   // So we add together the References and In-Reply-To headers, and
+   // then remove duplicate references (keping the last of the two) so that:
+   //
+   //  - If one header is empty, the other is used.
+   //
+   //  - We circumvent Eudora's behaviour, where the content of In-Reply-To 
+   //    is not repeated in References.
+   //
+   //  - If the content of References is somewhat screwed-up, the last
+   //    reference in the list will be the one given in In-Reply-To, which,
+   //    when present, seems to be more reliable (no ordering problem).
+   //
+   // XNOFIXME:
+   // One still standing problem is if there are conflicting References 
+   // headers between messages. In this case, the winner is he first one
+   // seen by the algorithm. The problem is that the input order of the
+   // messages in the algorithm depends on the sorting options chosen by
+   // the user. Thus, the output of the algorithm depends on external 
+   // factors...
+   //
+   // As In-Reply-To headers are more reliable, but carry less information 
+   // (they do not allow to reconstruct threads when some messages are 
+   // missing), one possible way would be to make two passes: one with 
+   // only In-Reply-To, and then one with References.
+   
+   kbStringList *tmp = new kbStringList;
+   String refs = m_hi->GetReferences() + m_hi->GetInReplyTo();
+   if (refs.empty())
+      return tmp;
+   
+   const char *s = refs.c_str();
+   
+   enum State {
+      notInRef,
+      openingSeen,
+      atSeen
+   } state = notInRef;
+   
+   size_t start = 0;
+   size_t nbChar = refs.Len();
+   size_t i = 0;
+   while (i < nbChar)
+   {
+      char current = s[i];
+      switch (state)
+      {
+      case notInRef:
+         if (current == '<')
+         {
+            start = i;
+            state = openingSeen;
+         }
+         break;
+      case openingSeen:
+         if (current == '@')
+            state = atSeen;
+         break;
+      case atSeen:
+         if (current == '>')
+         {
+            // We found a reference
+            String *ref = new String(refs.Mid(start, i+1-start));
+            // In case of duplicated reference we keep the last one:
+            // It is important that In-Reply-To is the last reference
+            // in the list.
+            kbStringList::iterator i;
+            for (i = tmp->begin(); i != tmp->end(); i++)
+            {
+               String *previous = *i;
+               if (*previous == *ref)
+               {
+                  tmp->erase(i);
+                  break;
+               }
+            }
+            tmp->push_back(ref);
+            state = notInRef;
+         }
+      }
+      i++;
+   }
+   return tmp;
+}
+
+
+String Threadable::getSimplifiedSubject() const
+{
+   // XNOFIXME : strutil_removeReplyPrefix is only able to remove
+   // *one* occurence of reply prefix!
+#if defined(JWZ_THREADABLE_CACHE)
+   Threadable *that = (Threadable *)this;    // Remove constness
+   if (that->m_simplifiedSubject != 0)
+      return *that->m_simplifiedSubject;
+   that->m_simplifiedSubject = new String;
+   *that->m_simplifiedSubject = strutil_removeReplyPrefix(m_hi->GetSubject());
+   return *that->m_simplifiedSubject;
+#else
+   return strutil_removeReplyPrefix(m_hi->GetSubject());
+#endif
+}
+
+
+bool Threadable::subjectIsReply() const
+{
+#if defined(JWZ_THREADABLE_CACHE)
+   Threadable *that = (Threadable *)this;    // Remove constness
+   if (that->m_isReply == -1)
+   {
+      if (that->getSimplifiedSubject().Len() != m_hi->GetSubject().Len())
+         that->m_isReply = 1;
+      else
+         that->m_isReply = 0;
+   }
+   return (that->m_isReply == 1);
+#else
+   return (getSimplifiedSubject().Len() != m_hi->GetSubject().Len());
+#endif
+}
+
+
+
+// --------------------------------------------------------------------
+// ThreadContainer
+// --------------------------------------------------------------------
+
+#if defined(DEBUG)
+// Count of the number of instances alive
+// Should be 0 at the end of the threading
+static int NumberOfThreadContainers = 0;
+#endif
+
+class ThreadContainer {
+private:
+   Threadable      *m_threadable;
+   ThreadContainer *m_parent;
+   ThreadContainer *m_child;
+   ThreadContainer *m_next;
+   
+public:
+   ThreadContainer(Threadable *th = 0);
+   ~ThreadContainer();
+   
+   Threadable *getThreadable() const { return m_threadable; }
+   ThreadContainer *getParent() const { return m_parent; }
+   ThreadContainer *getChild() const { return m_child; }
+   ThreadContainer *getNext() const { return m_next; }
+   void setThreadable(Threadable *x) { m_threadable = x; }
+   void setParent(ThreadContainer *x) { m_parent = x; }
+   void setChild(ThreadContainer *x) { m_child = x; }
+   void setNext(ThreadContainer *x) { m_next = x; }
+   
+   /** Returns the index to be used to compare instances
+       of ThreadContainer to determine their ordering
+       */
+   size_t getIndex() const;
+   /** Adds a ThreadContainer to the children of the caller,
+       taking their index into account.
+       */
+   void addAsChild(ThreadContainer *c);
+   
+   /** Returns true if target is a children (maybe deep in the
+       tree) of the caller.
+       */
+   bool findChild(ThreadContainer *target, bool withNexts = false) const;
+   
+   /// Recursively reverses the order of the the caller's children
+   void reverseChildren();
+   
+   /** Computes and saves (in the Threadable they store) the indentation
+       and the numbering of the messages
+       */
+   void flush(size_t &threadedIndex, size_t indent);
+   
+   /// Recursively destroys a tree
+   void destroy();
+};
+
+
+inline
+ThreadContainer::ThreadContainer(Threadable *th)
+   : m_threadable(th)
+   , m_parent(0)
+   , m_child(0)
+   , m_next(0)
+{
+#if defined(DEBUG)
+   NumberOfThreadContainers++;
+#endif
+}
+
+
+inline
+ThreadContainer::~ThreadContainer() 
+{
+#if defined(DEBUG)
+   NumberOfThreadContainers--;
+#endif
+}
+
+
+size_t ThreadContainer::getIndex() const 
+{ 
+   static size_t depth = 0;
+   VERIFY(depth < 1000, "Deep recursion in ThreadContainer::getSmallestIndex()");
+   Threadable *th = getThreadable();
+   if (th != 0)
+      return th->getIndex();
+   else
+   {
+      if (getChild() != 0)
+      {
+         depth++;
+         size_t index = getChild()->getIndex();
+         depth--;
+         VERIFY(depth >= 0, "Negative recursion depth in ThreadContainer::getSmallestIndex()");
+         return index;
+      }
+      else
+         return 1000000000;
+   }
+}
+
+
+void ThreadContainer::addAsChild(ThreadContainer *c)
+{
+   // Takes into account the indices so that the new kid
+   // is inserted in the correct position
+   ASSERT(c->getThreadable());
+   size_t cIndex = c->getThreadable()->getIndex();
+   ThreadContainer *prev = 0;
+   ThreadContainer *current = getChild();
+   while (current != 0)
+   {
+      if (current->getIndex() > cIndex)
+         break;
+      prev = current;
+      current = current->getNext();
+   }
+   c->setParent(this);
+   c->setNext(current);
+   if (prev != 0)
+      prev->setNext(c);
+   else
+      setChild(c);
+}
+
+
+bool ThreadContainer::findChild(ThreadContainer *target, bool withNexts) const
+{
+   static size_t depth = 0;
+   VERIFY(depth < 1000, "Deep recursion in ThreadContainer::findChild()");
+   if (m_child == target)
+      return true;
+   if (withNexts && m_next == target)
+      return true;
+   if (m_child != 0)
+   {
+      depth++;
+      bool found = m_child->findChild(target, true);
+      depth--;
+      VERIFY(depth >= 0, "Negative recursion depth in ThreadContainer::findChild()");
+      if (found)
+         return true;
+   }
+   if (withNexts && m_next != 0)
+   {
+      bool found = m_next->findChild(target, true);
+      if (found)
+         return true;
+   }
+   return false;
+}
+
+
+void ThreadContainer::reverseChildren()
+{
+   static size_t depth = 0;
+   VERIFY(depth < 1000, "Deep recursion in ThreadContainer::reverseChildren()");
+   
+   if (m_child != 0)
+   {
+      ThreadContainer *kid, *prev, *rest;
+      for (prev = 0, kid = m_child, rest = kid->getNext();
+      kid != 0;
+      prev = kid, kid = rest, rest = (rest == 0 ? 0 : rest->getNext()))
+         kid->setNext(prev);
+      m_child = prev;
+      
+      depth++;
+      for (kid = m_child; kid != 0; kid = kid->getNext())
+         kid->reverseChildren();
+      depth--;
+      VERIFY(depth >= 0, "Negative recursion depth in ThreadContainer::reverseChildren()");
+   }
+}
+
+
+void ThreadContainer::flush(size_t &threadedIndex, size_t indent)
+{
+   static size_t depth = 0;
+   VERIFY(depth < 1000, "Deep recursion in ThreadContainer::flush()");
+   ASSERT(m_threadable != 0); // Only the root node may not have a threadable
+   m_threadable->setChild(m_child == 0 ? 0 : m_child->getThreadable());
+   if (!m_threadable->isDummy())
+   {
+      m_threadable->setThreadedIndex(threadedIndex++);
+      m_threadable->setIndent(indent);
+   }
+   if (m_child != 0)
+   {
+      depth++;
+#if !defined(JWZ_NO_MISSING_INDENT)
+      m_child->flush(threadedIndex, indent+1);
+#else
+      m_child->flush(threadedIndex, indent+(m_threadable->isDummy() ? 0 : 1));
+#endif
+      depth--;
+      VERIFY(depth >= 0, "Negative recursion depth in ThreadContainer::flush()");
+   }
+   if (m_threadable != 0)
+      m_threadable->setNext(m_next == 0 ? 0 : m_next->getThreadable());
+   if (m_next != 0)
+      m_next->flush(threadedIndex, indent);
+}
+
+
+void ThreadContainer::destroy()
+{
+   static size_t depth = 0;
+   VERIFY(depth < 1000, "Deep recursion in ThreadContainer::destroy()");
+   if (m_child != 0)
+   {
+      depth++;
+      m_child->destroy();
+      depth--;
+      VERIFY(depth >= 0, "Negative recursion depth in ThreadContainer::destroy()");
+   }
+   delete m_child;
+   m_child = 0;
+   if (m_next != 0)
+      m_next->destroy();
+   delete m_next;
+   m_next = 0;
+}
+
+
+
+
+// --------------------------------------------------------------------
+// Threader : a JWZ threader
+// --------------------------------------------------------------------
+
+class Threader {
+private:
+   ThreadContainer *m_root;
+   HASHTAB         *m_idTable;
+   int              m_bogusIdCount;
+public:
+   Threader()
+      : m_root(0)
+      , m_idTable(0)
+      , m_bogusIdCount(0)
+   {}
+   
+   /** Does all the job. Input is a list of messages, output
+       is a dummy root message, with all the tree under.
+       If shouldGatherSubjects is true, all messages that
+        have the same non-empty subject will be considered
+       to be part of the same thread.
+       */
+   Threadable *thread(Threadable *threadableRoot,
+                      bool shouldGatherSubjects = true);
+   
+private:
+   void buildContainer(Threadable *threadable);
+   void findRootSet();
+   void pruneEmptyContainers(ThreadContainer *parent);
+   void gatherSubjects();
+   
+   // An API on top of the hash-table
+   HASHTAB *create(size_t) const;
+   ThreadContainer* lookUp(HASHTAB*, const String&) const;
+   void add(HASHTAB*, const String&, ThreadContainer*) const;
+   void destroy(HASHTAB **) const;
+};
+
+
+
+
+
+static bool SeemsPrime(size_t n)
+{
+   if (n % 2 == 0)
+      return false;
+   if (n % 3 == 0)
+      return false;
+   if (n % 5 == 0)
+      return false;
+   if (n % 7 == 0)
+      return false;
+   if (n % 11 == 0)
+      return false;
+   if (n % 13 == 0)
+      return false;
+   if (n % 17 == 0)
+      return false;
+   if (n % 19 == 0)
+      return false;
+   return true;
+}
+
+
+static size_t FindPrime(size_t n)
+{
+   if (n % 2 == 0)
+      n++;
+   while (!SeemsPrime(n))
+      n += 2;
+   return n;
+}
+
+
+HASHTAB *Threader::create(size_t size) const
+{
+   // Find a correct size for an hash-table
+   size_t aPrime = FindPrime(size);
+   // Create it
+   return hash_create(aPrime);
+}
+
+
+void Threader::add(HASHTAB *hTable, const String &str, ThreadContainer *container) const
+{
+   // As I do not want to ensure that the String instance given
+   // as key will last at least as long as the table, I copy its
+   // value.
+   char *s = new char[str.Len()+1];
+   strcpy(s, str.c_str());
+   hash_add(hTable, s, container, 0);
+}
+
+
+ThreadContainer *Threader::lookUp(HASHTAB *hTable, const String &s) const
+{
+   void** data = hash_lookup(hTable, (char*) s.c_str());
+   if (data != 0)
+      return (ThreadContainer*)data[0];
+   else 
+      return 0;
+}
+
+
+void Threader::destroy(HASHTAB ** hTable) const
+{
+   // Delete all the strings that have been used as key
+   HASHENT *ent;
+   size_t i;
+   for (i = 0; i < (*hTable)->size; i++)
+      for (ent = (*hTable)->table[i]; ent != 0; ent = ent->next)
+         delete [] ent->name;
+      // and destroy the hash-table
+      hash_destroy(hTable);
+}
+
+
+
+Threadable *Threader::thread(Threadable *threadableRoot,
+                             bool shouldGatherSubjects)
+{
+   if (threadableRoot == 0)
+      return 0;
+   
+#if defined(DEBUG)
+   // In case we leaked in a previous run of the algo, reset the count
+   NumberOfThreadContainers = 0;
+#endif
+   
+   // Count the number of messages to thread, and verify
+   // the input list
+   Threadable *th = threadableRoot;
+   size_t thCount = 0;
+   for (; th != 0; th = th->getNext())
+   {
+      VERIFY(th->getChild() == 0, "Bad input list in Threader::thread()");
+      thCount++;
+   }
+   // Make an hash-table big enough to hold all the instances of
+   // ThreadContainer that will be created during the run.
+   // Note that some dummy containers will be created also, so
+   // don't be shy...
+   m_idTable = create(thCount*2);
+   
+   // Scan the list, and build the corresponding ThreadContainers
+   // This step will:
+   //  - Build a ThreadContainer for the Threadable given as argument
+   //  - Scan the references of the message, and build on the fly some
+   //    ThreadContainer for them, if the corresponding messages have not
+   //    already been processed
+   //  - Store all those containers in the hash-table
+   //  - Build their parent/child relations
+   for (th = threadableRoot; th != 0; th = th->getNext())
+   {
+      VERIFY(th->getIndex() >= 0, "Negative index in Threader::thread()");
+      VERIFY(th->getIndex() < thCount, "Too big in Threader::thread()");
+      // As things are now, dummy messages won't get past the algorithm
+      // and won't be displayed. Thus we should not get them back when
+      // re-threading this folder.
+      // When this changes, we will have to take care to skip them.
+      VERIFY(!th->isDummy(), "Dummy message in Threader::thread()");
+      buildContainer(th);
+   }
+   
+   // Create a dummy root ThreadContainer (stored in m_root) and
+   // scan the content of the hash-table to make all parent-less 
+   // containers (i.e. first message in a thread) some children of
+   // this root.
+   findRootSet();
+   
+   // We are finished with this hash-table
+   destroy(&m_idTable);
+   
+   // Remove all the useless containers (e.g. those that are not
+   // in the root-set, have no message, but have a child)
+   pruneEmptyContainers(m_root);
+   
+   // If asked to, gather all the messages that have the same
+   // non-empty subjet in the same thread.
+   if (shouldGatherSubjects)
+      gatherSubjects();
+   
+   ASSERT(m_root->getNext() == 0); // root node has a next ?!
+   
+   // Build dummy messages for the nodes that have no message.
+   // Those can only appear in the root set.
+   ThreadContainer *thr;
+   for (thr = m_root->getChild(); thr != 0; thr = thr->getNext())
+      if (thr->getThreadable() == 0)
+         thr->setThreadable(thr->getChild()->getThreadable()->makeDummy());
+      
+      // Prepare the result to be returned: the root of the
+      // *Threadable* tree that we will build by flushing the
+      // ThreadContainer tree structure.
+      Threadable *result = (m_root->getChild() == 0 
+         ? 0 
+         : m_root->getChild()->getThreadable());
+      
+      // Compute the index of each message (the line it will be
+      // displayed to when threaded) and its indentation.
+      size_t threadedIndex = 0;
+      if (m_root->getChild() != 0)
+         m_root->getChild()->flush(threadedIndex, 0);
+      
+      // Destroy the ThreadContainer structure.
+      m_root->destroy();
+      delete m_root;
+      ASSERT(NumberOfThreadContainers == 0); // Some ThreadContainers leak
+      
+      return result;
+}
+
+
+
+void Threader::buildContainer(Threadable *th)
+{
+   String id = th->messageThreadID();
+   ASSERT(!id.IsEmpty());
+   ThreadContainer *container = lookUp(m_idTable, id);
+   
+   if (container != 0)
+   {
+      if (container->getThreadable() != 0)
+      {
+         id = String("<bogusId:") << m_bogusIdCount++ << ">";
+         container = 0;
+      } else {
+         container->setThreadable(th);
+      }
+   }
+   
+   if (container == 0)
+   {
+      container = new ThreadContainer(th);
+      add(m_idTable, id, container);
+   }
+   
+   ThreadContainer *parentRefCont = 0;
+   kbStringList *refs = th->messageThreadReferences();
+   kbStringList::iterator i;
+   for (i = refs->begin(); i != refs->end(); i++)
+   {
+      String *ref = *i;
+      ThreadContainer *refCont = lookUp(m_idTable, *ref);
+      if (refCont == 0)
+      {
+         refCont = new ThreadContainer();
+         add(m_idTable, *ref, refCont);
+      }
+      
+      if ((parentRefCont != 0) &&
+          (refCont->getParent() == 0) &&
+          (parentRefCont != refCont) &&
+          !parentRefCont->findChild(refCont))
+      {
+         if (!refCont->findChild(parentRefCont))
+         {
+            refCont->setParent(parentRefCont);
+            refCont->setNext(parentRefCont->getChild());
+            parentRefCont->setChild(refCont);
+         } else
+         {
+            // refCont should be a child of parentRefCont (because
+            // refCont is seens in the references after parentRefCont
+            // but refCont is the parent of parentRefCont.
+            // This must be because some References fields contradict
+            // each other about the order. Let's keep the first
+            // encountered.
+            int i = 0;
+         }
+      }
+      parentRefCont = refCont;
+   }
+   if ((parentRefCont != 0) &&
+       ((parentRefCont == container) ||
+        container->findChild(parentRefCont)))
+      parentRefCont = 0;
+   
+   if (container->getParent() != 0) {
+      ThreadContainer *rest, *prev;
+      for (prev = 0, rest = container->getParent()->getChild();
+           rest != 0;
+           prev = rest, rest = rest->getNext())
+         if (rest == container)
+            break;
+         ASSERT(rest != 0); // Did not find a container in parent
+         if (prev == 0)
+            container->getParent()->setChild(container->getNext());
+         else
+            prev->setNext(container->getNext());
+         container->setNext(0);
+         container->setParent(0);
+   }
+   
+   if (parentRefCont != 0)
+   {
+      ASSERT(!container->findChild(parentRefCont));
+      container->setParent(parentRefCont);
+      container->setNext(parentRefCont->getChild());
+      parentRefCont->setChild(container);
+   }
+   delete refs;
+   //wxLogTrace(TRACE_JWZ, "Leaving Threader::buildContainer(Threadable 0x%lx)", th);
+}
+
+
+void Threader::findRootSet()
+{
+   wxLogTrace(TRACE_JWZ, "Entering Threader::findRootSet()");
+   m_root = new ThreadContainer();
+   HASHENT *ent;
+   size_t i;
+   for (i = 0; i < m_idTable->size; i++)
+      for (ent = m_idTable->table[i]; ent != 0; ent = ent->next) {
+         ThreadContainer *container = (ThreadContainer*)ent->data[0];
+         if (container->getParent() == 0)
+         {
+            // This one will be in the root set
+            ASSERT(container->getNext() == 0);
+            // Find the correct position to insert it, so that the
+            // order given to us is respected
+            ThreadContainer *c = m_root->getChild();
+            if (c == 0)
+            {
+               // This is the first one found
+               container->setNext(m_root->getChild());
+               m_root->setChild(container);
+            } else {
+               size_t index = container->getIndex();
+               ThreadContainer *prev = 0;
+               while ((c != 0) &&
+                  (c->getIndex() < index))
+               {
+                  prev = c;
+                  c = c->getNext();
+               }
+               ASSERT(container->getNext() == 0);
+               container->setNext(c);
+               if (prev == 0)
+               {
+                  ASSERT(m_root->getChild() == c);
+                  m_root->setChild(container);
+               } else 
+               {
+                  ASSERT(prev->getNext() == c);
+                  prev->setNext(container);
+               }
+            }
+         }
+      }
+}
+
+
+void Threader::pruneEmptyContainers(ThreadContainer *parent)
+{
+   ThreadContainer *c, *prev, *next;
+   for (prev = 0, c = parent->getChild(), next = c->getNext();
+   c != 0;
+   prev = c, c = next, next = (c == 0 ? 0 : c->getNext()))
+   {
+      if ((c->getThreadable() == 0) &&
+          (c->getChild() == 0))
+      {
+         if (prev == 0)
+            parent->setChild(c->getNext());
+         else
+            prev->setNext(c->getNext());
+         delete c;
+         c = prev;
+         
+      } else if ((c->getThreadable() == 0) &&
+                 (c->getChild() != 0) &&
+                 ((c->getParent() != 0) ||
+                  (c->getChild()->getNext() == 0)))
+      {
+         ThreadContainer *kids = c->getChild();
+         if (prev == 0)
+            parent->setChild(kids);
+         else
+            prev->setNext(kids);
+         
+         ThreadContainer *tail;
+         for (tail = kids; tail->getNext() != 0; tail = tail->getNext())
+            tail->setParent(c->getParent());
+         
+         tail->setParent(c->getParent());
+         tail->setNext(c->getNext());
+         
+         next = kids;
+         
+         delete c;
+         c = prev;
+         
+      } else if (c->getChild() != 0)
+         
+         pruneEmptyContainers(c);
+   }
+}
+
+
+// If any two members of the root set have the same subject, merge them.
+// This is so that messages which don't have Reference headers at all
+// still get threaded (to the extent possible, at least.)
+//
+
+// FIXME : as we only consider subjects in the root-set, we miss the case
+// where the subject is changed in the same thread, and some messages with
+// the new subject do not have References.
+
+// FIXME : it seems Eudora Pro 5.1 is 'able to' send messages with the
+// following behaviour : the In-Reply-To field of the original message
+// ends in the References, and the In-Reply-To of the answer is the id
+// of the original (see the mail from Luigi Ballabio in the Doxygen 
+// mailing list). Here, the original had changed the subject, but had
+// a References field.
+
+void Threader::gatherSubjects()
+{
+   size_t count = 0;
+   ThreadContainer *c = m_root->getChild();
+   for (; c != 0; c = c->getNext())
+      count++;
+   
+   // Make the hash-table large enough to not need to be rehashed
+   HASHTAB *subjectTable = create(count*2);
+   
+   count = 0;
+   for (c = m_root->getChild(); c != 0; c = c->getNext())
+   {
+      Threadable *cTh = c->getThreadable();
+      Threadable *th = cTh;
+      
+      // If there is no threadable, this is a dummy node in the root set.
+      // Only root set members may be dummies, and they always have at least
+      // two kids. Take the first kid as representative of the subject.
+      if (th == 0)
+         th = c->getChild()->getThreadable();
+      ASSERT(th != 0);
+      
+      String subject = th->getSimplifiedSubject();
+      if (subject.empty())
+         continue;
+      
+      ThreadContainer *old = lookUp(subjectTable, subject);
+      
+      // Add this container to the table if:
+      //  - There is no container in the table with this subject, or
+      //  - This one is a dummy container and the old one is not: the dummy
+      //    one is more interesting as a root, so put it in the table instead
+      //  - The container in the table has a "Re:" version of this subject,
+      //    and this container has a non-"Re:" version of this subject.
+      //    The non-"Re:" version is the more interesting of the two.
+      //
+      if (old == 0 ||
+          (cTh == 0 && old->getThreadable() != 0) ||
+          (old->getThreadable() != 0 &&  old->getThreadable()->subjectIsReply() &&
+           cTh != 0 && !cTh->subjectIsReply()))
+      {
+         // The hash-table we use does not offer to replace (nor remove)
+         // an entry. But adding a new entry with the same key will 'hide'
+         // the old one. This is just not as efficient if there are collisions
+         // but we do not care for now.
+         add(subjectTable, subject, c);
+         count++;
+      }
+   }
+   
+   if (count == 0)            // If the table is empty, we're done.
+   {
+      destroy(&subjectTable);
+      return;
+   }
+   
+   // The sujectTable is now populated with one entry for each subject which
+   // occurs in the root set. Now iterate over the root set, and gather
+   // together the difference.
+   //
+   ThreadContainer *prev, *rest;
+   for (prev = 0, c = m_root->getChild(), rest = c->getNext();
+        c != 0;
+        prev = c, c = rest, rest = (rest == 0 ? 0 : rest->getNext()))
+   {
+      Threadable *th = c->getThreadable();
+      if (th == 0)   // might be a dummy -- see above
+         th = c->getChild()->getThreadable();
+      
+      String subject = th->getSimplifiedSubject();
+      
+      // Don't thread together all subjectless messages; let them dangle.
+      if (subject.empty())
+         continue;
+      
+      ThreadContainer *old = lookUp(subjectTable, subject);
+      if (old == c)    // oops, that's us
+         continue;
+      
+      // Ok, so now we have found another container in the root set with 
+      // the same subject. There are a few possibilities:
+      //
+      // - If both are dummies, append one's children to the other, and remove
+      //   the now-empty container.
+      //
+      // - If one container is a dummy and the other is not, make the non-dummy
+      //   one be a child of the dummy, and a sibling of the other "real"
+      //   messages with the same subject (the dummy's children.)
+      //
+      // - If that container is a non-dummy, and that message's subject does
+      //   not begin with "Re:", but *this* message's subject does, then make
+      //   this be a child of the other.
+      //
+      // - If that container is a non-dummy, and that message's subject begins
+      //   with "Re:", but *this* message's subject does *not*, then make that
+      //   be a child of this one -- they were misordered. (This happens
+      //   somewhat implicitely, since if there are two messages, one with "Re:"
+      //   and one without, the one without will be in the hash-table,
+      //   regardless of the order in which they were seen.)
+      //
+      // - Otherwise, make a new dummy container and make both messages be a
+      //   child of it.  This catches the both-are-replies and neither-are-
+      //   replies cases, and makes them be siblings instead of asserting a
+      //   hierarchical relationship which might not be true.
+      //
+      //   (People who reply to messages without using "Re:" and without using
+      //   a References line will break this slightly.  Those people suck.)
+      //
+      // (It has occurred to me that taking the date or message number into
+      // account would be one way of resolving some of the ambiguous cases,
+      // but that's not altogether straightforward either.)
+      
+      
+      // Remove the "second" message from the root set.
+      if (prev == 0)
+         m_root->setChild(c->getNext());
+      else
+         prev->setNext(c->getNext());
+      c->setNext(0);
+      
+      if (old->getThreadable() == 0 && c->getThreadable() == 0)
+      {
+         // They're both dummies; merge them.
+         ThreadContainer *tail;
+         for (tail = old->getChild();
+              tail != 0 && tail->getNext() != 0;
+              tail = tail->getNext())
+         {}
+         tail->setNext(c->getChild());
+         for (tail = c->getChild(); tail != 0; tail = tail->getNext())
+            tail->setParent(old);
+         c->setChild(0);
+      }
+      else if (old->getThreadable() == 0 ||               // old is empty, or
+               (c->getThreadable() != 0 &&
+                c->getThreadable()->subjectIsReply() &&   // c has "Re:"
+                !old->getThreadable()->subjectIsReply())) // and old does not
+      {
+         // Make this message be a child of the other.
+         old->addAsChild(c);
+      }
+      else
+      {
+         // Make the old and new message be children of a new dummy container.
+         // We do this by creating a new container object for old->msg and
+         // transforming the old container into a dummy (by merely emptying it
+         // so that the hash-table still points to the one that is at depth 0
+         // instead of depth 1.
+         
+         ThreadContainer *newC = new ThreadContainer(old->getThreadable());
+         newC->setChild(old->getChild());
+         ThreadContainer *tail = newC->getChild();
+         for (; tail != 0; tail = tail->getNext())
+            tail->setParent(newC);
+         
+         old->setThreadable(0);
+         old->setChild(0);
+         c->setParent(old);
+         newC->setParent(old);
+         
+         // Determine the one, between c and newC, that must be displayed
+         // first, by considering their index. Reorder them so that c is the one
+         // with smallest index (to be displayed first)
+         if (c->getThreadable()->getIndex() >
+            newC->getThreadable()->getIndex())
+         {
+            ThreadContainer *tmp = c;
+            c = newC;
+            newC = tmp;
+         }
+         
+         // Make old point to its kids
+         old->setChild(c);
+         c->setNext(newC);
+      }
+      
+      // We've done a merge, so keep the same 'prev' next time around.
+      c = prev;
+  }
+  
+  destroy(&subjectTable);
+}
+
+
+
+// Buld the input struture for the threader: a list
+// of all the messages to thread.
+static Threadable *BuildThreadableList(HeaderInfoList *hilp)
+{
+   wxLogTrace(TRACE_JWZ, "Entering BuildThreadableList");
+   ASSERT(hilp);
+   HeaderInfoList_obj hil(hilp);
+   size_t count = hil->Count();
+   size_t i;
+   Threadable *root = 0;
+   for (i = 0; i < count; ++i) {
+      HeaderInfo *hi = hil[i];
+      Threadable *item = new Threadable(hi, i);
+      item->setNext(root);
+      root = item;
+   }
+   wxLogTrace(TRACE_JWZ, "Leaving BuildThreadableList");
+   return root;
+}
+
+
+// Scan the Threadable tree and fill the arrays needed to
+// correctly display the threads
+//
+static void FlushThreadable(Threadable *t, 
+                            size_t indices[],
+                            size_t indents[]
+#if defined(DEBUG)
+                            , bool seen[]
+#endif
+                            ) 
+{
+   if (!t->isDummy()) 
+   {
+      size_t threadedIndex = t->getThreadedIndex();
+      size_t index = t->getIndex();
+      indices[threadedIndex] = index;
+      indents[threadedIndex] = t->getIndent();
+#if defined(DEBUG)
+      seen[index] = true;
+#endif
+   }
+   if (t->getChild())
+#if defined(DEBUG)
+      FlushThreadable(t->getChild(), indices, indents, seen);
+#else
+   FlushThreadable(t->getChild(), indices, indents);
+#endif
+   if (t->getNext())
+#if defined(DEBUG)
+      FlushThreadable(t->getNext(), indices, indents, seen);
+#else
+   FlushThreadable(t->getNext(), indices, indents);
+#endif
+}
+
+
+static void ComputeThreadedIndicesWithJWZ(HeaderInfoList *hilp, 
+                                          size_t indices[],
+                                          size_t indents[]) 
+{
+   wxLogTrace(TRACE_JWZ, "Entering BuildDependantsWithJWZ");
+   Threadable *threadableRoot = BuildThreadableList(hilp);
+#if defined(DEBUG)
+   size_t count = 0;
+   Threadable *th = threadableRoot;
+   for (; th != 0; th = th->getNext())
+      count++;
+#endif
+   Threader *threader = new Threader;
+   
+   // FIXME : get the option from somewhere...
+   bool shouldGatherSubjects = true;
+   threadableRoot = threader->thread(threadableRoot, shouldGatherSubjects);
+   
+   if (threadableRoot != 0)
+   {
+#if defined(DEBUG)
+      bool *seen = new bool[count];
+      for (size_t i = 0; i < count; ++i)
+         seen[i] = false;
+      FlushThreadable(threadableRoot, indices, indents, seen);
+      for (i = 0; i < count; ++i)
+         ASSERT(seen[i]);
+      for (i = 0; i < count; ++i)
+         if (indices[i] > count)
+         {
+            indices[i] = 0;
+            indents[i] = 0;
+         }
+         delete [] seen;
+         
+#else
+         FlushThreadable(threadableRoot, indices, indents);
+#endif
+         threadableRoot->destroy();
+   }
+   delete threadableRoot;
+   delete threader;
+   wxLogTrace(TRACE_JWZ, "Leaving BuildDependantsWithJWZ");
+}
+
+#endif //EXPERIMENTAL_JWZ_THREADING
+
+
+
 
 static void AddDependents(size_t &idx,
                           int level,
@@ -1094,6 +2317,12 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    // We need a list of dependent messages for each entry.
    SizeTList *dependents = new SizeTList[count];
 
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+   size_t *indices = new size_t[count];
+   size_t *indents = new size_t[count];
+   hilp->IncRef();
+   ComputeThreadedIndicesWithJWZ(hilp, indices, indents);
+#else
    for ( i = 0; i < count; i++ )
    {
       String id = hil[i]->GetId();
@@ -1140,6 +2369,7 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    // we should have found all the messages
    ASSERT_MSG( idx == hilp->Count(), "logic error in threading code" );
 
+#endif
    // we use AddTranslationTable() instead of SetTranslationTable() as this one
    // should be combined with the existing table from sorting
    hilp->AddTranslationTable(indices);
