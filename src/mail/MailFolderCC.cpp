@@ -2669,7 +2669,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid)
 {
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
+   CHECK_DEAD_RC("Cannot access closed folder '%s'.", NULL);
 
    HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, NULL, "no listing in GetMessage" );
@@ -2937,7 +2937,7 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
                               bool set)
 {
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
+   CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
    String flags = GetImapFlags(flag);
 
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,

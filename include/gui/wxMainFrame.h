@@ -1,25 +1,29 @@
-/*-*- c++ -*-********************************************************
- * wxMainFrame.h: a basic window class                              *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
-#ifndef  WXMAINFRAME_H
-#define  WXMAINFRAME_H
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany
+// File name:   gui/wxMainFrame.h - main frame class declaration
+// Author:      Mahogany Team
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 Mahogany Team
+// License:     M license
+///////////////////////////////////////////////////////////////////////////////
 
-#include "MMainFrame.h"
-#include "gui/wxMenuDefs.h"
-#include "gui/wxMFrame.h"
+#ifndef _GUI_MAINFRAME_H_
+#define _GUI_MAINFRAME_H_
 
 #ifdef __GNUG__
 #   pragma interface "wxMainFrame.h"
 #endif
 
+#include "MMainFrame.h"
+#include "gui/wxMenuDefs.h"
+#include "gui/wxMFrame.h"
+
 class MFolder;
 class wxFolderView;
 class wxFolderTree;
-class wxSplitterWindow;
+class WXDLLEXPORT wxSplitterWindow;
 
 class wxMainFrame : public wxMFrame
 {
@@ -50,6 +54,7 @@ public:
    void OnCommandEvent(wxCommandEvent &event);
    void OnIdentChange(wxCommandEvent &event);
    void OnIdle(wxIdleEvent &event);
+   void OnUpdateUIEnableIfHasFolder(wxUpdateUIEvent& event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
    /// Appends the menu for a module to the menubar
@@ -86,19 +91,18 @@ protected:
 
    /// the folder view
    wxFolderView *m_FolderView;
-   
+
    /// the name of the currently opened folder (empty if none)
    String m_folderName;
-
-   /// true if we have a message preview
-   bool m_hasPreview;
 
    /// the module extension menu if it is set
    class wxMenu *m_ModulesMenu;
 
 private:
    void MakeModulesMenu(void);
+
    DECLARE_EVENT_TABLE()
 };
 
-#endif
+#endif // _GUI_MAINFRAME_H_
+

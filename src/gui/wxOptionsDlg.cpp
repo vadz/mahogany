@@ -333,20 +333,26 @@ enum ConfigFields
    ConfigField_HelpersFirst = ConfigField_AdbLast,
    ConfigField_HelpersHelp1,
    ConfigField_Browser,
+#ifndef OS_WIN    // we don't care about browser kind under Windows
    ConfigField_BrowserIsNetscape,
+#endif // !Win
    ConfigField_BrowserInNewWindow,
+
 #ifdef USE_EXT_HTML_HELP
    ConfigField_HelpersHelp2,
    ConfigField_HelpBrowser,
    ConfigField_HelpBrowserIsNetscape,
 #endif // USE_EXT_HTML_HELP
+
    ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
+
 #ifdef OS_UNIX
    ConfigField_ImageConverter,
    ConfigField_ConvertGraphicsFormat,
 #endif // OS_UNIX
+
    ConfigField_HelpNewMailCommand,
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
@@ -994,8 +1000,19 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // helper programs
    { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
    { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
+      // we don't care if it is Netscape or not under Windows
+#ifndef OS_WIN
    { gettext_noop("URL &browser is Netscape"),    Field_Bool,    -1                      },
-   { gettext_noop("Open browser in new &window"),    Field_Bool, ConfigField_BrowserIsNetscape },
+#endif // OS_UNIX
+   { gettext_noop("Open browser in new &window"), Field_Bool,
+      // under Unix we can only implement this with Netscape, under Windows it
+      // also works with IE (and presumably others too)
+#ifdef OS_WIN
+                  -1
+#else // Unix
+                  ConfigField_BrowserIsNetscape
+#endif // Win/Unix
+   },
 #ifdef USE_EXT_HTML_HELP
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },

@@ -316,11 +316,14 @@ protected:
       return enableOld;
    }
 
-   // update our "unique selection" flag
+   /// update our "unique selection" flag
    void UpdateUniqueSelFlag()
    {
       m_selIsUnique = GetUniqueSelection() != -1;
    }
+
+   /// do we have a folder opened?
+   bool HasFolder() const { return m_FolderView->GetFolder() != NULL; }
 
    /// parent window
    wxWindow *m_Parent;
@@ -594,9 +597,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
    // don't process events until we're fully initialized and also only process
    // simple characters here (without Ctrl/Alt)
-   if( !m_FolderView ||
+   if( !HasFolder() ||
        !m_FolderView->m_MessagePreview ||
-       !m_FolderView->GetFolder() ||
        event.HasModifiers() )
    {
       event.Skip();
@@ -827,18 +829,21 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
    wxFrame *frame = m_FolderView->m_Frame;
    if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
 #endif // OS_WIN
-   if ( m_FolderView->GetFocusFollowMode() && (FindFocus() != this) )
-   {
-      SetFocus();
-   }
-
-   // start the drag and drop operation
-   if ( event.Dragging() )
-   {
-      if ( m_FolderView->DragAndDropMessages() )
+      if ( m_FolderView->GetFocusFollowMode() && (FindFocus() != this) )
       {
-         // skipping event.Skip() below
-         return;
+         SetFocus();
+      }
+
+   if ( HasFolder() )
+   {
+      // start the drag and drop operation
+      if ( event.Dragging() )
+      {
+         if ( m_FolderView->DragAndDropMessages() )
+         {
+            // skipping event.Skip() below
+            return;
+         }
       }
    }
 
@@ -847,6 +852,9 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
+   if ( !HasFolder() )
+      return;
+
    // PopupMenu() is very dangerous: it can send more messages before returning
    if ( m_isInPopupMenu )
    {
@@ -933,6 +941,9 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
    mApplication->UpdateAwayMode();
+
+   if ( !HasFolder() )
+      return;
 
    // there is exactly one item with the focus on it
    long focused = GetFocusedItem();
@@ -2440,8 +2451,15 @@ void wxFolderView::SelectAll(bool on)
 }
 
 void
-wxFolderView::OnCommandEvent(wxCommandEvent &event)
+wxFolderView::OnCommandEvent(wxCommandEvent& event)
 {
+   // we can't do much if we're not opened
+   if ( !m_ASMailFolder )
+   {
+      event.Skip();
+      return;
+   }
+
    int cmd = event.GetId();
 
    // first process commands which can be reduced to other commands
@@ -3206,6 +3224,8 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 bool
 wxFolderView::DragAndDropMessages()
 {
+   CHECK( GetFolder(), false, "can't drag and drop without opened folder" );
+
    bool didDrop = false;
 
    const UIdArray& selections = GetSelections();

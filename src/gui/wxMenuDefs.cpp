@@ -123,7 +123,6 @@ static const int g_aMainTbar[] =
    WXTBAR_MSG_DELETE,
    WXTBAR_SEP,
    WXTBAR_ADB,
-   WXTBAR_SEP,
    -1
 };
 

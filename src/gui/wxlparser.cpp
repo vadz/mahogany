@@ -176,22 +176,27 @@ void wxLayoutImportHTML(wxLayoutList *list,
 }
 
 void wxLayoutImportText(wxLayoutList *list,
-                        wxString const &str,
+                        const wxString& strOrig,
                         wxFontEncoding encoding)
 {
-   if ( !str )
+   if ( strOrig.empty() )
       return;
 
-   bool useConverter = FALSE;
-   wxEncodingConverter conv;
+   wxString str;
+
 #if wxCHECK_VERSION(2, 3, 0)
    if ( encoding == wxFONTENCODING_UTF8 )
    {
       // Convert from UTF-8 to environment's default encoding
-      str = wxString(str.wc_str(wxConvUTF8), wxConvLocal);
+      str = wxString(strOrig.wc_str(wxConvUTF8), wxConvLocal);
       encoding = wxLocale::GetSystemEncoding();
    }
+   else
 #endif // 2.3.0
+      str = strOrig;
+
+   bool useConverter = FALSE;
+   wxEncodingConverter conv;
    SetEncoding(list, encoding, &useConverter, &conv);
    wxLayoutImportTextInternal(list, str, useConverter, conv);
 }
