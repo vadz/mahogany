@@ -132,6 +132,16 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
    wxLayoutConstraints *c;
    wxStaticBox *box = CreateStdButtonsAndBox(_("&Rename folder:"));
 
+   // create the checkbox first because OnText() uses it and so it must be
+   // created before the text controls or we'd crash
+   m_chkRenameMbox = new wxPCheckBox
+                         (
+                           "RenameMbox",
+                           this,
+                           -1,
+                           _("Rename mailbox &separately")
+                         );
+
    // create the zone for folder renaming
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
@@ -172,14 +182,6 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
    c->top.Below(m_textFolder, 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    msg->SetConstraints(c);
-
-   m_chkRenameMbox = new wxPCheckBox
-                         (
-                           "RenameMbox",
-                           this,
-                           -1,
-                           _("Rename mailbox &separately")
-                         );
 
    c = new wxLayoutConstraints;
    c->left.SameAs(label, wxLeft);
@@ -338,7 +340,7 @@ extern bool ShowFolderRenameDialog(const MFolder *folder,
    {
       String name = wxGetTextFromUser
                     (
-                     _("New &folder name:"),
+                     _("New folder name:"),
                      GetRenameDialogTitle(folder),
                      folder->GetName(),
                      parent
