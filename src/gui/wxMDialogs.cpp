@@ -129,11 +129,12 @@ private:
 
 
 // ----------------------------------------------------------------------------
-// MProgressDialog : a progress bar dialog box
+// MProgressDialog: a progress bar dialog box with an optional "Cancel" button
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MProgressDialog, wxFrame)
-    EVT_BUTTON(-1, MProgressDialog::OnButton)
+   EVT_BUTTON(-1, MProgressDialog::OnCancel)
+   EVT_CLOSE(MProgressDialog::OnClose)
 END_EVENT_TABLE()
 
 
@@ -144,34 +145,54 @@ MProgressDialog::MProgressDialog(wxString const &title,
                                  bool parentOnly,
                                  bool abortButton)
 {
-   if(! parent)
+   if( !parent )
       parent = wxTheApp->GetTopWindow();
 
-   wxPoint p = wxDefaultPosition;
-   if(parent)
-   {
-      int x,y;
-      p = wxPoint(0,0);
-      parent->GetSize(&x,&y);
-      p = wxPoint((x-220)/2,(y-50)/2);  // approximately centred
-      parent = parent->GetParent();
-      while(parent)
-      {
-         parent->GetSize(&x,&y);
-         p.x += x; p.y += y;
-         parent = parent->GetParent();
-      }
-   }
-   m_continue = true;
-   m_Parent = parent;
+   m_state = abortButton ? Continue : Uncancelable;
    m_disableParentOnly = parentOnly;
-   wxFrame::Create(m_Parent,-1,_(title),p,
-                   wxSize(220,50), wxCAPTION|wxSTAY_ON_TOP|wxTHICK_FRAME);
-   (void) new wxStaticText(this, -1, _(message),wxPoint(10,10));
-   m_gauge = new wxGauge(this,-1, maximum, wxPoint(10,35),wxSize(200,10));
+
+   int height = 70;     // FIXME arbitrary numbers
+   if ( abortButton )
+      height += 35;
+   wxFrame::Create(parent, -1, _(title),
+                   wxPoint(0, 0), wxSize(220, height),
+                   wxCAPTION | wxSTAY_ON_TOP | wxTHICK_FRAME);
+
+   wxLayoutConstraints *c;
+
+   wxControl *ctrl = new wxStaticText(this, -1, _(message));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, 10);
+   c->top.SameAs(this, wxTop, 10);
+   c->width.AsIs();
+   c->height.AsIs();
+   ctrl->SetConstraints(c);
+
+   m_gauge = new wxGauge(this, -1, maximum);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(ctrl, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_gauge->SetConstraints(c);
+
+   if ( abortButton )
+   {
+      ctrl = new wxButton(this, -1, _("Cancel"));
+      c = new wxLayoutConstraints;
+      c->centreX.SameAs(this, wxCentreX);
+      c->top.Below(m_gauge, 2*LAYOUT_Y_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      ctrl->SetConstraints(c);
+   }
+
    m_gauge->SetValue(0);
-   Fit();
+
+   SetAutoLayout(TRUE);
    Show(TRUE);
+   Centre(wxCENTER_FRAME | wxBOTH);
+
    EnableDisableEvents(false);
    wxYield();
 }
@@ -179,29 +200,49 @@ MProgressDialog::MProgressDialog(wxString const &title,
 void
 MProgressDialog::EnableDisableEvents(bool enable)
 {
-  if(m_disableParentOnly && m_Parent != NULL)
-      m_Parent->Enable(enable);
+   wxWindow *parent = GetParent();
+   if ( m_disableParentOnly && parent != NULL )
+   {
+      parent->Enable(enable);
+   }
    else
    {
       wxNode *node;
-      for(node = wxTopLevelWindows.GetFirst(); node ;
-          node=node->GetNext())
-         ((wxWindow*)node->GetData())->Enable(enable);
+      for ( node = wxTopLevelWindows.GetFirst();
+            node;
+            node = node->GetNext() )
+      {
+         wxWindow *win = ((wxWindow*)node->GetData());
+         win->Enable(enable);
+      }
    }
-  this->Enable(true);
-}
 
-MProgressDialog::~MProgressDialog()
-{
-   EnableDisableEvents(true);
+   // always enable ourselves
+   Enable(true);
 }
 
 bool
 MProgressDialog::Update(int value)
 {
    m_gauge->SetValue(value);
+
+#ifdef __WXGTK__
+   // at least under wxGTK it's necessary to call ProcessIdle() to update the
+   // frames size which might have been changed
+   wxTheApp->ProcessIdle();
+#endif // GTK
+
    wxYield();
-   return m_continue;
+
+   return m_state != Canceled;
+}
+
+void MProgressDialog::OnClose(wxCloseEvent& event)
+{
+   if ( m_state == Uncancelable )
+      event.Veto(TRUE);
+   else
+      m_state = Canceled;
 }
 
 // ----------------------------------------------------------------------------

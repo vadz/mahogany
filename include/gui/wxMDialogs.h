@@ -27,6 +27,8 @@ class ArrayAdbElements;
 class wxString;
 class MWindow;
 class MFolder;
+class wxButtonEvent;
+class wxCloseEvent;
 
 /**
    Dialog Boxes
@@ -55,28 +57,42 @@ public:
    /** Destructor.
        Re-enables event handling for other windows.
    */
-   ~MProgressDialog();
+   ~MProgressDialog() { EnableDisableEvents(true); }
+
    /** Update the status bar to the new value.
        @param value new value
        @returns true if ABORT button has not been pressed
    */
    bool Update(int value);
+
+   /** Can be called to continue after the cancel button has been pressed, but
+       the program decided to continue the operation (e.g., user didn't
+       configrm it)
+   */
+   void Resume() { m_state = Continue; }
+
    /// Callback for optional abort button
-   void OnButton(WXUNUSED(wxButtonEvent))
-      {
-         m_continue = false;
-      }
+   void OnCancel(wxButtonEvent& WXUNUSED(event)) { m_state = Canceled; }
+
+   /// callback to disable "hard" window closing
+   void OnClose(wxCloseEvent& event);
+
 private:
    /// used to enable/disable envent handling
    void EnableDisableEvents(bool enable);
+
    /// the status bar
    class wxGauge *m_gauge;
    /// disable all or parent window only
    bool m_disableParentOnly;
    /// continue processing or not (return value for Update())
-   bool m_continue;
-   /// pointer to parent window
-   wxWindow *m_Parent;
+   enum
+   {
+      Uncancelable = -1,   // dialog can't be canceled
+      Canceled,            // can be cancelled and, in fact, was
+      Continue             // can be cancelled but wasn't
+   } m_state;
+
    DECLARE_EVENT_TABLE()
 };
 
