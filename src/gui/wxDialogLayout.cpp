@@ -211,7 +211,7 @@ wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
                                            const char *aszImages[])
                     : wxPNotebook(configPath, parent, -1)
 {
-   wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
+   wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
    wxIconManager *iconmanager = mApplication->GetIconManager();
 
    for ( size_t n = 0; aszImages[n]; n++ ) {
