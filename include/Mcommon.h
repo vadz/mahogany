@@ -70,11 +70,11 @@
 #   define CreateLabel(parent, title)                                          \
     GLOBAL_NEW wxStaticText(parent, -1, _(title))
 
-#   define CreateButton(parent, title, name)                                   \
-    GLOBAL_NEW wxButton(parent, -1, _(title), wxDefaultPosition,              \
+#   define CreateButton(parent, title, name, id)                              \
+    GLOBAL_NEW wxButton(parent, id, _(title), wxDefaultPosition,              \
                         wxDefaultSize, 0, DEFAULT_VALIDATOR name)
 
-#   define CreateText(parent, x, y, w, h, name)                                \
+#   define CreateText(parent, x, y, w, h, name)                               \
     GLOBAL_NEW wxTextCtrl(parent, -1, "", wxPoint(x, y), wxSize(w, h),        \
                           0, DEFAULT_VALIDATOR name)
 
@@ -98,7 +98,7 @@
                                                                  w, h, 0, n)
 #   define CreatePanel(p, x, y, w, h)  GLOBAL_NEW wxPanel(p, x, y, w, h)
 #   define CreateLabel(p, t)           GLOBAL_NEW wxMessage(p, _(t))
-#   define CreateButton(p, t, n)       GLOBAL_NEW wxButton(p, NULL, _(t),      \
+#   define CreateButton(p, t, n, id)   GLOBAL_NEW wxButton(p, NULL, _(t),      \
                                                           -1, -1, -1, -1,     \
                                                           0, n)
 #   define CreateText(p, x, y, w, h, name)   GLOBAL_NEW wxText(p, NULL, NULL,  \
@@ -125,9 +125,9 @@
 
 // LOG_INFO defined in yunchanc-client/.h
 #undef  LOG_INFO
-
-// wxWindows 2 has built in logging capabilities
+    
 #ifdef   USE_WXWINDOWS2
+   // wxWindows 2 has built in logging capabilities
 #  include <wx/intl.h>
 #	include <wx/log.h>
 
