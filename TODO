@@ -14,6 +14,7 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+ - folderview listctrl has extra Subject column behind Size field ???
 
 - reimplement some form of IsDirt6y() / HasBeenModified() for
   wxComposeView.
@@ -38,7 +39,6 @@ $Id$
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog!
 
-- folderview listctrl has extra Subject column behind Size field ???
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in

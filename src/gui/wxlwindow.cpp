@@ -33,8 +33,13 @@
 #include <ctype.h>
 #include <wx/clipbrd.h>
 
+/// offsets to put a nice frame around text
 #define WXLO_XOFFSET   4
 #define WXLO_YOFFSET   4
+
+/// offset to the right and bottom for when to redraw scrollbars
+#define   WXLO_ROFFSET   20
+#define   WXLO_BOFFSET   20
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_PAINT    (wxLayoutWindow::OnPaint)
@@ -367,13 +372,13 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
    wxPoint max = m_llist->GetSize();
    
    if(max.x > m_maxx || max.y > m_maxy
-      || max.x > (7*m_maxx)/10 || max.y > (7*m_maxy)/10
+      || max.x > m_maxx-WXLO_ROFFSET || max.y > m_maxy-WXLO_BOFFSET
       || exact)
    {
-      if(! exact)  // add an extra 20% to the sizes to avoid future updates
+      if(! exact)  // add an extra bit to the sizes to avoid future updates
       {
-         max.x = (12*max.x)/10;  // 12/20 = 120%
-         max.y = (12*max.y)/10;
+         max.x = max.x+WXLO_ROFFSET;  
+         max.y = max.y+WXLO_BOFFSET;
       }
       ViewStart(&m_ViewStartX, &m_ViewStartY);
       SetScrollbars(10, 20, max.x/10+1,max.y/20+1,m_ViewStartX,m_ViewStartY,true);

@@ -96,7 +96,7 @@ long wxIconManager::m_wxBitmapHandlers[] =
    wxBITMAP_TYPE_PNG,  //wxGTK
    wxBITMAP_TYPE_GIF,
    wxBITMAP_TYPE_TIF,
-   wxBITMAP_TYPE_JPEG,
+   wxBITMAP_TYPE_JPEG, //wxGTK optional
    wxBITMAP_TYPE_BMP,  //wxGTK
    wxBITMAP_TYPE_ANY,
    wxBITMAP_TYPE_CUR, 
@@ -122,7 +122,7 @@ wxIconManager::LoadImage(String filename, bool *success)
    // will fail.
    {
       wxLogNull logNo;
-   
+      
       if(! m_knowHandlers) // first time initialisation
       {
          for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
@@ -130,13 +130,39 @@ wxIconManager::LoadImage(String filename, bool *success)
                m_wxBitmapHandlers[i] = 0; // not available
          m_knowHandlers = true;
       }
-   
+         
       for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
          if(m_wxBitmapHandlers[i])
-            loaded = img->LoadFile(filename, m_wxBitmapHandlers[i] );
+            loaded = img->LoadFile(filename, wxBITMAP_TYPE_PNG);
+   }// normal logging again
+#ifdef OS_UNIX
+   if(! loaded) // try to use imageMagick to convert image to PNG
+   {
+      String oldfilename = filename;
+      String tempfile = filename + ".png";
+      // strip leading path
+      int i = tempfile.Length();
+      while(i && tempfile.c_str()[i] != '/')
+         i--;
+      tempfile.assign(tempfile,i+1,tempfile.length()-1-i);
+      tempfile = String(
+         (getenv("TMP") && strlen(getenv("TMP")))
+         ? getenv("TMP"):"/tmp"
+         ) + String('/') + tempfile;
+      String command;
+      command = READ_APPCONFIG(MP_CONVERTPROGRAM);
+      command << ' ' << filename << ' ' << tempfile;
+      wxLogTrace(wxTraceIconLoading,
+                 "wxIconManager::LoadImage() calling '%s'...",
+                 command.c_str());
+      if(system(command) == 0)
+         loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
+      if(tempfile.length()) // using a temporary file
+         wxRemoveFile(tempfile);
    }
+#endif
 
-   // now old logging is restored
+   // if everything else failed, try xpm loading:
    if((! loaded) /*&& m_wxBitmapHandlers[0] == 0*/) // try our own XPM loading code
    {
       char ** cpptr = LoadImageXpm(filename);
