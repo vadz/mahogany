@@ -49,6 +49,7 @@
 # Any problems, comments, improvements:  mailto:ballueder@gmx.net
 #
 
+CVSID='$Id$'
 
 echo "##############################################################################"
 echo "makeM_deb running on " `hostname` " date: " `date`
@@ -61,6 +62,9 @@ DEBUG=no
 USETARSRC=no
 MKTARSRC=no
 ADDON=
+
+RESTARTED=no
+ORIGINALSCRIPT=
 
 while [ ! -z "$1" ]
 do
@@ -89,11 +93,16 @@ do
 		MKTARSRC=yes
 		shift
 	;;
+	"x--restart--")
+                RESTARTED=yes
+                ORIGINALSCRIPT=$0
+	;;
 	*)
 	echo "Illegal argument $1"
 	exit 1
 	esac
 done
+
 
 PATH=$PATH:/usr/bin:/usr/local/bin
     
@@ -140,15 +149,13 @@ LOGNAME="karsten"
 export LOGNAME
 
 MNAME=mahogany
-MVERSION=0.60
+MVERSION=0.23a
 MTAG="-A"
 
 WXNAME=wxGTK
 WXVERSION=2.1.11
 
 DOCHOST=phyw164
-
-RPM_ROOT=$HOME/build/rpm
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
@@ -303,6 +310,40 @@ fi
 if [ ! -d $BUILDDIR ] ; then  mkdir $BUILDDIR ; fi
 if [ ! -d $WXPREFIX ] ; then mkdir $WXPREFIX ; fi
 if [ ! -d $MPREFIX ] ; then mkdir $MPREFIX ; fi
+
+
+#
+# Ugly hack to allow auto-updating this script:
+#
+# Now that everything is set up we can copy the last obtained version
+# of our script here and restart ourselves:
+#
+SCRIPT=$0 # where are we
+
+if [ $RESTARTED = no ]
+then
+  echo "This is script $CVSID"
+  echo "Checking for build script..."
+  echo "  ($BUILDDIR/$MNAME-$MVERSION/extra/scripts/makeM_all)"
+  if [ -f $BUILDDIR/$MNAME-$MVERSION/extra/scripts/makeM_all ]
+  then
+    echo "Updating build script..."
+    ( cd $BUILDDIR/$MNAME-$MVERSION/extra/scripts && \
+      $CVS update $MTAG )
+    cp $BUILDDIR/$MNAME-$MVERSION/extra/scripts/makeM_all /tmp/makeM_all$$ && \
+    chmod +x /tmp/makeM_all$$
+    echo "Restarting script..."
+    exec /tmp/makeM_all$$ --restart-- "$SCRIPT"
+    exit # not needed
+  fi
+else
+  echo "Script was restarted, now replacing original (cp $0 $ORIGINALSCRIPT)."
+  # now the script is run from /tmp/makeM_all$$, so we must copy it:
+  cp "$0" "$ORIGINALSCRIPT" 
+  echo "This is script $CVSID"
+  echo "Continuing..."
+fi
+
 
 echo "OSTYPE=$OSTYPE"
 echo "OSTYPE_ADDON=$OSTYPE_ADDON"
@@ -527,13 +568,15 @@ then
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
-  (cd $NAME-$VERSION && make rpm RPM_ROOT=$RPM_ROOT 2>/dev/null 2>&1) && \ 
-  (  if [ "$DOINSTALL" = "yes" ] ; then \
-	echo "Uploading rpms..." ; \
-	$SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm ;\
-	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm ;\
-  fi )
-  echo "Building RedHat package finished."
+  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
+  cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
+  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
+  cd /usr/src/redhat/ && \
+  rpm -ba SPECS/M.spec
+  if [ "$DOINSTALL" = "yes" ] ; then
+	  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
+	  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
+  fi
 fi
 
 ###########################
