@@ -38,6 +38,9 @@ public:
    /// name of the alt config file
    String configFile;
 
+   /// spec of the config file/location to import
+   String configImport;
+
    /// the locale/language to use, override LANG env var and auto detection
    String lang;
 
