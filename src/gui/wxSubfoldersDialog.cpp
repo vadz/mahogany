@@ -189,13 +189,15 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
    // then we'd need to maintain some complicated data structure instead of a
    // simple stack we have currently...
 
+   wxASSERT_MSG( *name != m_folderPath, "shouldn't be called for the root" );
+
    // if there is no root, add it now
    wxTreeItemId root = m_treectrl->GetRootItem();
    if ( !root )
    {
       // add the root item to the tree - this allows us to forget about the
       // difference between listing all folders and all folders under some
-      // folder (in the first case, there is no "root" returned bycclient, in
+      // folder (in the first case, there is no "root" returned by cclient, in
       // the second case there would be)
       String label = m_folderPath.AfterLast('/');
       if ( !label )
@@ -222,10 +224,24 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
          // of the root MH pseufo-folder)
          return folderId;
       }
-      if ( strncmp(*name, folderName, folderName.length()) == 0 )
+
+      // this should never happen, but check for it nevertheless
+      if ( *name == folderName )
       {
-         // we found the parent (+1 is needed to skip the '/')
-         *name = name->c_str() + folderName.length() + 1;
+         wxFAIL_MSG( "same folder listed twice in subfolders list" );
+
+         return folderId;
+      }
+
+      // to be the child of the folderName, name must be longer than it and
+      // start by folderName followed by '/'
+      size_t len = folderName.length() + 1;
+      folderName += '/';
+      if ( strncmp(*name, folderName, len) == 0 )
+      {
+         // we found the parent, so now leave only the child part of the
+         // folder name
+         (*name).erase(0, len);
 
          return folderId;
       }
@@ -242,10 +258,24 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
 void wxSubscriptionDialog::OnNewFolder(String& name)
 {
    String nameFull(name);
-   wxTreeItemId parent = GetParentForFolder(&name);
-   wxTreeItemId itemId = m_treectrl->AppendItem(parent, name);
 
-   PushFolder(nameFull, itemId);
+   // remove trailing backslashes if any
+   size_t len = name.length();
+   while ( len > 0 && name[len - 1] == '/' )
+   {
+      // 1 more char to remove
+      len--;
+   }
+
+   name.Truncate(len);
+
+   if ( name != m_folderPath )
+   {
+      wxTreeItemId parent = GetParentForFolder(&name);
+      wxTreeItemId itemId = m_treectrl->AppendItem(parent, name);
+
+      PushFolder(nameFull, itemId);
+   }
 }
 
 void wxSubscriptionDialog::OnNoMoreFolders()
@@ -404,7 +434,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       // generate an event notifying everybody that a new folder has been
       // created
       MEventManager::Send(
-         new MEventFolderTreeChangeData(m_folderPath,
+         new MEventFolderTreeChangeData(m_folder->GetFullName(),
                                         MEventFolderTreeChangeData::Create)
          );
       MEventManager::DispatchPending();
@@ -452,7 +482,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    // The folder must be opened via the profile mode, so it can read
    // login and password from it. If using MF_IMAP/MF_NNTP here, one
    // must provide server/login/passwd explicitly.
-   ASMailFolder *asmf = ASMailFolder::OpenFolder(MF_PROFILE, 
+   ASMailFolder *asmf = ASMailFolder::OpenFolder(MF_PROFILE,
                                                  folder->GetName(),
                                                  profile);
 
