@@ -58,9 +58,9 @@ clean:
 test:
 	@if test -f Manual.tex ; then \
 	echo "Found a Manual.tex file. There should not be one."; \
-	echo "The Manual should be exported to a file Manual.ltex instead."; \
+	echo "The Manual should be exported to a file Manual.htex instead."; \
 	echo "Usually all you need to do now is:"; \
-	echo "mv Manual.tex Manual.ltex"; \
+	echo "mv Manual.tex Manual.htex"; \
 	echo "Then run make again." ;\
 	exit 1; \
 	fi 
