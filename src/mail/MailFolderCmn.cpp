@@ -40,6 +40,9 @@
 
 #include "MPython.h"
 
+#include "Sequence.h"
+#include "UIdArray.h"
+
 #include "MFolder.h"
 #include "MFilter.h"
 #include "modules/Filters.h"
@@ -50,8 +53,12 @@
 #include "Address.h"
 
 #include "MThread.h"
-
 #include "MFCache.h"
+
+#include "Composer.h"
+
+#include "MailFolderCmn.h"
+#include "MFPrivate.h"
 
 #include <wx/timer.h>
 #include <wx/datetime.h>
@@ -59,11 +66,6 @@
 #include <wx/utils.h>         // for wxExecute()
 
 #include "wx/persctrl.h"      // for wxPFileSelector
-
-#include "Composer.h"
-
-#include "MailFolderCmn.h"
-#include "MFPrivate.h"
 
 // ----------------------------------------------------------------------------
 // options we use here

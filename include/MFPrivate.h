@@ -12,6 +12,43 @@
 
 #include "MEvent.h"
 
+// ----------------------------------------------------------------------------
+// MFSuspendInteractivity: resets the folders interactive frame thus suppresing
+//                         any dialogs/... during the life time of this object
+// ----------------------------------------------------------------------------
+
+class MFSuspendInteractivity
+{
+public:
+   // we will DecRef() the mail folder which must be !NULL
+   MFSuspendInteractivity(MailFolder *mf)
+   {
+      m_mf = mf;
+      if ( m_mf )
+      {
+         m_frameOld = mf->SetInteractiveFrame(NULL);
+      }
+      else
+      {
+         FAIL_MSG( "NULL folder in MFInteractiveLock" );
+      }
+   }
+
+   ~MFSuspendInteractivity()
+   {
+      if ( m_mf )
+      {
+         (void)m_mf->SetInteractiveFrame(m_frameOld);
+
+         m_mf->DecRef();
+      }
+   }
+
+private:
+   MailFolder *m_mf;
+   wxFrame *m_frameOld;
+};
+
 /*
    This class is used to restore the folders interactive frame "later", i.e.
    during the next idle loop iteration. To do this, we just send an event of

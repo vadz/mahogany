@@ -63,6 +63,7 @@
 #include "MThread.h"
 #include "MFolder.h"
 #include "MFCache.h"
+#include "MSearch.h"
 
 #include "FolderMonitor.h" // for case WXK_F5
 
@@ -74,8 +75,10 @@
 #include "TemplateDialog.h"
 #include "Composer.h"
 #include "MsgCmdProc.h"
+#include "MFui.h"
 
 #include "Sequence.h"
+#include "UIdArray.h"
 
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderMenu.h"
@@ -280,7 +283,7 @@ public:
       else if ( name == "date" )
          *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
       else if ( name == "size" )
-         *value = MailFolder::SizeToString(m_hi->GetSize());
+         *value = SizeToString(m_hi->GetSize());
 #ifdef USE_HEADER_SCORE
       else if ( name == "score" )
          *value = m_hi->GetScore();
@@ -2790,7 +2793,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
    switch ( field )
    {
       case WXFLC_STATUS:
-         text = MailFolder::ConvertMessageStatusToString(hi->GetStatus());
+         text = ConvertMessageStatusToString(hi->GetStatus());
          break;
 
       case WXFLC_FROM:
@@ -2847,9 +2850,12 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          break;
 
       case WXFLC_SIZE:
-         text = MailFolder::SizeToString(hi->GetSize(),
-                                         hi->GetLines(),
-                                         GetSettings().showSize);
+         text = SizeToString
+                (
+                  hi->GetSize(),
+                  hi->GetLines(),
+                  (MessageSizeShow)GetSettings().showSize
+                );
          break;
 
       case WXFLC_SUBJECT:
@@ -3413,8 +3419,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->senderOnlyNames =
        READ_CONFIG_BOOL(profile, MP_FVIEW_NAMES_ONLY);
 
-   settings->showSize =
-      (MessageSizeShow)(long)READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT);
+   settings->showSize = READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT);
 
    settings->replaceFromWithTo =
        READ_CONFIG_BOOL(profile, MP_FVIEW_FROM_REPLACE);

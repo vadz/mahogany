@@ -36,6 +36,8 @@
 
 #include "MFolder.h"
 
+#include "UIdArray.h"
+
 #include "ASMailFolder.h"
 #include "HeaderInfo.h"
 

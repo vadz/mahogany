@@ -121,21 +121,24 @@ public:
       virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
       virtual UIdArray * GetSequence(void) const { return m_Seq; }
    protected:
-      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id, UIdArray * mc,
+      ResultImpl(ASMailFolder *mf,
+                 Ticket t,
+                 OperationId id,
+                 UIdArray * mc,
                  UserData ud)
          {
             m_Id = id;
             m_Ticket = t;
-            m_Mf = mf;
             m_UserData = ud;
             m_Seq = mc;
-            if(m_Mf) m_Mf->IncRef();
+
+            m_Mf = mf;
+            if ( m_Mf )
+               m_Mf->IncRef();
          }
-      virtual ~ResultImpl()
-         {
-            if(m_Mf) m_Mf->DecRef();
-            if(m_Seq) delete m_Seq;
-         }
+
+      virtual ~ResultImpl();
+
    private:
       OperationId   m_Id;
       ASMailFolder *m_Mf;
@@ -359,7 +362,7 @@ public:
    /** Search Messages for certain criteria.
        @return UIdArray with UIds of matching messages
    */
-   virtual Ticket SearchMessages(const class SearchCriterium *crit, UserData ud) = 0;
+   virtual Ticket SearchMessages(const SearchCriterium *crit, UserData ud) = 0;
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.

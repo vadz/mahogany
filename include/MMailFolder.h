@@ -102,14 +102,6 @@ public:
    */
    static bool CanExit(String *which);
 
-   /** Utiltiy function to get a textual representation of a message
-       status.
-       @param message status
-       @param mf optional pointer to folder to treat e.g. NNTP separately
-       @return string representation
-   */
-   static String ConvertMessageStatusToString(int status,
-                                              MailFolder *mf = NULL);
    /** Forward one message.
        @param message message to forward
        @param profile environment
@@ -226,7 +218,7 @@ public:
        @return UIdArray with UIds of matching messages, caller must
        free it
    */
-   virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit);
 
    /// return class name
    virtual const char *GetClassName(void) const

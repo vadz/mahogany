@@ -89,5 +89,13 @@ private:
    String m_seq;
 };
 
+/**
+  Helper function: get the sequence string for these messages
+
+  @param messages array of messages to get the sequence for, can't be NULL
+  @return the sequence string or "" on error
+ */
+extern String GetSequenceString(const UIdArray *messages);
+
 #endif // _SEQUENCE_H_
 

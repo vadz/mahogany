@@ -297,7 +297,7 @@ private:
       int columns[WXFLC_NUMENTRIES];
 
       /// how to show the size
-      MessageSizeShow showSize;
+      long /* MessageSizeShow */ showSize;
 
       /// do we have focus-follow enabled?
       bool focusOnMouse;

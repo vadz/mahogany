@@ -13,11 +13,16 @@
 #ifndef   USE_PCH
 #   include "sysutil.h"
 #   include "strutil.h"
+
 #   include "guidef.h"
 #   include "gui/wxMFrame.h"
+
 #   include "MApplication.h"
+
 #   include "Message.h"
 #endif
+
+#include <ctype.h>
 
 #include <wx/colour.h>
 #include <wx/bitmap.h>
@@ -27,10 +32,10 @@
 
 #include "Mdefaults.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
+#include "MFStatus.h"
 #include "ASMailFolder.h"
-#include "miscutil.h"
 
-#include <ctype.h>
+#include "miscutil.h"
 
 extern const MOption MP_FOLDERSTATUS_STATBAR;
 extern const MOption MP_FOLDERSTATUS_TITLEBAR;

@@ -32,7 +32,7 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
-#include "MailFolder.h"    // for UIdArray
+#include "UIdArray.h"
 #include "Sequence.h"
 
 #include <ctype.h>
@@ -268,5 +268,24 @@ UIdType Sequence::GetNext(UIdType n, size_t& cookie) const
    }
 
    return GetNumberAt(cookie);
+}
+
+// ----------------------------------------------------------------------------
+// other public functions defined here
+// ----------------------------------------------------------------------------
+
+String GetSequenceString(const UIdArray *messages)
+{
+   CHECK( messages, "", "NULL messages array in GetSequenceString" );
+
+   Sequence seq;
+
+   size_t count = messages ? messages->GetCount() : 0;
+   for ( size_t n = 0; n < count; n++ )
+   {
+      seq.Add((*messages)[n]);
+   }
+
+   return seq.GetString();
 }
 

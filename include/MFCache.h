@@ -17,7 +17,7 @@
 #   pragma interface "MFCache.h"
 #endif
 
-#include "MailFolder.h"          // for MailFolderStatus
+#include "MFStatus.h"
 
 #include "CacheFile.h"           // base class
 

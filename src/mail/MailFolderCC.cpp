@@ -36,6 +36,13 @@
 #include "MDialogs.h"
 #include "FolderView.h"
 
+#include "UIdArray.h"
+
+#include "MFStatus.h"
+#include "MSearch.h"
+#include "LogCircle.h"
+#include "MFui.h"                      // for SizeToString
+
 #include "AddressCC.h"
 #include "MailFolderCC.h"
 #include "MessageCC.h"
@@ -818,67 +825,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// FolderListing stuff (TODO: move elsewhere, i.e. in MailFolderCmn)
-// ----------------------------------------------------------------------------
-
-class FolderListingEntryCC : public FolderListingEntry
-{
-public:
-   /// The folder's name.
-   virtual const String &GetName(void) const
-      { return m_folderName;}
-   /// The folder's attribute.
-   virtual long GetAttribute(void) const
-      { return m_Attr; }
-   FolderListingEntryCC(const String &name, long attr)
-      : m_folderName(name)
-      { m_Attr = attr; }
-private:
-   const String &m_folderName;
-   long          m_Attr;
-};
-
-/** This class holds the listings of a server's folders. */
-class FolderListingCC : public FolderListing
-{
-public:
-   /// Return the delimiter character for entries in the hierarchy.
-   virtual char GetDelimiter(void) const
-      { return m_Del; }
-   /// Returns the number of entries.
-   virtual size_t CountEntries(void) const
-      { return m_list.size(); }
-   /// Returns the first entry.
-   virtual const FolderListingEntry * GetFirstEntry(iterator &i) const
-      {
-         i = m_list.begin();
-         if ( i != m_list.end() )
-            return (*i);
-         else
-            return NULL;
-      }
-   /// Returns the next entry.
-   virtual const FolderListingEntry * GetNextEntry(iterator &i) const
-      {
-         i++;
-         if ( i != m_list.end())
-            return (*i);
-         else
-            return NULL;
-      }
-   /** For our use only. */
-   void SetDelimiter(char del)
-      { m_Del = del; }
-   void Add( FolderListingEntry *entry )
-      {
-         m_list.push_back(entry);
-      }
-private:
-   char m_Del;
-   FolderListingList m_list;
-};
-
-// ----------------------------------------------------------------------------
 // Various locker classes
 // ----------------------------------------------------------------------------
 
@@ -1209,11 +1155,17 @@ private:
    void CreateDialog()
    {
       String msg;
-      msg.Printf(_("Reading %s..."),
-                 MailFolder::SizeToString(m_readTotal, 0,
-                                          MessageSize_AutoBytes,
-                                          true /* verbose */).c_str()
-                );
+      msg.Printf
+          (
+            _("Reading %s..."),
+            SizeToString
+            (
+               m_readTotal,
+               0,
+               MessageSize_AutoBytes,
+               SizeToString_Verbose
+            ).c_str()
+          );
 
       m_dlgProgress = new MProgressDialog
                           (
@@ -1848,8 +1800,6 @@ MailFolderCC::Create(MFolderType type, int flags)
    UpdateTimeoutValues();
 
    Init();
-
-   m_FolderListing = NULL;
 
    m_ASMailFolder = NULL;
 
@@ -5745,10 +5695,9 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
                       long  attrib)
 {
    MailFolderCC *mf = LookupObject(stream);
-   CHECK_RET(mf,"NULL mailfolder");
-   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
-   mf->m_FolderListing->SetDelimiter(delim);
-   mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
+   CHECK_RET(mf, "NULL mailfolder");
+
+   wxFAIL_MSG( "TODO" );
 }
 
 /** status of mailbox has changed
@@ -6032,7 +5981,7 @@ MailFolderCC::Subscribe(const String &host,
 {
    String spec = MailFolder::GetImapSpec(protocol, 0, mailboxname, host, "");
    return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
-           : mail_unsubscribe (NIL, (char *)spec.c_str()) ) != NIL;
+                     : mail_unsubscribe (NIL, (char *)spec.c_str())) != NIL;
 }
 
 void

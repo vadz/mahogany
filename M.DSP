@@ -286,6 +286,10 @@ SOURCE=.\src\mail\HeaderInfoImpl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mail\LogCircle.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\MailFolder.cpp
 # End Source File
 # Begin Source File
@@ -311,6 +315,10 @@ SOURCE=.\src\mail\MessageCC.cpp
 # Begin Source File
 
 SOURCE=.\src\mail\MFCache.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\MFui.cpp
 # End Source File
 # Begin Source File
 

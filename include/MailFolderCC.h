@@ -178,7 +178,7 @@ public:
                                                 SEARCH_UNDELETED,
                                     MsgnoType last = 0) const;
 
-   virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit);
 
 
    virtual bool ThreadMessages(const ThreadParams& thrParams,
@@ -605,9 +605,6 @@ private:
    Ticket   m_Ticket;
    ASMailFolder *m_ASMailFolder;
    //@}
-
-   /// Used by the subscription management.
-   class FolderListingCC *m_FolderListing;
 
    //@}
 

@@ -53,6 +53,7 @@
 #include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
+#include "UIdArray.h"
 
 #include "MDialogs.h"
 #include "Mpers.h"

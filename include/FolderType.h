@@ -61,6 +61,25 @@ enum MFolderType
    FolderInvalid = MF_ILLEGAL  // folder not initialized properly
 };
 
+/// supported formats for the local file mailboxes (hence MH not counted)
+enum FileMailboxFormat
+{
+   /// the default format, must be 0!
+   FileMbox_MBX,
+
+   /// traditional Unix one
+   FileMbox_MBOX,
+
+   /// SCO default format
+   FileMbox_MMDF,
+
+   /// MM-compatible fast format
+   FileMbox_TNX,
+
+   /// end of enum marker
+   FileMbox_Max
+};
+
 // ----------------------------------------------------------------------------
 // Flags of a mail folder
 // ----------------------------------------------------------------------------

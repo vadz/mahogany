@@ -50,6 +50,8 @@
 #include "modules/Filters.h"
 #include "MFilterLang.h"
 
+#include "UIdArray.h"
+
 #include <wx/regex.h>   // wxRegEx::Flags
 
 // ----------------------------------------------------------------------------

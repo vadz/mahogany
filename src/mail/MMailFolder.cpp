@@ -265,20 +265,6 @@ MMailFolder::CanExit(String *which)
    return TRUE;
 }
 
-/** Utiltiy function to get a textual representation of a message
-    status.
-    @param message status
-    @param mf optional pointer to folder to treat e.g. NNTP separately
-    @return string representation
-    */
-/* static */
-String
-MMailFolder::ConvertMessageStatusToString(int status,
-                                          MailFolder *mf = NULL)
-{
-   MMAILFOLDER_MISSING();
-   return "unknown";
-}
 /** Forward one message.
     @param message message to forward
     @param profile environment
@@ -432,7 +418,7 @@ MMailFolder::ExpungeMessages(void){ MMAILFOLDER_MISSING(); }
     free it
 */
 UIdArray *
-MMailFolder::SearchMessages(const class SearchCriterium *crit){ MMAILFOLDER_MISSING(); }
+MMailFolder::SearchMessages(const SearchCriterium *crit){ MMAILFOLDER_MISSING(); }
 
 /**@name Access control */
 //@{

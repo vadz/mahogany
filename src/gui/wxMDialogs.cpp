@@ -63,6 +63,7 @@
 #include "gui/wxMIds.h"
 
 #include "MFolder.h"
+#include "MSearch.h"
 
 #include "gui/wxIconManager.h"
 
@@ -1753,7 +1754,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
 
 /* Configuration dialog for searching messages. */
 extern
-bool ConfigureSearchMessages(class SearchCriterium *crit,
+bool ConfigureSearchMessages(SearchCriterium *crit,
                              Profile *profile, wxWindow *parent)
 {
    wxMessageSearchDialog dlg(crit, profile, parent);

@@ -33,6 +33,8 @@ class Profile;
 class MFolder;
 class MPersMsgBox;
 
+struct SearchCriterium;
+
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxStaticText;
 
@@ -365,7 +367,7 @@ void ShowModulesDialog(wxFrame *parent);
 /* Configuration dialog for searching for messages. */
 extern
 bool
-ConfigureSearchMessages(class SearchCriterium *crit,
+ConfigureSearchMessages(SearchCriterium *crit,
                         Profile *profile,
                         wxWindow *parent);
 

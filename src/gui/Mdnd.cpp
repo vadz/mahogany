@@ -39,6 +39,8 @@
 
 #include "MsgCmdProc.h"
 
+#include "UIdArray.h"
+
 #include "Mdnd.h"
 
 // ============================================================================

@@ -24,6 +24,11 @@
 #include "Mdefaults.h"
 #include "Message.h"
 
+#include "Sequence.h"
+#include "UIdArray.h"
+
+#include "MSearch.h"
+
 #include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
@@ -34,6 +39,14 @@
 #else
 #   define   AScheck()
 #endif
+
+ASMailFolder::ResultImpl::~ResultImpl()
+{
+   if ( m_Mf )
+      m_Mf->DecRef();
+
+   delete m_Seq;
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -431,7 +444,7 @@ public:
 class MT_SearchMessages : public MailThread
 {
 public:
-   MT_SearchMessages(ASMailFolder *mf, UserData ud, const class SearchCriterium *crit)
+   MT_SearchMessages(ASMailFolder *mf, UserData ud, const SearchCriterium *crit)
       : MailThread(mf, ud) { m_Criterium = *crit;}
    virtual void WorkFunction(void)
       {
@@ -767,7 +780,7 @@ public:
    /** Search Messages.
        @return a Result with a sequence of matching uids.
     */
-   virtual Ticket SearchMessages(const class SearchCriterium *crit, UserData ud)
+   virtual Ticket SearchMessages(const SearchCriterium *crit, UserData ud)
       {
          return (new MT_SearchMessages(this, ud, crit))->Start();
       }

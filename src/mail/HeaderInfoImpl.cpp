@@ -41,6 +41,7 @@
 #include "HeaderInfoImpl.h"
 
 #include "Sequence.h"
+#include "UIdArray.h"
 
 #include "MDialogs.h"         // for MProgressInfo
 

@@ -35,6 +35,8 @@
 #include "MInterface.h"
 #include "Message.h"
 
+#include "UIdArray.h"
+
 #include "ASMailFolder.h"
 #include "HeaderInfo.h"
 #include "Message.h"

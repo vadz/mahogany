@@ -6,12 +6,12 @@
 // Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)
+// Copyright:   (C) 1997-2002 Mahogany Team
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MAILFOLDER_H
-#define MAILFOLDER_H
+#ifndef _MAILFOLDER_H
+#define _MAILFOLDER_H
 
 #ifdef __GNUG__
 #   pragma interface "MailFolder.h"
@@ -21,181 +21,34 @@
 #include "FolderType.h"
 #include "kbList.h"
 
-class Composer;
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-/// supported formats for the local file mailboxes (hence MH not counted)
-enum FileMailboxFormat
-{
-   /// the default format, must be 0!
-   FileMbox_MBX,
-   /// traditional Unix one
-   FileMbox_MBOX,
-   /// SCO default format
-   FileMbox_MMDF,
-   /// MM-compatible fast format
-   FileMbox_TNX,
-   /// end of enum marker
-   FileMbox_Max
-};
-
-/// how to show the message size in the viewer?
-enum MessageSizeShow
-{
-   /// choose lines/bytes/kbytes/mbytes automatically
-   MessageSize_Automatic,
-   /// always show bytes/kbytes/mbytes
-   MessageSize_AutoBytes,
-   /// always show size in bytes
-   MessageSize_Bytes,
-   /// always show size in Kb
-   MessageSize_KBytes,
-   /// always show size in Mb
-   MessageSize_MBytes,
-   /// end of enum marker
-   MessageSize_Max
-};
-
-class HeaderInfoList;
-
 #include <wx/fontenc.h>
-
-/** The UIdArray define is a class which is an integer array. It needs
-    to provide a int Count() method to return the number of elements
-    and an int operator[int] to access them.
-    We use wxArrayInt for this.
-    @deffunc UIdArray
-*/
-#include <wx/dynarray.h>
-WX_DEFINE_ARRAY_INT(UIdType, UIdArray);
-typedef UIdArray MsgnoArray;
-
-// this is unused so far
-#if 0
-
-/// UIdArray which maintains its items always sorted
-WX_DEFINE_SORTED_ARRAY(UIdType, UIdArraySortedBase);
-
-/// the function used for comparing UIDs
-inline int CMPFUNC_CONV UIdCompareFunction(UIdType uid1, UIdType uid2)
-{
-   // an invalid UID is less than all the others
-   return uid1 == UID_ILLEGAL ? -1
-                              : uid2 == UID_ILLEGAL ? 1
-                                                    : (long)(uid1 - uid2);
-}
-
-class UIdArraySorted : public UIdArraySortedBase
-{
-public:
-   UIdArraySorted() : UIdArraySortedBase(UIdCompareFunction) { }
-};
-
-#endif // 0
 
 // forward declarations
 class ArrayHeaderInfo;
+class Composer;
 class FolderView;
 class HeaderInfo;
-class Profile;
-class MFolder;
+class HeaderInfoList;
 class Message;
 class MessageView;
+class MFolder;
+class MLogCircle;
+class Profile;
 class Sequence;
+class UIdArray;
 
-class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxWindow;
-
+struct MailFolderStatus;
+struct SearchCriterium;
 struct SortParams;
 struct ThreadData;
 struct ThreadParams;
 
-// ----------------------------------------------------------------------------
-// MLogCircle
-// ----------------------------------------------------------------------------
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindow;
 
-/**
-  A small class to hold the last N log messages for analysis: when an error
-  happens you may call its GuessError() method to try to give the user a
-  human-readable description of the problem.
- */
-class MLogCircle
-{
-public:
-   MLogCircle(int n);
-   ~MLogCircle();
-
-   void Add(const String &txt);
-   bool Find(const String needle, String *store = NULL) const;
-   String GetLog(void) const;
-   void Clear(void);
-
-   /**
-     Looks at log data and guesses what went wrong and calls LOGMESSAGE()
-     if we have any ideas.
-    */
-   void GuessError(void) const;
-
-private:
-   int m_N,
-       m_Next;
-
-   String *m_Messages;
-};
-
-// ----------------------------------------------------------------------------
-// MailFolderStatus
-// ----------------------------------------------------------------------------
-
-/**
-  MailFolderStatus contains the "interesting" and often changing information
-  about the folder such as the number of new/unread messages in it
-*/
-
-struct MailFolderStatus
-{
-   MailFolderStatus() { Init(); }
-
-   void Init()
-   {
-      total = UID_ILLEGAL;
-      newmsgs =
-      recent =
-      unread =
-      flagged =
-      searched = 0;
-   }
-
-   bool IsValid() const { return total != UID_ILLEGAL; }
-
-   // do we have any "interesting" messages at all?
-   bool HasSomething() const
-   {
-      return newmsgs || recent || unread || flagged || searched;
-   }
-
-   bool operator==(const MailFolderStatus& status)
-   {
-      return memcmp(this, &status, sizeof(MailFolderStatus)) == 0;
-   }
-
-   // the total number of messages and the number of new, recent, unread,
-   // important (== flagged) and searched (== results of search) messages in
-   // this folder
-   //
-   // note that unread is the total number of unread messages, i.e. it
-   // includes some which are just unseen and the others which are new (i.e.
-   // unseen and recent)
-   unsigned long total,
-                 newmsgs,
-                 recent,
-                 unread,
-                 flagged,
-                 searched;
-};
+#ifndef MsgnoArray
+   #define MsgnoArray UIdArray
+#endif
 
 // ----------------------------------------------------------------------------
 // MailFolder
@@ -213,6 +66,7 @@ class MailFolder : public MObjectRC
 public:
    /** @name Constants and Types */
    //@{
+
    /** What is the status of a given message in the folder?
        Recent messages are those that we never saw in a listing
        before. Once we open a folder, the messages will no longer be
@@ -314,6 +168,7 @@ public:
       /// the special value for msgview meaning not to quote anything at all
       static const MessageView *NO_QUOTE;
    };
+
    //@}
 
    /** @name Static functions, implemented in MailFolder.cpp */
@@ -457,34 +312,6 @@ public:
    //@}
 
    /**
-     @name Conversion to textual representation helpers
-   */
-   //@{
-
-   /** Utility function to get a textual representation of a message
-       status.
-
-       @param message flags
-       @return string representation
-   */
-   static String ConvertMessageStatusToString(int status);
-
-   /**
-     Returns the string containing the size as it should be shown to the user.
-
-     @param sizeBytes the size of the message in bytes
-     @param sizeLines the size of message in lines (only if text)
-     @param show how should we show the size?
-     @return string containing the text for display
-    */
-   static String SizeToString(unsigned long sizeBytes,
-                              unsigned long sizeLines = 0,
-                              MessageSizeShow show = MessageSize_Automatic,
-                              bool verbose = false);
-
-   //@}
-
-   /**
      @name Replying/forwarding to the messages
     */
    //@{
@@ -617,6 +444,7 @@ public:
 
    /** Folder capabilities querying */
    //@{
+
    /// Does the folder need a working network to be accessed?
    virtual bool NeedsNetwork(void) const
    {
@@ -783,11 +611,12 @@ public:
                                                 SEARCH_UNDELETED,
                                     MsgnoType last = 0) const = 0;
 
-   /** Search messages for certain criteria.
-       @return UIdArray with UIds of matching messages, caller must
-       free it
+   /**
+     Search messages for certain criteria.
+
+     @return UIdArray with UIds of matching messages, caller must free it
    */
-   virtual UIdArray *SearchMessages(const class SearchCriterium *crit) = 0;
+   virtual UIdArray *SearchMessages(const SearchCriterium *crit) = 0;
 
    //@}
 
@@ -1030,7 +859,7 @@ public:
    virtual wxFrame *GetInteractiveFrame() const = 0;
 
    /// Returns the shared log circle object used for error analysis
-   static MLogCircle& GetLogCircle(void) { return ms_LogCircle; }
+   static MLogCircle& GetLogCircle(void);
    //@}
 
    /** @name Update control
@@ -1057,9 +886,6 @@ protected:
    /// Close the folder
    virtual void Close(void) = 0;
 
-   /// the helper class for determining the exact error msg from cclient log
-   static MLogCircle ms_LogCircle;
-
    /// the folder for which we had set default interactive frame
    static String ms_interactiveFolder;
 
@@ -1073,141 +899,6 @@ private:
 
 // MailFolder_obj is a smart reference to MailFolder
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
-
-// ----------------------------------------------------------------------------
-// MFSuspendInteractivity: resets the folders interactive frame thus suppresing
-//                         any dialogs/... during the life time of this object
-// ----------------------------------------------------------------------------
-
-class MFSuspendInteractivity
-{
-public:
-   // we will DecRef() the mail folder which must be !NULL
-   MFSuspendInteractivity(MailFolder *mf)
-   {
-      m_mf = mf;
-      if ( m_mf )
-      {
-         m_frameOld = mf->SetInteractiveFrame(NULL);
-      }
-      else
-      {
-         FAIL_MSG( "NULL folder in MFInteractiveLock" );
-      }
-   }
-
-   ~MFSuspendInteractivity()
-   {
-      if ( m_mf )
-      {
-         (void)m_mf->SetInteractiveFrame(m_frameOld);
-
-         m_mf->DecRef();
-      }
-   }
-
-private:
-   MailFolder *m_mf;
-   wxFrame *m_frameOld;
-};
-
-// ----------------------------------------------------------------------------
-// Various helper classes
-// ----------------------------------------------------------------------------
-
-/** This class temporarily locks a mailfolder */
-class MailFolderLock
-{
-public:
-   /// Attempts to lock the folder.
-   MailFolderLock(const MailFolder *mf)
-      { m_Mf = mf; m_Locked = mf->Lock(); }
-   /// Automatically releases lock.
-   ~MailFolderLock()
-      { if(m_Mf) m_Mf->UnLock(); }
-   /// Call this to check that we have a lock.
-   bool Locked(void) { return m_Locked; }
-private:
-   const MailFolder *m_Mf;
-   bool              m_Locked;
-};
-
-
-/** This class holds information about a single folder. */
-class FolderListingEntry
-{
-public:
-   /// The folder's name.
-   virtual const String &GetName(void) const = 0;
-   /// The folder's attribute.
-   virtual long GetAttribute(void) const = 0;
-   virtual ~FolderListingEntry() {}
-};
-
-KBLIST_DEFINE(FolderListingList, FolderListingEntry);
-
-/** This class holds the listings of a server's folders. */
-class FolderListing
-{
-public:
-   typedef FolderListingList::iterator iterator;
-   /// Return the delimiter character for entries in the hierarchy.
-   virtual char GetDelimiter(void) const = 0;
-   /// Returns the number of entries.
-   virtual size_t CountEntries(void) const = 0;
-   /// Returns the first entry.
-   virtual const FolderListingEntry *
-   GetFirstEntry(FolderListing::iterator &i) const = 0;
-   /// Returns the next entry.
-   virtual const FolderListingEntry *
-   GetNextEntry(FolderListing::iterator &i) const = 0;
-   virtual ~FolderListing() {}
-};
-
-/** Search criterium for searching folder for certain messages. */
-class SearchCriterium
-{
-public:
-   SearchCriterium()
-      {
-         m_What = SC_ILLEGAL;
-      }
-
-   enum Type { SC_ILLEGAL = -1,
-               SC_FULL = 0, SC_BODY, SC_HEADER, SC_SUBJECT, SC_TO,
-               SC_FROM, SC_CC} m_What;
-   bool m_Invert;
-   String m_Key;
-};
-
-/**
-   Formats a message replacing the occurences of the format specifiers with the
-   data. The format specifiers (listed with their meanings) are:
-
-      %f          folder name
-      %t          total number of messages in the folder
-      %n          number of new messages in the folder
-      %r          number of recent messages in the folder
-      %u          number of unseen/unread messages in the folder
-      %%          percent sign
-
-   The function uses MailFolderStatus oassed to it and will fill it if it is in
-   unfilled state and if it needs any of the data in it - so you should reuse
-   the same struct when calling this function several times.if possible.
-
-   @param format the format string
-   @param folderName the full folder name
-   @param status the status struct to use and fill
-   @param mf the mail folder to use, may be NULL (then folderName is used)
-   @return the formatted string
- */
-extern String FormatFolderStatusString(const String& format,
-                                       const String& folderName,
-                                       MailFolderStatus *status,
-                                       const MailFolder *mf = NULL);
-
-// get the sequence string for these messages
-extern String GetSequenceString(const UIdArray *messages);
 
 // ----------------------------------------------------------------------------
 // global (but private to MailFolder) functions
@@ -1228,5 +919,5 @@ extern bool MailFolderCCInit();
 /// shutdown cclient
 extern void MailFolderCCCleanup();
 
-#endif /// MAILFOLDER_H
+#endif // _MAILFOLDER_H
 

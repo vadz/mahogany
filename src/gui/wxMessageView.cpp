@@ -54,6 +54,8 @@
 #include "MsgCmdProc.h"
 #include "FolderView.h"
 
+#include "UIdArray.h"
+
 #include "MessageTemplate.h"
 #include "Composer.h"
 

@@ -38,6 +38,8 @@
 #include "MailFolderCC.h"
 #include "MFolder.h"
 
+#include "LogCircle.h"
+
 #include "MThread.h"
 
 #include "AddressCC.h"
