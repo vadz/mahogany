@@ -646,7 +646,7 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
       }
    }
    mf->Ping(); // update any views
-   mf->EnableNewMailEvents(events, true);
+   mf->EnableNewMailEvents(events, updateCount);
    mf->DecRef();
    if(pd) delete pd;
    return rc;

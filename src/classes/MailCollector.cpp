@@ -219,7 +219,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
 
-   if(m_Count)
+#if 0
+   <if(m_Count)
    {
       // step 1: execute external command if it's configured
       String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
@@ -254,6 +255,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
             MDialog_Message(text, NULL, _("New Mail"));
          }
    }
+#endif
+   
    return rc;
 }
 
@@ -319,7 +322,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       {
          if(mf->SaveMessages(&selections,
                              READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                             true /* isProfile */, true /* update count */))
+                             true /* isProfile */, false /* update count */))
          {
             mf->DeleteMessages(&selections);
             mf->ExpungeMessages();

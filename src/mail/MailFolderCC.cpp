@@ -1024,6 +1024,9 @@ MailFolderCC::Ping(void)
          ProcessEventQueue();
       }
       CC_SetLogLevel(ccl);
+      if(m_NumOfMessages > m_OldMessageCount)
+         RequestUpdate();
+      ProcessEventQueue();
       UnLock();
    }
 }
