@@ -276,9 +276,10 @@ public:
    // starting from now, all methods are for the wxRcptXXX controls only
 
    // change type of this one - called by choice
-   void OnTypeChange(wxComposeView::RecipientType rcptType);
+   virtual void OnTypeChange(wxComposeView::RecipientType rcptType);
 
-   // expand our text - called by the "Expand" button
+   // expand our text: called by the "Expand" button and
+   // wxAddressTextCtrl::OnChar()
    void OnExpand();
 
    // is it enabled (disabled if type == none)?
@@ -318,6 +319,10 @@ public:
 
    virtual wxSizer *CreateControls(wxWindow *parent);
 
+   // notify the composer that the default recipient type changed
+   virtual void OnTypeChange(wxComposeView::RecipientType rcptType);
+
+   // callback for "add new recipient" button
    void OnAdd();
 
    virtual ~wxRcptMainControl();
@@ -375,12 +380,12 @@ private:
 class wxRcptTypeChoice : public wxChoice
 {
 public:
-   wxRcptTypeChoice(wxRcptControl *rcptControls, wxWindow *parent)
+   wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent)
       : wxChoice(parent, -1,
                  wxDefaultPosition, wxDefaultSize,
                  WXSIZEOF(ms_addrTypes), ms_addrTypes)
    {
-      m_rcptControls = rcptControls;
+      m_rcptControl = rcptControl;
    }
 
    // callbacks
@@ -388,7 +393,7 @@ public:
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptControl *m_rcptControls;
+   wxRcptControl *m_rcptControl;
 
    static const wxString ms_addrTypes[wxComposeView::Recipient_Max];
 
@@ -409,12 +414,13 @@ class wxAddressTextCtrl : public wxTextCtrl
 {
 public:
    // ctor
-   wxAddressTextCtrl(wxWindow *parent, wxComposeView *composer)
+   wxAddressTextCtrl(wxWindow *parent,
+                     wxRcptControl *rcptControl)
       : wxTextCtrl(parent, -1, "",
                    wxDefaultPosition, wxDefaultSize,
                    wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
    {
-      m_composeView = composer;
+      m_rcptControl = rcptControl;
    }
 
    // expand the text in the control using the address book(s)
@@ -425,11 +431,13 @@ public:
    void OnEnter(wxCommandEvent& event);
 
 protected:
-   wxComposeView *GetComposer() const { return m_composeView; }
+   // accessors for the derived classes
+   wxComposeView *GetComposer() const { return m_rcptControl->GetComposer(); }
+   wxRcptControl *GetRcptControl() const { return m_rcptControl; }
 
 private:
-   // the composer
-   wxComposeView *m_composeView;
+   // the recipient control we're part of
+   wxRcptControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
 };
@@ -442,18 +450,16 @@ private:
 class wxMainAddressTextCtrl : public wxAddressTextCtrl
 {
 public:
-   wxMainAddressTextCtrl(wxRcptMainControl *rcptControls, wxWindow *parent)
-      : wxAddressTextCtrl(parent, rcptControls->GetComposer())
+   // we do need wxRcptMainControl and not any wxRcptControl here, see OnEnter
+   wxMainAddressTextCtrl(wxWindow *parent, wxRcptMainControl *rcptControl)
+      : wxAddressTextCtrl(parent, rcptControl)
       {
-         m_rcptControls = rcptControls;
       }
 
    // callbacks
    void OnEnter(wxCommandEvent& event);
 
 private:
-   wxRcptMainControl *m_rcptControls;
-
    DECLARE_EVENT_TABLE()
 };
 
@@ -464,19 +470,15 @@ private:
 class wxExtraAddressTextCtrl : public wxAddressTextCtrl
 {
 public:
-   wxExtraAddressTextCtrl(wxRcptControl *rcptControls, wxWindow *parent)
-      : wxAddressTextCtrl(parent, rcptControls->GetComposer())
+   wxExtraAddressTextCtrl(wxRcptControl *rcptControl, wxWindow *parent)
+      : wxAddressTextCtrl(parent, rcptControl)
       {
-         m_rcptControls = rcptControls;
       }
 
    // callbacks
    void OnUpdateUI(wxUpdateUIEvent& event);
 
 private:
-   // the back pointer to the entire group of controls
-   wxRcptControl *m_rcptControls;
-
    DECLARE_EVENT_TABLE()
 };
 
@@ -487,7 +489,7 @@ private:
 class wxRcptExpandButton : public wxBitmapButton
 {
 public:
-   wxRcptExpandButton(wxRcptControl *rcptControls, wxWindow *parent)
+   wxRcptExpandButton(wxRcptControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
                        GetTransparentBitmap("tb_lookup"),
@@ -495,17 +497,17 @@ public:
                        wxDefaultSize,
                        wxBORDER_NONE)
       {
-         m_rcptControls = rcptControls;
+         m_rcptControl = rcptControl;
 
          SetToolTip(_("Expand the address using address books"));
       }
 
    // callback
-   void OnButton(wxCommandEvent&) { m_rcptControls->OnExpand(); }
+   void OnButton(wxCommandEvent&) { m_rcptControl->OnExpand(); }
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptControl *m_rcptControls;
+   wxRcptControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
 };
@@ -517,7 +519,7 @@ private:
 class wxRcptAddButton : public wxBitmapButton
 {
 public:
-   wxRcptAddButton(wxRcptMainControl *rcptControls, wxWindow *parent)
+   wxRcptAddButton(wxRcptMainControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
                        GetTransparentBitmap("tb_new"),
@@ -525,17 +527,17 @@ public:
                        wxDefaultSize,
                        wxBORDER_NONE)
       {
-         m_rcptControls = rcptControls;
+         m_rcptControl = rcptControl;
 
          SetToolTip(_("Create a new recipient entry"));
       }
 
    // callback
-   void OnButton(wxCommandEvent&) { m_rcptControls->OnAdd(); }
+   void OnButton(wxCommandEvent&) { m_rcptControl->OnAdd(); }
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptMainControl *m_rcptControls;
+   wxRcptMainControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
 };
@@ -548,7 +550,7 @@ private:
 class wxRcptRemoveButton : public wxBitmapButton
 {
 public:
-   wxRcptRemoveButton(wxRcptExtraControl *rcptControls, wxWindow *parent)
+   wxRcptRemoveButton(wxRcptExtraControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
                        GetTransparentBitmap("tb_trash"),
@@ -556,17 +558,17 @@ public:
                        wxDefaultSize,
                        wxBORDER_NONE)
       {
-         m_rcptControls = rcptControls;
+         m_rcptControl = rcptControl;
 
          SetToolTip(_("Delete this address from the message recipients list"));
       }
 
    // callback
-   void OnButton(wxCommandEvent&) { m_rcptControls->OnRemove(); }
+   void OnButton(wxCommandEvent&) { m_rcptControl->OnRemove(); }
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptExtraControl *m_rcptControls;
+   wxRcptExtraControl *m_rcptControl;
 
    DECLARE_EVENT_TABLE()
 };
@@ -735,25 +737,31 @@ wxRcptControl::~wxRcptControl()
 
 void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
 {
-   m_composeView->OnRcptTypeChange(rcptType);
+   // nothing to do here
 }
 
 void wxRcptControl::OnExpand()
 {
-   m_text->DoExpand();
+   Composer::RecipientType rcptType = m_text->DoExpand();
+   if ( rcptType != Composer::Recipient_None &&
+         rcptType != Composer::Recipient_Max )
+   {
+      // update the type of the choice control
+      SetType(rcptType);
+   }
 }
 
 bool wxRcptControl::IsEnabled() const
 {
-   return m_choice->GetSelection() != wxComposeView::Recipient_None;
+   return m_choice->GetSelection() != Composer::Recipient_None;
 }
 
-wxComposeView::RecipientType wxRcptControl::GetType() const
+Composer::RecipientType wxRcptControl::GetType() const
 {
-   return (wxComposeView::RecipientType)m_choice->GetSelection();
+   return (Composer::RecipientType)m_choice->GetSelection();
 }
 
-void wxRcptControl::SetType(wxComposeView::RecipientType rcptType)
+void wxRcptControl::SetType(Composer::RecipientType rcptType)
 {
    m_choice->SetSelection(rcptType);
 
@@ -771,7 +779,7 @@ wxString wxRcptControl::GetValue() const
 
 wxAddressTextCtrl *wxRcptMainControl::CreateText(wxWindow *parent)
 {
-   return new wxMainAddressTextCtrl(this, parent);
+   return new wxMainAddressTextCtrl(parent, this);
 }
 
 wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
@@ -787,6 +795,11 @@ wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
    GetChoice()->SetSelection(Composer::Recipient_To);
 
    return sizer;
+}
+
+void wxRcptMainControl::OnTypeChange(Composer::RecipientType rcptType)
+{
+   GetComposer()->OnRcptTypeChange(rcptType);
 }
 
 void wxRcptMainControl::OnAdd()
@@ -852,8 +865,7 @@ const wxString wxRcptTypeChoice::ms_addrTypes[] =
 void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 {
    // notify the others (including the composer indirectly)
-   m_rcptControls->
-      OnTypeChange((wxComposeView::RecipientType)event.GetSelection());
+   m_rcptControl->OnTypeChange((Composer::RecipientType)event.GetSelection());
 
    event.Skip();
 }
@@ -896,7 +908,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          // if the text is empty instead.
          if ( !GetValue().empty() )
          {
-            DoExpand();
+            m_rcptControl->OnExpand();
 
             // don't call event.Skip()
             return;
@@ -916,7 +928,7 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand()
 {
    String text = GetValue();
 
-   Composer::RecipientType rcptType = m_composeView->ExpandRecipient(&text);
+   Composer::RecipientType rcptType = GetComposer()->ExpandRecipient(&text);
 
    if ( rcptType != Composer::Recipient_None )
    {
@@ -942,7 +954,9 @@ void wxMainAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
    }
    else // add the contents of the control as a new recipient
    {
-      m_rcptControls->OnAdd();
+      // cast is safe as our rcpt control is always of this class (see ctor
+      // signature)
+      ((wxRcptMainControl *)GetRcptControl())->OnAdd();
    }
 }
 
@@ -953,7 +967,7 @@ void wxMainAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
 void wxExtraAddressTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
 {
    // enable the text only if it has a valid type
-   event.Enable(m_rcptControls->IsEnabled());
+   event.Enable(GetRcptControl()->IsEnabled());
 }
 
 // ----------------------------------------------------------------------------
@@ -1641,6 +1655,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
    Composer::RecipientType addrType = Composer::Recipient_Max;
    if ( textOrig.length() > 3 )
    {
+      // check for to:, cc: or bcc: prefix
       if ( textOrig[2u] == ':' )
       {
          if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
