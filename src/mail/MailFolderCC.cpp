@@ -81,11 +81,13 @@ String MailFolderCC::MF_pwd;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
+/// a variable disabling all events
+static bool mm_disable_callbacks = false;
 
 // be quiet
-static inline void CCQuiet(void) { mm_ignore_errors = true; }
+static inline void CCQuiet(bool disableCallbacks = false) { mm_ignore_errors = true; if(disableCallbacks) mm_disable_callbacks = true;}
 // normal logging
-static inline void CCVerbose(void) { mm_ignore_errors = false; }
+static inline void CCVerbose(void) { mm_ignore_errors = mm_disable_callbacks = false; }
 
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
@@ -420,13 +422,13 @@ MailFolderCC::Ping(void)
 
 MailFolderCC::~MailFolderCC()
 {
-   CCQuiet();
+   CCQuiet(true); // disable all callbacks!
    mail_check(m_MailStream); // update flags, etc, .newsrc
-   CCVerbose();
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
    if( m_MailStream ) mail_close(m_MailStream);
+   CCVerbose();
    if( m_Listing ) delete [] m_Listing;
 
    RemoveFromMap(m_MailStream);
@@ -1347,6 +1349,8 @@ extern "C"
 void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
@@ -1355,6 +1359,8 @@ mm_searched(MAILSTREAM *stream, unsigned long number)
 void
 mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
@@ -1363,6 +1369,8 @@ mm_expunged(MAILSTREAM *stream, unsigned long number)
 void
 mm_flags(MAILSTREAM *stream, unsigned long number)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Flags);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
@@ -1371,7 +1379,9 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 void
 mm_notify(MAILSTREAM *stream, char *str, long
              errflg)
-{
+{ 
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify);
    evptr->m_args[0].m_str = new String(str);
    evptr->m_args[1].m_long = errflg;
@@ -1381,6 +1391,8 @@ mm_notify(MAILSTREAM *stream, char *str, long
 void
 mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List);
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
@@ -1391,6 +1403,8 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub);
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
@@ -1401,6 +1415,8 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
+   if(mm_disable_callbacks)
+      return;
    // update count immediately to reflect change:
    MailFolderCC::mm_exists(stream, number);
 }
@@ -1408,6 +1424,8 @@ mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
    MailFolderCC::QueueEvent(evptr);
 }
@@ -1415,6 +1433,8 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
+   if(mm_disable_callbacks)
+      return;
    String *msg = new String(str);
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
@@ -1436,6 +1456,8 @@ mm_log(char *str, long errflg)
 void
 mm_dlog(char *str)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog);
    evptr->m_args[0].m_str = new String(str);
    MailFolderCC::QueueEvent(evptr);
@@ -1444,6 +1466,8 @@ mm_dlog(char *str)
 void
 mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
+   if(mm_disable_callbacks)
+      return;
    // Cannot use event system, has to be called while c-client is working.
    MailFolderCC::mm_login(mb, user, pwd, trial);
 }
@@ -1451,24 +1475,32 @@ mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 void
 mm_critical(MAILSTREAM *stream)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::mm_critical(stream);
 }
 
 void
 mm_nocritical(MAILSTREAM *stream)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::mm_nocritical(stream);
 }
 
 long
 mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 {
+   if(mm_disable_callbacks)
+      return;
    return MailFolderCC::mm_diskerror(stream,  errorcode, serious);
 }
 
 void
 mm_fatal(char *str)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::mm_fatal(str);
 }
 
@@ -1477,6 +1509,8 @@ mm_fatal(char *str)
 static void
 mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 {
+   if(mm_disable_callbacks)
+      return;
    MailFolderCC::OverviewHeader(stream, uid, ov);
 }
 
