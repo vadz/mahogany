@@ -882,8 +882,7 @@ class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
    CHECK(m_Listing, NULL, "no listing");
-
-   m_Listing->IncRef();
+   if(m_Listing) m_Listing->IncRef();
    return m_Listing;
 }
 
