@@ -742,13 +742,20 @@ static void protect_name(char *d, char *s)
 {
    while(*s) {
       switch(*s) {
-         case '/': *(d++) = '=';
+         case '/': 
+            *(d++) = '=';
             *(d++) = '2';
             *(d++) = 'F';
             break;
-         case '=': *(d++) = '=';
+         case '=': 
+            *(d++) = '=';
             *(d++) = '3';
             *(d++) = 'D';
+            break;
+         case ',': 
+            *(d++) = '=';
+            *(d++) = '2';
+            *(d++) = 'C';
             break;
          case '\x0A':
             *(d++) = '=';
@@ -970,6 +977,7 @@ PalmOSModule::Backup(void)
          return;
       }
 
+      // check whether this might be a database we have to ignore
       if (m_IncrBackup)
          if (stat(name, &statb) == 0)
             if (info.modifyDate == statb.st_mtime) {
@@ -980,6 +988,39 @@ PalmOSModule::Backup(void)
       if (!m_BackupAll && !(info.flags & dlpDBFlagBackup)) {
          RemoveFromList(name, orig_files, ofile_total);
          continue;
+      }
+
+      // check exclude list
+      int pos;
+      char *fname = name + strlen(m_BackupDir);
+
+      pos = m_BackupExcludeList.find(fname, 0);
+      if (pos >= 0) {
+         // the found string is only valid, if it is either surrounded by commata or
+         // with string start or end
+         bool valid = false;
+
+         if (pos == 0) 
+            valid = true;  // first entry in ExcludeList
+         else 
+            if ((m_BackupExcludeList.Mid(pos-1, 1)).Cmp(",") == 0) 
+               if (pos == 1)
+                  valid = true;  // should never happen (string starts with kommata)
+               else
+                  if ((m_BackupExcludeList.Mid(pos-2, 1)).Cmp("\\") != 0) 
+                     valid = true; // before entry is a kommata that is not escaped
+         
+         // now we´ve made sure that the entry in the exclude list started correctly,
+         // so let´s check whether it ends correctly, too
+         if (valid) 
+            if (m_BackupExcludeList.Len() != (pos + strlen(fname )))
+               if ((m_BackupExcludeList.Mid(pos + strlen(fname),1)).Cmp(",") != 0)
+                  valid = false; // it was neither the last entry nor did it end with komma
+         
+         if (valid) {
+            RemoveFromList(name, orig_files, ofile_total);
+            continue;
+         }
       }
 
       // create file
