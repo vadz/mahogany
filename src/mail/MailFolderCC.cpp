@@ -1709,7 +1709,7 @@ void MailFolderCC::CreateFileFolder()
 
    // we either already tried to create it once or it had existed even before
    Profile_obj profile(m_mfolder->GetProfile());
-   if ( profile->HasEntry() )
+   if ( profile->HasEntry(MP_FOLDER_TRY_CREATE) )
    {
       profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
    }
