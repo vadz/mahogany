@@ -180,6 +180,7 @@ public:
       MiscVar_Date,        // insert the date in the default format
       MiscVar_Cursor,      // position the cursor here after template expansion
       MiscVar_To,          // the recipient name
+      MiscVar_Cc,          // the copied-to recipient name
       MiscVar_Subject,     // the message subject (without any "Re"s)
 
       // all entries from here only apply to the reply/forward/followup
@@ -221,6 +222,7 @@ public:
       OriginalHeader_FirstName,
       OriginalHeader_LastName,
       OriginalHeader_To,
+      OriginalHeader_Cc,
       OriginalHeader_ReplyTo,
       OriginalHeader_Newsgroups,
       OriginalHeader_Domain,
@@ -587,6 +589,7 @@ const wxChar *VarExpander::ms_templateMiscVars[] =
    _T("date"),
    _T("cursor"),
    _T("to"),
+   _T("cc"),
    _T("subject"),
    _T("quote"),
    _T("quote822"),
@@ -614,6 +617,7 @@ const wxChar *VarExpander::ms_templateOriginalVars[] =
    _T("firstname"),
    _T("lastname"),
    _T("to"),
+   _T("cc"),
    _T("replyto"),
    _T("newsgroups"),
    _T("domain"),
@@ -759,6 +763,7 @@ VarExpander::ExpandMisc(const String& name,
 
          // some shortcuts for the values of the "original:" category
       case MiscVar_To:
+      case MiscVar_Cc:
       case MiscVar_Subject:
       case MiscVar_Quote:
       case MiscVar_Quote822:
@@ -1059,6 +1064,10 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
          case OriginalHeader_To:
             *value = m_msg->GetAddressesString(MAT_TO);
+            break;
+
+         case OriginalHeader_Cc:
+            *value = m_msg->GetAddressesString(MAT_CC);
             break;
 
          case OriginalHeader_PersonalName:
