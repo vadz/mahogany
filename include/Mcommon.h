@@ -61,6 +61,13 @@
 #include <wx/intl.h>
 
 // ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+/// function which will close the splash screen if it's (still) opened
+extern void CloseSplash();
+
+// ----------------------------------------------------------------------------
 // message logging macros
 // ----------------------------------------------------------------------------
 
@@ -75,21 +82,19 @@
 #  define M_LOG_ERROR   wxLOG_Warning
 #  define M_LOG_URGENT  wxLOG_Error
 
-#  define ERRORMESSAGE(arg)   wxLogError arg
-#  define SYSERRMESSAGE(arg)  wxLogSysError arg
-#  define FATALERROR(arg)     wxLogFatalError arg
-#  define INFOMESSAGE(arg)    wxLogInfo arg
+#  define ERRORMESSAGE(arg)   CloseSplash(); wxLogError arg
+#  define SYSERRMESSAGE(arg)  CloseSplash(); wxLogSysError arg
+#  define FATALERROR(arg)     CloseSplash(); wxLogFatalError arg
+#  define INFOMESSAGE(arg)    CloseSplash(); wxLogInfo arg
 #  define LOGMESSAGE(arg)     wxLogGeneric arg
 #  define STATUSMESSAGE(arg)  wxLogStatus arg
 #  ifdef DEBUG
 #     define   DBGMESSAGE(arg)    wxLogDebug arg
 #     define   TRACEMESSAGE(arg)  wxLogTrace arg
-#     define   DBGLOG(arg)        wxLogTrace(wxString(M_EMPTYSTRING) << arg)
 #     define   INTERNALERROR(arg) wxLogFatalError arg    // aborts
 #  else
 #     define   DBGMESSAGE(arg)
 #     define   TRACEMESSAGE(arg)
-#     define   DBGLOG(arg)
 #     define   INTERNALERROR(arg) wxLogError arg         // just log the error
 #  endif
 

@@ -798,6 +798,7 @@ wxMApp::OnInit()
                           "locale '%s', do you want to retry next time?",
                           locale);
             }
+
             if ( wxMessageBox(msg, "Error",
                               wxICON_STOP | wxYES_NO) != wxYES )
             {
@@ -955,17 +956,12 @@ int wxMApp::OnExit()
    delete m_OnlineManager;
 
    // FIXME this is not the best place to do it, but at least we're safe
-   //       because we now that by now it's unused any more
+   //       because we know that by now it's unused any more
    Profile::DeleteGlobalConfig();
 
    MObjectRC::CheckLeaks();
    MObject::CheckLeaks();
 
-   // delete the previously active log target (it's the one we had set before
-   // here, but in fact it doesn't even matter: if somebody installed another
-   // one, we will delete his log object and his code will delete ours)
-   wxLog *log = wxLog::SetActiveTarget(NULL);
-   delete log;
    return 0;
 }
 
@@ -1151,8 +1147,10 @@ wxMApp::LoadModules(void)
    {
       module = MModule::LoadModule(**i);
       if(module == NULL)
+      {
          ERRORMESSAGE((_("Cannot load module '%s'."),
                        (**i).c_str()));
+      }
       else
       {
          // remember it so we can decref it before exiting
@@ -1733,13 +1731,6 @@ void wxMApp::ShowLog(bool doShow)
    {
       if ( doShow )
       {
-         // close the splash first as otherwise we get a subtle bug: the
-         // splash screen installs its own (temp) log handler and deletes itin
-         // its dtor, however if we install ourselves as the log handler in
-         // the meanwhile, _we_ will be deleted - which we don't want to
-         // happen
-         CloseSplash();
-
          // before creating the log window, force auto creation of the default
          // GUI logger so that log window would pass messages to it
          (void)wxLog::GetActiveTarget();

@@ -889,55 +889,6 @@ private:
    wxAboutWindow *m_window;
 };
 
-// VZ: there is a fatal bug in this code currently which I don't quite
-//     understand (it wasn't there before so it's due to someone else's
-//     changes): when the about frame is closed, it deletes the wrong pointer
-//     - the log window one instead of the splash killer as the log window is
-//     created *after* the about frame and so replaces the log target it
-//     installs. All this is so confusing that I start to think it's not a
-//     good idea to mess up with the log targets at this moment at all - and,
-//     at any rate, it currently just crashes, so I disable all this stuff for
-//     now
-
-#undef USE_SPLASH_LOG
-
-#ifdef USE_SPLASH_LOG
-// getting log messages when splash screen is shown is extremely annoying,
-// because there is no (easy) way to close the msg box hidden by the splash
-// screen, so install a temporary log redirector which will close the splash
-// screen before showing any messages
-class SplashKillerLog : public wxLog
-{
-public:
-   SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
-   virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
-
-   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
-   {
-      // all previous ones will show a msg box
-      if ( level < wxLOG_Status )
-      {
-         CloseSplash();
-      }
-
-      if ( m_logOld )
-      {
-         // the cast is bogus, just to be able to call protected DoLog()
-         ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
-      }
-   }
-
-   virtual void Flush()
-   {
-      if ( m_logOld )
-         m_logOld->Flush();
-   }
-
-private:
-   wxLog *m_logOld;
-};
-#endif // USE_SPLASH_LOG
-
 #include "wx/html/htmlwin.h"
 
 // the main difference is that it goes away as soon as you click it
@@ -985,15 +936,7 @@ class wxAboutFrame : public wxFrame
 {
 public:
    wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame()
-   {
-      g_pSplashScreen = NULL;
-#ifdef USE_SPLASH_LOG
-      wxLog *log = wxLog::SetActiveTarget(NULL);
-      delete log;
-      // this will remove SplashKillerLog and restore the original one
-#endif // USE_SPLASH_LOG
-   }
+   virtual ~wxAboutFrame();
 
    void OnClose(wxCloseEvent& event)
    {
@@ -1004,6 +947,8 @@ public:
 
 private:
    wxAboutWindow *m_Window;
+
+   wxLog *m_logSplash;
 
    DECLARE_EVENT_TABLE()
 };
@@ -1198,16 +1143,16 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 
    g_pSplashScreen = (wxMFrame *)this;
 
-#ifdef USE_SPLASH_LOG
-   wxLog::SetActiveTarget(new SplashKillerLog);
-#endif // USE_SPLASH_LOG
-
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
 
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
 }
 
+wxAboutFrame::~wxAboutFrame()
+{
+   g_pSplashScreen = NULL;
+}
 
 // ----------------------------------------------------------------------------
 // Splash screen stuff

@@ -285,9 +285,6 @@ MDialog_ShowTip(const wxWindow *parent);
 // the global pointer to the splash screen (NULL if there is no flash screen)
 extern class wxFrame *g_pSplashScreen;
 
-/// function which will close the splash screen if it's (still) opened
-extern void CloseSplash();
-
 /// edit an existing folder profile (wrapper around ShowFolderPropertiesDialog)
 void
 MDialog_FolderProfile(const wxWindow *parent, const String& folderName);
