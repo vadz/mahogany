@@ -55,6 +55,8 @@
 
 #include "MsgCmdProc.h"
 
+#include "SpamFilter.h"
+
 #include "gui/wxDialogLayout.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -83,6 +85,7 @@ extern const MOption MP_REPLY_QUOTE_ORIG;
 
 extern const MPersMsgBox *M_MSGBOX_CONFIRM_RESEND;
 extern const MPersMsgBox *M_MSGBOX_CONFIRM_ZAP;
+extern const MPersMsgBox *M_MSGBOX_ZAP_SPAM;
 
 // ----------------------------------------------------------------------------
 // MsgCmdProcImpl
@@ -198,6 +201,12 @@ protected:
    /// Show the string uniquely identifying the message
    void ShowUIDL(UIdType uid);
 #endif // EXPERIMENTAL_show_uid
+
+   /// Reclassify the message as [non] spam
+   void ReclassifyAsSpam(const UIdArray& uids, bool isSpam);
+
+   /// Check whether the message is spam
+   void CheckIfSpam(const UIdArray& uids);
 
    //@}
 
@@ -878,6 +887,15 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          ShowMIMEDialog(messages[0]);
          break;
 
+      case WXMENU_MSG_SPAM_MARK:
+      case WXMENU_MSG_SPAM_UNMARK:
+         ReclassifyAsSpam(messages, cmd == WXMENU_MSG_SPAM_MARK);
+         break;
+
+      case WXMENU_MSG_SPAM_CHECK:
+         CheckIfSpam(messages);
+         break;
+
       default:
          // try passing it to message view
          if ( !m_msgView->DoMenuCommand(cmd) )
@@ -917,11 +935,10 @@ MsgCmdProcImpl::ShowRawText(UIdType uid)
 {
    String text;
 
-   Message *msg = GetMessage(uid);
+   Message_obj msg(GetMessage(uid));
    if ( msg )
    {
       msg->WriteToString(text, true);
-      msg->DecRef();
    }
 
    if ( text.empty() )
@@ -963,6 +980,86 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    (void)dialog.ShowModal();
 
    msg->DecRef();
+}
+
+void MsgCmdProcImpl::ReclassifyAsSpam(const UIdArray& uids, bool isSpam)
+{
+   wxString msg = isSpam ? _("Reclassifiying as spam...")
+                         : _("Reclassifiying as ham...");
+   wxLogStatus(GetFrame(), msg);
+
+   // first mark the messages as spam/ham
+   const size_t count = uids.Count();
+   for ( size_t i = 0; i < count; i++ )
+   {
+      Message_obj msg(GetMessage(uids[i]));
+      if ( !msg )
+      {
+         wxLogError(_("Failed to retrieve the message %#08x to reclassify."),
+                    uids[i]);
+         continue;
+      }
+
+      SpamFilter::ReclassifyAsSpam(*msg, isSpam);
+   }
+
+   wxLogStatus(GetFrame(), msg + _("done"));
+
+   // second, permanently delete all the spam
+   if ( isSpam && MDialog_YesNoDialog
+        (
+            String::Format
+            (
+               _("Do you want to permanently delete the %lu messages "
+                 "marked as spam now?"),
+               (unsigned long)count
+            ),
+            GetFrame(),
+            MDIALOG_YESNOTITLE,
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_ZAP_SPAM
+        ) )
+   {
+      // TODO: make this action configurable (i.e. could be moved to another
+      //       folder and it should also be possible to define an action for
+      //       ham messages, e.g. move them back to inbox)
+      DeleteAndExpungeMessages(uids);
+   }
+}
+
+void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
+{
+   wxString status(_("Checking message using spam filters..."));
+   wxLogStatus(GetFrame(), status);
+
+   const size_t n = uids.Count();
+   for ( size_t i = 0; i < n; i++ )
+   {
+      Message_obj msg(GetMessage(uids[i]));
+      if ( !msg )
+      {
+         wxLogError(_("Failed to retrieve the message to check in spam filter."));
+         continue;
+      }
+
+      float prob = 1.;
+      String str(_("The message with subject \"%s\" from \"%s\"\n"));
+      if ( SpamFilter::CheckIfSpam(*msg, &prob) )
+      {
+         wxLogWarning(str + _("seems to be a spam (probability: %0.3f)"),
+                      msg->Subject().c_str(),
+                      msg->From().c_str(),
+                      prob);
+      }
+      else // !spam
+      {
+         wxLogMessage(str + _("doesn't seem to be a spam"),
+                      msg->Subject().c_str(),
+                      msg->From().c_str());
+      }
+   }
+
+   wxLogStatus(GetFrame(), status + _("done"));
 }
 
 void
