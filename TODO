@@ -8,7 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9		Send outbox before closing windows!
+9	KB	duplicate password prompt: only ask on demand when
+		needed, then set it. Like it is now, re-opening an
+		open folder prompts again - not necessary.
 
 9		wxLayout PS printing text overlaps as font sizes are
 		wrong. Install different AFM set?
