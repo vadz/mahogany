@@ -570,7 +570,7 @@ wxMApp::Help(int id, wxWindow *parent)
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));
       helpfile = GetGlobalDir()+"/doc";
 #else // Windows
-      helpfile = GetGlobalDir()+"\\Mahogany.hlp";
+      helpfile = GetGlobalDir()+"\\doc\\Mahogany.hlp";
 #endif // Unix/Windows
       // initialise the help system
       ok = m_HelpController->Initialize(helpfile);

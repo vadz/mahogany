@@ -39,8 +39,8 @@ Name: "{app}\locale"
 Source: "Release\M.EXE"; DestDir: "{app}"
 
 ; --- help
-Source: "doc\Manual\Hlp\Mahogany.hlp"; DestDir: "{app}"
-Source: "doc\Manual\Hlp\Mahogany.cnt"; DestDir: "{app}"
+Source: "doc\Hlp\Mahogany.hlp"; DestDir: "{app}\doc"
+Source: "doc\Hlp\Mahogany.cnt"; DestDir: "{app}\doc"
 
 ; --- python support
 ; "python15.dll";   "{app}\python15.dll"; copy_normal; 
@@ -90,6 +90,7 @@ Source: "doc\copying"; DestDir: "{app}\doc"
 
 [Icons]
 Name: "{group}\Mahogany"; Filename: "{app}\M.EXE"; WorkingDir: "{app}"
+Name: "{group}\Mahogany Help"; Filename: "{app}\doc\Mahogany.hlp"
 
 [Registry]
 Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekey
