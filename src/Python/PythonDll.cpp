@@ -50,9 +50,7 @@
 
 inline String GetDllName(const String& basename)
 {
-    String fullname = basename;
-    fullname << '.' << wxDllLoader::GetDllExt();
-    return fullname;
+    return basename + wxDllLoader::GetDllExt();
 }
 
 #ifdef OS_WIN
