@@ -20,7 +20,7 @@ dnl
 AC_DEFUN(AM_PATH_WXCONFIG,
 [
   dnl do we have wx-config name: it can be wx-config or wxd-config or ...
-  if test x${WX_CONFIG_NAME+set} = xset ; then
+  if test x${WX_CONFIG_NAME+set} != xset ; then
      WX_CONFIG_NAME=wx-config
   fi
 
