@@ -3308,6 +3308,12 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
                              wxRESIZE_BORDER |
 #endif // MSW/GTK
                              wxSTAY_ON_TOP);
+
+#ifdef __WXMSW__
+   m_frame->SetBackgroundColour(wxSystemSettings::
+                                GetSystemColour(wxSYS_COLOUR_BTNFACE));
+#endif // __WXMSW__
+
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
    m_labelText = new wxStaticText(m_frame, -1, text);
    sizer->Add(m_labelText, 0, wxALL & ~wxRIGHT, 10);
