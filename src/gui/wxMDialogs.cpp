@@ -308,12 +308,13 @@ public:
     : wxDialog(parent, -1, wxString("Mahogany: ") + title, position, size,
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
                | wxSYSTEM_MENU | wxMINIMIZE_BOX
-               | wxMAXIMIZE_BOX | wxTHICK_FRAME) // make it resizealbe
+               | wxMAXIMIZE_BOX | wxTHICK_FRAME ) // make it resizealbe
     {
        // create controls
-       m_text = new wxTextCtrl(this, -1, text,
+       m_text = new wxTextCtrl(this, -1, "",
                                wxPoint(0, 0), size,
                                wxTE_MULTILINE | wxTE_READONLY);
+       m_text->SetValue(text);
        m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
                               wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
