@@ -1102,10 +1102,11 @@ void wxMFrame::OnPrintSetupPS()
    wxPrintDialog printerDialog(this, & printDialogData);
 
    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
-   printerDialog.ShowModal();
-
-   (*((wxMApp *)mApplication)->GetPrintData())
-      = printerDialog.GetPrintDialogData().GetPrintData();
+   if ( printerDialog.ShowModal() == wxID_OK )
+   {
+      (*((wxMApp *)mApplication)->GetPrintData())
+         = printerDialog.GetPrintDialogData().GetPrintData();
+   }
 }
 
 #endif // USE_PS_PRINTING
@@ -1158,10 +1159,11 @@ void wxMFrame::OnPageSetup()
 #else
       wxGenericPageSetupDialog pageSetupDialog(this, & data);
 #endif
-      pageSetupDialog.ShowModal();
-
-      data = pageSetupDialog.GetPageSetupData();
-      //FIXME orientation = data.GetOrientation();
+      if ( pageSetupDialog.ShowModal() == wxID_OK )
+      {
+         data = pageSetupDialog.GetPageSetupData();
+         //FIXME orientation = data.GetOrientation();
+      }
 }
 
 void wxMFrame::OnPageSetupPS()
@@ -1172,7 +1174,7 @@ void wxMFrame::OnPageSetupPS()
       //data.SetOrientation(orientation);
 
       wxGenericPageSetupDialog pageSetupDialog(this, & data);
-      pageSetupDialog.ShowModal();
+      (void)pageSetupDialog.ShowModal();
 
       //FIXME orientation = pageSetupDialog.GetPageSetupData().GetOrientation();
 }

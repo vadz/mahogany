@@ -2729,7 +2729,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    {
       // now show the dialog allowing to choose those entries whih the user
       // wants to reenable
-      if ( dlg.ShowModal() )
+      if ( dlg.ShowModal() == wxID_OK )
       {
          const wxArrayInt& selections = dlg.GetSelections();
          size_t count = selections.GetCount();
@@ -2835,9 +2835,9 @@ wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
 extern
 bool ShowLicenseDialog(wxWindow *parent)
 {
-   Profile *p = mApplication->GetProfile();
-   wxLicenseDialog dlg(p, parent);
-   return ( dlg.ShowModal() == wxID_OK );
+   wxLicenseDialog dlg(mApplication->GetProfile(), parent);
+
+   return dlg.ShowModal() == wxID_OK;
 }
 
 // ----------------------------------------------------------------------------

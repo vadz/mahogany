@@ -903,7 +903,7 @@ MAppBase::InitDirectories()
                                   M_MSGBOX_ASK_SPECIFY_DIR) )
          {
             wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
-            if ( dlg.ShowModal() )
+            if ( dlg.ShowModal() == wxID_OK )
             {
                m_globalDir = dlg.GetPath();
             }

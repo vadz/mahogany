@@ -39,17 +39,16 @@ enum MFDialogTest
    ORC_T_SmallerThan,      //                        smaller
    ORC_T_OlderThan,        // date of the message is older than argument
    ORC_T_NewerThan,        //                        newer
-   ORC_T_IsSpam,           // doesn't pass RBL test [BROKEN]
+   ORC_T_IsSpam,           // doesn't pass some heuristic SPAM tests
    ORC_T_Python,           // return value of Python script
    ORC_T_MatchRegEx,       // target matches RE in argument
    ORC_T_ScoreAbove,       // score of the message is greater than argument
    ORC_T_ScoreBelow,       //                         less
-   ORC_T_IsToMe,           // the message is addresses to one of my addresses
-   ORC_T_8BitSubject,      // the message has too many 8 bit chars in subject
-   ORC_T_Illegal,// illegal must not occur
+   ORC_T_IsToMe,           // the message is addressed to one of my addresses
+   ORC_T_Illegal,          // illegal must not occur
    ORC_T_Max = ORC_T_Illegal
 };
-   
+
 enum MFDialogTarget
 {
    ORC_W_Illegal = -1,

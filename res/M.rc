@@ -127,6 +127,7 @@ access		BITMAP "access.bmp"
 #ifdef USE_MODULES
 calendar	BITMAP "calendar.bmp"
 #endif
+spam		BITMAP "spam.bmp"
 
 // Folder tree bitmaps (16x16)
 folder_inbox		BITMAP "folder_inbox.bmp"

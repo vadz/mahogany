@@ -141,13 +141,12 @@ const char * ORC_T_Names[] =
    "size() < ",         // ORC_T_SmallerThan
    "(now()-date()) > ", // ORC_T_OlderThan
    "(now()-date()) < ", // ORC_T_NewerThan
-   "isspam()",          // ORC_T_IsSpam
+   "isspam(",           // ORC_T_IsSpam
    "python(",           // ORC_T_Python
    "matchregexi(",      // ORC_T_MatchRegEx
    "score() > ",        // ORC_T_ScoreAbove
    "score() < ",        // ORC_T_ScoreBelow
-   "istome()",        // ORC_T_IsToMe
-   "subj8bit()",        // ORC_T_8BitSubject
+   "istome()",          // ORC_T_IsToMe
    NULL
 };
 
@@ -167,13 +166,12 @@ static unsigned char ORC_T_Flags[] =
    ORC_F_NeedsArg,                     // ORC_T_SmallerThan,
    ORC_F_NeedsArg,                     // ORC_T_OlderThan,
    ORC_F_NeedsArg,                     // ORC_T_NewerThan,
-   0,                                  // ORC_T_IsSpam,
+   ORC_F_NeedsArg,                     // ORC_T_IsSpam,
    ORC_F_NeedsArg,                     // ORC_T_Python,
    ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegEx,
    ORC_F_NeedsArg,                     // ORC_T_ScoreAbove,
    ORC_F_NeedsArg,                     // ORC_T_ScoreBelow
    0,                                  // ORC_T_IsToMe
-   0,                                  // ORC_T_8BitSubject
 };
 
 bool FilterTestNeedsArgument(int test)
@@ -206,7 +204,7 @@ const char * ORC_W_Names[] =
    NULL
 };
 
-static const char * OAC_T_Names[] = 
+static const char * OAC_T_Names[] =
 {
    "delete(",
    "copy(",
@@ -253,7 +251,7 @@ MFDialogComponent::WriteTest(void)
    String program;
 
    CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program, "illegal filter test" );
-   
+
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
    switch(m_Logical)
@@ -276,7 +274,7 @@ MFDialogComponent::WriteTest(void)
    program << '(';
    if ( m_Inverted )
       program << '!';
-         
+
 
    program << ORC_T_Names[m_Test];
 
@@ -327,7 +325,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    }
    else
       m_Logical = ORC_L_None;
-   
+
    if(*cptr++ != '(')
       return FALSE;
 
@@ -367,7 +365,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    if(needsTarget && needsArgument
       && *cptr++ != ',')
       return FALSE;
-   
+
    m_Argument = "";
    if(needsArgument)
    {
@@ -412,21 +410,21 @@ public:
          MOcheck();
          return m_Tests[n].m_Inverted;
       }
-   
+
    /// Return the n-th logical operator, i.e. the one after the n-th test:
    virtual MFDialogLogical GetLogical(size_t n) const
       {
          MOcheck();
          return m_Tests[n].m_Logical;
       }
-   
+
    /// Return the n-th test's argument if any:
    virtual String GetTestArgument(size_t n) const
       {
          MOcheck();
          return m_Tests[n].m_Argument;
       }
-   
+
    virtual MFDialogTarget GetTestTarget(size_t n) const
       {
          MOcheck();
@@ -479,7 +477,7 @@ public:
    bool ReadSettings(const String & str);
    String WriteSettings(void) const;
    String WriteActionSettings(void) const;
-   
+
    String WriteAction(void) const;
 
    MOBJECT_DEBUG(MFDialogSettingsImpl)
@@ -592,7 +590,7 @@ MFDialogSettingsImpl::ReadSettings(const String & istr)
    }
    if(m_Tests.Count() == 0)
       return FALSE;
-   
+
    // now read the action settings:
    long a = strutil_readNumber(str, &rc);
    if(! rc) return FALSE;
@@ -611,7 +609,7 @@ MFDialogSettingsImpl::WriteSettings(void) const
    str << WriteActionSettings();
    return str;
 }
-   
+
 String
 MFDialogSettingsImpl::WriteActionSettings(void) const
 {
@@ -625,10 +623,10 @@ MFDialogSettingsImpl::WriteRule(void) const
 {
    ASSERT(m_Tests.Count() > 0);
    String program = "if(";
-   
+
    for(size_t i = 0; i < m_Tests.Count(); i++)
       program << m_Tests[i].WriteTest();
-   
+
    program << ')'
            << '{'
            << WriteAction()
@@ -684,10 +682,10 @@ public:
 
       m_dirty = true;
    }
-   
+
    static MFilterFromProfile * Create(Profile *p)
       { return new MFilterFromProfile(p); }
-   
+
    MOBJECT_DEBUG(MFilter)
 
 protected:
@@ -721,7 +719,7 @@ protected:
 
          m_dirty = false;
       }
-   
+
    virtual ~MFilterFromProfile()
       {
          if ( m_dirty )
@@ -747,11 +745,11 @@ protected:
          SafeDecRef(m_Settings);
          m_Profile->DecRef();
       }
-   
+
 private:
    void UpdateSettings(void)
       {
-         // old style settings: 
+         // old style settings:
          if ( m_SettingsStr.Length() != 0 )
          {
             // parse the settings string

@@ -57,6 +57,8 @@
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"
+#include "gui/wxOptionsPage.h"
+#include "gui/wxOptionsDlg.h"
 #include "gui/wxSelectionDlg.h"
 
 // ----------------------------------------------------------------------------
@@ -80,6 +82,9 @@ enum
    Button_Edit,
    Button_Rename,
    Button_Copy,
+
+   Button_MoreTests,
+   Button_LessTests,
 
    // for wxOneFilterDialog
    Text_Program = 200
@@ -112,7 +117,6 @@ wxString ORC_Types[] =
    gettext_noop("Score above"),
    gettext_noop("Score below"),
    gettext_noop("Sent to me"),
-   gettext_noop("Has 8 bit subject"),
 };
 
 static const size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
@@ -202,14 +206,17 @@ public:
    // returns TRUE if the format string was changed
    bool HasChanges() const { return !(*m_FilterData == m_OriginalFilterData);}
 
+   // update the program text from the controls values
+   void UpdateProgram();
+
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);
-   void OnButton(wxCommandEvent& event);
+   void OnButtonMoreOrLess(wxCommandEvent& event);
    void OnProgramTextUpdate(wxCommandEvent& event);
 
    void OnText(wxCommandEvent& event);
-   void OnChoice(wxCommandEvent& event) { UpdateProgram(event); }
-   void OnCheckBox(wxCommandEvent& event) { UpdateProgram(event); }
+   void OnChoice(wxCommandEvent& event) { UpdateProgram(); }
+   void OnCheckBox(wxCommandEvent& event) { UpdateProgram(); }
 
 protected:
    void AddOneControl();
@@ -219,9 +226,6 @@ protected:
 
    // helper of TransferDataToWindow() and UpdateProgram()
    bool DoTransferDataFromWindow(MFilterDesc *filterData);
-
-   // update the program text from the controls values
-   void UpdateProgram(wxCommandEvent& event);
 
    // true if we have a simple (expressed with dialog controls) filter
    bool m_isSimple;
@@ -253,14 +257,19 @@ protected:
    wxEnhancedPanel *m_Panel;
 
 private:
+   DECLARE_DYNAMIC_CLASS(wxOneFilterDialog)
    DECLARE_EVENT_TABLE()
 };
+
+// abstract because we don't want to create it via wxRTTI
+IMPLEMENT_ABSTRACT_CLASS(wxOneFilterDialog, wxManuallyLaidOutDialog)
 
 BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
    EVT_UPDATE_UI(-1, wxOneFilterDialog::OnUpdateUI)
 
    // More/Less button
-   EVT_BUTTON(-1, wxOneFilterDialog::OnButton)
+   EVT_BUTTON(Button_MoreTests, wxOneFilterDialog::OnButtonMoreOrLess)
+   EVT_BUTTON(Button_LessTests, wxOneFilterDialog::OnButtonMoreOrLess)
 
    // changes to the program text
    EVT_TEXT(Text_Program, wxOneFilterDialog::OnProgramTextUpdate)
@@ -269,6 +278,32 @@ BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
    EVT_TEXT(-1, wxOneFilterDialog::OnText)
    EVT_CHOICE(-1, wxOneFilterDialog::OnChoice)
    EVT_CHECKBOX(-1, wxOneFilterDialog::OnCheckBox)
+END_EVENT_TABLE()
+
+// ----------------------------------------------------------------------------
+// CritDetailsButton: a helper button used by OneCritControl
+// ----------------------------------------------------------------------------
+
+class CritDetailsButton : public wxButton
+{
+public:
+   CritDetailsButton(wxWindow *parent, OneCritControl *ctrl)
+      : wxButton(parent, -1, _("Configure &details..."))
+      {
+         m_ctrl = ctrl;
+      }
+
+protected:
+   void OnClick(wxCommandEvent& event);
+
+private:
+   OneCritControl *m_ctrl;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(CritDetailsButton, wxButton)
+   EVT_BUTTON(-1, CritDetailsButton::OnClick)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -309,45 +344,74 @@ public:
 
    String GetArgument() const
    {
-      return m_Argument->GetValue();
+      return GetTest() == ORC_T_IsSpam ? GetSpamTestArgument()
+                                       : m_Argument->GetValue();
    }
 
+   // enable the controls corresponding to the current m_Type value
    void UpdateUI();
-   void Disable()
-   {
-      m_Not->Disable();
-      m_Type->Disable();
-      m_Argument->Disable();
-      m_Where->Disable();
-      if ( m_Logical )
-         m_Logical->Disable();
-   }
+
+   // show the details dialog: called by CritDetailsButton::OnClick()
+   void ShowDetails();
+
+   // disable all the controls
+   void Disable();
 
    /// layout the current controls under the window *last
    void LayoutControls(wxWindow **last);
    wxWindow *GetLastCtrl() { return m_Where; }
 
 private:
-   wxCheckBox *m_Not;   // Not
-   wxChoice   *m_Type;  // "Match", "Match substring", "Match RegExp",
-                        // "Greater than", "Smaller than", "Older than"; "Newer than"
-   wxTextCtrl *m_Argument; // string, number of days or bytes
-   wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
-   wxChoice   *m_Logical;
+   // create the spam button and position it correctly
+   void CreateSpamButton();
 
-   wxWindow   *m_Parent; // the parent for all these controls
+   // initialize m_checkXXX vars(called from CreateSpamButton())
+   void InitSpamOptions();
+
+   // return the string containing the argument for the isspam() test
+   String GetSpamTestArgument() const;
+
+   // the controls which are always shown
+
+   wxCheckBox *m_Not;      // invert the condition if checked
+   wxChoice   *m_Logical;  // corresponds to ORC_Logical
+   wxChoice   *m_Type;     // corresponds to ORC_Types
+
+   // the controls which are shown for most of ORC_T_XXX values
+   wxTextCtrl *m_Argument; // string, number of days or bytes
+   wxChoice   *m_Where;    // corresponds to ORC_Where
+
+   // special controls
+   wxButton   *m_btnSpam;  // configure the ORC_T_IsSpam test
+
+   // the parent for all these controls
+   wxWindow   *m_Parent;
+
+
+   // the spam test data
+   bool m_check8bit:1;
+   bool m_checkKorean:1;
+   bool m_checkXAuthWarn:1;
+#ifdef USE_RBL
+   bool m_checkRBL:1;
+#endif // USE_RBL
 };
+
+wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
+wxCOMPILE_TIME_ASSERT( ORC_TypesCount == ORC_T_Max, MismatchInTestTypes );
+wxCOMPILE_TIME_ASSERT( ORC_WhereCount == ORC_W_Max, MismatchInTargets );
 
 OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 {
    m_Parent = parent;
 
+   // don't create it yet as it might be not needed at all, so postpone it
+   m_btnSpam = NULL;
+
    // only create the logical condition (And/Or) control if we have something
    // to combine this one with
    if ( previous )
    {
-      wxASSERT_MSG( ORC_LogicalCount == ORC_L_Max, "forgot to update something" );
-
       m_Logical = new wxChoice(parent, -1, wxDefaultPosition,
                                wxDefaultSize, ORC_LogicalCount,
                                ORC_Logical);
@@ -359,12 +423,10 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
       m_Not = new wxCheckBox(parent, -1, _("Not"));
    }
 
-   wxASSERT_MSG( ORC_TypesCount == ORC_T_Max, "forgot to update something" );
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_TypesCount, ORC_Types);
    m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
 
-   wxASSERT_MSG( ORC_WhereCount == ORC_W_Max, "forgot to update something" );
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCount, ORC_Where);
 
@@ -385,12 +447,17 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 
 OneCritControl::~OneCritControl()
 {
-   // we need a destructor to clean up our controls:
+   // we need a destructor to clean up our controls because even though they
+   // would be deleted by their parent later, it would mean that
+   // adding/removing a test would result in "temporarily" leaking memory
    delete m_Logical;
    delete m_Not;
    delete m_Type;
+
    delete m_Argument;
    delete m_Where;
+
+   delete m_btnSpam;
 }
 
 void
@@ -442,29 +509,82 @@ OneCritControl::LayoutControls(wxWindow **last)
 }
 
 void
+OneCritControl::CreateSpamButton()
+{
+   ASSERT_MSG( !m_btnSpam, "CreateSpamButton() called twice?" );
+
+   InitSpamOptions();
+
+   m_btnSpam = new CritDetailsButton(m_Parent, this);
+
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
+   c->centreY.SameAs(m_Not, wxCentreY);
+   c->height.AsIs();
+   m_btnSpam->SetConstraints(c);
+
+   m_Parent->Layout();
+}
+
+void
 OneCritControl::UpdateUI()
 {
    int test = m_Type->GetSelection();
-   if ( test != -1 )
+   switch ( test )
    {
-      bool enableArg = FilterTestNeedsArgument(test);
-      if ( !enableArg )
-      {
-         // don't leave anything in this field if it's not needed for the
-         // current test
-         //
-         // NB: don't call SetValue() unconditionally because it results in
-         //     another callback generated by wxGTK even if the text control is
-         //     already empty!
-         if ( !m_Argument->GetValue().empty() )
-         {
-            m_Argument->SetValue("");
-         }
-      }
+      case -1:
+         // no selection -- do nothing
+         break;
 
-      m_Argument->Enable(enableArg);
-      m_Where->Enable(FilterTestNeedsTarget(test));
+      case ORC_T_IsSpam:
+         if ( !m_btnSpam )
+         {
+            CreateSpamButton();
+         }
+
+         m_btnSpam->Show();
+         m_Argument->Hide();
+         m_Where->Hide();
+         break;
+
+      default:
+         bool enableArg = FilterTestNeedsArgument(test);
+         if ( !enableArg )
+         {
+            // don't leave anything in this field if it's not needed for the
+            // current test
+            //
+            // NB: don't call SetValue() unconditionally because it results in
+            //     another callback generated by wxGTK even if the text control is
+            //     already empty!
+            if ( !m_Argument->GetValue().empty() )
+            {
+               m_Argument->SetValue("");
+            }
+         }
+
+         if ( m_btnSpam )
+         {
+            m_btnSpam->Hide();
+            m_Argument->Show();
+            m_Where->Show();
+         }
+
+         m_Argument->Enable(enableArg);
+         m_Where->Enable(FilterTestNeedsTarget(test));
    }
+}
+
+void
+OneCritControl::Disable()
+{
+   m_Not->Disable();
+   m_Type->Disable();
+   m_Argument->Disable();
+   m_Where->Disable();
+   if ( m_Logical )
+      m_Logical->Disable();
 }
 
 void
@@ -478,6 +598,161 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    m_Type->SetSelection(settings.GetTest(n));
    m_Where->SetSelection(settings.GetTestTarget(n));
    m_Argument->SetValue(settings.GetTestArgument(n));
+}
+
+// ----------------------------------------------------------------------------
+// spam details dialog code
+// ----------------------------------------------------------------------------
+
+// spam details page options
+#define MP_SPAM_8BIT_SUBJECT "Spam8BitSubject"
+#define MP_SPAM_8BIT_SUBJECT_D 1l
+
+#define MP_SPAM_KOREAN_CSET  "SpamKoreanCharset"
+#define MP_SPAM_KOREAN_CSET_D  1l
+
+#define MP_SPAM_X_AUTH_WARN  "SpamXAuthWarning"
+#define MP_SPAM_X_AUTH_WARN_D  0l
+
+#ifdef USE_RBL
+#define MP_SPAM_RBL          "SpamIsInRBL"
+#define MP_SPAM_RBL_D          0l
+#endif // USE_RBL
+
+#define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
+#define CONFIG_NONE()  ConfigValueNone()
+
+static const ConfigValueDefault gs_SpamPageConfigValues[] =
+{
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SPAM_8BIT_SUBJECT),
+   CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
+   CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
+#ifdef USE_RBL
+   CONFIG_ENTRY(MP_SPAM_RBL),
+#endif // USE_RBL
+};
+
+#undef CONFIG_ENTRY
+#undef CONFIG_NONE
+
+static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
+{
+   { gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
+                  "Please choose the ones you'd like to be used by checking\n"
+                  "the corresponding entries.\n"
+                  "\n"
+                  "So the message is considered to be spam if it has..."),
+                  wxOptionsPage::Field_Message, -1 },
+   { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1},
+   { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1},
+   { gettext_noop("X-Authentification-&Warning header"), wxOptionsPage::Field_Bool, -1},
+#ifdef USE_RBL
+   { gettext_noop("been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
+#endif // USE_RBL
+};
+
+static const wxOptionsPageDesc gs_SpamPageDesc =
+   wxOptionsPageDesc(
+      // title and image
+      gettext_noop("Details of spam detection"),
+      "spam",
+
+      // help id (TODO)
+      -1,
+
+      // the fields description
+      gs_SpamPageFieldInfos,
+      gs_SpamPageConfigValues,
+      WXSIZEOF(gs_SpamPageFieldInfos)
+   );
+
+
+void
+OneCritControl::InitSpamOptions()
+{
+   m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
+   m_checkKorean = MP_SPAM_KOREAN_CSET_D;
+
+   m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
+
+#ifdef USE_RBL
+   m_checkRBL = MP_SPAM_RBL_D;
+#endif // USE_RBL
+}
+
+void
+OneCritControl::ShowDetails()
+{
+   // we use the global app profile to pass the settings to/from the options
+   // page because like this we can reuse the options page classes easily
+   Profile *profile = mApplication->GetProfile();
+
+   // transfer data to dialog
+   profile->writeEntry(MP_SPAM_8BIT_SUBJECT, m_check8bit);
+   profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
+   profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
+#ifdef USE_RBL
+   profile->writeEntry(MP_SPAM_RBL, m_checkRBL);
+#endif // USE_RBL
+
+   if ( ShowCustomOptionsDialog(gs_SpamPageDesc, profile, GetFrame(m_Parent)) )
+   {
+      m_check8bit = profile->readEntry(MP_SPAM_8BIT_SUBJECT, 0l) != 0;
+      m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
+      m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
+#ifdef USE_RBL
+      m_checkRBL = profile->readEntry(MP_SPAM_RBL, 0l) != 0;
+#endif // USE_RBL
+
+      wxOneFilterDialog *dlg = GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
+      CHECK_RET( dlg, "should be a child of wxOneFilterDialog" );
+
+      dlg->UpdateProgram();
+   }
+   //else: cancelled
+
+   // don't keep this stuff in profile, we don't use it except here
+   profile->DeleteEntry(MP_SPAM_8BIT_SUBJECT);
+   profile->DeleteEntry(MP_SPAM_KOREAN_CSET);
+   profile->DeleteEntry(MP_SPAM_X_AUTH_WARN);
+#ifdef USE_RBL
+   profile->DeleteEntry(MP_SPAM_RBL);
+#endif // USE_RBL
+}
+
+static void AddToSpamArgument(String& s, const char *arg)
+{
+   if ( !s.empty() )
+      s += ':';
+
+   s += arg;
+}
+
+String
+OneCritControl::GetSpamTestArgument() const
+{
+   String s;
+
+   CHECK( m_btnSpam, s, "shouldn't be called if spam button not used" );
+
+   if ( m_check8bit )
+      AddToSpamArgument(s, "subj8bit");
+   if ( m_checkKorean )
+      AddToSpamArgument(s, "korean");
+   if ( m_checkXAuthWarn )
+      AddToSpamArgument(s, "xauthwarn");
+#ifdef USE_RBL
+   if ( m_checkRBL )
+      AddToSpamArgument(s, "rbl");
+#endif // USE_RBL
+
+   return s;
+}
+
+void CritDetailsButton::OnClick(wxCommandEvent& WXUNUSED(event))
+{
+   m_ctrl->ShowDetails();
 }
 
 // ----------------------------------------------------------------------------
@@ -724,8 +999,8 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_ActionControl = new OneActionControl(canvas);
    m_IfMessage = new wxStaticText(canvas, -1, _("If message..."));
    m_DoThis = new wxStaticText(canvas, -1, _("Then do this:"));
-   m_ButtonMore = new wxButton(canvas, -1, _("&More"));
-   m_ButtonLess = new wxButton(canvas, -1, _("&Fewer"));
+   m_ButtonMore = new wxButton(canvas, Button_MoreTests, _("&More"));
+   m_ButtonLess = new wxButton(canvas, Button_LessTests, _("&Fewer"));
    m_ButtonMore->SetToolTip(_("Add another condition"));
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
 
@@ -808,7 +1083,7 @@ wxOneFilterDialog::RemoveOneControl()
    delete m_CritControl[m_nControls];
 }
 
-void wxOneFilterDialog::UpdateProgram(wxCommandEvent& event)
+void wxOneFilterDialog::UpdateProgram()
 {
    if ( !m_initializing )
    {
@@ -829,8 +1104,6 @@ void wxOneFilterDialog::UpdateProgram(wxCommandEvent& event)
          settings->DecRef();
       }
    }
-
-   event.Skip();
 }
 
 void
@@ -877,40 +1150,31 @@ wxOneFilterDialog::OnProgramTextUpdate(wxCommandEvent& event)
 void
 wxOneFilterDialog::OnText(wxCommandEvent& event)
 {
+   event.Skip();
+
    if ( event.GetEventObject() == m_NameCtrl )
    {
       // avoid updating the program unnecessarily if only the filter name was
       // changed
-      event.Skip();
-
       return;
    }
 
-   UpdateProgram(event);
+   UpdateProgram();
 }
 
 void
-wxOneFilterDialog::OnButton(wxCommandEvent &event)
+wxOneFilterDialog::OnButtonMoreOrLess(wxCommandEvent &event)
 {
-   if ( event.GetEventObject() == m_ButtonLess )
+   if ( event.GetId() == Button_LessTests )
    {
       RemoveOneControl();
 
       // make the and/or clause disappear
-      UpdateProgram(event);
-
-      // UpdateProgram() calls Skip() on the event, undo it
-      event.Skip(FALSE);
+      UpdateProgram();
    }
-   else if ( event.GetEventObject() == m_ButtonMore )
+   else // Button_MoreTests
    {
       AddOneControl();
-   }
-   else
-   {
-      event.Skip();
-
-      return;
    }
 
    LayoutControls();

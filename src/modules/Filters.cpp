@@ -1864,32 +1864,59 @@ static bool findIP(String &header,
 
 #endif
 
-static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
+static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 {
-   // standard check:
-   if(args->Count() != 0)
-      return Value("");
+   String arg;
+   switch ( args->Count() )
+   {
+      case 0:
+         // for compatibility: before, this function didn't take any arguments
+         // and only checked the RBL
+         arg = "rbl";
+         break;
 
-   bool rc = false;
+      case 1:
+         arg = args->GetArg(0)->Evaluate().GetString();
+         break;
+
+      default:
+         return Value();
+   }
+
+   wxArrayString tests = strutil_restore_array(arg);
+   size_t count = tests.GetCount();
+
+   if ( !count )
+   {
+      wxLogWarning(_("No SPAM tests configured, please edit this filter rule."));
+
+      return Value();
+   }
 
    Message_obj msg = p->GetMessage();
-   if ( msg )
+   if ( !msg )
+      return false;
+
+   String value;
+
+   bool rc = false;
+   for ( size_t n = 0; n < count && !rc; n++ )
    {
-      String value;
-
-#ifdef USE_RBL
-      msg->GetHeaderLine("Received", value);
-
-      int a,b,c,d;
-      String testHeader = value;
-
-      while ( !rc && !testHeader.empty() )
+      const wxString& test = tests[n];
+      if ( test == "subj8bit" )
       {
-         if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
+         // consider that the message is a spem if its subject contains more
+         // than half of non alpha numeric chars
+         String subject = msg->Subject();
+         size_t num8bit = 0,
+                max8bit = subject.length() / 2;
+         for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
+               *pc;
+               pc++ )
          {
-            for ( int i = 0; gs_RblSites[i]; ++i )
+            if ( *pc > 127 || *pc == '?' || *pc == '!' )
             {
-               if ( CheckRBL(a,b,c,d,gs_RblSites[i]) )
+               if ( num8bit++ == max8bit )
                {
                   rc = true;
                   break;
@@ -1897,15 +1924,29 @@ static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
             }
          }
       }
-
-      if ( !rc )
+      else if ( test == "korean" )
       {
-         testHeader = value;
+         rc = msg->GetHeaderLine("Content-Type", value) &&
+               value.Lower().find("ks_c_5601-1987") != String::npos;
+      }
+      else if ( test == "xauthwarn" )
+      {
+         // consider that only spams have this header
+         rc = msg->GetHeaderLine("X-Authentication-Warning", value);
+      }
+#ifdef USE_RBL
+      else if ( test == "rbl" )
+      {
+         msg->GetHeaderLine("Received", value);
+
+         int a,b,c,d;
+         String testHeader = value;
+
          while ( !rc && !testHeader.empty() )
          {
-            if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
+            if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
             {
-               for ( int i = 0; gs_RblSites[i] ; ++i )
+               for ( int i = 0; gs_RblSites[i]; ++i )
                {
                   if ( CheckRBL(a,b,c,d,gs_RblSites[i]) )
                   {
@@ -1915,16 +1956,29 @@ static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
                }
             }
          }
+
+         if ( !rc )
+         {
+            testHeader = value;
+            while ( !rc && !testHeader.empty() )
+            {
+               if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
+               {
+                  for ( int i = 0; gs_RblSites[i] ; ++i )
+                  {
+                     if ( CheckRBL(a,b,c,d,gs_RblSites[i]) )
+                     {
+                        rc = true;
+                        break;
+                     }
+                  }
+               }
+            }
+         }
+
+         /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
       }
-
-      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
-
-      if ( !rc )
 #endif // USE_RBL
-      {
-         // consider that only spams have this header
-         rc = msg->GetHeaderLine("X-Authentication-Warning", value);
-      }
    }
 
    return rc;
@@ -2033,35 +2087,6 @@ static Value func_matchregex(ArgList *args, FilterRuleImpl *p)
 static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
 {
    return DoMatchRegEx(args, p, wxRE_ICASE);
-}
-
-static Value func_subj8bit(ArgList *args, FilterRuleImpl *p)
-{
-   if(args->Count() != 0)
-      return Value(false);
-
-   Message_obj msg = p->GetMessage();
-   if(! msg)
-      return Value(false);
-
-   // consider that the subject is 8 bit if it contains more than half of 8 bit
-   // chars
-   String subject = msg->Subject();
-   size_t num8bit = 0,
-          max8bit = subject.length() / 2;
-   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
-         *pc; pc++ )
-   {
-      if ( *pc > 127 || *pc == '?' || *pc == '!' )
-      {
-         if ( num8bit++ == max8bit )
-         {
-            return Value(true);
-         }
-      }
-   }
-
-   return Value(false);
 }
 
 #ifdef USE_PYTHON
@@ -2496,7 +2521,7 @@ BuiltinFunctions(void)
          Define("date", func_date);
          Define("size", func_size);
          Define("now", func_now);
-         Define("isspam", func_checkSpam);
+         Define("isspam", func_isspam);
          Define("expunge", func_expunge);
          Define("python", func_python);
          Define("matchregexi", func_matchregexi);
@@ -2504,7 +2529,6 @@ BuiltinFunctions(void)
          Define("score", func_score);
          Define("addscore", func_addscore);
          Define("istome", func_istome);
-         Define("subj8bit", func_subj8bit);
 #ifdef TEST
          Define("nargs", func_nargs);
          Define("arg", func_arg);

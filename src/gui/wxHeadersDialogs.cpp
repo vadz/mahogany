@@ -448,7 +448,7 @@ void wxComposeHeadersDialog::OnEditCustomHeaders(wxCommandEvent& event)
 {
    wxCustomHeadersDialog dlg(m_profile, GetParent());
 
-   dlg.ShowModal();
+   (void)dlg.ShowModal();
 }
 
 bool wxComposeHeadersDialog::TransferDataToWindow()

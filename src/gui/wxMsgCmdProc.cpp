@@ -934,7 +934,7 @@ MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
    wxMIMETreeDialog dialog(part, GetFrame(),
                            m_msgView->GetUId() == uid ? m_msgView : NULL);
 
-   dialog.ShowModal();
+   (void)dialog.ShowModal();
 
    msg->DecRef();
 }

@@ -1303,7 +1303,7 @@ void wxOptionsEditDialog::OnOK(wxCommandEvent& /* event */)
          m_profileForButtons = NULL;
       }
 
-      EndModal(TRUE);
+      EndModal(wxID_OK);
    }
    //else: test done from DoApply() failed, don't close the dialog
    //      nor free m_profileForButtons (this will be done in OnCancel or in
@@ -1371,7 +1371,7 @@ void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
       m_profileForButtons = NULL;
    }
 
-   EndModal(FALSE);
+   EndModal(wxID_CANCEL);
 }
 
 void wxOptionsEditDialog::OnHelp(wxCommandEvent& /* event */)

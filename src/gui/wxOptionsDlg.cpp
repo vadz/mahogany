@@ -4166,7 +4166,7 @@ bool ShowRestoreDefaultsDialog(Profile *profile, wxFrame *parent)
    return dlg.HasChanges();
 }
 
-void ShowCustomOptionsDialog(size_t nPages,
+bool ShowCustomOptionsDialog(size_t nPages,
                              const wxOptionsPageDesc *pageDesc,
                              Profile *profile,
                              wxFrame *parent)
@@ -4175,7 +4175,7 @@ void ShowCustomOptionsDialog(size_t nPages,
    dlg.CreateAllControls();
    dlg.Layout();
 
-   (void)dlg.ShowModal();
+   return dlg.ShowModal() == wxID_OK;
 }
 
 void ShowIdentityDialog(const wxString& identity, wxFrame *parent)
