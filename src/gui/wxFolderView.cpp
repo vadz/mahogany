@@ -1160,7 +1160,7 @@ void wxFolderListCtrl::CreateColumns()
 
    for ( n = widths.GetCount(); n < count; n++ )
    {
-      widths.Add(widths[n]);
+      widths.Add(widthsStd[n]);
    }
 
    // add the new columns
