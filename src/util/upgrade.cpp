@@ -45,6 +45,7 @@
 #include <wx/confbase.h>
 #include <wx/utils.h>         // wxGetFullHostName()
 #include <wx/dialup.h>        // for IsAlwaysOnline()
+#include <wx/datetime.h>      // for wxDateTime::Now()
 
 #define USE_WIZARD
 
@@ -143,6 +144,9 @@ struct InstallWizardData
    // helpers page
    String browser;
 #endif // OS_UNIX
+
+   // did we run the wizard at all?
+   bool done;
 } gs_installWizardData;
 
 // the base class for our wizards pages: it allows to return page ids (and not
@@ -585,7 +589,13 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
 {
-   return m_useWizard ? InstallWizard_IdentityPage : InstallWizard_Done;
+   if ( m_useWizard )
+      return InstallWizard_IdentityPage;
+
+   // remember that we didn't really run the wizard
+   gs_installWizardData.done = false;
+
+   return InstallWizard_Done;
 }
 
 void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent& event)
@@ -936,6 +946,9 @@ bool RunInstallWizard()
    gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
    gs_installWizardData.nntp = READ_APPCONFIG(MP_NNTPHOST);
 
+   // assume we don't skip the wizard by default
+   gs_installWizardData.done = true;
+
    wxIconManager *iconManager = mApplication->GetIconManager();
    wxWizard *wizard = wxWizard::Create
                       (
@@ -949,23 +962,23 @@ bool RunInstallWizard()
    memset(gs_wizardPages, 0, sizeof(gs_wizardPages));
 
    gs_wizardPages[InstallWizard_WelcomePage] = new InstallWizardWelcomePage(wizard);
+
+   // the wizard may be either cancelled or a checkbox may be used to skip it
+   // entirely (besides, this is confusing - the checkbox is probably useless,
+   // except that it allows to cancel it without having to answer the
+   // confirmation...)
+   bool wizardDone = false;
    if ( wizard->RunWizard(gs_wizardPages[InstallWizard_WelcomePage]) )
    {
-      // transfer the wizard settings from InstallWizardData
+      wizardDone = gs_installWizardData.done;
+   }
 
-      ProfileBase * profile = mApplication->GetProfile();
-      profile->writeEntry(MP_RETURN_ADDRESS,
-                          gs_installWizardData.email);
-      profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
-
-      // write the values even if they're empty as otherwise we'd try to
-      // create folders with default names - instead of not creating them at
-      // all
-      profile->writeEntry(MP_POPHOST, gs_installWizardData.pop);
-      profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
-      profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
-      profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
-
+   // make sure we have some _basic_ things set up whether the wizard ran or
+   // not (basic here meaning that the program will not operate properly
+   // without any of them)
+   ProfileBase *profile = mApplication->GetProfile();
+   if ( wizardDone )
+   {
       // load all modules by default:
       wxString modules = "Filters";
 #ifdef USE_PISOCK
@@ -974,89 +987,132 @@ bool RunInstallWizard()
 #endif // USE_PISOCK
 
       profile->writeEntry(MP_MODULES, modules);
-
-      CompleteConfiguration(gs_installWizardData);
    }
+   else
+   {
+      // assume the simplest possible values for everything
+      gs_installWizardData.useOutbox = false;
+      gs_installWizardData.useTrash = false;
+      gs_installWizardData.useDialUp = false;
+#if USE_PYTHON
+      gs_installWizardData.usePython = false;
+#endif // USE_PYTHON
+#if USE_PISOCK
+      gs_installWizardData.usePalmOs = false;
+#endif // USE_PISOCK
+      gs_installWizardData.collectAllMail = false;
+
+      // don't touch the SMTP server: it won't lead to creation of any
+      // (unwanted) folders, so it doesn't hurt to have the default value
+      gs_installWizardData.pop =
+      gs_installWizardData.imap =
+      gs_installWizardData.nntp = "";
+
+      // also, don't show the tips for the users who skip the wizard
+      profile->writeEntry(MP_SHOWTIPS, 0l);
+   }
+
+   // transfer the wizard settings from InstallWizardData
+   profile->writeEntry(MP_RETURN_ADDRESS, gs_installWizardData.email);
+   profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
+
+   // write the values even if they're empty as otherwise we'd try to create
+   // folders with default names - instead of not creating them at all
+   profile->writeEntry(MP_POPHOST, gs_installWizardData.pop);
+   profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
+   profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
+   profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
+
+   CompleteConfiguration(gs_installWizardData);
 
    wizard->Destroy();
 
    gs_isWizardRunning = false;
    SetupServers();
 
-   // create a welcome message:
+   String mainFolderName = gs_installWizardData.collectAllMail
+                              ? READ_APPCONFIG(MP_NEWMAIL_FOLDER)
+                              : String("INBOX");
+   mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, mainFolderName);
 
-   //MessageCC *msg = Create(
-   String msgFmt =
-      _("From: m-users-subscribe@egroups.com\015\012"
-        "Subject: Welcome to Mahogany!\015\012"
-        "Date: %s\015\012"
-        "\015\012"
-        "Thank you for trying Mahogany!\015\012"
-        "\015\012"
-        "This mail and news client is developed as an OpenSource project by a\015\012"
-        "team of volunteers from around the world.\015\012"
-        "If you would like to contribute to its development, you are\015\012"
-        "always welcome to join in.\015\012"
-        "\015\012"
-        "We also rely on you to report any bugs or wishes for improvements\015\012"
-        "that you may have.\015\012"
-        "\015\012"
-        "Please visit our web pages at http://www.wxwindows.org/Mahogany/\015\012"
-        "\015\012"
-        "Also, reply to this e-mail message and you will automatically be\015\012"
-        "added to the mailing list of Mahogany users, where you will find\015\012"
-        "other users happy to share their experiences with you and help you\015\012"
-        "get started.\015\012"
-        "\015\012"
-        "Your Mahogany Developers Team\015\012"
-        );
+   // create a welcome message unless the user didn't use the wizard (in which
+   // case we assume he is so advanced that he doesn't need this stuff)
+   if ( wizardDone )
+   {
+      MailFolder *mf = MailFolder::OpenFolder(MF_FILE, mainFolderName);
 
-   time_t tt;
-   time(&tt);
-   struct tm *ourtime = localtime(&tt);
-   String timeStr;
-   switch(ourtime->tm_mon)
-   {
-   case  0: timeStr = "Jan"; break;
-   case  1: timeStr = "Feb"; break;
-   case  2: timeStr = "Mar"; break;
-   case  3: timeStr = "Apr"; break;
-   case  4: timeStr = "May"; break;
-   case  5: timeStr = "Jun"; break;
-   case  6: timeStr = "Jul"; break;
-   case  7: timeStr = "Aug"; break;
-   case  8: timeStr = "Sep"; break;
-   case  9: timeStr = "Oct"; break;
-   case 10: timeStr = "Nov"; break;
-   case 11: timeStr = "Dec"; break;
-   default:
-      ; // suppress warning
+      if ( mf )
+      {
+         String msgFmt =
+            _("From: m-users-subscribe@egroups.com\015\012"
+              "Subject: Welcome to Mahogany!\015\012"
+              "Date: %s\015\012"
+              "\015\012"
+              "Thank you for trying Mahogany!\015\012"
+              "\015\012"
+              "This mail and news client is developed as an OpenSource project by a\015\012"
+              "team of volunteers from around the world.\015\012"
+              "If you would like to contribute to its development, you are\015\012"
+              "always welcome to join in.\015\012"
+              "\015\012"
+              "We also rely on you to report any bugs or wishes for improvements\015\012"
+              "that you may have.\015\012"
+              "\015\012"
+              "Please visit our web pages at http://www.wxwindows.org/Mahogany/\015\012"
+              "\015\012"
+              "Also, reply to this e-mail message and you will automatically be\015\012"
+              "added to the mailing list of Mahogany users, where you will find\015\012"
+              "other users happy to share their experiences with you and help you\015\012"
+              "get started.\015\012"
+              "\015\012"
+              "Your Mahogany Developers Team\015\012"
+              );
+
+         // VZ: why do it in such complicated way? could use strftime(), too...
+#if 0
+         time_t tt;
+         time(&tt);
+         struct tm *ourtime = localtime(&tt);
+         String timeStr;
+         switch(ourtime->tm_mon)
+         {
+         case  0: timeStr = "Jan"; break;
+         case  1: timeStr = "Feb"; break;
+         case  2: timeStr = "Mar"; break;
+         case  3: timeStr = "Apr"; break;
+         case  4: timeStr = "May"; break;
+         case  5: timeStr = "Jun"; break;
+         case  6: timeStr = "Jul"; break;
+         case  7: timeStr = "Aug"; break;
+         case  8: timeStr = "Sep"; break;
+         case  9: timeStr = "Oct"; break;
+         case 10: timeStr = "Nov"; break;
+         case 11: timeStr = "Dec"; break;
+         default:
+            ; // suppress warning
+         }
+         timeStr.Printf("%02d %s %d %02d:%02d:%02d",
+                        ourtime->tm_mday,
+                        timeStr.c_str(),
+                        ourtime->tm_year+1900,
+                        ourtime->tm_hour,
+                        ourtime->tm_min,
+                        ourtime->tm_sec);
+#else // 1
+         wxString timeStr = wxDateTime::Now().Format("%d %b %Y %H:%M:%S");
+#endif // 0/1
+
+         String msgString = wxString::Format(msgFmt, timeStr.c_str());
+
+         mf->AppendMessage(msgString);
+         mf->DecRef();
+      }
+      else
+      {
+         FAIL_MSG( "Cannot get main folder?" );
+      }
    }
-   timeStr.Printf("%02d %s %d %02d:%02d:%02d",
-                  ourtime->tm_mday,
-                  timeStr.c_str(),
-                  ourtime->tm_year+1900,
-                  ourtime->tm_hour,
-                  ourtime->tm_min,
-                  ourtime->tm_sec);
-   String msgString; msgString.Printf(msgFmt, timeStr.c_str());
-   MailFolder *mf = NULL;
-   if(gs_installWizardData.collectAllMail)
-   {
-      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-      mf = MailFolder::OpenFolder(MF_FILE, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-   }
-   else
-   {
-      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, "INBOX");
-      mf = MailFolder::OpenFolder(MF_INBOX, "INBOX");
-   }
-   ASSERT_MSG(mf,"Cannot get main folder?");
-   if(mf)
-   {
-      mf->AppendMessage(msgString);
-      mf->DecRef();
-   }
+
    return true;
 }
 
@@ -1153,6 +1209,10 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
                                     _("Trash folder for deleted messages.") ) )
          wxLogError(_("Could not create Trash mailbox."));
       // the rest is done in Update()
+   }
+   else
+   {
+      profile->writeEntry(MP_USE_TRASH_FOLDER, 0l);
    }
 
 
@@ -1660,7 +1720,7 @@ VerifyInbox(void)
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
    }
-#endif
+#endif // OS_WIN
 
    /*
     * Is the newmail folder properly configured?
