@@ -1597,8 +1597,9 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
          return;
    }
 
+   // m_folderType hadn't been updated yet, so use GetCurrentFolderType()!
    int subtype;
-   GetRadioIndexFromFolderType(m_folderType, &subtype);
+   GetRadioIndexFromFolderType(GetCurrentFolderType(sel), &subtype);
 
    m_folderSubtype->SetSelection(subtype);
 }
@@ -1703,7 +1704,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
             // file folders come in several flavours, so choose the default
             // one if no selection yet
             int subtype;
-            switch ( m_folderType )
+            switch ( type )
             {
                default:
                   FAIL_MSG( "unknown file folder type?" );
