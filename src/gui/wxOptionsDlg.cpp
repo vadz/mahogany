@@ -263,7 +263,7 @@ enum ConfigFields
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
    ConfigField_XFaceFile,
-   ConfigField_AdbSubstring,
+   // not very useful ConfigField_AdbSubstring,
 #ifdef USE_FONT_DESC
    ConfigField_ComposeViewFont,
 #else // !USE_FONT_DESC
@@ -1109,8 +1109,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
 
    { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
-   { gettext_noop("Mail alias substring ex&pansion"),
-                                                   Field_Bool,    -1,                        },
+   // not very useful { gettext_noop("Mail alias substring ex&pansion"), Field_Bool,    -1,                        },
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
 #else // !USE_FONT_DESC
@@ -1675,7 +1674,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
-   CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
+   // not very useful: CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FONT_DESC),
 #else // !USE_FONT_DESC
