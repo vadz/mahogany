@@ -840,27 +840,28 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("The following fields are used as default values for the\n"
                   "corresponding server names. You may set them independently\n"
                   "for each folder as well, overriding the values specified "
-                  "here"),                         Field_Message, -1,                        },
-   { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
-   { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
+                  "here"),                         Field_Message | Field_AppWide, -1,                        },
+   { gettext_noop("&POP server"),                  Field_Text | Field_AppWide,    -1,                        },
+   { gettext_noop("&IMAP server"),                 Field_Text | Field_AppWide,    -1,                        },
 #ifdef USE_SENDMAIL
-   { gettext_noop("Use local mail transfer a&gent"), Field_Bool, -1,           },
-   { gettext_noop("Local MTA &command"), Field_Text, ConfigField_UseSendmail },
+   { gettext_noop("Use local mail transfer a&gent"), Field_Bool | Field_AppWide, -1,           },
+   { gettext_noop("Local MTA &command"), Field_Text | Field_AppWide, ConfigField_UseSendmail },
 #endif // USE_SENDMAIL
-   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_AppWide | Field_Vital,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
 #else
                                                    -1
 #endif
    },
-   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1, },
+   { gettext_noop("NNTP (&news) server"),          Field_Text | Field_AppWide,    -1, },
 
    { gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
                   "Mahogany may send 8 bit data without encoding it. If\n"
                   "the server doesn't support it, the data will be encoded\n"
                   "properly, so there is normally no risk in setting this "
                   "option."),                      Field_Message |
+                                                   Field_AppWide |
                                                    Field_Advanced,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail
@@ -869,6 +870,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    },
    { gettext_noop("Send &8 bit data"),             Field_Bool |
+                                                   Field_AppWide |
                                                    Field_Advanced,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail
@@ -880,38 +882,39 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop(
       "Some SMTP or NNTP servers require a user Id or login.\n"
       "You might need to enter the e-mail address provided by\n"
-      "your ISP here. Only enter a password if told to do so\n"
-      "by your ISP as it is not usually required."),
+      "your ISP here but please only do it if told to do so\n"
+      "by your ISP as it is not usually required and may lead\n"
+      "problems if specified when it is not needed."),
      Field_Message, -1,                        },
-   { gettext_noop("SMTP server &user ID"),         Field_Text,
+   { gettext_noop("SMTP server &user ID"),         Field_Text | Field_AppWide,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
 #else
                                                    -1
 #endif
    },
-   { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
-   { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
-   { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
+   { gettext_noop("SMTP server pa&ssword"),        Field_Passwd | Field_AppWide, ConfigField_MailServerLogin,           },
+   { gettext_noop("NNTP server user &ID"),         Field_Text | Field_AppWide,   -1,           },
+   { gettext_noop("NNTP server pass&word"),        Field_Passwd | Field_AppWide, ConfigField_NewsServerLogin,           },
 
-   { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
-   { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
+   { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_AppWide | Field_Advanced, ConfigField_MailServerLogin,           },
+   { gettext_noop("SMTP sender header"), Field_Text | Field_AppWide | Field_Advanced, -ConfigField_GuessSender,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.\n"
                   "You may also have to tell Mahogany to accept unsigned (or\n"
                   "self-signed) certificates if your organization uses them."),
                                                    Field_Message, -1 },
-   { gettext_noop("SMTP server uses SS&L"),        Field_Bool,
+   { gettext_noop("SMTP server uses SS&L"),        Field_Bool | Field_AppWide,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail,
 #else
                                                   -1,
 #endif
    },
-   { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool, ConfigField_SmtpServerSSL,     },
-   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
-   { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },
+   { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool | Field_AppWide, ConfigField_SmtpServerSSL,     },
+   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool | Field_AppWide,    -1,                        },
+   { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool | Field_AppWide, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
 
 #ifdef USE_DIALUP
@@ -921,13 +924,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
                   "server of your ISP. Leave it empty to use the SMTP server for this.")
      , Field_Message | Field_Global, -1 },
-   { gettext_noop("&Dial-up network support"),    Field_Bool | Field_Global,    -1,                        },
-   { gettext_noop("&Beacon host (e.g. www.yahoo.com)"), Field_Text | Field_Global,   ConfigField_DialUpSupport},
+   { gettext_noop("&Dial-up network support"),    Field_Bool | Field_AppWide | Field_Global,    -1,                        },
+   { gettext_noop("&Beacon host (e.g. www.yahoo.com)"), Field_Text | Field_AppWide | Field_Global,   ConfigField_DialUpSupport},
 #ifdef OS_WIN
-   { gettext_noop("&RAS connection to use"),   Field_Combo | Field_Global, ConfigField_DialUpSupport},
+   { gettext_noop("&RAS connection to use"),   Field_Combo | Field_AppWide | Field_Global, ConfigField_DialUpSupport},
 #elif defined(OS_UNIX)
-   { gettext_noop("Command to &activate network"),   Field_Text | Field_Global, ConfigField_DialUpSupport},
-   { gettext_noop("Command to &deactivate network"), Field_Text | Field_Global, ConfigField_DialUpSupport},
+   { gettext_noop("Command to &activate network"),   Field_Text | Field_AppWide | Field_Global, ConfigField_DialUpSupport},
+   { gettext_noop("Command to &deactivate network"), Field_Text | Field_AppWide | Field_Global, ConfigField_DialUpSupport},
 #endif // platform
 #endif // USE_DIALUP
 
@@ -1160,7 +1163,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
-                  "This is useful for folders you often reopen."), Field_Message, -1 },
+                  "This is useful for the folders which you often reopen."), Field_Message, -1 },
    { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
    { gettext_noop("Send outgoing messages later"), Field_Bool |
                                                    Field_Restart |
@@ -1171,7 +1174,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("Default format for mailbox files"
-      ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
+                  ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
      Field_Combo | Field_AppWide | Field_Advanced, -1},
    { gettext_noop("You can specify the format for the strings shown in the\n"
                   "status and title bars. Use %f for the folder name and\n"
