@@ -119,6 +119,12 @@ public:
 
   /// get the text describing the user to present the user with
   virtual String GetDescription() const = 0;
+
+  /** Return the icon name if set. The numeric return value must be -1 
+      for the default, or an index into the image list in AdbFrame.cpp.
+  */
+  virtual int GetIconId() const { return -1; }
+
 };
 
 /**
@@ -158,6 +164,7 @@ public:
     /// check whether we match the given string (see AdbLookup_xxx constants)
   virtual bool Matches(const char *str, int where, int how) = 0;
     /// description of an item is the name and the address
+
   virtual String GetDescription() const
   {
      String name, address;
@@ -222,11 +229,6 @@ public:
   // misc
     /// description of a group is just its name
   virtual String GetDescription() const { return GetName(); }
-
-  /** Return the icon name if set. The numeric return value must be -1 
-      for the default, or an index into the image list in AdbFrame.cpp.
-  */
-  virtual int GetIconId() const { return -1; }
 };
 
 // ============================================================================

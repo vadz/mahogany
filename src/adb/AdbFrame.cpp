@@ -3427,7 +3427,7 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
      
   case TreeElement_Group:
   {
-     AdbEntryGroup *group = ((AdbTreeNode *)this)->AdbGroup();
+     AdbElement *group = ((AdbTreeNode *)this)->AdbGroup();
      if(group)
         image = group->GetIconId();
      if(image == -1)

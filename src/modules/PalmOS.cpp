@@ -59,6 +59,8 @@ class PalmBook;
 #define MP_MOD_PALMOS_SYNCADDR_D 1l
 #define MP_MOD_PALMOS_BACKUP     "Backup"       // experimental
 #define MP_MOD_PALMOS_BACKUP_D   0l             // experimental
+#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"       // experimental
+#define MP_MOD_PALMOS_BACKUPDIR_D   0l             // experimental
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -234,20 +236,21 @@ MInterface * m_MInterface;
 private:
 
 #if EXPERIMENTAL
-int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
-void RemoveFromList(char *name, char **list, int max);
+   int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
+   void RemoveFromList(char *name, char **list, int max);
 #endif
 
-int m_PiSocket;
-int m_MailDB;
-int m_AddrDB;
-ProfileBase *m_Profile;
-
-int m_Dispose;
-bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
-String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
-int m_Speed;
-class wxDeviceLock *m_Lock;
+   int m_PiSocket;
+   int m_MailDB;
+   int m_AddrDB;
+   ProfileBase *m_Profile;
+   
+   int m_Dispose;
+   bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
+   String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
+   int m_Speed;
+   class wxDeviceLock *m_Lock;
+   String m_BackupDir;
 };
 
 /// small helper class
@@ -280,10 +283,10 @@ PalmOSModule::ProcessMenuEvent(int id)
    case WXMENU_MODULES_PALMOS_SYNC:
       Synchronise(NULL);
       return TRUE;
-#ifdef EXPERIMENTAL
    case WXMENU_MODULES_PALMOS_BACKUP:
       Backup();
       return TRUE;
+#ifdef EXPERIMENTAL
    case WXMENU_MODULES_PALMOS_RESTORE:
       return TRUE;
    case WXMENU_MODULES_PALMOS_INSTALL:
@@ -358,6 +361,7 @@ PalmOSModule::GetConfig(void)
    static int speeds[] = { 9600,19200,38400,57600,115200 };
    
    m_Backup   = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
+   m_BackupDir= READ_CONFIG(p, MP_MOD_PALMOS_BACKUPDIR);
    m_SyncMail = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
    m_SyncAddr = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
    m_LockPort = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
@@ -637,12 +641,10 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       if(m_SyncAddr)
          SyncAddresses(pBook);
      
-#ifdef EXPERIMENTAL
       if(m_Backup)
       {
          Backup();
       }
-#endif
       m_Profile->DecRef();
       m_Profile=NULL;
    }
@@ -712,10 +714,7 @@ PalmOSModule::Backup(void)
    bool removeDeleted = FALSE;     // really delete deleted entries on the Palm
    bool onlyChanged   = FALSE;     // backup only changed files or always all?
 
-   // we are backing up to /tmp/palmbackup for now, a "real" directory would have
-   // to be specified in the configuration dialog
-   char *dirname = "/tmp/palmbackup";   // TODO: Read value from configuration
-   mkdir(dirname, 0700);
+   mkdir(m_BackupDir, 0700);
    
    // Read original list of files in the backup dir
    int i, ofile_total, ofile_len;
@@ -727,7 +726,7 @@ PalmOSModule::Backup(void)
    ofile_len = 0;
 
    if (onlyChanged) {
-      dir = opendir(dirname);
+      dir = opendir(m_BackupDir);
       while( (dirent = readdir(dir)) ) {
          char name[256];
          if (dirent->d_name[0] == '.')
@@ -741,7 +740,7 @@ PalmOSModule::Backup(void)
             orig_files = (char **) realloc(orig_files, sizeof(char*) * ofile_len);
          }
 
-         sprintf(name, "%s/%s", dirname, dirent->d_name);
+         sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
          orig_files[ofile_total++] = strdup(name);
       }
       closedir(dir);
@@ -765,7 +764,7 @@ PalmOSModule::Backup(void)
          return;
       }
       
-      strcpy(name, dirname);
+      strcpy(name, m_BackupDir);
       strcat(name, "/");
       protect_name(strlen(name) + name, info.name);
       if (info.flags & dlpDBFlagResource)
@@ -1256,6 +1255,7 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
    ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
+   ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
    ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
    ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
@@ -1270,6 +1270,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   0},
    { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Always do Backup"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
    { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
    // the speed values must be in sync with the ones in the speeds[]
    // array in GetConfig() further up:

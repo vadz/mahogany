@@ -338,9 +338,10 @@ bool PalmBook::Flush()
 // PalmDataProvider
 // ----------------------------------------------------------------------------
 
+#define PALMOS_ADB_NAME "PalmOS:PalmADB"
 AdbBook *PalmDataProvider::CreateBook(const String& name)
 {
-  PalmBook *p_Book = new PalmBook("PalmADB");
+  PalmBook *p_Book = new PalmBook(PALMOS_ADB_NAME);
 
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
   if(palmModule)
@@ -365,7 +366,10 @@ bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
   bool rc = palmModule != NULL;
   SafeDecRef(palmModule);
-     
+  if(! rc)
+     return FALSE;
+  
+  rc = name == PALMOS_ADB_NAME;
   switch ( test )
   {
   case Test_Open:
