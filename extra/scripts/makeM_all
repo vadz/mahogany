@@ -124,7 +124,7 @@ fi
 if [ "$OSTYPE" = "SunOS" ]
 then
   LD_LIBRARY_PATH=$HOME/arch/SunOS/lib:/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin
-  LD_LIBRARY_PATH=/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin:$LD_LIBRARY_PATH
+  LD_LIBRARY_PATH=/opt/lib:/usr/openwin/lib:/usr/local/X11R5/lib:/usr/lib:/usr/ucblib:/opt/Fsfgcc/lib:/usr/dt/lib:/opt/GBxpm/lib:$HOME/bin:$LD_LIBRARY_PATH:/usr/local/lib
   CC=/opt/FSFgcc-2.8.0/bin/gcc
   CXX=/opt/FSFgcc-2.8.0/bin/c++
   LDFLAGS="$LDFLAGS -L/opt/FSFstdc++/lib -L/opt/lib -L/home/karsten/arch/SunOS/lib"
@@ -139,6 +139,14 @@ then
 
   WXPREFIX=/home/karsten/opt
   MPREFIX=/opt
+fi
+
+if [ `hostname` = caisteal -o `hostname` = dearg ]
+then
+  OSTYPE=SunOS
+  OSTYPE_ADDON="-sparc"
+  CC=gcc
+  CXX=c++
 fi
 
 if [ `hostname` = ronnie ]
