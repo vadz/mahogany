@@ -807,3 +807,60 @@ strutil_removeReplyPrefix(const String &isubject)
    strutil_delwhitespace(subject);
    return subject;
 }
+/* Read and remove the next number from string. */
+long
+strutil_readNumber(String &string)
+{
+   strutil_delwhitespace(string);
+   String newstr;
+   const char *cptr;
+   for(cptr = string.c_str(); *cptr && isdigit(*cptr);
+       cptr++)
+      newstr << *cptr;
+   string = cptr;
+   long num = -123456;
+   sscanf(newstr.c_str(),"%ld", &num);
+   return num;
+}
+
+/* Read and remove the next quoted string from string. */
+String
+strutil_readString(String &string)
+{
+   strutil_delwhitespace(string);
+   const char *cptr = string.c_str();
+   if(*cptr != '"')
+      return "";
+   else
+      cptr++;
+   
+   String newstr;
+   bool escaped = false;
+   for(; *cptr && (*cptr != '"' || escaped);
+       cptr++)
+   {
+      if(*cptr == '\\' && ! escaped)
+      {
+         escaped = true;
+         continue;
+      }
+      newstr << *cptr;
+   }
+   string = cptr;
+   return newstr;
+}
+
+/* Return an escaped string. */
+String
+strutil_escapeString(const String &string)
+{
+   String newstr;
+   for(const char *cptr = string.c_str();
+       *cptr; cptr++)
+   {
+      if(*cptr == '\\' || *cptr == '"')
+         newstr << '\\';
+      newstr << *cptr;
+   }
+   return newstr;
+}

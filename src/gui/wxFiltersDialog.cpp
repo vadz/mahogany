@@ -41,6 +41,7 @@
 #include <wx/layout.h>
 #include <wx/checklst.h>
 #include <wx/statbox.h>
+#include <wx/sizer.h>
 
 #include "gui/wxDialogLayout.h"
 
@@ -120,7 +121,8 @@ class OneCritControls
 {
 public:
    OneCritControls(wxWindow *parent, wxLayoutConstraints *c);
-   
+   void Save(wxString *str);
+   void Load(wxString *str);
 private:
    wxCheckBox *m_Not; // Not
    wxChoice   *m_Type; // "Match", "Match substring", "Match RegExp",
@@ -137,6 +139,7 @@ wxString ORC_Types[] =
   gettext_noop("Smaller than"), gettext_noop("Older than"),
   gettext_noop("Is SPAM")
 };
+
 static
 size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
 
@@ -180,7 +183,20 @@ OneCritControls::OneCritControls(wxWindow *parent, wxLayoutConstraints *c)
    CRIT_CTRLCONST(m_Argument, m_Where);
 }
 
+void
+OneCritControls::Save(wxString *str)
+{
+   str->Printf("%d %d \"%s\" %d",
+              (int)m_Not->GetValue(),
+              m_Type->GetSelection(),
+              m_Argument->GetValue().c_str(),
+              m_Where->GetSelection());
+}
 
+void
+OneCritControls::Load(wxString *str)
+{
+}
 class OneActionControls
 {
 public:
@@ -227,6 +243,25 @@ OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
 
 /*
   Contains several lines of "OneCritControls" and "OneActionControls":
+
+  +--------------------------------+
+  |                                |
+  | txt                            |
+  |                                |
+  | +----------------------------+ |
+  | |  filter patterns           | |
+  | +----------------------------+ |
+  |                                |
+  |                                |
+  | +----------------------------+ |
+  | |  action rules              | |
+  | +----------------------------+ |
+  |                                |
+  |                                |
+  |                                |
+  |                                |
+  +--------------------------------+
+
 */
 
 wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
@@ -242,6 +277,7 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
 
    SetDefaultSize(380, 240, FALSE /* not minimal */);
 
+   SetAutoLayout( TRUE );
    wxLayoutConstraints *c;
 
    m_NameCtrl = new wxTextCtrl(this, -1);

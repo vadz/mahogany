@@ -35,6 +35,8 @@ enum MEventId
    MEventId_ASFolderResult = 800,
    /// MEventOptionsChangeData
    MEventId_OptionsChange,
+   /// MEventPing - causes folders to ping themselves
+   MEventId_Ping,
    /// (invalid id for an event)
    MEventId_Max
 };
@@ -73,6 +75,14 @@ class MailFolder;
 
 ///FIXME: this shouldn't be needed! Opaque type?
 #include "ASMailFolder.h"
+
+// ----------------------------------------------------------------------------
+/// MEventPingData - the event asking the folders to ping
+class MEventPingData : public MEventData
+{
+public:
+   MEventPingData() : MEventData( MEventId_Ping ) {}
+};
 
 // ----------------------------------------------------------------------------
 /// MEventNewMailData - the event notifying the app about "new mail"

@@ -310,7 +310,6 @@ public:
       failure.
    */
    static const String& InitializeMH();
-
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -355,8 +354,6 @@ private:
    bool m_FirstListing;
    /// Path to mailbox
    String   m_MailboxPath;
-   /// The last seen UID, to check for new mails:
-   UIdType  m_LastSeenUId;
    
    /// The symbolic name of the folder
    String m_Name;
@@ -425,7 +422,7 @@ protected:
    void SetType(FolderType type) { m_folderType = type; }
 
    /// Check if this message is a "New Message":
-   virtual bool IsNewMessage(UIdType msgId) const;
+   virtual bool IsNewMessage(const HeaderInfo * hi);
    
    /* Handles the mm_overview_header callback on a per folder basis.
       It returns 0 to abort overview generation, 1 to continue.*/

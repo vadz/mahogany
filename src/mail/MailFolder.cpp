@@ -464,20 +464,28 @@ public:
          m_Mf = mf;
          m_MEventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
          ASSERT_MSG( m_MEventCookie, "can't reg folder with event manager");
+         m_MEventPingCookie = MEventManager::Register(*this, MEventId_Ping);
+         ASSERT_MSG( m_MEventPingCookie, "can't reg folder with event manager");
       }
    virtual inline ~MFCmnEventReceiver()
       {
          MEventManager::Deregister(m_MEventCookie);
+         MEventManager::Deregister(m_MEventPingCookie);
       }
    virtual inline bool OnMEvent(MEventData& event)
       {
-         m_Mf->UpdateConfig();
-         m_Mf->UpdateListing();
+         if(event.GetId() == MEventId_Ping)
+            m_Mf->Ping();
+         else // options change
+         {
+            m_Mf->UpdateConfig();
+            m_Mf->UpdateListing();
+         }
          return true;
       }
 private:
    MailFolderCmn *m_Mf;
-   void *m_MEventCookie;
+   void *m_MEventCookie, *m_MEventPingCookie;
 };
 
 
@@ -498,6 +506,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    m_Profile = profile;
    if(m_Profile) m_Profile->IncRef();
    m_Timer = new MailFolderTimer(this);
+   m_LastNewMsgUId = UID_ILLEGAL;
 
    m_MEventReceiver = new MFCmnEventReceiver(this);
    
@@ -986,6 +995,42 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
    gs_SortListingMutex.Unlock();
 }
 
+void
+MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
+{
+   /* Now check whether we need to send new mail notifications: */
+   if( m_GenerateNewMailEvents )
+   {
+      UIdType n = (*hilp).Count();
+      UIdType *messageIDs = new UIdType[n];
+      // Find the new messages:
+      UIdType nextIdx = 0;
+      int status;
+      UIdType highestId = UID_ILLEGAL;
+      for ( UIdType i = 0; i < n; i++ )
+      {
+         /* status =(*hilp)[i]->GetStatus();
+            ASSERT(nextIdx < n);
+            if( (status & MSG_STAT_RECENT) &&
+            !(status & MSG_STAT_SEEN))
+         */
+         if( IsNewMessage( (*hilp)[i] ) )
+         {
+            UIdType uid = (*hilp)[i]->GetUId();
+            messageIDs[nextIdx++] = uid;
+            if(highestId == UID_ILLEGAL || uid > highestId)
+               highestId = uid;
+         }
+      }
+      if(highestId != UID_ILLEGAL && m_UpdateMsgCount)
+         m_LastNewMsgUId = highestId;
+      ASSERT(nextIdx <= n);
+      if( nextIdx != 0)
+         MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
+      delete [] messageIDs;
+   }
+}
+
 
 
 void
@@ -1014,35 +1059,12 @@ MailFolderCmn::UpdateListing(void)
       if(m_Config.m_UseThreading)
          ThreadMessages(this, hilp);
       
-      /* Now check whether we need to send new mail notifications: */
-      if(!m_FirstListing && m_GenerateNewMailEvents
-         && (*hilp).Count() > m_OldMessageCount)
-      {
-         UIdType n = (*hilp).Count() - m_OldMessageCount;
-         UIdType *messageIDs = new UIdType[n];
-         // Find the new messages:
-         UIdType nextIdx = 0;
-         int status;
-         for ( UIdType i = 0; i < n; i++ )
-         {
-            /* status =(*hilp)[i]->GetStatus();
-               ASSERT(nextIdx < n);
-               if( (status & MSG_STAT_RECENT) &&
-               !(status & MSG_STAT_SEEN))
-            */
-               if( IsNewMessage( (*hilp)[i]->GetUId() ) )
-                  messageIDs[nextIdx++] = (*hilp)[i]->GetUId();
-            
-         }
-         ASSERT(nextIdx <= n);
-
-         MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
-         delete [] messageIDs;
-      }
 
       // now we sent an update event to update folderviews etc
       MEventManager::Send( new MEventFolderUpdateData (this) );
 
+      CheckForNewMail(hilp);
+      
       if(m_UpdateMsgCount) // this will suppress more new mail events
          m_OldMessageCount = (*hilp).Count();
 

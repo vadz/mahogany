@@ -52,6 +52,31 @@ struct MailCollectorFolderEntry
 KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
 
 
+class MCEventReceiver : public MEventReceiver
+{
+public:
+   MCEventReceiver(class MailCollector *mc)
+      {
+         m_MC = mc;
+         m_MEventCookie = MEventManager::Register(*this, MEventId_Ping);
+         ASSERT_MSG( m_MEventCookie, "can't reg mail collector with event manager");
+    }
+   ~MCEventReceiver()
+      {
+         MEventManager::Deregister(m_MEventCookie);
+      }
+   virtual inline bool OnMEvent(MEventData& event)
+      {
+         STATUSMESSAGE(( _("Checking for new mail...")));
+         m_MC->Collect();
+         STATUSMESSAGE(( _("Checking for new mail... done.")));
+         return true;
+      }
+private:
+   MailCollector *m_MC;
+   void *m_MEventCookie;
+};
+
 class MailCollectorImpl : public MailCollector
 {
 public:
@@ -107,6 +132,8 @@ private:
    String         m_Message;
    /// The number of new messages.
    unsigned long  m_Count;
+   /// we react to events
+   MCEventReceiver *m_EventReceiver;
 };
 
 /* static */
@@ -165,11 +192,13 @@ MailCollectorImpl::MailCollectorImpl()
    // keep it open all the time to speed things up
    m_NewMailFolder = NULL;
    SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+   m_EventReceiver = new MCEventReceiver(this);
 }
 
 MailCollectorImpl::~MailCollectorImpl()
 {
    MOcheck();
+   delete m_EventReceiver;
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
       if((**i).m_folder)

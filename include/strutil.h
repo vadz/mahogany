@@ -311,7 +311,17 @@ String strutil_ftime(time_t time, const String & format = "%c",
    it from the beginning of a subject line, used by sorting routines. */
 String
 strutil_removeReplyPrefix(const String &isubject);
-    
+
+/* Read and remove the next number from string. */
+long
+strutil_readNumber(String &string);
+
+/* Read and remove the next quoted string from string. */
+String
+strutil_readString(String &string);
+/* Return an escaped string. */
+String
+strutil_escapeString(const String &string);
 //@}
 
 //@}

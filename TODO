@@ -8,14 +8,7 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	- fix new mail event generation to avoid duplicate
-		  listing of already previously existing new mails
-		  UID for comparison? CheckNewMail() function?
-		Does it work?
-		The dialog is not working properly, empty message!
-		Call filtering for new mails before building listing,
-		remove recursion/unnecessary threading, etc.
-
+9		disabling "collect mail" in properties has no effect!
 9	KB	finish filters dialog
 
 9	KB	wxLayout:

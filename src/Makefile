@@ -4,7 +4,7 @@
 
 CWD = src
 UTILOBJ:=util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
-SUB_DIRS =  modules util classes gui mail adb wx
+SUB_DIRS =  util classes gui mail adb wx # modules
 MOBJS:=$(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
       wx/generic/*.o wx/common/*.o
 
@@ -58,17 +58,18 @@ static: $(MOBJS)
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
 subdirs:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -i -C $$i all; done
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+	set -e; $(MAKE) -i -C modules all
 
 doc:
 	$(MAKE) -C ../include $@
 
 clean:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
 	$(RM) core libM.so M M.static
 
 dep depend:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
 
 install: 
 	strip M
@@ -90,7 +91,7 @@ ifdef USE_PYTHON
 endif
 
 msgcat:
-	set -e; for i in $(SUB_DIRS) ; do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) modules ; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
 .PHONY: all dep clean doc semistatic static allclean install msgcat subdirs

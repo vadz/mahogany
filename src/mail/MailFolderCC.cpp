@@ -1105,8 +1105,11 @@ MailFolderCC::AppendMessage(String const &msg)
    ProcessEventQueue();
 
 //??   PingReopen();
-   bool rc = ( mail_append(m_MailStream,
-                           (char *)m_MailboxPath.c_str(),&str)
+   char *flags = "\\NEW\\RECENT";
+   bool rc = ( mail_append_full(
+      m_MailStream,
+      (char *)m_MailboxPath.c_str(),
+      flags, NIL, &str)
                != 0);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
@@ -1470,11 +1473,20 @@ extern "C"
 
 
 bool
-MailFolderCC::IsNewMessage(UIdType msgId) const
+MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 {
-   return (
-      m_LastSeenUId != UID_ILLEGAL // if not initialised, we cannot tell
-      && msgId > m_LastSeenUId );
+   UIdType msgId = hi->GetUId();
+   bool isNew = false;
+   int status = hi->GetStatus();
+
+   if( (status & MSG_STAT_SEEN) == 0
+       && ( status & MSG_STAT_RECENT))
+      isNew = true;
+   if(m_LastNewMsgUId != UID_ILLEGAL
+      && m_LastNewMsgUId >= msgId)
+      isNew = false;
+   
+   return isNew;
 }
 
 /* This is called by the UpdateListing method of the common code. */
@@ -1590,8 +1602,6 @@ MailFolderCC::BuildListing(void)
    m_Listing->SetCount(m_NumOfMessages);
 
 
-   if(m_UpdateMsgCount)
-      m_LastSeenUId = m_MailStream->uid_last;
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
 

@@ -176,10 +176,12 @@ protected:
    //@{
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
+   /// generate NewMail messages if needed
+   void CheckForNewMail(HeaderInfoList *hilp);
 
    /** Check if this message is a "New Message" for generating new
        mail event. */
-   virtual bool IsNewMessage(UIdType msgId) const = 0;
+   virtual bool IsNewMessage(const HeaderInfo * hi) = 0;
 
    /// Call this before actually closing the folder.
    void PreClose(void);
@@ -205,6 +207,8 @@ protected:
    bool m_FirstListing;
    /// Number of messages in last listing:
    UIdType m_OldMessageCount;
+   /// The last seen new UID, to check for new mails:
+   UIdType  m_LastNewMsgUId;
    /** Do we want to generate new mail events?
        Used to supporess new mail events when first opening the folder
        and when copying to it. */

@@ -251,19 +251,7 @@ wxMFrame::OnMenuCommand(int id)
       break;
 
    case WXMENU_FILE_COLLECT:
-      {
-         MailCollector *collector = mApplication->GetMailCollector();
-         if ( collector )
-         {
-            wxLogStatus(this, _("Checking for new mail..."));
-            collector->Collect();
-            wxLogStatus(this, _("Checking for new mail... done."));
-         }
-         else
-         {
-            wxFAIL_MSG("no mail collector??");
-         }
-      }
+      MEventManager::Send( new MEventPingData );
       break;
 
 #ifdef USE_PYTHON
