@@ -145,8 +145,9 @@ MProgressDialog::MProgressDialog(wxString const &title,
                                  bool parentOnly,
                                  bool abortButton)
 {
-   if( !parent )
-      parent = wxTheApp->GetTopWindow();
+// dangerous: startup window gets deleted while this is running!
+//   if( !parent )
+//      parent = wxTheApp->GetTopWindow();
 
    m_state = abortButton ? Continue : Uncancelable;
    m_disableParentOnly = parentOnly;
