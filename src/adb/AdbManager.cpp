@@ -145,9 +145,15 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
                const String& what,
                int where,
                int how,
-               const ArrayAdbBooks *paBooks)
+               AdbEntryGroup *group)
 {
-  return AdbLookupForEntriesOrGroups(aEntries, what, where, how, paBooks);
+   if ( !group )
+      return AdbLookupForEntriesOrGroups(aEntries, what, where, how, NULL);
+
+   // look just in this group
+   GroupLookup(aEntries, group, what, where, how);
+
+   return !aEntries.IsEmpty();
 }
 
 bool AdbExpand(wxArrayString& results, const String& what,

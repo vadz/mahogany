@@ -154,7 +154,7 @@ private:
   @param what - what to look for
   @param where - in which fields to look for this string? default is everywhere
   @param how - search options, default is case insensitive substring search
-  @param paBooks is the array of books to search the entry in and may be NULL
+  @param group specifies where to search, default is everywhere (NULL group)
 
   @return FALSE if no matches, TRUE otherwise
 */
@@ -164,7 +164,7 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
                                   AdbLookup_FullName |
                                   AdbLookup_EMail,
                       int how = AdbLookup_Substring,
-                      const ArrayAdbBooks *paBooks = NULL);
+                      AdbEntryGroup *group = NULL);
 
 /**
   Expand the abbreviated address: i.e. looks for an address entry which starts

@@ -48,12 +48,8 @@ DECLARE_AUTOPTR(AdbEntry);
 DECLARE_AUTOPTR(AdbEntryGroup);
 DECLARE_AUTOPTR(AdbBook);
 
-// ----------------------------------------------------------------------------
-// function prototype
-// ----------------------------------------------------------------------------
-
 // ============================================================================
-// implementation
+// implementation of our public API
 // ============================================================================
 
 void AutoCollectAddresses(const Message *message,
@@ -128,12 +124,6 @@ void AutoCollectAddress(const String& email,
       AdbManager_obj manager;
       CHECK_RET( manager, "can't get AdbManager" );
 
-      // load all address books mentioned in the profile
-      manager->LoadAll();
-
-      // and also explicitly load autocollect book - it might have not been
-      // loaded by LoadAll(), yet we want to search in it too
-      // won't recreate it if it already exists
       AdbBook *autocollectbook = manager->CreateBook(bookName);
 
       if ( !autocollectbook )
@@ -142,14 +132,44 @@ void AutoCollectAddress(const String& email,
                       "for autocollected e-mail addresses."),
                       bookName.c_str());
 
-         // TODO ask the user if he wants to disable autocollec?
+         // TODO ask the user if he wants to disable autocollect?
          return;
       }
 
-      ArrayAdbEntries matches;
-      if( !AdbLookup(matches, email, AdbLookup_EMail, AdbLookup_Match) )
+      // NB: we only look for this entry in the group where we're going to
+      //     create it as looking for it in all address books (or even just in
+      //     the entire autocollectbook) is too slow currently - and this
+      //     is, anyhow, not needed in 99% of cases because you either get a
+      //     message from a person who had already posted to this folder or
+      //     from a person you don't know, usually. And even if/when you do get
+      //     a mail from someone whose address you already have, it's still
+      //     better to create a duplicate entry than to annoy the user with a
+      //     long delay
+
+      // avoid creating groups with '/'s in the names - this would create
+      // nested groups!
+      wxString adbGroupName;
+      if ( groupName[0u] == '/' )
+         adbGroupName = groupName.c_str() + 1;
+      else
+         adbGroupName = groupName;
+      adbGroupName.Replace("/", "_");
+
+      AdbEntryGroup *group = autocollectbook->CreateGroup(adbGroupName);
+      if ( !group )
       {
-         if ( AdbLookup(matches, name, AdbLookup_FullName, AdbLookup_Match) )
+         // fall back to the root
+         group = autocollectbook;
+      }
+
+      ArrayAdbEntries matches;
+      if( !AdbLookup(matches, email,
+                     AdbLookup_EMail, AdbLookup_Match,
+                     group) )
+      {
+         if ( AdbLookup(matches, name,
+                        AdbLookup_FullName, AdbLookup_Match,
+                        group) )
          {
             // found: add another e-mail (it can't already have it, otherwise
             // our previous search would have succeeded)
@@ -178,25 +198,6 @@ void AutoCollectAddress(const String& email,
                                    frame)
                )
             {
-               // avoid creating groups with '/'s in the names - this will
-               // create nested groups!
-               wxString adbGroupName;
-               if ( groupName[0u] == '/' )
-                  adbGroupName = groupName.c_str() + 1;
-               else
-                  adbGroupName = groupName;
-               adbGroupName.Replace("/", "_");
-               // VZ: another possibility might be:
-               //adbGroupName = groupName.AfterLast('/')
-               // I don't know what's better...
-
-               AdbEntryGroup *group = autocollectbook->CreateGroup(adbGroupName);
-               if ( !group )
-               {
-                  // fall back to the root
-                  group = autocollectbook;
-               }
-
                AdbEntry *entry = group->CreateEntry(name);
 
                if ( !entry )
@@ -240,11 +241,6 @@ void AutoCollectAddress(const String& email,
                                  group->GetName().c_str());
                   }
                }
-
-               if ( group != autocollectbook )
-               {
-                  group->DecRef();
-               }
             }
          }
       }
@@ -284,10 +280,15 @@ void AutoCollectAddress(const String& email,
          matches[n]->DecRef();
       }
 
-      // release the book
+      // release the objects we created
+      if ( group != autocollectbook )
+      {
+         group->DecRef();
+      }
+
       autocollectbook->DecRef();
    }
-   else
+   else // invalid address
    {
       // it's not very intrusive and the user might wonder why the address
       // wasn't autocollected otherwise
