@@ -409,8 +409,13 @@ wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
       image = MimeType::OTHER + 1;
    }
 
+   wxString label = MessageView::GetLabelFor(mimepart);
+#ifdef DEBUG
+   label << " (" << mimepart->GetPartSpec() << ')';
+#endif // DEBUG
+
    wxTreeItemId id  = m_treectrl->AppendItem(idParent,
-                                             MessageView::GetLabelFor(mimepart),
+                                             label,
                                              image, image,
                                              new wxMIMETreeData(mimepart));
 
