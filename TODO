@@ -1,7 +1,11 @@
 TODO list for M   
 $Id$
 
-*** bugs to fix ***
+*** things to fix/implement next ***
+
+- check code for use of pointers to profile entries, replace them with
+  strings where necessary 
+
 - MessageView:
   + extraction of parameter list and filenames for mime handling/saving
   + some code in wxMessageView relies on unix unlink() behaviour 
@@ -35,6 +39,8 @@ $Id$
   + add documentation to installation target
 
 *** to implement in near future ***
+
+- drag and drop interaction with gmc and kfm
 
 - cut and paste for wxllist, wxhtmlwindow, wxHtmlImport()
 
