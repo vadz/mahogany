@@ -67,6 +67,8 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbManager.h"
 
+#include "MessageTemplate.h"
+
 // incredible, but true: cclient headers #define the symbol write...
 #undef write
 
@@ -195,6 +197,70 @@ private:
    int  m_lookupMode;
 
    DECLARE_EVENT_TABLE()
+};
+
+class StandardMessageTemplateSink
+{
+public:
+   // ctor
+   StandardMessageTemplateSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
+
+   // accessors
+      // get the whole text of the message
+   const wxString& GetText() const { return m_text; }
+      // get the cursor position
+   bool GetCursorPosition(int *x, int *y) const
+   {
+      if ( m_hasCursorPosition )
+      {
+         *x = m_x;
+         *y = m_y;
+
+         return TRUE;
+      }
+      else
+      {
+         return FALSE;
+      }
+   }
+
+   // implement base class pure virtual function
+   virtual bool Output(const String& text);
+
+   // called by StandardMessageTemplateVarExpander to remember the current
+   // position as the initial cursor position
+   void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
+
+private:
+   wxString m_text;
+   bool m_hasCursorPosition;
+   int  m_x, m_y;
+};
+
+// StandardMessageTemplateVarExpander is the implementation of
+// MessageTemplateVarExpander used here.
+class StandardMessageTemplateVarExpander : public MessageTemplateVarExpander
+{
+public:
+   // ctor
+   StandardMessageTemplateVarExpander(wxComposeView *cv,
+                                      StandardMessageTemplateSink *sink)
+   {
+      m_sink = sink;
+      m_composeView = cv;
+   }
+
+   // implement base class pure virtual function
+   virtual bool Expand(const String& category,
+                       const String& name,
+                       String *value) const;
+
+protected:
+   bool SlurpFile(const String& filename, String *value) const;
+
+private:
+   wxComposeView               *m_composeView;
+   StandardMessageTemplateSink *m_sink;
 };
 
 // ----------------------------------------------------------------------------
@@ -491,6 +557,45 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
    cv->m_mode = Mode_NNTP;
    cv->SetTitle(_("Article Composition"));
    cv->Create(parent,parentProfile);
+
+   // testing only
+#if 0
+   class Expander : public MessageTemplateVarExpander
+   {
+   public:
+      virtual bool Expand(const String& category,
+                          const String& name,
+                          String *value) const
+      {
+         value->Empty();
+         if ( !!category )
+            *value << category << '/';
+         *value << name;
+
+         return TRUE;
+      }
+   } expander;
+
+   String text;
+   const char *filename = "f:/progs/M/template.test";
+   FILE *fp = fopen(filename, "rt");
+   if ( fp )
+   {
+      char buf[4096];
+      while ( fgets(buf, WXSIZEOF(buf), fp) )
+      {
+         text += buf;
+      }
+   }
+
+   MessageTemplateParser parser(text, filename, &expander);
+   String output;
+   if ( parser.Parse(&output) )
+   {
+      cv->InsertText(output);
+   }
+#endif
+
    return cv;
 }
 
@@ -1770,5 +1875,138 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
    ((wxComposeView *)this)->ResetDirty(); // const_cast
 
    return true;
+}
+
+// ----------------------------------------------------------------------------
+// StandardMessageTemplateSink
+// ----------------------------------------------------------------------------
+
+bool StandardMessageTemplateSink::Output(const String& text)
+{
+   if ( !m_hasCursorPosition )
+   {
+      // update the current x and y position
+      int deltaX = 0, deltaY = 0;
+      for ( const char *pc = text.c_str(); *pc; pc++ )
+      {
+         if ( *pc == '\n' )
+         {
+            deltaX = -m_x;
+            deltaY++;
+         }
+         else
+         {
+            deltaX++;
+         }
+      }
+
+      m_x += deltaX;
+      m_y += deltaY;
+   }
+   //else: we don't have to count anything, we already have the cursor position
+   //      and this is all we want
+
+   m_text += text;
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// StandardMessageTemplateVarExpander
+// ----------------------------------------------------------------------------
+
+bool StandardMessageTemplateVarExpander::SlurpFile(const String& filename,
+                                                   String *value) const
+{
+   wxFile file(filename);
+   bool ok = file.IsOpened();
+   if ( ok )
+   {
+      off_t len = file.Length();
+      ok = file.Read(value->GetWriteBuf(len), len) != wxInvalidOffset;
+      value->UngetWriteBuf();
+   }
+
+   return ok;
+}
+
+bool StandardMessageTemplateVarExpander::Expand(const String& Category,
+                                                const String& Name,
+                                                String *value) const
+{
+   // comparison is case insensitive
+   wxString category = Category.Lower();
+   wxString name = Name.Lower();
+
+   value->Empty();
+
+   if ( category == "file" )
+   {
+      // insert the contents of a file
+      if ( !SlurpFile(name, value) )
+      {
+         wxLogError(_("Failed to insert file '%s' into the message."),
+                    name.c_str());
+
+         return FALSE;
+      }
+   }
+   else if ( category == "cmd" )
+   {
+      // execute a command (FIXME get the wxProcess class allowing stdout
+      // redirection and use it here)
+      MTempFileName temp;
+
+      bool ok = temp.IsOk();
+      wxString filename = temp.GetName(), command;
+
+      if ( ok )
+         command << name << " > " << filename;
+
+      if ( ok )
+         ok = system(command) == 0;
+
+      if ( ok )
+         ok = SlurpFile(filename, value);
+
+      if ( !ok )
+      {
+         wxLogSysError(_("Failed to execute the command '%s'"),
+                       name.c_str());
+
+         return FALSE;
+      }
+   }
+#ifdef USE_PYTHON
+   else if ( category == "python" )
+   {
+      // TODO
+   }
+#endif // USE_PYTHON
+   else if ( !category )
+   {
+      // deal with all special cases
+      if ( name == "date" )
+      {
+         char buf[256];
+         time_t ltime;
+         tm *now = localtime(&ltime);
+
+         (void)strftime(buf, WXSIZEOF(buf), "%x", now);
+
+         *value = buf;
+      }
+      else if ( name == "cursor" )
+      {
+         m_sink->RememberCursorPosition();
+      }
+   }
+   else
+   {
+      // unknown category
+      return FALSE;
+   }
+
+   return TRUE;
 }
 

@@ -1611,7 +1611,7 @@ MailFolderCC::ListFolders(const String &pattern,
    }
    else
    {
-      mail_lsub (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
+      mail_list (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
    }
    FolderListing * fl = m_FolderListing;
    m_FolderListing = NULL;

@@ -26,15 +26,11 @@ $Id$
 		now
 5	KB	fix rfc822 qprint for message from example in M/test folder
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-6	VY	folder properties assert when trying to create a
-		subfolder under INBOX
-6	VZ	icon selection dialog broken/ugly under wxGTK
 5	KB	for NNTP only count unread/new messages
 5	KB	make MailFolder timer react to options change
 5	KB	(optionally, but on by default) expunge deleted messages when
 		the folder is closed - as noticed in 32bitonline comparison,
 		otherwise it's a nuisance.
-3		"Can't find global dir" msg box cannot be disabled, why?
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
@@ -91,12 +87,6 @@ $Id$
 7	VZ	document the new properties dialog entries/pages, please
 3	VZ	XFaces under Windows?
 		KB: no problem if you can read XPMs, use the lib included
-5	VZ	Could you have a look at the setting of the default
-		columns sizes in wxFolderView.cpp, please?  Currently
-		it gets called in the constructor which doesn't work
-		properly, but moving that code to Clear(), using a
-		SetConfigPath(), just before RestoreWidths() is
-		called, didn't work either.
 
 7	KB	write tutorial bit in Manual.lyx
 7	KB	finish ASMailFolder classes
@@ -120,8 +110,6 @@ $Id$
 		next/previous/goto_next_unread
 4		improve key bindings for message editor, page up/down
 		whole page
-3	VZ	edit existing custom headers, remove them &c (from "Compose" options
-		page probably?
 2		different icon for activity log frame
 2	VZ?	make activity log frame appear on demand only
 
@@ -155,6 +143,19 @@ from 32bitsonline review:
 				.... working on it right now
 
 4	VZ	test ADB importing more
+
+5	KB	Could you have a look at the setting of the default
+		columns sizes in wxFolderView.cpp, please?
+
+		VZ: I fixed a buglet in your code and it seems to work ok now.
+		    Although it's not exactly elegant, it seems to do what you
+		    want (personally, I would prefer if it inherited from the
+		    root folder, why "New Mail"?). Please test it and tell me
+		    more if it doesn't do what you want.
+
+6	VZ	folder properties assert when trying to create a
+		subfolder under INBOX - sort of fixed because folders can't be
+		created under INBOX (or any other non group folder) any more.
 
 *********************************************************************
 *** GENERAL TODO

@@ -599,6 +599,9 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       m_menu->Enable(FolderMenu::Delete, !isRoot);
       m_menu->Enable(FolderMenu::Properties, !isRoot);
 
+      // only group folders can have subfolders
+      m_menu->Enable(FolderMenu::New, isRoot || isGroup);
+
       PopupMenu(m_menu, pos.x, pos.y);
    }
    //else: no selection

@@ -409,7 +409,7 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
    c = new wxLayoutConstraints;
    SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
    c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN + widthMax );
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN + nRightMargin);
+   c->width.AsIs();
    c->height.AsIs();
 
    // FIXME we assume that if there other controls dependent on this one in

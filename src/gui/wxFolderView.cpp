@@ -252,6 +252,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       {
          String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
          ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
+         p->SetPath("FolderView");
          entry = p->readEntry("FolderListCtrl","");
          if(entry.Length() && entry != wxFLC_DEFAULT_SIZES)
             fv->GetProfile()->writeEntry("FolderListCtrl", entry);
