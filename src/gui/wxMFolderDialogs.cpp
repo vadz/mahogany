@@ -1356,61 +1356,22 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
    // the value is fixed (whatever it is) by the folder type
    m_isGroup->Disable();
 
-#if 0 // FIXME
-   // file folders come in several flavours, so choose the default one if no
-   // selection yet
-   if ( m_folderSubtype->GetSelection() != -1 )
-      return;
-#endif // 0
+   bool isGroup = m_folderType == MF_MH
+#ifdef EXPERIMENTAL_MFormat
+                  || m_folderType == MF_MDIR
+#endif // EXPERIMENTAL_MFormat
+                  ;
 
-   int subtype;
-   switch ( m_folderType )
+   if ( isGroup )
    {
-      default:
-         FAIL_MSG( "new file folder type?" );
-         // fall through
-
-      case MF_FILE:
-#ifdef EXPERIMENTAL_MFormat
-      case MF_MFILE:
-         subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MFile
-                                            : FileFolderSubtype_Mbx;
-#else // !EXPERIMENTAL_MFormat
-      if ( m_isCreating )
-      {
-         subtype = READ_CONFIG ( m_profile, MP_FOLDER_FILE_DRIVER );
-         if ( subtype < 0  || (size_t)subtype > FileFolderSubtype_Max )
-         {
-            FAIL_MSG( "invalid mailbox format" );
-            subtype = 1;
-         }
-      }
-      else // existing folder
-         subtype = FileFolderSubtype_Mbx;  //FIXME
-#endif
-
-         m_browsePath->BrowseForFiles();
-
-         m_isGroup->SetValue(FALSE);
-         break;
-
-      case MF_MH:
-#ifdef EXPERIMENTAL_MFormat
-      case MF_MDIR:
-         subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MDir
-                                            : FileFolderSubtype_MH;
-#else // !EXPERIMENTAL_MFormat
-         subtype = FileFolderSubtype_MH;
-#endif
-         {
-            m_browsePath->BrowseForDirectories();
-
-            m_isGroup->SetValue(TRUE);
-         }
-         break;
+      m_browsePath->BrowseForDirectories();
+   }
+   else
+   {
+      m_browsePath->BrowseForFiles();
    }
 
-   m_folderSubtype->SetSelection(subtype);
+   m_isGroup->SetValue(isGroup);
 }
 
 // called when radiobox/choice selection changes
@@ -1632,7 +1593,10 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
          return;
    }
 
-   m_folderSubtype->SetSelection(0);
+   int subtype;
+   GetRadioIndexFromFolderType(m_folderType, &subtype);
+
+   m_folderSubtype->SetSelection(subtype);
 }
 
 FolderType
@@ -1732,9 +1696,42 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
       case MF_MH:
          if ( choiceIndex )
          {
-            *choiceIndex = type == MF_MH ? FileFolderSubtype_MH
-                                         : FileFolderSubtype_Mbx;
+            // file folders come in several flavours, so choose the default
+            // one if no selection yet
+            int subtype;
+            switch ( m_folderType )
+            {
+               default:
+                  FAIL_MSG( "unknown file folder type?" );
+                  // fall through
+
+               case MF_INBOX:
+               case MF_FILE:
+                  if ( m_isCreating )
+                  {
+                     subtype = READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER);
+                     if ( subtype < 0  ||
+                           (size_t)subtype > FileFolderSubtype_Max )
+                     {
+                        FAIL_MSG( "invalid mailbox format" );
+                        subtype = FileFolderSubtype_Mbx;
+                     }
+                  }
+                  else // !creating
+                  {
+                     // FIXME: how to get the type of the existing folder?
+                     subtype = FileFolderSubtype_Mbx;
+                  }
+                  break;
+
+               case MF_MH:
+                  subtype = FileFolderSubtype_MH;
+                  break;
+            }
+
+            *choiceIndex = subtype;
          }
+
          return Radio_File;
 
 #ifdef EXPERIMENTAL_MFormat
@@ -1743,8 +1740,9 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
          if ( choiceIndex )
          {
             *choiceIndex = type == MF_MDIR ? FileFolderSubtype_MDir
-               : FileFolderSubtype_MFile;
+                                           : FileFolderSubtype_MFile;
          }
+
          return Radio_File;
 #endif // EXPERIMENTAL_MFormat
 
@@ -1759,7 +1757,7 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
          if ( choiceIndex )
          {
             *choiceIndex = type == MF_NNTP ? NewsFolderSubtype_Nntp
-               : NewsFolderSubtype_News;
+                                           : NewsFolderSubtype_News;
          }
          return Radio_News;
 
@@ -1862,8 +1860,6 @@ wxFolderPropertiesPage::SetDefaultValues()
    Profile_obj profile("");
    profile->SetPath(m_folderPath);
 
-   //wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
-
    RadioIndex selRadio = (RadioIndex)m_radio->GetSelection();
    FolderType folderType = GetCurrentFolderType(selRadio);
 
@@ -1883,30 +1879,27 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    if ( FolderTypeHasServer(folderType) )
    {
-      value = "";
-      if ( !value )
+      // take the global server setting for this protocol
+      switch ( folderType )
       {
-         // take the global server setting for this protocol
-         switch ( folderType )
-         {
-            case MF_NNTP:
-               value = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
-               break;
-            case MF_POP:
-               value = READ_CONFIG_TEXT(profile, MP_POPHOST);
-               break;
-            case MF_IMAP:
-               value = READ_CONFIG_TEXT(profile, MP_IMAPHOST);
-               break;
+         case MF_NNTP:
+            value = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
+            break;
+         case MF_POP:
+            value = READ_CONFIG_TEXT(profile, MP_POPHOST);
+            break;
+         case MF_IMAP:
+            value = READ_CONFIG_TEXT(profile, MP_IMAPHOST);
+            break;
 
-            default:
-               FAIL_MSG("new remote foldertype was added");
-               // fall through
+         default:
+            FAIL_MSG("new remote foldertype was added");
+            // fall through
 
-            case MF_GROUP:
-               // we will read the correct value below from MP_HOSTNAME
-               break;
-         }
+         case MF_GROUP:
+            // we will read the correct value below from MP_HOSTNAME
+            value.clear();
+            break;
       }
 
       if ( !value )
@@ -2408,11 +2401,11 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       case MF_FILE:
          // write the folder format if needed
          {
-            int format = m_folderSubtype->GetSelection();
+            long format = m_folderSubtype->GetSelection();
             ASSERT_MSG( format >= 0 && format < FileMbox_Max,
                         "invalid folder format selection" );
 
-            if ( format != GetNumericDefault(MP_FOLDER_FILE_DRIVER) )
+            if ( format != READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER) )
             {
                m_profile->writeEntry(MP_FOLDER_FILE_DRIVER, format);
             }
