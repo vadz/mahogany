@@ -238,6 +238,7 @@ extern const MOption MP_UPDATEINTERVAL;
 extern const MOption MP_FOLDER_CLOSE_DELAY;
 extern const MOption MP_CONN_CLOSE_DELAY;
 extern const MOption MP_AUTOMATIC_WORDWRAP;
+extern const MOption MP_WRAP_QUOTED;
 extern const MOption MP_WRAPMARGIN;
 extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
 extern const MOption MP_VIEW_WRAPMARGIN;
@@ -860,6 +861,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 #define MP_CONN_CLOSE_DELAY_NAME   "ConnCloseDelay"
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_NAME   "AutoWrap"
+/// Wrap quoted lines?
+#define MP_WRAP_QUOTED_NAME "WrapQuoted"
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_NAME      "WrapMargin"
 /// do automatic word wrap in message view?
@@ -1694,8 +1697,10 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 #define MP_FOLDER_CLOSE_DELAY_DEFVAL    0l
 /// close of network connection delayed by
 #define MP_CONN_CLOSE_DELAY_DEFVAL    60
-/// do automatic word wrap?
+/// Wrap quoted lines?
 #define MP_AUTOMATIC_WORDWRAP_DEFVAL   1l
+/// do automatic word wrap?
+#define MP_WRAP_QUOTED_DEFVAL 0l
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_DEFVAL      75
 /// do automatic word wrap in message view?

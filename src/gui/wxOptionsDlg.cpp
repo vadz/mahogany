@@ -253,7 +253,7 @@ enum ConfigFields
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
-   ConfigField_WrapAuto,
+//   ConfigField_WrapAuto,
    ConfigField_ReplyDefKindHelp,
    ConfigField_ReplyDefKind,
    ConfigField_ReplyString,
@@ -1164,7 +1164,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Folder for sent messages"),
                                                    Field_Folder,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
-   { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
+//   { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
    { gettext_noop("There are several different reply commands in Mahogany:\n"
                   "reply to sender only replies to the person who sent the\n"
                   "message, reply to all - to all message recipients and\n"
@@ -1806,7 +1806,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_WRAPMARGIN),
-   CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
+//   CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP), // Meaningless with minimal editor
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DEFAULT_REPLY_KIND),
    CONFIG_ENTRY(MP_REPLY_PREFIX),

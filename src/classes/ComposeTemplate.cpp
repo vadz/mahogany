@@ -55,7 +55,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_AUTOMATIC_WORDWRAP;
+extern const MOption MP_WRAP_QUOTED;
 extern const MOption MP_COMPOSETEMPLATEPATH_GLOBAL;
 extern const MOption MP_COMPOSETEMPLATEPATH_USER;
 extern const MOption MP_COMPOSE_SIGNATURE;
@@ -1478,7 +1478,7 @@ VarExpander::ExpandOriginalText(const String& text,
 
    // where to break lines (if at all)?
    size_t wrapMargin;
-   if ( READ_CONFIG(m_profile, MP_AUTOMATIC_WORDWRAP) )
+   if ( READ_CONFIG(m_profile, MP_WRAP_QUOTED) )
    {
       wrapMargin = READ_CONFIG(m_profile, MP_WRAPMARGIN);
       if ( wrapMargin <= prefix.length() )
@@ -1488,7 +1488,7 @@ VarExpander::ExpandOriginalText(const String& text,
                       "\n"
                       "Disabling automatic wrapping for now."), wrapMargin);
 
-         m_profile->writeEntry(MP_AUTOMATIC_WORDWRAP, false);
+         m_profile->writeEntry(MP_WRAP_QUOTED, false);
          wrapMargin = 0;
       }
    }
