@@ -94,6 +94,11 @@
 #include "../icons/sortdown.xpm"
 #include "../icons/sortup.xpm"
 
+#ifndef wxHAS_RADIO_MENU_ITEMS
+   #define wxITEM_NORMAL FALSE
+   #define wxITEM_RADIO TRUE
+#endif
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -1830,11 +1835,11 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_SIZE:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), "", TRUE);
-         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), "", TRUE);
-         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), "", TRUE);
-         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), "", TRUE);
-         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), "", wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), "", wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), "", wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), "", wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), "", wxITEM_RADIO);
 
          {
             // we rely on the fact the SIZE_XXX menu items are in the same

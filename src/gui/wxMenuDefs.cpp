@@ -44,6 +44,12 @@
 
 #include "gui/wxIdentityCombo.h"
 
+#ifndef wxHAS_RADIO_MENU_ITEMS
+   #define wxITEM_NORMAL FALSE
+   #define wxITEM_CHECK TRUE
+   #define wxITEM_RADIO TRUE
+#endif
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -61,7 +67,11 @@ struct MenuItemInfo
    int idMenu;
    const char *label;
    const char *helpstring;
-   bool isCheckable;
+#ifdef wxHAS_RADIO_MENU_ITEMS
+   wxItemKind kind;
+#else
+   bool kind;
+#endif
 };
 
 struct TbarItemInfo
@@ -213,324 +223,324 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // file
    // available accels: BFGHJKLOQVWZ
-   { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &new message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
+   { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &new message\tCtrl-N"),  gettext_noop("Start a new message")      , wxITEM_NORMAL },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
-                           gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
-   { WXMENU_FILE_POST,     gettext_noop("Post news &article"),   gettext_noop("Write a news article and post it")      , FALSE },
-   { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folders for new mail and download it now") , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint setup"),     gettext_noop("Configure printing")  , FALSE },
-   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("Pa&ge setup"),     gettext_noop("Configure page setup")  , FALSE },
+                           gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , wxITEM_NORMAL },
+   { WXMENU_FILE_POST,     gettext_noop("Post news &article"),   gettext_noop("Write a news article and post it")      , wxITEM_NORMAL },
+   { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folders for new mail and download it now") , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint setup"),     gettext_noop("Configure printing")  , wxITEM_NORMAL },
+   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("Pa&ge setup"),     gettext_noop("Configure page setup")  , wxITEM_NORMAL },
 #ifdef USE_PS_PRINTING
    // extra postscript printing
-   { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , FALSE },
-// { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  , FALSE },
+   { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , wxITEM_NORMAL },
+// { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  , wxITEM_NORMAL },
 #endif // USE_PS_PRINTING
 
 #ifdef USE_PYTHON
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_RUN_PYSCRIPT,   gettext_noop("R&un Python script..."),    gettext_noop("Run a simple python script"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_RUN_PYSCRIPT,   gettext_noop("R&un Python script..."),    gettext_noop("Run a simple python script"), wxITEM_NORMAL },
 #endif // USE_PYTHON
 
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), wxITEM_NORMAL },
 
 #ifdef USE_DIALUP
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to network"), gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down network"), gettext_noop("Shutdown dial-up networking")        , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to network"), gettext_noop("Activate dial-up networking")        , wxITEM_NORMAL },
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down network"), gettext_noop("Shutdown dial-up networking")        , wxITEM_NORMAL },
 #endif // USE_DIALUP
 
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", FALSE },
-      { WXMENU_FILE_IDENT_ADD, gettext_noop("&Add..."),  gettext_noop("Create a new identity")        , FALSE },
-      { WXMENU_FILE_IDENT_CHANGE, gettext_noop("&Change..."), gettext_noop("Change the current identity")        , FALSE },
-      { WXMENU_FILE_IDENT_EDIT, gettext_noop("&Edit..."),  gettext_noop("Edit the current identity parameters")        , FALSE },
-      { WXMENU_FILE_IDENT_DELETE, gettext_noop("&Delete..."), gettext_noop("Remove an identity")        , FALSE },
-   { WXMENU_SUBMENU,       "", "", FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", wxITEM_NORMAL },
+      { WXMENU_FILE_IDENT_ADD, gettext_noop("&Add..."),  gettext_noop("Create a new identity")        , wxITEM_NORMAL },
+      { WXMENU_FILE_IDENT_CHANGE, gettext_noop("&Change..."), gettext_noop("Change the current identity")        , wxITEM_NORMAL },
+      { WXMENU_FILE_IDENT_EDIT, gettext_noop("&Edit..."),  gettext_noop("Edit the current identity parameters")        , wxITEM_NORMAL },
+      { WXMENU_FILE_IDENT_DELETE, gettext_noop("&Delete..."), gettext_noop("Remove an identity")        , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
 
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_IMPORT,   gettext_noop("I&mport..."),  gettext_noop("Import settings from another e-mail program")        , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_IMPORT,   gettext_noop("I&mport..."),  gettext_noop("Import settings from another e-mail program")        , wxITEM_NORMAL },
 
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_CLOSE,    gettext_noop("&Close window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"),        gettext_noop("Toggle unattended mode on/off"), TRUE },
-   { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_CLOSE,    gettext_noop("&Close window\tCtrl-W"),     gettext_noop("Close this window")        , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"),        gettext_noop("Toggle unattended mode on/off"), wxITEM_CHECK },
+   { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , wxITEM_NORMAL },
 
    // folder
    // available accels: DGHJKMQTVWXYZ
-   { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
-   { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , FALSE },
-   { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , FALSE },
-   { WXMENU_FOLDER_RENAME,    gettext_noop("Re&name..."), gettext_noop("Rename the selected folder")               , FALSE },
-   { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove from tree"), gettext_noop("Remove the selected folder from the folder tree")               , FALSE },
-   { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , FALSE },
-   { WXMENU_FOLDER_CLEAR,     gettext_noop("C&lear..."), gettext_noop("Delete all messages in the folder")               , FALSE },
-   { WXMENU_FOLDER_CLOSE,     gettext_noop("Clos&e"), gettext_noop("Close the current folder")               , FALSE },
-   { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , FALSE },
-   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
-   { WXMENU_FOLDER_UPDATE,    gettext_noop("&Update"), gettext_noop("Update the shown status of this folder"), FALSE },
-   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update &subtree..."), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), FALSE },
-   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , wxITEM_NORMAL },
+   { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , wxITEM_NORMAL },
+   { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_RENAME,    gettext_noop("Re&name..."), gettext_noop("Rename the selected folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove from tree"), gettext_noop("Remove the selected folder from the folder tree")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_CLEAR,     gettext_noop("C&lear..."), gettext_noop("Delete all messages in the folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_CLOSE,     gettext_noop("Clos&e"), gettext_noop("Close the current folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FOLDER_UPDATE,    gettext_noop("&Update"), gettext_noop("Update the shown status of this folder"), wxITEM_NORMAL },
+   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update &subtree..."), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_IMPORTTREE,gettext_noop("&Import file folders..."),
-                              gettext_noop("Create folders for all files in a directory"), FALSE },
-   { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , FALSE },
-   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
-   { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , FALSE },
-   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
-   { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , FALSE },
+                              gettext_noop("Create folders for all files in a directory"), wxITEM_NORMAL },
+   { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , wxITEM_NORMAL },
 
    // normal edit
 
    // the available accelerators for this menu:
    // BHIJKLNOQVWXYZ
-   { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },
-   { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , FALSE },
-   { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_FIND,  gettext_noop("&Find...\tF3"), gettext_noop("Find text in message") , FALSE },
-   { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , FALSE },
-   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , FALSE },
-   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
-   { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , FALSE },
-   { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
+   { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_EDIT_FIND,  gettext_noop("&Find...\tF3"), gettext_noop("Find text in message") , wxITEM_NORMAL },
+   { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , wxITEM_NORMAL },
+   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
+   { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_RESTORE_PREF,
-                           gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , FALSE },
+                           gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , wxITEM_NORMAL },
 
    // msg
 
    // the available accelerators for this menu:
    // bjqwz
 
-   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , FALSE },
-   { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer"), gettext_noop("Edit selected message in composer")    , FALSE },
-   { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , FALSE },
-   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
+   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
+   { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
+   { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , wxITEM_NORMAL },
+   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
 #ifdef USE_PS_PRINTING
-   { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
-   { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
+   { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , wxITEM_NORMAL },
+   { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , wxITEM_NORMAL },
 #endif // USE_PS_PRINTING
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_SUBMENU,       gettext_noop("Rep&ly"), "", FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("Rep&ly"), "", wxITEM_NORMAL },
       {
          WXMENU_MSG_REPLY,
          gettext_noop("&Reply\tCtrl-R"),
          gettext_noop("Reply to this message using default reply command"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_WITH_TEMPLATE,
          gettext_noop("Reply with &template...\tShift-Ctrl-R"),
          gettext_noop("Reply to this message after choosing a template to use"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_SENDER,
          gettext_noop("&Reply to sender"),
          gettext_noop("Reply to the sender of this message only"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_SENDER_WITH_TEMPLATE,
          gettext_noop("Reply to sender with &template..."),
          gettext_noop("Reply to the sender of this message after choosing a template to use"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_ALL,
          gettext_noop("Reply to a&ll\tCtrl-G"),
          gettext_noop("Reply to all recipients of this message (group reply)"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE,
          gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),
          gettext_noop("Reply to all recipients of this message after choosing a template to use"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_LIST,
          gettext_noop("Reply to &list\tCtrl-L"),
          gettext_noop("Reply to the mailing list this message was sent to"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_REPLY_LIST_WITH_TEMPLATE,
          gettext_noop("Reply to list &with template...\tShift-Ctrl-L"),
          gettext_noop("Reply to the mailing list after choosing a template to use"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_FORWARD,
          gettext_noop("&Forward\tCtrl-F"),
          gettext_noop("Forward this message to another recipient"),
-         FALSE
+         wxITEM_NORMAL
       },
       {
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
          gettext_noop("Forward with t&emplate...\tShift-Ctrl-F"),
          gettext_noop("Forward this message after choosing a template to use"),
-         FALSE
+         wxITEM_NORMAL
       },
-   { WXMENU_SUBMENU,       "", "", FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
-   { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , FALSE },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &file..."), gettext_noop("Export message to a file")   , FALSE },
-   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , FALSE },
-   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , FALSE },
-   { WXMENU_MSG_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete messages(s) (mark it as deleted or move to trash)")      , FALSE },
-   { WXMENU_MSG_DELETE_EXPUNGE,    gettext_noop("&Zap"), gettext_noop("Permanently and unrecoverably delete message(s)")      , FALSE },
-   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_EXPUNGE,   gettext_noop("E&xpunge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , FALSE },
-   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
-   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , FALSE },
-   { WXMENU_MSG_SEARCH,  gettext_noop("Searc&h..."), gettext_noop("Search and select messages") , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
-   { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), FALSE },
-   { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mar&k unread\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_SUBMENU,       gettext_noop("&Select"), "", FALSE },
-      { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
-      { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread\tShift-Ctrl-A"), gettext_noop("Select all unread messages")      , FALSE },
-      { WXMENU_MSG_SELECTFLAGGED, gettext_noop("Select all &flagged"), gettext_noop("Select all flagged messages")      , FALSE },
-      { WXMENU_MSG_DESELECTALL,gettext_noop("&Deselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
-   { WXMENU_SUBMENU,       "", "", FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_SUBMENU,       gettext_noop("&Yet more commands"), "", FALSE },
-      { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
-      { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
-      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , FALSE },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
+   { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , wxITEM_NORMAL },
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &file..."), gettext_noop("Export message to a file")   , wxITEM_NORMAL },
+   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , wxITEM_NORMAL },
+   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , wxITEM_NORMAL },
+   { WXMENU_MSG_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete messages(s) (mark it as deleted or move to trash)")      , wxITEM_NORMAL },
+   { WXMENU_MSG_DELETE_EXPUNGE,    gettext_noop("&Zap"), gettext_noop("Permanently and unrecoverably delete message(s)")      , wxITEM_NORMAL },
+   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , wxITEM_NORMAL },
+   { WXMENU_MSG_EXPUNGE,   gettext_noop("E&xpunge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , wxITEM_NORMAL },
+   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , wxITEM_NORMAL },
+   { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , wxITEM_NORMAL },
+   { WXMENU_MSG_SEARCH,  gettext_noop("Searc&h..."), gettext_noop("Search and select messages") , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , wxITEM_NORMAL },
+   { WXMENU_MSG_MARK_READ,   gettext_noop("Mark &read"), gettext_noop("Mark message as read"), wxITEM_NORMAL },
+   { WXMENU_MSG_MARK_UNREAD,   gettext_noop("Mar&k unread\tShift-Ctrl-U"), gettext_noop("Mark message as unread"), wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("&Select"), "", wxITEM_NORMAL },
+      { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , wxITEM_NORMAL },
+      { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread\tShift-Ctrl-A"), gettext_noop("Select all unread messages")      , wxITEM_NORMAL },
+      { WXMENU_MSG_SELECTFLAGGED, gettext_noop("Select all &flagged"), gettext_noop("Select all flagged messages")      , wxITEM_NORMAL },
+      { WXMENU_MSG_DESELECTALL,gettext_noop("&Deselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("&Yet more commands"), "", wxITEM_NORMAL },
+      { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },
+      { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
+      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
 #ifdef EXPERIMENTAL_show_uid
-      { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
+      { WXMENU_MSG_SHOWUID, "Show message UID&L", "", wxITEM_NORMAL },
 #endif // EXPERIMENTAL_show_uid
-      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , FALSE },
-   { WXMENU_SUBMENU,       "", "", FALSE },
+      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
 
    // compose
 
    // the available accelerators for this menu:
    // ABFGJMOQRUXYZ
    { WXMENU_COMPOSE_INSERTFILE,     gettext_noop("&Insert file...\tCtrl-I"),
-                                    gettext_noop("Attach a file to the message")            , FALSE },
+                                    gettext_noop("Attach a file to the message")            , wxITEM_NORMAL },
    { WXMENU_COMPOSE_LOADTEXT,       gettext_noop("I&nsert text...\tCtrl-T"),
-                                    gettext_noop("Insert text file")         , FALSE },
+                                    gettext_noop("Insert text file")         , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND,           gettext_noop("&Send\tShift-Ctrl-X"),
-                                    gettext_noop("Send the message now")     , FALSE },
+                                    gettext_noop("Send the message now")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SAVE_AS_DRAFT,  gettext_noop("Close and save as &draft"),
-                                    gettext_noop("Close the window and save the message in the drafts folder")     , FALSE },
+                                    gettext_noop("Close the window and save the message in the drafts folder")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND_LATER,     gettext_noop("Send &Later\tShift-Ctrl-L"),
-                                    gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
+                                    gettext_noop("Schedule the message to be send at a later time.")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND_KEEP_OPEN, gettext_noop("Send and &keep\tShift-Ctrl-K"),
-                                    gettext_noop("Send the message now and keep the editor open")     , FALSE },
-   { WXMENU_COMPOSE_PRINT,          gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_COMPOSE_PREVIEW, gettext_noop("Previe&w..."),   gettext_noop("View the message as it would be sent"), FALSE },
-   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
-   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , FALSE },
-   { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-E"),gettext_noop("Invoke alternative editor"), FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header...\tCtrl-H"), gettext_noop("Add/edit header fields not shown on the screen"), FALSE },
+                                    gettext_noop("Send the message now and keep the editor open")     , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_PRINT,          gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_PREVIEW, gettext_noop("Previe&w..."),   gettext_noop("View the message as it would be sent"), wxITEM_NORMAL },
+   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), wxITEM_NORMAL },
+   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-E"),gettext_noop("Invoke alternative editor"), wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header...\tCtrl-H"), gettext_noop("Add/edit header fields not shown on the screen"), wxITEM_NORMAL },
 
    // language
 
    // the available accelerators for this menu:
    // FJMNPQUVXZ
-   { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), TRUE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
-   { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_3, gettext_noop("Es&peranto (ISO-8859-3)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_4, gettext_noop("Baltic &old (ISO-8859-4)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_5, gettext_noop("&Cyrillic (ISO-8859-5)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic (ISO-8859-6)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek (ISO-8859-7)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_8, gettext_noop("Heb&rew (ISO-8859-8)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_9, gettext_noop("&Turkish (ISO-8859-9)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_10, gettext_noop("Nor&dic (ISO-8859-10)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_11, gettext_noop("T&hai (ISO-8859-11)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_12, gettext_noop("&Indian (ISO-8859-12)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_13, gettext_noop("&Baltic (ISO-8859-13)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_14, gettext_noop("Ce&ltic (ISO-8859-14)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_ISO8859_15, gettext_noop("Western European with &Euro (ISO-8859-15)"), gettext_noop(""), TRUE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
-   { WXMENU_LANG_CP1250, gettext_noop("Windows Central European (CP 125&0)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1251, gettext_noop("Windows Cyrillic (CP 125&1)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1252, gettext_noop("Windows Western European (CP 125&2)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1253, gettext_noop("Windows Greek (CP 125&3)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1254, gettext_noop("Windows Turkish (CP 125&4)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1255, gettext_noop("Windows Hebrew (CP 125&5)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), gettext_noop(""), TRUE },
-   { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), gettext_noop(""), TRUE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
-   { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), gettext_noop(""), TRUE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+   { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
+   { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_3, gettext_noop("Es&peranto (ISO-8859-3)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_4, gettext_noop("Baltic &old (ISO-8859-4)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_5, gettext_noop("&Cyrillic (ISO-8859-5)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic (ISO-8859-6)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek (ISO-8859-7)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_8, gettext_noop("Heb&rew (ISO-8859-8)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_9, gettext_noop("&Turkish (ISO-8859-9)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_10, gettext_noop("Nor&dic (ISO-8859-10)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_11, gettext_noop("T&hai (ISO-8859-11)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_12, gettext_noop("&Indian (ISO-8859-12)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_13, gettext_noop("&Baltic (ISO-8859-13)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_14, gettext_noop("Ce&ltic (ISO-8859-14)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_ISO8859_15, gettext_noop("Western European with &Euro (ISO-8859-15)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
+   { WXMENU_LANG_CP1250, gettext_noop("Windows Central European (CP 125&0)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1251, gettext_noop("Windows Cyrillic (CP 125&1)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1252, gettext_noop("Windows Western European (CP 125&2)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1253, gettext_noop("Windows Greek (CP 125&3)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1254, gettext_noop("Windows Turkish (CP 125&4)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1255, gettext_noop("Windows Hebrew (CP 125&5)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
+   { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
 #if wxCHECK_VERSION(2, 3, 0)
-   { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), gettext_noop(""), TRUE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+   { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), gettext_noop(""), wxITEM_RADIO },
+   { WXMENU_SEPARATOR, "", "", wxITEM_RADIO },
 #endif // 2.3.0
-   { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set default encoding..."), ""                         , FALSE },
+   { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set default encoding..."), ""                         , wxITEM_NORMAL },
 
    // ADB book management
-   { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book"), FALSE },
-   { WXMENU_ADBBOOK_OPEN,  gettext_noop("&Open..."),          gettext_noop("Open an address book file"), FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format"), FALSE },
-   { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format"), FALSE },
-   { WXMENU_SUBMENU,       gettext_noop("&vCard"), "", FALSE },
+   { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book"), wxITEM_NORMAL },
+   { WXMENU_ADBBOOK_OPEN,  gettext_noop("&Open..."),          gettext_noop("Open an address book file"), wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format"), wxITEM_NORMAL },
+   { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format"), wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       gettext_noop("&vCard"), "", wxITEM_NORMAL },
       { WXMENU_ADBBOOK_VCARD_IMPORT, gettext_noop("I&mport vCard file..."),
-                                     gettext_noop("Create an entry from vCard file"), FALSE },
+                                     gettext_noop("Create an entry from vCard file"), wxITEM_NORMAL },
       { WXMENU_ADBBOOK_VCARD_EXPORT, gettext_noop("E&xport vCard file..."),
-                                     gettext_noop("Export entry to a vCard file"), FALSE },
-   { WXMENU_SUBMENU,       "", "", FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+                                     gettext_noop("Export entry to a vCard file"), wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
 #ifdef DEBUG
-   { WXMENU_ADBBOOK_FLUSH, "&Flush",                           "Save changes to disk"                         , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_ADBBOOK_FLUSH, "&Flush",                           "Save changes to disk"                         , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
 #endif // debug
-   { WXMENU_ADBBOOK_PROP,  gettext_noop("&Properties..."), gettext_noop("View properties of the current address book")            , FALSE },
+   { WXMENU_ADBBOOK_PROP,  gettext_noop("&Properties..."), gettext_noop("View properties of the current address book")            , wxITEM_NORMAL },
 
    // ADB edit
-   { WXMENU_ADBEDIT_NEW,   gettext_noop("&New entry..."),     gettext_noop("Create new entry/group")   , FALSE },
-   { WXMENU_ADBEDIT_DELETE,gettext_noop("&Delete"),           gettext_noop("Delete the selected items"), FALSE },
-   { WXMENU_ADBEDIT_RENAME,gettext_noop("&Rename..."),        gettext_noop("Rename the selected items"), FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_ADBEDIT_CUT,   gettext_noop("Cu&t"),              gettext_noop("Copy and delete selected items")                    , FALSE },
-   { WXMENU_ADBEDIT_COPY,  gettext_noop("&Copy"),             gettext_noop("Copy selected items")      , FALSE },
-   { WXMENU_ADBEDIT_PASTE, gettext_noop("&Paste"),            gettext_noop("Paste here")               , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_ADBEDIT_UNDO,  gettext_noop("&Undo changes"),     gettext_noop("Undo all changes to the entry being edited")       , FALSE },
+   { WXMENU_ADBEDIT_NEW,   gettext_noop("&New entry..."),     gettext_noop("Create new entry/group")   , wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_DELETE,gettext_noop("&Delete"),           gettext_noop("Delete the selected items"), wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_RENAME,gettext_noop("&Rename..."),        gettext_noop("Rename the selected items"), wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_CUT,   gettext_noop("Cu&t"),              gettext_noop("Copy and delete selected items")                    , wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_COPY,  gettext_noop("&Copy"),             gettext_noop("Copy selected items")      , wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_PASTE, gettext_noop("&Paste"),            gettext_noop("Paste here")               , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_ADBEDIT_UNDO,  gettext_noop("&Undo changes"),     gettext_noop("Undo all changes to the entry being edited")       , wxITEM_NORMAL },
 
    // ADB search
-   { WXMENU_ADBFIND_FIND,  gettext_noop("&Find..."),          gettext_noop("Find entry by name or contents")                 , FALSE },
-   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next\tCtrl-G"),        gettext_noop("Go to the next match")     , FALSE },
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    , FALSE },
+   { WXMENU_ADBFIND_FIND,  gettext_noop("&Find..."),          gettext_noop("Find entry by name or contents")                 , wxITEM_NORMAL },
+   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next\tCtrl-G"),        gettext_noop("Go to the next match")     , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    , wxITEM_NORMAL },
 
    // help
-   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  , FALSE },
-   { WXMENU_HELP_TIP,      gettext_noop("Show a &tip..."),    gettext_noop("Show a tip about using Mahogany")  , FALSE },
-   { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , FALSE },
-   { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , FALSE },
+   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  , wxITEM_NORMAL },
+   { WXMENU_HELP_TIP,      gettext_noop("Show a &tip..."),    gettext_noop("Show a tip about using Mahogany")  , wxITEM_NORMAL },
+   { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , wxITEM_NORMAL },
+   { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , wxITEM_NORMAL },
 #ifdef DEBUG
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_HELP_WIZARD,   "Run &wizard",       ""                         , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_HELP_WIZARD,   "Run &wizard",       ""                         , wxITEM_NORMAL },
 #endif
-   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_HELP_CONTEXT, gettext_noop("&Help\tCtrl-H"),    gettext_noop("Help on current context..."), FALSE },
-   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents\tF1"),    gettext_noop("Contents of help system..."), FALSE },
-   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
-   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
+   { WXMENU_HELP_CONTEXT, gettext_noop("&Help\tCtrl-H"),    gettext_noop("Help on current context..."), wxITEM_NORMAL },
+   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents\tF1"),    gettext_noop("Contents of help system..."), wxITEM_NORMAL },
+   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), wxITEM_NORMAL },
+   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), wxITEM_NORMAL },
 };
 
 // ============================================================================
@@ -554,10 +564,7 @@ static inline const MenuItemInfo& GetMenuItem(int n)
 void AppendToMenu(wxMenu *menu, int& n)
 {
    int id = n > 0 ? GetMenuItem(n).idMenu : WXMENU_SEPARATOR;
-   if ( id == WXMENU_SEPARATOR ) {
-      menu->AppendSeparator();
-   }
-   else if ( id == WXMENU_SUBMENU ) {
+   if ( id == WXMENU_SUBMENU ) {
       // append all entries until the next one with id == WXMENU_SUBMENU to a
       // submenu
       wxMenu *submenu = new wxMenu();
@@ -581,7 +588,7 @@ void AppendToMenu(wxMenu *menu, int& n)
       menu->Append(id,
                    wxGetTranslation(mii.label),
                    wxGetTranslation(mii.helpstring),
-                   mii.isCheckable);
+                   mii.kind);
    }
 }
 
@@ -752,6 +759,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
 {
    wxFrame *frame = GetFrame(win);
    CHECK_RET(frame, "no parent frame in CheckLanguageInMenu");
+
    wxMenuBar *mb = frame->GetMenuBar();
    CHECK_RET(mb, "no menu bar in CheckLanguageInMenu");
 
@@ -804,6 +812,9 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_DEFAULT;
    }
 
+#ifdef wxHAS_RADIO_MENU_ITEMS
+   mb->Check(id, TRUE);
+#else // !wxHAS_RADIO_MENU_ITEMS
    // emulate the "radio menu items" as wxWin doesn't yet have this
    static const int menuIds[] =
    {
@@ -842,6 +853,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       int idCur = menuIds[nId];
       mb->Check(idCur, idCur == id);
    }
+#endif // wxHAS_RADIO_MENU_ITEMS/!wxHAS_RADIO_MENU_ITEMS
 }
 
 // translate the menu event id to the encoding
