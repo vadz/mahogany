@@ -14,8 +14,6 @@ MOBJS	:=
 MSOS	:=
 # Source files to be scanned for translation strings
 MSGSRC	:=
-# Run `make install' in these directories when installing
-INSTALL_DIRS :=
 # Generated objects to be removed by clean
 CLEAN	:=
 #
@@ -95,10 +93,12 @@ endif
 	for i in .src/icons/*.xpm; \
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
-	# using "set -e" instead of "for i in $INSTALL_DIRS" makes this work even
-	# when INSTALL_DIRS is empty - which it is if we don't use Python
-	set -e $(INSTALL_DIRS); \
-	for i; do $(MAKE) -C $$i install; done
+ifdef USE_PYTHON
+	$(INSTALL) -d $(DATADIR)/scripts
+	for i in Python/*.py Python/.src/Scripts/*.py; \
+		do $(INSTALL_DATA) $$i $(DATADIR)/scripts; \
+	done
+endif
 
 # invoked from locale to build message catalog
 msgcat:

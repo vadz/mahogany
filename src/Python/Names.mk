@@ -45,8 +45,6 @@ Python/swiglib.o: Python/swiglib.cpp-swig
 	$(M_COMPILE_SWIGLIB)
 endif
 
-INSTALL_DIRS += Python
-
 CLEAN	+= Python/swiglib.cpp Python/swiglib.py Python/swiglib_wrap.html \
 	$(POBJS) $(POBJS:.py=.cpp) $(POBJS:.py=_wrap.html)
 
