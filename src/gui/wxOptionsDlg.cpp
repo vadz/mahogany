@@ -1072,7 +1072,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Collect new mail from this folder"),
                                                    Field_Bool | Field_NotApp,
                                                    -1 },
-   { gettext_noop("Central ne&w mail folder"),     Field_Folder |
+   { gettext_noop("&To this folder"),              Field_Folder |
                                                    Field_Advanced |
                                                    Field_NotApp,
                                                    ConfigField_NewMailCollect },
