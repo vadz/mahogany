@@ -64,6 +64,14 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the suffix we add to the folder containing the messages if we can't have a
+// folder which has both subfolders and messages
+#define MESSAGES_SUFFIX _T(".messages")
+
+// ----------------------------------------------------------------------------
 // MigrateImapServer: IMAP server parameters
 // ----------------------------------------------------------------------------
 
@@ -536,6 +544,9 @@ private:
 
    // return the MFolder to copy to
    MFolder *GetDstFolder(const String& name, int flags);
+
+   // set the access parameters for an IMAP folder (GetDstFolder() helper)
+   void SetAccessParameters(MFolder *folderDst);
 
    // return the type of the folders we're creating
    MFolderType GetDstType() const;
@@ -1415,7 +1426,9 @@ MigrateWizardProgressPage::GetDstNameForSource(const String& name)
       {
          if ( !Data().delimiterDst )
          {
-            MFolder_obj folderDst = MFolder::CreateTemp(_T(""), GetDstType());
+            MFolder_obj folderDst(MFolder::CreateTemp(_T(""), GetDstType()));
+            SetAccessParameters(folderDst);
+
             Data().delimiterDst = MailFolder::GetFolderDelimiter(folderDst);
 
             if ( Data().delimiterDst == delimiterSrc )
@@ -1463,13 +1476,43 @@ MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
          }
 
          // and modify the name for the file itself
-         path += _T(".messages");
+         path += MESSAGES_SUFFIX;
       }
+   }
+   else // MF_IMAP
+   {
+      // TODO: some IMAP servers do support folders which have both messages
+      //       and subfolders, we should test for this -- but for now we
+      //       suppose the worst case
+      if ( !(flags & ASMailFolder::ATT_NOINFERIORS) )
+      {
+         path += MESSAGES_SUFFIX;
+      }
+
+      SetAccessParameters(folderDst);
    }
 
    folderDst->SetPath(path);
 
    return folderDst;
+}
+
+void
+MigrateWizardProgressPage::SetAccessParameters(MFolder *folderDst)
+{
+   CHECK_RET( folderDst, _T("NULL folder in SetAccessParameters") );
+
+   if ( folderDst->GetType() == MF_IMAP )
+   {
+      const MigrateImapServer& dstIMAP = Data().dstIMAP;
+      folderDst->SetServer(dstIMAP.server);
+      folderDst->SetAuthInfo(dstIMAP.username, dstIMAP.password);
+
+#ifdef USE_SSL
+      folderDst->SetSSL(dstIMAP.useSSL ? SSLSupport_SSL : SSLSupport_None,
+                        SSLCert_AcceptUnsigned);
+#endif // USE_SSL
+   }
 }
 
 bool
@@ -1517,8 +1560,9 @@ bool MigrateWizardProgressPage::CreateDstDirectory(const String& name)
 {
    if ( Data().toIMAP )
    {
-      // TODO: do we need to do anything here or will it be created
-      //       automatically for us?
+      // we don't have to do anything, it will be created when we access the
+      // first subfolder of this folder (which will also be created
+      // automatically)
       return true;
    }
    else // local file destination
@@ -1946,16 +1990,33 @@ void MigrateData::FixFolderFlags()
 {
    for ( int n = 0; n < countFolders; n++ )
    {
-      // check if this folder is a child of some of the previous folders
-      String parent = folderNames[n].BeforeLast(source.delimiter);
-      if ( !parent.empty() )
+      const String& name = folderNames[n];
+
+      // the index of the folder which has children (none so far)
+      int idx = wxNOT_FOUND;
+
+      // all folders are children of the the root one so if we have any more
+      // folders we must not have ATT_NOINFERIORS flag
+      if ( name.empty() )
       {
-         int idx = folderNames.Index(parent);
-         if ( idx != wxNOT_FOUND )
+         if ( countFolders > 1 )
          {
-            // this one does have children
-            folderFlags[(size_t)idx] &= ~ASMailFolder::ATT_NOINFERIORS;
+            idx = n;
          }
+      }
+      else // check if this folder is a child of some of the previous folders
+      {
+         String parent = name.BeforeLast(source.delimiter);
+         if ( !parent.empty() )
+         {
+            idx = folderNames.Index(parent);
+         }
+      }
+
+      if ( idx != wxNOT_FOUND )
+      {
+         // this one does have children
+         folderFlags[(size_t)idx] &= ~ASMailFolder::ATT_NOINFERIORS;
       }
    }
 }
