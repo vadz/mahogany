@@ -3434,11 +3434,11 @@ void MPasswordDialog::OnUpdateOk(wxUpdateUIEvent& event)
 }
 
 bool MDialog_GetPassword(const wxString& folderName,
-                         wxString *password,
                          wxString *username,
+                         wxString *password,
                          wxWindow *parent)
 {
-   MPasswordDialog dlg(parent, folderName, password, username);
+   MPasswordDialog dlg(parent, folderName, username, password);
 
    return dlg.ShowModal() == wxID_OK;
 }

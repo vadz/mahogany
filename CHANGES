@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+18.10.00 VZ: ask for the passwords as needed, propose to remember them
 30.09.00 VZ: allow sending mail to the addresses without the hostname part
 30.09.00 KB: added mail delivery via sendmail
              removed assert for wxFONTENCODING_DEFAULT encoding in SendMessageCC.cpp
@@ -16,7 +17,7 @@
              mailbox import to never complete, updated splash screen, finished config sync
 28.08.00 KB: fixed auto-creation of non-existent folders on IMAP etc
              reorganised the options dialog for the PalmOS module and documented
-	     it better
+             it better
              Started remote config synchronisation code, EXPERIMENTAL_sync
              configure: --with-experimental=a,b,c --> defines EXPERIMENTAL_a,
              EXPERIMENTAL_b, ...
