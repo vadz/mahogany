@@ -11,12 +11,15 @@ $Id$
 - SentMail folder path should be relative - broken
 - reply mail does not quote original mail but inserts junk
 - reply/forward buttons for messageview/folderview
-- make icons in AdbEdit transparent
 - make AdbEdit textctrl accept pasted text
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
+- add Picture field to Adb
 
 - folders should remember whether they were opened on program shutdown and
   reopen automatically in this case (/Folders/<FolderName>/AutoOpen = TRUE)
+  KB: WHY? We have the "list of open folders". Better: have a "Reopen
+      Folder" menu to toggle this behavious, i.e. add/remove it from that
+      list.
 
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
   + should have "restore defaults", would be nice to be able to do it for
@@ -24,7 +27,7 @@ $Id$
   + can easily get crashed/stuck in endless loop trying to satisfy constraints
   + Preferences editor should mail oneself for test (MAppBase::VerifySettings)
 
-- wxLayout:
+- wxLayout: --- working on this, KB ---
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
     + check printing example
   + scroll to cursor
@@ -41,12 +44,14 @@ $Id$
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
   + session management
+  + KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
 
 - Python
   + add remaining (important) interface definitions
   + user/global Minit files, security issues
   + add OnNewMail callback by counting messages in mailbox
     + add sample callback showing new messages
+  + merge in wxPython
 
 - DND with gmc (dead easy, see dnd example :-) )
 
@@ -90,7 +95,6 @@ expansions.
 
 ********************* known wxWindows bugs **********************
 
-- wxDC::GetTextExtent() does not set descent value (wxGTK)
 - font mess (wxGTK)
 - constraints
 

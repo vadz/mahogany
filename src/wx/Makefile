@@ -1,15 +1,19 @@
-# Makefile for src/wx directory and all its subdirectories
+# Makefile for src/wx directory
+#
+# $Id$
+#
+# For all targets apart from clean, it will call the
+# Makefile2 which includes the usual standard rules.
+# This is needed to avoid warnings.
 
-CWD = wx
-SRC = common/mimetype.cpp generic/persctrl.cpp
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
+all:
+	@$(MAKE) -f Makefile2 $@
 
-TARGETS = $(SRC:.cpp=.o)
+clean:
+	$(RM) common/*.o generic/*.o
 
-all: $(TARGETS)
+%: force
+	@$(MAKE) -f Makefile2 $@
+force: ;
 
-include ../../makeopts
-include ../../makerules
-include .depend
-
+,PHONY: clean
