@@ -19,7 +19,7 @@
 #######################################################################
 
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/*.cpp))
-OBJ	:= $(SRC:.cpp=.so)
+MOD	:= $(SRC:.cpp=.so)
 
 ifdef PISOCK_LIB
 LDFLAGS_modules_PalmOS_so := $(PISOCK_LIB)
@@ -28,10 +28,10 @@ CPPFLAGS_modules_PalmOS_o := -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)
 CPPFLAGS_modules_PalmOS_so := -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)
 endif
 else
-OBJ	:= $(filter-out modules/PalmOS.o, $(OBJ))
+MOD	:= $(filter-out modules/PalmOS.so, $(MOD))
 endif
 
-MSOS	+= $(OBJ)
+MSOS	+= $(MOD)
 
 MSGSRC	+= $(SRC)
 
