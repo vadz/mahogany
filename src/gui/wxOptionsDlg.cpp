@@ -1793,29 +1793,34 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
 {
-   bool dirty = FALSE;
+   // has the listbox contents changed?
+   bool dirty;
 
    switch ( event.GetId() )
    {
       case wxOptionsPage_BtnNew:
-         OnListBoxAdd();
+         dirty = OnListBoxAdd();
          break;
 
       case wxOptionsPage_BtnModify:
-         OnListBoxModify();
+         dirty = OnListBoxModify();
          break;
 
       case wxOptionsPage_BtnDelete:
-         OnListBoxDelete();
+         dirty = OnListBoxDelete();
          break;
 
       default:
          return;
    }
 
-   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
-   if ( dirty && dialog )
-      dialog->SetDirty();
+   if ( dirty )
+   {
+      // mark the dialog as being dirty too
+      wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+      if ( dialog )
+         dialog->SetDirty();
+   }
 }
 
 bool wxOptionsPage::OnListBoxAdd()

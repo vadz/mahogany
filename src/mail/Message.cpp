@@ -24,11 +24,6 @@
 
 #include   "strutil.h"
 
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -43,21 +38,23 @@
     @return true if found
 */
 bool
-Message::ExpandParameter(MessageParameterList const & list, String
-                         const &parameter,
+Message::ExpandParameter(MessageParameterList const & list,
+                         String const &parameter,
                          String *value) const
 {
    MessageParameterList::iterator i;
-   
+
    for(i = list.begin(); i != list.end(); i++)
    {
+      // parameter names are not case-sensitive, i.e. "charset" == "CHARSET"
       if ( parameter.CmpNoCase((*i)->name) == 0 )
-         // found
       {
+         // found
          *value = (*i)->value;
          return true;
       }
    }
+
    return false;
 }
 
@@ -283,7 +280,7 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
    strutil_tolower(host);
    email2 = mailbox;
    if(host[0]) email2 << '@' << host;
-   
+
    // TODO the address foo.bar@baz.com should be considered the same as
    //      bar@baz.com, for now it is not...
 
