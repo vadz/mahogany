@@ -237,8 +237,8 @@ MailCollector::CollectOneFolder(MailFolder *mf)
                          << _("  From: ") << hi->GetFrom()
                          << '\n';
             }
-            hil->DecRef();
          }
+         hil->DecRef();
       }
       if(selections.Count() > 0)
       {

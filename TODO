@@ -11,7 +11,7 @@ $Id$
 9	KB	wxLayout:
 		- scrollbars don't appear immediately
                   --> check why
-		- temparily disable layout while inserting/clearing
+		- temporarily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
 		- scroll window if mouse is selecting outside
 
@@ -26,7 +26,8 @@ $Id$
 
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
-	KB	wxModulesDialog: add decref/load as reaction to check/uncheck
+
+        KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
 4	KB	Nicer icons for some tabs and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"

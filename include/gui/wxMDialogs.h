@@ -304,7 +304,7 @@ public:
    wxXFaceButton(wxWindow *parent, int id,  wxString filename)
       {
          m_Parent = parent;
-         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("unknown");
+         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("noxface");
          wxBitmapButton::Create(parent,id, bmp, wxDefaultPosition,
                                 wxSize(64,64));
          SetFile(filename);

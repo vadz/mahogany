@@ -926,7 +926,7 @@ void wxOptionsPage::UpdateUI()
             }
             break;
 
-            default:
+         default:
                ;
          }
       }
@@ -1022,17 +1022,18 @@ bool wxOptionsPage::TransferDataToWindow()
             }
             break;
 
-         case Field_Message:
-         case Field_SubDlg:      // these settings will be read later
-         case Field_XFace:
-            if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
-               ((wxXFaceButton*)control)->SetFile(
-                  READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
-               else
-               ((wxXFaceButton *)control)->SetFile("");
-            break;
+      case Field_XFace:
+         if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
+            ((wxXFaceButton*)control)->SetFile(
+               READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
+         else
+            ((wxXFaceButton *)control)->SetFile("");
+         break;
 
-         default:
+      case Field_Message:
+      case Field_SubDlg:      // these settings will be read later
+         break;
+      default:
             wxFAIL_MSG("unexpected field type");
       }
 
@@ -1169,6 +1170,15 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    else if ( obj == GetControl(ConfigField_XFaceFile) )
    {
       dirty = PickXFaceDialog(m_Profile, this);
+      if(dirty)
+      {
+         wxXFaceButton *btn = (wxXFaceButton*)obj;
+         // Why doesn´t UpdateUI() have the same effect here?
+         if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
+            btn->SetFile(READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
+         else
+            btn->SetFile("");
+      }   
    }
    else
    {

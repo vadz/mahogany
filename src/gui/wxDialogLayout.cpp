@@ -504,8 +504,11 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
    if ( !strId || !sscanf(strId, "%d", &id) )
       id = -1;
 
-   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, wxString(""));
+   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
 
+   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, wxString(""));
 
    // for the label
    c = new wxLayoutConstraints;
@@ -513,9 +516,6 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
    c->centreY.SameAs(btn, wxCentreY);
    c->width.Absolute(widthMax);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
 
    c = new wxLayoutConstraints;

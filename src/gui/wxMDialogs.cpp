@@ -1609,7 +1609,6 @@ wxXFaceButton::SetFile(const wxString &filename)
    }
    else
       bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("noxface");
-
    SetBitmapLabel(bmp);
    SetBitmapFocus(bmp);
    SetBitmapSelected(bmp);
@@ -1686,7 +1685,7 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
 
    m_Changed = FALSE;
    
-   SetDefaultSize(280, 220, FALSE /* not minimal */);
+   SetDefaultSize(280, 188, FALSE /* not minimal */);
    TransferDataToWindow();
    m_OldXFace = m_Button->GetFile();
    m_OldUseXFace = m_Checkbox->GetValue();

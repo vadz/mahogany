@@ -630,7 +630,12 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
 
             default:
-               if((!(event.ControlDown() || event.AltDown() || event.MetaDown()))
+               if((!(event.ControlDown() || event.AltDown()
+//#if 0
+                     ///FIXME: wxGTK reports MetaDown always
+                     || event.MetaDown()
+//#endif
+                     ))
                   && (keyCode < 256 && keyCode >= 32)
                   )
                {
