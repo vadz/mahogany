@@ -3286,6 +3286,14 @@ wxFolderView::SelectInitialMessage()
          {
             idx = (MsgnoType)last;
 
+            if ( idx >= numMessages )
+            {
+               // this can happen if the number of messages in the folder has
+               // decreased since the last time, assume we want to be on the
+               // last messages then
+               idx = numMessages - 1;
+            }
+
             m_FolderCtrl->Focus(idx);
          }
       }
