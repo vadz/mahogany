@@ -278,6 +278,29 @@ strutil_findurl(String &str, String &url)
    return before;
 }
 
+
+int 
+strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
+{
+   int levels = 0;
+   int num_alpha, num_white;
+   const char *c;
+   
+   for (c = string; *c != 0 && *c != '\n'; c++)
+   {
+      num_alpha = num_white = 0;
+      while (*c == '\t' || *c == ' ') num_white++, c++;
+      while (*c >= 'A' && *c <= 'Z') num_alpha++, c++;
+      if ((*c == '>' || *c == '|') &&
+          (num_alpha <= max_white && num_white <= max_alpha))
+         levels++;
+      else 
+         return levels;
+   }
+   return levels;
+}
+
+
 String
 strutil_extract_formatspec(const char *format)
 {

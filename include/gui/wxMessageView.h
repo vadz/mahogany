@@ -201,7 +201,16 @@ protected:
    struct AllProfileValues
    {
       /// Background and foreground colours, colours for URLs and headers
-      wxColour BgCol, FgCol, UrlCol, QuotedCol, Quoted2Col, HeaderNameCol, HeaderValueCol;
+      wxColour BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
+      wxColour QuotedCol[3];
+      /// process quoted text colourizing?
+      bool quotedColourize;
+      /// if there is >3 levels of quoting, cycle colours?
+      bool quotedCycleColours;
+      /// max number of whitespaces before >
+      int quotedMaxWhitespace;
+      /// max number of A-Z before >
+      int quotedMaxAlpha;
       /// font attributes
       int font, size;
       /// show headers?

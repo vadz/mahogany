@@ -498,10 +498,20 @@
 #define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
+// perform quoted text colourization?
+#define   MP_MVIEW_QUOTED_COLOURIZE   "MViewQuotedColourized"
+// cycle colours?
+#define   MP_MVIEW_QUOTED_CYCLE_COLOURS   "MViewQuotedCycleColours"
 // which colour for quoted text
-#define   MP_MVIEW_QUOTEDCOLOUR      "MViewQuotedColour"
+#define   MP_MVIEW_QUOTED_COLOUR1      "MViewQuotedColour1"
 // which colour for quoted text, second level
-#define   MP_MVIEW_QUOTED2COLOUR      "MViewQuoted2Colour"
+#define   MP_MVIEW_QUOTED_COLOUR2      "MViewQuotedColour2"
+// which colour for quoted text, third level
+#define   MP_MVIEW_QUOTED_COLOUR3      "MViewQuotedColour3"
+/// the maximum number of whitespaces prepending >
+#define   MP_MVIEW_QUOTED_MAXWHITESPACE    "MViewQuotedMaxWhitespace"
+/// the maximum number of A-Z prepending >
+#define   MP_MVIEW_QUOTED_MAXALPHA    "MViewQuotedMaxAlpha"
 /// the colour for header names in the message view
 #define   MP_MVIEW_HEADER_NAMES_COLOUR  "MViewHeaderNamesColour"
 /// the colour for header values in the message view
@@ -1035,10 +1045,21 @@
 #define   MP_MVIEW_BGCOLOUR_D      "white"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_D     "blue"
+
+// colorize quoted text?
+#define   MP_MVIEW_QUOTED_COLOURIZE_D 1L
+// cycle colours?
+#define   MP_MVIEW_QUOTED_CYCLE_COLOURS_D  0L
 // which colour for quoted text
-#define   MP_MVIEW_QUOTEDCOLOUR_D     "gray"
+#define   MP_MVIEW_QUOTED_COLOUR1_D     "gray"
 // which colour for quoted text, seconds level
-#define   MP_MVIEW_QUOTED2COLOUR_D     "gray"
+#define   MP_MVIEW_QUOTED_COLOUR2_D     "gray"
+// which colour for quoted text, seconds level
+#define   MP_MVIEW_QUOTED_COLOUR3_D     "gray"
+/// the maximum number of whitespaces prepending >
+#define   MP_MVIEW_QUOTED_MAXWHITESPACE_D  2L
+/// the maximum number of A-Z prepending >
+#define   MP_MVIEW_QUOTED_MAXALPHA_D    3L
 /// the colour for header names in the message view
 #define   MP_MVIEW_HEADER_NAMES_COLOUR_D  "blue"
 /// the colour for header values in the message view

@@ -325,7 +325,9 @@ bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
    #define CMP(x) (x == other.x)
 
    return CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
-          CMP(QuotedCol) && CMP(Quoted2Col) &&
+          CMP(QuotedCol[0]) && CMP(QuotedCol[1]) && CMP(QuotedCol[2]) &&
+          CMP(quotedColourize) && CMP(quotedCycleColours) &&
+          CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(font) && CMP(size) &&
           CMP(showHeaders) && CMP(rfc822isText) &&
@@ -524,12 +526,18 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
    GET_COLOUR_FROM_PROFILE(FgCol, FGCOLOUR);
    GET_COLOUR_FROM_PROFILE(BgCol, BGCOLOUR);
    GET_COLOUR_FROM_PROFILE(UrlCol, URLCOLOUR);
-   GET_COLOUR_FROM_PROFILE(QuotedCol, QUOTEDCOLOUR);
-   GET_COLOUR_FROM_PROFILE(Quoted2Col, QUOTED2COLOUR);
+   GET_COLOUR_FROM_PROFILE(QuotedCol[0], QUOTED_COLOUR1);
+   GET_COLOUR_FROM_PROFILE(QuotedCol[1], QUOTED_COLOUR2);
+   GET_COLOUR_FROM_PROFILE(QuotedCol[2], QUOTED_COLOUR3);
    GET_COLOUR_FROM_PROFILE(HeaderNameCol, HEADER_NAMES_COLOUR);
    GET_COLOUR_FROM_PROFILE(HeaderValueCol, HEADER_VALUES_COLOUR);
 
    #undef GET_COLOUR_FROM_PROFILE
+
+   settings->quotedColourize = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_COLOURIZE);
+   settings->quotedCycleColours = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_CYCLE_COLOURS);
+   settings->quotedMaxWhitespace = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_MAXWHITESPACE);
+   settings->quotedMaxAlpha = READ_CONFIG(m_Profile,MP_MVIEW_QUOTED_MAXALPHA);
 
    settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
@@ -817,63 +825,75 @@ wxMessageView::Update(void)
          if(cptr == NULL)
             continue; // error ?
          llist->LineBreak();
-         if( m_ProfileValues.highlightURLs )
+
+         if( m_ProfileValues.highlightURLs || m_ProfileValues.quotedColourize )
          {
             tmp = cptr;
             String url;
             String before;
 
-            int last_mode, new_mode;
+            int level = 0;
             size_t line_pos, line_lng, line_from;
 
+// FIXME - should be put in some function
+#define SET_QUOTING_COLOUR(qlevel)                      \
+            switch (qlevel)                             \
+            {                                           \
+               case 0 :                                 \
+                  llist->SetFontColour(& m_ProfileValues.FgCol);\
+                  break;                                \
+               default :                                \
+                  llist->SetFontColour(& m_ProfileValues.QuotedCol[qlevel-1]);\
+                  break;                                \
+            }
+
+#define SET_QUOTING_LEVEL(qlevel, text)                 \
+            {                                           \
+            qlevel = strutil_countquotinglevels(text,   \
+                     m_ProfileValues.quotedMaxWhitespace,\
+                     m_ProfileValues.quotedMaxAlpha);   \
+            if (qlevel > 3)                             \
+            {                                           \
+               if (m_ProfileValues.quotedCycleColours)  \
+                  qlevel = (qlevel-1) % 3 + 1;          \
+               else                                     \
+                  qlevel = 3;                           \
+            }                                           \
+            }
+            
+            SET_QUOTING_LEVEL(level, tmp)
+            SET_QUOTING_COLOUR(level)
+            
             do
             {
                before = strutil_findurl(tmp, url);
 
-               last_mode = 0;
-               line_from = 0;
-               line_lng = before.Length();
-               for (line_pos = 0; line_pos < line_lng; line_pos++)
+               if (m_ProfileValues.quotedColourize)
                {
-                  if (before[line_pos] == '\n')
+                  line_from = 0;
+                  line_lng = before.Length();
+                  for (line_pos = 0; line_pos < line_lng; line_pos++)
                   {
-                     new_mode = 0;
-                     for (size_t i = line_pos + 1; i < line_pos + 6; i++)
+                     if (before[line_pos] == '\n')
                      {
-                        if (line_lng > i &&
-                               (before[i] == '>' || before[i] == '|'))
-                           new_mode++;
-                     }
-                     if (new_mode > 2) new_mode = 2;
-
-                     if (new_mode != last_mode || new_mode != 0)
-                     {
+                        SET_QUOTING_LEVEL(level, before.c_str() + line_pos + 1)
                         wxLayoutImportText(llist,
                                  before.Mid(line_from, line_pos - line_from + 1),
                                  encPart);
-                        switch (new_mode)
-                        {
-                           case 0 :
-                              llist->SetFontColour(& m_ProfileValues.FgCol);
-                              break;
-                           case 1 :
-                              llist->SetFontColour(& m_ProfileValues.QuotedCol);
-                              break;
-                           case 2 :
-                              llist->SetFontColour(& m_ProfileValues.Quoted2Col);
-                              break;
-                        }
-                        last_mode = new_mode;
+                        SET_QUOTING_COLOUR(level)
                         line_from = line_pos + 1;
                      }
                   }
+                  if (line_from < line_lng-1)
+                     wxLayoutImportText(llist,
+                                    before.Mid(line_from, line_lng - line_from),
+                                    encPart);
                }
-               if (line_from < line_lng-1)
-                  wxLayoutImportText(llist,
-                                 before.Mid(line_from, line_lng - line_from),
-                                 encPart);
+               
+               else // no quoted text colourizing
+                  wxLayoutImportText(llist, before, encPart);
 
-               if(!strutil_isempty(url))
+               if(!strutil_isempty(url) && m_ProfileValues.highlightURLs)
                {
                   ci = new ClickableInfo(url);
                   obj = new wxLayoutObjectText(url);
@@ -881,12 +901,13 @@ wxMessageView::Update(void)
                   ci->DecRef();
                   llist->SetFontColour(& m_ProfileValues.UrlCol);
                   llist->Insert(obj);
-                  llist->SetFontColour(& m_ProfileValues.FgCol);
+                  SET_QUOTING_COLOUR(level)
                }
             }
             while( !strutil_isempty(tmp) );
-
             lastObjectWasIcon = false;
+#undef SET_QUOTING_COLOR
+#undef SET_QUOTING_LEVEL
          }
       }
       else

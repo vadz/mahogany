@@ -180,6 +180,17 @@ strutil_findurl(String &str, String &url);
 /// extracts the last path component from a path
 String strutil_getfilename(const String& path);
 
+/** Count levels of quoting on the first line of passed string
+    (i.e. before the first \n). It understands standard e-mail
+    quoting methods: ">" and "XY>"
+    @param string the string to check
+    @param max_white max number of white characters before quotation mark
+    @param max_alpha max number of A-Z characters before quotation mark
+    @return number of quoting levels
+  */
+int strutil_countquotinglevels(const char *string, int max_white, int max_alpha);
+
+
 /*
    This function is used to verify that a given string may be used to pass it
    to printf(). The requirment is that the number and types of format
