@@ -3,14 +3,18 @@ Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
-Last modified:	23.07.03
+Last modified:	2004-05-15
 Version:	the information in this file applies to the cvs sources
 
 0. Requirements
 ---------------
 
 a) a compiler: currently, the supported compilers for building Mahogany are
-   MS Visual C++ 6.0 and cygwin. Version 5.0 of Visual C++ can be used as well.
+   MS Visual C++ 7.1 and cygwin. Previous versions of Visual C++ (5/6/7.0)
+   could probably be used as well but the project files haven't been updated
+   for them since quite some time and so this definitely won't work out of
+   the box but require some effort from your part.
+
    If you are interested in building using another compiler (mingw32, BC++)
    please contact us and we will try to help you.
 
@@ -34,20 +38,19 @@ a) wxWindows
    Mahogany depends on wxWindows and prior to compiling Mahogany you need to
 build the wxMSW library.
 
-   You may use either wxMSW 2.4.1 release (latest 2.4 release as of the time
+   You may use either wxMSW 2.5.2 release (latest 2.5 release as of the time
 of this writing, if a newer one is available, do use it) or the latest
 wxWindows sources from cvs HEAD which usually provide more functionality. Note
 that you may use M_STABLE tag to check out the wxWindows version which is known
 to work well with Mahogany.
 
    Before building Mahogany you will need to build wxWindows. To do it, you
-should open src/wxWindows.dsw in wxWindows directory and build wxWindows
-project in it. Note that in wxWindows cvs HEAD there are new project files in
-build directory but you should _not_ use them. You may use extra\scripts\
-wxmsw_setup.h file instead of the standard setup.h when building if you want to
-disable all the features not needed by Mahogany but doing this is optional and
-you should revert to the standard wx/setup.h if using wxmsw_setup.h results in
-errors (it is not always up to date...).
+should open build/msw/wx.dsw in wxWindows directory and build everything
+project in it. You may use extra\scripts\ wxmsw_setup.h file instead of the
+standard setup.h when building if you want to disable all the features not
+needed by Mahogany but doing this is optional and you should revert to the
+standard wx/setup.h if using wxmsw_setup.h results in errors (it is not always
+up to date...).
 
 
 b) Build process
@@ -61,8 +64,7 @@ the following projects contained in this workspace if they are not loaded yet:
 * compface - the library for X-Face handling
 * M - the main Mahogany project
 * versit - vCard handling routines
-* wxWindows - the wxMSW library: when opening this project, specify the correct
-              file location (in Mahogany directory) when asked
+* base, core, ... - wxWindows projects
 
    Note that after building everything (successfully) once, you may unload all
 the projects except "M" -- this will speed up workspace opening/closing. But if
