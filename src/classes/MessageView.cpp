@@ -733,7 +733,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    #define GET_COLOUR_FROM_PROFILE(col, name) \
       GetColourByName(&col, \
                       READ_CONFIG(profile, MP_MVIEW_##name), \
-                      GetStringDefault(MP_MVIEW_##name##))
+                      GetStringDefault(MP_MVIEW_##name))
 
    #define GET_COLOUR_FROM_PROFILE_IF_NOT_FG(which, name) \
       GET_COLOUR_FROM_PROFILE(col, name); \
