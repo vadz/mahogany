@@ -360,7 +360,11 @@ CountQuoteLevel(const char *string,
          //
          // where "333" would otherwise have been recognized as wrapped
          // quotation
-         if ( next - string > 10 )
+         //
+         // note that another idea could be to check that the "wrapped" line is
+         // longer than the line following it -- it wouldn't make sense if it
+         // were otherwise
+         if ( next - string > 30 )
          {
             const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
             if ( !nextnext ||
