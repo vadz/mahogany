@@ -18,21 +18,14 @@ $Id$
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).
  - Is POP3 really that slow or are we transferring more than needed?
- - ADB: does not use substring??? (Joen_Doedoe no expansion for
-   "doe" or "Doe")
  - copying to other folder only writes headers, no content 
  - folderview listctrl has extra Subject column behind Size field ???
  - message save to file doesn't work
  - add message/move to folder
  - wxlwindow: MIME menu appears at wrong position again
- - toolbars need to be a bit higher
- - crash when switching off header display in messageview
  - allow '=' in urls and don't allow ' '
- - forwarding message triggers assert in wxComposeView:119
- - lock file checking for INBOX:
-   + it does locking under Windows too, but the lock file names are different
- - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
-   any more)
+ - when inserting filetype of unknown MIME type, prompt for it,
+   possibly have a MIME types editor (similar to netscape's?)
 
  - wxLayout:
   + Refresh!!
@@ -78,6 +71,10 @@ $Id$
   + add "add current address to ADB" to compose view
   + should be updated when new entries are created (can't be deleted from
     elsewhere for now...), add an event for this
+  - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
+    any more)
+  - ADB: does not use substring??? (Joen_Doedoe no expansion for
+    "doe" or "Doe")
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app
@@ -85,8 +82,9 @@ $Id$
  - options dlg layout looks ugly (radiobox is way too big)
  - in folder create/properties dialog there is missing UpdateUI() right
    after creation - add it somewhere
-
-- announce M on bbdb mailing list
+ - lock file checking for INBOX:
+   + it does locking under Windows too, but the lock file names are different
+     Testing for FOLDER.lock* now, is that fine?
 
 *********************************************************************
 *** things to fix/implement next ***
@@ -287,6 +285,9 @@ classes in the hierarchy.
 
 *** Fixed and tested:
 *********************************************************************
+ - toolbars need to be a bit higher
+ - crash when switching off header display in messageview
+ - forwarding message triggers assert in wxComposeView:119
  - password entry field needs to use password setting to hide text
  - add explaining texts to python dialog
  - Toolbar sizes are wrong. --> used ugly workaround in
