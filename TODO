@@ -4,7 +4,7 @@ $Id$
 *** bugs to fix ***
 - MessageView:
   + extraction of parameter list and filenames for mime handling/saving
-  + move wxMessageView to be a panel only and rewrite folderview
+  + fix size an parent relationships
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
   + wxMessageView : Profile reading causes segfault, marked with FIXME
@@ -12,28 +12,20 @@ $Id$
   + ADD FORWARD AND REPLY, using wxFolderView functionality
 
 - ComposeView:
-   + MIME inclusion
    + extra header lines don't get set, why? Profile bug?
 
 - wxLayout:
   + fix my printing code in wxl*.new in src/Projects/wxLayout
-  + deletion of first character (ComposeView)?
-  + backspace sometimes goes wrong
+  + backspace sometimes goes wrong, occasional editing problems
   + flicker
 
-- fix memory corruption problem, caused by wxGTK?!
-
-- configure: USE_WXCONFIG does not get defined!
-
-- parent frames should not be NULL --> memory corruption
+- parent frames should not be NULL in dialogs
   (does not happen when run in gdb)
 
 - WINDOWS: how to do MIME handling?
 
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M
   headers in order to get "make depend" right
-
-- occasional segfaults on exit (but also in GNOME :-)
 
 - fix non-ASCII characters in header lines
 
@@ -43,8 +35,11 @@ $Id$
   + add remaining (important) interface definitions
   + add an InputBox dialog
   + user/global Minit files, security issues
+  + add documentation to installation target
 
 *** to implement in near future ***
+
+- cut and paste for wxllist, wxhtmlwindow, wxHtmlImport()
 
 - when run for the first time, should display "Mail" configuration dialog
   with reasonable defaults (add a top-level profile option "ConfigDone"
