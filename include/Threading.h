@@ -27,6 +27,12 @@ struct ThreadParams
    /// do we thread at all?
    bool useThreading;
 
+   /// do we use server side threading if available?
+   bool useServer;
+
+   /// do we use server side threading by references only (not by subject)?
+   bool useServerByRefOnly;
+
    /// the strings to use to bring subject to canonical form
    String simplifyingRegex;
    String replacementString;

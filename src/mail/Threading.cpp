@@ -41,6 +41,8 @@ extern const MOption MP_MSGS_BREAK_THREAD;
 extern const MOption MP_MSGS_GATHER_SUBJECTS;
 extern const MOption MP_MSGS_INDENT_IF_DUMMY;
 extern const MOption MP_MSGS_REPLACEMENT_STRING;
+extern const MOption MP_MSGS_SERVER_THREAD;
+extern const MOption MP_MSGS_SERVER_THREAD_REF_ONLY;
 extern const MOption MP_MSGS_SIMPLIFYING_REGEX;
 extern const MOption MP_MSGS_USE_THREADING;
 
@@ -55,6 +57,8 @@ extern const MOption MP_MSGS_USE_THREADING;
 ThreadParams::ThreadParams()
 {
    useThreading =
+   useServer =
+   useServerByRefOnly =
    gatherSubjects =
    breakThread =
    indentIfDummyNode = false;
@@ -63,6 +67,8 @@ ThreadParams::ThreadParams()
 void ThreadParams::Read(Profile *profile)
 {
    useThreading = READ_CONFIG_BOOL(profile, MP_MSGS_USE_THREADING);
+   useServer = READ_CONFIG_BOOL(profile, MP_MSGS_SERVER_THREAD);
+   useServerByRefOnly = READ_CONFIG_BOOL(profile, MP_MSGS_SERVER_THREAD_REF_ONLY);
    gatherSubjects = READ_CONFIG_BOOL(profile, MP_MSGS_GATHER_SUBJECTS);
    breakThread = READ_CONFIG_BOOL(profile, MP_MSGS_BREAK_THREAD);
    simplifyingRegex = READ_CONFIG_TEXT(profile, MP_MSGS_SIMPLIFYING_REGEX);
@@ -81,6 +87,10 @@ bool ThreadParams::operator==(const ThreadParams& other) const
 
   if ( !useThreading )
      return true;
+
+  if ( useServer != other.useServer ||
+        useServerByRefOnly != other.useServerByRefOnly )
+     return false;
 
   return simplifyingRegex == other.simplifyingRegex &&
          replacementString == other.replacementString &&

@@ -850,6 +850,9 @@ void HeaderInfoListImpl::Thread()
 
       if ( m_mf->ThreadMessages(tableThr, m_indents, m_thrParams) )
       {
+         // unfortunately it simply doesn't work this way... you can't combine
+         // them in such way!
+#if 0
          if ( HasTransTable() )
          {
             // combine the threading index translation with the sorting one:
@@ -873,6 +876,10 @@ void HeaderInfoListImpl::Thread()
             // it will be just the one we have built
             m_tableMsgno = tableThr;
          }
+#else // 1
+         FreeSortTables();
+         m_tableMsgno = tableThr;
+#endif // 0/1
 
 #ifdef DEBUG_SORTING
          UpdateInverseTable();
