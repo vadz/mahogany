@@ -369,7 +369,14 @@ public:
    // expand the text in the control using the address book(s): returns FALSE
    // if no expansion took place (and also show a message in the status bar
    // about this unless quiet is true)
-   bool DoExpand(bool quiet = false);
+   //
+   // return the type of the address inferred from it: i.e. if the address
+   // starts with "To:", it will be Recipient_To &c - and if no explicit
+   // recipient type given, Recipient_Max will be returned.
+   //
+   // finally, if the address wasn't expanded at all (or is invalid), return
+   // Recipient_None
+   Composer::RecipientType DoExpand(bool quiet = false);
 
    // callbacks
    void OnFocusSet(wxFocusEvent& event);
@@ -750,7 +757,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    event.Skip();
 }
 
-bool wxAddressTextCtrl::DoExpand(bool quiet)
+Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
 {
    // try to expand the last component
    String text = GetValue();
@@ -769,7 +776,7 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
                      _("Nothing to expand - please enter something."));
       }
 
-      return FALSE;
+      return Composer::Recipient_None;
    }
 
    // find the starting position of the last address in the address list
@@ -822,52 +829,85 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    // so now we've got the text we'll be trying to expand
    String textOrig = text.c_str() + nLastAddr;
 
+   // do we have an explicit address type specifier
+   Composer::RecipientType addrType = Composer::Recipient_Max;
+   if ( textOrig.length() > 3 )
+   {
+      if ( textOrig[2] == ':' )
+      {
+         if ( toupper(textOrig[0]) == 'T' && toupper(textOrig[1]) == 'O' )
+            addrType = Composer::Recipient_To;
+         else if ( toupper(textOrig[0]) == 'C' && toupper(textOrig[1]) == 'C' )
+            addrType = Composer::Recipient_Cc;
+      }
+      else if ( textOrig[3] == ':' && textOrig(0, 3).Upper() == "BCC" )
+      {
+         addrType = Composer::Recipient_Bcc;
+      }
+
+      if ( addrType != Composer::Recipient_Max )
+      {
+         // erase the colon as well
+         textOrig.erase(0, addrType == Composer::Recipient_Bcc ? 4 : 3);
+      }
+   }
+
    // remove "mailto:" prefix if it's there - this is convenient when you paste
    // in an URL from the web browser
    String newText;
    if ( !textOrig.StartsWith("mailto:", &newText) )
    {
-      // if the text already has a '@' inside it, assume it's a full email
-      // address and doesn't need to be expanded (this saves a lot of time as
-      // expanding a non existing address looks through all address books...)
-      if ( textOrig.find('@') != String::npos )
+      // if the text already has a '@' inside it and looks like a full email
+      // address assume that it doesn't need to be expanded (this saves a lot
+      // of time as expanding a non existing address looks through all address
+      // books...)
+      size_t pos = textOrig.find('@');
+      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
       {
-         // nothing to do
-         return TRUE;
-      }
-
-      wxArrayString expansions;
-      if ( !AdbExpand(expansions, textOrig, m_lookupMode,
-                     quiet ? NULL : GetComposer()) )
-      {
-         // cancelled, don't do anything
-         return TRUE;
-      }
-
-      // construct the replacement string(s)
-      size_t nExpCount = expansions.GetCount();
-      for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
-      {
-         if ( nExp > 0 )
-            newText += CANONIC_ADDRESS_SEPARATOR;
-
-         wxString address(expansions[nExp]);
-
-         // sometimes we must quote the address
-         bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
-         if ( doQuote )
+         // also check that the host part of the address is expanded - it
+         // should contain at least one dot normally
+         if ( strchr(textOrig.c_str() + pos + 1, '.') )
          {
-            newText += '"';
+            // looks like a valid address - nothing to do
+            newText = textOrig;
+         }
+      }
 
-            // escape all quotes
-            address.Replace("\"", "\\\"");
+      if ( newText.empty() )
+      {
+         wxArrayString expansions;
+         if ( !AdbExpand(expansions, textOrig, m_lookupMode,
+                        quiet ? NULL : GetComposer()) )
+         {
+            // cancelled, don't do anything
+            return Composer::Recipient_None;
          }
 
-         newText += address;
-
-         if ( doQuote )
+         // construct the replacement string(s)
+         size_t nExpCount = expansions.GetCount();
+         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
          {
-            newText += '"';
+            if ( nExp > 0 )
+               newText += CANONIC_ADDRESS_SEPARATOR;
+
+            wxString address(expansions[nExp]);
+
+            // sometimes we must quote the address
+            bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
+            if ( doQuote )
+            {
+               newText += '"';
+
+               // escape all quotes
+               address.Replace("\"", "\\\"");
+            }
+
+            newText += address;
+
+            if ( doQuote )
+            {
+               newText += '"';
+            }
          }
       }
    }
@@ -903,7 +943,7 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    SetValue(oldText + newText);
    SetInsertionPointEnd();
 
-   return TRUE;
+   return addrType;
 }
 
 // ----------------------------------------------------------------------------
@@ -913,10 +953,15 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
 void wxNewAddressTextCtrl::AddNewRecipients(bool quiet)
 {
    // expand before adding (make this optional?)
-   DoExpand(quiet);
+   Composer::RecipientType addrType = DoExpand(quiet);
+   if ( addrType == Composer::Recipient_None )
+   {
+      // cancelled or address is invalid
+      return;
+   }
 
    // add new recipient(s)
-   m_composeView->AddRecipients(GetValue());
+   m_composeView->AddRecipients(GetValue(), addrType);
 
    // clear the entry zone as recipient(s) were moved elsewhere
    SetValue("");
