@@ -410,12 +410,16 @@ MessageCC::FetchText(void)
       ASSERT_MSG(strlen(mailText) == m_MailTextLen,
                  "DEBUG: Mailfolder corruption detected");
       MailFolderCC::ProcessEventQueue();
+#if 0
       String str( (size_t) m_MailTextLen);
       const char *cptr = mailText;
       for(size_t i = 0; i < m_MailTextLen; i++)
          str[i] += *cptr++;
       str[m_MailTextLen] = '\0';
       return str;
+#else
+	return mailText;
+#endif
    }
    else // from a text
       return text;
@@ -867,12 +871,15 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          folder->UnLock();
          ASSERT_MSG(strlen(headerPart) == len,
                     "DEBUG: Mailfolder corruption detected");
+#if 0
          str = String( (size_t) len + 1);
          const char *cptr = headerPart;
          for(size_t i = 0; i < len; i++)
             str[i] = *cptr++;
          str[len] = '\0';
-         //str += String(headerPart, (size_t)len);
+#else
+         str += String(headerPart, (size_t)len);
+#endif
          str += ((MessageCC*)this)->FetchText();
          MailFolderCC::ProcessEventQueue();
       }
