@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+25.07.02 XN: preventing a renamed filter to not being used any more
 23.07.02 VZ: implemented "search in multiple folders" function
 17.07.02 VZ: limited virtual folder support for showing the search results
 01.07.02 NB: added a SpamAssassin SPAM test

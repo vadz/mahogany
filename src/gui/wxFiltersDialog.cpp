@@ -1598,6 +1598,44 @@ wxAllFiltersDialog::OnEditFiter(wxCommandEvent &event)
    }
 }
 
+
+#if !defined(NO_RENAME_FILTER_TRAVERSAL)
+class RenameAFilterTraversal : public MFolderTraversal
+{
+private:
+  wxString m_name;
+  wxString m_nameNew;
+public:
+   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew) 
+      : MFolderTraversal(*folder)
+      , m_name(name)
+      , m_nameNew(nameNew)
+   {  }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder* folder = MFolder::Get(folderName);
+         CHECK( folder, NULL, "RenameAFilterTraversal: NULL folder" );
+         wxArrayString filters = folder->GetFilters();
+         size_t countFilters = filters.GetCount();
+         int foundInThisFolder = 0;
+         for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+         {
+            if (filters[nFilter] == m_name)
+            {
+                filters[nFilter] = m_nameNew;
+                foundInThisFolder = 1;
+            }
+         }
+         if (foundInThisFolder)
+         {
+             folder->SetFilters(filters);
+         }
+         return true;
+      }
+};
+#endif
+
 void
 wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
 {
@@ -1621,6 +1659,7 @@ wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
       DoDeleteFilter(name);
    }
 
+#if defined(NO_RENAME_FILTER_TRAVERSAL)
    MDialog_Message(_("Please note that the renamed filter is not used by "
                      "any folder any more, you should probably go to the\n"
                      "\"Folder|Filters\" dialog and change it later.\n"
@@ -1630,6 +1669,12 @@ wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
                    this,
                    _("Filter renamed"),
                    "FilterRenameWarn");
+#else
+   MFolder_obj folderRoot("");
+   RenameAFilterTraversal traverse(folderRoot, name, nameNew);
+   traverse.Traverse();
+#endif
+
 }
 
 void
