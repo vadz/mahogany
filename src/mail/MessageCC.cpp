@@ -42,6 +42,7 @@
 
 #include "Mdefaults.h"
 
+#include "AddressCC.h"
 #include "MailFolderCC.h"
 #include "MessageCC.h"
 #include "MimePartCC.h"
@@ -224,8 +225,8 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 
    sendMsg->SetSubject(Subject());
 
-   String name, reply;
-   reply = Address( name, MAT_REPLYTO);
+   String name;
+   String reply = Address(name, MAT_REPLYTO);
 
    switch(protocol)
    {
@@ -657,35 +658,18 @@ MessageCC::GetAddressStruct(MessageAddressType type) const
    return addr;
 }
 
-/* static */ void
-MessageCC::AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email)
-{
-   CHECK_RET( addr, "ADDRESS can't be NULL here" );
-
-   email = addr->mailbox;
-   if(addr->host && strlen(addr->host) && (strcmp(addr->host,BADHOST) != 0))
-      email << '@' << addr->host;
-   name = addr->personal;
-
-   // VZ: is this really necessary? if it is, this check if by far not enough
-   if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
-      name = String("\"") + name + String("\"");
-}
-
 size_t
 MessageCC::GetAddresses(MessageAddressType type,
                         wxArrayString& addresses) const
 {
-   ADDRESS *addr = GetAddressStruct(type);
+   ADDRESS *adr = GetAddressStruct(type);
 
-   while ( addr )
+   while ( adr )
    {
-      String name, email;
-      AddressToNameAndEmail(addr, name, email);
+      AddressCC addrCC(adr);
+      addresses.Add(addrCC.GetAddress());
 
-      addresses.Add(GetFullEmailAddress(name, email));
-
-      addr = addr->next;
+      adr = adr->next;
    }
 
    return addresses.GetCount();
@@ -694,37 +678,37 @@ MessageCC::GetAddresses(MessageAddressType type,
 String
 MessageCC::Address(String &nameAll, MessageAddressType type) const
 {
-   ADDRESS *addr = GetAddressStruct(type);
+   ADDRESS *adr = GetAddressStruct(type);
 
    // special case for Reply-To: we want to find a valid reply address
    if ( type == MAT_REPLYTO )
    {
-      if(! addr)
-         addr = GetAddressStruct(MAT_FROM);
-      if(! addr)
-         addr = GetAddressStruct(MAT_SENDER);
+      if ( !adr )
+         adr = GetAddressStruct(MAT_FROM);
+      if ( !adr )
+         adr = GetAddressStruct(MAT_SENDER);
    }
 
    // concatenate all found addresses together
    String emailAll;
-   while ( addr )
+   while ( adr )
    {
-      String name, email;
-      AddressToNameAndEmail(addr, name, email);
+      AddressCC addrCC(adr);
 
       // concatenate emails together
       if ( !emailAll.empty() )
          emailAll += ", ";
 
-      emailAll += email;
+      emailAll += addrCC.GetEMail();
 
-      // for now: use first name found (VZ: FIXME, this is just wrong)
+      // for now: use first name found (VZ: FIXME, this is completely wrong!!!)
+      String name = addrCC.GetName();
       if ( nameAll.empty() )
         nameAll = name;
       else if ( !name.empty() ) // found another name
         nameAll << " ...";
 
-      addr = addr->next;
+      adr = adr->next;
    }
 
    return emailAll;

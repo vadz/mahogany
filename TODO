@@ -18,6 +18,10 @@ $Id$
 
 ************ optimize
 
+HeaderInfo::GetFromOrTo() is called *all* the time and is awfully slow as it
+uses Message::CompareAddresses() which calls rfc822_parse_adrlist() twice.
+We *must* cache the result - the problem is how to update this cache?
+
 ************ possible cclient improvements (from reading PINE sources)
 
 1. filtering speed improved a lot but we still do 2 trips to server because

@@ -117,10 +117,17 @@ String AddressCC::GetEMail() const
 
 bool AddressCC::IsSameAs(const Address& addr) const
 {
-   CHECK( addr.IsValid(), false, "can't compare invalid addresses" );
+   CHECK( IsValid() && addr.IsValid(), false,
+          "can't compare invalid addresses" );
 
-   // ignore the name parts when comparing
-   return false;
+   const AddressCC& addrCC = (const AddressCC&)addr;
+
+   // ignore the personal name part
+   //
+   // we also ignore adl field - IMHO the addresses differing only by source
+   // route should be considered identical, shouldn't they?
+   return wxStricmp(m_adr->mailbox, addrCC.m_adr->mailbox) == 0 &&
+          wxStricmp(m_adr->host, addrCC.m_adr->host) == 0;
 }
 
 // ============================================================================
@@ -247,7 +254,7 @@ bool AddressListCC::IsSameAs(const AddressList *addrListOther) const
       return !addrOther;
    }
 
-   while ( addr && addrOther && addr == addrOther )
+   while ( addr && addrOther && *addr == *addrOther )
    {
       addr = GetNext(addr);
       addrOther = addrListOther->GetNext(addrOther);
