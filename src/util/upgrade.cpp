@@ -371,6 +371,7 @@ bool InstallWizardPage::ShouldShowDialUpPage()
 {
    if ( gs_installWizardData.useDialUp == -1 )
    {
+#if 0 //FIXME: replace with user selection
       wxDialUpManager *man = wxDialUpManager::Create();
 
       // if we have a LAN connection, then we don't need to configure dial-up
@@ -378,6 +379,7 @@ bool InstallWizardPage::ShouldShowDialUpPage()
       gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
 
       delete man;
+#endif
    }
 
    return gs_installWizardData.useDialUp != 0;
