@@ -1470,7 +1470,7 @@ MessageView::ShowHeaders()
                      if ( stop )
                         break;
 
-                     urlText.insert(0u, 1u, ch);
+                     urlText.insert((size_t)0, (size_t)1, ch);
                      before.erase(before.length() - 1);
                   }
                }
