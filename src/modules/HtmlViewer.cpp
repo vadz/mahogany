@@ -901,7 +901,7 @@ void HtmlViewer::ShowHeaderName(const String& name)
 
    // create the first column: header names (width=1 means minimal width)
    m_htmlText += _T("<tr>"
-                 "<td align=\"right\" width=\"1\">");
+                 "<td align=\"right\" valign=\"top\" width=\"1\">");
 
    FontColourChanger colChanger(GetOptions().HeaderNameCol, m_htmlText);
 
