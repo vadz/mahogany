@@ -44,8 +44,8 @@ dep depend:
 install: all
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
-	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
-	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
+	ln -f -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
+	ln -f -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
 	$(INSTALL_DATA) `find icons/* -prune -not -type d` $(DATADIR)/icons
 	$(MAKE) -C Python $@
