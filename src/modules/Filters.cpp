@@ -523,14 +523,19 @@ private:
 // ----------------------------------------------------------------------------
 
 /** This class represents logical operators. */
-class Operator : public MObject
+// FIXME: you can't derive this class from MObject if you have global objects
+//        of it, please avoid having globals, replace them with static
+//        variables in the functions using them (VZ)
+class Operator // : public MObject
 {
 public:
    virtual Value Evaluate(SyntaxNode *left, SyntaxNode * right) const = 0;
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
-   MOBJECT_NAME(Operator)
+
+   void MOcheck() const { } // placeholder
+   //MOBJECT_NAME(Operator)
 };
 
 // ----------------------------------------------------------------------------

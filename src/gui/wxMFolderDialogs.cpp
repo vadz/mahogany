@@ -768,6 +768,11 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
 
 void wxFolderCreateDialog::SetFolderName(const String& name)
 {
+   // resist any attempt to change the folder name which was entered by user
+   // (and not resulted from previous calls to this function)
+   if ( m_nameModifiedByUser )
+      return;
+
    // take the last component of the folder name only considering that only
    // '/' and '.' are valid separators - this is surely false, at least for
    // IMAP folders which can have arbitrary delimiter characters, but this is
@@ -1158,7 +1163,7 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    case MF_MDIR:
    case MF_MFILE:
 #endif
-      // set the file name as the default folder name
+         // set the file name as the default folder name
          if ( objEvent == m_path )
          {
             wxString name, fullname = m_path->GetValue();

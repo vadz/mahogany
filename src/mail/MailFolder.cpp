@@ -1578,18 +1578,18 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
    // Find the new messages:
    UIdType nextIdx = 0;
-   UIdType highestId = UID_ILLEGAL;
+   UIdType highestId = m_LastNewMsgUId;
    for ( UIdType i = 0; i < n; i++ )
    {
-      if( ( m_LastNewMsgUId == UID_ILLEGAL
-            || (*hilp)[i]->GetUId() > m_LastNewMsgUId ))
+      UIdType uid = (*hilp)[i]->GetUId();
+      if ( uid > m_LastNewMsgUId )
       {
-         UIdType uid = (*hilp)[i]->GetUId();
-         if(IsNewMessage( (*hilp)[i] ) )
+         if ( IsNewMessage((*hilp)[i]) )
          {
             messageIDs[nextIdx++] = uid;
          }
-         if(highestId == UID_ILLEGAL || uid > highestId)
+
+         if ( uid > highestId )
             highestId = uid;
       }
    }
@@ -1597,13 +1597,13 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
    if( (m_UpdateFlags & UF_DetectNewMail) // do we want new mail events?
        && m_LastNewMsgUId != UID_ILLEGAL) // is it not the first time
-      // that we look at this folder?
+                                          // that we look at this folder?
    {
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
    }
 
-   if(highestId != UID_ILLEGAL && (m_UpdateFlags & UF_UpdateCount) )
+   if( m_UpdateFlags & UF_UpdateCount )
       m_LastNewMsgUId = highestId;
 
    DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",

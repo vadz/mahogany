@@ -2310,7 +2310,13 @@ MailFolderCC::BuildListing(void)
          sequence << ":*";
       }
 
+      // for some folders (MH) this call generates mm_exists notification
+      // resulting in an infinite recursion
+      bool oldCB = mm_disable_callbacks;
+      mm_disable_callbacks = true;
       mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+      mm_disable_callbacks = oldCB;
+
       if ( m_ProgressDialog != (MProgressDialog *)1 )
       {
          MGuiLocker locker;
@@ -3695,7 +3701,8 @@ void
 mm_critical(MAILSTREAM *stream)
 {
 #ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_critical(`%s') %d\n", stream->mailbox, mm_disable_callbacks);
+   printf("mm_critical(`%s') %d\n",
+          stream ? stream->mailbox : "<no stream>", mm_disable_callbacks);
 #endif
    MailFolderCC::mm_critical(stream);
 }
@@ -3704,7 +3711,8 @@ void
 mm_nocritical(MAILSTREAM *stream)
 {
 #ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_nocritical(`%s') %d\n", stream->mailbox, mm_disable_callbacks);
+   printf("mm_nocritical(`%s') %d\n",
+          stream ? stream->mailbox : "<no stream>", mm_disable_callbacks);
 #endif
    MailFolderCC::mm_nocritical(stream);
 }
