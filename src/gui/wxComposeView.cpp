@@ -958,7 +958,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    AddToolbarButtons(CreateToolBar(), WXFRAME_COMPOSE);
 
    CreateStatusBar(2);
-   static const int s_widths[] = { -1, 70 };
+   static const int s_widths[] = { -1, 90 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
    // create the child controls
