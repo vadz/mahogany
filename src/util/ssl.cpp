@@ -12,10 +12,13 @@
 
 #include "Mpch.h"
 
+#ifndef USE_PCH
+   #include "Mcommon.h"
+#endif // !USE_PCH
+
 #ifdef USE_SSL
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
    #include "Profile.h"
    #include "MApplication.h"
 #endif // !USE_PCH
