@@ -273,7 +273,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , FALSE },
-   { WXMENU_EDIT_SAVEADDRESSES, gettext_noop("E&xtract addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , FALSE },
    { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
@@ -323,6 +322,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
    { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."), gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("E&xtract addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
    { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-W"), gettext_noop("Show the raw message text") , FALSE },
 #ifdef EXPERIMENTAL_show_uid

@@ -168,14 +168,8 @@ public:
    /// [de]select all items
    void SelectAll(bool on = true);
 
-   /// select all unread messages
-   void SelectAllUnread();
-
-   /// select all flagged messages
-   void SelectAllFlagged();
-
-   /// select all messages by some status
-   void SelectAllByStatus(int status);
+   /// select all messages by some status/flag
+   void SelectAllByStatus(int status, bool condition);
 
    /// called by wxFolderListCtrl to drag and drop messages
    bool DragAndDropMessages();

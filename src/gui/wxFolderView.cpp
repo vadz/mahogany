@@ -208,12 +208,6 @@ public:
    /// select the item currently focused
    void SelectFocused() { Select(GetFocusedItem(), true); }
 
-   /// goto next unread message, return true if found
-   bool SelectNextUnread(void);
-
-   /// goto next flagged message, return true if found
-   bool SelectNextFlagged(void);
-
    /// goto next message by MessageStatus, return true if found
    bool SelectNextByStatus(int status, bool condition);
 
@@ -1499,18 +1493,6 @@ wxFolderListCtrl::SetEntryStatus(long index, const String& status)
 }
 
 bool
-wxFolderListCtrl::SelectNextUnread()
-{
-   return SelectNextByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
-}
-
-bool
-wxFolderListCtrl::SelectNextFlagged()
-{
-   return SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
-}
-
-bool
 wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
 {
    HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
@@ -2430,34 +2412,17 @@ void wxFolderView::ExpungeMessages()
    }
 }
 
-void wxFolderView::SelectAllUnread()
+void wxFolderView::SelectAllByStatus(int status, bool condition)
 {
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-   CHECK_RET( hil, "can't select unread messages without folder listing" );
+   CHECK_RET( hil, "can't select unread or flagged messages without folder listing" );
 
    size_t count = hil->Count();
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !(hil[n]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
-      {
-         m_FolderCtrl->Select(n, true);
-      }
-   }
-}
-
-void wxFolderView::SelectAllFlagged()
-{
-   wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
-
-   HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-   CHECK_RET( hil, "can't select flagged messages without folder listing" );
-
-   size_t count = hil->Count();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      if ( (hil[n]->GetStatus() & MailFolder::MSG_STAT_FLAGGED) )
+      if ( !(hil[n]->GetStatus() & status) == !condition )
       {
          m_FolderCtrl->Select(n, true);
       }
@@ -2628,11 +2593,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:
-         m_FolderCtrl->SelectNextUnread();
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
          break;
 
       case WXMENU_MSG_NEXT_FLAGGED:
-         m_FolderCtrl->SelectNextFlagged();
+         m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
          break;
 
       case WXMENU_MSG_PRINT:
@@ -2654,11 +2619,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_SELECTUNREAD:
-         SelectAllUnread();
+         SelectAllByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
          break;
 
       case WXMENU_MSG_SELECTFLAGGED:
-         SelectAllFlagged();
+         SelectAllByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
          break;
 
       case WXMENU_MSG_DESELECTALL:
@@ -2706,7 +2671,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          }
          break;
 
-      case WXMENU_EDIT_SAVEADDRESSES:
+      case WXMENU_MSG_SAVEADDRESSES:
          // this is probably not the way it should be done, but I don't know
          // how to get the folder to do all this synchronously otherwise -
          // and I don't think this operation gains anything from being async
