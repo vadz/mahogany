@@ -10,38 +10,38 @@
 #pragma	implementation "wxComposeView.h"
 #endif
 
-#include   "Mpch.h"
-#include	 "Mcommon.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#include	<wx/wx.h>
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include <wx/wx.h>
+#include "MFrame.h"
+#include "MLogFrame.h"
 
-#include	"Mdefaults.h"
+#include "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "PathFinder.h"
+#include "MimeList.h"
+#include "MimeTypes.h"
+#include "Profile.h"
 
-#include	"MApplication.h"
+#include "MApplication.h"
 
-#include	"FolderView.h"
-#include	"MailFolder.h"
-#include	"MailFolderCC.h"
-#include	"Message.h"
-#include	"MessageCC.h"
-#include	"SendMessageCC.h"
-#include  	"Adb.h"
-#include	"MDialogs.h"
-#include	"strutil.h"
+#include "FolderView.h"
+#include "MailFolder.h"
+#include "MailFolderCC.h"
+#include "Message.h"
+#include "MessageCC.h"
+#include "SendMessageCC.h"
+#include "Adb.h"
+#include "MDialogs.h"
+#include "strutil.h"
 
-#include	"gui/wxFontManager.h"
-#include	"gui/wxIconManager.h"
-#include	"gui/wxFText.h"
-#include	"gui/wxFTCanvas.h"
-#include	"gui/wxComposeView.h"
-#include	"gui/wxAdbEdit.h"
+#include "gui/wxFontManager.h"
+#include "gui/wxIconManager.h"
+#include "gui/wxFText.h"
+#include "gui/wxFTCanvas.h"
+#include "gui/wxComposeView.h"
+#include "gui/wxAdbEdit.h"
 
 // control ids
 enum
@@ -53,15 +53,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 #ifdef USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
-   /*
-      // wxMFrame menu events
-      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
-      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
-   */
       // wxComposeView menu events
       EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
       EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)

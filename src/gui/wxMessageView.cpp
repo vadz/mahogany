@@ -595,7 +595,7 @@ wxMessageViewPanel::wxMessageViewPanel(wxMessageView *iMessageView)
 {
   messageView = iMessageView;
   #if USE_WXWINDOWS2
-    // @@@@ Create(1 param)?
+    Create(messageView, -1);
   #else
     Create(messageView);
   #endif

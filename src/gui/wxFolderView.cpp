@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/15 21:59:35  VZ
+ * added 4th argument (id, unused in wxWin1) to CreateButton() calls
+ *
  * Revision 1.4  1998/05/13 19:02:17  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -314,7 +317,6 @@ wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
 {
    folderView = iFolderView;
 
-   // @@@@ what goes on here?
    #ifdef USE_WXWINDOWS2
       Create(folderView, -1);
    #else

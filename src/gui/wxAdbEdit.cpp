@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/15 21:59:33  VZ
+ * added 4th argument (id, unused in wxWin1) to CreateButton() calls
+ *
  * Revision 1.3  1998/04/22 19:56:31  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -23,33 +26,43 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma	implementation "wxAdbEdit.h"
+#pragma  implementation "wxAdbEdit.h"
 #endif
 
-#include    "Mpch.h"
-#include	  "Mcommon.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include "MFrame.h"
+#include "MLogFrame.h"
 
-#include	"Mdefaults.h"
+#include "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "PathFinder.h"
+#include "MimeList.h"
+#include "MimeTypes.h"
+#include "Profile.h"
 
-#include  "MApplication.h"
+#include "MApplication.h"
 
-#include  "Adb.h"
+#include "Adb.h"
 
-#include	"gui/wxtab.h"
-#include	"gui/wxAdbEdit.h"
+#include "gui/wxtab.h"
+#include "gui/wxAdbEdit.h"
+
+// control ids
+enum
+{
+   IDB_EXPAND,
+   IDB_NEW,
+   IDB_DELETE,
+   IDB_SAVE
+};
+
 
 #if 0
 void
 wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
-		   height)
+         height)
 {
    wxPanel::Create(parent,x,y,width,height);
    SetLabelPosition(wxVERTICAL);
@@ -57,10 +70,10 @@ wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
    wxLayoutConstraints *c;
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.SameAs	(parent, wxTop);
-   c->left.SameAs	(parent, wxLeft);
-   c->right.SameAs	(parent, wxRight);
-   c->bottom.SameAs	(parent, wxBottom);
+   c->top.SameAs  (parent, wxTop);
+   c->left.SameAs (parent, wxLeft);
+   c->right.SameAs   (parent, wxRight);
+   c->bottom.SameAs  (parent, wxBottom);
    this->SetConstraints(c);
    
    wxMessage *nameLabel = CreateLabel(this, "Key:");
@@ -81,27 +94,27 @@ wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
 
    listBox = CreateListBox(this, -1, -1, -1, -1);
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(nameLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (nameLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();
-   c->right.SameAs	(this, wxRight, 5);
+   c->right.SameAs   (this, wxRight, 5);
    listBox->SetConstraints(c);
 
 
    wxMessage *fnLabel = CreateLabel(this, "Formatted Name:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(listBox);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (listBox);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnLabel->SetConstraints(c);
 
    formattedName = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (fnLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();
-   c->right.SameAs	(this, wxRight, 5);
+   c->right.SameAs   (this, wxRight, 5);
    formattedName->SetConstraints(c);
 
    wxMessage *fnPrLabel = CreateLabel(this,"Prefix:");
@@ -117,315 +130,315 @@ wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
    strNamePostfix = CreateText(this, -1, -1, -1, -1, "");
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(formattedName);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (formattedName);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnPrLabel->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnPrLabel);
-   c->left.SameAs	(fnPrLabel, wxLeft);
+   c->top.Below      (fnPrLabel);
+   c->left.SameAs (fnPrLabel, wxLeft);
    c->height.AsIs();
-   c->width.PercentOf	(this, wxWidth, 10);
+   c->width.PercentOf   (this, wxWidth, 10);
    strNamePrefix->SetConstraints(c);
    
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(formattedName);
-   c->left.SameAs	(strNamePrefix, wxRight, 5);
+   c->top.Below      (formattedName);
+   c->left.SameAs (strNamePrefix, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnFiLabel->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnFiLabel);
-   c->left.SameAs	(fnFiLabel, wxLeft);
+   c->top.Below      (fnFiLabel);
+   c->left.SameAs (fnFiLabel, wxLeft);
    c->height.AsIs();
-   c->width.PercentOf	(this, wxWidth, 30);
+   c->width.PercentOf   (this, wxWidth, 30);
    strNameFirst->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(formattedName);
-   c->left.SameAs	(strNameFirst, wxRight, 5);
+   c->top.Below      (formattedName);
+   c->left.SameAs (strNameFirst, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnOtLabel->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnOtLabel);
-   c->left.SameAs	(fnOtLabel, wxLeft);
+   c->top.Below      (fnOtLabel);
+   c->left.SameAs (fnOtLabel, wxLeft);
    c->height.AsIs();
-   c->width.PercentOf	(this, wxWidth, 10);
+   c->width.PercentOf   (this, wxWidth, 10);
    strNameOther->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(formattedName);
-   c->left.SameAs	(strNameOther, wxRight, 5);
+   c->top.Below      (formattedName);
+   c->left.SameAs (strNameOther, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnFaLabel->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnFaLabel);
-   c->left.SameAs	(fnFaLabel, wxLeft);
+   c->top.Below      (fnFaLabel);
+   c->left.SameAs (fnFaLabel, wxLeft);
    c->height.AsIs();
-   c->width.PercentOf	(this, wxWidth, 30);
+   c->width.PercentOf   (this, wxWidth, 30);
    strNameFamily->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(formattedName);
-   c->left.SameAs	(strNameFamily, wxRight, 5);
+   c->top.Below      (formattedName);
+   c->left.SameAs (strNameFamily, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    fnPoLabel->SetConstraints(c);
 
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(fnPoLabel);
-   c->left.SameAs	(fnPoLabel, wxLeft);
+   c->top.Below      (fnPoLabel);
+   c->left.SameAs (fnPoLabel, wxLeft);
    c->height.AsIs();
-   c->width.PercentOf	(this, wxWidth, 5);
+   c->width.PercentOf   (this, wxWidth, 5);
    strNamePostfix->SetConstraints(c);
 
    wxMessage *tiLabel = CreateLabel(this, "Title:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(strNamePostfix);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (strNamePostfix);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();
    c->width.AsIs();
    tiLabel->SetConstraints(c);
    
    title = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(strNamePostfix);
-   c->left.SameAs	(tiLabel, wxRight, 5);
+   c->top.Below      (strNamePostfix);
+   c->left.SameAs (tiLabel, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    title->SetConstraints(c);
 
    wxMessage *orLabel = CreateLabel(this, "Organisation:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(strNamePostfix);
-   c->left.SameAs	(title, wxRight, 5);
+   c->top.Below      (strNamePostfix);
+   c->left.SameAs (title, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    orLabel->SetConstraints(c);
    
    organisation = GLOBAL_NEW wxText(this,NULL,NULL,"");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(strNamePostfix);
-   c->left.SameAs	(orLabel, wxRight, 5);
+   c->top.Below      (strNamePostfix);
+   c->left.SameAs (orLabel, wxRight, 5);
    c->height.AsIs();
    c->width.AsIs();
    organisation->SetConstraints(c);
 
    wxMessage *hAddrLabel = CreateLabel(this,"Home Address:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(title);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (title);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wxMessage *hApbLabel = CreateLabel(this,"PO Box:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAddrLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hAddrLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
    
    hApb = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAddrLabel);
-   c->left.SameAs	(hApbLabel, wxRight, 5);
+   c->top.Below      (hAddrLabel);
+   c->left.SameAs (hApbLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *hAexLabel = CreateLabel(this, "Extra:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hApbLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hApbLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hAex = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hApbLabel);
-   c->left.SameAs	(hAexLabel, wxRight, 5);
+   c->top.Below      (hApbLabel);
+   c->left.SameAs (hAexLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
 #if 0
    wxMessage *hAstLabel = CreateLabel(this, "Street:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAexLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hAexLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hAst = GLOBAL_NEW CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAexLabel);
-   c->left.SameAs	(hAstLabel, wxRight, 5);
+   c->top.Below      (hAexLabel);
+   c->left.SameAs (hAstLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *hAloLabel = CreateLabel(this,"Locality:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAstLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hAstLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hAlo = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAstLabel);
-   c->left.SameAs	(hAloLabel, wxRight, 5);
+   c->top.Below      (hAstLabel);
+   c->left.SameAs (hAloLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *hAreLabel = CreateLabel(this,"Region:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAloLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hAloLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hAre = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAloLabel);
-   c->left.SameAs	(hAreLabel, wxRight, 5);
+   c->top.Below      (hAloLabel);
+   c->left.SameAs (hAreLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *hApcLabel = CreateLabel(this,"Postcode:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAreLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hAreLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hApc = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hAreLabel);
-   c->left.SameAs	(hApcLabel, wxRight, 5);
+   c->top.Below      (hAreLabel);
+   c->left.SameAs (hApcLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *hAcoLabel = CreateLabel(this,"Country:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hApcLabel);
-   c->left.SameAs	(this, wxLeft, 5);
+   c->top.Below      (hApcLabel);
+   c->left.SameAs (this, wxLeft, 5);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    hAco = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(hApcLabel);
-   c->left.SameAs	(hAcoLabel, wxRight, 5);
+   c->top.Below      (hApcLabel);
+   c->left.SameAs (hAcoLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAddrLabel = CreateLabel(this,"Work Address:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(title);
-   c->left.PercentOf	(this, wxWidth, 50);
+   c->top.Below      (title);
+   c->left.PercentOf (this, wxWidth, 50);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wxMessage *wApbLabel = CreateLabel(this,"PO Box:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAddrLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wAddrLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
    
    wApb = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAddrLabel);
-   c->left.SameAs	(wApbLabel, wxRight, 5);
+   c->top.Below      (wAddrLabel);
+   c->left.SameAs (wApbLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAexLabel = CreateLabel(this,"Extra:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wApbLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wApbLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wAex = CreateText(this, -1, -1, -1, -1, "");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wApbLabel);
-   c->left.SameAs	(wAexLabel, wxRight, 5);
+   c->top.Below      (wApbLabel);
+   c->left.SameAs (wAexLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAstLabel = CreateLabel(this,"Street:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAexLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wAexLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wAst = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAexLabel);
-   c->left.SameAs	(wAstLabel, wxRight, 5);
+   c->top.Below      (wAexLabel);
+   c->left.SameAs (wAstLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAloLabel = CreateLabel(this,"Locality:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAstLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wAstLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wAlo = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAstLabel);
-   c->left.SameAs	(wAloLabel, wxRight, 5);
+   c->top.Below      (wAstLabel);
+   c->left.SameAs (wAloLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAreLabel = CreateLabel(this,"Region:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAloLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wAloLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wAre = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAloLabel);
-   c->left.SameAs	(wAreLabel, wxRight, 5);
+   c->top.Below      (wAloLabel);
+   c->left.SameAs (wAreLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wApcLabel = CreateLabel(this,"Postcode:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAreLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wAreLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wApc = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wAreLabel);
-   c->left.SameAs	(wApcLabel, wxRight, 5);
+   c->top.Below      (wAreLabel);
+   c->left.SameAs (wApcLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
 
    wxMessage *wAcoLabel = CreateLabel(this,"Country:");
    c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wApcLabel);
-   c->left.SameAs	(wAddrLabel, wxLeft);
+   c->top.Below      (wApcLabel);
+   c->left.SameAs (wAddrLabel, wxLeft);
    c->height.AsIs();   c->width.AsIs();
    title->SetConstraints(c);
 
    wAco = CreateText(this, -1, -1, -1, -1, "");
       c = GLOBAL_NEW wxLayoutConstraints;
-   c->top.Below		(wApcLabel);
-   c->left.SameAs	(wAcoLabel, wxRight, 5);
+   c->top.Below      (wApcLabel);
+   c->left.SameAs (wAcoLabel, wxRight, 5);
    c->height.AsIs();   c->right.PercentOf(this, wxWidth, 40);
    title->SetConstraints(c);
    
@@ -465,11 +478,11 @@ wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
    wxMessage *emailLabel = CreateLabel(this,_("Email:"));
    email = GLOBAL_NEW wxText(this, NULL, NULL, "");
    emailOther = GLOBAL_NEW wxListBox(this, (wxFunction) NULL, "",
-			   wxSINGLE,
-			   -1,-1,-1,-1,
-			   0,
-			   NULL,
-			   wxALWAYS_SB);
+            wxSINGLE,
+            -1,-1,-1,-1,
+            0,
+            NULL,
+            wxALWAYS_SB);
    
    wxMessage *aliasLabel = CreateLabel(this,_("Alias:"));
    alias = GLOBAL_NEW wxText(this, NULL, NULL, "");
@@ -480,7 +493,7 @@ wxAdbEditPanel::Create(wxMFrame *parent, int x, int y, int width, int
 }
    
 wxAdbEditPanel::wxAdbEditPanel(wxMFrame *parent, int x, int y, int width, int
-		   height)
+         height)
 {
    Create(parent, x, y, width, height);
 }
@@ -498,8 +511,8 @@ enum
 class wxAdbEditPanel : public wxTabbedPanel
 {
 private:
-   wxAdbEditFrame	*frame;
-   wxText		*key;
+   wxAdbEditFrame *frame;
+   wxText      *key;
 public:
    wxAdbEditPanel(wxAdbEditFrame *parent, int x, int y, int w, int h);
    void OnCommand(wxWindow &win, wxCommandEvent &event);
@@ -510,16 +523,16 @@ wxAdbEditPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
 {
    if(strcmp(win.GetName(),"keyField")==0)
    {
-      String	tmp = key->GetValue();
+      String   tmp = key->GetValue();
       int l = tmp.length();
       if(l > 0  &&  tmp.substr(l-1,1) == " ")
       {
-	 key->SetValue(WXCPTR tmp.substr(0,l-1).c_str());
-	 frame->Load(mApplication.GetAdb()->Lookup(String(key->GetValue()), frame));
+    key->SetValue(WXCPTR tmp.substr(0,l-1).c_str());
+    frame->Load(mApplication.GetAdb()->Lookup(String(key->GetValue()), frame));
       }
    }
    else if(strcmp(win.GetName(), "expandButton") == 0)
-	   frame->Load(mApplication.GetAdb()->Lookup(String(key->GetValue()), frame));
+      frame->Load(mApplication.GetAdb()->Lookup(String(key->GetValue()), frame));
    else if(strcmp(win.GetName(),"saveButton") == 0)
       frame->Save();
    else if(strcmp(win.GetName(),"newButton") == 0)
@@ -537,10 +550,10 @@ wxAdbEditPanel::wxAdbEditPanel(wxAdbEditFrame *parent, int x, int y, int w, int 
   wxMessage *nameLabel = CreateLabel(this, "Key:");
   key = CreateText(this, -1, -1, w/2, -1, "keyField");
 
-  CreateButton(this, "Expand", "expandButton");
-  CreateButton(this, "New",    "newButton");
-  CreateButton(this, "Delete", "delButton");
-  CreateButton(this, "Save",   "saveButton");
+  CreateButton(this, "Expand", "expandButton", IDB_EXPAND);
+  CreateButton(this, "New",    "newButton",    IDB_NEW);
+  CreateButton(this, "Delete", "delButton",    IDB_DELETE);
+  CreateButton(this, "Save",   "saveButton",   IDB_SAVE);
 }
 
 void
@@ -568,7 +581,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
 
    SetMenuBar(menuBar);
 
-   int	width, height;
+   int   width, height;
    this->GetClientSize(&width, &height);
    wxPanel *panel = GLOBAL_NEW wxAdbEditPanel(this,0,0,width,height);
    view = GLOBAL_NEW wxPanelTabView(panel, wxTAB_STYLE_DRAW_BOX);
@@ -598,7 +611,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    if (! view->AddTab(TAB_EMAIL, _("e-mail")))
       return;
 
-   int	fieldpos, fieldwidth;
+   int   fieldpos, fieldwidth;
    fieldpos = pwidth/3;
    fieldwidth = (int) (pwidth * 0.6);
    
@@ -683,7 +696,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
 
    // Panel 3 - work address
    wxPanel *panel3 = CreatePanel(panel, rect.x + 20, rect.y + 10,
-				                         pwidth, pheight);
+                                     pwidth, pheight);
    wxMessage *wApbLabel = CreateLabel(panel3,"PO Box:");
    wApb = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
@@ -724,7 +737,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    
    // Panel 4 - email
    wxPanel *panel4 = CreatePanel(panel, rect.x + 20, rect.y + 10,
-				                         pwidth, pheight);
+                                     pwidth, pheight);
    wxMessage *emailLabel = CreateLabel(panel4,"e-mail:");
    email = CreateText(panel4,fieldpos, -1,fieldwidth,-1, "");
 
@@ -786,7 +799,7 @@ wxAdbEditFrame::OnSize(int  w, int h)
 }
 
 wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent,
-			       ProfileBase *iprofile)
+                ProfileBase *iprofile)
 {
    initialised = false;
    Create(parent,iprofile);
@@ -836,7 +849,7 @@ wxAdbEditFrame::Delete(void)
 void
 wxAdbEditFrame::Load(AdbEntry *ieptr)
 {
-   String	tmp;
+   String   tmp;
 
    if(! ieptr)
       return;
@@ -890,7 +903,7 @@ wxAdbEditFrame::Load(AdbEntry *ieptr)
 void
 wxAdbEditFrame::Save(void)
 {
-   String	tmp;
+   String   tmp;
 
    if(! eptr)
    {
