@@ -1518,7 +1518,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                                _("Message sorting"),
                                                "MessageSortingDialog")
 {
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"), FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort messages by"), FALSE,
                                              MH_DIALOG_SORTING);
 
    wxClientDC dc(this);
@@ -1555,7 +1555,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       c->height.AsIs();
       txt->SetConstraints(c);
 
-      m_Checkboxes[n] = new wxCheckBox(this, -1, _("in reverse order"),
+      m_Checkboxes[n] = new wxCheckBox(this, -1, _("in &reverse order"),
                                        wxDefaultPosition, wxDefaultSize);
       c = new wxLayoutConstraints;
       c->width.AsIs();
@@ -1751,7 +1751,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 
    wxLayoutConstraints *c;
 
-   wxStaticText *critlabel = new wxStaticText(this, -1, _("Search for text in"));
+   wxStaticText *critlabel = new wxStaticText(this, -1, _("&Search for text in"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
@@ -1769,11 +1769,11 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    m_Choices->SetConstraints(c);
 
-   wxStaticText *keylabel = new wxStaticText(this, -1, _("Search for:"));
+   wxStaticText *keylabel = new wxStaticText(this, -1, _("Search &for:"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.AsIs();
-   c->top.Below(m_Choices, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->top.Below(m_Choices, 3*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    keylabel->SetConstraints(c);
 
@@ -1781,15 +1781,15 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c = new wxLayoutConstraints;
    c->left.RightOf(keylabel, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(keylabel, wxTop, 0);
+   c->centreY.SameAs(keylabel, wxCentreY);
    c->height.AsIs();
    m_Keyword->SetConstraints(c);
 
-   m_Invert = new wxCheckBox(this, -1, _("Invert selection"));
+   m_Invert = new wxCheckBox(this, -1, _("&Invert selection"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(keylabel, 2*LAYOUT_Y_MARGIN);
+   c->top.Below(keylabel, 3*LAYOUT_Y_MARGIN);
    c->height.AsIs();
    m_Invert->SetConstraints(c);
 

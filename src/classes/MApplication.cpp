@@ -148,7 +148,8 @@ MAppBase::MAppBase()
 
    m_cycle = Initializing;
 
-   m_isAway = FALSE;
+   m_isAway =
+   m_autoAwayOn = FALSE;
 
    ResetLastError();
 }
@@ -330,7 +331,7 @@ MAppBase::OnStartup()
 
    // do it first to avoid any interactive stuff from popping up if configured
    // to start up in the unattended mode
-   SetAwayMode(READ_APPCONFIG(MP_AWAY_STATUS));
+   SetAwayMode(READ_APPCONFIG(MP_AWAY_STATUS) != 0);
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from) unless this is our first run in which case it will
@@ -502,16 +503,19 @@ MAppBase::OnStartup()
 
    // only do it if we are using the NewMail folder at all
    m_MailCollector = MailCollector::Create();
-   if( READ_CONFIG(m_profile, MP_COLLECTATSTARTUP) != 0)
+   if( READ_APPCONFIG(MP_COLLECTATSTARTUP) != 0)
       m_MailCollector->Collect();
 
    // show the ADB editor if it had been shown the last time when we ran
    // ------------------------------------------------------------------
 
-   if ( READ_CONFIG(m_profile, MP_SHOWADBEDITOR) )
+   if ( READ_APPCONFIG(MP_SHOWADBEDITOR) )
    {
       ShowAdbFrame(TopLevelFrame());
    }
+
+   // cache the auto away flag as it will be checked often in UpdateAwayMode
+   m_autoAwayOn = READ_APPCONFIG(MP_AWAY_AUTO_ENTER) != 0;
 
    return TRUE;
 }
@@ -692,6 +696,25 @@ MAppBase::Exit(bool ask)
       // these frames still don't mind being closed - may be the user will
       // modify the compose view contents or something else changes
       m_framesOkToClose->Empty();
+   }
+}
+
+void MAppBase::UpdateAwayMode()
+{
+   if ( IsInAwayMode() )
+   {
+      // in away mode - should we exit from it?
+      if ( READ_APPCONFIG(MP_AWAY_AUTO_EXIT) )
+      {
+         SetAwayMode(false);
+      }
+   }
+   else // not in away mode - reset the timer if necessary
+   {
+      if ( m_autoAwayOn )
+      {
+         RestartTimer(Timer_Away);
+      }
    }
 }
 

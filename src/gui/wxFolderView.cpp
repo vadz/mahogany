@@ -207,7 +207,7 @@ public:
 
    /// return true if we preview this item
    bool IsPreviewed(long item) const
-      { return m_FolderView->GetPreviewUId() == GetUIdFromIndex(item); }
+      { return item == m_itemPreviewed; }
 
    /// return true if we preview the item with this UID
    bool IsUIdPreviewed(UIdType uid) const

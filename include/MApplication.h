@@ -205,24 +205,7 @@ public:
    virtual void SetAwayMode(bool isAway = true) { m_isAway = isAway; }
 
    /// exit away mode if necessary
-   void UpdateAwayMode()
-   {
-      if ( IsInAwayMode() )
-      {
-         // in away mode - should we exit from it?
-         if ( READ_APPCONFIG(MP_AWAY_AUTO_EXIT) )
-         {
-            SetAwayMode(false);
-         }
-      }
-      else // not in away mode - reset the timer if necessary
-      {
-         if ( READ_APPCONFIG(MP_AWAY_AUTO_ENTER) )
-         {
-            RestartTimer(Timer_Away);
-         }
-      }
-   }
+   void UpdateAwayMode();
    //@}
 
    /// @name Dial-up support
@@ -406,6 +389,9 @@ protected:
 
    /// are we in away mode?
    bool m_isAway;
+
+   /// should we enter the away mode after some period of idleness?
+   bool m_autoAwayOn;
 };
 
 /// Report a fatal error:
