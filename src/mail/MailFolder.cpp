@@ -887,7 +887,7 @@ MailFolder::ReplyMessage(Message *msg,
 
       // determine the reply level (level is 0 for first reply, 1 for the
       // reply to the reply &c)
-      size_t replyLevel = 0;
+      int replyLevel = 0;
 
       // the search is case insensitive, so transform everything to lower case
       wxString subjectLower(subject.Lower()),

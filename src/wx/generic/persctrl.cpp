@@ -442,7 +442,7 @@ void wxPTextEntry::SaveSettings()
         for ( size_t n = 0; n < count; n++ ) {
             value = GetString(n);
             if ( value != text ) {
-                key.Printf("%d", numKey++);
+                key.Printf("%lu", (unsigned long)numKey++);
                 config->Write(key, value);
             }
             //else: don't store duplicates
@@ -460,7 +460,7 @@ void wxPTextEntry::RestoreStrings()
         // read them all
         wxString key, val, text;
         for ( size_t n = 0; ; n++ ) {
-            key.Printf("%d", n);
+            key.Printf("%lu", (unsigned long)n);
             if ( !config->HasEntry(key) )
                 break;
             val = config->Read(key);
@@ -1322,7 +1322,8 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
         wxArrayString subbranches;
         if ( GetExpandedBranches(idChild, subbranches) )
         {
-            wxString prefix = wxString::Format(_T("%d,"), nChild);
+            wxString prefix = wxString::Format(_T("%lu,"),
+                                               (unsigned long)nChild);
             size_t count = subbranches.GetCount();
             for ( size_t n = 0; n < count; n++ )
             {

@@ -322,9 +322,9 @@ void MailFolderTimer::Notify(void)
 MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 {
    wxLogTrace(TRACE_MF_CLOSE,
-              _T("Delaying closing of '%s' (%d refs) for %d seconds."),
+              _T("Delaying closing of '%s' (%lu refs) for %d seconds."),
               mf->GetName().c_str(),
-              mf->GetNRef(),
+              (unsigned long)mf->GetNRef(),
               secs == NEVER_EXPIRES ? -1 : secs);
 
    m_mf = mf;
@@ -341,8 +341,8 @@ MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 
 MfCloseEntry::~MfCloseEntry()
 {
-   wxLogTrace(TRACE_MF_CLOSE, _T("Destroying MfCloseEntry(%s) (%d refs left)"),
-              m_mf->GetName().c_str(), m_mf->GetNRef());
+   wxLogTrace(TRACE_MF_CLOSE, _T("Destroying MfCloseEntry(%s) (%lu refs left)"),
+              m_mf->GetName().c_str(), (unsigned long)m_mf->GetNRef());
 
    m_mf->RealDecRef();
 }
@@ -555,8 +555,10 @@ MailFolderCmn::DecRef()
 void
 MailFolderCmn::IncRef()
 {
-   wxLogTrace(TRACE_MF_REF, _T("MF(%s)::IncRef(): %u -> %u"),
-              GetName().c_str(), GetNRef(), GetNRef() + 1);
+   wxLogTrace(TRACE_MF_REF, _T("MF(%s)::IncRef(): %lu -> %lu"),
+              GetName().c_str(),
+              (unsigned long)GetNRef(),
+              (unsigned long)GetNRef() + 1);
 
    MObjectRC::IncRef();
 
@@ -577,8 +579,10 @@ MailFolderCmn::IncRef()
 bool
 MailFolderCmn::RealDecRef()
 {
-   wxLogTrace(TRACE_MF_REF, _T("MF(%s)::DecRef(): %u -> %u"),
-              GetName().c_str(), GetNRef(), GetNRef() - 1);
+   wxLogTrace(TRACE_MF_REF, _T("MF(%s)::DecRef(): %lu -> %lu"),
+              GetName().c_str(),
+              (unsigned long)GetNRef(),
+              (unsigned long)GetNRef() - 1);
 
 #ifdef DEBUG_FOLDER_CLOSE
    // check that the folder is not in the mail folder closer list any more if
@@ -1596,8 +1600,8 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 {
    CHECK( filterRule, false, _T("FilterNewMail: NULL filter") );
 
-   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(%u msgs)"),
-              GetName().c_str(), uidsNew.GetCount());
+   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(%lu msgs)"),
+              GetName().c_str(), (unsigned long)uidsNew.GetCount());
 
    // we're almost surely going to look at all new messages, so pre-cache them
    // all at once
@@ -1637,8 +1641,8 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
    }
 
    // some messages could have been deleted by filters
-   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(): %u msgs left"),
-              GetName().c_str(), uidsNew.GetCount());
+   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::FilterNewMail(): %lu msgs left"),
+              GetName().c_str(), (unsigned long)uidsNew.GetCount());
 
    return true;
 }
@@ -1817,9 +1821,9 @@ MailFolderCmn::DoProcessNewMail(const MFolder *folder,
 bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
                                    const MFolder *folderDst)
 {
-   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ProcessNewMail(%u msgs) for %s"),
+   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ProcessNewMail(%lu msgs) for %s"),
               GetName().c_str(),
-              uidsNew.GetCount(),
+              (unsigned long)uidsNew.GetCount(),
               folderDst ? folderDst->GetFullName().c_str() : "ourselves");
 
    // use the settings for the folder where the new mail is!
@@ -1870,9 +1874,9 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
 
    bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
 
-   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::CollectNewMail(%u msgs) (%s)"),
+   wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::CollectNewMail(%lu msgs) (%s)"),
               GetName().c_str(),
-              uidsNew.GetCount(),
+              (unsigned long)uidsNew.GetCount(),
               move ? "moving" : "copying");
 
    if ( !SaveMessages(&uidsNew, newMailFolder) )
@@ -2209,8 +2213,9 @@ MailFolderCmn::SendMsgStatusChangeEvent()
 
    // next notify everyone else about the status change
    wxLogTrace(TRACE_MF_EVENTS,
-              _T("Sending MsgStatus event for %u msgs in folder '%s'"),
-              m_statusChangeData->msgnos.GetCount(), GetName().c_str());
+              _T("Sending MsgStatus event for %lu msgs in folder '%s'"),
+              (unsigned long)m_statusChangeData->msgnos.GetCount(),
+              GetName().c_str());
 
    MEventManager::Send(new MEventMsgStatusData(this, m_statusChangeData));
 

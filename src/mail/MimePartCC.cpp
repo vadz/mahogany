@@ -189,7 +189,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
       m_spec << specParent << '.';
    }
 
-   m_spec << wxString::Format("%u", nPart);
+   m_spec << wxString::Format("%lu", (unsigned long)nPart);
 }
 
 MimePartCC::~MimePartCC()

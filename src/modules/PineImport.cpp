@@ -254,13 +254,13 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
          mApplication->GetProfile()->writeEntry(MP_WRAPMARGIN, wrap);
          mApplication->GetProfile()->writeEntry(MP_VIEW_WRAPMARGIN, wrap);
 
-         wxLogMessage(_("Imported wrap margin setting from %s: %u."),
-                      wrap, "PINE");
+         wxLogMessage(_("Imported wrap margin setting from %s: %lu."),
+                      "PINE", wrap);
       }
       else
       {
-         wxLogDebug(_T(".pinerc(%u): non numeric composer-wrap-column value."),
-                    line);
+         wxLogDebug(_T(".pinerc(%lu): non numeric composer-wrap-column value."),
+                    (unsigned long)line);
       }
    }
    else if ( var == "editor" )
@@ -271,7 +271,7 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR, editor);
 
       wxLogMessage(_("Imported external editor setting from %s: %s."),
-                   editor.c_str(), "PINE");
+                   "PINE", editor.c_str());
    }
    else if ( var == "mail-check-interval" )
    {
@@ -280,45 +280,45 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       {
          mApplication->GetProfile()->writeEntry(MP_POLLINCOMINGDELAY, delay);
 
-         wxLogMessage(_("Imported mail check interval setting from %s: %u."),
-                      delay, "PINE");
+         wxLogMessage(_("Imported mail check interval setting from %s: %lu."),
+                      "PINE", delay);
       }
       else
       {
-         wxLogDebug(_T(".pinerc(%u): non numeric mail-check-interval value."),
-                    line);
+         wxLogDebug(_T(".pinerc(%lu): non numeric mail-check-interval value."),
+                    (unsigned long)line);
       }
    }
    else if ( var == "nntp-server" )
    {
       mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
       wxLogMessage(_("Imported NNTP host setting from %s: %s."),
-                   value.c_str(), "PINE");
+                   "PINE", value.c_str());
    }
    else if ( var == "personal-name" )
    {
       mApplication->GetProfile()->writeEntry(MP_PERSONALNAME, value);
       wxLogMessage(_("Imported personal name setting from %s: %s."),
-                   value.c_str(), "PINE");
+                   "PINE", value.c_str());
    }
    else if ( var == "reply-indent-string" )
    {
       mApplication->GetProfile()->writeEntry(MP_REPLY_PREFIX, value);
       wxLogMessage(_("Imported reply prefix setting from %s: %s."),
-                   value.c_str(), "PINE");
+                   "PINE", value.c_str());
    }
    else if ( var == "signature-file" )
    {
       mApplication->GetProfile()->writeEntry(MP_COMPOSE_SIGNATURE, value);
       wxLogMessage(_("Imported signature location from %s: %s."),
-                   value.c_str(), "PINE");
+                   "PINE", value.c_str());
    }
    else if ( var == "smtp-server" )
    {
       // FIXME this is a list and the entries may contain port numbers too!
       mApplication->GetProfile()->writeEntry(MP_SMTPHOST, value);
       wxLogMessage(_("Imported SMTP server setting from %s: %s."),
-                   value.c_str(), "PINE");
+                   "PINE", value.c_str());
    }
 }
 
@@ -364,14 +364,17 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
       int nEq = line.Find('=');
       if ( nEq == wxNOT_FOUND )
       {
-         wxLogDebug(_T("%s(%u): missing '=' sign."), filename.c_str(), nLine + 1);
+         wxLogDebug(_T("%s(%lu): missing '=' sign."),
+                    filename.c_str(),
+                    (unsigned long)nLine + 1);
 
          // skip line
          continue;
       }
 
-      wxString var(line, (size_t)nEq), value = line.c_str() + nEq + 1;
-      if ( !!value )
+      wxString var(line, (size_t)nEq),
+               value(line.c_str() + nEq + 1);
+      if ( !value.empty() )
       {
          ImportSetting(filename, nLine + 1, var, value);
       }

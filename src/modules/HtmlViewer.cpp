@@ -673,7 +673,8 @@ wxString HtmlViewer::GetVirtualFileName(size_t n) const
 {
    // the image file names must be globally unique, so concatenate the address
    // of this object together with counter to obtain a really unique name
-   return wxString::Format("Mhtml%08x%d.png", (unsigned int)this, n);
+   return wxString::Format("Mhtml%08lx%lu.png",
+                           (unsigned long)this, (unsigned long)n);
 }
 
 wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)

@@ -1499,7 +1499,7 @@ void SaveArray(wxConfigBase *conf,
    size_t nCount = astr.Count();
    String strkey;
    for ( size_t n = 0; n < nCount; n++ ) {
-      strkey.Printf("%d", n);
+      strkey.Printf("%lu", (unsigned long)n);
       conf->Write(path + strkey, astr[n]);
    }
 }
@@ -1514,7 +1514,7 @@ void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
 
    String strkey, strVal;
    for ( size_t n = 0; ; n++ ) {
-      strkey.Printf("%d", n);
+      strkey.Printf("%lu", (unsigned long)n);
       if ( !conf->HasEntry(path+strkey) )
          break;
 

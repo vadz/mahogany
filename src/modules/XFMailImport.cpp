@@ -173,7 +173,8 @@ bool MXFMailImporter::ImportSettings()
       if ( nEq == wxNOT_FOUND )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): missing '=' sign."), filename.c_str(), nLine + 1);
+                    _T("%s(%lu): missing '=' sign."),
+                    filename.c_str(), (unsigned long)nLine + 1);
 
          // skip line
          continue;
@@ -219,8 +220,8 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
          if ( nEq == wxNOT_FOUND )
          {
             wxLogTrace(_T("importxfmail"),
-                       _T("%s(%u): missing '=' sign."),
-                       filenamerc.c_str(), nLine + 1);
+                       _T("%s(%lu): missing '=' sign."),
+                       filenamerc.c_str(), (unsigned long)nLine + 1);
 
             // skip line
             continue;
@@ -263,8 +264,8 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       if ( !folderName )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): empty folder name, skipping."),
-                    foldersfilename.c_str(), nLine + 1);
+                    _T("%s(%lu): empty folder name, skipping."),
+                    foldersfilename.c_str(), (unsigned long)nLine + 1);
          continue;
       }
 
@@ -282,8 +283,9 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
          if ( folderName[0u] == '/' )
          {
             wxLogTrace(_T("importxfmail"),
-                       _T("%s(%u): folder '%s' assumed to be a spool, skipping."),
-                       foldersfilename.c_str(), nLine + 1, folderName.c_str());
+                       _T("%s(%lu): folder '%s' assumed to be a spool, skipping."),
+                       foldersfilename.c_str(), (unsigned long)nLine + 1,
+                       folderName.c_str());
             continue;
          }
 
@@ -306,8 +308,9 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       if ( !typeString.ToULong(&nType) || (nType != 1 && nType != 8) )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): unrecognized folder type %s, skipping."),
-                    foldersfilename.c_str(), nLine + 1, typeString.c_str());
+                    _T("%s(%lu): unrecognized folder type %s, skipping."),
+                    foldersfilename.c_str(), (unsigned long)nLine + 1,
+                    typeString.c_str());
          continue;
       }
 
@@ -349,8 +352,9 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       if ( !flagsString.ToULong(&flags) )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): not numeric folder flags %s, skipping."),
-                    foldersfilename.c_str(), nLine + 1, flagsString.c_str());
+                    _T("%s(%lu): not numeric folder flags %s, skipping."),
+                    foldersfilename.c_str(), (unsigned long)nLine + 1,
+                    flagsString.c_str());
          continue;
       }
 
@@ -365,8 +369,9 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
             folderName == "template" )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): folder %s is a system folder."),
-                    foldersfilename.c_str(), nLine + 1, folderName.c_str());
+                    _T("%s(%lu): folder %s is a system folder."),
+                    foldersfilename.c_str(), (unsigned long)nLine + 1,
+                    folderName.c_str());
 
          // do we import system folders at all?
          if ( !(flagsImport & ImportFolder_SystemImport) )
@@ -586,8 +591,8 @@ typedef struct _xf_rule {
       if ( *p++ != '@' )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): rule line doesn't start with '@', skipping."),
-                    filename.c_str(), nLine + 1);
+                    _T("%s(%lu): rule line doesn't start with '@', skipping."),
+                    filename.c_str(), (unsigned long)nLine + 1);
 
          continue;
       }
@@ -597,8 +602,8 @@ typedef struct _xf_rule {
       if ( tk.CountTokens() != 5 )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): rule line doesn't contain exactly 5 tokens, skipping."),
-                    filename.c_str(), nLine + 1);
+                    _T("%s(%lu): rule line doesn't contain exactly 5 tokens, skipping."),
+                    filename.c_str(), (unsigned long)nLine + 1);
 
          continue;
       }
@@ -609,8 +614,8 @@ typedef struct _xf_rule {
            !tk.GetNextToken().ToULong(&flags) )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): non numeric rule action or flags, skipping."),
-                    filename.c_str(), nLine + 1);
+                    _T("%s(%lu): non numeric rule action or flags, skipping."),
+                    filename.c_str(), (unsigned long)nLine + 1);
 
          continue;
       }
@@ -648,8 +653,9 @@ typedef struct _xf_rule {
       if ( where == ORC_W_Illegal )
       {
          wxLogTrace(_T("importxfmail"),
-                    _T("%s(%u): unrecognized rule header '%s', skipping."),
-                    filename.c_str(), nLine + 1, fmatch.c_str());
+                    _T("%s(%lu): unrecognized rule header '%s', skipping."),
+                    filename.c_str(), (unsigned long)nLine + 1,
+                    fmatch.c_str());
 
          continue;
       }

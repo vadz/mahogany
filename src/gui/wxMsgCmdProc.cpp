@@ -1410,8 +1410,9 @@ void
 MsgCmdProcImpl::DropMessagesToFolder(const UIdArray& selections,
                                      MFolder *folder)
 {
-   wxLogTrace(M_TRACE_DND, _T("Saving %d message(s) to folder '%s'"),
-              selections.Count(), folder->GetFullName().c_str());
+   wxLogTrace(M_TRACE_DND, _T("Saving %lu message(s) to folder '%s'"),
+              (unsigned long)selections.GetCount(),
+              folder->GetFullName().c_str());
 
    Ticket t = SaveMessagesToFolder(selections, folder);
 
