@@ -1944,9 +1944,8 @@ wxComposeView::Send(bool schedule)
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
       if(calmod)
       {
-         calmod->ScheduleMessage(msg);
+         success = calmod->ScheduleMessage(msg);
          calmod->DecRef();
-         success = TRUE;
       }
       else
          success = FALSE;

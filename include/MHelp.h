@@ -70,4 +70,5 @@
 /// Calendar module
 #define MH_MODULES_CALENDAR          10020
 #define MH_MODULES_CALENDAR_CONFIG   10021
+#define MH_MODULES_CALENDAR_DATEDLG  10022
 #endif // MHELP_H

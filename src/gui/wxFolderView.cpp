@@ -1004,15 +1004,17 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
       int pos = sender.Find(" <");
       if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
    }
+   MailFolder *mf = m_ASMailFolder->GetMailFolder();
    m_FolderCtrl->SetEntry(index,
                           MailFolder::ConvertMessageStatusToString(hi->GetStatus(),
-                                                                   m_ASMailFolder->GetMailFolder()),
+                                                                   mf),
                           sender,
                           subject,
                           strutil_ftime(hi->GetDate(),
                                         m_settingsCurrent.dateFormat,
                                         m_settingsCurrent.dateGMT),
                           strutil_ultoa(hi->GetSize()));
+   mf->DecRef();
    m_FolderCtrl->Select(index,selected);
    m_FolderCtrl->SetItemState(index, wxLIST_STATE_FOCUSED,
                               (hi->GetUId() == m_FocusedUId)?

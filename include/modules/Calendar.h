@@ -19,7 +19,7 @@
 class MModule_Calendar : public MModule
 {
 public:
-   virtual void ScheduleMessage(class SendMessageCC *msg) = 0;
+   virtual bool ScheduleMessage(class SendMessageCC *msg) = 0;
 };
 
 #define MMODULE_INTERFACE_CALENDAR   "Calendar"

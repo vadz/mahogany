@@ -504,7 +504,7 @@ public:
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax) = 0;
-   /// Returns the underlying MailFolder object.
+   /// Returns the underlying MailFolder object and increfs it.
    virtual MailFolder *GetMailFolder(void) const = 0;
    //@}
 

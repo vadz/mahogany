@@ -63,7 +63,7 @@ public:
    // dtor saves position/size
    virtual ~wxPDialog();
 
-   bool LastSizeRestored() const { return m_didRestoreSize; }
+   virtual bool LastSizeRestored() const { return m_didRestoreSize; }
 
 private:
    wxString m_profileKey;
@@ -84,27 +84,27 @@ public:
                            const wxString& profileKey = "");
 
    // get the minimal size previously set by SetDefaultSize()
-   const wxSize& GetMinimalSize() const { return m_sizeMin; }
+   virtual const wxSize& GetMinimalSize() const { return m_sizeMin; }
 
    // get the buttons size
-   wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
+   virtual inline wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
 
    // event handlers
-   void OnHelp(wxCommandEvent & /*ev*/)
+   virtual inline void OnHelp(wxCommandEvent & /*ev*/)
       { mApplication->Help(m_helpId, this); }
 
 protected:
    // set the diaqlog size if it wasn't restored from profile
-   void SetDefaultSize(int width, int height,
-                       bool setAsMinimalSizeToo = TRUE);
+   virtual void SetDefaultSize(int width, int height,
+                               bool setAsMinimalSizeToo = TRUE);
 
    // create Ok and Cancel buttons and a static box around all other ctrls
    // (if noBox is TRUE, the returned value is NULL and wxStaticBox is not
    // created). If helpId != -1, add a Help button.
-   wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
-                                       bool noBox = FALSE,
-                                       int helpId = -1);
-
+   virtual wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
+                                               bool noBox = FALSE,
+                                               int helpId = -1);
+   
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
    // compatibility with existing code)
@@ -245,9 +245,9 @@ class wxProfileSettingsEditDialog : public wxManuallyLaidOutDialog
 {
 public:
    wxProfileSettingsEditDialog(ProfileBase *profile,
-                               const wxString& profileKey,
-                               wxWindow *parent,
-                               const wxString& title)
+                                       const wxString& profileKey,
+                                       wxWindow *parent,
+                                       const wxString& title)
       : wxManuallyLaidOutDialog(parent, title, profileKey)
    {
       m_profile = profile;
@@ -259,10 +259,10 @@ public:
       {
          m_profile->DecRef();
       }
-   ProfileBase *GetProfile() const { return m_profile; }
+   virtual ProfileBase *GetProfile() const { return m_profile; }
 
-   bool HasChanges() const { return m_hasChanges; }
-   void MarkDirty() { m_hasChanges = TRUE; }
+   virtual bool HasChanges() const { return m_hasChanges; }
+   virtual void MarkDirty() { m_hasChanges = TRUE; }
 
 protected:
    ProfileBase *m_profile;
@@ -280,11 +280,11 @@ class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
 {
 public:
    wxOptionsPageSubdialog(ProfileBase *profile,
-                          wxWindow *parent,
-                          const wxString& label,
-                          const wxString& windowName);
+                                  wxWindow *parent,
+                                  const wxString& label,
+                                  const wxString& windowName);
 
-   void OnChange(wxEvent& event);
+   virtual void OnChange(wxEvent& event);
 
 private:
    DECLARE_EVENT_TABLE()

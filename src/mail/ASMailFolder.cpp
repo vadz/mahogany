@@ -102,12 +102,13 @@ public:
          return ticketSave;
       }
 
-#ifndef USE_THREADS
+//#ifndef USE_THREADS
    virtual ~MailThread()
       {
+         SafeDecRef(m_MailFolder);
          SafeDecRef(m_ASMailFolder);
       }
-#endif
+//#endif
 
 protected:
    void SendEvent(ASMailFolder::Result *result);
@@ -958,7 +959,7 @@ public:
       { AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const
-      { AScheck(); return m_MailFolder;}
+      { AScheck(); m_MailFolder->IncRef(); return m_MailFolder;}
    //@}
 protected:
    /** Used to obtain the next Ticked id for events. */
