@@ -14,9 +14,10 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
- - folderview listctrl has extra Subject column behind Size field ???
-
-- reimplement some form of IsDirt6y() / HasBeenModified() for
+- retrieve messages starting from last one
+- folderview listctrl has extra Subject column behind Size field ???
+- mime popup position in wxlwindow
+- reimplement some form of IsDirty() / HasBeenModified() for
   wxComposeView.
 
 - do not redraw messageview if the message is the one currently being

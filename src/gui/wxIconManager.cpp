@@ -158,7 +158,7 @@ wxIconManager::LoadImage(String filename, bool *success)
       if(system(command) == 0)
       {
          wxLogNull lo; // suppress error messages
-         loaded = img->LoadFile(filename, wxBITMAP_TYPE_PNG);
+         loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
       }
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);

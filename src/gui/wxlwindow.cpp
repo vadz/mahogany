@@ -352,6 +352,7 @@ wxLayoutWindow::InternalPaint(void)
    // Device origins on the memDC are suspect, we translate manually
    // with the translate parameter of Draw().
    m_memDC->SetDeviceOrigin(0,0);
+   //m_memDC->SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
    m_memDC->Clear();
 
    // The offsets give the window a tiny border on the left and top, looks nice.
