@@ -1984,9 +1984,9 @@ end of your reply template and add a Python function like this to your
 \texttt{Minit.py} file:
 \begin{verbatim}
    def sig(to):
-      if to = "someone@some.where":
+      if to == "someone@some.where":
          return "Hello someone!"
-      elif to = "someoneelse@...":
+      elif to == "someoneelse@...":
          return "Goodbye someone else"
       else # general case
          return "No special signature for you, sorry"
