@@ -682,9 +682,12 @@ PalmOSModule::Connect(void)
 
          return false;
       }
-
+#if HAVE_PI_ACCEPT_TO
       m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
-
+#else
+      // horrible old interface, hangs if fails:
+      m_PiSocket = pi_accept(m_PiSocket);
+#endif
       if(m_PiSocket < 0)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));

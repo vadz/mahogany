@@ -634,6 +634,8 @@ AC_CHECK_HEADER(pi-source.h,
     MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
     AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
     AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
+    AC_CHECK_LIB(pisock, pi_accept_to,AC_DEFINE(HAVE_PI_ACCEPT_TO),
+    AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
   ],
   AC_MSG_WARN(Cannot find pisock library - support for PalmOS disabled.)
  ),

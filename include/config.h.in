@@ -40,6 +40,9 @@
 /** Do we have a pisock library with setmaxspeed? */
 #undef HAVE_PI_SETMAXSPEED
 
+/** Do we have a pisock library with pi_accept_to? */
+#undef HAVE_PI_ACCEPT_TO
+
 /*@name These are obsolete and always defined. Other configurations
   are no longer supported.
 */
