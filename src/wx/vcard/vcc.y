@@ -90,8 +90,9 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #define yycheck mime_check
 #define yyname mime_name
 #define yyrule mime_rule
+#ifndef YYPREFIX
 #define YYPREFIX "mime_"
-
+#endif
 
 #ifndef _NO_LINE_FOLDING
 #define _SUPPORT_LINE_FOLDING 1
@@ -1191,13 +1192,6 @@ DLLEXPORT(VObject*) Parse_MIME_FromFileName(char *fname)
     }
 
 #endif
-
-/* ///////////////////////////////////////////////////////////////////////// */
-static void YYDebug(const char *s)
-{
-/*	Parse_Debug(s); */
-}
-
 
 static MimeErrorHandler mimeErrorHandler;
 

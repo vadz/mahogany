@@ -816,7 +816,8 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
          // m_tableMsgno) below
          MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
 
-         MsgnoType posRemoved;
+         // init it just to avoid warnings from stupid optimizing compilers
+         MsgnoType posRemoved = 0;
          if ( m_tablePos )
          {
             posRemoved = m_tablePos[n];
@@ -1542,7 +1543,8 @@ void HeaderInfoListImpl::Sort()
          // we do need to sort messages
          m_tableSort = AllocTable();
 
-         long sortOrderOld;
+         // init it just to avoid warnings from stupid optimizing compilers
+         long sortOrderOld = 0;
          if ( m_reverseOrder )
          {
             // we do the reversal ourselves
