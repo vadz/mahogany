@@ -1,0 +1,17 @@
+/*
+ * $Id$
+ *
+ *.mid file for generating IDL and .h files for Mahogany C interface
+ */
+
+
+m4_include(INCLUDE)
+
+INTERFACE(myobject,`
+
+FUNCTION(myFunc, INT) ( ARG(STRING a_string), ARG(INT a_number) )
+BODY(`
+return 3*4;
+')
+
+')
