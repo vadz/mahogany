@@ -1555,6 +1555,14 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       String flags = GetImapFlags(msg.GetStatus());
       String date;
       msg.GetHeaderLine("Date", date);
+      MESSAGECACHE mc;
+      const char *dateptr = NULL;
+      char datebuf[128];
+      if(mail_parse_date(&mc, (char *) date.c_str()) == T)
+      {
+        mail_date(datebuf, &mc);
+        dateptr = datebuf;
+      }
       // different folders, so we actually copy the message around:
       String tmp;
       msg.WriteToString(tmp);
@@ -1563,7 +1571,7 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       rc =  mail_append_full(m_MailStream,
                              (char *)m_ImapSpec.c_str(),
                              (char *)flags.c_str(),
-                             (char *)date.c_str(),
+                             (char *)dateptr,
                              &str);
    }
    if(rc == 0)
