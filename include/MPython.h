@@ -36,8 +36,18 @@
    #endif // USE_PYTHON_DYNAMIC
 #endif // OS_WIN
 
+// under Unix we get annoying messages about redefinition of this...
+#ifdef _POSIX_C_SOURCE
+   #define POSIX_C_SOURCE_WAS_DEFINED _POSIX_C_SOURCE
+   #undef _POSIX_C_SOURCE
+#endif
+
 #include <Python.h>
 
+#if defined(POSIX_C_SOURCE_WAS_DEFINED) && !defined(_POSIX_C_SOURCE)
+   #define _POSIX_C_SOURCE POSIX_C_SOURCE_WAS_DEFINED
+#endif
+   
 #ifdef USE_PYTHON_DYNAMIC
 
 // this function must be called before using any Python functions, it if
