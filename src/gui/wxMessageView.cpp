@@ -247,15 +247,17 @@ wxMessageView::Update(void)
    wxLayoutObjectBase *obj = NULL;
 
    GetLayoutList().SetEditable(true);
-      
+
+   String
+      fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
+      bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
+   
    Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
          READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
          READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
          READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
          0,
-         READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
-         READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR)
-      );
+         fg.c_str(),bg.c_str());
 
    // if wanted, display all header lines
    if(READ_CONFIG(m_Profile,MP_SHOWHEADERS))
