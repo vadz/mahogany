@@ -17,18 +17,8 @@
 #endif
 
 class wxFolderView;
+class wxFolderTree;
 class wxSplitterWindow;
-
-class wxMainTreeCtrl : public wxTreeCtrl
-{
-public:
-   wxMainTreeCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
-                const wxSize& size, long style):
-      wxTreeCtrl(parent, id, pos, size, style)
-      {
-      }
-};
-
 
 class wxMainFrame : public wxMFrame
 {
@@ -46,8 +36,12 @@ public:
 private:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
-   /// the folder view
-   wxFolderView     *m_FolderView;
+
+   // splitter panes:
+      /// the folder tree
+   wxFolderTree *m_FolderTree;
+      /// the folder view
+   wxFolderView *m_FolderView;
 
    DECLARE_EVENT_TABLE()
 };

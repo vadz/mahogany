@@ -2522,22 +2522,20 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
 {
   m_frame = frame;
 
-# ifdef __WXMSW__
-    // add images to our image list
-    static const char *aszImages[] =
-    {
-      // should be in sync with the corresponding enum in wxAdbTree
-      "library", "book", "address", "opened", "closed",
-    };
+  // add images to our image list
+  static const char *aszImages[] =
+  {
+    // should be in sync with the corresponding enum in wxAdbTree
+    "library", "book", "address", "opened", "closed",
+  };
 
-    wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
+  wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
 
-    for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
-      imageList->Add(wxBitmap(aszImages[n]));
-    }
+  for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
+    imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
+  }
 
-    SetImageList(imageList);
-# endif // Windows
+  SetImageList(imageList);
 }
 
 // tree control keyboard interface
@@ -2546,7 +2544,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
 // ----------------------------------------------------------------------
 // INS          creates new item in the current node
 // DEL          deletes the current item
-// Alt-Enter    shows hte properties of the current item
+// Alt-Enter    shows the properties of the current item
 void wxAdbTree::OnChar(wxKeyEvent& event)
 {
   switch ( event.KeyCode() ) {
@@ -2572,9 +2570,7 @@ void wxAdbTree::OnChar(wxKeyEvent& event)
 
 wxAdbTree::~wxAdbTree()
 {
-# ifdef __WXMSW__
-    delete GetImageList();
-# endif
+  delete GetImageList();
 }
 
 // -----------------------------------------------------------------------------

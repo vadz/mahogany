@@ -26,11 +26,16 @@ class MFolder;
 WX_DEFINE_ARRAY(MFolder *, ArrayMFolders);
 
 // ----------------------------------------------------------------------------
-// get the root pseudo-folder object: this function will create it and all its
-// subfolders (i.e. all folders).
+// global functions to get/free root pseudo-folder object
 // ----------------------------------------------------------------------------
 
+// get the root pseudo-folder object: this function will create it and all its
+// subfolders (i.e. all folders).
 extern MFolder *GetRootFolder();
+
+// must be called at the end of the program (will do nothing if GetRootFolder
+// was never called, otherwise will delete the root folder object)
+extern void DeleteRootFolder();
 
 // ----------------------------------------------------------------------------
 // A class representing a folder used by M. The folders are organized in a tree

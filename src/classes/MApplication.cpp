@@ -50,6 +50,8 @@
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
+#include "MFolder.h"          // DeleteRootFolder
+
 #ifdef OS_UNIX
 #  include  <unistd.h>
 #  include  <sys/stat.h>
@@ -324,6 +326,8 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   DeleteRootFolder();  // do it _before_ deleting the profile
+
    m_profile->DecRef();
    delete m_mimeManager;
 }

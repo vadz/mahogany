@@ -179,6 +179,9 @@ ConfigFileManager Profile::ms_cfManager;
 class wxConfigProfile : public ProfileBase
 {
 public:
+   // ctor
+   wxConfigProfile(STRINGARG fileName);
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -200,12 +203,12 @@ public:
    /// Write back the bool value.
    bool writeEntry(STRINGARG key, bool Value);
    //@}
-   wxConfigProfile(STRINGARG fileName);
 
    void SetPath(STRINGARG path);
    String GetPath(void) const;
    virtual bool HasEntry(STRINGARG key) const;
    virtual void DeleteGroup(STRINGARG path);
+
    /// return the name of the profile
    virtual String GetProfileName(void) { return String("/"); }
 
@@ -213,8 +216,6 @@ private:
    /// forbid deletion
    ~wxConfigProfile();
 };
-
-
 
 /** A structure holding name and wxConfig pointer.
    This is the element of the list.
@@ -231,8 +232,22 @@ struct FCData
 KBLIST_DEFINE(FCDataList, FCData);
 
 // ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+// code which is thrown out under Windows
+#ifdef OS_WIN
+   #define NOT_WIN(anything)
+#else  // !Win
+   #define NOT_WIN(anything)  anything
+#endif // Win/!Win
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
+
+// create the global wxConfig object
+static wxConfigBase *CreateGlobalConfigBase(NOT_WIN(const String& filename));
 
 // some characters are invalid in the profile name, replace them
 static String FilterProfileName(const String& profileName);
@@ -244,12 +259,12 @@ static String FilterProfileName(const String& profileName);
 // ----------------------------------------------------------------------------
 // ProfileBase
 // ----------------------------------------------------------------------------
-bool ProfileBase::GetFirstGroup(String& s, long l)
+bool ProfileBase::GetFirstGroup(String& s, long& l)
 {
    return m_config && m_config->GetFirstGroup(s, l);
 }
 
-bool ProfileBase::GetNextGroup(String& s, long l)
+bool ProfileBase::GetNextGroup(String& s, long& l)
 {
    return m_config && m_config->GetNextGroup(s, l);
 }
@@ -302,26 +317,7 @@ ProfileBase::readEntry(STRINGARG key,
 
 wxConfigProfile::wxConfigProfile(STRINGARG fileName)
 {
-   // the code for Unix is specific to wxFileConfig - unacceptable
-#  ifdef OS_WIN
-      // don't give explicit name, but rather use the default logic (it's
-      // perfectly ok, for the registry case our keys are under vendor\appname)
-      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                              "", "",
-                              wxCONFIG_USE_LOCAL_FILE |
-                              wxCONFIG_USE_GLOBAL_FILE);
-#  else  // Unix
-      // we don't need the config file manager for this profile
-      PathFinder pf(M_ETC_PATH);
-      String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
-      m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                              fileName, globalconfig,
-                              wxCONFIG_USE_LOCAL_FILE|
-                              wxCONFIG_USE_GLOBAL_FILE);
-
-      // set the default path for configuration entries
-      m_config->SetPath(M_APPLICATIONNAME);
-#  endif // Unix/Windows
+   m_config = CreateGlobalConfigBase(NOT_WIN(fileName));
 }
 
 void wxConfigProfile::SetPath(STRINGARG path)
@@ -401,38 +397,51 @@ wxConfigProfile::writeEntry(STRINGARG key, long value)
    profile. Thus, an inheriting profile structure is created.
 */
 Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
-   : profileName(iClassName)
+       : profileName(iClassName)
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
 
    // find our config file unless we already have an absolute path name
-   String fullFileName;
+   String fullName;
    if ( !IsAbsPath(profileName) )
    {
       String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
       PathFinder pf(tmp);
 
       String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
-      fullFileName = pf.FindFile(fileName, &isOk);
+      fullName = pf.FindFile(fileName, &isOk);
       if( !isOk )
-         fullFileName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
+         fullName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
    }
    else
+   {
       // easy...
-      fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
-   if ( READ_APPCONFIG(MC_CREATE_PROFILES)|| wxFileExists(fullFileName) )
+      fullName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
+   }
+
+   if ( READ_APPCONFIG(MC_CREATE_PROFILES) || wxFileExists(fullName) )
    {
       m_config = new wxFileConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                  fullFileName,wxString(""),
+                                  fullName, wxString(""),
                                   wxCONFIG_USE_LOCAL_FILE);
    }
-   ms_cfManager.Register(iClassName,this);
+   else
+   {
+      // ok, so we don't have our _own_ file, but we still must have read our
+      // data from/write to somewhere!
+      fullName = M_PROFILE_CONFIG_SECTION;
+      fullName << '/' << iClassName;
+      m_config = CreateGlobalConfigBase(NOT_WIN(""));
+      m_config->SetPath(fullName);
+   }
+
+   ms_cfManager.Register(iClassName, this);
 }
 
 // constructor for empty profile
 Profile::Profile(ProfileBase const *Parent)
-   : profileName("anonymous")
+       : profileName("anonymous")
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
@@ -801,6 +810,46 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key)
    }
 
    conf.SetPath("..");
+}
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static wxConfigBase *
+CreateGlobalConfigBase(NOT_WIN(const String& filename))
+{
+   wxConfigBase *config;
+#  ifdef OS_WIN
+      // don't give explicit name, but rather use the default logic (it's
+      // perfectly ok, for the registry case our keys are under vendor\appname)
+      config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                            "", "",
+                            wxCONFIG_USE_LOCAL_FILE |
+                            wxCONFIG_USE_GLOBAL_FILE);
+#  else  // Unix
+      static String s_filename;
+
+      // remember the global config file name
+      if ( !filename.IsEmpty() )
+      {
+         s_filename = filename;
+      }
+      //else: if no filename is given, reuse the last one
+
+      // we don't need the config file manager for this profile
+      PathFinder pf(M_ETC_PATH);
+      String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
+      config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                            s_filename, globalconfig,
+                            wxCONFIG_USE_LOCAL_FILE|
+                            wxCONFIG_USE_GLOBAL_FILE);
+
+      // set the default path for configuration entries
+      config->SetPath(M_APPLICATIONNAME);
+#  endif // Unix/Windows
+
+   return config;
 }
 
 // some characters are invalid in the profile name, replace them

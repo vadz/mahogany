@@ -108,6 +108,11 @@ private:
    static const char *ms_foldersPath;
 };
 
+// ----------------------------------------------------------------------------
+// private globals
+// ----------------------------------------------------------------------------
+static MRootFolder *gs_rootFolder = NULL;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -319,7 +324,7 @@ void MStorableFolder::LoadSubfolder(ProfileBase *profile, const String& name)
 // MRootFolder
 // ----------------------------------------------------------------------------
 
-const char *MRootFolder::ms_foldersPath = "/Folders/";
+const char *MRootFolder::ms_foldersPath = "/Profiles/";
 
 MRootFolder::MRootFolder() : MStorableFolder(NULL, "", MFolder::Root)
 {
@@ -327,7 +332,7 @@ MRootFolder::MRootFolder() : MStorableFolder(NULL, "", MFolder::Root)
 
    CHECK_RET( profile != NULL, "no profile to load folders from" );
 
-   profile->SetPath(ms_foldersPath);
+   ProfilePathChanger changePath(profile, ms_foldersPath);
 
    LoadChildren(profile);
 }
@@ -338,7 +343,7 @@ MRootFolder::~MRootFolder()
 
    CHECK_RET( profile != NULL, "no profile to save folders to" );
 
-   profile->SetPath(ms_foldersPath);
+   ProfilePathChanger changePath(profile, ms_foldersPath);
 
    SaveChildren(profile);
 }
@@ -349,7 +354,7 @@ void MRootFolder::DeleteGroup(const String& path)
 
    CHECK_RET( profile != NULL, "can't delete group - no app profile" );
 
-   profile->SetPath(ms_foldersPath);
+   ProfilePathChanger changePath(profile, ms_foldersPath);
    profile->DeleteGroup(path);
 }
 
@@ -360,12 +365,15 @@ MFolder *GetRootFolder()
 {
    // we don't want to create it more than once (just think about what would
    // happen when we'd write it back)
-   static MRootFolder *s_rootFolder = NULL;
-
-   if ( s_rootFolder == NULL )
+   if ( gs_rootFolder == NULL )
    {
-      s_rootFolder = new MRootFolder;
+      gs_rootFolder = new MRootFolder;
    }
 
-   return s_rootFolder;
+   return gs_rootFolder;
+}
+
+void DeleteRootFolder()
+{
+   delete gs_rootFolder;
 }

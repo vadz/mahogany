@@ -94,8 +94,8 @@ public:
 
        again, this is just directly forwarded to wxConfig
    */
-   bool GetFirstGroup(String& s, long l);
-   bool GetNextGroup(String& s, long l);
+   bool GetFirstGroup(String& s, long& l);
+   bool GetNextGroup(String& s, long& l);
 
    /** @name Managing environment variables
 
