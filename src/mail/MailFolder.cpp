@@ -50,7 +50,13 @@ MailFolder::OpenFolder(int typeAndFlags,
    
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
-      profile = ProfileBase::CreateProfile(i_name, parentProfile);
+      if(type == MF_PROFILE)
+         profile = ProfileBase::CreateProfile(i_name, parentProfile);
+      else
+      {
+         String pname = (i_name[0] == '/') ? String(i_name.c_str()+1) : i_name;
+         profile = ProfileBase::CreateProfile(pname, parentProfile);
+      }
       CHECK(profile, NULL, "can't create profile");   // return if it fails
       int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
       if(typeflags == MF_ILLEGAL)  // no such profile!
