@@ -554,7 +554,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 #ifndef OS_WIN
    SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
-   SetWrapMargin(READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   SetWrapMargin(READ_CONFIG(m_Profile, MP_VIEW_WRAPMARGIN));
 }
 
 void
@@ -956,8 +956,8 @@ wxMessageView::Update(void)
    // highlighting, not sure if needed, though
    llist->SetAutoFormatting(TRUE);
 
-   SetWrapMargin(READ_CONFIG(m_Profile, MP_WRAPMARGIN));
-   if(m_WrapMargin > 0 && READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0)
+   SetWrapMargin(READ_CONFIG(m_Profile, MP_VIEW_WRAPMARGIN));
+   if(m_WrapMargin > 0 && READ_CONFIG(m_Profile, MP_VIEW_AUTOMATIC_WORDWRAP) != 0)
       llist->WrapAll(m_WrapMargin);
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:

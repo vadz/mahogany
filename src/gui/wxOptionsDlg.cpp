@@ -224,6 +224,8 @@ enum ConfigFields
    ConfigField_MessageViewInlineGraphics,
    ConfigField_MessageViewAutoDetectEncoding,
    ConfigField_MessageViewRfc822IsText,
+   ConfigField_ViewWrapMargin,
+   ConfigField_ViewWrapAuto,
 #ifdef OS_UNIX
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
@@ -751,6 +753,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
    { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
+   { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
+   { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
 #ifdef OS_UNIX
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
@@ -988,6 +992,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INLINE_GFX),
    CONFIG_ENTRY(MP_MSGVIEW_AUTO_ENCODING),
    CONFIG_ENTRY(MP_RFC822_IS_TEXT),
+   CONFIG_ENTRY(MP_VIEW_WRAPMARGIN),
+   CONFIG_ENTRY(MP_VIEW_AUTOMATIC_WORDWRAP),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),

@@ -234,6 +234,7 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       if ( value.ToULong(&wrap) )
       {
          mApplication->GetProfile()->writeEntry(MP_WRAPMARGIN, wrap);
+         mApplication->GetProfile()->writeEntry(MP_VIEW_WRAPMARGIN, wrap);
 
          wxLogMessage(_("Imported wrap margin setting from %s: %u."),
                       wrap, "PINE");

@@ -444,8 +444,12 @@
 #define MP_FOLDER_CLOSE_DELAY   "FolderCloseDelay"
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP   "AutoWrap"
-/// wrapmargin for composition/message view (set to -1 to disable it)
+/// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN      "WrapMargin"
+/// do automatic word wrap in message view?
+#define MP_VIEW_AUTOMATIC_WORDWRAP   "ViewAutoWrap"
+/// wrapmargin for message view (set to -1 to disable it)
+#define   MP_VIEW_WRAPMARGIN      "ViewWrapMargin"
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT      "Rfc822IsText"
 /// prefix for subject in replies
@@ -522,7 +526,7 @@
 // which for recent messages
 #define   MP_FVIEW_RECENTCOLOUR      "FViewRecentColour"
 // which for unread messages
-#define   MP_FVIEW_UNREADCOLOUR      "FViewRecentColour"
+#define   MP_FVIEW_UNREADCOLOUR      "FViewUnreadColour"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -976,8 +980,12 @@
 #define MP_FOLDER_CLOSE_DELAY_D    30
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_D   1l
-/// wrapmargin for composition/message view (set to -1 to disable it)
+/// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_D      60
+/// do automatic word wrap in message view?
+#define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
+/// wrapmargin for message view (set to -1 to disable it)
+#define   MP_VIEW_WRAPMARGIN_D      70
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0l
 /// prefix for subject in replies

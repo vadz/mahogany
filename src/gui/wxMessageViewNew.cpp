@@ -517,7 +517,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 #ifndef OS_WIN
    m_EditCtrl->SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
-   m_EditCtrl->SetWrapMargin(READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   m_EditCtrl->SetWrapMargin(READ_CONFIG(m_Profile, MP_VIEW_WRAPMARGIN));
 }
 
 void
@@ -649,9 +649,9 @@ wxMessageView::Update(void)
    // highlighting, not sure if needed, though
    m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
 
-   long wrapmargin = READ_CONFIG(m_Profile, MP_WRAPMARGIN);
+   long wrapmargin = READ_CONFIG(m_Profile, MP_VIEW_WRAPMARGIN);
    m_EditCtrl->SetWrapMargin(wrapmargin);
-//FIXME   if(wrapmargin > 0 && READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0)
+//FIXME   if(wrapmargin > 0 && READ_CONFIG(m_Profile, MP_VIEW_AUTOMATIC_WORDWRAP) != 0)
 //FIXME      m_EditCtrl->GetLList()->WrapAll(wrapmargin);
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
