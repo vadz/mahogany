@@ -1263,7 +1263,7 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
    wxWindow *btnOk = FindWindow(wxID_OK);
 
    // File button
-   wxButton *btnFile = new wxButton(this, wxID_OPEN, _("File..."));
+   wxButton *btnFile = new wxButton(this, wxID_OPEN, _("&File..."));
    c = new wxLayoutConstraints;
    c->height.SameAs(btnOk, wxHeight);
    c->width.SameAs(btnOk, wxWidth);
