@@ -677,8 +677,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
    switch ( key )
    {
-      case 'M': // move = copy + delete
-         if ( !m_FolderView->SaveMessagesToFolder(selections, NULL, true) )
+      case 'M': // move
+         if ( !m_FolderView->MoveMessagesToFolder(selections) )
          {
             // don't delete the messages if we couldn't save them!
             newFocus = -1;
@@ -708,11 +708,11 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          newFocus = -1;
          break;
 
-      case 'C': // copy
+      case 'C': // copy (to folder)
          m_FolderView->SaveMessagesToFolder(selections);
          break;
 
-      case 'S': // save
+      case 'S': // save (to file)
          m_FolderView->SaveMessagesToFile(selections);
          break;
 
@@ -2126,6 +2126,7 @@ wxFolderView::SetEntryColour(size_t index, const HeaderInfo *hi)
    }
 }
 
+#include "MFCache.h"
 
 void
 wxFolderView::Update()
@@ -2154,6 +2155,15 @@ wxFolderView::Update()
 
    size_t numMessages = listing->Count();
 
+#if 1
+   MailFolderStatus status;
+   if ( !MfStatusCache::Get()->GetStatus(m_MailFolder->GetName(), &status) ||
+            numMessages != status.total )
+   {
+      wxLogDebug("Something is wrong in wxFolderView::Update()");
+   }
+#endif // 0
+
    static const size_t THRESHOLD = 100;
    if ( numMessages > THRESHOLD )
    {
@@ -2176,6 +2186,9 @@ wxFolderView::Update()
    // because of sorting/threading
    bool searchForFocus = m_uidPreviewed != UID_ILLEGAL;
 
+   //the item to set focus to or -1 if none found
+   int itemFocus = -1;
+
    // fill the list control
    const HeaderInfo *hi;
    for ( size_t i = 0; i < numMessages; i++ )
@@ -2192,9 +2205,7 @@ wxFolderView::Update()
          if ( hi->GetUId() == m_uidPreviewed )
          {
             searchForFocus = false;
-
-            m_FolderCtrl->Focus(i);
-            m_FolderCtrl->Select(i);
+            itemFocus = i;
          }
       }
    }
@@ -2215,12 +2226,17 @@ wxFolderView::Update()
    // clear the preview window if the focused message disappeared: this happens
    // only if we didn't find it above (notice that if there was no preview
    // message to start with, we have nothing to do here)
-   if ( searchForFocus )
+   if ( itemFocus != -1 )
+   {
+      m_FolderCtrl->Focus(itemFocus);
+      m_FolderCtrl->Select(itemFocus);
+   }
+   else if ( searchForFocus )
    {
       m_MessagePreview->Clear();
       InvalidatePreviewUID();
    }
-   //else: it is still there
+   //else: we didn't have preview at all
 
    m_UpdateSemaphore = false;
 
@@ -2534,7 +2550,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          break;
 
       case WXMENU_MSG_MOVE_TO_FOLDER:
-         SaveMessagesToFolder(GetSelections(), NULL, true);
+         MoveMessagesToFolder(GetSelections());
          break;
 
       case WXMENU_MSG_SAVE_TO_FILE:
@@ -2797,7 +2813,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                if ( folder )
                {
                   // it is, move messages there (it is "quick move" menu)
-                  SaveMessagesToFolder(GetSelections(), folder, true /* move */);
+                  MoveMessagesToFolder(GetSelections(), folder);
 
                   folder->DecRef();
                }
@@ -3017,19 +3033,19 @@ wxFolderView::ToggleMessages(const UIdArray& messages)
 }
 
 Ticket
-wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
-                                   MFolder *folder,
-                                   bool del)
+wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
 {
    size_t count = selections.GetCount();
-   if ( !count )
-      return ILLEGAL_TICKET;
+   CHECK( count, ILLEGAL_TICKET, "no messages to save" );
 
    if ( !folder )
    {
       folder = MDialog_FolderChoose(GetFrame(m_Parent));
       if ( !folder )
+      {
+         // cancelled by user
          return ILLEGAL_TICKET;
+      }
    }
    else
    {
@@ -3044,13 +3060,21 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
                                                    folder,
                                                    this);
    m_TicketList->Add(t);
-   if ( del )
-   {
-      // also don't forget to delete messages once they're successfulyl saved
-      m_TicketsToDeleteList->Add(t);
-   }
 
    folder->DecRef();
+
+   return t;
+}
+
+Ticket
+wxFolderView::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
+{
+   Ticket t = SaveMessagesToFolder(messages, folder);
+   if ( t != ILLEGAL_TICKET )
+   {
+      // delete messages once they're successfully saved
+      m_TicketsToDeleteList->Add(t);
+   }
 
    return t;
 }

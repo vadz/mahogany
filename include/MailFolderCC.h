@@ -202,8 +202,8 @@ public:
                         int flag,
                         bool set = true);
 
-   virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder);
+   /// override base class SaveMessages() to do server side copy if possible
+   virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
 
    /** Appends the message to this folder.
        @param msg the message to append

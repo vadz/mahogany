@@ -11,7 +11,7 @@
 %{
 #include   "Mswig.h"
 #include   "MailFolder.h"
-#include   "Profile.h"   
+#include   "Profile.h"
 #include   "HeaderInfo.h"
 %}
 
@@ -117,7 +117,7 @@ public:
                                   const String &symbolicname =
                                   NULLstring,
                                   bool halfopen = FALSE);
-   
+
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder);
@@ -126,7 +126,7 @@ public:
        @return true on success
    */
    static bool DeleteFolder(const MFolder *mfolder);
-   /**   
+   /**
          Creates a mailbox profile and checks the settings to be
          sensible.
          @param name name of new folder profile
@@ -277,35 +277,15 @@ public:
        free it
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
-   
+
    /** Get the profile.
        @return Pointer to the profile.
    */
    virtual inline Profile *GetProfile(void);
 
    /// return class name
-   const char *GetClassName(void)
-      { return "MailFolder"; }
+   const char *GetClassName(void) { return "MailFolder"; }
 
-   /// Flags controlling update behaviour
-   enum UpdateFlags
-   {
-      /// undefined flags, used as default arg
-      UF_Undefined   =   1,
-      /// update the message counter
-      UF_UpdateCount =   2,
-      /// detect new messages as new
-      UF_DetectNewMail = 4,
-      /// default setting
-      UF_Default = (UF_UpdateCount+UF_DetectNewMail)
-   };
-   /** Toggle update behaviour flags.
-       @param updateFlags the flags to set
-   */
-   virtual void SetUpdateFlags(int updateFlags);
-   /// Get the current update flags
-   virtual int  GetUpdateFlags(void);
-   
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
       These functions are not used by anything else in the MailFolder
@@ -315,24 +295,19 @@ public:
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
-       @param isProfile if true, the folderName will be interpreted as
-       a symbolic folder name, otherwise as a filename
-       @param updateCount If true, the number of messages in the
-       folder is updated. If false, they will be detected as new
-       messages.
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,
-                             const String & folderName,
-                             bool isProfile,
-                             bool updateCount);
+                             const String & folderName);
+
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
        @return true on success
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
-                                   const String & fileName);
+                                   const String& fileName,
+                                   MWindow *parent);
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -353,21 +328,6 @@ public:
        @return true on success
    */
    virtual bool UnDeleteMessages(const UIdArray *messages);
-
-   /** Save messages to a file.
-       @param messages pointer to an array holding the message numbers
-       @parent parent window for dialog
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFile(const UIdArray *messages,
-                                   MWindow *parent);
-
-   /** Save messages to a folder.
-       @param messages pointer to an array holding the message numbers
-       @param parent window for dialog
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFolder(const UIdArray *messages, MWindow *parent);
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -461,7 +421,7 @@ private:
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
 
-    IMPORTANT: When sorting messages, the instances of this class will 
+    IMPORTANT: When sorting messages, the instances of this class will
     be copied around in memory bytewise, but not duplicates of the
     object will be created. So the reference counting in wxString
     objects should be compatible with this, as at any time only one

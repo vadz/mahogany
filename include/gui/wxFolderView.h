@@ -107,15 +107,23 @@ public:
    void SaveMessagesToFile(UIdArray const &messages);
 
    /** Save messages to a folder.
-       @param n number of messages
-       @param messages pointer to an array holding the message numbers
+       @param messages array holding the message UIDs
        @param folder is the folder to save to, ask the user if NULL
-       @param del if TRUE, delete them when they are saved
        @return the ticket for the save operation
    */
-   Ticket SaveMessagesToFolder(UIdArray const &messages,
-                               MFolder *folder = NULL,
-                               bool del = FALSE);
+   Ticket SaveMessagesToFolder(const UIdArray &messages,
+                               MFolder *folder = NULL);
+
+
+   /** Move messages to a folder: SaveMessagesToFolder() and then delete
+       them if they had been saved successfully
+
+       @param messages array holding the message UIDs
+       @param folder is the folder to move to, ask the user if NULL
+       @return the ticket for the save operation
+   */
+   Ticket MoveMessagesToFolder(const UIdArray& messages,
+                               MFolder *folder = NULL);
 
    /** Save messages to a folder and possibly delete them later.
        This function should be used by drop targets accepting the message

@@ -524,7 +524,7 @@ static swig_type_info *swig_types[24];
 
 #include   "Mswig.h"
 #include   "MailFolder.h"
-#include   "Profile.h"   
+#include   "Profile.h"
 #include   "HeaderInfo.h"
 #ifdef __cplusplus
 extern "C" {
@@ -967,22 +967,16 @@ static PyObject *_wrap_MailFolder_SaveMessages(PyObject *self, PyObject *args) {
     MailFolder *arg0 ;
     UIdArray *arg1 ;
     String *arg2 ;
-    bool arg3 ;
-    bool arg4 ;
     PyObject * argo0 =0 ;
     PyObject * argo1 =0 ;
     PyObject * argo2 =0 ;
-    int tempbool3 ;
-    int tempbool4 ;
     bool result ;
     
-    if(!PyArg_ParseTuple(args,"OOOii:MailFolder_SaveMessages",&argo0,&argo1,&argo2,&tempbool3,&tempbool4)) return NULL;
+    if(!PyArg_ParseTuple(args,"OOO:MailFolder_SaveMessages",&argo0,&argo1,&argo2)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_UIdArray,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_String,1)) == -1) return NULL;
-    arg3 = (bool ) tempbool3;
-    arg4 = (bool ) tempbool4;
-    result = (bool )arg0->SaveMessages((UIdArray const *)arg1,(String const &)*arg2,arg3,arg4);
+    result = (bool )arg0->SaveMessages((UIdArray const *)arg1,(String const &)*arg2);
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
@@ -993,16 +987,19 @@ static PyObject *_wrap_MailFolder_SaveMessagesToFile(PyObject *self, PyObject *a
     MailFolder *arg0 ;
     UIdArray *arg1 ;
     String *arg2 ;
+    MWindow *arg3 ;
     PyObject * argo0 =0 ;
     PyObject * argo1 =0 ;
     PyObject * argo2 =0 ;
+    PyObject * argo3 =0 ;
     bool result ;
     
-    if(!PyArg_ParseTuple(args,"OOO:MailFolder_SaveMessagesToFile",&argo0,&argo1,&argo2)) return NULL;
+    if(!PyArg_ParseTuple(args,"OOOO:MailFolder_SaveMessagesToFile",&argo0,&argo1,&argo2,&argo3)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_UIdArray,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_String,1)) == -1) return NULL;
-    result = (bool )arg0->SaveMessagesToFile((UIdArray const *)arg1,(String const &)*arg2);
+    if ((SWIG_ConvertPtr(argo3,(void **) &arg3,SWIGTYPE_p_MWindow,1)) == -1) return NULL;
+    result = (bool )arg0->SaveMessagesToFile((UIdArray const *)arg1,(String const &)*arg2,arg3);
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
@@ -1057,26 +1054,6 @@ static PyObject *_wrap_MailFolder_UnDeleteMessages(PyObject *self, PyObject *arg
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_UIdArray,1)) == -1) return NULL;
     result = (bool )arg0->UnDeleteMessages((UIdArray const *)arg1);
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_MailFolder_SaveMessagesToFolder(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg0 ;
-    UIdArray *arg1 ;
-    MWindow *arg2 ;
-    PyObject * argo0 =0 ;
-    PyObject * argo1 =0 ;
-    PyObject * argo2 =0 ;
-    bool result ;
-    
-    if(!PyArg_ParseTuple(args,"OOO:MailFolder_SaveMessagesToFolder",&argo0,&argo1,&argo2)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_UIdArray,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_MWindow,1)) == -1) return NULL;
-    result = (bool )arg0->SaveMessagesToFolder((UIdArray const *)arg1,arg2);
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
@@ -1774,7 +1751,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_DeleteOrTrashMessages", _wrap_MailFolder_DeleteOrTrashMessages, METH_VARARGS },
 	 { "MailFolder_DeleteMessages", _wrap_MailFolder_DeleteMessages, METH_VARARGS },
 	 { "MailFolder_UnDeleteMessages", _wrap_MailFolder_UnDeleteMessages, METH_VARARGS },
-	 { "MailFolder_SaveMessagesToFolder", _wrap_MailFolder_SaveMessagesToFolder, METH_VARARGS },
 	 { "MailFolder_ReplyMessages", _wrap_MailFolder_ReplyMessages, METH_VARARGS },
 	 { "MailFolder_ForwardMessages", _wrap_MailFolder_ForwardMessages, METH_VARARGS },
 	 { "MailFolder_Lock", _wrap_MailFolder_Lock, METH_VARARGS },

@@ -499,15 +499,36 @@ MailFolderCmn::PreClose(void)
 
 bool
 MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
-                                  String const & fileName0)
+                                  const String& fileName0,
+                                  MWindow *parent)
 {
-   int
-      n = selections->Count(),
-      i;
-   String fileName = strutil_expandpath(fileName0);
-   if(strutil_isempty(fileName))
-      return false;
+   String fileName = fileName0;
 
+   if ( fileName.empty() )
+   {
+      // ask the user
+      fileName = wxPFileSelector
+                 (
+                  "MsgSave",
+                  _("Choose file to save message to"),
+                  NULL, NULL, NULL,
+                  _("All files (*.*)|*.*"),
+                  wxSAVE | wxOVERWRITE_PROMPT,
+                  parent
+                 );
+
+      if ( fileName.IsEmpty() )
+      {
+         // cancelled by user
+         return false;
+      }
+   }
+   else // not empty, use this file name
+   {
+      fileName = strutil_expandpath(fileName0);
+   }
+
+   // truncate the file
    wxFile file;
    if ( !file.Create(fileName, TRUE /* overwrite */) )
    {
@@ -515,7 +536,9 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
       return false;
    }
 
-   Message *msg;
+   // save the messages
+   int n = selections->Count();
+
    MProgressDialog *pd = NULL;
    int threshold = GetProfile() ?
       READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
@@ -524,42 +547,55 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    {
       wxString msg;
       msg.Printf(_("Saving %d messages to the file '%s'..."),
-                 n, fileName0.c_str());
+                 n, fileName0.empty() ? fileName.c_str() : fileName0.c_str());
 
       pd = new MProgressDialog(GetName(), msg, 2*n, NULL);
    }
 
-   int t,n2,j;
-   size_t size;
    bool rc = true;
-   const char *cptr;
    String tmpstr;
-   for(i = 0; i < n; i++)
+   for ( int i = 0; i < n; i++ )
    {
-      msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         if(pd) pd->Update( 2*i + 1 );
+      Message_obj msg = GetMessage((*selections)[i]);
 
-            // iterate over all parts
-         n2 = msg->CountParts();
-         for(j = 0; j < n2; j++)
+      if ( msg )
+      {
+         if ( pd )
+            pd->Update( 2*i + 1 );
+
+         // iterate over all parts
+         int numParts = msg->CountParts();
+         for ( int part = 0; part < numParts; part++ )
          {
-            t = msg->GetPartType(j);
-            if( ( size = msg->GetPartSize(j)) == 0)
-               continue; //    ignore empty parts
-            if ( (t == Message::MSG_TYPETEXT) ||
-                 (t == Message::MSG_TYPEMESSAGE ))
+            size_t size = msg->GetPartSize(part);
+            if ( size == 0 )
             {
-               cptr = msg->GetPartContent(j);
-               if(cptr == NULL)
-                  continue; // error ?
+               // skip empty parts
+               continue;
+            }
+
+            int partType = msg->GetPartType(part);
+            if ( (partType == Message::MSG_TYPETEXT) ||
+                 (partType == Message::MSG_TYPEMESSAGE ))
+            {
+               const char *cptr = msg->GetPartContent(part);
+               if( !cptr )
+               {
+                  FAIL_MSG( "failed to get the content of a text psrt?" );
+
+                  continue;
+               }
+
                tmpstr = strutil_enforceNativeCRLF(cptr);
-               rc &= (file.Write(tmpstr, tmpstr.length()) == size);
+               if ( file.Write(tmpstr, tmpstr.length()) != size )
+               {
+                  rc = false;
+               }
             }
          }
-         if(pd) pd->Update( 2*i + 2);
-         msg->DecRef();
+
+         if ( pd )
+            pd->Update( 2*i + 2);
       }
    }
 
@@ -573,6 +609,16 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
                             MFolder *folder)
 {
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
+
+   if ( !CanCreateMessagesInFolder(folder->GetType()) )
+   {
+      // normally, this should be checked by GUI code, but if it doesn't,
+      // detect it here
+      wxLogError(_("Impossible to copy messages in the folder '%s'.\n"
+                   "You can't create messages in the folders of this type."),
+                 folder->GetFullName().c_str());
+      return false;
+   }
 
    int n = selections->Count();
    CHECK( n, true, "SaveMessages(): nothing to save" );
@@ -637,12 +683,8 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
-                            String const & folderName,
-                            bool isProfile)
+                            const String& folderName)
 {
-   // this shouldn't happen any more, use SaveMessages(MFolder)
-   CHECK( isProfile, false, "obsolete version of SaveMessages called" );
-
    MFolder_obj folder(folderName);
    if ( !folder.IsOk() )
    {
@@ -653,55 +695,6 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    return SaveMessages(selections, folder);
-}
-
-bool
-MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections,
-                                    MWindow *parent,
-                                    MFolder *folder)
-{
-   // it used to be legal to call SaveMessagesToFolder() with NULL folder but
-   // now the caller must call MDialog_FolderChoose() itself if necessary
-   CHECK( folder, false, "no folder in SaveMessagesToFolder" );
-
-   bool rc;
-   if ( CanCreateMessagesInFolder(folder->GetType()) )
-   {
-      rc = SaveMessages(selections, folder);
-   }
-   else // we can't copy/move the messages there
-   {
-      wxLogError(_("Impossible to copy messages in the folder '%s'.\n"
-                   "You can't create messages in the folders of this type."),
-                 folder->GetFullName().c_str());
-      rc = false;
-   }
-
-   return rc;
-}
-
-bool
-MailFolderCmn::SaveMessagesToFile(const UIdArray *selections, MWindow *parent)
-{
-
-   String filename = wxPFileSelector("MsgSave",
-                                     _("Choose file to save message to"),
-                                     NULL, NULL, NULL,
-                                     _("All files (*.*)|*.*"),
-                                     wxSAVE | wxOVERWRITE_PROMPT,
-                                     parent);
-   if( filename.IsEmpty() )
-   {
-      // cancelled by user
-      return false;
-   }
-
-   // truncate the file
-   wxFile fd;
-   if ( !fd.Create(filename, TRUE /* overwrite */) )
-      wxLogError(_("Could not truncate the existing file."));
-
-   return SaveMessagesToFile(selections,filename);
 }
 
 // ----------------------------------------------------------------------------
@@ -1301,9 +1294,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
    }
    else // move to trash
    {
-      rc = SaveMessages(selections,
-                        trashFolderName,
-                        true /* is profile */);
+      rc = SaveMessages(selections, trashFolderName);
       if ( rc )
       {
          // delete and expunge
@@ -1497,9 +1488,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                }
             }
 
-            if ( SaveMessages(&messages,
-                              newMailFolder,
-                              true /* isProfile */))
+            if ( SaveMessages(&messages, newMailFolder) )
             {
                // delete and expunge
                DeleteMessages(&messages, true);

@@ -394,16 +394,14 @@ public:
    MT_SaveMessages(ASMailFolder *mf,
                    UserData ud,
                    const UIdArray *selections,
-                   const String &folderName,
-                   bool isProfile)
+                   const String &folderName)
       : MailThreadSeq(mf, ud, selections)
       {
          m_MfName = folderName;
-         m_IsProfile = isProfile;
       }
    virtual void WorkFunction(void)
       {
-         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName, m_IsProfile);
+         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName);
          SendEvent(ASMailFolder::ResultInt
                    ::Create(m_ASMailFolder,
                             m_Ticket,
@@ -416,7 +414,6 @@ public:
       }
 private:
    String    m_MfName;
-   bool      m_IsProfile;
 };
 
 class MT_SaveMessagesToFile : public MailThreadSeq
@@ -465,8 +462,8 @@ public:
    virtual void WorkFunction(void)
       {
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile
-                  ? m_MailFolder->SaveMessagesToFile(m_Seq, m_Parent)
-                  : m_MailFolder->SaveMessagesToFolder(m_Seq, m_Parent, m_Folder);
+                  ? m_MailFolder->SaveMessagesToFile(m_Seq, "", m_Parent)
+                  : m_MailFolder->SaveMessages(m_Seq, m_Folder);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket, m_Op,
                                                    m_Seq,
@@ -754,11 +751,9 @@ public:
    */
    virtual Ticket SaveMessages(const UIdArray *selections,
                                String const & folderName,
-                               bool isProfile,
                                UserData ud)
       {
-         return (new MT_SaveMessages(this, ud, selections,
-                                     folderName, isProfile))->Start();
+         return (new MT_SaveMessages(this, ud, selections, folderName))->Start();
       }
 
    /** Mark messages as deleted or move them to trash.

@@ -1,13 +1,14 @@
-/*-*- c++ -*-********************************************************
- * Message class: entries for message                               *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
-
-
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   Message.h: declaration of the Message class interface
+// Purpose:     Message is an ABC for the classes representing a mail message
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MESSAGE_H
 #define MESSAGE_H
@@ -349,5 +350,7 @@ protected:
    GCC_DTOR_WARN_OFF
    MOBJECT_NAME(Message)
 };
+
+DECLARE_AUTOPTR(Message);
 
 #endif

@@ -35,8 +35,13 @@ public:
       MailFolderCmn class on top of the other functions.
    */
    //@{
-   virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder);
+   /** Save messages to a folder identified by MFolder
+
+       @param selections pointer to an array holding the message UIDs
+       @param folder is the folder to save to, can't be NULL
+       @return true if messages got saved
+   */
+   virtual bool SaveMessages(const UIdArray *selections, MFolder *folder);
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
@@ -46,8 +51,7 @@ public:
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,
-                             String const & folderName,
-                             bool isProfile);
+                             const String& folderName);
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
@@ -55,7 +59,8 @@ public:
        @return true on success
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
-                                   String const & fileName);
+                                   const String& fileName,
+                                   MWindow *parent = NULL);
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -106,23 +111,6 @@ public:
       { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
 
    //@}
-   /** Save messages to a file.
-       @param messages pointer to an array holding the message numbers
-       @parent parent window for dialog
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFile(const UIdArray *messages, MWindow *parent = NULL);
-
-   /** Save messages to a folder.
-       @param messages pointer to an array holding the message numbers
-       @param parent window for dialog
-       @param folder is the folder to save to, ask the user if NULL
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFolder(const UIdArray *messages,
-                                     MWindow *parent = NULL,
-                                     MFolder *folder = NULL);
-
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog

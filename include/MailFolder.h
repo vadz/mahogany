@@ -536,29 +536,29 @@ public:
    //@{
    /** Save messages to a folder identified by MFolder
 
-       NB: this function should eventually replace the other SaveMessages()
+       @param selections pointer to an array holding the message UIDs
+       @param folder is the folder to save to, can't be NULL
+       @return true if messages got saved
    */
-   virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder) = 0;
+   virtual bool SaveMessages(const UIdArray *selections, MFolder *folder) = 0;
 
    /** Save the messages to a folder.
-       @param selections the message indices which will be converted using the current listing
+       @param selections the message UIDs
        @param folderName the name of the folder to save to
-       @param isProfile if true, the folderName will be interpreted as
-       a symbolic folder name, otherwise as a filename
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,
-                             const String& folderName,
-                             bool isProfile) = 0;
+                             const String& folderName) = 0;
 
    /** Save the messages to a folder.
-       @param selections the message indices which will be converted using the current listing
-       @param fileName the name of the folder to save to
+       @param selections the message UIDs
+       @param filename the name of the folder to save to, ask user if empty
+       @param parent the parent window for the file dialog
        @return true on success
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
-                                   const String& fileName) = 0;
+                                   const String& filename,
+                                   MWindow *parent = NULL) = 0;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -579,24 +579,6 @@ public:
        @return true on success
    */
    virtual bool UnDeleteMessages(const UIdArray *messages) = 0;
-
-   /** Save messages to a file.
-       @param messages pointer to an array holding the message numbers
-       @parent parent window for dialog
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFile(const UIdArray *messages,
-                                   MWindow *parent = NULL) = 0;
-
-   /** Save messages to a folder.
-       @param messages pointer to an array holding the message numbers
-       @param parent window for dialog
-       @param folder is the folder to save to, ask the user if NULL
-       @return true if messages got saved
-   */
-   virtual bool SaveMessagesToFolder(const UIdArray *messages,
-                                     MWindow *parent = NULL,
-                                     MFolder *folder = NULL) = 0;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
