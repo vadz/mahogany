@@ -34,10 +34,17 @@
 #include <ctype.h>   // isspace()
 
 
-#define ISO8859MARKER "=?iso-8859-1?Q?"
+#define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
+#define QPRINT_MIDDLEMARKER "?Q?"
 
 /* Little helper function to convert iso8859 encoded header lines into 
-   8 bit. This is a quick fix until wxWindows supports unicode. */
+   8 bit. This is a quick fix until wxWindows supports unicode.
+   Modified it now to not look at the charset argument but always do a 
+   deoding for "=?xxxxx?Q?.....?=" with arbitrary xxxx. If someone has a
+   different character set, he will have different fonts, so it
+   should be ok.
+*/
+
 /* static */
 String MailFolderCC::qprint(const String &in)
 {
@@ -45,8 +52,12 @@ String MailFolderCC::qprint(const String &in)
    if(pos == -1)
       return in;
    String out = in.substr(0,pos);
+   int pos2 = in.Find(QPRINT_MIDDLEMARKER);
+   if(pos2 == -1 || pos2 < pos)
+      return in;
+   
    String quoted;
-   const char *cptr = in.c_str() + pos + strlen(ISO8859MARKER);
+   const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER);
    while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
       quoted << (char) *cptr++;
    cptr += 2; // "?="
