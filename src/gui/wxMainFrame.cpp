@@ -91,6 +91,12 @@ extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_SEARCH_AGAIN_IF_NO_MATCH;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -372,7 +378,21 @@ public:
       }
       else
       {
-         wxLogWarning(_("No matching messages found."));
+         if ( MDialog_YesNoDialog
+              (
+               "No matching messages found.\n"
+               "\n"
+               "Would you like to search again?",
+               frame,
+               MDIALOG_YESNOTITLE,
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_SEARCH_AGAIN_IF_NO_MATCH
+              ) )
+         {
+            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                                 WXMENU_FOLDER_SEARCH);
+            wxPostEvent(frame, event);
+         }
       }
    }
 
