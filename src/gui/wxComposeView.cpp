@@ -2122,6 +2122,11 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
          }
          break;
 
+         // note that we may have recipients of Recipient_None type: this
+         // happens when we're replying to a sender of a message with many
+         // recipients  as we still add all of them to the new composer but
+         // disabled initially
+      case Recipient_None:
       case Recipient_To:
       case Recipient_Cc:
       case Recipient_Bcc:
@@ -2155,11 +2160,6 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
       case Recipient_Max:
       default:
          FAIL_MSG( _T("unexpected wxRcptControl type") );
-         // fall through
-
-      case Recipient_None:
-         // nothing to do
-         ;
    }
 }
 
