@@ -74,7 +74,7 @@ install_bin:
 	done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
-	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
+	do $(INSTALL_DATA) -m 644 $$i $(DOCDIR)/Tips; \
 	done
 
 install_doc:
@@ -99,6 +99,8 @@ install_rpm:
 	@echo "$(DATADIR)/locale" >> filelist
 	@echo "$(BINDIR)/M" >> filelist
 	@echo "$(BINDIR)/mahogany" >> filelist
+	@echo "$(DESTDIR)/man/man1/mahogany.1" >> filelist
+	@echo "$(DESTDIR)/man/man1/M.1" >> filelist
 	@# the second subsitution takes care of RPM_BUILD_ROOT
 	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
