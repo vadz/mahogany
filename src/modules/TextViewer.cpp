@@ -204,8 +204,7 @@ END_EVENT_TABLE()
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                 : wxTextCtrl(parent, -1, "",
                              wxDefaultPosition, wxDefaultSize,
-                             wxTE_RICH | wxTE_MULTILINE | wxTE_AUTO_URL |
-                             wxBORDER_NONE)
+                             wxTE_RICH | wxTE_MULTILINE | wxTE_AUTO_URL)
 {
    m_viewer = viewer;
 
