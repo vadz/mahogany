@@ -164,10 +164,10 @@ private:
    void Cache(const Sequence& seqmMsgnos);
 
    /// sort messages, i.e. set m_tableSort
-   void Sort();
+   bool Sort();
 
    /// thread the messages according to m_thrParams
-   void Thread();
+   bool Thread();
 
    /**
       Find first position in the given range containing a msgno from array

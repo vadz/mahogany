@@ -3309,11 +3309,12 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 #endif // MSW/GTK
                              wxSTAY_ON_TOP);
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-   sizer->Add(new wxStaticText(m_frame, -1, text), 0, wxALL & ~wxRIGHT, 10);
+   m_labelText = new wxStaticText(m_frame, -1, text);
+   sizer->Add(m_labelText, 0, wxALL & ~wxRIGHT, 10);
 
    // hack: use a long label for sizer calculations
-   m_label = new wxStaticText(m_frame, -1, _("XXXXXX done"));
-   sizer->Add(m_label, 0, wxALL, 10);
+   m_labelValue = new wxStaticText(m_frame, -1, _("XXXXXX done"));
+   sizer->Add(m_labelValue, 0, wxALL, 10);
 
    m_frame->SetAutoLayout(TRUE);
    m_frame->SetSizer(sizer);
@@ -3321,15 +3322,25 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    sizer->SetSizeHints(m_frame);
 
    // and then remove it
-   m_label->SetLabel("");
+   m_labelValue->SetLabel("");
 
    m_frame->CentreOnParent();
    m_frame->Show();
 }
 
+void MProgressInfo::SetLabel(const wxString& label)
+{
+   m_labelText->SetLabel(label);
+
+   // update the frame
+#if wxCHECK_VERSION(2, 2, 6)
+   wxYieldIfNeeded();
+#endif // wxWin 2.2.6+
+}
+
 void MProgressInfo::SetValue(size_t numDone)
 {
-   m_label->SetLabel(wxString::Format(_("%u done"), numDone));
+   m_labelValue->SetLabel(wxString::Format(_("%u done"), numDone));
 
    // update the frame
 #if wxCHECK_VERSION(2, 2, 6)

@@ -147,6 +147,8 @@ public:
    BusyIndicator(MailFolder *mf, const char *fmt, ...);
    ~BusyIndicator();
 
+   void SetLabel(const char *fmt, ...);
+
 private:
    // the busy info screen we show
    MProgressInfo *m_progInfo;
@@ -339,6 +341,17 @@ BusyIndicator::BusyIndicator(MailFolder *mf, const char *fmt, ...)
    else // busy indicator disabled
    {
       m_progInfo = NULL;
+   }
+}
+
+void BusyIndicator::SetLabel(const char *fmt, ...)
+{
+   if ( m_progInfo )
+   {
+      va_list argptr;
+      va_start(argptr, fmt);
+      m_progInfo->SetLabel(wxString::FormatV(fmt, argptr));
+      va_end(argptr);
    }
 }
 
@@ -1298,13 +1311,23 @@ void HeaderInfoListImpl::BuildTables()
    // what is it inverse for?
    ASSERT_MSG( !m_tablePos, "shouldn't have inverse table neither!" );
 
+   BusyIndicator *busy = NULL;
+
    // no, check if we need them
 
    // sort the messages if needed and not done yet: we'll need the sort table
    // anyhow, whether we thread messages or not
    if ( IsSorting() && !m_tableSort )
    {
-      Sort();
+      wxString msg = _("Sorting %lu messages...");
+
+      if ( busy )
+         busy->SetLabel(msg, m_count);
+      else
+         busy = new BusyIndicator(m_mf, msg, m_count);
+
+      if ( !Sort() )
+         busy->Fail(_("Sorting failed!"));
    }
 
    if ( IsThreading() )
@@ -1312,7 +1335,15 @@ void HeaderInfoListImpl::BuildTables()
       // first thread the messages if not done yet
       if ( !m_thrData || !m_thrData->m_root)
       {
-         Thread();
+         wxString msg = _("Threading %lu messages...");
+
+         if ( busy )
+            busy->SetLabel(msg, m_count);
+         else
+            busy = new BusyIndicator(m_mf, msg, m_count);
+
+         if ( !Thread() )
+            busy->Fail(_("Threading failed!"));
       }
 
       // how to sort threaded messages here, i.e. construct m_tableMsgno and
@@ -1350,6 +1381,8 @@ void HeaderInfoListImpl::BuildTables()
    {
       BuildPosTable();
    }
+
+   delete busy;
 
    CHECK_TABLES();
 }
@@ -1409,7 +1442,7 @@ void HeaderInfoListImpl::FreeSortData()
 }
 
 // sort the messages according to the current sort parameters
-void HeaderInfoListImpl::Sort()
+bool HeaderInfoListImpl::Sort()
 {
    // caller must check if we need to be sorted
    ASSERT_MSG( !m_tableMsgno && !m_tableSort,
@@ -1439,8 +1472,6 @@ void HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder &= ~1;
          }
 
-         BusyIndicator status(m_mf, _("Sorting %lu messages..."), m_count);
-
          if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
          {
             DUMP_TABLE(m_tableSort,
@@ -1451,7 +1482,7 @@ void HeaderInfoListImpl::Sort()
          {
             FreeSortData();
 
-            status.Fail(_("Sorting failed!"));
+            return false;
          }
 
          if ( m_reverseOrder )
@@ -1463,6 +1494,8 @@ void HeaderInfoListImpl::Sort()
 
          m_reversedTables = IsSortCritReversed(m_sortParams.sortOrder);
    }
+
+   return true;
 }
 
 // check if a sort order includes MSO_SENDER
@@ -1584,12 +1617,10 @@ void HeaderInfoListImpl::FreeThreadData()
    }
 }
 
-void HeaderInfoListImpl::Thread()
+bool HeaderInfoListImpl::Thread()
 {
    // the caller must check that we need to be threaded
    ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), "shouldn't be called" );
-
-   BusyIndicator status(m_mf, _("Threading %lu messages..."), m_count);
 
    delete m_thrData;
    m_thrData = new ThreadData(m_count);
@@ -1598,8 +1629,10 @@ void HeaderInfoListImpl::Thread()
    {
       FreeThreadData();
 
-      status.Fail(_("Threading failed!"));
+      return false;
    }
+
+   return true;
 }
 
 bool HeaderInfoListImpl::SetThreadParameters(const ThreadParams& thrParams)

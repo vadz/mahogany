@@ -31,10 +31,10 @@
 // fwd decl
 class Profile;
 class ArrayAdbElements;
-class wxString;
 class MFolder;
-class wxButtonEvent;
-class wxCloseEvent;
+
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxStaticText;
 
 /**
    Dialog Boxes
@@ -84,12 +84,16 @@ public:
                  const String& title = wxEmptyString);
   ~MProgressInfo();
 
-   /// change the second part of the label
+   /// change the label completely
+   void SetLabel(const wxString& label);
+
+   /// change just the number shown
    void SetValue(size_t numDone);
 
 private:
-   class WXDLLEXPORT wxFrame *m_frame;
-   class WXDLLEXPORT wxStaticText *m_label;
+   wxFrame *m_frame;
+   wxStaticText *m_labelText,
+                *m_labelValue;
 };
 
 /// This allows us to call them from modules.
