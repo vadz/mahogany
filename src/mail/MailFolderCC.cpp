@@ -50,6 +50,7 @@
 
 #include "MEvent.h"
 #include "ASMailFolder.h"
+#include "Mpers.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
@@ -795,7 +796,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                                NULL,
                                MDIALOG_YESNOTITLE,
                                TRUE, /* [Yes] default */
-                               "RememberPwd") )
+                               GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)) )
       {
          profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
       }

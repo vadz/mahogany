@@ -59,6 +59,7 @@
 #include "gui/wxIconManager.h"
 #include "MailCollector.h"
 #include "MModule.h"
+#include "Mpers.h"
 
 #ifdef OS_WIN
 #   include <winnls.h>
@@ -213,7 +214,7 @@ bool wxMLogWindow::OnFrameClose(wxFrame *frame)
                      "'Miscellaneous' page of the Preferences dialog."),
                    NULL,
                    MDIALOG_MSGTITLE,
-                   "ShowLogWinHint");
+                   GetPersMsgBoxName(M_MSGBOX_SHOWLOGWINHINT));
 
    return wxLogWindow::OnFrameClose(frame); // TRUE, normally
 }

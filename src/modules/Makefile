@@ -29,6 +29,10 @@ ifdef PISOCK_LIB
 SRC := $(SRC) PalmOS.cpp
 endif
 
+ifdef EXPERIMENTAL
+SRC := $(SRC) Calendar.cpp
+endif
+
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
@@ -36,7 +40,7 @@ ifeq ($(USE_MODULES),static)
 TARGETS = $(SRC:.cpp=.o)
 else
 ifeq ($(USE_MODULES),dynamic)
-TARGETS = $(SRC:.cpp=.so) $(SRC:.cpp=.mmd)
+TARGETS = $(SRC:.cpp=.so) #$(SRC:.cpp=.mmd)
 else
 TARGETS=
 endif
@@ -60,7 +64,7 @@ $(INTERFACE): ../../include/MInterface.mid
 
 ifdef PISOCK_LIB
 PalmOS.so: PalmOS.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) #-lM 
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) 
 
 endif
 

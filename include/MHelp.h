@@ -67,4 +67,7 @@
 /// PalmOS connectivity module help range: (10-19)
 #define MH_MODULES_PALMOS          10010
 #define MH_MODULES_PALMOS_CONFIG   10011
+/// Calendar module
+#define MH_MODULES_CALENDAR          10020
+#define MH_MODULES_CALENDAR_CONFIG   10021
 #endif // MHELP_H
