@@ -218,7 +218,7 @@ then
 	else
 		AC_MSG_RESULT(no)
 	fi
-	if test "x$USE_STRICT" != "x"; then
+	if test "$USE_STRICT" = 1; then
 		CXXFLAGS="$CXXFLAGS -Werror"
 	fi
 fi
