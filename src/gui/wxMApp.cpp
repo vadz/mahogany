@@ -466,8 +466,6 @@ wxMApp::wxMApp(void)
 
 wxMApp::~wxMApp()
 {
-   DoCleanup();
-
    // if the program startup failed it could be not deleted before
    if ( m_profile )
    {
@@ -816,7 +814,11 @@ wxMApp::OnInit()
 #if wxCHECK_VERSION(2, 3, 2)
    // parse our command line options inside OnInit()
    if ( !wxApp::OnInit() )
+   {
+      DoCleanup();
+
       return false;
+   }
 #endif // wxWin 2.3.2+
 
 #ifdef OS_WIN
@@ -978,6 +980,8 @@ wxMApp::OnInit()
       }
       //else: this would be superfluous
 
+      DoCleanup();
+
       return false;
    }
 
@@ -1103,14 +1107,6 @@ void wxMApp::DoCleanup()
       gs_timerMailCollection = NULL;
       gs_timerAway = NULL;
    }
-}
-
-int wxMApp::OnExit()
-{
-   // we won't be able to do anything more (i.e. another program copy can't ask
-   // us to execute any actions for it) so it's as if we were already not
-   // running at all -- call DoCleanup() to stop IPC service
-   DoCleanup();
 
    CleanUpPrintData();
 
@@ -1130,14 +1126,27 @@ int wxMApp::OnExit()
    MAppBase::OnShutDown();
 
    MModule_Cleanup();
-   delete m_IconManager;
+
+   if ( m_IconManager )
+   {
+      delete m_IconManager;
+      m_IconManager = NULL;
+   }
 
 #ifdef USE_I18N
-   delete m_Locale;
+   if ( m_Locale )
+   {
+      delete m_Locale;
+      m_Locale = NULL;
+   }
 #endif // USE_I18N
 
 #ifdef USE_DIALUP
-   delete m_OnlineManager;
+   if ( m_OnlineManager )
+   {
+      delete m_OnlineManager;
+      m_OnlineManager = NULL;
+   }
 #endif // USE_DIALUP
 
    // save all data now as we may still report errors -- later will be too late
@@ -1146,6 +1155,13 @@ int wxMApp::OnExit()
    // and delete config as we won't be using it any longer
    Profile::DeleteGlobalConfig();
 
+}
+
+int wxMApp::OnExit()
+{
+   DoCleanup();
+
+   // this does cleanup which must be done whether OnInit() succeeded or failed
    return wxApp::OnExit();
 }
 
