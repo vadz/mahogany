@@ -1340,6 +1340,10 @@ wxOneFilterDialog::OnButtonMoreOrLess(wxCommandEvent &event)
    else // Button_MoreTests
    {
       AddOneControl();
+
+      // we must hide/show the new test controls and also update the state of
+      // the less button
+      DoUpdateUI();
    }
 
    LayoutControls();
