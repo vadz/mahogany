@@ -57,6 +57,9 @@ protected:
    // real button events handler
    void OnButtonMove(bool up);
 
+   // update the buttons state to reflect the selection in the checklistbox
+   void UpdateButtons(int sel);
+
    // the box around all our controls (here for wxFolderViewColumnsDialog only)
    wxStaticBox    *m_box;
 

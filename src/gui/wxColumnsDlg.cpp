@@ -275,6 +275,12 @@ bool wxFolderViewColumnsDialog::TransferDataToWindow()
    if ( !wxSelectionsOrderDialogSimple::TransferDataToWindow() )
       return false;
 
+   // disable the controls corresponding to the hidden columns
+   for ( size_t n = 0; n < m_countCol; n++ )
+   {
+      UpdateWidthState(n);
+   }
+
    // the widths are already there as we set the values of the spin controls in
    // the ctor, so nothing more to do
 

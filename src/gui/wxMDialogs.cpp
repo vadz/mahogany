@@ -3062,17 +3062,23 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_checklstBox->SetConstraints(c);
 
+   UpdateButtons(m_checklstBox->GetSelection());
+
    // set the minimal window size
    SetDefaultSize(3*wBtn, 7*hBtn);
 }
 
-void wxSelectionsOrderDialog::OnCheckLstBoxSelChanged(wxCommandEvent& event)
+void wxSelectionsOrderDialog::UpdateButtons(int sel)
 {
-   // only enable buttons if there is something selected
-   int sel = event.GetSelection();
-
+   // only enable buttons if there is something selected and also if pressing
+   // them would do something
    m_btnDown->Enable(sel != -1 && sel < m_checklstBox->GetCount() - 1);
    m_btnUp->Enable(sel != -1 && sel > 0);
+}
+
+void wxSelectionsOrderDialog::OnCheckLstBoxSelChanged(wxCommandEvent& event)
+{
+   UpdateButtons(event.GetSelection());
 }
 
 void wxSelectionsOrderDialog::OnButtonMove(bool up)
