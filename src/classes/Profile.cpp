@@ -1565,7 +1565,7 @@ ProfileImpl::DoWriteEntry(const LookupData& data, ConfigSource *config)
       // set the flag telling us that we did write some suspended entries
       m_wroteSuspended = true;
 
-      path += SUSPEND_PATH;
+      path << _T('/') << SUSPEND_PATH;
    }
 
    return gs_allConfigSources->Write(path, data, config);
