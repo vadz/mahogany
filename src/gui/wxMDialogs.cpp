@@ -132,6 +132,11 @@ private:
 // MProgressDialog : a progress bar dialog box
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(MProgressDialog, wxFrame)
+    EVT_BUTTON(-1, MProgressDialog::OnButton)
+END_EVENT_TABLE()
+
+
 MProgressDialog::MProgressDialog(wxString const &title,
                                  wxString const &message,
                                  int maximum,
@@ -190,11 +195,12 @@ MProgressDialog::~MProgressDialog()
    EnableDisableEvents(true);
 }
 
-void
+bool
 MProgressDialog::Update(int value)
 {
    m_gauge->SetValue(value);
    wxYield();
+   return m_continue;
 }
 
 // ----------------------------------------------------------------------------

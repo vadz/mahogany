@@ -43,20 +43,29 @@ public:
        @param message message to display in window
        @param maximum maximum value for status bar
        @param parent window or NULL
-       @param disableParentOnly if true, only disable parent window's event handling
+       @param disableParentOnly if true, only disable parent window's
+       event handling
+       @param abortButton if true, dialog will show an abort button
    */
    MProgressDialog(wxString const &title, wxString const &message,
                    int maximum = 100,
                    wxWindow *parent = NULL,
-                   bool disableParentOnly = false);
+                   bool disableParentOnly = false,
+                   bool abortButton = false);
    /** Destructor.
        Re-enables event handling for other windows.
    */
    ~MProgressDialog();
    /** Update the status bar to the new value.
        @param value new value
+       @returns true if ABORT button has not been pressed
    */
-   void Update(int value);
+   bool Update(int value);
+   /// Callback for optional abort button
+   void OnButton(WXUNUSED(wxButtonEvent))
+      {
+         m_continue = false;
+      }
 private:
    /// used to enable/disable envent handling
    void EnableDisableEvents(bool enable);
@@ -64,8 +73,11 @@ private:
    class wxGauge *m_gauge;
    /// disable all or parent window only
    bool m_disableParentOnly;
+   /// continue processing or not (return value for Update())
+   bool m_continue;
    /// pointer to parent window
    wxWindow *m_Parent;
+   DECLARE_EVENT_TABLE()
 };
 
 /** display error message:
