@@ -15,7 +15,7 @@
 %define MAKETARGET quartstatic
 
 Summary: Mahogany email and news client
-Name: mahogany-dynamic
+Name: mahogany
 Version: %VERSION
 Release: %RELEASE
 Copyright: Mahogany Artistic License
