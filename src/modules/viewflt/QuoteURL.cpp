@@ -284,9 +284,7 @@ CountQuoteLevel(const char *string,
       // check if we have a quoted line or not now: we consider the line to be
       // quoted if it starts with a special quoting character and if the
       // next lines starts with the same prefix as well or is blank and if the
-      // previous line isn't similar to but not the same as this one (this is
-      // necessary to catch last line in a numbered list which would otherwise
-      // be considered quoted)
+      // previous line is similar to but not the same as this one
 
       // first check if we have a quote character at all
       // TODO: make the string of "quoting characters" configurable
@@ -294,7 +292,29 @@ CountQuoteLevel(const char *string,
       if ( !strchr(QUOTE_CHARS, *c) )
          break;
 
-      // next check if the next line has the same prefix
+      // check the previous line: if it was the same so far but differs now, we
+      // suppose that we have a numbered list which would be recognized as
+      // quotation by the code below, so deal with it first
+      if ( sameAsPrev == Line_Same && *prev != *c )
+      {
+         break;
+      }
+      //else: it's either identical or completely different, both are fine
+
+      // if this line has the same prefix as the previous one, it surely must
+      // be a continuation of a quoted paragraph
+      // checks in case this is not true
+      bool isQuoted = (sameAsPrev == Line_Unknown || sameAsPrev == Line_Same)
+                        && *prev == *c;
+
+      // next check the next line
+      if ( !isQuoted && sameAsNext == Line_Blank )
+      {
+         // previous line not quoted and next one neither -- so suppose this
+         // one is a misdetection
+         break;
+      }
+
       if ( sameAsNext != Line_Different )
       {
          // so far it does
@@ -318,31 +338,44 @@ CountQuoteLevel(const char *string,
       {
          // as this has a lot of potential for false positives, only do it for
          // the most common quoting character
-         if ( !nextStart || *c != '>' )
+         if ( !isQuoted && (!nextStart || *c != '>') )
             break;
 
-         const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
-         if ( !nextnext ||
-               (!IsBlankLine(nextnext + 1) &&
-                strncmp(string, nextnext + 1, next - nextStart) != 0) )
+         // empty or very short lines shouldn't be wrapped: this catches a
+         // not uncommon case of
+         //
+         //          > 111
+         //          >
+         //          333
+         //
+         // where "333" would otherwise have been recognized as wrapped
+         // quotation
+         if ( next - string > 10 )
          {
-            // the line after next doesn't start with the same prefix as
-            // this one so it's improbable that the next line was garbled
-            // because of quoting -- chances are this line is simply not
-            // quoted at all
-            break;
+            const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
+            if ( !nextnext ||
+                  (!IsBlankLine(nextnext + 1) &&
+                   strncmp(string, nextnext + 1, next - nextStart) != 0) )
+            {
+               // the line after next doesn't start with the same prefix as
+               // this one so it's improbable that the next line was garbled
+               // because of quoting -- chances are this line is simply not
+               // quoted at all unless we had already recognized it such
+               if ( !isQuoted )
+                  break;
+            }
+            else
+            {
+               // it does look like the next line is wrapped tail of this one
+               *nextWrapped = true;
+
+               isQuoted = true;
+            }
          }
 
-         // it does look like the next line is wrapped tail of this one
-         *nextWrapped = true;
+         if ( !isQuoted )
+            break;
       }
-
-      // finally check the previous line
-      if ( sameAsPrev == Line_Same && *prev != *c )
-      {
-         break;
-      }
-      //else: it's either identical or completely different, both are fine
 
       levels++;
    }
