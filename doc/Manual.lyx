@@ -230,8 +230,8 @@ Known bugs:
  
 \layout Itemize
 
-There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz
-/ and we are working on them.
+There are always some, listed on our bugtracker at http://mahogany.sourceforge.net
+/bugz/ and we are working on them.
 \layout Itemize
 
 Version 0.60 suffers from a minor printing bug leading to some overlap between
@@ -1084,8 +1084,8 @@ Create new folder
 
 .
  Then fill in the details: your username and password for accessing the
- account and the hostname of the POP server. Optionally you can enter
- a port number after a colon.
+ account and the hostname of the POP server.
+ Optionally you can enter a port number after a colon.
  If you want Mahogany to collect all mail from here and move it to 
 \begin_inset Quotes eld
 \end_inset 
