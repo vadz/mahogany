@@ -931,7 +931,6 @@ CalendarFrame::ParseFolder(void)
       hil->DecRef();
    }
    // update the listctrl:
-   m_ListCtrl->Clear();
    for(size_t count = 0; count < m_Alarms.Count(); count++)
    {
       m_ListCtrl->InsertItem(count, m_Alarms[count]->GetDate().Format(m_DateFormat));
