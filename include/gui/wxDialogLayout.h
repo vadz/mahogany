@@ -97,19 +97,27 @@ public:
       { mApplication->Help(m_helpId, this); }
 
 protected:
-   // set the diaqlog size if it wasn't restored from profile
-   virtual void SetDefaultSize(int width, int height,
-                               bool setAsMinimalSizeToo = TRUE);
+   // the constants for CreateStdButtonsAndBox() second argument
+   enum
+   {
+      StdBtn_Default = 0,
+      StdBtn_NoBox = 1,
+      StdBtn_NoCancel = 2
+   };
 
    // create Ok and Cancel buttons and a static box around all other ctrls
    // (if noBox is TRUE, the returned value is NULL and wxStaticBox is not
    // created). If helpId != -1, add a Help button.
    virtual wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
-                                               bool noBox = FALSE,
+                                               int flags = StdBtn_Default,
                                                int helpId = -1);
 
    // create just the buttons
    void CreateStdButtons() { (void)CreateStdButtonsAndBox("", TRUE); }
+
+   // set the diaqlog size if it wasn't restored from profile
+   virtual void SetDefaultSize(int width, int height,
+                               bool setAsMinimalSizeToo = TRUE);
 
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for

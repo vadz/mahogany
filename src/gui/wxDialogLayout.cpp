@@ -1029,31 +1029,40 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
 
 wxStaticBox *
 wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
-                                                bool noBox,
+                                                int flags,
                                                 int helpId)
 {
    wxLayoutConstraints *c;
 
-   // first the 2 buttons in the bottom/right corner
+   // the buttons in the bottom/right corner
+
+   // we always have at least the [Ok] button
    wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
    btnOk->SetDefault();
    c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
+   if ( flags & StdBtn_NoCancel )
+      c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+   else
+      c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
    c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
    btnOk->SetConstraints(c);
 
-   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnCancel->SetConstraints(c);
+   // and usually the [Cancel] one
+   if ( !(flags & StdBtn_NoCancel) )
+   {
+      wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
+      c = new wxLayoutConstraints;
+      c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
+      c->width.Absolute(wBtn);
+      c->height.Absolute(hBtn);
+      c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+      btnCancel->SetConstraints(c);
+   }
 
-   // add a help button?
-   if(helpId != -1)
+   // and, if we have a help id to invoke help, the [Help] one as well
+   if ( helpId != -1 )
    {
       wxButton *btnHelp = new wxButton(this, wxID_HELP, _("Help"));
       c = new wxLayoutConstraints;
@@ -1066,7 +1075,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
    }
 
    // a box around all the other controls
-   if ( noBox )
+   if ( flags & StdBtn_NoBox )
       return NULL;
 
    wxStaticBox *box = new wxStaticBox(this, -1, boxTitle);

@@ -406,7 +406,9 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
 
    // create controls
    wxLayoutConstraints *c;
-   m_box = CreateStdButtonsAndBox(""); // label will be set later
+
+   // label will be set later below
+   m_box = CreateStdButtonsAndBox("", StdBtn_NoCancel);
 
    m_treectrl = new wxMIMETreeCtrl(this);
    c = new wxLayoutConstraints;
