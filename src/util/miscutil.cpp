@@ -13,16 +13,18 @@
 #ifndef   USE_PCH
 #   include "sysutil.h"
 #   include "strutil.h"
-#   include "adb/AdbManager.h"
-#   include "adb/AdbBook.h"
 #   include "guidef.h"
 #   include "gui/wxMFrame.h"
-#   include "MDialogs.h"
 #endif
 
-#include <ctype.h>
+#include "adb/AdbManager.h"
+#include "adb/AdbBook.h"
+
+#include "MDialogs.h"
 
 #include "miscutil.h"
+
+#include <ctype.h>
 
 void
 AutoCollectAddresses(const String &email,

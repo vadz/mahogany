@@ -374,7 +374,9 @@ MessageCC::GetBody(void)
       envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
                                           FT_UID);
    MailFolderCC::ProcessEventQueue();
-   CHECK_RET(body && envelope, _("Non-existent message data."))
+   
+   CHECK(body && envelope, NULL, _("Non-existent message data."));
+
    return body;
 }
 

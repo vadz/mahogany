@@ -1209,13 +1209,13 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
       addr = mailMessage->Address(name, MAT_REPLYTO);
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
-                           m_ProfileValues.autocollectNamed,
+                           m_ProfileValues.autocollectNamed != 0,
                            m_ProfileValues.autocollectBookName,
                            (MFrame *)GetFrame(this));
       addr = mailMessage->Address(name, MAT_FROM);
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
-                           m_ProfileValues.autocollectNamed,
+                           m_ProfileValues.autocollectNamed != 0,
                            m_ProfileValues.autocollectBookName,
                            (MFrame *)GetFrame(this));
    }
