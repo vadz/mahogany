@@ -76,7 +76,8 @@ There are several more minor improvements as well:
 
 \begin{itemize}
 \item New URL popup menu in the message viewer and \char`\"{}Open URL in
-new browser window\char`\"{} option.
+new browser window\char`\"{} option
+\item {}``Open with...{}'' command for attachment context menu
 \item A new option to automatically select the units for message size (KB/MB)
 \item Python 2.x is now supported and not only 1.5 (Unix)
 \end{itemize}
