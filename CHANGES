@@ -9,10 +9,11 @@
 Release 0.65 'Claire' ???, 2003
 -------------------------------
 
+29.03.03 VZ: allow setting From and Fcc headers from the composer templates
 08.03.03 VZ: added (START)TLS support for POP/IMAP/SMTP/NNTP
 16.02.03 VZ: automatically retrieve PGP public keys from keyserver
 15.02.03 VZ: added find dialog to the raw text viewer
-14.02.03 NB: don't move focus to the next message when user cancelled copying/moving
+14.02.03 NB: don't move focus when user cancelled copying/moving
 
 Release 0.64.2 'Sparc' Feb 3, 2003 [semiofficial pre-release]
 -------------------------------------------------------------------------------

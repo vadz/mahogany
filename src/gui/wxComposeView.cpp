@@ -2157,8 +2157,29 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
          break;
 
       case Recipient_Fcc:
-         // folder names
-         AddRecipient(address, Recipient_Fcc);
+         // hack alert: there is a magic value here which, instead of adding a
+         // new folder to Fcc, removes Fcc entirely. This is very clumsy but
+         // too useful not to have it because like this it may be used in the
+         // (especially forward) templates to avoid saving messages in SentMail
+         // folder automatically
+
+         if ( address == _T("none") )
+         {
+            size_t count = m_rcptExtra.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+               wxRcptControl * const rcpt = m_rcptExtra[n];
+               if ( rcpt->GetType() == Recipient_Fcc )
+               {
+                  rcpt->SetType(Recipient_None);
+               }
+            }
+         }
+         else
+         {
+            // add another folder
+            AddRecipient(address, Recipient_Fcc);
+         }
          break;
 
       case Recipient_Max:
