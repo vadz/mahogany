@@ -6,6 +6,13 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.5  1998/06/27 20:07:18  KB
+ * several bug fixes for kbList
+ * started adding my layout stuff
+ *
+ * Revision 1.1.1.1  1998/06/13 21:51:12  karsten
+ * initial code
+ *
  * Revision 1.4  1998/05/24 14:48:00  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -26,7 +33,6 @@
 #   pragma implementation "kbList.h"
 #endif
 
-#include   "Mpch.h"   // get String type
 #include   "kbList.h"
 
 
@@ -171,14 +177,10 @@ kbList::insert(kbList::iterator & i, void *element)
    else if(i.Node() == first)
    {
       push_front(element);
+      i = first;
       return;
    }
-   else if(i.Node() == last)
-   {
-      push_back(element);
-      return;
-   }
-   (void) new kbListNode(element, i.Node()->prev, i.Node());
+   i = kbList::iterator(new kbListNode(element, i.Node()->prev, i.Node()));
 }
 
 void
@@ -197,7 +199,7 @@ kbList::erase(kbList::iterator & i)
    // correct first/last:
    if(node == first)
       first = node->next;
-   else if(node == last)
+   if(node == last)  // don't put else here!
       last = node->prev;
 
    // build new links:
