@@ -904,7 +904,7 @@
 /// command to execute when new mail arrives
 #ifdef  OS_UNIX
 #   define   MP_USE_NEWMAILCOMMAND_D   1
-#   define   MP_NEWMAILCOMMAND_D   "/usr/bin/play "M_BASEDIR"newmail.wav"
+#   define   MP_NEWMAILCOMMAND_D   "/usr/bin/play "M_BASEDIR"/newmail.wav"
 #else
 #   define   MP_USE_NEWMAILCOMMAND_D   0l
 #   define   MP_NEWMAILCOMMAND_D   M_EMPTYSTRING
