@@ -2287,6 +2287,27 @@ static bool CheckForHTMLOnly(const Message *msg)
    return false;
 }
 
+static wxArrayString GenerateSuperDomains(const String &domain)
+{
+   wxArrayString parts(strutil_restore_array(domain,_T('.')));
+   
+   wxArrayString result;
+   for( size_t count = 1; count <= parts.GetCount(); ++count )
+   {
+      String super;
+      for( size_t each = 0; each < count; ++each )
+      {
+         if( !each )
+            super += _T('.');
+         super += parts[parts.GetCount() - count + each];
+      }
+      
+      result.Add(super);
+   }
+   
+   return result;
+}
+
 // check whether any address field (sender or recipient) matches whitelist
 // FIXME: Match address groups (wx-*@wxwindows.org) and domains
 static bool CheckWhiteList(const Message *msg)
@@ -2346,10 +2367,19 @@ static bool CheckWhiteList(const Message *msg)
    for( Address *candidate = parser->GetFirst(); candidate;
       candidate = parser->GetNext(candidate) )
    {
-      if( !candidate->GetDomain().empty() )
+      wxArrayString domains(GenerateSuperDomains(candidate->GetDomain()));
+      
+      for( size_t super = 0; super < domains.GetCount(); ++super )
       {
-         if( book->Matches(String(_T("*@"))+candidate->GetDomain(),
+         // FIXME: Grammar without escape sequences
+         if( book->Matches(String(_T("*@"))+domains[super],
                AdbLookup_EMail,AdbLookup_Match) )
+         {
+            return false;
+         }
+         
+         // Allow whitelisting domain itself
+         if( book->Matches(domains[super],AdbLookup_EMail,AdbLookup_Match) )
          {
             return false;
          }
