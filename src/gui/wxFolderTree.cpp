@@ -144,7 +144,7 @@ private:
          New,
          Delete,
          Rename,
-         Properties,
+         Properties
       };
 
       FolderMenu(const String& folderName)

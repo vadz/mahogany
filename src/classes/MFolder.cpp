@@ -377,3 +377,4 @@ void DeleteRootFolder()
 {
    delete gs_rootFolder;
 }
+
