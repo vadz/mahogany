@@ -48,6 +48,10 @@
 #include "wx/config.h"
 #include "wx/persctrl.h"
 
+#ifndef MAX
+#   define   MAX(a,b) (((a) > (b))?(a):(b))
+#endif
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
@@ -542,7 +546,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
                              LAYOUT_X_MARGIN;
-    long widthDlg = max(widthTextMax, max(widthButtonsTotal, width)) +
+    long widthDlg = MAX(widthTextMax, MAX(widthButtonsTotal, width)) +
                     4*LAYOUT_X_MARGIN,
          heightDlg = 10*LAYOUT_Y_MARGIN + heightButton +
                      heightTextLine*(lines.Count() + 1);
