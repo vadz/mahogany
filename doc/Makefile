@@ -26,15 +26,14 @@ subdirs: docxx.sty html.sty
 	set -e; for i in $(SUB_DIRS); \
 	do if [ ! -d $$i ]; then mkdir $$i; fi; \
 	   cp -f docxx.sty html.sty $$i; \
-	   $(MAKE) -f ../.src/Makefile.sub -C $$i setup all DIR=$$i; \
+	   $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i setup all; \
 	done
 	
-
 install2:
 	$(INSTALL) -d $(DOCDIR)/Pdf
 	$(INSTALL_DATA) $(FILES_PDF) $(DOCDIR)/Pdf
 	set -e; for i in $(SUB_DIRS); \
-	do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install; \
+	do $(MAKE) DIR=$$i -f ../.src/Makefile.sub -C $$i install; \
 	done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
 #	ln -sf ../share/Mahogany/doc $(DESTDIR)/doc/Mahogany
@@ -53,15 +52,16 @@ classdoc:
 	$(MAKE) -C ../include doc
 	cp ../src/icons/Micon.jpg ../extra/scandoc/images/*.gif ../extra/scandoc/images/*.jpg classes
 
-makemap: subdirs
-	cp wxhelp.map0 wxhelp.tmp
-	#../extra/scripts/html2wxhelp >>wxhelp.tmp
-	set -e; for i in $(SUB_DIRS); do cat $$i/wxhelp.map | \
-	sed "1,$$ s/^\([ 	-0-9]*\)/\1$$i\//g" >>wxhelp.tmp; done
-	cat wxhelp.tmp | sort -n > wxhelp.map
+makemap: .src/wxhelp.map0 subdirs
+	@$(RM) -f wxhelp.map
+	#../extra/scripts/html2wxhelp >>wxhelp.map
+	set -e; for i in $(SUB_DIRS); \
+	do sed "s/^\([ 	-0-9]*\)/\1$$i\//g" $$i/wxhelp.map; \
+	done >>wxhelp.map
+	sort -n -o wxhelp.map .src/wxhelp.map0 wxhelp.map
 
 clean:
-	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc *.pdf
+	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab *.ps *.toc *.pdf
 	$(RM) -r $(SUB_DIRS) classes classes.tex wxhelp.map
 	$(RM) tmp.*
 

@@ -76,7 +76,9 @@ install_bin:
 
 install_doc:
 	$(MAKE) -C doc install
-	$(INSTALL_DATA) TODO README $(DOCDIR)
+	set -e; for i in TODO README; \
+	do $(INSTALL_DATA) .src/$$i $(DOCDIR); \
+	done
 
 # create the file list for the RPM installation
 install_rpm:

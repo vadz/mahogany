@@ -63,8 +63,7 @@ endif
 	$(CXX) -shared $< -lswigpy -o $@
 
 %.dvi: %.htex
-	cp $< tmp.tex
-	$(SOURCEDIR)/extra/scripts/striphelpids tmp.tex
+	$(SOURCEDIR)/extra/scripts/striphelpids $< >tmp.tex
 	$(LATEX) tmp.tex </dev/null
 	@touch tmp.idx
 	$(MAKEINDEX) tmp.idx
