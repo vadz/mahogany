@@ -209,6 +209,7 @@ echo "DEBUG=$DEBUG"
 echo "SCP=$SCP"
 echo "DOSHARED=$DOSHARED"
 echo "MCONFOPT=$MCONFOPT"
+echo "DOINSTALL=$DOINSTALL"
 
 export OSTYPE
 
@@ -367,9 +368,6 @@ then
 	# do not install locally        (cd $NAME-$VERSION && super debi)
         $SCP mahogany_* $FTPLOCATION
         #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
-#        cd /usr/share/Mahogany/doc && \
-#        ($SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
-#        $SCP -r /usr/share/Mahogany/doc/* karsten@nevis.phy.hw.ac.uk:WWW/Mahogany/doc/
     fi
     echo "Build of $NAME-$VERSION, debian, successful."
     UPLOADWXGTK=yes # cause wxWindow snapshot to be generated
@@ -395,10 +393,6 @@ then
   cd /usr/src/redhat/ && \
   rpm -ba SPECS/M.spec
   if [ "$DOINSTALL" = "yes" ] ; then
-#        chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
-#	  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
-#	  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
-#		rm SRPMS/$NAME*.rpm
 	  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
 	  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
   fi
@@ -453,7 +447,7 @@ fi
 #######################################
 ## Upload wxWindows shared lib to ftp
 #######################################
-if [ $DOSHARED = yes ]
+if [ $DOSHARED = yes -a $DOINSTALL = yes ]
 then
   echo "Uploading wxWindows shared library to ftp server"
   cd $WXPREFIX && \
