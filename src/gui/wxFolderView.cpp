@@ -3279,9 +3279,9 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
                 Delete, Undelete, eXpunge, Copytofolder, Savetofile,
                 Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
-                View, Group reply (== followup)
+                View, Group reply (== followup), List reply
             */
-            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG");
+            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGL");
             static const char *keycodes = _(keycodes_en);
 
             key = toupper(key);
