@@ -11,9 +11,11 @@
 
 %{
 #include   "Mswig.h"
+#include   "Mcommon.h"
 #include   "MailFolder.h"
 #include   "Profile.h"
 #include   "HeaderInfo.h"
+#include   "UIdArray.h"
 %}
 
 %import MString.i

@@ -9,8 +9,9 @@
 %module   MAppBase
 %{
 #include "Mswig.h"
+#include "Mcommon.h"
+#include "gui/wxMDialogs.h"
 #include "gui/wxMApp.h"
-#include "MDialogs.h"
 #include "MFrame.h"
 
 // SWIG bug: it generates code which assignes the default argument to "char *"

@@ -11,6 +11,7 @@
 
 %{
 #include   "Mswig.h"
+#include   "Mcommon.h"
 #include   "Message.h"
 %}
 

@@ -17,6 +17,7 @@
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #   include "strutil.h"
+#   include "Profile.h"                 // for writeEntry
 #endif
 
 #include "MPython.h"

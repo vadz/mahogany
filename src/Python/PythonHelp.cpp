@@ -374,7 +374,7 @@ PyH_RunMScript(const char *scriptname)
    }
 }
 
-#define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " ##what ## ">";goto done;}
+#define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " what ">";goto done;}
 
 
 void PyH_GetErrorMessage(String *errString)

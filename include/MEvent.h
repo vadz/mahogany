@@ -17,6 +17,10 @@
 #ifndef MEVENT_H
 #define MEVENT_H
 
+#ifndef USE_PCH
+#  include <wx/dynarray.h>              // for wxArrayInt
+#endif // USE_PCH
+
 #include "MObject.h"
 
 /**
