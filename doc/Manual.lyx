@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Mar 28 19:02:20 1999
+#This file was created by <karsten> Sat Apr 10 17:01:06 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -64,25 +64,6 @@ Release Notes_1001_
 Some quick notes about this release of Mahogany.
 \layout Subsection
 
-WARNING - this is alpha
-\layout Standard
-
-When you do a large free software project, you have two choices: either
- continue hacking without releases and risk to never get it finished, or
- set yourself a release date, no matter what the situation is.
- As we got several requests from people who want to play with it, we decided
- on a release date and did our best to get it into a working shape.
- BUT THIS SOFTWARE IS STILL UNDER DEVELOPMENT! This means
-\layout Itemize
-
-it is incomplete and may be awkward to use
-\layout Itemize
-
-it may crash occasionally or often or be completely unusable - 
-\shape italic 
-Use it at your own risk!
-\layout Subsection
-
 Which features are implemented?
 \layout Standard
 
@@ -113,10 +94,10 @@ m-developers@makelist.com
 
 Based on the c-client library from the University of Washington, therefore
  full access to a wide range of protocols and file formats, including SMTP,
- MAP, POP3, NNTP and several mailbox formats.
+ IMAP, POP3, NNTP and several mailbox formats.
 \layout Itemize
 
-Wide (extreme?) user configurability.
+Wide user configurability.
  Whatever makes sense to override or change, can be changed by the user.
  Configuration supports several configuration files on Unix, with special
  administrator support for making entries immutable, and the registry on
@@ -137,17 +118,17 @@ Easy MIME support.
 Inline displaying of images, clickable URLs, XFace support.
 \layout Itemize
 
-Multiple mail folders, basic news support.
+Multiple mail folders, support for any number of diffferent mail or news
+ servers.
 \layout Itemize
 
 Powerful address database and contact manager 
 \layout Itemize
 
-Printing of nicely formatted messages.
+Context sensitive help system (HTML based).
 \layout Itemize
 
-Full internationalisation support, Mahogany speaks multiple languages, but
- no complete translations yet.
+Full internationalisation support, Mahogany speaks multiple languages.
 \layout Subsection
 
 Known bugs
@@ -162,9 +143,36 @@ TODO, features to implement
 This is a list of features on our TODO list that we are currently working
  on.
  It is not necessarily up to date or complete.
+\layout Subsubsection
+
+We are currently working on the implementation of the following:
 \layout Itemize
 
-add keyboard accelerators
+Easy to use and powerful filtering system for mails.
+\layout Itemize
+
+Threading and scoring of messages and news articles.
+\layout Itemize
+
+Multi-threaded folder access, to avoid blocking while retrieving slow remote
+ folders/servers.
+\layout Itemize
+
+Support for PGP and GNU Privacy Guard to encrypt mails.
+ 
+\layout Itemize
+
+Full Drag and Drop interaction with filemanagers of Windows and Gnome/KDE
+ (will be added real soon, depends on wxGTK progress).
+\layout Itemize
+
+Better Clipboard support (depends on wxGTK progress)
+\layout Itemize
+
+Wide character (Unicode) support and other character sets.
+\layout Subsubsection
+
+Further we plan the following:
 \layout Itemize
 
 Better Python support.
@@ -177,20 +185,7 @@ Better Python support.
 Help welcome.
 \layout Itemize
 
-Full Drag and Drop interaction with filemanagers of Windows and Gnome (will
- be added real soon, easy).
-\layout Itemize
-
-Clipboard support
-\layout Itemize
-
-Easy to use filtering system for mails.
-\layout Itemize
-
 Support for V-cards.
-\layout Itemize
-
-Nested mail folder hierarchy.
 \layout Itemize
 
 Spam-Ex spam fighting/auto-complaint function.
@@ -199,25 +194,10 @@ Spam-Ex spam fighting/auto-complaint function.
 Rich-text editing and HTML mail support
 \layout Itemize
 
-Support for PGP and GNU Privacy Guard to encrypt mails.
-\layout Itemize
-
-Threading of messages and proper usenet news support.
-\layout Itemize
-
 Compression of mail folders.
 \layout Itemize
 
 Delay-Folder to keep mails and re-present them at a later date.
-\layout Itemize
-
-Context sensitive help system (HTML based).
-\layout Itemize
-
-Translations to German, French and Italian.
-\layout Itemize
-
-Wide character (Unicode) support and other character sets.
 \layout Itemize
 
 More import, export and synchronisation with other programs' address databases.
@@ -226,13 +206,7 @@ More import, export and synchronisation with other programs' address databases.
 Voice mail.
 \layout Itemize
 
-More Python support through wxPython.
-\layout Itemize
-
-Support for Drag and Drop interaction with KDE, once that wxQt is available.
-\layout Itemize
-
-CORBA support, possible cooperation with PINN project.
+CORBA support for GNOME and KDE.
 \layout Itemize
 
 ANY OTHER SUGGESTION
@@ -258,9 +232,33 @@ The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
  we are happy to support that port.
 \layout Itemize
 
-If you have access to other systems apart from Linux/Solaris/Windows, you
- are very welcome to help us port Mahogany to those platforms, or to other
- hardware than Intel.
+If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
+ you are very welcome to help us port Mahogany to those platforms, or to
+ other hardware than Intel.
+\layout Itemize
+
+Translations to other languages.
+\layout Itemize
+
+
+\series bold 
+Generally we welcome help for anything.
+ If you miss a feature in Mahogany, we are more than happy to help you implement
+ it yourself.
+ Naturally we tend to work on the features that we either need ourselves
+ or find interesting to do.
+ If your priorities are different, join our team and help us improve it.
+ Mahogany is and will always be an OpenSource(TM) project and your involvement
+ is wanted! If you have any questions about this, please contact the developers
+ at 
+\latex latex 
+
+\backslash 
+htmladdnormallink{m-developers@egroups.com}{mailto:m-developers@egroups.com}
+\latex default 
+.
+ If you have questions about the Mahogany License, discuss them with us
+ - we don't want the license to scare anyone.
 \layout Subsection
 
 Copyright_1003_
@@ -299,6 +297,31 @@ extra/src
  Please check the files in the individual directories for their copyright
  notices.
  However, they can freely distributed under certain conditions.
+\layout Subsubsection
+
+Why not the GPL/BSD/QPL/my favourite license?
+\layout Standard
+
+Recently discussions about which license to chose for which project provoced
+ major flamewars in the unix community.
+ There is a trend to put everything under the GPL or LGPL.
+ We do not want to get involved in this highly emotional and political discussio
+n.
+ Our intent is to alllow everyone to use and modify Mahogany while preserving
+ some form of control over its development.
+ That is why we chose a modified version of Perl's Artistic License.
+ It is both more and less restrictive than the GPL in certain ways.
+ We do not believe that there is one right license for everything.
+ The Mahogany Artistic License is much simpler and easier to understand
+ than the GPL, so we feel more comfortable with it.
+ If you want to do something with Mahogany and feel that the license poses
+ a problem, 
+\series bold 
+please
+\series default 
+ contact us! We do not want the license to be a problem and any reasonable
+ request for deviating uses of Mahogany will be likely to be granted.
+ If in doubt, ask us and we will find a solution.
 \layout Subsection
 
 The Mahogany ``Artistic License''
@@ -468,7 +491,12 @@ The Main Window_2001_
 \layout Standard
 
 Mahogany's main window is vertically divided into two parts.
- On the left it has a tree view of all available mail or news folders.
+ On the left it has a tree view (
+\begin_inset LatexCommand \ref{FolderTreeCtrl}
+
+\end_inset 
+
+)of all available mail or news folders.
  On the right of it, it shows the currently selected folder in a folder
  view(see 
 \begin_inset LatexCommand \ref{FolderView}
@@ -476,6 +504,23 @@ Mahogany's main window is vertically divided into two parts.
 \end_inset 
 
 ).
+\layout Subsection
+
+The Folder Tree_2004_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{FolderTreeCtrl}
+
+\end_inset 
+
+The folder tree shows a hierarchical view of all folders managed by Mahogany,
+ this includes both mail folders and newsgroups.
+ Folders can be grouped hierarchical and inherit settings from their parent
+ folders (e.g.
+ the server host).
+ Clicking the right mouse button on any tree node will pop up a menu with
+ options.
 \layout Subsection
 
 Folder Views_2002_
@@ -562,15 +607,6 @@ move marked messages to another folder
 S
 \newline 
 save marked messages to files
-\layout Subsection
-
-The Open-Folder Dialog_2004_
-\layout Standard
-
-Here you can temporarily open a folder without adding it to the main tree
- of folders.
- This is convenient if you just want to have a quick look at some folder
- and will not need it again.
 \layout Section
 
 Reading Mail
@@ -722,6 +758,127 @@ To:
 
  text entry zone and after pressing <TAB> it will be replaced by the e-mail
  addresses of all your friends.
+\layout Subsection
+
+The Mail Composition Window_2100_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{MailCompositionWindow}
+
+\end_inset 
+
+The composition window's appearance depends on your configuration settings
+ (
+\begin_inset LatexCommand \ref{ComposePage}
+
+\end_inset 
+
+).
+ Generally, it will at least show text entry fields to specify who to send
+ the message to, for the subject and a large editing window below for the
+ actual message itself.
+ It also features an EXPAND button next to the address field, which allows
+ you to lookup addresses in the currently loaded addressbooks.
+ If you type in the beginning or a substring of a name, alias or email address
+ and either press the expand button or the tabulator key, Mahogany will
+ look up a list of matching addressbook entries and either expand it directly
+ or prompt you with the matching choices.
+ This works for the main address field (
+\begin_inset Quotes eld
+\end_inset 
+
+To
+\begin_inset Quotes erd
+\end_inset 
+
+) as well as for the carbon copy addresses (
+\begin_inset Quotes eld
+\end_inset 
+
+CC
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+BCC
+\begin_inset Quotes erd
+\end_inset 
+
+).
+ If you specify an address in the 
+\begin_inset Quotes eld
+\end_inset 
+
+CC
+\begin_inset Quotes erd
+\end_inset 
+
+ or 
+\begin_inset Quotes eld
+\end_inset 
+
+BCC
+\begin_inset Quotes erd
+\end_inset 
+
+ fields, these people will receive a copy of the message.
+ The difference between them is that the list of addresses in 
+\begin_inset Quotes eld
+\end_inset 
+
+CC
+\begin_inset Quotes erd
+\end_inset 
+
+ is included in the message, while the 
+\begin_inset Quotes eld
+\end_inset 
+
+BCC
+\begin_inset Quotes erd
+\end_inset 
+
+ (blind carbon copy) addresses will be suppresed in the message keeping
+ them anonymous.
+ If you enter an address like 
+\begin_inset Quotes eld
+\end_inset 
+
+#myfolder
+\begin_inset Quotes erd
+\end_inset 
+
+, Mahogany will interpret it as the name of a mailfolder and save a copy
+ of the message to that folder (in this case 
+\begin_inset Quotes eld
+\end_inset 
+
+myfolder
+\begin_inset Quotes erd
+\end_inset 
+
+).
+ 
+\layout Subsection
+
+The News Article Composition Window_2101_
+\layout Standard
+
+This window is essentially identical to the mail composition window (
+\begin_inset LatexCommand \ref{MailCompositionWindow}
+
+\end_inset 
+
+), but instead of specifying a mail address to send the message to, you
+ can enter one or more newsgroups names (comma separated).
+ The newsserver used depends on from where this window was opened, if it
+ was opened while reading a specific newgroup, it will use the same newsserver
+ that the newsgroup was read from, otherwise it will fall back to the setting
+ in the global preferences.
 \layout Section
 
 Understanding program options
@@ -830,6 +987,17 @@ This is the server used for reading USENET newsgroups.
 
 \series bold 
 Personal name
+\layout Subsubsection
+
+Compose Page_4100_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{ComposePage}
+
+\end_inset 
+
+
 \layout Subsubsection
 
 Folders page_4107_

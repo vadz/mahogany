@@ -72,6 +72,7 @@ VZ:
   behaviour, has been a bug for months.
 
 - closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
+
 ******* Priorities for KB: ******************************
 
 DONE:
@@ -99,7 +100,10 @@ CHECK:
   Add a CHECK() wherever it is called.
 - support for local news spool
 - gtk 1.2 support seems to work
+- do wxImage changes affect list of available handlers, etc?
+- add -ljpeg to linker options and JPG as intermediary image format
 
+- printer settings seem to have no effect : are persistent, do they get used?
 
 TODO:
 
@@ -110,9 +114,6 @@ for release:
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 
-
-- do wxImage changes affect list of available handlers, etc?
-- printer settings seem to have no effect
 - do we really need to scan /var/lib/news/active?
 
 

@@ -114,7 +114,7 @@
 #define   MP_MBOXDIR         "FolderDir"
 /// command to convert tiff faxes to postscript
 #define   MP_TIFF2PS         "FaxToPS"
-/// preferred intermediary image format in conversions (0=xpm,1=png,2=bmp)
+/// preferred intermediary image format in conversions (0=xpm,1=png,2=bmp,3=jpg)
 #define MP_TMPGFXFORMAT      "ConvertGfxFormat"
 /// the user's M directory
 #   define   MP_USERDIR         "UserDirectory"

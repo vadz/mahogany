@@ -471,7 +471,7 @@ wxFolderView::Update(void)
 }
 
 
-void
+MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
    wxBeginBusyCursor();
@@ -482,6 +482,7 @@ wxFolderView::OpenFolder(String const &profilename)
    SafeDecRef(mf);
    m_ProfileName = profilename;
    wxEndBusyCursor();
+   return mf;
 }
 
 wxFolderView::~wxFolderView()
@@ -764,8 +765,14 @@ wxFolderViewFrame::Create(const String &folderName, wxMFrame *parent)
 {
    wxFolderViewFrame *f = new wxFolderViewFrame(folderName, parent);
    wxFolderView *fv = wxFolderView::Create(f);
-   fv->OpenFolder(folderName);
-   f->InternalCreate(fv,parent);
+   if(fv->OpenFolder(folderName))
+      f->InternalCreate(fv,parent);
+   else
+   {
+      delete fv;
+      delete f;
+      return NULL;
+   }
    return f;
 }
 

@@ -98,7 +98,8 @@ public:
                    const wxString& strCaption,
                    const wxString& strPrompt,
                    const wxString& strConfigPath,
-                   const wxString& strDefault);
+                   const wxString& strDefault,
+                   bool passwordflag);
 
   // accessors
   const wxString& GetText() const { return m_strText; }
@@ -108,8 +109,9 @@ public:
   virtual bool TransferDataFromWindow();
 
 private:
-  wxString      m_strText;
-  wxPTextEntry *m_text;
+   wxString      m_strText;
+   wxPTextEntry *m_text;
+   wxTextCtrl   *m_passwd; // used if we ask for a password, NULL otherwise
 };
 
 // a dialog showing all folders
@@ -314,7 +316,8 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strCaption,
                                    const wxString& strPrompt,
                                    const wxString& strConfigPath,
-                                   const wxString& strDefault)
+                                   const wxString& strDefault,
+                                   bool passwordflag)
    : wxDialog(parent, -1, wxString("M: ") + strCaption,
               wxDefaultPosition,
               wxDefaultSize,
@@ -352,10 +355,17 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_text = new wxPTextEntry(strConfigPath, this, -1, "",
-                            wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
-                            wxSize(widthText, heightText));
-
+  if(passwordflag)
+     m_passwd = new wxTextCtrl(this, -1, "",
+                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
+                               wxSize(widthText, heightText), wxTE_PASSWORD);
+  else
+  {
+     m_text = new wxPTextEntry(strConfigPath, this, -1, "",
+                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
+                               wxSize(widthText, heightText));
+     m_passwd = NULL; // signal that it's not used
+  }
   // buttons
   wxButton *btnOk = new
     wxButton(this, wxID_OK, _("OK"),
@@ -375,27 +385,32 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 
 bool MTextInputDialog::TransferDataToWindow()
 {
-  m_text->SetValue(m_strText);
-
-  // select everything so that it's enough to type a single letter to erase
-  // the old value (this way it's as unobtrusive as you may get)
-  m_text->SetSelection(-1, -1);
-
-  return TRUE;
+   if(m_passwd == NULL)
+   {
+      m_text->SetValue(m_strText);
+      // select everything so that it's enough to type a single letter to erase
+      // the old value (this way it's as unobtrusive as you may get)
+      m_text->SetSelection(-1, -1);
+   }
+   return TRUE;
 }
 
 bool MTextInputDialog::TransferDataFromWindow()
 {
-  wxString strText = m_text->GetValue();
-  if ( strText.IsEmpty() ) {
+   wxString strText;
+   if(m_passwd)
+      strText = m_passwd->GetValue();
+   else
+      strText = m_text->GetValue();
+  if ( strText.IsEmpty() )
+  {
     // imitate [Cancel] button
     EndModal(wxID_CANCEL);
-
     return FALSE;
   }
-  else {
+  else
+  {
     m_strText = strText;
-
     return TRUE;
   }
 }
@@ -406,20 +421,25 @@ bool MInputBox(wxString *pstr,
                const wxString& strPrompt,
                const wxWindow *parent,
                const char *szKey,
-               const char *def)
+               const char *def,
+               bool passwordflag)
 {
   wxString strConfigPath;
   strConfigPath << "/Prompts/" << szKey;
 
   MTextInputDialog dlg(GetParent(parent), *pstr,
-                       strCaption, strPrompt, strConfigPath, def);
+                       strCaption, strPrompt, strConfigPath, def, passwordflag);
 
-  if ( dlg.ShowModal() == wxID_OK ) {
+  // do not allow attempts to store the password:
+  wxASSERT((!passwordflag)||(szKey==NULL && def == NULL));
+  if ( dlg.ShowModal() == wxID_OK )
+  {
     *pstr = dlg.GetText();
 
     return TRUE;
   }
-  else {
+  else
+  {
     return FALSE;
   }
 }

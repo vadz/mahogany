@@ -27,7 +27,7 @@
 
 #  include "PathFinder.h"
 #  include "Profile.h"
-
+#  include "MHelp.h"
 #  include "MFrame.h"
 
 #  include "MApplication.h"
@@ -1015,7 +1015,11 @@ wxComposeView::OnMenuCommand(int id)
          }
       }
       break;
-
+   case WXMENU_HELP_CONTEXT:
+      mApplication->Help(
+         (m_mode == Mode_NNTP)?
+         MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
+      break;
    default:
       wxMFrame::OnMenuCommand(id);
    }

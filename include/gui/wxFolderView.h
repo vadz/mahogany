@@ -15,7 +15,6 @@
 
 #include "Mdefaults.h"
 #include "wxMFrame.h"
-#include "MailFolder.h"
 #include "FolderView.h"
 #include "wxMessageView.h"
 #include "MEvent.h"
@@ -29,6 +28,7 @@ class wxFolderView;
 class wxFolderListCtrl;
 class wxMFrame;
 class wxMessageView;
+class MailFolder;
 
 enum wxFolderListCtrlFields
 {
@@ -82,8 +82,9 @@ public:
    
    /** Open folder from profile and display.
        @param profilename the name of the folder profile
+       @return pointer to the folder or NULL
    */
-   void OpenFolder(String const &profilename);
+   MailFolder * OpenFolder(String const &profilename);
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);

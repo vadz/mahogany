@@ -17,6 +17,7 @@
 #   include  "guidef.h"    // only for high-level functions
 #   include  "strutil.h"
 #   include  "Profile.h"
+#   include  "MDialogs.h" // for the password prompt...
 #endif
 
 #include  <wx/file.h>
@@ -60,6 +61,8 @@ MailFolder::OpenFolder(int typeAndFlags,
          login = READ_CONFIG(profile, MP_POP_LOGIN);
          passwd = strutil_decrypt(READ_CONFIG(profile, MP_POP_PASSWORD));
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         if(strutil_isempty(name))
+            name = i_name;
       }
    }
    else // type != PROFILE
@@ -105,10 +108,31 @@ MailFolder::OpenFolder(int typeAndFlags,
          // nothing special to do
          break;
 
-      default:
-         FAIL_MSG("unknown folder type");
+   default:
+      profile->DecRef();
+      FAIL_MSG("unkno   wn folder type");
    }
 
+   if((type == MF_POP || type == MF_IMAP)
+      && strutil_isempty(passwd))
+   {
+      String prompt;
+      prompt.Printf( _("Password for '%s':"),
+                     name.c_str());
+      if(! MInputBox(&passwd,
+                     _("Password prompt"),
+                     prompt,
+                     NULL, NULL, NULL, // parent win, key, default,
+                     true) // password mode
+         || strutil_isempty(passwd))
+      {
+         String msg = _("Cannot access this folder without a password.");
+         ERRORMESSAGE((msg));
+         profile->DecRef();
+         return NULL;
+      }
+   }
+   
    // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    typeAndFlags = CombineFolderTypeAndFlags(type, flags);
 

@@ -197,7 +197,8 @@ const char *MDialog_FileRequester(String const &message,
   @param parent is the parent window for the modal dialog box
   @param key contains the name of config entry to use if !NULL
   @param def contains the default value (only if pstr->IsEmpty())
-
+  @param passwordflag if true, hide the input
+  
   @return FALSE if cancelled, TRUE otherwise
 */
 bool MInputBox(wxString *pstr,
@@ -205,9 +206,8 @@ bool MInputBox(wxString *pstr,
                const wxString& prompt,
                const MWindow *parent = NULL,
                const char *key = NULL,
-               const char *def = NULL);
-
-
+               const char *def = NULL,
+               bool passwordflag = false);
 /**
  Let the user choose an element from aEntries. If there is exactly one element
  in the array (and we shouldn't be called with 0), 0 is always returned and

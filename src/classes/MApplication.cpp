@@ -243,6 +243,19 @@ MAppBase::OnStartup()
 
       wxLogInfo(_("Created directory '%s' for configuration files."),
                 strConfFile.c_str());
+      //  Also, create an empty config file with the right
+      //  permissions:
+      String realFile = strConfFile + "/config";
+      int fd = creat(realFile, S_IRUSR|S_IWUSR);
+      if(fd == -1)
+      {
+         wxLogError(_("Could not create initial empty configuration file\n"
+                      "'%s'\n%s"),
+                    realFile.c_str(), strerror(errno));
+      }
+      else
+         close(fd);
+
    }
    strConfFile += "/config";
 #else  // Windows

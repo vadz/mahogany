@@ -89,18 +89,20 @@ wxString wxIconManager::ms_IconPath = "";
 /// valid filename extensions for icon files
 static const char *wxIconManagerFileExtensions[] =
 { 
-   ".xpm", ".png", ".gif", ".jpg", NULL
+   ".xpm", ".png", ".bmp", ".jpg", NULL
 };
+// how many formats/extensions stored in the array above?
+#define NUMBER_OF_FORMATS 4 
 
 bool wxIconManager::m_knowHandlers = false;
 long wxIconManager::m_wxBitmapHandlers[] =
 {
    wxBITMAP_TYPE_XPM,  // XPM must be first entry!
    wxBITMAP_TYPE_PNG,  //wxGTK
+   wxBITMAP_TYPE_BMP,  //wxGTK
+   wxBITMAP_TYPE_JPEG, //wxGTK optional
    wxBITMAP_TYPE_GIF,
    wxBITMAP_TYPE_TIF,
-   //wxBITMAP_TYPE_JPEG, //wxGTK optional -- dangerous, do not use
-   wxBITMAP_TYPE_BMP,  //wxGTK
    wxBITMAP_TYPE_ANY,
    wxBITMAP_TYPE_CUR, 
    wxBITMAP_TYPE_ICO,  //wxGTK ??
@@ -109,9 +111,9 @@ long wxIconManager::m_wxBitmapHandlers[] =
 
 static const char *HandlerNames[]    =
 {
-   "XPM", "PNG", "GIF", "TIF",
-   // "JPG" is dangerous
-   "BMP", "ANY", "CUR", "ICO"
+   "xpm", "png", "bmp", "jpg",
+   "gif", "tif",
+   "any", "cur", "ico"
 };
 
 // ----------------------------------------------------------------------------
@@ -162,18 +164,18 @@ wxIconManager::LoadImage(String filename, bool *success)
       String oldfilename = filename;
       String tempfile = filename;
       int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
-      switch(format)
+      if((format < 0 || format > NUMBER_OF_FORMATS)
+         || m_wxBitmapHandlers[format] == 0)
       {
-         case 0: // xpm
-            tempfile += ".xpm"; break;
-         case 1: // png
-            tempfile += ".png"; break;
-         case 2: // bmp
-            tempfile += ".bmp"; break;
-         default: // cannot happen
-            wxASSERT(0);
+         wxLogInfo(_("Unsupported intermediary image format '%s' specified,\n"
+                     "reset to '%s'."),
+                   ((format < 0 || format >NUMBER_OF_FORMATS) ?
+                    "unknown":HandlerNames[format]),
+                   HandlerNames[0]);
+         format = 0;
+         mApplication->GetProfile()->writeEntry(MP_TMPGFXFORMAT,format);
       }
-
+      tempfile += wxIconManagerFileExtensions[format];
       // strip leading path
       int i = tempfile.Length();
       while(i && tempfile.c_str()[i] != '/')
@@ -207,10 +209,18 @@ wxIconManager::LoadImage(String filename, bool *success)
          wxLogNull lo; // suppress error messages
          if(format != 0) // not xpm which we handle internally
          {
-            if(format == 1) // PNG!
+            switch(format)
+            {
+            case 1: // PNG!
                loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_PNG);
-            else // format == 2 BMP
+               break;
+            case 2: // 2 BMP
                loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_BMP);
+               break;
+            case 3: // 3 JPG
+               loaded = img->LoadFile(tempfile, wxBITMAP_TYPE_JPEG);
+               break;
+            }
          }
       }
       if(tempfile.length()) // using a temporary file

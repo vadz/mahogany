@@ -52,6 +52,7 @@
 #include   "gui/wxOptionsDlg.h"
 #include   "gui/wxOptionsPage.h"
 
+
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
 // is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
 //
@@ -358,7 +359,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Font &size"),                Field_Number, -1 },
    { gettext_noop("&Inline graphics"),          Field_Bool, -1 },
 #ifdef OS_UNIX
-   { gettext_noop("Conversion &graphics format:XPM:PNG:BMP"), Field_Combo, ConfigField_MessageViewInlineGraphics },
+   { gettext_noop("Conversion &graphics format:XPM:PNG:BMP:JPG"), Field_Combo, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool, -1},
    { gettext_noop("&Domains sending faxes"), Field_Text,
      ConfigField_MessageViewFaxSupport},

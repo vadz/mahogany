@@ -207,7 +207,7 @@ wxMApp::OnInit()
 #endif
    
 #ifdef wxUSE_LIBJPEG
-// we don't use it yet, broken   wxImage::AddHandler( new wxJPEGHandler );
+   wxImage::AddHandler( new wxJPEGHandler );
 #endif
 
    m_IconManager = new wxIconManager();

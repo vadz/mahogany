@@ -729,18 +729,10 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
       // line or on a command object:
       if(cursorSize->y < WXLO_MINIMUM_CURSOR_WIDTH)
       {
-         if(m_BaseLine > 0)
-         {
-            cursorSize->y = m_BaseLine;
-            if(cursorSize->x < WXLO_MINIMUM_CURSOR_WIDTH) cursorSize->x = WXLO_MINIMUM_CURSOR_WIDTH;
-         }
-         else // empty line
-         {
-            CoordType width, height, descent;
-            dc.GetTextExtent(WXLO_CURSORCHAR, &width, &height, &descent);
-            cursorSize->x = width;
-            cursorSize->y = height;
-         }
+         CoordType width, height, descent;
+         dc.GetTextExtent(WXLO_CURSORCHAR, &width, &height, &descent);
+         cursorSize->x = width;
+         cursorSize->y = height;
       }
       if(m_BaseLine >= cursorSize->y) // the normal case anyway
          cursorPos->y += m_BaseLine-cursorSize->y;
