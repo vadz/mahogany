@@ -2267,7 +2267,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
    // the command to execute
    wxString command;
 
-   bool bOk;
+   bool bOk = false;
    if ( m_ProfileValues.browser.empty() )
    {
 #ifdef OS_WIN
@@ -2321,7 +2321,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
          bOk = (int)ShellExecute(NULL, "open", url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
       }
-# else  // Unix
+#else  // Unix
       // propose to choose program for opening URLs
       if (
          MDialog_YesNoDialog
@@ -2343,11 +2343,8 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
       }
 #endif // Win/Unix
    }
-   else
+   else // browser setting non empty, use it
    {
-      // not empty, user provided his script - use it
-      bOk = false;
-
 #ifdef OS_UNIX
       if ( m_ProfileValues.browserIsNS ) // try re-loading first
       {
