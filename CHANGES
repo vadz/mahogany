@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+21.08.01 VZ: better colour selector control in the options dialog
 20.08.01 VZ: added navigation between unread folders in the tree using PgUp/Dn
 13.08.01 NB: added the option to configure Forward prefix
 12.08.01 VZ: added the option to include the selected text only in reply

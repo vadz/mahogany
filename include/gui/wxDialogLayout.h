@@ -29,6 +29,7 @@ class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxControl;
 class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxCheckBox;
+class /* WXDLLEXPORT */ wxColorBrowseButton;
 class /* WXDLLEXPORT */ wxDirBrowseButton;
 class /* WXDLLEXPORT */ wxFileBrowseButton;
 class /* WXDLLEXPORT */ wxFileOrDirBrowseButton;
@@ -409,9 +410,9 @@ public:
                                    (wxTextBrowseButton **)ppButton);
    }
       // another entry with a browse button
-   wxTextCtrl *CreateColorEntry(const char *label,
-                                long widthMax,
-                                wxControl *last);
+   wxColorBrowseButton *CreateColorEntry(const char *label,
+                                         long widthMax,
+                                         wxControl *last);
 
       // creates a static bitmap with a label and a browse button
    wxStaticBitmap *CreateIconEntry(const char *label,
@@ -442,6 +443,9 @@ public:
 
       // enable/disable the text control with label and button
    void EnableTextWithButton(wxTextCtrl *control, bool enable);
+
+      // enable/disable the colour browse button and its text with label
+   void EnableColourBrowseButton(wxColorBrowseButton *btn, bool bEnable);
 
       // enable/disable the combobox and its label
    void EnableComboBox(wxComboBox *control, bool enable)

@@ -62,6 +62,7 @@
 
 #include "MessageView.h" // for list of available viewers
 
+#include "gui/wxBrowseButton.h"  // for wxStaticCast(wxColorBrowseButton) only
 #include "gui/wxIconManager.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
@@ -654,7 +655,7 @@ BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    EVT_CHECKBOX(-1, wxOptionsPage::OnControlChange)
    EVT_RADIOBOX(-1, wxOptionsPage::OnControlChange)
    EVT_CHOICE(-1, wxOptionsPage::OnControlChange)
-   EVT_TEXT(-1, wxOptionsPage::OnChange)
+   EVT_TEXT(-1, wxOptionsPage::OnTextChange)
 
    // listbox events handling
    EVT_BUTTON(-1, wxOptionsPage::OnListBoxButton)
@@ -1553,22 +1554,22 @@ void wxOptionsPage::CreateControls()
 
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
-      case Field_Passwd:
-      case Field_Number:
-      case Field_Dir:
-      case Field_File:
-      case Field_Color:
-      case Field_Folder:
-      case Field_Bool:
-         // fall through: for this purpose (finding the longest label)
-         // they're the same as text
-      case Field_Action:
-      case Field_Text:
-         break;
+         case Field_Passwd:
+         case Field_Number:
+         case Field_Dir:
+         case Field_File:
+         case Field_Color:
+         case Field_Folder:
+         case Field_Bool:
+            // fall through: for this purpose (finding the longest label)
+            // they're the same as text
+         case Field_Action:
+         case Field_Text:
+            break;
 
-      default:
-         // don't take into account the other types
-         continue;
+         default:
+            // don't take into account the other types
+            continue;
       }
 
       aLabels.Add(_(m_aFields[n].label));
@@ -1699,6 +1700,27 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    return TRUE;
 }
 
+void wxOptionsPage::OnTextChange(wxEvent& event)
+{
+   // special case of text controls associated with the colour browsing
+   // buttons: we have to translate this event into one from the button itself
+   // because otherwise OnChangeCommon() would never find it in m_aControls
+   // array (we don't keep text control itself there)
+   wxControl *control = wxStaticCast(event.GetEventObject(), wxControl);
+   CHECK_RET( control, "text event from nowhere?" );
+
+   wxWindow *win = FindWindow(NextControlId(control->GetId()));
+   wxColorBrowseButton *btn = wxDynamicCast(win, wxColorBrowseButton);
+   if ( btn )
+   {
+      OnChangeCommon(btn);
+   }
+   else // normal text event
+   {
+      OnChange(event);
+   }
+}
+
 void wxOptionsPage::OnChange(wxEvent& event)
 {
    if ( !OnChangeCommon((wxControl *)event.GetEventObject()) )
@@ -1795,11 +1817,18 @@ void wxOptionsPage::UpdateUI()
                // for file entries, also disable the browse button
             case Field_File:
             case Field_Dir:
-            case Field_Color:
             case Field_Folder:
                wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
                EnableTextWithButton((wxTextCtrl *)control, bEnable);
+               break;
+
+            case Field_Color:
+               EnableColourBrowseButton
+               (
+                  wxStaticCast(control, wxColorBrowseButton),
+                  bEnable
+               );
                break;
 
             case Field_Passwd:
@@ -1874,11 +1903,15 @@ bool wxOptionsPage::TransferDataToWindow()
       case Field_Passwd:
          if( GetFieldType(n) == Field_Passwd )
             strValue = strutil_decrypt(strValue);
+
       case Field_Dir:
       case Field_File:
-      case Field_Color:
       case Field_Folder:
          wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
+         break;
+
+      case Field_Color:
+         wxStaticCast(control, wxColorBrowseButton)->SetValue(strValue);
          break;
 
       case Field_Bool:
@@ -1963,9 +1996,12 @@ bool wxOptionsPage::TransferDataFromWindow()
          case Field_Color:
          case Field_Folder:
          case Field_Number:
-            strValue = wxStaticCast(control, wxTextCtrl)->GetValue();
+            if ( GetFieldType(n) == Field_Color )
+               strValue = wxStaticCast(control, wxColorBrowseButton)->GetValue();
+            else
+               strValue = wxStaticCast(control, wxTextCtrl)->GetValue();
 
-            if( GetFieldType(n) == Field_Passwd )
+            if ( GetFieldType(n) == Field_Passwd )
                strValue = strutil_encrypt(strValue);
 
             if ( GetFieldType(n) == Field_Number ) {

@@ -88,6 +88,9 @@ static const char *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
 
 bool ParseColourString(const String& name, wxColour* colour)
 {
+   if ( name.empty() )
+      return FALSE;
+
    wxString customColourString(wxGetTranslation(rgbSpecificationString));
 
    // first check if it's a RGB specification

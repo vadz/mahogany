@@ -85,6 +85,30 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// notify the wxColorBrowseButton about changes to its associated text
+// control
+class wxColorTextEvtHandler : public wxEvtHandler
+{
+public:
+   wxColorTextEvtHandler(wxColorBrowseButton *btn)
+   {
+      m_btn = btn;
+   }
+
+protected:
+   void OnText(wxCommandEvent& event)
+   {
+      m_btn->UpdateColorFromText();
+
+      event.Skip();
+   }
+
+private:
+   wxColorBrowseButton *m_btn;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -100,6 +124,10 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxIconSelectionDialog, wxManuallyLaidOutDialog)
    EVT_UPDATE_UI(wxID_OK, wxIconSelectionDialog::OnUpdateUI)
    EVT_LIST_ITEM_SELECTED(-1, wxIconSelectionDialog::OnIconSelected)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxColorTextEvtHandler, wxEvtHandler)
+   EVT_TEXT(-1, wxColorTextEvtHandler::OnText)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -219,12 +247,25 @@ wxFolderBrowseButton::~wxFolderBrowseButton()
 // wxColorBrowseButton
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_ABSTRACT_CLASS(wxColorBrowseButton, wxButton)
+
+wxColorBrowseButton::wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
+                   : wxTextBrowseButton(text, parent, _("Choose colour"))
+{
+   GetTextCtrl()->PushEventHandler(new wxColorTextEvtHandler(this));
+}
+
+wxColorBrowseButton::~wxColorBrowseButton()
+{
+   GetTextCtrl()->PopEventHandler(TRUE /* delete it */);
+}
+
 void wxColorBrowseButton::DoBrowse()
 {
    wxColourData colData;
 
    wxString colName = GetText();
-   if ( !!colName )
+   if ( !colName.empty() )
    {
       (void)ParseColourString(colName, &m_color);
       colData.SetColour(m_color);
@@ -238,7 +279,54 @@ void wxColorBrowseButton::DoBrowse()
       m_color = colData.GetColour();
 
       SetText(GetColourName(m_color));
+
+      UpdateColor();
    }
+}
+
+void wxColorBrowseButton::SetValue(const wxString& text)
+{
+   if ( !text.empty() )
+   {
+      (void)ParseColourString(text, &m_color);
+   }
+   else // no valid colour, use default one
+   {
+      m_color = GetParent()->GetBackgroundColour();
+   }
+
+   UpdateColor();
+
+   SetText(text);
+}
+
+void wxColorBrowseButton::UpdateColorFromText()
+{
+   if ( ParseColourString(GetText(), &m_color) )
+   {
+      UpdateColor();
+   }
+}
+
+void wxColorBrowseButton::UpdateColor()
+{
+   if ( !m_color.Ok() )
+      return;
+
+   // some combinations of the fg/bg colours may be unreadable, so change the
+   // fg colour to be visible
+   wxColour colFg;
+   if ( m_color.Red() < 127 && m_color.Blue() < 127 && m_color.Green() < 127 )
+   {
+      colFg = *wxWHITE;
+   }
+   else
+   {
+      colFg = *wxBLACK;
+   }
+
+   SetForegroundColour(colFg);
+   SetBackgroundColour(m_color);
 }
 
 // ----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   gui/wxBrowseButton.h - button for browsing for text field
 //              contents
@@ -9,7 +9,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GUI_WXBROWSEBUTTON_H_
 #define _GUI_WXBROWSEBUTTON_H_
@@ -84,6 +84,9 @@ public:
    // direct access to the text controls contents
    wxString GetText() const { return m_text->GetValue(); }
    void SetText(const wxString& text) { m_text->SetValue(text); }
+
+   // text control we're associated with
+   wxTextCtrl *GetTextCtrl() const { return m_text; }
 
 private:
    wxTextCtrl *m_text;
@@ -214,8 +217,8 @@ private:
 class wxColorBrowseButton : public wxTextBrowseButton
 {
 public:
-   wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent)
-      : wxTextBrowseButton(text, parent, _("Choose colour")) { }
+   wxColorBrowseButton(wxTextCtrl *text, wxWindow *parent);
+   virtual ~wxColorBrowseButton();
 
    // get the colour chosen
    wxColour GetColor() const { return m_color; }
@@ -223,8 +226,25 @@ public:
    // show the color selection dialog
    virtual void DoBrowse();
 
+   // get/set the text value: must use these functions instead of wxTextCtrl
+   // methods to update the button colour as well!
+   void SetValue(const wxString& text);
+   wxString GetValue() const { return GetTextCtrl()->GetValue(); }
+
 private:
+   // update the button colour on screen to match m_color
+   void UpdateColor();
+
+   // update the button colour to match the text control contents
+   void UpdateColorFromText();
+
    wxColour m_color;
+
+   // it calls our UpdateColorFromText()
+   friend class wxColorTextEvtHandler;
+
+   // abstract because we have no default ctor
+   DECLARE_ABSTRACT_CLASS(wxColorBrowseButton)
 };
 
 // ----------------------------------------------------------------------------

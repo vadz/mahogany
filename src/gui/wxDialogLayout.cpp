@@ -18,6 +18,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -480,7 +481,7 @@ wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(GetCanvas(), -1, "",wxDefaultPosition,
+   wxTextCtrl *pText = new wxTextCtrl(GetCanvas(), -1, "", wxDefaultPosition,
                                       wxDefaultSize, style);
    pText->SetConstraints(c);
 
@@ -709,11 +710,14 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    return combobox;
 }
 
-wxTextCtrl *wxEnhancedPanel::CreateColorEntry(const char *label,
-                                              long widthMax,
-                                              wxControl *last)
+wxColorBrowseButton *wxEnhancedPanel::CreateColorEntry(const char *label,
+                                                       long widthMax,
+                                                       wxControl *last)
 {
-   return CreateEntryWithButton(label, widthMax, last, ColorBtn);
+   wxTextBrowseButton *btn;
+   (void)CreateEntryWithButton(label, widthMax, last, ColorBtn, &btn);
+
+   return wxStaticCast(btn, wxColorBrowseButton);
 }
 
 // create a listbox and the buttons to work with it
@@ -824,6 +828,15 @@ void wxEnhancedPanel::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
    }
 
    EnableTextWithLabel(control, bEnable);
+}
+
+// enable/disable the colour browse button and its text with label
+void wxEnhancedPanel::EnableColourBrowseButton(wxColorBrowseButton *btn,
+                                               bool bEnable)
+{
+   btn->Enable(bEnable);
+
+   EnableTextWithLabel(btn->GetTextCtrl(), bEnable);
 }
 
 // enable/disable the text control with label and button
