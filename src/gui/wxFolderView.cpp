@@ -4937,13 +4937,30 @@ IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
 void
 wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
+   CHECK_RET( fv, _T("No folder view in wxFolderViewFrame::InternalCreate()?") );
+
    m_FolderView = fv;
-   SetTitle(m_FolderView->GetFolder()->GetName());
 
    // add a toolbar to the frame
    //
    // NB: the buttons must have the same ids as the menu commands
    CreateMToolbar(this, WXFRAME_FOLDER);
+
+   // construct menubar
+   AddFileMenu();
+   AddEditMenu();
+
+   // no cut/paste for viewer
+   wxMenuBar *menuBar = GetMenuBar();
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
+
+   AddMessageMenu();
+   m_FolderView->CreateViewMenu();
+   AddLanguageMenu();
+
+   // and the status bar
+   CreateStatusBar();
 
    Show(true);
 }
@@ -4963,7 +4980,9 @@ wxFolderViewFrame::Create(MFolder *folder,
 
    wxFolderView *fv = wxFolderView::Create(frame);
 
-   // doesn't make sense to half open we're going to view
+   frame->InternalCreate(fv, parent);
+
+   // doesn't make sense to half open a folder that we're going to view
    ASSERT_MSG( openmode != MailFolder::HalfOpen,
                _T("invalid open mode in wxFolderViewFrame::Create") );
 
@@ -4974,7 +4993,8 @@ wxFolderViewFrame::Create(MFolder *folder,
       return NULL;
    }
 
-   frame->InternalCreate(fv, parent);
+   // can only do it now, after the folder had been opened
+   frame->SetTitle(fv->GetFolder()->GetName());
 
    return frame;
 }
@@ -4983,21 +5003,6 @@ wxFolderViewFrame::wxFolderViewFrame(const String& name, wxMFrame *parent)
                  : wxMFrame(name, parent)
 {
    m_FolderView = NULL;
-
-   // menu
-   AddFileMenu();
-   AddEditMenu();
-
-   // no cut/paste for viewer
-   wxMenuBar *menuBar = GetMenuBar();
-   menuBar->Enable(WXMENU_EDIT_CUT, false);
-   menuBar->Enable(WXMENU_EDIT_CUT, false);
-
-   AddMessageMenu();
-   AddLanguageMenu();
-
-   // status bar
-   CreateStatusBar();
 }
 
 wxFolderViewFrame::~wxFolderViewFrame()
@@ -5038,6 +5043,8 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
          if ( WXMENU_CONTAINS(MSG, id) ||
               WXMENU_CONTAINS(LAYOUT, id) ||
               (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
+              WXMENU_CONTAINS(VIEW, id) ||
+              WXMENU_CONTAINS(VIEW_FILTERS, id) ||
               id == WXMENU_HELP_CONTEXT ||
               id == WXMENU_EDIT_CUT ||
               id == WXMENU_EDIT_COPY ||
