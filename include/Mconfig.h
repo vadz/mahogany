@@ -14,15 +14,31 @@
 /// M release number and name
 #define   M_RELEASE_STRING "pre-alpha 0.00 \"$name$\""
 
-#undef	OS_UNIX
-#undef	OS_WIN
-#undef	OS_TYPE
-#undef	CC_GCC
-#undef	CC_MSC
+#undef   OS_SOLARIS
+#undef   OS_LINUX
+#undef   OS_UNIX
+#undef   OS_WIN
+#undef   OS_TYPE
+#undef   OS_SUBTYPE
+#undef   CC_GCC
+#undef   CC_MSC
+#undef   CC_TYPE
+
+#define   OS_SUBTYPE   "unknown"
 
 #ifdef unix
 #	define	OS_UNIX		1
 #	define	OS_TYPE		"unix"
+#   ifdef linux
+#      define   OS_LINUX
+#      undef    OS_SUBTYPE
+#      define   OS_SUBTYPE   "linux-gnu"
+#   endif
+#   ifdef sun
+#      define   OS_SOLARIS
+#      undef    OS_SUBTYPE
+#      define   OS_SUBTYPE   "solaris"
+#   endif
 #elif defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
 #	define	OS_WIN		1
 #	define	OS_TYPE		"windows"
@@ -36,79 +52,71 @@
 
 // Are we using GCC?
 #ifdef	__GNUG__
-#	undef	CC_GCC	// might already be defined thanks to configure
-#	define	CC_GCC	1
-        /// gcc does not support precompiled headers
-#	ifdef USE_PCH
-#		if USE_PCH
-#			undef	USE_PCH
-#			define	USE_PCH	1	// use the Mpch.h anyway
-#		else
-#			undef	USE_PCH
-#		endif
-#	endif
+#   undef   CC_GCC	// might already be defined thanks to configure
+#   define   CC_GCC	
+#   define   CC_TYPE "gcc"
+/// gcc does not support precompiled headers
+#   ifdef USE_PCH
+#      if USE_PCH
+#         undef	USE_PCH
+#         define   USE_PCH      // use the Mpch.h anyway
+#      else
+#         undef   USE_PCH
+#      endif
+#   endif
 #endif
 
 // Are we using Microsoft Visual C++ ?
-#ifdef	_MSC_VER 
-#		define	CC_MSC	1
-                /// are we using precompiled headers?
-#		ifndef USE_PCH
-# 			define USE_PCH        1
-#		endif
+#ifdef   _MSC_VER 
+#   define   CC_MSC   1
+#   define   CC_TYPE  "Visual C++"
+/// are we using precompiled headers?
+#   ifndef USE_PCH
+#      define USE_PCH        1
+#   endif
 #endif
 
-#ifdef  USE_WXWINDOWS2
-#	define wxTextWindow  wxTextCtrl
-#	define wxText        wxTextCtrl
-#   ifdef   USE_WXGTK
-#      define   wxMToolBar   wxToolBar
-#   else
-#      define   wxMToolBar   wxToolBar95
-#   endif
-#endif  // wxWin 2
-
 /// use one common base class
-#define	USE_COMMONBASE		1
+#define   USE_COMMONBASE      1
 
 /// do some memory allocation debugging
-#define	USE_MEMDEBUG		1
+#define   USE_MEMDEBUG      1
 
 /// derive common base from wxObject
-#undef	USE_WXOBJECT		
+#undef   USE_WXOBJECT      
 
 /// debug allocator
-#undef	USE_DEBUGNEW		
+#undef   USE_DEBUGNEW      
 
 
 #ifdef USE_DEBUGNEW
-#	define	GLOBAL_NEW	  WXDEBUG_NEW
-#	define	GLOBAL_DELETE	delete
+#   define   GLOBAL_NEW     WXDEBUG_NEW
+#   define   GLOBAL_DELETE   delete
 #else
-#	define	GLOBAL_NEW	  new
-#	define	GLOBAL_DELETE	delete
+#   define   GLOBAL_NEW     new
+#   define   GLOBAL_DELETE   delete
 #endif
 
 /// use simple dynamic class information
-#define	USE_CLASSINFO		1
+#define   USE_CLASSINFO      1
 
 /// name of the application
-#define	M_APPLICATIONNAME	"M"
+#define   M_APPLICATIONNAME   "M"
 
 
-#ifdef	USE_BASECLASS
-#	define	BASECLASS	CommonBase
+#ifdef   USE_BASECLASS
+#   define   BASECLASS   CommonBase
 #endif
 
-#ifdef	HAVE_COMPFACE_H
-#	define	HAVE_XFACES
+#ifdef   HAVE_COMPFACE_H
+#   define   HAVE_XFACES
 #endif
 
-#ifdef	HAVE_COMPFACE_H
-#	define	HAVE_XFACES
+#ifdef   HAVE_COMPFACE_H
+#   define   HAVE_XFACES
 #endif
 
-#define	M_STRBUFLEN		1024
+#define   M_STRBUFLEN      1024
 
 #ifndef   USE_WXSTRING
 #   define   USE_STD_STRING
@@ -149,10 +157,10 @@
 #  pragma warning(disable: 4786)
 
   // <string> includes <istream> (Grrr...)
-#	ifdef USE_IOSTREAMH
-#		undef  USE_WXSTRING
-#		define USE_WXSTRING    1
-#	endif
+#   ifdef USE_IOSTREAMH
+#      undef  USE_WXSTRING
+#      define USE_WXSTRING    1
+#   endif
 #endif  // VC++
 
 #ifdef           USE_IOSTREAMH
