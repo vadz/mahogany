@@ -507,7 +507,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
           || entry == wxFLC_DEFAULT_SIZES
           || entry == "80:80:80:80:80")
       {
-         String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+         String newMailFolder = READ_APPCONFIG(MP_MAINFOLDER);
          ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
          //p->SetPath("FolderView");
          entry = p->readEntry("FolderListCtrl","");

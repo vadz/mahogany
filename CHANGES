@@ -2,7 +2,7 @@
 02.05.00 VZ: the log window can be shown/hidden, closing it hides it permanently
 01.05.00 VZ: initial wizard small fixes: don't create servers not specified
              possibility to remember the password entered interactively
-             it is possible to _not_ use Outbox now
+             it is possible to _not_ use Outbox and/or New Mail folders now
              the config file is, finally, created with the correct permissions
 29.04.00 KB: MailFolder API cleanup, server config setting fixes,
              wxLayout fixes

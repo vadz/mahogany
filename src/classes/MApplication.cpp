@@ -473,10 +473,17 @@ MAppBase::OnStartup()
 
    // initialise collector object for incoming mails
    // ----------------------------------------------
-   m_MailCollector = MailCollector::Create();
-   m_MailCollector->Collect(); // empty all at beginning
+
+   // only do it if we are using the NewMail folder at all
+   if ( READ_APPCONFIG(MP_MAINFOLDER) == READ_APPCONFIG(MP_NEWMAIL_FOLDER) )
+   {
+      m_MailCollector = MailCollector::Create();
+      m_MailCollector->Collect(); // empty all at beginning
+   }
 
    // show the ADB editor if it had been shown the last time when we ran
+   // ------------------------------------------------------------------
+
    if ( READ_CONFIG(m_profile, MP_SHOWADBEDITOR) )
    {
       ShowAdbFrame(TopLevelFrame());
@@ -564,7 +571,9 @@ MAppBase::OnShutDown()
       MEventManager::Deregister(m_eventFolderStatusReg);
       m_eventFolderStatusReg = NULL;
    }
-   if(m_MailCollector) m_MailCollector->DecRef();
+
+   if (m_MailCollector)
+      m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
 
    // clean up
@@ -691,7 +700,7 @@ MAppBase::OnMEvent(MEventData& event)
       /* First, we need to check whether it is one of our incoming mail
       folders and if so, move it to the global new mail folder and
       ignore the event. */
-      if(m_MailCollector->IsIncoming(folder))
+      if( m_MailCollector && m_MailCollector->IsIncoming(folder) )
       {
          if(m_MailCollector->IsLocked())
             return false;
@@ -769,8 +778,31 @@ MAppBase::OnMEvent(MEventData& event)
             GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
       }
 #endif
-     // re-generate the mailcollector object:
-     m_MailCollector->RequestReInit();
+     if ( READ_APPCONFIG(MP_MAINFOLDER) == READ_APPCONFIG(MP_NEWMAIL_FOLDER) )
+     {
+        // we are using the New Mail folder
+
+        if ( m_MailCollector )
+        {
+           // re-generate the mailcollector object
+           m_MailCollector->RequestReInit();
+        }
+        else
+        {
+           // create mail collector
+            m_MailCollector = MailCollector::Create();
+            m_MailCollector->Collect(); // empty all at beginning
+        }
+     }
+     else // we're not using the New Mail folder
+     {
+        if ( m_MailCollector )
+        {
+           m_MailCollector->DecRef();
+           m_MailCollector = NULL;
+        }
+        //else: no mail collector, nothing to do
+     }
    }
    else if (event.GetId() == MEventId_FolderStatus)
    {
