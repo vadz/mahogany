@@ -483,9 +483,9 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
          p++; // skip '?'
          if ( *(p + 1) == '?' )
          {
-            if ( *p == 'B' )
+            if ( *p == 'B' || *p == 'b' )
                enc2047 = Encoding_Base64;
-            else if ( *p == 'Q' )
+            else if ( *p == 'Q' || *p == 'q' )
                enc2047 = Encoding_QuotedPrintable;
          }
          //else: multi letter encoding unreckognized
