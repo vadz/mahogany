@@ -29,7 +29,7 @@ class FolderView;
 
 // forward declarations
 class FolderView;
-class ProfileBase;
+class Profile;
 class MWindow;
 class Message;
 
@@ -115,7 +115,7 @@ public:
    */
    static MailFolder * OpenFolder(int typeAndFlags,
                                   const String &path,
-                                  ProfileBase *profile = NULL,
+                                  Profile *profile = NULL,
                                   const String &server = NULLstring,
                                   const String &login = NULLstring,
                                   const String &password = NULLstring,
@@ -291,7 +291,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline ProfileBase *GetProfile(void);
+   virtual inline Profile *GetProfile(void);
 
    /// return class name
    const char *GetClassName(void)

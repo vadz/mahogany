@@ -19,7 +19,7 @@
 %import MObject.i
 %import MString.i
 
-class ProfileBase : public MObjectRC
+class Profile : public MObjectRC
 {
 public:
 
@@ -38,15 +38,15 @@ public:
    };
 
    /// Creates the one global config object.
-   static ProfileBase * CreateGlobalConfig(const String & filename);
+   static Profile * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(const String & classname,
-                                      const ProfileBase *parent);
+   static Profile * CreateProfile(const String & classname,
+                                      const Profile *parent);
    /// Create a Profile object for a plugin module
-   static ProfileBase * CreateModuleProfile(const String & classname,
-                                            const ProfileBase *parent);
+   static Profile * CreateModuleProfile(const String & classname,
+                                            const Profile *parent);
    /// Create a dummy Profile just inheriting from the top level
-   static ProfileBase * CreateEmptyProfile(const ProfileBase *parent);
+   static Profile * CreateEmptyProfile(const Profile *parent);
 
    /// Delete the global config object
    static void DeleteGlobalConfig();
@@ -81,6 +81,6 @@ public:
 
 protected:
    /// why does egcs want this?
-   ProfileBase() {}
+   Profile() {}
 };
 

@@ -60,7 +60,7 @@ PSTOPDF	:= @PSTOPDF@
 
 # compiler stuff
 CPP	:= @CPP@
-CPPFLAGS:= @CPPFLAGS@
+CPPFLAGS= @CPPFLAGS@
 CC	:= @CC@
 CXX	:= @CXX@
 LIBTOOL	:= @LIBTOOL@

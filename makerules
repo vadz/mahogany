@@ -48,10 +48,8 @@ endif
 
 ifdef USE_SWIG
 vpath %.i .src
-%.cpp: %.i
+%.cpp %.py: %.i
 	$(SWIG) $(SWIGFLAGS) -o $*.cpp $<
-%.py: %.i
-	$(SWIG) $(SWIGFLAGS) -o $@ $<
 else
 vpath %.cpp-swig .src
 %.cpp: %.cpp-swig
@@ -59,11 +57,6 @@ vpath %.cpp-swig .src
 vpath %.py-swig .src
 %.py: %.py-swig
 	ln -sf $< $*.py
-ifneq ($(SOURCEDIR),$(BUILDDIR))
-# FIXME: should use .cpp-swig and .py-swig
-%.py: .src/%.py
-	ln -s $< $@
-endif
 endif
 
 %cmodule.so: %.o
@@ -113,10 +106,12 @@ tags:
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
-	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
+	@for i in $(SRC) $(CSRC) ; \
+	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; \
+	done
 
 stdclean:
-	$(RM) -r *.o *.so *.a *.lo *.d .libs $(MODSOS) $(MODOBJS)
+	$(RM) -r *.o *.so *.a *.lo *.d .libs
 
 modules: $(MODULES)
 	@true

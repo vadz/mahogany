@@ -41,7 +41,7 @@ inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
 %}
 
 %import MString.i
-%import Profile.i
+%import MProfile.i
 
 class MAppBase 
 {
@@ -52,7 +52,7 @@ public:
    String  GetGlobalDir(void) const;
    String  GetLocalDir(void) const;
    wxMimeTypesManager& GetMimeManager(void) const;
-   ProfileBase *GetProfile(void) const;
+   Profile *GetProfile(void) const;
 //   Adb *GetAdb(void) ;
 };
 
@@ -93,7 +93,7 @@ char *MDialog_FileRequester(String  &message,
                             String &extension = NULLstring,
                             String &wildcard = NULLstring,
                             bool save = false,
-                            ProfileBase *profile = NULL);
+                            Profile *profile = NULL);
 
 bool MInputBox(String *pstr,
                const char * caption,

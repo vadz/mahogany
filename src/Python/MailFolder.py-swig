@@ -78,7 +78,7 @@ class MailFolderPtr(MObjectRCPtr):
         return val
     def GetProfile(self):
         val = MailFolderc.MailFolder_GetProfile(self.this)
-        val = ProfileBasePtr(val)
+        val = ProfilePtr(val)
         return val
     def GetClassName(self):
         val = MailFolderc.MailFolder_GetClassName(self.this)
