@@ -606,8 +606,9 @@ QuoteURLFilter::DoProcess(String& text,
       const wxChar *endURL = lineCur;
       while ( startURL && (lineCur <= startURL && startURL < lineNext) )
       {
-         // insert the text before URL
-         String textBefore(lineCur, startURL);
+         // insert the text before URL (endURL is the end of previous URL, not
+         // this one or the start of line initially)
+         String textBefore(endURL, startURL);
          m_next->Process(textBefore, viewer, style);
 
          // then the URL itself (we use the same string for text and URL)
