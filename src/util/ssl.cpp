@@ -157,12 +157,12 @@ bool InitSSL(void) /* FIXME: MT */
                   ssl_dll.c_str()));
 #endif // 0
 
-   bool success = FALSE;
-   wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll, &success);
-   if(! success)
+   wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll);
+   if ( !cryptodll )
       return FALSE;
-   wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll, &success);
-   if(! success)
+
+   wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll);
+   if ( slldll )
       return FALSE;
 
    SSL_LOOKUP(SSL_new );
