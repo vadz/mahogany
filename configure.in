@@ -37,20 +37,24 @@ dnl Mahogany parameter evaluation
 dnl Usage: M_OVERRIDES(package,message,variable,default,help)
 dnl --------------------------------------------------------------------------
 
-M_OVERRIDES(opt,optimization,USE_OPT,1,
---disable-opt           no compiler optimisations - may not be effective)
+M_OVERRIDES(debugall,debugging,USE_DEBUG_ALL,0,
+--enable-debug          generate code for debugging)
 
+M_OVERRIDES(optimize,optimization,USE_OPT,1,
+--disable-optimize      disable compiler optimization)
+
+dnl TODO: the following three options should go
 M_OVERRIDES(debug,debug code,USE_DEBUG,0,
---with-debug            compile debug code)
+--with-debug            [deprecated, use --enable-debug instead])
 
 M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
---with-debuginfo        include debug info from compiler)
+--with-debuginfo        [deprecated, don't use])
 
 M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
 
 M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
---with-dmalloc          use dmalloc library (http://dmalloc.com/) for debugging)
+--with-dmalloc          use dmalloc (http://dmalloc.com/) for debugging)
 
 M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
 --with-leaktracer       use LeakTracer for debugging)
@@ -58,11 +62,11 @@ M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
 M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
 --with-efence           use ElectricFence for debugging)
 
-M_OVERRIDES(prof,profiling,USE_PROFILER,0,
---with-prof             generate profiling code)
+M_OVERRIDES(profile,profiling,USE_PROFILER,0,
+--enable-profile        generate code for profiling)
 
 M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
---with-strict           strict compiler flags - may not work on all systems)
+--enable-strict         strict compiler flags - may not work on all systems)
 
 M_OVERRIDES(nls,i18n support,USE_I18N,1,
 --disable-nls           no internationalization support)
@@ -92,7 +96,7 @@ M_OVERRIDES(modules,modules,USE_MODULES,auto,
 --with-modules=xxx      one of none/static/dynamic)
 
 M_OVERRIDES(ssl,SSL support,USE_SSL,1,
---with-ssl=DIR          path to SSL directories (requires OpenSSL))
+--with-ssl=ssldir       specify path where OpenSSL is installed)
 
 AC_MSG_CHECKING(for install location)
 case "$prefix" in
@@ -444,6 +448,15 @@ esac
 AC_SUBST(MAKE_USE_LEAKTRACER)
 
 dnl set debug/optimisation flags
+
+case "$USE_DEBUG_ALL" in
+0|'')	USE_DEBUG=""
+	;;
+*)	if test "x$USE_DEBUG" = "x"; then
+	    USE_DEBUG=1
+	fi
+	;;
+esac
 
 case "$USE_DEBUG" in
 0|'')	DEBUG_OPTS="" ;;
