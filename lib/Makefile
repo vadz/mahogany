@@ -12,7 +12,7 @@
 
 include ../makeopts
 
-SUB_DIRS := compface imap
+SUB_DIRS := compface dspam imap
 
 all clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i -f Makefile.M $@; done
