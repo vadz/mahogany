@@ -27,15 +27,18 @@ c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
 ------------
 
    Mahogany depends on wxWindows and prior to compiling Mahogany you need to
-build the wxMSW library. However, do *not* follow the standard build
-instructions included into wxWindows distribution. For historical reasons I am
-using my own project file to build wxWindows version used by Mahogany: it is
-included in Mahogany cvs and is called wxWindows.dsp. You should move this
-file to the directory where you installed wxWindows. You will also need to
-copy extra\scripts\wxmsw_setup.h to include\wx\msw\setup.h of your wxWindows
-installation. Notice that this is mandatory, do *not* try to build wxWindows
-using other settings unless you know what you are doing or you are sure to run
-into trouble.
+build the wxMSW library.
+
+a) Instructions for Mahogany up to and including version 0.63
+
+   Do *not* follow the standard build instructions included into wxWindows
+distribution. For historical reasons I am using my own project file to build
+wxWindows version used by Mahogany: it is included in Mahogany cvs and is
+called wxWindows.dsp. You should move this file to the directory where you
+installed wxWindows. You will also need to copy extra\scripts\wxmsw_setup.h to
+include\wx\msw\setup.h of your wxWindows installation. Notice that this is
+mandatory, do *not* try to build wxWindows using other settings unless you know
+what you are doing or you are sure to run into trouble.
 
    Also, please set the environment variable "wx" to contain the location of
 the directory where wxWindows is installed: e.g., "d:\progs\libs\wxWindows".
@@ -44,10 +47,21 @@ the directory where wxWindows is installed: e.g., "d:\progs\libs\wxWindows".
 switch when you do "cvs co" or "cvs up" wxWindows for the first time to get the
 files from 2.2 branch. It is not necessary to specify this switch subsequently.
 
+b) Instructions for Mahogany after version 0.63
+
+   You will need the latest cvs sources of the development branch of wxMSW (it
+is also the main one, so you will get it by default if you do "cvs co", however
+don't forget to "cvs up -A" if you had previously used "cvs up -r
+WX_2_2_BRANCH" as described above).
+
+   Mahogany now uses the standard wxWindows project files so just build
+wxWindows using the provided src/wx.dsp project. You will need to point
+MSDEV to this file when you open M.dsw workspace for the first time.
+
 2. Build process
 ----------------
 
-   Open the project workspace M.dsw inVisual C++ IDE. You will have to load
+   Open the project workspace M.dsw in Visual C++ IDE. You will have to load
 (right click the project in the project tree, choose "Load") the following
 projects contained in this workspace if they are not loaded yet:
 
@@ -80,4 +94,4 @@ src/wx/vcard/vcc.c-yacc to vcc.c.
 If you get problem with PROIO_yywrap being multiply defined in wxWindows,
 comment out the 2nd definition of this function in src/common/y_tab.c.
 
-vi: ts=8 nolist:
+vi: ts=8 nolist nocin:
