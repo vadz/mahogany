@@ -1309,7 +1309,10 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
    c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_tree->GetWindow()->SetConstraints(c);
+
+   wxWindow *winTree = m_tree->GetWindow();
+   winTree->SetConstraints(c);
+   winTree->SetFocus();
 
    // position the dialog
    SetDefaultSize(6*wBtn, 20*hBtn);
@@ -1366,7 +1369,7 @@ bool MFolderDialog::TransferDataToWindow()
    // restore last folder from config
    wxString folderName = mApplication->
                            GetProfile()->readEntry(GetConfigPath(), "");
-   if ( !!folderName )
+   if ( !folderName.empty() )
    {
       // select folder in the tree
       MFolder *folder = MFolder::Get(folderName);
@@ -1380,17 +1383,6 @@ bool MFolderDialog::TransferDataToWindow()
          folder->DecRef();
       }
       //else: the folder was probably destroyed since the last time
-
-      // and set the focus to [Ok] button to allow to quickly choose it
-      wxWindow *btnOk = FindWindow(wxID_OK);
-      if ( btnOk )
-      {
-         btnOk->SetFocus();
-      }
-      else
-      {
-         wxFAIL_MSG("no [Ok] button?");
-      }
    }
 
    return true;
