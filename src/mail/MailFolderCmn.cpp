@@ -1512,13 +1512,13 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    // finally, notify the user about it
    // ---------------------------------
 
-   ReportNewMail(uidsNew);
+   ReportNewMail(uidsNew, folder);
 
    return true;
 }
 
-bool MailFolderCmn::CollectNewMail(UIdArray& uidsNew,
-                                   const String& newMailFolder)
+bool
+MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
 {
    bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
 
@@ -1550,8 +1550,11 @@ bool MailFolderCmn::CollectNewMail(UIdArray& uidsNew,
    return true;
 }
 
-void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
+void
+MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
 {
+   CHECK_RET( folder, "ReportNewMail: NULL folder" );
+
    // first of all, do nothing at all in the away mode
    if ( mApplication->IsInAwayMode() )
    {
@@ -1560,17 +1563,17 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
    }
 
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(%u msgs)",
-              GetName().c_str(), uidsNew.GetCount());
+              folder->GetFullName().c_str(), uidsNew.GetCount());
 
    // step 1: execute external command if it's configured
-   Profile *profile = GetProfile();
+   Profile_obj profile = folder->GetProfile();
    if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
    {
       String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
       if ( !command.empty() )
       {
          wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(): running '%s'",
-                    GetName().c_str(), command.c_str());
+                    folder->GetFullName().c_str(), command.c_str());
 
          if ( !wxExecute(command, false /* async */) )
          {
@@ -1583,6 +1586,8 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
 
 #ifdef USE_PYTHON
    // step 2: folder specific Python callback
+   //
+   // FIXME: "this" should be folder below!
    if ( !PythonCallback(MCB_FOLDER_NEWMAIL, 0, this, GetClassName(), profile) )
 
       // step 3: global python callback
@@ -1607,14 +1612,15 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
             if ( detailsThreshold == -1 ||
                  number < (unsigned long)detailsThreshold )
             {
-               message = _("You have received new mail:");
+               message.Printf(_("You have received new mail in folder '%s':"),
+                              folder->GetFullName().c_str());
+
                for( unsigned long i = 0; i < number; i++)
                {
                   Message *msg = GetMessage(uidsNew[i]);
                   if ( msg )
                   {
                      message << '\n'
-                             << _("\tIn folder '") << GetName() << "'\n"
                              << _("\tFrom: '") << msg->From()
                              << _("' with subject: ") << msg->Subject();
 
@@ -1629,7 +1635,7 @@ void MailFolderCmn::ReportNewMail(const UIdArray& uidsNew)
                // of several messages
                message.Printf(_("You have received %lu new messages "
                                 "in the folder '%s'."),
-                              number, GetName().c_str());
+                              number, folder->GetFullName().c_str());
             }
 
             LOGMESSAGE((M_LOG_WINONLY, message));

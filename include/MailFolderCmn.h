@@ -257,8 +257,8 @@ private:
    /// copy/move new mail to the NewMail folder, return false on error
    bool CollectNewMail(UIdArray& uidsNew, const String& newMailFolder);
 
-   /// report new mail to the user
-   void ReportNewMail(const UIdArray& uidsNew);
+   /// report new mail in the given folder to the user
+   void ReportNewMail(const UIdArray& uidsNew, const MFolder *folder);
 
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;

@@ -2943,7 +2943,11 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       // deleted messages don't count, except for the total number
       if ( !(flags & MailFolder::MSG_STAT_DELETED) )
       {
-         bool isRecent = (flags & MailFolder::MSG_STAT_RECENT) != 0;
+         // note that the messages will always be recent in the destination
+         // folder!
+         //
+         //bool isRecent = (flags & MailFolder::MSG_STAT_RECENT) != 0;
+         static const bool isRecent = true;
 
          if ( !(flags & MailFolder::MSG_STAT_SEEN) )
          {
@@ -4315,31 +4319,51 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          m_headers->OnAdd(msgnoMax);
       }
 
-      // set a flag to avoid sending expunge events until we process the new
-      // mail event: this is unnecessary anyhow but, even worse, it may result
-      // in the c-client reentrancy as new mail invalidates the msgno ->
-      // position mapping in m_headers and so a call to GetPosFromIdx() in
-      // OnMailExpunge() below could result in another call to c-client if we
-      // use server side sorting and/or threading
-      m_gotUnprocessedNewMail = true;
-
-      // NB: if we have m_expungedMsgnos, leave them for now and don't discard
-      //     them as we used to do because if all new mail is filtered away,
-      //     we'd still have to notify the GUI about these expunged messages
-
-      // our cached idea of the number of messages we have doesn't correspond
-      // to reality any more but don't invalidate it from here - we will call
-      // MfStatusCache::UpdateStatus() soon from OnNewMail() anyhow
-
-      // do update the number of messages: it should always be in sync
+      // update the number of messages: it should always be in sync with the
+      // real folder
       m_nMessages = msgnoMax;
 
-      // we want to apply the filtering code but we can't do it from here
-      // because we're inside c-client now and it is not reentrant, so we
-      // send an event to ourselves to do it slightly later
+      // we don't have to do anything for empty folders except updating their
+      // status
       if ( msgnoMax )
       {
-         MEventManager::Send(new MEventFolderOnNewMailData(this));
+         // we often receive two "* EXISTS" in a row (this seems to be a bug in
+         // the IMAP I use but it does happen all the time) and in this case we
+         // don't want to send two MEventFolderOnNewMails
+         if ( !m_gotUnprocessedNewMail )
+         {
+            // set a flag to avoid sending expunge events until we process the
+            // new mail event: this is unnecessary anyhow but, even worse, it
+            // may result in the c-client reentrancy as new mail invalidates
+            // the msgno -> position mapping in m_headers and so a call to
+            // GetPosFromIdx() in OnMailExpunge() below could result in another
+            // call to c-client if we use server side sorting and/or threading
+            m_gotUnprocessedNewMail = true;
+
+            // NB: if we have m_expungedMsgnos, leave them for now and don't
+            //     discard them as we used to do because if all new mail is
+            //     filtered away, we'd still have to notify the GUI about these
+            //     expunged messages
+
+            // our cached idea of the number of messages we have doesn't
+            // correspond to reality any more but don't invalidate it from here
+            // - we will call MfStatusCache::UpdateStatus() soon from
+            // OnNewMail() anyhow
+
+            // we want to apply the filtering code but we can't do it from here
+            // because we're inside c-client now and it is not reentrant, so we
+            // send an event to ourselves to do it slightly later
+            MEventManager::Send(new MEventFolderOnNewMailData(this));
+         }
+      }
+      else // empty folder
+      {
+         // do update status in this case as OnNewMail() won't be called
+
+         MailFolderStatus status;
+         status.total = 0; // all the other fields are already 0
+
+         MfStatusCache::Get()->UpdateStatus(GetName(), status);
       }
    }
    else // same number of messages
@@ -4489,6 +4513,13 @@ void MailFolderCC::OnNewMail()
 
    // no more
    m_gotUnprocessedNewMail = false;
+
+   // update the status of the folder as we've got some new messages
+   MailFolderStatus status;
+   if ( DoCountMessages(&status) )
+   {
+      MfStatusCache::Get()->UpdateStatus(GetName(), status);
+   }
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now it is done and we can notify
