@@ -652,7 +652,15 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
       wxFileType *fileType = mimeManager.GetFileTypeFromExtension(ext);
       if ( fileType )
       {
+#if wxCHECK_VERSION(2, 5, 0)
+         wxIconLocation iconLoc;
+         if ( fileType->GetIcon(&iconLoc) )
+         {
+            icon = wxIcon(iconLoc);
+         }
+#else // wx 2.4.x
          (void)fileType->GetIcon(&icon);
+#endif
 
          delete fileType;
       }
