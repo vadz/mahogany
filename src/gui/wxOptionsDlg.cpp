@@ -1109,7 +1109,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
    CONFIG_NONE(),
-#ifdef EXPERIMENTAL_sync
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SYNC_REMOTE),
    CONFIG_ENTRY(MP_SYNC_FOLDER),
@@ -1117,7 +1116,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SYNC_IDS),
    CONFIG_ENTRY(MP_SYNC_FOLDERS),
    CONFIG_ENTRY(MP_SYNC_FOLDERGROUP),
-#endif
 };
 
 #undef CONFIG_ENTRY
