@@ -2268,19 +2268,6 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
    CHECK( m_headers, NULL, _T("no listing hence no header info") );
 
-   if ( m_mutexHeaders.IsLocked() )
-   {
-      // this is crazy enough to deserve an explanation: under Windows we may
-      // be called from deep inside wxYield() which is called from some
-      // progress dialog or another shown from inside mail code when we call
-      // CachePositions() from OnIdle() -- and if we start using HeaderInfo
-      // methods from here, completely unexpected reentrancies occur and we die
-      // horribly
-      //
-      // so don't do it
-      return NULL;
-   }
-
    wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
 
    if ( m_headers->HasChanged(m_cacheLastMod) )
@@ -2292,7 +2279,15 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 
    if ( m_indexHI != index )
    {
-      if ( !m_headers->IsInCache(index) )
+      // this is crazy enough to deserve an explanation: under Windows we may
+      // be called from deep inside wxYield() which is called from some
+      // progress dialog or another shown from inside mail code when we call
+      // CachePositions() from OnIdle() -- and if we start using HeaderInfo
+      // methods from here, completely unexpected reentrancies occur and we die
+      // horribly
+      //
+      // so don't do anything if we're accessing the headers right now
+      if ( m_mutexHeaders.IsLocked() || !m_headers->IsInCache(index) )
       {
          // we will retrieve it later as it may take a long time to do it now
          // and we shouldn't block inside OnGetItemXXX() functions which are,
