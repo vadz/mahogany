@@ -31,7 +31,7 @@
 
 \vfill{}
 \title{{\LARGE \textsl{Mahogany User Manual}}\\
-{\Large Version 0.67 ``???''}}
+{\Large Version 0.67 ``Constance''}}
 \vfill{}
 
 
@@ -80,6 +80,7 @@ any problems with building it.
 \subsubsection{0.67 against 0.66}
 
 \begin{itemize}
+   \item New integrated statistical spam filter (DSPAM)
    \item Folders can now be dragged in the folder tree to reorder them
    \item New \texttt{--import} command line option to simplify sharing
          of Mahogany options between different installations
@@ -87,7 +88,23 @@ any problems with building it.
          preferences dialog (see \ref{optionshighlight})
    \item New \texttt{nop()} (stop filter processing) filter action added
    \item The "Set From from To" option (\ref{IdentityPage}) is more useful
+   \item When replying to PGP-encrypted messages, clear text is used for
+         replies and not the original message.
 \end{itemize}
+
+By far the main new feature in this version is the integration of DSPAM
+According to http://www.nuclearelephant.com/projects/dspam/:
+
+\begin{quote}
+DSPAM (as in De-Spam) is an extremely scalable, open-source statistical
+anti-spam filter. While most commercial solutions only provide a mere 95\%
+accuracy (1 error in 20), a majority of DSPAM users frequently see between
+99.95\% (1 error in 2000) all the way up to 99.991\% (2 errors in 22,786).
+\end{quote}
+
+Please see \ref{DSPAM} section for the description of how to configure and use
+DSPAM.
+
 
 \subsubsection{0.66 against 0.65}
 
@@ -1532,6 +1549,63 @@ functions. The filter functions correspond to the choices in the GUI dialogs.
 Each test also has the associated code block executed only if it succeeds. Here
 again you can use the built-in functions which are the same as the verbs in the
 GUI controls.
+
+
+\subsection{Spam filtering}\label{spam}
+
+Mahogany supports pluggable spam filter modules. In theory it means that
+anybody can write such modules but in practice only two of them currently exist
+and are described in details below.
+
+However independently of the spam filters used, the interface to them remains
+always the same:
+\begin{itemize}
+   \item The spam filter options can be edited in
+         \MenuCmd{Edit|Spam filters...} dialog. Mostly you can rely on the
+         default values (but see \ref{DSPAM}).
+   \item You can check whether the currently selected messages are deemed to
+         be spam by using \MenuCmd{Message|Spam|Check message...} command.
+         This is mainly useful for testing, see below for how to check for spam
+         automatically.
+   \item If a statistical filter mistakenly recognizes a message as spam (so
+         called false positive, this should hopefully be very rare) or misses a
+         spam message, you can correct its mistake by using the two other
+         commands of \MenuCmd{Message|Spam} submenu. Please note that you
+         should \emph{not} use these commands for the messages not seen by the
+         spam filter at all, i.e. they don't work for training it but only for
+         correcting its errors.
+\end{itemize}
+
+To actually use the spam filters you need to configure a filter rule (see
+\ref{Filters}) using them. Usually you just create a rule named "Spam" using
+the "Seems to be spam" test and "Move to some Junk folder" (you will need to
+create this junk folder too) as its action. If you feel very confident in the
+spam filters (or just have backup of your mail somewhere) you can also
+configure the rule to delete the messages recognized as spam immediately but
+this is not recommended.
+
+
+\subsubsection{Simple header analyzer}
+
+This is a very simple filter which looks for some common characteristics of
+spam mail in the message headers. Its accuracy is much worse than that of DSPAM
+but it is also much faster to execute and doesn't need any training. You may
+configure its options in the \MenuCmd{Edit|Spam filters...} dialog.
+
+\subsubsection{DSPAM}\label{DSPAM}
+
+DSPAM is a statistical spam filter which means that to use it in the optimal
+way you need to \emph{train} it first. Just open the \MenuCmd{Edit|Spam
+filters...} dialog and use the \texttt{Train} button on the DSPAM page. For the
+best results you should train the filter with 2500 spam and 2500 non-spam (ham)
+messages. Be warned that this can take a rather long time and also consumes
+significant amount of disk space (of order of 50Mb) -- however the results are
+well worth it.
+
+If you don't have enough messages to train it with, you can start using it
+immediately but in this case you should be ready to manually mark messages as
+spams as explained in \ref{spam}. Please also remember to actually create a
+spam filter rule to really use DSPAM at all.
 
 
 \section{Sending Mail}
