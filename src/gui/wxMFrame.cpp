@@ -114,7 +114,7 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    RestorePosition(name, &xpos, &ypos, &width, &height);
 
    // use name as default title
-   wxFrame::   Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
+   wxFrame::Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
    //Show(true);
 
    SetIcon(ICON("MFrame"));

@@ -400,8 +400,8 @@ bool
 strutil_isabsolutepath(const String &path)
 {
 #ifdef OS_UNIX
-   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR ||
-                                     path[0u] == '~');
+   return !strutil_isempty(path) && (path[(size_t)0] == DIR_SEPARATOR ||
+                                     path[(size_t)0] == '~');
 #elif defined ( OS_WIN )
    // TODO copy the code from wxIsAbsolutePath() here if Karsten insists on it
    return wxIsAbsolutePath(path);

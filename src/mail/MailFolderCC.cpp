@@ -2368,7 +2368,7 @@ void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
                        (*stream->dtb->overview) (stream,sequence,(overview_t)ofn)) &&
       mail_uid_sequence (stream,sequence) && mail_ping (stream)) {
     MESSAGECACHE *elt;
-    ENVELOPE *env;
+    ENVELOPE *env = NULL;  // initialisation not needed but keeps compiler happy
     OVERVIEW ov;
     unsigned long i;
     ov.optional.lines = 0;
@@ -2403,7 +2403,7 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
        mail_ping (stream))
    {
       MESSAGECACHE *elt;
-      ENVELOPE *env;
+      ENVELOPE *env = NULL;  // keep compiler happy
       OVERVIEW ov;
       unsigned long i;
       ov.optional.lines = 0;

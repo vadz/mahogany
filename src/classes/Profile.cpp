@@ -610,12 +610,18 @@ Profile::Commit(void)
    {
       if(ms_GlobalConfig->Read(name, &strValue)) // try to read it as a string
       {
-         bool rc = ms_GlobalConfig->Write(truePath+name, strValue);
+#ifdef DEBUG
+         bool rc =
+            ms_GlobalConfig->Write(truePath+name, strValue);
+#endif
          ASSERT(rc);
       }
       else if(ms_GlobalConfig->Read(name, &numValue)) // it MUST be a number then!
       {
-         bool rc = ms_GlobalConfig->Write(truePath+name, numValue);
+#ifdef DEBUG
+         bool rc =
+#endif
+            ms_GlobalConfig->Write(truePath+name, numValue);
          ASSERT(rc);
       }
       else
@@ -637,7 +643,10 @@ Profile::Discard(void)
    if(m_ProfilePath)
       path << m_ProfilePath << '/';
    path << SUSPEND_PATH;
-   bool success = ms_GlobalConfig->DeleteGroup(path);
+#ifdef DEBUG
+   bool success =
+#endif
+      ms_GlobalConfig->DeleteGroup(path);
    ASSERT(success);
    m_Suspended = false;
 }
