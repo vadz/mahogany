@@ -116,7 +116,7 @@ private:
       m_CategoryName;
    int m_selection;
    int m_IncludeEmpty, m_IncludeComments;
-   
+
    // GUI controls
    wxComboBox *m_textCustomSep;
    wxTextCtrl *m_textFileName;
@@ -163,12 +163,12 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
      "County","Pcode","Uk","C1","C2","C3","C4","Note","0"
 
    */
-   
+
    wxString s;
    s.Alloc(4096);       // be generous and speed up the export
 
    s << '"' << category << "\";";
-   
+
    // dump all the fields
    wxString val, tmp;
    entry.GetField(AdbField_FamilyName, &val);
@@ -260,7 +260,7 @@ bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
    {
       AdbEntryGroup *subgroup = group.GetGroup(names[nGroup]);
 
-      bool ok = DoExportGroup(*subgroup, file, category, includeEmpty, 
+      bool ok = DoExportGroup(*subgroup, file, category, includeEmpty,
                               includeComments);
       subgroup->DecRef();
 
@@ -403,7 +403,7 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    m_textFileName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastFile,
                                             ""));
-      
+
    m_textCategoryName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastCategory,
                                             "Unfiled"));
@@ -439,7 +439,7 @@ bool wxAdbPalmExporterConfigDialog::TransferDataFromWindow()
    }
 
    m_IncludeEmpty = m_checkIncludeEmpty->GetValue();
-   
+
    m_IncludeComments = m_checkIncludeComments->GetValue();
 
    mApplication->GetProfile()->writeEntry(ms_profilePathLastFile,

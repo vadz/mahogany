@@ -331,23 +331,29 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
    wxTextBrowseButton *btn;
    switch ( kind )
    {
-   case FileBtn:
-   case FileSaveBtn:
-      btn = new wxFileBrowseButton(text, GetCanvas(), kind == FileBtn);
-      break;
-      
-   case FileOrDirBtn:
-   case FileOrDirSaveBtn:
-      btn = new wxFileOrDirBrowseButton(text, GetCanvas(), kind == FileOrDirBtn);
-      break;
-      
-   case ColorBtn:
-      btn = new wxColorBrowseButton(text, GetCanvas());
-      break;
-      
-   default:
-      wxFAIL_MSG("unknown browse button kind");
-      return NULL;
+      case FileBtn:
+      case FileNewBtn:
+      case FileSaveBtn:
+         btn = new wxFileBrowseButton(text, GetCanvas(),
+                                      kind != FileSaveBtn, // open
+                                      kind != FileNewBtn); // existing only
+         break;
+
+      case FileOrDirBtn:
+      case FileOrDirNewBtn:
+      case FileOrDirSaveBtn:
+         btn = new wxFileOrDirBrowseButton(text, GetCanvas(),
+                                           kind != FileOrDirSaveBtn,
+                                           kind != FileOrDirNewBtn);
+         break;
+
+      case ColorBtn:
+         btn = new wxColorBrowseButton(text, GetCanvas());
+         break;
+
+      default:
+         wxFAIL_MSG("unknown browse button kind");
+         return NULL;
    }
 
    wxLayoutConstraints *c = new wxLayoutConstraints;
@@ -827,7 +833,7 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
    // basic unit is the height of a char, from this we fix the sizes of all
    // other controls
    size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   
+
    hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
    wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 
@@ -906,7 +912,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
       btnHelp->SetConstraints(c);
       m_helpId = helpId;
    }
-   
+
    // a box around all the other controls
    if ( noBox )
       return NULL;
@@ -947,6 +953,13 @@ void wxNotebookDialog::CreateAllControls()
    // create the panel
    // ----------------
    wxPanel *panel = new wxPanel(this, -1);
+
+#ifdef DEBUG
+   // this makes wxWin debug messages about unsatisfied constraints a bit more
+   // informative
+   panel->SetName("MainNbookDlgPanel");
+#endif
+
    panel->SetAutoLayout(TRUE);
    c = new wxLayoutConstraints;
    c->left.SameAs(this, wxLeft);

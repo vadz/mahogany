@@ -355,16 +355,17 @@ public:
    wxXFaceButton *CreateXFaceButton(const wxString& label, long
                                     widthMax, wxControl *last);
 
-   // if ppButton != NULL, it's filled with the pointer to the ">>" browse
+      // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function (it will be a wxFileBrowseButton)
    wxTextCtrl *CreateFileEntry(const char *label,
                                long widthMax,
                                wxControl *last,
                                wxFileBrowseButton **ppButton = NULL,
-                               bool open = TRUE)
+                               bool open = TRUE,
+                               bool existingOnly = TRUE)
    {
       return CreateEntryWithButton(label, widthMax, last,
-                                   open ? FileBtn : FileSaveBtn,
+                                   GetBtnType(FileBtn, open, existingOnly),
                                    (wxTextBrowseButton **)ppButton);
    }
 
@@ -373,12 +374,12 @@ public:
    wxTextCtrl *CreateFileOrDirEntry(const char *label,
                                     long widthMax,
                                     wxControl *last,
-                                    wxFileOrDirBrowseButton **ppButton
-                                    = NULL,
-                                    bool open = TRUE)
+                                    wxFileOrDirBrowseButton **ppButton = NULL,
+                                    bool open = TRUE,
+                                    bool existingOnly = TRUE)
    {
       return CreateEntryWithButton(label, widthMax, last,
-                                   open ? FileOrDirBtn : FileOrDirSaveBtn,
+                                   GetBtnType(FileOrDirBtn, open, existingOnly),
                                    (wxTextBrowseButton **)ppButton);
    }
 
@@ -430,8 +431,37 @@ public:
                          size_t extraSpace = 0);
 
    // create an entry with a browse button
-   enum BtnKind { FileBtn, FileSaveBtn, FileOrDirBtn,
-                  FileOrDirSaveBtn, ColorBtn };
+   enum BtnKind
+   {
+      // the following 3 values must be consecutive, GetBtnType() relies on it
+      FileBtn,             // open an existing file
+      FileNewBtn,          // choose any file (might not exist)
+      FileSaveBtn,         // save to a file
+
+      // the following 3 values must be consecutive, GetBtnType() relies on it
+      FileOrDirBtn,        // open an existing file or directory
+      FileOrDirNewBtn,     // choose any file or directory
+      FileOrDirSaveBtn,    // save to a file or directory
+
+      ColorBtn             // choose a colour
+   };
+
+   // return the right btn type for the given "base" type and parameters
+   static BtnKind GetBtnType(BtnKind base, bool open, bool existing)
+   {
+      int ofs;
+      if ( open )
+      {
+         ofs = existing ? 0 : 1;
+      }
+      else
+      {
+         ofs = 2;
+      }
+
+      return (BtnKind)(base + ofs);
+   }
+
    wxTextCtrl *CreateEntryWithButton(const char *label,
                                      long widthMax,
                                      wxControl *last,

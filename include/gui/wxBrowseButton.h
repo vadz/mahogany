@@ -102,11 +102,16 @@ public:
    // OTOH, if open is FALSE, we're using this button for choosing the name of
    // the file to save something to, so any filename (even a non existing one
    // may be specified) and the user will have to confirm the file overwrite if
-   // he does specify an existing file name
-   wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent, bool open = TRUE)
+   // he does specify an existing file name. Finally, there may be situations
+   // where we want to allow choosing any filename for opening, even a non
+   // existing one - this is achieved by setting existingOnly param to FALSE
+   // (only for "open" buttons, it doesn't make sense for "save" ones)
+   wxFileBrowseButton(wxTextCtrl *text, wxWindow *parent,
+                      bool open = TRUE, bool existingOnly = TRUE)
       : wxTextBrowseButton(text, parent, _("Browse for the file"))
    {
       m_open = open;
+      m_existingOnly = existingOnly;
    }
 
    // show the file selection dialog and fill the associated text control with
@@ -114,7 +119,8 @@ public:
    virtual void DoBrowse();
 
 private:
-   bool m_open;
+   bool m_open,
+        m_existingOnly;
 };
 
 // ----------------------------------------------------------------------------
@@ -150,8 +156,11 @@ class wxFileOrDirBrowseButton : public wxFileBrowseButton
 {
 public:
    wxFileOrDirBrowseButton(wxTextCtrl *text, wxWindow *parent,
-                           bool open = TRUE)
-      : wxFileBrowseButton(text, parent, open) { m_browseForFile = TRUE; }
+                           bool open = TRUE, bool existingOnly = TRUE)
+      : wxFileBrowseButton(text, parent, open, existingOnly)
+   {
+      m_browseForFile = TRUE;
+   }
 
    // get or change the current browsing mode
       // returns TRUE if in "file" mode, FALSE if in "directory" one

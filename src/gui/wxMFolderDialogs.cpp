@@ -108,8 +108,6 @@ public:
    void SetMayEnableOk(bool may)
    {
       m_mayEnableOk = may;
-
-      DoUpdateButtons();
    }
 
    // set the folder name
@@ -119,8 +117,9 @@ public:
    wxFolderBaseDialog() { }
 
 protected:
-   // enable or disable [Ok] and [Apply] buttons
-   void DoUpdateButtons();
+   // return TRUE if the Ok/Apply buttons should be enabled (depending on the
+   // state of the other controls)
+   bool ShouldEnableOk() const;
 
    // base class pure virtual - return the profile we're working with
    virtual ProfileBase *GetProfile() const
@@ -181,7 +180,8 @@ public:
    MFolder *DoCreateFolder(FolderType folderType);
 
    // callbacks
-   void OnFolderNameChange(wxEvent&);
+   void OnFolderNameChange(wxCommandEvent& event);
+   void OnUpdateButton(wxUpdateUIEvent& event);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
@@ -459,6 +459,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
 BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,
             wxFolderCreateDialog::OnFolderNameChange)
+   EVT_UPDATE_UI(wxID_OK,    wxFolderCreateDialog::OnUpdateButton)
+   EVT_UPDATE_UI(wxID_APPLY, wxFolderCreateDialog::OnUpdateButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
@@ -617,7 +619,7 @@ void wxFolderBaseDialog::SetProfile(ProfileBase *profile)
    }
 }
 
-void wxFolderBaseDialog::DoUpdateButtons()
+bool wxFolderBaseDialog::ShouldEnableOk() const
 {
    // first of all, we should be able to enable it in principle
    bool enable = m_mayEnableOk;
@@ -637,7 +639,7 @@ void wxFolderBaseDialog::DoUpdateButtons()
       enable = page->IsOk();
    }
 
-   EnableButtons(enable);
+   return enable;
 }
 
 // -----------------------------------------------------------------------------
@@ -682,19 +684,20 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
    return m_newFolder;
 }
 
-void wxFolderCreateDialog::OnFolderNameChange(wxEvent& event)
+void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
 {
    SetDirty();
-
-   DoUpdateButtons();
 
    event.Skip();
 }
 
+void wxFolderCreateDialog::OnUpdateButton(wxUpdateUIEvent& event)
+{
+   event.Enable( ShouldEnableOk() );
+}
+
 bool wxFolderCreateDialog::TransferDataToWindow()
 {
-   EnableButtons(FALSE);   // initially, we have no folder name
-
    // this is one of rare cases where persistent controls are more painful than
    // useful - when we create the folder, we always want to start with the
    // "Access" page, but the persistent notebook restores thep age we used the
@@ -900,7 +903,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax,
                                  m_comment, &m_browsePath,
-                                 FALSE /* open = allow non existing file */);
+                                 TRUE,    // open
+                                 FALSE);  // allow non existing files
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
@@ -935,7 +939,7 @@ wxFolderPropertiesPage::SetFolderName(const wxString& name)
    dlg->SetFolderName(name);
 
    // FIXME this should go away as soon as wxGTK changes to wxMSW behaviour
-#ifdef __WXGTK__
+#if 0 // def __WXGTK__ --- did it already?
    wxEvent event;
    dlg->OnFolderNameChange(event);
 #endif

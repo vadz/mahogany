@@ -129,11 +129,15 @@ void wxFileBrowseButton::DoBrowse()
    wxString strLastDir, strLastFile, strLastExt, strPath = GetText();
    wxSplitPath(strPath, &strLastDir, &strLastFile, &strLastExt);
 
+   long style = m_open ? wxOPEN | wxHIDE_READONLY
+                       : wxSAVE | wxOVERWRITE_PROMPT;
+   if ( m_existingOnly )
+      style |= wxFILE_MUST_EXIST;
+
    wxFileDialog dialog(this, "",
                        strLastDir, strLastFile,
                        _(wxALL_FILES),
-                       m_open ? wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST
-                              : wxSAVE | wxOVERWRITE_PROMPT);
+                       style);
 
    if ( dialog.ShowModal() == wxID_OK )
    {
