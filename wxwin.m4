@@ -20,20 +20,20 @@ dnl
 AC_DEFUN(AM_PATH_WXCONFIG,
 [
   dnl do we have wx-config name: it can be wx-config or wxd-config or ...
-  if test x${WX_CONFIG+set} = xset ; then
+  if test x${WX_CONFIG_NAME+set} = xset ; then
      WX_CONFIG_NAME=wx-config
   fi
 
   dnl deal with optional prefixes
   if test x$wx_config_exec_prefix != x ; then
      wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
-     if test x${WX_CONFIG+set} != xset ; then
+     if test x${WX_CONFIG_NAME+set} != xset ; then
         WX_CONFIG_PATH=$wx_config_exec_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
   if test x$wx_config_prefix != x ; then
      wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
-     if test x${WX_CONFIG+set} != xset ; then
+     if test x${WX_CONFIG_NAME+set} != xset ; then
         WX_CONFIG_PATH=$wx_config_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
