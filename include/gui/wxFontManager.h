@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1999/07/21 21:01:14  VZ
+ * Win compilation fixes
+ *
  * Revision 1.5  1998/05/18 17:48:24  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -76,7 +79,8 @@ private:
    /** A list of all known fonts.
        @see FontData
    */
-   kbList fontList;
+   KBLIST_DEFINE(FontList, FontData);
+   FontList fontList;
    
    /// An Font to return for unknown lookup strings.
    wxFont   *unknownFont;

@@ -912,8 +912,7 @@ void MDialog_ShowText(MWindow *parent,
 #include "gui/wxDialogLayout.h"
 
 #define NUM_SORTLEVELS 6
-#define NUM_CRITERIA   11
-static wxString sortCriteria[NUM_CRITERIA] =
+static wxString sortCriteria[] =
 {
    gettext_noop("None"),
    gettext_noop("Date"),
@@ -928,6 +927,9 @@ static wxString sortCriteria[NUM_CRITERIA] =
    gettext_noop("Score (reverse)"),
    gettext_noop("Thread")
 };
+
+// dedining it liek this makes it much more difficult to forget to update it
+static const int NUM_CRITERIA  = WXSIZEOF(sortCriteria);
 
 #define NUM_LABELS 2
 static wxString labels[NUM_LABELS] =
