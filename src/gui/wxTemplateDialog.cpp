@@ -148,6 +148,9 @@ public:
    // get the value of the template chosen
    wxString GetTemplateValue() const;
 
+   // get the last template kind the user chose
+   MessageTemplateKind GetTemplateKind() const { return m_kind; }
+
    // called by wxWindows when [Ok] button was pressed
    virtual bool TransferDataFromWindow();
 
@@ -162,6 +165,9 @@ private:
    // helper function to get the correct title for the dialog
    static wxString GetTemplateTitle(MessageTemplateKind kind);
 
+   // set the template kind and update the dialog title to match it
+   void SetTemplateKind(MessageTemplateKind kind);
+
    // fill the listbox with the templates of the given m_kind
    void FillListBox();
 
@@ -175,8 +181,11 @@ private:
    // show the currently chosen template in the text control
    void UpdateText();
 
-   MessageTemplateKind m_kind;   // the kind of all templates we edit
-   wxString m_name;              // the name of the template being edited
+   // the kind of the templates we edit (compose/reply/...)
+   MessageTemplateKind m_kind;
+
+   // the name of the template being edited, empty if none
+   wxString m_name;
 
    // controls
    wxListBox  *m_listbox;
@@ -525,13 +534,12 @@ bool wxFolderTemplatesDialog::TransferDataFromWindow()
 wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
                                            const TemplatePopupMenuItem& menu,
                                            wxWindow *parent)
-                    : wxManuallyLaidOutDialog(parent,
-                                              GetTemplateTitle(kind),
-                                              "AllTemplates")
+                    : wxManuallyLaidOutDialog(parent, "", "AllTemplates")
 {
    // init member vars
    // ----------------
-   m_kind = kind;
+
+   SetTemplateKind(kind);
 
    // layout the controls
    // -------------------
@@ -539,6 +547,20 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
 
    // first the box around everything
    wxStaticBox *box = CreateStdButtonsAndBox("All available templates");
+
+   wxStaticText *msg =
+      new wxStaticText
+      (
+       this, -1,
+       _("Select the template to edit in the list first. Then right click the\n"
+         "mouse in the text control to get the list of all available macros.")
+      );
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
 
    // on the left side there is a combo allowing to choose the template type
    // and a listbox with all available templates for this type
@@ -561,8 +583,8 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
                                       wxCB_READONLY);
 
    c = new wxLayoutConstraints;
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+   c->left.SameAs(msg, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
    combo->SetConstraints(c);
@@ -573,7 +595,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
 
    c = new wxLayoutConstraints;
    c->top.Below(combo, 2*LAYOUT_Y_MARGIN);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(msg, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.SameAs(combo, wxWidth);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
@@ -584,15 +606,15 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxCentreY, -2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(m_listbox, wxCentreY, LAYOUT_Y_MARGIN);
    m_btnAdd->SetConstraints(c);
 
    m_btnDelete = new wxButton(this, Button_Template_Delete, _("&Delete"));
    c = new wxLayoutConstraints;
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
-   c->bottom.SameAs(box, wxCentreY, 2*LAYOUT_Y_MARGIN);
-   c->right.SameAs(m_btnAdd, wxRight);
+   c->top.SameAs(m_listbox, wxCentreY, LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_btnDelete->SetConstraints(c);
 
    // between the listbox and the buttons there is the text control where
@@ -712,11 +734,19 @@ void wxAllTemplatesDialog::CheckForChanges()
    }
 }
 
+void wxAllTemplatesDialog::SetTemplateKind(MessageTemplateKind kind)
+{
+   m_kind = kind;
+
+   SetTitle(GetTemplateTitle(m_kind));
+}
+
 void wxAllTemplatesDialog::OnComboBoxChange(wxCommandEvent& event)
 {
    CheckForChanges();
 
-   m_kind = (MessageTemplateKind)event.GetInt();
+   SetTemplateKind((MessageTemplateKind)event.GetInt());
+
    m_listbox->Clear();
    FillListBox();
    UpdateText();
@@ -827,28 +857,23 @@ String ChooseTemplateFor(MessageTemplateKind kind,
 void EditTemplates(wxWindow *parent,
                    const TemplatePopupMenuItem& menu)
 {
-   // first get the kind of templates to edit
-   wxString templateKinds[MessageTemplate_Max];
-   templateKinds[MessageTemplate_NewMessage] = _("Composing new messages");
-   templateKinds[MessageTemplate_NewArticle] = _("Writing new articles");
-   templateKinds[MessageTemplate_Reply] = _("Replying");
-   templateKinds[MessageTemplate_Forward] = _("Forwarding");
-   templateKinds[MessageTemplate_Followup] = _("Following up");
+   String path;
+   path << '/' << M_SETTINGS_CONFIG_SECTION << "/TemplateEditKind";
 
-   int index = wxGetSingleChoiceIndex
-               (
-                _("What kind of templates would you like to edit?\n"
-                  "Mahogany uses different templates for:"),
-                _("Mahogany : edit templates"),
-                WXSIZEOF(templateKinds), templateKinds,
-                parent
-               );
-
-   if ( index != -1 )
+   Profile *profile = mApplication->GetProfile();
+   long kindLastEdited = profile->readEntry(path, (long)MessageTemplate_Reply);
+   if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
    {
-      wxAllTemplatesDialog dlg((MessageTemplateKind)index, menu, parent);
+      wxLogDebug("Corrupted TemplateEditKind entry in config.");
 
-      dlg.ShowModal();
+      kindLastEdited = MessageTemplate_Reply;
+   }
+
+   wxAllTemplatesDialog dlg((MessageTemplateKind)kindLastEdited, menu, parent);
+
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+      profile->writeEntry(path, dlg.GetTemplateKind());
    }
 }
 
