@@ -1698,7 +1698,7 @@ SendMessageCC::Send(int flags)
    if ( !MailFolder::Init() )
       return false;
 
-   MCclientLocker locker();
+   MCclientLocker locker;
 
 #ifndef OS_UNIX
    // For non-unix systems we make sure that no-one tries to run
