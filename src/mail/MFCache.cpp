@@ -266,6 +266,9 @@ bool MfStatusCache::Load(const String& filename)
       {
          str = file[n];
 
+         // we have to unquote CACHE_DELIMITER which could occur in the folder
+         // name - see Save()
+         //
          // this is safe to do as we can only have 2 consecutive delimiters in
          // the folder name
          str.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
@@ -294,6 +297,7 @@ bool MfStatusCache::Load(const String& filename)
          name = wxString(str.c_str(), p);
 
          // get the rest
+         status.Init();
          switch ( fmt )
          {
             case CacheFile_1_0:
