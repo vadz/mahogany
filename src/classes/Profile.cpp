@@ -626,7 +626,7 @@ private:
 class FilterProfile : public ProfileImpl
 {
 public:
-   static FilterProfile * CreateFilterProfile(const String &name)
+   static FilterProfile * Create(const String &name)
       { return new FilterProfile(name); }
 
    virtual const wxChar * GetProfileSection(void) const
@@ -648,6 +648,29 @@ private:
       }
 
    DECLARE_NO_COPY_CLASS(FilterProfile)
+};
+
+/// Same as Identity and FilterProfile but for "/Modules" branch
+class ModuleProfile : public ProfileImpl
+{
+public:
+   static ModuleProfile *Create(const String& name)
+   {
+      return new ModuleProfile(name);
+   }
+
+   virtual const wxChar *GetProfileSection() const
+   {
+      return _T("/Modules");
+   }
+
+private:
+   ModuleProfile(const String& name)
+   {
+      m_ProfileName << GetRootPath() << _T('/') << name;
+   }
+
+   DECLARE_NO_COPY_CLASS(ModuleProfile)
 };
 
 /**
@@ -1174,7 +1197,7 @@ Profile::CreateFilterProfile(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  FilterProfile::CreateFilterProfile(idName);
+   Profile *p =  FilterProfile::Create(idName);
    EnforcePolicy(p);
    return p;
 }
@@ -1182,10 +1205,12 @@ Profile::CreateFilterProfile(const String & idName)
 Profile *
 Profile::CreateModuleProfile(const String & classname, Profile const *parent)
 {
+   ASSERT_MSG( !parent,
+               _T("CreateModuleProfile(): !NULL parent not supported") );
+
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != _T('/')));
-   String newName = _T("Modules/") + classname;
-   Profile *p =  ProfileImpl::CreateProfile(newName, parent);
+   Profile *p =  ModuleProfile::Create(classname);
 
    EnforcePolicy(p);
    return p;
