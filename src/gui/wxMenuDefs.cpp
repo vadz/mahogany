@@ -274,7 +274,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , wxITEM_NORMAL },
 
    // folder
-   // available accels: DGJKQVWXYZ
+   // available accels: DGJKQVXYZ
    { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , wxITEM_NORMAL },
    { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , wxITEM_NORMAL },
@@ -302,6 +302,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_SEARCH,    gettext_noop("Searc&h..."), gettext_noop("Search for the messages in folder(s)") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , wxITEM_NORMAL },
+   { WXMENU_FOLDER_WHENCE,    gettext_noop("&Where is filter..."), gettext_noop("Find the filters which move messages to this folder")               , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,        wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , wxITEM_NORMAL },
 
    // normal edit

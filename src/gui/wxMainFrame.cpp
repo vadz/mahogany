@@ -909,6 +909,14 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             }
             break;
 
+         case WXMENU_FOLDER_WHENCE:
+            {
+               MFolder_obj folder(m_FolderTree->GetSelection());
+               if ( folder )
+                  FindFiltersForFolder(folder, this);
+            }
+            break;
+
          case WXMENU_FOLDER_IMPORTTREE:
             // create all MBOX folders under the specified dir
             {

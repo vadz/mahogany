@@ -9,495 +9,494 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
-13.08.04 VZ: "Show MIME Structure" allows to save multiple attachments at once
-17.07.04 VZ: full support for showing PGP/MIME encoded messages
-17.07.04 VZ: added "Send now" command to the composer "Compose" menu
-16.07.04 VZ: show threading indicator in the status column
-12.07.04 VZ: use plain, not encrypted, text in replies to PGP messages
-11.07.04 VZ: integrated DSPAM statistical spam filter
-06.07.04 VZ: "Set From from To" option now behaves more usefully
-02.07.04 VZ: added nop() filter action (stop processing the filter program)
-15.05.04 VZ: added spam filter for dangerous (executable) attachments
-14.05.04 XN: added support for uuencoded attachments
-12.05.04 VZ: fixed bug with slashes and colons not working in the user names
-22.04.04 VZ: improved signature/trailer detection when replying to messages
-21.04.04 VZ: show subfolders not in the tree in bold in browse subfolders dialog
-20.04.04 VZ: added "--import" command line option
-19.04.04 VZ: made "Quick filter" dialog slightly easier to use
-08.04.04 VZ: close the message view window if underlying message is deleted
-14.03.04 VZ: highlight the options with non default values in the options dialog
-13.03.04 VZ: folders can now be dragged in the tree to change their order
+2004-09-13 VZ: added "Folder|Where is filter..." command
+2004-08-13 VZ: "Show MIME Structure" allows to save multiple attachments at once
+2004-07-17 VZ: full support for showing PGP/MIME encoded messages
+2004-07-17 VZ: added "Send now" command to the composer "Compose" menu
+2004-07-16 VZ: show threading indicator in the status column
+2004-07-12 VZ: use plain, not encrypted, text in replies to PGP messages
+2004-07-11 VZ: integrated DSPAM statistical spam filter
+2004-07-06 VZ: "Set From from To" option now behaves more usefully
+2004-07-02 VZ: added nop() filter action (stop processing the filter program)
+2004-05-15 VZ: added spam filter for dangerous (executable) attachments
+2004-05-14 XN: added support for uuencoded attachments
+2004-05-12 VZ: fixed bug with slashes and colons not working in the user names
+2004-04-22 VZ: improved signature/trailer detection when replying to messages
+2004-04-21 VZ: show subfolders not in the tree in bold in browse subfolders dialog
+2004-04-20 VZ: added "--import" command line option
+2004-04-19 VZ: made "Quick filter" dialog slightly easier to use
+2004-04-08 VZ: close the message view window if underlying message is deleted
+2004-03-14 VZ: highlight the options with non default values in the options dialog
+2004-03-13 VZ: folders can now be dragged in the tree to change their order
 
 Release 0.66 'Clio' January 18, 2004
 ------------------------------------
 
-17.01.04 VZ: added --userdir command line option
-28.12.03 VZ: exposed almost all mail classes to embedded Python interpreter
-27.12.03 VZ: added $header template variable (entire original message header)
-26.12.03 VZ: main program icon now indicates whether there is new mail anywhere
-18.12.03 VZ: added command to select all text in the viewer
-07.10.03 VZ: it is now possible to customize the layout of the main window
-06.10.03 VZ: added "Paste quoted" menu command in the composer
-03.10.03 VZ: added "isfromme()" filter function
-02.10.03 VZ: text viewer now supports printing
-01.10.03 VZ: added quick search commands in the folder view ('/', '?', 'n', 'N')
-01.10.03 VZ: added popup menu for the attachments in the composer
-28.09.03 VZ: better UI for disablable dialog boxes
-28.09.03 VZ: added support for using files, not registry, by default under Win
-26.09.03 RV: simple whitelist support
-23.09.03 VZ: respect X-Attribution header when writing replies
-19.09.03 VZ: added "Reply/Forward To" commands to mail address popup menu
-17.09.03 VZ: show UTF-7/8-encoded headers [as] correctly [as possible]
-25.08.03 RV: new text-only composer
-14.08.03 RV: simple one address per line address book support
+2004-01-17 VZ: added --userdir command line option
+2003-12-28 VZ: exposed almost all mail classes to embedded Python interpreter
+2003-12-27 VZ: added $header template variable (entire original message header)
+2003-12-26 VZ: main program icon now indicates whether there is new mail anywhere
+2003-12-18 VZ: added command to select all text in the viewer
+2003-10-07 VZ: it is now possible to customize the layout of the main window
+2003-10-06 VZ: added "Paste quoted" menu command in the composer
+2003-10-03 VZ: added "isfromme()" filter function
+2003-10-02 VZ: text viewer now supports printing
+2003-10-01 VZ: added quick search commands in the folder view ('/', '?', 'n', 'N')
+2003-10-01 VZ: added popup menu for the attachments in the composer
+2003-09-28 VZ: better UI for disablable dialog boxes
+2003-09-28 VZ: added support for using files, not registry, by default under Win
+2003-09-26 RV: simple whitelist support
+2003-09-23 VZ: respect X-Attribution header when writing replies
+2003-09-19 VZ: added "Reply/Forward To" commands to mail address popup menu
+2003-09-17 VZ: show UTF-7/8-encoded headers [as] correctly [as possible]
+2003-08-25 RV: new text-only composer
+2003-08-14 RV: simple one address per line address book support
 
 Release 0.65 'Claire' August 15, 2003
 -------------------------------------
 
-24.07.03 NB: added an option to choose between internal and external help viewers
-16.07.03 RV: added an option to not create "folder internal data" pseudo message
-14.07.03 NB: Mahogany can now be compiled with cygwin's -mno-cygwin switch
-23.06.03 VZ: fixed SSL compilation on RedHat 9
-23.06.03 NB: Mahogany can now be compiled with cygwin
-11.04.03 VZ: debugged the "Migrate" tool which is now half-usable
-03.04.03 VZ: added a new spam test for junk at the end of subject
-01.04.03 VZ: options to disable SMTP auth methods (broken servers workaround)
-30.03.03 VZ: speed up of header retrieval for POP and IMAP
-29.03.03 VZ: allow setting From and Fcc headers from the composer templates
-08.03.03 VZ: added (START)TLS support for POP/IMAP/SMTP/NNTP
-16.02.03 VZ: automatically retrieve PGP public keys from keyserver
-15.02.03 VZ: added find dialog to the raw text viewer
-14.02.03 NB: don't move focus when user cancelled copying/moving
+2003-07-24 NB: added an option to choose between internal and external help viewers
+2003-07-16 RV: added an option to not create "folder internal data" pseudo message
+2003-07-14 NB: Mahogany can now be compiled with cygwin's -mno-cygwin switch
+2003-06-23 VZ: fixed SSL compilation on RedHat 9
+2003-06-23 NB: Mahogany can now be compiled with cygwin
+2003-04-11 VZ: debugged the "Migrate" tool which is now half-usable
+2003-04-03 VZ: added a new spam test for junk at the end of subject
+2003-04-01 VZ: options to disable SMTP auth methods (broken servers workaround)
+2003-03-30 VZ: speed up of header retrieval for POP and IMAP
+2003-03-29 VZ: allow setting From and Fcc headers from the composer templates
+2003-03-08 VZ: added (START)TLS support for POP/IMAP/SMTP/NNTP
+2003-02-16 VZ: automatically retrieve PGP public keys from keyserver
+2003-02-15 VZ: added find dialog to the raw text viewer
+2003-02-14 NB: don't move focus when user cancelled copying/moving
 
 Release 0.64.2 'Sparc' Feb 3, 2003 [semiofficial pre-release]
 -------------------------------------------------------------------------------
 
-19.01.03 VZ: created a "View" menu from where view filters can be toggled
-16.12.02 VZ: yet another SPAM filter test: single part multipart/alternative
-16.12.02 VZ: added possibility to use '?' and '*' in address lists
-05.12.02 VZ: added trivial text markup (*bold* and _italic_ conventions) filter
-03.12.02 VZ: decrypting and verifying PGP messages starts to work
-19.10.02 MC: added new filter tests and actions for working with flags
-15.09.02 VZ: added an option to show text [only] in the toolbar buttons
-10.09.02 XN: added a "Move folder" command
-07.09.02 VZ: added possibility to directly edit FCC header in the composer
-02.09.02 VZ: added a dialog for editing the attachment properties in composer
-29.08.02 VZ: show the number of selected messages in the status bar
-15.08.02 VZ: added "Resend message" command
-08.08.02 NB: added "Follow-up to newsgroup" command
-25.07.02 XN: prevent a renamed filter from continuing being used under old name
-23.07.02 VZ: implemented "search in multiple folders" function
-17.07.02 VZ: limited virtual folder support for showing the search results
-01.07.02 NB: added a SpamAssassin SPAM test
-27.06.02 VZ: added an HTML SPAM test
-18.06.02 VZ: added additional filter tests for the SPAM messages
-12.06.02 VZ: fixes for working with read only folders
-11.06.02 VZ: added "Bounce" (a.k.a. redirect) command
-18.05.02 VZ: added a toolbar button to check for new mail
-13.05.02 VZ: added group reply/forwarding feature
-03.05.02 VZ: added highlighting of the URLs in the message headers
-26.04.02 VZ: added popup menu for the email addresses in the message view
-25.04.02 VZ: detect more URLs, including email addresses and wrapped URLs
-24.04.02 XN: implemented much more efficient URL matching algorithm
-22.04.02 VZ: added "--debug" command line option to enable mail debugging
-16.04.02 NB: added UTF-7 support
-14.04.02 VZ: option to use config files under Windows (not only registry)
-14.04.02 VZ: implemented remote control of Mahogany processes
-12.04.02 VZ: updated the composer layout to be simpler in use
-29.03.02 VZ: added command line options to open the composer immediately
-28.03.02 VZ: save unsaved messages when on crash or interrupt
-18.03.02 VZ: added "home folder" option to the folder tree
-17.03.02 VZ: implemented autosaving of the messages being composed
-16.03.02 VZ: implemented message postponing and "Drafts" folder
-16.03.02 VZ: include all ADB importers in the Win32 binary
-13.03.02 VZ: return to last previously selected message when opening a folder
-13.03.02 VZ: added a command to jump to message by number
-13.03.02 VZ: added a new "message number" column to the folder view
-13.03.02 VZ: new and improved folder view columns configuration dialog
-11.03.02 VZ: many fixes to persistent message box handling
-08.03.02 VZ: added "Preview" menu command to the composer
-04.03.02 VZ: added possibility to set the message headers from templates
-04.03.02 VZ: added $signature template macro
-22.02.02 VZ: smarter "To" setting when replying to a message from oneself
-15.02.02 VZ: added option to disable showing external images in the HTML viewer
-13.02.02 VZ: address autocollection is a lot faster now
-01.02.02 VZ: added signature highlighting in the message viewer
-01.02.02 VZ: fixed bug with viewing messages embedded in embedded messages
-25.01.02 VZ: more clear options for the initial message selection
-24.01.02 VZ: fixed crash in Win32 install wizard if user chose to use dialup
-23.01.02 TF: fixed "Preview message on select" bug when setting is off
-23.01.02 NB: fixed toggling of anonymous access in folder properties
+2003-01-19 VZ: created a "View" menu from where view filters can be toggled
+2002-12-16 VZ: yet another SPAM filter test: single part multipart/alternative
+2002-12-16 VZ: added possibility to use '?' and '*' in address lists
+2002-12-05 VZ: added trivial text markup (*bold* and _italic_ conventions) filter
+2002-12-03 VZ: decrypting and verifying PGP messages starts to work
+2002-10-19 MC: added new filter tests and actions for working with flags
+2002-09-15 VZ: added an option to show text [only] in the toolbar buttons
+2002-09-10 XN: added a "Move folder" command
+2002-09-07 VZ: added possibility to directly edit FCC header in the composer
+2002-09-02 VZ: added a dialog for editing the attachment properties in composer
+2002-08-29 VZ: show the number of selected messages in the status bar
+2002-08-15 VZ: added "Resend message" command
+2002-08-08 NB: added "Follow-up to newsgroup" command
+2002-07-25 XN: prevent a renamed filter from continuing being used under old name
+2002-07-23 VZ: implemented "search in multiple folders" function
+2002-07-17 VZ: limited virtual folder support for showing the search results
+2002-07-01 NB: added a SpamAssassin SPAM test
+2002-06-27 VZ: added an HTML SPAM test
+2002-06-18 VZ: added additional filter tests for the SPAM messages
+2002-06-12 VZ: fixes for working with read only folders
+2002-06-11 VZ: added "Bounce" (a.k.a. redirect) command
+2002-05-18 VZ: added a toolbar button to check for new mail
+2002-05-13 VZ: added group reply/forwarding feature
+2002-05-03 VZ: added highlighting of the URLs in the message headers
+2002-04-26 VZ: added popup menu for the email addresses in the message view
+2002-04-25 VZ: detect more URLs, including email addresses and wrapped URLs
+2002-04-24 XN: implemented much more efficient URL matching algorithm
+2002-04-22 VZ: added "--debug" command line option to enable mail debugging
+2002-04-16 NB: added UTF-7 support
+2002-04-14 VZ: option to use config files under Windows (not only registry)
+2002-04-14 VZ: implemented remote control of Mahogany processes
+2002-04-12 VZ: updated the composer layout to be simpler in use
+2002-03-29 VZ: added command line options to open the composer immediately
+2002-03-28 VZ: save unsaved messages when on crash or interrupt
+2002-03-18 VZ: added "home folder" option to the folder tree
+2002-03-17 VZ: implemented autosaving of the messages being composed
+2002-03-16 VZ: implemented message postponing and "Drafts" folder
+2002-03-16 VZ: include all ADB importers in the Win32 binary
+2002-03-13 VZ: return to last previously selected message when opening a folder
+2002-03-13 VZ: added a command to jump to message by number
+2002-03-13 VZ: added a new "message number" column to the folder view
+2002-03-13 VZ: new and improved folder view columns configuration dialog
+2002-03-11 VZ: many fixes to persistent message box handling
+2002-03-08 VZ: added "Preview" menu command to the composer
+2002-03-04 VZ: added possibility to set the message headers from templates
+2002-03-04 VZ: added $signature template macro
+2002-02-22 VZ: smarter "To" setting when replying to a message from oneself
+2002-02-15 VZ: added option to disable showing external images in the HTML viewer
+2002-02-13 VZ: address autocollection is a lot faster now
+2002-02-01 VZ: added signature highlighting in the message viewer
+2002-02-01 VZ: fixed bug with viewing messages embedded in embedded messages
+2002-01-25 VZ: more clear options for the initial message selection
+2002-01-24 VZ: fixed crash in Win32 install wizard if user chose to use dialup
+2002-01-23 TF: fixed "Preview message on select" bug when setting is off
+2002-01-23 NB: fixed toggling of anonymous access in folder properties
 
 Release 0.64 'Sparc' January 14, 2002
 -------------------------------------------------------------------------------
 
-13.01.02 VZ: added "Organization" header
-09.01.02 VZ: added "New Mail" page to the create folder wizard
-08.01.02 VZ: added "Leave mail on server" to the insall/folder create wizards
-04.12.01 VZ: added more commands to the folder view header popup menu
-04.12.01 VZ: added an option to send 8 bit data directly
-23.11.01 VZ: added the viewer bar to quickly change the current viewer
-19.11.01 VZ: added support for playing sounds on new mail
-17.11.01 VZ: SSL support for Win32 version
-16.11.01 VZ: added "Update" and "Update all" commands in the "Folder" menu
-15.11.01 VZ: added possibility to monitor the folders in the background
-14.11.01 VZ: apply filters faster by evaluating them all first
-02.11.01 VZ: show "busy info" dialog during long uninterruptible operations
-28.10.01 VZ: added Portuguese translation by Jorge Resende
-27.10.01 VZ: added possibility to remember password for current session only
-22.10.01 VZ: added HTML printing
-15.10.01 VZ: remember POP3 flags between sessions
-12.10.01 VZ: use "List-Post" header, if any, when doing "Reply to list"
-12.10.01 XN: message sorting and threading now work together
-09.10.01 VZ: added "Rename" and "Copy" buttons in the filters dialog
-08.10.01 VZ: "Reply to list" command - thanks to SF for forcing me to add it
-26.09.01 VZ: allow renaming folders and mailboxes independently
-24.09.01 VZ: quickly select next unread folder in the tree with Ctrl-Up/Down
-12.09.01 VZ: added "open folder in read only mode" command
-05.09.01 VZ: added support for server side threading
-05.09.01 VZ: added threading item to folder view popup menu
-03.09.01 VZ: added preview delay option in folder view
-01.09.01 VZ: added sorting menu (right click a column in the folder view)
-30.08.01 VZ: added support for server-side sorting
-30.08.01 VZ: handle connection loss more gracefully
-25.08.01 VZ: auto select the next unread msg/folder with one key press
-21.08.01 VZ: added address book interface to /etc/passwd (Unix only)
-21.08.01 VZ: better colour selector control in the options dialog
-13.08.01 NB: added the option to configure Forward prefix
-12.08.01 VZ: added the option to include the selected text only in reply
-11.08.01 MR: added "quote original text in reply" option (yes/no/ask)
-08.08.01 VZ: added "Zap" (== delete and expunge) command
-03.08.01 VZ: better feedback for dnd, show the target folder name in status bar
-30.07.01 XN: added mark read/unread commands
-11.07.01 VZ: added support for logging messages to a file
-28.06.01 VZ: automatically remove "mailto:" from addresses in composer
-19.06.01 XN: threading takes into account In-Reply-To, not only References
-19.06.01 VZ: POP3 speedup: only retrieve headers, not entire messages
+2002-01-13 VZ: added "Organization" header
+2002-01-09 VZ: added "New Mail" page to the create folder wizard
+2002-01-08 VZ: added "Leave mail on server" to the insall/folder create wizards
+2001-12-04 VZ: added more commands to the folder view header popup menu
+2001-12-04 VZ: added an option to send 8 bit data directly
+2001-11-23 VZ: added the viewer bar to quickly change the current viewer
+2001-11-19 VZ: added support for playing sounds on new mail
+2001-11-17 VZ: SSL support for Win32 version
+2001-11-16 VZ: added "Update" and "Update all" commands in the "Folder" menu
+2001-11-15 VZ: added possibility to monitor the folders in the background
+2001-11-14 VZ: apply filters faster by evaluating them all first
+2001-11-02 VZ: show "busy info" dialog during long uninterruptible operations
+2001-10-28 VZ: added Portuguese translation by Jorge Resende
+2001-10-27 VZ: added possibility to remember password for current session only
+2001-10-22 VZ: added HTML printing
+2001-10-15 VZ: remember POP3 flags between sessions
+2001-10-12 VZ: use "List-Post" header, if any, when doing "Reply to list"
+2001-10-12 XN: message sorting and threading now work together
+2001-10-09 VZ: added "Rename" and "Copy" buttons in the filters dialog
+2001-10-08 VZ: "Reply to list" command - thanks to SF for forcing me to add it
+2001-09-26 VZ: allow renaming folders and mailboxes independently
+2001-09-24 VZ: quickly select next unread folder in the tree with Ctrl-Up/Down
+2001-09-12 VZ: added "open folder in read only mode" command
+2001-09-05 VZ: added support for server side threading
+2001-09-05 VZ: added threading item to folder view popup menu
+2001-09-03 VZ: added preview delay option in folder view
+2001-09-01 VZ: added sorting menu (right click a column in the folder view)
+2001-08-30 VZ: added support for server-side sorting
+2001-08-30 VZ: handle connection loss more gracefully
+2001-08-25 VZ: auto select the next unread msg/folder with one key press
+2001-08-21 VZ: added address book interface to /etc/passwd (Unix only)
+2001-08-21 VZ: better colour selector control in the options dialog
+2001-08-13 NB: added the option to configure Forward prefix
+2001-08-12 VZ: added the option to include the selected text only in reply
+2001-08-11 MR: added "quote original text in reply" option (yes/no/ask)
+2001-08-08 VZ: added "Zap" (== delete and expunge) command
+2001-08-03 VZ: better feedback for dnd, show the target folder name in status bar
+2001-07-30 XN: added mark read/unread commands
+2001-07-11 VZ: added support for logging messages to a file
+2001-06-28 VZ: automatically remove "mailto:" from addresses in composer
+2001-06-19 XN: threading takes into account In-Reply-To, not only References
+2001-06-19 VZ: POP3 speedup: only retrieve headers, not entire messages
 
 Release 0.63 'Saugus' June 14, 2001
 -------------------------------------------------------------------------------
 
-12.06.01 VZ: added possibility to sort on "To: " in folder view
-10.06.01 VZ: fixed opening of files as folders
-06.06.01 NB: added support for displaying folder names containing letters encoded
-             in modified UTF-7 (converts text to current locale's encoding only,
-             requires wxWindows 2.3.x)
-06.06.01 VZ: show progress dialog while extracting addresses
-05.06.01 VZ: (Unix) configure now detects Python 2.x
-28.05.01 NB: added "Next flagged" menu command
-27.05.01 VZ: added URL popup menu
-26.05.01 NB: added possibility to open URLs in new window
-17.05.01 VZ: several bugs related to renaming the folders in the tree fixed
-14.05.01 VZ: added "Clear folder" command
-14.05.01 NB: fixed text highlighting (middle lines were black in selection)
-13.05.01 NB: added initial UTF-8 support (converts text to current locale's
-             encoding only, requires wxWindows 2.3.x)
-12.05.01 VZ: TwoFish encryption can now be used under Windows as well
-01.05.01 VZ: optionally show the number of messages in the folder tree
-25.04.01 VZ: added "Away" (or unattended) mode support
-19.04.01 VZ: added "Close" and "Close all" folder(s) commands
-17.04.01 VZ: added message progress display
-17.04.01 VZ: added (configurable) limit on the size of inline graphics
-17.04.01 VZ: added possibility to show message size in bytes/kb/mb
-09.04.01 VZ: Mahogany now uses imap2000b which fixes several mail related bugs
-08.04.01 VZ: use the charset of the original message when replying/forwarding
-04.04.01 VZ: huge speed up in messages copying between IMAP folders
-03.04.01 VZ: folder status is now persistent
-30.03.01 VZ: [WIN] fixed crash when showing preferences dialog
-29.03.01 VZ: fixed bug with broken "Identity Add/Edit" dialog
-27.03.01 VZ: printing bug (page was offset and page breaks were wrong) fixed
-26.03.01 VZ: fixed search bug (wrong messages were highlighted)
-24.03.01 VZ: retrieving remotedly stored folders/identities from Win works too
-23.03.01 VZ: added explicit "Sender" setting
-23.03.01 VZ: fixed bug with "Add" button being disabled in template dialog
+2001-06-12 VZ: added possibility to sort on "To: " in folder view
+2001-06-10 VZ: fixed opening of files as folders
+2001-06-06 NB: added support for displaying folder names containing letters
+                  encoded in modified UTF-7 (converts text to current locale's
+                  encoding only, requires wxWindows 2.3.x)
+2001-06-06 VZ: show progress dialog while extracting addresses
+2001-06-05 VZ: (Unix) configure now detects Python 2.x
+2001-05-28 NB: added "Next flagged" menu command
+2001-05-27 VZ: added URL popup menu
+2001-05-26 NB: added possibility to open URLs in new window
+2001-05-17 VZ: several bugs related to renaming the folders in the tree fixed
+2001-05-14 VZ: added "Clear folder" command
+2001-05-14 NB: fixed text highlighting (middle lines were black in selection)
+2001-05-13 NB: added initial UTF-8 support (converts text to current locale's
+                  encoding only, requires wxWindows 2.3.x)
+2001-05-12 VZ: TwoFish encryption can now be used under Windows as well
+2001-05-01 VZ: optionally show the number of messages in the folder tree
+2001-04-25 VZ: added "Away" (or unattended) mode support
+2001-04-19 VZ: added "Close" and "Close all" folder(s) commands
+2001-04-17 VZ: added message progress display
+2001-04-17 VZ: added (configurable) limit on the size of inline graphics
+2001-04-17 VZ: added possibility to show message size in bytes/kb/mb
+2001-04-09 VZ: Mahogany now uses imap2000b which fixes several mail related bugs
+2001-04-08 VZ: use the charset of the original message when replying/forwarding
+2001-04-04 VZ: huge speed up in messages copying between IMAP folders
+2001-04-03 VZ: folder status is now persistent
+2001-03-30 VZ: [WIN] fixed crash when showing preferences dialog
+2001-03-29 VZ: fixed bug with broken "Identity Add/Edit" dialog
+2001-03-27 VZ: printing bug (page was offset and page breaks were wrong) fixed
+2001-03-26 VZ: fixed search bug (wrong messages were highlighted)
+2001-03-24 VZ: retrieving remotedly stored folders/identities from Win works too
+2001-03-23 VZ: added explicit "Sender" setting
+2001-03-23 VZ: fixed bug with "Add" button being disabled in template dialog
 
 Release 0.62 'Mars' March 22, 2001
 -------------------------------------------------------------------------------
 
-21.03.01 VZ: keyboard navigation in the folder view improved significantly
-19.03.01 VZ: allow to have empty SMTP server for Unix setup
-16.03.01 VZ: more flexible initial msg selection in the folder viewer
-             reading newsgroups doesn't crash the program and works somehow
-15.03.01 VZ: added "Synchronize" page to the options dialog
-14.03.01 VZ: propose to retrieve all mailboxes from IMAP servers when opening
-12.03.01 VZ: MIME parsing is finally (almost) correct - and more efficient, too
-07.03.01 VZ: quick filter enhancements: now can filter on recipients too
-28.02.01 VZ: indicate the external editor status in the composer window title
-             filters don't get applied to deleted messages any more
-21.02.01 VZ: added hard limit on the number of headers retrieved
-             show filters progress in the status bar
-20.02.01 VZ: made new mail reporting less intrusive
-16.02.01 VZ: added highlighting of folders with flagged messages in the tree
-                and a menu command to flag messages
-             don't show duplicates in the address completion dialog
-15.02.01 VZ: added message sorting by status and by size
-13.02.01 VZ: added an option to not open any folders at startup at all
-10.02.01 VZ: better error msg when opening POP3 folder opened from elsewhere
-09.02.01 VZ: added "Edit" button to folder filters dlg, also edit on dbl click
-             allow setting Trash/Outbox on per folder basis
-08.02.01 VZ: fixed creation of all folders from IMAP server once again
-07.02.01 VZ: fixed bug with incorrect name in the folder tree after renaming
-             better handling of folder view columns widths setting
-06.02.01 VZ: scroll the msg view to the beginning when viewing a new message
-31.01.01 VZ: safety guard against expunging messages accidentally when moving
-30.01.01 VZ: made title/status bar of the message/folder view customizable
-29.01.01 VZ: support for flagging messages (display and status changing)
+2001-03-21 VZ: keyboard navigation in the folder view improved significantly
+2001-03-19 VZ: allow to have empty SMTP server for Unix setup
+2001-03-16 VZ: more flexible initial msg selection in the folder viewer
+                  reading newsgroups doesn't crash the program and works somehow
+2001-03-15 VZ: added "Synchronize" page to the options dialog
+2001-03-14 VZ: propose to retrieve all mailboxes from IMAP servers when opening
+2001-03-12 VZ: MIME parsing is finally (almost) correct - and more efficient, too
+2001-03-07 VZ: quick filter enhancements: now can filter on recipients too
+2001-02-28 VZ: indicate the external editor status in the composer window title
+                  filters don't get applied to deleted messages any more
+2001-02-21 VZ: added hard limit on the number of headers retrieved
+                  show filters progress in the status bar
+2001-02-20 VZ: made new mail reporting less intrusive
+2001-02-16 VZ: added highlighting of folders with flagged messages in the tree
+                  and a menu command to flag messages
+                 don't show duplicates in the address completion dialog
+2001-02-15 VZ: added message sorting by status and by size
+2001-02-13 VZ: added an option to not open any folders at startup at all
+2001-02-10 VZ: better error msg when opening POP3 folder opened from elsewhere
+2001-02-09 VZ: added "Edit" button to folder filters dlg, also edit on dbl click
+                 allow setting Trash/Outbox on per folder basis
+2001-02-08 VZ: fixed creation of all folders from IMAP server once again
+2001-02-07 VZ: fixed bug with incorrect name in the folder tree after renaming
+                 better handling of folder view columns widths setting
+2001-02-06 VZ: scroll the msg view to the beginning when viewing a new message
+2001-01-31 VZ: safety guard against expunging messages accidentally when moving
+2001-01-30 VZ: made title/status bar of the message/folder view customizable
+2001-01-29 VZ: support for flagging messages (display and status changing)
 
-26.01.01 VZ: big internal changes => much better stability and more efficient
+2001-01-26 VZ: big internal changes => much better stability and more efficient
 
 Release 0.61 'Hawkins' [UNRELEASED]
 -------------------------------------------------------------------------------
 
-23.01.01 ALL:allow (dual) licensing Mahogany under GPL
+2001-01-23 ALL allow (dual) licensing Mahogany under GPL
 
-22.01.01 VZ: open autocollect address book in the editor the first time
-22.01.01 NB: fix attachment name and language autodetection
-19.01.01 VZ: serious server side searching on IMAP servers bug fixed
-16.01.01 VZ: sending mail with local MTA respects BCC
-             temp mail files are not world readable any more
-15.01.01 VZ: serious bug in parsing embedded MIME message parts fixed
-08.01.01 VZ: added option to reopen all folders which were opened the last time
-06.01.01 VZ: fixed crash when viewing messages with incorrect dates
-             fixed crash when using encryption in Windows version
-04.01.01 VZ: fixed crash when removing folders with auto collect flag set
-             an option to not open the last opened folder on startup added
-             fixed crash (debug mode only) when copying 0 length messages
-30.12.00 VZ: added an option to show TEXT/PLAIN attachments inline
-04.12.00 VZ: improvement to "folder filters" dialog: can add filters from here
-01.12.00 VZ: "system" folders are now on the top of the folder tree
-             fixed bug with messages boxes which couldn't be disabled in 0.61
-27.11.00 VZ: added "Import file folders" from directory command
-23.11.00 KB: Ping timer interval <= 0 is now interpreted as "don't ping"
-20.11.00 KB: Added a miniframe with timeout as the dialog for starting PalmOS
-             synchronisation. No more any need to press [OK] button.
-08.11.00 KB: Simplifications to folder update and filtering mechanism. Visible
-             results are:
-             outbox status inconsistency is gone, filtering should be faster
-             as unnecessary updates are gone, filtering policy can be set per
-             folder
-09.11.00 VZ: added "Save addresses from message" command
-08.11.00 VZ: "Preview message before sending" setting (no GUI support though)
+2001-01-22 VZ: open autocollect address book in the editor the first time
+2001-01-22 NB: fix attachment name and language autodetection
+2001-01-19 VZ: serious server side searching on IMAP servers bug fixed
+2001-01-16 VZ: sending mail with local MTA respects BCC
+                 temp mail files are not world readable any more
+2001-01-15 VZ: serious bug in parsing embedded MIME message parts fixed
+2001-01-08 VZ: added option to reopen all folders which were opened the last time
+2001-01-06 VZ: fixed crash when viewing messages with incorrect dates
+                 fixed crash when using encryption in Windows version
+2001-01-04 VZ: fixed crash when removing folders with auto collect flag set
+                 an option to not open the last opened folder on startup added
+                 fixed crash (debug mode only) when copying 0 length messages
+2000-12-30 VZ: added an option to show TEXT/PLAIN attachments inline
+2000-12-04 VZ: improvement to "folder filters" dialog: can add filters from here
+2000-12-01 VZ: "system" folders are now on the top of the folder tree
+                 fixed bug with messages boxes which couldn't be disabled in 0.61
+2000-11-27 VZ: added "Import file folders" from directory command
+2000-11-23 KB: Ping timer interval <= 0 is now interpreted as "don't ping"
+2000-11-20 KB: Added a miniframe with timeout as the dialog for starting PalmOS
+                  synchronisation. No more any need to press [OK] button.
+2000-11-08 KB: Simplifications to folder update and filtering mechanism. Visible
+                  results are: outbox status inconsistency is gone, filtering
+                  should be faster as unnecessary updates are gone, filtering
+                  policy can be set per folder
+2000-11-09 VZ: added "Save addresses from message" command
+2000-11-08 VZ: "Preview message before sending" setting (no GUI support though)
 
 Release 0.60 'Redmond' November 9, 2000
 -------------------------------------------------------------------------------
-24.10.00 VZ: added a per-folder flag for new mail notification
-23.10.00 KB: fixed IMAP flag string generation (didn't work for some servers)
-20.10.00 VZ: access program options dialog from root folder properties
-             don't popup message boxes with unimportant messages any more
-18.10.00 VZ: ask for the passwords as needed, propose to remember them
-05.10.00 NB: Fixed incorrect generation of the "From" header, readded Reply-To
-30.09.00 VZ: allow sending mail to the addresses without the hostname part
-30.09.00 KB: added mail delivery via sendmail
-             removed assert for wxFONTENCODING_DEFAULT encoding in SendMessageCC.cpp
-             improved libmal error/status reporting, updated German translations
-             Added option for IMAP header pre-fetch/lookahead with default set to 1.
-             Fixed OVERVIEW_X bug for IMAP by always building overview on client side. :-(
-             Fixed (hopefully) deletion behaviour for Trash in folderlistctrl.
-             Fixed creation of SentMail folder.
-18.09.00 KB: status/error message display for MAL synchronisation, copying
-             messages now preserves status flags
-07.09.00 KB: Copying messages now uses IMAP server-side copies where available,
-             sooo much faster :-)
-05.09.00 KB: added TwoFish encryption/decryption for passwords
-03.09.00 KB: fixed endless recursion in INBOX listing callback which caused IMAP server
-             mailbox import to never complete, updated splash screen, finished config sync
-28.08.00 KB: fixed auto-creation of non-existent folders on IMAP etc
-             reorganised the options dialog for the PalmOS module and documented
-             it better
-             Started remote config synchronisation code, EXPERIMENTAL_sync
-             configure: --with-experimental=a,b,c --> defines EXPERIMENTAL_a,
-             EXPERIMENTAL_b, ...
-             Added MailFolderCC::HasInferiors()
-24.08.00 VZ: added "remove identity" command, it is now possible to set
-             signature/X-face and other composition parameters for each identity
-             separately, options which don't make sense for identities don't
-             appear in the identity edit dialog any more
-24.08.00 KB: rpm generation and SuSE compilation work now (export RPM_ROOT=
-             and if required make a link to it from the default location).
-             Added support for PAM under Linux to configure.
-21.08.00 KB: made install wizard explain more and always creates the INBOX
-             default folder for IMAP servers added warning about browsing
-             taking very long
-16.08.00 VZ: install wizard now creates all IMAP folders in the folder tree
-11.08.00 VZ: new option for not quoting the empty lines in reply
-06.08.00 KB: added printing to filter functions
-             renamed configure options back to --with instead of --enable
-             changed handling of --with-experimental to allow multiple
-             experimental settings together
-31.07.00 VZ: serious bug with messages in base64 encoding fixed
-28.07.00 VZ: readded rsh timeout setting, but it is now disabled by default
-26.07.00 VZ: encode 8bit characters in the header of outgoing messages too
-             allow adding all subfolders of an IMAP/MH/NNTP folder automatically
-25.07.00 VZ: support for setting charset for the outgoing messages
-21.07.00 VZ: completely rewrote subfoldrs dialog which is now *much* faster
-19.07.00 VZ: it is possible to specify several address which should be replaced
-             with the destination address when the corresponding option is on
-18.07.00 VZ: fixed serious bug in handling options changes, they are now
-             handled correctly and [Apply] and [Cancel] behave as expected
-             added the identity choice to the toolbar (advanced mode only)
-             the background colour of the folder tree can now be changed
-08.07.00 KB: Find now highlights text in viewer, MFilter reads/writes filter
-             code and not just dialog settings
-08.07.00 VZ: added an option to prepend sender initials to the reply prefix
-06.07.00 VS: quoted text highlighting in the message viewer
-06.07.00 VZ: almost complete rewrite of (user visible aspects of) filter code,
-             there are now several dialogs for filter editing,
-             also added "Quick filter" dialog
-05.07.00 VZ: made sending a test message during installation optional
-04.07.00 VZ: added "reverse order" checkboxes to sort dialog, made possible to
-             reverse sort by arrival order
-04.07.00 KB: wxOptionsDlg now automatically stores all Field_Password entries
-             encrypted, SMTP/NNTP server passwords are now encrypted in config
-             keep-open flag now only enforced for Outbox
-30.06.00 VZ: made it possible to attach several files at once
-27.06.00 KB: added DeleteDuplicates functionality, fixed (?) folderview selection behaviour
-             for auto-show-first and move focus on after delete/undelete/etc
-19.06.00 VZ: messages from oneself are (optionally) marked as such
-15.06.00 VZ: added "Message|Language" menu for manual language selection
-14.06.00 KB: MailCollector no longer keeps all incoming folders open to save
-             resources on servers and make collection more reliable.
-             Folders are now kept around after last DecRef() for a configurable
-             delay to speed up re-opening.
-14.06.00 VZ: RFC 2047 compliant header parsing for the non ASCII strings in
-             headers and displaying them using appropriate fonts
-             The folder view is immediately updated after options change.
-14.06.00 VZ: viewing messages in non-default charsets
-11.06.00 KB: Filter rules editor shows program code and should check for
-             consistency. Manual editing supported.
-             Install Wizard fixes, better default values for servers. No more
-             network autodetection for Unix.
-10.06.00 VZ: dialog for editing the order of folder view columns
-             sorting of folder view by any column on column click
-10.06.00 KB: Finished OpenSSL dynamic loading
-             Fixed next-unread-menu and some translations/keybindings
-             Added score and colour support to filters
-09.06.00 VZ: Added option to autolaunch the ext editor
-08.06.00 KB: added OpenSSL dynamic loading
-             improvements/streamlining of Profile code
-             wxMessageView fixes, Mime detection improved
-             wxComposeView profile inheritance fixed
-06.06.00 VZ: added a "Folder" menu in the main frame, renamed "File" -> "Mail"
-05.06.00 KB: added Identity redirection support to Profile classes
-             added MLogCircle and error guessing to folder and network operations
-04.06.00 KB: added configuration option for file folder format on creation
-             added upgrade message about changed server settings
-             Fixes and autoconf support for new wxMessageView code.
-04.06.00 VZ: Windows version now has the same (decent) icons as Unix one
-02.06.00 VZ: creating MH folders with the wizard finally works
-             "d&d"ing messages to group or root folder won't delete them
-02.06.00 VZ: improved highlighting in the folder tree
-02.06.00 KB: authentification for SMTP and NNTP
-30.05.00 KB: Split part of MessageView functionality into a separate class
-             to be shared with ComposeView.
-             Replaced several mail_check() calls with mail_ping() in
-             MailFolderCC code.
-23.05.00 VZ: an importer for PINE added (settings/folders/address books)
-26.05.00 VZ: importing filters from XFMail
-23.05.00 VZ: importers for PINE and XFMail added (settings/folders/address books)
-22.05.00 VZ: template dialog allows to choose any kind of templates
-19.05.00 VZ: vCards can also be exported
-17.05.00 VZ: added possibility to attach vCards to outgoing messages
-             added vCard import module for the address book editor
-             vCard can also be imported as a single entry, not as entire book
-16.05.00 KB: Calendar module does repeating events (minor glitches still)
-15.05.00 KB: Mahogany now runs as "root", too. Fixes to MailCollector and invocation
-             of filters. de.po is up to date.
-12.05.00 VZ: added "compose with template" and "edit templates"
-09.05.00 VZ: implemented reply/forward/followup with template menu commands
-09.05.00 VZ: version number bumped to 0.60
-03.05.00 KB: Started work on a small calendar plugin
-02.05.00 VZ: folder renaming implemented
-02.05.00 VZ: the log window can be shown/hidden, closing it hides it permanently
-01.05.00 VZ: initial wizard small fixes: don't create servers not specified
-             possibility to remember the password entered interactively
-             it is possible to _not_ use Outbox and/or New Mail folders now
-             the config file is, finally, created with the correct permissions
-29.04.00 KB: MailFolder API cleanup, server config setting fixes,
-             wxLayout fixes
-26.04.00 VZ: drag and drop works with other folder views (frames) too
-23.04.00 VZ: added drag and drop of messages to the folder tree
-23.04.00 VZ: added "Quick move" submenu to folder popup menu
-18.04.00 VZ: dynamic plug-in (modules) loading works under Windows
+2000-10-24 VZ: added a per-folder flag for new mail notification
+2000-10-23 KB: fixed IMAP flag string generation (didn't work for some servers)
+2000-10-20 VZ: access program options dialog from root folder properties
+                 don't popup message boxes with unimportant messages any more
+2000-10-18 VZ: ask for the passwords as needed, propose to remember them
+2000-10-05 NB: Fixed incorrect generation of the "From" header, readded Reply-To
+2000-09-30 VZ: allow sending mail to the addresses without the hostname part
+2000-09-30 KB: added mail delivery via sendmail
+                 removed assert for wxFONTENCODING_DEFAULT encoding in SendMessageCC.cpp
+                 improved libmal error/status reporting, updated German translations
+                 Added option for IMAP header pre-fetch/lookahead with default set to 1.
+                 Fixed OVERVIEW_X bug for IMAP by always building overview on client side. :-(
+                 Fixed (hopefully) deletion behaviour for Trash in folderlistctrl.
+                 Fixed creation of SentMail folder.
+2000-09-18 KB: status/error message display for MAL synchronisation, copying
+                 messages now preserves status flags
+2000-09-07 KB: Copying messages now uses IMAP server-side copies where available
+2000-09-05 KB: added TwoFish encryption/decryption for passwords
+2000-09-03 KB: fixed endless recursion in INBOX listing callback which caused IMAP server
+                 mailbox import to never complete, updated splash screen, finished config sync
+2000-08-28 KB: fixed auto-creation of non-existent folders on IMAP etc
+                 reorganised the options dialog for the PalmOS module and documented
+                  it better
+                 Started remote config synchronisation code, EXPERIMENTAL_sync
+                 configure: --with-experimental=a,b,c --> defines EXPERIMENTAL_a,
+                  EXPERIMENTAL_b, ...
+                 Added MailFolderCC::HasInferiors()
+2000-08-24 VZ: added "remove identity" command, it is now possible to set
+                  signature/X-face and other composition parameters for each
+                  identity separately, options which don't make sense for
+                  identities don't appear in the identity edit dialog any more
+2000-08-24 KB: rpm generation and SuSE compilation work now (export RPM_ROOT=
+                  and if required make a link to it from the default location).
+                 Added support for PAM under Linux to configure.
+2000-08-21 KB: made install wizard explain more and always creates the INBOX
+                  default folder for IMAP servers added warning about browsing
+                  taking very long
+2000-08-16 VZ: install wizard now creates all IMAP folders in the folder tree
+2000-08-11 VZ: new option for not quoting the empty lines in reply
+2000-08-06 KB: added printing to filter functions
+                 renamed configure options back to --with instead of --enable
+                 changed handling of --with-experimental to allow multiple
+                 experimental settings together
+2000-07-31 VZ: serious bug with messages in base64 encoding fixed
+2000-07-28 VZ: readded rsh timeout setting, but it is now disabled by default
+2000-07-26 VZ: encode 8bit characters in the header of outgoing messages too
+                 allow adding all subfolders of an IMAP/MH/NNTP folder automatically
+2000-07-25 VZ: support for setting charset for the outgoing messages
+2000-07-21 VZ: completely rewrote subfoldrs dialog which is now *much* faster
+2000-07-19 VZ: it is possible to specify several address which should be replaced
+                 with the destination address when the corresponding option is on
+2000-07-18 VZ: fixed serious bug in handling options changes, they are now
+                  handled correctly and [Apply] and [Cancel] behave as expected
+                 added the identity choice to the toolbar (advanced mode only)
+                 the background colour of the folder tree can now be changed
+2000-07-08 KB: Find now highlights text in viewer
+                 MFilter reads/writes filter code and not just dialog settings
+2000-07-08 VZ: added an option to prepend sender initials to the reply prefix
+2000-07-06 VS: quoted text highlighting in the message viewer
+2000-07-06 VZ: almost complete rewrite of (user visible aspects of) filter code,
+                 there are now several dialogs for filter editing,
+                 also added "Quick filter" dialog
+2000-07-05 VZ: made sending a test message during installation optional
+2000-07-04 VZ: added "reverse order" checkboxes to sort dialog, made possible to
+                  reverse sort by arrival order
+2000-07-04 KB: wxOptionsDlg now automatically stores all Field_Password entries
+                  encrypted, SMTP/NNTP server passwords are now encrypted in
+                  config keep-open flag now only enforced for Outbox
+2000-06-30 VZ: made it possible to attach several files at once
+2000-06-27 KB: added DeleteDuplicates functionality, fixed (?) folderview selection behaviour
+                 for auto-show-first and move focus on after delete/undelete/etc
+2000-06-19 VZ: messages from oneself are (optionally) marked as such
+2000-06-15 VZ: added "Message|Language" menu for manual language selection
+2000-06-14 KB: MailCollector no longer keeps all incoming folders open to save
+                  resources on servers and make collection more reliable.
+                 Folders are now kept around after last DecRef() for a configurable
+                  delay to speed up re-opening.
+2000-06-14 VZ: RFC 2047 compliant header parsing for the non ASCII strings in
+                  headers and displaying them using appropriate fonts
+                 The folder view is immediately updated after options change.
+2000-06-14 VZ: viewing messages in non-default charsets
+2000-06-11 KB: Filter rules editor shows program code and should check for
+                  consistency. Manual editing supported.
+                 Install Wizard fixes, better default values for servers. No more
+                  network autodetection for Unix.
+2000-06-10 VZ: dialog for editing the order of folder view columns
+                 sorting of folder view by any column on column click
+2000-06-10 KB: Finished OpenSSL dynamic loading
+                 Fixed next-unread-menu and some translations/keybindings
+                 Added score and colour support to filters
+2000-06-09 VZ: Added option to autolaunch the ext editor
+2000-06-08 KB: added OpenSSL dynamic loading
+                 improvements/streamlining of Profile code
+                 wxMessageView fixes, Mime detection improved
+                 wxComposeView profile inheritance fixed
+2000-06-06 VZ: added a "Folder" menu in the main frame, renamed "File" -> "Mail"
+2000-06-05 KB: added Identity redirection support to Profile classes
+                 added MLogCircle and error guessing to folder and network operations
+2000-06-04 KB: added configuration option for file folder format on creation
+                 added upgrade message about changed server settings
+                 Fixes and autoconf support for new wxMessageView code.
+2000-06-04 VZ: Windows version now has the same (decent) icons as Unix one
+2000-06-02 VZ: creating MH folders with the wizard finally works
+                 "d&d"ing messages to group or root folder won't delete them
+2000-06-02 VZ: improved highlighting in the folder tree
+2000-06-02 KB: authentification for SMTP and NNTP
+2000-05-30 KB: Split part of MessageView functionality into a separate class
+                  to be shared with ComposeView.
+                 Replaced several mail_check() calls with mail_ping() in
+                  MailFolderCC code.
+2000-05-23 VZ: an importer for PINE added (settings/folders/address books)
+2000-05-26 VZ: importing filters from XFMail
+2000-05-23 VZ: importers for PINE and XFMail added (settings/folders/address books)
+2000-05-22 VZ: template dialog allows to choose any kind of templates
+2000-05-19 VZ: vCards can also be exported
+2000-05-17 VZ: added possibility to attach vCards to outgoing messages
+                 added vCard import module for the address book editor
+                 vCard can also be imported as a single entry, not as entire book
+2000-05-16 KB: Calendar module does repeating events (minor glitches still)
+2000-05-15 KB: Mahogany now runs as "root", too. Fixes to MailCollector and invocation
+                  of filters. de.po is up to date.
+2000-05-12 VZ: added "compose with template" and "edit templates"
+2000-05-09 VZ: implemented reply/forward/followup with template menu commands
+2000-05-09 VZ: version number bumped to 0.60
+2000-05-03 KB: Started work on a small calendar plugin
+2000-05-02 VZ: folder renaming implemented
+2000-05-02 VZ: the log window can be shown/hidden, closing it hides it permanently
+2000-05-01 VZ: initial wizard small fixes: don't create servers not specified
+                 possibility to remember the password entered interactively
+                 it is possible to _not_ use Outbox and/or New Mail folders now
+                 the config file is, finally, created with the correct permissions
+2000-04-29 KB: MailFolder API cleanup, server config setting fixes,
+                 wxLayout fixes
+2000-04-26 VZ: drag and drop works with other folder views (frames) too
+2000-04-23 VZ: added drag and drop of messages to the folder tree
+2000-04-23 VZ: added "Quick move" submenu to folder popup menu
+2000-04-18 VZ: dynamic plug-in (modules) loading works under Windows
 
 Release 0.50 'Meadows' March 27, 2000
 -------------------------------------------------------------------------------
-24.03.00 VZ: startup tips
-             creating MH folders from subfolders dialogs works
-23.03.00 KB: Finished folder creation wizard. Fixed inheritance of FolderView column sizes.
-             Fixed some dialog sizes. Filters dialog behaves slightly better and uses folder
-             browse button. Fixed error message appearance in PalmOS.cpp.
-22.03.00 KB: Filters config dialog extended. BBDB ADB supports read-only status.
-             Folder creation wizard work.
-14.03.00 VZ: added changing folder colours depending on whether they have
-             new/recent messages
-08.03.00 VZ: browsing IMAP/NNTP servers and subscribing to them works
-             GUI support for deleting folders physically and not only removing
-03.03.00 VZ: all expanded branches of the folder tree are now saved/restored
-03.03.00 VZ: subscription dialog starts to work
-23.02.00 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.
-             Fixed empty names for BBDB and PalmOS addressbooks.
-05.02.00 KB: Folderlisting now uses colour highlighting.
-             Imap4.7a integrated and patches simplified.
-             POP3 headers cache patch added
-             SSL support added, using OpenSSL
-27.01.00 KB: Filters dialog changes, creates working (?) Filter rules now
-             hidden folder flag added to config dialog,
-             NewMail dialog changes
-             added static MailFolder::CreateFolder()
-16.01.00 VZ: added right click popup menu to the ADB editor
-             added a dialog to reenable previously disabled msg boxes
-03.12.99 KB: MIME type prompt added to compose view. Started adding filters dialog.
-             Message threading added. Fixed dialup handling in wxGTK.
-01.12.99 VZ: added support for hidden folder flag
-29.11.99 KB: Filters and application of filter rules added, next_unread button added.
-             Mail collection should now work more intelligently for dialup situations.
-             Better update and selection behaviour for folderview.
-             Network-local folder added, accessible without dial up network.
-             Bugs in event handling fixed.
-             "Trash" folder added.
-27.11.99 VZ: Ok/Cancel/Apply buttons in the options dialog finally work
-26.11.99 VZ: fixed the bug with double clicking in folder tree in "click to open
-             mode" (wrong folder was opened)
-14.11.99 VZ: added first-time run wizard
-10.11.99 VZ: fixes in folder creation/properties dialogs: buttons are
-             enabled/disabled correctly
-21.10.99 KB: dialup network handling and optional Outbox added
-15.08.99 KB: wxLayout scrolls when selecting with mouse, editing bugfree(?),
-             changed wxIcon/wxBitmap handling -> do icons appear again under wxMSW?
-12.08.99 KB: message sorting now ignores reply prefix in sort by subject
-06.08.99 VZ: GUI support for IMAP directories and news hierarchies
-27.07.99 KB: XFaces load any kind of file, dialog for configuring it. New icons.
-25.07.99 VZ: ADB export added (currently CSV/text only)
-25.07.99 KB: date format configurable, sorting configurable and complete,
-             help and modal dialogs work, mailfolder update improvements,
-             abort button for reading folder listings, retrieving listings
-             from newest messages first, iconmanager supports subdirectories now
-22.07.99 KB: more MailFolder tidying up, sorting works
-19.07.99 KB: tear-off menus option added
-18.07.99 KB: more async fixes, fixed some race-conditions,
-             MModule dialog working
-17.07.99 KB: more async code, non-async compilation no longer supported
-             scandoc now produces usable docs, MModule produces listing of modules,
-             subscription management
-16.07.99 KB: folder flag to force re-open on ping for broken POP servers added
-             quoted printable parsing bug removed
-             messages now get saved with right CR/LF convention
-16.07.99 VZ: it's now impossible to lock oneself in the program by choosing the
-             [No] button in exit confirmation msg box and remembering it (also,
-             the bug in the options dialog which used to do it automatically
-             fixed)
-15.07.99 VZ: dialogs now have vertical scrollbars and should be usable in any
-             screen resolution now and not only 1024*768 or greater
-11.07.99 VZ: import of Eudora address books added
-08.07.99 VZ: import of XFMail, .mailrc and PINE (Unix) address books added
-09.07.99 KB: made python work again
-07.07.99 VZ: importing of address books added (CSV and TAB formats)
-06.07.99 KB: fixed New Mail dialog showing empty lines
-             icons in messages appear correctly now
-             added "Unread" marker to message flags
-05.07.99 VZ: "folder already exists" bug when creating POP3 folder fixed
-04.07.99 VZ: folder icons can now be customized
-03.07.99 VZ: support for adding custom headers from compose view
+2000-03-24 VZ: startup tips
+               creating MH folders from subfolders dialogs works
+2000-03-23 KB: Finished folder creation wizard. Fixed inheritance of FolderView column sizes.
+               Fixed some dialog sizes. Filters dialog behaves slightly better and uses folder
+               browse button. Fixed error message appearance in PalmOS.cpp.
+2000-03-22 KB: Filters config dialog extended. BBDB ADB supports read-only status.
+               Folder creation wizard work.
+2000-03-14 VZ: added changing folder colours depending on whether they have
+               new/recent messages
+2000-03-08 VZ: browsing IMAP/NNTP servers and subscribing to them works
+               GUI support for deleting folders physically and not only removing
+2000-03-03 VZ: all expanded branches of the folder tree are now saved/restored
+2000-03-03 VZ: subscription dialog starts to work
+2000-02-23 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.
+               Fixed empty names for BBDB and PalmOS addressbooks.
+2000-02-05 KB: Folderlisting now uses colour highlighting.
+               Imap4.7a integrated and patches simplified.
+               POP3 headers cache patch added
+               SSL support added, using OpenSSL
+2000-01-27 KB: Filters dialog changes, creates working (?) Filter rules now
+               hidden folder flag added to config dialog,
+               NewMail dialog changes
+               added static MailFolder::CreateFolder()
+2000-01-16 VZ: added right click popup menu to the ADB editor
+               added a dialog to reenable previously disabled msg boxes
+1999-12-03 KB: MIME type prompt added to compose view. Started adding filters dialog.
+               Message threading added. Fixed dialup handling in wxGTK.
+1999-12-01 VZ: added support for hidden folder flag
+1999-11-29 KB: Filters and application of filter rules added, next_unread button added.
+               Mail collection should now work more intelligently for dialup situations.
+               Better update and selection behaviour for folderview.
+               Network-local folder added, accessible without dial up network.
+               Bugs in event handling fixed.
+               "Trash" folder added.
+1999-11-27 VZ: Ok/Cancel/Apply buttons in the options dialog finally work
+1999-11-26 VZ: fixed the bug with double clicking in folder tree in "click to open
+               mode" (wrong folder was opened)
+1999-11-14 VZ: added first-time run wizard
+1999-11-10 VZ: fixes in folder creation/properties dialogs: buttons are
+               enabled/disabled correctly
+1999-10-21 KB: dialup network handling and optional Outbox added
+1999-08-15 KB: wxLayout scrolls when selecting with mouse, editing bugfree(?),
+               changed wxIcon/wxBitmap handling -> do icons appear again under wxMSW?
+1999-08-12 KB: message sorting now ignores reply prefix in sort by subject
+1999-08-06 VZ: GUI support for IMAP directories and news hierarchies
+1999-07-27 KB: XFaces load any kind of file, dialog for configuring it. New icons.
+1999-07-25 VZ: ADB export added (currently CSV/text only)
+1999-07-25 KB: date format configurable, sorting configurable and complete,
+               help and modal dialogs work, mailfolder update improvements,
+               abort button for reading folder listings, retrieving listings
+               from newest messages first, iconmanager supports subdirectories now
+1999-07-22 KB: more MailFolder tidying up, sorting works
+1999-07-19 KB: tear-off menus option added
+1999-07-18 KB: more async fixes, fixed some race-conditions,
+               MModule dialog working
+1999-07-17 KB: more async code, non-async compilation no longer supported
+               scandoc now produces usable docs, MModule produces listing of modules,
+               subscription management
+1999-07-16 KB: folder flag to force re-open on ping for broken POP servers added
+               quoted printable parsing bug removed
+               messages now get saved with right CR/LF convention
+1999-07-16 VZ: it's now impossible to lock oneself in the program by choosing the
+               [No] button in exit confirmation msg box and remembering it (also,
+               the bug in the options dialog which used to do it automatically
+               fixed)
+1999-07-15 VZ: dialogs now have vertical scrollbars and should be usable in any
+               screen resolution now and not only 1024*768 or greater
+1999-07-11 VZ: import of Eudora address books added
+1999-07-08 VZ: import of XFMail, .mailrc and PINE (Unix) address books added
+1999-07-09 KB: made python work again
+1999-07-07 VZ: importing of address books added (CSV and TAB formats)
+1999-07-06 KB: fixed New Mail dialog showing empty lines
+               icons in messages appear correctly now
+               added "Unread" marker to message flags
+1999-07-05 VZ: "folder already exists" bug when creating POP3 folder fixed
+1999-07-04 VZ: folder icons can now be customized
+1999-07-03 VZ: support for adding custom headers from compose view
 
 
 Release 0.23a June 29, 1999

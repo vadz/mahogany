@@ -90,6 +90,7 @@ any problems with building it.
    \item The "Set From from To" option (\ref{IdentityPage}) is more useful
    \item When replying to PGP-encrypted messages, clear text is used for
          replies and not the original message.
+   \item New ``Where is filter'' command (\ref{filterdialogs})
 \end{itemize}
 
 By far the main new feature in this version is the integration of DSPAM
@@ -1531,6 +1532,30 @@ menu or the popup menu displayed when you right click the message.
 It allows to easily create filters for the most common cases. Note
 that you may update the filter rule later using the full-fledged filter
 edit dialog if you decide to add more conditions to it, for example.
+
+
+\subsubsection{Managing Filters}\label{filterdialogs}
+
+After some time of using the program, you will probably end up with quite a few
+filters. Several dialogs in Mahogany will help you with managing them:
+\begin{itemize}
+   \item The most useful dialog is the one allowing you to edit all the filters
+         associated to the current folder and it is accessed using
+         \MenuCmd{Folder|Filters...}. It allows you to add new filters, edit
+         existing ones and also to change the order of applying the filters to
+         the messages in this folder.
+
+   \item Another dialog in \MenuCmd{Edit|Filter rules...} shows you all defined
+         filters and also allows you to add new ones or edit or delete the
+         existing ones.
+
+   \item Finally, if you don't know which filter copies the messages to some
+         folder, you may use \MenuCmd{Edit|Where is filter...} command to find
+         it out. This is handy if you realize that you want to filter some more
+         messages to the given folder -- just use this command to quickly find
+         the filters you already have for it and add a new condition to an
+         existing filter.
+\end{itemize}
 
 
 \subsubsection{Filter Language}

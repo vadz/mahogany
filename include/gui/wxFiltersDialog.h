@@ -43,6 +43,13 @@ extern bool ConfigureFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
 extern bool ConfigureFilter(MFilterDesc *filterDesc,
                             wxWindow *parent = NULL);
 
+/**
+   Find all filters moving mail to the given folder and show them to user.
+
+   @return true if any filters were found, false otherwise
+ */
+extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
+
 /// allows to create a filter from the subject/from values
 extern bool CreateQuickFilter(MFolder *folder,
                               const String& from,

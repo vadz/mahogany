@@ -1480,6 +1480,7 @@ public:
 protected:
    bool DoCopyFilter(const wxString& nameOld, const wxString& nameNew);
    bool DoDeleteFilter(const wxString& name);
+   bool DoFillWithFilters(const wxArrayString& filterNames);
 
    // listbox contains the names of all filters
    wxListBox *m_lboxFilters;
@@ -1862,16 +1863,21 @@ wxAllFiltersDialog::DoDeleteFilter(const wxString& name)
 // ----------------------------------------------------------------------------
 
 bool
-wxAllFiltersDialog::TransferDataToWindow()
+wxAllFiltersDialog::DoFillWithFilters(const wxArrayString& filterNames)
 {
-   wxArrayString allFilters = Profile::GetAllFilters();
-   size_t count = allFilters.GetCount();
+   size_t count = filterNames.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      m_lboxFilters->Append(allFilters[n]);
+      m_lboxFilters->Append(filterNames[n]);
    }
 
    return true;
+}
+
+bool
+wxAllFiltersDialog::TransferDataToWindow()
+{
+   return DoFillWithFilters(Profile::GetAllFilters());
 }
 
 bool
@@ -1882,6 +1888,35 @@ wxAllFiltersDialog::TransferDataFromWindow()
 
    return true;
 }
+
+// ============================================================================
+// wxMultipleFiltersDialog - dialog to show multiple (but not all) filters
+// ============================================================================
+
+// confusingly enough, this one derives from wxAllFiltersDialog and not the
+// other way around -- this is entirely due to history of this code and lack of
+// time to erfactor it (but this can/should be done later)
+class wxMultipleFiltersDialog : public wxAllFiltersDialog
+{
+public:
+   wxMultipleFiltersDialog(wxWindow *win,
+                           const String& folderName,
+                           const wxArrayString& filterNames)
+      : wxAllFiltersDialog(win),
+        m_filterNames(filterNames)
+      {
+         SetTitle(String::Format(_("Filters copying messages to \"%s\""),
+                                 folderName.c_str()));
+      }
+
+   virtual bool TransferDataToWindow()
+   {
+      return DoFillWithFilters(m_filterNames);
+   }
+
+protected:
+   wxArrayString m_filterNames;
+};
 
 // ============================================================================
 // wxFolderFiltersDialog - dialog to configure filters to use for this folder
@@ -2515,3 +2550,52 @@ extern bool CreateQuickFilter(MFolder *folder,
 
    return dlg.ShowModal() == wxID_OK;
 }
+
+extern bool FindFiltersForFolder(MFolder *folder, wxWindow *parent)
+{
+   CHECK( folder, false, _T("FindFiltersForFolder(): NULL folder") );
+
+   // look at all filters and remember names of those which copy/move messages
+   // to this folder
+   wxArrayString filtersForThisFolder;
+   const String fullname = folder->GetFullName();
+   wxArrayString allFilters = Profile::GetAllFilters();
+   const size_t count = allFilters.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      // examine this filter: we can only really parse simple filters
+      const String& filterName = allFilters[n];
+      MFilter_obj filter(filterName);
+      MFilterDesc fdesc(filter->GetDesc());
+      if ( fdesc.IsSimple() )
+      {
+         RefCounter<MFDialogSettings> settings(fdesc.GetSettings());
+         if ( settings )
+         {
+            // look at the action: is it "copy/move to this folder"?
+            if ( (settings->GetAction() == OAC_T_CopyTo ||
+                  settings->GetAction() == OAC_T_MoveTo) &&
+                     settings->GetActionArgument() == fullname )
+            {
+               filtersForThisFolder.push_back(filterName);
+            }
+         }
+      }
+   }
+
+   if ( filtersForThisFolder.empty() )
+   {
+      wxLogStatus(GetFrame(parent),
+                  _("No filters copying messages to folder \"%s\" found."),
+                  fullname.c_str());
+
+      return false;
+   }
+
+   // we do have some filters, show them
+   wxMultipleFiltersDialog dlg(parent, fullname, filtersForThisFolder);
+   dlg.ShowModal();
+
+   return true;
+}
+
