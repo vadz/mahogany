@@ -73,10 +73,6 @@
 #include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
-#ifdef __WXGTK__
-   //#define BROKEN_LISTCTRL
-#endif
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -387,11 +383,6 @@ protected:
 
    /// flag to prevent reentrance in OnRightClick()
    bool m_isInPopupMenu;
-
-#ifdef BROKEN_LISTCTRL
-   /// flag used in UpdateFocus() to work around wxListCtrl bug in wxGTK
-   bool m_suppressFocusTracking;
-#endif // BROKEN_LISTCTRL
 
 private:
    // allow it to use EnableOnSelect()
@@ -721,10 +712,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menuFolders = NULL;
 
    m_isInPopupMenu = false;
-
-#ifdef BROKEN_LISTCTRL
-   m_suppressFocusTracking = false;
-#endif // BROKEN_LISTCTRL
 
    // start in frozen state, wxFolderView should call Thaw() later
    m_isFrozen = true;
@@ -1342,12 +1329,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
    // there is no "focus change" event in wxListCtrl so we have to track it
    // ourselves
-#ifdef BROKEN_LISTCTRL
-   if ( !m_suppressFocusTracking )
-#endif // BROKEN_LISTCTRL
-   {
-      UpdateFocus();
-   }
+   UpdateFocus();
 
    event.Skip();
 }
@@ -1550,16 +1532,7 @@ void wxFolderListCtrl::Focus(long index)
    // we don't want any events come here while we're inside EnsureVisible()
    MEventManagerSuspender noEvents;
 
-#ifdef BROKEN_LISTCTRL
-   // EnsureVisible() shouldn't call our OnIdle!
-   m_suppressFocusTracking = true;
-#endif // BROKEN_LISTCTRL
-
    EnsureVisible(index);
-
-#ifdef BROKEN_LISTCTRL
-   m_suppressFocusTracking = false;
-#endif // BROKEN_LISTCTRL
 #endif // wxWin >= 2.2.6
 
    // we will need the items nearby as well
@@ -3464,13 +3437,6 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    // being previewed
    bool previewDeleted = false;
 
-#ifdef BROKEN_LISTCTRL
-   // wxGTK doesn't seem to keep focus correctly itself when we delete items,
-   // help it
-   long focus = m_FolderCtrl->GetFocusedItem();
-   bool focusDeleted = focus == -1;
-#endif // BROKEN_LISTCTRL
-
    size_t n,
           count = event.GetCount();
 
@@ -3479,20 +3445,6 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    for ( n = 0; n < count; n++ )
    {
       long item = event.GetItem(n);
-
-#ifdef BROKEN_LISTCTRL
-      if ( !focusDeleted )
-      {
-         if ( item < focus )
-         {
-            focus--;
-         }
-         else if ( item == focus )
-         {
-            focusDeleted = true;
-         }
-      }
-#endif // BROKEN_LISTCTRL
 
       // we can't use m_FolderCtrl->GetUIdFromIndex(item) here because the item
       // is not in the headers any more, so we use indices instead of UIDs even
@@ -3514,25 +3466,6 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    {
       m_FolderCtrl->DeleteItem(itemsDeleted[n]);
    }
-
-#ifdef BROKEN_LISTCTRL
-   // restore focus if we had it
-   if ( focusDeleted && (focus != -1) )
-   {
-      // take the next item as focus, if there is any - otherwise the last
-      long itemMax = m_FolderCtrl->GetItemCount() - 1;
-      if ( focus > itemMax )
-         focus = itemMax;
-   }
-
-   // even if it wasn't deleted it might have changed because items before it
-   // were deleted
-   if ( focus != -1 )
-   {
-      m_FolderCtrl->Focus(focus);
-      OnFocusChange();
-   }
-#endif // BROKEN_LISTCTRL
 
    // clear preview window if the message showed there had been deleted
    if ( previewDeleted )
