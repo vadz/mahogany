@@ -98,6 +98,10 @@ bool AdbXFMailImporter::StartImport(const String& filename)
       return FALSE;
    }
 
+   // so that ImportEntry() won't try to use old, invalid data if it's
+   // (erroneously) called before GetEntryNames()
+   m_lineNumbers.Empty();
+
    // load the file into memory
    return m_textfile.Open(filename);
 }
@@ -109,7 +113,8 @@ size_t AdbXFMailImporter::GetEntryNames(const String& path,
 
    entries.Empty();
 
-   ((wxArrayInt &)m_lineNumbers).Empty(); // const_cast
+   wxArrayInt& lineNumbers = (wxArrayInt &)m_lineNumbers; // const_cast
+   lineNumbers.Empty();
 
    bool newEntry = FALSE;
    size_t nLines = m_textfile.GetLineCount();
@@ -153,7 +158,7 @@ size_t AdbXFMailImporter::GetEntryNames(const String& path,
          nickname.Trim();
 
          // remember the line number for ImportEntry()
-         ((wxArrayInt &)m_lineNumbers).Add(nLine);    // const_cast
+         lineNumbers.Add(nLine);
 
          // put the entry name into output array
          entries.Add(nickname);
