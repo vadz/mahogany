@@ -132,9 +132,9 @@ extern "C"
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_CONN_CLOSE_DELAY;
 extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
-extern const MOption MP_FOLDER_CLOSE_DELAY;
 extern const MOption MP_FOLDER_FILE_DRIVER;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
@@ -458,6 +458,15 @@ private:
    M_LIST_OWN(ServerInfoList, ServerInfoEntry);
    static ServerInfoList ms_servers;
 
+   /**
+     A small class to close the cached connections periodically.
+    */
+   static class ConnCloseTimer : public wxTimer
+   {
+   public:
+      virtual void Notify() { ServerInfoEntry::CheckTimeoutAll(); }
+   } *ms_connCloseTimer;
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -511,11 +520,6 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
       mail_close(stream);
    }
 }
-
-/**
-  The function called to close the connections which had timed out.
- */
-extern void CheckConnectionsTimeout() { ServerInfoEntry::CheckTimeoutAll(); }
 
 /**
    The idea behind CCEventReflector is to allow postponing some actions in
@@ -2995,6 +2999,10 @@ MailFolderCC::FindFolder(String const &path, String const &login)
 
    wxLogTrace(TRACE_MF_CACHE, "Looking for folder to re-use: '%s',login '%s'",
               path.c_str(), login.c_str());
+
+   // may happen if mail system not initialized yet
+   if ( !gs_StreamList )
+      return NULL;
 
    for ( StreamConnectionList::iterator i = gs_StreamList->begin();
          i != gs_StreamList->end();
@@ -6478,6 +6486,7 @@ void mahogany_read_progress(GETS_DATA *md, unsigned long count)
 // ============================================================================
 
 ServerInfoEntry::ServerInfoList ServerInfoEntry::ms_servers;
+ServerInfoEntry::ConnCloseTimer *ServerInfoEntry::ms_connCloseTimer = NULL;
 
 // ----------------------------------------------------------------------------
 // creation
@@ -6572,6 +6581,11 @@ ServerInfoEntry *ServerInfoEntry::GetOrCreate(const MFolder *folder)
 void ServerInfoEntry::DeleteAll()
 {
    ms_servers.clear();
+   if ( ms_connCloseTimer )
+   {
+      delete ms_connCloseTimer;
+      ms_connCloseTimer = NULL;
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -6599,13 +6613,25 @@ void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
 
    Profile_obj profile(folder->GetProfile());
    time_t t = time(NULL);
-   time_t delay = READ_CONFIG(profile, MP_FOLDER_CLOSE_DELAY);
+   time_t delay = READ_CONFIG(profile, MP_CONN_CLOSE_DELAY);
 
    wxLogTrace(TRACE_CONN_CACHE,
               "Keeping connection to %s alive for %d seconds.",
               stream->mailbox, delay);
 
    m_timeouts.push_back(t + delay);
+
+   if ( !ms_connCloseTimer )
+   {
+      ms_connCloseTimer = new ConnCloseTimer;
+   }
+
+   if ( !ms_connCloseTimer->IsRunning() ||
+           (ms_connCloseTimer->GetInterval() / 1000 > delay) )
+   {
+      // we want to use a smaller interval
+      ms_connCloseTimer->Start(delay * 1000);
+   }
 }
 
 void ServerInfoEntry::CheckTimeout()
@@ -6641,6 +6667,8 @@ void ServerInfoEntry::CheckTimeout()
 /* static */
 void ServerInfoEntry::CheckTimeoutAll()
 {
+   bool hasAnyConns = false;
+
    for ( ServerInfoList::iterator i = ms_servers.begin();
          i != ms_servers.end();
          ++i )
@@ -6649,7 +6677,15 @@ void ServerInfoEntry::CheckTimeoutAll()
       if ( !i->m_connections.empty() )
       {
          i->CheckTimeout();
+
+         hasAnyConns = true;
       }
+   }
+
+   if ( !hasAnyConns )
+   {
+      // timer will be restarted in KeepStream() when/if neecessary
+      ms_connCloseTimer->Stop();
    }
 }
 
