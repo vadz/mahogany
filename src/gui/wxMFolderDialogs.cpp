@@ -874,10 +874,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
    m_radio->Enable(m_isCreating);
-
-#ifdef __WXGTK__
-   UpdateUI();
-#endif
 }
 
 void
@@ -1406,10 +1402,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_forceReOpen->SetValue( (folder->GetFlags() & MF_FLAGS_REOPENONPING) != 0 );
    }
 
-#ifdef __WXMSW__
-   // the notification is sent automatically under GTK
    UpdateUI(m_radio->GetSelection());
-#endif // MSW
 
    return TRUE;
 }
