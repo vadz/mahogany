@@ -919,8 +919,10 @@ wxComposeView::OnMenuCommand(int id)
       if ( IsReadyToSend() )
       {
          if ( Send() )
+         {
             ResetDirty();
-         Close();
+            Close();
+         }
       }
       break;
 
