@@ -102,6 +102,12 @@ struct MigrateLocal
 
    // the format of the folders to create
    FileMailboxFormat format;
+
+   MigrateLocal()
+   {
+      // use MBOX by default
+      format = FileMbox_MBOX;
+   }
 };
 
 // ----------------------------------------------------------------------------
@@ -115,6 +121,9 @@ struct MigrateData
 
    // if true, use dstIMAP below, otherwise use dstLocal
    bool toIMAP;
+
+   // the delimiter of the folder names (NUL initially meaning "unknown")
+   char delimiterDst;
 
    // the destination server
    MigrateImapServer dstIMAP;
@@ -135,7 +144,33 @@ struct MigrateData
    {
       toIMAP = true;
 
+      delimiterDst = '\0';
+
       countFolders = -1;
+   }
+
+   // add a new folder to folderNames/folderFlags arrays
+   void AddFolder(const String& path, char delim, long flags)
+   {
+      source.delimiter = delim;
+
+      // check if this folder is a child of the last one and remember it
+      if ( countFolders )
+      {
+         String last = folderNames.Last();
+         if ( last.empty() || path.StartsWith(last + delim) )
+         {
+            folderFlags.Last() &= ~ASMailFolder::ATT_NOINFERIORS;
+         }
+      }
+
+      // we abuse ATT_NOINFERIORS flag here to mean not only that the folder
+      // doesn't have children but also to imply that a folder without this
+      // flag does have children (which is not true for IMAP) -- initially it's
+      // set as we don't have any children yet
+      folderNames.Add(path);
+      folderFlags.Add(flags | ASMailFolder::ATT_NOINFERIORS);
+      countFolders++;
    }
 };
 
@@ -407,8 +442,8 @@ public:
             _("There doesn't seem to be any folders on\n"
               "the IMAP server %s!\n"
               "\n"
-              "You may want to change its parameters\n"
-              "by return to the previous pages."),
+              "You may want to return to the previous page\n"
+              "and change the server parameters there."),
             parent->Data().source.server.c_str()
          )
         )
@@ -473,8 +508,6 @@ class MigrateWizardProgressPage : public MigrateWizardPage
 public:
    MigrateWizardProgressPage(MigrateWizard *parent);
 
-   virtual bool TransferDataToWindow();
-
 protected:
    // enable/disable all wizard buttons
    void EnableWizardButtons(bool enable);
@@ -482,21 +515,58 @@ protected:
    // cancel button handler
    void OnButtonCancel(wxCommandEvent& event);
 
+   // we don't have an "Ok" button but we generate a pseudo event from it to
+   // start working immediately after being shown
+   void OnButtonOk(wxCommandEvent& event);
+
+   // this is where we post the "Ok" button event from
+   void OnShow(wxShowEvent& event);
+
 private:
    // update the messages progress meter
-   void UpdateMessageProgress();
+   bool UpdateMessageProgress();
 
    // update the folder progress meter (also updates the messages one)
-   void UpdateFolderProgress();
+   bool UpdateFolderProgress();
 
    // update the status shown in m_labelStatus
-   void UpdateStatus(const String& msg);
+   bool UpdateStatus(const String& msg);
+
+
+   // returns the folder to copy from
+   MailFolder *OpenSource(const MigrateImapServer& imapData,
+                          const String& name);
+
+   // return the MFolder to copy to
+   MFolder *GetDstFolder(const String& name, int flags);
+
+   // return the type of the folders we're creating
+   MFolderType GetDstType() const;
+
+   // get the dst folder name corresponding to the given source folder
+   String GetDstNameForSource(const String& name);
+
+   // do copy all messages
+   bool CopyMessages(MailFolder *mfSrc, MFolder *folderDst);
+
+   // process the source folder with this name
+   bool ProcessOneFolder(const String& name, int flags);
+
+   // create the target folder corresponding to the non-selectable source one
+   bool CreateDstDirectory(const String& name);
+
+   // process all folders
+   void DoMigration();
 
 
    // data
    int m_nFolder,                   // current folder or -1 if none yet
        m_nMessage,                  // current message in current folder
        m_countMessages;             // total number of messages or -1
+
+   size_t m_nErrors;                // number of folders we couldn't copy
+
+   bool m_continue;                 // set to false if we're cancelled
 
    // the GUI controls
    wxStaticText *m_labelFolder,     // folder progress label
@@ -805,7 +875,7 @@ void IMAPServerPanel::OnText(wxCommandEvent& event)
          m_textPass->SetValue(m_folder->GetPassword());
 
 #ifdef USE_SSL
-         m_chkSSL->SetValue(m_folder->GetFlags() & MF_FLAGS_SSLAUTH);
+         m_chkSSL->SetValue((m_folder->GetFlags() & MF_FLAGS_SSLAUTH) != 0);
 #endif // USE_SSL
       }
    }
@@ -875,7 +945,16 @@ bool LocalPanel::TransferDataToWindow()
 bool LocalPanel::TransferDataFromWindow()
 {
    m_localData->root = m_textDir->GetValue();
-   m_localData->format = (FileMailboxFormat)m_choiceFormat->GetSelection();
+
+   int sel = m_choiceFormat->GetSelection();
+   if ( sel == -1 )
+   {
+      wxLogError(_("Please select the local mailbox format."));
+
+      return false;
+   }
+
+   m_localData->format = (FileMailboxFormat)sel;
 
    return true;
 }
@@ -975,13 +1054,17 @@ MigrateWizardDstPage::MigrateWizardDstPage(MigrateWizard *parent)
             LAYOUT_X_MARGIN
           );
 
-   m_radioIMAP = new wxRadioButton(this, -1, _("to another &IMAP server:"));
+   m_radioIMAP = new wxRadioButton(this, -1, _("to another &IMAP server:"),
+                                   wxDefaultPosition, wxDefaultSize,
+                                   wxRB_SINGLE);
    sizer->Add(m_radioIMAP, 0, wxALL, LAYOUT_X_MARGIN);
 
    m_panelIMAP = new IMAPServerPanel(this, &Data().dstIMAP);
    sizer->Add(m_panelIMAP, 1, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
-   m_radioLocal = new wxRadioButton(this, -1, _("or to a &local file:"));
+   m_radioLocal = new wxRadioButton(this, -1, _("or to a local &file:"),
+                                    wxDefaultPosition, wxDefaultSize,
+                                    wxRB_SINGLE);
    sizer->Add(m_radioLocal);
 
    m_panelLocal = new LocalPanel(this, &Data().dstLocal);
@@ -1007,11 +1090,15 @@ void MigrateWizardDstPage::OnRadioButton(wxCommandEvent& event)
 
    if ( useIMAP )
    {
+      m_radioLocal->SetValue(false);
+
       // button should be disabled if the server is not entered
       m_panelIMAP->UpdateForwardBtnUI();
    }
    else // local dst
    {
+      m_radioIMAP->SetValue(false);
+
       // button is always enabled
       EnableButtons(MigrateWizard::Btn_Next, true);
    }
@@ -1025,11 +1112,15 @@ bool MigrateWizardDstPage::TransferDataToWindow()
 
    EnablePanelToBeUsed();
 
-   return GetPanelToUse()->TransferDataToWindow();
+   // call TransferDataToWindow() for both panels even if only one is used at
+   // any given moment
+   return m_panelIMAP->TransferDataToWindow() &&
+            m_panelLocal->TransferDataToWindow();
 }
 
 bool MigrateWizardDstPage::TransferDataFromWindow()
 {
+   // but only call TransferDataFromWindow() for the one the user selected
    return GetPanelToUse()->TransferDataFromWindow();
 }
 
@@ -1101,6 +1192,9 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(MigrateWizardProgressPage, MigrateWizardPage)
+   EVT_SHOW(MigrateWizardProgressPage::OnShow)
+
+   EVT_BUTTON(wxID_OK, MigrateWizardProgressPage::OnButtonOk)
    EVT_BUTTON(wxID_CANCEL, MigrateWizardProgressPage::OnButtonCancel)
 END_EVENT_TABLE()
 
@@ -1111,6 +1205,8 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
                               MigrateWizard::Page_Progress
                            )
 {
+   m_continue = true;
+
    // create the GUI controls
    wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
    sizer->Add
@@ -1133,13 +1229,17 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
    m_labelFolder = new wxStaticText(this, -1, _(""));
    sizer->Add(m_labelFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
-   m_gaugeFolder = new wxGauge(this, -1, Data().countFolders);
+   m_gaugeFolder = new wxGauge(this, -1, Data().countFolders,
+                               wxDefaultPosition, wxDefaultSize,
+                               wxGA_HORIZONTAL | wxGA_SMOOTH);
    sizer->Add(m_gaugeFolder, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    m_labelMsg = new wxStaticText(this, -1, _(""));
    sizer->Add(m_labelMsg, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
-   m_gaugeMsg = new wxGauge(this, -1, 0); // range will be set later
+   m_gaugeMsg = new wxGauge(this, -1, 0, // range will be set later
+                            wxDefaultPosition, wxDefaultSize,
+                            wxGA_HORIZONTAL | wxGA_SMOOTH);
    sizer->Add(m_gaugeMsg, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    sizer->Add(0, 4*LAYOUT_Y_MARGIN);
@@ -1156,11 +1256,9 @@ MigrateWizardProgressPage::MigrateWizardProgressPage(MigrateWizard *parent)
    sizer->Add(m_labelStatus, 0, wxALL | wxEXPAND, LAYOUT_X_MARGIN);
 
    SetSizer(sizer);
-
-   EnableWizardButtons(false);
 }
 
-void MigrateWizardProgressPage::UpdateMessageProgress()
+bool MigrateWizardProgressPage::UpdateMessageProgress()
 {
    m_labelMsg->SetLabel
                (
@@ -1173,10 +1271,22 @@ void MigrateWizardProgressPage::UpdateMessageProgress()
                );
 
    m_gaugeMsg->SetValue(m_nMessage);
+
+   wxYield();
+
+   return m_continue;
 }
 
-void MigrateWizardProgressPage::UpdateFolderProgress()
+bool MigrateWizardProgressPage::UpdateFolderProgress()
 {
+   String fullname = Data().source.root,
+          name = Data().folderNames[m_nFolder];
+
+   if ( !fullname.empty() && !name.empty() )
+      fullname += Data().source.delimiter;
+
+   fullname += name;
+
    m_labelFolder->SetLabel
                   (
                      wxString::Format
@@ -1184,16 +1294,18 @@ void MigrateWizardProgressPage::UpdateFolderProgress()
                         _("Folder: %d/%d (%s)"),
                         m_nFolder + 1,
                         Data().countFolders,
-                        Data().folderNames[m_nFolder].c_str()
+                        fullname.c_str()
                      )
                   );
 
    m_gaugeFolder->SetValue(m_nFolder);
 
    wxYield();
+
+   return m_continue;
 }
 
-void MigrateWizardProgressPage::UpdateStatus(const String& msg)
+bool MigrateWizardProgressPage::UpdateStatus(const String& msg)
 {
    // we need to relayout because the size of the control changed and it must
    // be recentred
@@ -1202,160 +1314,319 @@ void MigrateWizardProgressPage::UpdateStatus(const String& msg)
    Layout();
 
    wxYield();
+
+   return m_continue;
 }
 
 void MigrateWizardProgressPage::EnableWizardButtons(bool enable)
 {
-   EnableButtons(MigrateWizard::Btn_All, enable);
+   // when we (re)enable the buttons, only "Finish" still makes sense, but when
+   // we disable them, we want to disable all of them
+   EnableButtons(enable ? MigrateWizard::Btn_Next
+                        : MigrateWizard::Btn_All, enable);
 }
 
-bool MigrateWizardProgressPage::TransferDataToWindow()
+MailFolder *
+MigrateWizardProgressPage::OpenSource(const MigrateImapServer& imapData,
+                                      const String& name)
 {
-   const char delimiterSrc = Data().source.delimiter;
+   MFolder_obj folderSrc(MFolder::CreateTemp(_T(""), MF_IMAP));
+   CHECK( folderSrc, NULL, _T("MFolder::CreateTemp() failed?") );
 
-   for ( m_nFolder = 0; m_nFolder < Data().countFolders; m_nFolder++ )
+   folderSrc->SetServer(imapData.server);
+
+   String path = imapData.root;
+   if ( !name.empty() )
    {
-      UpdateFolderProgress();
+      path << Data().source.delimiter << name;
+   }
+   folderSrc->SetPath(path);
 
-      // is this a "file" or a "directory"?
-      if ( Data().folderFlags[m_nFolder] & ASMailFolder::ATT_NOSELECT )
-      {
-      }
-      else // a "file"-like folder, copy the messages from it
-      {
-         // open the source folder
-         MFolder_obj folderSrc(MFolder::CreateTemp(_T(""), MF_IMAP));
-
-         const MigrateImapServer& imapData = Data().source;
-         folderSrc->SetServer(imapData.server);
-
-         String path = imapData.root,
-                name = Data().folderNames[m_nFolder];
-         if ( !name.empty() )
-         {
-            path << delimiterSrc << name;
-         }
-         folderSrc->SetPath(path);
-         folderSrc->SetAuthInfo(imapData.username, imapData.password);
+   folderSrc->SetAuthInfo(imapData.username, imapData.password);
 
 #ifdef USE_SSL
-         if ( imapData.useSSL )
-         {
-            folderSrc->AddFlags(MF_FLAGS_SSLAUTH | MF_FLAGS_SSLUNSIGNED);
-         }
+   if ( imapData.useSSL )
+   {
+      folderSrc->AddFlags(MF_FLAGS_SSLAUTH | MF_FLAGS_SSLUNSIGNED);
+   }
 #endif // USE_SSL
 
-         MailFolder_obj mf = MailFolder::OpenFolder
-                             (
-                               folderSrc,
-                               MailFolder::ReadOnly
-                             );
-         if ( mf )
+   return MailFolder::OpenFolder(folderSrc, MailFolder::ReadOnly);
+}
+
+MFolderType
+MigrateWizardProgressPage::GetDstType() const
+{
+   MFolderType folderType;
+   if ( Data().toIMAP )
+   {
+      folderType = MF_IMAP;
+   }
+   else // file, but which?
+   {
+      folderType = Data().dstLocal.format == FileMbox_Max ? MF_MH : MF_FILE;
+   }
+
+   return folderType;
+}
+
+String
+MigrateWizardProgressPage::GetDstNameForSource(const String& name)
+{
+   // when we start from source folder foo we want the target folder for foo to
+   // be named foo (and not have empty name) so always append source.root to
+   // the path
+   String path = Data().dstLocal.root,
+          rootSrc = Data().source.root;
+
+   const char delimiterSrc = Data().source.delimiter;
+
+   if ( !rootSrc.empty() )
+   {
+      if ( !path.empty() )
+         path += delimiterSrc;
+
+      path += rootSrc;
+   }
+
+   if ( !name.empty() )
+   {
+      if ( !path.empty() )
+         path += delimiterSrc;
+
+      path += name;
+   }
+
+   // make it into the dst path: it can have different delimiter
+   for ( size_t n = 0; n < path.length(); n++ )
+   {
+      if ( path[n] == delimiterSrc )
+      {
+         if ( !Data().delimiterDst )
          {
-            // create the folder to save the messages to
-            MFolderType folderType;
-            if ( Data().toIMAP )
+            MFolder_obj folderDst = MFolder::CreateTemp(_T(""), GetDstType());
+            Data().delimiterDst = MailFolder::GetFolderDelimiter(folderDst);
+
+            if ( Data().delimiterDst == delimiterSrc )
             {
-               folderType = MF_IMAP;
-            }
-            else // file, but which?
-            {
-               folderType = Data().dstLocal.format == FileMbox_Max
-                              ? MF_MH
-                              : MF_FILE;
-            }
-
-            MFolder_obj folderDst(MFolder::CreateTemp(_T(""), folderType));
-            if ( !folderDst )
-            {
-               FAIL_MSG( _T("MFolder::CreateTemp() failed?") );
-
-               continue;
-            }
-
-            if ( folderType == MF_FILE )
-            {
-               folderDst->SetFileMboxFormat(Data().dstLocal.format);
-            }
-
-            String path = Data().dstLocal.root;
-            if ( !name.empty() )
-            {
-               path << delimiterSrc << name;
-            }
-
-            // make it into the dst path
-            char delimiterDst = '\0';
-            for ( size_t n = 0; n < path.length(); n++ )
-            {
-               if ( path[n] == delimiterSrc )
-               {
-                  if ( !delimiterDst )
-                  {
-                     // we need to determine it as it can be mostly anything
-                     // for IMAP
-                     MailFolder_obj mfTmp = MailFolder::OpenFolder
-                                            (
-                                             folderDst,
-                                             MailFolder::HalfOpen
-                                            );
-                     if ( !mfTmp )
-                     {
-                        wxLogError(_("Failed to retrieve the target "
-                                     "folder hierarchy delimiter."));
-
-                        return true;
-                     }
-
-                     delimiterDst = mfTmp->GetFolderDelimiter();
-                  }
-
-                  path[n] = delimiterDst;
-               }
-            }
-
-            folderDst->SetPath(path);
-
-            MailFolder_obj mfDst = MailFolder::OpenFolder(folderDst);
-            if ( !mfDst )
-            {
-               wxLogError(_("Failed to create the targer folder \"%s\""),
-                          path.c_str());
-               continue;
-            }
-
-            // now copy all the messages from src to dst
-            UIdArray uids;
-            uids.Add(UID_ILLEGAL);
-
-            HeaderInfoList_obj headers = mf->GetHeaders();
-
-            m_countMessages = headers->Count();
-            for ( m_nMessage = 0; m_nMessage < m_countMessages; m_nMessage++ )
-            {
-               UpdateMessageProgress();
-
-               HeaderInfo *hi = headers->GetItemByIndex(m_nMessage);
-               if ( !hi )
-               {
-                  wxLogError(_("Failed to retrieve header for message %d"),
-                             m_nMessage);
-                  continue;
-               }
-
-               uids[0] = hi->GetUId();
-               if ( !mf->SaveMessages(&uids, folderDst) )
-               {
-                  wxLogError(_("Failed to copy the message %d from folder %s"),
-                             m_nMessage,
-                             Data().folderNames[m_nFolder].c_str());
-               }
+               // nothing to do, finally!
+               break;
             }
          }
+
+         path[n] = Data().delimiterDst;
+      }
+   }
+
+   return path;
+}
+
+MFolder *
+MigrateWizardProgressPage::GetDstFolder(const String& name, int flags)
+{
+   // which kind of folder are we going to create?
+   MFolderType folderType = GetDstType();
+   MFolder *folderDst = MFolder::CreateTemp(_T(""), folderType);
+   CHECK( folderDst, NULL, _T("MFolder::CreateTemp() failed?") );
+
+   if ( folderType == MF_FILE )
+   {
+      folderDst->SetFileMboxFormat(Data().dstLocal.format);
+   }
+
+   String path = GetDstNameForSource(name);
+
+   // there is a complication here: although IMAP folders may (depending on
+   // server) contain both messages and subfolders, this is impossible with
+   // MBOX and MBX folders (although ok with MH) and the way we deal with this
+   // is to put the messages in a file named "folder.messages"
+   if ( folderType == MF_FILE )
+   {
+      if ( !(flags & ASMailFolder::ATT_NOINFERIORS) )
+      {
+         // create a subdirectory for the subfolders
+         if ( !wxMkdir(path) )
+         {
+            wxLogWarning(_("Failed to create directory \"%s\" for folder \"%s\""),
+                         path.c_str(), name.c_str());
+         }
+
+         // and modify the name for the file itself
+         path += _T(".messages");
+      }
+   }
+
+   folderDst->SetPath(path);
+
+   return folderDst;
+}
+
+bool
+MigrateWizardProgressPage::CopyMessages(MailFolder *mfSrc, MFolder *folderDst)
+{
+   UIdArray uids;
+   uids.Add(UID_ILLEGAL);
+
+   HeaderInfoList_obj headers = mfSrc->GetHeaders();
+
+   m_countMessages = headers->Count();
+   m_gaugeMsg->SetRange(m_countMessages);
+
+   for ( m_nMessage = 0; m_nMessage < m_countMessages; m_nMessage++ )
+   {
+      if ( !UpdateMessageProgress() )
+      {
+         // cancelled
+         return true;
+      }
+
+      HeaderInfo *hi = headers->GetItemByIndex(m_nMessage);
+      if ( !hi )
+      {
+         wxLogError(_("Failed to retrieve header for message %d"),
+                    m_nMessage);
+         continue;
+      }
+
+      uids[0] = hi->GetUId();
+      if ( !mfSrc->SaveMessages(&uids, folderDst) )
+      {
+         wxLogError(_("Failed to copy the message %d from folder \"%s\""),
+                    m_nMessage,
+                    Data().folderNames[m_nFolder].c_str());
+
+         return false;
       }
    }
 
    return true;
+}
+
+bool MigrateWizardProgressPage::CreateDstDirectory(const String& name)
+{
+   if ( Data().toIMAP )
+   {
+      // TODO: do we need to do anything here or will it be created
+      //       automatically for us?
+      return true;
+   }
+   else // local file destination
+   {
+      // create a directory
+      return wxMkdir(GetDstNameForSource(name));
+   }
+}
+
+bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
+{
+   // open the source folder
+   MailFolder_obj mf(OpenSource(Data().source, name));
+   if ( !mf )
+   {
+      wxLogError(_("Failed to open source folder \"%s\""), name.c_str());
+
+      return false;
+   }
+
+   // create the folder to save the messages to
+   MFolder_obj folderDst = GetDstFolder(name, flags);
+   MailFolder_obj mfDst = MailFolder::OpenFolder(folderDst);
+   if ( !mfDst )
+   {
+      wxLogError(_("Failed to create the targer folder \"%s\""), name.c_str());
+
+      return false;
+   }
+
+   // now copy all the messages from src to dst
+   return CopyMessages(mf, folderDst);
+}
+
+void MigrateWizardProgressPage::DoMigration()
+{
+   EnableWizardButtons(false);
+
+   for ( m_nFolder = 0, m_nErrors = 0;
+         m_nFolder < Data().countFolders;
+         m_nFolder++ )
+   {
+      if ( !UpdateFolderProgress() )
+      {
+         // cancelled
+         break;
+      }
+;
+      const String& name = Data().folderNames[m_nFolder];
+
+      // is this a "file" or a "directory"?
+      if ( Data().folderFlags[m_nFolder] & ASMailFolder::ATT_NOSELECT )
+      {
+         // just create the corresponding directory or folder
+         if ( !CreateDstDirectory(name) )
+         {
+            // it's not a fatal error (no messages lost...) but still worth
+            // noting
+            wxLogWarning(_("Failed to copy the folder \"%s\""), name.c_str());
+         }
+      }
+      else // a "file"-like folder, copy the messages from it
+      {
+         if ( !ProcessOneFolder(name, Data().folderFlags[m_nFolder]) )
+         {
+            wxLogError(_("Failed to copy messages from folder \"%s\""),
+                       name.c_str());
+
+            m_nErrors++;
+         }
+      }
+   }
+
+   // update the UI to show that we're done now
+   if ( m_continue )
+   {
+      m_btnAbort->Disable();
+
+      m_gaugeMsg->SetValue(m_countMessages);
+      m_gaugeFolder->SetValue(Data().countFolders);
+
+      String msg;
+      if ( m_nErrors )
+      {
+         wxLogError(_("There were errors during the migration."));
+
+         msg.Printf(_("Done with %u error(s)"), m_nErrors);
+      }
+      else
+      {
+         msg = _("Completed successfully.");
+      }
+
+      UpdateStatus(msg);
+
+      EnableWizardButtons(true);
+   }
+   //else: cancelled
+
+   wxWindow *btnFinish = GetParent()->FindWindow(wxID_FORWARD);
+   CHECK_RET( btnFinish, _T("no \"Finish\" button?") );
+
+   btnFinish->SetFocus();
+}
+
+void MigrateWizardProgressPage::OnShow(wxShowEvent& event)
+{
+   if ( event.GetShow() )
+   {
+      wxCommandEvent eventOk(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
+      wxPostEvent(this, eventOk);
+   }
+
+   event.Skip();
+}
+
+void MigrateWizardProgressPage::OnButtonOk(wxCommandEvent& /* event */)
+{
+   DoMigration();
 }
 
 void MigrateWizardProgressPage::OnButtonCancel(wxCommandEvent& /* event */)
@@ -1366,6 +1637,8 @@ void MigrateWizardProgressPage::OnButtonCancel(wxCommandEvent& /* event */)
                      _("Mahogany: Please confirm"),
                      wxYES_NO | wxICON_QUESTION | wxNO_DEFAULT) == wxYES )
    {
+      m_continue = false;
+
       m_btnAbort->Disable();
       m_labelFolder->Disable();
       m_gaugeFolder->Disable();
@@ -1466,7 +1739,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
    {
       /* Page_Source */             Page_Max, // not used!
       /* Page_CantAccessSource */   Page_Max,
-      /* Page_WarnEmptySource */    Page_Dst,
+      /* Page_WarnEmptySource */    Page_Max,
       /* Page_Dst */                Page_Confirm,
       /* Page_Confirm */            Page_Progress,
       /* Page_Progress */           Page_Max,
@@ -1510,12 +1783,7 @@ wxWizardPage *MigrateWizard::GetNextPage(Page page)
             Data().countFolders = 0;
             m_doneWithList = false;
 
-            // the cast below is needed as ListEventReceiver compares the user
-            // data in the results it gets with "this" and its this pointer is
-            // different from our "this" as we use multiple inheritance
-            Ticket t = asmf->ListFolders(_T(""), false, _T(""),
-                                         (ListEventReceiver *)this);
-            if ( t != ILLEGAL_TICKET )
+            if ( ListAll(asmf) )
             {
                // process the events from ListFolders
                do
@@ -1572,7 +1840,6 @@ bool MigrateWizard::HasNextPage(wxWizardPage *page)
    switch ( ((MigrateWizardPage *)page)->GetId() )
    {
       case Page_Source:
-      case Page_WarnEmptySource:
       case Page_Dst:
       case Page_Confirm:
          return true;
@@ -1580,6 +1847,7 @@ bool MigrateWizard::HasNextPage(wxWizardPage *page)
       default:
          FAIL_MSG( _T("unknown page in MigrateWizard") );
 
+      case Page_WarnEmptySource:
       case Page_CantAccessSource:
       case Page_Progress:
          return false;
@@ -1595,11 +1863,7 @@ bool MigrateWizard::HasPrevPage(wxWizardPage *page)
 void
 MigrateWizard::OnListFolder(const String& path, char delim, long flags)
 {
-   Data().source.delimiter = delim;
-
-   Data().folderNames.Add(path);
-   Data().folderFlags.Add(flags);
-   Data().countFolders++;
+   Data().AddFolder(path, delim, flags);
 }
 
 void
