@@ -55,19 +55,19 @@ class FTObject
    /**@name canvas positions covered by this line */
    //@{
    /// the y position of the line
-   float	posY;
+   coord_t	posY;
    /// the correction for font height adjustments
-   float	posYdelta;
+   coord_t	posYdelta;
    /// the starting x position
-   float	posX;
+   coord_t	posX;
    /// the maximium y position
-   float	posY2;
+   coord_t	posY2;
    /// the maximum x position
-   float	posX2;
+   coord_t	posX2;
    /// the total height of the line
-   float	height;
+   coord_t	height;
    /// the total width of the line
-   float	width;
+   coord_t	width;
    //@}
 
    /// the contents of this line
@@ -111,7 +111,7 @@ public:
        @param dc pointer to wxDC for calculating size
        @return the object's type
    */
-   FTObjectType Create(String & str, int &cx, int &cy, float &x, float
+   FTObjectType Create(String & str, int &cx, int &cy, coord_t &x, coord_t
 		       &y, bool formatFlag = true, wxDC *dc = NULL);
 
    /**
@@ -120,7 +120,7 @@ public:
       @see
    */
    
-   FTObject(String & str, int &cx, int &cy, float &x, float &y,
+   FTObject(String & str, int &cx, int &cy, coord_t &x, coord_t &y,
 	    bool formatFlag = true, wxDC *dc = NULL);
 
    /// Destructor.
@@ -133,7 +133,7 @@ public:
       @param y the next object's y coordinate
       @param ftc the wxFTOList to process commands
    */
-   void Update(wxDC *dc, float &x, float &y, wxFTOList *ftc = NULL);
+   void Update(wxDC *dc, coord_t &x, coord_t &y, wxFTOList *ftc = NULL);
    
    /**
       Is object fully formatted?
@@ -181,48 +181,48 @@ public:
       @param h new height
       @param setDelta if TRUE, recalculate offset for baseline
    */
-   void  SetHeight(float h, Bool setDelta = FALSE);
+   void  SetHeight(coord_t h, Bool setDelta = FALSE);
 
    /**
       Gets the height value.
       @return new height in DC units
    */
-   float GetHeight(void) const { return height; }
+   coord_t GetHeight(void) const { return height; }
    
    /**
       Sets the y position on DC.
       @param y new position on DC
    */
-   void  SetYPos(float y) { posY = y; posY2 = y+height; }
+   void  SetYPos(coord_t y) { posY = y; posY2 = y+height; }
 
    /**
       Sets the adjustment for y position on DC.
       @param delta new adjustment
    */
-   void	SetYPosDelta(float delta) { posYdelta = delta; }
+   void	SetYPosDelta(coord_t delta) { posYdelta = delta; }
    
    /**
       Sets the x position on DC.
       @param x new position on DC
    */
-   void  SetXPos(float x) { posX = x; posX2 = x+width; }
+   void  SetXPos(coord_t x) { posX = x; posX2 = x+width; }
 
    /**
       Gets the width of object on DC.
       @return the width
    */
-   float GetWidth(void) const { return width; }
+   coord_t GetWidth(void) const { return width; }
 
    /** Gets the position of object on DC.
        @return the y position
    */
-   float  GetYPos(void) const { return posY; }
+   coord_t  GetYPos(void) const { return posY; }
 
    /** Gets the position of object on DC.
        @return the x position
    */
-   float  GetXPos(void) const { return posX; }
-   float  GetX2Pos(void) const { return posX2; }
+   coord_t  GetXPos(void) const { return posX; }
+   coord_t  GetX2Pos(void) const { return posX2; }
 
    /** Gets the text of the object.
        @return the string
@@ -230,7 +230,7 @@ public:
    const String & GetText(void) const { return text; }
    
    const  char *c_str(void) const { return text.c_str(); }
-   float  GetNextPosition(void) const { return posY + height; }
+   coord_t  GetNextPosition(void) const { return posY + height; }
    void   SetText(String const &in) { text = in; }
 
    void	InsertText(String const &str, int offset = 0);
@@ -268,9 +268,9 @@ class wxFTOList
       /// is it underlined?
       Bool	fontUnderline;
       /// descent of currently selected font
-      float	fontDescent;
+      coord_t	fontDescent;
       /// height of a text line in currently selected font
-      float	textHeight;
+      coord_t	textHeight;
       
       std::list<int> familyStack;
       std::list<int> styleStack;
@@ -326,9 +326,9 @@ class wxFTOList
       int	ChangeSize(int delta);
 
       /// return the text height in currently selected font
-      float	TextHeight(void) { return textHeight; }
+      coord_t	TextHeight(void) { return textHeight; }
       /// return the descent of currently selected font
-      float	Descent(void) { return fontDescent; }
+      coord_t	Descent(void) { return fontDescent; }
       
       void	Roman(Bool enable = TRUE) 	{ FontFamily(wxROMAN, enable); }
       void	Modern(Bool enable = TRUE) 	{ FontFamily(wxMODERN, enable); }
@@ -358,7 +358,7 @@ class wxFTOList
    int 		cursorMaxX, cursorMaxY;
    
    /// position in DC
-   float	dcX, dcY;
+   coord_t	dcX, dcY;
    /// the current settings
    DrawInfo	drawInfo;
    /// the DC
@@ -401,9 +401,9 @@ class wxFTOList
    /// the last drawn cursor
    struct
    {
-      float x;
-      float y1;
-      float y2;
+      coord_t x;
+      coord_t y1;
+      coord_t y2;
    } lastCursor;
 	 
    /// iterator  for content extraction:
@@ -492,7 +492,7 @@ public:
        @param y the y coordinate of mouse click
        @return a pointer to the object or NULL if not found
    */
-   FTObject const *FindClickable(float x, float y) const;
+   FTObject const *FindClickable(coord_t x, coord_t y) const;
    
 #ifndef NDEBUG
    void	Debug(void) const;
@@ -503,7 +503,7 @@ public:
        @param maxWidth if not NULL, the maximum width gets stored here
        @param maxHeight if not NULL, the maximum height gets stored here
    */
-   void ReCalculateLines(float *maxWidth = NULL, float *maxHeight = NULL);
+   void ReCalculateLines(coord_t *maxWidth = NULL, coord_t *maxHeight = NULL);
 
    /** Toggle editable status.
        @param enable true to activate editing

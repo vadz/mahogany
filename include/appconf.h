@@ -104,6 +104,10 @@
 #	endif
 #endif
 
+#ifndef USE_IOSTREAMH
+  #define USE_IOSTREAMH 1
+#endif
+
 #if     USE_IOSTREAMH
   #include  <iostream.h>
 #else   // old C style headers

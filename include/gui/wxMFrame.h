@@ -58,14 +58,13 @@ public:
 
    /// make it visible or invisible
 #if     USE_WXWINDOWS2
-   /// to be called on closing of window
-   ON_CLOSE_TYPE OnClose(wxEvent &ignore);
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
 #else
-   /// to be called on closing of window
-   ON_CLOSE_TYPE OnClose(void);
    void	Show(bool visible = true) { wxFrame::Show(visible); }
 #endif
+
+   /// to be called on closing of window
+   ON_CLOSE_TYPE OnClose(void);
    /// used to set the title of the window class
    void	SetTitle(String const & name);
    /// get name of this frame:
@@ -88,6 +87,8 @@ public:
    void OnExit(wxCommandEvent&)     { OnMenuCommand(WXMENU_FILE_EXIT); }
     /// 
    void OnAbout(wxCommandEvent&)    { OnMenuCommand(WXMENU_HELP_ABOUT); }
+    ///
+   void OnMenuClose(wxCommandEvent&) { OnMenuCommand(WXMENU_FILE_CLOSE); }
    //@}
 
    DECLARE_EVENT_TABLE()

@@ -12,7 +12,7 @@
 #pragma interface "wxtab.h"
 #endif
 
-#ifdef  USE_WXWINDOWS2
+#if  USE_WXWINDOWS2
 #	include <wx/hash.h>
 #	include <wx/string.h>
 #else //wxWin 1
@@ -26,7 +26,7 @@ class wxTabView;
  * A wxTabControl is the internal and visual representation
  * of the tab.
  */
- 
+
 class wxTabControl: public wxObject
 {
   DECLARE_DYNAMIC_CLASS(wxTabControl)
@@ -45,7 +45,7 @@ class wxTabControl: public wxObject
   public:
     wxTabControl(wxTabView *v = NULL);
     ~wxTabControl(void);
-    
+
     virtual void OnDraw(wxDC *dc, Bool lastInRow);
     inline void SetLabel(const wxString& str) { controlLabel = str; }
     inline wxString GetLabel(void) { return controlLabel; }
@@ -55,31 +55,31 @@ class wxTabControl: public wxObject
 
     inline void SetSelected(Bool sel) { isSelected = sel; }
     inline Bool IsSelected(void) { return isSelected; }
-    
+
     inline void SetPosition(int x, int y) { offsetX = x; offsetY = y; }
     inline void SetSize(int x, int y) { width = x; height = y; }
-    
+
     inline void SetRowPosition(int r) { rowPosition = r; }
     inline int GetRowPosition() { return rowPosition; }
     inline void SetColPosition(int c) { colPosition = c; }
     inline int GetColPosition() { return colPosition; }
-    
+
     inline int GetX(void) { return offsetX; }
     inline int GetY(void) { return offsetY; }
     inline int GetWidth(void) { return width; }
     inline int GetHeight(void) { return height; }
-    
+
     inline int GetId(void) { return id; }
     inline void SetId(int i) { id = i; }
-    
+
     virtual Bool HitTest(int x, int y);
 };
- 
+
 /*
  * Each wxTabLayer is a list of tabs. E.g. there
  * are 3 layers in the MS Word Options dialog.
  */
- 
+
 class wxTabLayer: public wxList
 {
   DECLARE_DYNAMIC_CLASS(wxTabLayer)
@@ -105,7 +105,7 @@ class wxTabView: public wxObject
  protected:
    // List of layers, from front to back.
    wxList layers;
-   
+
    // Selected tab
    int tabSelection;
 
@@ -117,19 +117,19 @@ class wxTabView: public wxObject
 
    // Usual tab width
    int tabWidth;
-   
+
    // Space between tabs
    int tabHorizontalSpacing;
-   
+
    // Space between top of normal tab and text
    int tabVerticalTextSpacing;
-   
+
    // Horizontal offset of each tab row above the first
    int tabHorizontalOffset;
 
    // Vertical offset between tab rows: NOT NEEDED: use tab height.
 //   int tabVerticalOffset;
-   
+
    // The distance between the bottom of the first tab row
    // and the top of the client area (i.e. the margin)
    int topMargin;
@@ -137,7 +137,7 @@ class wxTabView: public wxObject
    // The position and size of the view above which the tabs are placed.
    // I.e., the internal client area of the sheet.
    wxRectangle tabViewRect;
-   
+
    // Bitlist of styles
    long tabStyle;
 
@@ -146,23 +146,23 @@ class wxTabView: public wxObject
    wxColour shadowColour;
    wxColour backgroundColour;
    wxColour textColour;
-   
+
    // Pen and brush cache
    wxPen *highlightPen;
    wxPen *shadowPen;
    wxPen *backgroundPen;
    wxBrush *backgroundBrush;
-   
+
    wxFont *tabFont;
    wxFont *tabSelectedFont;
-   
+
    wxDC *tabDC;
  public:
   wxTabView(long style = wxTAB_STYLE_DRAW_BOX | wxTAB_STYLE_COLOUR_INTERIOR);
   ~wxTabView();
 
   inline int GetNumberOfLayers() { return layers.Number(); }
-  
+
   // Automatically positions tabs
   wxTabControl *AddTab(int id, const wxString& label);
   
@@ -249,7 +249,7 @@ class wxTabView: public wxObject
  * A dialog box class that is tab-friendly
  */
  
-#ifdef USE_WXWINDOWS2
+#if USE_WXWINDOWS2
 class wxTabbedDialogBox : public wxDialog
 #else
 class wxTabbedDialogBox : public wxDialogBox

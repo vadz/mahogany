@@ -136,6 +136,9 @@
   // make your choice...
 #	ifndef USE_IOSTREAMH
 #		define USE_IOSTREAMH   1
+#	error !use_iostream
+#else
+#	error use_iostream
 #	endif
 
   // <string> includes <istream> (Grrr...)

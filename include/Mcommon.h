@@ -31,12 +31,26 @@
 
 // hide differences between wxWin versions
 #if  USE_WXWINDOWS2
+  // screen coordinates type
+  typedef int coord_t;
+  #if USE_WXGTK
+    // @@: at least in wxGTK both 'long' and 'int' are used!
+    typedef long int lcoord_t;
+  #else
+    typedef coord_t lcoord_t;
+  #endif
+  
   // @@@ wxGTK alpha 10 doesn't have validators (yet)
-  #ifdef  __GTK__
+  #ifdef  USE_WXGTK
     #define DEFAULT_VALIDATOR
   #else
     #define DEFAULT_VALIDATOR wxDefaultValidator, 
   #endif //GTK
+    
+  // @@@ wxFrame::SetIcon doesn't exist in wxGTK
+  #ifdef  USE_WXGTK  
+    #define SetIcon(x)
+  #endif  //GTK
     
   // @@@ is this really the same thing
   #define wxMessage   wxStaticText
@@ -71,6 +85,9 @@
   #define CreateFrame(parent, title, x, y, w, h)                              \
     Create(parent, -1, title, wxPoint(x, y), wxSize(w, h))
 #else
+  // screen coordinates type
+  typedef float coord_t;
+  
   #define ON_CLOSE_TYPE     Bool
 
   #define PanelNewLine(panel)    panel->NewLine()
