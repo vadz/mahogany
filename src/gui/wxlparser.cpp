@@ -186,10 +186,10 @@ void wxLayoutImportText(wxLayoutList *list,
 
    wxString str = strOrig;
 
-   if ( encoding == wxFONTENCODING_UTF8 )
+   if ( encoding == wxFONTENCODING_UTF8 || encoding == wxFONTENCODING_UTF7 )
    {
-      // Convert from UTF-8 to environment's default encoding
-      encoding = ConvertUnicodeToSystem(&str);
+      // Convert from UTF-8|7 to environment's default encoding
+      encoding = ConvertUnicodeToSystem(&str, encoding == wxFONTENCODING_UTF7);
    }
 
    bool useConverter = FALSE;

@@ -755,11 +755,11 @@ void HtmlViewer::ShowHeader(const String& headerName,
    // second column: header values
    m_htmlText += "</td><td>";
 
-   if ( encHeader == wxFONTENCODING_UTF8 )
+   if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7)
    {
-      // convert from UTF-8 to environment's default encoding
+      // convert from UTF-8|7 to environment's default encoding
       // FIXME it won't be needed when full Unicode support is available
-      encHeader = ConvertUnicodeToSystem(&m_htmlText);
+      encHeader = ConvertUnicodeToSystem(&m_htmlText, encHeader == wxFONTENCODING_UTF7);
    }
 
    {

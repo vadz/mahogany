@@ -82,12 +82,6 @@
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
 
-#include "Mcclient.h"
-extern "C"
-{
-   #include "utf8.h"  // for utf8_text_utf7()
-}
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -1149,10 +1143,10 @@ MessageView::ShowHeaders()
       wxString value = headerValues[n];
       if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
       {
-         // special handling for the UTF-8 if it's not supported natively
-         if ( encHeader == wxFONTENCODING_UTF8 )
+         // special handling for the UTF-7|8 if it's not supported natively
+         if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7)
          {
-            encHeader = ConvertUnicodeToSystem(&value);
+            encHeader = ConvertUnicodeToSystem(&value, encHeader == wxFONTENCODING_UTF7);
          }
       }
 
@@ -1242,13 +1236,13 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    {
       encPart = mimepart->GetTextEncoding();
 
-      if ( encPart == wxFONTENCODING_UTF8 )
+      if ( encPart == wxFONTENCODING_UTF8 || encPart == wxFONTENCODING_UTF7)
       {
-         // convert from UTF-8 to environment's default encoding
-         encPart = ConvertUnicodeToSystem(&textPart);
+         // show UTF-8|7, not env. encoding in Language menu
+         m_encodingAuto = encPart;
 
-         // show UTF-8, not env. encoding in Language menu
-         m_encodingAuto = wxFONTENCODING_UTF8;
+         // convert from UTF-8|7 to environment's default encoding
+         encPart = ConvertUnicodeToSystem(&textPart, encPart == wxFONTENCODING_UTF7);
       }
       else if ( encPart == wxFONTENCODING_SYSTEM ||
                 encPart == wxFONTENCODING_DEFAULT )

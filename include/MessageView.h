@@ -679,7 +679,9 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid);
 
-/// try to convert text in UTF-8 to the current encoding in place
-extern wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf);
+/// try to convert text in UTF-8 or 7 to the current encoding in place
+/// returns wxLocale::GetSystemEncoding()
+extern wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf,
+                                             bool isUTF7 = false);
 
 #endif // MESSAGEVIEW_H
