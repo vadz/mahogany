@@ -25,14 +25,17 @@ allclean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
+config.status: configure
+	./config.status --recheck
+
 config: configure makeopts.in
 	./configure
 
-configure:	configure.in
-	autoconf
+configure: configure.in extra/scripts/aclocal.m4
+	autoconf --localdir=extra/scripts
 
-makeopts: makeopts.in configure
-	./configure
+makeopts: makeopts.in config.status
+	CONFIG_FILES=$@ CONFIG_HEADERS=./config.status
 
 include/config.h: include/config.h.in configure
 	./configure

@@ -1,100 +1,6 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
-AC_DEFUN(AC_OVERRIDES_PREPARE,
-[
-rm -f ${OSTYPE}.system.cache.tmp
-touch ${OSTYPE}.system.cache.tmp
-touch ${OSTYPE}.system.cache
-])
-
-AC_DEFUN(AC_OVERRIDES_DONE,
-[
-mv ${OSTYPE}.system.cache.tmp ${OSTYPE}.system.cache
-])
-
-dnl package,message,helpmessage,variable
-AC_DEFUN(AC_OVERRIDES,
-[
-AC_MSG_CHECKING("for $2")
-AC_ARG_WITH($1,$3,
-[if test "x$with_$1" = xyes; then
-  ac_cv_use_$1='$4="1"'
-else
-  ac_cv_use_$1='$4="0"'
-fi],
-[
-  LINE=`grep "$4" ${OSTYPE}.system.cache`
-  if test "x$LINE" != x ; then
-    eval "DEFAULT_$LINE"
-  fi
-  ac_cv_use_$1='$4='$DEFAULT_$4
-])
-eval "$ac_cv_use_$1"
-echo $ac_cv_use_$1 >> ${OSTYPE}.system.cache.tmp
-if test "$$4" = 1; then
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-])
-
-dnl AC_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
-dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES]]])
-
-AC_DEFUN(AC_CHECK_MYLIB,
-[AC_MSG_CHECKING([for $2 in -l$1])
-dnl Use a cache variable name containing both the library and function name,
-dnl because the test really is for library $1 defining function $2, not
-dnl just for library $1.  Separate tests with the same $1 and different $2s
-dnl may have different results.
-ac_lib_var=`echo $1['_']$2 | sed 'y%./+-%__p_%'`
-AC_CACHE_VAL(ac_cv_lib_$ac_lib_var,
-[ac_save_LIBS="$LIBS"
-for j in "." $3 ; do
-LIBS="-L$j -l$1 $6 $LIBS"
-AC_TRY_LINK(dnl
-ifelse([$2], [main], , dnl Avoid conflicting decl of main.
-[/* Override any gcc2 internal prototype to avoid an error.  */
-]ifelse(AC_LANG, CPLUSPLUS, [#ifdef __cplusplus
-extern "C"
-#endif
-])dnl
-[/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char $2();
-]),
-	    [$2()],
-            [eval "ac_cv_lib_$ac_lib_var=\"libpath_$ac_lib_var=-L$j\"" 
-             eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
-             LIBS="$ac_save_LIBS"
-             break
-            ],
-	     eval "ac_cv_lib_$ac_lib_var=no")
-LIBS="$ac_save_LIBS"
-done
-])dnl
-if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" != no"; then
-  AC_MSG_RESULT(yes)
-  eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
-  dnl  LIBS="`echo '$libpath_'$ac_lib_var` -l$1 $LIBS"
-  ifelse([$4], ,
-[changequote(, )dnl
-  ac_tr_lib=HAVE_LIB`echo $1 | sed -e 's/[^a-zA-Z0-9_]/_/g' \
-    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
-changequote([, ])dnl
-  AC_DEFINE_UNQUOTED($ac_tr_lib)
-  eval eval "`echo '$ac_cv_lib_'$ac_lib_var`"
-  LIBS="`echo '$libpath_'$ac_lib_var` -l$1 $LIBS"
-], [$4])
-else
-  AC_MSG_RESULT(no)
-ifelse([$5], , , [$5
-])dnl
-fi
-])
-
-
 dnl ######################## Here the actual script begins ###############
 
 AC_INIT(configure.in)
@@ -110,8 +16,11 @@ if test "x$OS" = "x"; then
                "please set this and restart again."
               )
 fi
+AC_CONFIG_HEADER(include/config.h)
+AC_CONFIG_AUX_DIR(extra/scripts)
 
-AC_OVERRIDES_PREPARE
+
+M_OVERRIDES_PREPARE
 
 DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=1
@@ -119,32 +28,27 @@ DEFAULT_USE_DEBUG=1
 DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=1
 
-AC_OVERRIDES(python,python,
+M_OVERRIDES(python,python,
 --with-python   use python scripting,
 USE_PYTHON)
 
-AC_OVERRIDES(threads,threads,
+M_OVERRIDES(threads,threads,
 --with-threads    link with pthread(s) library,
 USE_THREADS)
 
-AC_OVERRIDES(dmalloc,dmalloc,
+M_OVERRIDES(dmalloc,dmalloc,
 --with-dmalloc  use dmalloc library for debugging,
 USE_DMALLOC)
 
-AC_OVERRIDES(efence,efence,
+M_OVERRIDES(efence,efence,
 --with-efence   use ElectricFence,
 USE_EFENCE)
 
-AC_OVERRIDES(debug,debug,
+M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
 
 MAKE_LOCAL_LIBS_DEFINE="junk"
-
-AC_CONFIG_HEADER(include/config.h)
-
-
-AC_CONFIG_AUX_DIR(extra/scripts)
 
 dnl system check
 
@@ -186,10 +90,15 @@ dnl   defines CXX with the compiler to use
 dnl   defines GXX with yes if using gxx
 dnl   defines GXX empty if not using gxx
 dnl   defines CXXFLAGS
+
+AC_PROG_CXX_WORKS
+dnl check if the c++-compiler is working
+
 dnl what is the C++-preprocessor
 AC_PROG_CXXCPP
 dnl   defines CXXCPP with the C++-preprocessor
 
+dnl Karsten: why removing the -g flags??
 CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g./ /g'`
 
 AC_LANG_RESTORE
@@ -273,7 +182,6 @@ AC_STRUCT_TM
 AC_CHECK_FUNCS(strerror strstr strsep)
 
 AC_CHECK_HEADERS(strings.h unistd.h)
-AC_CHECK_HEADERS(libintl.h)
 AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(stdarg.h)
 
@@ -312,7 +220,7 @@ else
 	GTK_LDFLAGS=$X_EXTRA_LIBS
 fi
 LIBS="$LIBS $GTK_LDFLAGS"
-AC_CHECK_LIB(dl,main,,AC_MSG_ERROR("dl library is needed."))
+AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
 
 if test "$USE_THREADS" = 1
 then
@@ -336,33 +244,50 @@ AC_CHECK_HEADERS(libintl.h,
 dnl we test for python last, because setting LIBS like this confuses further tests
 
 MAKE_USE_PYTHON=
-if test "$USE_PYTHON" = 1
-then
-	AC_CHECK_HEADERS(python1.5/Python.h
-	,
- 		AC_CHECK_MYLIB(python1.5,main,
-		[        /usr \
-		         /usr/lib \
-		         /usr/lib/python1.5 \
-		         /usr/lib/python1.5/config \
-		         /usr/local \
-		         /usr/local/lib \
-		         /usr/local/lib/python1.5 \
-		         /usr/local/lib/python1.5/config \
-		         /usr/local/python1.5/config\
-		],
-			AC_CHECK_LIB(swigpy,main,
-				AC_DEFINE(USE_PYTHON)
-				MAKE_USE_PYTHON="USE_PYTHON=yes"
-				LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy $LIBS"
-				,
-				AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
-				MAKE_USE_PYTHON=
-				,[$libpath_python1_5_main -lpython1.5]
-			)
-		)			
-	)
-AC_PATH_PROG(SWIG,swig)
+
+if test "$USE_PYTHON" = 1 ; then
+   M_CHECK_MYHEADER(Python.h,
+       [ /usr \
+         /usr/include \
+         /usr/include/python1.5 \
+         /usr/local \
+         /usr/local/include \
+         /usr/local/include/python1.5 \
+         /home/local \
+         /home/local/include \
+         /home/local/include/python1.5 \
+       ],
+       [ M_CHECK_MYLIB(python1.5,main,
+           [ /usr \
+             /usr/lib \
+             /usr/lib/python1.5 \
+             /usr/lib/python1.5/config \
+             /usr/local \
+             /usr/local/lib \
+             /usr/local/lib/python1.5 \
+             /usr/local/lib/python1.5/config \
+             /usr/local/python1.5/config\
+             /home/local \
+             /home/local/lib \
+             /home/local/lib/python1.5 \
+             /home/local/lib/python1.5/config \
+             /home/local/python1.5/config\
+           ],
+           [ AC_CHECK_LIB(swigpy,main,
+              [ AC_DEFINE(USE_PYTHON)
+                MAKE_USE_PYTHON="USE_PYTHON=yes"
+                LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy $LIBS"
+              ],
+              [ AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
+                MAKE_USE_PYTHON=
+              ],
+              [$libpath_python1_5_main -lpython1.5]
+             )
+           ]
+         )
+       ]
+   )
+   AC_PATH_PROG(SWIG,swig)
 fi
 AC_SUBST(MAKE_USE_PYTHON)
 
