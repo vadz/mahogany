@@ -71,10 +71,6 @@
    }
 #endif // OS_UNIX
 
-#ifdef OS_WIN
-    #include "wx/msw/private.h"     // for ::UpdateWindow()
-#endif // OS_WIN
-
 extern "C"
 {
    #undef LOCAL         // before including imap4r1.h which defines it too
