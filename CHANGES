@@ -1,4 +1,8 @@
 (next release) on (date of next release)
+     0.50        March 27, 2000
+23.03.00 KB: Finished folder creation wizard. Fixed inheritance of FolderView column sizes.
+	     Fixed some dialog sizes. Filters dialog behaves slightly better and uses folder
+             browse button. Fixed error message appearance in PalmOS.cpp.
 22.03.00 KB: Filters config dialog extended. BBDB ADB supports read-only status.
 	     Folder creation wizard work.
 14.03.00 VZ: added changing folder colours depending on whether they have

@@ -28,6 +28,7 @@
 
 #ifndef USE_PCH
 #  include "MApplication.h"
+#  include "gui/wxMApp.h"
 #  include "Profile.h"
 
 #  include <wx/confbase.h>
@@ -530,9 +531,11 @@ void wxFolderTree::OnProperties(MFolder *folder)
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)
 {
-   MFolder *newfolder = RunCreateFolderWizard(parent, NULL);
-   if(newfolder == NULL)
-      return ShowFolderCreateDialog(NULL,
+   bool cancelled;
+   MFolder *newfolder = RunCreateFolderWizard(&cancelled, parent,
+                                              ((wxMApp *)mApplication)->GetTopWindow());
+   if(cancelled)
+      return ShowFolderCreateDialog(((wxMApp *)mApplication)->GetTopWindow(),
                                     FolderCreatePage_Default,
                                     parent);
    else

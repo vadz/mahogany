@@ -583,8 +583,7 @@ PalmOSModule::Connect(void)
          acceptThread->Run();
          time_t now = time(NULL);
          while(m_PiSocket < 0 && time(NULL)-now < 5)
-            ;
-         //wxThread::Sleep(5000);
+            wxThread::Sleep(100);
 
          if(m_PiSocket < 0)
          {
@@ -595,7 +594,7 @@ PalmOSModule::Connect(void)
 #else
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);
 #endif
-      if(m_PiSocket == -1)
+      if(m_PiSocket < 0)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket);

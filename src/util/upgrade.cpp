@@ -69,6 +69,7 @@ enum MVersion
    Version_Alpha001, // first public version
    Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
    Version_Alpha020, // folder host name is now ServerName, not HostName
+   Version_050,      // nothing really changed against 0.2x config-wise
    Version_NoChange, // any version from which we don't need to upgrade
    Version_Unknown   // some unrecognized version
 };
@@ -1224,7 +1225,7 @@ Upgrade(const String& fromVersion)
    else if ( fromVersion == "0.20a" )
       oldVersion = Version_Alpha020;
    else if ( fromVersion == "0.21a" || fromVersion == "0.22a" ||
-             fromVersion == "0.23a")
+             fromVersion == "0.23a" || fromVersion == "0.50")
       oldVersion = Version_NoChange;
    else
       oldVersion = Version_Unknown;
@@ -1260,6 +1261,7 @@ Upgrade(const String& fromVersion)
                       "the program before using it."),
                     fromVersion.c_str());
       break;
+   case Version_050:
    case Version_NoChange:
       break;
    default:
@@ -1367,6 +1369,7 @@ VerifyInbox(void)
       }
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, "INBOX");
    }
 #endif
 
@@ -1400,6 +1403,7 @@ VerifyInbox(void)
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
       ibp->writeEntry(MP_FOLDER_COMMENT,
                       _("Folder where Mahogany will collect all new mail."));
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, foldername);
       rc = FALSE;
    }
 

@@ -409,7 +409,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       // inheriting from NewMail folder.
       String entry = fv->GetProfile()->readEntry("FolderListCtrl","");
       wxLogDebug("FolderView columns: %s", entry.c_str());
-      if( entry.Length() == 0 || entry == wxFLC_DEFAULT_SIZES)
+      if( entry.Length() == 0
+          || entry == wxFLC_DEFAULT_SIZES
+          || entry == "80:80:80:80:80")
       {
          String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
          ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);

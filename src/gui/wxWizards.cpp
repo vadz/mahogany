@@ -77,8 +77,7 @@ enum MWizardPageId
    MWizard_CreateFolder_First,
    MWizard_CreateFolder_Welcome = MWizard_CreateFolder_First,     // say hello
    MWizard_CreateFolder_Type,
-   MWizard_CreateFolder_FirstType,
-   MWizard_CreateFolder_File =    MWizard_CreateFolder_FirstType,
+   MWizard_CreateFolder_File,
    MWizard_CreateFolder_MH,
    MWizard_CreateFolder_Imap,
    MWizard_CreateFolder_Pop3,
@@ -87,14 +86,17 @@ enum MWizardPageId
    MWizard_CreateFolder_ImapHier,
    MWizard_CreateFolder_NntpHier,
    MWizard_CreateFolder_Nntp,
-   MWizard_CreateFolder_News,
    MWizard_CreateFolder_NewsHier,
-   MWizard_CreateFolder_LastType = MWizard_CreateFolder_NewsHier,
+   MWizard_CreateFolder_News,
+   MWizard_CreateFolder_Group,
    MWizard_CreateFolder_Final,                            // say that everything is ok
+   MWizard_CreateFolder_FirstType  = MWizard_CreateFolder_File,
+   MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
    MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
-   MWizard_PagesMax = MWizard_CreateFolder_Final,  // the number of pages
 
-   MWizard_PageNone = 12345678          // illegal value
+   MWizard_PagesMax,  // the number of pages
+
+   MWizard_PageNone = -1          // illegal value
 };
 
 
@@ -130,6 +132,7 @@ public:
    bool Run(void);
    class MWizardPage * GetPageById(MWizardPageId id);
 
+   MWizardPageId m_ServerPageId; // used as last by final page
 private:
    MWizardType m_Type;
    class MWizardPage * m_WizardPages[MWizard_PagesMax];
@@ -318,7 +321,7 @@ enum FolderEntryType
    ET_FILE = 0, ET_MH, ET_IMAP, ET_POP3,
    ET_IMAP_SERVER, ET_NNTP_SERVER,
    ET_IMAP_HIER, ET_NNTP_HIER,
-   ET_NNTP, ET_NEWS_HIER, ET_NEWS
+   ET_NNTP, ET_NEWS_HIER, ET_NEWS, ET_GROUP
 };
 
 class MWizard_CreateFolder_TypePage : public MWizardPage
@@ -353,14 +356,14 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
 
       // a choice control, the entries are taken from the label string which is
       // composed as: "LABEL:entry1:entry2:entry3:...."
-   m_TypeCtrl = panel->CreateChoice(_("Enty type:"
+   m_TypeCtrl = panel->CreateChoice(_("Entry type:"
                                       "Local Mailbox File:"
                                       "Local MH Folder:"
                                       "IMAP Mailbox:POP3 Mailbox:"
                                       "IMAP Server:NNTP News Server:"
                                       "IMAP Hierarchy:NNTP News Hierarchy:"
                                       "NNTP Newsgroup:Local News Hierarchy:"
-                                      "Local Newsgroup"), 
+                                      "Local Newsgroup:Folder Group"), 
                                     maxwidth, NULL);
    panel->Layout();
 }
@@ -406,7 +409,7 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
    wxString
       entry,
       pathName = _("Mailbox name"),
-      msg = _("To access a%s\n"
+      msg = _("To access %s\n"
               "the following access parameters\n"
               "are needed:\n");
       bool
@@ -417,37 +420,43 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
    
    switch(type)
    {
+   case ET_GROUP:
+      needsServer = FALSE; // don't know which server :-)
+      needsUserId = TRUE;
+      needsPassword = TRUE;
+      needsPath = TRUE;
+      break;
    case ET_IMAP:
-      entry = _("n IMAP mailbox");
+      entry = _("an IMAP mailbox");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
       needsPath = TRUE;
       break;
    case ET_POP3:
-      entry = _(" POP3 mailbox");
+      entry = _("a POP3 mailbox");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
       break;
    case ET_NNTP:
-      entry = _(" NNTP newsgroup");
+      entry = _("a NNTP newsgroup");
       needsServer = TRUE;
       needsPath = TRUE;
       pathName = _("Newsgroup");
       break;
    case ET_IMAP_SERVER:
-      entry = _("n IMAP server");
+      entry = _("an IMAP server");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
       break;
    case ET_NNTP_SERVER:
-      entry = _(" NNTP newsserver");
+      entry = _("a NNTP newsserver");
       needsServer = TRUE;
       break;
    case ET_IMAP_HIER:
-      entry = _("n IMAP mail hierarchy");
+      entry = _("an IMAP mail hierarchy");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
@@ -455,34 +464,46 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       pathName = _("Path on IMAP server");
       break;
    case ET_NNTP_HIER:
-      entry = _(" NNTP news hierarchy");
+      entry = _("a NNTP news hierarchy");
       needsServer = TRUE;
       needsPath = TRUE;
       pathName = _("Hierarchy name");
       break;
    case ET_NEWS:
-      entry = _(" local newsgroup");
+      entry = _("a local newsgroup");
       needsPath = TRUE;
       pathName = _("Newsgroup");
       break;
    case ET_NEWS_HIER:
-      entry = _(" local news hierarchy");
+      entry = _("a local news hierarchy");
       needsServer = FALSE;
       needsPath = TRUE;
       pathName = _("Hierarchy name");
       break;
    case ET_FILE:
-      entry = _(" local mailbox file");
+      entry = _("a local mailbox file");
       needsPath = TRUE;
       break;
    case ET_MH:
-      entry = _(" local MH mailbox");
+      entry = _("a local MH mailbox");
       needsPath = TRUE;
       break;
    }
 
    wxString text;
-   text.Printf(msg, entry.c_str());
+   if(type == ET_GROUP)
+   {
+      text = _("A folder group is not a mailbox itself\n"
+               "but simply helps you organise the tree.\n"
+               "\n"
+               "Its sub-entries can inherit values from\n"
+               "the group, so you can fill in default\n"
+               "values for the most important settings\n"
+               "here, which will be inherited by all\n"
+               "entries below this group.\n");
+   }
+   else
+      text.Printf(msg, entry.c_str());
       
    wxStaticText *msgCtrl = new wxStaticText(
       this, -1,text);
@@ -583,6 +604,9 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    case ET_MH:
       params->m_FolderType = MF_MH;
       break;
+   case ET_GROUP:
+      params->m_FolderType = MF_GROUP;
+      break;
    }
    return TRUE;
 }
@@ -635,6 +659,9 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
       }
    }
    p->DecRef();
+
+   // store our page id for use by the final page:
+   ((CreateFolderWizard*)GetWizard())->m_ServerPageId = GetPageId();
    return TRUE;
 }
 
@@ -664,6 +691,7 @@ DEFINE_TYPEPAGE(NntpHier,NNTP_HIER);
 DEFINE_TYPEPAGE(Nntp,NNTP);
 DEFINE_TYPEPAGE(News,NEWS);
 DEFINE_TYPEPAGE(NewsHier,NEWS_HIER);
+DEFINE_TYPEPAGE(Group,GROUP);
 #undef DEFINE_TYPEPAGE
 
 // CreateFolderWizard final page
@@ -673,6 +701,10 @@ class MWizard_CreateFolder_FinalPage : public MWizardPage
 {
 public:
    MWizard_CreateFolder_FinalPage(MWizard *wizard);
+   virtual MWizardPageId GetPreviousPageId() const
+      { return ((CreateFolderWizard *)GetWizard())->m_ServerPageId; }
+   virtual MWizardPageId GetNextPageId() const
+      { return MWizard_PageNone; }
 };
 
 
@@ -702,12 +734,12 @@ MWizard::GetPageById(MWizardPageId id)
 {
    if ( id == GetLastPageId()+1 || id == MWizard_PageNone)
       return (MWizardPage *)NULL;
-
-   if ( !m_WizardPages[id] )
+   
+   if ( !m_WizardPages[id-GetFirstPageId()] )
    {
 #define CREATE_PAGE(pid)                             \
       case MWizard_##pid##:                          \
-         m_WizardPages[MWizard_##pid] =               \
+         m_WizardPages[MWizard_##pid-GetFirstPageId()] =               \
             new MWizard_##pid##Page(this); \
          break
 
@@ -727,25 +759,37 @@ MWizard::GetPageById(MWizardPageId id)
          CREATE_PAGE(CreateFolder_Nntp);
          CREATE_PAGE(CreateFolder_News);
          CREATE_PAGE(CreateFolder_NewsHier);
+         CREATE_PAGE(CreateFolder_Group);
       case MWizard_PageNone:
+      case MWizard_PagesMax:
          ASSERT_MSG(0,"illegal MWizard PageId");
       }
 #undef CREATE_PAGE
    }
-   return m_WizardPages[id];
+   return m_WizardPages[id-GetFirstPageId()];
 }
 
 
 
 
 MFolder *
-RunCreateFolderWizard(MFolder *parent, wxWindow *parentWin)
+RunCreateFolderWizard(bool *cancelled, MFolder *parent, wxWindow *parentWin)
 {
+   ASSERT(cancelled);
+
+   // Never show the wizard for advanced users:
+   if(READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED)
+   {
+      *cancelled = TRUE;
+      return NULL;
+   }
+
    CHECK(parent,NULL, "No parent folder?");
    CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
    MFolder *newfolder = NULL;
    if(wizard->Run() == TRUE)
    {
+      *cancelled = FALSE;
       CreateFolderWizard::FolderParams *params =
          wizard->GetParams();
       newfolder = CreateFolderTreeEntry(
@@ -780,6 +824,7 @@ RunCreateFolderWizard(MFolder *parent, wxWindow *parentWin)
          p->DecRef();
       }
    }
+   *cancelled = TRUE;
    delete wizard;
    return newfolder;
 }

@@ -827,7 +827,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,240);
 
-   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
+   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Msplash),
                               wxBITMAP_TYPE_PNG);
 #ifdef USE_PYTHON
    wxMemoryFSHandler::AddFile("pythonpowered.png", wxBITMAP(PythonPowered),
@@ -2348,7 +2348,7 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
+   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Msplash),
                               wxBITMAP_TYPE_PNG);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"

@@ -42,7 +42,7 @@
 #include <wx/layout.h>
 #include <wx/checklst.h>
 #include <wx/statbox.h>
-
+#include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 
 // ----------------------------------------------------------------------------
@@ -290,7 +290,7 @@ enum ORC_Where_Enum
 #define CRIT_CTRLCONST(oldctrl,newctrl) \
    c = new wxLayoutConstraints;\
    c->left.RightOf(oldctrl, LAYOUT_X_MARGIN);\
-   c->width.PercentOf(m_Parent, wxWidth, 25);\
+   c->width.PercentOf(m_Parent, wxWidth, 20);\
    c->top.SameAs(m_Not, wxTop, 0);\
    c->height.AsIs();\
    newctrl->SetConstraints(c);
@@ -538,6 +538,7 @@ private:
    wxChoice   *m_Type;
    wxTextCtrl  *m_Argument; // string, number of days or bytes
    wxWindow   *m_Parent;
+   wxFolderBrowseButton *m_Button;
 };
 
 static
@@ -572,13 +573,13 @@ void
 OneActionControl::UpdateUI()
 {
    int type = m_Type->GetSelection();
-   m_Argument->Enable(
-      !(type == OAC_T_Delete || type == OAC_T_Expunge
+   bool enable = !(type == OAC_T_Delete || type == OAC_T_Expunge 
 #ifdef USE_PYTHON
         || type == OAC_T_Python
 #endif
-         )
       );
+   m_Argument->Enable(enable);
+   m_Button->Enable(enable);
 }
 
 void
@@ -643,6 +644,9 @@ OneActionControl::OneActionControl(wxWindow *parent)
                          wxDefaultSize, OAC_TypesCount, OAC_Types);
 
    m_Argument = new wxTextCtrl(m_Parent,-1,"", wxDefaultPosition);
+
+   m_Button = new wxFolderBrowseButton(m_Argument,
+                                       m_Parent);
 }
 
 void
@@ -659,10 +663,18 @@ OneActionControl::LayoutControls(wxWindow **last)
    
    c = new wxLayoutConstraints;
    c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
-   c->width.PercentOf(m_Parent, wxWidth, 60);
+   c->width.PercentOf(m_Parent, wxWidth, 40);
    c->top.SameAs(m_Type, wxTop, 0);
    c->height.AsIs();
    m_Argument->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Argument, LAYOUT_X_MARGIN);
+   c->width.Absolute(60);
+   c->top.SameAs(m_Type, wxTop, 0);
+   c->height.AsIs();
+   m_Button->SetConstraints(c);
+
    *last = m_Argument;
 }
 
@@ -700,7 +712,7 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
                             "OneFilterDialog")
 {
    m_FilterData = fed;
-   SetDefaultSize(380, 240, FALSE /* not minimal */);
+   SetDefaultSize(480, 280, TRUE );
    SetAutoLayout( TRUE );
    wxLayoutConstraints *c;
 
@@ -822,6 +834,8 @@ wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
    m_ActionControl->UpdateUI();
    m_ButtonLess->Enable(m_nControls > 1);
    m_ButtonMore->Enable(m_nControls < MAX_CONTROLS);
+   FindWindow(wxID_OK)->Enable(
+      (m_NameCtrl->GetValue().Length() !=0) );
 }
 
 void
@@ -1068,7 +1082,7 @@ wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
    m_ListBox = new wxCheckListBox(this, -1);
    m_ListBox->SetConstraints(c);
 
-   SetDefaultSize(380, 240, FALSE /* not minimal */);
+   SetDefaultSize(380, 280, TRUE);
    TransferDataToWindow();
 
    for(size_t i = 0; i < m_FilterDataCount; i++)

@@ -301,7 +301,7 @@ extern bool ShowLicenseDialog(wxWindow *parent = NULL);
 /// Run a wizard for folder creation:
 extern
 class MFolder *
-RunCreateFolderWizard(MFolder *parent, wxWindow *parWin);
+RunCreateFolderWizard(bool *cancelled, MFolder *parent, wxWindow *parWin);
 
 #ifdef USE_SSL
 /// Accept or reject certificate
