@@ -840,6 +840,20 @@ void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
    }
    else // multi part
    {
+      // hack
+      MimePartCC *parent = mimepart->m_parent;
+      if ( parent )
+      {
+         MimeType::Primary mt = parent->GetType().GetPrimary();
+
+         // NB: can't use MimeType::MESSAGE here because MESSAGE is #define'd
+         //     by c-client!
+         if ( mt == TYPEMULTIPART || mt == TYPEMESSAGE )
+         {
+            mimepart->m_spec = parent->m_spec;
+         }
+      }
+
       // note that we don't increment m_numParts here as we only count parts
       // containing something and GetMimePart(n) ignores multitype parts
 
