@@ -90,7 +90,7 @@ private:
 
 MailCollector::MailCollector()
 {
-   Lock(false);
+   m_IsLocked = false;
    m_list = new MailCollectorFolderList;
    MAppFolderTraversal t (m_list);
    if(! t.Traverse(true))

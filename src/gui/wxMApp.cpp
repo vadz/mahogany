@@ -492,11 +492,10 @@ int wxMApp::OnExit()
 
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-#  if 0 // def OS_WIN
-      free(sysinbox());
-      free(myhomedir());
-      free(myusername());
-#  endif
+#ifdef OS_WIN
+   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
+   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+#endif // OS_WIN
 
    return 0;
 }

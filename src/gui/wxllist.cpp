@@ -2389,10 +2389,10 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
       line = line->GetNextLine();
    }
 
+   bool didFind = line != NULL;
+
    if ( !line )
    {
-      if ( found )
-          *found = false;
       // use the last line:
       line = lastline;
    }
@@ -2406,8 +2406,9 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos,
                                            pos.x,
                                            cursorPos ? &cursorPos->x : NULL,
                                            &foundinline);
-   if(found)
-      *found = *found && foundinline;
+   if ( found )
+      *found = didFind && foundinline;
+
    return (i == NULLIT) ? NULL : *i;
 
 }

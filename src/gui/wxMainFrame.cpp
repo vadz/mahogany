@@ -305,11 +305,14 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
 wxMainFrame::~wxMainFrame()
 {
+   // tell the app there is no main frame any more and do it as the very first
+   // thing because the next calls may result in message boxes being displayed
+   // and they shouldn't have this frame as a parent because it can go away at
+   // any moment
+   mApplication->OnMainFrameClose();
+
    delete m_FolderView;
    delete m_FolderTree;
-
-   // tell the app there is no main frame any more
-   mApplication->OnMainFrameClose();
 
    // save the last opened folder
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);

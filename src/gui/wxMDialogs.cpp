@@ -859,15 +859,15 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 #else  // !MSW
                       wxSize(320, 270),
 #endif // MSW/!MSW
-                      /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP|wxCENTER)
+                      /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
    g_pSplashScreen = (MFrame *)this;
 
    (void)new wxAboutWindow(this, bCloseOnTimeout);
 
-   Show(TRUE);
    Centre(wxCENTER_FRAME | wxBOTH);
+   Show(TRUE);
 }
 
 void

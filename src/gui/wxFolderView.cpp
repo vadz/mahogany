@@ -339,28 +339,34 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    if(m_MailFolder)  // clean up old folder
    {
-      wxString msg;
-      msg.Printf(_("Mark all articles in\n%s\nas read?"),
-                 m_MailFolder->GetName().c_str());
-      if(m_NumOfMessages > 0 && m_MailFolder->GetType() == MF_NNTP
-         && MDialog_YesNoDialog(msg,
-                                m_Parent,
-                                MDIALOG_YESNOTITLE,
-                                true,
-                                ProfileBase::FilterProfileName(m_Profile->GetName())))
+      // NB: the test for m_InDeletion is needed because of wxMSW bug which
+      //     prevents us from showing a dialog box when called from dtor
+      if ( !m_InDeletion )
       {
-         // build sequence
-         wxString sequence;
-         HeaderInfo const *hi;
-         for(hi = m_MailFolder->GetFirstHeaderInfo();
-             hi;
-             hi = m_MailFolder->GetNextHeaderInfo(hi))
+         wxString msg;
+         msg.Printf(_("Mark all articles in\n%s\nas read?"),
+                    m_MailFolder->GetName().c_str());
+
+         if(m_NumOfMessages > 0 && m_MailFolder->GetType() == MF_NNTP
+            && MDialog_YesNoDialog(msg,
+                                   m_Parent,
+                                   MDIALOG_YESNOTITLE,
+                                   true,
+                                   ProfileBase::FilterProfileName(m_Profile->GetName())))
          {
-            sequence += strutil_ultoa(hi->GetUId());
-            sequence += ',';
+            // build sequence
+            wxString sequence;
+            HeaderInfo const *hi;
+            for(hi = m_MailFolder->GetFirstHeaderInfo();
+                hi;
+                hi = m_MailFolder->GetNextHeaderInfo(hi))
+            {
+               sequence += strutil_ultoa(hi->GetUId());
+               sequence += ',';
+            }
+            sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
+            m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
          }
-         sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
-         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
       }
 
       // This little trick makes sure that we don't react to any final
@@ -562,8 +568,8 @@ wxFolderView::OpenFolder(String const &profilename)
 
 wxFolderView::~wxFolderView()
 {
-   if(m_InDeletion)
-      return;
+   wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
+
    m_InDeletion = true;
    SetFolder(NULL, FALSE);
 }
