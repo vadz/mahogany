@@ -58,6 +58,8 @@ public:
    */
    void Update(int value);
 private:
+   /// used to enable/disable envent handling
+   void EnableDisableEvents(bool enable);
    /// the status bar
    class wxGauge *m_gauge;
    /// disable all or parent window only

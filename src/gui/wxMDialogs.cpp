@@ -166,15 +166,27 @@ MProgressDialog::MProgressDialog(wxString const &title,
    m_gauge->SetValue(0);
    Fit();
    Show(TRUE);
-   wxFrame *f = mApplication->TopLevelFrame();
-   if(f) f->Enable(false);
+   EnableDisableEvents(false);
    wxYield();
+}
+
+void
+MProgressDialog::EnableDisableEvents(bool enable)
+{
+  if(m_disableParentOnly && m_Parent != NULL)
+      m_Parent->Enable(enable);
+   else
+   {
+      wxNode *node;
+      for(node = wxTopLevelWindows.GetFirst(); node ;
+          node=node->GetNext())
+         ((wxWindow*)node->GetData())->Enable(enable);
+   }
 }
 
 MProgressDialog::~MProgressDialog()
 {
-   wxFrame *f = mApplication->TopLevelFrame();
-   if(f) f->Enable(true);
+   EnableDisableEvents(false);
 }
 
 void
