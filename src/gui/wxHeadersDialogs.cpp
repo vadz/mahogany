@@ -92,6 +92,9 @@ private:
    wxCheckBox *m_checkboxes[Header_Max];
    wxTextCtrl *m_textvalues[Header_Max];
 
+   // dirty flag for the checkboxes (textctrls have their own)
+   bool        m_oldCheckboxValues[Header_Max];
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -285,7 +288,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
    // edit the real value stored in the config
    ProfileEnvVarSave suspend(m_profile, false);
 
-   int show;      // show the header or not (checkbox value)
+   bool show;     // show the header or not (checkbox value)
    wxString def;  // default value (text ctrl value)
 
    for ( size_t header = 0; header < Header_Max; header++ )
@@ -303,11 +306,14 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
          m_checkboxes[header]->SetValue(show != 0);
       }
 
+      m_oldCheckboxValues[header] = show;
+
       if ( show )
       {
          def = m_profile->readEntry(ms_profileNamesDefault[header], "");
 
          m_textvalues[header]->SetValue(def);
+         m_textvalues[header]->DiscardEdits();
       }
    }
 
@@ -328,10 +334,13 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
       else
       {
          show = m_checkboxes[header]->GetValue();
-         m_profile->writeEntry(ms_profileNamesShow[header], show);
+         if ( show != m_oldCheckboxValues[header] )
+         {
+            m_profile->writeEntry(ms_profileNamesShow[header], show);
+         }
       }
 
-      if ( show )
+      if ( show && m_textvalues[header]->IsModified() )
       {
          def = m_textvalues[header]->GetValue();
 
