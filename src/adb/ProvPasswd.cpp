@@ -409,8 +409,8 @@ PasswdBook::~PasswdBook()
 
 bool PasswdBook::IsSameAs(const String& name) const
 {
-   // 2 books of this type are always the same
-   return true;
+   // there is only one password book, it's never the same as anything else
+   return false;
 }
 
 String PasswdBook::GetName() const

@@ -1661,6 +1661,9 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // we already have it
       headers->DecRef();
 
+      // update the number of items the listctrl thinks to have
+      UpdateItemCount();
+
       // keep the same item selected if possible: use its UID as its index
       // might have changed if the sort order in the folder changed
       long posFocus = -1; // the new position of the focused item
@@ -1712,9 +1715,6 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
             Select(posPreview, true);
          }
       }
-
-      // just show the new items
-      UpdateItemCount();
    }
    else // new listing
    {

@@ -81,6 +81,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_SHOWADBEDITOR;
 extern const MOption MP_USERDIR;
 
@@ -1373,7 +1374,11 @@ void wxAdbEditFrame::RestoreSettings1()
 
   // if there are no address books at all, load at least the autocollect book
   if ( !m_astrAdb.Count() ) {
-    m_astrAdb.Add(mApplication->GetLocalDir() + "/autocollect.adb");
+    String bookAutoCollect = READ_APPCONFIG_TEXT(MP_AUTOCOLLECT_ADB);
+    if ( !IsAbsPath(bookAutoCollect) ) {
+      bookAutoCollect.Prepend(mApplication->GetLocalDir() + '/');
+    }
+    m_astrAdb.Add(bookAutoCollect);
 
     // it should be empty anyhow, but just in case
     m_astrProviders.Empty();

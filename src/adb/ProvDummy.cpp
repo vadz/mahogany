@@ -421,7 +421,7 @@ bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
              test, name.c_str());
   return MDialog_YesNoDialog(str);
 #else
-  return TRUE;
+  return FALSE;
 #endif
 }
 
