@@ -6,6 +6,9 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+14.05.01 NB: fixed text highlighting (middle lines were black in selection)
+13.05.01 NB: added initial UTF-8 support (converts text to current locale's
+             encoding only)
 01.05.01 VZ: optionally show the number of messages in the folder tree
 25.04.01 VZ: added "Away" (or unattended) mode support
 19.04.01 VZ: added "Close" and "Close all" folder(s) commands
