@@ -560,7 +560,8 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    if ( frameId == WXFRAME_MAIN &&
         READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED )
    {
-      toolbar->AddControl(CreateIdentCombo(toolbar));
+      wxControl *combo = CreateIdentCombo(toolbar);
+      if (combo) toolbar->AddControl(combo);
    }
 
    // next add the "Help" and "Exit" buttons
