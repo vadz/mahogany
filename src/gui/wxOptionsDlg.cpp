@@ -392,6 +392,10 @@ enum ConfigFields
    ConfigField_FolderViewAutoNextMsg,
    ConfigField_FolderViewAutoNextFolder,
 
+   ConfigField_FolderViewHelpLayout,
+   ConfigField_FolderViewSplitVertically,
+   ConfigField_FolderViewFoldersOnTop,
+
    ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
@@ -425,6 +429,7 @@ enum ConfigFields
 
    // folder tree options
    ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
+   ConfigField_FolderTreeIsOnLeft,
    ConfigField_FolderTreeColourHelp,
    ConfigField_FolderTreeFgColour,
    ConfigField_FolderTreeBgColour,
@@ -1420,6 +1425,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("    next unread &message"),     Field_Bool,    -1},
    { gettext_noop("    next unread &folder"),      Field_Bool,
                                                    ConfigField_FolderViewAutoNextMsg},
+   { gettext_noop("\nThe settings below specify how should the two windows\n"
+                  "(folder and message view) arranged inside the folder view."),
+                                                   Field_Message, -1 },
+   { gettext_noop("Split the view vertically"),    Field_Bool, -1 },
+   { gettext_noop("Put folder view on top/to the left"), Field_Bool |
+                                                         Field_Restart, -1 },
    { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
@@ -1466,6 +1477,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus },
 
    // folder tree
+   { gettext_noop("Put folder tree on the left side"), Field_Bool | Field_AppWide, -1 },
    { gettext_noop("The two options below are common for all folders,\n"
                   "but note that the first of them may be overridden by setting\n"
                   "the normal folder colour in the \"Folder View\" page."), Field_Message | Field_AppWide, -1 },
@@ -1950,6 +1962,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
 
+   CONFIG_NONE(),    // layout help
+   CONFIG_ENTRY(MP_FVIEW_VERTICAL_SPLIT),
+   CONFIG_ENTRY(MP_FVIEW_FVIEW_TOP),
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
@@ -1980,6 +1996,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
 
    // folder tree
+   CONFIG_ENTRY(MP_FTREE_LEFT),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_FGCOLOUR),
    CONFIG_ENTRY(MP_FTREE_BGCOLOUR),

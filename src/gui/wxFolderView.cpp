@@ -135,6 +135,7 @@ extern const MOption MP_FVIEW_FONT;
 extern const MOption MP_FVIEW_FONT_DESC;
 extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_FROM_REPLACE;
+extern const MOption MP_FVIEW_FVIEW_TOP;
 extern const MOption MP_FVIEW_NAMES_ONLY;
 extern const MOption MP_FVIEW_NEWCOLOUR;
 extern const MOption MP_FVIEW_PREVIEW_DELAY;
@@ -143,6 +144,7 @@ extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
+extern const MOption MP_FVIEW_VERTICAL_SPLIT;
 extern const MOption MP_LASTSELECTED_MESSAGE;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_USE_THREADING;
@@ -3229,10 +3231,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
    m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
 
-   m_SplitterWindow->SplitHorizontally(m_FolderCtrl,
-                                       m_MessageWindow,
-                                       m_Parent->GetClientSize().y/3);
-   m_SplitterWindow->SetMinimumPaneSize(10);
+   // don't split it right now, will be done in ApplyOptions() later when we
+   // have anything to show
+   m_SplitterWindow->SetMinimumPaneSize(50);
 }
 
 wxFolderView::~wxFolderView()
@@ -3528,6 +3529,8 @@ wxFolderView::AllProfileSettings::AllProfileSettings()
    previewOnSingleClick =
    senderOnlyNames =
    replaceFromWithTo =
+   splitVert =
+   folderOnTop =
    focusOnMouse = false;
 
    fontFamily = wxFONTFAMILY_DEFAULT;
@@ -3606,6 +3609,9 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->autoNextUnread = READ_CONFIG_BOOL(profile, MP_FVIEW_AUTONEXT_UNREAD_MSG);
    settings->usingTrash = READ_CONFIG_BOOL(profile, MP_USE_TRASH_FOLDER);
 
+   settings->splitVert = READ_CONFIG_BOOL(profile, MP_FVIEW_VERTICAL_SPLIT);
+   settings->folderOnTop = READ_CONFIG_BOOL(profile, MP_FVIEW_FVIEW_TOP);
+
    settings->updateStatus = READ_CONFIG_BOOL(profile, MP_FVIEW_STATUS_UPDATE);
    if ( settings->updateStatus )
    {
@@ -3618,6 +3624,48 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 void
 wxFolderView::ApplyOptions()
 {
+   // has the split mode changed?
+   if ( m_settings.splitVert !=
+            (m_SplitterWindow->GetSplitMode() == wxSPLIT_VERTICAL) ||
+         m_settings.folderOnTop !=
+            (m_SplitterWindow->GetWindow1() == m_FolderCtrl) )
+   {
+      if ( m_SplitterWindow->IsSplit() )
+      {
+         // must unsplit it first before splitting again
+         m_SplitterWindow->Unsplit();
+      }
+
+      // get the order of windows
+      wxWindow *win1,
+               *win2;
+      if ( READ_APPCONFIG_BOOL(MP_FVIEW_FVIEW_TOP) )
+      {
+         win1 = m_FolderCtrl;
+         win2 = m_MessageWindow;
+      }
+      else // folder view to the right/bottom
+      {
+         win1 = m_MessageWindow;
+         win2 = m_FolderCtrl;
+      }
+
+      // show them if they had been previously hidden by Unsplit()
+      m_FolderCtrl->Show();
+      m_MessageWindow->Show();
+
+      // and (re)split in the right direction
+      const wxSize size = m_Parent->GetClientSize();
+      if ( READ_APPCONFIG_BOOL(MP_FVIEW_VERTICAL_SPLIT) )
+      {
+         m_SplitterWindow->SplitVertically(win1, win2, size.x/2);
+      }
+      else
+      {
+         m_SplitterWindow->SplitHorizontally(win1, win2, size.y/3);
+      }
+   }
+
    m_FolderCtrl->DeleteAllItems();
 
    m_FolderCtrl->ApplyOptions(m_settings.FgCol,
@@ -5466,6 +5514,8 @@ operator==(const wxFolderView::AllProfileSettings& other) const
           replaceFromWithTo == other.replaceFromWithTo &&
           showSize == other.showSize &&
           memcmp(columns, other.columns, sizeof(columns)) == 0 &&
-          returnAddresses == other.returnAddresses;
+          returnAddresses == other.returnAddresses &&
+          splitVert == other.splitVert &&
+          folderOnTop == other.folderOnTop;
 }
 

@@ -319,6 +319,12 @@ private:
 
       /// the format of the status messages (only if updateStatus)
       String statusFormat;
+
+      /// is the folder view split vertically (or horizontally)?
+      bool splitVert;
+
+      /// is the folder view on top/to the lft of msg view (or bottom/right)?
+      bool folderOnTop;
    } m_settings;
 
    /// the last message we the user has jumped to

@@ -306,8 +306,11 @@ extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_PREVIEW_DELAY;
+extern const MOption MP_FVIEW_VERTICAL_SPLIT;
+extern const MOption MP_FVIEW_FVIEW_TOP;
 
 // folder tree
+extern const MOption MP_FTREE_LEFT;
 extern const MOption MP_FTREE_FGCOLOUR;
 extern const MOption MP_FTREE_BGCOLOUR;
 extern const MOption MP_FTREE_FORMAT;
@@ -993,6 +996,10 @@ extern const MOption MP_WHITE_LIST;
 #define   MP_FVIEW_STATUS_FMT_NAME  "FViewStatFmt"
 /// delay before previewing the selected item in the folder view (0 to disable)
 #define MP_FVIEW_PREVIEW_DELAY_NAME "FViewPreviewDelay"
+/// split folder view vertically (or horizontally)?
+#define MP_FVIEW_VERTICAL_SPLIT_NAME "FViewVertSplit"
+/// put folder view on top and msg view on bottom or vice versa?
+#define MP_FVIEW_FVIEW_TOP_NAME "FViewOnTop"
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_NAME "ReplaceFrom"
 /// the ':' separated list of addresses which are "from oneself"
@@ -1000,6 +1007,8 @@ extern const MOption MP_WHITE_LIST;
 //@}
 /**@name  Font settings for folder tree */
 //@{
+/// is the folder tree on the left of folder view or on the right?
+#define MP_FTREE_LEFT_NAME "FTreeLeft"
 /// the foreground colour for the folder tree
 #define MP_FTREE_FGCOLOUR_NAME "FTreeFgColour"
 /// the background colour for the folder tree
@@ -1965,9 +1974,15 @@ extern const MOption MP_WHITE_LIST;
 #define   MP_FVIEW_STATUS_FMT_DEFVAL _("Date: $date, Subject: $subject, From: $from")
 /// delay before previewing the selected item in the folder view (0 to disable)
 #define MP_FVIEW_PREVIEW_DELAY_DEFVAL 500L
+/// split folder view vertically (or horizontally)?
+#define MP_FVIEW_VERTICAL_SPLIT_DEFVAL 0L
+/// put folder view on top and msg view on bottom or vice versa?
+#define MP_FVIEW_FVIEW_TOP_DEFVAL 1L
 //@}
 /**@name Font settings for folder tree */
 //@{
+/// is the folder tree on the left of folder view or on the right?
+#define MP_FTREE_LEFT_DEFVAL 1L
 /// the foreground colour for the folder tree
 #define MP_FTREE_FGCOLOUR_DEFVAL ""
 /// the background colour for the folder tree
