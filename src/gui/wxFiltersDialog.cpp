@@ -2174,6 +2174,7 @@ protected:
    void DoUpdateUI() { m_action->UpdateUI(); }
 
    // event handlers
+   void OnText(wxCommandEvent& event);
    void OnChoice(wxCommandEvent&) { DoUpdateUI(); }
    void OnUpdateOk(wxUpdateUIEvent& event);
 
@@ -2197,6 +2198,7 @@ private:
 
 BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxManuallyLaidOutDialog)
    EVT_CHOICE(-1, wxQuickFilterDialog::OnChoice)
+   EVT_TEXT(-1, wxQuickFilterDialog::OnText)
 
    EVT_UPDATE_UI(wxID_OK, wxQuickFilterDialog::OnUpdateOk)
 END_EVENT_TABLE()
@@ -2213,6 +2215,10 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    m_folder = folder;
    m_folder->IncRef();
 
+   // this is used in OnText() to check if we had finished with initializing
+   // the dialog
+   m_action = NULL;
+
    wxLayoutConstraints *c;
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Apply this filter"),
@@ -2221,7 +2227,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    wxStaticText *msg = new wxStaticText
                            (
                             this, -1,
-                            _("Only if:")
+                            _("Only if all of the below conditions are true:")
                            );
 
    c = new wxLayoutConstraints;
@@ -2273,7 +2279,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
       m_check[n]->SetConstraints(c);
    }
 
-   msg = new wxStaticText(this, -1, _("&And then:"));
+   msg = new wxStaticText(this, -1, _("&And if they are, then:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_check[Filter_Max - 1], 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -2366,6 +2372,31 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
 wxQuickFilterDialog::~wxQuickFilterDialog()
 {
    m_folder->DecRef();
+}
+
+void wxQuickFilterDialog::OnText(wxCommandEvent& event)
+{
+   if ( !m_action )
+   {
+      // the dialog hasn't been fully initialized yet so this change comes from
+      // our code and not from user -- ignore it for our purposes here
+      return;
+   }
+
+   // if the user starts editing the text field, chances are that he wants to
+   // use it as the filter condition, so check the corresponding checkbox
+   // automatically to save him a few keystrokes/mouse movements
+   for ( size_t n = 0; n < Filter_Max; n++ )
+   {
+      if ( m_text[n] == event.GetEventObject() )
+      {
+         m_check[n]->SetValue(true);
+
+         return;
+      }
+   }
+
+   FAIL_MSG( _T("ignoring text event from unknown control") );
 }
 
 void wxQuickFilterDialog::OnUpdateOk(wxUpdateUIEvent& event)
