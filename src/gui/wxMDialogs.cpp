@@ -2514,7 +2514,9 @@ static const struct
       { "GetRemoteNow",           gettext_noop("Question whether to retrieve remote configuration from options dialog") },
          { "RetrieveRemote", gettext_noop("Question whether to retrieve remote settings at startup.") },
          { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
-   //{ "", gettext_noop("") },
+            { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },                                                                                                         
+                                                                                                         
+                                                                                                         //{ "", gettext_noop("") },
 };
 
 /// return the name to use for the given persistent msg box

@@ -169,7 +169,7 @@ MailFolderCC::InitializeMH()
    if ( !ms_MHpath )
    {
       // first, init cclient
-      if ( !cclientInitialisedFlag )
+      if ( !ms_CClientInitialisedFlag )
       {
          CClientInit();
       }

@@ -2541,8 +2541,9 @@ bool RetrieveRemoteConfigSettings(void)
       return TRUE; // nothing to do
 
    // this forces the disappearance of the startup splash or wxGTK
-   // will crash :-)
-   LOGMESSAGE((M_LOG_WINONLY,_("Asking to retrieve configuration settings...")));
+   // will crash or produce funny memory corruption :-)
+   CloseSplash();
+   
    if (! MDialog_YesNoDialog(
       _("Retrieve remote configuration settings now?"), NULL,
       _("Retrieve remote settings?"), true,
@@ -2779,6 +2780,16 @@ bool SaveRemoteConfigSettings(void)
       rc = FALSE;
    }
    mf->DecRef();
+
+   if(rc)
+   {
+      wxString msg;
+      msg.Printf(
+         _("Successfully stored shared configuration info in folder '%s'."),
+         mf->GetName().c_str());
+      MDialog_Message(msg, NULL, _("Saved settings"),
+                      GetPersMsgBoxName(M_MSGBOX_CONFIG_SAVED_REMOTELY)); 
+   }
    return rc;
 }
 

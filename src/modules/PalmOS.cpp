@@ -838,7 +838,12 @@ void PalmOSModule::SyncAddresses(PalmBook *pBook)
 
 void PalmOSModule::Synchronise(PalmBook *pBook)
 {
-   if(m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
+   /* If we are called with pBook == NULL, then the user triggered the
+      synchronisation via the menu and we don't ask for
+      confirmation. If pBook != NULL, we check before trying to sync
+      as we are called from adb code. */
+   if(pBook == NULL ||
+      m_MInterface->YesNoDialog(_("Do you want synchronise with your PalmOS device?")))
    {
       PiConnection conn(this);
       if(! IsConnected())
@@ -910,7 +915,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
       }
   
 #endif
-      name = dirent->d_name[0];
+      name = dirent->d_name;
       wxString extension = name.AfterLast('.');
       if(extension != "pdb" && extension != "prc" &&
          extension != "prc" && extension != "PRC")
@@ -1280,6 +1285,10 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
       }
 
       fflush(stdout);
+      wxString msg;
+      msg.Printf(_("Installing file '%s'..."), db[i]->name);
+      StatusMessage(_(msg));
+      //FIXME: check returncode
       pi_file_install(f, m_PiSocket, 0);
       pi_file_close(f);
 

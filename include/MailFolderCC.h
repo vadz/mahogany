@@ -62,8 +62,9 @@ struct mail_address;
 struct OVERVIEW_X;
 
 /// structure to hold MailFolder pointer and associated mailstream pointer
-struct StreamConnection
+class StreamConnection : public MObject
 {
+public:
    /// pointer to a MailFolderCC object
    MailFolderCC    *folder;
    /// pointer to the associated MAILSTREAM
@@ -76,6 +77,7 @@ struct StreamConnection
    bool m_PROAflag;
 
    StreamConnection()
+      : MObject()
       {
          folder = NULL; stream = NULL; m_PROAflag = FALSE;
       }
@@ -329,7 +331,7 @@ public:
                               wxFontEncoding *encoding = NULL);
 
    /// return TRUE if CClient lib had been initialized
-   static bool IsInitialized() { return cclientInitialisedFlag; }
+   static bool IsInitialized() { return ms_CClientInitialisedFlag; }
 
    /** @name Folder names and specifications */
    //@{
@@ -464,13 +466,13 @@ private:
    //@{
 
    /// a pointer to the object to use as default if lookup fails
-   static MailFolderCC   *streamListDefaultObj;
+   static MailFolderCC   *ms_StreamListDefaultObj;
 
    /// mapping MAILSTREAM* to objects of this class and their names
-   static StreamConnectionList   streamList;
+   static StreamConnectionList   ms_StreamList;
 
    /// has c-client library been initialised?
-   static bool   cclientInitialisedFlag;
+   static bool   ms_CClientInitialisedFlag;
 
    /// initialise c-client library
    static void CClientInit(void);
