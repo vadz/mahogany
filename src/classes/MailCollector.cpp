@@ -37,7 +37,7 @@
 #include "MailCollector.h"
 
 #include "MDialogs.h"   // MDialog_YesNoDialog
-
+#include "Mpers.h"
 
 // instead of writing our own wrapper for wxExecute()
 #include  <wx/utils.h>
@@ -354,6 +354,26 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
          }
       }
       hil->DecRef();
+   }
+   else
+   {
+      wxLogStatus(_("Cannot get listing for incoming folder '%s'."),
+                  mf->GetName().c_str());
+      if(MDialog_YesNoDialog(
+         _("Accessing the incoming folder\n"
+           "'%s' failed.\n\n"
+           "Do you want to stop collecting\n"
+           "mail from it in this session?"),
+         NULL,
+         _("Mail collection failed"),
+         TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+      {
+         mf->SetUpdateFlags(updateFlags);
+         Lock(locked);
+         RemoveIncomingFolder(mf->GetName());
+         return false;
+      }
+      rc = false;
    }
    if(selections.Count() > 0)
    {

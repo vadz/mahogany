@@ -82,7 +82,7 @@ clean:
 	$(RM) core libM.so M M.static
 
 dep depend:
-	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -i -C $$i $@; done
 
 install: install-modules
 	strip M

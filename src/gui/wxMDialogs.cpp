@@ -2193,6 +2193,7 @@ static const struct
    { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
+   { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
    //{ "", gettext_noop("") },
 };
 
