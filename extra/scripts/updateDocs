@@ -1,0 +1,17 @@
+#!/bin/sh
+
+REPOSITORY=:pserver:anonymous@cvs1:/cvsroot/mahogany 
+CVS="cvs -z3"
+MAKE=make
+LOG=/tmp/mdocs.log
+
+# the location where the manual should live (in subdir Manual)
+TARGET=/home/groups/mahogany/htdocs/doc
+
+{
+$CVS -q -d $REPOSITORY co -l M/doc/Manual.htex \
+                             M/doc/Makefile.html \
+                             M/extra/scripts/striphelpids &&
+$MAKE -f Makefile.html &&
+rm $TARGET && mv Manual $TARGET
+} >> $LOG 2>&1
