@@ -282,9 +282,9 @@ MAppBase::ContinueStartup()
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
       String foldersToReopen = READ_APPCONFIG(MP_OPENFOLDERS);
-      char *folders = strutil_strdup(wxConvertWX2MB(foldersToReopen));
+      wxChar *folders = strutil_strdup(foldersToReopen);
       kbStringList openFoldersList;
-      strutil_tokenise(folders, ";", openFoldersList);
+      strutil_tokenise(folders, _T(";"), openFoldersList);
       delete [] folders;
 
       bool ok = true;
@@ -1066,7 +1066,7 @@ MAppBase::InitDirectories()
       {
          // we want just the DESTDIR, not DESTDIR/share/mahogany, so
          // truncate (-1 for slash)
-         m_globalDir.resize(m_globalDir.length() - strlen(MAHOGANY_DATADIR) - 1);
+         m_globalDir.resize(m_globalDir.length() - wxStrlen(MAHOGANY_DATADIR) - 1);
       }
 #elif defined(OS_WIN)
       // use the program installation directory under Windows

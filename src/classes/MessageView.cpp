@@ -2521,8 +2521,8 @@ MessageView::MimeHandle(const MimePart *mimepart)
    {
       kbStringList faxdomains;
       String faxListing = READ_CONFIG(profile, MP_INCFAX_DOMAINS);
-      char *faxlisting = strutil_strdup(wxConvertWX2MB(faxListing));
-      strutil_tokenise(faxlisting, ":;,", faxdomains);
+      wxChar *faxlisting = strutil_strdup(faxListing);
+      strutil_tokenise(faxlisting, _T(":;,"), faxdomains);
       delete [] faxlisting;
 
       bool isfax = false;
