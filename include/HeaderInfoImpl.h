@@ -119,6 +119,9 @@ private:
    /// do we have the translation tables?
    inline bool HaveTables() const;
 
+   /// do we have to be resorted?
+   inline bool NeedsSort() const;
+
    /// get the msgno which should appear at the given display position
    MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
 
@@ -133,6 +136,9 @@ private:
 
    /// reverse the existing translation tables
    void Reverse();
+
+   /// resort us after the new messages appeared in the folder
+   void Resort();
 
    /**
       Find first position in the given range containing a msgno from array
@@ -177,6 +183,9 @@ private:
 
    /// sorting parameters
    SortParams m_sortParams;
+
+   /// set to true if we must be resorted (after OnAdd(), for example)
+   bool m_needsResort;
 
    //@}
 

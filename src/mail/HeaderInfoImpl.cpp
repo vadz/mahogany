@@ -232,6 +232,11 @@ inline bool HeaderInfoListImpl::HaveTables() const
    return m_tableMsgno != NULL;
 }
 
+inline bool HeaderInfoListImpl::NeedsSort() const
+{
+   return m_needsResort;
+}
+
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl creation and destruction
 // ----------------------------------------------------------------------------
@@ -264,6 +269,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_tablePos = NULL;
 
    m_reverseOrder = false;
+   m_needsResort = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -369,6 +375,9 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
 
 MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 {
+   // we have to resort before using m_tableMsgno!
+   ASSERT_MSG( !NeedsSort(), "can't be called now" );
+
    CHECK( pos < m_count, INDEX_ILLEGAL, "invalid position in GetIdxFromPos" );
 
    return IsSorting() ? GetMsgnoFromPos(pos) - 1 : pos;
@@ -376,6 +385,9 @@ MsgnoType HeaderInfoListImpl::GetIdxFromPos(MsgnoType pos) const
 
 MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 {
+   // we have to resort before using m_tablePos!
+   ASSERT_MSG( !NeedsSort(), "can't be called now" );
+
    CHECK( n < m_count, INDEX_ILLEGAL, "invalid index in GetPosFromIdx" );
 
    if ( m_reverseOrder )
@@ -498,7 +510,23 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
 
 void HeaderInfoListImpl::OnAdd(MsgnoType countNew)
 {
-   ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
+   if ( HaveTables() )
+   {
+      // FIXME: resort everything :-(
+      //
+      // what we should do instead is to remember the last sorted msgno and
+      // check the header info being retrieved against it in GetHeaderInfo():
+      // if it is greater, do a binary search in the sorted arrays and insert
+      // the new headers into the correct places
+      //
+      // however there are many problems with it:
+      //  1. we can't do it from here because c-client is not reentrant
+      //  2. retrieving a lot of headers from GetHeaderInfo() may be too slow
+      //  3. what to do if this hadn't been done yet when OnRemove() is called?
+      FreeSortTables();
+
+      m_needsResort = true;
+   }
 
    m_count = countNew;
 
@@ -643,6 +671,16 @@ void HeaderInfoListImpl::Sort()
          FreeSortTables();
       }
    }
+}
+
+void HeaderInfoListImpl::Resort()
+{
+   // don't call us it again
+   m_needsResort = false;
+
+   // FIXME: this should just insert new elements into the already sorted
+   //        array, see comments in OnAdd()
+   Sort();
 }
 
 void HeaderInfoListImpl::Reverse()
@@ -797,6 +835,13 @@ void HeaderInfoListImpl::Cache(const Sequence& seq)
 
 void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
+   // first thing to do is to (re)establish the correct mapping between msgnos
+   // and positions, if necessary
+   if ( NeedsSort() )
+   {
+      Resort();
+   }
+
    // transform sequence of positions into sequence of msgnos
    Sequence seqMsgnos;
    if ( IsSorting() )
@@ -838,6 +883,15 @@ void HeaderInfoListImpl::CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo)
 
 bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
 {
+   // we can't use GetIdxFromPos() if our sorting tables are out of date, tell
+   // them to re-retrieve all positions they're interested in
+   //
+   // NB: don't call Resort() from here as this function is supposed to always
+   //     return immediately and Resort() is a long function (it access the
+   //     folder)
+   if ( NeedsSort() )
+      return false;
+
    MsgnoType idx = GetIdxFromPos(pos);
 
    CHECK( idx < m_count, false,

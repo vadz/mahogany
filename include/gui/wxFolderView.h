@@ -176,7 +176,7 @@ public:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
    /// called when the focused (== current) item in the listctrl changes
-   void OnFocusChange(void);
+   void OnFocusChange(long item, UIdType uid);
 
    /// get the parent frame of the folder view
    MFrame *GetParentFrame() const { return m_Frame; }

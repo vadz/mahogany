@@ -1444,6 +1444,19 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
       m_headers->CachePositions(seq);
 
+      // we may now (quickly!) update m_uidFocus, see comment in UpdateFocus()
+      // to understand why we do it here
+      if ( m_uidFocus == UID_ILLEGAL && m_itemFocus != -1 )
+      {
+         if ( m_headers->IsInCache(m_itemFocus) )
+         {
+            m_uidFocus = GetUIdFromIndex(m_itemFocus);
+
+            m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
+         }
+         //else: hmm, what to do? we need call OnFocusChange... (FIXME)
+      }
+
       // now the header info should be in cache, so GetHeaderInfo() will
       // return it
       RefreshItems(posMin, posMax);
@@ -1570,9 +1583,19 @@ void wxFolderListCtrl::UpdateFocus()
    // the first selected message, see OnSelected()!)
 
    m_itemFocus = itemFocus;
-   m_uidFocus = m_itemFocus == -1 ? UID_ILLEGAL : GetUIdFromIndex(m_itemFocus);
 
-   m_FolderView->OnFocusChange();
+   // we can't call GetUIdFromIndex() from here as the item might not be
+   // cached and we don't want to block now - we'll set it later when we
+   // retrieve the focused item anyhow
+   m_uidFocus = UID_ILLEGAL;
+
+   // if there is no focus, we can notify the folder view immediately as it
+   // doesn't cost much - but if there is, it will be done later, when
+   // m_uidFocus will have been set
+   if ( m_itemFocus == -1 )
+   {
+      m_FolderView->OnFocusChange(-1, UID_ILLEGAL);
+   }
 
    if ( m_selIsUnique && m_itemFocus != -1 )
    {
@@ -1924,7 +1947,9 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
       // we really want to see it regardless of m_PreviewOnSingleClick
       // setting
       m_FolderView->PreviewMessage(uid);
-      m_FolderView->OnFocusChange();
+
+      // notify the folder view about the message change
+      m_FolderView->OnFocusChange(idxFocused, uid);
 
       return true;
    }
@@ -3077,11 +3102,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 // ----------------------------------------------------------------------------
 
 void
-wxFolderView::OnFocusChange(void)
+wxFolderView::OnFocusChange(long idx, UIdType uid)
 {
-   long idx;
-   UIdType uid = m_FolderCtrl->GetFocusedUId(&idx);
-
    if ( uid != m_uidFocused )
    {
       wxLogTrace(M_TRACE_SELECTION, "item %ld (uid = %lx) is now focused",
