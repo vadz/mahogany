@@ -22,6 +22,8 @@
 // headers
 // ----------------------------------------------------------------------------
 
+#if EXPERIMENTAL
+
 // M
 #include "Mpch.h"
 
@@ -576,3 +578,5 @@ String PalmDataProvider::DebugDump() const
 }
 
 #endif // DEBUG
+
+#endif // EXPERIMENTAL
