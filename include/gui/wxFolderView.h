@@ -315,6 +315,9 @@ private:
       String statusFormat;
    } m_settings;
 
+   /// the last message we the user has jumped to
+   long m_nLastJump;
+
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);
 

@@ -3116,6 +3116,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_TicketList = ASTicketList::Create();
 
    m_nDeleted = UID_ILLEGAL;
+   m_nLastJump = 1;
 
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
@@ -4312,19 +4313,15 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                break;
             }
 
-            long num = m_FolderCtrl->GetPreviewedItem();
-            if ( num == -1 )
-               num = 1;
-
-            num = MGetNumberFromUser
-                  (
-                     String::Format(_("Enter the number of the message "
-                                      "to go to, from 1 to %ld"), max),
-                     _("Message: "),
-                     _("Jump to a message"),
-                     num, 1, max,
-                     m_Frame
-                  );
+            long num = MGetNumberFromUser
+                       (
+                           String::Format(_("Enter the number of the message "
+                                            "to go to, from 1 to %ld"), max),
+                           _("Message: "),
+                           _("Jump to a message"),
+                           m_nLastJump, 1, max,
+                           m_Frame
+                       );
 
             if ( num == -1 )
             {
@@ -4332,6 +4329,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                break;
             }
 
+            // save it as the default for the next time
+            m_nLastJump = num;
+
+            // users count from 1, but we -- from 0
             GoToMessage(num - 1);
          }
          break;
