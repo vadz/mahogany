@@ -1490,8 +1490,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SHOW_XFACES_DEFVAL      1
 /// show graphics inline
 #define   MP_INLINE_GFX_DEFVAL       1
-/// limit size for inline graphics in Kb (0 for no limit)
-#define   MP_INLINE_GFX_SIZE_DEFVAL  40
+/// limit size for inline graphics in Kb (-1 for no limit)
+#define   MP_INLINE_GFX_SIZE_DEFVAL  100
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_DEFVAL "LayoutViewer"
 /// which headers to show in the message view?
