@@ -291,10 +291,7 @@ private:
    /// unique message id
    UIdType m_uid;
 
-   // the (cached) subject
-   String m_subject;
-
-   /// the (cached) date
+   /// the parsed date value which we cache
    time_t m_date;
 
    /// holds the pointer to a text buffer allocated by cclient lib

@@ -784,14 +784,13 @@ void wxMessageView::DoShowHeader(const String& headerName,
       llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
 
       wxLayoutImportText(llist, headerValue, encHeader);
+      llist->LineBreak();
 
       if ( encHeader != wxFONTENCODING_SYSTEM )
       {
          // restore the default encoding
          GetLayoutList()->SetFontEncoding(wxFONTENCODING_DEFAULT);
       }
-
-      llist->LineBreak();
    }
 }
 

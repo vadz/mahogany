@@ -149,7 +149,6 @@ void MessageCC::Init()
 }
 
 MessageCC::MessageCC(MailFolderCC *folder, const HeaderInfo& hi)
-         : m_subject(hi.GetSubject())
 {
    Init();
 
@@ -343,7 +342,15 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 
 String MessageCC::Subject(void) const
 {
-   return m_subject;
+   CheckEnvelope();
+
+   String subject;
+   if ( m_Envelope )
+      subject = m_Envelope->subject;
+   else
+      FAIL_MSG( "should have envelop in Subject()" );
+
+   return subject;
 }
 
 time_t
@@ -691,21 +698,12 @@ MessageCC::AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email)
 {
    CHECK_RET( addr, "ADDRESS can't be NULL here" );
 
-   name.clear();
-   email.clear();
+   email = addr->mailbox;
+   if(addr->host && strlen(addr->host) && (strcmp(addr->host,BADHOST) != 0))
+      email << '@' << addr->host;
+   name = addr->personal;
 
-   email = String(addr->mailbox);
-   if(addr->host && strlen(addr->host)
-      && (strcmp(addr->host,BADHOST) != 0))
-      email += String("@") + String(addr->host);
-   email = MailFolderCC::DecodeHeader(email);
-   if(addr->personal && strlen(addr->personal))
-   {
-      name = String(addr->personal);
-      name = MailFolderCC::DecodeHeader(name);
-   }
-   else
-      name = "";
+   // VZ: is this really necessary? if it is, this check if by far not enough
    if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
       name = String("\"") + name + String("\"");
 }

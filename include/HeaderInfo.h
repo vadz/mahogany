@@ -40,7 +40,11 @@ class HeaderInfo
 public:
    HeaderInfo();
 
-   /** @name Access header information */
+   /** @name Access header information
+
+       Note that all header values are returned decoded, i.e. with all
+       encoded words removed and without encoding info.
+    */
    //@{
    /// return the message subject
    const String& GetSubject(void) const { return m_Subject; }
@@ -150,7 +154,7 @@ private:
    /// from headers
    time_t m_Date;
 
-   /// the encoding of the headers
+   /// the "main" encoding of the headers
    wxFontEncoding m_Encoding;
 
    // it is the only one which can create these objects for now, later we

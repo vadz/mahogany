@@ -3578,13 +3578,12 @@ MailFolderCC::ParseAddress(ADDRESS *adr)
 {
    String from;
 
-   /* get first from address from envelope */
+   // ignore the addresses without host part, they can be only bogus
    while ( adr && !adr->host )
       adr = adr->next;
 
-   if(adr)
+   if ( adr )
    {
-      from = "";
       if (adr->personal) // a personal name is given
          from << adr->personal;
       if(adr->mailbox)
