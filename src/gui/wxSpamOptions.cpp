@@ -97,7 +97,7 @@ public:
    virtual const wxChar *Token() const = 0;
    virtual const wxChar *ProfileHackName() const = 0;
    virtual const wxChar *Title() const = 0;
-   
+
    bool m_active;
 };
 
@@ -166,6 +166,16 @@ public:
       { return gettext_noop("&Korean charset"); }
 };
 
+class SpamOptionExeAttach : public SpamOption
+{
+   virtual bool DefaultValue() const { return true; }
+   virtual const wxChar *Token() const
+      { return SPAM_TEST_EXECUTABLE_ATTACHMENT; }
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamExeAttachment"); }
+   virtual const wxChar *Title() const
+      { return gettext_noop("E&xecutable attachment"); }
+};
 
 class SpamOptionXAuth : public SpamOption
 {
@@ -253,25 +263,25 @@ class SpamOptionManagerBody : public SpamOptionManager
 {
 public:
    SpamOptionManagerBody();
-   
+
    virtual void FromString(const String &source);
    virtual String ToString();
-   
+
    virtual bool ShowDialog(wxFrame *parent);
-   
+
 private:
    void BuildConfigValues();
    void BuildFieldInfo();
-   
+
    void SetDefaults();
    void SetFalse();
-   
+
    void WriteProfile(Profile *profile);
    void ReadProfile(Profile *profile);
    void DeleteProfile(Profile *profile);
 
    size_t ConfigEntryCount() const { return ms_count+1; }
-   
+
    BOUND_ARRAY(ConfigValueNone,ConfigValueArray);
    ConfigValueArray m_configValues;
    BOUND_ARRAY(wxOptionsPage::FieldInfo,FieldInfoArray);
@@ -279,34 +289,37 @@ private:
 
    SpamOptionAssassin m_checkSpamAssassin;
    SpamOption *PickAssassin() { return &m_checkSpamAssassin; }
-   
+
    SpamOption8Bit m_check8bit;
    SpamOption *Pick8bit() { return &m_check8bit; }
-   
+
    SpamOptionCaps m_checkCaps;
    SpamOption *PickCaps() { return &m_checkCaps; }
-   
+
    SpamOptionJunkSubject m_checkJunkSubj;
    SpamOption *PickJunkSubject() { return &m_checkJunkSubj; }
-   
+
    SpamOptionKorean m_checkKorean;
    SpamOption *PickKorean() { return &m_checkKorean; }
-   
+
+   SpamOptionExeAttach m_checkExeAttach;
+   SpamOption *PickExeAttach() { return &m_checkExeAttach; }
+
    SpamOptionXAuth m_checkXAuthWarn;
    SpamOption *PickXAuthWarn() { return &m_checkXAuthWarn; }
-   
+
    SpamOptionReceived m_checkReceived;
    SpamOption *PickReceived() { return &m_checkReceived; }
-   
+
    SpamOptionHtml m_checkHtml;
    SpamOption *PickHtml() { return &m_checkHtml; }
-   
+
    SpamOptionMime m_checkMime;
    SpamOption *PickMime() { return &m_checkMime; }
-   
+
    SpamOptionWhiteList m_whitelist;
    SpamOption *PickWhiteList() { return &m_whitelist; }
-   
+
 #ifdef USE_RBL
    SpamOptionRbl m_checkRBL;
    SpamOption *PickRBL() { return &m_checkRBL; }
@@ -315,13 +328,13 @@ private:
    typedef SpamOption *(SpamOptionManagerBody::*PickMember)();
    static const PickMember ms_members[];
    static const size_t ms_count;
-   
+
    class Iterator
    {
    public:
       Iterator(SpamOptionManagerBody *container)
          : m_container(container), m_index(0) {}
-      
+
       SpamOption *operator->()
       {
          return (m_container->*SpamOptionManagerBody::ms_members[m_index])();
@@ -329,7 +342,7 @@ private:
       void operator++() { if ( !IsEnd() ) m_index++; }
       bool IsEnd() { return m_index == SpamOptionManagerBody::ms_count; }
       size_t Index() { return m_index; }
-         
+
    private:
       SpamOptionManagerBody *m_container;
       size_t m_index;
@@ -345,6 +358,7 @@ const SpamOptionManagerBody::PickMember SpamOptionManagerBody::ms_members[] =
    &SpamOptionManagerBody::PickCaps,
    &SpamOptionManagerBody::PickJunkSubject,
    &SpamOptionManagerBody::PickKorean,
+   &SpamOptionManagerBody::PickExeAttach,
    &SpamOptionManagerBody::PickXAuthWarn,
    &SpamOptionManagerBody::PickReceived,
    &SpamOptionManagerBody::PickHtml,
@@ -393,35 +407,39 @@ void SpamOptionManagerBody::FromString(const String &source)
       SetDefaults();
       return;
    }
-   
+
    SetFalse();
-   
+
    const wxArrayString tests = strutil_restore_array(source);
-   
+
    size_t token;
    for ( token = 0; token < tests.GetCount(); token++ )
    {
       const wxString& actual = tests[token];
-      
-      for ( SpamOptionManagerBody::Iterator option(this);
-         !option.IsEnd(); ++option )
+
+      SpamOptionManagerBody::Iterator option(this);
+      while ( !option.IsEnd() )
       {
          if ( actual == option->Token() )
          {
             option->m_active = true;
-            goto found;
+            break;
          }
+
+         ++option;
       }
-      wxLogDebug(_T("Unknown spam test \"%s\""), actual.c_str());
-found:
-      ;
+
+      if ( option.IsEnd() )
+      {
+         FAIL_MSG(String::Format(_T("Unknown spam test \"%s\""), actual.c_str()));
+      }
    }
 }
 
 String SpamOptionManagerBody::ToString()
 {
    String result;
-   
+
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
@@ -429,11 +447,11 @@ String SpamOptionManagerBody::ToString()
       {
          if ( !result.empty() )
             result += ':';
-      
+
          result += option->Token();
       }
    }
-   
+
    return result;
 }
 
@@ -468,7 +486,7 @@ void SpamOptionManagerBody::DeleteProfile(Profile *profile)
 void SpamOptionManagerBody::BuildConfigValues()
 {
    m_configValues.Initialize(ConfigEntryCount());
-   
+
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
@@ -481,7 +499,7 @@ void SpamOptionManagerBody::BuildConfigValues()
 void SpamOptionManagerBody::BuildFieldInfo()
 {
    m_fieldInfo.Initialize(ConfigEntryCount());
-   
+
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
                      "Please choose the ones you'd like to be used by checking\n"
@@ -490,7 +508,7 @@ void SpamOptionManagerBody::BuildFieldInfo()
                      "So the message is considered to be spam if it has...");
    m_fieldInfo[0].flags = wxOptionsPage::Field_Message;
    m_fieldInfo[0].enable = -1;
-   
+
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
@@ -512,26 +530,26 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
 
    const wxOptionsPageDesc page(
          // title and image
-         gettext_noop("Details of spam detection"),
+         gettext_noop("Spam tests"),
          _T("spam"),
-   
+
          // help id (TODO)
          -1,
-   
+
          // the fields description
          m_fieldInfo.Get(),
          m_configValues.Get(),
          ConfigEntryCount()
       );
-   
+
    bool status = ShowCustomOptionsDialog(page, profile, parent);
-   
+
    if ( status )
       ReadProfile(profile);
 
    // don't keep this stuff in profile, we don't use it except here
    DeleteProfile(profile);
-   
+
    return status;
 }
 

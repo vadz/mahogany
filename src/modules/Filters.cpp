@@ -2083,6 +2083,35 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
    return false;
 }
 
+// check if we have any executable attachments in this message
+static bool CheckForExeAttach(const MimePart *part)
+{
+   while ( part )
+   {
+      if ( CheckForExeAttach(part->GetNested()) )
+         return true;
+
+      String filename = part->GetParam(_T("filename")).Lower();
+      if ( !filename.empty() )
+      {
+         String ext;
+         wxSplitPath(filename, NULL, NULL, &ext);
+         wxSortedArrayString extsExe;
+         extsExe.Add(_T("scr"));
+         extsExe.Add(_T("pif"));
+         extsExe.Add(_T("hta"));
+         if ( extsExe.Index(ext) != wxNOT_FOUND )
+         {
+            return true;
+         }
+      }
+
+      part = part->GetNext();
+   }
+
+   return false;
+}
+
 // check the value of X-Spam-Status header and return true if we believe it
 // indicates that this is a spam
 static bool CheckXSpamStatus(const String& value)
@@ -2720,6 +2749,11 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       {
          if ( CheckWhiteList(msg.Get()) )
             gs_spamTest = _("not in whitelist");
+      }
+      else if ( test == SPAM_TEST_EXECUTABLE_ATTACHMENT )
+      {
+         if ( CheckForExeAttach(msg->GetTopMimePart()) )
+            gs_spamTest = _("contains Windows executable attachment");
       }
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )

@@ -45,6 +45,9 @@
 /// suspicious MIME structure?
 #define SPAM_TEST_MIME _T("badmime")
 
+/// executable attachment?
+#define SPAM_TEST_EXECUTABLE_ATTACHMENT _T("exeattach")
+
 /// no address in whitelist?
 #define SPAM_TEST_WHITE_LIST _T("whitelist")
 
