@@ -117,6 +117,15 @@ String AddressCC::GetEMail() const
 // AddressCC comparison
 // ----------------------------------------------------------------------------
 
+// case insensitive string compare of strings which may be NULL
+static inline bool SafeCompare(const char *s1, const char *s2)
+{
+   if ( !s1 || !s2 )
+      return !s1 == !s2;
+
+   return wxStricmp(s1, s2) == 0;
+}
+
 bool AddressCC::IsSameAs(const Address& addr) const
 {
    CHECK( IsValid() && addr.IsValid(), false,
@@ -128,8 +137,8 @@ bool AddressCC::IsSameAs(const Address& addr) const
    //
    // we also ignore adl field - IMHO the addresses differing only by source
    // route should be considered identical, shouldn't they?
-   return wxStricmp(m_adr->mailbox, addrCC.m_adr->mailbox) == 0 &&
-          wxStricmp(m_adr->host, addrCC.m_adr->host) == 0;
+   return SafeCompare(m_adr->mailbox, addrCC.m_adr->mailbox) &&
+          SafeCompare(m_adr->host, addrCC.m_adr->host);
 }
 
 // ============================================================================
