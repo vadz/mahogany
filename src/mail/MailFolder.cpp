@@ -191,20 +191,6 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
    //     above is unused and not checked at all and although it's not a
    //     serious problem it still doesn't look right (fixme)
    MailFolder *mf = MFPool::Find(driver, folder, login);
-   if ( mf )
-   {
-      // make sure it's updated
-      mf->Ping();
-
-      // the connection could have been lost from inside Ping() so check for it
-      // yet again and reopen the folder if this is what happened
-      if ( !mf->IsOpened() )
-      {
-         mf->DecRef();
-         mf = NULL;
-      }
-   }
-
    if ( !mf )
    {
       // check whether this folder is accessible
