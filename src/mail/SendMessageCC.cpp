@@ -1157,6 +1157,8 @@ SendMessageCC::SendOrQueue(bool sendNow)
          msg.Printf(_("Article queued in '%s'."), m_OutboxName.c_str());
 
       STATUSMESSAGE((msg));
+
+      success = true;
    }
 
    return success;
