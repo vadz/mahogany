@@ -2097,7 +2097,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    }
 
    // now write the arrays back to the profile
-   size_t index = 0;
+   int index = 0;
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
       wxFolderListCtrlFields col = GetColumnByName(choices[n]);
