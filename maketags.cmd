@@ -1,1 +1,1 @@
-@ctags.exe -R -i mCF --totals --lang=c++ -I WXDLLEXPORT src include
+@ctags.exe -R --c++-types=+px --totals --language-force=c++ -I WXDLLEXPORT src include
