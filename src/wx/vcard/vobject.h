@@ -281,6 +281,7 @@ extern DLLEXPORT(void*) vObjectAnyValue(VObject *o);
 extern DLLEXPORT(VObject*) vObjectVObjectValue(VObject *o);
 extern DLLEXPORT(void) setVObjectVObjectValue(VObject *o, VObject *p);
 
+extern DLLEXPORT(int) delVObjectProp(VObject *o, VObject *p);
 extern DLLEXPORT(VObject*) addVObjectProp(VObject *o, VObject *p);
 extern DLLEXPORT(VObject*) addProp(VObject *o, const char *id);
 extern DLLEXPORT(VObject*) addProp_(VObject *o, const char *id);

@@ -32,6 +32,7 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
+    #include "wx/datetime.h"
     #include "wx/app.h"
     #include "wx/dynarray.h"
     #include "wx/filefn.h"
@@ -152,6 +153,21 @@ wxVCardObject::Type wxVCardObject::GetType() const
 {
     // the values are the same as in Type enum, just cast
     return m_vObj ? (Type)vObjectValueType(m_vObj) : Invalid;
+}
+
+void wxVCardObject::SetValue(const wxString& val)
+{
+    setVObjectStringZValue(m_vObj, val);
+}
+
+void wxVCardObject::SetValue(unsigned int val)
+{
+    setVObjectIntegerValue(m_vObj, val);
+}
+
+void wxVCardObject::SetValue(unsigned long val)
+{
+    setVObjectLongValue(m_vObj, val);
 }
 
 bool wxVCardObject::GetValue(wxString *val) const
@@ -362,6 +378,66 @@ bool wxVCard::GetVersion(wxString *version) const
 }
 
 // ----------------------------------------------------------------------------
+// composite properties
+// ----------------------------------------------------------------------------
+
+bool wxVCard::GetName(wxString *familyName,
+                      wxString *givenName,
+                      wxString *additionalNames,
+                      wxString *namePrefix,
+                      wxString *nameSuffix) const
+{
+    wxVCardObject *vcobjName = GetProperty(VCNameProp);
+    if ( !vcobjName )
+        return FALSE;
+
+    if ( familyName )
+        vcobjName->GetNamedPropValue(VCFamilyNameProp, familyName);
+    if ( givenName )
+        vcobjName->GetNamedPropValue(VCGivenNameProp, givenName);
+    if ( additionalNames )
+        vcobjName->GetNamedPropValue(VCAdditionalNamesProp, additionalNames);
+    if ( namePrefix )
+        vcobjName->GetNamedPropValue(VCNamePrefixesProp, namePrefix);
+    if ( nameSuffix )
+        vcobjName->GetNamedPropValue(VCNameSuffixesProp, nameSuffix);
+
+    return TRUE;
+}
+
+bool wxVCard::GetOrganization(wxString *name, wxString *unit) const
+{
+    wxVCardObject *vcobjOrg = GetProperty(VCOrgProp);
+    if ( !vcobjOrg )
+        return FALSE;
+
+    if ( name )
+        vcobjOrg->GetNamedPropValue(VCOrgNameProp, name);
+    if ( unit )
+        vcobjOrg->GetNamedPropValue(VCOrgUnitProp, unit);
+
+    return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// other (non string) std properties
+// ----------------------------------------------------------------------------
+
+bool wxVCard::GetBirthDay(wxDateTime *datetime)
+{
+    wxString value;
+    if ( !GetNamedPropValue(VCBirthDateProp, &value) )
+        return FALSE;
+
+    if ( !datetime->ParseDate(value) )
+    {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+// ----------------------------------------------------------------------------
 // adding properties
 // ----------------------------------------------------------------------------
 
@@ -381,13 +457,66 @@ void wxVCardObject::AddProperty(const wxString& name, const wxString& value)
     }
 }
 
+void wxVCardObject::SetProperty(const wxString& name, const wxString& value)
+{
+    VObject *vObj = isAPropertyOf(m_vObj, name);
+    if ( vObj )
+    {
+        wxVCardObject(vObj).SetValue(value);
+    }
+    else
+    {
+        AddProperty(name, value);
+    }
+}
+
+bool wxVCardObject::DeleteProperty(const wxString& name)
+{
+    VObject *vObj = isAPropertyOf(m_vObj, name);
+    if ( !vObj )
+        return FALSE;
+
+    if ( !delVObjectProp(m_vObj, vObj) )
+    {
+        wxFAIL_MSG(_T("failed to delete VObject property?"));
+    }
+
+    return TRUE;
+}
+
+void wxVCard::ClearAddresses()
+{
+    ClearAllProps(VCAdrProp);
+}
+
+void wxVCard::ClearAddressLabels()
+{
+    ClearAllProps(VCDeliveryLabelProp);
+}
+
+void wxVCard::ClearPhoneNumbers()
+{
+    ClearAllProps(VCTelephoneProp);
+}
+
+void wxVCard::ClearEMails()
+{
+    ClearAllProps(VCEmailAddressProp);
+}
+
+void wxVCard::ClearAllProps(const wxString& name)
+{
+    while ( DeleteProperty(name) )
+        ;
+}
+
 // ----------------------------------------------------------------------------
 // setting standard properties
 // ----------------------------------------------------------------------------
 
 void wxVCard::SetFullName(const wxString& fullName)
 {
-    AddProperty(VCFullNameProp, fullName);
+    SetProperty(VCFullNameProp, fullName);
 }
 
 void wxVCard::SetName(const wxString& familyName,
@@ -396,7 +525,10 @@ void wxVCard::SetName(const wxString& familyName,
                       const wxString& namePrefix,
                       const wxString& nameSuffix)
 {
-    VObject *prop = addProp(m_vObj, VCNameProp);
+    VObject *prop = isAPropertyOf(m_vObj, VCNameProp);
+    if ( !prop )
+        prop = addProp(m_vObj, VCNameProp);
+
     if ( !!familyName )
         addPropValue(prop, VCFamilyNameProp, familyName);
     if ( !!givenName )
@@ -411,18 +543,21 @@ void wxVCard::SetName(const wxString& familyName,
 
 void wxVCard::SetTitle(const wxString& title)
 {
-    AddProperty(VCTitleProp, title);
+    SetProperty(VCTitleProp, title);
 }
 
 void wxVCard::SetBusinessRole(const wxString& role)
 {
-    AddProperty(VCBusinessRoleProp, role);
+    SetProperty(VCBusinessRoleProp, role);
 }
 
 void wxVCard::SetOrganization(const wxString& name,
                               const wxString& unit)
 {
-    VObject *prop = addProp(m_vObj, VCOrgProp);
+    VObject *prop = isAPropertyOf(m_vObj, VCOrgProp);
+    if ( !prop )
+        prop = addProp(m_vObj, VCOrgProp);
+
     if ( !!name )
         addPropValue(prop, VCOrgNameProp, name);
     if ( !!unit )
@@ -431,22 +566,39 @@ void wxVCard::SetOrganization(const wxString& name,
 
 void wxVCard::SetComment(const wxString& comment)
 {
-    AddProperty(VCCommentProp, comment);
+    SetProperty(VCCommentProp, comment);
 }
 
 void wxVCard::SetURL(const wxString& url)
 {
-    AddProperty(VCURLProp, url);
+    SetProperty(VCURLProp, url);
 }
 
 void wxVCard::SetUID(const wxString& uid)
 {
-    AddProperty(VCUniqueStringProp, uid);
+    SetProperty(VCUniqueStringProp, uid);
 }
 
 void wxVCard::SetVersion(const wxString& version)
 {
-    AddProperty(VCVersionProp, version);
+    SetProperty(VCVersionProp, version);
+}
+
+// ----------------------------------------------------------------------------
+// setting other (non string) std properties
+// ----------------------------------------------------------------------------
+
+void wxVCard::SetBirthDay(const wxDateTime& datetime)
+{
+    SetProperty(VCBirthDateProp, datetime.FormatISODate());
+}
+
+void wxVCard::AddEMail(const wxString& email, wxVCardEMail::Type type)
+{
+    addPropValue(m_vObj, VCEmailAddressProp, email);
+
+    wxASSERT_MSG( type == wxVCardEMail::Internet,
+                  _T("support for other email types not implemented") );
 }
 
 // ----------------------------------------------------------------------------

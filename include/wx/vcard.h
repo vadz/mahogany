@@ -89,6 +89,13 @@ public:
     void AddProperty(const wxString& name);
     void AddProperty(const wxString& name, const wxString& value);
 
+    // set the property value adding the property if needed
+    void SetProperty(const wxString& name, const wxString& value);
+
+    // delete the (first) property with the given name, returns TRUE if the
+    // property was deleted
+    bool DeleteProperty(const wxString& name);
+
     // return the output form of the object as a string
     wxString Write() const;
 
@@ -102,6 +109,8 @@ public:
     virtual ~wxVCardObject();
 
 protected:
+    friend class wxVCard; // uses GetNamedPropValue()
+
     // ctors
     wxVCardObject(VObject *vObj = NULL);
     wxVCardObject(wxVCardObject *parent, const wxString& name);
@@ -341,7 +350,8 @@ public:
     wxVCardEMail *GetFirstEMail(void **cookie) const;
     wxVCardEMail *GetNextEMail(void **cookie) const;
 
-    // setters for the standard properties
+    // setters for the standard properties: they replace the vaue of a
+    // property if it already exists
     void SetFullName(const wxString& fullName);
     void SetName(const wxString& familyName,
                  const wxString& givenName = wxEmptyString,
@@ -372,6 +382,22 @@ public:
 
     void SetPublicKey(const wxString& key);
 
+    // before adding new multiply occuring properties, it may be useful to
+    // clear all the existing ones
+    void ClearAddresses();
+    void ClearAddressLabels();
+    void ClearPhoneNumbers();
+    void ClearEMails();
+
+    // add a new copy of a multiply occuring property
+#if 0
+    void AddAddress(const wxVCardAddress& adr);
+    void AddAddressLabel(const wxVCardAddressLabel& label);
+    void AddPhoneNumber(const wxVCardPhoneNumber& phone);
+#endif
+    void AddEMail(const wxString& email,
+                  wxVCardEMail::Type type = wxVCardEMail::Internet);
+
 protected:
     // ctor which takes ownership of the vObject
     wxVCard(VObject *vObj) : wxVCardObject(vObj) { }
@@ -379,6 +405,23 @@ protected:
     // enumerate the properties of the given name
     VObject *GetFirstPropOfName(const char *name, void **cookie) const;
     VObject *GetNextPropOfName(const char *name, void **cookie) const;
+
+    // delete all properties of the given name
+    void ClearAllProps(const wxString& name);
 };
+
+// ----------------------------------------------------------------------------
+// GUI functions to show a dialog to edit a vCard
+// ----------------------------------------------------------------------------
+
+#if wxUSE_GUI
+
+// edit an existing vCard, return TRUE if [Ok] was chosen, FALSE otherwise
+extern bool WXDLLEXPORT wxEditVCard(wxVCard *vcard);
+
+// create a new vCard, return a pointer to the new object or NULL
+extern wxVCard * WXDLLEXPORT wxCreateVCard();
+
+#endif // wxUSE_GUI
 
 #endif // _WX_VCARD_H_

@@ -297,6 +297,30 @@ DLLEXPORT(VObject*) addVObjectProp(VObject *o, VObject *p)
     return p;
 }
 
+DLLEXPORT(int) delVObjectProp(VObject *o, VObject *p)
+{
+    VObject *cur, *prev;
+
+    prev = NULL;
+    cur = o->prop;
+    while ( cur && cur != p ) {
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if ( !cur )
+        return 0;
+
+    if ( prev )
+        prev->next = cur->next;
+    else
+        o->prop = NULL;
+
+    cleanVObject(p);
+
+    return 1;
+}
+
 DLLEXPORT(VObject*) addProp(VObject *o, const char *id)
 {
     return addVObjectProp(o,newVObject(id));
