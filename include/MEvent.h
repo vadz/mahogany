@@ -74,14 +74,17 @@ class MEventNewMailData : public MEventData
 public:
    /** Constructor.
        @param folder the mail folder where the new mail was detected
+       @param n number o fnew messages
        @param messageIDs points to an array of the sequence numbers of
        the new messages in that folder, freed by the caller
    */
    MEventNewMailData(MailFolder *folder,
-                    unsigned long *messageIDs)
+                     unsigned long n,
+                     unsigned long *messageIDs)
       : MEventData(MEventId_NewMail)
       {
          m_folder = folder;
+         m_number = n;
          m_messageIDs = messageIDs;
       }
 
@@ -89,6 +92,8 @@ public:
    //@{
    /// get the folder in which there are new messages
    MailFolder *GetFolder() const { return m_folder; }
+   /// get the number of new messages
+   unsigned long GetNumber(void) const { return m_number; }
    /// get the index of the Nth new message (for calling GetMessage)
    unsigned long GetNewMessageIndex(unsigned long n) const
       {
@@ -98,6 +103,7 @@ public:
 private:
    MailFolder    *m_folder;
    unsigned long *m_messageIDs;
+   unsigned long  m_number;
 };
 
 

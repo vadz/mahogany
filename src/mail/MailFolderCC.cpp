@@ -379,8 +379,7 @@ MailFolderCC::GetName(void) const
    case MF_NNTP:
       symbolicName << "news_" << m_Login;
    default:
-      // just to keep the compiler happy
-      ;
+      ASSERT(0);
    }
    return symbolicName;
 }
@@ -516,7 +515,7 @@ MailFolderCC::UpdateCount(void)
       for ( unsigned long i = 0; i < n; i++ )
          messageIDs[i] = oldnum + i + 1;
 
-      MEventNewMailData data(this, messageIDs);
+      MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);
 
       delete [] messageIDs;
@@ -614,7 +613,7 @@ MailFolderCC::BuildListing(void)
       for ( unsigned long i = 0; i < n; i++ )
          messageIDs[i] = m_OldNumOfMessages + i + 1;
 
-      MEventNewMailData data(this, messageIDs);
+      MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);
 
       delete [] messageIDs;

@@ -502,7 +502,7 @@ MAppBase::OnMEvent(MEventData& event)
       {
          String message;
 
-         unsigned long number = folder->CountMessages();
+         unsigned long number = mailevent.GetNumber();
          unsigned i;
          if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
                                                     MP_SHOW_NEWMAILINFO)) 
@@ -526,7 +526,8 @@ MAppBase::OnMEvent(MEventData& event)
          {
             // it seems like a better idea to give this brief message in case
             // of several messages
-            message.Printf(_("You have received %lu new messages."), number);
+            message.Printf(_("You have received %lu new messages\nin folder '%s'."),
+                           number, folder->GetName());
          }
 
          // TODO make it a wxPMessageBox to let the user shut if off from here?
