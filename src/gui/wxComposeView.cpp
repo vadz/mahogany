@@ -38,6 +38,7 @@
 #  include <ctype.h>          // for isspace()
 #endif
 
+#include <wx/textctrl.h>
 #include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/ffile.h>
 #include <wx/textfile.h>
@@ -1729,7 +1730,7 @@ wxComposeView::Send(void)
 
    wxLayoutObject *lo = NULL;
    MimeContent *mc = NULL;
-   wxLayoutExportObject *export;
+   wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
    /// The message to be composed.
@@ -1746,13 +1747,13 @@ wxComposeView::Send(void)
    }
 
    ASSERT(msg);
-   while((export = wxLayoutExport( &status,
+   while((exp = wxLayoutExport( &status,
                                    WXLO_EXPORT_AS_TEXT,
                                    WXLO_EXPORT_WITH_CRLF)) != NULL)
    {
-      if(export->type == WXLO_EXPORT_TEXT)
+      if(exp->type == WXLO_EXPORT_TEXT)
       {
-         String* text = export->content.text;
+         String* text = exp->content.text;
          msg->AddPart
             (
                Message::MSG_TYPETEXT,
@@ -1762,7 +1763,7 @@ wxComposeView::Send(void)
       }
       else
       {
-         lo = export->content.object;
+         lo = exp->content.object;
          if(lo->GetType() == WXLO_TYPE_ICON)
          {
             mc = (MimeContent *)lo->GetUserData();
@@ -1839,7 +1840,7 @@ wxComposeView::Send(void)
          }
       }
 
-      delete export;
+      delete exp;
    }
 
    // Add additional header lines: first for this time only and then also the
@@ -2123,14 +2124,14 @@ wxComposeView::InsertFileAsText(const String& filename,
       wxLayoutList * other_list = new wxLayoutList;
       wxLayoutObject *obj;
       wxLayoutExportStatus status(layoutList);
-      wxLayoutExportObject *export;
-      while((export = wxLayoutExport( &status,
+      wxLayoutExportObject *exp;
+      while((exp = wxLayoutExport( &status,
                                       WXLO_EXPORT_AS_OBJECTS)) != NULL)
       {
          // ignore WXLO_EXPORT_EMPTYLINE:
-         if(export->type == WXLO_EXPORT_OBJECT)
+         if(exp->type == WXLO_EXPORT_OBJECT)
          {
-            obj = export->content.object;
+            obj = exp->content.object;
             switch(obj->GetType())
             {
             case WXLO_TYPE_TEXT:
@@ -2143,17 +2144,17 @@ wxComposeView::InsertFileAsText(const String& filename,
                ; // cmd    objects get ignored
             }
          }
-         delete export;
+         delete exp;
       }
       layoutList->Empty();
       //now we move the non-text objects back:
       wxLayoutExportStatus status2(other_list);
-      while((export = wxLayoutExport( &status2,
+      while((exp = wxLayoutExport( &status2,
                                       WXLO_EXPORT_AS_OBJECTS)) != NULL)
-         if(export->type == WXLO_EXPORT_EMPTYLINE)
+         if(exp->type == WXLO_EXPORT_EMPTYLINE)
             layoutList->LineBreak();
          else
-            layoutList->Insert(export->content.object->Copy());
+            layoutList->Insert(exp->content.object->Copy());
       delete other_list;
    }
 
@@ -2178,14 +2179,14 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
 
    // export first text part of the message
 
-   wxLayoutExportObject *export;
+   wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   while((export = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
+   while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
    {
       // non text objects get ignored
-      if(export->type == WXLO_EXPORT_TEXT)
-         if ( !file.Write(*export->content.text) )
+      if(exp->type == WXLO_EXPORT_TEXT)
+         if ( !file.Write(*exp->content.text) )
          {
             wxLogError(_("Cannot write message to file '%s'."),
                        filename.c_str());

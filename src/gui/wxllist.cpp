@@ -2798,15 +2798,15 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
    {
       wxString string;
 
-      wxLayoutExportObject *export;
+      wxLayoutExportObject *exp;
       wxLayoutExportStatus status(llist);
-      while((export = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != NULL)
+      while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != NULL)
       {
-         if(export->type == WXLO_EXPORT_EMPTYLINE)
+         if(exp->type == WXLO_EXPORT_EMPTYLINE)
             ; //FIXME missing support for linebreaks in string format
          else
-            export->content.object->Write(string);
-         delete export;
+            exp->content.object->Write(string);
+         delete exp;
       }
 
       wxlo->SetData(string.c_str(), string.Length()+1);

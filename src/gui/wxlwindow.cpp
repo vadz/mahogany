@@ -1097,13 +1097,13 @@ wxLayoutWindow::Copy(bool invalidate)
       return FALSE;
    // Export selection as text:
    wxString text;
-   wxLayoutExportObject *export;
+   wxLayoutExportObject *exp;
    wxLayoutExportStatus status(llist);
-   while((export = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
+   while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
    {
-      if(export->type == WXLO_EXPORT_TEXT)
-         text << *(export->content.text);
-      delete export;
+      if(exp->type == WXLO_EXPORT_TEXT)
+         text << *(exp->content.text);
+      delete exp;
    }
    delete llist;
 
