@@ -197,7 +197,7 @@ inline bool operator==(const MOptionValue& v, long l)
    return l == v.GetNumberValue();
 }
 
-inline bool operator==(long l, onst MOptionValue& v)
+inline bool operator==(long l, const MOptionValue& v)
 {
    return l == v.GetNumberValue();
 }
@@ -207,7 +207,7 @@ inline bool operator!=(const MOptionValue& v, long l)
    return l != v.GetNumberValue();
 }
 
-inline bool operator!=(long l, onst MOptionValue& v)
+inline bool operator!=(long l, const MOptionValue& v)
 {
    return l != v.GetNumberValue();
 }
