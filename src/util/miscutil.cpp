@@ -99,6 +99,7 @@ AutoCollectAddresses(const String &email,
                              "(added to the entry '%s')."),
                            email.c_str(), name.c_str());
             }
+            entry->DecRef();
          }
          else // no such address, no such name - create a new entry
          {

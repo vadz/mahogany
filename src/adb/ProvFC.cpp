@@ -299,7 +299,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
     pGroup->GetConfig()->Read(GetPath(), &strValue);
     Load(strValue);
   }
-
+  if(m_pGroup) m_pGroup->IncRef();
   m_bDirty = FALSE;
 }
 
@@ -307,6 +307,7 @@ FCEntry::~FCEntry()
 {
   if ( m_bDirty )
     Save();
+  if(m_pGroup) m_pGroup->DecRef();
 }
 
 wxString FCEntry::GetPath() const
