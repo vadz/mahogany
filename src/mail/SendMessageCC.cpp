@@ -734,8 +734,13 @@ SendMessageCC::AddPart(Message::ContentType type,
    unsigned char
       *data;
 
+   // it seems that text data must be NUL terminated, even if its size is
+   // known, so copy the terminating NUL too here
+   if ( type == TYPETEXT )
+      len += sizeof(char);
+
    data = (unsigned char *) fs_get (len);
-   memcpy(data,buf,len);
+   memcpy(data, buf, len);
 
    String subtype(subtype_given);
    if( subtype.length() == 0 )
@@ -755,34 +760,34 @@ SendMessageCC::AddPart(Message::ContentType type,
    }
 
    bdy = &(m_NextPart->body);
+   bdy->type = type;
 
-   switch(type)
+   bdy->subtype = (char *) fs_get( subtype.length()+1);
+   strcpy(bdy->subtype,(char *)subtype.c_str());
+
+   bdy->contents.text.data = data;
+   bdy->contents.text.size = len;
+
+   // set the transfer encoding
+   switch ( type )
    {
-   case TYPEMESSAGE:
-      //FIXME: leads to empty body?
-      bdy->nested.msg = mail_newmsg();
-   case TYPETEXT:
-      bdy->type = type;
-      bdy->subtype = (char *) fs_get( subtype.length()+1);
-      strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = data;
-      bdy->contents.text.size = len;
-      bdy->encoding = (type == TYPETEXT) ?
-         ( strutil_is7bit((char *)data) ? ENC7BIT : ENC8BIT) // encode text as
-                                                     // 8 bit if needed
-         : ENC7BIT; // all other parts are 7bit encoded
-      /* ENC8BIT for text is auto-converted to quoted printable */
-      break;
+      case TYPEMESSAGE:
+         // FIXME: leads to empty body?
+         bdy->nested.msg = mail_newmsg();
 
-   default:
-      bdy->type = type;
-      bdy->subtype = (char *) fs_get(subtype.length()+1);
-      strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = data;
-      bdy->contents.text.size = len;
-      bdy->encoding = ENCBINARY;
-      break;
+         // fall through
+
+      case TYPETEXT:
+         // FIXME: why do we use ENC7BIT for TYPEMESSAGE?
+         bdy->encoding = (type == TYPETEXT) && !strutil_is7bit(buf)
+                           ? ENC8BIT  // auto converted to QP by cclient
+                           : ENC7BIT; // either ASCII text or something else
+         break;
+
+      default:
+         bdy->encoding = ENCBINARY;
    }
+
    m_NextPart->next = mail_newbody_part();
    m_LastPart = m_NextPart;
    m_NextPart = m_NextPart->next;
@@ -805,21 +810,35 @@ SendMessageCC::AddPart(Message::ContentType type,
       }
    }
 
-   // add the charset parameter to the param list
-   if (type == TYPETEXT)
+   // add the charset parameter to the param list for the text parts
+   if ( type == TYPETEXT )
    {
-      String cs = EncodingToCharset(enc);
-      if ( !!cs )
+      String cs;
+      if ( bdy->encoding == ENC7BIT )
       {
-         // if an encoding is specified, it overrides the default value
-         m_CharSet = cs;
+         // plain text messages should be in US_ASCII as all clients should be
+         // able to show them and some might complain [even] about iso8859-1
+         cs = "US-ASCII";
+      }
+      else
+      {
+         cs = EncodingToCharset(enc);
+         if ( cs.empty() )
+         {
+            cs = m_CharSet;
+         }
+         else
+         {
+            // if an encoding is specified, it overrides the default value
+            m_CharSet = cs;
+         }
       }
 
-      if ( !m_CharSet.empty() )
+      if ( !cs.empty() )
       {
          par = mail_newbody_parameter();
          par->attribute = strdup("CHARSET");
-         par->value     = strdup(m_CharSet);
+         par->value     = strdup(cs);
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1137,6 +1156,7 @@ SendMessageCC::WriteToString(String  &output)
 {
    Build();
 
+   // FIXME what if the message is > 100kb???
    char *buffer = new char[HEADERBUFFERSIZE];
 
    rfc822_setextraheaders(m_headerNames,m_headerValues);
