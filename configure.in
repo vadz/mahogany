@@ -37,8 +37,7 @@ DEFAULT_USE_THREADS=0
 DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
-DEFAULT_USE_WXCONFIG=1
-DEFAULT_USE_LIBTOOL=0
+dnl DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_DOCXX=0
 DEFAULT_USE_MODULES=auto
 DEFAULT_USE_LEAKTRACER=0
@@ -81,12 +80,9 @@ M_OVERRIDES(debuginfo, debuginfo,
 USE_DEBUG_FLAG)
 
 M_OVERRIDES(wxdebug,wxdebug,
---with-wxdebug    force use of __WXDEBUG__ define,
+--with-wxdebug    use debug wxWindows,
 USE_WXDEBUG)
 
-M_OVERRIDES(wxconfig,wxconfig,
---without-wxconfig    do not use output from wx-config,
-USE_WXCONFIG)
 
 M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
@@ -259,14 +255,6 @@ dnl set the extra include and lib directories
 LDFLAGS="$LDFLAGS -L$BUILDDIR/extra/lib"
 CPPFLAGS="$CPPFLAGS -D__WXGTK__ -I$BUILDDIR/extra/include"
 
-dnl if the environment variable "wx" is set, it contains the top level
-dnl wxWindows directory - this is used for building with uninstalled copy of
-dnl wxWin, i.e. only when we're not using wx-config
-if test $USE_WXCONFIG != 1; then
-	LDFLAGS="$LDFLAGS -L$wx/gtk/lib -lwx_gtk"
-	CPPFLAGS="$CPPFLAGS -I$wx/include -I$wx/gtk/include"
-fi
-
 dnl add all extra/src directories to the search paths
 EXTRA_SRC_LIB=
 EXTRA_SRC_INC=
@@ -362,6 +350,9 @@ MAKE_DEBUG=
 
 if test "$USE_WXDEBUG" = 1; then
 	DBGFLAGS="-D__WXDEBUG__"
+	WXCONFIG_NAME="wxd-config"
+else
+	WXCONFIG_NAME="wx-config"
 fi
 
 if test "$USE_DEBUG" = 1; then
@@ -571,48 +562,13 @@ dnl --------------------------------------------------------------------------
 
 GTK_LDFLAGS=
 dnl check for wx-config
-if test $USE_WXCONFIG = 1
+AC_PATH_PROG(WX_CONFIG,WXCONFIG_NAME)
+if test "x$WX_CONFIG" != "x"
 then
-	if test "x$WX_CONFIG" = "x"
-	then
-		AC_PATH_PROG(WX_CONFIG,wx-config)
-	fi
-	if test "x$WX_CONFIG" != "x"
-	then
-		GTK_CFLAGS=`$WX_CONFIG --cflags`
-		GTK_LDFLAGS=`$WX_CONFIG --libs`
-	else
-		AC_MSG_ERROR("Cannot find wx-config program.")
-	fi
+	GTK_CFLAGS=`$WX_CONFIG --cflags`
+	GTK_LDFLAGS=`$WX_CONFIG --libs`
 else
-	dnl check for gtk-config
-	if test "x$GTK_CONFIG" = "x"
-	then
-		AC_PATH_PROG(GTK_CONFIG,gtk-config)
-	fi
-	if test ! -x "$GTK_CONFIG"
-	then
-		AC_MSG_ERROR("Cannot execute $GTK_CONFIG!");
-	fi
-
-	dnl we don't set the LIBS directly as libwx_gtk might break other
-	dnl checks thanks to its included main() function
-	if test "x$GTK_CONFIG" != "x"
-	then
-		GTK_CFLAGS=`gtk-config --cflags`
-		GTK_LDFLAGS=`gtk-config --libs`
-	else
-		dnl find the X11 include and library files -- our best guess
-		AC_PATH_XTRA
-		GTK_CFLAGS="$X_CFLAGS"
-		GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
-	fi
-	dnl we might need posix4 (depending on OS), so link with it if
-	dnl it is available
-	AC_CHECK_LIB(posix4,nanosleep)
-	dnl check for wcslen
-	AC_CHECK_LIB(c,wcslen,,
-		AC_CHECK_LIB(w,wcslen,,AC_MSG_ERROR("Cannot find wcslen function.")))
+	AC_MSG_ERROR("Cannot find wx-config program.")
 fi
 AC_SUBST(GTK_LDFLAGS)
 GUI_LIBS_STATIC=`echo $GTK_LDFLAGS | sed '
@@ -624,18 +580,6 @@ CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
 dnl only now can we check for wx.h because it would fail without the
 dnl gtk headers
 AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
-
-dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
-dnl they are not installed, the test for wx_gtk will fail anyway.
-
-OLDLIBS="$LIBS"
-AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
-LIBS="$OLDLIBS"
-
-dnl png library not required as it is included in wxGTK
-LIB_PNG=
-#AC_CHECK_LIB(png,main,LIB_PNG="-lpng",AC_MSG_WARN("PNG library not available linking might fail."))
-#AC_CHECK_LIB(jpeg,main,LIB_JPEG="-ljpeg",AC_MSG_WARN("JPEG library not available linking might fail."))
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
@@ -868,7 +812,7 @@ CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror//g'`
 AC_SUBST(CXXFLAGS_RELAXED)
 
 dnl Make sure, we get statically linked against wxGTK:
-LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
+LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
