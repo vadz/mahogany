@@ -1009,7 +1009,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #else
                    "Release build "
 #endif
-                   "(compiled at " __DATE__ ", " __TIME__ ")"
+                   "(compiled at " __DATE__ ", " __TIME__ "<br>"
+                   "using " wxVERSION_STRING ")"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
                    "<h4>Extra features:</h4>"
