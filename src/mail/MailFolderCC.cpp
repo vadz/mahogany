@@ -5587,7 +5587,6 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    {
       stream = mf->m_MailStream;
       nmsgs = mf->GetMessageCount();
-      mf->DecRef();
 
       noCCC = NULL;
    }
@@ -5639,8 +5638,6 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       if ( mf )
       {
          mf->ExpungeMessages();
-
-         mf->DecRef();
       }
       else // folder is not opened, just expunge quietly
       {
@@ -5655,6 +5652,9 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       }
    }
    //else: no messages to delete
+
+   if ( mf )
+      mf->DecRef();
 
    delete noCCC;
 
