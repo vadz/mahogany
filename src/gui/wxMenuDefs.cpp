@@ -199,11 +199,9 @@ const static MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
 
    // file
-   { WXMENU_FILE_OPEN,     "&Open Folder",      "Open a message folder"    },
+   { WXMENU_FILE_OPEN,     "&Open Folder",      "Open an existing message folder"    },
+   { WXMENU_FILE_CREATE,   "&Create Folder",    "Creates a new folder defintion"},
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
-#ifdef DEBUG
-   { WXMENU_FILE_TEST,     "&Test",             "Test"                     },
-#endif
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_EXIT,     "E&xit",             "Quit the application"     },

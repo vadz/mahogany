@@ -149,6 +149,7 @@ int wxMApp::OnExit()
 
    wxLogWindow *log = (wxLogWindow *)wxLog::GetActiveTarget();
    wxLog::SetActiveTarget(log->GetOldLog());
+   //FIXME: is this legal?
    delete log;
  
    // as c-client lib doesn't seem to think that deallocating memory is

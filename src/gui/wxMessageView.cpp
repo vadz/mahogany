@@ -443,9 +443,12 @@ wxMessageView::~wxMessageView()
       return;
 
    GLOBAL_DELETE mailMessage;
-   GLOBAL_DELETE xface;
-   GLOBAL_DELETE [] xfaceXpm;
-   delete m_MimePopup;
+   if(xface)
+      delete xface;
+   if(xfaceXpm)
+      delete [] xfaceXpm;
+   if(m_MimePopup)
+      delete m_MimePopup;
    delete m_Profile;
 }
 

@@ -25,6 +25,7 @@
 #include   "gui/wxMApp.h"
 #include   "gui/wxIconManager.h"
 #include   "gui/wxFolderView.h"
+#include   "gui/wxMDialogs.h"
 
 #ifdef   USE_WXWINDOWS2
 // ----------------------------------------------------------------------------
@@ -91,17 +92,19 @@ wxMainFrame::OnCloseWindow(wxCloseEvent&)
 }
 
 void
-wxMainFrame::OnMenuCommand(int id)
-{
-   wxMFrame::OnMenuCommand(id);
-}
-
-void
 wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
-   if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
-      m_FolderView->OnCommandEvent(event);
+   
+   if(m_FolderView)
+   {
+      if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
+         m_FolderView->OnCommandEvent(event);
+      else if(id == WXMENU_EDIT_PREF)
+         MDialog_FolderProfile(this, m_FolderView->GetProfile());
+      else
+         wxMFrame::OnMenuCommand(id);
+   }
    else
       wxMFrame::OnMenuCommand(id);
 }

@@ -202,7 +202,7 @@ bool MInputBox(wxString *pstr,
       pConf->Read(pstr, strSectionName + szKey, def);
   }
 
-  MTextInputDialog dlg(GetParent(parent), *pstr, strCaption, strPrompt);
+  MTextInputDialog dlg(GetParent(parent), *pstr, wxString("M - "+strCaption), strPrompt);
   if ( dlg.ShowModal() == wxID_OK ) {
     *pstr = dlg.GetText();
 
@@ -225,7 +225,7 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool modal)
 {
-   wxMessageBox(msg, title, Style(wxOK|wxICON_EXCLAMATION), GetParent(parent));
+   wxMessageBox(msg, wxString("M -" + wxString(title)), Style(wxOK|wxICON_EXCLAMATION), GetParent(parent));
 }
 
 
@@ -247,7 +247,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, title, modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M -" + wxString(title)), modal);
 }
 
    
@@ -263,7 +263,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent,title,true);
+   MDialog_ErrorMessage(message,parent,wxString("M -" + wxString(title)),true);
    mApplication.Exit(true);
 }
 
@@ -280,7 +280,7 @@ MDialog_Message(const char *msg,
                 const char *title,
                 bool modal)
 {
-   wxMessageBox(msg, title, Style(wxOK|wxICON_INFORMATION), GetParent(parent));
+   wxMessageBox(msg, wxString("M -" + wxString(title)), Style(wxOK|wxICON_INFORMATION), GetParent(parent));
 }
 
 
@@ -299,7 +299,7 @@ MDialog_YesNoDialog(const char *message,
              const char *title,
              bool YesDefault)
 {
-   return wxMessageBox(message, title, Style(wxYES_NO|wxICON_QUESTION),
+   return wxMessageBox(message, wxString("M -" + wxString(title)), Style(wxYES_NO|wxICON_QUESTION),
                        GetParent(parent)) == wxYES;
 }
 
@@ -369,7 +369,7 @@ MDialog_YesNoDialog(String const &message,
                     bool modal,
                     bool YesDefault)
 {
-   return wxMessageBox(message, _("Decision"), Style(wxYES_NO|wxICON_QUESTION),
+   return wxMessageBox(message, _("M - Decision"), Style(wxYES_NO|wxICON_QUESTION),
                        GetParent(parent)) == wxYES;
 }
 
@@ -556,11 +556,12 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    choices[3] = _("IMAP");
    choices[4] = _("NNTP/News");
    m_FolderTypeRadioBox = new wxRadioBox( this, M_WXID_PEP_RADIO, _("Folder Type"),
-                                          wxPoint(labelWidth+inputWidth+10,10),
+                                          wxPoint(labelWidth+inputWidth+20,10),
                                           wxSize(-1,-1),
                                           5, choices,
                                           1, wxRA_VERTICAL );
 
+   pos.y +=10;
    int x,y;
    MkButton(m_OkButton,"Ok",M_WXID_PEP_OK);
    m_OkButton->GetSize(&x,&y);
@@ -635,13 +636,19 @@ MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
 }
 
 void
-MDialog_FolderCreate(MWindow *parent, ProfileBase *profile)
+MDialog_FolderCreate(MWindow *parent)
 {
-   // for now, open a frame and display the panel, return immediately
-   wxMFrame *frame = new wxMFrame("FolderCreateFrame",parent);
+   wxString name = "NewFolder";
+   
+   if(! MInputBox(&name,
+                  _("M - New Folder"),
+                  _("Symbolic name for the new folder"),
+                  parent,
+                  "NewFolderDialog",
+                  "NewFolder"))
+      return;
 
-   (void) new wxPEP_Folder(profile,frame);
-   frame->SetTitle(_("M - Create Folder"));
-   frame->Fit();
-   frame->Show(TRUE);
+   ProfileBase *profile = new Profile(name, NULL);
+   MDialog_FolderProfile(parent, profile);
+   delete profile;
 }
