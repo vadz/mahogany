@@ -40,6 +40,8 @@
 #include <wx/ffile.h>
 #include <wx/tokenzr.h>
 
+#include "wx/regex.h"
+
 // ----------------------------------------------------------------------------
 // the classes which are used together with compose view - we have here a
 // derivation of variable expander and expansion sink which are used for parsing
@@ -1004,28 +1006,72 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                         // skip it
                         continue;
                      }
-
                      lastWasPlainText = mimeType == "text/plain";
 
-                     String str = m_msg->GetPartContent(nPart);
+                     String str = m_msg->GetPartContent(nPart), str2;
                      const char *cptr = str.c_str();
-                     String str2 = prefix;
-                     while ( *cptr )
-                     {
-                        if ( *cptr == '\r' )
-                        {
+                     unsigned int idx = prefix.Len();
+                     int wrap_margin = -1;
+                     if ( READ_CONFIG(m_profile, MP_AUTOMATIC_WORDWRAP) )
+                        wrap_margin = READ_CONFIG(m_profile, MP_WRAPMARGIN);
+                     *value += prefix;
+                     while ( *cptr ) {
+                        if ( *cptr == '\r' ) {
                            cptr++;
                            continue;
                         }
 
+                        // when we quote, if there's a wrap margin defined, we
+                        // must pay attention to the line length, and we want
+                        // to break lines between words.
                         str2 += *cptr;
-                        if( *cptr++ == '\n' && *cptr )
-                        {
+                        idx++;
+                        if ( isspace(*cptr) ) {
+                            // safe to add to current line
+                            *value += str2;
+                            str2.Empty();
+                        }
+                        if ( *cptr++ == '\n' && *cptr ) {
+#if defined(wxUSE_REGEX)
+                           String sigSeparator = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
+                           if (!sigSeparator.IsEmpty())
+                           {
+                              sigSeparator += _("\r\n");
+                              wxRegEx regEx(sigSeparator);
+                              if (regEx.Matches(cptr))
+                                 break;
+                           }
+#else
+                           if (*cptr == '-' &&
+                               *(cptr+1) == '-' &&
+                               ((*(cptr+2) == ' ' &&
+                                 *(cptr+3) == '\r') ||
+                                *(cptr+2) == '\r'))
+                              // Remaining is a sig. Skip
+                              break;
+#endif
                            if ( quoteEmpty ||
                                 (*cptr != '\r' && *cptr != '\n') )
                            {
-                              str2 += prefix;
+                                *value += str2 + prefix;
+                                idx = prefix.Len();
+                                str2.Empty();
                            }
+                        }
+                        if ( wrap_margin > 0 && 
+                                    idx >= (unsigned int) wrap_margin ) {
+                            // break the line.
+                            // if the first word on a new line overflows the
+                            // margin, we just chop it off, else, we put the
+                            // next word on the next, new, line.
+                            if ( prefix.Len() + str2.Len() == idx) {
+                                *value += str2 + '\n' + prefix;
+                                idx = prefix.Len();
+                            } else {
+                                *value += '\n' + prefix + str2;
+                                idx = prefix.Len() + str2.Len();
+                            }
+                            str2.Empty();
                         }
                      }
 

@@ -62,6 +62,7 @@
 #ifndef   MCCLIENT_H
 #include "Mcclient.h"         // for hash_table
 #endif
+#include "wx/regex.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -1129,9 +1130,16 @@ public:
 
    String messageThreadID() const;
    kbStringList *messageThreadReferences() const;
+   
+#if defined(wxUSE_REGEX)
+   String getSimplifiedSubject(wxRegEx *replyRemover,
+                               const String &replacementString) const;
+   bool subjectIsReply(wxRegEx *replyRemover,
+                       const String &replacementString) const;
+#else // wxUSE_REGEX
    String getSimplifiedSubject(bool removeListPrefix) const;
    bool subjectIsReply(bool removeListPrefix) const;
-
+#endif // wxUSE_REGEX
 };
 
 inline
@@ -1309,7 +1317,8 @@ String RemoveListPrefix(const String &subject)
 // spaces (start, end, or multiple consecutive spaces).
 // Reply prefixes are removed only at the start of the
 // string or just after a list prefix (i.e. [ListName]).
-//
+// 
+#if !defined(WX_HAVE_REGEX)
 String
 strutil_removeAllReplyPrefixes(const String &isubject,
                                bool &replyPrefixSeen)
@@ -1431,9 +1440,14 @@ strutil_removeAllReplyPrefixes(const String &isubject,
    delete [] s;
    return result;
 }
+#endif // WX_HAVE_REGEX
 
-
+#if defined(wxUSE_REGEX)
+String Threadable::getSimplifiedSubject(wxRegEx *replyRemover,
+                                        const String &replacementString) const
+#else
 String Threadable::getSimplifiedSubject(bool removeListPrefix) const
+#endif
 {
    // First, we remove all reply prefixes occuring near the beginning
    // of the subject (by near, we mean that a list prefix is ignored,
@@ -1459,20 +1473,39 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
    if (that->m_simplifiedSubject != 0)
       return *that->m_simplifiedSubject;
    that->m_simplifiedSubject = new String;
-   *that->m_simplifiedSubject =
+#if defined(wxUSE_REGEX)
+   *(that->m_simplifiedSubject) = m_hi->GetSubject();
+   if (!replyRemover)
+   {
+      that->m_isReply = false;
+      return *that->m_simplifiedSubject;
+   }
+   size_t len = that->m_simplifiedSubject->Len();
+   if (replyRemover->Replace(that->m_simplifiedSubject, replacementString, 1))
+      that->m_isReply = (that->m_simplifiedSubject->Len() != len);
+   else
+      that->m_isReply = 0;
+#else // wxUSE_REGEX
+   *that->m_simplifiedSubject = 
       strutil_removeAllReplyPrefixes(m_hi->GetSubject(),
                                      that->m_isReply);
    if (removeListPrefix)
       *that->m_simplifiedSubject = RemoveListPrefix(*that->m_simplifiedSubject);
+#endif // wxUSE_REGEX
    return *that->m_simplifiedSubject;
 }
 
 
-bool Threadable::subjectIsReply(bool removeListPrefix) const
+#if defined(wxUSE_REGEX)
+bool Threadable::subjectIsReply(wxRegEx *replyRemover, 
+                                const String &replacementString) const
+#else
+bool Threadable::subjectIsReply(bool x) const
+#endif
 {
    Threadable *that = (Threadable *)this;    // Remove constness
    if (that->m_simplifiedSubject == 0)
-      getSimplifiedSubject(removeListPrefix);
+      getSimplifiedSubject(replyRemover, replacementString);
    return that->m_isReply;
 }
 
@@ -1553,6 +1586,8 @@ ThreadContainer::ThreadContainer(Threadable *th)
 inline
 ThreadContainer::~ThreadContainer()
 {
+   //if (m_threadable != NULL && m_threadable->isDummy())
+   //   delete m_threadable;
 #if defined(DEBUG)
    NumberOfThreadContainers--;
 #endif
@@ -1723,9 +1758,12 @@ private:
 
    // Options
    bool m_gatherSubjects;
+   wxRegEx *m_replyRemover;
+   String m_replacementString;
    bool m_breakThreadsOnSubjectChange;
    bool m_indentIfDummyNode;
-   bool m_removeListPrefix;
+   bool m_removeListPrefixGathering;
+   bool m_removeListPrefixBreaking;
 
 public:
    Threader()
@@ -1733,11 +1771,19 @@ public:
       , m_idTable(0)
       , m_bogusIdCount(0)
       , m_gatherSubjects(true)
+      , m_replyRemover(0)
+      , m_replacementString()
       , m_breakThreadsOnSubjectChange(true)
       , m_indentIfDummyNode(false)
-      , m_removeListPrefix(true)
+      , m_removeListPrefixGathering(true)
+      , m_removeListPrefixBreaking(true)
    {}
-
+   
+   ~Threader()
+   {
+      delete m_replyRemover;
+   }
+   
    /** Does all the job. Input is a list of messages, output
        is a dummy root message, with all the tree under.
 
@@ -1751,14 +1797,24 @@ public:
    Threadable *thread(Threadable *threadableRoot);
 
    void setGatherSubjects(bool x) { m_gatherSubjects = x; }
+   void setSimplifyingRegex(const String &x) 
+   { 
+      if (!m_replyRemover)
+         m_replyRemover = new wxRegEx(x);
+      else
+         m_replyRemover->Compile(x);
+   }
+   void setReplacementString(const String &x) { m_replacementString = x; }
    void setBreakThreadsOnSubjectChange(bool x) { m_breakThreadsOnSubjectChange = x; }
    void setIndentIfDummyNodet(bool x) { m_indentIfDummyNode = x; }
-   void setRemoveListPrefix(bool x) { m_removeListPrefix = x; }
-
+   void setRemoveListPrefixGathering(bool x) { m_removeListPrefixGathering = x; }
+   void setRemoveListPrefixBreaking(bool x) { m_removeListPrefixBreaking = x; }
+   
 private:
    void buildContainer(Threadable *threadable);
    void findRootSet();
-   void pruneEmptyContainers(ThreadContainer *parent);
+   void pruneEmptyContainers(ThreadContainer *parent,
+                             bool fromBreakThreads);
    size_t collectSubjects(HASHTAB*, ThreadContainer *, bool recursive);
    void gatherSubjects();
    void breakThreads(ThreadContainer*);
@@ -1905,7 +1961,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
 
    // Remove all the useless containers (e.g. those that are not
    // in the root-set, have no message, but have a child)
-   pruneEmptyContainers(m_root);
+   pruneEmptyContainers(m_root, false);
 
    // If asked to, gather all the messages that have the same
    // non-empty subjet in the same thread.
@@ -2086,7 +2142,8 @@ void Threader::findRootSet()
 }
 
 
-void Threader::pruneEmptyContainers(ThreadContainer *parent)
+void Threader::pruneEmptyContainers(ThreadContainer *parent,
+                                    bool fromBreakThreads)
 {
    ThreadContainer *c, *prev, *next;
    for (prev = 0, c = parent->getChild(), next = c->getNext();
@@ -2101,6 +2158,8 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent)
             parent->setChild(c->getNext());
          else
             prev->setNext(c->getNext());
+         if (fromBreakThreads)
+            delete c->getThreadable();
          delete c;
          c = prev;
 
@@ -2124,13 +2183,16 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent)
          tail->setNext(c->getNext());
 
          next = kids;
+         
+         if (fromBreakThreads)
+            delete c->getThreadable();
 
          delete c;
          c = prev;
-
-      } else if (c->getChild() != 0)
-
-         pruneEmptyContainers(c);
+         
+      } else if (c->getChild() != 0 && !fromBreakThreads)
+         
+         pruneEmptyContainers(c, false);
    }
 }
 
@@ -2171,10 +2233,18 @@ void Threader::gatherSubjects()
    {
       Threadable *th = c->getThreadable();
       if (th == 0)   // might be a dummy -- see above
-         th = c->getChild()->getThreadable();
-
-      String subject = th->getSimplifiedSubject(m_removeListPrefix);
-
+      {
+          th = c->getChild()->getThreadable();
+          ASSERT(th != NULL);
+      }
+      
+#if defined(wxUSE_REGEX)
+      String subject = th->getSimplifiedSubject(m_replyRemover,
+                                                m_replacementString);
+#else
+      String subject = th->getSimplifiedSubject(m_removeListPrefixGathering);
+#endif
+      
       // Don't thread together all subjectless messages; let them dangle.
       if (subject.empty())
          continue;
@@ -2222,21 +2292,28 @@ void Threader::gatherSubjects()
 
       if (old->getThreadable() == 0 && c->getThreadable() == 0)
       {
-         // They're both dummies; merge them.
-         ThreadContainer *tail;
-         for (tail = old->getChild();
-              tail != 0 && tail->getNext() != 0;
-              tail = tail->getNext())
-         {}
-         tail->setNext(c->getChild());
-         for (tail = c->getChild(); tail != 0; tail = tail->getNext())
-            tail->setParent(old);
-         c->setChild(0);
+         // They're both dummies; merge them by
+         // adding all the children of c to old
+         ThreadContainer *kid = c->getChild();
+         while (kid != NULL)
+         {
+            ThreadContainer *next = kid->getNext();
+            old->addAsChild(kid);
+            kid = next;
+         }
+         delete c;
       }
       else if (old->getThreadable() == 0 ||               // old is empty, or
                (c->getThreadable() != 0 &&
-                c->getThreadable()->subjectIsReply(m_removeListPrefix) &&   // c has "Re:"
-                !old->getThreadable()->subjectIsReply(m_removeListPrefix))) // and old does not
+#if defined(wxUSE_REGEX)
+               c->getThreadable()->subjectIsReply(m_replyRemover,
+                                                  m_replacementString) &&   // c has "Re:"
+                !old->getThreadable()->subjectIsReply(m_replyRemover,
+                                                      m_replacementString))) // and old does not
+#else
+               c->getThreadable()->subjectIsReply(m_removeListPrefixGathering) &&   // c has "Re:"
+                !old->getThreadable()->subjectIsReply(m_removeListPrefixGathering))) // and old does not
+#endif
       {
          // Make this message be a child of the other.
          old->addAsChild(c);
@@ -2315,8 +2392,13 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
          th = c->getChild()->getThreadable();
       }
       ASSERT(th != 0);
-
-      String subject = th->getSimplifiedSubject(m_removeListPrefix);
+      
+#if defined(wxUSE_REGEX)
+      String subject = th->getSimplifiedSubject(m_replyRemover,
+                                                m_replacementString);
+#else
+      String subject = th->getSimplifiedSubject(m_removeListPrefixGathering);
+#endif
       if (subject.empty())
          continue;
 
@@ -2332,10 +2414,19 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
       //
       if (old == 0 ||
           (cTh == 0 && old->getThreadable() != 0) ||
-          (old->getThreadable() != 0 &&
-           old->getThreadable()->subjectIsReply(m_removeListPrefix) &&
-           cTh != 0 &&
-           !cTh->subjectIsReply(m_removeListPrefix)))
+          (old->getThreadable() != 0 &&  
+#if defined(wxUSE_REGEX)
+           old->getThreadable()->subjectIsReply(m_replyRemover,
+                                                m_replacementString) &&
+#else
+           old->getThreadable()->subjectIsReply(m_removeListPrefixGathering) &&
+#endif
+           cTh != 0 && 
+#if defined(wxUSE_REGEX)
+           !cTh->subjectIsReply(m_replyRemover, m_replacementString)))
+#else
+           !cTh->subjectIsReply(m_removeListPrefixGathering)))
+#endif
       {
          // The hash-table we use does not offer to replace (nor remove)
          // an entry. But adding a new entry with the same key will 'hide'
@@ -2377,8 +2468,15 @@ void Threader::breakThreads(ThreadContainer* c)
 
       ThreadContainer *parent = c->getParent();
 
-      if (c->getThreadable()->getSimplifiedSubject(m_removeListPrefix) !=
-          parent->getThreadable()->getSimplifiedSubject(m_removeListPrefix))
+#if defined(wxUSE_REGEX)
+      if (c->getThreadable()->getSimplifiedSubject(m_replyRemover,
+                                                   m_replacementString) !=
+          parent->getThreadable()->getSimplifiedSubject(m_replyRemover,
+                                                        m_replacementString))
+#else
+      if (c->getThreadable()->getSimplifiedSubject(m_removeListPrefixGathering) !=
+          parent->getThreadable()->getSimplifiedSubject(m_removeListPrefixGathering))
+#endif
       {
          // Subject changed. Break the thread
          if (parent->getChild() == c)
@@ -2402,7 +2500,7 @@ void Threader::breakThreads(ThreadContainer* c)
             ThreadContainer *grandParent = parent->getParent();
             if (grandParent == NULL)
                grandParent = m_root;
-            pruneEmptyContainers(grandParent);
+            pruneEmptyContainers(grandParent, true);
          }
       }
    }
@@ -2468,7 +2566,7 @@ static void FlushThreadable(Threadable *t,
 #if defined(DEBUG)
       FlushThreadable(t->getChild(), indices, indents, seen);
 #else
-   FlushThreadable(t->getChild(), indices, indents);
+      FlushThreadable(t->getChild(), indices, indents);
 #endif
    if (t->getNext())
 #if defined(DEBUG)
@@ -2489,28 +2587,39 @@ static void ComputeThreadedIndicesWithJWZ(MailFolder *mf,
    size_t count = 0;
    Threadable *th = threadableRoot;
    for (; th != 0; th = th->getNext())
-      count++;
+    count++;
    Threader *threader = new Threader;
 
-   // FIXME : get the options from somewhere...
    bool gatherSubjects = false;
+   String simplifyingRegex;
+   String replacementString;
    bool breakThreadsOnSubjectChange = false;
    bool indentIfDummyNode = true;
-   bool removeListPrefix = false;
+   bool removeListPrefixGathering = false;
+   bool removeListPrefixBreaking = false;
    Profile *profile = mf->GetProfile();
    if (profile != NULL)
    {
       gatherSubjects = (READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) == 1);
       breakThreadsOnSubjectChange = (READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) == 1);
+#if defined(wxUSE_REGEX)
+      simplifyingRegex = READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
+      replacementString = READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
+#else
+      removeListPrefixGathering = (READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_GATHERING) == 1);
+      removeListPrefixBreaking = (READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING) == 1);
+#endif
       indentIfDummyNode = (READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) == 1);
-      removeListPrefix = (READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX) == 1);
    }
 
    threader->setGatherSubjects(gatherSubjects);
+   threader->setSimplifyingRegex(simplifyingRegex);
+   threader->setReplacementString(replacementString);
    threader->setBreakThreadsOnSubjectChange(breakThreadsOnSubjectChange);
    threader->setIndentIfDummyNodet(indentIfDummyNode);
-   threader->setRemoveListPrefix(removeListPrefix);
-
+   threader->setRemoveListPrefixGathering(removeListPrefixGathering);
+   threader->setRemoveListPrefixBreaking(removeListPrefixBreaking);
+   
    threadableRoot = threader->thread(threadableRoot);
 
    if (threadableRoot != 0)
@@ -2902,9 +3011,15 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    config.m_UseThreading = READ_CONFIG(profile, MP_MSGS_USE_THREADING) != 0;
 #if defined(EXPERIMENTAL_JWZ_THREADING)
    config.m_GatherSubjects = READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) != 0;
-   config.m_IndentIfDummyNode = READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) != 0;
-   config.m_RemoveListPrefix = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX) != 0;
    config.m_BreakThread = READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) != 0;
+#if defined(wxUSE_REGEX)
+   config.m_SimplifyingRegex = READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
+   config.m_ReplacementString = READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
+#else
+   config.m_RemoveListPrefixGathering = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_GATHERING) != 0;
+   config.m_RemoveListPrefixBreaking = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING) != 0;
+#endif
+   config.m_IndentIfDummyNode = READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) != 0;
 #endif // EXPERIMENTAL_JWZ_THREADING
    config.m_replaceFromWithTo = READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) != 0;
    if ( config.m_replaceFromWithTo )

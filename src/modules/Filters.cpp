@@ -2023,7 +2023,7 @@ extern "C"
 
    static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
    {
-      return DoMatchRegEx(args, p, wxRegExBase::RE_ICASE);
+      return DoMatchRegEx(args, p, wxRE_ICASE);
    }
 
 #ifdef USE_PYTHON

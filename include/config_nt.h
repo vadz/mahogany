@@ -26,7 +26,7 @@
 #undef HAVE_PI_ACCEPT_TO
 
 /** Define if you use Python. */
-#define USE_PYTHON 1
+//#define USE_PYTHON 1
 
 /** Define if you have libswigpy */
 #undef HAVE_SWIGLIB
@@ -36,9 +36,6 @@
 
 /** Define this if you want to compile in SSL support. */
 #undef USE_SSL
-
-/** Define this if you have POSIX.2 regexp suport. */
-#undef HAVE_POSIX_REGEX
 
 /** Define this to use built-in i18n support */
 #undef USE_I18N

@@ -175,7 +175,11 @@ enum ConfigFields
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
-
+#if defined(wxUSE_REGEX)
+   ConfigField_ReplySigSeparatorHelp,
+   ConfigField_ReplySigSeparator,
+#endif
+   
    ConfigField_Signature,
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
@@ -297,9 +301,18 @@ enum ConfigFields
    ConfigField_FolderViewDeletedColour,
    ConfigField_FolderViewThreadMessages,
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+#if defined(wxUSE_REGEX)
+   ConfigField_FolderViewSimplifyingRegex,
+   ConfigField_FolderViewReplacementString,
+#endif // wxUSE_REGEX
    ConfigField_FolderViewGatherSubjects,
-   ConfigField_FolderViewRemoveListPrefix,
-   ConfigField_FolderViewBreakThread,
+#if !defined(wxUSE_REGEX)
+   ConfigField_FolderViewRemoveListPrefixGathering,
+#endif
+   ConfigField_FolderViewBreakThreads,
+#if !defined(wxUSE_REGEX)
+   ConfigField_FolderViewRemoveListPrefixBreaking,
+#endif
    ConfigField_FolderViewIndentIfDummy,
 #endif // EXPERIMENTAL_JWZ_THREADING
    ConfigField_FolderViewSortMessagesBy,
@@ -803,6 +816,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
+#if defined(wxUSE_REGEX)
+   { gettext_noop("When replying to a message, a regex can be used to detect\n"
+                  "the beginning of the signature of the message replied to.\n"
+                  "(Do not try to detect the end of the line: a \\r\\n pair will\n"
+                  "be added for that at the end of the specified regex. On the\n)"
+                  "other hand, do not forget '^' at the beginning...)"),
+   Field_Message | Field_AppWide, -1 },
+                  { gettext_noop("Signature separator"),          Field_Text,    -1,                        },
+#endif
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
@@ -960,9 +982,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+#if defined(wxUSE_REGEX)
+   { gettext_noop("Regex used to simplify subjects"),       Field_Text,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("Replacement string for the matched part"),       Field_Text,    ConfigField_FolderViewThreadMessages},
+#endif // wxUSE_REGEX
    { gettext_noop("Gather messages with same subject"),              Field_Bool,    ConfigField_FolderViewThreadMessages},
-   { gettext_noop("Remove list prefix to compare subjects"),         Field_Bool,    ConfigField_FolderViewGatherSubjects},
+#if !defined(wxUSE_REGEX)
+   { gettext_noop("Remove list prefix to compare subjects to gather messages"),         Field_Bool,    ConfigField_FolderViewGatherSubjects},
+#endif
    { gettext_noop("B&reak thread when subject changes"),             Field_Bool,    ConfigField_FolderViewThreadMessages},
+#if !defined(wxUSE_REGEX)
+   { gettext_noop("Remove list prefix to compare subjects to break threads"),         Field_Bool,    ConfigField_FolderViewBreakThreads},
+#endif
    { gettext_noop("Indent messages with missing ancestor"),          Field_Bool,    ConfigField_FolderViewThreadMessages},
 #endif // EXPERIMENTAL_JWZ_THREADING
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
@@ -1198,6 +1229,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
+#if defined(wxUSE_REGEX)
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_REPLY_SIG_SEPARATOR),
+#endif
 
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
@@ -1284,7 +1319,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
    CONFIG_ENTRY(MP_DATE_FMT),
    CONFIG_ENTRY(MP_MVIEW_TITLE_FMT),
-
+   
    // folder view
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USE_NEWMAILCOMMAND),
@@ -1307,11 +1342,20 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
-
+   
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+#if defined(wxUSE_REGEX)
+   CONFIG_ENTRY(MP_MSGS_SIMPLIFYING_REGEX),
+   CONFIG_ENTRY(MP_MSGS_REPLACEMENT_STRING),
+#endif // wxUSE_REGEX
    CONFIG_ENTRY(MP_MSGS_GATHER_SUBJECTS),
-   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX),
+#if !defined(wxUSE_REGEX)
+   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX_GATHERING),
+#endif
    CONFIG_ENTRY(MP_MSGS_BREAK_THREAD),
+#if !defined(wxUSE_REGEX)
+   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX_BREAKING),
+#endif
    CONFIG_ENTRY(MP_MSGS_INDENT_IF_DUMMY),
 #endif // EXPERIMENTAL_JWZ_THREADING
 

@@ -513,6 +513,10 @@ enum MFolderIndex
 #define MP_AUTOMATIC_WORDWRAP   "AutoWrap"
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN      "WrapMargin"
+#if defined(wxUSE_REGEX)
+/// a regex to detect signature
+#define MP_REPLY_SIG_SEPARATOR "SigSeparator"
+#endif
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP   "ViewAutoWrap"
 /// wrapmargin for message view (set to -1 to disable it)
@@ -653,14 +657,24 @@ enum MFolderIndex
 #define MP_MSGS_USE_THREADING  "ThreadMessages"
 
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS "GatherSubjectsWhenThreading"
-/// Remove list prefix when comparin message's subject
-#define MP_MSGS_REMOVE_LIST_PREFIX "RemoveListPrefix"
 /// break thread when subject changes
 #define MP_MSGS_BREAK_THREAD "BreakThreadIfSubjectChanges"
 /// Indent messages when common ancestor is missing
 #define MP_MSGS_INDENT_IF_DUMMY "IndentIfDummy"
+
+#if defined(wxUSE_REGEX)
+#   define MP_MSGS_SIMPLIFYING_REGEX "SimplifyingRegex"
+#   define MP_MSGS_REPLACEMENT_STRING "ReplacementString"
+#else // wxUSE_REGEX
+    /// Remove list prefix when comparing message's subject to gather them
+#   define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING "RemoveListPrefixWhenGathering"
+    /// Remove list prefix when comparing message's subject to break threads
+#   define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING "RemoveListPrefixWhenBreaking"
+#endif // wxUSE_REGEX
+
 #endif // EXPERIMENTAL_JWZ_THREADING
 
 /// search criterium for searching in folders
@@ -1196,6 +1210,10 @@ enum MFolderIndex
 #define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_D      75
+#if defined(wxUSE_REGEX)
+/// a regex to detect signature
+#define MP_REPLY_SIG_SEPARATOR_D "^((_____*)|(-- ?))"
+#endif
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)
@@ -1448,14 +1466,24 @@ enum MFolderIndex
 #define MP_MSGS_USE_THREADING_D  1l
 
 #if defined(EXPERIMENTAL_JWZ_THREADING)
+
 /// Gather messages with same subject in one thread
 #define MP_MSGS_GATHER_SUBJECTS_D 1l
-/// Remove list prefix when comparin message's subject
-#define MP_MSGS_REMOVE_LIST_PREFIX_D 1l
 /// break thread when subject changes
 #define MP_MSGS_BREAK_THREAD_D 1l
 /// Indent messages when common ancestor is missing
 #define MP_MSGS_INDENT_IF_DUMMY_D 0l
+
+#if defined(wxUSE_REGEX)
+#  define MP_MSGS_SIMPLIFYING_REGEX_D "^ *(R[Ee](\\[[0-9]+\\])?: +)*(\\[[^][]+\\] +)?(R[Ee](\\[[0-9]+\\])?: +)*"
+#  define MP_MSGS_REPLACEMENT_STRING_D "\\3"
+#else // wxUSE_REGEX
+   /// Remove list prefix when comparing message's subject to gather them
+#  define MP_MSGS_REMOVE_LIST_PREFIX_GATHERING_D 1l
+   /// Remove list prefix when comparing message's subject to break threads
+#  define MP_MSGS_REMOVE_LIST_PREFIX_BREAKING_D 1l
+#endif // wxUSE_REGEX
+
 #endif // EXPERIMENTAL_JWZ_THREADING
 
 // how to show the size (MessageSizeShow enum value)
