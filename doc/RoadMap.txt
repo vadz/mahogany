@@ -5,45 +5,34 @@ $Id$
 Here is the rough plan for the future of the M development:
 
 
-* 0.65-0.70: 2 main tasks are
-
-   + compose classes split similar to the message view one, i.e. separate
-     the GUI-independent logic from the GUI stuff and make it modularizable
-     to allow for having multiple compose implementations (e.g. a simple
-     wxTextCtrl instead of wxLayout-based composer)
-
-     There should be also provision for spell checker in the new interface!
-
-     And smart line wrap.
+* 0.65-0.70:
 
    + ADB lift up:
-   
+
       - it becomes very slow with big books and the autocollect book grows
         really fast (~1000 entries in mine) and the books are also way too
         big. We need a more efficient and more compact format. Support for
-	Gnome and KDE address books (maybe even Windows WAB? ;).
+        Gnome and KDE address books (maybe even Windows WAB? ;).
 
       - GUI side: we need a reusable ADB-tree control like the folder tree
         one which could be reused from other places (composer, extract
         addresses dialog, ...) and it should also support multiple selection
 
+   + implement text only message editor
 
-   Also it would be very nice to:
-
-   + implement Drafts folder and save messages in it in case of a crash
-     or interrupt
-
-
-   + command line options
+   + built-in anti SPAM rule (?)
 
 * 0.75:
 
    + real MIME types editor
 
-   + allow using the config file under Windows as well, sync with it
-     at startup/shutdown
-     
+   + implement smart config file synchronization
+
    + store ADB on IMAP server and sync it
+
+   + composer improvements:
+     - spell checker
+     - smart line wrap.
 
 * 0.80:
 
