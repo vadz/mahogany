@@ -65,6 +65,20 @@ class wxConfigBase;
 class ProfileBase : public MObjectRC
 {
 public:
+   /** An enum explaining the possible types of profiles. In fact,
+       just a number stored as a normal profile entry which must be
+       maintained manually.
+   */
+   enum Type
+   {
+      /// No profile type specified.
+      PT_Unknown = -1,
+      /// Any profile, default argument for ListProfiles().
+      PT_Any = -1,  // PT_Unknown
+      /// This profile belongs to a folder.
+      PT_FolderProfile = 1
+   };
+
    /// Creates the one global config object.
    static ProfileBase * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
@@ -87,20 +101,6 @@ public:
 
    /// some characters are invalid in the profile name, replace them
    static String FilterProfileName(const String& profileName);
-
-   /** An enum explaining the possible types of profiles. In fact,
-       just a number stored as a normal profile entry which must be
-       maintained manually.
-   */
-   enum Type
-   {
-      /// No profile type specified.
-      PT_Unknown = -1,
-      /// Any profile, default argument for ListProfiles().
-      PT_Any = -1,  // PT_Unknown
-      /// This profile belongs to a folder.
-      PT_FolderProfile = 1
-   };
 
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
