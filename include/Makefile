@@ -13,7 +13,7 @@ install: $(INSTALLTARGET)
 
 msgcat:
 	@touch $(BUILDDIR)/imessages.po
-	@for i in *.h gui/*.h adb/*.h ; do $(XGETTEXT) -C -a -j -o $(BUILDDIR)/imessages.po $$i ; done
+	@for i in *.h gui/*.h adb/*.h ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/imessages.po $$i ; done
 
 clean:
 

@@ -144,19 +144,19 @@ wxMFrame::AddFileMenu(void)
 void
 wxMFrame::AddEditMenu(void)
 {
-   WXADD_MENU(m_MenuBar, EDIT, "&Edit");
+   WXADD_MENU(m_MenuBar, EDIT, _("&Edit"));
 }
 
 void
 wxMFrame::AddHelpMenu(void)
 {
-   WXADD_MENU(m_MenuBar, HELP, "&Help");
+   WXADD_MENU(m_MenuBar, HELP, _("&Help"));
 }
 
 void
 wxMFrame::AddMessageMenu(void)
 {
-   WXADD_MENU(m_MenuBar, MSG, "&Message");
+   WXADD_MENU(m_MenuBar, MSG, _("&Message"));
 }
 
 wxMFrame::~wxMFrame()

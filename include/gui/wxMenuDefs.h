@@ -28,11 +28,11 @@ extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
    (WXMENU_##menu##_BEGIN < (id) && WXMENU_##menu##_END >= (id))
 
 /// creates a menu, appends all it's items to it and appends it to menu bar
-#define  WXADD_MENU(menubar, menu, caption)                             \
+#define  WXADD_MENU(menubar, menu, caption)                                \
    {                                                                       \
       wxMenu *pMenu = new wxMenu;                                          \
       AppendToMenu(pMenu, WXMENU_##menu##_BEGIN + 1, WXMENU_##menu##_END); \
-      menubar->Append(pMenu, wxGetTranslation(caption));                   \
+      menubar->Append(pMenu, caption);                                     \
    }
 
 /** Definition of all numeric menu IDs.
@@ -60,13 +60,14 @@ enum
 #endif
    WXMENU_FILE_SEP2,
    WXMENU_FILE_CREATE,
-   WXMENU_FILE_CLOSE,
 #ifdef USE_PYTHON
    WXMENU_FILE_SEP3,
    WXMENU_FILE_SCRIPT,
-   WXMENU_FILE_SEP4,
 #endif // USE_PYTHON
 
+   WXMENU_FILE_SEP4,
+   WXMENU_FILE_CLOSE,
+   WXMENU_FILE_SEP5,
    WXMENU_FILE_EXIT,
    WXMENU_FILE_END = WXMENU_FILE_EXIT,
 

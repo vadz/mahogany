@@ -388,7 +388,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // build menu
    // ----------
    AddFileMenu();
-   WXADD_MENU(m_MenuBar, COMPOSE, "&Compose");
+   WXADD_MENU(m_MenuBar, COMPOSE, _("&Compose"));
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
 

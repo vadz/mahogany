@@ -1001,11 +1001,11 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // create our menu
   // ---------------
 
-  AddFileMenu();                            // file (global) operations
-  WXADD_MENU(m_MenuBar, ADBBOOK, "&Book");  // operations on address books
-  WXADD_MENU(m_MenuBar, ADBEDIT, "&Edit");  // commands to edit ADB entries
-  WXADD_MENU(m_MenuBar, ADBFIND, "&Find");  // searching and moving
-  AddHelpMenu();                            // help
+  AddFileMenu();                               // file (global) operations
+  WXADD_MENU(m_MenuBar, ADBBOOK, _("&Book"));  // operations on address books
+  WXADD_MENU(m_MenuBar, ADBEDIT, _("&Edit"));  // commands to edit ADB entries
+  WXADD_MENU(m_MenuBar, ADBFIND, _("&Find"));  // searching and moving
+  AddHelpMenu();                               // help
 
   SetMenuBar(m_MenuBar);
 

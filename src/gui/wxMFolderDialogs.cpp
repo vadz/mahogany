@@ -606,13 +606,13 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    static const char *szLabels[Label_Max] =
    {
-      "User name: ",
-      "Password: ",
-      "File name: ",
-      "Server: ",
-      "Mailbox: ",
-      "Newsgroup: ",
-      "Comment: "
+      gettext_noop("User name: "),
+      gettext_noop("Password: "),
+      gettext_noop("File name: "),
+      gettext_noop("Server: "),
+      gettext_noop("Mailbox: "),
+      gettext_noop("Newsgroup: "),
+      gettext_noop("Comment: ")
    };
 
    wxArrayString labels;

@@ -203,8 +203,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // file
    { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  },
-   { WXMENU_FILE_OPENANY,  gettext_noop("Open &Any Folder..."),   gettext_noop("Open any existing message folder")             },
-   { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               },
+   { WXMENU_FILE_OPENANY,  gettext_noop("Open &Any Folder..."),   gettext_noop("Open any message folder")             },
    { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_PRINT_SETUP,    gettext_noop("&Print Setup"),     gettext_noop("Configure printing")  },
@@ -215,14 +214,16 @@ static const MenuItemInfo g_aMenuItems[] =
 //   { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  },
 #endif
    { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        },
+   { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               },
 
 #ifdef USE_PYTHON
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_SCRIPT,   gettext_noop("Run &Script..."),    gettext_noop("Run a simple python script")},
-   { WXMENU_SEPARATOR,     "",                  ""                         },
 #endif // USE_PYTHON
 
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit"),             gettext_noop("Quit the application")     },
 
    // edit

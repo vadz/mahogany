@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: M\n"
-"POT-Creation-Date: 1999-02-18 21:33+0100\n"
+"POT-Creation-Date: 1999-02-18 21:38+0100\n"
 "Last-Translator: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>\n"
 "Language-Team: M-developers <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
@@ -2287,6 +2287,34 @@ msgstr "De"
 #: wxFolderView.cpp:66
 msgid "Subject"
 msgstr "Au sujet de"
+
+#: wxMFolderDialogs.cpp:609
+msgid "User name: "
+msgstr "Nom d'utilisateur: "
+
+#: wxMFolderDialogs.cpp:610
+msgid "Password: "
+msgstr "Mot de passe: "
+
+#: wxMFolderDialogs.cpp:611
+msgid "File name: "
+msgstr "Nom du fichier: "
+
+#: wxMFolderDialogs.cpp:612
+msgid "Server: "
+msgstr "Serveur: "
+
+#: wxMFolderDialogs.cpp:613
+msgid "Mailbox: "
+msgstr "Répertoires: "
+
+#: wxMFolderDialogs.cpp:614
+msgid "Newsgroup: "
+msgstr "Groupe de discussion: "
+
+#: wxMFolderDialogs.cpp:615
+msgid "Comment: "
+msgstr "Commentaire: "
 
 msgid "Cannot run script: "
 msgstr "Impossible d'exécuter le script: "

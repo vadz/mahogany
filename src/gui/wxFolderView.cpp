@@ -59,7 +59,11 @@ END_EVENT_TABLE()
 
 static const char *wxFLC_ColumnNames[] =
 {
-   "Status","Date","Size","From","Subject"
+   gettext_noop("Status"),
+   gettext_noop("Date"),
+   gettext_noop("Size"),
+   gettext_noop("From"),
+   gettext_noop("Subject")
 };
 
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
