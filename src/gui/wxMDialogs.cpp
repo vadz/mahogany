@@ -486,6 +486,17 @@ static void ReallyCloseTopLevelWindow(wxFrame *frame)
 #endif // wxWin 2.3+
 }
 
+wxWindow *GetParentOfClass(const wxWindow *win, wxClassInfo *classinfo)
+{
+   // find the frame we're in
+   while ( win && !win->IsKindOf(classinfo) ) {
+      win = win->GetParent();
+   }
+
+   // may be NULL!
+   return (wxWindow *)win; // const_cast
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
