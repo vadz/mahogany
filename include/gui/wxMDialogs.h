@@ -187,6 +187,29 @@ bool MInputBox(wxString *pstr,
                const char *key = NULL,
                const char *def = NULL,
                bool passwordflag = false);
+
+/**
+  Gets a number in the given range from user. Both message andprompt may be
+  empty (but probably not simultaneously unless you only work with really
+  clever users)
+
+  @param message a possibly multiline explanation message
+  @param prompt a singleline prompt shown just before the number entry zone
+  @param caption the dialog title
+  @param value initial value
+  @param min the minimum possible value
+  @param max the maximum possible value
+ */
+extern long
+MGetNumberFromUser(const wxString& message,
+                   const wxString& prompt,
+                   const wxString& caption,
+                   long value = 0,
+                   long min = 0,
+                   long max = 100,
+                   wxWindow *parent = (wxWindow *)NULL,
+                   const wxPoint& pos = wxDefaultPosition);
+
 /**
  Let the user choose an element from aEntries. If there is exactly one element
  in the array (and we shouldn't be called with 0), 0 is always returned and

@@ -54,6 +54,7 @@
 #include <wx/stattext.h>
 #include <wx/statbmp.h>
 #include <wx/choice.h>
+#include <wx/textdlg.h>
 
 #include "MFolderDialogs.h"
 
@@ -211,6 +212,25 @@ static inline long Style(long style)
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// simple wrappers around wxWin functions
+// ----------------------------------------------------------------------------
+
+long
+MGetNumberFromUser(const wxString& message,
+                   const wxString& prompt,
+                   const wxString& caption,
+                   long value,
+                   long min,
+                   long max,
+                   wxWindow *parent,
+                   const wxPoint& pos)
+{
+   return wxGetNumberFromUser(message, prompt, caption,
+                              value, min, max,
+                              parent, pos);
+}
 
 // ----------------------------------------------------------------------------
 // MTextInputDialog dialog and MInputBox (which uses it)

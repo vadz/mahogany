@@ -1064,50 +1064,25 @@ MailFolderCC::BuildListing(void)
         (m_RetrievalLimit > 0) && m_FirstListing &&
         (m_NumOfMessages > m_RetrievalLimit) )
    {
-
-#if 0
-   /*
-    * When fixing this, please introduce a MGetNumberDialog() in
-    wxMDialogs.h! I don't want any direct wxXXX calls in here. Just a
-    simple inline function...
-
-    I wonder where RR's "design decision" will lead us...
-   */
       // too many messages - ask the user how many of them he really wants
       String msg, prompt, title;
       title.Printf(_("How many messages to retrieve from folder '%s'?"),
-                   GetName().c_str());
+            GetName().c_str());
       msg.Printf(_("This folder contains %lu messages, which is greater than\n"
-                   "the current threshold of %lu (set it to 0 to avoid this "
-                   "question)."),
-                 m_NumOfMessages, m_RetrievalLimit);
+               "the current threshold of %lu (set it to 0 to avoid this "
+               "question)."),
+            m_NumOfMessages, m_RetrievalLimit);
       prompt = _("How many of them do you want to retrieve?");
 
-      long nRetrieve = wxGetNumberFromUser(msg, prompt, title,
-                                           m_RetrievalLimit,
-                                           1, m_NumOfMessages);
-       if ( nRetrieve != -1 )
+      long nRetrieve = MGetNumberFromUser(msg, prompt, title,
+                                          m_RetrievalLimit,
+                                          1, m_NumOfMessages);
+      if ( nRetrieve != -1 )
       {
-         numMessages = m_RetrievalLimit;
+         numMessages = nRetrieve;
       }
       //else: cancelled, retrieve all
-#else
-    // TODO should really ask the user how many of them he wants (like slrn)
-       String msg;
-       msg.Printf(_("This folder (%s) contains %lu messages, which is greater than "
-                    "the current threshold of %lu.\n"
-                    "\n"
-                    "Would you like to retrieve all messages anyway?\n"),
-                  GetName().c_str(),   m_NumOfMessages,
-                  m_RetrievalLimit);
-       String confpath;
-       confpath << m_Profile->GetName() << '/' << "RetrieveAll";
-       if ( ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true,
-                                  confpath) )
-          firstMessage = m_NumOfMessages - m_RetrievalLimit + 1; 
-      
    }
-#endif
 
    m_BuildNextEntry = 0;
 
