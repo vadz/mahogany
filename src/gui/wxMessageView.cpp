@@ -35,6 +35,7 @@
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+#  include "gui/wxIconManager.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -495,7 +496,7 @@ wxMessageView::~wxMessageView()
    if(xface)
       delete xface;
    if(xfaceXpm)
-      delete [] xfaceXpm;
+      wxIconManager::FreeImage(xfaceXpm);
 
    wxDELETE(m_MimePopup);
 

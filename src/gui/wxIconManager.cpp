@@ -92,9 +92,9 @@ static const char *wxIconManagerFileExtensions[] =
 char **
 wxIconManager::LoadImage(String filename)
 {
-#if 1 // FIXME
-   return NULL;
-#endif
+//#if 1 // FIXME
+//   return NULL;
+//#endif
    
    String tempfile;
    
@@ -129,6 +129,7 @@ wxIconManager::LoadImage(String filename)
    ASSERT(cpptr);
 
    ifstream in(filename);
+   int len;
    if(in)
    {  
       String str;
@@ -142,7 +143,14 @@ wxIconManager::LoadImage(String filename)
             ASSERT(cpptr);
          }
          strutil_getstrline(in,str);
-         cpptr[line++] = strutil_strdup(str);
+         // We only load the actual data, that is, lines starting with 
+         // a double quote and ending in a comma:  "data",  --> data
+         if(str.c_str()[0] == '"')
+         {
+            str = str.substr(1,str.length()-1);
+            str = strutil_before(str,'"');
+            cpptr[line++] = strutil_strdup(str);
+         }
       }while(! in.fail());
       cpptr[line++] = NULL;
       cpptr = (char **)realloc(cpptr,line*sizeof(char *));
@@ -163,7 +171,11 @@ wxIconManager::FreeImage(char **cpptr)
 {
    char **cpptr2 = cpptr;
    while(*cpptr2)
-      delete[] *(cpptr++);
+// broken: compiler bug?      delete[] *(cpptr2++);
+   {
+      delete [] *cpptr2;
+      cpptr2++;
+   }
    free(cpptr);
 }
 

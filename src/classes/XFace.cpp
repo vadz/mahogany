@@ -15,6 +15,8 @@
 
 #include	"XFace.h"
 #include	"strutil.h"
+#include        "kbList.h"
+#include        "gui/wxIconManager.h"
 #include	<stdio.h>
 
 #ifdef HAVE_COMPFACE_H
@@ -22,11 +24,11 @@ extern "C" {
 #include	<compface.h>
 	   };
 #else
-  #ifdef  CC_MSC
-    #pragma message("No compface library found, compiling empty XFace class!")
-  #else
-    #warning	"No compface library found, compiling empty XFace class!"
-  #endif
+#   ifdef  CC_MSC
+#      pragma message("No compface library found, compiling empty XFace class!")
+#   else
+#      warning	"No compface library found, compiling empty XFace class!"
+#   endif
 #endif
 
 
@@ -116,12 +118,7 @@ XFace::CreateFromXpm(const char *xpmdata)
    xface = new char[2500];
    strcpy(xface, data);
 
-   //ReadFace(xface);
-   //GenFace();
-   //CompAll(xface);
-//#if 0
-   // @@@ VZ: compface gives link errors to me (undef reference), why?
-   #if  !USE_WXGTK
+#if  !USE_WXGTK
      if(compface(xface) < 0)
      {
         delete [] xface;
@@ -129,8 +126,7 @@ XFace::CreateFromXpm(const char *xpmdata)
         xface = data = NULL;
         return false;
      }
-   #endif // wxGTK
-//#endif
+#endif // wxGTK
    initialised = true;
    return true;
 #endif
@@ -265,7 +261,7 @@ XFace::CreateXpm(char ***xpm)
    String
       tmp;
    
-   *xpm = new char * [ 51 ];
+   *xpm = (char **) malloc(sizeof(char *)*51);
    
    buf = strutil_strdup(data);
    ptr = buf;
