@@ -1,0 +1,9 @@
+WARNING: This is an alpha version of the Mahogany e-mail
+         client. "Alpha" means that many of the features
+	 which the finished product will have are still
+	 lacking and that you may (and probably will) find
+	 bugs in it. We release this version only as a
+	 demonstration of how Mahogany will look like in the
+	 future and do NOT recommend using it as your main
+	 e-mail client (although it is possible and the
+	 authors do use it).

@@ -1,50 +1,84 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 21.08.98
-Version: the information in this file applies to pre-alpha 0.01
-
-             *********************************************************
-             *** please see file README.txt for main documentation ***
-             *********************************************************
+Date: 20.06.99
+Version: the information in this file applies to alpha 0.23
 
 0. Requirments
 --------------
 
- a) Win95/98/NT 4.0. At this moment M hadn't been yet tested with Windows 98, please
-    write us if you experience some specific problems with this version of Windows
-    (installation or otherwise).
+ a) Win95/98/NT 4.0. Mahogany has been tested the most under NT 4.0, but it
+    also works (with very minor shortcomings) under Windows 9x.
 
-    M hasn't been tested with neither Win32s nor Windows NT 3.51 and earlier, but
-    probably could be made to work with them. However, future plans do not include
-    supporting these platforms and future versions will make usage of 95/NT 4.0
-    specific features.
-
- b) POP3/IMAP server to read mail from (you might also use local files in Unix
-    mbox format as well as several others, but it's not very exciting, is it?).
-    NNTP servers are also supported, but M is not really a news reader (yet)
+ b) You need a POP3 or IMAP4 (recommended, especially for slow connection!)
+    server to read e-mail and an SMTP server to send it. Reading and sending
+    USENET news is also supported (although this alpha version doesn't have
+    the "advanced" newsreader features).
 
 1. Installation
 ---------------
 
  a) the preferred installation method is to use the provided setup.exe program
     which will guide you through the installation process and will allow you to
-    uninstall the program automatically later.
+    uninstall the program automatically later (by going into the "Add/Remove
+    programs" applet in the Control panel).
 
- b) you can also install M manually. This involves copying M files to any directory
-    on your hard drive. The registry entries necessary for the program will be
-    created automatically under the key HKCU\Software\wxWindows\M.
+    Uninstallation note: all the mail boxes files created by the program will
+    be left even if you uninstall it. This means that at least the SentMail
+    and NewMail folders will be left in the installation directory and so it
+    will not be deleted during uninstallation. Please delete these files
+    manually if you really don't want to keep them.
 
- c) python usage: if you already have python15.dll installed on your system, you
-    can use it instead of provided one saving something lke 450Kb of disk space.
+ b) you can also install Mahogany manually. This involves copying the main
+    executable M.exe to any directory on your hard drive. The registry entries
+    necessary for the program will be created automatically under the key
+    HKCU\Software\wxWindows\M, so they will have to be deleted manually if you
+    later want to uninstall the program.
 
-2. Differences from the Unix version
+ c) installation over previous versions: if you're one of courageous people
+    who have tried pre-alpha 0.10, please delete/uninstall it before
+    installing this version. The registry settings will be updated
+    automatically and so may be left, but you should not try to install the
+    program in the same directory.
+
+2. Miscellaneous remarks
+------------------------
+
+ a) locale support: like the Unix version, Mahogany for Windows supports many
+    different languages (please see our WWW page for the up-to-date list - new
+    translations are added quite often). However, they're not included in this
+    distribution and you'll have to fetch them yourself from the WWW page (see
+    the address above) and put them into the locale directory to make it work.
+
+ b) documentation: sorry, this preliminary Windows version comes without any
+    online help. You may access it, however, at http:// using any Web browser.
+
+ c) working off-line: there are no special support for off-line mode in
+    Mahogany yet, but you may use it as off-line reader too.
+
+3. Differences from the Unix version
 ------------------------------------
 
  All of features enumerated below already work in the Unix version, but are not
 yet implemented under Windows.
 
- a) handling of MIME attachements is (more) buggy and the MIME dialog is truly ugly
+ a) there is no XFace support yet.
 
- b) there is no XFace support yet
+ b) this release comes without Python support due to lack of its usefullness
+    so far.
 
- c) Python support is flaky, especially under 95. For NT, it works ok for me, but with
-    95 there are some problems.
+ c) there is unfortunately no help yet.
+
+4. Items from our TODO list
+---------------------------
+
+ In addition to the common TODO list which may be consulted at Mahogany Web
+page, the following items are scheduled for implementation under Windows in
+the near future:
+
+ a) import of "foreign" address books from Eudora, MS Outlook and The Bat!
+    programs.
+
+ b) import of folder information from the same programs.
+
+ c) converting of the online HTML help into Microsoft HTML help format.
+
+ d) better support for working off-line

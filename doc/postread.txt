@@ -1,0 +1,6 @@
+Please consult the various files under the "doc" directory,
+paying special attention to the list of known bugs in
+bugs.txt.
+
+And don't forget that the online documentation is always
+available at http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html!.
