@@ -1099,9 +1099,9 @@ MWizard::GetPageById(MWizardPageId id)
 
    if ( !m_WizardPages[id-GetFirstPageId()] )
    {
-#define CREATE_PAGE(pid)                             \
-      case MWizard_##pid##:                          \
-         m_WizardPages[MWizard_##pid-GetFirstPageId()] =               \
+#define CREATE_PAGE(pid) \
+      case MWizard_##pid: \
+         m_WizardPages[MWizard_##pid-GetFirstPageId()] = \
             new MWizard_##pid##Page(this); \
          break
 
