@@ -896,10 +896,6 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          CheckIfSpam(messages);
          break;
 
-      case WXMENU_MSG_SPAM_CONFIG:
-         SpamFilter::Configure(GetFrame());
-         break;
-
       default:
          // try passing it to message view
          if ( !m_msgView->DoMenuCommand(cmd) )
@@ -1048,9 +1044,8 @@ void MsgCmdProcImpl::CheckIfSpam(const UIdArray& uids)
 
       String str(_("The message with subject \"%s\" from \"%s\"\n"));
 
-      wxArrayString params;
       String result;
-      if ( SpamFilter::CheckIfSpam(*msg, params, &result) )
+      if ( SpamFilter::CheckIfSpam(*msg, _T(""), &result) )
       {
          wxLogWarning(str + _("seems to be a spam (%s)."),
                       msg->Subject().c_str(),

@@ -307,8 +307,8 @@ static const MenuItemInfo g_aMenuItems[] =
    // normal edit
 
    // the available accelerators for this menu:
-   // BHJKNOVWYZ
-   { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
+   // BHJNVUWYZ
+   { WXMENU_EDIT_CUT,  gettext_noop("Cu&t\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE_QUOTED,gettext_noop("Paste &quoted\tShift-Ctrl-V"), gettext_noop("Paste from clipboard as quoted text")           , wxITEM_NORMAL },
@@ -317,17 +317,17 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_FIND,  gettext_noop("&Find...\tF3"), gettext_noop("Find text in message") , wxITEM_NORMAL },
    { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , wxITEM_NORMAL },
+   { WXMENU_EDIT_ADB,      gettext_noop("Address boo&ks...\tCtrl-D"), gettext_noop("Edit the address book(s)") , wxITEM_NORMAL },
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tCtrl-Shift-E"),   gettext_noop("Change options")           , wxITEM_NORMAL },
-   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_MODULES,  gettext_noop("M&odules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
    { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
-   { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
+   { WXMENU_EDIT_TEMPLATES,gettext_noop("Te&mplates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
+   { WXMENU_EDIT_SPAM_CONFIG, gettext_noop("Sp&am filters..."), gettext_noop("Set the options for spam detection"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save preferences"), gettext_noop("Save options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_EXPORT_PREF,gettext_noop("E&xport preferences..."), gettext_noop("Export options")             , wxITEM_NORMAL },
    { WXMENU_EDIT_IMPORT_PREF,gettext_noop("&Import preferences..."), gettext_noop("Import options")             , wxITEM_NORMAL },
-   { WXMENU_EDIT_RESTORE_PREF,
-                           gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , wxITEM_NORMAL },
+   { WXMENU_EDIT_RESTORE_PREF, gettext_noop("Restore &defaults..."), gettext_noop("Restore default options values") , wxITEM_NORMAL },
 
    // msg
 
@@ -437,8 +437,6 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_MSG_SPAM_MARK, gettext_noop("Dispose as &spam\tShift-Ctrl-Del"), gettext_noop("Classify the message as spam and treat it accordingly"), wxITEM_NORMAL },
       { WXMENU_MSG_SPAM_UNMARK, gettext_noop("Mark as &ham"), gettext_noop("Classify the message as non-spam"), wxITEM_NORMAL },
       { WXMENU_MSG_SPAM_CHECK, gettext_noop("Chec&k message...\tShift-Ctrl-K"), gettext_noop("Check if this message is spam"), wxITEM_NORMAL },
-      { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
-      { WXMENU_MSG_SPAM_CONFIG, gettext_noop("&Configure spam filters..."), gettext_noop("Set the options for spam detection"), wxITEM_NORMAL },
    { WXMENU_SUBMENU,       wxEmptyString, wxEmptyString, wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extract &addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },
