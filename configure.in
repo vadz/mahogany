@@ -469,7 +469,9 @@ AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
 dnl they are not installed, the test for wx_gtk will fail anyway.
 
+OLDLIBS="$LIBS"
 AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+LIBS="$OLDLIBS"
 
 dnl png library not required as it is included in wxGTK
 LIB_PNG=

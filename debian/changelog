@@ -1,5 +1,6 @@
-mahogany (0.22a) unstable; urgency=low
+mahogany (0.23a) unstable; urgency=low
 
+  * Bug fixes, minor improvements, Windows release. 
   * Bug fix release, improved message editor. 
   * Initial Release.
 

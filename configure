@@ -4206,8 +4206,9 @@ done
 
 
 
+OLDLIBS="$LIBS"
 echo $ac_n "checking for main in -lwx_gtk""... $ac_c" 1>&6
-echo "configure:4211: checking for main in -lwx_gtk" >&5
+echo "configure:4212: checking for main in -lwx_gtk" >&5
 ac_lib_var=`echo wx_gtk'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4215,14 +4216,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lwx_gtk $GTK_LDFLAGS $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4219 "configure"
+#line 4220 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4226: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4227: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4250,6 +4251,7 @@ else
 { echo "configure: error: "wx_gtk library is required."" 1>&2; exit 1; }
 fi
 
+LIBS="$OLDLIBS"
 
 LIB_PNG=
 #AC_CHECK_LIB(png,main,LIB_PNG="-lpng",AC_MSG_WARN("PNG library not available linking might fail."))
@@ -4258,7 +4260,7 @@ LIB_PNG=
 
 
 echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
-echo "configure:4262: checking for c-client library OS type" >&5
+echo "configure:4264: checking for c-client library OS type" >&5
 CCOSTYPE=
 case "${OSTYPE}" in
 linux* | Linux*)
@@ -4295,7 +4297,7 @@ fi
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4299: checking for $ac_word" >&5
+echo "configure:4301: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4331,7 +4333,7 @@ DOCTEX="echo \"No doc generator(tex) available.\""
 # Extract the first word of "doc++", so it can be a program name with args.
 set dummy doc++; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4335: checking for $ac_word" >&5
+echo "configure:4337: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DOCXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4367,7 +4369,7 @@ else
 		# Extract the first word of "kdoc", so it can be a program name with args.
 set dummy kdoc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4371: checking for $ac_word" >&5
+echo "configure:4373: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_KDOC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4416,7 +4418,7 @@ fi
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4420: checking for $ac_word" >&5
+echo "configure:4422: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4447,7 +4449,7 @@ fi
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4451: checking for $ac_word" >&5
+echo "configure:4453: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4478,7 +4480,7 @@ fi
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4482: checking for $ac_word" >&5
+echo "configure:4484: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4521,7 +4523,7 @@ LATEX2HTML="echo \"No doc generator(html) available.\""
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4525: checking for $ac_word" >&5
+echo "configure:4527: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
