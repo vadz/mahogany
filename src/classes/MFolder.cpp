@@ -1142,6 +1142,8 @@ bool MFolderFromProfile::Rename(const String& newName)
 
 bool MFolderFromProfile::Move(MFolder *newParent)
 {
+   CHECK( newParent, false, _T("no new parent in MFolder::Move()") );
+
    // This does not really 'move' the folder, but it creates a new one with the
    // correct parent and name, and copies all the profile information from the
    // old one to the new one. It then calls Delete on itself, so that the old
@@ -1149,11 +1151,14 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    // new folder has been created.
 
    // There are things that do not make sense at all
-   CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, _T("How did you manage to try to move an MF_ILLEGAL folder ?") );
-   CHECK( GetFolderType(GetType()) != MF_NEWS, false, _T("can't move News folders") );
-   CHECK( GetFolderType(GetType()) != MF_INBOX, false, _T("can't move system Inbox") );
-   CHECK( GetFolderType(GetType()) != MF_ROOT, false, _T("can't move the root pseudo-folder") );
-   //CHECK( !m_folderName.empty(), false, _T("can't move the root pseudo-folder") );
+   CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false,
+            _T("How did you manage to try to move an MF_ILLEGAL folder ?") );
+   CHECK( GetFolderType(GetType()) != MF_NEWS, false,
+            _T("can't move News folders") );
+   CHECK( GetFolderType(GetType()) != MF_INBOX, false,
+            _T("can't move system Inbox") );
+   CHECK( GetFolderType(GetType()) != MF_ROOT, false,
+            _T("can't move the root pseudo-folder") );
 
    // And there are things we can't do yet.
    CHECK( GetSubfolderCount() == 0, false, _T("can't move a folder with sub-folders (yet)") );
@@ -1209,9 +1214,8 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    // Iterate over all the filters to change the name of the folder where
    // it appears.
    wxArrayString allFilterNames = MFilter::GetAllFilters();
-   for ( size_t i = 0; i < allFilterNames.GetCount(); ++i)
+   for ( size_t i = 0; i < allFilterNames.GetCount(); ++i )
    {
-
       wxString filterName = allFilterNames[i];
       MFilter *filter = MFilter::CreateFromProfile(filterName);
       MFilterDesc filterDesc = filter->GetDesc();
@@ -1234,7 +1238,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       }
       else
       {
-         // XNOTODO: Find out how to updqte this filter anyway
+         // XNOTODO: Find out how to update this filter anyway
          wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName.c_str());
       }
       filter->DecRef();
