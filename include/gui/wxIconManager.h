@@ -57,7 +57,7 @@ public:
    /** Constructor
        @param sub_dir if not empty a favourite subdirectory to use for the icons
     */
-   wxIconManager(wxString sub_dir = "");
+   wxIconManager(wxString sub_dir = _T(""));
 
    /** Destructor
        writes back all entries
@@ -87,7 +87,7 @@ public:
        @param extension filename extension if known
    */
    wxIcon GetIconFromMimeType(const String& type, const String &
-                              extension = "");
+                              extension = _T(""));
 
    /** Add a name/icon pair to the list
        @param iconName the name for the icon

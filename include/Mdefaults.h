@@ -188,10 +188,10 @@ class MOption
 public:
    MOption();
 
-   inline const char *GetName() const;
+   inline const wxChar *GetName() const;
 
    // implicit conversions required for backwards compatibility
-   inline operator const char *() const;
+   inline operator const wxChar *() const;
    inline operator String() const;
 
    // for internal use only!
@@ -206,7 +206,7 @@ private:
 // ----------------------------------------------------------------------------
 
 /// get the name of the option in profile
-extern const char *GetOptionName(const MOption opt);
+extern const wxChar *GetOptionName(const MOption opt);
 
 /// is it a numeric option or a string one?
 extern bool IsNumeric(const MOption opt);
@@ -215,14 +215,14 @@ extern bool IsNumeric(const MOption opt);
 extern long GetNumericDefault(const MOption opt);
 
 /// get the default value of a string option
-extern const char *GetStringDefault(const MOption opt);
+extern const wxChar *GetStringDefault(const MOption opt);
 
 // ----------------------------------------------------------------------------
 // MOption inline methods implementation (couldn't be done before)
 // ----------------------------------------------------------------------------
 
-inline const char *MOption::GetName() const { return GetOptionName(*this); }
-inline MOption::operator const char *() const { return GetOptionName(*this); }
+inline const wxChar *MOption::GetName() const { return GetOptionName(*this); }
+inline MOption::operator const wxChar *() const { return GetOptionName(*this); }
 inline MOption::operator String() const { return GetOptionName(*this); }
 
 inline String operator+(const String& s, const MOption& opt)

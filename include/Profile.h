@@ -39,11 +39,11 @@ class kbStringList;
   profiles (without trailing '/')
 */
 #ifndef M_PROFILE_CONFIG_SECTION
-   #define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
-   #define   M_IDENTITY_CONFIG_SECTION  "/M/Ids"
-   #define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
-   #define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
-   #define   M_TEMPLATES_CONFIG_SECTION "/M/Templates"
+   #define   M_PROFILE_CONFIG_SECTION   _T("/M/Profiles")
+   #define   M_IDENTITY_CONFIG_SECTION  _T("/M/Ids")
+   #define   M_FILTERS_CONFIG_SECTION   _T("/M/Filters")
+   #define   M_FRAMES_CONFIG_SECTION    _T("/M/Frames")
+   #define   M_TEMPLATES_CONFIG_SECTION _T("/M/Templates")
 #endif
 
 /**
@@ -58,18 +58,18 @@ class kbStringList;
   The section in the global configuration file used for storing
   control settings.
 */
-#define M_SETTINGS_CONFIG_SECTION       "Settings"
+#define M_SETTINGS_CONFIG_SECTION       _T("Settings")
 
 /// the root path for all ADB editor config entries
-#define ADB_CONFIG_PATH "AdbEditor"
+#define ADB_CONFIG_PATH _T("AdbEditor")
 
 /** @name Keys where the template for messages of given type is stored */
 //@{
-#define MP_TEMPLATE_NEWMESSAGE   "NewMessage"
-#define MP_TEMPLATE_NEWARTICLE   "NewArticle"
-#define MP_TEMPLATE_REPLY        "Reply"
-#define MP_TEMPLATE_FOLLOWUP     "Followup"
-#define MP_TEMPLATE_FORWARD      "Forward"
+#define MP_TEMPLATE_NEWMESSAGE   _T("NewMessage")
+#define MP_TEMPLATE_NEWARTICLE   _T("NewArticle")
+#define MP_TEMPLATE_REPLY        _T("Reply")
+#define MP_TEMPLATE_FOLLOWUP     _T("Followup")
+#define MP_TEMPLATE_FORWARD      _T("Forward")
 //@}
 
 //@}
@@ -128,7 +128,7 @@ public:
    //@{
    /// Read a character entry.
    virtual String readEntry(const String & key,
-                            const String & defaultvalue = (const char*)NULL,
+                            const String & defaultvalue = (const wxChar*)NULL,
                             bool *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,

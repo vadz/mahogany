@@ -317,8 +317,8 @@ void PasswdEntryGroup::ReadPasswdDb()
    struct passwd *pwd;
    while ( (pwd = getpwent()) != NULL )
    {
-      size_t index = m_names.Add(pwd->pw_name);
-      m_gecos.Insert(pwd->pw_gecos, index);
+      size_t index = m_names.Add(wxChar(pwd->pw_name));
+      m_gecos.Insert(wxChar(pwd->pw_gecos), index);
    }
 
    endpwent();
@@ -416,7 +416,7 @@ bool PasswdBook::IsSameAs(const String& name) const
 
 String PasswdBook::GetFileName() const
 {
-   return "";
+   return _T("");
 }
 
 void PasswdBook::SetName(const String& WXUNUSED(strName))

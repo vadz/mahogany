@@ -254,7 +254,7 @@ public:
        If loadableOnly is true, will only return the modules with non
        empty desc property.
    */
-   static MModuleListing * ListAvailableModules(const String& iface = "",
+   static MModuleListing * ListAvailableModules(const String& iface = _T(""),
                                                 bool loadableOnly = false);
 
    /** As ListAvailableModules() but only returns the modules which can be

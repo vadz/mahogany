@@ -335,10 +335,10 @@ BbdbEntry::ReadHeader(String *version, String *line)
       ;
    strutil_delwhitespace(*line);
 
-   if(line->Left(strlen("file-version")) != "file-version")
+   if(line->Left(wxStrlen(_T("file-version"))) != _T("file-version"))
       return false;
 
-   *line = line->Right(line->Length()-strlen("file-version"));
+   *line = line->Right(line->Length()-wxStrlen(_T("file-version")));
 
    if(! ReadToken(':', line))
       return false;
@@ -353,7 +353,7 @@ bool
 BbdbEntry::ReadNil(String *line)
 {
    strutil_delwhitespace(*line);
-   if(line->Length() >= 3 && line->Left(3) == "nil")
+   if(line->Length() >= 3 && line->Left(3) == _T("nil"))
    {
       *line = line->Right(line->Length()-3);
       return true;
@@ -378,12 +378,12 @@ BbdbEntry::ReadString(String * line, bool *success)
             *success = ReadNil(line);
          else
             ReadNil(line);
-         return "";
+         return _T("");
       }
    }
 
    strutil_delwhitespace(*line);
-   String str = "";
+   String str = _T("");
    const wxChar *cptr = line->c_str();
    bool escaped = false;
 
@@ -543,7 +543,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
          alias = m_AnonymousName;
    }
    else
-      alias << first_name << "_" << last_name;
+      alias << first_name << _T("_") << last_name;
 
    if(m_EnforceUnique)
    {
@@ -553,7 +553,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
          e_exists->DecRef(); // GetEntry() does an IncRef()
          tmp.Printf(_T("%d"), count);
          alias = temp;
-         alias << "_" << tmp;
+         alias << _T("_") << tmp;
          count++;
       }
    }
@@ -580,7 +580,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
           i++, count++)
       {
          ll = *i; // each phone number has a list of strings for itself
-         str = "";
+         str = _T("");
          j = ll->begin(); j++; // skip description
          for(; j != ll->end(); j++)
          {
@@ -614,12 +614,12 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
             field = AdbField_O_AddrPageFirst;
 
          ll = *i; // each address number has a list of strings for itself
-         str = "";
+         str = _T("");
          j = ll->begin(); j++; // skip description
          for(count2 = 1; j != ll->end(); j++,count2++)
          {
             k = (**j).begin(); // the entries are lists with one string each
-            str = "";
+            str = _T("");
             for(;k != (**j).end(); k++)
                str << **k << ' ';
             str = str.Left(str.Length()-1);
@@ -700,7 +700,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
       LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version.c_str()));
    }
 
-   MProgressDialog status_frame("BBDB import", "Importing...",
+   MProgressDialog status_frame(_T("BBDB import"), _T("Importing..."),
                                  length, NULL);// open a status window:
    do
    {
@@ -768,7 +768,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          int length = 0, count = 0;
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
-         MProgressDialog status_frame("BBDB", "Saving...",
+         MProgressDialog status_frame(_T("BBDB"), _T("Saving..."),
                                       length, NULL);// open a status window:
 
          String str;
@@ -803,7 +803,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
 #endif
             out << "nil ";
             String home;
-            home = "";
+            home = _T("");
             APPEND_FIELD(AdbField_H_POBox, home);
             APPEND_FIELD(AdbField_H_Street, home);
             APPEND_FIELD(AdbField_H_Locality, home);

@@ -47,7 +47,7 @@ public:
                     me, me->node, me->node->next, me->node->prev,
                     me->node->element);
          //fprintf(stderr, "%s\n", ms_debuginfo);
-         return ms_debuginfo;
+         return wxChar(ms_debuginfo);
       }
 };
 

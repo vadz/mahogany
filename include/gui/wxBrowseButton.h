@@ -36,7 +36,7 @@ class wxBrowseButton : public wxButton
 {
 public:
    wxBrowseButton(wxWindow *parent, const wxString& tooltip)
-      : wxButton(parent, -1, ">>") { SetToolTip(tooltip); }
+      : wxButton(parent, -1, _T(">>")) { SetToolTip(tooltip); }
 
    // function which shows the file selection dialog and changes the associated
    // controls contents; it is called in response to the click on the button,
@@ -324,7 +324,7 @@ public:
    // accessors
       // get the selected icon name
    wxString GetIconName() const
-      { return m_nIcon == -1 ? wxString("") : m_iconNames[(size_t)m_nIcon]; }
+      { return m_nIcon == -1 ? wxString(_T("")) : m_iconNames[(size_t)m_nIcon]; }
 
       // get the selected icon index in the array passed to the ctor or -1 if none
    int GetIconIndex() const { return m_nIcon; }

@@ -219,7 +219,7 @@ public:
    /// launch a process, returns FALSE if it failed
    bool LaunchProcess(const String& command,    // cmd to execute
                       const String& errormsg,   // err msg to give on failure
-                      const String& tempfile = ""); // temp file name if any
+                      const String& tempfile = _T("")); // temp file name if any
 
 protected:
    /** @name Initialization

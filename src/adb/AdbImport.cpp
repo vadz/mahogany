@@ -219,7 +219,7 @@ bool DoAdbImport(const String& filename,
    {
       // start importing: recursively copy all entries from the foreign ADB into
       // the native one
-      ok = AdbImportGroup(importer, group, "");
+      ok = AdbImportGroup(importer, group, _T(""));
    }
 
    return ok;
@@ -318,14 +318,14 @@ exit:
          if ( !errMsg )
          {
             // nothing else...
-            errImport += '.';
+            errImport += _T('.');
 
             wxLogError(errImport, adbname.c_str());
          }
          else
          {
             // add the detailed error message
-            errImport += ": %s";
+            errImport += _T(": %s");
 
             wxLogError(errImport, adbname.c_str(), errMsg.c_str());
          }
@@ -351,7 +351,7 @@ bool AdbImport(const String& filename,
    {
       // build the message from the pieces already translated (used above)
       wxString errImport = _("Import of address book from file '%s' failed");
-      errImport += ": %s";
+      errImport += _T(": %s");
 
       wxLogError(errImport, filename.c_str(), _("unsupported format."));
 

@@ -35,7 +35,7 @@ class wxMainFrame : public wxMFrame, public MEventReceiver
 {
 public:
    /// constructor & dtor
-   wxMainFrame(const String &iname = String("wxMainFrame"),
+   wxMainFrame(const String &iname = String(_T("wxMainFrame")),
                wxFrame *parent = NULL);
 
    virtual ~wxMainFrame();

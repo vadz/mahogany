@@ -171,8 +171,8 @@ public:
        @param BCC blind carbon copy addresses
    */
    void SetAddresses(const String& to,
-                     const String& cc = "",
-                     const String& bcc = "")
+                     const String& cc = _T(""),
+                     const String& bcc = _T(""))
    {
       AddRecipients(to, Recipient_To);
       AddRecipients(cc, Recipient_Cc);

@@ -227,10 +227,10 @@ DummyEntry::DummyEntry(DummyEntryGroup *pGroup, const String& strName)
   m_pGroup = pGroup;
   m_astrFields.Add(strName);
 
-  SetField(AdbField_FirstName, "Dummy");
-  SetField(AdbField_FamilyName, "entry");
-  SetField(AdbField_Comments, "some\ndummy\ncomments");
-  SetField(AdbField_EMail, "email@nowhere");
+  SetField(AdbField_FirstName, _T("Dummy"));
+  SetField(AdbField_FamilyName, _T("entry"));
+  SetField(AdbField_Comments, _T("some\ndummy\ncomments"));
+  SetField(AdbField_EMail, _T("email@nowhere"));
 
   m_bDirty = FALSE;
 }
@@ -289,7 +289,7 @@ DummyEntryGroup::~DummyEntryGroup()
 size_t DummyEntryGroup::GetEntryNames(wxArrayString& aNames) const
 {
   aNames.Empty();
-  aNames.Add("Dummy entry");
+  aNames.Add(_T("Dummy entry"));
 
   return aNames.Count();
 }
@@ -303,12 +303,12 @@ size_t DummyEntryGroup::GetGroupNames(wxArrayString& aNames) const
 
 AdbEntry *DummyEntryGroup::GetEntry(const String& name) const
 {
-  return new DummyEntry((DummyEntryGroup *)this, "Dummy entry");
+  return new DummyEntry((DummyEntryGroup *)this, _T("Dummy entry"));
 }
 
 bool DummyEntryGroup::Exists(const String& path) const
 {
-  return path == "Dummy entry";
+  return path == _T("Dummy entry");
 }
 
 AdbEntryGroup *DummyEntryGroup::GetGroup(const String& name) const
@@ -349,7 +349,7 @@ DummyBook::DummyBook(const String& name)
          : m_strName(name), m_strDesc(name)
 {
   // create the root group
-  m_pRootGroup = new DummyEntryGroup(NULL, "Dummy group");
+  m_pRootGroup = new DummyEntryGroup(NULL, _T("Dummy group"));
 }
 
 DummyBook::~DummyBook()

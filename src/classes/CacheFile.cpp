@@ -49,7 +49,7 @@
 String CacheFile::GetCacheDirName()
 {
    String dirname;
-   dirname << mApplication->GetLocalDir() << DIR_SEPARATOR << "cache";
+   dirname << mApplication->GetLocalDir() << DIR_SEPARATOR << _T("cache");
 
    return dirname;
 }

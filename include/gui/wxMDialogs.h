@@ -85,7 +85,7 @@ public:
                    wxWindow *parent = NULL,
                    bool disableParentOnly = false,
                    bool abortButton = false)
-   : wxProgressDialog(wxString("Mahogany : ") + title, message,
+   : wxProgressDialog(wxString(_T("Mahogany : ")) + title, message,
                       maximum, parent,
                       (disableParentOnly ? 0 : wxPD_APP_MODAL) |
                       (abortButton ? wxPD_CAN_ABORT : 0) |
@@ -450,7 +450,7 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
                              wxWindow *parent = NULL,
-                             const wxString& confpath = "",
+                             const wxString& confpath = _T(""),
                              const wxSize& sizeDef = wxDefaultSize);
 
 /**
@@ -542,7 +542,7 @@ public:
    wxXFaceButton(wxWindow *parent, int id,  wxString filename)
       {
          m_Parent = parent;
-         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("noxface");
+         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(_T("noxface"));
          wxBitmapButton::Create(parent,id, bmp, wxDefaultPosition,
                                 wxSize(64,64));
          SetFile(filename);

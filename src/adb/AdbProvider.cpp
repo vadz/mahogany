@@ -56,7 +56,7 @@ AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const wxChar *name,
 
 AdbDataProvider *AdbDataProvider::GetNativeProvider()
 {
-   AdbDataProvider *provider = GetProviderByName("FCDataProvider");
+   AdbDataProvider *provider = GetProviderByName(_T("FCDataProvider"));
 
    ASSERT_MSG( provider, _T("native ADB data provider not linked in??") );
 

@@ -480,9 +480,9 @@ public:
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   Ticket ListFolders(const String &pattern = "*",
+   Ticket ListFolders(const String &pattern = _T("*"),
                       bool subscribed_only = false,
-                      const String &reference = "",
+                      const String &reference = _T(""),
                       UserData ud = 0);
 
    //@}

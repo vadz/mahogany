@@ -143,7 +143,7 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
     AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
 
-    if ( pEntry->GetField(AdbField_ExpandPriority) == "-1" )
+    if ( pEntry->GetField(AdbField_ExpandPriority) == _T("-1") )
     {
       // never use this one for expansion
       pEntry->DecRef();
@@ -494,8 +494,8 @@ void AdbManager::LoadAll()
   conf->SetPath(GetAdbEditorConfigPath());
 
   wxArrayString astrAdb, astrProv;
-  RestoreArray(conf, astrAdb, "AddressBooks");
-  RestoreArray(conf, astrProv, "Providers");
+  RestoreArray(conf, astrAdb, _T("AddressBooks"));
+  RestoreArray(conf, astrProv, _T("Providers"));
 
   wxString strProv;
   AdbDataProvider *pProvider;
@@ -569,7 +569,7 @@ AdbBook *AdbManager::FindInCache(const String& name,
 String AdbManager::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << (int)gs_booksCache.Count() << "books in cache";
+  str << (int)gs_booksCache.Count() << _T("books in cache");
 
   return str;
 }

@@ -99,7 +99,7 @@ extern const MPersMsgBox *M_MSGBOX_ADB_DELETE_ENTRY;
 extern String GetAdbEditorConfigPath()
 {
   String path;
-  path << '/' << M_SETTINGS_CONFIG_SECTION << '/' << ADB_CONFIG_PATH;
+  path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T('/') << ADB_CONFIG_PATH;
 
   return path;
 }
@@ -297,7 +297,7 @@ public:
               AdbTreeNode *parent,
               bool onClipboard = FALSE);
     // a special ctor used by derived classes
-  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, "", 0)
+  AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, _T(""), 0)
     { m_bWasExpanded = FALSE; m_pGroup = NULL; }
 
     // dtor deletes all children
@@ -1187,7 +1187,7 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
 
 // ADB frame constructor
 wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
-              : wxMFrame("adbedit", parent)
+              : wxMFrame(_T("adbedit"), parent)
 {
   // inc the number of objects alive
   ms_nAdbFrames++;
@@ -1229,7 +1229,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------------
   wxPanel *panel = new wxPanel(this, -1);
   wxStaticText *label = new wxStaticText(panel, -1, _("&Lookup:"));
-  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH "/FindKey", panel, AdbView_Lookup);
+  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH _T("/FindKey"), panel, AdbView_Lookup);
   m_treeAdb = new wxAdbTree(this, panel, AdbView_Tree);
   m_notebook = new wxAdbNotebook(panel, AdbView_Notebook);
 
@@ -1289,7 +1289,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // caption and icon
   // ----------------
   SetTitle(_("Address Book Editor"));
-  SetIcon(ICON("adbedit"));
+  SetIcon(ICON(_T("adbedit")));
 
   // final initializations
   // ---------------------
@@ -1398,10 +1398,10 @@ void wxAdbEditFrame::RestoreSettings1()
     // under Unix, use the ADB for the users from /etc/passwd
 #ifdef OS_UNIX
     AdbDataProvider *provPasswd =
-      AdbDataProvider::GetProviderByName("PasswdDataProvider");
+      AdbDataProvider::GetProviderByName(_T("PasswdDataProvider"));
     if ( provPasswd )
     {
-      m_astrAdb.Add("");  // no name for this provider
+      m_astrAdb.Add(_T(""));  // no name for this provider
       m_astrProviders.Add(provPasswd->GetProviderName());
 
       provPasswd->DecRef();
@@ -1822,7 +1822,7 @@ void wxAdbEditFrame::AdvanceToNextFound()
     else {
       // remove the string which might have been left since the last time we
       // were called
-      SetStatusText("");
+      SetStatusText(_T(""));
     }
 
     MoveSelection(m_aFindResults[m_nFindIndex]);
@@ -2119,7 +2119,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
         // ask for the file name
         strAdbName = wxPFileSelector
                      (
-                      ADB_CONFIG_PATH "/AdbFile",
+                      ADB_CONFIG_PATH _T("/AdbFile"),
                       strTitle,
                       READ_APPCONFIG_TEXT(MP_USERDIR),
                       _T("M.adb"),
@@ -2213,7 +2213,7 @@ void wxAdbEditFrame::ExportVCardEntry()
 {
   wxCHECK_RET( !m_current->IsGroup(), _T("command should be disabled") );
 
-  AdbExporter *exporter = AdbExporter::GetExporterByName("AdbVCardExporter");
+  AdbExporter *exporter = AdbExporter::GetExporterByName(_T("AdbVCardExporter"));
   if ( !exporter )
   {
     wxLogError(_("Sorry, vCard exporting is unavailable."));
@@ -2224,7 +2224,7 @@ void wxAdbEditFrame::ExportVCardEntry()
   // ask the user for the file name
   wxString filename = wxPFileSelector
                       (
-                        ADB_CONFIG_PATH "/AdbVCardFile",
+                        ADB_CONFIG_PATH _T("/AdbVCardFile"),
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
                         _T("vcard.vcf"),
@@ -2260,7 +2260,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
                _T("should be disabled as there is no current group") );
 
   // check that we have the importer for vCards
-  AdbImporter *importer = AdbImporter::GetImporterByName("AdbVCardImporter");
+  AdbImporter *importer = AdbImporter::GetImporterByName(_T("AdbVCardImporter"));
   if ( !importer )
   {
     wxLogError(_("Sorry, importing vCards is unavailable."));
@@ -2271,7 +2271,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
   // choose the file
   wxString filename = wxPFileSelector
                       (
-                        ADB_CONFIG_PATH "/AdbVCardFile",
+                        ADB_CONFIG_PATH _T("/AdbVCardFile"),
                         _("Choose the name of vCard file"),
                         READ_APPCONFIG_TEXT(MP_USERDIR),
                         _T("vcard.vcf"),
@@ -2398,11 +2398,11 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
       SetStatusText(((AdbTreeBook *)m_current)->GetName(), 0);
     }
     else {
-      SetStatusText("", 0);
+      SetStatusText(_T(""), 0);
     }
 
     // clear the text set previously
-    SetStatusText("", 1);
+    SetStatusText(_T(""), 1);
   }
   else {
     wxString str;
@@ -2750,14 +2750,14 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
        dy = (heightText - heightLabel)/2;
 
   // static box around everything except buttons
-  (void)new wxStaticBox(this, -1, "",  wxPoint(LAYOUT_X_MARGIN, 0),
+  (void)new wxStaticBox(this, -1, _T(""),  wxPoint(LAYOUT_X_MARGIN, 0),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 2*LAYOUT_Y_MARGIN - heightBtn));
 
   // label and text control
   (void)new wxStaticText(this, -1, label, wxPoint(x, y + dy),
             wxSize(widthLabel, heightLabel));
-  m_textWhat = new wxTextCtrl(this, -1, "",
+  m_textWhat = new wxTextCtrl(this, -1, _T(""),
                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                               wxSize(widthText, heightText));
 
@@ -2766,50 +2766,50 @@ wxADBFindDialog::wxADBFindDialog(wxWindow *parent,
   size_t widthBox = widthDlg - 4*LAYOUT_X_MARGIN,
        widthChk = widthBox/2 - 4*LAYOUT_X_MARGIN;
 
-  (void)new wxStaticBox(this, -1, "&How", wxPoint(x, y),
+  (void)new wxStaticBox(this, -1, _("&How"), wxPoint(x, y),
                         wxSize(widthBox, 3*heightLabel));
   y += heightLabel + LAYOUT_Y_MARGIN;
-  m_checkCase = new wxCheckBox(this, -1, "&Case sensitive",
+  m_checkCase = new wxCheckBox(this, -1, _("&Case sensitive"),
                                wxPoint(x + LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
-  m_checkSub = new wxCheckBox(this, -1, "&Substring search",
+  m_checkSub = new wxCheckBox(this, -1, _("&Substring search"),
                                wxPoint(widthChk + 3*LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
 
   // where to look for it
   y += 2*heightLabel;
 
-  (void)new wxStaticBox(this, -1, "&Where", wxPoint(x, y),
+  (void)new wxStaticBox(this, -1, _("&Where"), wxPoint(x, y),
                        wxSize(widthBox, 4*(heightLabel + LAYOUT_Y_MARGIN)));
 
   y = y + heightLabel + LAYOUT_Y_MARGIN;
-  m_checkNick = new wxCheckBox(this, -1, "&Nick name",
+  m_checkNick = new wxCheckBox(this, -1, _("&Nick name"),
                               wxPoint(x + LAYOUT_X_MARGIN, y),
                               wxSize(widthChk, heightLabel));
-  m_checkEMail = new wxCheckBox(this, -1, "&E-mail address",
+  m_checkEMail = new wxCheckBox(this, -1, _("&E-mail address"),
                                 wxPoint(widthChk + 3*LAYOUT_X_MARGIN, y),
                                 wxSize(widthChk, heightLabel));
 
   y += heightLabel + LAYOUT_Y_MARGIN;
-  m_checkFull = new wxCheckBox(this, -1, "&Full name",
+  m_checkFull = new wxCheckBox(this, -1, _("&Full name"),
                                wxPoint(x + LAYOUT_X_MARGIN, y),
                                wxSize(widthChk, heightLabel));
-  m_checkWWW = new wxCheckBox(this, -1, "&Home page",
+  m_checkWWW = new wxCheckBox(this, -1, _("&Home page"),
                               wxPoint(widthChk + 3*LAYOUT_X_MARGIN, y),
                               wxSize(widthChk, heightLabel));
 
   y = y + heightLabel + LAYOUT_Y_MARGIN;
-  m_checkOrg = new wxCheckBox(this, -1, "&Organization",
+  m_checkOrg = new wxCheckBox(this, -1, _("&Organization"),
                               wxPoint(x + LAYOUT_X_MARGIN, y),
                               wxSize(widthChk, heightLabel));
 
   // and the buttons
   wxButton *btnOk = new
-    wxButton(this, wxID_OK, "OK",
+    wxButton(this, wxID_OK, _("OK"),
              wxPoint(widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn,
                      heightDlg - LAYOUT_Y_MARGIN - heightBtn),
              wxSize(widthBtn, heightBtn));
-  (void)new wxButton(this, wxID_CANCEL, "Cancel",
+  (void)new wxButton(this, wxID_CANCEL, _("Cancel"),
                      wxPoint(widthDlg - LAYOUT_X_MARGIN - widthBtn,
                              heightDlg - LAYOUT_Y_MARGIN - heightBtn),
                      wxSize(widthBtn, heightBtn));
@@ -2903,7 +2903,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
        dy = (heightText - heightLabel) / 2;
 
   // a box around all entries
-  (void)new wxStaticBox(this, -1, "",
+  (void)new wxStaticBox(this, -1, _T(""),
                         wxPoint(LAYOUT_X_MARGIN, 0),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 2*LAYOUT_Y_MARGIN - heightBtn));
@@ -2911,7 +2911,7 @@ wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, label, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_textName = new wxTextCtrl(this, -1, "",
+  m_textName = new wxTextCtrl(this, -1, _T(""),
                               wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                               wxSize(widthText, heightText));
 
@@ -2966,7 +2966,7 @@ bool wxADBCreateDialog::TransferDataFromWindow()
 // wxADBPropertiesDialog dialog
 // ----------------------------------------------------------------------------
 wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book)
-                     : wxDialog(parent, -1, "",
+                     : wxDialog(parent, -1, _T(""),
                                 wxDefaultPosition,
                                 wxDefaultSize,
                                 wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
@@ -2977,11 +2977,11 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // ------
 
   static const wxChar *labels[] = {
-    _T("&Name:"),
-    _T("File name:"),
-    _T("File size:"),
-    _T("&Description: "),
-    _T("Number of entries: ")
+    _("&Name:"),
+    _("File name:"),
+    _("File size:"),
+    _("&Description: "),
+    _("Number of entries: ")
   };
 
   // translated lables
@@ -3012,7 +3012,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   SetClientSize(widthDlg, heightDlg);
 
   // and a box around all entries
-  (void)new wxStaticBox(this, -1, "",
+  (void)new wxStaticBox(this, -1, _T(""),
                         wxPoint(LAYOUT_X_MARGIN, 0 /*LAYOUT_Y_MARGIN*/),
                         wxSize(widthDlg - 2*LAYOUT_X_MARGIN,
                                heightDlg - 3*LAYOUT_Y_MARGIN - heightBtn));
@@ -3031,15 +3031,15 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   wxSize sizeText(widthText, heightText);
   x = 3*LAYOUT_X_MARGIN + widthLabelMax;
   y = 2*LAYOUT_Y_MARGIN;
-  m_textName = new wxTextCtrl(this, -1, "", wxPoint(x, y), sizeText);
+  m_textName = new wxTextCtrl(this, -1, _T(""), wxPoint(x, y), sizeText);
   y += heightText;
-  m_staticFileName = new wxStaticText(this, -1, "", wxPoint(x, y + dy), sizeLabel);
+  m_staticFileName = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
   y += heightText;
-  m_staticFileSize = new wxStaticText(this, -1, "", wxPoint(x, y + dy), sizeLabel);
+  m_staticFileSize = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
   y += heightText;
-  m_textDescription = new wxTextCtrl(this, -1, "", wxPoint(x, y), sizeText);
+  m_textDescription = new wxTextCtrl(this, -1, _T(""), wxPoint(x, y), sizeText);
   y += heightText;
-  m_staticNumEntries = new wxStaticText(this, -1, "", wxPoint(x, y + dy), sizeLabel);
+  m_staticNumEntries = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
 
   // finally add buttons
   wxButton *btnOk = new
@@ -3370,7 +3370,7 @@ void wxAdbPage::SetData(const AdbEntry& data)
 
       case AdbTreeEntry::FieldBool:
         data.GetField(n, &str);
-        CHECKBOX(n - m_nFirstField)->SetValue(str == "1");
+        CHECKBOX(n - m_nFirstField)->SetValue(str == _T("1"));
         break;
 
       default:
@@ -3400,9 +3400,9 @@ void wxAdbPage::SaveChanges(AdbEntry& data)
 
       case AdbTreeEntry::FieldBool:
         if ( CHECKBOX(n - m_nFirstField)->GetValue() )
-          data.SetField(n, "1");
+          data.SetField(n, _T("1"));
         else
-          data.SetField(n, "0");
+          data.SetField(n, _T("0"));
         break;
 
       default:
@@ -3455,7 +3455,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
   c->height.AsIs();
-  wxTextCtrl *pText = new wxTextCtrl(this, -1, "");
+  wxTextCtrl *pText = new wxTextCtrl(this, -1, _T(""));
   pText->SetConstraints(c);
 
   return pText;
@@ -3465,7 +3465,7 @@ wxTextCtrl *wxAdbPage::CreateTextWithLabel(const wxChar *label,
 wxTextCtrl *wxAdbPage::CreateMultiLineText(const wxChar *label, wxControl *last)
 {
   wxStaticText *pLabel = new wxStaticText(this, -1, label);
-  wxTextCtrl *textComments = new wxTextCtrl(this, -1, "",
+  wxTextCtrl *textComments = new wxTextCtrl(this, -1, _T(""),
                                             wxDefaultPosition, wxDefaultSize,
                                             wxTE_MULTILINE);
   LayoutBelow(textComments, pLabel, last);
@@ -3759,11 +3759,11 @@ wxString AdbTreeElement::GetFullName() const
   // to augment the size of AdbTreeElement which must be as small as possible.
   wxString strPath;
   if ( IsRoot() )
-    strPath = "/";
+    strPath = _T("/");
   else if ( GetParent()->IsRoot() )
-    strPath << "/" << ((AdbTreeBook *)this)->GetName();
+    strPath << _T("/") << ((AdbTreeBook *)this)->GetName();
   else {
-    strPath << GetParent()->GetFullName() << "/" << m_name;
+    strPath << GetParent()->GetFullName() << _T("/") << m_name;
   }
 
   return strPath;
@@ -4194,7 +4194,7 @@ AdbTreeRoot::AdbTreeRoot(wxArrayString& astrAdb, wxArrayString& astrProviders)
            : m_astrAdb(astrAdb), m_astrProviders(astrProviders)
 {
   m_kind = TreeElement_Root;
-  m_name = "root entry";
+  m_name = _T("root entry");
 
   m_bWasExpanded = FALSE;
 

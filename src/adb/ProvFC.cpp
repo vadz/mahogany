@@ -316,7 +316,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
   if ( bNew ) {
     // force the creation of our entry by writing something (writing empty
     // string will be ignored)
-    if ( !pGroup->GetConfig()->Write(GetPath(), wxString(":")) ) {
+    if ( !pGroup->GetConfig()->Write(GetPath(), wxString(_T(":"))) ) {
       // also if it fails it means that something is wrong and this entry
       // can't be created, so be sure that our IsOk() will return FALSE
       m_pGroup = NULL;
@@ -470,7 +470,7 @@ bool FCEntry::Save()
           strField += ',';
         for ( const wxChar *pc = m_astrEmails[nEMail]; *pc != '\0'; pc++ ) {
           if ( *pc == ',' )
-            strField +=  "\\,";
+            strField +=  _T("\\,");
           else
             strField += *pc;
         }
@@ -486,11 +486,11 @@ bool FCEntry::Save()
     for ( const wxChar *pc = strField; *pc != '\0'; pc++ ) {
       switch ( *pc ) {
         case ':':
-          strValue << "\\:";
+          strValue << _T("\\:");
           break;
 
         case '\n':
-          strValue << "\\n";
+          strValue << _T("\\n");
           break;
 
         default:
@@ -529,7 +529,7 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
     String path = GetPath();
     if ( !path || path.Last() != '/' )
        path += '/';
-    if ( !m_pConfig->Write(path, wxString("")) ) {
+    if ( !m_pConfig->Write(path, wxString(_T(""))) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
       m_pConfig = NULL;
@@ -550,9 +550,9 @@ wxString FCEntryGroup::GetPath() const
 {
   wxString strPath;
   if ( m_pParent == NULL )
-    strPath = "/ADB_Entries";
+    strPath = _T("/ADB_Entries");
   else
-    strPath << m_pParent->GetPath() << "/" << m_strName;
+    strPath << m_pParent->GetPath() << _T("/") << m_strName;
 
   return strPath;
 }
@@ -672,7 +672,7 @@ AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
 
 String FCBook::GetFullAdbPath(const String& filename)
 {
-  CHECK( !filename.empty(), "", _T("ADB without name?") );
+  CHECK( !filename.empty(), _T(""), _T("ADB without name?") );
 
   String path;
   if ( wxIsAbsolutePath(filename) )
@@ -722,27 +722,27 @@ String FCBook::GetFileName() const
 
 void FCBook::SetDescription(const String& strAdb)
 {
-  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_DESC, strAdb);
+  m_pConfig->Write(_T("/") ADB_HEADER _T("/") ADB_HEADER_DESC, strAdb);
 }
 
 String FCBook::GetDescription() const
 {
-  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_DESC, m_strFileName);
+  return m_pConfig->Read(_T("/") ADB_HEADER _T("/") ADB_HEADER_DESC, m_strFileName);
 }
 
 void FCBook::SetName(const String& strDesc)
 {
-  m_pConfig->Write("/" ADB_HEADER "/" ADB_HEADER_NAME, strDesc);
+  m_pConfig->Write(_T("/") ADB_HEADER _T("/") ADB_HEADER_NAME, strDesc);
 }
 
 String FCBook::GetName() const
 {
-  return m_pConfig->Read("/" ADB_HEADER "/" ADB_HEADER_NAME, m_strFile);
+  return m_pConfig->Read(_T("/") ADB_HEADER _T("/") ADB_HEADER_NAME, m_strFile);
 }
 
 size_t FCBook::GetNumberOfEntries() const
 {
-  m_pConfig->SetPath("/" ADB_ENTRIES);
+  m_pConfig->SetPath(_T("/") ADB_ENTRIES);
   return m_pConfig->GetNumberOfEntries(TRUE);
 }
 
@@ -860,7 +860,7 @@ bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 String FCEntry::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << "name = '" << GetName() << '\'';
+  str << _T("name = '") << GetName() << '\'';
 
   return str;
 }
@@ -868,7 +868,7 @@ String FCEntry::DebugDump() const
 String FCEntryGroup::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << "path = '" << GetPath() << '\'';
+  str << _T("path = '") << GetPath() << '\'';
 
   return str;
 }
@@ -876,7 +876,7 @@ String FCEntryGroup::DebugDump() const
 String FCBook::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << "file = '" << m_strFile << '\'';
+  str << _T("file = '") << m_strFile << '\'';
 
   return str;
 }

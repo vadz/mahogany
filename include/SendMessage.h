@@ -85,8 +85,8 @@ public:
        @param bcc blind carbon copy addresses
    */
    virtual void SetAddresses(const String &to,
-                             const String &cc = "",
-                             const String &bcc = "") = 0;
+                             const String &cc = _T(""),
+                             const String &bcc = _T("")) = 0;
 
    /** Sets the value for the from field.
        @param from sender address
@@ -94,8 +94,8 @@ public:
        @param sender setting if needed
    */
    virtual void SetFrom(const String &from,
-                        const String &replyaddress = "",
-                        const String &sender = "") = 0;
+                        const String &replyaddress = _T(""),
+                        const String &sender = _T("")) = 0;
 
    /**
      Sets the Newsgroup header value
@@ -169,7 +169,7 @@ public:
    virtual void AddPart(MimeType::Primary type,
                         const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = "INLINE",
+                        const String &disposition = _T("INLINE"),
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM) = 0;

@@ -347,7 +347,7 @@ protected:
 
 private:
    // helper used by GetCategory and GetVariable
-   static int FindStringInArray(const char *strs[], int max, const String& s);
+   static int FindStringInArray(const wxChar *strs[], int max, const String& s);
 
    // helper used by ExpandOriginal(): return the personal name part of the
    // first address of the given type
@@ -373,18 +373,18 @@ private:
    Profile *m_profile;
 
    // this array contains the list of all categories
-   static const char *ms_templateVarCategories[Category_Max];
+   static const wxChar *ms_templateVarCategories[Category_Max];
 
    // this array contains the list of all variables without category
-   static const char *ms_templateMiscVars[MiscVar_Max];
+   static const wxChar *ms_templateMiscVars[MiscVar_Max];
 
    // this array contains the variable names from "message" category
-   static const char *ms_templateMessageVars[MessageHeader_Max];
+   static const wxChar *ms_templateMessageVars[MessageHeader_Max];
 
    // this array contains all the variables in the "original" category which
    // map to the headers of the original message (there are other variables in
    // this category as well)
-   static const char *ms_templateOriginalVars[OriginalHeader_Max];
+   static const wxChar *ms_templateOriginalVars[OriginalHeader_Max];
 };
 
 // ----------------------------------------------------------------------------
@@ -397,51 +397,51 @@ private:
 // the misc submenu
 static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 {
-   TemplatePopupMenuItem(_("Put &cursor here"), "$cursor"),
-   TemplatePopupMenuItem(_("Insert &signature"), "$signature"),
+   TemplatePopupMenuItem(_("Put &cursor here"), _T("$cursor")),
+   TemplatePopupMenuItem(_("Insert &signature"), _T("$signature")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert current &date"), "$date"),
+   TemplatePopupMenuItem(_("Insert current &date"), _T("$date")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
-   TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
+   TemplatePopupMenuItem(_("Insert &quoted text"), _T("$quote")),
+   TemplatePopupMenuItem(_("&Attach original text"), _T("$quote822")),
 };
 
 // the file insert/attach sub menu
 static TemplatePopupMenuItem gs_popupSubmenuFile[] =
 {
-   TemplatePopupMenuItem(_("&Insert file..."), "${file:%s}", TRUE),
-   TemplatePopupMenuItem(_("Insert &any file..."), "${file:%s?ask", TRUE),
-   TemplatePopupMenuItem(_("Insert &quoted file..."), "${file:%s?quote}", TRUE),
-   TemplatePopupMenuItem(_("&Attach file..."), "${attach:%s}", TRUE),
+   TemplatePopupMenuItem(_("&Insert file..."), _T("${file:%s}"), TRUE),
+   TemplatePopupMenuItem(_("Insert &any file..."), _T("${file:%s?ask"), TRUE),
+   TemplatePopupMenuItem(_("Insert &quoted file..."), _T("${file:%s?quote}"), TRUE),
+   TemplatePopupMenuItem(_("&Attach file..."), _T("${attach:%s}"), TRUE),
 };
 
 // the message submenu
 static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
 {
-   TemplatePopupMenuItem(_("&To"), "${message:to}"),
-   TemplatePopupMenuItem(_("&First name"), "${message:firstname}"),
-   TemplatePopupMenuItem(_("&Last name"), "${message:lastname}"),
-   TemplatePopupMenuItem(_("&Subject"), "${message:subject}"),
-   TemplatePopupMenuItem(_("&CC"), "${message:cc}"),
-   TemplatePopupMenuItem(_("&BCC"), "${message:bcc}"),
+   TemplatePopupMenuItem(_("&To"), _T("${message:to}")),
+   TemplatePopupMenuItem(_("&First name"), _T("${message:firstname}")),
+   TemplatePopupMenuItem(_("&Last name"), _T("${message:lastname}")),
+   TemplatePopupMenuItem(_("&Subject"), _T("${message:subject}")),
+   TemplatePopupMenuItem(_("&CC"), _T("${message:cc}")),
+   TemplatePopupMenuItem(_("&BCC"), _T("${message:bcc}")),
 };
 
 // the original message submenu
 static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
 {
-   TemplatePopupMenuItem(_("&Date"), "${original:date}"),
-   TemplatePopupMenuItem(_("&From"), "${original:from}"),
-   TemplatePopupMenuItem(_("&Subject"), "${original:subject}"),
-   TemplatePopupMenuItem(_("Full &name"), "${original:fullname}"),
-   TemplatePopupMenuItem(_("F&irst name"), "${original:firstname}"),
-   TemplatePopupMenuItem(_("&Last name"), "${original:lastname}"),
-   TemplatePopupMenuItem(_("&To"), "${original:to}"),
-   TemplatePopupMenuItem(_("&Reply to"), "${original:replyto}"),
-   TemplatePopupMenuItem(_("&Newsgroups"), "${original:newsgroups}"),
+   TemplatePopupMenuItem(_("&Date"), _T("${original:date}")),
+   TemplatePopupMenuItem(_("&From"), _T("${original:from}")),
+   TemplatePopupMenuItem(_("&Subject"), _T("${original:subject}")),
+   TemplatePopupMenuItem(_("Full &name"), _T("${original:fullname}")),
+   TemplatePopupMenuItem(_("F&irst name"), _T("${original:firstname}")),
+   TemplatePopupMenuItem(_("&Last name"), _T("${original:lastname}")),
+   TemplatePopupMenuItem(_("&To"), _T("${original:to}")),
+   TemplatePopupMenuItem(_("&Reply to"), _T("${original:replyto}")),
+   TemplatePopupMenuItem(_("&Newsgroups"), _T("${original:newsgroups}")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
-   TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
-   TemplatePopupMenuItem(_("Insert &unquoted Text"), "$text"),
+   TemplatePopupMenuItem(_("Insert &quoted text"), _T("$quote")),
+   TemplatePopupMenuItem(_("&Attach original text"), _T("$quote822")),
+   TemplatePopupMenuItem(_("Insert &unquoted Text"), _T("$text")),
 };
 
 // the whole menu
@@ -460,11 +460,11 @@ static TemplatePopupMenuItem gs_popupMenu[] =
                          gs_popupSubmenuFile,
                          WXSIZEOF(gs_popupSubmenuFile)),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("&Execute command..."), "${cmd:%s}", FALSE),
+   TemplatePopupMenuItem(_("&Execute command..."), _T("${cmd:%s}"), FALSE),
 };
 
 const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
-   TemplatePopupMenuItem("", gs_popupMenu, WXSIZEOF(gs_popupMenu));
+   TemplatePopupMenuItem(_T(""), gs_popupMenu, WXSIZEOF(gs_popupMenu));
 
 // ============================================================================
 // implementation
@@ -568,59 +568,59 @@ ExpansionSink::InsertTextInto(Composer& cv) const
 // VarExpander - used by wxComposeView
 // ----------------------------------------------------------------------------
 
-const char *VarExpander::ms_templateVarCategories[] =
+const wxChar *VarExpander::ms_templateVarCategories[] =
 {
-   "",
-   "file",
-   "attach",
-   "cmd",
+   _T(""),
+   _T("file"),
+   _T("attach"),
+   _T("cmd"),
 #ifdef USE_PYTHON
-   "python",
+   _T("python"),
 #endif // USE_PYTHON
-   "message",
-   "original",
-   "header",
+   _T("message"),
+   _T("original"),
+   _T("header"),
 };
 
-const char *VarExpander::ms_templateMiscVars[] =
+const wxChar *VarExpander::ms_templateMiscVars[] =
 {
-   "date",
-   "cursor",
-   "to",
-   "subject",
-   "quote",
-   "quote822",
-   "text",
-   "sender",
-   "signature",
+   _T("date"),
+   _T("cursor"),
+   _T("to"),
+   _T("subject"),
+   _T("quote"),
+   _T("quote822"),
+   _T("text"),
+   _T("sender"),
+   _T("signature"),
 };
 
-const char *VarExpander::ms_templateMessageVars[] =
+const wxChar *VarExpander::ms_templateMessageVars[] =
 {
-   "to",
-   "cc",
-   "bcc",
-   "subject",
-   "firstname",
-   "lastname",
+   _T("to"),
+   _T("cc"),
+   _T("bcc"),
+   _T("subject"),
+   _T("firstname"),
+   _T("lastname"),
 };
 
-const char *VarExpander::ms_templateOriginalVars[] =
+const wxChar *VarExpander::ms_templateOriginalVars[] =
 {
-   "date",
-   "from",
-   "subject",
-   "fullname",
-   "firstname",
-   "lastname",
-   "to",
-   "replyto",
-   "newsgroups",
-   "domain",
+   _T("date"),
+   _T("from"),
+   _T("subject"),
+   _T("fullname"),
+   _T("firstname"),
+   _T("lastname"),
+   _T("to"),
+   _T("replyto"),
+   _T("newsgroups"),
+   _T("domain"),
 };
 
 int
-VarExpander::FindStringInArray(const char *strings[],
+VarExpander::FindStringInArray(const wxChar *strings[],
                                int max,
                                const String& s)
 {
@@ -766,7 +766,7 @@ VarExpander::ExpandMisc(const String& name,
          return ExpandOriginal(name, value);
 
       case MiscVar_Sender:
-         return ExpandOriginal("from", value);
+         return ExpandOriginal(_T("from"), value);
 
       case MiscVar_Signature:
          *value = GetSignature();
@@ -863,7 +863,7 @@ VarExpander::ExpandAttach(const String& name,
       // guess MIME type from extension
       m_sink.InsertAttachment(wxStrdup(value->c_str()),
                               value->length(),
-                              "", // will be determined from filename laer
+                              _T(""), // will be determined from filename laer
                               filename);
 
       // avoid inserting file as text additionally
@@ -900,10 +900,10 @@ VarExpander::ExpandCommand(const String& name,
          wxString arg = arguments[n];
          arg.Replace(_T("'"), _T("\\'"));
 
-         command << " '" << arg << '\'';
+         command << _T(" '") << arg << '\'';
       }
 
-      command << " > " << filename;
+      command << _T(" > ") << filename;
 
       ok = wxSystem(command) == 0;
    }
@@ -944,17 +944,17 @@ VarExpander::SetHeaderValue(const String& name,
 
    // is it one of the standard headers or some other one?
    String headerName = name.Lower();
-   if ( headerName == "subject" )
+   if ( headerName == _T("subject") )
       m_cv.SetSubject(headerValue);
-   else if ( headerName == "to" )
+   else if ( headerName == _T("to") )
       m_cv.AddTo(headerValue);
-   else if ( headerName == "cc" )
+   else if ( headerName == _T("cc") )
       m_cv.AddCc(headerValue);
-   else if ( headerName == "bcc" )
+   else if ( headerName == _T("bcc") )
       m_cv.AddBcc(headerValue);
    // TODO: we don't have SetFrom() yet in Composer
 #if 0
-   else if ( headerName == "from" )
+   else if ( headerName == _T("from") )
       m_cv.SetFrom(headerValue);
 #endif // 0
    else // some other header
@@ -1077,7 +1077,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_Newsgroups:
-            m_msg->GetHeaderLine("Newsgroups", *value);
+            m_msg->GetHeaderLine(_T("Newsgroups"), *value);
             break;
 
          case OriginalHeader_Domain:
@@ -1096,12 +1096,12 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
             // it isn't a variable which maps directly onto header, check the
             // others
-            if ( name == "text" || name == "quote" )
+            if ( name == _T("text") || name == _T("quote") )
             {
                // insert the original text (optionally prefixed by reply
                // string)
                String prefix;
-               if ( name == "quote" )
+               if ( name == _T("quote") )
                {
                   prefix = GetReplyPrefix();
                }
@@ -1152,17 +1152,17 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                         //        replying in the most common case (2 parts:
                         //        text/plain and text/html)
                         String mimeType = m_msg->GetPartMimeType(nPart).Lower();
-                        if ( mimeType == "text/html" && lastWasPlainText )
+                        if ( mimeType == _T("text/html") && lastWasPlainText )
                         {
                            // skip it
                            continue;
                         }
 
-                        lastWasPlainText = mimeType == "text/plain";
+                        lastWasPlainText = mimeType == _T("text/plain");
 
                         ExpandOriginalText
                         (
-                           (const char *)m_msg->GetPartContent(nPart),
+                           (const wxChar *)m_msg->GetPartContent(nPart),
                            prefix,
                            value
                         );
@@ -1174,13 +1174,13 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                   }
                }
             }
-            else if ( name == "quote822" )
+            else if ( name == _T("quote822") )
             {
                // insert the original message as RFC822 attachment
                String str;
                m_msg->WriteToString(str);
                m_sink.InsertAttachment(wxStrdup(str), str.Length(),
-                                       "message/rfc822", "");
+                                       _T("message/rfc822"), _T(""));
             }
             else
             {
@@ -1253,7 +1253,7 @@ String VarExpander::GetSignature() const
                                      M_DLG_YES_DEFAULT,
                                      M_MSGBOX_ASK_FOR_SIG) )
             {
-               strSignFile = wxPFileSelector("sig",
+               strSignFile = wxPFileSelector(_T("sig"),
                                              _("Choose signature file"),
                                              NULL, _T(".signature"), NULL,
                                              wxALL_FILES,
@@ -1280,7 +1280,7 @@ String VarExpander::GetSignature() const
          // insert separator optionally
          if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
-            signature += "-- \n";
+            signature += _T("-- \n");
          }
 
          // read the whole file
@@ -1455,7 +1455,7 @@ VarExpander::ExpandOriginalText(const String& text,
          //
          // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
          String sigRE;
-         sigRE << '^' << sig << "\r\n";
+         sigRE << '^' << sig << _T("\r\n");
 
          if ( !reSig.Compile(sigRE, wxRE_NOSUB) )
          {

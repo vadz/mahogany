@@ -374,7 +374,7 @@ public:
 
    MEventFolderTreeChangeData(const String& fullname,
                               ChangeKind what,
-                              const String& newname = "")
+                              const String& newname = _T(""))
       : MEventData(MEventId_FolderTreeChange),
         m_fullname(fullname),
         m_newname(newname)

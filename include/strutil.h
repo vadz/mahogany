@@ -300,7 +300,7 @@ extern bool strutil_haspasswd(void);
     @param gmtflag if true, return GMT
     @return a string with the time informaton
 */
-String strutil_ftime(time_t time, const String & format = "%c",
+String strutil_ftime(time_t time, const String & format = _T("%c"),
                      bool gmtflag = false);
 
 
@@ -341,10 +341,10 @@ strutil_freeRegEx(class strutil_RegEx *regex);
 //@}
 
 // convert a string array to/from 'ch' separated string
-extern wxArrayString strutil_restore_array(char ch, const String& str);
-inline wxArrayString strutil_restore_array(const String& str, char ch = ':')
+extern wxArrayString strutil_restore_array(wxChar ch, const String& str);
+inline wxArrayString strutil_restore_array(const String& str, wxChar ch = ':')
    { return strutil_restore_array(ch, str); }
-extern String strutil_flatten_array(const wxArrayString& array, char ch = ':');
+extern String strutil_flatten_array(const wxArrayString& array, wxChar ch = ':');
 
 // return an array containing unique strings from sorted array
 extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);

@@ -362,7 +362,7 @@ MAppBase::OnStartup()
 #ifdef DEBUG
    // enable tracing of the specified kinds of messages
    wxArrayString
-      masks = strutil_restore_array(':', m_profile->readEntry("DebugTrace", ""));
+      masks = strutil_restore_array(_T(':'), m_profile->readEntry(_T("DebugTrace"), _T("")));
    size_t nMasks = masks.GetCount();
    for ( size_t nMask = 0; nMask < nMasks; nMask++ )
    {
@@ -418,7 +418,7 @@ MAppBase::OnStartup()
    wxConfigBase::Set(m_profile->GetConfig());
 
    // also set the path for persistent controls to save their state to
-   wxPControls::SetSettingsPath("/Settings/");
+   wxPControls::SetSettingsPath(_T("/Settings/"));
 
 #ifdef OS_UNIX
    // now check our user ID: mahogany does not like being run as root
@@ -484,11 +484,11 @@ MAppBase::OnStartup()
 
    // extend path for commands, look in M's dirs first
    String pathEnv;
-   pathEnv << "PATH="
-           << GetLocalDir() << "/scripts" << PATH_SEPARATOR
-           << GetDataDir() << "/scripts";
+   pathEnv << _T("PATH=")
+           << GetLocalDir() << _T("/scripts") << PATH_SEPARATOR
+           << GetDataDir() << _T("/scripts");
 
-   const char *path = getenv("PATH");
+   const wxChar *path = wxGetenv(_T("PATH"));
    if ( path )
       pathEnv << PATH_SEPARATOR << path;
 

@@ -87,7 +87,7 @@ private:
    static wxString GetFileProfilePath()
    {
       wxString path;
-      path << '/' << M_SETTINGS_CONFIG_SECTION << "/AdbImportFile";
+      path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T("/AdbImportFile");
       return path;
    }
 
@@ -195,7 +195,7 @@ END_EVENT_TABLE()
 wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Import address book"),
-                                           "AdbImport")
+                                           _T("AdbImport"))
 {
    wxLayoutConstraints *c;
 
@@ -207,7 +207,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    //    buttons
 
    // buttons
-   (void)CreateStdButtonsAndBox("", TRUE /* no box please */);
+   (void)CreateStdButtonsAndBox(_T(""), TRUE /* no box please */);
    m_btnOk = (wxButton *)FindWindow(wxID_OK);
 
    // panel for all other items
@@ -227,7 +227,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    // icon and help message
    wxStaticBitmap *bmp = new wxStaticBitmap(canvas, -1,
                                             mApplication->GetIconManager()->
-                                             GetBitmap("adbimport"));
+                                             GetBitmap(_T("adbimport")));
    c = new wxLayoutConstraints;
    c->top.SameAs(canvas, wxTop);
    c->left.SameAs(canvas, wxLeft);
@@ -286,7 +286,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    m_text = m_panel->CreateFileEntry(label, (long)widthMax, msg, &m_browseBtn);
 
    // checkboxes
-   m_autoLocation = new wxPCheckBox("AdbImportAutoFile", canvas, -1,
+   m_autoLocation = new wxPCheckBox(_T("AdbImportAutoFile"), canvas, -1,
                                     _("Determine the &location automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_text, LAYOUT_Y_MARGIN);
@@ -295,7 +295,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    c->height.AsIs();
    m_autoLocation->SetConstraints(c);
 
-   m_autoFormat = new wxPCheckBox("AdbImportAutoFormat", canvas, -1,
+   m_autoFormat = new wxPCheckBox(_T("AdbImportAutoFormat"), canvas, -1,
                                   _("Determine the &format automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_autoLocation, LAYOUT_Y_MARGIN);
@@ -305,7 +305,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    m_autoFormat->SetConstraints(c);
 
    // listbox
-   m_listbox = new wxPListBox("AdbImportFormat", canvas, -1);
+   m_listbox = new wxPListBox(_T("AdbImportFormat"), canvas, -1);
    c = new wxLayoutConstraints;
    c->top.Below(m_autoFormat, LAYOUT_Y_MARGIN);
    c->left.SameAs(canvas, wxLeft);
@@ -405,7 +405,7 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
                                      wxFrame *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Expansion options"),
-                                           "AdrListSelect"),
+                                           _T("AdrListSelect")),
                    m_aEverything(aEverything),
                    m_aMoreEntries(aMoreEntries),
                    m_nGroups(nGroups)
@@ -525,7 +525,7 @@ void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
    }
 
    // remember to not use it for the expansion again
-   entry->SetField(AdbField_ExpandPriority, "-1");
+   entry->SetField(AdbField_ExpandPriority, _T("-1"));
 
    entry->DecRef();
 }
@@ -578,7 +578,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 
          filename = wxPFileSelector
                     (
-                     "AdbImportFile",
+                     _T("AdbImportFile"),
                      _("Please select source address book file"),
                      NULL, NULL, NULL, NULL,
                      wxOPEN | wxFILE_MUST_EXIST,
@@ -606,7 +606,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    }
 
    // the standard suffix for our address books
-   adbname += ".adb";
+   adbname += _T(".adb");
 
    if ( !MInputBox(&adbname,
                    _("Address book import"),
@@ -627,7 +627,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    }
 
    // do import
-   bool ok = AdbImport(filename, adbname, "", importer);
+   bool ok = AdbImport(filename, adbname, _T(""), importer);
 
    // release it only if we created it
    SafeDecRef(importer);
@@ -650,7 +650,7 @@ bool AdbShowExportDialog(const AdbEntryGroup& group)
       int idx = wxGetSingleChoiceIndex
          (
             _("Please choose an export format:"),
-            wxString("Mahogany : ")+_("ADB export options"),
+            wxString(_T("Mahogany : "))+_("ADB export options"),
             n,
             &descs[0],
             NULL,
@@ -667,7 +667,7 @@ bool AdbShowExportDialog(const AdbEntryGroup& group)
    else
    {
       // we have at most 1 exporter, so don't propose to choose
-      name = n == 0 ? String("AdbTextExporter") : names[0];
+      name = n == 0 ? String(_T("AdbTextExporter")) : names[0];
    }
 
    AdbExporter *exporter = AdbExporter::GetExporterByName(name);

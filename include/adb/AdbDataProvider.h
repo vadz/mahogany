@@ -118,7 +118,7 @@ public:
   String GetProviderName() const;                                             \
   static AdbProviderInfo ms_info
 #define IMPLEMENT_ADB_PROVIDER(name, bCanCreate, userName, fmt)               \
-  String name::GetProviderName() const { return #name; }                      \
+  String name::GetProviderName() const { return _T(#name); }                      \
   AdbDataProvider *ConstructorFor##name() { return new name; }                \
   AdbDataProvider::AdbProviderInfo name::ms_info(_T(#name), ConstructorFor##name, \
                                                  bCanCreate, userName,        \

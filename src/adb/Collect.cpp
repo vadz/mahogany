@@ -354,7 +354,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
                        addresses,
                        &selections,
                        parent,
-                       "AddrExtract"
+                       _T("AddrExtract")
                       );
     }
     //else: don't ask the user to choose when there is one address only
