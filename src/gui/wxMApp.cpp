@@ -84,10 +84,6 @@ public:
    // override base class virtual to implement saving the frame position
    virtual void OnFrameDelete(wxFrame *frame);
 
-protected:
-   // we handle verbose messages in a special way
-   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
-
 private:
    bool m_hasWindow;
 };
@@ -197,24 +193,6 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
    m_hasWindow = false;
 
    wxLogWindow::OnFrameDelete(frame);
-}
-
-void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
-{
-   // close the splash screen as the very first thing because otherwise it
-   // would float on top of our message boxes
-   //CloseSplash(); -- not any more, we have our SplashKillerLog installed
-
-   if ( m_hasWindow ) //&& level == wxLOG_User )
-   {
-      // this will call wxLogWindow::DoLogString()
-      wxLog::DoLog(level, szString, t);
-   }
-   else
-   {
-      // leave the base class handle it
-      wxLogWindow::DoLog(level, szString, t);
-   }
 }
 
 #if 0
