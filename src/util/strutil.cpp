@@ -1372,21 +1372,6 @@ wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
    return addresses;
 }
 
-/// Check if text is 7bit only:
-bool strutil_is7bit(const unsigned char *text)
-{
-   if ( !text )
-      return TRUE;
-
-   while ( *text )
-   {
-      if ( !isascii(*text++) )
-         return FALSE;
-   }
-
-   return TRUE;
-}
-
 // convert a string in UTF-8 or 7 into the string in the current encoding: of
 // course, this doesn't work in general as Unicode is not representable as an 8
 // bit charset but it works in some common cases and is better than no UTF-8

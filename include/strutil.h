@@ -314,9 +314,6 @@ strutil_readString(String &string, bool *success = NULL);
 String
 strutil_escapeString(const String &string);
 
-/// Check if text is 7bit only:
-bool strutil_is7bit(const unsigned char *text);
-
 /** @name regular expression matching */
 //@{
 /** Compile a string into a regular expression
