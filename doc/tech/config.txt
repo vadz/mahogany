@@ -1,0 +1,275 @@
+                    The descriptions of config file entries
+                    =======================================
+
+NB: set tab stops to 40 and text width to 180 for better viewing
+
+entry name in the program	entry name in config file	default value	meaning
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+MP_ADBFILE	AddressBook
+MP_ADB_SUBSTRINGEXPANSION	ExpandWithSubstring	1l
+MP_ADD_DEFAULT_HOSTNAME	AddDefaultHostName	1L
+MP_AFMPATH	AfmPath	M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+MP_ALWAYS_USE_EXTERNALEDITOR	AlwaysUseExtEditor	0l
+MP_AUTOCOLLECT	AutoCollect	2l
+MP_AUTOCOLLECT_ADB	AutoCollectAdb	"autocollect.adb
+MP_AUTOCOLLECT_NAMED	AutoCollectNamed	0l
+MP_AUTOMATIC_WORDWRAP	AutoWrap	1l
+MP_AUTOSAVEDELAY	AutoSaveDelay	60
+MP_AUTOSHOW_FIRSTMESSAGE	AutoShowFirstMessage	0l
+MP_BBDB_ANONYMOUS	BbdbAnonymousName	"anonymous"
+MP_BBDB_GENERATEUNIQUENAMES	BbdbGenerateUniqueNames	0L
+MP_BBDB_IGNOREANONYMOUS	BbdbIgnoreAnonymous	0L
+MP_BBDB_SAVEONEXIT	BbdbSaveOnExit	M_ACTION_PROMPT
+MP_BEACONHOST	BeaconHost	""
+MP_BROWSER	Browser	"netscape" (Unix) or "" (elsewhere)
+MP_BROWSER_ISNS	BrowserIsNetscape	1 (Unix) or 0 (elsewhere)
+MP_CHARSET	CharSet	"ISO-8859-1"
+MP_COMPOSETEMPLATEPATH_GLOBAL	CompooseTemplatePath"
+MP_COMPOSETEMPLATEPATH_USER	CompooseTemplatePathUser"
+MP_COMPOSE_BCC	ComposeBccDefault	M_EMPTYSTRING
+MP_COMPOSE_CC	ComposeCcDefault	M_EMPTYSTRING
+MP_COMPOSE_SIGNATURE	SignatureFile	"$HOME/.signature"
+MP_COMPOSE_TO	ComposeToDefault	M_EMPTYSTRING
+MP_COMPOSE_USE_SIGNATURE	ComposeInsertSignature	1
+MP_COMPOSE_USE_SIGNATURE_SEPARATOR	ComposeSeparateSignature	1
+MP_COMPOSE_USE_XFACE	UseXFaces	1
+MP_COMPOSE_XFACE_FILE	XFace	"$HOME/.xface"
+MP_CONFIRMEXIT	ConfirmExit	1l
+MP_CONVERTPROGRAM	ImageConverter	"convert %s -compress None %s"
+MP_CREATE_PROFILES	CreateProfileFiles	0l
+MP_CRYPTALGO	CryptAlgo	0L
+MP_CRYPT_TESTDATA	CryptData	""
+MP_CURRENT_IDENTITY	Identity	M_EMPTYSTRING
+MP_CVIEW_BGCOLOUR	CViewBGColout	"white"
+MP_CVIEW_FGCOLOUR	CViewFGColour	"black"
+MP_CVIEW_FONT	CViewFont	0L
+MP_CVIEW_FONT_SIZE	CViewFontSize	12L
+MP_DATE_FMT	DateFormat	"%c"
+MP_DATE_GMT	GMTDate	0l
+MP_DEBUG_CCLIENT	MailDebug	0l
+MP_DEFAULT_LOAD_EXTENSION	LoadExtension	M_EMPTYSTRING
+MP_DEFAULT_LOAD_FILENAME	LoadFileName	"*"
+MP_DEFAULT_LOAD_PATH	LoadPath	M_EMPTYSTRING
+MP_DEFAULT_LOAD_WILDCARD	LoadWildcard	"*" or "*.*"
+MP_DEFAULT_SAVE_EXTENSION	SaveExtension	M_EMPTYSTRING
+MP_DEFAULT_SAVE_FILENAME	SaveFileName	"*"
+MP_DEFAULT_SAVE_PATH	SavePath	M_EMPTYSTRING
+MP_DEFAULT_SAVE_WILDCARD	SaveWildcard	"*" or "*.*"
+MP_DIALUP_SUPPORT	DialUpNetSupport	0L
+MP_DOCKABLE_MENUBARS	MenuBarsDockable	1l
+MP_DOCKABLE_TOOLBARS	ToolBarsDockable	1l
+MP_ETCPATH	ConfigPath	"/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
+MP_EXPAND_TREECTRL	ExpandTreeControl	1
+MP_EXTERNALEDITOR	ExternalEditor	"gvim %s" or "notepad %s"
+MP_FILTER_RULE	Filter	""
+MP_FIRSTRUN	FirstRun	1
+MP_FLAT_TOOLBARS	ToolBarsFlat	1l
+MP_FLC_DATECOL	ColumnDate	3
+MP_FLC_DATEWIDTH	ColumnWidthDate	27
+MP_FLC_FROMCOL	ColumnFrom	2
+MP_FLC_FROMWIDTH	ColumnWidthFrom	20
+MP_FLC_SIZECOL	ColumnSize	4
+MP_FLC_SIZEWIDTH	ColumnWidthSize	10
+MP_FLC_STATUSCOL	ColumnStatus	0l
+MP_FLC_STATUSWIDTH	ColumnWidthStatus	10
+MP_FLC_SUBJECTCOL	ColumnSubject	1
+MP_FLC_SUBJECTWIDTH	ColumnWidthSubject	33
+MP_FOCUS_FOLLOWSMOUSE	FocusFollowsMouse	1l
+MP_FOLDERPROGRESS_THRESHOLD	FolderProgressThreshold	20L
+MP_FOLDERSTATUS_STATBAR	StatusBarFmt	"%f (%t messages, %r recent, %n new)"
+MP_FOLDERSTATUS_TITLEBAR	TitleBarFmt	"%f (%t messages, %n new)"
+MP_FOLDER_BGCOLOUR	FTreeBgColour	""
+MP_FOLDER_CLOSE_DELAY	FolderCloseDelay	30
+MP_FOLDER_COMMENT	Comment	M_EMPTYSTRING
+MP_FOLDER_FILE_DRIVER	MailboxFileFormat	0L
+MP_FOLDER_FILTERS	Filters	""
+MP_FOLDER_ICON	Icon	(int)-1        // no special icon
+MP_FOLDER_LOGIN	Login	M_EMPTYSTRING
+MP_FOLDER_PASSWORD	Password	M_EMPTYSTRING
+MP_FOLDER_PATH	Path	((const char *)NULL) // don't change this!
+MP_FOLDER_TYPE	Type	(int)(0x00ff)  // MF_ILLEGAL
+MP_FORWARD_PREFIX	ForwardPrefix	"Forwarded message: "
+MP_FROM_REPLACE_ADDRESSES	ReplaceFromAdr	""
+MP_FVIEW_BGCOLOUR	FViewBgColour	"white"
+MP_FVIEW_DELETEDCOLOUR	FViewDeletedColour	"grey"
+MP_FVIEW_FGCOLOUR	FViewFgColour	"black"
+MP_FVIEW_FONT	FViewFont	6L
+MP_FVIEW_FONT_SIZE	FViewFontSize	12L
+MP_FVIEW_FROM_REPLACE	ReplaceFrom	0L
+MP_FVIEW_NAMES_ONLY	FViewNamesOnly	0L
+MP_FVIEW_NEWCOLOUR	FViewNewColour	"orange"
+MP_FVIEW_RECENTCOLOUR	FViewRecentColour	"red"
+MP_FVIEW_UNREADCOLOUR	FViewUnreadColour	"blue"
+MP_GLOBALDIR	GlobalDir	M_BASEDIR or ""
+MP_HEIGHT	Height	400
+MP_HELPBROWSER	HelpBrowser	"netscape"
+MP_HELPBROWSER_ISNS	HelpBrowserIsNetscape	1
+MP_HELPFRAME_HEIGHT	HelpFrameHeight	500l
+MP_HELPFRAME_WIDTH	HelpFrameWidth	560l
+MP_HELPFRAME_XPOS	HelpFrameXpos	40l
+MP_HELPFRAME_YPOS	HelpFrameYpos	40l
+MP_HIGHLIGHT_URLS	HighlightURL	1
+MP_HOSTNAME	HostName	M_EMPTYSTRING
+MP_ICONISED	Iconised	0l
+MP_ICONPATH	IconDirectory	"icons"
+MP_ICON_MAINFRAME	MainFrameIcon	"mainframe.xpm"
+MP_ICON_MFRAME	MFrameIcon	"mframe.xpm"
+MP_IMAPHOST	Imap4Host	"imap"
+MP_IMAP_LOOKAHEAD	IMAPlookahead	0l
+MP_INCFAX_DOMAINS	IncomingFaxDomains	"efax.com"
+MP_INCFAX_SUPPORT	IncomingFaxSupport	1L
+MP_INLINE_GFX	InlineGraphics	1
+MP_LASTTIP	LastTip	0L
+MP_LAST_CREATED_FOLDER_TYPE	LastFolderType	(int)File
+MP_LICENSE_ACCEPTED	LicenseAccepted	0l
+MP_LOCALE	Locale	M_EMPTYSTRING
+MP_LOGLEVEL	LogLevel	0l
+MP_MAILCAP	MailCap	"mailcap"
+MP_MAINFOLDER	MainFolder	"INBOX"
+MP_MAX_HEADERS_NUM	MaxHeadersNum	100l
+MP_MAX_MESSAGE_SIZE	MaxMsgSize	100l
+MP_MBOXDIR	FolderDir	M_EMPTYSTRING
+MP_MIMETYPES	MimeTypes	"mime.types"
+MP_MODULES	Modules	"Filters"
+MP_MSGS_RESORT_ON_CHANGE	ReSortMessagesOnChange	0l
+MP_MSGS_SEARCH_ARG	SearchArgument	"foo"
+MP_MSGS_SEARCH_CRIT	SearchCriterium	0l
+MP_MSGS_SORTBY	SortMessagesBy	55l
+MP_MSGS_USE_THREADING	ThreadMessages	1l
+MP_MSGVIEW_ALL_HEADERS	MsgViewAllHeaders	\
+MP_MSGVIEW_AUTO_ENCODING	MsgViewAutoDetectEnc	1
+MP_MSGVIEW_DEFAULT_ENCODING	DefEncoding	(long)wxFONTENCODING_DEFAULT
+MP_MSGVIEW_HEADERS	MsgViewHeaders	\
+MP_MVIEW_BGCOLOUR	MViewBgColour	"white"
+MP_MVIEW_FGCOLOUR	MViewFgColour	"black"
+MP_MVIEW_FONT	MViewFont	0L
+MP_MVIEW_FONT_SIZE	MViewFontSize	12L
+MP_MVIEW_HEADER_NAMES_COLOUR	MViewHeaderNamesColour	"blue"
+MP_MVIEW_HEADER_VALUES_COLOUR	MViewHeaderValuesColour	"black"
+MP_MVIEW_QUOTED_COLOUR1	MViewQuotedColour1	"gray"
+MP_MVIEW_QUOTED_COLOUR2	MViewQuotedColour2	"gray"
+MP_MVIEW_QUOTED_COLOUR3	MViewQuotedColour3	"gray"
+MP_MVIEW_QUOTED_COLOURIZE	MViewQuotedColourized	1L
+MP_MVIEW_QUOTED_CYCLE_COLOURS	MViewQuotedCycleColours	0L
+MP_MVIEW_QUOTED_MAXALPHA	MViewQuotedMaxAlpha	3L
+MP_MVIEW_QUOTED_MAXWHITESPACE	MViewQuotedMaxWhitespace	2L
+MP_MVIEW_URLCOLOUR	MViewUrlColour	"blue"
+MP_NET_CONNECTION	RasConnection	"RasConnection"
+MP_NET_OFF_COMMAND	NetOnCommand	"killall pppd"
+MP_NET_ON_COMMAND	NetOffCommand	"wvdial"
+MP_NEWMAILCOMMAND	OnNewMail	"/usr/bin/play "M_BASEDIR"/newmail.wav" or ""
+MP_NEWMAIL_FOLDER	NewMailFolder	"" // obsolete
+MP_NEWS_SPOOL_DIR	NewsSpool	M_EMPTYSTRING
+MP_NNTPHOST	NewsHost	"news"
+MP_NNTPHOST_FB	news"
+MP_NNTPHOST_LOGIN	NewsHostLogin	""
+MP_NNTPHOST_PASSWORD	NewsHostPw	""
+MP_NNTPHOST_USE_SSL	NewsHostSSL	0l
+MP_OLD_FOLDER_HOST	HostName"
+MP_OPENFOLDERS	OpenFolders	M_EMPTYSTRING
+MP_OPEN_ON_CLICK	ClickToOpen	0l
+MP_OUTBOX_NAME	OutBoxName	""
+MP_OUTGOINGFOLDER	SentMailFolder	"" // obsolete
+MP_PATHLIST	PathList	M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+MP_PERSONALNAME	PersonalName	M_EMPTYSTRING
+MP_POLLINCOMINGDELAY	PollIncomingDelay	300
+MP_POPHOST	Pop3Host	"pop"
+MP_PREFIXPATH	PrefixPath	"/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp"
+MP_PREVIEW_ON_SELECT	PreviewOnSelect	1l
+MP_PRINT_BOTTOMMARGIN_X	PrintMarginRight	0l
+MP_PRINT_BOTTOMMARGIN_Y	PrintMarginBottom	0l
+MP_PRINT_COLOUR	PrintUseColour	1
+MP_PRINT_COMMAND	PrintCommand	"lpr"
+MP_PRINT_FILE	PrintFilenname	"mahogany.ps"
+MP_PRINT_MODE	PrintMode	0  /* PS_PRINTER */
+MP_PRINT_OPTIONS	PrintOptions	""
+MP_PRINT_ORIENTATION	PrintOrientation	1  /* wxPORTRAIT */
+MP_PRINT_PAPER	PrintPaperType	0L
+MP_PRINT_PREVIEWZOOM	PrintPreviewZoom	100l
+MP_PRINT_TOPMARGIN_X	PrintMarginLeft	0l
+MP_PRINT_TOPMARGIN_Y	PrintMarginTop	0l
+MP_PROFILE_EXTENSION	ProfileExtension	".profile"
+MP_PROFILE_IDENTITY	ProfileId	""
+MP_PROFILE_PATH	ProfilePath	"."
+MP_PROFILE_TYPE	ProfileType	0l
+MP_PYTHONPATH	PythonPath	M_EMPTYSTRING
+MP_RECORDDEFAULTS	RecordDefaults	0l
+MP_REPLY_COLLAPSE_PREFIX	CollapseReplyPrefix	2l
+MP_REPLY_MSGPREFIX	ReplyQuote	"> "
+MP_REPLY_MSGPREFIX_FROM_SENDER	ReplyQuoteUseSender	0l
+MP_REPLY_PREFIX	ReplyPrefix	"Re: "
+MP_REPLY_QUOTE_EMPTY	ReplyQuoteEmpty	1l
+MP_RETURN_ADDRESS	ReturnAddress	M_EMPTYSTRING
+MP_RFC822_IS_TEXT	Rfc822IsText	0l
+MP_ROOTDIRNAME	RootDirectoryName	"Mahogany"
+MP_RSH_PATH	RshPath	"rsh"
+MP_SENDMAILCMD	SendmailCmd	"/usr/lib/sendmail -t"
+MP_SET_REPLY_FROM_TO	ReplyEqualsTo	0l
+MP_SHOWADBEDITOR	ShowAdb	0L
+MP_SHOWBCC	ShowBCC	1
+MP_SHOWCC	ShowCC	1
+MP_SHOWCONSOLE	ShowConsole	1
+MP_SHOWHEADERS	ShowHeaders	0l
+MP_SHOWLOG	ShowLog	1
+MP_SHOWSPLASH	ShowSplash	1
+MP_SHOWTIPS	ShowTips	1L
+MP_SHOW_HIDDEN_FOLDERS	ShowHiddenFolders	0l
+MP_SHOW_NEWMAILINFO	ShowNewMailInfo	10
+MP_SHOW_NEWMAILMSG	ShowNewMail	1
+MP_SHOW_XFACES	ShowXFaces	1
+MP_SMTPHOST	MailHost	"mail"
+MP_SMTPHOST_FB	localhost"
+MP_SMTPHOST_LOGIN	MailHostLogin	""
+MP_SMTPHOST_PASSWORD	MailHostPw	""
+MP_SMTPHOST_USE_SSL	MailHostSSL	0l
+MP_SPLASHDELAY	SplashDelay	5
+MP_SSH_PATH	SshPath	"ssh"
+MP_SSL_DLL_CRYPTO	CryptoDll	"libcrypto.dll" or "libcrypto.so.0"
+MP_SSL_DLL_SSL	SSLDll	"libssl.dll" or "libssl.so.0"
+MP_STARTUPSCRIPT	StartupScript	"Minit"
+MP_SYNC_DATE	SyncDate	0L
+MP_SYNC_FILTERS	SyncFilters	0L
+MP_SYNC_FOLDER	SyncFolder	"MahoganySharedConfig"
+MP_SYNC_FOLDERGROUP	SyncFolderGroup	""
+MP_SYNC_FOLDERS	SyncFolders	0L
+MP_SYNC_IDS	SyncIds	0L
+MP_SYNC_REMOTE	SyncRemote	0L
+MP_TCP_CLOSETIMEOUT	TCPCloseTimeout	60l
+MP_TCP_OPENTIMEOUT	TCPOpenTimeout	10l
+MP_TCP_READTIMEOUT	TCPReadTimeout	30l
+MP_TCP_RSHTIMEOUT	TCPRshTimeout	0l
+MP_TCP_SSHTIMEOUT	TCPSshTimeout	0l
+MP_TCP_WRITETIMEOUT	TCPWriteTimeout	30l
+MP_TEMPLATE_FOLLOWUP	Followup"
+MP_TEMPLATE_FORWARD	Forward"
+MP_TEMPLATE_NEWARTICLE	NewArticle"
+MP_TEMPLATE_NEWMESSAGE	NewMessage"
+MP_TEMPLATE_REPLY	Reply"
+MP_TESTENTRY	TestEntry	0L
+MP_TIFF2PS	FaxToPS	"tiff2ps -ap %s -O %s"
+MP_TMPGFXFORMAT	ConvertGfxFormat	2
+MP_TRASH_FOLDER	TrashFolder	""
+MP_UMASK	Umask	022
+MP_UPDATEINTERVAL	UpdateInterval	180
+MP_USEOUTGOINGFOLDER	KeepCopies	1
+MP_USEPYTHON	UsePython	1
+MP_USERDIR	UserDirectory	M_EMPTYSTRING
+MP_USERLEVEL	Userlevel	M_USERLEVEL_NOVICE
+MP_USERNAME	UserName	M_EMPTYSTRING
+MP_USER_MDIR	MDirName	".M"
+MP_USEVCARD	UseVCard	0l
+MP_USE_NEWMAILCOMMAND	CommandOnNewMail	0l
+MP_USE_OUTBOX	UseOutBox	1l
+MP_USE_SENDMAIL	UseSendmail	0l
+MP_USE_TRASH_FOLDER	UseTrash	1l
+MP_VCARD	VCard	"vcard.vcf"
+MP_VERSION	Version	M_EMPTYSTRING
+MP_VIEW_AUTOMATIC_WORDWRAP	ViewAutoWrap	1l
+MP_VIEW_WRAPMARGIN	ViewWrapMargin	70
+MP_WIDTH	Width	600
+MP_WRAPMARGIN	WrapMargin	60
+MP_XPOS	XPos	20
+MP_YPOS	YPos	50
+
+vi: set ts=40 noet nolist tw=0:
