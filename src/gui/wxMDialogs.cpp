@@ -3350,8 +3350,17 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
    wxStaticText *label;
 
    wxStaticBox *box = CreateStdButtonsAndBox(
-      wxString::Format(_("Please enter login/password for the folder '%s'"),
+      wxString::Format(_("Folder '%s':"),
                        folderName.c_str()));
+
+   label = new wxStaticText(this, -1,
+                            _("Please enter login/password to access this folder"));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->height.AsIs();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
 
    wxArrayString labels;
    labels.Add(_("&Username: "));
@@ -3359,12 +3368,12 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
 
    long widthMax = GetMaxLabelWidth(labels, this);
 
-   label = new wxStaticText(this, -1, labels[0]);
    c = new wxLayoutConstraints;
    c->width.Absolute(widthMax);
    c->height.AsIs();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->top.Below(label, 2*LAYOUT_Y_MARGIN);
+   label = new wxStaticText(this, -1, labels[0]);
    label->SetConstraints(c);
 
    m_textUser = new wxTextCtrl(this, -1, "");
@@ -3393,7 +3402,7 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
    c->height.AsIs();
    m_textPwd->SetConstraints(c);
 
-   SetDefaultSize(4*wBtn, 2*hBtn);
+   SetDefaultSize(5*wBtn, 7*hBtn);
 }
 
 bool MPasswordDialog::TransferDataToWindow()
