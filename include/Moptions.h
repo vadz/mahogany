@@ -301,6 +301,7 @@ extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_PREVIEW_DELAY;
 extern const MOption MP_FVIEW_VERTICAL_SPLIT;
 extern const MOption MP_FVIEW_FVIEW_TOP;
+extern const MOption MP_FVIEW_AUTONEXT_ON_COMMAND;
 
 // folder tree
 extern const MOption MP_FTREE_LEFT;
@@ -1004,6 +1005,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_FVIEW_FROM_REPLACE_NAME _T("ReplaceFrom")
 /// the ':' separated list of addresses which are "from oneself"
 #define MP_FROM_REPLACE_ADDRESSES_NAME _T("ReplaceFromAdr")
+/// Automatically focus next message after copy, mark (un)read, etc.
+#define MP_FVIEW_AUTONEXT_ON_COMMAND_NAME _T("FViewAutoNextOnCommand")
 //@}
 /**@name  Font settings for folder tree */
 //@{
@@ -1966,6 +1969,9 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define MP_FVIEW_VERTICAL_SPLIT_DEFVAL 0L
 /// put folder view on top and msg view on bottom or vice versa?
 #define MP_FVIEW_FVIEW_TOP_DEFVAL 1L
+/// Should many commands like copy,mark (un)read, etc., automatically go to the next message
+#define MP_FVIEW_AUTONEXT_ON_COMMAND_DEFVAL 1L
+
 //@}
 /**@name Font settings for folder tree */
 //@{

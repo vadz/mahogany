@@ -396,6 +396,7 @@ enum ConfigFields
    ConfigField_FolderViewPreviewHelp,
    ConfigField_FolderViewPreviewOnSelect,
    ConfigField_FolderViewSelectInitially,
+   ConfigField_FolderViewAutoNextOnCommand,
 
    ConfigField_FolderViewAutoNextHelp,
    ConfigField_FolderViewAutoNextMsg,
@@ -1463,6 +1464,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message,    -1 },
    { gettext_noop("Preview message when &selected"), Field_Bool,  -1 },
    { gettext_noop("&Select the initial message"),    Field_Bool,  ConfigField_FolderViewPreviewOnSelect },
+   { gettext_noop("Go to next message on command"),  Field_Bool,  -1},
 
    { gettext_noop("\nWhat happens when you scroll down beyond "
                   "the end of the current message?\n"
@@ -2016,6 +2018,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_ENTRY(MP_AUTOSHOW_SELECT),
+   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_ON_COMMAND),
 
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),

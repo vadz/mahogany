@@ -158,6 +158,7 @@ extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_PREVIEW_ON_SELECT;
 extern const MOption MP_USE_TRASH_FOLDER;
+extern const MOption MP_FVIEW_AUTONEXT_ON_COMMAND;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -4257,6 +4258,11 @@ wxFolderView::HandleMsgViewCharEvent(wxKeyEvent& event)
 void
 wxFolderView::UpdateFocusAfterCommand(int cmd)
 {
+   Profile *profile = m_Profile ? m_Profile : mApplication->GetProfile();
+   if (!READ_CONFIG(profile, MP_FVIEW_AUTONEXT_ON_COMMAND))
+   {
+      return;
+   }
    switch ( cmd )
    {
       case WXMENU_MSG_SAVE_TO_FOLDER:
