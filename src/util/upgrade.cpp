@@ -2852,7 +2852,7 @@ VerifyStdFolders(void)
             "dialog at any time."
            ),
           NULL,
-          NULL,
+          MDIALOG_MSGTITLE,
           "WarnInbox"
          );
       }
