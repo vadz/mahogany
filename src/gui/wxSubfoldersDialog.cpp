@@ -411,7 +411,7 @@ wxString wxSubfoldersTree::GetRelativePath(wxTreeItemId id) const
       ASSERT_MSG( m_chDelimiter, _T("should know folder name separator by now!") );
 
       path.Prepend(GetItemText(id) + m_chDelimiter);
-      id = GetParent(id);
+      id = GetItemParent(id);
    }
 
    return path;
@@ -990,7 +990,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       {
          components.Add(m_treectrl->GetItemText(id));
          ids.Add(id);
-         id = m_treectrl->GetParent(id);
+         id = m_treectrl->GetItemParent(id);
       }
 
       size_t levelMax = components.GetCount();

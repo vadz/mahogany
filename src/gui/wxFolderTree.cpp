@@ -2119,7 +2119,7 @@ wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
             if ( idNext.IsOk() )
                break;
 
-            idParent = GetParent(idParent);
+            idParent = GetItemParent(idParent);
          }
       }
    }
@@ -2129,7 +2129,7 @@ wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
       if ( !idNext.IsOk() )
       {
          // simple case: our previous item is our parent
-         idNext = GetParent(id);
+         idNext = GetItemParent(id);
       }
       else // find the last child of our previous sibling now
       {
@@ -2804,7 +2804,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
             if ( IsHidden(GetFolderTreeNode(item)) != m_curIsHidden )
             {
                // reexpand just the parent of this folder
-               idToReopen = GetParent(item);
+               idToReopen = GetItemParent(item);
 
                m_curIsHidden = !m_curIsHidden;
             }
@@ -2962,7 +2962,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             wxTreeItemId item = GetTreeItemFromName(folderName);
             CHECK_RET( item.IsOk(), _T("no such item in the tree??") );
 
-            wxTreeItemId parent = GetParent(item);
+            wxTreeItemId parent = GetItemParent(item);
 
             // if the deleted folder was either the tree ctrl selection or was
             // opened (these 2 folders may be different), refresh

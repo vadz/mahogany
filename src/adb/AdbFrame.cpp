@@ -1783,7 +1783,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       }
 
       // move upwards
-      id2 = m_treeAdb->GetParent(id2);
+      id2 = m_treeAdb->GetItemParent(id2);
     }
   }
 
