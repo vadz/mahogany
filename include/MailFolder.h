@@ -43,6 +43,7 @@ WX_DEFINE_ARRAY(UIdType, UIdArray);
 // forward declarations
 class FolderView;
 class Profile;
+class MFolder;
 class MFrame;
 class MWindow;
 class Message;
@@ -227,7 +228,7 @@ public:
 
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
-   static MailFolder * OpenFolder(const class MFolder *mfolder);
+   static MailFolder * OpenFolder(const MFolder *mfolder);
 
    /** This opens a mailfolder from either a profile of that name, or,
        if it is an absolute path, from a file of that name.
@@ -237,8 +238,25 @@ public:
                                   Profile *profile = NULL);
 
    /** Half open the folder using paremeters from MFolder object. */
-   static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
+   static MailFolder * HalfOpenFolder(const MFolder *mfolder,
                                       Profile *profile = NULL);
+
+   /**
+      Closes the folder: this is always safe to call, even if this folder is
+      not opened at all. OTOH, if it is opened, this function will always
+      close it (i.e. break any connection to server).
+
+      @param folder identifies the folder to be closed
+      @return true if the folder was closed, false if it wasn't opened
+    */
+   static bool CloseFolder(const MFolder *mfolder);
+
+   /**
+      Closes all currently opened folders
+
+      @return the number of folders closed, -1 on error
+    */
+   static int CloseAll();
    //@}
 
    /** Phyically deletes this folder.

@@ -708,10 +708,10 @@ wxConfigBase * Profile::ms_GlobalConfig;
 /** This function sets profile parameters and is applied
     to all profiles directly after creation.
 */
-inline static
+static inline
 void EnforcePolicy(Profile *p)
 {
-   p->SetExpandEnvVars(true);
+   // currently we don't do anything here
 }
 
 Profile *
@@ -814,6 +814,7 @@ Profile::CreateGlobalConfig(const String & filename)
    // among other things, the passwords
    ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
 #  endif // Unix/Windows
+
    Profile *p = ProfileImpl::CreateProfile("",NULL);
    EnforcePolicy(p);
    return p;

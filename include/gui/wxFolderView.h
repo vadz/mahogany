@@ -1,10 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxFolderView.h: a window displaying a mail folder                *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$          *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany
+// File name:   gui/wxFolderView.h - wxFolderView and related classes
+// Purpose:     wxFolderView is used to show to the user folder contents
+// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef WXFOLDERVIEW_H
 #define WXFOLDERVIEW_H
@@ -43,8 +47,10 @@ enum wxFolderListCtrlFields
    WXFLC_NONE = WXFLC_NUMENTRIES // must be equal for GetColumnByIndex()
 };
 
+// ----------------------------------------------------------------------------
+// wxFolderView: allows the user to view messages in the folder
+// ----------------------------------------------------------------------------
 
-/** a wxWindows FolderView class */
 class wxFolderView : public FolderView
 {
 public:
@@ -52,6 +58,9 @@ public:
        @param parent   the parent window
    */
    static wxFolderView *Create(MWindow *parent = NULL);
+
+   /// first time constructor
+   wxFolderView(wxWindow *parent);
 
    /// Destructor
    ~wxFolderView();
@@ -62,7 +71,7 @@ public:
    /** Set the associated folder.
        @param folder the folder to display or NULL
    */
-   void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
+   virtual void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
 
    /** Open folder from profile and display.
        @param profilename the name of the folder profile
@@ -182,6 +191,8 @@ public:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// update the folderview
    virtual void OnFolderExpungeEvent(MEventFolderExpungeData &event);
+   /// close the folder
+   virtual void OnFolderClosedEvent(MEventFolderClosedData &event);
    /// update the folderview
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
    /// the derived class should react to the result to an asynch operation
@@ -218,8 +229,6 @@ protected:
 private:
    /// profile name
    wxString m_ProfileName;
-   /// first time constructor
-   wxFolderView(wxWindow *parent);
 
    /// the number of messages in the folder when last updated
    unsigned long m_NumOfMessages;
@@ -329,6 +338,9 @@ private:
    friend class wxFolderListCtrl;
 };
 
+// ----------------------------------------------------------------------------
+// wxFolderViewFrame: a frame containing just a folder view
+// ----------------------------------------------------------------------------
 
 class wxFolderViewFrame : public wxMFrame
 {

@@ -2939,21 +2939,24 @@ wxFolderView::SaveMessagesToFile(const UIdArray& selections)
    wxLogStatus(m_Frame, msg);
 }
 
+void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
+{
+   if ( event.GetFolder() == m_MailFolder )
+   {
+      SetFolder(NULL);
+   }
+}
+
 void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 {
    if ( folderName == m_folderName )
    {
-      if ( m_Parent->IsKindOf(CLASSINFO(wxFrame)) )
-      {
-         wxLogMessage(_("Closing folder '%s' because the underlying mail "
-                        "folder was deleted."), m_folderName.c_str());
+      // assume we're in a folder view frame
+      wxLogStatus(GetFrame(m_Parent),
+                  _("Closing folder '%s' because the underlying mail "
+                    "folder was deleted."), m_folderName.c_str());
 
-         m_Parent->Close();
-      }
-   }
-   else // main frame splitter
-   {
-      SetFolder(NULL, true);
+      SetFolder(NULL);
    }
 }
 

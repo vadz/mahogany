@@ -60,8 +60,11 @@
 // private classes
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
 // override wxFolderTree OnOpenHere() function to open the folder in this
 // frame and OnClose() to close it
+// ----------------------------------------------------------------------------
+
 class wxMainFolderTree : public wxFolderTree
 {
 public:
@@ -96,13 +99,41 @@ public:
 
    virtual bool OnClose(MFolder *folder)
    {
+      if ( !wxFolderTree::OnClose(folder) )
+         return false;
+
       m_frame->CloseFolder(folder);
 
-      return TRUE;
+      return true;
    }
 
 private:
    wxMainFrame *m_frame;
+};
+
+// ----------------------------------------------------------------------------
+// wxMainFolderView: the folder view which keeps our m_folderName in sync
+// ----------------------------------------------------------------------------
+
+class wxMainFolderView : public wxFolderView
+{
+public:
+   wxMainFolderView(wxWindow *parent, wxMainFrame *mainFrame)
+      : wxFolderView(parent)
+   {
+      m_mainFrame = mainFrame;
+   }
+
+   virtual void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE)
+   {
+      if ( !mf )
+         m_mainFrame->ClearFolderName();
+
+      wxFolderView::SetFolder(mf, recreateFolderCtrl);
+   }
+
+private:
+   wxMainFrame *m_mainFrame;
 };
 
 // ----------------------------------------------------------------------------
@@ -176,7 +207,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
-   m_FolderView = wxFolderView::Create(m_splitter);
+   m_FolderView = new wxMainFolderView(m_splitter, this);
    m_splitter->SplitVertically(m_FolderTree->GetWindow(),
                                m_FolderView->GetWindow(),
                                x/3);
@@ -207,7 +238,7 @@ wxMainFrame::CloseFolder(MFolder *folder)
    {
       m_FolderView->SetFolder(NULL);
 
-      m_folderName.clear();
+      //m_folderName.clear(); -- now done in our ClearFolderName()
    }
    //else: otherwise, we don't have it opened
 }
@@ -402,6 +433,20 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             }
             break;
 
+         case WXMENU_FOLDER_CLOSEALL:
+            {
+               int nClosed = MailFolder::CloseAll();
+               if ( nClosed < 0 )
+               {
+                  wxLogError(_("Failed to close all opened folders."));
+               }
+               else
+               {
+                  wxLogStatus(this, _("Closed %d folders."), nClosed);
+               }
+            }
+            break;
+
          default:
             // all others are processed by the folder tree
             m_FolderTree->ProcessMenuCommand(id);
@@ -414,9 +459,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
              id == WXMENU_FILE_COMPOSE ||
              id == WXMENU_FILE_POST ||
              id == WXMENU_EDIT_COPY ) )
+   {
       m_FolderView->OnCommandEvent(event);
+   }
    else if(id == WXMENU_HELP_CONTEXT)
+   {
       mApplication->Help(MH_MAIN_FRAME,this);
+   }
    else
    {
       wxMFrame::OnMenuCommand(id);

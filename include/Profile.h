@@ -259,6 +259,7 @@ private:
 // ----------------------------------------------------------------------------
 // a small class to temporarily suspend env var expansion
 // ----------------------------------------------------------------------------
+
 class ProfileEnvVarSave
 {
 public:
@@ -277,7 +278,7 @@ public:
 
 private:
   Profile *m_profile;
-  bool         m_wasExpanding;
+  bool     m_wasExpanding;
 };
 
 
@@ -317,4 +318,5 @@ void SaveArray(Profile *conf, const wxArrayString& astr, const String & key);
 void RestoreArray(Profile * conf, wxArrayString& astr, const String & key);
 
 //@}
+
 #endif // PROFILE_H

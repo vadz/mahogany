@@ -53,6 +53,8 @@ protected:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
    /// update the folderview
    virtual void OnFolderExpungeEvent(MEventFolderExpungeData &event) = 0;
+   /// close the folderview
+   virtual void OnFolderClosedEvent(MEventFolderClosedData &event) = 0;
    /// the derived class should update their display
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event) = 0;
    /// the derived class should react to the result of an async operation
@@ -76,6 +78,7 @@ private:
    void *m_regCookieTreeChange,
         *m_regCookieFolderUpdate,
         *m_regCookieFolderExpunge,
+        *m_regCookieFolderClosed,
         *m_regCookieASFolderResult,
         *m_regCookieMsgStatus,
         *m_regCookieAppExit;

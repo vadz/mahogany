@@ -1580,6 +1580,53 @@ MailFolderCC::Open(void)
    return true;   // success
 }
 
+/* static */
+bool
+MailFolderCC::CloseFolder(const MFolder *folder)
+{
+   // find the mailstream
+   MailFolderCC *mf = FindFolder(folder);
+   if ( !mf )
+   {
+      // nothing to close
+      return false;
+   }
+
+   mf->Close();
+
+   return true;
+}
+
+/* static */
+int
+MailFolderCC::CloseAll()
+{
+   size_t count = ms_StreamList.size();
+   StreamConnection **connections = new StreamConnection *[count];
+
+   size_t n = 0;
+   for ( StreamConnectionList::iterator i = ms_StreamList.begin();
+         i != ms_StreamList.end();
+         i++ )
+   {
+      connections[n++] = *i;
+   }
+
+   for ( n = 0; n < count; n++ )
+   {
+      MailFolderCC *mf = connections[n]->folder;
+
+      mf->Close();
+
+      // notify any opened folder views
+      MEventManager::Send(new MEventFolderClosedData(mf) );
+   }
+
+   delete [] connections;
+
+   return count;
+}
+
 bool
 MailFolderCC::IsAlive() const
 {
@@ -1722,7 +1769,8 @@ MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 }
 
 // this function should normally always return a non NULL folder
-/* static */ MailFolderCC *
+/* static */
+MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
    MailFolderCC *mf = LookupStream(stream);
@@ -1762,6 +1810,22 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
    return NULL;
 }
 
+/* static */
+MailFolderCC *
+MailFolderCC::FindFolder(const MFolder* folder)
+{
+   String login = folder->GetLogin();
+   String mboxpath = MailFolder::GetImapSpec
+                     (
+                      folder->GetType(),
+                      folder->GetFlags(),
+                      folder->GetPath(),
+                      folder->GetServer(),
+                      login
+                     );
+
+   return FindFolder(mboxpath, login);
+}
 
 /* static */
 MailFolderCC *
@@ -2046,16 +2110,15 @@ MailFolderCC::Ping(void)
 void
 MailFolderCC::Close()
 {
-   /*
-     DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
-     THE OBJECT *WILL* DISAPPEAR!
-   */
-
-   CCAllDisabler no;
-
-   if( m_MailStream )
+   if ( m_MailStream )
    {
-      if(!NeedsNetwork() || mApplication->IsOnline())
+      /*
+         DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
+         THE OBJECT *WILL* DISAPPEAR!
+       */
+      CCAllDisabler no;
+
+      if ( !NeedsNetwork() || mApplication->IsOnline() )
       {
          if ( !m_MailStream->halfopen )
          {
@@ -2065,8 +2128,12 @@ MailFolderCC::Close()
 
          mail_close(m_MailStream);
       }
-      else
-         gs_CCStreamCleaner->Add(m_MailStream); // delay closing
+      else // a remote folder but we're not connected
+      {
+         // delay closing
+         gs_CCStreamCleaner->Add(m_MailStream);
+      }
+
       m_MailStream = NIL;
    }
 }

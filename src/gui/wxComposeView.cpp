@@ -326,8 +326,9 @@ public:
    }
 
    // expand the text in the control using the address book(s): returns FALSE
-   // if no expansion took place
-   bool DoExpand();
+   // if no expansion took place (and also show a message in the status bar
+   // about this unless quiet is true)
+   bool DoExpand(bool quiet = false);
 
    // callbacks
    void OnFocusSet(wxFocusEvent& event);
@@ -365,7 +366,7 @@ public:
       }
 
    // add the new recipient fields for the addresses currently entered
-   void AddNewRecipients();
+   void AddNewRecipients(bool quiet = false);
 
    // callbacks
    void OnEnter(wxCommandEvent& event);
@@ -705,7 +706,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    event.Skip();
 }
 
-bool wxAddressTextCtrl::DoExpand()
+bool wxAddressTextCtrl::DoExpand(bool quiet)
 {
    // try to expand the last component
    String text = GetValue();
@@ -718,8 +719,11 @@ bool wxAddressTextCtrl::DoExpand()
    if ( text.IsEmpty() || text == '"' )
    {
       // don't do anything
-      wxLogStatus(GetComposer(),
-                  _("Nothing to expand - please enter something."));
+      if ( !quiet )
+      {
+         wxLogStatus(GetComposer(),
+                     _("Nothing to expand - please enter something."));
+      }
 
       return FALSE;
    }
@@ -771,11 +775,15 @@ bool wxAddressTextCtrl::DoExpand()
       }
    }
 
+   String textOrig = text.c_str() + nLastAddr;
+
+   // remove "mailto:" prefix if it's there - this is convenient when you paste
+   // in an URL from the web browser
+   (void)textOrig.StartsWith("mailto:", &textOrig);
+
    wxArrayString expansions;
-   if ( AdbExpand(expansions,
-                  text.c_str() + nLastAddr,
-                  m_lookupMode,
-                  GetComposer()) )
+   if ( AdbExpand(expansions, textOrig, m_lookupMode,
+                  quiet ? NULL : GetComposer()) )
    {
       // find the end of the previous address
       size_t nPrevAddrEnd;
@@ -843,10 +851,10 @@ bool wxAddressTextCtrl::DoExpand()
 // wxNewAddressTextCtrl
 // ----------------------------------------------------------------------------
 
-void wxNewAddressTextCtrl::AddNewRecipients()
+void wxNewAddressTextCtrl::AddNewRecipients(bool quiet)
 {
    // expand before adding (make this optional?)
-   DoExpand();
+   DoExpand(quiet);
 
    // add new recipient(s)
    m_composeView->AddRecipients(GetValue());
@@ -2597,7 +2605,7 @@ wxComposeView::IsReadyToSend() const
    }
 
    // take into account any recipients still in the "new address" field
-   m_txtRecipient->AddNewRecipients();
+   m_txtRecipient->AddNewRecipients(true /* quiet */);
 
    // did we forget the recipients?
    if ( GetRecipients(Recipient_To).empty() )

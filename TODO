@@ -2,13 +2,16 @@
 TODO list for Mahogany
 $Id$
 
-*** PLEASE DO NOT USE THIS FILE ANYMORE BUT ADD NEW BUGS
-    TO THE BUGTRACKER at http://mahogany.sourceforge.net/bugz/
+*** please do not use this file anymore but add new bugs
+    to the bugtracker at http://mahogany.sourceforge.net/bugz/
 
-    JUST CONTINUE TO REMOVE BUGS FROM THIS LIST AS THEY ARE 
-    FIXED.
+    just continue to remove bugs from this list as they are 
+    fixed.
 
-************ optimize
+    CLOSE ALL doesn't work
+    CLOSE doesn't take effect "immediately"
+
+************ optimize (MSW)
 
 1. wxIconManager::LoadImageXpm() is very slow
 
@@ -18,10 +21,10 @@ $Id$
 
 4. print data in OnInit() shouldn't be allocated initially, only on demand
 
-5. make env var expansion optional and disable it by default under Windows
-   (takes half a second just for itself!)
++5. make env var expansion optional and disable it by default under Windows
+    (takes half a second just for itself!)
 
-6. wxColourDisplay() should cache the result
++6. wxColourDisplay() should cache the result
 
 ************ possible cclient improvements (from reading PINE sources)
 

@@ -426,6 +426,21 @@ MailFolder::OpenFolder(int folderType,
 
 /* static */
 bool
+MailFolder::CloseFolder(const MFolder *mfolder)
+{
+   // for now there is only one implementation to call:
+   return MailFolderCC::CloseFolder(mfolder);
+}
+
+/* static */
+int
+MailFolder::CloseAll()
+{
+   return MailFolderCC::CloseAll();
+}
+
+/* static */
+bool
 MailFolder::DeleteFolder(const MFolder *mfolder)
 {
    if ( !Init() )

@@ -46,6 +46,7 @@ FolderView::FolderView()
             MEventId_FolderTreeChange,  &m_regCookieTreeChange,
             MEventId_FolderUpdate,      &m_regCookieFolderUpdate,
             MEventId_FolderExpunge,     &m_regCookieFolderExpunge,
+            MEventId_FolderClosed,      &m_regCookieFolderClosed,
             MEventId_MsgStatus,         &m_regCookieMsgStatus,
             MEventId_ASFolderResult,    &m_regCookieASFolderResult,
             MEventId_AppExit,           &m_regCookieAppExit,
@@ -61,6 +62,7 @@ void FolderView::DeregisterEvents(void)
     MEventManager::DeregisterAll(&m_regCookieTreeChange,
                                  &m_regCookieFolderUpdate,
                                  &m_regCookieFolderExpunge,
+                                 &m_regCookieFolderClosed,
                                  &m_regCookieMsgStatus,
                                  &m_regCookieASFolderResult,
                                  &m_regCookieAppExit,
@@ -78,13 +80,15 @@ FolderView::~FolderView()
 bool FolderView::OnMEvent(MEventData& ev)
 {
     if ( ev.GetId() == MEventId_MsgStatus )
-        OnMsgStatusEvent((MEventMsgStatusData&)ev );
+        OnMsgStatusEvent((MEventMsgStatusData&)ev);
     else if ( ev.GetId() == MEventId_FolderExpunge )
-        OnFolderExpungeEvent((MEventFolderExpungeData&)ev );
+        OnFolderExpungeEvent((MEventFolderExpungeData&)ev);
     else if ( ev.GetId() == MEventId_FolderUpdate )
-        OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
+        OnFolderUpdateEvent((MEventFolderUpdateData&)ev);
     else if ( ev.GetId() == MEventId_ASFolderResult )
-        OnASFolderResultEvent((MEventASFolderResultData &) ev );
+        OnASFolderResultEvent((MEventASFolderResultData &)ev);
+    else if ( ev.GetId() == MEventId_FolderClosed )
+        OnFolderClosedEvent((MEventFolderClosedData &)ev);
     else if ( ev.GetId() == MEventId_FolderTreeChange )
     {
         MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;

@@ -150,6 +150,8 @@ enum MFolderIndex
 #define   MP_FIRSTRUN         "FirstRun"
 /// shall we record default values in configuration files
 #define   MP_RECORDDEFAULTS      "RecordDefaults"
+/// expand env vars in entries read from config?
+#define   MP_EXPAND_ENV_VARS  "ExpandEnvVars"
 /// default position x
 #define   MP_XPOS            "XPos"
 /// default position y
@@ -785,6 +787,12 @@ enum MFolderIndex
 #define   MP_FIRSTRUN_D         1
 /// shall we record default values in configuration files
 #define   MP_RECORDDEFAULTS_D      0l
+/// expand env vars in entries read from config?
+#ifdef OS_WIN
+#define   MP_EXPAND_ENV_VARS_D 0l
+#else
+#define   MP_EXPAND_ENV_VARS_D 1l
+#endif
 /// default window position x
 #define   MP_XPOS_D        20
 /// default window position y

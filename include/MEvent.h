@@ -35,6 +35,8 @@ enum MEventId
    MEventId_FolderUpdate = 400,
    /// MEventFolderExpunge - messages were expunged from the folder
    MEventId_FolderExpunge,
+   /// MEventId_FolderClosed - the folder was closed (by user)
+   MEventId_FolderClosed,
    /// MEventMsgStatusData - message status changed
    MEventId_MsgStatus,
    /// MEventFolderStatusData - folder status changed
@@ -102,8 +104,10 @@ public:
    /** Get the folder associated.
        If you need the folder after the MEvent object disappears, you
        need to call IncRef() on it, this function does not IncRef()
-       the folder automatically! */
+       the folder automatically!
+    */
    MailFolder *GetFolder() const { return m_Folder; }
+
 private:
    MailFolder *m_Folder;
 };
@@ -204,6 +208,19 @@ public:
 
 private:
    wxArrayInt *m_delMsgnos;
+};
+
+/**
+ MEventFolderClosedData: notifies about folder closure
+ */
+class MEventFolderClosedData : public MEventWithFolderData
+{
+public:
+   // ctor takes the array of deleted msgnos which will be deleted by us
+   MEventFolderClosedData(MailFolder *folder)
+      : MEventWithFolderData(MEventId_FolderClosed, folder)
+      {
+      }
 };
 
 /**

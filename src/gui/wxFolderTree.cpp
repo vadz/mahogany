@@ -309,6 +309,7 @@ protected:
 
    void DoFolderCreate();
    void DoFolderDelete(bool removeOnly = TRUE);
+   void DoFolderClose();
 
    void DoBrowseSubfolders();
 
@@ -346,6 +347,7 @@ private:
          Remove = WXMENU_FOLDER_REMOVE,
          Delete = WXMENU_FOLDER_DELETE,
          Rename = WXMENU_FOLDER_RENAME,
+         Close = WXMENU_FOLDER_CLOSE,
          BrowseSub = WXMENU_FOLDER_BROWSESUB,
          Properties = WXMENU_FOLDER_PROP,
          ShowHidden
@@ -367,6 +369,7 @@ private:
             Append(Delete, _("&Delete folder"));
          }
          Append(Rename, _("Re&name folder..."));
+         Append(Close, _("&Close folder"));
 
          AppendSeparator();
 
@@ -829,7 +832,8 @@ bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
 
 bool wxFolderTree::OnClose(MFolder *folder)
 {
-   // we don't have to close it as we don't keep it opened
+   (void)MailFolder::CloseFolder(folder);
+
    return TRUE;
 }
 
@@ -1322,6 +1326,19 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
    folder->DecRef();
 }
 
+void wxFolderTreeImpl::DoFolderClose()
+{
+   MFolder_obj folder = m_sink->GetSelection();
+   if ( !folder )
+   {
+      wxLogError(_("Please select the folder to close first."));
+
+      return;
+   }
+
+   (void)m_sink->OnClose(folder);
+}
+
 void wxFolderTreeImpl::DoBrowseSubfolders()
 {
    m_sink->OnBrowseSubfolders(m_sink->GetSelection());
@@ -1607,6 +1624,10 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
                folder->DecRef();
             }
          }
+         break;
+
+      case FolderMenu::Close:
+         DoFolderClose();
          break;
 
       case FolderMenu::BrowseSub:

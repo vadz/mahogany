@@ -116,6 +116,8 @@ public:
                                     String const &symname,
                                     bool halfopen);
 
+   static bool CloseFolder(const MFolder *mfolder);
+   static int CloseAll();
    //@}
 
    /** Phyically deletes this folder.
@@ -126,9 +128,11 @@ public:
    /// return the directory of the newsspool:
    static String GetNewsSpool(void);
 
+   /// wrapper for FindFolder() version below
+   static MailFolderCC *FindFolder(const MFolder* mfolder);
+
    /// checks whether a folder with that path exists
-   static MailFolderCC *FindFolder(String const &path,
-                                   String const &login);
+   static MailFolderCC *FindFolder(const String& path, const String& login);
 
    /** Checks if it is OK to exit the application now.
         @param which Will either be set to empty or a '\n' delimited

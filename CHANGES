@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+19.04.01 VZ: added "Close" and "Close all" folder(s) commands
 17.04.01 VZ: added message progress display
 17.04.01 VZ: added (configurable) limit on the size of inline graphics
 17.04.01 VZ: added possibility to show message size in bytes/kb/mb
