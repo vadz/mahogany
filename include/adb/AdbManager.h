@@ -100,7 +100,8 @@ private:
   AdbManager() { }
 
   // helper
-  AdbBook *FindInCache(const String& name) const;
+  AdbBook *FindInCache(const String& name,
+                       const AdbDataProvider *provider) const;
 
   static AdbManager *ms_pManager;
 

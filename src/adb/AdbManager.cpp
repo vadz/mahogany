@@ -42,7 +42,10 @@
 
 // cache: we store pointers to all already created ADBs here (it means that
 // once created they're not deleted until the next call to ClearCache)
-static ArrayAdbBooks gs_cache;
+static ArrayAdbBooks gs_booksCache;
+
+// and the provider (names) for each book
+static wxArrayString gs_provCache;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -124,7 +127,7 @@ static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
   wxASSERT( aEntries.IsEmpty() );
 
   if ( paBooks == NULL || paBooks->IsEmpty() )
-    paBooks = &gs_cache;
+    paBooks = &gs_booksCache;
 
   size_t nBookCount = paBooks->Count();
   for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
@@ -323,12 +326,14 @@ void AdbManager::Delete()
 
 // create a new address book using specified provider or trying all of them
 // if it's NULL
-AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
+AdbBook *AdbManager::CreateBook(const String& name,
+                                AdbDataProvider *provider,
                                 String *providerName)
 {
-   AdbBook * book = NULL;
+   AdbBook *book = NULL;
+
    // first see if we don't already have it
-   book = FindInCache(name);
+   book = FindInCache(name, provider);
    if ( book )
    {
       book->IncRef();
@@ -342,7 +347,8 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
     AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
     while ( info ) {
       prov = info->CreateProvider();
-      if ( prov->TestBookAccess(name, AdbDataProvider::Test_Create) ) {
+      if ( prov->TestBookAccess(name, AdbDataProvider::Test_OpenReadOnly) ||
+            prov->TestBookAccess(name, AdbDataProvider::Test_Create) ) {
         if ( providerName ) {
           // return the provider name if asked for it
           *providerName = info->szName;
@@ -359,10 +365,6 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
 
   if ( prov ) {
     book = prov->CreateBook(name);
-    if ( provider == NULL ) {
-      // only if it's the one we created, not the one which was passed in!
-      prov->DecRef();
-    }
   }
 
   if ( book == NULL ) {
@@ -370,7 +372,13 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
   }
   else {
     book->IncRef();
-    gs_cache.Add(book);
+    gs_booksCache.Add(book);
+    gs_provCache.Add(prov->GetProviderName());
+  }
+
+  if ( prov && !provider ) {
+    // only if it's the one we created, not the one which was passed in!
+    prov->DecRef();
   }
 
   return book;
@@ -378,12 +386,15 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
 
 size_t AdbManager::GetBookCount() const
 {
-  return gs_cache.Count();
+  ASSERT_MSG( gs_provCache.Count() == gs_booksCache.Count(),
+              "mismatch between gs_booksCache and gs_provCache!" );
+
+  return gs_booksCache.Count();
 }
 
 AdbBook *AdbManager::GetBook(size_t n) const
 {
-  AdbBook *book = gs_cache[n];
+  AdbBook *book = gs_booksCache[n];
   book->IncRef();
 
   return book;
@@ -426,12 +437,14 @@ void AdbManager::LoadAll()
 
 void AdbManager::ClearCache()
 {
-  size_t nCount = gs_cache.Count();
+  size_t nCount = gs_booksCache.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
-    gs_cache[n]->DecRef();
+    gs_booksCache[n]->DecRef();
   }
 
-  gs_cache.Clear();
+  gs_booksCache.Clear();
+
+  gs_provCache.Clear();
 }
 
 AdbManager::~AdbManager()
@@ -442,12 +455,19 @@ AdbManager::~AdbManager()
 // ----------------------------------------------------------------------------
 // AdbManager private methods
 // ----------------------------------------------------------------------------
-AdbBook *AdbManager::FindInCache(const String& name) const
+
+AdbBook *AdbManager::FindInCache(const String& name,
+                                 const AdbDataProvider *provider) const
 {
   AdbBook *book;
-  size_t nCount = gs_cache.Count();
+  size_t nCount = gs_booksCache.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
-    book = gs_cache[n];
+    if ( provider && provider->GetProviderName() != gs_provCache[n] ) {
+      // don't compare books belonging to different providers
+      continue;
+    }
+
+    book = gs_booksCache[n];
     if ( book->IsSameAs(name) )
       return book;
   }
@@ -463,7 +483,7 @@ AdbBook *AdbManager::FindInCache(const String& name) const
 String AdbManager::DebugDump() const
 {
   String str = MObjectRC::DebugDump();
-  str << (int)gs_cache.Count() << "books in cache";
+  str << (int)gs_booksCache.Count() << "books in cache";
 
   return str;
 }

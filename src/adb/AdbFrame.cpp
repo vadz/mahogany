@@ -1378,6 +1378,19 @@ void wxAdbEditFrame::RestoreSettings1()
     }
 
     m_astrProviders.Add(nameDef);
+
+    // under Unix, use the ADB for the users from /etc/passwd
+#ifdef OS_UNIX
+    AdbDataProvider *provPasswd =
+      AdbDataProvider::GetProviderByName("PasswdDataProvider");
+    if ( provPasswd )
+    {
+      m_astrAdb.Add("");  // no name for this provider
+      m_astrProviders.Add(provPasswd->GetProviderName());
+
+      provPasswd->DecRef();
+    }
+#endif // OS_UNIX
   }
 
   // now, m_astrAdb contains all previously opened ADBs: then copy the ones
@@ -1413,7 +1426,11 @@ void wxAdbEditFrame::RestoreSettings1()
       pProvider = AdbDataProvider::GetProviderByName(strProv);
 
     if ( pProvider ) {
-      if ( pProvider->TestBookAccess(strFile, AdbDataProvider::Test_Open) ) {
+      // we need to be able to open it at least in read only mode, this doesn't
+      // mean that we actually open it in it, i.e. it will still be read/write
+      // for the ADB providers which support it
+      if ( pProvider->TestBookAccess(strFile,
+                                     AdbDataProvider::Test_OpenReadOnly) ) {
         astrProviders.Add(strProv);
         astrAdb.Add(strFile);
       }
