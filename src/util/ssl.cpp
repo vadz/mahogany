@@ -25,6 +25,16 @@
    against these. */
 
 #include <openssl/ssl.h>
+
+// starting from 0.9.6a (I think), OpenSSL uses void, as it should, instead of
+// char
+#include <openssl/opensslv.h>
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER > 0x0090600fL)
+   #define ssl_data_t void *
+#else // old ssl
+   #define ssl_data_t char *
+#endif
+
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
 extern "C" {
@@ -49,8 +59,8 @@ SSL_DEF( int,  SSL_set_rfd, (SSL *s, int fd) );
 SSL_DEF( int,  SSL_set_wfd, (SSL *s, int fd) );
 SSL_DEF( void, SSL_set_read_ahead, (SSL *s, int yes) );
 SSL_DEF( int,  SSL_connect, (SSL *ssl) );
-SSL_DEF( int,  SSL_read, (SSL *ssl,void *buf,int num) );
-SSL_DEF( int,  SSL_write, (SSL *ssl,const void *buf,int num) );
+SSL_DEF( int,  SSL_read, (SSL *ssl,ssl_data_t buf,int num) );
+SSL_DEF( int,  SSL_write, (SSL *ssl,const ssl_data_t buf,int num) );
 SSL_DEF( int,  SSL_pending, (SSL *s) );
 SSL_DEF( int,  SSL_library_init, (void ) );
 SSL_DEF( void, SSL_load_error_strings, (void ) );
@@ -84,9 +94,9 @@ void  SSL_set_read_ahead(SSL *s, int yes)
 { (*stub_SSL_set_read_ahead)(s,yes); }
 int   SSL_connect(SSL *ssl)
 { return (*stub_SSL_connect)(ssl); }
-int   SSL_read(SSL *ssl,void * buf, int num)
+int   SSL_read(SSL *ssl,ssl_data_t buf, int num)
 { return (*stub_SSL_read)(ssl, buf, num); }
-int   SSL_write(SSL *ssl,const void *buf,int num)
+int   SSL_write(SSL *ssl,const ssl_data_t buf,int num)
 { return (*stub_SSL_write)(ssl, buf, num); }
 int  SSL_pending(SSL *s)
 { return (*stub_SSL_pending)(s); }
