@@ -1509,6 +1509,10 @@ wxMApp::SetAwayMode(bool isAway)
       {
          mbar->Check(WXMENU_FILE_AWAY_MODE, isAway);
       }
+
+      wxLogStatus(m_topLevelFrame,
+                  isAway ? _("Mahogany is now in unattended mode")
+                         : _("Mahogany is not in unattended mode any more"));
    }
 }
 

@@ -245,7 +245,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"), gettext_noop("Quit the application"), TRUE },
+   { WXMENU_FILE_AWAY_MODE,gettext_noop("Awa&y mode\tCtrl-Y"),        gettext_noop("Toggle unattended mode on/off"), TRUE },
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
 
    // folder

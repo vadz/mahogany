@@ -934,6 +934,8 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
+   mApplication->UpdateAwayMode();
+
    UpdateUniqueSelFlag();
 
    if ( m_enableOnSelect )
@@ -1099,6 +1101,8 @@ void wxFolderListCtrl::UpdateFocus()
 
 void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
 {
+   mApplication->UpdateAwayMode();
+
    switch ( event.GetCode() )
    {
       case WXK_UP:

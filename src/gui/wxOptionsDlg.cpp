@@ -1033,8 +1033,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "\n"
                   "This is useful if you want to not be distracted by new\n"
                   "mail arrival temporarily without having to shut down."), Field_Message, -1 },
-   { gettext_noop("Enter awa&y mode after that many minutes:"), Field_Number, -1 },
-   { gettext_noop("E&xit from away mode when user does something"), Field_Bool, -1 },
+   { gettext_noop("Enter awa&y mode when idle during (min):"), Field_Number, -1 },
+   { gettext_noop("E&xit away mode automatically"), Field_Bool, -1 },
    { gettext_noop("Rememeber a&way status (otherwise always reset it)"), Field_Bool, -1 },
 
    // sync page

@@ -362,8 +362,14 @@ wxMFrame::OnMenuCommand(int id)
       break;
 #endif   // USE_PYTHON
 
+      case WXMENU_FILE_AWAY_MODE:
+         mApplication->SetAwayMode(GetMenuBar()->IsChecked(id));
+         break;
+
       case WXMENU_FILE_EXIT:
-         wxYield(); // just to flush MEvent queues for safety
+         // flush MEvent queues for safety
+         MEventManager::DispatchPending();
+
          if ( CanClose() )
          {
             // this frame has been already asked whether it wants to exit, so
@@ -382,17 +388,19 @@ wxMFrame::OnMenuCommand(int id)
       case WXMENU_EDIT_ADB:
          ShowAdbFrame(this);
          break;
+
       case WXMENU_EDIT_PREF:
          ShowOptionsDialog(this);
          break;
+
       case WXMENU_EDIT_FILTERS:
-      {
          (void) ConfigureAllFilters(this);
          break;
-      }
+
       case WXMENU_EDIT_MODULES:
          ShowModulesDialog(this);
          break;
+
       case WXMENU_EDIT_TEMPLATES:
          EditTemplates(this);
          break;

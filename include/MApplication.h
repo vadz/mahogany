@@ -207,9 +207,20 @@ public:
    /// exit away mode if necessary
    void UpdateAwayMode()
    {
-      if ( IsInAwayMode() && READ_APPCONFIG(MP_AWAY_AUTO_EXIT) )
+      if ( IsInAwayMode() )
       {
-         SetAwayMode(false);
+         // in away mode - should we exit from it?
+         if ( READ_APPCONFIG(MP_AWAY_AUTO_EXIT) )
+         {
+            SetAwayMode(false);
+         }
+      }
+      else // not in away mode - reset the timer if necessary
+      {
+         if ( READ_APPCONFIG(MP_AWAY_AUTO_ENTER) )
+         {
+            RestartTimer(Timer_Away);
+         }
       }
    }
    //@}
