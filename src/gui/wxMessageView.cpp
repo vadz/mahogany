@@ -328,6 +328,7 @@ wxMessageView::wxMessageView(MailFolder *folder,
    : wxLayoutWindow(parent)
 {
    m_folder = folder;
+   m_Profile = NULL;
    Create(fv,parent);
    ShowMessage(folder,num);
    Show(TRUE);
