@@ -175,7 +175,7 @@ public:
    virtual bool OnMEvent(MEventData& event);
 
 #ifdef __WXGTK__
-   void OnMouseMove(wxMouseEvent &event) { SetFocus(); }
+   void OnMouseMove(wxMouseEvent &event) { if(m_FocusFollowMode) SetFocus(); }
 #endif // wxGTK
 
    // get the folder tree node object from item id
@@ -292,6 +292,8 @@ private:
    //          it's not too bad
    bool     m_suppressSelectionChange;
    MFolder *m_previousFolder;
+   /// used under unix only
+   bool m_FocusFollowMode;
 
    DECLARE_EVENT_TABLE()
 };
@@ -567,6 +569,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_menu = NULL;
    m_suppressSelectionChange = FALSE;
    m_previousFolder = NULL;
+   m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE);
 
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
@@ -962,6 +965,8 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
+      m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE);
+
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 
       ProfileBase *profileChanged = event.GetProfile();
