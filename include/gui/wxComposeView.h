@@ -361,8 +361,17 @@ private:
    /// the type of the last recipient
    RecipientType m_rcptTypeLast;
 
-   /// composer font
-   int m_font, m_size;
+   /** @name font options */
+   //@{
+
+   /// font description
+   String m_font;
+
+   /// font family and size used only if m_font is empty
+   int m_fontFamily,
+       m_fontSize;
+
+   //@}
 
    /// composer colours
    wxColour m_fg, m_bg;

@@ -372,8 +372,7 @@ void TextViewer::Clear()
 
    const ProfileValues& profileValues = GetOptions();
 
-   m_window->SetFont(wxFont(profileValues.fontSize, profileValues.fontFamily,
-                            wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+   m_window->SetFont(profileValues.GetFont());
    m_window->SetForegroundColour(profileValues.FgCol);
    m_window->SetBackgroundColour(profileValues.BgCol);
 }
@@ -502,10 +501,7 @@ void TextViewer::ShowHeader(const String& headerName,
    wxTextAttr attr(col);
    if ( encHeader != wxFONTENCODING_SYSTEM )
    {
-      wxFont font = m_window->GetFont();
-      font.SetPointSize(profileValues.fontSize);
-      font.SetFamily(profileValues.fontFamily);
-      font.SetEncoding(encHeader);
+      wxFont font = profileValues.GetFont(encHeader);
       attr.SetFont(font);
    }
 

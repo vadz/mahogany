@@ -102,6 +102,11 @@
 // define this to have additional TCP parameters in the options dialog
 #define USE_TCP_TIMEOUTS
 
+// define this to use the font description for specifying the fonts instead of
+// font family/size combination which doesn't allow the user to set all
+// available fonts he has
+#define USE_FONT_DESC
+
 // ----------------------------------------------------------------------------
 // data
 // ----------------------------------------------------------------------------
@@ -252,8 +257,12 @@ enum ConfigFields
    ConfigField_SignatureSeparator,
    ConfigField_XFaceFile,
    ConfigField_AdbSubstring,
+#ifdef USE_FONT_DESC
+   ConfigField_ComposeViewFont,
+#else // !USE_FONT_DESC
    ConfigField_ComposeViewFontFamily,
    ConfigField_ComposeViewFontSize,
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    ConfigField_ComposeViewFGColour,
    ConfigField_ComposeViewBGColour,
 
@@ -316,8 +325,12 @@ enum ConfigFields
    ConfigField_MsgViewerHelp,
    ConfigField_MsgViewer,
    ConfigField_MsgViewerBar,
+#ifdef USE_FONT_DESC
+   ConfigField_MessageViewFont,
+#else // !USE_FONT_DESC
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    ConfigField_MessageViewFGColour,
    ConfigField_MessageViewBGColour,
    ConfigField_MessageViewUrlColour,
@@ -362,8 +375,12 @@ enum ConfigFields
    ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
+#ifdef USE_FONT_DESC
+   ConfigField_FolderViewFont,
+#else // !USE_FONT_DESC
    ConfigField_FolderViewFontFamily,
    ConfigField_FolderViewFontSize,
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    ConfigField_FolderViewFGColour,
    ConfigField_FolderViewBGColour,
    ConfigField_FolderViewNewColour,
@@ -1066,13 +1083,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
 
-   { gettext_noop("Configure &XFace..."),                  Field_XFace,  -1          },
+   { gettext_noop("Configure &XFace..."),          Field_XFace,   -1          },
    { gettext_noop("Mail alias substring ex&pansion"),
                                                    Field_Bool,    -1,                        },
+#ifdef USE_FONT_DESC
+   { gettext_noop("&Font to use"),                 Field_Font | Field_Global, -1 },
+#else // !USE_FONT_DESC
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo | Field_Global,   -1},
    { gettext_noop("Font si&ze"),                   Field_Number | Field_Global,  -1},
+#endif // USE_FONT_DESC/!USE_FONT_DESC
+
    { gettext_noop("Foreground c&olour"),           Field_Color | Field_Global,   -1},
    { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
 
@@ -1179,10 +1201,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,    -1 },
    { gettext_noop("Show viewer &bar"),             Field_Bool,    -1 },
 
+#ifdef USE_FONT_DESC
+   { gettext_noop("&Font to use"),                 Field_Font,    -1 },
+#else // !USE_FONT_DESC
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
    { gettext_noop("Font si&ze"),                   Field_Number,  -1 },
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1 },
    { gettext_noop("Back&ground colour"),           Field_Color,   -1 },
    { gettext_noop("Colour for &URLs"),             Field_Color,   -1 },
@@ -1234,10 +1260,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("\n\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
+#ifdef USE_FONT_DESC
+   { gettext_noop("&Font to use"),                 Field_Font,    -1 },
+#else // !USE_FONT_DESC
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1},
    { gettext_noop("Font si&ze"),                   Field_Number,  -1},
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
    { gettext_noop("&Backgroud colour"),            Field_Color,   -1},
    { gettext_noop("Colour for &new message"),      Field_Color,   -1},
@@ -1577,8 +1607,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
    CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
+#ifdef USE_FONT_DESC
+   CONFIG_ENTRY(MP_CVIEW_FONT_DESC),
+#else // !USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FONT),
    CONFIG_ENTRY(MP_CVIEW_FONT_SIZE),
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
 
@@ -1632,8 +1666,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_NONE(), // and not MP_MSGVIEW_VIEWER: we handle it specially
    CONFIG_ENTRY(MP_MSGVIEW_SHOWBAR),
+#ifdef USE_FONT_DESC
+   CONFIG_ENTRY(MP_MVIEW_FONT_DESC),
+#else // !USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_URLCOLOUR),
@@ -1676,8 +1714,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
+#ifdef USE_FONT_DESC
+   CONFIG_ENTRY(MP_FVIEW_FONT_DESC),
+#else // !USE_FONT_DESC
    CONFIG_ENTRY(MP_FVIEW_FONT),
    CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
+#endif // USE_FONT_DESC/!USE_FONT_DESC
    CONFIG_ENTRY(MP_FVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_NEWCOLOUR),
@@ -1938,6 +1980,10 @@ void wxOptionsPage::CreateControls()
             last = CreateColorEntry(_(m_aFields[n].label), widthMax, last);
             break;
 
+         case Field_Font:
+            last = CreateFontEntry(_(m_aFields[n].label), widthMax, last);
+            break;
+
          case Field_Action:
             last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
             break;
@@ -2146,6 +2192,7 @@ void wxOptionsPage::UpdateUI()
             case Field_File:
             case Field_Dir:
             case Field_Folder:
+            case Field_Font:
                wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
                EnableTextWithButton((wxTextCtrl *)control, bEnable);
@@ -2232,6 +2279,10 @@ bool wxOptionsPage::TransferDataToWindow()
          if( GetFieldType(n) == Field_Passwd )
             strValue = strutil_decrypt(strValue);
 
+      case Field_Font:
+         strValue = wxFontBrowseButton::FontDescToUser(strValue);
+         // fall through
+
       case Field_Dir:
       case Field_File:
       case Field_Folder:
@@ -2241,7 +2292,6 @@ bool wxOptionsPage::TransferDataToWindow()
       case Field_Color:
          wxStaticCast(control, wxColorBrowseButton)->SetValue(strValue);
          break;
-
       case Field_Bool:
          wxASSERT( m_aDefaults[n].IsNumeric() );
 
@@ -2327,24 +2377,28 @@ bool wxOptionsPage::TransferDataFromWindow()
       if ( !*m_aDefaults[n].name )
          continue;
 
-      switch ( GetFieldType(n) )
+      FieldType fieldType = GetFieldType(n);
+      switch ( fieldType )
       {
          case Field_Passwd:
          case Field_Text:
          case Field_Dir:
          case Field_File:
          case Field_Color:
+         case Field_Font:
          case Field_Folder:
          case Field_Number:
-            if ( GetFieldType(n) == Field_Color )
+            if ( fieldType == Field_Color )
                strValue = wxStaticCast(control, wxColorBrowseButton)->GetValue();
             else
                strValue = wxStaticCast(control, wxTextCtrl)->GetValue();
 
-            if ( GetFieldType(n) == Field_Passwd )
+            // post processing is needed for some fields
+            if ( fieldType == Field_Passwd )
                strValue = strutil_encrypt(strValue);
-
-            if ( GetFieldType(n) == Field_Number ) {
+            else if ( fieldType == Field_Font )
+               strValue = wxFontBrowseButton::FontDescFromUser(strValue);
+            else if ( fieldType == Field_Number ) {
                wxASSERT( m_aDefaults[n].IsNumeric() );
 
                lValue = atol(strValue);

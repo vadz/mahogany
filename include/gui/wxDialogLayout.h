@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   gui/wxDialogLayout.h - helper functions for laying out the
 //              dialog controls in a consistent manner
@@ -9,7 +9,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GUI_WXDIALOGLAYOUT_H
 #define _GUI_WXDIALOGLAYOUT_H
@@ -34,6 +34,7 @@ class /* WXDLLEXPORT */ wxColorBrowseButton;
 class /* WXDLLEXPORT */ wxDirBrowseButton;
 class /* WXDLLEXPORT */ wxFileBrowseButton;
 class /* WXDLLEXPORT */ wxFileOrDirBrowseButton;
+class /* WXDLLEXPORT */ wxFontBrowseButton;
 class /* WXDLLEXPORT */ wxFolderBrowseButton;
 class /* WXDLLEXPORT */ wxIconBrowseButton;
 class /* WXDLLEXPORT */ wxTextBrowseButton;
@@ -429,6 +430,18 @@ public:
                                    (wxTextBrowseButton **)ppButton);
    }
 
+      // create a text control with a browse button allowing to browse for
+      // fonts
+   wxTextCtrl *CreateFontEntry(const char *label,
+                               long widthMax,
+                               wxControl *last,
+                               wxFontBrowseButton **ppButton = NULL)
+   {
+      return CreateEntryWithButton(label, widthMax, last,
+                                   FontBtn,
+                                   (wxTextBrowseButton **)ppButton);
+   }
+
    // UpdateUI helpers: enable disable several controls at once
    //
    // NB: these functions assume that control ids are consecutif,
@@ -491,6 +504,7 @@ private:
 
       DirBtn,              // choose a directory
       ColorBtn,            // choose a colour
+      FontBtn,             // choose a font
       FolderBtn            // choose a folder
    };
 

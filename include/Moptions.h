@@ -240,6 +240,7 @@ extern const MOption MP_FOLDER_FILE_DRIVER;
 
 extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
+extern const MOption MP_MVIEW_FONT_DESC;
 extern const MOption MP_MVIEW_FONT_SIZE;
 extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_BGCOLOUR;
@@ -258,6 +259,7 @@ extern const MOption MP_HIGHLIGHT_URLS;
 
 // folder view
 extern const MOption MP_FVIEW_FONT;
+extern const MOption MP_FVIEW_FONT_DESC;
 extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_NAMES_ONLY;
 extern const MOption MP_FVIEW_FGCOLOUR;
@@ -282,6 +284,7 @@ extern const MOption MP_FTREE_NEVER_UNREAD;
 
 // composer
 extern const MOption MP_CVIEW_FONT;
+extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_BGCOLOUR;
@@ -832,6 +835,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FONT_NAME         "MViewFont"
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_NAME         "MViewFontSize"
+/// the full font desc (replaces the 2 settings above)
+#define   MP_MVIEW_FONT_DESC_NAME   "MViewFontDesc"
 /// which foreground colour for the font
 #define   MP_MVIEW_FGCOLOUR_NAME      "MViewFgColour"
 /// which background colour for the font
@@ -865,6 +870,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_FONT_NAME         "FViewFont"
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_NAME         "FViewFontSize"
+/// the full font desc (replaces the 2 settings above)
+#define   MP_FVIEW_FONT_DESC_NAME         "FViewFontDesc"
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY_NAME         "FViewNamesOnly"
 /// which foreground colour for the font
@@ -915,6 +922,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CVIEW_FONT_NAME         "CViewFont"
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_NAME         "CViewFontSize"
+/// the full font desc (replaces the 2 settings above)
+#define   MP_CVIEW_FONT_DESC_NAME         "CViewFontDesc"
 /// which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_NAME      "CViewFGColour"
 /// which background colour for the font
@@ -1709,6 +1718,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FONT_DEFVAL         6L
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_DEFVAL         DEFAULT_FONT_SIZE
+/// the full font desc (replaces the 2 settings above)
+#define   MP_MVIEW_FONT_DESC_DEFVAL   ""
 /// which foreground colour for the font
 #define   MP_MVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
@@ -1743,6 +1754,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_FONT_DEFVAL         4L
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_DEFVAL         DEFAULT_FONT_SIZE
+/// the full font desc (replaces the 2 settings above)
+#define   MP_FVIEW_FONT_DESC_DEFVAL   ""
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY_DEFVAL         0L
 /// which foreground colour for the font
@@ -1789,6 +1802,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CVIEW_FONT_DEFVAL         6L
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_DEFVAL    DEFAULT_FONT_SIZE
+/// the full font desc (replaces the 2 settings above)
+#define   MP_CVIEW_FONT_DESC_DEFVAL   ""
 /// which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font

@@ -506,6 +506,26 @@ wxLayoutStyleInfo::wxLayoutStyleInfo(int ifamily,
    underline = iul != 0;
    enc = ienc;
 
+   InitColours(fg, bg);
+}
+
+wxLayoutStyleInfo::wxLayoutStyleInfo(const wxFont& ifont,
+                                     wxColour *fg,
+                                     wxColour *bg)
+                 : font(ifont)
+{
+   family = wxFONTFAMILY_DEFAULT;
+   size = font.GetPointSize();
+   style = font.GetStyle();
+   weight = font.GetWeight();
+   underline = font.GetUnderlined();
+   enc = font.GetEncoding();
+
+   InitColours(fg, bg);
+}
+
+void wxLayoutStyleInfo::InitColours(wxColour *fg, wxColour *bg)
+{
    m_fg_valid = fg != 0;
    m_bg_valid = bg != 0;
    m_fg = m_fg_valid ? *fg : *wxBLACK;
@@ -526,6 +546,11 @@ wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &right)
    if(right.m_fg_valid) m_fg = right.m_fg;
    if(right.m_bg_valid) m_bg = right.m_bg;
    return *this;
+}
+
+wxLayoutObjectCmd::wxLayoutObjectCmd(const wxFont& font)
+{
+   m_StyleInfo = new wxLayoutStyleInfo(font);
 }
 
 wxLayoutObjectCmd::wxLayoutObjectCmd(int family, int size, int style, int
@@ -1774,6 +1799,14 @@ wxLayoutList::Read(wxString &istr)
    Insert(new wxLayoutObjectCmd(current_si));
 }
 
+void
+wxLayoutList::SetFont(const wxFont& font)
+{
+   CHECK_RET( font.Ok(), "invalid font in wxLayoutList::SetFont" );
+
+   m_CurrentStyleInfo.font = font;
+   Insert(new wxLayoutObjectCmd(font));
+}
 
 void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
@@ -1818,15 +1851,32 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
 }
 
 void
-wxLayoutList::Clear(
-   int family, int size, int style, int weight,
-   int underline, wxColour *fg, wxColour *bg,
-   wxFontEncoding encoding)
+wxLayoutList::Clear(const wxFont& font,
+                    wxColour *fg,
+                    wxColour *bg)
+{
+   wxCHECK_RET( font.Ok(), "invalid font in Clear()" );
+
+   DoClear(wxLayoutStyleInfo(font, fg, bg));
+}
+
+void
+wxLayoutList::Clear(int family, int size,
+                    int style, int weight,
+                    int underline, wxColour *fg, wxColour *bg,
+                    wxFontEncoding encoding)
+{
+   DoClear(wxLayoutStyleInfo(family, size, style, weight,
+                             underline, fg, bg, encoding));
+}
+
+void
+wxLayoutList::DoClear(const wxLayoutStyleInfo& styleInfo)
 {
    InternalClear();
-   m_DefaultStyleInfo = wxLayoutStyleInfo(family, size, style, weight,
-                                        underline, fg, bg, encoding);
-   m_CurrentStyleInfo = m_DefaultStyleInfo;
+
+   m_DefaultStyleInfo =
+   m_CurrentStyleInfo = styleInfo;
 
    // Empty() should be called after we set m_DefaultStyleInfo because
    // otherwise the style info for the first line (created in Empty()) would be
@@ -3061,22 +3111,35 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
    return llist;
 }
 
-
-
-#define COPY_SI(what) if(si.what != -1) { m_CurrentStyleInfo.what = si.what; fontChanged = TRUE; }
-
 void
 wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
 {
-   bool fontChanged = FALSE;
-   COPY_SI(family);
-   COPY_SI(size);
-   COPY_SI(style);
-   COPY_SI(weight);
-   COPY_SI(underline);
-   COPY_SI(enc);
-   if(fontChanged)
-      dc.SetFont( m_FontCache.GetFont(m_CurrentStyleInfo) );
+   if ( si.font.Ok() )
+   {
+      m_CurrentStyleInfo.font = si.font;
+      dc.SetFont(si.font);
+   }
+   else
+   {
+#define COPY_SI(what) \
+      if(si.what != -1) \
+      { \
+         m_CurrentStyleInfo.what = si.what; \
+         fontChanged = TRUE; \
+      }
+
+      bool fontChanged = FALSE;
+      COPY_SI(family);
+      COPY_SI(size);
+      COPY_SI(style);
+      COPY_SI(weight);
+      COPY_SI(underline);
+      COPY_SI(enc);
+      if(fontChanged)
+         dc.SetFont( m_FontCache.GetFont(m_CurrentStyleInfo) );
+
+#undef COPY_SI
+   }
 
    if(si.m_fg_valid)
    {
@@ -3270,14 +3333,17 @@ bool wxLayoutPrintout::HasPage(int pageNum)
    return pageNum <= m_NumOfPages;
 }
 
-wxFont &
+wxFont
 wxFontCache::GetFont(int family, int size, int style, int weight,
                      bool underline, wxFontEncoding encoding)
 {
    for(wxFCEList::iterator i = m_FontList.begin();
        i != m_FontList.end(); ++i)
+   {
       if( (**i).Matches(family, size, style, weight, underline, encoding) )
          return (**i).GetFont();
+   }
+
    // not found:
    wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
                                                 weight, underline, encoding);

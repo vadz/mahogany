@@ -258,6 +258,26 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// font browser button allows the user to select a font by popping up a font
+// selection dialog when clicked - the text control may be used to enter the
+// font name directly even though it's not really convenient right now
+// ----------------------------------------------------------------------------
+
+class wxFontBrowseButton : public wxTextBrowseButton
+{
+public:
+   wxFontBrowseButton(wxTextCtrl *text, wxWindow *parent);
+
+   // show the font selection dialog
+   virtual void DoBrowse();
+
+   // convert between wxNativeFontInfo description and the string we show to
+   // the user in the text control
+   static String FontDescToUser(const String& desc);
+   static String FontDescFromUser(const String& desc);
+};
+
+// ----------------------------------------------------------------------------
 // Icon browse button allows the user to choose an icon from the list of icons.
 // It's associated with a wxStaticBitmap control whose contents it updates to
 // reflect the currently chosen icon. It also stores the name of the chosen

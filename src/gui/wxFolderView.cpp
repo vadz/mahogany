@@ -56,6 +56,8 @@
 #include <wx/file.h>
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
+#include <wx/fontutil.h>
+
 #include "wx/persctrl.h"
 
 #include "MThread.h"
@@ -114,6 +116,7 @@ extern const MOption MP_FVIEW_DELETEDCOLOUR;
 extern const MOption MP_FVIEW_FGCOLOUR;
 extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
 extern const MOption MP_FVIEW_FONT;
+extern const MOption MP_FVIEW_FONT_DESC;
 extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_FROM_REPLACE;
 extern const MOption MP_FVIEW_NAMES_ONLY;
@@ -516,6 +519,7 @@ public:
 
    /// change the options governing our appearance
    void ApplyOptions(const wxColour& fg, const wxColour& bg,
+                     const String& font,
                      int fontFamily, int fontSize,
                      int columns[WXFLC_NUMENTRIES]);
 
@@ -1317,6 +1321,7 @@ void wxFolderListCtrl::OnFolderChange()
 }
 
 void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
+                                    const String& fontDesc,
                                     int fontFamily, int fontSize,
                                     int columns[WXFLC_NUMENTRIES])
 {
@@ -1325,7 +1330,23 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
    SetTextColour( fg );
    SetBackgroundColour( bg );
 
-   SetFont(wxFont(fontSize, fontFamily, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+   wxFont font;
+   if ( !fontDesc.empty() )
+   {
+      wxNativeFontInfo fontInfo;
+      if ( fontInfo.FromString(fontDesc) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+
+   if ( !font.Ok() )
+   {
+      font = wxFont(fontSize, fontFamily,
+                    wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+   }
+
+   SetFont(font);
 
    if ( memcmp(m_columns, columns, sizeof(m_columns)) != 0 )
    {
@@ -3194,27 +3215,13 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
                    READ_CONFIG(profile, MP_FVIEW_UNREADCOLOUR),
                    GetStringDefault(MP_FVIEW_UNREADCOLOUR));
 
-   static const int fontFamilies[] =
+   settings->font = READ_CONFIG_TEXT(profile, MP_FVIEW_FONT_DESC);
+   if ( settings->font.empty() )
    {
-      wxDEFAULT,
-      wxDECORATIVE,
-      wxROMAN,
-      wxSCRIPT,
-      wxSWISS,
-      wxMODERN,
-      wxTELETYPE
-   };
-
-   settings->font = READ_CONFIG(profile,MP_FVIEW_FONT);
-   if ( settings->font < 0 || (size_t)settings->font > WXSIZEOF(fontFamilies) )
-   {
-      wxFAIL_MSG( "bad font setting in config" );
-
-      settings->font = 0;
+      settings->fontFamily = GetFontFamilyFromProfile(profile, MP_FVIEW_FONT);
+      settings->fontSize = READ_CONFIG(profile, MP_FVIEW_FONT_SIZE);
    }
 
-   settings->font = fontFamilies[settings->font];
-   settings->size = READ_CONFIG(profile, MP_FVIEW_FONT_SIZE);
    settings->senderOnlyNames =
        READ_CONFIG_BOOL(profile, MP_FVIEW_NAMES_ONLY);
 
@@ -3251,7 +3258,8 @@ wxFolderView::ApplyOptions()
    m_FolderCtrl->ApplyOptions(m_settings.FgCol,
                               m_settings.BgCol,
                               m_settings.font,
-                              m_settings.size,
+                              m_settings.fontFamily,
+                              m_settings.fontSize,
                               m_settings.columns);
 }
 

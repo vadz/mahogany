@@ -454,10 +454,13 @@ private:
                HeaderNameCol,
                HeaderValueCol;
 
-      /// font family (wxROMAN/wxSWISS/wxTELETYPE/...)
+      /// the native font description
+      String fontDesc;
+
+      /// font family (wxROMAN/wxSWISS/wxTELETYPE/...) used if font is empty
       int fontFamily;
 
-      /// font size
+      /// font size (used only if font is empty)
       int fontSize;
       //@}
 
@@ -536,6 +539,9 @@ private:
       bool operator==(const AllProfileValues& other) const;
       bool operator!=(const AllProfileValues& other) const
          { return !(*this == other); }
+
+      /// get the font corresponding to the current options
+      wxFont GetFont(wxFontEncoding enc = wxFONTENCODING_DEFAULT) const;
    } m_ProfileValues;
 
    /// read all our options from the current profile (returned by GetProfile())

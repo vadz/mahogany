@@ -265,8 +265,11 @@ private:
                RecentCol,     //                 recent
                DeletedCol,    //                 deleted
                UnreadCol;     //                 unseen
-      /// font attributes
-      int font, size;
+      /// font description
+      String font;
+      /// font family and size if font is empty
+      int fontFamily,
+          fontSize;
       /// do we want to preview messages when activated?
       bool previewOnSingleClick;
       /// delay between selecting a message and previewing it

@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   gui/wxOptionsPage.h - declaration of pages of the options
 //              notebook
@@ -9,7 +9,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GUI_WXOPTIONSPAGE_H
 #define _GUI_WXOPTIONSPAGE_H
@@ -86,7 +86,7 @@ public:
       Field_Number = 0x0002, // the same as text but accepts only digits
       Field_List   = 0x0004, // list of values - represented as a listbox
       Field_Bool   = 0x0008, // a checkbox
-      Field_File   = 0x0010, // a text entry with a "Browse..." button
+      Field_File   = 0x0010, // a text entry with a "Browse..." for file button
       Field_Message= 0x0020, // just a bit of explaining text, no input
       Field_Action = 0x0040, // offering the 0,1,2 No,Ask,Yes radiobox
       Field_Combo  = 0x0080, // offering 0,1,2,..n, from a combobox
@@ -95,7 +95,8 @@ public:
       Field_XFace  = 0x0400, // a wxXFaceButton invoking another dialog
       Field_Folder = 0x0800, // a text entry with a "Browse for folder" button
       Field_Passwd = 0x1000, // a masked text entry for the password
-      Field_Dir    = 0x2000, // a text entry with a "Browse..." button
+      Field_Dir    = 0x2000, // a text entry with a "Browse..." for dir button
+      Field_Font   = 0x4000, // a text entry with a "Browse..." for font button
       Field_Type   = 0xffff  // bit mask selecting the type
    };
 

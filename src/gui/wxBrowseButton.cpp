@@ -36,6 +36,8 @@
 
 #include <wx/imaglist.h>
 #include <wx/colordlg.h>
+#include <wx/fontdlg.h>
+#include <wx/fontutil.h>
 
 #include "MFolder.h"
 #include "MFolderDialogs.h"
@@ -357,6 +359,69 @@ void wxColorBrowseButton::UpdateColor()
 
    SetForegroundColour(colFg);
    SetBackgroundColour(m_color);
+}
+
+// ----------------------------------------------------------------------------
+// wxFontBrowseButton
+// ----------------------------------------------------------------------------
+
+wxFontBrowseButton::wxFontBrowseButton(wxTextCtrl *text, wxWindow *parent)
+                  : wxTextBrowseButton(text, parent, _("Choose font"))
+{
+}
+
+// FIXME: these methods rely on internals of wxNativeFontInfo because they
+//        know that it prepends the format version number (currently 0) to
+//        the real font desc string - they shouldn't but we should add methods
+//        to wxNativeFontInfo to do this conversion instead!
+
+String wxFontBrowseButton::FontDescToUser(const String& desc)
+{
+   String user = desc;
+   if ( user.length() > 2 && user[0u] == '0' && user[1u] == ';' )
+   {
+      user.erase(0, 2);
+   }
+
+   return user;
+}
+
+String wxFontBrowseButton::FontDescFromUser(const String& user)
+{
+   String desc;
+   if ( !user.empty() )
+   {
+      desc = "0;";
+   }
+
+   desc += user;
+
+   return desc;
+}
+
+void wxFontBrowseButton::DoBrowse()
+{
+   wxFont font;
+   wxNativeFontInfo fontInfo;
+   wxString desc = GetText();
+   if ( !desc.empty() )
+   {
+      if ( fontInfo.FromString(FontDescFromUser(desc)) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+   
+   wxFontData data;
+   data.SetInitialFont(font);
+
+   wxFontDialog dialog(this, &data);
+   if ( dialog.ShowModal() == wxID_OK )
+   {
+      font = dialog.GetFontData().GetChosenFont();
+
+      SetText(FontDescToUser(font.GetNativeFontInfoDesc()));
+   }
 }
 
 // ----------------------------------------------------------------------------

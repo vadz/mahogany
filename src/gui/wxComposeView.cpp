@@ -55,6 +55,8 @@
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
+#include <wx/fontutil.h>
+
 #include "wx/persctrl.h"
 
 #include "Mdefaults.h"
@@ -107,6 +109,7 @@ extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_FONT;
+extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
@@ -1033,6 +1036,9 @@ wxComposeView::wxComposeView(const String &name,
 
    m_indexLast = -1;
 
+   m_fontFamily = -1;
+   m_fontSize = -1;
+
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
 
@@ -1343,29 +1349,13 @@ wxComposeView::CreateFTCanvas(void)
    GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
    GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
 
-   // font family
-   static const int wxFonts[] =
+   // font
+   m_font = READ_CONFIG_TEXT(m_Profile, MP_CVIEW_FONT_DESC);
+   if ( m_font.empty() )
    {
-     wxDEFAULT,
-     wxDECORATIVE,
-     wxROMAN,
-     wxSCRIPT,
-     wxSWISS,
-     wxMODERN,
-     wxTELETYPE
-   };
-
-   m_font = READ_CONFIG(m_Profile, MP_CVIEW_FONT);
-   if ( m_font < 0 || (size_t)m_font > WXSIZEOF(wxFonts) )
-   {
-      FAIL_MSG( "invalid font value in config" );
-      m_font = 0;
+      m_fontFamily = GetFontFamilyFromProfile(m_Profile, MP_CVIEW_FONT);
+      m_fontSize = READ_CONFIG(m_Profile, MP_CVIEW_FONT_SIZE);
    }
-
-   m_font = wxFonts[m_font];
-
-   // font size
-   m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
 
    // others
 #ifndef OS_WIN
@@ -1387,8 +1377,23 @@ wxComposeView::CreateFTCanvas(void)
 
 void wxComposeView::DoClear()
 {
-   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int) wxNORMAL, 0,
-                         &m_fg, &m_bg);
+   wxFont font;
+   if ( !m_font.empty() )
+   {
+      wxNativeFontInfo fontInfo;
+      if ( fontInfo.FromString(m_font) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+
+   if ( font.Ok() )
+      m_LayoutWindow->Clear(font, &m_fg, &m_bg);
+   else
+      m_LayoutWindow->Clear(m_fontFamily, m_fontSize,
+                            (int) wxNORMAL, (int) wxNORMAL, 0,
+                            &m_fg, &m_bg);
+
 
    // set the default encoding if any
    SetEncoding(wxFONTENCODING_DEFAULT);

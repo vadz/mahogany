@@ -73,6 +73,12 @@ public:
               wxColour *bg = NULL,
               bool noUpdate = false);
 
+   /// Clear taking an explicit font
+   void Clear(const wxFont& font,
+              wxColour *fg = NULL,
+              wxColour *bg = NULL,
+              bool noUpdate = false);
+
    /// override base class virtual to also refresh the scrollbar position
    virtual void Refresh(bool eraseBackground = TRUE,
                         const wxRect *rect = (const wxRect *)NULL);
@@ -222,6 +228,9 @@ public:
    void ScrollToCursor(void);
 
 protected:
+   /// clear just the window, don't touch the layout list
+   void DoClearWindow(bool noUpdate);
+
    /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);
    /// for sending events

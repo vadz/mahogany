@@ -380,6 +380,10 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
          btn = new wxColorBrowseButton(text, GetCanvas());
          break;
 
+      case FontBtn:
+         btn = new wxFontBrowseButton(text, GetCanvas());
+         break;
+
       case FolderBtn:
          btn = new wxFolderBrowseButton(text, GetCanvas());
          break;

@@ -304,6 +304,7 @@ const MOption MP_FOLDER_FILE_DRIVER;
 
 const MOption MP_MVIEW_TITLE_FMT;
 const MOption MP_MVIEW_FONT;
+const MOption MP_MVIEW_FONT_DESC;
 const MOption MP_MVIEW_FONT_SIZE;
 const MOption MP_MVIEW_FGCOLOUR;
 const MOption MP_MVIEW_BGCOLOUR;
@@ -321,6 +322,7 @@ const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
 const MOption MP_HIGHLIGHT_URLS;
 
 const MOption MP_FVIEW_FONT;
+const MOption MP_FVIEW_FONT_DESC;
 const MOption MP_FVIEW_FONT_SIZE;
 const MOption MP_FVIEW_NAMES_ONLY;
 const MOption MP_FVIEW_FGCOLOUR;
@@ -343,6 +345,7 @@ const MOption MP_FTREE_PROPAGATE;
 const MOption MP_FTREE_NEVER_UNREAD;
 
 const MOption MP_CVIEW_FONT;
+const MOption MP_CVIEW_FONT_DESC;
 const MOption MP_CVIEW_FONT_SIZE;
 const MOption MP_CVIEW_FGCOLOUR;
 const MOption MP_CVIEW_BGCOLOUR;
@@ -669,6 +672,7 @@ static const MOptionData MOptions[] =
 
     DEFINE_OPTION(MP_MVIEW_TITLE_FMT),
     DEFINE_OPTION(MP_MVIEW_FONT),
+    DEFINE_OPTION(MP_MVIEW_FONT_DESC),
     DEFINE_OPTION(MP_MVIEW_FONT_SIZE),
     DEFINE_OPTION(MP_MVIEW_FGCOLOUR),
     DEFINE_OPTION(MP_MVIEW_BGCOLOUR),
@@ -686,6 +690,7 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_HIGHLIGHT_URLS),
 
     DEFINE_OPTION(MP_FVIEW_FONT),
+    DEFINE_OPTION(MP_FVIEW_FONT_DESC),
     DEFINE_OPTION(MP_FVIEW_FONT_SIZE),
     DEFINE_OPTION(MP_FVIEW_NAMES_ONLY),
     DEFINE_OPTION(MP_FVIEW_FGCOLOUR),
@@ -708,6 +713,7 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_FTREE_NEVER_UNREAD),
 
     DEFINE_OPTION(MP_CVIEW_FONT),
+    DEFINE_OPTION(MP_CVIEW_FONT_DESC),
     DEFINE_OPTION(MP_CVIEW_FONT_SIZE),
     DEFINE_OPTION(MP_CVIEW_FGCOLOUR),
     DEFINE_OPTION(MP_CVIEW_BGCOLOUR),
@@ -858,5 +864,29 @@ extern long GetNumericDefault(const MOption opt)
 extern const char *GetStringDefault(const MOption opt)
 {
    return MOptions[opt.GetId()].value.s;
+}
+
+extern int GetFontFamilyFromProfile(Profile *profile, const MOption option)
+{
+   static const int fontFamilies[] =
+   {
+      wxDEFAULT,
+      wxDECORATIVE,
+      wxROMAN,
+      wxSCRIPT,
+      wxSWISS,
+      wxMODERN,
+      wxTELETYPE
+   };
+
+   int font = GetOptionValue(profile, option);
+   if ( font < 0 || (size_t)font > WXSIZEOF(fontFamilies) )
+   {
+      wxFAIL_MSG( "bad font setting in config" );
+
+      font = 0;
+   }
+
+   return fontFamilies[font];
 }
 

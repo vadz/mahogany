@@ -71,6 +71,7 @@
 #include <wx/mimetype.h>      // for wxFileType::MessageParameters
 #include <wx/process.h>
 #include <wx/mstream.h>
+#include <wx/fontutil.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -100,11 +101,10 @@ extern const MOption MP_INLINE_GFX_SIZE;
 extern const MOption MP_MAX_MESSAGE_SIZE;
 extern const MOption MP_MSGVIEW_AUTO_ENCODING;
 extern const MOption MP_MSGVIEW_HEADERS;
-extern const MOption MP_MSGVIEW_HEADERS_D;
 extern const MOption MP_MSGVIEW_VIEWER;
-extern const MOption MP_MSGVIEW_VIEWER_D;
 extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
+extern const MOption MP_MVIEW_FONT_DESC;
 extern const MOption MP_MVIEW_FONT_SIZE;
 extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_BGCOLOUR;
@@ -327,8 +327,8 @@ MessageView::AllProfileValues::AllProfileValues()
    // init everything to some default values, even if they're not normally
    // used before ReadAllSettings() is called it is still better not to leave
    // junk in the struct fields
-   fontFamily = wxDEFAULT;
-   fontSize = 12;
+   fontFamily = -1;
+   fontSize = -1;
 
    quotedColourize =
    quotedCycleColours = false;
@@ -363,9 +363,10 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(quotedColourize) && CMP(quotedCycleColours) &&
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
-          CMP(fontFamily) && CMP(fontSize) &&
-          CMP(showHeaders) && CMP(highlightURLs) &&
-          CMP(inlineRFC822) && CMP(inlinePlainText) && CMP(inlineGFX) &&
+          CMP(fontDesc) &&
+          (!fontDesc.empty() || (CMP(fontFamily) && CMP(fontSize))) &&
+          CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
+          CMP(highlightURLs) && CMP(inlineGFX) &&
           // even if these fields are different, they don't change our
           // appearance, so ignore them for the purpose of this comparison
 #if 0
@@ -379,6 +380,33 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(showFaces);
 
    #undef CMP
+}
+
+wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
+{
+   wxFont font;
+
+   if ( (encoding == wxFONTENCODING_DEFAULT) && !fontDesc.empty() )
+   {
+      wxNativeFontInfo fontInfo;
+      if ( fontInfo.FromString(fontDesc) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+
+   if ( !font.Ok() )
+   {
+      font = wxFont(fontSize,
+                    fontFamily,
+                    wxFONTSTYLE_NORMAL,
+                    wxFONTWEIGHT_NORMAL,
+                    FALSE,   // not underlined
+                    "",      // no specific face name
+                    encoding);
+   }
+
+   return font;
 }
 
 // ============================================================================
@@ -768,29 +796,15 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
        READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
    settings->quotedMaxAlpha = READ_CONFIG(profile,MP_MVIEW_QUOTED_MAXALPHA);
 
-   static const int fontFamilies[] =
-   {
-      wxDEFAULT,
-      wxDECORATIVE,
-      wxROMAN,
-      wxSCRIPT,
-      wxSWISS,
-      wxMODERN,
-      wxTELETYPE
-   };
-
-   long idx = READ_CONFIG(profile, MP_MVIEW_FONT);
-   if ( idx < 0 || (size_t)idx >= WXSIZEOF(fontFamilies) )
-   {
-      FAIL_MSG( "corrupted config data" );
-
-      idx = 0;
-   }
-
    settings->msgViewer = READ_CONFIG_TEXT(profile, MP_MSGVIEW_VIEWER);
 
-   settings->fontFamily = fontFamilies[idx];
-   settings->fontSize = READ_CONFIG(profile, MP_MVIEW_FONT_SIZE);
+   settings->fontDesc = READ_CONFIG_TEXT(profile, MP_MVIEW_FONT_DESC);
+   if ( settings->fontDesc.empty() )
+   {
+      settings->fontFamily = GetFontFamilyFromProfile(profile, MP_MVIEW_FONT);
+      settings->fontSize = READ_CONFIG(profile, MP_MVIEW_FONT_SIZE);
+   }
+
    settings->showHeaders = READ_CONFIG_BOOL(profile, MP_SHOWHEADERS);
    settings->inlinePlainText = READ_CONFIG_BOOL(profile, MP_PLAIN_IS_TEXT);
    settings->inlineRFC822 = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
@@ -1248,15 +1262,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    {
       if ( EnsureAvailableTextEncoding(&encPart, &textPart) )
       {
-         wxFont font(
-                     m_ProfileValues.fontSize,
-                     m_ProfileValues.fontFamily,
-                     wxNORMAL,
-                     wxNORMAL,
-                     FALSE,   // not underlined
-                     "",      // no specific face name
-                     encPart
-                    );
+         wxFont font = m_ProfileValues.GetFont(encPart);
+
          style.SetFont(font);
       }
       //else: don't change font - no such encoding anyhow

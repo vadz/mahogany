@@ -207,6 +207,7 @@ protected:
    /// get the msg view options
    const ProfileValues& GetOptions() const
       { return m_msgView->GetProfileValues(); }
+
    //@}
 
    /// protected ctor as the objects of this class are never created directly

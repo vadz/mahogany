@@ -219,6 +219,24 @@ wxLayoutWindow::Clear(int family,
                       bool noUpdate)
 {
    GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
+
+   DoClearWindow(noUpdate);
+}
+
+void
+wxLayoutWindow::Clear(const wxFont& font,
+                      wxColour *fg,
+                      wxColour *bg,
+                      bool noUpdate)
+{
+   GetLayoutList()->Clear(font, fg, bg);
+
+   DoClearWindow(noUpdate);
+}
+
+void
+wxLayoutWindow::DoClearWindow(bool noUpdate)
+{
    SetBackgroundColour(GetLayoutList()->GetDefaultStyleInfo().GetBGColour());
    wxScrolledWindow::Clear();
    ResizeScrollbars(true);

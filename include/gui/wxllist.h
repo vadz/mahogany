@@ -353,6 +353,10 @@ private:
 */
 struct wxLayoutStyleInfo
 {
+   wxLayoutStyleInfo(const wxFont& font,
+                     wxColour *fg = NULL,
+                     wxColour *bg = NULL);
+
    wxLayoutStyleInfo(int ifamily = -1,
                      int isize = -1,
                      int istyle = -1,
@@ -365,6 +369,9 @@ struct wxLayoutStyleInfo
 
    wxColour & GetBGColour() { return m_bg; }
 
+   /// the ofnt itself if we have it
+   wxFont font;
+
    /// Font change parameters.
    int  size, family, style, weight, underline;
    wxFontEncoding enc;
@@ -372,6 +379,10 @@ struct wxLayoutStyleInfo
    /// Colours
    wxColour m_bg, m_fg;
    int m_fg_valid, m_bg_valid; // bool, but must be int!
+
+private:
+   /// init the colour fields (common part of all ctors)
+   void InitColours(wxColour *fg, wxColour *bg);
 };
 
 /// a cached font
@@ -381,6 +392,9 @@ public:
    wxFontCacheEntry(int family, int size, int style, int weight,
                     bool underline,
                     wxFontEncoding encoding)
+      : m_Font(size, family,
+               style, weight, underline,
+               wxEmptyString, encoding)
       {
          m_Family = family;
          m_Size = size;
@@ -388,10 +402,8 @@ public:
          m_Weight = weight;
          m_Underline = underline;
          m_Encoding = encoding;
-         m_Font = new wxFont(m_Size, m_Family,
-                             m_Style, m_Weight, m_Underline,
-                             wxEmptyString, encoding);
       }
+
    bool Matches(int family, int size, int style, int weight,
                 bool underline,
                 wxFontEncoding encoding) const
@@ -400,13 +412,11 @@ public:
             && style == m_Style && weight == m_Weight
             && underline == m_Underline && encoding == m_Encoding;
       }
-   wxFont & GetFont(void) { return *m_Font; }
-   ~wxFontCacheEntry()
-      {
-         delete m_Font;
-      }
+
+   wxFont GetFont() const { return m_Font; }
+
 private:
-   wxFont *m_Font;
+   wxFont m_Font;
 
    int  m_Family, m_Size, m_Style, m_Weight;
    bool m_Underline;
@@ -418,13 +428,14 @@ KBLIST_DEFINE(wxFCEList, wxFontCacheEntry);
 class wxFontCache
 {
 public:
-   wxFont & GetFont(int family, int size, int style, int weight,
+   wxFont GetFont(int family, int size, int style, int weight,
                    bool underline, wxFontEncoding encoding);
-   wxFont & GetFont(wxLayoutStyleInfo const &si)
+   wxFont GetFont(wxLayoutStyleInfo const &si)
       {
          return GetFont(si.family, si.size, si.style, si.weight,
                         si.underline != 0, si.enc);
       }
+
 private:
    wxFCEList m_FontList;
 };
@@ -445,6 +456,7 @@ public:
                      wxLayoutList *wxllist,
                      CoordType begin = -1,
                      CoordType end = -1);
+   wxLayoutObjectCmd(const wxFont& font);
    wxLayoutObjectCmd(int family = -1,
                      int size = -1,
                      int style = -1,
@@ -815,6 +827,12 @@ public:
               wxColour *fg=NULL,
               wxColour *bg=NULL,
               wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
+
+   /// Clear with epxlicit font
+   void Clear(const wxFont& font,
+              wxColour *fg = NULL,
+              wxColour *bg = NULL);
+
    /// Empty: clear the list but leave font settings.
    void Empty(void);
 
@@ -994,6 +1012,9 @@ public:
    /// set font colours by colour
    inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+
+   /// set font explicitly
+   void SetFont(const wxFont& font);
 
    /**
       Returns a pointer to the default settings.
@@ -1218,8 +1239,12 @@ private:
    /// Clear the list.
    void InternalClear(void);
 
+   /// clear resetting the default style to the given one
+   void DoClear(const wxLayoutStyleInfo& styleInfo);
+
    /// The list of lines.
    wxLayoutLine *m_FirstLine;
+
    /// The number of lines in the list (store instead recalculating for speed)
    size_t m_numLines;
 

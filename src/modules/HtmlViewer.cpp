@@ -671,7 +671,9 @@ void HtmlViewer::StartHeaders()
    // close <body> tag
    m_htmlText += ">";
 
-   int diff = CalculateFontSize(profileValues.fontSize - DEFAULT_FONT_SIZE);
+   wxFont font = profileValues.GetFont();
+
+   int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
    if ( diff )
    {
       m_htmlText << "<font size=" << wxString::Format("%+d", diff) << ">";
@@ -681,7 +683,7 @@ void HtmlViewer::StartHeaders()
    // map the font family into HTML font face name
    //
    // FIXME: use <font face="...">
-   if ( profileValues.fontFamily == wxTELETYPE )
+   if ( font.IsFixedWidth() )
    {
       m_htmlText << "<tt>";
       m_htmlEnd.Prepend("</tt>");
@@ -694,7 +696,9 @@ void HtmlViewer::StartHeaders()
 void HtmlViewer::ShowRawHeaders(const String& header)
 {
    const ProfileValues& profileValues = GetOptions();
-   int diff = CalculateFontSize(profileValues.fontSize - DEFAULT_FONT_SIZE);
+   wxFont font = profileValues.GetFont();
+
+   int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
    m_htmlText << "<pre>" << "<font size=" << wxString::Format("%+d", diff) << ">"
               << MakeHtmlSafe(header) << "</font>" << "</pre>";
 }

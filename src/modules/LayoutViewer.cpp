@@ -332,11 +332,7 @@ void LayoutViewer::Clear()
 
    // reset visibility params
    const ProfileValues& profileValues = GetOptions();
-   m_window->Clear(profileValues.fontFamily,
-                   profileValues.fontSize,
-                   (int)wxNORMAL,
-                   (int)wxNORMAL,
-                   0,
+   m_window->Clear(profileValues.GetFont(),
                    (wxColour *)&profileValues.FgCol,
                    (wxColour *)&profileValues.BgCol,
                    true /* no update */);
@@ -602,8 +598,12 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
    llist->SetFontColour(colFg.Ok() ? &colFg : NULL,
                         colBg.Ok() ? &colBg : NULL);
 
-   wxFontEncoding enc = style.HasFont() ? style.GetFont().GetEncoding()
-                                        : wxFONTENCODING_SYSTEM;
+   bool hasFont = style.HasFont();
+   if ( hasFont )
+      llist->SetFont(style.GetFont());
+
+   wxFontEncoding enc = hasFont ? style.GetFont().GetEncoding()
+                                : wxFONTENCODING_SYSTEM;
 
    wxLayoutImportText(llist, text, enc);
 }
