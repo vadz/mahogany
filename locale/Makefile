@@ -54,12 +54,12 @@ endif		# MSGFMT
 clean:
 	$(RM) $(FILES_MO)
 
-mergecat: .src/extra_po
+mergecat:
 ifeq "$(TRANSLATIONS)" "yes"
 # we have the programs necessary to update existing translations
 # with any new strings used by the program
 	$(MAKE) -C ../src msgcat 
-	cat ../messages.po .src/extra_po > messages_po
+	cat ../messages.po > messages_po
 	@$(RM) tmp.po
 	@echo "Merging message strings into translation files:"
 	@for i in $(FILES_PO); \
