@@ -88,6 +88,7 @@
 
 extern const MOption MP_AUTOCOLLECT;
 extern const MOption MP_AUTOCOLLECT_ADB;
+extern const MOption MP_AUTOCOLLECT_SENDER;
 extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_BROWSER;
 extern const MOption MP_BROWSER_INNW;
@@ -358,8 +359,8 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           // appearance, so ignore them for the purpose of this comparison
 #if 0
           CMP(browser) && CMP(browserInNewWindow) &&
-          CMP(autocollect) && CMP(autocollectNamed) &&
-          CMP(autocollectBookName) &&
+          CMP(autocollect) && CMP(autocollectSenderOnly) &&
+          CMP (autocollectNamed) CMP(autocollectBookName) &&
 #ifdef OS_UNIX
           CMP(browserIsNS)
 #endif // Unix
@@ -829,6 +830,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->browser = READ_CONFIG_TEXT(profile, MP_BROWSER);
    settings->browserInNewWindow = READ_CONFIG_BOOL(profile, MP_BROWSER_INNW);
    settings->autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
+   settings->autocollectSenderOnly =  READ_CONFIG(profile, MP_AUTOCOLLECT_SENDER);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
    settings->showFaces = READ_CONFIG_BOOL(profile, MP_SHOW_XFACES);
@@ -3022,6 +3024,7 @@ MessageView::DoShowMessage(Message *mailMessage)
       {
          AutoCollectAddresses(m_mailMessage,
                               m_ProfileValues.autocollect,
+                              m_ProfileValues.autocollectSenderOnly != 0,
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,
                               GetFolderName(),

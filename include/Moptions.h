@@ -344,6 +344,7 @@ extern const MOption MP_SHOWHEADERS;
 extern const MOption MP_AUTOCOLLECT;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
+extern const MOption MP_AUTOCOLLECT_SENDER;
 extern const MOption MP_SSL_DLL_SSL;
 extern const MOption MP_SSL_DLL_CRYPTO;
 extern const MOption MP_INCFAX_SUPPORT;
@@ -1044,6 +1045,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOCOLLECT_NAME         "AutoCollect"
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_NAME     "AutoCollectAdb"
+/// Autocollect email addresses from sender only ?
+#define   MP_AUTOCOLLECT_SENDER_NAME     "AutoCollectSender"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_NAME "AutoCollectNamed"
 /// support efax style incoming faxes
@@ -1965,6 +1968,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOCOLLECT_DEFVAL     (long)M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_DEFVAL    "autocollect.adb"
+/// Autocollect email addresses from sender only ?
+#define   MP_AUTOCOLLECT_SENDER_DEFVAL     1l
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_DEFVAL 0l
 

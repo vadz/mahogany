@@ -17,6 +17,7 @@ class Message;
 
     @param message the message to collect addresses from
     @param autocollectFlag the 0,1,2 value whether to do auto collection or not
+    @param senderOnly if true, only collect sender's address
     @param collectNamed if true, only collect addresses with a name
     @param bookName the address book name for auto collection
     @param groupName the subgroup name in bookName where to put new entries
@@ -24,6 +25,7 @@ class Message;
 */
 extern void AutoCollectAddresses(const Message *message,
                                  int autocollectFlag,
+                                 bool senderOnly,
                                  bool collectNamed,
                                  const String& bookName,
                                  const String& groupName,

@@ -54,6 +54,7 @@ DECLARE_AUTOPTR(AdbBook);
 
 void AutoCollectAddresses(const Message *message,
                           int autocollectFlag,
+                          bool senderOnly,
                           bool collectNamed,
                           const String& bookName,
                           const String& groupName,
@@ -61,13 +62,23 @@ void AutoCollectAddresses(const Message *message,
 {
    static const MessageAddressType addressTypesToCollect[] =
    {
+      // In this array, the values corresponding to 'Sender' headers
+      // (e.g. From and ReplyTo) must appear before the others. And if
+      // some other 'sender' headers must be taken into account, the ending
+      // index in the for loop below (named stopAt) must be changed.
       MAT_REPLYTO,
-      MAT_FROM
+      MAT_FROM,
+      MAT_TO,
+      MAT_CC,
    };
 
-   for ( size_t n = 0; n < WXSIZEOF(addressTypesToCollect); n++ )
+   size_t stopAt = WXSIZEOF(addressTypesToCollect);
+   if (senderOnly) {
+      stopAt = 2;
+   }
+   for ( size_t n = 0; n < stopAt; n++ )
    {
-      AddressList *addrList = message->GetAddressList(MAT_REPLYTO);
+      AddressList *addrList = message->GetAddressList(addressTypesToCollect[n]);
       if ( !addrList )
          continue;
 

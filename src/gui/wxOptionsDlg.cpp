@@ -451,6 +451,7 @@ enum ConfigFields
    ConfigField_AutoCollect_HelpText,
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
+   ConfigField_AutoCollectSenderOnly,
    ConfigField_AutoCollectNameless,
 #ifdef USE_BBDB
    ConfigField_Bbdb_HelpText,
@@ -1438,6 +1439,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message, -1                     },
    { gettext_noop("&Autocollect addresses"),       Field_Radio,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
+   { gettext_noop("Autocollect only &senders' addresses"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
 #ifdef USE_BBDB
    { gettext_noop("The following settings configure the support of the Big Brother\n"
@@ -1875,6 +1877,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOCOLLECT),
    CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
+   CONFIG_ENTRY(MP_AUTOCOLLECT_SENDER),
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
 #ifdef USE_BBDB
    CONFIG_NONE(),

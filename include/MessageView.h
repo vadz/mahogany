@@ -561,6 +561,9 @@ private:
       /// Autocollect email addresses?
       int autocollect;
 
+      /// Autocollect only email sender's address?
+      int autocollectSenderOnly;
+
       /// Autocollect only email addresses with complete name?
       int autocollectNamed;
 
