@@ -704,10 +704,9 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       // continue selection to the current (new) cursor position
       m_llist->ContinueSelection();
    }
-   RequestUpdate(m_llist->GetUpdateRect());
    ScrollToCursor();
    // refresh the screen
-   //RequestUpdate(m_llist->GetUpdateRect());
+   RequestUpdate(m_llist->GetUpdateRect());
 }
 
 void
@@ -726,6 +725,9 @@ wxLayoutWindow::OnKeyUp(wxKeyEvent& event)
 void
 wxLayoutWindow::ScrollToCursor(void)
 {
+   //is always needed to make sure we know where the cursor is
+   //if(IsDirty())
+   RequestUpdate(m_llist->GetUpdateRect());
 
    int x0,y0,x1,y1, dx, dy;
 
@@ -768,6 +770,7 @@ wxLayoutWindow::ScrollToCursor(void)
       Scroll(nx == -1 ? -1 : (nx+dx-1)/dx, ny == -1 ? -1 : (ny+dy-1)/dy);
       // avoid recursion
       m_ScrollToCursor = false;
+      RequestUpdate();
    }
 }
 
@@ -931,7 +934,6 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 #endif // WXLAYOUT_USE_CARET
 
    ResetDirty();
-   m_ScrollToCursor = false;
 
    if ( m_StatusBar && m_StatusFieldCursor != -1 )
    {
