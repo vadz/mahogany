@@ -939,60 +939,33 @@ wxArrayString MFolderFromProfile::GetFilters() const
 
 void MFolderFromProfile::SetFilters(const wxArrayString& filters)
 {
-   m_profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters, ':'));
+   m_profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters));
 }
 
 void MFolderFromProfile::PrependFilter(const String& filter)
 {
-   String filters = filter;
-
-   String filtersOld = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
-   if ( !filtersOld.empty() )
-      filters += ':';
-
-   m_profile->writeEntry(MP_FOLDER_FILTERS, filters + filtersOld);
+   wxArrayString filters = GetFilters();
+   filters.Insert(filter, 0);
+   SetFilters(filters);
 }
 
 void MFolderFromProfile::AddFilter(const String& filter)
 {
-   String filters = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
-   if ( !filters.empty() )
-      filters += ':';
-   filters += filter;
-
-   m_profile->writeEntry(MP_FOLDER_FILTERS, filters);
+   wxArrayString filters = GetFilters();
+   filters.Add(filter);
+   SetFilters(filters);
 }
 
 void MFolderFromProfile::RemoveFilter(const String& filter)
 {
-   String filters = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
-
-   if ( filters == filter )
+   wxArrayString filters = GetFilters();
+   int n = filters.Index(filter);
+   if ( n != wxNOT_FOUND )
    {
-      // we don't have any other filters
-      filters.clear();
-   }
-   else // something will be left
-   {
-      String others;
-      if ( filters.StartsWith(filter + _T(':'), &others) )
-      {
-         filters = others;
-      }
-      else
-      {
-         const wxChar *start = wxStrstr(filters, _T(':') + filter);
-         if ( !start )
-         {
-            // we don't have such filter
-            return;
-         }
+      filters.RemoveAt(n);
 
-         filters.erase(start - filter.c_str(), filter.length() + 1);
-      }
+      SetFilters(filters);
    }
-
-   m_profile->writeEntry(MP_FOLDER_FILTERS, filters);
 }
 
 // ----------------------------------------------------------------------------
