@@ -452,9 +452,16 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case ' ': // mark:
          // should just be the default behaviour
-         event.Skip();
-         MoveFocus(newFocus);
-         return;
+         /* I would like it to mark the current entry and then
+            move to the next one, but it doesn't work.
+            I don't know what funny things wxWindows does here,
+            but for now I leave it as it is.
+
+          event.Skip();
+          MoveFocus(newFocus);
+          return;
+         */
+	;
       }
    }
    event.Skip();
@@ -571,8 +578,8 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
       const HeaderInfo *hi = (*hil)[event.m_itemIndex];
       m_FolderView->UpdateSelectionInfo();
-
-      m_FolderView->PreviewMessage(hi->GetUId());
+      if(m_PreviewOnSingleClick)
+        m_FolderView->PreviewMessage(hi->GetUId());
       hil->DecRef();
    }
 }
