@@ -49,9 +49,6 @@
 /** Define to load Python library during run-time */
 #undef USE_PYTHON_DYNAMIC
 
-/** Define if you use dspam */
-#undef USE_DSPAM
-
 /** Define if you have libswigpy */
 #undef HAVE_SWIGLIB
 
