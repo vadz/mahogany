@@ -455,6 +455,9 @@ wxMApp::DoExit()
       m_IdleTimer = NULL; // paranoid
    }
 
+   // flush the logs while we can
+   wxLog::FlushActive();
+
    // before deleting the frames, make sure that all dialogs which could be
    // still hanging around don't do it any more
    wxTheApp->DeletePendingObjects();

@@ -29,8 +29,6 @@
 
 #include "Mpch.h"
 
-#ifdef EXPERIMENTAL_NSImporter
-
 #ifndef USE_PCH
    #include "Mcommon.h"
 
@@ -370,15 +368,14 @@ static  PrefMap g_RestPrefMap[] = {
 
 
 // this should be ok on unix
-const wxString g_VarIdent      = "user_pref";   // identifies a key-value entry
-const wxString g_GlobalPrefDir = "/usr/lib/netscape";
-const wxString g_PrefFile      = "preferences.js";
-const wxString g_PrefFile2      = "liprefs.js";
-const wxString g_DefNetscapePrefDir = "$HOME/.netscape";
-const wxString g_DefNetscapeMailDir = "$HOME/nsmail";
+static const wxString g_VarIdent      = "user_pref";   // identifies a key-value entry
+static const wxString g_GlobalPrefDir = "/usr/lib/netscape";
+static const wxString g_PrefFile      = "preferences.js";
+static const wxString g_PrefFile2      = "liprefs.js";
+static const wxString g_DefNetscapePrefDir = "$HOME/.netscape";
+static const wxString g_DefNetscapeMailDir = "$HOME/nsmail";
 
-const wxChar   g_CommentChar   = '/';
-const wxChar   g_PathSep       = '/';
+static const wxChar   g_CommentChar   = '/';
 
 //---------------------------------------------
 // UTILITY CLASSES
@@ -502,11 +499,12 @@ bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
 
 bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
 {
-  value = -1;
   wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
 
   if ( tmp && tmp->ToULong(&value) )
    return TRUE;
+
+  value = (unsigned long)-1; // FIXME: is this really needed?
 
   return FALSE;
 }
@@ -534,6 +532,10 @@ public:
 
 private:
 
+  // call ImportSettingsFromFile() if the file exists, do nothing (and return
+  // TRUE) otherwise
+  bool ImportSettingsFromFileIfExists( const wxString& prefs );
+
   // parses the preferences file to find key-value pairs
   bool ImportSettingsFromFile( const wxString& prefs );
   bool ImportIdentitySettings ( MyHashTable& tbl );
@@ -549,7 +551,7 @@ private:
   bool WriteProfileEntry(const wxString& key, const int val, const wxString& desc );
   bool WriteProfileEntry(const wxString& key, const bool val, const wxString& desc );
 
-  bool CreateFolders( MFolder& parent, wxString& dir );
+  bool CreateFolders(MFolder *parent, const wxString& dir, int flags);
 
   wxString m_MailDir;    // it is a free user choice, stored in preferences
   wxString m_PrefDir;    // it is a free user choice
@@ -575,8 +577,10 @@ MNetscapeImporter::MNetscapeImporter()
 // generic
 // ----------------------------------------------------------------------------
 
+// TODO: mention with which Netscape versions it works (i.e. should it be
+//       "Import settings from Netscape 4.x"? "6.x"?)
 IMPLEMENT_M_IMPORTER(MNetscapeImporter, "Netscape",
-                     gettext_noop("Import settings from NETSCAPE"));
+                     gettext_noop("Import settings from Netscape"));
 
 int MNetscapeImporter::GetFeatures() const
 {
@@ -601,30 +605,32 @@ bool MNetscapeImporter::Applies() const
 
 bool MNetscapeImporter::ImportADB()
 {
-   // import the NETSCAPE address book from ~/.addressbook
-//    AdbImporter *importer = AdbImporter::GetImporterByName("AdbNetscapeImporter");
-//    if ( !importer )
-//    {
-//       wxLogError(_("%s address book import module not found."), "NETSCAPE");
+#if 0
+   // import the Netscape address book from ~/.addressbook
+   AdbImporter *importer = AdbImporter::GetImporterByName("AdbNetscapeImporter");
+   if ( !importer )
+   {
+      wxLogError(_("%s address book import module not found."), "Netscape");
 
-//       return FALSE;
-//    }
+      return FALSE;
+   }
 
-//    wxString filename = importer->GetDefaultFilename();
-//    wxLogMessage(_("Starting importing %s address book '%s'..."),
-//                 "NETSCAPE", filename.c_str());
-//    bool ok = AdbImport(filename, "Netscape.adb", "NETSCAPE Address Book", importer);
+   wxString filename = importer->GetDefaultFilename();
+   wxLogMessage(_("Starting importing %s address book '%s'..."),
+                "Netscape", filename.c_str());
+   bool ok = AdbImport(filename, "Netscape.adb", "Netscape Address Book", importer);
 
-//    importer->DecRef();
+   importer->DecRef();
 
-//    if ( ok )
-//       wxLogMessage(_("Successfully imported %s address book."), "NETSCAPE");
-//    else
-//       wxLogError(_("Failed to import %s address book."), "NETSCAPE");
+   if ( ok )
+      wxLogMessage(_("Successfully imported %s address book."), "Netscape");
+   else
+      wxLogError(_("Failed to import %s address book."), "Netscape");
 
-//    return ok;
+   return ok;
+#endif // 0
+
   return FALSE;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -642,8 +648,9 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
    {
      // TODO
      // - ask the user for his Netscape mail dir
-     //   On the other hand it shoudl ahve been read in prefs
-     wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"), m_MailDir.c_str());
+     //   On the other hand it should ahve been read in prefs
+     wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"),
+                  m_MailDir.c_str());
      return FALSE;
    }
 
@@ -651,25 +658,15 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
   if ( ! dir.IsOpened() )    // if it can't be opened bail out
    return FALSE;          // looks like the isOpened already logs a message
 
-  // the parent for all folders
-  // Vadim, my faith in you, 'cause I have no clue (hey, it rhimes)
-  MFolder *parent = (flags & ImportFolder_AllUseParent) == ImportFolder_AllUseParent ? folderParent : NULL;
-
-  MFolder *rootFolder = CreateFolderTreeEntry (   // may want to remove it if things go wrong
-                                    parent,         // parent may be NULL
-                                    "Netscape",     // the folder name
-                                    MF_GROUP,        //            type
-                                    0,              //            flags
-                                    m_MailDir,      //            path
-                                    FALSE  );       // don't notify
-
-  if ( rootFolder && CreateFolders(*rootFolder, m_MailDir) )
+  // the parent for all folders: use the given one, don't create an extra level
+  // of indirection if the user doesn't want it
+  if ( CreateFolders(folderParent, m_MailDir, flags) )
    {
      MEventManager::Send
       (
        new MEventFolderTreeChangeData
        (
-        parent ? parent->GetFullName() : String(""),
+        folderParent ? folderParent->GetFullName() : String(""),
         MEventFolderTreeChangeData::CreateUnder
         )
        );
@@ -693,7 +690,9 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
 // M lacks this functionality, therefore messages in the Netscape FoF will
 // be stored in a subfolder called "Misc"
 
-bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
+bool MNetscapeImporter::CreateFolders(MFolder *parent,
+                                      const wxString& dir,
+                                      int flags )
 {
   // this part is one2one from the Pine importer
   // thanks Vadim
@@ -759,10 +758,13 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
    {
      const wxString& name = dirList[n];
      wxString path;
-     path << dir << g_PathSep << name;
+     path << dir << DIR_SEPARATOR << name;
      dirFldName = name.BeforeLast('.');
 
-     folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
+     // TODO: determine if this is a system folder (probably just by name, i.e.
+     //       compare with Inbox, Outbox, Drafts, ...) and process it
+     //       accordingly to the flags
+     folder = CreateFolderTreeEntry (parent,    // parent may be NULL
                               dirFldName,      // the folder name
                               MF_GROUP,   //            type
                               0,         //            flags
@@ -786,7 +788,7 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
         // - ask the user what name does he want to give to the folder
 
         wxString tmpPath;
-        tmpPath << dir << g_PathSep << fileList[i];
+        tmpPath << dir << DIR_SEPARATOR << fileList[i];
         subFolder = CreateFolderTreeEntry ( folder,    // parent may be NULL
                                    "Misc",      // the folder name
                                    MF_FILE,   //            type
@@ -807,7 +809,7 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
       }
 
      // recursive call
-     if ( ! CreateFolders( *folder, path ) )
+     if ( ! CreateFolders( folder, path, flags ) )
       return FALSE;
    }
 
@@ -818,9 +820,9 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
    {
      const wxString& name = fileList[n];
      wxString path;
-     path << dir << g_PathSep << name;
+     path << dir << DIR_SEPARATOR << name;
 
-     folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
+     folder = CreateFolderTreeEntry ( parent,    // parent may be NULL
                               name,      // the folder name
                               MF_FILE,   //            type
                               0,         //            flags
@@ -848,20 +850,20 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
 bool MNetscapeImporter::ImportSettings()
 {
 
-   // parse the $HOME/.netscape file and pick the settings of interest to us
-   // from it. Try the global preference file first
+   // parse different netscape config files and pick the settings of interest to
+   // us from it. Try the global preference file first
 
-  wxString filename = g_GlobalPrefDir + g_PathSep + g_PrefFile;
+  wxString filename = g_GlobalPrefDir + DIR_SEPARATOR + g_PrefFile;
 
-  if ( ! ImportSettingsFromFile(g_GlobalPrefDir))
-   wxLogMessage(_("Couldn't find or open the global preference file: %s."),
-             g_GlobalPrefDir.c_str(), "NETSCAPE");
+  if ( ! ImportSettingsFromFileIfExists(filename) )
+   wxLogMessage(_("Couldn't import the global preferences file: %s."),
+             filename.c_str());
 
   // user own preference file
   // entries here will override the global settings
   // TODO
   // - check which one is more recent
-  filename = m_PrefDir + g_PathSep + g_PrefFile;
+  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile;
 
   if (! wxFile::Exists(filename.c_str()) )
    {
@@ -874,11 +876,32 @@ bool MNetscapeImporter::ImportSettings()
 
   // TODO
   // - check if g_PrefFile2 is younger or older than g_PrefFile
-  bool status= ImportSettingsFromFile(filename);
-  filename = m_PrefDir + g_PathSep + g_PrefFile2;
-  if (status && wxFile::Exists(filename.c_str()) )
-   status= ImportSettingsFromFile(filename);
+  //   (use wxFileModificationTime)
+  bool status = ImportSettingsFromFileIfExists(filename);
+  if ( !status )
+  {
+     wxLogMessage(_("Couldn't import the user preferences file: %s."),
+                  filename.c_str());
+  }
+
+  filename = m_PrefDir + DIR_SEPARATOR + g_PrefFile2;
+  if (status)
+   status = ImportSettingsFromFileIfExists(filename);
+  //else: hmm, what message should we give here?
+
   return status;
+}
+
+bool
+MNetscapeImporter::ImportSettingsFromFileIfExists(const wxString& filename)
+{
+   if ( !wxFile::Exists(filename) )
+   {
+      // pretend everything is ok
+      return TRUE;
+   }
+
+   return ImportSettingsFromFile(filename);
 }
 
 
@@ -1024,7 +1047,7 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
    {
      // if I'm correct, Netscape names the files and the folders the same
      // therefore taking the last of the path should be sufficient
-     lstr = lstr.AfterLast(g_PathSep);
+     lstr = lstr.AfterLast(DIR_SEPARATOR);
      tbl.Delete("mail.default_fcc");     // it isn't a dictionary, multiple entries ok
      tbl.Put("mail.default_fcc",lstr);   // change the value in the hashtable
    }                                     // insertion will be done by ImportSettingList
@@ -1116,7 +1139,7 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
 {
   wxString value;
   bool tmp = FALSE;
-  unsigned long lval = -1;
+  unsigned long lval = (unsigned long)-1;
 
   for (int i=0; map[i].npKey != "END"; i++)
    {
@@ -1207,7 +1230,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& v
 
   if ( status = l_Profile->writeEntry( key, tmpVal) )
    wxLogMessage(_("Imported '%s' setting from %s: %s."),
-             desc.c_str(),"NETSCAPE",tmpVal.c_str());
+             desc.c_str(),"Netscape",tmpVal.c_str());
   else
    wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
 
@@ -1222,7 +1245,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, co
 
   if ( status = l_Profile->writeEntry( key, val) )
    wxLogMessage(_("Imported '%s' setting from %s: %u."),
-             desc.c_str(),"NETSCAPE",val);
+             desc.c_str(),"Netscape",val);
   else
    wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
 
@@ -1241,7 +1264,7 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const bool val, c
    status = l_Profile->writeEntry( key.c_str(), 0L);
 
   if ( status )
-   wxLogMessage(_("Imported '%s' setting from %s: %u."), desc.c_str(),"NETSCAPE",val);
+   wxLogMessage(_("Imported '%s' setting from %s: %u."), desc.c_str(),"Netscape",val);
   else
    wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
 
@@ -1345,8 +1368,3 @@ bool MNetscapeImporter::ImportFilters()
 /*  {"mail.thread.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"mail.thread.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
 
-
-
-
-
-#endif // EXPERIMENTAL_NSImporter

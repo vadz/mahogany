@@ -1114,28 +1114,14 @@ MailFolderCC::Create(int typeAndFlags)
 {
    m_MailStream = NIL;
 
-   m_InCritical = false;
-
    UpdateTimeoutValues();
 
    SetRetrievalLimits(0, 0); // no limits by default
 
-   m_nMessages = 0;
-   m_msgnoMax = 0;
-   m_nRecent = UID_ILLEGAL;
-   m_LastUId = UID_ILLEGAL;
-   m_Listing = NULL;
-   m_expungedIndices = NULL;
-
-   m_statusNew = NULL;
-
-   // currently not used, but might be in the future
-   m_GotNewMessages = false;
-   m_FirstListing = true;
+   Init();
 
    m_FolderListing = NULL;
 
-   m_InCritical = false;
    m_ASMailFolder = NULL;
 
    FolderType type = GetFolderType(typeAndFlags);
@@ -1149,6 +1135,24 @@ MailFolderCC::Create(int typeAndFlags)
    m_PingReopenSemaphore = new MMutex;
    m_InListingRebuild = new MMutex;
    m_InFilterCode = new MMutex;
+}
+
+void MailFolderCC::Init()
+{
+   m_nMessages = 0;
+   m_msgnoMax = 0;
+   m_nRecent = UID_ILLEGAL;
+   m_LastUId = UID_ILLEGAL;
+   m_Listing = NULL;
+   m_expungedIndices = NULL;
+
+   m_statusNew = NULL;
+
+   // currently not used, but might be in the future
+   m_GotNewMessages = false;
+   m_FirstListing = true;
+
+   m_InCritical = false;
 }
 
 void MailFolderCC::SetRetrievalLimits(unsigned long soft, unsigned long hard)
@@ -1586,6 +1590,8 @@ MailFolderCC::CloseFolder(const MFolder *folder)
    }
 
    mf->Close();
+
+   mf->Init();
 
    return true;
 }

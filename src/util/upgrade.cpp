@@ -110,6 +110,8 @@ enum MVersion
    Version_050,      // nothing really changed against 0.2x config-wise
    Version_060,      // templates are organised differently
    Version_061,      // system folders have non default positions in tree
+   Version_062 = Version_061, // no changes in config since 0.61
+   Version_063 = Version_062, // no changes in config since 0.62
    Version_NoChange, // any version from which we don't need to upgrade
    Version_Unknown   // some unrecognized version
 };

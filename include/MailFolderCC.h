@@ -368,6 +368,9 @@ private:
    /// Common code for constructors
    void Create(int typeAndFlags);
 
+   /// code common to Create() and Close()
+   void Init();
+
    /** Try to open the mailstream for this folder.
        @return true on success
    */

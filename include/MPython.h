@@ -10,6 +10,10 @@
 #ifndef MPYTHON_H
 #define MPYTHON_H
 
+#include "Mconfig.h"    // for USE_PYTHON
+
+#ifdef USE_PYTHON
+
 // before including Python.h, undef all these macros defined by our config.h
 // and redefined by Python's config.h under Windows to avoid the warnings
 #ifdef OS_WIN
@@ -163,5 +167,7 @@ extern "C"
 #include "PythonHelp.h"
 
 #define  M_PYTHON_MODULE "Minit"
+
+#endif // USE_PYTHON
 
 #endif // MPYTHON_H
