@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Profile - managing configuration options on a per class basis    *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -126,6 +126,9 @@ public:
    virtual bool GetFirstEntry(String& s, long& l) const;
    /// see wxConfig docs
    virtual bool GetNextEntry(String& s, long& l) const;
+
+      /// Returns a pointer to the parent profile.
+   virtual ProfileBase *GetParent(void) const;
 
    virtual bool HasEntry(const String & key) const;
    virtual bool HasGroup(const String & name) const;
@@ -308,6 +311,8 @@ ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
    return p;
 }
 
+
+
 ProfileBase *
 ProfileBase::CreateEmptyProfile(ProfileBase const *parent)
 {
@@ -406,6 +411,12 @@ Profile::CreateEmptyProfile(ProfileBase const *parent)
 Profile::~Profile()
 {
    ASSERT(this != mApplication->GetProfile());
+}
+
+ProfileBase *
+Profile::GetParent(void) const
+{
+   return CreateProfile(GetName().BeforeLast('/'), NULL);
 }
 
 bool

@@ -38,7 +38,6 @@
 #include "MInterface.h"
 #include "MInterface.cpp"
 
-//static MInterfaceImpl gs_MInterface;
 
 // ----------------------------------------------------------------------------
 // Actual MModule code
@@ -55,7 +54,11 @@ struct ModuleEntry
    MModule *m_Module;
 };
 
+/// A list of all loaded modules.
+KBLIST_DEFINE(ModuleList, ModuleEntry);
 
+/// The actual list of all loaded modules.
+static ModuleList gs_ModuleList;
 
 class MModuleImpl : public MModule
 {
@@ -134,16 +137,29 @@ MModuleImpl::~MModuleImpl()
    ASSERT(unLoadModuleFunc);
    if(! unLoadModuleFunc)
       return; // be careful
+
+   // Remove our entry in the list:
+#ifdef DEBUG
+   bool found = false;
+#endif
+   ModuleList::iterator i;
+   for(i = gs_ModuleList.begin();
+       i != gs_ModuleList.end();
+       i++)
+      if( (**i).m_Name == GetName() )
+      {
+         gs_ModuleList.erase(i);
+#ifdef DEBUG
+         found = true;
+#endif  
+         break;
+      }
+   ASSERT(found == true);
+   
    if(unLoadModuleFunc()) // check if we can safely unload it
       wxDllLoader::UnloadLibrary(m_Dll);
 }
 
-
-/// A list of all loaded modules.
-KBLIST_DEFINE(ModuleList, ModuleEntry);
-
-/// The actual list of all loaded modules.
-static ModuleList gs_ModuleList;
 
 static
 MModule *FindModule(const String & name)

@@ -139,6 +139,13 @@
 #define   MP_EXPAND_TREECTRL   "ExpandTreeControl"
 /// use tear-off menus?
 #define   MP_TEAROFF_MENUS     "TearOffMenus"
+/// dockable menu bars?
+#define   MP_DOCKABLE_MENUBARS "MenuBarsDockable"
+/// dockable tool bars?
+#define   MP_DOCKABLE_TOOLBARS   "ToolBarsDockable"
+/// flat tool bars?
+#define   MP_FLAT_TOOLBARS   "ToolBarsFlat"
+
 /// help browser name
 #define   MP_HELPBROWSER   "HelpBrowser"
 /// is help browser of netscape type?
@@ -409,6 +416,8 @@
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
+/// sort criterium for folder listing
+#define MP_MSGS_SORTBY         "SortMesagesBy"
 /// open URLs with
 #define   MP_BROWSER         "Browser"
 /// Browser is netscape variant
@@ -535,6 +544,12 @@
 #define   MP_EXPAND_TREECTRL_D   1
 /// use tear-off menus?
 #define   MP_TEAROFF_MENUS_D   1l
+/// dockable menu bars?
+#define   MP_DOCKABLE_MENUBARS_D   1l
+/// dockable tool bars?
+#define   MP_DOCKABLE_TOOLBARS_D   1l
+/// flat tool bars?
+#define   MP_FLAT_TOOLBARS_D      1l
 
 /// the user's M directory
 #define   MP_USERDIR_D         M_EMPTYSTRING
@@ -796,7 +811,8 @@
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
-
+/// sort criterium for folder listing
+#define MP_MSGS_SORTBY_D         0l
 /// open URLs with
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"

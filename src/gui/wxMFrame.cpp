@@ -120,7 +120,10 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    SetIcon(ICON("MFrame"));
 
    initialised = true;
-   m_MenuBar = new wxMenuBar;
+   int style = 0;
+   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+      style = wxMB_DOCKABLE;
+   m_MenuBar = new wxMenuBar(style);
    m_ToolBar = NULL;
 }
 
@@ -368,9 +371,14 @@ wxMFrame::OnMenuCommand(int id)
 wxToolBar *
 wxMFrame::CreateToolBar(void)
 {
+   int style = wxTB_HORIZONTAL;
+   if(READ_APPCONFIG(MP_DOCKABLE_TOOLBARS) != 0)
+      style |= wxTB_DOCKABLE;
+   if(READ_APPCONFIG(MP_FLAT_TOOLBARS) != 0)
+      style |= wxTB_FLAT;
+
    wxToolBar *tb =
-      wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL,-1,
-                             _("Mahogany Toolbar"));
+      wxFrame::CreateToolBar(style,-1, _("Mahogany Toolbar"));
    tb->SetMargins(2,2);
    return tb;
 }

@@ -8,9 +8,8 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	POP signing off bug
-9	KB	Implement a ProfileBase::GetParent() and functions to
-		enumerate sub-groups.
+9	KB	Implement functions to	enumerate profile sub-groups.
+	     !-> Is this still needed?	
 9	KB	Do we need FolderView/ComposeView profiles? 
 9	KB	When retrieving only N our of M messages, Mah. will
 		later say that there are M-N new messages :-(

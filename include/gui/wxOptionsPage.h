@@ -213,6 +213,7 @@ public:
 
    void OnIdle(wxIdleEvent&);
 
+   void OnButton(wxCommandEvent&);
    void OnNewFolder(wxCommandEvent&);
    void OnModifyFolder(wxCommandEvent&);
    void OnDeleteFolder(wxCommandEvent&);

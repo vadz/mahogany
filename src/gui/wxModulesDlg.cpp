@@ -47,7 +47,7 @@
 class wxModulesDialog : public wxManuallyLaidOutDialog
 {
 public:
-   wxModulesDialog(wxFrame *parent);
+   wxModulesDialog(wxWindow *parent);
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -70,9 +70,9 @@ BEGIN_EVENT_TABLE(wxModulesDialog, wxDialog)
 END_EVENT_TABLE()
 
 
-wxModulesDialog::wxModulesDialog(wxFrame *parent)
+wxModulesDialog::wxModulesDialog(wxWindow *parent)
    : wxManuallyLaidOutDialog( parent,
-                              _("Mahogany : Extension Modules Configuration"),
+                              _("Extension Modules Configuration"),
                               "ModulesDialog")
 {
    SetDefaultSize(380,400);
@@ -84,7 +84,7 @@ wxModulesDialog::wxModulesDialog(wxFrame *parent)
    char *tmp = strutil_strdup(modules);
    strutil_tokenise(tmp, ":", m_Modules);
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"));
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"),MH_DIALOG_MODULES);
    wxLayoutConstraints *c;
 
    // create a short help message above
@@ -101,7 +101,7 @@ wxModulesDialog::wxModulesDialog(wxFrame *parent)
    // create the checklistbox in the area which is left
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, -2*LAYOUT_X_MARGIN);
    c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
    c->height.PercentOf(box, wxHeight, 60);
 
@@ -113,7 +113,7 @@ wxModulesDialog::wxModulesDialog(wxFrame *parent)
                                wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, -2*LAYOUT_X_MARGIN);
    c->top.Below(m_checklistBox, 2*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);

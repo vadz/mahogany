@@ -233,6 +233,10 @@ void MDialog_ShowText(MWindow *parent,
 } // extern "C"
 
 /// Configure modules, in wxModulesDialog.cpp:
-extern void ShowModulesDialog(wxFrame *parent);
+extern
+void ShowModulesDialog(wxFrame *parent);
+/// Configure message/folder sorting
+extern
+bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
 
 #endif  //WXMDIALOGS_H

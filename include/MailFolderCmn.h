@@ -63,6 +63,40 @@ public:
    */
    virtual bool UnDeleteMessages(const INTARRAY *messages);
 
+   /**@name Old-style functions, try to avoid. */
+   //@{
+   
+   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
+       @param uid mesage uid
+       @param flag flag to be set, e.g. "\\Deleted"
+       @param set if true, set the flag, if false, clear it
+       @return always true UNSUPPORTED!
+   */
+  virtual bool SetMessageFlag(unsigned long uid,
+                              int flag,
+                              bool set = true)
+      {
+         return SetSequenceFlag(strutil_ultoa(uid),flag,set);
+      }
+
+   /** Delete a message.
+       @param uid mesage uid
+       @return always true UNSUPPORTED!
+   */
+   virtual inline bool DeleteMessage(unsigned long uid)
+   {
+     SetMessageFlag(uid,MSG_STAT_DELETED);
+     return true;
+   }
+
+   /** UnDelete a message.
+       @param uid mesage uid
+       @return always true UNSUPPORTED!
+   */
+   virtual inline bool UnDeleteMessage(unsigned long uid)
+      { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
+
+   //@}   
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
@@ -107,6 +141,14 @@ public:
    virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
    //@}
 protected:
+   /** This function is called to update the folder listing. */
+   void UpdateListing(void);
+
+   /** This function must be implemented by the driver and return a
+       newly built listing of all messages in the folder.
+   */
+   virtual HeaderInfoList *BuildListing(void) = 0;
+
    /**@name Common variables might or might not be used */
    //@{
    /// Login for password protected mail boxes.

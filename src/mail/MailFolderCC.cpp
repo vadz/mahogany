@@ -925,18 +925,6 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
    return true; /* not supported by c-client */
 }
 
-bool
-MailFolderCC::SetMessageFlag(unsigned long uid,
-                             int flag,
-                             bool set)
-{
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
-   ASSERT(m_Listing);
-//FIXME uid check   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
-   String sequence = strutil_ultoa(uid);
-   SetSequenceFlag(sequence,flag,set);
-   return true; /* not supported by c-client */
-}
 
 bool
 MailFolderCC::SetFlag(const INTARRAY *selections, int flag, bool set)
@@ -1045,7 +1033,8 @@ extern "C"
    void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
 };
 
-void
+
+HeaderInfoList *
 MailFolderCC::BuildListing(void)
 {
 //FIXME: leads to missing updates??
@@ -1055,7 +1044,7 @@ MailFolderCC::BuildListing(void)
    m_BuildListingSemaphore = true;
    m_UpdateNeeded = false;
 
-   CHECK_DEAD("Cannot access closed folder\n'%s'.");
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
 
    if ( m_FirstListing )
       m_NumOfMessages = m_MailStream->nmsgs;
@@ -1174,6 +1163,9 @@ MailFolderCC::BuildListing(void)
    }
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
+
+   m_Listing->IncRef();
+   return m_Listing;
 }
 
 void
@@ -1703,7 +1695,7 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
          if(mf && mf->UpdateNeeded())  // only call it once
-            mf->BuildListing();
+            mf->UpdateListing();
          break;
       }
       }// switch

@@ -95,6 +95,10 @@ BEGIN_EVENT_TABLE(wxNotebookPageBase, wxEnhancedPanel)
    EVT_COMBOBOX(-1, wxNotebookPageBase::OnChange)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxManuallyLaidOutDialog, wxDialog)
+   EVT_BUTTON  (wxID_HELP, wxManuallyLaidOutDialog::OnHelp)
+END_EVENT_TABLE()
+
 IMPLEMENT_DYNAMIC_CLASS(wxManuallyLaidOutDialog, wxDialog)
 IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxManuallyLaidOutDialog)
 
@@ -738,16 +742,17 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
                                                  const wxString& profileKey)
                        : wxPDialog(profileKey,
                                    parent,
-                                   title,
+                                   wxString("Mahogany: ")+title,
                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    // basic unit is the height of a char, from this we fix the sizes of all
    // other controls
    size_t heightLabel = AdjustCharHeight(GetCharHeight());
-
+   
    hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
    wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
 
+   m_helpId = -1; // no help id by default
    // the controls will be positioned with the constraints
    SetAutoLayout(TRUE);
 }
@@ -786,8 +791,10 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
 }
 
 wxStaticBox *
-wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
-                                                bool noBox)
+wxManuallyLaidOutDialog::CreateStdButtonsAndBox(
+   const wxString& boxTitle,
+   int helpId,
+   bool noBox)
 {
    wxLayoutConstraints *c;
 
@@ -809,6 +816,19 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
    c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
    btnCancel->SetConstraints(c);
 
+   // add a help button?
+   if(helpId != -1)
+   {
+      wxButton *btnHelp = new wxButton(this, wxID_HELP, _("Help"));
+      c = new wxLayoutConstraints;
+      c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+      c->width.Absolute(wBtn);
+      c->height.Absolute(hBtn);
+      c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+      btnHelp->SetConstraints(c);
+      m_helpId = helpId;
+   }
+   
    // a box around all the other controls
    if ( noBox )
       return NULL;

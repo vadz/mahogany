@@ -85,6 +85,8 @@ public:
    // get the buttons size
    wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
 
+   void OnHelp(wxCommandEvent & /*ev*/)
+      { mApplication->Help(m_helpId,this); }
 protected:
    // set the diaqlog size if it wasn't restored from profile
    void SetDefaultSize(int width, int height,
@@ -92,8 +94,9 @@ protected:
 
    // create Ok and Cancel buttons and a static box around all other ctrls
    // (if noBox is TRUE, the returned value is NULL and wxStaticBox is not
-   // created)
+   // created) If helpId != -1, add a Help button.
    wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
+                                       int helpId = -1,
                                        bool noBox = FALSE);
 
    // these variables are set in the ctor and are the basic measurement unites
@@ -104,8 +107,9 @@ protected:
 private:
    // the minimal size (only if SetDefaultSize() was called)
    wxSize m_sizeMin;
-
+   int    m_helpId;
    DECLARE_DYNAMIC_CLASS(wxManuallyLaidOutDialog)
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------

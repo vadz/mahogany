@@ -58,9 +58,6 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnMouse)
 
 #ifdef __WXGTK__
-   // FIXME why do you do it (VZ)?
-   EVT_KEY_DOWN(wxFolderListCtrl::OnChar)
-
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
 #endif // wxGTK
 

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Profile - managing configuration options on a per class basis    *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -158,6 +158,8 @@ public:
    /// see wxConfig docs
    virtual bool GetNextEntry(String& s, long& l) const = 0;
 
+   /// Returns a pointer to the parent profile.
+   virtual ProfileBase *GetParent(void) const = 0;
    /** @name Managing environment variables
        just expose wxConfig methods (we do need them to be able to read the
        real config values, i.e. to disable expansion, sometimes)

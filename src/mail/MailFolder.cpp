@@ -646,3 +646,11 @@ MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
       ForwardMessage(msg, GetProfile(), parent);
    }
 }
+
+void
+MailFolderCmn::UpdateListing(void)
+{
+   HeaderInfoList *hil = BuildListing();
+   if(hil)
+      hil->DecRef();
+}

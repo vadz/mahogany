@@ -53,6 +53,7 @@
 #include <wx/gauge.h>
 #include <wx/stattext.h>
 #include <wx/statbmp.h>
+#include <wx/choice.h>
 
 #include "MFolderDialogs.h"
 
@@ -906,3 +907,126 @@ void MDialog_ShowText(MWindow *parent,
       wxMFrame::SavePosition(configPath, &dlg);
 }
 
+
+
+#include "gui/wxDialogLayout.h"
+
+#define NUM_CRITERIA   9
+static wxString sortCriteria[NUM_CRITERIA] =
+{
+   gettext_noop("None"),
+   gettext_noop("Date"),
+   gettext_noop("Date (reverse)"),
+   gettext_noop("Subject"),
+   gettext_noop("Subject (reverse)"),
+   gettext_noop("Author"),
+   gettext_noop("Author (reverse)"),
+   gettext_noop("Status"),
+   gettext_noop("Status (reverse)")
+};
+
+#define NUM_LABELS 2
+static wxString labels[NUM_LABELS] =
+{
+   gettext_noop("First, sort by"),
+   gettext_noop("then, sort by")
+};
+
+class wxMessageSortingDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent);
+   ~wxMessageSortingDialog();
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow(); 
+   virtual bool TransferDataToWindow();
+   bool WasChanged(void) { return FALSE;};
+protected:
+   ProfileBase *m_Profile;
+   wxChoice    *m_Choices[NUM_CRITERIA];
+};
+
+wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent)
+   : wxManuallyLaidOutDialog( parent,
+                              _("Message sorting"),
+                              "MessageSortingDialog")
+{
+   m_Profile = profile;
+   profile->IncRef(); // paranoid
+   
+   SetDefaultSize(380,400);
+
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"),MH_DIALOG_SORTING);
+
+   wxClientDC dc(this);
+   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+   long width, widthMax = 0;
+   for ( size_t n = 0; n < NUM_LABELS; n++ )
+   {
+      dc.GetTextExtent(labels[n], &width, NULL);
+      if ( width > widthMax ) widthMax = width;
+   }
+
+   wxLayoutConstraints *c;
+   for(size_t n = 0; n < NUM_CRITERIA; n++)
+   {
+      wxStaticText *txt = new wxStaticText(this, -1,
+                                           n < NUM_LABELS ? _(labels[n]) :
+                                           _(labels[NUM_LABELS-1]),
+                                           wxDefaultPosition);
+      c = new wxLayoutConstraints;
+      c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->width.Absolute(widthMax);
+      if(n == 0)
+         c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+      else
+         c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
+      c->height.AsIs();
+      txt->SetConstraints(c);
+      
+      m_Choices[n] = new wxChoice(this, -1, wxDefaultPosition,
+                                  wxDefaultSize, NUM_CRITERIA,
+                                  sortCriteria);
+      c = new wxLayoutConstraints;
+      c->left.RightOf(txt, 2*LAYOUT_X_MARGIN);
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+      if(n == 0)
+         c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+      else
+         c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
+      c->height.AsIs();
+      m_Choices[n]->SetConstraints(c);
+   }
+}
+
+wxMessageSortingDialog::~wxMessageSortingDialog()
+{
+   m_Profile->DecRef();
+}
+
+
+bool wxMessageSortingDialog::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+bool wxMessageSortingDialog::TransferDataToWindow()
+{
+   return TRUE;
+}
+
+/* Configuration dialog for sorting messages. */
+extern
+bool ConfigureSorting(ProfileBase *profile, wxWindow *parent)
+{
+   wxMessageSortingDialog dlg(profile, parent);
+   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
+   {
+      return TRUE;
+   }
+   else
+   {
+      return FALSE;
+   }
+}

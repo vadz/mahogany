@@ -177,16 +177,6 @@ public:
                         int flag,
                         bool set = true);
 
-   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
-       @param uid mesage uid
-       @param flag flag to be set, e.g. "\\Deleted"
-       @param set if true, set the flag, if false, clear it
-       @return always true UNSUPPORTED!
-   */
-  virtual bool SetMessageFlag(unsigned long uid,
-                              int flag,
-                              bool set = true);
-
    /** Appends the message to this folder.
        @param msg the message to append
        @return true on success
@@ -198,23 +188,6 @@ public:
        @return true on success
    */
    virtual bool AppendMessage(String const &msg);
-
-   /** Delete a message.
-       @param uid mesage uid
-       @return always true UNSUPPORTED!
-   */
-   bool DeleteMessage(unsigned long uid)
-   {
-     SetMessageFlag(uid,MSG_STAT_DELETED);
-     return true;
-   }
-
-   /** UnDelete a message.
-       @param uid mesage uid
-       @return always true UNSUPPORTED!
-   */
-   bool UnDeleteMessage(unsigned long uid)
-      { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
 
    /** Expunge messages.
      */
@@ -429,8 +402,6 @@ protected:
    void UpdateTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }
 
-   /// Gets a complete folder listing from the stream.
-   void BuildListing(void);
    /* Handles the mm_overview_header callback on a per folder basis. */
    void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
    /// closes the mailstream
@@ -492,6 +463,8 @@ public:
       { ms_EventQueue.push_back(evptr); }
 
 protected:
+   /// Gets a complete folder listing from the stream.
+   HeaderInfoList * BuildListing(void);
    /// The list of events to be processed.
    static EventQueue ms_EventQueue;
    /** The index of the next entry in list to fill. Only used for

@@ -136,7 +136,8 @@ enum ConfigFields
    ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
    ConfigField_AutoShowFirstMessage,
-   ConfigField_FoldersLast = ConfigField_AutoShowFirstMessage,
+   ConfigField_SortMessagesBy,
+   ConfigField_FoldersLast = ConfigField_SortMessagesBy,
 
 #ifdef USE_PYTHON
    // python
@@ -218,10 +219,11 @@ enum ConfigFields
 #ifdef OS_UNIX
    ConfigField_AFMPath,
    ConfigField_TearOffMenus,
-   ConfigField_OthersLast = ConfigField_TearOffMenus,
-#else // !Unix
-   ConfigField_OthersLast = ConfigField_ShowNewMail,
-#endif // Unix/!Unix
+#endif // Unix
+   ConfigField_DockableMenubars,
+   ConfigField_DockableToolbars,
+   ConfigField_ToolbarsFlatButtons,
+   ConfigField_OthersLast = ConfigField_ToolbarsFlatButtons,
    // the end
    ConfigField_Max
 };
@@ -353,9 +355,7 @@ BEGIN_EVENT_TABLE(wxOptionsPageMessageView, wxOptionsPage)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
-   EVT_BUTTON(wxOptionsPage_BtnNew,    wxOptionsPageFolders::OnNewFolder)
-   EVT_BUTTON(wxOptionsPage_BtnModify, wxOptionsPageFolders::OnModifyFolder)
-   EVT_BUTTON(wxOptionsPage_BtnDelete, wxOptionsPageFolders::OnDeleteFolder)
+   EVT_BUTTON(-1, wxOptionsPageFolders::OnButton)
 
    EVT_IDLE(wxOptionsPageFolders::OnIdle)
 END_EVENT_TABLE()
@@ -443,6 +443,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
+   { gettext_noop("&Sort messages by..."),      Field_SubDlg,  -1},
 
 
 #ifdef USE_PYTHON
@@ -531,8 +532,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
-   { gettext_noop("Use &Tear-off menus"),           Field_Bool,    -1                     },
+   { gettext_noop("Use &detachable tar-off menus"), Field_Bool,    -1                     },
 #endif
+   { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
+   { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
+   { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     }
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -598,6 +602,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
+   CONFIG_ENTRY(MP_MSGS_SORTBY),
 
    // python
 #ifdef USE_PYTHON
@@ -669,6 +674,9 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AFMPATH),
    CONFIG_ENTRY(MP_TEAROFF_MENUS),
 #endif
+   CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
+   CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
+   CONFIG_ENTRY(MP_FLAT_TOOLBARS)
 };
 
 #undef CONFIG_ENTRY
@@ -1404,6 +1412,27 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 
    return rc;
 }
+
+
+void wxOptionsPageFolders::OnButton(wxCommandEvent& event)
+{
+   bool dirty = FALSE;
+
+   switch(event.GetId())
+   {
+   case wxOptionsPage_BtnNew: OnNewFolder(event); break;
+   case wxOptionsPage_BtnModify: OnModifyFolder(event); break;
+   case wxOptionsPage_BtnDelete: OnDeleteFolder(event); break;
+   default:
+      wxObject *obj = event.GetEventObject();
+      if ( obj == GetControl(ConfigField_SortMessagesBy) )
+         dirty = ConfigureSorting(m_Profile, this);
+   }
+
+   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+   if(dirty) dialog->SetDirty();
+}
+
 
 void wxOptionsPageFolders::OnNewFolder(wxCommandEvent& event)
 {
