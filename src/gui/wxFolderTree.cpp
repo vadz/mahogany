@@ -242,6 +242,13 @@ protected:
    // reexpand branch - called when something in the tree changes
    void ReopenBranch(wxTreeItemId parent);
 
+   // returns TRUE if the given node has hidden flag set in the profile
+   bool IsHidden(wxFolderTreeNode *node)
+   {
+      return node ? (node->GetFolder()->GetFlags() & MF_FLAGS_HIDDEN) != 0
+                  : FALSE;
+   }
+
 private:
    class FolderMenu : public wxMenu
    {
@@ -329,8 +336,16 @@ private:
    bool     m_suppressSelectionChange;
    MFolder *m_previousFolder;
 
-   /// used under unix only
+   // to avoid reexpanding the entire folder tree each time, remember whether
+   // we show hidden folders at all in the tree and whether the current folder
+   // is hidden
+   bool     m_showHidden;
+   bool     m_curIsHidden;
+
+#ifdef __WXGTK__
+   // give focus to the tree when mouse enters it [used under unix only]
    bool m_FocusFollowMode;
+#endif // wxGTK
 
    DECLARE_EVENT_TABLE()
 };
@@ -605,7 +620,13 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_menuRoot = NULL;
    m_suppressSelectionChange = FALSE;
    m_previousFolder = NULL;
+
+   m_showHidden = ShowHiddenFolders();
+   m_curIsHidden = FALSE;
+
+#ifdef __WXGTK__
    m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
+#endif // wxGTK
 
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
@@ -770,8 +791,12 @@ void wxFolderTreeImpl::DoFolderDelete()
 
    if ( m_sink->OnDelete(folder) )
    {
-      if(folder == m_current->GetFolder())
+      if ( folder == m_current->GetFolder() )
+      {
+         // don't leave invalid selection
          m_current = NULL;
+      }
+
       wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
    }
 
@@ -795,9 +820,9 @@ void wxFolderTreeImpl::DoFolderProperties()
 
 void wxFolderTreeImpl::DoToggleHidden()
 {
-   bool show = !ShowHiddenFolders();
+   m_showHidden = !ShowHiddenFolders();
 
-   mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, show);
+   mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, m_showHidden);
 
    ReopenBranch(GetRootItem());
 }
@@ -864,6 +889,8 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    // might be called _before_ this function returns and the tree selection is
    // updated
    m_current = newCurrent;
+
+   m_curIsHidden = IsHidden(m_current);
 
    if ( !m_suppressSelectionChange )
    {
@@ -1017,11 +1044,32 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 
 void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
 {
+   wxString currentName;
+   if ( m_current )
+   {
+      currentName = m_current->GetFolder()->GetFullName();
+   }
+
    Collapse(parent);
    DeleteChildren(parent);
    GetFolderTreeNode(parent)->ResetExpandedFlag();
    SetItemHasChildren(parent, TRUE);
    Expand(parent);
+
+   if ( !!currentName )
+   {
+      wxTreeItemId id = GetTreeItemFromName(currentName);
+      if ( id.IsOk() )
+      {
+         m_current = GetFolderTreeNode(id);
+      }
+      else
+      {
+         // this may happen if the previously selected folder became hidden and
+         // is not shown in the tree any more
+         m_current = NULL;
+      }
+   }
 }
 
 bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
@@ -1056,9 +1104,9 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
+#ifdef __WXGTK__
       m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
-
-//FIXME: causes crash      ReopenBranch(GetRootItem()); // hidden folder flags might have changed
+#endif // wxGTK
 
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 
@@ -1074,24 +1122,19 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       wxString profileName = profileChanged->GetName();
       int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
-      if ( pos != 0 )
-      {
-         // don't know how to get folder name...
-         FAIL_MSG("weird profile path");
 
-         // test for item.IsOk() will fail below, so just do nothing
-      }
-      else
-      {
-         // skip the M_PROFILE_CONFIG_SECTION prefix
-         wxString folderName = profileName.c_str() +
-                               strlen(M_PROFILE_CONFIG_SECTION);
+      // don't know how to get folder name...
+      CHECK( pos == 0, TRUE, "weird profile path" )
 
-         item = GetTreeItemFromName(folderName);
-      }
+      // skip the M_PROFILE_CONFIG_SECTION prefix
+      wxString folderName = profileName.c_str() +
+                            strlen(M_PROFILE_CONFIG_SECTION);
+
+      item = GetTreeItemFromName(folderName);
 
       if ( item.IsOk() )
       {
+         // the icon might have changed too
          switch ( event.GetChangeKind() )
          {
             case MEventOptionsChangeData::Apply:
@@ -1109,6 +1152,35 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
             default:
                FAIL_MSG("unknown options change event");
+         }
+
+         // important: after calling ReopenBranch() we can't use item any more
+         //            because it is invalidated by this call, so change the
+         //            icon first and reexpand the tree after this!
+
+         // hidden folder flags might have changed (either for the entire tree
+         // or just for this folder)
+         wxTreeItemId idToReopen;
+         if ( ShowHiddenFolders() != m_showHidden )
+         {
+            // reexpend the entire tree
+            idToReopen = GetRootItem();
+         }
+         else if ( !m_showHidden )  // if we show all, nothing can change!
+         {
+            if ( IsHidden(GetFolderTreeNode(item)) != m_curIsHidden )
+            {
+               // reexpand just the parent of this folder
+               idToReopen = GetParent(item);
+
+               m_curIsHidden = !m_curIsHidden;
+            }
+            //else: nothing changed, do nothing
+         }
+
+         if ( idToReopen.IsOk() )
+         {
+            ReopenBranch(idToReopen);
          }
       }
    }

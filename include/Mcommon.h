@@ -35,6 +35,7 @@ typedef long int lcoord_t;
 // ----------------------------------------------------------------------------
 #ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
+#  undef ASSERT
 #  ifndef __WXDEBUG__
 #     define ASSERT(x)          assert(x)
 #     define ASSERT_MSG(x, msg) assert(x)

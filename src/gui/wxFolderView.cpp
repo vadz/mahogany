@@ -43,6 +43,7 @@
 #include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MessageView.h"
+#include "TemplateDialog.h"
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMessageView.h"
@@ -936,7 +937,34 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
    UpdateSelectionInfo();
 
-   switch(event.GetId())
+   int cmd = event.GetId();
+
+   // first process commands which can be reduced to other commands
+   bool askForTemplate;
+   switch ( cmd )
+   {
+      case WXMENU_MSG_REPLY_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_REPLY;
+         askForTemplate = TRUE;
+         break;
+
+      case WXMENU_MSG_FORWARD_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_FORWARD;
+         askForTemplate = TRUE;
+         break;
+
+      default:
+         askForTemplate = FALSE;
+   }
+
+   if ( askForTemplate )
+   {
+      // TODO we really need another dialog here which proposes to choose on
+      //      template among all existing
+      ConfigureTemplates(m_ASMailFolder->GetProfile(), GetFrame(m_Parent));
+   }
+
+   switch ( cmd )
    {
    case WXMENU_MSG_SEARCH:
       SearchMessages();
@@ -945,7 +973,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_TOGGLEHEADERS:
    case WXMENU_MSG_SHOWRAWTEXT:
    case WXMENU_EDIT_COPY:
-      (void)m_MessagePreview->DoMenuCommand(event.GetId());
+      (void)m_MessagePreview->DoMenuCommand(cmd);
       break;
    case WXMENU_LAYOUT_LCLICK:
    case WXMENU_LAYOUT_RCLICK:
@@ -977,10 +1005,15 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_REPLY:
    case WXMENU_MSG_FOLLOWUP:
-      GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->ReplyMessages(&selections, GetFrame(m_Parent),
-                                            (event.GetId() == WXMENU_MSG_FOLLOWUP)
-                                            ? MailFolder::REPLY_FOLLOWUP:0));
+      {
+         int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
+                                                : 0;
+
+         GetSelections(selections);
+         m_TicketList->Add(m_ASMailFolder->ReplyMessages(&selections,
+                                                         GetFrame(m_Parent),
+                                                         flags));
+      }
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
@@ -1054,7 +1087,9 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    }
    break;
    default:
-      wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
+      // VZ: I get asserts here when choosing "Exit" from the main menu...
+      //wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
+       ;
    }
 }
 

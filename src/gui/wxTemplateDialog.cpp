@@ -52,7 +52,7 @@
 // ----------------------------------------------------------------------------
 
 // the text window for editing templates: it has a popup menu which allows the
-// user to insert any ob existing macors
+// user to insert any of existing macors
 class TemplateEditor : public wxTextCtrl
 {
 public:

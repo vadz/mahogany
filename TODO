@@ -2,10 +2,7 @@
 TODO list for Mahogany
 $Id$
 
-
-
 *** PLEASE ADD NEW BUGS TO BUGZILLA AND THE TODO FILE FOR NOW ***
-
 
 *********************************************************************
 *** BUGS
@@ -13,13 +10,20 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
+		leaks memory - the font will be never freed.
+
+5	VZ	we should really remember the folder tree state, i.e. reexpand
+		all branches which were open the last time, not just root
+		(it's annoying that all opened branches are closed when the
+		"show hidden" flag changes) - this is the job for wxPTreeCtrl
+
+5	VZ	should have a global list of all templates (identified either by
+		name or file name) and a dialog to choose among all of them
+
 9	VZ	properties dialog fails for INBOX and corrupts its
 		settings
 		"collect all mail" checkbox does not react immediately
-
-9	VZ	FolderTree: changing folder hidden flag is not
-		reflected, tried to react to it in options change event, but doesn't
-		work, see wxFolderTree.cpp:1061 //FIXME
 
 5	VZ	appending to log file (Log Window/Save) fails
 
@@ -33,9 +37,6 @@ $Id$
 6	VZ	"Browse subfolders" under root folder should give a choice:
 		subscribe to newsgroups, import MH folders, mirror server IMAP
 		folders...
-
-6	VZ	constraints in the notebooks half broken again, both GTK and
-                Windows (well, they actually work but give warnings)
 
 5               [Cancel] in options dialog doesn't cancel everything (i.e. if
                 you [Apply] change first it's not undone when [Cancel] is
@@ -92,13 +93,6 @@ $Id$
 		headerinfo for consistency (different from/reply-to lines)
 7	KB	selecting/deselecting only message in folder
 		--fixed?
-
-
-9	VZ	Selecting a folder group tries to open it and produces a
-		dialog that it couldn't be opened. Gets expanded anyway.
-		As a consequence of this, it is not possible to create new
-		entries under a group as "Create..." is disabled in the
-		popup.
 
 9	VZ	deleting groups from an ADB book messes up the book and
 		deletes other non-selected groups and entries, too
@@ -585,6 +579,21 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 
 DONE - TO BE TESTED:
+9	VZ	Selecting a folder group tries to open it and produces a
+		dialog that it couldn't be opened. Gets expanded anyway.
+		As a consequence of this, it is not possible to create new
+		entries under a group as "Create..." is disabled in the
+		popup.
+		VZ: can't reproduce. It's an old one, I think it's gone.
+
+9	VZ	FolderTree: changing folder hidden flag is not
+		reflected, tried to react to it in options change event, but doesn't
+		work, see wxFolderTree.cpp:1061 //FIXME
+		VZ: fixed and optimized most of its occurences away. Works here.
+
+6	VZ	constraints in the notebooks half broken again, both GTK and
+                Windows (well, they actually work but give warnings)
+
 9    W  VZ      wxStaticBox bug makes it impossible to work with most dialogs
 
 7       VZ	We need a generic way to re-enable disabled pControls

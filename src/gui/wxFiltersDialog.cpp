@@ -97,7 +97,7 @@ public:
          SetName( profile->readEntry("Name",_("unnamed")) );
          SetCriterium( profile->readEntry("Criterium","") );
          SetAction( profile->readEntry("Action","") );
-         SetActive( profile->readEntry("Active", 1L) );
+         SetActive( profile->readEntry("Active", 1L) != 0 );
       }
 
    FilterEntryData()
@@ -937,6 +937,7 @@ wxFiltersDialog::TransferDataFromWindow()
    /* We need to remove all old subgroups and write the new
       settings. */
 
+   size_t i;
    wxArrayString groups;
    wxString name;
    long ref;
@@ -944,12 +945,12 @@ wxFiltersDialog::TransferDataFromWindow()
        found;
        found = m_FiltersProfile->GetNextGroup(name, ref))
       groups.Add(name);
-   for(size_t i = 0; i < groups.Count(); i++)
+   for(i = 0; i < groups.Count(); i++)
       m_FiltersProfile->DeleteGroup(groups[i]);
 
    m_Filter = "";
    // now they are all gone, we can write the new groups:
-   for(size_t i = 0; i < m_FilterDataCount; i++)
+   for(i = 0; i < m_FilterDataCount; i++)
    {
       wxString name;
       name.Printf("%ld", (long int) i);
@@ -997,7 +998,7 @@ wxFiltersDialog::TransferDataToWindow()
       m_FilterData[i].SetAction(
          m_FiltersProfile->readEntry(name+"/Action",""));
       m_FilterData[i].SetActive(
-         m_FiltersProfile->readEntry(name+"/Active", 0L));
+         m_FiltersProfile->readEntry(name+"/Active", 0L) != 0);
       m_FilterDataCount++;
    }
    DoUpdate();

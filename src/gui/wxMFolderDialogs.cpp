@@ -1644,7 +1644,6 @@ wxFolderPropertiesPage::IsOk() const
 {
    switch ( GetCurrentFolderType() )
    {
-      case POP:
       case IMAP:
          return !!m_mailboxname->GetValue();
 

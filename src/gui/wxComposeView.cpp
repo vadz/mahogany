@@ -882,7 +882,7 @@ wxComposeView::InitText(Message *msg)
 
       if ( !templateValue )
       {
-         // if there is no templat just don't do anything
+         // if there is no template just don't do anything
          break;
       }
 

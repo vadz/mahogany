@@ -76,7 +76,9 @@ struct TemplatePopupMenuItem
 /// the popup menu for the compose view templates
 extern const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu;
 
-/** Show the dialog allowing the user to configure the message templates.
+/** Show the dialog allowing the user to configure the message templates for
+    the given profile, i.e. choose the default templates for new messages,
+    replies, forwards &c.
 
     @param menu the information about supported tags for the popup menu
     @param profile where to save the message templates

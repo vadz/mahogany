@@ -925,7 +925,10 @@ void wxPListBox::RestoreSelection()
             // the listbox
             wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, GetId());
             event.m_commandInt = sel;
-            event.m_clientData = GetClientData(sel);
+            if ( HasClientUntypedData() )
+                event.m_clientData = GetClientData(sel);
+            else if ( HasClientObjectData() )
+                event.m_clientData = GetClientObject(sel);
             event.m_commandString = GetString(sel);
             event.SetEventObject( this );
             (void)ProcessEvent(event);

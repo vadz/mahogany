@@ -270,8 +270,10 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
 #endif
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    , FALSE },
+   { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Repl&y with template..."), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
    { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     , FALSE },
+   { WXMENU_MSG_FORWARD_WITH_TEMPLATE, gettext_noop("Forward with &template..."), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("Next &unread"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

@@ -1045,14 +1045,11 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
    /* Now check whether we need to send new mail notifications: */
    UIdType n = (*hilp).Count();
-   UIdType messageIDs[n];
-
+   UIdType *messageIDs = new UIdType[n];
 
    DBGMESSAGE(("CheckForNewMail(): folder: %s highest seen uid: %lu.",
                GetName().c_str(), (unsigned long) m_LastNewMsgUId));
 
-
-   
    // Find the new messages:
    UIdType nextIdx = 0;
    UIdType highestId = UID_ILLEGAL;
@@ -1072,7 +1069,6 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
       m_LastNewMsgUId = highestId;
    ASSERT(nextIdx <= n);
    
-
    DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
                GetName().c_str(), (unsigned long) highestId));
 
@@ -1081,6 +1077,8 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
    }
+
+   delete [] messageIDs;
 }
 
 
