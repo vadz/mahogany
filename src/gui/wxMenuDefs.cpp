@@ -604,6 +604,8 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
    }
    else
    {
+      wxASSERT_MSG( s_idCurrent != -1, "no currently selected charset?" );
+
       mb->Check(s_idCurrent, FALSE);
 
       switch ( encoding )

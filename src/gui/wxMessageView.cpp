@@ -580,9 +580,7 @@ wxMessageView::Clear(void)
 void
 wxMessageView::SetEncoding(wxFontEncoding enc)
 {
-   m_encoding = enc;
-
-   CheckLanguageInMenu(this, enc);
+   SetFontForEncoding(enc);
 
    Update();
 }
@@ -637,15 +635,24 @@ wxMessageView::SetFontForEncoding(wxFontEncoding enc)
          {
             // remember it
             m_encoding = enc;
-
-            // and update the menu to reflect the current charset
-            CheckLanguageInMenu(this, enc);
          }
       }
    }
 
    if ( enc != wxFONTENCODING_SYSTEM )
    {
+      // before setting the font for the layout list, make sure that we can
+      // create fonts with such encodings - otherwise, we would pop up a
+      // message box asking for replacement from wxLayoutWindow::OnPaint()
+      // which is a recipe for disaster (infinite loop in this case)
+      wxFont font(12, wxDEFAULT, wxNORMAL, wxNORMAL, FALSE, "", enc);
+      wxClientDC dc(this);
+      dc.SetFont(font);
+      dc.GetTextExtent("foo", (wxCoord *)NULL, (wxCoord *)NULL);
+
+      // and update the menu to reflect the current charset
+      CheckLanguageInMenu(this, enc);
+
       GetLayoutList()->SetFontEncoding(enc);
    }
 }
