@@ -3569,7 +3569,7 @@ wxFolderView::DoClear(bool keepTheViewer)
       //     is NULL only when we're in dtor
       if ( m_MessagePreview )
       {
-         if ( GetHeadersCount() > 0 &&
+         if ( GetHeadersCount()-GetDeletedCount() > 0 &&
              (m_ASMailFolder->GetType() == MF_NNTP ||
               m_ASMailFolder->GetType() == MF_NEWS) )
          {
