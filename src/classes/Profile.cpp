@@ -632,8 +632,19 @@ ProfileImpl::readEntry(const String & key, const String & def, bool * found) con
 
    String str;
 
-   // First, check if we are being redirected:
-   if(m_Identity)
+   bool foundHere = FALSE;
+   if ( m_Suspended )
+   {
+      foundHere = ms_GlobalConfig->Read(keySuspended, &str, def);
+   }
+   if ( !foundHere )
+   {
+      foundHere = ms_GlobalConfig->Read(key, &str, def);
+   }
+
+   // if we don't have our own setting, check for identity override before
+   // quering the parent
+   if ( !foundHere && m_Identity )
    {
       // try suspended path first:
       bool idFound = FALSE;
@@ -647,16 +658,6 @@ ProfileImpl::readEntry(const String & key, const String & def, bool * found) con
       }
    }
    
-   bool foundHere = FALSE;
-   if ( m_Suspended )
-   {
-      foundHere = ms_GlobalConfig->Read(keySuspended, &str, def);
-   }
-   if ( !foundHere )
-   {
-      foundHere = ms_GlobalConfig->Read(key, &str, def);
-   }
-
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )

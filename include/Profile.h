@@ -184,6 +184,13 @@ public:
    /// Discard changes from suspended mode.
    virtual void Discard(void) = 0;
 
+   /// Set the identity to be used for this profile
+   virtual void SetIdentity(const String & idName) = 0;
+   /// Unset the identity set by SetIdentity
+   virtual void ClearIdentity(void) = 0;
+   // Get the currently used identity
+   virtual String GetIdentity(void) const = 0;
+
    /// is this profile a (grand) parent of the given one?
    virtual bool IsAncestor(Profile *profile) const = 0;
 
