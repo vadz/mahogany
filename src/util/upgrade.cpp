@@ -470,13 +470,14 @@ public:
             // optimizations) but I can't fix it right now otherwise
             gs_installWizardData.useDialUp = false;
 #else // !Win
-            wxDialUpManager *dialupMan =
-                  ((wxMApp *)mApplication)->GetDialUpManager();
+            wxDialUpManager *dialupMan = wxDialUpManager::Create();
 
             // if we have a LAN connection, then we don't need to configure
             // dial-up networking, but if we don't, then we probably do
             gs_installWizardData.useDialUp = dialupMan &&
                                                 !dialupMan->IsAlwaysOnline();
+
+            delete dialupMan;
 #endif // Win/!Win
          }
 #endif // USE_DIALUP
