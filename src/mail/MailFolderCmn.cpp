@@ -2234,13 +2234,17 @@ MailFolderCmn::SendMsgStatusChangeEvent()
    {
       // we still have to weed out the expunged messages, just as we do above
       size_t count = m_statusChangeData->msgnos.GetCount();
-      for ( size_t n = 0; n < count; n++ )
+      for ( size_t n = 0; n < count; )
       {
          if ( m_statusChangeData->msgnos[n] == MSGNO_ILLEGAL )
          {
             m_statusChangeData->Remove(n);
 
             count--;
+         }
+         else // message still exists
+         {
+            n++;
          }
       }
    }
