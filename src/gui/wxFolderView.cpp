@@ -4325,7 +4325,6 @@ wxFolderView::UpdateFocusAfterCommand(int cmd)
       case WXMENU_MSG_MARK_READ:
       case WXMENU_MSG_MARK_UNREAD:
       case WXMENU_MSG_OPEN:
-      case WXMENU_MSG_PRINT:
          // go to the next message unconditionally for these commands
          break;
 
