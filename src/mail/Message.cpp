@@ -123,6 +123,14 @@ static void SplitAddress(const String& addr,
                          String *firstName,
                          String *lastName)
 {
+   ASSERT(firstName);
+   ASSERT(lastName);
+   if(addr.Length() == 0)
+   {
+      *firstName = "";
+      *lastName = "";
+      return;
+   }
    String fullname;
    SplitAddress(addr, &fullname);
 

@@ -1279,15 +1279,18 @@ MailFolderCC::AppendMessage(String const &msg)
          // yet at this point
          m_LastNewMsgUId = m_MailStream->uid_last+1;
       }
-   
+   	// triggers asserts:
+#if 0
       /// apply filter rules to the new message, it might be moved
       /// somewhere straightaway
       UIdArray uidarr;
       uidarr.Add(m_MailStream->uid_last+1);
       ProcessEventQueue();
       (void) ApplyFilterRules(uidarr);
+#endif
    }
    ProcessEventQueue();
+   ApplyFilterRules(TRUE);
    return rc;
 }
 
