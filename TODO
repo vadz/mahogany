@@ -19,6 +19,11 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+ - wxListCtrl selection gets reset if message has to be fetched, if it 
+   was already clicked on once, it won't reset the
+   selection. Apparently fetching a message resets the listctrl. Maybe  
+   some c-client update event?
+
  - forwarding messages broken, no content
  - sending messages takes ages - why? Vadim: can you do some profiling
    on that?  --> Local network problem? Verify again later.
