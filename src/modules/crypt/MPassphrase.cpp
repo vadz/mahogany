@@ -19,8 +19,8 @@
 #pragma implementation "MPassphrase.h"
 #endif // __GNUG__
 
-#include "MCrypt.h"
-#include "MPassphrase.h"
+#include "modules/MCrypt.h"
+#include "modules/MPassphrase.h"
 
 
 static const char * defaultInputDialogCaption =

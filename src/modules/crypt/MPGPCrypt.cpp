@@ -27,7 +27,7 @@
 #pragma implementation "MPGPCrypt.h"
 #endif // __GNU__
 
-#include "MPGPCrypt.h"
+#include "modules/MPGPCrypt.h"
 
 static const int ConversionTable[][2] =
 {
@@ -151,33 +151,57 @@ static int ExecPGP(const wxString & command,
 }
 
 
-MPGPCrypt::MPGPCrypt(const wxString & user,
-		     MPassphrase & passphrase) :
-   MExtProcCrypt("pgp", user, passphrase)
+MPGPCrypt::MPGPCrypt() :
+   MExtProcCrypt("pgp")
 {
-   wxString inDlgPrompt;
-
-   inDlgPrompt.Format(pgpPassPhraseInputDialogPrompt, user.c_str());
-   m_passphrase.SetInputDialogPrompt(inDlgPrompt);
-
    // we must be sure this environment is set just under our
    // control
    CryptProcess::UnsetEnv(PGPPASSFD);
 }
 
 
-int MPGPCrypt::Encrypt(const wxString & recipient,
+int MPGPCrypt::Decrypt(MPassphrase & passphrase,
 		       const wxString & messageIn,
-		       wxString & messageOut,
-		       bool sign = TRUE)
+		       wxString & messageOut)
 {
    messageOut.Clear();
 
    // get a temporary decrypted passphrase
-   MDecryptedPassphrase passphrase;
+   MDecryptedPassphrase decPassphrase;
 
    {
-      int res = m_passphrase.Get(passphrase);
+      int res = passphrase.Get(decPassphrase);
+
+      if(res != OK)
+      {
+	 return res;
+      }
+   }
+
+   wxString args("-f +batchmode +verbose=1");
+
+   wxString errorString;
+
+   return ExecPGP(m_path, args, &messageIn, &messageOut,
+		  &errorString, &decPassphrase);
+}
+
+
+int MPGPCrypt::Encrypt(const wxString & recipient,
+		       const wxString & messageIn,
+		       wxString & messageOut,
+		       const wxString * user,
+		       MPassphrase * passphrase)
+{
+   bool sign = user && passphrase;
+   
+   messageOut.Clear();
+
+   // get a temporary decrypted passphrase
+   MDecryptedPassphrase decPassphrase;
+
+   if(sign) {
+      int res = passphrase->Get(decPassphrase);
 
       if(res != OK) {
 	 return res;
@@ -189,26 +213,29 @@ int MPGPCrypt::Encrypt(const wxString & recipient,
 
    wxString args;
 
-   args.sprintf(args_fmt, (sign) ? "s" : "", m_user.c_str(),
+   args.sprintf(args_fmt, (sign) ? "s" : "",
+		(sign) ? user->c_str() : "",
 		GetComment().c_str(), recipient.c_str());
 
    wxString errorString;
 
    return ExecPGP(m_path, args, &messageIn, &messageOut,
-		  &errorString, &passphrase);
+		  &errorString, (sign) ? &decPassphrase : NULL);
 }
 
 
-int MPGPCrypt::Sign(const wxString & messageIn,
+int MPGPCrypt::Sign(const wxString & user,
+		    MPassphrase & passphrase,
+		    const wxString & messageIn,
 		    wxString & messageOut)
 {
    messageOut.Clear();
 
    // get a temporary decrypted passphrase
-   MDecryptedPassphrase passphrase;
+   MDecryptedPassphrase decPassphrase;
 
    {
-      int res = m_passphrase.Get(passphrase);
+      int res = passphrase.Get(decPassphrase);
 
       if(res != OK)
       {
@@ -217,7 +244,7 @@ int MPGPCrypt::Sign(const wxString & messageIn,
    }
 
    wxString args("-fsta +batchmode +verbose=1 -u \"" +
-		 m_user + "\" +clearsig=on +comment=\"" +
+		 user + "\" +clearsig=on +comment=\"" +
 		 GetComment() + "\"");
 
    wxString errorString;
@@ -226,7 +253,7 @@ int MPGPCrypt::Sign(const wxString & messageIn,
    // invalid file, although it reports in stderr the signature is OK
     
    return ExecPGP(m_path, args, &messageIn, &messageOut,
-		  &errorString, &passphrase);
+		  &errorString, &decPassphrase);
 }
 
 
@@ -247,32 +274,6 @@ int MPGPCrypt::VerifySignature(const wxString & messageIn,
 int MPGPCrypt::CheckRecipient(const wxString & recipient) const
 {
    return 0;
-}
-
-
-int MPGPCrypt::Decrypt(const wxString & messageIn,
-		       wxString & messageOut)
-{
-   messageOut.Clear();
-
-   // get a temporary decrypted passphrase
-   MDecryptedPassphrase passphrase;
-
-   {
-      int res = m_passphrase.Get(passphrase);
-
-      if(res != OK)
-      {
-	 return res;
-      }
-   }
-
-   wxString args("-f +batchmode +verbose=1");
-
-   wxString errorString;
-
-   return ExecPGP(m_path, args, &messageIn, &messageOut,
-		  &errorString, &passphrase);
 }
 
 

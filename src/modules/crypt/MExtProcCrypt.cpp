@@ -1,13 +1,14 @@
-/*-*- c++ -*-*******************************************************
- * Project:   M                                                    *
- * File name: MCrypt.h: crypto classes implementation              *
- * Author:    Carlos Henrique Bauer                                *
- * Modified by:                                                    *
- * CVS-ID:    $Id$   *
- * Copyright: (C) 2000 by Carlos H. Bauer <chbauer@acm.org>        *
- *                                        <bauer@atlas.unisinos.br>*
- * License: M license                                              *
- ******************************************************************/
+/*-*- c++ -*-*********************************************************
+ * Project    : M                                                    *
+ * File name  : MCrypt.h: crypto classes implementation              *
+ * Author     : Carlos Henrique Bauer                                *
+ * Modified by:                                                      *
+ * CVS-ID     :                                                      *
+ *         $Id$ *
+ * Copyright  : (C) 2000 by Carlos H. Bauer <chbauer@acm.org>        *
+ *                                          <bauer@atlas.unisinos.br>*
+ * License  : M license                                              *
+ ********************************************************************/
 
 #ifdef EXPERIMENTAL
 
@@ -18,7 +19,7 @@
 #pragma implementation "MExtProcCrypt.h"
 #endif
 
-#include "MExtProcCrypt.h"
+#include "modules/MExtProcCrypt.h"
 
 
 BEGIN_EVENT_TABLE(MExtProcCrypt::CryptProcess, wxProcess)
