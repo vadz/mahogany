@@ -1241,74 +1241,76 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       style.SetFont(font);
    }
 
-   // FIXME: this is *horribly* slow, we iterate over the entire text
-   //        char by char - we should use regexs instead!
-   //
-   // TODO:  detect signature as well and call m_viewer->InsertSignature()
-   //        for it
-   if ( m_ProfileValues.highlightURLs || m_ProfileValues.quotedColourize )
+   // TODO: detect signature as well and call m_viewer->InsertSignature()
+   //       for it
+   String url;
+   String before;
+
+   do
    {
-      String url;
-      String before;
-
-      size_t level = GetQuotedLevel(textPart);
-      style.SetTextColour(GetQuoteColour(level));
-
-      do
+      if ( m_ProfileValues.highlightURLs )
       {
          // extract the first URL into url string and put all preceding
          // text into before, textPart is updated to contain only the text
          // after the URL
          before = strutil_findurl(textPart, url);
+      }
+      else
+      {
+         before = textPart;
 
-         if ( m_ProfileValues.quotedColourize )
+         textPart.clear();
+      }
+
+      if ( m_ProfileValues.quotedColourize )
+      {
+         size_t level = GetQuotedLevel(textPart);
+         style.SetTextColour(GetQuoteColour(level));
+
+         // the string shouldn't be shared as only we use it and, although the
+         // cast is still ugly and dangerous, it should be used here as it
+         // allows us to avoid copying potentially huge strings below but to
+         // just insert '\0' as needed
+         char *lineCur = (char *)before.c_str();
+         char *lineNext = strchr(lineCur, '\n');
+         while ( lineNext )
          {
-            size_t line_from = 0,
-                   line_lng = before.length();
-            for ( size_t line_pos = 0; line_pos < line_lng; line_pos++ )
+            size_t levelNew = GetQuotedLevel(lineNext);
+            if ( levelNew != level )
             {
-               if ( before[line_pos] == '\n' )
-               {
-                  level = GetQuotedLevel(before.c_str() + line_pos + 1);
+               char chSave = *lineNext;
+               *lineNext = '\0';
 
-                  m_viewer->InsertText(before.Mid(line_from,
-                                                  line_pos - line_from + 1),
-                                       style);
+               m_viewer->InsertText(lineCur, style);
 
-                  style.SetTextColour(GetQuoteColour(level));
-                  line_from = line_pos + 1;
-               }
+               *lineNext = chSave;
+
+               level = levelNew;
+               style.SetTextColour(GetQuoteColour(level));
+
+               lineCur = lineNext;
             }
+            //else: same level as the previous line, just continue
 
-            // anything left?
-            if ( line_from < line_lng )
-            {
-               m_viewer->InsertText(before.Mid(line_from), style);
-            }
+            lineNext = strchr(lineNext + 1, '\n');
          }
-         else // no quoted text colourizing
-         {
-            m_viewer->InsertText(before, style);
-         }
 
-         if ( !strutil_isempty(url) )
+         if ( lineCur )
          {
-            if ( m_ProfileValues.highlightURLs )
-            {
-               m_viewer->InsertURL(url);
-            }
-            else
-            {
-               m_viewer->InsertText(url, style);
-            }
+            m_viewer->InsertText(lineCur, style);
          }
       }
-      while( !strutil_isempty(textPart) );
+      else // no quoted text colourizing
+      {
+         m_viewer->InsertText(before, style);
+      }
+
+      if ( !strutil_isempty(url) )
+      {
+         m_viewer->InsertURL(url);
+      }
    }
-   else // no URL highlighting, no quoting text colourizing
-   {
-      m_viewer->InsertText(textPart, style);
-   }
+   while ( !strutil_isempty(textPart) );
 }
 
 // ----------------------------------------------------------------------------
