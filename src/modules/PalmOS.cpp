@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
- * PalmOS - a PalmOS connectivity module for Mahogany               *
+ * PalmOS -  PalmOS connectivity module for Mahogany                *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)           *
  *                  Daniel Seifert (dseifert@gmx.net)               *
  *                                                                  *
  * $Id$              *
@@ -1846,7 +1846,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
 
 static
 struct wxOptionsPageDesc  gs_OptionsPageDesc =
-{
+wxOptionsPageDesc(
    gettext_noop("PalmOS module preferences"),
       "palmpilot",// image
       MH_MODULES_PALMOS_CONFIG,
@@ -1854,7 +1854,7 @@ struct wxOptionsPageDesc  gs_OptionsPageDesc =
       gs_FieldInfos,
       gs_ConfigValues,
       WXSIZEOF(gs_FieldInfos)
-};
+);
 
 void
 PalmOSModule::Configure(void)

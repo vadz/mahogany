@@ -1228,7 +1228,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
 
 static
 struct wxOptionsPageDesc  gs_OptionsPageDesc =
-{
+wxOptionsPageDesc(
    gettext_noop("Calendar module preferences"),
    "calendar",// image
    MH_MODULES_CALENDAR_CONFIG,
@@ -1236,7 +1236,7 @@ struct wxOptionsPageDesc  gs_OptionsPageDesc =
    gs_FieldInfos,
    gs_ConfigValues,
    WXSIZEOF(gs_FieldInfos)
-};
+);
 
 void
 CalendarModule::Configure(void)
