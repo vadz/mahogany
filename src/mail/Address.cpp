@@ -328,7 +328,7 @@ ContainsOwnAddress(const String& str,
                   addr->GetDomain().Matches(domain) )
          {
             if ( own )
-               *own = addresses[n];
+               *own = addr->GetAddress();
 
             return true;
          }
