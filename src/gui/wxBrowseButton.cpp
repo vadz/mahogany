@@ -468,15 +468,20 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       int w1, h1; // size of the icon on the screen
       m_staticBitmap->GetSize(&w1, &h1);
 
-      // size of the icon
-      int w2 = bmp.GetWidth(),
-          h2 = bmp.GetHeight();
-
-      if ( (w1 != w2) || (h1 != h2) )
+      if ( w1 && h1 )
       {
-         bmp = wxBitmap(bmp.ConvertToImage().Rescale(w1, h1));
+         // size of the icon
+         int w2 = bmp.GetWidth(),
+             h2 = bmp.GetHeight();
+
+         if ( (w1 != w2) || (h1 != h2) )
+         {
+            bmp = wxBitmap(bmp.ConvertToImage().Rescale(w1, h1));
+         }
+         //else: the size is already correct
       }
-      //else: the size is already correct
+      //else: don't rescale the image to invalid size (happens under MSW
+      //      during the initial layout phase)
 
       m_staticBitmap->SetBitmap(bmp);
    }
