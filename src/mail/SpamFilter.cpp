@@ -66,7 +66,7 @@ public:
    {
       m_notebook = new wxPNotebook(_T("SpamOptions"), panel);
       if ( m_imagelist )
-         m_notebook->SetImageList(m_imagelist);
+         m_notebook->AssignImageList(m_imagelist);
 
       // now we can put the pages into it
       for ( SpamFilter *p = SpamFilter::ms_first; p; p = p->m_next )
