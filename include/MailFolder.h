@@ -157,6 +157,29 @@ public:
       SEARCH_UID = 4
    };
 
+   /// flags for DeleteOrTrashMessages
+   enum
+   {
+      /// use the trash setting of the folder (default)
+      DELETE_ALLOW_TRASH = 0,
+
+      /**
+         don't move the messages to trash, even if the folder is configured to
+         use it, always delete them
+       */
+      DELETE_NO_TRASH = 1,
+   };
+
+   /// flags for DeleteMessages
+   enum
+   {
+      /// don't expunge after deleting the messages, this is the default
+      DELETE_NO_EXPUNGE = 0,
+
+      /// expunge the messages after deleting them
+      DELETE_EXPUNGE = 1
+   };
+
    /**
      The structure containing the parameters for Forward/ReplyMessage(s)
      methods.
@@ -676,18 +699,21 @@ public:
                                    wxWindow *parent = NULL) = 0;
 
    /** Mark messages as deleted or move them to trash.
-       @param messages pointer to an array holding the message numbers
+
+       @param messages pointer to an array holding the message UIDs, !NULL
+       @param flags combination of DELETE_XXX values
        @return true on success
    */
-   virtual bool DeleteOrTrashMessages(const UIdArray *messages) = 0;
+   virtual bool DeleteOrTrashMessages(const UIdArray *messages,
+                                      int flags = DELETE_ALLOW_TRASH) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
-       @param expunge expunge deleted messages
+       @param flags combination of DELETE_XXX values
        @return true on success
    */
    virtual bool DeleteMessages(const UIdArray *messages,
-                               bool expunge = false) = 0;
+                               int flags = DELETE_NO_EXPUNGE) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

@@ -1167,7 +1167,12 @@ MsgCmdProcImpl::DeleteOrTrashMessages(const UIdArray& selections)
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, _("Deleting messages..."));
 
-   status->Monitor(m_asmf->DeleteOrTrashMessages(&selections, this),
+   status->Monitor(m_asmf->DeleteOrTrashMessages
+                           (
+                              &selections,
+                              MailFolder::DELETE_ALLOW_TRASH,
+                              this
+                           ),
                    _("Failed to delete messages"));
 }
 
@@ -1680,8 +1685,15 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   {
                      // delete right now
 
-                     // true => expunge as well
-                     Ticket t = m_asmf->DeleteMessages(seq, true, this);
+                     // don't copy the messages to the trash, they had been
+                     // already copied somewhere
+                     Ticket t = m_asmf->DeleteOrTrashMessages
+                                        (
+                                          seq,
+                                          MailFolder::DELETE_NO_TRASH,
+                                          this
+                                        );
+
                      if ( t != ILLEGAL_TICKET )
                      {
                         m_TicketList->Add(t);

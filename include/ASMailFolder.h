@@ -393,7 +393,9 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket DeleteOrTrashMessages(const UIdArray *messages, UserData ud = 0) = 0;
+   virtual Ticket DeleteOrTrashMessages(const UIdArray *messages,
+                                        int flags = MailFolder::DELETE_ALLOW_TRASH,
+                                        UserData ud = 0) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
@@ -401,7 +403,7 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket DeleteMessages(const UIdArray *messages,
-                                 bool expunge = false,
+                                 int flags = MailFolder::DELETE_NO_EXPUNGE,
                                  UserData ud = 0) = 0;
 
    /** Mark messages as no longer deleted.

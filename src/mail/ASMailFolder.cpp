@@ -298,13 +298,16 @@ class MT_DeleteOrTrashMessages : public MailThreadSeq
 {
 public:
    MT_DeleteOrTrashMessages(ASMailFolder *mf, UserData ud,
-                            const UIdArray *sequence)
+                            const UIdArray *sequence,
+                            int flags)
       : MailThreadSeq(mf, ud, sequence)
       {
+         m_Flags = flags;
       }
+
    virtual void WorkFunction(void)
       {
-         bool rc = m_MailFolder->DeleteOrTrashMessages(m_Seq);
+         bool rc = m_MailFolder->DeleteOrTrashMessages(m_Seq, m_Flags);
          SendEvent(ASMailFolder::ResultInt::Create
                    (
                      m_ASMailFolder,
@@ -319,6 +322,9 @@ public:
          m_Seq = NULL;
 #endif
       }
+
+private:
+   int m_Flags;
 };
 
 class MT_DeleteMessages : public MailThreadSeq
@@ -326,14 +332,14 @@ class MT_DeleteMessages : public MailThreadSeq
 public:
    MT_DeleteMessages(ASMailFolder *mf, UserData ud,
                      const UIdArray *sequence,
-                     bool expunge)
+                     int flags)
       : MailThreadSeq(mf, ud, sequence)
       {
-         m_expunge = expunge;
+         m_Flags = flags;
       }
    virtual void WorkFunction(void)
       {
-         bool rc = m_MailFolder->DeleteMessages(m_Seq, m_expunge);
+         bool rc = m_MailFolder->DeleteMessages(m_Seq, m_Flags);
          SendEvent(ASMailFolder::ResultInt::Create
                    (
                      m_ASMailFolder,
@@ -350,7 +356,7 @@ public:
       }
 
 protected:
-   bool   m_expunge;
+   int m_Flags;
 };
 
 class MT_GetMessage : public MailThread
@@ -873,22 +879,25 @@ public:
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
+       @param flags combination of MailFolder::DELETE_XXX bit flags
        @return ResultInt boolean
    */
    virtual Ticket DeleteOrTrashMessages(const UIdArray *messages,
+                                        int flags,
                                         UserData ud)
       {
-         return (new MT_DeleteOrTrashMessages(this, ud, messages))->Start();
+         return (new MT_DeleteOrTrashMessages(this, ud, messages, flags))->Start();
       }
+
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
    virtual Ticket DeleteMessages(const UIdArray *messages,
-                                 bool expunge,
+                                 int flags,
                                  UserData ud)
       {
-         return (new MT_DeleteMessages(this, ud, messages, expunge))->Start();
+         return (new MT_DeleteMessages(this, ud, messages, flags))->Start();
       }
 
    /** Mark messages as no longer deleted.

@@ -82,14 +82,15 @@ public:
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool DeleteOrTrashMessages(const UIdArray *messages);
+   virtual bool DeleteOrTrashMessages(const UIdArray *messages,
+                                      int flags = DELETE_ALLOW_TRASH);
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
-       @param expunge expunge messages after deletion
        @return true on success
    */
-   virtual bool DeleteMessages(const UIdArray *messages, bool expunge = false);
+   virtual bool DeleteMessages(const UIdArray *messages,
+                               int flags = DELETE_NO_EXPUNGE);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

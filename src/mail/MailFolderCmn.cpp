@@ -1483,29 +1483,38 @@ MailFolderCmn::UnDeleteMessage(unsigned long uid)
 }
 
 bool
-MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
+MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
+                                     int flags)
 {
    CHECK( CanDeleteMessagesInFolder(GetType()), FALSE,
           "can't delete messages in this folder" );
 
-   // we can either "really delete" the messages (in fact, just mark them as
-   // deleted) or move them to trash which implies deleting and expunging them
-   bool reallyDelete = !READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
+   // we can either delete the messages by moving them to the trash folder and
+   // expunging them from this one or by marking them deleted and leaving them
+   // in place
+   bool useTrash = READ_CONFIG_BOOL(GetProfile(), MP_USE_TRASH_FOLDER);
 
-   // If we are the trash folder, we *really* delete
-   wxString trashFolderName = READ_CONFIG(GetProfile(), MP_TRASH_FOLDER);
-   if ( !reallyDelete && GetName() == trashFolderName )
-      reallyDelete = true;
+   wxString trashFolderName;
+   if ( useTrash )
+   {
+      // however if we are the trash folder, we can't use it
+      trashFolderName = READ_CONFIG(GetProfile(), MP_TRASH_FOLDER);
+      if ( GetName() == trashFolderName )
+         useTrash = false;
+   }
 
    bool rc;
-   if ( reallyDelete )
+   if ( useTrash )
    {
-      // delete without expunging
-      rc = DeleteMessages(selections, FALSE /* don't expunge */);
-   }
-   else // move to trash
-   {
-      rc = SaveMessages(selections, trashFolderName);
+      // skip moving the messages to trash if the caller disabled it: in this
+      // case we keep the same apparent behaviour as usual (i.e. unlike in the
+      // !useTrash case, no messages marked as deleted are left in the folder)
+      // but we don't copy the messages unnecessarily -- this is especially
+      // useful when moving the messages, as when we delete them after having
+      // successfully copied them elsewhere we really don't need to keep yet
+      // another copy in the trash
+      rc = flags & DELETE_NO_TRASH ? true
+                                   : SaveMessages(selections, trashFolderName);
       if ( rc )
       {
          // delete and expunge
@@ -1517,13 +1526,19 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
          //       http://mahogany.sourceforge.net/cgi-bin/show_bug.cgi?id=653
          rc = DeleteMessages(selections, TRUE /* expunge */);
       }
+
+   }
+   else // delete in place
+   {
+      // delete without expunging
+      rc = DeleteMessages(selections, FALSE /* don't expunge */);
    }
 
    return rc;
 }
 
 bool
-MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
+MailFolderCmn::DeleteMessages(const UIdArray *selections, int flags)
 {
    CHECK( selections, false,
           "NULL selections in MailFolderCmn::DeleteMessages" );
@@ -1532,7 +1547,7 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
    seq.AddArray(*selections);
 
    bool rc = SetSequenceFlag(SEQ_UID, seq, MailFolder::MSG_STAT_DELETED);
-   if ( rc && expunge )
+   if ( rc && (flags & DELETE_EXPUNGE) )
       ExpungeMessages();
 
    return rc;
