@@ -776,7 +776,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
    // general config and identity
    { gettext_noop("Your personal name and organization are used only for\n"
-                  "informational purposes and so you may give then any\n"
+                  "informational purposes and so you may give them any\n"
                   "values at all or even leave them empty, while the\n"
                   "user name is used as the default login for the servers\n"
                   "which require authentification and should be set to\n"
@@ -785,7 +785,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Organization"),                Field_Text,    -1,                        },
    { gettext_noop("&User name or login"),          Field_Text,    -1,                        },
    { gettext_noop("The e-mail address is the value of the \"From:\" header\n"
-                  "while the reply address is used for the \"Reply-To\" one.\n"
+                  "while the reply address is used for the \"Reply-To:\" one.\n"
                   "If you don't know whether you should set it, leave the\n"
                   "reply address empty."),         Field_Message | Field_Advanced, -1 },
    { gettext_noop("&E-mail address"),              Field_Text | Field_Vital,   -1, },
