@@ -562,10 +562,10 @@ InitRecipients(Composer *cv,
                const MailFolder::Params& params,
                Profile *profile)
 {
+   // get the reply kind we use and also remember if it was explicitly chosen
+   // by the user or whether it is the default reply kind configured
    MailFolder::ReplyKind replyKind;
-   bool explicitReplyKind;
-
-   explicitReplyKind = GetReplyKind(params, profile, replyKind);
+   bool explicitReplyKind = GetReplyKind(params, profile, replyKind);
 
    // our own addresses - used in the code below
    String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
@@ -662,9 +662,6 @@ InitRecipients(Composer *cv,
       WX_APPEND_ARRAY(otherAddresses, replyToAddresses);
 
       otherAddresses.Add(msg->From());
-
-      // don't want to exclude the Reply-To addresses in the code below
-      replyToAddresses.Clear();
    }
    else // we already have used some addresses
    {
@@ -730,8 +727,12 @@ InitRecipients(Composer *cv,
               addressesList;
    for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
    {
-      String addr = uniqueAddresses[n];
-      if ( Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND ||
+      const String& addr = uniqueAddresses[n];
+
+      // in the list reply mode we shouldn't exclude Reply-To addresses as we
+      // haven't used them yet
+      if ( (replyKind != MailFolder::REPLY_LIST &&
+            Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND) ||
            Message::FindAddress(ownAddresses, addr) != wxNOT_FOUND )
       {
          addressesToIgnore.Add(n);
@@ -807,9 +808,11 @@ InitRecipients(Composer *cv,
             //
             // but if the dog was only cc'ed, we should keep cc'ing it
             rcptType =
-               Message::FindAddress(ccAddresses, address) == wxNOT_FOUND
+               Message::FindAddress(replyToAddresses, address) != wxNOT_FOUND
                   ? Composer::Recipient_To
-                  : Composer::Recipient_Cc;
+                  : Message::FindAddress(ccAddresses, address) == wxNOT_FOUND
+                     ? Composer::Recipient_To
+                     : Composer::Recipient_Cc;
             break;
 
          case MailFolder::REPLY_LIST:
