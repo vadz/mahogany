@@ -245,8 +245,7 @@ protected:
                          bool replaceFirstTextPart = false);
 
    /// save the first text part of the message to the given file
-   bool SaveMsgTextToFile(const String& filename,
-                          bool errorIfNoText = true) const;
+   bool SaveMsgTextToFile(const String& filename) const;
 
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesNames;
@@ -388,6 +387,10 @@ private:
 
    // external editor support
    // -----------------------
+   //@{
+
+   /// compute the text hash to see if it was changed by external editor
+   unsigned long ComputeTextHash() const;
 
    /// ids for different processes we may launch
    enum
@@ -395,9 +398,19 @@ private:
       HelperProcess_Editor = 1
    };
 
-   wxProcess *m_procExtEdit;  // wxWin process notification helper
-   String     m_tmpFileName;  // temporary file we passed to the editor
-   int        m_pidEditor;    // pid of external editor (0 if none)
+   /// wxWin process notification helper
+   wxProcess *m_procExtEdit;
+
+   /// temporary file we passed to the editor
+   String     m_tmpFileName;
+
+   /// pid of external editor (0 if none)
+   int        m_pidEditor;
+
+   /// the hash of text computed before it was passed to the ext editor
+   unsigned long m_oldTextHash;
+
+   //@}
 
 private:
    // it creates us

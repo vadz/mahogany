@@ -2206,6 +2206,26 @@ bool wxComposeView::OnFirstTimeFocus()
    return false;
 }
 
+unsigned long wxComposeView::ComputeTextHash() const
+{
+   // TODO: our hash is quite lame actually - it is just the text length!
+   unsigned long len = 0;
+
+   wxLayoutExportObject *exp;
+   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
+
+   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
+   {
+      // non text objects get ignored
+      if (exp->type == WXLO_EXPORT_TEXT )
+      {
+         len += exp->content.text->length();
+      }
+   }
+
+   return len;
+}
+
 bool wxComposeView::StartExternalEditor()
 {
    if ( m_procExtEdit )
@@ -2246,12 +2266,16 @@ bool wxComposeView::StartExternalEditor()
          }
 
          // 'false' means that it's ok to leave the file empty
-         if ( !SaveMsgTextToFile(tmpFileName.GetName(), false) )
+         if ( !SaveMsgTextToFile(tmpFileName.GetName()) )
          {
             wxLogError(_("Failed to pass message to external editor."));
 
             break;
          }
+
+         // save it to be able to check if the text was externally modified
+         // later
+         m_oldTextHash = ComputeTextHash();
 
          // we have a handy function in wxFileType which will replace
          // '%s' with the file name or add the file name at the end if
@@ -2370,7 +2394,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
       {
          wxLogError(_("Failed to insert back the text from external editor."));
       }
-      else
+      else // InsertFileAsText() succeeded
       {
          if ( remove(m_tmpFileName) != 0 )
          {
@@ -2379,6 +2403,13 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
          ok = true;
          wxLogStatus(this, _("Inserted text from external editor."));
+
+         // check if the text was really changed
+         if ( ComputeTextHash() == m_oldTextHash )
+         {
+            // assume it wasn't
+            ResetDirty();
+         }
       }
    }
 
@@ -2565,8 +2596,7 @@ wxComposeView::InsertFileAsText(const String& filename,
       wxLayoutObject *obj;
       wxLayoutExportStatus status(layoutList);
       wxLayoutExportObject *exp;
-      while((exp = wxLayoutExport( &status,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != NULL )
       {
          // ignore WXLO_EXPORT_EMPTYLINE:
          if(exp->type == WXLO_EXPORT_OBJECT)
@@ -3067,8 +3097,7 @@ wxComposeView::Print(void)
 
 /// save the first text part of the message to the given file
 bool
-wxComposeView::SaveMsgTextToFile(const String& filename,
-                                 bool errorIfNoText) const
+wxComposeView::SaveMsgTextToFile(const String& filename) const
 {
    // TODO write (and read later...) headers too!
 
@@ -3086,7 +3115,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
    wxLayoutExportObject *exp;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
+   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
    {
       // non text objects get ignored
       if(exp->type == WXLO_EXPORT_TEXT)
