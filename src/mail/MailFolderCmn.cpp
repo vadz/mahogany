@@ -56,10 +56,11 @@
 #include <wx/timer.h>
 #include <wx/datetime.h>
 #include <wx/file.h>
+#include <wx/utils.h>         // for wxExecute()
 
 #include "wx/persctrl.h"      // for wxPFileSelector
 
-#include  <wx/utils.h>        // for wxExecute()
+#include "Composer.h"
 
 #include "MailFolderCmn.h"
 #include "MFPrivate.h"
@@ -872,16 +873,21 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
                              wxWindow *parent)
 {
+   Composer *composer = NULL;
+
    int n = selections->Count();
    for( int i = 0; i < n; i++ )
    {
       Message *msg = GetMessage((*selections)[i]);
       if ( msg )
       {
-         ReplyMessage(msg, params, GetProfile(), parent);
+         composer = ReplyMessage(msg, params, GetProfile(), parent, composer);
          msg->DecRef();
       }
    }
+
+   if ( composer )
+      composer->Launch();
 }
 
 
@@ -890,16 +896,21 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
                                const MailFolder::Params& params,
                                wxWindow *parent)
 {
-   int i;
-   Message *msg;
+   Composer *composer = NULL;
 
    int n = selections->Count();
-   for(i = 0; i < n; i++)
+   for ( int i = 0; i < n; i++ )
    {
-      msg = GetMessage((*selections)[i]);
-      ForwardMessage(msg, params, GetProfile(), parent);
-      msg->DecRef();
+      Message *msg = GetMessage((*selections)[i]);
+      if ( msg )
+      {
+         composer = ForwardMessage(msg, params, GetProfile(), parent, composer);
+         msg->DecRef();
+      }
    }
+
+   if ( composer )
+      composer->Launch();
 }
 
 // ----------------------------------------------------------------------------

@@ -952,8 +952,7 @@ wxComposeView *
 CreateComposeView(Profile *profile,
                   const MailFolder::Params& params,
                   wxComposeView::Mode mode,
-                  wxComposeView::MessageKind kind,
-                  bool hide)
+                  wxComposeView::MessageKind kind)
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView
@@ -966,43 +965,48 @@ CreateComposeView(Profile *profile,
 
    cv->SetTemplate(params.templ);
    cv->SetTitle(COMPOSER_TITLE);
-   cv->Create(parent, profile, hide);
+   cv->Create(parent, profile);
 
    return cv;
 }
 
 Composer *
 Composer::CreateNewArticle(const MailFolder::Params& params,
-                           Profile *profile,
-                           bool hide)
+                           Profile *profile)
 {
-   return CreateComposeView(profile, params,
-                            wxComposeView::Mode_News,
-                            wxComposeView::Message_New,
-                            hide);
+   wxComposeView *cv = CreateComposeView(profile, params,
+                                         wxComposeView::Mode_News,
+                                         wxComposeView::Message_New);
+
+   CHECK( cv, NULL, "failed to create composer for a new article" );
+
+   cv->Launch();
+
+   return cv;
 }
 
 Composer *
-Composer::CreateNewMessage(const MailFolder::Params& params,
-                           Profile *profile,
-                           bool hide)
+Composer::CreateNewMessage(const MailFolder::Params& params, Profile *profile)
 {
-   return CreateComposeView(profile, params,
-                            wxComposeView::Mode_Mail,
-                            wxComposeView::Message_New,
-                            hide);
+   wxComposeView *cv = CreateComposeView(profile, params,
+                                         wxComposeView::Mode_Mail,
+                                         wxComposeView::Message_New);
+
+   CHECK( cv, NULL, "failed to create composer for a new message" );
+
+   cv->Launch();
+
+   return cv;
 }
 
 Composer *
 Composer::CreateReplyMessage(const MailFolder::Params& params,
                              Profile *profile,
-                             Message *original,
-                             bool hide)
+                             Message *original)
 {
    wxComposeView *cv = CreateComposeView(profile, params,
                                          wxComposeView::Mode_Mail,
-                                         wxComposeView::Message_Reply,
-                                         hide);
+                                         wxComposeView::Message_Reply);
 
    cv->SetOriginal(original);
 
@@ -1012,13 +1016,11 @@ Composer::CreateReplyMessage(const MailFolder::Params& params,
 Composer *
 Composer::CreateFwdMessage(const MailFolder::Params& params,
                            Profile *profile,
-                           Message *original,
-                           bool hide)
+                           Message *original)
 {
    wxComposeView *cv = CreateComposeView(profile, params,
                                          wxComposeView::Mode_Mail,
-                                         wxComposeView::Message_Forward,
-                                         hide);
+                                         wxComposeView::Message_Forward);
 
    cv->SetOriginal(original);
 
@@ -1402,9 +1404,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 }
 
 void
-wxComposeView::Create(wxWindow * WXUNUSED(parent),
-                      Profile *parentProfile,
-                      bool hide)
+wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 {
    // first create the profile: we must have one, so find a non NULL one
    m_Profile = parentProfile ? parentProfile : mApplication->GetProfile();
@@ -1448,17 +1448,10 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    m_splitter->SplitHorizontally(m_panel, m_editor->GetWindow(), heightHeaders);
    m_splitter->SetMinimumPaneSize(heightHeaders);
 
-   // show the frame
-   // --------------
-
-   if ( !hide )
-   {
-      Show(TRUE);
-   }
-
-   // note that we must do it before setting the control values or the text
-   // would be scrolled to the right in the text fields as they initially don't
-   // have enough space to show it...
+   // note that we must show and layout the frame before setting the control
+   // values or the text would be scrolled to the right in the text fields as
+   // they initially don't have enough space to show it...
+   Show();
    Layout();
 
    // initialize the controls
@@ -1984,7 +1977,10 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
 
       DoInitText(msg, msgview);
    }
+}
 
+void wxComposeView::Launch()
+{
    // we also use this method to initialize the focus as we can't do it before
    // the composer text is inited
 
@@ -2009,14 +2005,17 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
          m_rcptMain->GetText()->SetFocus();
          break;
    }
-
-   Show();
 }
 
 void
 wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
 {
-   // NB: the signature is now inserted by the template parser
+   // position the cursor correctly and separate us from the previous message
+   // if we're replying to several messages at once
+   if ( !IsEmpty() )
+   {
+      InsertText("\n");
+   }
 
    // deal with templates: first decide what kind of template do we need
    MessageTemplateKind kind;
@@ -2104,6 +2103,8 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
          }
       }
    } while ( templateChanged );
+
+   // NB: the signature is now inserted by the template parser
 
    // finally, attach a vCard if requested
    //
@@ -3480,6 +3481,11 @@ bool wxComposeView::IsModified() const
    return m_isModified || m_editor->IsModified();
 }
 
+bool wxComposeView::IsEmpty() const
+{
+   return m_editor->IsEmpty();
+}
+
 // ----------------------------------------------------------------------------
 // other wxComposeView operations
 // ----------------------------------------------------------------------------
@@ -3495,7 +3501,13 @@ wxComposeView::SetFocusToComposer()
 void
 wxComposeView::MoveCursorTo(int x, int y)
 {
-   m_editor->MoveCursorTo(x, y);
+   m_editor->MoveCursorTo((unsigned long)x, (unsigned long)y);
+}
+
+void
+wxComposeView::MoveCursorBy(int x, int y)
+{
+   m_editor->MoveCursorBy(x, y);
 }
 
 /// print the message

@@ -1014,20 +1014,25 @@ InitRecipients(Composer *cv,
    }
 }
 
-void
+/* static */
+Composer *
 MailFolder::ReplyMessage(Message *msg,
                          const MailFolder::Params& params,
                          Profile *profile,
-                         wxWindow *parent)
+                         wxWindow *parent,
+                         Composer *cv)
 {
-   CHECK_RET(msg, "no message to reply to");
+   CHECK( msg, NULL, "no message to reply to");
 
    if(! profile)
       profile = mApplication->GetProfile();
 
-   Composer *cv = Composer::CreateReplyMessage(params,
-                                               profile,
-                                               msg);
+   if ( !cv )
+   {
+      cv = Composer::CreateReplyMessage(params, profile, msg);
+
+      CHECK( cv, NULL, "failed to create composer" );
+   }
 
    InitRecipients(cv, msg, params, profile);
 
@@ -1190,21 +1195,28 @@ MailFolder::ReplyMessage(Message *msg,
    }
 
    cv->InitText(msg, params.msgview);
+
+   return cv;
 }
 
 /* static */
-void
+Composer *
 MailFolder::ForwardMessage(Message *msg,
                            const MailFolder::Params& params,
                            Profile *profile,
-                           wxWindow *parent)
+                           wxWindow *parent,
+                           Composer *cv)
 {
-   CHECK_RET(msg, "no message to forward");
+   CHECK(msg, NULL, "no message to forward");
 
    if ( !profile )
       profile = mApplication->GetProfile();
 
-   Composer *cv = Composer::CreateFwdMessage(params, profile, msg);
+   if ( !cv )
+   {
+      cv = Composer::CreateFwdMessage(params, profile, msg);
+      CHECK( cv, NULL, "failed to create composer" );
+   }
 
    // FIXME: we shouldn't assume that all headers have the same encoding
    //        so we should set the subject text and tell the composer its
@@ -1212,6 +1224,8 @@ MailFolder::ForwardMessage(Message *msg,
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) +
                      DecodeHeader(msg->Subject()));
    cv->InitText(msg, params.msgview);
+
+   return cv;
 }
 
 // ----------------------------------------------------------------------------

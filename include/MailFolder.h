@@ -21,6 +21,8 @@
 #include "FolderType.h"
 #include "kbList.h"
 
+class Composer;
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -485,22 +487,28 @@ public:
        @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
+       @param composer the composer to use, will create if NULL
+       @return the composer
    */
-   static void ForwardMessage(Message *msg,
-                              const Params& params,
-                              Profile *profile = NULL,
-                              wxWindow *parent = NULL);
+   static Composer *ForwardMessage(Message *msg,
+                                   const Params& params,
+                                   Profile *profile = NULL,
+                                   wxWindow *parent = NULL,
+                                   Composer *composer = NULL);
 
    /** Reply to one message.
        @param message message to reply to
        @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
+       @param composer the composer to use, will create if NULL
+       @return the composer
    */
-   static void ReplyMessage(Message *msg,
-                            const Params& params,
-                            Profile *profile = NULL,
-                            wxWindow *parent = NULL);
+   static Composer *ReplyMessage(Message *msg,
+                                 const Params& params,
+                                 Profile *profile = NULL,
+                                 wxWindow *parent = NULL,
+                                 Composer *composer = NULL);
 
    //@}
 

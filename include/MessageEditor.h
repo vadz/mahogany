@@ -84,6 +84,9 @@ public:
    /// were we modified by the user?
    virtual bool IsModified() const = 0;
 
+   /// do we contain anything at all?
+   virtual bool IsEmpty() const = 0;
+
    /// compute the text hash
    virtual unsigned long ComputeHash() const = 0;
 
@@ -124,6 +127,9 @@ public:
 
    /// move the cursor to the initial position
    virtual void MoveCursorTo(unsigned long x, unsigned long y) = 0;
+
+   /// move the cursor by the given displacement
+   virtual void MoveCursorBy(long x, long y) = 0;
 
    /// set focus to the window where the user may type the text
    virtual void SetFocus() = 0;

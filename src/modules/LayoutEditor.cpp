@@ -64,6 +64,7 @@ public:
    // accessors
    virtual wxWindow *GetWindow() const;
    virtual bool IsModified() const;
+   virtual bool IsEmpty() const;
    virtual unsigned long ComputeHash() const;
 
    // creation
@@ -83,6 +84,7 @@ public:
    virtual void PrintPreview();
 
    virtual void MoveCursorTo(unsigned long x, unsigned long y);
+   virtual void MoveCursorBy(long x, long y);
    virtual void SetFocus();
 
    // content
@@ -280,6 +282,14 @@ bool LayoutEditor::IsModified() const
    return m_LayoutWindow->IsModified();
 }
 
+bool LayoutEditor::IsEmpty() const
+{
+   // see below: the hash is just the text length
+   //
+   // if our "hash" ever changes, we'd need to be less lazy here
+   return !ComputeHash();
+}
+
 unsigned long LayoutEditor::ComputeHash() const
 {
    // TODO: our hash is quite lame actually - it is just the text length!
@@ -349,6 +359,13 @@ void LayoutEditor::SetEncoding(wxFontEncoding encoding)
 void LayoutEditor::MoveCursorTo(unsigned long x, unsigned long y)
 {
    m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(x, y));
+}
+
+void LayoutEditor::MoveCursorBy(long x, long y)
+{
+   wxLayoutList *llist = m_LayoutWindow->GetLayoutList();
+   llist->MoveCursorVertically(y);
+   llist->MoveCursorHorizontally(x);
 }
 
 void LayoutEditor::SetFocus()

@@ -99,6 +99,7 @@ public:
 
    // implement Composer pure virtuals
    virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL);
+   virtual void Launch();
    virtual void InsertFile(const char *filename = NULL,
                            const char *mimetype = NULL);
 
@@ -112,6 +113,7 @@ public:
    virtual void InsertMimePart(const MimePart *mimePart);
 
    virtual void MoveCursorTo(int x, int y);
+   virtual void MoveCursorBy(int x, int y);
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
@@ -233,11 +235,8 @@ protected:
    /** quasi-Constructor
        @param parent parent window
        @param parentProfile parent profile
-       @param hide if true, do not show frame
    */
-   void Create(wxWindow *parent = NULL,
-               Profile *parentProfile = NULL,
-               bool hide = false);
+   void Create(wxWindow *parent = NULL, Profile *parentProfile = NULL);
 
    /** Constructor
        @param name  name of windowclass
@@ -276,6 +275,9 @@ protected:
 
    /// has the message been modified since last save?
    bool IsModified() const;
+
+   /// do we have anything at all in the editor?
+   bool IsEmpty() const;
 
    /// insert a text file at the current cursor position
    bool InsertFileAsText(const String& filename,
@@ -468,8 +470,7 @@ private:
    friend wxComposeView *CreateComposeView(Profile *profile,
                                            const MailFolder::Params& params,
                                            wxComposeView::Mode mode,
-                                           wxComposeView::MessageKind kind,
-                                           bool hide);
+                                           wxComposeView::MessageKind kind);
 
    // it uses our m_DraftMessage
    friend Composer *Composer::EditMessage(Profile *profile, Message *msg);

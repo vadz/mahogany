@@ -477,7 +477,9 @@ ExpansionSink::Output(const String& text)
    if ( !m_hasCursorPosition )
    {
       // update the current x and y position
-      // FIXME: this supposes that there is no autowrap - is it true?
+      //
+      // TODO: this supposes that there is no autowrap, to be changed if/when
+      //       it appears
       int deltaX = 0, deltaY = 0;
       for ( const char *pc = text.c_str(); *pc; pc++ )
       {
@@ -549,7 +551,7 @@ ExpansionSink::InsertTextInto(Composer& cv) const
 
    // position the cursor - if RememberCursorPosition() hadn't been called, it
    // will be put in (0, 0)
-   cv.MoveCursorTo(m_x, m_y);
+   cv.MoveCursorBy(m_x, m_y);
 
    // as the inserted text comes from the program, not from the user, don't
    // mark the composer contents as dirty

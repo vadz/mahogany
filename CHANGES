@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+13.05.02 VZ: added group reply/forwarding feature
 03.05.02 VZ: added highlighting of the URLs in the message headers
 26.04.02 VZ: added popup menu for the email addresses in the message view
 25.04.02 VZ: detect more URLs, including email addresses and wrapped URLs

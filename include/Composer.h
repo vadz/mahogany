@@ -44,55 +44,45 @@ public:
 
    /** Constructor for posting news.
        @param profile parent profile
-       @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static Composer *CreateNewArticle(const MailFolder::Params& params,
-                                     Profile *profile = NULL,
-                                     bool hide = false);
+                                     Profile *profile = NULL);
 
    /// short cut
-   static Composer *CreateNewArticle(Profile *profile = NULL,
-                                     bool hide = false)
-      { return CreateNewArticle(MailFolder::Params(), profile, hide); }
+   static Composer *CreateNewArticle(Profile *profile = NULL)
+      { return CreateNewArticle(MailFolder::Params(), profile); }
 
    /** Constructor for sending mail.
        @param profile parent profile
-       @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static Composer *CreateNewMessage(const MailFolder::Params& params,
-                                     Profile *profile = NULL,
-                                     bool hide = false);
+                                     Profile *profile = NULL);
 
    /// short cut
-   static Composer *CreateNewMessage(Profile *profile = NULL,
-                                     bool hide = false)
-      { return CreateNewMessage(MailFolder::Params(), profile, hide); }
+   static Composer *CreateNewMessage(Profile *profile = NULL)
+      { return CreateNewMessage(MailFolder::Params(), profile); }
 
    /** Constructor for sending a reply to a message.
 
        @param profile parent profile
        @param original message that we replied to
-       @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static Composer *CreateReplyMessage(const MailFolder::Params& params,
                                        Profile *profile,
-                                       Message * original = NULL,
-                                       bool hide = false);
+                                       Message * original = NULL);
 
    /** Constructor for forwarding a message.
 
        @param templ is the template to use
        @param profile parent profile
-       @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static Composer *CreateFwdMessage(const MailFolder::Params& params,
                                      Profile *profile,
-                                     Message *original = NULL,
-                                     bool hide = false);
+                                     Message *original = NULL);
 
    /**
      Create a composer window initialized with an existing message.
@@ -206,6 +196,11 @@ public:
     */
    virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL) = 0;
 
+   /** Finishes the composer initialization and shows the composer frame,
+       should be called after all calls to InitText()
+   */
+   virtual void Launch() = 0;
+
    /** insert a file into buffer
        @param filename file to insert (ask the user if NULL)
        @param mimetype mimetype to use (auto detect if NULL)
@@ -233,6 +228,9 @@ public:
 
    /// move the cursor to the given position
    virtual void MoveCursorTo(int x, int y) = 0;
+
+   /// move the cursor to the right and downwards by given number of characters
+   virtual void MoveCursorBy(int x, int y) = 0;
 
    /// reset the "dirty" flag
    virtual void ResetDirty() = 0;
