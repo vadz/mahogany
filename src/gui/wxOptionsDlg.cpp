@@ -267,8 +267,10 @@ enum ConfigFields
    ConfigField_FolderProgressThreshold,
    ConfigField_ShowBusyInfo,
    ConfigField_FolderMaxHelpText,
+#if 0
    ConfigField_FolderMaxHeadersNumHard,
    ConfigField_FolderMaxHeadersNum,
+#endif
    ConfigField_FolderMaxMsgSize,
    ConfigField_CloseDelay_HelpText,
    ConfigField_CloseDelay,
@@ -1068,6 +1070,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "show the progress dialog at all."), Field_Message, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Show bus&y dialog while sorting/threading"), Field_Bool, -1},
+   { gettext_noop("The following setting allows to limit the amount of data\n"
+                  "retrieved from remote server: if the message size\n"
+                  "is greater than the value specified here, you\n"
+                  "will be asked for confirmation before transfering data."),
+                                                   Field_Message,  -1 },
+#if 0
    { gettext_noop("The following settings allow to limit the amount of data\n"
                   "retrieved from remote server: if the message size or\n"
                   "number is greater than the value specified here, you\n"
@@ -1077,6 +1085,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message,  -1 },
    { gettext_noop("&Hard message limit"),  Field_Number,   -1 },
    { gettext_noop("Ask if &number of messages >"),  Field_Number,   -1 },
+#endif
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
@@ -1540,8 +1549,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_SHOWBUSY_DURING_SORT),
    CONFIG_NONE(),
+#if 0
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
+#endif
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
