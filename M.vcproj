@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include,$(wxwin)/lib/vc_lib/mswd,$(wxwin)/include,extra/src/compface,lib/imap/src/osdep/nt,lib/imap/src/c-client"
+				AdditionalIncludeDirectories="include;&quot;$(wxwin)/lib/vc_lib/mswd&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -36,7 +36,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase25d.lib wxbase25d_net.lib wxmsw25d_core.lib wxmsw25d_adv.lib wxmsw25d_html.lib wxpngd.lib wxjpegd.lib wxregexd.lib wxtiffd.lib wxzlibd.lib lib/imap/debug/imap.lib extra/src/compface/debug/compface.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
+				AdditionalDependencies="wxbase25d.lib wxbase25d_net.lib wxmsw25d_core.lib wxmsw25d_adv.lib wxmsw25d_html.lib wxpngd.lib wxjpegd.lib wxregexd.lib wxtiffd.lib wxzlibd.lib lib/imap/debug/imap.lib lib/compface/debug/compface.lib src\wx\vcard\Debug\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -74,7 +74,7 @@
 			CharacterSet="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="include,$(wxwin)/lib/vc_lib/msw,$(wxwin)/include,extra/src/compface,lib/imap/src/osdep/nt,lib/imap/src/c-client"
+				AdditionalIncludeDirectories="include;&quot;$(wxwin)/lib/vc_lib/msw&quot;;&quot;$(wxwin)/include&quot;;lib/compface;lib/imap/src/osdep/nt;&quot;lib/imap/src/c-client&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="3"
@@ -88,7 +88,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wxbase25.lib wxbase25_net.lib wxmsw25_core.lib wxmsw25_adv.lib wxmsw25_html.lib wxpng.lib wxjpeg.lib wxregex.lib wxtiff.lib wxzlib.lib lib/imap/release/imap.lib extra/src/compface/release/compface.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
+				AdditionalDependencies="wxbase25.lib wxbase25_net.lib wxmsw25_core.lib wxmsw25_adv.lib wxmsw25_html.lib wxpng.lib wxjpeg.lib wxregex.lib wxtiff.lib wxzlib.lib lib/imap/release/imap.lib lib/compface/release/compface.lib src\wx\vcard\release\versit.lib winmm.lib comctl32.lib rpcrt4.lib wsock32.lib"
 				OutputFile="$(OutDir)/M.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(wxwin)\lib\vc_lib"
@@ -872,7 +872,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -880,7 +881,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -891,7 +893,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -899,7 +902,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -910,7 +914,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -918,7 +923,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -929,7 +935,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -937,7 +944,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -948,7 +956,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -956,7 +965,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -967,7 +977,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -975,7 +986,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -986,7 +998,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -994,7 +1007,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
@@ -1005,7 +1019,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 							<FileConfiguration
@@ -1013,7 +1028,8 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Updating SWIG-generated sources"
-									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp"
+									CommandLine="copy $(InputPath) $(InputDir)\$(InputName)_swig.cpp
+"
 									Outputs="$(InputDir)\$(InputName)_swig.cpp"/>
 							</FileConfiguration>
 						</File>
