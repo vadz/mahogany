@@ -19,7 +19,12 @@
 #   include "Mdefaults.h"
 #   include "gui/wxMenuDefs.h"
 #   include "MMainFrame.h"
+
 #   include <wx/stattext.h>
+#   include <wx/layout.h>
+#   include <wx/menu.h>
+#   include <wx/statusbr.h>
+#   include <wx/statbox.h>
 #endif
 
 
@@ -42,13 +47,12 @@
 #include "gui/wxMDialogs.h"
 #include "gui/wxMainFrame.h"
 
-#include <wx/menu.h>
 #include <wx/calctrl.h>
-#include <wx/persctrl.h>
+#include <wx/spinbutt.h>
 #include <wx/textdlg.h>
-#include <wx/layout.h>
-#include <wx/statusbr.h>
-#include <wx/statbox.h>
+
+#include <wx/persctrl.h>
+
 #include "gui/wxDialogLayout.h"
 #include "MHelp.h"
 
