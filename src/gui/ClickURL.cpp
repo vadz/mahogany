@@ -38,7 +38,7 @@
 #include "Composer.h"
 #include "Collect.h"
 
-#include "MPers.h"
+#include "Mpers.h"
 
 #include <wx/clipbrd.h>
 
