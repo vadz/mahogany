@@ -2363,6 +2363,12 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
       self->m_cacheLastMod = m_headers->GetLastMod();
 
       self->InvalidateCache();
+
+      if ( !m_headers->Count() )
+      {
+         // this probably menas that we lost the connection unexpectedly
+         return NULL;
+      }
    }
 
    if ( m_indexHI != index )
@@ -2730,9 +2736,10 @@ void wxFolderListCtrl::UpdateFocus()
    {
       m_FolderView->OnFocusChange(-1, UID_ILLEGAL);
    }
-   else
+   else // got valid focus, find its UID
    {
-      if ( m_headers->IsInCache(m_itemFocus) )
+      // check that the folder is still opened
+      if ( m_headers->Count() && m_headers->IsInCache(m_itemFocus) )
       {
          m_uidFocus = GetUIdFromIndex(m_itemFocus);
       }

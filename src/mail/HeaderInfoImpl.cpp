@@ -1522,12 +1522,16 @@ void HeaderInfoListImpl::BuildTables()
             busy->Fail(_("Threading failed!"));
       }
 
-      // create m_tableMsgno from m_tableSort and m_tableThread
-      CombineSortAndThread();
+      // we could have failed to rebuild them above
+      if ( m_thrData && m_thrData->m_root )
+      {
+         // create m_tableMsgno from m_tableSort and m_tableThread
+         CombineSortAndThread();
 
-      // reset it as it doesn't make sense to use it with threading (thread
-      // would be inverted as well and grow upwards - hardly what we want)
-      m_reverseOrder = false;
+         // reset it as it doesn't make sense to use it with threading (thread
+         // would be inverted as well and grow upwards - hardly what we want)
+         m_reverseOrder = false;
+      }
    }
    else if ( IsSorting() )
    {
@@ -1913,6 +1917,10 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
    if ( MustRebuildTables() )
    {
       BuildTables();
+
+      // we could lose connection while sorting/threading
+      if ( !m_count )
+         return;
    }
 
    // transform sequence of positions into sequence of msgnos
