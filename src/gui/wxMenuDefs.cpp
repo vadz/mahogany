@@ -334,7 +334,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear\tCtrl-C"),            gettext_noop("Delete message contents")  , FALSE },
    { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-X"),gettext_noop("Invoke alternative editor"), FALSE },
+   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-E"),gettext_noop("Invoke alternative editor"), FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header...\tCtrl-H"), gettext_noop("Add/edit header fields not shown on the screen"), FALSE },
 
