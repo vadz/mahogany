@@ -44,7 +44,7 @@ def GetUserName():
 
 def Minit():
     msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
-    MDialogs.Status(msg, 1)
+    MDialogs.Message(msg)
 
 ####################################################################
 #                                                                  #
