@@ -196,6 +196,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_PingReopenSemaphore = false;
    m_BuildListingSemaphore = false;
 
+   m_InCritical = false;
+   
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
    m_Timer = NULL;

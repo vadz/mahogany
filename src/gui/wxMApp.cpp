@@ -479,11 +479,11 @@ wxMApp::Help(int id, wxWindow *parent)
       break;
       // implement a search:
    case MH_SEARCH:
-      last_key = wxGetTextFromUser(_("Search for?"),
-                                   _("Search help for keyword"),
-                                   last_key,
-                                   parent ? parent : TopLevelFrame());
-      if(! last_key.IsEmpty())
+      if( MInputBox(&last_key,
+                     _("Search for?"),
+                     _("Search help for keyword"),
+                    parent ? parent : TopLevelFrame())
+                    && ! last_key.IsEmpty())
          m_HelpController->KeywordSearch(last_key);
       break;
       // all other help ids, just look them up:
