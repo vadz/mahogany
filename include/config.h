@@ -60,6 +60,6 @@
 /* #undef USE_WXSTRING */
 
 /** Define if you use Python. */
-#define USE_PYTHON 1
+/* #undef USE_PYTHON */
 
 //@}

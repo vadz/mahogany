@@ -7,6 +7,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:45:52  karsten
+ * checked consistency of CVS archive, made XFace.cc compile in absence
+ * of libcompface
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -24,7 +28,6 @@
 
 #include	<Message.h>
 #include	<MailFolderCC.h>
-#include	<MBodyPart.h>
 #include	<CommonBase.h>
 #include	<Profile.h>
 

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:45:53  karsten
+ * checked consistency of CVS archive, made XFace.cc compile in absence
+ * of libcompface
+ *
  * Revision 1.1  1998/03/14 12:21:20  karsten
  * first try at a complete archive
  *
@@ -41,7 +45,7 @@ XFace::CreateFromXpm(const char *xpmdata)
 {
 #ifndef	HAVE_COMPFACE_H
    return false;
-#endif
+else
    if(data)
       delete [] data;
 
@@ -128,6 +132,7 @@ XFace::CreateFromXpm(const char *xpmdata)
 //#endif
    initialised = true;
    return true;
+#endif
 }
 
 
@@ -136,7 +141,7 @@ XFace::CreateFromXFace(const char *xfacedata)
 {
 #ifndef	HAVE_COMPFACE_H
    return false;
-#endif
+#else
    if(data) delete [] data;
    if(xface) delete [] xface;
    initialised = false;
@@ -154,6 +159,7 @@ XFace::CreateFromXFace(const char *xfacedata)
    }
    initialised = true;
    return true;
+#endif
 }
 
 bool
@@ -161,7 +167,7 @@ XFace::CreateXpm(String &xpm)
 {
 #ifndef	HAVE_COMPFACE_H
    return false;
-#endif
+#else
    int
       l,c,q;
    char
@@ -240,6 +246,7 @@ XFace::CreateXpm(String &xpm)
 	 xpm += "\n};\n";
    }
    return true;
+#endif
 }
 
 static char **

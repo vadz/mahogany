@@ -1,3 +1,9 @@
+dnl ================ User editable settings ============================
+dnl where to find Python source
+PYTHON_PATH="/usr/local/src/Python-1.3"
+
+dnl ================ do not edit below here ============================
+
 AC_DEFUN(AC_OVERRIDES_PREPARE,
 [
 rm -f ${OSTYPE}.system.cache.tmp
@@ -143,8 +149,6 @@ DEFAULT_USE_WXWINDOWS2=0
 DEFAULT_USE_WXSTRING=0
 
 dnl search path for includes and libraries
-
-PYTHON_PATH="/usr/local/src/Python-1.3"
 
 SEARCH_INCLUDE="\
     ./extra/include	      \
@@ -395,7 +399,6 @@ AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
 if test "$ac_find_includes" != "" ; then
   AC_PATH_FIND_LIBRARIES($SEARCH_LIB,Python)
   if test "$ac_find_libraries" != "" ; then
-  echo $ac_find_libraries
     AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
     AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
     CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"

@@ -43,7 +43,7 @@ If compiling with a non-default compiler like egcs, make sure that
 
 <sect2>Solaris/SunOS
 
-<sect1>Other issues
+<sect1>Other issues/libraries
 
 <sect2>STL
 <em/M/ uses the STL, so you need a sufficiently recent compiler,
@@ -55,14 +55,34 @@ i.e. <tt/egcs/ or <tt/gcc-2.8/.
 different location, change the variable <tt/PYTHON_PATH/ at the
 beginning of <tt/configure/. 
 
-<p>
-This document is the user's guide to the SGML-Tools document processing system.
-It contains more or less everything you need to know to set up
-SGML-Tools and write documents using it.  See <tt/example.sgml/ for
-an example of an SGML document that you can use as a model for your
-own documents.
+<sect2>XFaces
+If you have the <tt/compface/ library and header file installed, it
+will be used to support XFaces.
 
 <sect>Installation
+
+<sect1>Configuration and Compilation
+
+<p>
+Follow these steps:
+<enum>
+
+<item>
+Edit <tt/configure/ so it will find your installation  of
+<tt/Python/. If you do not have it, just skip this step.
+
+<item>
+Run <tt>./configure</tt> to create the <tt>include/config.h</tt> and
+<tt>makeopts</tt> file. It may be required to edit <tt/makeopts/ by
+hand.
+
+<item>
+Run <tt/make dep/ and <tt/cd src/ and <tt/make/ to compile and link
+<em/M/. Compiling some of the source files will take an enormous
+amount of memory, so make sure you have enough virtual memory.
+
+</enum>
+
 <p>
 You can download the latest version of M from
 <itemize>
@@ -72,26 +92,6 @@ name="http://Ballueder.home.ml.org/M/">
 
 You can also get up-to-date information on M from the 
 <url url="http://Ballueder.home.ml.org/M/" name="M WWW Page">.
-
-<sect1>Requirements
-<p>
-The file <tt/sgml-tools-0.99.20.tar.gz/ contains everything that you
-need to write SGML documents and convert them to groff, LaTeX,
-PostScript, HTML, GNU info, LyX, and RTF.  In addition to this
-package, you will need some additional tools for generating formatted
-output.
-<enum>
-<item><tt/groff/.  You <em/need/ version 1.08 or greater.  You can get
-this from <htmlurl url="ftp://prep.ai.mit.edu/pub/gnu"
-name="ftp://prep.ai.mit.edu/pub/gnu">.  There is a Linux binary
-version at <htmlurl url="ftp://sunsite.unc.edu/pub/Linux/utils/text"
-name="ftp://sunsite.unc.edu/pub/Linux/utils/text"> as well.  You
-will need <tt/groff/ to produce plain text from your SGML documents.
-<tt/nroff/ will <em/not/ work!
-</enum>
-<sect1>Installing The Software
-<p>
-The steps needed to install and configure the SGML-Tools are:
 
 
 </article>
