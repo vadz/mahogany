@@ -1418,10 +1418,14 @@ void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 
    m_headers = listing;
 
-   UpdateItemCount();
-
    // we'll crash if we use it after the listing changed!
+   //
+   // NB: do it before calling UpdateItemCount() as under GTK it redraws
+   //     the window immediately, hence calling back our OnGetItemText() which
+   //     sets m_hiCached
    ASSERT_MSG( !m_hiCached, "should be reset" );
+
+   UpdateItemCount();
 }
 
 HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
