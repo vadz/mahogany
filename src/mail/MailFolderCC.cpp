@@ -1954,10 +1954,16 @@ MailFolderCC::CountMessages(int mask, int value) const
    {
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
+#ifndef DEBUG_no_hack
+      ///HACK: these two counts should be the same, but sometimes they're
+      ///not, so we use the "wrong" value since it won't cause a crash.
+      unsigned long numOfMessages = hil->Count();
+#else
       unsigned long numOfMessages = 0;
-      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+#endif
+      for ( unsigned long msgno = numOfMessages; msgno > 0; )
       {
-         if ( (hil[msgno]->GetStatus() & mask) == value )
+         if ( (hil[--msgno]->GetStatus() & mask) == value )
             numOfMessages++;
       }
 
@@ -2831,7 +2837,14 @@ extern void CC_Cleanup(void)
       gs_CCStreamCleaner = NULL;
    }
 
+#ifdef DEBUG_no_hack
    ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
+#else
+   ///HACK: we really need to clean up these entries, so we just
+   ///decrement the reference count until they go away.
+   while (!MailFolderCC::ms_StreamList.empty())
+      MailFolderCC::ms_StreamList.front()->folder->DecRef();
+#endif
 }
 
 CCStreamCleaner::~CCStreamCleaner()
