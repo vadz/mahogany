@@ -1,6 +1,8 @@
 # Makefile for M root directory
 # $Id$
 
+include makeopts
+
 FILES := configure.in configure Makefile makeopts.in makerules
 ifeq ($(USE_RESOURCES),yes)
 SUB_DIRS := include extra res src
@@ -8,8 +10,6 @@ else
 SUB_DIRS := include extra src
 endif
 ALL_DIRS := $(SUB_DIRS) doc
-
-include makeopts
 
 all semistatic quartstatic static:
 	@set -e; for i in $(SUB_DIRS); do \
