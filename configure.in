@@ -384,7 +384,7 @@ AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
 dnl they are not installed, the test for wx_gtk will fail anyway.
 
-AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+AC_CHECK_LIB(wx_gtk_1_0,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
