@@ -49,9 +49,6 @@ extern "C"
 
 extern const MOption MP_USEPYTHON;
 
-// from InitPython.cpp
-extern PyObject *Python_MinitModule;
-
 // ----------------------------------------------------------------------------
 // M_PyObject: safe wrapper for PyObject which never forgets to Py_DECREF()
 // ----------------------------------------------------------------------------
@@ -189,7 +186,7 @@ PythonFunction(const char *func,
       }
       else // no explicit module, use the default one
       {
-         modname = _T("Minit");
+         modname = MP_PYTHONMODULE_TO_LOAD_DEFVAL;
       }
 
       M_PyObject module(PyImport_ImportModule((char *)modname.c_str()));
