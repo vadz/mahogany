@@ -46,20 +46,20 @@ ber)"
 #   include "strutil.h"
 #   include "strings.h"
 #   include "guidef.h"
-#   include "MDialogs.h"
 
 #   include <strings.h>
 
 
 #endif // USE_PCH
 
-#include   "Mdefaults.h"
-#include   "MApplication.h"
-#include   "Message.h"
-#include   "MailFolderCC.h"
-#include   "SendMessageCC.h"
-#include   "XFace.h"
-#include   "gui/wxIconManager.h"
+#include "Mdefaults.h"
+#include "MApplication.h"
+#include "Message.h"
+#include "MailFolderCC.h"
+#include "SendMessageCC.h"
+#include "XFace.h"
+#include "MDialogs.h"
+#include "gui/wxIconManager.h"
 
 extern "C"
 {
