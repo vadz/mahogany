@@ -1,3 +1,4 @@
+aclocal.m4
 M.spec
 config.cache
 config.log

@@ -56,13 +56,6 @@ M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
 M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
 
-M_OVERRIDES(wxconfigprg,wxWin config prog,USE_WXCONFIGPRG,,
---with-wxconfigprg=xxx  use wx-config program named xxx e.g. wxgtkd-config)
-case "$USE_WXCONFIGPRG" in 1)
-	AC_MSG_WARN([you must specify a name for --with-wxconfigprg=xxx])
-	USE_WXCONFIGPRG='' ;;
-esac
-
 M_OVERRIDES(prof,profiling,USE_PROFILER,0,
 --with-prof           generate profiling code)
 
@@ -101,6 +94,8 @@ case "$m_cv_prefix" in /*) ;; *)
 	m_cv_prefix=$ac_default_prefix
 esac
 prefix=$m_cv_prefix
+
+AM_OPTIONS_WXCONFIG
 
 dnl save parameter settings in case stuff below aborts
 AC_CACHE_SAVE
@@ -404,16 +399,10 @@ case "$DEBUG_OPTS" in '') ;; *)
 esac
 AC_SUBST(MAKE_DEBUG)
 
-case "$USE_WXDEBUG" in
-1)	# AC_DEFINE(__WXDEBUG__)
-	USE_OPT=0
-	WXCONFIG_NAME="wxgtkd-config" ;;
-*)	WXCONFIG_NAME="wx-config" ;;
-esac
-case "$USE_WXCONFIGPRG" in
-''|0)	;;
-*)	WXCONFIG_NAME="$USE_WXCONFIGPRG" ;;
-esac
+if test "$USE_WXDEBUG" = 1; then
+   USE_OPT=0
+   WX_CONFIG="wxgtkd-config"
+fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
 1.yes.*)	MYFLAGS="$MYFLAGS -g3" 
@@ -498,11 +487,17 @@ no)	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
 	# to compile. It doesn't matter anyway as we load openssl
 	# later, but we must be able to compile the header file.
 	CCLIENT_EXTRACFLAGS="-DNO_IDEA -DNO_DSA -DNO_RSA"
-	case "$ssl_option" in /usr/include) ;; *)
+	case "$ssl_option" in
+	    /usr/include)
+	    ;;
+	    *)
 		CCLIENT_EXTRACFLAGS="-I$ssl_option $CCLIENT_EXTRACFLAGS"
 		CPPFLAGS="$CPPFLAGS -I$ssl_option"
-	esac ;;
-*)	AC_MSG_ERROR([Internal configure problem; we shouldn't get here]) ;;
+	esac
+	LIBS="$LIBS -lssl"
+	;;
+*)	AC_MSG_ERROR([Internal configure problem; we shouldn't get here])
+	;;
 esac
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
@@ -628,27 +623,42 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wx-config
-WX_CONFIG="$WXCONFIG_NAME"	# Bug in autoconf?
-AC_PATH_PROG(WX_CONFIG,$WXCONFIG_NAME)
-case "$WX_CONFIG" in '')
-	AC_MSG_ERROR([cannot find $WXCONFIG_NAME program to get the wxWin
-	configuration.  If it's not in the standard PATH, use the
-	--with-wxconfigprg option to specify it.])
-esac
 
-CXXFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
+dnl check for 2.2.6 first as it has separate --cppflags, --cflags and --cxxflags
+dnl and so should work in any case while previous version return switches for
+dnl C++ compiler in --cflags which will lead to compilation errors sometimes
+dnl (i.e. if wxWin was built with --enable-no_rtti, CC can choke on -fno_rtti)
+AM_PATH_WXCONFIG(2.2.6, WX226=1)
 
-GTK_LDFLAGS=`$WX_CONFIG --libs`
-AC_SUBST(GTK_LDFLAGS)
-GUI_LIBS_STATIC=`echo $GTK_LDFLAGS | sed '
+if test "$WX226" != 1; then
+   # I'm not sure that it still works with 2.2.1, bump the version checked
+   # here if needed
+   AM_PATH_WXCONFIG(2.2.1, WX221=1)
+   if test "$WX221" != 1; then
+       AC_MSG_ERROR([
+               Mahogany requires wxWindows to be installed on your system
+               but wx-config script couldn't be found.
+
+               Please check that wx-config is in path, the directory
+               where wxWindows libraries are installed (returned by
+               'wx-config --libs' command) is in LD_LIBRARY_PATH or
+               equivalent variable and wxWindows version is 2.2.1 or above.
+       ])
+   fi
+fi
+
+dnl set all flags
+CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+
+WX_LDFLAGS="$WX_LIBS"
+AC_SUBST(WX_LDFLAGS)
+
+GUI_LIBS_STATIC=`echo $WX_LDFLAGS | sed '
 s/-lgtk/-Wl,-Bstatic -lgtk/g
 s/-lglib/-lglib -Wl,-Bdynamic/g'`
 AC_SUBST(GUI_LIBS_STATIC)
-
-dnl only now can we check for wx.h because it would
-dnl fail without the gtk headers
-AC_CHECK_HEADER(wx/wx.h,,AC_MSG_ERROR([cannot find wx/wx.h header file.
-	You must have wxWindows installed to compile Mahogany.]))
 
 case "$USE_THREADS" in 1)
 	AC_CACHE_CHECK(if wxWindows was compiled with threads,
@@ -679,12 +689,20 @@ dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
 
+dnl we need to distinguish between different Linux versions before guessing
+dnl CCOSTYPE
+case "$OSTYPE" in
+   linux* | Linux*)
+      AC_CHECK_LIB(pam, pam_end, CCOSTYPE=lnp, CCOSTYPE=slx)
+      ;;
+esac
+
 dnl we need to set the target for c-client library
 case "$USE_CCOSTYPE" in
 ''|0|1)	AC_MSG_CHECKING(for c-client library OS type)
 	case "$OSTYPE" in
 	linux* | Linux*)
-		AC_CHECK_LIB(pam, pam_end, CCOSTYPE=lnp, CCOSTYPE=slx) ;;
+		;; dnl CCOSTYPE already set above
 	Solaris* | solaris* | SunOS*)
 		case "$GXX" in
 		yes)	CCOSTYPE=gso ;;
@@ -774,7 +792,7 @@ static|Static|STATIC)
 auto|Auto|AUTO|1)
 	dnl check for wxGTK dynamic linkage
 	echo "int main() { return 0; }" >conftest.c
-	if $CXX -o conftest $GTK_LDFLAGS conftest.c && \
+	if $CXX -o conftest $WX_LDFLAGS conftest.c && \
 		ldd conftest | fgrep libwx  >/dev/null
 	then
 		m_cv_USE_MODULES=dynamic
