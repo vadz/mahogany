@@ -18,10 +18,6 @@ class MailFolder(MObjectRC):
     MSG_STAT_FLAGGED = MailFolderc.MailFolder_MSG_STAT_FLAGGED
     NONE = MailFolderc.MailFolder_NONE
     REPLY_FOLLOWUP = MailFolderc.MailFolder_REPLY_FOLLOWUP
-    UF_Undefined = MailFolderc.MailFolder_UF_Undefined
-    UF_UpdateCount = MailFolderc.MailFolder_UF_UpdateCount
-    UF_DetectNewMail = MailFolderc.MailFolder_UF_DetectNewMail
-    UF_Default = MailFolderc.MailFolder_UF_Default
     def __init__(self,this):
         self.this = this
 
@@ -78,12 +74,6 @@ class MailFolder(MObjectRC):
         return val
     def GetClassName(*args):
         val = apply(MailFolderc.MailFolder_GetClassName,args)
-        return val
-    def SetUpdateFlags(*args):
-        val = apply(MailFolderc.MailFolder_SetUpdateFlags,args)
-        return val
-    def GetUpdateFlags(*args):
-        val = apply(MailFolderc.MailFolder_GetUpdateFlags,args)
         return val
     def SaveMessages(*args):
         val = apply(MailFolderc.MailFolder_SaveMessages,args)
@@ -361,7 +351,18 @@ MailFolder_Subscribe = MailFolderc.MailFolder_Subscribe
 MSO_NONE = MailFolderc.MSO_NONE
 MSO_NONE_REV = MailFolderc.MSO_NONE_REV
 MSO_DATE = MailFolderc.MSO_DATE
-MSO_DATE_REVe);
+MSO_DATE_REV = MailFolderc.MSO_DATE_REV
+MSO_SUBJECT = MailFolderc.MSO_SUBJECT
+MSO_SUBJECT_REV = MailFolderc.MSO_SUBJECT_REV
+MSO_AUTHOR = MailFolderc.MSO_AUTHOR
+MSO_AUTHOR_REV = MailFolderc.MSO_AUTHOR_REV
+MSO_STATUS = MailFolderc.MSO_STATUS
+MSO_STATUS_REV = MailFolderc.MSO_STATUS_REV
+MSO_SCORE = MailFolderc.MSO_SCORE
+MSO_SCORE_REV = MailFolderc.MSO_SCORE_REV
+MSO_SIZE = MailFolderc.MSO_SIZE
+MSO_SIZE_REV = MailFolderc.MSO_SIZE_REV
+                                    e);
       break;
     case SWIG_PY_POINTER:
       obj = SWIG_NewPointerObj(constants[i].pvalue, *(constants[i]).ptype);
@@ -829,35 +830,6 @@ static PyObject *_wrap_MailFolder_GetClassName(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
     result = (char *)arg0->GetClassName();
     resultobj = PyString_FromString(result);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_MailFolder_SetUpdateFlags(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg0 ;
-    int arg1 ;
-    PyObject * argo0 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"Oi:MailFolder_SetUpdateFlags",&argo0,&arg1)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    arg0->SetUpdateFlags(arg1);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
-    return resultobj;
-}
-
-
-static PyObject *_wrap_MailFolder_GetUpdateFlags(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg0 ;
-    PyObject * argo0 =0 ;
-    int result ;
-    
-    if(!PyArg_ParseTuple(args,"O:MailFolder_GetUpdateFlags",&argo0)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    result = (int )arg0->GetUpdateFlags();
-    resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
 
@@ -1644,8 +1616,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_SearchMessages", _wrap_MailFolder_SearchMessages, METH_VARARGS },
 	 { "MailFolder_GetProfile", _wrap_MailFolder_GetProfile, METH_VARARGS },
 	 { "MailFolder_GetClassName", _wrap_MailFolder_GetClassName, METH_VARARGS },
-	 { "MailFolder_SetUpdateFlags", _wrap_MailFolder_SetUpdateFlags, METH_VARARGS },
-	 { "MailFolder_GetUpdateFlags", _wrap_MailFolder_GetUpdateFlags, METH_VARARGS },
 	 { "MailFolder_SaveMessages", _wrap_MailFolder_SaveMessages, METH_VARARGS },
 	 { "MailFolder_SaveMessagesToFile", _wrap_MailFolder_SaveMessagesToFile, METH_VARARGS },
 	 { "MailFolder_DeleteOrTrashMessages", _wrap_MailFolder_DeleteOrTrashMessages, METH_VARARGS },
@@ -1782,10 +1752,6 @@ static swig_const_info swig_const_table[] = {
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_FLAGGED", (long) MailFolder::MSG_STAT_FLAGGED, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_NONE", (long) MailFolder::NONE, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_REPLY_FOLLOWUP", (long) MailFolder::REPLY_FOLLOWUP, 0, 0, 0},
-    { SWIG_PY_INT,     "MailFolder_UF_Undefined", (long) MailFolder::UF_Undefined, 0, 0, 0},
-    { SWIG_PY_INT,     "MailFolder_UF_UpdateCount", (long) MailFolder::UF_UpdateCount, 0, 0, 0},
-    { SWIG_PY_INT,     "MailFolder_UF_DetectNewMail", (long) MailFolder::UF_DetectNewMail, 0, 0, 0},
-    { SWIG_PY_INT,     "MailFolder_UF_Default", (long) MailFolder::UF_Default, 0, 0, 0},
 {0}};
 
 static PyObject *SWIG_globals;

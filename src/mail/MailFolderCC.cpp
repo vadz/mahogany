@@ -2177,6 +2177,10 @@ MailFolderCC::PingReopenAll(bool fullPing)
       {
          if ( fullPing ? mf->PingReopen() : mf->Ping() )
          {
+            wxLogTrace("collect",
+                       "Checking for new mail in folder '%s'...",
+                       mf->GetName().c_str());
+
             // retrieving the folder listing filters new messages
             SafeDecRef(mf->GetHeaders());
          }
@@ -4143,7 +4147,7 @@ MailFolderCC::mm_dlog(const String& str)
       }
 
       // send it to the window
-      wxLogGeneric(wxLOG_User, _("Mail log: %s"), msg.c_str());
+      wxLogGeneric(M_LOG_WINONLY, _("Mail log: %s"), msg.c_str());
    }
 }
 

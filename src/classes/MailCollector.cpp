@@ -265,7 +265,9 @@ MailCollectorImpl::Collect(MailFolder *mf)
       mfolder->DecRef();
       if(imf)
       {
-         rc &= (imf && CollectOneFolder(imf));
+         if ( !CollectOneFolder(imf) )
+            rc = false;
+
          imf->DecRef();
          (**i).m_failcount = 0;
       }
@@ -297,6 +299,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
          }
       }
    }
+
    return rc;
 }
 
@@ -305,6 +308,10 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 {
    ReCreate();
    MOcheck();
+
+   wxLogTrace("collect",
+              "Checking for new mail in folder '%s'...",
+              mf->GetName().c_str());
 
    if ( mf->IsLocked() )
    {
