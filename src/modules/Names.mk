@@ -36,8 +36,6 @@ else
 CPPFLAGS_modules_spam_DspamFilter_so := -I../lib/dspam/.src
 LDFLAGS_modules_spam_DspamFilter_so := ../lib/dspam/libdspam.a -lsqlite
 endif
-else
-MOD	:= $(filter-out modules/spam/dspam.so, $(MOD))
 endif
 
 MSOS	+= $(MOD)
