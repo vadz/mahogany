@@ -444,6 +444,8 @@ wxMApp::AllowBgProcessing() const
    return !gs_mutexBlockBg.IsLocked();
 }
 
+#ifdef __WXDEBUG__
+
 void
 wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
 {
@@ -454,6 +456,8 @@ wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
 
    wxApp::OnAssert(file, line, msg);
 }
+
+#endif // __WXDEBUG__
 
 bool
 wxMApp::Yield(bool onlyIfNeeded)
