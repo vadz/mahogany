@@ -144,7 +144,7 @@ FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
 LIBMALLOCATION="ballueder@mahogany.sourceforge.net:FTP/Libraries/libmal.tar.gz"
 WWWDOCLOCATION="ballueder@mahogany.sourceforge.net:WWW/doc/"
 WXCVSROOT=":pserver:anonymous@cvs.wxwindows.sourceforge.net:/cvsroot/wxwindows"
-MCVSROOT=":pserver:KB@mcvs.dhs.org:/var/cvs/Mahogany"
+MCVSROOT=":pserver:anonymous@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 #if [ "$UID" = 0 ]
