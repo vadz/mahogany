@@ -7,11 +7,17 @@ package=mahogany
 build:
 	$(checkdir)
 	autoconf
-	./configure --prefix=/usr
+	# debian 2.1 has no wxGTK shared lib:
+	if test "`cat /etc/debian_version`" = "2.1" ; \
+	then \
+		./configure --prefix=/usr --with-modules=static \
+	else \
+		./configure --prefix=/usr \
+	fi
 	make depend || true
 	make doc
 	$(MAKE) all CFLAGS="-O2 -g -Wall"
-# If we are on Debian Slink, we need to build a semistatic binary:
+	# If we are on Debian Slink, we need to build a semistatic binary:
 	if test "`cat /etc/debian_version`" = "2.1" ; \
 	then \
 		( cd src && make semistatic ) \
