@@ -84,9 +84,9 @@ void  SSL_set_read_ahead(SSL *s, int yes)
 { (*stub_SSL_set_read_ahead)(s,yes); }
 int   SSL_connect(SSL *ssl)
 { return (*stub_SSL_connect)(ssl); }
-int   SSL_read(SSL *ssl,char * buf, int num)
+int   SSL_read(SSL *ssl,void * buf, int num)
 { return (*stub_SSL_read)(ssl, buf, num); }
-int   SSL_write(SSL *ssl,const char *buf,int num)
+int   SSL_write(SSL *ssl,const void *buf,int num)
 { return (*stub_SSL_write)(ssl, buf, num); }
 int  SSL_pending(SSL *s)
 { return (*stub_SSL_pending)(s); }
