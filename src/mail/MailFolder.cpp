@@ -984,7 +984,7 @@ MailFolder::ReplyMessage(Message *msg,
          pStart += matchLen;
 
          // skip spaces
-         while ( wxIsspace(*pStart) )
+         while ( isspace(*pStart) )
             pStart++;
       }
 

@@ -800,7 +800,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
           char buf[1024];
           while ( fgets(buf, WXSIZEOF(buf), fp) ) {
             const char *pc = buf;
-            while ( wxIsspace(*pc) )
+            while ( isspace(*pc) )
               pc++;
 
             // is it a wxFileConfig comment or is the line empty?

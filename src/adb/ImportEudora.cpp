@@ -204,12 +204,12 @@ bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
 
    // skip spaces (normally only one, but be careful)
    const char *pc = line.c_str() + lenAlias;
-   while( wxIsspace(*pc) )
+   while( isspace(*pc) )
       pc++;
 
    // next goes the nickname
    nickname->Empty();
-   while ( *pc && !wxIsspace(*pc) )
+   while ( *pc && !isspace(*pc) )
       *nickname += *pc++;
 
    // parse all other data only on request
@@ -217,11 +217,11 @@ bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
    {
       // next is the address (don't know whether multiple addresses are
       // allowed)
-      while ( wxIsspace(*pc) )
+      while ( isspace(*pc) )
          pc++;
 
       wxString address;
-      while ( *pc && !wxIsspace(*pc) )
+      while ( *pc && !isspace(*pc) )
          address += *pc++;
 
       entry->SetField(AdbField_EMail, address);
@@ -234,17 +234,17 @@ bool AdbEudoraImporter::ParseEudoraAdbEntry(size_t nLine,
          if ( strncmp(line, "note", lenNote) == 0 )
          {
             pc = line.c_str() + lenNote;
-            while( wxIsspace(*pc) )
+            while( isspace(*pc) )
                pc++;
 
             // next goes the nickname (again)
             wxString nick2;
-            while ( *pc && !wxIsspace(*pc) )
+            while ( *pc && !isspace(*pc) )
                nick2 += *pc++;
 
             if ( nick2 == *nickname )
             {
-               while ( wxIsspace(*pc) )
+               while ( isspace(*pc) )
                   pc++;
 
                // now parse all these <tag:value> pairs

@@ -257,8 +257,8 @@ SplitAddress(const String& addr,
 {
    if ( addr.length() == 0 )
    {
-      if(firstName) *firstName = "";
-      if(lastName) *lastName = "";
+      if(firstName) *firstName = _T("");
+      if(lastName) *lastName = _T("");
       return;
    }
 
@@ -270,7 +270,7 @@ SplitAddress(const String& addr,
    // the last name is the last word in the name part
    String last;
    const char *p = start + fullname.length() - 1;
-   while ( p >= start && !wxIsspace(*p) )
+   while ( p >= start && !isspace(*p) )
       last += *p--;
 
    // first name(s) is everything preceding the last name

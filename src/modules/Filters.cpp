@@ -306,7 +306,7 @@ public:
 
 protected:
    void EatWhiteSpace(void)
-      { while(wxIsspace(m_Input[m_Position])) m_Position++; }
+      { while(isspace(m_Input[m_Position])) m_Position++; }
    const char Char(void) const
       { return m_Input[m_Position]; }
    const char CharInc(void)
@@ -2014,7 +2014,7 @@ static bool CheckSubjectForCapitals(const String& subject)
          return false;
       }
 
-      if ( wxIsspace(*pc) )
+      if ( isspace(*pc) )
       {
          // remember that we have more than one word
          hasSpace = true;
