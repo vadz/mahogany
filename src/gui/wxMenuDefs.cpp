@@ -101,9 +101,9 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_mail_reply",    WXMENU_MSG_REPLY,     "Reply to message"  },
    { "tb_print",         WXMENU_MSG_PRINT,     "Print message"     },
    { "tb_trash",         WXMENU_MSG_DELETE,    "Delete message"    },
- 
+
    // ADB edit frame
-   { "tb_open",     WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
+   //{ "tb_open",     WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
    { "tb_new",      WXMENU_ADBEDIT_NEW,     "Create new entry"        },
    { "tb_delete",   WXMENU_ADBEDIT_DELETE,  "Delete"                  },
    { "tb_undo",     WXMENU_ADBEDIT_UNDO,    "Undo"                    },
@@ -172,7 +172,6 @@ static const int g_aMsgTbar[] =
 
 static const int g_aAdbTbar[] =
 {
-   WXTBAR_ADB_OPEN,
    WXTBAR_SEP,
    WXTBAR_ADB_NEW,
    WXTBAR_ADB_DELETE,
@@ -203,13 +202,22 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
 
    // file
-   { WXMENU_FILE_OPEN,     "&Open Folder...",   "Open an existing message "
+   { WXMENU_FILE_OPEN,     "&Open Folder...",   "Open an existing message"
      " folder"                  },
-   { WXMENU_FILE_OPENANY,  "Open &Any Folder...",   "Open any existing message "
+   { WXMENU_FILE_OPENANY,  "Open &Any Folder...",   "Open any existing message"
      " folder"                  },
    { WXMENU_FILE_CREATE,   "Create &Folder...", "Creates a new folder "
      "definition"               },
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_FILE_PRINT_SETUP,    "&Print Setup",     "Configure printing"  },
+//   { WXMENU_FILE_PAGE_SETUP,    "P&age Setup",     "Configure page setup"  },
+#ifdef USE_PS_PRINTING
+   // extra postscript printing
+   { WXMENU_FILE_PRINT_SETUP_PS,    "&Print PS Setup",     "Configure PostScript printing"  },
+//   { WXMENU_FILE_PAGE_SETUP_PS,    "P&age PS Setup",     "Configure PostScript page setup"  },
+#endif
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
 
@@ -229,6 +237,11 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
    { WXMENU_MSG_OPEN,      "&Open",             "View selected message"    },
    { WXMENU_MSG_PRINT,     "&Print",            "Print this message"       },
+   { WXMENU_MSG_PRINT_PREVIEW, "Print Pre&view","Preview a printout of this message"       },
+#ifdef USE_PS_PRINTING
+   { WXMENU_MSG_PRINT_PS,     "PS-Prin&t",      "Print this message as PostScript"       },
+   { WXMENU_MSG_PRINT_PREVIEW_PS,     "PS&-Print Preview",      "View PostScript printout"       },
+#endif
    { WXMENU_MSG_REPLY,     "&Reply",            "Reply to this message"    },
    { WXMENU_MSG_FORWARD,   "&Forward",          "Forward this message"     },
    { WXMENU_SEPARATOR,     "",                  ""                         },
@@ -240,14 +253,21 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_MSG_SELECTALL, "Select &all",       "Select all messages"      },
    { WXMENU_MSG_DESELECTALL,"D&eselect all",    "Unselect all messages"    },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_MSG_TOGGLEHEADERS,"Show &header",    "Toggle display of message header" },
+   { WXMENU_MSG_SHOWRAWTEXT,  "Show ra&w message", "Show the raw message text" },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE,
-     "&Insert file...",   "Insert a file"            },
+                           "&Insert file...",   "Insert a file"            },
    { WXMENU_COMPOSE_SEND,  "&Send",             "Send the message now"     },
    { WXMENU_COMPOSE_PRINT, "&Print",            "Print the message"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_COMPOSE_SAVETEXT,"Save &text...",   "Save message text to file"},
+   { WXMENU_COMPOSE_LOADTEXT,"In&sert text...", "Insert text file"         },
    { WXMENU_COMPOSE_CLEAR, "&Clear",            "Delete message contents"  },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_COMPOSE_EXTEDIT, "&External editor","Invoke alternative editor"},
 
    // ADB book management
    { WXMENU_ADBBOOK_NEW,   "&New...",           "Create a new address book"},
@@ -285,6 +305,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_CONTEXT, "&Help",    "Help on current context..."},
    { WXMENU_HELP_CONTENTS, "Help &Contents",    "Contents of help system..."},
    { WXMENU_HELP_SEARCH,   "&Search Help",      "Search help system for keyword..."},
+   { WXMENU_HELP_COPYRIGHT,   "C&opyright",      "Show Copyright."}
 };
 
 // ============================================================================
@@ -381,7 +402,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    // it looks better like this under GTK
    AddToolbarButton(toolbar, WXTBAR_SEP);
 #endif
-    
+
    // first add the "Close" icon - but only if we're not the main frame
    if ( frameId != WXFRAME_MAIN ) {
       AddToolbarButton(toolbar, WXTBAR_CLOSE);

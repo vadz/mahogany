@@ -1,14 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbEntry.h - ADB data record interface
-// Purpose:     
+// Purpose:
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.07.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _ADBENTRY_H
 #define   _ADBENTRY_H
@@ -107,11 +107,16 @@ enum
 
   As this class derives from MObjectRC, both AdbEntry and
   AdbEntryGroup.do too, so they use reference counting: see the
-  comments in MObject.h for more details about it.  */
+  comments in MObject.h for more details about it.
+*/
 class AdbElement : public MObjectRC
 {
+public:
   /// the group this entry/group belongs to (never NULL for these classes)
   virtual AdbEntryGroup *GetGroup() const = 0;
+
+  /// get the text describing the user to present the user with
+  virtual String GetDescription() const = 0;
 };
 
 /**
@@ -148,6 +153,20 @@ public:
   // other operations
     /// check whether we match the given string (see AdbLookup_xxx constants)
   virtual bool Matches(const char *str, int where, int how) = 0;
+    /// description of an item is the name and the address
+  virtual String GetDescription() const
+  {
+     String name, address;
+     GetField(AdbField_FullName, &name);
+     GetField(AdbField_EMail, &address);
+
+     // the full form is "FullName <email>", but if the "fullname" is empty,
+     // we take "nickname" instead (it can not be empty normally)
+     if ( name.IsEmpty() )
+        GetField(AdbField_NickName, &name);
+
+     return name + " <" + address + '>';
+  }
 };
 
 /**
@@ -159,6 +178,8 @@ class AdbEntryGroup : public AdbElement
 {
 public:
   // accessors
+    /// get the name of the group
+  virtual String GetName() const = 0;
     /// get the names of all entries, returns the number of them
   virtual size_t GetEntryNames(wxArrayString& aNames) const = 0;
 
@@ -185,6 +206,40 @@ public:
 
     /// find entry by name (returns NULL if not found)
   virtual AdbEntry *FindEntry(const char *szName) = 0;
+
+  // misc
+    /// description of a group is just its name
+  virtual String GetDescription() const { return GetName(); }
+};
+
+// ============================================================================
+// base class for a common implementation model of AdbEntry - one in which all
+// data is stored in memory
+// ============================================================================
+
+class AdbEntryStoredInMemory : public AdbEntry
+{
+public:
+  AdbEntryStoredInMemory() { m_bDirty = FALSE; }
+
+  // we can implement some of the base class functions in the manner independent
+  // of the exact nature of the derived class
+  virtual void GetField(size_t n, String *pstr) const;
+  virtual void SetField(size_t n, const String& strValue);
+  virtual void AddEMail(const String& strEMail)
+    { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
+  virtual void ClearExtraEMails();
+  virtual size_t GetEMailCount() const { return m_astrEmails.Count(); }
+  virtual void GetEMail(size_t n, String *p) const { *p = m_astrEmails[n]; }
+  virtual void ClearDirty() { m_bDirty = FALSE; }
+  virtual bool IsDirty() const { return m_bDirty; }
+  virtual bool Matches(const char *str, int where, int how);
+
+protected:
+  wxArrayString m_astrFields; // all text entries (some may be not present)
+  wxArrayString m_astrEmails; // all email addresses except for the first one
+
+  bool m_bDirty;              // dirty flag
 };
 
 #endif  //_ADBENTRY_H

@@ -76,8 +76,10 @@ work		BITMAP "work.bmp"
 // Options dialog notebook image list (32x32)
 ident		BITMAP "ident.bmp"
 compose		BITMAP "compose.bmp"
-python		BITMAP "python.bmp"
 folders		BITMAP "folders.bmp"
+python		BITMAP "python.bmp"
+adrbook		BITMAP "adrbook.bmp"
+helpers		BITMAP "helpers.bmp"
 miscopt		BITMAP "miscopt.bmp"
 access		BITMAP "access.bmp"
 

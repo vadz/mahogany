@@ -56,6 +56,8 @@ public:
    /// Destructor
    ~wxMApp();
 
+   /// get a reference to the print data
+   wxPrintData &GetPrintData(void) { return m_PrintData; }
 private:
    /// an iconmanager instance
    wxIconManager *m_IconManager;
@@ -63,6 +65,8 @@ private:
    wxHelpController *m_HelpController;
    /// a locale for translation
    class wxLocale *m_Locale;
+   /// data for printing:
+   wxPrintData    m_PrintData;
 };
 
 // ----------------------------------------------------------------------------

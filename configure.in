@@ -1,5 +1,4 @@
 dnl $Id$
-dnl Process this file with autoconf to produce a configure script.
 
 dnl ######################## Here the actual script begins ###############
 
@@ -54,13 +53,6 @@ M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
 
-M_OVERRIDES(kdoc,kdoc,
---with-kdoc   use kdoc for documentation,
-USE_KDOC)
-
-M_OVERRIDES(docxx,docxx,
---with-docxx   use doc++ for documentation,
-USE_DOCXX)
 
 dnl --------------------------------------------------------------------------
 dnl testing operating system and compilers
@@ -173,8 +165,10 @@ EXTRA_SRC_LIB=
 EXTRA_SRC_INC=
 for i in `pwd`/extra/src/*
 do
-	LIBS="$LIBS -L$i"
-	CPPFLAGS="$CPPFLAGS -I$i"
+	if test -d $i ; then
+		LIBS="$LIBS -L$i"
+		CPPFLAGS="$CPPFLAGS -I$i"
+	fi
 done
 
 dnl --------------------------------------------------------------------------
@@ -246,6 +240,7 @@ fi
 
 dnl set debug/optimisation flags
 DBGFLAGS=
+MAKE_DEBUG=
 if test "$USE_DEBUG" = 1; then
 	if test "$GCC" = "yes"
 	then
@@ -253,8 +248,9 @@ if test "$USE_DEBUG" = 1; then
 	else
 		DBGFLAGS="-g -DDEBUG -D__WXDEBUG__"
 	fi
+	MAKE_DEBUG="DEBUG=yes"
 fi
-
+AC_SUBST(MAKE_DEBUG)
 
 dnl precompiled headers
 if test "$USE_PCH" = 1; then
@@ -446,35 +442,31 @@ dnl --------------------------------------------------------------------------
 DOCHTML="echo \"No doc generator(html) available.\""
 DOCTEX="echo \"No doc generator(tex) available.\""
 
-dnl test for doc++ if selected
-if test "$USE_DOCXX" = 1
-then
-	AC_PATH_PROG(DOCXX,docxx,yes,no)
-	if test "x$DOCXX" = "x"
-	then
-		USE_KDOC=1
-	else
-		DOCHTML="\$(DOCXXHTML)"
-		DOCTEX="\$(DOCXXTEX)"
-	fi
-fi
+dnl test for doc++ first
 
-dnl test for kdoc if selected
-if test "$USE_KDOC" = 1
+AC_PATH_PROG(DOCXX,doc++)
+if test "x$DOCXX" != "x"
 then
-	AC_PATH_PROG(KDOC,kdoc,yes,no)
-	if test "x$KDOC" = "x"
+	DOCHTML="\$(DOCXXHTML)"
+	DOCTEX="\$(DOCXXTEX)"
+else
+	dnl test for kdoc if selected
+	AC_PATH_PROG(KDOC,kdoc)
+	if test "x$KDOC" != "x"
 	then
-		dnl without kdoc, fall back to doc++ if available
-		AC_PATH_PROG(DOCXX,docxx,yes,no)
-		if test "x$DOCXX" != "x"
-		then
-			DOCHTML="\$(DOCXXHTML)"
-			DOCTEX="\$(DOCXXTEX)"
-		fi
-	else
 		DOCHTML="\$(KDOCHTML)"
 		DOCTEX="\$(KDOCTEX)"
+	else
+		dnl fall back to scandoc
+		AC_PATH_PROG(PERL,perl)
+		if test "x$PERL" = "x"
+		then
+			AC_MSG_WARN("Cannot generate class documentation!")
+		else 
+			dnl use scandoc
+			DOCHTML="\$(SCANDOCHTML)"
+			DOCTEX="\$(SCANDOCTEX)"
+		fi
 	fi
 fi
 AC_SUBST(DOCHTML)
@@ -483,13 +475,16 @@ AC_SUBST(DOCTEX)
 dnl check for latex/dvips
 
 AC_PATH_PROG(LATEX,latex)
+AC_PATH_PROG(MAKEINDEX,makeindex)
 AC_PATH_PROG(DVIPS,dvips)
-if test "x$LATEX" = x -o "x$DVIPS" = x
+if test "x$LATEX" = x -o "x$DVIPS" = x -o "x$MAKEINDEX" = x
 then
 	LATEX="echo \"No latex available.\""
 	DVIPS="echo \"No dvips available.\""
+	MAKEINDEX="echo \"No makeindex available.\""
 	AC_SUBST(LATEX)
 	AC_SUBST(DVIPS)
+	AC_SUBST(MAKEINDEX)
 fi
 
 MAKE_HAVE_SGMLTOOLS=

@@ -27,7 +27,7 @@
 
 #include <wx/log.h>
 #include <wx/dynarray.h>
- 
+
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
@@ -48,12 +48,25 @@ static ArrayAdbBooks gs_cache;
 // private functions
 // ----------------------------------------------------------------------------
 
-// AdbLookup helper
-static void GroupLookup(ArrayAdbEntries& aEntries,
-                        AdbEntryGroup *pGroup, 
+// helper function: does a recursive search for entries/groups matching the
+// given pattern (see AdbManager.h for the possible values of where and how
+// paramaters)
+static void GroupLookup(
+                        ArrayAdbEntries& aEntries,
+                        AdbEntryGroup *pGroup,
                         const String& what,
                         int where,
-                        int how);
+                        int how,
+                        ArrayAdbGroups *aGroups = NULL
+                       );
+
+// search in the books specified or in all loaded books otherwise
+static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
+                                        const String& what,
+                                        int where,
+                                        int how,
+                                        const ArrayAdbBooks *paBooks,
+                                        ArrayAdbGroups *aGroups = NULL);
 
 // ============================================================================
 // implementation
@@ -65,10 +78,11 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
 
 // recursive (depth first) search
 static void GroupLookup(ArrayAdbEntries& aEntries,
-                        AdbEntryGroup *pGroup, 
+                        AdbEntryGroup *pGroup,
                         const String& what,
                         int where,
-                        int how)
+                        int how,
+                        ArrayAdbGroups *aGroups)
 {
   wxArrayString aNames;
   size_t nGroupCount = pGroup->GetGroupNames(aNames);
@@ -77,7 +91,13 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
 
     GroupLookup(aEntries, pSubGroup, what, where, how);
 
-    pSubGroup->DecRef();
+    // groups are matched by name only (case-insensitive)
+    if ( aGroups && aNames[nGroup].Lower().Matches(what.Lower() + '*') ) {
+      aGroups->Add(pSubGroup);
+    }
+    else {
+      pSubGroup->DecRef();
+    }
   }
 
   aNames.Empty();
@@ -94,11 +114,12 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   }
 }
 
-bool AdbLookup(ArrayAdbEntries& aEntries,
-               const String& what,
-               int where,
-               int how,
-               const ArrayAdbBooks *paBooks)
+static bool AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
+                                        const String& what,
+                                        int where,
+                                        int how,
+                                        const ArrayAdbBooks *paBooks,
+                                        ArrayAdbGroups *aGroups)
 {
   wxASSERT( aEntries.IsEmpty() );
 
@@ -107,65 +128,112 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
 
   size_t nBookCount = paBooks->Count();
   for ( size_t nBook = 0; nBook < nBookCount; nBook++ ) {
-    GroupLookup(aEntries, (*paBooks)[nBook], what, where, how);
+    GroupLookup(aEntries, (*paBooks)[nBook], what, where, how, aGroups);
   }
 
   // return true if something found
-  return !aEntries.IsEmpty();
+  return !aEntries.IsEmpty() || (aGroups && !aGroups->IsEmpty());
 }
 
-String AdbExpand(const String& what, wxFrame *frame)
+bool AdbLookup(ArrayAdbEntries& aEntries,
+               const String& what,
+               int where,
+               int how,
+               const ArrayAdbBooks *paBooks)
 {
-  String result;
+  return AdbLookupForEntriesOrGroups(aEntries, what, where, how, paBooks);
+}
 
+bool AdbExpand(wxArrayString& results, const String& what, wxFrame *frame)
+{
   AdbManager_obj manager;
-  CHECK( manager, result, "can't expand address: no AdbManager" );
-  
+  CHECK( manager, FALSE, "can't expand address: no AdbManager" );
+
+  results.Empty();
+
+  if ( what.IsEmpty() )
+     return FALSE;
+
   manager->LoadAll();
 
   static const int lookupMode = AdbLookup_NickName |
                                 AdbLookup_FullName |
                                 AdbLookup_EMail;
+
+  // check for a group match too
+  ArrayAdbGroups aGroups;
   ArrayAdbEntries aEntries;
-  if ( AdbLookup(aEntries, what, lookupMode, AdbLookup_StartsWith ) )
-  {
-    int rc = MDialog_AdbLookupList(aEntries, frame);
-    
-    if ( rc != -1 )
-    {
-      wxString name, email;
 
-      AdbEntry *pEntry = aEntries[rc];
-      pEntry->GetField(AdbField_FullName, &name);
-      pEntry->GetField(AdbField_EMail, &email);
+  if ( AdbLookupForEntriesOrGroups(aEntries, what, lookupMode,
+                                   AdbLookup_StartsWith, NULL, &aGroups ) ) {
+    // merge both arrays into one big one: notice that the order is important,
+    // the groups should come first (see below)
+    ArrayAdbElements aEverything;
+    size_t n;
 
-      // the full form is "FullName <email>", but if the "fullname" is empty,
-      // we take "nickname" instead (it can not be empty normally)
-      if ( name.IsEmpty() )
-        pEntry->GetField(AdbField_NickName, &name);
+    size_t nGroupCount = aGroups.GetCount();
+    for ( n = 0; n < nGroupCount; n++ ) {
+      aEverything.Add(aGroups[n]);
+    }
 
-      result << name << " <" << email << '>';
-      if ( frame )
-      {
-        wxLogStatus(frame, _("Expanded '%s' using entry '%s'"),
-                    what.c_str(), name.c_str());
+    size_t nEntryCount = aEntries.GetCount();
+    for ( n = 0; n < nEntryCount; n++ ) {
+      aEverything.Add(aEntries[n]);
+    }
+
+    // let the user choose the one he wants
+    int rc = MDialog_AdbLookupList(aEverything, frame);
+
+    if ( rc != -1 ) {
+      size_t index = (size_t)rc;
+
+      if ( index < nGroupCount ) {
+        // it's a group, take all entries from it
+        AdbEntryGroup *group = aGroups[index];
+        wxArrayString aEntryNames;
+        size_t count = group->GetEntryNames(aEntryNames);
+        for ( n = 0; n < count; n++ ) {
+          AdbEntry *entry = group->GetEntry(aEntryNames[n]);
+          if ( entry ) {
+            results.Add(entry->GetDescription());
+
+            entry->DecRef();
+          }
+        }
+
+        if ( frame ) {
+          wxLogStatus(frame, _("Expanded '%s' using entries from group '%s'"),
+                      what.c_str(), group->GetDescription().c_str());
+        }
+      }
+      else {
+        // one entry
+        AdbEntry *entry = aEntries[index - nGroupCount];
+        results.Add(entry->GetDescription());
+
+        if ( frame ) {
+          String name;
+          entry->GetField(AdbField_FullName, &name);
+          wxLogStatus(frame, _("Expanded '%s' using entry '%s'"),
+                      what.c_str(), name.c_str());
+        }
       }
     }
-    
-    // free all entries
-    size_t nCount = aEntries.Count();
-    for ( size_t n = 0; n < nCount; n++ )
+    //else: cancelled by user
+
+    // free all entries and groups
+    size_t nCount = aEverything.Count();
+    for ( n = 0; n < nCount; n++ )
     {
-      aEntries[n]->DecRef();
+      aEverything[n]->DecRef();
     }
   }
-  else
-  {
+  else {
     if ( frame )
       wxLogStatus(frame, _("No matches for '%s'."), what.c_str());
   }
 
-  return result;
+  return !results.IsEmpty();
 }
 
 // ----------------------------------------------------------------------------
@@ -180,6 +248,12 @@ AdbManager *AdbManager::Get()
   if ( ms_pManager ==  NULL ) {
     // create it
     ms_pManager = new AdbManager;
+
+    // artificially bump up the ref count so it will be never deleted (if the
+    // calling code behaves properly) until the very end of the application
+    ms_pManager->IncRef();
+
+    wxLogTrace("AdbManager created.");
   }
   else {
     // just inc ref count on the existing one
@@ -200,7 +274,33 @@ void AdbManager::Unget()
   if ( !ms_pManager->DecRef() ) {
     // the object deleted itself
     ms_pManager = NULL;
+
+    wxLogTrace("AdbManager deleted.");
   }
+}
+
+// force the deletion of ms_pManager
+void AdbManager::Delete()
+{
+  // we should only be called when the program terminates, otherwise some
+  // objects could still have references to us
+  ASSERT_MSG( !mApplication->IsRunning(),
+              "AdbManager::Delete() called, but the app is still running!" );
+
+#ifdef DEBUG
+  size_t count = 0;
+#endif
+
+  while ( ms_pManager ) {
+    #ifdef DEBUG
+      count++;
+    #endif
+
+    Unget();
+  }
+
+  // there should be _exactly_ one extra IncRef(), not several
+  ASSERT_MSG( count < 2, "Forgot AdbManager::Unget() somewhere" );
 }
 
 // ----------------------------------------------------------------------------
@@ -280,7 +380,8 @@ AdbBook *AdbManager::GetBook(size_t n) const
 void AdbManager::LoadAll()
 {
   ProfileBase & conf = *mApplication->GetProfile();
-  conf.SetPath("/AdbEditor");
+  //FIXME: is this correct? SetPath() corrupts the global profile path! (KB)
+  ProfilePathChanger pc(&conf,"/AdbEditor");
 
   wxArrayString astrAdb, astrProv;
   RestoreArray(conf, astrAdb, "AddressBooks");
@@ -294,12 +395,12 @@ void AdbManager::LoadAll()
       strProv = astrProv[n];
     else
       strProv.Empty();
-    
+
     if ( strProv.IsEmpty() )
       pProvider = NULL;
     else
       pProvider = AdbDataProvider::GetProviderByName(strProv);
-    
+
     // it's getting worse and worse... we're using our knowledge of internal
     // structure of AdbManager here: we know the book will not be deleted
     // after this DecRef because the cache also has a lock on it
@@ -333,7 +434,7 @@ AdbBook *AdbManager::FindInCache(const String& name) const
   size_t nCount = gs_cache.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
     book = gs_cache[n];
-    if ( name == book->GetName() )
+    if ( book->IsSameAs(name) )
       return book;
   }
 

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M
 // File name:   gui/wxOptionsDlg.h - functions to work with the options dialog
 // Purpose:
@@ -8,7 +8,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _WXOPTIONSDLG_H
 #define   _WXOPTIONSDLG_H
@@ -33,6 +33,8 @@ enum OptionPage
 #ifdef USE_PYTHON
    OptionPage_Python,
 #endif
+   OptionsPage_Adb,
+   OptionPage_Helpers,
    OptionPage_Misc,
    OptionPage_Max
 };

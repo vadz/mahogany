@@ -4,27 +4,40 @@
 
 CWD = doc
 FILES_TXT=*.txt
-FILES_TEX=$(wildcard *.tex)
-FILES_PS=$(FILES_TEX:.tex=.ps)
+#FILES_TEX=$(wildcard *.tex)
+FILES_TEX=Manual.tex 
+FILES_PS=$(FILES_TEX:.tex=.ps) classes.ps
 SUB_DIRS=$(FILES_TEX:.tex=)
 
 include ../makeopts
 
-all: subdirs ps makemap
+all: 
+	$(MAKE) -k ps
+	$(MAKE) -k makemap
 
-subdirs:
+subdirs: 
 	set -e; for i in $(SUB_DIRS); do if [ ! -d $$i ] ; then mkdir $$i ; fi ; done
-	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i all ; done
+	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i setup ; done
+	set -e; for i in $(SUB_DIRS); do ( cd $$i && $(MAKE) -f ../Makefile.sub all DIR=$$i ) ; done
 
-install: all
-	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript
+install2: all
+	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes
+	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
+	$(INSTALL_DATA) classes/* $(DOCDIR)/classes
+	$(INSTALL) -d $(DESTDIR)/doc/M
+	ln -f -s $(DOCDIR) $(DESTDIR)/doc/M/doc
 
 ps: $(FILES_PS) 
 
+install:
+	if [ -f Mdoc.tar.gz ] ; then gzip -dc < Mdoc.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
+
+classes.tex: ../include/*.h ../include/adb/*.h ../include/gui/*.h
+	$(MAKE) -C ../include doc
+
 makemap: subdirs
-	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i wxhelp.map ; done
 	cp wxhelp.map0 wxhelp.tmp
 	../extra/scripts/html2wxhelp >>wxhelp.tmp
 	set -e; for i in $(SUB_DIRS); do cat $$i/wxhelp.map | sed "1,$$ s/;/;$$i: /g" | \
@@ -34,9 +47,9 @@ makemap: subdirs
 clean:
 	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc
 	set -e; for i in $(SUB_DIRS); do $(RM) -r $$i; done
+	$(RM) -r classes/* classes.tex wxhelp.map
 
-
-.PHONY: all install ps clean subdirs makemap
+.PHONY: all install ps clean subdirs makemap install2
 
 include ../makerules
 

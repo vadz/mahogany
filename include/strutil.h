@@ -6,6 +6,8 @@
  * $Id$
  *
  *******************************************************************/
+
+
 #ifndef STRUTIL_H
 #define STRUTIL_H
 
@@ -129,19 +131,19 @@ char * strutil_strdup(const char *in);
 */
 char *strutil_strdup(String const &in);
 
-/** Duplicate a string.
+/* * Duplicate a string.
 
     @param the string to duplicate
     @return the newly allocated string, must be deleted by caller
-*/
-/*char *strutil_strdup(String const *in)
+
+char *strutil_strdup(String const *in)
 {
    return in ? strutil_strdup(in->c_str()) : NULL;
 }
 */
 
-/**
-   
+/*
+
 void strutil_splitlist(String const &str, std::map<String,String> &table);
   */
 
@@ -197,7 +199,7 @@ String strutil_extract_formatspec(const char *format);
 bool strutil_isabsolutepath(const String &path);
 
 /** Expands tilde in a pathname. A tilde followed by a slash is the
-    user's home directory, taken from the environment. Tilde+name will 
+    user's home directory, taken from the environment. Tilde+name will
     be expanded to the user's home directory.
     @param ipath the path to look up
     @return the expanded path
@@ -212,13 +214,51 @@ String strutil_expandpath(const String &ipath);
 
 /** A small helper function to expand mailfolder names or path names.
     This function takes absolute or relative names. Absolute ones are
-    expanded and returned, relative names are expanded relative to the 
+    expanded and returned, relative names are expanded relative to the
     mail folder directory.
     @param name name of a mail folder
     @return the path to the folder file
 */
 String
 strutil_expandfoldername(const String &name);
+
+#ifdef OS_UNIX
+#   define STRUTIL_PATH_SEPARATOR '/'
+#else
+#   define STRUTIL_PATH_SEPARATOR '\\'
+#endif
+
+/** Cut off last directory from path and return string before that.
+
+    @param pathname the path in which to go up
+    @param separator the path separator
+    @return the parent directory to the one specified
+*/
+String
+strutil_path_parent(String const &path, char separator = STRUTIL_PATH_SEPARATOR);
+
+/** Cut off last name from path and return string that (filename).
+
+    @param pathname the path
+    @param separator the path separator
+    @return the parent directory to the one specified
+*/
+String
+strutil_path_filename(String const &path, char separator = STRUTIL_PATH_SEPARATOR);
+
+/** Compare 2 filenames and return true if they refer to the same file. Notice
+    that the files don't have to exist when this function is called.
+*/
+bool
+strutil_compare_filenames(const String& path1, const String& path2);
+
+/** Enforces CR/LF newline convention.
+
+    @param in string to copy
+    @return the DOSified string
+*/
+String
+strutil_enforceCRLF(String const &in);
 
 //@}
 #endif

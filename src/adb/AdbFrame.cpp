@@ -22,12 +22,10 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#   include  "kbList.h"
+#   include "kbList.h"
 
-#   include  "guidef.h"
-#   include  "strutil.h"
-#   include  <ctype.h>
-#   include <wx/confbase.h>
+#   include "guidef.h"
+#   include "strutil.h"
 
 #   include "Mcommon.h"
 #   include "MFrame.h"
@@ -35,11 +33,12 @@
 
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
-#   include "gui/wxMFrame.h"
-#   include "kbList.h"
+
+#   include <ctype.h>
 #endif //USE_PCH
 
 #include "MDialogs.h"
+#include "Mdefaults.h"
 #include "gui/wxMenuDefs.h"
 #include "gui/wxIconManager.h"
 
@@ -49,6 +48,7 @@
 #include <wx/wx.h>
 #include <wx/log.h>
 #include <wx/intl.h>
+#include <wx/confbase.h>
 #include <wx/dynarray.h>
 #include <wx/notebook.h>
 #include <wx/treectrl.h>
@@ -65,6 +65,13 @@
 
 // our public interface
 #include "adb/AdbFrame.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the root path for all our config entries - trailing '/' is needed!
+#define ADB_CONFIG_PATH "/AdbEditor/"
 
 // ----------------------------------------------------------------------------
 // classes
@@ -524,8 +531,6 @@ public:
   void Load();
 
   // callbacks
-  virtual bool OnClose() { return TRUE; }
-
   void OnMenuCommand(wxCommandEvent&);
 
   void OnHelp(wxCommandEvent&);
@@ -682,9 +687,7 @@ private:
   // ---------------
 
   // @@@ should save several last values for text dialog entries
-  wxString m_strLastAdbDir,     // last values of fields in "Open ADB..."
-           m_strLastAdbFile,    //  dialog
-           m_strLastNewEntry,   // last value of "New..." prompt
+  wxString m_strLastNewEntry,   // last value of "New..." prompt
            m_strSelection;      // the full name of the entry which is selected
   long  m_bLastNewWasGroup;     // kind of last created entry (entry or group)
 
@@ -1014,7 +1017,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------------
   wxPanel *panel = new wxPanel(this, -1);
   wxStaticText *label = new wxStaticText(panel, -1, _("&Lookup:"));
-  m_textKey = new wxPTextEntry("/AdbEditor/FindKey", panel, AdbView_Lookup);
+  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH "FindKey", panel, AdbView_Lookup);
   m_treeAdb = new wxAdbTree(this, panel, AdbView_Tree);
   m_notebook = new wxAdbNotebook(panel, AdbView_Notebook);
 
@@ -1094,8 +1097,6 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
   // enum must be in sync with the array below
   enum
   {
-    ConfigName_LastAdbDir,
-    ConfigName_LastAdbFile,
     ConfigName_LastNewEntry,
     ConfigName_LastNewWasGroup,
     ConfigName_AddressBooks,
@@ -1108,8 +1109,6 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
 
   static const char *aszConfigNames[] =
   {
-    "LastAdbDir",
-    "LastAdbFile",
     "LastNewEntry",
     "LastNewWasGroup",
     "AddressBooks",
@@ -1145,10 +1144,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
       RestoreArray(conf, var, aszConfigNames[i])
 
   ProfileBase &conf = *mApplication->GetProfile();
-  ProfilePathChanger adbPath(&conf, "/AdbEditor");
+  ProfilePathChanger adbPath(&conf, ADB_CONFIG_PATH);
 
-  TRANSFER_STRING(m_strLastAdbDir, ConfigName_LastAdbDir);
-  TRANSFER_STRING(m_strLastAdbFile, ConfigName_LastAdbFile);
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
 
@@ -1321,7 +1318,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
                              const char *szProvName)
 {
   // check that we don't already have it
-  if ( m_astrAdb.Index(strPath) != NOT_FOUND ) {
+  if ( m_astrAdb.Index(strPath) != wxNOT_FOUND ) {
     wxLogError(_("The address book '%s' is already opened."), strPath.c_str());
 
     return FALSE;
@@ -1718,22 +1715,25 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
     case AdbDataProvider::Name_File:
       {
         // ask for the file name
-        wxFileDialog dialog
+        strAdbName = wxPFileSelector
                      (
-                      this, strTitle,
-                      m_strLastAdbDir, m_strLastAdbFile,
+                      ADB_CONFIG_PATH "AdbFile",
+                      strTitle,
+                      READ_APPCONFIG(MP_USERDIR),
+                      "M.adb",
+                      "adb",
                       _("Address books (*.adb)|*.adb|All files (*.*)|*.*"),
-                      wxHIDE_READONLY | (bDoCreate ? 0 : wxFILE_MUST_EXIST)
+                      wxHIDE_READONLY | (bDoCreate ? 0 : wxFILE_MUST_EXIST),
+                      this
                      );
 
         if ( dialog.ShowModal() != wxID_OK )
           return FALSE;
 
-        // remember last position
-        wxString strFile, strExt;
-        strAdbName = dialog.GetPath();
-        wxSplitPath(strAdbName, &m_strLastAdbDir, &strFile, &strExt);
-        m_strLastAdbFile = strFile + strExt;
+        if ( strAdbName.IsEmpty() ) {
+           // cancelled by user
+           return FALSE;
+        }
       }
       break;
 
@@ -1840,6 +1840,15 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
   m_current = (AdbTreeNode *)m_treeAdb->GetItemData(id);
 
   if ( m_current->IsGroup() ) {
+    if ( m_current->IsBook() ) {
+      // show the book description in the status line
+      SetStatusText(((AdbTreeBook *)m_current)->GetDescription(), 0);
+    }
+    else {
+      SetStatusText("", 0);
+    }
+
+    // clear the text set previously
     SetStatusText("", 1);
   }
   else {
@@ -1895,12 +1904,24 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
 
 void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent&)
 {
+  // these events are never received this early under MSW
+#ifdef __WXGTK__
+  if ( !m_textKey )
+    return;
+#endif // GTK
+
   DoFind();
 }
 
+// FIXME should do it in UpdateUI handler
 void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
 {
-  // @@ should do it in UpdateUI handler
+  // these events are never received this early under MSW
+#ifdef __WXGTK__
+  if ( !m_textKey )
+    return;
+#endif // GTK
+
   m_ToolBar->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
 }
 

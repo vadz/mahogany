@@ -1,14 +1,18 @@
-#This file was created by <karsten> Sun Nov 22 17:27:05 1998
-#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <zeitlin> Wed Feb 10 21:19:00 1999
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
+\begin_preamble
+\usepackage{html, epsfig}
+\makeatletter
+\end_preamble
 \language default
 \inputencoding default
 \fontscheme palatino
 \graphics default
-\paperfontsize default
+\paperfontsize 12
 \spacing single 
-\papersize Default
+\papersize a4paper
 \paperpackage a4
 \use_geometry 0
 \use_amsmath 0
@@ -20,7 +24,7 @@
 \quotes_language english
 \quotes_times 2
 \papercolumns 1
-\papersides 2
+\papersides 1
 \paperpagestyle default
 
 \layout Title
@@ -29,14 +33,18 @@
 \shape italic 
 M
 \shape default 
- Manual
+
+\newline 
+User Manual
 \layout Author
 
-Karsten Ballüder <
+Copyright 1999 by Karsten Ballüder <
 \family typewriter 
 Ballueder@usa.net
 \family default 
 >
+\newline 
+Written by Karsten Ballüder and Vadim Zeitlin
 \layout Standard
 
 
@@ -47,7 +55,408 @@ Ballueder@usa.net
 
 \layout Chapter
 
-Using M
+Using M 
+\layout Section
+
+Release Notes_1001_
+\layout Standard
+
+Some quick notes about this release of M.
+\layout Subsection
+
+WARNING - this is alpha
+\layout Standard
+
+When you do a large free software project, you have two choices: either
+ continue hacking without releases and risk to never get it finished, or
+ set yourself a release date, no matter what the situation is.
+ As we got several requests from people who want to play with it, we decided
+ on a release date and did our best to get it into a working shape.
+ BUT THIS SOFTWARE IS STILL UNDER DEVELOPMENT! This means
+\layout Itemize
+
+it is incomplete and may be awkward to use
+\layout Itemize
+
+it may crash occasionally or often or be completely unusable - 
+\shape italic 
+Use it at your own risk!
+\layout Subsection
+
+Which features are implemented?
+\layout Standard
+
+Quite some already, but more are still missing.
+ What we have so far:
+\layout Itemize
+
+Cross-platform.
+ M compiles on a variety of Unix systems and on Microsoft Windows.
+ Use one mail client, no matter what system you use.
+ The source and binary for Windows 95/98/NT are available on request (
+\latex latex 
+
+\backslash 
+htmladdnormallink{
+\family typewriter 
+m-developers@makelist.com
+\family default 
+}{
+\family typewriter 
+m-developers@makelist.com
+\family default 
+}
+\latex default 
+).
+ Mailbox file formats are the same on both platforms.
+\layout Itemize
+
+Based on the c-client library from the University of Washington, therefore
+ full access to a wide range of protocols and file formats, including SMTP,
+ MAP, POP3, NNTP and several mailbox formats.
+\layout Itemize
+
+Wide (extreme?) user configurability.
+ Whatever makes sense to override or change, can be changed by the user.
+ Configuration supports several configuration files on Unix, with special
+ administrator support for making entries immutable, and the registry on
+ Windows.
+\layout Itemize
+
+Scriptable and extendable.
+ M includes an embedded Python interpreter with full access to its object
+ hierarchy.
+ Write object-oriented scripts to extend and control M.
+\layout Itemize
+
+Easy MIME support.
+ Text and other content can be freely mixed and different filetypes are
+ represented by icons.
+\layout Itemize
+
+Inline displaying of images, clickable URLs, XFace support.
+\layout Itemize
+
+Multiple mail folders, basic news support.
+\layout Itemize
+
+Powerful address database and contact manager 
+\layout Itemize
+
+Printing of nicely formatted messages.
+\layout Itemize
+
+Full internationalisation support, M speaks multiple languages, but no complete
+ translations yet.
+\layout Subsection
+
+Known bugs
+\layout Itemize
+
+some
+\layout Subsection
+
+TODO, features to implement
+\layout Standard
+
+This is a list of features on our TODO list that we are currently working
+ on.
+ It is not necessarily up to date or complete.
+\layout Itemize
+
+add keyboard accelerators
+\layout Itemize
+
+Better Python support.
+ We have some callbacks in place, but after the class hierarchy rewrite
+ we have to generate new interface files for the complete class hierarchy.
+ Also by this time wxPython might be integrated, so we can actually write
+ some of the configuration dialogs in python which should speed things up.
+ 
+\shape italic 
+Help welcome.
+\layout Itemize
+
+Full Drag and Drop interaction with filemanagers of Windows and Gnome (will
+ be added real soon, easy).
+\layout Itemize
+
+Clipboard support
+\layout Itemize
+
+Easy to use filtering system for mails.
+\layout Itemize
+
+Support for V-cards.
+\layout Itemize
+
+Nested mail folder hierarchy.
+\layout Itemize
+
+Spam-Ex spam fighting/auto-complaint function.
+\layout Itemize
+
+Rich-text editing and HTML mail support
+\layout Itemize
+
+Support for PGP and GNU Privacy Guard to encrypt mails.
+\layout Itemize
+
+Threading of messages and proper usenet news support.
+\layout Itemize
+
+Compression of mail folders.
+\layout Itemize
+
+Delay-Folder to keep mails and re-present them at a later date.
+\layout Itemize
+
+Context sensitive help system (HTML based).
+\layout Itemize
+
+Translations to German, French and Italian.
+\layout Itemize
+
+Wide character (Unicode) support and other character sets.
+\layout Itemize
+
+More import, export and synchronisation with other programs' address databases.
+\layout Itemize
+
+Voice mail.
+\layout Itemize
+
+More Python support through wxPython.
+\layout Itemize
+
+Support for Drag and Drop interaction with KDE, once that wxQt is available.
+\layout Itemize
+
+CORBA support, possible cooperation with PINN project.
+\layout Itemize
+
+ANY OTHER SUGGESTION
+\layout Subsection
+
+Help Needed
+\layout Standard
+
+As you can see, we have big plans for M.
+ To achieve all this, we need some help.
+ Areas where we would use some help are
+\layout Itemize
+
+Python 
+\layout Itemize
+
+support for further mail protocols, LDAP
+\layout Itemize
+
+The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
+ for any help.
+ We are not directly involved in this, but being involved with wxWindows,
+ we are happy to support that port.
+\layout Itemize
+
+If you have access to other systems apart from Linux/Solaris/Windows, you
+ are very welcome to help us port M to those platforms, or to other hardware
+ than Intel.
+\layout Subsection
+
+Copyright
+\layout Standard
+
+M is copyright by Karsten Ballüder and Vadim Zeitlin.
+ It is licensed under the M 
+\begin_inset Quotes eld
+\end_inset 
+
+Artistic License
+\begin_inset Quotes erd
+\end_inset 
+
+ as stated in section
+\begin_inset LatexCommand \ref{License}
+
+\end_inset 
+
+.
+ Some part of the source tree distributed with M is not covered under this
+ license.
+ These additional sources can be found in the 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+extra/src
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+ subdirectory.
+ Please check the files in the individual directories for their copyright
+ notices.
+ However, they can freely distributed under certain conditions.
+\layout Subsection
+
+The M ``Artistic License''
+\begin_inset LatexCommand \label{License}
+
+\end_inset 
+
+_1003_
+\layout Subsubsection
+
+Preamble
+\layout Standard
+
+The intent of this document is to state the conditions under which this
+ software package may be copied, such that the Copyright Holder maintains
+ some semblance of artistic control over the development of the package,
+ while giving the users of the package the right to use and distribute the
+ Package in a more-or-less customary fashion, plus the right to make reasonable
+ modifications.
+ 
+\layout Standard
+
+This license is based on Perl's ``Artistic License'' and has been adapted
+ to better suit M.
+ It aims to confirm with the Open-Source specification.
+\layout Subsubsection
+
+Definitions
+\layout Standard
+
+``Package'' refers to the collection of files distributed by the Copyright
+ Holder, and derivatives of that collection of files created through textual
+ modification.
+ 
+\layout Standard
+
+``Standard Version'' refers to such a Package if it has not been modified,
+ or has been modified in accordance with the wishes of the Copyright Holder
+ as specified below.
+ 
+\layout Standard
+
+``Copyright Holder'' is whoever is named in the copyright or copyrights
+ for the package.
+ 
+\layout Standard
+
+``You'' is you, if you're thinking about copying or distributing this Package.
+ 
+\layout Standard
+
+``Reasonable copying fee'' is whatever you can justify on the basis of media
+ cost, duplication charges, time of people involved, and so on.
+ (You will not be required to justify it to the Copyright Holder, but only
+ to the computing community at large as a market that must bear the fee.)
+ 
+\layout Standard
+
+``Freely Available'' means that no fee is charged for the item itself, though
+ there may be fees involved in handling the item.
+ It also means that recipients of the item may redistribute it under the
+ same conditions they received it.
+ 
+\layout Paragraph
+
+Conditions of Use
+\layout Enumerate
+
+You may make and give away verbatim copies of the source form of the Standard
+ Version of this Package without restriction, provided that you duplicate
+ all of the original copyright notices and associated disclaimers and only
+ distribute the complete package as a whole.
+ 
+\layout Enumerate
+
+You may apply bug fixes, portability fixes and other modifications derived
+ from the Public Domain or from the Copyright Holder.
+ A Package modified in such a way shall still be considered the Standard
+ Version.
+ 
+\layout Enumerate
+
+You may otherwise modify your copy of this Package in any way, provided
+ that you insert a prominent notice in each changed file stating how and
+ when you changed that file, and provided that you do at least ONE of the
+ following: 
+\begin_deeper 
+\layout Enumerate
+
+place your modifications in the Public Domain or otherwise make them Freely
+ Available, such as by posting said modifications to Usenet or an equivalent
+ medium, or placing the modifications on a major archive site such as sunsite.unc.
+edu, or by allowing the Copyright Holder to include your modifications in
+ the Standard Version of the Package, and rename any non-standard executables
+ so the names do not conflict with standard executables, which must also
+ be provided, and provide a separate manual page for each non-standard executabl
+e that clearly documents how it differs from the Standard Version.
+ You must not make the modified version depend on any other software or
+ libary if that software or libary is not Freely Available or if it is covered
+ under a license more restrictive than this.
+ 
+\layout Enumerate
+
+use the modified Package only within your corporation or organization.
+ c.make other distribution arrangements with the Copyright Holder.
+ 
+\end_deeper 
+\layout Enumerate
+
+You may distribute the programs of this Package in object code or executable
+ form, provided that you do at least ONE of the following: 
+\begin_deeper 
+\layout Enumerate
+
+distribute a Standard Version of the executables and library files, together
+ with instructions (in the manual page or equivalent) on where to get the
+ Standard Version.
+ 
+\layout Enumerate
+
+accompany the distribution with the machine-readable source of the Package
+ with your modifications, including the complete machine-readable source
+ of the unmodified Standard Version.
+ You must not make the modified version depend on any other software or
+ libary if that software or libary is not Freely Available or if it is covered
+ under a license more restrictive than this.
+ 
+\layout Enumerate
+
+give non-standard executables non-standard names, and clearly document the
+ differences in manual pages (or equivalent), together with instructions
+ on where to get the Standard Version.
+ d.make other distribution arrangements with the Copyright Holder.
+ 
+\end_deeper 
+\layout Enumerate
+
+You may charge a reasonable copying fee for any distribution of this Package.
+ You may charge any fee you choose for support of this Package.
+ You may not charge a fee for this Package itself.
+ However, you may distribute this Package in aggregate with other (possibly
+ commercial) programs as part of a larger (possibly commercial) software
+ distribution provided that you do not advertise this Package as a product
+ of your own.
+ 
+\layout Enumerate
+
+The name of the Copyright Holder may not be used to endorse or promote products
+ derived from this software without specific prior written permission.
+ However, all products derived from this software must reproduce the original
+ copyright notice as found in the Standard Version.
+ 
+\layout Enumerate
+
+THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
+, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY
+ AND FITNESS FOR A PARTICULAR PURPOSE.
+ 
 \layout Section
 
 The User Interface
@@ -59,12 +468,12 @@ The Main Window_2001_
 M's main window is vertically divided into two parts.
  On the left it has a tree view of all available mail or news folders.
  On the right of it, it shows the currently selected folder in a folder
- view
-\begin_inset LatexCommand \label{FolderView}
+ view(see 
+\begin_inset LatexCommand \ref{FolderView}
 
 \end_inset 
 
-.
+).
 \layout Subsection
 
 Folder Views_2002_
@@ -87,20 +496,1719 @@ The list of message headers at the top, showing message subjects, authors,
 The contents of the currently selected message below.
 \layout Subsection
 
-The Open-Folder Dialog_2003_
+The Open-Folder Dialog_2004_
+\layout Standard
+
+Here you can temporarily open a folder without adding it to the main tree
+ of folders.
+ This is convenient if you just want to have a quick look at some folder
+ and will not need it again.
 \layout Section
 
 Reading Mail
 \layout Subsection
 
 The INBOX Folder
+\layout Standard
+
+The folder named INBOX has a special meaning.
+ It is the main system mailbox and cannot be deleted or renamed.
+ All new mail will arrive in here.
+ At present, M leaves all messages in the system inbox.
+ Future versions of M will be able to collect mail from several different
+ incoming mailboxes, e.g.
+ the INBOX and some additional POP3 accounts, and move them to a new folder.
+ 
 \layout Subsection
 
 Other Folders
+\layout Standard
+
+The folders are organized in a tree structure: this is purely for the convenienc
+e of the user, so any folder may contain as many other folders as needed.
+ Folders can be managed either from the top level menu or from the popup
+ menu in the folder control invoked by pressing the right mouse button in
+ it.
 \layout Section
 
 Sending Mail
+\layout Subsection
+
+Using the address book_3100_
+\layout Standard
+
+Although you may directly enter the addresses of recepients of your message
+ into the different address fields (
+\begin_inset Quotes eld
+\end_inset 
+
+To:
+\begin_inset Quotes eld
+\end_inset 
+
+, 
+\begin_inset Quotes eld
+\end_inset 
+
+Cc:
+\begin_inset Quotes eld
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Bcc:
+\begin_inset Quotes eld
+\end_inset 
+
+ althought the last two are optional and so might not appear), there is
+ a more convenient way to do it using the address book.
+ To insert an address fromyour adress book you should type the first few
+ letters of either the 
+\begin_inset Quotes eld
+\end_inset 
+
+nick name
+\begin_inset Quotes erd
+\end_inset 
+
+ (or the 
+\begin_inset Quotes eld
+\end_inset 
+
+alias
+\begin_inset Quotes erd
+\end_inset 
+
+) for this address or the the first letters of the e-mail address and press
+ <TAB> key or click on the 
+\begin_inset Quotes eld
+\end_inset 
+
+Expand
+\begin_inset Quotes erd
+\end_inset 
+
+ button.
+ If there is only one possible expansion for the letters you have typed,
+ M will automatically replace them with the corresponding full e-mail address.
+ Other possible cases: either there are no matches at all and a message
+ in the status line of the window will tell you so, or there are more than
+ one match in which case you will be presented with a choice of all possible
+ completions.
+ 
+\layout Standard
+
+
+\emph on 
+Hint: 
+\emph default 
+if you press <TAB> immediately after the address expansion it will bring
+ you to the next text entry zone and will not attempt the address expansion
+ the second time.
+\layout Standard
+
+A special feature of the address expansion is the so-called 
+\begin_inset Quotes eld
+\end_inset 
+
+group extension
+\begin_inset Quotes erd
+\end_inset 
+
+: if you type the first few letters of an address group name (see 
+\begin_inset Quotes eld
+\end_inset 
+
+Address Book Editor
+\begin_inset Quotes erd
+\end_inset 
+
+ description for more about it) it will be replaced by the addresses of
+ all the addresses in this group.
+ So, for example, if you have a group called 
+\begin_inset Quotes eld
+\end_inset 
+
+Friends
+\begin_inset Quotes erd
+\end_inset 
+
+ you may type 
+\begin_inset Quotes eld
+\end_inset 
+
+fri
+\begin_inset Quotes erd
+\end_inset 
+
+ in the 
+\begin_inset Quotes eld
+\end_inset 
+
+To:
+\begin_inset Quotes eld
+\end_inset 
+
+ text entry zone and after pressing <TAB> it will be replaced by the e-mail
+ addresses of all your friends.
 \layout Section
 
-Sending Mail
+Understanding program options
+\layout Standard
+
+One of the goals of the M project is to be as configurably as possible.
+ Of course, it means that M has a lot of options - however we hope that
+ it doesn't make the program more difficult to use because you have the
+ complete liberty to ignore all options until you need to use them.
+ Moreover, some program options are completely transparent to the user because
+ they're automatically remembered by the program.
+ All the other ones may be changed from the main options dialog which may
+ be invoked from the main window toolbar or from the menu.
+\layout Subsection
+
+Automatically remembered options
+\layout Standard
+
+These options include the sizes and the positions of all windows, the texts
+ of all prompts, the positions of splitters in the main program window and
+ the other folder views as well as several other things.
+ These options are special in that they do not appear in the options dialog
+ and so can not be changed directly - instead M remembers them each time
+ it is shut down, so when it is reopened it will be in exactly the same
+ state as during the last run.
+ Try to play with it: adjust the sizes of the main program window and the
+ splitters in it as you like, exit M and restart it (this is for testing
+ only, of course, you do not need to do it each time!) - you should see
+ that the window reappears on the same position (although this might not
+ work under some window managers), has the same size and is split in the
+ same manner.
+\layout Subsection
+
+Other options
+\layout Standard
+
+All other options except those mentioned in the previous subsection can
+ be changed from the program options dialog.
+ This dialog has several pages which are described in more details below:
+\layout Subsubsection
+
+Identity page
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+begin{figure}{
+\backslash 
+htmlimage{scale=1}
+\backslash 
+centering
+\backslash 
+epsfig{file=pics/Identity.eps}}
+\backslash 
+end{figure}
+\layout Standard
+
+Here several important settings are configured, so it is advised (as the
+ program itself will tell you whenit is run for the first time) to set them
+ up before starting using M.
+\layout Itemize
+
+
+\series bold 
+Username
+\series default 
+
+\newline 
+This is used as (default) login name for the accounts which require one
+ (POP3 or IMAP4) and also as the base for the return address unless it is
+ overriden by explicit setting of the return address.
+\layout Itemize
+
+
+\series bold 
+Hostname
+\layout Itemize
+
+
+\series bold 
+Return address
+\layout Itemize
+
+
+\series bold 
+SMTP server
+\series default 
+
+\newline 
+This is the server used for sending outgoing mail, please ask your system
+ administrator if you don't know its name.
+ If you don't configure this setting, you will not be able to send any e-mail!
+\layout Itemize
+
+
+\series bold 
+NNTP server
+\series default 
+
+\newline 
+This is the server used for reading USENET newsgroups.
+\layout Itemize
+
+
+\series bold 
+Personal name
+\layout Subsubsection
+
+Network page
+\layout Standard
+
+TODO
+\layout Subsubsection
+
+Folders page
+\layout Standard
+
+TODO
+\layout Subsubsection
+
+Python page
+\layout Standard
+
+(only if you have a Python-enabled version of M)
+\layout Standard
+
+
+\begin_inset LatexCommand \label{PythonOptions}
+
+\end_inset 
+
+
+\layout Subsubsection
+
+Addressbook page
+\layout Standard
+
+M may automatically remember all addresses from all e-mail messages you
+ receive (actually, only those which you read).
+ This is called 
+\emph on 
+address autocollection 
+\emph default 
+and, as almost any other feature of M can be turned on and off as desired.
+ In this page you may choose whether you want to use this feature at all
+ (it is on by default) and, if so, where should be the autocollected addresses
+ be put and other settings.
+\layout Itemize
+
+
+\series bold 
+Autocollect addresses
+\series default 
+
+\newline 
+You may choose 
+\begin_inset Quotes eld
+\end_inset 
+
+No
+\begin_inset Quotes erd
+\end_inset 
+
+ to disable autollecting addresses completely, or choose 
+\begin_inset Quotes eld
+\end_inset 
+
+Yes
+\begin_inset Quotes erd
+\end_inset 
+
+ to always autocollect them.
+ The remaining option, 
+\begin_inset Quotes eld
+\end_inset 
+
+Ask
+\begin_inset Quotes erd
+\end_inset 
+
+, means that you will be presented with a message box each time an address
+ is about to be autocollected.
+\layout Itemize
+
+
+\series bold 
+Address book to use
+\series default 
+
+\newline 
+You may enter the path of the address book to use for autocollected addresses.
+ Although you may use any address book for this, it is probably better to
+ have a special address book for all autocollected addresses.
+ If the path name given here is an absolute one, it is used as is.
+ Otherwise, it is considered to be relative to your M directory.
+ For example, the default for this option is 
+\begin_inset Quotes eld
+\end_inset 
+
+autocollect.adb
+\begin_inset Quotes erd
+\end_inset 
+
+ and so the default autocollect book will be created in 
+\noun on 
+$HOME/.M/autocollect.adb
+\noun default 
+ under Unix.
+\layout Itemize
+
+
+\series bold 
+Ignore addresses without names
+\series default 
+
+\newline 
+You may with to autocollect only addresses which have a full name - in this
+ case you should check this option.
+ If it is off and the address has no name, the first part of e-mail address
+ (the one preceding the '@' symbol) will be used instead of the name.
+\layout Standard
+
+In addition to its own built-in addressbook format, M also supports the
+ addressbook files of the BBDB addressbook used with Emacs (see 
+\begin_inset LatexCommand \ref{BBDB}
+
+\end_inset 
+
+).
+ Some settings can be set here which apply only to the BBDB addressbook
+ support:
+\layout Itemize
+
+
+\series bold 
+Ignore entries without names
+\series default 
+
+\newline 
+BBDB can store entries which have only an e-mail address with them, but
+ no name.
+ If you set this option, M will discard such entries.
+\layout Itemize
+
+
+\series bold 
+Generate unique aliases
+\series default 
+
+\newline 
+Setting this option allows M to ensure that all aliases are unique.
+ If two entries have the same alias, one of them will be modified to distinguish
+ them.
+ This is especially useful in conjuction with the following option.
+ If this option is set, reading in of BBDB addressbooks is slowed down considera
+bly.
+ However, setting it once, then saving the addressbook and disabling it,
+ will make sure that all aliases are unique without slowing down subsequent
+ loading of the addressbook the next time it is used.
+\layout Itemize
+
+
+\series bold 
+Name for nameless entries
+\series default 
+
+\newline 
+If M finds entries without a name and is not set to ignore it, this name
+ will be used for such entries.
+ It can be combined with the option to generate unique aliases.
+\layout Itemize
+
+
+\series bold 
+Save on exit
+\series default 
+
+\newline 
+As saving BBDB addressbook can potentially lead to some loss of information
+ in the original database file (BBDB and M support different fields), you
+ can choose whether you want M to automatically save the data on exit or
+ ask you for confirmation.
+ Read section 
+\begin_inset LatexCommand \ref{BBDB}
+
+\end_inset 
+
+ for more details about how BBDB and M differ in interpreting the database.
+\layout Paragraph
+
+Helpers
+\layout Standard
+
+On this page you can customise which external helper applications M uses
+ for different action that it does not perform itself.
+\layout Itemize
+
+
+\series bold 
+Open URLs with
+\series default 
+
+\newline 
+M will use the program listed here to open URLs embedded in email messages.
+ If you want to use Lynx as your Web browser you should prefix it with 
+\begin_inset Quotes eld
+\end_inset 
+
+xterm -e
+\begin_inset Quotes erd
+\end_inset 
+
+ under Unix in order to open Lynx in a separate window.
+ For example, you may use 
+\noun on 
+xterm -t Lynx -e Lynx.
+\layout Itemize
+
+
+\series bold 
+URL browser is Netscape
+\series default 
+
+\newline 
+If the browser used to open URLs belongs to the family of Netscape programs,
+ tick this box.
+ Instead of calling a new browser each time, M will tell the already running
+ Netscape process to load the new URL.
+ Also, don't forget to clear it if you use another browser - otherwise it
+ will fail to start up.
+\layout Itemize
+
+
+\series bold 
+Help viewer
+\series default 
+
+\newline 
+The program listed here will be used to view the online help system in HTML
+ format.
+ Any simple HTML viewer can be used here.
+\layout Itemize
+
+
+\series bold 
+Help viewer is Netscape
+\series default 
+
+\newline 
+Just like the option for the URL browser, this will take talk to an already
+ running Netscape process instead of opening a new one each time.
+\layout Itemize
+
+
+\series bold 
+New Mail Command
+\series default 
+
+\newline 
+The line in this field will be executed whenever M receives new mail.
+ This can be used to play a sound to notify the user of incoming messages,
+ or do something else to alert him.
+\layout Subsubsection
+
+Miscellaneous
+\layout Standard
+
+All options which don't fit in any other pages areb collected here.
+\layout Itemize
+
+
+\series bold 
+Show log window
+\newline 
+
+\series default 
+If this option is on, the log window showing all program messages will be
+ displayed during program execution.
+ It is advised to leave it on because the log messages (which can be saved
+ to a file from the log window menu) can be valuable for the bug reports.
+\layout Itemize
+
+
+\series bold 
+Splash screen on startup
+\newline 
+
+\series default 
+If this option is on, a splash screen is shown on startup.
+ It will go away when clicked with the mouse or when a given delay (see
+ the next item) expires.
+\layout Itemize
+
+
+\series bold 
+Splash screen delay
+\newline 
+
+\series default 
+The delay after which the splash screen disappears.
+\layout Itemize
+
+
+\series bold 
+Autosave delay
+\newline 
+
+\series default 
+This option allows to automatically save all program settings (but not messages
+ being composed so far) each time the given delay (in seconds) passes.
+ It can be disabled by setting the delay to 0, but it is advised to leave
+ it enabled - so that your changes to the program configuration will be
+ always saved.
+\layout Itemize
+
+
+\series bold 
+Confirm exit
+\newline 
+
+\series default 
+If this options is on, you will be asked whether you want to leave the program
+ each time before exiting.
+ The checkbox on the message box with this question can be used to change
+ the value of this option as well.
+\layout Itemize
+
+
+\series bold 
+Click folder to open
+\newline 
+
+\series default 
+If this option is on, it is enough to select (for example, by clicking on
+ it) a folder in the folder tree control in the main window to open it in
+ the integrated folder view.
+ Double clicking the folder or choosing 
+\begin_inset Quotes eld
+\end_inset 
+
+Open
+\begin_inset Quotes erd
+\end_inset 
+
+ from the popup menu will open folder in a separate window.
+ This approach has a drawback of being a little slow with either very big
+ folders or on slow machines/network connections, so an alternative way
+ is to uncheck this checkbox.
+ Then double clicking a folder will be needed to open it in the integrated
+ folder view - while 
+\begin_inset Quotes eld
+\end_inset 
+
+Open
+\begin_inset Quotes erd
+\end_inset 
+
+ popup menu item will still open it in a separate window.
+\layout Itemize
+
+
+\series bold 
+Format for the date
+\newline 
+
+\series default 
+This controls how the dates are shown in the folder view window.
+ The string here has the same format as an argument to strftime(), on a
+ Unix system you may execute 
+\noun on 
+man strftime 
+\noun default 
+to see them all.
+\layout Itemize
+
+
+\series bold 
+Show new mail notification
+\newline 
+
+\series default 
+If this option is on, a message box will be shown each time new messages
+ are received.
+\layout Section
+
+The Address Database_3000_
+\layout Subsection
+
+Introduction
+\layout Subsection
+
+The native Address Book _3001_
+\layout Subsection
+
+Support for BBDB Address Books_3002_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{BBDB}
+
+\end_inset 
+
+M supports reading and writing of BBDB address book files.
+ BBDB is the Big Brother DataBase used with the Emacs family of editors.
+ If you have an existing address book file, usually called 
+\family typewriter 
+.bbdb
+\family default 
+, you can load it into M and use it.
+ This is especially useful if you have an existing file with auto-collected
+ email addresses that you want to continue to use.
+\layout Paragraph*
+
+Caution:
+\layout Standard
+
+The BBDB address book format supports different fields than M's native database.
+ When reading a BBDB file, M will only read the first two addresses and
+ telephone numbers and assign them to the 
+\begin_inset Quotes eld
+\end_inset 
+
+Home
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Work
+\begin_inset Quotes erd
+\end_inset 
+
+ addresses and phone numbers.
+ All additional addresses and phone numbers, the AKA list and the comments
+ will get lost.
+ M will only save the information displayed in the address editor window.
+ Currently saving of phone numbers to BBDB files is unsupported as it uses
+ a different format from M.
+ 
+\shape italic 
+Therefore, reading a BBDB file and saving it back to disk may lead to a
+ loss of information!
+\layout Chapter
+
+Scripting and Extending 
+\shape slanted 
+M
+\layout Section
+
+Introduction
+\layout Standard
+
+
+\shape slanted 
+M 
+\shape default 
+has an embedded Python interpreter, if compiled with Python support enabled.
+ Python is an object-oriented script language which can be used to write
+ scripts to be executed by 
+\shape slanted 
+M
+\shape default 
+ or even to extend 
+\shape slanted 
+M
+\shape default 
+'s functionality.
+ Python scripts have full access to all internal M data structures and objects.Sc
+ripting and Python integration A number of user definable callback functions
+ are available.
+ Scripts have access most objects living in M.
+ Scripting can be disabled in the Preferences dialog (see 
+\begin_inset LatexCommand \ref{PythonOptions}
+
+\end_inset 
+
+).
+\layout Standard
+
+Currently the scripting support is quite basic.
+ If you are interested in writing scripts and need additional callbacks
+ or support for them within 
+\shape slanted 
+M
+\shape default 
+, please get in touch with the developers who will be happy to add it.
+\layout Section
+
+Initialisation 
+\layout Standard
+
+At startup, 
+\shape slanted 
+M
+\shape default 
+ will load a file called 
+\family typewriter 
+Minit.py
+\family default 
+ and call the 
+\family typewriter 
+Minit()
+\family default 
+ function defined in there, without any arguments.
+\layout Section
+
+Callback Functions (Hooks)
+\layout Standard
+
+There are a number of callbacks available which will be called from different
+ places within 
+\shape slanted 
+M
+\shape default 
+.
+ These are defined in the header file 
+\family typewriter 
+Mcallbacks.h
+\family default 
+.
+ The documentation of these callbacks can be found in the Classes documentation(
+\latex latex 
+
+\backslash 
+htmladdnormallink{Classes online docs}{classes/index.html}
+\latex default 
+).
+ All of these callbacks are called with at least two arguments:
+\layout Enumerate
+
+The name of the hook for which the function got called, e.g.
+ 
+\family typewriter 
+FolderOpenHook
+\layout Enumerate
+
+A pointer to the object from which it was called.
+ E.g.
+ for 
+\family typewriter 
+FolderOpenHook
+\family default 
+, this would be a pointer to a 
+\family typewriter 
+MailFolder
+\family default 
+ object.
+ This object does not carry a useable type with it and needs to be converted
+ in the callback, e.g.
+ if the argument is called 
+\family typewriter 
+arg
+\family default 
+ and the object is a 
+\family typewriter 
+MailFolder
+\family default 
+, the object must either be used as 
+\family typewriter 
+MailFolder.MailFolder(arg)
+\family default 
+ or be converted as 
+\family typewriter 
+mf = MailFolder.MailFolder(arg)
+\family default 
+.
+ 
+\layout Enumerate
+
+Some callbacks have a third argument.
+ This is either a single value or a tuple holding several values.
+\layout Section
+
+Namespaces
+\layout Standard
+
+To avoid repeatedly typing in the name of the module (
+\family typewriter 
+MailFolder
+\family default 
+ in this case), it can be imported into the global namespace with 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+from
+\protected_separator 
+MailFolder
+\protected_separator 
+import
+\protected_separator 
+*
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ By default modules are not imported into the global namespace and must
+ be explicitly named.
+\layout Section
+
+List of Callbacks
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+11 5 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+1 1 0 0
+0 1 0 0
+0 0 0 0
+0 1 0 0
+2 1 0 "" ""
+8 1 0 "" ""
+2 1 0 "" ""
+2 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+Callback Name
+\newline 
+Object Type
+\newline 
+Additional Arguments/Types
+\newline 
+Return Value
+\newline 
+Documentaion
+\newline 
+FolderOpenHook
+\newline 
+MailFolder
+\newline 
+
+\newline 
+void
+\newline 
+Called after a folder has been opened.
+\newline 
+FolderUpdateHook
+\newline 
+MailFolder
+\newline 
+
+\newline 
+void
+\newline 
+Called after a folder has been updated.
+\newline 
+FolderSetMessageFlag
+\newline 
+MailFolder
+\newline 
+(long) index of message
+\newline 
+1 if changing flags is ok,0 otherwise
+\newline 
+Called before changing flags for a mesage.
+\newline 
+
+\newline 
+
+\newline 
+(string)name of flag
+\newline 
+
+\newline 
+
+\newline 
+FolderClearMessageFlag
+\newline 
+MailFolder
+\newline 
+(long) index of message
+\newline 
+1 if changing flags is ok,0 otherwise
+\newline 
+Called before changing flags for a mesage.
+\newline 
+
+\newline 
+
+\newline 
+(string) name of flag
+\newline 
+
+\newline 
+
+\newline 
+FolderExpungeHook
+\newline 
+MailFolder
+\newline 
+
+\newline 
+1 to expunge, 0 to abort
+\newline 
+Called before expunging messages.
+\newline 
+FolderNewMailHook
+\newline 
+MailFolder
+\newline 
+
+\newline 
+1 to suppress default message, 0 else
+\newline 
+Called when new mail arrived in folder.
+\newline 
+GlobalNewMailHook
+\newline 
+mApplication
+\newline 
+(string) sender of mail
+\newline 
+1 to suppress default message, 0 else
+\newline 
+Called when new mail arrived anywhere.
+\newline 
+
+\newline 
+
+\newline 
+(string) subject of mail
+\newline 
+
+\newline 
+
+\layout Section
+
+Supported Classes
+\layout Standard
+
+Python has access to M's internal class hierarchy.
+ At present we supply interface definitions and Python modules for only
+ a small number of classes, however if there is need for more classes being
+ supported, we can easily extend the list - please ask us if you want more
+ support!
+\layout Standard
+
+Some automatically generated documentation of the Python interface to M
+ classes can be found in the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{doc/Python directory}{../Python/}
+\latex default 
+.
+ Documentation about all classes, including those not available to Python,
+ can be found in the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{doc/classes directory}{../classes/}
+\latex default 
+.
+\layout Chapter
+
+Getting Help and Support
+\layout Section
+
+WWW Support
+\layout Standard
+
+M has a home on the world wide web where you can get up to date information
+ about development and the last releases.
+ Come and visit us at the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{M Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
+\layout Section
+
+Mailing Lists
+\layout Standard
+
+Currently there exist three different mailing lists to help support M users:
+\layout Paragraph
+
+m-announce:
+\layout Itemize
+
+M-announce is a moderated list which distributes announcements of new releases
+ of M.
+ It is a low volume mailing list.
+\layout Itemize
+
+To subscribe send an e-mail to: 
+\latex latex 
+
+\backslash 
+htmladdnormallink{m-announce-subscribe@egroups.com}{mailto:m-announce-subscribe@e
+groups.com}
+\layout Itemize
+
+To unsubscribe send an e-mail t
+\latex latex 
+o: 
+\backslash 
+htmladdnormallink{m-announce-unsubscribe@egroups.com}{mailto:m-announce-unsubscri
+be@egroups.com}
+\layout Paragraph*
+
+m-users:
+\layout Itemize
+
+M-Users is an unmoderated list for users of M to discuss problems and enhancemen
+ts.
+ All announcements will be sent to this list, too.
+ It carries any kind of general discussion about M.
+ If you just have simple questions which might not constitute a real bug
+ report, try asking for help on m-users.
+\layout Itemize
+
+To subscribe send an e-mail to: 
+\latex latex 
+
+\backslash 
+htmladdnormallink{m-users-subscribe@egroups.com}{mailto:m-users-subscribe@egroups.
+com}
+\layout Itemize
+
+To unsubscribe send an e-mail to:
+\latex latex 
+ 
+\backslash 
+htmladdnormallink{m-users-unsubscribe@egroups.com}{mailto:m-users-unsubscribe@egr
+oups.com}
+\layout Paragraph*
+
+m-developers:
+\layout Itemize
+
+M-developers is a moderated mailing list for the people involved in M's
+ development and testing.
+ There are generally two reasons why you would want to send an e-mail here:
+ 
+\latex latex 
+
+\backslash 
+htmladdnormallink{m-developers@egroups.com}{mailto:m-developers@egroups.com}
+\begin_deeper 
+\layout Enumerate
+
+You have discovered a bug or problem in M and want to tell the developers
+ about, or, even better, you want to submit a patch to fix it.
+\layout Enumerate
+
+You want to help develop, translate or test M.
+ This is highly welcome and encouraged.
+ Please, if you want to add a feature, get in touch with us.
+\end_deeper 
+\layout Itemize
+
+If you want to contact the developers, send an e-mail to the address above.
+\layout Itemize
+
+Subscription to this list is by invitation only.
+ If you would like to join the team, contact the developers and we will
+ be happy to add you to the list.
+\layout Paragraph
+
+Subscribe Directly
+\layout Standard
+
+If your help browser understands HTML forms, you will find to forms below
+ where you can directly subscribe to the support mailing lists.
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+begin{rawhtml}<form method=GET action="http://www.findmail.com/cgi-bin/subscribe.py
+"><input 
+\protected_separator 
+type=hidden name="listname" value="m-announce"><table BORDER=0 CELLSPACING=0
+ BGCOLOR="#000000" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3
+ WIDTH="300" BGCOLOR="#FFFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontf
+ace="arial,helvetica"><font color="#FFFFFF">Subscribe to M-announcements
+ list&nbsp;</font></font></b></td></tr><tr><td>Enter your e-mail address:&nbsp;<
+/td></tr><tr><td><input type=text name="emailaddr" value="your e-mail" size=21><
+input type=submit name="SubmitAction" VALUE="Subscribe"></td></tr><tr><td><a
+ href="http://www.findmail.com/list/m-annouce/">FindMail List Archive</a></td></tr
+><tr><td><font face="arial,helvetica"><font size=-1>A mailing list hosted
+ by<a href="http://www.makelist.com/">MakeList!</a></font></font></td></tr></table
+></td></tr></table> </form>
+\backslash 
+end{rawhtml}
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+begin{rawhtml}<form method=GET action="http://www.findmail.com/cgi-bin/subscribe.py
+"><input 
+\protected_separator 
+type=hidden name="listname" value="m-users BORDER=0 CELLSPACING=0 BGCOLOR="#0000
+00" ><tr><td><table BORDER=0 CELLSPACING=0 CELLPADDING=3 WIDTH="300" BGCOLOR="#F
+FFFCC" ><tr><td ALIGN=CENTER BGCOLOR="#000000"><b><fontface="arial,helvetica"><f
+ont color="#FFFFFF">Subscribe to M-users forum&nbsp;</font></font></b></td></tr>
+<tr><td>Enter your e-mail address:&nbsp;</td></tr><tr><td><input type=text
+ name="emailaddr" value="your e-mail" size=21><input type=submit name="SubmitAct
+ion" VALUE="Subscribe"></td></tr><tr><td><a href="http://www.findmail.com/list/m-a
+nnouce/">FindMail List Archive</a></td></tr><tr><td><font face="arial,helvetica"
+><font size=-1>A mailing list hosted by<a href="http://www.makelist.com/">MakeList
+!</a></font></font></td></tr></table></td></tr></table> </form>
+\backslash 
+end{rawhtml}
+\layout Standard
+
+If there are no forms above this line, you need to subscribe by email or
+ visit the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{M Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
+\layout Subsection*
+
+Mailing List Archives
+\layout Standard
+
+All three mailing lists are archived at 
+\latex latex 
+
+\backslash 
+htmladdnormallink{Egroups.com}{http://www.egroups.com/}
+\layout Chapter
+
+Compiling 
+\shape slanted 
+M
+\shape default 
+ from source
+\layout Standard
+
+These compilation notes are probably a bit outdated.
+ The best start is to use the 
+\family typewriter 
+--help
+\family default 
+ option of configure to see which options it supports.
+\layout Section
+
+Operating systems specific
+\layout Subsection
+
+Linux
+\layout Standard
+
+If compiling with a non-default compiler like 
+\family typewriter 
+egcs
+\family default 
+, make sure that 
+\family typewriter 
+/usr/include
+\family default 
+ is not in the include path, neither should 
+\family typewriter 
+/usr/lib
+\family default 
+ be explicitly listed.
+ M has been compiled with 
+\family typewriter 
+egcs
+\family default 
+ and 
+\family typewriter 
+gcc-2.8.x
+\family default 
+ on both, 
+\family typewriter 
+libc5
+\family default 
+ and 
+\family typewriter 
+glibc2
+\family default 
+ systems.
+\layout Subsection
+
+Solaris/SunOS
+\layout Standard
+
+M has been successfully compiled with 
+\family typewriter 
+gcc-2.8.0
+\family default 
+ on Solaris.
+ Currently it does not compile with the standard 
+\family typewriter 
+C++
+\family default 
+ compiler.
+\layout Subsection
+
+Microsoft Windows 
+\layout Standard
+
+M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
+ Visual C++ version 4.x or later.
+ The makefiles are included in the M source distribution (they will build
+ the version of M without Python support).
+\layout Subsection
+
+DEC Alpha with Digital UNIX 3.2c
+\layout Standard
+
+(Karsten Ballüder: It seemed at that time that the segmentation fault was
+ caused by a bug in wxGTK.
+ By now this should be fixed.
+ However, no new attempt to compile M on DEC Unix has been made yet.
+ However, I include Holger's report as a help for some future attemp.)
+\layout Standard
+
+This section has been contributed by Holger Bauer 
+\latex latex 
+
+\newline 
+
+\family typewriter 
+\size small 
+
+\backslash 
+htmladdnormallink{bauer@itsm.uni-stuttgart.de}{bauer@itsm.uni-stuttgart.de}
+\latex default 
+ 
+\latex latex 
+
+\backslash 
+htmladdnormallink{http://www.itsm.uni-stuttgart.de/~bauer}{http://www.itsm.uni-stuttg
+art.de/~bauer}
+\layout Enumerate
+
+First I took the following arguments for configure:
+\newline 
+
+\family typewriter 
+\size small 
+configure --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/shlib
+ --with-wxGTK --without-python
+\newline 
+
+\family default 
+This would not work since
+\family typewriter 
+ make dep 
+\family default 
+still tries to find 
+\family typewriter 
+Python.h
+\family default 
+.
+\newline 
+Therefore I created a dummy include file Python.h in 
+\family typewriter 
+\latex latex 
+
+\backslash 
+dots
+\latex default 
+/M/src/Python
+\family default 
+.
+ This helped to complete make dep.
+ 
+\begin_inset LatexCommand \label{item1}
+
+\end_inset 
+
+
+\layout Enumerate
+
+However step 
+\begin_inset LatexCommand \ref{item1}
+
+\end_inset 
+
+ still reported some warnings:
+\newline 
+
+\family typewriter 
+\latex latex 
+
+\backslash 
+dots
+\latex default 
+/M/extra/src/c-client/mail.h 
+\family default 
+would complain about a missing 
+\family typewriter 
+linkage.h
+\family default 
+ header file.
+ Also, a missing 
+\family typewriter 
+osdep.h
+\family default 
+ file was reported.
+\newline 
+
+\family typewriter 
+\latex latex 
+
+\backslash 
+dots
+\latex default 
+/M/extra/src/c-client/osdep.h 
+\family default 
+falsely pointed to 
+\family typewriter 
+os_gof.h 
+\family default 
+but this file was missing.
+ Therefore copied
+\family typewriter 
+ os_osf.h 
+\family default 
+to
+\family typewriter 
+ os_gof.h
+\family default 
+.
+ Also, copied
+\family typewriter 
+ os_osf.c 
+\family default 
+to
+\family typewriter 
+ os_gof.c 
+\family default 
+since 
+\family typewriter 
+osdepbas.c 
+\family default 
+pointed to
+\family typewriter 
+ os_gof.c
+\family default 
+.
+ 
+\layout Enumerate
+
+
+\family typewriter 
+cd src;
+\newline 
+make;
+\family default 
+
+\newline 
+This would fail since swig was not searched for by the configure script.
+ Since even I gave --without-python to configure make would search in /src/Pytho
+n and try to compile things there I decided to install python and swig.
+\layout Enumerate
+
+The Python-FAQ states that python definitely has to be compiled with the
+ DEC cc.
+\layout Enumerate
+
+After that I took:
+\newline 
+
+\family typewriter 
+\size small 
+configure --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/shlib
+ --with-wxGTK
+\newline 
+
+\family default 
+The make process would then stop in 
+\family typewriter 
+\size default 
+\latex latex 
+
+\backslash 
+dots
+\latex default 
+/M/src/adb/AdbFrame.cpp
+\family default 
+.
+ The line 
+\latex latex 
+
+\newline 
+
+\family typewriter 
+\latex default 
+AdbTreeElement *current = wxIsPathSeparator(strEntry[0u])
+\latex latex 
+
+\backslash 
+dots
+\newline 
+
+\family default 
+\latex default 
+would not compile since the wxString function takes a long integer (due
+ to the 64 bit architecture).
+\newline 
+This error might disappear if somebody adjusts the wxString library accordingly.
+\newline 
+In meantime (for my local 
+\family typewriter 
+libwx_gtk.so
+\family default 
+) I changed to 
+\family typewriter 
+strEntry[0]
+\family default 
+.
+\layout Enumerate
+
+Then only final linkage errors occured:
+\newline 
+
+\family typewriter 
+-lpthread
+\family default 
+ is not known, needs 
+\family typewriter 
+-lpthreads
+\family default 
+
+\newline 
+
+\family typewriter 
+-lcrypt
+\family default 
+ is not known, just omit
+\newline 
+
+\family typewriter 
+-ldmalloc
+\family default 
+ is not known, pass
+\family typewriter 
+ --without-dmalloc
+\family default 
+ to
+\family typewriter 
+ configure
+\family default 
+.
+\layout Enumerate
+
+Because the link process did not give me any error I expected M to run (at
+ least some kind of unstable).
+ But a core dump appeared immediately.
+\newline 
+
+\family typewriter 
+dbx
+\family default 
+ gives to following information:
+\newline 
+
+\family typewriter 
+(dbx) run 
+\newline 
+signal Segmentation fault at >*[mig_get_reply_port, 0x3ff83004a0c] stq r26,
+ 0(sp) 
+\newline 
+(dbx) where 
+\newline 
+> 0 mig_get_reply_port(0xffffffffffffffff, 0xffffffffffffffff, 0xfffffffffffffff
+f, 0xffffffffffffffff, 0xffffffffffffffff) [0x3ff83004a0c] 
+\newline 
+
+\family default 
+The output of 
+\family typewriter 
+gdb
+\family default 
+ is not very appealing:
+\newline 
+
+\family typewriter 
+(gdb) run Starting program: /usr3/bauer/src/M/M/src/M 
+\newline 
+Program received signal SIGSEGV, 
+\newline 
+Segmentation fault.
+ 0x3ff83008f5c in port_allocate ()
+\newline 
+(gdb) where
+\newline 
+#0 0x3ff83008f5c in port_allocate () #1 0x3ff83004a38 in mig_get_reply_port
+ () 
+\newline 
+#2 0x3ff83008f94 in port_allocate () #3 0x3ff83004a38 in mig_get_reply_port
+ ()
+\newline 
+
+\family default 
+This output runs until infinity 
+\latex latex 
+
+\backslash 
+dots
+\latex default 
+.
+\layout Section
+
+Configuration and Testing
+\layout Standard
+
+Under Unix all configuration settings are stored in 
+\family typewriter 
+~/.M/config
+\family default 
+ under Windows in the registry.
+ To get an overview over all possible configuration options and their default
+ values, set the value 
+\family typewriter 
+RecordDefaults=1
+\family default 
+.
+ Under Unix, do this by creating a new 
+\family typewriter 
+~/.M/config
+\family default 
+ file containig the lines
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|[M]|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|RecordDefaults=1|
+\layout Standard
+
+After running M, this file will then contain all default settings.
+ Most of them are easily understood.
+ Otherwise, the file 
+\family typewriter 
+include/Mdefaults.h
+\family default 
+ contains them all with some short comments.
+\layout Section
+
+wxWindows
+\layout Standard
+
+You will need the wxWindows GUI toolkit to compile 
+\shape slanted 
+M
+\shape default 
+.
+\layout Standard
+
+Further Information
+\layout Itemize
+
+wxWindows is available from
+\latex latex 
+ 
+\family typewriter 
+\latex default 
+http://web.ukonline.co.uk/julian.smart/
+\layout Itemize
+
+The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~
+wxxt/
+\layout Standard
+
+In order to compile this alpha release of 
+\emph on 
+M 
+\emph default 
+you will need wxWindows 2.0 strictly later than beta 3 and so it is probably
+ easier to take the wxWindows sources snapshot from the 
+\emph on 
+M
+\emph default 
+ home page.
+\layout Chapter
+
+FAQ - Frequently Asked Questions_1002_
+\layout Standard
+
+Being a brand new program, this section is currently empty.
+ However, we will constantly update this chapter with questions received
+ on the mailing lists.
 \the_end

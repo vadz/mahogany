@@ -18,7 +18,7 @@
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
 %.dvi: %.tex
-	$(LATEX) $< ; $(LATEX) $< ; $(LATEX) $<
+	$(LATEX) $< ; $(MAKEINDEX) `basename $< .tex`.idx; $(LATEX) $< ; $(LATEX) $<
 
 %.ps: %.dvi
 	$(DVIPS) $< -o $@
@@ -42,19 +42,11 @@ dep depend:
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-.PHONY: stdclean doc dep depend tags msgcat
+.PHONY: stdclean dep depend tags msgcat
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
-	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -a -j -o $(BUILDDIR)/messages.po $$i ; done
+	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -a -j -d $(BUILDDIR)/messages $$i ; done
 
 stdclean:
 	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a
-
-doc:
-	mkdir $(DOCDIR)/$(CWD)
-	$(DXX) $(DXXHFLAGS) docxx.h #$(HDR)
-	$(DXX) $(DXXTFLAGS) docxx.h #$(HDR)
-
-doc2:
-	for i in *.h ; do $(DXX) -f -k -u -k $(DXXTBL) -H -t -o $(DOCDIR)/$$i.tex $$i ; done

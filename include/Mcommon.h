@@ -5,11 +5,16 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
+
+
 #ifndef MCOMMON_H
 #define  MCOMMON_H
 
 #include   "Mconfig.h"
 #include   "MObject.h"
+
+/// defines an empty string for argument lists, needed for scandoc
+#define   M_EMPTYSTRING   ""
 
 /// macro which defines compare operators needed for std::list
 #define IMPLEMENT_DUMMY_COMPARE_OPERATORS(classname)                          \
@@ -56,7 +61,7 @@ typedef long int lcoord_t;
                         wxDefaultSize, 0, DEFAULT_VALIDATOR name)
 
 #  define CreateText(parent, x, y, w, h, name)                                \
-   GLOBAL_NEW wxTextCtrl(parent, -1, "", wxPoint(x, y), wxSize(w, h),         \
+   GLOBAL_NEW wxTextCtrl(parent, -1, M_EMPTYSTRING, wxPoint(x, y), wxSize(w, h),         \
                          0, DEFAULT_VALIDATOR name)
 
 #  define CreateListBox(parent, x, y, w, h)                                   \
@@ -127,7 +132,7 @@ typedef long int lcoord_t;
 #  else
 #     define   DBGMESSAGE(arg)    wxLogDebug arg
 #     define   TRACEMESSAGE(arg)  wxLogTrace arg
-#     define   DBGLOG(arg)        wxLogTrace(wxString("") << arg)
+#     define   DBGLOG(arg)        wxLogTrace(wxString(M_EMPTYSTRING) << arg)
 #     define   INTERNALERROR(arg) wxLogFatalError arg    // aborts
 #  endif
 

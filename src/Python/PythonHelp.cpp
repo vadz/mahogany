@@ -83,7 +83,7 @@ PythonCallback(const char *name, int def, void *obj, const char *classname,
       *parg;
 
    // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
       return def;
 
    va_list argslist;
@@ -136,7 +136,7 @@ bool PyH_CallFunction(const char *func,
    )
 {
    // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
       return false;
 
    PyObject
@@ -195,7 +195,7 @@ bool PyH_CallFunctionVa(const char *func,
    )
 {
    // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
       return false;
 
    PyObject
@@ -357,7 +357,7 @@ void
 PyH_RunScript(FILE *file, const char *filename)
 {
    // first check if Python is not disabled
-   if ( READ_APPCONFIG(MC_USEPYTHON) )
+   if ( READ_APPCONFIG(MP_USEPYTHON) )
       PyRun_SimpleFile(file, (char *) filename);
 }
 

@@ -22,18 +22,22 @@ ODIR=.
 @MAKE_USE_PYTHON@
 @MAKE_USE_SWIG@
 @MAKE_HAVE_SGMLTOOLS@
+@MAKE_DEBUG@
 
 # canonical host
 CANONICAL_HOST=@host@
 
 # DOC++/kdoc
 DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
-DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/M.tex
+DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/classes.tex
 KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M  
 KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
+SCANDOCHTML = @PERL@ $(BUILDDIR)/extra/scandoc/scandoc.pl  -i $(BUILDDIR)/extra/scandoc/Mtemplate.html -p $(BUILDDIR)/doc/classes/ -t 3 
+SCANDOCTEX  = echo "Cannot generate .tex class documentation with scandoc."
 DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
 LATEX=@LATEX@
+MAKEINDEX=@MAKEINDEX@
 DVIPS=@DVIPS@
 LATEX2HTML=@LATEX2HTML@ -local_icons
 XGETTEXT=@XGETTEXT@
@@ -63,23 +67,21 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-PREFIX=@prefix@
-exec_prefix=@exec_prefix@
+DESTDIR = @prefix@
 # Directory in which to install scripts.
-BINDIR = @bindir@
+BINDIR = $(DESTDIR)/bin
 # Directory in which to install library files.
-DATADIR = @datadir@/M
+DATADIR = $(DESTDIR)/share/M
 # where to install docs
-DOCDIR = @datadir@/M/doc
+DOCDIR = $(DATADIR)/doc
 
+PREFIX=@prefix@
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
-DEF = -DM_PREFIX="\"$(PREFIX)\"" -DM_BASEDIR="\"$(DATADIR)\"" 
+DEF = -DM_PREFIX="\"$(PREFIX)/\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 
 CFLAGS   = @CFLAGS@  $(CPPFLAGS) $(DEF) $(INC)
 CXXFLAGS = @CXXFLAGS@ $(CPPFLAGS) $(DEF) $(INC)

@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
 // Name:        wx/persctrl.h
 // Purpose:     persistent classes declarations
 // Author:      Vadim Zeitlin
@@ -7,7 +7,7 @@
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows license (part of wxExtra library)
-/////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////
 
 #ifndef   _WX_PWINDOW_H_
 #define   _WX_PWINDOW_H_
@@ -22,13 +22,15 @@ class wxPHelper;
 
 // the headers we really need
 #include <wx/notebook.h>
-//#include <wx/combobox.h>
-#include <wx/wx.h>
+#include <wx/control.h>
+#include <wx/combobox.h>
+#include <wx/splitter.h>
+
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
 // ----------------------------------------------------------------------------
 
-class wxPControls
+class WXDLLEXPORT wxPControls
 {
 public:
     // static functions
@@ -171,6 +173,89 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
+// A splitter control which remembers its last position
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxPSplitterWindow : public wxSplitterWindow
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPSplitterWindow();
+        // normal ctor
+    wxPSplitterWindow(const wxString& configPath,
+                      wxWindow *parent,
+                      wxWindowID id = -1,
+                      const wxPoint& pos = wxDefaultPosition,
+                      const wxSize& size = wxDefaultSize,
+                      long style = wxSP_3D | wxCLIP_CHILDREN,
+                      wxConfigBase *config = NULL);
+
+        // to be used if object was created with default ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxSP_3D | wxCLIP_CHILDREN,
+                wxConfigBase *config = NULL);
+
+        // dtor saves the strings
+    ~wxPSplitterWindow();
+
+    // when the window is split for the first time we restore the previously
+    // saved position of the splitter
+    virtual bool SplitVertically(wxWindow *window1, wxWindow *window2,
+                                 int sashPosition = 0);
+    virtual bool SplitHorizontally(wxWindow *window1, wxWindow *window2,
+                                   int sashPosition = 0);
+
+    // we need to update our m_wasSplit here
+    virtual void OnUnsplit(wxWindow *removed);
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+protected:
+    // retrieve the position of the sash from config
+    int GetStoredPosition(int defaultPos) const;
+    // save current position there
+    void SavePosition();
+
+    bool       m_wasSplit;
+    wxPHelper *m_persist;
+
+private:
+    // the config key where we store the sash position
+    static const char *ms_sashKey;
+};
+
+// ----------------------------------------------------------------------------
+// Persistent file selector functions: remember the last directory and file
+// name used.
+//
+// See wxWindows docs and/or wx/filedlg.h for the meaning of all parameters
+// except the first and the last one. Also, "defname" (default value)
+// parameter is overriden by the last entry saved in the config, so it only
+// matters when the function is called for the very first time.
+// ----------------------------------------------------------------------------
+
+extern WXDLLEXPORT wxString wxPFileSelector(const wxString& configPath,
+                                            const wxString& title,
+                                            const char *defpath = NULL,
+                                            const char *defname = NULL,
+                                            const char *extension = NULL,
+                                            const char *filter = NULL,
+                                            int flags = 0,
+                                            wxWindow *parent = NULL,
+                                            wxConfigBase *config = NULL);
+
+// ----------------------------------------------------------------------------
+// Persistent (a.k.a. "don't remind me again") message boxes functions.
+//
 // This function shows to the user a message box with a "don't show this
 // message again" check box. If the user checks, it's state will be saved to
 // the config object and the next call to this function will return the value

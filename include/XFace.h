@@ -76,6 +76,4 @@ class XFace
    bool	IsInitialised(void) const { return initialised; }
 };
 
-//@}
-
 #endif

@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxComposeView.cc : a wxWindows look at a message                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$        *
+ * $Id$   *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -22,6 +22,7 @@
 
 #ifndef USE_PCH
 #  include "strutil.h"
+#  include "sysutil.h"
 
 #  include "PathFinder.h"
 #  include "Profile.h"
@@ -33,6 +34,11 @@
 
 #  include <ctype.h>          // for isspace()
 #endif
+
+#include <wx/textfile.h>
+#include <wx/process.h>
+#include <wx/mimetype.h>
+#include <wx/persctrl.h>
 
 #include "Mdefaults.h"
 
@@ -54,11 +60,11 @@
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxComposeView.h"
 
-#include <wx/textfile.h>
-#include <wx/mimetype.h>
-
 #include "adb/AdbEntry.h"
 #include "adb/AdbManager.h"
+
+// incredible, but true: cclient headers #define the symbol write...
+#undef write
 
 // ----------------------------------------------------------------------------
 // constants
@@ -95,12 +101,13 @@ public:
    ~MimeContent()
       {
          if ( m_Type == MIMECONTENT_DATA )
-            delete m_Data;
+            delete [] m_Data;
       }
 
    // initialize
    void SetMimeType(const String& mimeType);
-   void SetData(char *data, size_t length); // we'll delete data!
+   void SetData(char *data, size_t length,
+                const char *filename = NULL); // we'll delete data!
    void SetFile(const String& filename);
 
    // accessors
@@ -110,7 +117,7 @@ public:
    Message::ContentType GetMimeCategory() const { return m_NumericMimeType; }
 
    const String& GetFileName() const
-      { ASSERT( m_Type == MIMECONTENT_FILE ); return m_FileName; }
+      { return m_FileName; }
 
    const char *GetData() const
       { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Data; }
@@ -147,6 +154,7 @@ public:
    {
       m_composeView = composeView;
       m_id = id;
+      m_lastWasTab = FALSE;
    }
 
    // callbacks
@@ -163,6 +171,8 @@ private:
    wxComposeView              *m_composeView;
    wxComposeView::AddressField m_id;
 
+   bool m_lastWasTab;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -172,17 +182,11 @@ private:
 IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
-   // wxComposeView menu events
-   EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
-   EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
-   EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
-   EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
+   // process termination notification
+   EVT_END_PROCESS(HelperProcess_Editor, wxComposeView::OnExtEditorTerm)
 
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
-
-   // can we close now?
-   EVT_CLOSE(wxComposeView::OnCloseWindow)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
@@ -222,13 +226,15 @@ void MimeContent::SetMimeType(const String& mimeType)
       m_NumericMimeType = Message::MSG_TYPEOTHER;
 }
 
-void MimeContent::SetData(char *data, size_t length)
+void MimeContent::SetData(char *data, size_t length, const char *filename)
 {
    ASSERT( data != NULL );
 
    m_Data = data;
    m_Length = length;
    m_Type = MIMECONTENT_DATA;
+   if(filename)
+      m_FileName = filename;
 }
 
 void MimeContent::SetFile(const String& filename)
@@ -250,7 +256,7 @@ void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
     event.SetDirection(TRUE);       // forward
     event.SetWindowChange(FALSE);   // control change
     event.SetEventObject(this);
-    
+
     GetEventHandler()->ProcessEvent(event);
 }
 
@@ -261,10 +267,15 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 
    m_composeView->SetLastAddressEntry(m_id);
 
-   // we're only interested in TABs
-   if ( event.KeyCode() == WXK_TAB && !event.ControlDown() && 
-        !event.ShiftDown() && !event.AltDown() )
+   // we're only interested in TABs and only it's not a second TAB in a row
+   if ( event.KeyCode() == WXK_TAB && !m_lastWasTab &&
+        !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
    {
+      // rememeber it and interpret TAB "normally" if the user presses it the
+      // second time to go to the next window immediately after having expanded
+      // the entry
+      m_lastWasTab = TRUE;
+
       // try to expand the last component
       String text = GetValue();
       if ( text.IsEmpty() )
@@ -290,8 +301,8 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          nLastAddr++;
       }
 
-      String expansion = AdbExpand(text.c_str() + nLastAddr, m_composeView);
-      if ( !expansion.IsEmpty() )
+      wxArrayString expansions;
+      if ( AdbExpand(expansions, text.c_str() + nLastAddr, m_composeView) )
       {
          // find the end of the previous address
          size_t nPrevAddrEnd;
@@ -307,7 +318,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
             if ( !isspace(c) && (c != ',') && (c != ';') )
                break;
          }
-         
+
          // take what was there before...
          wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
          if ( !newText.IsEmpty() )
@@ -316,8 +327,15 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
             newText += CANONIC_ADDRESS_SEPARATOR;
          }
 
-         // ... and and the replacement string
-         newText += expansion;
+         // ... and and the replacement string(s)
+         size_t nExpCount = expansions.GetCount();
+         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
+         {
+            if ( nExp > 0 )
+               newText += CANONIC_ADDRESS_SEPARATOR;
+
+            newText += expansions[nExp];
+         }
 
          SetValue(newText);
          SetInsertionPointEnd();
@@ -327,6 +345,8 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    }
    else
    {
+      m_lastWasTab = FALSE;
+
       // let the text control process it normally
       event.Skip();
    }
@@ -335,6 +355,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 // ----------------------------------------------------------------------------
 // wxComposeView creation
 // ----------------------------------------------------------------------------
+
 void
 wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
                       ProfileBase *parentProfile,
@@ -464,6 +485,10 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
             c2->height.AsIs();
             btnExpand->SetConstraints(c2);
 
+#if wxUSE_TOOLTIPS
+            btnExpand->SetToolTip(_("Expand the address using address books"));
+#endif // tooltips
+
             c->right.LeftOf(btnExpand, LAYOUT_MARGIN);
          }
          else
@@ -513,49 +538,93 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
-      String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
-      if ( strSignFile.IsEmpty() ) {
-         // no signature, propose to choose it now
-         if ( MDialog_YesNoDialog(
-               _("No signature file found. Would you like to choose one\n"
-                 "right now (otherwise no signature will be used)?"),
-                 this, MDIALOG_YESNOTITLE, true, "AskForSig") ) {
-            wxFileDialog dialog(this, "", "", "", _("All files (*.*)|*.*"),
-                                wxHIDE_READONLY | wxFILE_MUST_EXIST);
-            if ( dialog.ShowModal() == wxID_OK ) {
-               strSignFile = dialog.GetPath();
+      wxTextFile fileSig;
+
+      bool hasSign = false;
+      while ( !hasSign )
+      {
+         String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
+         if ( !strSignFile.IsEmpty() ) {
+            hasSign = fileSig.Open(strSignFile);
+         }
+
+         if ( !hasSign )
+         {
+            // no signature at all or sig file not found, propose to choose or
+            // change it now
+            wxString msg;
+            if ( strSignFile.IsEmpty() )
+            {
+               msg = _("You haven't configured your signature file.");
             }
+            else
+            {
+               // to show message from wxTextFile::Open()
+               wxLog *log = wxLog::GetActiveTarget();
+               if ( log )
+                  log->Flush();
+
+               msg.Printf(_("Signature file '%s' couldn't be opened."),
+                          strSignFile.c_str());
+            }
+
+            msg += _("\n\nWould you like to choose your signature "
+                     "right now (otherwise no signature will be used)?");
+            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                     true, "AskForSig") )
+            {
+               strSignFile = wxPFileSelector("sig",
+                                             _("Choose signature file"),
+                                             NULL, ".signature", NULL,
+                                             _("All files (*.*)|*.*"),
+                                             0, this);
+            }
+            else
+            {
+               // user doesn't want to use signature file
+               break;
+            }
+
+            if ( strSignFile.IsEmpty() )
+            {
+               // user canceled "choose signature" dialog
+               break;
+            }
+
+            m_Profile->writeEntry(MP_COMPOSE_SIGNATURE, strSignFile);
          }
       }
 
-      if ( !strSignFile.IsEmpty() ) {
-         wxTextFile fileSig(strSignFile);
-         if ( fileSig.Open() ) {
-            // insert separator optionally
-            if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
-               m_LayoutWindow->GetLayoutList().Insert("--");
-               m_LayoutWindow->GetLayoutList().LineBreak();;
-            }
-
-            // read the whole file
-            size_t nLineCount = fileSig.GetLineCount();
-            for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
-               m_LayoutWindow->GetLayoutList().Insert(fileSig[nLine]);
-               m_LayoutWindow->GetLayoutList().LineBreak();;
-            }
-
-            // let's respect the netiquette
-            static const size_t nMaxSigLines = 4;
-            if ( nLineCount > nMaxSigLines ) {
-               wxLogWarning(_("Your signature is too long: it should not be more"
-                              " than %d lines"), nMaxSigLines);
-            }
-
-            m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+      if ( hasSign )
+      {
+         wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
+         // insert separator optionally
+         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
+            layoutList.Insert("--");
+            layoutList.LineBreak();;
          }
+
+         // read the whole file
+         size_t nLineCount = fileSig.GetLineCount();
+         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+            layoutList.Insert(fileSig[nLine]);
+            layoutList.LineBreak();;
+         }
+
+         // let's respect the netiquette
+         static const size_t nMaxSigLines = 4;
+         if ( nLineCount > nMaxSigLines ) {
+            wxLogWarning(_("Your signature is %stoo long: it should "
+                           "not be more than %d lines"),
+                         nLineCount > 10 ? "way " : "", nMaxSigLines);
+         }
+
+         layoutList.SetCursor(wxPoint(0,0));
+         layoutList.ResetDirty();
       }
-      else {
-         // no signature file
+      else
+      {
+         // don't ask the next time
          m_Profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
       }
    }
@@ -586,7 +655,7 @@ wxComposeView::CreateFTCanvas(void)
       0,
       fg.c_str(),bg.c_str());
    m_LayoutWindow->GetLayoutList().SetEditable(true);
-   //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
+   m_LayoutWindow->GetLayoutList().SetWrapMargin(READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN));
 }
 
 wxComposeView::wxComposeView(const String &iname,
@@ -596,8 +665,13 @@ wxComposeView::wxComposeView(const String &iname,
    : wxMFrame(iname,parent)
 {
    initialised = false;
+
+   m_pidEditor = 0;
+   m_procExtEdit = NULL;
+
    m_fieldLast = Field_Max;
    Create(iname,parent,parentProfile, "","","",hide);
+   SetTitle(_("M : Message Composition"));
 }
 
 wxComposeView::~wxComposeView()
@@ -671,34 +745,53 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
    }
 
    // expand all entries (TODO: some may be already expanded??)
-   String expansion, total;
+   String total;
    size_t nEntries = addresses.Count();
    for ( size_t n = 0; n < nEntries; n++ )
    {
-      expansion = AdbExpand(addresses[n], this);
-      if ( expansion.IsEmpty() )
+      if ( n > 0 )
+         total += CANONIC_ADDRESS_SEPARATOR;
+
+      wxArrayString expansions;
+      if ( !AdbExpand(expansions, addresses[n], this) )
       {
          // expansion failed, leave as is
          total += addresses[n];
       }
       else
       {
-         // replace with expanded address
-         total += expansion;
+         // replace with expanded address(es)
+         size_t nExpCount = expansions.GetCount();
+         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
+         {
+            if ( nExp > 0 )
+               total += CANONIC_ADDRESS_SEPARATOR;
+            total += expansions[nExp];
+         }
       }
-
-      total += CANONIC_ADDRESS_SEPARATOR;
    }
 
    m_txtFields[m_fieldLast]->SetValue(total);
 }
 
-void
-wxComposeView::OnCloseWindow(wxCloseEvent& event)
+bool
+wxComposeView::CanClose() const
 {
-   bool bDoClose = TRUE;
-   if ( m_LayoutWindow && m_LayoutWindow->IsDirty() ) {
-      bDoClose = MDialog_YesNoDialog
+   bool canClose = true;
+
+   // we can't close while the external editor is running (I think it will
+   // lead to a nice crash later)
+   if ( m_procExtEdit )
+   {
+      wxLogError(_("Please terminate the external editor (pid %d) before "
+                   "closign this window."), m_pidEditor);
+
+      canClose = false;
+   }
+   else if ( m_LayoutWindow && m_LayoutWindow->IsDirty() )
+   {
+      // ask the user if he wants to save the changes
+      canClose = MDialog_YesNoDialog
                  (
                   _("There are unsaved changes, close anyway?"),
                   this, // parent
@@ -706,10 +799,12 @@ wxComposeView::OnCloseWindow(wxCloseEvent& event)
                   false // "yes" not default
                  );
    }
-
-   if ( bDoClose ) {
-      Destroy();
+   else
+   {
+      canClose = true;
    }
+
+   return canClose;
 }
 
 void
@@ -738,9 +833,208 @@ wxComposeView::OnMenuCommand(int id)
       m_LayoutWindow->Clear();
       break;
 
+   case WXMENU_COMPOSE_LOADTEXT:
+      {
+         String filename = wxPFileSelector("MsgInsertText",
+                                           _("Please choose a file to insert."),
+                                           NULL, "dead.letter", NULL,
+                                           _("All files (*.*)|*.*"),
+                                           wxOPEN | wxHIDE_READONLY,
+                                           this);
+
+         if ( filename.IsEmpty() )
+         {
+            wxLogStatus(this, _("Cancelled"));
+         }
+         else if ( InsertFileAsText(filename) )
+         {
+            wxLogStatus(this, _("Inserted file '%s'."), filename.c_str());
+         }
+         else
+         {
+            wxLogError(_("Failed to insert the text file '%s'."),
+                       filename.c_str());
+         }
+      }
+      break;
+
+   case WXMENU_COMPOSE_SAVETEXT:
+      {
+         String filename = wxPFileSelector("MsgSaveText",
+                                           _("Choose file to save message to"),
+                                           NULL, "dead.letter", NULL,
+                                           _("All files (*.*)|*.*"),
+                                           wxSAVE | wxOVERWRITE_PROMPT,
+                                           this);
+
+         if ( filename.IsEmpty() )
+         {
+            wxLogStatus(this, _("Cancelled"));
+         }
+         else if ( SaveMsgTextToFile(filename) )
+         {
+            wxLogStatus(this, _("Message text saved to file '%s'."),
+                        filename.c_str());
+         }
+         else
+         {
+            wxLogError(_("Failed to save the message."));
+         }
+      }
+      break;
+
+   case WXMENU_COMPOSE_EXTEDIT:
+      {
+         if ( m_procExtEdit )
+         {
+            wxLogError(_("External editor is already running (pid %d)"),
+                       m_pidEditor);
+
+            break;
+         }
+
+         // if the editor can't be started we ask the user if he wantes to
+         // reconfigure it and in this case we retry with the new setting
+         bool tryAgain = true;
+         while ( !m_procExtEdit && tryAgain )
+         {
+            tryAgain = false;
+
+            // this entry is supposed to contain '%s' - not to be expanded
+            ProfileEnvVarSave envVarDisable(mApplication->GetProfile());
+
+            String extEdit = READ_APPCONFIG(MP_EXTERNALEDITOR);
+            if ( !extEdit )
+            {
+               wxLogStatus(this, _("External editor not configured."));
+            }
+            else
+            {
+               // first write the text we already have into a temp file
+               MTempFileName tmpFileName;
+               if ( !tmpFileName.IsOk() )
+               {
+                  wxLogSysError(_("Can not create temporary file"));
+
+                  break;
+               }
+
+               // 'false' means that it's ok to leave the file empty
+               if ( !SaveMsgTextToFile(tmpFileName.GetName(), false) )
+               {
+                  wxLogError(_("Failed to pass message to external editor."));
+
+                  break;
+               }
+
+               // we have a handy function in wxFileType which will replace
+               // '%s' with the file name or add the file name at the end if
+               // there is no '%s'
+               wxFileType::MessageParameters params(tmpFileName.GetName(), "");
+               String command = wxFileType::ExpandCommand(extEdit, params);
+
+               // do start the external process
+               m_procExtEdit = new wxProcess(this, HelperProcess_Editor);
+               m_pidEditor = wxExecute(command, FALSE, m_procExtEdit);
+
+               if ( !m_pidEditor  )
+               {
+                  wxLogError(_("Execution of '%s' failed."), command.c_str());
+               }
+               else
+               {
+                  tmpFileName.Ok();
+                  m_tmpFileName = tmpFileName.GetName();
+
+                  wxLogStatus(this, _("Started external editor (pid %d)"),
+                        m_pidEditor);
+               }
+            }
+
+            if ( !m_pidEditor  )
+            {
+               if ( m_procExtEdit )
+               {
+                  delete m_procExtEdit;
+                  m_procExtEdit = NULL;
+               }
+
+               // either it wasn't configured at all, or the configured editor
+               // couldn't be started - propose to change it
+               String msg = _("Would you like to change the external "
+                              "editor setting now?");
+               if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                        true, "AskForExtEdit") )
+               {
+                  if ( MInputBox(&extEdit,
+                                 _("Set up external editor"),
+                                 _("Enter the command name (%%s will be "
+                                   "replaced with the name of the file):"),
+                                 this,
+                                 NULL,
+                                 extEdit) )
+                  {
+                     // the ext editor setting is global, don't write it in
+                     // our profile
+                     mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR,
+                                                            extEdit);
+
+                     tryAgain = true;
+                  }
+                  //else: the dialog was cancelled, don't retry
+               }
+               //else: user doesn't want to set up ext editor, don't retry
+            }
+         }
+      }
+      break;
+
    default:
       wxMFrame::OnMenuCommand(id);
    }
+}
+
+void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
+{
+   CHECK_RET( event.GetPid() == m_pidEditor , "unknown program terminated" );
+
+   bool ok = false;
+
+   // check the return code of the editor process
+   if ( event.GetExitCode() != 0 )
+   {
+      wxLogError(_("External editor terminated with non null exit code."));
+   }
+   else
+   {
+      // 'true' means "replace the first text part"
+      if ( !InsertFileAsText(m_tmpFileName, true) )
+      {
+         wxLogError(_("Failed to insert back the text from external editor."));
+      }
+      else
+      {
+         if ( remove(m_tmpFileName) != 0 )
+         {
+            wxLogDebug("Stale temp file '%s' left.", m_tmpFileName.c_str());
+         }
+
+         ok = true;
+         wxLogStatus(this, _("Inserted text from external editor."));
+      }
+   }
+
+   if ( !ok )
+   {
+      wxLogError(_("The text was left in the file '%s'."),
+                 m_tmpFileName.c_str());
+   }
+
+   m_pidEditor = 0;
+   m_tmpFileName.Empty();
+
+   delete m_procExtEdit;
+   m_procExtEdit = NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -750,7 +1044,8 @@ wxComposeView::OnMenuCommand(int id)
 void
 wxComposeView::InsertData(char *data,
                           size_t length,
-                          const char *mimetype)
+                          const char *mimetype,
+                          const char *filename)
 {
    MimeContent *mc = new MimeContent();
 
@@ -760,8 +1055,8 @@ wxComposeView::InsertData(char *data,
    }
 
    mc->SetMimeType(mimetype);
-   mc->SetData(data, length);
-
+   mc->SetData(data, length, filename);
+   
    wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mimetype);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
@@ -772,24 +1067,35 @@ wxComposeView::InsertData(char *data,
 }
 
 void
-wxComposeView::InsertFile(const char *filename, const char *mimetype)
+wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 {
    MimeContent
       *mc = new MimeContent();
 
+   String filename(fileName);
    if( strutil_isempty(filename) )
    {
-      filename = MDialog_FileRequester(NULLstring, this, NULLstring,
-                                       NULLstring, NULLstring,
-                                       NULLstring, true, m_Profile);
-      if( strutil_isempty(filename) )
+      filename = wxPFileSelector("MsgInsert",
+                                 _("Please choose a file to insert."),
+                                 NULL, "dead.letter", NULL,
+                                 _("All files (*.*)|*.*"),
+                                 wxOPEN | wxHIDE_READONLY,
+                                 this);
+
+      if( !filename )
       {
-         // cancelled by user
+         // empty string means it was cancelled by user
          return;
       }
    }
 
-   String strExt = wxString(filename).After('.');
+   // if there is a slash after the dot, it is not extension (otherwise it
+   // might be not an extension too, but consider that it is - how can we
+   // decide otherwise?)
+   String strExt = filename.AfterLast('.');
+   if ( strchr(strExt, '/') )
+      strExt.Empty();
+
    String strMimeType;
    if ( strutil_isempty(mimetype) )
    {
@@ -820,7 +1126,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype)
    m_LayoutWindow->GetLayoutList().Insert(obj);
 
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
-               filename, strMimeType.c_str());
+               filename.c_str(), strMimeType.c_str());
 
    Refresh();
 }
@@ -849,7 +1155,7 @@ wxComposeView::Send(void)
    MimeContent *mc = NULL;
 
    while((export = wxLayoutExport(m_LayoutWindow->GetLayoutList(),
-                                  i,WXLO_EXPORT_AS_TEXT)) != NULL)
+                                  i,WXLO_EXPORT_AS_TEXT|WXLO_EXPORT_WITH_CRLF)) != NULL)
    {
       if(export->type == WXLO_EXPORT_TEXT)
       {
@@ -914,11 +1220,13 @@ wxComposeView::Send(void)
             case MimeContent::MIMECONTENT_DATA:
                {
                   MessageParameterList dlist;
-                  MessageParameter *p = new MessageParameter;
-                  p->name = "FILENAME";
-                  p->value = wxFileNameFromPath(mc->GetFileName());
-                  dlist.push_back(p);
-
+                  if(! strutil_isempty(mc->GetFileName()))
+                  {
+                     MessageParameter *p = new MessageParameter;
+                     p->name = "FILENAME";
+                     p->value = wxFileNameFromPath(mc->GetFileName());
+                     dlist.push_back(p);
+                  }
                   sm.AddPart
                   (
                      mc->GetMimeCategory(),
@@ -942,25 +1250,9 @@ wxComposeView::Send(void)
 
    success = sm.Send();  // true if sent
 
-   if(READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
-   {
-      String file;
-      MailFolder *mf =
-         MailFolder::OpenFolder(MailFolder::MF_PROFILE,
-                                READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
-      if(! mf) // no profile of such name
-         mf = MailFolder::OpenFolder(MailFolder::MF_FILE,
-                                     strutil_expandfoldername(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER))); 
-               
-      if(mf)
-      {
-         file = READ_CONFIG(m_Profile,MP_FOLDER_PATH);
-         if(strutil_isempty(file))
-            file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
-         sm.WriteToFile(file,true/*append*/);
-         mf->DecRef();
-      }
-   }
+   if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
+      sm.WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+
    return success;
 }
 
@@ -1002,7 +1294,31 @@ wxComposeView::InsertText(const String &txt)
 void
 wxComposeView::Print(void)
 {
-   m_LayoutWindow->Print();
+#ifdef OS_WIN
+   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
+#else
+   bool found;
+   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
+   //    set AFM path (recursive!)
+   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
+   pf.AddPaths(mApplication->GetGlobalDir(), true);
+   pf.AddPaths(mApplication->GetLocalDir(), true);
+   String afmpath = pf.FindDirFile("Cour.afm", &found);
+   if(! found) // be brutal
+   {
+      pf.AddPaths(READ_APPCONFIG(MP_AFMPATH), true);
+      afmpath = pf.FindDirFile("Cour.afm", &found);
+   }
+   if(found)
+      wxSetAFMPath((char *) afmpath.c_str());
+#endif
+   wxPrinter printer;
+   wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("M: Printout"));
+   if (! printer.Print(this, &printout, TRUE))
+      wxMessageBox(
+         _("There was a problem with printing the message:\n"
+           "perhaps your current printer is not set up correctly?"),
+         _("Printing"), wxOK);
 }
 
 // -----------------------------------------------------------------------------
@@ -1033,7 +1349,7 @@ wxComposeView::IsReadyToSend() const
          }
          else
          {
-            wxLogError(_("Can not send message - network is not configured."));
+            wxLogError(_("Cannot send message - network is not configured."));
 
             return FALSE;
          }
@@ -1053,7 +1369,7 @@ wxComposeView::IsReadyToSend() const
 
       return false;
    }
-   
+
    // did we forget the subject?
    if ( m_txtFields[Field_Subject]->GetValue().IsEmpty() )
    {
@@ -1076,3 +1392,135 @@ wxComposeView::IsReadyToSend() const
    // everything is ok
    return true;
 }
+
+/// insert a text file at the current cursor position
+bool
+wxComposeView::InsertFileAsText(const String& filename,
+                                bool replaceFirstTextPart)
+{
+   // read the text from the file
+   char *text = NULL;
+   wxFile file(filename);
+
+   bool ok = file.IsOpened();
+   if ( ok )
+   {
+      off_t lenFile = file.Length();
+      text = new char[lenFile + 1];
+      text[lenFile] = '\0';
+
+      ok = file.Read(text, lenFile) != wxInvalidOffset;
+   }
+
+   if ( !ok )
+   {
+      wxLogError(_("Can not insert text file into the message."));
+
+      if ( text )
+         delete [] text;
+
+      return false;
+   }
+
+   // insert the text in the beginning of the message replacing the old
+   // text if asked for this
+   if ( replaceFirstTextPart )
+   {
+      // this is not as simple as it sounds, because we normally exported all
+      // the text which was in the beginning of the message and it's not one
+      // text object, but possibly several text objects and line break
+      // objects, so now we must delete them and then recreate the new ones...
+      wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
+      wxLayoutObjectList::iterator i = layoutList.begin();
+      wxLayoutObjectBase *object = *i;
+      while ( i != layoutList.end() &&
+            (object->GetType() == WXLO_TYPE_TEXT ||
+             object->GetType() == WXLO_TYPE_LINEBREAK) )
+      {
+         // replace the old contents of the text objects with the new one: of
+         // course, it means that the user's changes to this text will be
+         // lost, but if we don't do it (and the text wasn't changed) we would
+         // have 2 copies of this text, the original one and the edited one
+         // and it's not a lot better...
+         layoutList.erase(i);
+
+         // NB: erase() will advance the iterator, so no "i++" needed
+         if ( i != layoutList.end() )
+            object = *i;
+      }
+
+      // if we're replacing the first text part, move the cursor to the
+      // beginning before inserting new text
+      layoutList.SetCursor(wxPoint(0, 0));
+   }
+
+   // now insert the new text
+   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
+
+   delete [] text;
+
+   m_LayoutWindow->Update();
+   return true;
+}
+
+/// save the first text part of the message to the given file
+bool
+wxComposeView::SaveMsgTextToFile(const String& filename,
+                                 bool errorIfNoText) const
+{
+   // TODO write (and read later...) headers too!
+
+   // write the text part of the message into a file
+   wxFile file(filename, wxFile::write);
+
+   // export first text part of the message
+   wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
+   wxLayoutList::iterator i = layoutList.begin();
+   wxLayoutExportObject *export = NULL;
+   bool textPart = false;
+   while ( !textPart )
+   {
+      // NB: wxLayoutExport will do "i++" itself
+      export = wxLayoutExport(layoutList, i);
+
+      if ( !export )
+      {
+         // error?
+         break;
+      }
+
+      textPart = export->type == WXLO_EXPORT_TEXT;
+   }
+
+   if ( export )
+   {
+      if ( !file.Write(*export->content.text) )
+      {
+         wxLogError(_("Can not write message to file '%s'."),
+                    filename.c_str());
+
+         return false;
+      }
+   }
+   else // nothing to export
+   {
+      if ( errorIfNoText )
+      {
+         wxLogWarning(_("There is no text to save."));
+
+         // remove the empty file
+         if ( !remove(filename) )
+         {
+            wxLogLastError("remove");
+         }
+
+         return false;
+      }
+      //else: leave the empty file and don't give error messages
+   }
+
+   layoutList.ResetDirty();
+
+   return true;
+}
+

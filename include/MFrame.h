@@ -20,7 +20,7 @@
 */
 
 class MFrameBase
-{   
+{
 private:
    /// each frame has a unique name used to identify it
    String name;
@@ -37,6 +37,9 @@ public:
 
    /// make it visible or invisible
    virtual SHOW_TYPE Show(bool visible = true) = 0;
+
+   /// is it ok to close the frame?
+   virtual bool CanClose() const { return true; }
 
    /// virtual destructor
    virtual ~MFrameBase() {};

@@ -1,69 +1,170 @@
+-*- text -*-
+TODO list for M
 $Id$
 
+*********************************************************************
+*** Suspicious, to be tested:
+*********************************************************************
 
+ - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
+ -  new mail dialog getting stuck?
+ - mAppBase::OnExit() gets called twice
+
+*********************************************************************
+*** not fixed yet:
+*********************************************************************
+
+ - forwarding message triggers assert in wxComposeView:119
+ - lock file checking for INBOX:
+   + need to check for xxx.lock.* not just xxx.lock !
+ - can't open autocollect.adb in AdbEditor if already opened
+
+ - wxLayout:
+  + Refresh!!
+  + undo?
+  + fix the minor (moving up in 1st column over empty line) bug
+  + after Clear() font becomes smaller
+
+ - integrate new c-client lib 4.5
+ - help fails to find copyright
+ - dirty flag in composeview
+ - save and restore printer settings in profile
+ - add a wxASSERT() for the correct path in READ_APPCONFIG()
+
+ - Profile readEntry() needs interface extension to allow a boolean success
+   value, remove hacks like 17 or "illegal value"!
+
+ - trying to exit M when wxMessageViews are open doesn't work and MObjects get
+   leaked
+ - Memory leaks whenever using wxMessageView (there are some from cclient)
+ - add remaining translation strings from include files
+ - handle "truncated mailfolder" more gracefully (i.e. close and re-open folder)
+   VZ: when 2 mail clients are running simultaneously and the message is deleted
+       from the spool M crashes with meaningless backtrace.
+       Didn't happen to me but c-client produced an error message and deactivated
+       the mail stream.
+
+ - OptionsPanels: add a help button which calls a help id depending on which page we're on
+
+ - GUI problems:
+  - configuration panels way too large!
+  - log window occasionally doesn't layout menu correctly (here too, no idea)
+
+- add (simple) keyboard interface to folder view (?)
+  (at least d,n,p or something like that)
+
+- ADB:
+  + make AdbEdit auto-generate a formatted name from first/family-name
+    and prefix/title. 
+  + for names without entries, use the same method for name generation 
+    as ProvBBDB for consistency
+  + config entry names should allow  ',' (needed for mail names which
+    might contain it, just received one from "john doe, archeology")  
+
+(Windows)
+ - list ctrl resizing columns doesn't propagate the event to the app
+ - memory leaks (run Purify on it)
+ - options dlg layout looks ugly (radiobox is way too big)
+ - in folder create/properties dialog there is missing UpdateUI() right
+   after creation - add it somewhere
+
+- announce M on bbdb mailing list
+
+*********************************************************************
 *** things to fix/implement next ***
+*********************************************************************
 
-(I've sorted them a bit by "responsible person". :-) )
+- wxPNotebook doesn't restore the page sometimes, why?
+
+- wxFolderCreateNotebook should be split into base class and 2 derivations:
+  wxFolderCreateNotebook and wxFolderPropNotebook
+
+- put number of total/unread/new msgs in the status bar for the selected
+  folder in wxMainFrame, also draw the folders with the new mail in bold
+
+- could we have each flag at its own position in folder view listview? I.e.
+  now they all appear in sequence and I'd like each of them have its own
+  position (looks better and it becomes easier to spot, for example, all
+  unread messages)
+
+- folder set message flag update hook takes too long for really large folders
+==> code commented out in MailFolderCC.cpp
+
+- easy to implement but useful features:
+  - "check for new mail now"
+
+- Are wxConfig/Profile GetNextGroup()/GetFirstGroup()  thread-safe??
+  I started marking possible problems for multi-threaded code with
+  //FIXME:MT
+  VZ: ok, I usually do it too (always) except for the "obvious" problems, e.g.
+      usage of static vars. I always name them with "s_" prefix (for this
+      reason too) so it should be quite easy to do a grep for them later
+  - MT-problem: rfc822_extraheaders()
+
+- add "Send Digest"
+
+- wxLayout:
+  + cut&paste, different cursor for focus/no focus
+  + DragNDrop (waiting for GNOME 1.0 / Debian Slink)
+
+- integrate new IMAP c-client library CAREFUL: rfc822.c has changed, old patch no longer
+  valid:
+   This is the new code for rfc822_extraheader_lines:
+
+	void rfc822_extraheader_lines (char **header,ENVELOPE *env)
+	{
+	   char **names = rfc822_extraheader_names;
+	   char **values = rfc822_extraheader_values;
+	   while(names && *names)
+	   {
+	      if (values) sprintf ((*header += strlen (*header)),"%s%s: %s\015\012",
+				 env->remail ? "ReSent-" : "",
+				 *(names++),
+				 *(values++)
+				 );
+	   }
+	}
+
+
+- KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
 
 - toggle header display menu entry
 
-- wxLayout mouse clicks don't work, for two reasons:
-     1. event ids are not the ones expected, easy to fix
-     2. for some reasons ProcessEvents() does not call any event handler...why?
 
-- wxLayout: --- working on this, KB ---
-  + cut&paste, different cursor for focus/no focus
-  + Bug: in a clear window type "a", <Backspace> - cursor doesn't return
-    to the position (0, 0)
+- add !(command) expansion to wxConfig, i.e.
+  VAR=!(hostname):me would execute "hostname" and return "hydra.medieval.de:me"
 
 - reply/forward buttons for messageview/folderview
 - only quote the selected text in reply/forward if there is any selection
   (as in XFMail) - very handy
 - update FolderView if mailbox has shrunk  (which callback gets called?)
-- New Mail indicator
-- Check for new mail button
 
 - look into wxListCtrl reset after dialog box popup
-
-- why is $HOME/.signature sometimes not found?
 
 - rearrange some preferences pages, distinguish between compose options
   and compose window layout (BCC label etc)
 
 - Add the real folder create panel to the folder create notebook
 
-
 - DND with gmc (dead easy, see dnd example :-) )
 
 - merge messages.po with locale/*.po
 - when installing M.po files, create links to @prefix@/locale/...
 
-- Alpha:
-  + editing after reply/signature in wrong place
-  + doesn't terminate
-  + wxList asserts
+- announce M on bbdb mailing list
 
-- announce M and bbdb2adb on bbdb mailing list
-
-- ADB:
-  + make AdbEdit textctrl accept pasted text
-    VZ: I don't have any problems with this (Win/GTK)?
-
-  + make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
   + add Picture field to Adb
-    VZ: what should it contain? a file name?
+    VZ: what should it contain? a file name? ...let's do this later
   + implement "internal clipboard" for
     - cut-&-paste
     - drag-&-drop
 
-  + <Enter> in "Lookup" combo doesn't work
   + some fields are sometimes created disabled under Windows - very mysterious...
 
 - UI things
   + we should somehow merge the toolbars into the main frame toolbar if it
     shows the folder view, for example
   + session management
-  + KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
 
 - Python
   + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
@@ -74,7 +175,22 @@ $Id$
   + merge in wxPython
 
 
+- merge text parts into one, send non-MIME mail
+
+
 *** to implement in near future ***
+
+- event subsystem
+  + write some macros for safe casting of the event param in the handlers to
+    the correct type
+  + separate "folder tree change" event in "pre" and "post" kind
+  + may be introduce return values?
+
+- news reader functions
+  + get the list of newsgroup and allow to choose from them
+  + propose to get only some articles when there are more than some number of
+    them (opening a never-read newsgroup takes _ages_)
+  + "catch up" command
 
 - wxFolderView assumes that msg numbers are 1...n - change this to use uids instead.
 
@@ -82,25 +198,28 @@ $Id$
 
 - Edit-CC, CC messages to others but edit the individual copies before sending
 
-- !!! non-blocking message retrieval !!!
-
-- REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
-  (for being controlled from xbiff like programs)
-  idea: listen() on a socket and write socket number to a file ~/.M/socket 
-
 - SendMessageCC should derive from a SendMessage abc
 
 - threading of messages via MessageId/References header lines
   Follow examples in SunExpert journal.
 
-- support for external editor (WHAT!? KB)
-  + I want vim ....I'm getting sick.
+- compressed mail folders
+
+- "Power Search": search all (even compressed?) folders for a keyword
+  and when found, open the folder and display the message.
+
+- Export and import of addressbook in text format.
+  I'd like a feature to select fields from the addressbook and write
+  them, e.g. semicolon separated as a list to a file, so one could
+  parse them in scripts or whatever else.
 
 - fix non-ASCII characters in header lines
 
 - if message contains only text, don't create MIME multipart message
 
-*** long-term projects ***
+- REMOTE-CONTROL: add support for popping window open and reading a folder of one's choice
+  (for being controlled from xbiff like programs)
+  idea: listen() on a socket and write socket number to a file ~/.M/socket
 
 - Support for different charsets (Unicode/utf-7/8?)
 
@@ -113,16 +232,97 @@ $Id$
 
 ********************* targets for re-write **********************
 
+MailFolder::OpenFolder() are so confusing (login for NNTP is the newsgroup!!)
+that even you apparently forget what is what - let's call the newsgroup
+parameter "newsgroup" even if we will have unused parameters for each call...
+
 Clean up MailFolder/Message classes as part of header/class rewrite
 for modularisation. Share common code in
-MessageCC/MailFolderCC/SendMessageCC and somehow integrate SendMessage 
+MessageCC/MailFolderCC/SendMessageCC and somehow integrate SendMessage
 classes in the hierarchy.
 
-Create a function to expand path names, including ~ or $HOME.
-Create a module to deal with all kinds of pathname lookups and
-expansions. 
+- !!! non-blocking message retrieval !!!
 
 ********************* known wxWindows bugs **********************
 
 - font mess (wxGTK)
 - constraints
+  - Ian Galbraith complained about being unable to enter anything into
+    the compose view (all wxTextCtrls in wxFrames instead of dialogs under
+    OpenLook WM)  --> wxGTK bug, ignore it!
+
+- wxMemoryDC and Blit() cannot handle non-(0,0) viewports
+
+
+*** Fixed and tested:
+*********************************************************************
+ - password entry field needs to use password setting to hide text
+ - add explaining texts to python dialog
+ - Toolbar sizes are wrong. --> used ugly workaround in
+                                wxMainFrame.cpp which works most of the time
+                                Robert is aware of this.
+ - set permissions for config files (passwords!) (This is done in Profile.cpp now
+   but should really be in wxConfig code)
+ - SentMessages folder sometimes looked up in wrong directory (seems ok)
+ - SentMail folder looked up in wrong directory still and gets
+   overwritten instead of appended to
+ - funny: X-Face/X-Mailer headers get sent but don't appear in SentMail folder.
+ - BBDB file format in read-only mode seems to work, needs a bit more
+   testing, crashes are gone
+ - BBDB save on exit, and parsing it in again
+ - BBDB miniframe needs parent and text needs to move down
+ - add explaining texts configuration panel  (return address, hostname)
+ - add Statusbar to wxMessageView
+ - ADB: warnings when opening BBDB, about missing entries
+ - ADB: file format looks strange, all entries have absolute paths,
+   although within the AdbEntries group
+ - deleting message ("Messsage|Delete") doesn't work
+ - configuration panel got stuck on Solaris (usual constraints problem,
+   goes away after resizing) -- (VZ) it happens to me under Linux too sometimes
+   (occasional wxGTK bug?)
+ - new "new mail" message seems to show wrong number
+ - user name no longer contains additional fields
+ - wxAboutDialog:
+   + has extra wxYield() to improve display at startup
+   + scrollbars should disappear now
+ - deleting messages from wxMessageView doesn't work
+ - wxLayout:
+   + "Home" key is funny  (fixed)
+   + some other keys are funny, too, ignore control characters
+   + flicker is gone, scrollbars are fine
+   + some more keyboard bindings (ctrl-u/k)
+   + make it have a border (easy via offset!)
+   + scrollbar settings  .. work perfectly fine for me
+   + Delete() in wxLayoutList is broken (ctrl-y triggers it)
+   + cursor corrupts last character
+ - MFrame icon not found, compile it in. (lowercase?!)
+ - strange lyx/latex problems (caused by % in rawhtml section)
+ - toggle headers doesn't work
+ - wxLayout
+  + printing takes ages to find .afm files
+  + does word wrap work?
+  + cursor bitmap occasionally causes segfault in bitmap generation
+    (odd dimensions?) (no longer used)
+  + horizontal scrollbar doesn't jump to cursorpos when newline
+  + "Home" key is funny  (fixed)
+  + cursor movement must be displayed properly ( redraw function marked
+    with //FIXME)
+  + already faster, but could get even faster. Layout/Draw only parts of the list
+ - wxllist::Delete() is almost surely broken, but behaves fine
+ - treecontrol uses folder names starting with "/" which must not be passed
+   to wxFolderView, etc. Folder names do not start with a slash, but are relative.
+   Especially, "INBOX" != "/INBOX".
+   I added a crude hack to wxMainFrame::OpenFolder() //FIXME
+   and wxFolderTree.
+ - documentation system should support pictures
+ - wxComposeView::Print() fails, wxMessageView::Print() works, why?
+
+*********************************************************************
+*** Fixed, to be tested:
+*********************************************************************
+ - sometimes mailfolders/messages seem empty
+ - .mo files should be found in M_BASEDIR/locale
+ - wxLayout:
+   + printing needs better scaling how does sample do it?
+   + use smaller fonts for printing.
+

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbDataProvider.h - data provider public interface
 // Purpose:     a data provider is a class which creates/deletes the address
@@ -9,7 +9,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _ADBDATAPROVIDER_H
 #define   _ADBDATAPROVIDER_H

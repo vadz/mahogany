@@ -1,4 +1,4 @@
-// -*- c++ -*-/////////////////////////////////////////////////////////////////
+// -*- c++ -*-// //// //// //// //// //// //// //// //// //// //// //// //// //
 // Project:     M - cross platform e-mail GUI client
 // File name:   MObject.h - the base class for all ref counted objects
 // Purpose:     MObject provides the standard lock/unlock methods and deletes
@@ -10,12 +10,10 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// // //// //// //// //// //// //// //// //// //// //// //// //// //// //// ///
 
 #ifndef   MOBJECT_H
 #define   MOBJECT_H
-
-
 
 // ----------------------------------------------------------------------------
 // MObject: the mother of all classes
@@ -39,7 +37,7 @@ public:
        This function should be called wherever such an object is used,
        especially at the beginning of all methods.
    */
-   void MOcheck(void) const
+   virtual void MOcheck(void) const
       {
          // check that this != NULL
          wxASSERT(this);
@@ -155,7 +153,10 @@ private:
 // utility functions
 // ----------------------------------------------------------------------------
 
-// unlock the pointer only if it's empty
+// lock the pointer only if it's !NULL
+inline void SafeIncRef(MObjectRC *p) { if ( p != NULL ) p->IncRef(); }
+
+// unlock the pointer only if it's !NULL
 inline void SafeDecRef(MObjectRC *p) { if ( p != NULL ) p->DecRef(); }
 
 #endif  //MOBJECT_H

@@ -1,10 +1,12 @@
 /*-*- c++ -*-********************************************************
  * Profile - managing configuration options on a per class basis    *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
+
+
 
 #ifndef PROFILE_H
 #define PROFILE_H
@@ -18,12 +20,29 @@
 //
 // ----------------------------------------------------------------------------
 
+class kbStringList;
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
 
+/**@name Profile management classes. */
+//@{
+
 /// read from the global config section
-#define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(key, key##_D))
+#ifdef DEBUG
+   // assert(0) is called when the app profile path is incorrect (should never
+   // be changed by the app or must be restored until the next call of
+   // READ_APPCONFIG() if it is)
+   #define   READ_APPCONFIG(key) ( \
+      mApplication->GetProfile()->GetPath() == M_PROFILE_CONFIG_SECTION ? \
+      (assert(0), mApplication->GetProfile()->readEntry(key, key##_D)) : \
+      mApplication->GetProfile()->readEntry(key, key##_D))
+#else
+   #define READ_APPCONFIG(key) \
+      (mApplication->GetProfile()->readEntry(key, key##_D))
+#endif
+
 /// read from a normal profile
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
 
@@ -33,15 +52,12 @@
 
 class wxConfigBase;
 
-/**@name Profile management classes. */
-//@{
 
 /** ProfileBase, an abstract base class for all Profile classes.
     This class serves as a common base class for the ProfileAppConfig
     and Profile classes. The real implementation is class Profile. In
     order to allow it to inherit values from an AppConfig class
     instance, the wrapper class ProfileAppConfig is available.
-    @see Profile
 */
 class ProfileBase : public MObjectRC
 {
@@ -57,6 +73,9 @@ public:
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
 
+   /// Flush all (disk-based) profiles now
+   static void FlushAll();
+
    /** An enum explaining the possible types of profiles. In fact,
        just a number stored as a normal profile entry which must be
        maintained manually.
@@ -68,7 +87,7 @@ public:
       /// This profile belongs to a folder.
       PT_FolderProfile
    };
-       
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -100,8 +119,12 @@ public:
    virtual String GetPath(void) const = 0;
    /// return true if the entry is defined
    virtual bool HasEntry(String const & key) const = 0;
+   /// return true if the group exists
+   virtual bool HasGroup(String const & name) const = 0;
    /// delete the entry group specified by path
    virtual void DeleteGroup(String const & path) = 0;
+   /// rename a group
+   virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile
    virtual String GetProfileName(void) = 0;
 
@@ -109,8 +132,18 @@ public:
 
        again, this is just directly forwarded to wxConfig
    */
-   bool GetFirstGroup(String& s, long& l);
-   bool GetNextGroup(String& s, long& l);
+      /// return the number of subgroups in the current group
+   size_t GetGroupCount() const;
+      /// see wxConfig docs
+   bool GetFirstGroup(String& s, long& l) const;
+      /// see wxConfig docs
+   bool GetNextGroup(String& s, long& l) const;
+
+   /** @name Listing all external profiles
+       @return a kbStringList of profile names, must be freed by
+       caller, never NULL
+    */
+   static kbStringList *GetExternalProfiles(void);
 
    /** @name Managing environment variables
 
@@ -131,11 +164,14 @@ protected:
    /** The config object we use (may be NULL).
        A normal profile either has a wxFileConfig associated with it
        or not. If not, m_config is NULL and all read/write operations
-       will be passed on to the parent profile if it exists or applied 
+       will be passed on to the parent profile if it exists or applied
        to the corresponding section in the global profile. Of course,
        the global profile must always have a non-NULL pointer here.
    */
    wxConfigBase  *m_config;
+
+   /// Do we need to expand environment variables (only if m_config == NULL)
+   bool m_expandEnvVars;
 
    /// why does egcs want this?
    ProfileBase() {}
@@ -154,17 +190,18 @@ private:
 // ----------------------------------------------------------------------------
 // a small class to temporarily suspend env var expansion
 // ----------------------------------------------------------------------------
-class ProfileEnvVarSuspend
+class ProfileEnvVarSave
 {
 public:
-   ProfileEnvVarSuspend(ProfileBase *profile)
+   ProfileEnvVarSave(ProfileBase const *profile, bool expand = false)
    {
-      m_profile = profile;
+      // we don't really change it, just temporarily change its behaviour
+      m_profile = (ProfileBase *)profile;
       m_wasExpanding = profile->IsExpandingEnvVars();
-      profile->SetExpandEnvVars(FALSE);
+      m_profile->SetExpandEnvVars(expand);
    }
 
-   ~ProfileEnvVarSuspend()
+   ~ProfileEnvVarSave()
    {
       m_profile->SetExpandEnvVars(m_wasExpanding);
    }
@@ -187,18 +224,19 @@ private:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(ProfileBase *config, const String& path)
-   {
-      m_config = config;
-      m_strOldPath = m_config->GetPath();
-      m_config->SetPath(path);
-   }
+   ProfilePathChanger(ProfileBase const *config, const String& path)
+      {
+         // we don't really change it, just temporarily change the path
+         m_config = (ProfileBase *)config;
+         m_strOldPath = m_config->GetPath();
+         m_config->SetPath(path);
+      }
 
    ~ProfilePathChanger() { m_config->SetPath(m_strOldPath); }
 
 private:
    ProfileBase *m_config;
-   String       m_strOldPath;
+   String      m_strOldPath;
 };
 
 
@@ -207,5 +245,5 @@ private:
 // ----------------------------------------------------------------------------
 void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const & key);
 void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const & key);
-
+//@}
 #endif // PROFILE_H

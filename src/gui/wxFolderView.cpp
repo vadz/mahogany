@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.cc: a window displaying a mail folder               *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$         *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -24,11 +24,17 @@
 #  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+#  include "Profile.h"
+
+#  include <wx/dynarray.h>
 #endif
 
 #include <XFace.h>
 
 #include <wx/file.h>
+#include <wx/persctrl.h>
+
+#include "MFolder.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -48,11 +54,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_SIZE              (wxFolderListCtrl::OnSize)
 END_EVENT_TABLE()
 
-// FIXME need to put this function (now in wxMessageView.cpp) in some header
-extern wxFrame *GetFrame(wxWindow *win);
-
 #define   LCFIX ((wxFolderListCtrl *)this)->
-
 
 static const char *wxFLC_ColumnNames[] =
 {
@@ -180,7 +182,9 @@ wxFolderView::InternalCreate(MailFolder *mf, MWindow *iparent)
    int x,y;
    m_Parent->GetClientSize(&x, &y);
 
-   m_SplitterWindow = new wxSplitterWindow(m_Parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D,wxSP_BORDER);
+   m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
+                                            wxDefaultPosition, wxSize(x,y),
+                                            wxSP_3D|wxSP_BORDER);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,m_MessagePreview, y/3);
@@ -198,14 +202,14 @@ wxFolderView::InternalCreate(MailFolder *mf, MWindow *iparent)
 }
 
 wxFolderView *
-wxFolderView::Create(MailFolder *mf, MWindow *iparent)
+wxFolderView::Create(MailFolder *mf, MWindow *parent)
 {
-   if(! mf)
-      return NULL;
+   CHECK( mf, NULL, "NULL folder passed to wxFolderView::Create" );
 
    mf->IncRef();  // make sure it doesn't go away
    wxFolderView *fv = new wxFolderView();
-   fv->InternalCreate(mf,iparent);
+   fv->InternalCreate(mf,parent);
+
    return fv;
 }
 
@@ -221,6 +225,8 @@ wxFolderView::Create(String const & folderName, MWindow *iparent)
 
    wxFolderView *fv = new wxFolderView();
    fv->InternalCreate(mf, iparent);
+   fv->m_folderName = folderName;
+
    return fv;
 }
 
@@ -249,8 +255,8 @@ wxFolderView::Update(void)
    // error messages about failed env var expansion (this string contains '%'
    // which introduce env vars under Windows)
    {
-      ProfileEnvVarSuspend suspend(mApplication->GetProfile());
-      dateFormat = READ_APPCONFIG(MC_DATE_FMT);
+      ProfileEnvVarSave suspend(mApplication->GetProfile(),false);
+      dateFormat = READ_APPCONFIG(MP_DATE_FMT);
 
       // should have _exactly_ 3 format specificators, otherwise can't call
       // Printf()!
@@ -266,15 +272,18 @@ wxFolderView::Update(void)
             wxLogError(_("Invalid value '%s' for the date format: it should "
                          "contain exactyly 3 %%u format specificators. Default "
                          "value '%s' will be used instead."),
-                         dateFormat.c_str(), MC_DATE_FMT_D);
+                         dateFormat.c_str(), MP_DATE_FMT_D);
          }
 
-         dateFormat = MC_DATE_FMT_D;
+         dateFormat = MP_DATE_FMT_D;
       }
    }
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
+   {
       m_FolderCtrl->Clear();
+      m_NumOfMessages = 0;
+   }
 
    for(i = 0; i < n; i++)
    {
@@ -294,7 +303,6 @@ wxFolderView::Update(void)
       selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
       m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
       m_FolderCtrl->Select(i,selected);
-
       delete mptr;
    }
    m_NumOfMessages = n;
@@ -366,7 +374,20 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       GetSelections(selections);
       DeleteMessages(selections);
       break;
-
+   case WXMENU_MSG_PRINT:
+      GetSelections(selections);
+      PrintMessages(selections);
+      break;
+#ifdef USE_PS_PRINTING
+   case WXMENU_MSG_PRINT_PS:
+      //FIXME GetSelections(selections);
+      //FIXME PrintMessages(selections);
+      break;
+#endif
+   case WXMENU_MSG_PRINT_PREVIEW:
+      GetSelections(selections);
+      PrintPreviewMessages(selections);
+      break;
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,TRUE);
@@ -377,6 +398,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());
+      break;
+   case WXMENU_MSG_TOGGLEHEADERS:
+   case WXMENU_MSG_SHOWRAWTEXT:
+      (void)m_MessagePreview->DoMenuCommand(event.GetId());
       break;
 
    default:
@@ -442,6 +467,41 @@ wxFolderView::UnDeleteMessages(const wxArrayInt& selections)
 }
 
 void
+wxFolderView::PrintMessages(const wxArrayInt& selections)
+{
+   int n = selections.Count();
+
+   if(n == 1)
+      m_MessagePreview->Print();
+   else
+   {
+      int i;
+      for(i = 0; i < n; i++)
+      {
+         PreviewMessage(i);
+         m_MessagePreview->Print();
+      }
+   }
+}
+
+void
+wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
+{
+   int n = selections.Count();
+
+   if(n == 1)
+      m_MessagePreview->PrintPreview();
+   else
+   {
+      int i;
+      for(i = 0; i < n; i++)
+      {
+         PreviewMessage(i);
+         m_MessagePreview->PrintPreview();
+      }
+   }
+}
+void
 wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderName)
 {
    int i;
@@ -465,28 +525,42 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
 void
 wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
 {
-   wxString folderName;
-   if ( MInputBox(&folderName, _("Save Message"),
-                  _("Name of the folder to write to?"),
-                  m_Parent, "SaveFolderName") ) {
-      SaveMessages(selections,folderName);
+   MFolder *folder = MDialog_FolderChoose(m_Parent);
+   if ( folder )
+   {
+      // +1 is apparently needed to skip the '/'
+      SaveMessages(selections, folder->GetFullName().c_str() + 1);
+
+      folder->DecRef();
+   }
+   else
+   {
+      wxLogStatus(GetFrame(m_Parent), _("Cancelled"));
    }
 }
 
 void
 wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
 {
-   String
-      filename =
-      MDialog_FileRequester(NULLstring, m_Parent, NULLstring,
-                            NULLstring, NULLstring, NULLstring, true,
-                            m_Profile);
+   String filename = wxPFileSelector("MsgSave",
+                                     _("Choose file to save message to"),
+                                     NULL, NULL, NULL,
+                                     _("All files (*.*)|*.*"),
+                                     wxSAVE | wxOVERWRITE_PROMPT,
+                                     m_Parent);
 
-   // truncate the file
-   wxFile file(filename, wxFile::write);
-   file.Close();
+   if ( !filename )
+   {
+      wxLogStatus(GetFrame(m_Parent), _("Cancelled"));
+   }
+   else
+   {
+      // truncate the file
+      wxFile file(filename, wxFile::write);
+      file.Close();
 
-   SaveMessages(selections,filename);
+      SaveMessages(selections,filename);
+   }
 }
 
 void
@@ -503,8 +577,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
    prefix = READ_CONFIG(m_Profile, MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
-      cv = GLOBAL_NEW wxComposeView(_("Reply"),m_Parent,
-                                    m_Profile);
+      cv = GLOBAL_NEW wxComposeView(_("Reply"),m_Parent, m_Profile);
       str = "";
       msg = m_MailFolder->GetMessage(selections[i]+1);
       np = msg->CountParts();
@@ -566,7 +639,9 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
                                  + msg->Subject());
 
       m_MailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
+//FIXME:      cv->InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
+      cv->InsertData(strutil_strdup(str), str.Length(),
+                     "TEXT/PLAIN");
    }
 
    wxLogStatus(GetFrame(m_Parent), _("%d messages forwarded"), n);
@@ -579,6 +654,24 @@ wxFolderView::SetSize(const int x, const int y, const int width, int
 //   wxPanel::SetSize(x,y,width,height);
    if(m_SplitterWindow)
       m_SplitterWindow->SetSize( x, y, width, height );
+}
+
+void wxFolderView::OnFolderDeleteEvent(const String& folderName)
+{
+   if ( folderName == m_folderName )
+   {
+      if ( m_Parent->IsKindOf(CLASSINFO(wxFrame)) )
+      {
+         wxLogMessage(_("Closing folder '%s' because the underlying mail "
+                        "folder was deleted."), m_folderName.c_str());
+
+         m_Parent->Close();
+      }
+      else
+      {
+         FAIL_MSG("I thought folder view parent must be a frame.");
+      }
+   }
 }
 
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
@@ -597,23 +690,17 @@ void
 wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame *parent)
 {
    m_FolderView = fv;
-   SetTitle(String("M - " + m_FolderView->GetFolder()->GetName()));
-   // menu
-   AddFileMenu();
-   AddEditMenu();
-   AddMessageMenu();
-   SetMenuBar(m_MenuBar);
-
-   // status bar
-   CreateStatusBar();
-
-   // add a toolbar to the frame
-   // NB: the buttons must have the same ids as the menu commands
-   m_ToolBar = CreateToolBar();
-   AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
+   SetTitle(String("M: " + m_FolderView->GetFolder()->GetName()));
 
    if ( m_FolderView->IsOk() )
+   {
+      // add a toolbar to the frame
+      // NB: the buttons must have the same ids as the menu commands
+      m_ToolBar = CreateToolBar();
+      AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
+
       Show(true);
+   }
    else
    {
       delete m_FolderView;
@@ -622,13 +709,11 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame *parent)
    }
 }
 
-
 wxFolderViewFrame *
 wxFolderViewFrame::Create(MailFolder *mf, wxMFrame *parent)
 
 {
-   if(! mf)
-      return NULL;
+   CHECK( mf, NULL, "NULL folder passed to wxFolderViewFrame::Create" );
 
    wxFolderViewFrame *f = new wxFolderViewFrame(mf->GetName(),parent);
    wxFolderView *fv = wxFolderView::Create(mf,f);
@@ -659,6 +744,15 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
    : wxMFrame(name,parent)
 {
    m_FolderView = NULL;
+
+   SetTitle(String("M: " + name));
+   // menu
+   AddFileMenu();
+   AddEditMenu();
+   AddMessageMenu();
+   SetMenuBar(m_MenuBar);
+   // status bar
+   CreateStatusBar();
 }
 
 wxFolderViewFrame::~wxFolderViewFrame()
@@ -669,7 +763,8 @@ wxFolderViewFrame::~wxFolderViewFrame()
 void
 wxFolderViewFrame::OnUpdateUI(wxUpdateUIEvent& event)
 {
-   event.Enable(m_FolderView->HasSelection());
+   if(m_FolderView)
+      event.Enable(m_FolderView->HasSelection());
 }
 
 void
@@ -681,7 +776,8 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       MDialog_FolderProfile(this, m_FolderView->GetProfile());
       return;
    }
-   if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id) )
+   if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
+       || id == WXMENU_HELP_CONTEXT)
       m_FolderView->OnCommandEvent(event);
    else
       wxMFrame::OnMenuCommand(id);
@@ -695,4 +791,4 @@ wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 
    if(m_FolderView)
       m_FolderView->SetSize(0,0,x,y);
-};
+}

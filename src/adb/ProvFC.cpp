@@ -45,9 +45,9 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
-
 #  include "strutil.h"
-
+#  include "sysutil.h"
+#  include "MApplication.h"
 #  include <ctype.h>
 #endif //USE_PCH
 
@@ -87,7 +87,7 @@ class FCBook;
 class FCDataProvider;
 
 // our AdbEntryData implementation
-class FCEntry : public AdbEntry
+class FCEntry : public AdbEntryStoredInMemory
 {
 public:
   // ctor
@@ -96,21 +96,6 @@ public:
   // implement interface methods
     // AdbEntry
   virtual AdbEntryGroup *GetGroup() const;
-
-  virtual void GetField(size_t n, String *pstr) const;
-
-  virtual size_t GetEMailCount() const           { return m_astrEmails.Count(); }
-  virtual void GetEMail(size_t n, String *pstr) const { *pstr = m_astrEmails[n]; }
-
-  virtual void ClearDirty()    { m_bDirty = FALSE; }   
-  virtual bool IsDirty() const { return m_bDirty; }
-
-  virtual void SetField(size_t n, const String& strValue);
-  virtual void AddEMail(const String& strEMail)
-    { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
-  virtual void ClearExtraEMails();
-
-  virtual bool Matches(const char *str, int where, int how);
 
   // pack/unpack data: we store it as a colon delimited list of values, but
   // it's too slow to modify it in place, so we unpack it to an array of
@@ -135,11 +120,6 @@ public:
 private:
   virtual ~FCEntry();
 
-  wxArrayString m_astrFields; // all text entries (some may be not present)
-  wxArrayString m_astrEmails; // all email addresses except for the first one
-
-  bool m_bDirty;              // dirty flag
-
   FCEntryGroup *m_pGroup;     // the group which contains us (never NULL)
 
   GCC_DTOR_WARN_OFF();
@@ -159,6 +139,7 @@ public:
   // implement interface methods
     // AdbEntryGroup
   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
+  virtual String GetName() const { return m_strName; }
 
   virtual size_t GetEntryNames(wxArrayString& aNames) const;
   virtual size_t GetGroupNames(wxArrayString& aNames) const;
@@ -204,6 +185,10 @@ private:
 class FCBook : public AdbBook
 {
 public:
+  // get the full file name - it's the same as the filename passed in for the
+  // absolute pathes or the name with M local dir prepended for the other ones
+  static String GetFullAdbPath(const String& filename);
+
   FCBook(const String& filename);
 
   // implement interface methods
@@ -239,7 +224,8 @@ public:
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
-  virtual const char *GetName() const;
+  virtual bool IsSameAs(const String& name) const;
+  virtual String GetName() const;
 
   virtual void SetUserName(const String& name);
   virtual String GetUserName() const;
@@ -299,7 +285,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
   if ( bNew ) {
     // force the creation of our entry by writing something (writing empty
     // string will be ignored)
-    if ( !pGroup->GetConfig()->Write(GetPath(), ":") ) {
+    if ( !pGroup->GetConfig()->Write(GetPath(), wxString(":")) ) {
       // also if it fails it means that something is wrong and this entry
       // can't be created, so be sure that our IsOk() will return FALSE
       m_pGroup = NULL;
@@ -332,95 +318,6 @@ wxString FCEntry::GetPath() const
 AdbEntryGroup *FCEntry::GetGroup() const
 {
   return m_pGroup;
-}
-
-// we store only the fields which were non-empty, so check the index
-void FCEntry::GetField(size_t n, String *pstr) const
-{
-  if ( n < m_astrFields.Count() )
-    *pstr = m_astrFields[n];
-  else
-    pstr->Empty();
-}
-
-// the problem here is that we may have only several first strings in the
-// m_astrFields array, so we need to add some before setting n-th field
-void FCEntry::SetField(size_t n, const wxString& strValue)
-{
-  size_t nCur = m_astrFields.Count();
-  // add some empty fields if needed
-  for ( int nAdd = 0; nAdd < (int)(n - nCur + 1); nAdd++ )
-    m_astrFields.Add(wxGetEmptyString());
-
-  if ( m_astrFields[n] != strValue ) {
-    m_astrFields[n] = strValue;
-    m_bDirty = TRUE;
-  }
-}
-
-void FCEntry::ClearExtraEMails()
-{ 
-  if ( !m_astrEmails.IsEmpty() ) {
-    m_astrEmails.Empty();
-    m_bDirty = TRUE;
-  }
-  //else: don't set dirty flag if it didn't change anything
-}
-
-bool FCEntry::Matches(const char *szWhat, int where, int how)
-{
-  wxString strWhat;
-
-  // substring lookup looks for a part of the string, "starts with" means
-  // what is says, otherwise the entire string should be matched by the pattern
-  if ( how & AdbLookup_Substring )
-    strWhat << '*' << szWhat << '*';
-  else if ( how & AdbLookup_StartsWith )
-    strWhat << szWhat << '*';
-  else
-    strWhat = szWhat;
-
-  // if the search is not case sensitive, transform everything to lower case
-  if ( (how & AdbLookup_CaseSensitive) == 0 )
-    strWhat.MakeLower();
-
-  wxString strField;
-
-  #define CHECK_MATCH(field)                                        \
-    if ( where & AdbLookup_##field ) {                              \
-      strField = m_astrFields[AdbField_##field];                    \
-      if ( (how & AdbLookup_CaseSensitive) == 0 )                   \
-        strField.MakeLower();                                       \
-      if ( strField.Matches(strWhat) )                              \
-        return TRUE;                                                \
-    }
-
-  CHECK_MATCH(NickName);
-  CHECK_MATCH(FullName);
-  CHECK_MATCH(Organization);
-  CHECK_MATCH(HomePage);
-
-  // special case: we have to look in _all_ e-mail addresses
-  // NB: this search is always case insensitive, because e-mail addresses are
-  if ( where & AdbLookup_EMail ) {
-    if ( m_astrFields.Count() > AdbField_EMail ) {
-      strField = m_astrFields[AdbField_EMail];
-      strField.MakeLower();
-      if ( strField.Matches(strWhat) )
-        return TRUE;
-    }
-
-    // look in additional email addresses too
-    size_t nCount = m_astrEmails.Count();
-    for ( size_t n = 0; n < nCount; n++ ) {
-      strField = m_astrEmails[n];
-      strField.MakeLower();
-      if ( strField.Matches(strWhat) )
-        return TRUE;
-    }
-  }
-
-  return FALSE;
 }
 
 // load the data from file and parse it
@@ -556,7 +453,9 @@ bool FCEntry::Save()
 
   wxFileConfig *pConf = m_pGroup->GetConfig();
 
-  return pConf->Write(GetPath(), strValue);
+  bool ok = pConf->Write(GetPath(), strValue);
+
+  return ok;
 }
 
 // ----------------------------------------------------------------------------
@@ -579,7 +478,7 @@ FCEntryGroup::FCEntryGroup(FCEntryGroup *pParent,
 
   if ( bNew ) {
     // force creation of the group
-    if ( !m_pConfig->Write(GetPath(), "") ) {
+    if ( !m_pConfig->Write(GetPath(), wxString("")) ) {
       // something went wrong, don't create this group, the next line ensures
       // that IsOk() will return FALSE
       m_pConfig = NULL;
@@ -713,10 +612,23 @@ AdbEntry *FCEntryGroup::FindEntry(const char * /* szName */)
 // FCBook
 // ----------------------------------------------------------------------------
 
-FCBook::FCBook(const String& filename)
-      : m_strFile(filename)
+String FCBook::GetFullAdbPath(const String& filename)
 {
-  m_strFileName = strutil_getfilename(m_strFile).Left('.');
+  CHECK( !filename.IsEmpty(), "", "ADB without name?" );
+
+  String path;
+  if ( IsAbsPath(filename) )
+    path = filename;
+  else
+    path << mApplication->GetLocalDir() << DIR_SEPARATOR << filename;
+
+  return path;
+}
+
+FCBook::FCBook(const String& filename)
+      : m_strFile(GetFullAdbPath(filename))
+{
+  m_strFileName = strutil_getfilename(filename).BeforeLast('.');
 
   // we must load the file here because we need the ADB's name and description
   m_pConfig = new wxFileConfig(wxGetEmptyString(), wxGetEmptyString(),
@@ -732,9 +644,16 @@ FCBook::~FCBook()
   delete m_pConfig;
 }
 
-const char *FCBook::GetName() const
+bool FCBook::IsSameAs(const String& name) const
 {
-  return m_strFile.c_str();
+   String path = GetFullAdbPath(name);
+
+   return sysutil_compare_filenames(m_strFile, path);
+}
+
+String FCBook::GetName() const
+{
+  return m_strFile;
 }
 
 void FCBook::SetUserName(const String& strAdb)
@@ -785,6 +704,8 @@ bool FCDataProvider::EnumBooks(wxArrayString& /* aNames */)
 
 bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
+  String fullname = FCBook::GetFullAdbPath(name);
+
   bool ok = FALSE;
 
   switch ( test )
@@ -793,7 +714,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
     case Test_OpenReadOnly:
       {
         // the test is not 100% fool proof...
-        FILE *fp = fopen(name, "rt");
+        FILE *fp = fopen(fullname, "rt");
         if ( fp != NULL )
         {
           char buf[1024];
@@ -822,11 +743,11 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 
         // it's the only portable way to test for it I can think of
         wxFile file;
-        if ( file.Create(name, FALSE /* !overwrite */, wxFile::write) )
+        if ( !file.Create(fullname, FALSE /* !overwrite */) )
         {
           // either it already exists or we don't have permission to create
           // it there. Check whether it exists now.
-          ok = file.Open(name, wxFile::write_append, wxFile::write);
+          ok = file.Open(fullname, wxFile::write_append);
         }
         else
         {
@@ -835,7 +756,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
           ok = TRUE;
 
           file.Close();
-          remove(name);
+          remove(fullname);
         }
       }
       break;
@@ -862,7 +783,7 @@ bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 String FCEntry::Dump() const
 {
   String str;
-  str.Printf("FC: name = '%s', m_nRef = %d", GetName(), m_nRef);
+  str.Printf("FCEntry: name = '%s', m_nRef = %d", GetName(), m_nRef);
 
   return str;
 }

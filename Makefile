@@ -4,7 +4,7 @@
 
 
 CWD = 
-SUB_DIRS = extra src include locale
+SUB_DIRS = extra src include
 FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 
@@ -33,7 +33,7 @@ config.status:
 	@echo "You should really run ./configure with appropriate arguments."
 	@echo "Type ./configure --help to find out more about it."
 	@echo "Running ./configure with default setup now..."
-	$(MAKE) config
+	./configure
 
 config: configure makeopts.in
 	./configure || $(RM) config.status
@@ -56,7 +56,7 @@ bak backup:
 install:
 	@echo "Installing M in " $(BINDIR)
 	@echo "        data in " $(DATADIR)
-	@echo "        docs in " $(PREFIX)/doc/M
+	@echo "        docs in " $(DOCDIR)
 	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
@@ -65,12 +65,15 @@ install:
 	$(INSTALL) -d $(DATADIR)/lib
 	$(INSTALL) -d $(DATADIR)/doc
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
-	$(INSTALL_DATA) `find doc \! -type d` $(DOCDIR)
 
 install_doc:
 	$(MAKE) -C doc install
+	$(INSTALL_DATA) TODO README $(DOCDIR)
 
-install_all: install install_doc
+install_all: install install_doc install_locale
+
+install_locale:
+	$(MAKE) -C locale install
 
 msgcat:
 	$(MAKE) -C src msgcat
@@ -80,5 +83,5 @@ locales:
 	$(MAKE) -C locale all
 
 .PHONY: all dep clean bak backup config program doc install install_doc \
-        install_all msgcat locales
+        install_all msgcat locales scandoc install_locale
 

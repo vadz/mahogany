@@ -84,9 +84,9 @@ MimeList::MimeList(void)
       MimeEntry   *newEntry;
       String   tmp;
 
-      PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
+      PathFinder pf(READ_APPCONFIG(MP_ETCPATH));
 
-      String file = pf.FindFile(READ_APPCONFIG(MC_MAILCAP), &found);
+      String file = pf.FindFile(READ_APPCONFIG(MP_MAILCAP), &found);
       if(! found)
          return;
       ifstream str(file.c_str());

@@ -21,7 +21,7 @@
 
 // fwd decl
 class ProfileBase;
-class ArrayAdbEntries;
+class ArrayAdbElements;
 class wxString;
 class MWindow;
 class MFolder;
@@ -159,14 +159,14 @@ bool MInputBox(wxString *pstr,
  user is not asked at all. If the dialog is shown, the user may cancel it and
  in this case -1 is returned. Otherwise, it's the index of selected item.
 */
-int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
+int MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                           const MWindow *parent = NULL);
 
 /// simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( const MWindow *parent, bool bCloseOnTimeout = true);
 
-// @@@@ it is the only way I see right now...
+// the global pointer to the splash screen (NULL if there is no flash screen)
 extern class MFrame *g_pSplashScreen;
 
 /// function which will close the splash screen if it's (still) opened
@@ -187,5 +187,17 @@ MDialog_FolderChoose(const MWindow *parent);
 
 /// test
 void MDialog_FolderOpen(class wxMFrame *parent);
+
+/** show a (modal) dialog with the given text
+
+    @param title is the title of the dialog
+    @param text is the text to show in it
+    @param configPath is the path in the config used to save dialog position
+           and size and may be NULL
+*/
+void MDialog_ShowText(MWindow *parent,
+                      const char *title,
+                      const char *text,
+                      const char *configPath = NULL);
 
 #endif  //WXMDIALOGS_H

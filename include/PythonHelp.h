@@ -87,7 +87,7 @@ PyH_RunScript(FILE *file, const char *filename);
 /** Function to run a simple python script in the global namespace.
     The scriptname is relative to M's script directory. Really just a
     convenient wrapper around PyH_RunScript().
-    @param scriptname
+    @param scriptname name of the script to execute
 */
 void
 PyH_RunMScript(const char *scriptname);

@@ -46,6 +46,11 @@
 
 #include <ctype.h>
 
+#ifdef OS_UNIX
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 /// a name for the empty profile, like this it is invalid for wxConfig, so it will never conflict with a real profile name
 #define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
 
@@ -70,6 +75,11 @@ public:
        writes back all entries
    */
    ~ConfigFileManager();
+
+   /**
+        Flushes all profiles, i.e. writes them to disk.
+   */
+   void Flush();
 
    /**  Finds a profile if it already exists
         @param fileName name of configuration file
@@ -116,6 +126,9 @@ public:
    /// makes an empty profile, just inheriting from Parent
    static ProfileBase * CreateEmptyProfile(ProfileBase const *Parent);
 
+   /// flushes all profiles to disk
+   static void FlushAll() { ms_cfManager.Flush(); }
+
    /// get the associated config object
    wxConfigBase *GetConfig() const { return m_config; }
 
@@ -140,10 +153,12 @@ public:
    void SetPath(const String & path);
    String GetPath(void) const;
    virtual bool HasEntry(const String & key) const;
+   virtual bool HasGroup(const String & name) const;
    virtual void DeleteGroup(const String & path);
+   virtual bool Rename(const String& oldName, const String& newName);
    /// return the name of the profile
    virtual String GetProfileName(void) { return profileName; }
-   
+
    MOBJECT_DEBUG
 
 private:
@@ -153,7 +168,7 @@ private:
        @param section the section to use if not M_PROFILE_CONFIG_SECTION
        This will try to load the configuration file given by
        iClassName".profile" and look for it in all the paths specified
-       by GetAppConfig()->readEntry(MC_PROFILEPATH).
+       by GetAppConfig()->readEntry(MP_PROFILEPATH).
 
    */
    Profile(const String & iClassName, ProfileBase const *Parent,
@@ -216,7 +231,9 @@ public:
    void SetPath(const String & path);
    String GetPath(void) const;
    virtual bool HasEntry(const String & key) const;
+   virtual bool HasGroup(const String & name) const;
    virtual void DeleteGroup(const String & path);
+   virtual bool Rename(const String& oldName, const String& newName);
 
    /// return the name of the profile
    virtual String GetProfileName(void) { return String("/"); }
@@ -224,6 +241,11 @@ public:
 private:
    /// forbid deletion
    ~wxConfigProfile();
+
+   // remember the umask
+#ifdef OS_UNIX
+   long m_umask;
+#endif // Unix
 
    GCC_DTOR_WARN_OFF();
 };
@@ -267,54 +289,86 @@ static String FilterProfileName(const String& profileName);
 // ----------------------------------------------------------------------------
 // ProfileBase
 // ----------------------------------------------------------------------------
-bool ProfileBase::GetFirstGroup(String& s, long& l)
+
+void ProfileBase::FlushAll()
+{
+   Profile::FlushAll();
+}
+
+size_t ProfileBase::GetGroupCount() const
+{
+   return m_config ? m_config->GetNumberOfGroups() : 0u;
+}
+
+//FIXME:MT calling wxWindows from possibly non-GUI code
+bool ProfileBase::GetFirstGroup(String& s, long& l) const
 {
    return m_config && m_config->GetFirstGroup(s, l);
 }
 
-bool ProfileBase::GetNextGroup(String& s, long& l)
+bool ProfileBase::GetNextGroup(String& s, long& l) const
 {
    return m_config && m_config->GetNextGroup(s, l);
 }
 
 bool ProfileBase::IsExpandingEnvVars() const
 {
-   return m_config && m_config->IsExpandingEnvVars();
+   return (m_config && m_config->IsExpandingEnvVars()) || m_expandEnvVars;
 }
 
 void ProfileBase::SetExpandEnvVars(bool bDoIt)
 {
-   if(m_config) m_config->SetExpandEnvVars(bDoIt);
+   if(m_config)
+      m_config->SetExpandEnvVars(bDoIt);
+   else
+      m_expandEnvVars = bDoIt;
 }
 
 // ----------------------------------------------------------------------------
 // ProfileBase
 // ----------------------------------------------------------------------------
 
+/** This function sets profile parameters and is applied
+    to all profiles directly after creation.
+*/
+inline static
+void EnforcePolicy(ProfileBase *p)
+{
+   p->SetExpandEnvVars(true);
+}
+
 ProfileBase *
 ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
 {
-   return  Profile::CreateProfile(FilterProfileName(classname), parent);
+   ProfileBase *p =  Profile::CreateProfile(FilterProfileName(classname), parent);
+   EnforcePolicy(p);
+   return p;
 }
 
 ProfileBase *
 ProfileBase::CreateEmptyProfile(ProfileBase const *parent)
 {
-   return Profile::CreateEmptyProfile(parent);
+   ProfileBase *p = Profile::CreateEmptyProfile(parent);
+   EnforcePolicy(p);
+   return p;
 }
 
 ProfileBase *
 ProfileBase::CreateGlobalConfig(const String & filename)
 {
    ASSERT( ! strutil_isempty(filename) );
-   return new wxConfigProfile(filename);
+   ProfileBase *p = new wxConfigProfile(filename);
+   EnforcePolicy(p);
+   return p;
 }
 
 ProfileBase *
 ProfileBase::CreateFolderProfile(const String & iClassName,
                                  ProfileBase const *parent)
 {
-   return Profile::CreateFolderProfile(iClassName,parent);
+   ProfileBase *p = Profile::CreateFolderProfile(iClassName,parent);
+   EnforcePolicy(p);
+   return p;
 }
 
 
@@ -328,6 +382,24 @@ ProfileBase::readEntry(const String & key,
    return str;
 }
 
+kbStringList *
+ProfileBase::GetExternalProfiles(void)
+{
+   kbStringList *profiles = new kbStringList;
+   String pattern = READ_APPCONFIG(MP_USERDIR);
+   String s;
+   pattern << STRUTIL_PATH_SEPARATOR << "*.profile";
+   wxString file = wxFindFirstFile(pattern);
+   while( !!file )
+   {
+      s = file;
+      s = strutil_path_filename(s);
+      profiles->push_back(strutil_strdup(s));
+      file = wxFindNextFile();
+   }
+   return profiles;
+}
+
 // ----------------------------------------------------------------------------
 // wxConfigProfile - global wrapper
 // ----------------------------------------------------------------------------
@@ -339,12 +411,13 @@ wxConfigProfile::wxConfigProfile(const String & fileName)
    // perfectly ok, for the registry case our keys are under
    // vendor\appname)
 
-   //FIXME: is this ok for Windows?
    m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                             "", "",
                             wxCONFIG_USE_LOCAL_FILE |
                             wxCONFIG_USE_GLOBAL_FILE);
 #  else  // Unix
+   m_umask = 0;
+
    static String s_filename;
 
    // remember the global config file name
@@ -354,12 +427,22 @@ wxConfigProfile::wxConfigProfile(const String & fileName)
                            wxCONFIG_USE_LOCAL_FILE|
                            wxCONFIG_USE_GLOBAL_FILE);
 #  endif // Unix/Windows
+
    // set the default path for configuration entries
    m_config->SetPath(M_PROFILE_CONFIG_SECTION);
 }
 
 void wxConfigProfile::SetPath(const String & path)
 {
+#ifdef OS_UNIX
+   if ( !m_umask )
+   {
+      // remember the default umask - we won't be able to retrieve it from the
+      // dtor because it's too late to call config functions then
+      m_umask = READ_APPCONFIG(MP_UMASK);
+   }
+#endif // Unix
+
    MOcheck();
    m_config->SetPath(path);
 }
@@ -372,10 +455,25 @@ wxConfigProfile::GetPath(void) const
 }
 
 bool
+wxConfigProfile::HasGroup(const String & name) const
+{
+   MOcheck();
+   return m_config->HasGroup(name);
+}
+
+bool
 wxConfigProfile::HasEntry(const String & key) const
 {
    MOcheck();
    return m_config->HasEntry(key) || m_config->HasGroup(key);
+}
+
+bool
+wxConfigProfile::Rename(const String& oldName, const String& newName)
+{
+   MOcheck();
+
+   return m_config->RenameGroup(oldName, newName);
 }
 
 void
@@ -388,8 +486,19 @@ wxConfigProfile::DeleteGroup(const String & path)
 wxConfigProfile::~wxConfigProfile()
 {
    MOcheck();
+
+#ifdef OS_UNIX
+   umask(066);  // turn off read/write for all other users
+#endif // Unix
+
    m_config->Flush();
    delete m_config;
+
+   // reset it to a sensible default
+#ifdef OS_UNIX
+   if ( m_umask )
+      umask(m_umask);  // turn off read/write for all other users
+#endif
 }
 
 String
@@ -438,7 +547,7 @@ wxConfigProfile::writeEntry(const String & key, long value)
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-Profile::Profile(const String & iClassName, ProfileBase const *Parent, 
+Profile::Profile(const String & iClassName, ProfileBase const *Parent,
                  const char *section)
 {
    m_config = NULL;   // set it before using CHECK()
@@ -452,10 +561,10 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent,
    String fullName;
    if ( !IsAbsPath(profileName) )
    {
-      String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
+      String tmp = READ_APPCONFIG(MP_PROFILE_PATH);
       PathFinder pf(tmp);
 
-      String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
+      String fileName = profileName + READ_APPCONFIG(MP_PROFILE_EXTENSION);
       fullName = pf.FindFile(fileName, &isOk);
       if( !isOk )
          fullName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
@@ -463,14 +572,20 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent,
    else
    {
       // easy...
-      fullName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
+      fullName << profileName << READ_APPCONFIG(MP_PROFILE_EXTENSION);
    }
 
-   if ( READ_APPCONFIG(MC_CREATE_PROFILES) || wxFileExists(fullName) )
+   if ( READ_APPCONFIG(MP_CREATE_PROFILES) || wxFileExists(fullName) )
    {
+#ifdef OS_UNIX
+     umask(066);  // turn off read/write for all other users
+#endif
       m_config = new wxFileConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                   fullName, wxString(""),
                                   wxCONFIG_USE_LOCAL_FILE);
+#ifdef OS_UNIX
+     umask(READ_APPCONFIG(MP_UMASK));  // turn off read/write for all other users
+#endif
    }
    else
    {
@@ -521,8 +636,15 @@ Profile::CreateEmptyProfile(ProfileBase const *parent)
 
 Profile::~Profile()
 {
+
+#ifdef OS_UNIX
+     umask(022);  // turn off read/write for all other users
+#endif
    if ( m_config )
       m_config->Flush();
+#ifdef OS_UNIX
+     umask(READ_APPCONFIG(MP_UMASK));  // turn off read/write for all other users
+#endif
    if( ! m_isEmpty)
       ms_cfManager.DeRegister(this);
    delete m_config;
@@ -569,9 +691,11 @@ readEntryFromProfile(KeyValue& value,
 {
    if ( defaultValue.IsString() )
    {
-      String strValue = profile->readEntry(key, (const char *)NULL);
+      const char * illegal = "^%%&*^&*^y--illegal-profile-value^&%%$&^";
+      //FIXME: need readEntry which returns success value
+      String strValue = profile->readEntry(key, (const char *)illegal);
       value.SetValue(strValue);
-      return !strutil_isempty(strValue);
+      return strValue != illegal;
    }
    else
    {
@@ -586,13 +710,17 @@ readEntryFromProfile(KeyValue& value,
 
 /** Read the value from the specified key and return it in KeyValue.
     This is only used in Profile.
+
+    If a value has been read, read is set to true, it is false if the
+    default value got returned.
 */
 static KeyValue
 readEntryHelper(wxConfigBase *config,
                 const ProfileBase *parentProfile,
                 const String& profileName,
                 const String & key,
-                const KeyValue& defaultValue)
+                const KeyValue& defaultValue,
+                bool expandEnvVars, bool *read = NULL)
 {
    KeyValue value;
    String strValue;
@@ -600,6 +728,9 @@ readEntryHelper(wxConfigBase *config,
 
    bool bRead = false;
 
+   // first, try our own config file if it exists
+   // Don't need to set expansion state as this is done anyway
+   // if we own the config.
    if ( config )
    {
       if ( defaultValue.IsString() )
@@ -616,19 +747,33 @@ readEntryHelper(wxConfigBase *config,
       }
    }
 
-   // second, try the parent profile
-   if ( !bRead && parentProfile != NULL )
-   {
-      bRead = readEntryFromProfile(value, parentProfile, key, defaultValue);
-   }
-
-   // third, try our name in the global config file:
+   // second, try our name in the global config file:
    if ( !bRead )
    {
       //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
       //mApplication->GetProfile()->SetPath(profileName);
       ProfilePathChanger ppc(mApplication->GetProfile(), profileName);
-      
+      ProfileEnvVarSave env(mApplication->GetProfile(), expandEnvVars);
+
+      bRead = readEntryFromProfile(value, mApplication->GetProfile(),
+                                   key, defaultValue);
+   }
+
+   // third, try the parent profile
+   if ( !bRead && parentProfile != NULL )
+   {
+      ProfileEnvVarSave env(parentProfile, expandEnvVars);
+      bRead = readEntryFromProfile(value, parentProfile, key, defaultValue);
+   }
+
+   // forth: try all parent sections:
+   String profile_path = profileName;
+   while ( !bRead && ! profile_path.IsEmpty())
+   {
+      profile_path = strutil_path_parent(profile_path);
+      ProfilePathChanger ppc(mApplication->GetProfile(), profile_path);
+      ProfileEnvVarSave env(mApplication->GetProfile(), expandEnvVars);
+
       bRead = readEntryFromProfile(value, mApplication->GetProfile(),
                                    key, defaultValue);
    }
@@ -636,7 +781,7 @@ readEntryHelper(wxConfigBase *config,
    // record the default value back into config if asked for
    if( !bRead )
    {
-      if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
+      if ( READ_APPCONFIG(MP_RECORDDEFAULTS) )
       {
          if(config)
          {
@@ -649,6 +794,7 @@ readEntryHelper(wxConfigBase *config,
             //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
             //mApplication->GetProfile()->SetPath(profileName);
             ProfilePathChanger ppc(mApplication->GetProfile(), profileName);
+            ProfileEnvVarSave env(mApplication->GetProfile(), expandEnvVars);
             if( defaultValue.IsString() )
                mApplication->GetProfile()->writeEntry(key, defaultValue.GetString());
             else
@@ -659,16 +805,17 @@ readEntryHelper(wxConfigBase *config,
    }
 
 #  ifdef DEBUG
-      String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
-                      String(key) + ") returned: ";
-      if ( value.IsString() )
-         dbgtmp += value.GetString();
-      else
-         dbgtmp += strutil_ltoa(value.GetNumber());
-
-      DBGLOG(Str(dbgtmp));
+   String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
+      String(key) + ") returned: ";
+   if ( value.IsString() )
+      dbgtmp += value.GetString();
+   else
+      dbgtmp += strutil_ltoa(value.GetNumber());
+   DBGLOG(Str(dbgtmp));
 #  endif
 
+   if(read)
+      *read = bRead;
    return value;
 }
 
@@ -676,9 +823,13 @@ String
 Profile::readEntry(const String & key, const String & defaultvalue) const
 {
    MOcheck();
-
-   return readEntryHelper(m_config, parentProfile, profileName,
-                          key, KeyValue(defaultvalue)).GetString();
+   bool read;
+   String value = readEntryHelper(m_config, parentProfile, profileName,
+                                  key, KeyValue(defaultvalue),
+                                  m_expandEnvVars, &read).GetString();
+   if(m_expandEnvVars && ! read)
+      value = wxExpandEnvVars(value);
+   return value;
 }
 
 long
@@ -687,7 +838,8 @@ Profile::readEntry(const String & key, long defaultvalue) const
    MOcheck();
 
    return readEntryHelper(m_config, parentProfile, profileName,
-                          key, KeyValue(defaultvalue)).GetNumber();
+                          key, KeyValue(defaultvalue),
+                          m_expandEnvVars).GetNumber();
 }
 
 
@@ -705,6 +857,21 @@ Profile::GetPath(void) const
       return m_config->GetPath();
    else
       return (const char *)NULL;
+}
+
+bool
+Profile::HasGroup(const String & name) const
+{
+   MOcheck();
+   return m_config && m_config->HasGroup(name);
+}
+
+bool
+Profile::Rename(const String& oldName, const String& newName)
+{
+   MOcheck();
+
+   return m_config && m_config->RenameGroup(oldName, newName);
 }
 
 bool
@@ -798,6 +965,19 @@ ConfigFileManager::~ConfigFileManager()
    }
 
    delete fcList;
+}
+
+void
+ConfigFileManager::Flush()
+{
+   FCDataList::iterator i;
+   for(i = fcList->begin(); i != fcList->end(); i++)
+   {
+      ProfileBase *profile = (*i)->profile;
+      wxConfigBase *config = profile->GetConfig();
+      if ( config )
+         config->Flush();
+   }
 }
 
 ProfileBase *

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   upgrade.cpp - functions to upgrade from previous version of M
-// Purpose:     
+// Purpose:
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     20.08.98
@@ -56,7 +56,7 @@ enum MVersion
 {
    Version_None,     // this is the first installation of M on this machine
    Version_Alpha001, // first public version
-   Version_Alpha002, // some config strucutre changes (due to wxPTextEntry)
+   Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
    Version_Unknown   // some unreckognized version
 };
 
@@ -73,12 +73,12 @@ UpgradeFromNone()
 {
 #if 0 // VZ: this code has no effect!
    // we do it here and only once because it takes a long time
-   PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
+   PathFinder pf(READ_APPCONFIG(MP_PATHLIST));
    pf.AddPaths(M_PREFIX,true);
    bool found;
-   String strRootPath = pf.FindDir(READ_APPCONFIG(MC_ROOTDIRNAME), &found);
+   String strRootPath = pf.FindDir(READ_APPCONFIG(MP_ROOTDIRNAME), &found);
 #endif // 0
-   
+
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
       static const char *msg =
@@ -105,6 +105,7 @@ UpgradeFrom001()
    // 2) last values of the adb editor search control stored as subkeys of
    //    /AdbEditor/LastSearch instead of a single value with this name.
    // 3) /AdbEditor/LastPage is /AdbEditor/Notebook/Page
+   // 4) /AdbEditor/LastAdb{Dir|File} => AdbFilePrompt/AdbFilePromptPath
 
    // TODO
    return true;
@@ -126,8 +127,8 @@ Upgrade(const String& fromVersion)
    else if ( fromVersion == "0.01a" ) {
       oldVersion = Version_Alpha001;
    }
-   else if ( fromVersion == "0.02a" ) {
-      oldVersion = Version_Alpha002;
+   else if ( fromVersion == "0.02a" || fromVersion == "0.10a") {
+      oldVersion = Version_Alpha010;
    }
    else {
       oldVersion = Version_Unknown;
@@ -145,7 +146,7 @@ Upgrade(const String& fromVersion)
          UpgradeFrom001();
          // fall through
 
-      case Version_Alpha002:
+      case Version_Alpha010:
          wxLogMessage(_("Configuration information and program files were "
                         "successfully upgraded from the version '%s'."),
                       fromVersion.c_str());
@@ -166,7 +167,7 @@ Upgrade(const String& fromVersion)
 }
 
 /** Make sure we have /Profiles/INBOX set up.
- 
+
     Returns TRUE if the profile already existed, FALSE if it was just created
  */
 extern bool
@@ -188,7 +189,7 @@ VerifyInbox(void)
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
       ibp->writeEntry(MP_FOLDER_TYPE, MFolder::Inbox);
       ibp->writeEntry(MP_FOLDER_COMMENT,
-                     _("Default system folder for incoming mail.")); 
+                     _("Default system folder for incoming mail."));
       ibp->DecRef();
 
       return FALSE;
@@ -230,7 +231,7 @@ VerifyMailConfig(void)
                      me,nil,nil);
    String msg = _("If you can read this, your M configuration works.");
    sm.AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
-   sm.Send();  
+   sm.Send();
 
    msg.Empty();
    msg << _("Sent email message to:\n")

@@ -16,6 +16,7 @@
 #   pragma interface "wxMainFrame.h"
 #endif
 
+class MFolder;
 class wxFolderView;
 class wxFolderTree;
 class wxSplitterWindow;
@@ -29,13 +30,16 @@ public:
 
    virtual ~wxMainFrame();
 
-   // callbacks
+   // open the given folder in the integrated folder view (may be called
+   // multiple times)
+   bool OpenFolder(MFolder *folder);
+
+   // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnCloseWindow(wxCloseEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
-//   void OnSize( wxSizeEvent &event );
 
-private:
+protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
 
@@ -45,6 +49,10 @@ private:
       /// the folder view
    wxFolderView *m_FolderView;
 
+   /// the name of the currently opened folder (empty if none)
+   String m_folderName;
+
+private:
    DECLARE_EVENT_TABLE()
 };
 

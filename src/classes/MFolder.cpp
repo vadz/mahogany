@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
-// File name:   classes/MFolder.cpp - older related classes
+// File name:   classes/MFolder.cpp - folder related classes
 // Purpose:     manage all folders used by the application
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -28,8 +28,10 @@
 #  include "Mcommon.h"
 
 #  include "Profile.h"
-
 #  include "MApplication.h"
+
+#  include <wx/confbase.h>    // for wxSplitPath
+#  include <wx/dynarray.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -37,363 +39,551 @@
 #include "MFolder.h"
 
 // ----------------------------------------------------------------------------
+// template classes
+// ----------------------------------------------------------------------------
+
+WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-// this class adds functions to save/restore itself to/from config file.
+// this class implements MFolder pure virtuals by reading/writing the data
+// to/from (main application) profile.
 //
 // the way we store the data is pretty straightforward and quite ineffcient: the
 // folders correspond to the config groups and the data is stored as the named
 // values.
-//
-// as, of course, all this would be too nice without some dirty hacks, here is
-// one: this class shouldn't have any member vars because we cast MFolder
-// objects into MStorableFolders all the time - in fact, we could just as well
-// define all these functions in the base (MFolder) class, but doing it here
-// spares other source modules a recompilation if we change some implementation
-// detail.
-class MStorableFolder : public MFolder
+class MFolderFromProfile : public MFolder
 {
 public:
    // ctor & dtor
-   MStorableFolder(MFolder *parent, const String& name, Type type = Invalid)
-      : MFolder(parent, name, type) { }
+      // the folderName is the full profile path which should exist: it may be
+      // created with Create() if Exists() returns FALSE
+   MFolderFromProfile(const String& folderName) : MFolder()
+      { m_folderName = folderName; }
+      // dtor is trivial
+   virtual ~MFolderFromProfile();
 
-   // save/restore folder info (the current path in config object associated to
-   // the profile should be the path of our group)
-   void Save(ProfileBase *profile);
-   void Load(ProfileBase *profile);
+   // static functions
+      // return TRUE if the folder with given name exists
+   static bool Exists(const String& fullname);
+      // create a folder in the profile, shouldn't be called if it already
+      // exists - will return FALSE in this case.
+   static bool Create(const String& fullname);
 
-   // get the path to our group (top groups path is "")
-   String GetPath() const;
+   // implement base class pure virtuals
+   virtual String GetName() const;
+   virtual wxString GetFullName() const { return m_folderName; }
+
+   virtual Type GetType() const;
+
+   virtual String GetComment() const;
+   virtual void SetComment(const String& comment);
+
+   virtual unsigned int GetFlags() const;
+   virtual void SetFlags(unsigned int flags);
+
+   virtual size_t GetSubfolderCount() const;
+   virtual MFolder *GetSubfolder(size_t n) const;
+   virtual MFolder *GetSubfolder(const String& name) const;
+   virtual MFolder *GetParent() const;
+
+   virtual MFolder *CreateSubfolder(const String& name, Type type);
+   virtual void Delete();
+   virtual bool Rename(const String& newName);
 
 protected:
-   // override some base class virtuals
-   virtual void OnDelete();
-   virtual void OnRename(const String& name);
-
    // helpers
+      // common part of Create() and Exists()
+   static bool GroupExists(ProfileBase *profile, const String& fullname);
+      // get the full name of the subfolder
+   wxString GetSubFolderFullName(const String& name) const
+   {
+      String fullname;
+      fullname << m_folderName << '/' << name;
 
-   // our info only, without children
-   void SaveSelf(ProfileBase *profile);
-   void LoadSelf(ProfileBase *profile);
-
-   // the children
-   void SaveChildren(ProfileBase *profile);
-   void LoadChildren(ProfileBase *profile);
-
-   // the given subfolder only
-   void SaveSubfolder(ProfileBase *profile, size_t n);
-   void LoadSubfolder(ProfileBase *profile, const String& name);
+      return fullname;
+   }
 
 private:
-   // the value names we use to store our info
-   static const char *ms_keyType;
-   static const char *ms_keyFlags;
-   static const char *ms_keyComment;
+   String m_folderName;    // the full folder name
 };
 
-// this class loads everything from config when created and writes it back
-// there when deleted
-class MRootFolder : public MStorableFolder
+// a special case of MFolderFromProfile: the root folder
+class MRootFolderFromProfile : public MFolderFromProfile
 {
 public:
-   // ctor & dtor
-   MRootFolder();
-   virtual ~MRootFolder();
+   // ctor
+   MRootFolderFromProfile() : MFolderFromProfile("") { }
 
-   // operations
-      // delete (recursively!) a group from config file
-   void DeleteGroup(const String& path);
+   // implement base class pure virtuals (some of them don't make sense to us)
+   virtual Type GetType() const { return MFolder::Root; }
 
-private:
-   // path in the global profile where we store our data
-   static const char *ms_foldersPath;
+   virtual String GetComment() const { return ""; }
+   virtual void SetComment(const String& /* comment */)
+      { FAIL_MSG("can not set root folder attributes."); }
+
+   virtual unsigned int GetFlags() const { return 0u; }
+   virtual void SetFlags(unsigned int flags)
+      { FAIL_MSG("can not set root folder attributes."); }
+
+   virtual MFolder *GetParent() const { return NULL; }
+
+   virtual void Delete()
+      { FAIL_MSG("can not delete root folder."); }
+   virtual bool Rename(const String& newName)
+      { FAIL_MSG("can not rename root folder."); return FALSE; }
 };
 
-// ----------------------------------------------------------------------------
-// private globals
-// ----------------------------------------------------------------------------
-static MRootFolder *gs_rootFolder = NULL;
+// maintain the list of already created MFolder objects (the cache)
+//
+// there should be only one object of this class (gs_cache defined in this
+// file) and it's only needed to check in its dtor that nothing is left in the
+// cache on program termination, otherwise this class has just static
+// functions.
+class MFolderCache
+{
+public:
+   // default ctor and dtor
+   MFolderCache() { }
 
-// ============================================================================
+   // functions to work with the cache
+      // returns NULL is the object is not in the cache
+   static MFolder *Get(const String& name);
+      // adds a new folder to the cache (must be really new!)
+   static void Add(MFolder *folder);
+      // removes an object from the cache (must be there!)
+   static void Remove(MFolder *folder);
+
+private:
+   // no copy ctor/assignment operator
+   MFolderCache(const MFolderCache&);
+   MFolderCache& operator=(const MFolderCache&);
+
+   // consistency check
+   static void Check()
+   {
+      ASSERT_MSG( ms_aFolderNames.GetCount() == ms_aFolders.GetCount(),
+                  "folder cache corrupted" );
+   }
+
+   static wxArrayString ms_aFolderNames;
+   static wxArrayFolder ms_aFolders;
+};
+
+// -----------------------------------------------------------------------------
+// global variables
+// -----------------------------------------------------------------------------
+
+// the global cache of already created folders
+static MFolderCache gs_cache;
+
+// =============================================================================
 // implementation
-// ============================================================================
+// =============================================================================
 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // MFolder
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-MFolder::MFolder(MFolder *parent, const String& name, Type type)
-       : m_name(name)
+MFolder *MFolder::Get(const String& fullname)
 {
-   m_type = type;
-   m_flags = 0;
-   m_parent = parent;
-}
+   wxString name = fullname;
 
-MFolder::~MFolder()
-{
-   // delete all children
-   size_t nCount = m_subfolders.Count();
-   for ( size_t n = 0; n < nCount; n++ )
+   // remove the trailing backslash if any
+   size_t len = fullname.Len();
+   if ( len != 0 && fullname[len - 1] == '/' )
    {
-      delete m_subfolders[n];
+      name.Truncate(len - 1);
    }
-}
 
-int MFolder::GetSubfolder(const String& name) const
-{
-   // stupid linear search
-   size_t nCount = m_subfolders.Count();
-   for ( size_t n = 0; n < nCount; n++ )
+   // first see if we already have it in the cache
+   MFolder *folder = MFolderCache::Get(name);
+   if ( !folder )
    {
-      if ( m_subfolders[n]->GetName().CmpNoCase(name) == 0 )
+      // the first case catches the root folder - it always exists
+      if ( name.IsEmpty() )
       {
-         return n;
+         folder = new MRootFolderFromProfile();
+         MFolderCache::Add(folder);
       }
+      else if ( MFolderFromProfile::Exists(name) )
+      {
+         // do create a new folder object
+         folder = new MFolderFromProfile(name);
+         MFolderCache::Add(folder);
+      }
+      //else: folder doesn't exist, NULL will be returned
+   }
+   else
+   {
+      // in the cache
+      folder->IncRef();
    }
 
-   return -1;
+   return folder;
 }
 
-MFolder *MFolder::CreateSubfolder(const String& name, Type type)
+MFolder *MFolder::Create(const String& fullname, Type type)
+{
+   MFolder *folder = Get(fullname);
+   if ( folder )
+   {
+      wxLogError(_("Can not create a folder '%s' which already exists."),
+                 fullname.c_str());
+
+      folder->DecRef();
+
+      return NULL;
+   }
+
+   if ( !MFolderFromProfile::Create(fullname) )
+   {
+      // error message already given
+
+      return NULL;
+   }
+
+   folder = Get(fullname);
+
+   CHECK( folder, NULL, "Get() must succeed if Create() succeeded!" );
+
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, NULL, "panic in MFolder: no app profile" );
+
+   FolderPathChanger pathChanger(profile, folder->GetFullName());
+   profile->writeEntry(MP_FOLDER_TYPE, type);
+
+   return folder;
+}
+
+#ifdef DEBUG
+
+String MFolder::Dump() const
+{
+   String str;
+   str.Printf("MFolder: name = %s, %d refs", GetFullName().c_str(), m_nRef);
+
+   return str;
+}
+
+#endif // DEBUG
+
+// -----------------------------------------------------------------------------
+// MFolderFromProfile
+// -----------------------------------------------------------------------------
+
+MFolderFromProfile::~MFolderFromProfile()
+{
+   // remove the object being deleted (us) from the cache
+   MFolderCache::Remove(this);
+}
+
+bool
+MFolderFromProfile::GroupExists(ProfileBase *profile, const String& fullname)
+{
+   // split path into '/' separated components
+   wxArrayString components;
+   wxSplitPath(components, fullname);
+
+   FolderPathChanger changePath(profile, "");
+
+   size_t n, count = components.GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      if ( !profile->HasGroup(components[n]) )
+      {
+         break;
+      }
+
+      // go down
+      profile->SetPath(components[n]);
+   }
+
+   // group only exists if we exited from the loop normally (not via break)
+   return n == count;
+}
+
+bool MFolderFromProfile::Exists(const String& fullname)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+
+   if ( !GroupExists(profile, fullname) )
+      return FALSE;
+
+   // the profile type field must be set for the folder profile group
+   FolderPathChanger changePath(profile, fullname);
+
+   return READ_CONFIG(profile, MP_PROFILE_TYPE) == ProfileBase::PT_FolderProfile;
+}
+
+bool MFolderFromProfile::Create(const String& fullname)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+
+   if ( GroupExists(profile, fullname) )
+   {
+      wxLogError(_("Can not create profile folder '%s' because a group "
+                   "with this name already exists."), fullname.c_str());
+
+      return FALSE;
+   }
+
+   // this will create everything automatically
+   FolderPathChanger changePath(profile, fullname);
+   profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+
+   return TRUE;
+}
+
+String MFolderFromProfile::GetName() const
+{
+   return m_folderName.AfterLast('/');
+}
+
+MFolder::Type MFolderFromProfile::GetType() const
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, MFolder::Invalid, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+   return (Type)READ_CONFIG(profile, MP_FOLDER_TYPE);
+}
+
+String MFolderFromProfile::GetComment() const
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, "", "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+   return READ_CONFIG(profile, MP_FOLDER_COMMENT);
+}
+
+void MFolderFromProfile::SetComment(const String& comment)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+   profile->writeEntry(MP_FOLDER_COMMENT, comment);
+}
+
+unsigned int MFolderFromProfile::GetFlags() const
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+   return (unsigned int)READ_CONFIG(profile, MP_FOLDER_FLAGS);
+}
+
+void MFolderFromProfile::SetFlags(unsigned int flags)
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+   profile->writeEntry(MP_FOLDER_FLAGS, flags);
+}
+
+size_t MFolderFromProfile::GetSubfolderCount() const
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+
+   // enumerate all groups
+   String name;
+   long dummy;
+   size_t count = 0;
+
+   bool cont = profile->GetFirstGroup(name, dummy);
+   while ( cont )
+   {
+      // check that it's a folder - this is the reason why we can't call
+      // GetGroupCount() directly
+      {
+         ProfilePathChanger changePath2(profile, name);
+         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) ==
+                  ProfileBase::PT_FolderProfile )
+         {
+            count++;
+         }
+      }
+
+      cont = profile->GetNextGroup(name, dummy);
+   }
+
+   return count;
+}
+
+MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
+{
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+
+   FolderPathChanger changePath(profile, m_folderName);
+
+   // count until the group we need by enumerating them
+   wxString name;
+   long dummy;
+   bool cont = profile->GetFirstGroup(name, dummy);
+   for ( cont = profile->GetFirstGroup(name, dummy);
+         cont;
+         cont = profile->GetNextGroup(name, dummy) )
+   {
+      // check that it's a folder - this is the reason why we can't call
+      // GetGroupCount() directly
+      {
+         ProfilePathChanger changePath2(profile, name);
+         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) !=
+                  ProfileBase::PT_FolderProfile )
+         {
+            // skip "n--" - it doesn't count as a folder
+            continue;
+         }
+      }
+
+      if ( n-- == 0 )
+         break;
+   }
+
+   CHECK( cont, NULL, "invalid subfolder index" );
+
+   return Get(GetSubFolderFullName(name));
+}
+
+MFolder *MFolderFromProfile::GetSubfolder(const String& name) const
+{
+   return Get(GetSubFolderFullName(name));
+}
+
+MFolder *MFolderFromProfile::GetParent() const
+{
+   String path = m_folderName.BeforeLast('/');
+
+   return Get(path);
+}
+
+MFolder *MFolderFromProfile::CreateSubfolder(const String& name, Type type)
 {
    // first of all, check if the name is valid
-   if ( GetSubfolder(name) != -1 )
+   MFolder *folder = GetSubfolder(name);
+   if ( folder )
    {
       wxLogError(_("Can't create subfolder '%s': folder with this name "
                    "already exists."), name.c_str());
+
+      folder->DecRef();
 
       return NULL;
    }
 
    // ok, it is: do create it
-   MFolder *folder = new MFolder(this, name, type);
-   m_subfolders.Add(folder);
-
-   return folder;
+   return MFolder::Create(GetSubFolderFullName(name), type);
 }
 
-void MFolder::Delete()
+void MFolderFromProfile::Delete()
 {
-   CHECK_RET( m_parent != NULL, "can't delete the root pseudo-folder" );
+   CHECK_RET( !m_folderName.IsEmpty(), "can't delete the root pseudo-folder" );
 
-   // it's really the parent who deletes us
-   int index = m_parent->GetSubfolder(m_name);
-   CHECK_RET( index != -1, "we're not a subfolder of our parent??" );
+   ProfileBase *profile = mApplication->GetProfile();
+   CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
 
-   OnDelete();
+   FolderPathChanger changePath(profile, m_folderName);
 
-   m_parent->m_subfolders.Remove((size_t)index);
+   profile->SetPath("..");
+   profile->DeleteGroup(GetName());
 
-   // bye-bye
-   delete this;
+   // notify everybody about the disappearance of the folder
+   EventFolderTreeChangeData event(GetFullName(),
+                                   EventFolderTreeChangeData::Delete);
+   EventManager::Send(event);
 }
 
-void MFolder::Rename(const String& name)
+bool MFolderFromProfile::Rename(const String& newName)
 {
-   CHECK_RET( m_parent != NULL, "can't rename the root pseudo-folder" );
+   CHECK( !m_folderName.IsEmpty(), FALSE, "can't rename the root pseudo-folder" );
 
-   if ( m_parent->GetSubfolder(name) != -1 )
+   if ( GetType() == Inbox )
+   {
+      wxLogError(_("INBOX folder is a special folder used by the mail "
+                   "system and can not be renamed."));
+
+      return FALSE;
+   }
+
+   String path = m_folderName.BeforeLast('/'),
+          name = m_folderName.AfterLast('/');
+
+   String newFullName;
+   newFullName << path << '/' << newName;
+
+   if ( Exists(newFullName) )
    {
       wxLogError(_("Can't rename folder '%s' to '%s': the folder with "
                    "the new name already exists."),
-                   m_name.c_str(), name.c_str());
-      return;
+                   m_folderName.c_str(), newName.c_str());
+
+      return FALSE;
    }
 
-   OnRename(name);
-
-   m_name = name;
-}
-
-wxString MFolder::GetFullName() const
-{
-   wxString fullname;
-   MFolder *parent = GetParent();
-   if ( parent )
-   {
-      fullname << parent->GetFullName() << '/' << GetName();
-   }
-
-   return fullname;
-}
-
-// ----------------------------------------------------------------------------
-// MStorableFolder
-// ----------------------------------------------------------------------------
-
-const char *MStorableFolder::ms_keyType = MP_FOLDER_TYPE;
-const char *MStorableFolder::ms_keyFlags = MP_FOLDER_FLAGS;
-const char *MStorableFolder::ms_keyComment = MP_FOLDER_COMMENT;
-
-String MStorableFolder::GetPath() const
-{
-   String str;
-   if ( m_parent != NULL )
-   {
-      str << ((MStorableFolder *)m_parent)->GetPath() << '/' << m_name;
-   }
-
-   return str;
-}
-
-void MStorableFolder::OnDelete()
-{
-   // delete our group
-   ((MRootFolder *)GetRootFolder())->DeleteGroup(GetPath());
-}
-
-void MStorableFolder::OnRename(const String& /* name */)
-{
-   // delete the old data - the new data will be written when we're saved anyhow
-   OnDelete();
-}
-
-void MStorableFolder::Save(ProfileBase *profile)
-{
-   SaveSelf(profile);
-   SaveChildren(profile);
-}
-
-void MStorableFolder::Load(ProfileBase *profile)
-{
-   LoadSelf(profile);
-   LoadChildren(profile);
-}
-
-void MStorableFolder::SaveSelf(ProfileBase *profile)
-{
-   profile->writeEntry(ms_keyType, (long)m_type);
-   profile->writeEntry(ms_keyFlags, (long)m_flags);
-   if ( !m_comment.IsEmpty() )
-      profile->writeEntry(ms_keyComment, m_comment);
-}
-
-void MStorableFolder::LoadSelf(ProfileBase *profile)
-{
-   m_type = (MFolder::Type)profile->readEntry(ms_keyType, 0l);
-   m_flags = (unsigned int)profile->readEntry(ms_keyFlags, 0l);
-   m_comment = profile->readEntry(ms_keyComment, "");
-}
-
-void MStorableFolder::SaveChildren(ProfileBase *profile)
-{
-   size_t nCount = m_subfolders.Count();
-   for ( size_t n = 0; n < nCount; n++ )
-   {
-      SaveSubfolder(profile, n);
-   }
-}
-
-void MStorableFolder::LoadChildren(ProfileBase *profile)
-{
-   // enum all the children and load them
-   wxArrayString names;
-   String folderName;
-   long dummy;
-
-   bool cont = profile->GetFirstGroup(folderName, dummy);
-   while ( cont )
-   {
-      if ( names.Index(folderName) == NOT_FOUND )
-      {
-         names.Add(folderName);
-         LoadSubfolder(profile, folderName);
-      }
-      else
-      {
-         // we already have such folder!
-         wxLogWarning(_("Folder '%s': duplicate subfolder name '%s', "
-                        "only the first subfolder loaded."),
-                      m_name.c_str(), folderName.c_str());
-      }
-
-      cont = profile->GetNextGroup(folderName, dummy);
-   }
-
-   // save some memory
-   m_subfolders.Shrink();
-}
-
-void MStorableFolder::SaveSubfolder(ProfileBase *profile, size_t n)
-{
-   // attention to the cast: the object is not really of this type, but we can
-   // nevertheless do it in order to call MStorableFolders methods on it.
-   MStorableFolder *folder = (MStorableFolder *)m_subfolders[n];
-
-   // go down into the subgroup (path will be restored on scope exit)
-   ProfilePathChanger changePath(profile, folder->GetName());
-   folder->Save(profile);
-}
-
-void MStorableFolder::LoadSubfolder(ProfileBase *profile, const String& name)
-{
-   // go down into the subgroup (path will be restored on scope exit)
-   ProfilePathChanger changePath(profile, name);
-
-   MStorableFolder *folder = new MStorableFolder(this, name);
-   folder->Load(profile);
-
-   m_subfolders.Add(folder);
-}
-
-// ----------------------------------------------------------------------------
-// MRootFolder
-// ----------------------------------------------------------------------------
-
-const char *MRootFolder::ms_foldersPath = M_FOLDER_CONFIG_SECTION;
-
-MRootFolder::MRootFolder() : MStorableFolder(NULL, "", MFolder::Root)
-{
    ProfileBase *profile = mApplication->GetProfile();
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
 
-   CHECK_RET( profile != NULL, "no profile to load folders from" );
-
-   ProfilePathChanger changePath(profile, ms_foldersPath);
-
-   LoadChildren(profile);
-}
-
-MRootFolder::~MRootFolder()
-{
-   ProfileBase *profile = mApplication->GetProfile();
-
-   CHECK_RET( profile != NULL, "no profile to save folders to" );
-
-   ProfilePathChanger changePath(profile, ms_foldersPath);
-
-   SaveChildren(profile);
-}
-
-void MRootFolder::DeleteGroup(const String& path)
-{
-   ProfileBase *profile = mApplication->GetProfile();
-
-   CHECK_RET( profile != NULL, "can't delete group - no app profile" );
-
-   ProfilePathChanger changePath(profile, ms_foldersPath);
-   profile->DeleteGroup(path);
-}
-
-// ----------------------------------------------------------------------------
-// our public interface
-// ----------------------------------------------------------------------------
-MFolder *GetRootFolder()
-{
-   // we don't want to create it more than once (just think about what would
-   // happen when we'd write it back)
-   if ( gs_rootFolder == NULL )
+   FolderPathChanger changePath(profile, path);
+   if ( profile->Rename(name, newName) )
    {
-      gs_rootFolder = new MRootFolder;
+      m_folderName = newFullName;
+
+      return TRUE;
    }
-
-   return gs_rootFolder;
+   else
+   {
+      return FALSE;
+   }
 }
 
-void DeleteRootFolder()
+// -----------------------------------------------------------------------------
+// MFolderCache implementation
+// -----------------------------------------------------------------------------
+
+wxArrayString MFolderCache::ms_aFolderNames;
+wxArrayFolder MFolderCache::ms_aFolders;
+
+MFolder *MFolderCache::Get(const String& name)
 {
-   delete gs_rootFolder;
+   Check();
+
+   int index = ms_aFolderNames.Index(name);
+   return index == wxNOT_FOUND ? NULL : ms_aFolders[(size_t)index];
 }
 
+void MFolderCache::Add(MFolder *folder)
+{
+   Check();
+
+   // the caller should verify that it's not already in the cache
+   ASSERT_MSG( ms_aFolders.Index(folder) == wxNOT_FOUND,
+               "can't add the folder to the cache - it's already there" );
+
+   ms_aFolderNames.Add(folder->GetFullName());
+   ms_aFolders.Add(folder);
+}
+
+void MFolderCache::Remove(MFolder *folder)
+{
+   Check();
+
+   // don't use name here - the folder might have been renamed
+   int index = ms_aFolders.Index(folder);
+   CHECK_RET( index != wxNOT_FOUND,
+              "can't remove folder from cache because it's not in it" );
+
+   ms_aFolderNames.Remove((size_t)index);
+   ms_aFolders.Remove((size_t)index);
+}

@@ -8,7 +8,7 @@ FILES_PS=$(FILES_TEX:.tex=.ps)
 
 include ../../makeopts
 
-all: $(DIR)/index.html wxhelp.map
+all:  wxhelp.map
 
 install: 
 	$(INSTALL) -d $(DOCDIR)/$(DIR)
@@ -17,16 +17,21 @@ install:
 
 ps: $(FILES_PS)
 
-$(DIR)/index.html: ../$(DIR).tex
-	$(LATEX2HTML) ../$(DIR).tex
+index: ../$(DIR).tex
+	$(LATEX2HTML) -debug ../$(DIR).tex
 
-wxhelp.map: $(DIR)/index.html
+wxhelp.map: index
 	( cd $(DIR); ../../../extra/scripts/html2wxhelp > ../wxhelp.map)
 
-clean:
+setup: clean
+	mkdir $(DIR) pics
+	cp ../pics/*.eps pics
+
+clean: 
+	$(RM) -r pics $(DIR)
 
 
-.PHONY: all install ps clean
+.PHONY: all install ps clean setup index
 
 include ../../makerules
 

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M
 // File name:   gui/wxFolderTree.h - a specialized tree control for folders
 // Purpose:
@@ -8,7 +8,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _WXFOLDERTREE_H
 #define   _WXFOLDERTREE_H
@@ -17,6 +17,7 @@
 class wxWindow;
 class wxFolderTreeImpl;
 class MFolder;
+class wxMainFrame;
 
 // abstraction of the folder tree control for M usage
 class wxFolderTree
@@ -37,9 +38,16 @@ public:
       // dtor
    virtual ~wxFolderTree();
 
+   // operations
+      // select the tree node specified by the given folder, returns FALSE if
+      // the folder is not in the tree
+   bool SelectFolder(MFolder *folder);
+
    // events
       // parameters are the previously selected folder and the new selection
    virtual void OnSelectionChange(MFolder *oldsel, MFolder *newsel);
+      // folder single clicked (does nothing in the base class)
+   virtual void OnOpenHere(MFolder *folder);
       // folder double clicked/enter pressed
    virtual void OnOpen(MFolder *folder);
       // folder properties requested
@@ -51,7 +59,9 @@ public:
    virtual bool OnDelete(MFolder *folder);
 
    // accessors
+      // associated window object (for showing/hiding/resizing...)
    wxWindow *GetWindow() const;
+      // don't froget to call DecRef() on the returned pointer
    MFolder  *GetSelection() const;
 
 private:

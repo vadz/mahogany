@@ -32,6 +32,8 @@
 #ifndef USE_PCH
 #  include "MApplication.h"
 #  include "Profile.h"
+
+#  include <wx/confbase.h>
 #endif // USE_PCH
 
 #include "MDialogs.h"
@@ -39,9 +41,12 @@
 #include "MFolder.h"
 #include "MFolderDialogs.h"
 
+#include "wx/treectrl.h"
+
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
+#include "gui/wxMainFrame.h"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -56,7 +61,16 @@ public:
                     MFolder *folder,
                     wxFolderTreeNode *parent = NULL);
 
+   // dtor
+   //
+   // NB: the folder passed to the ctor will be released by this class, i.e.
+   //     it takes ownership of it, the caller should not release it!
+   virtual ~wxFolderTreeNode() { SafeDecRef(m_folder); }
+
    // accessors
+      // has the side effect of setting a flag which tells us that we were
+      // expanded - the overall result is this it only returns false once,
+      // subsequent calls will always return true.
    bool WasExpanded()
    {
       bool wasExpanded = m_wasExpanded;
@@ -64,7 +78,12 @@ public:
 
       return wasExpanded;
    }
+      // reset the "was expanded" flag (useful when the subtree must be
+      // recreated)
+   void ResetExpandedFlag() { m_wasExpanded = false; }
 
+      // NB: DecRef() shouldn't be called on the pointer returned by this
+      //     function
    MFolder          *GetFolder() const { return m_folder; }
    wxFolderTreeNode *GetParent() const { return m_parent; }
 
@@ -81,7 +100,7 @@ private:
 };
 
 // the tree itself
-class wxFolderTreeImpl : public wxTreeCtrl
+class wxFolderTreeImpl : public wxTreeCtrl, public EventReceiver
 {
 public:
    // constants
@@ -105,11 +124,19 @@ public:
    // accessors
    wxFolderTreeNode *GetSelection() const { return m_current; }
 
+   // helpers
+      // find the tree item by full name (as this function changes the state
+      // of the tree - it may expand it - it is not `const')
+   wxTreeItemId GetTreeItemFromName(const String& fullname);
+
+      // change the currently opened (in the main frame) folder name: we need
+      // it to notify the main frame if this folder is deleted
+   void SetOpenFolderName(const String& name) { m_openFolderName = name; }
+
    // callbacks
    void OnChar(wxKeyEvent&);
 
-   void OnDoubleClick(wxMouseEvent&)
-      { DoFolderOpen(); }
+   void OnDoubleClickHandler(wxMouseEvent&) { OnDoubleClick(); }
    void OnRightDown(wxMouseEvent& event);
 
    void OnMenuCommand(wxCommandEvent&);
@@ -117,7 +144,20 @@ public:
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
 
+   // event processing function
+   virtual bool OnEvent(EventData& event);
+
 protected:
+   // is the root item chosen?
+   bool IsRootChosen() const
+   {
+      return wxTreeCtrl::GetSelection() == GetRootItem();
+   }
+
+   // this is the real handler for double-click and enter events
+   void OnDoubleClick();
+
+   // always opens the folder in a separate view
    void DoFolderOpen() { m_sink->OnOpen(m_sink->GetSelection()); }
 
    void DoFolderCreate();
@@ -165,6 +205,13 @@ private:
    wxFolderTree      *m_sink;     // for sending events
    wxFolderTreeNode  *m_current;  // current selection (NULL if none)
 
+   void              *m_eventReg; // event registration handle
+
+   // the full names of the folder currently opened in the main frame and
+   // of the current selection in the tree ctrl (empty if none)
+   String m_openFolderName,
+          m_selectedFolderName;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -179,7 +226,7 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxTreeCtrl)
    EVT_TREE_SEL_CHANGED(-1,    wxFolderTreeImpl::OnTreeSelect)
    EVT_TREE_ITEM_EXPANDING(-1, wxFolderTreeImpl::OnTreeExpanding)
 
-   EVT_LEFT_DCLICK(wxFolderTreeImpl::OnDoubleClick)
+   EVT_LEFT_DCLICK(wxFolderTreeImpl::OnDoubleClickHandler)
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
 
    EVT_CHAR(wxFolderTreeImpl::OnChar)
@@ -200,11 +247,42 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
                    const wxPoint& pos, const wxSize& size)
 {
    m_tree = new wxFolderTreeImpl(this, parent, id, pos, size);
+
+   ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
+   if( READ_CONFIG(mApplication->GetProfile(), MP_EXPAND_TREECTRL) )
+      m_tree->Expand(m_tree->GetRootItem());
 }
 
 wxFolderTree::~wxFolderTree()
 {
+   ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
+
+   mApplication->GetProfile()->writeEntry(MP_EXPAND_TREECTRL,
+      m_tree->IsExpanded(m_tree->GetRootItem()));
    delete m_tree;
+}
+
+bool wxFolderTree::SelectFolder(MFolder *folder)
+{
+   wxTreeItemId item = m_tree->GetTreeItemFromName(folder->GetFullName());
+   if ( item.IsOk() )
+   {
+      // the item which is returned should correspond to the folder we started
+      // with, otherwise there is something wrong
+      ASSERT_MSG(
+                  ((wxFolderTreeNode *)m_tree->GetItemData(item))->
+                  GetFolder() == folder,
+                  "GetTreeItemFromName() is buggy"
+                );
+
+      m_tree->SelectItem(item);
+
+      return true;
+   }
+   else
+   {
+      return false;
+   }
 }
 
 MFolder *wxFolderTree::GetSelection() const
@@ -212,7 +290,13 @@ MFolder *wxFolderTree::GetSelection() const
    CHECK( m_tree, NULL, "you didn't call Init()" );
 
    wxFolderTreeNode *node = m_tree->GetSelection();
-   return ( node == NULL ) ? NULL : node->GetFolder();
+   if ( node == NULL )
+      return NULL;
+
+   MFolder *folder = node->GetFolder();
+   folder->IncRef();
+
+   return folder;
 }
 
 wxWindow *wxFolderTree::GetWindow() const
@@ -222,16 +306,58 @@ wxWindow *wxFolderTree::GetWindow() const
    return m_tree;
 }
 
+// open this folder in the current frame's folder view
 void wxFolderTree::OnSelectionChange(MFolder *oldsel, MFolder *newsel)
 {
-   // this function is intentionally left blank
+   // MP_OPEN_ON_CLICK profile setting tells us if we should open the folder
+   // in the main frame when it's just clicked - otherwise it must be double
+   // clicked to be opened. This option might be set for the situations when
+   // opening the folder takes too much time.
+   if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
+   {
+      // don't even try to open the root folder
+      if ( newsel && newsel->GetType() != MFolder::Root )
+      {
+         newsel->IncRef(); // before returning it to the outside world
+         OnOpenHere(newsel);
+      }
+      else
+      {
+         // remove the folder view
+         OnOpenHere(NULL);
+      }
+   }
+}
+
+// open a folder view in the same frame - must be overriden to do something
+void wxFolderTree::OnOpenHere(MFolder *folder)
+{
+   if ( folder )
+   {
+      m_tree->SetOpenFolderName(folder->GetFullName());
+
+      folder->DecRef();
+   }
+   else
+   {
+      m_tree->SetOpenFolderName("");
+   }
 }
 
 // open a new folder view on this folder
 void wxFolderTree::OnOpen(MFolder *folder)
 {
-   (void)wxFolderViewFrame::Create(folder->GetName(),
-                                   mApplication->TopLevelFrame());
+   if ( folder->GetType() != MFolder::Root )
+   {
+      (void)wxFolderViewFrame::Create(folder->GetFullName(),
+                                      mApplication->TopLevelFrame());
+   }
+   else
+   {
+      FAIL_MSG("can't open root pseudo-folder");
+   }
+
+   folder->DecRef();
 }
 
 // bring up the properties dialog for this profile
@@ -247,13 +373,14 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
 
 bool wxFolderTree::OnDelete(MFolder *folder)
 {
-   wxCHECK_MSG( folder, FALSE, "can't delete NULL folder" );
+   CHECK( folder, FALSE, "can't delete NULL folder" );
 
    switch ( folder->GetType() )
    {
       case MFolder::Inbox:
-         // TODO what about explaining why...
-         wxLogError(_("You should not delete the INBOx folder."));
+         wxLogError(_("You should not delete the INBOX folder:\n"
+                      "it is automatically created by M to store your "
+                      "incoming mail"));
          return FALSE;
 
       case MFolder::Root:
@@ -281,11 +408,18 @@ bool wxFolderTree::OnDelete(MFolder *folder)
                  folder->GetName().c_str());
    }
 
-   return MDialog_YesNoDialog(msg,
-                              m_tree->wxWindow::GetParent(),
-                              MDIALOG_YESNOTITLE,
-                              FALSE /* 'no' default */,
-                              configPath);
+   bool ok = MDialog_YesNoDialog(msg,
+                                 m_tree->wxWindow::GetParent(),
+                                 MDIALOG_YESNOTITLE,
+                                 FALSE /* 'no' default */,
+                                 configPath);
+   if ( ok )
+   {
+      // do delete it
+      folder->Delete();
+   }
+
+   return ok;
 }
 
 // ----------------------------------------------------------------------------
@@ -384,7 +518,12 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    SetImageList(imageList);
 
    // create the root item
-   (void)new wxFolderTreeNode(this, GetRootFolder());
+   MFolder *folderRoot = MFolder::Get("");
+   (void)new wxFolderTreeNode(this, folderRoot);
+
+   // register with the event manager
+   m_eventReg = EventManager::Register(*this, EventId_FolderTreeChange);
+   ASSERT_MSG( m_eventReg, "can't register for folder tree change event" );
 }
 
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
@@ -412,17 +551,66 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    //else: no selection
 }
 
+wxTreeItemId
+wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
+{
+   wxArrayString components;
+   wxSplitPath(components, fullname);
+
+   wxTreeItemId current = GetRootItem();
+   wxString currentPath;
+
+   size_t count = components.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      // find the child of the current item which corresponds to (the [grand]
+      // parent of) our folder
+      currentPath << '/' << components[n];
+
+      long cookie;
+      wxTreeItemId child = GetFirstChild(current, cookie);
+      while ( child.IsOk() )
+      {
+         // expand it first
+         Expand(child);
+
+         wxFolderTreeNode *node = (wxFolderTreeNode *)GetItemData(child);
+         CHECK( node, false, "tree folder node without folder?" );
+
+         if ( node->GetFolder()->GetFullName() == currentPath )
+            break;
+
+         child = GetNextChild(current, cookie);
+      }
+
+      current = child;
+
+      if ( !current.IsOk() )
+      {
+         // didn't find the folder
+         break;
+      }
+   }
+
+   return current;
+}
+
 void wxFolderTreeImpl::DoFolderCreate()
 {
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
    if ( folderNew != NULL )
    {
+      // now done in OnEvent()
+#if 0
      wxTreeItemId idCurrent = wxTreeCtrl::GetSelection();
      wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(idCurrent);
 
      wxASSERT_MSG( parent, "can't get the parent of current tree item" );
 
      (void)new wxFolderTreeNode(this, folderNew, parent);
+#endif // 0
+
+     folderNew->DecRef();
    }
    //else: cancelled by user
 }
@@ -433,18 +621,28 @@ void wxFolderTreeImpl::DoFolderDelete()
    if ( !folder )
    {
       wxLogError(_("Please select the folder to delete first."));
+
+      return;
    }
-   else if ( m_sink->OnDelete(folder) )
+
+   if ( m_sink->OnDelete(folder) )
    {
-     Delete(wxTreeCtrl::GetSelection()); 
+      // now done in OnEvent()
+#if 0
+     Delete(wxTreeCtrl::GetSelection());
+
+     SelectItem(GetRootItem());
+#endif // 0
 
      wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
    }
+
+   folder->DecRef();
 }
 
 void wxFolderTreeImpl::DoFolderRename()
 {
-   FAIL_MSG("folder renaming not implemented"); // @@@
+   FAIL_MSG("folder renaming not implemented"); // TODO
 }
 
 void wxFolderTreeImpl::DoFolderProperties()
@@ -471,7 +669,11 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    size_t nSubfolders = folder->GetSubfolderCount();
    for ( size_t n = 0; n < nSubfolders; n++ )
    {
-      (void)new wxFolderTreeNode(this, folder->GetSubfolder(n), parent);
+      MFolder *subfolder = folder->GetSubfolder(n);
+      if ( subfolder )
+      {
+         (void)new wxFolderTreeNode(this, subfolder, parent);
+      }
    }
 
    // if there are no subfolders, indicate it to user by removing the [+]
@@ -494,6 +696,29 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    m_sink->OnSelectionChange(oldsel, newsel);
 
    m_current = newCurrent;
+   m_selectedFolderName = m_current ? m_current->GetFolder()->GetFullName()
+                                    : wxString("");
+}
+
+void wxFolderTreeImpl::OnDoubleClick()
+{
+   if ( IsRootChosen() )
+   {
+      wxLogStatus(GetFrame(this), _("Can not open this folder."));
+
+      return;
+   }
+
+   if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
+   {
+      // then double click opens in a separate view
+      DoFolderOpen();
+   }
+   else
+   {
+      // double click is needed to open it here
+      m_sink->OnOpenHere(m_sink->GetSelection());
+   }
 }
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
@@ -557,8 +782,8 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
       }
       else
       {
-         // without Alt
-         DoFolderOpen();
+         // without Alt it's the same as double click
+         OnDoubleClick();
       }
       break;
 
@@ -567,8 +792,48 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
   }
 }
 
+bool wxFolderTreeImpl::OnEvent(EventData& ev)
+{
+   if ( ev.GetId() == EventId_FolderTreeChange )
+   {
+      EventFolderTreeChangeData& event = (EventFolderTreeChangeData &)ev;
+
+      String folderName = event.GetFolderFullName();
+
+      // refresh the branch of the tree with the parent of the folder which
+      // changed
+      String parentName = folderName.BeforeLast('/');
+
+      // recreate the branch
+      wxTreeItemId parent = GetTreeItemFromName(parentName);
+
+      ASSERT_MSG(parent.IsOk(), "no such item in the tree??");
+
+      Collapse(parent);
+      DeleteChildren(parent);
+      ((wxFolderTreeNode *)GetItemData(parent))->ResetExpandedFlag();
+      SetItemHasChildren(parent, TRUE);
+      Expand(parent);
+
+      if ( event.GetChangeKind() == EventFolderTreeChangeData::Delete )
+      {
+         // if the deleted folder was either the tree ctrl selection or was
+         // opened (these 2 folders may be different), refresh
+         if ( folderName == m_openFolderName ||
+              folderName == m_selectedFolderName )
+         {
+            SelectItem(GetRootItem());
+         }
+      }
+   }
+
+   return true;
+}
+
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
+   EventManager::Unregister(m_eventReg);
+
    delete GetImageList();
 
    delete m_menu;

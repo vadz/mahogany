@@ -104,9 +104,9 @@ MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
       bool   found;
       String   tmp;
    
-      PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
+      PathFinder pf(READ_APPCONFIG(MP_ETCPATH));
 
-      String file = pf.FindFile(READ_APPCONFIG(MC_MIMETYPES), &found);
+      String file = pf.FindFile(READ_APPCONFIG(MP_MIMETYPES), &found);
       if(! found)
          return;
       ifstream str(file.c_str());

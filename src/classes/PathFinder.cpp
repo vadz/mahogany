@@ -34,25 +34,24 @@
 
 #include   <wx/filefn.h>
 
-PathFinder::PathFinder(STRINGARG ipathlist, bool recursive)
+PathFinder::PathFinder(const String & ipathlist, bool recursive)
 {
    pathList = new kbStringList(FALSE);
    AddPaths(ipathlist,recursive);
 }
 
 void
-PathFinder::AddPaths(STRINGARG ipathlist, bool recursive, bool prepend)
+PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
 {
    char *work = new char[ipathlist.length()+1];
    char   *found;
    String   tmp;
    String   subdirList = "";
-   char   *nextfile;
-   
+
    MOcheck();
    strcpy(work,ipathlist.c_str());
    found = strtok(work, PATHFINDER_DELIMITER);
-   
+
    while(found)
    {
       if(prepend)
@@ -62,8 +61,8 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive, bool prepend)
       if(recursive && IsDir(found))   // look for subdirectories
       {
          tmp = String(found) + ANYFILE;
-         nextfile = wxFindFirstFile(tmp.c_str(), wxDIR);
-         while(nextfile)
+         wxString nextfile = wxFindFirstFile(tmp.c_str(), wxDIR);
+         while ( !nextfile.IsEmpty() )
          {
             if(IsDir(nextfile))
             {
@@ -82,13 +81,13 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive, bool prepend)
 }
 
 String
-PathFinder::Find(STRINGARG filename, bool *found,
+PathFinder::Find(const String & filename, bool *found,
                  int mode) const
 {
    kbStringList::iterator i;
    String   work;
    int   result;
-   
+
    MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
@@ -106,13 +105,13 @@ PathFinder::Find(STRINGARG filename, bool *found,
 }
 
 String
-PathFinder::FindFile(STRINGARG filename, bool *found,
+PathFinder::FindFile(const String & filename, bool *found,
                      int mode) const
 {
    kbStringList::iterator i;
    String   work;
    int   result;
-   
+
    MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
@@ -130,13 +129,13 @@ PathFinder::FindFile(STRINGARG filename, bool *found,
 }
 
 String
-PathFinder::FindDir(STRINGARG filename, bool *found,
+PathFinder::FindDir(const String & filename, bool *found,
                     int mode) const
 {
    kbStringList::iterator i;
    String   work;
    int   result;
-   
+
    MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
@@ -154,13 +153,13 @@ PathFinder::FindDir(STRINGARG filename, bool *found,
 }
 
 String
-PathFinder::FindDirFile(STRINGARG filename, bool *found,
+PathFinder::FindDirFile(const String & filename, bool *found,
                         int mode) const
 {
    kbStringList::iterator i;
    String   work;
    int   result;
-   
+
    MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
@@ -179,10 +178,10 @@ PathFinder::FindDirFile(STRINGARG filename, bool *found,
 
 // static
 bool
-PathFinder::IsDir(STRINGARG pathname)
+PathFinder::IsDir(const String & pathname)
 {
    struct stat buf;
-   
+
    if(stat(pathname.c_str(),&buf) == 0 && S_ISDIR(buf.st_mode))
       return true;
    else
@@ -191,7 +190,7 @@ PathFinder::IsDir(STRINGARG pathname)
 
 //static
 bool
-PathFinder::IsFile(STRINGARG pathname) 
+PathFinder::IsFile(const String & pathname)
 {
    struct stat buf;
    if(stat(pathname.c_str(),&buf) == 0 && S_ISREG(buf.st_mode))

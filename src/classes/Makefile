@@ -3,7 +3,7 @@
 
 CWD = classes
 SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
-      XFace.cpp kbList.cpp MFolder.cpp
+      XFace.cpp kbList.cpp MFolder.cpp MEvent.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 

@@ -37,20 +37,49 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    if(i_type == MF_PROFILE)
    {
-      profile = ProfileBase::CreateFolderProfile(i_name,parentProfile);
+      String profileName;
+      if ( !i_name.IsEmpty() && i_name[0u] == '/' )
+         profileName = i_name.c_str() + 1;
+      else
+         profileName = i_name;
+
+      profile = ProfileBase::CreateFolderProfile(profileName,parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       login = READ_CONFIG(profile, MP_POP_LOGIN);
       passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
       type = (MailFolder::Type)READ_CONFIG(profile, MP_FOLDER_TYPE);
-      name = READ_CONFIG(profile, MP_FOLDER_PATH);
-      if(strutil_isempty(name))
+
+      switch ( type )
       {
-         name = i_name;
-         if(name == "INBOX")
-            type = MF_INBOX;
-         else
-            type = (MailFolder::Type) MP_FOLDER_TYPE_D;
+      case MF_NNTP:
+         name = READ_CONFIG(profile, MP_NNTPHOST);
+         // FIXME this login is, in fact, a newsgroup name - which is
+         //       stored in folder path config entry. Clear, eh?
+         login = READ_CONFIG(profile, MP_FOLDER_PATH);
+         break;
+      case MF_FILE:
+         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         if( strutil_isempty(name) )
+         {
+            name = profileName; // i_name is wrong here because we
+                                // need a relative path
+            if(name == "INBOX")
+               type = MF_INBOX;
+            else
+               type = (MailFolder::Type) MP_FOLDER_TYPE_D;
+         }
+         break;
+
+      case MF_POP:
+      case MF_IMAP:
+         name = READ_CONFIG(profile, MP_POP_HOST);
+         if ( strutil_isempty(name) )
+            name = "localhost";
+         break;
+      default:
+         // not sure about others, but fall through for now
+         ;
       }
    }
    else // type != PROFILE
@@ -66,7 +95,7 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    // @@ calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    MailFolder *mf = MailFolderCC::OpenFolder(type, name, profile, login, passwd);
-   if ( mf ) 
+   if ( mf )
       mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
 
    profile->DecRef();

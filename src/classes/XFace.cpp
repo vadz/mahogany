@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * XFace.cc -  a class encapsulating XFace handling                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)              *
  *                                                                  *
- * $Id$                 *
+ * $Id$           *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -106,7 +106,7 @@ XFace::CreateFromXpm(const char *xpmdata)
       }
       dataString += '\n';
       token = strsep(&ptr, "\n\r");
-      if(! token)
+      if(l < 47 && ! token)
       {
 	 delete [] buf;
 	 return false;
@@ -130,6 +130,10 @@ XFace::CreateFromXpm(const char *xpmdata)
 #else
    xface = NULL;
 #endif // wxGTK
+   //convert it:
+   String out = strutil_enforceCRLF(xface);
+   delete [] xface;
+   xface = strutil_strdup(out);
    initialised = true;
    return true;
 #endif
@@ -157,6 +161,9 @@ XFace::CreateFromXFace(const char *xfacedata)
       data = xface = NULL;
       return false;
    }
+   String out = strutil_enforceCRLF(xface);
+   delete [] xface;
+   xface = strutil_strdup(out);
    initialised = true;
    return true;
 #endif
@@ -264,7 +271,7 @@ XFace::CreateXpm(char ***xpm)
    String
       tmp;
    
-   *xpm = (char **) malloc(sizeof(char *)*51);
+   *xpm = (char **) malloc(sizeof(char *)*52);
    
    buf = strutil_strdup(data);
    ptr = buf;
@@ -328,6 +335,7 @@ XFace::CreateXpm(char ***xpm)
       }
       (*xpm)[line++] = strutil_strdup(tmp);
    }
+   (*xpm)[line++] = NULL;
    return true;
 #endif
 }

@@ -3,9 +3,10 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$          *
+ * $Id$     *
  *******************************************************************/
-#ifndef	WXMESSAGEVIEW_H
+
+#ifndef WXMESSAGEVIEW_H
 #define WXMESSAGEVIEW_H
 
 #ifdef __GNUG__
@@ -31,7 +32,7 @@ class MailFolder;
 /** A wxWindows MessageView class
   */
 
-class wxMessageView : public MessageViewBase, public wxLayoutWindow
+class wxMessageView : public wxLayoutWindow, public MessageViewBase
 {
 public:
    /** quasi-Constructor
@@ -83,16 +84,27 @@ public:
    /// prints the currently displayed message
    void Print(void);
 
+   /// print-previews the currently displayed message
+   void PrintPreview(void);
+
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
 
    // callbacks
       /// called on Menu selection
-   void OnMenuCommand(int id);
+   void OnMenuCommand(wxCommandEvent& event) { (void) DoMenuCommand(event.GetId()); }
+   /// returns true if it handled the command
+   bool DoMenuCommand(int command);
 
-      /// called on mouse click
+   /// called on mouse click
    void OnMouseEvent(wxCommandEvent & event);
 
+   /// call to show the raw text of the current message (modal dialog)
+   bool ShowRawText(MailFolder *folder = NULL);
+
+   /// for use by wxMessageViewFrame, to be removed after
+   /// OnCommandEvent() is cleaned up:
+   wxFolderView *GetFolderView(void) { return m_FolderView; }
 private:
    /// is initialised?
    bool initialised;
@@ -103,12 +115,13 @@ private:
    /// the current message
    Message   *mailMessage;
    /// the mail folder
-   MailFolder   *folder;
+   MailFolder   *m_folder;
    /// the folder view, which handles some actions for us
    wxFolderView *m_FolderView;
    /// the message part selected for MIME display
    int      mimeDisplayPart;
-
+   /// do we want to display all header lines?
+   bool m_showHeaders;
    /// this can hold an xface
    XFace   *xface;
    /// and the xpm for it
@@ -128,6 +141,8 @@ protected:
    void MimeHandle(int num);
    /// saves the currently selected MIME content
    void MimeSave(int num, const char *filename = NULL);
+
+   DECLARE_EVENT_TABLE()
 };
 
 

@@ -1,14 +1,14 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbBook.h - address book public interface
 // Purpose:     AdbBook defines an abstract interface for any ADB (sic!)
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _ADBBOOK_H
 #define   _ADBBOOK_H
@@ -27,20 +27,23 @@
   AdbDataProviders to actually create the book.
 
   This class derives from MObjectRC and uses reference counting, see
-  the comments in MObject.h for more details about it.  
+  the comments in MObject.h for more details about it.
 */
 
 class AdbBook : public AdbEntryGroup
 {
 public:
   // accessors
+    // compare this book with the book named 'name' and return TRUE if it's the
+    // same (dumb name comparaison doesn't work for file based books)
+  virtual bool IsSameAs(const String& name) const = 0;
     // get the "name" (uniquely identifies the book)
-  virtual const char *GetName() const = 0;
+  virtual String GetName() const = 0;
 
     // get/set ADB name (user name)
   virtual void SetUserName(const String& name) = 0;
   virtual String GetUserName() const = 0;
-  
+
     // get/set ADB description (long name)
   virtual void SetDescription(const String& desc) = 0;
   virtual String GetDescription() const = 0;

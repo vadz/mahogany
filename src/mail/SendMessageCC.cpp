@@ -114,22 +114,23 @@ SendMessageCC::Create(ProfileBase *iprof,
       CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    env->return_path = mail_newaddr ();
 
-  tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-  if(strutil_isempty(tmpstr))
-     tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
-  else
-     tmpstr = strutil_before(tmpstr,'@');
-  env->return_path->mailbox = CPYSTR(tmpstr);
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(strutil_isempty(tmpstr))
+      tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
+   else
+      tmpstr = strutil_before(tmpstr,'@');
+   env->return_path->mailbox = CPYSTR(tmpstr);
 
-  tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-  if(strutil_isempty(tmpstr))
-     tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
-  else
-     tmpstr = strutil_after(tmpstr,'@');
-  env->return_path->host = CPYSTR(tmpstr);
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(strutil_isempty(tmpstr))
+      tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+   else
+      tmpstr = strutil_after(tmpstr,'@');
+   env->return_path->host = CPYSTR(tmpstr);
 
-  tmpstr = to;   ExtractFccFolders(tmpstr);
-   tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   tmpstr = to;   ExtractFccFolders(tmpstr);
+   tmp = strutil_strdup(tmpstr);
+   tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    rfc822_parse_adrlist (&env->to,tmp,tmp2);
    delete [] tmp; delete [] tmp2;
   
@@ -293,7 +294,7 @@ SendMessageCC::Build(void)
    if(m_headerNames != NULL) // message was already build
       return;
    
-   headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));
+   headers = strutil_strdup(READ_CONFIG(profile, MP_EXTRAHEADERS));
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
@@ -317,30 +318,34 @@ SendMessageCC::Build(void)
    {
       xpmarray =
          wxIconManager::LoadImage(profile->readEntry(MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
-   }
-   else
-   {
-      bool found;
-      PathFinder pf(READ_APPCONFIG(MC_ICONPATH), true);
-      pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
-      pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-      String name = pf.FindFile("xface.xpm", &found);
-      if(found)
-         xpmarray = wxIconManager::LoadImage(name);
-   }
-   if(xpmarray)
-   {
-      XFace xface;
-      for(int i = 0; xpmarray[i]; i++)
+      if(! xpmarray)
       {
-         xpmdata += xpmarray[i];
-         xpmdata += '\n';
+         bool found;
+         PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+         pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
+         pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
+         String name = pf.FindFile("xface.xpm", &found);
+         if(found)
+            xpmarray = wxIconManager::LoadImage(name);
       }
-      wxIconManager::FreeImage(xpmarray);
-      if(xface.CreateFromXpm(xpmdata.c_str()))
+      if(xpmarray)
       {
-         m_headerNames[j] = strutil_strdup("X-Face");
-         m_headerValues[j++] = strutil_strdup(xface.GetHeaderLine());
+         XFace xface;
+         for(int i = 0; xpmarray[i]; i++)
+         {
+            xpmdata += xpmarray[i];
+            xpmdata += '\n';
+         }
+         wxIconManager::FreeImage(xpmarray);
+         if(xface.CreateFromXpm(xpmdata.c_str()))
+         {
+            m_headerNames[j] = strutil_strdup("X-Face");
+            m_headerValues[j] = strutil_strdup(xface.GetHeaderLine());
+            //FIXME: find more elegant solution for this (GetHeaderLine())
+            ((char *)(m_headerValues[j]))[strlen(m_headerValues[j])-1] = '\0'; //
+            // cut off \n
+            j++;
+         }
       }
    }
 #endif
@@ -348,7 +353,7 @@ SendMessageCC::Build(void)
    m_headerNames[j] = NULL;
    m_headerValues[j] = NULL;
    rfc822_setextraheaders(m_headerNames,m_headerValues);
-   
+
    mail_free_body_part(&lastpart->next);
    lastpart->next = NULL;
    rfc822_date (tmpbuf);

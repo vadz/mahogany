@@ -7,6 +7,8 @@
  *
  *******************************************************************/
 
+
+
 #ifndef   KBLIST_H
 #   define   KBLIST_H
 
@@ -312,5 +314,6 @@ protected: \
 /// define the most commonly used list type once:
 KBLIST_DEFINE(kbStringList, String);
 #endif
+//@}
 
 #endif // KBLIST_H

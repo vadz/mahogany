@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * strutil.cc : utility functions for string handling               *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -12,6 +12,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifndef   USE_PCH
 #   include "strutil.h"
@@ -223,19 +224,23 @@ strutil_matchurl(const char *string)
 {
    int i;
    String url = "";
-   const char * cptr = string;
+   const char * cptr;
 
 
    for(i = 0; urlnames[i]; i++)
-      if(strcmp(string,urlnames[i]) >= 0) // found
-      {
-         while(*cptr && ! isspace(*cptr))
+      if(strcmp(string,urlnames[i]) >= 0)
          {
-            url += *cptr;
-            cptr++;
+            cptr = string + strlen(urlnames[i]);
+            if(isspace(*cptr) || *cptr == '\0')
+               break;  // "file: " doesn't count!
+            cptr = string;
+            while(*cptr && ! isspace(*cptr))
+            {
+               url += *cptr;
+               cptr++;
+            }
+            return url;
          }
-         return url;
-      }
    return String("");
 }
 
@@ -392,11 +397,57 @@ bool
 strutil_isabsolutepath(const String &path)
 {
 #ifdef OS_UNIX
-   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR || path[0u] == '~');
+   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR ||
+                                     path[0u] == '~');
 #elif defined ( OS_WIN )
    // TODO copy the code from wxIsAbsolutePath() here if Karsten insists on it
    return wxIsAbsolutePath(path);
 #endif
+}
+
+static void
+strutil_squeeze_slashes(String& path)
+{
+   String result;
+   for ( const char *p = path.c_str(); *p != '\0'; p++ )
+   {
+      if ( *p == '/' )
+      {
+         while ( *p++ == '/' )
+            ;
+
+         // we are one position too far - return to the last '/'
+         p--;
+      }
+
+      result += *p;
+   }
+
+   path = result;
+}
+
+// TODO it doesn't work properly: should take into account the symbolic names
+//      under Unix and drive letters under Windows. Also, relative paths are not
+//      supported at all
+bool
+strutil_compare_filenames(const String& path1, const String& path2)
+{
+   String file1(path1), file2(path2);
+
+   // replace all '\\' with '/' under Windows - they're the same
+#ifdef OS_WIN
+   file1.Replace("\\", "/");
+   file2.Replace("\\", "/");
+#endif // Windows
+
+   file1 = strutil_expandpath(file1);
+   file2 = strutil_expandpath(file2);
+   
+   // replace all repeating '/' with only one
+   strutil_squeeze_slashes(file1);
+   strutil_squeeze_slashes(file2);
+
+   return file1.IsSameAs(file2, FALSE /* no case */);
 }
 
 String
@@ -404,7 +455,7 @@ strutil_expandpath(const String &ipath)
 {
 #ifdef OS_UNIX
    String path;
-   
+
    if(strutil_isempty(ipath))
       return "";
 
@@ -441,6 +492,79 @@ strutil_expandpath(const String &ipath)
       return ipath;
 }
 
+/** Cut off last directory from path and return string before that.
+
+    @param pathname the path in which to go up
+    @param separator the path separator
+    @return the parent directory to the one specified
+*/
+String
+strutil_path_parent(String const &path, char separator)
+{
+   char *cptr = strrchr(path.c_str(),separator);
+   if(cptr == NULL) // not found
+      return "";
+   else
+      return path.Left((int)(cptr-path.c_str()));
+}
+
+/** Cut off last name from path and return string that (filename).
+
+    @param pathname the path
+    @param separator the path separator
+    @return the parent directory to the one specified
+*/
+String
+strutil_path_filename(String const &path, char separator)
+{
+   char *cptr = strrchr(path.c_str(),separator);
+   if(cptr == NULL) // not found
+      return "";
+   else
+      return String(cptr+1);
+}
+
+
+
+/** Enforces CR/LF newline convention.
+
+    @param in string to copy
+    @return the DOSified string
+*/
+String
+strutil_enforceCRLF(String const &in)
+{
+   String out;
+   const char *cptr = in.c_str();
+   bool has_cr =  false;
+
+   if(! cptr)
+      return "";
+   while(*cptr)
+   {
+      switch(*cptr)
+      {
+      case '\r':
+         has_cr = true;
+         out += '\r';
+         break;
+      case '\n':
+         if(! has_cr)
+            out += '\r';
+         out += '\n';
+         has_cr = false;
+         break;
+      default:
+         out += *cptr;
+         has_cr = false;
+         break;
+      }
+      cptr++;
+   }
+   return out;
+}
+
+
 //************************************************************************
 //        Profile and other classes dependent functions:
 //************************************************************************
@@ -454,11 +578,11 @@ String
 strutil_expandfoldername(const String &name)
 {
    String mboxpath;
-   
+
    if(strutil_isabsolutepath(name))
       mboxpath = name;
    else
-      mboxpath << READ_APPCONFIG(MC_MBOXDIR) << DIR_SEPARATOR << name; 
+      mboxpath << READ_APPCONFIG(MP_MBOXDIR) << DIR_SEPARATOR << name;
    mboxpath = strutil_expandpath(mboxpath);
    return mboxpath;
 }

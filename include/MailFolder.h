@@ -6,6 +6,8 @@
  * $Id$
  *******************************************************************/
 
+
+
 #ifndef MAILFOLDER_H
 #define MAILFOLDER_H
 
@@ -33,11 +35,11 @@ class ProfileBase;
    <li>Use it with a different type and set other options such as
        login/password manually. This will use a dummy profile
        inheriting from the global profile section.
-   <ul>
+   </ul>
 */
 class MailFolder : public MObjectRC
 {
-public:   
+public:
    /** @name Constants and Types */
    //@{
    /** Which type is this mailfolder? (consistent with c-client?)
@@ -79,10 +81,10 @@ public:
       MSG_STAT_SEARCHED = 16
    };
    //@}
-   
+
    /** @name Constructors and destructor */
    //@{
-   
+
    /**
       Opens an existing mail folder of a certain type.
       The path argument is as follows:
@@ -93,7 +95,7 @@ public:
       <li>MF_POP:   hostname
       <li>MF_IMAP:  hostname
       <li>MF_NNTP:  newshost
-      <ul>
+      </ul>
       @param type one of the supported types
       @param path either a hostname or filename depending on type
       @param profile parent profile
@@ -120,7 +122,7 @@ public:
        @param reg if false, unregister it
    */
    virtual void RegisterView(FolderView *view, bool reg = true) = 0;
-   
+
    /** is mailbox "ok", i.e. was there an error or not?
        @return  true if everything succeeded
    */
@@ -138,7 +140,7 @@ public:
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
-   
+
    /** Get status of message.
        @param  msgno sequence no of message
        @param size if not NULL, size in bytes gets stored here
@@ -153,12 +155,18 @@ public:
       unsigned int *day = NULL,
       unsigned int *month = NULL,
       unsigned int *year = NULL) = 0;
-   
+
    /** get the message with number msgno
        @param msgno sequence number
        @return message handler
    */
    virtual class Message *GetMessage(unsigned long msgno) = 0;
+
+   /** get the raw text of the message with given number
+       @param msgno sequence number
+       @return string containing the text (empty on error)
+   */
+   virtual String GetRawMessage(unsigned long msgno) = 0;
 
    /** Delete a message.
        @param index the sequence number
@@ -191,7 +199,7 @@ public:
    /** Expunge messages.
      */
    virtual void ExpungeMessages(void) = 0;
-   
+
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -200,8 +208,10 @@ public:
    /// return class name
    const char *GetClassName(void) const
       { return "MailFolder"; }
+
    /// Get update interval in seconds
-   inline int GetUpdateInterval(void) const { return m_UpdateInterval; }
+   int GetUpdateInterval(void) const { return m_UpdateInterval; }
+
 protected:
    /**@name Accessor methods */
    //@{

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbManager.h - ADB manager public interface
 // Purpose:     AdbManager manages all AdbBooks used by the application
@@ -8,7 +8,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef   _ADBMANAGER_H
 #define   _ADBMANAGER_H
@@ -25,7 +25,9 @@ class AdbDataProvider;
 
 // arrays
 WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
+WX_DEFINE_ARRAY(AdbEntryGroup *, ArrayAdbGroups);
 WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
+WX_DEFINE_ARRAY(AdbElement *, ArrayAdbElements);
 
 
 /**
@@ -61,6 +63,11 @@ public:
     /// decrement the ref count of the manager object
     //  NB: you can't use the pointer returned by Get() after Unget()!
   static void Unget();
+    // this function is for private usage (of MApplication) only, it deletes the
+    // ADB manager (regardless of the number of references to it) on application
+    // exit ensuring that all ADB data is saved, even if there is a bug in ref
+    // counting code somewhere
+  static void Delete();
 
   // accessors
     /// get the number of books currently open
@@ -161,11 +168,20 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
 
 /**
   Expand the abbreviated address: i.e. looks for an address entry which starts
-  with the specified text and returns it if found. Returns empty string if no
-  match. The frame parameter is used as parent for possible dialog boxes and
-  also to log status messages.
+  with the specified text and returns it if found. If more than one address
+  match, the user is proposed with a listbox from which one or more items can be
+  chosen. If a group matches, all the items of this group are returned.
+
+  @param results is the array filled with the expanded addresses
+  @param what is the string to look for
+  @param frame is used as parent for possible dialog boxes and also to log
+         status messages (may be NULL)
+
+  @return FALSE if no matches, TRUE if at least one item matched
 */
 class wxFrame;
-extern String AdbExpand(const String& what, wxFrame *frame);
+extern bool AdbExpand(wxArrayString& results,
+                      const String& what,
+                      wxFrame *frame);
 
 #endif  //_ADBMANAGER_H

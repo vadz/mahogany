@@ -34,10 +34,12 @@
 #   include "Profile.h"
 #endif
 
+#include "MHelp.h"
 
 #include "gui/wxMApp.h"
 #include "gui/wxMIds.h"
 
+#include "MFolder.h"
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
@@ -50,6 +52,7 @@
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
+#include "adb/AdbManager.h"
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxFolderView.h"
@@ -80,9 +83,6 @@ extern void CloseSplash()
 // private classes
 // ----------------------------------------------------------------------------
 
-// an array of AdbEntries
-WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-
 // better looking and wxConfig-aware wxTextEntryDialog
 class MTextInputDialog : public wxDialog
 {
@@ -110,6 +110,7 @@ class MFolderDialog : public wxDialog
 {
 public:
    MFolderDialog(wxWindow *parent);
+   ~MFolderDialog() { delete m_tree; }
 
    // accessors
    MFolder *GetFolder() const { return m_folder; }
@@ -122,6 +123,41 @@ private:
    MFolder      *m_folder;
    wxFolderTree *m_tree;
 };
+
+// ----------------------------------------------------------------------------
+// MTextDialog - a dialog containing a multi-line text control (used to show
+//               user some text)
+// ----------------------------------------------------------------------------
+
+class MTextDialog : public wxDialog
+{
+public:
+    MTextDialog(wxWindow *parent,
+                const wxString& title,
+                const wxString& text,
+                const wxPoint& position,
+                const wxSize& size)
+    : wxDialog(parent, -1, title, position, size,
+               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) // make it resizealbe
+    {
+        m_text = new wxTextCtrl(this, -1, text, wxPoint(0, 0), size,
+                                wxTE_MULTILINE | wxTE_READONLY);
+    }
+
+    void OnSize(wxSizeEvent& event)
+    {
+       m_text->SetSize(event.GetSize().GetX(), event.GetSize().GetY(), -1, -1);
+    }
+
+private:
+    wxTextCtrl *m_text;
+
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(MTextDialog, wxDialog)
+    EVT_SIZE(MTextDialog::OnSize)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // functions
@@ -393,49 +429,52 @@ MDialog_FileRequester(String const & message,
                       bool save,
                       ProfileBase *profile)
 {
+   // VZ: disabling this code because it is almost useless now with the advent
+   //     of wxPFileSelector()
+#if 0
    if(! profile)
       profile = mApplication->GetProfile();
 
    if(! path)
       path = save ?
-    profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
-    : profile->readEntry(MP_DEFAULT_LOAD_PATH,MP_DEFAULT_LOAD_PATH_D);
+         profile->readEntry(MP_DEFAULT_SAVE_PATH,MP_DEFAULT_SAVE_PATH_D)
+         : profile->readEntry(MP_DEFAULT_LOAD_PATH,MP_DEFAULT_LOAD_PATH_D);
    if(! filename)
       filename = save ?
-    profile->readEntry(MP_DEFAULT_SAVE_FILENAME,MP_DEFAULT_SAVE_FILENAME_D)
-    : profile->readEntry(MP_DEFAULT_LOAD_FILENAME,MP_DEFAULT_LOAD_FILENAME_D);
+         profile->readEntry(MP_DEFAULT_SAVE_FILENAME,MP_DEFAULT_SAVE_FILENAME_D)
+         : profile->readEntry(MP_DEFAULT_LOAD_FILENAME,MP_DEFAULT_LOAD_FILENAME_D);
    if(! extension)
       extension = save ?
-    profile->readEntry(MP_DEFAULT_SAVE_EXTENSION,MP_DEFAULT_SAVE_EXTENSION_D)
-    : profile->readEntry(MP_DEFAULT_LOAD_EXTENSION,MP_DEFAULT_LOAD_EXTENSION_D);
-      if(! wildcard)
-    wildcard = save ?
-       profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
-       : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
+         profile->readEntry(MP_DEFAULT_SAVE_EXTENSION,MP_DEFAULT_SAVE_EXTENSION_D)
+         : profile->readEntry(MP_DEFAULT_LOAD_EXTENSION,MP_DEFAULT_LOAD_EXTENSION_D);
+   if(! wildcard)
+      wildcard = save ?
+         profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
+         : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
+#endif // 0
 
    if(parent == NULL)
       parent = mApplication->TopLevelFrame();
 
-   return wxFileSelector(message, path, filename, extension, wildcard, 0,
-                         (wxWindow *)parent);
+   // TODO we save only one file name for all "open file" dialogs and one for
+   //      all "save file" dialogs - may be should be more specific (add
+   //      configPath parameter to MDialog_FileRequester?)
+   return wxPFileSelector(save ? "save" : "load",
+                          message, path, filename, extension,
+                          wildcard, 0, (wxWindow *)parent);
 }
 
 int
-MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
+MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                       const MWindow *parent)
 {
    wxArrayString aChoices;
    wxString strName, strEMail;
 
    size_t nEntryCount = aEntries.Count();
-   AdbEntry *pEntry;
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
-      pEntry = aEntries[nEntry];
-      pEntry->GetField(AdbField_FullName, &strName);
-      pEntry->GetField(AdbField_EMail, &strEMail);
-
-      aChoices.Add(strName + " <" + strEMail + ">");
+      aChoices.Add(aEntries[nEntry]->GetDescription());
    }
 
    int w,h;
@@ -495,7 +534,7 @@ private:
     {
       m_window = window;
 
-      Start(READ_APPCONFIG(MC_SPLASHDELAY));
+      Start(READ_APPCONFIG(MP_SPLASHDELAY));
     }
 
     virtual void Notify() { m_window->DoClose(); }
@@ -548,7 +587,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.LineBreak();
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("  Copyright (c) 1998 by Karsten Ballüder");
+   ll.Insert("  Copyright (c) 1999 by Karsten Ballüder");
    ll.LineBreak();
    ll.LineBreak();
    ll.Insert("          Written by Karsten Ballüder");
@@ -556,7 +595,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.Insert("                      and Vadim Zeitlin");
    ll.LineBreak();
    ll.SetEditable(false);
-
+   DoPaint();
+   UpdateScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
      m_pTimer = new CloseTimer(this);
@@ -570,7 +610,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
                       wxDefaultPosition, wxSize(220, 300),
-                      wxDOUBLE_BORDER | wxSTAY_ON_TOP)
+                      /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
    g_pSplashScreen = (MFrame *)this;
@@ -585,6 +625,7 @@ void
 MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 {
    (void)new wxAboutFrame(bCloseOnTimeout);
+   wxYield(); // to make sure it gets displayed at startup
 }
 
 
@@ -948,8 +989,8 @@ MDialog_FolderChoose(const MWindow *parent)
 class wxMRDialog : public wxDialog
 {
 public:
-   wxMRDialog()
-      { } // we cannot Centre() it here because we don't have a parent yet!
+   wxMRDialog(int helpID = MH_CONTENTS)
+      { m_helpID = helpID; } // we cannot Centre() it here because we don't have a parent yet!
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
@@ -958,6 +999,7 @@ protected:
    //    callbacks
    void OnButton(wxCommandEvent& event);
 
+   int m_helpID;
    DECLARE_EVENT_TABLE()
 };
 
@@ -976,6 +1018,8 @@ void wxMRDialog::OnButton(wxCommandEvent&  event)
    }
    else if(win->GetName() == "CANCEL_BUTTON")
       EndModal(0);
+   else if(win->GetName() == "HELP_BUTTON")
+      mApplication->Help(m_helpID,this);
 }
 
 bool wxMRDialog::TransferDataToWindow(void)
@@ -991,6 +1035,7 @@ bool wxMRDialog::TransferDataFromWindow(void)
 class wxMROpenFolderDialog : public wxMRDialog
 {
 public:
+   wxMROpenFolderDialog() : wxMRDialog(MH_FOLDER_OPEN_DIALOG) {}
    virtual bool TransferDataFromWindow(void);
    void OnRadio(wxCommandEvent &event);
    void UpdateRadioBox(void);
@@ -1110,4 +1155,21 @@ MDialog_FolderOpen(wxMFrame *parent)
       }
       dialog->Close(TRUE);
    }
+}
+
+void MDialog_ShowText(MWindow *parent,
+                      const char *title,
+                      const char *text,
+                      const char *configPath)
+{
+   int x = -1, y = -1, w = -1, h = -1;
+   if ( configPath )
+      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
+
+   MTextDialog dlg(parent, title, text,
+                   wxPoint(x, y), wxSize(w, h));
+   (void)dlg.ShowModal();
+
+   if ( configPath )
+      wxMFrame::SavePosition(configPath, &dlg);
 }

@@ -27,13 +27,16 @@
 #   include   "MLogFrame.h"
 #endif
 
+#include "MEvent.h"
+
 class wxMimeTypesManager;
+class MailFolder;
 
 /**
    Application class, doing all non-GUI application specific stuff
 */
 
-class MAppBase
+class MAppBase : public EventReceiver
 {
 protected:
    // global variables stored in the application object
@@ -50,10 +53,12 @@ protected:
 
    /// a list of all known mime types
    wxMimeTypesManager *m_mimeManager;
-   
+
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
 
+   /// registration seed for EventManager
+   void *m_eventReg;
 
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
@@ -109,7 +114,7 @@ public:
        @param parent parent window pointer
    */
    virtual void Help(int id, MWindow *parent = NULL) = 0;
-   
+
    /** gets toplevel frame
        @return the toplevel window of the application
    */
@@ -120,7 +125,7 @@ public:
         @return the translated text
    */
    const char *GetText(const char *in) const;
-   
+
    /** return the global directory
        @return the path to the global M data files
    */
@@ -148,6 +153,17 @@ public:
 
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
+
+   /** Returns TRUE if the application has been initialized and is not yet
+       being shut down
+   */
+   bool IsRunning() const { return m_topLevelFrame != NULL; }
+
+   /// called by the main frame when it's closed
+   void OnMainFrameClose() { m_topLevelFrame = NULL; }
+
+   /// called when the events we're interested in are generated
+   virtual bool OnEvent(EventData& event);
 };
 
 extern MAppBase *mApplication;

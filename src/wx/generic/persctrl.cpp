@@ -41,6 +41,7 @@
 #   include  "wx/dcclient.h"
 #   include  "wx/settings.h"
 #   include  "wx/statbox.h"
+#   include  "wx/filedlg.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"
@@ -409,6 +410,133 @@ void wxPTextEntry::SetConfigPath(const wxString& path)
 }
 
 // ----------------------------------------------------------------------------
+// wxPSplitterWindow
+// ----------------------------------------------------------------------------
+
+const char *wxPSplitterWindow::ms_sashKey = "Sash";
+
+wxPSplitterWindow::wxPSplitterWindow()
+{
+    m_persist = new wxPHelper;
+}
+
+wxPSplitterWindow::wxPSplitterWindow(const wxString& configPath,
+                                     wxWindow *parent,
+                                     wxWindowID id,
+                                     const wxPoint& pos,
+                                     const wxSize& size,
+                                     long style,
+                                     wxConfigBase *config)
+                 : wxSplitterWindow(parent, id, pos, size, style)
+{
+    m_wasSplit = FALSE;
+   
+    m_persist = new wxPHelper(configPath, config);
+}
+
+bool wxPSplitterWindow::Create(const wxString& configPath,
+                               wxWindow *parent,
+                               wxWindowID id,
+                               const wxPoint& pos,
+                               const wxSize& size,
+                               long style,
+                               wxConfigBase *config)
+{
+   m_wasSplit = FALSE;
+   
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath);
+
+   return wxSplitterWindow::Create(parent, id, pos, size, style);
+}
+
+wxPSplitterWindow::~wxPSplitterWindow()
+{
+    SavePosition();
+
+    delete m_persist;
+}
+
+void wxPSplitterWindow::SavePosition()
+{
+    // only store the position if we're split
+    if ( m_wasSplit && m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+        config->Write(ms_sashKey, (long)GetSashPosition());
+
+        m_persist->RestorePath();
+    }
+}
+
+int wxPSplitterWindow::GetStoredPosition(int defaultPos) const
+{
+    if ( m_persist->ChangePath() ) {
+        int pos = m_persist->GetConfig()->Read(ms_sashKey, defaultPos);
+
+        m_persist->RestorePath();
+
+        return pos;
+    }
+
+    return defaultPos;
+}
+
+bool wxPSplitterWindow::SplitVertically(wxWindow *window1,
+                                        wxWindow *window2,
+                                        int sashPosition)
+{
+    int pos;
+
+    if ( !m_wasSplit ) {
+        m_wasSplit = TRUE;
+
+        pos = GetStoredPosition(sashPosition);
+    }
+    else {
+        pos = sashPosition;
+    }
+
+    return wxSplitterWindow::SplitVertically(window1, window2, pos);
+}
+
+bool wxPSplitterWindow::SplitHorizontally(wxWindow *window1,
+                                          wxWindow *window2,
+                                          int sashPosition)
+{
+    int pos;
+
+    if ( !m_wasSplit ) {
+        m_wasSplit = TRUE;
+
+        pos = GetStoredPosition(sashPosition);
+    }
+    else {
+        pos = sashPosition;
+    }
+
+    return wxSplitterWindow::SplitHorizontally(window1, window2, pos);
+}
+
+void wxPSplitterWindow::OnUnsplit(wxWindow *removed)
+{
+    SavePosition();
+
+    m_wasSplit = FALSE;
+
+    wxSplitterWindow::OnUnsplit(removed);
+}
+
+void wxPSplitterWindow::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+void wxPSplitterWindow::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path);
+}
+
+// ----------------------------------------------------------------------------
 // peristent message box stuff
 // ----------------------------------------------------------------------------
 
@@ -592,12 +720,12 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
         if ( buttons[nBtn] ) {
             c = new wxLayoutConstraints;
-            
+
             if ( btnPrevious ) {
                 c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
             }
             else {
-                c->left.SameAs(this, wxLeft, 
+                c->left.SameAs(this, wxLeft,
                                (widthDlg - widthButtonsTotal) / 2);
             }
 
@@ -654,19 +782,20 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
     }
 }
 
-// get the path to use
+// get the path to use for message box settings
 static void wxPMessageBoxHelper(const wxString& configPath,
                                 wxString& ourPath,
                                 wxString& ourValue)
 {
-    ourPath.Empty();
+    wxASSERT_MSG( ourPath.IsEmpty(), "should be passed in an empty string" );
+
     if ( configPath[0u] != '/' ) {
         // prepend some common prefix
         ourPath = "Messages/";
     }
 
-    ourPath += configPath.Before('/');
-    ourValue = configPath.Right('/');
+    ourPath += configPath.BeforeLast('/');
+    ourValue = configPath.AfterLast('/');
 }
 
 int wxPMessageBox(const wxString& configPath,
@@ -736,4 +865,77 @@ void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
        // delete stored value
        config->DeleteEntry(configValue);
     }
+}
+
+// -----------------------------------------------------------------------------
+// Persistent file selector boxes stuff
+// -----------------------------------------------------------------------------
+
+// get the path to use for file prompts settings
+static void wxPFileSelectorHelper(const wxString& configPath,
+                                  wxString& ourPath,
+                                  wxString& ourValue)
+{
+    wxASSERT_MSG( ourPath.IsEmpty(), "should be passed in an empty string" );
+
+    if ( configPath[0u] != '/' ) {
+        // prepend some common prefix
+        ourPath = "FilePrompts/";
+    }
+
+    ourPath += configPath.BeforeLast('/');
+    ourValue = configPath.AfterLast('/');
+}
+
+wxString wxPFileSelector(const wxString& configPath,
+                         const wxString& title,
+                         const char *defpath,
+                         const char *defname,
+                         const char *extension,
+                         const char *filter,
+                         int flags,
+                         wxWindow *parent,
+                         wxConfigBase *config)
+{
+    wxString ourPath,           // path in the config
+             configValueFile,   // name of the entry where filename is stored
+             configValuePath;   // name of the entry where path is stored
+    wxPFileSelectorHelper(configPath, ourPath, configValueFile);
+    configValuePath << configValueFile << "Path";
+
+    wxPHelper persist(ourPath, config);
+    persist.ChangePath();
+
+    // if config was NULL, wxPHelper already has the global one
+    config = persist.GetConfig();
+
+    // use the stored value for the default name/path and fall back to the
+    // given one if there is none
+    wxString defaultName, defaultPath;
+    if ( config ) {
+        defaultName = config->Read(configValueFile, defname);
+        defaultPath = config->Read(configValuePath, defpath);
+    }
+    else {
+        defaultName = defname;
+        defaultPath = defpath;
+    }
+
+    // do show the file selector box
+    wxString filename = wxFileSelector(title, defaultPath, defaultName, NULL,
+                                       filter
+                                        ? filter
+                                        : wxFileSelectorDefaultWildcardStr,
+                                       flags, parent);
+
+    // and save the file name if it was entered
+    if ( !filename.IsEmpty() && config ) {
+        wxString path, name, ext;
+        wxSplitPath(filename, &path, &name, &ext);
+
+        config->Write(configValueFile, name + ext);
+        config->Write(configValuePath, path);
+    }
+
+    return filename;
 }

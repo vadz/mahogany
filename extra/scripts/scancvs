@@ -1,0 +1,85 @@
+#!/bin/sh
+# $Id$
+# Shell script to find all files and directories not contained in cvs.
+# Call it from the toplevel directory as either
+# scancvs              
+# scancvs remove
+#
+# If called with the remove option, it will remove all non-cvs files
+# and directories. All temporary files will be removed in any case.
+
+extra_dirs=""
+extra_files=""
+
+scan_dir()
+{
+	path=$1
+	echo Scanning $path ...
+	# lists all direct subdirectories
+	subdirs=`find . -type d -maxdepth 1 -a -not -name CVS -print | sed "1,$ s/^\.\///g"`
+	# now check whether they are in cvs (D/dirname/ in Entries)
+	for i in $subdirs
+	do
+		if [ "$i" != "." ]
+		then
+			egrep -q "^D/$i/" < CVS/Entries >/dev/null
+			if [ $? != 0 ]
+			then
+				extra_dirs="$extra_dirs $path/$i"
+				echo $path/$i
+			else
+				(cd $i ; scan_dir $path/$i)
+			fi
+		fi
+	done
+	
+	# lists all files in this directory
+	files=`find . -type f -maxdepth 1 -print | sed "1,$ s/^\.\///g"`
+	# now check whether they are in cvs (/dirname/ in Entries)
+	for i in $files
+	do
+		egrep -q "^/$i/" < CVS/Entries >/dev/null
+		if [ $? != 0 ]
+		then
+			kill=0
+			(echo $i | egrep -q "^\.#") || \
+			(echo $i | egrep -q "~$" ) || \
+			(echo $i | egrep -q "\.bak$")
+			if [ $? = 0 ]
+			then
+				echo Removing $i...
+				rm $i
+			else
+				(echo $i | egrep -q "\.o$")
+				if [ $? != 0 ]
+				then
+					extra_files="$extra_files $path/$i"
+					echo $path/$i
+				fi
+			fi
+		fi
+	done
+}
+
+scan_dir .
+
+echo -- directories not found in cvs: -------------------------------
+echo $extra_dirs
+echo -- files not found in cvs: ------------------------------------
+for i in $extra_files ; do echo $i ; done
+echo ----------------------------------------------------------------
+
+if [ "x$1" = "xremove" ]
+then
+	for i in $extra_dirs
+	do
+		echo Removing directory $i ...
+#		rm -r $i
+	done
+
+	for i in $extra_files
+	do
+		echo Removing file $i ...
+#		rm $i
+	done
+fi

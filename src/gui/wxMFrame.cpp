@@ -37,6 +37,7 @@
 #endif // Python
 
 #include "MHelp.h"
+#include "MFolder.h"
 
 #include "FolderView.h"
 #include "MDialogs.h"
@@ -52,11 +53,16 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
-#ifdef  USE_WXWINDOWS2
-   BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-      EVT_MENU(-1,    wxMFrame::OnCommandEvent)
-      EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
-   END_EVENT_TABLE()
+BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
+   EVT_MENU(-1,    wxMFrame::OnCommandEvent)
+   EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
+   EVT_CLOSE(wxMFrame::OnCloseWindow)
+END_EVENT_TABLE()
+
+#ifdef OS_WIN
+    // ok, wxPrintDialog is the right one
+#else
+    typedef wxGenericPrintDialog wxPrintDialog;
 #endif
 
 bool wxMFrame::RestorePosition(const char *name,
@@ -70,19 +76,19 @@ bool wxMFrame::RestorePosition(const char *name,
       ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
       pConf->SetPath(name);
 
-      *x = READ_APPCONFIG(MC_XPOS);
-      *y = READ_APPCONFIG(MC_YPOS);
-      *w = READ_APPCONFIG(MC_WIDTH);
-      *h = READ_APPCONFIG(MC_HEIGHT);
+      *x = READ_APPCONFIG(MP_XPOS);
+      *y = READ_APPCONFIG(MP_YPOS);
+      *w = READ_APPCONFIG(MP_WIDTH);
+      *h = READ_APPCONFIG(MP_HEIGHT);
 
       return TRUE;
    }
    else {
       wxLogDebug("Can't restore frame '%s' position.", name);
-      *x = MC_XPOS_D;
-      *y = MC_YPOS_D;
-      *w = MC_WIDTH_D;
-      *h = MC_HEIGHT_D;
+      *x = MP_XPOS_D;
+      *y = MP_YPOS_D;
+      *w = MP_WIDTH_D;
+      *h = MP_HEIGHT_D;
 
       return FALSE;
    }
@@ -129,7 +135,8 @@ wxMFrame::AddFileMenu(void)
 
    if ( parent != NULL )
       AppendToMenu(fileMenu, WXMENU_FILE_CLOSE);
-   AppendToMenu(fileMenu, WXMENU_FILE_CLOSE + 1, WXMENU_FILE_END);
+   // +2 because WXMENU_FILE_CLOSE has a separator with it
+   AppendToMenu(fileMenu, WXMENU_FILE_CLOSE + 2, WXMENU_FILE_END);
 
    m_MenuBar->Append(fileMenu, _("&File"));
 }
@@ -157,12 +164,6 @@ wxMFrame::~wxMFrame()
    SavePosition(MFrameBase::GetName(), this);
 }
 
-ON_CLOSE_TYPE wxMFrame::OnClose(void)
-{
-   // @@@ check that we have no unsaved data!
-   return TRUE;
-}
-
 void
 wxMFrame::SetTitle(String const &title)
 {
@@ -171,7 +172,7 @@ wxMFrame::SetTitle(String const &title)
 }
 
 void
-wxMFrame::SavePosition(const char *name, wxFrame *frame)
+wxMFrame::SavePosition(const char *name, wxWindow *frame)
 {
    int x,y;
 
@@ -181,12 +182,12 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
       pConf->SetPath(name);
 
       frame->GetPosition(&x,&y);
-      pConf->writeEntry(MC_XPOS, x);
-      pConf->writeEntry(MC_YPOS, y);
+      pConf->writeEntry(MP_XPOS, x);
+      pConf->writeEntry(MP_YPOS, y);
 
       frame->GetSize(&x,&y);
-      pConf->writeEntry(MC_WIDTH, x);
-      pConf->writeEntry(MC_HEIGHT, y);
+      pConf->writeEntry(MP_WIDTH, x);
+      pConf->writeEntry(MP_HEIGHT, y);
    }
 }
 
@@ -215,7 +216,11 @@ wxMFrame::OnMenuCommand(int id)
       break;
 
    case WXMENU_FILE_CREATE:
-      (void)ShowFolderCreateDialog(this);
+      {
+         MFolder *folder = ShowFolderCreateDialog(this);
+         if ( folder )
+            folder->DecRef();
+      }
       break;
 
    case WXMENU_FILE_COMPOSE:
@@ -254,7 +259,9 @@ wxMFrame::OnMenuCommand(int id)
 #endif   // USE_PYTHON
 
    case WXMENU_FILE_EXIT:
-      mApplication->Exit();
+      // first decide if it's ok to close this frame
+      if ( CanClose() )
+         mApplication->Exit();
       break;
 
    case WXMENU_EDIT_ADB:
@@ -298,14 +305,110 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_HELP_SEARCH:
       mApplication->Help(MH_SEARCH,this);
       break;
+   case WXMENU_HELP_COPYRIGHT:
+      mApplication->Help(MH_COPYRIGHT,this);
+      break;
+      // printing:
+   case WXMENU_FILE_PRINT_SETUP:
+      OnPrintSetup();
+      break;
+//   case WXMENU_FILE_PAGE_SETUP:
+//      OnPageSetup();
+//      break;
+#ifdef USE_PS_PRINTING
+   case WXMENU_FILE_PRINT_SETUP_PS:
+      OnPrintSetup();
+      break;
+#endif
+//   case WXMENU_FILE_PAGE_SETUP_PS:
+//      OnPageSetup();
+//      break;
    }
 }
 
-#ifdef   USE_WXWINDOWS2
+void
+wxMFrame::OnCloseWindow(wxCloseEvent& event)
+{
+   if ( event.CanVeto() && !CanClose() )
+      event.Veto();
+   else
+      Destroy();
+}
+
 void
 wxMFrame::OnCommandEvent(wxCommandEvent &event)
 {
    OnMenuCommand(event.GetId());
 }
+
+void
+wxMFrame::OnPrintSetup()
+{
+#ifdef OS_WIN
+      wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
+#else
+      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 #endif
 
+      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
+      //FIXME: save and restore orientation
+      //data.SetOrientation(orientation);
+
+      wxPrintDialog printerDialog(this, & data);
+      printerDialog.GetPrintData().SetSetupDialog(TRUE);
+      printerDialog.ShowModal();
+
+      //FIXME orientation = printerDialog.GetPrintData().GetOrientation();
+}
+
+void wxMFrame::OnPrintSetupPS()
+{
+      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
+
+      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
+      //FIXMEdata.SetOrientation(orientation);
+
+      wxPrintDialog printerDialog(this, & data);
+      printerDialog.GetPrintData().SetSetupDialog(TRUE);
+      printerDialog.ShowModal();
+
+      //FIXME orientation = printerDialog.GetPrintData().GetOrientation();
+}
+
+#if 0
+// unused so far:
+
+void wxMFrame::OnPageSetup()
+{
+#ifdef OS_WIN
+      wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
+#else
+      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
+#endif
+      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
+      //FIXME data.SetOrientation(orientation);
+
+#ifdef OS_WIN
+      wxPageSetupDialog pageSetupDialog(this, & data);
+#else
+      wxGenericPageSetupDialog pageSetupDialog(this, & data);
+#endif
+      pageSetupDialog.ShowModal();
+
+      data = pageSetupDialog.GetPageSetupData();
+      //FIXME orientation = data.GetOrientation();
+}
+
+void wxMFrame::OnPageSetupPS()
+{
+      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
+
+      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
+      data.SetOrientation(orientation);
+
+      wxGenericPageSetupDialog pageSetupDialog(this, & data);
+      pageSetupDialog.ShowModal();
+
+      //FIXME orientation = pageSetupDialog.GetPageSetupData().GetOrientation();
+}
+#endif

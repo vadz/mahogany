@@ -95,7 +95,9 @@ wxIconManager::LoadImage(String filename)
    String tempfile;
    String oldfilename = filename;
    char **cpptr = NULL;
-   
+
+   wxLogTrace("wxIconManager::LoadImage(%s) called...", filename.c_str());
+
    // lets convert to xpm using image magick:
    if(! wxMatchWild("*.xpm",filename,FALSE))
    {
@@ -106,15 +108,16 @@ wxIconManager::LoadImage(String filename)
       i = tempfile.length();
       while(i && tempfile.c_str()[i] != '/')
          i--;
-      if(i > 0) i--; // skip the slash
-      tempfile.assign(tempfile,i,tempfile.length()-1);
-      tempfile << (getenv("TMP") ? getenv("TMP") : "/tmp")
-               << '/' << tempfile;
+      tempfile.assign(tempfile,i+1,tempfile.length()-1);
+      tempfile = String(
+         (getenv("TMP") && strlen(getenv("TMP")))
+         ? getenv("TMP"):"/tmp"
+         ) + String('/') + tempfile;
       String command;
-      command << "convert " << filename << tempfile;
-      system(command); // don't check for returncode, will fail later
-      // if it didn't work
-      cpptr = LoadXpm(tempfile);
+      command << "convert " << filename << ' ' << tempfile;
+      wxLogTrace("wxIconManager::LoadImage() calling '%s'...", command.c_str());
+      if(system(command) == 0)
+         cpptr = LoadXpm(tempfile);
 #endif
    }
    if(! cpptr)  // try loading the file itself as an xpm
@@ -133,7 +136,8 @@ wxIconManager::LoadXpm(String filename)
    
    char **cpptr = (char **) malloc(maxlines * sizeof(char *));
    ASSERT(cpptr);
-
+   bool found_xpm = false;
+   
    ifstream in(filename);
    if(in)
    {  
@@ -148,6 +152,14 @@ wxIconManager::LoadXpm(String filename)
             ASSERT(cpptr);
          }
          strutil_getstrline(in,str);
+         if(line == 0 && strstr(str.c_str(),"/* XPM */")) // check whether
+            // it's an xpm file
+            found_xpm = true;
+         if(line > 0 && ! found_xpm)
+         {
+            free(cpptr);
+            return NULL;
+         }
          // We only load the actual data, that is, lines starting with 
          // a double quote and ending in a comma:  "data",  --> data
          if(str.c_str()[0] == '"')
@@ -280,7 +292,7 @@ wxIconManager::GetIcon(String const &_iconName)
    wxIcon icn;
    int c;
    bool found;
-   PathFinder pf(READ_APPCONFIG(MC_ICONPATH), true);
+   PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
    pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
    pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
 
@@ -382,6 +394,7 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
       IconData *id = new IconData;
 
       id->iconName = iconName;
+      strutil_tolower(id->iconName);
       id->iconRef  = icon;
       m_iconList->push_front(id);
    }

@@ -7,6 +7,8 @@
  *
  *******************************************************************/
 
+
+
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
@@ -36,6 +38,9 @@
 
 /// a type used by Address():
 enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO };
+
+/// a define to make scandoc work
+#define   MessageContentType Message::ContentType
 
 /// a type to store parameters and their values
 class MessageParameter

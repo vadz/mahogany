@@ -48,6 +48,7 @@ extern "C"
 #include "guidef.h"
 
 #include "strutil.h"
+#include "sysutil.h"
 
 #include "Mcommon.h"
 

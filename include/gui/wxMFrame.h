@@ -35,10 +35,10 @@ public:
    static bool RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h);
       //  save the given frame's position and size in config file
-   static void SavePosition(const char *name, wxFrame *frame);
+   static void SavePosition(const char *name, wxWindow *frame);
 
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
-   wxMFrame() : MFrameBase("") { initialised = false; }
+   wxMFrame() : MFrameBase(M_EMPTYSTRING) { initialised = false; }
    /// Constructor
    wxMFrame(const String &iname, wxWindow *parent = NULL);
    /// Creates an object
@@ -50,14 +50,8 @@ public:
    bool  IsInitialised(void) const { return initialised; }
 
    /// make it visible or invisible
-#ifdef     USE_WXWINDOWS2
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
-#else
-   void Show(bool visible = true) { wxFrame::Show(visible); }
-#endif
 
-   /// to be called on closing of window
-   ON_CLOSE_TYPE OnClose(void);
    /// used to set the title of the window class
    void  SetTitle(String const & name);
    /// return menu bar
@@ -69,13 +63,18 @@ public:
    void AddHelpMenu(void);
    void AddMessageMenu(void);
 
+   /// wxMFrame handles all print setup
+   void OnPrintSetup();
+   void OnPrintSetupPS();
+//   void OnPageSetup();
+//   void OnPageSetupPS();
+
    // callbacks
    virtual void OnMenuCommand(int id);
-#ifdef     USE_WXWINDOWS2
    void OnCommandEvent(wxCommandEvent & event);
+   void OnCloseWindow(wxCloseEvent& event);
 
    DECLARE_EVENT_TABLE()
-#endif   //wxWin2
 
 protected:
    /// menu bar

@@ -5,58 +5,62 @@
  *                                                                  *
  * $Id$           *
  *******************************************************************/
-#ifndef  WXFOLDERVIEW_H
+
+#ifndef WXFOLDERVIEW_H
 #define WXFOLDERVIEW_H
 
 #ifdef __GNUG__
 #pragma interface "wxFolderView.h"
 #endif
 
-#include   "Mdefaults.h"
-#include   "wxMFrame.h"
-#include   "MailFolder.h"
-#include   "FolderView.h"
-#include   "wxMessageView.h"
-#include   <wx/listctrl.h>
-#include   <wx/dynarray.h>
-#include   <wx/splitter.h>
+#include "Mdefaults.h"
+#include "wxMFrame.h"
+#include "MailFolder.h"
+#include "FolderView.h"
+#include "wxMessageView.h"
+
+#include <wx/listctrl.h>
+#include <wx/splitter.h>
+
+class wxArrayInt;
 class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;
 class wxMFrame;
 class wxMessageView;
 
-
 enum wxFolderListCtrlFields
 {
-   WXFLC_STATUS = 0, WXFLC_DATE, WXFLC_SIZE, WXFLC_FROM,
-   WXFLC_SUBJECT, WXFLC_NUMENTRIES
+   WXFLC_STATUS = 0,
+   WXFLC_DATE,
+   WXFLC_SIZE,
+   WXFLC_FROM,
+   WXFLC_SUBJECT,
+   WXFLC_NUMENTRIES
 };
 
 /** a timer class for the FolderView */
 class wxFVTimer : public wxTimer
 {
-protected:
-   /// the mailfolder to update
-   MailFolder  *mf;
 public:
    /** constructor
-       @param imf the mailfolder to query on timeout
+       @param mf the mailfolder to query on timeout
    */
-   wxFVTimer(MailFolder *imf)
-      {
-    mf = imf;
-    Start(mf->GetUpdateInterval()*1000);
-      }
+   wxFVTimer(MailFolder *mf) : m_mf(mf)
+   {
+      Start(mf->GetUpdateInterval()*1000);
+   }
+
    /// get called on timeout and pings the mailfolder
-   void Notify(void)
-      {
-    mf->Ping();
-      }
+   void Notify(void) { m_mf->Ping(); }
+
+protected:
+   /// the mailfolder to update
+   MailFolder  *m_mf;
 };
 
 /** a wxWindows FolderView class */
-class wxFolderView : public FolderView 
+class wxFolderView : public FolderView
 {
 public:
    /** Constructor
@@ -64,14 +68,14 @@ public:
        @param parent   the parent window
    */
    static wxFolderView *Create(String const & folderName,
-                        MWindow *parent = NULL);
+                               MWindow *parent = NULL);
 
    /* Constructor, for displaying an already open mail folder
       @param mf pointer to mailfolder
       @param parent parent window
    */
    static wxFolderView* Create(MailFolder *mf, MWindow *parent = NULL);
-   
+
    /// Destructor
    ~wxFolderView();
 
@@ -103,27 +107,39 @@ public:
    */
    void UnDeleteMessages(wxArrayInt const &messages);
 
+   /** Print messages.
+       @param n number of messages to print
+       @messages pointer to an array holding the message numbers
+   */
+   void PrintMessages(wxArrayInt const &messages);
+
+   /** Print-preview messages.
+       @param n number of messages to print preview
+       @messages pointer to an array holding the message numbers
+   */
+   void PrintPreviewMessages(wxArrayInt const &messages);
+
    /** Save messages to a file.
-       @param n number of messages 
+       @param n number of messages
        @messages pointer to an array holding the message numbers
    */
    void SaveMessagesToFile(wxArrayInt const &messages);
 
    /** Save messages to a folder.
-       @param n number of messages 
+       @param n number of messages
        @messages pointer to an array holding the message numbers
    */
    void SaveMessagesToFolder(wxArrayInt const &messages);
 
    /** Reply to selected messages.
-              @param n number of messages 
+              @param n number of messages
        @messages pointer to an array holding the message numbers
    */
    void ReplyMessages(wxArrayInt const &messages);
 
    /** Forward selected messages.
-       
-       @param n number of messages 
+
+       @param n number of messages
        @messages pointer to an array holding the message numbers
    */
    void ForwardMessages(wxArrayInt const &messages);
@@ -133,23 +149,28 @@ public:
    bool HasSelection() const;
 
    /** Gets an array containing the positions of the selected
-       strings. The number of selections is returned. 
+       strings. The number of selections is returned.
        @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
        @return number of selections.
    */
-   int   GetSelections(wxArrayInt &selections);
+   int GetSelections(wxArrayInt &selections);
 
    /** Show a message in the preview window.
     */
    void PreviewMessage(long messageno)
       { m_MessagePreview->ShowMessage(m_MailFolder,messageno+1); }
    void SetSize(const int x, const int y, const int width, int height);
+
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
    /// return a profile pointer:
-   inline ProfileBase *GetProfile(void) const { return m_Profile; }
+   ProfileBase *GetProfile(void) const { return m_Profile; }
    /// return pointer to folder
-   inline MailFolder * GetFolder(void) const { return m_MailFolder; }
+   MailFolder * GetFolder(void) const { return m_MailFolder; }
+
+   // process folder delete event
+   virtual void OnFolderDeleteEvent(const String& folderName);
+
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -157,6 +178,7 @@ protected:
        @messages pointer to an array holding the message numbers
    */
    void SaveMessages(wxArrayInt const &messages, String const &file);
+
 private:
    /* Constructor, for displaying an already open mail folder
       @param mf pointer to mailfolder
@@ -194,7 +216,9 @@ private:
    bool m_UpdateSemaphore;
    /// Profile:
    ProfileBase *m_Profile;
-}; 
+   /// full folder name
+   String m_folderName;
+};
 
 class wxFolderViewFrame : public wxMFrame
 {
@@ -220,12 +244,13 @@ public:
    void OnUpdateUI(wxUpdateUIEvent& event);
 
    bool IsOk(void) const { return m_FolderView && m_FolderView->IsOk(); }
+
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
    wxFolderViewFrame(String const &name, wxMFrame *parent);
    wxFolderView *m_FolderView;
 
-   DECLARE_EVENT_TABLE() 
+   DECLARE_EVENT_TABLE()
 };
 
 #if 0
@@ -245,7 +270,7 @@ protected:
    /// parent window
    wxWindow *m_Parent;
 };
-#endif
+#endif // 0
 
 class wxFolderListCtrl : public wxListCtrl
 {
@@ -258,7 +283,7 @@ public:
 
    void Select(long index, bool on=true)
       { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
-      
+
    int GetSelections(wxArrayInt &selections) const;
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED; }
@@ -282,4 +307,4 @@ protected:
    int m_firstColumn;
 };
 
-#endif
+#endif // WXFOLDERVIEW_H

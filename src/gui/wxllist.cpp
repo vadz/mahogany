@@ -20,12 +20,15 @@
     is four cursor positions long. This makes sure that cursor
     positions are "as expected", i.e. in "abc\ndef" the 'd' would be
     at positions (x=0,y=1).
+
+
+    The redrawing of the cursor no longer erases it at the last
+    position, because the list gets redrawn anyway.
 */
 
 /*
   TODO:
 
-  - cursor redraw problems
   - blinking cursor
   - mouse click positions cursor
   - selection (SetMark(), GetSelection())
@@ -33,18 +36,13 @@
   - wxlwindow: formatting menu: problem with checked/unchecked consistency gtk bug?
 */
 
-/*
-  Known wxGTK bugs:
-  - MaxX()/MaxY() don't get set
-*/
-
  
 #ifdef __GNUG__
 #pragma implementation "wxllist.h"
 #endif
 
-//#include "Mpch.h"
-#ifdef M_BASEDIR
+#include "Mpch.h"
+#ifdef M_PREFIX
 #   include "gui/wxllist.h"
 #else
 #   include "wxllist.h"
@@ -53,7 +51,7 @@
 #ifndef USE_PCH
 #   include   "iostream.h"
 #   include   <wx/dc.h>
-#   include   <wx/postscrp.h>
+#   include   <wx/dcps.h>
 #   include   <wx/print.h>
 #   include   <wx/log.h>
 #endif
@@ -244,7 +242,8 @@ wxLayoutList::wxLayoutList()
    m_DefaultSetting = NULL;
    m_WrapMargin = -1;
    m_Editable = FALSE;
-
+   m_boldCursor = FALSE;
+   
    Clear();
 }
 
@@ -259,7 +258,6 @@ void
 wxLayoutList::LineBreak(void)
 {
    Insert(new wxLayoutObjectLineBreak);
-//   m_CursorPos.x = 0; m_CursorPos.y++;
 }
 
 void
@@ -420,7 +418,7 @@ wxLayoutList::Draw(wxDC &dc,
                    iterator start,
                    wxPoint const &translate)
 {
-   Layout(dc); // FIXME just for now
+   //Layout(dc); // FIXME just for now
 
    ResetSettings(dc);
 
@@ -449,7 +447,7 @@ wxLayoutList::Draw(wxDC &dc,
 
 /** Erase at least to end of line */
 void
-wxLayoutList::EraseAndDraw(wxDC &dc, iterator start)
+wxLayoutList::EraseAndDraw(wxDC &dc, iterator start, wxPoint const &translate)
 {
    //look for begin of line
    while(start != end() && start != begin() && (**start).GetType() !=
@@ -468,7 +466,7 @@ wxLayoutList::EraseAndDraw(wxDC &dc, iterator start)
    dc.SetBrush(wxBrush(*m_ColourBG, wxSOLID));
    dc.SetPen(wxPen(*m_ColourBG,0,wxTRANSPARENT));
    dc.DrawRectangle(p.x,p.y,2000,2000); //dc.MaxX(),dc.MaxY());
-   Draw(dc,-1,-1,start,wxPoint(0,0));
+   Draw(dc,-1,-1,start,translate);
    //dc.DrawRectangle(p.x,p.y,2000,2000); //dc.MaxX(),dc.MaxY());
 }
 
@@ -476,13 +474,18 @@ wxLayoutList::EraseAndDraw(wxDC &dc, iterator start)
 void
 wxLayoutList::CalculateCursor(wxDC &dc)
 {
+   if(! m_CursorMoved)
+      return;
+   
    CoordType width, height, descent;
    CoordType baseLineSkip = 20; //FIXME
 
+   int cursorWidth = m_boldCursor ? 4 : 2;
+   
    if( m_CursorObject == iterator(NULL))  // empty list
    {
       m_CursorCoords = wxPoint(0,0);
-      m_CursorSize = wxPoint(2,baseLineSkip);
+      m_CursorSize = wxPoint(cursorWidth,baseLineSkip);
       m_CursorMoved = false; // coords are valid
       return;
    }
@@ -497,14 +500,14 @@ wxLayoutList::CalculateCursor(wxDC &dc)
       dc.GetTextExtent(sstr,&width,&height,&descent);
       m_CursorCoords = wxPoint(m_CursorCoords.x+width,
                                m_CursorCoords.y);
-      m_CursorSize = wxPoint(2,height);
+      m_CursorSize = wxPoint(cursorWidth,height);
    }
    else if(obj.GetType() == WXLO_TYPE_LINEBREAK)
    {
       if(m_CursorOffset == 1) // behind linebreak
          m_CursorCoords = wxPoint(0, m_CursorCoords.y + baseLineSkip);
       //m_CursorCoords = wxPoint(0, m_CursorCoords.y);
-      m_CursorSize = wxPoint(2,baseLineSkip);
+      m_CursorSize = wxPoint(cursorWidth,baseLineSkip);
    }
    else
    {
@@ -512,43 +515,52 @@ wxLayoutList::CalculateCursor(wxDC &dc)
       //cursorPosition = wxPoint(position.x, position.y);
       //cursorSize = wxPoint(size.x > 0 ? size.x : 1,size.y > 0 ? size.y : baseLineSkip);
       m_CursorCoords = wxPoint(m_CursorCoords.x+obj.GetSize().x, m_CursorCoords.y);
-      m_CursorSize = wxPoint(2, obj.GetSize().y);
+      m_CursorSize = wxPoint(cursorWidth, obj.GetSize().y);
       if(m_CursorSize.y < 1) m_CursorSize.y = baseLineSkip;
    }
    m_CursorMoved = false; // coords are valid
 }
 
 void
-wxLayoutList::DrawCursor(wxDC &dc, bool erase)
+wxLayoutList::DrawCursor(wxDC &dc, bool erase, wxPoint const &translate)
 {
    if(! m_Editable)
       return;
    
    if(erase)
-   {
-      //dc.SetBrush(*wxWHITE_BRUSH);
-      //dc.SetPen(wxPen(*wxWHITE,1,wxSOLID));
-      //dc.DrawRectangle(m_CursorCoords.x, m_CursorCoords.y, m_CursorSize.x, m_CursorSize.y);
-      dc.Blit(m_CursorCoords.x, m_CursorCoords.y, m_CursorSize.x,
-              m_CursorSize.y, &m_CursorMemDC,
-              0, 0, 0, 0);
-   }
+      ;
+#if 0
+   dc.Blit(m_CursorCoords.x+translate.x,
+              m_CursorCoords.y+translate.y,
+              m_CursorSize.x,m_CursorSize.y,
+              &m_CursorMemDC,
+           0, 0, 0, 0);
+#endif
    else
    {
+      // erase it at the old position:
       if(IsDirty() || CursorMoved())
       {
-         DrawCursor(dc,true);
+         // We don't need to erase the cursor because the screen gets
+         // redrawn completely.
+//         DrawCursor(dc,true);
+         // this is needed to update the cursor coordinates
          Layout(dc);
       }
-      // Save background:
+#if      0
+// Save background:
       wxBitmap bm(m_CursorSize.x+1,m_CursorSize.y+1);
       m_CursorMemDC.SelectObject(bm);
-      m_CursorMemDC.Blit(0, 0, m_CursorSize.x, m_CursorSize.y,
-                         &dc, m_CursorCoords.x,
-                         m_CursorCoords.y, 0, 0);
+      m_CursorMemDC.Blit(0, 0,
+                         m_CursorSize.x, m_CursorSize.y,
+                         &dc,
+                         m_CursorCoords.x+translate.x,
+                         m_CursorCoords.y+translate.y, 0, 0);
+#endif
+      // draw it:
       dc.SetBrush(*wxBLACK_BRUSH);
       dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
-      dc.DrawRectangle(m_CursorCoords.x, m_CursorCoords.y,
+      dc.DrawRectangle(m_CursorCoords.x+translate.x, m_CursorCoords.y+translate.y,
                        m_CursorSize.x, m_CursorSize.y);
    }
 }
@@ -713,6 +725,11 @@ wxLayoutList::MoveCursor(int dx, int dy)
    if(newPos.y < 0) newPos.y = 0;
    else if(newPos.y > m_MaxLine) newPos.y = m_MaxLine;
 
+   //FIXME: quick and dirty hack: as last object in buffer should be a 
+   // linebreak, we don't allow to go there
+   if(newPos.y >= m_MaxLine)
+      return false;
+
    if(newPos.y > m_CursorPos.y ||
       newPos.y == m_CursorPos.y &&
       newPos.x >= m_CursorPos.x)
@@ -763,6 +780,12 @@ wxLayoutList::MoveCursor(int dx, int dy)
       newPos.y = m_CursorPos.y;  // exited by break
       
    // now line is right, go to right column:
+   if(dx == 0) // we are moving up or down only
+   {
+      int max_x = GetLineLength(m_CursorObject);
+      if(max_x <= newPos.x)  // ... so we don't want to cross linebreaks
+         newPos.x = max_x-1; // but just go to the right column
+   }
    direction = newPos.x >= m_CursorPos.x ? down : up;
    while(newPos.x != m_CursorPos.x)
    {
@@ -824,7 +847,15 @@ wxLayoutList::MoveCursor(int dx, int dy)
          }
       }
    }
+
    return true; // FIXME: when return what?
+}
+void
+wxLayoutList::SetCursor(wxPoint const &p)
+{
+   m_CursorPos = p;
+   m_CursorObject = FindObjectCursor(&m_CursorPos, &m_CursorOffset);
+   m_CursorMoved = true;  
 }
 
 void
@@ -847,8 +878,8 @@ wxLayoutList::Delete(CoordType count)
       if(i == end())
          return; // we cannot delete anything more
 
-/* Here we need to treat linebreaks differently.
-   If m_CursorOffset==0 we are before the linebreak, otherwise behind.  */
+   /* Here we need to treat linebreaks differently.
+      If m_CursorOffset==0 we are before the linebreak, otherwise behind.  */
       if((*i)->GetType() == WXLO_TYPE_LINEBREAK)
       {
          if(m_CursorOffset == 0)
@@ -871,26 +902,32 @@ wxLayoutList::Delete(CoordType count)
       {
          wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
          CoordType len = tobj->CountPositions();
-// If we find the end of a text object, this means that we
-// have to delete from the object following it.
+         /* If we find the end of a text object, this means that we
+            have to delete from the object following it. */
          if(len == m_CursorOffset)
          {
             i++;
             m_CursorOffset = 0;
             goto startover;
          }
-         else if(len <= count) // delete this object
-         {
-            count -= len;
-            erase(i);
-            m_CursorObject = i;
-            m_CursorOffset = 0;
-            continue; 
-         }
          else
          {
-            len = count;
-            tobj->GetText().erase(m_CursorOffset,len);
+            if(m_CursorOffset == 0 && len <= count) // delete this object
+            {
+               count -= len;
+               erase(i);
+               m_CursorObject = i;
+               m_CursorOffset = 0;
+               continue; 
+            }
+
+            int todelete = count;
+            if(todelete > len-m_CursorOffset)
+               todelete = len-m_CursorOffset;
+            
+            len = len - todelete;
+            tobj->GetText().erase(m_CursorOffset,todelete);
+            count -= todelete;
             // cursor unchanged
             return; // we are done
          }
@@ -919,6 +956,7 @@ wxLayoutList::Delete(CoordType count)
    }
    while(count && i != end());      
 }
+
 
 void
 wxLayoutList::Insert(wxLayoutObjectBase *obj)
@@ -1079,7 +1117,10 @@ wxLayoutList::GetLineLength(wxLayoutObjectList::iterator i, CoordType offs)
    CoordType len = 0;
 
    if(offs == 0 && (**i).GetType() == WXLO_TYPE_LINEBREAK)
-      i--;
+      if(i != begin())
+         i--;
+      else
+         return 0; // at begin of buffer in front of a linebreak
          
 // search backwards for beginning of line:
    while(i != begin() && (*i)->GetType() != WXLO_TYPE_LINEBREAK)
@@ -1105,7 +1146,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_dirty = true;  // force redraw/recalc
    wxLayoutObjectList::iterator i = begin();
 
-   wxBitmap bm(1,1);
+   wxBitmap bm(4,4);
    m_CursorMemDC.SelectObject(bm);
 
    while(i != end()) // == while valid
@@ -1129,7 +1170,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_CursorOffset = 0;
    m_CursorSize = wxPoint(2,(BASELINESTRETCH*m_FontPtSize)/10);
    
-   m_MaxLine = 1;
+   m_MaxLine = 0;
    m_LineHeight = (BASELINESTRETCH*m_FontPtSize)/10;
    m_MaxX = 0; m_MaxY = 0;
 
@@ -1216,28 +1257,38 @@ wxLayoutList::WrapLine(void)
       for(; offset > 0; offset--)
          if(t.GetText().c_str()[offset] == ' ' || t.GetText().c_str()[offset] == '\t')
          {
-            String left = t.GetText().substr(0,offset-1); // get part before cursor
-            t.GetText() = t.GetText().substr(offset,t.CountPositions()-offset); // keeps the right halve
+            int rlen;
+            String left = t.GetText().substr(0,offset); // get part before cursor (len==offset)
+            rlen = t.GetText().length()-offset-1;
+            t.GetText() = t.GetText().substr(offset+1,rlen); // keeps the right halve
             insert(i,new wxLayoutObjectLineBreak);
             insert(i,new wxLayoutObjectText(left)); // inserts before
-            break;
+            m_CursorOffset = m_CursorOffset - offset - 1; // at end of new text object
+            m_CursorPos.x = m_CursorOffset;  // at begin of new line
+         break;
          }
       if(offset == 0)
       {
          // only insert a line break if there  isn't already one
          iterator j = i; j--;
          if(j && j != begin() && (**j).GetType() != WXLO_TYPE_LINEBREAK)
+         {
             insert(i,new wxLayoutObjectLineBreak);
+            m_CursorOffset = 1; // behind linebreak
+            m_CursorPos.x = 0;  // at begin of new line
+         }
          else
             return; // do nothing
       }
    }
    else
+   {
       insert(i,new wxLayoutObjectLineBreak);
+      m_CursorOffset = 1; // behind linebreak
+      m_CursorPos.x = 0;  // at begin of new line
+   }
    m_MaxLine++;
    m_CursorPos.y++;
-   m_CursorPos.x -= offset;
-   m_CursorOffset -= offset;
 }
 /******************** printing stuff ********************/
 
@@ -1252,6 +1303,42 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList &llist,
 bool wxLayoutPrintout::OnPrintPage(int page)
 {
    wxDC *dc = GetDC();
+
+
+   // The following bit is taken from the printing sample, let's see
+   // whether it works for us.
+   
+   /* You might use THIS code to set the printer DC to ROUGHLY reflect
+    * the screen text size. This page also draws lines of actual length 5cm
+    * on the page.
+    */
+  // Get the logical pixels per inch of screen and printer
+   int ppiScreenX, ppiScreenY;
+   GetPPIScreen(&ppiScreenX, &ppiScreenY);
+   int ppiPrinterX, ppiPrinterY;
+   GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
+
+  // This scales the DC so that the printout roughly represents the
+  // the screen scaling. The text point size _should_ be the right size
+  // but in fact is too small for some reason. This is a detail that will
+  // need to be addressed at some point but can be fudged for the
+  // moment.
+  float scale = (float)((float)ppiPrinterX/(float)ppiScreenX);
+
+  // Now we have to check in case our real page size is reduced
+  // (e.g. because we're drawing to a print preview memory DC)
+  int pageWidth, pageHeight;
+  int w, h;
+  dc->GetSize(&w, &h);
+  GetPageSizePixels(&pageWidth, &pageHeight);
+
+  // If printer pageWidth == current DC width, then this doesn't
+  // change. But w might be the preview bitmap width, so scale down.
+  float overallScale = scale * (float)(w/(float)pageWidth);
+  dc->SetUserScale(overallScale, overallScale);
+
+
+  
    if (dc)
    {
       DrawHeader(*dc,wxPoint(m_Margins.left,m_Margins.top/2),wxPoint(m_Margins.right,m_Margins.top),page);
@@ -1306,7 +1393,13 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    //FIXME this is wrong but not used at the moment
    m_PageWidth = m_Margins.right - m_Margins.left;
 
-   m_NumOfPages = (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight) + 0.5);
+   m_NumOfPages = (int)( m_llist->GetSize().y /
+                         (float)(m_PrintoutHeight) + 0.5);
+   //FIXME: this is a crude hack to get it right for very small
+   // printouts. No idea why this is required, I thought +0.5 would do 
+   // the job. :-(
+   if(m_NumOfPages == 0 && m_llist->GetSize().y > 0)
+      m_NumOfPages = 1;
    *minPage = 1;
    *maxPage = m_NumOfPages;
 

@@ -112,6 +112,13 @@
 /// path for etc directories
 #define   M_ETC_PATH   "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc"
 
+/// basic M installation directory
+#ifdef OS_UNIX
+#   define   M_BASEDIR M_PREFIX"share/M"
+#else
+#   define   M_PREFIX   "" 
+#   define   M_BASEDIR M_PREFIX"\\M"
+#endif
 #ifdef   HAVE_COMPFACE_H
 #   define   HAVE_XFACES
 #endif

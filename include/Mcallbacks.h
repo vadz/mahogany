@@ -8,6 +8,8 @@
  *
  *******************************************************************/
 
+
+
 #ifndef MCALLBACKS_H
 #define   MCALLBACKS_H
 
@@ -23,19 +25,27 @@
 #define   MCB_FOLDERSETMSGFLAG "FolderSetMessageFlagHook"
 /// called when flag for message gets cleared
 #define   MCB_FOLDERCLEARMSGFLAG "FolderClearMessageFlagHook"
+/// called when a mail folder gets new mail
+#define   MCB_FOLDER_NEWMAIL "FolderNewMailHook"
+/// called when mApplication gets notified of new mail arrival
+#define   MCB_MAPPLICATION_NEWMAIL "GlobalNewMailHook"
 //@}                                           
 
 /** @name Default values for callback function entries in profiles. */
 //@{
 /// called after folder has been opened
-#define   MCB_FOLDEROPEN_D   ""
+#define   MCB_FOLDEROPEN_D   M_EMPTYSTRING
 /// called when folder got changed
-#define   MCB_FOLDERUPDATE_D ""
+#define   MCB_FOLDERUPDATE_D M_EMPTYSTRING
 /// called before messages get expunged
-#define   MCB_FOLDEREXPUNGE_D ""
+#define   MCB_FOLDEREXPUNGE_D M_EMPTYSTRING
 /// called when flag for message gets set
-#define   MCB_FOLDERSETMSGFLAG_D ""
+#define   MCB_FOLDERSETMSGFLAG_D M_EMPTYSTRING
 /// called when flag for message gets cleared
-#define   MCB_FOLDERCLEARMSGFLAG_D ""
+#define   MCB_FOLDERCLEARMSGFLAG_D M_EMPTYSTRING
+/// called when a mail folder gets new mail
+#define   MCB_FOLDER_NEWMAIL_D M_EMPTYSTRING
+/// called when mApplication gets notified of new mail arrival
+#define   MCB_MAPPLICATION_NEWMAIL_D M_EMPTYSTRING
 //@}                                           
 #endif

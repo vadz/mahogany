@@ -5,6 +5,9 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
+
+
+
 #ifndef WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
 
@@ -32,6 +35,9 @@ class wxFTOList;
 class wxComposeView;
 class wxFTCanvas;
 class wxLayoutWindow;
+
+class wxProcess;
+class wxProcessEvent;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -66,7 +72,7 @@ public:
       Field_Bcc,
       Field_Max
    };
-   
+
    /** quasi-Constructor
        @param iname  name of windowclass
        @param parent parent window
@@ -79,9 +85,9 @@ public:
    void Create(const String &iname = String("wxComposeView"),
         wxWindow *parent = NULL,
         ProfileBase *parentProfile = NULL,
-        String const &to = "",
-        String const &cc = "",
-        String const &bcc = "",
+        String const &to = M_EMPTYSTRING,
+        String const &cc = M_EMPTYSTRING,
+        String const &bcc = M_EMPTYSTRING,
         bool hide = false);
 
    /** Constructor
@@ -98,6 +104,9 @@ public:
    /// Destructor
    ~wxComposeView();
 
+   /// is it ok to close now?
+   virtual bool CanClose() const;
+
    /** insert a file into buffer
        @param filename file to insert
        @param mimetype mimetype to use
@@ -110,10 +119,12 @@ public:
        @param data pointer to data (we take ownership of it)
        @param len length of data
        @param mimetype mimetype to use
+       @param filename optional filename to add to list of parameters
        */
    void InsertData(char *data,
                    size_t length,
-                   const char *mimetype = NULL);
+                   const char *mimetype = NULL,
+                   const char *filename = NULL);
 
    /// sets To field
    void SetTo(const String &to);
@@ -147,27 +158,29 @@ public:
       /// for button
    void OnExpand(wxCommandEvent &event);
 
-      ///
-   void OnInsertFile(wxCommandEvent&)
-      { OnMenuCommand(WXMENU_COMPOSE_INSERTFILE); }
-      ///
-   void OnSend(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_SEND); }
-      ///
-   void OnPrint(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_PRINT); }
-      ///
-   void OnClear(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_CLEAR); }
-
-      /// can we close now?
-   void OnCloseWindow(wxCloseEvent& event);
+      /// called when external editor terminates
+   void OnExtEditorTerm(wxProcessEvent& event);
    //@}
 
    // for wxAddressTextCtrl usage
    void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
 
 protected:
+   // helpers
+   // -------
+   
    /// verify that the message can be sent
    bool IsReadyToSend() const;
 
+   /// insert a text file at the current cursor position
+   bool InsertFileAsText(const String& filename,
+                         bool replaceFirstTextPart = false);
+
+   /// save the first text part of the message to the given file
+   bool SaveMsgTextToFile(const String& filename,
+                          bool errorIfNoText = true) const;
+
+>>>>>>> 1.25.2.8
 private:
    /// a profile
    ProfileBase * m_Profile;
@@ -177,7 +190,7 @@ private:
 
    /// compose menu
    wxMenu *composeMenu;
-   
+
    /**@name Input fields (arranged into an array) */
    //@{
       /// The text fields
@@ -208,6 +221,20 @@ private:
    /// makes the canvas
    void CreateFTCanvas(void);
 
+   /// ids for different processes we may launch
+   enum
+   {
+      HelperProcess_Editor = 1
+   };
+
+   // external editor support
+   // -----------------------
+
+   wxProcess *m_procExtEdit;  // wxWin process notification helper
+   String     m_tmpFileName;  // temporary file we passed to the editor
+   int        m_pidEditor;    // pid of external editor (0 if none)
+
+private:
    DECLARE_EVENT_TABLE()
    DECLARE_DYNAMIC_CLASS(wxComposeView)
 };

@@ -5,7 +5,7 @@ static char *FolderOpenPanel = "panel(name = 'FolderOpenPanel',\
   x = 10, y = 40, width = 500, height = 220,\
   background_colour = 'D6D6D6',\
   font = [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0],\
-  control = [103, wxRadioBox, 'Folder Type', 'wxRA_VERTICAL', 'FolderType', 20, 20, 111, 136, ['INBOX', 'Mailbox File', 'POP3', 'IMAP', 'NNTP'], 1,\
+  control = [103, wxRadioBox, 'Folder Type', 'wxRA_HORIZONTAL', 'FolderType', 20, 20, 111, 136, ['INBOX', 'Mailbox File', 'POP3', 'IMAP', 'NNTP'], 1,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [104, wxStaticBox, 'Access Details', '0', 'staticbox5', 145, 20, 360, 136,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\

@@ -87,7 +87,7 @@ public:
       <li>MF_POP:   hostname
       <li>MF_IMAP:  hostname
       <li>MF_NNTP:  newshost
-      <ul>
+      </ul>
       @param type one of the supported types
       @param path either a hostname or filename depending on type
       @param profile parent profile
@@ -143,6 +143,12 @@ public:
    */
    class Message *GetMessage(unsigned long msgno);
 
+   /** get the raw text of the message with given number
+       @param msgno sequence number
+       @return string containing the text (empty on error)
+   */
+   virtual String GetRawMessage(unsigned long msgno);
+
    /** Get status of message.
        @param    msgno   sequence no of message
        @param size if not NULL, size in bytes gets stored here
@@ -192,6 +198,13 @@ public:
    /** Check whether mailbox has changed. */
    void Ping(void);
 
+   /** Tells the folder that n messages are now in it.
+       Called from mm_exists callback.
+       
+       @param n the number of messages in the folder
+   */
+   void UpdateCount(long n);
+   
    /** Updates the associated FolderViews */
    void UpdateViews(void);
 

@@ -105,6 +105,7 @@ public:
   // implement interface methods
     // AdbEntryGroup
   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
+  virtual String GetName() const { return m_strName; }
 
   virtual size_t GetEntryNames(wxArrayString& aNames) const;
   virtual size_t GetGroupNames(wxArrayString& aNames) const;
@@ -173,7 +174,8 @@ public:
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
-  virtual const char *GetName() const;
+  virtual bool IsSameAs(const String& name) const;
+  virtual String GetName() const;
 
   virtual void SetUserName(const String& name);
   virtual String GetUserName() const;
@@ -356,9 +358,14 @@ DummyBook::~DummyBook()
   SafeDecRef(m_pRootGroup);
 }
 
-const char *DummyBook::GetName() const
+bool DummyBook::IsSameAs(const String& name) const
 {
-  return m_strName.c_str();
+   return m_strName == name;
+}
+
+String DummyBook::GetName() const
+{
+  return m_strName;
 }
 
 void DummyBook::SetUserName(const String& strUserName)

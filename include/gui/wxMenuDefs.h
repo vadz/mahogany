@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 // Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxMenuDefs.h - items definitions for menus and toolbars
 // Purpose:     the definitions of all menu (and toolbar, inspite the name)
@@ -9,7 +9,7 @@
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Licence:     M license
-///////////////////////////////////////////////////////////////////////////////
+// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
 
 #ifndef  WXMENUDEFS_H
 #define  WXMENUDEFS_H
@@ -50,13 +50,21 @@ enum
    WXMENU_FILE_OPEN,
    WXMENU_FILE_OPENANY,
    WXMENU_FILE_COMPOSE,
+   WXMENU_FILE_SEP,
+   WXMENU_FILE_PRINT_SETUP,
+//   WXMENU_FILE_PAGE_SETUP,
+#ifdef USE_PS_PRINTING
+   // extra postscript printing
+   WXMENU_FILE_PRINT_SETUP_PS,
+//   WXMENU_FILE_PAGE_SETUP_PS,
+#endif
+   WXMENU_FILE_SEP2,
    WXMENU_FILE_CREATE,
    WXMENU_FILE_CLOSE,
-   WXMENU_FILE_SEP,
-
+   WXMENU_FILE_SEP3,
 #ifdef USE_PYTHON
    WXMENU_FILE_SCRIPT,
-   WXMENU_FILE_SEP2,
+   WXMENU_FILE_SEP4,
 #endif // USE_PYTHON
 
    WXMENU_FILE_EXIT,
@@ -72,6 +80,12 @@ enum
    WXMENU_MSG_BEGIN = WXMENU_EDIT_END,
    WXMENU_MSG_OPEN,
    WXMENU_MSG_PRINT,
+   WXMENU_MSG_PRINT_PREVIEW,
+#ifdef USE_PS_PRINTING
+   // extra postscript printing
+   WXMENU_MSG_PRINT_PS,
+   WXMENU_MSG_PRINT_PREVIEW_PS,
+#endif
    WXMENU_MSG_REPLY,
    WXMENU_MSG_FORWARD,
    WXMENU_MSG_SEP1,
@@ -83,15 +97,22 @@ enum
    WXMENU_MSG_SEP2,
    WXMENU_MSG_SELECTALL,
    WXMENU_MSG_DESELECTALL,
-   WXMENU_MSG_END = WXMENU_MSG_DESELECTALL,
+   WXMENU_MSG_SEP3,
+   WXMENU_MSG_TOGGLEHEADERS,
+   WXMENU_MSG_SHOWRAWTEXT,
+   WXMENU_MSG_END = WXMENU_MSG_SHOWRAWTEXT,
 
    WXMENU_COMPOSE_BEGIN = WXMENU_MSG_END,
    WXMENU_COMPOSE_INSERTFILE,
    WXMENU_COMPOSE_SEND,
    WXMENU_COMPOSE_PRINT,
-   WXMENU_COMPOSE_SEP,
+   WXMENU_COMPOSE_SEP1,
+   WXMENU_COMPOSE_LOADTEXT,
+   WXMENU_COMPOSE_SAVETEXT,
    WXMENU_COMPOSE_CLEAR,
-   WXMENU_COMPOSE_END = WXMENU_COMPOSE_CLEAR,
+   WXMENU_COMPOSE_SEP2,
+   WXMENU_COMPOSE_EXTEDIT,
+   WXMENU_COMPOSE_END = WXMENU_COMPOSE_EXTEDIT,
 
    WXMENU_ADBBOOK_BEGIN = WXMENU_COMPOSE_END,
    WXMENU_ADBBOOK_NEW,
@@ -127,7 +148,8 @@ enum
    WXMENU_HELP_CONTEXT,
    WXMENU_HELP_CONTENTS,
    WXMENU_HELP_SEARCH,
-   WXMENU_HELP_END = WXMENU_HELP_SEARCH,
+   WXMENU_HELP_COPYRIGHT,
+   WXMENU_HELP_END = WXMENU_HELP_COPYRIGHT,
 
    WXMENU_END = WXMENU_HELP_END,
 
@@ -177,8 +199,7 @@ enum
    WXTBAR_MSG_REPLY,
    WXTBAR_MSG_PRINT,
    WXTBAR_MSG_DELETE,
-   
-   WXTBAR_ADB_OPEN,
+
    WXTBAR_ADB_NEW,
    WXTBAR_ADB_DELETE,
    WXTBAR_ADB_UNDO,

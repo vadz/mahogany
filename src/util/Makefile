@@ -2,7 +2,7 @@
 # $Id$
 
 CWD = util
-SRC = strutil.cpp upgrade.cpp
+SRC = strutil.cpp sysutil.cpp upgrade.cpp 
 CSRC =
 HDR = $(SRC:.cpp=.h) $(CSRC:.c=.h)
 

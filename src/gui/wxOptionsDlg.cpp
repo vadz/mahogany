@@ -56,7 +56,9 @@ enum ConfigFields
 {
    // network & identity
    ConfigField_IdentFirst = -1,
+   ConfigField_UsernameHelp,
    ConfigField_Username,
+   ConfigField_HostnameHelp,
    ConfigField_Hostname,
    ConfigField_ReturnAddress,
    ConfigField_MailServer,
@@ -66,13 +68,13 @@ enum ConfigFields
 
    // compose
    ConfigField_ComposeFirst = ConfigField_IdentLast,
-   ConfigField_FromLabel,
-   ConfigField_ToLabel,
+   ConfigField_ToDefault,
    ConfigField_ShowCC,
-   ConfigField_CCLabel,
+   ConfigField_CCDefault,
    ConfigField_ShowBCC,
-   ConfigField_BCCLabel,
-
+   ConfigField_BCCDefault,
+   ConfigField_UseOutgoingFolder,
+   ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
    ConfigField_ReplyCharacter,
 
@@ -92,6 +94,7 @@ enum ConfigFields
 #ifdef USE_PYTHON
    // python
    ConfigField_PythonFirst = ConfigField_FoldersLast,
+   ConfigField_Python_HelpText,
    ConfigField_EnablePython,
    ConfigField_PythonPath,
    ConfigField_StartupScript,
@@ -105,15 +108,43 @@ enum ConfigFields
    ConfigField_PythonLast = ConfigField_FoldersLast,
 #endif // USE_PYTHON
 
+   // autocollecting addresses options
+   ConfigField_AdbFirst = ConfigField_PythonLast,
+   ConfigField_AutoCollect_HelpText,
+   ConfigField_AutoCollect,
+   ConfigField_AutoCollectAdb,
+   ConfigField_AutoCollectNameless,
+   ConfigField_Bbdb_HelpText,
+   ConfigField_Bbdb_IgnoreAnonymous,
+   ConfigField_Bbdb_GenerateUnique,
+   ConfigField_Bbdb_AnonymousName,
+   ConfigField_Bbdb_SaveOnExit,
+   ConfigField_AdbLast = ConfigField_Bbdb_SaveOnExit,
+
+   // helper programs
+   ConfigField_HelpersFirst = ConfigField_AdbLast,
+   ConfigField_HelpersHelp1,
+   ConfigField_Browser,
+   ConfigField_BrowserIsNetscape,
+   ConfigField_HelpersHelp2,
+   ConfigField_HelpBrowser,
+   ConfigField_HelpBrowserIsNetscape,
+   ConfigField_HelpersHelp3,
+   ConfigField_ExternalEditor,
+   ConfigField_NewMailCommand,
+   ConfigField_HelpersLast = ConfigField_NewMailCommand,
+   
    // other options
-   ConfigField_OthersFirst = ConfigField_PythonLast,
+   ConfigField_OthersFirst = ConfigField_HelpersLast,
    ConfigField_ShowLog,
    ConfigField_Splash,
    ConfigField_SplashDelay,
+   ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
-   ConfigField_Browser,
+   ConfigField_OpenOnClick,
    ConfigField_DateFormat,
-   ConfigField_OthersLast = ConfigField_DateFormat,
+   ConfigField_ShowNewMail,
+   ConfigField_OthersLast = ConfigField_ShowNewMail,
 
    // the end
    ConfigField_Max
@@ -144,6 +175,11 @@ struct ConfigValueDefault
    bool bNumeric;
 };
 
+struct ConfigValueNone : public ConfigValueDefault
+{
+   ConfigValueNone() : ConfigValueDefault("none",0L) { }
+};
+
 // -----------------------------------------------------------------------------
 // our notebook class
 // -----------------------------------------------------------------------------
@@ -170,9 +206,9 @@ public:
    ~wxOptionsDialog();
 
    // notifications from the notebook pages
-      // something important change
+   // something important change
    void SetDoTest() { SetDirty(); m_bTest = TRUE; }
-      // some setting changed, but won't take effect until restart
+   // some setting changed, but won't take effect until restart
    void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
 
    // override base class functions
@@ -190,10 +226,10 @@ protected:
 
 private:
    bool         m_bTest,            // test new settings?
-                m_bRestartWarning;  // changes will take effect after restart
+      m_bRestartWarning;  // changes will take effect after restart
 
    DECLARE_DYNAMIC_CLASS(wxOptionsDialog)
-};
+      };
 
 // ----------------------------------------------------------------------------
 // event tables and such
@@ -204,6 +240,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxOptionsDialog, wxNotebookDialog)
 BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    // any change should make us dirty
    EVT_CHECKBOX(-1, wxOptionsPage::OnCheckboxChange)
+   EVT_RADIOBOX(-1, wxOptionsPage::OnRadioboxChange)
    EVT_TEXT(-1, wxOptionsPage::OnChange)
 END_EVENT_TABLE()
 
@@ -228,24 +265,30 @@ END_EVENT_TABLE()
 wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 {
    // network config and identity
+   { "The user and host names are used to compose the return address, unless\n"
+     "a differenent return address is explicitly specified.",
+     Field_Message, -1},
    { "&Username",                    Field_Text,    -1,                        },
+   { "The host name is also used as a default host name for local mail addresses.",
+     Field_Message, -1},
    { "&Hostname",                    Field_Text |
-                                     Field_Vital,   -1,                        },
+     Field_Vital,   -1,                        },
    { "&Return address",              Field_Text |
-                                     Field_Vital,   -1,                        },
+     Field_Vital,   -1,                        },
    { "SMTP (&mail) server",          Field_Text |
-                                     Field_Vital,   -1,                        },
+     Field_Vital,   -1,                        },
    { "NNTP (&news) server",          Field_Text,    -1,                        },
    { "&Personal name",               Field_Text,    -1,                        },
 
    // compose
-   { "&From field label",            Field_Text,    -1,                        },
-   { "&To field label",              Field_Text,    -1,                        },
+   { "&To field default value",              Field_Text,    -1,                        },
    { "Show &CC field",               Field_Bool,    -1,                        },
-   { "CC field &label",              Field_Text,    ConfigField_ShowCC         },
+   { "CC field &default value",              Field_Text,    ConfigField_ShowCC         },
    { "Show &BCC field",              Field_Bool,    -1,                        },
-   { "BCC field l&abel",             Field_Text,    ConfigField_ShowBCC        },
+   { "BCC field d&efault value",             Field_Text,    ConfigField_ShowBCC        },
 
+   { "Sa&ve sent mesasges", Field_Bool,    -1,                        },
+   { "&Folder file for sent messages",   Field_File,    ConfigField_UseOutgoingFolder        },
    { "&Wrap margin",                 Field_Number,  -1,                        },
    { "&Reply character",             Field_Text,    -1,                        },
 
@@ -257,12 +300,15 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
    // folders
    { "Folders to open on &startup",  Field_List |
-                                     Field_Restart, -1,                        },
+     Field_Restart, -1,                        },
    { "&Folder opened in main frame", Field_Text,    -1,                        },
 
 
 #ifdef USE_PYTHON
    // python
+   {"Python is the built-in scripting language which can be\n"
+    "used to extend M's functionality. It is not essential\n"
+    "for the program's normal operation.", Field_Message, -1},
    { "&Enable Python",               Field_Bool,    -1,                        },
    { "Python &Path",                 Field_Text,    ConfigField_EnablePython   },
    { "&Startup script",              Field_File,    ConfigField_EnablePython   },
@@ -273,40 +319,78 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { "Flag &clear callback",         Field_Text,    ConfigField_EnablePython   },
 #endif // USE_PYTHON
 
+   // adb: autocollect and bbdb options
+   { "M may automatically remember all e-mail addresses in the messages you "
+     "receive in a special addresss book. This is called 'address "
+     "autocollection' and may be turned on or off from this page",
+                                     Field_Message, -1                     },
+   { "&Autocollect addresses",       Field_Action,  -1,                    },
+   { "Address &book to use",         Field_Text, ConfigField_AutoCollect   },
+   { "Ignore addresses without &names", Field_Bool, ConfigField_AutoCollect},
+   {"Thes following settings configure the support of the Big Brother\n"
+    "addressbook (BBDB) format. This is supported only for compatibility\n"
+    "with other software. The normal addressbook is unaffected by these\n"
+    "settings.", Field_Message, -1},
+   {"&Ignore entries without names", Field_Bool, -1 },
+   {"&Generate unique aliases",      Field_Bool, -1 },
+   {"&Name for nameless entries",    Field_Text, ConfigField_Bbdb_GenerateUnique },
+   {"&Save on exit",                 Field_Action, -1 },
+
+   // helper programs
+   { "The following program will be used to open URLs "
+     "embedded in messages:",       Field_Message, -1                      },
+   { "Open &URLs with",             Field_File,    -1                      },
+   { "URL &browser is Netscape",    Field_Bool,    -1                      },
+   { "The following program will be used to view "
+     "the online help system:",     Field_Message, -1                      },
+   { "&Help viewer",                Field_File,    -1                      },
+   { "Help &viewer is Netscape",    Field_Bool,    -1                      },
+   { "&External editor",            Field_Text,    -1                      },
+   { "The following line will be executed each time "
+     "new mail is received:",       Field_Message, -1                      },
+   { "&New Mail Command",           Field_File,    -1                      },
+
    // other options
-   { "Show &log window",             Field_Bool,    -1,                        },
+   { "Show &log window",             Field_Bool,    -1,                    },
    { "&Splash screen at startup",    Field_Bool |
-                                     Field_Restart, -1,                        },
-   { "Splash screen &delay",         Field_Number,  ConfigField_Splash         },
+                                     Field_Restart, -1,                    },
+   { "Splash screen &delay",         Field_Number,  ConfigField_Splash     },
+   { "&Autosave delay",              Field_Number |
+                                     Field_Restart, -1                     },
    { "Confirm &exit",                Field_Bool |
-                                     Field_Restart, -1,                        },
-   { "&Browser program",             Field_File,    -1,                        },
-   { "&Format for the date",         Field_Text,    -1,                        },
+                                     Field_Restart, -1                     },
+   { "&Click folder to open",        Field_Bool,    -1                     },
+   { "&Format for the date",         Field_Text,    -1                     },
+   { "Show new mail &notifications", Field_Bool,    -1                     },
 };
 
 // @@@ ugly, ugly, ugly... config settings should be living in an array from
 //     the beginning which would avoid us all these contorsions
 #define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
+// even worse: dummy entries for message fields
+#define CONFIG_NONE()  ConfigValueNone()
 
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
 static const ConfigValueDefault gs_aConfigDefaults[] =
 {
    // network and identity
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_USERNAME),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_HOSTNAME),
    CONFIG_ENTRY(MP_RETURN_ADDRESS),
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_ENTRY(MP_PERSONALNAME),
 
-   CONFIG_ENTRY(MC_FROM_LABEL),
-   CONFIG_ENTRY(MC_TO_LABEL),
+   CONFIG_ENTRY(MP_COMPOSE_TO),
    CONFIG_ENTRY(MP_SHOWCC),
-   CONFIG_ENTRY(MC_CC_LABEL),
+   CONFIG_ENTRY(MP_COMPOSE_CC),
    CONFIG_ENTRY(MP_SHOWBCC),
-   CONFIG_ENTRY(MC_BCC_LABEL),
-
+   CONFIG_ENTRY(MP_COMPOSE_BCC),
+   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
+   CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
 
@@ -317,14 +401,15 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
 
    // folders
-   CONFIG_ENTRY(MC_OPENFOLDERS),
-   CONFIG_ENTRY(MC_MAINFOLDER),
+   CONFIG_ENTRY(MP_OPENFOLDERS),
+   CONFIG_ENTRY(MP_MAINFOLDER),
 
    // python
 #ifdef USE_PYTHON
-   CONFIG_ENTRY(MC_USEPYTHON),
-   CONFIG_ENTRY(MC_PYTHONPATH),
-   CONFIG_ENTRY(MC_STARTUPSCRIPT),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_USEPYTHON),
+   CONFIG_ENTRY(MP_PYTHONPATH),
+   CONFIG_ENTRY(MP_STARTUPSCRIPT),
    CONFIG_ENTRY(MCB_FOLDEROPEN),
    CONFIG_ENTRY(MCB_FOLDERUPDATE),
    CONFIG_ENTRY(MCB_FOLDEREXPUNGE),
@@ -332,17 +417,41 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MCB_FOLDERCLEARMSGFLAG),
 #endif // USE_PYTHON
 
-   // other
-   CONFIG_ENTRY(MC_SHOWLOG),
-   CONFIG_ENTRY(MC_SHOWSPLASH),
-   CONFIG_ENTRY(MC_SPLASHDELAY),
-   CONFIG_ENTRY(MC_CONFIRMEXIT),
-   CONFIG_ENTRY(MP_BROWSER),
-   CONFIG_ENTRY(MC_DATE_FMT),
+   // autocollect
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_AUTOCOLLECT),
+   CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
+   CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_BBDB_IGNOREANONYMOUS),
+   CONFIG_ENTRY(MP_BBDB_GENERATEUNIQUENAMES),
+   CONFIG_ENTRY(MP_BBDB_ANONYMOUS),
+   CONFIG_ENTRY(MP_BBDB_SAVEONEXIT),
 
+   // helper programs
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_BROWSER),
+   CONFIG_ENTRY(MP_BROWSER_ISNS),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_HELPBROWSER),
+   CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
+   CONFIG_ENTRY(MP_EXTERNALEDITOR),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_NEWMAILCOMMAND),
+
+   // other
+   CONFIG_ENTRY(MP_SHOWLOG),
+   CONFIG_ENTRY(MP_SHOWSPLASH),
+   CONFIG_ENTRY(MP_SPLASHDELAY),
+   CONFIG_ENTRY(MP_AUTOSAVEDELAY),
+   CONFIG_ENTRY(MP_CONFIRMEXIT),
+   CONFIG_ENTRY(MP_OPEN_ON_CLICK),
+   CONFIG_ENTRY(MP_DATE_FMT),
+   CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
 };
 
 #undef CONFIG_ENTRY
+#undef CONFIG_NONE
 
 // ============================================================================
 // implementation
@@ -357,7 +466,6 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              ProfileBase *profile,
                              size_t nFirst,
                              size_t nLast)
-             : wxNotebookPageBase(notebook)
 {
    int image = notebook->GetPageCount();
 
@@ -381,18 +489,18 @@ void wxOptionsPage::CreateControls()
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
-         case Field_Number:
-         case Field_File:
-         case Field_Bool:
-            // fall through: for this purpose (finding the longest label)
-            // they're the same as text
+      case Field_Number:
+      case Field_File:
+      case Field_Bool:
+         // fall through: for this purpose (finding the longest label)
+         // they're the same as text
+      case Field_Action:
+      case Field_Text:
+         break;
 
-         case Field_Text:
-            break;
-
-         default:
-            // don't take into account the other types
-            continue;
+      default:
+         // don't take into account the other types
+         continue;
       }
 
       aLabels.Add(_(ms_aFields[n].label));
@@ -404,24 +512,32 @@ void wxOptionsPage::CreateControls()
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       switch ( GetFieldType(n) ) {
-         case Field_File:
-            last = CreateFileEntry(_(ms_aFields[n].label), widthMax, last);
-            break;
+      case Field_File:
+         last = CreateFileEntry(_(ms_aFields[n].label), widthMax, last);
+         break;
 
-         case Field_Number:
-            // fall through -- for now they're the same as text
+      case Field_Action:
+         last = CreateActionChoice(_(ms_aFields[n].label), widthMax,
+                                   last);
+         break;
 
-         case Field_Text:
-            last = CreateTextWithLabel(_(ms_aFields[n].label), widthMax, last);
-            break;
+      case Field_Number:
+         // fall through -- for now they're the same as text
+      case Field_Text:
+         last = CreateTextWithLabel(_(ms_aFields[n].label), widthMax, last);
+         break;
 
-         case Field_List:
-            last = CreateListbox(_(ms_aFields[n].label), last);
-            break;
+      case Field_List:
+         last = CreateListbox(_(ms_aFields[n].label), last);
+         break;
 
-         case Field_Bool:
-            last = CreateCheckBox(_(ms_aFields[n].label), widthMax, last);
-            break;
+      case Field_Bool:
+         last = CreateCheckBox(_(ms_aFields[n].label), widthMax, last);
+         break;
+
+      case Field_Message:
+         last = CreateMessage(_(ms_aFields[n].label), last);
+         break;
 
          default:
             wxFAIL_MSG("unknown field type in CreateControls");
@@ -445,10 +561,12 @@ void wxOptionsPage::OnChange(wxEvent& event)
 
    if ( !dialog )
    {
-       // we don't put an assert here because this does happen when we're a
-       // page in the folder properties dialog
-       return;
+      // we don't put an assert here because this does happen when we're a
+      // page in the folder properties dialog
+      return;
    }
+
+   UpdateUI();
 
    wxControl *control = (wxControl *)event.GetEventObject();
    if ( m_aVitalControls.Index(control) != -1 )
@@ -458,6 +576,13 @@ void wxOptionsPage::OnChange(wxEvent& event)
 
    if ( m_aRestartControls.Index(control) != -1 )
       dialog->SetGiveRestartWarning();
+}
+
+void wxOptionsPage::OnRadioboxChange(wxEvent& event)
+{
+   OnChange(event);
+
+   Refresh();
 }
 
 void wxOptionsPage::OnCheckboxChange(wxEvent& event)
@@ -476,25 +601,37 @@ void wxOptionsPage::UpdateUI()
 
          // avoid signed/unsigned mismatch in expressions
          size_t nCheck = (size_t)nCheckField;
-         wxASSERT( GetFieldType(nCheck) == Field_Bool );
+         wxASSERT( GetFieldType(nCheck) == Field_Bool ||
+                   GetFieldType(nCheck) == Field_Action );
          wxASSERT( nCheck >= m_nFirst && nCheck < m_nLast );
 
          // enable only if the checkbox is checked
-         wxCheckBox *checkbox = (wxCheckBox *)GetControl(nCheck);
-         wxASSERT( checkbox->IsKindOf(CLASSINFO(wxCheckBox)) );
+         bool bEnable = true;
+         if ( GetFieldType(nCheck) == Field_Bool )
+         {
+            wxCheckBox *checkbox = (wxCheckBox *)GetControl(nCheck);
+            wxASSERT( checkbox->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+            bEnable = checkbox->GetValue();
+         }
+         else
+         {
+            wxRadioBox *radiobox = (wxRadioBox *)GetControl(nCheck);
+
+            if ( radiobox->GetSelection() == 0 ) // FIXME hardcoded!
+               bEnable = false;
+         }
 
          wxControl *control = GetControl(n);
-         bool bEnable = checkbox->GetValue();
-
          control->Enable(bEnable);
 
          switch ( GetFieldType(n) ) {
-            case Field_File:
-               // for file entries, also disable the browse button
-            {
-               // @@ we assume that the control ids are consecutif
-               long id = control->GetId() + 1;
-               wxWindow *win = FindWindow(id);
+         case Field_File:
+            // for file entries, also disable the browse button
+         {
+            // @@ we assume that the control ids are consecutif
+            long id = control->GetId() + 1;
+            wxWindow *win = FindWindow(id);
 
                if ( win == NULL ) {
                   wxFAIL_MSG("can't find browse button for the file entry zone");
@@ -526,10 +663,11 @@ void wxOptionsPage::UpdateUI()
                   }
                }
             }
-            break;
+         }
+         break;
 
-            default:
-               ;
+         default:
+            ;
          }
       }
       // this field is always enabled
@@ -541,7 +679,7 @@ bool wxOptionsPage::TransferDataToWindow()
 {
    // disable environment variable expansion here because we want the user to
    // edit the real value stored in the config
-   ProfileEnvVarSuspend suspend(m_Profile);
+   ProfileEnvVarSave suspend(m_Profile, false);
 
    // check that we didn't forget to update one of the arrays...
    wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
@@ -565,23 +703,10 @@ bool wxOptionsPage::TransferDataToWindow()
 
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) ) {
-         case Field_Text:
-         case Field_File:
-         case Field_Number:
-            if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
-
-               strValue.Printf("%ld", lValue);
-            }
-            else {
-               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
-            }
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-
-            ((wxTextCtrl *)control)->SetValue(strValue);
-            break;
-
-         case Field_Bool:
+      case Field_Text:
+      case Field_File:
+      case Field_Number:
+         if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
@@ -592,19 +717,30 @@ bool wxOptionsPage::TransferDataToWindow()
             wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-            // split it (FIXME @@@ what if it contains ';'?)
-            {
-               String str;
-               for ( size_t m = 0; m < strValue.Len(); m++ ) {
-                  if ( strValue[m] == ';' ) {
-                     if ( !str.IsEmpty() ) {
-                        ((wxListBox *)control)->Append(str);
-                        str.Empty();
-                     }
-                     //else: nothing to do, two ';' one after another
-                  }
-                  else {
-                     str << strValue[m];
+         ((wxTextCtrl *)control)->SetValue(strValue);
+         break;
+
+      case Field_Bool:
+         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+         ((wxCheckBox *)control)->SetValue(lValue != 0);
+         break;
+      case Field_Action:
+         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
+         ((wxRadioBox *)control)->SetSelection(lValue);
+         break;
+      case Field_List:
+         wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+
+         // split it (FIXME @@@ what if it contains ';'?)
+         {
+            String str;
+            for ( size_t m = 0; m < strValue.Len(); m++ ) {
+               if ( strValue[m] == ';' ) {
+                  if ( !str.IsEmpty() ) {
+                     ((wxListBox *)control)->Append(str);
+                     str.Empty();
                   }
                }
 
@@ -614,8 +750,15 @@ bool wxOptionsPage::TransferDataToWindow()
             }
             break;
 
-         default:
-            wxFAIL_MSG("unexpected field type");
+            if ( !str.IsEmpty() ) {
+               ((wxListBox *)control)->Append(str);
+            }
+         }
+         break;
+      case Field_Message:
+         break;
+      default:
+         wxFAIL_MSG("unexpected field type");
       }
    }
 
@@ -651,7 +794,7 @@ bool wxOptionsPage::TransferDataFromWindow()
             }
             break;
 
-         case Field_Bool:
+         if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
@@ -662,21 +805,36 @@ bool wxOptionsPage::TransferDataFromWindow()
             wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-            // join it (FIXME @@@ what if it contains ';'?)
-            {
-               wxListBox *listbox = (wxListBox *)control;
-               for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
-                  if ( !strValue.IsEmpty() ) {
-                     strValue << ';';
-                  }
+      case Field_Bool:
+         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+         lValue = ((wxCheckBox *)control)->GetValue();
+         break;
+
+      case Field_Action:
+         wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
+
+         lValue = ((wxRadioBox *)control)->GetSelection();
+         break;
+      case Field_List:
+         wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
                   strValue << listbox->GetString(m);
                }
             }
             break;
 
-         default:
-            wxFAIL_MSG("unexpected field type");
+               strValue << listbox->GetString(m);
+            }
+         }
+         break;
+      case Field_Message:
+         break;
+      default:
+         wxFAIL_MSG("unexpected field type");
       }
 
       if ( gs_aConfigDefaults[n].IsNumeric() )
@@ -700,11 +858,11 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
                                            ProfileBase *profile)
-                    : wxOptionsPage(parent,
-                                    _("Compose"),
-                                    profile,
-                                    ConfigField_ComposeFirst,
-                                    ConfigField_ComposeLast)
+   : wxOptionsPage(parent,
+                   _("Compose"),
+                   profile,
+                   ConfigField_ComposeFirst,
+                   ConfigField_ComposeLast)
 {
 }
 
@@ -714,11 +872,11 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
 
 wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
                                        ProfileBase *profile)
-                  : wxOptionsPage(parent,
-                                  _("Identity"),
-                                  profile,
-                                  ConfigField_IdentFirst,
-                                  ConfigField_IdentLast)
+   : wxOptionsPage(parent,
+                   _("Identity"),
+                   profile,
+                   ConfigField_IdentFirst,
+                   ConfigField_IdentLast)
 {
 }
 
@@ -730,15 +888,31 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
 
 wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
                                          ProfileBase *profile)
-                   : wxOptionsPage(parent,
-                                   _("Python"),
-                                   profile,
-                                   ConfigField_PythonFirst,
-                                   ConfigField_PythonLast)
+   : wxOptionsPage(parent,
+                   _("Python"),
+                   profile,
+                   ConfigField_PythonFirst,
+                   ConfigField_PythonLast)
 {
 }
 
 #endif // USE_PYTHON
+
+// ----------------------------------------------------------------------------
+// wxOptionsPageAdb
+// ----------------------------------------------------------------------------
+
+
+wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
+                                    ProfileBase *profile)
+   : wxOptionsPage(parent,
+                   _("Adressbook"),
+                   profile,
+                   ConfigField_AdbFirst,
+                   ConfigField_AdbLast)
+{
+}
+
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageOthers
@@ -746,11 +920,11 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 
 wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                          ProfileBase *profile)
-                   : wxOptionsPage(parent,
-                                   _("Miscellaneous"),
-                                   profile,
-                                   ConfigField_OthersFirst,
-                                   ConfigField_OthersLast)
+   : wxOptionsPage(parent,
+                   _("Miscellaneous"),
+                   profile,
+                   ConfigField_OthersFirst,
+                   ConfigField_OthersLast)
 {
 }
 
@@ -760,8 +934,8 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    // these setting might be out of date - synchronize
 
    // TODO this should be table based too probably...
-   if ( !wxPMessageBoxEnabled(MC_CONFIRMEXIT) )
-      m_Profile->writeEntry(MC_CONFIRMEXIT, false);
+   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
+      m_Profile->writeEntry(MP_CONFIRMEXIT, false);
 
    return wxOptionsPage::TransferDataToWindow();
 }
@@ -773,8 +947,48 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
    {
       // now if the user checked "confirm exit" checkbox we must reenable
       // the message box by erasing the stored answer to it
-      if ( m_Profile->readEntry(MC_CONFIRMEXIT, false) )
-         wxPMessageBoxEnable(MC_CONFIRMEXIT);
+      if ( m_Profile->readEntry(MP_CONFIRMEXIT, false) )
+         wxPMessageBoxEnable(MP_CONFIRMEXIT);
+   }
+
+   return rc;
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsPageHelpers
+// ----------------------------------------------------------------------------
+
+wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
+                                         ProfileBase *profile)
+   : wxOptionsPage(parent,
+                   _("Helpers"),
+                   profile,
+                   ConfigField_HelpersFirst,
+                   ConfigField_HelpersLast)
+{
+}
+
+bool wxOptionsPageHelpers::TransferDataToWindow()
+{
+   // if the user checked "don't ask me again" checkbox in the message box
+   // these setting might be out of date - synchronize
+
+   // TODO this should be table based too probably...
+   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
+      m_Profile->writeEntry(MP_CONFIRMEXIT, false);
+
+   return wxOptionsPage::TransferDataToWindow();
+}
+
+bool wxOptionsPageHelpers::TransferDataFromWindow()
+{
+   bool rc = wxOptionsPage::TransferDataFromWindow();
+   if ( rc )
+   {
+      // now if the user checked "confirm exit" checkbox we must reenable
+      // the message box by erasing the stored answer to it
+      if ( m_Profile->readEntry(MP_CONFIRMEXIT, false) )
+         wxPMessageBoxEnable(MP_CONFIRMEXIT);
    }
 
    return rc;
@@ -786,11 +1000,11 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 
 wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                                            ProfileBase *profile)
-                    : wxOptionsPage(parent,
-                                    _("Mail boxes"),
-                                    profile,
-                                    ConfigField_FoldersFirst,
-                                    ConfigField_FoldersLast)
+   : wxOptionsPage(parent,
+                   _("Mail boxes"),
+                   profile,
+                   ConfigField_FoldersFirst,
+                   ConfigField_FoldersLast)
 {
 }
 
@@ -844,7 +1058,7 @@ void wxOptionsPageFolders::OnNewFolder(wxCommandEvent& event)
       listbox->Append(str);
 
       wxOptionsPage::OnChange(event);
-  }
+   }
 }
 
 void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
@@ -892,7 +1106,7 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // ----------------------------------------------------------------------------
 
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-               : wxNotebookDialog(parent, _("Program options"))
+   : wxNotebookDialog(parent, _("Program options"))
 {
 }
 
@@ -940,7 +1154,7 @@ wxOptionsDialog::OnSettingsChange()
       MDialog_Message(_("Some of the changes to the program options will\n"
                         "only take effect when the progam will be run the\n"
                         "next time and not during this session."),
-                        this, MDIALOG_MSGTITLE, "WarnRestartOpt");
+                      this, MDIALOG_MSGTITLE, "WarnRestartOpt");
       m_bRestartWarning = FALSE;
    }
 
@@ -958,7 +1172,7 @@ void wxOptionsDialog::ResetDirty()
    wxNotebookDialog::ResetDirty();
 
    m_bTest =
-   m_bRestartWarning = FALSE;
+      m_bRestartWarning = FALSE;
 }
 
 wxOptionsDialog::~wxOptionsDialog()
@@ -982,13 +1196,15 @@ const char *wxOptionsNotebook::s_aszImages[] =
 #ifdef USE_PYTHON
    "python",
 #endif
+   "adrbook",
+   "helpers",
    "miscopt",
    NULL
 };
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-                 : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
+   : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
 {
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == OptionPage_Max + 1);
@@ -1002,6 +1218,8 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 #ifdef USE_PYTHON
    (void)new wxOptionsPagePython(this, profile);
 #endif
+   (void)new wxOptionsPageAdb(this, profile);
+   (void)new wxOptionsPageHelpers(this, profile);
    (void)new wxOptionsPageOthers(this, profile);
 }
 
@@ -1016,3 +1234,4 @@ void ShowOptionsDialog(wxFrame *parent, OptionPage page)
    dlg.SetNotebookPage(page);
    (void)dlg.ShowModal();
 }
+

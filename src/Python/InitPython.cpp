@@ -69,7 +69,7 @@ InitPython(void)
 #  ifndef OS_WIN
    // initialise python interpreter
    tmp = "PYTHONPATH=";
-   path = mApplication->GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+   path = mApplication->GetProfile()->readEntry(MP_PYTHONPATH,MP_PYTHONPATH_D);
    if(strutil_isempty(path))
    {
       path += mApplication->GetLocalDir();
@@ -78,10 +78,10 @@ InitPython(void)
       path += mApplication->GetGlobalDir();
       path += "/scripts";
       tmp += path;
-      mApplication->GetProfile()->writeEntry(MC_PYTHONPATH,path);
+      mApplication->GetProfile()->writeEntry(MP_PYTHONPATH,path);
    }
    else
-      tmp += mApplication->GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+      tmp += mApplication->GetProfile()->readEntry(MP_PYTHONPATH,MP_PYTHONPATH_D);
    if(getenv("PYTHONPATH"))
    {
       tmp += PATH_SEPARATOR;
@@ -93,7 +93,7 @@ InitPython(void)
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();
 
-   if( !READ_CONFIG(mApplication->GetProfile(), MC_USEPYTHON) )
+   if( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
       return true; // it is not an error to have it disabled
    
    // initialise the modules

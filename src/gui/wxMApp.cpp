@@ -37,8 +37,8 @@
    }
 
 #  include <wx/log.h>
-
 #  include <wx/config.h>
+#  include <wx/intl.h>
 #endif
 
 #include "Mdefaults.h"
@@ -72,6 +72,35 @@ public:
    // override base class virtual to implement saving the frame position
    virtual void OnFrameDelete(wxFrame *frame);
 };
+
+// a timer used to periodically autosave profile settings
+class AutoSaveTimer : public wxTimer
+{
+public:
+   AutoSaveTimer() { m_started = FALSE; }
+
+   virtual bool Start( int millisecs = -1, bool oneShot = FALSE )
+      { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
+
+   virtual void Notify()
+      { wxLogTrace("Autosaving everything."); ProfileBase::FlushAll(); }
+
+    virtual void Stop()
+      { if ( m_started ) wxTimer::Stop(); }
+
+public:
+    bool m_started;
+};
+
+// ----------------------------------------------------------------------------
+// global vars
+// ----------------------------------------------------------------------------
+
+// a (unique) autosave timer instance
+static AutoSaveTimer gs_timerAutoSave;
+
+// this creates the one and only application object
+IMPLEMENT_APP(wxMApp);
 
 // ============================================================================
 // implementation
@@ -122,7 +151,7 @@ wxMApp::OnAbnormalTermination()
                 "Please report the bug to m-developers@makelist.com\n"
                         "Thank you!"), "Fatal application error",
                 MB_ICONSTOP);
-#endif   
+#endif
 }
 
 // app initilization
@@ -131,31 +160,42 @@ wxMApp::OnInit()
 {
    // Set up locale first, so everything is in the right language.
    const char * locale = getenv("LANG");
-   if(locale)
+   if( locale && (strcmp(locale, "C") != 0) )
    {
-      m_Locale = new wxLocale("configured language", locale, "");
+      m_Locale = new wxLocale(locale, locale, "");
+      String localePath ;
+      localePath << M_BASEDIR << "/locale";
+      m_Locale->AddCatalogLookupPathPrefix(localePath);
       m_Locale->AddCatalog(M_APPLICATIONNAME);
    }
    else
       m_Locale = NULL;
-   
+
    m_IconManager = new wxIconManager();
-   
+
    if ( OnStartup() )
    {
       // now we can create the log window
-      if ( READ_APPCONFIG(MC_SHOWLOG) ) {
+      if ( READ_APPCONFIG(MP_SHOWLOG) ) {
          (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
-         
+
          // we want it to be above the log frame
          m_topLevelFrame->Raise();
       }
+
+      // at this moment we're fully initialized, i.e. profile and log
+      // subsystems are working and the main window is created
+
+      // start a timer to autosave the profile entries
+      long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY);
+      if ( delay > 0 )
+         gs_timerAutoSave.Start(delay);
 
       return true;
    }
    else {
       ERRORMESSAGE(("Can't initialize application, terminating."));
-      
+
       return false;
    }
 }
@@ -166,6 +206,7 @@ MFrame *wxMApp::CreateTopLevelFrame()
    m_topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    m_topLevelFrame->Show(true);
 
+   SetTopWindow(m_topLevelFrame);
    return m_topLevelFrame;
 }
 
@@ -176,11 +217,14 @@ int wxMApp::OnRun()
 
 int wxMApp::OnExit()
 {
+   // disable autosave, won't need it any more
+   gs_timerAutoSave.Stop();
+
    MAppBase::OnShutDown();
 
    delete m_IconManager;
-   if(m_Locale) delete m_Locale;
-   
+   delete m_Locale;
+
    MObjectRC::CheckLeaks();
 
    // delete the previously active log target (it's the one we had set before
@@ -188,7 +232,7 @@ int wxMApp::OnExit()
    // one, we will delete his log object and his code will delete ours)
    wxLog *log = wxLog::SetActiveTarget(NULL);
    delete log;
- 
+
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
 #  ifdef OS_WIN
@@ -205,14 +249,14 @@ wxMApp::Help(int id, wxWindow *parent)
 {
    // store help key used in search
    static wxString last_key;
-   
+
    if(! m_HelpController)
    {
       m_HelpController = new wxHelpController;
 #ifdef OS_UNIX
       ((wxExtHelpController *)m_HelpController)->SetBrowser(
-         READ_APPCONFIG(MC_HELPBROWSER),
-         READ_APPCONFIG(MC_HELPBROWSER_ISNS));
+         READ_APPCONFIG(MP_HELPBROWSER),
+         READ_APPCONFIG(MP_HELPBROWSER_ISNS));
       // initialise the help system
       m_HelpController->Initialize(GetGlobalDir()+"/doc");
 #else // Windows
@@ -238,16 +282,12 @@ wxMApp::Help(int id, wxWindow *parent)
       break;
       // all other help ids, just look them up:
    default:
-      if(! m_HelpController->DisplaySection(id)) 
-         MDialog_Message(_("No help found for current context."),NULL,_("Sorry"));
+      if(! m_HelpController->DisplaySection(id))
+      {
+         wxString str;
+         str.Printf(_("No help found for current context (%d)."), id);
+         MDialog_Message(str,NULL,_("Sorry"));
+      }
       break;
    }
 }
-
-
-// ----------------------------------------------------------------------------
-// global vars
-// ----------------------------------------------------------------------------
-
-// this creates the one and only application object
-IMPLEMENT_APP(wxMApp);

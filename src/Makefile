@@ -5,7 +5,7 @@
 CWD = src
 SUB_DIRS = util classes gui mail adb wx
 MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o adb/*.o \
-      wx/common/*.o wx/generic/*.o
+      wx/generic/*.o #wx/common/*.o
 
 include ../makeopts
 
@@ -45,8 +45,7 @@ install: M
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
-	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
-	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
+	ln -s ../share/M/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
 	$(MAKE) -C Python $@

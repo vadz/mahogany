@@ -71,4 +71,10 @@ extern wxWindow *GetParentOfClass(wxWindow *win, wxClassInfo *classinfo);
 #define GET_PARENT_OF_CLASS(win, classname)  \
    ((classname *)(GetParentOfClass(win, CLASSINFO(classname))))
 
+// get the pointer to the frame we belong to (returns NULL if none)
+inline wxFrame *GetFrame(wxWindow *win)
+{
+   return GET_PARENT_OF_CLASS(win, wxFrame);
+}
+
 #endif // GUIDEF_H

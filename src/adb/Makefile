@@ -1,12 +1,12 @@
 # Makefile for src/adb directory
 
 CWD = adb
-SRC = AdbFrame.cpp AdbManager.cpp ProvFC.cpp AdbProvider.cpp
+SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
+      ProvFC.cpp ProvBbdb.cpp
 
-# FIXME: DEBUG is not defined here... how should I do it??
-# ifdef DEBUG
+ifdef DEBUG
 SRC += ProvDummy.cpp
-# endif
+endif
 
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)

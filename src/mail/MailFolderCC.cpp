@@ -15,16 +15,18 @@
 #ifndef  USE_PCH
 #   include "strutil.h"
 #   include "MApplication.h"
-#   include "MDialogs.h"
 #   include "Profile.h"
 #endif // USE_PCH
 
 #include "Mdefaults.h"
+#include "MDialogs.h"
 #include "MPython.h"
 #include "FolderView.h"
 
 #include "MailFolderCC.h"
 #include "MessageCC.h"
+
+#include "MEvent.h"
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
@@ -51,11 +53,12 @@ MailFolderCC::MailFolderCC(MailFolder::Type type,
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
+   numOfMessages = -1;
    type = (MailFolder::Type) (type & MF_TYPEMASK);
    SetType(type);
    if(type == MF_INBOX || type == MF_FILE)
       m_Login = ""; // empty login for these types
-      
+
 }
 
 MailFolderCC *
@@ -122,6 +125,45 @@ MailFolderCC::Open(void)
    }
 
    SetDefaultObj();
+   // for files, check whether mailbox is locked, c-client library is
+   // to dumb to handle this properly
+   if(GetType() == MF_FILE
+#ifdef OS_UNIX
+      || GetType() == MF_INBOX
+#endif    
+      )
+   {
+      String lockfile;
+      if(GetType() == MF_FILE)
+         lockfile = m_MailboxPath + ".lock";
+#ifdef OS_UNIX
+      else // INBOX
+      {
+         // get INBOX path name
+         lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+         lockfile << ".lock";
+      }
+#endif
+      FILE *fp = fopen(lockfile,"r");
+      if(fp) // outch, someone has a lock
+      {
+         if(MDialog_YesNoDialog(
+            "Found lock-file for the mail folder\n"
+            "'%s'\n"
+            "Some other process may be using the folder.\n"
+            "Shall I forcefully override the lock?",
+            NULL, MDIALOG_YESNOTITLE, true))
+         {
+            int success = remove(lockfile);
+            if(success != 0) // error!
+               MDialog_Message(
+                  "Could not remove lock-file.\n"
+                  "Other process may have terminated.\n"
+                  "Will try to continue as normal.");
+         }
+         fclose(fp);
+      }
+   }
    CCQuiet(); // first try, don't log errors
    m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                           debugFlag ? OP_DEBUG : NIL);
@@ -293,6 +335,11 @@ MailFolderCC::GetMessage(unsigned long index)
    return new MessageCC(this,index,mail_uid(m_MailStream,index));
 }
 
+String
+MailFolderCC::GetRawMessage(unsigned long index)
+{
+   return mail_fetch_message(m_MailStream, index, NULL, 0);
+}
 
 void
 MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
@@ -318,10 +365,12 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    }
 
 #if USE_PYTHON
+#if 0
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
 
    if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
                      GetProfile(), "ls", (signed long) index, flagstr),1)  )
+#endif
    {
       if(set)
          mail_setflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
@@ -381,6 +430,31 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
       SetDefaultObj(false);
 }
 
+void
+MailFolderCC::UpdateCount(long n)
+{
+   long oldnum = numOfMessages;
+   numOfMessages = n;
+   UpdateViews();
+
+   if(n > oldnum && oldnum != -1) // new mail has arrived
+   {
+      n = numOfMessages - oldnum;
+      unsigned long *messageIDs = new unsigned long[n];
+
+      // FIXME we assume here that the indices of all new messages are
+      //       consecutive which is not the case in general (should iterate
+      //       over all messages and look at their "New" flag instead)
+      // KB: I think it should be "New" AND "Unseen"
+      for ( unsigned long i = 0; i < (unsigned long)n; i++ )
+         messageIDs[i] = oldnum + n;
+
+      EventMailData data(this, (unsigned long)n, messageIDs);
+      EventManager::Send(data);
+
+      delete [] messageIDs;
+   }
+}
 
 //-------------------------------------------------------------------
 // static class member functions:
@@ -455,14 +529,15 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
    if(mf)
    {
 #if DEBUG
-      String
-    tmp = "MailFolderCC::mm_exists() for folder " + mf->m_MailboxPath
-    + String(" n: ") + strutil_ultoa(number);
+      String tmp = "MailFolderCC::mm_exists() for folder " + mf->m_MailboxPath
+                   + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-
-      mf->numOfMessages = number;
-      mf->UpdateViews();
+      mf->UpdateCount(number);
+   }
+   else
+   {
+      FAIL_MSG("new mail in unknown mail folder?");
    }
 }
 

@@ -6,6 +6,8 @@
  * $Id$             *
  ********************************************************************/
 
+
+
 #ifndef PATHFINDER_H
 #define PATHFINDER_H
 
@@ -13,10 +15,6 @@
 #   pragma interface "PathFinder.h"
 #endif
 
-#ifndef STRINGARG
-#   define   STRINGARG String const &
-//#   define   STRINGARG String
-#endif
 
 /**@name PathFinder class for finding files */
 //@{
@@ -44,7 +42,7 @@ public:
       @param initial pathlist, separated by either colons (unix) or semicolons (dos)
       @param recursive if true, add all subdirectories
    */
-   PathFinder(STRINGARG ipathlist = "", bool recursive = false);
+   PathFinder(const String & ipathlist = M_EMPTYSTRING, bool recursive = false);
 
    /**
       Destructor.
@@ -57,7 +55,7 @@ public:
       @param recursive if true, add all subdirectories
       @param prepend if true, add paths to head of list
    */
-   void AddPaths(STRINGARG pathlist, bool recursive = false,
+   void AddPaths(const String & pathlist, bool recursive = false,
                  bool prepend = true);
    
    /** 
@@ -67,7 +65,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String Find(STRINGARG filename,
+   String Find(const String & filename,
                bool *found = NULL,
                int mode = R_OK) const;
 
@@ -78,7 +76,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindFile(STRINGARG filename,
+   String FindFile(const String & filename,
                    bool *found = NULL,
                    int mode = R_OK) const;
 
@@ -89,7 +87,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindDir(STRINGARG filename,
+   String FindDir(const String & filename,
                   bool *found = NULL,
                   int mode = R_OK) const;
 
@@ -100,7 +98,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindDirFile(STRINGARG filename,
+   String FindDirFile(const String & filename,
                       bool *found = NULL,
                       int mode = R_OK) const;
 
@@ -108,13 +106,13 @@ public:
       check whether pathname is a directory
       @return true if directory
    */
-   static bool IsDir(STRINGARG pathname);
+   static bool IsDir(const String & pathname);
 
    /**
       check whether pathname is a file
       @return true if file
    */
-   static bool IsFile(STRINGARG pathname);
+   static bool IsFile(const String & pathname);
 };
 
 //@}

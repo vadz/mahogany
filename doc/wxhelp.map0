@@ -9,11 +9,6 @@
 0    aindex.html                ; Alphabetic Classes Index 
 0    HIER.html                  ; Class Hierarchy; inheritance
 ;
-; Real help topics
-;
-1001 README/index.html                ; Release Notes; installation setup
-1002 FAQ/index.html                   ; M FAQ
-;
 ; Python interface help
 ;
 0 Python/index.html          ;Python: interface documentation

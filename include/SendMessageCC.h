@@ -6,6 +6,8 @@
  * $Id$
  *******************************************************************/
 
+
+
 #ifndef SENDMESSAGECC_H
 #define SENDMESSAGECC_H
 
@@ -14,6 +16,9 @@
 #endif
 
 class ProfileBase;
+
+/// another scandoc fix
+#define   SM_INLINE "INLINE"
 
 /** A class representing a message during composition.
  */
@@ -54,12 +59,12 @@ public:
        @param plist list of parameters
        @subtype if not empty, mime subtype to use
    */
-   void	AddPart(Message::ContentType type,
+   void	AddPart(MessageContentType type,
                  const char *buf, size_t len,
-		           String const &subtype = "",
-                 String const &disposition = "INLINE",
-                 MessageParameterList const *dlist = NULL,
-                 MessageParameterList const *plist = NULL);
+                String const &subtype = M_EMPTYSTRING,
+                String const &disposition = SM_INLINE,
+                MessageParameterList const *dlist = NULL,
+                MessageParameterList const *plist = NULL);
 
    /** Writes the message to a String
        @param output string to write to
