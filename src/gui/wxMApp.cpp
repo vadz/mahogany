@@ -758,9 +758,6 @@ wxMApp::OnInit()
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
 
-      wxString nameShort,
-               nameLong;
-
       if ( locale.empty() )
       {
          // use the default system language
@@ -792,21 +789,16 @@ wxMApp::OnInit()
                break;
 
             default:
-               const wxLanguageInfo *info = wxLocale::GetLanguageInfo(lang);
-               nameLong = info->Description;
-               nameShort = info->CanonicalName;
+               m_Locale = new wxLocale(lang);
          }
       }
       else // we have locale
       {
-         nameLong =
-         nameShort = locale;
+         m_Locale = new wxLocale(locale, locale);
       }
 
-      if ( !nameShort.empty() )
+      if ( m_Locale )
       {
-         m_Locale = new wxLocale(nameShort, nameLong);
-
          if ( !m_Locale->IsOk() )
          {
             delete m_Locale;
