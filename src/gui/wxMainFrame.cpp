@@ -242,10 +242,11 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
    {
       // we want save the full folder name in m_folderName
       ASSERT( folder->GetFullName() == m_folderName );
-
+      
       MailFolder *mailFolder = m_FolderView->OpenFolder(folder->GetFullName());
       if ( mailFolder )
       {
+         mailFolder->IncRef();
          // reset the unaccessible and modified flags this folder might have
          // had
          folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
@@ -254,6 +255,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
          statusMsg.Printf(_("Opened folder '%s'"), m_folderName.c_str());
 
          UpdateTitleAndStatusBars(m_folderName, statusMsg, this, mailFolder);
+         mailFolder->DecRef();
       }
       else
       {
