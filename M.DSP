@@ -195,16 +195,16 @@ SOURCE=.\src\classes\ComposeTemplate.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\FolderMonitor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\FolderView.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\classes\kbList.cpp
 # SUBTRACT CPP /YX /Yc /Yu
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\classes\MailCollector.cpp
 # End Source File
 # Begin Source File
 
