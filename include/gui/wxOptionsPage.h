@@ -134,8 +134,24 @@ public:
    int GetFieldFlags(size_t n) const
       { return m_aFields[n].flags & Field_Flags; }
 
-   // ctor will add this page to the notebook (with the image refering to the
-   // notebook's imagelist)
+   // almost default ctor: this just takes the parent notebook
+   //
+   // you'll need to call Create() later
+   wxOptionsPage(wxNotebook *parent) : wxNotebookPageBase(parent) { }
+
+   // initialize this page and add it to the notebook (with the image refering
+   // to the notebook's imagelist)
+   bool Create(FieldInfoArray aFields,
+               ConfigValuesArray aDefaults,
+               size_t nFirst,
+               size_t nLast,
+               wxNotebook *notebook,
+               const wxChar *title,
+               Profile *profile,
+               int helpId = -1,
+               int image = -1);
+
+   // this ctor is equivalent to the other one and Create()
    wxOptionsPage(FieldInfoArray aFields,
                  ConfigValuesArray aDefaults,
                  size_t nFirst, size_t nLast,
@@ -144,7 +160,9 @@ public:
                  Profile *profile,
                  int helpID = -1,
                  int image = -1);
+
    virtual ~wxOptionsPage();
+
 
    // transfer data to/from the controls
    virtual bool TransferDataToWindow();
@@ -327,7 +345,21 @@ private:
 class wxOptionsPageDynamic : public wxOptionsPage
 {
 public:
+   // if you use this ctor, you must use Create() later
+   wxOptionsPageDynamic(wxNotebook *parent) : wxOptionsPage(parent) { }
+
    // the aFields array contains the controls descriptions
+   bool Create(wxNotebook *parent,
+               const wxChar *title,
+               Profile *profile,
+               FieldInfoArray aFields,
+               ConfigValuesArray aDefaults,
+               size_t nFields,
+               size_t nOffset = 0,
+               int helpID = -1,
+               int image = -1);
+
+   // ctor doing all at once
    wxOptionsPageDynamic(wxNotebook *parent,
                         const wxChar *title,
                         Profile *profile,

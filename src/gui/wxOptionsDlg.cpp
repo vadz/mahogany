@@ -2230,18 +2230,28 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              int image)
              : wxNotebookPageBase(notebook)
 {
+   Create(aFields, aDefaults, nFirst, nLast, notebook, title,
+          profile, helpId, image);
+}
+
+
+bool wxOptionsPage::Create(FieldInfoArray aFields,
+                           ConfigValuesArray aDefaults,
+                           size_t nFirst,
+                           size_t nLast,
+                           wxNotebook *notebook,
+                           const wxChar *title,
+                           Profile *profile,
+                           int helpId,
+                           int image)
+{
    // no listbox by default
    m_lboxData = NULL;
 
    m_aFields = aFields;
    m_aDefaults = aDefaults;
 
-   // assume that if the user doesn't want to see the images in the toolbar, he
-   // doesn't want to see them elsewhere, in particular in the notebook tabs
-   // neither
-   //
-   // NB: the config values are shifted related to the enum values, hence "+1"
-   if ( (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 == TbarShow_Text )
+   if ( !wxNotebookWithImages::ShouldShowIcons() )
    {
       image = -1;
    }
@@ -2257,6 +2267,8 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
    m_nLast = nLast;
 
    CreateControls();
+
+   return true;
 }
 
 wxOptionsPage::~wxOptionsPage()
@@ -3163,6 +3175,31 @@ wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
                                      nOffset, nOffset + nFields,
                                      parent, title, profile, helpId, image)
 {
+}
+
+bool
+wxOptionsPageDynamic::Create(wxNotebook *parent,
+                             const wxChar *title,
+                             Profile *profile,
+                             FieldInfoArray aFields,
+                             ConfigValuesArray aDefaults,
+                             size_t nFields,
+                             size_t nOffset,
+                             int helpID,
+                             int image)
+{
+   return wxOptionsPage::Create
+          (
+            aFields - nOffset,
+            aDefaults - nOffset,
+            nOffset,
+            nOffset + nFields,
+            parent,
+            title,
+            profile,
+            helpID,
+            image
+          );
 }
 
 // ----------------------------------------------------------------------------
