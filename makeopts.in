@@ -41,18 +41,18 @@ endif
 CANONICAL_HOST := @host@
 
 # DOC++/kdoc (doc++ is preferred, -r to do short filenames to avoid dpkg bug)
-DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BILDDIR)/doc/classes
-DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BILDDIR)/doc/classes.tex
-KDOCHTML = kdoc -H -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M  
-KDOCTEX =  kdoc -T -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M
-SCANDOCHTML = @PERL@ $(SOURCEDIR)/extra/scandoc/scandoc.pl  -i $(SOURCEDIR)/extra/scandoc/Mtemplate.html -p $(BILDDIR)/doc/classes/ -t 3 
+DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
+DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/classes.tex
+KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M  
+KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M
+SCANDOCHTML = @PERL@ $(SOURCEDIR)/extra/scandoc/scandoc.pl  -i $(SOURCEDIR)/extra/scandoc/Mtemplate.html -p $(BUILDDIR)/doc/classes/ -t 3 
 SCANDOCTEX  = echo "Cannot generate .tex class documentation with scandoc."
 DOCHTML	:= @DOCHTML@
 DOCTEX	:= @DOCTEX@
 LATEX	:= @LATEX@
 MAKEINDEX := @MAKEINDEX@
 DVIPS	:= @DVIPS@
-LATEX2HTML := @LATEX2HTML@ -local_icons
+LATEX2HTML := @LATEX2HTML@
 XGETTEXT := @XGETTEXT@
 MSGFMT	:= @MSGFMT@
 PERL	:= @PERL@

@@ -71,7 +71,7 @@ install_bin:
 	done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
-	do $(INSTALL) $$i $(DOCDIR)/Tips; \
+	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done
 
 install_doc:
@@ -141,7 +141,7 @@ rpm: rpm_prep
 		export RPM_BUILD_ROOT=$(RPM_ROOT)/ROOT; \
 	fi; \
 	echo "*** Building RPM under $$RPM_BUILD_ROOT..."; \
-	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec
+	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec \
 	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bs M.spec
 
 msgcat:
