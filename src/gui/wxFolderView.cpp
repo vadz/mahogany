@@ -1545,6 +1545,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    if ( templKind != MessageTemplate_None )
    {
       templ = ChooseTemplateFor(templKind, GetFrame(m_Parent));
+      if ( !templ )
+      {
+         // cancelled by user
+         return;
+      }
    }
 
    switch ( cmd )
