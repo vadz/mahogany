@@ -242,9 +242,13 @@ wxMainFrame::OpenFolder(MFolder *folder)
    {
       if ( m_splitter->IsSplit() )
          m_splitter->Unsplit();
+   }
 
-      if ( winOldFolderView )
-         delete winOldFolderView;
+   if ( winOldFolderView )
+   {
+      // it's not done by Unsplit() nor by ReplaceWindow(), so we must delete
+      // the window ourselves
+      delete winOldFolderView;
    }
 
    if ( !hasFolder )
