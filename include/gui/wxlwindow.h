@@ -22,6 +22,10 @@
 #   define WXLOWIN_MENU_FIRST 12000
 #endif
 
+/** shall we copy formatting to the clipboard? For now: NO (either
+    true or false) */
+#define WXLO_COPY_FORMAT FALSE
+
 
 enum
 {

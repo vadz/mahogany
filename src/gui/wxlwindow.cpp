@@ -56,10 +56,6 @@
 
 #include <ctype.h>
 
-/** shall we copy formatting to the clipboard? For now: NO (either
-    true or false) */
-#define WXLO_COPY_FMT FALSE
-
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -706,7 +702,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
             case WXK_DELETE :
                if(event.ShiftDown())
-                  Cut(WXLO_PRIVATE_FMT, FALSE);
+                  Cut(WXLO_COPY_FORMAT, FALSE);
                else
                   if(! deletedSelection)
                   {
