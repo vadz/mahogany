@@ -5,13 +5,25 @@ CVS="cvs -z3"
 MAKE=make
 LOG=/tmp/mdocs.log
 
+# the dir where we create our temp files
+BUILDDIR=/tmp/mdocs
+
 # the location where the manual should live (in subdir Manual)
 TARGET=/home/groups/mahogany/htdocs/doc
 
 {
-$CVS -q -d $REPOSITORY co -l M/doc/Manual.htex \
+mkdir $BUILDDIR &&
+cd $BUILDDIR &&
+$CVS -q -d $REPOSITORY co -l M/README \
+                             M/doc/Manual.htex \
                              M/doc/Makefile.html \
                              M/extra/scripts/striphelpids &&
+cd M &&
 $MAKE -f Makefile.html &&
-rm $TARGET && mv Manual $TARGET
+rm -rf $TARGET/Manual && mv Manual $TARGET &&
+mv README $TARGET
 } >> $LOG 2>&1
+
+rm -rf $BUILDDIR
+
+exit 0
