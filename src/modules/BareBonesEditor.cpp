@@ -827,21 +827,6 @@ void BareBonesEditor::Clear()
 {
    m_textControl->Clear();
    m_textControl->DiscardEdits();
-
-   Options& options = (Options &)GetOptions();     // const_cast
-
-   wxFont font;
-   if ( !options.m_font.empty() )
-   {
-      wxNativeFontInfo fontInfo;
-      if ( fontInfo.FromString(options.m_font) )
-      {
-         font.SetNativeFontInfo(fontInfo);
-      }
-   }
-
-   if ( font.Ok() )
-      m_textControl->SetFont(font);
 }
 
 void BareBonesEditor::Enable(bool enable)
