@@ -2,138 +2,131 @@
 TODO list for M
 $Id$
 
+
 *********************************************************************
-*** Plans for the next release(s):
+*** BUGS
+*********************************************************************
+*SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-** These are the main topics planned for the next release(s):
+5		wxLayout editing glitches & cursor positioning bug	
+		selections via keyboard still broken
+		speed up wxLayout scrollbar setting, *way* too slow
+		now 
+
+7 gtk	VZ?	message boxes have broken icons under wxGTK
+  win	VZ	lock files are sometimes left
+
+2 win	VZ	keyboard navigation is somewhat strange in the options
+		dialog, can't TAB to the buttons from the notebook
+		page
+
+6	VZ	All Folder create dialog pages have no HelpIDs set.
+
+7 gtk		Mahogany occasionally doesn't terminate but remains in
+		gtk event loop without any open windows.
+
+7	KB	why does Message/Find no longer work?
+
+5	KB	for NNTP only count unread/new messages
+
+5		changing the value of "autocollect" timer doesn't take
+		effect until next run - either add a message saying
+		or, better, recreate timer when the option changes.
+		-- use OptionsChange event for this?!
+
+6		"Hostname" in identity options page is misleading -
+		should be "default server for POP/IMAP. It isn't!!
+		Also, move TCP params somewhere else - what does
+		it have to do with identity?? Nothing, neither the
+		servers. Set up a "Network" page?
+
+3		foldername in password prompt seems wrong
+3		URL highlighting in headers is missing (e.g. X-Url)
+
+*********************************************************************
+*** PROJECTS
+*********************************************************************
+* PRI	WHO	DESCRIPTION
+*********************************************************************
+
+8	VZ	when user level is >=1 (advanced) show full
+		preferences pages in folder notbook
+
+6	VZ	Could you please add a file-browse button/dialog to
+		the folder selection dialog and modify its return
+		value to somehow indicate that a file rather than a
+		folder name was selected?
+		I'll then add support for that to the Copy/Move
+		Messages functions. (KB)
+
+2	VZ	Would it be possible to set the icon in the treectrl
+		on a per-folder basis? I'd like to read the iconname
+		from the folder profile, that would allow nice things
+		such as a "trash/junk" folder, etc. 
+
+5	VZ	Could you have a look at the setting of the default
+		columns sizes in wxFolderView.cpp, please?  Currently
+		it gets called in the constructor which doesn't work
+		properly, but moving that code to Clear(), using a
+		SetConfigPath(), just before RestoreWidths() is
+		called, didn't work either.  
+
+7	KB	write tutorial bit in Manual.lyx
+7	KB	finish ASMailFolder classes
+6	KB	completion of filtering rules/scoring code
+6	KB	implement listing of folders on remote servers
+4	CB	GPG/PGP support
+5	KB	Fix MessageCC(const String &) constructor.
+3	KB	eval wxHTML for help system and as built-in HTML viewer
+
+5	VZ	when installing, create a welcome message in "New
+		Mail". Also, create a default address book with
+		m-users/m-developers entries in it. Also add entry for 
+		autocollect book. Wait for MessageCC(const String &)
+		constructor. 
+7	KB	add group reply/followup functionality
+5		add goto_next_unread to folderview
+5		add more buttons to folderview, such as
+		next/previous/goto_next_unread
+4		improve key bindings for message editor, page up/down
+		whole page 
+5		easy to implement but useful feature: "check for new mail now"
+
+*********************************************************************
+*** TESTS
+*********************************************************************
+* PRI	WHO	DESCRIPTION
+*********************************************************************
+
+5	KB	properties dialog forgets IMAP mailbox name
+5	KB	clicking in startup dialog no longer causes crash
+5	KB	check handling of missing hostnames,
+
+
+*********************************************************************
+*** GENERAL TODO
+*********************************************************************
+
 
 - support for working offline (will need wxWin API modifications?)
-- completion of filtering rules/scoring code
 - subscription management for NNTP/IMAP/newsspool
 - DND with KDE/Gnome filemanagers (now supported by wxGTK)
-- Finish the new message editor code: rich-text editing
 - Templates/style-sheets for message composition and flexible reply
   handling 
 - Messages sorting, threading, scoring and searching
-- multi-threading to avoid delays and timeouts
-- GPG/PGP support
-- built-in HTML viewer
-
-** for VZ
 - add wxWizard for the first time run
 - add tips on startup (a wxTipDialog class?)
-- when installing, create a welcome message in "New Mail". Also, create
-  a default address book with m-users/m-developers entries in it.
-
-GENERAL ROADMAP/ORDER OF THINGS:
-
-  1. finish filtering code
-  2. do multi-threading before adding sorting etc
-  3. sorting/threading/scoring of messages
-
-*********************************************************************
-*** Currently being worked on:
-***   (This section is a bit of a mess as it is our day to day
-***    noticeboard where we list whatever comes to our mind.)
-*********************************************************************
-
-
-*********************************************************************
-*** buglets (may be fixed by anybody, shouldn't take long to do it)
-*********************************************************************
-
-- changing the value of "autocollect" timer doesn't take effect until
-  next run - either add a message saying or, better, recreate timer
-  when the option changes.
-
-- "Hostname" in identity options page is misleading - should be "default
-  server for POP/IMAP". Also, move TCP params somewhere else - what does
-  it have to do with identity??
-
 - there should be no [Expand] button in "Post news message" window,
   or may be there should be [choose newsgroup] one instead.
-
-*********************************************************************
-*** wxMSW bugs:
-*********************************************************************
-
-- lock files are sometimes left
-
-- keyboard navigation is somewhat strange in the options dialog, can't
-  TAB to the buttons from the notebook page.
-
-*********************************************************************
-*** VZ:
-*********************************************************************
-
-- properties dialog forgets IMAP mailbox name
-- All Folder create dialog pages have no HelpIDs set, why?
-- help button for first folder create page nees a help id
-  KB: couldn't even find out where you create the button :-(
-- when user level is >=1 (advanced) show full preferences pages in
-  folder notbook
-
-- Clicking on splashscreen or closing it while M starts up leads to
-  segfault
-  + should be fixed now, never happens under Windows
-
-- foldertreectrl in folder selection dialog should have keyboard focus 
-  and should not open folder when pressed return, but select it :-)
-
-- Could you please add a file-browse button/dialog to the folder
-  selection dialog and modify its return value to somehow indicate that
-  a file rather than a folder name was selected?
-  I'll then add support for that to the Copy/Move Messages functions.
-
-- Preferences on per-folder basis, please..... :-)
-
-- Would it be possible to set the icon in the treectrl on a per-folder 
-  basis? I'd like to read the iconname from the folder profile, that
-  would allow nice things such as a "trash/junk" folder, etc.
-
-- Could you have a look at the setting of the default columns sizes in 
-  wxFolderView.cpp, please?  Currently it gets called in the
-  constructor which doesn't work properly, but moving that code to
-  Clear(), using a SetConfigPath(), just before RestoreWidths() is
-  called, didn't work either. 
-
-- configuration dialog for columns in folderview
-  + VZ: will do
-
-- could you please add custom add/delete buttons to the MsgView header 
-  config dialog, to e.g. add X-Url or other headers to show?
-
-*********************************************************************
-*** KB:
-*********************************************************************
-
-** started using/implementing ASMailFolder classes!
-- speed up wxLayout scrollbar setting, *way* too slow now
-- why does Message/Find no longer work?
-- implement listing of folders on remote servers!!
-- for NNTP only count unread/new messages
-- check handling of missing hostnames,
-  suppress missing hostname c-client error message
-- write tutorial bit in Manual.lyx
-
 -HTML mail
--------------------------
-
 - eventually add a Drafts folder and toggable Online/Offline mode
-  - Use MessageCC(const String &) constructor for this!
 - add icons to doc++ generated docs
 - add new mail and group reply/followup buttons (and menu entry for
    the latter) to folderview
 - move setting of -fPIC to configure
 
-- foldername in password prompt
-- URL highlighting in Headers
 
-- add goto_next_unread to folderview
-- add more buttons to folderview, such as
-      next/previous/goto_next_unread
-- improve key bindings for message editor, page up/down whole page
 - check whether focus handling in folderview is fine now, does it get
   lost after update() ?
 
@@ -180,9 +173,6 @@ GENERAL ROADMAP/ORDER OF THINGS:
 
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
-- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-  SendMessageCC::AddPart()
- - easy to implement but useful feature: "check for new mail now"
  - possibly have a MIME types editor (similar to netscape's?)
  - easy: add support for email-to-fax gateway at www.tpc.int and
    their coverpage
@@ -310,35 +300,5 @@ GENERAL ROADMAP/ORDER OF THINGS:
 
 - importing mail folders and address books from other clients:
   Eudora, Outlook, XFMail, Netscape, The Bat! (in this order)
-
-*********************************************************************
-*** New MailFolder classes will be roughly like this:
-*********************************************************************
-
-
-		ASMailFolder  - Asynchronous MF ABC
-		|
-		ASMailFolderCommon - Implementing high level functionality,
-		|		     using functions from ASMailFolderCC
-		|
-		ASMailFolderImpl   - implementing lower level functionality,
-				     using synchronous MailFolder classes
-
-		MailFolder	   - will become ABC for synchronous access
-		|
-		MailFolderCC	   - as is
-
-*********************************************************************
-*** Fixed, to be tested:
-*********************************************************************
-
-*********************************************************************
-*** Fixed and tested:
-*********************************************************************
-
-- change of settings in the msg view section of the options dlg should generate
-  an event which would propagete to all open msg views.
-- make [Apply] work too!
-- add "double click to open" profile option support to folder list ctrl
 
 vi: set si tw=80:
