@@ -41,6 +41,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name wxWindows
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name config
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -53,11 +56,26 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name config
+    End Project Dependency
 }}}
 
 ###############################################################################
 
 Project: "compface"=.\extra\src\compface\compface.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "config"=.\Mconfig.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
