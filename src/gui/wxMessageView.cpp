@@ -18,12 +18,12 @@
 #endif
 
 #include "Mpch.h"
-#include "Mcommon.h"
-#include "guidef.h"
-#include "Message.h"
 
 #ifndef USE_PCH
+#  include "Mcommon.h"
+
 #  include "strutil.h"
+#  include "guidef.h"
 
 #  include "PathFinder.h"
 #  include "MimeList.h"
@@ -32,11 +32,14 @@
 
 #  include "MFrame.h"
 #  include "MLogFrame.h"
+
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
 
-#include "MApplication.h"
+#include "Message.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -48,14 +51,16 @@
 
 #include "XFace.h"
 
-#include "gui/wxMApp.h"
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
-#include   "gui/wxFolderView.h"
-#include   "gui/wxllist.h"
-#include   "gui/wxlwindow.h"
-#include   "gui/wxlparser.h"
+#include "gui/wxFolderView.h"
+#include "gui/wxllist.h"
+#include "gui/wxlwindow.h"
+#include "gui/wxlparser.h"
+
+#include "gui/wxOptionsDlg.h"
+
 #include <wx/dynarray.h>
 
 #include <ctype.h>  // for isspace
@@ -97,47 +102,9 @@ struct ClickableInfo
    String url;
 };
 
-#if !USE_WXWINDOWS2
-static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
-#endif // wxWin 1/2
-
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
-class myPopup : public wxMenu
-{
-protected:
-   wxWindow *popup_parent;
-   int      menu_offset;  // all selections get added to this and passed
-   // to popup_parent->OnMenuCommand(offset+entry)
-
-#if !USE_WXWINDOWS2
-   friend void popup_callback(wxMenu& menu, wxCommandEvent& ev);
-#endif
-
-public:
-   myPopup(const char *name, wxWindow *frame, int offset)
-#if USE_WXWINDOWS2
-      : wxMenu(name)
-#else  // wxWin 1
-         : wxMenu((char *)name, (wxFunction) &popup_callback)
-#endif // wxWin1/2
-      {
-         popup_parent = frame;
-         menu_offset  = offset;
-      }
-};
-
-#if USE_WXWINDOWS2
-// @@@@ OnMenuCommand?
-#else
-static void popup_callback(wxMenu& menu, wxCommandEvent& ev)
-{
-   myPopup *popup = (myPopup *)&menu;
-   popup->popup_parent->OnMenuCommand(popup->menu_offset + ev.GetSelection());
-}
-#endif
-
 
 class MimePopup : public wxMenu
 {
@@ -151,7 +118,6 @@ public:
       }
 };
 
-
 #define   BUTTON_HEIGHT 24
 #define   BUTTON_WIDTH  60
 
@@ -160,7 +126,7 @@ class MimeDialog : public wxDialog
 public:
    MimeDialog(wxMessageView *parent, wxPoint const & pos, int partno)
       : wxDialog(parent, -1, _("MIME Menu"), pos,
-                 wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+            wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
       {
          m_PartNo = partno;
          m_MessageView = parent;
@@ -172,7 +138,8 @@ public:
       }
    void OnCommandEvent(wxCommandEvent &event);
    DECLARE_EVENT_TABLE()
-      private:
+
+private:
    wxMessageView *m_MessageView;
    int m_PartNo;
 };
@@ -182,7 +149,7 @@ public:
 // ----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MimeDialog, wxDialog)
    EVT_BUTTON(-1,    MimeDialog::OnCommandEvent)
-   END_EVENT_TABLE()
+END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
@@ -663,8 +630,10 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                                        NULLstring, NULLstring, true,
                                        folder ? folder->GetProfile() :
                                        NULL); 
-      if ( strutil_isempty(filename) )
+      if ( strutil_isempty(filename) ) {
+         // cancelled
          return;
+      }
    }
    else
       filename = ifilename;
@@ -675,7 +644,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       char const *content = mailMessage->GetPartContent(mimeDisplayPart,&len);
       if(! content)
       {
-         FATALERROR(("Cannot get message content."));
+         ERRORMESSAGE((_("Cannot get message content.")));
          return;
       }
       FILE *out = fopen(filename,"wb");
@@ -741,7 +710,7 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
                wxBeginBusyCursor();
 
                bool bOk;
-               String cmd = m_Profile->readEntry(MP_BROWSER,MP_BROWSER_D);
+               String cmd = READ_CONFIG(m_Profile, MP_BROWSER);
                if ( cmd.IsEmpty() ) {
 #                 ifdef OS_WIN
                      bOk = (int)ShellExecute(NULL, "open", ci->url,
@@ -750,9 +719,25 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
                         wxLogSysError(_("Can't open URL '%s'"), ci->url.c_str());
                      }
 #                 else  // Unix
-                     // @@@ propose to change it right now
-                     wxLogError(_("No command configured to view URLs."));
-                     bOk = FALSE;
+                     // propose to choose program for opening URLs
+                     if (
+                          MDialog_YesNoDialog
+                          (
+                           _("No command configured to view URLs.\n"
+                             "Would you like to choose one now?"),
+                           frame
+                          )
+                        )
+                     {
+                        ShowOptionsDialog();
+                        cmd = READ_CONFIG(m_Profile, MP_BROWSER);
+                     }
+
+                     if ( cmd.IsEmpty() )
+                     {
+                        wxLogError(_("No command configured to view URLs."));
+                        bOk = FALSE;
+                     }
 #                 endif
                }
                else {
@@ -835,7 +820,6 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
       return;
    }
    Update();
-
 }
 
 
@@ -850,26 +834,23 @@ wxMessageView::Print(void)
 
    String afmpath = pf.FindDirFile("Cour.afm");
    wxSetAFMPath((char *) afmpath.c_str());
-#endif
+#endif // Unix
     
    wxLayoutWindow::Print();
 } 
 
 
-#ifdef USE_WXWINDOWS2
 BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
-   EVT_SIZE    (    wxMessageViewFrame::OnSize)
-   EVT_MENU    (    -1, wxMessageViewFrame::OnCommandEvent)
-   EVT_TOOL    (    -1, wxMessageViewFrame::OnCommandEvent)
-   END_EVENT_TABLE()
-#endif // wxWin2
+   EVT_SIZE(wxMessageViewFrame::OnSize)
+   EVT_MENU(-1, wxMessageViewFrame::OnCommandEvent)
+   EVT_TOOL(-1, wxMessageViewFrame::OnCommandEvent)
+END_EVENT_TABLE()
 
-
-   wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
-                                          long num,
-                                          wxFolderView *fv,
-                                          MWindow  *parent,
-                                          const String &name)
+wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
+                                       long num,
+                                       wxFolderView *fv,
+                                       MWindow  *parent,
+                                       const String &name)
 {
    m_MessageView = NULL;
    m_ToolBar = NULL;
@@ -883,7 +864,6 @@ BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
 
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
-
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MESSAGE);
 

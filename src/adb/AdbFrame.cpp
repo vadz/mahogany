@@ -536,8 +536,6 @@ public:
   void OnTreeExpanding(wxTreeEvent&);
   void OnTreeSelect(wxTreeEvent&);
 
-  void OnPageChange(wxNotebookEvent& event);
-
   void OnTextLookupEnter(wxCommandEvent& event);
   void OnTextLookupChange(wxCommandEvent& event);
 
@@ -909,9 +907,6 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
   EVT_TREE_ITEM_EXPANDED(AdbView_Tree, wxAdbEditFrame::OnTreeExpand)
   EVT_TREE_ITEM_COLLAPSED(AdbView_Tree, wxAdbEditFrame::OnTreeCollapse)
   EVT_TREE_ITEM_EXPANDING(AdbView_Tree, wxAdbEditFrame::OnTreeExpanding)
-
-  // @@ currently unused
-  EVT_NOTEBOOK_PAGE_CHANGED(AdbView_Notebook, wxAdbEditFrame::OnPageChange)
 
   // buttons: they do the same as the menu entries from ADB submenu
   EVT_BUTTON(AdbView_New, wxAdbEditFrame::OnMenuCommand)
@@ -1935,16 +1930,6 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
   }
 }
 
-void wxAdbEditFrame::OnPageChange(wxNotebookEvent& event)
-{
-  #ifdef __WXDEBUG__
-    wxString str;
-    str.Printf("Current page = %d, previous = %d",
-               event.GetSelection(), event.GetOldSelection());
-    SetStatusText(str, 1);
-  #endif
-}
-
 void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent&)
 {
   DoFind();
@@ -1956,8 +1941,23 @@ void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
   m_ToolBar->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
 }
 
+// UpdateUI event handlers are called during the idle time and set the state
+// of misc GUI elements to correspond to the properties of current selection.
+//
+// NB: due to some wxGTK wierdness the idle events may be generated *before*
+//     the frame construction is finished, so we must test for it.
+
+#ifdef __WXGTK__
+  #define CHECK_INIT_DONE if ( !m_current ) return;
+#else  // !GTK
+  // don't waste time to check for it, it can never happen
+  #define CHECK_INIT_DONE
+#endif // GTK
+
 void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
 {
+  CHECK_INIT_DONE
+
   // 'undo' can only be performed when something is actually in process
   // of being edited
   bool bDoEnable = !m_current->IsGroup() && m_notebook->IsDirty();
@@ -1969,12 +1969,16 @@ void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
 
 void wxAdbEditFrame::OnUpdateProp(wxUpdateUIEvent& event)
 {
+  CHECK_INIT_DONE
+
   // only if the selected item is an ADB
   event.Enable(AllowShowProp());
 }
 
 void wxAdbEditFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 {
+  CHECK_INIT_DONE
+
   // can't delete root
   bool bDoEnable = AllowDelete();
 
@@ -1985,12 +1989,16 @@ void wxAdbEditFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 
 void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)
 {
+  CHECK_INIT_DONE
+
   // only when there is something on the clipboard
   event.Enable(m_clipboard != NULL);
 }
 
 void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
+  CHECK_INIT_DONE
+
 #if 0
   // only when not root or ADB (i.e. a normal entry or group)
   event.Enable(!(m_current->IsRoot() || m_current->IsBook()));
@@ -1998,6 +2006,9 @@ void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
   event.Enable(FALSE); // cut-&-paste doesn't work right now
 #endif
 }
+
+// keep your namespace clean
+#undef CHECK_INIT_DONE
 
 void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
 {
@@ -2477,7 +2488,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // set label and position
   // ----------------------
   wxString strTitle;
-  strTitle.Printf(_("Properties for '%s'"), book->GetAdbName());
+  strTitle.Printf(_("Properties for '%s'"), book->GetAdbName().c_str());
   SetTitle(strTitle);
 
   Centre(wxCENTER_FRAME | wxBOTH);
@@ -2531,22 +2542,22 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
 {
   m_frame = frame;
 
-  // add images to our image list
-  static const char *aszImages[] =
-  {
-    // should be in sync with the corresponding enum in wxAdbTree
-    #ifdef __WINDOWS__
+# ifdef __WXMSW__
+    // add images to our image list
+    static const char *aszImages[] =
+    {
+      // should be in sync with the corresponding enum in wxAdbTree
       "library", "book", "address", "opened", "closed",
-    #endif
-  };
+    };
 
-  wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
+    wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
 
-  for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
-    imageList->Add(wxBitmap(aszImages[n]));
-  }
+    for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
+      imageList->Add(wxBitmap(aszImages[n]));
+    }
 
-  SetImageList(imageList);
+    SetImageList(imageList);
+# endif // Windows
 }
 
 // tree control keyboard interface
@@ -2581,7 +2592,9 @@ void wxAdbTree::OnChar(wxKeyEvent& event)
 
 wxAdbTree::~wxAdbTree()
 {
-  delete GetImageList();
+# ifdef __WXMSW__
+    delete GetImageList();
+# endif
 }
 
 // -----------------------------------------------------------------------------
@@ -2591,12 +2604,6 @@ wxAdbTree::~wxAdbTree()
 wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
              : wxNotebook(parent, id)
 {
-  // add pages to the notebook (in the order of creation)
-  (void)new wxAdbNamePage(this);
-  (void)new wxAdbEMailPage(this);
-  (void)new wxAdbOfficeAddrPage(this);
-  (void)new wxAdbHomeAddrPage(this);
-
   // create the message which is shown when there is nothing to edit
   m_box = new wxStaticBox(parent, -1, wxGetEmptyString());
   m_message = new wxStaticText(parent, -1, _("No selection"));
@@ -2625,17 +2632,22 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   static const char *aszImages[] =
   {
     // should be in sync with the corresponding enum
-    #ifdef __WINDOWS__
-      "general", "email", "home", "work"
-    #endif
+    "general", "email", "home", "work"
   };
 
   wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
   for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
-    imageList->Add(wxBitmap(aszImages[n]));
+    imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
   }
 
   SetImageList(imageList);
+
+  // add pages to the notebook (in the order of creation)
+  // NB: it must be done after the image list is assigned to the notebook
+  (void)new wxAdbNamePage(this);
+  (void)new wxAdbEMailPage(this);
+  (void)new wxAdbOfficeAddrPage(this);
+  (void)new wxAdbHomeAddrPage(this);
 }
 
 // change = save + set
@@ -3195,7 +3207,8 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
     m_idItem = tree.InsertItem(0 /* at the top */, item);
   }
   else {
-    long where = IsGroup() ? m_parent->GetLastGroupId() : wxTREE_INSERT_LAST;
+    long where = IsGroup() ? m_parent->GetLastGroupId()
+                           : (long)wxTREE_INSERT_LAST;
     m_idItem = tree.InsertItem(m_parent->GetId(), item, where);
 
     if ( IsGroup() )

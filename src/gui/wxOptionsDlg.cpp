@@ -103,6 +103,7 @@ enum ConfigFields
   ConfigField_Splash,
   ConfigField_SplashDelay,
   ConfigField_ConfirmExit,
+  ConfigField_Browser,
   ConfigField_DateFormat,
   ConfigField_OthersLast = ConfigField_DateFormat,
 
@@ -110,7 +111,9 @@ enum ConfigFields
   ConfigField_Max
 };
 
-// a structure giving the name of config key and it's default value
+// a structure giving the name of config key and it's default value which may
+// be either numeric or a string (no special type for boolean values right
+// now)
 struct ConfigValueDefault
 {
   ConfigValueDefault(const char *name_, long value)
@@ -216,8 +219,8 @@ public:
 
   struct FieldInfo
   {
-    const char *label;
-    FieldType   type;
+    const char *label;   // which is shown in the dialog
+    FieldType   type;    // see above
     int         enable;  // disable this field if "enable" field is unchecked
   };
 
@@ -418,6 +421,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "&Splash screen at startup",    Field_Bool,    -1,                        },
   { "Splash screen &delay",         Field_Number,  ConfigField_Splash         },
   { "Confirm &exit",                Field_Bool,    -1,                        },
+  { "&Browser program",             Field_File,    -1,                        },
   { "&Format for the date",         Field_Text,    -1,                        },
 };
 
@@ -467,6 +471,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MC_SHOWSPLASH),
   CONFIG_ENTRY(MC_SPLASHDELAY),
   CONFIG_ENTRY(MC_CONFIRMEXIT),
+  CONFIG_ENTRY(MP_BROWSER),
   CONFIG_ENTRY(MC_DATE_FMT),
 };
 
@@ -575,7 +580,10 @@ wxCheckBox *wxOptionsPage::CreateCheckBox(const char *label,
   static size_t widthCheck = 0;
   if ( widthCheck == 0 ) {
     // calculate it only once, it's almost a constant
-    widthCheck = GetCharHeight() - 2; // @@ 2 is purely empiric...
+    widthCheck = GetCharHeight();
+#   ifdef __WXMSW__
+      widthCheck -= 2; // @@ looks better like this
+#   endif
   }
 
   wxCheckBox *checkbox = new wxCheckBox(this, -1, label,
@@ -879,8 +887,8 @@ bool wxOptionsPage::TransferDataToWindow()
         // split it (FIXME @@@ what if it contains ';'?)
         {
           String str;
-          for ( size_t n = 0; n < strValue.Len(); n++ ) {
-            if ( strValue[n] == ';' ) {
+          for ( size_t m = 0; m < strValue.Len(); m++ ) {
+            if ( strValue[m] == ';' ) {
               if ( !str.IsEmpty() ) {
                 ((wxListBox *)control)->Append(str);
                 str.Empty();
@@ -888,7 +896,7 @@ bool wxOptionsPage::TransferDataToWindow()
               //else: nothing to do, two ';' one after another
             }
             else {
-              str << strValue[n];
+              str << strValue[m];
             }
           }
 
@@ -950,12 +958,12 @@ bool wxOptionsPage::TransferDataFromWindow()
         // join it (FIXME @@@ what if it contains ';'?)
         {
           wxListBox *listbox = (wxListBox *)control;
-          for ( size_t n = 0; n < (size_t)listbox->Number(); n++ ) {
+          for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
             if ( !strValue.IsEmpty() ) {
               strValue << ';';
             }
 
-            strValue << listbox->GetString(n);
+            strValue << listbox->GetString(m);
           }
         }
         break;
@@ -975,7 +983,7 @@ bool wxOptionsPage::TransferDataFromWindow()
     }
   }
 
-  // @@@@ yeah, no errors, that;s it...
+  // @@@@ life is easy if we don't check for errors...
   return TRUE;
 }
 
@@ -1031,7 +1039,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 {
   return TRUE;
 }
-#endif
+#endif // 0 (not yet implemented)
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageFolders
@@ -1134,9 +1142,7 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // wxOptionsDialog
 // ----------------------------------------------------------------------------
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-               : wxFrame(parent, -1, wxString(_("M Options")),
-                         wxDefaultPosition, wxSize(470, 350),
-                         wxDEFAULT_FRAME_STYLE | wxDIALOG_MODAL)
+               : wxFrame(parent, -1, wxString(_("M Options")))
 {
   wxLayoutConstraints *c;  
   SetAutoLayout(TRUE);
@@ -1146,8 +1152,17 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
   // basic unit is the height of a char, from this we fix the sizes of all 
   // other controls
-  int hBtn = TEXT_HEIGHT_FROM_LABEL(GetCharHeight() - 3), // @@ -3 is empiric
+  size_t heightLabel = GetCharHeight();
+# ifdef __WXMSW__
+    heightLabel -= 3; // @@ -3 is purely empiric, but it looks better with it
+# endif
+  int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+
+  // these are more or less arbitrary numbers
+  const int wDlg = 6*wBtn;
+  const int hDlg = 19*hBtn;
+  SetSize(wDlg, hDlg);
 
   // create the panel
   // ----------------
@@ -1163,7 +1178,6 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
   // create the notebook
   // -------------------
 
-  // create the control itself
   m_notebook = new wxOptionsNotebook(panel);
   c = new wxLayoutConstraints;
   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
@@ -1205,7 +1219,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
   // set position
   // ------------
-  SetSizeHints(6*wBtn, 17*hBtn);
+  SetSizeHints(wDlg, hDlg);
   Centre(wxCENTER_FRAME | wxBOTH);
 
   TransferDataToWindow();
@@ -1238,21 +1252,21 @@ bool wxOptionsDialog::TransferDataFromWindow()
   return TRUE;
 }
 
-void wxOptionsDialog::OnOK(wxCommandEvent& event)
+void wxOptionsDialog::OnOK(wxCommandEvent& /* event */)
 {
   if ( !m_bDirty || TransferDataFromWindow() ) {
     Close();
   }
 }
 
-void wxOptionsDialog::OnApply(wxCommandEvent& event)
+void wxOptionsDialog::OnApply(wxCommandEvent& /* event */)
 {
   TransferDataFromWindow();
   m_bDirty = FALSE;
   m_btnApply->Enable(FALSE);
 }
 
-void wxOptionsDialog::OnCancel(wxCommandEvent& event)
+void wxOptionsDialog::OnCancel(wxCommandEvent& /* event */)
 {
   Close();
 }
