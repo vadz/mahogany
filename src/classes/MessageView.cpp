@@ -1898,27 +1898,28 @@ MessageView::ProcessPart(const MimePart *mimepart)
                         signedText, signature, log);
 
                      ClickablePGPInfo *pgpInfo = NULL;
+                     const String& user = log->GetUserID();
                      switch ( status ) 
                      {
                         case MCryptoEngine::OK:
                            // create an icon for the sig just to show that it was there
-                           pgpInfo = new PGPInfoGoodSig(this, log->GetUserID());
+                           pgpInfo = new PGPInfoGoodSig(this, user);
                            break;
 
                         case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
-                           pgpInfo = new PGPInfoExpiredSig(this, log->GetUserID());
+                           pgpInfo = new PGPInfoExpiredSig(this, user);
                            break;
 
                         case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
-                           pgpInfo = new PGPInfoUntrustedSig(this, log->GetUserID());
+                           pgpInfo = new PGPInfoUntrustedSig(this, user);
                            break;
 
                         case MCryptoEngine::NONEXISTING_KEY_ERROR:
-                           pgpInfo = new PGPInfoKeyNotFoundSig(this, log->GetUserID());
+                           pgpInfo = new PGPInfoKeyNotFoundSig(this, user);
                            break;
 
                         default:
-                           pgpInfo = new PGPInfoBadSig(this, log->GetUserID());
+                           pgpInfo = new PGPInfoBadSig(this, user);
                      }
 
                      ProcessPart(signedPart);
