@@ -67,6 +67,8 @@ public:
    /// Destructor
    virtual ~wxFolderView();
 
+   virtual bool MoveToNextUnread() { return SelectNextUnread(); }
+
    /** Set the associated folder.
        @param folder the folder to display or NULL
    */
@@ -194,8 +196,8 @@ protected:
    /// select the first interesting message in the folder
    void SelectInitialMessage(const HeaderInfoList_obj& hil);
 
-   /// select the next unread message
-   void SelectNextUnread();
+   /// select the next unread message, return false if no more
+   bool SelectNextUnread();
 
    /// get the number of the messages we show
    inline size_t GetHeadersCount() const;

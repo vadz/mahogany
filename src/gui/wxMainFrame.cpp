@@ -126,6 +126,27 @@ public:
       m_mainFrame = mainFrame;
    }
 
+   virtual bool MoveToNextUnread()
+   {
+      if ( wxFolderView::MoveToNextUnread() )
+      {
+         // we moved to the next message in this folder, ok
+         return true;
+      }
+
+      // no more unread messages here, go to the next unread folder
+      MFolder *folder = m_mainFrame->GetFolderTree()->FindNextUnreadFolder();
+      if ( !folder )
+      {
+         // no unread folders neither, what can we do?
+         return false;
+      }
+
+      m_mainFrame->OpenFolder(folder);
+
+      return true;
+   }
+
    virtual void SetFolder(MailFolder *mf)
    {
       if ( !mf )

@@ -280,6 +280,9 @@ public:
       // of the tree - it may expand it - it is not `const')
    wxTreeItemId GetTreeItemFromName(const String& fullname);
 
+      // find the next/previous folder with unread status in the tree
+   wxTreeItemId FindNextUnreadFolder(wxTreeItemId id, bool next = true) const;
+
       // go to the next folder with unread messages after the given one
    bool GoToNextUnreadFolder(wxFolderTreeNode *nodeStart, bool next = true);
 
@@ -393,9 +396,6 @@ protected:
 
    // get the next/previouos item after/before this one
    wxTreeItemId GetNextItem(wxTreeItemId id, bool next = true) const;
-
-   // find the next/previous folder with unread status in the tree
-   wxTreeItemId FindNextUnreadFolder(wxTreeItemId id, bool next = true) const;
 
 private:
    class FolderMenu : public wxMenu
@@ -699,11 +699,21 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
    }
 }
 
-bool wxFolderTree::GoToNextUnreadFolder(bool next)
+MFolder *wxFolderTree::FindNextUnreadFolder(bool next)
 {
-   CHECK( m_tree, false, "you didn't call Init()" );
+   CHECK( m_tree, NULL, "you didn't call Init()" );
 
-   return m_tree->GoToNextUnreadFolder(m_tree->GetSelection(), next);
+   wxFolderTreeNode *node = m_tree->GetSelection();
+   if ( !node )
+      return NULL;
+
+   wxTreeItemId id = m_tree->FindNextUnreadFolder(node->GetId(), next);
+   if ( !id.IsOk() )
+      return NULL;
+
+   MFolder *folder = m_tree->GetFolderTreeNode(id)->GetFolder();
+   folder->IncRef();
+   return folder;
 }
 
 void wxFolderTree::ProcessMenuCommand(int id)
@@ -2323,7 +2333,7 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
    }
 
    // go to next or previous folder
-   m_sink->GoToNextUnreadFolder(keycode == WXK_NEXT);
+   (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_NEXT);
 }
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)

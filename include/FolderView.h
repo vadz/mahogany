@@ -33,8 +33,23 @@ public:
    /// virtual destructor
    virtual ~FolderView();
 
-   /// event processing function
-   virtual bool OnMEvent(MEventData& ev);
+   /** @name Operations */
+   //@{
+
+   /// open this folder in the folder view
+   virtual void SetFolder(MailFolder *mf) = 0;
+
+   /**
+      Move to the next unread message, if any.
+
+      @return true if we moved to next unread message, false if no more
+    */
+   virtual bool MoveToNextUnread() = 0;
+
+   //@}
+
+   /** @name Accessors */
+   //@{
 
    /// return full folder name
    const String& GetFullName() { return m_folderName; }
@@ -48,6 +63,11 @@ public:
    /// return pointer to associated mail folder (IncRef()'d as usual)
    MailFolder *GetMailFolder() const
       { return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL; }
+
+   //@}
+
+   /// event processing function
+   virtual bool OnMEvent(MEventData& ev);
 
 protected:
    /// the derived class should close when our folder is deleted

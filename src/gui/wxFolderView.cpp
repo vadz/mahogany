@@ -288,6 +288,12 @@ public:
    void Thaw() { if ( m_isFrozen ) { m_isFrozen = false; Refresh(); } }
 
 protected:
+   /// go to the next unread message or to the next folder
+   void MoveToNextUnread()
+   {
+      m_FolderView->MoveToNextUnread();
+   }
+
    /// get the colour to use for this entry (depends on status)
    wxColour GetEntryColour(const HeaderInfo *hi) const;
 
@@ -870,7 +876,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             if ( !m_FolderView->m_MessagePreview->PageDown() )
             {
                // go to the next message if we were already at the end
-               m_FolderView->SelectNextUnread();
+               MoveToNextUnread();
             }
          }
          else
@@ -1121,7 +1127,9 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
       // scroll down one line, go to the next unread if already at the end of
       // this one
       if ( !m_FolderView->m_MessagePreview->LineDown() )
-         m_FolderView->SelectNextUnread();
+      {
+         MoveToNextUnread();
+      }
    }
    else // do preview
    {
@@ -1956,13 +1964,13 @@ inline size_t wxFolderView::GetHeadersCount() const
    return m_FolderCtrl->GetHeadersCount();
 }
 
-void wxFolderView::SelectNextUnread()
+bool wxFolderView::SelectNextUnread()
 {
    HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
 
    int idxFocused = m_FolderCtrl->GetFocusedItem();
    if ( idxFocused == -1 )
-      return;
+      return false;
 
    size_t idx = hil->FindHeaderByFlag(MailFolder::MSG_STAT_SEEN, false,
                                       idxFocused);
@@ -1971,7 +1979,7 @@ void wxFolderView::SelectNextUnread()
    if ( idx == UID_ILLEGAL )
    {
       if ( idxFocused == m_FolderCtrl->GetItemCount() - 1 )
-         return;
+         return false;
 
       // take just the next one
       idx = idxFocused + 1;
@@ -1980,6 +1988,8 @@ void wxFolderView::SelectNextUnread()
    m_FolderCtrl->Focus(idx);
 
    PreviewMessage(m_FolderCtrl->GetUIdFromIndex(idx));
+
+   return true;
 }
 
 void

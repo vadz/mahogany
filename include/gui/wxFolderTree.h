@@ -64,6 +64,10 @@ public:
       // select the tree node specified by the given folder, returns FALSE if
       // the folder is not in the tree
    bool SelectFolder(MFolder *folder);
+      // find the next/previous folder with unread messages, return NULL if
+      // there are no more
+   MFolder *FindNextUnreadFolder(bool next = TRUE);
+
       // process one of WXMENU_FOLDER_XXX commands
    void ProcessMenuCommand(int id);
       // update the menu items state (NB: doesn't inc/dec ref the pointer)

@@ -82,6 +82,9 @@ public:
    /// "private" method - for wxMainFolderView use only
    void ClearFolderName() { m_folderName.clear(); }
 
+   /// semi-private accessor: for wxMainFolderView only
+   wxFolderTree *GetFolderTree() const { return m_FolderTree; }
+
 protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
