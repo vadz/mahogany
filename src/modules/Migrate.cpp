@@ -621,7 +621,7 @@ private:
 
 MMODULE_BEGIN_IMPLEMENT(MigrateModule,
                         _T("Migrate"),
-                        _T("Migrate"),
+                        STARTUP_INTERFACE,
                         _T("Migration tool"),
                         _T("1.00"))
    MMODULE_PROP(_T("description"),
