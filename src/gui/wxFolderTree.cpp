@@ -491,8 +491,8 @@ private:
          if ( !isRoot )
          {
             Append(Close, _("&Close folder"));
-            Append(Update, _("&Update status"));
          }
+         Append(Update, _("&Update status"));
 
          AppendSeparator();
 
@@ -836,9 +836,12 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
       menu->Enable(WXMENU_FOLDER_CLEAR, !isGroup);
    }
 
+   // the only type of folder for which updating status doesn't make sense is a
+   // group without children
    if ( menu->FindItem(WXMENU_FOLDER_UPDATE) )
    {
-      menu->Enable(WXMENU_FOLDER_UPDATE, !isGroup);
+      menu->Enable(WXMENU_FOLDER_UPDATE,
+                     !isGroup || folder->GetSubfolderCount());
    }
 
    // browsing subfolders only makes sense if we have any and not for the
@@ -1186,16 +1189,38 @@ void wxFolderTree::OnClear(MFolder *folder)
 
 void wxFolderTree::OnUpdate(MFolder *folder)
 {
-   if ( !MailFolder::CheckFolder(folder) )
+   // for the folders which can't be opened but have subfolders we should
+   // update their subfolders
+   if ( folder->CanOpen() || !folder->GetSubfolderCount() )
    {
-      wxLogError(_("Failed to update the status of the folder '%s'."),
-                 folder->GetFullName().c_str());
+      if ( !MailFolder::CheckFolder(folder) )
+      {
+         wxLogError(_("Failed to update the status of the folder '%s'."),
+                    folder->GetFullName().c_str());
+      }
+      else
+      {
+         wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+                     _("Updated status of the folder '%s'"),
+                     folder->GetFullName().c_str());
+      }
    }
-   else
+   else // update subfolders
    {
-      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
-                  _("Updated status of the folder '%s'"),
-                  folder->GetFullName().c_str());
+      // this is from wxMainFrame.cpp (TODO: move somewhere else)
+      extern int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
+
+      int nUpdated = UpdateFoldersSubtree(*folder, m_tree);
+      if ( nUpdated < 0 )
+      {
+         wxLogError(_("Failed to update the status"));
+      }
+      else
+      {
+         wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+                     _("Updated status of %d folders."),
+                     nUpdated);
+      }
    }
 }
 

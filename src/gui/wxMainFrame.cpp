@@ -87,6 +87,7 @@ extern const MOption MP_REOPENLASTFOLDER;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_SEARCH_AGAIN_IF_NO_MATCH;
+extern const MPersMsgBox *M_MSGBOX_CONT_UPDATE_AFTER_ERROR;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -94,7 +95,7 @@ extern const MPersMsgBox *M_MSGBOX_SEARCH_AGAIN_IF_NO_MATCH;
 
 // update the status of all folders under the given one in the folder tree,
 // returns the number of the folders updated or -1 on error
-static int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
+extern int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1242,8 +1243,9 @@ class UpdateFolderVisitor : public MFolderTraversal
 public:
    UpdateFolderVisitor(const MFolder& folder, wxWindow *parent)
       : MFolderTraversal(folder),
-   m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
+        m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
    {
+      m_winParent = parent;
       m_nCount = 0;
    }
 
@@ -1260,8 +1262,21 @@ public:
 
       if ( !MailFolder::CheckFolder(folder) )
       {
-         // stop on error as chances are that the other ones could follow
-         return false;
+         // ask the user whether we should continue with the others as they
+         // could be inaccessible as well (if server is offline for example)
+         return MDialog_YesNoDialog
+                (
+                  wxString::Format
+                  (
+                     _("Checking status of the folder \"%s\" failed, do you\n"
+                       "want to continue updating the other folders?"),
+                     folderName.c_str()
+                  ),
+                  m_winParent,
+                  MDIALOG_YESNOTITLE,
+                  M_DLG_NO_DEFAULT,
+                  M_MSGBOX_CONT_UPDATE_AFTER_ERROR
+                );
       }
 
       m_progInfo.SetValue(++m_nCount);
@@ -1272,6 +1287,9 @@ public:
    size_t GetCountTraversed() const { return m_nCount; }
 
 private:
+   // the parent window for all dialogs &c
+   wxWindow *m_winParent;
+
    // the progress indicator
    MProgressInfo m_progInfo;
 
@@ -1279,7 +1297,7 @@ private:
    size_t m_nCount;
 };
 
-static int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent)
+int UpdateFoldersSubtree(const MFolder& folder, wxWindow *parent)
 {
    UpdateFolderVisitor visitor(folder, parent);
 
