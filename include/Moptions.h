@@ -335,6 +335,7 @@ extern const MOption MP_BROWSER_INNW;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_PGP_COMMAND;
+extern const MOption MP_PGP_KEYSERVER;
 extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
@@ -1034,6 +1035,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_ALWAYS_USE_EXTERNALEDITOR_NAME    "AlwaysUseExtEditor"
 /// PGP/GPG application
 #define MP_PGP_COMMAND_NAME    "PGPCommand"
+/// PGP/GPG key server for public keys
+#define MP_PGP_KEYSERVER_NAME  "PGPKeyServer"
 /// execute a command when new mail arrives?
 #define   MP_USE_NEWMAILCOMMAND_NAME      "CommandOnNewMail"
 /// command to execute when new mail arrives
@@ -1971,6 +1974,9 @@ extern const MOption MP_AWAY_STATUS;
 #else
 #  define   MP_PGP_COMMAND_DEFVAL  "gpg.exe"
 #endif // Unix/Win
+
+/// PGP/GPG key server for public keys
+#define MP_PGP_KEYSERVER_DEFVAL "wwwkeys.eu.pgp.net"
 
 /// command to execute when new mail arrives
 #define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l
