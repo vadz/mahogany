@@ -194,19 +194,6 @@ MAppBase::OnStartup()
 {
    mApplication = this;
 
-#ifdef OS_UNIX
-#if 0
-   // First, check our user ID: mahogany does not like being run as root.
-   if(geteuid() == 0)
-   {
-      wxLogError(_("You are trying to run Mahogany as the super-user (root).\n"
-                   "For security reasons this is not possible, please log in\n"
-                   "as an ordinary user and try again."));
-      return false;
-   }
-#endif
-#endif // Unix
-
    // initialise the profile(s)
    // -------------------------
 
@@ -295,7 +282,8 @@ MAppBase::OnStartup()
          }
          wxLogError(msg);
       }
-#endif
+#endif // OS_UNIX
+
    // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
    //     can be already shown from here and this initialization must be done
@@ -308,8 +296,35 @@ MAppBase::OnStartup()
    // also set the path for persistent controls to save their state to
    wxPControls::SetSettingsPath("/Settings/");
 
+   // check if we're not running as root - although it does work now, it is
+   // still a bad idea
+#ifdef OS_UNIX
+   // First, check our user ID: mahogany does not like being run as root.
+   if ( geteuid() == 0 )
+   {
+      if ( !MDialog_YesNoDialog(
+                 _("You are running Mahogany as the super-user (root).\n"
+                   "This is dangerous from security view point and it is "
+                   "strongly advised that you log in as an ordinary user "
+                   "instead.\n"
+                   "\n"
+                   "Do you wish to continue?"),
+                 NULL,                 // no parent
+                 MDIALOG_YESNOTITLE,
+                 FALSE,                // [no] default
+                 "AskRunAsRoot"
+            ) )
+      {
+         SetLastError(M_ERROR_CANCEL);
+
+         return false;
+      }
+   }
+#endif // Unix
+
    // find our directories
    // --------------------
+
    String tmp;
    m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
    if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))

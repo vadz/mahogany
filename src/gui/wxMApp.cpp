@@ -697,7 +697,12 @@ wxMApp::OnInit()
    }
    else
    {
-      ERRORMESSAGE(("Can't initialize application, terminating."));
+      if ( GetLastError() != M_ERROR_CANCEL )
+      {
+         ERRORMESSAGE(("Can't initialize application, terminating."));
+      }
+      //else: this would be superfluous
+
       return false;
    }
 }

@@ -2156,6 +2156,9 @@ static const struct
 } gs_persMsgBoxData[] =
 {
    { "AskSpecifyDir",            gettext_noop("prompt for global directory if not found") },
+#ifdef OS_UNIX
+   { "AskRunAsRoot",             gettext_noop("warn if Mahogany is run as root") },
+#endif // OS_UNIX
    { "SendOutboxOnExit",         gettext_noop("ask whether to send unsent messages on exit") },
    { "AbandonCriticalFolders",   gettext_noop("prompt before abandoning critical folders ") },
    { "GoOnlineToSendOutbox",     gettext_noop("ask whether to go online to send Outbox") },
