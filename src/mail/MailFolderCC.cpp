@@ -986,7 +986,7 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
          // get the encoded text
          bool hasUnderscore = false;
          const char *pEncTextStart = p;
-         while ( *p && *p != '?' )
+         while ( *p && (p[0] != '?' || p[1] != '=') )
          {
             // this is needed for QP hack below
             if ( *p == '_' )
@@ -997,17 +997,17 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
 
          unsigned long lenEncWord = p - pEncTextStart;
 
-         if ( !*p || *++p != '=' )
+         if ( !*p )
          {
             wxLogDebug("Missing encoded word end marker in '%s'.",
                        pEncWordStart);
-            if ( !*p )
-               out += pEncWordStart;
-            else
-               out += String(pEncWordStart, p);
+            out += pEncWordStart;
 
             continue;
          }
+
+         // skip '=' following '?'
+         p++;
 
          // now decode the text using cclient functions
          unsigned long len;
