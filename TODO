@@ -43,6 +43,7 @@ $Id$
 
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
+6	KB	add a message status marker for "Unread"
 
 *********************************************************************
 *** PROJECTS
@@ -152,14 +153,7 @@ $Id$
 - speed up copy mail to folder by cusing c-client functionality
 - wxComposeView: if replying, only mark message as answered if reply
   got sent --> difficult/ after ASMailFolder is there
-
-
 - update c-client patch several changes in smpt.c/rfc822.c
-
-*********************************************************************
-*** Miscellaneous Todo:
-*********************************************************************
-
 - obtain a full IMAP tree as part of subscription management
 - move to scandoc instead of doc++??
 - add calendar tool/plugin
@@ -184,8 +178,6 @@ $Id$
   - folder tree control should (configurable on a per-folder basis)
     highlight and count the number of new messages
   - add "Inline" option for MIME popup on graphics
-  - typing keys while M starts up can cause segfault (startup-splash
-    event handling?)
 
 - ADB:
   + add "add current address to ADB" to compose view
@@ -215,7 +207,6 @@ $Id$
 
 - add "Send Digest"
 - add "Send bug report"
-- add "Send group reply/Followup"
 
 - detect one's own messages (i.e. mark "Myself" in "From:" or, as XFMail
   does, mark "To: ..." in "From:" column for them) and optionally suppress them
@@ -243,14 +234,11 @@ $Id$
   + user/global Minit files, security issues
   + merge in wxPython (Robin Dunn wanted to help...)
 
-*** to implement in near future ***
-
 - event subsystem
   + write some macros for safe casting of the event param in the handlers to
     the correct type
   + separate "folder tree change" event in "pre" and "post" kind
   + maybe introduce return values?
-  + make event sending asynchronous
 
 - news reader functions
   + get the list of newsgroup and allow to choose from them
