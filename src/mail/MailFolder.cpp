@@ -170,15 +170,25 @@ MLogCircle::GuessError(void) const
    bool addLog = false;
    bool addErr = false;
 
-   if(Find("No such host", &err))
+   if ( Find("No such host", &err) )
    {
       guess = _("The server name could not be resolved.\n"
                 "Maybe the network connection or the DNS servers are down?");
       addErr = true;
    }
-   else if(Find("User unknown", &err))
+   else if ( Find("User unknown", &err) )
    {
       guess = _("One or more email addresses were not recognised.");
+      addErr = true;
+      addLog = true;
+   }
+   else if ( Find("authorization failed", &err) ||
+             Find("password wrong", &err) ||
+             Find("bad password", &err) ||
+             Find("unknown user name", &err) ||
+             Find("Invalid login", &err) )
+   {
+      guess = _("Username or password incorrect.");
       addErr = true;
       addLog = true;
    }
@@ -190,8 +200,8 @@ MLogCircle::GuessError(void) const
       guess = _("Mail server didn't accept one or more of the message recipients");
    }
 #endif // 0
-   else if(Find("INVALID_ADDRESS", &err)
-           || Find(".SYNTAX-ERROR.", &err))
+   else if ( Find("INVALID_ADDRESS", &err) ||
+             Find(".SYNTAX-ERROR.", &err) )
    {
       guess = _("The message contained an invalid address specification.");
       addErr = true;
@@ -208,12 +218,12 @@ MLogCircle::GuessError(void) const
        addErr = true;
    }
 
-   if(addErr)
+   if ( addErr )
    {
       guess += _("\nThe exact error message was:\n");
       guess += err;
    }
-   if(addLog) // we have an idea
+   if ( addLog ) // we have an idea
    {
       guess += _("\nThe last few log messages were:\n");
       guess += GetLog();
