@@ -353,7 +353,7 @@ MDialog_FatalErrorMessage(const char *message,
    String msg = String(message) + _("\nExiting application...");
 
    MDialog_ErrorMessage(message,parent, wxString("M: ")+title,true);
-   mApplication->Exit(true);
+   mApplication->Exit();
 }
 
 
@@ -375,7 +375,7 @@ MDialog_Message(const char *message,
    if ( configPath != NULL )
    {
       wxPMessageBox(configPath, message, caption,
-                    wxOK | wxICON_INFORMATION | wxCENTRE,
+                    Style(wxOK | wxICON_INFORMATION),
                     GetParent(parent));
    }
    else

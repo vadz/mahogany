@@ -30,13 +30,15 @@ public:
 
    virtual ~wxMainFrame();
 
+   // ask user whether he really wants to exit
+   virtual bool CanClose() const;
+
    // open the given folder in the integrated folder view (may be called
    // multiple times)
    void OpenFolder(MFolder *folder);
 
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
-   void OnCloseWindow(wxCloseEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
 protected:

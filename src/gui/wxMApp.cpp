@@ -128,6 +128,7 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 // ----------------------------------------------------------------------------
 // wxMApp
 // ----------------------------------------------------------------------------
+
 wxMApp::wxMApp(void)
 {
    m_IconManager = NULL;
@@ -145,13 +146,42 @@ wxMApp::OnAbnormalTermination()
 {
    MAppBase::OnAbnormalTermination();
 
-//FIXME
-#if 0
+#ifdef __WXMSW__
    ::MessageBox(NULL, _("The application is terminating abnormally.\n"
-                "Please report the bug to m-developers@makelist.com\n"
-                        "Thank you!"), "Fatal application error",
+                        "Please report the bug to m-developers@makelist.com\n"
+                        "Thank you!"),
+                "Fatal application error",
                 MB_ICONSTOP);
-#endif
+#endif // MSW only for now
+}
+
+// can we close now?
+bool
+wxMApp::CanClose() const
+{
+    wxNode *node = wxTopLevelWindows.First();
+    while ( node )
+    {
+        wxWindow *win = (wxWindow *)node->Data();
+        node = node->Next();
+
+        if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
+        {
+           wxMFrame *frame = (wxMFrame *)win;
+
+           if ( !IsOkToClose(frame) )
+           {
+              if ( !frame->CanClose() )
+                 return false;
+           }
+           //else: had been asked before
+        }
+        //else: what to do here? if there is something other than a frame
+        //      opened, it might be a (non modal) dialog or may be the log
+        //      frame?
+    }
+
+    return MAppBase::CanClose();
 }
 
 // app initilization

@@ -237,11 +237,11 @@ protected:
    virtual void ResetDirty();
 
 private:
-   bool         m_bTest,            // test new settings?
-      m_bRestartWarning;  // changes will take effect after restart
+   bool  m_bTest,            // test new settings?
+         m_bRestartWarning;  // changes will take effect after restart
 
    DECLARE_DYNAMIC_CLASS(wxOptionsDialog)
-      };
+};
 
 // ----------------------------------------------------------------------------
 // event tables and such

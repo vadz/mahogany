@@ -31,6 +31,8 @@
 #  include   "Mdefaults.h"
 #  include   "MApplication.h"
 #  include   "MPython.h"
+
+#  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
 #include <errno.h>
@@ -60,8 +62,14 @@
 #endif //Unix
 
 // instead of writing our own wrapper for wxExecute()
-#include   <wx/utils.h>
+#include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
+
+// ----------------------------------------------------------------------------
+// private types
+// ----------------------------------------------------------------------------
+
+WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 
 // ----------------------------------------------------------------------------
 // functions
@@ -85,6 +93,7 @@ MAppBase::MAppBase()
 {
    m_eventReg = NULL;
    m_topLevelFrame = NULL;
+   m_framesOkToClose = NULL;
 }
 
 /* The code in VerifySettings somehow overlaps with the purpose of
@@ -419,12 +428,41 @@ MAppBase::GetText(const char *in) const
 #  endif
 }
 
-void
-MAppBase::Exit(bool force)
+bool
+MAppBase::CanClose() const
 {
-   if(m_topLevelFrame)
-      m_topLevelFrame->Close(force);
-   m_topLevelFrame = NULL;
+   return true;
+}
+
+void
+MAppBase::AddToFramesOkToClose(const wxMFrame *frame)
+{
+   if ( !m_framesOkToClose )
+      m_framesOkToClose = new ArrayFrames;
+
+   m_framesOkToClose->Add(frame);
+}
+
+bool
+MAppBase::IsOkToClose(const wxMFrame *frame) const
+{
+   return m_framesOkToClose && m_framesOkToClose->Index(frame) != wxNOT_FOUND;
+}
+
+void
+MAppBase::Exit()
+{
+   if ( m_topLevelFrame )
+   {
+      if ( m_topLevelFrame->Close() )
+         m_topLevelFrame = NULL;
+   }
+
+   if ( m_framesOkToClose )
+   {
+      delete m_framesOkToClose;
+      m_framesOkToClose = NULL;
+   }
 }
 
 bool

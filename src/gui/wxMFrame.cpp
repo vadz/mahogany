@@ -259,9 +259,14 @@ wxMFrame::OnMenuCommand(int id)
 #endif   // USE_PYTHON
 
    case WXMENU_FILE_EXIT:
-      // first decide if it's ok to close this frame
       if ( CanClose() )
+      {
+         // this frame has been already asked whether it wants to exit, so
+         // don't ask it again
+         mApplication->AddToFramesOkToClose(this);
+
          mApplication->Exit();
+      }
       break;
 
    case WXMENU_EDIT_ADB:
@@ -338,10 +343,14 @@ wxMFrame::CreateToolBar(void)
 void
 wxMFrame::OnCloseWindow(wxCloseEvent& event)
 {
-   if ( event.CanVeto() && !CanClose() )
+   if ( event.CanVeto() && !mApplication->IsOkToClose(this) && !CanClose() )
+   {
       event.Veto();
+   }
    else
+   {
       Destroy();
+   }
 }
 
 void

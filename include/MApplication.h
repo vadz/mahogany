@@ -31,6 +31,7 @@
 
 class wxMimeTypesManager;
 class MailFolder;
+class ArrayFrames;
 
 /**
    Application class, doing all non-GUI application specific stuff
@@ -38,36 +39,6 @@ class MailFolder;
 
 class MAppBase : public EventReceiver
 {
-protected:
-   // global variables stored in the application object
-   // -------------------------------------------------
-
-   /// the application's toplevel window
-   MFrame  *m_topLevelFrame;
-
-   /// the directory of the M global data tree
-   String   m_globalDir;
-
-   /// the directory of the User's M data files
-   String   m_localDir;
-
-   /// a list of all known mime types
-   wxMimeTypesManager *m_mimeManager;
-
-   /// a profile wrapper object for the global configuration
-   ProfileBase *m_profile;
-
-   /// registration seed for EventManager
-   void *m_eventReg;
-
-   /** Checks some global configuration settings and makes sure they
-       have sensible values. Especially important when M is run for
-       the first time.
-
-       @return true if the application is being run for the first time
-   */
-   bool VerifySettings(void);
-
 public:
    MAppBase(void);
    virtual ~MAppBase();
@@ -103,11 +74,26 @@ public:
    */
    virtual void OnAbnormalTermination();
 
-   /** ends the application
-       prompting before whether user really wants to exit.
-       @param force force exit, do not ask user whether to exit or not
+   /**
+       asks all the opened frames whether it's ok for them to close: returns
+       true only if all of them returned true (base class version always
+       returns true because it knows nothing about GUI things like frames)
      */
-   void  Exit(bool force = false);
+   virtual bool CanClose() const;
+
+   /** add a frame to the list of frames which were already asked whether it
+       was ok to close them and returned true - this prevents them from being
+       asked the second time
+     */
+   void AddToFramesOkToClose(const wxMFrame *frame);
+
+   /** has this frame already been asked (and replied "yes")?
+     */
+   bool IsOkToClose(const wxMFrame *frame) const;
+
+   /** ends the application (unless the user cancels shutdown)
+     */
+   void Exit();
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
@@ -154,16 +140,49 @@ public:
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
 
+   /// called by the main frame when it's closed
+   void OnMainFrameClose() { m_topLevelFrame = NULL; }
+
    /** Returns TRUE if the application has been initialized and is not yet
        being shut down
    */
    bool IsRunning() const { return m_topLevelFrame != NULL; }
 
-   /// called by the main frame when it's closed
-   void OnMainFrameClose() { m_topLevelFrame = NULL; }
-
    /// called when the events we're interested in are generated
    virtual bool OnEvent(EventData& event);
+
+protected:
+   /** Checks some global configuration settings and makes sure they
+       have sensible values. Especially important when M is run for
+       the first time.
+
+       @return true if the application is being run for the first time
+   */
+   bool VerifySettings(void);
+
+   // global variables stored in the application object
+   // -------------------------------------------------
+
+   /// the application's toplevel window
+   MFrame  *m_topLevelFrame;
+
+   /// the directory of the M global data tree
+   String   m_globalDir;
+
+   /// the directory of the User's M data files
+   String   m_localDir;
+
+   /// a list of all known mime types
+   wxMimeTypesManager *m_mimeManager;
+
+   /// a profile wrapper object for the global configuration
+   ProfileBase *m_profile;
+
+   /// registration seed for EventManager
+   void *m_eventReg;
+
+   /// list of frames to not ask again in CanClose()
+   ArrayFrames *m_framesOkToClose;
 };
 
 extern MAppBase *mApplication;

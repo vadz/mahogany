@@ -25,6 +25,7 @@ class wxPHelper;
 #include <wx/control.h>
 #include <wx/combobox.h>
 #include <wx/splitter.h>
+#include <wx/listctrl.h>
 
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
@@ -232,6 +233,56 @@ protected:
 private:
     // the config key where we store the sash position
     static const char *ms_sashKey;
+};
+
+// ----------------------------------------------------------------------------
+// a list control which remembers the widths of its columns
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxPListCtrl : public wxListCtrl
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPListCtrl();
+        // standard ctor
+    wxPListCtrl(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                long style = wxLC_ICON,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+        // pseudo ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                long style = wxLC_ICON,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+
+    // dtor saves the settings
+    virtual ~wxPListCtrl();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+protected:
+    // retrieve the position of the sash from config
+    void RestoreWidths();
+    // save current position there
+    void SavePosition();
+
+    wxPHelper *m_persist;
+
+private:
+    static const char *ms_listctrlKey;
 };
 
 // ----------------------------------------------------------------------------

@@ -39,11 +39,13 @@ public:
    virtual void OnFatalException() { OnAbnormalTermination(); }
    virtual void OnAbnormalTermination();
 
+   // override this to return true only if all frames can close
+   virtual bool CanClose() const;
+
    // wxWin calls these functions to start/run/stop the application
    virtual bool OnInit();
    virtual int  OnRun();
    virtual int  OnExit();
-
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
@@ -58,6 +60,7 @@ public:
 
    /// get a reference to the print data
    wxPrintData &GetPrintData(void) { return m_PrintData; }
+
 private:
    /// an iconmanager instance
    wxIconManager *m_IconManager;

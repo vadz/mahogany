@@ -57,6 +57,8 @@
 // event tables
 // -----------------------------------------------------------------------------
 
+IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxDialog)
+
 BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
    EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxNotebookDialog::OnApply)

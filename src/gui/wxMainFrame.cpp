@@ -93,7 +93,6 @@ private:
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
-  EVT_CLOSE(wxMainFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -213,21 +212,29 @@ wxMainFrame::OpenFolder(MFolder *folder)
 #endif // HAS_DYNAMIC_MENU_SUPPORT
 }
 
-void
-wxMainFrame::OnCloseWindow(wxCloseEvent&)
+bool
+wxMainFrame::CanClose() const
 {
+   bool ok;
+
    // ask the user unless disabled
    if ( MDialog_YesNoDialog(_("Do you really want to exit M?"), this,
                             MDIALOG_YESNOTITLE, false,
                             MP_CONFIRMEXIT) )
    {
-      delete m_FolderTree;
-      delete m_FolderView;
+      // already asked
+      mApplication->AddToFramesOkToClose(this);
 
-      mApplication->OnMainFrameClose();
-
-      Destroy();
+      // closing the main frame will close the app so ask the other frames
+      // whether it's ok to close them
+      ok = mApplication->CanClose();
    }
+   else
+   {
+      ok = false;
+   }
+
+   return ok;
 }
 
 void
@@ -246,6 +253,12 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
 wxMainFrame::~wxMainFrame()
 {
+   delete m_FolderView;
+   delete m_FolderTree;
+
+   // tell the app there is no main frame any more
+   mApplication->OnMainFrameClose();
+
    // save the last opened folder
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
 }

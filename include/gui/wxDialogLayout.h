@@ -126,6 +126,7 @@ private:
 
    bool m_bDirty;
 
+   DECLARE_DYNAMIC_CLASS(wxNotebookDialog)
    DECLARE_EVENT_TABLE()
 };
 
