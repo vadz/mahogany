@@ -377,7 +377,7 @@ public:
    RestExpression(class LeftOfRest *parent,
                   class SyntaxNode     *term,
                   class Operator       *op,
-                  class RestExpression *rest)
+                  class SyntaxNode *rest)
       {
          m_Parent = parent;
          m_Op = op;
@@ -392,8 +392,6 @@ public:
       }
    virtual long Evaluate() const;
    virtual long EvaluateLeft(void) const;
-   void SetRest(class RestExpression *rest)
-      { m_Rest = rest; }
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -409,9 +407,9 @@ public:
 #endif
 private:
    class LeftOfRest *m_Parent;
-   class Operator             *m_Op;
-   class SyntaxNode           *m_Term;
-   class RestExpression       *m_Rest;
+   class Operator   *m_Op;
+   class SyntaxNode *m_Term;
+   class SyntaxNode *m_Rest;
 };
 
 /** An expression consisting of more than one token. */
@@ -733,7 +731,6 @@ ParserImpl::ParseRestExpression(LeftOfRest *parent)
    
    Operator *op = NULL;
    RestExpression *sn = NULL;
-   RestExpression *rest = NULL;
    SyntaxNode *term = NULL;
    char token = t.GetChar();
    size_t position = GetPos();
@@ -755,9 +752,7 @@ ParserImpl::ParseRestExpression(LeftOfRest *parent)
    default:
       ;
    }
-   sn = new RestExpression(parent, term, op, NULL);
-   rest = ParseRestExpression(sn);
-   sn->SetRest(rest);
+   sn = new RestExpression(parent, term, op, term);
    return sn;
 }
 
@@ -766,8 +761,8 @@ ParserImpl::ParseRestTerm(LeftOfRest *parent)
 {
    MOcheck();
    /* RESTTERM :=
-      | * TERM
-      | * TERM
+      | * FACTOR
+      | / FACTOR
       | EMPTY
 
       The term passed as argument is the left side of the operator in
@@ -789,16 +784,14 @@ ParserImpl::ParseRestTerm(LeftOfRest *parent)
       return new RestExpression(parent,NULL,NULL,NULL);
    
    Operator *op = NULL;
-   RestExpression *sn = NULL;
-   RestExpression *rest = NULL;
-   SyntaxNode *term = NULL;
-   t = GetToken();
+   SyntaxNode *factor = NULL;
+   t = GetToken(); // eat operator
    char token = t.GetChar();
    size_t position = GetPos();
-   term = ParseTerm();
-   if(! term)
+   factor = ParseFactor();
+   if(! factor)
    {
-      Error(_("Expected term after operator."));
+      Error(_("Expected factor after operator."));
       Rewind(position); // needed?
       return NULL;
    }
@@ -813,10 +806,7 @@ ParserImpl::ParseRestTerm(LeftOfRest *parent)
    default:
       return new RestExpression(parent, NULL,NULL,NULL);
    }
-   sn = new RestExpression(parent, term, op, NULL);
-   rest = ParseRestTerm(sn);
-   sn->SetRest(rest);
-   return sn;
+   return new RestExpression(parent, factor, op, NULL);
 }
 
 Expression *
