@@ -215,7 +215,7 @@ SplitAddress(const String& addr,
 }
 
 /* static */ String
-GetFirstNameFromAddress(const String& address)
+Message::GetFirstNameFromAddress(const String& address)
 {
    String first;
    SplitAddress(address, &first, NULL);
