@@ -158,8 +158,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "ReleaseDebug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
-# ADD CPP /nologo /MD /W4 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD BASE CPP /nologo /MD /W4 /O2 /I "$(WXWIN)\lib\msw" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /Zi /O2 /I "$(WXWIN)\lib\msw" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(WXWIN)\include" /d "NDEBUG"
@@ -168,9 +168,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo /o"Debug/M.bsc"
 # ADD BSC32 /nologo /o"Debug/M.bsc"
 LINK32=link.exe
-# ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /fixed:no
-# SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 extra\src\c-client\Release\cclient.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib wxmsw.lib regex.lib zlib.lib png.lib jpeg.lib tiff.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib" /fixed:no
+# ADD BASE LINK32 extra\src\c-client\Release\cclient.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib wxmsw.lib regex.lib zlib.lib png.lib jpeg.lib tiff.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib" /fixed:no
+# SUBTRACT BASE LINK32 /pdb:none /debug
+# ADD LINK32 extra\src\c-client\Release\cclient.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib wxmsw.lib regex.lib zlib.lib png.lib jpeg.lib tiff.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /map /debug /machine:I386 /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib" /fixed:no
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -680,8 +680,6 @@ SOURCE=.\src\adb\ImportEudora.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# PROP BASE Exclude_From_Build 1
-
 !ENDIF 
 
 # End Source File
@@ -702,8 +700,6 @@ SOURCE=.\src\adb\ImportMailrc.cpp
 # PROP BASE Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP BASE Exclude_From_Build 1
 
 !ENDIF 
 
@@ -726,8 +722,6 @@ SOURCE=.\src\adb\ImportPine.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
-# PROP BASE Exclude_From_Build 1
-
 !ENDIF 
 
 # End Source File
@@ -748,8 +742,6 @@ SOURCE=.\src\adb\ImportText.cpp
 # PROP BASE Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP BASE Exclude_From_Build 1
 
 !ENDIF 
 
@@ -775,8 +767,6 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 # PROP BASE Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP BASE Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1539,6 +1529,7 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
+# PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
 !ENDIF 
@@ -1568,6 +1559,7 @@ SOURCE=.\src\Python\MAppBase_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
+# PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
 !ENDIF 
@@ -1597,6 +1589,7 @@ SOURCE=.\src\Python\Message_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
+# PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
 !ENDIF 
@@ -1626,6 +1619,7 @@ SOURCE=.\src\Python\MObject_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
+# PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
 !ENDIF 
@@ -1634,12 +1628,58 @@ SOURCE=.\src\Python\MObject_swig.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\MProfile_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MString_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1669,7 +1709,30 @@ SOURCE=.\src\Python\PythonHelp.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\swiglib_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "wx"
@@ -1958,8 +2021,9 @@ SOURCE=.\src\util\twofish2.c
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
+# ADD BASE CPP /W1 /Od
 # SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /W1
+# ADD CPP /W1 /Od
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ENDIF 
