@@ -100,18 +100,24 @@ MLogCircle:: Find(const String needle, String *store) const
    // search from m_Next-1 to 0
    if(m_Next > 0)
       for(int i = m_Next-1; i >= 0 ; i--)
+      {
+         wxLogDebug("checking msg %d, %s", i, m_Messages[i].c_str());
          if(m_Messages[i].Contains(needle))
          {
             if(store) *store = m_Messages[i];
             return true;
          }
+      }
    // search from m_N-1 down to m_Next:
    for(int i = m_N-1; i >= m_Next; i--)
+   {
+      wxLogDebug("checking msg %d, %s", i, m_Messages[i].c_str());
       if(m_Messages[i].Contains(needle))
       {
          if(store) *store = m_Messages[i];
          return true;
       }
+   }
    // last attempt:
    String tmp = strerror(errno);
    if(tmp.Contains(needle))
@@ -149,9 +155,9 @@ MLogCircle::GuessError(void) const
                 "Maybe the network connection or the DNS servers are down?");
       addErr = true;
    }
-   if(Find("recipients failed", &err))
+   if(Find("User unknown", &err))
    {
-      guess = _("One or more email addresses were not recognised.\n");
+      guess = _("One or more email addresses were not recognised.");
       addErr = true;
       addLog = true;
    }

@@ -699,6 +699,7 @@ SendMessageCC::Send(void)
       default:
          FAIL_MSG("illegal protocol");
       }
+      MailFolderCC::ProcessEventQueue();
       rfc822_setextraheaders(NULL,NULL);
       if(success)
       {
