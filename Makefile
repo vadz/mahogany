@@ -120,7 +120,7 @@ install_rpm:
 	@echo "%config $(DATADIR)/M.conf" >> filelist
 	@echo "$(DATADIR)/scripts" >> filelist
 	@echo "$(DATADIR)/newmail.wav" >> filelist
-#	@echo "$(DATADIR)/kylemail.wav" >> filelist
+	@echo "$(DATADIR)/kylemail.wav" >> filelist
 	@echo "$(DATADIR)/afm" >> filelist
 	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
 	@echo "$(DATADIR)/icons" >> filelist
