@@ -29,7 +29,9 @@
 #include "MEvent.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
-#include   <wx/filefn.h>
+#include <wx/filefn.h>
+
+#include <ctype.h>   // isspace()
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
@@ -673,7 +675,10 @@ MailFolderCC::mm_log(const char *str, long /* errflg */)
 {
    if(mm_ignore_errors)
       return;
-   String   msg = (String) "c-client " + (String) str;
+
+   String  msg = _("c-client log: ");
+   msg += str;
+
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
 }
 
@@ -683,8 +688,30 @@ MailFolderCC::mm_log(const char *str, long /* errflg */)
 void
 MailFolderCC::mm_dlog(const char *str)
 {
-   String   msg = (String) "c-client debug: " + (String) str;
-   //mApplication.Message(msg.c_str());
+   String msg = _("c-client debug: ");
+   // check for PASS
+   if ( str[0] == 'P' && str[1] == 'A' && str[2] == 'S' && str[3] == 'S' )
+   {
+      msg += "PASS";
+
+      size_t n = 4;
+      while ( isspace(str[n]) )
+      {
+         msg += str[n++];
+      }
+
+      // hide the password
+      while ( str[n] != '\0' )
+      {
+         msg += '*';
+         n++;
+      }
+   }
+   else
+   {
+      msg += str;
+   }
+   
    LOGMESSAGE((M_LOG_DEBUG, Str(msg)));
 }
 
@@ -808,15 +835,13 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 void
 mm_log(char *str, long errflg)
 {
-   String   tmp = String(_("log: ")) + str;
-   MailFolderCC::mm_log(tmp.c_str(),errflg);
+   MailFolderCC::mm_log(str, errflg);
 }
 
 void
 mm_dlog(char *str)
 {
-   String   tmp = String(_("debug: ")) + str;
-   MailFolderCC::mm_dlog(tmp.c_str());
+   MailFolderCC::mm_dlog(str);
 }
 
 void
