@@ -196,6 +196,33 @@ bool IsBlankLine(const char *p)
    }
 }
 
+enum LineResult
+{
+   Line_Blank = -2,
+   Line_Unknown = -1,
+   Line_Different,
+   Line_Same
+};
+
+// advance the *pp pointer if it points to the same thing as c
+static void
+UpdateLineStatus(const char *c, const char **pp, LineResult *pSameAs)
+{
+   if ( *pSameAs == Line_Unknown || *pSameAs == Line_Same )
+   {
+      if ( **pp != *c )
+      {
+         *pSameAs = IsBlankLine(*pp) ? Line_Blank : Line_Different;
+      }
+      else
+      {
+         *pSameAs = Line_Same; // could have been Line_Unknown
+
+         (*pp)++;
+      }
+   }
+}
+
 int
 CountQuoteLevel(const char *string,
                 const char *prev,
@@ -223,27 +250,35 @@ CountQuoteLevel(const char *string,
 
 
    // look at the beginning of this string and count (nested) quoting levels
+   LineResult sameAsNext = Line_Unknown,
+                 sameAsPrev = Line_Unknown;
    int levels = 0;
    for ( const char *c = string; *c != 0 && *c != '\n'; c++, prev++, next++ )
    {
       // skip leading white space
-      for ( int num_white = 0; *c == '\t' || *c == ' '; c++, prev++, next++  )
+      for ( int num_white = 0; *c == '\t' || *c == ' '; c++ )
       {
          if ( ++num_white > max_white )
          {
             // too much whitespace for this to be a quoted string
             return levels;
          }
+
+         UpdateLineStatus(c, &prev, &sameAsPrev);
+         UpdateLineStatus(c, &next, &sameAsNext);
       }
 
       // skip optional alphanumeric prefix
-      for ( int num_alpha = 0; isalpha((unsigned char)*c); c++, prev++, next++ )
+      for ( int num_alpha = 0; isalpha((unsigned char)*c); c++ )
       {
          if ( ++num_alpha > max_alpha )
          {
             // prefix too long, not start of the quote
             return levels;
          }
+
+         UpdateLineStatus(c, &prev, &sameAsPrev);
+         UpdateLineStatus(c, &next, &sameAsNext);
       }
 
       // check if we have a quoted line or not now: we consider the line to be
@@ -252,17 +287,35 @@ CountQuoteLevel(const char *string,
       // previous line isn't similar to but not the same as this one (this is
       // necessary to catch last line in a numbered list which would otherwise
       // be considered quoted)
-      //
+
+      // first check if we have a quote character at all
       // TODO: make the string of "quoting characters" configurable
       static const char *QUOTE_CHARS = ">|})*";
-      const size_t pos = c - string;
-      if ( !strchr(QUOTE_CHARS, *c) ||
-            (strncmp(string, next - pos, pos + 1) && !IsBlankLine(next + 1)) ||
-             (*prev == *c && strncmp(string, prev - pos, pos)) )
+      if ( !strchr(QUOTE_CHARS, *c) )
+         break;
+
+      // next check if the next line has the same prefix
+      if ( sameAsNext != Line_Different )
       {
-         // not quoted (according to our heuristics anyhow)
+         // so far it does
+         if ( *next != *c && !IsBlankLine(next) )
+         {
+            // but then it diverges, so this is unlikely to be a quote marker
+            break;
+         }
+      }
+      else // not the same one, but maybe the next line is blank?
+      {
+         if ( !IsBlankLine(next + 1) )
+            break;
+      }
+
+      // finally check the previous line
+      if ( sameAsPrev == Line_Same && *prev != *c )
+      {
          break;
       }
+      //else: it's either identical or completely different, both are fine
 
       levels++;
    }
