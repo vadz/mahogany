@@ -51,7 +51,9 @@ will be happy to help you.
 
 \subsection{Changes against the previous version}
 
-\textbf{0.62 against 0.61}\\
+
+\subsubsection{0.62 against 0.61}
+
 The main changes in this release concern the Mahogany internals: the
 stability and efficiency have been both greatly improved, in particular
 it is believed that all fatal crashes using IMAP servers are now gone.
@@ -90,8 +92,11 @@ And a few improvements too:
 \item messages can now also be sorted by status and by size
 \item a hard limit on number of the messages retrieved can be set
 \end{itemize}
-\textbf{0.61 against 0.60} (note: the version 0.61 wasn't officially
-released)\textbf{}\\
+
+\subsubsection{0.61 against 0.60 }
+
+Note: the version 0.61 wasn't officially released
+
 A couple of new features, most importantly:
 
 \begin{itemize}
@@ -101,7 +106,9 @@ appearinganywhere in the headers.
 using \noun{{}''Folder|Import folder tree...{}''} command (see
 \ref{Import})
 \end{itemize}
-\textbf{0.60 against 0.50}\\
+
+\subsubsection{0.60 against 0.50}
+
 Most importantly, all known major bugs in 0.5 have been fixed in this
 release. We still have some minor buglets and lots of wishes and enhancements
 on our list, but all serious bugs should be gone now. A couple of
@@ -778,12 +785,9 @@ is very useful for accessing mail folders through a slow connection.
 The same setting effects the behaviour of the space bar, it acts exactly
 like a single mouse click in the window and will only cause a message
 to be previewed if a single mouse click is configured to do so. The
-key {}``V{}'' can be used to view the message under the current
-cursor. Also, using the mouse or the space bar together with the SHIFT
-or CTRL keys, allows one to select multiple messages at once.
+space key can be used to view the message under the current cursor.
 
-When the top window, the list of messages, is active, certain keyboard
-bindings are active, the following keys are recognized:
+Other keyboard bindings are summarized in the following table:
 
 \vspace{0.3cm}
 {\centering \begin{tabular}{|c|c|}
@@ -792,17 +796,13 @@ Key&
 Action performed\\
 \hline
 \hline 
-M&
+{*}&
 mark/unmark message under cursor\\
-\hline 
-&
-If message are to be previewed on selection, this will also preview
-the message.\\
 \hline 
 SPACE&
 preview message under cursor\\
 \hline 
-D or DELETE&
+D or DEL&
 mark selected messages for deletion\\
 \hline 
 U&
@@ -814,8 +814,8 @@ expunge messages marked for deletion\\
 C&
 copy marked messages to another folder\\
 \hline 
-V&
-move marked messages to another folder\\
+M&
+move selected messages to another folder\\
 \hline 
 S&
 save marked messages to files\\
@@ -833,14 +833,25 @@ O&
 open messages in separate window\\
 \hline 
 H&
-toggle display of headers\\
-\hline
+toggle display of all headers\\
 \hline 
-{*}&
- flag or unflag the message\\
-\hline
+BACK/PG UP&
+scroll the message preview one page up\\
+\hline 
+PG DOWN&
+scroll the message preview one page down\\
+\hline 
+Ctrl-U&
+view next unread message\\
 \end{tabular}\par}
 \vspace{0.3cm}
+
+Note that all commands for which it makes sense operate either on
+the current message only if there is no selection or on all selected
+messages at once. You can use the mouse or the cursor arrows together
+with the SHIFT or CTRL keys to select multiple messages at once. The
+commands which affect the message preview are inactive if no message
+is previewed.
 
 
 \subsection{Migrating from another mail client}

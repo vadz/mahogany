@@ -1,12 +1,11 @@
-#This file was created by <zeitlin> Thu Feb 22 16:55:06 2001
-#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
-\lyxformat 2.15
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 218
 \textclass book
 \begin_preamble
 \usepackage{html, epsfig}
 \makeatletter
 \end_preamble
-\language default
+\language english
 \inputencoding default
 \fontscheme palatino
 \graphics default
@@ -63,7 +62,7 @@ http://mahogany.sourceforge.net/
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents
+\begin_inset LatexCommand \tableofcontents{}
 
 \end_inset 
 
@@ -92,14 +91,11 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Subsubsection
+
+0.62 against 0.61
 \layout Standard
 
-
-\series bold 
-0.62 against 0.61
-\newline 
-
-\series default 
 The main changes in this release concern the Mahogany internals: the stability
  and efficiency have been both greatly improved, in particular it is believed
  that all fatal crashes using IMAP servers are now gone.
@@ -170,18 +166,14 @@ messages can now also be sorted by status and by size
 \layout Itemize
 
 a hard limit on number of the messages retrieved can be set
+\layout Subsubsection
+
+0.61 against 0.60 
 \layout Standard
 
+Note: the version 0.61 wasn't officially released
+\layout Standard
 
-\series bold 
-0.61 against 0.60 
-\series default 
-(note: the version 0.61 wasn't officially released)
-\series bold 
-
-\newline 
-
-\series default 
 A couple of new features, most importantly:
 \layout Itemize
 
@@ -208,14 +200,11 @@ Folder|Import folder tree...
 \end_inset 
 
 )
+\layout Subsubsection
+
+0.60 against 0.50
 \layout Standard
 
-
-\series bold 
-0.60 against 0.50
-\newline 
-
-\series default 
 Most importantly, all known major bugs in 0.5 have been fixed in this release.
  We still have some minor buglets and lots of wishes and enhancements on
  our list, but all serious bugs should be gone now.
@@ -892,17 +881,16 @@ ion for any purpose and without fee is hereby granted, provided that the
  notice and this permission notice appear in supporting documentation, and
  that the name of the University of Washington not be used in advertising
  or publicity pertaining to distribution of the software without specific,
- written prior permission.
-\protected_separator 
- This software is made available "as is", and THE UNIVERSITY OF WASHINGTON
- DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO THIS SOFTWARE,
- INCLUDING WITHOUT LIMITATION ALL IMPLIED WARRANTIES OF MERCHANTABILITY
- AND FITNESS FOR A PARTICULAR PURPOSE, AND IN NO EVENT SHALL THE UNIVERSITY
- OF WASHINGTON BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES
- OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- WHETHER IN AN ACTION OF CONTRACT, TORT (INCLUDING NEGLIGENCE) OR STRICT
- LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
- OF THIS SOFTWARE.
+ written prior permission.\SpecialChar ~
+ This software is made available "as is", and THE
+ UNIVERSITY OF WASHINGTON DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED,
+ WITH REGARD TO THIS SOFTWARE, INCLUDING WITHOUT LIMITATION ALL IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, AND
+ IN NO EVENT SHALL THE UNIVERSITY OF WASHINGTON BE LIABLE FOR ANY SPECIAL,
+ INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, TORT (INCLUDING
+ NEGLIGENCE) OR STRICT LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
+ USE OR PERFORMANCE OF THIS SOFTWARE.
 \layout Subsubsection
 
 The OpenSSL toolkit:
@@ -1722,140 +1710,337 @@ Preview message when selected
  The same setting effects the behaviour of the space bar, it acts exactly
  like a single mouse click in the window and will only cause a message to
  be previewed if a single mouse click is configured to do so.
- The key 
-\begin_inset Quotes eld
-\end_inset 
-
-V
-\begin_inset Quotes erd
-\end_inset 
-
- can be used to view the message under the current cursor.
- Also, using the mouse or the space bar together with the SHIFT or CTRL
- keys, allows one to select multiple messages at once.
+ The space key can be used to view the message under the current cursor.
 \layout Standard
 
-When the top window, the list of messages, is active, certain keyboard bindings
- are active, the following keys are recognized:
+Other keyboard bindings are summarized in the following table:
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-16 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="17" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 Key
-\newline 
-Action performed
-\newline 
-M
-\newline 
-mark/unmark message under cursor
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
-If message are to be previewed on selection, this will also preview the
- message.
-\newline 
-SPACE
-\newline 
-preview message under cursor
-\newline 
-D or DELETE
-\newline 
-mark selected messages for deletion
-\newline 
-U
-\newline 
-remove deletion mark from selected messages
-\newline 
-X or #
-\newline 
-expunge messages marked for deletion
-\newline 
-C
-\newline 
-copy marked messages to another folder
-\newline 
-V
-\newline 
-move marked messages to another folder
-\newline 
-S
-\newline 
-save marked messages to files
-\newline 
-P
-\newline 
-print marked messages
-\newline 
-R
-\newline 
-reply to messages
-\newline 
-F
-\newline 
-forward messages
-\newline 
-O
-\newline 
-open messages in separate window
-\newline 
-H
-\newline 
-toggle display of headers
-\newline 
+\layout Standard
+
+Action performed
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 *
-\newline 
- flag or unflag the message
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+mark/unmark message under cursor
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+SPACE
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+preview message under cursor
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+D or DEL
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+mark selected messages for deletion
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+U
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+remove deletion mark from selected messages
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+X or #
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+expunge messages marked for deletion
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+C
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+copy marked messages to another folder
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+M
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+move selected messages to another folder
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+S
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+save marked messages to files
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+P
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+print marked messages
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+R
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+reply to messages
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+F
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+forward messages
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+O
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+open messages in separate window
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+H
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+toggle display of all headers
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+BACK/PG UP
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+scroll the message preview one page up
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+PG DOWN
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+scroll the message preview one page down
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Ctrl-U
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+view next unread message
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+Note that all commands for which it makes sense operate either on the current
+ message only if there is no selection or on all selected messages at once.
+ You can use the mouse or the cursor arrows together with the SHIFT or CTRL
+ keys to select multiple messages at once.
+ The commands which affect the message preview are inactive if no message
+ is previewed.
 \layout Subsection
 
 Migrating from another mail client
@@ -2190,102 +2375,249 @@ BCC means Blind Carbon Copy - like CC:, copies will be sent to the addresses
 
 Key Bindings in the Message Editor
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-13 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="13" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 Key
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Function
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 ALT-D
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 delete word
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-Y
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 delete line
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-U
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 delete to begin of line
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-K
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 delete to end of line
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-C 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 copy selection to clipboard
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 SHIFT-INSERT
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-X
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 cut selection to clipboard
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 SHIFT-DELETE
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-V
-\newline 
-paste text from clipboard
-\newline 
-CTRL-INSERT
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+paste text from clipboard
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+CTRL-INSERT
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-S
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 search for text
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 CTRL-T
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 search same text again
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Subsection
 
 Using the address book_3100_
@@ -4574,12 +4906,9 @@ MailFolder
 
 
 \family typewriter 
-from
-\protected_separator 
-MailFolder
-\protected_separator 
-import
-\protected_separator 
+from\SpecialChar ~
+MailFolder\SpecialChar ~
+import\SpecialChar ~
 *
 \family default 
 
@@ -4593,189 +4922,466 @@ import
 
 List of Callbacks
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-11 5 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="11" columns="5">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 0 8 1 0 0 0 00 8 1 0 0 0 0Callback Name
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Object Type
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Additional Arguments/Types
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Return Value
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Documentation
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderOpenHook
-\newline 
-MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+MailFolder
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 void
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called after a folder has been opened.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderUpdateHook
-\newline 
-MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+MailFolder
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 void
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called after a folder has been updated.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderSetMessageFlag
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (long) index of message
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 1 if changing flags is ok,0 otherwise
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called before changing flags for a message.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (string)name of flag
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderClearMessageFlag
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (long) index of message
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 1 if changing flags is ok,0 otherwise
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called before changing flags for a message.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (string) name of flag
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderExpungeHook
-\newline 
-MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+MailFolder
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 1 to expunge, 0 to abort
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called before expunging messages.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 FolderNewMailHook
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 MailFolder
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 1 to suppress default message, 0 else
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called when new mail arrived in folder.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 GlobalNewMailHook
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 mApplication
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (string) sender of mail
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 1 to suppress default message, 0 else
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Called when new mail arrived anywhere.
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 (string) subject of mail
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
 
 \layout Subsection
 
@@ -5155,10 +5761,9 @@ You can configure the PalmOS module via the Plugin menu in a lot of ways.
  can access using the Plugin-Menu:
 \layout Description
 
-Synchronise
-\protected_separator 
-Mail When you have this enabled, you can specify a mailbox which will be
- used as place of exchange for mails.
+Synchronise\SpecialChar ~
+Mail When you have this enabled, you can specify a mailbox which
+ will be used as place of exchange for mails.
  Mails in this folder will be transfered to the Palm at the next hotsync
  and the outbox of the Palm´s mail program will be send.
  This mailbox is also used as a configuration setting for messages sent.
@@ -5188,12 +5793,10 @@ Mahogany
 .
 \layout Description
 
-Mailbox
-\protected_separator 
-for
-\protected_separator 
-Exchange Enter here the name of the mailbox that should be used for mail
- exchange when you have the 
+Mailbox\SpecialChar ~
+for\SpecialChar ~
+Exchange Enter here the name of the mailbox that should be used
+ for mail exchange when you have the 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -5204,12 +5807,10 @@ Synchronise Mail
  feature enabled (see above).
 \layout Description
 
-Mail
-\protected_separator 
-disposal
-\protected_separator 
-mode This specifies what to do with outgoing e-mails retrieved from the
- PalmPilot and sent.
+Mail\SpecialChar ~
+disposal\SpecialChar ~
+mode This specifies what to do with outgoing e-mails retrieved
+ from the PalmPilot and sent.
  You have three options: 
 \begin_deeper 
 \layout Itemize
@@ -5224,12 +5825,10 @@ keep : keep messages in Palm's Outbox
 \end_deeper 
 \layout Description
 
-Always
-\protected_separator 
-do
-\protected_separator 
-Backup Setting this checkbox to true will make a backup take place every
- time you 
+Always\SpecialChar ~
+do\SpecialChar ~
+Backup Setting this checkbox to true will make a backup take place
+ every time you 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -5240,27 +5839,20 @@ Synchronize
 .
 \layout Description
 
-Directory
-\protected_separator 
-for
-\protected_separator 
-backup
-\protected_separator 
-files This field does contain a valid directory path where the PalmOS-Module
- will store the backup of your Palm´s databases.
+Directory\SpecialChar ~
+for\SpecialChar ~
+backup\SpecialChar ~
+files This field does contain a valid directory path where
+ the PalmOS-Module will store the backup of your Palm´s databases.
 \layout Description
 
-Delete
-\protected_separator 
-no
-\protected_separator 
-longer
-\protected_separator 
-existing
-\protected_separator 
-backups This checkbox determines whether you want files to be deleted on
- the PC that are residing in the backup directory but are not any longer
- on the Palm.
+Delete\SpecialChar ~
+no\SpecialChar ~
+longer\SpecialChar ~
+existing\SpecialChar ~
+backups This checkbox determines whether you want
+ files to be deleted on the PC that are residing in the backup directory
+ but are not any longer on the Palm.
  This makes it possible to really keep the backup identical to the Palm,
  but has the disadvantage that you might loose data if you (accidently?)
  delete important data on the Palm and do a backup, as the backup-ed databases
@@ -5268,38 +5860,31 @@ backups This checkbox determines whether you want files to be deleted on
  So think carefully whether you do really want to do this.
 \layout Description
 
-Make
-\protected_separator 
-incremental
-\protected_separator 
-backup
-\protected_separator 
-only Enable this checkbox if you only want to make an incremental backup.
+Make\SpecialChar ~
+incremental\SpecialChar ~
+backup\SpecialChar ~
+only Enable this checkbox if you only want to make
+ an incremental backup.
  Using this features will speed the backup process up, as only changed or
  new databases are downloaded from the Palm.
 \layout Description
 
-Backup
-\protected_separator 
-all
-\protected_separator 
-databases Enabling this checkbox will make the PalmOS-Module ignore the
- backup flags of the databases.
+Backup\SpecialChar ~
+all\SpecialChar ~
+databases Enabling this checkbox will make the PalmOS-Module ignore
+ the backup flags of the databases.
  By default the PalmOS-Module does only backup files with a set backup flag.
  Use this option if you want all files to be backup´ed.
 \layout Description
 
-Exclude
-\protected_separator 
-these
-\protected_separator 
-databases Here you can specify a comma separated list of databases (without
- spaces!) that should not be backup´ed.
+Exclude\SpecialChar ~
+these\SpecialChar ~
+databases Here you can specify a comma separated list of databases
+ (without spaces!) that should not be backup´ed.
  
 \layout Description
 
-Do
-\protected_separator 
+Do\SpecialChar ~
 auto-install Using this feature enables the auto-install feature and everytime
  you 
 \begin_inset Quotes eld
@@ -5314,24 +5899,21 @@ Synchronize
  notice!
 \layout Description
 
-Auto-install
-\protected_separator 
-directory Specify here a directory where the files to be auto-installed
- can be found.
+Auto-install\SpecialChar ~
+directory Specify here a directory where the files to be auto-instal
+led can be found.
 \layout Standard
 
 Besides that, some general options are available:
 \layout Description
 
-Pilot
-\protected_separator 
-device Here you can specify the device where the Pilot is residing (this
- ought to be /dev/pilot under Unix/Linux and Com1: or Com2: under MS Windows
- (not yet supported)).
+Pilot\SpecialChar ~
+device Here you can specify the device where the Pilot is residing
+ (this ought to be /dev/pilot under Unix/Linux and Com1: or Com2: under
+ MS Windows (not yet supported)).
 \layout Description
 
-Connection
-\protected_separator 
+Connection\SpecialChar ~
 speed You have the choice beetween different hotsync speeds (
 \begin_inset Quotes eld
 \end_inset 
@@ -5344,13 +5926,11 @@ connection speed
  
 \layout Description
 
-Try
-\protected_separator 
-to
-\protected_separator 
-lock
-\protected_separator 
-device You can force a lock of the above set device by enabling 
+Try\SpecialChar ~
+to\SpecialChar ~
+lock\SpecialChar ~
+device You can force a lock of the above set device by enabling
+ 
 \begin_inset Quotes eld
 \end_inset 
 

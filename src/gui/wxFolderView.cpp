@@ -186,6 +186,9 @@ public:
    /// select the item currently focused
    void SelectFocused() { Select(GetFocusedItem(), true); }
 
+   /// goto next unread message, return true if found
+   bool SelectNextUnread(void);
+
    /// focus the given item
    void Focus(long index)
       {
@@ -197,11 +200,22 @@ public:
    long GetNextSelected(long item) const
       { return GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED); }
 
+   /// return true if we preview this item
+   bool IsPreviewed(long item) const
+      { return m_FolderView->GetPreviewUId() == GetUIdFromIndex(item); }
+
+   /// return true if we preview the item with this UID
+   bool IsUIdPreviewed(UIdType uid) const
+      { return m_FolderView->GetPreviewUId() == uid; }
+
    /**
      if nofocused == true the focused entry will not be substituted
      for an empty list of selections
    */
    int GetSelections(UIdArray &selections, bool nofocused = false) const;
+
+   /// get the UID of the given item
+   UIdType GetUIdFromIndex(long item) const;
 
    /// get the UID and, optionally, the index of the focused item
    UIdType GetFocusedUId(long *idx = NULL) const;
@@ -230,9 +244,6 @@ public:
    void OnMouseMove(wxMouseEvent &event);
    //@}
 
-   /// goto next unread message, return true if found
-   bool SelectNextUnread(void);
-
    /// change the options governing our appearance
    void ApplyOptions(const wxColour &fg, const wxColour &bg,
                      int fontFamily, int fontSize,
@@ -253,6 +264,14 @@ public:
 protected:
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
+
+   /// enable/disable handling of select events (returns old value)
+   bool EnableOnSelect(bool enable)
+   {
+      bool enableOld = m_enableOnSelect;
+      m_enableOnSelect = enable;
+      return enableOld;
+   }
 
    /// parent window
    wxWindow *m_Parent;
@@ -275,8 +294,8 @@ protected:
    /// did we create the list ctrl columns?
    bool m_Initialised;
 
-   /// did the listctrl focused item change?
-   bool m_FocusedItemChanged;
+   /// do we handle OnSelected()?
+   bool m_enableOnSelect;
 
    /// the popup menu
    wxMenu *m_menu;
@@ -285,7 +304,30 @@ protected:
    wxMenu *m_menuFolders;
 
 private:
+   // allow it to use EnableOnSelect()
+   friend class wxFolderListCtrlBlockOnSelect;
+
    DECLARE_EVENT_TABLE()
+};
+
+/// an object of this class blocks OnSelected() handling during its lifetime
+class wxFolderListCtrlBlockOnSelect
+{
+public:
+   wxFolderListCtrlBlockOnSelect(wxFolderListCtrl *ctrl)
+   {
+      m_ctrl = ctrl;
+      m_enableOld = m_ctrl->EnableOnSelect(false);
+   }
+
+   ~wxFolderListCtrlBlockOnSelect()
+   {
+      m_ctrl->EnableOnSelect(m_enableOld);
+   }
+
+private:
+   wxFolderListCtrl *m_ctrl;
+   bool m_enableOld;
 };
 
 // ----------------------------------------------------------------------------
@@ -430,6 +472,7 @@ static wxArrayString UnpackWidths(const wxString& s)
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_CHAR(wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
+   EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
 
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
 
@@ -459,8 +502,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       return; // nothing to do
    }
 
-   long keyCode = event.KeyCode();
-   if ( keyCode == WXK_F1 ) // help
+   long key = event.KeyCode();
+   if ( key == WXK_F1 ) // help
    {
       mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
                          m_FolderView->GetWindow());
@@ -470,47 +513,22 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
    // we can operate either on all selected items
    UIdArray selections;
-   long nselected = m_FolderView->GetSelections(selections);
+   m_FolderView->GetSelections(selections);
 
-   // or only on the one which is focused
-   long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   // get the focused item
+   long focused = GetFocusedItem();
 
-   UIdType focused_uid = UID_ILLEGAL;
+   // find the next item
+   long newFocus = focused;
+   if ( newFocus == -1 )
+      newFocus = 0;
+   else if ( focused < GetItemCount() - 1 )
+      newFocus++;
 
-   long newFocus = -1;
-   if ( nselected == 0 )
-   {
-      if ( focused == -1 )
-      {
-         // no selection and no focus
-         event.Skip();
-         return;
-      }
-
-      // in this case we operate on the highlighted message
-      HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
-      if ( hil )
-      {
-         focused_uid = hil[focused]->GetUId();
-         selections.Add(focused_uid);
-      }
-
-      // don't move focus
-      newFocus = -1;
-   }
-   else // operate on the selected messages
-   {
-      // advance focus
-      newFocus = focused;
-      if ( newFocus == -1 )
-         newFocus = 0;
-      else if ( focused < GetItemCount() - 1 )
-         newFocus++;
-   }
-
-   int key = toupper((int)keyCode);
    switch ( key )
    {
+      case WXK_PRIOR:
+      case WXK_NEXT:
       case WXK_BACK:
       case '*':
          // leave as is
@@ -536,6 +554,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             */
             static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG");
             static const char *keycodes = _(keycodes_en);
+
+            key = toupper(key);
 
             int idx = 0;
             for ( ; keycodes[idx] && keycodes[idx] != key; idx++ )
@@ -634,10 +654,35 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          newFocus = -1;
          break;
 
+      case WXK_NEXT:
+         // scroll down the preview window
+         if ( IsPreviewed(focused) )
+         {
+            m_FolderView->m_MessagePreview->PageDown();
+         }
+         else
+         {
+            // let it work as usual
+            event.Skip();
+         }
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      case WXK_PRIOR:
       case WXK_BACK:
          // scroll up within the message viewer:
-         if ( m_FolderView->GetPreviewUId() == focused_uid )
+         if ( IsPreviewed(focused) )
+         {
             m_FolderView->m_MessagePreview->PageUp();
+         }
+         else
+         {
+            // let it work as usual
+            event.Skip();
+         }
+
 
          // don't move focus
          newFocus = -1;
@@ -774,17 +819,30 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    }
 }
 
+void wxFolderListCtrl::OnSelected(wxListEvent& event)
+{
+   if ( m_enableOnSelect )
+   {
+      // update it as it is normally only updated in OnIdle() which wasn't
+      // called yet
+      m_itemFocus = GetFocusedItem();
+
+      // only preview the message when it is the first one we select
+      if ( GetUniqueSelection() != -1 && (event.m_itemIndex == m_itemFocus) )
+      {
+         // the current message is selected - view it if we don't yet
+         m_FolderView->PreviewMessage(GetFocusedUId());
+      }
+      //else: don't react to selecting another message
+   }
+   //else: processing this is temporarily blocked
+}
+
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
    // called by RETURN press
-   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
-   CHECK_RET(hil, "no header listing in wxFolderListCtrl");
-
-   const HeaderInfo *hi = hil[event.m_itemIndex];
-   CHECK_RET(hi, "no header entry in wxFolderListCtrl");
-
-   UIdType uid = hi->GetUId();
-   if ( m_FolderView->GetPreviewUId() == uid )
+   UIdType uid = GetUIdFromIndex(event.m_itemIndex);
+   if ( IsPreviewed(uid) )
       m_FolderView->m_MessagePreview->PageDown();
    else
       m_FolderView->PreviewMessage(uid);
@@ -901,6 +959,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
    m_Initialised = false;
+   m_enableOnSelect = true;
    m_menu =
    m_menuFolders = NULL;
 
@@ -1021,6 +1080,16 @@ long wxFolderListCtrl::GetUniqueSelection() const
 UIdType
 wxFolderListCtrl::GetFocusedUId(long *idx) const
 {
+   long item = GetFocusedItem();
+   if ( idx )
+      *idx = item;
+
+   return GetUIdFromIndex(item);
+}
+
+UIdType
+wxFolderListCtrl::GetUIdFromIndex(long item) const
+{
    UIdType uid = UID_ILLEGAL;
    ASMailFolder *asmf = m_FolderView->GetFolder();
    if ( asmf )
@@ -1032,15 +1101,11 @@ wxFolderListCtrl::GetFocusedUId(long *idx) const
       {
          size_t nMessages = hil->Count();
 
-         long item = GetFocusedItem();
-
          // we need to compare with nMessages because the listing might have
          // been already updated and messages could have been deleted from it
          if ( item != -1 && (unsigned long)item < nMessages )
          {
             uid = hil[item]->GetUId();
-            if ( idx )
-               *idx = item;
          }
       }
    }
@@ -1986,6 +2051,8 @@ void wxFolderView::ExpungeMessages()
 
 void wxFolderView::SelectAll(bool on)
 {
+   wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
+
    for ( size_t n = 0; n < m_NumOfMessages; n++ )
    {
       m_FolderCtrl->Select(n, on);
@@ -2325,11 +2392,14 @@ wxFolderView::GetSelections(UIdArray& selections)
 void
 wxFolderView::PreviewMessage(long uid)
 {
-   // select the item we preview in the folder control
-   m_FolderCtrl->SelectFocused();
+   if ( (unsigned long)uid != m_previewUId )
+   {
+      // select the item we preview in the folder control
+      m_FolderCtrl->SelectFocused();
 
-   m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
-   m_previewUId = uid;
+      m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
+      m_previewUId = uid;
+   }
 }
 
 
@@ -2690,6 +2760,8 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          {
             UIdArray *ia = result->GetSequence();
             unsigned long count = ia->Count();
+
+            wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
             /* The returned message numbers are UIds which we must map
                to our listctrl indices via the current HeaderInfo

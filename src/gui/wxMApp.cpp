@@ -107,7 +107,7 @@ public:
       { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
 
    virtual void Notify()
-      { wxLogTrace("Autosaving everything."); Profile::FlushAll(); }
+      { wxLogTrace("timer", "Autosaving everything."); Profile::FlushAll(); }
 
     virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
@@ -127,7 +127,7 @@ public:
 
    virtual void Notify()
       {
-         wxLogTrace("Collection timer expired.");
+         wxLogTrace("timer", "Collection timer expired.");
          mApplication->UpdateOutboxStatus();
          MailCollector *collector = mApplication->GetMailCollector();
          if ( collector )

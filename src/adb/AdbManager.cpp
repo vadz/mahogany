@@ -267,7 +267,7 @@ AdbManager *AdbManager::Get()
     // calling code behaves properly) until the very end of the application
     ms_pManager->IncRef();
 
-    wxLogTrace("AdbManager created.");
+    wxLogTrace("adb", "AdbManager created.");
   }
   else {
     // just inc ref count on the existing one
@@ -289,7 +289,7 @@ void AdbManager::Unget()
     // the object deleted itself
     ms_pManager = NULL;
 
-    wxLogTrace("AdbManager deleted.");
+    wxLogTrace("adb", "AdbManager deleted.");
   }
 }
 
