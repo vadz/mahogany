@@ -111,8 +111,15 @@ public:
    /** Draws an object.
        @param dc the wxDC to draw on
        @param coords where to draw the baseline of the object.
+       @param wxllist pointer to wxLayoutList
+       @param begin if !=-1, from which position on to highlight it
+       @param end if begin !=-1, how many positions to highlight it
    */
-   virtual void Draw(wxDC & /* dc */, wxPoint const & /* coords */)  { }
+   virtual void Draw(wxDC & /* dc */,
+                     wxPoint const & /* coords */,
+                     class wxLayoutList *wxllist,
+                     CoordType begin = -1,
+                     CoordType end = -1)  { }
 
    /** Calculates and returns the size of the object. 
        @param top where to store height above baseline
@@ -187,7 +194,10 @@ public:
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
    virtual void Layout(wxDC &dc);
-   virtual void Draw(wxDC &dc, wxPoint const &coords);
+   virtual void Draw(wxDC &dc, wxPoint const &coords,
+                     class wxLayoutList *wxllist,
+                     CoordType begin = -1,
+                     CoordType end = -1);
    /** Calculates and returns the size of the object. 
        @param top where to store height above baseline
        @param bottom where to store height below baseline
@@ -244,7 +254,10 @@ public:
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
    virtual void Layout(wxDC &dc);
-   virtual void Draw(wxDC &dc, wxPoint const &coords);
+   virtual void Draw(wxDC &dc, wxPoint const &coords,
+                     class wxLayoutList *wxllist,
+                     CoordType begin = -1,
+                     CoordType end = -1);
 
    /** Calculates and returns the size of the object. 
        @param top where to store height above baseline
@@ -288,7 +301,10 @@ class wxLayoutObjectCmd : public wxLayoutObject
 public:
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
    virtual void Layout(wxDC &dc);
-   virtual void Draw(wxDC &dc, wxPoint const &coords);
+   virtual void Draw(wxDC &dc, wxPoint const &coords,
+                     class wxLayoutList *wxllist,
+                     CoordType begin = -1,
+                     CoordType end = -1);
    wxLayoutObjectCmd(int size, int family, int style, int weight,
                 bool underline,
                 wxColour &fg, wxColour &bg);
@@ -315,6 +331,9 @@ private:
 
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/// forward declaration
+class wxLayoutList;
+
 /** This class represents a single line of objects to be displayed.
     It knows its height and total size and whether it needs to be
     redrawn or not.
@@ -327,8 +346,9 @@ public:
    /** Constructor.
        @param prev pointer to previous line or NULL
        @param next pointer to following line or NULL
+       @param llist pointer to layout list
    */
-   wxLayoutLine(wxLayoutLine *prev);
+   wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist);
    /** This function inserts a new object at cursor position xpos.
        @param xpos where to insert new object
        @param obj  the object to insert
@@ -356,7 +376,7 @@ public:
    /** This function appens the next line to this, i.e. joins the two
        lines into one.
    */
-   void MergeNextLine(void);
+   void MergeNextLine(wxLayoutList *llist);
 
    /** This function deletes npos cursor positions from position xpos.
        @param xpos where to delete
@@ -369,7 +389,7 @@ public:
        @param xpos where to break it
        @return pointer to the new line object replacing the old one
    */
-   wxLayoutLine *Break(CoordType xpos);
+   wxLayoutLine *Break(CoordType xpos, wxLayoutList *llist);
 
    /** Deletes the next word from this position, including leading
        whitespace.
@@ -409,7 +429,8 @@ public:
    */
    wxLayoutObjectList::iterator FindObjectScreen(wxDC &dc,
                                                  CoordType xpos,
-                                                 CoordType *offset) const ;
+                                                 CoordType *offset,
+                                                 bool *found = NULL) const ;
 
    /** Get the first object in the list. This is used by the wxlparser 
        functions to export the list.
@@ -423,36 +444,41 @@ public:
    /** Deletes this line, returns pointer to next line.
        @param update If true, update all following lines.
    */
-   wxLayoutLine *DeleteLine(bool update);
+   wxLayoutLine *DeleteLine(bool update, wxLayoutList *llist);
 
    /**@name Cursor Management */
    //@{
    /** Return the line number of this line.
        @return the line number
    */
-   CoordType GetLineNumber(void) const { return m_LineNumber; }
+   inline CoordType GetLineNumber(void) const { return m_LineNumber; }
    /** Return the length of the line.
        @return line lenght in cursor positions
    */
-   CoordType GetLength(void) const { return m_Length; }
+   inline CoordType GetLength(void) const { return m_Length; }
    //@}
 
    /**@name Drawing and Layout */
    //@{
    /** Draws the line on a wxDC.
        @param dc the wxDC to draw on
+       @param llist the wxLayoutList 
        @param offset an optional offset to shift printout
    */
-   void Draw(wxDC &dc, const wxPoint &offset = wxPoint(0,0)) const;
+   void Draw(wxDC &dc,
+             wxLayoutList *llist,
+             const wxPoint &offset = wxPoint(0,0)) const;
    
    /** Recalculates the positions of objects and the height of the
        line.
        @param dc the wxDC to draw on
+       @param llist th   e wxLayoutList 
        @param cursorPos if not NULL, set cursor screen position in there
        @param cursorSize if not cursorPos != NULL, set cursor size in there
        @param cx if cursorPos != NULL, the cursor x position
    */
    void Layout(wxDC &dc,
+               wxLayoutList *llist,
                wxPoint *cursorPos = NULL,
                wxPoint *cursorSize = NULL,
                int cx = 0);
@@ -460,9 +486,13 @@ public:
        position. It assumes that Layout() has been called before.
        @param dc the wxDC to use for calculations
        @param xpos screen x position
+       @param found if non-NULL set to false if we return the last
+       object before the cursor, to true if we really have an object
+       for that position
        @return pointer to the object
    */
-   wxLayoutObject * FindObjectScreen(wxDC &dc, CoordType xpos);
+   wxLayoutObject * FindObjectScreen(wxDC &dc, CoordType xpos, bool
+                                     *found = NULL);
    //@}
 
    /**@name List traversal */
@@ -493,9 +523,14 @@ public:
        minimum(!) recursion level, continue with all lines till the end of
        the list or until the coordinates no longer changed.
    */
-   void RecalculatePositions(int recurse = 0);
+   void RecalculatePositions(int recurse, wxLayoutList *llist);
    /// Recalculates the position of this line on the canvas.
-   wxPoint RecalculatePosition(void);
+   wxPoint RecalculatePosition(wxLayoutList *llist);
+
+#ifdef WXLAYOUT_DEBUG
+   void Debug(void);
+#endif
+   
 private:
    /// Destructor is private. Use DeleteLine() to remove it.
    ~wxLayoutLine();
@@ -506,8 +541,8 @@ private:
        dirty.
        @param height new height
    */
-   void SetHeight(CoordType height)
-      { m_Height = height; RecalculatePositions(true); }
+   void SetHeight(CoordType height, wxLayoutList *llist)
+      { m_Height = height; RecalculatePositions(true, llist); }
 
    /** Moves the linenumbers one on, because a line has been inserted
        or deleted.
@@ -542,6 +577,8 @@ private:
    wxLayoutLine *m_Next;
    /// Just to suppress gcc compiler warnings.
    friend class dummy;
+private:
+   wxLayoutLine(const wxLayoutLine &);
 };
 
 
@@ -562,7 +599,6 @@ public:
    /// Destructor.
    ~wxLayoutList();
 
-   
    /// Clear the list.
    void Clear(int family = wxROMAN,
               int size=WXLO_DEFAULTFONTSIZE,
@@ -571,7 +607,6 @@ public:
               int underline=0,
               wxColour *fg=NULL,
               wxColour *bg=NULL);
-            
    /// Empty: clear the list but leave font settings.
    void Empty(void);
    
@@ -605,7 +640,7 @@ public:
       { MoveCursorHorizontally(-m_CursorPos.x); }
 
    /// Returns current cursor position.
-   wxPoint GetCursorPos(void) const { return m_CursorPos; }
+   wxPoint GetCursorPos(wxDC &dc) const { return m_CursorPos; }
    //@}
 
    /**@name Editing functions.
@@ -671,8 +706,8 @@ public:
    /// sets font parameters
    void SetFont(int family, int size, int style,
                 int weight, int underline,
-                wxColour *fg = NULL,
-                wxColour *bg = NULL);
+                wxColour *fg,
+                wxColour *bg);
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
@@ -694,15 +729,11 @@ public:
    /// set font weight
    inline void SetFontWeight(int weight) { SetFont(-1,-1,-1,weight); }
    /// toggle underline flag
-   inline void SetFontUnderline(bool ul) {
-      SetFont(-1,-1,-1,-1,(int)ul, (const char*)NULL); }
+   inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
    /// set font colours by name
-   inline void SetFontColour(char const *fg, char const *bg = NULL)
-      { SetFont(-1,-1,-1,-1,-1,fg,bg); }
-   /// set font colours by name
-   inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
-      { SetFont(-1,-1,-1,-1,-1,fg,bg); }
-   
+   inline void SetFontColour(char const *fg, char const *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+   /// set font colours by colour
+   inline void SetFontColour(wxColour *fg, wxColour *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
    /**
       Returns a pointer to the default settings.
       This is only valid temporarily and should not be stored
@@ -720,22 +751,23 @@ public:
        @param top optional y coordinate where to start drawing
        @param bottom optional y coordinate where to stop drawing
    */
-   void Draw(wxDC &dc, const wxPoint &offset = wxPoint(0,0),
-             CoordType top = -1, CoordType bottom = -1) const;
+   void Draw(wxDC &dc,
+             const wxPoint &offset = wxPoint(0,0),
+             CoordType top = -1, CoordType bottom = -1);
 
    /** Calculates new layout for the list, like Draw() but does not
        actually draw it.
        @param dc the wxDC to draw on
        @param bottom optional y coordinate where to stop calculating
    */
-   void Layout(wxDC &dc, CoordType bottom = -1) const;
+   void Layout(wxDC &dc, CoordType bottom = -1);
 
    /** Calculates new sizes for everything in the list, like Layout()
        but this is needed after the list got changed.
        @param dc the wxDC to draw on
        @param bottom optional y coordinate where to stop calculating
    */
-   void Recalculate(wxDC &dc, CoordType bottom = -1) const;
+   void Recalculate(wxDC &dc, CoordType bottom = -1);
    
    /** Returns the size of the list in screen coordinates.
        The return value only makes sense after the list has been
@@ -748,8 +780,7 @@ public:
    /** Returns the cursor position on the screen.
        @return cursor position in pixels
    */
-   wxPoint GetCursorScreenPos(void) const
-      { return m_CursorScreenPos; }
+   wxPoint GetCursorScreenPos(wxDC &dc);
    
    /** Draws the cursor.
        @param active If true, draw a bold cursor to mark window as
@@ -764,16 +795,25 @@ public:
        position. It assumes that Layout() has been called before.
        @param pos screen position
        @param cursorPos if non NULL, store cursor position in there
+       @param found if used, set this to true if we really found an
+       object, to false if we had to take the object near to it
        @return pointer to the object
    */
    wxLayoutObject * FindObjectScreen(wxDC &dc,
                                      wxPoint const pos,
-                                     wxPoint *cursorPos = NULL);
+                                     wxPoint *cursorPos = NULL,
+                                     bool *found = NULL);
 
+   /** Called by the objects to update the update rectangle.
+       @param x horizontal coordinate to include in rectangle
+       @param y vertical coordinate to include in rectangle
+   */
+   void SetUpdateRect(CoordType x, CoordType y);
    /** Called by the objects to update the update rectangle.
        @param p a point to include in it
    */
-   void SetUpdateRect(const wxPoint &p);
+   inline void SetUpdateRect(const wxPoint &p)
+      { SetUpdateRect(p.x,p.y); }
    /// Invalidates the update rectangle.
    void InvalidateUpdateRect(void) { m_UpdateRectValid = false; }
    /// Returns the update rectangle.
@@ -789,9 +829,42 @@ public:
          return m_FirstLine;
       }
    //@}
+
+   /// Begin selecting text.
+   void StartSelection(void);
+   // Continue selecting text
+   void ContinueSelection(void);
+   /// End selecting text.
+   void EndSelection(void);
+   /// Are we still selecting text?
+   bool IsSelecting(void);
+   bool IsSelected(const wxPoint &cursor);
+
+   /// starts highlighting of text for selections
+   void StartHighlighting(wxDC &dc);
+   /// ends highlighting of text for selections
+   void EndHighlighting(wxDC &dc);
+   
+   /** Tests whether this layout line is selected and needs
+       highlighting.
+       @param line to test for
+       @param from set to first cursorpos to be highlighted (for returncode == -1)
+       @param to set to last cursorpos to be highlighted  (for returncode == -1)
+       @return 0 = not selected, 1 = fully selected, -1 = partially
+       selected
+       
+   */
+   int IsSelected(const wxLayoutLine *line, CoordType *from, CoordType *to);
+   
+#ifdef WXLAYOUT_DEBUG
+   void Debug(void);
+#endif
 private:
    /// Clear the list.
    void InternalClear(void);
+   /** Calculates the cursor position on the screen.
+   */
+   void UpdateCursorScreenPos(wxDC &dc);
    
    /// The list of lines.
    wxLayoutLine *m_FirstLine;
@@ -811,6 +884,14 @@ private:
    wxLayoutLine *m_CursorLine;
    //@}   
 
+   /// A structure for the selection.
+   struct Selection
+   {
+      bool m_valid;
+      bool m_selecting;
+      wxPoint m_CursorA, m_CursorB;
+      Selection() { m_valid = false; m_selecting = true; }
+   } m_Selection;
    /** @name Font parameters. */
    //@{
    int m_FontFamily, m_FontStyle, m_FontWeight;
@@ -846,6 +927,9 @@ public:
    wxLayoutPrintout(wxLayoutList *llist,
                     wxString const & title =
                     "wxLayout Printout");
+   /// Destructor.
+   ~wxLayoutPrintout();
+   
    /** Function which prints the n-th page.
        @param page the page number to print
        @return bool true if we are not at end of document yet

@@ -61,6 +61,7 @@ public:
 
    /// add a menu to the bar
    void AddEditMenu(void);
+   void AddMessageEditMenu(void);
    void AddFileMenu(void);
    void AddHelpMenu(void);
    void AddMessageMenu(void);

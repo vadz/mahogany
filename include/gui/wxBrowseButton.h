@@ -43,7 +43,6 @@ public:
    virtual void Enable(bool enable)
    {
       m_text->Enable(enable);
-
       wxButton::Enable(enable);
    }
 

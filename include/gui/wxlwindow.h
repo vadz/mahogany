@@ -68,12 +68,16 @@ public:
               wxColour *bg=NULL)
       {
          GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
-         m_maxx = m_maxy = 0;
          SetBackgroundColour(GetLayoutList()->GetDefaults()->GetBGColour());
          ResizeScrollbars(true);
          SetDirty();
          SetModified(false);
-         DoPaint();
+         wxRect r;
+         int w,h;
+         r.x = r.y = 0; GetSize(&w,&h);
+         r.width = w;
+         r.height = h;
+         DoPaint(&r);
       }
    /** Sets a background image, only used on screen, not on printouts.
        @param bitmap a pointer to a wxBitmap or NULL to remove it
@@ -102,10 +106,8 @@ public:
    /** Redraws the window.
        Internally, this stores the parameter and calls a refresh on
        wxMSW, draws directly on wxGTK.
-       @param scrollToCursor if true, scroll the window so that the
-       cursor becomes visible
    */
-   void DoPaint(bool scrollToCursor = false);
+   void DoPaint(const wxRect *updateRect);
 
 #ifdef __WXMSW__
    virtual long MSWGetDlgCode();
@@ -126,6 +128,7 @@ public:
    //@{
    void OnPaint(wxPaintEvent &event);
    void OnChar(wxKeyEvent& event);
+   void OnKeyUp(wxKeyEvent& event);
    void OnMenu(wxCommandEvent& event);
    void OnLeftMouseClick(wxMouseEvent& event)  { OnMouse(WXLOWIN_MENU_LCLICK, event); }
    void OnRightMouseClick(wxMouseEvent& event) { OnMouse(WXLOWIN_MENU_RCLICK, event); }
@@ -147,7 +150,7 @@ public:
    void ResetDirty(void) { m_Dirty = false; }
    //@}
    /// Redraws the window, used by DoPaint() or OnPaint().
-   void InternalPaint(void);
+   void InternalPaint(const wxRect *updateRect);
 
    /// Has list been modified/edited?
    bool IsModified(void) const { return m_Modified; }
@@ -185,6 +188,8 @@ private:
    wxLayoutList *m_llist;
    /// Can user edit the window?
    bool m_Editable;
+   /// Are we currently building a selection with the keyboard?
+   bool m_Selecting;
    /// wrap margin
    CoordType    m_WrapMargin;
    /// Is list dirty (for redraws, internal use)?

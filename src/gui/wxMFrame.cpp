@@ -147,6 +147,12 @@ wxMFrame::AddEditMenu(void)
 }
 
 void
+wxMFrame::AddMessageEditMenu(void)
+{
+   WXADD_MENU(m_MenuBar, MSG_EDIT, _("&Edit"));
+}
+
+void
 wxMFrame::AddHelpMenu(void)
 {
    WXADD_MENU(m_MenuBar, HELP, _("&Help"));

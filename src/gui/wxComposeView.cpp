@@ -483,6 +483,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // build menu
    // ----------
    AddFileMenu();
+   AddMessageEditMenu();
    WXADD_MENU(m_MenuBar, COMPOSE, _("&Compose"));
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
@@ -1046,6 +1047,10 @@ wxComposeView::OnMenuCommand(int id)
       mApplication->Help(
          (m_mode == Mode_NNTP)?
          MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
+      break;
+   case WXMENU_MSG_EDIT_PASTE:
+      m_LayoutWindow->Paste();
+      m_LayoutWindow->Refresh();
       break;
    default:
       wxMFrame::OnMenuCommand(id);

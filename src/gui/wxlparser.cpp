@@ -11,12 +11,6 @@
 #endif
 
 #include "Mpch.h"
-
-#include "wx/wxprec.h"
-#ifdef __BORLANDC__
-#  pragma hdrstop
-#endif
-
 #ifdef M_PREFIX
 #   include "gui/wxllist.h"
 #   include "gui/wxlparser.h"
@@ -33,17 +27,19 @@ inline static bool IsEndOfLine(const char *p, int mode)
    // the DOS one under Windows
    return
       (mode == WXLO_EXPORT_WITH_CRLF) ?
-      ((*p == '\r') && (*(p + 1) == '\n'))
+      ((*p == '\r') && (*(p + 1) == '\n')) 
       :
       (((*p == '\r') && (*(p + 1) == '\n'))||(*p == '\n'));
 }
 
 void wxLayoutImportText(wxLayoutList *list, wxString const &str, int withflag)
 {
+   if(str.Length() == 0)
+      return;
    char * cptr = (char *)str.c_str(); // string gets changed only temporarily
    const char * begin = cptr;
    char  backup;
-
+   
    for(;;)
    {
       begin = cptr;
@@ -74,12 +70,12 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
 {
    static char buffer[20];
    wxString html;
-
+   
    wxLayoutStyleInfo si;
    cmd.GetStyle(&si);
 
    int size, sizecount;
-
+   
    html += "<font ";
 
    html +="color=";
@@ -132,7 +128,7 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
 
    if(si.style == wxSLANT)
       si.style = wxITALIC; // the same for html
-
+   
    if((si.style == wxITALIC) && ( (!styleInfo) || (styleInfo->style != wxITALIC)))
       html += "<i>";
    else
@@ -144,12 +140,34 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
    else if(si.underline == false && ( styleInfo && styleInfo->underline))
       html += "</u>";
 
-
+   
    *styleInfo = si; // update last style info
-
+   
    return html;
 }
 
+
+
+wxLayoutExportStatus::wxLayoutExportStatus(wxLayoutList *list,
+                                           wxPoint fromPos,
+                                           wxPoint toPos)
+{
+   list->GetDefaults()->GetStyle(&m_si);
+   m_line = list->GetFirstLine();
+   m_iterator = m_line->GetFirstObject();
+   m_fromPos = fromPos;
+   m_toPos = toPos;
+
+   if(m_fromPos.x != -1)
+   {
+      while(m_line && m_line->GetLineNumber() != m_fromPos.y)
+         m_line = m_line->GetNextLine();
+      wxASSERT(m_line);
+      CoordType dummy;
+      m_iterator = m_line->FindObject(fromPos.x, &dummy);
+   }
+}
+   
 
 
 #define   WXLO_IS_TEXT(type) \
@@ -159,48 +177,49 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
 
 
 
+extern const wxPoint wxLayoutExportNoPosition = wxPoint(-1,-1);
+
 wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
                                      int mode, int flags)
 {
    wxASSERT(status);
-   wxLayoutExportObject * expObject;
-
+   wxLayoutExportObject * export;
+   
    if(status->m_iterator == NULLIT) // end of line
    {
       if(!status->m_line || status->m_line->GetNextLine() == NULL)
          // reached end of list
          return NULL;
    }
-   expObject = new wxLayoutExportObject();
+   export = new wxLayoutExportObject();
    wxLayoutObjectType type;
    if(status->m_iterator != NULLIT)
    {
       type = (** status->m_iterator).GetType();
       if( mode == WXLO_EXPORT_AS_OBJECTS || ! WXLO_IS_TEXT(type)) // simple case
       {
-         expObject->type = WXLO_EXPORT_OBJECT;
-         expObject->content.object = *status->m_iterator;
+         export->type = WXLO_EXPORT_OBJECT;
+         export->content.object = *status->m_iterator;
          status->m_iterator++;
-         return expObject;
+         return export;
       }
    }
    else
    {  // iterator == NULLIT
       if(mode == WXLO_EXPORT_AS_OBJECTS)
       {
-         expObject->type = WXLO_EXPORT_EMPTYLINE;
-         expObject->content.object = NULL; //empty line
+         export->type = WXLO_EXPORT_EMPTYLINE;
+         export->content.object = NULL; //empty line
          status->m_line = status->m_line->GetNextLine();
          if(status->m_line)
             status->m_iterator = status->m_line->GetFirstObject();
-         return expObject;
+         return export;
       }
       else
          type = WXLO_TYPE_TEXT;
    }
 
    wxString *str = new wxString();
-
    // text must be concatenated
    for(;;)
    {
@@ -220,7 +239,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
             break; // end of list
       }
       if(! status->m_line)  // reached end of list, fall through
-         break;
+         break; 
       type = (** status->m_iterator).GetType();
       if(type == WXLO_TYPE_ICON)
          break;
@@ -232,7 +251,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       case WXLO_TYPE_CMD:
          wxASSERT_MSG( mode == WXLO_EXPORT_AS_HTML,
                        "reached cmd object in text mode" );
-
+         
          *str += wxLayoutExportCmdAsHTML(*(wxLayoutObjectCmd const
                                            *)*status->m_iterator, & status->m_si);
          break;
@@ -242,10 +261,9 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       status->m_iterator++;
    }
 
-   expObject->type = (mode == WXLO_EXPORT_AS_HTML)
+   export->type = (mode == WXLO_EXPORT_AS_HTML)
       ?  WXLO_EXPORT_HTML : WXLO_EXPORT_TEXT;
-   expObject->content.text = str;
-
-   return expObject;
+   export->content.text = str;
+   return export;
 }
 

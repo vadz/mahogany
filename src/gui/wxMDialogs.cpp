@@ -792,7 +792,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
 #endif // Python
    
-   DoPaint();
+   Refresh();
    ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
