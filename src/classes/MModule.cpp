@@ -462,11 +462,11 @@ MModule::ListLoadedModules(void)
 
 /* static */
 MModuleListing *
-MModule::ListAvailableModules(void)
+MModule::ListAvailableModules(const String& interfaceName)
 {
 #ifdef USE_MODULES_STATIC
    return DoListLoadedModules(true);
-#else
+#else // !USE_MODULES_STATIC
    kbStringList modules;
 
    // look under extra M_CANONICAL_HOST directory under Unix, but not for other
@@ -513,7 +513,31 @@ MModule::ListAvailableModules(void)
             }
          }
    }
-   /// Second: load list info:
+
+   // the components of MMD file format
+   enum
+   {
+      MMD_LINE_SIGNATURE,
+      MMD_LINE_NAME,
+      MMD_LINE_INTERFACE,
+      MMD_LINE_VERSION,
+      MMD_LINE_AUTHOR,
+      MMD_LINE_LAST
+   };
+
+   static const char *MMD_HEADERS[] =
+   {
+      MMD_SIGNATURE,
+      "Name:",
+      "Interface:",
+      "Version:",
+      "Author:",
+   };
+
+   ASSERT_MSG( WXSIZEOF(MMD_HEADERS) == MMD_LINE_LAST,
+               "forgot to update the constants describing MMD format" );
+
+   // Second: load list info:
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
    kbStringList::iterator it;
    bool errorflag;
@@ -525,45 +549,50 @@ MModule::ListAvailableModules(void)
       errorflag = false;
       wxTextFile tf(filename);
       if(! tf.Open())
+      {
          errorflag = true;
-      /*
-        We need at least the following lines:
-        Mahogany-Module-Definition"
-        Name:
-        Interface:
-        Version:
-        Author:
-      */
+      }
       else
       {
-         if(tf.GetLineCount() < 5)
+         // check that we have all required lines
+         if(tf.GetLineCount() < MMD_LINE_LAST)
+         {
             errorflag = true;
+         }
          else
          {
-            String first = tf[0].Mid(0,strlen(MMD_SIGNATURE));
-            if(first != MMD_SIGNATURE ||
-               tf[1].Mid(0,strlen("Name:")) != "Name:" ||
-               tf[2].Mid(0,strlen("Interface:")) != "Interface:" ||
-               tf[3].Mid(0,strlen("Version:")) != "Version:" ||
-               tf[4].Mid(0,strlen("Author:")) != "Author:")
-                         errorflag = true;
-            else
+            // check that the first MMD_LINE_LAST lines are correct and get
+            // the values of the fields too
+            wxString headerValues[MMD_LINE_LAST];
+            for ( size_t line = 0; !errorflag && (line < MMD_LINE_LAST); line++ )
             {
-               String description;
-               for(size_t l = 6; l < tf.GetLineCount(); l++)
-                  description << tf[l] << '\n';
-               String name = (**it).AfterLast(DIR_SEPARATOR);
-               name = name.Mid(0, filename.Length()-strlen(".mmd"));
-               String tmp = tf[1].Mid(strlen("Name:")); // == short description
-               MModuleListingEntryImpl entry(
-                  name, // module name
+               if ( !tf[line].StartsWith(MMD_HEADERS[line], &headerValues[line]) )
+                  errorflag = TRUE;
+            }
 
-                  tf[2].Mid(strlen("Interface:")),
-                  tmp,
-                  description,
-                  tf[3].Mid(strlen("Version:")),
-                  tf[4].Mid(strlen("Author:")));
-               (*listing)[count++] = entry;
+            if ( !errorflag )
+            {
+               String interfaceModule = tf[MMD_LINE_INTERFACE].Mid(strlen("Interface:"));
+
+               // take all modules if interfaceName is empty, otherwise only
+               // take those which implement the given interface
+               if ( !!interfaceName || interfaceName == interfaceModule )
+               {
+                  String description;
+                  for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
+                     description << tf[l] << '\n';
+                  String name = (**it).AfterLast(DIR_SEPARATOR);
+                  name = name.Mid(0, filename.Length()-strlen(".mmd"));
+                  MModuleListingEntryImpl entry(
+                     name, // module name
+
+                     headerValues[MMD_LINE_INTERFACE],
+                     headerValues[MMD_LINE_NAME],
+                     description,
+                     headerValues[MMD_LINE_VERSION],
+                     headerValues[MMD_LINE_AUTHOR]);
+                  (*listing)[count++] = entry;
+               }
             }
          }
       }
@@ -577,5 +606,5 @@ MModule::ListAvailableModules(void)
    }
    listing->SetCount(count);
    return listing;
-#endif
+#endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 }

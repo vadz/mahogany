@@ -160,8 +160,10 @@ public:
    /** Returns a pointer to a listing of available modules. Must be
        DecRef()'d by the caller. Does not check if modules are loaded, 
        i.e. GetModule() from these entries will return NULL.
+       If interfaceName is not empty, will only return modules implementing
+       the given interface.
    */
-   static MModuleListing * ListAvailableModules(void);
+   static MModuleListing * ListAvailableModules(const String& interfaceName);
    /** Finds a module which provides the given interface. Only
        searches already loaded modules.
        @param interface name of the interface
