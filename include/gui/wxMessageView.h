@@ -13,37 +13,42 @@
 #endif
 
 #ifndef USE_PCH
-#   include   <Message.h>
-#   include   <MessageView.h>
-#   include   <gui/wxMenuDefs.h>
-#   include   <gui/wxMFrame.h>
-#   include   <XFace.h>
+#   include   "MessageView.h"
+#   include   "gui/wxMFrame.h"
+#   include   "gui/wxlwindow.h"
 #endif
 
 
 class wxMessageViewPanel;
 class wxMessageView;
-class wxLayoutWindow;
+class wxFolderView;
+class XFace;
+class Message;
 
 /** A wxWindows MessageView class
   */
 
-class wxMessageView : public MessageViewBase , public wxPanel
+class wxMessageView : public MessageViewBase, public wxLayoutWindow
 {
 public:
    /** quasi-Constructor
-       @param iname  name of windowclass
+       @param fv a folder view which handles some actions for us
        @param parent parent window
+       @param iname  name of windowclass
    */
-   void Create(const String &iname = String("wxMessageView"),
-     wxMFrame *parent = NULL);
+   void Create(wxFolderView *fv,
+               wxMFrame *parent = NULL,
+               const String &iname = wxString("MessageView"));
 
    /** Constructor
-       @param iname  name of windowclass
+       @param fv a folder view which handles some actions for us
        @param parent parent window
+       @param iname  name of windowclass
    */
-   wxMessageView(const String &iname = String("wxMessageView"),
-     wxMFrame *parent = NULL);
+   wxMessageView(wxFolderView *fv,
+                 wxMFrame *parent = NULL,
+                 const String &iname = String("MessageView")
+                 );
    
    /** Constructor
        @param folder the mailfolder
@@ -52,9 +57,11 @@ public:
        @param parent parent window
    */
    wxMessageView(MailFolder *folder,
-       long num,
-       const String &iname = String("wxMessageView"),
-       wxMFrame  *parent = NULL);
+                 long num,
+                 wxFolderView *fv,
+                 wxMFrame  *parent = NULL,
+                 const String &iname = String("MessageView")
+      );
    /// Destructor
    ~wxMessageView();
 
@@ -87,18 +94,14 @@ private:
    bool initialised;
    /// the parent frame
    wxMFrame   *m_Parent;
-
+   /// number of the message
+   long m_uid;
    /// the current message
    Message   *mailMessage;
    /// the mail folder
    MailFolder   *folder;
-   /// the menu with message related commands
-   wxMenu   *messageMenu;
-   /// the canvas for displaying the mail
-   //wxCanvas   *ftCanvas;
-   wxLayoutWindow *m_LWindow;
-   /// the popup menu
-   wxMenu   *popupMenu;
+   /// the folder view, which handles some actions for us
+   wxFolderView *m_FolderView;
    /// the message part selected for MIME display
    int      mimeDisplayPart;
 
@@ -127,9 +130,13 @@ class wxMessageViewFrame : public wxMFrame
 {
 public:
    wxMessageViewFrame(MailFolder *folder,
-       long num, const String &iname = String("wxMessageView"),
-       wxMFrame  *parent = NULL);
-   void OnMenuCommand(int id);
+                      long num, 
+                      wxFolderView *folderview,
+                      wxMFrame  *parent = NULL,
+                      const String &iname = String("MessageViewFrame"));
+
+   /// wxWin2 event system
+   void OnCommandEvent(wxCommandEvent & event);
 #ifdef USE_WXWINDOWS2
       void OnSize( wxSizeEvent &WXUNUSED(event) );
 #endif

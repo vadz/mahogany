@@ -111,6 +111,13 @@ public:
    */
    void ReplyMessages(wxArrayInt const &messages);
 
+   /** Forward selected messages.
+       
+       @param n number of messages 
+       @messages pointer to an array holding the message numbers
+   */
+   void ForwardMessages(wxArrayInt const &messages);
+
    /** Gets an array containing the positions of the selected
        strings. The number of selections is returned. 
        @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.

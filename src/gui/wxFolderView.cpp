@@ -21,6 +21,7 @@
 #  include "MimeList.h"
 #  include "MimeTypes.h"
 #  include "Profile.h"
+#  include "gui/wxMApp.h"
 #endif
 
 #include <XFace.h>
@@ -38,24 +39,10 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
-#ifdef USE_WXWINDOWS2
-// toolbar icons
-#   include   "../src/icons/tb_exit.xpm"
-#   include   "../src/icons/tb_close.xpm"
-#   include   "../src/icons/tb_help.xpm"
-#   include   "../src/icons/tb_open.xpm"
-#   include   "../src/icons/tb_mail_compose.xpm"
-#   include   "../src/icons/tb_mail_reply.xpm"
-#   include   "../src/icons/tb_mail_forward.xpm"
-#   include   "../src/icons/tb_print.xpm"
-#   include   "../src/icons/tb_trash.xpm"
-#   include   "../src/icons/tb_book_open.xpm"
-#   include   "../src/icons/tb_preferences.xpm"
-#  include <wx/dynarray.h>
-#endif
+#include <wx/dynarray.h>
  
 wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
-            : wxPanel(iparent)
+   : wxPanel(iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
@@ -101,14 +88,14 @@ wxFolderView::Update(void)
    const char *format;
    
 #  ifdef USE_APPCONF
-      bool doesExpand = Profile::GetAppConfig()->doesExpandVariables() != 0;
-      Profile::GetAppConfig()->expandVariables(false);
+   bool doesExpand = Profile::GetAppConfig()->doesExpandVariables() != 0;
+   Profile::GetAppConfig()->expandVariables(false);
 #  endif
 
    format = READ_APPCONFIG(MC_DATE_FMT);
 
 #  ifdef USE_APPCONF
-      Profile::GetAppConfig()->expandVariables(doesExpand);
+   Profile::GetAppConfig()->expandVariables(doesExpand);
 #  endif
 
    listBox->Clear();
@@ -169,13 +156,12 @@ wxFolderView::OnMenuCommand(int id)
       ReplyMessages(selections);
       break;
    case WXMENU_MSG_FORWARD:
-      //n = GetSelections(selections);
-      //SaveMessages(n, selections);
+      GetSelections(selections);
+      ForwardMessages(selections);
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
       DeleteMessages(selections);
-      Update();
       break;
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < listBox->Number(); n++)
@@ -210,7 +196,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
       mptr = mailFolder->GetMessage(selections[i]+1);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageViewFrame(mailFolder,selections[i]+1,
-              "wxMessageView",parent);
+                                         this);
       mv->SetTitle(title);
    }
 }
@@ -222,6 +208,7 @@ wxFolderView::DeleteMessages(const wxArrayInt& selections)
    int i;
    for(i = 0; i < n; i++)
       mailFolder->DeleteMessage(selections[i]+1);
+   Update();
 }
 
 void
@@ -231,12 +218,12 @@ wxFolderView::SaveMessages(const wxArrayInt& selections)
    String str;
 
 #  ifdef  USE_WXWINDOWS2
-      wxString 
+   wxString 
 #  else
       char *
 #  endif
-   folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
-                                  _("Save Message"),"",this);
+      folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
+                                     _("Save Message"),"",this);
    MailFolderCC   *mf;
    
    if(! folderName || strlen(folderName) == 0)
@@ -271,27 +258,56 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       msg = mailFolder->GetMessage(selections[i]+1);
       msg->WriteToString(str, false);
       cv = GLOBAL_NEW wxComposeView(_("Reply"),parent,
-              mailFolder->GetProfile());
+                                    mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
       while(*cptr)
       {
-    str2 += *cptr;
-    if(*cptr == '\n')
-       str2 += prefix;
-    cptr++;
+         str2 += *cptr;
+         if(*cptr == '\n')
+            str2 += prefix;
+         cptr++;
       }
       cv->InsertText(str2);
       cv->Show(TRUE);
       String
-    name, email;
+         name, email;
       email = msg->Address(name, MAT_REPLYTO);
       if(name.length() > 0)
-    email = name + String(" <") + email + String(">");
+         email = name + String(" <") + email + String(">");
       cv->SetTo(email);
       cv->SetSubject(mailFolder->GetProfile()
-           ->readEntry(MP_REPLY_PREFIX,MP_REPLY_PREFIX_D) + msg->Subject());
+                     ->readEntry(MP_REPLY_PREFIX,MP_REPLY_PREFIX_D) + msg->Subject());
    }
+}
+
+
+void
+wxFolderView::ForwardMessages(const wxArrayInt& selections)
+{
+   int i;
+   String str;
+   String str2, prefix;
+   const char *cptr;
+   wxComposeView *cv;
+   Message *msg;
+
+   int n = selections.Count();
+   prefix = mailFolder->GetProfile()->readEntry(MP_REPLY_MSGPREFIX,MP_REPLY_MSGPREFIX_D);
+   for(i = 0; i < n; i++)
+   {
+      str = "";
+      msg = mailFolder->GetMessage(selections[i]+1);
+      cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
+                                    mailFolder->GetProfile());
+      cv->SetSubject(mailFolder->GetProfile()
+                     ->readEntry(MP_FORWARD_PREFIX,MP_FORWARD_PREFIX_D) + msg->Subject());
+
+      mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
+#pragma warning FIXME: needs completion or even easier interface
+//      cv->InsertFile(tmpfilename,"MESSAGE/RFC822",TYPEMESSAGE);
+   }
+
 }
 
 wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
@@ -299,9 +315,9 @@ wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
    folderView = iFolderView;
 
 #  ifdef USE_WXWINDOWS2
-      Create(folderView, -1);
+   Create(folderView, -1);
 #  else
-      Create(folderView);
+   Create(folderView);
 #  endif
 }
 
@@ -314,7 +330,7 @@ wxFolderViewPanel::OnDefaultAction(wxItem *item)
 }
 
 #ifdef USE_WXWINDOWS2
-   // @@@ wxFolderViewPanel::OnCommand() doesn't eixst in wxWin2
+// @@@ wxFolderViewPanel::OnCommand() doesn't eixst in wxWin2
 #else // wxWin1
 void
 wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
@@ -328,14 +344,14 @@ wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
 
 
 #ifdef USE_WXWINDOWS2
-   BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
-      EVT_SIZE    (    wxFolderViewFrame::OnSize)
+BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
+   EVT_SIZE    (    wxFolderViewFrame::OnSize)
    END_EVENT_TABLE()
 #endif // wxWin2
 
-wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
-                                     wxFrame *parent)
-   : wxMFrame(folderName, parent)
+   wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
+                                        wxFrame *parent)
+      : wxMFrame(folderName, parent)
 {
    VAR(folderName);
    m_FolderView = NULL;
@@ -353,21 +369,21 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
    m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, tb_open, WXMENU_MSG_OPEN, "Open message");
-   TB_AddTool(m_ToolBar, tb_close, WXMENU_FILE_CLOSE, "Close folder");
+   TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_MSG_OPEN, "Open message");
+   TB_AddTool(m_ToolBar, ICON("tb_close"), WXMENU_FILE_CLOSE, "Close folder");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, tb_mail_compose, WXMENU_FILE_COMPOSE, "Compose message");
-   TB_AddTool(m_ToolBar, tb_mail_forward, WXMENU_MSG_FORWARD, "Forward message");
-   TB_AddTool(m_ToolBar, tb_mail_reply, WXMENU_MSG_REPLY, "Reply to message");
-   TB_AddTool(m_ToolBar, tb_print, WXMENU_MSG_PRINT, "Print message");
-   TB_AddTool(m_ToolBar, tb_trash, WXMENU_MSG_DELETE, "Delete message");
+   TB_AddTool(m_ToolBar, ICON("tb_mail_compose"), WXMENU_FILE_COMPOSE, "Compose message");
+   TB_AddTool(m_ToolBar, ICON("tb_mail_forward"), WXMENU_MSG_FORWARD, "Forward message");
+   TB_AddTool(m_ToolBar, ICON("tb_mail_reply"), WXMENU_MSG_REPLY, "Reply to message");
+   TB_AddTool(m_ToolBar, ICON("tb_print"), WXMENU_MSG_PRINT, "Print message");
+   TB_AddTool(m_ToolBar, ICON("tb_trash"), WXMENU_MSG_DELETE, "Delete message");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, tb_book_open, WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, tb_preferences, WXMENU_EDIT_PREFERENCES, "Edit Preferences");
+   TB_AddTool(m_ToolBar, ICON("tb_book_open"), WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, ICON("tb_preferences"), WXMENU_EDIT_PREFERENCES, "Edit Preferences");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, tb_help, WXMENU_HELP_ABOUT, "Help");
+   TB_AddTool(m_ToolBar, ICON("tb_help"), WXMENU_HELP_ABOUT, "Help");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
+   TB_AddTool(m_ToolBar, ICON("tb_exit"), WXMENU_FILE_EXIT, "Exit M");
 #endif
 
    m_FolderView = new wxFolderView(folderName,this);
@@ -387,11 +403,11 @@ void
 wxFolderViewFrame::OnSize( wxSizeEvent &event )
    
 {
-  int x = 0;
-  int y = 0;
-  GetClientSize( &x, &y );
-  if(m_ToolBar)
-     m_ToolBar->SetSize( 1, 0, x-2, 30 );
-  if(m_FolderView)
-     m_FolderView->SetSize(1,30,x-2,y);
+   int x = 0;
+   int y = 0;
+   GetClientSize( &x, &y );
+   if(m_ToolBar)
+      m_ToolBar->SetSize( 1, 0, x-2, 30 );
+   if(m_FolderView)
+      m_FolderView->SetSize(1,30,x-2,y);
 };

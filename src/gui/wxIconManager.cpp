@@ -35,10 +35,12 @@
 #  define   dvi_xpm         "dvi"
 #  define   hlink_xpm   "hlink"
 #  define   ftplink_xpm "ftplink"
+#  define   mframe_xpm  "mframe"
 #else   //real XPMs
 #  include  "../src/icons/unknown.xpm"
 #  include  "../src/icons/hlink.xpm"
 #  include  "../src/icons/ftplink.xpm"
+#  include  "../src/icons/MFrame.xpm"
 #endif  //Win/Unix
 
 #include    "gui/wxIconManager.h"
@@ -55,6 +57,7 @@ wxIconManager::wxIconManager()
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
+   AddIcon("MFrame", ftplink_xpm);
    unknownIcon = new wxIcon(unknown_xpm,-1,-1);
 }
 

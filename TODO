@@ -4,23 +4,27 @@ $Id$
 *** bugs to fix ***
 - MessageView:
   + extraction of parameter list and filenames for mime handling/saving
-  + fix size an parent relationships
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
-  + wxMessageView : Profile reading causes segfault, marked with FIXME
-  + fix profile mess in here, use folder profile and MessageView profile
-  + ADD FORWARD AND REPLY, using wxFolderView functionality
+  + occasional Xlib error messages from MimePopup/Handle  WHAT's that?
 
 - ComposeView:
    + extra header lines don't get set, why? Profile bug?
 
+- wxFolderView:
+  + add wxMessageView
+  + use ListCtrl
+  + complete ForwardMessages, add InsertData() to wxComposeView
+
 - wxLayout:
-  + fix my printing code in wxl*.new in src/Projects/wxLayout
+  + fix wxGTK postscript printing which is pretty broken
+  + deletion of first character (ComposeView)?
   + backspace sometimes goes wrong, occasional editing problems
   + flicker
 
-- parent frames should not be NULL in dialogs
-  (does not happen when run in gdb)
+- configure: USE_WXCONFIG does not get defined!
+
+- SEGFAULT on  exit if a message was opened, i.e. if Exit is called before closing all windows
 
 - WINDOWS: how to do MIME handling?
 

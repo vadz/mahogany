@@ -3,29 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$              *
- *
- * $Log$
- * Revision 1.10  1998/07/10 09:24:43  KB
- * minor changes and support for c-client config in configure.in
- *
- * Revision 1.9  1998/07/05 12:20:05  KB
- * wxMessageView works and handles mime (segfault on deletion)
- * wsIconManager loads files
- * install target
- *
- * Revision 1.8  1998/05/30 17:55:31  KB
- * Python integration mostly complete, added hooks and sample callbacks.
- * Wrote documentation on how to use it.
- *
- * Revision 1.7  1998/05/24 14:47:10  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.6  1998/05/02 18:29:57  KB
- * After many problems, Python integration is eventually taking off -
- * works.
- *
+ * $Id$
  *
  *******************************************************************/
 
@@ -198,6 +176,8 @@
 #define   MP_REPLY_PREFIX         "ReplyPrefix"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
+/// prefix for subject in forwards
+#define   MP_FORWARD_PREFIX         "ForwardPrefix"
 /// show XFaces?
 #define   MP_SHOW_XFACES         "ShowXFaces"
 // show graphics inline
@@ -306,9 +286,9 @@
 /// log level
 #define   MP_LOGLEVEL_D         0
 /// add extra headers
-#define   MP_ADD_EXTRAHEADERS_D      1
+#define   MP_ADD_EXTRAHEADERS_D      0
 /// list of extra headers, semicolon separated name=value
-#define   MP_EXTRAHEADERS_D      "X-Mailer=M"
+#define   MP_EXTRAHEADERS_D      ""
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH_D      ""
 /// the default filename for saving files
@@ -347,18 +327,20 @@
 #define   MP_REPLY_PREFIX_D      "Re:"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_D      " > "
+/// prefix for subject in forwards
+#define   MP_FORWARD_PREFIX_D      "Forwarded message: "
 /// show XFaces?
 #define   MP_SHOW_XFACES_D      1
 // show graphics inline
 #define   MP_INLINE_GFX_D       1
 /// which font to use
-#define   MP_FTEXT_FONT_D         0
+#define   MP_FTEXT_FONT_D         wxTELETYPE
 /// which font size
-#define   MP_FTEXT_SIZE_D         12
+#define   MP_FTEXT_SIZE_D         16
 /// which font style
-#define   MP_FTEXT_STYLE_D      1
+#define   MP_FTEXT_STYLE_D      wxNORMAL
 /// which font weight
-#define   MP_FTEXT_WEIGHT_D      0
+#define   MP_FTEXT_WEIGHT_D     wxNORMAL
 // which foreground colour for the font
 #define   MP_FTEXT_FGCOLOUR_D      "black"
 // which background colour for the font

@@ -53,12 +53,6 @@
 #include   "gui/wxFolderView.h"
 #include   "gui/wxAdbEdit.h"
 
-#ifdef    OS_WIN
-#  define   MFrame_xpm    "MFrame"
-#else
-#  include   "../src/icons/MFrame.xpm"
-#endif
-
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #ifdef  USE_WXWINDOWS2
@@ -119,11 +113,7 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    wxFrame::CreateFrame(parent, MFrameBase::GetName(), xpos, ypos, width, height);
    //Show(true);
 
-#if   defined(USE_WXWINDOWS2) && defined(USE_WXGTK)
-   SetIcon(new wxIcon(MFrame_xpm,-1,-1));
-#else
-   SetIcon(new wxIcon(MFrame_xpm));
-#endif
+   SetIcon(ICON("MFrame"));
   
    initialised = true;
    menuBar = new wxMenuBar;
@@ -186,6 +176,7 @@ wxMFrame::AddMessageMenu(void)
    messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
    messageMenu->Append(WXMENU_MSG_DELETE,(char *)_("&Delete"));
    messageMenu->Append(WXMENU_MSG_SAVE,(char *)_("&Save"));
+   messageMenu->Append(WXMENU_MSG_PRINT,(char *)_("&Print"));
    messageMenu->Append(WXMENU_MSG_SELECTALL, (char *)_("Select &all"));
    messageMenu->Append(WXMENU_MSG_DESELECTALL, (char *)_("&Deselect all"));
    messageMenu->AppendSeparator();

@@ -26,7 +26,7 @@
 #ifdef USE_STD_STRING
 #   include   <string>
     typedef   std::string String;
-#   define    Str(str)((str).c_str())
+#   define    Str(str)(str.c_str())
 #else
     typedef   wxString String;
 #   define    Str(str) str

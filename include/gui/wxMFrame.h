@@ -28,7 +28,7 @@ class wxMFrame : public wxFrame, public MFrameBase
    DECLARE_DYNAMIC_CLASS(wxMFrame)
 public:
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
-   wxMFrame() : MFrameBase("") { FAIL; }
+   wxMFrame() : MFrameBase("") { initialised = false; }
    /// Constructor
    wxMFrame(const String &iname, wxWindow *parent = NULL);
    /// Creates an object
@@ -82,9 +82,9 @@ protected:
    /// toolbar:
    wxMToolBar *m_ToolBar;
 #endif
-private:
    /// is it initialised?
    bool  initialised;
+private:
    ///  try to save the window position and size in config file
    void  SavePosition(void);
 };

@@ -10,6 +10,10 @@
 
 #include	"config.h"
 
+
+/// M release number and name
+#define   M_RELEASE_STRING "pre-alpha 0.00 \"$name$\""
+
 #undef	OS_UNIX
 #undef	OS_WIN
 #undef	OS_TYPE

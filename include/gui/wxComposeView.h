@@ -77,11 +77,13 @@ public:
    /// Destructor
    ~wxComposeView();
 
-   /// return true if initialised
-   inline bool IsInitialised(void) const { return initialised; }
-
-   /// insert a file into buffer
-   void InsertFile(void);
+   /** insert a file into buffer
+       @param filename file to insert
+       @param mimetype mimetype to use
+       @param num_mimetype numeric mimetype
+       */
+   void InsertFile(const char *filename = NULL, const char *mimetype =
+   NULL, int num_mimetype = 0);
 
    /// sets To field
    void SetTo(const String &to);
@@ -128,9 +130,6 @@ public:
    void OnCommand(wxWindow &win, wxCommandEvent &event);
 #endif //wxWin1/2
 private:
-   /// is initialised?
-   bool initialised;
-
    /// a profile
    Profile * profile;
 

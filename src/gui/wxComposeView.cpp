@@ -415,21 +415,28 @@ wxComposeView::OnMenuCommand(int id)
    }
 }
 void
-wxComposeView::InsertFile(void)
+wxComposeView::InsertFile(const char *filename, const char *mimetype,
+                          int num_mimetype)
 {
    MimeContent 
       *mc = new MimeContent();
-   const char
-      *filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,profile);
 
-   if(! filename)
-      return;
+   if(filename == NULL)
+   {
+      filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,profile);
+      if(! filename)
+         return;
+      mc->m_NumericMimeType = TYPEAPPLICATION;
+      if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
+         mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
+   }
+   else
+   {
+      mc->m_NumericMimeType = num_mimetype;
+      mc->m_MimeType = mimetype;
+   }
 
-   mc->m_FileName = "";
-   mc->m_FileName += filename;
-   mc->m_NumericMimeType = TYPEAPPLICATION;
-   if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
-      mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
+   mc->m_FileName = filename;
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
    obj->SetUserData(mc);
