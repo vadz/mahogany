@@ -99,6 +99,8 @@ public:
    virtual void OnClear(MFolder *folder);
       // the folder must be closed, return FALSE to prevent it from closing
    virtual bool OnClose(MFolder *folder);
+      // update the status of the folder shown in the tree
+   virtual void OnUpdate(MFolder *folder);
 
    // low level events (have reasonable default implementation in base class)
       // folder double clicked/enter pressed

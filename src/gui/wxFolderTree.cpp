@@ -384,6 +384,7 @@ protected:
    void DoFolderDelete(bool removeOnly = true);
    void DoFolderClear();
    void DoFolderClose();
+   void DoFolderUpdate();
 
    void DoBrowseSubfolders();
 
@@ -434,6 +435,7 @@ private:
          Delete = WXMENU_FOLDER_DELETE,
          Rename = WXMENU_FOLDER_RENAME,
          Close = WXMENU_FOLDER_CLOSE,
+         Update = WXMENU_FOLDER_UPDATE,
          BrowseSub = WXMENU_FOLDER_BROWSESUB,
          Properties = WXMENU_FOLDER_PROP,
          ShowHidden
@@ -459,6 +461,7 @@ private:
          if ( !isRoot )
          {
             Append(Close, _("&Close folder"));
+            Append(Update, _("&Update status"));
          }
 
          AppendSeparator();
@@ -786,6 +789,11 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
       menu->Enable(WXMENU_FOLDER_CLEAR, !isGroup);
    }
 
+   if ( menu->FindItem(WXMENU_FOLDER_UPDATE) )
+   {
+      menu->Enable(WXMENU_FOLDER_UPDATE, !isGroup);
+   }
+
    // browsing subfolders only makes sense if we have any and not for the
    // simple groups which can contain anything - so browsing is impossible
    bool mayHaveSubfolders =
@@ -1089,6 +1097,21 @@ void wxFolderTree::OnClear(MFolder *folder)
                      _("%lu messages were deleted from folder '%s'."),
                      (unsigned long)n, fullname.c_str());
       }
+   }
+}
+
+void wxFolderTree::OnUpdate(MFolder *folder)
+{
+   if ( !MailFolder::CheckFolder(folder) )
+   {
+      wxLogError(_("Failed to update the status of the folder '%s'."),
+                 folder->GetFullName().c_str());
+   }
+   else
+   {
+      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+                  _("Updated status of the folder '%s'"),
+                  folder->GetFullName().c_str());
    }
 }
 
@@ -1852,6 +1875,19 @@ void wxFolderTreeImpl::DoFolderClear()
    m_sink->OnClear(folder);
 }
 
+void wxFolderTreeImpl::DoFolderUpdate()
+{
+   MFolder_obj folder = m_sink->GetSelection();
+   if ( !folder.IsOk() )
+   {
+      wxLogError(_("Please select the folder to update first."));
+
+      return;
+   }
+
+   (void)m_sink->OnUpdate(folder);
+}
+
 void wxFolderTreeImpl::DoFolderClose()
 {
    MFolder_obj folder = m_sink->GetSelection();
@@ -2372,6 +2408,10 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
 
       case FolderMenu::Close:
          DoFolderClose();
+         break;
+
+      case FolderMenu::Update:
+         DoFolderUpdate();
          break;
 
       case FolderMenu::BrowseSub:

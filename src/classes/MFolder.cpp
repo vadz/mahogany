@@ -976,6 +976,11 @@ void MFolderCache::RenameAll(const String& oldName, const String& newName)
 // MFolderTraversal
 // ----------------------------------------------------------------------------
 
+MFolderTraversal::MFolderTraversal()
+{
+   // leave m_folderName empty for the root folder
+}
+
 MFolderTraversal::MFolderTraversal(const MFolder& folderStart)
 {
    m_folderName = folderStart.GetFullName();

@@ -2487,6 +2487,7 @@ static const struct
    { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
+   { "ConfirmUpdateAll",         gettext_noop("ask for confirmation before updating all folders") },
    //{ "", gettext_noop() },
 };
 

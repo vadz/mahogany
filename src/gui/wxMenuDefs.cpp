@@ -257,7 +257,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tCtrl-Q"),             gettext_noop("Quit the application")     , FALSE },
 
    // folder
-   // available accels: DGHJKMQSTUVWXYZ
+   // available accels: DGHJKMQSTVWXYZ
    { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
    { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , FALSE },
    { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , FALSE },
@@ -267,6 +267,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_CLEAR,     gettext_noop("C&lear..."), gettext_noop("Delete all messages in the folder")               , FALSE },
    { WXMENU_FOLDER_CLOSE,     gettext_noop("Clos&e"), gettext_noop("Close the current folder")               , FALSE },
    { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , FALSE },
+   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_UPDATE,    gettext_noop("&Update"), gettext_noop("Update the shown status of this folder"), FALSE },
+   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Upda&te all..."), gettext_noop("Update the status of all folders in the folder tree"), FALSE },
    { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
    { WXMENU_FOLDER_IMPORTTREE,gettext_noop("&Import file folders..."),
                               gettext_noop("Create folders for all files in a directory"), FALSE },

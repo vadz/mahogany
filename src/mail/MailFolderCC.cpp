@@ -689,7 +689,7 @@ public:
       ms_mailstatus = mailstatus;
       memset(ms_mailstatus, 0, sizeof(*ms_mailstatus));
 
-      if ( !mail_valid_net_parse((char *)mailbox.c_str(), &ms_mailbox) )
+      if ( !CanonicalizeMailbox(mailbox, &ms_mbx, &ms_filename) )
       {
          FAIL_MSG( "c-client failed to parse our spec?" );
       }
@@ -702,12 +702,44 @@ public:
       gs_mmStatusRedirect = NULL;
 
       ms_mailstatus = NULL;
-      // ms_mailbox.clear(); -- unneeded
    }
 
 private:
-   static NETMBX ms_mailbox;
+   // we have either the filename for the local folders or the parsed struct
+   // for the remote ones
+   static String ms_filename;
+   static NETMBX ms_mbx;
+
+   // we store the result of mm_status() here
    static MAILSTATUS *ms_mailstatus;
+
+   // bring the folder name to the canonical form: for the filenames this means
+   // making it absolute, for the remote folders - parsing it into a NETMBX
+   // which can be compared with another NETMBX later
+   //
+   // returns false if we failed to parse the mailbox spec
+   static bool CanonicalizeMailbox(const char *mailbox,
+                                   NETMBX *mbx,
+                                   String *filename)
+   {
+      CHECK( mailbox && mbx && filename, false,
+             "CanonicalizeMailbox: NULL parameter" );
+
+      if ( *mailbox == '{' )
+      {
+         // remote spec
+         if ( !mail_valid_net_parse((char *)mailbox, mbx) )
+         {
+            return false;
+         }
+      }
+      else // local file
+      {
+         *filename = strutil_expandfoldername(mailbox);
+      }
+
+      return true;
+   }
 
    static void MMStatusRedirectorHandler(MAILSTREAM * /* stream */,
                                          const char *name,
@@ -718,26 +750,44 @@ private:
       // NB: note that simply comparing the names doesn't work because the
       //     name we have might not be in the canonical form while c-client's
       //     name already is
-      NETMBX mb;
-      if ( !mail_valid_net_parse((char *)name, &mb) )
+      String filename;
+      NETMBX mbx;
+      if ( !CanonicalizeMailbox(name, &mbx, &filename) )
       {
          FAIL_MSG( "c-client failed to parse its own spec?" );
       }
-      else
+      else // parsed ok
       {
-         if ( !strcmp(ms_mailbox.host, mb.host) &&
-              !strcmp(ms_mailbox.user, mb.user) &&
-              !strcmp(ms_mailbox.mailbox, mb.mailbox) &&
-              !strcmp(ms_mailbox.service, mb.service) &&
-              (!ms_mailbox.port || (ms_mailbox.port == mb.port)) )
+         // what have we got?
+         if ( filename.empty() )
          {
-            memcpy(ms_mailstatus, mailstatus, sizeof(*ms_mailstatus));
+            // remote spec
+            if ( strcmp(ms_mbx.host, mbx.host) ||
+                 strcmp(ms_mbx.user, mbx.user) ||
+                 strcmp(ms_mbx.mailbox, mbx.mailbox) ||
+                 strcmp(ms_mbx.service, mbx.service) ||
+                 (ms_mbx.port && (ms_mbx.port != mbx.port)) )
+            {
+               // skip the assignment below
+               return;
+            }
          }
+         else // local file
+         {
+            if ( !strutil_compare_filenames(filename, ms_filename) )
+            {
+               // skip the assignment below
+               return;
+            }
+         }
+
+         memcpy(ms_mailstatus, mailstatus, sizeof(*ms_mailstatus));
       }
    }
 };
 
-NETMBX MMStatusRedirector::ms_mailbox;
+String MMStatusRedirector::ms_filename;
+NETMBX MMStatusRedirector::ms_mbx;
 MAILSTATUS *MMStatusRedirector::ms_mailstatus = NULL;
 
 // ----------------------------------------------------------------------------
@@ -2467,24 +2517,13 @@ MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 // this function should normally always return a non NULL folder
 /* static */
 MailFolderCC *
-MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
+MailFolderCC::LookupObject(const MAILSTREAM *stream, const char *name)
 {
    MailFolderCC *mf = LookupStream(stream);
    if ( mf )
       return mf;
 
-   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
-      for e.g. mail_status(), that is difficult to handle here, we
-      must compare the name parameter which might not be 100%
-      identical, but we can check the hostname for identity and the
-      path. However, that seems a bit far-fetched for now, so I just
-      make sure that ms_StreamListDefaultObj gets set before any call to
-      mail_status(). If that doesn't work, we need to parse the name
-      string for hostname, portnumber and path and compare these.
-
-      FIXME: This might be an issue for MT code.
-   */
-   if(name)
+   if ( name )
    {
       StreamConnectionList::iterator i;
       for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
@@ -2495,13 +2534,19 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       }
    }
 
-   if(ms_StreamListDefaultObj)
+   if ( ms_StreamListDefaultObj )
    {
       wxLogTrace(TRACE_MF_CACHE, "Routing call to default mailfolder.");
       return ms_StreamListDefaultObj;
    }
 
-   FAIL_MSG("Cannot find mailbox for callback!");
+   // mail_status() sometimes (depends on the folder type and server
+   // capabilities for IMAP) allocates a private stream which we don't know
+   // about - just ignore it here, but panic otherwise (we risk to miss some
+   // important notification!)
+   //
+   // NB: gs_mmStatusRedirect is !NULL only while we're inside mail_status()
+   ASSERT_MSG( gs_mmStatusRedirect, "No mailfolder for c-client callback?" );
 
    return NULL;
 }

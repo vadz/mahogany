@@ -72,6 +72,14 @@ extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// update the status of all folders shown in the folder tree, returns the
+// number of the folders updated or -1 on error
+static int UpdateAllFolders(wxWindow *parent);
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -523,7 +531,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_FOLDER_FILTERS:
             {
-               MFolder_obj folder(m_FolderTree->GetSelection());
+               MFolder_obj folder = m_FolderTree->GetSelection();
                if ( folder )
                   ConfigureFiltersForFolder(folder, this);
             }
@@ -574,6 +582,50 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                else
                {
                   wxLogStatus(this, _("Closed %d folders."), nClosed);
+               }
+            }
+            break;
+
+         case WXMENU_FOLDER_UPDATE:
+            {
+               MFolder_obj folder = m_FolderTree->GetSelection();
+               if ( folder )
+               {
+                  if ( !MailFolder::CheckFolder(folder) )
+                  {
+                     wxLogError(_("Failed to update the status of "
+                                  "the folder '%s'."),
+                                folder->GetFullName().c_str());
+                  }
+                  else
+                  {
+                     wxLogStatus(this, _("Updated status of the folder '%s'"),
+                                 folder->GetFullName().c_str());
+                  }
+               }
+            }
+            break;
+
+         case WXMENU_FOLDER_UPDATEALL:
+            if ( MDialog_YesNoDialog
+                 (
+                  _("Please note that updating all folders may take a long "
+                    "time. Do you still want to do it?"),
+                  this,
+                  _("Please confirm full rescan"),
+                  false, // [No] default
+                  GetPersMsgBoxName(M_MSGBOX_CONFIRM_UPDATE_ALL)
+                 ) )
+            {
+               int nUpdated = UpdateAllFolders(this);
+               if ( nUpdated < 0 )
+               {
+                  wxLogError(_("Failed to update the status"));
+               }
+               else
+               {
+                  wxLogStatus(this, _("Updated status of %d folder."),
+                              nUpdated);
                }
             }
             break;
@@ -659,5 +711,59 @@ Profile *
 wxMainFrame::GetFolderProfile(void)
 {
    return m_FolderView ? m_FolderView->GetProfile() : NULL;
+}
+
+// ----------------------------------------------------------------------------
+// UpdateAllFolders() implementation
+// ----------------------------------------------------------------------------
+
+class UpdateFolderVisitor : public MFolderTraversal
+{
+public:
+   UpdateFolderVisitor(wxWindow *parent)
+      : m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
+   {
+      m_nCount = 0;
+   }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+   {
+      MFolder_obj folder(folderName);
+      CHECK( folder, false, "visiting folder which doesn't exist?" );
+
+      if ( !folder->CanOpen() )
+      {
+         // skip this one and continue
+         return true;
+      }
+
+      if ( !MailFolder::CheckFolder(folder) )
+      {
+         // stop on error as chances are that the other ones could follow
+         return false;
+      }
+
+      m_progInfo.SetValue(++m_nCount);
+
+      return true;
+   }
+
+   size_t GetCountTraversed() const { return m_nCount; }
+
+private:
+   // the progress indicator
+   MProgressInfo m_progInfo;
+
+   // the count of the folders traversed so far
+   size_t m_nCount;
+};
+
+static int UpdateAllFolders(wxWindow *parent)
+{
+   UpdateFolderVisitor visitor(parent);
+
+   (void)visitor.Traverse();
+
+   return visitor.GetCountTraversed();
 }
 

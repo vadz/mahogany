@@ -288,6 +288,9 @@ private:
 class MFolderTraversal
 {
 public:
+   /// traverse starting from the root folder (i.e. everything)
+   MFolderTraversal();
+
    /// give the folder from which to start to the ctor
    MFolderTraversal(const MFolder& folderStart);
 

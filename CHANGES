@@ -1,11 +1,12 @@
       This file contains the detailed list of the user visible changes in
       Mahogany, you can use it to find all important changes between releases.
-      Please refer to the cvs update list archives for the detailed list of
-      all changes.
+      Please refer to the cvs update list archives for the even more detailed
+      list of all changes.
 
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+16.11.01 VZ: added "Update" and "Update all" commands in the "Folder" menu
 15.11.01 VZ: added possibility to monitor the folders in the background
 14.11.01 VZ: apply filters faster by evaluating them all first
 02.11.01 VZ: show "busy info" dialog during long uninterruptible operations
