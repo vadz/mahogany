@@ -3576,6 +3576,7 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
    props.name = wxFileNameFromPath(filename);
    props.mimetype = strMimeType;
    mc->SetFile(props.filename);
+   mc->SetName(props.name);
 
    // by default propose to send the images and text parts inline but all the
    // rest as attachment
@@ -3584,6 +3585,7 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
                         primaryType == MimeType::IMAGE
                         ? AttachmentProperties::Disposition_Inline
                         : AttachmentProperties::Disposition_Attachment;
+   mc->SetDisposition(props.GetDisposition());
 
    // show the attachment properties dialog automatically?
    String configPath = GetPersMsgBoxName(M_MSGBOX_MIME_TYPE_CORRECT);
