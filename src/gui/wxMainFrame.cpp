@@ -41,6 +41,7 @@
 #include "gui/wxFolderTree.h"
 
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder
+#include "gui/wxIdentityCombo.h" // for IDC_IDENT_COMBO
 
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
@@ -234,8 +235,10 @@ private:
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
-  EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
-  EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
+   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
+   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
+
+   EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -450,6 +453,23 @@ wxMainFrame::CanClose() const
    if(rc == TRUE)
       m_FolderView->SetFolder(NULL);
    return rc;
+}
+
+void
+wxMainFrame::OnIdentChange(wxCommandEvent &event)
+{
+   Profile *profile = mApplication->GetProfile();
+   if ( event.GetInt() == 0 )
+   {
+      // restore the default identity
+      profile->DeleteEntry(MP_CURRENT_IDENTITY);
+   }
+   else
+   {
+      profile->writeEntry(MP_CURRENT_IDENTITY, event.GetString());
+   }
+
+   // TODO: update everything on identity change
 }
 
 void

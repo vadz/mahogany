@@ -23,7 +23,7 @@ enum
 };
 
 /// create the identity combobox, may return NULL if no identities defined
-extern wxComboBox *CreateIdentCombo(wxWindow *parent);
+extern wxChoice *CreateIdentCombo(wxWindow *parent);
 
 //(implemented in src/gui/wxMDialogs.cpp)
 

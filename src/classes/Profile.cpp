@@ -142,7 +142,7 @@ public:
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
-   //@{  
+   //@{
    /// Read a character entry.
    virtual String readEntry(const String & key,
                             const String & defaultvalue = (const char*)NULL,
@@ -206,7 +206,7 @@ public:
    /// Returns a unique, not yet existing sub-group name: //MT!!
    virtual String GetUniqueGroupName(void) const
       { return "NOSUCHGROUP"; }
-   
+
    /// Returns a pointer to the parent profile.
    virtual Profile *GetParent(void) const
       { return m_Parent; }
@@ -290,7 +290,7 @@ public:
                   bool * found = NULL) const;
    /// Read string or integer
    virtual void readEntry(LookupData &ld) const;
-   
+
    /// Write back the character value.
    bool writeEntry(const String & key,
                    const String & Value);
@@ -354,7 +354,7 @@ public:
    virtual void SetIdentity(const String & idName);
    virtual void ClearIdentity(void);
    virtual String GetIdentity(void) const;
-   
+
    MOBJECT_DEBUG(ProfileImpl)
 
    virtual bool IsAncestor(Profile *profile) const;
@@ -372,7 +372,7 @@ protected:
       }
    /// Destructor, writes back those entries that got changed.
    ~ProfileImpl();
-   
+
    /// Name of this profile == path in wxConfig
    String   m_ProfileName;
 
@@ -409,7 +409,7 @@ class Identity : public ProfileImpl
 public:
    static Profile * CreateIdentity(const String &name)
       { return new Identity(name); }
-   
+
    virtual const char * GetRootPath(void) const
       {
          return gs_RootPath_Identity;
@@ -441,7 +441,7 @@ class FilterProfile : public ProfileImpl
 public:
    static FilterProfile * CreateFilterProfile(const String &name)
       { return new FilterProfile(name); }
-   
+
    virtual const char * GetRootPath(void) const
       {
          return gs_RootPath_FilterProfile;
@@ -687,12 +687,12 @@ void EnforcePolicy(Profile *p)
 
 Profile *
 Profile::CreateProfile(const String & classname,
-                           Profile const *parent)
+                       Profile const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
    Profile *p =  ProfileImpl::CreateProfile(classname, parent);
-   
+
    EnforcePolicy(p);
    return p;
 }
@@ -702,7 +702,7 @@ Profile::CreateIdentity(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  Identity::CreateIdentity(idName);  
+   Profile *p =  Identity::CreateIdentity(idName);
    EnforcePolicy(p);
    return p;
 }
@@ -712,7 +712,7 @@ Profile::CreateFilterProfile(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  FilterProfile::CreateFilterProfile(idName);  
+   Profile *p =  FilterProfile::CreateFilterProfile(idName);
    EnforcePolicy(p);
    return p;
 }
@@ -724,7 +724,7 @@ Profile::CreateModuleProfile(const String & classname, Profile const *parent)
           (classname[0u] != '.' && classname[0u] != '/'));
    String newName = "Modules/" + classname;
    Profile *p =  ProfileImpl::CreateProfile(newName, parent);
-   
+
    EnforcePolicy(p);
    return p;
 }
@@ -829,7 +829,9 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
    m_Identity = NULL;
 
    String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
-   if ( id.length() )
+   if ( !id && mApplication->GetProfile() )
+      id = READ_APPCONFIG(MP_CURRENT_IDENTITY);
+   if ( !!id )
       SetIdentity(id);
 }
 
@@ -956,7 +958,7 @@ ProfileImpl::readEntry(LookupData &ld) const
    // the value read from profile
    String strResult;
    long   longResult;
-   
+
    bool foundHere;
    if( ld.GetType() == LookupData::LD_STRING )
       foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
@@ -990,7 +992,7 @@ ProfileImpl::readEntry(LookupData &ld) const
          if( ld.GetType() == LookupData::LD_STRING )
             strResult = m_Identity->readEntry(ld.GetKey(), ld.GetString(), &idFound);
          else
-            longResult = m_Identity->readEntry(ld.GetKey(), ld.GetLong(), &idFound);            
+            longResult = m_Identity->readEntry(ld.GetKey(), ld.GetLong(), &idFound);
       }
       if(idFound)
       {
@@ -1001,8 +1003,11 @@ ProfileImpl::readEntry(LookupData &ld) const
          ld.SetFound(FALSE);
          return;
       }
+
+      // restore the global path possibly changed by readEntry() calls above
+      ms_GlobalConfig->SetPath(pathProfile);
    }
-   
+
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != GetRootPath()) )
@@ -1013,19 +1018,19 @@ ProfileImpl::readEntry(LookupData &ld) const
       {
          foundAnywhere = ms_GlobalConfig->Read(keySuspended,
                                                &strResult,
-                                               ld.GetString()); 
+                                               ld.GetString());
          if ( !foundAnywhere )
             foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
-                                                  ld.GetString()); 
+                                                  ld.GetString());
       }
       else
       {
          foundAnywhere = ms_GlobalConfig->Read(keySuspended,
                                                &longResult,
-                                               ld.GetLong()); 
+                                               ld.GetLong());
          if ( !foundAnywhere )
             foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
-                                                  ld.GetLong()); 
+                                                  ld.GetLong());
       }
    }
    if(foundAnywhere)

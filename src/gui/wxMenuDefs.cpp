@@ -31,6 +31,7 @@
 #  include "guidef.h"
 
 #  include <wx/toolbar.h>
+#  include <wx/choice.h>
 #endif
 
 #include <wx/menu.h>
@@ -41,6 +42,8 @@
 #include "gui/wxIconManager.h"
 
 #include "gui/wxMenuDefs.h"
+
+#include "gui/wxIdentityCombo.h"
 
 // ----------------------------------------------------------------------------
 // local data
@@ -543,6 +546,13 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 
    for ( size_t nButton = 0; aTbarIcons[nButton] != -1 ; nButton++ ) {
       AddToolbarButton(toolbar, aTbarIcons[nButton]);
+   }
+
+   // show the identity combo in the main frame
+   if ( frameId == WXFRAME_MAIN &&
+        READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED )
+   {
+      toolbar->AddControl(CreateIdentCombo(toolbar));
    }
 
    // next add the "Help" and "Exit" buttons

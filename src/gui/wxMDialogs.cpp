@@ -2878,12 +2878,12 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
 // ident combo stuff
 // ----------------------------------------------------------------------------
 
-extern wxComboBox *CreateIdentCombo(wxWindow *parent)
+extern wxChoice *CreateIdentCombo(wxWindow *parent)
 {
    wxArrayString identities = Profile::GetAllIdentities();
    size_t count = identities.GetCount();
    if ( !count )
-      return (wxComboBox *)NULL;
+      return (wxChoice *)NULL;
 
    // first one is always the default identity, i.e. no identity at all
    wxString *choices = new wxString[count + 1];
@@ -2893,15 +2893,18 @@ extern wxComboBox *CreateIdentCombo(wxWindow *parent)
       choices[n + 1] = identities[n];
    }
 
-   wxComboBox *combo = new wxComboBox(
-                                       parent,
-                                       IDC_IDENT_COMBO,
-                                       wxEmptyString, // value
-                                       wxDefaultPosition, wxDefaultSize,
-                                       count + 1, choices,
-                                       wxCB_READONLY
-                                      );
+   wxChoice *combo = new wxChoice(
+                                    parent,
+                                    IDC_IDENT_COMBO,
+                                    wxDefaultPosition, wxDefaultSize,
+                                    count + 1, choices
+                                 );
    delete [] choices;
+
+   wxString identity = READ_APPCONFIG(MP_CURRENT_IDENTITY);
+   if ( !!identity )
+      combo->SetStringSelection(identity);
+   combo->SetToolTip(_("Change the identity"));
 
    return combo;
 }

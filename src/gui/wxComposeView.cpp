@@ -568,7 +568,7 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
    // identity combo notification
-   EVT_COMBOBOX(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
+   EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)

@@ -45,6 +45,7 @@ public:
 
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
+   void OnIdentChange(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
    /// Appends the menu for a module to the menubar

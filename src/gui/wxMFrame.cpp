@@ -58,6 +58,7 @@
 #include "gui/wxMFrame.h"
 #include "gui/wxComposeView.h"
 #include "gui/wxFolderView.h"
+#include "gui/wxIdentityCombo.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
@@ -187,7 +188,7 @@ wxMFrame::~wxMFrame()
 void
 wxMFrame::SetTitle(String const &title)
 {
-   wxString t = "Mahogany : " + title;
+   wxString t = _("Mahogany : ") + title;
 
    wxFrame::SetTitle(t.c_str());
 }
@@ -445,6 +446,7 @@ wxMFrame::OnMenuCommand(int id)
             }
             else
             {
+               identities.Insert(_("Default"), 0);
                int rc = MDialog_GetSelection
                         (
                          _("Select the new identity"),
@@ -452,16 +454,33 @@ wxMFrame::OnMenuCommand(int id)
                          identities,
                          this
                         );
+
                if ( rc != -1 )
                {
-                  wxString ident = identities[(size_t)rc];
-                  mApplication->GetProfile()->writeEntry(MP_CURRENT_IDENTITY,
-                                                         ident);
+                  Profile *profile = mApplication->GetProfile();
+                  if ( rc == 0 )
+                  {
+                     // restore the default identity
+                     profile->DeleteEntry(MP_CURRENT_IDENTITY);
+                  }
+                  else
+                  {
+                     wxString ident = identities[(size_t)rc];
+                     profile->writeEntry(MP_CURRENT_IDENTITY, ident);
+                  }
+
+                  // update the identity combo in the toolbar if any
+                  wxWindow *win = GetToolBar()->FindWindow(IDC_IDENT_COMBO);
+                  if ( win )
+                  {
+                     wxChoice *combo = wxDynamicCast(win, wxChoice);
+                     combo->SetSelection(rc);
+                  }
 
                   // TODO: should update everything (all options might have
                   //       changed)
                }
-               //else: cancelled
+               //else: dialog cancelled, nothing to do
             }
          }
          break;
