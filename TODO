@@ -11,6 +11,9 @@ $Id$
     + check printing example
   + scroll to cursor
   + cut&paste, different cursor ofr focus/no focus
+  + URL highlighting is buggy: I don't know how should we fix it without first
+    reading all the docs, but Profile::readEntry() definitely shouldn't be
+    highlighted (well, "Pro" is not) :-)
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
