@@ -158,7 +158,7 @@ static const char * OAC_T_Names[] =
 {
    "delete(", "copy(", "move(", "expunge(",
       "message(", "log(", "python(", "addscore(",
-      "setcolour(", "uniq(", "print(", NULL
+      "setcolour(", "zap(", "print(", NULL
 };
 
 #define OAC_F_NeedsArg   0x01

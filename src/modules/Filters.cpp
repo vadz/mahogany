@@ -2198,14 +2198,16 @@ extern "C"
       return Value(str);
    }
 
-   static Value func_delete(ArgList *args, FilterRuleImpl *p)
+   static Value func_do_delete(ArgList *args, FilterRuleImpl *p, bool expunge)
    {
       if(args->Count() != 0)
          return 0;
       MailFolder *mf = p->GetFolder();
       if(! mf) return Value(0);
       UIdType uid = p->GetMessageUId();
-      int rc = mf->DeleteMessage(uid);    // without expunging
+      UIdArray uids;
+      uids.Add(uid);
+      int rc = mf->DeleteMessages(&uids, expunge);
       mf->DecRef();
       p->SetDeleted();
 
@@ -2218,6 +2220,16 @@ extern "C"
       }
 
       return v;
+   }
+
+   static Value func_delete(ArgList *args, FilterRuleImpl *p)
+   {
+      return func_do_delete(args, p, false);
+   }
+
+   static Value func_zap(ArgList *args, FilterRuleImpl *p)
+   {
+      return func_do_delete(args, p, true);
    }
 
    static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
@@ -2420,6 +2432,7 @@ BuiltinFunctions(void)
    Define("body", func_body);
    Define("text", func_text);
    Define("delete", func_delete);
+   Define("zap", func_zap);
    Define("copy", func_copytofolder);
    Define("move", func_movetofolder);
    Define("print", func_print);
