@@ -1,0 +1,31 @@
+-*- text -*-
+$Id$
+
+*****************************************************************************
+** List of known and reported bugs in M with bug-ID                        **
+** ID ***********************************************************************
+
+0001  KB forwarding messages as TEXT/PLAIN instead of MESSAGE/RFC822
+0002  KB lock file checking for INBOX:
+         needs to check for xxx.lock.* not just xxx.lock !
+0003  KB can't open autocollect.adb in AdbEditor if already opened
+
+0004  KB help fails to find copyright
+0005  KB Profile readEntry() needs interface extension to allow a boolean success
+         value, remove hacks like 17 or "illegal value"!
+
+0006  KB Memory leaks whenever using wxMessageView (there are some from cclient)
+0007  KB add remaining translation strings from include files
+0008  KB handle "truncated mailfolder" more gracefully (i.e. close and
+         re-open folder)  
+      VZ when 2 mail clients are running simultaneously and the message is deleted
+         from the spool M crashes with meaningless backtrace.
+
+*****************************************************************************
+** Fixed, to be tested                                                     **
+** ID ** date fixed ** comment **********************************************
+
+
+*****************************************************************************
+** Fixed   (only move entries here when tested)                            **
+** ID ** date fixed ** comment **********************************************
