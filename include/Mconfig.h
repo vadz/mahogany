@@ -5,6 +5,7 @@
  *                                                                  *
  * $Id$               *
  *******************************************************************/
+
 #ifndef MCONFIG_H
 #define  MCONFIG_H
 
@@ -238,4 +239,10 @@
 #   endif
 #endif
 
-#endif
+// although this is not necessary, including this header allows to have more
+// info in the logs
+#ifdef USE_DMALLOC
+#   include <dmalloc.h>
+#endif // USE_DMALLOC
+
+#endif // MCONFIG_H

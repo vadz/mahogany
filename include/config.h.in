@@ -116,6 +116,9 @@
 /** Define this if you want debugging logic included. */
 #undef DEBUG
 
+/** Define this to use dmalloc debugging library */
+#undef USE_DMALLOC
+
 /** This define contains the installation prefix where Mahogany
     is installed.
 */

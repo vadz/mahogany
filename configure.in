@@ -373,8 +373,9 @@ esac
 dnl dmalloc debugging lib
 case "$USE_DMALLOC" in 1)
 	AC_CHECK_LIB(dmalloc,main,
-		LIB_DMALLOC="-ldmalloc",
-		AC_MSG_WARN(dmalloc library configured but not available.))
+		[LIB_DMALLOC="-ldmalloc"
+		 AC_DEFINE(USE_DMALLOC)],
+		AC_MSG_WARN(dmalloc library not available, get it from http://dmalloc.com/.))
 esac
 
 dnl LeakTracer debugging lib
