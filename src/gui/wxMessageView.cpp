@@ -567,8 +567,8 @@ wxMessageView::Update(void)
       }
    }
    llist->LineBreak();
-   //Refresh();
-   //ResizeScrollbars(true);
+   Refresh();
+   ResizeScrollbars(true);
 }
 
 String
