@@ -561,7 +561,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    wxLayoutConstraints *c;
 
    // first the box around everything
-   wxStaticBox *box = CreateStdButtonsAndBox("All available templates");
+   wxStaticBox *box = CreateStdButtonsAndBox(_("All available templates"));
 
    wxStaticText *msg =
       new wxStaticText

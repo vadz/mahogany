@@ -1225,10 +1225,12 @@ bool wxMApp::InitHelp()
 
          // ask the user if we want to look elsewhere?
          wxString msg;
-         msg << _("Cannot initialise help system:\n")
-             << _("Help files not found in the directory '") << helpdir << "'\n"
-             << "\n"
-             << _("Would you like to specify another help files location?");
+         msg.Printf(_("Cannot initialise help system:\n"
+                      "help files not found in the directory '%s'.\n"
+                      "\n"
+                      "Would you like to specify another help files "
+                      "location (otherwise help will be unavailable)?"),
+                    helpdir.c_str());
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Mahogany Help")) )
          {

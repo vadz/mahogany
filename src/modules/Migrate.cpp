@@ -1186,7 +1186,7 @@ MigrateWizardConfirmPage::BuildMsg(MigrateWizard *parent) const
              );
    }
 
-   msg += _("\n\nPlease press \"Next\" to conitnue, \"Back\" to\n"
+   msg += _("\n\nPlease press \"Next\" to continue, \"Back\" to\n"
             "modify the migration parameters\n"
             "or \"Cancel\" to abort the operation.");
 

@@ -472,7 +472,7 @@ bool TextViewer::Print()
 
 void TextViewer::PrintPreview()
 {
-   wxLogError(_("Sorry, printing is not supposed by the text viewer.\n"
+   wxLogError(_("Sorry, printing is not supported by the text viewer.\n"
                 "Please change to another viewer to print this message."));
 }
 

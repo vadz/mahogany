@@ -1298,9 +1298,22 @@ String VarExpander::GetSignature() const
          if ( nLineCount > nMaxSigLines )
          {
             wxString msg;
-            msg.Printf(_("Your signature is %stoo long: it should "
-                         "not be more than %d lines."),
-                       nLineCount > 10 ? _("way ") : _T(""), nMaxSigLines);
+            if ( nLineCount > 10 )
+            {
+               // *really* insult the user -- [s]he merits it
+               msg.Printf(_("Your signature is waaaaay too long: "
+                            "it should be no more than %d lines, "
+                            "please trim it as it it risks to be "
+                            "unreadable for the others."),
+                          nMaxSigLines);
+            }
+            else // too long but not incredibly too long
+            {
+               msg.Printf(_("Your signature is too long: it should "
+                            "not be more than %d lines."),
+                            nMaxSigLines);
+            }
+
             MDialog_Message(msg, m_cv.GetFrame(),
                             _("Signature is too long"),
                             GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));

@@ -3810,7 +3810,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
          {
             if ( AddAllSubfoldersToTree(folder, asmf) > 0 )
             {
-               wxLogStatus(_("You can now open any of folders on the "
+               wxLogStatus(_("You can now open any of the folders on the "
                              "IMAP server '%s'"), folder->GetName().c_str());
             }
 
@@ -4337,9 +4337,9 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
       case WXMENU_MSG_GOTO_MSGNO:
          {
-            long max = GetHeadersCount() + 1;
+            long nMsgMax = GetHeadersCount();
 
-            if ( max == 1 )
+            if ( !nMsgMax )
             {
                // we're empty
                wxLogStatus(m_Frame, _("No messages to jump to."));
@@ -4349,10 +4349,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
             long num = MGetNumberFromUser
                        (
                            String::Format(_("Enter the number of the message "
-                                            "to go to, from 1 to %ld"), max),
+                                            "to go to, from 1 to %ld"), nMsgMax),
                            _("Message: "),
                            _("Jump to a message"),
-                           m_nLastJump, 1, max,
+                           m_nLastJump, 1, nMsgMax,
                            m_Frame
                        );
 

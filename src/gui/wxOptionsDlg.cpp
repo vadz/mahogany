@@ -3627,17 +3627,29 @@ void wxOptionsPageSync::OnButton(wxCommandEvent& event)
                   : RetrieveRemoteConfigSettings(false);
    if ( !ok )
    {
-      wxLogError(_("Failed to %s remote configuration %s '%s'."),
-                 save ? _("save") : _("retrieve"),
-                 save ? _("to") : _("from"),
-                 foldername.c_str());
+      if ( save )
+      {
+         wxLogError(_("Failed to save remote configuration to '%s'"),
+                    foldername.c_str());
+      }
+      else // restoring
+      {
+         wxLogError(_("Failed to retrieve remote configuration from '%s'"),
+                    foldername.c_str());
+      }
    }
-   else
+   else // ok
    {
-      wxLogMessage(_("Successfully %s remote configuration %s '%s'."),
-                   save ? _("saved") : _("retrieved"),
-                   save ? _("to") : _("from"),
-                   foldername.c_str());
+      if ( save )
+      {
+         wxLogMessage(_("Successfully saved remote configuration to '%s'."),
+                      foldername.c_str());
+      }
+      else // restoring
+      {
+         wxLogMessage(_("Successfully restored remote configuration from '%s'."),
+                      foldername.c_str());
+      }
    }
 
    // restore old value regardless

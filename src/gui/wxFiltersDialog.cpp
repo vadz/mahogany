@@ -607,13 +607,35 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
       m_Logical = NULL;
 
    m_Not = new wxCheckBox(parent, -1, _("Not"));
+
+   // create a separate array with the translated strings
+   wxString typesTrans[ORC_TypesCount];
+   for ( size_t nType = 0; nType < ORC_TypesCountS; nType++ )
+   {
+      typesTrans[nType] = _(ORC_Types[nType]);
+   }
+
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
-                         wxDefaultSize, ORC_TypesCountS, ORC_Types);
+                         wxDefaultSize, ORC_TypesCountS, typesTrans);
+
+   wxString msgflagsTrans[ORC_Msg_Flag_Count];
+   for ( size_t nMsgFlag = 0; nMsgFlag < ORC_Msg_Flag_Count; nMsgFlag++ )
+   {
+      msgflagsTrans[nMsgFlag] = _(ORC_Msg_Flag[nMsgFlag]);
+   }
+
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
-                         wxDefaultSize, ORC_Msg_Flag_Count, ORC_Msg_Flag);
+                         wxDefaultSize, ORC_Msg_Flag_Count, msgflagsTrans);
    m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
+
+   wxString whereTrans[ORC_WhereCount];
+   for ( size_t nWhere = 0; nWhere < ORC_WhereCountS; nWhere++ )
+   {
+      whereTrans[nWhere] = _(ORC_Where[nWhere]);
+   }
+
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
-                          wxDefaultSize, ORC_WhereCountS, ORC_Where);
+                          wxDefaultSize, ORC_WhereCountS, whereTrans);
 
    // set up the initial values or the code in UpdateProgram() would complain
    // about invalid values

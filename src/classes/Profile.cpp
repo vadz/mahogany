@@ -864,8 +864,8 @@ Profile::CreateGlobalConfig(const String& filename)
             }
             else
             {
-               msg << String::Format(_("Failed to correct the directory access (%s)"
-                                       "rights, please do it manually and "
+               msg << String::Format(_("Failed to correct the directory access "
+                                       "rights (%s), please do it manually and "
                                        "restart the program!"),
                                      strerror(errno));
             }
