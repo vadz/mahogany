@@ -5,7 +5,7 @@ Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
 06.01.01 VZ: fixed crash when viewing messages with incorrect dates
-             fixed crash when usign encryption in Windows version
+             fixed crash when using encryption in Windows version
 04.01.01 VZ: fixed crash when removing folders with auto collect flag set
              an option to not open the last opened folder on startup added
              fixed crash (debug mode only) when copying 0 length messages
