@@ -700,7 +700,7 @@ void wxPListCtrl::RestoreWidths()
         if ( !str.empty() )
         {
             int countCol = GetColumnCount();
-            char *p = str.GetWriteBuf(str.Len());
+            char *p = (char *)str.c_str();
             for ( int col = 0; col < countCol; col++ )
             {
                 if ( IsEmpty(p) )
@@ -712,17 +712,19 @@ void wxPListCtrl::RestoreWidths()
 
                 int width;
                 if ( sscanf(p, "%d", &width) == 1 )
+                {
                     SetColumnWidth(col, width);
+                }
                 else
+                {
                     wxFAIL_MSG("wxPListCtrl: corrupted config entry?");
+                }
 
-                if ( end )
-                    p = end + 1;
-                else
+                if ( !end )
                     break;
-            }
 
-            str.UngetWriteBuf();
+                p = end + 1;
+            }
         }
 
         m_persist->RestorePath();
