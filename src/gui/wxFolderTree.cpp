@@ -584,18 +584,37 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
                                  configPath);
    if ( ok )
    {
-      if ( !removeOnly )
+      // close the folder first
+      ok = OnClose(folder);
+      if ( !ok )
+      {
+         wxLogError(_("The folder must be closed before it can be deleted."));
+      }
+
+      if ( ok && !removeOnly )
       {
          ok = MailFolder::DeleteFolder(folder);
-         if(! ok)
+         if ( !ok )
+         {
             wxLogError(_("Failed to physically delete folder '%s'."),
                        folder->GetName().c_str());
+         }
       }
-      // do delete it
-      folder->Delete();
+
+      if ( ok )
+      {
+         // delete it from the folder tree
+         folder->Delete();
+      }
    }
 
    return ok;
+}
+
+bool wxFolderTree::OnClose(MFolder *folder)
+{
+   // we can't close it from here
+   return FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -1266,7 +1285,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          {
             0x000000,
             0x00ff00,
-            0xff0000,
+            0x0000ff,
          };
 
          node->SetStatus(status);

@@ -183,7 +183,7 @@ END_EVENT_TABLE()
 #endif
 
 // override wxFolderTree OnOpenHere() function to open the folder in this
-// frame
+// frame and OnClose() to close it
 class wxMainFolderTree : public wxFolderTree
 {
 public:
@@ -213,6 +213,13 @@ public:
       m_frame->OpenFolder(folder);
    }
 
+   virtual bool OnClose(MFolder *folder)
+   {
+      m_frame->CloseFolder(folder);
+
+      return TRUE;
+   }
+
 private:
    wxMainFrame *m_frame;
 };
@@ -236,10 +243,10 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
 
-   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging    
-   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo           
-   GetStatusBar()->SetFieldsCount(3, widths);                                   
-   
+   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
+   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
+   GetStatusBar()->SetFieldsCount(3, widths);
+
    AddFileMenu();
    AddEditMenu();
 
@@ -249,7 +256,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
 
    m_ModulesMenu = NULL;
-   
+
    int x,y;
    GetClientSize(&x, &y);
 
@@ -306,6 +313,17 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // GTK
 }
 
+void
+wxMainFrame::CloseFolder(MFolder *folder)
+{
+   if ( folder && folder->GetFullName() == m_folderName )
+   {
+      m_FolderView->SetFolder(NULL);
+
+      m_folderName.clear();
+   }
+   //else: otherwise, we don't have it opened
+}
 
 void
 wxMainFrame::OpenFolder(MFolder *pFolder)
@@ -501,7 +519,7 @@ wxMainFrame::AddModulesMenu(const char *name,
       id = NewControlId();
    m_ModulesMenu->Append(id, name, submenu, help);
 }
-   
+
 
 /// Appends the menu entry for a module to the modules menu
 void

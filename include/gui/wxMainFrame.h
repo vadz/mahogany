@@ -37,10 +37,13 @@ public:
    // multiple times)
    void OpenFolder(MFolder *folder);
 
+   // close the given folder if it is opened
+   void CloseFolder(MFolder *folder);
+
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
-   
+
    /// Appends the menu for a module to the menubar
    virtual void AddModulesMenu(const char *name,
                                const char *help,

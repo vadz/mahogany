@@ -57,7 +57,7 @@ AdbEntryCommon::GetField(size_t n, wxString *pstr) const
          *pstr = pstr->BeforeLast(' ');
       else if(n == AdbField_FamilyName)
          *pstr = pstr->AfterLast(' ');
-   }   
+   }
 }
 
 // ----------------------------------------------------------------------------

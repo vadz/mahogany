@@ -327,7 +327,7 @@ bool PalmBook::IsReadOnly() const
 
 bool PalmBook::Flush()
 {
-   // I don´t have the slightest idea what this method should do
+   // this does nothing for us as we're read only
    return true;
 }
 

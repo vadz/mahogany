@@ -115,7 +115,6 @@ public:
    const char *GetName() const
       { return m_astrFields[0]; }
 
-   virtual bool IsReadOnly(void) const;
    /**@name the parser */
    //@{
    enum FieldTypes { Field_String, Field_Integer};
@@ -174,11 +173,6 @@ public:
    virtual void DeleteGroup(const String& strName);
 
    virtual AdbEntry *FindEntry(const char *szName);
-   virtual bool IsReadOnly(void) const
-      {
-         /*ASSERT(m_pParent); return m_pParent->IsReadOnly(); */
-         return FALSE;
-      }
 
 private:
    virtual ~BbdbEntryGroup();
@@ -188,12 +182,6 @@ private:
    BbdbEntryGroup   *m_pParent;      // the parent group (never NULL)
    GCC_DTOR_WARN_OFF
 };
-
-bool BbdbEntry::IsReadOnly() const
-{
-   ASSERT(m_pGroup);
-   return m_pGroup->IsReadOnly();
-}
 
 // our AdbBook implementation: it maps to a disk file here
 class BbdbBook : public AdbBook
@@ -247,10 +235,11 @@ public:
 
    virtual bool IsLocal() const { return TRUE; }
    virtual bool IsReadOnly() const;
-  /** Return the icon name if set. The numeric return value must be -1 
-      for the default, or an index into the image list in AdbFrame.cpp.
-  */
-  virtual int GetIconId() const { return 6; }
+
+   /** Return the icon name if set. The numeric return value must be -1
+     for the default, or an index into the image list in AdbFrame.cpp.
+    */
+   virtual int GetIconId() const { return 6; }
 
 private:
    virtual ~BbdbBook();
@@ -664,7 +653,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
 
    m_strName = strName; // there is only one group so far
    m_pParent = NULL;
-   
+
    BbdbEntry *e;
    wxString line, version;
    int ignored = 0, entries_read = 0;
@@ -688,7 +677,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    {
       LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version.c_str()));
    }
-   
+
    MProgressDialog status_frame("BBDB import", "Importing...",
                                  length, NULL);// open a status window:
    do
@@ -961,7 +950,7 @@ BbdbBook::BbdbBook(const String& name)
    if(m_strUserName.Length() == 0)
       m_strUserName << '.' << ext;
    m_strName = name;
-   
+
    String desc = GetUserName();
    desc << _(" (Emacs BBDB addressbook)");
    SetDescription(desc);

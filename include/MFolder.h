@@ -67,8 +67,17 @@ public:
        the folder name which already exists (NULL will be returned)
    */
    static MFolder *Create(const String& fullname, FolderType type);
+   /** create a temp object containing folder data
+   */
+   static MFolder *CreateTemp(const String& fullname,
+                              FolderType type,
+                              int flags,
+                              const String& path,
+                              const String& server,
+                              const String& login,
+                              const String& password);
    //@}
-   
+
    /**@name misc accessors */
    //@{
    /** get the folder path (i.e. something by which it's identified by the
@@ -102,10 +111,10 @@ public:
    virtual String GetComment() const = 0;
       /// change the comment
    virtual void SetComment(const String& comment) = 0;
-   //@}   
+   //@}
    /**@name flags */
    //@{
-       /// get the folder flags (see Flags enum)   
+       /// get the folder flags (see Flags enum)
    virtual int GetFlags() const = 0;
       /// set the flags (this replaces the old value of flags)
    virtual void SetFlags(int flags) = 0;
@@ -115,7 +124,7 @@ public:
       /// clear the specified flags
    void ResetFlags(int flags) { SetFlags(GetFlags() & ~flags); }
    //@}
-   
+
    /**@name sub folders access */
    //@{
    /// get the number of subfolders
@@ -127,7 +136,7 @@ public:
       /// get the parent of this folder (NULL only for the top level one)
    virtual MFolder *GetParent() const = 0;
    //@}
-   
+
    /**@name operations */
    //@{
    /// create a new subfolder
@@ -137,6 +146,7 @@ public:
       /// rename this folder: FALSE returned if it failed
    virtual bool Rename(const String& name) = 0;
    //@}
+
    MOBJECT_DEBUG(MFolder)
 
 protected:
@@ -185,7 +195,7 @@ private:
 // any useful action should be done in OnVisitFolder() virtual function
 // ----------------------------------------------------------------------------
 
-// FIXME this class currently works only with folders stored in the profiles
+// NB: this class currently works only with folders stored in the profiles
 class MFolderTraversal
 {
 public:

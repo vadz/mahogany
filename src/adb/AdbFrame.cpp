@@ -341,10 +341,12 @@ public:
 
   size_t GetNumberOfEntries() const { return m_pBook->GetNumberOfEntries(); }
 
+  AdbBook *GetBook() { return m_pBook; }
+
   // operations
     // flush
   bool Flush() const { return m_pBook->Flush(); }
-   AdbBook * GetBook() { return m_pBook; }
+
 protected:
   AdbBook   *m_pBook;
 };
@@ -830,6 +832,7 @@ private:
   AdbTreeEntry *m_pTreeEntry; // the entry we're editing
   AdbEntry     *m_pAdbEntry;  // associated data (may be NULL)
   bool          m_bDirty;     // has the currently selected entry been changed?
+  bool          m_bReadOnly;  // is the current entry read-only?
 };
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
@@ -2874,7 +2877,8 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   // no data yet
   m_pTreeEntry = NULL;
   m_pAdbEntry = NULL;
-  m_bDirty = FALSE;
+  m_bDirty =
+  m_bReadOnly = FALSE;
 
   // add images to our image list
   static const char *aszImages[] =
@@ -2909,7 +2913,7 @@ void wxAdbNotebook::ChangeData(AdbTreeEntry *pEntry)
 // save changes i.e. transfer all data from our controls to AdbEntry
 void wxAdbNotebook::SaveChanges()
 {
-  if ( m_pAdbEntry && !m_pAdbEntry->IsReadOnly()) {
+  if ( m_pAdbEntry && !m_bReadOnly ) {
     for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SaveChanges(*m_pAdbEntry);
     }
@@ -2940,9 +2944,21 @@ void wxAdbNotebook::SetData(AdbTreeEntry *pEntry)
 
   // if we have got some data - show it
   if ( m_pAdbEntry ) {
+    // determine if an entry is read only by querying the book it is in
+    AdbTreeNode *parent = m_pTreeEntry->GetParent();
+    while ( parent && !parent->IsBook() )
+      parent = parent->GetParent();
+
+    if ( parent ) {
+      m_bReadOnly = ((AdbTreeBook *)parent)->GetBook()->IsReadOnly();
+    }
+    else {
+      wxFAIL_MSG("entry outside of an address book?");
+    }
+
     for ( size_t n = 0; n < Page_Max; n++ ) {
       ((wxAdbPage *)GetPage(n))->SetData(*m_pAdbEntry);
-      ((wxAdbPage *)GetPage(n))->Enable( ! m_pAdbEntry->IsReadOnly() );
+      ((wxAdbPage *)GetPage(n))->Enable(!m_bReadOnly);
     }
   }
 
@@ -3425,7 +3441,7 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
   case TreeElement_Entry:
      image = wxAdbTree::Address;
      break;
-     
+
   case TreeElement_Group:
   {
      AdbElement *group = ((AdbTreeNode *)this)->AdbGroup();
@@ -3447,12 +3463,12 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
   case TreeElement_Root:
      image = wxAdbTree::Library;
      break;
-     
+
   default:
      wxFAIL_MSG("unknown tree element type");
   }
 
-  
+
   if ( IsRoot() ) {
     SetId(tree.AddRoot(wxString(_("Address Books")), image, image, this));
     tree.SetItemHasChildren(GetId());

@@ -48,6 +48,60 @@ WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 // private classes
 // ----------------------------------------------------------------------------
 
+// MTempFolder is a temporary object which stores tyhe info about folder, but is
+// not persistent
+class MTempFolder : public MFolder
+{
+public:
+   MTempFolder(const String& fullname,
+               FolderType type,
+               int flags,
+               const String& path,
+               const String& server,
+               const String& login,
+               const String& password)
+      : m_type(type),
+        m_flags(flags),
+        m_fullname(fullname),
+        m_server(server), m_login(login), m_password(password)
+        {
+        }
+
+   // trivial implementation of base class pure virtuals
+   virtual String GetPath() const { return m_path; }
+   virtual String GetServer() const { return m_server; }
+   virtual String GetLogin() const { return m_login; }
+   virtual String GetPassword() const {return m_password; }
+   virtual String GetName() const { return m_fullname.AfterLast('/'); }
+   virtual wxString GetFullName() const { return m_fullname; }
+   virtual FolderType GetType() const { return m_type; }
+   virtual int GetIcon() const { return -1; }
+   virtual void SetIcon(int /* icon */) { }
+   virtual String GetComment() const { return ""; }
+   virtual void SetComment(const String& /* comment */) { }
+   virtual int GetFlags() const { return m_flags; }
+   virtual void SetFlags(int flags) { m_flags = flags; }
+
+   // we're outside the tree, so none of these functions make sense for us
+   virtual size_t GetSubfolderCount() const { return 0; }
+   virtual MFolder *GetSubfolder(size_t) const { return NULL; }
+   virtual MFolder *GetSubfolder(const String&) const { return NULL; }
+   virtual MFolder *GetParent() const { return NULL; }
+   virtual MFolder *CreateSubfolder(const String&, FolderType) { return NULL; }
+   virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
+   virtual bool Rename(const String&)
+    { FAIL_MSG("doesn't make sense for MTempFolder"); return FALSE; }
+
+private:
+   FolderType m_type;
+   int m_flags;
+   String m_fullname,
+          m_path,
+          m_server,
+          m_login,
+          m_password;
+};
+
 // this class implements MFolder pure virtuals by reading/writing the data
 // to/from (main application) profile.
 //
@@ -74,13 +128,10 @@ public:
 
    // implement base class pure virtuals
    virtual String GetPath() const;
-// get the server for the folder:
    virtual String GetServer() const;
-   // get the login for the folder:
    virtual String GetLogin() const;
-   // get the password for the folder:
    virtual String GetPassword() const;
-   
+
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
@@ -273,6 +324,18 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
    profile->writeEntry(MP_FOLDER_TYPE, type);
 
    return folder;
+}
+
+/* static */
+MFolder *MFolder::CreateTemp(const String& fullname,
+                             FolderType type,
+                             int flags,
+                             const String& path,
+                             const String& server,
+                             const String& login,
+                             const String& password)
+{
+   return new MTempFolder(fullname, type, flags, path, server, login, password);
 }
 
 #ifdef DEBUG
