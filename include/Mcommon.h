@@ -74,13 +74,7 @@ typedef long int lcoord_t;
 // ----------------------------------------------------------------------------
 // debugging macros
 // ----------------------------------------------------------------------------
-#ifdef NDEBUG
-#  define   DEBUG_DEF
-
-   // these macros do nothing in release build
-#  define ASSERT(x)
-#  define ASSERT_MSG(x, msg)
-#else
+#ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
 #  ifdef USE_WXWINDOWS2
 #     define ASSERT(x)          wxASSERT(x)
@@ -91,6 +85,11 @@ typedef long int lcoord_t;
 #     define ASSERT(x)          assert(x)
 #     define ASSERT_MSG(x, msg) DBGMESSAGE((msg)); assert(x)
 #  endif // wxWin2
+#else
+#  define   DEBUG_DEF
+// these macros do nothing in release build
+#  define ASSERT(x)
+#  define ASSERT_MSG(x, msg)
 #endif
 
 #define FAIL           ASSERT(0)
@@ -124,16 +123,16 @@ typedef long int lcoord_t;
 #  define INFOMESSAGE(arg)    wxLogInfo arg
 #  define LOGMESSAGE(arg)     wxLogGeneric arg
 
-#  ifdef NDEBUG
-#     define   DBGMESSAGE(arg)
-#     define   TRACEMESSAGE(arg)
-#     define   DBGLOG(arg)
-#     define   INTERNALERROR(arg) wxLogError arg         // just log the error
-#  else
+#  ifdef DEBUG
 #     define   DBGMESSAGE(arg)    wxLogDebug arg
 #     define   TRACEMESSAGE(arg)  wxLogTrace arg
 #     define   DBGLOG(arg)        wxLogTrace(wxString(M_EMPTYSTRING) << arg)
 #     define   INTERNALERROR(arg) wxLogFatalError arg    // aborts
+#  else
+#     define   DBGMESSAGE(arg)
+#     define   TRACEMESSAGE(arg)
+#     define   DBGLOG(arg)
+#     define   INTERNALERROR(arg) wxLogError arg         // just log the error
 #  endif
 
 #ifdef   OS_UNIX
