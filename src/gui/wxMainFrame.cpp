@@ -381,9 +381,9 @@ public:
       {
          if ( MDialog_YesNoDialog
               (
-               "No matching messages found.\n"
+               _("No matching messages found.\n"
                "\n"
-               "Would you like to search again?",
+               "Would you like to search again?"),
                frame,
                MDIALOG_YESNOTITLE,
                M_DLG_YES_DEFAULT,
