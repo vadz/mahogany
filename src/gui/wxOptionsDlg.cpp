@@ -384,6 +384,10 @@ public:
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
    wxOptionsDialog() { wxFAIL_MSG("should be never used"); }
 
+   // return TRUE if this dialog edits global options for the program, FALSE
+   // if this is another kind of dialog
+   virtual bool IsGlobalOptionsDialog() const { return TRUE; }
+
 protected:
    // unset the dirty flag
    virtual void ResetDirty();
@@ -508,6 +512,9 @@ public:
    virtual void SetDoTest() { SetDirty(); } // TODO: might do something here
    virtual void SetGiveRestartWarning() { }
 
+   // we're not the global options dialog
+   virtual bool IsGlobalOptionsDialog() const { return FALSE; }
+
 private:
    // create our pages desc: do it dynamically because they may depend on the
    // user level (which can change) in the future
@@ -609,8 +616,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Some more rarely used and less obvious program\n"
                   "features are only accessible in the so-called\n"
                   "`advanced' user mode which may be set here."),
-                                                   Field_Message,   -1,                        },
-   { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
+                                                   Field_Message | Field_Global,   -1,                        },
+   { gettext_noop("User &level:novice:advanced"),  Field_Combo | Field_Global,   -1,                        },
 
    // network
    { gettext_noop("The following fields are used as default values for the\n"
@@ -642,35 +649,35 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
                   "server of your ISP. Leave it empty to use the SMTP server for this.")
      , Field_Message, -1 },
-   { gettext_noop("&Dial-up network support"),    Field_Bool,    -1,                        },
-   { gettext_noop("&Beacon host (e.g. www.yahoo.com)"),Field_Text,   ConfigField_DialUpSupport},
+   { gettext_noop("&Dial-up network support"),    Field_Bool | Field_Global,    -1,                        },
+   { gettext_noop("&Beacon host (e.g. www.yahoo.com)"), Field_Text | Field_Global,   ConfigField_DialUpSupport},
 #ifdef OS_WIN
-   { gettext_noop("&RAS connection to use"),   Field_Combo, ConfigField_DialUpSupport},
+   { gettext_noop("&RAS connection to use"),   Field_Combo | Field_Global, ConfigField_DialUpSupport},
 #elif defined(OS_UNIX)
-   { gettext_noop("Command to &activate network"),   Field_Text, ConfigField_DialUpSupport},
-   { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
+   { gettext_noop("Command to &activate network"),   Field_Text | Field_Global, ConfigField_DialUpSupport},
+   { gettext_noop("Command to &deactivate network"), Field_Text | Field_Global, ConfigField_DialUpSupport},
 #endif // platform
    { gettext_noop("The following timeout value is used for TCP connections to\n"
-                  "remote mail or news servers."), Field_Message | Field_Advanced, -1 },
-   { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Advanced,    -1,                        },
+                  "remote mail or news servers."), Field_Message | Field_Global | Field_Advanced, -1 },
+   { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #ifdef USE_TCP_TIMEOUTS
-   { gettext_noop("&Read timeout"),                Field_Number | Field_Advanced,    -1,                        },
-   { gettext_noop("&Write timeout"),               Field_Number | Field_Advanced,    -1,                        },
-   { gettext_noop("&Close timeout"),               Field_Number | Field_Advanced,    -1,                        },
+   { gettext_noop("&Read timeout"),                Field_Number | Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("&Write timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("&Close timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
    { gettext_noop("If the RSH timeout below is greater than 0, Mahogany will\n"
                   "first try to connect to IMAP servers using rsh instead of\n"
                   "sending passwords in clear text. However, if the server\n"
                   "does not support rsh connections, enabling this option can\n"
-                  "lead to unneeded delays."),     Field_Message | Field_Advanced,    -1,                        },
-   { gettext_noop("&Rsh timeout"),                 Field_Number | Field_Advanced,    -1,                        },
+                  "lead to unneeded delays."),     Field_Message | Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("&Rsh timeout"),                 Field_Number | Field_Global | Field_Advanced,    -1,                        },
 
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder for sent messages"),
                                                    Field_Folder,    ConfigField_UseOutgoingFolder },
-   { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
-   { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
+   { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
+   { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
@@ -688,10 +695,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Bool,    -1,                        },
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
-                                                   Field_Combo,   -1},
-   { gettext_noop("Font si&ze"),                   Field_Number,  -1},
-   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
-   { gettext_noop("Back&ground colour"),           Field_Color,   -1},
+                                                   Field_Combo | Field_Global,   -1},
+   { gettext_noop("Font si&ze"),                   Field_Number | Field_Global,  -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color | Field_Global,   -1},
+   { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
 
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
@@ -1123,13 +1130,22 @@ void wxOptionsPage::CreateControls()
 {
    size_t n;
 
-   // soem fields are only shown in 'advanced' mode, so check if we're in it
+   // some fields are only shown in 'advanced' mode, so check if we're in it
    bool isAdvanced = READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
+
+   // some others are not shown when we're inside the identity dialog
+   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+   bool isIdentDialog = dialog && !dialog->IsGlobalOptionsDialog();
 
    // first determine the longest label
    wxArrayString aLabels;
    for ( n = m_nFirst; n < m_nLast; n++ ) {
-      if ( !isAdvanced && (GetFieldFlags(n) & Field_Advanced) )
+      FieldFlags flags = GetFieldFlags(n);
+
+      // don't show the global settings when editing the identity dialog and
+      // don't show the advanced ones in the novice mode
+      if ( (!isAdvanced && (flags & Field_Advanced)) ||
+           (isIdentDialog && (flags & Field_Global)) )
       {
          // skip this one
          continue;
@@ -1165,7 +1181,8 @@ void wxOptionsPage::CreateControls()
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       FieldFlags flags = GetFieldFlags(n);
-      if ( !isAdvanced && (flags & Field_Advanced) )
+      if ( (!isAdvanced && (flags & Field_Advanced)) ||
+           (isIdentDialog && (flags & Field_Global)) )
       {
          // skip this one
          m_aControls.Add(NULL);

@@ -102,6 +102,7 @@ public:
       Field_Vital   = 0x10000000, // vital setting, test after change
       Field_Restart = 0x20000000, // will only take effect during next run
       Field_Advanced= 0x40000000, // don't show this field in novice mode
+      Field_Global  = 0x80000000, // no identity override for this field
       Field_Flags   = 0xf0000000  // bit mask selecting the flags
    };
 
