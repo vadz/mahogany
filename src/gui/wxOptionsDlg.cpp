@@ -48,7 +48,6 @@
 #include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
-#include <wx/resource.h>
 #include <wx/confbase.h>
 
 #include <wx/menuitem.h>
