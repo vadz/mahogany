@@ -1443,7 +1443,7 @@ MessageView::ShowHeaders()
             {
                before = strutil_findurl(value, url);
 
-               if ( *url.c_str() == '<' )
+               if ( *url.c_str() == _T('<') )
                {
                   urlText = url;
 
@@ -1454,15 +1454,15 @@ MessageView::ShowHeaders()
 
                   while ( !before.empty() )
                   {
-                     char ch = before.Last();
+                     wxChar ch = before.Last();
                      switch ( ch )
                      {
-                        case '"':
+                        case _T('"'):
                            inQuotes = !inQuotes;
                            break;
 
-                        case ',':
-                        case ';':
+                        case _T(','):
+                        case _T(';'):
                            if ( !inQuotes )
                               stop = true;
                      }
@@ -1470,7 +1470,7 @@ MessageView::ShowHeaders()
                      if ( stop )
                         break;
 
-                     urlText.insert(0, 1, ch);
+                     urlText.insert(0u, 1u, ch);
                      before.erase(before.length() - 1);
                   }
                }
