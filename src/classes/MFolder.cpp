@@ -70,6 +70,8 @@ extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_PROFILE_TYPE;
 extern const MOption MP_USERNAME;
+extern const MOption MP_USE_SSL;
+extern const MOption MP_USE_SSL_UNSIGNED;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -162,6 +164,9 @@ public:
    virtual String GetClass() const { return GetClassForType(m_type); }
 
    virtual bool NeedsNetwork(void) const { return false; }
+   virtual SSLSupport GetSSL(SSLCert *) const { return SSLSupport_None; }
+   virtual void SetSSL(SSLSupport, SSLCert) { }
+
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
 
@@ -269,6 +274,8 @@ public:
    virtual MFolderType GetType() const;
    virtual String GetClass() const;
    virtual bool NeedsNetwork() const;
+   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned) const;
+   virtual void SetSSL(SSLSupport ssl, SSLCert cert);
 
    virtual int GetIcon() const;
    virtual void SetIcon(int icon);
@@ -362,6 +369,8 @@ public:
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual MFolderType GetType() const { return MF_ROOT; }
    virtual bool NeedsNetwork(void) const { return false; }
+   virtual SSLSupport GetSSL(SSLCert *) const { return SSLSupport_None; }
+   virtual void SetSSL(SSLSupport, SSLCert) { }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)
@@ -792,6 +801,37 @@ String MFolderFromProfile::GetClass() const
 bool MFolderFromProfile::NeedsNetwork() const
 {
    return FolderNeedsNetwork(GetType(), GetFlags());
+}
+
+SSLSupport MFolderFromProfile::GetSSL(SSLCert *acceptUnsigned) const
+{
+   SSLSupport ssl = (SSLSupport)(long)READ_CONFIG(m_profile, MP_USE_SSL);
+
+   if ( acceptUnsigned )
+   {
+      if ( ssl != SSLSupport_None )
+      {
+         *acceptUnsigned = READ_CONFIG_BOOL(m_profile, MP_USE_SSL_UNSIGNED)
+                           ? SSLCert_AcceptUnsigned : SSLCert_SignedOnly;
+      }
+      else // we don't use SSL certs at all
+      {
+         *acceptUnsigned = SSLCert_SignedOnly;
+      }
+   }
+
+   return ssl;
+}
+
+void MFolderFromProfile::SetSSL(SSLSupport ssl, SSLCert cert)
+{
+   m_profile->writeEntry(GetOptionName(MP_USE_SSL), (long)ssl);
+   if ( ssl != SSLSupport_None )
+   {
+      m_profile->writeEntry(GetOptionName(MP_USE_SSL_UNSIGNED),
+                            cert == SSLCert_AcceptUnsigned);
+   }
+   //else: no need to write it there
 }
 
 int MFolderFromProfile::GetIcon() const

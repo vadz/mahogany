@@ -235,6 +235,11 @@ public:
 
       /// does this folder need net connection to be accessed?
    virtual bool NeedsNetwork(void) const = 0;
+
+      /// SSL mode for this folder (this is a NOP for temp folders)
+   virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = NULL) const = 0;
+   virtual void SetSSL(SSLSupport ssl, SSLCert cert) = 0;
+
    //@}
 
    /**@name Filters */
