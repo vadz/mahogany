@@ -27,6 +27,8 @@
    #define USE_WORKAROUND_FOR_MAXIMIZE
 #endif // wxMSW < 2.3.0
 
+class Profile;
+
 /**
   * A wxWindows Frame class
   */
@@ -70,13 +72,15 @@ public:
    /// used to set the title of the window class
    void  SetTitle(String const & name);
 
-   /** This virtual method returns either NULL or an incref'd
-       pointer to the profile of the mailfolder being displayed, for
-       those wxMFrames which have a folder displayed. Used to make the
-       compose view inherit the current folder's settings.
+   /**
+      This virtual method returns a pointer to the profile of the mailfolder
+      being displayed, for those wxMFrames which have a folder displayed or the
+      global application profile for the other ones. Used to make the compose
+      view inherit the current folder's settings.
+
+      @return profile pointer, the caller must DecRef() it
    */
-   virtual class Profile *GetFolderProfile(void)
-      { return NULL; }
+   virtual Profile *GetFolderProfile(void) const;
 
    /// Passes a menu id to modules for reacting to it.
    virtual bool ProcessModulesMenu(int id);

@@ -201,25 +201,12 @@ public:
    virtual Profile *GetFolderProfile() const
    {
       Profile *profile = GetProfile();
-      if ( profile )
-      {
-         profile->IncRef();
-      }
-      else // no opened folder in this folder view
-      {
-         // try the profile for the folder in the tree
-         MFolder_obj folder = m_mainFrame->GetFolderTree()->GetSelection();
-         if ( folder )
-         {
-            profile = Profile::CreateProfile(folder->GetFullName());
-         }
-      }
-
       if ( !profile )
       {
          profile = mApplication->GetProfile();
-         profile->IncRef();
       }
+
+      profile->IncRef();
 
       return profile;
    }
@@ -727,9 +714,23 @@ wxMainFrame::AddModulesMenu(const char *name,
 }
 
 Profile *
-wxMainFrame::GetFolderProfile(void)
+wxMainFrame::GetFolderProfile(void) const
 {
-   return m_FolderView ? m_FolderView->GetProfile() : NULL;
+   // try the profile for the folder in the tree first: like this, the compose
+   // command will use the settings of the currently selected folder and not
+   // the one currently opened which is usually what you want
+   //
+   // this also allows to use the settings of a folder which you can't open now
+   // (e.g. because you're offline)
+   MFolder_obj folder = GetFolderTree()->GetSelection();
+   if ( folder )
+   {
+      return Profile::CreateProfile(folder->GetFullName());
+   }
+
+   // no current selection but maybe an opened folder (weird, but who knows)?
+   return m_FolderView ? m_FolderView->GetFolderProfile()
+                       : wxMFrame::GetFolderProfile();
 }
 
 // ----------------------------------------------------------------------------
@@ -741,7 +742,7 @@ class UpdateFolderVisitor : public MFolderTraversal
 public:
    UpdateFolderVisitor(const MFolder& folder, wxWindow *parent)
       : MFolderTraversal(folder),
-        m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
+   m_progInfo(parent, _("Folders updated:"), _("Updating folder tree"))
    {
       m_nCount = 0;
    }

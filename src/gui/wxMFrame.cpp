@@ -172,6 +172,21 @@ END_EVENT_TABLE()
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// misc wxMFrame methods
+// ----------------------------------------------------------------------------
+
+Profile *wxMFrame::GetFolderProfile(void) const
+{
+   Profile *profile = mApplication->GetProfile();
+
+   CHECK( profile, NULL, "no global profile??" );
+
+   profile->IncRef();
+
+   return profile;
+}
+
+// ----------------------------------------------------------------------------
 // wxMFrame creation
 // ----------------------------------------------------------------------------
 
@@ -533,8 +548,8 @@ wxMFrame::OnMenuCommand(int id)
                }
             }
 
-            Composer *composeView =
-               Composer::CreateNewMessage(templ, GetFolderProfile());
+            Profile_obj profile(GetFolderProfile());
+            Composer *composeView = Composer::CreateNewMessage(templ, profile);
 
             composeView->InitText();
          }
@@ -546,8 +561,8 @@ wxMFrame::OnMenuCommand(int id)
 
       case WXMENU_FILE_POST:
          {
-            Composer *composeView =
-               Composer::CreateNewArticle(GetFolderProfile());
+            Profile_obj profile(GetFolderProfile());
+            Composer *composeView = Composer::CreateNewArticle(profile);
 
             composeView->InitText();
          }

@@ -4730,6 +4730,16 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 }
 
 // ----------------------------------------------------------------------------
+// other wxFolderViewFrame methods
+// ----------------------------------------------------------------------------
+
+Profile *wxFolderViewFrame::GetFolderProfile(void) const
+{
+   return m_FolderView ? m_FolderView->GetFolderProfile()
+                       : wxMFrame::GetFolderProfile();
+}
+
+// ----------------------------------------------------------------------------
 // other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
 

@@ -332,15 +332,15 @@ public:
    void OnCommandEvent(wxCommandEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
-   /** This virtual method returns either NULL or a (not incref'd)
-       pointer to the profile of the mailfolder being displayed, for
-       those wxMFrames which have a folder displayed. Used to make the
-       compose view inherit the current folder's settings.
+   /**
+      This virtual method returns a pointer to the profile of the mailfolder
+      being displayed, for those wxMFrames which have a folder displayed or the
+      global application profile for the other ones. Used to make the compose
+      view inherit the current folder's settings.
+
+      @return profile pointer, the caller must DecRef() it
    */
-   virtual Profile *GetFolderProfile(void)
-      {
-         return m_FolderView ? m_FolderView->GetProfile() : NULL;
-      }
+   virtual Profile *GetFolderProfile(void) const;
 
    /// don't even think of using this!
    wxFolderViewFrame(void) { wxFAIL_MSG("unreachable"); }
