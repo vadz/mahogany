@@ -72,10 +72,10 @@
 
 // @@@@ for testing only
 #ifndef USE_PCH
-   extern "C"
-   {
-#     include <rfc822.h>
-   }
+//   extern "C"
+//   {
+//#     include <rfc822.h>
+//   }
 #  include "MessageCC.h"
 #endif //USE_PCH
 
