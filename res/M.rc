@@ -71,6 +71,7 @@ tb_delete	BITMAP	"tb_delete.bmp"
 tb_undo		BITMAP	"tb_undo.bmp"
 tb_lookup	BITMAP	"tb_lookup.bmp"
 tb_editor	BITMAP	"tb_editor.bmp"
+tb_modules	BITMAP	"tb_modules.bmp"
 
 // ADB tree ctrl image list (16x16) bitmaps
 adb_address	BITMAP "address.bmp"
@@ -121,6 +122,7 @@ image_both	BITMAP	"image_both.bmp"
 
 // Others
 noxface		BITMAP	"noxface.bmp"
+install_welcome BITMAP  "install1.bmp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources
