@@ -301,6 +301,8 @@ protected:
    /// the array with the initial values of the settings for this folder
    wxString m_originalValues[MaxProperty];
 
+   /// the initial value of the "anonymous" flag
+   bool m_originalIsAnonymous;
    /// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
    /// the initial value of the "keep open" flag
@@ -1328,6 +1330,10 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
    
+   // and the same for the anon flag
+   m_originalIsAnonymous = (flags & MF_FLAGS_ANON) != 0;
+   m_isAnonymous->SetValue(m_originalIsAnonymous);
+
    // update the folder icon
    if ( m_isCreating )
    {
@@ -1604,7 +1610,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    bool isKeepOpen = m_keepOpen->GetValue();
    if ( m_originalKeepOpenValue != isKeepOpen )
    {
-      if(isKeepOpen)
+      if ( isKeepOpen )
          mApplication->AddKeepOpenFolder(fullname);
       else
       {
@@ -1613,6 +1619,15 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       }
    }
    //else: nothing changed, nothing to do
+
+   bool isAnonymous = m_isAnonymous->GetValue();
+   if ( isAnonymous != m_originalIsAnonymous )
+   {
+      if ( isAnonymous )
+         folder->AddFlags(MF_FLAGS_ANON);
+      else
+         folder->ResetFlags(MF_FLAGS_ANON);
+   }
 
    int folderIcon = m_browseIcon->GetIconIndex();
    if ( folderIcon != m_originalFolderIcon )
