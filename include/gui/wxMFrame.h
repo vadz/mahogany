@@ -4,15 +4,21 @@
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$               *
+ *
+ * $Log$
+ * Revision 1.7  1998/05/02 15:21:33  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
+ *
+ *
  *******************************************************************/
-#ifdefndef	WXMFRAME_H
+#ifndef	WXMFRAME_H
 #define WXMFRAME_H
 
-#ifdefdef __GNUG__
+#ifdef __GNUG__
 #pragma interface "wxMFrame.h"
 #endif
 
-#ifdefndef	USE_PCH
+#ifndef	USE_PCH
 #	include	"MFrame.h"
 #	include	"guidef.h"
 #endif

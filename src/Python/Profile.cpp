@@ -33,8 +33,8 @@
  * and things like that.
  *
  * $Log$
- * Revision 1.1  1998/04/29 19:55:43  KB
- * some more scripting and configure changes for python
+ * Revision 1.2  1998/05/02 15:21:34  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
  ************************************************************************/
 

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/02 15:21:33  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
+ *
  * Revision 1.4  1998/05/01 14:02:41  KB
  * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
  * conventions.
@@ -21,20 +24,20 @@
  * first try at a complete archive
  *
  *******************************************************************/
-#ifdefndef	WXCOMPOSEVIEW_H
+#ifndef	WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
 
-#ifdefdef __GNUG__
+#ifdef __GNUG__
 #pragma interface "wxComposeView.h"
 #endif
 
-#ifdef !USE_PCH
-  #include	<map>
+#ifndef USE_PCH
+#   include	<map>
 
-  #include	<Message.h>
-  #include	<wxMenuDefs.h>
-  #include	<wxMFrame.h>
-  #include	<Profile.h>
+#   include	<Message.h>
+#   include	<wxMenuDefs.h>
+#   include	<wxMFrame.h>
+#   include	<Profile.h>
 
   using namespace std;
 #endif

@@ -5,7 +5,7 @@
  *                                                                  *
  * $Id$                *
  *******************************************************************/
-#ifdefndef MCONFIG_H
+#ifndef MCONFIG_H
 #define	MCONFIG_H
 
 #include	"config.h"
@@ -16,7 +16,7 @@
 #undef	CC_GCC
 #undef	CC_MSC
 
-#ifdefdef unix
+#ifdef unix
 #	define	OS_UNIX		1
 #	define	OS_TYPE		"unix"
 #elif defined(__WIN__) || defined (__WIN32__)
@@ -30,12 +30,12 @@
 # error   "Unknown platform (forgot to #define unix?)"
 #endif
 
-#ifdefdef	__WINDOWS__
-#error windows
+#ifdef	__WINDOWS__
+#   error windows
 #endif
 
 // Are we using GCC?
-#ifdefdef	__GNUG__
+#ifdef	__GNUG__
 #	undef	CC_GCC	// might already be defined thanks to configure
 #	define	CC_GCC	1
         /// gcc does not support precompiled headers
@@ -50,7 +50,7 @@
 #endif
 
 // Are we using Microsoft Visual C++ ?
-#ifdefdef	_MSC_VER 
+#ifdef	_MSC_VER 
 #		define	CC_MSC	1
                 /// are we using precompiled headers?
 #		ifndef USE_PCH
@@ -60,7 +60,7 @@
 #		endif
 #endif
 
-#ifdefdef  USE_WXWINDOWS2
+#ifdef  USE_WXWINDOWS2
 #	define wxTextWindow  wxTextCtrl
 #	define wxText        wxTextCtrl
 #endif  // wxWin 2
@@ -72,10 +72,10 @@
 #define	USE_MEMDEBUG		1
 
 /// derive common base from wxObject
-#define	USE_WXOBJECT		0
+#undef	USE_WXOBJECT		
 
 /// debug allocator
-#define	USE_DEBUGNEW		0
+#undef	USE_DEBUGNEW		
 
 
 #ifdef USE_DEBUGNEW
@@ -97,11 +97,11 @@
 #	define	BASECLASS	CommonBase
 #endif
 
-#ifdefdef	HAVE_COMPFACE_H
+#ifdef	HAVE_COMPFACE_H
 #	define	HAVE_XFACES
 #endif
 
-#ifdefdef	HAVE_COMPFACE_H
+#ifdef	HAVE_COMPFACE_H
 #	define	HAVE_XFACES
 #endif
 
@@ -126,7 +126,7 @@
 
 
 // Microsoft Visual C++
-#ifdefdef  CC_MSC
+#ifdef  CC_MSC
   // suppress the warning "identifier was truncated to 255 characters 
   // in the debug information"
 #	pragma warning(disable: 4786)
@@ -166,7 +166,7 @@
   using namespace std;
 #endif
 
-#ifdefdef	USE_WXWINDOWS
+#ifdef	USE_WXWINDOWS
 #       ifdef        USE_WXWINDOWS2
 #               define  WXCPTR  	/**/
 #		define	WXSTR(str)	str

@@ -6,27 +6,27 @@
  * $Id$             *
  *******************************************************************/
 
-#ifdefndef WXMDIALOGS_H
+#ifndef WXMDIALOGS_H
 #define WXMDIALOGS_H
 
-#ifdefdef __GNUG__
+#ifdef __GNUG__
 #pragma interface "wxMDialogs.h"
 #endif
 
-#ifdef     !USE_PCH
-  #include	<MApplication.h>
-  #include	<MFrame.h>
-  #include	<MDialogs.h>
-  #include	<Adb.h>
+#ifndef     USE_PCH
+#   include	<MApplication.h>
+#   include	<MFrame.h>
+#   include	<MDialogs.h>
+#   include	<Adb.h>
 #else
   // fwd decl
   class ProfileBase;
   class AdbEntry;
 
   // don't fwd decl typedef if it's already defined
-#ifdefndef   ADB_H
+#   ifndef   ADB_H
     class AdbExpandListType;
-  #endif
+#   endif
 #endif
 
 /**

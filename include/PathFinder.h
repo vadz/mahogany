@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/02 15:21:32  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
+ *
  * Revision 1.3  1998/05/01 14:02:39  KB
  * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
  * conventions.
@@ -19,24 +22,23 @@
  *
  *******************************************************************/
 
-#ifdefndef PATHFINDER_H
+#ifndef PATHFINDER_H
 #define PATHFINDER_H
 
-#ifdefdef __GNUG__
-#pragma interface "PathFinder.h"
+#ifdef __GNUG__
+#   pragma interface "PathFinder.h"
 #endif
 
-#ifdef !USE_PCH
-  #include	<Mcommon.h>
-  #include	<CommonBase.h>
-
-  #include	<list>
+#ifdef USE_PCH
+#   include	<Mcommon.h>
+#   include	<CommonBase.h>
+#   include	<list>
 #endif
 
 /**@name PathFinder class for finding files */
 //@{
 
-#ifdef     defined(OS_UNIX)
+#ifdef   OS_UNIX
 /// define a delimiter for separating paths
 #	define	PATHFINDER_DELIMITER	":"
 #	include	<unistd.h>

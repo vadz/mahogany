@@ -5,12 +5,12 @@
  *                                                                  *
  * $Id$           *
  *******************************************************************/
-#ifdefndef MCOMMON_H
+#ifndef MCOMMON_H
 #define	MCOMMON_H
 
 #include	"Mconfig.h"
 
-#ifdefdef	HAVE_LIBINTL_H
+#ifdef	HAVE_LIBINTL_H
 #	define 	USE_GETTEXT	1
 #	include	<libintl.h>
 #else
@@ -25,92 +25,94 @@
     bool operator> (const classname&) const { assert(0); return false; }
 
 // wxWindows 2 has/will have native gettext support
-#ifdef     !USE_WXWINDOWS2
-  #define	_(string)	mApplication.GetText(string)
+#ifndef     USE_WXWINDOWS2
+#   define	_(string)	mApplication.GetText(string)
 #endif  // wxWin 2
 
 // hide differences between wxWin versions
 #ifdef  USE_WXWINDOWS2
   // screen coordinates type
   typedef int coord_t;
-#ifdef USE_WXGTK
+
+#   ifdef USE_WXGTK
     // @@: at least in wxGTK both 'long' and 'int' are used!
     typedef long int lcoord_t;
-  #else
+#   else
     typedef coord_t lcoord_t;
-  #endif
+#   endif
   
   // @@@ wxGTK alpha 10 doesn't have validators (yet)
-#ifdefdef  USE_WXGTK
-    #define DEFAULT_VALIDATOR
-  #else
-    #define DEFAULT_VALIDATOR wxDefaultValidator, 
-  #endif //GTK
+#   ifdef  USE_WXGTK
+#      define DEFAULT_VALIDATOR
+#   else
+#      define DEFAULT_VALIDATOR wxDefaultValidator, 
+#   endif //GTK
     
   // @@@ wxFrame::SetIcon doesn't exist in wxGTK
-#ifdefdef  USE_WXGTK  
-    #define SetIcon(x)
-  #endif  //GTK
+#   ifdef  USE_WXGTK  
+#      define SetIcon(x)
+#   endif  //GTK
     
   // @@@ is this really the same thing
-  #define wxMessage   wxStaticText
-  #define wxCanvas    wxWindow
-  #define wxItem      wxControl
-  #define wxDialogBox wxDialog
+#   define wxMessage   wxStaticText
+#   define wxCanvas    wxWindow
+#   define wxItem      wxControl
+#   define wxDialogBox wxDialog
 
-  #define ON_CLOSE_TYPE    bool
+#   define ON_CLOSE_TYPE    bool
 
-  #define PanelNewLine(panel)
+#   define PanelNewLine(panel)
 
-  #define CreateNamedPanel(parent, x, y, w, h, name)                          \
+#   define CreateNamedPanel(parent, x, y, w, h, name)                          \
     GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h), 0, name)
-  #define CreatePanel(parent, x, y, w, h)                                     \
+#   define CreatePanel(parent, x, y, w, h)                                     \
     GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h))
 
-  #define CreateLabel(parent, title)                                          \
+#   define CreateLabel(parent, title)                                          \
     GLOBAL_NEW wxStaticText(parent, -1, _(title))
 
-  #define CreateButton(parent, title, name)                                   \
+#   define CreateButton(parent, title, name)                                   \
     GLOBAL_NEW wxButton(parent, -1, _(title), wxDefaultPosition,              \
                         wxDefaultSize, 0, DEFAULT_VALIDATOR name)
 
-  #define CreateText(parent, x, y, w, h, name)                                \
+#   define CreateText(parent, x, y, w, h, name)                                \
     GLOBAL_NEW wxTextCtrl(parent, -1, "", wxPoint(x, y), wxSize(w, h),        \
                           0, DEFAULT_VALIDATOR name)
 
-  #define CreateListBox(parent, x, y, w, h)                                   \
+#   define CreateListBox(parent, x, y, w, h)                                   \
     GLOBAL_NEW wxListBox(parent, -1, wxPoint(x, y), wxSize(w, h),             \
                          0, NULL, wxLB_SINGLE | wxLB_ALWAYS_SB)
 
-  #define CreateFrame(parent, title, x, y, w, h)                              \
+#   define CreateFrame(parent, title, x, y, w, h)                              \
     Create(parent, -1, title, wxPoint(x, y), wxSize(w, h))
-#else
+#else   // wxWin 1.xx
   // screen coordinates type
   typedef float coord_t;
+  typedef coord_t lcoord_t;
   
-  #define ON_CLOSE_TYPE     Bool
+#   define ON_CLOSE_TYPE     Bool
 
-  #define PanelNewLine(panel)    panel->NewLine()
+#   define PanelNewLine(panel)    panel->NewLine()
 
-  #define CreateNamedPanel(p, x, y, w, h, n)  GLOBAL_NEW wxPanel(p, x, y,     \
+#   define CreateNamedPanel(p, x, y, w, h, n)  GLOBAL_NEW wxPanel(p, x, y,     \
                                                                  w, h, 0, n)
-  #define CreatePanel(p, x, y, w, h)  GLOBAL_NEW wxPanel(p, x, y, w, h)
-  #define CreateLabel(p, t)           GLOBAL_NEW wxMessage(p, _(t))
-  #define CreateButton(p, t, n)       GLOBAL_NEW wxButton(p, NULL, _(t),      \
+#   define CreatePanel(p, x, y, w, h)  GLOBAL_NEW wxPanel(p, x, y, w, h)
+#   define CreateLabel(p, t)           GLOBAL_NEW wxMessage(p, _(t))
+#   define CreateButton(p, t, n)       GLOBAL_NEW wxButton(p, NULL, _(t),      \
                                                           -1, -1, -1, -1,     \
                                                           0, n)
-  #define CreateText(p, x, y, w, h, name)   GLOBAL_NEW wxText(p, NULL, NULL,  \
+#   define CreateText(p, x, y, w, h, name)   GLOBAL_NEW wxText(p, NULL, NULL,  \
                                                        "", x, y, w, h, 0, name)
 
-  #define CreateListBox(parent, x, y, w, h)                                   \
+#   define CreateListBox(parent, x, y, w, h)                                   \
     GLOBAL_NEW wxListBox(parent, (wxFunction) NULL, (const char *)"", \
 			 0, x, y, w, h,           \
                          0, NULL, wxALWAYS_SB)
-  #define CreateFrame(p, t, x, y, w, h) Create(p, t, x, y, w, h)
+#   define CreateFrame(p, t, x, y, w, h) Create(p, t, x, y, w, h)
 #endif
 
 
-#ifdefndef NDEBUG
+#ifndef NDEBUG
 /// macro to define debug method
 #	define DEBUG_DEF		void Debug(void) const;
 #	define	DBGLOG(x)		cerr << x << endl;
@@ -177,9 +179,9 @@
 #	endif
 #endif
 
-#ifdef   defined(OS_UNIX)
+#ifdef   OS_UNIX
 #	include	"Munix.h"
-#elif defined(OS_WIN)
+#elif   defined(OS_WIN)
 #	include "Mwin.h"
 #endif
 

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/02 15:21:33  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
+ *
  * Revision 1.3  1998/05/01 14:02:41  KB
  * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
  * conventions.
@@ -19,20 +22,20 @@
  *
  *******************************************************************/
 
-#ifdefndef WXFONTMANAGER_H
+#ifndef WXFONTMANAGER_H
 #define WXFONTMANAGER_H
 
-#ifdefdef __GNUG__
+#ifdef __GNUG__
 #pragma interface "wxFontManager.h"
 #endif
 
-#ifdef         !USE_PCH
-  #define	Uses_wxFont
-  #include	<wx/wx.h>
+#ifndef         USE_PCH
+#   define	Uses_wxFont
+#   include	<wx/wx.h>
 
-  #include	<Mcommon.h>
+#   include	<Mcommon.h>
 
-  #include	<list>
+#   include	<list>
 #endif
 
 #define	WXFM_DEFAULT_SIZE	12

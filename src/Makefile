@@ -19,7 +19,7 @@ doc:
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(RM) core set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	$(RM) core 
 
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done

@@ -6,7 +6,7 @@
  * $Id$              *
  *******************************************************************/
 
-#ifdefndef MLOGFRAME_H
+#ifndef MLOGFRAME_H
 #define MLOGFRAME_H
 
 #include	"Mconfig.h"

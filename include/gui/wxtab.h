@@ -5,10 +5,10 @@
  *
  */
 
-#ifdefndef wx_tabh
+#ifndef wx_tabh
 #define wx_tabh
 
-#ifdefdef __GNUG__
+#ifdef __GNUG__
 #pragma interface "wxtab.h"
 #endif
 

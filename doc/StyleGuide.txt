@@ -16,7 +16,7 @@ projects.
 
 1.1 #define's
 
-1.1.1 features and compile time defines
+1.1.1 Features and Compile time defines
 
 As most platforms use the GNU configure system to set defines, we have
 to follow its way of doing things. Therefor all defines which enable
@@ -28,6 +28,9 @@ or disable features, should follow the following conventions:
 
 2. If defined, they must have the value 1. Never define it to be 0,
   but use #undef instead.
+
+3. To test a define, do not use #if, but use #ifdef, #if defined() or
+  #ifndef .
 
 1.1.2 Operating system identifiers
 
@@ -62,6 +65,9 @@ be used in the following way:
 
 * On systems without precompiled headers, it only includes Mconfig.h.
 
+* On systems that support precompiled headers, the define USE_PCH will
+  be defined.
+
 All source files should include Mpch.h, all header files should include
 Mconfig.h.
 
@@ -70,10 +76,9 @@ Mconfig.h.
 * All preprocessor directives must start at column 0. Indentation should
   happen between the leading hash (#) and the directive.
 
-* Indentation is by a TAB characters, or by eight spaces.
+* Indentation is by a three spaces.
 
-* Between a #include and the file name, there should be a TAB, not
-  a space.
+* Between a #include and the file name, there should be three spaces.
 
 Example:
 
@@ -113,9 +118,12 @@ Example:
 Format your code like seen in Bjarne Stroustrup's The C++ Programming
 Language.
 
-3.2 braces
+3.2 Braces 
 
-Always put braces on a line by themselves. 
+Braces should always be on a line by themselves. If following a control
+statement, they should be on the same indentation level as that statement.
+E.g. the brace after an if() statement should be directly under the
+``i''
 
 Do not write code like:
 
@@ -131,7 +139,13 @@ but write
 
 
 
-3.3 Use DOC++ comments
+3.3 Tabulators and Spaces
+
+To make cooperation easier we have agreed to not to use any tabulator
+characters in the sources. Instead three spaces should be used. The
+basic indentation depth is three spaces per level.
+
+3.4 Use DOC++ comments
 
 It's pretty buggy, but maybe some day there will be a working version
 of it, so use it.
@@ -155,18 +169,3 @@ Example:
 
 Do not define a global macro such as SIZE(x), but call it mylibSIZE(x)
 or mSIZE(x).
-
-4.3 Indentation
-
-4.3.1 Tabulators and Spaces
-
-To make cooperation easier we have agreed to not to use any tabulator
-characters in the sources. Instead three spaces should be used. The
-basic indentation depth is three spaces per level.
-
-4.3.2 Braces
-
-Braces should always be on a line by themselves. If following a control
-statement, they should be on the same indentation level as that statement.
-E.g. the brace after an if() statement should be directly under the
-``i''

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri May  1 15:06:39 1998
+#This file was created by <karsten> Sat May  2 16:13:56 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -56,7 +56,7 @@ Preprocessor Usage
 #define's
 \layout Subsubsection
 
-features and compile time defines
+Features and Compile time defines
 \layout Standard
 
 As most platforms use the GNU 
@@ -85,6 +85,29 @@ If defined, they must have the value 1.
 #undef
 \family default 
  instead.
+\layout Enumerate
+
+To test a define, do 
+\shape italic 
+not
+\shape default 
+ use 
+\family typewriter 
+#if
+\family default 
+, but use 
+\family typewriter 
+#ifdef
+\family default 
+, 
+\family typewriter 
+#if defined()
+\family default 
+ or 
+\family typewriter 
+#ifndef
+\family default 
+ .
 \layout Subsubsection
 
 Operating system identifiers
@@ -191,6 +214,13 @@ On systems without precompiled headers, it only includes
 Mconfig.h
 \family default 
 .
+\layout Itemize
+
+On systems that support precompiled headers, the define 
+\family typewriter 
+USE_PCH
+\family default 
+ will be defined.
 \layout Standard
 
 All source files should include 
@@ -211,14 +241,14 @@ All preprocessor directives must start at column 0.
  Indentation should happen between the leading hash (#) and the directive.
 \layout Itemize
 
-Indentation is by a TAB characters, or by eight spaces.
+Indentation is by a three spaces.
 \layout Itemize
 
 Between a 
 \family typewriter 
 #include
 \family default 
- and the file name, there should be a TAB, not a space.
+ and the file name, there should be three spaces.
 \layout Standard
 
 Example:
@@ -334,11 +364,30 @@ Format your code like seen in Bjarne Stroustrup's
 The C++ Programming Language.
 \layout Subsection
 
-braces
+Braces 
 \layout Standard
 
-Always put braces on a line by themselves.
- 
+Braces should always be on a line by themselves.
+ If following a control statement, they should be on the same indentation
+ level as that statement.
+ E.g.
+ the brace after an 
+\family typewriter 
+if()
+\family default 
+ statement should be directly under the 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+i
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+
 \layout Standard
 
 Do not write code like:
@@ -386,6 +435,18 @@ verb|{|
 verb| printf("foo is bar
 \backslash 
 n");|
+\layout Subsection
+
+Tabulators and Spaces
+\layout Standard
+
+To make cooperation easier we have agreed to 
+\emph on 
+not
+\emph default 
+ to use any tabulator characters in the sources.
+ Instead three spaces should be used.
+ The basic indentation depth is three spaces per level.
 \layout Subsection
 
 Use DOC++ comments
@@ -441,47 +502,4 @@ mylibSIZE(x)
 mSIZE(x)
 \family default 
 .
-\layout Subsection
-
-Indentation
-\layout Subsubsection
-
-Tabulators and Spaces
-\layout Standard
-
-To make cooperation easier we have agreed to 
-\emph on 
-not
-\emph default 
- to use any tabulator characters in the sources.
- Instead three spaces should be used.
- The basic indentation depth is three spaces per level.
-\layout Subsubsection
-
-Braces
-\layout Standard
-
-Braces should always be on a line by themselves.
- If following a control statement, they should be on the same indentation
- level as that statement.
- E.g.
- the brace after an 
-\family typewriter 
-if()
-\family default 
- statement should be directly under the 
-\begin_inset Quotes eld
-\end_inset 
-
-
-\family typewriter 
-i
-\family default 
-
-\begin_inset Quotes erd
-\end_inset 
-
-
-\layout Standard
-
 \the_end

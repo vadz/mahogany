@@ -3,9 +3,12 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
+ * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/02 15:21:31  KB
+ * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
+ *
  * Revision 1.3  1998/05/01 14:02:39  KB
  * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
  * conventions.
@@ -19,18 +22,18 @@
  *
  *******************************************************************/
 
-#ifdefndef COMMONBASE_H
+#ifndef COMMONBASE_H
 #define	COMMONBASE_H
 
 #ifdef         USE_IOSTREAMH
-#ifdefdef    OS_WIN
+#   ifdef    OS_WIN
     // remember these 8.3 names
-    #include	<strstrea.h>
-  #else
-    #include	<strstream.h>
-  #endif
+#      include	<strstrea.h>
+#   else
+#      include	<strstream.h>
+#   endif
 #else
-  #include	<strstream>
+#      include	<strstream>
 #endif  // VC++
 
 #ifdef	USE_MEMDEBUG
@@ -41,11 +44,11 @@
 #endif
 
 #ifdef USE_COMMONBASE
-#ifdef !	USE_CLASSINFO
+#ifndef	USE_CLASSINFO
 #	define	CB_IMPLEMENT_CLASS(newclass, parent)	
 #	define	CB_DECLARE_CLASS(newclass, parent)	
 #else
-#	if	USE_WXOBJECT
+#	ifdef	USE_WXOBJECT
 #		define	CB_IMPLEMENT_CLASS(newclass, parent) IMPLEMENT_CLASS(newclass, parent)	
 #		define CB_DECLARE_CLASS(newclass) DECLARE_CLASS(newclass,  parent)
 #	else
@@ -91,7 +94,7 @@ public:
 
    CB_DECLARE_CLASS(CommonBase, CommonBase)
 
-#ifdefndef NDEBUG
+#ifndef NDEBUG
    /// prints some debugging information
    virtual void Debug(void) const; 
 #endif
