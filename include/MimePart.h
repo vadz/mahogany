@@ -22,9 +22,6 @@
 // for MimeParameterList
 #include "lists.h"
 
-// c-client defines this
-#undef MESSAGE
-
 // ----------------------------------------------------------------------------
 // MimeType: represents a string of the form "type/subtype"
 // ----------------------------------------------------------------------------
