@@ -47,10 +47,9 @@
 #include "ASMailFolder.h"
 #include "MFolder.h"
 #include "MDialogs.h"
+
 #include "MessageView.h"
-#include "XFace.h"
-#include "miscutil.h"
-#include "sysutil.h"
+#include "MessageViewer.h"
 
 #include "MessageTemplate.h"
 #include "Composer.h"
@@ -68,6 +67,7 @@
 #include <wx/mimetype.h>
 #include <wx/fontmap.h>
 #include <wx/clipbrd.h>
+#include <wx/splitter.h>
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -304,6 +304,28 @@ wxMessageView::DoShowMessage(Message *mailMessage)
       frame->SetTitle(ParseMessageTemplate(fmt, expander));
    }
    //else: we're in the main frame, don't do this
+}
+
+// ----------------------------------------------------------------------------
+// helpers for viewer changing
+// ----------------------------------------------------------------------------
+
+void
+wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
+                              const MessageViewer *viewerNew)
+{
+   if ( !viewerOld )
+   {
+      return;
+   }
+
+   wxWindow *winOld = viewerOld->GetWindow();
+   wxSplitterWindow *splitter = wxDynamicCast(winOld->GetParent(), wxSplitterWindow);
+
+   if ( splitter )
+      splitter->ReplaceWindow(winOld, viewerNew->GetWindow());
+
+   delete winOld;
 }
 
 // ----------------------------------------------------------------------------

@@ -189,7 +189,8 @@ public:
 
 protected:
    /// Removes the module from the global list
-   virtual ~MModuleCommon() { m_MInterface->RemoveModule(this); }
+   virtual ~MModuleCommon()
+      { if ( m_MInterface ) m_MInterface->RemoveModule(this); }
 
    MInterface *m_MInterface;
 

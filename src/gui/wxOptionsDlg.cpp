@@ -60,6 +60,8 @@
 #include "Mdefaults.h"
 #include "Mcallbacks.h"
 
+#include "MessageView.h" // for list of available viewers
+
 #include "gui/wxIconManager.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
@@ -247,6 +249,7 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_MsgViewerHelp,
    ConfigField_MsgViewer,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
@@ -918,7 +921,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message view
-   { gettext_noop("&Message viewer"),              Field_Text,    -1 },
+   // FIXME: this text is stupid but we should have _some_ explanation, right?
+   { gettext_noop("Mahogany has several standard message viewers and more\n"
+                  "can be plugged in. The default one is the safest choice\n"
+                  "but you may try the others for an alternative look."),
+                                                   Field_Message |
+                                                   Field_Advanced,    -1 },
+   { gettext_noop("&Message viewer"),              Field_Combo |
+                                                   Field_Advanced,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
@@ -1296,7 +1306,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
-   CONFIG_ENTRY(MP_MSGVIEW_VIEWER),
+   CONFIG_NONE(),
+   CONFIG_NONE(), // and not MP_MSGVIEW_VIEWER: we handle it specially
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
@@ -1590,33 +1601,7 @@ void wxOptionsPage::CreateControls()
             break;
 
          case Field_Combo:
-            // a hack to dynamicially fill the RAS connections combo box under
-            // Windows - I didn't find anything better to do right now, may be
-            // later (feel free to tell me if you have any ideas)
-#ifdef OS_WIN
-            if ( n == ConfigField_NetConnection )
-            {
-               wxString title = _(m_aFields[n].label);
-
-               // may be NULL if we don't use dial up manager at all
-               wxDialUpManager *dial =
-                  ((wxMApp *)mApplication)->GetDialUpManager();;
-               if ( dial )
-               {
-                  wxArrayString aConnections;
-                  dial->GetISPNames(aConnections);
-
-                  if ( !aConnections.IsEmpty() )
-                  {
-                     title << ':' << strutil_flatten_array(aConnections);
-                  }
-               }
-
-               last = CreateChoice(title, widthMax, last);
-            }
-            else
-#endif // OS_WIN
-                last = CreateChoice(_(m_aFields[n].label), widthMax, last);
+            last = CreateChoice(_(m_aFields[n].label), widthMax, last);
             break;
 
          case Field_Passwd:
@@ -2306,6 +2291,7 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
                    ConfigField_MessageViewLast,
                    MH_OPAGE_MESSAGEVIEW)
 {
+   m_currentViewer = -1;
 }
 
 void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
@@ -2331,6 +2317,57 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
       dialog->SetDirty();
    }
+}
+
+bool wxOptionsPageMessageView::TransferDataToWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataToWindow();
+   if ( bRc )
+   {
+      wxArrayString descViewers;
+      size_t count = MessageView::GetAllAvailableViewers(&m_nameViewers,
+                                                         &descViewers);
+
+      wxChoice *choice = wxStaticCast(GetControl(ConfigField_MsgViewer),
+                                                 wxChoice);
+      if ( choice )
+      {
+         for ( size_t n = 0; n < count; n++ )
+         {
+            choice->Append(descViewers[n]);
+         }
+
+         wxString name = READ_CONFIG(m_Profile, MP_MSGVIEW_VIEWER);
+         m_currentViewer = m_nameViewers.Index(name);
+         if ( m_currentViewer != -1 )
+         {
+            choice->SetSelection(m_currentViewer);
+         }
+      }
+   }
+
+   return bRc;
+}
+
+bool wxOptionsPageMessageView::TransferDataFromWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataFromWindow();
+   if ( bRc )
+   {
+      wxChoice *choice = wxStaticCast(GetControl(ConfigField_MsgViewer),
+                                                 wxChoice);
+
+      if ( choice )
+      {
+         int sel = choice->GetSelection();
+         if ( sel != -1 && sel != m_currentViewer )
+         {
+            m_Profile->writeEntry(MP_MSGVIEW_VIEWER, m_nameViewers[(size_t)sel]);
+         }
+      }
+   }
+
+   return bRc;
 }
 
 // ----------------------------------------------------------------------------
@@ -2465,6 +2502,41 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
                                     MH_OPAGE_NETWORK)
 {
 }
+
+// dynamicially fill the RAS connections combo box under Windows
+#ifdef OS_WIN
+
+bool wxOptionsPageNetwork::TransferDataToWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataToWindow();
+   if ( bRc )
+   {
+      wxChoice *choice = wxStaticCast(GetControl(ConfigField_NetConnection),
+                                                 wxChoice);
+
+      if ( choice )
+      {
+         // may be NULL if we don't use dial up manager at all
+         wxDialUpManager *dial = ((wxMApp *)mApplication)->GetDialUpManager();
+
+         if ( dial )
+         {
+            wxArrayString aConnections;
+            dial->GetISPNames(aConnections);
+
+            size_t count = aConnections.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+               choice->Append(aConnections[n]);
+            }
+         }
+      }
+   }
+
+   return bRc;
+}
+
+#endif // OS_WIN
 
 // ----------------------------------------------------------------------------
 // wxOptionsPagePython

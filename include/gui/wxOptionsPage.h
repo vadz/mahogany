@@ -358,7 +358,16 @@ public:
 
    void OnButton(wxCommandEvent&);
 
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
 private:
+   // the names of all available viewers
+   wxArrayString m_nameViewers;
+
+   // the index of the current viewer in the arryas above or -1
+   int m_currentViewer;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -400,6 +409,10 @@ class wxOptionsPageNetwork : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
+
+#ifdef OS_WIN
+   virtual bool TransferDataToWindow();
+#endif // OS_WIN
 };
 
 // global folder settings (each folder has its own settings which are changed

@@ -1,10 +1,15 @@
-/*-*- c++ -*-********************************************************
- * wxMessageView.h: a window displaying a mail message              *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   wxMessageView.h: wxMessageView and wxMessageViewFrame
+// Purpose:     wxMessageView adds missing GUI bits and pieces to MessageView:
+//              it shows the popup menu when needed &c
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef WXMESSAGEVIEW_H
 #define WXMESSAGEVIEW_H
@@ -43,6 +48,10 @@ public:
 
    /// show message
    virtual void DoShowMessage(Message *msg);
+
+   /// update the GUI to show the new viewer window
+   virtual void OnViewerChange(const MessageViewer *viewerOld,
+                               const MessageViewer *viewerNew);
 
 private:
    /// show the URL popup menu

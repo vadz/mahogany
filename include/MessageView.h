@@ -174,6 +174,10 @@ public:
 
    //@}
 
+   /// get the info about all available viewers
+   static size_t GetAllAvailableViewers(wxArrayString *names,
+                                        wxArrayString *descs);
+
 protected:
    /** @name Initialization
     */
@@ -184,11 +188,24 @@ protected:
 
    //@}
 
+   /** @name GUI stuff
+
+       We need to interact with the rest of the GUI but we don't do it in this
+       class: instead we provide the hooks for the derived one
+    */
+   //@{
+
    /// update the "show headers" menu item from m_ProfileValues.showHeaders
    void UpdateShowHeadersInMenu();
 
    /// show this message in the viewer
    virtual void DoShowMessage(Message *msg);
+
+   /// update GUI to show the new viewer window
+   virtual void OnViewerChange(const MessageViewer *viewerOld,
+                               const MessageViewer *viewerNew) = 0;
+
+   //@}
 
    /** @name Accessors
 

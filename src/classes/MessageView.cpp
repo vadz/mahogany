@@ -75,9 +75,6 @@
    #include <sys/stat.h>
 #endif
 
-// FIXME: there shouldn't be no GUI code here
-#include <wx/splitter.h>
-
 // ----------------------------------------------------------------------------
 // helper functions
 // ----------------------------------------------------------------------------
@@ -195,19 +192,31 @@ private:
 // DummyViewer: a trivial implementation of MessageViewer which doesn't do
 //              anything but which we use to avoid crashing if no viewers are
 //              found
+//
+//              this is also the one we use when we have no folder set
 // ----------------------------------------------------------------------------
 
 class DummyViewer : public MessageViewer
 {
 public:
-   // creation &c
-   virtual void Create(MessageView *msgView, wxWindow *parent) { }
+   // creation
+   DummyViewer() { }
+   DummyViewer(MessageView *msgView, wxWindow *parent)
+   {
+      Create(msgView, parent);
+   }
+
+   virtual void Create(MessageView *msgView, wxWindow *parent)
+   {
+      m_window = new wxWindow(parent, -1);
+   }
+
+   // operations
    virtual void Clear() { }
    virtual void Update() { }
    virtual void UpdateOptions() { }
-   virtual wxWindow *GetWindow() const { return NULL; }
+   virtual wxWindow *GetWindow() const { return m_window; }
 
-   // operations
    virtual void Find(const String& text) { }
    virtual void FindAgain() { }
    virtual void Copy() { }
@@ -255,6 +264,9 @@ public:
                             int *version_minor,
                             int *version_release) const { }
    virtual int Entry(int /* MMOD_FUNC */, ... ) { return 0; }
+
+private:
+   wxWindow *m_window;
 };
 
 // ============================================================================
@@ -394,7 +406,7 @@ MessageView::MessageView(wxWindow *parent)
 {
    Init();
 
-   CreateViewer(parent);
+   m_viewer = new DummyViewer(this, parent);
 }
 
 void
@@ -412,20 +424,45 @@ MessageView::Init()
    RegisterForEvents();
 }
 
+// ----------------------------------------------------------------------------
+// viewer loading &c
+// ----------------------------------------------------------------------------
+
+/* static */
+size_t MessageView::GetAllAvailableViewers(wxArrayString *names,
+                                           wxArrayString *descs)
+{
+   CHECK( names && descs, 0, "NULL pointer in GetAllAvailableViewers" );
+
+   MModuleListing *listing =
+      MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
+   if ( !listing )
+   {
+      return 0;
+   }
+
+   // found some viewers
+   size_t count = listing->Count();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MModuleListingEntry& entry = (*listing)[n];
+
+      names->Add(entry.GetName());
+      descs->Add(entry.GetShortDescription());
+   }
+
+   listing->DecRef();
+
+   return count;
+}
+
 void
 MessageView::CreateViewer(wxWindow *parent)
 {
-   // FIXME: there shouldn't be no GUI code here
-   wxWindow *winOld = NULL;
-   wxSplitterWindow *splitter = NULL;
-   if ( m_viewer )
-   {
-      winOld = m_viewer->GetWindow();
-      splitter = wxDynamicCast(winOld->GetParent(), wxSplitterWindow);
+   // we'll delete it below, after calling OnViewerChange()
+   MessageViewer *viewerOld = m_viewer;
 
-      m_viewer->DecRef();
-      m_viewer = NULL;
-   }
+   m_viewer = NULL;
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
@@ -489,13 +526,10 @@ MessageView::CreateViewer(wxWindow *parent)
 
    m_viewer->Create(this, parent);
 
-   // FIXME: there shouldn't be no GUI code here
-   if ( winOld )
+   OnViewerChange(viewerOld, m_viewer);
+   if ( viewerOld )
    {
-      if ( splitter )
-         splitter->ReplaceWindow(winOld, m_viewer->GetWindow());
-
-      delete winOld;
+      viewerOld->DecRef();
    }
 }
 
@@ -670,7 +704,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    Profile *profile = GetProfile();
    CHECK_RET( profile, "MessageView::ReadAllSettings: no profile" );
 
-   // We also use this to set all values to be read to speed things up:
+   // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(which, name) \
       GetColourByName(&settings->which, \
                       READ_CONFIG(profile, MP_MVIEW_##name), \

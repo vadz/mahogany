@@ -211,7 +211,7 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// Macros for loading the viewers from the modules
+// Loading the viewers from the modules
 // ----------------------------------------------------------------------------
 
 // this macro must be used inside MessageViewer-derived class declaration
