@@ -732,19 +732,14 @@ SendMessageCC::AddPart(Message::ContentType type,
    BODY *bdy;
    unsigned char *data;
 
-   // the text must be NUL terminated or it will not be encoded correctly
-   if ( type == TYPETEXT )
-      len += sizeof(char);
-
+   // the text must be NUL terminated or it will not be encoded correctly and
+   // it won't hurt to add a NUL after the end of data in the other cases as
+   // well (note that cclient won't get this last NUL as len will be
+   // decremented below)
+   len += sizeof(char);
    data = (unsigned char *) fs_get (len);
-
-   if ( type == TYPETEXT )
-   {
-      data[len] = '\0';
-
-      len -= sizeof(char);
-   }
-
+   len -= sizeof(char);
+   data[len] = '\0';
    memcpy(data, buf, len);
 
    String subtype(subtype_given);
@@ -825,7 +820,7 @@ SendMessageCC::AddPart(Message::ContentType type,
          // able to show them and some might complain [even] about iso8859-1
          cs = "US-ASCII";
       }
-      else
+      else // 8bit message
       {
          cs = EncodingToCharset(enc);
          if ( cs.empty() )
@@ -854,7 +849,8 @@ SendMessageCC::AddPart(Message::ContentType type,
    if(dlist)
    {
       MessageParameterList::iterator i;
-      PARAMETER *lastpar = NULL, *par;
+      PARAMETER *lastpar = NULL,
+                *par;
 
       for(i=dlist->begin(); i != dlist->end(); i++)
       {
