@@ -30,6 +30,8 @@
    #include <wx/textctrl.h>
 #endif // USE_PCH
 
+#include <wx/dynarray.h>
+
 #include "Mdefaults.h"
 
 #include "MessageView.h"
@@ -106,18 +108,59 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// TextViewerWindow: wxLayoutWindow used by TextViewer
+// TextViewerClickable: an object we can click on in the text control
+// ----------------------------------------------------------------------------
+
+class TextViewerClickable
+{
+public:
+   TextViewerClickable(ClickableInfo *ci, long pos, size_t len)
+   {
+      m_start = pos;
+      m_len = len;
+      m_ci = ci;
+   }
+
+   ~TextViewerClickable() { delete m_ci; }
+
+   // accessors
+
+   bool Inside(long pos) const
+      { return pos >= m_start && pos - m_start < m_len; }
+
+   const ClickableInfo *GetClickableInfo() const { return m_ci; }
+
+private:
+   // the range of the text we correspond to
+   long m_start,
+        m_len;
+
+   ClickableInfo *m_ci;
+};
+
+WX_DEFINE_ARRAY(TextViewerClickable *, ArrayClickables);
+
+// ----------------------------------------------------------------------------
+// TextViewerWindow: the viewer window used by TextViewer
 // ----------------------------------------------------------------------------
 
 class TextViewerWindow : public wxTextCtrl
 {
 public:
    TextViewerWindow(TextViewer *viewer, wxWindow *parent);
+   virtual ~TextViewerWindow();
+
+   void InsertClickable(const wxString& text,
+                        ClickableInfo *ci,
+                        const wxColour& col = wxNullColour);
 
 private:
-   void OnMouseEvent(wxCommandEvent& event);
+   void OnMouseEvent(wxMouseEvent& event);
 
    TextViewer *m_viewer;
+
+   // all "active" objects
+   ArrayClickables m_clickables;
 
    DECLARE_EVENT_TABLE()
 };
@@ -140,9 +183,58 @@ TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
    m_viewer = viewer;
 }
 
-void TextViewerWindow::OnMouseEvent(wxCommandEvent& event)
+TextViewerWindow::~TextViewerWindow()
 {
-   // TODO: we need hit testing here!
+   WX_CLEAR_ARRAY(m_clickables);
+}
+
+void TextViewerWindow::InsertClickable(const wxString& text,
+                                       ClickableInfo *ci,
+                                       const wxColour& col)
+{
+   if ( col.Ok() )
+   {
+      SetDefaultStyle(wxTextAttr(col));
+   }
+
+   TextViewerClickable *clickable =
+      new TextViewerClickable(ci, GetLastPosition(), text.length());
+   m_clickables.Add(clickable);
+
+   AppendText(text);
+}
+
+void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
+{
+   long pos = GetInsertionPoint();
+
+   size_t count = m_clickables.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      TextViewerClickable *clickable = m_clickables[n];
+      if ( clickable->Inside(pos) )
+      {
+         int id;
+         if ( event.RightUp() )
+         {
+            id = WXMENU_LAYOUT_RCLICK;
+         }
+         else if ( event.LeftUp() )
+         {
+            id = WXMENU_LAYOUT_LCLICK;
+         }
+         else // must be double click, what else?
+         {
+            ASSERT_MSG( event.LeftDClick(), "unexpected mouse event" );
+
+            id = WXMENU_LAYOUT_DBLCLICK;
+         }
+
+         m_viewer->DoMouseCommand(id, clickable->GetClickableInfo(),
+                                  event.GetPosition());
+      }
+   }
+
    event.Skip();
 }
 
@@ -302,10 +394,9 @@ void TextViewer::StartPart()
 
 void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
-   // TODO something better
    wxString str;
    str << '[' << "Attachment: " << ci->GetLabel() << ']';
-   InsertText(str, wxTextAttr(*wxLIGHT_GREY));
+   m_window->InsertClickable(str, ci, GetOptions().AttCol);
 }
 
 void TextViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
@@ -330,7 +421,7 @@ void TextViewer::InsertText(const String& text, const TextStyle& style)
 
 void TextViewer::InsertURL(const String& url)
 {
-   InsertText(url, wxTextAttr(GetOptions().UrlCol));
+   m_window->InsertClickable(url, new ClickableInfo(url), GetOptions().UrlCol);
 }
 
 void TextViewer::InsertSignature(const String& signature)

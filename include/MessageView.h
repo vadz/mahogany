@@ -395,6 +395,7 @@ private:
       wxColour BgCol,
                FgCol,
                UrlCol,
+               AttCol,
                HeaderNameCol,
                HeaderValueCol;
 

@@ -375,7 +375,8 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
 {
    #define CMP(x) (x == other.x)
 
-   return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
+   return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) &&
+          CMP(UrlCol) && CMP(AttCol) &&
           CMP(QuotedCol[0]) && CMP(QuotedCol[1]) && CMP(QuotedCol[2]) &&
           CMP(quotedColourize) && CMP(quotedCycleColours) &&
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
@@ -713,6 +714,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    GET_COLOUR_FROM_PROFILE(FgCol, FGCOLOUR);
    GET_COLOUR_FROM_PROFILE(BgCol, BGCOLOUR);
    GET_COLOUR_FROM_PROFILE(UrlCol, URLCOLOUR);
+   GET_COLOUR_FROM_PROFILE(AttCol, ATTCOLOUR);
    GET_COLOUR_FROM_PROFILE(QuotedCol[0], QUOTED_COLOUR1);
    GET_COLOUR_FROM_PROFILE(QuotedCol[1], QUOTED_COLOUR2);
    GET_COLOUR_FROM_PROFILE(QuotedCol[2], QUOTED_COLOUR3);

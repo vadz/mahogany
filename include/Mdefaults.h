@@ -581,6 +581,8 @@ enum MFolderIndex
 #define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
+// colour for attachment labels
+#define   MP_MVIEW_ATTCOLOUR      "MViewAttColour"
 // perform quoted text colourization?
 #define   MP_MVIEW_QUOTED_COLOURIZE   "MViewQuotedColourized"
 // cycle colours?
@@ -1399,6 +1401,8 @@ enum MFolderIndex
 #define   MP_MVIEW_BGCOLOUR_D      "white"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_D     "blue"
+// colour for attachment labels
+#define   MP_MVIEW_ATTCOLOUR_D     "dark olive green"
 
 // colorize quoted text?
 #define   MP_MVIEW_QUOTED_COLOURIZE_D 1L
