@@ -1,2 +1,3 @@
 ?package(mahogany):needs=X11 section=Apps/Net\
-  title="Mahogany" command="/usr/bin/mahogany"
+  title="Mahogany" command="/usr/bin/mahogany" \
+  icon="/usr/share/Mahogany/icons/M_32x32.xpm"
