@@ -1447,6 +1447,19 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    m_splitter->SplitHorizontally(m_panel, m_editor->GetWindow(), heightHeaders);
    m_splitter->SetMinimumPaneSize(heightHeaders);
 
+   // show the frame
+   // --------------
+
+   if ( !hide )
+   {
+      Show(TRUE);
+   }
+
+   // note that we must do it before setting the control values or the text
+   // would be scrolled to the right in the text fields as they initially don't
+   // have enough space to show it...
+   Layout();
+
    // initialize the controls
    // -----------------------
 
@@ -1456,14 +1469,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
    AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
    AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
-
-   // show the frame
-   // --------------
-
-   if ( !hide )
-   {
-      Show(TRUE);
-   }
 }
 
 /// create the compose window itself
