@@ -70,7 +70,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
       return; // nothing to do
-   
+
    if(! event.ControlDown())
    {
       long keyCode = event.KeyCode();
@@ -95,7 +95,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
       */
       const char keycodes_en[] = gettext_noop("DUXCSMRFOPH ");
       const char *keycodes = _(keycodes_en);
-      
+
       int idx = 0;
       int key = toupper((int)keyCode);
       for(;keycodes[idx] && keycodes[idx] != key;idx++)
@@ -103,7 +103,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
       // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
-    
+
       switch(keycodes_en[idx])
       {
       case 'D':
@@ -187,7 +187,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
    EnableSelectionCallbacks(true);
-   
+
    int
       w = 500,
       h = 300;
@@ -252,7 +252,7 @@ wxFolderListCtrl::Clear(void)
    SaveWidths();
 
    ClearAll();
-   
+
    if (m_Style & wxLC_REPORT)
    {
       for(int c = 0; c < WXFLC_NUMENTRIES; c++)
@@ -293,7 +293,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    wxSafeYield();
 
-   
+
    if(m_MailFolder)  // clean up old folder
    {
       m_timer->Stop();
@@ -329,7 +329,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       mf->DecRef();
    }
 
-   SafeDecRef(m_Profile); 
+   SafeDecRef(m_Profile);
 
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
@@ -460,7 +460,7 @@ wxFolderView::Update(void)
    {
       // FIXME vars are not initialised here!
       nsize = day = month = year = 0;
-      
+
       date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
 
@@ -492,7 +492,15 @@ wxFolderView::OpenFolder(String const &profilename)
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;
+
    wxEndBusyCursor();
+
+   if ( !mf )
+   {
+      wxLogError(_("The folder '%s' couldn't be opened, please check "
+                   "its settings."), profilename.c_str());
+   }
+
    return mf;
 }
 
@@ -694,7 +702,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
 {
    String msg;
    bool rc;
-   
+
    rc = m_MailFolder->SaveMessagesToFile(&selections,
                                          GetFrame(m_Parent));
    if(rc)

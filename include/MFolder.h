@@ -83,8 +83,13 @@ public:
 
       // get the folder flags (see Flags enum)
    virtual int GetFlags() const = 0;
-      // set the flags (no consitency checks made here!)
+      // set the flags (this replaces the old value of flags)
    virtual void SetFlags(int flags) = 0;
+
+      // set the specified flags (this adds new flags to the old value)
+   void AddFlags(int flags) { SetFlags(GetFlags() | flags); }
+      // clear the specified flags
+   void ResetFlags(int flags) { SetFlags(GetFlags() & ~flags); }
 
    // sub folders access
       // get the number of subfolders
@@ -125,7 +130,11 @@ class MFolder_obj
 {
 public:
    // ctor & dtor
+      // creates a new folder
    MFolder_obj(const String& name) { m_folder = MFolder::Get(name); }
+      // takes ownership of the existing object
+   MFolder_obj(MFolder *folder) { m_folder = folder; }
+      // release folder
   ~MFolder_obj() { SafeDecRef(m_folder); }
 
    // provide access to the real thing via operator->

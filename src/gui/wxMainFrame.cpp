@@ -38,6 +38,7 @@
 #include "gui/wxIconManager.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderTree.h"
+#include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 
 #include "MHelp.h"
 #include "MDialogs.h"
@@ -170,20 +171,55 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 }
 
 void
-wxMainFrame::OpenFolder(MFolder *folder)
+wxMainFrame::OpenFolder(MFolder *pFolder)
 {
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    static bool s_hasMsgMenu = false;
 #endif
+
+   MFolder_obj folder(pFolder);
 
    // don't do anything if there is nothing to change
    if ( folder && m_folderName == folder->GetFullName() )
    {
       // ... unless opening the folder previously failed, in which case we'll
       // try to reopen it (may be the user changed some of its settings)
-      folder->DecRef();
+      bool reopen = FALSE;
 
-      return;
+      int flags = folder->GetFlags();
+      if ( flags & MF_FLAGS_MODIFIED )
+      {
+         // user changed some settings, try opening the folder again without
+         // asking all sorts of dumb questions (like below)
+         reopen = TRUE;
+      }
+      else if ( flags & MF_FLAGS_UNACCESSIBLE )
+      {
+         if ( MDialog_YesNoDialog(_("This folder couldn't be opened last time, "
+                                    "do you still want to try to open it (it "
+                                    "will probably fail again)?"),
+                                  this,
+                                  MDIALOG_YESNOTITLE,
+                                  FALSE,
+                                  "OpenUnaccessibleFolder") )
+         {
+            if ( MDialog_YesNoDialog(_("Would you like to change folder "
+                                       "settings before trying to open it?"),
+                                     this,
+                                     MDIALOG_YESNOTITLE,
+                                     FALSE,
+                                     "ChangeUnaccessibleFolderSettings") )
+            {
+               // invoke the folder properties dialog
+               (void)ShowFolderPropertiesDialog(folder, this);
+            }
+
+            reopen = TRUE;
+         }
+      }
+
+      if ( !reopen )
+         return;
    }
    else if ( folder )
       m_folderName = folder->GetFullName();
@@ -196,8 +232,23 @@ wxMainFrame::OpenFolder(MFolder *folder)
    {
       // we want save the full folder name in m_folderName
       ASSERT( folder->GetFullName() == m_folderName );
-      m_FolderView->OpenFolder(folder->GetFullName());
-      folder->DecRef(); // done with it
+
+      if ( m_FolderView->OpenFolder(folder->GetFullName()) )
+      {
+         // reset the unaccessible and modified flags this folder might have
+         // had
+         folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
+
+         wxLogStatus(this, _("Opened folder '%s'"), m_folderName.c_str());
+      }
+      else
+      {
+         // it's not modified any more...
+         folder->ResetFlags(MF_FLAGS_MODIFIED);
+
+         // ... and it is unacessible because we couldn't open it
+         folder->AddFlags(MF_FLAGS_UNACCESSIBLE);
+      }
   }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once
