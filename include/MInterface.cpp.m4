@@ -29,6 +29,7 @@
 #include "MailFolder.h"
 #include "Message.h"
 #include "SendMessage.h"
+#include "Address.h"
 #include "wx/persctrl.h"
 
 /* Define the MInterface ABC: */
@@ -248,6 +249,17 @@ virtual void strutil_freeRegEx (
 strutil_RegEx * re)
 {
 ::strutil_freeRegEx(re);
+}
+
+
+
+virtual bool contains_own_address (
+      const String & str,
+      Profile * profile
+   )
+{
+return ::ContainsOwnAddress(str, profile);
+
 }
 
 

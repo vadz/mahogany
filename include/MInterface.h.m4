@@ -30,6 +30,7 @@
 #include "MailFolder.h"
 #include "Message.h"
 #include "SendMessage.h"
+#include "Address.h"
 #include "wx/persctrl.h"
 
 /* Define the MInterface ABC: */
@@ -166,6 +167,13 @@ int flags
 
 virtual void strutil_freeRegEx (
 strutil_RegEx * re ) = 0;
+
+
+
+virtual bool contains_own_address (
+      const String & str ,
+      Profile * profile 
+   ) = 0;
 
 
 
