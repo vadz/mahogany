@@ -574,8 +574,6 @@ MAppBase::OnShutDown()
       m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
 
-   MailFolder::CleanUp();
-
    // clean up
    AdbManager::Delete();
    Profile::FlushAll();
@@ -586,6 +584,7 @@ MAppBase::OnShutDown()
    m_profile = NULL;
    p->DecRef();
    delete m_mimeManager;
+   MailFolder::CleanUp();
 }
 
 const char *
