@@ -2232,14 +2232,16 @@ extern "C"
          return Value(-1);
       Message *msg = p->GetMessage();
       struct tm tms;
-      tms.tm_sec = 0; tms.tm_min = 0; tms.tm_hour = 0;
-      tms.tm_wday = -1; tms.tm_yday = -1; // I hope this works!
+      memset(&tms, 0, sizeof(tms));
       (void) msg->GetStatus(NULL,
                             (unsigned int *)&tms.tm_mday,
                             (unsigned int *)&tms.tm_mon,
                             (unsigned int *)&tms.tm_year);
       msg->DecRef();
-      time_t today = mktime(&tms) / 60 / 60 / 24; // we count in days
+      // cclient returns the real year whil mktime() uses 1900 as the origin
+      tms.tm_year -= 1900;
+      time_t today = mktime(&tms);
+      today /= 60 * 60 * 24; // we count in days, not seconds
       return Value(today);
    }
 
