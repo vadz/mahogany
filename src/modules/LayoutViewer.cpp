@@ -126,6 +126,8 @@ class LayoutViewerWindow : public wxLayoutWindow
 public:
    LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent);
 
+   virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
+
 private:
    void OnMouseEvent(wxCommandEvent& event);
 

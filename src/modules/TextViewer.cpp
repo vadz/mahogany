@@ -154,8 +154,9 @@ public:
                         ClickableInfo *ci,
                         const wxColour& col = wxNullColour);
 
-   // override base class virtuals
+   // override some base class virtuals
    virtual void Clear();
+   virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
 
 private:
    // only Win32 supports URLs in the text control natively so far
