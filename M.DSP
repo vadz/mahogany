@@ -1958,6 +1958,7 @@ SOURCE=.\src\modules\LayoutEditor.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\Calendar.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
