@@ -3,19 +3,17 @@
 
 include ../../makeopts
 
-CPPFLAGS:=$(CPPFLAGS) -DSWIG_GLOBAL
-CXXFLAGS:=$(CXXFLAGS_RELAXED)
+CPPFLAGS := $(CPPFLAGS) -DSWIG_GLOBAL
+CXXFLAGS := $(CXXFLAGS_RELAXED)
 
-SWIGSRC = MAppBase.i MailFolder.i MString.i MProfile.i Message.i\
+SWIGSRC	:= MAppBase.i MailFolder.i MString.i MProfile.i Message.i\
 	MObject.i #SendMessageCC.i
-CPPSRC = InitPython.cpp PythonHelp.cpp
-
-SRC=$(CPPSRC)
+SRC	:= InitPython.cpp PythonHelp.cpp
 
 PYTARGETS  := $(SWIGSRC:.i=.py)
 CPPTARGETS := $(SWIGSRC:.i=.cpp) swiglib.cpp
 
-OBJECTS    := $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
+OBJECTS    := $(CPPTARGETS:.cpp=.o) $(SRC:.cpp=.o)
 
 all:	$(PYTARGETS) $(OBJECTS)
 	@true

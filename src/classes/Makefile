@@ -3,9 +3,9 @@
 
 include ../../makeopts
 
-SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
-      XFace.cpp kbList.cpp MFolder.cpp MEvent.cpp MailCollector.cpp \
-      MModule.cpp MessageTemplate.cpp MFilter.cpp
+SRC :=	MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
+	XFace.cpp kbList.cpp MFolder.cpp MEvent.cpp MailCollector.cpp \
+	MModule.cpp MessageTemplate.cpp MFilter.cpp
 
 TARGETS = $(SRC:.cpp=.o)
 

@@ -84,9 +84,10 @@ ifdef USE_PYTHON
 	$(MAKE) -C Python $@
 endif
 
+# invoked from locale to build message catalog
 msgcat:
 	echo > $(BUILDDIR)/messages.po
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-#	$(MAKE) -C $(BUILDDIR)/locale mergecat
+# Yes, there really are some translatable strings in ../include
+	@set -e; for i in ../include $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 .PHONY:	all clean doc semistatic static allclean install msgcat subdirs

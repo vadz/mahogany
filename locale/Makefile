@@ -1,33 +1,22 @@
 # Makefile for locale directory
 # $Id$
 
-# Do a "make all" to update all .po files with latest strings from program
-# sources. A simple "make" will only rebuild the .mo files, not the .po ones.
+# Do a "make mergecat" to update all .po files with latest strings from
+# program sources.  A simple "make" will only rebuild the .mo files, not
+# the .po ones.
 
-FILES_PO:=$(wildcard .src/*.po)
-FILES_MO:=$(patsubst .src/%.po, %.mo, $(FILES_PO))
+FILES_PO := $(patsubst .src/%,%,$(wildcard .src/*.po))
+FILES_MO := $(FILES_PO:.po=.mo)
 
 include ../makeopts
 
+ifdef MSGFMT	# we have MSGFMT; we can compile translations to binary
 vpath %.po .src
-
 %.mo: %.po
 	$(MSGFMT) -v -o $@ $<
 
 all:	$(FILES_MO)
 	cd wxstd && $(MAKE)
-
-clean:
-	$(RM) $(FILES_MO) wxstd/*.mo
-
-update: 
-	$(MAKE) msgcat 
-	$(MAKE) mergecat
-	$(MAKE) check
-	@true
-
-check:
-	@for i in $(FILES_PO); do echo $$i:; msgfmt -v $$i ; done
 
 install: all
 	$(INSTALL) -d $(DATADIR)/locale
@@ -40,13 +29,35 @@ install: all
 	$(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/wxstd.mo; \
 	done
 
-msgcat:
-	$(MAKE) -C .. msgcat
+check:
+	@for i in $(FILES_PO); \
+	do echo $$i:; $(MSGFMT) -v -o /dev/null $$i; \
+	done
 
-mergecat:
-	cp ../messages.po messages_po
-#	cat messages_po extra_po | sed "1,$$ s/^\\#\\~ //g" > tmp && mv tmp messages_po
-	cat extra_po >> messages_po
-	$(RM) tmp.po ; for i in $(FILES_PO); do msgmerge $$i messages_po -o tmp.po && mv tmp.po $$i; done
+else		# we don't have MSGFMT; don't try to compile translations
 
-.PHONY:	all clean doc install msgcat mergecat update check
+all install check:
+	@true
+endif		# MSGFMT
+
+clean:
+	$(RM) $(FILES_MO) wxstd/*.mo
+
+mergecat: .src/extra_po
+ifeq "$(TRANSLATIONS)" "yes"
+# we have the programs necessary to update existing translations
+# with any new strings used by the program
+	$(MAKE) -C ../src msgcat 
+	cat ../messages.po .src/extra_po > messages_po
+	@$(RM) tmp.po
+	@echo "Merging message strings into translation files:"
+	@for i in $(FILES_PO); \
+	do echo -n "$$i: "; \
+	   $(MSGMERGE) .src/$$i messages_po -o tmp.po && mv tmp.po $$i; \
+	done
+else
+	@echo "you need xgettext and msgmerge to update the translations"
+	@false
+endif
+
+.PHONY:	all clean doc install mergecat update check

@@ -3,11 +3,12 @@
 
 include ../../makeopts
 
-SRC=$(wildcard *.cpp)
-TARGETS = strutil.o sysutil.o upgrade.o miscutil.o twofish2.o
+# Need SRC for translation processing
+SRC	:= $(patsubst .src/%,%,$(wildcard .src/*.cpp))
+TARGETS	:= strutil.o sysutil.o upgrade.o miscutil.o twofish2.o
 
 ifdef USE_LEAKTRACER
-TARGETS := $(TARGETS) LeakTracer.o
+TARGETS	+= LeakTracer.o
 endif
 
 all:	$(TARGETS)

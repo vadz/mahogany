@@ -606,21 +606,24 @@ case "$USE_PYTHON" in
 esac
 AC_SUBST(MAKE_USE_PYTHON)
 
-dnl check for xgettext
+dnl check for xgettext/msgmerge
+MAKE_XLATE='TRANSLATIONS := yes'
 AC_PATH_PROG(XGETTEXT,xgettext)
-case "$XGETTEXT" in '')
-	AC_MSG_WARN(cannot generate messages.po for translations.)
-	XGETTEXT="true xgettext"
+AC_PATH_PROG(MSGMERGE,msgmerge)
+case ".$XGETTEXT.$MSGMERGE." in *..*)
+	AC_MSG_WARN([cannot rebuild message translations.  You must
+	install xgettext/msgmerge in order to rebuild translations.])
+	MAKE_XLATE='TRANSLATIONS := no'
 esac
-AC_SUBST(XGETTEXT)
+AC_SUBST(MAKE_XLATE)
 
-dnl check for msgfmt
+# compile/install binary translations
 AC_PATH_PROG(MSGFMT,msgfmt)
 case "$MSGFMT" in '')
-	AC_MSG_WARN(cannot translate messages.)
-	MSGFMT="true msgfmt"
+	AC_MSG_WARN([cannot compile message translations.
+	Binary translations will not be installed.  You need
+	the 'msgfmt' program to compile message translations.]) ;;
 esac
-AC_SUBST(MSGFMT)
 
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
@@ -796,12 +799,11 @@ dnl set up generators for class documentation
 dnl --------------------------------------------------------------------------
 
 dnl use scandoc
-DOCHTML="\$(SCANDOCHTML)"
-AC_SUBST(DOCHTML)
+DOCHTML="\$(SCANDOCHTML)"	AC_SUBST(DOCHTML)
+DOCTEX="\$(SCANDOCTEX)"		AC_SUBST(DOCTEX)
 
 AC_DEFUN([M_DOC_TOOL], [AC_PATH_PROG($1,$2)dnl
-case "$$1" in '') MAKE_HAVE_DOCTOOLS='' $1='false "No $2 available"' ;; esac
-AC_SUBST($1)])dnl
+case "$$1" in '') MAKE_HAVE_DOCTOOLS='' $1='false "No $2 available"';; esac])dnl
 
 dnl check for latex/dvips
 MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'

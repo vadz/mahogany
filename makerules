@@ -75,9 +75,13 @@ tags:
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
-	@for i in $(SRC) $(CSRC) ; \
-	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; \
+ifdef SRC
+ifeq "$(TRANSLATIONS)" "yes"
+	@set -e; cd .src; for i in $(SRC) $(CSRC); \
+	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i; \
 	done
+endif
+endif
 
 stdclean:
 	$(RM) -r *.o *.so *.a *.lo *.d .libs

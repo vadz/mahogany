@@ -3,9 +3,8 @@
 
 include ../../../makeopts
 
-SRC = persctrl.cpp vcarddlg.cpp
-
-TARGETS = $(SRC:.cpp=.o)
+SRC	:= persctrl.cpp vcarddlg.cpp
+TARGETS	:= $(SRC:.cpp=.o)
 
 all:	$(TARGETS)
 	@true

@@ -77,11 +77,27 @@ install_bin:
 	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done
 
+install_locale:
+	$(MAKE) -C locale install
+
 install_doc:
 	$(MAKE) -C doc install
 	set -e; for i in TODO README; \
 	do $(INSTALL_DATA) .src/$$i $(DOCDIR); \
 	done
+
+install: install_bin install_locale install_doc
+
+locales:
+	$(MAKE) -C locale all
+
+mergecat:
+	$(MAKE) -C locale mergecat
+
+#########################################################################
+# The targets below don't really belong here.  They should either be in
+# a separate makefile or the logic should be moved to the spec file.
+#########################################################################
 
 # create the file list for the RPM installation
 install_rpm:
@@ -103,11 +119,6 @@ install_rpm:
 	@echo "$(DESTDIR)/man/man1/M.1" >> filelist
 	@# the second subsitution takes care of RPM_BUILD_ROOT
 	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
-
-install: install_bin install_locale install_doc
-
-install_locale:
-	$(MAKE) -C locale install
 
 # prepare the scene for building the RPM version
 rpm_prep:
@@ -151,12 +162,5 @@ rpm: rpm_prep
 	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec ;\
 	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bs M.spec
 
-msgcat:
-	$(MAKE) -C src msgcat
-	$(MAKE) -C include msgcat
-
-locales:
-	$(MAKE) -C locale all
-
 .PHONY: all clean bak backup config program doc install install_doc \
-        install_all msgcat locales scandoc install_locale rpm_prep rpm classdoc
+        install_all locales scandoc install_locale rpm_prep rpm classdoc

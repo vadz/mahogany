@@ -24,13 +24,12 @@ include ../../makeopts
 # aren't fully C++ compliant on RH6.1
 CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
-MOD :=	$(patsubst .src/%, %, $(wildcard .src/*.cpp))
-MOD :=	$(filter-out PalmOS.cpp, $(MOD))
-
-SRC = $(wildcard .src/*.cpp)
+# Need SRC for translation processing
+SRC :=	$(patsubst .src/%,%,$(wildcard .src/*.cpp))
+MOD :=	$(filter-out PalmOS.cpp, $(SRC))
 
 ifdef PISOCK_LIB
-MOD += PalmOS.cpp
+MOD +=	PalmOS.cpp
 ifdef LIBMAL_SRC
 PalmOS.o PalmOS.so: CPPFLAGS += -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC) 
 endif

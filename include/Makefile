@@ -30,9 +30,9 @@ install:
 $(IDLFILES) $(INTERFACES) $(CPPFILES): $(MID) $(M4DEF)
 
 msgcat:
-	@touch $(BUILDDIR)/imessages.po
-	@set -e; for i in *.h gui/*.h adb/*.h ; \
-	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/imessages.po $$i ; \
+	@touch $(BUILDDIR)/messages.po
+	@set -e; cd .src; for i in *.h gui/*.h adb/*.h ; \
+	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; \
 	done
 
 clean:

@@ -1,17 +1,18 @@
 # Makefile for src/gui directory
 
-SRC = wxMApp.cpp wxMFrame.cpp wxFolderView.cpp \
-wxComposeView.cpp wxMainFrame.cpp wxIconManager.cpp wxMDialogs.cpp  \
-wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
-wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp wxBrowseButton.cpp \
-wxHeadersDialogs.cpp wxTemplateDialog.cpp wxModulesDlg.cpp \
-wxSubfoldersDialog.cpp wxFiltersDialog.cpp wxWizards.cpp wxFolderMenu.cpp \
-Mdnd.cpp MImport.cpp wxMessageView.cpp wxMessageViewNew.cpp wxMEditCtrl.cpp
+SRC :=	wxMApp.cpp wxMFrame.cpp wxFolderView.cpp wxComposeView.cpp \
+	wxMainFrame.cpp wxIconManager.cpp wxMDialogs.cpp wxlwindow.cpp \
+	wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
+	wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp \
+	wxBrowseButton.cpp wxHeadersDialogs.cpp wxTemplateDialog.cpp \
+	wxModulesDlg.cpp wxSubfoldersDialog.cpp wxFiltersDialog.cpp \
+	wxWizards.cpp wxFolderMenu.cpp Mdnd.cpp MImport.cpp \
+	wxMessageView.cpp wxMessageViewNew.cpp wxMEditCtrl.cpp
 
 include ../../makeopts
 
 
-TARGETS = $(SRC:.cpp=.o)
+TARGETS := $(SRC:.cpp=.o)
 
 all:	$(TARGETS)
 	@true

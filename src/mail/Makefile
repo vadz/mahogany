@@ -2,15 +2,15 @@
 
 include ../../makeopts
 
-SRC = MailFolder.cpp Message.cpp MailFolderCC.cpp MessageCC.cpp \
-SendMessageCC.cpp ASMailFolder.cpp MailMH.cpp HeaderInfoImpl.cpp
+SRC :=	MailFolder.cpp Message.cpp MailFolderCC.cpp MessageCC.cpp \
+	SendMessageCC.cpp ASMailFolder.cpp MailMH.cpp HeaderInfoImpl.cpp
 
 ifdef EXPERIMENTAL
 #commenting out for now as it doesn't do anything and gives tons of warnings
-#SRC += MMailFolder.cpp
+#SRC +=	MMailFolder.cpp
 endif
 
-OBJ = $(SRC:.cpp=.o)
+OBJ :=	$(SRC:.cpp=.o)
 
 all:	$(OBJ)
 	@true
