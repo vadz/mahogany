@@ -46,7 +46,7 @@ public:
        @param changeflag - if not NULL set to TRUE if folder was changed
 */
    virtual int Apply(class MailFolder *mf, UIdType uid,
-                     bool *changeflag = NULL) const = 0;
+                     bool *changeflag = NULL) = 0;
    /** Apply the filter to the messages in a folder.
        @param folder - the MailFolder object
        @param NewOnly - if true, apply it only to new messages
@@ -55,7 +55,7 @@ public:
    */
    virtual int Apply(class MailFolder *folder,
                      bool NewOnly = true,
-                     bool *changeflag = NULL) const = 0;
+                     bool *changeflag = NULL) = 0;
    /** Apply the filter to the messages in a folder.
        @param folder - the MailFolder object
        @param msgs - the list of messages to apply to
@@ -66,7 +66,7 @@ public:
    virtual int Apply(class MailFolder *folder,
                      UIdArray msgs,
                      bool ignoreDeleted = TRUE,
-                     bool *changeflag = NULL) const = 0;
+                     bool *changeflag = NULL) = 0;
    MOBJECT_NAME(FilterRule)
 };
 

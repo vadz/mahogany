@@ -57,13 +57,13 @@
 class ArgList;
 class Expression;
 class Filter;
+class FilterRuleImpl;
 class FunctionCall;
 class FunctionDefinition;
 class IfElse;
 class Negation;
 class Negative;
 class Number;
-class Parser;
 class Statement;
 class StringConstant;
 class SyntaxNode;
@@ -72,50 +72,8 @@ class Value;
 
 /// Type for functions to be called.
 extern "C" {
-   typedef Value (* FunctionPointer)(ArgList *args, Parser *p);
+   typedef Value (* FunctionPointer)(ArgList *args, FilterRuleImpl *p);
 };
-
-/** Parsed representation of a filtering rule to be applied to a
-    message.
-*/
-class FilterRuleImpl : public FilterRule
-{
-public:
-   virtual int Apply(MailFolder *mf, UIdType uid,
-                     bool *changeflag) const;
-   virtual int Apply(MailFolder *folder, bool NewOnly,
-                     bool *changeflag) const;
-   virtual int Apply(MailFolder *folder,
-                     UIdArray msgs,
-                     bool ignoreDeleted,
-                     bool *changeflag) const;
-   static FilterRule * Create(const String &filterrule,
-                              MInterface *minterface, MModule_Filters *mod)
-      { return new FilterRuleImpl(filterrule, minterface, mod); }
-#ifdef DEBUG
-   void Debug(void);
-#endif
-
-protected:
-   FilterRuleImpl(const String &filterrule,
-                  MInterface *minterface,
-                  MModule_Filters *fmodule);
-   ~FilterRuleImpl();
-   /// common code for the two Apply() functions
-   int ApplyCommonCode(MailFolder *folder,
-                       UIdArray *msgs,
-                       bool newOnly,
-                       bool ignoreDeleted,
-                       bool *changeflag) const;
-private:
-   Parser     *m_Parser;
-   const SyntaxNode *m_Program;
-   MModule_Filters *m_FilterModule;
-};
-
-///------------------------------
-/// Own functionality:
-///------------------------------
 
 class Token
 {
@@ -202,156 +160,42 @@ private:
    String    m_string;
 };
 
-/** This is a value. */
-class Value : public MObject
+/** Parsed representation of a filtering rule to be applied to a
+    message.
+*/
+class FilterRuleImpl : public FilterRule
 {
 public:
-   /** This enum is used to distinguish variable or result types. */
-   enum Type
-   {
-      Type_Error,  /// Undefine value.
-      Type_Number, /// Value is a long int number.
-      Type_String  /// Value is a string.
-   };
+   virtual int Apply(MailFolder *mf, UIdType uid,
+                     bool *changeflag);
+   virtual int Apply(MailFolder *folder, bool NewOnly,
+                     bool *changeflag);
+   virtual int Apply(MailFolder *folder,
+                     UIdArray msgs,
+                     bool ignoreDeleted,
+                     bool *changeflag);
+   static FilterRule * Create(const String &filterrule,
+                              MInterface *minterface,
+                              MModule_Filters *mod)
+      { return new FilterRuleImpl(filterrule, minterface, mod); }
+#ifdef DEBUG
+   void Debug(void);
+#endif
 
-   // constructors
-   Value()
-      { m_Type = Type_Error; }
-   Value(const String &str)
-      { m_Type = Type_String; m_String = str; }
-   Value(long num) { m_Type = Type_Number; m_Num = num; }
+protected:
+   FilterRuleImpl(const String &filterrule,
+                  MInterface *minterface,
+                  MModule_Filters *fmodule);
+   ~FilterRuleImpl();
+   /// common code for the two Apply() functions
+   int ApplyCommonCode(MailFolder *folder,
+                       UIdArray *msgs,
+                       bool newOnly,
+                       bool ignoreDeleted,
+                       bool *changeflag);
 
-   Type GetType(void) const
-      { MOcheck(); return m_Type; }
-   long GetNumber(void) const
-      {
-         MOcheck();
-         ASSERT(m_Type == Type_Number);
-         return m_Num;
-      }
-   String GetString(void) const
-      {
-         MOcheck();
-         ASSERT(m_Type == Type_String);
-         return m_String;
-      }
-   String ToString(void) const
-      {
-         MOcheck();
-         if(m_Type == Type_String)
-            return m_String;
-         String str;
-         str.Printf("%ld", m_Num);
-         return str;
-      }
-   long ToNumber(void) const
-      {
-         MOcheck();
-         // FIXME: if string contains a number, convert it
-         if(m_Type == Type_String)
-            return m_String.Length();
-         return GetNumber();
-      }
-private:
-   Type m_Type;
-   // Can't use union here because m_String needs constructor.
-   long   m_Num;
-   String m_String;
-   MOBJECT_NAME(Value)
-};
-
-/** A Parser class.
- */
-// FIXME: this class is not visible outside this file; there's no need
-// for it to be a separate ABC class and an implementation class.  The
-// two classes should be combined into a single class.
-class Parser : public MObjectRC
-{
 public:
-   virtual const SyntaxNode * Parse(void) = 0;
-  /** Reads the next token from the string and removes it from it.
-      @param str   string to parse
-      @param remove if true, move on in input
-  */
-   virtual Token GetToken(bool remove = true) = 0;
-   /// Returns the next token without removing it from the input.
-   virtual Token PeekToken(void) = 0;
-   /// Rewinds the input to the given position.
-   virtual void Rewind(size_t pos = 0) = 0;
-   /// Returns current position in input.
-   virtual size_t GetPos(void) const = 0;
-   /** Takes an error message and passes it to the program, sets error
-       flag.
-       @param error message describing error
-   */
-   virtual void Error(const String &error) = 0;
-   /// Print out a message in a message box.
-   virtual void Output(const String &msg) = 0;
-   /// Print out a message.
-   virtual void Log(const String &imsg, int level = M_LOG_DEFAULT) = 0;
-   /// check if a function is already defined
-   virtual FunctionDefinition *FindFunction(const String &name) = 0;
-   /// Defines a function and overrides a given one
-   virtual FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr) = 0;
-
-   /**@name for runtime information */
-   //@{
-   /// Set the message and folder to operate on:
-   virtual void SetMessage(MailFolder *folder,
-                           UIdType uid = UID_ILLEGAL) = 0;
-   virtual bool GetChanged(void) const = 0;
-   /// Obtain the mailfolder to operate on:
-   virtual MailFolder * GetFolder(void) = 0;
-   /// Obtain the message UId to operate on:
-   virtual UIdType GetMessageUId(void) = 0;
-   /// Obtain the message itself:
-   virtual Message * GetMessage(void) = 0;
-   /// tell parser that msg or folder got changed
-   virtual void SetChanged(void) = 0;
-   //@}
-
-   /// virtual destructor
-   virtual ~Parser(void) {}
-   /** Constructor function, returns a valid Parser object.
-       @param input the input string holding the text to parse
-   */
-   static Parser * Create(const String &input, MInterface *minterface);
-
-   virtual MInterface * GetInterface(void) = 0;
-   MOBJECT_NAME(Parser)
-};
-
-
-// ----------------------------------------------------------------------------
-// A smart reference to Parser - an easy way to avoid memory leaks
-// ----------------------------------------------------------------------------
-
-class Parser_obj
-{
-public:
-   // ctor & dtor
-   Parser_obj(const String& program, MInterface *minterface)
-      { m_Parser = Parser::Create(program, minterface); }
-   ~Parser_obj()
-      { SafeDecRef(m_Parser); }
-   // provide access to the real thing via operator->
-   Parser *operator->() const { return m_Parser; }
-   operator bool() const { return m_Parser != NULL; }
-private:
-   // no assignment operator/copy ctor
-   Parser_obj(const Parser_obj&);
-   Parser_obj& operator=(const Parser_obj&);
-   Parser *m_Parser;
-};
-
-// ----------------------------------------------------------------------------
-// An implementation of the Parser ABC
-// ----------------------------------------------------------------------------
-
-class ParserImpl : public Parser
-{
-public:
-   const SyntaxNode * Parse(void);
+   const SyntaxNode * Parse(const String &);
    const SyntaxNode * ParseProgram(void);
    const SyntaxNode * ParseFilters(void);
    const SyntaxNode * ParseIfElse(void);
@@ -371,29 +215,30 @@ public:
    const SyntaxNode * ParseFactor(void);
    const SyntaxNode * ParseUnary(void);
    const SyntaxNode * ParseFunctionCall(Token id);
-   virtual size_t GetPos(void) const { return m_Position; }
-   virtual Token GetToken(bool remove = true);
-   virtual Token PeekToken(void) { return token; }
-   virtual void Rewind(size_t pos = 0);
+   size_t GetPos(void) const { return m_Position; }
+   Token GetToken(bool remove = true);
+   Token PeekToken(void) { return token; }
+   void Rewind(size_t pos = 0);
    inline void NextToken(void) { Rewind(m_Peek); }
-   virtual void Error(const String &error);
-   virtual void Output(const String &msg)
+#ifdef TEST
+   virtual // So we can override the Error function
+#endif
+   void Error(const String &error);
+   void Output(const String &msg)
       { m_MInterface->MessageDialog(msg,NULL,_("Filters output")); }
-   virtual void Log(const String &imsg, int level)
+   void Log(const String &imsg, int level = M_LOG_DEFAULT)
       {
          String msg = _("Filters: ");
          msg << imsg;
          m_MInterface->Log(level, msg);
       }
    /// check if a function is already defined
-   virtual FunctionDefinition *FindFunction(const String &name);
-   /// Defines a function and overrides a given one
-   virtual FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr);
+   const FunctionDefinition *FindFunction(const String &name);
 
    /**@name for runtime information */
    //@{
    /// Set the message and folder to operate on:
-   virtual void SetMessage(MailFolder *folder = NULL,
+   void SetMessage(MailFolder *folder = NULL,
                            UIdType uid = UID_ILLEGAL)
       {
          SafeDecRef(m_MailFolder);
@@ -403,29 +248,28 @@ public:
          m_MfWasChanged = FALSE;
       }
    /// Has filter rule caused a change to the folder/message?
-   virtual bool GetChanged(void) const
+   bool GetChanged(void) const
       {
          ASSERT(m_MailFolder);
          return m_MfWasChanged;
       }
    /// Obtain the mailfolder to operate on:
-   virtual MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
+   MailFolder * GetFolder(void)
+      { SafeIncRef(m_MailFolder); return m_MailFolder; }
    /// Obtain the message UId to operate on:
-   virtual UIdType GetMessageUId(void) { return m_MessageUId; }
+   UIdType GetMessageUId(void) { return m_MessageUId; }
    /// Obtain the message itself:
-   virtual Message * GetMessage(void)
-   {
-      return m_MailFolder ?
-         m_MailFolder->GetMessage(m_MessageUId) :
-         NULL ;
-   }
+   Message * GetMessage(void)
+      {
+         return m_MailFolder ?
+            m_MailFolder->GetMessage(m_MessageUId) :
+            NULL ;
+      }
    //@}
-   virtual MInterface * GetInterface(void) { return m_MInterface; }
+   MInterface * GetInterface(void) { return m_MInterface; }
    /// tell parser that msg or folder got changed
-   virtual void SetChanged(void) { m_MfWasChanged = TRUE; }
+   void SetChanged(void) { m_MfWasChanged = TRUE; }
 protected:
-   ParserImpl(const String &input, MInterface *minterface);
-   ~ParserImpl();
    inline void EatWhiteSpace(void)
       { while(isspace(m_Input[m_Position])) m_Position++; }
    inline const char Char(void) const
@@ -436,22 +280,115 @@ protected:
       { return m_Input.Left(m_Position); }
    inline String CharMid(void)
       { return m_Input.Mid(m_Position); }
-
-   void AddBuiltinFunctions(void);
-   friend Parser;
 private:
-   String m_Input;
-   Token token, peek;        // current and next tokens
-   size_t m_Position;        // seek offset of current token
-   size_t m_Peek;        // seek offset of next token
+   MModule_Filters *m_FilterModule;
    MInterface *m_MInterface;
-   FunctionDefinition *m_FunctionList;
+
+   String m_Input;
+   Token token;              // current token
+   size_t m_Position;        // seek offset of current token
+   size_t m_Peek;            // seek offset of next token
+   const SyntaxNode *m_Program; // compiled filter program
 
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
    bool m_MfWasChanged;
 
    GCC_DTOR_WARN_OFF
+};
+
+///------------------------------
+/// Own functionality:
+///------------------------------
+
+/** This is a value. */
+class Value : public MObject
+{
+   /** This enum is used to distinguish variable or result types. */
+   enum Type
+   {
+      Type_Error,  /// Undefined value (used for expression error)
+      Type_Number, /// Value is a long int number
+      Type_String, /// Value is a string
+      Type_Finis   /// Expression processing was aborted
+   };
+
+public:
+   // constructors
+   Value() : m_Type(Type_Error) {}
+   Value(long num) : m_Type(Type_Number), m_Num(num) {}
+   Value(const String &str) : m_Type(Type_String), m_String(str) {}
+
+   bool IsValid(void) const
+      { MOcheck(); return m_Type != Type_Error; }
+   bool IsNumber(void) const
+      { MOcheck(); return m_Type == Type_Number; }
+   bool IsString(void) const
+      { MOcheck(); return m_Type == Type_String; }
+   bool IsFinis(void) const
+      { MOcheck(); return m_Type == Type_Finis; }
+   bool IsSame(const Value &v) const
+      { MOcheck(); v.MOcheck(); return v.m_Type == m_Type; }
+   long GetNumber(void) const
+      {
+         MOcheck();
+         ASSERT(m_Type == Type_Number);
+         return m_Num;
+      }
+   const String GetString(void) const
+      {
+         MOcheck();
+         ASSERT(m_Type == Type_String);
+         return m_String;
+      }
+   bool MakeNumber(void) const
+      {
+         MOcheck();
+         if (m_Type == Type_String) {
+            int v = 0, k = m_String.length();
+            for (int i = 0; i < k; ++i)
+            {
+               int c = m_String[i];
+               if (c < '0' || c > '9')
+                  return false;
+               v = v*10 + (c - '0');
+            }
+            Value *that = (Value*)this;
+            that->m_Num = v;
+            that->m_Type = Type_Number;
+         }
+         ASSERT(m_Type == Type_Number);
+         return true;
+      }
+   long ToNumber(void) const
+      {
+         MOcheck();
+         if(!MakeNumber())
+            return m_String.Length();
+         return GetNumber();
+      }
+   const String ToString(void) const
+      {
+         MOcheck();
+         if(m_Type == Type_String)
+            return m_String;
+         String str;
+         str.Printf("%ld", m_Num);
+         return str;
+      }
+
+   static const Value Finis(void)
+      {
+         Value v;
+         v.m_Type = Type_Finis;
+         return v;
+      }
+private:
+   Type m_Type;
+   // Can't use union here because m_String needs constructor.
+   long   m_Num;
+   const String m_String;
+   MOBJECT_NAME(Value)
 };
 
 // ----------------------------------------------------------------------------
@@ -464,7 +401,7 @@ class SyntaxNode : public MObject
 public:
    SyntaxNode(void) {}
    virtual ~SyntaxNode(void) {}
-   virtual Value Evaluate(void) const = 0;
+   virtual const Value Evaluate(void) const = 0;
    virtual String ToString(void) const
       { return Evaluate().ToString(); }
 #ifdef DEBUG
@@ -474,22 +411,32 @@ private:
    MOBJECT_NAME(SyntaxNode)
 };
 
-class Filter : public SyntaxNode
+class SequentialEval : public SyntaxNode
 {
 public:
-   Filter(const SyntaxNode *r, const SyntaxNode *n)
+   SequentialEval(const SyntaxNode *r, const SyntaxNode *n)
+      : m_Rule(r), m_Next(n)
       {
-         ASSERT(r != NULL); ASSERT(n != NULL);
-         m_Rule = r; m_Next = n;
+         ASSERT(m_Rule); ASSERT(m_Next);
       }
-   ~Filter(void) { delete m_Rule; delete m_Next; }
-   virtual Value Evaluate() const
+   ~SequentialEval(void) { delete m_Rule; delete m_Next; }
+   virtual const Value Evaluate() const
       {
          MOcheck();
-         (void) m_Rule->Evaluate();;
+         if (m_Rule->Evaluate().IsFinis())
+            return Value::Finis();
          // tail recursion, so no add'l stack frame
          return m_Next->Evaluate();
       }
+protected:
+   const SyntaxNode *m_Rule, *m_Next;
+};
+
+class Filter : public SequentialEval
+{
+public:
+   Filter(const SyntaxNode *r, const SyntaxNode *n)
+      : SequentialEval(r, n) {}
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -499,28 +446,14 @@ public:
          return s;
       }
 #endif
-private:
-   const SyntaxNode * m_Rule, * m_Next;
    MOBJECT_NAME(Filter)
 };
 
-class Statement : public SyntaxNode
+class Statement : public SequentialEval
 {
 public:
    Statement(const SyntaxNode *r, const SyntaxNode *n)
-      {
-         ASSERT(r != NULL); ASSERT(n != NULL);
-         m_Rule = r; m_Next = n;
-      }
-   ~Statement(void) { delete m_Rule; delete m_Next; }
-   virtual Value Evaluate() const
-      {
-         MOcheck();
-         (void) m_Rule->Evaluate();;
-         // tail recursion, so no add'l stack frame
-         return m_Next->Evaluate();
-      }
-   void AddNext(const SyntaxNode *node) { m_Next = node; }
+      : SequentialEval(r, n) {}
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -530,8 +463,6 @@ public:
          return s;
       }
 #endif
-private:
-   const SyntaxNode * m_Rule, * m_Next;
    MOBJECT_NAME(Statement)
 };
 
@@ -539,7 +470,7 @@ class Number : public SyntaxNode
 {
 public:
    Number(long v) { m_value = v; }
-   virtual Value Evaluate() const { MOcheck(); return m_value; }
+   virtual const Value Evaluate() const { MOcheck(); return m_value; }
 #ifdef DEBUG
    virtual String Debug(void) const
       { MOcheck(); String s; s.Printf("%ld",m_value); return s; }
@@ -552,8 +483,8 @@ private:
 class StringConstant : public SyntaxNode
 {
 public:
-   StringConstant(String v) { m_String = v; }
-   virtual Value Evaluate() const
+   StringConstant(String v) : m_String(v) {}
+   virtual const Value Evaluate() const
       { MOcheck(); return m_String; }
 
 #ifdef DEBUG
@@ -566,7 +497,7 @@ public:
       }
 #endif
 private:
-   String m_String;
+   const String m_String;
    MOBJECT_NAME(StringConstant)
 };
 
@@ -575,11 +506,11 @@ class Negation : public SyntaxNode
 public:
    Negation(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negation() { MOcheck(); delete m_Sn; }
-   virtual Value Evaluate() const
+   virtual const Value Evaluate() const
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
-         return ! (v.GetType() == Value::Type_Number ?
+         return ! (v.MakeNumber() ?
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
@@ -601,11 +532,11 @@ class Negative : public SyntaxNode
 public:
    Negative(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negative() { MOcheck(); delete m_Sn; }
-   virtual Value Evaluate() const
+   virtual const Value Evaluate() const
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
-         return -(v.GetType() == Value::Type_Number ?
+         return -(v.MakeNumber() ?
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
@@ -625,69 +556,21 @@ private:
 /** Functioncall handling */
 
 /** This little class contains the definition of a function,
-    i.e. links its name to a bit of C code and maintains a use
-    count. */
+    i.e. links its name to a bit of C code. */
 
-// FIXME: why isn't this a MObjectRC?
-class FunctionDefinition : public MObject
+class FunctionDefinition
 {
 public:
-   FunctionDefinition(const String &name, FunctionPointer fptr,
-                      FunctionDefinition * next)
-      {
-         m_Name = name; m_FunctionPtr = fptr; m_Next = next; m_UseCount = 1;
-         ASSERT(m_FunctionPtr);
-      }
-   ~FunctionDefinition()
-      {
-         MOcheck();
-         ASSERT(m_UseCount == 0);
-         if (m_Next != NULL)
-            m_Next->DecRef();
-      }
-
-   FunctionDefinition * FindFunction(const String &name)
-      {
-         MOcheck();
-         if(name == m_Name) {
-            IncRef();
-            return this;
-         }
-         if(m_Next == NULL)
-            return NULL;
-         // tail recursion
-         return m_Next->FindFunction(name);
-      }
-
-   String Name(void) const
-      { MOcheck(); return m_Name; }
-
-   bool DecRef(void)
-      {
-         MOcheck();
-         if(--m_UseCount == 0)
-         {
-            delete this;
-            return true;
-         }
-         else
-            return false;
-      }
-   void IncRef(void)
-      {
-         MOcheck();
-         m_UseCount++;
-      }
-
-   inline const String &GetName(void) const { return m_Name; }
+   FunctionDefinition(const char *name, FunctionPointer fptr)
+      : m_Name(name), m_FunctionPtr(fptr)
+      { ASSERT(m_Name); ASSERT(m_FunctionPtr); }
+   inline const char *GetName(void) const { return m_Name; }
    inline FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
 private:
-   int             m_UseCount;
    String          m_Name;
    FunctionPointer m_FunctionPtr;
-   FunctionDefinition * m_Next;
-   MOBJECT_NAME(FunctionDefinition)
 };
+M_LIST(FunctionList,FunctionDefinition);
 
 /** These classes represents a function call. */
 
@@ -705,7 +588,8 @@ public:
       }
    ~ArgList()
       {
-         for(size_t i = 0; i < m_NArgs; i++)
+         MOcheck();
+         for(size_t i = 0; i < m_NArgs; ++i)
             delete m_Args[i];
          delete [] m_Args;
       }
@@ -745,19 +629,17 @@ class FunctionCall : public SyntaxNode
 {
 public:
    // takes ownership of the FunctionDefinition argument
-   FunctionCall(FunctionDefinition *fd, ArgList *args, Parser *p)
+   FunctionCall(const FunctionDefinition *fd, ArgList *args, FilterRuleImpl *p)
+      : m_fd(fd), m_args(args), m_Parser(p)
       {
-         m_args = args; ASSERT(m_args);
-         m_fd = fd; ASSERT(m_fd);
-         m_Parser = p; ASSERT(m_Parser);
+         ASSERT(m_fd); ASSERT(m_args); ASSERT(m_Parser);
       }
    ~FunctionCall()
       {
          MOcheck();
-         m_fd->DecRef();
          delete m_args;
       }
-   virtual Value Evaluate() const
+   virtual const Value Evaluate() const
       {
          MOcheck();
          return (*m_fd->GetFPtr())(m_args, m_Parser);
@@ -766,13 +648,13 @@ public:
    virtual String Debug(void) const
       {
          MOcheck();
-         return String("FunctionCall(") + m_fd->Name() + String(")");
+         return String("FunctionCall(") + m_fd->GetName() + String(")");
       }
 #endif
 private:
-   FunctionDefinition *m_fd;
+   const FunctionDefinition *m_fd;
    ArgList *m_args;
-   Parser *m_Parser;
+   FilterRuleImpl *m_Parser;
    MOBJECT_NAME(FunctionCall)
 };
 
@@ -780,9 +662,9 @@ class QueryOp : public SyntaxNode
 {
 public:
    QueryOp(const SyntaxNode *cond, const SyntaxNode *left, const SyntaxNode *right)
+      : m_Cond(cond), m_Left(left), m_Right(right)
       {
-         ASSERT(cond != NULL); ASSERT(left != NULL); ASSERT(right != NULL);
-         m_Cond = cond; m_Left = left; m_Right = right;
+         ASSERT(m_Cond); ASSERT(m_Left); ASSERT(m_Right);
       }
    ~QueryOp(void)
       {
@@ -791,7 +673,7 @@ public:
          delete m_Left;
          delete m_Right;
       }
-   virtual Value Evaluate(void) const
+   virtual const Value Evaluate(void) const
       {
          MOcheck();
          return m_Cond->Evaluate().ToNumber()
@@ -823,9 +705,9 @@ class Expression : public SyntaxNode
 {
 public:
    Expression(const SyntaxNode *left, const SyntaxNode *right)
+      : m_Left(left), m_Right(right)
       {
-         m_Left = left; ASSERT(m_Left != NULL);
-         m_Right = right; ASSERT(m_Right != NULL);
+         ASSERT(m_Left); ASSERT(m_Right);
       }
    ~Expression()
       {
@@ -854,20 +736,18 @@ protected:
 #define IMPLEMENT_VALUE_OP(oper, string) \
 static inline Value operator oper(const Value &left, const Value &right) \
 { \
-   if(left.GetType() == Value::Type_Error || \
-      right.GetType() == Value::Type_Error) \
-      return Value(); \
-   if(left.GetType() == right.GetType()) \
+   if(left.IsValid() && right.IsValid()) \
    { \
-      if(left.GetType() == Value::Type_Number) \
+      if(!left.IsSame(right)) \
+      { \
+         if(!left.MakeNumber() || !right.MakeNumber()) \
+            return Value(); \
+      } \
+      if(left.IsNumber()) \
          return Value(left.GetNumber() oper right.GetNumber()); \
-      if(left.GetType() == Value::Type_String) \
+      if(left.IsString()) \
          return Value(left.string oper right.string); \
       ASSERT(0); \
-   } \
-   else \
-   { \
-      /* FIXME: should convert numeric string */ \
    } \
    return Value(); \
 }
@@ -882,7 +762,7 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual Value Evaluate(void) const \
+   virtual const Value Evaluate(void) const \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
    virtual const char *OperName(void) const { return #oper; } \
 }
@@ -890,7 +770,7 @@ public: \
 #else        // not DEBUGing
 
 #define IMPLEMENT_OP(name, oper, string) \
-IMPLEMENT_VALUE_OP(oper, string); \
+IMPLEMENT_VALUE_OP(oper, string) \
 class Operator##name : Expression \
 { \
 public: \
@@ -898,7 +778,7 @@ public: \
       : Expression(l, r) {} \
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
       { return new Operator##name(l, r); } \
-   virtual Value Evaluate(void) const \
+   virtual const Value Evaluate(void) const \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
 }
 #endif
@@ -924,7 +804,7 @@ public:
    OperatorAnd(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorAnd(l, r); }
-   virtual Value Evaluate(void) const
+   virtual const Value Evaluate(void) const
       {
          Value lv = m_Left->Evaluate();
          if(lv.ToNumber())
@@ -945,7 +825,7 @@ public:
    OperatorOr(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
    static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
       { return new OperatorOr(l, r); }
-   virtual Value Evaluate(void) const
+   virtual const Value Evaluate(void) const
       {
          Value lv = m_Left->Evaluate();
          if(! lv.ToNumber())
@@ -977,12 +857,12 @@ public:
          delete m_IfBlock;
          delete m_ElseBlock;
       }
-   virtual Value Evaluate(void) const
+   virtual const Value Evaluate(void) const
       {
          MOcheck();
          ASSERT(m_Condition != NULL);
          ASSERT(m_IfBlock != NULL);
-         Value rc = m_Condition->Evaluate();
+         const Value rc = m_Condition->Evaluate();
          if(rc.ToNumber())
             return m_IfBlock->Evaluate();
          else if(m_ElseBlock)
@@ -1013,109 +893,20 @@ private:
    MOBJECT_NAME(IfElse)
 };
 
-
-static void PreProcessInput(String *input)
+static const FunctionList *BuiltinFunctions(void);
+const FunctionDefinition *
+FilterRuleImpl::FindFunction(const String &name)
 {
-   bool modified = false;
-   String output;
-   while(input->Length() && input->c_str()[0] == '@')
-   {
-      const char *cptr = input->c_str()+1;
-      String filename;
-      while(*cptr && *cptr != '\n' && *cptr != '\r')
-         filename += *cptr++;
-      while(*cptr && (*cptr == '\r' || *cptr == '\n'))
-         cptr++;
-      *input = cptr;
-      FILE *fp = fopen(filename,"rt");
-      if(fp)
-      {
-         fseek(fp, 0, SEEK_END);
-         long len = ftell(fp);
-         fseek(fp, 0, SEEK_SET);
-         if(len > 0)
-         {
-            char *cp = new char [ len + 1];
-            if(fread(cp, 1, len, fp) > 0)
-            {
-               cp[len] = '\0';
-               output << cp;
-               modified = true;
-            }
-            delete [] cp;
-         }
-         fclose(fp);
-      }
-   }
-   if(modified)
-   {
-      *input = output;
-      if(input->Length())
-         PreProcessInput(input);
-   }
+   // SOMEDAY: when user-defined functions, search that list, too
+   const FunctionList *list = BuiltinFunctions();
+   for (FunctionList::iterator i = list->begin(); i != list->end(); ++i)
+      if (name == i->GetName())
+         return i.operator->();
+   return NULL;
 }
-
-/* static */
-Parser *
-Parser::Create(const String &input, MInterface *i)
-{
-   /* Here we handle the one special occasion of input being
-      @filename
-      in which case we replace input with the contents of that file.
-   */
-   String program = input;
-   PreProcessInput(&program);
-   return new ParserImpl(program, i);
-}
-
-
-ParserImpl::ParserImpl(const String &input, MInterface *minterface)
-{
-   m_Input = input;
-   Rewind();
-   m_MInterface = minterface;
-   m_FunctionList = NULL;
-   m_MailFolder = NULL;
-   m_MessageUId = UID_ILLEGAL;
-
-   AddBuiltinFunctions();
-}
-
-ParserImpl::~ParserImpl()
-{
-   /* Make sure all function definitions are gone. They are
-      refcounted, so all we need to do is decrement the
-      count for the pointer we are destroying */
-   if (m_FunctionList != NULL)
-      m_FunctionList->DecRef();
-
-   SafeDecRef(m_MailFolder);
-}
-
-
-FunctionDefinition *
-ParserImpl::DefineFunction(const String &name, FunctionPointer fptr)
-{
-   FunctionDefinition *fd = FindFunction(name);
-   if(fd != NULL)
-   {
-      fd->DecRef();
-      return NULL; // already exists, not overridden
-   }
-   return m_FunctionList = new FunctionDefinition(name, fptr, m_FunctionList);
-}
-
-FunctionDefinition *
-ParserImpl::FindFunction(const String &name)
-{
-   if (m_FunctionList == NULL)
-      return NULL;
-   return m_FunctionList->FindFunction(name);
-}
-
 
 void
-ParserImpl::Error(const String &error)
+FilterRuleImpl::Error(const String &error)
 {
    MOcheck();
    unsigned long pos = GetPos();
@@ -1135,7 +926,7 @@ ParserImpl::Error(const String &error)
     @param str   string to parse
 */
 Token
-ParserImpl::GetToken(bool remove)
+FilterRuleImpl::GetToken(bool remove)
 {
    MOcheck();
    if (remove) {
@@ -1150,7 +941,7 @@ ParserImpl::GetToken(bool remove)
     @param loc   location within string
 */
 void
-ParserImpl::Rewind(size_t pos)
+FilterRuleImpl::Rewind(size_t pos)
 {
    MOcheck();
 
@@ -1171,9 +962,10 @@ ParserImpl::Rewind(size_t pos)
    }
    else if(isdigit(Char())) // it is a number
    {
+      long v = CharInc() - '0';
       while(isdigit(Char()))
-         tokstr += CharInc();
-      token.SetNumber(atol(tokstr.c_str()));
+         v = v*10 + (CharInc() - '0');
+      token.SetNumber(v);
    }
    else if(Char() == '"') // a quoted string
    {
@@ -1282,15 +1074,66 @@ ParserImpl::Rewind(size_t pos)
    m_Position = pos;
 }
 
-const SyntaxNode *
-ParserImpl::Parse(void)
+static void PreProcessInput(String *input)
 {
-   MOcheck();
-   return ParseProgram();
+   bool modified = false;
+   String output;
+   while(input->Length() && input->c_str()[0] == '@')
+   {
+      const char *cptr = input->c_str()+1;
+      String filename;
+      while(*cptr && *cptr != '\n' && *cptr != '\r')
+         filename += *cptr++;
+      while(*cptr && (*cptr == '\r' || *cptr == '\n'))
+         cptr++;
+      *input = cptr;
+      FILE *fp = fopen(filename,"rt");
+      if(fp)
+      {
+         fseek(fp, 0, SEEK_END);
+         long len = ftell(fp);
+         fseek(fp, 0, SEEK_SET);
+         if(len > 0)
+         {
+            char *cp = new char[len + 1];
+            if(fread(cp, 1, len, fp) > 0)
+            {
+               cp[len] = '\0';
+               output << cp;
+               modified = true;
+            }
+            delete [] cp;
+         }
+         fclose(fp);
+      }
+   }
+   if(modified)
+   {
+      *input = output;
+      if(input->Length())
+         PreProcessInput(input);
+   }
 }
 
 const SyntaxNode *
-ParserImpl::ParseProgram(void)
+FilterRuleImpl::Parse(const String &input)
+{
+   MOcheck();
+   /* Here we handle the one special occasion of input being @filename
+      in which case we replace input with the contents of that file.
+   */
+   m_Input = input;
+   PreProcessInput(&m_Input);
+   Rewind();
+#ifndef TEST
+   return ParseProgram();
+#else
+   return 0;
+#endif
+}
+
+const SyntaxNode *
+FilterRuleImpl::ParseProgram(void)
 {
    MOcheck();
    if(token.IsEOF())
@@ -1305,7 +1148,7 @@ ParserImpl::ParseProgram(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseFilters(void)
+FilterRuleImpl::ParseFilters(void)
 {
    MOcheck();
    const SyntaxNode * filter = NULL;
@@ -1330,7 +1173,7 @@ ParserImpl::ParseFilters(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseIfElse(void)
+FilterRuleImpl::ParseIfElse(void)
 {
    MOcheck();
 
@@ -1382,7 +1225,7 @@ ParserImpl::ParseIfElse(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseBlock(void)
+FilterRuleImpl::ParseBlock(void)
 {
    MOcheck();
    // Normal block:
@@ -1413,7 +1256,7 @@ ParserImpl::ParseBlock(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseStmts(void)
+FilterRuleImpl::ParseStmts(void)
 {
    MOcheck();
    const SyntaxNode * stmt;
@@ -1453,14 +1296,14 @@ ParserImpl::ParseStmts(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseExpression(void)
+FilterRuleImpl::ParseExpression(void)
 {
    MOcheck();
    return ParseQueryOp();
 }
 
 const SyntaxNode *
-ParserImpl::ParseCondition(void)
+FilterRuleImpl::ParseCondition(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseQueryOp();
@@ -1471,7 +1314,7 @@ ParserImpl::ParseCondition(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseQueryOp(void)
+FilterRuleImpl::ParseQueryOp(void)
 {
    MOcheck();
    const SyntaxNode *sn = ParseOrs();
@@ -1515,7 +1358,7 @@ ParserImpl::ParseQueryOp(void)
 typedef const SyntaxNode *(*OpCreate)(const SyntaxNode *l, const SyntaxNode *r);
 #define LeftAssoc(name,opers,part,msg) \
 const SyntaxNode * \
-ParserImpl::Parse##name(void) \
+FilterRuleImpl::Parse##name(void) \
 { \
    MOcheck(); \
    const SyntaxNode *expr = Parse##part(); \
@@ -1650,7 +1493,7 @@ RelOp(Token t)
 }
 // Relationals are a special case; they don't associate.
 const SyntaxNode *
-ParserImpl::ParseRelational(void)
+FilterRuleImpl::ParseRelational(void)
 {
    MOcheck();
    const SyntaxNode *expr = ParseTerm();
@@ -1699,7 +1542,7 @@ MulOp(Token t)
 LeftAssoc(Factor,MulOp,Unary,_("Expected factor after multiply/divide/modulus operator"))
 
 const SyntaxNode *
-ParserImpl::ParseUnary(void)
+FilterRuleImpl::ParseUnary(void)
 {
    MOcheck();
    const SyntaxNode *sn = NULL;
@@ -1782,7 +1625,7 @@ ParserImpl::ParseUnary(void)
 }
 
 const SyntaxNode *
-ParserImpl::ParseFunctionCall(Token id)
+FilterRuleImpl::ParseFunctionCall(Token id)
 {
    MOcheck();
    ASSERT(id.GetType() == Token::TT_Identifier);
@@ -1827,7 +1670,7 @@ ParserImpl::ParseFunctionCall(Token id)
    }
    NextToken(); // swallow ')'
 
-   FunctionDefinition *fd = FindFunction(id.GetIdentifier());
+   const FunctionDefinition *fd = FindFunction(id.GetIdentifier());
    if(fd == NULL)
    {
       String err;
@@ -1956,7 +1799,7 @@ static bool findIP(String &header,
 extern "C"
 {
 #endif // VC++
-   static Value func_checkSpam(ArgList *args, Parser *p)
+   static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
    {
       // standard check:
       if(args->Count() != 0) return Value("");
@@ -1977,7 +1820,7 @@ extern "C"
       {
          if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
          {
-            for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+            for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
                rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
          }
       }
@@ -1986,7 +1829,7 @@ extern "C"
       {
          if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
          {
-            for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+            for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
                rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
          }
       }
@@ -1996,34 +1839,22 @@ extern "C"
       return rc;
    }
 
-   static Value func_msgbox(ArgList *args, Parser *p)
+   static Value func_msgbox(ArgList *args, FilterRuleImpl *p)
    {
-      const SyntaxNode *sn;
-      Value v;
       ASSERT(args);
       String msg;
-      for(size_t i = 0; i < args->Count(); i++)
-      {
-         sn = args->GetArg(i);
-         v= sn->Evaluate();
-         msg << v.ToString();
-      }
+      for(size_t i = 0; i < args->Count(); ++i)
+         msg << args->GetArg(i)->Evaluate().ToString();
       p->Output(msg);
       return 1;
    }
 
-   static Value func_log(ArgList *args, Parser *p)
+   static Value func_log(ArgList *args, FilterRuleImpl *p)
    {
-      const SyntaxNode *sn;
-      Value v;
       ASSERT(args);
       String msg;
-      for(size_t i = 0; i < args->Count(); i++)
-      {
-         sn = args->GetArg(i);
-         v= sn->Evaluate();
-         msg << v.ToString();
-      }
+      for(size_t i = 0; i < args->Count(); ++i)
+         msg << args->GetArg(i)->Evaluate().ToString();
       p->Log(msg);
       return 1;
    }
@@ -2032,13 +1863,13 @@ extern "C"
  * Tests for message contents
  *
  * * * * * * * * * * * * * */
-   static Value func_containsi(ArgList *args, Parser *p)
+   static Value func_containsi(ArgList *args, FilterRuleImpl *p)
    {
       ASSERT(args);
       if(args->Count() != 2)
          return 0;
-      Value v1 = args->GetArg(0)->Evaluate();
-      Value v2 = args->GetArg(1)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
+      const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
       p->GetInterface()->strutil_tolower(haystack);
@@ -2046,37 +1877,37 @@ extern "C"
       return haystack.Find(needle) != -1;
    }
 
-   static Value func_contains(ArgList *args, Parser *p)
+   static Value func_contains(ArgList *args, FilterRuleImpl *p)
    {
       ASSERT(args);
       if(args->Count() != 2)
          return 0;
-      Value v1 = args->GetArg(0)->Evaluate();
-      Value v2 = args->GetArg(1)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
+      const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
       return haystack.Find(needle) != -1;
    }
 
-   static Value func_match(ArgList *args, Parser *p)
+   static Value func_match(ArgList *args, FilterRuleImpl *p)
    {
       ASSERT(args);
       if(args->Count() != 2)
          return 0;
-      Value v1 = args->GetArg(0)->Evaluate();
-      Value v2 = args->GetArg(1)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
+      const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
       return haystack == needle;
    }
 
-   static Value func_matchi(ArgList *args, Parser *p)
+   static Value func_matchi(ArgList *args, FilterRuleImpl *p)
    {
       ASSERT(args);
       if(args->Count() != 2)
          return 0;
-      Value v1 = args->GetArg(0)->Evaluate();
-      Value v2 = args->GetArg(1)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
+      const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
       p->GetInterface()->strutil_tolower(haystack);
@@ -2084,13 +1915,13 @@ extern "C"
       return haystack == needle;
    }
 
-   static Value DoMatchRegEx(ArgList *args, Parser *p, int flags = 0)
+   static Value DoMatchRegEx(ArgList *args, FilterRuleImpl *p, int flags = 0)
    {
       ASSERT(args);
       if(args->Count() != 2)
          return 0;
-      Value v1 = args->GetArg(0)->Evaluate();
-      Value v2 = args->GetArg(1)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
+      const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
       strutil_RegEx * re = p->GetInterface()->strutil_compileRegEx(needle);
@@ -2100,18 +1931,18 @@ extern "C"
       return rc;
    }
 
-   static Value func_matchregex(ArgList *args, Parser *p)
+   static Value func_matchregex(ArgList *args, FilterRuleImpl *p)
    {
       return DoMatchRegEx(args, p);
    }
 
-   static Value func_matchregexi(ArgList *args, Parser *p)
+   static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
    {
       return DoMatchRegEx(args, p, wxRegExBase::RE_ICASE);
    }
 
 #ifdef USE_PYTHON
-   static Value func_python(ArgList *args, Parser *p)
+   static Value func_python(ArgList *args, FilterRuleImpl *p)
    {
 #ifndef TEST        // uses functions not in libraries
       ASSERT(args);
@@ -2136,14 +1967,14 @@ extern "C"
    }
 #else
 
-   static Value func_python(ArgList *args, Parser *p)
+   static Value func_python(ArgList *args, FilterRuleImpl *p)
    {
       p->Error(_("Python support for filters is not available."));
       return false;
    }
 #endif
 
-   static Value func_print(ArgList *args, Parser *p)
+   static Value func_print(ArgList *args, FilterRuleImpl *p)
    {
 #ifndef TEST        // uses functions not in libraries
       if(args->Count() != 0)
@@ -2172,7 +2003,7 @@ extern "C"
  * Access to message contents
  *
  * * * * * * * * * * * * * */
-   static Value func_subject(ArgList *args, Parser *p)
+   static Value func_subject(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2184,7 +2015,7 @@ extern "C"
       return Value(subj);
    }
 
-   static Value func_from(ArgList *args, Parser *p)
+   static Value func_from(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2196,7 +2027,7 @@ extern "C"
       return Value(subj);
    }
 
-   static Value func_to(ArgList *args, Parser *p)
+   static Value func_to(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2209,7 +2040,7 @@ extern "C"
       return Value(tostr);
    }
 
-   static Value func_recipients(ArgList *args, Parser *p)
+   static Value func_recipients(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2224,7 +2055,7 @@ extern "C"
          NULL
       };
       String tmp;
-      for(int i = 0; headers[i]; i++)
+      for(int i = 0; headers[i]; ++i)
       {
          msg->GetHeaderLine(headers[i], tmp);
          if(tmp[0] && result[0])
@@ -2235,7 +2066,7 @@ extern "C"
       return Value(result);
    }
 
-   static Value func_header(ArgList *args, Parser *p)
+   static Value func_header(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2247,11 +2078,11 @@ extern "C"
       return Value(subj);
    }
 
-   static Value func_headerline(ArgList *args, Parser *p)
+   static Value func_headerline(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 1)
          return Value("");
-      Value v1 = args->GetArg(0)->Evaluate();
+      const Value v1 = args->GetArg(0)->Evaluate();
       String field = v1.ToString();
       Message * msg = p->GetMessage();
       if(! msg)
@@ -2262,7 +2093,7 @@ extern "C"
       return Value(result);
    }
 
-   static Value func_body(ArgList *args, Parser *p)
+   static Value func_body(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2275,7 +2106,7 @@ extern "C"
       return Value(str);
    }
 
-   static Value func_text(ArgList *args, Parser *p)
+   static Value func_text(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value("");
@@ -2288,7 +2119,7 @@ extern "C"
       return Value(str);
    }
 
-   static Value func_delete(ArgList *args, Parser *p)
+   static Value func_delete(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return 0;
@@ -2298,10 +2129,11 @@ extern "C"
       int rc = mf->DeleteMessage(uid);
       mf->DecRef();
       p->SetChanged();
+      return Value::Finis();
       return Value(rc);
    }
 
-   static Value func_uniq(ArgList *args, Parser *p)
+   static Value func_uniq(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return 0;
@@ -2314,12 +2146,12 @@ extern "C"
       // more deleted
    }
 
-   static Value func_copytofolder(ArgList *args, Parser *p)
+   static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
    {
 #ifndef TEST                // UIdArray not instantiated
       if(args->Count() != 1)
          return 0;
-      Value fn = args->GetArg(0)->Evaluate();
+      const Value fn = args->GetArg(0)->Evaluate();
       MailFolder *mf = p->GetFolder();
       UIdType uid = p->GetMessageUId();
       UIdArray ia;
@@ -2332,7 +2164,7 @@ extern "C"
 #endif
    }
 
-   static Value func_movetofolder(ArgList *args, Parser *p)
+   static Value func_movetofolder(ArgList *args, FilterRuleImpl *p)
    {
       Value rc = func_copytofolder(args, p);
       if(rc.ToNumber()) // successful
@@ -2344,7 +2176,7 @@ extern "C"
          return 0;
    }
 
-   static Value func_getstatus(ArgList *args, Parser *p)
+   static Value func_getstatus(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(-1);
@@ -2354,7 +2186,7 @@ extern "C"
       return Value(rc);
    }
 
-   static Value func_date(ArgList *args, Parser *p)
+   static Value func_date(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(-1);
@@ -2373,7 +2205,7 @@ extern "C"
       return Value(today);
    }
 
-   static Value func_now(ArgList *args, Parser *p)
+   static Value func_now(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(-1);
@@ -2381,7 +2213,7 @@ extern "C"
       return Value(today);
    }
 
-   static Value func_size(ArgList *args, Parser *p)
+   static Value func_size(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(-1);
@@ -2392,7 +2224,7 @@ extern "C"
       return Value(size / 1024); // return KiloBytes
    }
 
-   static Value func_score(ArgList *args, Parser *p)
+   static Value func_score(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(0);
@@ -2408,11 +2240,11 @@ extern "C"
       return Value(score);
    }
 
-   static Value func_addscore(ArgList *args, Parser *p)
+   static Value func_addscore(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 1)
          return Value(-1);
-      Value d = args->GetArg(0)->Evaluate();
+      const Value d = args->GetArg(0)->Evaluate();
       int delta = d.ToNumber();
       Message *msg = p->GetMessage();
       HeaderInfoList *hil = p->GetFolder()->GetHeaders();
@@ -2424,11 +2256,11 @@ extern "C"
       msg->DecRef();
       return Value(0);
    }
-   static Value func_setcolour(ArgList *args, Parser *p)
+   static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 1)
          return Value(-1);
-      Value c = args->GetArg(0)->Evaluate();
+      const Value c = args->GetArg(0)->Evaluate();
       String col = c.ToString();
       Message *msg = p->GetMessage();
       HeaderInfoList *hil = p->GetFolder()->GetHeaders();
@@ -2447,7 +2279,7 @@ extern "C"
  * Folder functionality
  *
  * * * * * * * * * * * * * */
-   static Value func_expunge(ArgList *args, Parser *p)
+   static Value func_expunge(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
          return Value(0);
@@ -2465,11 +2297,11 @@ extern "C"
  * Testing hacks
  *
  * * * * * * * * * * * * * */
-   static Value func_nargs(ArgList *args, Parser *p)
+   static Value func_nargs(ArgList *args, FilterRuleImpl *p)
    {
       return args->Count();
    }
-   static Value func_arg(ArgList *args, Parser *p)
+   static Value func_arg(ArgList *args, FilterRuleImpl *p)
    {
       if (args->Count() != 1)
          return 0;
@@ -2482,47 +2314,51 @@ extern "C"
 };
 #endif // VC++
 
-
-
-void
-ParserImpl::AddBuiltinFunctions(void)
+static const FunctionList *
+BuiltinFunctions(void)
 {
-   DefineFunction("message", func_msgbox);
-   DefineFunction("log", func_log);
-   DefineFunction("match", func_match);
-   DefineFunction("contains", func_contains);
-   DefineFunction("matchi", func_matchi);
-   DefineFunction("containsi", func_containsi);
-   DefineFunction("matchregex", func_matchregex);
-   DefineFunction("subject", func_subject);
-   DefineFunction("to", func_to);
-   DefineFunction("recipients", func_recipients);
-   DefineFunction("headerline", func_headerline);
-   DefineFunction("from", func_from);
-   DefineFunction("header", func_header);
-   DefineFunction("body", func_body);
-   DefineFunction("text", func_text);
-   DefineFunction("delete", func_delete);
-   DefineFunction("uniq", func_uniq);
-   DefineFunction("copy", func_copytofolder);
-   DefineFunction("move", func_movetofolder);
-   DefineFunction("print", func_print);
-   DefineFunction("date", func_date);
-   DefineFunction("size", func_size);
-   DefineFunction("now", func_now);
-   DefineFunction("isspam", func_checkSpam);
-   DefineFunction("expunge", func_expunge);
+   static FunctionList *defaults;
+   if (defaults)
+      return defaults;
+   defaults = new FunctionList;
+#define Define(name, fn) defaults->push_back(FunctionDefinition(name, fn))
+   Define("message", func_msgbox);
+   Define("log", func_log);
+   Define("match", func_match);
+   Define("contains", func_contains);
+   Define("matchi", func_matchi);
+   Define("containsi", func_containsi);
+   Define("matchregex", func_matchregex);
+   Define("subject", func_subject);
+   Define("to", func_to);
+   Define("recipients", func_recipients);
+   Define("headerline", func_headerline);
+   Define("from", func_from);
+   Define("header", func_header);
+   Define("body", func_body);
+   Define("text", func_text);
+   Define("delete", func_delete);
+   Define("uniq", func_uniq);
+   Define("copy", func_copytofolder);
+   Define("move", func_movetofolder);
+   Define("print", func_print);
+   Define("date", func_date);
+   Define("size", func_size);
+   Define("now", func_now);
+   Define("isspam", func_checkSpam);
+   Define("expunge", func_expunge);
 #ifdef USE_PYTHON
-   DefineFunction("python", func_python);
+   Define("python", func_python);
 #endif
-   DefineFunction("matchregexi", func_matchregexi);
-   DefineFunction("setcolour", func_setcolour);
-   DefineFunction("score", func_score);
-   DefineFunction("addscore", func_addscore);
+   Define("matchregexi", func_matchregexi);
+   Define("setcolour", func_setcolour);
+   Define("score", func_score);
+   Define("addscore", func_addscore);
 #ifdef TEST
-   DefineFunction("nargs", func_nargs);
-   DefineFunction("arg", func_arg);
+   Define("nargs", func_nargs);
+   Define("arg", func_arg);
 #endif
+   return defaults;
 }
 
 
@@ -2532,26 +2368,26 @@ ParserImpl::AddBuiltinFunctions(void)
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid,
-                          bool *changeflag) const
+                          bool *changeflag)
 {
-   if(! m_Program || ! m_Parser)
+   if(! m_Program)
       return 0;
 
    ASSERT(mf);
    ASSERT(uid != UID_ILLEGAL);
 //FIXME   ASSERT(mf->IsLocked()); // must be called on a locked mailfolder
    mf->IncRef();
-   m_Parser->SetMessage(mf, uid);
-   Value rc = m_Program->Evaluate();
-   if(changeflag) *changeflag = m_Parser->GetChanged();
-   m_Parser->SetMessage(NULL);
+   SetMessage(mf, uid);
+   const Value rc = m_Program->Evaluate();
+   if(changeflag) *changeflag = GetChanged();
+   SetMessage(NULL);
    mf->DecRef();
    return (int) rc.GetNumber();
 }
 
 int
 FilterRuleImpl::Apply(MailFolder *mf, bool NewOnly,
-                      bool *changeflag) const
+                      bool *changeflag)
 {
    return ApplyCommonCode(mf, NULL, NewOnly, NewOnly, changeflag);
 }
@@ -2560,7 +2396,7 @@ int
 FilterRuleImpl::Apply(MailFolder *folder,
                       UIdArray msgs,
                       bool ignoreDeleted,
-                      bool *changeflag) const
+                      bool *changeflag)
 {
 #ifndef TEST                // UIdArray not instantiated
    return ApplyCommonCode(folder, &msgs, FALSE, ignoreDeleted, changeflag);
@@ -2591,10 +2427,10 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
                                 UIdArray *msgs,
                                 bool newOnly,
                                 bool ignoreDeleted,
-                                bool *changeflag) const
+                                bool *changeflag)
 {
 #ifndef TEST                // UIdArray not instantiated
-   if(! m_Program || ! m_Parser)
+   if(! m_Program)
       return 0;
    int rc = 1; // no error yet
    CHECK(mf, 0, "no folder for filtering");
@@ -2619,7 +2455,7 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    }
    else // apply to all or all recent messages
    {
-      for(size_t i = 0; i < hil->Count(); i++)
+      for(size_t i = 0; i < hil->Count(); ++i)
       {
          const HeaderInfo * hi = (*hil)[i];
          ASSERT(hi);
@@ -2644,19 +2480,23 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *minterface,
                                MModule_Filters *mod
    )
+: m_FilterModule(mod), m_MInterface(minterface), m_MailFolder(NULL)
 {
-   m_FilterModule = mod; ASSERT(m_FilterModule);
+#ifndef TEST
    // we cannot allow the module to disappear while we exist
-   m_FilterModule->IncRef();
-   m_Parser = Parser::Create(filterrule, minterface);
-   m_Program = m_Parser->Parse();
+   ASSERT(m_FilterModule); m_FilterModule->IncRef();
+#endif
+   m_Program = Parse(filterrule);
+   m_MessageUId = UID_ILLEGAL;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
 {
-   if(m_Program) delete m_Program;
-   m_Parser->DecRef();
+   SafeDecRef(m_MailFolder);
+   delete m_Program;
+#ifndef TEST
    m_FilterModule->DecRef();
+#endif
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2668,7 +2508,7 @@ FilterRuleImpl::~FilterRuleImpl()
 #ifdef DEBUG
 void FilterRuleImpl::Debug(void)
 {
-   m_Parser->Output(m_Program->Debug());
+   Output(m_Program->Debug());
 }
 #endif
 
@@ -2727,160 +2567,174 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
 
 #ifdef TEST        // test suite
 #include "../classes/MObject.cpp"        // Gross hack...
-class MyParser : public ParserImpl
+class MyParser : public FilterRuleImpl
 {
 public:
-        MyParser(String s, bool r = false) : ParserImpl(s, 0) { m_reject = r; }
-        virtual void Error(const String &error);
-        String CharLeft() { return ParserImpl::CharLeft(); }
-        String CharMid() { return ParserImpl::CharMid(); }
+   MyParser(String s, bool r = false)
+      : FilterRuleImpl(s, 0, 0)
+      { m_reject = r; }
+   virtual void Error(const String &error);
+   String CharLeft() { return FilterRuleImpl::CharLeft(); }
+   String CharMid() { return FilterRuleImpl::CharMid(); }
 private:
-        bool m_reject;
+   bool m_reject;
 };
 void
 MyParser::Error(const String &error)
 {
-        if (m_reject == false)
-                printf(">>>%s\n", error.c_str());
+   if (m_reject == false)
+      printf(">>>%s\n", error.c_str());
 }
 
 void
 Rejected(MyParser &p)
 {
-        printf("Rejected `%s<ERROR>%s'\n",
-                p.CharLeft().c_str(),
-                p.CharMid().c_str());
+   printf("Rejected `%s<ERROR>%s'\n",
+           p.CharLeft().c_str(),
+           p.CharMid().c_str());
 }
 
 int        // test whether the string is rejected by the parser
 TestExprFail(const char *s)
 {
-        MyParser p(s, true);
-        const SyntaxNode *exp = p.ParseExpression();
-        if (exp == NULL) {
-                Rejected(p);
-                return 0;
-        }
-        Value v = exp->Evaluate();
-        delete exp;
-        printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
-        return 1;
+   MyParser p(s, true);
+   const SyntaxNode *exp = p.ParseExpression();
+   if (exp == NULL)
+   {
+      Rejected(p);
+      return 0;
+   }
+   const Value v = exp->Evaluate();
+   delete exp;
+   printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
+   return 1;
 }
 
 int        // test whether the string is accepted by the parser
 TestExpr(int arg, const char *s)
 {
-        MyParser p(s);
-        const SyntaxNode *exp = p.ParseExpression();
-        if (exp == NULL) {
-                Rejected(p);
-                return 1;
-        }
-        Value v = exp->Evaluate();
-        delete exp;
-        if (v.ToNumber() != arg) {
-                printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
-                return 1;
-        }
-        return 0;
+   MyParser p(s);
+   const SyntaxNode *exp = p.ParseExpression();
+   if (exp == NULL)
+   {
+      Rejected(p);
+      return 1;
+   }
+   const Value v = exp->Evaluate();
+   delete exp;
+   if (v.ToNumber() != arg)
+   {
+      printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
+      return 1;
+   }
+   return 0;
 }
 
 int        // test whether the pgm is rejected by the parser
 TestReject(const char *s)
 {
-        MyParser p(s, true);
-        const SyntaxNode *pgm = p.ParseProgram();
-        if (pgm == NULL) {
-                Rejected(p);
-                return 0;
-        }
-        Value v = pgm->Evaluate();
-        delete pgm;
-        printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
-        return 1;
+   MyParser p(s, true);
+   const SyntaxNode *pgm = p.ParseProgram();
+   if (pgm == NULL)
+   {
+      Rejected(p);
+      return 0;
+   }
+   const Value v = pgm->Evaluate();
+   delete pgm;
+   printf("`%s' was accepted and evaluated as %ld\n", s, v.ToNumber());
+   return 1;
 }
 
 int        // test whether the pgm is accepted by the parser
 TestAccept(const char *s)
 {
-        MyParser p(s);
-        const SyntaxNode *pgm = p.ParseProgram();
-        if (pgm == NULL) {
-                Rejected(p);
-                return 1;
-        }
-        delete pgm;
-        return 0;
+   MyParser p(s);
+   const SyntaxNode *pgm = p.ParseProgram();
+   if (pgm == NULL)
+   {
+      Rejected(p);
+      return 1;
+   }
+   delete pgm;
+   return 0;
 }
 
 int        // test whether the pgm is accepted by the parser
 TestPgm(int arg, const char *s)
 {
-        MyParser p(s);
-        const SyntaxNode *pgm = p.ParseProgram();
-        if (pgm == NULL) {
-                Rejected(p);
-                return 1;
-        }
-        Value v = pgm->Evaluate();
-        delete pgm;
-        if (v.ToNumber() != arg) {
-                printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
-                return 1;
-        }
-        return 0;
+   MyParser p(s);
+   const SyntaxNode *pgm = p.ParseProgram();
+   if (pgm == NULL)
+   {
+      Rejected(p);
+      return 1;
+   }
+   const Value v = pgm->Evaluate();
+   delete pgm;
+   if (v.ToNumber() != arg)
+   {
+      printf("`%s' was %ld instead of %d\n", s, v.ToNumber(), arg);
+      return 1;
+   }
+   return 0;
 }
 
 int
 main(void)
 {
-        int errs = 0;
-        for (;;) {
-                int c = getchar();
-                if (c == EOF)
-                        break;
-                if (c == '\n')
-                        continue;
-                if (c == '#') {
-                        // swallow comment
-                        while (getchar() != '\n') {}
-                        continue;
-                }
-                String cmd = (char)c, opt, exp;
-                while ((c = getchar()) != '\t')
-                        cmd += (char)c;
-                while ((c = getchar()) != '\t')
-                        opt += (char)c;
-                while ((c = getchar()) != '\n')
-                        exp += (char)c;
-                if (cmd == "expr") {
-                        long val;
-                        if (opt == "reject")
-                                errs += TestExprFail(exp);
-                        else if (opt.ToLong(&val))
-                                errs += TestExpr(val, exp);
-                        else
-                                printf("Unknown option `%s' to expr command\n",
-                                        opt.c_str());
-                } else
-                if (cmd == "pgm") {
-                        long val;
-                        if (opt == "accept")
-                                errs += TestAccept(exp);
-                        else if (opt == "reject")
-                                errs += TestReject(exp);
-                        else if (opt.ToLong(&val))
-                                errs += TestPgm(val, exp);
-                        else
-                                printf("Unknown option `%s' to pgm command\n",
-                                        opt.c_str());
-                } else
-                        printf("Unknown command `%s'\n", cmd.c_str());
-        }
+   int errs = 0;
+   for (;;)
+   {
+      int c = getchar();
+      if (c == EOF)
+         break;
+      if (c == '\n')
+         continue;
+      if (c == '#')
+      {
+         // swallow comment
+         while (getchar() != '\n') {}
+         continue;
+      }
+      String cmd = (char)c, opt, exp;
+      while ((c = getchar()) != '\t')
+         cmd += (char)c;
+      while ((c = getchar()) != '\t')
+         opt += (char)c;
+      while ((c = getchar()) != '\n')
+         exp += (char)c;
+      if (cmd == "expr")
+      {
+         long val;
+         if (opt == "reject")
+            errs += TestExprFail(exp);
+         else if (opt.ToLong(&val))
+            errs += TestExpr(val, exp);
+         else
+            printf("Unknown option `%s' to expr command\n",
+               opt.c_str());
+      }
+      else if (cmd == "pgm")
+      {
+         long val;
+         if (opt == "accept")
+            errs += TestAccept(exp);
+         else if (opt == "reject")
+            errs += TestReject(exp);
+         else if (opt.ToLong(&val))
+            errs += TestPgm(val, exp);
+         else
+            printf("Unknown option `%s' to pgm command\n",
+               opt.c_str());
+      }
+      else
+         printf("Unknown command `%s'\n", cmd.c_str());
+   }
 
-        if (errs > 0)
-                printf("%d errors found\n", errs);
+   if (errs > 0)
+      printf("%d errors found\n", errs);
 
-        return errs != 0;
+   return errs != 0;
 }
 #endif
