@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.191 2000/10/17 11:55:28 ballueder Exp 
+# From configure.in Id: configure.in,v 1.192 2000/11/01 00:01:32 ballueder Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -1520,7 +1520,7 @@ else
 int main() {
 
 /* Ultrix mips cc rejects this.  */
-typedef int charset[2]; const charset x;
+typedef int charset[2]; const charset x = {0,0};
 /* SunOS 4.1.1 cc rejects this.  */
 char const *const *ccp;
 char **p;
@@ -1595,7 +1595,7 @@ for ac_kw in inline __inline__ __inline; do
 #include "confdefs.h"
 
 int main() {
-} $ac_kw foo() {
+} int $ac_kw foo() {
 ; return 0; }
 EOF
 if { (eval echo configure:1602: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
@@ -2443,7 +2443,7 @@ else
 #line 2444 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int) throw();
+extern "C" void exit(int);
 #endif
 #include <ctype.h>
 #define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
@@ -4631,8 +4631,8 @@ case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
 esac
 
-CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/imap/c-client"
-LIBS="$BUILDDIR/extra/src/imap/c-client/c-client.a $LIBS"
+CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/c-client"
+LIBS="$BUILDDIR/extra/src/c-client/c-client.a $LIBS"
 CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface"
 LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
 
