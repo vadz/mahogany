@@ -423,7 +423,9 @@ MailFolderCC::~MailFolderCC()
    CCQuiet();
    mail_check(m_MailStream); // update flags, etc, .newsrc
    CCVerbose();
-   ProcessEventQueue(); // must be done before close or we run into trouble!!
+   // We cannot run ProcessEventQueue() here as we must not allow any
+   // Message to be created from this stream. If we miss an event -
+   // that's a pity.
    if( m_MailStream ) mail_close(m_MailStream);
    if( m_Listing ) delete [] m_Listing;
 
