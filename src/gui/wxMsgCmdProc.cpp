@@ -712,7 +712,11 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 
       case WXMENU_MSG_SAVE_TO_FILE:
-         SaveMessagesToFile(messages);
+         if ( SaveMessagesToFile(messages) == ILLEGAL_TICKET )
+         {
+            // cancelled by user
+            rc = false;
+         }
          break;
 
       case WXMENU_MSG_MOVE_TO_FOLDER:
