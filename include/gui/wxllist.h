@@ -16,12 +16,12 @@
 
 #include   "kbList.h"
 
-#include   "wx/wx.h"
-#include   "wx/print.h"
-#include   "wx/printdlg.h"
-#include   "wx/generic/printps.h"
-#include   "wx/generic/prntdlgg.h"
-#include   "wx/dataobj.h"
+#include   <wx/wx.h>
+#include   <wx/print.h>
+#include   <wx/printdlg.h>
+#include   <wx/generic/printps.h>
+#include   <wx/generic/prntdlgg.h>
+#include   <wx/dataobj.h>
 
 // skip the following defines if embedded in M application
 #ifndef   M_BASEDIR
@@ -29,6 +29,12 @@
 #   define WXMENU_LAYOUT_RCLICK     1112
 #   define WXMENU_LAYOUT_DBLCLICK   1113
 #endif
+
+// use the wxWindows caret class instead of home grown cursor whenever possible
+#ifdef __WXMSW__
+#   undef WXLAYOUT_USE_CARET
+#   define WXLAYOUT_USE_CARET 1
+#endif // __WXMSW__
 
 // do not enable debug mode within Mahogany
 #if defined(__WXDEBUG__)  && ! defined(M_BASEDIR)
@@ -38,7 +44,7 @@
 #ifdef WXLAYOUT_DEBUG
 #   define WXLO_TRACE(x)   wxLogDebug(x)
 #else
-#   define WXLO_TRACE(x)   
+#   define WXLO_TRACE(x)
 #endif
 
 #define WXLO_DEBUG_URECT 0
@@ -52,7 +58,6 @@
 #else
 #   define WXLO_BITMAP_FORMAT wxBITMAP_TYPE_PNG
 #endif
-
 
 /// Types of currently supported layout objects.
 enum wxLayoutObjectType
@@ -72,20 +77,22 @@ typedef long CoordType;
 
 // Forward declarations.
 class wxLayoutList;
+class wxLayoutLine;
 class wxLayoutObject;
-class wxDC;
-class wxColour;
-class wxFont;
 
+class WXDLLEXPORT wxCaret;
+class WXDLLEXPORT wxColour;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxFont;
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    The wxLayout objects which make up the lines.
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-                                                                               
+
 /** The base class defining the interface to each object which can be
-    part of the layout. Each object needs to draw itself and calculate 
+    part of the layout. Each object needs to draw itself and calculate
     its size.
 */
 class wxLayoutObject
@@ -118,7 +125,7 @@ public:
        @param dc the wxDC to draw on
        @param llist the wxLayoutList
    */
-   virtual void Layout(wxDC &dc, class wxLayoutList *llist) = 0;
+   virtual void Layout(wxDC &dc, wxLayoutList *llist) = 0;
 
    /** Draws an object.
        @param dc the wxDC to draw on
@@ -129,11 +136,11 @@ public:
    */
    virtual void Draw(wxDC & /* dc */,
                      wxPoint const & /* coords */,
-                     class wxLayoutList *wxllist,
+                     wxLayoutList *wxllist,
                      CoordType begin = -1,
                      CoordType end = -1)  { }
 
-   /** Calculates and returns the size of the object. 
+   /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
@@ -174,7 +181,7 @@ public:
          if(m_UserData)
             m_UserData->IncRef();
       }
-   
+
    /** Return the user data.
     Increments the object's reference count. When no longer needed,
     caller must call DecRef() on the pointer returned.
@@ -196,6 +203,10 @@ public:
    */
    static wxLayoutObject *Read(wxString &istr);
    //@}
+
+   /// returns TRUE if the object is shown on the screen (i.e. not cmd object)
+   bool IsVisibleObject() const { return GetType() != WXLO_TYPE_CMD; }
+
 protected:
    /// optional data for application's use
    UserData *m_UserData;
@@ -207,9 +218,9 @@ KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObject);
 /// An illegal iterator to save typing.
 #define NULLIT (wxLayoutObjectList::iterator(NULL))
 /// The iterator type.
-#define wxLOiterator   wxLayoutObjectList::iterator
+typedef wxLayoutObjectList::iterator wxLOiterator;
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectText
 
@@ -220,14 +231,14 @@ class wxLayoutObjectText : public wxLayoutObject
 {
 public:
    wxLayoutObjectText(const wxString &txt = "");
-   
+
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
-   virtual void Layout(wxDC &dc, class wxLayoutList *llist);
+   virtual void Layout(wxDC &dc, wxLayoutList *llist);
    virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     class wxLayoutList *wxllist,
+                     wxLayoutList *wxllist,
                      CoordType begin = -1,
                      CoordType end = -1);
-   /** Calculates and returns the size of the object. 
+   /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
@@ -268,7 +279,7 @@ private:
    long   m_Bottom;
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectIcon
 
@@ -284,13 +295,13 @@ public:
    ~wxLayoutObjectIcon() { if(m_Icon) delete m_Icon; }
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
-   virtual void Layout(wxDC &dc, class wxLayoutList *llist);
+   virtual void Layout(wxDC &dc, wxLayoutList *llist);
    virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     class wxLayoutList *wxllist,
+                     wxLayoutList *wxllist,
                      CoordType begin = -1,
                      CoordType end = -1);
 
-   /** Calculates and returns the size of the object. 
+   /** Calculates and returns the size of the object.
        @param top where to store height above baseline
        @param bottom where to store height below baseline
        @return the size of the object's box in pixels
@@ -309,8 +320,7 @@ private:
    wxBitmap *m_Icon;
 };
 
-/** This structure holds all formatting information. Members which are 
-    undefined (for a CmdObject this means: no change), are set to -1.
+/** This structure holds all formatting information.
 */
 struct wxLayoutStyleInfo
 {
@@ -321,11 +331,10 @@ struct wxLayoutStyleInfo
                      int iul = -1,
                      wxColour *fg = NULL,
                      wxColour *bg = NULL);
-   wxColour & GetBGColour()
-      {
-         return m_bg;
-      }
    wxLayoutStyleInfo & operator=(const wxLayoutStyleInfo &right);
+
+   wxColour & GetBGColour() { return m_bg; }
+
    /// Font change parameters.
    int  size, family, style, weight, underline;
    /// Colours
@@ -333,11 +342,11 @@ struct wxLayoutStyleInfo
    int m_fg_valid, m_bg_valid; // bool, but must be int!
 };
 
-
+/// a cached font
 class wxFontCacheEntry
 {
 public:
-   wxFontCacheEntry(int family, int size, int style, int weight, 
+   wxFontCacheEntry(int family, int size, int style, int weight,
                     bool underline)
       {
          m_Family = family; m_Size = size; m_Style = style;
@@ -345,7 +354,7 @@ public:
          m_Font = new wxFont(m_Size, m_Family,
                              m_Style, m_Weight, m_Underline);
       }
-   bool Matches(int family, int size, int style, int weight, 
+   bool Matches(int family, int size, int style, int weight,
                 bool underline) const
       {
          return size == m_Size && family == m_Family
@@ -359,6 +368,8 @@ public:
       }
 private:
    wxFont *m_Font;
+
+   // VZ: I wonder why it doesn't use wxLayoutStyleInfo instead of those?
    int  m_Family, m_Size, m_Style, m_Weight;
    bool m_Underline;
 };
@@ -368,7 +379,7 @@ KBLIST_DEFINE(wxFCEList, wxFontCacheEntry);
 class wxFontCache
 {
 public:
-   wxFont & GetFont(int family, int size, int style, int weight, 
+   wxFont & GetFont(int family, int size, int style, int weight,
                    bool underline);
    wxFont & GetFont(wxLayoutStyleInfo const &si)
       {
@@ -379,7 +390,7 @@ private:
    wxFCEList m_FontList;
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectCmd
 
@@ -390,9 +401,9 @@ class wxLayoutObjectCmd : public wxLayoutObject
 {
 public:
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
-   virtual void Layout(wxDC &dc, class wxLayoutList *llist);
+   virtual void Layout(wxDC &dc, wxLayoutList *llist);
    virtual void Draw(wxDC &dc, wxPoint const &coords,
-                     class wxLayoutList *wxllist,
+                     wxLayoutList *wxllist,
                      CoordType begin = -1,
                      CoordType end = -1);
    wxLayoutObjectCmd(int family = -1,
@@ -414,19 +425,16 @@ private:
    wxLayoutStyleInfo *m_StyleInfo;
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    The wxLayoutLine object
 
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/// forward declaration
-class wxLayoutList;
-
 /** This class represents a single line of objects to be displayed.
     It knows its height and total size and whether it needs to be
     redrawn or not.
-    It has pointers to its first and next line so it can automatically 
+    It has pointers to its first and next line so it can automatically
     update them as needed.
 */
 class wxLayoutLine
@@ -444,13 +452,13 @@ public:
        @return true if that xpos existed and the object was inserted
    */
    bool Insert(CoordType xpos, wxLayoutObject *obj);
-   
+
    /** This function inserts text at cursor position xpos.
        @param xpos where to insert
        @param text  the text to insert
        @return true if that xpos existed and the object was inserted
    */
-   bool Insert(CoordType xpos, wxString text);
+   bool Insert(CoordType xpos, const wxString& text);
 
    /** This function appends an object to the line.
        @param obj  the object to insert
@@ -458,6 +466,7 @@ public:
    void Append(wxLayoutObject * obj)
       {
          wxASSERT(obj);
+
          m_ObjectList.push_back(obj);
          m_Length += obj->GetLength();
       }
@@ -484,20 +493,20 @@ public:
        whitespace.
        This function does not delete over font changes, i.e. a word
        with formatting instructions in the middle of it is treated as
-       two (three actually!) words. In fact, if the cursor is on a non-text object, that 
+       two (three actually!) words. In fact, if the cursor is on a non-text object, that
        one is treated as a word.
        @param xpos from where to delete
        @return true if a word was deleted
    */
    bool DeleteWord(CoordType npos);
 
-   /** Finds a suitable position left to the given column to break the 
+   /** Finds a suitable position left to the given column to break the
        line.
        @param column we want to break the line to the left of this
        @return column for breaking line or -1 if no suitable location found
    */
    CoordType GetWrapPosition(CoordType column);
-   
+
    /** Finds the object which covers the cursor position xpos in this
        line.
        @param xpos the column number
@@ -511,12 +520,14 @@ public:
    /** Finds the object which covers the screen position xpos in this
        line.
        @param dc the wxDC to use for calculations
+       @param llist the layout list to which this line belongs
        @param xpos the screen x coordinate
        @param offset where to store the difference between xpos and
        the object's head
        @return iterator to the object or NULLIT
    */
    wxLayoutObjectList::iterator FindObjectScreen(wxDC &dc,
+                                                 wxLayoutList *llist,
                                                  CoordType xpos,
                                                  CoordType *offset,
                                                  bool *found = NULL) const ;
@@ -527,16 +538,23 @@ public:
        @return the cursoor coord where it was found or -1
    */
    CoordType FindText(const wxString &needle, CoordType xpos = 0) const;
-   
-   /** Get the first object in the list. This is used by the wxlparser 
+
+   /** Get the first object in the list. This is used by the wxlparser
        functions to export the list.
        @return iterator to the first object
    */
-   wxLayoutObjectList::iterator GetFirstObject(void)
+   wxLayoutObjectList::iterator GetFirstObject(void) const
       {
          return m_ObjectList.begin();
       }
-       
+
+   /** Get the last object in the list.
+    */
+   wxLayoutObjectList::iterator GetLastObject(void) const
+      {
+         return m_ObjectList.tail();
+      }
+
    /** Deletes this line, returns pointer to next line.
        @param update If true, update all following lines.
    */
@@ -558,26 +576,30 @@ public:
    //@{
    /** Draws the line on a wxDC.
        @param dc the wxDC to draw on
-       @param llist the wxLayoutList 
+       @param llist the wxLayoutList
        @param offset an optional offset to shift printout
    */
    void Draw(wxDC &dc,
              wxLayoutList *llist,
              const wxPoint &offset = wxPoint(0,0)) const;
-   
+
    /** Recalculates the positions of objects and the height of the
        line.
        @param dc the wxDC to draw on
-       @param llist th   e wxLayoutList 
+       @param llist th   e wxLayoutList
        @param cursorPos if not NULL, set cursor screen position in there
        @param cursorSize if not cursorPos != NULL, set cursor size in there
+       @param cursorStyle if non NULL where to store styleinfo for cursor pos
        @param cx if cursorPos != NULL, the cursor x position
+       @param suppressStyleUpdate FALSe normally, only to suppress updating of m_StyleInfo
    */
    void Layout(wxDC &dc,
                wxLayoutList *llist,
                wxPoint *cursorPos = NULL,
                wxPoint *cursorSize = NULL,
-               int cx = 0);
+               wxLayoutStyleInfo *cursorStyle = NULL,
+               int cx = 0,
+               bool suppressStyleUpdate = FALSE);
    /** This function finds an object belonging to a given cursor
        position. It assumes that Layout() has been called before.
        @param dc the wxDC to use for calculations
@@ -587,8 +609,14 @@ public:
        for that position
        @return pointer to the object
    */
-   wxLayoutObject * FindObjectScreen(wxDC &dc, CoordType xpos, bool
-                                     *found = NULL);
+   wxLayoutObject * FindObjectScreen(wxDC &dc,
+                                     CoordType xpos,
+                                     bool *found = NULL);
+   /** This sets the style info for the beginning of this line.
+       @param si styleinfo structure
+    */
+   void ApplyStyle(const wxLayoutStyleInfo &si)
+      { m_StyleInfo = si; }
 
    //@}
 
@@ -632,16 +660,34 @@ public:
    void Copy(wxLayoutList *llist,
              CoordType from = 0,
              CoordType to = -1);
-   
+
 #ifdef WXLAYOUT_DEBUG
    void Debug(void);
 #endif
-   wxLayoutStyleInfo &GetStyleInfo() { return m_StyleInfo; }
+   wxLayoutStyleInfo const & GetStyleInfo() const { return m_StyleInfo; }
 
    /// Returns dirty state
    bool IsDirty(void) const { return m_Dirty; }
-   /// Marks line as diry.
-   void MarkDirty(void) { m_Dirty = true; }
+   /** Marks this line as diry.
+       @param left xpos from where it is dirty or -1 for all
+   */
+   void MarkDirty(CoordType left = -1)
+   {
+      if ( left != -1 )
+      {
+         if ( m_updateLeft == -1 || left < m_updateLeft )
+            m_updateLeft = left;
+      }
+
+      m_Dirty = true;
+   }
+   /** Marks the following lines as dirty.
+       @param recurse if -1 recurse to end of list, otherwise depth of recursion.
+   */
+   void MarkNextDirty(int recurse = 0);
+   /// Reset the dirty flag
+   void MarkClean() { m_Dirty = false; m_updateLeft = -1; }
+
 private:
    /// Destructor is private. Use DeleteLine() to remove it.
    ~wxLayoutLine();
@@ -682,6 +728,8 @@ private:
    wxLayoutObjectList m_ObjectList;
    /// Have we been changed since the last layout?
    bool m_Dirty;
+   /// The coordinate of the left boundary of the update rectangle (if m_Dirty)
+   CoordType m_updateLeft;
    /// Pointer to previous line if it exists.
    wxLayoutLine *m_Previous;
    /// Pointer to next line if it exists.
@@ -696,13 +744,13 @@ private:
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   
+
    The wxLayoutList object
-   
+
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** The wxLayoutList is a list of wxLayoutLine objects. It provides a
-    higher level of abstraction for the text and can generally be considered 
-    as representing "the text". 
+    higher level of abstraction for the text and can generally be considered
+    as representing "the text".
  */
 class wxLayoutList
 {
@@ -711,6 +759,11 @@ public:
    wxLayoutList();
    /// Destructor.
    ~wxLayoutList();
+
+#ifdef WXLAYOUT_USE_CARET
+   /// give us the pointer to the caret to use
+   void SetCaret(wxCaret *caret) { m_caret = caret; }
+#endif // WXLAYOUT_USE_CARET
 
    /// Clear the list.
    void Clear(int family = wxROMAN,
@@ -722,7 +775,7 @@ public:
               wxColour *bg=NULL);
    /// Empty: clear the list but leave font settings.
    void Empty(void);
-   
+
    /**@name Cursor Management */
    //@{
    /** Set new cursor position.
@@ -736,26 +789,43 @@ public:
    */
    bool MoveCursorVertically(int n);
    /** Move cursor left or right.
-       @param n
+       @param n = number of positions to move
        @return bool if it could be moved
    */
    bool MoveCursorHorizontally(int n);
+   /** Move cursor to the left or right counting in words
+       @param n = number of positions in words
+       @param untilNext: puts the cursor at the start of the next word if true,
+              leaves it at the end of the current one otherwise
+       @return bool if it could be moved
+   */
+   bool MoveCursorWord(int n, bool untilNext = true);
 
    /// Move cursor to end of line.
    void MoveCursorToEndOfLine(void)
       {
          wxASSERT(m_CursorLine);
-         MoveCursorHorizontally(m_CursorLine->GetLength()-m_CursorPos.x); 
+         MoveCursorHorizontally(m_CursorLine->GetLength()-m_CursorPos.x);
       }
-   
-   /// Move cursor to begin of line.
+
+   /// Move cursor to the start of line.
    void MoveCursorToBeginOfLine(void)
       { MoveCursorHorizontally(-m_CursorPos.x); }
+
+   /// get the number of lines in the list
+   size_t GetNumLines() const { return m_numLines; }
 
    /// Returns current cursor position.
    const wxPoint &GetCursorPos(wxDC &dc) const { return m_CursorPos; }
    const wxPoint &GetCursorPos() const { return m_CursorPos; }
-   
+
+   /// move cursor to the end of text
+   void MoveCursorToEnd(void)
+   {
+      MoveCursorTo(wxPoint(0, GetNumLines() - 1));
+      MoveCursorToEndOfLine();
+   }
+
    //@}
 
    /**@name Editing functions.
@@ -768,7 +838,7 @@ public:
    bool Insert(wxLayoutObject *obj);
    /// Inserts objects at current cursor positions
    bool Insert(wxLayoutList *llist);
-   
+
    /// Inserts a linebreak at current cursor position.
    bool LineBreak(void);
    /** Wraps the current line. Searches to the left of the cursor to
@@ -789,7 +859,7 @@ public:
        @return how many it could not delete
    */
    int DeleteLines(int n);
-   
+
    /// Delete to end of line.
    void DeleteToEndOfLine(void)
       {
@@ -822,7 +892,7 @@ public:
    /** Finds text in this list.
        @param needle the text to find
        @param cpos the position where to start the search
-       @return the cursoor coord where it was found or (-1,-1)
+       @return the cursor coord where it was found or (-1,-1)
    */
    wxPoint FindText(const wxString &needle, const wxPoint &cpos = wxPoint(0,0)) const;
 
@@ -840,11 +910,11 @@ public:
                 char const *bg = NULL);
    /// changes to the next larger font size
    inline void SetFontLarger(void)
-      { SetFont(-1,(12*m_CurrentSetting.size)/10); }
+      { SetFont(-1,(12*m_CurrentStyleInfo.size)/10); }
    /// changes to the next smaller font size
    inline void SetFontSmaller(void)
-      { SetFont(-1,(10*m_CurrentSetting.size)/12); }
-   
+      { SetFont(-1,(10*m_CurrentStyleInfo.size)/12); }
+
    /// set font family
    inline void SetFontFamily(int family) { SetFont(family); }
    /// set font size
@@ -862,15 +932,36 @@ public:
    inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
 
-
    /**
       Returns a pointer to the default settings.
       This is only valid temporarily and should not be stored
       anywhere.
       @return the default settings of the list
    */
-   wxLayoutStyleInfo *GetDefaults(void) { return &m_DefaultSetting ; }
-   wxLayoutStyleInfo *GetStyleInfo(void) { return &m_CurrentSetting ; }
+   wxLayoutStyleInfo &GetDefaultStyleInfo(void) { return m_DefaultStyleInfo ; }
+   wxLayoutStyleInfo &GetStyleInfo(void) { return m_CurrentStyleInfo ; }
+   const wxLayoutStyleInfo &GetStyleInfo(void) const { return m_CurrentStyleInfo ; }
+   const wxLayoutStyleInfo &GetCursorStyleInfo(void) const { return m_CursorStyleInfo ; }
+
+   /// is the current font underlined?
+   bool IsFontUnderlined() const { return GetCursorStyleInfo().underline != 0; }
+   /// is the current font bold?
+   bool IsFontBold() const { return GetCursorStyleInfo().weight == wxBOLD; }
+   /// is the current font italic?
+   bool IsFontItalic() const { return GetCursorStyleInfo().style == wxITALIC; }
+
+   /// set underline if it was off, turn it off if it was on
+   void ToggleFontUnderline()
+      { SetFontUnderline(!IsFontUnderlined()); }
+
+   /// make font bold if it was normal or make it normal if it was bold
+   void ToggleFontWeight()
+      { SetFontWeight(IsFontBold() ? wxNORMAL : wxBOLD); }
+
+   /// make font italic if it was normal or make it normal if it was italic
+   void ToggleFontItalics()
+      { SetFontStyle(IsFontItalic() ? wxNORMAL : wxITALIC); }
+
    //@}
 
    /**@name Drawing */
@@ -890,8 +981,22 @@ public:
        @param dc the wxDC to draw on
        @param bottom optional y coordinate where to stop calculating
        @param forceAll force re-layout of all lines
+       @param cpos Can hold a cursorposition, and will be overwritten
+       with the corresponding DC position.
+       @param csize Will hold the cursor size relating to cpos.
    */
-   void Layout(wxDC &dc, CoordType bottom = -1, bool forceAll = false);
+   void Layout(wxDC &dc, CoordType bottom = -1, bool forceAll = false,
+               wxPoint *cpos = NULL,
+               wxPoint *csize = NULL);
+
+   /** Returns the screen coordinates relating to a given cursor
+       position and the size of the cursor at that position.
+       @param dc for which to calculate it
+       @param cpos Cursor position to look for.
+       @param csize If non-NULL, will be set to the cursor size.
+       @return The cursor position on the DC.
+   */
+   wxPoint GetScreenPos(wxDC &dc, const wxPoint &cpos, wxPoint *csize = NULL);
 
    /** Calculates new sizes for everything in the list, like Layout()
        but this is needed after the list got changed.
@@ -899,7 +1004,7 @@ public:
        @param bottom optional y coordinate where to stop calculating
    */
    void Recalculate(wxDC &dc, CoordType bottom = -1);
-   
+
    /** Returns the size of the list in screen coordinates.
        The return value only makes sense after the list has been
        drawn.
@@ -912,7 +1017,7 @@ public:
        @return cursor position in pixels
    */
    wxPoint GetCursorScreenPos(wxDC &dc);
-   
+
    /** Draws the cursor.
        @param active If true, draw a bold cursor to mark window as
        active.
@@ -943,13 +1048,25 @@ public:
    /** Called by the objects to update the update rectangle.
        @param p a point to include in it
    */
-   inline void SetUpdateRect(const wxPoint &p)
+   void SetUpdateRect(const wxPoint &p)
       { SetUpdateRect(p.x,p.y); }
+   /// adds the cursor position to the update rectangle
+   void AddCursorPosToUpdateRect()
+   {
+      #ifndef WXLAYOUT_USE_CARET
+         SetUpdateRect(m_CursorScreenPos);
+         SetUpdateRect(m_CursorScreenPos+m_CursorSize);
+      //#else - the caret will take care of refreshing itself
+      #endif // !WXLAYOUT_USE_CARET
+   }
    /// Invalidates the update rectangle.
    void InvalidateUpdateRect(void) { m_UpdateRectValid = false; }
    /// Returns the update rectangle.
    const wxRect *GetUpdateRect(void) const { return &m_UpdateRect; }
    //@}
+
+   /// get the current cursor size
+   const wxPoint& GetCursorSize() const { return m_CursorSize; }
 
    /**@name For exporting one object after another. */
    //@{
@@ -961,15 +1078,24 @@ public:
       }
    //@}
 
-   /// Begin selecting text.
-   void StartSelection(wxPoint cpos = wxPoint(-1,-1));
+   /// Begin selecting text
+   void StartSelection(const wxPoint& cpos = wxPoint(-1,-1),
+                       const wxPoint& spos = wxPoint(-1,-1));
    // Continue selecting text
-   void ContinueSelection(wxPoint cpos = wxPoint(-1,-1));
+   void ContinueSelection(const wxPoint& cpos = wxPoint(-1,-1),
+                          const wxPoint& spos = wxPoint(-1,-1));
    /// End selecting text.
-   void EndSelection(wxPoint cpos = wxPoint(-1,-1));
+   void EndSelection(const wxPoint& cpos = wxPoint(-1,-1),
+                     const wxPoint& spos = wxPoint(-1,-1));
+   /// Discard the current selection
+   void DiscardSelection();
    /// Are we still selecting text?
-   bool IsSelecting(void);
-   bool IsSelected(const wxPoint &cursor);
+   bool IsSelecting(void) const;
+   /// Is the given point (text coords) selected?
+   bool IsSelected(const wxPoint &cursor) const;
+   /// Do we have a non null selection?
+   bool HasSelection() const
+      { return m_Selection.m_valid || m_Selection.m_selecting; }
 
    /** Return the selection as a wxLayoutList.
        @param invalidate if true, the selection will be invalidated after this and can no longer be used.
@@ -978,7 +1104,7 @@ public:
    wxLayoutList *GetSelection(class wxLayoutDataObject *wxldo = NULL, bool invalidate = TRUE);
    /// Delete selected bit
    void DeleteSelection(void);
-   
+
    wxLayoutList *Copy(const wxPoint &from = wxPoint(0,0),
                       const wxPoint &to = wxPoint(-1,-1));
 
@@ -986,7 +1112,7 @@ public:
    void StartHighlighting(wxDC &dc);
    /// ends highlighting of text for selections
    void EndHighlighting(wxDC &dc);
-   
+
    /** Tests whether this layout line is selected and needs
        highlighting.
        @param line to test for
@@ -994,45 +1120,89 @@ public:
        @param to set to last cursorpos to be highlighted  (for returncode == -1)
        @return 0 = not selected, 1 = fully selected, -1 = partially
        selected
-       
+
    */
    int IsSelected(const wxLayoutLine *line, CoordType *from, CoordType *to);
 
-   void ApplyStyle(wxLayoutStyleInfo *si, wxDC &dc);
+   void ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc);
 #ifdef WXLAYOUT_DEBUG
    void Debug(void);
 #endif
+
+   // for wxLayoutLine usage only
+   void IncNumLines() { m_numLines++; }
+   void DecNumLines() { m_numLines--; }
+
+   /// get the line by number
+   wxLayoutLine *GetLine(CoordType index) const
+   {
+       wxASSERT_MSG( (0 <= index) && (index < (CoordType)m_numLines),
+                     "invalid index" );
+
+       wxLayoutLine *line;
+       CoordType n = index;
+       for ( line = m_FirstLine; line && n-- > 0; line = line->GetNextLine() )
+           ;
+
+       if ( line )
+       {
+          // should be the right one
+          wxASSERT( line->GetLineNumber() == index );
+       }
+
+       return line;
+   }
+
 private:
    /// Clear the list.
    void InternalClear(void);
-   /** Calculates the cursor position on the screen.
-   */
-   void UpdateCursorScreenPos(wxDC &dc);
-   
+
    /// The list of lines.
    wxLayoutLine *m_FirstLine;
+   /// The number of lines in the list (store instead recalculating for speed)
+   size_t m_numLines;
+
    /// The update rectangle which needs to be refreshed:
    wxRect  m_UpdateRect;
    /// Is the update rectangle valid?
    bool    m_UpdateRectValid;
+
    /**@name Cursor Management */
    //@{
    /// Where the text cursor (column,line) is.
    wxPoint   m_CursorPos;
-   /// The size of the cursor.
-   wxPoint   m_CursorSize;
    /// Where the cursor should be drawn.
    wxPoint   m_CursorScreenPos;
    /// The line where the cursor is.
    wxLayoutLine *m_CursorLine;
-   //@}   
+   /// The size of the cursor.
+   wxPoint   m_CursorSize;
+   /// Has the cursor moved (is m_CursorScreenPos up to date)?
+   bool      m_movedCursor;
+#ifdef WXLAYOUT_USE_CARET
+   /// the caret
+   wxCaret  *m_caret;
+#endif // WXLAYOUT_USE_CARET
+   //@}
 
-   /// A structure for the selection.
+   /// selection.state and begin/end coordinates
    struct Selection
    {
-      Selection() { m_valid = false; m_selecting = false; }
+      Selection() { m_valid = m_selecting = m_discarded = false; }
+
       bool m_valid;
       bool m_selecting;
+      bool m_discarded; // may be TRUE only until the next redraw
+
+      // returns true if we already have the screen coordinates of the
+      // selection start and end
+      bool HasValidScreenCoords() const
+          { return m_ScreenA.x != -1 && m_ScreenB.x != -1; }
+
+      // the start and end of the selection coordinates in pixels
+      wxPoint m_ScreenA, m_ScreenB;
+
+      // these coordinates are in text positions, not in pixels
       wxPoint m_CursorA, m_CursorB;
    } m_Selection;
    /** @name Font parameters. */
@@ -1040,18 +1210,19 @@ private:
    /// this object manages the fonts for us
    wxFontCache m_FontCache;
    /// the default setting:
-   wxLayoutStyleInfo m_DefaultSetting;
+   wxLayoutStyleInfo m_DefaultStyleInfo;
    /// the current setting:
-   wxLayoutStyleInfo m_CurrentSetting;
+   wxLayoutStyleInfo m_CurrentStyleInfo;
+   /// the current setting:
+   wxLayoutStyleInfo m_CursorStyleInfo;
    //@}
 };
 
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   
+
    The wxLayoutDataObject for exporting data to the clipboard in our
    own format.
-   
+
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 class wxLayoutDataObject : public wxPrivateDataObject
 {
@@ -1064,10 +1235,10 @@ public:
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   
+
    The wxLayoutPrintout object for printing within the wxWindows print
    framework.
-   
+
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** This class implements a wxPrintout for printing a wxLayoutList within
     the wxWindows printing framework.
@@ -1084,7 +1255,7 @@ public:
                     "wxLayout Printout");
    /// Destructor.
    ~wxLayoutPrintout();
-   
+
    /** Function which prints the n-th page.
        @param page the page number to print
        @return bool true if we are not at end of document yet
@@ -1115,7 +1286,7 @@ protected:
 
    /* no longer used
      virtual void DrawHeader(wxDC &dc, wxPoint topleft, wxPoint bottomright, int pageno);
-   */                      
+   */
 private:
    /// The list to print.
    wxLayoutList *m_llist;

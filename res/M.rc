@@ -43,10 +43,10 @@ video		BITMAP	"video.bmp"
 
 unknown 	ICON	"unknown.ico"
 
-// toolbar bitmaps (16x15)
+// toolbar bitmaps (32x32)
+tb_adr_book	BITMAP	"tb_adr_book.bmp"
 tb_book_open	BITMAP	"tb_book_open.bmp"
 tb_open		BITMAP	"tb_open.bmp"
-tb_openany	BITMAP	"tb_openany.bmp"
 tb_attach	BITMAP	"tb_attach.bmp"
 tb_help		BITMAP	"tb_help.bmp"
 tb_print	BITMAP	"tb_print.bmp"
@@ -63,10 +63,10 @@ tb_mail_forward	BITMAP	"tb_mail_forward.bmp"
 tb_mail_reply	BITMAP	"tb_mail_reply.bmp"
 tb_mail_send	BITMAP	"tb_mail_send.bmp"
 
-tb_delete	BITMAP "delete.bmp"
-tb_undo		BITMAP "undo.bmp"
-tb_lookup	BITMAP "lookup.bmp"
-tb_editor	BITMAP "editor.bmp"
+tb_delete	BITMAP	"tb_delete.bmp"
+tb_undo		BITMAP	"tb_undo.bmp"
+tb_lookup	BITMAP	"tb_lookup.bmp"
+tb_editor	BITMAP	"tb_editor.bmp"
 
 // ADB tree ctrl image list (16x16) bitmaps
 adb_address	BITMAP "address.bmp"
@@ -94,7 +94,7 @@ msgview		BITMAP "msgview.bmp"
 miscopt		BITMAP "miscopt.bmp"
 access		BITMAP "access.bmp"
 
-// Folder tree bitmaps
+// Folder tree bitmaps (16x16)
 folder_inbox	BITMAP "folder_inbox.bmp"
 folder_file	BITMAP "folder_file.bmp"
 folder_pop	BITMAP "folder_pop.bmp"
@@ -106,7 +106,7 @@ folder_root	BITMAP "folder_root.bmp"
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources
 ///////////////////////////////////////////////////////////////////////////////
-#include "wx/msw/wx.rc"
+#include <wx/msw/wx.rc>
 
 ///////////////////////////////////////////////////////////////////////////////
 // version info

@@ -814,7 +814,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition, wxSize(320, 230),
+                      wxDefaultPosition,
+                      // this is ugly, but having scrollbars is even uglier
+#ifdef __WXMSW__
+                      wxSize(400, 250),
+#else  // !MSW
+                      wxSize(320, 230),
+#endif // MSW/!MSW
                       /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP|wxCENTER)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );

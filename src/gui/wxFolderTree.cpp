@@ -659,13 +659,6 @@ void wxFolderTreeImpl::DoFolderDelete()
 
    if ( m_sink->OnDelete(folder) )
    {
-      // now done in OnMEvent()
-#if 0
-     Delete(wxTreeCtrl::GetSelection());
-
-     SelectItem(GetRootItem());
-#endif // 0
-
      wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
    }
 

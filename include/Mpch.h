@@ -33,6 +33,7 @@ extern "C"
 #  include <nntp.h>
 
    // windows.h included from osdep.h #defines all these
+#  undef   DrawText
 #  undef   GetMessage
 #  undef   FindWindow
 #  undef   GetCharWidth

@@ -224,6 +224,8 @@ MAppBase::VerifySettings(void)
 
 MAppBase::~MAppBase()
 {
+   if ( m_framesOkToClose )
+      delete m_framesOkToClose;
 }
 
 bool
@@ -231,9 +233,8 @@ MAppBase::OnStartup()
 {
    mApplication = this;
 
-
-   /* First, check our user ID: mahogany does not like being run as
-      root. */
+#ifdef OS_UNIX
+   // First, check our user ID: mahogany does not like being run as root.
    if(geteuid() == 0)
    {
       wxLogError(_("You are trying to run Mahogany as the super-user (root).\n"
@@ -241,6 +242,8 @@ MAppBase::OnStartup()
                    "as an ordinary user and try again."));
       return false;
    }
+#endif // Unix
+
    // initialise the profile(s)
    // -------------------------
 
@@ -585,7 +588,7 @@ MAppBase::CanClose() const
       msg += _("Do you want to exit anyway?");
       return MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                  FALSE /* no=default */,
-                                 "AskSpecifyDir");
+                                 "AbandonCriticalFolders");
    }
    else
       return true;

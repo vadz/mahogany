@@ -178,6 +178,24 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
 {
    m_MailStream = NIL;
 
+#ifdef DEBUG
+   debugFlag = true;
+#else // !DEBUG
+   debugFlag = false;
+#endif
+   
+   m_InCritical = false;
+
+   #define SET_TO(setting, var) var = MP_TCP_##setting##_D
+
+   SET_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
+   SET_TO(READTIMEOUT, ms_TcpReadTimeout);
+   SET_TO(WRITETIMEOUT, ms_TcpWriteTimeout);
+   SET_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
+   SET_TO(RSHTIMEOUT, ms_TcpRshTimeout);
+
+   #undef SET_TO
+
    //FIXME: server is ignored for now
    SetRetrievalLimit(0); // no limit
    m_Profile = profile;

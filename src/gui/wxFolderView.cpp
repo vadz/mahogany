@@ -71,7 +71,7 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
-#define wxFLC_DEFAULT_SIZES "80:80:80:80:80"
+static const char *wxFLC_DEFAULT_SIZES = "80:80:80:80:80";
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
@@ -209,6 +209,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Parent = parent;
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
+   m_SelectionCallbacks = true;
    m_Initialised = false;
 
    if(READ_CONFIG(fv->GetProfile(), MP_PREVIEW_ON_SELECT))

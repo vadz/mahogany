@@ -753,6 +753,10 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     wxLayoutConstraints *c;
     SetAutoLayout(TRUE);
 
+    // the static box should be created first - otherwise it will hide the
+    // controls which are disposed on top of it
+    wxStaticBox *box = new wxStaticBox(this, -1, "");
+
     // split the message in lines
     // --------------------------
     wxClientDC dc(this);
@@ -845,29 +849,29 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     long heightTextLine;
     wxString textCheckbox = _("Don't show this message again ");
     dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
-    width += 15;    // for the [x]
-    heightTextLine = (12*heightTextLine) / 10;   // *1.2 baselineskip
+
+    // extra space for the check box
+    width += 15;
+
+    // *1.2 baselineskip
+    heightTextLine *= 12;
+    heightTextLine /= 10;
+
+    size_t nLineCount = lines.Count();
+
     long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
                              LAYOUT_X_MARGIN;
+
+    // the initial (and minimal possible) size of the dialog
     long widthDlg = MAX(widthTextMax, MAX(widthButtonsTotal, width)) +
                     6*LAYOUT_X_MARGIN,
-         heightDlg = 13*LAYOUT_Y_MARGIN + heightButton +
-                     heightTextLine*(lines.Count() + 1);
-
-    // set default button
-    if ( nDefaultBtn != -1 ) {
-        buttons[nDefaultBtn]->SetDefault();
-        buttons[nDefaultBtn]->SetFocus();
-    }
-    else {
-        wxFAIL_MSG( "can't find default button for this dialog." );
-    }
+         heightDlg = 12*LAYOUT_Y_MARGIN + heightButton +
+                     heightTextLine*(nLineCount + 1);
 
     // create the controls
     // -------------------
 
     // a box around text and buttons
-    wxStaticBox *box = new wxStaticBox(this, -1, "");
     c = new wxLayoutConstraints;
     c->top.SameAs(this, wxTop/*, LAYOUT_Y_MARGIN*/);
     c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
@@ -876,8 +880,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     box->SetConstraints(c);
 
     wxStaticText *text = NULL;
-    size_t nCount = lines.Count();
-    for ( size_t nLine = 0; nLine < nCount; nLine++ ) {
+    for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
         c = new wxLayoutConstraints;
         if ( text == NULL )
             c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
@@ -905,7 +908,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             }
 
             c->width.Absolute(widthBtnMax);
-            c->top.Below(text, 4*LAYOUT_Y_MARGIN);
+            c->top.Below(text, 3*LAYOUT_Y_MARGIN);
             c->height.Absolute(heightButton);
             buttons[nBtn]->SetConstraints(c);
 
@@ -922,11 +925,30 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     m_checkBox = new wxCheckBox(this, -1, textCheckbox);
     m_checkBox->SetConstraints(c);
 
+    // set default button
+    // ------------------
+
+    if ( nDefaultBtn != -1 ) {
+        buttons[nDefaultBtn]->SetDefault();
+        buttons[nDefaultBtn]->SetFocus();
+    }
+    else {
+        wxFAIL_MSG( "can't find default button for this dialog." );
+    }
+
     // position the controls and the dialog itself
     // -------------------------------------------
 
     SetClientSize(widthDlg, heightDlg);
+
+    // SetSizeHints() wants the size of the whole dialog, not just client size
+    wxSize sizeTotal = GetSize(),
+           sizeClient = GetClientSize();
+    SetSizeHints(widthDlg + sizeTotal.GetWidth() - sizeClient.GetWidth(),
+                 heightDlg + sizeTotal.GetHeight() - sizeClient.GetHeight());
+
     Layout();
+
     Centre(wxCENTER_FRAME | wxBOTH);
 }
 

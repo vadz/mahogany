@@ -167,8 +167,11 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    // trim off trailing newlines/crs
    if(strlen(rc))
    {
-      char *cptr  = val + strlen(rc)-1;
-      while(*cptr == '\n' || *cptr == '\r')
+      // start by the last char and move backwards until we don't throw off all
+      // line termination chars - be careful to not underflow the (almost)
+      // empty string!
+      char *cptr  = val + strlen(rc) - 1;
+      while( cptr >= val && (*cptr == '\n' || *cptr == '\r') )
          cptr--;
       cptr++;
       *cptr = '\0';

@@ -29,18 +29,18 @@ enum
 {
    WXLOWIN_MENU_LARGER = WXLOWIN_MENU_FIRST,
    WXLOWIN_MENU_SMALLER,
-   WXLOWIN_MENU_UNDERLINE_ON,
-   WXLOWIN_MENU_UNDERLINE_OFF,
-   WXLOWIN_MENU_BOLD_ON,
-   WXLOWIN_MENU_BOLD_OFF,
-   WXLOWIN_MENU_ITALICS_ON,
-   WXLOWIN_MENU_ITALICS_OFF,
+   WXLOWIN_MENU_UNDERLINE,
+   WXLOWIN_MENU_BOLD,
+   WXLOWIN_MENU_ITALICS,
    WXLOWIN_MENU_ROMAN,
    WXLOWIN_MENU_TYPEWRITER,
    WXLOWIN_MENU_SANSSERIF,
    WXLOWIN_MENU_RCLICK,
-   WXLOWIN_MENU_LCLICK,
    WXLOWIN_MENU_DBLCLICK,
+   WXLOWIN_MENU_MDOWN,
+   WXLOWIN_MENU_LDOWN,
+   WXLOWIN_MENU_LCLICK = WXLOWIN_MENU_LDOWN,
+   WXLOWIN_MENU_LUP,
    WXLOWIN_MENU_MOUSEMOVE,
    WXLOWIN_MENU_LAST = WXLOWIN_MENU_MOUSEMOVE
 };
@@ -69,6 +69,11 @@ public:
               int underline=0,
               wxColour *fg=NULL,
               wxColour *bg=NULL);
+
+   /// override base class virtual to also refresh the scrollbar position
+   virtual void Refresh(bool eraseBackground = TRUE,
+                        const wxRect *rect = (const wxRect *)NULL);
+
    /** Sets a background image, only used on screen, not on printouts.
        @param bitmap a pointer to a wxBitmap or NULL to remove it
    */
@@ -78,7 +83,8 @@ public:
          m_BGbitmap = bitmap;
       }
    /// Enable or disable editing, i.e. processing of keystrokes.
-   void SetEditable(bool toggle) { m_Editable = toggle; }
+   void SetEditable(bool toggle)
+      { m_Editable = toggle; SetCursorVisibility(toggle); }
    /// Query whether list can be edited by user.
    bool IsEditable(void) const { return m_Editable; }
    /** Sets cursor visibility, visible=1, invisible=0,
@@ -89,9 +95,9 @@ public:
    inline int SetCursorVisibility(int visibility = -1)
       { int v =m_CursorVisibility;
       m_CursorVisibility = visibility; return v;}
-   
+
    /// Pastes text from clipboard.
-   void Paste(void);
+   void Paste(bool usePrimarySelection = FALSE);
    /** Copies selection to clipboard.
        @param invalidate used internally, see wxllist.h for details
    */
@@ -102,23 +108,19 @@ public:
 
    bool Find(const wxString &needle,
              wxPoint * fromWhere = NULL);
-   
+
    void EnablePopup(bool enable = true) { m_DoPopupMenu = enable; }
 
    /** Sets the wrap margin.
        @param margin set this to 0 to disable it
    */
    void SetWrapMargin(CoordType margin) { m_WrapMargin = margin; }
-   
+
    /** Redraws the window.
        Internally, this stores the parameter and calls a refresh on
        wxMSW, draws directly on wxGTK.
    */
    void DoPaint(const wxRect *updateRect = NULL);
-
-#ifdef __WXMSW__
-   virtual long MSWGetDlgCode();
-#endif //MSW
 
    /// if exact == false, assume 50% extra size for the future
    void ResizeScrollbars(bool exact = false);  // don't change this to true!
@@ -133,12 +135,18 @@ public:
 
    /**@name Callbacks */
    //@{
+   void OnSize(wxSizeEvent &event);
    void OnPaint(wxPaintEvent &event);
    void OnChar(wxKeyEvent& event);
    void OnKeyUp(wxKeyEvent& event);
+   void OnUpdateMenuUnderline(wxUpdateUIEvent& event);
+   void OnUpdateMenuBold(wxUpdateUIEvent& event);
+   void OnUpdateMenuItalic(wxUpdateUIEvent& event);
    void OnMenu(wxCommandEvent& event);
-   void OnLeftMouseClick(wxMouseEvent& event)  { OnMouse(WXLOWIN_MENU_LCLICK, event); }
+   void OnLeftMouseDown(wxMouseEvent& event)   { OnMouse(WXLOWIN_MENU_LDOWN, event); }
+   void OnLeftMouseUp(wxMouseEvent& event)     { OnMouse(WXLOWIN_MENU_LUP, event); }
    void OnRightMouseClick(wxMouseEvent& event) { OnMouse(WXLOWIN_MENU_RCLICK, event); }
+   void OnMiddleMouseDown(wxMouseEvent& event) { OnMouse(WXLOWIN_MENU_MDOWN, event); }
    void OnMouseDblClick(wxMouseEvent& event)   { OnMouse(WXLOWIN_MENU_DBLCLICK, event); }
    void OnMouseMove(wxMouseEvent &event)       { OnMouse(WXLOWIN_MENU_MOUSEMOVE, event) ; }
    void OnSetFocus(wxFocusEvent &ev);
@@ -176,7 +184,8 @@ public:
          m_StatusBar = bar; m_StatusFieldLabel = labelfield;
          m_StatusFieldCursor = cursorfield;
       }
-protected:   
+
+protected:
    /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);
    /// as the name says
@@ -191,7 +200,7 @@ protected:
    bool m_HaveFocus;
    /// do we handle clicks of the right mouse button?
    bool m_DoPopupMenu;
-   /// Should InternalPaint() scroll to cursor.
+   /// Should InternalPaint() scroll to cursor (VZ: seems unused any more)
    bool m_ScrollToCursor;
    /// Do we currently have a non-standard cursor?
    bool m_HandCursor;
@@ -203,10 +212,22 @@ protected:
    int m_maxx;
    int m_maxy;
    int m_lineHeight;
+
+   /// do we have the corresponding scrollbar?
+   bool m_hasHScrollbar,
+        m_hasVScrollbar;
+
    /** Visibility parameter for cursor. 0/1 as expected, -1: visible
        on demand.
    */
    int m_CursorVisibility;
+
+   bool SetAutoDeleteSelection(bool enable = TRUE)
+   {
+      bool old = m_AutoDeleteSelection;
+      m_AutoDeleteSelection = enable;
+      return old;
+   }
 private:
    /// The layout list to be displayed.
    wxLayoutList *m_llist;
@@ -231,6 +252,11 @@ private:
    int          m_StatusFieldCursor;
    /// a pointer to a bitmap for the background
    wxBitmap    *m_BGbitmap;
+   /**@name Some configuration options */
+   //@{
+   /// Do we want to auto-replace the selection with new text?
+   bool         m_AutoDeleteSelection;
+   //@}
    DECLARE_EVENT_TABLE()
 };
 

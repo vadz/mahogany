@@ -322,16 +322,19 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_FolderView = fv;
    m_MimePopup = NULL;
    m_uid = -1;
-//   SetFocus();
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 
-   wxWindow *p = GetParent();
-   while(p && ! p->IsKindOf(CLASSINFO(wxFrame)))
-      p = p->GetParent();
-   if(p && ((wxFrame *)p)->GetStatusBar())
-      SetStatusBar(((wxFrame *)p)->GetStatusBar(),0,1);
-
+   wxFrame *p = GetFrame(this);
+   if ( p )
+   {
+      wxStatusBar *statusBar = p->GetStatusBar();
+      if ( statusBar )
+      {
+         // we don't edit the message, so the cursor coordinates are useless
+         SetStatusBar(statusBar, 0, -1);
+      }
+   }
 }
 
 
@@ -407,6 +410,21 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
 }
 
 void
+wxMessageView::Clear(void)
+{
+   SetCursorVisibility(-1); // on demand
+   wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
+                         (int)wxNORMAL, (int)wxNORMAL, 0,
+                         &m_ProfileValues.FgCol,
+                         &m_ProfileValues.BgCol);
+   SetBackgroundColour( m_ProfileValues.BgCol );
+
+   // be sure that we don't keep the old m_uid, otherwise we won't update later
+   // (if the new uid will be the same...)
+   m_uid = -1;
+}
+
+void
 wxMessageView::Update(void)
 {
    int i,n,t;
@@ -419,7 +437,7 @@ wxMessageView::Update(void)
    wxLayoutObject *obj = NULL;
 
    Clear();
-   
+
    if(! m_mailMessage)  // no message to display
       return;
 

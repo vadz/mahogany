@@ -346,6 +346,13 @@ ProfileBase::CreateGlobalConfig(const String & filename)
    return p;
 }
 
+void
+ProfileBase::DeleteGlobalConfig()
+{
+   if ( ms_GlobalConfig )
+      delete ms_GlobalConfig;
+}
+
 String
 ProfileBase::readEntry(const String & key,
                        const char *defaultvalue,

@@ -423,6 +423,10 @@ int wxMApp::OnExit()
    delete m_IconManager;
    delete m_Locale;
 
+   // FIXME this is not the best place to do it, but at least we're safe
+   //       because we now that by now it's unused any more
+   ProfileBase::DeleteGlobalConfig();
+
    MObjectRC::CheckLeaks();
 
    // delete the previously active log target (it's the one we had set before

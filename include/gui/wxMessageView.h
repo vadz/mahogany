@@ -64,16 +64,16 @@ public:
                  long num,
                  wxFolderView *fv,
                  wxWindow  *parent = NULL);
-   
+
    /// Tell it a new parent profile - in case folder changed.
    void SetParentProfile(ProfileBase *profile);
-   
+
    /// Destructor
    ~wxMessageView();
 
    /** show message
        @param mailfolder the folder
-       @param num the message uid 
+       @param num the message uid
    */
    void ShowMessage(MailFolder *folder, long uid);
 
@@ -111,15 +111,8 @@ public:
    wxFolderView *GetFolderView(void) { return m_FolderView; }
 
    /// Clear the window.
-   void Clear(void)
-      {
-         wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
-                               (int)wxNORMAL, (int)wxNORMAL, 0,
-                               &m_ProfileValues.FgCol,
-                               &m_ProfileValues.BgCol);
-         SetBackgroundColour( m_ProfileValues.BgCol );
-         SetCursorVisibility(-1); // on demand
-      }
+   void Clear(void);
+
    /// returns the mail folder
    MailFolder *GetFolder(void);
 
@@ -127,7 +120,7 @@ public:
    bool Find(const wxString &what = "");
    /// Find last string again.
    bool FindAgain(void);
-   
+
 private:
    /// the parent window
    wxWindow   *m_Parent;

@@ -79,7 +79,7 @@ static const TbarItemInfo g_aToolBarData[] =
 
    // common for all frames
    { "tb_close",       WXMENU_FILE_CLOSE,  gettext_noop("Close this window") },
-   { "tb_book_blue",   WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
+   { "tb_adr_book",    WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
    { "tb_preferences", WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
 
    // main frame
@@ -395,8 +395,9 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 {
    wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX );
 
-#ifndef __WXGTK__
-   toolbar->SetToolBitmapSize(wxSize(16, 16));
+#ifdef __WXMSW__
+   // we use the icons of non standard size
+   toolbar->SetToolBitmapSize(wxSize(32, 32));
 #endif
 
    // if the buttons were of other size we'd have to use this function
