@@ -474,6 +474,48 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
    return listbox;
 }
 
+// enable/disable the text control and its label
+void wxNotebookPageBase::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
+{
+   // NB: we assume that the control ids are consecutif
+   long id = control->GetId() + 1;
+   wxWindow *win = FindWindow(id);
+
+   if ( win == NULL ) {
+      wxFAIL_MSG("can't find browse button for the text entry zone");
+   }
+   else {
+      wxASSERT( win->IsKindOf(CLASSINFO(wxButton)) );
+
+      win->Enable(bEnable);
+   }
+
+   EnableTextWithLabel(control, bEnable);
+}
+
+// enable/disable the text control with label and button
+void wxNotebookPageBase::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
+{
+   // not only enable/disable it, but also make (un)editable because it gives
+   // visual feedback
+   control->SetEditable(bEnable);
+
+   // disable the label too: this will grey it out
+
+   // NB: we assume that the control ids are consecutif
+   long id = control->GetId() - 1;
+   wxWindow *win = FindWindow(id);
+
+   if ( win == NULL ) {
+      wxFAIL_MSG("can't find label for the text entry zone");
+   }
+   else {
+      // did we find the right one?
+      wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
+
+      win->Enable(bEnable);
+   }
+}
 
 // -----------------------------------------------------------------------------
 // wxNotebookDialog

@@ -750,25 +750,15 @@ void wxOptionsPage::UpdateUI()
             // for file entries, also disable the browse button
             case Field_File:
             case Field_Color:
-            {
-               // NB: we assume that the control ids are consecutif
-               long id = control->GetId() + 1;
-               wxWindow *win = FindWindow(id);
+               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-               if ( win == NULL ) {
-                  wxFAIL_MSG("can't find browse button for the file entry zone");
-               }
-               else {
-                  win->Enable(bEnable);
-               }
-            }
-            // fall through
+               EnableTextWithButton((wxTextCtrl *)control, bEnable);
+               break;
 
             case Field_Text:
-               // not only enable/disable it, but also make (un)editable because
-               // it gives visual feedback
                wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-               ((wxTextCtrl *)control)->SetEditable(bEnable);
+
+               EnableTextWithLabel((wxTextCtrl *)control, bEnable);
                break;
 
             case Field_List:
@@ -789,7 +779,7 @@ void wxOptionsPage::UpdateUI()
 
             default:
                ;
-            }
+         }
       }
       // this field is always enabled
    }

@@ -291,6 +291,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnEvent)
+   EVT_CHECKBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
 END_EVENT_TABLE()
 
@@ -737,56 +738,67 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_server->SetValue("");
       m_mailboxname->SetValue("");
       s_selection = selection;
-   }
 
-   SetDefaultValues();
+      if ( selection == MF_NNTP )
+      {
+         // although NNTP servers do support password-protected access, this
+         // is so rare that anonymous is the default
+         m_isAnonymous->SetValue(TRUE);
+      }
+      else
+      {
+         // by default it's off for other types of folders
+         m_isAnonymous->SetValue(FALSE);
+      }
+
+      // set the defaults for this kind of folder
+      SetDefaultValues();
+   }
 
    // if it has user name, it has password as well
    bool hasPassword = FolderTypeHasUserName((FolderType)selection);
 
    m_isAnonymous->Enable(hasPassword);
-   // only enable password field if anonymous access is disabled
-   m_password->Enable(hasPassword && !m_isAnonymous->GetValue());
+
+   // only enable password and login fields if anonymous access is disabled
+   EnableTextWithLabel(m_password, hasPassword && !m_isAnonymous->GetValue());
+   EnableTextWithLabel(m_login, hasPassword && !m_isAnonymous->GetValue());
 
    switch ( selection )
    {
       case MF_IMAP:
-         m_mailboxname->Enable(TRUE); //only difference from POP
+         EnableTextWithLabel(m_mailboxname, TRUE); // only difference from POP
          // fall through
 
       case MF_POP:
-         m_login->Enable(TRUE);
-         m_server->Enable(TRUE);
-         m_newsgroup->Enable(FALSE);
-         m_browsePath->Enable(FALSE);
+         EnableTextWithLabel(m_server, TRUE);
+         EnableTextWithLabel(m_newsgroup, FALSE);
+         EnableTextWithButton(m_path, FALSE);
          break;
 
-      case MF_NEWS:
       case MF_NNTP:
-         m_mailboxname->Enable(FALSE);
-         m_login->Enable(FALSE);
-         m_server->Enable(TRUE);
-         m_newsgroup->Enable(TRUE);
-         m_browsePath->Enable(FALSE);
+      case MF_NEWS:
+         EnableTextWithLabel(m_mailboxname, FALSE);
+         EnableTextWithLabel(m_server, TRUE);
+         EnableTextWithLabel(m_newsgroup, TRUE);
+         EnableTextWithButton(m_path, FALSE);
          break;
 
       case MF_FILE:
-         m_mailboxname->Enable(FALSE);
-         m_login->Enable(FALSE);
-         m_server->Enable(FALSE);
-         m_newsgroup->Enable(FALSE);
+         EnableTextWithLabel(m_mailboxname, FALSE);
+         EnableTextWithLabel(m_server, FALSE);
+         EnableTextWithLabel(m_newsgroup, FALSE);
 
          // this can not be changed for an already existing folder
-         m_browsePath->Enable(TRUE & m_isCreating);
+         EnableTextWithButton(m_path, m_isCreating);
          break;
 
       case MF_INBOX:
-         m_mailboxname->Enable(FALSE);
-         m_login->Enable(FALSE);
-         m_server->Enable(FALSE);
-         m_newsgroup->Enable(FALSE);
+         EnableTextWithLabel(m_mailboxname, FALSE);
+         EnableTextWithLabel(m_server, FALSE);
+         EnableTextWithLabel(m_newsgroup, FALSE);
 
-         m_browsePath->Enable(FALSE);
+         EnableTextWithButton(m_path, FALSE);
          if ( m_isCreating )
          {
             // INBOX folder can't be created by the user

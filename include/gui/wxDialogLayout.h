@@ -155,6 +155,7 @@ protected:
    //
    // widthMax parameter is the max width of the labels and is used to align
    // labels/text entries, it can be found with GetMaxWidth() function below.
+   // -----------------------------------------------------------------------
 
       // a listbox with 3 standard buttons: Add, Modify and Delete
       // (FIXME this is probably not flexible enough)
@@ -177,19 +178,19 @@ protected:
                                    int style = 0);
    wxStaticText *CreateMessage(const char *label, wxControl *last);
 
-   // A ComboBox, the entries are taken from the label string which
-   // is composed as: "LABEL:entry1:entry2:entry3:...."
+      // a combobox, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
    wxComboBox *CreateComboBox(const char *label,
                               long widthMax,
                               wxControl *last,
                               size_t nRightMargin = 0);
 
-   // a button: the label string is "label:id" where id is the id for the
-   // button
+      // a button: the label string is "label:id" where id is the id for the
+      // button
    wxButton *CreateButton(const wxString& label, wxControl *last);
 
-   // if ppButton != NULL, it's filled with the pointer to the ">>" browse
-   // button created by this function
+      // if ppButton != NULL, it's filled with the pointer to the ">>" browse
+      // button created by this function
    wxTextCtrl *CreateFileEntry(const char *label,
                                long widthMax,
                                wxControl *last,
@@ -199,7 +200,7 @@ protected:
                                    (wxBrowseButton **)ppButton);
    }
 
-   // another entry with a browse button
+      // another entry with a browse button
    wxTextCtrl *CreateColorEntry(const char *label,
                                 long widthMax,
                                 wxControl *last)
@@ -207,8 +208,21 @@ protected:
       return CreateEntryWithButton(label, widthMax, last, ColorBtn);
    }
 
-   // callbacks which will set the parent's dirty flag whenever something
-   // changes
+   // UpdateUI helpers: enable disable several controls at once
+   //
+   // NB: these functions assume that control ids are consecutif,
+   //     i.e. the label always precedes the text ctrl &c
+   // -----------------------------------------------------------
+
+      // enable/disable the text control and its label
+   void EnableTextWithLabel(wxTextCtrl *control, bool enable);
+
+      // enable/disable the text control with label and button
+   void EnableTextWithButton(wxTextCtrl *control, bool enable);
+
+   // callbacks which will set the parent's dirty flag whenever
+   // something changes
+   // ---------------------------------------------------------
    void OnChange(wxEvent& event);
 
 private:
