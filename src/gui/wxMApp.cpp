@@ -252,19 +252,27 @@ wxMApp::Help(int id, wxWindow *parent)
 
    if(! m_HelpController)
    {
+      bool ok;
       m_HelpController = new wxHelpController;
+      wxString helpfile;
 #ifdef OS_UNIX
       ((wxExtHelpController *)m_HelpController)->SetBrowser(
          READ_APPCONFIG(MP_HELPBROWSER),
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));
-      // initialise the help system
-      m_HelpController->Initialize(GetGlobalDir()+"/doc");
+      helpfile = GetGlobalDir()+"/doc";
 #else // Windows
-      m_HelpController->Initialize(GetGlobalDir()+"\\doc\\M.hlp");
+      helpfile = GetGlobalDir()+"\\doc\\M.hlp";
 #endif // Unix/Windows
+      // initialise the help system
+      ok = m_HelpController->Initialize(helpfile);
+      if(! ok)
+      {
+         wxString msg = _("Cannot initialise help system.\n");
+         msg << _("Help file '") << helpfile << _("' not found.");
+         wxLogError(msg);
+         return ;
+      }
    }
-
-   // show help:
    switch(id)
    {
       // look up contents:

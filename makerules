@@ -46,7 +46,7 @@ tags:
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
-	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -a -j -d $(BUILDDIR)/messages $$i ; done
+	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -a -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
 	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a

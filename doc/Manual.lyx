@@ -1,4 +1,4 @@
-#This file was created by <zeitlin> Wed Feb 10 21:19:00 1999
+#This file was created by <karsten> Thu Feb 11 22:25:27 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -263,7 +263,7 @@ If you have access to other systems apart from Linux/Solaris/Windows, you
  than Intel.
 \layout Subsection
 
-Copyright
+Copyright_1003_
 \layout Standard
 
 M is copyright by Karsten Ballüder and Vadim Zeitlin.
@@ -306,7 +306,7 @@ The M ``Artistic License''
 
 \end_inset 
 
-_1003_
+
 \layout Subsubsection
 
 Preamble
@@ -1761,6 +1761,203 @@ These compilation notes are probably a bit outdated.
 --help
 \family default 
  option of configure to see which options it supports.
+\layout Section
+
+General Procedure
+\layout Subsection
+
+Prerequisites
+\layout Standard
+
+Before you can compile M, you will need a matching copy of 
+\latex latex 
+
+\backslash 
+htmladdnormallink{wxWindows}{http://web.ukonline.co.uk/julian.smart/wxwin/}
+\latex default 
+, that is, if compiling under Unix, you will need 
+\latex latex 
+
+\backslash 
+htmladdnormallink{wxGTK}{http://www.freiburg.linux.de/~wxxt/}
+\latex default 
+.
+ As wxGTK is under constant development, you should use the same copy of
+ wxGTK that we used to build M, you can get it from the 
+\latex latex 
+
+\backslash 
+htmladdnormallink{M download page}{http://www.phy.hw.ac.uk/~karsten/M/download.html}
+\latex default 
+.
+\layout Subsection
+
+Configuring wxGTK
+\layout Subsubsection
+
+Unpack wxGTK and run its 
+\family typewriter 
+configure
+\family default 
+ script:
+\layout Quote
+
+
+\family typewriter 
+./configure --without-threads --with-gtk --without-shared --without-debug_flags
+ 
+\newline 
+ --without-debug_info --without-odbc
+\layout Standard
+
+Of course, feel free to change the two debug options to 
+\family typewriter 
+--with-debug
+\family default 
+ if you want to generate a version with debugging enabled.
+\layout Subsubsection
+
+Compile and install wxGTK
+\layout Standard
+
+Change into the src directory and run 
+\family typewriter 
+make
+\family default 
+ and 
+\family typewriter 
+make install
+\family default 
+.
+ wxGTK requires libgtk 1.0.x, it does not work with gtk-1.1 (yet).
+\layout Subsection
+
+Configuring M
+\layout Standard
+
+As with wxGTK, just run M's 
+\family typewriter 
+configure
+\family default 
+ script.
+ If you have built wxGTK with debugging enabled, specify the additional
+ option 
+\family typewriter 
+--with-debug
+\family default 
+ when configuring M.
+ Call 
+\family typewriter 
+./configure --help
+\family default 
+ to get a list of supported options.
+ Generally you will just run it without options.
+ If configure fails to find some header files or libraries, you can create
+ links to them in the 
+\family typewriter 
+extra/include
+\family default 
+ and 
+\family typewriter 
+extra/lib
+\family default 
+ directories and configure will find them.
+ To reconfigure M, make sure that you delete any 
+\family typewriter 
+*cache*
+\family default 
+ files first.
+\layout Subsection
+
+Compiling M
+\layout Standard
+
+Just run 
+\family typewriter 
+make
+\family default 
+ from the top level M directory.
+ If you later want to rebuild M without rebuilding the libraries contained
+ in the 
+\family typewriter 
+extra/src
+\family default 
+ directory, i.e.
+ after changing the M source, just run 
+\family typewriter 
+make
+\family default 
+ in the 
+\family typewriter 
+src
+\family default 
+ directory.
+\layout Subsubsection
+
+To generate the documentation
+\layout Standard
+
+...type 
+\family typewriter 
+make doc
+\family default 
+ from the main directory or simply 
+\family typewriter 
+make
+\family default 
+ in the doc directory.
+\layout Subsection
+
+Installing M
+\layout Standard
+
+Just call any or all of the following make targets in the main directory:
+\layout Subsubsection
+
+make install
+\layout Standard
+
+Will compile and install M and the required additional files.
+\layout Subsubsection
+
+make install_doc
+\layout Standard
+
+Will install and, if necessary, regenerate the documentation and online
+ help system.
+\layout Subsubsection
+
+make install_locale
+\layout Standard
+
+Will attempt to generate message catalogs for translations and install them.
+ Note that M is not fully translated yet.
+\layout Subsubsection
+
+make install_all
+\layout Standard
+
+Will do all of the above
+\layout Subsection
+
+Some extra software might be required
+\layout Standard
+
+For regenerating the documentation you will need 
+\family typewriter 
+doc++
+\family default 
+ for generating the class documentation.
+ Alternatively the Makefile system will try to use kdoc or scandoc (included),
+ but might fail halfway during class documentation generation.
+ Also, latex, latex2html, netpbm and plenty of disk space on 
+\family typewriter 
+/tmp
+\family default 
+ are required for generating the online docs.
+ However, the distribution includes a file Mdoc.tar.gz in the doc directory.
+ As long as you leave this file there, the Makefile will not attempt to
+ regenerate the documentation but use this instead.
 \layout Section
 
 Operating systems specific

@@ -181,7 +181,7 @@ $Id$
     + add sample callback showing new messages
   + merge in wxPython
 
-
+- find a way to run stripwxhelpids from Manual automatically
 - merge text parts into one, send non-MIME mail
 
 

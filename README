@@ -2,6 +2,11 @@ $Id$
 
 Preliminary README file for M.
 
+These are some very brief notes about how to compile M.
+More detailed, step for step, instructions can be found in the Manual,
+which is contained in the Mdoc.tar.gz file in the doc directory.
+You can also view it online at http://www.phy.hw.ac.uk/~karsten/M/dl/Manual/
+
 To install:
   ./configure --help
   ./configure "with your appropriate options"
@@ -17,15 +22,6 @@ To install:
     make install_doc     # this should install the documentation and online help
     make install_locale  # this tries to build and install the message catalogs
 
-  If the generation of the docs fails (likely!), you can get the file
-  Mdoc.tar.gz from http://www.phy.hw.ac.uk/~karsten/M/dl/
-  and either unpack it directly in the .../share/M/doc/ directory
-  (.. is wherever M gets installed, e.g. /usr/local) or copy it to the
-  doc directory in the source tree and run "make install" in there.
-
-  To rebuild only from the M source, without recompiling the extra
-  libraries, run make from the M/src sub-directory.
-
 Required software:
 
    - wxGTK, the gtk port of wxWindows
@@ -36,18 +32,6 @@ Required software:
         download the wxGTK snapshot used by us to compile the binary release
 	of M. It is available from:
 	http://www.phy.hw.ac.uk/~karsten/M/dl/wxGTK.tar.gz
-	We have configured wxGTK for the build as follows:
-	./configure --with-gtk --without-odbc --without-tooltips
-                    --with-debug_flag --with-debug_info
-	After running configure in the wxWindows directory, change to
-        the src sub-directory and run "make" and "make install".
 
    - libgtk 1.0.x, libglib 1.0.x, wxGTK does not work with gtk-1.1 (yet)
 
-   For regenerating the documentation only (can be avoided by using
-   Mdoc.tar.gz as explained above):
-   - doc++ for generating the class documentation
-     Alternatively the Makefile system will try to use kdoc or scandoc
-     (included), but might fail halfway during class documentation generation.
-   - latex, latex2html, netpbm and plenty of disk space on /tmp for
-     generating the online docs 

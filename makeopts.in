@@ -21,7 +21,6 @@ ODIR=.
 # this will be set or unset
 @MAKE_USE_PYTHON@
 @MAKE_USE_SWIG@
-@MAKE_HAVE_SGMLTOOLS@
 @MAKE_DEBUG@
 
 # canonical host

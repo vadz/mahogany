@@ -21,11 +21,13 @@ subdirs:
 	set -e; for i in $(SUB_DIRS); do ( cd $$i && $(MAKE) -f ../Makefile.sub all DIR=$$i ) ; done
 
 install2: all
-	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes
+	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes $(DOCDIR)/classes/images
 	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
-	$(INSTALL_DATA) classes/* $(DOCDIR)/classes
+	$(INSTALL_DATA) classes/*.html $(DOCDIR)/classes
+	$(INSTALL_DATA) classes/images/*.gif $(DOCDIR)/classes/images
+	$(INSTALL_DATA) classes/images/*.jpg $(DOCDIR)/classes/images
 	$(INSTALL) -d $(DESTDIR)/doc/M
 	ln -f -s $(DOCDIR) $(DESTDIR)/doc/M/doc
 

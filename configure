@@ -3657,7 +3657,7 @@ case "${OSTYPE}" in
 linux* | Linux*)
   CCOSTYPE=slx
   ;;
-solaris*|SunOS*)
+Solaris* | solaris* | SunOS*)
   if test "$GCC" = "yes"
   then
     CCOSTYPE=gso
@@ -3908,50 +3908,12 @@ then
 	
 fi
 
-MAKE_HAVE_SGMLTOOLS=
-# Extract the first word of "sgml2html", so it can be a program name with args.
-set dummy sgml2html; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3916: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_SGML2HTML'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  case "$SGML2HTML" in
-  /*)
-  ac_cv_path_SGML2HTML="$SGML2HTML" # Let the user override the test with a path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
-  for ac_dir in $PATH; do
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_SGML2HTML="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  ;;
-esac
-fi
-SGML2HTML="$ac_cv_path_SGML2HTML"
-if test -n "$SGML2HTML"; then
-  echo "$ac_t""$SGML2HTML" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-if test "x$SGML2HTML" != "x"
-then
-  MAKE_HAVE_SGMLTOOLS="HAVE_SGMLTOOLS=yes"
-fi
-
-
 MAKE_HAVE_LATEX2HTML=
 LATEX2HTML="echo \"No doc generator(html) available.\""
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:3955: checking for $ac_word" >&5
+echo "configure:3917: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4163,8 +4125,6 @@ s%@DOCTEX@%$DOCTEX%g
 s%@LATEX@%$LATEX%g
 s%@MAKEINDEX@%$MAKEINDEX%g
 s%@DVIPS@%$DVIPS%g
-s%@SGML2HTML@%$SGML2HTML%g
-s%@MAKE_HAVE_SGMLTOOLS@%$MAKE_HAVE_SGMLTOOLS%g
 s%@LATEX2HTML@%$LATEX2HTML%g
 s%@MAKE_HAVE_LATEX2HTML@%$MAKE_HAVE_LATEX2HTML%g
 

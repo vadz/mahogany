@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: M 0.023\n"
-"POT-Creation-Date: 1999-02-08 22:38+0000\n"
+"POT-Creation-Date: 1999-02-11 21:54+0000\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <Ballueder@usa.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -52,26 +52,26 @@ msgstr ""
 msgid "file:"
 msgstr "&Datei"
 
-#: strutil.cpp:337
+#: strutil.cpp:338
 #, fuzzy
 msgid "unknown size field"
 msgstr "Unbekanntes Größenfeld"
 
-#: strutil.cpp:439 strutil.cpp:440
+#: strutil.cpp:437 strutil.cpp:438
 msgid "\\"
 msgstr ""
 
 #: AdbFrame.cpp:3118 AdbFrame.cpp:3120 AdbFrame.cpp:3122 Profile.cpp:239
 #: ProvFC.cpp:499 ProvFC.cpp:661 ProvFC.cpp:666 ProvFC.cpp:671 ProvFC.cpp:676
-#: ProvFC.cpp:681 strutil.cpp:439 strutil.cpp:440
+#: ProvFC.cpp:681 strutil.cpp:437 strutil.cpp:438
 msgid "/"
 msgstr ""
 
-#: MApplication.cpp:125 MApplication.cpp:222 strutil.cpp:466
+#: MApplication.cpp:125 MApplication.cpp:222 strutil.cpp:464
 msgid "HOME"
 msgstr ""
 
-#: AdbFrame.cpp:2614 strutil.cpp:484
+#: AdbFrame.cpp:2614 strutil.cpp:482
 msgid "home"
 msgstr ""
 
@@ -118,10 +118,9 @@ msgstr ""
 msgid "invalid version value"
 msgstr "Ungültiger Versionswert"
 
-#: MailFolder.cpp:58 MailFolderCC.cpp:80 MailFolderCC.cpp:287 upgrade.cpp:181
-#: upgrade.cpp:188 wxMDialogs.cpp:748 wxMDialogs.cpp:799 wxMDialogs.cpp:832
-#: wxMDialogs.cpp:1080 wxMFolderDialogs.cpp:541 wxMFolderDialogs.cpp:790
-#: wxMFrame.cpp:203
+#: MailFolder.cpp:67 MailFolderCC.cpp:80 MailFolderCC.cpp:287 upgrade.cpp:181
+#: upgrade.cpp:188 wxMDialogs.cpp:751 wxMDialogs.cpp:802 wxMDialogs.cpp:835
+#: wxMDialogs.cpp:1083 wxMFolderDialogs.cpp:569 wxMFrame.cpp:203
 msgid "INBOX"
 msgstr ""
 
@@ -344,7 +343,7 @@ msgstr ""
 msgid "New Mail"
 msgstr ""
 
-#: PathFinder.cpp:71 ProvFC.cpp:288
+#: PathFinder.cpp:70 ProvFC.cpp:288
 msgid ":"
 msgstr ""
 
@@ -356,74 +355,78 @@ msgstr ""
 msgid "No config object in wxConfigProfile"
 msgstr ""
 
-#: Profile.cpp:806
+#: Profile.cpp:694
+msgid "^%%&*^&*^y--illegal-profile-value^&%%$&^"
+msgstr ""
+
+#: Profile.cpp:808
 msgid "Profile("
 msgstr ""
 
-#: Profile.cpp:806
+#: Profile.cpp:808
 msgid ")::readEntry("
 msgstr ""
 
-#: Profile.cpp:807
+#: Profile.cpp:809
 msgid ") returned: "
 msgstr ""
 
-#: Profile.cpp:929
+#: Profile.cpp:931
 #, c-format
 msgid "Profile '%s' (m_nRef = %d)."
 msgstr ""
 
-#: Profile.cpp:961
+#: Profile.cpp:963
 msgid "Profile left over at exit:"
 msgstr ""
 
-#: Profile.cpp:986
+#: Profile.cpp:988
 msgid "ConfigFileManager.Find("
 msgstr ""
 
-#: Profile.cpp:986 ProvBbdb.cpp:861 wxMessageView.cpp:848
+#: Profile.cpp:988 ProvBbdb.cpp:861 wxMessageView.cpp:848
 msgid ")"
 msgstr ""
 
-#: Profile.cpp:1008
+#: Profile.cpp:1010
 #, c-format
 msgid "ConfigFileManager::DeRegister(%s)"
 msgstr ""
 
-#: Profile.cpp:1015
+#: Profile.cpp:1017
 msgid "ConfigFileManager::DeRegister(): bogus profile"
 msgstr ""
 
-#: Profile.cpp:1021
+#: Profile.cpp:1023
 #, c-format
 msgid "ConfigFileManager.Register(%s)"
 msgstr ""
 
-#: Profile.cpp:1033
+#: Profile.cpp:1035
 msgid "------ConfigFileManager------\n"
 msgstr ""
 
-#: Profile.cpp:1040
+#: Profile.cpp:1042
 msgid "-----------------------------\n"
 msgstr ""
 
-#: AdbFrame.cpp:2491 AdbFrame.cpp:2501 Profile.cpp:1058 Profile.cpp:1074
+#: AdbFrame.cpp:2491 AdbFrame.cpp:2501 Profile.cpp:1060 Profile.cpp:1076
 #: ProvBbdb.cpp:580 generic/persctrl.cpp:366 generic/persctrl.cpp:384
 #, c-format
 msgid "%d"
 msgstr ""
 
-#: MFolder.cpp:485 Profile.cpp:1062 Profile.cpp:1081
+#: MFolder.cpp:499 Profile.cpp:1064 Profile.cpp:1083
 msgid ".."
 msgstr ""
 
-#: Profile.cpp:1093
+#: Profile.cpp:1095
 msgid "_-."
 msgstr ""
 
 #: InitPython.cpp:28 MAppBase.cpp:40 MAppBase.cpp:529 MObject.cpp:40
 #: MObject.cpp:202 MString.cpp:40 MString.cpp:110 MTest.cpp:42 MTest.cpp:648
-#: MailFolder.cpp:40 MailFolder.cpp:587 MailFolderCC.cpp:718 Message.cpp:40
+#: MailFolder.cpp:40 MailFolder.cpp:587 MailFolderCC.cpp:728 Message.cpp:40
 #: Message.cpp:865 Profile.cpp:40 Profile.cpp:393 PythonHelp.cpp:32
 #: PythonHelp.cpp:41 SendMessageCC.cpp:36 XFace.cpp:23 swiglib.cpp:42
 #: swiglib.cpp:562 wxMApp.cpp:33 wxMApp.cpp:163
@@ -570,63 +573,63 @@ msgstr "Kann den obersten Eintrag nicht löschen."
 msgid "can not rename root folder."
 msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#: MFolder.cpp:166
+#: MFolder.cpp:168
 msgid "folder cache corrupted"
 msgstr ""
 
-#: MFolder.cpp:231
+#: MFolder.cpp:233
 #, fuzzy, c-format
 msgid "Can not create a folder '%s' which already exists."
 msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
-#: MFolder.cpp:248
+#: MFolder.cpp:250
 msgid "Get() must succeed if Create() succeeded!"
 msgstr ""
 
-#: MFolder.cpp:251 MFolder.cpp:309 MFolder.cpp:323 MFolder.cpp:348
-#: MFolder.cpp:357 MFolder.cpp:366 MFolder.cpp:375 MFolder.cpp:384
-#: MFolder.cpp:393 MFolder.cpp:425 MFolder.cpp:481 MFolder.cpp:517
+#: MFolder.cpp:253 MFolder.cpp:311 MFolder.cpp:325 MFolder.cpp:350
+#: MFolder.cpp:359 MFolder.cpp:368 MFolder.cpp:377 MFolder.cpp:386
+#: MFolder.cpp:395 MFolder.cpp:427 MFolder.cpp:495 MFolder.cpp:536
 msgid "panic in MFolder: no app profile"
 msgstr ""
 
-#: MFolder.cpp:264
+#: MFolder.cpp:266
 #, c-format
 msgid "MFolder: name = %s, %d refs"
 msgstr ""
 
-#: MFolder.cpp:327
+#: MFolder.cpp:329
 #, fuzzy, c-format
 msgid ""
 "Can not create profile folder '%s' because a group with this name already "
 "exists."
 msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
-#: MFolder.cpp:441
+#: MFolder.cpp:455
 #, fuzzy
 msgid "invalid subfolder index"
 msgstr "Mailbox öffnen"
 
-#: MFolder.cpp:464
+#: MFolder.cpp:478
 #, c-format
 msgid "Can't create subfolder '%s': folder with this name already exists."
 msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
-#: MFolder.cpp:478
+#: MFolder.cpp:492
 msgid "can't delete the root pseudo-folder"
 msgstr "Kann den obersten Eintrag nicht löschen."
 
-#: MFolder.cpp:491
+#: MFolder.cpp:510
 #, fuzzy
 msgid "can't rename the root pseudo-folder"
 msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#: MFolder.cpp:495
+#: MFolder.cpp:514
 msgid ""
 "INBOX folder is a special folder used by the mail system and can not be "
 "renamed."
 msgstr ""
 
-#: MFolder.cpp:509
+#: MFolder.cpp:528
 #, c-format
 msgid ""
 "Can't rename folder '%s' to '%s': the folder with the new name already "
@@ -634,19 +637,19 @@ msgid ""
 msgstr ""
 "Kann Mailbox '%s' nicht zu '%s' umbenennen: neuer Name existiert bereits."
 
-#: MFolder.cpp:553
+#: MFolder.cpp:572
 msgid "can't add the folder to the cache - it's already there"
 msgstr ""
 
-#: MFolder.cpp:566
+#: MFolder.cpp:585
 msgid "can't remove folder from cache because it's not in it"
 msgstr ""
 
-#: MEvent.cpp:106
+#: MEvent.cpp:114
 msgid "Registering the same handler twice in EventManager::Register()"
 msgstr ""
 
-#: MEvent.cpp:122
+#: MEvent.cpp:130
 msgid "unregistering event handler which was not registered"
 msgstr ""
 
@@ -684,28 +687,41 @@ msgstr "M Aktionsbericht"
 msgid "Can't initialize application, terminating."
 msgstr "Programm kann nicht initialisiert werden, wird beendet."
 
-#: wxMApp.cpp:261
+#: wxMApp.cpp:262
 msgid "/doc"
 msgstr ""
 
-#: wxMApp.cpp:263
+#: wxMApp.cpp:264
 msgid "\\doc\\M.hlp"
 msgstr ""
 
-#: wxMApp.cpp:276
+#: wxMApp.cpp:270
+#, fuzzy
+msgid "Cannot initialise help system.\n"
+msgstr "Inhaltsverzeichnis des Hilfesystems..."
+
+#: wxMApp.cpp:271
+msgid "Help file '"
+msgstr ""
+
+#: wxMApp.cpp:271
+msgid "' not found."
+msgstr ""
+
+#: wxMApp.cpp:284
 msgid "Search for?"
 msgstr "Suche nach?"
 
-#: wxMApp.cpp:277
+#: wxMApp.cpp:285
 msgid "Search help for keyword"
 msgstr "In Hilfe nach Schlüsselbegriff suchen"
 
-#: wxMApp.cpp:288
+#: wxMApp.cpp:296
 #, fuzzy, c-format
 msgid "No help found for current context (%d)."
 msgstr "Keine Hilfe für aktuellen Kontext."
 
-#: wxMApp.cpp:289 wxMFrame.cpp:294
+#: wxMApp.cpp:297 wxMFrame.cpp:294
 msgid "Sorry"
 msgstr "Tut mir leid."
 
@@ -837,11 +853,11 @@ msgstr ""
 msgid "Can't open folder '%s'."
 msgstr "Kann Mailbox '%s' nicht öffnen."
 
-#: wxFolderView.cpp:263
+#: wxFolderView.cpp:264
 msgid "ddd"
 msgstr ""
 
-#: wxFolderView.cpp:271
+#: wxFolderView.cpp:272
 msgid ""
 "Invalid value '%s' for the date format: it should contain exactyly 3 %%u "
 "format specificators. Default value '%s' will be used instead."
@@ -849,84 +865,93 @@ msgstr ""
 "Falsches Format '%s' für Datum: es sollte genau 3 %%uFormatangaben enhalten. "
 "Standardwert '%s' wird verwendet."
 
-#: wxFolderView.cpp:345
+#: wxFolderView.cpp:346
 msgid "Deleted messages were expunged"
 msgstr "Gelöschte Nachrichten wurden entfernt"
 
-#: wxFolderView.cpp:407
+#: wxFolderView.cpp:408
 msgid "wxFolderView::OnMenuCommand() called with illegal id."
 msgstr ""
 
-#: wxFolderView.cpp:435
+#: wxFolderView.cpp:436
 msgid " - "
 msgstr ""
 
-#: wxFolderView.cpp:453
+#: wxFolderView.cpp:454
 #, c-format
 msgid "%d messages deleted"
 msgstr "%d Nachrichten gelöscht"
 
-#: wxFolderView.cpp:465
+#: wxFolderView.cpp:466
 #, c-format
 msgid "%d messages undeleted"
 msgstr "%d Nachrichten vor Löschen bewahrt"
 
-#: wxFolderView.cpp:521
+#: wxFolderView.cpp:522
 #, c-format
 msgid "%d messages saved"
 msgstr "%d Nachrichten gespeichert"
 
-#: wxComposeView.cpp:844 wxComposeView.cpp:869 wxFolderView.cpp:537
-#: wxFolderView.cpp:553
+#: wxComposeView.cpp:847 wxComposeView.cpp:872 wxFolderView.cpp:538
+#: wxFolderView.cpp:554
 #, fuzzy
 msgid "Cancelled"
 msgstr "Abbruch"
 
-#: wxFolderView.cpp:544
+#: wxFolderView.cpp:545
 msgid "MsgSave"
 msgstr ""
 
-#: wxComposeView.cpp:861 wxFolderView.cpp:545
+#: wxComposeView.cpp:864 wxFolderView.cpp:546
 #, fuzzy
 msgid "Choose file to save message to"
 msgstr "Kein Profileintrag um Mailbox zu speichern"
 
-#: wxBrowseButton.cpp:58 wxComposeView.cpp:576 wxComposeView.cpp:838
-#: wxComposeView.cpp:863 wxComposeView.cpp:1077 wxFolderView.cpp:547
+#: wxBrowseButton.cpp:58 wxComposeView.cpp:579 wxComposeView.cpp:841
+#: wxComposeView.cpp:866 wxComposeView.cpp:1081 wxFolderView.cpp:548
 msgid "All files (*.*)|*.*"
 msgstr "Alle Dateien (*.*)|*.*"
 
-#: wxFolderView.cpp:579 wxMessageView.cpp:789
+#: wxFolderView.cpp:580 wxMessageView.cpp:789
 msgid "Reply"
 msgstr "Beantworten"
 
-#: wxFolderView.cpp:612 wxMessageView.cpp:339
+#: wxFolderView.cpp:613 wxMessageView.cpp:339
 msgid " <"
 msgstr ""
 
-#: wxFolderView.cpp:612 wxlparser.cpp:119
+#: wxFolderView.cpp:613 wxlparser.cpp:119
 msgid ">"
 msgstr ""
 
-#: wxFolderView.cpp:635
+#: wxFolderView.cpp:636
 msgid "Forward"
 msgstr "Weiterleiten"
 
-#: wxFolderView.cpp:641
-msgid "MESSAGE/RFC822"
+#: wxFolderView.cpp:644
+msgid "TEXT/PLAIN"
 msgstr ""
 
-#: wxFolderView.cpp:644
+#: wxFolderView.cpp:647
 #, c-format
 msgid "%d messages forwarded"
 msgstr "%d Nachrichten weitergeleitet"
 
-#: wxFolderView.cpp:672 wxFolderView.cpp:727 wxMDialogs.cpp:360
-#: wxMDialogs.cpp:393
+#: wxFolderView.cpp:665
+#, c-format
+msgid "Closing folder '%s' because the underlying mail folder was deleted."
+msgstr ""
+
+#: wxFolderView.cpp:672
+msgid "I thought folder view parent must be a frame."
+msgstr ""
+
+#: wxFolderView.cpp:693 wxFolderView.cpp:748 wxMDialogs.cpp:363
+#: wxMDialogs.cpp:396
 msgid "M: "
 msgstr ""
 
-#: wxFolderView.cpp:695
+#: wxFolderView.cpp:716
 msgid "NULL folder passed to wxFolderViewFrame::Create"
 msgstr ""
 
@@ -940,7 +965,7 @@ msgstr "MIME Typ:"
 msgid "&Info..."
 msgstr "&Öffnen..."
 
-#: wxFolderTree.cpp:176 wxMenuDefs.cpp:238 wxMessageView.cpp:130
+#: wxFolderTree.cpp:191 wxMenuDefs.cpp:238 wxMessageView.cpp:130
 msgid "&Open"
 msgstr "&Öffnen"
 
@@ -1041,7 +1066,7 @@ msgstr ""
 msgid "MIME information"
 msgstr "MIME Information"
 
-#: wxComposeView.cpp:218 wxMessageView.cpp:578
+#: wxComposeView.cpp:219 wxMessageView.cpp:578
 msgid "MESSAGE"
 msgstr ""
 
@@ -1067,7 +1092,7 @@ msgstr ""
 msgid "Don't know how to handle data of type '%s'."
 msgstr "Keine Information über die Behandlung von Typ '%s'."
 
-#: wxMessageView.cpp:616 wxllist.cpp:605
+#: wxMessageView.cpp:616 wxllist.cpp:609
 #, c-format
 msgid " %s"
 msgstr ""
@@ -1098,7 +1123,7 @@ msgstr "Kann Anlage nicht öffnen: Fehler bei Programmaufruf '%s'."
 msgid "Can't delete temporary file '%s'"
 msgstr "Kann temporäre Datei '%s' nicht löschen"
 
-#: wxComposeView.cpp:1187 wxComposeView.cpp:1220 wxMessageView.cpp:694
+#: wxComposeView.cpp:1191 wxComposeView.cpp:1226 wxMessageView.cpp:694
 msgid "FILENAME"
 msgstr ""
 
@@ -1240,115 +1265,115 @@ msgstr "E-Mail Adresse '%s' gesammelt, in Eintrag '%s'."
 msgid "'%s': the name is missing, address was not autocollected."
 msgstr ""
 
-#: wxComposeView.cpp:1297 wxMessageView.cpp:1165
+#: wxComposeView.cpp:1303 wxMessageView.cpp:1165
 msgid "/afm"
 msgstr ""
 
-#: wxComposeView.cpp:1300 wxComposeView.cpp:1304 wxMessageView.cpp:1168
-#: wxMessageView.cpp:1172 wxMessageView.cpp:1182 wxMessageView.cpp:1206
+#: wxComposeView.cpp:1306 wxComposeView.cpp:1310 wxMessageView.cpp:1168
+#: wxMessageView.cpp:1172 wxMessageView.cpp:1197
 msgid "Cour.afm"
 msgstr ""
 
-#: wxComposeView.cpp:1310 wxMessageView.cpp:1187
+#: wxComposeView.cpp:1316 wxMessageView.cpp:1178
 #, fuzzy
 msgid "M: Printout"
 msgstr "Drucken"
 
-#: wxMessageView.cpp:1190
+#: wxComposeView.cpp:1319 wxMessageView.cpp:1181
 msgid ""
 "There was a problem with printing the message:\n"
 "perhaps your current printer is not set up correctly?"
 msgstr ""
 
-#: wxComposeView.cpp:1314 wxMessageView.cpp:1192
+#: wxComposeView.cpp:1321 wxMessageView.cpp:1183
 #, fuzzy
 msgid "Printing"
 msgstr "Drucken"
 
-#: wxMessageView.cpp:1218
+#: wxMessageView.cpp:1209
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
 msgstr ""
 
-#: wxMessageView.cpp:1220
+#: wxMessageView.cpp:1211
 msgid "Previewing"
 msgstr ""
 
-#: wxMessageView.cpp:1225
+#: wxMessageView.cpp:1216
 msgid "Demo Print Preview"
 msgstr ""
 
-#: wxComposeView.cpp:210
+#: wxComposeView.cpp:211
 msgid "VIDEO"
 msgstr ""
 
-#: wxComposeView.cpp:212
+#: wxComposeView.cpp:213
 msgid "AUDIO"
 msgstr ""
 
-#: wxComposeView.cpp:214
+#: wxComposeView.cpp:215
 msgid "IMAGE"
 msgstr ""
 
-#: wxComposeView.cpp:216
+#: wxComposeView.cpp:217
 msgid "TEXT"
 msgstr ""
 
-#: wxComposeView.cpp:220
+#: wxComposeView.cpp:221
 msgid "APPLICATION"
 msgstr ""
 
-#: wxComposeView.cpp:222
+#: wxComposeView.cpp:223
 msgid "MODEL"
 msgstr ""
 
-#: wxComposeView.cpp:362
+#: wxComposeView.cpp:365
 #, fuzzy
 msgid "wxComposeView created twice"
 msgstr "wxMFrame wurde zweimal erzeugt"
 
-#: wxComposeView.cpp:374
+#: wxComposeView.cpp:377
 #, fuzzy
 msgid "&Compose"
 msgstr "&Nachricht schreiben"
 
-#: wxComposeView.cpp:428
+#: wxComposeView.cpp:431
 msgid "To:"
 msgstr "An:"
 
-#: wxComposeView.cpp:428
+#: wxComposeView.cpp:431
 #, fuzzy
 msgid "Subject:"
 msgstr "Betreff"
 
-#: wxComposeView.cpp:428
+#: wxComposeView.cpp:431
 msgid "CC:"
 msgstr "Verteiler:"
 
-#: wxComposeView.cpp:428
+#: wxComposeView.cpp:431
 msgid "BCC:"
 msgstr "Blind-Verteiler:"
 
-#: wxComposeView.cpp:477
+#: wxComposeView.cpp:480
 msgid "Expand"
 msgstr "Expandieren"
 
-#: wxComposeView.cpp:486
+#: wxComposeView.cpp:489
 #, fuzzy
 msgid "Expand the address using address books"
 msgstr "Adreßbuch editieren"
 
-#: wxComposeView.cpp:555
+#: wxComposeView.cpp:558
 msgid "You haven't configured your signature file."
 msgstr ""
 
-#: wxComposeView.cpp:564
+#: wxComposeView.cpp:567
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr ""
 
-#: wxComposeView.cpp:568
+#: wxComposeView.cpp:571
 #, fuzzy
 msgid ""
 "\n"
@@ -1359,208 +1384,202 @@ msgstr ""
 "Keine Signaturdatei gefunden. Möchten Sie jetzt eine\n"
 "auswählen (andernfalls wird keine Signatur angehängt)?"
 
-#: wxComposeView.cpp:571
+#: wxComposeView.cpp:574
 msgid "AskForSig"
 msgstr ""
 
-#: wxComposeView.cpp:573
+#: wxComposeView.cpp:576
 msgid "sig"
 msgstr ""
 
-#: wxComposeView.cpp:574
+#: wxComposeView.cpp:577
 msgid "Choose signature file"
 msgstr ""
 
-#: wxComposeView.cpp:575
+#: wxComposeView.cpp:578
 msgid ".signature"
 msgstr ""
 
-#: wxComposeView.cpp:600
+#: wxComposeView.cpp:603
 msgid "--"
 msgstr ""
 
-#: wxComposeView.cpp:614
+#: wxComposeView.cpp:617
 #, fuzzy, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines"
 msgstr "Ihre Singatur ist zu lang: sie sollte nicht mehr als %d Zeilen haben"
 
-#: wxComposeView.cpp:616
+#: wxComposeView.cpp:619
 msgid "way "
 msgstr ""
 
-#: wxComposeView.cpp:671
+#: wxComposeView.cpp:674
 msgid "M : Message Composition"
 msgstr ""
 
-#: wxComposeView.cpp:700
+#: wxComposeView.cpp:703
 msgid "Nothing to expand - please enter something."
 msgstr "Nichts zum expandieren - bitte geben Sie erste etwas ein."
 
-#: wxComposeView.cpp:783
+#: wxComposeView.cpp:786
 #, c-format
 msgid ""
 "Please terminate the external editor (pid %d) before closign this window."
 msgstr ""
 
-#: wxComposeView.cpp:793
+#: wxComposeView.cpp:796
 msgid "There are unsaved changes, close anyway?"
 msgstr "Änderungen nicht gesichert, trotzdem schließen?"
 
-#: wxComposeView.cpp:835
+#: wxComposeView.cpp:838
 msgid "MsgInsertText"
 msgstr ""
 
-#: wxComposeView.cpp:836 wxComposeView.cpp:1075
+#: wxComposeView.cpp:839 wxComposeView.cpp:1079
 #, fuzzy
 msgid "Please choose a file to insert."
 msgstr "Speichern unter Name:"
 
-#: wxComposeView.cpp:837 wxComposeView.cpp:862 wxComposeView.cpp:1076
+#: wxComposeView.cpp:840 wxComposeView.cpp:865 wxComposeView.cpp:1080
 #, fuzzy
 msgid "dead.letter"
 msgstr "&Wiederherstellen"
 
-#: wxComposeView.cpp:848
+#: wxComposeView.cpp:851
 #, fuzzy, c-format
 msgid "Inserted file '%s'."
 msgstr "Datei '%s' eingefügt (als '%s')"
 
-#: wxComposeView.cpp:852
+#: wxComposeView.cpp:855
 #, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr ""
 
-#: wxComposeView.cpp:860
+#: wxComposeView.cpp:863
 msgid "MsgSaveText"
 msgstr ""
 
-#: wxComposeView.cpp:873
+#: wxComposeView.cpp:876
 #, fuzzy, c-format
 msgid "Message text saved to file '%s'."
 msgstr "%lu Bytes in Datei '%s' geschrieben"
 
-#: wxComposeView.cpp:878
+#: wxComposeView.cpp:881
 #, fuzzy
 msgid "Failed to save the message."
 msgstr "Nachricht löschen"
 
-#: wxComposeView.cpp:887
+#: wxComposeView.cpp:890
 #, c-format
 msgid "External editor is already running (pid %d)"
 msgstr ""
 
-#: wxComposeView.cpp:906
+#: wxComposeView.cpp:909
 #, fuzzy
 msgid "External editor not configured."
 msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
-#: wxComposeView.cpp:914
+#: wxComposeView.cpp:917
 #, fuzzy
 msgid "Can not create temporary file"
 msgstr "Kann temporäre Datei nicht umbenennen."
 
-#: wxComposeView.cpp:922
+#: wxComposeView.cpp:925
 msgid "Failed to pass message to external editor."
 msgstr ""
 
-#: wxComposeView.cpp:939
+#: wxComposeView.cpp:942
 #, fuzzy, c-format
 msgid "Execution of '%s' failed."
 msgstr "Fehler beim Öffnen von URL '%s'."
 
-#: wxComposeView.cpp:946
+#: wxComposeView.cpp:949
 #, c-format
 msgid "Started external editor (pid %d)"
 msgstr ""
 
-#: wxComposeView.cpp:961
+#: wxComposeView.cpp:964
 msgid "Would you like to change the external editor setting now?"
 msgstr ""
 
-#: wxComposeView.cpp:964
+#: wxComposeView.cpp:967
 msgid "AskForExtEdit"
 msgstr ""
 
-#: wxComposeView.cpp:967
+#: wxComposeView.cpp:970
 msgid "Set up external editor"
 msgstr ""
 
-#: wxComposeView.cpp:968
+#: wxComposeView.cpp:971
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
 msgstr ""
 
-#: wxComposeView.cpp:996
+#: wxComposeView.cpp:999
 #, fuzzy
 msgid "unknown program terminated"
 msgstr "Unbekannte Mausaktion"
 
-#: wxComposeView.cpp:1003
+#: wxComposeView.cpp:1006
 msgid "External editor terminated with non null exit code."
 msgstr ""
 
-#: wxComposeView.cpp:1010
+#: wxComposeView.cpp:1013
 msgid "Failed to insert back the text from external editor."
 msgstr ""
 
-#: wxComposeView.cpp:1016
+#: wxComposeView.cpp:1019
 #, fuzzy, c-format
 msgid "Stale temp file '%s' left."
 msgstr "&Löschen"
 
-#: wxComposeView.cpp:1020
+#: wxComposeView.cpp:1023
 msgid "Inserted text from external editor."
 msgstr ""
 
-#: wxComposeView.cpp:1026
+#: wxComposeView.cpp:1029
 #, c-format
 msgid "The text was left in the file '%s'."
 msgstr ""
 
-#: wxComposeView.cpp:1050 wxComposeView.cpp:1103
+#: wxComposeView.cpp:1054 wxComposeView.cpp:1107
 msgid "APPLICATION/OCTET-STREAM"
 msgstr ""
 
-#: wxComposeView.cpp:1074
+#: wxComposeView.cpp:1078
 #, fuzzy
 msgid "MsgInsert"
 msgstr "Datei einfügen"
 
-#: wxComposeView.cpp:1124
+#: wxComposeView.cpp:1128
 #, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Datei '%s' eingefügt (als '%s')"
 
-#: wxComposeView.cpp:1163
+#: wxComposeView.cpp:1167
 msgid "PLAIN"
 msgstr ""
 
-#: wxComposeView.cpp:1196 wxComposeView.cpp:1229
+#: wxComposeView.cpp:1200 wxComposeView.cpp:1235
 msgid "INLINE"
 msgstr ""
 
-#: wxComposeView.cpp:1202
+#: wxComposeView.cpp:1206
 #, c-format
 msgid "Can't read file '%s' included in this message!"
 msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#: wxComposeView.cpp:1210
+#: wxComposeView.cpp:1214
 #, c-format
 msgid "Can't open file '%s' included in this message!"
 msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#: wxComposeView.cpp:1237
+#: wxComposeView.cpp:1243
 #, fuzzy
 msgid "Unknwown part type"
 msgstr "Unbekannter MIME-Typ"
 
-#: wxComposeView.cpp:1313
-msgid ""
-"There was a problem printing.\n"
-"Perhaps your current printer is not set correctly?"
-msgstr ""
-
-#: wxComposeView.cpp:1333
+#: wxComposeView.cpp:1340
 msgid ""
 "The message can not be sent because the network settings are either not "
 "configured or incorrect. Would you like to change them now?"
@@ -1568,42 +1587,42 @@ msgstr ""
 "Die Nachricht kann nicht gesendet werden. Netzwerkeinstellungen sind "
 "fehlerhaft. Möchten Sie sie ändern?"
 
-#: wxComposeView.cpp:1339
+#: wxComposeView.cpp:1346
 msgid "ConfigNetFromCompose"
 msgstr ""
 
-#: wxComposeView.cpp:1345
+#: wxComposeView.cpp:1352
 #, fuzzy
 msgid "Cannot send message - network is not configured."
 msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
-#: wxComposeView.cpp:1360
+#: wxComposeView.cpp:1367
 msgid "Please specify at least one recipient in the \"To:\" field!"
 msgstr "Bitte geben Sie mindestens einen Empfänger an!"
 
-#: wxComposeView.cpp:1372
+#: wxComposeView.cpp:1379
 msgid "The subject of your message is empty, would you like to change it?"
 msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
 
-#: wxComposeView.cpp:1377
+#: wxComposeView.cpp:1384
 msgid "SendemptySubject"
 msgstr ""
 
-#: wxComposeView.cpp:1410
+#: wxComposeView.cpp:1417
 #, fuzzy
 msgid "Can not insert text file into the message."
 msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#: wxComposeView.cpp:1491
+#: wxComposeView.cpp:1499
 #, fuzzy, c-format
 msgid "Can not write message to file '%s'."
 msgstr "Kann nicht in temporäre Datei schreiben."
 
-#: wxComposeView.cpp:1501
+#: wxComposeView.cpp:1509
 msgid "There is no text to save."
 msgstr ""
 
-#: wxComposeView.cpp:1506
+#: wxComposeView.cpp:1514
 msgid "remove"
 msgstr ""
 
@@ -1620,7 +1639,7 @@ msgstr ""
 msgid "MainSplitter"
 msgstr ""
 
-#: wxMainFrame.cpp:245
+#: wxMainFrame.cpp:266
 msgid "Do you really want to exit M?"
 msgstr "Möchten Sie M wirklich beenden?"
 
@@ -1697,35 +1716,35 @@ msgstr ""
 msgid "... icon not found."
 msgstr ""
 
-#: wxMDialogs.cpp:195 wxMDialogs.cpp:304 wxMDialogs.cpp:327 wxMDialogs.cpp:343
-#: wxMDialogs.cpp:496
+#: wxMDialogs.cpp:198 wxMDialogs.cpp:307 wxMDialogs.cpp:330 wxMDialogs.cpp:346
+#: wxMDialogs.cpp:499
 msgid "M:"
 msgstr ""
 
 #: AdbFrame.cpp:2226 AdbFrame.cpp:2342 AdbFrame.cpp:2461
-#: generic/persctrl.cpp:641 wxDialogLayout.cpp:418 wxMDialogs.cpp:232
-#: wxMDialogs.cpp:770 wxMDialogs.cpp:936 wxMFolderDialogs.cpp:851
+#: generic/persctrl.cpp:641 wxDialogLayout.cpp:422 wxMDialogs.cpp:235
+#: wxMDialogs.cpp:773 wxMDialogs.cpp:939 wxMFolderDialogs.cpp:968
 msgid "OK"
 msgstr ""
 
 #: AdbFrame.cpp:2230 AdbFrame.cpp:2346 AdbFrame.cpp:2465
-#: generic/persctrl.cpp:648 wxDialogLayout.cpp:427 wxMDialogs.cpp:236
-#: wxMDialogs.cpp:774 wxMDialogs.cpp:948 wxMFolderDialogs.cpp:860
+#: generic/persctrl.cpp:648 wxDialogLayout.cpp:431 wxMDialogs.cpp:239
+#: wxMDialogs.cpp:777 wxMDialogs.cpp:951 wxMFolderDialogs.cpp:977
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: wxMDialogs.cpp:280
+#: wxMDialogs.cpp:283
 msgid "/Prompts/"
 msgstr ""
 
-#: wxMDialogs.cpp:324
+#: wxMDialogs.cpp:327
 #, fuzzy
 msgid ""
 "\n"
 "System error: "
 msgstr "Systemfehler"
 
-#: wxMDialogs.cpp:341
+#: wxMDialogs.cpp:344
 msgid ""
 "\n"
 "Exiting application..."
@@ -1733,195 +1752,195 @@ msgstr ""
 "\n"
 "Programm wird beendet..."
 
-#: wxMDialogs.cpp:461
+#: wxMDialogs.cpp:464
 msgid "save"
 msgstr ""
 
-#: wxMDialogs.cpp:461
+#: wxMDialogs.cpp:464
 msgid "load"
 msgstr ""
 
-#: wxMDialogs.cpp:496
+#: wxMDialogs.cpp:499
 msgid "Please choose an entry:"
 msgstr "Bitte wählen Sie einen Eintrag:"
 
-#: wxMDialogs.cpp:497
+#: wxMDialogs.cpp:500
 msgid "Expansion options"
 msgstr "Expansions-Einstellungen"
 
-#: wxMDialogs.cpp:565
+#: wxMDialogs.cpp:568
 msgid "white"
 msgstr ""
 
-#: wxMDialogs.cpp:565
+#: wxMDialogs.cpp:568
 msgid "navy"
 msgstr ""
 
-#: wxMDialogs.cpp:572
+#: wxMDialogs.cpp:575
 msgid "   Welcome"
 msgstr "   Willkommen"
 
-#: wxMDialogs.cpp:574
+#: wxMDialogs.cpp:577
 msgid "         to"
 msgstr "         zu"
 
-#: wxMDialogs.cpp:576
+#: wxMDialogs.cpp:579
 msgid "         "
 msgstr ""
 
-#: wxMDialogs.cpp:578
+#: wxMDialogs.cpp:581
 msgid "!"
 msgstr ""
 
-#: wxMDialogs.cpp:585
+#: wxMDialogs.cpp:588
 msgid "    Version: "
 msgstr ""
 
-#: wxMDialogs.cpp:589
+#: wxMDialogs.cpp:592
 msgid "  Copyright (c) 1999 by Karsten Ballüder"
 msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
 
-#: wxMDialogs.cpp:592
+#: wxMDialogs.cpp:595
 msgid "          Written by Karsten Ballüder"
 msgstr "          Geschrieben von Karsten Ballüder"
 
-#: wxMDialogs.cpp:594
+#: wxMDialogs.cpp:597
 msgid "                      and Vadim Zeitlin"
 msgstr "                      und Vadim Zeitlin"
 
-#: wxMDialogs.cpp:610
+#: wxMDialogs.cpp:613
 msgid "Welcome"
 msgstr "Willkommen"
 
-#: wxMDialogs.cpp:614
+#: wxMDialogs.cpp:617
 msgid "one splash is more than enough"
 msgstr ""
 
-#: wxMDialogs.cpp:719 wxMFolderDialogs.cpp:493
+#: wxMDialogs.cpp:722 wxMFolderDialogs.cpp:518
 #, fuzzy
 msgid "Folder properties"
 msgstr "Mailbox öffnen"
 
-#: wxMDialogs.cpp:730
+#: wxMDialogs.cpp:733
 msgid "Update interval in seconds"
 msgstr "Aktualisierungsintervall in Sekunden"
 
-#: wxMDialogs.cpp:745
+#: wxMDialogs.cpp:748
 msgid "User ID"
 msgstr "Benutzerkennung"
 
-#: wxMDialogs.cpp:746 wxMDialogs.cpp:1074 wxMDialogs.cpp:1121
+#: wxMDialogs.cpp:749 wxMDialogs.cpp:1077 wxMDialogs.cpp:1124
 msgid "Password"
 msgstr "Passwort"
 
-#: wxMDialogs.cpp:749
+#: wxMDialogs.cpp:752
 #, fuzzy
 msgid "Message box file"
 msgstr "Mailbox-Datei"
 
-#: wxMDialogs.cpp:750 wxMFolderDialogs.cpp:543
+#: wxMDialogs.cpp:753 wxMFolderDialogs.cpp:571
 msgid "POP3"
 msgstr ""
 
-#: wxMDialogs.cpp:751 wxMFolderDialogs.cpp:544
+#: wxMDialogs.cpp:754 wxMFolderDialogs.cpp:572
 msgid "IMAP"
 msgstr ""
 
-#: wxMDialogs.cpp:752 wxMFolderDialogs.cpp:545
+#: wxMDialogs.cpp:755 wxMFolderDialogs.cpp:573
 msgid "News"
 msgstr ""
 
-#: wxMDialogs.cpp:755 wxMFolderDialogs.cpp:547
+#: wxMDialogs.cpp:758 wxMFolderDialogs.cpp:575
 #, fuzzy
 msgid "Folder Type"
 msgstr "Mailbox öffnen"
 
-#: wxMDialogs.cpp:772
+#: wxMDialogs.cpp:775
 #, fuzzy
 msgid "&Undo"
 msgstr "&Rückgängig"
 
-#: wxMDialogs.cpp:790
+#: wxMDialogs.cpp:793
 msgid "Hostname"
 msgstr "Rechnername"
 
-#: wxMDialogs.cpp:796
+#: wxMDialogs.cpp:799
 #, fuzzy
 msgid "Pathname or name of folder"
 msgstr "Name oder Datei der Mailbox?"
 
-#: wxMDialogs.cpp:862 wxMDialogs.cpp:869
+#: wxMDialogs.cpp:865 wxMDialogs.cpp:872
 msgid "NewFolder"
 msgstr ""
 
-#: wxMDialogs.cpp:865
+#: wxMDialogs.cpp:868
 msgid "M - New Folder"
 msgstr "M : Neue Mailbox"
 
-#: wxMDialogs.cpp:866
+#: wxMDialogs.cpp:869
 #, fuzzy
 msgid "Symbolic name for the new folder"
 msgstr "Name der neuen Mailbox?"
 
-#: wxMDialogs.cpp:868
+#: wxMDialogs.cpp:871
 msgid "NewFolderDialog"
 msgstr ""
 
-#: wxMDialogs.cpp:899
+#: wxMDialogs.cpp:902
 #, fuzzy
 msgid "Choose folder"
 msgstr "Mailbox auswählen"
 
-#: wxMDialogs.cpp:1013
+#: wxMDialogs.cpp:1016
 msgid "OK_BUTTON"
 msgstr ""
 
-#: wxMDialogs.cpp:1018
+#: wxMDialogs.cpp:1021
 msgid "CANCEL_BUTTON"
 msgstr ""
 
-#: wxMDialogs.cpp:1020
+#: wxMDialogs.cpp:1023
 msgid "HELP_BUTTON"
 msgstr ""
 
-#: wxMDialogs.cpp:1067 wxMDialogs.cpp:1117
+#: wxMDialogs.cpp:1070 wxMDialogs.cpp:1120
 msgid "FolderType"
 msgstr ""
 
-#: wxMDialogs.cpp:1071
+#: wxMDialogs.cpp:1074
 msgid "UIDLABEL"
 msgstr ""
 
-#: wxMDialogs.cpp:1072
+#: wxMDialogs.cpp:1075
 msgid "HOSTLABEL"
 msgstr ""
 
-#: wxMDialogs.cpp:1073 wxMDialogs.cpp:1119
+#: wxMDialogs.cpp:1076 wxMDialogs.cpp:1122
 msgid "UserID"
 msgstr "Benutzerkennung"
 
-#: wxMDialogs.cpp:1075 wxMDialogs.cpp:1123
+#: wxMDialogs.cpp:1078 wxMDialogs.cpp:1126
 msgid "MailHost"
 msgstr "Mailserver"
 
-#: wxMDialogs.cpp:1079 wxMDialogs.cpp:1086
+#: wxMDialogs.cpp:1082 wxMDialogs.cpp:1089
 #, fuzzy
 msgid "Foldername"
 msgstr "Mailboxname"
 
-#: wxMDialogs.cpp:1092
+#: wxMDialogs.cpp:1095
 msgid "Mailhost"
 msgstr "Mailserver"
 
-#: wxMDialogs.cpp:1099
+#: wxMDialogs.cpp:1102
 msgid "Newsserver"
 msgstr ""
 
-#: wxMDialogs.cpp:1101
+#: wxMDialogs.cpp:1104
 msgid "Newsgroup"
 msgstr ""
 
-#: wxMDialogs.cpp:1140
+#: wxMDialogs.cpp:1143
 msgid "OpenFolderDialog"
 msgstr ""
 
@@ -2013,70 +2032,70 @@ msgstr ""
 msgid "%s: size = %dx%d, pos=%d,%d, bl = %d"
 msgstr ""
 
-#: wxllist.cpp:142
+#: wxllist.cpp:144
 #, c-format
 msgid " `%s`"
 msgstr ""
 
-#: wxllist.cpp:580
+#: wxllist.cpp:584
 msgid "------------------------ debug start ------------------------"
 msgstr ""
 
-#: wxllist.cpp:583
+#: wxllist.cpp:587
 msgid "-------------------------- list end -------------------------"
 msgstr ""
 
-#: wxllist.cpp:587
+#: wxllist.cpp:591
 msgid "------------------------- debug end -------------------------"
 msgstr ""
 
-#: wxllist.cpp:593
+#: wxllist.cpp:597
 #, c-format
 msgid "CursorPos (%d, %d)"
 msgstr ""
 
-#: wxllist.cpp:594
+#: wxllist.cpp:598
 #, c-format
 msgid "CursorOffset = %d"
 msgstr ""
 
-#: wxllist.cpp:595
+#: wxllist.cpp:599
 #, c-format
 msgid "CursorObject = %p"
 msgstr ""
 
-#: wxllist.cpp:597
+#: wxllist.cpp:601
 msgid "<<no object found>>"
 msgstr ""
 
-#: wxllist.cpp:601
+#: wxllist.cpp:605
 #, c-format
 msgid " \"%s\", offs: %d"
 msgstr ""
 
-#: wxllist.cpp:607
+#: wxllist.cpp:611
 #, c-format
 msgid "Line length: %d"
 msgstr ""
 
-#: wxllist.cpp:964
+#: wxllist.cpp:968
 msgid "no object to insert"
 msgstr ""
 
-#: wxllist.cpp:1382
+#: wxllist.cpp:1438
 msgid "Helvetica"
 msgstr ""
 
-#: wxllist.cpp:1386
+#: wxllist.cpp:1442
 msgid "9999/9999  "
 msgstr ""
 
-#: wxllist.cpp:1389
+#: wxllist.cpp:1445
 #, c-format
 msgid "%d/%d"
 msgstr ""
 
-#: wxllist.cpp:1391
+#: wxllist.cpp:1447
 msgid "XXXX"
 msgstr ""
 
@@ -2494,7 +2513,7 @@ msgstr "In Mailbox &kopieren"
 msgid "Save message to folder"
 msgstr "Nachricht Speichern"
 
-#: AdbFrame.cpp:1026 AdbFrame.cpp:2858 wxDialogLayout.cpp:315
+#: AdbFrame.cpp:1026 AdbFrame.cpp:2858 wxDialogLayout.cpp:319
 #: wxMenuDefs.cpp:250 wxMenuDefs.cpp:281
 msgid "&Delete"
 msgstr "&Löschen"
@@ -2987,11 +3006,11 @@ msgid "Open &URLs with"
 msgstr ""
 
 #: wxOptionsDlg.cpp:343
-msgid "The following program will be used to view the online help system:"
+msgid "URL &browser is Netscape"
 msgstr ""
 
-#: wxOptionsDlg.cpp:345
-msgid "URL &browser is Netscape"
+#: wxOptionsDlg.cpp:344
+msgid "The following program will be used to view the online help system:"
 msgstr ""
 
 #: wxOptionsDlg.cpp:346
@@ -3155,7 +3174,7 @@ msgstr ""
 msgid "ident"
 msgstr "Drucken"
 
-#: wxMFolderDialogs.cpp:807 wxOptionsDlg.cpp:1184
+#: wxMFolderDialogs.cpp:923 wxOptionsDlg.cpp:1184
 msgid "compose"
 msgstr ""
 
@@ -3185,63 +3204,59 @@ msgstr ""
 msgid "OptionsNotebook"
 msgstr ""
 
-#: wxFolderTree.cpp:173
+#: wxFolderTree.cpp:188
 #, fuzzy
 msgid "Folder '"
 msgstr "Mailbox öffnen"
 
-#: wxFolderTree.cpp:180
+#: wxFolderTree.cpp:195
 #, fuzzy
 msgid "Create &new folder..."
 msgstr "Mailbox &anlegen..."
 
-#: wxFolderTree.cpp:181
+#: wxFolderTree.cpp:196
 #, fuzzy
 msgid "&Delete folder"
 msgstr "&Löschen"
 
-#: wxFolderTree.cpp:182
+#: wxFolderTree.cpp:197
 #, fuzzy
 msgid "&Rename folder..."
 msgstr "Mailbox &öffnen..."
 
-#: wxFolderTree.cpp:186
+#: wxFolderTree.cpp:201
 #, fuzzy
 msgid "&Properties"
 msgstr "&Eigenschaften..."
 
-#: wxFolderTree.cpp:266
-msgid "tree folder node without folder?"
+#: wxFolderTree.cpp:275
+msgid "GetTreeItemFromName() is buggy"
 msgstr ""
 
-#: wxFolderTree.cpp:285
-msgid "something is wrong in the tree traversal code"
-msgstr ""
-
-#: wxFolderTree.cpp:295 wxFolderTree.cpp:309
+#: wxFolderTree.cpp:290 wxFolderTree.cpp:304
 msgid "you didn't call Init()"
 msgstr ""
 
-#: wxFolderTree.cpp:355
+#: wxFolderTree.cpp:357
 #, fuzzy
 msgid "can't open root pseudo-folder"
 msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#: wxFolderTree.cpp:374
+#: wxFolderTree.cpp:376
 msgid "can't delete NULL folder"
 msgstr ""
 
-#: wxFolderTree.cpp:379
+#: wxFolderTree.cpp:381
 msgid ""
 "You should not delete the INBOX folder:\n"
 "it is automatically created by M to store your incoming mail"
 msgstr ""
 
-#: wxFolderTree.cpp:385
+#: wxFolderTree.cpp:387
 msgid "The root folder can not be deleted."
 msgstr ""
 
-#: wxFolderTree.cpp:398
+#: wxFolderTree.cpp:400
 #, c-format
 msgid ""
 "Do you really want to delete folder '%s' and all of its\n"
@@ -3249,211 +3264,231 @@ msgid ""
 "for the deleted folders!"
 msgstr ""
 
-#: wxFolderTree.cpp:404
+#: wxFolderTree.cpp:406
 msgid "ConfirmFolderDelete"
 msgstr ""
 
-#: wxFolderTree.cpp:405
+#: wxFolderTree.cpp:407
 #, fuzzy, c-format
 msgid "Do you really want to delete folder '%s'?"
 msgstr "Möchten Sie M wirklich beenden?"
 
-#: wxFolderTree.cpp:464
+#: wxFolderTree.cpp:466
 msgid "no icon for this folder type"
 msgstr ""
 
-#: wxFolderTree.cpp:469
+#: wxFolderTree.cpp:471
 msgid "All folders"
 msgstr "Alle Mailboxen"
 
-#: wxFolderTree.cpp:499
+#: wxFolderTree.cpp:501
 msgid "folder_inbox"
 msgstr ""
 
-#: wxFolderTree.cpp:500
+#: wxFolderTree.cpp:502
 msgid "folder_file"
 msgstr ""
 
-#: wxFolderTree.cpp:501
+#: wxFolderTree.cpp:503
 msgid "folder_pop"
 msgstr ""
 
-#: wxFolderTree.cpp:502
+#: wxFolderTree.cpp:504
 msgid "folder_imap"
 msgstr ""
 
-#: wxFolderTree.cpp:503
+#: wxFolderTree.cpp:505
 #, fuzzy
 msgid "folder_news"
 msgstr "Alle Mailboxen"
 
-#: wxFolderTree.cpp:504
+#: wxFolderTree.cpp:506
 msgid "folder_root"
 msgstr ""
 
-#: wxFolderTree.cpp:507
+#: wxFolderTree.cpp:509
 msgid "bad number of icon names"
 msgstr ""
 
-#: wxFolderTree.cpp:556
+#: wxFolderTree.cpp:526
+msgid "can't register for folder tree change event"
+msgstr ""
+
+#: wxFolderTree.cpp:578
+msgid "tree folder node without folder?"
+msgstr ""
+
+#: wxFolderTree.cpp:608
 msgid "can't get the parent of current tree item"
 msgstr ""
 
-#: wxFolderTree.cpp:570
+#: wxFolderTree.cpp:623
 #, fuzzy
 msgid "Please select the folder to delete first."
 msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
 
-#: wxFolderTree.cpp:581
+#: wxFolderTree.cpp:637
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr ""
 
-#: wxFolderTree.cpp:589
+#: wxFolderTree.cpp:645
 msgid "folder renaming not implemented"
 msgstr ""
 
-#: wxFolderTree.cpp:600 wxFolderTree.cpp:633
+#: wxFolderTree.cpp:656 wxFolderTree.cpp:689
 msgid "got other treectrls event?"
 msgstr ""
 
-#: wxFolderTree.cpp:649
+#: wxFolderTree.cpp:707
 #, fuzzy
 msgid "Can not open this folder."
 msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#: wxFolderTree.cpp:696
+#: wxFolderTree.cpp:754
 msgid "renaming folders not yet implemented"
 msgstr ""
 
-#: wxFolderTree.cpp:704
+#: wxFolderTree.cpp:762
 msgid "unexpected menu command in wxFolderTree"
 msgstr ""
 
-#: generic/persctrl.cpp:635 wxDialogLayout.cpp:278
+#: wxFolderTree.cpp:810
+msgid "no such item in the tree??"
+msgstr ""
+
+#: generic/persctrl.cpp:635 wxDialogLayout.cpp:282
 msgid "No"
 msgstr "Nein"
 
-#: wxDialogLayout.cpp:279
+#: wxDialogLayout.cpp:283
 msgid "Ask"
 msgstr ""
 
-#: generic/persctrl.cpp:634 wxDialogLayout.cpp:280
+#: generic/persctrl.cpp:634 wxDialogLayout.cpp:284
 msgid "Yes"
 msgstr "Ja"
 
-#: AdbFrame.cpp:2856 wxDialogLayout.cpp:313
+#: AdbFrame.cpp:2856 wxDialogLayout.cpp:317
 msgid "&Add"
 msgstr ""
 
-#: AdbFrame.cpp:2857 wxDialogLayout.cpp:314
+#: AdbFrame.cpp:2857 wxDialogLayout.cpp:318
 msgid "&Modify"
 msgstr ""
 
-#: wxDialogLayout.cpp:435
+#: wxDialogLayout.cpp:439
 #, fuzzy
 msgid "&Apply"
 msgstr "&Beantworten"
 
-#: wxDialogLayout.cpp:495
+#: wxDialogLayout.cpp:499
 msgid "'Apply' should be disabled!"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:301
+#: wxMFolderDialogs.cpp:318
 #, fuzzy
 msgid "Folder Name: "
 msgstr "Mailbox öffnen"
 
-#: wxMFolderDialogs.cpp:337
+#: wxMFolderDialogs.cpp:354
 #, fuzzy
 msgid "Parent folder: "
 msgstr "Mailbox öffnen"
 
-#: wxMFolderDialogs.cpp:389
+#: wxMFolderDialogs.cpp:406
 #, fuzzy
 msgid "Create new folder"
 msgstr "Mailbox &anlegen..."
 
-#: wxMFolderDialogs.cpp:470
+#: wxMFolderDialogs.cpp:490
 msgid "should have created parent folder"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:474
+#: wxMFolderDialogs.cpp:494
 msgid "new folder not created"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:500 wxMFolderDialogs.cpp:512
+#: wxMFolderDialogs.cpp:525 wxMFolderDialogs.cpp:537
 msgid "no folder in folder properties dialog"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:527
+#: wxMFolderDialogs.cpp:553
 msgid "Access"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:542
+#: wxMFolderDialogs.cpp:570
 #, fuzzy
 msgid "File"
 msgstr "&Datei"
 
-#: wxMFolderDialogs.cpp:579
+#: wxMFolderDialogs.cpp:607
 msgid "User name: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:580
+#: wxMFolderDialogs.cpp:608
 msgid "Password: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:581
+#: wxMFolderDialogs.cpp:609
 msgid "File name: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:582
+#: wxMFolderDialogs.cpp:610
 msgid "Server: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:583
+#: wxMFolderDialogs.cpp:611
 msgid "Newsgroup: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:584
+#: wxMFolderDialogs.cpp:612
 msgid "Comment: "
 msgstr ""
 
-#: wxMFolderDialogs.cpp:630 wxMFolderDialogs.cpp:746
+#: wxMFolderDialogs.cpp:657 wxMFolderDialogs.cpp:846
 msgid "folder page should be in folder dialog!"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:651
+#: wxMFolderDialogs.cpp:698
 msgid "wxFolderPropertiesPage without parent dialog?"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:701 wxMFolderDialogs.cpp:794
+#: wxMFolderDialogs.cpp:767 wxMFolderDialogs.cpp:899
 msgid "Unexpected folder type."
 msgstr ""
 
-#: wxMFolderDialogs.cpp:740
+#: wxMFolderDialogs.cpp:840
 msgid "Ok button should be disabled"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:808
+#: wxMFolderDialogs.cpp:853
+msgid "GET_PARENT_OF_CLASS broken?"
+msgstr ""
+
+#: wxMFolderDialogs.cpp:866
+msgid "must have folder by this point"
+msgstr ""
+
+#: wxMFolderDialogs.cpp:924
 msgid "access"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:814
+#: wxMFolderDialogs.cpp:931
 msgid "FolderCreateNotebook"
 msgstr ""
 
-#: wxMFolderDialogs.cpp:834
+#: wxMFolderDialogs.cpp:951
 #, fuzzy
 msgid "Please choose a folder"
 msgstr "Bitte wählen Sie"
 
-#: MailFolder.cpp:41 MailFolder.cpp:76
+#: MailFolder.cpp:47 MailFolder.cpp:88
 #, fuzzy
 msgid "can't create profile"
 msgstr "Kann temporäre Datei nicht umbenennen."
 
-#: MailFolder.cpp:69
+#: MailFolder.cpp:78
 #, fuzzy
 msgid "localhost"
 msgstr "Mailserver"
@@ -3561,83 +3596,83 @@ msgstr ""
 msgid "Cannot find mailbox for callback!"
 msgstr ""
 
-#: MailFolderCC.cpp:532
+#: MailFolderCC.cpp:533
 msgid "MailFolderCC::mm_exists() for folder "
 msgstr ""
 
-#: MailFolderCC.cpp:533
+#: MailFolderCC.cpp:534
 msgid " n: "
 msgstr ""
 
-#: MailFolderCC.cpp:540
+#: MailFolderCC.cpp:541
 msgid "new mail in unknown mail folder?"
 msgstr ""
 
-#: MailFolderCC.cpp:549
+#: MailFolderCC.cpp:550
 #, fuzzy
 msgid "Expunged message no. "
 msgstr "Nachricht öffnen"
 
-#: MailFolderCC.cpp:625
+#: MailFolderCC.cpp:630
 msgid "MailFolderCC::mm_status() for folder "
 msgstr ""
 
-#: MailFolderCC.cpp:644
+#: MailFolderCC.cpp:649
 msgid "c-client "
 msgstr ""
 
-#: MailFolderCC.cpp:654
+#: MailFolderCC.cpp:659
 msgid "c-client debug: "
 msgstr ""
 
 # MDialogs.h
-#: MailFolderCC.cpp:711
+#: MailFolderCC.cpp:721
 #, fuzzy
 msgid "Fatal Error:"
 msgstr "Fehler"
 
-#: MailFolderCC.cpp:774
+#: MailFolderCC.cpp:784
 msgid "log: "
 msgstr ""
 
-#: MailFolderCC.cpp:781
+#: MailFolderCC.cpp:791
 msgid "debug: "
 msgstr ""
 
-#: MailFolderCC.cpp:825
+#: MailFolderCC.cpp:835
 msgid "DemoBox"
 msgstr ""
 
-#: MailFolderCC.cpp:826
+#: MailFolderCC.cpp:836
 msgid "/home/karsten/src/Projects/M/test/testbox"
 msgstr ""
 
-#: MailFolderCC.cpp:827
+#: MailFolderCC.cpp:837
 msgid "Open() returned error."
 msgstr ""
 
-#: MailFolderCC.cpp:832
+#: MailFolderCC.cpp:842
 msgid "Object initialised correctly."
 msgstr ""
 
-#: MailFolderCC.cpp:834
+#: MailFolderCC.cpp:844
 msgid "Object initialisation failed."
 msgstr ""
 
-#: MailFolderCC.cpp:836
+#: MailFolderCC.cpp:846
 msgid "----------------------------------------------------------"
 msgstr ""
 
-#: MailFolderCC.cpp:841
+#: MailFolderCC.cpp:851
 msgid "Name: "
 msgstr ""
 
-#: MailFolderCC.cpp:842
+#: MailFolderCC.cpp:852
 #, fuzzy
 msgid "# of Messages: "
 msgstr "&Nachricht"
 
-#: MailFolderCC.cpp:846
+#: MailFolderCC.cpp:856
 msgid "m is of class "
 msgstr ""
 
