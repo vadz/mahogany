@@ -59,17 +59,17 @@ void MObjectRC::CheckLeaks()
    size_t nCount = gs_aObjects.Count();
 
    if ( nCount > 0 ) {
-      wxLogDebug("MEMORY LEAK: %d object leaked:", nCount);
+      wxLogDebug("MEMORY LEAK: %lu object leaked:", nCount);
    }
 
    for ( size_t n = 0; n < nCount; n++ ) {
-      wxLogDebug("Object %d: %s", n, gs_aObjects[n]->DebugDump().c_str());
+      wxLogDebug("Object %lu: %s", n, gs_aObjects[n]->DebugDump().c_str());
    }
 }
 
 String MObjectRC::DebugDump() const
 {
-   return MObject::DebugDump() + String::Format(" m_nRef = %d: ", m_nRef);
+   return MObject::DebugDump() + String::Format(" m_nRef = %lu: ", m_nRef);
 }
 
 void MObject::CheckLeaks()
@@ -81,7 +81,7 @@ String MObject::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("%s at 0x%x", DebugGetClassName(), this);
+   str.Printf("%s at %p", DebugGetClassName(), this);
 
    return str;
 }
@@ -104,7 +104,7 @@ void MObjectRC::IncRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object 0x%x: IncRef() called, m_nRef = %u.", this, m_nRef);
+      wxLogTrace("Object %p: IncRef() called, m_nRef = %lu.", this, m_nRef);
    }
 }
 
@@ -117,7 +117,7 @@ bool MObjectRC::DecRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object 0x%x: DecRef() called, m_nRef = %u.", this, m_nRef);
+      wxLogTrace("Object %p: DecRef() called, m_nRef = %lu.", this, m_nRef);
    }
 
    if ( m_nRef == 0 )

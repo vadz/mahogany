@@ -1822,7 +1822,7 @@ void wxAdbEditFrame::AdvanceToNextFound()
     else {
       // remove the string which might have been left since the last time we
       // were called
-      wxLogStatus(this, "");
+      SetStatusText("");
     }
 
     MoveSelection(m_aFindResults[m_nFindIndex]);
@@ -3076,7 +3076,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
     wxLogNull nolog;
     wxFile file(filename);
     if ( file.IsOpened() ) {
-      str.Printf("%d", file.Length());
+      str.Printf("%lu", (unsigned long)file.Length());
     }
     else {
       str = _("unknown");
@@ -3090,7 +3090,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   m_staticFileSize->SetLabel(str);
   m_staticFileName->SetLabel(filename);
 
-  str.Printf("%d", m_book->GetNumberOfEntries());
+  str.Printf("%ld", m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);
 
   m_textName->SetValue(m_book->GetBook()->GetName());
