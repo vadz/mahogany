@@ -4074,7 +4074,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          // another one, check for this - this will go away once true radio
          // menu items are supported
          cmd -= WXMENU_FVIEW_SIZE_AUTO;
-         if ( cmd == READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT) )
+         if ( cmd == (long)READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT) )
          {
             // nothing changed
             return;

@@ -812,10 +812,20 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "properly, so there is normally no risk in setting this "
                   "option."),                      Field_Message |
                                                    Field_Advanced,
-                                                  -ConfigField_UseSendmail },
+#ifdef USE_SENDMAIL
+                                                  -ConfigField_UseSendmail
+#else
+                                                  -1
+#endif
+   },
    { gettext_noop("Send &8 bit data"),             Field_Bool |
                                                    Field_Advanced,
-                                                  -ConfigField_UseSendmail },
+#ifdef USE_SENDMAIL
+                                                  -ConfigField_UseSendmail
+#else
+                                                  -1
+#endif
+   },
 
    { gettext_noop(
       "Some SMTP or NNTP servers require a user Id or login.\n"
