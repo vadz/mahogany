@@ -1087,6 +1087,7 @@ wxLayoutLine::Draw(wxDC &dc,
          (**i).Draw(dc, pos, llist, from-xpos, to-xpos);
       }
       else
+      {
          if (highlight == 1) llist->StartHighlighting(dc);
          if (highlight == 0) llist->EndHighlighting(dc);
          (**i).Draw(dc, pos, llist);
