@@ -299,10 +299,8 @@ protected:
    */
    bool VerifySettings(void);
 
-   /// Windows: get the directory where we're installed and init m_globalDir
-#ifdef OS_WIN
+   /// if the global dir doesn't exist, ask the user for it
    void InitGlobalDir();
-#endif // Windows
 
    // global variables stored in the application object
    // -------------------------------------------------

@@ -279,9 +279,10 @@ public:
                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     }
 
-    void OnSize(wxSizeEvent& event)
+    void OnSize(wxSizeEvent& WXUNUSED(event))
     {
-       m_text->SetSize(-1, -1, event.GetSize().GetX(), event.GetSize().GetY());
+       wxSize size = GetClientSize();
+       m_text->SetSize(0, 0, size.x, size.y);
     }
 
 private:

@@ -428,7 +428,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
    if(groups.Length())
    {
       ASSERT(m_Envelope->newsgroups == NIL);
-      m_Envelope->newsgroups = strutil_strdup(groups);
+      m_Envelope->newsgroups = strdup(groups);
    }
 
 }
@@ -796,8 +796,8 @@ SendMessageCC::AddPart(Message::ContentType type,
       for(i=plist->begin(); i != plist->end(); i++)
       {
          par = mail_newbody_parameter();
-         par->attribute = strutil_strdup((*i)->name);
-         par->value     = strutil_strdup((*i)->value);
+         par->attribute = strdup((*i)->name);
+         par->value     = strdup((*i)->value);
          par->next      = lastpar;
          lastpar = par;
       }
@@ -813,18 +813,18 @@ SendMessageCC::AddPart(Message::ContentType type,
          m_CharSet = cs;
       }
 
-      if(m_CharSet.Length() != 0)
+      if ( !m_CharSet.empty() )
       {
          par = mail_newbody_parameter();
-         par->attribute = strutil_strdup("CHARSET");
-         par->value     = strutil_strdup(m_CharSet);
+         par->attribute = strdup("CHARSET");
+         par->value     = strdup(m_CharSet);
          par->next      = lastpar;
          lastpar = par;
       }
    }
 
    bdy->parameter = lastpar;
-   bdy->disposition.type = strutil_strdup(disposition);
+   bdy->disposition.type = strdup(disposition);
    if(dlist)
    {
       MessageParameterList::iterator i;
@@ -833,8 +833,8 @@ SendMessageCC::AddPart(Message::ContentType type,
       for(i=dlist->begin(); i != dlist->end(); i++)
       {
          par = mail_newbody_parameter();
-         par->attribute = strutil_strdup((*i)->name);
-         par->value     = strutil_strdup((*i)->value);
+         par->attribute = strdup((*i)->name);
+         par->value     = strdup((*i)->value);
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;

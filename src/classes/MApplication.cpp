@@ -312,43 +312,10 @@ MAppBase::OnStartup()
 
    // find our directories
    // --------------------
-   String tmp;
-   m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
-   if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))
-   {
-#ifdef OS_UNIX
-      bool   found;
-      if(PathFinder::IsDir(M_BASEDIR))
-         m_globalDir = M_BASEDIR;
-      else
-      {
-         PathFinder pf(MP_PREFIXPATH_D);
-         pf.AddPaths(M_PREFIX,false,true);
-         m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
-         if(!found)
-         {
-            String msg;
-            msg.Printf(_("Cannot find global directory \"%s\" in\n"
-                         "\"%s\"\n"
-                         "Would you like to specify its location now?"),
-                       MP_ROOTDIRNAME_D, MP_ETCPATH_D);
-            if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                     TRUE /* yes default */, "AskSpecifyDir") )
-            {
-               wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
-               if ( dlg.ShowModal() )
-               {
-                  m_globalDir = dlg.GetPath();
-               }
-            }
-         }
-      }
-#else  //Windows
-      InitGlobalDir();
-#endif //Unix
 
-      m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
-   }
+   InitGlobalDir();
+
+   String tmp;
 #ifdef USE_ICON_SUBDIRS
    // KB: we no longer use different subdirs:
    // We need to set this before wxWindows has a chance to process
@@ -502,11 +469,11 @@ MAppBase::OnStartup()
    CHECK( m_eventNewMailReg, FALSE,
           "failed to register event handler for new mail event " );
    m_eventOptChangeReg = MEventManager::Register(*this,
-                                                 MEventId_OptionsChange); 
+                                                 MEventId_OptionsChange);
    CHECK( m_eventOptChangeReg, FALSE,
           "failed to register event handler for options change event " );
    m_eventFolderUpdateReg = MEventManager::Register(*this,
-                                                    MEventId_FolderUpdate); 
+                                                    MEventId_FolderUpdate);
    CHECK( m_eventFolderUpdateReg, FALSE,
           "failed to register event handler for folder status event " );
 
@@ -560,7 +527,7 @@ MAppBase::OnShutDown()
    if(! SaveRemoteConfigSettings() )
       wxLogError(_("Synchronised configuration information could not "
                    "be stored remotely."));
-   
+
    // don't want events any more
    if ( m_eventNewMailReg )
    {
@@ -596,6 +563,12 @@ MAppBase::OnShutDown()
    MailFolder::CleanUp();
    // there might have been events queued, get rid of them:
    MEventManager::DispatchPending();
+
+#ifdef OS_WIN
+   // clean up after cclient
+   free(myusername_full(NULL));
+   free(sysinbox());
+#endif // OS_WIN
 }
 
 const char *
@@ -770,7 +743,7 @@ MAppBase::OnMEvent(MEventData& event)
                }
                // This test is there as the messages might have gone
                // in the meantime, as happens when filtering.
-               if(found > 0) 
+               if(found > 0)
                   MDialog_Message(message, m_topLevelFrame, _("New Mail"));
             }
          }
@@ -806,12 +779,40 @@ MAppBase::OnMEvent(MEventData& event)
    return TRUE;
 }
 
-#ifdef OS_WIN
 void
 MAppBase::InitGlobalDir()
 {
-   if ( !m_globalDir )
+   m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
+   if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))
    {
+#ifdef OS_UNIX
+      bool   found;
+      if(PathFinder::IsDir(M_BASEDIR))
+         m_globalDir = M_BASEDIR;
+      else
+      {
+         PathFinder pf(MP_PREFIXPATH_D);
+         pf.AddPaths(M_PREFIX,false,true);
+         m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
+         if(!found)
+         {
+            String msg;
+            msg.Printf(_("Cannot find global directory \"%s\" in\n"
+                         "\"%s\"\n"
+                         "Would you like to specify its location now?"),
+                       MP_ROOTDIRNAME_D, MP_ETCPATH_D);
+            if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                     TRUE /* yes default */, "AskSpecifyDir") )
+            {
+               wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
+               if ( dlg.ShowModal() )
+               {
+                  m_globalDir = dlg.GetPath();
+               }
+            }
+         }
+      }
+#else  // Windows
       // under Windows our directory is always the one where the executable is
       // located. At least we're sure that it exists this way...
       wxString strPath;
@@ -821,10 +822,20 @@ MAppBase::InitGlobalDir()
 
       // extract the dir name
       wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+
+      // a really stupid hack: when I run the program while developing it, the
+      // executable is in either Debug or Release subdirectory but I want to
+      // use the top program dir
+      wxString strLastDir = m_globalDir.AfterLast('\\');
+      if ( strLastDir == "Debug" || strLastDir == "Release" )
+      {
+         m_globalDir = m_globalDir.BeforeLast('\\');
+      }
+#endif // Unix/Windows
+
+      m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
-   //else: already done once
 }
-#endif
 
 /// Send all messages from the outbox
 void
@@ -898,7 +909,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       }
    }
    mf->DecRef();
-   
+
    if(nSMTP) *nSMTP = smtp;
    if(nNNTP) *nNNTP = nntp;
    return smtp != 0 || nntp != 0;

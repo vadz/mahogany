@@ -888,14 +888,23 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
                                    DIALOG_STYLE
                                   )
 {
+   // this doesn't give corret results under MSW
+#if 0
    // basic unit is the height of a char, from this we fix the sizes of all
    // other controls
    size_t heightLabel = AdjustCharHeight(GetCharHeight());
 
    hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
    wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+#else // 1
+   // basic unit is the standard button
+   wxSize size = wxButton::GetDefaultSize();
+   wBtn = size.x;
+   hBtn = size.y;
+#endif // 0/1
 
    m_helpId = -1; // no help id by default
+
    // the controls will be positioned with the constraints
    SetAutoLayout(TRUE);
 }
