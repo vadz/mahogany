@@ -122,7 +122,7 @@ public:
    */
    virtual bool GetHeaderLine(const String &line,
                               String &value,
-                              wxFontEncoding *encoding = NULL) = 0;
+                              wxFontEncoding *encoding = NULL) const = 0;
 
    /** Get the complete header text.
        @return string with multiline text containing the message headers

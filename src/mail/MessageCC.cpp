@@ -278,7 +278,7 @@ MessageCC::GetHeader(void) const
 
 bool
 MessageCC::GetHeaderLine(const String &line,
-                         String &value, wxFontEncoding *encoding)
+                         String &value, wxFontEncoding *encoding) const
 {
    CHECK_DEAD_RC(false);
    if(! folder)

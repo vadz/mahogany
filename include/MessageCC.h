@@ -32,7 +32,7 @@ public:
    */
    bool GetHeaderLine(const String &line,
                       String &value,
-                      wxFontEncoding *encoding = NULL);
+                      wxFontEncoding *encoding = NULL) const;
 
    /** Get a complete header text.
        @return string with multiline text containing the message headers
