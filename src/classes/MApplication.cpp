@@ -553,6 +553,13 @@ MAppBase::OnStartup()
 void
 MAppBase::OnAbnormalTermination()
 {
+   // no more event processing as it may lead to unexpected results in the
+   // state we are in
+   MEventManager::Suspend();
+
+   m_cycle = ShuttingDown;
+
+   // maybe we could try calling OnShutDown()?
 }
 
 void
