@@ -253,6 +253,14 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
       CHECK_RET( mbar, _T("no menu bar in the frame containing wxMessageView?") );
 
       mbar->Check(WXMENU_VIEW_VIEWERS_BEGIN + 1 + n, true);
+
+      // finally we must ensure that the new viewer is positioned/sized
+      // correctly: folder view does it itself in OnMsgViewerChange() but for
+      // standalone message view frame we have to do it ourselves
+      if ( !m_FolderView )
+      {
+         frame->SendSizeEvent();
+      }
    }
 }
 
