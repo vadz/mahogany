@@ -747,7 +747,7 @@ static|Static|STATIC)
 	if test "$USE_PYTHON" != 0; then
 	    dnl extra libs required by python on freebsd
 	    case "$OSTYPE" in freebsd* | FreeBSD*)
-		LIBS="-lreadline $LIBS"
+		PYTHON_LIBS="-lreadline $PYTHON_LIBS"
 		;;
 	    esac
 
@@ -755,7 +755,8 @@ static|Static|STATIC)
 	    dnl under Linux but in libutil
 	    if test "$USE_PYTHON2" != 0; then
 		AC_CHECK_FUNC(openpty,,
-			AC_CHECK_LIB(util,openpty,LIBS="-lutil $LIBS"))
+			AC_CHECK_LIB(util,openpty,
+			    PYTHON_LIBS="-lutil $PYTHON_LIBS"))
 	    fi
 	fi
 	;;
