@@ -245,13 +245,22 @@ bool wxAttachmentDialog::TransferDataFromWindow()
 bool
 ShowAttachmentDialog(wxWindow *parent,
                      AttachmentProperties *properties,
-                     bool *allowDisable)
+                     bool& dontShowAgain)
+{
+   CHECK( properties, false, _T("NULL properties in ShowAttachmentDialog") );
+
+   wxAttachmentDialog dlg(parent, properties, &dontShowAgain);
+
+   return dlg.ShowModal() == wxID_OK;
+}
+
+bool
+EditAttachmentProperties(wxWindow *parent, AttachmentProperties *properties)
 {
    CHECK( properties, false, _T("NULL properties in EditAttachmentProperties") );
 
-   wxAttachmentDialog dlg(parent, properties, allowDisable);
+   wxAttachmentDialog dlg(parent, properties, NULL /* no "don't show" box */);
 
    return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
 }
-
 

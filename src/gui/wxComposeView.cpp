@@ -727,7 +727,7 @@ AttachmentMenu::ShowAttachmentProperties(wxWindow *win, EditorContentPart *part)
    props.SetDisposition(part->GetDisposition());
    props.mimetype = part->GetMimeType();
 
-   if ( ShowAttachmentDialog(win, &props) )
+   if ( EditAttachmentProperties(win, &props) )
    {
       part->SetFile(props.filename);
       part->SetName(props.name);
@@ -3594,7 +3594,15 @@ wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
    {
       bool dontShowAgain = false;
 
-      ShowAttachmentDialog(m_editor->GetWindow(), &props, &dontShowAgain);
+      if ( !ShowAttachmentDialog(m_editor->GetWindow(),
+                                 &props,
+                                 dontShowAgain) )
+      {
+         // adding the attachment was cancelled
+         wxLogStatus(this, _("Attachment not added."));
+
+         return;
+      }
 
       mc->SetName(props.name);
       mc->SetDisposition(props.GetDisposition());

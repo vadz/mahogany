@@ -65,20 +65,39 @@ struct AttachmentProperties
 };
 
 /**
-  Show the dialog allowing the user to edit the attachment properties. It can
-  be shown either automatically when the user attaches the file in which case
-  allowDisable should be pointing to a bool var with value == true which will
-  be set to false by this function if the user chose to disable showing this
-  dialog; or when the user clicks on the attachment in which case allowDisable
-  should be NULL.
+   Show the dialog allowing the user to edit the attachment properties.
 
-  @param parent the parent for the dialog
-  @param properties to edit, can't be NULL
-  @param allowDisable if true, the dialog will have "don't show again" checkbox
-  @return true if the user has changed something, false otherwise
+   This dialog is shown when the user chooses to edit the properties of an
+   already existing attachment.
+
+   @sa ShowAttachmentDialog()
+
+   @param parent the parent for the dialog
+   @param properties to edit, can't be NULL
+   @return true if the user has changed something, false otherwise
  */
-extern bool ShowAttachmentDialog(wxWindow *parent,
-                                 AttachmentProperties *properties,
-                                 bool *allowDisable = NULL);
+extern bool
+EditAttachmentProperties(wxWindow *parent, AttachmentProperties *properties);
+
+/**
+   Show the dialog allowing the user to edit the attachment properties
+   immediately after attaching the file.
+
+   The difference between this function and EditAttachmentProperties() is the
+   allowDisable parameter and different return value interpretation: if the
+   user cancels the EditAttachmentProperties() dialog, nothing should be done
+   while if he cancels this one, the attachment shouldn't be inserted at all as
+   still inserting it after the user pressed cancel would be counterintuitive.
+
+   @param parent the parent for the dialog
+   @param properties to edit, can't be NULL
+   @param dontShowAgain if set to true on return, the dialog shouldn't be shown
+                        the next time any more (user chose to disable it)
+   @return true if the user chose ok, false if the dialog was cancelled
+ */
+extern bool
+ShowAttachmentDialog(wxWindow *parent,
+                     AttachmentProperties *properties,
+                     bool& dontShowAgain);
 
 #endif // _ATTACHDIALOG_H_
