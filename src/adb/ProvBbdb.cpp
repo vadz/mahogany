@@ -855,7 +855,7 @@ BbdbEntryGroup::GetEntry(const String& name) const
 
    BbdbEntryList::iterator i;
 
-   wxLogDebug("BbdbEntryGroup::GetEntry() called with: %s", name.c_str());
+//   wxLogDebug("BbdbEntryGroup::GetEntry() called with: %s", name.c_str());
    for(i = m_entries->begin(); i != m_entries->end(); i++)
    {
       (**i).MOcheck();
@@ -878,7 +878,7 @@ BbdbEntryGroup::Exists(const String& path) const
 AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
 {
    MOcheck();
-   wxLogDebug("BbdbEntryGroup::GetGroup() called with: %s", name.c_str());
+//   wxLogDebug("BbdbEntryGroup::GetGroup() called with: %s", name.c_str());
    return NULL;
 }
 
@@ -923,7 +923,7 @@ AdbEntry *
 BbdbEntryGroup::FindEntry(const char *szName)
 {
    MOcheck();
-   wxLogDebug("BbdbEntryGroup::FindEntry() called with: %s", szName);
+//   wxLogDebug("BbdbEntryGroup::FindEntry() called with: %s", szName);
    return NULL;
 }
 
