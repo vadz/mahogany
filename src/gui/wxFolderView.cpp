@@ -2719,8 +2719,10 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
 
       m_FolderCtrl->Focus(idx);
 
+#ifndef __WXMSW__
       // update the scrollbars to show the visible item
       wxYield();
+#endif // !__WXMSW__
    }
 
    // the item is already focused, now preview it automatically too if we're
