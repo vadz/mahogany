@@ -10,6 +10,23 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+   Explanation of the profile entries we use: in each profile we have
+
+   CustomHeaders_Mail = "X-Foo:X-Bar:...:X-Baz"
+
+   and also CustomHeaders_News and CustomHeaders_Both which specify the set of
+   custom headers to use for email messages, news messages and all messages
+   respectively.
+
+   The value of an extra header X-Foo is stored under CustomHeaders:X-Foo:Mail,
+   CustomHeaders:X-Foo:News or CustomHeaders:X-Foo:Both.
+
+   Note that the names of the custom headers must be valie profile names and
+   can't contain ':'. This is not a restriction as a valid RFC 822 (or 1036)
+   header satisfies both of these requirments anyhow.
+ */
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -70,7 +87,10 @@ extern const MOption MP_USERLEVEL;
 // constants
 // ----------------------------------------------------------------------------
 
-// headers of different types live in different subgroups
+/// the prefix for custom headers values
+#define CUSTOM_HEADERS_PREFIX "CustomHeaders"
+
+// prefixes identifying headers of different types
 static const char *gs_customHeaderSubgroups[CustomHeader_Max] =
 {
    "News",
@@ -271,8 +291,7 @@ private:
    // retrieves the name and value for header by index from the listctrl
    void GetHeader(int index, String *headerName, String *headerValue);
 
-   // our profile: the headers info is stored under
-   // M_CUSTOM_HEADERS_CONFIG_SECTION in it
+   // our profile: the headers info is stored here
    Profile *m_profile;
 
    // the types of the headers (not ints, but CustomHeaderTypes, in fact)
@@ -642,7 +661,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
                                            wxWindow *parent,
                                            bool letUserChooseType)
                      : wxOptionsPageSubdialog(profile, parent,
-                                              _("Edit custom header"),
+                                              _("Edit custom headers"),
                                               "CustomHeader")
 {
    // init the member vars
@@ -658,9 +677,9 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    wxString foldername = GetFolderNameFromProfile(profile);
    wxString labelBox;
    if ( !foldername.empty() )
-      labelBox.Printf(_("Header value for folder '%s'"), foldername.c_str());
+      labelBox.Printf(_("Custom header for folder '%s'"), foldername.c_str());
    else
-      labelBox.Printf(_("Default value for header"));
+      labelBox.Printf(_("Default custom header"));
    wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
 
    // calc the max width of the label
@@ -800,6 +819,22 @@ bool wxCustomHeaderDialog::TransferDataToWindow()
 bool wxCustomHeaderDialog::TransferDataFromWindow()
 {
    m_headerName = m_textctrlName->GetValue();
+
+   // check that this is a valid header name
+   for ( const char *pc = m_headerName.c_str(); *pc; pc++ )
+   {
+      // RFC 822 allows '/' but we don't because it has a special meaning for
+      // the profiles/wxConfig; other characters are excluded in accordance
+      // with the definition of the header name in the RFC
+      unsigned char c = *pc;
+      if ( c < 32 || c > 126 || c == ':' || c == '/' )
+      {
+         wxLogError(_("The character '%c' is invalid in the header name, "
+                      "please replace or remove it."), c);
+         return false;
+      }
+   }
+
    m_headerValue = m_textctrlValue->GetValue();
 
    if ( m_checkboxRemember )
@@ -1017,34 +1052,61 @@ bool wxCustomHeadersDialog::TransferDataToWindow()
 
 bool wxCustomHeadersDialog::TransferDataFromWindow()
 {
-   // FIXME not really efficient - we could update only the entries which
-   //       really changed instead of rewriting everything
+   // not really efficient - we could update only the entries which really
+   // changed instead of rewriting everything - but hardly crucial
 
-   // delete the old entries
-   wxString root = M_CUSTOM_HEADERS_CONFIG_SECTION;
+   // delete all old entries
+   wxArrayString entriesToDelete;
+   String name;
+   long cookie;
+   bool cont = m_profile->GetFirstEntry(name, cookie);
+   while ( cont )
    {
-      ProfilePathChanger pathChanger(m_profile, root);
-
-      for ( int type = 0; type < CustomHeader_Max; type++ )
+      if ( name.StartsWith(CUSTOM_HEADERS_PREFIX) )
       {
-         m_profile->DeleteGroup(gs_customHeaderSubgroups[type]);
+         // don't delete entries while enumerating them, this confused the
+         // enumeration
+         entriesToDelete.Add(name);
       }
+
+      cont = m_profile->GetNextEntry(name, cookie);
    }
 
-   // write the new ones
+   size_t count = entriesToDelete.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_profile->DeleteEntry(entriesToDelete[n]);
+   }
+
+   // write the values of the new ones
+   String pathBase = CUSTOM_HEADERS_PREFIX;
+   pathBase += ':';
+
+   wxArrayString headersFor[CustomHeader_Max];
    String headerName, headerValue;
    int nItems = m_listctrl->GetItemCount();
    for ( int nItem = 0; nItem < nItems; nItem++ )
    {
+      // retrieve the info about this header
       GetHeader(nItem, &headerName, &headerValue);
-
-      // write the entry into the correct subgroup
       int type = m_headerTypes[(size_t)nItem];
-      wxString path;
-      path << root << '/' << gs_customHeaderSubgroups[type];
-      ProfilePathChanger pathChanger(m_profile, path);
 
-      m_profile->writeEntry(headerName, headerValue);
+      // write the corresponding entry
+      wxString path;
+      path << pathBase << headerName << ':' << gs_customHeaderSubgroups[type];
+
+      m_profile->writeEntry(path, headerValue);
+   }
+
+   // finally write the names of the headers to use
+   pathBase = CUSTOM_HEADERS_PREFIX;
+   for ( size_t type = 0; type < CustomHeader_Max; type++ )
+   {
+      if ( !headersFor[type].IsEmpty() )
+      {
+         m_profile->writeEntry(pathBase + gs_customHeaderSubgroups[type],
+                               strutil_flatten_array(headersFor[type]));
+      }
    }
 
    return TRUE;
@@ -1105,7 +1167,7 @@ void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
    CHECK_RET( GetSelection(&sel), "button should be disabled" );
 
    m_listctrl->DeleteItem(sel);
-   m_headerTypes.Remove(sel);
+   m_headerTypes.RemoveAt(sel);
 }
 
 // ----------------------------------------------------------------------------
@@ -1150,7 +1212,8 @@ bool ConfigureMsgViewHeaders(Profile *profile, wxWindow *parent)
    return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
 }
 
-bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
+bool ConfigureCustomHeader(Profile *profile,
+                           wxWindow *parent,
                            String *headerName, String *headerValue,
                            bool *storedInProfile,
                            CustomHeaderType type)
@@ -1175,12 +1238,24 @@ bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
 
       if ( remember )
       {
+         // update the value of this headers
          String path;
-         path << M_CUSTOM_HEADERS_CONFIG_SECTION << '/'
+         path << CUSTOM_HEADERS_PREFIX << ':' << *headerName << ':'
                << gs_customHeaderSubgroups[type];
 
-         ProfilePathChanger pathChanger(profile, path);
-         profile->writeEntry(*headerName, *headerValue);
+         profile->writeEntry(path, *headerValue);
+
+         // and add this header to thel ist of headers to use
+         path.clear();
+         path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
+         wxArrayString
+            headerNames = strutil_restore_array(profile->readEntry(path, ""));
+         if ( headerNames.Index(*headerName) == wxNOT_FOUND )
+         {
+            headerNames.Add(*headerName);
+            profile->writeEntry(path, strutil_flatten_array(headerNames));
+         }
+         //else: it's already there
       }
 
       return true;
@@ -1199,56 +1274,61 @@ bool ConfigureCustomHeaders(Profile *profile, wxWindow *parent)
    return dlg.ShowModal() == wxID_OK;
 }
 
-// TODO we should implement inheritance!!
 size_t GetCustomHeaders(Profile *profile,
                         CustomHeaderType typeWanted,
                         wxArrayString *names,
                         wxArrayString *values,
                         wxArrayInt *types)
 {
+   CHECK( profile && names && values, (size_t)-1, "invalid parameter" );
+
    // init
    names->Empty();
    values->Empty();
    if ( types )
       types->Empty();
 
-   // read headers of all types, select those which we need
-   String headerName, headerValue;
-   long dummy;
+   // examine all custom header types
+   String pathBase = CUSTOM_HEADERS_PREFIX;
    for ( int type = 0; type < CustomHeader_Max; type++ )
    {
       // check whether we're interested in the entries of this type at all
-      if ( (typeWanted < CustomHeader_Both) && (typeWanted != type) )
+      // (CustomHeader_Max means to take all entries)
+      if ( (typeWanted != CustomHeader_Max) &&
+           (typeWanted != CustomHeader_Both) &&
+           (typeWanted != type) )
       {
          // no, we want only "Mail" entries and the current type is "News" (or
          // vice versa), skip this type
          continue;
       }
 
-      // go to the subgroup
-      String path;
-      path << M_CUSTOM_HEADERS_CONFIG_SECTION << '/'
-           << gs_customHeaderSubgroups[type];
-      ProfilePathChanger pathChanger(profile, path);
+      // get the names of custom headers for this type
+      String hdrs
+          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], "");
 
-      // enum all entries in it
-      bool cont = profile->GetFirstEntry(headerName, dummy);
-      while ( cont )
+      // if we have any ...
+      if ( !hdrs.empty() )
       {
-         if ( names->Index(headerName) == wxNOT_FOUND )
-         {
-            headerValue = profile->readEntry(headerName, "");
+         // ... add all these headers
+         wxArrayString headerNames = strutil_restore_array(hdrs);
 
-            names->Add(headerName);
-            values->Add(headerValue);
+         size_t count = headerNames.GetCount();
+         for ( size_t n = 0; n < count; n++ )
+         {
+            String name = headerNames[n];
+            String path = pathBase;
+            path << ':' << name
+                 << ':' << gs_customHeaderSubgroups[type];
+
+            names->Add(name);
+            values->Add(profile->readEntry(path, ""));
             if ( types )
                types->Add(type);
          }
-         //else: ignore all occurences except the first
-
-         cont = profile->GetNextEntry(headerName, dummy);
       }
    }
 
    return names->GetCount();
 }
+

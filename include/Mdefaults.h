@@ -65,12 +65,6 @@
 /// the root path for all ADB editor config entries
 #define ADB_CONFIG_PATH "AdbEditor"
 
-/// the subgroup for custom headers values
-#define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
-
-/// the subgroup for message templates (should have the trailing slash)
-#define M_TEMPLATE_SECTION "Template/"
-
 /** @name Keys where the template for messages of given type is stored */
 //@{
 #define MP_TEMPLATE_NEWMESSAGE   "NewMessage"

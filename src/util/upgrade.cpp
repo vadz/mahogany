@@ -133,7 +133,10 @@ extern const MOption MP_VERSION;
 
 #define MP_OLD_FOLDER_HOST "HostName"
 
-#define M_TEMPLATES_SECTION "Templates/"
+#define M_TEMPLATES_SECTION "Templates"
+#define M_TEMPLATE_SECTION "Template"
+
+#define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -2085,7 +2088,7 @@ public:
                String templateValue = profile->readEntry(entry, "");
 
                String entryNew;
-               entryNew << M_TEMPLATES_SECTION
+               entryNew << M_TEMPLATES_SECTION << '/'
                         << templateKinds[n] << '/'
                         << folderName;
                Profile *profileApp = mApplication->GetProfile();
@@ -2221,49 +2224,151 @@ UpgradeFrom060()
 // 0.63 -> 0.64
 // ----------------------------------------------------------------------------
 
+// UpdateNonFolderProfiles() helper: copies all entries from CustomHeaders
+// group to the current group itself flattening their names (see
+// wxHeadersDialogs.cpp for the details of the config format used)
 static void
-RemoveProfileTypes(wxConfigBase *config)
+UpdateCustomHeadersTo064(wxConfigBase *config)
 {
-   if ( config->HasEntry("ProfileType" /* MP_PROFILE_TYPE_NAME */) )
+   // from wxHeadersDialogs.cpp
+   static const char *customHeaderSubgroups[] =
    {
-      config->DeleteEntry("ProfileType");
-   }
+      "News",
+      "Mail",
+      "Both"
+   };
 
-   String name;
-   long cookie;
-   bool cont = config->GetFirstGroup(name, cookie);
-   while ( cont )
+   String pathBase = M_CUSTOM_HEADERS_CONFIG_SECTION;
+   for ( int type = 0; type < WXSIZEOF(customHeaderSubgroups); type++ )
    {
-      config->SetPath(name);
-      RemoveProfileTypes(config);
-      config->SetPath("..");
+      String path = pathBase + '/' + customHeaderSubgroups[type];
+      if ( config->HasGroup(path) )
+      {
+         wxArrayString headerNames,
+                       headerValues;
 
-      cont = config->GetNextGroup(name, cookie);
+         config->SetPath(path);
+
+         String name;
+         long cookie;
+         for ( bool cont = config->GetFirstEntry(name, cookie);
+               cont;
+               cont = config->GetNextEntry(name, cookie) )
+         {
+            headerNames.Add(name);
+            headerValues.Add(config->Read(name, ""));
+         }
+
+         config->SetPath("../..");
+
+         // write them as ::GetCustomHeaders() expects them to be
+         config->Write(pathBase + customHeaderSubgroups[type],
+                       strutil_flatten_array(headerNames));
+
+         size_t count = headerValues.GetCount();
+         for ( size_t n = 0; n < count; n++ )
+         {
+            path.clear();
+            path << pathBase
+                 << ':' << headerNames[n]
+                 << ':' << customHeaderSubgroups[type];
+
+            config->Write(path, headerValues[n]);
+         }
+      }
    }
 }
 
 static void
-RemoveNonFolderProfiles(wxConfigBase *config)
+UpdateTemplatesTo064(wxConfigBase *config)
 {
+   config->SetPath(M_TEMPLATE_SECTION);
+
+   wxArrayString names,
+                 values;
+
+   String name;
+   long cookie;
+   for ( bool cont = config->GetFirstEntry(name, cookie);
+         cont;
+         cont = config->GetNextEntry(name, cookie) )
+   {
+      names.Add(name);
+      values.Add(config->Read(name, ""));
+   }
+
+   config->SetPath("..");
+
+   size_t count = names.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      String path;
+      path << M_TEMPLATE_SECTION << '_' << names[n];
+      config->Write(path, values[n]);
+   }
+}
+
+static void
+UpdateNonFolderProfiles(wxConfigBase *config)
+{
+   wxArrayString groupsToDelete;
+
    String name;
    long cookie;
    bool cont = config->GetFirstGroup(name, cookie);
    while ( cont )
    {
-      if ( config->Read(name + "/ProfileType", 0l) != 1 )
+      bool deleteGroup;
+      if ( name == M_CUSTOM_HEADERS_CONFIG_SECTION )
       {
-         wxLogWarning(_("Invalid config settings group '%s' was removed."),
-                      name.c_str());
-         config->DeleteGroup(name);
+         UpdateCustomHeadersTo064(config);
+
+         deleteGroup = true;
+      }
+      else if ( name == "Template" )
+      {
+         UpdateTemplatesTo064(config);
+
+         deleteGroup = true;
+      }
+      else
+      {
+         // delete all groups under M_PROFILE_CONFIG_SECTION without ProfileType=1
+         // in them: normally, there shouldn't be any, but somehow in my own
+         // ~/.M/config there is some junk (maybe left from some very old
+         // version?) and if we leave them in config we'd have all kinds of
+         // problems with them because they don't represent the real folders
+         deleteGroup = config->Read(name + "/ProfileType", 0l) != 1;
+         if ( deleteGroup )
+         {
+            wxLogWarning(_("Removing invalid config settings group '%s'."),
+                         name.c_str());
+         }
+      }
+
+      if ( deleteGroup )
+      {
+         // don't delete it now as it confuses enumerating the subgroups, do it
+         // when we finish with them
+         groupsToDelete.Add(name);
       }
       else // valid folder group, descend into it
       {
+         // remove obsolete "ProfileType", it's not used nor needed any more
+         config->DeleteEntry(name + "/ProfileType");
+
          config->SetPath(name);
-         RemoveNonFolderProfiles(config);
+         UpdateNonFolderProfiles(config);
          config->SetPath("..");
       }
 
       cont = config->GetNextGroup(name, cookie);
+   }
+
+   size_t count = groupsToDelete.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      config->DeleteGroup(groupsToDelete[n]);
    }
 }
 
@@ -2284,7 +2389,8 @@ UpgradeFrom061()
    if ( CopyEntries(config, pathOld, pathNew) == -1 )
    {
       wxLogWarning(_("Address book editor settings couldn't be updated."));
-      rc = false;
+
+      return false;
    }
    else // copied successfully
    {
@@ -2303,8 +2409,9 @@ UpgradeFrom061()
    pathNew << M_TEMPLATES_CONFIG_SECTION;
    if ( CopyEntries(config, pathOld, pathNew) == -1 )
    {
-      wxLogWarning(_("Address book editor settings couldn't be updated."));
-      rc = false;
+      wxLogWarning(_("Template settings couldn't be updated."));
+
+      return false;
    }
    else // copied successfully
    {
@@ -2312,17 +2419,11 @@ UpgradeFrom061()
       config->DeleteGroup(pathOld);
    }
 
-   // delete all groups under M_PROFILE_CONFIG_SECTION without ProfileType=1 in
-   // them: normally, there shouldn't be any, but somehow in my own ~/.M/config
-   // there is some junk (maybe left from some very old version?) and if we
-   // leave them in config we'd have all kinds of problems with them because
-   // they don't represent the real folders
-   RemoveNonFolderProfiles(config);
+   // now examine all folders recursively upgrading the old settings to the new
+   // format and removing all obsolete ProfileType settings in progress
+   UpdateNonFolderProfiles(config);
 
-   // finally remove all ProfileType entries which are unused any more
-   RemoveProfileTypes(config);
-
-   return rc;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -492,11 +492,11 @@ static String GetTemplateKindPath(MessageTemplateKind kind)
 }
 
 // returns the relative profile path for the name of the template of the given
-// kind (Template/<kind>)
+// kind (Template_<kind>)
 static String GetTemplateNamePath(MessageTemplateKind kind)
 {
    String path;
-   path << M_TEMPLATE_SECTION << GetTemplateKindPath(kind);
+   path << "Template_" << GetTemplateKindPath(kind);
 
    return path;
 }
@@ -506,7 +506,7 @@ static String GetTemplateNamePath(MessageTemplateKind kind)
 static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
 {
    String path;
-   path << M_TEMPLATES_CONFIG_SECTION << GetTemplateKindPath(kind)
+   path << M_TEMPLATES_CONFIG_SECTION << '/' << GetTemplateKindPath(kind)
         << '/' << name;
 
    return path;
