@@ -1910,6 +1910,10 @@ MessageView::ProcessPart(const MimePart *mimepart)
                            pgpInfo = new PGPInfoUntrustedSig(this, log->GetUserID());
                            break;
 
+                        case MCryptoEngine::NONEXISTING_KEY_ERROR:
+                           pgpInfo = new PGPInfoKeyNotFoundSig(this, log->GetUserID());
+                           break;
+
                         default:
                            pgpInfo = new PGPInfoBadSig(this, log->GetUserID());
                      }

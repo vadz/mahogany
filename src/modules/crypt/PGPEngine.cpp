@@ -634,14 +634,14 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("NO_PUBKEY") )
             {
-               wxLogWarning(_("Failed to check signature: public key \"%s\" "
-                              "not available."), pc);
+               status = NONEXISTING_KEY_ERROR;
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("NO_SECKEY") ||
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
-                      code == _T("GOT_IT") )
+                      code == _T("GOT_IT") ||
+                      code == _T("IMPORT_RES") )
             {
                // ignore these
             }

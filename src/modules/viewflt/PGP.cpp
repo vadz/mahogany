@@ -309,6 +309,10 @@ PGPFilter::DoProcess(String& text,
                   pgpInfo = new PGPInfoUntrustedSig(m_msgView, log->GetUserID());
                   break;
 
+               case MCryptoEngine::NONEXISTING_KEY_ERROR:
+                  pgpInfo = new PGPInfoKeyNotFoundSig(m_msgView, log->GetUserID());
+                  break;
+
                default:
                   // use unmodified text
                   out = in;

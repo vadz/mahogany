@@ -81,7 +81,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ) ),
                          _T("pgpsig_good"),
                          *wxGREEN) { }
 };
@@ -95,7 +95,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ) ),
                          _T("pgpsig_exp"),
                          wxColour(0, 255, 255)) { }
 };
@@ -109,7 +109,7 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" \"%s\"") , from) ) ),
+                                                    _T(" \"%s\"") , from.c_str()) ) ),
                          _T("pgpsig_untrust"),
                          wxColour(255, 128, 0)) { }
 };
@@ -123,9 +123,24 @@ public:
                                            (from.empty() ? 
                                                  _T("") :
                                                  wxString::Format(
-                                                    _T(" from \"%s\"") , from) ) ),
+                                                    _T(" from \"%s\"") , from.c_str()) ) ),
                          _T("pgpsig_bad"),
                          *wxRED) { }
+};
+
+
+class PGPInfoKeyNotFoundSig : public ClickablePGPInfo
+{
+public:
+   PGPInfoKeyNotFoundSig(MessageView *msgView, const String& from)
+      : ClickablePGPInfo(msgView,
+                         wxString::Format( _("PGP public key not found%s"), 
+                                           (from.empty() ? 
+                                                 _T("") :
+                                                 wxString::Format(
+                                                    _T(" from \"%s\"") , from.c_str()) ) ),
+                         _T("pgpsig_bad"),
+                         wxColour(145, 145, 145)) { }
 };
 
 class PGPInfoGoodMsg : public ClickablePGPInfo
