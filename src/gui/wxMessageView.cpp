@@ -666,7 +666,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          }
 #     endif // Win
 
-      if ( !wxExecute(command) )
+      if ( !wxExecute(command, TRUE) )
       {
          wxLogError(_("Error opening attachment: command '%s' failed."),
                     command.c_str());
