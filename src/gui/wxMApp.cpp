@@ -484,8 +484,8 @@ wxMApp::OnInit()
    bool hasLocale = false;
 
 #ifdef OS_UNIX
-   const char *locale = getenv("LANG");
-   hasLocale = locale &&
+   wxString locale = getenv("LANG");
+   hasLocale = locale.Length() &&
                (strcmp(locale, "C") != 0) &&
                (strcmp(locale, "en") != 0) &&
                (strcmp(locale, "us") != 0);
