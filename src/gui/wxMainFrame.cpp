@@ -995,7 +995,8 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
              id == WXMENU_EDIT_FIND ||
              id == WXMENU_EDIT_FINDAGAIN ||
              WXMENU_CONTAINS(VIEW, id) ||
-             WXMENU_CONTAINS(VIEW_FILTERS, id)) )
+             WXMENU_CONTAINS(VIEW_FILTERS, id) ||
+             WXMENU_CONTAINS(VIEW_VIEWERS, id) ) )
    {
       m_FolderView->OnCommandEvent(event);
    }

@@ -354,7 +354,9 @@ enum ConfigFields
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
    ConfigField_MsgViewerHelp,
    ConfigField_MsgViewer,
+#ifdef USE_VIEWER_BAR
    ConfigField_MsgViewerBar,
+#endif // USE_VIEWER_BAR
 #ifdef USE_FONT_DESC
    ConfigField_MessageViewFont,
 #else // !USE_FONT_DESC
@@ -1347,7 +1349,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,    -1 },
    { gettext_noop("&Message viewer"),              Field_Combo |
                                                    Field_Advanced,    -1 },
+#ifdef USE_VIEWER_BAR
    { gettext_noop("Show viewer &bar"),             Field_Bool,    -1 },
+#endif // USE_VIEWER_BAR
 
 #ifdef USE_FONT_DESC
    { gettext_noop("&Font to use"),                 Field_Font,    -1 },
@@ -1895,10 +1899,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    ConfigValueDefault(MCB_FOLDERCLEARMSGFLAG, ""),
 #endif // USE_PYTHON
 
-   // message views
+   // message view
    CONFIG_NONE(),
    CONFIG_NONE(), // and not MP_MSGVIEW_VIEWER: we handle it specially
+#ifdef USE_VIEWER_BAR
    CONFIG_ENTRY(MP_MSGVIEW_SHOWBAR),
+#endif // USE_VIEWER_BAR
 #ifdef USE_FONT_DESC
    CONFIG_ENTRY(MP_MVIEW_FONT_DESC),
 #else // !USE_FONT_DESC

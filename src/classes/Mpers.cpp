@@ -147,7 +147,9 @@ static const struct
    { "GfxNotInlined",            gettext_noop("inline the big images") },
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
+#ifdef USE_VIEWER_BAR
    { "ViewerBarTip",             gettext_noop("give tip about reenabling the viewer bar when closing it") },
+#endif // USE_VIEWER_BAR
    { "EmptyTrashOnExit",         gettext_noop("purge trash folder on exit") },
    { "SendOffline",              gettext_noop("send mail when the system is offline") },
    { "AskForVCard",              gettext_noop("propose to attach a vCard if none specified") },

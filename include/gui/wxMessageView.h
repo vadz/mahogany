@@ -57,10 +57,12 @@ public:
    /// create the "View" menu for our parent frame
    virtual void CreateViewMenu();
 ;
-   virtual void OnToggleViewFilter(int id, bool checked);
+   virtual void OnToggleViewFilter(int id);
+   virtual void OnSelectViewer(int id);
 
 protected:
    virtual MessageViewer *CreateDefaultViewer() const;
+   virtual void OnShowHeadersChange();
 
 private:
    /// the associated folder view, if any
@@ -68,6 +70,12 @@ private:
 
    /// the array containing the names of all the existing filters
    wxArrayString m_namesFilters;
+
+   /// and another one containing their state (on/off)
+   wxArrayInt m_statesFilters;
+
+   /// the array containing the names of all the existing viewers
+   wxArrayString m_namesViewers;
 };
 
 // ----------------------------------------------------------------------------

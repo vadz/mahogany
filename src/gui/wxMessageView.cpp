@@ -76,6 +76,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MVIEW_TITLE_FMT;
 
 // ----------------------------------------------------------------------------
@@ -263,6 +264,22 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
    {
       delete viewerOld->GetWindow();
    }
+
+   // we also need to update the viewers menu to indicate the currently
+   // selected one
+   if ( viewerNew )
+   {
+      int n = m_namesViewers.Index(GetProfileValues().msgViewer);
+      CHECK_RET( n != wxNOT_FOUND, _T("non existing viewer selected?") );
+
+      wxFrame *frame = GetFrame(viewerNew->GetWindow());
+      CHECK_RET( frame, _T("no parent frame in wxMessageView") );
+
+      wxMenuBar *mbar = frame->GetMenuBar();
+      CHECK_RET( mbar, _T("no menu bar in the frame containing wxMessageView?") );
+
+      mbar->Check(WXMENU_VIEW_VIEWERS_BEGIN + 1 + n, true);
+   }
 }
 
 MessageViewer *
@@ -272,7 +289,7 @@ wxMessageView::CreateDefaultViewer() const
 }
 
 // ----------------------------------------------------------------------------
-// message view filters functions
+// "View" menu support functions
 // ----------------------------------------------------------------------------
 
 void
@@ -284,9 +301,39 @@ wxMessageView::CreateViewMenu()
    // create the top level menu
    WXADD_MENU(frame->GetMenuBar(), VIEW, _("&View"));
 
-   // find the filters submenu in it
-   wxMenu *menu = FindSubmenu(frame, WXMENU_VIEW_FILTERS_SUBMENU_BEGIN + 1);
-   CHECK_RET( menu, _T("View|Filters submenu not found?") );
+   // initialize viewers submenu
+   // --------------------------
+
+   wxMenu *menuView = FindSubmenu(frame, WXMENU_VIEW_VIEWERS_SUBMENU_BEGIN + 1);
+   CHECK_RET( menuView, _T("View|Viewers submenu not found?") );
+
+   Profile * const profile = GetProfile();
+   CHECK_RET( profile, _T("no Profile in wxMessageView?") );
+
+   const wxString nameCurViewer = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+   wxArrayString descViewers;
+   size_t countViewers = GetAllAvailableViewers(&m_namesViewers, &descViewers);
+
+   for ( size_t nViewer = 0; nViewer < countViewers; nViewer++ )
+   {
+      const int id = WXMENU_VIEW_VIEWERS_BEGIN + 1 + nViewer;
+
+      menuView->AppendRadioItem(id, descViewers[nViewer]);
+
+      if ( m_namesViewers[nViewer] == nameCurViewer )
+      {
+         // indicate the current viewer
+         menuView->Check(id, true);
+      }
+   }
+
+
+   // initialize view filters submenu
+   // -------------------------------
+
+   // find the filters submenu in the top level menu
+   wxMenu *menuFlt = FindSubmenu(frame, WXMENU_VIEW_FILTERS_SUBMENU_BEGIN + 1);
+   CHECK_RET( menuFlt, _T("View|Filters submenu not found?") );
 
 
    // add all the filters to it
@@ -296,18 +343,19 @@ wxMessageView::CreateViewMenu()
 
    // and then iterate over all the filters adding them
    int id = WXMENU_VIEW_FILTERS_BEGIN + 1;
-   void *cookie;
    String name,
           desc;
+   void *cookie;
    bool enabled;
    bool cont = GetFirstViewFilter(&name, &desc, &enabled, &cookie);
    while ( cont )
    {
       m_namesFilters.Add(name);
+      m_statesFilters.Add(enabled);
 
-      menu->AppendCheckItem(id, desc);
+      menuFlt->AppendCheckItem(id, desc);
       if ( enabled )
-         menu->Check(id, true);
+         menuFlt->Check(id, true);
 
       id++;
 
@@ -318,7 +366,7 @@ wxMessageView::CreateViewMenu()
 }
 
 void
-wxMessageView::OnToggleViewFilter(int id, bool checked)
+wxMessageView::OnToggleViewFilter(int id)
 {
    const int n = id - WXMENU_VIEW_FILTERS_BEGIN - 1;
 
@@ -329,13 +377,51 @@ wxMessageView::OnToggleViewFilter(int id, bool checked)
    Profile * const profile = GetProfile();
    CHECK_RET( profile, _T("no Profile in wxMessageView?") );
 
-   profile->writeEntry(m_namesFilters[n], checked);
+   m_statesFilters[n] = !m_statesFilters[n];
+   profile->writeEntry(m_namesFilters[n], m_statesFilters[n]);
 
    MEventManager::Send(new MEventOptionsChangeData
                            (
                             profile,
                             MEventOptionsChangeData::Ok
                            ));
+}
+
+void
+wxMessageView::OnSelectViewer(int id)
+{
+   const int n = id - WXMENU_VIEW_VIEWERS_BEGIN - 1;
+
+   CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
+              _T("invalid viewer selected from the menu?") );
+
+   // this one must not be DecRef()'d
+   Profile * const profile = GetProfile();
+   CHECK_RET( profile, _T("no Profile in wxMessageView?") );
+
+   profile->writeEntry(MP_MSGVIEW_VIEWER, m_namesViewers[n]);
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            profile,
+                            MEventOptionsChangeData::Ok
+                           ));
+}
+
+// ----------------------------------------------------------------------------
+// other menu stuff
+// ----------------------------------------------------------------------------
+
+void
+wxMessageView::OnShowHeadersChange()
+{
+   wxFrame *frame = GetParentFrame();
+   CHECK_RET( frame, _T("message view without parent frame?") );
+
+   wxMenuBar *mbar = frame->GetMenuBar();
+   CHECK_RET( mbar, _T("message view frame without menu bar?") );
+
+   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, GetProfileValues().showHeaders);
 }
 
 // ----------------------------------------------------------------------------

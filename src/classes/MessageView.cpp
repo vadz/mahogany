@@ -734,7 +734,7 @@ MessageView::InitializeViewFilters()
                                        filter,
                                        prio,
                                        name,
-                                       filterFactory->GetDescription(),
+                                       _(filterFactory->GetDescription()),
                                        node
                                    );
 
@@ -1085,7 +1085,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
 
    // update the parents menu as the show headers option might have changed
-   UpdateShowHeadersInMenu();
+   OnShowHeadersChange();
 
    m_viewer->UpdateOptions();
 
@@ -2789,16 +2789,10 @@ MessageView::MimeViewText(const MimePart *mimepart)
 bool
 MessageView::DoMenuCommand(int id)
 {
-   if ( m_uid == UID_ILLEGAL )
-      return false;
-
    CHECK( GetFolder(), false, _T("no folder in message view?") );
 
    Profile *profile = GetProfile();
    CHECK( profile, false, _T("no profile in message view?") );
-
-   UIdArray msgs;
-   msgs.Add(m_uid);
 
    switch ( id )
    {
@@ -2807,6 +2801,7 @@ MessageView::DoMenuCommand(int id)
          break;
 
       case WXMENU_EDIT_FIND:
+         if ( m_uid != UID_ILLEGAL )
          {
             String text;
             if ( MInputBox(&text,
@@ -2826,7 +2821,7 @@ MessageView::DoMenuCommand(int id)
          break;
 
       case WXMENU_EDIT_FINDAGAIN:
-         if ( !m_viewer->FindAgain() )
+         if ( m_uid != UID_ILLEGAL && !m_viewer->FindAgain() )
          {
             wxLogStatus(GetParentFrame(), _("No more matches"));
          }
@@ -2837,16 +2832,27 @@ MessageView::DoMenuCommand(int id)
          break;
 
       case WXMENU_MSG_TOGGLEHEADERS:
-         m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
-         profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
-         UpdateShowHeadersInMenu();
-         Update();
+         if ( m_uid != UID_ILLEGAL )
+         {
+            m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
+            profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+            OnShowHeadersChange();
+            Update();
+         }
          break;
 
       default:
          if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
          {
             SetLanguage(id);
+         }
+         else if ( WXMENU_CONTAINS(VIEW_FILTERS, id) )
+         {
+            OnToggleViewFilter(id);
+         }
+         else if ( WXMENU_CONTAINS(VIEW_VIEWERS, id) )
+         {
+            OnSelectViewer(id);
          }
          else
          {
@@ -2915,18 +2921,6 @@ void MessageView::ResetUserEncoding()
    // we'll detect the encoding automatically
    m_encodingUser = (wxFontEncoding)(long)
                      READ_CONFIG(GetProfile(), MP_MSGVIEW_DEFAULT_ENCODING);
-}
-
-void
-MessageView::UpdateShowHeadersInMenu()
-{
-   wxFrame *frame = GetParentFrame();
-   CHECK_RET( frame, _T("message view without parent frame?") );
-
-   wxMenuBar *mbar = frame->GetMenuBar();
-   CHECK_RET( mbar, _T("message view frame without menu bar?") );
-
-   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
 }
 
 // ----------------------------------------------------------------------------

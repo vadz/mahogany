@@ -226,8 +226,21 @@ public:
    /// create the "View" menu for our parent frame
    virtual void CreateViewMenu();
 
-   /// called when view filter state is toggled
-   virtual void OnToggleViewFilter(int id, bool checked) = 0;
+   /**
+      Called when view filter state is toggled.
+
+      @param id the corresponding menu id, starting from
+                WXMENU_VIEW_FILTERS_BEGIN + 1
+    */
+   virtual void OnToggleViewFilter(int id) = 0;
+
+   /**
+      Called to change the viewer to be used.
+
+      @param id the corresponding menu id, starting from
+                WXMENU_VIEW_VIEWERS_BEGIN + 1
+    */
+   virtual void OnSelectViewer(int id) = 0;
 
 protected:
    /** @name Initialization
@@ -239,6 +252,111 @@ protected:
 
    //@}
 
+   /** @name Options
+
+       Message view uses the options from the profile of the folder it
+       currently shows.
+    */
+   //@{
+
+   /// All values read from the profile
+   struct AllProfileValues
+   {
+      /** @name Appearance parameters
+       */
+      //@{
+      /// message viewer (LayoutViewer, TextViewer, ...)
+      String msgViewer;
+
+      /// Background and foreground colours, colours for URLs and headers
+      wxColour BgCol,
+               FgCol,
+               AttCol,           // attachment colour
+               HeaderNameCol,
+               HeaderValueCol;
+
+      /// the native font description
+      String fontDesc;
+
+      /// font family (wxROMAN/wxSWISS/wxTELETYPE/...) used if font is empty
+      int fontFamily;
+
+      /// font size (used only if font is empty)
+      int fontSize;
+      //@}
+
+      /// @name MIME options
+      //@{
+
+      /// show all headers?
+      bool showHeaders:1;
+
+      /// inline MESSAGE/RFC822 attachments?
+      bool inlineRFC822:1;
+
+      /// inline TEXT/PLAIN attachments?
+      bool inlinePlainText:1;
+
+      /// max size of inline graphics: 0 if never inline at all, -1 if no limit
+      long inlineGFX;
+
+      /// follow the links to external images in the HTML messages?
+      bool showExtImages:1;
+
+      /// Show XFaces?
+      bool showFaces:1;
+
+      //@}
+
+      /// @name URL viewing
+      //@{
+
+      /// highlight the URLs in the message?
+      bool highlightURLs;
+
+      /// the colour to use for URL highlighting (if highlightURLs is true)
+      wxColour UrlCol;
+
+      //@}
+
+      /// @name Address autocollection
+      //@{
+
+      /// Autocollect email addresses?
+      int autocollect;
+
+      /// Autocollect only email sender's address?
+      int autocollectSenderOnly;
+
+      /// Autocollect only email addresses with complete name?
+      int autocollectNamed;
+
+      /// Name of the ADB book to use for autocollect.
+      String autocollectBookName;
+
+      //@}
+
+      AllProfileValues();
+
+      bool operator==(const AllProfileValues& other) const;
+      bool operator!=(const AllProfileValues& other) const
+         { return !(*this == other); }
+
+      /// get the font corresponding to the current options
+      wxFont GetFont(wxFontEncoding enc = wxFONTENCODING_DEFAULT) const;
+   } m_ProfileValues;
+
+   /// read all our options from the current profile (returned by GetProfile())
+   void ReadAllSettings(AllProfileValues *settings);
+
+   /// reread the entries from our profile
+   void UpdateProfileValues();
+
+   /// get the profile values (mainly for MessageViewer)
+   const AllProfileValues& GetProfileValues() const { return m_ProfileValues; }
+
+   //@}
+
    /** @name GUI stuff
 
        We need to interact with the rest of the GUI but we don't do it in this
@@ -246,15 +364,15 @@ protected:
     */
    //@{
 
-   /// update the "show headers" menu item from m_ProfileValues.showHeaders
-   void UpdateShowHeadersInMenu();
-
    /// show this message in the viewer
    virtual void DoShowMessage(Message *msg);
 
    /// update GUI to show the new viewer window
    virtual void OnViewerChange(const MessageViewer *viewerOld,
                                const MessageViewer *viewerNew) = 0;
+
+   /// update GUI to indicate the new "show headers" options state
+   virtual void OnShowHeadersChange() = 0;
 
    //@}
 
@@ -468,111 +586,6 @@ private:
 
    /// printing helper, called by Print() and PrintPreview()
    void PrepareForPrinting();
-
-   /** @name Options
-
-       Message view uses the options from the profile of the folder it
-       currently shows.
-    */
-   //@{
-
-   /// All values read from the profile
-   struct AllProfileValues
-   {
-      /** @name Appearance parameters
-       */
-      //@{
-      /// message viewer (LayoutViewer, TextViewer, ...)
-      String msgViewer;
-
-      /// Background and foreground colours, colours for URLs and headers
-      wxColour BgCol,
-               FgCol,
-               AttCol,           // attachment colour
-               HeaderNameCol,
-               HeaderValueCol;
-
-      /// the native font description
-      String fontDesc;
-
-      /// font family (wxROMAN/wxSWISS/wxTELETYPE/...) used if font is empty
-      int fontFamily;
-
-      /// font size (used only if font is empty)
-      int fontSize;
-      //@}
-
-      /// @name MIME options
-      //@{
-
-      /// show all headers?
-      bool showHeaders:1;
-
-      /// inline MESSAGE/RFC822 attachments?
-      bool inlineRFC822:1;
-
-      /// inline TEXT/PLAIN attachments?
-      bool inlinePlainText:1;
-
-      /// max size of inline graphics: 0 if never inline at all, -1 if no limit
-      long inlineGFX;
-
-      /// follow the links to external images in the HTML messages?
-      bool showExtImages:1;
-
-      /// Show XFaces?
-      bool showFaces:1;
-
-      //@}
-
-      /// @name URL viewing
-      //@{
-
-      /// highlight the URLs in the message?
-      bool highlightURLs;
-
-      /// the colour to use for URL highlighting (if highlightURLs is true)
-      wxColour UrlCol;
-
-      //@}
-
-      /// @name Address autocollection
-      //@{
-
-      /// Autocollect email addresses?
-      int autocollect;
-
-      /// Autocollect only email sender's address?
-      int autocollectSenderOnly;
-
-      /// Autocollect only email addresses with complete name?
-      int autocollectNamed;
-
-      /// Name of the ADB book to use for autocollect.
-      String autocollectBookName;
-
-      //@}
-
-      AllProfileValues();
-
-      bool operator==(const AllProfileValues& other) const;
-      bool operator!=(const AllProfileValues& other) const
-         { return !(*this == other); }
-
-      /// get the font corresponding to the current options
-      wxFont GetFont(wxFontEncoding enc = wxFONTENCODING_DEFAULT) const;
-   } m_ProfileValues;
-
-   /// read all our options from the current profile (returned by GetProfile())
-   void ReadAllSettings(AllProfileValues *settings);
-
-   /// reread the entries from our profile
-   void UpdateProfileValues();
-
-   /// get the profile values - mainly for MessageViewer
-   const AllProfileValues& GetProfileValues() const { return m_ProfileValues; }
-
-   //@}
 
    /** @name Viewer related stuff
     */

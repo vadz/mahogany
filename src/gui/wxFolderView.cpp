@@ -142,7 +142,9 @@ extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_LASTSELECTED_MESSAGE;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_USE_THREADING;
+#ifdef USE_VIEWER_BAR
 extern const MOption MP_MSGVIEW_SHOWBAR;
+#endif // USE_VIEWER_BAR
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_PREVIEW_ON_SELECT;
 extern const MOption MP_USE_TRASH_FOLDER;
@@ -158,7 +160,9 @@ extern const MPersMsgBox *M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL;
 extern const MPersMsgBox *M_MSGBOX_EXPLAIN_COLUMN_CLICK;
 extern const MPersMsgBox *M_MSGBOX_MARK_READ;
 extern const MPersMsgBox *M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER;
+#ifdef USE_VIEWER_BAR
 extern const MPersMsgBox *M_MSGBOX_VIEWER_BAR_TIP;
+#endif // USE_VIEWER_BAR
 
 // ----------------------------------------------------------------------------
 // constants
@@ -337,12 +341,14 @@ protected:
    // resize our own child to fill the entire window
    void Resize();
 
+#ifdef USE_VIEWER_BAR
    // create/delete the controls we put above the viewer window
    void CreateViewerBar();
    void DeleteViewerBar();
 
    // update the state of the viewer bar
    void UpdateViewerBar();
+#endif // USE_VIEWER_BAR
 
 private:
    // the associated folder view (never NULL)
@@ -354,14 +360,15 @@ private:
    // the current viewer window (may be NULL)
    wxWindow *m_winViewer;
 
+   // the event handler to hook the kbd input (NULL initially, !NULL later)
+   class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
+
+#ifdef USE_VIEWER_BAR
    // the viewer bar: contains the controls we put above the viewer
    wxPanel *m_winBar;
 
    // the array containing the names of all the existing viewers
    wxArrayString m_namesViewers;
-
-   // the event handler to hook the kbd input (NULL initially, !NULL later)
-   class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
 
    // the event table ids
    enum
@@ -369,6 +376,7 @@ private:
       Button_Close = 100,
       Choice_Viewer = 200
    };
+#endif // USE_VIEWER_BAR
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxFolderMsgWindow)
@@ -1048,8 +1056,10 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
    EVT_SIZE(wxFolderMsgWindow::OnSize)
 
+#ifdef USE_VIEWER_BAR
    EVT_BUTTON(wxFolderMsgWindow::Button_Close, wxFolderMsgWindow::OnButton)
    EVT_CHOICE(wxFolderMsgWindow::Choice_Viewer, wxFolderMsgWindow::OnChoice)
+#endif // USE_VIEWER_BAR
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1064,7 +1074,9 @@ wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent,
                             folderView ? wxBORDER_NONE : wxBORDER_DEFAULT)
 {
    m_winViewer = NULL;
+#ifdef USE_VIEWER_BAR
    m_winBar = NULL;
+#endif // USE_VIEWER_BAR
    m_folderView = folderView;
    m_listCtrl = listCtrl;
    m_winViewer = NULL;
@@ -1082,6 +1094,7 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
    {
       m_winViewer->PopEventHandler(false /* don't delete it */);
    }
+#ifdef USE_VIEWER_BAR
    else // we didn't have any viewer window before
    {
       if ( m_folderView->GetFolder() )
@@ -1095,6 +1108,7 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
       }
       //else: don't create the viewer bar if we don't have any folder
    }
+#endif // USE_VIEWER_BAR
 
    m_winViewer = winViewerNew;
 
@@ -1111,11 +1125,13 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
    }
    else // we don't have any viewer any longer
    {
+#ifdef USE_VIEWER_BAR
       if ( m_winBar )
       {
          DeleteViewerBar();
       }
       //else: we might not have created it
+#endif // USE_VIEWER_BAR
    }
 }
 
@@ -1130,6 +1146,8 @@ wxFolderMsgWindow::~wxFolderMsgWindow()
 // ----------------------------------------------------------------------------
 // wxFolderMsgWindow viewer bar stuff
 // ----------------------------------------------------------------------------
+
+#ifdef USE_VIEWER_BAR
 
 void wxFolderMsgWindow::CreateViewerBar()
 {
@@ -1231,8 +1249,11 @@ void wxFolderMsgWindow::UpdateViewerBar()
    }
 }
 
+#endif // USE_VIEWER_BAR
+
 void wxFolderMsgWindow::UpdateOptions()
 {
+#ifdef USE_VIEWER_BAR
    if ( !m_winViewer )
    {
       // we don't show the viewer bar anyhow if we don't have the viewer
@@ -1269,6 +1290,7 @@ void wxFolderMsgWindow::UpdateOptions()
    {
       UpdateViewerBar();
    }
+#endif // USE_VIEWER_BAR
 }
 
 // ----------------------------------------------------------------------------
@@ -1282,6 +1304,8 @@ void wxFolderMsgWindow::OnSize(wxSizeEvent& /* event */)
       Resize();
    }
 }
+
+#ifdef USE_VIEWER_BAR
 
 void wxFolderMsgWindow::OnButton(wxCommandEvent& /* event */)
 {
@@ -1330,17 +1354,21 @@ void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
       m_listCtrl->SetFocus();
 }
 
+#endif // USE_VIEWER_BAR
+
 // resize our own child to fill the entire available for it area
 void wxFolderMsgWindow::Resize()
 {
    wxSize size = GetClientSize();
    int y;
+#ifdef USE_VIEWER_BAR
    if ( m_winBar )
    {
       y = m_winBar->GetSize().y;
       m_winBar->SetSize(0, 0, size.x, y);
    }
    else // no viewer bar
+#endif // USE_VIEWER_BAR
    {
       y = 0;
    }
@@ -4443,12 +4471,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          break;
 
       default:
-         if ( WXMENU_CONTAINS(VIEW_FILTERS, cmd) )
-         {
-            if ( m_MessagePreview )
-               m_MessagePreview->OnToggleViewFilter(cmd, event.IsChecked());
-         }
-         else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+         if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
             // it might be a folder from popup menu
             wxFolderMenu *menu = m_FolderCtrl->GetFolderMenu();
@@ -5092,6 +5115,7 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
               (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
               WXMENU_CONTAINS(VIEW, id) ||
               WXMENU_CONTAINS(VIEW_FILTERS, id) ||
+              WXMENU_CONTAINS(VIEW_VIEWERS, id) ||
               id == WXMENU_HELP_CONTEXT ||
               id == WXMENU_EDIT_CUT ||
               id == WXMENU_EDIT_COPY ||

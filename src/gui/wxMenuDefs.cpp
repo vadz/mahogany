@@ -437,6 +437,9 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // the available accelerators for this menu:
    // ABCDEFGIJKNOPQRSTUVXYZ
+   { WXMENU_SUBMENU,       gettext_noop("&Viewer to use"), "", wxITEM_NORMAL },
+   { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , wxITEM_CHECK },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , wxITEM_NORMAL },
 #ifdef EXPERIMENTAL_show_uid
