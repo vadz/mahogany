@@ -2,16 +2,19 @@
 TODO list for Mahogany
 $Id$
 
-*** PLEASE ADD NEW BUGS TO BUGZILLA AND THE TODO FILE FOR NOW ***
-
 *********************************************************************
 *** BUGS
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	RFC822_IS_TEXT config setting missing
-6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
-		leaks memory - the font will be never freed.
+
+
+*** PLEASE DO NOT USE THIS FILE ANYMORE BUT ADD NEW BUGS
+    TO THE BUGTRACKER at http://www.wxwindows.org/m-bugs/
+
+    JUST CONTINUE TO REMOVE BUGS FROM THIS LIST AS THEY ARE 
+    FIXED.
+
 
 5	VZ	we should really remember the folder tree state, i.e. reexpand
 		all branches which were open the last time, not just root
@@ -631,5 +634,8 @@ DONE - TO BE TESTED:
 fixed?	KB	only one new mail dialog at any given time, suppress
 		them while showing it
 9  	KB	check mm_list, use debugging wxWindows
+
+6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
+		leaks memory - the font will be never freed.
 
 vi: set si ts=8 sw=8 noet nolist tw=80:
