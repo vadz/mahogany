@@ -162,7 +162,6 @@ static const struct
    { _T("SearchAgainIfNoMatch"),     gettext_noop("propose to search again if no matches were found") },
    { _T("UseCreateFolderWizard"),    gettext_noop("use wizard when creating a new folder") },
    { _T("FormatParagraphBeforeExit"),gettext_noop("format all paragraphs in composer before exit") },
-   { _T("LangChangedWarn"),          gettext_noop("warn if 8bit characters are used in composer and language is not set") },
    { _T("ContUpdateAfterError"),     gettext_noop("ask if we should continue updating folders after an error") },
    { _T("RemoveAllAttach"),          gettext_noop("ask for confirmation before removing all attachments from composer") },
    { _T("SendDiffEncoding"),         gettext_noop("ask before sending message in a different encoding than chosen") },
