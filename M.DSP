@@ -448,6 +448,10 @@ SOURCE=.\src\gui\wxModulesDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxMsgCmdProc.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxOptionsDlg.cpp
 # End Source File
 # Begin Source File
