@@ -299,19 +299,23 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    m_composeView->SetLastAddressEntry(m_id);
 
    // we're only interested in TABs and only it's not a second TAB in a row
-   if ( event.KeyCode() == WXK_TAB && !m_lastWasTab &&
-        !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
+   if ( event.KeyCode() == WXK_TAB )
    {
-      // rememeber it and interpret TAB "normally" if the user presses it the
-      // second time to go to the next window immediately after having expanded
-      // the entry
-      m_lastWasTab = TRUE;
-
-      if ( DoExpand() )
+      if ( !m_lastWasTab &&
+           !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
       {
+         // rememeber it and interpret TAB "normally" if the user presses it
+         // the second time to go to the next window immediately after having
+         // expanded the entry
+         m_lastWasTab = TRUE;
+
+         DoExpand();
+
          // don't call event.Skip()
          return;
       }
+      //else: nothing because we're not interested in Ctrl-TAB, Shift-TAB &c -
+      //      and also in the TABs if the last one was already a TAB
    }
    else
    {

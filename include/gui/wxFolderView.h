@@ -249,7 +249,11 @@ public:
          return rc;
       }
 
-   void GrabFocus(wxMouseEvent &event)       { SetFocus(); }
+   // this is a workaround for focus handling under GTK but it should not be
+   // enabled under other platforms
+#ifdef __WXGTK__
+   void OnMouseMove(wxMouseEvent &event) { SetFocus(); }
+#endif // wxGTK
 
    DECLARE_EVENT_TABLE()
 

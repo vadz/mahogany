@@ -1851,6 +1851,8 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
             // moved to the end/beginning of text
             return false;
          }
+
+         offset = -1;
       }
 
       wxLayoutObject *obj = *i;

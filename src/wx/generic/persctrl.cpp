@@ -54,6 +54,18 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// icons
+// ----------------------------------------------------------------------------
+
+// MSW icons are in the ressources, for all other platforms - in XPM files
+#ifndef __WXMSW__
+    #include "wx/generic/info.xpm"
+    #include "wx/generic/question.xpm"
+    #include "wx/generic/warning.xpm"
+    #include "wx/generic/error.xpm"
+#endif // __WXMSW__
+
+// ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
@@ -68,6 +80,7 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
+
 #define LAYOUT_X_MARGIN       5
 #define LAYOUT_Y_MARGIN       5
 
@@ -757,6 +770,46 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     // controls which are disposed on top of it
     wxStaticBox *box = new wxStaticBox(this, -1, "");
 
+    // create an icon
+    enum
+    {
+        Icon_Information,
+        Icon_Question,
+        Icon_Warning,
+        Icon_Error
+    } which;
+
+#ifdef __WXMSW__
+    static char *icons[] =
+    {
+        "wxICON_INFO",
+        "wxICON_QUESTION",
+        "wxICON_WARNING",
+        "wxICON_ERROR",
+    };
+#else // XPM icons
+    static char **icons[] =
+    {
+        info,
+        question,
+        warning,
+        error,
+    };
+#endif // !XPM/XPM
+
+    if ( style & wxICON_EXCLAMATION )
+        which = Icon_Warning;
+    else if ( style & wxICON_HAND )
+        which = Icon_Error;
+    else if ( style & wxICON_QUESTION )
+        which = Icon_Question;
+    else
+        which = Icon_Information;
+
+    static const int iconSize = 32; // x32 pixels
+
+    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+
     // split the message in lines
     // --------------------------
     wxClientDC dc(this);
@@ -863,7 +916,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                              LAYOUT_X_MARGIN;
 
     // the initial (and minimal possible) size of the dialog
-    long widthDlg = MAX(widthTextMax, MAX(widthButtonsTotal, width)) +
+    long widthDlg = MAX(widthTextMax + iconSize + 4*LAYOUT_X_MARGIN,
+                        MAX(widthButtonsTotal, width)) +
                     6*LAYOUT_X_MARGIN,
          heightDlg = 12*LAYOUT_Y_MARGIN + heightButton +
                      heightTextLine*(nLineCount + 1);
@@ -879,6 +933,13 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
     box->SetConstraints(c);
 
+    c = new wxLayoutConstraints;
+    c->width.Absolute(iconSize);
+    c->height.Absolute(iconSize);
+    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+    icon->SetConstraints(c);
+
     wxStaticText *text = NULL;
     for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
         c = new wxLayoutConstraints;
@@ -886,7 +947,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
         else
             c->top.Below(text);
-        c->centreX.SameAs(this, wxCentreX);
+        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
         c->width.Absolute(widthTextMax);
         c->height.Absolute(heightTextLine);
         text = new wxStaticText(this, -1, lines[nLine]);
@@ -908,7 +969,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             }
 
             c->width.Absolute(widthBtnMax);
-            c->top.Below(text, 3*LAYOUT_Y_MARGIN);
+            c->top.Below(text, 4*LAYOUT_Y_MARGIN);
             c->height.Absolute(heightButton);
             buttons[nBtn]->SetConstraints(c);
 

@@ -92,6 +92,10 @@ protected:
 // below it and, optionally, some extra controls above/below the notebook. For
 // example, options dialog and folder creation dialogs in M derive from this
 // class.
+//
+// this class sends MEventId_OptionsChange event when either of Ok/Cancel/Apply
+// buttons is pressed. To do it, it needs a profile pointer which is retrieved
+// via virtual GetProfile() function - and it is only used for this purpose.
 // ----------------------------------------------------------------------------
 class wxNotebookDialog : public wxManuallyLaidOutDialog
 {
@@ -164,15 +168,27 @@ protected:
       m_btnApply->Enable(FALSE);
    }
 
+   // the helper for the handlers of Apply/Ok buttons, returns TRUE if the
+   // changes were accepted
+   bool DoApply();
+
    wxPNotebook *m_notebook;
 
+   // get the profile for event sending
+   virtual ProfileBase *GetProfile() const = 0;
+
 private:
-   wxButton
-      *m_btnHelp,
-      *m_btnOk,
-      *m_btnApply;
+   // send a notification event about options change using m_lastBtn value
+   void SendOptionsChangeEvent();
+
+   wxButton *m_btnHelp,
+            *m_btnOk,
+            *m_btnApply;
 
    bool m_bDirty;
+
+   // Ok/Cancel/Apply depending on the last button pressed
+   MEventOptionsChangeData::ChangeKind m_lastBtn;
 
    DECLARE_ABSTRACT_CLASS(wxNotebookDialog)
    DECLARE_EVENT_TABLE()

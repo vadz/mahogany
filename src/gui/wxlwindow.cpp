@@ -296,10 +296,13 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
          // selecting?
          if ( event.LeftIsDown() )
          {
-            wxASSERT_MSG( m_Selecting, "should be set in OnMouseLeftDown" );
-
-            m_llist->ContinueSelection(cursorPos, m_ClickPosition);
-            DoPaint();  // TODO: we don't have to redraw everything!
+            // m_Selecting might not be set if the button got pressed
+            // outside this window, so check for it:
+            if( m_Selecting )
+            {
+               m_llist->ContinueSelection(cursorPos, m_ClickPosition);
+               DoPaint();  // TODO: we don't have to redraw everything!
+            }
          }
 
          if ( u )
@@ -614,6 +617,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
 
             case WXK_TAB:
+               if ( !event.ShiftDown() )
                {
                    // TODO should be configurable
                    static const int tabSize = 8;

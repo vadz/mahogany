@@ -307,7 +307,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    },
 
    // help
-   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program in formation and copyright")  },
+   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  },
    { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  },
    { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  },
    { WXMENU_SEPARATOR,     "",                  ""                         },

@@ -54,6 +54,8 @@
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
 
+#include "MEvent.h"
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -75,6 +77,7 @@ BEGIN_EVENT_TABLE(wxNotebookPageBase, wxPanel)
    EVT_TEXT    (-1, wxNotebookPageBase::OnChange)
    EVT_CHECKBOX(-1, wxNotebookPageBase::OnChange)
    EVT_RADIOBOX(-1, wxNotebookPageBase::OnChange)
+   EVT_COMBOBOX(-1, wxNotebookPageBase::OnChange)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -637,6 +640,8 @@ wxNotebookDialog::wxNotebookDialog(wxFrame *parent, const wxString& title)
 {
    m_btnOk =
    m_btnApply = NULL;
+
+   m_lastBtn = MEventOptionsChangeData::Invalid;
 }
 
 void wxNotebookDialog::CreateAllControls()
@@ -744,12 +749,35 @@ bool wxNotebookDialog::TransferDataFromWindow()
    return TRUE;
 }
 
+void
+wxNotebookDialog::SendOptionsChangeEvent()
+{
+   ASSERT_MSG( m_lastBtn != MEventOptionsChangeData::Invalid,
+               "this should be only called when a button is pressed" );
+
+   // notify everybody who cares about the change
+   ProfileBase *profile = GetProfile();
+   MEventOptionsChangeData *data = new MEventOptionsChangeData
+                                       (
+                                        profile,
+                                        m_lastBtn
+                                       );
+   MEventManager::Send(data);
+   profile->DecRef();
+
+   // event sent, reset the flag value
+   m_lastBtn = MEventOptionsChangeData::Invalid;
+}
+
 // button event handlers
 // ---------------------
-void wxNotebookDialog::OnOK(wxCommandEvent& event)
+
+void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
 {
+   m_lastBtn = MEventOptionsChangeData::Ok;
+
    if ( m_bDirty )
-      OnApply(event);
+      DoApply();
 
    if ( !m_bDirty )
    {
@@ -763,22 +791,36 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
 {
    ASSERT_MSG( m_bDirty, "'Apply' should be disabled!" );
 
-   if(TransferDataFromWindow())
+   m_lastBtn = MEventOptionsChangeData::Apply;
+
+   (void)DoApply();
+}
+
+bool wxNotebookDialog::DoApply()
+{
+   if ( TransferDataFromWindow() )
    {
       if ( OnSettingsChange() )
       {
          m_bDirty = FALSE;
          m_btnApply->Enable(FALSE);
+
+         SendOptionsChangeEvent();
+
+         return TRUE;
       }
    }
    // If OnSettingsChange() or the Transfer function failed, we
    // don't reset the m_bDirty flag so that OnOk() will know we failed
+
+   return FALSE;
 }
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
-   // FIXME this should restore the old settings, even if "Apply" has been
-   //       done!
+   m_lastBtn = MEventOptionsChangeData::Cancel;
+   SendOptionsChangeEvent();
+
    EndModal(FALSE);
 }
 

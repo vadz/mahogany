@@ -147,7 +147,10 @@ public:
 
    // event processing function
    virtual bool OnMEvent(MEventData& event);
-   void GrabFocus(wxMouseEvent &event)       { SetFocus(); }
+
+#ifdef __WXGTK__
+   void OnMouseMove(wxMouseEvent &event) { SetFocus(); }
+#endif // wxGTK
 
 protected:
    // is the root item chosen?
@@ -244,7 +247,10 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxTreeCtrl)
    EVT_CHAR(wxFolderTreeImpl::OnChar)
 
    EVT_MENU(-1, wxFolderTreeImpl::OnMenuCommand)
-   EVT_MOTION (wxFolderTreeImpl::GrabFocus)
+
+#ifdef __WXGTK__
+   EVT_MOTION (wxFolderTreeImpl::OnMouseMove)
+#endif // wxGTK
 END_EVENT_TABLE()
 
 // ============================================================================

@@ -746,23 +746,41 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
+   // strings used for primitive alignment of text
+   static const char *justify = "                 ";
+   static const char *justify2 = "        ";
+
    wxLayoutList *ll = GetLayoutList();
    wxBitmap *bm = new wxBitmap(background);
    SetBackgroundBitmap(bm);
 
    SetCursorVisibility(0);
-   wxColour col("yellow");
-   Clear(wxROMAN, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
+   wxColour col("blue");
+   Clear(wxDECORATIVE, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
 
-   ll->Insert(new wxLayoutObjectIcon(wxIcon(mahogany)));
+   ll->Insert(justify2);
+   ll->Insert("Welcome to ");
    ll->LineBreak();
-   ll->SetFontWeight(wxNORMAL);
-   ll->SetFontSize(10);
-   String version = _("    Version: ");
+   ll->Insert(justify2);
+   ll->Insert("Mahogany!");
+   ll->LineBreak();
+
+   // unfortunately, I can't make it transparent under Windows, so it looks
+   // really ugly - disabling for now
+#if 0
+   ll->Insert(new wxLayoutObjectIcon(wxBitmap(mahogany)));
+   ll->LineBreak();
+#endif // 0
+
+   ll->SetFont(wxROMAN, 10, wxNORMAL, wxNORMAL, FALSE, "yellow");
+   ll->LineBreak();
+   String version = _("Version: ");
    version += M_VERSION_STRING;
+   ll->Insert(justify);
+   ll->Insert(justify);
    ll->Insert(version);
    ll->LineBreak();
-   version = _("        compiled for: ");
+   version = _("compiled for ");
 #ifdef OS_UNIX
    version += M_OSINFO;
 #else // Windows
@@ -770,33 +788,43 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    version += "Windows";
 #endif // Unix/Windows
 
+   ll->Insert(justify);
+   ll->Insert(justify);
    ll->Insert(version);
    ll->LineBreak();
    ll->LineBreak();
+
+   ll->SetFontSize(12);
+   ll->Insert(justify);
+   ll->Insert(_("Copyright (c) 1999 by Karsten Ballüder"));
    ll->LineBreak();
-   ll->Insert(_("  Copyright (c) 1999 by Karsten Ballüder"));
    ll->LineBreak();
+   ll->Insert(justify);
+   ll->Insert(justify2);
+   ll->Insert(_("Written by Karsten Ballüder"));
    ll->LineBreak();
-   ll->Insert(_("          Written by Karsten Ballüder"));
+   ll->Insert(justify);
+   ll->Insert(justify);
+   ll->Insert(_("and Vadim Zeitlin"));
    ll->LineBreak();
-   ll->Insert(_("                      and Vadim Zeitlin"));
    ll->LineBreak();
    ll->SetFontSize(8);
-   ll->Insert("                 ");
+   ll->Insert(justify);
    ll->Insert(_("This software is provied 'as is' and without any expressed or implied"));
    ll->LineBreak();
-   ll->Insert("                 ");
+   ll->Insert(justify);
    ll->Insert(_("warranties, including, without limitation, the implied warranties"));
    ll->LineBreak();
-   ll->Insert("                 ");
+   ll->Insert(justify);
    ll->Insert(_("of merchantibility and fitness for a particular purpose."));
    ll->LineBreak();
-   ll->Insert("                 ");
+   ll->Insert(justify);
    ll->Insert(_("This is OpenSource(TM) software."));
 #ifdef USE_PYTHON
    ll->LineBreak();
    ll->LineBreak();
-   ll->Insert("                 ");
+   ll->Insert(justify);
+   ll->Insert(justify);
    ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
 #endif // Python
    
@@ -817,7 +845,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       wxDefaultPosition,
                       // this is ugly, but having scrollbars is even uglier
 #ifdef __WXMSW__
-                      wxSize(400, 250),
+                      wxSize(400, 350),
 #else  // !MSW
                       wxSize(320, 230),
 #endif // MSW/!MSW

@@ -38,7 +38,9 @@ class MailFolder;
 /** A wxWindows MessageView class
   */
 
-class wxMessageView : public wxLayoutWindow, public MessageViewBase
+class wxMessageView : public wxLayoutWindow,
+                      public MessageViewBase,
+                      public MEventReceiver
 {
 public:
    /** quasi-Constructor
@@ -103,6 +105,9 @@ public:
    /// called when a process we launched terminates
    void OnProcessTermination(wxProcessEvent& event);
 
+   // internal M events processing function
+   virtual bool OnMEvent(MEventData& event);
+
    /// call to show the raw text of the current message (modal dialog)
    bool ShowRawText(MailFolder *folder = NULL);
 
@@ -122,6 +127,12 @@ public:
    bool FindAgain(void);
 
 private:
+   /// register with MEventManager
+   void RegisterForEvents();
+
+   /// reread the entries from our profile
+   void UpdateProfileValues();
+
    /// the parent window
    wxWindow   *m_Parent;
    /// uid of the message
@@ -144,6 +155,9 @@ private:
    ProfileBase *m_Profile;
    /// the MIME popup menu
    wxMenu *m_MimePopup;
+
+   /// event registration handle
+   void *m_eventReg;
 
 protected:
    friend class MimePopup;
@@ -195,7 +209,9 @@ protected:
 #endif // Unix
       /// Show XFaces?
       bool showFaces;
-   } m_ProfileValues;
+   } m_ProfileValues, m_oldProfileValue;
+
+   bool m_hasOldValues;
 
 private:
    /// array of process info for all external viewers we have launched

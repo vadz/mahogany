@@ -104,8 +104,15 @@ protected:
    void DoUpdateButtons()
       { EnableButtons(m_mayEnableOk && !m_folderName->GetValue().IsEmpty()); }
 
+   // base class pure virtual - return the profile we're working with
+   virtual ProfileBase *GetProfile() const
+   {
+      return m_newFolder ? ProfileBase::CreateProfile(m_newFolder->GetFullName())
+                         : (ProfileBase *)NULL;
+   }
+
    wxTextCtrl  *m_folderName,
-         *m_parentName;
+               *m_parentName;
 
    wxFolderBrowseButton *m_btnParentFolder;
 
@@ -563,7 +570,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    CHECK( m_newFolder, FALSE, "no folder in folder properties dialog" );
 
    wxString folderName = m_newFolder->GetFullName();
-   ProfileBase *profile = ProfileBase::CreateProfile(folderName);
+   ProfileBase *profile = GetProfile();
 
    // lame hack: use SetFolderPath() so the page will read its data from the
    // profile section corresponding to our folder

@@ -129,7 +129,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                      -1,
                      wxPoint(1,31),       // FIXME what is this "31"?
                      wxSize(x-1,y-31),
-                     wxSP_3D | wxSP_BORDER
+                     0//wxSP_3D | wxSP_BORDER
                     );
 
    // insert treectrl in one of the splitter panes

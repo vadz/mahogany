@@ -314,6 +314,7 @@ END_EVENT_TABLE()
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
+   m_hasOldValues = false;
    m_mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
@@ -335,6 +336,8 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
          SetStatusBar(statusBar, 0, -1);
       }
    }
+
+   RegisterForEvents();
 }
 
 
@@ -360,6 +363,15 @@ wxMessageView::wxMessageView(MailFolder *folder,
    Show(TRUE);
 }
 
+void
+wxMessageView::RegisterForEvents()
+{
+   // register with the event manager
+   m_eventReg = MEventManager::Register(*this, MEventId_OptionsChange);
+
+   ASSERT_MSG( m_eventReg, "can't register for options change event" );
+}
+
 MailFolder *
 wxMessageView::GetFolder(void)
 {
@@ -374,6 +386,14 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
 
    m_Profile = ProfileBase::CreateProfile("MessageView", profile);
 
+   UpdateProfileValues();
+
+   Clear();
+}
+
+void
+wxMessageView::UpdateProfileValues()
+{
    // We also use this to set all values to be read to speed things up:
    #define GET_COLOUR_FROM_PROFILE(which, name) \
       GetColourByName(&m_ProfileValues.which, \
@@ -406,7 +426,6 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
    m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
-   Clear();
 }
 
 void
@@ -676,6 +695,11 @@ wxMessageView::FindAgain(void)
 
 wxMessageView::~wxMessageView()
 {
+   if ( m_eventReg )
+   {
+      MEventManager::Deregister(m_eventReg);
+   }
+
    size_t procCount = m_processes.GetCount();
    for ( size_t n = 0; n < procCount; n++ )
    {
@@ -699,7 +723,6 @@ wxMessageView::~wxMessageView()
    if(m_Profile) m_Profile->DecRef();
 
    wxDELETE(m_MimePopup);
-
 }
 
 // show information about an attachment
@@ -1024,6 +1047,60 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
    wxLogError(_("Could not save the attachment."));
 
    return false;
+}
+
+bool
+wxMessageView::OnMEvent(MEventData& ev)
+{
+   if ( ev.GetId() == MEventId_OptionsChange )
+   {
+      MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
+
+      // first of all, are we interested in this profile or not?
+      ProfileBase *profileChanged = event.GetProfile();
+      if ( !profileChanged || !profileChanged->IsAncestor(m_Profile) )
+      {
+         // it's some profile which has nothing to do with us
+         return true;
+      }
+
+      switch ( event.GetChangeKind() )
+      {
+         case MEventOptionsChangeData::Apply:
+            if ( !m_hasOldValues )
+            {
+               // save the original values
+               m_oldProfileValue = m_ProfileValues;
+            }
+            //else: don't clobber the original values if Apply is pressed for
+            //      the second (or more) time
+
+            UpdateProfileValues();
+
+            m_hasOldValues = true;
+            break;
+
+         case MEventOptionsChangeData::Ok:
+            UpdateProfileValues();
+
+            m_hasOldValues = false;
+            break;
+
+         case MEventOptionsChangeData::Cancel:
+            // restore the old values
+            ASSERT_MSG( m_hasOldValues, "cancel without preceding apply?" );
+
+            m_ProfileValues = m_oldProfileValue;
+            break;
+
+         default:
+            FAIL_MSG("unknown options change event");
+      }
+
+      Update();
+   }
+
+   return true;
 }
 
 void

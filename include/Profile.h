@@ -177,6 +177,9 @@ public:
 /*     virtual const String GetPath() const = 0;
 */
 
+   /// is this profile a (grand) parent of the given one?
+   virtual bool IsAncestor(ProfileBase *profile) const = 0;
+
 protected:
    /// why does egcs want this?
    ProfileBase() {}

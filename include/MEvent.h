@@ -24,17 +24,19 @@
 enum MEventId
 {
    /// (invalid id for an event)
-   MEventId_Null = -1,                          
+   MEventId_Null = -1,
    /// MEventMailData
-   MEventId_NewMail = 100,                      
+   MEventId_NewMail = 100,
    /// MEventFolderTreeChangeData
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData
    MEventId_FolderUpdate = 400,
    /// MEventASFolderResult
    MEventId_ASFolderResult = 800,
+   /// MEventOptionsChangeData
+   MEventId_OptionsChange,
    /// (invalid id for an event)
-   MEventId_Max                                 
+   MEventId_Max
 };
 
 // ----------------------------------------------------------------------------
@@ -101,7 +103,7 @@ public:
       {
          return m_messageIDs[n];
       }
-   //@}   
+   //@}
 private:
    MailFolder    *m_folder;
    unsigned long *m_messageIDs;
@@ -110,7 +112,8 @@ private:
 
 
 // ----------------------------------------------------------------------------
-/** MEventFolderUpdate Data - Does not carry any data apart from pointer to mailfolder.*/
+/** MEventFolderUpdate Data - Does not carry any data apart from pointer to
+ * mailfolder.*/
 class MEventFolderUpdateData : public MEventData
 {
 public:
@@ -125,6 +128,66 @@ public:
    MailFolder *GetFolder() const { return m_folder; }
 private:
    MailFolder *m_folder;
+};
+
+// ----------------------------------------------------------------------------
+// MEventOptionsChangeData - this event is generated whenever some of the
+// program options change. It happens when the user clicks either of the
+// buttons in the options dialog: Apply, Cancel or Ok. The program is supposed
+// to apply the changes immediately in response to Apply, but be prepared to
+// undo them if Cancel is received. Ok should do the same as Apply, but it
+// can't be followed by Cancel. The profile pointer is the profile being
+// modified and generally it should be safe to ignore all changes to the
+// profile if it's not a parent of the profile in use.
+//
+// In response to "Apply" event (only) the event handler may prevent it from
+// taking place by calling Veto() on the event object.
+// ----------------------------------------------------------------------------
+
+class MEventOptionsChangeData : public MEventData
+{
+public:
+   // what happened?
+   enum ChangeKind
+   {
+      Invalid,
+      Apply,
+      Cancel,
+      Ok
+   };
+
+   // ctor
+   MEventOptionsChangeData(ProfileBase *profile, ChangeKind what)
+      : MEventData(MEventId_OptionsChange)
+      {
+         SafeIncRef(profile);
+
+         m_profile = profile;
+         m_what = what;
+         m_vetoed = false;
+      }
+
+   // what happened?
+   ChangeKind GetChangeKind() const { return m_what; }
+
+   // which profile was modified?
+   ProfileBase *GetProfile() const { return m_profile; }
+
+   // veto the event - "Apply" will be forbidden (logging a message explaining
+   // why this happened together with calling this function is probably a good
+   // idea)
+   void Veto() { m_vetoed = true; }
+
+   // event is allowed if Veto() hadn't been called
+   bool IsAllowed() const { return !m_vetoed; }
+
+   // dtor releases profile
+   virtual ~MEventOptionsChangeData() { SafeDecRef(m_profile); }
+
+private:
+   ProfileBase *m_profile;
+   ChangeKind   m_what;
+   bool         m_vetoed;
 };
 
 // ----------------------------------------------------------------------------
@@ -208,7 +271,7 @@ public:
 
    /// Dispatches all events in the queue.
    static void DispatchPending(void);
-   
+
    // register the event receiever for the events "eventId", the returned
    // pointer is NULL if the function failed, otherwise it should be saved for
    // subsequent call to Deregister()
@@ -219,6 +282,7 @@ public:
    // events, Deregister() should be called for each (successful) call to
    // Register()
    static bool Deregister(void *handle);
+
 protected:
    /// Dispatches a single event.
    static void Dispatch(MEventData * data);

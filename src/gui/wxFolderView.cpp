@@ -57,7 +57,11 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
    EVT_KEY_DOWN          (wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnMouse)
-   EVT_MOTION (wxFolderListCtrl::GrabFocus)
+
+#ifdef __WXGTK__
+   EVT_MOTION (wxFolderListCtrl::OnMouseMove)
+#endif // wxGTK
+
 END_EVENT_TABLE()
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
@@ -652,15 +656,24 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());
       break;
+
    case WXMENU_FILE_COMPOSE:
    {
-      wxComposeView *composeView = wxComposeView::CreateNewMessage(m_Parent, GetProfile());
+      wxComposeView *composeView = wxComposeView::CreateNewMessage
+                                   (
+                                    GetFrame(m_Parent),
+                                    GetProfile()
+                                   );
       composeView->Show();
    }
    break;
    case WXMENU_FILE_POST:
    {
-      wxComposeView *composeView = wxComposeView::CreateNewArticle(m_Parent, GetProfile());
+      wxComposeView *composeView = wxComposeView::CreateNewArticle
+                                   (
+                                    GetFrame(m_Parent),
+                                    GetProfile()
+                                   );
       composeView->Show();
    }
    break;

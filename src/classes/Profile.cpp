@@ -97,7 +97,7 @@ public:
                                       ProfileBase const *Parent);
    /// like the constructor, but reuses existing objects
    static ProfileBase * CreateEmptyProfile(const ProfileBase *Parent);
-      
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -148,6 +148,8 @@ public:
       }
 
    MOBJECT_DEBUG(Profile)
+
+   virtual bool IsAncestor(ProfileBase *profile) const;
 
 private:
    /** Constructor.
@@ -478,13 +480,14 @@ Profile::readEntry(const String & key, long def, bool * found) const
    keypath << key;
    long val;
    bool f = ms_GlobalConfig->Read(keypath,&val,def);
-   bool ff = f;
    while(! f && (ms_GlobalConfig->GetPath()) != M_PROFILE_CONFIG_SECTION)
    {
       ms_GlobalConfig->SetPath("..");
-      ms_GlobalConfig->Read(keypath,&val,def);
+      f = ms_GlobalConfig->Read(keypath,&val,def);
    }
-   if(found) *found = ff;
+   if(found)
+       *found = f;
+
    return val;
 }
 
@@ -587,10 +590,37 @@ ProfileBase::FilterProfileName(const String& profileName)
       }
       else
       {
-         // replace it -- hopefully the name will stay unique (@@)
+         // replace it -- hopefully the name will stay unique (FIXME)
          filteredName << '_';
       }
    }
 
    return filteredName;
+}
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
+
+bool Profile::IsAncestor(ProfileBase *profile) const
+{
+   if ( !profile )
+      return false;
+
+   // can't compare as strings because '/' are sometimes duplicated...
+   wxArrayString aMyComponents, aOtherComponents;
+   wxSplitPath(aMyComponents, m_ProfileName);
+   wxSplitPath(aOtherComponents, ((Profile *)profile)->m_ProfileName);
+
+   if ( aOtherComponents.GetCount() < aMyComponents.GetCount() )
+      return false;
+
+   size_t count = aMyComponents.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( aOtherComponents[n] != aMyComponents[n] )
+         return false;
+   }
+
+   return true;
 }

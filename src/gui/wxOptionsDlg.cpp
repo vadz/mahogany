@@ -256,6 +256,9 @@ public:
    static const char *s_aszImages[];
 
    wxOptionsNotebook(wxWindow *parent);
+
+   // the profile we use - just the global one here
+   ProfileBase *GetProfile() const { return ProfileBase::CreateProfile(""); }
 };
 
 // -----------------------------------------------------------------------------
@@ -282,11 +285,17 @@ public:
    virtual bool OnSettingsChange();
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxOptionsDialog() { }
+   wxOptionsDialog() { wxFAIL_MSG("should be never used"); }
 
 protected:
    // unset the dirty flag
    virtual void ResetDirty();
+
+   // implement base class pure virtual
+   virtual ProfileBase *GetProfile() const
+   {
+      return ((wxOptionsNotebook *)m_notebook)->GetProfile();
+   }
 
 private:
    bool  m_bTest,            // test new settings?
@@ -315,8 +324,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxOptionsDialog, wxNotebookDialog)
 
 BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    // any change should make us dirty
-   EVT_CHECKBOX(-1, wxOptionsPage::OnCheckboxChange)
-   EVT_RADIOBOX(-1, wxOptionsPage::OnRadioboxChange)
+   EVT_CHECKBOX(-1, wxOptionsPage::OnControlChange)
+   EVT_RADIOBOX(-1, wxOptionsPage::OnControlChange)
+   EVT_COMBOBOX(-1, wxOptionsPage::OnControlChange)
    EVT_TEXT(-1, wxOptionsPage::OnChange)
 END_EVENT_TABLE()
 
@@ -376,7 +386,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
-                  
+
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
@@ -528,7 +538,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
-   
+
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
@@ -786,14 +796,7 @@ void wxOptionsPage::OnChange(wxEvent& event)
       dialog->SetGiveRestartWarning();
 }
 
-void wxOptionsPage::OnRadioboxChange(wxEvent& event)
-{
-   OnChange(event);
-
-   Refresh();
-}
-
-void wxOptionsPage::OnCheckboxChange(wxEvent& event)
+void wxOptionsPage::OnControlChange(wxEvent& event)
 {
    OnChange(event);
 
@@ -1456,7 +1459,7 @@ wxOptionsDialog::~wxOptionsDialog()
 }
 
 // ----------------------------------------------------------------------------
-// wxOptionsNotebookBase manages its own image list
+// wxOptionsNotebook manages its own image list
 // ----------------------------------------------------------------------------
 
 // should be in sync with the enum OptionsPage in wxOptionsDlg.h!
@@ -1477,12 +1480,12 @@ const char *wxOptionsNotebook::s_aszImages[] =
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-   : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
+                 : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
 {
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == OptionsPage_Max + 1);
 
-   ProfileBase *profile = ProfileBase::CreateProfile("");
+   ProfileBase *profile = GetProfile();
 
    // create and add the pages
    (void)new wxOptionsPageIdent(this, profile);
