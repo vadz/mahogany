@@ -64,6 +64,7 @@ export DESTDIR
 USESTABLE=no
 
 FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
+WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 REALHOME=$HOME
@@ -422,7 +423,7 @@ then
     echo "Building and packaging documentation..."
     ( cd $BUILDDIR/$NAME-$VERSION && $MAKE doc && $MAKE install_all DESTDIR=$DESTDIR ) >/dev/null
     echo "Copying docs in $DESTDIR/share/Mahogany/doc to WWW..."
-    ( cd $DESTDIR/share/Mahogany/doc &&  $SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc )
+    ( cd $DESTDIR/share/Mahogany/doc &&  $SCP -r * $WWWDOCLOCATION )
     echo "Packing docs in $DESTDIR/share/Mahogany/doc..."
     (cd $DESTDIR/share/Mahogany/doc && \
 	tar czvf /tmp/Mdocs.tar.gz * && $SCP /tmp/Mdocs.tar.gz $FTPLOCATION)
