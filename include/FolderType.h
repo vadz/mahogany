@@ -88,7 +88,8 @@ enum FolderFlags
    MF_FLAGS_REOPENONPING  = 0x00008000, // force a close and re-open on a ping
    MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
    MF_FLAGS_HIDDEN        = 0x00020000, // don't show in the folder tree
-   MF_FLAGS_GROUP         = 0x00040000  // can be only half opened, not opened
+   MF_FLAGS_GROUP         = 0x00040000, // can be only half opened, not opened
+   MF_FLAGS_SSLAUTH       = 0x00080000  // use SSL authentication/encryption
 };
 
 /** SendMessageCC supports two different protocols:
@@ -123,6 +124,24 @@ inline static int GetFolderFlags(int typeAndFlags)
 {
    return typeAndFlags & MF_FLAGSMASK;
 }
+
+
+#ifdef USE_SSL
+/// is this a folder type for which username/password make sense?
+inline bool FolderTypeSupportsSSL(FolderType type)
+{
+   ASSERT(GetFolderType(type) == type);
+   switch(type)
+   {
+   case MF_POP:
+   case MF_IMAP:
+   case MF_NNTP:
+      return true;
+   default:
+      return false;
+   }
+}
+#endif
 
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(FolderType type)

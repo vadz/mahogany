@@ -109,6 +109,10 @@ M_OVERRIDES(docxx,docxx,
 --with-doc++      use DOC++ for class documentation generation,
 USE_DOCXX)
 
+M_OVERRIDES(ssl,ssl,
+--with-ssl      compile in SSL support (requires openSSL),
+USE_SSL)
+
 M_OVERRIDES_DONE
 
 dnl --------------------------------------------------------------------------
@@ -369,6 +373,21 @@ dnl precompiled headers
 if test "$USE_PCH" = 1; then
 	AC_DEFINE(USE_PCH)
 fi
+
+dnl Use SSL (requires openSSL)
+MAKE_USESSL=
+CCLIENT_EXTRAAUTHENTICATORS=
+if test "$USE_SSL" = 1; then
+	AC_CHECK_LIB(crypto,CRYPTO_free,
+	[ LIBS="$LIBS -lcrypto"	AC_CHECK_LIB(ssl,ssl3_connect,
+	[ 	MAKE_USESSL="USESSL=yes"
+		AC_DEFINE(USE_SSL)
+		CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
+	] ,AC_MSG_ERROR("Cannot find openSSL library libssl."), -lcrypto) ],
+	AC_MSG_ERROR("Cannot find openSSL library libcrypto."))
+fi
+AC_SUBST(MAKE_USESSL)
+AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
 
 dnl kdoc/docxx have their own section further down
 

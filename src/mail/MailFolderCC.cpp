@@ -608,6 +608,23 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    int flags = GetFolderFlags(typeAndFlags);
    int type = GetFolderType(typeAndFlags);
 
+#ifdef USE_SSL
+   // SSL only for NNTP/IMAP/POP:
+   if(((flags & MF_FLAGS_SSLAUTH) != 0)
+      && ! FolderTypeSupportsSSL(type))
+   {
+      flags ^= MF_FLAGS_SSLAUTH;
+      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), 
+                     GetName().c_str()));
+   }
+#else
+   if( (flags & MF_FLAGS_SSLAUTH) != 0)
+   {
+      ERRORMESSAGE((_("SSL authentication is not supported.")));
+      flags ^= MF_FLAGS_SSLAUTH;
+   }
+#endif
+   
    switch( type )
    {
    case MF_INBOX:
@@ -620,25 +637,33 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       mboxpath << "#mh/" << name;
       break;
    case MF_POP:
-      mboxpath << '{' << server << "/pop3}";
+      mboxpath << '{' << server << "/pop3";
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}';
       break;
    case MF_IMAP:  // do we need /imap flag?
       if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous}" << name;
+         mboxpath << '{' << server << "/anonymous" << name;
       else
       {
          if(login.Length())
-            mboxpath << '{' << server << "/user=" << login << '}'<<
-               name;
-         else // we get asked later FIXME!!
+            mboxpath << '{' << server << "/user=" << login ;
+         else // we get asked  later FIXME!!
             mboxpath << '{' << server << '}'<< name;
       }
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}' << name;
       break;
    case MF_NEWS:
       mboxpath << "#news." << name;
       break;
    case MF_NNTP:
-      mboxpath << '{' << server << "/nntp}" << name;
+      mboxpath << '{' << server << "/nntp";
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}' << name;
       break;
    default:
       FAIL_MSG("Unsupported folder type.");

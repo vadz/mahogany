@@ -357,6 +357,11 @@ protected:
    wxCheckBox *m_forceReOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
+#ifdef USE_SSL
+   /// Use SSL authentication for this folder?
+   wxCheckBox *m_useSSL;
+#endif
+
 #ifdef USE_LOCAL_CHECKBOX
    /// Is folder local?
    wxCheckBox *m_isLocal;
@@ -379,7 +384,11 @@ protected:
 
    /// the initial value of the "anonymous" flag
    bool m_originalIsAnonymous;
-   /// the initial value of the "is incoming" flag
+#ifdef USE_SSL
+   /// the initial value of the "use SSL" flag
+   bool m_originalUseSSL;
+#endif
+/// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
    /// the initial value of the "keep open" flag
    bool m_originalKeepOpenValue;
@@ -898,6 +907,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_KeepOpen,
       Label_ForceReOpen,
       Label_IsAnonymous,
+#ifdef USE_SSL
+      Label_UseSSL,
+#endif
 #ifdef USE_LOCAL_CHECKBOX
       Label_IsLocal,
 #endif // USE_LOCAL_CHECKBOX
@@ -921,6 +933,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Keep folder always open: "),
       gettext_noop("Force &re-open on ping: "),
       gettext_noop("Anon&ymous access: "),
+#ifdef USE_SSL
+      gettext_noop("Use &Secure Sockets Layer (SSL): "),
+#endif
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network "),
 #endif // USE_LOCAL_CHECKBOX
@@ -954,13 +969,19 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
-   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_forceReOpen);
+   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax,
+                                  m_forceReOpen);
+   wxControl *lastCtrl = m_isAnonymous;
+#ifdef USE_SSL
+   m_useSSL = CreateCheckBox(labels[Label_useSSL], widthMax,
+                             lastCtrl);
+   lastCtrl = m_useSSL;
+#endif
 #ifdef USE_LOCAL_CHECKBOX
-   m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, m_isAnonymous);
-   m_isDir = CreateCheckBox(labels[Label_IsDir], widthMax, m_isLocal);
-#else // !USE_LOCAL_CHECKBOX
-   m_isDir = CreateCheckBox(labels[Label_IsDir], widthMax, m_isAnonymous);
+   m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, lastCtrl);
+   lastCtrl = m_isLocal;
 #endif // USE_LOCAL_CHECKBOX/!USE_LOCAL_CHECKBOX
+   m_isDir = CreateCheckBox(labels[Label_IsDir], widthMax, lastCtrl);
    m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, m_isDir);
    m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isHidden);
 
@@ -974,6 +995,10 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                "name and password check this to try to connect\n"
                                "without any - this might work or fail depending "
                                "on the server settings."));
+#ifdef USE_SSL
+   m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
+                          "for communication with the server."));
+#endif
    m_isDir->SetToolTip(_("Some folders are like directories and may only "
                          "contain other folders and not the messages.\n"
                          "Check this to create a folder of this kind."));
@@ -1208,12 +1233,18 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
    CHECK_RET( dlg, "wxFolderPropertiesPage without parent dialog?" );
 
    bool enableAnonymous, enableLogin;
+#ifdef USE_SSL
+   bool enableSSL;
+#endif
+   
 
    if ( m_folderType == MF_GROUP )
    {
       // enable all fields for these folders (see the message above)
-      enableAnonymous =
-      enableLogin = true;
+      enableAnonymous = enableLogin = true;
+#ifdef USE_SSL
+      bool enableSSL = false;
+#endif
    }
    else
    {
@@ -1226,8 +1257,16 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       // only enable password and login fields if anonymous access is disabled
       bool isAnon = m_isAnonymous->GetValue();
       enableLogin = hasPassword && !isAnon;
+
+#ifdef USE_SSL
+      bool enableSSL = FolderTypeSupportsSSL(m_folderType);
+#endif
+
    }
 
+#ifdef USE_SSL
+   m_useSSL->Enable(enableSSL);
+#endif
    m_isAnonymous->Enable(enableAnonymous);
    EnableTextWithLabel(m_password, enableLogin);
    EnableTextWithLabel(m_login, enableLogin);
@@ -1623,6 +1662,11 @@ wxFolderPropertiesPage::SetDefaultValues()
                            (m_isCreating && folderType == MF_NNTP);
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
+#ifdef USE_SSL_AUTH
+   m_originalUseSSL = (flags & MF_FLAGS_SSLAUTH);
+   m_useSSL->SetValue(m_originalUseSSL);
+#endif
+   
    // update the folder icon
    if ( m_isCreating )
    {
@@ -1767,7 +1811,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       {
          // anonymous access?
          bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
-
+#ifdef USE_SSL
+         if(m_useSSL->GetValue() != 0)
+            flags |= MF_FLAGS_SSLAUTH;
+#endif
          if ( anonymous )
             flags |= MF_FLAGS_ANON;
          else
@@ -1966,6 +2013,17 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       else
          folder->ResetFlags(MF_FLAGS_ANON);
    }
+
+#ifdef USE_SSL
+   bool useSSL = m_useSSL->GetValue();
+   if ( useSSL != m_originalUseSSL )
+   {
+      if ( useSSL )
+         folder->AddFlags(MF_FLAGS_SSLAUTH);
+      else
+         folder->ResetFlags(MF_FLAGS_SSLAUTH);
+   }
+#endif
 
    bool isDir = m_isDir->GetValue();
    if ( isDir != m_originalIsDir )
