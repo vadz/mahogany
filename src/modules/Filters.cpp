@@ -1668,9 +1668,15 @@ ParserImpl::ParseTerm(void)
 
 #ifdef USE_RBL
 
+
 #define __STRICT_ANSI__
 #include <netinet/in.h>
+
+// FreeBSD uses a variable name "class"
+#define class xxclass
 #include <arpa/nameser.h>
+#undef class
+
 #include <resolv.h>
 #include <netdb.h>
 
