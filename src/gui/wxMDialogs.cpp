@@ -671,6 +671,22 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
 
 // simple AboutDialog to be displayed at startup
 
+// timer which calls our DoClose() when it expires
+class LogCloseTimer : public wxTimer
+{
+public:
+   LogCloseTimer(class wxAboutWindow *window)
+      {
+         m_window = window;
+         Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000);
+      }
+
+   virtual void Notify();
+   private:
+   wxAboutWindow *m_window;
+};
+
+
 // the main difference is that it goes away as soon as you click it
 // or after some time (if not disabled in the ctor).
 //
@@ -701,25 +717,15 @@ public:
          m_pTimer = NULL;
       }
 private:
-  // timer which calls our DoClose() when it expires
-  class CloseTimer : public wxTimer
-  {
-  public:
-    CloseTimer(wxAboutWindow *window)
-    {
-      m_window = window;
-
-      Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000);
-    }
-
-    virtual void Notify() { m_window->DoClose(); }
-
-  private:
-    wxAboutWindow *m_window;
-  } *m_pTimer;
-
-  DECLARE_EVENT_TABLE();
+   LogCloseTimer  *m_pTimer;
+   DECLARE_EVENT_TABLE();
 };
+
+void
+LogCloseTimer::Notify()
+{
+   m_window->DoClose();
+}
 
 class wxAboutFrame : public wxFrame
 {
@@ -846,7 +852,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
-     m_pTimer = new CloseTimer(this);
+     m_pTimer = new LogCloseTimer(this);
    }
    else {
      // must initialize to NULL because we delete it later unconditionally
@@ -854,30 +860,18 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    }
 }
 
-wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
-            : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition,
-                      // this is ugly, but having scrollbars is even uglier
-#ifdef __WXMSW__
-                      wxSize(400, 350),
-#else  // !MSW
-                      wxSize(320, 270),
-#endif // MSW/!MSW
-                      /* no border styles at all */ wxSTAY_ON_TOP )
+
+// getting log messages when splash screen is shown is extremely annoying,
+// because there is no (easy) way to close the msg box hidden by the splash
+// screen, so install a temporary log redirector which will close the splash
+// screen before showing any messages
+class SplashKillerLog : public wxLog
 {
-   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+public:
+   SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
+   virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
 
-   // getting log messages when splash screen is shown is extremely annoying,
-   // because there is no (easy) way to close the msg box hidden by the splash
-   // screen, so install a temporary log redirector which will close the splash
-   // screen before showing any messages
-   class SplashKillerLog : public wxLog
-   {
-   public:
-      SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
-      virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
-
-      virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+   virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
       {
          // all previous ones will show a msg box
          if ( level < wxLOG_Status )
@@ -892,9 +886,23 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
          }
       }
 
-   private:
-      wxLog *m_logOld;
-   };
+private:
+   wxLog *m_logOld;
+};
+
+
+wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
+            : wxFrame(NULL, -1, _("Welcome"),
+                      wxDefaultPosition,
+                      // this is ugly, but having scrollbars is even uglier
+#ifdef __WXMSW__
+                      wxSize(400, 350),
+#else  // !MSW
+                      wxSize(320, 270),
+#endif // MSW/!MSW
+                      /* no border styles at all */ wxSTAY_ON_TOP )
+{
+   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
 
    wxLog::SetActiveTarget(new SplashKillerLog);
 
