@@ -2931,6 +2931,10 @@ wxFolderView::Clear()
          CheckExpungeDialog(m_ASMailFolder, m_Frame);
       }
 
+      // this folder is not associated with our frame any more
+      MailFolder_obj mf = m_ASMailFolder->GetMailFolder();
+      mf->SetInteractiveFrame(NULL);
+
       m_ASMailFolder->DecRef();
       m_ASMailFolder = NULL;
 
