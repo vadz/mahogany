@@ -19,6 +19,8 @@
 #include "FolderType.h"    // for strutil_expandfoldername
 
 class kbStringList;
+class Profile;
+class wxRegEx;
 
 /**@name String class helper functions */
 //@{
@@ -354,6 +356,26 @@ extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
 extern wxFontEncoding
 ConvertUnicodeToSystem(wxString *strUtf,
                        wxFontEncoding utfEnc = wxFONTENCODING_UTF8);
+
+// return the length of the line terminator if we're at the end of line or 0
+// otherwise
+extern size_t IsEndOfLine(const wxChar *p);
+
+class DetectSignature
+{
+public:
+   DetectSignature();
+   ~DetectSignature();
+   bool Initialize(Profile *profile);
+   bool StartsHere(const wxChar *cptr);
+
+private:
+#if wxUSE_REGEX
+   bool m_useRE;
+   // a RE to detect the start of the signature
+   wxRegEx *m_reSig;
+#endif
+};
 
 //@}
 #endif

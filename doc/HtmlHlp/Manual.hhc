@@ -14,400 +14,404 @@
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00210000000000000000">
+<param name="Local" value="#SECTION00210000000000000000">
 <param name="Name" value="Release Notes">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00211000000000000000">
+<param name="Local" value="#SECTION00211000000000000000">
 <param name="Name" value="Changes against the previous versions">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00212000000000000000">
+<param name="Local" value="#SECTION00212000000000000000">
 <param name="Name" value="Known bugs">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00213000000000000000">
+<param name="Local" value="#SECTION00213000000000000000">
 <param name="Name" value="TODO, features to implement">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00214000000000000000">
+<param name="Local" value="#SECTION00214000000000000000">
 <param name="Name" value="Help Needed">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00215000000000000000">
+<param name="Local" value="#SECTION00215000000000000000">
 <param name="Name" value="Copyright">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00216000000000000000">
+<param name="Local" value="#SECTION00216000000000000000">
 <param name="Name" value="The Mahogany ``Artistic License''">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00217000000000000000">
+<param name="Local" value="#SECTION00217000000000000000">
 <param name="Name" value="The License Dialog">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00218000000000000000">
+<param name="Local" value="#SECTION00218000000000000000">
 <param name="Name" value="Additional Credits">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00220000000000000000">
+<param name="Local" value="#SECTION00220000000000000000">
 <param name="Name" value="Introduction / Tutorial">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00221000000000000000">
+<param name="Local" value="#SECTION00221000000000000000">
 <param name="Name" value="Getting started">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00222000000000000000">
+<param name="Local" value="#SECTION00222000000000000000">
 <param name="Name" value="The main window">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00223000000000000000">
+<param name="Local" value="#SECTION00223000000000000000">
 <param name="Name" value="How to configure POP and IMAP folders?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00224000000000000000">
+<param name="Local" value="#SECTION00224000000000000000">
 <param name="Name" value="How to set up your mail accounts">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00230000000000000000">
+<param name="Local" value="#SECTION00230000000000000000">
 <param name="Name" value="Setting up Mahogany, its configuration files">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00231000000000000000">
+<param name="Local" value="#SECTION00231000000000000000">
 <param name="Name" value="Mahogany command line options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00232000000000000000">
+<param name="Local" value="#SECTION00232000000000000000">
 <param name="Name" value="User configuration files (Unix only)">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00233000000000000000">
+<param name="Local" value="#SECTION00233000000000000000">
 <param name="Name" value="Registry (Windows only)">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00240000000000000000">
+<param name="Local" value="#SECTION00240000000000000000">
 <param name="Name" value="The User Interface">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00241000000000000000">
+<param name="Local" value="#SECTION00241000000000000000">
 <param name="Name" value="The Main Window">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00242000000000000000">
+<param name="Local" value="#SECTION00242000000000000000">
 <param name="Name" value="The Folder Tree">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00243000000000000000">
+<param name="Local" value="#SECTION00243000000000000000">
 <param name="Name" value="Create New Folder Dialog">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00244000000000000000">
+<param name="Local" value="#SECTION00244000000000000000">
 <param name="Name" value="Folder Views">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00245000000000000000">
+<param name="Local" value="#SECTION00245000000000000000">
 <param name="Name" value="Migrating from another mail client">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00250000000000000000">
+<param name="Local" value="#SECTION00250000000000000000">
 <param name="Name" value="Reading Mail">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00251000000000000000">
+<param name="Local" value="#SECTION00251000000000000000">
 <param name="Name" value="The INBOX Folder">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00252000000000000000">
+<param name="Local" value="#SECTION00252000000000000000">
 <param name="Name" value="The ``New Mail'' Folder">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00253000000000000000">
+<param name="Local" value="#SECTION00253000000000000000">
 <param name="Name" value="Other Folders">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00254000000000000000">
+<param name="Local" value="#SECTION00254000000000000000">
 <param name="Name" value="Accessing Mail Remotely">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00255000000000000000">
+<param name="Local" value="#SECTION00255000000000000000">
 <param name="Name" value="Filters">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00260000000000000000">
+<param name="Local" value="#SECTION00260000000000000000">
 <param name="Name" value="Sending Mail">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00261000000000000000">
+<param name="Local" value="#SECTION00261000000000000000">
 <param name="Name" value="To: CC: and BCC: Settings">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00262000000000000000">
+<param name="Local" value="#SECTION00262000000000000000">
 <param name="Name" value="Key Bindings in the Message Editor">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00263000000000000000">
+<param name="Local" value="#SECTION00263000000000000000">
 <param name="Name" value="Using the address book">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00264000000000000000">
+<param name="Local" value="#SECTION00264000000000000000">
 <param name="Name" value="The Mail Composition Window">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00265000000000000000">
+<param name="Local" value="#SECTION00265000000000000000">
 <param name="Name" value="The News Article Composition Window">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00270000000000000000">
+<param name="Local" value="#SECTION00270000000000000000">
 <param name="Name" value="Understanding program options">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00271000000000000000">
+<param name="Local" value="#SECTION00271000000000000000">
 <param name="Name" value="Automatically remembered options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00272000000000000000">
+<param name="Local" value="#SECTION00272000000000000000">
 <param name="Name" value="Other options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00273000000000000000">
+<param name="Local" value="#SECTION00273000000000000000">
 <param name="Name" value="Remote configuration synchronisation">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00274000000000000000">
+<param name="Local" value="#SECTION00274000000000000000">
 <param name="Name" value="Some Other Dialogs You May Encounter">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00275000000000000000">
+<param name="Local" value="#SECTION00275000000000000000">
 <param name="Name" value="Mahogany Plugin Modules">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00280000000000000000">
+<param name="Local" value="#SECTION00280000000000000000">
 <param name="Name" value="The Address Database">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00281000000000000000">
+<param name="Local" value="#SECTION00281000000000000000">
 <param name="Name" value="The native Address Book ">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00282000000000000000">
+<param name="Local" value="#SECTION00282000000000000000">
 <param name="Name" value="The Address Book Editor">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00283000000000000000">
+<param name="Local" value="#SECTION00283000000000000000">
 <param name="Name" value="Support for BBDB Address Books">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00284000000000000000">
+<param name="Local" value="#SECTION00284000000000000000">
+<param name="Name" value="One Address per Line File Address Books">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="#SECTION00285000000000000000">
 <param name="Name" value="Support for Palm Address Books">
 </OBJECT>
 </UL>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00300000000000000000">
-<param name="Name" value="Scripting and Extending Mahogany">
+<param name="Local" value="#SECTION00300000000000000000">
+<param name="Name" value="Scripting and Extending <I>Mahogany</I>">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00310000000000000000">
+<param name="Local" value="#SECTION00310000000000000000">
 <param name="Name" value="Python Scripting">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00311000000000000000">
+<param name="Local" value="#SECTION00311000000000000000">
 <param name="Name" value="Introduction">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00312000000000000000">
+<param name="Local" value="#SECTION00312000000000000000">
 <param name="Name" value="Initialisation ">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00313000000000000000">
+<param name="Local" value="#SECTION00313000000000000000">
 <param name="Name" value="Callback Functions (Hooks)">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00314000000000000000">
+<param name="Local" value="#SECTION00314000000000000000">
 <param name="Name" value="Namespaces">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00315000000000000000">
+<param name="Local" value="#SECTION00315000000000000000">
 <param name="Name" value="List of Callbacks">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00316000000000000000">
+<param name="Local" value="#SECTION00316000000000000000">
 <param name="Name" value="Supported Classes">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00320000000000000000">
+<param name="Local" value="#SECTION00320000000000000000">
 <param name="Name" value="Plugins">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00321000000000000000">
+<param name="Local" value="#SECTION00321000000000000000">
 <param name="Name" value="Introduction">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00322000000000000000">
+<param name="Local" value="#SECTION00322000000000000000">
 <param name="Name" value="The Filters Module">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00323000000000000000">
+<param name="Local" value="#SECTION00323000000000000000">
 <param name="Name" value="The PalmOS Module">
 </OBJECT>
 </UL>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00400000000000000000">
+<param name="Local" value="#SECTION00400000000000000000">
 <param name="Name" value="Getting Help and Support">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00410000000000000000">
+<param name="Local" value="#SECTION00410000000000000000">
 <param name="Name" value="Troubleshooting">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00420000000000000000">
+<param name="Local" value="#SECTION00420000000000000000">
 <param name="Name" value="WWW Support">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00430000000000000000">
+<param name="Local" value="#SECTION00430000000000000000">
 <param name="Name" value="Mailing Lists">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00500000000000000000">
+<param name="Local" value="#SECTION00500000000000000000">
 <param name="Name" value="Advanced Usage">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00510000000000000000">
-<param name="Name" value="Compiling Mahogany from source">
+<param name="Local" value="#SECTION00510000000000000000">
+<param name="Name" value="Compiling <I>Mahogany</I> from source">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00520000000000000000">
-<param name="Name" value="Using Mahogany more efficiently">
+<param name="Local" value="#SECTION00520000000000000000">
+<param name="Name" value="Using <I>Mahogany</I> more efficiently">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00521000000000000000">
-<param name="Name" value="Speeding up Mahogany startup">
+<param name="Local" value="#SECTION00521000000000000000">
+<param name="Name" value="Speeding up <I>Mahogany</I> startup">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00522000000000000000">
+<param name="Local" value="#SECTION00522000000000000000">
 <param name="Name" value="Limiting Amount of Data Transferred">
 </OBJECT>
 </UL>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00600000000000000000">
+<param name="Local" value="#SECTION00600000000000000000">
 <param name="Name" value="FAQ - Frequently Asked Questions">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00610000000000000000">
+<param name="Local" value="#SECTION00610000000000000000">
 <param name="Name" value="Installation Problems">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00611000000000000000">
+<param name="Local" value="#SECTION00611000000000000000">
 <param name="Name" value="All Mahogany icons show a question mark">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00612000000000000000">
+<param name="Local" value="#SECTION00612000000000000000">
 <param name="Name" value="How do I unpack the compressed files?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00613000000000000000">
+<param name="Local" value="#SECTION00613000000000000000">
 <param name="Name" value="Compiling aborts with errors">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00614000000000000000">
+<param name="Local" value="#SECTION00614000000000000000">
 <param name="Name" value="Mahogany fails to find wxWindows, configure fails">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00615000000000000000">
+<param name="Local" value="#SECTION00615000000000000000">
 <param name="Name" value="SSL does not work">
 </OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00620000000000000000">
+<param name="Local" value="#SECTION00620000000000000000">
 <param name="Name" value="Other Problems / Questions">
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00621000000000000000">
+<param name="Local" value="#SECTION00621000000000000000">
 <param name="Name" value="The Preferences Dialog does not show up properly">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00622000000000000000">
+<param name="Local" value="#SECTION00622000000000000000">
 <param name="Name" value="How to use Mahogany with fetchmail/procmail?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00623000000000000000">
+<param name="Local" value="#SECTION00623000000000000000">
 <param name="Name" value="Does Mahogany have group aliases?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00624000000000000000">
+<param name="Local" value="#SECTION00624000000000000000">
 <param name="Name" value="How can I set up POP3/IMAP access?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00625000000000000000">
+<param name="Local" value="#SECTION00625000000000000000">
 <param name="Name" value="How can I set up IMAP access?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00626000000000000000">
+<param name="Local" value="#SECTION00626000000000000000">
 <param name="Name" value="Can I have multiple POP3 or IMAP accounts?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00627000000000000000">
+<param name="Local" value="#SECTION00627000000000000000">
 <param name="Name" value="Can I have multiple identities?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00628000000000000000">
+<param name="Local" value="#SECTION00628000000000000000">
 <param name="Name" value="Can I run Mahogany as root?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION00629000000000000000">
+<param name="Local" value="#SECTION00629000000000000000">
 <param name="Name" value="How can I set which language to use?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006210000000000000000">
+<param name="Local" value="#SECTION006210000000000000000">
 <param name="Name" value="How can I delete messages?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006211000000000000000">
+<param name="Local" value="#SECTION006211000000000000000">
 <param name="Name" value="How can I forward a message with attachments?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006212000000000000000">
+<param name="Local" value="#SECTION006212000000000000000">
 <param name="Name" value="How can I customize the position of folders in the tree?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006213000000000000000">
+<param name="Local" value="#SECTION006213000000000000000">
 <param name="Name" value="How can I ``leave messages on server'' (POP3)?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006214000000000000000">
+<param name="Local" value="#SECTION006214000000000000000">
 <param name="Name" value="Can I have ``subfolders'' of File type (mbox) folders?">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-<param name="Local" value="Manual.html#SECTION006215000000000000000">
+<param name="Local" value="#SECTION006215000000000000000">
 <param name="Name" value="Can I ``Follow-up'' to the message?">
 </OBJECT>
 </UL></UL></UL>

@@ -53,6 +53,7 @@ extern const MOption MP_CRYPTALGO;
 extern const MOption MP_CRYPT_TESTDATA;
 extern const MOption MP_CRYPT_TWOFISH_OK;
 extern const MOption MP_MBOXDIR;
+extern const MOption MP_REPLY_SIG_SEPARATOR;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -1406,3 +1407,106 @@ ConvertUnicodeToSystem(wxString *strUtf, wxFontEncoding enc)
 #endif // wxUSE_INTL/!wxUSE_INTL
 }
 
+// return the length of the line terminator if we're at the end of line or 0
+// otherwise
+size_t IsEndOfLine(const wxChar *p)
+{
+   // although the text of the mail message itself has "\r\n" at the end of
+   // each line, when we quote the selection only (which we got from the text
+   // control) it has just "\n"s, so we should really understand both of them
+   if ( p[0] == '\n' )
+      return 1;
+   else if ( p[0] == '\r' && p[1] == '\n' )
+      return 2;
+
+   return 0;
+}
+
+DetectSignature::DetectSignature()
+{
+#if wxUSE_REGEX
+   // don't use RE at all by default because the manual code is faster
+   m_useRE = false;
+   m_reSig = NULL;
+#endif
+}
+
+DetectSignature::~DetectSignature()
+{
+#if wxUSE_REGEX
+   if( m_reSig )
+      delete m_reSig;
+#endif
+}
+
+bool DetectSignature::Initialize(Profile *profile)
+{
+#if wxUSE_REGEX
+   String sig = READ_CONFIG(profile, MP_REPLY_SIG_SEPARATOR);
+
+   if ( sig != GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
+   {
+      // we have no choice but to use the user-supplied RE
+      m_reSig = new wxRegEx;
+
+      // we implicitly anchor the RE at start/end of line
+      //
+      // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
+      String sigRE;
+      sigRE << '^' << sig << _T("\r\n");
+
+      if ( !m_reSig->Compile(sigRE, wxRE_NOSUB) )
+      {
+         wxLogError(_("Regular expression '%s' used for detecting the "
+                      "signature start is invalid, please modify it."),
+                    sigRE.c_str());
+
+         return false;
+      }
+      
+      m_useRE = true;
+   }
+#endif // wxUSE_REGEX
+   return true;
+}
+
+bool DetectSignature::StartsHere(const wxChar *cptr)
+{
+   bool isSig = false;
+#if wxUSE_REGEX
+   if ( m_useRE )
+   {
+      isSig = m_reSig->Matches(cptr);
+   }
+   else
+#endif // wxUSE_REGEX
+   {
+      // hard coded detection for standard signature separator "--"
+      // and the mailing list trailer "____...___"
+      if ( cptr[0] == '-' && cptr[1] == '-' )
+      {
+         // there may be an optional space after "--" (in fact the
+         // space should be there but some people don't put it)
+         const wxChar *p = cptr + 2;
+         if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
+         {
+            // looks like the start of the sig
+            isSig = true;
+         }
+      }
+      else if ( cptr[0] == '_' )
+      {
+         const wxChar *p = cptr + 1;
+         while ( *p == '_' )
+            p++;
+
+         // consider that there should be at least 5 underscores...
+         if ( IsEndOfLine(p) && p - cptr >= 5 )
+         {
+            // looks like the mailing list trailer
+            isSig = true;
+         }
+      }
+   }
+   return isSig;
+}

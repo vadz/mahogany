@@ -163,12 +163,16 @@ private:
       const String &paragraph,int lineStart,int paragraphEnd) const;
    size_t RFind(const String &where,wxChar what,size_t start) const;
    size_t FindLastNotOf(const String &where,wxChar what,size_t start) const;
+   void FindSignature();
+   bool PastSignature() { return m_from >= m_signature; }
 
    wxTextCtrl *m_control;
    int m_from;
    int m_to;
    int m_margin;
    String m_prefix;
+   int m_signature; // Line with signature separator
+   Profile *m_profile;
 };
 
 class wxBareBonesEditorNotebook : public wxNotebook
@@ -245,12 +249,12 @@ IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
 
 FormattedParagraph::FormattedParagraph(wxTextCtrl *control,
    BareBonesEditor *editor)
-   : m_control(control), m_from(0), m_to(0)
+   : m_control(control), m_from(0), m_to(0), m_profile(editor->GetProfile())
 {
-   m_margin = READ_CONFIG(editor->GetProfile(),MP_WRAPMARGIN);
+   m_margin = READ_CONFIG(m_profile,MP_WRAPMARGIN);
    if(m_margin <= 0)
       m_margin = 1;
-   m_prefix = READ_CONFIG_TEXT(editor->GetProfile(),MP_REPLY_MSGPREFIX);
+   m_prefix = READ_CONFIG_TEXT(m_profile,MP_REPLY_MSGPREFIX);
 }
 
 void FormattedParagraph::FromCursor()
@@ -280,12 +284,12 @@ void FormattedParagraph::FromCursor()
 bool FormattedParagraph::IsWhiteLine(int line)
 {
    String text = m_control->GetLineText(line);
-   const wxChar *p = text.c_str();
 
-   while ( wxIsalnum(*p) )
-      p++;
+   bool graph = false;
+   for(size_t each = 0; each < text.size(); ++each )
+      graph = graph || wxIsgraph(text[each]);
 
-   return *p == _T('\0');
+   return !graph;
 }
 
 int FormattedParagraph::FindLineByWhite(int start,bool white)
@@ -340,7 +344,9 @@ void FormattedParagraph::Set(const String &modified)
    }
    if(!modified.empty() && modified[modified.size()-1] != _T('\n'))
       ++lineCount;
-   m_to = m_from+lineCount;
+   int shift = lineCount-(m_to-m_from);
+   m_to += shift;
+   m_signature += shift;
 }
 
 int FormattedParagraph::LineToPosition(int line)
@@ -387,13 +393,15 @@ bool FormattedParagraph::NeedsFormat()
 
 void FormattedParagraph::FormatAll()
 {
-   for(First(); !Empty(); Next())
+   FindSignature();
+   for(First(); !Empty() && !PastSignature(); Next())
       Format();
 }
 
 void FormattedParagraph::UnformatAll()
 {
-   for(First(); !Empty(); Next())
+   FindSignature();
+   for(First(); !Empty() && !PastSignature(); Next())
       Unformat();
 }
 
@@ -523,6 +531,22 @@ size_t FormattedParagraph::FindLastNotOf(
    return result;
 }
 
+void FormattedParagraph::FindSignature()
+{
+   int count = m_control->GetNumberOfLines();
+
+   DetectSignature detector;
+   detector.Initialize(m_profile);
+   
+   for(m_signature = 0; m_signature < count; ++m_signature)
+   {
+      String line = m_control->GetLineText(m_signature);
+      line += '\n';
+      if( detector.StartsHere(line.c_str()) )
+         break;
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxBareBonesEditorNotebook
 // ----------------------------------------------------------------------------
@@ -563,13 +587,13 @@ wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
    wxSizer *buttonRow = new wxGridSizer(1,4,0,10);
 
    buttonRow->Add(new wxButton(parent,Button_FormatParagraph,
-      _("Format Paragraph")),0,wxEXPAND);
+      _("Wrap Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_FormatAll,
-      _("Format All")),0,wxEXPAND);
+      _("Wrap All")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatParagraph,
-      _("Unformat Paragraph")),0,wxEXPAND);
+      _("Unwrap Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatAll,
-      _("Unformat All")),0,wxEXPAND);
+      _("Unwrap All")),0,wxEXPAND);
 
    return buttonRow;
 }

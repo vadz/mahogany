@@ -1459,21 +1459,6 @@ String VarExpander::GetReplyPrefix() const
    return prefix;
 }
 
-// return the length of the line terminator if we're at the end of line or 0
-// otherwise
-static inline size_t IsEndOfLine(const wxChar *p)
-{
-   // although the text of the mail message itself has "\r\n" at the end of
-   // each line, when we quote the selection only (which we got from the text
-   // control) it has just "\n"s, so we should really understand both of them
-   if ( p[0] == '\n' )
-      return 1;
-   else if ( p[0] == '\r' && p[1] == '\n' )
-      return 2;
-
-   return 0;
-}
-
 void
 VarExpander::ExpandOriginalText(const String& text,
                                 const String& prefix,
@@ -1513,41 +1498,15 @@ VarExpander::ExpandOriginalText(const String& text,
    bool detectSig = (flags & DetectSig) &&
                         READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
 
-#if wxUSE_REGEX
-   // don't use RE at all by default because the manual code is faster
-   bool useRE = false;
-
-   // a RE to detect the start of the signature
-   wxRegEx reSig;
-   if ( detectSig )
+   DetectSignature signature;
+   if( detectSig )
    {
-      String sig = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
-
-      if ( sig != GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
+      if( !signature.Initialize(m_profile) )
       {
-         // we have no choice but to use the user-supplied RE
-         useRE = true;
-
-         // we implicitly anchor the RE at start/end of line
-         //
-         // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
-         String sigRE;
-         sigRE << '^' << sig << _T("\r\n");
-
-         if ( !reSig.Compile(sigRE, wxRE_NOSUB) )
-         {
-            wxLogError(_("Regular expression '%s' used for detecting the "
-                         "signature start is invalid, please modify it.\n"
-                         "\n"
-                         "Disabling sinature stripping for now."),
-                       sigRE.c_str());
-
-            m_profile->writeEntry(MP_REPLY_DETECT_SIG, false);
-            detectSig = false;
-         }
+         m_profile->writeEntry(MP_REPLY_DETECT_SIG, false);
+         detectSig = false;
       }
    }
-#endif // wxUSE_REGEX
 
    // if != 0, then we're at the end of the current line
    size_t lenEOL = 0;
@@ -1565,45 +1524,7 @@ VarExpander::ExpandOriginalText(const String& text,
       {
          if ( detectSig )
          {
-            bool isSig = false;
-
-#if wxUSE_REGEX
-            if ( useRE )
-            {
-               isSig = reSig.Matches(cptr);
-            }
-            else
-#endif // wxUSE_REGEX
-            {
-               // hard coded detection for standard signature separator "--"
-               // and the mailing list trailer "____...___"
-               if ( cptr[0] == '-' && cptr[1] == '-' )
-               {
-                  // there may be an optional space after "--" (in fact the
-                  // space should be there but some people don't put it)
-                  const wxChar *p = cptr + 2;
-                  if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
-                  {
-                     // looks like the start of the sig
-                     isSig = true;
-                  }
-               }
-               else if ( cptr[0] == '_' )
-               {
-                  const wxChar *p = cptr + 1;
-                  while ( *p == '_' )
-                     p++;
-
-                  // consider that there should be at least 5 underscores...
-                  if ( IsEndOfLine(p) && p - cptr >= 5 )
-                  {
-                     // looks like the mailing list trailer
-                     isSig = true;
-                  }
-               }
-            }
-
-            if ( isSig )
+            if ( signature.StartsHere(cptr) )
             {
                // remember that the sig apparently starts here
                posSig = value->length();
