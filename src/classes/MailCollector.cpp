@@ -221,19 +221,22 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       INTARRAY selections;
 
       HeaderInfoList *hil = mf->GetHeaders();
-      const HeaderInfo *hi;
-      m_Message << _("From folder '") << mf->GetName() << "':\n";
-      size_t i;
-      for(i = 0; i < hil->Count(); i++)
+      if(hil)
       {
-         hi=(*hil)[i];
-         selections.Add(hi->GetUId());
-         m_Count ++;
-         m_Message << _("  Subject: ") << hi->GetSubject()
-                   << _("  From: ") << hi->GetFrom()
-                   << '\n';
+         const HeaderInfo *hi;
+         m_Message << _("From folder '") << mf->GetName() << "':\n";
+         size_t i;
+         for(i = 0; i < hil->Count(); i++)
+         {
+            hi=(*hil)[i];
+            selections.Add(hi->GetUId());
+            m_Count ++;
+            m_Message << _("  Subject: ") << hi->GetSubject()
+                      << _("  From: ") << hi->GetFrom()
+                      << '\n';
+         }
+         hil->DecRef();
       }
-      hil->DecRef();
       if(mf->SaveMessages(&selections,
                           READ_APPCONFIG(MP_NEWMAIL_FOLDER),
                           true /* isProfile */, true /* update count */))
@@ -247,15 +250,18 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       i = 0;
       String seq;
       hil = m_NewMailFolder->GetHeaders();
-      for(i = 0; i < hil->Count(); i++)
+      if(hil)
       {
-         if(i >= (size_t)oldcount)
+         for(i = 0; i < hil->Count(); i++)
          {
-            if(seq.Length()) seq << ',';
-            seq << strutil_ultoa((*hil)[i]->GetUId());
+            if(i >= (size_t)oldcount)
+            {
+               if(seq.Length()) seq << ',';
+               seq << strutil_ultoa((*hil)[i]->GetUId());
+            }
          }
+         hil->DecRef();
       }
-      hil->DecRef();
       // mark new messages as new:
       m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
       m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
