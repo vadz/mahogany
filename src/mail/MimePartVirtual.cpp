@@ -39,7 +39,7 @@
 MimePartVirtual::MimePartVirtual(const String& msgText)
                : m_msgText(msgText)
 {
-   m_lenHeader = NULL;
+   m_lenHeader = 0;
 
    if ( !CclientParseMessage(msgText, &m_env, &m_body, &m_lenHeader) )
    {
