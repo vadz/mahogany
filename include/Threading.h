@@ -21,6 +21,11 @@ class Profile;
 class HeaderInfoList;
 class WXDLLEXPORT wxWindow;
 
+// THREADNODE is defined in <cclient.h> which may have been or not included
+#ifndef THREADNODE
+   #define THREADNODE struct thread_node
+#endif
+
 /// struct holding all threading parameters
 struct ThreadParams
 {
