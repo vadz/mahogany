@@ -215,7 +215,7 @@ HOST=`hostname`.`domainname`
 if [ $DOWXWIN = yes ]
 then
   echo "##################################################################"
-  echo "Building Debian package."
+  echo "Building wxGTK."
   echo "##################################################################"
 
   CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/wxcvs"
@@ -375,7 +375,7 @@ echo "Building tar.gz package."
 echo "##################################################################"
 cd $BUILDDIR
 ( cd $NAME-$VERSION && ( $MAKE clean >/dev/null 2>&1 ; \
-  autoconf && ./configure $DEBUGOPTS --prefix=$MPREFIX $MCONFOPT>config.output && \
+  rm -f configure ; autoconf && ./configure $DEBUGOPTS --prefix=$MPREFIX $MCONFOPT>config.output && \
   ( $MAKE depend >/dev/null 2>&1 ; $MAKE all >/dev/null) ))
 
 if [ $? = 0 ]
@@ -418,10 +418,11 @@ then
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
 #  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
-  $SCP $FTPLOCATION/Mdocs.tar.gz $NAME-$VERSION/doc && \
+  $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
   tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
   cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
   cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
+  cp $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz /usr/src/redhat/BUILD/$NAME-$VERSION/doc/ && \
   cd /usr/src/redhat/ && \
   rpm -ba SPECS/M.spec
   if [ "$DOINSTALL" = "yes" ] ; then
