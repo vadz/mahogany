@@ -785,6 +785,28 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 {
    m_useWizard = true;
 
+#if wxCHECK_VERSION(2,5,0)
+   wxStaticText *introduction =
+#endif // 2.5.0+
+   new wxStaticText(this, -1, _(
+      "Welcome to Mahogany!\n"
+      "\n"
+      "This wizard will help you to setup the most\n"
+      "important settings needed to successfully use\n"
+      "the program. You don't need to specify all of\n"
+      "them here and now -- you can always change all\n"
+      "the program options later from the \"Preferences\"\n"
+      "dialog accessible via the \"Edit\" menu.\n"
+      "\n"
+      "However, the wizard may be helpful to setup a\n"
+      "working default configuration and we advise you\n"
+      "to complete it, especially if you are new to\n"
+      "Mahogany, so please take time to complete it.\n"
+      "\n"
+      "If you still decide to not use it, just check\n"
+      "the box below or press [Cancel] at any moment."
+                                         ));
+
    m_checkbox = new wxCheckBox
                 (
                   this, -1,
@@ -798,25 +820,6 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
    // adjust the vertical position
    m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
 #else // 2.5.x
-   wxStaticText *introduction = new wxStaticText(this, -1, _(
-      "Welcome to Mahogany!\n"
-      "\n"
-      "This wizard will help you to setup the most\n"
-      "important settings needed to successfully use\n"
-      "the program. You don't need to specify all of\n"
-      "them here and now - you can always change all\n"
-      "the program options later from the \"Preferences\"\n"
-      "dialog accessible via the \"Edit\" menu.\n"
-      "\n"
-      "However, the wizard may be helpful to setup a\n"
-      "working default configuration and we advise you\n"
-      "to complete it, especially if you are new to\n"
-      "Mahogany.\n"
-      "\n"
-      "If you still decide to not use it, just check\n"
-      "the box below or press [Cancel] at any moment."
-                                         ));
-
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    pageSizer->Add(
       introduction,
