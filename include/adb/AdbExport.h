@@ -20,6 +20,7 @@
 
 #include "AdbModule.h"    // the base class declaration
 
+class AdbEntry;
 class AdbEntryGroup;
 
 // the interface we implement
@@ -48,8 +49,13 @@ public:
    }
 
    // do export the given address group (it may be an address book or may be
-   // not - this can be tested for)
-   virtual bool Export(const AdbEntryGroup& group) = 0;
+   // not - this can be tested for) to the specified "destination" which can bea
+   // filename, directory name or whatever else (if empty, the exporter should
+   // ask the user)
+   virtual bool Export(const AdbEntryGroup& group, const String& dest) = 0;
+
+   // export one entry only
+   virtual bool Export(const AdbEntry& entry, const String& dest) = 0;
 };
 
 // ----------------------------------------------------------------------------

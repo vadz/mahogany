@@ -429,9 +429,10 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 bool AdbShowExportDialog(const AdbEntryGroup& group)
 {
    wxArrayString names, descs;
-   size_t n = AdbExporter::EnumExporters(names,descs);
    wxString name;
-   if(n > 1)
+
+   size_t n = AdbExporter::EnumExporters(names, descs);
+   if( n > 1 )
    {
       int
          w = 400,
@@ -455,13 +456,15 @@ bool AdbShowExportDialog(const AdbEntryGroup& group)
 
    }
    else
-      name = "AdbTextExporter";
-   
-   // no exporter choice for now (there is exactly one of them), but this
-   // should be done when we have more of them (TODO)
+   {
+      // we have at most 1 exporter, so don't propose to choose
+      name = n == 0 ? String("AdbTextExporter") : names[0];
+   }
+
    AdbExporter *exporter = AdbExporter::GetExporterByName(name);
    if ( !exporter )
    {
+      // this can only happen if EnumExporters() returned 0
       wxLogError(_("Cannot export address book - the functionality "
                    "is missing in this version of the program."));
 

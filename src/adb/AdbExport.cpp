@@ -41,8 +41,9 @@
 // public interface
 // ----------------------------------------------------------------------------
 
-bool AdbExport(const AdbEntryGroup& group, AdbExporter& exporter)
+bool AdbExport(const AdbEntryGroup& group,
+               AdbExporter& exporter)
 {
    // simple...
-   return exporter.Export(group);
+   return exporter.Export(group, "");
 }

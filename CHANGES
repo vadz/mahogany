@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+19.05.00 VZ: vCards can also be exported
 17.05.00 VZ: added possibility to attach vCards to outgoing messages
              added vCard import module for the address book editor
              vCard can also be imported as a single entry, not as entire book

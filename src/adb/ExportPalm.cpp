@@ -50,7 +50,8 @@
 class AdbPalmExporter : public AdbExporter
 {
 public:
-   virtual bool Export(const AdbEntryGroup& group);
+   virtual bool Export(const AdbEntryGroup& group, const String& dest);
+   virtual bool Export(const AdbEntry& entry, const String& dest);
 
    DECLARE_ADB_EXPORTER();
 
@@ -294,10 +295,14 @@ bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
    return TRUE;
 }
 
-bool AdbPalmExporter::Export(const AdbEntryGroup& group)
+bool AdbPalmExporter::Export(const AdbEntryGroup& group, const String& dest)
 {
    // try to guess a reasonable default name for the file to create
-   wxString filename = group.GetDescription();
+   wxString filename = dest;
+   if ( !filename )
+   {
+      filename << group.GetDescription() << ".palm";
+   }
 
    // get the name of the file to create
    wxAdbPalmExporterConfigDialog dialog(filename);
@@ -326,6 +331,12 @@ bool AdbPalmExporter::Export(const AdbEntryGroup& group)
 
    wxLogError(_("Export failed."));
 
+   return FALSE;
+}
+
+bool AdbPalmExporter::Export(const AdbEntry& entry, const String& dest)
+{
+   // TODO
    return FALSE;
 }
 

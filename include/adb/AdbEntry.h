@@ -177,6 +177,13 @@ public:
 
      return GetFullEmailAddress(name, address);
   }
+
+  String GetField(size_t n) const
+  {
+     String s;
+     GetField(n, &s);
+     return s;
+  }
 };
 
 class AdbEntryCommon : public AdbEntry

@@ -2028,7 +2028,8 @@ void wxAdbEditFrame::ExportVCardEntry()
                       );
   if ( !!filename )
   {
-    if ( AdbExport(*(GetCurNode()->AdbGroup()), *exporter) )
+    AdbEntry *entry = ((AdbTreeEntry *)m_current)->GetAdbEntry();
+    if ( exporter->Export(*entry, filename) )
     {
       wxLogStatus(_("Successfully exported address book data to the file '%s'."),
                   filename.c_str());
@@ -2037,6 +2038,8 @@ void wxAdbEditFrame::ExportVCardEntry()
     {
       wxLogStatus(_("Address book export failed."));
     }
+
+    entry->DecRef();
   }
   //else: cancelled by user
 

@@ -53,7 +53,8 @@
 class AdbTextExporter : public AdbExporter
 {
 public:
-   virtual bool Export(const AdbEntryGroup& group);
+   virtual bool Export(const AdbEntryGroup& group, const String& dest);
+   virtual bool Export(const AdbEntry& entry, const String& dest);
 
    DECLARE_ADB_EXPORTER();
 
@@ -239,10 +240,14 @@ bool AdbTextExporter::DoExportGroup(const AdbEntryGroup& group,
    return TRUE;
 }
 
-bool AdbTextExporter::Export(const AdbEntryGroup& group)
+bool AdbTextExporter::Export(const AdbEntryGroup& group, const String& dest)
 {
    // try to guess a reasonable default name for the file to create
-   wxString filename = group.GetDescription();
+   wxString filename = dest;
+   if ( !filename )
+   {
+      filename << group.GetDescription() << ".txt";
+   }
 
    // get the name of the file to create
    wxAdbTextExporterConfigDialog dialog(filename);
@@ -270,6 +275,12 @@ bool AdbTextExporter::Export(const AdbEntryGroup& group)
 
    wxLogError(_("Export failed."));
 
+   return FALSE;
+}
+
+bool AdbTextExporter::Export(const AdbEntry& entry, const String& dest)
+{
+   // TODO
    return FALSE;
 }
 
