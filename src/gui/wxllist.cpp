@@ -697,10 +697,30 @@ wxLayoutLine::RecalculatePositions(int recurse, wxLayoutList *llist)
 
    wxASSERT(recurse >= 0);
    wxPoint pos = m_Position;
-   CoordType height = m_Height;
+//   CoordType height = m_Height;
 
 //   WXLO_TRACE("RecalculatePositions()");
    RecalculatePosition(llist);
+
+   wxLayoutLine *line = m_Next;
+   if(line)
+   {
+      CoordType height = line->m_Height;
+      CoordType oldheight = height;
+      while(line && recurse)
+      {
+         oldheight = line->m_Height;
+         line->RecalculatePosition(llist);
+         height = line->m_Height;
+         if(recurse > 0)
+            recurse --;
+         else
+            if(height == oldheight)
+               break;
+         line = line->m_Next;
+      }
+   }
+#if 0
    if(m_Next)
    {
 
@@ -710,6 +730,7 @@ wxLayoutLine::RecalculatePositions(int recurse, wxLayoutList *llist)
       else if(pos != m_Position || m_Height != height)
          m_Next->RecalculatePositions(0, llist);
    }
+#endif
 }
 
 wxLayoutObjectList::iterator
@@ -1249,14 +1270,15 @@ wxLayoutLine::Layout(wxDC &dc,
       m_BaseLine = m_Height - descent;
    }
 
-#if 0
    // tell next line about coordinate change
    if(m_Next && m_Height != heightOld)
    {
+      m_Next->MarkDirty();
+#if 0
       // FIXME isn't this done in RecalculatePositions() below anyhow?
       m_Next->RecalculatePositions(0, llist);
-   }
 #endif
+   }
    
    // We need to check whether we found a valid cursor size:
    if(cursorPos && cursorSize)

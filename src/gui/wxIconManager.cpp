@@ -574,6 +574,7 @@ wxIconManager::GetIcon(String const &_iconName)
          name = _iconName + wxIconManagerFileExtensions[c];
          name = pf.FindFile(name, &found);
 
+#if 0
          if ( !found && IsMimeType(iconName) )
          {
             key = strutil_after(iconName,'/');
@@ -587,7 +588,9 @@ wxIconManager::GetIcon(String const &_iconName)
                name = pf.FindFile(name, &found);
             }
          }
-
+#endif
+         
+         
          if( found )
          {
 #ifdef   OS_UNIX
@@ -611,7 +614,7 @@ wxIconManager::GetIcon(String const &_iconName)
                m_iconList->push_front(id);
                return icn;
             }
-        }
+            }
      } // for
    }// if globaldir
 
@@ -633,7 +636,8 @@ wxIconManager::GetIcon(String const &_iconName)
    return m_unknownIcon;
 }
 
-wxIcon wxIconManager::GetIconFromMimeType(const String& type)
+   wxIcon wxIconManager::GetIconFromMimeType(const String& type,
+                                             const String &ext)
 {
    wxASSERT(this);
 
@@ -641,20 +645,33 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type)
    // but if we can't, we fall back to a standard icon and look for partial
    // matches only if there is none
    wxIcon icon = GetIcon(type);
+
+   // Then, try the extension with GNOME first:
+   if(ext.Length() > 0 )
+      icon = GetIcon("file-dot-"+ext);
+   
+   wxArrayString exts;
    if ( icon == m_unknownIcon )
    {
       wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
       wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
       if ( fileType != NULL ) {
          fileType->GetIcon(&icon);
-
+         fileType->GetExtensions(exts);
          delete fileType;
       }
    }
    if ( icon == m_unknownIcon )
-      icon = GetIcon(type.Before('/'));
-   if ( icon == m_unknownIcon )
       icon = GetIcon(type.After('/'));
+   for(size_t i = 0; i < exts.Count(); i++)
+   {
+      /// try the gnome style filenames "file-dot-wav.xpm"
+      icon = GetIcon("file-dot-"+exts[i]);
+      if(icon != m_unknownIcon)
+         return icon;
+   }
+   if ( icon == m_unknownIcon )
+      icon = GetIcon(type.Before('/'));
 
    return icon;
 }

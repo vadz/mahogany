@@ -19,6 +19,8 @@
 #endif
 
 #include <wx/colour.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
 
 #include "gui/wxIconManager.h"
 
@@ -377,4 +379,6 @@ void GetColourByName(wxColour *colour,
       *colour = def;
    }
 }
+
+
 

@@ -76,8 +76,11 @@ public:
    wxBitmap GetBitmap(const String& bmpName);
 
    /** Get the icon for MIME type (first calls GetIcon)
+       @param type mime type
+       @param extension filename extension if known
    */
-   wxIcon GetIconFromMimeType(const String& type);
+   wxIcon GetIconFromMimeType(const String& type, const String &
+                              extension = "");
 
    /** Add a name/icon pair to the list
        @param iconName the name for the icon

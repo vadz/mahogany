@@ -17,6 +17,11 @@
 #define    XFACE_WITH_WXIMAGE   1
 #endif
 
+
+#ifdef XFACE_WITH_WXIMAGE
+#  include <wx/image.h>
+#endif
+
 /**
    XFace class for handling XFaces.
 */
@@ -55,12 +60,16 @@ class XFace
    bool	CreateFromXpm(const char *xpmdata);
 
 #if XFACE_WITH_WXIMAGE
-   /**
-      Create an XFace from a wxImage.
-      @param image image to read
-      @return true on success
+   /** Create an XFace from an image file.
+       @param filename obvious
+       @return true on success
    */
-   bool	CreateFromImage(class wxImage *image);
+   bool CreateFromFile(const char *filename);
+
+   static class wxImage GetXFaceImg(const String &filename,
+                                    bool *hasimg = NULL,
+                                    class wxWindow *parent = NULL);
+   static String ConvertImgToXFaceData(wxImage &img);
 #endif
    /**
       Create an XFace from an XFace line.
@@ -93,6 +102,7 @@ class XFace
    
    /// initialised == there is a list of paths
    bool	IsInitialised(void) const { return initialised; }
+
 };
 
 #endif

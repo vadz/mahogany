@@ -242,6 +242,37 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
+
+static String
+GetParameter(Message *msg, int partno, const String &param)
+{
+   const MessageParameterList &plist = msg->GetParameters(partno);
+   MessageParameterList::iterator plist_it;
+   if(plist.size() > 0)
+   {
+      for(plist_it = plist.begin(); plist_it != plist.end();
+          plist_it++)
+      {
+         if(Stricmp((*plist_it)->name, param) == 0)
+            return (*plist_it)->value;
+      }
+   }
+
+   const MessageParameterList &plist2 = msg->GetDisposition(partno);
+   if(plist2.size() > 0)
+   {
+      for(plist_it = plist2.begin(); plist_it != plist2.end();
+          plist_it++)
+      {
+         if(Stricmp((*plist_it)->name, param) == 0)
+            return (*plist_it)->value;
+      }
+   }
+   return "";
+}
+
+
+
 void
 MimePopup::OnCommandEvent(wxCommandEvent &event)
 {
@@ -586,6 +617,25 @@ wxMessageView::Update(void)
       if(m_mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
 
+      if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
+      {
+         wxString ext = GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.');
+         wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+         wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
+         if(ft)
+         {
+            wxString mt;
+            ft->GetMimeType(&mt);
+            delete ft;
+            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
+               t = Message::MSG_TYPEIMAGE;
+            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
+               t = Message::MSG_TYPEAUDIO;
+            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
+               t = Message::MSG_TYPEVIDEO;
+         }
+      }
+         
       // insert text:
       if ( (t == Message::MSG_TYPETEXT) ||
            (t == Message::MSG_TYPEMESSAGE &&
@@ -639,18 +689,22 @@ wxMessageView::Update(void)
                icn = img.ConvertToBitmap();
             else
                icn = mApplication->GetIconManager()->
-                  GetIconFromMimeType(m_mailMessage->GetPartMimeType(i));
+                  GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
+                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'));
             obj = new wxLayoutObjectIcon(icn);
          }
          else
          {
             icn = mApplication->GetIconManager()->
-               GetIconFromMimeType(m_mailMessage->GetPartMimeType(i));
+               GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
+                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'));
          }
          obj = new wxLayoutObjectIcon(icn);
 
          {
             String label;
+            label = GetParameter(m_mailMessage,i,"FILENAME");
+            if(label.Length()) label << " : ";
             label << m_mailMessage->GetPartMimeType(i) << ", "
                   << strutil_ultoa(m_mailMessage->GetPartSize(i, true)) << _(" bytes");
             ci = new ClickableInfo(i, label);

@@ -67,6 +67,8 @@ install: M
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
+	$(INSTALL) -d $(DATADIR)/icons/GNOME
+	for i in icons/GNOME/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons/GNOME; done
 ifdef USE_PYTHON
 	$(MAKE) -C Python $@
 endif

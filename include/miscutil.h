@@ -69,6 +69,8 @@ extern void GetColourByName(wxColour *colour,
                             const String& name,
                             const String& defaultName);
 
+
+
 //@}
 #endif // MISCUTIL_H
 

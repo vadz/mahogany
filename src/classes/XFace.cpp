@@ -1,23 +1,32 @@
 /*-*- c++ -*-********************************************************
  * XFace.cc -  a class encapsulating XFace handling                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-1999 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
- * $Id$                 *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation "XFace.h"
 #endif
 
-#include	"Mpch.h"
-#include	"Mcommon.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#include	"XFace.h"
-#include	"strutil.h"
-#include        "kbList.h"
-#include        "gui/wxIconManager.h"
-#include	<stdio.h>
+#include "XFace.h"
+#include "strutil.h"
+#include "kbList.h"
+#include  <stdio.h>
+
+#ifdef XFACE_WITH_WXIMAGE
+#   include "guidef.h"
+#   include "MDialogs.h"
+#   include "gui/wxIconManager.h"
+#   include "PathFinder.h"
+#   include "MApplication.h"
+#   include "Profile.h"
+#endif
+
 
 #ifdef HAVE_COMPFACE_H
 extern "C" {
@@ -156,6 +165,90 @@ XFace::CreateFromXpm(const char *xpmdata)
 
 #include   <wx/image.h>
 
+/* static */
+wxImage
+XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
+{
+   bool success;
+   wxImage img = wxIconManager::LoadImage(filename, &success);
+   if(success)
+   {
+      if(img.GetWidth() != 48 || img.GetHeight() != 48)
+         img = img.Scale(48,48);
+      // Now, check if we have some non-B&W colours:
+      int intensity;
+      for(int y = 0; y < 48; y++)
+         for(int x = 0; x < 48; x++)
+         {
+            intensity = img.GetRed(x,y) + img.GetGreen(x,y) +
+               img.GetBlue(x,y);
+            if(intensity >= (3*255)/2 && intensity != 3*255)
+               img.SetRGB(x,y,255,255,255);
+            if(intensity <= (3*255)/2 && intensity != 0)
+               img.SetRGB(x,y,0,0,0);
+         }
+      if(hasimg) *hasimg = true;
+   }
+   else
+   {
+      String msg;
+      msg.Printf(_("Could not load XFace file '%s'."),
+                 filename.c_str());
+      MDialog_ErrorMessage(msg, parent);
+      PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+      pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
+      pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
+      String name = pf.FindFile("xface.xpm", &success);
+      if(success)
+         img = wxIconManager::LoadImage(name, &success);
+      if(hasimg) *hasimg = success;
+   }
+   return img;
+}
+
+
+/* static */
+String
+XFace::ConvertImgToXFaceData(wxImage &img)
+{
+   int l, n, i;
+   int value;
+   String dataString;
+   String tmp;
+   
+   for(l = 0; l < 48; l++)
+   {
+      for(n = 0; n <= 32; n+= 16)
+      {
+	 value = 0;
+	 for(i = 0; i < 16; i++)
+	 {
+	    if(img.GetRed(n+i,l) != 0)
+	       value += 1;
+	    if(i != 15)
+               value <<= 1;
+	 }
+         value = value ^ 0xffff;
+	 tmp.Printf("0x%04lX", value);
+	 dataString += tmp;
+         dataString += ',';
+      }
+      dataString += '\n';
+   }
+   return dataString;
+}
+
+
+bool
+XFace::CreateFromFile(const char *filename)
+{
+   wxImage img = GetXFaceImg(filename );
+   String datastring = ConvertImgToXFaceData(img);
+   return CreateFromData(datastring);
+}
+
+
+#if 0
 /**
    Create an XFace from a wxImage.
    @param image image to read
@@ -204,7 +297,8 @@ XFace::CreateFromImage(wxImage *image)
 #endif   
 }
 #endif
-// with wxImage
+
+#endif // with wxImage
 
 bool
 XFace::CreateFromXFace(const char *xfacedata)

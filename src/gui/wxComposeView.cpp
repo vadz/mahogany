@@ -1643,7 +1643,9 @@ wxComposeView::InsertData(char *data,
    mc->SetMimeType(mimetype);
    mc->SetData(data, length, filename);
 
-   wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mimetype);
+   wxIcon icon =
+      mApplication->GetIconManager()->GetIconFromMimeType(mimetype,
+                                                          wxString(filename).AfterLast('.'));
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
@@ -1705,7 +1707,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    mc->SetFile(filename);
 
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxIcon icon = iconManager->GetIconFromMimeType(strMimeType);
+   wxIcon icon = iconManager->GetIconFromMimeType(strMimeType, strExt);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);

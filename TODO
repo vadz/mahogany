@@ -15,9 +15,13 @@ $Id$
                 1. Change RecalculatePositions() to be non-recursive,
 		   possibly from wxLayoutList, 11000 recursions take 
 		   just too long
- 
+
+		--> new strategy: just mark lines as dirty, let
+		wxllist::Layout() re-layout all dirty lines and the ones
+		following as they are used
+
                 - deleting wxllist takes ages, calling MoveLines(,-1)
-		  recursively 
+		  recursively--> disable auto-layout? 
                 - delete lines at begin of window, then move cursor
   		  down, next insert at wrong position. If cursor gets
 		  moved with mouse instead of keys, everything is fine.
@@ -30,24 +34,16 @@ $Id$
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
 
-		Write proper ASMailFolder constructor
-
 		Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
 
 		Auto-Expunge question appears even when we have no
                 deleted messages??
 
-	KB	Finish XFace dialog:
-		- check image for correct size
-		- check if B&W, otherwise offer to convert it
-		- set focused-image, too
-		
 9	KB	message sorting seems buggy -- maybe not
 9	KB	check new mail after startup -- should be done already
 9               initial dialogs (wxConfig errors) show unknown icon
 9	KB	check password prompt in mailfolder
-5	KB	make MailFolder timer react to options change
 4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
@@ -215,12 +211,13 @@ from 32bitsonline review:
 ?		idea after seeing a standalone program on freshmeat which does
 		this: what if we supported retrieving mail from Web based email
 		services (hotmail, yahoo, ...)?
-
+		NAMG...total crap, I'd like it to work though
 *********************************************************************
 *** TESTS
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+5	KB	make MailFolder timer react to options change
 5	KB	for NNTP only count unread/new messages
 7		test MH folders
 9	KB	Modify mail_fetch_overview() to work backwards.

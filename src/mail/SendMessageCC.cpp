@@ -322,44 +322,16 @@ SendMessageCC::Build(void)
    }
 #ifdef HAVE_XFACES
    // add an XFace?
-   char **xpmarray = NULL;
-   String xpmdata;
-   if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
+   if(READ_CONFIG(profile,MP_COMPOSE_USE_XFACE))
    {
-      xpmarray =
-         wxIconManager::LoadImageXpm(profile->readEntry(
-               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
-      if(! xpmarray)
-      {
-         bool found;
-         PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
-         pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
-         pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-         String name = pf.FindFile("xface.xpm", &found);
-         if(found)
-            xpmarray = wxIconManager::LoadImageXpm(name);
-      }
-      if(xpmarray)
-      {
-         XFace xface;
-         for(j = 0; xpmarray[j]; j++)
-         {
-            xpmdata += xpmarray[j];
-            xpmdata += '\n';
-         }
-         wxIconManager::FreeImage(xpmarray);
-         if(xface.CreateFromXpm(xpmdata.c_str()))
-         {
-            m_headerNames[h] = strutil_strdup("X-Face");
-            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
-            //FIXME: find more elegant solution for this (GetHeaderLine())
-            if(strlen(m_headerValues[h]))  // paranoid, I know.
-               ((char*)
-                (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
-                  '\0'; // cut off \n
-            h++;
-         }
-      }
+      XFace xface;
+      xface.CreateFromFile(READ_CONFIG(profile, MP_COMPOSE_XFACE_FILE));
+      m_headerNames[h] = strutil_strdup("X-Face");
+      m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+      if(strlen(m_headerValues[h]))  // paranoid, I know.
+         ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
+            '\0'; // cut off \n
+      h++;
    }
 #endif
 

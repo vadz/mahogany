@@ -797,7 +797,7 @@ public:
        @return number of messages
    */
    virtual unsigned long CountMessages(int mask, int value) const
-      { AScheck(); return m_MailFolder->CountMessages(); }
+      { AScheck(); return m_MailFolder->CountMessages(mask, value); }
 
    /** Get the profile.
        @return Pointer to the profile.
