@@ -4,7 +4,7 @@
 // Purpose:     a data provider is a class which creates/deletes the address
 //              books of given type
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -31,7 +31,7 @@ class wxArrayString;
   all data providers managed by AdbManager.
 
   This class derives from MObjectRC and uses reference counting, see
-  the comments in MObject.h for more details about it. 
+  the comments in MObject.h for more details about it.
 */
 
 class AdbDataProvider : public MObjectRC
@@ -39,13 +39,22 @@ class AdbDataProvider : public MObjectRC
 public:
   typedef AdbDataProvider *(*Constructor)();
 
+  // the syntax for the address book name
   enum AdbNameFormat
   {
     Name_No,      // this provider supports only one address book
     Name_File,    // address books are files (the most common case)
     Name_String   // anything else
   };
-    
+
+  // the flags for TestBookAccess (not a bit flag)
+  enum AdbTests
+  {
+    Test_Create,        // may create book with this name?
+    Test_Open,          // does the book with this name already exists?
+    Test_OpenReadOnly   // currently unused
+  };
+
   // list holding descriptions of all data providers
   static struct AdbProviderInfo
   {
@@ -56,7 +65,7 @@ public:
     const char *szFmtName;    // NB: this name is shown to the user
 
     Constructor CreateProvider;
-        
+
     AdbProviderInfo *pNext;
 
     AdbProviderInfo(const char *name, Constructor ctor,
@@ -82,9 +91,18 @@ public:
   // case); if not supported (can't delete www.yahoo.com...) just return FALSE
   virtual bool DeleteBook(AdbBook *book) = 0;
 
-  // this function is only for file-based data providers, all the others should
-  // return FALSE here. TRUE means that the file is in our format
-  virtual bool IsSupportedFormat(const String& name) = 0;
+  // this function is used for testing for different things:
+  //  * if test is Test_Open, it asks whether the book specified by 'name'
+  //    exists and, in this case, whether it's in the format supported by this
+  //    provider.
+  //  * if test is Test_Create it asks whether we can create a book by such
+  //    name (it's not an error if it already exists). Note that even if we
+  //    return TRUE from here, CreateBook() may still fail, so the return code
+  //    must still be tested!
+  //
+  // in any case, the function must return TRUE if the operation may succeed
+  // and FALSE if it will not.
+  virtual bool TestBookAccess(const String& name, AdbTests test) = 0;
 };
 
 /// dynamic object creation helpers

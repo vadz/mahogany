@@ -3,7 +3,7 @@
 // File name:   adb/AdbManager.cpp - implementation of AdbManager class
 // Purpose:     AdbManager manages all AdbBooks used by the application
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -171,7 +171,7 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
     AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
     while ( info ) {
       prov = info->CreateProvider();
-      if ( prov->IsSupportedFormat(name) ) {
+      if ( prov->TestBookAccess(name, AdbDataProvider::Test_Create) ) {
         if ( providerName ) {
           // return the provider name if asked for it
           *providerName = info->szName;

@@ -3,7 +3,7 @@
 // File name:   adb/AdbManager.h - ADB manager public interface
 // Purpose:     AdbManager manages all AdbBooks used by the application
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -31,7 +31,7 @@ WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
 
 
 /**
-  A book corresponds to a physical medium (disk file, database...), the 
+  A book corresponds to a physical medium (disk file, database...), the
   manager provides methods to access all the books used as well as methods for
   creation of the new books and deletion of the existing ones. For this, it
   uses the AdbDataProviders each of which can work with the address books of
@@ -47,6 +47,9 @@ WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
   the static Get function. Get() increments the ref count of the object if
   it already exists, so you should call Unget() when you're done with it
   (internally, each Get() does a Lock() and Unget() - Unlock()).
+
+  Please see AdbManager_obj class below for an easy way to never forget to
+  call Unget().
 
   @@@ This seems a bit complicated but I don't know how to ensure that there is
       at most one object of this type otherwise...
@@ -96,6 +99,43 @@ private:
   AdbBook *FindInCache(const String& name) const;
 
   static AdbManager *ms_pManager;
+
+  GCC_DTOR_WARN_OFF();
+};
+
+/**
+  This class is a "smart reference" to AdbManager. It acquires a pointer to
+  AdbManager in ctor with AdbManager::Get() and releases it in dtor with
+  AdbManager::Unget(). It's usage is highly recommended!
+
+  Example:
+   void Foo()
+   {
+      AdbManager_obj adbManager;
+
+      ...
+      adbManager->LoadAll();
+      nBooks = adbManager->GetBookCount();
+      ...
+
+      // nothing to do, Unget() called automagically on scope exit
+   }
+*/
+class AdbManager_obj
+{
+public:
+   // ctor & dtor
+   AdbManager_obj() { m_manager = AdbManager::Get(); }
+   ~AdbManager_obj() { AdbManager::Unget(); }
+
+   // provide access to the real thing via operator->
+   AdbManager *operator->() const { return m_manager; }
+
+   // testing for validity
+   operator bool() const { return m_manager != NULL; }
+
+private:
+   AdbManager *m_manager;
 };
 
 /**
@@ -113,12 +153,12 @@ private:
 
   @return FALSE if no matches, TRUE otherwise
 */
-bool AdbLookup(ArrayAdbEntries& aEntries,
-               const String& what,
-               int where = AdbLookup_NickName |
-                           AdbLookup_FullName |
-                           AdbLookup_EMail,
-               int how = AdbLookup_Substring,
-               const ArrayAdbBooks *paBooks = NULL);
+extern bool AdbLookup(ArrayAdbEntries& aEntries,
+                      const String& what,
+                      int where = AdbLookup_NickName |
+                                  AdbLookup_FullName |
+                                  AdbLookup_EMail,
+                      int how = AdbLookup_Substring,
+                      const ArrayAdbBooks *paBooks = NULL);
 
 #endif  //_ADBMANAGER_H

@@ -175,6 +175,8 @@ private:
 
    /// config file manager class
    static ConfigFileManager ms_cfManager;
+
+   GCC_DTOR_WARN_OFF();
 };
 //@}
 
@@ -184,11 +186,11 @@ ConfigFileManager Profile::ms_cfManager;
 /** wxConfigProfile, a wrapper around wxConfig.
     This is not really a Profile as it is not inheriting from
     anywhere. It simply wraps around wxConfig to mask it as a
-    profile. There is only one instance of this class in existence and 
+    profile. There is only one instance of this class in existence and
     it serves as the "mother of all profiles", i.e. the top level
-    profile from which all others inherit. This object can be accessed 
+    profile from which all others inherit. This object can be accessed
     as mApplication->GetProfile(). Its m_config pointer must never be
-    NULL. 
+    NULL.
  */
 
 class wxConfigProfile : public ProfileBase
@@ -230,6 +232,8 @@ public:
 private:
    /// forbid deletion
    ~wxConfigProfile();
+
+   GCC_DTOR_WARN_OFF();
 };
 
 /** A structure holding name and wxConfig pointer.
@@ -335,7 +339,7 @@ wxConfigProfile::wxConfigProfile(const String & fileName)
    // perfectly ok, for the registry case our keys are under
    // vendor\appname)
 
-   //FIXME: is this ok for Windows? 
+   //FIXME: is this ok for Windows?
    m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                             "", "",
                             wxCONFIG_USE_LOCAL_FILE |
@@ -436,7 +440,7 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent)
    parentProfile = Parent;
    profileName = iClassName;
    m_isEmpty = false; // by default we are no dummy
-   
+
    // find our config file unless we already have an absolute path name
    String fullName;
    if ( !IsAbsPath(profileName) )
@@ -626,7 +630,7 @@ readEntryHelper(wxConfigBase *config,
                mApplication->GetProfile()->writeEntry(key, defaultValue.GetString());
             else
                mApplication->GetProfile()->writeEntry(key, defaultValue.GetNumber());
-         }               
+         }
       }
       value = defaultValue;
    }

@@ -511,8 +511,6 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
-   long idRoot = GetRootItem();
-   
    delete GetImageList();
 
    delete m_menu;

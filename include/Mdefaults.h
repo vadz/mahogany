@@ -256,6 +256,8 @@
 #define   MP_SHOWHEADERS         "ShowHeaders"
 /// Autocollect email addresses? 0=no 1=ask 2=always
 #define   MP_AUTOCOLLECT         "AutoCollect"
+/// Name of the address books for autocollected addresses
+#define   MP_AUTOCOLLECT_ADB     "AutoCollectAdb"
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -487,12 +489,14 @@
 #define   MP_SHOWHEADERS_D         0
 /// Autocollect email addresses? 0=no 1=ask 2=always
 #define   MP_AUTOCOLLECT_D         2
+/// Name of the address books for autocollected addresses
+#define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
 /// status
-#define   MP_FLC_STATUSWIDTH_D 10  
+#define   MP_FLC_STATUSWIDTH_D 10
 /// subject
 #define   MP_FLC_SUBJECTWIDTH_D  33
 /// from

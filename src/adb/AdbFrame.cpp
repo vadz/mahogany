@@ -1219,7 +1219,7 @@ void wxAdbEditFrame::RestoreSettings1()
       pProvider = AdbDataProvider::GetProviderByName(strProv);
 
     if ( pProvider ) {
-      if ( pProvider->IsSupportedFormat(strFile) ) {
+      if ( pProvider->TestBookAccess(strFile, AdbDataProvider::Test_Open) ) {
         astrProviders.Add(strProv);
         astrAdb.Add(strFile);
       }

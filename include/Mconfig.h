@@ -6,9 +6,9 @@
  * $Id$                *
  *******************************************************************/
 #ifndef MCONFIG_H
-#define	MCONFIG_H
+#define  MCONFIG_H
 
-#include	"config.h"
+#include  "config.h"
 
 #undef   OS_SOLARIS
 #undef   OS_LINUX
@@ -23,8 +23,8 @@
 #define   OS_SUBTYPE   "unknown"
 
 #ifdef unix
-#	define	OS_UNIX		1
-#	define	OS_TYPE		"unix"
+#  define  OS_UNIX    1
+#  define  OS_TYPE    "unix"
 #   ifdef linux
 #      define   OS_LINUX
 #      undef    OS_SUBTYPE
@@ -36,34 +36,44 @@
 #      define   OS_SUBTYPE   "solaris"
 #   endif
 #elif defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
-#	define	OS_WIN		1
-#	define	OS_TYPE		"windows"
-# 	ifndef  __WINDOWS__
-#   		define  __WINDOWS__     // for wxWindows 2.x
-# 	endif
+#  define  OS_WIN    1
+#  define  OS_TYPE    "windows"
+#   ifndef  __WINDOWS__
+#       define  __WINDOWS__     // for wxWindows 2.x
+#   endif
 #else
   // this reminder is important, it won't compile without it anyhow...
 # error   "Unknown platform (forgot to #define unix?)"
 #endif
 
 // Are we using GCC?
-#ifdef	__GNUG__
-#   undef   CC_GCC	// might already be defined thanks to configure
-#   define   CC_GCC	
-#   define   CC_TYPE "gcc"
-/// gcc does not support precompiled headers
-#   ifdef USE_PCH
-#      if USE_PCH
-#         undef	USE_PCH
-#         define   USE_PCH      // use the Mpch.h anyway
-#      else
-#         undef   USE_PCH
-#      endif
-#   endif
+#ifdef  __GNUG__
+#  undef    CC_GCC  // might already be defined thanks to configure
+#  define   CC_GCC
+#  define   CC_TYPE "gcc"
+
+   /// gcc does not support precompiled headers
+#  ifdef USE_PCH
+#     if USE_PCH
+#        undef  USE_PCH
+#        define   USE_PCH      // use the Mpch.h anyway
+#     else
+#        undef   USE_PCH
+#     endif
+#  endif
+
+   // gcc gives an annoying warning
+   // "class 'Foo' only defines a private destructor and has no friends"
+   // even when it's a ref counted class which deletes itself.
+   //
+   // suppress it for all MObjectRC derived classes with this macro
+#  define GCC_DTOR_WARN_OFF()    friend class MObjectRC
+#else
+#  define GCC_DTOR_WARN_OFF()
 #endif
 
 // Are we using Microsoft Visual C++ ?
-#ifdef   _MSC_VER 
+#ifdef   _MSC_VER
 #   define   CC_MSC   1
 #   define   CC_TYPE  "Visual C++"
 /// are we using precompiled headers?
@@ -73,7 +83,7 @@
 #endif
 
 /// debug allocator
-#undef   USE_DEBUGNEW      
+#undef   USE_DEBUGNEW
 
 
 #ifdef USE_DEBUGNEW
@@ -142,7 +152,7 @@
 
 // Microsoft Visual C++
 #ifdef  CC_MSC
-   // suppress the warning "identifier was truncated to 255 characters 
+   // suppress the warning "identifier was truncated to 255 characters
    // in the debug information"
 #  pragma warning(disable: 4786)
 
@@ -186,7 +196,6 @@
 # define  STL_LIST  list
 #endif
 
-
 #define Bool    int
 
 // use builtin wxConfig by default in wxWin2 and appconf otherwise
@@ -197,5 +206,5 @@
 #     define  USE_APPCONF  1
 #  endif
 #endif
-  
+
 #endif

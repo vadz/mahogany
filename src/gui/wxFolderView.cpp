@@ -130,8 +130,7 @@ wxFolderListCtrl::Clear(void)
    GetClientSize(&x,&y);
 
    DeleteAllItems();
-   for (int i = 0; i < WXFLC_NUMENTRIES; i++)
-      DeleteColumn( i );
+   DeleteAllColumns();
 
    if (m_Style & wxLC_REPORT)
    {

@@ -3,7 +3,7 @@
 // File name:   adb/ProvFC.cpp - wxFileConfig based AdbDataProvider
 // Purpose:     simple implementations of AdbBook and AdbDataProvider
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -65,7 +65,6 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
-
 
 // ----------------------------------------------------------------------------
 // constants
@@ -142,6 +141,8 @@ private:
   bool m_bDirty;              // dirty flag
 
   FCEntryGroup *m_pGroup;     // the group which contains us (never NULL)
+
+  GCC_DTOR_WARN_OFF();
 };
 
 // our AdbEntryGroup implementation: it maps on a wxFileConfig group
@@ -195,6 +196,8 @@ private:
   wxString      m_strName;      // our name
   wxFileConfig *m_pConfig;      // our config object
   FCEntryGroup *m_pParent;      // the parent group (never NULL)
+
+  GCC_DTOR_WARN_OFF();
 };
 
 // our AdbBook implementation: it maps to a disk file here
@@ -259,6 +262,8 @@ private:
   wxFileConfig *m_pConfig;  // our config object (on our file)
 
   FCEntryGroup *m_pRootGroup; // the ADB_Entries group
+
+  GCC_DTOR_WARN_OFF();
 };
 
 // our AdbDataProvider implementation
@@ -269,7 +274,7 @@ public:
   virtual AdbBook *CreateBook(const String& name);
   virtual bool EnumBooks(wxArrayString& aNames);
   virtual bool DeleteBook(AdbBook *book);
-  virtual bool IsSupportedFormat(const String& name);
+  virtual bool TestBookAccess(const String& name, AdbTests test);
 
   MOBJECT_DEBUG
 
@@ -776,31 +781,57 @@ bool FCDataProvider::EnumBooks(wxArrayString& /* aNames */)
   return FALSE;
 }
 
-bool FCDataProvider::IsSupportedFormat(const String& name)
+bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
-  // the test is not 100% fool proof...
-  FILE *fp = fopen(name, "rt");
-  if ( fp == NULL )
-    return FALSE;
+  bool ok = FALSE;
 
-  char buf[1024];
-  bool bOk = FALSE;
-  while ( fgets(buf, WXSIZEOF(buf), fp) ) {
-    const char *pc = buf;
-    while ( isspace(*pc) )
-      pc++;
+  switch ( test )
+  {
+    case Test_Open:
+    case Test_OpenReadOnly:
+      {
+        // the test is not 100% fool proof...
+        FILE *fp = fopen(name, "rt");
+        if ( fp != NULL )
+        {
+          char buf[1024];
+          bool bOk = FALSE;
+          while ( fgets(buf, WXSIZEOF(buf), fp) ) {
+            const char *pc = buf;
+            while ( isspace(*pc) )
+              pc++;
 
-    // is it a wxFileConfig comment or is the line empty?
-    if ( *pc == '#' || *pc == ';' || *pc == '\0' )
-      continue; // yes, ignore this line
+            // is it a wxFileConfig comment or is the line empty?
+            if ( *pc == '#' || *pc == ';' || *pc == '\n' )
+              continue; // yes, ignore this line
 
-    bOk = strstr(pc, ADB_HEADER) || strstr(pc, ADB_ENTRIES);
-    break;
+            ok = strstr(pc, ADB_HEADER) || strstr(pc, ADB_ENTRIES);
+            break;
+          }
+
+          fclose(fp);
+        }
+      }
+      break;
+
+    case Test_Create:
+      {
+        // it's the only portable way to test for it I can think of
+        FILE *fp = fopen(name, "a");
+        if ( fp != NULL )
+        {
+          ok = TRUE;
+          fclose(fp);
+          remove(name);
+        }
+      }
+      break;
+
+    default:
+      FAIL_MSG("invalid test in TestBookAccess");
   }
 
-  fclose(fp);
-
-  return bOk;
+  return ok;
 }
 
 bool FCDataProvider::DeleteBook(AdbBook * /* book */)

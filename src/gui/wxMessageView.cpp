@@ -889,58 +889,102 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
       return;
    }
 
-   
-   /* FIXMEfor now it's here, should go somewhere else: */
+   /* FIXME for now it's here, should go somewhere else: */
    ProfileBase *profile = folder->GetProfile();
-   if(READ_CONFIG(profile,MP_AUTOCOLLECT))
+   int autocollect = READ_CONFIG(profile, MP_AUTOCOLLECT);
+   if ( autocollect )
    {
-      String
-         email, name;
-      email = mailMessage->Address(name,MAT_FROM);
+      String name;
+      String email = mailMessage->Address(name, MAT_REPLYTO);
+      if ( email.IsEmpty() || name.IsEmpty() )
+      {
+         // may it ever happen?
+         return;
+      }
 
-      AdbManager *manager = AdbManager::Get();
+      AdbManager_obj manager;
+      CHECK_RET( manager, "can't get AdbManager" );
+
+      // load all address books mentioned in the profile
       manager->LoadAll();
-      AdbBook *book = manager->CreateBook("autocollect");
-      ArrayAdbEntries matches;
-      //FIXME: how can I lookup email or name??
-      if( AdbLookup(matches, email,
-                    AdbLookup_FullName |
-                    AdbLookup_EMail,
-                    0, // not substring, not case sensitive,
-                    NULL // search all books
-         ))
-      {
-         //found:
-#if 0
-         size_t count = matches.Count();
-         for(size_t n = 0; n < count; n++)
-         {
-            AdbEntry *entry = matches[n];
-            // hmm...
-         }
-#endif
-      }
-      else
-      {
-         // the value is either 1 or 2, if 1 we have to ask
-         if(READ_CONFIG(profile,MP_AUTOCOLLECT) == 2 ||
-            MDialog_YesNoDialog(
-               _("Add new e-mail entry to database?"),
-               this))
-         {
-            // not found, add entry
-            wxString entryname = name;
-            for(size_t n = 0; n < name.length(); n++)
-               if(isspace(name[n])) name[n] = '_';
-            AdbEntry *entry = book->CreateEntry(entryname);
-            wxCHECK_RET( entry,
-                         _("Error creating autocollect ADB entry!") );
 
-            entry->SetField(AdbField_NickName, entryname);
-            entry->SetField(AdbField_FullName, entryname);
-            entry->SetField(AdbField_EMail, email);
+      ArrayAdbEntries matches;
+      if( !AdbLookup(matches, email, AdbLookup_EMail, AdbLookup_Match) )
+      {
+         if ( AdbLookup(matches, name, AdbLookup_FullName, AdbLookup_Match) )
+         {
+            // found: add another e-mail (it can't already have it, otherwise
+            // our previous search would have succeeded)
+            AdbEntry *entry = matches[0];
+            entry->AddEMail(email);
+
+            wxString name;
+            entry->GetField(AdbField_NickName, &name);
+            wxLogStatus(GetFrame(this),
+                        _("Auto collected e-mail address '%s' "
+                          "(added to the entry '%s')."),
+                        email.c_str(), name.c_str());
+         }
+         else // no such address, no such name - create a new entry
+         {
+            // the value is either 1 or 2, if 1 we have to ask
+            bool askUser = autocollect == 1;
+            if (
+                !askUser ||
+                MDialog_YesNoDialog(_("Add new e-mail entry to database?"),
+                                    this)
+               )
+            {
+               String autoCollectBookName = READ_CONFIG(profile,
+                                                        MP_AUTOCOLLECT_ADB);
+
+               // won't recreate it if it already exists
+               AdbBook *book = manager->CreateBook(autoCollectBookName);
+
+               if ( !book )
+               {
+                  wxLogError(_("Failed to create the address book '%s' "
+                               "for autocollected e-mail addresses."),
+                             autoCollectBookName.c_str());
+
+                  // TODO ask the user if he wants to disable autocollec?
+
+                  return;
+               }
+
+               // filter invalid characters in the record name
+               wxString entryname;
+               for ( const char *pc = name; *pc != '\0'; pc++ )
+               {
+                  entryname << (isspace(*pc) ? '_' : *pc);
+               }
+
+               AdbEntry *entry = book->CreateEntry(entryname);
+               if ( !entry )
+               {
+                  wxLogError(_("Couldn't create an entry in the address "
+                               "book '%s' for autocollected address."),
+                             autoCollectBookName.c_str());
+
+                  // TODO ask the user if he wants to disable autocollec?
+
+                  return;
+               }
+
+               entry->SetField(AdbField_NickName, entryname);
+               entry->SetField(AdbField_FullName, entryname);
+               entry->SetField(AdbField_EMail, email);
+
+               wxLogStatus(GetFrame(this),
+                           _("Auto collected e-mail address '%s' "
+                             "(created new entry '%s')."),
+                           email.c_str(), entryname.c_str());
+            }
          }
       }
+      //else: there is already an entry which has this e-mail, don't create
+      //      another one (even if the name is different it's more than likely
+      //      that it's the same person)
    }
 
    Update();

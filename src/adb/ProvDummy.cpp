@@ -3,7 +3,7 @@
 // File name:   adb/ProvDummy.cpp - dummy AdbDataProvider
 // Purpose:     this is a dummy provider implementation for testing only
 // Author:      Vadim Zeitlin
-// Modified by: 
+// Modified by:
 // Created:     09.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -69,7 +69,7 @@ public:
   virtual size_t GetEMailCount() const           { return m_astrEmails.Count(); }
   virtual void GetEMail(size_t n, String *pstr) const { *pstr = m_astrEmails[n]; }
 
-  virtual void ClearDirty()    { m_bDirty = FALSE; }   
+  virtual void ClearDirty()    { m_bDirty = FALSE; }
   virtual bool IsDirty() const { return m_bDirty; }
 
   virtual void SetField(size_t n, const String& strValue);
@@ -130,6 +130,8 @@ private:
 
   wxString         m_strName;      // our name
   DummyEntryGroup *m_pParent;      // the parent group (never NULL)
+
+  GCC_DTOR_WARN_OFF();
 };
 
 // our AdbBook implementation: it maps to a disk file here
@@ -192,6 +194,8 @@ private:
            m_strDesc;
 
   DummyEntryGroup *m_pRootGroup; // the ADB_Entries group
+
+  GCC_DTOR_WARN_OFF();
 };
 
 // our AdbDataProvider implementation
@@ -202,7 +206,7 @@ public:
   virtual AdbBook *CreateBook(const String& name);
   virtual bool EnumBooks(wxArrayString& aNames);
   virtual bool DeleteBook(AdbBook *book);
-  virtual bool IsSupportedFormat(const String& name);
+  virtual bool TestBookAccess(const String& name, AdbTests test);
 
   DECLARE_ADB_PROVIDER(DummyDataProvider);
 };
@@ -260,7 +264,7 @@ void DummyEntry::SetField(size_t n, const wxString& strValue)
 }
 
 void DummyEntry::ClearExtraEMails()
-{ 
+{
 }
 
 bool DummyEntry::Matches(const char *what, int where, int how)
@@ -401,11 +405,12 @@ bool DummyDataProvider::EnumBooks(wxArrayString& aNames)
   return FALSE;
 }
 
-bool DummyDataProvider::IsSupportedFormat(const String& name)
+bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
   String str;
-  str.Printf("Return TRUE from DummyDataProvider::IsSupportedFormat for %s?",
-             name.c_str());
+  str.Printf("Return TRUE from DummyDataProvider::TestBookAccess(%d) "
+             " for '%s'?",
+             test, name.c_str());
   return MDialog_YesNoDialog(str);
 }
 
