@@ -200,6 +200,9 @@ wxLayoutWindow::Clear(int family,
    SetDirty();
    SetModified(false);
 
+   if ( m_Editable )
+      m_CursorVisibility = 1;
+
 #ifdef WXLAYOUT_USE_CARET
    if ( m_CursorVisibility == 1 )
       GetCaret()->Show();
@@ -253,28 +256,41 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    switch ( eventId )
    {
       case WXLOWIN_MENU_MOUSEMOVE:
-         // found is only true if we are really over an object, not just
-         // behind it
-         if(found && u && ! m_Selecting)
          {
-            if(!m_HandCursor)
-               SetCursor(wxCURSOR_HAND);
-            m_HandCursor = TRUE;
-            if(m_StatusBar && m_StatusFieldLabel != -1)
+            // this variables is used to only erase the message in the status
+            // bar if we had put it there previously - otherwise empting status
+            // bar might be undesirable
+            static bool s_hasPutMessageInStatusBar = false;
+
+            // found is only true if we are really over an object, not just
+            // behind it
+            if(found && u && ! m_Selecting)
             {
-               const wxString &label = u->GetLabel();
-               if(label.Length())
-                  m_StatusBar->SetStatusText(label,
-                                             m_StatusFieldLabel);
+               if(!m_HandCursor)
+                  SetCursor(wxCURSOR_HAND);
+               m_HandCursor = TRUE;
+               if(m_StatusBar && m_StatusFieldLabel != -1)
+               {
+                  const wxString &label = u->GetLabel();
+                  if(label.Length())
+                  {
+                     m_StatusBar->SetStatusText(label,
+                                                m_StatusFieldLabel);
+                     s_hasPutMessageInStatusBar = true;
+                  }
+               }
             }
-         }
-         else
-         {
-            if(m_HandCursor)
-               SetCursor(wxCURSOR_IBEAM);
-            m_HandCursor = FALSE;
-            if(m_StatusBar && m_StatusFieldLabel != -1)
-               m_StatusBar->SetStatusText("", m_StatusFieldLabel);
+            else
+            {
+               if(m_HandCursor)
+                  SetCursor(wxCURSOR_IBEAM);
+               m_HandCursor = FALSE;
+               if( m_StatusBar && m_StatusFieldLabel != -1 &&
+                   s_hasPutMessageInStatusBar )
+               {
+                  m_StatusBar->SetStatusText("", m_StatusFieldLabel);
+               }
+            }
          }
 
          // selecting?

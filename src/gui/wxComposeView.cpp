@@ -168,7 +168,7 @@ public:
                      wxWindow *parent)
       : wxTextCtrl(parent, -1, "",
                    wxDefaultPosition, wxDefaultSize,
-                   wxTE_PROCESS_ENTER)
+                   wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
    {
       m_composeView = composeView;
       m_id = id;
@@ -188,18 +188,13 @@ public:
    void OnChar(wxKeyEvent& event);
    void OnEnter(wxCommandEvent& event);
 
-#ifdef __WXMSW__
-      // if we don't return this, we won't get TABs in OnChar() events
-      long wxAddressTextCtrl::MSWGetDlgCode()
-        { return DLGC_WANTTAB | wxTextCtrl::MSWGetDlgCode(); }
-#endif //MSW
-
 private:
    wxComposeView              *m_composeView;
    wxComposeView::AddressField m_id;
 
    bool m_lastWasTab;
    int  m_lookupMode;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -569,17 +564,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    c->top.SameAs(m_panel, wxTop, LAYOUT_MARGIN);
    box->SetConstraints(c);
 
-   // compose window
-   CreateFTCanvas(); // to get a m_LayoutWindow
-   m_LayoutWindow->SetStatusBar(GetStatusBar(),0,1);
-   m_LayoutWindow->SetCursorVisibility(1);
-   c = new wxLayoutConstraints;
-   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
-   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
-   c->top.Below(box, LAYOUT_MARGIN);
-   c->bottom.SameAs(m_panel, wxBottom, LAYOUT_MARGIN);
-   m_LayoutWindow->SetConstraints(c);
-
    // layout the labels and text fields: label at the left of the field
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
@@ -684,6 +668,18 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    // now we can fix the bottom of the box
    box->GetConstraints()->bottom.Below(last, -LAYOUT_MARGIN);
+
+   // compose window
+   CreateFTCanvas(); // creates a m_LayoutWindow
+   m_LayoutWindow->SetStatusBar(GetStatusBar(),0,1);
+   m_LayoutWindow->SetCursorVisibility(1);
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
+   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
+   c->top.Below(box, LAYOUT_MARGIN);
+   c->bottom.SameAs(m_panel, wxBottom, LAYOUT_MARGIN);
+   m_LayoutWindow->SetConstraints(c);
 
    // initialize the controls
    // -----------------------
@@ -827,8 +823,8 @@ wxComposeView::CreateFTCanvas(void)
    m_font = wxFonts[m_font];
    m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
 
-   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    EnableEditing(true);
+   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN));
 }
 
