@@ -715,8 +715,6 @@ dnl Check if we have libmal source in extra/src
     AC_MSG_CHECKING(for libmal library source in ./extra/src)
     if  test -d ./extra/src/libmal 
     then
-	AC_DEFINE(HAVE_LIBMAL)
-	MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
 	AC_MSG_RESULT(found - MAL synchronisation for PalmOS activated)
 	dnl the following settings are used by the libmal/Makefile
 	dnl MALTOP=$BUILDDIR/extra/src/libmal/malsync_src
@@ -730,10 +728,9 @@ dnl Check if we have libmal source in extra/src
 	AC_SUBST(libs)
 	AC_SUBST(llibs)
 	AC_SUBST(ccoptions)
-	PILOT_FLAGS=
-	AC_SUBST(PILOT_FLAGS)
 	PILOT_LIBS=$PISOCK_LIB
 	AC_SUBST(PILOT_LIBS)
+	MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
     else
       AC_MSG_RESULT(not found - MAL synchronisation for PalmOS not available)
     fi

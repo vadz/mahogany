@@ -136,9 +136,6 @@
 /** Define this if you have POSIX.2 regexp suport. */
 #undef HAVE_POSIX_REGEX
 
-/** Defined if libmal exists */
-/* #undef HAVE_LIBMAL */
-
 /** This define carries some information about the operating system
     and release that M is compiled for.
 */
