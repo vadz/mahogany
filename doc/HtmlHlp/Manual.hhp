@@ -4,8 +4,10 @@ Compiled file=Manual.chm
 Contents file=Manual.hhc
 Default topic=Manual.html
 Display compile progress=No
+Index file=Manual.hhk
 Language=0x409 English (United States)
 Title=Mahogany Manual
+
 
 [FILES]
 Manual.html

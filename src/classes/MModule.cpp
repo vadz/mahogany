@@ -736,6 +736,8 @@ static wxArrayString BuildListOfModulesDirs()
    return dirs;
 }
 
+#endif // !USE_MODULES_STATIC
+
 // ----------------------------------------------------------------------------
 // working with module properties
 // ----------------------------------------------------------------------------
@@ -752,5 +754,3 @@ const char *GetMModuleProperty(const ModuleProperty *table, const char *name)
 
    return "";
 }
-
-#endif // !USE_MODULES_STATIC

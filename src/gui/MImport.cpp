@@ -49,7 +49,33 @@
 WX_DEFINE_ARRAY(MImporter *, wxArrayImporters);
 
 // ----------------------------------------------------------------------------
-// wxImportDialog
+// private function prototypes
+// ----------------------------------------------------------------------------
+
+static bool FindAllImporters(wxArrayImporters& importers,
+                             wxArrayString& prognames);
+
+static void FreeImporters(const wxArrayImporters& importers);
+
+// ----------------------------------------------------------------------------
+// ImportersArray_obj: small helper class which frees importers automatically
+// ----------------------------------------------------------------------------
+
+class ImportersArrayFree
+{
+public:
+   ImportersArrayFree(wxArrayImporters& importers) : m_importers(importers)
+   {
+   }
+
+   ~ImportersArrayFree() { FreeImporters(m_importers); }
+
+private:
+   wxArrayImporters& m_importers;
+};
+
+// ----------------------------------------------------------------------------
+// wxImportDialog: the dialog from which the user launches importing
 // ----------------------------------------------------------------------------
 
 class wxImportDialog : public wxDialog
@@ -334,18 +360,22 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// helper: common part of HasImporters() and ShowImportDialog()
+// helpers: common part of HasImporters() and ShowImportDialog()
 // ----------------------------------------------------------------------------
 
-static void FindAllImporters(wxArrayImporters& importers,
+// fills the provided arrays with all importers which can be used (i.e. their
+// Applies() returned true)
+//
+// return true if we have any importers, false otherwise
+static bool FindAllImporters(wxArrayImporters& importers,
                              wxArrayString& prognames)
 {
    MModuleListing *listing = MModule::ListAvailableModules(M_IMPORTER_INTERFACE);
    if ( !listing )
-      return;
+      return false;
 
-   size_t n, count = listing->Count();
-   for ( n = 0; n < count; n++ )
+   size_t count = listing->Count();
+   for ( size_t n = 0; n < count; n++ )
    {
       const MModuleListingEntry& entry = (*listing)[n];
 
@@ -371,6 +401,18 @@ static void FindAllImporters(wxArrayImporters& importers,
    }
 
    listing->DecRef();
+
+   return count > 0;
+}
+
+// frees all importers in the array
+static void FreeImporters(const wxArrayImporters& importers)
+{
+   size_t count = importers.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      importers[n]->DecRef();
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -381,15 +423,10 @@ extern bool HasImporters()
 {
    wxArrayImporters importers;
    wxArrayString prognames;
-   FindAllImporters(importers, prognames);
 
-   size_t count = importers.GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      importers[n]->DecRef();
-   }
+   ImportersArrayFree impoFree(importers);
 
-   return count > 0;
+   return FindAllImporters(importers, prognames);
 }
 
 extern bool ShowImportDialog(MImporter& importer, wxWindow *parent)
@@ -404,7 +441,15 @@ extern bool ShowImportDialog(wxWindow *parent)
    // first, find all (applicable) importers
    wxArrayImporters importers;
    wxArrayString prognames;
-   FindAllImporters(importers, prognames);
+
+   ImportersArrayFree impoFree(importers);
+
+   if ( !FindAllImporters(importers, prognames) )
+   {
+      wxLogWarning(_("None of Mahogany importers can be used, sorry."));
+
+      return false;
+   }
 
    // then let the user choose which ones he wants to use
    wxArrayInt selections;
@@ -425,13 +470,6 @@ extern bool ShowImportDialog(wxWindow *parent)
    {
       if ( ShowImportDialog(*importers[selections[n]], parent) )
          doneSomething  = true;
-   }
-
-   // clean up
-   count = importers.GetCount();
-   for ( n = 0; n < count; n++ )
-   {
-      importers[n]->DecRef();
    }
 
    return doneSomething;
