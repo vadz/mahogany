@@ -49,11 +49,26 @@ public:
    /// Create a normal Profile object
    static ProfileBase * CreateProfile(String const & classname,
                                       ProfileBase const *parent = NULL);
+   /// Create a Profile object for a mail folder.
+   static ProfileBase * CreateFolderProfile(const String & iClassName,
+                                            ProfileBase const *Parent);
    /// Create a global configuration profile object
    static ProfileBase * CreateGlobalConfig(String const &  filename);
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
 
+   /** An enum explaining the possible types of profiles. In fact,
+       just a number stored as a normal profile entry which must be
+       maintained manually.
+   */
+   enum Type
+   {
+      /// No profile type specified.
+      PT_unknown,
+      /// This profile belongs to a folder.
+      PT_FolderProfile
+   };
+       
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */

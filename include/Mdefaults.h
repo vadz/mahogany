@@ -17,32 +17,40 @@
 
 /** @name The sections of the configuration file. */
 //@{
+
+// The trailing slashes in the following defines are important,
+// otherwise Profile.cpp will get broken!
+
 /** The section in the global configuration file used for storing
     profiles (trailing '/' required). FIXME where is it?
 */
 #ifndef M_PROFILE_CONFIG_SECTION
 #  ifdef OS_WIN
-#     define   M_PROFILE_CONFIG_SECTION   ""
+#     define   M_PROFILE_CONFIG_SECTION   "/Profiles/"
 #  else  // Unix
-#     define   M_PROFILE_CONFIG_SECTION   "/M"
+#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles/"
 #  endif // Unix/Win
 #endif
 
 /** The section in the global configuration file used for storing
-    information about configured folders (no trailing '/')
+    folder profiles (trailing '/' required).
 */
-#ifndef M_FOLDERS_CONFIG_SECTION
-#  define   M_FOLDERS_CONFIG_SECTION    M_PROFILE_CONFIG_SECTION "/Folders"
+#ifndef M_FOLDER_CONFIG_SECTION
+#  ifdef OS_WIN
+#     define   M_FOLDER_CONFIG_SECTION   "/Folders/"
+#  else  // Unix
+#     define   M_FOLDER_CONFIG_SECTION   "/M/Folders/"
+#  endif // Unix/Win
 #endif
 
 /** The section in the global configuration file used for storing
-    window positions (trailing '/' required).  FIXME where is it?
+    window positions (trailing '/' required).
 */
 #ifndef M_FRAMES_CONFIG_SECTION
 #  ifdef OS_WIN
-#  define   M_FRAMES_CONFIG_SECTION       "/Frames"
+#  define   M_FRAMES_CONFIG_SECTION       "/Frames/"
 #  else  // Unix
-#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
+#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames/"
 #  endif // Unix/Win
 #endif
 //@}
@@ -57,6 +65,10 @@
 #define   M_ACTION_ALWAYS   2
 //@}
 
+/**
+ NOTICE: the distinction between MC_xxx and MP_xxx config entries no
+ longer exists. They are now treated identically.
+**/
 /** @name built-in icon names */
 //@{
 /// for hyperlinks/http
@@ -159,6 +171,8 @@
 #define   MC_CREATE_PROFILES   "CreateProfileFiles"
 /**@name For Profiles: */
 //@{
+/// The Profile Type.
+#define   MP_PROFILE_TYPE      "ProfileType"
 /// the user's full name
 #define   MP_PERSONALNAME         "PersonalName"
 /// the username/login
@@ -300,6 +314,8 @@
 
 /** @name default values of configuration entries */
 //@{
+/// The Profile Type.
+#define   MP_PROFILE_TYPE_D      0
 /// our version
 #define   MC_VERSION_D          ""
 /// are we running for the first time?
