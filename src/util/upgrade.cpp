@@ -3912,7 +3912,7 @@ bool SaveRemoteConfigSettings(bool confirm)
 
    wxFile tmpfile(filename, wxFile::read);
    wxChar * buffer = new wxChar [ tmpfile.Length() + 1];
-   const wxFileSize_t lenTmp = tmpfile.Length();
+   const size_t lenTmp = tmpfile.Length();
    if(tmpfile.Read(buffer, lenTmp) != lenTmp)
    {
       wxLogError(_("Cannot read configuration info from temporary file\n"
