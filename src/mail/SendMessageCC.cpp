@@ -135,7 +135,10 @@ static long write_str_output(void *, char *);
 static inline
 bool IsAddressHeader(const String& name)
 {
-   return name == _T("TO") || name == _T("CC") || name == _T("BCC");
+   return name == _T("FROM") ||
+          name == _T("TO") ||
+          name == _T("CC") ||
+          name == _T("BCC");
 }
 
 static inline
