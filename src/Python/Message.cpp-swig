@@ -9,7 +9,6 @@
  * ----------------------------------------------------------------------------- */
 
 #define SWIGPYTHON
-#define SWIG_NOINCLUDE
 /***********************************************************************
  * common.swg
  *
@@ -508,10 +507,10 @@ static swig_type_info *swig_types[8];
 #define SWIG_name    "Messagec"
 
 #include   "Mpch.h"
-#include   "Mcommon.h"   
+#include   "Mcommon.h"
 #include   "Message.h"
 #include   "kbList.h"
-   
+
 // we don't want to export our functions as we don't build a shared library
 #if defined(__WIN32__)
 #   undef SWIGEXPORT
@@ -613,7 +612,7 @@ static PyObject *_wrap_Message_GetHeader(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,"O:Message_GetHeader",&argo0)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
-    result = new String const (arg0->GetHeader());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
+    result = new String (arg0->GetHeader());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
     return resultobj;
 }
 
@@ -626,7 +625,7 @@ static PyObject *_wrap_Message_Subject(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,"O:Message_Subject",&argo0)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
-    String const &_result_ref = arg0->Subject();
+    String &_result_ref = arg0->Subject();
     result = (String *) &_result_ref;
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String);
     return resultobj;
@@ -645,7 +644,7 @@ static PyObject *_wrap_Message_Address(PyObject *self, PyObject *args) {
     if(!PyArg_ParseTuple(args,"OO|i:Message_Address",&argo0,&argo1,&arg2)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_String,1)) == -1) return NULL;
-    result = new String const (arg0->Address(*arg1,(MessageAddressType )arg2));    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
+    result = new String (arg0->Address(*arg1,(MessageAddressType )arg2));    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
     return resultobj;
 }
 
@@ -658,7 +657,7 @@ static PyObject *_wrap_Message_From(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,"O:Message_From",&argo0)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
-    result = new String const (arg0->From());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
+    result = new String (arg0->From());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
     return resultobj;
 }
 
