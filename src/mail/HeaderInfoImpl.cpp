@@ -39,6 +39,8 @@
 
 #include "HeaderInfoImpl.h"
 
+#include "Sequence.h"
+
 // ----------------------------------------------------------------------------
 // HeaderInfo
 // ----------------------------------------------------------------------------
@@ -158,13 +160,17 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
 
    if ( !IsHeaderValid(n) )
    {
-      ((HeaderInfoListImpl *)this)->ExpandToMakeIndexValid(n); // const_cast
+      HeaderInfoListImpl *self = (HeaderInfoListImpl *)this; // const_cast
+
+      self->ExpandToMakeIndexValid(n);
 
       // alloc space for new header
       m_headers[n] = new HeaderInfo;
 
       // get header info for the new header
-      m_mf->GetHeaderInfo(&m_headers[n], n + 1, n + 1);
+      Sequence seq;
+      seq.Add(n + 1);
+      m_mf->GetHeaderInfo(self->m_headers, seq);
    }
 
    ASSERT_MSG( m_headers[n]->IsValid(), "returning invalid HeaderInfo" );
@@ -370,17 +376,25 @@ void HeaderInfoListImpl::ExpandToMakeIndexValid(size_t n)
    }
 }
 
-void HeaderInfoListImpl::Cache(size_t idxFrom, size_t idxTo)
+void HeaderInfoListImpl::Cache(const Sequence& seq)
 {
-   CHECK_RET( (idxFrom <= idxTo) && (idxTo < m_count),
-              "HeaderInfoListImpl::HintCache(): invalid range" );
+   UIdType idxMax;
+   seq.GetBounds(NULL, &idxMax);
 
-   // cache all messages in this range
-   ExpandToMakeIndexValid(idxTo);
+   // make it an index from msgno
+   idxMax--;
+
+   CHECK_RET( idxMax < m_count, "HeaderInfoListImpl::Cache(): invalid range" );
+
+   // create all headers we're going to cache first
+   ExpandToMakeIndexValid(idxMax);
 
    size_t countNotInCache = 0;
-   for ( size_t idx = idxFrom; idx <= idxTo; idx++ )
+   size_t n;
+   for ( UIdType i = seq.GetFirst(n); i != UID_ILLEGAL; i = seq.GetNext(i, n) )
    {
+      size_t idx = GetIdxFromMsgno(i);
+
       if ( !m_headers[idx] )
       {
          countNotInCache++;
@@ -389,22 +403,35 @@ void HeaderInfoListImpl::Cache(size_t idxFrom, size_t idxTo)
       }
    }
 
-   // trying to minimize the number of headers we're asking for is probably not
-   // worth it as c-client caches them anyhow internally, so getting them is
-   // quick the second time
+   // cache the headers now if needed
    if ( countNotInCache )
    {
-      m_mf->GetHeaderInfo(&m_headers[idxFrom], idxFrom + 1, idxTo + 1);
+      m_mf->GetHeaderInfo(m_headers, seq);
    }
 }
 
-void HeaderInfoListImpl::HintCache(size_t posFrom, size_t posTo)
+void HeaderInfoListImpl::CachePositions(const Sequence& seq)
 {
-   // for now the positions are the same as indices, so we have no problems
-   // here but when we're going to have sorting/threading, what should we do
-   // here? FIXME-SORTING
+   // FIXME-SORTING: transform sequence of positions into sequence of msgnos
+   Cache(seq);
+}
 
-   Cache(posFrom, posTo);
+void HeaderInfoListImpl::CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo)
+{
+   Sequence seq;
+   seq.AddRange(msgnoFrom, msgnoTo);
+
+   Cache(seq);
+}
+
+bool HeaderInfoListImpl::IsInCache(size_t pos) const
+{
+   size_t idx = GetIdxFromPos(pos);
+
+   CHECK( idx < m_count, false,
+          "HeaderInfoListImpl::IsInCache(): invalid position" );
+
+   return (idx < m_headers.GetCount()) && (m_headers[idx] != NULL);
 }
 
 // ----------------------------------------------------------------------------

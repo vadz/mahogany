@@ -314,8 +314,9 @@ public:
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    virtual unsigned long GetMessageCount() const;
-   virtual MsgnoType GetHeaderInfo(HeaderInfo **headers,
-                                   MsgnoType msgnoFrom, MsgnoType msgnoTo);
+
+   virtual MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
+                                   const Sequence& seq);
    //@}
 
    virtual char GetFolderDelimiter() const;

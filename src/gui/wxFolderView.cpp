@@ -39,7 +39,7 @@
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
 #  include <wx/menu.h>
-#endif
+#endif // USE_PCH
 
 #include <ctype.h>
 #include "XFace.h"
@@ -62,6 +62,8 @@
 #include "TemplateDialog.h"
 #include "Composer.h"
 #include "MsgCmdProc.h"
+
+#include "Sequence.h"
 
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderMenu.h"
@@ -246,7 +248,6 @@ public:
    void OnColumnClick(wxListEvent& event);
    void OnListKeyDown(wxListEvent& event);
    void OnActivated(wxListEvent& event);
-   void OnListCacheHint(wxListEvent &event);
 
    void OnChar(wxKeyEvent &event);
 
@@ -256,6 +257,8 @@ public:
 
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
+
+   void OnIdle(wxIdleEvent& event);
 
    /// called by wxFolderView before previewing the focused message
    void OnPreview();
@@ -320,6 +323,11 @@ protected:
    const wxFolderView::AllProfileSettings& GetSettings() const
       { return m_FolderView->m_settings; }
 
+   /**
+     Header retrieving data
+    */
+   //@{
+
    /// get the header info for this index
    HeaderInfo *GetHeaderInfo(size_t index) const;
 
@@ -334,6 +342,11 @@ protected:
 
    /// the last headers list modification "date"
    HeaderInfoList::LastMod m_cacheLastMod;
+
+   /// the headers we need to get
+   wxArrayInt m_headersToGet;
+
+   //@}
 
    // TODO: we should have the standard attributes for each of the possible
    //       message states/colours (new/recent/unread/flagged/deleted) and
@@ -567,7 +580,6 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-   EVT_LIST_CACHE_HINT(-1, wxFolderListCtrl::OnListCacheHint)
 
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
 
@@ -577,6 +589,8 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
    EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
+
+   EVT_IDLE(wxFolderListCtrl::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1076,31 +1090,6 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    //else: processing this is temporarily blocked
 }
 
-// called by the list control itself before showing the given range of items
-void wxFolderListCtrl::OnListCacheHint(wxListEvent& event)
-{
-   // cache all items which are going to become visible
-   if ( m_headers )
-   {
-      size_t from = event.GetCacheFrom(),
-             to = event.GetCacheTo();
-
-      // it may happen that our UpdateListing() hasn't been called yet and then
-      // the control may (briefly) believe that it has got wrong number of
-      // items, so check the range explicitly
-      size_t count = GetHeadersCount();
-      if ( count )
-      {
-         if ( to >= count )
-            to = count - 1;
-         if ( from < to )
-         {
-            m_headers->HintCache(from, to);
-         }
-      }
-   }
-}
-
 // called by RETURN press
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
@@ -1279,7 +1268,10 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
 void wxFolderListCtrl::InvalidateCache()
 {
    m_indexHI = (size_t)-1;
+
    m_hiCached = NULL;
+
+   m_headersToGet.Empty();
 }
 
 void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
@@ -1322,11 +1314,61 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 
    if ( m_indexHI != index )
    {
+      if ( !m_headers->IsInCache(index) )
+      {
+         // we will retrieve it later as it may take a long time to do it now
+         // and we shouldn't block inside OnGetItemXXX() functions which are,
+         // themselves, called from the list control OnPaint()
+         if ( m_headersToGet.Index(index) == wxNOT_FOUND )
+         {
+            self->m_headersToGet.Add(index);
+         }
+
+         return NULL;
+      }
+
       self->m_hiCached = m_headers->GetItem(index);
       self->m_indexHI = index;
    }
 
    return m_hiCached;
+}
+
+void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
+{
+   event.Skip();
+
+   if ( !m_headersToGet.IsEmpty() )
+   {
+      CHECK_RET( m_headers, "can't get headers without listing" );
+
+      int posMin = INT_MAX,
+          posMax = 0;
+
+      Sequence seq;
+
+      size_t count = m_headersToGet.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         int pos = m_headersToGet[n];
+         if ( pos < posMin )
+            posMin = pos;
+
+         if ( pos > posMax )
+            posMax = pos;
+
+         // make it a msgno
+         seq.Add(pos + 1);
+      }
+
+      m_headersToGet.Empty();
+
+      m_headers->CachePositions(seq);
+
+      // now the header info should be in cache, so GetHeaderInfo() will
+      // return it
+      RefreshItems(posMin, posMax);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -1534,7 +1576,11 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
    }
 
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
-   CHECK( hi, text, "no header info in OnGetItemText" );
+   if ( !hi )
+   {
+      // will get it later
+      return _("...");
+   }
 
    wxFolderListCtrlFields field = GetColumnByIndex(m_columns, column);
    switch ( field )
@@ -1694,7 +1740,11 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    }
 
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
-   CHECK( hi, NULL, "no header info in OnGetItemText" );
+   if ( !hi )
+   {
+      // will get it later
+      return NULL;
+   }
 
    if ( !m_attr )
    {

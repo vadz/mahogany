@@ -82,8 +82,9 @@ public:
    virtual LastMod GetLastMod() const;
    virtual bool HasChanged(const LastMod since) const;
 
-   virtual void Cache(size_t idxFrom, size_t idxTo);
-   virtual void HintCache(size_t posFrom, size_t posTo);
+   virtual void CachePositions(const Sequence& seq);
+   virtual void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo);
+   virtual bool IsInCache(size_t pos) const;
 
    virtual ~HeaderInfoListImpl();
 
@@ -105,6 +106,9 @@ private:
 
    /// expand m_headers array so that the given index is valid
    void ExpandToMakeIndexValid(size_t n);
+
+   /// cache the sequence of msgnos
+   void Cache(const Sequence& seqmMsgnos);
 
    /// the folder we contain the listinf for
    MailFolder *m_mf;

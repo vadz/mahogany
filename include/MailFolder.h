@@ -130,6 +130,7 @@ public:
 #endif // 0
 
 // forward declarations
+class ArrayHeaderInfo;
 class FolderView;
 class HeaderInfo;
 class Profile;
@@ -137,6 +138,11 @@ class MFolder;
 class MFrame;
 class MWindow;
 class Message;
+class Sequence;
+
+// ----------------------------------------------------------------------------
+// MLogCircle
+// ----------------------------------------------------------------------------
 
 /** A small class to hold the last N log messages for analysis.
  */
@@ -155,6 +161,10 @@ private:
    int m_N, m_Next;
    String *m_Messages;
 };
+
+// ----------------------------------------------------------------------------
+// MailFolderStatus
+// ----------------------------------------------------------------------------
 
 /**
   MailFolderStatus contains the "interesting" and often changing information
@@ -202,6 +212,10 @@ struct MailFolderStatus
                  flagged,
                  searched;
 };
+
+// ----------------------------------------------------------------------------
+// MailFolder
+// ----------------------------------------------------------------------------
 
 /**
    MailFolder base class, represents anything containig mails.
@@ -513,18 +527,16 @@ public:
    virtual HeaderInfoList *GetHeaders(void) const = 0;
 
    /**
-      Get the header info for the specified range of headers. This is for
-      use of HeaderInfoList only!
+      Get the header info for the specified headers. This is for use of
+      HeaderInfoList only!
 
-      @param headers pointer to a sufficiently big array of HeaderInfos
-      @param msgnoFrom starting header to retrieve
-      @param msgnoTo last header to retrieve (inclusive)
+      @param headers the array in which we read the headers
+      @param seq sequence containing the msgnos of headers to retrieve
       @return the number of headers retrieved (may be less than requested if
               cancelled or an error occured)
     */
-   virtual MsgnoType GetHeaderInfo(HeaderInfo **headers,
-                                   MsgnoType msgnoFrom,
-                                   MsgnoType msgnoTo) = 0;
+   virtual MsgnoType GetHeaderInfo(ArrayHeaderInfo& headers,
+                                   const Sequence& seq) = 0;
 
    /**
       Get the total number of messages in the folder. This should be a fast

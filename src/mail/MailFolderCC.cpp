@@ -44,11 +44,13 @@
 #include "ASMailFolder.h"
 #include "Mpers.h"
 
-#include "HeaderInfo.h"
+// we need "Impl" for ArrayHeaderInfo declaration
+#include "HeaderInfoImpl.h"
 
 #include "modules/Filters.h"
 
 #include "MFCache.h"
+#include "Sequence.h"
 
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
@@ -270,13 +272,14 @@ public:
    // ctor takes the pointer to the start of HeaderInfo buffer and the number
    // of slots in it and the msgno we are going to start retrieving headers
    // from
-   OverviewData(HeaderInfo **headers, size_t nTotal, MsgnoType msgnoFrom)
+   OverviewData(const Sequence& seq, ArrayHeaderInfo& headers, size_t nTotal)
+      : m_seq(seq), m_headers(headers)
    {
-      m_msgnoStart = msgnoFrom;
       m_nTotal = nTotal;
       m_nRetrieved = 0;
-      m_headers = headers;
       m_progdlg = NULL;
+
+      m_current = m_seq.GetFirst(m_seqCookie);
    }
 
    // dtor deletes the progress dialog if it had been shown
@@ -306,13 +309,18 @@ public:
    }
 
    // get the current HeaderInfo object
-   HeaderInfo *GetCurrent() const { return *(m_headers + m_nRetrieved); }
+   HeaderInfo *GetCurrent() const { return m_headers[m_current - 1]; }
 
    // get the number of messages retrieved so far
    size_t GetRetrievedCount() const { return m_nRetrieved; }
 
    // go to the next message
-   void Next() { m_nRetrieved++; }
+   void Next()
+   {
+      m_nRetrieved++;
+
+      m_current = m_seq.GetNext(m_current, m_seqCookie);
+   }
 
    // return true if we retrieved all the messages
    bool Done() const
@@ -350,9 +358,6 @@ public:
    }
 
 private:
-   // the starting msgno we're retrieving
-   MsgnoType m_msgnoStart;
-
    // the total number of messages we are going to retrieve
    size_t m_nTotal;
 
@@ -360,9 +365,17 @@ private:
    // GetHeaderInfo() return value
    size_t m_nRetrieved;
 
-   // the buffer in which to store the headers retrieved (in fact, the pointer
-   // to the current header as it is incremented inside OverviewHeaderEntry)
-   HeaderInfo **m_headers;
+   // the current msgno in the sequence
+   UIdType m_current;
+
+   // the sequence cookie used for iterating over it
+   size_t m_seqCookie;
+
+   // the sequence we're overviewing
+   const Sequence& m_seq;
+
+   // the array where we read the info
+   ArrayHeaderInfo& m_headers;
 
    // the progress dialog if we use one, NULL otherwise
    MProgressDialog *m_progdlg;
@@ -3181,69 +3194,15 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
 /* static */
 String MailFolderCC::BuildSequence(const UIdArray& messages)
 {
-   // generate the sequence of the form "1:10,12,13,17:19,27"
+   Sequence seq;
 
-   // current, first and last msgnos in the sequence we're generating
-   MsgnoType msgno = MSGNO_ILLEGAL,
-             msgnoFirst = MSGNO_ILLEGAL,
-             msgnoLast = MSGNO_ILLEGAL;
-
-   String sequence;
-
-   // we do one extra iteration to flush the last range at the end
    size_t count = messages.GetCount();
-   for ( size_t n = 0; n <= count; n++ )
+   for ( size_t n = 0; n < count; n++ )
    {
-      if ( n < count )
-         msgno = messages[n];
-
-      if ( msgnoFirst != MSGNO_ILLEGAL )
-      {
-         if ( n < count && msgno == msgnoLast + 1 )
-         {
-            // continue this range
-            msgnoLast = msgno;
-
-            // skip starting of the new range below
-            continue;
-         }
-         else
-         {
-            // flush the previous range
-            if ( !sequence.empty() )
-               sequence << ',';
-
-            sequence << msgnoFirst;
-
-            switch ( msgnoLast - msgnoFirst )
-            {
-               case 0:
-                  // single msg
-                  break;
-
-               case 1:
-                  // 2 messages, still don't generate a range for this
-                  sequence << ',' << msgnoLast;
-                  break;
-
-               default:
-                  // real range
-                  sequence << ':' << msgnoLast;
-            }
-
-            // start the new range below
-         }
-      }
-      //else: this is the first message, start the new range below
-
-      if ( n < count )
-      {
-         msgnoFirst =
-         msgnoLast = msgno;
-      }
+      seq.Add(messages[n]);
    }
 
-   return sequence;
+   return seq.GetString();
 }
 
 bool
@@ -3460,24 +3419,22 @@ bool MailFolderCC::CanThread() const
 // MailFolderCC working with the headers
 // ----------------------------------------------------------------------------
 
-MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo **headers,
-                                      MsgnoType msgnoFrom, MsgnoType msgnoTo)
+MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
+                                      const Sequence& seq)
 {
-   CHECK( msgnoFrom <= msgnoTo, 0, "GetHeaderInfo: msgnos in disorder" );
    CHECK( m_MailStream, 0, "GetHeaderInfo: folder is closed" );
 
    MailFolderLocker lockFolder(this);
 
-   CHECK( msgnoTo <= m_MailStream->nmsgs, 0, "GetHeaderInfo: invalid msgnoTo" );
-
-   wxLogTrace(TRACE_MF_CALLS, "Retrieving info for headers %lu..%lu for '%s'...",
-              msgnoFrom, msgnoTo, GetName().c_str());
+   String sequence = seq.GetString();
+   wxLogTrace(TRACE_MF_CALLS, "Retrieving headers %s for '%s'...",
+              sequence.c_str(), GetName().c_str());
 
    // prepare overviewData to be used by OverviewHeaderEntry()
    // --------------------------------------------------------
 
-   MsgnoType nMessages = msgnoTo - msgnoFrom + 1;
-   OverviewData overviewData(headers, nMessages, msgnoFrom);
+   MsgnoType nMessages = seq.GetCount();
+   OverviewData overviewData(seq, headers, nMessages);
 
    // don't show the progress dialog if we're not in interactive mode
    if ( GetInteractiveFrame() && !mApplication->IsInAwayMode() )
@@ -3501,42 +3458,14 @@ MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo **headers,
    }
    //else: no progress dialog
 
-   // tell c-client which headers we want and go get them
-   // ---------------------------------------------------
-
-   // build the IMAP sequence
-   UIdType from = mail_uid(m_MailStream, msgnoFrom),
-           to = mail_uid(m_MailStream, msgnoTo);
-
-   String sequence = strutil_ultoa(from);
-
-   // don't produce sequences like "1:1", just "1" will do
-   if ( to != from )
-   {
-      sequence << ':' << strutil_ultoa(to);
-   }
-
-   if ( !mail_uid_sequence(m_MailStream, (char *)sequence.c_str()) )
-   {
-      FAIL_MSG( "mail_uid_sequence() failed" );
-
-      return 0;
-   }
-
    // do fill the listing
-   for ( MsgnoType i = msgnoFrom; i <= msgnoTo; i++ )
+   size_t n;
+   for ( UIdType i = seq.GetFirst(n); i != UID_ILLEGAL; i = seq.GetNext(i, n) )
    {
       MESSAGECACHE *elt = mail_elt(m_MailStream, i);
       if ( !elt )
       {
          FAIL_MSG( "failed to get sequence element?" );
-         continue;
-      }
-
-      if ( !elt->sequence )
-      {
-         FAIL_MSG( "the element is supposed to be in the sequence" );
-
          continue;
       }
 

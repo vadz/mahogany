@@ -3226,8 +3226,7 @@ MailFolderCmn::FilterNewMail()
 
    if ( msgnoFirstNew < msgnoLastNew )
    {
-      hil->Cache(hil->GetIdxFromMsgno(msgnoFirstNew),
-                 hil->GetIdxFromMsgno(msgnoLastNew));
+      hil->CacheMsgnos(msgnoFirstNew, msgnoLastNew);
    }
 
    for ( size_t n = 0; n < count; n++ )

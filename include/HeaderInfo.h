@@ -24,6 +24,7 @@
 #include "MailFolder.h"    // for MailFolder::MessageStatus
 
 class wxArrayString;
+class Sequence;
 
 #define INDEX_ILLEGAL ((size_t)-1)
 
@@ -318,24 +319,26 @@ public:
    virtual bool HasChanged(const LastMod since) const = 0;
 
    /**
-      Cache all items between the given indices.
+      Cache all items at positions in this sequence. IsInCache() must return
+      true for all of these items when Cache() returns.
+
+      This is called from GUI code before retrieving all/many of items of this
+      sequence.
     */
-   virtual void Cache(size_t idxFrom, size_t idxTo) = 0;
+   virtual void CachePositions(const Sequence& seq) = 0;
 
    /**
-      Prepare to access the items in this range of positions (NOT indices
-      unlike Cache() above!)
-
-      This is supposed to be called from GUI code when it thinks that it is
-      going to need these indices soon.
+      Cache all items between these msgnos.
     */
-   virtual void HintCache(size_t posFrom, size_t posTo) = 0;
+   virtual void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo) = 0;
 
-   // currently unused
-#if 0
-   /// Is the item with this msgno already cached?
-   virtual bool IsInCache(MsgnoType msgno) const = 0;
-#endif // 0
+   /**
+      Is the item which should be shown at this position already cached?
+
+      If it is, calling GetItem() for it is fast, otherwise it may involve a
+      trip to server and so should be done asynchronously.
+    */
+   virtual bool IsInCache(size_t pos) const = 0;
    //@}
 
    MOBJECT_NAME(HeaderInfoList)
