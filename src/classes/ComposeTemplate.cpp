@@ -160,8 +160,9 @@ public:
 #ifdef USE_PYTHON
       Category_Python,     // execute Python script
 #endif // USE_PYTHON
-      Category_Message,    // the headers of the message being written
+      Category_Message,    // access the headers of the message being written
       Category_Original,   // variables pertaining to the original message
+      Category_Headers,    // set the headers of the message being written
       Category_Invalid,    // unknown/invalid category
       Category_Max = Category_Invalid
    };
@@ -297,19 +298,27 @@ protected:
    static String GetAbsFilename(const String& name);
 
    // Expand determines the category and then calls one of these functions
-   bool ExpandMisc(const String& name, String *value) const;
+   bool ExpandMisc(const String& name,
+                   const wxArrayString& arguments,
+                   String *value) const;
    bool ExpandFile(const String& name,
                    const wxArrayString& arguments,
                    String *value) const;
    bool ExpandAttach(const String& name,
                      const wxArrayString& arguments,
                      String *value) const;
-   bool ExpandCommand(const String& name, String *value) const;
+   bool ExpandCommand(const String& name,
+                      const wxArrayString& arguments,
+                      String *value) const;
 #ifdef USE_PYTHON
    bool ExpandPython(const String& name, String *value) const;
 #endif // USE_PYTHON
    bool ExpandMessage(const String& name, String *value) const;
    bool ExpandOriginal(const String& name, String *value) const;
+
+   bool SetHeaderValue(const String& name,
+                       const wxArrayString& arguments,
+                       String *value) const;
 
    // get the signature to use (including the signature separator, if any)
    String GetSignature() const;
@@ -555,6 +564,7 @@ const char *VarExpander::ms_templateVarCategories[] =
 #endif // USE_PYTHON
    "message",
    "original",
+   "header",
 };
 
 const char *VarExpander::ms_templateMiscVars[] =
@@ -680,7 +690,7 @@ VarExpander::Expand(const String& category,
          return ExpandAttach(name, arguments, value);
 
       case Category_Command:
-         return ExpandCommand(name, value);
+         return ExpandCommand(name, arguments, value);
 
 #ifdef USE_PYTHON
       case Category_Python:
@@ -694,7 +704,10 @@ VarExpander::Expand(const String& category,
          return ExpandOriginal(name, value);
 
       case Category_Misc:
-         return ExpandMisc(name, value);
+         return ExpandMisc(name, arguments, value);
+
+      case Category_Headers:
+         return SetHeaderValue(name, arguments, value);
 
       default:
          // unknown category
@@ -703,7 +716,9 @@ VarExpander::Expand(const String& category,
 }
 
 bool
-VarExpander::ExpandMisc(const String& name, String *value) const
+VarExpander::ExpandMisc(const String& name,
+                        const wxArrayString& arguments,
+                        String *value) const
 {
    // deal with all special cases
    switch ( GetVariable(name.Lower()) )
@@ -845,20 +860,38 @@ VarExpander::ExpandAttach(const String& name,
 }
 
 bool
-VarExpander::ExpandCommand(const String& name, String *value) const
+VarExpander::ExpandCommand(const String& name,
+                           const wxArrayString& arguments,
+                           String *value) const
 {
-   // execute a command (FIXME get the wxProcess class allowing stdout
-   // redirection and use it here)
+   // execute a command
    MTempFileName temp;
 
    bool ok = temp.IsOk();
-   wxString filename = temp.GetName(), command;
+   wxString filename = temp.GetName();
 
    if ( ok )
-      command << name << " > " << filename;
+   {
+      wxString command = name;
 
-   if ( ok )
+      // although the arguments may be included directly in the template,
+      // passing them via "?" argument mechanism allows to calculate them
+      // during run-time, i.e. it makes it possible to call an external command
+      // using the result of application of another template
+      size_t count = arguments.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         // forbid further expansion in the arguments by quoting them
+         wxString arg = arguments[n];
+         arg.Replace("'", "\\'");
+
+         command << " '" << arg << '\'';
+      }
+
+      command << " > " << filename;
+
       ok = system(command) == 0;
+   }
 
    if ( ok )
       ok = SlurpFile(filename, value);
@@ -867,8 +900,50 @@ VarExpander::ExpandCommand(const String& name, String *value) const
    {
       wxLogSysError(_("Failed to execute the command '%s'"), name.c_str());
 
+      // make sure the value isn't empty to avoid message about unknown
+      // variable from the parser
+      *value = '?';
+
       return FALSE;
    }
+
+   return TRUE;
+}
+
+bool
+VarExpander::SetHeaderValue(const String& name,
+                            const wxArrayString& arguments,
+                            String *value) const
+{
+   if ( arguments.GetCount() != 1 )
+   {
+      wxLogError(_("${header:%s} requires exactly one argument."),
+                 name.c_str());
+
+      *value = '?';
+
+      return FALSE;
+   }
+
+   String headerValue = arguments[0];
+
+   // is it one of the standard headers or some other one?
+   String headerName = name.Lower();
+   if ( headerName == "subject" )
+      m_cv.SetSubject(headerValue);
+   else if ( headerName == "to" )
+      m_cv.AddTo(headerValue);
+   else if ( headerName == "cc" )
+      m_cv.AddCc(headerValue);
+   else if ( headerName == "bcc" )
+      m_cv.AddBcc(headerValue);
+   // TODO: we don't have SetFrom() yet in Composer
+#if 0
+   else if ( headerName == "from" )
+      m_cv.SetFrom(headerValue);
+#endif // 0
+   else // some other header
+      m_cv.AddHeaderEntry(headerName, headerValue);
 
    return TRUE;
 }
@@ -1189,14 +1264,17 @@ String VarExpander::GetSignature() const
          // insert separator optionally
          if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
-            signature += "\n--";
+            signature += "--\n";
          }
 
          // read the whole file
          size_t nLineCount = fileSig.GetLineCount();
          for ( size_t nLine = 0; nLine < nLineCount; nLine++ )
          {
-            signature << '\n' << fileSig[nLine];
+            if ( nLine )
+               signature += '\n';
+
+            signature += fileSig[nLine];
          }
 
          // let's respect the netiquette

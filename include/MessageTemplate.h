@@ -35,12 +35,17 @@
 
    The "category" is one of the elements of gs_templateVarCategories elements.
    The "name"s are in gs_templateVarNames array. Both of them are "words", i.e.
-   are sequences of alphabetic characters.
+   are sequences of alphabetic characters. The category also may be implied by
+   using the special brackets: $`...` implies the category "cmd", i.e. executes
+   the command specified inside the single quotes and $<...< implies the
+   category file (rationale: think about the Unix shell).
 
-   The arguments are optional and if they are present are a comma-separated
-   list of words (i.e. alphabetic characters only are allowed). For example,
-   the following will insert the quoted contents of the file after asking the
-   user for a file name default to foo.bar: $(file:foo.bar?ASK,QUOTE)
+   The arguments are optional and if they are present are either a
+   comma-separated list of words (i.e. alphabetic characters only are allowed)
+   or another variable expansion. For example, the following will insert
+   the quoted contents of the file after asking the user for a file name
+   default to foo.bar: $(file:foo.bar?ASK,QUOTE) and this example will set the
+   value of the specified header as expected: $(header:X-UnixName?$`whoami`)
 
    The optional tail {+|-|=}<number> may be used to justify the value: + aligns
    it to the right, - (default) to the left and = centers it in the text field
@@ -160,8 +165,21 @@ public:
    bool Parse(MessageTemplateSink& sink) const;
 
 private:
+   // parse an expression starting with '$'
+   bool ExpandTemplate(const char **ppc, String *value) const;
+
    MessageTemplateVarExpander *m_expander;
-   String m_templateText, m_filename;
+
+   // the entire template text and the name of the file we had read it from
+   String m_templateText,
+          m_filename;
+
+   // the current line number while parsing
+   size_t m_nLine;
+
+   // start of the current line (for calculating the offset in line for the
+   // error messages)
+   const char *m_pStartOfLine;
 };
 
 // ----------------------------------------------------------------------------

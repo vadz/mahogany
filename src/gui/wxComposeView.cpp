@@ -1873,6 +1873,9 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
    }
 
    m_LayoutWindow->Refresh();
+
+   // the text hasn't been modified by the user
+   m_LayoutWindow->ResetDirty();
 }
 
 void wxComposeView::OnFirstTimeModify()
