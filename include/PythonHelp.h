@@ -103,24 +103,6 @@ PyH_RunScript(const char *filename);
 bool
 PyH_RunMScript(const char *scriptname);
 
-
-
-/// macro to run an expression
-#define   PyH_Expression(exp,module,resfmt,cresult) \
-   PyH_RunCodestr(PY_EXPRESSION,exp,module, resfmt, cresult)
-
-/// macro to run a statement
-#define   PyH_Statement(stat,module,resfmt,cresult) \
-   PyH_RunCodestr(PY_STATEMENT,stat,module, resfmt, cresult)
-
-/** Converts a PyObject to a C++ variable in a safe way.
-    @param presult the object to convert
-    @param resFormat the format string
-    @param resTarget where to store it
-    @return 0 on error
-*/
-int PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget);
-
 /**
   Gets the last error message/traceback from Python and stores it in a String.
 

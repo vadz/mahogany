@@ -72,6 +72,23 @@ private:
    PyObject *m_pyObj;
 };
 
+// ----------------------------------------------------------------------------
+// private functions prototypes
+// ----------------------------------------------------------------------------
+
+/**
+   Converts a PyObject to a C++ variable in a safe way.
+
+   This function takes ownership of pyResult (i.e. it calls Py_DECREF() on it if
+   it is not non-NULL) unless it is returned in result.
+
+   @param pyResult the object to convert
+   @param format the format string
+   @param result where to store it
+   @return true if ok, false on error
+*/
+bool PyH_ConvertResult(PyObject *pyResult, const char *format, void *result);
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -213,8 +230,6 @@ PyH_CallFunction(const char *func,
             module = moduleRe;
          }
 
-         PyObject *rc = NULL;
-
          PyObject *function = PyObject_GetAttrString
                               (
                                  module,
@@ -233,16 +248,16 @@ PyH_CallFunction(const char *func,
             PyObject *object = SWIG_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
 
             // and do call the function
+            PyObject *rc = NULL;
             if ( parg )
                rc = PyObject_CallFunction(function, "sOO", name, object, parg);
             else
                rc = PyObject_CallFunction(function, "sO", name, object);
 
-            if ( rc )
+            // translate result back to C
+            if ( PyH_ConvertResult(rc, resultfmt, result) )
             {
-               // translate result back to C
-               PyH_ConvertResult(rc, resultfmt, result);
-
+               // everything ok, skip error messages below
                return true;
             }
          }
@@ -348,23 +363,28 @@ PyH_LoadModule(const char *modname)            /* returns module object */
          }
 }
 
-int
-PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget)
+bool
+PyH_ConvertResult(PyObject *pyResult, const char *format, void *result)
 {
-   if (presult == NULL)            /* error when run? */
-      return 0;
-   if (resTarget == NULL || resFormat == NULL || *resFormat == '\0') {        /* NULL: ignore result */
-      Py_DECREF(presult);         /* procedures return None */
-      return 0;
+   CHECK( result && format && format[0], false,
+            _T("PyH_ConvertResult: invalid parameters") );
+
+   if ( !pyResult )
+      return false;
+
+   // try to convert
+   if ( !PyArg_Parse(pyResult, (char *)format, result) )
+   {
+      Py_DECREF(pyResult);
+      return false;
    }
-   if (! PyArg_Parse(presult, (char *)resFormat, resTarget)) { /* convert Python->C */
-      Py_DECREF(presult);                             /* may not be a tuple */
-      return 0;                                      /* error in convert? */
-   }
-   if (strcmp(resFormat, "O") != 0)       /* free object unless passed-out */
-      Py_DECREF(presult);
-   return 1;                              /* 1=success, 0=failure */
-}                                          /* if 1: result in *resTarget  */
+
+   // free the object unless we return it as our result
+   if ( format[0] != 'O' )
+      Py_DECREF(pyResult);
+
+   return true;
+}
 
 int
 PyH_RunCodestr(enum PyH_RunModes mode, const char *code,      /* expr or stmt string */
