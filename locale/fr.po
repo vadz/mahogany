@@ -5810,7 +5810,7 @@ msgstr ""
 
 #: wxOptionsDlg.cpp:676
 #, fuzzy
-msgid "Sendmail &command"
+msgid "Local MDA &command"
 msgstr "Exécuter quand un message est &reçu"
 
 #: wxOptionsDlg.cpp:678

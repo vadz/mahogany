@@ -673,7 +673,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
 #ifdef OS_UNIX
    { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
-   { gettext_noop("Sendmail &command"), Field_Text, ConfigField_UseSendmail },
+   { gettext_noop("Local MDA &command"), Field_Text, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"

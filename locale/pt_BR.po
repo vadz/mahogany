@@ -5854,7 +5854,7 @@ msgstr ""
 
 #: wxOptionsDlg.cpp:676
 #, fuzzy
-msgid "Sendmail &command"
+msgid "Local MDA &command"
 msgstr "Comando para &novas mensagens"
 
 #: wxOptionsDlg.cpp:678

@@ -6718,7 +6718,7 @@ msgstr ""
 # wxOptionsDlg.cpp:581
 #: wxOptionsDlg.cpp:676
 #, fuzzy
-msgid "Sendmail &command"
+msgid "Local MDA &command"
 msgstr "&Nieuwe post commando"
 
 # wxOptionsDlg.cpp:428

@@ -5757,7 +5757,7 @@ msgid "Use local mail delivery a&gent"
 msgstr "Lokalen Mail-Delivery-A&gent verwenden"
 
 #: wxOptionsDlg.cpp:676
-msgid "Sendmail &command"
+msgid "Local MDA &command"
 msgstr "&Programmaufruf für sendmail"
 
 #: wxOptionsDlg.cpp:678
