@@ -500,15 +500,8 @@ case "$USE_PYTHON" in 1)
              /home/local/lib/python1.5/config \
              /home/local/python1.5/config\
            ],
-             [ PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
-#               AC_CHECK_LIB(swigpy,main,
-#               [  AC_DEFINE(HAVE_SWIGLIB)
-#                  PYTHON_LIBS="$PYTHON_LIBS -lswigpy"
-#               ],
-#               [ AC_MSG_WARN(Cannot find SWIG library for python - trying anyway.)
-#               ],
-#               $PYTHON_LIBS)
-           ], [ USE_PYTHON=0 ]
+             [ PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"],
+               [ USE_PYTHON=0 ]
          )
        ], [ USE_PYTHON=0 ]
    )
@@ -583,20 +576,12 @@ dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
 
-LIB_PAM=
 dnl we need to set the target for c-client library
 case "$USE_CCOSTYPE" in
 ''|0|1)	AC_MSG_CHECKING(for c-client library OS type)
 	case "$OSTYPE" in
 	linux* | Linux*)
-		AC_CHECK_LIB(pam, pam_end,
-		[
-			CCOSTYPE=lnp
-			LIB_PAM="-lpam"
-		],
-		[
-			CCOSTYPE=slx
-		]) ;;
+		AC_CHECK_LIB(pam, pam_end, CCOSTYPE=lnp, CCOSTYPE=slx) ;;
 	Solaris* | solaris* | SunOS*)
 		case "$GXX" in
 		yes)	CCOSTYPE=gso ;;
@@ -624,6 +609,10 @@ case "$USE_CCOSTYPE" in
 *)	CCOSTYPE="$USE_CCOSTYPE" ;;
 esac
 AC_SUBST(CCOSTYPE)
+case "$CCOSTYPE" in
+lnp)	LIB_PAM="-lpam" ;;
+*)	LIB_PAM= ;;
+esac
 
 dnl this must come after we checked for wxGTK and network libraries
 dnl Check if we have the pi-sock library and headers for PalmOS support.
@@ -785,7 +774,7 @@ esac
 dnl add other flags
 CFLAGS="$CFLAGS $MYFLAGS"
 CXXFLAGS="$CXXFLAGS $MYFLAGS"
-LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOCi $LIB_PAM"
+LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
 dnl Python code produces warnings at present, so don't break compilation:
 CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
