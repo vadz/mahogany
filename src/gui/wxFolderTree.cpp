@@ -35,6 +35,7 @@
 #include "miscutil.h" // for ParseColourString()
 
 #include <wx/tokenzr.h>
+#include <wx/imaglist.h>
 #include <wx/persctrl.h>
 
 #include "gui/wxOptionsDlg.h"

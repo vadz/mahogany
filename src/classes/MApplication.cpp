@@ -40,6 +40,7 @@
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "FolderMonitor.h"
+#include "PathFinder.h"
 #include "Composer.h"         // for RestoreAll()
 
 #include "gui/wxMainFrame.h"

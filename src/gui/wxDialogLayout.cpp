@@ -33,6 +33,8 @@
 #  include <wx/statbmp.h>
 #endif
 
+#include <wx/imaglist.h>
+
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"
 

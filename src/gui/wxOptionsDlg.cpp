@@ -35,8 +35,8 @@
 #endif
 
 #include <wx/checklst.h>
-
 #include <wx/layout.h>
+#include <wx/dialup.h>
 
 #include "Mpers.h"
 
@@ -3433,7 +3433,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
       if ( choice )
       {
          // may be NULL if we don't use dial up manager at all
-          wxDialUpManager *dial = wxDialUpManager::Create();
+         wxDialUpManager *dial = wxDialUpManager::Create();
 
          if ( dial )
          {

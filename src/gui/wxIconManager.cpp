@@ -30,6 +30,7 @@
 
 #include "gui/wxIconManager.h"
 #include "MDialogs.h"
+#include "PathFinder.h"
 
 #include <wx/mimetype.h>
 #include <wx/file.h>

@@ -27,6 +27,8 @@
 #   include <wx/sizer.h>
 #endif // USE_PCH
 
+#include <wx/imaglist.h>
+
 #include "Composer.h"
 #include "MessageEditor.h"
 

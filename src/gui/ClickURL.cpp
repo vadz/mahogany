@@ -27,9 +27,9 @@
    #include "gui/wxOptionsDlg.h"
 
    #include <wx/menu.h>
-#ifdef OS_WIN // cygwin and mingw
-   #include <wx/msw/registry.h>
-#endif
+   #ifdef OS_WIN // cygwin and mingw
+      #include <wx/msw/registry.h>
+   #endif
 #endif //USE_PCH
 
 #include "ClickURL.h"
@@ -37,6 +37,8 @@
 
 #include "Composer.h"
 #include "Collect.h"
+
+#include "Mpers.h"
 
 #include <wx/clipbrd.h>
 

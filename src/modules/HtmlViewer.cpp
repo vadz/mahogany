@@ -33,7 +33,9 @@
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
 
-#include "wx/html/m_templ.h"
+#include <wx/html/htmlwin.h>
+#include <wx/html/htmprint.h>
+#include <wx/html/m_templ.h>
 
 class HtmlViewerWindow;
 

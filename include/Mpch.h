@@ -39,7 +39,7 @@
 #include "Mcommon.h"
 #include "Merror.h"
 
-#include "PathFinder.h"
+#include "Mdefaults.h"
 
 #include "MFrame.h"
 #include "gui/wxMFrame.h"

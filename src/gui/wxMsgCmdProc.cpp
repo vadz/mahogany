@@ -28,6 +28,8 @@
    #include <wx/statbox.h>
 #endif // USE_PCH
 
+#include <wx/imaglist.h>
+
 #include "strutil.h"          // for strutil_uniq_array()
 #include "Collect.h"          // for InteractivelyCollectAddresses()
 

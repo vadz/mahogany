@@ -48,6 +48,7 @@
 #  include "strutil.h"   // strutil_flatten_array()
 #endif
 
+#include <wx/imaglist.h>
 #include <wx/checklst.h>
 
 #include "gui/wxSelectionDlg.h"

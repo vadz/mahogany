@@ -32,11 +32,12 @@
 
 #include <wx/menu.h>
 
+#include "Profile.h"
+
 #include "gui/wxIconManager.h"
+#include "gui/wxIdentityCombo.h"
 
 #include "gui/wxMenuDefs.h"
-
-#include "gui/wxIdentityCombo.h"
 
 #ifndef wxHAS_RADIO_MENU_ITEMS
    #define wxITEM_NORMAL FALSE

@@ -27,13 +27,14 @@
 #endif
 
 #include <wx/msgdlg.h>   // for wxMessageBox
-#include "wx/persctrl.h"        // for wxPMessageBoxEnable
+#include "wx/persctrl.h" // for wxPMessageBoxEnable
 #include <wx/ffile.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
 #include <wx/fs_inet.h>
 #include <wx/cmdline.h>
+#include <wx/encconv.h>
 
 #ifdef USE_DIALUP
 #  include <wx/dialup.h>

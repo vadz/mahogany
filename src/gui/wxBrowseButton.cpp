@@ -32,6 +32,7 @@
 #include <wx/colordlg.h>
 #include <wx/fontdlg.h>
 #include <wx/fontutil.h>
+#include <wx/imaglist.h>
 
 #include "MFolder.h"
 
