@@ -516,7 +516,7 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 /// the acceptance status of the license
 #define MP_LICENSE_ACCEPTED_NAME   _T("LicenseAccepted")
 
-/// the complete path to the glocal M directory
+/// the complete path to the global M directory
 #define MP_GLOBALDIR_NAME      _T("GlobalDir")
 
 /// run onl one copy of the program at once?
@@ -1364,12 +1364,12 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 // Unix-only entries
 #ifdef OS_UNIX
-/// the complete path to the glocal M directory
-#  define   MP_GLOBALDIR_DEFVAL      M_BASEDIR
+/// the complete path to the global M directory
+#  define   MP_GLOBALDIR_DEFVAL      M_PREFIX
 /// the path where to find .afm files
 #  define   MP_AFMPATH_DEFVAL M_BASEDIR _T("/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript")
 #else // !Unix
-/// the complete path to the glocal M directory
+/// the complete path to the global M directory
 #  define   MP_GLOBALDIR_DEFVAL  wxEmptyString
 #endif // Unix/!Unix
 
