@@ -1043,12 +1043,24 @@ SendMessageCC::Send(void)
       //else: already done for preview above
 
       bool success = false;
-      /// write to temp file:
+
+      // write to temp file:
+#if 0 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now
       const char *filename = wxGetTempFileName("Mtemp");
-      if(filename)
+#else
+      // tmpnam() is POSIX, so use it even if mk(s)temp() would be better
+      // because here we have a race condition
+      const char *filename = tmpnam(NULL);
+#endif
+
+      if ( filename )
       {
-         wxFile out(filename, wxFile::write);
-         if ( out.IsOpened() )
+         wxFile out;
+
+         // don't overwrite because someone could have created file with "bad"
+         // (i.e. world readable) permissions in the meanwhile
+         if ( out.Create(filename, FALSE /* don't overwrite */,
+                         wxS_IRUSR | wxS_IWUSR) )
          {
             size_t written = out.Write(msgText, msgText.Length());
             out.Close();

@@ -4,6 +4,8 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+16.01.01 VZ: sending mail with local MDA respects BCC
+             temp mail files are not world readable any more
 15.01.01 VZ: serious bug in parsing embedded MIME message parts fixed
 08.01.01 VZ: added option to reopen all folders which were opened the last time
 06.01.01 VZ: fixed crash when viewing messages with incorrect dates
