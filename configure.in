@@ -399,7 +399,7 @@ if test "$USE_SSL" = 1; then
 		[ 	MAKE_USESSL="USESSL=yes"
 			AC_DEFINE(USE_SSL)
 			CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
-		] ,AC_MSG_ERROR("Cannot find openSSL header files openssl/ssl."))
+		] ,AC_MSG_WARN("Cannot find openSSL header files openssl/ssl - SSL support disabled."))
 fi
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
