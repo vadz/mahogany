@@ -408,6 +408,8 @@ MailFolderCC::Create(int typeAndFlags)
       m_Login = ""; // empty login for these types
 #ifdef USE_THREADS
    m_Mutex = new MMutex;
+#else
+   m_Mutex = false;
 #endif
 }
 
