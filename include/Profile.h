@@ -99,6 +99,7 @@ public:
       Read_FromParent = 2
    };
 
+
    /// Creates the one global config object.
    static Profile * CreateGlobalConfig(const String & filename);
 
@@ -121,6 +122,23 @@ public:
 
    /// creates/gets a FilterProfile entry in the configuration
    static Profile * CreateFilterProfile(const String &name);
+
+   /**
+      Create a temporary profile.
+
+      Such temporary profiles are used for messages opened separately from the
+      folder view associated with their folder and for temporary folders (i.e.
+      those not in the folder tree at all). They inherit all settings from
+      their parent profile but any changes to them -- intentionally --
+      disappear when they are destroyed.
+
+      @param parent the parent profile to inherit settings from, global profile
+                    is used if this parameter is NULL (default)
+      @return a temporary profile object which can be used as any other and
+              must be DecRef()'d by caller or NULL if creation failed
+    */
+   static Profile *CreateTemp(Profile *parent = NULL);
+
 
    /// Delete the global config object
    static void DeleteGlobalConfig();

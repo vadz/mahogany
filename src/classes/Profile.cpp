@@ -646,6 +646,46 @@ private:
    DECLARE_NO_COPY_CLASS(FilterProfile)
 };
 
+/**
+   Temporary profile.
+
+   This class is a subtree of its parent profile and it deletes this subtree
+   from config when it is itself deleted.
+ */
+class TempProfile : public ProfileImpl
+{
+public:
+   TempProfile(Profile *parent)
+   {
+      if ( !parent )
+         parent = mApplication->GetProfile();
+
+      // find the first unused temporary name
+      for( int n = 0; ; n++ )
+      {
+         m_name.Printf(_T("__Temp%d__"), n);
+         if ( !parent->HasGroup(m_name) )
+            break;
+      }
+
+      m_parent = parent;
+      m_parent->IncRef();
+
+      m_ProfileName << GetRootPath() << _T('/') << m_name;
+   }
+
+   ~TempProfile()
+   {
+      m_parent->DeleteGroup(m_name);
+      m_parent->DecRef();
+   }
+
+private:
+   Profile *m_parent;
+
+   String m_name;
+};
+
 // ============================================================================
 // AllConfigSources implementation
 // ============================================================================
@@ -1147,6 +1187,12 @@ Profile *
 Profile::CreateFolderProfile(const String& foldername)
 {
    return CreateProfile(foldername);
+}
+
+Profile *
+Profile::CreateTemp(Profile *parent)
+{
+   return new TempProfile(parent);
 }
 
 Profile *
