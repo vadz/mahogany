@@ -1007,16 +1007,16 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
     // enable only if an ADB is selected
   EVT_UPDATE_UI(WXMENU_ADBBOOK_PROP, wxAdbEditFrame::OnUpdateProp)
     // edit operations are only enabled when an item/group are selected
-  EVT_UPDATE_UI(WXMENU_ADBEDIT_CUT, OnUpdateCopy)
-  EVT_UPDATE_UI(WXMENU_ADBEDIT_COPY, OnUpdateCopy)
+  EVT_UPDATE_UI(WXMENU_ADBEDIT_CUT, wxAdbEditFrame::OnUpdateCopy)
+  EVT_UPDATE_UI(WXMENU_ADBEDIT_COPY, wxAdbEditFrame::OnUpdateCopy)
     // paste is only enabled if there is something to paste
-  EVT_UPDATE_UI(WXMENU_ADBEDIT_PASTE, OnUpdatePaste)
+  EVT_UPDATE_UI(WXMENU_ADBEDIT_PASTE, wxAdbEditFrame::OnUpdatePaste)
     // enable/disable anything that can be done only when something except
     // root is selected
-  EVT_UPDATE_UI(WXMENU_ADBEDIT_DELETE, OnUpdateDelete)
-  EVT_UPDATE_UI(WXMENU_ADBEDIT_RENAME, OnUpdateDelete)
+  EVT_UPDATE_UI(WXMENU_ADBEDIT_DELETE, wxAdbEditFrame::OnUpdateDelete)
+  EVT_UPDATE_UI(WXMENU_ADBEDIT_RENAME, wxAdbEditFrame::OnUpdateDelete)
     // exporting is only possible when a group or book is selected
-  EVT_UPDATE_UI(WXMENU_ADBBOOK_EXPORT, OnUpdateExport)
+  EVT_UPDATE_UI(WXMENU_ADBBOOK_EXPORT, wxAdbEditFrame::OnUpdateExport)
 
   // other
     // need to intercept this to prevent default implementation to give the

@@ -775,9 +775,9 @@ private:
 };
 
 BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
-  EVT_LEFT_DOWN(OnClick)
-  EVT_MIDDLE_DOWN(OnClick)
-  EVT_RIGHT_DOWN(OnClick)
+  EVT_LEFT_DOWN(wxAboutWindow::OnClick)
+  EVT_MIDDLE_DOWN(wxAboutWindow::OnClick)
+  EVT_RIGHT_DOWN(wxAboutWindow::OnClick)
 END_EVENT_TABLE()
 
 
