@@ -1,6 +1,6 @@
---------------------------------------------------------------------
+====================================================================
 README file for Mahogany 0.64 "Sparc"
---------------------------------------------------------------------
+====================================================================
 
 --------------------------------------------------------------------
 Issues with the current release
@@ -19,6 +19,56 @@ original working title for "Mahogany".
 
 Please note that in places where this file contradicts the manual,
 the information here should be considered correct.
+
+--------------------------------------------------------------------
+Installation and building instructions
+--------------------------------------------------------------------
+
+a) Windows users: please refer to the file doc/readme_win.txt
+   for instructions about installing the provided Win32 binary.
+   If you are interested in rebuilding the program from sources
+   yourself, please see doc/build_win.txt (in addition to the
+   previous file)
+
+b) Unix users: the binary installation is dependent on your OS (or
+   distribution) and so cannot be described here but it is not
+   different from installing any other program. If we don't provide
+   a binary exactly matching your system it is highly recommended
+   that you rebuild the program from sources, please see INSTALL
+   file for the instuctions.
+
+--------------------------------------------------------------------
+What's next?
+--------------------------------------------------------------------
+
+You should be able to run Mahogany by now. If you run it for the
+first time, you will see the initial installation wizard which will
+allow you to set the most basic options needed to use the program.
+Please note that all of them can be changed later, in particular you
+don't have to create any server using the wizard as you may add
+them later as well.
+
+If you completed the wizard successfully, you should now be able to
+start using Mahogany. The next thing to do is probably to configure
+it to suit your needs better - you will find a lot of possibilities
+for this in the programs options dialog which is accessed via the
+"Preferences..." item of the "Edit" menu.
+
+--------------------------------------------------------------------
+Troubleshooting
+--------------------------------------------------------------------
+
+Please post any questions you may have to the Mahogany users mailing
+list. If you are reporting a bug, don't forget to specify the
+version of Mahogany you are using and also the platform you are
+running it under - thank you in advance!
+
+Also please turn on the "Debug server and mailbox access" option
+found in the last page of the preferences dialog or run Mahogany
+with "--debug" command line option if you experience any mail
+related problems (e.g. receiving or sending mail doesn't work): this
+will result in more verbose messages in the log window which can be
+very helpful to diagnose the problem.
 
 --------------------------------------------------------------------
 Internet resources
@@ -41,136 +91,6 @@ Mahogany mailing lists:
 
                 mahogany-users@lists.sourceforge.net
              mahogany-developers@lists.sourceforge.net
-
---------------------------------------------------------------------
-Note for the Windows users
---------------------------------------------------------------------
-
-You shouldn't be reading this file further, please refer to
-doc/readme_win.txt The rest of this file is oriented towards Unix
-users.
-
---------------------------------------------------------------------
-Unix compilation instructions
---------------------------------------------------------------------
-
-0. Prerequisites
-----------------
-
-Required software:
-
-   - wxGTK (GTK+ port of wxWindows) 2.3.2 or above
-     (2.3.2 is the latest released version as of this writing)
-
-   - GTK+ 1.2.3 or above, 1.2.10 recommended
-
-   - GNU make: both wxWindows and Mahogany may be compiled with many
-     different C++ compilers (i.e. not only g++) but they both
-     require GNU make, please install it if you don't have it yet
-     (it might be available as gmake on some systems)
-
-In addition:
-
-   - If you want to compile Mahogany with SSL support, you must also
-     have OpenSSL libraries and headers, see http://www.openssl.org/.
-     If you already have them installed but in a non-standard
-     location where Mahogany doesn't find them, use --with-ssl=dir
-     configure option.
-
-   - If you want to compile Mahogany with Python support, you need
-     Python libraries and headers installed. Python 1.5x, 2.0 and
-     2.1 are currently supported. You should run configure with
-     --with-python option as well.
-
-   - To build with Palm support you need pisock library and headers.
-
-   - To rebuild the documentation from sources you need Perl, LaTeX,
-     makeindex, dvips, ps2pdf and latex2html - however you may just
-     use the prebuilt documentation instead of installing all these
-     tools if you don't have them, please see below
-
-   - If you want AvantGo/MAL synchronisation for the PalmOS module,
-     you will need to get the libmal.tar.gz library source from the
-     Mahogany ftp server and unpack it in the extra/src directory.
-
-1. Compilation
---------------
-
-a) wxWindows
-
-Before you can compile Mahogany, you will need to have installed
-wxWindows compiled for the GTK library (wxGTK).
-
-NOTE: there are unfortunately a few bugs in wxGTK 2.3.2 directly
-      affecting Mahogany which were fixed immediately after 2.3.2
-      release. If, by the time you are reading it, 2.3.3 is not
-      released yet please download wxWindows source distribution
-      from our download page instead of using the official 2.3.2
-      release!
-
-The recommended switches for wxWindows compilation are:
-
-      ./configure --disable-threads --disable-joystick \
-                  --no-recursion --with-gtk
-
-(you may also use the usual --prefix switch, of course)
-
-After running configure, do "make" (or "gmake" if your make is not
-the GNU make) and "make install".
-
-If you get a message "cannot find wx-config" while compiling Mahogany
-you have to add /usr/local/bin to your PATH.
-
-If you cannot run Mahogany and get an error
-    mahogany: error while loading shared libraries:
-    libwx_gtk-2.3.so: cannot open shared object file:
-    No such file or directory
-you have to add /usr/local/lib to /etc/ld.so.conf and run
-/sbin/ldconfig.
-
-b) Mahogany
-
-Mahogany uses the standard configure script as well, so the simplest
-way to compile it is to just type "./configure && make && make
-install".
-
-The recommended way to build it is to do the following from the
-Mahogany directory:
-
-      mkdir build_dir   # name is arbitrary
-      cd build_dir
-      ../configure
-      make    # or "make all" to try to build message catalogs as well
-      make doc
-      make install
-
-Depending on whether you have installed all required programs in the
-right versions, "make doc" and "make install" might fail. Please
-download the file Mdocs-0.64.tar.gz from the SourceForge download
-server and put it in the build_dir/doc directory, then retry.
-
-If you don't want to install the documentation at all, you may do the
-following:
-
-    make install_bin     # this will install the program and other
-                         # required files
-    make install_locale  # this tries to build and install the message
-                         # catalogs
-    make install_doc     # this should install the documentation and
-                         # online help
-
-2. What's next?
----------------
-
-You should be able to use Mahogany by now. The next thing to do is
-probably to configure it to suit your needs better - you will find a
-lot of possibilities for this in the programs options dialog which
-is accessed via the "Preferences..." item of the "Edit" menu.
-
-Please post any questions you may have to the Mahogany users mailing
-list. If you are reporting a bug, don't forget to specify the
-version of Mahogany you are using and also the platform you are
-running it under - thank you in advance!
 
 We hope you will enjoy Mahogany!
 
