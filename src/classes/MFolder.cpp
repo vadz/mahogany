@@ -335,7 +335,6 @@ private:
                   "folder cache corrupted" );
    }
 
-   // FIXME: make the array sorted, should be more efficient
    static wxArrayString ms_aFolderNames;
    static wxArrayFolder ms_aFolders;
 };
@@ -848,7 +847,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 // MFolderCache implementation
 // -----------------------------------------------------------------------------
 
-wxArrayString MFolderCache::ms_aFolderNames;
+wxArrayString MFolderCache::ms_aFolderNames(TRUE /* auto sort */);
 wxArrayFolder MFolderCache::ms_aFolders;
 
 MFolder *MFolderCache::Get(const String& name)
@@ -866,8 +865,8 @@ void MFolderCache::Add(MFolder *folder)
    ASSERT_MSG( ms_aFolders.Index(folder) == wxNOT_FOUND,
                "can't add the folder to the cache - it's already there" );
 
-   ms_aFolderNames.Add(folder->GetFullName());
-   ms_aFolders.Add(folder);
+   size_t index = ms_aFolderNames.Add(folder->GetFullName());
+   ms_aFolders.Insert(folder, index);
 }
 
 void MFolderCache::Remove(MFolder *folder)

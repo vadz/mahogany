@@ -376,6 +376,17 @@ SOURCE=.\src\gui\wxMainFrame.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\wxMApp.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 

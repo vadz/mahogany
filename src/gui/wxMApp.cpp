@@ -1467,6 +1467,10 @@ void wxMApp::ShowLog(bool doShow)
          // happen
          CloseSplash();
 
+         // before creating the log window, force auto creation of the default
+         // GUI logger so that log window would pass messages to it
+         (void)wxLog::GetActiveTarget();
+
          // create the log window
          m_logWindow = new wxMLogWindow(m_topLevelFrame,
                                         _("Mahogany : Activity Log"));

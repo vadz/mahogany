@@ -23,7 +23,7 @@
 
 // under Windows we can use resources as "normal" windows programs do or we can
 // use XPMs as under Unix
-//#define USE_ICONS_FROM_RESOURCES
+#define USE_ICONS_FROM_RESOURCES
 
 /**
    IconManager class, this class allocates and deallocates icons for

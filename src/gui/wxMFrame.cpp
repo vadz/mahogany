@@ -238,20 +238,10 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
 void
 wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 {
-   int x,y;
-
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
    if ( pConf != NULL )
    {
-      frame->GetPosition(&x,&y);
-      pConf->Write(MP_XPOS, (long)x);
-      pConf->Write(MP_YPOS, (long)y);
-
-      frame->GetSize(&x,&y);
-      pConf->Write(MP_WIDTH, (long)x);
-      pConf->Write(MP_HEIGHT, (long)y);
-
       if ( isFrame )
       {
          wxFrame *fr = (wxFrame *)frame;
@@ -265,7 +255,24 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 
          if ( isMaximized != (pConf->Read(MP_MAXIMISED, 0l) != 0) )
             pConf->Write(MP_MAXIMISED, isMaximized);
+
+         if ( isMaximized || isIconized )
+         {
+            // don't remember the coords in this case: wxWindows returns
+            // something weird for them for iconized frames and we don't need
+            // them for maximized ones anyhow
+            return;
+         }
       }
+
+      int x, y;
+      frame->GetPosition(&x, &y);
+      pConf->Write(MP_XPOS, (long)x);
+      pConf->Write(MP_YPOS, (long)y);
+
+      frame->GetSize(&x,&y);
+      pConf->Write(MP_WIDTH, (long)x);
+      pConf->Write(MP_HEIGHT, (long)y);
    }
 }
 

@@ -192,38 +192,21 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    m_ModulesMenu = NULL;
 
-   int x,y;
-   GetClientSize(&x, &y);
+   // create the children
+   m_splitter = new wxPSplitterWindow("MainSplitter", this);
 
-   m_splitter = new wxPSplitterWindow
-                    (
-                     "MainSplitter",
-                     this,
-                     -1,
-                     wxPoint(1,31),       // FIXME what is this "31"?
-                     wxSize(x-1,y-31),
-                     wxSP_3D | wxSP_BORDER
-                    );
+   wxSize sizeFrame = GetClientSize();
+   m_splitter->SetSize(sizeFrame);
 
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
    m_FolderView = new wxMainFolderView(m_splitter, this);
    m_splitter->SplitVertically(m_FolderTree->GetWindow(),
                                m_FolderView->GetWindow(),
-                               x/3);
+                               sizeFrame.x/3);
 
    m_splitter->SetMinimumPaneSize(10);
    m_splitter->SetFocus();
-
-   //FIXME: ugly workaround for wxGTK toolbar/resize bug
-#ifdef __WXGTK__
-   {
-     int x,y;
-     GetSize(&x,&y);
-     SetSize(x,y+1);
-     SetSize(x,y);
-   }
-#endif // GTK
 }
 
 void wxMainFrame::AddFolderMenu(void)

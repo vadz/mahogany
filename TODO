@@ -8,21 +8,9 @@ $Id$
     just continue to remove bugs from this list as they are 
     fixed.
 
-************ optimize (MSW)
+************ optimize
 
-1. wxIconManager::LoadImageXpm() is *very* slow - this is the main remaining
-   performance problem at startup!
-
-+2. wxRegConfig::SetPath() takes 15% of program time!!!
-
-+3. wxLogError() &c shouldn't do anything if wxNoLog
-
-4. print data in OnInit() shouldn't be allocated initially, only on demand
-
-+5. make env var expansion optional and disable it by default under Windows
-    (takes half a second just for itself!)
-
-+6. wxColourDisplay() should cache the result
+MFolderCache and MfStatusCache should use sorted arrays!
 
 ************ possible cclient improvements (from reading PINE sources)
 

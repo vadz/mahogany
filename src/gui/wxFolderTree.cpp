@@ -1789,6 +1789,12 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       // find the folder which has been changed
       wxString profileName = profileChanged->GetName();
+      if ( profileName.empty() )
+      {
+         // root folder, ignore
+         return TRUE;
+      }
+
       int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
 
       // don't know how to get folder name...
