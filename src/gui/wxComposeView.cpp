@@ -1244,6 +1244,10 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    m_Profile = parentProfile;
    m_Profile->IncRef();
 
+   // sometimes this profile had been created before the identity changed:
+   // make sure we use the current identity for the new message composition
+   m_Profile->SetIdentity(READ_APPCONFIG(MP_CURRENT_IDENTITY));
+
    // build menu
    // ----------
    AddFileMenu();

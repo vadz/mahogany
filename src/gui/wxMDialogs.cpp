@@ -2920,6 +2920,21 @@ public:
       ms_allIdentCombos.Remove(this);
    }
 
+   virtual void Delete(int index)
+   {
+      // sync all other combos with this one
+      size_t count = ms_allIdentCombos.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         if ( ms_allIdentCombos[n] != this )
+         {
+            ms_allIdentCombos[n]->Delete(index);
+         }
+      }
+
+      return wxChoice::Delete(index);
+   }
+
    virtual int DoAppend(const wxString& item)
    {
       // sync all other combos with this one

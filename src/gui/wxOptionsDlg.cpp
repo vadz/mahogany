@@ -2429,9 +2429,13 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 
 void wxIdentityOptionsDialog::CreatePagesDesc()
 {
+   // TODO: it would be better to have custom pages here as not all settings
+   //       make sense for the identities, but it's easier to use the standard
+   //       ones
+
    size_t nOffset;
-   m_nPages = 2;
-   m_aPages = new wxOptionsPageDesc[2];
+   m_nPages = 3;
+   m_aPages = new wxOptionsPageDesc[3];
 
    // identity page
    nOffset = ConfigField_IdentFirst + 1;
@@ -2456,6 +2460,19 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
       wxOptionsPageStandard::ms_aFields + nOffset,
       wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
       ConfigField_NetworkLast - ConfigField_NetworkFirst,
+      nOffset
+   );
+
+   // compose page
+   nOffset = ConfigField_ComposeFirst + 1;
+   m_aPages[2] = wxOptionsPageDesc
+   (
+      _("Compose"),
+      wxOptionsNotebook::ms_aszImages[OptionsPage_Compose],
+      MH_OPAGE_COMPOSE,
+      wxOptionsPageStandard::ms_aFields + nOffset,
+      wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
+      ConfigField_ComposeLast - ConfigField_ComposeFirst,
       nOffset
    );
 };

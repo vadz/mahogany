@@ -539,6 +539,56 @@ wxMFrame::OnMenuCommand(int id)
          }
          break;
 
+      case WXMENU_FILE_IDENT_DELETE:
+         {
+            String ident;
+            wxArrayString identities = Profile::GetAllIdentities();
+            if ( identities.IsEmpty() )
+            {
+               wxLogError(_("There are no existing identities to delete."));
+            }
+            else
+            {
+               int rc = MDialog_GetSelection
+                        (
+                         _("Which identity would you like to delete?"),
+                         MDIALOG_YESNOTITLE,
+                         identities,
+                         this
+                        );
+               if ( rc != -1 )
+               {
+                  ident = identities[(size_t)rc];
+               }
+               //else: cancelled
+            }
+
+            if ( !!ident )
+            {
+               if ( ident == READ_APPCONFIG(MP_CURRENT_IDENTITY) )
+               {
+                  // can't keep this one
+               }
+
+               // FIXME: will this really work? if there are objects which
+               //        use this identity the section will be recreated...
+               String identSection;
+               identSection << M_IDENTITY_CONFIG_SECTION << '/' << ident;
+               mApplication->GetProfile()->DeleteGroup(identSection);
+
+               // update the identity combo in the toolbar if any
+               wxWindow *win = GetToolBar()->FindWindow(IDC_IDENT_COMBO);
+               if ( win )
+               {
+                  wxChoice *combo = wxDynamicCast(win, wxChoice);
+                  combo->Delete(combo->FindString(ident));
+               }
+
+               wxLogStatus(_("Identity '%s' deleted."), ident.c_str());
+            }
+         }
+         break;
+
       case WXMENU_LANG_SET_DEFAULT:
          {
             static const wxFontEncoding encodingsSupported[] =

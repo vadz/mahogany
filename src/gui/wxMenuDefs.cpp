@@ -237,6 +237,7 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_FILE_IDENT_ADD, gettext_noop("&Add..."),  gettext_noop("Create a new identity")        , FALSE },
       { WXMENU_FILE_IDENT_CHANGE, gettext_noop("&Change..."), gettext_noop("Change the current identity")        , FALSE },
       { WXMENU_FILE_IDENT_EDIT, gettext_noop("&Edit..."),  gettext_noop("Edit the current identity parameters")        , FALSE },
+      { WXMENU_FILE_IDENT_DELETE, gettext_noop("&Delete..."), gettext_noop("Remove an identity")        , FALSE },
    { WXMENU_SUBMENU,       "", "", FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

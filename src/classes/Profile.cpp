@@ -619,9 +619,14 @@ void
 ProfileImpl::SetIdentity(const String & idName)
 {
    PCHECK();
-   if(m_Identity) ClearIdentity();
-   m_Identity = Profile::CreateIdentity(idName);
+
+   if ( m_Identity )
+      ClearIdentity();
+
+   if ( !!idName )
+      m_Identity = Profile::CreateIdentity(idName);
 }
+
 void
 ProfileImpl::ClearIdentity(void)
 {
