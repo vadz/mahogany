@@ -1315,8 +1315,11 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          wxLogStatus(GetFrame(m_Parent), msg);
          if(result->GetTicket() == m_DeleteSavedMessagesTicket)
          {
+            ProfileBase *p = m_ASMailFolder->GetProfile();
             m_TicketList->Add(m_ASMailFolder->DeleteMessages(
-               result->GetSequence(),this));
+               result->GetSequence(),
+               (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),
+               this));
          }
          break;
 

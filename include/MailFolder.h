@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: ABC defining the interface to mail folders     *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -351,9 +351,11 @@ public:
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
+       @param expunge expunge deleted messages
        @return true on success
    */
-   virtual bool DeleteMessages(const INTARRAY *messages) = 0;
+   virtual bool DeleteMessages(const INTARRAY *messages,
+                               bool expunge = false) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

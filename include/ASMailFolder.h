@@ -2,7 +2,7 @@
  * ASMailFolder class: ABC defining the interface for asynchronous  *
  *                     mail folders                                 *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
+ * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -361,9 +361,12 @@ public:
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
+       @param expunge expunge deleted messages
        @return ResultInt boolean
    */
-   virtual Ticket DeleteMessages(const INTARRAY *messages, UserData ud = 0) = 0;
+   virtual Ticket DeleteMessages(const INTARRAY *messages,
+                                 bool expunge = false,
+                                 UserData ud = 0) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers

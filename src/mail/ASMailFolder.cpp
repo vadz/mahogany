@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * ASMailFolder class: asynchronous handling of mail folders        *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
+ * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -257,13 +257,15 @@ class MT_DeleteMessages : public MailThreadSeq
 {
 public:
    MT_DeleteMessages(ASMailFolder *mf, UserData ud,
-                     const INTARRAY *sequence)
+                     const INTARRAY *sequence,
+                     bool expunge)
       : MailThreadSeq(mf, ud, sequence)
       {
+         m_expunge = expunge;
       }
    virtual void WorkFunction(void)
       {
-         m_MailFolder->DeleteMessages(m_Seq);
+         m_MailFolder->DeleteMessages(m_Seq, m_expunge);
          // we don´t send a result event, so we need to delete it:
          delete m_Seq;
 #ifdef DEBUG
@@ -272,6 +274,7 @@ public:
       }
 protected:
    String m_Sequence;
+   bool   m_expunge;
 };
 
 class MT_GetMessage : public MailThread
@@ -731,9 +734,10 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket DeleteMessages(const INTARRAY *messages,
+                                 bool expunge,
                                  UserData ud)
       {
-         return (new MT_DeleteMessages(this, ud, messages))->Start();
+         return (new MT_DeleteMessages(this, ud, messages, expunge))->Start();
       }
 
    /** Mark messages as no longer deleted.

@@ -1198,9 +1198,13 @@ MailFolderCmn::DeleteOrTrashMessages(const INTARRAY *selections)
 }
 
 bool
-MailFolderCmn::DeleteMessages(const INTARRAY *selections)
+MailFolderCmn::DeleteMessages(const INTARRAY *selections, bool expunge)
 {
-   return SetSequenceFlag(GetSequenceString(selections), MailFolder::MSG_STAT_DELETED);
+   bool rc = SetSequenceFlag(GetSequenceString(selections),
+                             MailFolder::MSG_STAT_DELETED);
+   if(rc && expunge)
+      ExpungeMessages();
+   return rc;
 }
 
 int
