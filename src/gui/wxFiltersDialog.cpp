@@ -262,8 +262,8 @@ END_EVENT_TABLE()
 class OneCritControl
 {
 public:
-   OneCritControl(wxWindow *parent,
-                  bool followup = FALSE);
+   /// create a new test; previous is the previous test or NULL
+   OneCritControl(wxWindow *parent, OneCritControl *previous);
    ~OneCritControl();
 
    /// init the control values from n-th test in MFDialogSettings
@@ -322,12 +322,13 @@ private:
    wxWindow   *m_Parent; // the parent for all these controls
 };
 
-OneCritControl::OneCritControl(wxWindow *parent,
-                               bool followup)
+OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
 {
    m_Parent = parent;
 
-   if(! followup)
+   // only create the logical condition (And/Or) control if we have something
+   // to combine this one with
+   if ( previous )
    {
       wxASSERT_MSG( ORC_LogicalCount == ORC_L_Max, "forgot to update something" );
 
@@ -353,10 +354,15 @@ OneCritControl::OneCritControl(wxWindow *parent,
 
    // set up the initial values or the code in UpdateProgram() would complain
    // about invalid values
-   //
-   // TODO: take the values from the preceding control instead of defaults?
    if ( m_Logical )
-      m_Logical->Select(ORC_L_Or);
+   {
+      // take the values from the preceding control, if any, instead of default
+      // as it is usually more convenient (user usually creates filter of the
+      // form "foo AND bar AND baz" or "foo OR bar OR baz"...)
+      wxChoice *prevLogical = previous->m_Logical;
+      m_Logical->Select(prevLogical ? prevLogical->GetSelection() : ORC_L_Or);
+   }
+
    m_Type->Select(ORC_T_Contains);
    m_Where->Select(ORC_W_Subject);
 }
@@ -364,7 +370,7 @@ OneCritControl::OneCritControl(wxWindow *parent,
 OneCritControl::~OneCritControl()
 {
    // we need a destructor to clean up our controls:
-   if(m_Logical) delete m_Logical;
+   delete m_Logical;
    delete m_Not;
    delete m_Type;
    delete m_Argument;
@@ -388,7 +394,7 @@ OneCritControl::LayoutControls(wxWindow **last)
       c = new wxLayoutConstraints;
       c->left.RightOf(m_Logical, LAYOUT_X_MARGIN);
       c->width.AsIs();
-      c->top.SameAs(m_Logical, wxTop, 0);
+      c->centreY.SameAs(m_Logical, wxCentreY);
       c->height.AsIs();
       m_Not->SetConstraints(c);
    }
@@ -398,21 +404,21 @@ OneCritControl::LayoutControls(wxWindow **last)
    c = new wxLayoutConstraints;
    c->left.RightOf(m_Not, LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->top.SameAs(m_Not, wxTop, 0);
+   c->centreY.SameAs(m_Not, wxCentreY);
    c->height.AsIs();
    m_Type->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->right.SameAs(m_Parent, wxRight, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->top.SameAs(m_Not, wxTop, 0);
+   c->centreY.SameAs(m_Not, wxCentreY);
    c->height.AsIs();
    m_Where->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
    c->right.LeftOf(m_Where, LAYOUT_X_MARGIN);
-   c->top.SameAs(m_Not, wxTop, 0);
+   c->centreY.SameAs(m_Not, wxCentreY);
    c->height.AsIs();
    m_Argument->SetConstraints(c);
 
@@ -554,6 +560,9 @@ OneActionControl::OneActionControl(wxWindow *parent)
    m_Argument = new wxTextCtrl(parent, -1, "");
    m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
+
+   // select something or UpdateProgram() would complain abotu invalid action
+   m_Type->Select(OAC_T_Delete);
 }
 
 void
@@ -753,8 +762,9 @@ wxOneFilterDialog::AddOneControl()
 {
    ASSERT_MSG( m_nControls < MAX_CONTROLS, "too many filter controls" );
 
-   m_CritControl[m_nControls] = new OneCritControl(m_Panel->GetCanvas(),
-                                                   m_nControls == 0);
+   OneCritControl *prev = m_nControls == 0 ? NULL
+                                           : m_CritControl[m_nControls - 1];
+   m_CritControl[m_nControls] = new OneCritControl(m_Panel->GetCanvas(), prev);
    m_nControls++;
 }
 
