@@ -52,7 +52,7 @@ install: M
 
 msgcat:
 	set -e; for i in $(SUB_DIRS) ; do $(MAKE) -C $$i $@; done
-	$(MAKE) -C $(BUILDDIR)/locale mergecat
+#	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
 .PHONY: all dep clean doc semistatic static allclean install msgcat
 
