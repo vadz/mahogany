@@ -84,10 +84,6 @@ public:
     */
    const char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
 
-   /** get the decoded part text
-    */
-   const void *GetPartData(const MimePart& mimepart, unsigned long *len = NULL);
-
    /**
       Get all headers of this message part.
 
@@ -109,7 +105,7 @@ public:
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
-   virtual MailFolder * GetFolder(void) const { return m_folder; }
+   virtual MailFolder * GetFolder(void) const;
 
    /** Return the numeric status of message.
        @return flags of message
@@ -203,11 +199,9 @@ private:
    /// parse the MIME structure of the message and fill m_mimePartTop
    bool ParseMIMEStructure();
 
-   /// ParseMIMEStructure() helper
-   void DecodeMIME(MimePartCC *mimepart, struct mail_bodystruct *body);
-
    /// GetMimePart() helper
    static MimePart *FindPartInMIMETree(MimePart *mimepart, int& n);
+
    //@}
 
    /// reference to the folder this mail is stored in
@@ -239,22 +233,6 @@ private:
 
    /// pointer to the main message MIME part, it links to all others
    MimePartCC *m_mimePartTop;
-
-   /// total number of MIME parts in the message
-   size_t m_numParts;
-
-   /**
-     A temporarily allocated buffer for GetPartContent().
-
-     It holds the information returned by that function and is only
-     valid until its next call.
-
-     We should free it only if m_ownsPartContent flag is true!
-   */
-   void *m_partContentPtr;
-
-   /// Flag telling whether we should free m_partContentPtr or not
-   bool m_ownsPartContent;
 };
 
 #endif // _MESSAGECC_H

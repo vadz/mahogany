@@ -18,7 +18,7 @@
 #endif
 
 // base class
-#include "MimePart.h"
+#include "MimePartCCBase.h"
 
 class MessageCC;
 
@@ -26,47 +26,16 @@ class MessageCC;
 // MimePartCC: represents a MIME message part of the main message
 // ----------------------------------------------------------------------------
 
-class MimePartCC : public MimePart
+class MimePartCC : public MimePartCCBase
 {
 public:
-   // MIME tree navigation
-   virtual MimePart *GetParent() const;
-   virtual MimePart *GetNext() const;
-   virtual MimePart *GetNested() const;
-
-   // headers access
-   virtual MimeType GetType() const;
-   virtual String GetDescription() const;
-   virtual String GetFilename() const;
-   virtual String GetDisposition() const;
-   virtual String GetPartSpec() const;
-   virtual String GetParam(const String& name) const;
-   virtual String GetDispositionParam(const String& name) const;
-   virtual const MimeParameterList& GetParameters() const;
-   virtual const MimeParameterList& GetDispositionParameters() const;
-
    // data access
    virtual const void *GetRawContent(unsigned long *len = NULL) const;
-   virtual const void *GetContent(unsigned long *len = NULL) const;
-   virtual String GetTextContent() const;
    virtual String GetHeaders() const;
-   virtual MimeXferEncoding GetTransferEncoding() const;
-   virtual size_t GetSize() const;
-
-   // text part additional info
-   virtual wxFontEncoding GetTextEncoding() const;
-   virtual size_t GetNumberOfLines() const;
 
 protected:
-   /// find the parameter in the list by name
-   static String FindParam(const MimeParameterList& list, const String& name);
-
-   /// fill our param list with values from c-client
-   static void InitParamList(MimeParameterList *list,
-                             struct mail_body_parameter *par);
-
    /// get the message we belong to
-   MessageCC *GetMessage() const;
+   MessageCC *GetMessage() const { return m_message; }
 
 private:
    /** @name Ctors/dtor
@@ -75,49 +44,23 @@ private:
     */
    //@{
 
-   /// common part of all ctors
-   void Init();
-
    /// ctor for the top level part
-   MimePartCC(MessageCC *message);
+   MimePartCC(MessageCC *message, struct mail_bodystruct *body);
 
    /// ctor for non top part
-   MimePartCC(MimePartCC *parent, size_t nPart = 1);
-
-   /// dtor deletes all subparts and siblings
-   virtual ~MimePartCC();
+   MimePartCC(struct mail_bodystruct *body, MimePartCC *parent, size_t nPart);
 
    //@}
 
-   /// the parent part (NULL for top level one)
-   MimePartCC *m_parent;
+   // create all subparts of this one, called from both ctors
+   void CreateSubParts();
 
-   /// first child part for multipart or message parts
-   MimePartCC *m_nested;
 
-   // m_next and m_message could be in a union as only the top level message
-   // has m_message pointer but it never has any siblings
-   //
-   // but is it worth it?
-
-   /// next part in the message
-   MimePartCC *m_next;
-
-   /// the message we're part of (never NULL, not a ref for technical reasons)
+   // the message we're part of (never NULL and never changes)
    MessageCC *m_message;
 
-   /// the c-client BODY struct we stand for
-   struct mail_bodystruct *m_body;
 
-   /// MIME/IMAP4 part spec (#.#.#.#)
-   String m_spec;
-
-   /// list of parameters if we already have them: never access directly!
-   MimeParameterList *m_parameterList;
-
-   /// list of disposition parameters if we already have them
-   MimeParameterList *m_dispositionParameterList;
-
+   // it creates us
    friend class MessageCC;
 };
 

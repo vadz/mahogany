@@ -54,6 +54,7 @@
 #include "MailFolderCC.h" // needed to properly include MessageCC.h
 #include "MessageCC.h"
 #include "MimePartCC.h"
+#include "MimePartVirtual.h"
 #include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
@@ -85,7 +86,7 @@
    #include <wx/dcps.h> // for wxThePrintSetupData
 #endif
 
-class MPersMsgBox;
+M_LIST_OWN(VirtualMimePartsList, MimePart);
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -565,6 +566,7 @@ MessageView::Init()
    m_mailMessage = NULL;
    m_viewer = NULL;
    m_filters = NULL;
+   m_virtualMimeParts = NULL;
 
    m_uid = UID_ILLEGAL;
    m_encodingUser = wxFONTENCODING_DEFAULT;
@@ -577,6 +579,8 @@ MessageView::Init()
 
 MessageView::~MessageView()
 {
+   delete m_virtualMimeParts;
+
    UnregisterForEvents();
 
    DetachAllProcesses();
@@ -2131,20 +2135,17 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
             case MCryptoEngine::OK:
                pgpInfo = new PGPInfoGoodMsg(this);
 
-               // TODO: process the mime part that's just been decrypted
-               // the problem is: how to create a MimePart instance from its full text?
-               // The following code raises an assert because the MessageCC is
-               // not associated to a folder...
                {
-                  MessageCC* decryptedMessage = MessageCC::Create(wxConvertWX2MB(decryptedData));
-                  const MimePart* decryptedMimePart = decryptedMessage->GetTopMimePart();
-                  ProcessPart(decryptedMimePart);
+                  MimePartVirtual *mpv = new MimePartVirtual(decryptedData);
+                  AddVirtualMimePart(mpv);
+                  ProcessPart(mpv);
                }
                break;
 
             default:
                wxLogError(_("Decrypting the PGP message failed."));
                // fall through
+
             // if the user cancelled decryption, don't complain about it
             case MCryptoEngine::OPERATION_CANCELED_BY_USER:
                // using unmodified text is not very helpful here anyhow so
@@ -2197,12 +2198,10 @@ MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
    {
       ProcessSignedMultiPart(mimepart);
    }
-#if 0
    else if ( subtype == _T("ENCRYPTED") )
    {
       ProcessEncryptedMultiPart(mimepart);
    }
-#endif
    else // process all unknown as MIXED (according to the RFC 2047)
    {
       ProcessAllNestedParts(mimepart);
@@ -2251,9 +2250,20 @@ MessageView::ProcessPart(const MimePart *mimepart)
 }
 
 void
-MessageView::Update(void)
+MessageView::AddVirtualMimePart(MimePart *mimepart)
+{
+   if ( !m_virtualMimeParts )
+      m_virtualMimeParts = new VirtualMimePartsList;
+
+   m_virtualMimeParts->push_back(mimepart);
+}
+
+void
+MessageView::Update()
 {
    m_viewer->Clear();
+   if ( m_virtualMimeParts )
+      m_virtualMimeParts->clear();
 
    if( !m_mailMessage )
    {

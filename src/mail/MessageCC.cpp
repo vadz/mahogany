@@ -92,10 +92,7 @@ void MessageCC::Init()
    m_mailFullText = NULL;
    m_Body = NULL;
    m_Envelope = NULL;
-   m_partContentPtr = NULL;
    m_msgText = NULL;
-
-   m_ownsPartContent = false;
 
    m_folder = NULL;
    m_Profile = NULL;
@@ -145,49 +142,28 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
    // move \n --> \r\n convention
    m_msgText = strutil_strdup(wxConvertWX2MB(strutil_enforceCRLF(wxConvertMB2WX(text))));
 
-   // find end of header "\012\012" (FIXME: not "\015\012"???)
-   char
-      *header = NULL,
-      *bodycptr = NULL;
-   unsigned long
-      headerLen = 0;
-
-   for ( unsigned long pos = 0; m_msgText[pos]; pos++ )
+   if ( !CclientParseMessage(m_msgText, &m_Envelope, &m_Body) )
    {
-      if((m_msgText[pos] == '\012' && m_msgText[pos+1] == '\012') // empty line
-         // is end of header
-         || m_msgText[pos+1] == '\0')
-      {
-         header = new char [pos+2];
-         strncpy(header, m_msgText, pos+1);
-         header[pos+1] = '\0';
-         headerLen = pos+1;
-         bodycptr = m_msgText + pos + 2;
-         break;
-      }
-      pos++;
+      wxLogError(_("Failed to create a mail message."));
    }
-
-   if(! header)
-      return;  // failed
-
-   STRING str;
-   INIT(&str, mail_string, (void *) bodycptr, strlen(bodycptr));
-   rfc822_parse_msg (&m_Envelope, &m_Body, header, headerLen,
-                     &str, ""   /*defaulthostname */, 0);
-   delete [] header;
 }
 
 MessageCC::~MessageCC()
 {
    delete m_mimePartTop;
 
-   if ( m_ownsPartContent )
-      fs_give(&m_partContentPtr);
+   if ( m_folder )
+   {
+      m_folder->DecRef();
+   }
+   else
+   {
+      delete [] m_msgText;
 
-   delete [] m_msgText;
+      mail_free_envelope(&m_env);
+      mail_free_body(&m_body);
+   }
 
-   SafeDecRef(m_folder);
    SafeDecRef(m_Profile);
 }
 
@@ -601,61 +577,9 @@ MessageCC::ParseMIMEStructure()
       return false;
    }
 
-   m_numParts = 0;
-   m_mimePartTop = new MimePartCC(this);
-
-   DecodeMIME(m_mimePartTop, m_Body);
+   m_mimePartTop = new MimePartCC(this, m_Body);
 
    return true;
-}
-
-void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
-{
-   CHECK_RET( mimepart && body, _T("NULL pointer(s) in DecodeMIME") );
-
-   mimepart->m_body = body;
-
-   if ( body->type != TYPEMULTIPART )
-   {
-      m_numParts++;
-
-      // is it an encapsulated message?
-      if ( body->type == TYPEMESSAGE && strcmp(body->subtype, "RFC822") == 0 )
-      {
-         body = body->nested.msg->body;
-         if ( body )
-         {
-            mimepart->m_nested = new MimePartCC(mimepart);
-
-            DecodeMIME(mimepart->m_nested, body);
-         }
-         else
-         {
-            // this is not fatal but not expected neither - I don't know if it
-            // can ever happen, in fact
-            wxLogDebug(_T("Embedded message/rfc822 without body structure?"));
-         }
-      }
-   }
-   else // multi part
-   {
-      // note that we don't increment m_numParts here as we only count parts
-      // containing something and GetMimePart(n) ignores multitype parts
-
-      MimePartCC **prev = &mimepart->m_nested;
-      PART *part;
-
-      // NB: message parts are counted from 1
-      size_t n;
-      for ( n = 1, part = body->nested.part; part; part = part->next, n++ )
-      {
-         *prev = new MimePartCC(mimepart, n);
-
-         DecodeMIME(*prev, &part->body);
-
-         prev = &((*prev)->m_next);
-      }
-   }
 }
 
 const MimePart *MessageCC::GetTopMimePart() const
@@ -670,7 +594,7 @@ MessageCC::CountParts(void) const
 {
    CheckMIME();
 
-   return m_numParts;
+   return m_mimePartTop->GetPartsCount();
 }
 
 /* static */
@@ -716,12 +640,13 @@ const MimePart *MessageCC::GetMimePart(int n) const
 {
    CheckMIME();
 
-   CHECK( n >= 0 && (size_t)n < m_numParts, NULL, _T("invalid part number") );
+   CHECK( n >= 0 && n < CountParts(), NULL, _T("invalid part number") );
 
    MimePart *mimepart = m_mimePartTop;
 
-   // skip the MULTIPART pseudo parts - this is consistent with DecodeMIME()
-   // which doesn't count them in m_numParts neither
+   // skip the MULTIPART pseudo parts -- this is consistent with how
+   // MimePartCCBase numbers the MIME parts as it doesn't count them in
+   // neither
    while ( n || mimepart->GetType().GetPrimary() == MimeType::MULTIPART )
    {
       mimepart = FindPartInMIMETree(mimepart, n);
@@ -806,201 +731,6 @@ MessageCC::GetPartHeaders(const MimePart& mimepart)
    }
 
    return s;
-}
-
-const void *
-MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
-{
-   CHECK( lenptr, NULL, _T("MessageCC::GetPartData(): NULL len ptr") );
-
-   // first get the raw text
-   // ----------------------
-
-   const char *cptr = GetRawPartData(mimepart, lenptr);
-   if ( !cptr || !*lenptr )
-      return NULL;
-
-   // now decode it
-   // -------------
-
-   // free old text
-   if (m_ownsPartContent )
-   {
-      m_ownsPartContent = false;
-
-      fs_give(&m_partContentPtr);
-   }
-
-   // total size of this message part
-   unsigned long size = mimepart.GetSize();
-
-   // just for convenience...
-   unsigned char *text = (unsigned char *)cptr;
-
-   switch ( mimepart.GetTransferEncoding() )
-   {
-      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-         m_partContentPtr = rfc822_qprint(text, size, lenptr);
-
-         // some broken mailers sent messages with QP specified as the content
-         // transfer encoding in the headers but don't encode the message
-         // properly - in this case show it as plain text which is better than
-         // not showing it at all
-         if ( m_partContentPtr )
-         {
-            m_ownsPartContent = true;
-
-            break;
-         }
-         //else: treat it as plain text
-
-         // it was overwritten by rfc822_qprint() above
-         *lenptr = size;
-
-         // fall through
-
-      case ENC7BIT:        // 7 bit SMTP semantic data
-      case ENC8BIT:        // 8 bit SMTP semantic data
-      case ENCBINARY:      // 8 bit binary data
-      case ENCOTHER:       // unknown
-      default:
-         // nothing to do
-         m_partContentPtr = text;
-         break;
-
-
-      case ENCBASE64:      // base-64 encoded data
-         // the size of possible extra non Base64 encoded text following a
-         // Base64 encoded part
-         const unsigned char *startSlack = NULL;
-         size_t sizeSlack = 0;
-
-         // there is a frequent problem with mail list software appending the
-         // mailing list footer (i.e. a standard signature containing the
-         // instructions about how to [un]subscribe) to the top level part of a
-         // Base64-encoded message thus making it invalid - worse c-client code
-         // doesn't complain about it but simply returns some garbage in this
-         // case
-         //
-         // we try to detect this case and correct for it: note that neither
-         // '-' nor '_' which typically start the signature are valid
-         // characters in base64 so the logic below should work for all common
-         // cases
-
-         // only check the top level part
-         if ( !mimepart.GetParent() )
-         {
-            const unsigned char *p;
-            for ( p = text; *p; p++ )
-            {
-               // we do *not* want to use the locale-specific settings here,
-               // hence don't use isalpha()
-               const unsigned char ch = *p;
-               if ( (ch >= 'A' && ch <= 'Z') ||
-                     (ch >= 'a' && ch <= 'z') ||
-                      (ch >= '0' && ch <= '9') ||
-                       (ch == '+' || ch == '/' || ch == '\r' || ch == '\n') )
-               {
-                  // valid Base64 char
-                  continue;
-               }
-
-               if ( ch == '=' )
-               {
-                  p++;
-
-                  // valid, but can only occur at the end of data as padding,
-                  // so still break below -- but not before:
-
-                  // a) skipping a possible second '=' (can't be more than 2 of
-                  // them)
-                  if ( *p == '=' )
-                     p++;
-
-                  // b) skipping the terminating "\r\n"
-                  if ( p[0] == '\r' && p[1] == '\n' )
-                     p += 2;
-               }
-
-               // what (if anything) follows can't appear in a valid Base64
-               // message
-               break;
-            }
-
-            size_t sizeValid = p - text;
-            if ( sizeValid != size )
-            {
-               ASSERT_MSG( sizeValid < size,
-                           _T("logic error in base64 validity check") );
-
-               // take all the rest verbatim below
-               startSlack = p;
-               sizeSlack = size - sizeValid;
-
-               // and decode just the (at least potentially) valid part
-               size = sizeValid;
-            }
-         }
-
-         m_partContentPtr = rfc822_base64(text, size, lenptr);
-         if ( !m_partContentPtr )
-         {
-            wxLogDebug(_T("rfc822_base64() failed"));
-
-            // use original text: this is better than nothing and can be
-            // exactly what we need in case of messages generated with base64
-            // encoding in the headers but then sent as 8 it binary (old (circa
-            // 2003) versions of Thunderbird did this!)
-            m_partContentPtr = text;
-            *lenptr = size;
-         }
-         else // ok
-         {
-            // append the non Base64-encoded chunk, if any, to the end of decoded
-            // data
-            if ( sizeSlack )
-            {
-               fs_resize(&m_partContentPtr, *lenptr + sizeSlack);
-               memcpy((char *)m_partContentPtr + *lenptr, startSlack, sizeSlack);
-
-               *lenptr += sizeSlack;
-            }
-
-            m_ownsPartContent = true;
-         }
-   }
-
-   return m_partContentPtr;
-}
-
-const void *MimePartCC::GetRawContent(unsigned long *len) const
-{
-   return GetMessage()->GetRawPartData(*this, len);
-}
-
-const void *MimePartCC::GetContent(unsigned long *len) const
-{
-   return GetMessage()->GetPartData(*this, len);
-}
-
-String MimePartCC::GetHeaders() const
-{
-   return GetMessage()->GetPartHeaders(*this);
-}
-
-String MimePartCC::GetTextContent() const
-{
-   unsigned long len;
-   const char *p = reinterpret_cast<const char *>(GetContent(&len));
-   if ( !p )
-      return wxGetEmptyString();
-
-#if wxUSE_UNICODE
-   #warning "We need the original encoding here, TODO"
-   return wxConvertMB2WX(p);
-#else // ANSI
-   return wxString(p, len);
-#endif // Unicode/ANSI
 }
 
 // ----------------------------------------------------------------------------
@@ -1136,6 +866,11 @@ MessageCC::GetSize() const
    return mc->rfc822_size;
 }
 
+MailFolder *MessageCC::GetFolder() const
+{
+   return m_folder;
+}
+
 // ----------------------------------------------------------------------------
 // MessageCC::WriteToString
 // ----------------------------------------------------------------------------
@@ -1176,6 +911,56 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
    // and the text too
    str += ((MessageCC*)this)->FetchText();
+
+   return true;
+}
+
+// ============================================================================
+// functions from Mcclient.h
+// ============================================================================
+
+bool
+CclientParseMessage(const char *msgText,
+                    ENVELOPE **ppEnv,
+                    BODY **ppBody,
+                    size_t *pHdrLen)
+{
+   const char *bodycptr = NULL;
+   unsigned long headerLen = 0;
+
+   // find end of header "\r\n\r\n"
+   bool eol = true;
+   for ( unsigned long pos = 0; msgText[pos]; pos++ )
+   {
+      // empty line or end of text?
+      if ( msgText[pos] == '\r' && msgText[++pos] == '\n' )
+      {
+         if ( eol )
+         {
+            headerLen = pos - 1;
+            bodycptr = msgText + pos + 1; // skip eol
+            break;
+         }
+
+         eol = true;
+      }
+      else
+      {
+         eol = false;
+      }
+   }
+
+   if ( !headerLen )
+      return false;
+
+   STRING str;
+   INIT(&str, mail_string, const_cast<char *>(bodycptr), strlen(bodycptr));
+   rfc822_parse_msg(ppEnv, ppBody,
+                    const_cast<char *>(msgText), headerLen,
+                    &str, "", 0);
+
+   if ( pHdrLen )
+      *pHdrLen = headerLen;
 
    return true;
 }

@@ -57,4 +57,28 @@ extern "C"
 #  undef T
 }
 
+/**
+   @name Helper functions for working with c-client.
+
+   All of these functions are defined in MessageCC.cpp for historical reasons.
+ */
+//@{
+
+/**
+   Parse the complete message text into internal envelope and body structures.
+
+   @param msgText message text in Unix (LF-only) line ending convention
+   @param ppEnv filled with message ENVELOPE
+   @param ppBody filled with message BODY
+   @param pHdrLen filled with the length of the header if non-NULL
+   @return true if ok, false on error
+ */
+extern bool
+CclientParseMessage(const char *msgText,
+                    ENVELOPE **ppEnv,
+                    BODY **ppBody,
+                    size_t *pHdrLen = NULL);
+
+//@}
+
 #endif  //MCCLIENT_H

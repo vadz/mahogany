@@ -285,6 +285,17 @@ public:
     */
    void OnBodyText(const String& text) { m_textBody += text; }
 
+   /**
+      Give us ownership of a virtual mime part created on the fly.
+
+      This is a hack: sometimes we create virtual, i.e. not existing in the
+      original message, mime parts which don't exist in the original Message.
+      This creates a problem of disposing them: normally we don't free MimePart
+      objects at all because they belong to the Message, but the virtual ones
+      don't, so someone else has to delete them. This someone else is us.
+    */
+   void AddVirtualMimePart(MimePart *mimepart);
+
 protected:
    /** @name Initialization
     */
@@ -680,6 +691,10 @@ private:
    class ViewFilterNode *m_filters;
 
    //@}
+
+
+   /// list of all virtual MIME parts, created on demand
+   class VirtualMimePartsList *m_virtualMimeParts;
 
 
    friend class ProcessEvtHandler;

@@ -29,335 +29,90 @@
    #include "Mcclient.h" // for body_types
 #endif // USE_PCH
 
-#include <wx/fontmap.h>
-
 #include "MimePartCC.h"
+#include "MessageCC.h"
 #include "MailFolder.h"    // for DecodeHeader
-
-#undef MESSAGE
-
-// ============================================================================
-// MimeType implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// initializing
-// ----------------------------------------------------------------------------
-
-MimeType::MimeType(Primary primary, const String& subtype)
-{
-   m_primary = primary;
-   m_subtype = subtype.Upper();
-}
-
-MimeType& MimeType::Assign(const String& mimetype)
-{
-   String type = mimetype.BeforeFirst('/').Upper();
-
-   m_primary = INVALID;
-   for ( size_t n = 0; body_types[n]; n++ )
-   {
-      if ( type == wxConvertMB2WX(body_types[n]) )
-      {
-         m_primary = (MimeType::Primary)n;
-
-         break;
-      }
-   }
-
-   m_subtype = mimetype.AfterFirst('/').Upper();
-
-   return *this;
-}
-
-// ----------------------------------------------------------------------------
-// accessors
-// ----------------------------------------------------------------------------
-
-String MimeType::GetType() const
-{
-   ASSERT_MSG( IsOk(), _T("using uninitialized MimeType") );
-
-   // body_types is defined in c-client/rfc822.c
-   return wxConvertMB2WX(body_types[m_primary]);
-}
-
-// ----------------------------------------------------------------------------
-// tests
-// ----------------------------------------------------------------------------
-
-bool MimeType::Matches(const MimeType& wildcard) const
-{
-   return m_primary == wildcard.m_primary &&
-            (wildcard.m_subtype == '*' || m_subtype == wildcard.m_subtype);
-}
 
 // ============================================================================
 // MimePartCC implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// ctors/dtors
+// ctors
 // ----------------------------------------------------------------------------
 
-void MimePartCC::Init()
+MimePartCC::MimePartCC(MessageCC *message, BODY *body)
+          : MimePartCCBase(body)
 {
-   m_body = NULL;
-
-   m_parent =
-   m_nested =
-   m_next = NULL;
-
-   m_message = NULL;
-
-   m_parameterList =
-   m_dispositionParameterList = NULL;
-}
-
-MimePartCC::MimePartCC(MessageCC *message)
-{
-   Init();
-
    m_message = message;
 
-   // if this message is not multipart, we must have "1", otherwise it is
-   // unused anyhow (the trouble is that we don't know if we're multipart or
-   // not yet as m_body is not set)
-   m_spec = _T('1');
+   CreateSubParts();
 }
 
-MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
+MimePartCC::MimePartCC(BODY *body, MimePartCC *parent, size_t nPart)
+          : MimePartCCBase(body, parent, nPart)
 {
-   Init();
+   // only the top level message has m_message set, so delegate to parent if we
+   // have one
+   m_message = parent->GetMessage();
 
-   m_parent = parent;
+   CreateSubParts();
+}
 
-   /*
-      Nasty hack: c-client (and so probably IMAP as well) doesn't seem to
-      number the multipart parts whose parent part is the message, so when
-      assigning the part spec to their children we should skip the parent and
-      use the grandparent spec as the base.
-
-      I'd like to really understand the rule to be used here one of these
-      days...
-    */
-   if ( m_parent && m_parent->GetParent() )
+void MimePartCC::CreateSubParts()
+{
+   if ( m_body->type != TYPEMULTIPART )
    {
-      String specParent;
+      m_numParts++;
 
-      MimeType::Primary mt = m_parent->GetType().GetPrimary();
-      if ( mt == MimeType::MULTIPART )
+      // is it an encapsulated message?
+      if ( m_body->type == TYPEMESSAGE &&
+               strcmp(m_body->subtype, "RFC822") == 0 )
       {
-         MimePartCC *grandparent = m_parent->m_parent;
-
-         // it shouldn't be the top level part (note that it is non NULL
-         // because of the test in the enclosing if)
-         if ( grandparent->m_parent )
+         BODY *bodyNested = m_body->nested.msg->body;
+         if ( bodyNested )
          {
-            mt = grandparent->GetType().GetPrimary();
-
-            if ( mt == MimeType::MESSAGE )
-            {
-               // our parent part doesn't have its own part number, use the
-               // grand parent spec as the base
-               specParent = grandparent->m_spec;
-            }
+            m_nested = new MimePartCC(bodyNested, this, 1);
+         }
+         else
+         {
+            // this is not fatal but not expected neither - I don't know if it
+            // can ever happen, in fact
+            wxLogDebug(_T("Embedded message/rfc822 without body structure?"));
          }
       }
-
-      if ( specParent.empty() )
-      {
-         specParent = m_parent->m_spec;
-      }
-
-      m_spec << specParent << '.';
    }
-
-   m_spec << wxString::Format(_T("%lu"), (unsigned long)nPart);
-}
-
-MimePartCC::~MimePartCC()
-{
-   delete m_next;
-   delete m_nested;
-
-   delete m_parameterList;
-   delete m_dispositionParameterList;
-}
-
-// ----------------------------------------------------------------------------
-// MIME tree access
-// ----------------------------------------------------------------------------
-
-MimePart *MimePartCC::GetParent() const
-{
-   return m_parent;
-}
-
-MimePart *MimePartCC::GetNext() const
-{
-   return m_next;
-}
-
-MimePart *MimePartCC::GetNested() const
-{
-   return m_nested;
-}
-
-// ----------------------------------------------------------------------------
-// headers access
-// ----------------------------------------------------------------------------
-
-MimeType MimePartCC::GetType() const
-{
-   // cast is ok as we use the same values in MimeType as c-client
-   return MimeType((MimeType::Primary)m_body->type, wxConvertMB2WX(m_body->subtype));
-}
-
-String MimePartCC::GetDescription() const
-{
-   // FIXME: we lose the encoding info here - but we don't have any way to
-   //        return it from here currently
-   return MailFolder::DecodeHeader(wxConvertMB2WX(m_body->description));
-}
-
-String MimePartCC::GetFilename() const
-{
-   // try hard to find an acceptable name for this part
-   String filename = GetDispositionParam(_T("filename"));
-
-   if ( filename.empty() )
-      filename = GetParam(_T("filename"));
-
-   if ( filename.empty() )
-      filename = GetParam(_T("name"));
-
-   return filename;
-}
-
-String MimePartCC::GetDisposition() const
-{
-   return wxConvertMB2WX(m_body->disposition.type);
-}
-
-String MimePartCC::GetPartSpec() const
-{
-   return m_spec;
-}
-
-// ----------------------------------------------------------------------------
-// parameters access
-// ----------------------------------------------------------------------------
-
-/* static */
-String MimePartCC::FindParam(const MimeParameterList& list, const String& name)
-{
-   String value;
-
-   MimeParameterList::iterator i;
-   for ( i = list.begin(); i != list.end(); i++ )
+   else // multi part
    {
-      // parameter names are not case-sensitive, i.e. "charset" == "CHARSET"
-      if ( name.CmpNoCase(i->name) == 0 )
+      // note that we don't increment m_numParts here as we only count parts
+      // containing something and MessageCC::GetMimePart(n) ignores multitype
+      // parts
+
+      MimePartCCBase **prev = &m_nested;
+
+      // NB: message parts are counted from 1
+      size_t n = 1;
+      for ( PART *part = m_body->nested.part; part; part = part->next, n++ )
       {
-         // found
-         value = i->value;
-         break;
+         *prev = new MimePartCC(&part->body, this, n);
+
+         // static_cast<> needed to access protected member
+         prev = &(static_cast<MimePartCC *>(*prev)->m_next);
       }
    }
-
-   // FIXME: we lose the encoding info here - but we don't have any way to
-   //        return it from here currently
-   return MailFolder::DecodeHeader(value);
-}
-
-String MimePartCC::GetParam(const String& name) const
-{
-   return FindParam(GetParameters(), name);
-}
-
-String MimePartCC::GetDispositionParam(const String& name) const
-{
-   return FindParam(GetDispositionParameters(), name);
-}
-
-// ----------------------------------------------------------------------------
-// parameter lists handling
-// ----------------------------------------------------------------------------
-
-/* static */
-void MimePartCC::InitParamList(MimeParameterList *list, PARAMETER *par)
-{
-   while ( par )
-   {
-      list->push_back(new MimeParameter(wxConvertMB2WX(par->attribute), wxConvertMB2WX(par->value)));
-
-      par = par->next;
-   }
-}
-
-const MimeParameterList& MimePartCC::GetParameters() const
-{
-   if ( !m_parameterList )
-   {
-      ((MimePartCC *)this)->m_parameterList = new MimeParameterList;
-      InitParamList(m_parameterList, m_body->parameter);
-   }
-
-   return *m_parameterList;
-}
-
-const MimeParameterList& MimePartCC::GetDispositionParameters() const
-{
-   if ( !m_dispositionParameterList )
-   {
-      ((MimePartCC *)this)->m_dispositionParameterList = new MimeParameterList;
-      InitParamList(m_dispositionParameterList, m_body->disposition.parameter);
-   }
-
-   return *m_dispositionParameterList;
 }
 
 // ----------------------------------------------------------------------------
 // data access
 // ----------------------------------------------------------------------------
 
-MessageCC *MimePartCC::GetMessage() const
+const void *MimePartCC::GetRawContent(unsigned long *len) const
 {
-   // only the top level message has m_message set, so delegate to parent if we
-   // have one
-   return m_parent ? m_parent->GetMessage() : m_message;
+   return GetMessage()->GetRawPartData(*this, len);
 }
 
-// MimePartCC::GetContent(), GetRawContent() and GetHeaders() are implemented
-// in MessageCC.cpp to reduce compilation dependencies (Message doesn't have
-// the necessary methods so we'd need to include MessageCC.h here...)
-
-MimeXferEncoding MimePartCC::GetTransferEncoding() const
+String MimePartCC::GetHeaders() const
 {
-   // cast is ok as we use the same values for MimeXferEncoding as c-client
-   return (MimeXferEncoding)m_body->encoding;
-}
-
-size_t MimePartCC::GetSize() const
-{
-   return m_body->size.bytes;
-}
-
-// ----------------------------------------------------------------------------
-// text part additional info
-// ----------------------------------------------------------------------------
-
-size_t MimePartCC::GetNumberOfLines() const
-{
-   return m_body->size.lines;
-}
-
-wxFontEncoding MimePartCC::GetTextEncoding() const
-{
-   String charset = GetParam(_T("charset"));
-
-   return charset.empty() ? wxFONTENCODING_SYSTEM
-                          : wxFontMapper::Get()->CharsetToEncoding(charset);
+   return GetMessage()->GetPartHeaders(*this);
 }
 

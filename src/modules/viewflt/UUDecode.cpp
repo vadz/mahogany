@@ -25,102 +25,17 @@
 #   include "MApplication.h"
 #endif //USE_PCH
 
+#include <wx/bitmap.h>
+#include <wx/mimetype.h>
+
 #include "MessageViewer.h"
 #include "ViewFilter.h"
 #include "ClickAtt.h"
 
-#include <wx/bitmap.h>
-
-#include "MimePart.h"
-#include <wx/mimetype.h>
-
-// MimePartRaw
-//
-// A MIME part built from raw data. This class does not know about sub-parts,
-// or other MIME stuff.
-//
-// It should be possible to re-use this class to handle the result of decrypting
-// (part of) a message.
-
-class MimePartRaw : public MimePart
-{
-public:
-  MimePartRaw(const String& fileName,
-              const String& mimeType,
-              const String& content,
-              const String& disposition)
-    : m_fileName(fileName)
-    , m_mimeType(mimeType)
-    , m_content(content)
-    , m_disposition(disposition)
-  {}
-public:
-   virtual MimePart *GetParent() const {return 0;}
-   virtual MimePart *GetNext() const {return 0;}
-   virtual MimePart *GetNested() const {return 0;}
-
-   virtual MimeType GetType() const {
-      return MimeType(m_mimeType);
-   }
-   virtual String GetDescription() const {return String();}
-   virtual String GetFilename() const {return m_fileName;}
-   virtual String GetDisposition() const {return m_disposition;}
-   virtual String GetPartSpec() const {return String();}
-   virtual String GetParam(const String& name) const {return String();}
-   virtual String GetDispositionParam(const String& name) const {return String();}
-   virtual const MimeParameterList& GetParameters() const {return m_parameters;}
-   virtual const MimeParameterList& GetDispositionParameters() const {return m_dispositionParameters;}
-
-   /// get the raw (un-decoded) contents of this part
-   virtual const void *GetRawContent(unsigned long *len = NULL) const
-   {
-      // We actually return the only thing we have: the decoded file.
-      return GetContent(len);
-   }
-   virtual const void *GetContent(unsigned long *len) const
-   {
-     if (len)
-        *len = m_content.Length();
-     return m_content.c_str();
-   }
-   virtual String GetTextContent() const
-   {
-      // Same as for MimePartCC
-      unsigned long len;
-      const char *p = reinterpret_cast<const char *>(GetContent(&len));
-      if ( !p )
-         return wxGetEmptyString();
-
-#if wxUSE_UNICODE
-#warning "We need the original encoding here, TODO"
-      return wxConvertMB2WX(p);
-#else // ANSI
-      return wxString(p, len);
-#endif // Unicode/ANSI
-   }
-
-
-   virtual String GetHeaders() const {return String();}
-   virtual MimeXferEncoding GetTransferEncoding() const {return MIME_ENC_BINARY;}
-   virtual size_t GetSize() const {return m_content.length();}
-
-   virtual wxFontEncoding GetTextEncoding() const {return wxFONTENCODING_DEFAULT;}
-   virtual size_t GetNumberOfLines() const {return 0;}
-
-private:
-  MimeParameterList m_parameters;
-  MimeParameterList m_dispositionParameters;
-
-  String m_fileName;
-  String m_mimeType;
-  String m_content;
-  String m_disposition;
-};
+#include "MimePartVirtual.h"
 
 // strlen("\r\n")
 static const size_t lenEOL = 2;
-
-
 
 // ----------------------------------------------------------------------------
 // UUDecodeFilter itself
@@ -130,21 +45,11 @@ class UUDecodeFilter : public ViewFilter
 {
 public:
    UUDecodeFilter(MessageView *msgView, ViewFilter *next, bool enable);
-   virtual ~UUDecodeFilter();
 
 protected:
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
                           MTextStyle& style);
-
-   // all MimePartRaw we create: we add them to this array to free them later
-   //
-   // unfortunately this is totally bogus as we're normally destroyed only when
-   // the program terminates so even if it doesn't appear as the memory leak in
-   // the end, it still is one: the MimePartRaws should have been destroyed
-   // much earlier... unfortunately it's not clear when, probably they should
-   // be attached to the Message and destroyed with it but this is so ugly...
-   wxArrayPtrVoid m_mimeParts;
 };
 
 // ----------------------------------------------------------------------------
@@ -177,15 +82,6 @@ UUDecodeFilter::UUDecodeFilter(MessageView *msgView,
                                bool enable)
               : ViewFilter(msgView, next, enable)
 {
-}
-
-UUDecodeFilter::~UUDecodeFilter()
-{
-   const size_t count = m_mimeParts.GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      delete static_cast<MimePartRaw *>(m_mimeParts[n]);
-   }
 }
 
 // ----------------------------------------------------------------------------
@@ -378,18 +274,29 @@ UUDecodeFilter::DoProcess(String& text,
             m_next->Process(prolog, viewer, style);
          }
 
-         // Let's get a mimeType from the extention
-         wxFileType *fileType = mApplication->GetMimeManager().GetFileTypeFromExtension(fileName.AfterLast('.'));
-         String mimeType;
-         if ( !fileType || !fileType->GetMimeType(&mimeType) )
-         {
-            mimeType = _T("APPLICATION/OCTET-STREAM");
-         }
-         delete fileType;
+         // now create the header for the uuencoded part
+         String header(_T("Mime-Version: 1.0\nContent-Disposition: uuencoded\n"));
 
-         MimePartRaw *mimepart =
-            new MimePartRaw(fileName, mimeType, decodedFile, _T("uuencoded"));
-         m_mimeParts.Add(mimepart);
+         // get a mimeType from the extention
+         String mimeType;
+         String ext;
+         wxSplitPath(fileName, NULL, NULL, &ext);
+         if ( !ext.empty() )
+         {
+            wxFileType *
+               ft = mApplication->GetMimeManager().GetFileTypeFromExtension(ext);
+            if ( ft )
+               ft->GetMimeType(&mimeType);
+            delete ft;
+         }
+
+         if ( mimeType.empty() )
+            mimeType = _T("APPLICATION/OCTET-STREAM");
+         header += _T("Content-Type: ") + mimeType + _T("\n");
+
+         MimePartVirtual *
+            mimepart = new MimePartVirtual(header + _T('\n') + decodedFile);
+         m_msgView->AddVirtualMimePart(mimepart);
          m_msgView->ShowPart(mimepart);
 
          nextToOutput =
