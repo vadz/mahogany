@@ -346,25 +346,39 @@ bool wxMLogWindow::IsShown() const
 
 bool wxMLogWindow::OnFrameClose(wxFrame *frame)
 {
-   if ( !MDialog_YesNoDialog
-        (
-         _("Would you like to close the log window only for the rest "
-           "of this session or permanently?\n"
-           "\n"
-           "Note that in either case you may make it appear again by "
-           "changing the corresponding\n"
-           "setting in the 'Miscellaneous' page of the Preferences dialog.\n"
-           "\n"
-           "Choose \"Yes\" to close the log window just for this "
-           "session, \"No\" - to permanently close it."),
-         NULL,
-         MDIALOG_MSGTITLE,
-         M_DLG_YES_DEFAULT,
-         M_MSGBOX_SHOWLOGWINHINT
-        ) )
+   switch ( MDialog_YesNoCancel
+            (
+               _("Would you like to close the log window only for the rest "
+                 "of this session or permanently?\n"
+                 "\n"
+                 "Note that in either case you may make it appear again by "
+                 "changing the corresponding\n"
+                 "setting in the 'Miscellaneous' page of the Preferences dialog.\n"
+                 "\n"
+                 "Choose \"Yes\" to close the log window just for this session,\n"
+                 "\"No\" - to permanently close it or \"Cancel\" to not close\n"
+                 "the log window at all."),
+               NULL,
+               MDIALOG_YESNOTITLE,
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_SHOWLOGWINHINT
+            ) )
    {
-      // disable the log window permanently
-      mApplication->GetProfile()->writeEntry(MP_SHOWLOG, 0l);
+      case MDlg_No:
+         // disable the log window permanently
+         mApplication->GetProfile()->writeEntry(MP_SHOWLOG, 0l);
+
+         // fall through
+      case MDlg_Yes:
+         break;
+
+      default:
+         FAIL_MSG( "unexpected MDialog_YesNoCancel return value" );
+         // fall through
+
+      case MDlg_Cancel:
+         // don't close
+         return false;
    }
 
    return wxLogWindow::OnFrameClose(frame); // TRUE, normally
