@@ -4429,10 +4429,18 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
             // everything done
             return true;
          }
-         else
+         else if ( IsOpened() )
          {
+            // it was really an error with threading, how strange
             wxLogWarning(_("Server side threading failed, trying to thread "
                            "messages locally."));
+         }
+         else // folder closed
+         {
+            // we lost connection while threading
+            wxLogWarning(_("Connection lost while threading messages."));
+
+            return false;
          }
       }
       //else: no appropriate thread method
