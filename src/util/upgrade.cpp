@@ -2588,6 +2588,23 @@ VerifyStdFolder(const MOption& optName,
    return rc;
 }
 
+/// set MP_FVIEW_FROM_REPLACE option for the given folder
+static void
+SetReplaceFromOption(const String& folderName)
+{
+   MFolder_obj folder(folderName);
+   if ( !folder )
+   {
+      FAIL_MSG( "folder must exist" );
+   }
+   else
+   {
+      Profile_obj profile(folder->GetProfile());
+
+      profile->writeEntry(MP_FVIEW_FROM_REPLACE, 1);
+   }
+}
+
 /**
   Checks that the standard folders (INBOX, NeMail, SentMail, Trash, ...) exist
   and creates them if it doesn't. Also checks that they have the correct flags
@@ -2711,21 +2728,10 @@ VerifyStdFolders(void)
             return false;
 
          case -1:
-            // set some more default options for the Outbox: by default, show
+            // set some more default options for the SentMail: by default, show
             // "To:" addresses in it and not "From:"
-            {
-               MFolder_obj folder(READ_APPCONFIG(MP_OUTGOINGFOLDER));
-               if ( !folder )
-               {
-                  FAIL_MSG( "failed to get newly created Outbox folder?" );
-               }
-               else
-               {
-                  Profile_obj profile(folder->GetProfile());
-
-                  profile->writeEntry(MP_FVIEW_FROM_REPLACE, 1);
-               }
-            }
+            SetReplaceFromOption(READ_APPCONFIG(MP_OUTGOINGFOLDER));
+            break;
 
          default:
             FAIL_MSG( "unexpected VerifyStdFolder return value" );
@@ -2761,17 +2767,32 @@ VerifyStdFolders(void)
 
    if ( READ_APPCONFIG(MP_USE_OUTBOX) )
    {
-      if ( !VerifyStdFolder
-            (
-               MP_OUTBOX_NAME,
-               _("Outbox"),
-               0,
-               _("Folder where Mahogany will queue messages to be sent"),
-               MFolderIndex_Outbox,
-               wxFolderTree::iconOutbox
-            ) )
+      switch ( VerifyStdFolder
+               (
+                  MP_OUTBOX_NAME,
+                  _("Outbox"),
+                  0,
+                  _("Folder where Mahogany will queue messages to be sent"),
+                  MFolderIndex_Outbox,
+                  wxFolderTree::iconOutbox
+               ) )
       {
-         return false;
+         case 0:
+            return false;
+
+         case -1:
+            // set some more default options for the Outbox: by default, show
+            // "To:" addresses in it and not "From:"
+            SetReplaceFromOption(READ_APPCONFIG(MP_OUTBOX_NAME));
+            break;
+
+         default:
+            FAIL_MSG( "unexpected VerifyStdFolder return value" );
+            // fall through
+
+         case 1:
+            // nothing to do
+            ;
       }
    }
 
