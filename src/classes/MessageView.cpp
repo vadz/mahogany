@@ -2483,7 +2483,15 @@ MessageView::MimeHandle(const MimePart *mimepart)
       }
 
       filename = path + wxFILE_SEP_PATH + name;
-      filename << '.' << ext;
+      if ( !ext.empty() )
+      {
+         // normally the extension should always already have the leading dot
+         // but check for it just in case
+         if ( ext[0u] != wxFILE_SEP_EXT )
+            filename += wxFILE_SEP_EXT;
+
+         filename += ext;
+      }
    }
 
    MailMessageParameters params(filename, mimetype, mimepart);
