@@ -117,18 +117,33 @@ public:
    // put an error message into the status bar
    void Fail(const String& msgError) { m_msgFinal = msgError; }
 
-private:
+protected:
+   // just for derived classes, they must call Init() themselves
+   StatusIndicator() { }
+
+   // ctor version which can be also called by derived classes
+   void Init(wxFrame *frame, const char *fmt, va_list argptr);
+
    // our frame - may be NULL!
    wxFrame *m_frame;
-
-   // the busy info screen we show if !NULL
-   MProgressInfo *m_progInfo;
 
    // the message given in the ctor
    String m_msgInitial;
 
    // the message given to Fail() or empty
    String m_msgFinal;
+};
+
+// same as StatusIndicator but also shows a "busy info" screen while we're busy
+class BusyIndicator : public StatusIndicator
+{
+public:
+   BusyIndicator(wxFrame *frame, const char *fmt, ...);
+   ~BusyIndicator();
+
+private:
+   // the busy info screen we show
+   MProgressInfo *m_progInfo;
 };
 
 // ----------------------------------------------------------------------------
@@ -269,23 +284,23 @@ StatusIndicator::StatusIndicator(wxFrame *frame, const char *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
-   m_msgInitial.PrintfV(fmt, argptr);
+   Init(frame, fmt, argptr);
    va_end(argptr);
+}
 
-   m_frame = (wxFrame *)frame;
+void StatusIndicator::Init(wxFrame *frame, const char *fmt, va_list argptr)
+{
+   m_msgInitial.PrintfV(fmt, argptr);
+
+   m_frame = frame;
    if ( m_frame )
    {
       wxLogStatus(m_frame, m_msgInitial);
    }
-
-   m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
-   wxYield();
 }
 
 StatusIndicator::~StatusIndicator()
 {
-   delete m_progInfo;
-
    if ( m_frame )
    {
       if ( m_msgFinal.empty() )
@@ -297,6 +312,26 @@ StatusIndicator::~StatusIndicator()
 
       wxLogStatus(m_frame, m_msgFinal);
    }
+}
+
+// ----------------------------------------------------------------------------
+// BusyIndicator
+// ----------------------------------------------------------------------------
+
+BusyIndicator::BusyIndicator(wxFrame *frame, const char *fmt, ...)
+{
+   va_list argptr;
+   va_start(argptr, fmt);
+   Init(frame, fmt, argptr);
+   va_end(argptr);
+
+   m_progInfo = new MProgressInfo(m_frame, m_msgInitial);
+   wxYield();
+}
+
+BusyIndicator::~BusyIndicator()
+{
+   delete m_progInfo;
 }
 
 // ----------------------------------------------------------------------------
@@ -1391,8 +1426,8 @@ void HeaderInfoListImpl::Sort()
             m_sortParams.sortOrder &= ~1;
          }
 
-         StatusIndicator status(m_mf->GetInteractiveFrame(),
-                                _("Sorting %lu messages..."), m_count);
+         BusyIndicator status(m_mf->GetInteractiveFrame(),
+                              _("Sorting %lu messages..."), m_count);
 
          if ( m_mf->SortMessages(m_tableSort, m_sortParams) )
          {
@@ -1542,8 +1577,8 @@ void HeaderInfoListImpl::Thread()
    // the caller must check that we need to be threaded
    ASSERT_MSG( (!m_thrData || !m_thrData->m_root) && IsThreading(), "shouldn't be called" );
 
-   StatusIndicator status(m_mf->GetInteractiveFrame(),
-                          _("Threading %lu messages..."), m_count);
+   BusyIndicator status(m_mf->GetInteractiveFrame(),
+                        _("Threading %lu messages..."), m_count);
 
    delete m_thrData;
    m_thrData = new ThreadData(m_count);
