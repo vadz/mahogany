@@ -1689,9 +1689,11 @@ wxFolderPropertiesPage::IsOk() const
 {
    switch ( GetCurrentFolderType() )
    {
-      case IMAP:
-         return !!m_mailboxname->GetValue();
-
+   case IMAP:
+      // an empty IMAP path is perfectly acceptable and will be the
+      // default user inbox
+         //return !!m_mailboxname->GetValue();
+         return TRUE;
       case Nntp:
       case News:
          // it's valid to have an empty name for the newsgroup hierarchy - the
