@@ -656,7 +656,9 @@ MailFolderCC::BuildListing(void)
 
    m_BuildNextEntry = 0;
 
-   if(m_ProgressDialog == NULL)
+   if(m_ProgressDialog == NULL
+      && m_NumOfMessages > READ_CONFIG(m_Profile,
+                                       MP_FOLDERPROGRESS_THRESHOLD))
    {
       String msg;
       msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_NumOfMessages);
@@ -785,7 +787,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    m_BuildNextEntry++;
 
    // This is 1 if we don't want any further updates.
-   if(m_ProgressDialog != (MProgressDialog *)1)
+   if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
       m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_NumOfMessages);
 }
 

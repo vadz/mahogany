@@ -76,7 +76,8 @@ enum ConfigFields
    ConfigField_MailServer,
    ConfigField_NewsServer,
    ConfigField_PersonalName,
-   ConfigField_IdentLast = ConfigField_PersonalName,
+   ConfigField_UserLevel,
+   ConfigField_IdentLast = ConfigField_UserLevel,
 
    // compose
    ConfigField_ComposeFirst = ConfigField_IdentLast,
@@ -105,7 +106,9 @@ enum ConfigFields
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
    ConfigField_NewMailFolder,
-   ConfigField_FoldersLast = ConfigField_NewMailFolder,
+   ConfigField_PollIncomingDelay,
+   ConfigField_FolderProgressThreshold,
+   ConfigField_FoldersLast = ConfigField_FolderProgressThreshold,
 
 #ifdef USE_PYTHON
    // python
@@ -323,6 +326,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
      Field_Vital,   -1,                        },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
+   { gettext_noop("User &level:novice:advanced"),  Field_Combo,    -1,                        },
 
    // compose
    { gettext_noop("Sa&ve sent messages"), Field_Bool,    -1,                        },
@@ -350,6 +354,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                                                    Field_Restart, -1,                        },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
+   { gettext_noop("&Poll for new mail delay in seconds"), Field_Number, -1},
+   { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
 
 
 #ifdef USE_PYTHON
@@ -446,6 +452,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_ENTRY(MP_PERSONALNAME),
+   CONFIG_ENTRY(MP_USERLEVEL),
 
    // compose
 #if 0
@@ -476,7 +483,8 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
-
+   CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    // python
 #ifdef USE_PYTHON
    CONFIG_NONE(),

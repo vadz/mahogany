@@ -258,13 +258,13 @@ wxMApp::OnInit()
 #endif // wxUSE_POSTSCRIPT
       
       // start a timer to autosave the profile entries
-      long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY);
+      long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
       if ( delay > 0 )
          gs_timerAutoSave.Start(delay);
 
       // start another timer to poll for new mail:
       // start a timer to autosave the profile entries
-      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
+      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY) * 1000;
       if ( delay > 0 )
          gs_MailCollectionTimer.Start(delay);
       

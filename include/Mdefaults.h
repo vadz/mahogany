@@ -175,7 +175,7 @@
 #define   MP_SPLASHDELAY       "SplashDelay"
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY       "AutoSaveDelay"
-/// how often should we check for incoming mail (millisecs, 0 to disable)?
+/// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY       "PollIncomingDelay"
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT       "ConfirmExit"
@@ -223,6 +223,8 @@
 #define   MP_PROFILE_TYPE      "ProfileType"
 /// the user's full name
 #define   MP_PERSONALNAME         "PersonalName"
+/// the user's qualification
+#define   MP_USERLEVEL        "Userlevel"
 /// the username/login
 #define   MP_USERNAME         "UserName"
 /// the user's hostname
@@ -247,6 +249,8 @@
 #define   MP_FOLDER_PASSWORD      "Password"
 /// log level
 #define   MP_LOGLEVEL      "LogLevel"
+/// threshold for displaying mailfolder progress dialog
+#define   MP_FOLDERPROGRESS_THRESHOLD   "FolderProgressThreshold"
 /// add extra headers
 #define   MP_ADD_EXTRAHEADERS   "AddExtraHeaders"
 /// list of extra headers, semicolon separated name=value
@@ -493,11 +497,11 @@
 /// show splash screen on startup?
 #define     MP_SHOWSPLASH_D      1
 /// how long should splash screen stay (0 disables timeout)?
-#define MP_SPLASHDELAY_D        5000
+#define MP_SPLASHDELAY_D        50
 /// how often should we autosave the profile settings (0 to disable)?
-#define   MP_AUTOSAVEDELAY_D       60000
-/// how often should we check for incoming mail (millisecs, 0 to disable)?
-#define   MP_POLLINCOMINGDELAY_D       60000
+#define   MP_AUTOSAVEDELAY_D       60
+/// how often should we check for incoming mail (secs, 0 to disable)?
+#define   MP_POLLINCOMINGDELAY_D       60
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1
 /// open folders when they're clicked (otherwise - double clicked)
@@ -543,6 +547,8 @@
 //@}
 /// the user's full name
 #define   MP_PERSONALNAME_D      M_EMPTYSTRING
+/// the user's qualification 0=novice,1=advanced
+#define   MP_USERLEVEL_D        0L
 /// the username/login
 #define   MP_USERNAME_D         M_EMPTYSTRING
 /// the user's hostname
@@ -571,6 +577,8 @@
 #define   MP_FOLDER_PASSWORD_D      M_EMPTYSTRING
 /// log level
 #define   MP_LOGLEVEL_D         0l
+/// threshold for displaying mailfolder progress dialog
+#define   MP_FOLDERPROGRESS_THRESHOLD_D 20L
 /// add extra headers
 #define   MP_ADD_EXTRAHEADERS_D      0l
 /// list of extra headers, semicolon separated name=value

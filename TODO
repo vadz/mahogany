@@ -110,6 +110,8 @@ DONE:
 - MailFolderCC: keep m_MailStream around after error and mark dead
   stream otherwise, OR, really completely reopen the folder.
   Like it is now, MessageCC might access it.
+- add support for POLLINCOMINGDELAY in preferences
+  and threshold for progress dialog
 
 
 CHECK:
@@ -149,14 +151,8 @@ for release:
      time to their PING interval.
 
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
-
-- config panels are too small/too full, move font settings somewhere
-  else, i.e. have a "layout" page?
-
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
-
-- add user levels, so Vadim can add full preferences for folders
 
 doc: add note about news active file
 
@@ -173,6 +169,9 @@ after release:
   Is already like this, but fetch_overview() does an extra fetch, even
   in mtest.
 STRANGE....
+
+- Problem: mail uids and nums are long, WXARRAYINT.Count() is int,
+  content is int.
 
 = wxLayout:
   - merge my colour changes into wxGTK/devel version

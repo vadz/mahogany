@@ -701,7 +701,7 @@ private:
     {
       m_window = window;
 
-      Start(READ_APPCONFIG(MP_SPLASHDELAY));
+      Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000);
     }
 
     virtual void Notify() { m_window->DoClose(); }

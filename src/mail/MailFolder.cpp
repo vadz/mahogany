@@ -192,7 +192,6 @@ MailFolder::SaveMessages(const INTARRAY *selections,
    if(strutil_isempty(folderName))
       return false;
 
-   Message *msg;
    mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE, folderName);
    if(! mf)
    {
@@ -201,17 +200,34 @@ MailFolder::SaveMessages(const INTARRAY *selections,
       ERRORMESSAGE((msg));
       return false;
    }
+   Message *msg;
    bool events = mf->SendsNewMailEvents();
    mf->EnableNewMailEvents(false);
+
+   MProgressDialog *pd = NULL;
+   int threshold = mf->GetProfile() ?
+      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   if(n > threshold)
+   {
+      String msg;
+      msg.Printf(_("Saving %d messages..."), n);
+      pd = new MProgressDialog(mf->GetName(),
+                                             msg,
+                                             2*n, NULL);// open a status window:
+   }
    for(i = 0; i < n; i++)
    {
       msg = GetMessage((*selections)[i]);
+      if(pd) pd->Update( 2*i + 1 );
       mf->AppendMessage(*msg);
+      if(pd) pd->Update( 2*i + 2);
       msg->DecRef();
    }
    mf->Ping(); // update any views
    mf->EnableNewMailEvents(events);
    mf->DecRef();
+   if(pd) delete pd;
    return true;
 }
 
