@@ -38,7 +38,7 @@ public:
 protected:
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
-                          const MTextStyle& style);
+                          MTextStyle& style);
 };
 
 // ============================================================================
@@ -60,7 +60,7 @@ IMPLEMENT_VIEWER_FILTER(Rot13Filter,
 void
 Rot13Filter::DoProcess(String& text,
                        MessageViewer *viewer,
-                       const MTextStyle& style)
+                       MTextStyle& style)
 {
    for ( char *pc = (char *)text.c_str(); *pc; pc++ )
    {

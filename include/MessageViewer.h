@@ -20,13 +20,8 @@ class WXDLLEXPORT wxWindow;
 
 class ClickableInfo;
 
-// use the standard wxWin class: even if it is not really intended for this, it
-// just what we need here as it combines text colours and font info
-class MTextStyle : public wxTextAttr
-{
-};
-
 #include "MModule.h"
+#include "MTextStyle.h"
 
 // the message viewer module interface name
 #define MESSAGE_VIEWER_INTERFACE "MessageViewer"

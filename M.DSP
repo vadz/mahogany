@@ -1824,6 +1824,18 @@ SOURCE=.\src\modules\XFMailImport.cpp
 # Begin Group "modules"
 
 # PROP Default_Filter ""
+# Begin Group "viewflt"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\modules\viewflt\Rot13.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\viewflt\Trailer.cpp
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\src\modules\Calendar.cpp
@@ -1847,10 +1859,6 @@ SOURCE=.\src\modules\LayoutViewer.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\Migrate.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\modules\Rot13Filter.cpp
 # End Source File
 # Begin Source File
 

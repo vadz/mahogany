@@ -269,7 +269,7 @@ public:
 protected:
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
-                          const MTextStyle& style)
+                          MTextStyle& style)
    {
       viewer->InsertText(text, style);
    }
@@ -283,7 +283,7 @@ class ViewFilterNode
 {
 public:
    ViewFilterNode(ViewFilter *filter,
-                  ViewFilter::Priority prio,
+                  int prio,
                   const String& name,
                   ViewFilterNode *next)
       : m_name(name)
@@ -300,13 +300,13 @@ public:
    }
 
    ViewFilter *GetFilter() const { return m_filter; }
-   ViewFilter::Priority GetPriority() const { return m_prio; }
+   int GetPriority() const { return m_prio; }
    const String& GetName() const { return m_name; }
    ViewFilterNode *GetNext() const { return m_next; }
 
 private:
    ViewFilter *m_filter;
-   ViewFilter::Priority m_prio;
+   int m_prio;
    String m_name;
    ViewFilterNode *m_next;
 };
@@ -714,7 +714,7 @@ MessageView::InitializeViewFilters()
          if ( filterFactory )
          {
             // create the node for the new filter
-            ViewFilter::Priority prio = filterFactory->GetPriority();
+            int prio = filterFactory->GetPriority();
 
             if ( prio < ViewFilter::Priority_Lowest )
             {

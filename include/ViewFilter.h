@@ -38,19 +38,22 @@ public:
      Finally note that all filters with equal priority are applied in some
      random (i.e. undefined) order
     */
-   enum Priority
+   enum
    {
       /// the filter with this priority is applied after all the others
-      Priority_Lowest = -10,
+      Priority_Lowest = -100,
 
-      /// low priority filter: applied after the built in logic
-      Priority_Low = -5,
+      /// low priority filter: applied after the default ones
+      Priority_Low = -50,
 
       /// this is the priority of the URL detection/colorization default filter
       Priority_Default = 0,
 
-      /// the filter with this priority is appleid before all the others
-      Priority_Highest = 10,
+      /// high priority filter: applied before the default ones
+      Priority_High = 50,
+
+      /// the filter with this priority is applied before all the others
+      Priority_Highest = 100,
 
       /// invalid value for filter priority
       Priority_Max
@@ -94,7 +97,7 @@ public:
     */
    void Process(String& text,
                 MessageViewer *viewer,
-                const MTextStyle& style)
+                MTextStyle& style)
    {
       if ( IsEnabled() )
          DoProcess(text, viewer, style);
@@ -121,7 +124,7 @@ protected:
    /// the function to implement in the derived classes, called by Process()
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
-                          const MTextStyle& style) = 0;
+                          MTextStyle& style) = 0;
 
    /// pointer to the next filter or NULL if this is the last one
    ViewFilter *m_next;
@@ -138,7 +141,7 @@ class ViewFilterFactory : public MModule
 {
 public:
    /// returns the priority of the filter object of this class
-   virtual ViewFilter::Priority GetPriority() const = 0;
+   virtual int GetPriority() const = 0;
 
    /// return the default filter state: active or not?
    virtual bool GetDefaultState() const = 0;
@@ -151,7 +154,7 @@ public:
   This macro must be used in the implementation part of all filter classes.
 
   @param cname    the name of the class (derived from ViewFilter)
-  @param prio     the filter priority (see ViewFilter::Priority enum)
+  @param prio     the filter priority (see ViewFilter::Priority_XXX enum)
   @param state    the initial state (enabled or disabled)
   @param desc     the short description shown in the filters dialog
   @param cpyright the module author/copyright string
@@ -160,7 +163,7 @@ public:
    class cname##Factory : public ViewFilterFactory                         \
    {                                                                       \
    public:                                                                 \
-      virtual ViewFilter::Priority GetPriority() const { return prio; }    \
+      virtual int GetPriority() const { return prio; }                     \
       virtual bool GetDefaultState() const { return state; }               \
       virtual ViewFilter *Create(ViewFilter *next) const                   \
          { return new cname(next, state); }                                \
