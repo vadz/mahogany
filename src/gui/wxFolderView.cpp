@@ -1740,6 +1740,9 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_MARK_READ,
          WXMENU_MSG_MARK_UNREAD,
          WXMENU_MSG_SEP3,
+         WXMENU_MSG_SPAM_MARK,
+         WXMENU_MSG_SPAM_UNMARK,
+         WXMENU_MSG_SEP3,
          WXMENU_MSG_SHOWRAWTEXT,
       };
 
