@@ -217,11 +217,6 @@ private:
    void OnLinkEvent(wxTextUrlEvent& event);
 #endif // USE_AUTO_URL_DETECTION
 
-#ifdef __WXMSW__
-   // get the text position from the coords
-   long GetTextPositionFromCoords(const wxPoint& pt) const;
-#endif // __WXMSW__
-
    // the generic mouse event handler for right/left/double clicks
    void OnMouseEvent(wxMouseEvent& event);
 
@@ -431,40 +426,12 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 
 #endif // USE_AUTO_URL_DETECTION
 
-#ifdef __WXMSW__
-
-long TextViewerWindow::GetTextPositionFromCoords(const wxPoint& pt) const
-{
-   POINTL ptl = { pt.x, pt.y };
-
-   // can't use SendMessage because it's a class name for us and so we had to
-   // #undef it before...
-   long pos = ::SendMessageA(GetHwnd(), EM_CHARFROMPOS, 0, (LPARAM)&ptl);
-
-   // EM_CHARFROMPOS lies when the point is below the last line: it simply
-   // ignroes the y coord then, so double check that we really clicked where it
-   // pretends we did
-   ::SendMessageA(GetHwnd(), EM_POSFROMCHAR, (LPARAM)&ptl, pos);
-   if ( pt.y > ptl.y + GetCharHeight() )
-   {
-      // the click was really below the last line, there is nothing there
-      pos = -1;
-   }
-
-   return pos;
-}
-
-#endif // __WXMSW__
-
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
-#ifdef __WXMSW__
-   long pos = GetTextPositionFromCoords(event.GetPosition());
-#else
-   long pos = GetInsertionPoint();
-#endif // __WXMSW__/!__WXMSW__
+   long pos;
+   wxTextCtrlHitTestResult rc = HitTest(event.GetPosition(), &pos);
 
-   if ( pos == -1 || !ProcessMouseEvent(event, pos) )
+   if ( rc != wxTE_HT_ON_TEXT || !ProcessMouseEvent(event, pos) )
    {
       event.Skip();
    }
