@@ -95,6 +95,7 @@ extern const MOption MP_FTREE_BGCOLOUR;
 extern const MOption MP_FTREE_FGCOLOUR;
 extern const MOption MP_FOLDER_TREEINDEX;
 extern const MOption MP_FTREE_FORMAT;
+extern const MOption MP_FTREE_HOME;
 extern const MOption MP_FTREE_NEVER_UNREAD;
 extern const MOption MP_FTREE_PROPAGATE;
 extern const MOption MP_FVIEW_FGCOLOUR;
@@ -314,6 +315,16 @@ public:
 
       // go to the next folder with unread messages after the given one
    bool GoToNextUnreadFolder(wxFolderTreeNode *nodeStart, bool next = true);
+
+      // go to the home folder, if any
+   bool GoToHomeFolder();
+
+      // go to the given tree item: select it and ensure it is visible
+   void GoToItem(wxTreeItemId id)
+   {
+      SelectItem(id);
+      EnsureVisible(id);
+   }
 
       // change the currently opened (in the main frame) folder name: we need
       // it to notify the main frame if this folder is deleted
@@ -731,8 +742,7 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
                 );
 
       // select the item and also scroll to it
-      m_tree->SelectItem(item);
-      m_tree->EnsureVisible(item);
+      m_tree->GoToItem(item);
 
       return true;
    }
@@ -2094,10 +2104,28 @@ bool wxFolderTreeImpl::GoToNextUnreadFolder(wxFolderTreeNode *node, bool next)
       return false;
    }
 
-   SelectItem(id);
-   EnsureVisible(id);
+   GoToItem(id);
 
    return true;
+}
+
+bool wxFolderTreeImpl::GoToHomeFolder()
+{
+   String folderHome = READ_APPCONFIG_TEXT(MP_FTREE_HOME);
+   if ( !folderHome.empty() )
+   {
+      wxTreeItemId id = GetTreeItemFromName(folderHome);
+      if ( id.IsOk() )
+      {
+         GoToItem(id);
+
+         return true;
+      }
+   }
+
+   wxLogStatus(GetFrame(this), _("No home folder configured."));
+
+   return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -2514,17 +2542,26 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
    if ( evtKey.ControlDown() )
    {
       int keycode = evtKey.GetKeyCode();
-      if ( keycode == WXK_DOWN || keycode == WXK_UP )
+      switch ( keycode )
       {
-         // do go to next or previous folder
-         (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_DOWN);
+         case WXK_DOWN:
+         case WXK_UP:
+            // do go to next or previous folder
+            (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_DOWN);
+            break;
 
-         // skip Skip() below
-         return;
+         case WXK_HOME:
+            (void)GoToHomeFolder();
+            break;
+
+         default:
+            event.Skip();
       }
    }
-
-   event.Skip();
+   else
+   {
+      event.Skip();
+   }
 }
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)

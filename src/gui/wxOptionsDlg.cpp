@@ -434,7 +434,10 @@ enum ConfigFields
    ConfigField_FolderTreeNeverUnread,
    ConfigField_FolderTreeOpenOnClick,
    ConfigField_FolderTreeShowHiddenFolders,
-   ConfigField_FolderTreeLast = ConfigField_FolderTreeShowHiddenFolders,
+   ConfigField_FolderTreeHomeHelp,
+   ConfigField_FolderTreeHomeFolder,
+   ConfigField_FolderTreeIsHome,
+   ConfigField_FolderTreeLast = ConfigField_FolderTreeIsHome,
 
    // autocollecting and address books options
    ConfigField_AdbFirst = ConfigField_FolderTreeLast,
@@ -1388,6 +1391,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Skip this folder"), Field_Bool | Field_NotApp, -1 },
    { gettext_noop("Open folder on single &click"), Field_Bool | Field_AppWide | Field_Global, -1 },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_AppWide | Field_Global,-1 },
+   { gettext_noop("When you press Ctrl-Home in the tree Mahogany will go to\n"
+                  "the home folder (usually Inbox or NewMail) if any."), Field_Message, -1 },
+   { gettext_noop("&Home folder"), Field_Folder | Field_AppWide, -1 },
+   { gettext_noop("Is &home folder"), Field_Bool | Field_NotApp, -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
@@ -1825,6 +1832,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FTREE_NEVER_UNREAD),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
+   CONFIG_NONE(), // home help
+   CONFIG_ENTRY(MP_FTREE_HOME),
+   CONFIG_NONE(), // is home checkbox
 
    // addresses
    CONFIG_NONE(),
@@ -1960,6 +1970,21 @@ wxOptionsPage::~wxOptionsPage()
    }
 
    SafeDecRef(m_Profile);
+}
+
+String wxOptionsPage::GetFolderName() const
+{
+   String name;
+   if ( !m_Profile->GetName().StartsWith
+                              (
+                                 String(M_PROFILE_CONFIG_SECTION) + '/',
+                                 &name
+                              ) )
+   {
+      FAIL_MSG( "unexpected profile name!" );
+   }
+
+   return name;
 }
 
 void wxOptionsPage::CreateControls()
@@ -3071,6 +3096,58 @@ wxOptionsPageFolderTree::wxOptionsPageFolderTree(wxNotebook *parent,
 {
 }
 
+bool wxOptionsPageFolderTree::TransferDataToWindow()
+{
+   if ( !wxOptionsPageStandard::TransferDataToWindow() )
+      return false;
+
+   wxControl *control = GetControl(ConfigField_FolderTreeIsHome);
+   if ( control )
+   {
+      wxCheckBox *check = wxStaticCast(control, wxCheckBox);
+      CHECK( check, true, "folder tree is home control is not a checkbox?" );
+
+      String folderHome = READ_APPCONFIG_TEXT(MP_FTREE_HOME);
+      m_isHomeOrig = !folderHome.empty() && folderHome == GetFolderName();
+
+      check->SetValue(m_isHomeOrig);
+   }
+   //else: ok, we could be editing the global options
+
+   return true;
+}
+
+bool wxOptionsPageFolderTree::TransferDataFromWindow()
+{
+   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+      return false;
+
+   wxControl *control = GetControl(ConfigField_FolderTreeIsHome);
+   if ( control )
+   {
+      wxCheckBox *check = wxStaticCast(control, wxCheckBox);
+      CHECK( check, true, "folder tree is home control is not a checkbox?" );
+
+      // only do something if the value really changed
+      if ( check->GetValue() != m_isHomeOrig )
+      {
+         Profile *profile = mApplication->GetProfile();
+         if ( m_isHomeOrig )
+         {
+            // the checkbox was unchecked, we're not the home folder any more
+            profile->DeleteEntry(MP_FTREE_HOME);
+         }
+         else // we're the new home folder
+         {
+            profile->writeEntry(MP_FTREE_HOME, GetFolderName());
+         }
+      }
+   }
+   //else: ok, we could be editing the global options
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // wxOptionsPageIdent
 // ----------------------------------------------------------------------------
@@ -3183,15 +3260,7 @@ bool wxOptionsPageNewMail::GetFolderFromProfile()
 {
    CHECK( !m_folder, true, "creating the folder twice" );
 
-   String name;
-   if ( m_Profile->GetName().StartsWith
-                             (
-                              String(M_PROFILE_CONFIG_SECTION) + '/',
-                              &name
-                             ) )
-   {
-      m_folder = MFolder::Get(name);
-   }
+   m_folder = MFolder::Get(GetFolderName());
 
    return m_folder != NULL;
 }

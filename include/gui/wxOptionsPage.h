@@ -172,6 +172,9 @@ public:
    int HelpId(void) const { return m_HelpId; }
 
 protected:
+   /// get the name of the folder we're editing the options of
+   String GetFolderName() const;
+
    // range of our controls in m_aFields
    size_t m_nFirst, m_nLast;
 
@@ -472,6 +475,12 @@ class wxOptionsPageFolderTree : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageFolderTree(wxNotebook *parent, Profile *profile);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   bool m_isHomeOrig;
 };
 
 // global folder settings (each folder has its own settings which are changed

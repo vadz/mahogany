@@ -290,6 +290,7 @@ extern const MOption MP_FTREE_BGCOLOUR;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_PROPAGATE;
 extern const MOption MP_FTREE_NEVER_UNREAD;
+extern const MOption MP_FTREE_HOME;
 
 // composer
 extern const MOption MP_CVIEW_FONT;
@@ -941,6 +942,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FTREE_PROPAGATE_NAME "FTreePropagate"
 /// skip this folder when looking for next unread one in the tree
 #define MP_FTREE_NEVER_UNREAD_NAME "FTreeNeverUnread"
+/// go to this folder when Ctrl-Home is pressed
+#define MP_FTREE_HOME_NAME "FTreeHome"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -1841,6 +1844,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FTREE_PROPAGATE_DEFVAL 1L
 /// skip this folder when looking for next unread one in the tree
 #define MP_FTREE_NEVER_UNREAD_DEFVAL 0L
+/// go to this folder when Ctrl-Home is pressed
+#define MP_FTREE_HOME_DEFVAL ""
 //@}
 /**@name Font settings for compose view */
 //@{

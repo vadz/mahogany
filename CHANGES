@@ -6,6 +6,8 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+18.03.02 VZ: added "home folder" option to the folder tree
+17.03.02 VZ: implemented autosaving of the messages being composed
 16.03.02 VZ: implemented message postponing and "Drafts" folder
 16.03.02 VZ: include all ADB importers in the Win32 binary
 13.03.02 VZ: return to last previously selected message when opening a folder
