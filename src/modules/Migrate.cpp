@@ -240,6 +240,7 @@ public:
 
    // access the migration data
    MigrateData& Data() { return m_migrateData; }
+   const MigrateData& Data() const { return m_migrateData; }
 
    // return the next/previous page for the given one
    wxWizardPage *GetNextPage(Page page);
@@ -285,6 +286,7 @@ public:
    // common accessors
    MigrateWizard *GetWizard() const { return m_wizard; }
    MigrateData& Data() { return GetWizard()->Data(); }
+   const MigrateData& Data() const { return GetWizard()->Data(); }
 
    MigrateWizard::Page GetId() const { return m_id; }
 
@@ -396,8 +398,15 @@ public:
 protected:
    void OnCheckBox(wxCommandEvent& event);
 
+   // return the panel we're currently using (IMAP or local)
+   wxEnhancedPanel *GetPanelToUse() const
+   {
+      return Data().toIMAP ? (wxEnhancedPanel *)m_panelIMAP
+                           : (wxEnhancedPanel *)m_panelLocal;
+   }
+
    // enable/disable the panels according to whether we use IMAP or local file
-   void UseIMAP(bool useIMAP);
+   void EnablePanelToBeUsed();
 
 private:
    wxCheckBox *m_chkUseIMAP;
@@ -908,8 +917,10 @@ MigrateWizardDstPage::MigrateWizardDstPage(MigrateWizard *parent)
    SetSizer(sizer);
 }
 
-void MigrateWizardDstPage::UseIMAP(bool useIMAP)
+void MigrateWizardDstPage::EnablePanelToBeUsed()
 {
+   const bool useIMAP = Data().toIMAP;
+
    m_panelIMAP->Enable(useIMAP);
    m_panelLocal->Enable(!useIMAP);
 }
@@ -921,7 +932,7 @@ void MigrateWizardDstPage::OnCheckBox(wxCommandEvent& event)
       bool useIMAP = event.IsChecked();
       Data().toIMAP = useIMAP;
 
-      UseIMAP(useIMAP);
+      EnablePanelToBeUsed();
 
       if ( useIMAP )
       {
@@ -943,18 +954,16 @@ void MigrateWizardDstPage::OnCheckBox(wxCommandEvent& event)
 
 bool MigrateWizardDstPage::TransferDataToWindow()
 {
-   bool useIMAP = Data().toIMAP;
+   m_chkUseIMAP->SetValue(Data().toIMAP);
 
-   m_chkUseIMAP->SetValue(useIMAP);
+   EnablePanelToBeUsed();
 
-   UseIMAP(useIMAP);
-
-   return (useIMAP ? m_panelIMAP : m_panelLocal)->TransferDataToWindow();
+   return GetPanelToUse()->TransferDataToWindow();
 }
 
 bool MigrateWizardDstPage::TransferDataFromWindow()
 {
-   return (Data().toIMAP ? m_panelIMAP : m_panelLocal)->TransferDataFromWindow();
+   return GetPanelToUse()->TransferDataFromWindow();
 }
 
 // ----------------------------------------------------------------------------
