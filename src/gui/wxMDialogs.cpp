@@ -713,8 +713,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
    wxLayoutList *ll = GetLayoutList();
+#ifdef OS_UNIX
    wxBitmap *bm = new wxBitmap(background);
    SetBackgroundBitmap(bm);
+#else // Win
+   // TODO
+#endif // Unix/Win
+
    Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "yellow");
 
    ll->LineBreak();

@@ -26,8 +26,8 @@
 #   include   "Profile.h"
 #   include   "guidef.h"
 #   include   "strutil.h"
-#   include   "gui/wxMIds.h"
 #   include   "MHelp.h"
+#   include   "gui/wxMIds.h"
 #endif
 
 #include   <wx/log.h>
@@ -62,7 +62,7 @@
 IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxDialog)
 
 BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
-   EVT_BUTTON(M_WXID_HELP,   wxNotebookDialog::OnHelp)
+   EVT_BUTTON(M_WXID_HELP, wxNotebookDialog::OnHelp)
    EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
    EVT_BUTTON(wxID_APPLY,  wxNotebookDialog::OnApply)
    EVT_BUTTON(wxID_CANCEL, wxNotebookDialog::OnCancel)

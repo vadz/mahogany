@@ -65,6 +65,9 @@ extern "C"
 #include "gui/wxMApp.h"
 #include "gui/wxMFrame.h"
 
+#include "MHelp.h"
+#include "gui/wxMIds.h"
+
 #endif  //USE_PCH
 
 #endif  //MPCH_H

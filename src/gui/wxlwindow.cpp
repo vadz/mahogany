@@ -10,7 +10,7 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-//#include "Mpch.h"
+#include "Mpch.h"
 
 #ifdef M_BASEDIR
 #   ifndef USE_PCH
@@ -18,7 +18,9 @@
 #     include "gui/wxMenuDefs.h"
 #     include "gui/wxMApp.h"
 #   endif // USE_PCH
+
 #   include "gui/wxlwindow.h"
+#   include "gui/wxlparser.h"
 #else
 #   ifdef   __WXMSW__
 #       include <windows.h>
@@ -26,12 +28,15 @@
 #       undef GetCharWidth
 #       undef StartDoc
 #   endif
+
 #   include "wxlwindow.h"
 #   include "wxlparser.h"
 #endif
 
-#include <ctype.h>
 #include <wx/clipbrd.h>
+#include <wx/dataobj.h>
+
+#include <ctype.h>
 
 /// offsets to put a nice frame around text
 #define WXLO_XOFFSET   4

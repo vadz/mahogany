@@ -112,7 +112,6 @@
 #ifdef OS_UNIX
 #   define   M_BASEDIR M_PREFIX"share/M"
 #else
-#   define   M_PREFIX   "" 
 #   define   M_BASEDIR M_PREFIX"\\M"
 #endif
 #ifdef   HAVE_COMPFACE_H

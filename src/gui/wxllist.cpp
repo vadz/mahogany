@@ -14,7 +14,7 @@
 #pragma implementation "wxllist.h"
 #endif
 
-//#include "Mpch.h"
+#include "Mpch.h"
 #ifdef M_PREFIX
 #   include "gui/wxllist.h"
 #else
@@ -831,7 +831,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
       {
          do
          {
-            if( isspace(((wxLayoutObjectText*)*i)->GetText()[offset]))
+            if( isspace(((wxLayoutObjectText*)*i)->GetText()[(size_t)offset]))
                return column;
             else
             {
@@ -1317,18 +1317,19 @@ wxLayoutList::GetSize(void) const
    if(! line)
       return wxPoint(0,0);
 
-   wxPoint max(0,0);
+   wxPoint maxPoint(0,0);
    
    // find last line:
    while(line)
    {
-      if(line->GetWidth() > max.x) max.x = line->GetWidth();
+      if(line->GetWidth() > maxPoint.x)
+          maxPoint.x = line->GetWidth();
       last = line;
       line = line->GetNextLine();
    }
 
-   max.y = last->GetPosition().y + last->GetHeight();
-   return max;
+   maxPoint.y = last->GetPosition().y + last->GetHeight();
+   return maxPoint;
 }
 
 void
