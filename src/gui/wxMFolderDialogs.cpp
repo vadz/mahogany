@@ -1707,7 +1707,10 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
 
    if ( value != m_originalValues[property] )
    {
-      m_profile->writeEntry(profileKeys[property], value);
+      if(property ==  Password)
+         m_profile->writeEntry(profileKeys[property], strutil_encrypt(value));
+      else
+         m_profile->writeEntry(profileKeys[property], value);
 
       if ( !m_isCreating )
       {
@@ -2189,7 +2192,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    if ( (hasUsername && !(flags & MF_FLAGS_ANON)) || folderType == MF_GROUP )
    {
       WriteEntryIfChanged(Username, loginName);
-      WriteEntryIfChanged(Password, strutil_encrypt(password));
+      WriteEntryIfChanged(Password, password);
    }
 
    m_profile->writeEntry(MP_FOLDER_TYPE, folderType | flags);

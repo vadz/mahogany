@@ -1643,15 +1643,16 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 {
    ASSERT(crit);
    m_CritStruct = crit;
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Message search criteria"), FALSE,
-                                               MH_DIALOG_SEARCHMSGS);
+   wxStaticBox *box = CreateStdButtonsAndBox(
+      _("Message search criteria"), FALSE, MH_DIALOG_SEARCHMSGS);
 
    wxClientDC dc(this);
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
 
    wxLayoutConstraints *c;
 
-   wxStaticText *critlabel = new wxStaticText(this, -1,_("Search for text in"));
+   wxStaticText *critlabel = new
+      wxStaticText(this, -1,_("Search for text in"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.AsIs();
@@ -1733,14 +1734,7 @@ bool ConfigureSearchMessages(class SearchCriterium *crit,
                              Profile *profile, wxWindow *parent)
 {
    wxMessageSearchDialog dlg(crit, profile, parent);
-   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
-   {
-      return TRUE;
-   }
-   else
-   {
-      return FALSE;
-   }
+   return ( dlg.ShowModal() == wxID_OK );
 }
 
 //-----------------------------------------------------------------------------

@@ -131,6 +131,18 @@ public:
          return NULL;
       }
 
+   /** Returns the index in the list for a UId or UID_ILLEGAL */
+   virtual UIdType GetIdxFromUId(UIdType uid) const
+      {
+         MOcheck();
+         for(size_t i = 0; i < m_NumEntries; i++)
+         {
+            if( m_Listing[i].GetUId() == uid )
+               return i;
+         }
+         return UID_ILLEGAL;
+      }
+
    /// Returns pointer to array of data:
    virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
 

@@ -909,6 +909,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
       }
   
 #endif
+      name = dirent->d_name[0];
       wxString extension = name.AfterLast('.');
       if(extension != "pdb" && extension != "prc" &&
          extension != "prc" && extension != "PRC")

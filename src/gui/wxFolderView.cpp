@@ -1504,9 +1504,11 @@ wxFolderView::SearchMessages(void)
 {
    SearchCriterium criterium;
 
-   ConfigureSearchMessages(&criterium,GetProfile(),NULL);
-   Ticket t = m_ASMailFolder->SearchMessages(&criterium, this);
-   m_TicketList->Add(t);
+   if( ConfigureSearchMessages(&criterium,GetProfile(),NULL) )
+   {
+      Ticket t = m_ASMailFolder->SearchMessages(&criterium, this);
+      m_TicketList->Add(t);
+   }
 }
 
 void
@@ -2108,8 +2110,17 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             msg.Printf(_("Found %lu messages."), (unsigned long)
                        ia->Count());
             bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+            /* The returned message numbers are UIds which we must map
+               to our listctrl indices via the current HeaderInfo
+               structure. */
+            HeaderInfoList *hil = GetFolder()->GetHeaders();
             for(unsigned long n = 0; n < ia->Count(); n++)
-               m_FolderCtrl->Select((*ia)[n]);
+            {
+               UIdType idx = hil->GetIdxFromUId((*ia)[n]);
+               if(idx != UID_ILLEGAL)
+                  m_FolderCtrl->Select(idx);
+            }
+            hil->DecRef();
             m_FolderCtrl->EnableSelectionCallbacks(tmp);
 
          }

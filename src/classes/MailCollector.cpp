@@ -46,12 +46,18 @@
 // should the mailcollector keep folders open?
 //#define MC_KEEP_OPEN
 
+#define MC_MAX_FAIL   5
+
 struct MailCollectorFolderEntry
 {
    String      m_name;
 #ifdef MC_KEEP_OPEN
    MailFolder *m_folder;
 #endif
+   /** Failcount is 0 initially, when it reaches MC_MAX_FAIL a warning is
+       printed. If set to -1, user has been warned about it being
+       inaccessible and no more warnings are printed. */
+   int m_failcount;
 };
 
 KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
@@ -206,6 +212,7 @@ public:
 #ifdef MC_KEEP_OPEN
             e->m_folder = MailFolder::OpenFolder(folderName); // might be NULL!
 #endif
+            e->m_failcount = 0;
             m_list->push_back(e);
          }
          if(f) f->DecRef();
@@ -348,6 +355,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
          {
             ERRORMESSAGE((_("Cannot find incoming folder '%s'."),
                           (**i).m_name.c_str()));
+            RemoveIncomingFolder((**i).m_name);
             continue; // skip this one
          }
 
@@ -356,6 +364,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
             ERRORMESSAGE((_("Cannot collect from incoming mailbox '%s'"
                           " while network is offline."),
                           (**i).m_name.c_str()));
+            (**i).m_failcount = -1; // shut up
             continue; // skip to next in list
          }
          MailFolder *imf = MailFolder::OpenFolder( mfolder );
@@ -364,24 +373,30 @@ MailCollectorImpl::Collect(MailFolder *mf)
          {
             rc &= (imf && CollectOneFolder(imf));
             imf->DecRef();
+            (**i).m_failcount = 0;
          }
          else
          {
-            ERRORMESSAGE((_("Cannot open incoming mailbox '%s'."),
-                          (**i).m_name.c_str()));
-            wxString msg;
-            msg.Printf(_("Accessing the incoming folder\n"
-                         "'%s' failed.\n\n"
-                         "Do you want to stop collecting\n"
-                         "mail from it in this session?"),
-                       (**i).m_name.c_str());
-            if(MDialog_YesNoDialog(
-               msg, NULL, _("Mail collection failed"),
-               TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+            ASSERT( (**i).m_failcount > 0);
+            (**i).m_failcount ++;
+            if((**i).m_failcount > MC_MAX_FAIL)
             {
-               RemoveIncomingFolder((**i).m_name);
-               // re-start from beginning of list to avoid iterator trouble:
-               i = m_list->begin();
+               ERRORMESSAGE((_("Cannot open incoming mailbox '%s'."),
+                             (**i).m_name.c_str()));
+               wxString msg;
+               msg.Printf(_("Accessing the incoming folder\n"
+                            "'%s' failed.\n\n"
+                            "Do you want to stop collecting\n"
+                            "mail from it in this session?"),
+                          (**i).m_name.c_str());
+               if(MDialog_YesNoDialog(
+                  msg, NULL, _("Mail collection failed"),
+                  TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+               {
+                  RemoveIncomingFolder((**i).m_name);
+                  // re-start from beginning of list to avoid iterator trouble:
+                  i = m_list->begin();
+               }
             }
          }
 #endif

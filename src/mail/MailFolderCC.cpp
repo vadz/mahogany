@@ -1824,13 +1824,6 @@ MailFolderCC::ExpungeMessages(void)
    ProcessEventQueue();
 }
 
-/*
-  TODO: this code relies on the header info list being sorted the same
-  way as the listing in the folderview. Better would be to return UIds
-  rather than msgnumbers and have the folderview select individual
-  messages, or simply mark them as selected somehow and rebuild the
-  listing in the views. But that seems to be an O(N^2) operation. :-(
-*/
 
 UIdArray *
 MailFolderCC::SearchMessages(const class SearchCriterium *crit)
@@ -1844,129 +1837,128 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 
    unsigned long lastcount = 0;
    MProgressDialog *progDlg = NULL;
-   if ( m_nMessages > (unsigned)READ_CONFIG(m_Profile,
-                                            MP_FOLDERPROGRESS_THRESHOLD) )
-   {
-      String msg;
-      msg.Printf(_("Searching in %lu messages..."),
-                 (unsigned long) m_nMessages);
-      {
-        MGuiLocker locker;
-        progDlg = new MProgressDialog(GetName(),
-                                    msg,
-                                    m_nMessages,
-                                    NULL,
-                                    false, true);// open a status window:
-      }
-   }
-
    m_SearchMessagesFound = new UIdArray;
-
-   String what;
-
+   // Error is set to true if we cannot handle it on the server side
+   // or later, if a real error occurs.
    bool error = false;
 
-   for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+   /* Do server-side searches if we are using IMAP */
+   if( GetType() == MF_IMAP )
    {
-      if(crit->m_What == SearchCriterium::SC_SUBJECT)
-         what = (*hil)[msgno]->GetSubject();
-      else
-         if(crit->m_What == SearchCriterium::SC_FROM)
-            what = (*hil)[msgno]->GetFrom();
-         else
-         {
-            Message *msg = GetMessage((*hil)[msgno]->GetUId());
-            ASSERT(hil);
-            switch(crit->m_What)
-            {
-            case SearchCriterium::SC_FULL:
-            case SearchCriterium::SC_BODY:
-               // wrong for body as it checks the whole message
-               // including header
-               what = msg->FetchText();
-               break;
-            case SearchCriterium::SC_HEADER:
-               what = msg->GetHeader();
-               break;
-            case SearchCriterium::SC_TO:
-               msg->GetHeaderLine("To", what);
-               break;
-            case SearchCriterium::SC_CC:
-               msg->GetHeaderLine("CC", what);
-               break;
-            default:
-               LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
-               error = true;
-            }
-            msg->DecRef();
-         }
-      bool found =  what.Contains(crit->m_Key);
-      if(crit->m_Invert)
-         found = ! found;
-      if(found)
-         m_SearchMessagesFound->Add(msgno); // sequence number, not uid!!!
+      SEARCHPGM *pgm = mail_newsearchpgm();
+      STRINGLIST *slist = mail_newstringlist();
 
-      if(progDlg)
+      slist->text.data = (unsigned char *)strutil_strdup(crit->m_Key);
+      slist->text.size = crit->m_Key.length();
+      switch(crit->m_What)
+      {
+      case SearchCriterium::SC_FULL:
+         pgm->subject = slist; break;
+      case SearchCriterium::SC_BODY:
+         pgm->subject = slist; break;
+      case SearchCriterium::SC_SUBJECT:
+         pgm->subject = slist; break;
+      case SearchCriterium::SC_TO:
+         pgm->subject = slist; break;
+      case SearchCriterium::SC_FROM:
+         pgm->subject = slist; break;
+      case SearchCriterium::SC_CC:
+         pgm->subject = slist; break;
+      default:
+         error = true;
+      }
+      if(! error)
+         mail_search_full (m_MailStream,
+                           /* charset */ NIL,
+                           pgm,
+                           SE_UID|SE_FREE|SE_NOPREFETCH);
+      else
+         mail_free_searchpgm(&pgm);
+   }
+   /* our own search for all other folder types or unsuppported server
+      searches */
+   if( GetType() != MF_IMAP || error == TRUE)
+   {
+      String what;
+      error = false;
+
+      if ( m_nMessages > (unsigned)READ_CONFIG(m_Profile,
+                                               MP_FOLDERPROGRESS_THRESHOLD) )
       {
          String msg;
          msg.Printf(_("Searching in %lu messages..."),
                     (unsigned long) m_nMessages);
-         String msg2;
-         unsigned long cnt = m_SearchMessagesFound->Count();
-         if(cnt != lastcount)
          {
-            msg2.Printf(_(" - %lu matches found."), cnt);
-            msg = msg + msg2;
-            if(! progDlg->Update( msgno, msg ))
-               break;  // abort searching
-            lastcount = cnt;
+            MGuiLocker locker;
+            progDlg = new MProgressDialog(GetName(),
+                                          msg,
+                                          m_nMessages,
+                                          NULL,
+                                          false, true);// open a status window:
          }
-         else if(! progDlg->Update( msgno ))
-            break;  // abort searching
       }
+
+      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+      {
+         if(crit->m_What == SearchCriterium::SC_SUBJECT)
+            what = (*hil)[msgno]->GetSubject();
+         else
+            if(crit->m_What == SearchCriterium::SC_FROM)
+               what = (*hil)[msgno]->GetFrom();
+            else
+            {
+               Message *msg = GetMessage((*hil)[msgno]->GetUId());
+               ASSERT(hil);
+               switch(crit->m_What)
+               {
+               case SearchCriterium::SC_FULL:
+               case SearchCriterium::SC_BODY:
+                  // wrong for body as it checks the whole message
+                  // including header
+                  what = msg->FetchText();
+                  break;
+               case SearchCriterium::SC_HEADER:
+                  what = msg->GetHeader();
+                  break;
+               case SearchCriterium::SC_TO:
+                  msg->GetHeaderLine("To", what);
+                  break;
+               case SearchCriterium::SC_CC:
+                  msg->GetHeaderLine("CC", what);
+                  break;
+               default:
+                  LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
+                  error = true;
+               }
+               msg->DecRef();
+            }
+         bool found =  what.Contains(crit->m_Key);
+         if(crit->m_Invert)
+            found = ! found;
+         if(found)
+            m_SearchMessagesFound->Add((*hil)[msgno]->GetUId());
+
+         if(progDlg)
+         {
+            String msg;
+            msg.Printf(_("Searching in %lu messages..."),
+                       (unsigned long) m_nMessages);
+            String msg2;
+            unsigned long cnt = m_SearchMessagesFound->Count();
+            if(cnt != lastcount)
+            {
+               msg2.Printf(_(" - %lu matches found."), cnt);
+               msg = msg + msg2;
+               if(! progDlg->Update( msgno, msg ))
+                  break;  // abort searching
+               lastcount = cnt;
+            }
+            else if(! progDlg->Update( msgno ))
+               break;  // abort searching
+         }
+      }
+      hil->DecRef();
    }
-   hil->DecRef();
-
-#if 0
-   /// TODO: Use this code for IMAP!
-   // c-client does not implement this for all drivers, so we do it ourselves
-   SEARCHPGM *pgm = mail_newsearchpgm();
-
-   STRINGLIST *slist = mail_newstringlist();
-
-
-   slist->text.data = (unsigned char *)strutil_strdup(crit->m_Key);
-   slist->text.size = crit->m_Key.length();
-
-   bool error = false;
-
-   switch(crit->m_What)
-   {
-   case SearchCriterium::SC_FULL:
-      pgm->subject = slist; break;
-   case SearchCriterium::SC_BODY:
-      pgm->subject = slist; break;
-   case SearchCriterium::SC_SUBJECT:
-      pgm->subject = slist; break;
-   case SearchCriterium::SC_TO:
-      pgm->subject = slist; break;
-   case SearchCriterium::SC_FROM:
-      pgm->subject = slist; break;
-   case SearchCriterium::SC_CC:
-      pgm->subject = slist; break;
-   default:
-      LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
-      error = true;
-   }
-
-   if(! error)
-      mail_search_full (m_MailStream,
-                        /* charset */ NIL,
-                        pgm,
-                        SE_UID|SE_FREE);
-   else
-      mail_free_searchpgm(&pgm);
-#endif
 
    UIdArray *rc = m_SearchMessagesFound; // will get freed by caller!
    m_SearchMessagesFound = NULL;
@@ -2701,6 +2693,7 @@ MailFolderCC::mm_searched(MAILSTREAM * stream,
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
+      ASSERT(mf->m_SearchMessagesFound);
       mf->m_SearchMessagesFound->Add(number);
    }
 }
@@ -3047,9 +3040,6 @@ MailFolderCC::ProcessEventQueue(void)
       switch(evptr->m_type)
       {
          /* The following events don't have much meaning yet. */
-      case Searched:
-         MailFolderCC::mm_searched(evptr->m_stream,  evptr->m_args[0].m_ulong);
-         break;
       case Notify:
          MailFolderCC::mm_notify(evptr->m_stream,
                                  *(evptr->m_args[0].m_str),
@@ -3101,6 +3091,7 @@ MailFolderCC::ProcessEventQueue(void)
          }
          break;
       }
+      case Searched: // obsolete
       case Flags: // obsolete
       case Update: // obsolete
          ASSERT_MSG(0,"obsolete code called");
@@ -3377,9 +3368,7 @@ mm_searched(MAILSTREAM *stream, unsigned long number)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched,__LINE__);
-   evptr->m_args[0].m_ulong = number;
-   MailFolderCC::QueueEvent(evptr);
+   MailFolderCC::mm_searched(stream,  number);
 }
 
 void

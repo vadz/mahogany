@@ -3155,8 +3155,8 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
 
    if(ppiScreenX == 0) // not yet set, need to guess
    {
-      ppiScreenX = 100;
-      ppiScreenY = 100;
+      ppiScreenX = 95;
+      ppiScreenY = 95;
    }
    if(ppiPrinterX == 0) // not yet set, need to guess
    {
@@ -3187,6 +3187,13 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
   return scale;
 }
 
+bool
+wxLayoutPrintout::OnBeginDocument(int startPage, int endPage)
+{
+   if (!wxPrintout::OnBeginDocument(startPage, endPage)) return FALSE;
+   ScaleDC(GetDC());
+   return TRUE;
+}
 
 bool wxLayoutPrintout::OnPrintPage(int page)
 {
@@ -3205,6 +3212,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
       // SetDeviceOrigin() doesn't work here, so we need to manually
       // translate all coordinates.
       wxPoint translate(m_Offset.x,m_Offset.y - top);
+      m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
       m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly 
                                                        */);
       return true;
@@ -3213,6 +3221,10 @@ bool wxLayoutPrintout::OnPrintPage(int page)
       return false;
 }
 
+/*
+ * This function does a dummy run on a temporary postscript DC to
+ * estimate the number of pages.
+*/
 void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
 {
    /* We allocate a temporary wxDC for printing, so that we can
@@ -3258,6 +3270,26 @@ bool wxLayoutPrintout::HasPage(int pageNum)
    return pageNum <= m_NumOfPages;
 }
 
+
+
+wxFont &
+wxFontCache::GetFont(int family, int size, int style, int weight,
+                     bool underline, wxFontEncoding encoding)
+{
+   for(wxFCEList::iterator i = m_FontList.begin();
+       i != m_FontList.end(); i++)
+      if( (**i).Matches(family, size, style, weight, underline, encoding) )
+         return (**i).GetFont();
+   // not found:
+   wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
+                                                weight, underline, encoding);
+   m_FontList.push_back(fce);
+   return fce->GetFont();
+}
+
+
+
+
 /*
   Stupid wxWindows doesn't draw proper ellipses, so we comment this
   out. It's a waste of paper anyway.
@@ -3298,20 +3330,3 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    dc.SetFont(font);
 }
 #endif
-
-
-wxFont &
-wxFontCache::GetFont(int family, int size, int style, int weight,
-                     bool underline, wxFontEncoding encoding)
-{
-   for(wxFCEList::iterator i = m_FontList.begin();
-       i != m_FontList.end(); i++)
-      if( (**i).Matches(family, size, style, weight, underline, encoding) )
-         return (**i).GetFont();
-   // not found:
-   wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
-                                                weight, underline, encoding);
-   m_FontList.push_back(fce);
-   return fce->GetFont();
-}
-

@@ -159,8 +159,9 @@ esac
 
 dnl how to generate dependencies...
 dnl for now, we just support -MD on gcc
+dnl NOTICE: this only looks at #include "xxx.h" -- NOT <xxx.h> !!
 case "$GCC" in yes)
-	CFLAGS="$CFLAGS -MD"
+	CFLAGS="$CFLAGS -MMD"
 esac
 
 dnl what is the c-preprocessor?

@@ -1376,7 +1376,7 @@ echo "$ac_t""$m_cv_gcc_exceptions" 1>&6
 esac
 
 case "$GCC" in yes)
-	CFLAGS="$CFLAGS -MD"
+	CFLAGS="$CFLAGS -MMD"
 esac
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6

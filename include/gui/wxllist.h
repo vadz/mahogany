@@ -1322,6 +1322,9 @@ public:
    /// Destructor.
    ~wxLayoutPrintout();
 
+   /** Called to set things up */
+   bool OnBeginDocument(int startPage, int endPage);
+
    /** Function which prints the n-th page.
        @param page the page number to print
        @return bool true if we are not at end of document yet

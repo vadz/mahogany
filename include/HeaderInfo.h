@@ -85,6 +85,8 @@ public:
    virtual HeaderInfo * GetArray(void) = 0;
    /// Returns pointer to entry with this UId
    virtual HeaderInfo * GetEntryUId(UIdType uid) = 0;
+   /** Returns the index in the info list sequence number for a UId or UID_ILLEGAL */
+   virtual UIdType GetIdxFromUId(UIdType uid) const= 0;
    /// Swaps two elements:
    virtual void Swap(size_t index1, size_t index2) = 0;
    /** Sets a translation table re-mapping index values.
