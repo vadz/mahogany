@@ -163,7 +163,7 @@ then
   CXX=$CC
   LDFLAGS="$LDFLAGS -lreadline -lstdc++"
   export CC CXX OSTYPE LDFLAGS
-  USESTABLE=yes
+  USESTABLE=no
   SCP=scp1
   MCONFOPT="$MCONFOPT --without-opt"
 fi
@@ -238,7 +238,7 @@ then
     ( HOME=$REALHOME; $CVS checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1)
   else
     echo "Updating wxWindows sources."
-    (HOME=$REALHOME; cd wxWindows && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+    (HOME=$REALHOME; cd wxWindows && $CVS update $TAG >>$BUILDDIR/cvs.log 2>&1)
   fi
   if [ $? -gt 1 ]
   then
@@ -309,7 +309,7 @@ then
   mv M $NAME-$VERSION
 else
   echo "Updating Mahogany sources."
-  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS update -A >>$BUILDDIR/cvs.log 2>&1)
 fi
 if [ $? -gt 1 ]
 then
