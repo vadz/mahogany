@@ -1343,8 +1343,14 @@ wxLayoutWindow::Find(const wxString &needle,
       m_llist->MoveCursorTo(found);
       m_llist->StartSelection(found);
       m_llist->EndSelection(wxPoint(found.x+m_FindString.Length(), found.y));
+
       ScrollToCursor();
       RequestUpdate();
+
+      // advance beyond the end of the current match so that FindAgain() finds
+      // the next occurence (if any), not the same one
+      m_llist->MoveCursorHorizontally(1);
+
       return true;
    }
 

@@ -823,23 +823,44 @@ CoordType
 wxLayoutLine::FindText(const wxString &needle, CoordType xpos) const
 {
    int cpos = 0;
-   const wxString *text;
+   wxString text;
 
    for(wxLOiterator i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
-      if(cpos >= xpos) // search from here!
+      int len = (*i)->GetLength();
+
+      // don't look for the string before we have a chance to find it after the
+      // position xpos
+      if ( cpos + len >= xpos )
       {
          if((**i).GetType() == WXLO_TYPE_TEXT)
          {
-            text = & ((wxLayoutObjectText*)(*i))->GetText();
-            int relpos = text->Find(needle);
+            wxLayoutObjectText *objText = (wxLayoutObjectText *)*i;
+
+            // search from xpos, not the beginning of the text, if xpos lies
+            // inside this text object
+            int ofsStart;
+            if ( xpos >= cpos )
+            {
+               ofsStart = xpos - cpos;
+               text = wxString(objText->GetText().c_str() + ofsStart);
+            }
+            else // look from the start, any match here will be after xpos
+            {
+               ofsStart = 0;
+               text = objText->GetText();
+            }
+
+            int relpos = text.Find(needle);
             if ( relpos != wxNOT_FOUND )
             {
-               return cpos+relpos;
+               return cpos + ofsStart + relpos;
             }
          }
-         cpos += (**i).GetLength();
+         //else: non text block
       }
+
+      cpos += len;
    }
    return -1; // not found
 }
