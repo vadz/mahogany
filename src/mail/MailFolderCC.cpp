@@ -1280,7 +1280,7 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
 
 MailFolderCC::MailFolderCC(const MFolder *mfolder)
 {
-   m_mfolder = mfolder;
+   m_mfolder = (MFolder *)mfolder; // const_cast needed for IncRef()/DecRef()
    m_mfolder->IncRef();
 
    m_Profile = mfolder->GetProfile();
