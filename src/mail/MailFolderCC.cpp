@@ -2400,16 +2400,16 @@ MailFolderCC::Close()
 
    if ( m_MailStream )
    {
-      if ( GetType() == MF_POP )
-      {
-         Pop3_SaveFlags(GetName(), m_MailStream);
-      }
-
       /*
          DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
          THE OBJECT *WILL* DISAPPEAR!
        */
       CCAllDisabler no;
+
+      if ( GetType() == MF_POP )
+      {
+         Pop3_SaveFlags(GetName(), m_MailStream);
+      }
 
 #ifdef USE_DIALUP
       if ( NeedsNetwork() && !mApplication->IsOnline() )
