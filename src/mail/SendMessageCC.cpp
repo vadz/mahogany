@@ -87,6 +87,7 @@ extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_PREVIEW_SEND;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_SENDER;
+extern const MOption MP_SMTP_DISABLED_AUTHS;
 extern const MOption MP_SMTP_USE_8BIT;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_SMTPHOST_LOGIN;
@@ -1624,8 +1625,8 @@ SendMessageCC::Send(int flags)
 #endif // USE_SSL
 
    // prepare the hostlist for c-client: we use only one server
-   const char *hostlist[2];
-   hostlist[0] = server;
+   char *hostlist[2];
+   hostlist[0] = (char *)server.c_str();
    hostlist[1] = NIL;
 
    // preview message being sent if asked for it
@@ -1658,29 +1659,41 @@ SendMessageCC::Send(int flags)
    switch ( m_Protocol )
    {
       case Prot_SMTP:
-         wxLogTrace(TRACE_SEND, _T("Trying to open connection to SMTP server '%s'"),
-                    m_ServerHost.c_str());
-         if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
          {
-            options |= SOP_8BITMIME;
-         }
+            wxLogTrace(TRACE_SEND,
+                       _T("Trying to open connection to SMTP server '%s'"),
+                       m_ServerHost.c_str());
 
-         stream = smtp_open_full(NIL,
-                                 (char **)hostlist,
-                                 "smtp",
-                                 SMTPTCPPORT,
-                                 options);
+            if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
+            {
+               options |= SOP_8BITMIME;
+            }
+
+            // do we need to disable any authentificators (presumably because
+            // they're incorrectly implemented by the server)?
+            const String
+               authsToDisable(READ_CONFIG(m_profile, MP_SMTP_DISABLED_AUTHS));
+            if ( !authsToDisable.empty() )
+            {
+               smtp_parameters(SET_SMTPDISABLEDAUTHS,
+                                 (char *)authsToDisable.c_str());
+            }
+
+            stream = smtp_open(hostlist, options);
+
+            // don't leave any dangling pointers
+            if ( !authsToDisable.empty() )
+            {
+               smtp_parameters(SET_SMTPDISABLEDAUTHS, NIL);
+            }
+         }
          break;
 
       case Prot_NNTP:
          wxLogTrace(TRACE_SEND, _T("Trying to open connection to NNTP server '%s'"),
                     m_ServerHost.c_str());
 
-         stream = nntp_open_full(NIL,
-                                 (char **)hostlist,
-                                 "nntp",
-                                 NNTPTCPPORT,
-                                 options);
+         stream = nntp_open(hostlist, options);
          break;
 
 #ifdef OS_UNIX
