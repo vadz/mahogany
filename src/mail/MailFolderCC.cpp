@@ -2853,10 +2853,7 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
    self->m_SearchMessagesFound = new UIdArray;
 
-   mail_search_full (m_MailStream,
-                     NIL /* charset: use default (US-ASCII) */,
-                     pgm,
-                     SE_UID | SE_FREE | SE_NOPREFETCH);
+   mail_search_full(m_MailStream, NIL, pgm, SE_FREE | SE_NOPREFETCH);
 
    unsigned long count;
    if ( m_SearchMessagesFound )
@@ -2874,6 +2871,70 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    }
 
    return count;
+}
+
+MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, bool set) const
+{
+   CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
+
+   SEARCHPGM *pgm = mail_newsearchpgm();
+
+   switch ( flag )
+   {
+      case MSG_STAT_SEEN:
+         if ( set )
+            pgm->seen = 1;
+         else
+            pgm->unseen = 1;
+         break;
+
+      case MSG_STAT_DELETED:
+         if ( set )
+            pgm->deleted = 1;
+         else
+            pgm->undeleted = 1;
+         break;
+
+      case MSG_STAT_ANSWERED:
+         if ( set )
+            pgm->answered = 1;
+         else
+            pgm->unanswered = 1;
+         break;
+
+      case MSG_STAT_RECENT:
+         if ( set )
+            pgm->recent = 1;
+         else
+            pgm->old = 1;
+         break;
+
+      case MSG_STAT_FLAGGED:
+         if ( set )
+            pgm->flagged = 1;
+         else
+            pgm->unflagged = 1;
+         break;
+
+      case MSG_STAT_NONE:
+      case MSG_STAT_SEARCHED:
+      default:
+         FAIL_MSG( "unexpected flag in SearchByFlag" );
+
+         mail_free_searchpgm(&pgm);
+
+         return NULL;
+   }
+
+   MailFolderCC *self = (MailFolderCC *)this; // const_cast
+   self->m_SearchMessagesFound = new UIdArray;
+
+   mail_search_full(m_MailStream, NIL, pgm, SE_FREE | SE_NOPREFETCH);
+
+   MsgnoArray *results = m_SearchMessagesFound;
+   self->m_SearchMessagesFound = NULL;
+
+   return results;
 }
 
 UIdArray *
@@ -3198,6 +3259,12 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    HeaderInfo *hi = headers->GetItemByIndex(idx);
    CHECK_RET( hi, "UpdateMessageStatus: no header info for the given msgno?" );
 
+   // it may happen that we get mm_flags notification exactly for the header
+   // we're building right now - in this case it doesn't have valid status yet,
+   // so don't do anything
+   if ( !hi->IsValid() )
+      return;
+
    int statusNew = GetMsgStatus(elt),
        statusOld = hi->GetStatus();
    if ( statusNew != statusOld )
@@ -3205,7 +3272,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       // update the cached status
       MailFolderStatus status;
       MfStatusCache *mfStatusCache = MfStatusCache::Get();
-      if ( !mfStatusCache->GetStatus(GetName(), &status) )
+      if ( mfStatusCache->GetStatus(GetName(), &status) )
       {
          bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
               isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
@@ -3338,8 +3405,8 @@ bool MailFolderCC::CanThread() const
 // MailFolderCC working with the headers
 // ----------------------------------------------------------------------------
 
-size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
-                                   MsgnoType msgnoFrom, MsgnoType msgnoTo)
+MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
+                                      MsgnoType msgnoFrom, MsgnoType msgnoTo)
 {
    CHECK( msgnoFrom <= msgnoTo, 0, "GetHeaderInfo: msgnos in disorder" );
    CHECK( m_MailStream, 0, "GetHeaderInfo: folder is closed" );

@@ -208,12 +208,13 @@ public:
        @param isSet go to message with status bit set if true, unset if false
        @return true if we found such item
    */
-   bool SelectNextByStatus(int status, bool isSet);
+   bool SelectNextByStatus(MailFolder::MessageStatus status, bool isSet);
 
    /// select next unread or flagged message after the given one
    UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
                                  long indexStart = -1,
-                                 int status = MailFolder::MSG_STAT_SEEN,
+                                 MailFolder::MessageStatus status =
+                                    MailFolder::MSG_STAT_SEEN,
                                  bool isSet = FALSE);
 
    /// focus the given item and ensure it is visible
@@ -1852,7 +1853,8 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
 // ----------------------------------------------------------------------------
 
 bool
-wxFolderListCtrl::SelectNextByStatus(int status, bool isSet)
+wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
+                                     bool isSet)
 {
    HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
    if( !hil || hil->Count() == 0 )
@@ -1901,34 +1903,22 @@ wxFolderListCtrl::SelectNextByStatus(int status, bool isSet)
 }
 
 
-UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
-                                                long idxFocused, int status,
-                                                bool isSet)
+UIdType
+wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
+                                        long idxFocused,
+                                        MailFolder::MessageStatus status,
+                                        bool isSet)
 {
-   long idx = idxFocused;
-   for ( ;; )
+   size_t idx = hil->FindHeaderByFlagWrap(status, isSet, idxFocused);
+
+   if ( idx != INDEX_ILLEGAL )
    {
-      idx = GetNextItem(idx);
-      if ( idx == idxFocused )
-      {
-         // we have looped
-         break;
-      }
-
-      if ( idx == -1 )
-      {
-         // continue from the beginning
-         continue;
-      }
-
-      // is this one unread or flagged?
       const HeaderInfo *hi = hil[idx];
-      if( CheckStatusBit(hi->GetStatus(), status, isSet) )
-      {
-         Focus(idx);
+      CHECK( hi, UID_ILLEGAL, "failed to get header" );
 
-         return hi->GetUId();
-      }
+      Focus(idx);
+
+      return hi->GetUId();
    }
 
    return UID_ILLEGAL;
@@ -2580,21 +2570,25 @@ void wxFolderView::ExpungeMessages()
 }
 
 
-void wxFolderView::SelectAllByStatus(int status, bool isSet)
+void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
+                                     bool isSet)
 {
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
    CHECK_RET( hil, "can't select unread or flagged messages without folder listing" );
 
-   size_t count = hil->Count();
+   MsgnoArray *indices = hil->GetAllHeadersByFlag(status, isSet);
+   if ( !indices )
+      return;
+
+   size_t count = indices->GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( CheckStatusBit(hil[n]->GetStatus(), status, isSet) )
-      {
-         m_FolderCtrl->Select(n, true);
-      }
+      m_FolderCtrl->Select(indices->Item(n), true);
    }
+
+   delete indices;
 }
 
 void wxFolderView::SelectAll(bool on)

@@ -170,11 +170,11 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
 // HeaderInfoListImpl UID to index
 // ----------------------------------------------------------------------------
 
-UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
+size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 {
    MsgnoType msgno = m_mf->GetMsgnoFromUID(uid);
 
-   // this will return UID_ILLEGAL if msgno == MSGNO_ILLEGAL
+   // this will return INDEX_ILLEGAL if msgno == MSGNO_ILLEGAL
    return GetIdxFromMsgno(msgno);
 }
 
@@ -239,6 +239,85 @@ size_t HeaderInfoListImpl::GetIndentation(size_t n) const
    //       GUI thing and HeaderInfo lives at mail level of abstraction...
 
    return 0;
+}
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl searching
+// ----------------------------------------------------------------------------
+
+class FindHeaderHelper
+{
+public:
+   FindHeaderHelper(MailFolder *mf, MailFolder::MessageStatus flag, bool set)
+   {
+      m_msgnosFound = mf->SearchByFlag(flag, set);
+   }
+
+   const MsgnoArray *GetResults() const { return m_msgnosFound; }
+
+   ~FindHeaderHelper()
+   {
+      delete m_msgnosFound;
+   }
+
+private:
+   MsgnoArray *m_msgnosFound;
+};
+
+// return the first array element in range [from, to[ or UID_ILLEGAL
+static MsgnoType
+FindElementInRange(const MsgnoArray& array, MsgnoType from, MsgnoType to)
+{
+   size_t count = array.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      MsgnoType msgno = array[n];
+      if ( msgno >= from && msgno < to )
+      {
+         return msgno;
+      }
+   }
+
+   return MSGNO_ILLEGAL;
+}
+
+size_t
+HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
+                                     bool set,
+                                     long indexFrom)
+{
+   FindHeaderHelper helper(m_mf, flag, set);
+
+   const MsgnoArray *results = helper.GetResults();
+   if ( !results )
+      return UID_ILLEGAL;
+
+   return GetIdxFromMsgno(FindElementInRange(*results, indexFrom + 1, m_count));
+}
+
+size_t
+HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
+                                         bool set,
+                                         long indexFrom)
+{
+   FindHeaderHelper helper(m_mf, flag, set);
+
+   const MsgnoArray *results = helper.GetResults();
+   if ( !results )
+      return INDEX_ILLEGAL;
+
+   MsgnoType msgno = FindElementInRange(*results, indexFrom + 1, m_count);
+   if ( msgno == MSGNO_ILLEGAL )
+      msgno = FindElementInRange(*results, 0, indexFrom);
+
+   return GetIdxFromMsgno(msgno);
+}
+
+MsgnoArray *
+HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
+                                        bool set)
+{
+   return m_mf->SearchByFlag(flag, set);
 }
 
 // ----------------------------------------------------------------------------

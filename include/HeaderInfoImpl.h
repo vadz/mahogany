@@ -61,7 +61,7 @@ public:
    virtual size_t Count(void) const;
 
    virtual HeaderInfo *GetItemByIndex(size_t n) const;
-   virtual UIdType GetIdxFromUId(UIdType uid) const;
+   virtual size_t GetIdxFromUId(UIdType uid) const;
 
    virtual size_t GetIdxFromPos(size_t pos) const;
    virtual size_t GetPosFromIdx(size_t n) const;
@@ -71,6 +71,13 @@ public:
    virtual void OnClose();
 
    virtual size_t GetIndentation(size_t n) const;
+
+   virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
+                                   bool set, long indexFrom);
+   virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus  flag,
+                                       bool set, long indexFrom);
+   virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
+                                           bool set);
 
    virtual ~HeaderInfoListImpl();
 

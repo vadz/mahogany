@@ -189,7 +189,7 @@ public:
    void SelectAll(bool on = true);
 
    /// select all messages by some status/flag
-   void SelectAllByStatus(int status, bool condition);
+   void SelectAllByStatus(MailFolder::MessageStatus status, bool isSet = true);
 
    /// called by wxFolderListCtrl to drag and drop messages
    bool DragAndDropMessages();

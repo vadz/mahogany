@@ -21,10 +21,11 @@
 
 #include <wx/fontenc.h>
 
-#include "FolderType.h"    // for MsgnoType
+#include "MailFolder.h"    // for MailFolder::MessageStatus
 
 class wxArrayString;
-class MailFolder;
+
+#define INDEX_ILLEGAL ((size_t)-1)
 
 /**
    This class contains all the information from message header
@@ -203,8 +204,8 @@ public:
 
    /** @name UID/msgno to index mapping */
    //@{
-   /** Returns the (internal) index for this UId or UID_ILLEGAL */
-   virtual UIdType GetIdxFromUId(UIdType uid) const = 0;
+   /** Returns the (internal) index for this UID or INDEX_ILLEGAL */
+   virtual size_t GetIdxFromUId(UIdType uid) const = 0;
 
    /// Returns pointer to entry with this UId
    virtual HeaderInfo *GetEntryUId(UIdType uid) const
@@ -213,12 +214,7 @@ public:
    }
 
    /** Returns the (internal) index for the given msgno. */
-   size_t GetIdxFromMsgno(MsgnoType msgno) const
-   {
-      ASSERT_MSG( msgno != MSGNO_ILLEGAL, "invalid msgno" );
-
-      return msgno - 1;
-   }
+   size_t GetIdxFromMsgno(MsgnoType msgno) const { return msgno - 1; }
    //@}
 
    /** @name Position to/from index mapping */
@@ -249,6 +245,43 @@ public:
 
    /// Called when the underlying folder is closed
    virtual void OnClose() = 0;
+   //@}
+
+   /** @name Header searching
+
+       Instead of iterating over all headers (thus forcing us to retrieve all
+       of them from server) the functions in this section should be used to
+       find the messages satisfying the given criteria.
+
+       Note that indexFrom parameter below is exclusiv, i.e. the search is
+       started from the next item.
+    */
+   //@{
+   /**
+       Get the index of the first header with[out] the given flag after the
+       given position.
+
+       @return the index or INDEX_ILLEGAL if none found
+    */
+   virtual size_t FindHeaderByFlag(MailFolder::MessageStatus flag,
+                                   bool set = true,
+                                   long indexFrom = -1) = 0;
+
+   /**
+       Same as GetHeaderByFlag() but wraps to the start if the header is not
+       found between indexFrom and the end of the listing
+    */
+   virtual size_t FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
+                                       bool set = true,
+                                       long indexFrom = -1) = 0;
+
+   /**
+       Return the array containing all headers with[out] the given flag.
+       The array must be deleted by the caller (but may be NULL)
+    */
+   virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
+                                           bool set = true) = 0;
+
    //@}
 
    // currently unused

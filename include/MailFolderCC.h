@@ -218,6 +218,8 @@ public:
      */
    virtual void ExpungeMessages(void);
 
+   virtual MsgnoArray *SearchByFlag(MessageStatus flag, bool set = true) const;
+
    /** Search Messages for certain criteria.
        @return UIdArray with UIds of matching messages
    */
@@ -310,8 +312,8 @@ public:
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    virtual unsigned long GetMessageCount() const;
-   virtual size_t GetHeaderInfo(HeaderInfo *arrayHI,
-                                MsgnoType msgnoFrom, MsgnoType msgnoTo);
+   virtual MsgnoType GetHeaderInfo(HeaderInfo *arrayHI,
+                                   MsgnoType msgnoFrom, MsgnoType msgnoTo);
    //@}
 
    virtual char GetFolderDelimiter() const;

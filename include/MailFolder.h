@@ -104,6 +104,7 @@ class HeaderInfoList;
 */
 #include <wx/dynarray.h>
 WX_DEFINE_ARRAY(UIdType, UIdArray);
+typedef UIdArray MsgnoArray;
 
 // this is unused so far
 #if 0
@@ -521,8 +522,9 @@ public:
       @return the number of headers retrieved (may be less than requested if
               cancelled or an error occured)
     */
-   virtual size_t GetHeaderInfo(HeaderInfo *arrayHI,
-                                MsgnoType msgnoFrom, MsgnoType msgnoTo) = 0;
+   virtual MsgnoType GetHeaderInfo(HeaderInfo *arrayHI,
+                                   MsgnoType msgnoFrom,
+                                   MsgnoType msgnoTo) = 0;
 
    /**
       Get the total number of messages in the folder. This should be a fast
@@ -637,10 +639,20 @@ public:
    virtual bool AppendMessage(const String& msg) = 0;
 
    /** Expunge messages.
-     */
+    */
    virtual void ExpungeMessages(void) = 0;
 
-   /** Search Messages for certain criteria.
+   /** Find messages with given flags.
+
+       @param flag one of MSG_STAT_xxx constants
+       @param set if true, find all messages with this flag, false - without
+       @param return array with msgnos (not UIDs!) of messages found to be
+              freed by caller
+   */
+   virtual MsgnoArray *SearchByFlag(MessageStatus flag,
+                                    bool set = true) const = 0;
+
+   /** Search messages for certain criteria.
        @return UIdArray with UIds of matching messages, caller must
        free it
    */
