@@ -31,8 +31,9 @@ doc:	all
 
 ifdef HAVE_DOCTOOLS
 makemap: .src/wxhelp.map0 $(SUBDIRS)
-	sed "s/^\([ 	-0-9]*\)/\1$$i\//g" $(SUB_MAPS) >wxhelp.map
-	sort -n -o wxhelp.map .src/wxhelp.map0 wxhelp.map
+	set -e; for i in $(SUB_DIRS); \
+	do sed "s,^\([ 	-0-9]*\),\1$$i/,g" $$i/wxhelp.map; \
+	done | sort -n -o wxhelp.map .src/wxhelp.map0 -
 else
 makemap:
 	@echo "  # One of the tools required to build documentation is missing."
