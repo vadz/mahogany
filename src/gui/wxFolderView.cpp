@@ -1002,12 +1002,17 @@ void wxFolderMsgWindow::CreateViewerBar()
    // add the spacer and the button at the far right to close this bar
    sizer->Add(5, 0, 1); // expandable
 
+   wxBitmap bmp = mApplication->GetIconManager()->GetBitmap("tb_close");
+
+#ifdef OS_WIN
+   bmp.SetMask(new wxMask(bmp, *wxLIGHT_GREY));
+#endif // OS_WIN
+
    wxBitmapButton *btnClose = new wxBitmapButton
                                   (
                                     m_winBar,
                                     wxID_CLOSE,
-                                    mApplication->GetIconManager()->
-                                       GetBitmap("tb_close"),
+                                    bmp,
                                     wxDefaultPosition,
                                     wxDefaultSize,
                                     wxBORDER_NONE
