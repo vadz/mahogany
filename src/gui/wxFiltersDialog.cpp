@@ -605,6 +605,7 @@ wxOneFilterDialog::OnCancel(wxCommandEvent &event)
 {
    *m_FilterData = m_OriginalFilterData;
    TransferDataToWindow();
+   event.Skip();
 }
 
 bool
@@ -846,6 +847,7 @@ wxFiltersDialog::OnCancel( wxCommandEvent &event )
    for(size_t i = 0; i < m_FilterDataCount; i++)
       m_FilterData[i] = m_OriginalFilterData[i];
    m_Filter = m_OriginalFilter;
+   event.Skip();
 }
 
 void
