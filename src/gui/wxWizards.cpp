@@ -163,7 +163,7 @@ public:
    virtual MWizardPageId GetPreviousPageId() const;
 
    MWizardPageId GetPageId() const { return m_id; }
-   MWizard * GetWizard() const { return (MWizard *)m_Wizard; }
+   virtual MWizard * GetWizard() const { return (MWizard *)m_Wizard; }
    
    void OnWizardCancel(wxWizardEvent& event);
    
@@ -236,6 +236,40 @@ MWizard::Run()
    return RunWizard(GetPageById(GetFirstPageId()));
 }
 
+
+
+// The CreateFolderWizard
+//
+// ----------------------------------------------------------------------------
+
+class CreateFolderWizard : public MWizard
+{
+public:
+   CreateFolderWizard(wxWindow *parent = NULL)
+      : MWizard( MWizardType_CreateFolder,
+                 MWizard_CreateFolder_First,
+                 MWizard_CreateFolder_Last,
+                 _("Create a Mailbox Entry"),
+                 NULL, parent)
+      {
+         
+      }
+   
+   struct FolderParams
+   {
+      int m_FolderType;
+      int m_FolderFlags;
+      wxString m_Name;
+      wxString m_Path;
+      wxString m_Server;
+      wxString m_Login;
+      wxString m_Password;
+   };
+
+   FolderParams * GetParams() { return &m_Params; }
+protected:
+   FolderParams m_Params;
+};
 
 
 // CreateFolderWizardWelcomePage
@@ -382,6 +416,7 @@ public:
                                    MWizardPageId id,
                                    FolderEntryType type);
    virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
    virtual MWizardPageId GetNextPageId() const
       { return MWizard_CreateFolder_Final; }
    virtual MWizardPageId GetPreviousPageId() const
@@ -491,22 +526,25 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
    labels.Add(_("Entry Name"));   
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
-   wxTextCtrl *last = NULL;
-   m_Server   = needsServer ?
-      last = panel->CreateTextWithLabel(labels[0],maxwidth,last) : NULL; 
-   m_UserId   = needsUserId ?
-      last = panel->CreateTextWithLabel(labels[1],maxwidth,last) : NULL;
-   m_Password = needsPassword ?
-      last = panel->CreateTextWithLabel(labels[2],maxwidth,last, 0, wxPASSWORD) :
-      NULL;
-   m_Path     = needsPath ?
-      panel->CreateFileOrDirEntry(labels[3], maxwidth,
-                                  last,NULL,TRUE,FALSE) : NULL;
+#define CREATE_CTRL(name, creat) \
+if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
+   
+   wxControl *last = NULL;
+   CREATE_CTRL(Server,
+               panel->CreateTextWithLabel(labels[0],maxwidth,last)); 
+   CREATE_CTRL(UserId,
+               panel->CreateTextWithLabel(labels[1],maxwidth,last)); 
+   CREATE_CTRL(Password,
+               panel->CreateTextWithLabel(labels[2],maxwidth,last, 0,
+                                          wxPASSWORD)); 
+   CREATE_CTRL(Path, panel->CreateFileOrDirEntry(labels[3], maxwidth,
+                                  last,NULL,TRUE,FALSE));
+#undef CREATE_CTRL
    wxStaticText * msg2 = panel->CreateMessage(
-      _("You also need to give your new enty\n"
-        "a name to appear in the tree.\n"
-        "If you leave it empty, Mahogany\n"
-        "will choose one for you."), m_Path);
+      _("\n"
+        "You also need to give your new enty\n"
+        "a name to appear in the tree."
+        ), m_Path);
    m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, msg2);
 
    panel->Layout();
@@ -515,9 +553,60 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
 bool
 MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 {
+   
+   CreateFolderWizard::FolderParams *params =
+      ((CreateFolderWizard*)GetWizard())->GetParams();
+   
+   params->m_Name = m_Name ? m_Name->GetValue() : wxString("New Folder");
+   params->m_Path = m_Path ? m_Path->GetValue() : wxString("");
+   params->m_Server = m_Server ? m_Server->GetValue() : wxString("");
+   params->m_Login = m_UserId ? m_UserId->GetValue() : wxString("");
+   params->m_Password = m_Password ? m_Password->GetValue() : wxString("");
+
+   params->m_FolderType = 0;
+   params->m_FolderFlags = MF_FLAGS_DEFAULT;
+   
+   switch(m_Type)
+   {
+   case ET_IMAP:
+   case ET_IMAP_SERVER:
+   case ET_IMAP_HIER:
+      params->m_FolderType = MF_IMAP;
+      if(m_Type == ET_IMAP_HIER)
+         params->m_FolderFlags |= MF_FLAGS_GROUP;
+      break;
+   case ET_POP3:
+      params->m_FolderType = MF_POP;
+      break;
+   case ET_NNTP:
+   case ET_NNTP_SERVER:
+   case ET_NNTP_HIER:
+      params->m_FolderType = MF_NNTP;
+      params->m_FolderFlags |= MF_FLAGS_ANON; // by default
+      if(m_Type == ET_NNTP_HIER)
+         params->m_FolderFlags |= MF_FLAGS_GROUP;
+      break;
+   case ET_NEWS:
+   case ET_NEWS_HIER:
+      params->m_FolderType = MF_NEWS;
+      if(m_Type == ET_NEWS_HIER)
+         params->m_FolderFlags |= MF_FLAGS_GROUP;
+      break;
+   case ET_FILE:
+      params->m_FolderType = MF_FILE;
+      break;
+   case ET_MH:
+      params->m_FolderType = MF_MH;
+      break;
+   }
    return TRUE;
 }
 
+bool
+MWizard_CreateFolder_ServerPage::TransferDataToWindow()
+{
+   return TRUE;
+}
 
 // CreateFolderWizardXXXPage - the various folder types
 // ----------------------------------------------------------------------------
@@ -620,23 +709,6 @@ MWizard::GetPageById(MWizardPageId id)
 }
 
 
-// The CreateFolderWizard
-//
-// ----------------------------------------------------------------------------
-
-class CreateFolderWizard : public MWizard
-{
-public:
-   CreateFolderWizard(wxWindow *parent = NULL)
-      : MWizard( MWizardType_CreateFolder,
-                 MWizard_CreateFolder_First,
-                 MWizard_CreateFolder_Last,
-                 _("Create a Mailbox Entry"),
-                 NULL, parent)
-      {
-         
-      }
-};
 
 
 bool

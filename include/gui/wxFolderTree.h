@@ -39,8 +39,8 @@ class wxFolderTree
       iconNewMail,
       iconSentMail,
       iconPalmPilot,
-      iconTrash,
       iconOutbox,
+      iconTrash,
       iconFolderMax
    };
    // ctor(s) and dtor

@@ -87,11 +87,11 @@ enum InstallWizardPageId
    InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
    InstallWizard_OperationsPage,       // how we want Mahogany to work
    InstallWizard_DialUpPage,           // set up dial-up networking
-   InstallWizard_MiscPage,             // other common options
+//   InstallWizard_MiscPage,             // other common options
 #ifdef USE_HELPERS_PAGE
-   InstallWizard_HelpersPage,          // external programs set up
+//   InstallWizard_HelpersPage,          // external programs set up
 #endif // USE_HELPERS_PAGE
-   InstallWizard_ImportPage,           // propose to import ADBs (and folders)
+//   InstallWizard_ImportPage,           // propose to import ADBs (and folders)
    InstallWizard_FinalPage,            // say that everything is ok
    InstallWizard_PagesMax,             // the number of pages
    InstallWizard_Done = -1             // invalid page index
@@ -292,9 +292,9 @@ public:
             gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
          }
          m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
-         m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox);
-         m_TrashCheckbox->SetValue(gs_installWizardData.useTrash);
-         m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail);
+         m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
+         m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
+         m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
          return TRUE;
       }
 
@@ -444,11 +444,11 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
          CREATE_PAGE(Servers);
          CREATE_PAGE(Operations);
          CREATE_PAGE(DialUp);
-         CREATE_PAGE(Misc);
+//         CREATE_PAGE(Misc);
 #ifdef USE_HELPERS_PAGE
-         CREATE_PAGE(Helpers);
+//         CREATE_PAGE(Helpers);
 #endif // USE_HELPERS_PAGE
-         CREATE_PAGE(Import);
+//         CREATE_PAGE(Import);
          CREATE_PAGE(Final);
       case InstallWizard_WelcomePage:
       case InstallWizard_Done:
@@ -532,8 +532,8 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
          "Please specify your name and e-mail address:\n"
-         "they will be used for sending the messages"
-                                     ));
+         "they will be used for sending the messages.\n"
+         ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
@@ -556,17 +556,20 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_ServersPage)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
-         "To receive e-mail, you need to have at least one\n"
-         "mail server. Mail server may use POP3 or IMAP4,\n"
-         "but you need only one of them (IMAP4 is better).\n"
-         "\n"
-         "To read Usenet discussion groups, you need to\n"
-         "specify the NNTP (news) server and to be able to\n"
-         "send e-mail, SMTP server is required.\n"
-         "\n"
-         "All of these fields may be filled later as well\n"
-         "(and you will be able to specify multiple servers too)"
-                                     ));
+      "You can receive e-mail from remote mail\n"
+      "servers, or through the local mail spool.\n"
+      "\n"
+      "Mail servers may use POP3 or IMAP4 access,\n"
+      "but you usually need only one of them\n"
+      "(IMAP4 is much better and faster).\n"
+      "\n"
+      "To read Usenet discussion groups, you need to\n"
+      "specify the NNTP (news) server and to be able\n"
+      "to send e-mail, an SMTP server is required.\n"
+      "\n"
+      "All of these fields may be filled later as well\n"
+      "(and you will be able to specify multiple servers too)"
+      ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
@@ -595,8 +598,8 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    
 #ifdef OS_UNIX
    wxStaticText *text = new wxStaticText(this, -1, _(
-      "Mahogany can automatically detect if your network\n"
-      "connection is online or offline.\n"
+      "Mahogany can automatically detect if your\n"
+      "network connection is online or offline.\n"
       "It can also connect and disconnect you to the\n"
       "network, but for this it needs to know which\n"
       "commands to execute to go online or offline."));
@@ -627,10 +630,12 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_OperationsPage)
 {
    wxStaticText *text = new wxStaticText(this, -1, _(
-      "Mahogany can either leave all messages in your system\n"
-      "mailbox or create its own mailbox for new mail and\n"
-      "collect new messages in there. This is recommended,\n"
-      "especially when collecting from remote servers."
+      "Mahogany can either leave all messages in\n"
+      "your system mailbox or create its own\n"
+      "mailbox for new mail and collect new\n"
+      "messages in there. This is recommended,\n"
+      "especially when collecting from remote\n"
+      "servers."
       ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
@@ -639,7 +644,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    wxArrayString labels;
    labels.Add(_("&Collect new mail:"));
    labels.Add(_("Use &Trash mailbox:"));
-   labels.Add(_("Use &Outbox queues:"));
+   labels.Add(_("Use &Outbox queue:"));
    labels.Add(_("Use dial-up network:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
@@ -647,54 +652,64 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax,NULL);
    wxStaticText *text2 = panel->CreateMessage(
       _(
-         "Mahogany has two options for deleting messages.\n"
-         "You can mark messages as deleted and leave them\n"
-         "around to be expunged later, or you can use a Trash\n"
+         "\n"
+         "Mahogany has two options for deleting\n"
+         "messages. You can either mark messages\n"
+         "as deleted and leave them around to be\n"
+         "expunged later, or you can use a Trash\n"
          "folder where to move them to."
          ), m_CollectCheckbox);
    m_TrashCheckbox = panel->CreateCheckBox(labels[1], widthMax, text2);
 
    wxStaticText *text3 = panel->CreateMessage(
       _(
-         "Mahogany can either send messages immediately\n"
-         "or queue them and only send them on demand."
+         "\n"
+         "Mahogany can either send messages\n"
+         "immediately or queue them and only\n"
+         "send them on demand. This is especially\n"
+         "recommended for dial-up networking."
          ), m_TrashCheckbox);
    m_UseOutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
    
-   m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, m_UseOutboxCheckbox);
+   wxStaticText *text4 = panel->CreateMessage(
+      _(
+         "\n"
+         "If you are using dial-up networking,\n"
+         "Mahogany detect your connection status\n"
+         "and optionally dial and hang-up."
+         ), m_UseOutboxCheckbox);
+   m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
 
-
-//TODO: collect remote POP account?
-   
    panel->Layout();
+   Layout();
 }
 
 #ifdef USE_HELPERS_PAGE
 
 // InstallWizardHelpersPage
 // ----------------------------------------------------------------------------
-
+/*
 InstallWizardHelpersPage::InstallWizardHelpersPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_HelpersPage)
 {
    // TODO ask for the web browser
    new wxStaticText(this, -1, "This page is under construction");
 }
-
+*/
 #endif // USE_HELPERS_PAGE
 
 // InstallWizardMiscPage
 // ----------------------------------------------------------------------------
-
+/*
 InstallWizardMiscPage::InstallWizardMiscPage(wxWizard *wizard)
                      : InstallWizardPage(wizard, InstallWizard_MiscPage)
 {
    new wxStaticText(this, -1, "This page is under construction");
 }
-
+*/
 // InstallWizardImportPage
 // ----------------------------------------------------------------------------
-
+/*
 InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
                        : InstallWizardPage(wizard, InstallWizard_ImportPage)
 {
@@ -705,7 +720,7 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
    //     separate from the update module
    new wxStaticText(this, -1, "This page is under construction");
 }
-
+*/
 // InstallWizardFinalPage
 // ----------------------------------------------------------------------------
 
@@ -713,16 +728,27 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
                       : InstallWizardPage(wizard, InstallWizard_FinalPage)
 {
    (void)new wxStaticText(this, -1, _(
-      "Congratulations! You have successfully finished configuring\n"
+      "Congratulations!\n"
+      "You have successfully configured\n"
       "Mahogany and may now start using it.\n"
       "\n"
-      "Please remember to consult online help and the documentaion\n"
-      "files included in the distribution in case of problems and,\n"
-      "of course, remember about Mahogany users mailing list.\n"
+      "Please remember to consult the online help\n"
+      "and the documentaion files included.\n"
+      "\n"
+      "You may want to have a look at the\n"
+      "full set of program options, too.\n"
+      "\n"
+      "In case of a problem, consult the help\n"
+      "system and, if you cannot resolve it,\n"
+      "please visit our web site at\n"
+      "http://www.wxwindows.org/Mahogany/\n"
+      "\n"
+      "You might also want to join the Mahogany\n"
+      "mailing lists, which you can access via\n"
+      "the web page."
       "\n"
       "\n"
-      "\n"
-      "We hope you will enjoy Mahogany!\n"
+      "We hope you will enjoy using Mahogany!\n"
       "                    M-Team"
                                      ));
 }
@@ -757,6 +783,10 @@ bool RunInstallWizard()
    gs_installWizardData.useDialUp = -1;
    gs_installWizardData.dialCommand = READ_APPCONFIG(MP_NET_ON_COMMAND);
    gs_installWizardData.hangupCommand = READ_APPCONFIG(MP_NET_OFF_COMMAND);
+
+   gs_installWizardData.useOutbox = TRUE;
+   gs_installWizardData.useTrash = TRUE;
+   gs_installWizardData.collectAllMail = TRUE;
    
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
@@ -828,7 +858,10 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       profile->writeEntry(MP_USE_OUTBOX, 1l);
       wxString name = READ_CONFIG(profile, MP_OUTBOX_NAME);
       if(name.Length() == 0)
+      {
          name = _("Outbox");
+         profile->writeEntry(MP_OUTBOX_NAME, name);
+      }
       if(! MailFolder::CreateFolder(name, MF_FILE,
                                     MF_FLAGS_KEEPOPEN,
                                     name,
@@ -843,7 +876,8 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       // create hidden INBOX
       if(! MailFolder::CreateFolder("INBOX",
                                     MF_INBOX,
-                                    MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE|MF_FLAGS_HIDDEN,
+                                    MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE
+                                    |MF_FLAGS_HIDDEN|MF_FLAGS_KEEPOPEN, 
                                     "",
                                     _("Default system folder for incoming mail.")))
          wxLogError(_("Could not create INBOX mailbox."));
@@ -870,7 +904,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       // create normal INBOX
       if(! MailFolder::CreateFolder("INBOX",
                                     MF_INBOX,
-                                    MF_FLAGS_DONTDELETE,
+                                    MF_FLAGS_DONTDELETE|MF_FLAGS_KEEPOPEN,
                                     "",
                                     _("Default system folder for incoming mail.") ) )
          wxLogError(_("Could not create INBOX mailbox."));
@@ -880,6 +914,13 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    if(gs_installWizardData.useTrash)
    {
       profile->writeEntry(MP_USE_TRASH_FOLDER, 1l);
+      profile->writeEntry(MP_TRASH_FOLDER, _("Trash"));
+      if(! MailFolder::CreateFolder(_("Trash"),
+                                    MF_FILE,
+                                    MF_FLAGS_DONTDELETE|MF_FLAGS_KEEPOPEN,
+                                    "",
+                                    _("Trash folder for deleted messages.") ) )
+         wxLogError(_("Could not create Trash mailbox."));
       // the rest is done in Update()
    }
 
@@ -1649,8 +1690,8 @@ SetupMinimalConfig(void)
 #endif
 #endif
 #endif
-
-
+   // load all modules by default:
+   mApplication->GetProfile()->writeEntry(MP_MODULES,"Filters:PalmOS");
 
 }
 

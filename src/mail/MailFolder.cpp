@@ -287,7 +287,7 @@ MailFolder::CreateFolder(const String &name,
    if( name.Length() == 0 )
       return false;
 
-   ASSERT( (iflags & MF_FLAGSMASK) != iflags);
+   ASSERT( (iflags & MF_FLAGSMASK) == iflags);
    FolderFlags flags = (FolderFlags) ( iflags & MF_FLAGSMASK ) ;
    ProfileBase * p = ProfileBase::CreateProfile(name);
    p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
