@@ -353,12 +353,8 @@ public: \
       } \
 }
 
-/** Macro to define a list with a given name, having elements of pointer
-    to the given reference-counted type; i.e. M_LIST_RC(MyRef,obj) will
-    create a MyRef type holding pointers-to-obj.  The list will take
-    ownership of any pointer in it and will DecRef any orphaned objects.
-*/
-#define M_LIST_RC(name,type) \
+/// common part of M_LIST_RC and M_LIST_RC_ABSTRACT
+#define M_LIST_RC_common(name,type,operator_star_and_inline) \
 M_LIST_common(name##_common,type*); \
 class name : public name##_common \
 { \
@@ -366,11 +362,11 @@ public: \
    class iterator : public name##_common::iterator \
    { \
    public: \
+      iterator(ListNode *n = NULL) : name##_common::iterator(n) {} \
       iterator(const name##_common::iterator &i) \
          : name##_common::iterator(i) {} \
-      inline type operator*(void) \
-         { return *(name##_common::iterator::operator*()); } \
-      inline value_type operator->(void) \
+      operator_star_and_inline \
+      value_type operator->(void) \
          { return name##_common::iterator::operator*(); } \
    }; \
    inline iterator erase(iterator i) \
@@ -389,6 +385,30 @@ public: \
          clear(); \
       } \
 }
+
+/// helper for M_LIST_RC
+#define M_LIST_RC_operator_star(name, type)                                \
+      inline type operator*(void)                                          \
+         { return *(name##_common::iterator::operator*()); }               \
+      inline
+
+/** Macro to define a list with a given name, having elements of pointer
+    to the given reference-counted type; i.e. M_LIST_RC(MyRef,obj) will
+    create a MyRef type holding pointers-to-obj.  The list will take
+    ownership of any pointer in it and will DecRef any orphaned objects.
+*/
+#define M_LIST_RC(name,type)                                               \
+      M_LIST_RC_common(name, type, M_LIST_RC_operator_star(name, type))
+
+/**
+   M_LIST_RC_ABSTRACT is just like M_LIST_RC but for abstract classes.
+
+   M_LIST_RC doesn't work for abstract classes because we can't have a function
+   returning objects of such classes and operator*() does just that. So we
+   define a macro which does exactly the same thing as M_LIST_RC except that it
+   omits the definition of operator*().
+ */
+#define M_LIST_RC_ABSTRACT(name,type) M_LIST_RC_common(name, type, inline)
 
 #endif // LISTS_H
 
