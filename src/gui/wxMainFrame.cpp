@@ -169,17 +169,20 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                x/3);
 
    // open the last folder in the main frame by default
-   String foldername = READ_APPCONFIG(MP_MAINFOLDER);
-   if ( !foldername.IsEmpty() )
+   if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
-      MFolder *folder = MFolder::Get(foldername);
-      if ( folder )
+      String foldername = READ_APPCONFIG(MP_MAINFOLDER);
+      if ( !foldername.IsEmpty() )
       {
-         // make sure it doesn't go away after OpenFolder()
-         folder->IncRef();
-         OpenFolder(folder);
-         m_FolderTree->SelectFolder(folder);
-         folder->DecRef();
+         MFolder *folder = MFolder::Get(foldername);
+         if ( folder )
+         {
+            // make sure it doesn't go away after OpenFolder()
+            folder->IncRef();
+            OpenFolder(folder);
+            m_FolderTree->SelectFolder(folder);
+            folder->DecRef();
+         }
       }
    }
 

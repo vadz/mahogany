@@ -84,6 +84,23 @@ HeaderInfo *HeaderInfoListImpl::operator[](size_t n)
    return &m_Listing[GetTranslatedIndex(n)];
 }
 
+// FIXME: this is awfully inefficient :-(
+size_t HeaderInfoListImpl::GetUntranslatedIndex(size_t n) const
+{
+   if ( m_TranslationTable )
+   {
+      for ( size_t i = 0; i < m_NumEntries; i++ )
+      {
+         if ( m_TranslationTable[i] == n )
+         {
+            return i;
+         }
+      }
+   }
+
+   return n;
+}
+
 HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
 {
    MOcheck();
@@ -102,7 +119,7 @@ UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
    for ( size_t i = 0; i < m_NumEntries; i++ )
    {
       if ( m_Listing[i].GetUId() == uid )
-         return GetTranslatedIndex(i);
+         return GetUntranslatedIndex(i);
    }
 
    return UID_ILLEGAL;

@@ -2989,25 +2989,31 @@ void
 MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
-   if ( mf )
+   CHECK_RET( mf, "number of messages changed in unknown mail folder" );
+
+   if ( msgno > mf->m_nMessages )
    {
-      // if a new message has arrived, we need to reapply the filters
-      if ( msgno > mf->m_nMessages )
+      // new message(s) arrived, we need to reapply the filters
+      mf->m_GotNewMessages = true;
+
+      // rebuild the listing completely
+      //
+      // TODO: should just add new messages to it!
+      if ( mf->m_Listing )
       {
-         mf->m_GotNewMessages = true;
-
-         mf->RequestUpdate();
+         mf->m_Listing->DecRef();
+         mf->m_Listing = NULL;
       }
-      // else: the messages were only expunged, avoid rebuilding the entire
-      //       listing - the entries were already removed from mm_expunged()
-
    }
-   else
+   else // the messages were expunged
    {
-      FAIL_MSG("new mail in unknown mail folder?");
+      // msgno should never be less than m_nMessages because we adjust the
+      // latter in mm_expunged immediately when a message is expunged
+      ASSERT_MSG( msgno == mf->m_nMessages, "msg number unexpected changed" );
    }
-}
 
+   mf->RequestUpdate();
+}
 
 /** deliver stream message event
        @param stream mailstream
@@ -3248,17 +3254,15 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
       wxCHECK_RET( idx != UID_ILLEGAL, "expunged a non existent message?" );
 
-      // remove oen message from listing
+      // remove one message from listing
+      wxLogTrace(TRACE_MF_CALLBACK,
+                 "Removing element %lu (uid=%lu) from listing",
+                 idx, uid);
+
       mf->m_Listing->Remove(idx);
       mf->m_nMessages--;
-
-      // tell all interested that the listing changed
-      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
-                 mf->GetName().c_str());
-
-      MEventManager::Send(new MEventFolderUpdateData(mf));
    }
-   //else: no need to react to this
+   //else: no need to do anything right now
 }
 
 /* static */
@@ -3409,12 +3413,6 @@ MailFolderCC::RequestUpdate()
                  GetName().c_str()));
 
       return;
-   }
-
-   if ( m_Listing )
-   {
-      m_Listing->DecRef();
-      m_Listing = NULL;
    }
 
    // tell all interested that the listing changed

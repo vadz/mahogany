@@ -263,6 +263,8 @@ enum MFolderIndex
 #define   MP_SHOWCONSOLE      "ShowConsole"
 /// name of address database
 #define   MP_ADBFILE         "AddressBook"
+/// open any folders at all on startup?
+#define   MP_DONTOPENSTARTUP   "DontOpenAtStartup"
 /// names of folders to open at startup (semicolon separated list)
 #define   MP_OPENFOLDERS         "OpenFolders"
 /// reopen the last opened folder in the main frame
@@ -866,6 +868,8 @@ enum MFolderIndex
 #define   MP_DATE_GMT_D         0l
 /// show console window
 #define   MP_SHOWCONSOLE_D      1
+/// open any folders at all on startup?
+#define   MP_DONTOPENSTARTUP_D   0l
 /// names of folders to open at startup
 #define   MP_OPENFOLDERS_D      M_EMPTYSTRING
 /// reopen the last opened folder in the main frame

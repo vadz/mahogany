@@ -2097,7 +2097,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          MFolder_obj folder(GetName());
          wxArrayString filters;
          if ( folder )
-            folder->GetFilters();
+            filters = folder->GetFilters();
          count = filters.GetCount();
          for ( size_t n = 0; n < count; n++ )
          {

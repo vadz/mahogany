@@ -370,18 +370,6 @@ MAppBase::OnStartup()
    // must be done before using the network
    SetupOnlineManager();
 
-   // create and show the main program window
-   CreateTopLevelFrame();
-
-   // update status of outbox once:
-   UpdateOutboxStatus();
-
-   // now we can create the log window (the child of the main frame)
-   if ( READ_APPCONFIG(MP_SHOWLOG) )
-   {
-      ShowLog();
-   }
-
    // extend path for commands, look in M's dirs first
    tmp = "PATH=";
    tmp << GetLocalDir() << "/scripts" << PATH_SEPARATOR
@@ -423,19 +411,35 @@ MAppBase::OnStartup()
    // below
    LoadModules();
 
+   // create and show the main program window
+   CreateTopLevelFrame();
+
+   // update status of outbox once:
+   UpdateOutboxStatus();
+
+   // now we can create the log window (the child of the main frame)
+   if ( READ_APPCONFIG(MP_SHOWLOG) )
+   {
+      ShowLog();
+   }
+
    // open all default mailboxes
    // --------------------------
-   char *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
-   kbStringList openFoldersList;
-   strutil_tokenise(folders,";",openFoldersList);
-   GLOBAL_DELETE [] folders;
-   kbStringList::iterator i;
-   for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
+
+   if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
-      if((*i)->length() == 0) // empty token
-         continue;
-      DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
-      (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
+      char *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
+      kbStringList openFoldersList;
+      strutil_tokenise(folders,";",openFoldersList);
+      delete [] folders;
+      kbStringList::iterator i;
+      for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
+      {
+         if((*i)->length() == 0) // empty token
+            continue;
+         DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
+         (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
+      }
    }
 
    KeepOpenFolderTraversal t(m_KeepOpenFolders);

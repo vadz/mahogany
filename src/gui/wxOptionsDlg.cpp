@@ -186,6 +186,7 @@ enum ConfigFields
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_ReopenLastFolder_HelpText,
+   ConfigField_DontOpenAtStartup,
    ConfigField_ReopenLastFolder,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
@@ -757,10 +758,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
 
    // folders
-   { gettext_noop("You may either choose to reopen all folders which were\n"
-                  "when the program closed last time or explicitly specify\n"
-                  "the folders to reopen on each startup"), Field_Message | Field_AppWide, -1 },
-   { gettext_noop("Reopen last open folders"), Field_Bool | Field_AppWide, -1, },
+   { gettext_noop("You may choose to not open any folders at all on startup,\n"
+                  "reopen all folders which were when the program was closed\n"
+                  "the last time or explicitly specify the folders to reopen\n"
+                  "on each startup"), Field_Message | Field_AppWide, -1 },
+   { gettext_noop("Don't open any folders at startup"), Field_Bool | Field_AppWide, -1, },
+   { gettext_noop("Reopen last open folders"), Field_Bool | Field_AppWide,
+                                               -ConfigField_DontOpenAtStartup, },
    { gettext_noop("Folders to open on &startup"),  Field_List |
                                                    Field_Restart |
                                                    Field_AppWide,
@@ -1054,6 +1058,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // folders
    CONFIG_NONE(),
+   CONFIG_ENTRY(MP_DONTOPENSTARTUP),
    CONFIG_ENTRY(MP_REOPENLASTFOLDER),
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
@@ -1486,7 +1491,22 @@ void wxOptionsPage::UpdateUI()
 
          bool bEnable = true;
          wxControl *controlDep = GetControl(nCheck);
-         if ( controlDep )
+         if ( !controlDep )
+         {
+            // control we depend on wasn't created: this is possible if it is
+            // advanced/global control and we're in novice/identity mode, so
+            // just ignore it
+            continue;
+         }
+
+         // first of all, check if the control we depend on is not disabled
+         // itself because some other control overrides it too - if it is
+         // disabled, we are disabled as well
+         if ( !controlDep->IsEnabled() )
+         {
+            bEnable = false;
+         }
+         else // control we depend on is enabled
          {
             if ( GetFieldType(nCheck) == Field_Bool )
             {
@@ -1512,17 +1532,10 @@ void wxOptionsPage::UpdateUI()
                // only enable if the text control has something
                bEnable = !text->GetValue().IsEmpty();
             }
-         }
-         else
-         {
-            // control we depend on wasn't created: this is possible if it is
-            // advanced/global control and we're in novice/identity mode, so
-            // just ignore it
-            continue;
-         }
 
-         if ( inverseMeaning )
-            bEnable = !bEnable;
+            if ( inverseMeaning )
+               bEnable = !bEnable;
+         }
 
          control->Enable(bEnable);
 

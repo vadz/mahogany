@@ -156,6 +156,9 @@ protected:
       return n;
    }
 
+   // get the index which will correspond to the given one after translation
+   size_t GetUntranslatedIndex(size_t n) const;
+
    /// The current listing of the folder
    HeaderInfoImpl *m_Listing;
 

@@ -740,7 +740,7 @@ wxMApp::OnInit()
 
 MFrame *wxMApp::CreateTopLevelFrame()
 {
-   m_topLevelFrame = GLOBAL_NEW wxMainFrame();
+   m_topLevelFrame = new wxMainFrame();
    m_topLevelFrame->Show(true);
    SetTopWindow(m_topLevelFrame);
    return m_topLevelFrame;
