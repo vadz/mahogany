@@ -219,6 +219,11 @@ protected:
    bool SaveMsgTextToFile(const String& filename,
                           bool errorIfNoText = true) const;
 
+   /// A list of all extra headerslines to add to header.
+   kbStringList m_ExtraHeaderLinesNames;
+   /// A list of all extra headerslines to add to header.
+   kbStringList m_ExtraHeaderLinesValues;
+
 private:
    /// a profile
    ProfileBase * m_Profile;
@@ -231,8 +236,6 @@ private:
    /// compose menu
    wxMenu *composeMenu;
 
-   /// The message to be composed.
-   class SendMessageCC * m_msg;
 
    /// the edit/cut menu item
    class wxMenuItem *m_MItemCut;

@@ -146,13 +146,18 @@ SendMessageCC::SetAddresses(const String &to,
    // anything.
    ASSERT(m_headerNames == NULL);
    ASSERT(m_protocol == Prot_SMTP);
+
+   String
+      defaulthost;
+   if(READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME))
+        defaulthost = profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
    
    if(to.Length())
    {
       ASSERT(env->to == NIL);
       tmpstr = to;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      tmp2 = strutil_strdup(defaulthost);
       rfc822_parse_adrlist (&env->to,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -160,7 +165,8 @@ SendMessageCC::SetAddresses(const String &to,
    {
       ASSERT(env->cc == NIL);
       tmpstr = cc;   ExtractFccFolders(tmpstr);
-      tmp = strutil_strdup(tmpstr);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      tmp = strutil_strdup(tmpstr);
+      tmp2 = strutil_strdup(defaulthost);
       rfc822_parse_adrlist (&env->cc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -168,7 +174,8 @@ SendMessageCC::SetAddresses(const String &to,
    {
       ASSERT(env->bcc == NIL);
       tmpstr = bcc;   ExtractFccFolders(tmpstr);
-      tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      tmp = strutil_strdup(tmpstr);
+      tmp2 = strutil_strdup(defaulthost);
       rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -279,7 +286,6 @@ SendMessageCC::Build(void)
       m_headerNames[h] = strutil_strdup(**i);
       if(strcmp(m_headerNames[h], "Reply-To") == 0)
          replyToSet = true;
-      // this is clever: read header value from profile:
       m_headerValues[h] = strutil_strdup(**i2);
    }
 

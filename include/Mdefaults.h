@@ -241,6 +241,8 @@
 #define   MP_USERNAME         "UserName"
 /// the user's hostname
 #define   MP_HOSTNAME         "HostName"
+/// Add this hostname for addresses without hostname?
+#define   MP_ADD_DEFAULT_HOSTNAME   "AddDefaultHostName"
 /// the username for returned mail
 #define   MP_RETURN_ADDRESS      "ReturnAddress"
 /// the mail host
@@ -612,6 +614,8 @@
 #define   MP_USERNAME_D         M_EMPTYSTRING
 /// the user's hostname
 #define   MP_HOSTNAME_D         M_EMPTYSTRING
+/// Add this hostname for addresses without hostname?
+#define   MP_ADD_DEFAULT_HOSTNAME_D 0L
 /// the mail host
 #define   MP_SMTPHOST_D         ""
 /// tyhe mail server fallback

@@ -88,6 +88,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
+- document proper folder name for FCC
 - generally: think of a way to modularise and load plug-ins
   (Especially useful as we add more functionality such as the calendar 
    or more addressbook formats.)

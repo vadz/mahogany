@@ -54,6 +54,7 @@ install: M
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
+	$(INSTALL) -d $(BINDIR)
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons

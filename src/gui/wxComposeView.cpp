@@ -522,16 +522,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
       parentProfile = mApplication->GetProfile();
    m_Profile = ProfileBase::CreateProfile(m_name,parentProfile);
 
-   switch(m_mode)
-   {
-   case Mode_SMTP:
-      m_msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_SMTP);
-      break;
-   case Mode_NNTP:
-      m_msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_NNTP);
-      break;
-   }
-
    // build menu
    // ----------
    AddFileMenu();
@@ -862,7 +852,6 @@ wxComposeView::~wxComposeView()
       m_Profile->DecRef();
       delete m_LayoutWindow;
    }
-   delete m_msg;
 }
 
 // ----------------------------------------------------------------------------
@@ -1278,136 +1267,154 @@ wxComposeView::Send(void)
    wxLayoutExportObject *export;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
-   if(! m_sent) // if sent once, just recycle old SendMessageCC
+   /// The message to be composed.
+   class SendMessageCC * msg;
+
+   switch(m_mode)
    {
-      while((export = wxLayoutExport( &status,
-                                      WXLO_EXPORT_AS_TEXT,
-                                      WXLO_EXPORT_WITH_CRLF)) != NULL)
+   case Mode_SMTP:
+      msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_SMTP);
+      break;
+   case Mode_NNTP:
+      msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_NNTP);
+      break;
+   }
+
+
+   while((export = wxLayoutExport( &status,
+                                   WXLO_EXPORT_AS_TEXT,
+                                   WXLO_EXPORT_WITH_CRLF)) != NULL)
+   {
+      if(export->type == WXLO_EXPORT_TEXT)
       {
-         if(export->type == WXLO_EXPORT_TEXT)
+         String* text = export->content.text;
+         msg->AddPart
+            (
+               Message::MSG_TYPETEXT,
+               text->c_str(), text->length(),
+               "PLAIN"
+               );
+      }
+      else
+      {
+         lo = export->content.object;
+         if(lo->GetType() == WXLO_TYPE_ICON)
          {
-            String* text = export->content.text;
-            m_msg->AddPart
-               (
-                  Message::MSG_TYPETEXT,
-                  text->c_str(), text->length(),
-                  "PLAIN"
-                  );
-         }
-         else
-         {
-            lo = export->content.object;
-            if(lo->GetType() == WXLO_TYPE_ICON)
+            mc = (MimeContent *)lo->GetUserData();
+
+            switch( mc->GetType() )
             {
-               mc = (MimeContent *)lo->GetUserData();
-
-               switch( mc->GetType() )
+            case MimeContent::MIMECONTENT_FILE:
+            {
+               String filename = mc->GetFileName();
+               wxFile file;
+               if ( file.Open(filename) )
                {
-               case MimeContent::MIMECONTENT_FILE:
-               {
-                  String filename = mc->GetFileName();
-                  wxFile file;
-                  if ( file.Open(filename) )
+                  size_t size = file.Length();
+                  char *buffer = new char[size];
+                  if ( file.Read(buffer, size) )
                   {
-                     size_t size = file.Length();
-                     char *buffer = new char[size];
-                     if ( file.Read(buffer, size) )
-                     {
-                        MessageParameterList dlist;
-                        MessageParameter *p = new MessageParameter;
-                        p->name = "FILENAME";
-                        p->value = wxFileNameFromPath(filename);
-                        dlist.push_back(p);
+                     MessageParameterList dlist;
+                     MessageParameter *p = new MessageParameter;
+                     p->name = "FILENAME";
+                     p->value = wxFileNameFromPath(filename);
+                     dlist.push_back(p);
 
-                        m_msg->AddPart
-                           (
-                              mc->GetMimeCategory(),
-                              buffer, size,
-                              strutil_after(mc->GetMimeType(),'/'), //subtype
-                              "INLINE",
-                              &dlist
-                              );
-                     }
-                     else
-                     {
-                        wxLogError(_("Cannot read file '%s' included in "
-                                     "this message!"), filename.c_str());
-                     }
-
-                     delete [] buffer;
+                     msg->AddPart
+                        (
+                           mc->GetMimeCategory(),
+                           buffer, size,
+                           strutil_after(mc->GetMimeType(),'/'), //subtype
+                           "INLINE",
+                           &dlist
+                           );
                   }
                   else
                   {
-                     wxLogError(_("Cannot open file '%s' included in "
+                     wxLogError(_("Cannot read file '%s' included in "
                                   "this message!"), filename.c_str());
                   }
-               }
-               break;
 
-               case MimeContent::MIMECONTENT_DATA:
+                  delete [] buffer;
+               }
+               else
                {
-                  MessageParameterList dlist;
-                  if(! strutil_isempty(mc->GetFileName()))
-                  {
-                     MessageParameter *p = new MessageParameter;
-                     p->name = "FILENAME";
-                     p->value = wxFileNameFromPath(mc->GetFileName());
-                     dlist.push_back(p);
-                  }
-                  m_msg->AddPart
-                     (
-                        mc->GetMimeCategory(),
-                        mc->GetData(), mc->GetSize(),
-                        strutil_after(mc->GetMimeType(),'/'),  //subtype
-                        "INLINE"
-                        ,&dlist,
-                        NULL
-                        );
+                  wxLogError(_("Cannot open file '%s' included in "
+                               "this message!"), filename.c_str());
                }
-               break;
-
-               default:
-                  FAIL_MSG(_("Unknwown part type"));
-               }
-               mc->DecRef();
             }
-         }
+            break;
 
-         delete export;
-      }
-
-      m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
-      switch(m_mode)
-      {
-         case Mode_SMTP:
+            case MimeContent::MIMECONTENT_DATA:
             {
-               // although 'To' field is always present, the others may not be
-               // shown (nor created) at all
-               String to = m_txtFields[Field_To]->GetValue();
-               String cc, bcc;
-               if ( m_txtFields[Field_Cc] )
-                  cc = m_txtFields[Field_Cc]->GetValue();
-               if ( m_txtFields[Field_Bcc] )
-                  bcc = m_txtFields[Field_Bcc]->GetValue();
-
-               m_msg->SetAddresses(to, cc, bcc);
+               MessageParameterList dlist;
+               if(! strutil_isempty(mc->GetFileName()))
+               {
+                  MessageParameter *p = new MessageParameter;
+                  p->name = "FILENAME";
+                  p->value = wxFileNameFromPath(mc->GetFileName());
+                  dlist.push_back(p);
+               }
+               msg->AddPart
+                  (
+                     mc->GetMimeCategory(),
+                     mc->GetData(), mc->GetSize(),
+                     strutil_after(mc->GetMimeType(),'/'),  //subtype
+                     "INLINE"
+                     ,&dlist,
+                     NULL
+                     );
             }
             break;
 
-         case Mode_NNTP:
-            m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
-            break;
+            default:
+               FAIL_MSG(_("Unknwown part type"));
+            }
+            mc->DecRef();
+         }
       }
-   }// if(m_sent)
 
-   success = m_msg->Send();  // true if sent
+      delete export;
+   }
+
+
+   /* Add additional header lines: */
+   kbStringList::iterator
+      i, i2;
+   i = m_ExtraHeaderLinesNames.begin();
+   i2 = m_ExtraHeaderLinesValues.begin();
+   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
+      msg->AddHeaderEntry(**i, **i2);
+   
+   msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
+   switch(m_mode)
+   {
+   case Mode_SMTP:
+   {
+      // although 'To' field is always present, the others may not be
+      // shown (nor created) at all
+      String to = m_txtFields[Field_To]->GetValue();
+      String cc, bcc;
+      if ( m_txtFields[Field_Cc] )
+         cc = m_txtFields[Field_Cc]->GetValue();
+      if ( m_txtFields[Field_Bcc] )
+         bcc = m_txtFields[Field_Bcc]->GetValue();
+
+      msg->SetAddresses(to, cc, bcc);
+   }
+   break;
+
+   case Mode_NNTP:
+      msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+      break;
+   }
+
+   success = msg->Send();  // true if sent
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
-      m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
-                       MF_PROFILE_OR_FILE);
+      msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
+                           MF_PROFILE_OR_FILE);
 
-   m_sent = true;
-   EnableEditing(FALSE);
-   m_panel->Enable(FALSE);
+   delete msg;
    return success;
 }
 
@@ -1415,7 +1422,12 @@ void
 wxComposeView::AddHeaderEntry(const String &entry,
                               const String &value)
 {
-   m_msg->AddHeaderEntry(entry, value);
+   String
+      *name = new String(),
+      *value = new String();
+   *name = entry; *value = ivalue;
+   m_ExtraHeaderLinesNames.push_back(name);
+   m_ExtraHeaderLinesValues.push_back(value);
 }
 
 // -----------------------------------------------------------------------------
