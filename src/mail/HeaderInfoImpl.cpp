@@ -161,7 +161,7 @@ protected:
 class BusyIndicator : public StatusIndicator
 {
 public:
-   BusyIndicator(MailFolder *mf, const char *fmt, ...);
+   BusyIndicator(bool nonInteractive, MailFolder *mf, const char *fmt, ...);
    ~BusyIndicator();
 
    void SetLabel(const char *fmt, ...);
@@ -343,11 +343,13 @@ StatusIndicator::~StatusIndicator()
 // BusyIndicator
 // ----------------------------------------------------------------------------
 
-BusyIndicator::BusyIndicator(MailFolder *mf, const char *fmt, ...)
+BusyIndicator::BusyIndicator(bool nonInteractive,
+                             MailFolder *mf,
+                             const char *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
-   Init(mf->GetInteractiveFrame(), fmt, argptr);
+   Init(nonInteractive ? NULL : mf->GetInteractiveFrame(), fmt, argptr);
    va_end(argptr);
 
    // only show the busy dialog when we're opening the folder manually,
@@ -518,6 +520,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_thrData = NULL;
 
    m_dontFreeMsgnos = false;
+   m_firstSort = true;
 
    m_reverseOrder = false;
    m_reversedTables = false;
@@ -1335,9 +1338,20 @@ void HeaderInfoListImpl::BuildTables()
    // what is it inverse for?
    ASSERT_MSG( !m_tablePos, "shouldn't have inverse table neither!" );
 
+   // note that we only show any interactive dialogs during the first
+   // sorting/threading because I didn't find any simple way to suppress them
+   // when they are not done in response to a users action (this is always
+   // called during the idle time, long time after execution of any function in
+   // which I can put a MFSuspendInteractivity object...) and it is so annoying
+   // to have the busy dialog popup while you're doing something else that I
+   // decided to only show it the first time the folder is opened
+   //
+   // this also makes sense because the server side sorting/threading seems to
+   // be much faster the subsequent times (the server probably keeps some data
+   // alive) but the first time it's really slow
    BusyIndicator *busy = NULL;
 
-   // no, check if we need them
+   // no tables, check if we need them
 
    // sort the messages if needed and not done yet: we'll need the sort table
    // anyhow, whether we thread messages or not
@@ -1348,7 +1362,7 @@ void HeaderInfoListImpl::BuildTables()
       if ( busy )
          busy->SetLabel(msg, m_count);
       else
-         busy = new BusyIndicator(m_mf, msg, m_count);
+         busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_count);
 
       if ( !Sort() )
          busy->Fail(_("Sorting failed!"));
@@ -1364,25 +1378,14 @@ void HeaderInfoListImpl::BuildTables()
          if ( busy )
             busy->SetLabel(msg, m_count);
          else
-            busy = new BusyIndicator(m_mf, msg, m_count);
+            busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_count);
 
          if ( !Thread() )
             busy->Fail(_("Threading failed!"));
       }
 
-      // how to sort threaded messages here, i.e. construct m_tableMsgno and
-      // m_tablePos from m_thrData and m_tableSort
-      //if ( IsSorting() )
-      //{
-         // create m_tableMsgno from m_tableSort and m_tableThread
-         CombineSortAndThread();
-      //}
-      //else // no sorting
-      //{
-      //   // just reuse the same table
-      //   m_tableMsgno = m_thrData->m_tableThread;
-      //   m_dontFreeMsgnos = true;
-      //}
+      // create m_tableMsgno from m_tableSort and m_tableThread
+      CombineSortAndThread();
 
       // reset it as it doesn't make sense to use it with threading (thread
       // would be inverted as well and grow upwards - hardly what we want)
@@ -1407,6 +1410,9 @@ void HeaderInfoListImpl::BuildTables()
    }
 
    delete busy;
+
+   // first sorting/threading done
+   m_firstSort = false;
 
    CHECK_TABLES();
 }
@@ -1620,6 +1626,10 @@ bool HeaderInfoListImpl::SetSortOrder(const SortParams& sortParams)
       // we will resort messages when needed
       FreeSortData();
       FreeTables();
+
+      // show the busy info dialog the next time because it will be done in
+      // response to the users change (only the user can change the sort order)
+      m_firstSort = true;
    }
 
    // assume it changed
@@ -1674,6 +1684,10 @@ bool HeaderInfoListImpl::SetThreadParameters(const ThreadParams& thrParams)
       // nothing can change for us anyhow
       return false;
    }
+
+   // show the busy info dialog the next time we thread messages because it
+   // will be a result of a users action
+   m_firstSort = true;
 
    // we will rethread messages and rebuild the translation tables the next time
    // they are needed

@@ -229,6 +229,9 @@ private:
    /// if true, don't free the msgno table as it's the same as thread/sort
    bool m_dontFreeMsgnos;
 
+   /// true if sorting/threading for the first time
+   bool m_firstSort;
+
    //@}
 
    /// last modification "date": incremented each time the listing changes
