@@ -757,11 +757,22 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    // FROM
    /* get first from address from envelope */
    for (adr = ov->from; adr && !adr->host; adr = adr->next);
-   if (adr) /* if a personal name exists use it */
+   if(adr)
+   {
+      entry.m_From = "";
       if (adr->personal) // a personal name is given
-         entry.m_From.Printf("%s <%s@%s>", adr->personal,adr->mailbox,adr->host);
-      else
-         entry.m_From.Printf("%s@%s",adr->mailbox,adr->host);
+         entry.m_From << adr->personal;
+      if(adr->mailbox)
+      {
+         if(adr->personal)
+            entry.m_From << " <";
+         entry.m_From << adr->mailbox;
+         if(adr->host && strlen(adr->host)
+            && (strcmp(adr->host,BADHOST) != 0))
+            entry.m_From << '@' << adr->host;
+         entry.m_From << '>';
+      }
+   }
    else
       entry.m_From = _("<address missing>");
    entry.m_From = qprint(entry.m_From);
@@ -996,7 +1007,10 @@ MailFolderCC::mm_log(String str, long errflg )
 #ifdef DEBUG
    msg << _(" error level: ") << strutil_ultoa(errflg);
 #endif
-   LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
+   if(errflg)
+      LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
+   else
+      INFOMESSAGE((msg));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)
    {
