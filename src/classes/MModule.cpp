@@ -228,8 +228,16 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    {
       MModuleListEntry *me = new MModuleListEntry;
       me->m_Name = name;
-      me->m_Interface = module->GetInterface();
       me->m_Module = module;
+//      me->m_Interface = module->GetInterface();
+      //FIXME: This is a workaround in a bug of the properties code:
+      MModule_GetModulePropFuncType propFunc =
+         (MModule_GetModulePropFuncType)
+         wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
+      if(propFunc)
+         me->m_Interface = (*propFunc)("interface");
+      else
+         me->m_Interface = name;
       GetMModuleList()->push_back(me);
    }
    else
