@@ -2725,9 +2725,16 @@ wxLayoutList::GetSize(void) const
    return maxPoint;
 }
 
+#ifdef WXLAYOUT_USE_CARET
+   #define UNUSED_IF_USE_CARET(arg)
+#else
+   #define UNUSED_IF_USE_CARET(arg) arg
+#endif
 
 void
-wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
+wxLayoutList::DrawCursor(wxDC& UNUSED_IF_USE_CARET(dc),
+                         bool UNUSED_IF_USE_CARET(active),
+                         const wxPoint& translate)
 {
    if ( m_movedCursor )
       m_movedCursor = false;
@@ -2748,9 +2755,6 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
 
 #ifdef WXLAYOUT_USE_CARET
    m_caret->Move(coords);
-
-   dc;
-   active;
 #else // !WXLAYOUT_USE_CARET
 
    wxASSERT(m_CursorSize.x >= WXLO_MINIMUM_CURSOR_WIDTH);

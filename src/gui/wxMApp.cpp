@@ -102,6 +102,10 @@
    #ifdef wxHAS_CRASH_REPORT
       #include "wx/msw/crashrpt.h"
    #endif
+
+   #define UNUSED_IF_WIN(arg)
+#else
+   #define UNUSED_IF_WIN(arg) arg
 #endif
 
 // ----------------------------------------------------------------------------
@@ -1379,7 +1383,7 @@ bool wxMApp::InitHelp()
 }
 
 void
-wxMApp::Help(int id, wxWindow *parent)
+wxMApp::Help(int UNUSED_IF_WIN(id), wxWindow * UNUSED_IF_WIN(parent))
 {
    // first thing: close splash if it's still there
    CloseSplash();
@@ -1396,9 +1400,6 @@ wxMApp::Help(int id, wxWindow *parent)
 #ifdef OS_WIN
    // under Windows only help contents can be currently shown
    m_HelpController->DisplayContents();
-
-   id;
-   parent;
 #else // !OS_WIN
    switch(id)
    {
@@ -1674,7 +1675,7 @@ wxWindow *wxMApp::GetTopWindow() const
 
 // return our icons
 wxIcon
-wxMApp::GetStdIcon(int which) const
+wxMApp::GetStdIcon(int UNUSED_IF_WIN(which)) const
 {
 #ifndef OS_WIN
    // this function may be (and is) called from the persistent controls code
@@ -1713,9 +1714,7 @@ wxMApp::GetStdIcon(int which) const
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
    }
-#else
-   which;
-#endif
+#endif // !OS_WIN
 
    return wxNullIcon;
 }

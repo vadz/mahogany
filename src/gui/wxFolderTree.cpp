@@ -3158,7 +3158,7 @@ bool wxFolderTreeImpl::MSWOnNotify(int idCtrl,
 {
     NMHDR *hdr = (NMHDR *)lParam;
 
-    bool isDblClk = hdr->code == NM_DBLCLK;
+    bool isDblClk = hdr->code == (UINT)NM_DBLCLK; // cast for cygwin
     if ( isDblClk )
     {
        m_openedFolderOnDblClick = false;
