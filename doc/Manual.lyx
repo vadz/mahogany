@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed Jun 30 14:33:07 1999
+#This file was created by <karsten> Tue Jul  6 21:42:15 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -713,6 +713,220 @@ Obviously, the more of this manual you read, the better use you can make
  of Mahogany.
  Once the manual has grown too large, we will provide a short tutorial,
  but for now we go on coding instead.
+\layout Subsection
+
+Getting started
+\layout Standard
+
+When you start Mahogany for the first time, it will present you with a rather
+ lengthy configuration dialog where you can configure all kinds of more
+ or less useful options.
+ Don't be afraid of it - just make sure that the main points, notably the
+ settings on the Identity (
+\begin_inset LatexCommand \ref{IdentityPage}
+
+\end_inset 
+
+) and Network () page are correct and ignore the rest for now.
+ The defaults should be suitable for most situations.
+\layout Standard
+
+The main window will then show you a tree of folders (
+\begin_inset LatexCommand \ref{FolderTreeCtrl}
+
+\end_inset 
+
+) on the left and a view of the currently selected folder (
+\begin_inset LatexCommand \ref{FolderView}
+
+\end_inset 
+
+) to the right of it.
+ By default, you will find a small number of folders that Mahogany sets
+ up for you, usually these are 
+\begin_inset Quotes eld
+\end_inset 
+
+INBOX
+\begin_inset Quotes erd
+\end_inset 
+
+, 
+\begin_inset Quotes eld
+\end_inset 
+
+SentMail
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ So, what are they? 
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+SentMail
+\begin_inset Quotes erd
+\end_inset 
+
+ is obvious, Mahogany will store copies of messages that you send in there.
+ 
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+INBOX
+\begin_inset Quotes erd
+\end_inset 
+
+ is a little more tricky, it represents the 
+\begin_inset Quotes eld
+\end_inset 
+
+system inbox
+\begin_inset Quotes erd
+\end_inset 
+
+ for your system.
+ This depends on your system setup, on Unix, it will most commonly be the
+ 
+\family typewriter 
+/var/spool/mail
+\family default 
+ or 
+\family typewriter 
+/var/mail
+\family default 
+ entry for you, or wherever new mail for you gets stored.
+ If you have an existing 
+\family typewriter 
+mbox
+\family default 
+ or 
+\family typewriter 
+INBOX
+\family default 
+ mailfolder in your home directory, as created by some other mail software,
+ it will refer to this.
+ Generally, you don't need to worry about it, it will just be a black-box
+ showing you new mail on the system you are logged in to.
+ If it should not work, you can just create a folder entry for wherever
+ the mail gets stored and ignore 
+\family typewriter 
+INBOX
+\family default 
+.
+\layout Itemize
+
+
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ is just a normal file folder, which is used by Mahogany to store mail that
+ it collects from other places.
+ By default, Mahogany will attempt to collect all new mail arriving in 
+\family typewriter 
+INBOX
+\family default 
+ and move it to 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+, as it is considered bad practice to leave messages in the system spool
+ area.
+ Also, if you want to collect mail from more than one location, for example
+ from your ISP's POP account, Mahogany will move it to 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ It's just a convenient central place to store new messages, so you have
+ them all in one folder, no matter where they come from.
+ Of course, you can change this, if you don't like it.
+ Whether Mahogany collects mail from a folder or not, can be set in the
+ Properties dialog of the folder, accessible via a click with the right
+ mouse button in the folder tree.
+ If you try this, you will see, that Mahogany is set up to collect from
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+INBOX
+\begin_inset Quotes erd
+\end_inset 
+
+, but not from 
+\begin_inset Quotes eld
+\end_inset 
+
+SentMail
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ Good.
+\layout Subsection
+
+So how about setting up POP access? And what is IMAP?
+\layout Standard
+
+Setting up POP access is dead easy: You simply click the right mouse button
+ in the folder tree and select 
+\begin_inset Quotes eld
+\end_inset 
+
+Create new folder
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ Then fill in the details: your username and password for accessing the
+ account and the hostname of the POP server.
+ If you want Mahogany to collect all mail from here and move it to 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ automatically, tick the box, otherwise it will leave the messages on the
+ server and you can only read them while you are online.
+\layout Subsubsection
+
+IMAP - what's that?
+\layout Standard
+
+IMAP is POP's big brother.
+ Faster, more powerful and better, even more secure.
+ If your ISP supports it, use IMAP rather than POP, your phone bills will
+ go down, too.
+ It's really just a different protocol for accessing the folder, but can
+ do a few fancy things, more about that later.
 \layout Subsection
 
 How to set up your mail accounts
@@ -1912,6 +2126,11 @@ Identity page_4102_
 
 
 \latex latex 
+
+\begin_inset LatexCommand \label{IdentityPage}
+
+\end_inset 
+
 %%disabled!
 \backslash 
 begin{figure}{
