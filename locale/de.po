@@ -1846,7 +1846,7 @@ msgstr "&Antworttext im Betreff"
 
 #: wxOptionsDlg.cpp:366 wxOptionsDlg.cpp:367
 msgid "Co&llapse reply markers:no:collapse:collapse & count"
-msgstr "Antwort&marker sammeln:nein:sammeln:sammeln & zaehlen"
+msgstr "Antwort&marker sammeln:nein:sammeln:sammeln & zählen"
 
 #: wxOptionsDlg.cpp:368 wxOptionsDlg.cpp:369
 msgid "Quote &character"
@@ -2237,8 +2237,8 @@ msgid ""
 "Please check the settings whose values\n"
 "should be reset to the defaults."
 msgstr ""
-"Bitte waehlen Sie die Einstellungen die Sie\n"
-"zuruecksetzen moechten."
+"Bitte wählen Sie die Einstellungen die Sie\n"
+"zuruecksetzen möchten."
 
 #: wxFolderTree.cpp:190
 msgid "Folder '"
@@ -3077,7 +3077,7 @@ msgstr "Einfügen"
 
 #: wxOptionsDlg.cpp:394
 msgid "&Automatically select first message in viewer"
-msgstr "&Automatisch erste Nachricht auswaehlen"
+msgstr "&Automatisch erste Nachricht auswählen"
 
 # MDialogs.h
 msgid "Error"
