@@ -57,41 +57,6 @@ enum MessageSizeShow
    MessageSize_Max
 };
 
-/** Sort order enum for sorting message listings. */
-enum MessageSortOrder
-{
-   /// no sorting (i.e. sorting in the arrival order or reverse arrival order)
-   MSO_NONE, MSO_NONE_REV,
-
-   /// date or reverse date
-   MSO_DATE, MSO_DATE_REV,
-
-   /// subject
-   MSO_SUBJECT, MSO_SUBJECT_REV,
-
-   // old, deprecated name for MSO_SENDER
-   MSO_AUTHOR, MSO_AUTHOR_REV,
-
-   /// sender (or recipient for messages from oneself)
-   MSO_SENDER = MSO_AUTHOR,
-   MSO_SENDER_REV = MSO_AUTHOR_REV,
-
-   /// status (deleted < answered < unread < new)
-   MSO_STATUS, MSO_STATUS_REV,
-
-   /// score
-   MSO_SCORE, MSO_SCORE_REV,
-
-   /// size in bytes
-   MSO_SIZE, MSO_SIZE_REV
-
-   // NB: the code in wxFolderListCtrl::OnColumnClick() and ComparisonFunction()
-   //     relies on MSO_XXX_REV immediately following MSO_XXX, so don't change
-   //     the values of the elements of this enum and always add MSO_XXX and
-   //     MSO_XXX in this order.
-   // Don't forget to add to sortCriteria[] in wxMDialogs.cpp
-};
-
 class HeaderInfoList;
 
 #include <wx/fontenc.h>

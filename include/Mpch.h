@@ -57,6 +57,7 @@
 #include "Profile.h"
 
 #include "FolderType.h"
+#include "Sorting.h"
 
 #include "MApplication.h"
 #include "gui/wxMApp.h"

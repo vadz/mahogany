@@ -198,33 +198,9 @@ protected:
    //@{
    struct MFCmnOptions
    {
-      MFCmnOptions()
-      {
-         memset(this, sizeof(*this), 0);
-      }
+      MFCmnOptions();
 
-      bool operator!=(const MFCmnOptions& other) const
-      {
-         return m_ListingSortOrder != other.m_ListingSortOrder ||
-                m_ReSortOnChange != other.m_ReSortOnChange ||
-                m_UpdateInterval != other.m_UpdateInterval ||
-                m_UseThreading != other.m_UseThreading ||
-#if defined(EXPERIMENTAL_JWZ_THREADING)
-#if wxUSE_REGEX
-                m_SimplifyingRegex != other.m_SimplifyingRegex ||
-                m_ReplacementString != other.m_ReplacementString ||
-#endif
-                m_GatherSubjects != other.m_GatherSubjects ||
-                m_BreakThread != other.m_BreakThread ||
-#if !wxUSE_REGEX
-                m_RemoveListPrefixGathering != other.m_RemoveListPrefixGathering ||
-                m_RemoveListPrefixBreaking != other.m_RemoveListPrefixBreaking ||
-#endif
-                m_IndentIfDummyNode != other.m_IndentIfDummyNode ||
-#endif // EXPERIMENTAL_JWZ_THREADING
-                m_replaceFromWithTo != other.m_replaceFromWithTo ||
-                m_ownAddresses != other.m_ownAddresses;
-      }
+      bool operator!=(const MFCmnOptions& other) const;
 
       bool operator==(const MFCmnOptions& other) const
       {
@@ -235,31 +211,37 @@ protected:
       long m_ListingSortOrder;
       /// do we want to re-sort it on a status change?
       bool m_ReSortOnChange;
+
       /// Timer update interval for checking folder content
       int m_UpdateInterval;
+
       /// do we want to thread messages?
       bool m_UseThreading;
+
 #if defined(EXPERIMENTAL_JWZ_THREADING)
 #if wxUSE_REGEX
+      /// the strings to use to bring subject to canonical form
       String m_SimplifyingRegex;
       String m_ReplacementString;
-#endif
-      /// SHould we gather in same thread messages with same subject
-      bool m_GatherSubjects;
-      /// Should we break thread when subject changes
-      bool m_BreakThread;
-#if !wxUSE_REGEX
+#else // !wxUSE_REGEX
       /// Should we remove list prefix when comparing subjects to gather them
       bool m_RemoveListPrefixGathering;
       /// Should we remove list prefix when comparing subjects to break threads
       bool m_RemoveListPrefixBreaking;
-#endif
+#endif // wxUSE_REGEX/!wxUSE_REGEX
+
+      /// SHould we gather in same thread messages with same subject
+      bool m_GatherSubjects;
+      /// Should we break thread when subject changes
+      bool m_BreakThread;
+
       /// Should we indent messages with missing ancestor
       bool m_IndentIfDummyNode;
 #endif // EXPERIMENTAL_JWZ_THREADING
+
       /// do we use "To" instead of "From" for messages from oneself?
       bool m_replaceFromWithTo;
-      /// if m_replaceFromWithTo, the list of our addresses
+      /// if m_replaceFromWithTo, the list of the addresses for "oneself"
       wxArrayString m_ownAddresses;
    } m_Config;
 

@@ -79,6 +79,10 @@ public:
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set);
 
+   virtual bool SetSortOrder(long sortOrder,
+                             bool detectOwnAddresses,
+                             const wxArrayString& ownAddresses);
+
    virtual LastMod GetLastMod() const;
    virtual bool HasChanged(const LastMod since) const;
 
@@ -101,17 +105,26 @@ private:
    /// perform the clean up (called from dtor)
    void CleanUp();
 
+   /// free the sort/thread tables
+   void FreeSortTables();
+
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(size_t n) const;
 
    /// do we sort messages at all?
-   bool IsSorting() const { return m_tableMsgno != NULL; }
+   inline bool IsSorting() const;
+
+   /// get the msgno which should appear at the given display position
+   MsgnoType GetMsgnoFromPos(size_t pos) const;
 
    /// expand m_headers array so that the given index is valid
    void ExpandToMakeIndexValid(size_t n);
 
    /// cache the sequence of msgnos
    void Cache(const Sequence& seqmMsgnos);
+
+   /// init the translation tables using the current searching criterium
+   void Sort();
 
    /**
       Find first position in the given range containing a msgno from array
@@ -138,6 +151,10 @@ private:
 
      The tables below are synhronized if not NULL (they are both NULL if no
      sorting/threading is done)
+
+     Finally, we also keep m_reverseOrder flag which allows us to flip the
+     order of messages in the folder quickly. Note that it may be set even if
+     m_tableMsgno == m_tablePos == NULL!
     */
    //@{
 
@@ -146,6 +163,25 @@ private:
 
    /// the translation table allowing to get position from msgno (index)
    size_t *m_tablePos;
+
+   /// should we reverse the order of messages in the folder?
+   bool m_reverseOrder;
+
+   //@}
+
+   /**
+     @name Sorting parameters
+    */
+   //@{
+
+   /// the sort order (composed of MSO_XXX values)
+   long m_sortOrder;
+
+   /// use "To" instead of "From" for addresses from oneself?
+   bool m_detectOwnAddresses;
+
+   /// the array of our own addresses (only used if m_detectOwnAddresses)
+   wxArrayString m_ownAddresses;
 
    //@}
 

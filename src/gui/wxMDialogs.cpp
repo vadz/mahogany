@@ -33,6 +33,7 @@
 #  include "Profile.h"
 #  include "MModule.h"
 #  include "MHelp.h"
+#  include "Sorting.h"
 
 #  include <wx/layout.h>
 #  include <wx/sizer.h>

@@ -32,6 +32,8 @@
 #  include "Profile.h"
 #  include "MEvent.h"
 #  include "MApplication.h"
+
+#  include "Sorting.h"
 #endif
 
 #include "Mdefaults.h"
@@ -2945,27 +2947,97 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 }
 
 // ----------------------------------------------------------------------------
+// MFCmnOptions
+// ----------------------------------------------------------------------------
+
+MailFolderCmn::MFCmnOptions::MFCmnOptions()
+{
+   m_ListingSortOrder = MSO_NONE;
+   m_ReSortOnChange = false;
+
+   m_UpdateInterval = 0;
+
+   m_UseThreading = false;
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+#if !wxUSE_REGEX
+   m_RemoveListPrefixGathering =
+   m_RemoveListPrefixBreaking = false;
+#endif // !wxUSE_REGEX
+
+   m_GatherSubjects =
+   m_BreakThread =
+   m_IndentIfDummyNode = false;
+#endif // EXPERIMENTAL_JWZ_THREADING
+
+   m_replaceFromWithTo = false;
+}
+
+bool MailFolderCmn::MFCmnOptions::operator!=(const MFCmnOptions& other) const
+{
+   return m_ListingSortOrder != other.m_ListingSortOrder ||
+          m_ReSortOnChange != other.m_ReSortOnChange ||
+          m_UpdateInterval != other.m_UpdateInterval ||
+          m_UseThreading != other.m_UseThreading ||
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+#if wxUSE_REGEX
+          m_SimplifyingRegex != other.m_SimplifyingRegex ||
+          m_ReplacementString != other.m_ReplacementString ||
+#else // !wxUSE_REGEX
+          m_RemoveListPrefixGathering != other.m_RemoveListPrefixGathering ||
+          m_RemoveListPrefixBreaking != other.m_RemoveListPrefixBreaking ||
+#endif // wxUSE_REGEX/!wxUSE_REGEX
+          m_GatherSubjects != other.m_GatherSubjects ||
+          m_BreakThread != other.m_BreakThread ||
+          m_IndentIfDummyNode != other.m_IndentIfDummyNode ||
+#endif // EXPERIMENTAL_JWZ_THREADING
+          m_replaceFromWithTo != other.m_replaceFromWithTo ||
+          (m_replaceFromWithTo && m_ownAddresses != other.m_ownAddresses);
+}
+
+// ----------------------------------------------------------------------------
 // MailFolderCmn options handling
 // ----------------------------------------------------------------------------
 
 void
 MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
 {
-   /*
-      We want to avoid rebuilding the listing unnecessary (it is an expensive
-      operation) so we only do it if something really changed for us.
-   */
-
    MFCmnOptions config;
    ReadConfig(config);
    if ( config != m_Config )
    {
+      bool listingChanged = false;
+
+      // we want to avoid rebuilding the listing unnecessary (it is an
+      // expensive operation) so we only do it if a setting really affecting
+      // it changed
+      if ( m_headers )
+      {
+         // do we need to resort messages?
+         if ( config.m_ListingSortOrder != m_Config.m_ListingSortOrder ||
+              config.m_replaceFromWithTo != m_Config.m_replaceFromWithTo ||
+              (config.m_replaceFromWithTo &&
+               config.m_ownAddresses != m_Config.m_ownAddresses) )
+         {
+            listingChanged = m_headers->SetSortOrder
+                                        (
+                                          config.m_ListingSortOrder,
+                                          config.m_replaceFromWithTo,
+                                          config.m_ownAddresses
+                                        );
+         }
+
+         // TODO: threading
+      }
+
       m_Config = config;
 
       DoUpdate();
 
-      // listing has been resorted/rethreaded
-      RequestUpdate();
+      if ( listingChanged )
+      {
+         // listing has been resorted/rethreaded
+         RequestUpdate();
+      }
    }
 }
 

@@ -30,6 +30,8 @@
    #include "MailFolder.h"
 
    #include "Message.h"
+
+   #include "Sorting.h"
 #endif // USE_PCH
 
 #include "HeaderInfoImpl.h"
@@ -132,6 +134,20 @@ HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
 }
 
 // ----------------------------------------------------------------------------
+// HeaderInfoListImpl inline methods
+// ----------------------------------------------------------------------------
+
+inline bool HeaderInfoListImpl::IsSorting() const
+{
+   return m_tableMsgno != NULL || m_reverseOrder;
+}
+
+inline bool HeaderInfoListImpl::IsHeaderValid(size_t n) const
+{
+   return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
+}
+
+// ----------------------------------------------------------------------------
 // HeaderInfoListImpl creation and destruction
 // ----------------------------------------------------------------------------
 
@@ -158,20 +174,13 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_count = (size_t)mf->GetMessageCount();
    m_headers.Alloc(m_count);
 
-#if 1
    // no sorting/threading yet
    m_tableMsgno =
    m_tablePos = NULL;
-#else // testing code
-   m_tableMsgno = (size_t *)malloc(m_count * sizeof(size_t));
-   m_tablePos = (size_t *)malloc(m_count * sizeof(size_t));
 
-   for ( size_t n = 0; n < m_count; n++ )
-   {
-      m_tableMsgno[n] = m_count - n;
-      m_tablePos[n] = m_count - n - 1;
-   }
-#endif
+   m_reverseOrder = false;
+   m_sortOrder = 0;
+   m_detectOwnAddresses = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -183,6 +192,11 @@ void HeaderInfoListImpl::CleanUp()
 
    m_lastMod++;
 
+   FreeSortTables();
+}
+
+void HeaderInfoListImpl::FreeSortTables()
+{
    if ( m_tableMsgno )
    {
       free(m_tableMsgno);
@@ -201,11 +215,6 @@ HeaderInfoListImpl::~HeaderInfoListImpl()
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl item access
 // ----------------------------------------------------------------------------
-
-inline bool HeaderInfoListImpl::IsHeaderValid(size_t n) const
-{
-   return (n < m_headers.GetCount()) && (m_headers[n] != NULL);
-}
 
 size_t HeaderInfoListImpl::Count(void) const
 {
@@ -252,14 +261,54 @@ size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 // HeaderInfoListImpl index to/from position mapping
 // ----------------------------------------------------------------------------
 
+MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(size_t pos) const
+{
+   if ( m_reverseOrder )
+   {
+      if ( m_tableMsgno )
+      {
+         // flip the table (which always corresponds to the direct ordering)
+         return m_tableMsgno[m_count - 1 - pos];
+      }
+      else // no table, reverse the natural message order
+      {
+         return m_count - pos;
+      }
+   }
+   else // just use the table
+   {
+      CHECK( m_tableMsgno, 0, "should only be called if IsSorting()" );
+
+      return m_tableMsgno[pos];
+   }
+}
+
 size_t HeaderInfoListImpl::GetIdxFromPos(size_t pos) const
 {
-   return m_tableMsgno ? m_tableMsgno[pos] - 1 : pos;
+   CHECK( pos < m_count, (size_t)-1, "invalid position in GetIdxFromPos" );
+
+   return IsSorting() ? GetMsgnoFromPos(pos) - 1 : pos;
 }
 
 size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 {
-   return m_tablePos ? m_tablePos[n] : n;
+   CHECK( n < m_count, (size_t)-1, "invalid index in GetPosFromIdx" );
+
+   if ( m_reverseOrder )
+   {
+      if ( m_tablePos )
+      {
+         return m_count - 1 - m_tablePos[n];
+      }
+      else // no table, reverse the natural message order
+      {
+         return m_count - 1 - n;
+      }
+   }
+   else // use the table if any
+   {
+      return m_tablePos ? m_tablePos[n] : n;
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -270,6 +319,8 @@ size_t HeaderInfoListImpl::GetPosFromIdx(size_t n) const
 
 void HeaderInfoListImpl::OnRemove(size_t n)
 {
+   ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
+
    CHECK_RET( n < m_count, "invalid index in HeaderInfoList::OnRemove" );
 
    if ( n < m_headers.GetCount() )
@@ -288,6 +339,8 @@ void HeaderInfoListImpl::OnRemove(size_t n)
 
 void HeaderInfoListImpl::OnAdd(size_t countNew)
 {
+   ASSERT_MSG( !IsSorting(), "FIXME-SORTING" );
+
    m_count = countNew;
 
    // we probably don't need to do m_headers.Alloc() as countNew shouldn't be
@@ -392,6 +445,99 @@ HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
 }
 
 // ----------------------------------------------------------------------------
+// HeaderInfoListImpl sorting
+// ----------------------------------------------------------------------------
+
+// sort the messages according to the current sort parameters
+void HeaderInfoListImpl::Sort()
+{
+   // easy case: don't sort at all
+   if ( GetSortCritDirect(m_sortOrder) == MSO_NONE )
+   {
+      // we may still need to reverse the messages order
+      m_reverseOrder = GetSortCrit(m_sortOrder) == MSO_NONE_REV;
+
+      FreeSortTables();
+   }
+   else // we do need to sort messages
+   {
+#if 0 // testing code
+      m_tableMsgno = (size_t *)malloc(m_count * sizeof(size_t));
+      m_tablePos = (size_t *)malloc(m_count * sizeof(size_t));
+
+      if ( m_sortOrder & 1 )
+      {
+         // reverse
+         for ( size_t n = 0; n < m_count; n++ )
+         {
+            m_tableMsgno[n] = m_count - n;
+            m_tablePos[n] = m_count - n - 1;
+         }
+      }
+      else // normal
+      {
+         for ( size_t n = 0; n < m_count; n++ )
+         {
+            m_tableMsgno[n] = n + 1;
+            m_tablePos[n] = n;
+         }
+      }
+#endif
+   }
+}
+
+// change the sorting order
+bool HeaderInfoListImpl::SetSortOrder(long sortOrder,
+                                      bool detectOwnAddresses,
+                                      const wxArrayString& ownAddresses)
+{
+   // we are only called if some of the sorting parameters changed, but make
+   // sure this change will really affect us
+   if ( sortOrder == m_sortOrder )
+   {
+      // something related to detectOwnAddresses changed, do we use this at
+      // all?
+      bool useSender = false;
+      while ( sortOrder != MSO_NONE )
+      {
+         if ( GetSortCritDirect(sortOrder) == MSO_SENDER )
+         {
+            useSender = true;
+            break;
+         }
+
+         sortOrder = GetSortNextCriterium(sortOrder);
+      }
+
+      if ( !useSender )
+      {
+         // nothing changes for us
+         return false;
+      }
+   }
+
+   // remember new sort order
+   m_sortOrder = sortOrder;
+   m_detectOwnAddresses = detectOwnAddresses;
+   m_ownAddresses = ownAddresses;
+
+   // sorting order can hardly change the listing if we have less than 2
+   // elements
+   if ( m_count < 2 )
+   {
+      return false;
+   }
+
+   // recalculate the tables
+   Sort();
+
+   // assume it changed
+   m_lastMod++;
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // HeaderInfoListImpl last modification "date" handling
 // ----------------------------------------------------------------------------
 
@@ -483,7 +629,7 @@ void HeaderInfoListImpl::CachePositions(const Sequence& seq)
       {
          ASSERT_MSG( pos < m_count, "invalid position in the sequence" );
 
-         MsgnoType msgno = m_tableMsgno[pos];
+         MsgnoType msgno = GetMsgnoFromPos(pos);
 
          if ( !msgnoMin || msgno < msgnoMin )
             msgnoMin = msgno;

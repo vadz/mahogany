@@ -23,7 +23,7 @@
 
 #include "MailFolder.h"    // for MailFolder::MessageStatus
 
-class wxArrayString;
+class WXDLLEXPORT wxArrayString;
 class Sequence;
 
 #define INDEX_ILLEGAL ((size_t)-1)
@@ -286,6 +286,26 @@ public:
     */
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set = true) = 0;
+
+   //@}
+
+   /** @name Sorting/threading
+    */
+   //@{
+
+   /**
+      Set the sort order to use for the messages.
+
+      @param sortOrder is a combination of (shifted) MSO_XXX flags
+      @param detectOwnAddresses if true, use "To", not "From" for own msgs
+      @param ownAddresses are the users own addresses
+      @return true if the order of messages really changed
+    */
+   virtual bool SetSortOrder(long sortOrder,
+                             bool detectOwnAddresses,
+                             const wxArrayString& ownAddresses) = 0;
+
+   /// TODO: threading
 
    //@}
 

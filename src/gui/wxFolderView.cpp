@@ -35,6 +35,7 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "Profile.h"
+#  include "Sorting.h"
 
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
@@ -474,6 +475,17 @@ protected:
    /// true until SelectInitialMessage() is called, don't update the control
    bool m_isFrozen;
 
+   /**
+     @name Currently selected item data
+
+     We need to store the focused item to be able to detect when it changes
+     and its UID to be able to refocus it after the sort order change.
+    */
+   //@{
+
+   /// uid of the currently focused item or UID_ILLEGAL
+   UIdType m_uidFocus;
+
    /// the currently focused item
    long m_itemFocus;
 
@@ -485,6 +497,8 @@ protected:
 
    /// HACK: this is set to true to force m_selIsUnique update if needed
    bool m_selMaybeChanged;
+
+   //@}
 
    /// the profile used for storing columns widths
    Profile *m_profile;
@@ -814,6 +828,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_isFrozen = true;
 
    // no item focused yet
+   m_uidFocus = UID_ILLEGAL;
    m_itemFocus = -1;
 
    // nor previewed
@@ -1269,6 +1284,17 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // we don't need it
       headers->DecRef();
 
+      // keep the same item selected if possible: use its UID as its index
+      // might have changed if the sort order in the folder changed
+      if ( m_uidFocus != UID_ILLEGAL )
+      {
+         size_t idx = m_headers->GetIdxFromUId(m_uidFocus);
+         if ( idx != INDEX_ILLEGAL )
+         {
+            Focus(m_headers->GetPosFromIdx(idx));
+         }
+      }
+
       // just show the new items
       UpdateItemCount();
    }
@@ -1381,6 +1407,9 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       // return it
       RefreshItems(posMin, posMax);
    }
+
+   // check if the focus changed
+   UpdateFocus();
 }
 
 // ----------------------------------------------------------------------------
@@ -1500,6 +1529,7 @@ void wxFolderListCtrl::UpdateFocus()
    // the first selected message, see OnSelected()!)
 
    m_itemFocus = itemFocus;
+   m_uidFocus = GetUIdFromIndex(m_itemFocus);
 
    m_FolderView->OnFocusChange();
 

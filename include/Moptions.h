@@ -1712,8 +1712,8 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_DEFVAL      1
-/// sort criterium for folder listing (== MSO_DATE)
-#define MP_MSGS_SORTBY_DEFVAL         2l
+/// sort criterium for folder listing (== MSO_NONE)
+#define MP_MSGS_SORTBY_DEFVAL         0l
 /// re-sort messages on status change?
 #define MP_MSGS_RESORT_ON_CHANGE_DEFVAL 0l
 /// use threading
