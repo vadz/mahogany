@@ -430,6 +430,11 @@ private:
    /// do we need to authentificate?
    bool NeedsAuthInfo() const;
 
+   /// set login data (possibly asking the user about it) if needed, return
+   /// false if we don't have login/password and so can't continue
+   static bool SetLoginDataIfNeeded(const MFolder *mfolder,
+                                    String *login = NULL);
+
    //@}
 
    /** @name c-client initialization */

@@ -3922,6 +3922,26 @@ bool MailFolderCC::NeedsAuthInfo() const
    return !HasLogin() && m_mfolder->NeedsLogin();
 }
 
+/* static */ bool
+MailFolderCC::SetLoginDataIfNeeded(const MFolder *mfolder, String *loginOut)
+{
+   String login, password;
+   if ( !GetAuthInfoForFolder(mfolder, login, password ) )
+   {
+      return false;
+   }
+
+   if ( !login.empty() )
+   {
+      SetLoginData(login, password);
+      if ( loginOut )
+         *loginOut = login;
+   }
+   //else: we don't need any login credentials at all
+
+   return true;
+}
+
 // ----------------------------------------------------------------------------
 // Debug only helpers
 // ----------------------------------------------------------------------------
@@ -5481,10 +5501,27 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
    // if we rename the folder being used - or maybe not?
    (void)MailFolderCC::CloseFolder(mfolder);
 
-   String spec = MailFolder::GetImapSpec(mfolder);
+   // prepare login credentials as we're opening a new connection to the server
+   String login;
+   SetLoginDataIfNeeded(mfolder, &login);
+
+   // name is the folder name on server, i.e. without the remote spec part,
+   // while c-client needs it, so prepend it before calling mail_rename()
+   String spec = MailFolder::GetImapSpec(mfolder, login);
+   String specNew;
+   if ( *spec.c_str() == _T('{') ) // works even if it is empty
+   {
+      specNew = spec.BeforeFirst(_T('}')) + _T('}') + name;
+   }
+   else // local file
+   {
+      specNew = name;
+   }
+
+   // do rename
    if ( !mail_rename(NULL,
                      (char *)spec.c_str(),
-                     (char *)name.c_str()) )
+                     (char *)specNew.c_str()) )
    {
       wxLogError(_("Failed to rename the mailbox for folder '%s' "
                    "from '%s' to '%s'."),
@@ -5506,9 +5543,7 @@ MailFolderCC::Rename(const MFolder *mfolder, const String& name)
 long
 MailFolderCC::ClearFolder(const MFolder *mfolder)
 {
-   String login = mfolder->GetLogin(),
-          password = mfolder->GetPassword(),
-          fullname = mfolder->GetFullName();
+   String fullname = mfolder->GetFullName();
    String mboxpath = MailFolder::GetImapSpec(mfolder);
 
    wxLogTrace(TRACE_MF_CALLS, _T("Clearing folder '%s'"), fullname.c_str());
@@ -5534,12 +5569,11 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    }
    else // this folder is not opened
    {
-      if ( !GetAuthInfoForFolder(mfolder, login, password ) )
+      if ( !SetLoginDataIfNeeded(mfolder) )
       {
          return false;
       }
 
-      SetLoginData(login, password);
 
       // we don't want any notifications
       noCCC = new CCCallbackDisabler;
@@ -5624,8 +5658,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   String login, password;
-   if ( !GetAuthInfoForFolder(mfolder, login, password ) )
+   String login;
+   if ( !SetLoginDataIfNeeded(mfolder, &login) )
    {
       return false;
    }
@@ -5633,7 +5667,6 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    String mboxpath = MailFolder::GetImapSpec(mfolder, login);
 
    MCclientLocker lock;
-   SetLoginData(login, password);
 
    wxLogTrace(TRACE_MF_CALLS,
               _T("MailFolderCC::DeleteFolder(%s)"), mboxpath.c_str());
