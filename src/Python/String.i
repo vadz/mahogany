@@ -1,0 +1,25 @@
+/*-*- c++ -*-********************************************************
+ * String class interface for python                                *
+ *                                                                  *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ *                                                                  *
+ * $Id$                 *
+ ********************************************************************
+ * $Log$
+ * Revision 1.1  1998/05/24 14:51:50  KB
+ * lots of progress on Python, but cannot call functions yet
+ *
+ *
+ *******************************************************************/
+
+%module 	String
+%{
+#include	"Mpch.h"
+%}
+
+class String 
+{
+public:
+   String();
+   const char *c_str(void);
+};
