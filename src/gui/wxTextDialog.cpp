@@ -60,6 +60,9 @@ private:
    // show the "Find" dialog
    void OnFind(wxCommandEvent& event);
 
+   // close the dialog
+   void OnCancel(wxCommandEvent& event);
+
 
    // find dialog events
 
@@ -100,6 +103,7 @@ private:
 BEGIN_EVENT_TABLE(MTextDialog, wxDialog)
    EVT_BUTTON(wxID_SAVE, MTextDialog::OnSave)
    EVT_BUTTON(wxID_FIND, MTextDialog::OnFind)
+   EVT_BUTTON(wxID_CANCEL, MTextDialog::OnCancel)
 
    EVT_FIND(-1, MTextDialog::OnFindDialogNext)
    EVT_FIND_NEXT(-1, MTextDialog::OnFindDialogNext)
@@ -241,6 +245,11 @@ void MTextDialog::OnSave(wxCommandEvent&)
          wxLogError(_("Failed to save the dialog contents."));
       }
    }
+}
+
+void MTextDialog::OnCancel(wxCommandEvent&)
+{
+   Destroy();
 }
 
 void MTextDialog::OnFind(wxCommandEvent&)
