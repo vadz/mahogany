@@ -763,15 +763,17 @@ Profile::CreateGlobalConfig(const String & filename)
    //    1. compile-time specified installation dir
    //    2. run-time specified installation dir
    //    3. default installation dir
-   String globalFileName, globalFile;
-   globalFileName << '/' << M_APPLICATIONNAME << ".conf";
-   globalFile = String(M_PREFIX) + globalFileName;
+   String globalFileName;
+   globalFileName << M_APPLICATIONNAME << ".conf";
+   String globalFile;
+   globalFile << M_PREFIX << "/etc/" << globalFileName;
    if ( !wxFileExists(globalFile) )
    {
       const char *dir = getenv("MAHOGANY_DIR");
       if ( dir )
       {
-         globalFile = String(dir) + globalFileName;
+         globalFile.clear();
+         globalFile << dir << "/etc/" << globalFileName;
       }
    }
    if ( !wxFileExists(globalFile) )
