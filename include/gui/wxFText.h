@@ -5,7 +5,7 @@
  *                                                                  *
  * $Id$                *
  *******************************************************************/
-#ifndef	WXFTEXT_H
+#ifndef  WXFTEXT_H
 #define WXFTEXT_H
 
 
@@ -14,25 +14,24 @@
 #endif
 
 #ifndef USE_PCH
-#  undef    T
-#	include	<map>
-#	include	<list>
-
-#	include	<Profile.h>
-#	include	<wxFontManager.h>
-#	include	<wxIconManager.h>
-
-   using namespace std;
+#  include  "kbList.h"
+#  include  "Profile.h"
+#  include  "wxFontManager.h"
+#  include  "wxIconManager.h"
 #endif
+
+class wxFTOList;
+class FTObject;
+class MapIntInt;
+
+KBLIST_DEFINE(kbIntList, int);
+KBLIST_DEFINE(FTOListType, FTObject);
 
 /// describing a FTObject's type
 enum FTObjectType { LI_TEXT, LI_COMMAND, LI_NEWLINE, LI_ICON, LI_URL, LI_ILLEGAL };
 
-class wxFTOList;
-class FTObject;
-
 /// For scrolling on canvases: number of scroll steps per scroll page.
-#define	WXFTEXT_SCROLLSTEPS_PER_PAGE	20
+#define  WXFTEXT_SCROLLSTEPS_PER_PAGE  20
 
 /**
       FTObject holds information about the current line
@@ -41,48 +40,48 @@ class FTObject;
 class FTObject
 {
    /// type of object
-   FTObjectType	type;
+   FTObjectType   type;
 
    /**@name cursor positions covered by this line */
    //@{
    /// y cursor position
-   int	cursorY;
+   int   cursorY;
    /// x cursor position
-   int	cursorX;
+   int   cursorX;
    /// maximum x position covered
-   int	cursorX2;
+   int   cursorX2;
    //@}
    /**@name canvas positions covered by this line */
    //@{
    /// the y position of the line
-   coord_t	posY;
+   coord_t  posY;
    /// the correction for font height adjustments
-   coord_t	posYdelta;
+   coord_t  posYdelta;
    /// the starting x position
-   coord_t	posX;
+   coord_t  posX;
    /// the maximium y position
-   coord_t	posY2;
+   coord_t  posY2;
    /// the maximum x position
-   coord_t	posX2;
+   coord_t  posX2;
    /// the total height of the line
-   coord_t	height;
+   coord_t  height;
    /// the total width of the line
-   coord_t	width;
+   coord_t  width;
    //@}
 
    /// the contents of this line
-   String	text;
+   String   text;
 
    /// if it is an icon, pointer to it
-   wxIcon	*icon;
+   wxIcon   *icon;
 
    /// if it is text, the font to use
-   wxFont	*font;
+   wxFont   *font;
    
    /// does the line need to be recalculated?
-   Bool	isOk;
+   Bool  isOk;
    /// does it contain formatting info?
-   Bool	needsFormat;
+   Bool  needsFormat;
 
    /**@name delimiters for commands */
    //@{
@@ -112,7 +111,7 @@ public:
        @return the object's type
    */
    FTObjectType Create(String & str, int &cx, int &cy, coord_t &x, coord_t
-		       &y, bool formatFlag = true, wxDC *dc = NULL);
+             &y, bool formatFlag = true, wxDC *dc = NULL);
 
    /**
       Creates a FTObject by parsing the string.
@@ -121,7 +120,7 @@ public:
    */
    
    FTObject(String & str, int &cx, int &cy, coord_t &x, coord_t &y,
-	    bool formatFlag = true, wxDC *dc = NULL);
+       bool formatFlag = true, wxDC *dc = NULL);
 
    /// Destructor.
    ~FTObject();
@@ -139,18 +138,18 @@ public:
       Is object fully formatted?
       @return true if ready to print
    */
-   Bool	IsOk(void) const { return isOk; }
+   Bool  IsOk(void) const { return isOk; }
 
    /**
       For string objects: set the font to use.
       @param ifont a wxFont to use
    */
-   void	SetFont(wxFont *ifont)
+   void  SetFont(wxFont *ifont)
       { font = ifont; }
 
 #ifndef NDEBUG
    /// print debugging information
-   void	Debug(void) const;
+   void  Debug(void) const;
 #endif
    
    /**
@@ -160,7 +159,7 @@ public:
       @param pagecount internal parameter
    */
    void Draw(wxFTOList & ftc, bool pageing = false, int
-	     *pagecount = NULL) const;
+        *pagecount = NULL) const;
 
    /**
       Set delimiters for marking commands.
@@ -199,7 +198,7 @@ public:
       Sets the adjustment for y position on DC.
       @param delta new adjustment
    */
-   void	SetYPosDelta(coord_t delta) { posYdelta = delta; }
+   void  SetYPosDelta(coord_t delta) { posYdelta = delta; }
    
    /**
       Sets the x position on DC.
@@ -233,8 +232,8 @@ public:
    coord_t  GetNextPosition(void) const { return posY + height; }
    void   SetText(String const &in) { text = in; }
 
-   void	InsertText(String const &str, int offset = 0);
-   void	DeleteChar(int offset = 0);
+   void  InsertText(String const &str, int offset = 0);
+   void  DeleteChar(int offset = 0);
 
    IMPLEMENT_DUMMY_COMPARE_OPERATORS(FTObject)
 };
@@ -254,47 +253,47 @@ class wxFTOList
    {
    private:
       /// a wxFontManager
-      wxFontManager	fontManager;
+      wxFontManager  fontManager;
       /// the default fontsize
-      int	fontDefaultSize;
+      int   fontDefaultSize;
       /// the fontsize
-      int	fontSize;
+      int   fontSize;
       /// the font family
-      int	fontFamily;
+      int   fontFamily;
       /// the font style
-      int	fontStyle;
+      int   fontStyle;
       /// the font weight
-      int	fontWeight;
+      int   fontWeight;
       /// is it underlined?
-      Bool	fontUnderline;
+      Bool  fontUnderline;
       /// descent of currently selected font
-      coord_t	fontDescent;
+      coord_t  fontDescent;
       /// height of a text line in currently selected font
-      coord_t	textHeight;
+      coord_t  textHeight;
       
-      std::list<int> familyStack;
-      std::list<int> styleStack;
-      std::list<int> weightStack;
-      std::list<Bool> underlineStack;
-      std::list<int> sizeStack;
+      kbIntList familyStack,
+                styleStack,
+                weightStack,
+                underlineStack,
+                sizeStack;
 
       /// the current font:
-      wxFont	*font;
+      wxFont   *font;
 
       /// no copy constructor
 //      DrawInfo & operator=(DrawInfo const & in) {}
    public:
       /**
-	 constructor
-	 @param size	pixel size to use
-	 @param family	font family
-	 @param	style	font style
-	 @param	weight	font weight
-	 @param underlined TRUE if text is to be underlined
-      */	
+    constructor
+    @param size   pixel size to use
+    @param family font family
+    @param  style font style
+    @param  weight   font weight
+    @param underlined TRUE if text is to be underlined
+      */ 
       DrawInfo(int size = 14, int family =
-	       wxROMAN, int style = wxNORMAL, int weight = wxNORMAL,
-	       Bool underlined = FALSE);
+          wxROMAN, int style = wxNORMAL, int weight = wxNORMAL,
+          Bool underlined = FALSE);
 
       /// destructor, freeing resources
       ~DrawInfo();
@@ -303,45 +302,45 @@ class wxFTOList
       wxFont *Apply(wxDC *dc);
 
       /** Return the current font.
-	  @return a wxFont pointer
+     @return a wxFont pointer
       */
-      wxFont	*GetFont(void) { return font; }
+      wxFont   *GetFont(void) { return font; }
       
       /// set font family
-      void	FontFamily(int family, Bool enable = TRUE);
+      void  FontFamily(int family, Bool enable = TRUE);
       /// set font style
-      void	FontStyle(int style, Bool enable = TRUE);
+      void  FontStyle(int style, Bool enable = TRUE);
       /// set font weight
-      void	FontWeight(int weight, Bool enable = TRUE);
+      void  FontWeight(int weight, Bool enable = TRUE);
       /// set font underline
-      void	Underline(Bool enable = TRUE);
+      void  Underline(Bool enable = TRUE);
       /// set font size ion pixels
-      void	FontSize(int size, Bool enable = TRUE);
+      void  FontSize(int size, Bool enable = TRUE);
       /// allocate a font with the current settings
-      wxFont *	SetFont(wxDC *dc);
+      wxFont * SetFont(wxDC *dc);
       /** change font size in steps, starting from default size
-	  @param delta a parameter +/- n
-	  @return the new pixel size
+     @param delta a parameter +/- n
+     @return the new pixel size
       */
-      int	ChangeSize(int delta);
+      int   ChangeSize(int delta);
 
       /// return the text height in currently selected font
-      coord_t	TextHeight(void) { return textHeight; }
+      coord_t  TextHeight(void) { return textHeight; }
       /// return the descent of currently selected font
-      coord_t	Descent(void) { return fontDescent; }
+      coord_t  Descent(void) { return fontDescent; }
       
-      void	Roman(Bool enable = TRUE) 	{ FontFamily(wxROMAN, enable); }
-      void	Modern(Bool enable = TRUE) 	{ FontFamily(wxMODERN, enable); }
-      void 	Typewriter(Bool enable = TRUE){ FontFamily(wxTELETYPE, enable); }
-      void	SansSerif(Bool enable = TRUE) { FontFamily(wxSWISS, enable); }
-      void	Script(Bool enable = TRUE) 	{ FontFamily(wxSCRIPT, enable); }
-      void	Decorative(Bool enable = TRUE){ FontFamily(wxDECORATIVE, enable); }
-      void 	Italics(Bool enable = TRUE)	{ FontStyle(wxITALIC, enable); }
-      void	NormalStyle(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }	
-      void	Slanted(Bool enable = TRUE)	{ FontStyle(wxSLANT, enable); }
-      void	Bold(Bool enable = TRUE) 	{ FontWeight(wxBOLD, enable); }
-      void	Light(Bool enable = TRUE) 	{ FontWeight(wxLIGHT, enable); }
-      void	NormalWeight(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }
+      void  Roman(Bool enable = TRUE)  { FontFamily(wxROMAN, enable); }
+      void  Modern(Bool enable = TRUE)    { FontFamily(wxMODERN, enable); }
+      void  Typewriter(Bool enable = TRUE){ FontFamily(wxTELETYPE, enable); }
+      void  SansSerif(Bool enable = TRUE) { FontFamily(wxSWISS, enable); }
+      void  Script(Bool enable = TRUE)    { FontFamily(wxSCRIPT, enable); }
+      void  Decorative(Bool enable = TRUE){ FontFamily(wxDECORATIVE, enable); }
+      void  Italics(Bool enable = TRUE)   { FontStyle(wxITALIC, enable); }
+      void  NormalStyle(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }  
+      void  Slanted(Bool enable = TRUE)   { FontStyle(wxSLANT, enable); }
+      void  Bold(Bool enable = TRUE)   { FontWeight(wxBOLD, enable); }
+      void  Light(Bool enable = TRUE)  { FontWeight(wxLIGHT, enable); }
+      void  NormalWeight(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }
    };
 
 
@@ -353,51 +352,49 @@ class wxFTOList
 
 
    /// cursor positions
-   int		cursorX, cursorY;
+   int      cursorX, cursorY;
    /// maximum allowed cursor position
-   int 		cursorMaxX, cursorMaxY;
+   int      cursorMaxX, cursorMaxY;
    
    /// position in DC
-   coord_t	dcX, dcY;
+   coord_t  dcX, dcY;
    /// the current settings
-   DrawInfo	drawInfo;
+   DrawInfo drawInfo;
    
    /// the DC
-   wxDC	*dc;
+   wxDC  *dc;
    /// @@ added by VZ - where is it supposed to be?
    bool pageingFlag;
    
    /**@name A list of all text lines. */
    //@{
-   /// The type of the list. 
-   typedef std::list<FTObject>	FTOListType;
    /// The list itself:
    FTOListType *listOfLines;
    //@}
    /// a list of all text line lengths, indexed by cursor position
-   std::map<int,int>	listOfLengths;
+   MapIntInt *m_plistOfLengths;
    
    /// a list of all clickable items
-   std::list<FTObject const *> *listOfClickables;
+   FTOListType *listOfClickables;
    
    /// a wxIconManager
-   wxIconManager	iconManager;
+   wxIconManager  iconManager;
       
    /// shall we look for formatting commands
-   Bool		formatFlag;
+   Bool     formatFlag;
 
 
    /// Is List editable?
-   bool		editable;
+   bool     editable;
 
    /// Do we need to recalculate sizes?
-   bool		contentChanged;
+   bool     contentChanged;
    
    /// no copy constructor
 //   wxFTOList &operator=(wxFTOList const &in) { }
 
    /// remember the last line at which redraw started
-   std::list<FTObject>::iterator	lastLineFound;
+   FTOListType::iterator lastLineFound;
 
    /// the last drawn cursor
    struct
@@ -406,23 +403,23 @@ class wxFTOList
       coord_t y1;
       coord_t y2;
    } lastCursor;
-	 
+    
    /// iterator  for content extraction:
-   FTOListType::iterator	extractIterator;
+   FTOListType::iterator   extractIterator;
    /// string holding the value to be returned in GetContent()
-   String	extractContent;
+   String   extractContent;
    /**@name Information needed for scrolling on canvases. */
    //@{
    /// If a canvas is given update its scrollbars, otherwise this is NULL.
-   wxCanvas	*canvas;
+   wxCanvas *canvas;
    /// Pixels per scroll step, x direction.
-   int	scrollPixelsX;
+   int   scrollPixelsX;
    /// Pixels per scroll step, y direction.
-   int	scrollPixelsY;
+   int   scrollPixelsY;
    /// Length of scrollbar in steps, x direction.
-   int	scrollLengthX;
+   int   scrollLengthX;
    /// Length of scrollbar in steps, y direction.
-   int	scrollLengthY;
+   int   scrollLengthY;
    //@}
    /// Bad, but useful.
    friend FTObject;
@@ -438,11 +435,11 @@ public:
        @param line the text to add
        @param formatFlag if true, interpret formatting tags
    */
-   void	AddText(String const &line, bool formatFlag = false);
+   void  AddText(String const &line, bool formatFlag = false);
    /** Adds text to the canvas and interpret formatting tags.
        @param line the text to add
    */
-   void	AddFormattedText(String const &line) { AddText(line, true); }
+   void  AddFormattedText(String const &line) { AddText(line, true); }
 
    //@}
    /**
@@ -451,24 +448,24 @@ public:
       @param command the text between the delimiters
       @param fto pointer to the FTObject
    */
-   void	ProcessCommand(String const &command, FTObject *fto = NULL);
+   void  ProcessCommand(String const &command, FTObject *fto = NULL);
 
    /** Return the current font from DrawInfo.
        @return a wxFont pointer
    */
-   wxFont	*GetFont(void) { return drawInfo.GetFont(); }
+   wxFont   *GetFont(void) { return drawInfo.GetFont(); }
    
    /** Sets the DC to use for calculations and drawing.
        @param idc the wxDC to use
        @param prFlag set it to true when printing to a printer/PS
    */
-   void	SetDC(wxDC *idc, bool prFlag = false);
+   void  SetDC(wxDC *idc, bool prFlag = false);
 
    /** Sets the Canvas and DC to use for calculations and drawing.
        The Canvas' scrollbars will be updated.
        @param idc the wxDC to use
    */
-   void	SetCanvas(wxCanvas *ic);
+   void  SetCanvas(wxCanvas *ic);
    
    /** Extract information from canvas.
        @param ftoType A pointer to an object type variable to hold the
@@ -499,7 +496,7 @@ public:
    FTObject const *FindClickable(coord_t x, coord_t y) const;
    
 #ifndef NDEBUG
-   void	Debug(void) const;
+   void  Debug(void) const;
 #endif
    
    /** Recalculate the dimensions of all objects. Needs to be called
@@ -535,7 +532,7 @@ public:
       /// Move Cursor to position x,y
    void MoveCursorTo(int x, int y);
    /// Moves the cursor to the end of the line.
-   void	MoveCursorEndOfLine(void);
+   void  MoveCursorEndOfLine(void);
    /// Moves the cursor to the begin of the line.
    void MoveCursorBeginOfLine(void);
    /** Deletes one character to the right of the cursor.
@@ -545,9 +542,9 @@ public:
    /// Draws the cursor at the new position and erases the old one.
    void DrawCursor(void);
    /// If drawing on a canvas, makes sure that cursor is visible.
-   void	ScrollToCursor(void);
+   void  ScrollToCursor(void);
    /// Check whether we need to wrap the text.
-   void	Wrap(int margin);
+   void  Wrap(int margin);
    
    /**@name Methods for manipulating the list of objects. */
    //@{
@@ -582,7 +579,7 @@ public:
        @return Iterator to the first object of the next line, or listOfLines->end().
    */
    FTOListType::iterator SimplifyLine(FTOListType::iterator i, bool toEnd =
-				false);
+            false);
    
    /** Recalculate the line by merging text objects.
        @param i Iterator of any object within this line.
