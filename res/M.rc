@@ -45,6 +45,8 @@ image		BITMAP	"image.bmp"
 postscript	BITMAP	"postscript.bmp"
 txt		BITMAP	"txt.bmp"
 video		BITMAP	"video.bmp"
+hlink		ICON	"hlink.ico"
+ftplink		ICON	"ftplink.ico"
 
 unknown 	ICON	"unknown.ico"
 

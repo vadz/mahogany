@@ -3,7 +3,7 @@ static char *ftplink_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    32    32       11            1",
 /* colors */
-". c #fefe04",
+". c none",
 "# c #c2c2c4",
 "a c #fefebc",
 "b c #fe0204",

@@ -2494,9 +2494,10 @@ public:
 };
 
 wxLicenseDialog::wxLicenseDialog(Profile *profile, wxWindow *parent)
-   : wxOptionsPageSubdialog(profile,parent,
-                            _("Mahogany Licensing Conditions"),
-                            "LicensingDialog")
+               : wxOptionsPageSubdialog(profile,
+                                        parent,
+                                        _("Mahogany Licensing Conditions"),
+                                        "LicensingDialog")
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), FALSE,
                                              MH_DIALOG_LICENSE);

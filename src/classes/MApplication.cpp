@@ -378,7 +378,6 @@ MAppBase::OnStartup()
    {
       ERRORMESSAGE((_("Program execution aborted.")));
 
-      wxYield();
       return false;
    }
 

@@ -109,7 +109,7 @@ public:
 
    /// return the directory of the newsspool:
    static String GetNewsSpool(void);
-   
+
    /// checks whether a folder with that path exists
    static MailFolderCC *FindFolder(String const &path,
                                    String const &login);
@@ -280,6 +280,9 @@ public:
    */
    static String qprint(const String &in);
 
+   /// return TRUE if CClient lib had been initialized
+   static bool IsInitialized() { return cclientInitialisedFlag; }
+
    /** @name Folder names and specifications */
    //@{
    /** Extracts the folder name from the folder specification string used by
@@ -357,8 +360,8 @@ private:
    /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
    friend class SendMessageCC;
-   
-   /// for POP/IMAP boxes, this holds the user id for the callback   
+
+   /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
@@ -557,7 +560,7 @@ protected:
 public:
    /// re-read some cclient settings
    static void UpdateCClientConfig(void);
-   
+
    /** @name common callback routines
        They all take a stram argument and the number of a message.
        Do not call them, they are only for use by the c-client library!
@@ -690,7 +693,7 @@ private:
 
    /// Counts the number of new mails
    UIdType CountNewMessages(void) const;
-   
+
    /**@name only used for ListFolders: */
    //@{
    UserData m_UserData;

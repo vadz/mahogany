@@ -149,14 +149,15 @@ CCStreamCleaner::~CCStreamCleaner()
 /// exactly one object
 static CCStreamCleaner *gs_CCStreamCleaner = NULL;
 
-
-
-extern void CC_Cleanup(void)
+void CC_Cleanup(void)
 {
-   // as c-client lib doesn't seem to think that deallocating memory is
-   // something good to do, do it at it's place...
-   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
-   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   if ( MailFolderCC::IsInitialized() )
+   {
+      // as c-client lib doesn't seem to think that deallocating memory is
+      // something good to do, do it at it's place...
+      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
+      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   }
 
    if(gs_CCStreamCleaner)
    {

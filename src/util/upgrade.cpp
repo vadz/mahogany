@@ -384,16 +384,18 @@ public:
          return TRUE;
       }
 private:
-   wxChoice *m_FolderTypeChoice; 
-   wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
-      *m_UseOutboxCheckbox, *m_UseDialUpCheckbox
+   wxChoice *m_FolderTypeChoice;
+   wxCheckBox *m_CollectCheckbox,
+              *m_TrashCheckbox,
+              *m_UseOutboxCheckbox,
+              *m_UseDialUpCheckbox
 #ifdef USE_PISOCK
-   , *m_UsePalmOsCheckbox
+             , *m_UsePalmOsCheckbox
 #endif
 #ifdef USE_PYTHON
-   , *m_UsePythonCheckbox
+             , *m_UsePythonCheckbox
 #endif
-   ;
+             ;
 };
 
 #ifdef USE_HELPERS_PAGE
@@ -604,13 +606,18 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
 {
-   if ( m_useWizard )
-      return InstallWizard_FirstPage;
+   // override the default logic if the user chose to skip the qizard entirely
+   if ( !m_useWizard )
+   {
+      // remember that we didn't really run the wizard
+      gs_installWizardData.done = false;
 
-   // remember that we didn't really run the wizard
-   gs_installWizardData.done = false;
-
-   return InstallWizard_Done;
+      return InstallWizard_Done;
+   }
+   else
+   {
+      return InstallWizardPage::GetNextPageId();
+   }
 }
 
 void InstallWizardWelcomePage::OnUseWizardCheckBox(wxCommandEvent& event)
@@ -826,7 +833,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
       _(
          "\n"
          "If you are using dial-up networking,\n"
-         "Mahogany detect your connection status\n"
+         "Mahogany may detect your connection status\n"
          "and optionally dial and hang-up."
          ), m_UseOutboxCheckbox);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
@@ -1009,6 +1016,10 @@ bool RunInstallWizard()
       wizardDone = gs_installWizardData.done;
    }
 
+   wizard->Destroy();
+
+   gs_isWizardRunning = false;
+
    // make sure we have some _basic_ things set up whether the wizard ran or
    // not (basic here meaning that the program will not operate properly
    // without any of them)
@@ -1061,9 +1072,6 @@ bool RunInstallWizard()
 
    CompleteConfiguration(gs_installWizardData);
 
-   wizard->Destroy();
-
-   gs_isWizardRunning = false;
    SetupServers();
 
    String mainFolderName = gs_installWizardData.collectAllMail
@@ -2278,6 +2286,8 @@ CheckConfiguration(void)
       else
       {
          ERRORMESSAGE((_("You must accept the license to run Mahogany.")));
+
+         mApplication->SetLastError(M_ERROR_CANCEL);
 
          return FALSE;
       }

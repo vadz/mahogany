@@ -16,7 +16,7 @@ static char *hlink_xpm[] = {
 "i c #02be04",
 "j c #827e7c",
 "k c #0202bc",
-"l c #fefefc",
+"l c none",
 /* pixels */
 "llllllllllllllllllllllllllllllll",
 "llllllllllllllllllllllllllllllll",

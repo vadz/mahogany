@@ -128,10 +128,11 @@ MLogCircle::GetLog(void) const
 {
    String log;
    // search from m_Next to m_N
-   for(int i = m_Next; i < m_N ; i++)
+   int i;
+   for(i = m_Next; i < m_N ; i++)
       log << m_Messages[i] << '\n';
          // search from 0 to m_Next-1:
-   for(int i = 0; i < m_Next; i++)
+   for(i = 0; i < m_Next; i++)
       log << m_Messages[i] << '\n';
    return log;
 }
