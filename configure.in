@@ -384,7 +384,14 @@ dnl --------------------------------------------------------------------------
 dnl check for wx-config
 if test $USE_WXCONFIG = 1
 then
-	AC_PATH_PROG(WX_CONFIG,wx-config)
+	if test "x$WX_CONFIG" = "x"
+	then
+		AC_PATH_PROG(WX_CONFIG,wx-config)
+	fi
+	if test ! -x $WX_CONFIG
+	then
+		AC_MSG_ERROR("Cannot execute $WX_CONFIG!");
+	fi
 	if test "x$WX_CONFIG" != "x"
 	then
 		GTK_CFLAGS=`$WX_CONFIG --cflags`
@@ -394,7 +401,15 @@ then
 	fi
 else
 	dnl check for gtk-config
-	AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+	if test "x$GTK_CONFIG" = "x"
+	then
+		AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+	fi
+	if test ! -x $GTK_CONFIG
+	then
+		AC_MSG_ERROR("Cannot execute $GTK_CONFIG!");
+	fi
+
 	dnl we don't set the LIBS directly as libwx_gtk might break other
 	dnl checks thanks to its included main() function
 	if test "$GTK_CONFIG" = yes

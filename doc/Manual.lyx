@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Mar  2 15:26:25 1999
+#This file was created by <karsten> Wed Mar 10 09:42:53 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -30,8 +30,8 @@
 \layout Title
 \added_space_top vfill \added_space_bottom vfill 
 
-\shape italic 
-M
+\shape slanted 
+Mahogany Mail
 \shape default 
 
 \newline 
@@ -55,13 +55,13 @@ Written by Karsten Ballüder and Vadim Zeitlin
 
 \layout Chapter
 
-Using M 
+Using Mahogany Mail
 \layout Section
 
 Release Notes_1001_
 \layout Standard
 
-Some quick notes about this release of M.
+Some quick notes about this release of Mahogany.
 \layout Subsection
 
 WARNING - this is alpha
@@ -91,7 +91,7 @@ Quite some already, but more are still missing.
 \layout Itemize
 
 Cross-platform.
- M compiles on a variety of Unix systems and on Microsoft Windows.
+ Mahogany compiles on a variety of Unix systems and on Microsoft Windows.
  Use one mail client, no matter what system you use.
  The source and binary for Windows 95/98/NT are available on request (
 \latex latex 
@@ -124,9 +124,9 @@ Wide (extreme?) user configurability.
 \layout Itemize
 
 Scriptable and extendable.
- M includes an embedded Python interpreter with full access to its object
- hierarchy.
- Write object-oriented scripts to extend and control M.
+ Mahogany includes an embedded Python interpreter with full access to its
+ object hierarchy.
+ Write object-oriented scripts to extend and control Mahogany.
 \layout Itemize
 
 Easy MIME support.
@@ -146,8 +146,8 @@ Powerful address database and contact manager
 Printing of nicely formatted messages.
 \layout Itemize
 
-Full internationalisation support, M speaks multiple languages, but no complete
- translations yet.
+Full internationalisation support, Mahogany speaks multiple languages, but
+ no complete translations yet.
 \layout Subsection
 
 Known bugs
@@ -241,7 +241,7 @@ ANY OTHER SUGGESTION
 Help Needed
 \layout Standard
 
-As you can see, we have big plans for M.
+As you can see, we have big plans for Mahogany.
  To achieve all this, we need some help.
  Areas where we would use some help are
 \layout Itemize
@@ -259,15 +259,15 @@ The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
 \layout Itemize
 
 If you have access to other systems apart from Linux/Solaris/Windows, you
- are very welcome to help us port M to those platforms, or to other hardware
- than Intel.
+ are very welcome to help us port Mahogany to those platforms, or to other
+ hardware than Intel.
 \layout Subsection
 
 Copyright_1003_
 \layout Standard
 
-M is copyright by Karsten Ballüder and Vadim Zeitlin.
- It is licensed under the M 
+Mahogany is copyright by Karsten Ballüder and Vadim Zeitlin.
+ It is licensed under the Mahogany 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -281,8 +281,8 @@ Artistic License
 \end_inset 
 
 .
- Some part of the source tree distributed with M is not covered under this
- license.
+ Some part of the source tree distributed with Mahogany is not covered under
+ this license.
  These additional sources can be found in the 
 \begin_inset Quotes eld
 \end_inset 
@@ -301,7 +301,7 @@ extra/src
  However, they can freely distributed under certain conditions.
 \layout Subsection
 
-The M ``Artistic License''
+The Mahogany ``Artistic License''
 \begin_inset LatexCommand \label{License}
 
 \end_inset 
@@ -322,7 +322,7 @@ The intent of this document is to state the conditions under which this
 \layout Standard
 
 This license is based on Perl's ``Artistic License'' and has been adapted
- to better suit M.
+ to better suit Mahogany.
  It aims to confirm with the Open-Source specification.
 \layout Subsubsection
 
@@ -465,7 +465,7 @@ The User Interface
 The Main Window_2001_
 \layout Standard
 
-M's main window is vertically divided into two parts.
+Mahogany's main window is vertically divided into two parts.
  On the left it has a tree view of all available mail or news folders.
  On the right of it, it shows the currently selected folder in a folder
  view(see 
@@ -580,8 +580,8 @@ The INBOX Folder
 The folder named INBOX has a special meaning.
  It is the main system mailbox and cannot be deleted or renamed.
  All new mail will arrive in here.
- At present, M leaves all messages in the system inbox.
- Future versions of M will be able to collect mail from several different
+ At present, Mahogany leaves all messages in the system inbox.
+ Future versions of Mahogany will be able to collect mail from several different
  incoming mailboxes, e.g.
  the INBOX and some additional POP3 accounts, and move them to a new folder.
  
@@ -658,7 +658,8 @@ Expand
 
  button.
  If there is only one possible expansion for the letters you have typed,
- M will automatically replace them with the corresponding full e-mail address.
+ Mahogany will automatically replace them with the corresponding full e-mail
+ address.
  Other possible cases: either there are no matches at all and a message
  in the status line of the window will tell you so, or there are more than
  one match in which case you will be presented with a choice of all possible
@@ -724,10 +725,10 @@ To:
 Understanding program options
 \layout Standard
 
-One of the goals of the M project is to be as configurably as possible.
- Of course, it means that M has a lot of options - however we hope that
- it doesn't make the program more difficult to use because you have the
- complete liberty to ignore all options until you need to use them.
+One of the goals of the Mahogany project is to be as configurably as possible.
+ Of course, it means that Mahogany has a lot of options - however we hope
+ that it doesn't make the program more difficult to use because you have
+ the complete liberty to ignore all options until you need to use them.
  Moreover, some program options are completely transparent to the user because
  they're automatically remembered by the program.
  All the other ones may be changed from the main options dialog which may
@@ -741,15 +742,15 @@ These options include the sizes and the positions of all windows, the texts
  of all prompts, the positions of splitters in the main program window and
  the other folder views as well as several other things.
  These options are special in that they do not appear in the options dialog
- and so can not be changed directly - instead M remembers them each time
- it is shut down, so when it is reopened it will be in exactly the same
- state as during the last run.
+ and so can not be changed directly - instead Mahogany remembers them each
+ time it is shut down, so when it is reopened it will be in exactly the
+ same state as during the last run.
  Try to play with it: adjust the sizes of the main program window and the
- splitters in it as you like, exit M and restart it (this is for testing
- only, of course, you do not need to do it each time!) - you should see
- that the window reappears on the same position (although this might not
- work under some window managers), has the same size and is split in the
- same manner.
+ splitters in it as you like, exit Mahogany and restart it (this is for
+ testing only, of course, you do not need to do it each time!) - you should
+ see that the window reappears on the same position (although this might
+ not work under some window managers), has the same size and is split in
+ the same manner.
 \layout Subsection
 
 Other options
@@ -780,7 +781,7 @@ end{figure}
 
 Here several important settings are configured, so it is advised (as the
  program itself will tell you whenit is run for the first time) to set them
- up before starting using M.
+ up before starting using Mahogany.
 \layout Itemize
 
 
@@ -844,7 +845,7 @@ TODO
 Python page
 \layout Standard
 
-(only if you have a Python-enabled version of M)
+(only if you have a Python-enabled version of Mahogany)
 \layout Standard
 
 
@@ -858,13 +859,14 @@ Python page
 Addressbook page
 \layout Standard
 
-M may automatically remember all addresses from all e-mail messages you
- receive (actually, only those which you read).
+Mahogany may automatically remember all addresses from all e-mail messages
+ you receive (actually, only those which you read).
  This is called 
 \emph on 
 address autocollection 
 \emph default 
-and, as almost any other feature of M can be turned on and off as desired.
+and, as almost any other feature of Mahogany can be turned on and off as
+ desired.
  In this page you may choose whether you want to use this feature at all
  (it is on by default) and, if so, where should be the autocollected addresses
  be put and other settings.
@@ -915,7 +917,7 @@ You may enter the path of the address book to use for autocollected addresses.
  Although you may use any address book for this, it is probably better to
  have a special address book for all autocollected addresses.
  If the path name given here is an absolute one, it is used as is.
- Otherwise, it is considered to be relative to your M directory.
+ Otherwise, it is considered to be relative to your Mahogany directory.
  For example, the default for this option is 
 \begin_inset Quotes eld
 \end_inset 
@@ -943,8 +945,8 @@ You may with to autocollect only addresses which have a full name - in this
  (the one preceding the '@' symbol) will be used instead of the name.
 \layout Standard
 
-In addition to its own built-in addressbook format, M also supports the
- addressbook files of the BBDB addressbook used with Emacs (see 
+In addition to its own built-in addressbook format, Mahogany also supports
+ the addressbook files of the BBDB addressbook used with Emacs (see 
 \begin_inset LatexCommand \ref{BBDB}
 
 \end_inset 
@@ -962,7 +964,7 @@ Ignore entries without names
 \newline 
 BBDB can store entries which have only an e-mail address with them, but
  no name.
- If you set this option, M will discard such entries.
+ If you set this option, Mahogany will discard such entries.
 \layout Itemize
 
 
@@ -971,7 +973,7 @@ Generate unique aliases
 \series default 
 
 \newline 
-Setting this option allows M to ensure that all aliases are unique.
+Setting this option allows Mahogany to ensure that all aliases are unique.
  If two entries have the same alias, one of them will be modified to distinguish
  them.
  This is especially useful in conjuction with the following option.
@@ -988,8 +990,8 @@ Name for nameless entries
 \series default 
 
 \newline 
-If M finds entries without a name and is not set to ignore it, this name
- will be used for such entries.
+If Mahogany finds entries without a name and is not set to ignore it, this
+ name will be used for such entries.
  It can be combined with the option to generate unique aliases.
 \layout Itemize
 
@@ -1000,22 +1002,23 @@ Save on exit
 
 \newline 
 As saving BBDB addressbook can potentially lead to some loss of information
- in the original database file (BBDB and M support different fields), you
- can choose whether you want M to automatically save the data on exit or
- ask you for confirmation.
+ in the original database file (BBDB and Mahogany support different fields),
+ you can choose whether you want Mahogany to automatically save the data
+ on exit or ask you for confirmation.
  Read section 
 \begin_inset LatexCommand \ref{BBDB}
 
 \end_inset 
 
- for more details about how BBDB and M differ in interpreting the database.
+ for more details about how BBDB and Mahogany differ in interpreting the
+ database.
 \layout Paragraph
 
 Helpers
 \layout Standard
 
-On this page you can customise which external helper applications M uses
- for different action that it does not perform itself.
+On this page you can customise which external helper applications Mahogany
+ uses for different action that it does not perform itself.
 \layout Itemize
 
 
@@ -1024,7 +1027,8 @@ Open URLs with
 \series default 
 
 \newline 
-M will use the program listed here to open URLs embedded in email messages.
+Mahogany will use the program listed here to open URLs embedded in email
+ messages.
  If you want to use Lynx as your Web browser you should prefix it with 
 \begin_inset Quotes eld
 \end_inset 
@@ -1047,8 +1051,8 @@ URL browser is Netscape
 \newline 
 If the browser used to open URLs belongs to the family of Netscape programs,
  tick this box.
- Instead of calling a new browser each time, M will tell the already running
- Netscape process to load the new URL.
+ Instead of calling a new browser each time, Mahogany will tell the already
+ running Netscape process to load the new URL.
  Also, don't forget to clear it if you use another browser - otherwise it
  will fail to start up.
 \layout Itemize
@@ -1080,7 +1084,7 @@ New Mail Command
 \series default 
 
 \newline 
-The line in this field will be executed whenever M receives new mail.
+The line in this field will be executed whenever Mahogany receives new mail.
  This can be used to play a sound to notify the user of incoming messages,
  or do something else to alert him.
 \layout Subsubsection
@@ -1223,13 +1227,13 @@ Support for BBDB Address Books_3002_
 
 \end_inset 
 
-M supports reading and writing of BBDB address book files.
+Mahogany supports reading and writing of BBDB address book files.
  BBDB is the Big Brother DataBase used with the Emacs family of editors.
  If you have an existing address book file, usually called 
 \family typewriter 
 .bbdb
 \family default 
-, you can load it into M and use it.
+, you can load it into Mahogany and use it.
  This is especially useful if you have an existing file with auto-collected
  email addresses that you want to continue to use.
 \layout Paragraph*
@@ -1237,9 +1241,10 @@ M supports reading and writing of BBDB address book files.
 Caution:
 \layout Standard
 
-The BBDB address book format supports different fields than M's native database.
- When reading a BBDB file, M will only read the first two addresses and
- telephone numbers and assign them to the 
+The BBDB address book format supports different fields than Mahogany's native
+ database.
+ When reading a BBDB file, Mahogany will only read the first two addresses
+ and telephone numbers and assign them to the 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -1258,9 +1263,10 @@ Work
  addresses and phone numbers.
  All additional addresses and phone numbers, the AKA list and the comments
  will get lost.
- M will only save the information displayed in the address editor window.
+ Mahogany will only save the information displayed in the address editor
+ window.
  Currently saving of phone numbers to BBDB files is unsupported as it uses
- a different format from M.
+ a different format from Mahogany.
  
 \shape italic 
 Therefore, reading a BBDB file and saving it back to disk may lead to a
@@ -1269,7 +1275,7 @@ Therefore, reading a BBDB file and saving it back to disk may lead to a
 
 Scripting and Extending 
 \shape slanted 
-M
+Mahogany
 \layout Section
 
 Introduction
@@ -1277,23 +1283,23 @@ Introduction
 
 
 \shape slanted 
-M 
+Mahogany 
 \shape default 
 has an embedded Python interpreter, if compiled with Python support enabled.
  Python is an object-oriented script language which can be used to write
  scripts to be executed by 
 \shape slanted 
-M
+Mahogany
 \shape default 
  or even to extend 
 \shape slanted 
-M
+Mahogany
 \shape default 
 's functionality.
- Python scripts have full access to all internal M data structures and objects.Sc
-ripting and Python integration A number of user definable callback functions
- are available.
- Scripts have access most objects living in M.
+ Python scripts have full access to all internal Mahogany data structures
+ and objects.Scripting and Python integration A number of user definable
+ callback functions are available.
+ Scripts have access most objects living in Mahogany.
  Scripting can be disabled in the Preferences dialog (see 
 \begin_inset LatexCommand \ref{PythonOptions}
 
@@ -1306,7 +1312,7 @@ Currently the scripting support is quite basic.
  If you are interested in writing scripts and need additional callbacks
  or support for them within 
 \shape slanted 
-M
+Mahogany
 \shape default 
 , please get in touch with the developers who will be happy to add it.
 \layout Section
@@ -1316,7 +1322,7 @@ Initialisation
 
 At startup, 
 \shape slanted 
-M
+Mahogany
 \shape default 
  will load a file called 
 \family typewriter 
@@ -1335,7 +1341,7 @@ Callback Functions (Hooks)
 There are a number of callbacks available which will be called from different
  places within 
 \shape slanted 
-M
+Mahogany
 \shape default 
 .
  These are defined in the header file 
@@ -1617,14 +1623,14 @@ Called when new mail arrived anywhere.
 Supported Classes
 \layout Standard
 
-Python has access to M's internal class hierarchy.
+Python has access to Mahogany's internal class hierarchy.
  At present we supply interface definitions and Python modules for only
  a small number of classes, however if there is need for more classes being
  supported, we can easily extend the list - please ask us if you want more
  support!
 \layout Standard
 
-Some automatically generated documentation of the Python interface to M
+Some automatically generated documentation of the Python interface to Mahogany
  classes can be found in the 
 \latex latex 
 
@@ -1648,26 +1654,27 @@ Getting Help and Support
 WWW Support
 \layout Standard
 
-M has a home on the world wide web where you can get up to date information
- about development and the last releases.
+Mahogany has a home on the world wide web where you can get up to date informati
+on about development and the last releases.
  Come and visit us at the 
 \latex latex 
 
 \backslash 
-htmladdnormallink{M Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
+htmladdnormallink{Mahogany Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
 \layout Section
 
 Mailing Lists
 \layout Standard
 
-Currently there exist three different mailing lists to help support M users:
+Currently there exist three different mailing lists to help support Mahogany
+ users:
 \layout Paragraph
 
 m-announce:
 \layout Itemize
 
 M-announce is a moderated list which distributes announcements of new releases
- of M.
+ of Mahogany.
  It is a low volume mailing list.
 \layout Itemize
 
@@ -1690,10 +1697,10 @@ be@egroups.com}
 m-users:
 \layout Itemize
 
-M-Users is an unmoderated list for users of M to discuss problems and enhancemen
-ts.
+M-Users is an unmoderated list for users of Mahogany to discuss problems
+ and enhancements.
  All announcements will be sent to this list, too.
- It carries any kind of general discussion about M.
+ It carries any kind of general discussion about Mahogany.
  If you just have simple questions which might not constitute a real bug
  report, try asking for help on m-users.
 \layout Itemize
@@ -1717,7 +1724,7 @@ oups.com}
 m-developers:
 \layout Itemize
 
-M-developers is a moderated mailing list for the people involved in M's
+M-developers is a moderated mailing list for the people involved in Mahogany's
  development and testing.
  There are generally two reasons why you would want to send an e-mail here:
  
@@ -1728,11 +1735,11 @@ htmladdnormallink{m-developers@egroups.com}{mailto:m-developers@egroups.com}
 \begin_deeper 
 \layout Enumerate
 
-You have discovered a bug or problem in M and want to tell the developers
+You have discovered a bug or problem in Mahogany and want to tell the developers
  about, or, even better, you want to submit a patch to fix it.
 \layout Enumerate
 
-You want to help develop, translate or test M.
+You want to help develop, translate or test Mahogany.
  This is highly welcome and encouraged.
  Please, if you want to add a feature, get in touch with us.
 \end_deeper 
@@ -1801,7 +1808,7 @@ If there are no forms above this line, you need to subscribe by email or
 \latex latex 
 
 \backslash 
-htmladdnormallink{M Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
+htmladdnormallink{Mahogany Homepage}{http://www.phy.hw.ac.uk/~karsten/M/}
 \layout Subsection*
 
 Mailing List Archives
@@ -1816,7 +1823,7 @@ htmladdnormallink{Egroups.com}{http://www.egroups.com/}
 
 Compiling 
 \shape slanted 
-M
+Mahogany
 \shape default 
  from source
 \layout Standard
@@ -1835,7 +1842,7 @@ General Procedure
 Prerequisites
 \layout Standard
 
-Before you can compile M, you will need a matching copy of 
+Before you can compile Mahogany, you will need a matching copy of 
 \latex latex 
 
 \backslash 
@@ -1849,11 +1856,12 @@ htmladdnormallink{wxGTK}{http://www.freiburg.linux.de/~wxxt/}
 \latex default 
 .
  As wxGTK is under constant development, you should use the same copy of
- wxGTK that we used to build M, you can get it from the 
+ wxGTK that we used to build Mahogany, you can get it from the 
 \latex latex 
 
 \backslash 
-htmladdnormallink{M download page}{http://www.phy.hw.ac.uk/~karsten/M/download.html}
+htmladdnormallink{Mahogany download page}{http://www.phy.hw.ac.uk/~karsten/M/downloa
+d.html}
 \latex default 
 .
 \layout Subsection
@@ -1905,7 +1913,7 @@ Of course, feel free to change the two debug options to
 \family default 
  if you want to generate a version with debugging enabled.
  Just make sure that if you configure wxGTK with debug, then you also need
- to configure M 
+ to configure Mahogany 
 \family typewriter 
 --with-debug
 \family default 
@@ -1924,13 +1932,23 @@ make
 make install
 \family default 
 .
- wxGTK requires libgtk 1.0.x, it does not work with gtk-1.1 (yet).
+ wxGTK requires libgtk 1.0.x, it does not work with gtk-1.1/1.2 (yet).
+ If you have both gtk 1.0 and 1.2 installed in separate locations, you can
+ use the 
+\family typewriter 
+--with-gtk-prefix
+\family default 
+ to tell wxGTK's 
+\family typewriter 
+configure
+\family default 
+ about where to find it.
 \layout Subsection
 
-Configuring M
+Configuring Mahogany
 \layout Standard
 
-As with wxGTK, just run M's 
+As with wxGTK, just run Mahogany's 
 \family typewriter 
 configure
 \family default 
@@ -1940,7 +1958,7 @@ configure
 \family typewriter 
 --with-debug
 \family default 
- when configuring M.
+ when configuring Mahogany.
  Call 
 \family typewriter 
 ./configure --help
@@ -1957,28 +1975,41 @@ extra/include
 extra/lib
 \family default 
  directories and configure will find them.
- To reconfigure M, make sure that you delete any 
+ To reconfigure Mahogany, make sure that you delete any 
 \family typewriter 
 *cache*
 \family default 
  files first.
+ If you have multiple versions of wxGTK installed, you can set the 
+\family typewriter 
+WX_CONFIG
+\family default 
+ environment variable to tell 
+\family typewriter 
+configure
+\family default 
+ which 
+\family typewriter 
+wx-config
+\family default 
+ program to call.
 \layout Subsection
 
-Compiling M
+Compiling Mahogany
 \layout Standard
 
 Just run 
 \family typewriter 
 make
 \family default 
- from the top level M directory.
- If you later want to rebuild M without rebuilding the libraries contained
- in the 
+ from the top level Mahogany directory.
+ If you later want to rebuild Mahogany without rebuilding the libraries
+ contained in the 
 \family typewriter 
 extra/src
 \family default 
  directory, i.e.
- after changing the M source, just run 
+ after changing the Mahogany source, just run 
 \family typewriter 
 make
 \family default 
@@ -2003,7 +2034,7 @@ make
  in the doc directory.
 \layout Subsection
 
-Installing M
+Installing Mahogany
 \layout Standard
 
 Just call any or all of the following make targets in the main directory:
@@ -2012,7 +2043,7 @@ Just call any or all of the following make targets in the main directory:
 make install
 \layout Standard
 
-Will compile and install M and the required additional files.
+Will compile and install Mahogany and the required additional files.
 \layout Subsubsection
 
 make install_doc
@@ -2026,7 +2057,7 @@ make install_locale
 \layout Standard
 
 Will attempt to generate message catalogs for translations and install them.
- Note that M is not fully translated yet.
+ Note that Mahogany is not fully translated yet.
 \layout Subsubsection
 
 make install_all
@@ -2074,7 +2105,7 @@ egcs
 /usr/lib
 \family default 
  be explicitly listed.
- M has been compiled with 
+ Mahogany has been compiled with 
 \family typewriter 
 egcs
 \family default 
@@ -2096,7 +2127,7 @@ glibc2
 Solaris/SunOS
 \layout Standard
 
-M has been successfully compiled with 
+Mahogany has been successfully compiled with 
 \family typewriter 
 gcc-2.8.0
 \family default 
@@ -2111,10 +2142,10 @@ C++
 Microsoft Windows 
 \layout Standard
 
-M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
+Mahogany can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
  Visual C++ version 4.x or later.
- The makefiles are included in the M source distribution (they will build
- the version of M without Python support).
+ The makefiles are included in the Mahogany source distribution (they will
+ build the version of Mahogany without Python support).
 \layout Subsection
 
 DEC Alpha with Digital UNIX 3.2c
@@ -2123,7 +2154,7 @@ DEC Alpha with Digital UNIX 3.2c
 (Karsten Ballüder: It seemed at that time that the segmentation fault was
  caused by a bug in wxGTK.
  By now this should be fixed.
- However, no new attempt to compile M on DEC Unix has been made yet.
+ However, no new attempt to compile Mahogany on DEC Unix has been made yet.
  However, I include Holger's report as a help for some future attemp.)
 \layout Standard
 
@@ -2358,8 +2389,8 @@ Then only final linkage errors occured:
 .
 \layout Enumerate
 
-Because the link process did not give me any error I expected M to run (at
- least some kind of unstable).
+Because the link process did not give me any error I expected Mahogany to
+ run (at least some kind of unstable).
  But a core dump appeared immediately.
 \newline 
 
@@ -2451,7 +2482,7 @@ verb|[M]|
 verb|RecordDefaults=1|
 \layout Standard
 
-After running M, this file will then contain all default settings.
+After running Mahogany, this file will then contain all default settings.
  Most of them are easily understood.
  Otherwise, the file 
 \family typewriter 
@@ -2465,7 +2496,7 @@ wxWindows
 
 You will need the wxWindows GUI toolkit to compile 
 \shape slanted 
-M
+Mahogany
 \shape default 
 .
 \layout Standard
@@ -2487,19 +2518,19 @@ wxxt/
 
 In order to compile this alpha release of 
 \emph on 
-M 
+Mahogany 
 \emph default 
 you will need wxWindows 2.0 strictly later than beta 3 and so it is probably
  easier to take the wxWindows sources snapshot from the 
 \emph on 
-M
+Mahogany
 \emph default 
  home page.
 \layout Chapter
 
 
 \shape italic 
-M
+Mahogany
 \shape default 
  Hacker's Guide
 \layout Standard
@@ -2507,7 +2538,7 @@ M
 Here we are trying to provide some information for existing and potential
  
 \shape italic 
-M
+Mahogany
 \shape default 
  developers.
 \layout Section
@@ -2525,8 +2556,8 @@ Profiles are objects storing configuration information.
 inheritance
 \emph default 
 .
- Each profile relates to some real existing object in M, for example, a
- mailfolder "MyFolder" would have a FolderProfile with the same name as
+ Each profile relates to some real existing object in Mahogany, for example,
+ a mailfolder "MyFolder" would have a FolderProfile with the same name as
  the folder associated with it, or the settings of the FolderView window
  would read their settings from a profile with the name "FolderView".
  So each object requests a profile of well-defined name relating to the
@@ -2545,7 +2576,8 @@ Whenever a profile is being created, it takes the pointer to a parent profile
 \layout Standard
 
 The Motivation behind this is to have the behaviour of different parts of
- M change dynamically as they are being used, to make them context aware.
+ Mahogany change dynamically as they are being used, to make them context
+ aware.
  For example, a ComposeView used to reply to a message from a mailing list
  might set a different return address to a ComposeView writing a message
  to a friend.
@@ -2557,10 +2589,10 @@ The Motivation behind this is to have the behaviour of different parts of
  its messages are stored in (it inherits from the FolderView which inherits
  from the mailfolder) and therefore if a mailfolder is likely to contain
  lots of long mails (e.g.
- the M developers ranting about the advantages and shortcomings of different
- features), it can have a smaller typeface configured for displaying the
- messages -- configured at the mailfolder level, not for a particular MessageVie
-w.
+ the Mahogany developers ranting about the advantages and shortcomings of
+ different features), it can have a smaller typeface configured for displaying
+ the messages -- configured at the mailfolder level, not for a particular
+ MessageView.
 \layout Subsection
 
 Which Profiles are there?
@@ -2700,8 +2732,8 @@ All access to wxConfig pointers in profiles and groups etc should be removed.
 Filtering - a Proposal
 \layout Standard
 
-Filtering rules in M are described in a simple control language, interpreted
- by a recursive descent parser.
+Filtering rules in Mahogany are described in a simple control language,
+ interpreted by a recursive descent parser.
  No yacc or flex required.
  I try to explain this in some form of BNF notation:
 \layout Verse
@@ -2812,8 +2844,8 @@ A Filter object would be an abstract representation of a set of rules parsed
  only knows conditions but no rules.
  It would return true if its conditions all return true (includin possible
  logical operators of course), false otherwise.
- It is used by the Filter class and could be used by some other M functionality
- like e.g.
+ It is used by the Filter class and could be used by some other Mahogany
+ functionality like e.g.
  a "vacation" function which needs to check for mail-loops.
  Though, all this can actually be achieved with Filters, there shouldn't
  really be a need for a MatchTest class.
@@ -2901,7 +2933,7 @@ Other EMails (list of additional e-mail addresses)
 Home and office address
 \layout Subsubsection
 
-current ADB files format (M version 0.xx)
+current ADB files format (Mahogany version 0.xx)
 \layout Standard
 
 TODO
@@ -6064,9 +6096,10 @@ AdbDataProvider
 This is the class responsible for actually creating the address books objects.
  Each AdbDataProvider corresponds to one particular implementation of ADB,
  i.e.
- one provider is used for working with ADBs in M's native format, but another
- one may be used to work with ADBs in some other application's format or
- with remote (global wide) directory services accessible on the Internet.
+ one provider is used for working with ADBs in Mahogany's native format,
+ but another one may be used to work with ADBs in some other application's
+ format or with remote (global wide) directory services accessible on the
+ Internet.
  
 \layout Standard
 
@@ -6148,36 +6181,36 @@ Being a brand new program, this section is currently pretty empty.
 Installation Problems
 \layout Subsection
 
-All M icons show a questionmark
+All Mahogany icons show a questionmark
 \layout Standard
 
 
 \shape italic 
-I'm a linuxuser (redhat) who just found M and really likes it, but I have
- a problem, I cant get all the widgets to work, the pictures on the buttons
- and the ones before the mailboxes all appear as an questionmark.
+I'm a linuxuser (redhat) who just found Mahogany and really likes it, but
+ I have a problem, I cant get all the widgets to work, the pictures on the
+ buttons and the ones before the mailboxes all appear as an questionmark.
  Do I need some library to make it look like your screenshot? If you would
  assist me in this matter I would be very greatful.
 \layout Standard
 
 It depends how you installed it.
- If the icon with the questionmark appears, it means that M didn't find
- its installation directory with the icons.
+ If the icon with the questionmark appears, it means that Mahogany didn't
+ find its installation directory with the icons.
  If you installed the linux version from the .tar.gz with the binary, it should
  go into /usr/local or a similar place and you should have the icons in
  /usr/local/share/M/icons.
- If they are not there, M cannot find them.
- If you have installed it in a different location, M should ask you for
- the installation ("global M directory") when you start it for the first
- time.
+ If they are not there, Mahogany cannot find them.
+ If you have installed it in a different location, Mahogany should ask you
+ for the installation ("global Mahogany directory") when you start it for
+ the first time.
 \layout Standard
 
 If you have compiled it yourself, make sure you do a "make install" or "make
  install_all" (of which parts might fail, depending on your setup), to install
  everything in the right place.
  If you just grabbed the binary of the daily snapshot, you need to have
- a working M installation as well or it won't get the icons.
- You do not need any additional library, M handles xpm files internally.
+ a working Mahogany installation as well or it won't get the icons.
+ You do not need any additional library, Mahogany handles xpm files internally.
 \layout Subsection
 
 The Preferences Dialog does not show up properly
@@ -6185,7 +6218,8 @@ The Preferences Dialog does not show up properly
 
 
 \shape italic 
-When I set up M or select the preferences dialog, its contents do not appear.
+When I set up Mahogany or select the preferences dialog, its contents do
+ not appear.
  Sometimes I cannot enter anything in the fields.
 \layout Standard
 
@@ -6216,7 +6250,7 @@ gzip
 tar
 \family default 
 .
- Change to the directory where you want to install M, e.g to 
+ Change to the directory where you want to install Mahogany, e.g to 
 \family typewriter 
 /usr
 \family default 
