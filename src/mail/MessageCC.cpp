@@ -870,6 +870,13 @@ MimePart *MessageCC::FindPartInMIMETree(MimePart *mimepart, int& n)
 {
    if ( mimepart->GetNested() )
    {
+      // MULTIPARTs don't count for total part count but MESSAGE (which also
+      // have nested parts) do
+      if ( mimepart->GetType().GetPrimary() != MimeType::MULTIPART )
+      {
+         n--;
+      }
+
       return FindPartInMIMETree(mimepart->GetNested(), n);
    }
    else // a simple part
@@ -904,7 +911,10 @@ const MimePart *MessageCC::GetMimePart(int n) const
    CHECK( n >= 0 && (size_t)n < m_numParts, NULL, "invalid part number" );
 
    MimePart *mimepart = m_mimePartTop;
-   while ( n || mimepart->GetNested() )
+
+   // skip the MULTIPART pseudo parts - this is consistent with DecodeMIME()
+   // which doesn't count them in m_numParts neither
+   while ( n || mimepart->GetType().GetPrimary() == MimeType::MULTIPART )
    {
       mimepart = FindPartInMIMETree(mimepart, n);
 
