@@ -8,12 +8,7 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	dialup.cpp: OnTerminate() must not call the test
-                again or we get recursion! Must find a way around it.
-
-
 9	KB	wxLayout:
-		- cannot type text when NUMLOCK is on
 		- delete in empty line
 		- undo
 		- dead accents dont work
@@ -21,14 +16,11 @@ $Id$
 		- write editor plugin translating keysyms to actions
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
-		- fix import of own clipboard format
 		- add HTML import
 	KB	MessageView:
 		 - should show cursor only on demand
-		 - remember focused message not by index but by UID
-		   and find it again after re-sort
-
-8	KB	no handler found for this image in html help
+		 - shouldn't preview messages unless configured to do so
+                   (currently does preview on delete)
 
 8	KB	integrate imap 4.7 and recently received patches
 5	KB	let all message sorting use the translation table
