@@ -79,15 +79,9 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
-<<<<<<< MailFolderCC.cpp
    m_numOfMessages = 0;
    m_Listing = NULL;
    m_GenerateNewMailEvents = false; // for now don't!
-   
-=======
-   numOfMessages = oldnum = -1;
-
->>>>>>> 1.71
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
 
@@ -507,20 +501,12 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 void
 MailFolderCC::UpdateCount(void)
 {
-<<<<<<< MailFolderCC.cpp
    unsigned long oldnum = m_numOfMessages;
    m_numOfMessages = n;
 
-=======
->>>>>>> 1.71
    UpdateViews();
 
-<<<<<<< MailFolderCC.cpp
    if(m_GenerateNewMailEvents && n  > oldnum) // new mail has arrived
-=======
-   long n;
-   if(numOfMessages > oldnum && oldnum != -1) // new mail has arrived
->>>>>>> 1.71
    {
       n = m_numOfMessages - oldnum;
       unsigned long *messageIDs = new unsigned long[n];
