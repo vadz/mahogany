@@ -227,7 +227,9 @@ private:
          return ptr; \
       } \
  \
-      classname *operator->() const { return m_ptr; } \
+      classname *Get() const { return m_ptr; } \
+ \
+      classname *operator->() const { return Get(); } \
  \
    private: \
       classname *m_ptr;

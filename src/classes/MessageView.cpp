@@ -2113,13 +2113,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
             wxString name;
             name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
 
-            MFolder_obj mfolder = MFolder::CreateTemp
-                                  (
-                                    name,
-                                    MF_FILE,
-                                    MF_FLAGS_TEMPORARY,  // delete file on close
-                                    filename
-                                  );
+            MFolder_obj mfolder = MFolder::CreateTempFile(name, filename);
 
             if ( mfolder )
             {

@@ -1550,7 +1550,7 @@ bool MFolderDialog::TransferDataFromWindow()
       wxSplitPath(m_FileName, NULL, &name, NULL);
 
       SafeDecRef(m_folder);
-      m_folder = MFolder::CreateTemp(name, MF_FILE, 0, m_FileName);
+      m_folder = MFolder::CreateTempFile(name, m_FileName, 0);
    }
 
    m_userChoseFolder = true;

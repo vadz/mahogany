@@ -352,6 +352,10 @@ SOURCE=.\src\mail\Threading.cpp
 
 SOURCE=.\src\mail\ThreadJWZ.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\VFolder.cpp
+# End Source File
 # End Group
 # Begin Group "gui"
 

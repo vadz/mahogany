@@ -86,6 +86,8 @@ VirtualFolder::VirtualFolder(const MFolder *folder, OpenMode openmode)
 
 VirtualFolder::~VirtualFolder()
 {
+   Close();
+
    ClearMsgs();
 
    m_folder->DecRef();
@@ -158,9 +160,9 @@ long VirtualFolder::ClearFolder(const MFolder *folder)
 String
 VirtualFolder::GetFullImapSpec(const MFolder *folder, const String& login)
 {
-   FAIL_MSG( "TODO" );
+   CHECK( folder, "", "NULL folder in VirtualFolder::GetFullImapSpec" );
 
-   return "";
+   return folder->GetFullName();
 }
 
 // ----------------------------------------------------------------------------
@@ -243,7 +245,10 @@ Profile *VirtualFolder::GetProfile() const
 
 VirtualFolder::Msg *VirtualFolder::GetMsgFromMsgno(MsgnoType msgno) const
 {
-   CHECK( msgno < GetMsgCount(), NULL, "invalid msgno in VirtualFolder" );
+   msgno--;
+
+   CHECK( 0 <= msgno && msgno < GetMsgCount(), NULL,
+          "invalid msgno in VirtualFolder" );
 
    return m_messages[(size_t)msgno];
 }
@@ -323,7 +328,7 @@ VirtualFolder::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
    size_t cookie;
    for ( UIdType n = seq.GetFirst(cookie);
          n != UID_ILLEGAL;
-         n = seq.GetNext(n, cookie) )
+         n = seq.GetNext(n, cookie), count )
    {
       const Msg *msg = GetMsgFromMsgno(n);
       if ( !msg )
@@ -335,11 +340,24 @@ VirtualFolder::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
       // we rely on the fact that headers array contains pointers to HeaderInfo
       // objects so we can fill them by passing the same pointer to
       // GetHeaderInfo()
-      ArrayHeaderInfo subhdrs;
-      subhdrs.Add(headers[count++]);
+      HeaderInfo * const hi = headers[count++];
 
-      // FIXME: what to do on failure?
-      msg->mf->GetHeaderInfo(subhdrs, subseq);
+      ArrayHeaderInfo subhdrs;
+      subhdrs.Add(hi);
+
+      if ( msg->mf->GetHeaderInfo(subhdrs, subseq) )
+      {
+         // override some fields
+
+         // UID must refer to this folder, not the other one (notice that count
+         // is already incremented, as it should be -- UIDs == msgnos start
+         // from 1, not 0)
+         hi->m_UId = count;
+
+         // and we maintain our own, independent flags
+         hi->m_Status = msg->flags;
+      }
+      //else: what to do on failure? (FIXME)
    }
 
    return count;
@@ -466,7 +484,6 @@ Message *VirtualFolder::GetMessage(unsigned long uid)
 
    return msg ? msg->mf->GetMessage(msg->uid) : NULL;
 }
-
 
 bool
 VirtualFolder::SetMessageFlag(unsigned long uid,

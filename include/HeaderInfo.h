@@ -162,9 +162,9 @@ private:
    /// the "main" encoding of the headers
    wxFontEncoding m_Encoding;
 
-   // it is the only one which can create these objects for now, later we
-   // should find some better way to allow other classes do it as well
+   // these classes can create/manipulate the HeaderInfo objects directly
    friend class MailFolderCC;
+   friend class VirtualFolder;
 };
 
 /**

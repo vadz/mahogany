@@ -46,6 +46,14 @@
     Actually, the folder information is stored in a profile, but this class
     hides this implementation detail so in the future we may store folder info
     in a database or on the network and still use the same interface.
+
+
+    There is also another kind of folders, which don't appear in the tree at
+    all: they're called "temporary" folders because they're not stored in
+    profile and so only exist during one session. Temporary folders are used
+    for things like showing an attachment of type message/rfc822 in a
+    standalone viewer (we create a temp mail folder for it then and so need an
+    associated MFolder) or for virtual folders such as the search results one.
 */
 class MFolder : public MObjectRC
 {
@@ -57,27 +65,71 @@ public:
       OpenInMainFrame = 0x0002   /// or in a separate window?
    };
 
-   /**@name static functions */
+   /** @name static functions
+
+     These methods are used to access an existing MFolder object by name (only
+     returns "permanent" folders) or creating a new MFolder object -- Create()
+     creates a new permanent MFolder while CreateTemp() a new temporary one
+    */
    //@{
-   /** get folder object by name, NULL is returned if it doesn't exist. The
-       root folder is returned if the name is empty.
+
+   /**
+     get folder object by name, NULL is returned if it doesn't exist. The
+     root folder is returned if the name is empty.
+
+     @param fullname the full folder name without the leading slash
+     @return folder (should be DecRef()'d by caller) or NULL on error
    */
    static MFolder *Get(const String& fullname);
-   /** create a new folder of specified type, it's an error to call it with
-       the folder name which already exists (NULL will be returned)
+
+   /**
+     create a new folder of specified type, it's an error to call it with
+     the folder name which already exists (NULL will be returned)
+
+     The parameter tryCreateOnOpen tells us to try to create the physical
+     folder (e.g. file, IMAP mailbox, ...) when the folder is opened for the
+     first time. It is harmless to specify this parameter even for the folder
+     types which can't be created (e.g. NNTP or POP).
+
+     @param fullname the full folder name without the leading slash
+     @param type the type of the new folder
+     @param tryCreateOnOpen if true, create physical folder later
+     @return folder (should be DecRef()'d by caller) or NULL on error
    */
    static MFolder *Create(const String& fullname,
                           MFolderType type,
                           bool tryCreateOnOpen = true);
-   /** create a temp object containing folder data
-   */
-   static MFolder *CreateTemp(const String& fullname,
+
+   /**
+     create a temporary folder with the specified name, type and class (all the
+     other parameters may be set later)
+
+     @param kind the class of the folder ("cclient", "virtual", ...)
+     @param fullname the name of the folder, not used for much currently
+     @param type the type of the new folder
+     @param profile associated with this folder, use global one if NULL
+     @return folder (should be DecRef()'d by caller) or NULL on error
+    */
+   static MFolder *CreateTemp(const String& kind,
+                              const String& fullname,
                               MFolderType type,
-                              int flags,
-                              const String& path,
-                              const String& server = "",
-                              const String& login = "",
-                              const String& password = "");
+                              Profile *profile = NULL);
+
+   /**
+     Create a temp folder representing a file.
+
+     NB: with the default value the file specified by path parameter will be
+         physically deleted when this folder object is deleted!
+
+     @param fullname the name of the folder, not used for much currently
+     @param path the path to the file
+     @param flags for the folder (only MF_FLAGS_TEMPORARY makes sense here)
+     @return folder (should be DecRef()'d by caller) or NULL on error
+   */
+   static MFolder *CreateTempFile(const String& fullname,
+                                  const String& path,
+                                  int flags = MF_FLAGS_TEMPORARY);
+
    //@}
 
    /**@name misc accessors */
@@ -134,17 +186,14 @@ public:
       /// set the position in the tree (used by wxFolderTree only)
    virtual void SetTreeIndex(int pos) { }
 
-      /**
-        Get the profile associated with this folder: it will never be NULL (as
-        we fall back to the application profile if we don't have our own) and
-        can be used to read the other (than the ones we have explicit functions
-        for accessing them) settings associated with this folder.
+   /**
+     Get the profile associated with this folder: it will never be NULL (as
+     we fall back to the application profile if we don't have our own) and
+     can be used to read the other (than the ones we have explicit functions
+     for accessing them) settings associated with this folder.
 
-        Avoid using this function in the new code, it is mainly for backwards
-        compatibility!
-
-        @return profile object to be DecRef()d by caller (never NULL)
-       */
+     @return profile object to be DecRef()d by caller (never NULL)
+    */
    virtual Profile *GetProfile() const = 0;
    //@}
 
@@ -285,7 +334,7 @@ private:
 #endif // !NO_PRIVATE_COPY
 
    // create folder by name
-   void Init(const String& name);
+   void Init(const String& name) { m_folder = MFolder::Get(name); }
 
    MFolder *m_folder;
 };

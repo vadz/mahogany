@@ -714,19 +714,6 @@ wxMFrame::OnMenuCommand(int id)
          mApplication->Help(MH_COPYRIGHT,this);
          break;
 
-#ifdef DEBUG
-      case WXMENU_HELP_WIZARD:
-         {
-            extern bool RunInstallWizard();
-
-            wxLogStatus("Running installation wizard...");
-
-            wxLogMessage("Wizard returned %s",
-                          RunInstallWizard() ? "true" : "false");
-         }
-         break;
-#endif // DEBUG
-
          // printing:
       case WXMENU_FILE_PRINT_SETUP:
          OnPrintSetup();

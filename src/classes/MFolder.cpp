@@ -79,32 +79,22 @@ static const size_t INVALID_CHILDREN_COUNT = (size_t)-1;
 // MFolder implementations
 // ----------------------------------------------------------------------------
 
-// MTempFolder is a temporary object which stores tyhe info about folder, but is
-// not persistent
+// MTempFolder is a temporary object which stores tyhe info about folder, but
+// is not persistent
 class MTempFolder : public MFolder
 {
 public:
-   MTempFolder(const String& fullname,
+   MTempFolder(const String& kind,
+               const String& fullname,
                MFolderType type,
-               int flags,
-               const String& path,
-               const String& server,
-               const String& login,
-               const String& password)
-      : m_type(type),
-        m_flags(flags),
+               Profile *profile)
+      : m_kind(kind),
         m_fullname(fullname),
-        m_path(path),
-        m_server(server), m_login(login), m_password(password)
+        m_type(type),
+        m_flags(0)
         {
-           // just as in MFolderFromProfile::GetPath() we need to ensure that
-           // we don't have any slashes in the file names under Windows
-#ifdef OS_WIN
-           if ( type == MF_FILE || type == MF_MH )
-           {
-              m_path.Replace("/", "\\");
-           }
-#endif // Windows
+           m_profile = profile ? profile : mApplication->GetProfile();
+           m_profile->IncRef();
         }
 
    ~MTempFolder()
@@ -115,33 +105,52 @@ public:
          // delete it now as we don't need it any longer
          wxRemoveFile(m_path);
       }
+
+      m_profile->DecRef();
    }
 
    // trivial implementation of base class pure virtuals
    virtual String GetPath() const { return m_path; }
-   virtual void SetPath(const String& path) { m_path = path; }
+   virtual void SetPath(const String& path)
+   {
+      m_path = path;
+
+      // just as in MFolderFromProfile::GetPath() we need to ensure that
+      // we don't have any slashes in the file names under Windows
+#ifdef OS_WIN
+      if ( m_type == MF_FILE || m_type == MF_MH )
+      {
+         m_path.Replace("/", "\\");
+      }
+#endif // Windows
+   }
+
    virtual String GetServer() const { return m_server; }
+
    virtual String GetLogin() const { return m_login; }
    virtual String GetPassword() const { return m_password; }
    virtual void SetAuthInfo(const String& login, const String& password)
       { m_login = login; m_password = password; }
+
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual MFolderType GetType() const { return m_type; }
-   virtual String GetClass() const { return "cclient"; }
+   virtual String GetClass() const { return m_kind; }
+
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
+
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */) { }
+
    virtual int GetFlags() const { return m_flags; }
    virtual void SetFlags(int flags) { m_flags = flags; }
 
    virtual Profile *GetProfile() const
    {
-      Profile *profile = mApplication->GetProfile();
-      profile->IncRef();
-      return profile;
+      m_profile->IncRef();
+      return m_profile;
    }
 
    virtual wxArrayString GetFilters() const { return wxArrayString(); }
@@ -159,16 +168,21 @@ public:
                                     MFolderType, bool) { return NULL; }
    virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
    virtual bool Rename(const String&)
-    { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
+      { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
 
 private:
-   MFolderType m_type;
-   int m_flags;
-   String m_fullname,
+   String m_kind,
+          m_fullname,
           m_path,
           m_server,
           m_login,
           m_password;
+
+   MFolderType m_type;
+
+   int m_flags;
+
+   Profile *m_profile;
 };
 
 // this class implements MFolder pure virtuals by reading/writing the data
@@ -515,15 +529,27 @@ MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
 }
 
 /* static */
-MFolder *MFolder::CreateTemp(const String& fullname,
-                             MFolderType type,
-                             int flags,
-                             const String& path,
-                             const String& server,
-                             const String& login,
-                             const String& password)
+MFolder *
+MFolder::CreateTemp(const String& kind,
+                    const String& fullname,
+                    MFolderType type,
+                    Profile *profile)
 {
-   return new MTempFolder(fullname, type, flags, path, server, login, password);
+   return new MTempFolder(kind, fullname, type, profile);
+}
+
+/* static */
+MFolder *
+MFolder::CreateTempFile(const String& fullname, const String& path, int flags)
+{
+   MFolder *folder = CreateTemp("", fullname, MF_FILE);
+   if ( folder )
+   {
+      folder->SetPath(path);
+      folder->SetFlags(flags);
+   }
+
+   return folder;
 }
 
 #ifdef DEBUG
@@ -1310,20 +1336,3 @@ size_t CreateMboxSubtree(MFolder *parent, const String& rootMailDir)
    return count;
 }
 
-// ----------------------------------------------------------------------------
-// MFolder_obj
-// ----------------------------------------------------------------------------
-
-void MFolder_obj::Init(const String& name)
-{
-   if ( !name.empty() && IsAbsPath(name) )
-   {
-      // called with a filename, create a temp folder to access it
-      m_folder = MFolder::CreateTemp(name, MF_FILE, 0, name);
-   }
-   else
-   {
-      // called with a folder name, create a folder for the tree entry
-      m_folder = MFolder::Get(name);
-   }
-}

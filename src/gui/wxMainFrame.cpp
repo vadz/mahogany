@@ -57,10 +57,28 @@
 
 #include "MModule.h"
 
+#ifdef DEBUG
+   #include "HeaderInfo.h"
+#endif
+
 // define this for future, less broken versions of wxWindows to dynamically
 // insert/remove the message menu depending on whether we have or not a folder
 // view in the frame - with current wxGTK it doesn't work at all, so disabling
 #undef HAS_DYNAMIC_MENU_SUPPORT
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+#ifdef DEBUG
+
+enum
+{
+   WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
+   WXMENU_DEBUG_SHOWVFOLDER,
+};
+
+#endif // DEBUG
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -246,7 +264,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetTitle(_("Copyright (C) 1997-2002 The Mahogany Developers Team"));
 
    static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
-   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
+   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345
    GetStatusBar()->SetFieldsCount(3, widths);
 
    // construct the menu and toolbar
@@ -258,6 +276,13 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddMessageMenu();
    AddLanguageMenu();
 #endif
+
+#ifdef DEBUG
+   wxMenu *menuDebug = new wxMenu;
+   menuDebug->Append(WXMENU_DEBUG_WIZARD, "Run install &wizard...");
+   menuDebug->Append(WXMENU_DEBUG_SHOWVFOLDER, "Show test &virtual folder");
+   GetMenuBar()->Append(menuDebug, "&Debug");
+#endif // debug
 
    AddHelpMenu();
    AddToolbarButtons(CreateToolBar(), WXFRAME_MAIN);
@@ -658,10 +683,69 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    {
       m_FolderView->OnCommandEvent(event);
    }
-   else if(id == WXMENU_HELP_CONTEXT)
+   else if (id == WXMENU_HELP_CONTEXT)
    {
       mApplication->Help(MH_MAIN_FRAME,this);
    }
+#ifdef DEBUG
+   else if ( WXMENU_CONTAINS(DEBUG, id) )
+   {
+      switch ( id )
+      {
+         case WXMENU_DEBUG_WIZARD:
+            extern bool RunInstallWizard();
+
+            wxLogStatus("Running installation wizard...");
+
+            wxLogMessage("Wizard returned %s",
+                          RunInstallWizard() ? "true" : "false");
+            break;
+
+         case WXMENU_DEBUG_SHOWVFOLDER:
+            if ( m_FolderView )
+            {
+               MailFolder_obj mf(m_FolderView->GetMailFolder());
+               if ( mf )
+               {
+                  MFolder_obj folder = MFolder::CreateTemp
+                                       (
+                                          "virtual",
+                                          "Search results",
+                                          MF_FILE,
+                                          mf->GetProfile()
+                                       );
+                  if ( folder )
+                  {
+                     MailFolder_obj vf = MailFolder::OpenFolder(folder);
+                     if ( vf )
+                     {
+                        HeaderInfoList_obj hil = mf->GetHeaders();
+                        if ( hil )
+                        {
+                           const HeaderInfo *hi = hil[0];
+                           if ( hi )
+                           {
+                              Message_obj message = mf->GetMessage(hi->GetUId());
+
+                              if ( message )
+                              {
+                                 vf->AppendMessage(*message.Get());
+
+                                 OpenFolderViewFrame(folder, this);
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            break;
+
+         default:
+            FAIL_MSG( "unknown debug menu command?" );
+      }
+   }
+#endif // DEBUG
    else
    {
       wxMFrame::OnMenuCommand(id);

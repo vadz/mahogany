@@ -3908,12 +3908,10 @@ bool Composer::RestoreAll()
    {
       filename = name + filename;
 
-      MFolder_obj folder(MFolder::CreateTemp
+      MFolder_obj folder(MFolder::CreateTempFile
                          (
                            String::Format(_("Interrupted message %d"),
                                           nResumed + 1),
-                           MF_FILE,
-                           MF_FLAGS_TEMPORARY,
                            filename
                          ));
 
