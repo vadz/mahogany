@@ -326,10 +326,16 @@ dnl   defines GCC with yes if using gcc
 dnl   defines GCC empty if not using gcc
 dnl   defines CFLAGS
 
+dnl this should be done for GXX, but we assume CC and CXX to be the same
 CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
 if test "$GCC" = "yes"
 then
-	CFLAGS="$CFLAGS -DCC_GCC  -fno-exceptions -Wall -pedantic "
+	CFLAGS="$CFLAGS -DCC_GCC -Wall -pedantic "
+	$CC -v | grep -q 2.8
+	if [ $? = 0 ]
+	then
+		CFLAGS="$CFLAGS -fno-exceptions "
+	fi
 fi
 
 dnl does compiler support -c and -o simultaniously
