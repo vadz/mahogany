@@ -644,7 +644,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    case ET_IMAP_SERVER:
    case ET_IMAP_HIER:
       params->m_FolderType = MF_IMAP;
-      if(m_Type == ET_IMAP_HIER)
+      if(m_Type == ET_IMAP_HIER || m_Type == ET_IMAP_SERVER)
          params->m_FolderFlags |= MF_FLAGS_GROUP;
       break;
    case ET_POP3:
