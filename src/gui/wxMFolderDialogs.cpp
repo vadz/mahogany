@@ -810,6 +810,7 @@ void wxFolderCreateDialog::SetFolderName(const String& name)
 
    m_nameModifiedByUser = -1;
    m_folderName->SetValue(nameFolder);
+   m_nameModifiedByUser = false;
 }
 
 void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
@@ -825,12 +826,8 @@ void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
       page->UpdateOnFolderNameChange();
 
    }
-   else
-   {
-      // it comes from a call to SetFolderName() called by the page itself, no
-      // need to update it
-      m_nameModifiedByUser = false;
-   }
+   //else: it comes from a call to SetFolderName() called by the page itself,
+   //      no need to update it
 
    event.Skip();
 }
