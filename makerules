@@ -7,6 +7,8 @@
 	$(CC) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
+%cmodule.so: %.o
+	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
 dep depend:
 	$(CXX) -M $(CXXFLAGS) $(SRC) >.depend
@@ -18,7 +20,7 @@ dep depend:
 .PHONY: clean doc dep depend 
 
 clean:
-	$(RM) $(ODIR)/*.o 
+	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a
 
 doc:
 	mkdir $(DOCDIR)/$(CWD)

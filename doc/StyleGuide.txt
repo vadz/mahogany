@@ -145,7 +145,19 @@ To make cooperation easier we have agreed to not to use any tabulator
 characters in the sources. Instead three spaces should be used. The
 basic indentation depth is three spaces per level.
 
-3.4 Use DOC++ comments
+3.4 Comments
+
+3.4.1 Comment markers
+
+Comments should be marked by // only if they are short. If they continue
+over more than one line, they should be marked as C-style comments.
+
+3.4.2 FIXME comments
+
+To mark places in the source which need further attention or fixing,
+a comment containing the word FIXME should be used.
+
+3.4.3 Use DOC++ comments
 
 It's pretty buggy, but maybe some day there will be a working version
 of it, so use it.
@@ -169,3 +181,20 @@ Example:
 
 Do not define a global macro such as SIZE(x), but call it mylibSIZE(x)
 or mSIZE(x).
+
+4.3 Version Control
+
+The sources are managed by the CVS version control system. For easy
+identification, each file should start with a comment, including at
+least the $Id$ and the $Log$
+least the $Id$ and the Revision 1.4  1998/05/02 18:29:51  KB
+least the $Id$ and the After many problems, Python integration is eventually taking off -
+least the $Id$ and the works.
+least the $Id$ and the tags. Including the $Log$
+least the $Id$ and the $Log$ tags. Including the Revision 1.4  1998/05/02 18:29:51  KB
+least the $Id$ and the $Log$ tags. Including the After many problems, Python integration is eventually taking off -
+least the $Id$ and the $Log$ tags. Including the works.
+least the $Id$ and the $Log$ tags. Including the information
+in each file somehow inflates the code, but as the CVS archive might
+only be accessible through a dial-up internet connection, it provides
+valuable information.

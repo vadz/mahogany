@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat May  2 16:13:56 1998
+#This file was created by <karsten> Sat May  2 16:37:50 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -449,6 +449,32 @@ not
  The basic indentation depth is three spaces per level.
 \layout Subsection
 
+Comments
+\layout Subsubsection
+
+Comment markers
+\layout Standard
+
+Comments should be marked by 
+\family typewriter 
+//
+\family default 
+ only if they are short.
+ If they continue over more than one line, they should be marked as C-style
+ comments.
+\layout Subsubsection
+
+FIXME comments
+\layout Standard
+
+To mark places in the source which need further attention or fixing, a comment
+ containing the word 
+\family typewriter 
+FIXME
+\family default 
+ should be used.
+\layout Subsubsection
+
 Use DOC++ comments
 \layout Standard
 
@@ -502,4 +528,39 @@ mylibSIZE(x)
 mSIZE(x)
 \family default 
 .
+\layout Subsection
+
+Version Control
+\layout Standard
+
+The sources are managed by the 
+\family typewriter 
+CVS
+\family default 
+ version control system.
+ For easy identification, each file should start with a comment, including
+ at least the 
+\family typewriter 
+$Id$
+\family default 
+ and the 
+\family typewriter 
+$Log$
+Revision 1.5  1998/05/02 18:29:51  KB
+After many problems, Python integration is eventually taking off -
+works.
+
+\family default 
+ tags.
+ Including the 
+\family typewriter 
+$Log$
+Revision 1.5  1998/05/02 18:29:51  KB
+After many problems, Python integration is eventually taking off -
+works.
+
+\family default 
+ information in each file somehow inflates the code, but as the CVS archive
+ might only be accessible through a dial-up internet connection, it provides
+ valuable information.
 \the_end

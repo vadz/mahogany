@@ -1,5 +1,12 @@
 # Makefile for M root directory
 # $Id$
+#
+# $Log$
+# Revision 1.4  1998/05/02 18:29:41  KB
+# After many problems, Python integration is eventually taking off -
+# works.
+#
+#
 
 CWD = 
 SUB_DIRS = src include
