@@ -1210,7 +1210,7 @@ void wxPMessageBoxEnable(const wxString& configPath,
        // disable
        if ( config ) {
            // assume it's a Yes/No dialog box
-           config->Write(configValue, (long)wxID_YES);
+           config->Write(configValue, (long)wxYES);
        }
     }
 }

@@ -62,6 +62,7 @@
 #include "gui/wxOptionsPage.h"
 
 #include "HeadersDialogs.h"
+#include "TemplateDialog.h"
 
 // first and last are shifted by -1, i.e. the range of fields for the page Foo
 // is from ConfigField_FooFirst + 1 to ConfigField_FooLast inclusive.
@@ -122,6 +123,7 @@ enum ConfigFields
    ConfigField_ComposeViewBGColour,
 
    ConfigField_ComposeHeaders,
+   ConfigField_ComposeTemplates,
 
    ConfigField_ComposeLast = ConfigField_ComposeHeaders,
 
@@ -429,6 +431,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Back&ground colour"),           Field_Color,   -1},
 
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
+   { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
 
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
@@ -583,11 +586,12 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
    CONFIG_NONE(),
+   CONFIG_NONE(),
 
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
-//   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
+// CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
@@ -1115,13 +1119,28 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
 
 void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 {
-   // FIXME there is only one button for now, but if we had several of them,
-   //       how would we know which one was clicked?
-   wxASSERT_MSG( event.GetEventObject() ==
-                 GetControl(ConfigField_ComposeHeaders), "alien button" );
+   bool dirty;
 
-   // create and show the "outgoing headers" config dialog
-   if ( ConfigureComposeHeaders(m_Profile, this) )
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_ComposeHeaders) )
+   {
+      // create and show the "outgoing headers" config dialog
+      dirty = ConfigureComposeHeaders(m_Profile, this);
+   }
+   else if ( obj == GetControl(ConfigField_ComposeTemplates) )
+   {
+      dirty = ConfigureTemplates(m_Profile, this);
+   }
+   else
+   {
+      FAIL_MSG("click from alien button in compose view page");
+
+      dirty = FALSE;
+
+      event.Skip();
+   }
+
+   if ( dirty )
    {
       // something changed - make us dirty
       wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);

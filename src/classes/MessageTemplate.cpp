@@ -59,12 +59,12 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
    // as this is used only for diagnostic messages, start counting from 1 - as
    // people like it (unlike the programmers)
    size_t nLine = 1;
-   const char *pStartOfLine = 0;
 
    // only generate something if we can
    bool doOutput = m_expander != NULL;
 
    const char *pc = m_templateText.c_str();
+   const char *pStartOfLine = pc;
    while ( *pc )
    {
       // find next '$'
@@ -152,7 +152,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       String word;
       while ( *pc && (*pc != '\n') &&
               ((quoted && *pc && *pc != '"') ||
-              (!strchr("-+=:", *pc) && *pc != bracketClose && *pc)) )
+              (!strchr("-+=: \t", *pc) && *pc != bracketClose && *pc)) )
       {
          word += *pc++;
       }
@@ -313,7 +313,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
                         "in the file '%s'."),
                       name.c_str(),
                       nLine,
-                      pc - pStartOfLine,
+                      pc - pStartOfLine - name.length(),
                       m_filename.c_str());
 
          return FALSE;

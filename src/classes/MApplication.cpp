@@ -34,7 +34,6 @@
 #  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
-
 #include <errno.h>
 
 #include "MFolder.h"

@@ -55,10 +55,12 @@
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
-   EVT_KEY_DOWN          (wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnMouse)
 
 #ifdef __WXGTK__
+   // FIXME why do you do it (VZ)?
+   EVT_KEY_DOWN(wxFolderListCtrl::OnChar)
+
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
 #endif // wxGTK
 
@@ -728,6 +730,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                                     GetFrame(m_Parent),
                                     GetProfile()
                                    );
+      composeView->InitText();
       composeView->Show();
    }
    break;
@@ -738,6 +741,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                                     GetFrame(m_Parent),
                                     GetProfile()
                                    );
+      composeView->InitText();
       composeView->Show();
    }
    break;

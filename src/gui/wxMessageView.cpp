@@ -1166,6 +1166,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                wxEndBusyCursor();
                wxComposeView *cv = wxComposeView::CreateNewMessage(frame, m_Profile);
                cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
+               cv->InitText();
                cv->Show(TRUE);
                break;
             }

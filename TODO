@@ -46,6 +46,12 @@ $Id$
 4 gtk	VZ	icon selector suffers from several appearance problems
 3 gtk	??	menu acceleratos don't work if we process char events
 
+4	KB	I don't quite understabd profile usage in
+		MailFolder::ForwardMessages() - is the profile parameter used at
+		all (doesn't seem so)? Should it be used?
+		Also, why "hide" parameter to all wxComposeView::CreateXXX()
+		functions is ignored - is it used anywhere?
+
 *********************************************************************
 *** PROJECTS
 *********************************************************************
@@ -59,9 +65,19 @@ $Id$
 9	KB	Profile: add enumeration of entries for profile and
 		its subgroups
 
+8	VZ	make the message templates work: GUI suport for configuring them
+		and (many) more macros should be added.
+
+8		support of different charsets:
+		a) allow configuring them for outgoing messages
+		b) automatically choose the correct one and display the message using
+		   the right encoding for the incoming ones
+
 7	KB	Find all possible MT problems in MailFolder.cpp and
 		put mutexes around them.
 7	VZ	document the new properties dialog entries/pages, please
+	KB	which ones are undocumented? It seems like everything is there...
+
 7	KB	write more on tutorial bit in Manual.lyx
 6		simple HTML import for wxLayout
 6		threading via References header
@@ -118,6 +134,8 @@ $Id$
 2	VZ	printing from ADB
 3	VZ	"GoTo"  the entry should expand the branch which contains it
 3	VZ	LDIF format import
+
+3		a useful feature: change POP/IMAP password for the folder.
 
 2		fix es.po - many little errors
 2	KB	optionally activate tearoff menus

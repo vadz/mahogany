@@ -55,6 +55,8 @@
 #include "MailCollector.h"
 #include "MModule.h"
 
+#include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
+
 #ifdef OS_WIN
 #   include <winnls.h>
 #endif
@@ -244,16 +246,35 @@ wxMApp::OnAbnormalTermination()
 bool
 wxMApp::CanClose() const
 {
-   // If we get called the second time, we just reuse our old value,
-   // but only if it was TRUE.
-   if(m_CanClose)
+   // If we get called the second time, we just reuse our old value, but only
+   // if it was TRUE (if we couldn't close before, may be we can now)
+   if ( m_CanClose )
       return m_CanClose;
 
-   // ask the user unless disabled
-   if ( ! MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"), m_topLevelFrame,
-                            MDIALOG_YESNOTITLE, false,
-                            MP_CONFIRMEXIT) )
+   // verify that the user didn't accidentally remembered "No" as the answer to
+   // the next message box - the problem with this is that in this case there
+   // is no way to exit M at all!
+   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
+   {
+      if ( !MDialog_YesNoDialog("", NULL, "", false, MP_CONFIRMEXIT) )
+      {
+         wxLogDebug("Exit confirmation msg box has been disabled on [No], "
+                    "reenabling it.");
+
+         wxPMessageBoxEnable(MP_CONFIRMEXIT, true);
+      }
+      //else: it was on [Yes], ok
+   }
+
+   // ask the user for confirmation
+   if ( !MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"),
+                              m_topLevelFrame,
+                              MDIALOG_YESNOTITLE,
+                              false,
+                              MP_CONFIRMEXIT) )
+   {
       return false;
+   }
 
    wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
    while ( node )

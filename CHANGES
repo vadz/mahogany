@@ -3,6 +3,10 @@
 17.07.99 KB: folder flag to force re-open on ping for broken POP servers added
              quoted printable parsing bug removed
              messages now get saved with right CR/LF convention
+16.07.99 VZ: it's now impossible to lock oneself in the program by choosing the
+             [No] button in exit confirmation msg box and remembering it (also,
+             the bug in the options dialog which used to do it automatically
+             fixed)
 15.07.99 VZ: dialogs now have vertical scrollbars and should be usable in any
              screen resolution now and not only 1024*768 or greater
 11.07.99 VZ: import of Eudora address books added

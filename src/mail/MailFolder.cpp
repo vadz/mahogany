@@ -402,53 +402,21 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                           ProfileBase *profile,
                           int flags)
 {
-   int i,np,p;
-   String str;
-   String str2, prefix;
-   const char *cptr;
    wxComposeView *cv;
    Message *msg;
 
-   if(! profile) profile = mApplication->GetProfile();
+   if(! profile)
+      profile = mApplication->GetProfile();
    int n = selections->Count();
-   prefix = READ_CONFIG(profile, MP_REPLY_MSGPREFIX);
-   for(i = 0; i < n; i++)
+   for( int i = 0; i < n; i++ )
    {
       msg = GetMessage((*selections)[i]);
       if(msg)
       {
-         cv = wxComposeView::CreateNewMessage(parent, profile);
-         str = "";
-         np = msg->CountParts();
-         for(p = 0; p < np; p++)
-         {
-            if(msg->GetPartType(p) == Message::MSG_TYPETEXT)
-            {
-               str = msg->GetPartContent(p);
-               cptr = str.c_str();
-               str2 = prefix;
-               while(*cptr)
-               {
-                  if(*cptr == '\r')
-                  {
-                     cptr++;
-                     continue;
-                  }
-                  str2 += *cptr;
-                  if(*cptr == '\n' && *(cptr+1))
-                  {
-                     str2 += prefix;
-                  }
-                  cptr++;
-               }
-               cv->InsertText(str2);
-               // the inserted text comes from the program, not from the user
-               cv->ResetDirty();
-            }
-         }
-         cv->Show(TRUE);
+         // create the new message
+         cv = wxComposeView::CreateReplyMessage(parent, profile);
 
-      // set the recipient address
+         // set the recipient address
          String name;
          String email = msg->Address(name, MAT_REPLYTO);
          email = GetFullEmailAddress(name, email);
@@ -462,7 +430,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
          }
          cv->SetAddresses(email,cc);
 
-         // construct    the new subject
+         // construct the new subject
          String newSubject;
          String replyPrefix = READ_CONFIG(GetProfile(), MP_REPLY_PREFIX);
          String subject = msg->Subject();
@@ -493,7 +461,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
 
             // the search is case insensitive
             wxString subjectLower(subject.Lower()),
-               replyPrefixLower(replyPrefixWithoutColon.Lower());
+            replyPrefixLower(replyPrefixWithoutColon.Lower());
             const char *pStart = subjectLower.c_str();
             for ( ;; )
             {
@@ -514,7 +482,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                else if ( !matchLen )
                   matchLen = strlen(replyPrefixStandard);
                if ( !pMatch
-                    || (*(pMatch+matchLen) != '[' &&
+                     || (*(pMatch+matchLen) != '[' &&
                         *(pMatch+matchLen) != ':'
                         && *(pMatch+matchLen) != '(')
                   )
@@ -525,27 +493,27 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                replyLevel++;
             }
 
-//            if ( replyLevel == 1 )
-//            {
-               // try to see if we don't have "Re[N]" string already
-               int replyLevelOld;
-               if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
-                    sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
-               {
-                  replyLevel += replyLevelOld;
-                  replyLevel --; // one was already counted
-                  pStart++; // opening [ or (
-                  while( isdigit(*pStart) )
+            //            if ( replyLevel == 1 )
+            //            {
+            // try to see if we don't have "Re[N]" string already
+            int replyLevelOld;
+            if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
+                  sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
+            {
+               replyLevel += replyLevelOld;
+               replyLevel --; // one was already counted
+               pStart++; // opening [ or (
+                     while( isdigit(*pStart) )
                      pStart ++;
-                  pStart++; // closing ] or )
-               }
-//            }
+                     pStart++; // closing ] or )
+            }
+            //            }
 
             // skip spaces
             while ( isspace(*pStart) )
                pStart++;
 
-         // skip also the ":" after "Re" is there was one
+            // skip also the ":" after "Re" is there was one
             if ( replyLevel > 0 && *pStart == ':' )
             {
                pStart++;
@@ -568,9 +536,9 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                // powers of two :-) KB
                replyLevel ++;
                newSubject.Printf("%s[%d]: %s",
-                                 replyPrefixWithoutColon.c_str(),
-                                 replyLevel,
-                                 subject.c_str());
+                     replyPrefixWithoutColon.c_str(),
+                     replyLevel,
+                     subject.c_str());
             }
          }
 
@@ -582,7 +550,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
 
          cv->SetSubject(newSubject);
 
-      // other headers
+         // other headers
          String messageid;
          msg->GetHeaderLine("Message-Id", messageid);
          String references;
@@ -599,12 +567,15 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
             msg->GetHeaderLine("To", rt);
             cv->AddHeaderEntry("Reply-To", rt);
          }
+
+         cv->InitText(msg);
+         cv->Show(TRUE);
+
          SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
          SafeDecRef(msg);
       }//if(msg)
    }//for()
 }
-
 
 void
 MailFolder::ForwardMessages(const INTARRAY *selections,
@@ -612,26 +583,24 @@ MailFolder::ForwardMessages(const INTARRAY *selections,
                             ProfileBase *profile)
 {
    int i;
-   String str;
-   String str2, prefix;
    wxComposeView *cv;
    Message *msg;
 
-   if(! profile) profile = mApplication->GetProfile();
+   if( !profile )
+      profile = mApplication->GetProfile();
    int n = selections->Count();
-   prefix = READ_CONFIG(GetProfile(), MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
-      str = "";
       msg = GetMessage((*selections)[i]);
       if(msg)
       {
-         cv = wxComposeView::CreateNewMessage(parent,GetProfile());
+         cv = wxComposeView::CreateFwdMessage(parent,GetProfile());
          cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
                         + msg->Subject());
-         msg->WriteToString(str);
-         cv->InsertData(strutil_strdup(str), str.Length(),
-                        "MESSAGE/RFC822");
+
+         cv->InitText(msg);
+         cv->Show(TRUE);
+
          SafeDecRef(msg);
       }
    }

@@ -817,11 +817,10 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_forceReOpen);
 
 
-   wxToolTip tip1(_("Tick this box if Mahogany appears to have problems\n"
-                    "updating the folder listing. This is needed for some\n"
-                    "broken POP3 servers.\n"
-                    "Normally this is not needed."));
-   tip1.Apply(m_forceReOpen);
+   m_forceReOpen->SetToolTip(_("Tick this box if Mahogany appears to have "
+                               "problems updating the folder listing.\n"
+                               "This is needed for some broken POP3 servers.\n"
+                               "Normally this is not needed."));
    
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, "should have a parent dialog!" );

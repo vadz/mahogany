@@ -71,6 +71,12 @@ static size_t GetBrowseButtonWidth(wxWindow *win);
 // event tables
 // -----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxProfileSettingsEditDialog)
+   EVT_CHECKBOX(-1, wxOptionsPageSubdialog::OnChange)
+   EVT_RADIOBOX(-1, wxOptionsPageSubdialog::OnChange)
+   EVT_TEXT(-1,     wxOptionsPageSubdialog::OnChange)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
    EVT_BUTTON(M_WXID_HELP, wxNotebookDialog::OnHelp)
    EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
@@ -160,6 +166,32 @@ wxPDialog::~wxPDialog()
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageSubdialog - the common base class all the dialogs which may be
+// shown from the options dialog (i.e. whose parent is an options page)
+// ----------------------------------------------------------------------------
+
+wxOptionsPageSubdialog::wxOptionsPageSubdialog(ProfileBase *profile,
+                                               wxWindow *parent,
+                                               const wxString& label,
+                                               const wxString& windowName)
+                      : wxProfileSettingsEditDialog
+                        (
+                           profile,
+                           windowName,
+                           GET_PARENT_OF_CLASS(parent, wxFrame),
+                           label
+                        )
+{
+}
+
+void wxOptionsPageSubdialog::OnChange(wxEvent&)
+{
+   // we don't do anything, but just eat these messages - otherwise they will
+   // confuse wxOptionsPage which is our parent because it only processes
+   // messages from its own controls
+}
+
+// ----------------------------------------------------------------------------
 // wxNotebookWithImages
 // ----------------------------------------------------------------------------
 
@@ -195,32 +227,47 @@ wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent)
 
 void wxEnhancedPanel::OnSize(wxSizeEvent& event)
 {
-   if ( m_canvas )
+   if ( !m_canvas )
+      return;
+
+   // find the total height of this panel
+   int height = 0;
+   for ( wxWindowList::Node *node = m_canvas->GetChildren().GetFirst();
+         node;
+         node = node->GetNext() )
    {
-      wxManuallyLaidOutDialog *dlg = GET_PARENT_OF_CLASS(this,
-                                                         wxManuallyLaidOutDialog);
-      if ( dlg )
+      wxWindow *child = node->GetData();
+      if ( !child->IsTopLevel() )
       {
-         m_sizeMin = dlg->GetMinimalSize();
+         int y = child->GetPosition().y + child->GetSize().y;
+         if ( y > height )
+         {
+            height = y;
+         }
       }
-
-      if ( m_sizeMin.y != 0 )
-      {
-         static const int nPageSize = 10;
-         int y = m_sizeMin.y - 4*dlg->GetButtonSize().y;
-
-         m_canvas->SetScrollbars(0, nPageSize, 0, y/nPageSize);
-         m_canvas->EnableScrolling(FALSE, TRUE);
-      }
-      else
-      {
-         m_canvas->EnableScrolling(FALSE, FALSE);
-      }
-
-      m_canvas->SetSize(event.GetSize());
-
-      m_canvas->Layout();
+      //else: don't deal with dialogs/frames here
    }
+
+   // a small margin to aviod that the canvas just fits into the panel
+   height += 2*LAYOUT_Y_MARGIN;
+
+   if ( height > event.GetSize().y )
+   {
+      // why 10? well, it seems a reasonable value and changing it doesn't
+      // change much anyhow...
+      static const int nPageSize = 10;
+
+      m_canvas->SetScrollbars(0, nPageSize, 0, height / nPageSize);
+      m_canvas->EnableScrolling(FALSE, TRUE);
+   }
+   else
+   {
+      m_canvas->EnableScrolling(FALSE, FALSE);
+   }
+
+   m_canvas->SetSize(event.GetSize());
+
+   m_canvas->Layout();
 }
 
 // the top item is positioned near the top of the page, the others are

@@ -223,12 +223,14 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_FILE_COMPOSE:
       {
          wxComposeView *composeView = wxComposeView::CreateNewMessage(this);
+         composeView->InitText();
          composeView->Show();
       }
       break;
    case WXMENU_FILE_POST:
       {
          wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
+         composeView->InitText();
          composeView->Show();
       }
       break;

@@ -70,6 +70,7 @@
 #include "adb/AdbManager.h"
 
 #include "MessageTemplate.h"
+#include "TemplateDialog.h"
 
 // incredible, but true: cclient headers #define the symbol write...
 #undef write
@@ -201,11 +202,11 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-class StandardMessageTemplateSink : public MessageTemplateSink
+class ExpansionSink : public MessageTemplateSink
 {
 public:
    // ctor
-   StandardMessageTemplateSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
+   ExpansionSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
 
    // accessors
       // get the whole text of the message
@@ -229,8 +230,8 @@ public:
    // implement base class pure virtual function
    virtual bool Output(const String& text);
 
-   // called by StandardMessageTemplateVarExpander to remember the current
-   // position as the initial cursor position
+   // called by VarExpander to remember the current position as the initial
+   // cursor position
    void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
 
 private:
@@ -239,15 +240,72 @@ private:
    int  m_x, m_y;
 };
 
-// StandardMessageTemplateVarExpander is the implementation of
+// VarExpander is the implementation of
 // MessageTemplateVarExpander used here.
-class StandardMessageTemplateVarExpander : public MessageTemplateVarExpander
+class VarExpander : public MessageTemplateVarExpander
 {
 public:
-   // ctor
-   StandardMessageTemplateVarExpander(StandardMessageTemplateSink& sink)
+   // all categories
+   enum Category
+   {
+      Category_Misc,       // empty category - misc variables
+      Category_File,       // insert file
+      Category_Command,    // execute external command
+#ifdef USE_PYTHON
+      Category_Python,     // execute Python script
+#endif // USE_PYTHON
+      Category_Message,    // the headers of the message being written
+      Category_Original,   // variables pertaining to the original message
+      Category_Invalid,    // unknown/invalid category
+      Category_Max = Category_Invalid
+   };
+
+   // the variables in "misc" category
+   enum Variable
+   {
+      Var_Date,            // insert the date in the default format
+      Var_Cursor,          // position the cursor here after template expansion
+      Var_To,              // the recepient name
+      Var_Subject,         // the message subject
+      Var_Quote,           // quote the original text
+      Var_Quote822,        // attach the original text
+      Var_Invalid,
+      Var_Max = Var_Invalid
+   };
+
+   // get the category from the category string (may return Category_Invalid)
+   static Category GetCategory(const String& category)
+   {
+      return (Category)FindStringInArray(ms_templateVarCategories,
+                                         Category_Max, category);
+   }
+
+   // get the variable id from the string (may return Var_Invalid)
+   static Variable GetVariable(const String& variable)
+   {
+      return (Variable)FindStringInArray(ms_templateVarNames,
+                                         Var_Max, variable);
+   }
+
+   // ctor takes the sink (we need it to implement some pseudo macros such as
+   // "$CURSOR") and also a pointer to message for things like $QUOTE - this
+   // may (and in fact should) be NULL for new messages, in this case using the
+   // macros which require it will result in an error
+   VarExpander(ExpansionSink& sink,
+               ProfileBase *profile = NULL,
+               Message *msg = NULL)
       : m_sink(sink)
    {
+      m_profile = profile ? profile : mApplication->GetProfile();
+      m_profile->IncRef();
+      m_msg = msg;
+      SafeIncRef(m_msg);
+   }
+
+   virtual ~VarExpander()
+   {
+      m_profile->DecRef();
+      SafeDecRef(m_msg);
    }
 
    // implement base class pure virtual function
@@ -256,10 +314,37 @@ public:
                        String *value) const;
 
 protected:
-   bool SlurpFile(const String& filename, String *value) const;
+   static bool SlurpFile(const String& filename, String *value);
+
+   // Expand determines the category and then calls one of these functions
+   bool ExpandMisc(const String& name, String *value) const;
+   bool ExpandFile(const String& name, String *value) const;
+   bool ExpandCommand(const String& name, String *value) const;
+#ifdef USE_PYTHON
+   bool ExpandPython(const String& name, String *value) const;
+#endif // USE_PYTHON
+   bool ExpandMessage(const String& name, String *value) const;
+   bool ExpandOriginal(const String& name, String *value) const;
 
 private:
-   StandardMessageTemplateSink& m_sink;
+   // helper used by GetCategory and GetVariable
+   static int FindStringInArray(const char *strs[], int max, const String& s);
+
+   // the sink we use when expanding pseudo variables
+   ExpansionSink& m_sink;
+
+   // the message used for expansion of variables pertaining to the original
+   // message
+   Message *m_msg;
+
+   // the profile to use for everything (global one by default)
+   ProfileBase *m_profile;
+
+   // this array contains the list of all categories
+   static const char *ms_templateVarCategories[Category_Max];
+
+   // this array contains the list of all variables without category
+   static const char *ms_templateVarNames[Var_Max];
 };
 
 // ----------------------------------------------------------------------------
@@ -541,6 +626,7 @@ void wxComposeView::EnableEditing(bool enable)
 // ----------------------------------------------------------------------------
 // wxComposeView creation
 // ----------------------------------------------------------------------------
+
 /** Constructor for posting news.
     @param parentProfile parent profile
     @param parent parent window
@@ -554,6 +640,7 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
 {
    wxComposeView *cv = new wxComposeView("_ComposeViewNews", parent);
    cv->m_mode = Mode_NNTP;
+   cv->m_kind = Message_New;
    cv->SetTitle(_("Article Composition"));
    cv->Create(parent,parentProfile);
 
@@ -568,8 +655,8 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
    wxFFile file(filename);
    if ( file.IsOpened() && file.ReadAll(&text) )
    {
-      StandardMessageTemplateSink sink;
-      StandardMessageTemplateVarExpander expander(sink);
+      ExpansionSink sink;
+      VarExpander expander(sink);
       MessageTemplateParser parser(text, filename, &expander);
       if ( parser.Parse(sink) )
       {
@@ -595,14 +682,134 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
 */
 wxComposeView *
 wxComposeView::CreateNewMessage(wxWindow *parent,
-                                        ProfileBase *parentProfile,
-                                        bool hide)
+                                ProfileBase *parentProfile,
+                                bool hide)
 {
    wxComposeView *cv = new wxComposeView("_ComposeViewMail", parent);
    cv->m_mode = Mode_SMTP;
+   cv->m_kind = Message_New;
    cv->SetTitle(_("Message Composition"));
    cv->Create(parent,parentProfile);
+
    return cv;
+}
+
+wxComposeView *
+wxComposeView::CreateReplyMessage(wxWindow *parent,
+                                  ProfileBase *parentProfile,
+                                  bool hide)
+{
+   wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
+
+   cv->m_kind = Message_Reply;
+
+   return cv;
+}
+
+wxComposeView *
+wxComposeView::CreateFwdMessage(wxWindow *parent,
+                                ProfileBase *parentProfile,
+                                bool hide)
+{
+   wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
+
+   cv->m_kind = Message_Forward;
+
+   return cv;
+}
+
+void
+wxComposeView::InitText(Message *msg)
+{
+   CHECK_RET( (msg != NULL) || (m_kind == Message_New),
+              "no message in InitText" );
+
+   // choose the template
+   String templateKey = "Template/";
+   switch ( m_kind )
+   {
+      case Message_Reply:
+         templateKey += m_mode == Mode_SMTP ? "Reply" : "Followup";
+         break;
+
+      case Message_Forward:
+         ASSERT_MSG( m_mode == Mode_SMTP, "can't forward article in news" );
+         templateKey += "Forward";
+         break;
+
+      default:
+         FAIL_MSG("unknown message kind");
+         // still fall through
+
+      case Message_New:
+         templateKey += m_mode == Mode_SMTP ? "NewMessage" : "NewArticle";
+         break;
+   }
+
+   // loop until the template is correct or the user abandons the idea to fix
+   // it
+   bool templateChanged = FALSE;
+   do
+   {
+      // get the template value
+      String templateValue = m_Profile->readEntry(templateKey, "");
+
+      if ( !templateValue )
+      {
+         // we have the default templates for reply and forward
+         if ( m_kind == Message_Reply )
+         {
+            templateValue = _("On $DATE you wrote:\n"
+                              "\n"
+                              "$QUOTE"
+                              "\n"
+                              "$CURSOR");
+         }
+         else if ( m_kind == Message_Forward )
+         {
+            templateValue = "$CURSOR\n$QUOTE822";
+         }
+      }
+
+      if ( !templateValue )
+      {
+         // still nothing - so just don't do anything
+         return;
+      }
+
+      // do parse the template
+      ExpansionSink sink;
+      VarExpander expander(sink, m_Profile, msg);
+      MessageTemplateParser parser(templateValue, _("template"), &expander);
+      if ( parser.Parse(sink) )
+      {
+         InsertText(sink.GetText());
+         int x, y;
+         sink.GetCursorPosition(&x, &y);
+         MoveCursorTo(x, y);
+
+         // the inserted text comes from the program, not from the user
+         ResetDirty();
+      }
+      else
+      {
+         if ( MDialog_YesNoDialog(_("There were errors in the template. Would "
+                                    "you like to edit it now?"),
+                                    this,
+                                    MDIALOG_YESNOTITLE,
+                                    true,
+                                    "FixTemplate") )
+         {
+            // invoke the template configuration dialog and if something
+            // changed...
+            if ( ConfigureTemplates(m_Profile, this) )
+            {
+               // ...restart the loop
+               templateChanged = TRUE;
+            }
+         }
+      }
+   } while ( templateChanged );
 }
 
 void
@@ -1872,10 +2079,10 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
 }
 
 // ----------------------------------------------------------------------------
-// StandardMessageTemplateSink
+// ExpansionSink
 // ----------------------------------------------------------------------------
 
-bool StandardMessageTemplateSink::Output(const String& text)
+bool ExpansionSink::Output(const String& text)
 {
    if ( !m_hasCursorPosition )
    {
@@ -1906,140 +2113,287 @@ bool StandardMessageTemplateSink::Output(const String& text)
 }
 
 // ----------------------------------------------------------------------------
-// StandardMessageTemplateVarExpander
+// VarExpander
 // ----------------------------------------------------------------------------
 
-bool StandardMessageTemplateVarExpander::SlurpFile(const String& filename,
-                                                   String *value) const
+const char *VarExpander::ms_templateVarCategories[] =
 {
-   wxFFile file(filename);
-   bool ok = file.IsOpened();
-   if ( ok )
+   "",
+   "file",
+   "cmd",
+#ifdef USE_PYTHON
+   "python",
+#endif // USE_PYTHON
+   "message",
+   "original"
+};
+
+const char *VarExpander::ms_templateVarNames[] =
+{
+   "date",
+   "cursor",
+   "to",
+   "subject",
+   "quote",
+   "quote822"
+};
+
+int
+VarExpander::FindStringInArray(const char *strings[],
+                               int max,
+                               const String& s)
+{
+   int n;
+   for ( n = 0; n < max; n++ )
    {
-      ok = file.ReadAll(value);
+      if ( strings[n] == s )
+         break;
    }
 
-   return ok;
+   return n;
 }
 
-bool StandardMessageTemplateVarExpander::Expand(const String& Category,
-                                                const String& Name,
-                                                String *value) const
+bool
+VarExpander::SlurpFile(const String& filename, String *value)
 {
-   // comparison is case insensitive
-   wxString category = Category.Lower();
-   wxString name = Name.Lower();
+   wxFFile file(filename);
 
+   return file.IsOpened() && file.ReadAll(value);
+}
+
+bool
+VarExpander::Expand(const String& category,
+                    const String& name,
+                    String *value) const
+{
    value->Empty();
 
-   if ( category == "file" )
+   // comparison is case insensitive
+   switch ( GetCategory(category.Lower()) )
    {
-      // NB: use the original version of the filename, not the lower case one
-      String filename = wxExpandEnvVars(Name);
-      if ( !IsAbsPath(filename) )
-      {
-         ProfileBase *profile = mApplication->GetProfile();
-         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
-                                          mApplication->GetLocalDir());
-         if ( !path || path.Last() != '/' )
-         {
-            path += '/';
-         }
-         String filename2 = path + filename;
+      case Category_File:
+         return ExpandFile(name, value);
 
-         if ( wxFile::Exists(filename2) )
-         {
-            // ok, found
-            filename = filename2;
-         }
-         else
-         {
-            // try the global dir
-            String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
-                                             mApplication->GetGlobalDir());
-            if ( !path || path.Last() != '/' )
-            {
-               path += '/';
-            }
+      case Category_Command:
+         return ExpandCommand(name, value);
 
-            filename.Prepend(path);
-         }
-      }
-      //else: absolute filename given, don't look anywhere else
-
-      // insert the contents of a file
-      if ( !SlurpFile(filename, value) )
-      {
-         wxLogError(_("Failed to insert file '%s' into the message."),
-                    name.c_str());
-
-         // not FALSE, because we did understood this variable - just failed
-         // to find the file
-         return TRUE;
-      }
-   }
-   else if ( category == "cmd" )
-   {
-      // execute a command (FIXME get the wxProcess class allowing stdout
-      // redirection and use it here)
-      MTempFileName temp;
-
-      bool ok = temp.IsOk();
-      wxString filename = temp.GetName(), command;
-
-      if ( ok )
-         command << name << " > " << filename;
-
-      if ( ok )
-         ok = system(command) == 0;
-
-      if ( ok )
-         ok = SlurpFile(filename, value);
-
-      if ( !ok )
-      {
-         wxLogSysError(_("Failed to execute the command '%s'"),
-                       name.c_str());
-
-         return FALSE;
-      }
-   }
 #ifdef USE_PYTHON
-   else if ( category == "python" )
-   {
-      // TODO
-   }
+      case Category_Python:
+         return ExpandPython(name, value);
 #endif // USE_PYTHON
-   else if ( !category )
+
+      case Category_Message:
+         return ExpandMessage(name, value);
+
+      case Category_Original:
+         return ExpandOriginal(name, value);
+
+      case Category_Misc:
+         return ExpandMisc(name, value);
+
+      default:
+         // unknown category
+         return FALSE;
+   }
+}
+
+bool
+VarExpander::ExpandMisc(const String& name, String *value) const
+{
+   // deal with all special cases
+   switch ( GetVariable(name.Lower()) )
    {
-      // deal with all special cases
-      if ( name == "date" )
-      {
-         char buf[256];
-         time_t ltime;
-         (void)time(&ltime);
-         tm *now = localtime(&ltime);
+      case Var_Date:
+         {
+            char buf[256];
+            time_t ltime;
+            (void)time(&ltime);
+            tm *now = localtime(&ltime);
 
-         (void)strftime(buf, WXSIZEOF(buf), "%x", now);
+            (void)strftime(buf, WXSIZEOF(buf), "%x", now);
 
-         *value = buf;
-      }
-      else if ( name == "cursor" )
-      {
+            *value = buf;
+         }
+         break;
+
+      case Var_Cursor:
          m_sink.RememberCursorPosition();
-      }
-      else
-      {
+         break;
+
+      case Var_To:
+         // just the shorthand for "message:to"
+         return ExpandMessage(name, value);
+
+      case Var_Quote:
+         return ExpandOriginal("quote", value);
+
+      case Var_Quote822:
+         return ExpandOriginal("quote822", value);
+
+      default:
          // unknown name
          return FALSE;
-      }
-   }
-   else
-   {
-      // unknown category
-      return FALSE;
    }
 
    return TRUE;
 }
 
+bool
+VarExpander::ExpandFile(const String& name, String *value) const
+{
+   String filename = wxExpandEnvVars(name);
+   if ( !IsAbsPath(filename) )
+   {
+      ProfileBase *profile = mApplication->GetProfile();
+      String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
+                                       mApplication->GetLocalDir());
+      if ( !path || path.Last() != '/' )
+      {
+         path += '/';
+      }
+      String filename2 = path + filename;
+
+      if ( wxFile::Exists(filename2) )
+      {
+         // ok, found
+         filename = filename2;
+      }
+      else
+      {
+         // try the global dir
+         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
+                                          mApplication->GetGlobalDir());
+         if ( !path || path.Last() != '/' )
+         {
+            path += '/';
+         }
+
+         filename.Prepend(path);
+      }
+   }
+   //else: absolute filename given, don't look anywhere else
+
+   // insert the contents of a file
+   if ( !SlurpFile(filename, value) )
+   {
+      wxLogError(_("Failed to insert file '%s' into the message."),
+                 name.c_str());
+
+      // don't return FALSE, because we did understood this variable - just
+      // failed to find the file
+   }
+
+   return TRUE;
+}
+
+bool
+VarExpander::ExpandCommand(const String& name, String *value) const
+{
+   // execute a command (FIXME get the wxProcess class allowing stdout
+   // redirection and use it here)
+   MTempFileName temp;
+
+   bool ok = temp.IsOk();
+   wxString filename = temp.GetName(), command;
+
+   if ( ok )
+      command << name << " > " << filename;
+
+   if ( ok )
+      ok = system(command) == 0;
+
+   if ( ok )
+      ok = SlurpFile(filename, value);
+
+   if ( !ok )
+   {
+      wxLogSysError(_("Failed to execute the command '%s'"), name.c_str());
+   }
+
+   return TRUE;
+}
+
+#ifdef USE_PYTHON
+bool
+VarExpander::ExpandPython(const String& name, String *value) const
+{
+   // TODO
+   return FALSE;
+}
+#endif // USE_PYTHON
+
+bool
+VarExpander::ExpandMessage(const String& name, String *value) const
+{
+   // TODO
+   return FALSE;
+}
+
+bool
+VarExpander::ExpandOriginal(const String& name, String *value) const
+{
+   // insert the quoted text of the original message - of course, this
+   // only works if we have this original message
+   if ( !m_msg )
+   {
+      // unfortunately we don't have the real name of the variable
+      // here
+      wxLogWarning(_("The variables using the original message cannot "
+               "be used in this template; variable ignored."));
+   }
+   else
+   {
+      if ( name == "text" )
+      {
+         // just insert the original text
+      }
+      else if ( name == "quote" )
+      {
+         // insert the original text prefixed by reply string
+         String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
+         int nParts = m_msg->CountParts();
+         for ( int nPart = 0; nPart < nParts; nPart++ )
+         {
+            if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
+            {
+               String str = m_msg->GetPartContent(nPart);
+               const char *cptr = str.c_str();
+               String str2 = prefix;
+               while ( *cptr )
+               {
+                  if ( *cptr == '\r' )
+                  {
+                     cptr++;
+                     continue;
+                  }
+
+                  str2 += *cptr;
+                  if( *cptr++ == '\n' && *cptr )
+                  {
+                     str2 += prefix;
+                  }
+               }
+
+               *value += str2;
+            }
+         }
+      }
+      else if ( name == "quote822" )
+      {
+         // insert the original message as RFC822 attachment
+#if 0
+         String str;
+         m_msg->WriteToString(str);
+         InsertData(strutil_strdup(str), str.Length(), "MESSAGE/RFC822");
+#else
+         m_msg->WriteToString(*value);
+#endif
+      }
+      else
+      {
+         return FALSE;
+      }
+   }
+
+   return TRUE;
+}

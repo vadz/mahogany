@@ -64,6 +64,9 @@ KBLIST_DEFINE(wxCVFileMapType,wxCVFileMapEntry);
 class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
 {
 public:
+   // constants
+
+   /// header fields we may show in the composer (not all of them are shown!)
    enum AddressField
    {
       Field_To,
@@ -79,7 +82,15 @@ public:
       Mode_SMTP,
       Mode_NNTP
    };
-   
+
+   // a message kind - combined with the mode this determines the template
+   // InitText() will use
+   enum MessageKind
+   {
+      Message_New,      // either new mail message or new article
+      Message_Reply,    // reply or follow-up
+      Message_Forward   // this one is incompatible with Mode_NNTP
+   };
 
    /** Constructor for posting news.
        @param parentProfile parent profile
@@ -90,18 +101,50 @@ public:
    static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
                                             ProfileBase *parentProfile = NULL,
                                             bool hide = false);
-   
+
    /** Constructor for sending mail.
-       @param parentProfile parent profile
        @param parent parent window
+       @param parentProfile parent profile
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
                                            ProfileBase *parentProfile = NULL,
                                            bool hide = false);
-       
-       
+
+
+   /** Constructor for sending a reply to a message.
+
+       @param parent parent window
+       @param parentProfile parent profile
+       @param hide if true, do not show frame
+       @return pointer to the new compose view
+    */
+   static wxComposeView * CreateReplyMessage(wxWindow *parent,
+                                             ProfileBase *parentProfile,
+                                             bool hide = false);
+
+   /** Constructor for forwarding a message.
+
+       @param parent parent window
+       @param parentProfile parent profile
+       @param hide if true, do not show frame
+       @return pointer to the new compose view
+    */
+   static wxComposeView * CreateFwdMessage(wxWindow *parent,
+                                           ProfileBase *parentProfile,
+                                           bool hide = false);
+
+   /** Initializes the composer text: for example, if this is a reply, inserts
+       the quoted contents of the message being replied to (except that, in
+       fact, it may do whatever the user configured it to do using templates).
+       The msg parameter may be NULL only for the new messages, messages
+       created with CreateReply/FwdMessage require it to be !NULL.
+
+       @param msg the message we're replying to or forwarding
+    */
+   void InitText(Message *msg = NULL);
+
    /// Destructor
    ~wxComposeView();
 
@@ -143,7 +186,7 @@ public:
        @param groups the list of newsgroups
    */
    void SetNewsgroups(const String &groups);
-   
+
    /// sets Subject field
    void SetSubject(const String &subj);
 
@@ -210,7 +253,7 @@ protected:
 
    // helpers
    // -------
-   
+
    /// verify that the message can be sent
    bool IsReadyToSend() const;
 
@@ -232,7 +275,7 @@ private:
    ProfileBase * m_Profile;
    /// the name of the class
    String m_name;
-   
+
    /// the panel
    wxPanel *m_panel;
 
@@ -246,7 +289,7 @@ private:
    class wxMenuItem *m_MItemCopy;
    /// the edit/paste menu item
    class wxMenuItem *m_MItemPaste;
-   
+
    /**@name Input fields (arranged into an array) */
    //@{
       /// The text fields
@@ -290,8 +333,12 @@ private:
 
    /// News or smtp?
    Mode m_mode;
+   /// New article, reply/follow-up or forward?
+   MessageKind m_kind;
+
    /// Has message been sent already?
    bool m_sent;
+
    // external editor support
    // -----------------------
 

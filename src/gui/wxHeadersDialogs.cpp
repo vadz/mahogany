@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -35,7 +36,6 @@
 #  include <wx/statbmp.h>
 #endif
 
-#include <wx/layout.h>
 #include <wx/notebook.h>
 #include <wx/menuitem.h>
 #include <wx/checklst.h>
@@ -99,24 +99,6 @@ static String GetFolderNameFromProfile(ProfileBase *profile);
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
-
-// this class eats all command events which shouldn't propagate upwards to the
-// parent: this is useful when we're shown from the options dialog because the
-// option pages there suppose that all command events can only originate from
-// their controls.
-class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
-{
-public:
-   wxOptionsPageSubdialog(ProfileBase *profile,
-                          wxWindow *parent,
-                          const wxString& label,
-                          const wxString& windowName);
-
-   void OnChange(wxEvent& event);
-
-private:
-   DECLARE_EVENT_TABLE()
-};
 
 // dialog to configure standard headers shown during message composition
 class wxComposeHeadersDialog : public wxOptionsPageSubdialog
@@ -320,12 +302,6 @@ private:
       (wxObject *) NULL\
    },
 
-BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxDialog)
-   EVT_CHECKBOX(-1, wxOptionsPageSubdialog::OnChange)
-   EVT_RADIOBOX(-1, wxOptionsPageSubdialog::OnChange)
-   EVT_TEXT(-1,     wxOptionsPageSubdialog::OnChange)
-END_EVENT_TABLE()
-
 BEGIN_EVENT_TABLE(wxComposeHeadersDialog, wxOptionsPageSubdialog)
    EVT_UPDATE_UI_RANGE(TextCtrlId,
                        TextCtrlId + wxComposeHeadersDialog::Header_Max,
@@ -356,31 +332,6 @@ END_EVENT_TABLE()
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// wxOptionsPageSubdialog - the common base class for our dialogs
-// ----------------------------------------------------------------------------
-
-wxOptionsPageSubdialog::wxOptionsPageSubdialog(ProfileBase *profile,
-                                               wxWindow *parent,
-                                               const wxString& label,
-                                               const wxString& windowName)
-                      : wxProfileSettingsEditDialog
-                        (
-                           profile,
-                           windowName,
-                           GET_PARENT_OF_CLASS(parent, wxFrame),
-                           label
-                        )
-{
-}
-
-void wxOptionsPageSubdialog::OnChange(wxEvent&)
-{
-   // we don't do anything, but just eat these messages - otherwise they will
-   // confuse wxOptionsPage which is our parent because it only processes
-   // messages from its own controls
-}
 
 // ----------------------------------------------------------------------------
 // wxComposeHeadersDialog - configure the headers in the outgoing messages

@@ -248,6 +248,27 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
+// this class eats all command events which shouldn't propagate upwards to the
+// parent: this is useful when we're shown from the options dialog because the
+// option pages there suppose that all command events can only originate from
+// their controls.
+// ----------------------------------------------------------------------------
+
+class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
+{
+public:
+   wxOptionsPageSubdialog(ProfileBase *profile,
+                          wxWindow *parent,
+                          const wxString& label,
+                          const wxString& windowName);
+
+   void OnChange(wxEvent& event);
+
+private:
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
 // A panel class which has some useful functions for control creation and which
 // supports (vertical only so far) scrolling which makes it useful for the large
 // dialogs.
