@@ -81,12 +81,9 @@ SWIGFLAGS := $(SWIGFLAGS_LIBSWIG) -dhtml -c
 RM	:= rm -f
 M4	:= @M4@ 
 # currently broken in configure:
-#INSTALL	:= @INSTALL@
-#INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
-#INSTALL_DATA	:= @INSTALL_DATA@
-INSTALL	:= $(BUILDDIR)/extra/scripts/install-sh
-INSTALL_PROGRAM	:= $(INSTALL)
-INSTALL_DATA	:= $(INSTALL)
+INSTALL	:= @INSTALL@
+INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
+INSTALL_DATA	:= @INSTALL_DATA@
 
 DESTDIR = @prefix@
 # Directory in which to install scripts.
