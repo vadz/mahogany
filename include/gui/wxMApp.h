@@ -18,10 +18,11 @@
 #  include <wx/cmndata.h>  // for wxPageSetupData, can't fwd declare it
 #endif  //USE_PCH
 
-#include  <wx/dialup.h>
-
 // fwd decl
-class WXDLLEXPORT wxDialUpManager;
+#ifdef USE_DIALUP
+   class WXDLLEXPORT wxDialUpEvent;
+   class WXDLLEXPORT wxDialUpManager;
+#endif // USE_DIALUP
 class WXDLLEXPORT wxLocale;
 class WXDLLEXPORT wxLog;
 class WXDLLEXPORT wxLogChain;
@@ -111,12 +112,17 @@ public:
    wxHelpControllerBase *GetHelpController(void) const
       { return m_HelpController; }
 
+#ifdef USE_DIALUP
    virtual bool IsOnline(void) const;
    virtual void GoOnline(void) const;
    virtual void GoOffline(void) const;
 
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
+
+   /// access the wxDialUpManager directly (wxMApp-specific method)
+   wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
+#endif // USE_DIALUP
 
    virtual bool AllowBgProcessing() const;
 
@@ -128,9 +134,6 @@ public:
    /// Report a fatal error:
    virtual void FatalError(const char *message);
 
-   /// access the wxDialUpManager directly (wxMApp-specific method)
-   wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
-
 #ifdef __WXDEBUG__
    virtual void OnAssert(const wxChar *file, int line, const wxChar *msg);
 #endif // __WXDEBUG__
@@ -140,8 +143,15 @@ public:
 protected:
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;
+
+#ifdef USE_DIALUP
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void);
+
+   /// update display of online connection status
+   void UpdateOnlineDisplay();
+#endif // USE_DIALUP
+
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
        otherwise leave.
    */
@@ -152,9 +162,6 @@ protected:
    virtual void InitModules(void);
    /// Unload modules loaded at startup
    virtual void UnloadModules(void);
-
-   /// update display of online connection status
-   void UpdateOnlineDisplay();
 
    /// initialize the help controller, return true only if ok
    bool InitHelp();
@@ -188,10 +195,14 @@ private:
    bool m_CanClose;
    /// timer used to call OnIdle for MEvent handling
    wxTimer *m_IdleTimer;
+
+#ifdef USE_DIALUP
    /// online manager
    wxDialUpManager *m_OnlineManager;
+
    /// are we currently online?
    bool m_IsOnline;
+#endif // USE_DIALUP
 
    /// the log window (may be NULL)
    class wxMLogWindow *m_logWindow;

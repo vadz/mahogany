@@ -154,13 +154,22 @@ extern const MOption MP_NNTPHOST_PASSWORD;
 extern const MOption MP_NNTPHOST_USE_SSL;
 extern const MOption MP_NNTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_BEACONHOST;
-extern const MOption MP_DIALUP_SUPPORT;
 extern const MOption MP_SET_REPLY_FROM_TO;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_VCARD;
+
+#ifdef USE_DIALUP
+
+extern const MOption MP_DIALUP_SUPPORT;
+#ifdef OS_WIN
 extern const MOption MP_NET_CONNECTION;
+#else // !Windows
 extern const MOption MP_NET_ON_COMMAND;
 extern const MOption MP_NET_OFF_COMMAND;
+#endif // Windows/!Windows
+
+#endif // USE_DIALUP
+
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_LOGLEVEL;
@@ -650,8 +659,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_NAME   "NewsHostSSLUnsigned"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_NAME      "BeaconHost"
+#ifdef USE_DIALUP
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_NAME   "DialUpNetSupport"
+#endif // USE_DIALUP
 
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_NAME   "ReplyEqualsTo"
@@ -1402,8 +1413,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_DEFVAL      ""
+#ifdef USE_DIALUP
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_DEFVAL   0L
+#endif // USE_DIALUP
 
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_DEFVAL   0l
@@ -1411,6 +1424,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_USEVCARD_DEFVAL 0l
 /// the vCard to use
 #define MP_VCARD_DEFVAL "vcard.vcf"
+
+#ifdef USE_DIALUP
 
 #if defined(OS_WIN)
 /// the RAS connection to use
@@ -1421,6 +1436,8 @@ extern const MOption MP_AWAY_STATUS;
 /// the command to go offline
 #define MP_NET_OFF_COMMAND_DEFVAL   "killall pppd"
 #endif // platform
+
+#endif // USE_DIALUP
 
 /// login for mailbox
 #define   MP_FOLDER_LOGIN_DEFVAL      M_EMPTYSTRING

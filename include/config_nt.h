@@ -40,3 +40,6 @@
 /** Define this to use built-in i18n support */
 #undef USE_I18N
 
+/** Define this to build M with dialup support */
+#undef USE_DIALUP
+

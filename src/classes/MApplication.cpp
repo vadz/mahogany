@@ -155,7 +155,10 @@ MAppBase::MAppBase()
    m_framesOkToClose = NULL;
    m_FolderMonitor = NULL;
    m_profile = NULL;
+
+#ifdef USE_DIALUP
    m_DialupSupport = FALSE;
+#endif // USE_DIALUP
 
    m_mimeManager = NULL;
 
@@ -353,8 +356,10 @@ MAppBase::OnStartup()
    mail_parameters((MAILSTREAM *)NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&strHome));
 #endif // OS_WIN
 
+#ifdef USE_DIALUP
    // must be done before using the network
    SetupOnlineManager();
+#endif // USE_DIALUP
 
    // extend path for commands, look in M's dirs first
    String pathEnv;
@@ -744,7 +749,10 @@ MAppBase::OnMEvent(MEventData& event)
 {
    if (event.GetId() == MEventId_OptionsChange)
    {
+#ifdef USE_DIALUP
       SetupOnlineManager(); // make options change effective
+#endif // USE_DIALUP
+
 #ifdef USE_ICON_SUBDIRS
      {
          unsigned long idx = (unsigned long)  READ_APPCONFIG(MP_ICONSTYLE);
@@ -967,6 +975,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       return;
    }
 
+#ifdef USE_DIALUP
    if(checkOnline && ! IsOnline())
    {
       if ( MDialog_YesNoDialog(
@@ -985,6 +994,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          return;
       }
    }
+#endif // USE_DIALUP
 
    HeaderInfoList *hil = mf->GetHeaders();
    if(! hil)

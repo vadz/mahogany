@@ -1051,6 +1051,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #ifdef USE_PYTHON
                    "Python<br>"
 #endif
+#ifdef USE_DIALUP
+                   "Dial-up support<br>"
+#endif
 #ifdef USE_I18N
                    "Internationalization<br>"
 #endif
@@ -2414,8 +2417,13 @@ static const struct
    { "ConfirmFolderDelete",      gettext_noop("ask confirmation before removing folder from the folder tree") },
    { "ConfirmFolderPhysDelete",  gettext_noop("ask confirmation before deleting folder with its contents") },
    { "MarkRead",                 gettext_noop("ask whether to mark all articles as read before closing folder") },
+#ifdef USE_DIALUP
    { "DialUpConnectedMsg",       gettext_noop("show notification on dial-up network connection") },
    { "DialUpDisconnectedMsg",    gettext_noop("show notification on dial-up network disconnection") },
+   { "DialUpOnOpenFolder",       gettext_noop("propose to start dial up networking before trying to open a remote folder") },
+   { "NetDownOpenAnyway",        gettext_noop("warn before opening remote folder while not being online") },
+   { "NoNetPingAnyway",          gettext_noop("ask whether to ping remote folders offline") },
+#endif // USE_DIALUP
    // "ConfirmExit" is the same as MP_CONFIRMEXIT_NAME!
    { "ConfirmExit",              gettext_noop("ask confirmation before exiting the program") },
    { "AskLogin",                 gettext_noop("ask for the login name when opening the folder if required") },
@@ -2427,9 +2435,6 @@ static const struct
    { "OptTestAsk",               gettext_noop("propose to test new settings after changing any important ones") },
    { "WarnRestartOpt",           gettext_noop("warn if some options changes don't take effect until program restart") },
    { "SaveTemplate",             gettext_noop("propose to save changed template before closing it") },
-   { "DialUpOnOpenFolder",       gettext_noop("propose to start dial up networking before trying to open a remote folder") },
-   { "NetDownOpenAnyway",        gettext_noop("warn before opening remote folder while not being online") },
-   { "NoNetPingAnyway",          gettext_noop("ask whether to ping remote folders offline") },
    { "MailNoNetQueuedMessage",   gettext_noop("show notification if the message is queued in Outbox and not sent out immediately") },
    { "MailQueuedMessage",        gettext_noop("show notification for queued messages") },
    { "MailSentMessage",          gettext_noop("show notification for sent messages") },

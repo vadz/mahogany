@@ -215,6 +215,7 @@ public:
    void UpdateAwayMode();
    //@}
 
+#ifdef USE_DIALUP
    /// @name Dial-up support
    //@{
 
@@ -226,7 +227,12 @@ public:
 
    /// hang up the modem
    virtual void GoOffline(void) const = 0;
+
+   /// do we have dial-up support?
+   bool SupportsDialUpNetwork(void) const { return m_DialupSupport; }
+
    //@}
+#endif // USE_DIALUP
 
    /// Send all messages from the outbox
    virtual void SendOutbox(void) const;
@@ -295,8 +301,6 @@ public:
    virtual void ThrLeave(SectionId what, bool testing = false) = 0;
 
    //@}
-   bool SupportsDialUpNetwork(void) const
-      { return m_DialupSupport; }
 
    enum StatusFields
    {
@@ -338,8 +342,10 @@ protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 
+#ifdef USE_DIALUP
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void) = 0;
+#endif // USE_DIALUP
 
    /**
      Initializes the value of the global and local directories returned by
@@ -381,8 +387,11 @@ protected:
    void *m_eventOptChangeReg;
    void *m_eventFolderUpdateReg;
 
+#ifdef USE_DIALUP
    /// do we support dialup networking
    bool m_DialupSupport;
+#endif // USE_DIALUP
+
    /// do we use an Outbox?
    bool m_UseOutbox;
 

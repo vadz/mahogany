@@ -44,7 +44,9 @@
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
 
-#include <wx/dialup.h>
+#ifdef USE_DIALUP
+#  include <wx/dialup.h>
+#endif // USE_DIALUP
 
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
@@ -79,7 +81,9 @@ extern const MOption MP_AUTOSAVEDELAY;
 extern const MOption MP_AWAY_AUTO_ENTER;
 extern const MOption MP_BEACONHOST;
 extern const MOption MP_CONFIRMEXIT;
+#ifdef USE_DIALUP
 extern const MOption MP_DIALUP_SUPPORT;
+#endif // USE_DIALUP
 extern const MOption MP_HELPBROWSER;
 extern const MOption MP_HELPBROWSER_ISNS;
 extern const MOption MP_HELPDIR;
@@ -380,35 +384,16 @@ private:
 
 BEGIN_EVENT_TABLE(wxMApp, wxApp)
    EVT_IDLE                (wxMApp::OnIdle)
+
+#ifdef USE_DIALUP
    EVT_DIALUP_CONNECTED    (wxMApp::OnConnected)
    EVT_DIALUP_DISCONNECTED (wxMApp::OnDisconnected)
+#endif // USE_DIALUP
 END_EVENT_TABLE()
 
-void
-wxMApp::OnConnected(wxDialUpEvent &event)
-{
-   if(! m_DialupSupport)
-      return;
-   m_IsOnline = TRUE;
-   UpdateOnlineDisplay();
-   MDialog_Message(_("Dial-Up network connection established."),
-                   m_topLevelFrame,
-                   _("Information"),
-                   "DialUpConnectedMsg");
-}
-
-void
-wxMApp::OnDisconnected(wxDialUpEvent &event)
-{
-   if(! m_DialupSupport)
-      return;
-   m_IsOnline = FALSE;
-   UpdateOnlineDisplay();
-   MDialog_Message(_("Dial-Up network shut down."),
-                   m_topLevelFrame,
-                   _("Information"),
-                   "DialUpDisconnectedMsg");
-}
+// ----------------------------------------------------------------------------
+// wxMApp ctor/dtor
+// ----------------------------------------------------------------------------
 
 wxMApp::wxMApp(void)
 {
@@ -416,8 +401,11 @@ wxMApp::wxMApp(void)
    m_HelpController = NULL;
    m_CanClose = FALSE;
    m_IdleTimer = NULL;
+
+#ifdef USE_DIALUP
    m_OnlineManager = NULL;
    m_DialupSupport = FALSE;
+#endif // USE_DIALUP
 
    m_logWindow = NULL;
    m_logChain = NULL;
@@ -856,8 +844,10 @@ wxMApp::OnInit()
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
 
+#ifdef USE_DIALUP
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
+#endif // USE_DIALUP
 
       // make sure this is displayed correctly:
       UpdateOutboxStatus();
@@ -953,7 +943,9 @@ int wxMApp::OnExit()
    delete m_Locale;
 #endif // USE_I18N
 
+#ifdef USE_DIALUP
    delete m_OnlineManager;
+#endif // USE_DIALUP
 
    // FIXME this is not the best place to do it, but at least we're safe
    //       because we know that by now it's unused any more
@@ -1420,44 +1412,6 @@ wxMApp::GetStdIcon(int which) const
 }
 
 void
-wxMApp::UpdateOnlineDisplay(void)
-{
-   // Can be called during  application startup, in this case do
-   // nothing:
-   if(! m_topLevelFrame)
-      return;
-   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
-   wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
-   ASSERT(sbar);
-   ASSERT(mbar);
-
-   if(! m_DialupSupport)
-   {
-      mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
-      mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
-   }
-   else
-   {
-      bool online = IsOnline();
-      if(online)
-      {
-         mbar->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
-         mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
-      }
-      else
-      {
-         mbar->Enable((int)WXMENU_FILE_NET_ON, TRUE);
-         mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
-      }
-      int field = GetStatusField(SF_ONLINE);
-      UpdateStatusBar(field+1, TRUE);
-      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
-   }
-}
-
-void
 wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 {
    ASSERT(nfields <= SF_MAXIMUM);
@@ -1489,8 +1443,12 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
       widths[GetStatusField(SF_ONLINE)] = statusIconWidth;
    }
 #endif
+
+#ifdef USE_DIALUP
    if(m_DialupSupport)
       widths[GetStatusField(SF_ONLINE)] = 70;
+#endif // USE_DIALUP
+
    if(READ_APPCONFIG(MP_USE_OUTBOX))
       widths[GetStatusField(SF_OUTBOX)] = 100;
    //FIXME: wxGTK crashes after calling this repeatedly sbar->SetFieldsCount(n, widths);
@@ -1544,6 +1502,34 @@ wxIconManager *wxMApp::GetIconManager(void) const
 // ----------------------------------------------------------------------------
 // dial up support
 // ----------------------------------------------------------------------------
+
+#ifdef USE_DIALUP
+
+void
+wxMApp::OnConnected(wxDialUpEvent &event)
+{
+   if(! m_DialupSupport)
+      return;
+   m_IsOnline = TRUE;
+   UpdateOnlineDisplay();
+   MDialog_Message(_("Dial-Up network connection established."),
+                   m_topLevelFrame,
+                   _("Information"),
+                   "DialUpConnectedMsg");
+}
+
+void
+wxMApp::OnDisconnected(wxDialUpEvent &event)
+{
+   if(! m_DialupSupport)
+      return;
+   m_IsOnline = FALSE;
+   UpdateOnlineDisplay();
+   MDialog_Message(_("Dial-Up network shut down."),
+                   m_topLevelFrame,
+                   _("Information"),
+                   "DialUpDisconnectedMsg");
+}
 
 void
 wxMApp::SetupOnlineManager(void)
@@ -1637,6 +1623,50 @@ wxMApp::GoOffline(void) const
       ERRORMESSAGE((_("Attempt to shut down network seems to have failed.")));
    }
 }
+
+void
+wxMApp::UpdateOnlineDisplay(void)
+{
+   // Can be called during  application startup, in this case do
+   // nothing:
+   if(! m_topLevelFrame)
+      return;
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+   ASSERT(sbar);
+   ASSERT(mbar);
+
+   if(! m_DialupSupport)
+   {
+      mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
+      mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
+   }
+   else
+   {
+      bool online = IsOnline();
+      if(online)
+      {
+         mbar->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
+         mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+      }
+      else
+      {
+         mbar->Enable((int)WXMENU_FILE_NET_ON, TRUE);
+         mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
+      }
+      int field = GetStatusField(SF_ONLINE);
+      UpdateStatusBar(field+1, TRUE);
+      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
+   }
+}
+
+#endif // USE_DIALUP
+
+// ----------------------------------------------------------------------------
+// miscellaneous
+// ----------------------------------------------------------------------------
 
 void
 wxMApp::FatalError(const char *message)

@@ -73,6 +73,9 @@ M_OVERRIDES(python,Python scripting,USE_PYTHON,none,
 M_OVERRIDES(swig,whether we should use SWIG,USE_SWIG,1,
 --without-swig          don't use swig even if it is available)
 
+M_OVERRIDES(dialup,special dial-up support,USE_DIALUP,1,
+--disable-dialup        disable dial-up support for modem users)
+
 M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
 --with-experimental     compile experimental code)
 
@@ -508,6 +511,10 @@ case "$EXPERIMENTAL" in '') ;; *)
 	done  
 esac
 AC_SUBST(MAKE_EXPERIMENTAL)
+
+if test "x$USE_DIALUP" = "x1"; then
+    AC_DEFINE(USE_DIALUP)
+fi
 
 dnl --------------------------------------------------------------------------
 dnl check for SSL

@@ -216,8 +216,10 @@ typedef void (*mm_status_handler)(MAILSTREAM *stream,
 /// object used to reflect some events back to MailFolderCC
 static class CCEventReflector *gs_CCEventReflector = NULL;
 
+#ifdef USE_DIALUP
 /// object used to close the streams if it can't be done when closing folder
 static class CCStreamCleaner *gs_CCStreamCleaner = NULL;
+#endif // USE_DIALUP
 
 /// handler for temporarily redirected mm_list calls
 static mm_list_handler gs_mmListRedirect = NULL;
@@ -348,6 +350,8 @@ private:
         *m_cookieMsgStatus;
 };
 
+#ifdef USE_DIALUP
+
 // ----------------------------------------------------------------------------
 // CCStreamCleaner
 // ----------------------------------------------------------------------------
@@ -372,6 +376,8 @@ public:
 private:
    StreamList m_List;
 };
+
+#endif // USE_DIALUP
 
 // ----------------------------------------------------------------------------
 // OverviewData: this class is just used to share parameters between
@@ -1896,6 +1902,7 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
 
    bool ok = TRUE;
 
+#ifdef USE_DIALUP
    // check if we need to dial up to open this folder
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
    {
@@ -1907,7 +1914,8 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
 
       if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                TRUE /* [Yes] default */,
-                               mf->GetName()+"/DialUpOnOpenFolder"))
+                               mf->GetName()+ '/' +
+                               GetPersMsgBoxName(M_MSGBOX_DIALUP_ON_OPEN_FOLDER)))
       {
          mApplication->GoOnline();
       }
@@ -1918,7 +1926,8 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
                                      "Continue anyway?"),
                                    NULL, MDIALOG_YESNOTITLE,
                                    FALSE /* [No] default */,
-                                   mf->GetName()+"/NetDownOpenAnyway") )
+                                   mf->GetName() + '/' +
+                                   GetPersMsgBoxName(M_MSGBOX_NET_DOWN_OPEN_ANYWAY)) )
          {
              ok = FALSE;
 
@@ -1927,6 +1936,7 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
          }
       }
    }
+#endif // USE_DIALUP
 
    // try to really open it
    if ( ok )
@@ -2378,7 +2388,15 @@ MailFolderCC::Close()
        */
       CCAllDisabler no;
 
-      if ( !NeedsNetwork() || mApplication->IsOnline() )
+#ifdef USE_DIALUP
+      if ( NeedsNetwork() && !mApplication->IsOnline() )
+      {
+         // a remote folder but we're not connected: delay closing as we can't
+         // do it properly right now
+         gs_CCStreamCleaner->Add(m_MailStream);
+      }
+      else
+#endif // USE_DIALUP
       {
          // it is wrong to do this as it may result in mm_exists() callbacks
          // which we ignore (per above), so we miss new mail
@@ -2391,11 +2409,6 @@ MailFolderCC::Close()
 #endif // 0
 
          mail_close(m_MailStream);
-      }
-      else // a remote folder but we're not connected
-      {
-         // delay closing as we can't do it properly right now
-         gs_CCStreamCleaner->Add(m_MailStream);
       }
 
       m_MailStream = NIL;
@@ -2812,12 +2825,14 @@ MailFolderCC::Checkpoint(void)
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
               GetName().c_str());
 
+#ifdef USE_DIALUP
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"),
                    GetName().c_str()));
       return;
    }
+#endif // USE_DIALUP
 
    MailFolderLocker lock(this);
    if ( lock )
@@ -2860,6 +2875,7 @@ MailFolderCC::Ping(void)
          Close();
       }
 
+#ifdef USE_DIALUP
       if ( NeedsNetwork() && !mApplication->IsOnline() &&
            !MDialog_YesNoDialog
            (
@@ -2872,13 +2888,14 @@ MailFolderCC::Ping(void)
             NULL,
             MDIALOG_YESNOTITLE,
             false,
-            GetName()+"/NoNetPingAnyway")
+            GetName() + '/' + GetPersMsgBoxName(M_MSGBOX_NO_NET_PING_ANYWAY))
         )
       {
          ForceClose();
 
          return false;
       }
+#endif // USE_DIALUP
 
       // try to reopen the folder if it is closed
       if ( !m_MailStream )
@@ -4955,12 +4972,16 @@ MailFolderCC::CClientInit(void)
 
    ms_CClientInitialisedFlag = true;
 
+#ifdef USE_DIALUP
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();
+#endif // USE_DIALUP
 
    ASSERT_MSG( !gs_CCEventReflector, "couldn't be created yet" );
    gs_CCEventReflector = new CCEventReflector;
 }
+
+#ifdef USE_DIALUP
 
 CCStreamCleaner::~CCStreamCleaner()
 {
@@ -5000,6 +5021,8 @@ CCStreamCleaner::~CCStreamCleaner()
    }
 }
 
+#endif // USE_DIALUP
+
 // ----------------------------------------------------------------------------
 // functions used by MailFolder initialization/shutdown code
 // ----------------------------------------------------------------------------
@@ -5020,11 +5043,13 @@ extern void MailFolderCCCleanup(void)
    free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
    free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
 
+#ifdef USE_DIALUP
    if ( gs_CCStreamCleaner )
    {
       delete gs_CCStreamCleaner;
       gs_CCStreamCleaner = NULL;
    }
+#endif // USE_DIALUP
 
    ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
 

@@ -1116,6 +1116,7 @@ SendMessageCC::SendOrQueue(bool sendNow)
    // messages already from Outbox) or if there is no Outbox configured at all
    bool send = sendNow || m_OutboxName.empty();
 
+#ifdef USE_DIALUP
    if ( send && !mApplication->IsOnline() )
    {
       /*
@@ -1143,6 +1144,7 @@ SendMessageCC::SendOrQueue(bool sendNow)
          return false;
       }
    }
+#endif // USE_DIALUP
 
    // prepare the message for sending or queuing
    Build(!send);

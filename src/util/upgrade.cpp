@@ -28,6 +28,7 @@
 #  include "strutil.h"
 #  include "Mpers.h"
 #  include "gui/wxMApp.h"  // for wxMApp::GetDialUpManager()
+
 #  include <wx/stattext.h>
 #endif  //USE_PCH
 
@@ -37,7 +38,12 @@
 // define to enable DNS lookup of the server names - disabled for now as it
 // causes too many problems (it may hang for a long time if DNS is not
 // available)
-#undef USE_DNS
+//#define USE_DNS
+
+// the DNS lookup code using wxDialUpManager
+#ifndef USE_DIALUP
+   #undef USE_DNS
+#endif // USE_DIALUP
 
 #include "Message.h"
 #include "MailFolder.h"
@@ -50,7 +56,11 @@
 #include <wx/log.h>
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
-#include <wx/dialup.h>        // for IsAlwaysOnline()
+
+#ifdef USE_DIALUP
+   #include <wx/dialup.h>     // for IsAlwaysOnline()
+#endif // USE_DIALUP
+
 #include <wx/utils.h>         // wxGetFullHostName()
 
 #ifdef USE_DNS
@@ -82,7 +92,9 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_COLLECT_INBOX;
+#ifdef USE_DIALUP
 extern const MOption MP_DIALUP_SUPPORT;
+#endif // USE_DIALUP
 extern const MOption MP_FIRSTRUN;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_FOLDER_FILE_DRIVER;
@@ -189,11 +201,15 @@ enum InstallWizardPageId
    InstallWizard_IdentityPage,         // ask name, e-mail
    InstallWizard_ServersPage,          // ask POP, SMTP, NNTP servers
    InstallWizard_OperationsPage,       // how we want Mahogany to work
+#ifdef USE_DIALUP
    InstallWizard_DialUpPage,           // set up dial-up networking
+#endif // USE_DIALUP
+
 //   InstallWizard_MiscPage,             // other common options
 #ifdef USE_HELPERS_PAGE
 //   InstallWizard_HelpersPage,          // external programs set up
 #endif // USE_HELPERS_PAGE
+
    InstallWizard_FinalPage,            // say that everything is ok
    InstallWizard_PagesMax,             // the number of pages
    InstallWizard_Done = -1             // invalid page index
@@ -222,7 +238,9 @@ struct InstallWizardData
           nntp;
 
    // operations page:
+#ifdef USE_DIALUP
    int    useDialUp; // initially -1
+#endif // USE_DIALUP
    bool   useOutbox;
    bool   useTrash;
    int    folderType;
@@ -238,6 +256,7 @@ struct InstallWizardData
 #endif // USE_INBOX
 
    // dial up page
+#ifdef USE_DIALUP
 #if defined(OS_WIN)
    String connection;
 #elif defined(OS_UNIX)
@@ -247,7 +266,8 @@ struct InstallWizardData
    // helpers page
    String browser;
 #endif // OS_UNIX
-
+#endif // USE_DIALUP
+   
    // did we run the wizard at all?
    bool done;
 
@@ -294,8 +314,10 @@ public:
    virtual InstallWizardPageId GetPrevPageId() const;
    virtual InstallWizardPageId GetNextPageId() const;
 
+#ifdef USE_DIALUP
    // the dial up page should be shown only if this function returns TRUE
    static bool ShouldShowDialUpPage();
+#endif // USE_DIALUP
 
    // the import page should be shown only if this function returns TRUE
    static bool ShouldShowImportPage();
@@ -520,6 +542,8 @@ private:
               *m_nntp;
 };
 
+#ifdef USE_DIALUP
+
 class InstallWizardDialUpPage : public InstallWizardPage
 {
 public:
@@ -558,6 +582,8 @@ private:
 #endif // platform
 };
 
+#endif // USE_DIALUP
+
 class InstallWizardOperationsPage : public InstallWizardPage
 {
 public:
@@ -565,6 +591,7 @@ public:
 
    virtual bool TransferDataToWindow()
       {
+#ifdef USE_DIALUP
          // no setting yet?
          if ( gs_installWizardData.useDialUp == -1 )
          {
@@ -584,15 +611,18 @@ public:
                                                 !dialupMan->IsAlwaysOnline();
 #endif // Win/!Win
          }
+#endif // USE_DIALUP
 
          m_FolderTypeChoice->SetSelection(gs_installWizardData.folderType);
 #ifdef USE_PYTHON
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
-#endif
+#endif // USE_PYTHON
+#ifdef USE_DIALUP
          m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
+#endif // USE_DIALUP
 #ifdef USE_PISOCK
          m_UsePalmOsCheckbox->SetValue(gs_installWizardData.usePalmOs != 0);
-#endif
+#endif // USE_PISOCK
          m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
          m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
 #ifdef USE_INBOX
@@ -607,11 +637,13 @@ public:
          gs_installWizardData.folderType  = m_FolderTypeChoice->GetSelection();
 #ifdef USE_PYTHON
          gs_installWizardData.usePython  = m_UsePythonCheckbox->GetValue();
-#endif
+#endif // USE_PYTHON
 #ifdef USE_PISOCK
          gs_installWizardData.usePalmOs  = m_UsePalmOsCheckbox->GetValue();
-#endif
+#endif // USE_PISOCK
+#ifdef USE_DIALUP
          gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
+#endif // USE_DIALUP
          gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
          gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
 #ifdef USE_INBOX
@@ -623,8 +655,10 @@ public:
 private:
    wxChoice *m_FolderTypeChoice;
    wxCheckBox *m_TrashCheckbox,
-              *m_UseOutboxCheckbox,
-              *m_UseDialUpCheckbox
+              *m_UseOutboxCheckbox
+#ifdef USE_DIALUP
+             , *m_UseDialUpCheckbox
+#endif // USE_DIALUP
 #ifdef USE_INBOX
              , *m_CollectCheckbox
 #endif // USE_INBOX
@@ -686,15 +720,12 @@ extern bool RunInstallWizard();
 #endif // USE_WIZARD
 
 // ============================================================================
-// implementation
+// wizard pages implementation
 // ============================================================================
 
 #ifdef USE_WIZARD
 
 // ----------------------------------------------------------------------------
-// wizard pages code
-// ----------------------------------------------------------------------------
-
 // InstallWizardPage
 // ----------------------------------------------------------------------------
 
@@ -702,10 +733,14 @@ BEGIN_EVENT_TABLE(InstallWizardPage, wxWizardPage)
    EVT_WIZARD_CANCEL(-1, InstallWizardPage::OnWizardCancel)
 END_EVENT_TABLE()
 
+#ifdef USE_DIALUP
+
 bool InstallWizardPage::ShouldShowDialUpPage()
 {
    return gs_installWizardData.useDialUp != 0;
 }
+
+#endif // USE_DIALUP
 
 bool InstallWizardPage::ShouldShowImportPage()
 {
@@ -718,7 +753,10 @@ bool InstallWizardPage::ShouldShowImportPage()
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
 {
    int id = m_id - 1;
-   if ( (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+   if ( 
+#ifdef USE_DIALUP
+        (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+#endif // USE_DIALUP
         (id == InstallWizard_ImportPage && !ShouldShowImportPage()) )
    {
       // skip it
@@ -731,7 +769,10 @@ InstallWizardPageId InstallWizardPage::GetPrevPageId() const
 InstallWizardPageId InstallWizardPage::GetNextPageId() const
 {
    int id = m_id + 1;
-   if ( (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+   if (
+#ifdef USE_DIALUP
+        (id == InstallWizard_DialUpPage && !ShouldShowDialUpPage()) ||
+#endif // USE_DIALUP
         (id == InstallWizard_ImportPage && !ShouldShowImportPage()) )
    {
       // skip it
@@ -776,12 +817,17 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
          CREATE_PAGE(Identity);
          CREATE_PAGE(Servers);
          CREATE_PAGE(Operations);
+#ifdef USE_DIALUP
          CREATE_PAGE(DialUp);
+#endif // USE_DIALUP
+
 //         CREATE_PAGE(Misc);
 #ifdef USE_HELPERS_PAGE
 //         CREATE_PAGE(Helpers);
 #endif // USE_HELPERS_PAGE
+
          CREATE_PAGE(Final);
+
       case InstallWizard_WelcomePage:
       case InstallWizard_Done:
       case InstallWizard_PagesMax:
@@ -974,6 +1020,8 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    panel->Layout();
 }
 
+#ifdef USE_DIALUP
+
 // InstallWizardDialUpPage
 // ----------------------------------------------------------------------------
 
@@ -1023,6 +1071,8 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    panel->Layout();
 }
 
+#endif // USE_DIALUP
+
 // InstallWizardOperationsPage
 // ----------------------------------------------------------------------------
 
@@ -1046,7 +1096,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 #endif // USE_INBOX
       Label_UseTrash,
       Label_UseOutbox,
+#ifdef USE_DIALUP
       Label_UseDialUp,
+#endif // USE_DIALUP
 #ifdef USE_PISOCK
       Label_UsePalmOS,
 #endif // USE_PISOCK
@@ -1063,7 +1115,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 #endif // USE_INBOX
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queue:"));
+#ifdef USE_DIALUP
    labels.Add(_("&Use dial-up network:"));
+#endif // USE_DIALUP
 #ifdef USE_PISOCK
    labels.Add(_("&Load PalmOS support:"));
 #endif // USE_PISOCK
@@ -1113,16 +1167,20 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    m_UseOutboxCheckbox = panel->CreateCheckBox(labels[Label_UseOutbox],
                                                widthMax, text3);
 
+   last = m_UseOutboxCheckbox;
+
+#ifdef USE_DIALUP
    wxStaticText *text4 = panel->CreateMessage(
       _(
          "\n"
          "If you are using dial-up networking,\n"
          "Mahogany may detect your connection status\n"
          "and optionally dial and hang-up."
-         ), m_UseOutboxCheckbox);
+         ), last);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[Label_UseDialUp],
                                                widthMax, text4);
    last = m_UseDialUpCheckbox;
+#endif // USE_DIALUP
 
 #ifdef USE_PISOCK
    wxStaticText *text5 = panel->CreateMessage(
@@ -1321,14 +1379,17 @@ bool RunInstallWizard()
 
    // first, set up the default values for the wizard:
 
-   gs_installWizardData.useDialUp = -1;
    gs_installWizardData.showImportPage = -1;
+
+#ifdef USE_DIALUP
+   gs_installWizardData.useDialUp = -1;
 #if defined(OS_WIN)
    gs_installWizardData.connection = READ_APPCONFIG_TEXT(MP_NET_CONNECTION);
 #elif defined(OS_UNIX)
    gs_installWizardData.dialCommand = READ_APPCONFIG_TEXT(MP_NET_ON_COMMAND);
    gs_installWizardData.hangupCommand = READ_APPCONFIG_TEXT(MP_NET_OFF_COMMAND);
 #endif // platform
+#endif // USE_DIALUP
 
    gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX) != 0;
    gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER) != 0;
@@ -1400,7 +1461,9 @@ bool RunInstallWizard()
       // assume the simplest possible values for everything
       gs_installWizardData.useOutbox = false;
       gs_installWizardData.useTrash = false;
+#ifdef USE_DIALUP
       gs_installWizardData.useDialUp = false;
+#endif // USE_DIALUP
 #if USE_PYTHON
       gs_installWizardData.usePython = false;
 #endif // USE_PYTHON
@@ -1526,6 +1589,7 @@ void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
    // do setup the std folders now
    VerifyStdFolders();
 
+#ifdef USE_DIALUP
    // Dial-Up network:
    profile->writeEntry(MP_DIALUP_SUPPORT, gs_installWizardData.useDialUp);
    if(gs_installWizardData.useDialUp)
@@ -1537,6 +1601,7 @@ void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
       profile->writeEntry(MP_NET_OFF_COMMAND,gs_installWizardData.hangupCommand);
 #endif // platform
    }
+#endif // USE_DIALUP
 
    if(gs_installWizardData.folderType !=
          GetNumericDefault(MP_FOLDER_FILE_DRIVER) )

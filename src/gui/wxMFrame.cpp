@@ -720,9 +720,11 @@ wxMFrame::OnMenuCommand(int id)
          break;
 #endif // USE_PS_PRINTING
 
+#ifdef USE_DIALUP
       case WXMENU_FILE_NET_ON:
          mApplication->GoOnline();
          break;
+
       case WXMENU_FILE_NET_OFF:
          if(mApplication->CheckOutbox())
          {
@@ -736,6 +738,7 @@ wxMFrame::OnMenuCommand(int id)
          }
          mApplication->GoOffline();
          break;
+#endif // USE_DIALUP
 
          // create a new identity and edit it
       case WXMENU_FILE_IDENT_ADD:

@@ -162,7 +162,9 @@ enum ConfigFields
    ConfigField_SmtpServerSSLUnsigned,
    ConfigField_NntpServerSSL,
    ConfigField_NntpServerSSLUnsigned,
-#endif
+#endif // USE_SSL
+
+#ifdef USE_DIALUP
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
    ConfigField_BeaconHost,
@@ -172,6 +174,8 @@ enum ConfigFields
    ConfigField_NetOnCommand,
    ConfigField_NetOffCommand,
 #endif // platform
+#endif // USE_DIALUP
+
    ConfigField_TimeoutInfo,
    ConfigField_OpenTimeout,
 #ifdef USE_TCP_TIMEOUTS
@@ -867,6 +871,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
    { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
+
+#ifdef USE_DIALUP
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
@@ -881,6 +887,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Command to &activate network"),   Field_Text | Field_Global, ConfigField_DialUpSupport},
    { gettext_noop("Command to &deactivate network"), Field_Text | Field_Global, ConfigField_DialUpSupport},
 #endif // platform
+#endif // USE_DIALUP
+
    { gettext_noop("The following timeout values are used for TCP connections to\n"
                   "remote mail or news servers."), Field_Message | Field_Global | Field_Advanced, -1 },
    { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Global | Field_Advanced,    -1,                        },
@@ -1463,6 +1471,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NNTPHOST_USE_SSL),
    CONFIG_ENTRY(MP_NNTPHOST_USE_SSL_UNSIGNED),
 #endif // USE_SSL
+
+#ifdef USE_DIALUP
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),
@@ -1472,6 +1482,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NET_ON_COMMAND),
    CONFIG_ENTRY(MP_NET_OFF_COMMAND),
 #endif // platform
+#endif // USE_DIALUP
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
 #ifdef USE_TCP_TIMEOUTS
@@ -2882,6 +2894,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 bool wxOptionsPageNetwork::TransferDataToWindow()
 {
    bool bRc = wxOptionsPage::TransferDataToWindow();
+#ifdef USE_DIALUP
    if ( bRc )
    {
       wxChoice *choice = wxStaticCast(GetControl(ConfigField_NetConnection),
@@ -2905,6 +2918,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
          }
       }
    }
+#endif // USE_DIALUP
 
    return bRc;
 }

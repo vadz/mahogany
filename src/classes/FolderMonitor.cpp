@@ -36,7 +36,9 @@
 
 #include "MThread.h"
 
-#include "MApplication.h"  // for IsOnline()
+#ifdef USE_DIALUP
+   #include "MApplication.h"  // for IsOnline()
+#endif // USE_DIALUP
 
 #include "MDialogs.h"      // MDialog_YesNoDialog
 #include "Mpers.h"
@@ -65,8 +67,10 @@ enum FolderState
    // can be checked
    Folder_Ok,
 
+#ifdef USE_DIALUP
    // can't be checked now but might be checked later
    Folder_TempUnavailable,
+#endif // USE_DIALUP
 
    // can't be checked now nor later
    Folder_Unaccessible
@@ -488,6 +492,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
 
    switch ( i->GetState() )
    {
+#ifdef USE_DIALUP
       case Folder_TempUnavailable:
          // if online status changed, the folder might have become accessible
          // again now
@@ -498,6 +503,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
             break;
          }
          //else: fall through
+#endif // USE_DIALUP
 
       case Folder_Unaccessible:
          // don't even try any more
@@ -528,6 +534,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
       mf->DecRef();
    }
 
+#ifdef USE_DIALUP
    if ( folder->NeedsNetwork() && !mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("Cannot check for new mail in the folder '%s' "
@@ -539,6 +546,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
 
       i->SetState(Folder_TempUnavailable);
    }
+#endif // USE_DIALUP
 
    // update the time of the next check
    i->UpdateCheckTime();

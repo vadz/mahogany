@@ -235,9 +235,11 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
+#ifdef USE_DIALUP
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to network"), gettext_noop("Activate dial-up networking")        , FALSE },
    { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down network"), gettext_noop("Shutdown dial-up networking")        , FALSE },
+#endif // USE_DIALUP
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", FALSE },
