@@ -763,25 +763,30 @@ extern WXDLLMAYEXP wxString wxPDirSelector(const wxString& configPath,
 // wxPMessageBoxEnabled() for this).
 // ----------------------------------------------------------------------------
 
-// some additional style bits for the persistent message boxes
-//
-// they shouldn't conflict with the usual wxMessageDialog styles
-enum
+// parameters specifying how this message may be disabled
+struct WXDLLMAYEXP wxPMessageBoxParams
 {
-    // initially check the "don't remind me again" checkbox
-    wxPMSGBOX_DISABLE   = 0x2000,
+    wxPMessageBoxParams()
+        : disableMsg(_("Don't show this message again "))
+    {
+        indexDisable = -1;
+        dontDisableOnNo = false;
+    }
 
-    // don't allow disabling the message box on "No" value
-    wxPMSGBOX_NOT_ON_NO = 0x4000
+    wxString disableMsg;
+    wxArrayString disableOptions;
+    int indexDisable;
+    bool dontDisableOnNo;
 };
 
-extern WXDLLMAYEXP int wxPMessageBox(const wxString& configPath,
-                                     const wxString& message,
-                                     const wxString& caption,
-                                     long style = wxYES_NO | wxICON_QUESTION,
-                                     wxWindow *parent = NULL,
-                                     wxConfigBase *config = NULL,
-                                     bool *wontShowAgain = NULL);
+extern WXDLLMAYEXP int
+wxPMessageBox(const wxString& configPath,
+              const wxString& message,
+              const wxString& caption,
+              long style = wxYES_NO | wxICON_QUESTION,
+              wxWindow *parent = NULL,
+              wxConfigBase *config = NULL,
+              wxPMessageBoxParams *params = NULL);
 
 // Return a non null value if the message box was previously disabled.
 //
@@ -802,3 +807,4 @@ extern WXDLLMAYEXP void wxPMessageBoxDisable(const wxString& configPath,
                                              wxConfigBase *config = NULL);
 
 #endif // _WX_PWINDOW_H_
+

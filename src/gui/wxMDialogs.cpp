@@ -673,10 +673,12 @@ MDialog_Message(const char *message,
    NoBusyCursor noBC;
 
    long style = GetMsgBoxStyle(wxOK | wxICON_INFORMATION);
-   if ( flags & M_DLG_DISABLE )
-      style |= wxPMSGBOX_DISABLE;
    if ( flags & M_DLG_ALLOW_CANCEL )
       style |= wxCANCEL;
+
+   wxPMessageBoxParams params;
+   if ( flags & M_DLG_DISABLE )
+      params.indexDisable = 0;
 
    return wxPMessageBox
           (
@@ -684,7 +686,9 @@ MDialog_Message(const char *message,
             message,
             String(M_TITLE_PREFIX) + title,
             style,
-            GetDialogParent(parent)
+            GetDialogParent(parent),
+            NULL,
+            &params
           ) != wxCANCEL;
 }
 
@@ -766,7 +770,6 @@ MDialog_YesNoDialog(const char *message,
 
    if ( msgBox )
    {
-      pathLocal =
       pathGlobal = GetPersMsgBoxName(msgBox);
 
       // first check the global value
@@ -776,8 +779,7 @@ MDialog_YesNoDialog(const char *message,
       // disabled just for this folder
       if ( !storedValue && folderName )
       {
-         pathLocal << '/'
-                   << Profile::FilterProfileName(folderName)
+         pathLocal << Profile::FilterProfileName(folderName)
                    << '/'
                    << pathGlobal;
 
@@ -795,68 +797,56 @@ MDialog_YesNoDialog(const char *message,
    NoBusyCursor noBC;
    CloseSplash();
 
-   bool wasDisabled;
+   wxPMessageBoxParams params;
+   params.dontDisableOnNo = (flags & M_DLG_NOT_ON_NO) != 0;
+
+   if ( folderName )
+   {
+      params.disableOptions.Add(_("just for this &folder"));
+      params.disableOptions.Add(_("for &all folders"));
+   }
+
+   if ( flags & M_DLG_DISABLE )
+   {
+      params.indexDisable = 0;
+   }
+
    int rc = wxPMessageBox
             (
                pathLocal,
                message,
                String(M_TITLE_PREFIX) + title,
-               GetYesNoMsgBoxStyle(flags) |
-                  // these bits are equal to the corresponding wx constants
-                  (flags & (M_DLG_NOT_ON_NO | M_DLG_DISABLE)),
+               GetYesNoMsgBoxStyle(flags),
                GetDialogParent(parent),
                NULL,
-               &wasDisabled
+               &params
             );
 
-   if ( wasDisabled )
+   if ( params.indexDisable != -1 )
    {
       // a folder-specific message box can be disabled just for this folder or
       // for all of them globally
-      if ( folderName )
+      if ( folderName && params.indexDisable == 1 )
       {
-         // no recursion here as we call ourselves without pathGlobal (nor
-         // folderName)
-         String msg = String::Format
-                      (
-                        _("You have chosen to disable the previous dialog and "
-                          "now you have the choice between doing it\n"
-                          "only for this folder (%s) or for all folders.\n"
-                          "\n"
-                          "If you answer \"Yes\", it will be disabled for all "
-                          "folders, otherwise only for this one. In either case\n"
-                          "you may use the \"Reenable message boxes\" button in "
-                          "the last page of the preferences dialog to restore\n"
-                          "this message box later.\n"
-                          "\n"
-                          "Disable this question for all folders?"),
-                        folderName
-                      );
+         // we don't need the local key
+         wxPMessageBoxEnable(pathLocal);
 
-         if ( MDialog_YesNoDialog(msg, parent) )
-         {
-            // we don't need the local key
-            wxPMessageBoxEnable(pathLocal);
+         // as we disable it globally anyhow
+         wxPMessageBoxDisable(pathGlobal, rc);
+      }
+      //else: it's already disabled for this folder by wxPMessageBox()
 
-            // as we disable it globally anyhow
-            wxPMessageBoxDisable(pathGlobal, rc);
-         }
-         //else: it's already disabled for this folder
-      }
-      else
-      {
-         // show a message about how to enable this dialog back
-         MDialog_Message
-         (
-            _("Remember that you can reenable this and other dialogs\n"
-              "by using the button in the last page of the \"Preferences\"\n"
-              "dialog.\n"),
-            parent,
-            MDIALOG_MSGTITLE,
-            GetPersMsgBoxName(M_MSGBOX_REENABLE_HINT),
-            M_DLG_DISABLE
-         );
-      }
+      // show a message about how to enable this dialog back
+      MDialog_Message
+      (
+         _("Remember that you can reenable this and other dialogs\n"
+           "by using the button in the last page of the \"Preferences\"\n"
+           "dialog.\n"),
+         parent,
+         MDIALOG_MSGTITLE,
+         GetPersMsgBoxName(M_MSGBOX_REENABLE_HINT),
+         M_DLG_DISABLE
+      );
    }
 
    return rc == wxYES;

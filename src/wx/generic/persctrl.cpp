@@ -30,20 +30,24 @@
 
 // wxWindows
 #ifndef WX_PRECOMP
+#   include "wx/log.h"
+#   include "wx/intl.h"
 #   include "wx/config.h"
-#   include  "wx/layout.h"
-#   include  "wx/button.h"
-#   include  "wx/stattext.h"
-#   include  "wx/statbmp.h"
-#   include  "wx/intl.h"
-#   include  "wx/statbox.h"
-#   include  "wx/filedlg.h"
-#   include  "wx/dirdlg.h"
-#   include  "wx/msgdlg.h"
-#   include  "wx/log.h"
+
+#   include "wx/sizer.h"
+
+#   include "wx/button.h"
+#   include "wx/radiobut.h"
+#   include "wx/stattext.h"
+#   include "wx/statbmp.h"
+#   include "wx/statline.h"
+
+#   include "wx/filedlg.h"
+#   include "wx/dirdlg.h"
+#   include "wx/msgdlg.h"
 #endif //WX_PRECOMP
 
-#include  "wx/artprov.h"
+#include "wx/artprov.h"
 
 #include "wx/tokenzr.h"
 
@@ -53,13 +57,6 @@
     #include <windows.h>
     #include "wx/msw/winundef.h"
 #endif // __WINDOWS__
-
-#ifndef MAX
-#   define   MAX(a,b) (((a) > (b))?(a):(b))
-#endif
-
-// use icon in msg box?
-#define USE_ICON
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -1570,28 +1567,33 @@ public:
                      const wxString& message,
                      const wxString& caption,
                      long style,
-                     bool persistent = TRUE);
+                     const wxPMessageBoxParams& params);
 
-    // accessors
-    bool DontShowAgain() const { return m_checkBox->GetValue(); }
+    // return the index of the checked radio button or -1 if not disabled
+    int GetDisabledIndex() const;
 
     // callbacks
+    void OnCheckBox(wxCommandEvent& event)
+        { EnableRadioBtns(event.IsChecked()); }
     void OnButton(wxCommandEvent& event);
 
 private:
-    wxCheckBox *m_checkBox;
+    void EnableRadioBtns(bool enable);
 
-    long        m_dialogStyle;
+
+    wxCheckBox *m_chkDisable;
+
+    size_t m_countRadioBtns;
+    wxRadioButton *m_radiobuttons[6]; // should be enough choices...
+
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPMessageDialog)
 };
 
 BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)
-    EVT_BUTTON(wxID_YES,    wxPMessageDialog::OnButton)
-    EVT_BUTTON(wxID_NO,     wxPMessageDialog::OnButton)
-    EVT_BUTTON(wxID_CANCEL, wxPMessageDialog::OnButton)
-    EVT_BUTTON(wxID_OK,     wxPMessageDialog::OnButton)
+    EVT_BUTTON(-1,      wxPMessageDialog::OnButton)
+    EVT_CHECKBOX(-1,    wxPMessageDialog::OnCheckBox)
 END_EVENT_TABLE()
 
 // although this enum really should be local in wxPMessageDialog ctor, this
@@ -1608,22 +1610,22 @@ enum
 wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                                    const wxString& message,
                                    const wxString& caption,
-                                   long style, bool persistent)
-                : wxDialog(parent, -1, caption,
-                           wxDefaultPosition, wxDefaultSize,
-                           wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+                                   long style,
+                                   const wxPMessageBoxParams& params)
+                : wxDialog(parent, -1, caption)
 {
-    m_dialogStyle = style;  // we need it in OnButton
+    m_chkDisable = NULL;
+    m_countRadioBtns = 0;
 
-    wxLayoutConstraints *c;
-    SetAutoLayout(TRUE);
+    // the dialog consists of the main, msg box, part and optionally a lower
+    // part allowing to disable it, sizerTop contains both of them
+    wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
 
-    // the static box should be created first - otherwise it will hide the
-    // controls which are disposed on top of it
-    wxStaticBox *box = new wxStaticBox(this, -1, "");
+    // create the main part
+    wxSizer *sizerMsgBox = new wxBoxSizer(wxVERTICAL);
+    wxSizer *sizerMsgAndText = new wxBoxSizer(wxHORIZONTAL),
+            *sizerButtons = CreateButtonSizer(style);
 
-    // create an icon
-#ifdef USE_ICON
     wxArtID id;
     switch ( style & wxICON_MASK )
     {
@@ -1648,227 +1650,102 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             break;
     }
 
-    wxStaticBitmap *icon = new wxStaticBitmap
-                               (
-                                this,
-                                -1,
-                                wxArtProvider::GetBitmap(id)
-                               );
-    const int iconSize = icon->GetIcon().GetWidth();
-#else
-    const int iconSize = 0;
-#endif // use icon
+    wxBitmap bmp = wxArtProvider::GetBitmap(id);
 
-    // split the message in lines
-    // --------------------------
-    wxClientDC dc(this);
-    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+    sizerMsgAndText->Add(new wxStaticBitmap(this, -1, bmp), 0,
+                            wxALIGN_TOP | wxRIGHT, LAYOUT_X_MARGIN);
+    sizerMsgAndText->Add(new wxStaticText(this, -1, message), 1,
+                            wxALIGN_TOP | wxALL, LAYOUT_Y_MARGIN);
 
-    wxArrayString lines;
-    wxString curLine;
-    long width, widthTextMax = 0;
-    for ( const char *pc = message; ; pc++ ) {
-        if ( *pc == '\n' || *pc == '\0' ) {
-            dc.GetTextExtent(curLine, &width, NULL);
-            if ( width > widthTextMax )
-                widthTextMax = width;
+    sizerMsgBox->Add(sizerMsgAndText, 1, wxEXPAND);
+    sizerMsgBox->Add(0, LAYOUT_Y_MARGIN);
+    sizerMsgBox->Add(sizerButtons, 0,
+                        wxALIGN_CENTER | (wxALL & ~wxBOTTOM), LAYOUT_Y_MARGIN);
 
-            lines.Add(curLine);
+    sizerTop->Add(sizerMsgBox, 1, wxEXPAND | wxALL, LAYOUT_Y_MARGIN);
 
-            if ( *pc == '\n' ) {
-               curLine.Empty();
-            }
-            else {
-               // the end of string
-               break;
-            }
-        }
-        else {
-            curLine += *pc;
-        }
-    }
-
-    // calculate the total dialog size
-    wxButton *buttons[Btn_Max] = { NULL, NULL, NULL, NULL };
-    int nDefaultBtn = -1;
-
-    // some checks are in order...
-    wxASSERT_MSG( !(style & wxOK) || !(style & wxYES_NO),
-                  _T("don't create dialog with both Yes/No and Ok buttons!") );
-
-    wxASSERT_MSG( (style & wxOK ) || (style & wxYES_NO),
-                  _T("don't create dialog with only the Cancel button!") );
-
-    if ( style & wxYES_NO ) {
-       buttons[Btn_Yes] = new wxButton(this, wxID_YES, _("Yes"));
-       buttons[Btn_No] = new wxButton(this, wxID_NO, _("No"));
-
-
-       if(style & wxNO_DEFAULT)
-          nDefaultBtn = Btn_No;
-       else
-          nDefaultBtn = Btn_Yes;
-    }
-
-    if (style & wxOK) {
-        buttons[Btn_Ok] = new wxButton(this, wxID_OK, _("OK"));
-
-        if ( nDefaultBtn == -1 )
-            nDefaultBtn = Btn_Ok;
-    }
-
-    if (style & wxCANCEL) {
-        buttons[Btn_Cancel] = new wxButton(this, wxID_CANCEL, _("Cancel"));
-    }
-
-    // get the longest caption and also calc the number of buttons
-    size_t nBtn, nButtons = 0;
-    long widthBtnMax = 0;
-    for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
-        if ( buttons[nBtn] ) {
-            nButtons++;
-            dc.GetTextExtent(buttons[nBtn]->GetLabel(), &width, NULL);
-            if ( width > widthBtnMax )
-                widthBtnMax = width;
-        }
-    }
-
-    // now we can place the buttons
-    if ( widthBtnMax < 75 )
-        widthBtnMax = 75;
-    else
-        widthBtnMax += 10;
-    long heightButton = widthBtnMax*23/75;
-
-    long heightTextLine = 0;
-    wxString textCheckbox = _("Don't show this message again ");
-    dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
-
-    if ( persistent )
+    // create the lower part if needed
+    if ( !params.disableMsg.empty() )
     {
-       // extra space for the check box
-       width += 15;
+        sizerTop->Add(new wxStaticLine(this, -1), 0, wxEXPAND);
 
-       // *1.2 baselineskip
-       heightTextLine *= 12;
-       heightTextLine /= 10;
+        wxSizer *sizerDontShow = new wxBoxSizer(wxHORIZONTAL);
+        m_chkDisable = new wxCheckBox(this, -1, params.disableMsg);
+        sizerDontShow->Add(m_chkDisable, 0, wxALIGN_CENTRE_VERTICAL);
 
-    }
-    size_t nLineCount = lines.Count();
+        m_countRadioBtns = params.disableOptions.GetCount();
+        if ( m_countRadioBtns >= 2 )
+        {
+            if ( m_countRadioBtns > WXSIZEOF(m_radiobuttons) )
+            {
+                wxFAIL_MSG( _T("too many ways to disable") );
 
-    long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
-                             LAYOUT_X_MARGIN;
-
-    // the initial (and minimal possible) size of the dialog
-    long widthDlg = MAX(widthTextMax + iconSize + 4*LAYOUT_X_MARGIN,
-                        MAX(widthButtonsTotal, width)) +
-                    6*LAYOUT_X_MARGIN,
-         heightDlg = 12*LAYOUT_Y_MARGIN + heightButton +
-                     heightTextLine*(nLineCount + 1);
-
-    // create the controls
-    // -------------------
-
-    // a box around text and buttons
-    c = new wxLayoutConstraints;
-    c->top.SameAs(this, wxTop/*, LAYOUT_Y_MARGIN*/);
-    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-    c->bottom.SameAs(this, wxBottom, heightTextLine + 3*LAYOUT_Y_MARGIN);
-    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-    box->SetConstraints(c);
-
-    c = new wxLayoutConstraints;
-    c->width.Absolute(iconSize);
-    c->height.Absolute(iconSize);
-    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
-    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-
-#ifdef USE_ICON
-    icon->SetConstraints(c);
-#endif
-
-    wxStaticText *text = NULL;
-    for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
-        c = new wxLayoutConstraints;
-        if ( text == NULL )
-            c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
-        else
-            c->top.Below(text);
-
-#ifdef USE_ICON
-        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
-#else
-        c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-#endif
-
-        c->width.Absolute(widthTextMax);
-        c->height.Absolute(heightTextLine);
-        text = new wxStaticText(this, -1, lines[nLine]);
-        text->SetConstraints(c);
-    }
-
-    // create the buttons
-    wxButton *btnPrevious = (wxButton *)NULL;
-    for ( nBtn = 0; nBtn < Btn_Max; nBtn++ ) {
-        if ( buttons[nBtn] ) {
-            c = new wxLayoutConstraints;
-
-            if ( btnPrevious ) {
-                c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
-            }
-            else {
-                c->left.SameAs(this, wxLeft,
-                               (widthDlg - widthButtonsTotal) / 2);
+                m_countRadioBtns = WXSIZEOF(m_radiobuttons);
             }
 
-            c->width.Absolute(widthBtnMax);
-            c->top.Below(text, 4*LAYOUT_Y_MARGIN);
-            c->height.Absolute(heightButton);
-            buttons[nBtn]->SetConstraints(c);
+            // several ways to disable this message box
+            wxSizer *sizerOpts = new wxBoxSizer(wxVERTICAL);
+            for ( size_t n = 0; n < m_countRadioBtns; n++ )
+            {
+                m_radiobuttons[n]
+                    = new wxRadioButton(this, -1, params.disableOptions[n]);
+                sizerOpts->Add(m_radiobuttons[n], 0, wxBOTTOM, LAYOUT_Y_MARGIN);
 
-            btnPrevious = buttons[nBtn];
+                if ( (int)n == params.indexDisable )
+                {
+                    m_radiobuttons[n]->SetValue(true);
+                }
+            }
+
+            sizerDontShow->Add(sizerOpts, 0,
+                                wxALIGN_CENTRE_VERTICAL | wxLEFT, LAYOUT_X_MARGIN);
         }
+        else // m_countRadioBtns < 2
+        {
+            wxASSERT_MSG( !m_countRadioBtns,
+                            _T("one string in disableOptions doesn't make sense") );
+
+            m_countRadioBtns = 0;
+        }
+
+        const bool enable = params.indexDisable != -1;
+        m_chkDisable->SetValue(enable);
+        EnableRadioBtns(enable);
+
+        sizerTop->Add(sizerDontShow, 0, wxALIGN_CENTER | wxALL, LAYOUT_Y_MARGIN);
     }
 
-    // and finally create the check box
-    if(persistent)
-    {
-       c = new wxLayoutConstraints;
-       c->width.AsIs();
-       c->height.AsIs();
-       c->top.Below(box, LAYOUT_Y_MARGIN);
-       c->centreX.SameAs(this, wxCentreX);
-       m_checkBox = new wxCheckBox(this, -1, textCheckbox);
-       m_checkBox->SetConstraints(c);
-    }
-    // set default button
-    // ------------------
-
-    if ( nDefaultBtn != -1 ) {
-        buttons[nDefaultBtn]->SetDefault();
-        buttons[nDefaultBtn]->SetFocus();
-    }
-    else {
-        wxFAIL_MSG( _T("can't find default button for this dialog.") );
-    }
-
-    if ( style & wxPMSGBOX_DISABLE )
-        m_checkBox->SetValue(TRUE);
-
-    // position the controls and the dialog itself
-    // -------------------------------------------
-
-    SetClientSize(widthDlg, heightDlg);
-
-    // SetSizeHints() wants the size of the whole dialog, not just client size
-    wxSize sizeTotal = GetSize(),
-           sizeClient = GetClientSize();
-    SetSizeHints(widthDlg + sizeTotal.GetWidth() - sizeClient.GetWidth(),
-                 heightDlg + sizeTotal.GetHeight() - sizeClient.GetHeight());
-
-    Layout();
-
+    SetSizerAndFit(sizerTop);
     Centre(wxCENTER_FRAME | wxBOTH);
+}
+
+int wxPMessageDialog::GetDisabledIndex() const
+{
+    if ( m_chkDisable->GetValue() )
+    {
+        if ( !m_countRadioBtns )
+        {
+            // if there are no radio buttons there is only one way in which we
+            // can be disabled
+            return 0;
+        }
+
+        for ( size_t n = 0; n < m_countRadioBtns; n++ )
+        {
+            if ( m_radiobuttons[n]->GetValue() )
+                return n;
+        }
+    }
+
+    return -1;
+}
+
+void wxPMessageDialog::EnableRadioBtns(bool enable)
+{
+    for ( size_t n = 0; n < m_countRadioBtns; n++ )
+    {
+        m_radiobuttons[n]->Enable(enable);
+    }
 }
 
 void wxPMessageDialog::OnButton(wxCommandEvent& event)
@@ -1887,8 +1764,8 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
         case wxID_CANCEL:
             // allow to cancel the dialog with [Cancel] only if it's not a
             // "Yes/No" type dialog
-            if ( (m_dialogStyle & wxYES_NO) != wxYES_NO ||
-                 (m_dialogStyle & wxCANCEL) ) {
+            if ( (GetWindowStyle() & wxYES_NO) != wxYES_NO || HasFlag(wxCANCEL) )
+            {
                 break;
             }
 
@@ -1900,6 +1777,7 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
 }
 
 static const char *gs_MessageBoxPath = "MessageBox";
+static const int DONT_PREDISABLE = -1;
 
 int wxPMessageBox(const wxString& configPath,
                   const wxString& message,
@@ -1907,11 +1785,8 @@ int wxPMessageBox(const wxString& configPath,
                   long style,
                   wxWindow *parent,
                   wxConfigBase *config,
-                  bool *wontShowAgain)
+                  wxPMessageBoxParams *paramsUser)
 {
-    if ( wontShowAgain )
-        *wontShowAgain = FALSE;
-
     if ( configPath.Length() ) {
         wxPHelper persist(configPath, gs_MessageBoxPath, config);
 
@@ -1919,9 +1794,26 @@ int wxPMessageBox(const wxString& configPath,
         config = persist.GetConfig();
 
         if ( config ) {
+            wxPMessageBoxParams paramsDef;
+            wxPMessageBoxParams *params = paramsUser ? paramsUser : &paramsDef;
+
             wxString configValue = persist.GetKey();
 
-            int rc = ConvertId(config->Read(configValue, 0l));
+            int rc = config->Read(configValue, 0l);
+
+            // special hack: we use -1 as an indicator that the msg box should
+            // not be "pre disabled", see also below
+            if ( rc == DONT_PREDISABLE )
+            {
+                // don't pre disable anything
+                params->indexDisable = -1;
+
+                rc = 0;
+            }
+            else
+            {
+                rc = ConvertId(rc);
+            }
 
             if ( !rc ) {
 #ifdef __WINDOWS__
@@ -1932,21 +1824,33 @@ int wxPMessageBox(const wxString& configPath,
 #endif // __WINDOWS__
 
                 // do show the msg box
-                wxPMessageDialog dlg(parent, message, caption, style);
+                wxPMessageDialog dlg(parent, message, caption, style, *params);
                 rc = dlg.ShowModal();
 
-                // ignore checkbox value if the dialog was cancelled
-                if ( rc != wxCANCEL && dlg.DontShowAgain() ) {
-                    if ( rc != wxNO || !(style & wxPMSGBOX_NOT_ON_NO) ) {
-                        // next time we won't show it
-                        persist.ChangePath();
-                        config->Write(configValue, rc);
-
-                        // let the caller know that we were disabled
-                        if ( wontShowAgain )
-                            *wontShowAgain = TRUE;
+                // forget everything if the dialog was cancelled
+                if ( rc != wxCANCEL )
+                {
+                    // remember if the user doesn't want to see this dialog
+                    // again
+                    params->indexDisable = dlg.GetDisabledIndex();
+                    if ( params->indexDisable != -1 )
+                    {
+                        if ( rc != wxNO || !params->dontDisableOnNo )
+                        {
+                            // next time we won't show it
+                            persist.ChangePath();
+                            config->Write(configValue, rc);
+                        }
+                        //else: don't allow remembering "No" as the answer
                     }
-                    //else: don't allow remembering "No" as the answer
+                    else // user didn't disable it
+                    {
+                        // remember that we shouldn't pre-disable this message
+                        // box by default when it is called for the next time
+                        // by writing a special value
+                        persist.ChangePath();
+                        config->Write(configValue, DONT_PREDISABLE);
+                    }
                 }
             }
             //else: don't show it, it was disabled
@@ -2263,6 +2167,9 @@ static int ConvertId(long rc)
 #endif
         case wxNO:
             return wxNO;
+
+        case DONT_PREDISABLE:
+            return 0;
 
         default:
             wxFAIL_MSG( _T("unexpected persistent message box value") );
