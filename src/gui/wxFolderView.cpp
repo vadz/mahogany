@@ -63,6 +63,7 @@
 
 #include "MThread.h"
 #include "MFolder.h"
+#include "MFCache.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -2958,15 +2959,27 @@ wxFolderView::SelectInitialMessage()
       return;
    }
 
-   MsgnoType idx;
-   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) &&
-         m_FolderCtrl->SelectNextUnreadAfter() )
+   MsgnoType idx = INDEX_ILLEGAL;
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
    {
-      idx = m_FolderCtrl->GetFocusedItem();
-   }
-   else
-   {
-      idx = INDEX_ILLEGAL;
+      // don't waste time looking for unread messages if we already know that
+      // there are none (as we often do)
+      MailFolder_obj mf = GetMailFolder();
+
+      if ( mf )
+      {
+         MailFolderStatus status;
+         if ( MfStatusCache::Get()->GetStatus(mf->GetName(), &status) &&
+               status.unread &&
+                 m_FolderCtrl->SelectNextUnreadAfter() )
+         {
+            idx = m_FolderCtrl->GetFocusedItem();
+         }
+      }
+      else
+      {
+         FAIL_MSG( "no mail folder?" );
+      }
    }
 
    if ( idx == INDEX_ILLEGAL )
