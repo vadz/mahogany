@@ -324,7 +324,7 @@ void MStorableFolder::LoadSubfolder(ProfileBase *profile, const String& name)
 // MRootFolder
 // ----------------------------------------------------------------------------
 
-const char *MRootFolder::ms_foldersPath = "/";
+const char *MRootFolder::ms_foldersPath = M_FOLDERS_CONFIG_SECTION;
 
 MRootFolder::MRootFolder() : MStorableFolder(NULL, "", MFolder::Root)
 {

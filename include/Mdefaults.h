@@ -18,7 +18,7 @@
 /** @name The sections of the configuration file. */
 //@{
 /** The section in the global configuration file used for storing
-    profiles (trailing '/' required).
+    profiles (trailing '/' required). FIXME where is it?
 */
 #ifndef M_PROFILE_CONFIG_SECTION
 #  ifdef OS_WIN
@@ -29,7 +29,14 @@
 #endif
 
 /** The section in the global configuration file used for storing
-    window positions (trailing '/' required).
+    information about configured folders (no trailing '/')
+*/
+#ifndef M_FOLDERS_CONFIG_SECTION
+#  define   M_FOLDERS_CONFIG_SECTION    M_PROFILE_CONFIG_SECTION "/Folders"
+#endif
+
+/** The section in the global configuration file used for storing
+    window positions (trailing '/' required).  FIXME where is it?
 */
 #ifndef M_FRAMES_CONFIG_SECTION
 #  ifdef OS_WIN
@@ -73,7 +80,7 @@
 #define   MC_YPOS            "YPos"
 /// window width
 #define   MC_WIDTH         "Width"
-/// window height   
+/// window height
 #define   MC_HEIGHT         "Height"
 
 /// show log window?
@@ -96,7 +103,7 @@
 #   define   MC_ROOTDIRNAME         "RootDirectoryName"
 /// the user's M directory
 #   define   MC_USERDIR         "UserDirectory"
-/// the name of the M directory 
+/// the name of the M directory
 #   define   MC_USER_MDIR         "MDirName"
 /// the path where to find .afm files
 #   define   MC_AFMPATH         "AfmPath"
@@ -129,7 +136,7 @@
 /// the printf() format for dates
 #define   MC_DATE_FMT         "DateFormat"
 /// show console window
-#define   MC_SHOWCONSOLE      "ShowConsole"  
+#define   MC_SHOWCONSOLE      "ShowConsole"
 /// name of address database
 #define   MC_ADBFILE         "AddressBook"
 /// names of folders to open at startup (semicolon separated list)
@@ -172,14 +179,14 @@
 #define   MP_POP_HOST      "HostName"
 /// login for mailbox
 #define   MP_POP_LOGIN      "Login"
-/// password for mailbox   
+/// password for mailbox
 #define   MP_POP_PASSWORD      "Password"
 /// log level
 #define   MP_LOGLEVEL      "LogLevel"
 /// add extra headers
 #define   MP_ADD_EXTRAHEADERS   "AddExtraHeaders"
 /// list of extra headers, semicolon separated name=value
-#define   MP_EXTRAHEADERS      "ExtraHeaders"      
+#define   MP_EXTRAHEADERS      "ExtraHeaders"
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH      "SavePath"
 /// the default filename for saving files
@@ -207,7 +214,7 @@
 /// use "--" to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
 /// filename of signature file
-#define   MP_COMPOSE_SIGNATURE      "SignatureFile"   
+#define   MP_COMPOSE_SIGNATURE      "SignatureFile"
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
 /// Name from where to read XFace
@@ -326,7 +333,7 @@
 #define   MC_ROOTDIRNAME_D   "M"
 /// the user's M directory
 #define   MC_USERDIR_D         ""
-/// the name of the M directory 
+/// the name of the M directory
 #define   MC_USER_MDIR_D         ".M"
 /// the path where to find .afm files
 #define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
@@ -401,7 +408,7 @@
 #define   MP_POP_HOST_D      "localhost"
 /// login for mailbox
 #define   MP_POP_LOGIN_D      ""
-/// passwor for mailbox   
+/// passwor for mailbox
 #define   MP_POP_PASSWORD_D      ""
 /// log level
 #define   MP_LOGLEVEL_D         0
@@ -450,7 +457,7 @@
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_D      60
 /// wrapmargin for composition view (set to -1 to disable it)
-#define   MP_COMPOSE_WRAPMARGIN_D      60      
+#define   MP_COMPOSE_WRAPMARGIN_D      60
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0
 /// prefix for subject in replies
@@ -540,7 +547,7 @@
 #define   M_TOPLEVELFRAME_TITLE   "M - Copyright 1998 by Karsten Ballüder"
 /// do we want variable expansion for profiles?
 #define   M_PROFILE_VAREXPAND      1
-/// c-client lib needs a char buffer to write header data 
+/// c-client lib needs a char buffer to write header data
 #define   CC_HEADERBUFLEN         1000000
 /// file name prefix for lock files
 #define   LOCK_PREFIX         "M-lock"
