@@ -102,6 +102,8 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
 
 - fix non-ASCII characters in header lines
 
+- if message contains only text, don't create MIME multipart message
+
 *** long-term projects ***
 
 - Support for different charsets (Unicode/utf-7/8?)
