@@ -932,6 +932,8 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
+   mApplication->UpdateAwayMode();
+
    // there is exactly one item with the focus on it
    long focused = GetFocusedItem();
 
@@ -953,8 +955,6 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   mApplication->UpdateAwayMode();
-
    long item = event.m_itemIndex;
 
    wxLogTrace(M_TRACE_SELECTION, "%ld was selected", item);
@@ -983,6 +983,8 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 // called by RETURN press
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
+   mApplication->UpdateAwayMode();
+
    UIdType uid = GetUIdFromIndex(event.m_itemIndex);
 
    if ( IsPreviewed(event.m_itemIndex) )
@@ -998,6 +1000,8 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
 void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 {
+   mApplication->UpdateAwayMode();
+
    // get the column which was clicked
    wxFolderListCtrlFields col = GetColumnByIndex(m_columns, event.GetColumn());
    wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
