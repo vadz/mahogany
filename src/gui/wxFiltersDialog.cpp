@@ -618,7 +618,6 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_initializing = true;
    m_nControls = 0;
    m_FilterData = fd;
-   SetDefaultSize(480, 280, TRUE );
    SetAutoLayout( TRUE );
    wxLayoutConstraints *c;
 
@@ -680,7 +679,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_ButtonMore->SetToolTip(_("Add another condition"));
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
 
-   SetDefaultSize(8*wBtn, 5*hBtn);
+   SetDefaultSize(8*wBtn, 15*hBtn);
 }
 
 void
