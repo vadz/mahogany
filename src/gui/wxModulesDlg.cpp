@@ -95,8 +95,13 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    wxLayoutConstraints *c;
 
    // create a short help message above
-   wxStaticText *msg = new wxStaticText( this, -1, _("The selected modules will be loaded\n"
-                                                     "into Mahogany at the next program start.") );
+   wxStaticText *msg = new wxStaticText
+                           (
+                            this,
+                            -1,
+                            _("The selected modules will be loaded\n"
+                              "into Mahogany at the next program start.")
+                           );
 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -125,7 +130,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);
 
-   SetDefaultSize(380,400);
+   SetDefaultSize(380, 400);
 }
 
 wxModulesDialog::~wxModulesDialog()
