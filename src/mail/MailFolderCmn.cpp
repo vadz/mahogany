@@ -1036,7 +1036,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
                FAIL_MSG("Unknown search criterium!");
          }
 
-         msg->DecRef();
+         //msg->DecRef();
       }
 
       bool found = strstr(what, crit->m_Key) != NULL;
