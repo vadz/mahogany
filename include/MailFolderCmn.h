@@ -19,7 +19,7 @@
 #include "MEvent.h"     // for MEventOptionsChangeData
 
 // define this for some additional checks of folder closing logic
-#define DEBUG_FOLDER_CLOSE
+#undef DEBUG_FOLDER_CLOSE
 
 /**
    MailFolderCmn  class, common code shared by all implementations of

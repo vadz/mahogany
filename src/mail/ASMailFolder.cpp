@@ -262,15 +262,18 @@ public:
       }
    virtual void WorkFunction(void)
       {
-         m_MailFolder->DeleteOrTrashMessages(m_Seq);
-         // we don´t send a result event, so we need to delete it:
-         delete m_Seq;
-#ifdef DEBUG
-         m_Seq = NULL;
-#endif
+         bool rc = m_MailFolder->DeleteOrTrashMessages(m_Seq);
+         SendEvent(ASMailFolder::ResultInt::Create
+                   (
+                     m_ASMailFolder,
+                     m_Ticket,
+                     ASMailFolder::Op_DeleteOrTrashMessages,
+                     m_Seq,
+                     rc,
+                     m_UserData
+                    )
+                   );
       }
-protected:
-   String m_Sequence;
 };
 
 class MT_DeleteMessages : public MailThreadSeq
@@ -285,15 +288,20 @@ public:
       }
    virtual void WorkFunction(void)
       {
-         m_MailFolder->DeleteMessages(m_Seq, m_expunge);
-         // we don´t send a result event, so we need to delete it:
-         delete m_Seq;
-#ifdef DEBUG
-         m_Seq = NULL;
-#endif
+         bool rc = m_MailFolder->DeleteMessages(m_Seq, m_expunge);
+         SendEvent(ASMailFolder::ResultInt::Create
+                   (
+                     m_ASMailFolder,
+                     m_Ticket,
+                     ASMailFolder::Op_DeleteMessages,
+                     m_Seq,
+                     rc,
+                     m_UserData
+                    )
+                   );
       }
+
 protected:
-   String m_Sequence;
    bool   m_expunge;
 };
 
@@ -311,9 +319,16 @@ public:
    virtual void WorkFunction(void)
       {
          Message *msg = m_MailFolder->GetMessage(m_UId);
-         SendEvent(ASMailFolder::ResultMessage::Create(
-            m_ASMailFolder, m_Ticket, NULL,
-            msg, m_UId, m_UserData));
+         SendEvent(ASMailFolder::ResultMessage::Create
+                   (
+                     m_ASMailFolder,
+                     m_Ticket,
+                     NULL,
+                     msg,
+                     m_UId,
+                     m_UserData
+                    )
+                  );
       }
 protected:
    unsigned long m_UId;
