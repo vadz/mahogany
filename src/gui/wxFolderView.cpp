@@ -2285,7 +2285,7 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 
             wxLogTrace(M_TRACE_FV_SELECTION,
                        _T("Updated focused UID, now %08lx (index = %ld)"),
-                       (unsigned long)m_uidFocus, (unsigned long)index);
+                       (unsigned long)m_uidFocus, (long)index);
          }
       }
 
