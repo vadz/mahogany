@@ -405,7 +405,7 @@ FolderMonitorImpl::CheckNewMail(int flags)
    // check all opened folders if requested
    if ( flags & Opened )
    {
-      if ( !MailFolder::PingAllOpened(GetMode(flags & Interactive)) )
+      if ( !MailFolder::PingAllOpened(GetMode((flags & Interactive) != 0)) )
          rc = false;
    }
 
@@ -418,7 +418,7 @@ FolderMonitorImpl::CheckNewMail(int flags)
       // hasn't expired yet
       if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
       {
-         if ( !CheckOneFolder(i.operator->(), flags & Interactive) )
+         if ( !CheckOneFolder(i.operator->(), (flags & Interactive) != 0) )
             rc = false;
       }
       //else: don't check this folder yet
