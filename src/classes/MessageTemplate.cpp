@@ -548,7 +548,15 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
             break;
 
          case MessageTemplate_Forward:
-            value = "$CURSOR\n$QUOTE822";
+            value = _("$CURSOR\n\n"
+                      "------ Forwarded message ------\n"
+                      "From: ${ORIGINAL:FROM}\n"
+                      "Date: ${ORIGINAL:DATE}\n"
+                      "Subject: ${ORIGINAL:SUBJECT}\n"
+                      "To: ${ORIGINAL:TO}\n"
+                      "\n"
+                      "$QUOTE\n"
+                      "-------- End of message -------");
             break;
 
          case MessageTemplate_Followup:
@@ -562,7 +570,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
 
          case MessageTemplate_NewMessage:
          case MessageTemplate_NewArticle:
-            // nothing to do, but put it here to slience gcc warnings
+            // nothing to do, but put it here to silence gcc warnings
             ;
       }
    }

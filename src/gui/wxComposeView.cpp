@@ -3240,10 +3240,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_To:
-            {
-               String dummy;
-               *value = m_msg->Address(dummy, MAT_SENDER);
-            }
+            (void)m_msg->GetHeaderLine("To", *value);
             break;
 
          case OriginalHeader_PersonalName:
