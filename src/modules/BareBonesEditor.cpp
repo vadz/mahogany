@@ -167,7 +167,7 @@ public:
    void FromCursor();
    void First();
    void Next();
-   bool Empty() { return m_from == m_to; }
+   bool IsEmpty() const { return m_from == m_to; }
    void Format();
    void Unformat();
    bool NeedsFormat();
@@ -180,7 +180,7 @@ private:
    String Get();
    void Set(const String &modified);
    int LineToPosition(int line);
-   bool IsQuoted();
+   bool IsQuoted() const;
    String UnformatCommon();
    String FormatCommon();
    int SizeWithoutNewline(const String &paragraph);
@@ -411,13 +411,13 @@ void FormattedParagraph::Next()
 
 void FormattedParagraph::Format()
 {
-   if(!Empty() && !IsQuoted())
+   if(!IsEmpty() && !IsQuoted())
       Set(FormatCommon());
 }
 
 void FormattedParagraph::Unformat()
 {
-   if(!Empty() && !IsQuoted())
+   if(!IsEmpty() && !IsQuoted())
       Set(UnformatCommon());
 }
 
@@ -450,21 +450,15 @@ int FormattedParagraph::LineToPosition(int line)
    return m_control->XYToPosition(0,line);
 }
 
-bool FormattedParagraph::IsQuoted()
+bool FormattedParagraph::IsQuoted() const
 {
-   int line;
-   for(line = m_from; line < m_to; ++line)
+   for ( int line = m_from; line < m_to; ++line )
    {
-      String content(m_control->GetLineText(line));
-      int offset;
-      for(offset = 0; content.size()-offset >= m_prefix.size()
-         && (!offset || isupper(content[(size_t)(offset-1)])); ++offset)
-      {
-         if(content.compare(offset,m_prefix.size(),m_prefix) == 0)
-            return true;
-      }
+      if ( !m_control->GetLineText(line).StartsWith(m_prefix) )
+         return false;
    }
-   return false;
+
+   return true;
 }
 
 String FormattedParagraph::UnformatCommon()
@@ -482,20 +476,20 @@ String FormattedParagraph::UnformatCommon()
 
 bool FormattedParagraph::NeedsFormat()
 {
-   return !Empty() && !IsQuoted() && Get() != FormatCommon();
+   return !IsEmpty() && !IsQuoted() && Get() != FormatCommon();
 }
 
 void FormattedParagraph::FormatAll()
 {
    FindSignature();
-   for(First(); !Empty() && !PastSignature(); Next())
+   for(First(); !IsEmpty() && !PastSignature(); Next())
       Format();
 }
 
 void FormattedParagraph::UnformatAll()
 {
    FindSignature();
-   for(First(); !Empty() && !PastSignature(); Next())
+   for(First(); !IsEmpty() && !PastSignature(); Next())
       Unformat();
 }
 
@@ -964,7 +958,7 @@ bool BareBonesEditor::FinishWork()
    FormattedParagraph paragraph(m_textControl,this);
 
    bool needsFormat = false;
-   for(paragraph.First(); !paragraph.Empty(); paragraph.Next())
+   for(paragraph.First(); !paragraph.IsEmpty(); paragraph.Next())
       needsFormat = needsFormat || paragraph.NeedsFormat();
 
    if(needsFormat)
