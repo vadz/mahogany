@@ -82,8 +82,9 @@ private:
    // pointer to the head of the linked list of addresses
    AddressCC *m_addrCC;
 
-   // it uses our ctor
+   // these methods use our private ctor
    friend AddressList *AddressList::Create(const String&, const String&);
+   friend AddressList *AddressList::CreateFromAddress(Profile *profile);
 
    MOBJECT_DEBUG(AddressListCC)
 };

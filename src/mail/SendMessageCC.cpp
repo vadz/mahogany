@@ -228,11 +228,11 @@ SendMessageCC::Create(Protocol protocol,
    m_DefaultHost = READ_CONFIG_TEXT(prof, MP_HOSTNAME);
 
    // set up default values for From/Reply-To headers
-   Address *addrFrom = Address::CreateFromAddress(prof);
+   AddressList_obj addrList(AddressList::CreateFromAddress(prof));
+   Address *addrFrom = addrList->GetFirst();
    if ( addrFrom )
    {
       m_From = addrFrom->GetAddress();
-      delete addrFrom;
    }
 
    m_ReplyTo = READ_CONFIG_TEXT(prof, MP_REPLY_ADDRESS);

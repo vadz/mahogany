@@ -52,6 +52,10 @@ bool Address::operator==(const String& address) const
    return addr->IsSameAs(*this);
 }
 
+Address::~Address()
+{
+}
+
 // ----------------------------------------------------------------------------
 // Address static helpers
 // ----------------------------------------------------------------------------

@@ -43,9 +43,6 @@ class Profile;
 class Address
 {
 public:
-   /// create the from address using settings in this profile
-   static Address *CreateFromAddress(Profile *profile);
-
    /// is the address valid?
    virtual bool IsValid() const = 0;
 
@@ -78,8 +75,11 @@ public:
    static String NormalizeSubject(const String& subject);
 
 protected:
-   /// must have default ctor because we declarae copy ctor private
+   /// must have default ctor because we declare copy ctor private
    Address() { }
+
+   /// normally the user code doesn't delete us
+   virtual ~Address();
 
    /// comparison function
    virtual bool IsSameAs(const Address& addr) const = 0;
@@ -107,6 +107,9 @@ public:
    /// create the address list from string (may be empty)
    static AddressList *Create(const String& address,
                               const String& defhost = "");
+
+   /// create the "From" address using settings in this profile
+   static AddressList *CreateFromAddress(Profile *profile);
 
    /// get the first address in the list, return NULL if list is empty
    virtual Address *GetFirst() const = 0;

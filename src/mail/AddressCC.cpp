@@ -77,49 +77,6 @@ AddressCC::AddressCC(ADDRESS *adr)
    m_addrNext = NULL;
 }
 
-/* static */
-Address *Address::CreateFromAddress(Profile *profile)
-{
-   // it is a bit difficult for From because we have 2 entries in config to
-   // specify it (for historic reasons mainly, I don't think this is actually
-   // useful) and so we must combine them together
-
-   // set personal name
-   ADDRESS *adr = mail_newaddr();
-   adr->personal = cpystr(READ_CONFIG_TEXT(profile, MP_PERSONALNAME));
-
-   // set mailbox/host
-   String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
-   size_t pos = email.find('@');
-   if ( pos != String::npos )
-   {
-      adr->mailbox = cpystr(email.substr(0, pos));
-      adr->host = cpystr(email.c_str() + pos + 1);
-   }
-   else // no '@'?
-   {
-      adr->mailbox = cpystr(email);
-
-      String host;
-      if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
-      {
-         host = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
-      }
-
-      if ( host.empty() )
-      {
-         // trick c-client into accepting addresses without host names
-         // instead of using a stupid MISSING.WHATEVER instead of the host
-         // part
-         host = '@';
-      }
-
-      adr->host = cpystr(host);
-   }
-
-   return new AddressCC(adr);
-}
-
 // ----------------------------------------------------------------------------
 // AddressCC accessors
 // ----------------------------------------------------------------------------
@@ -297,6 +254,49 @@ AddressList *AddressListCC::Create(const mail_address *adr)
    }
 
    return new AddressListCC(adrCopy);
+}
+
+/* static */
+AddressList *AddressList::CreateFromAddress(Profile *profile)
+{
+   // it is a bit difficult for From because we have 2 entries in config to
+   // specify it (for historic reasons mainly, I don't think this is actually
+   // useful) and so we must combine them together
+
+   // set personal name
+   ADDRESS *adr = mail_newaddr();
+   adr->personal = cpystr(READ_CONFIG_TEXT(profile, MP_PERSONALNAME));
+
+   // set mailbox/host
+   String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
+   size_t pos = email.find('@');
+   if ( pos != String::npos )
+   {
+      adr->mailbox = cpystr(email.substr(0, pos));
+      adr->host = cpystr(email.c_str() + pos + 1);
+   }
+   else // no '@'?
+   {
+      adr->mailbox = cpystr(email);
+
+      String host;
+      if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
+      {
+         host = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
+      }
+
+      if ( host.empty() )
+      {
+         // trick c-client into accepting addresses without host names
+         // instead of using a stupid MISSING.WHATEVER instead of the host
+         // part
+         host = '@';
+      }
+
+      adr->host = cpystr(host);
+   }
+
+   return new AddressListCC(adr);
 }
 
 /* static */

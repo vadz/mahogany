@@ -1042,6 +1042,8 @@ wxComposeView::wxComposeView(const String &name,
 
 wxComposeView::~wxComposeView()
 {
+   WX_CLEAR_ARRAY(m_rcptControls);
+
    SafeDecRef(m_Profile);
 
    delete m_LayoutWindow;
@@ -3127,13 +3129,13 @@ wxComposeView::SetDefaultFrom()
 {
    if ( m_txtFrom )
    {
-      Address *addr = Address::CreateFromAddress(m_Profile);
+      AddressList_obj addrList(AddressList::CreateFromAddress(m_Profile));
+
+      Address *addr = addrList->GetFirst();
       if ( addr )
       {
          m_from = addr->GetAddress();
          m_txtFrom->SetValue(m_from);
-
-         delete addr;
       }
    }
 }
