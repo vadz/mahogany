@@ -142,6 +142,39 @@ static String NormalizeString(const String& s)
    return norm;
 }
 
+// convert a string in UTF-8 into the string in the current encoding: of
+// course, this doesn't work in general as Unicode is not representable as an 8
+// bit charset but it works in some common cases and is better than no UTF-8
+// support at all
+//
+// FIXME this won't be needed when full Unicode support is available
+static wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf)
+{
+   CHECK( strUtf, wxFONTENCODING_SYSTEM,
+          "NULL string in ConvertUnicodeToSystem" );
+
+   if ( !strUtf->empty() )
+   {
+      wxString str(strUtf->wc_str(wxConvUTF8), wxConvLocal);
+      if ( str.empty() )
+      {
+         // conversion failed - use original text (and display incorrectly,
+         // unfortunately)
+         wxLogDebug("conversion from UTF-8 to default encoding failed");
+      }
+      else
+      {
+         *strUtf = str;
+      }
+   }
+
+#if wxUSE_INTL
+   return wxLocale::GetSystemEncoding();
+#else // !wxUSE_INTL
+   return wxFONTENCODING_ISO8859_1;
+#endif // wxUSE_INTL/!wxUSE_INTL
+}
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -1093,7 +1126,14 @@ MessageView::ShowHeaders()
       }
 
       wxString value = headerValues[n];
-      EnsureAvailableTextEncoding(&encHeader, &value);
+      if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
+      {
+         // special handling for the UTF-8 if it's not supported natively
+         if ( encHeader == wxFONTENCODING_UTF8 )
+         {
+            encHeader = ConvertUnicodeToSystem(&value);
+         }
+      }
 
       m_viewer->ShowHeader(headerNames[n], value, encHeader);
    }
@@ -1179,22 +1219,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       if ( encPart == wxFONTENCODING_UTF8 )
       {
          // convert from UTF-8 to environment's default encoding
-         // FIXME it won't be needed when full Unicode support is available
-         String textPartOrig = textPart;
-         textPart = wxString(textPartOrig.wc_str(wxConvUTF8), wxConvLocal);
-         if ( textPart.Length() == 0 )
-         {
-            // conversion failed - use original text (and display
-            // incorrectly, unfortunately)
-            textPart = textPartOrig;
-            wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
-         }
-
-#if wxUSE_INTL
-         encPart = wxLocale::GetSystemEncoding();
-#else // !wxUSE_INTL
-         encPart = wxFONTENCODING_ISO8859_1;
-#endif // wxUSE_INTL/!wxUSE_INTL
+         encPart = ConvertUnicodeToSystem(&textPart);
 
          // show UTF-8, not env. encoding in Language menu
          m_encodingAuto = wxFONTENCODING_UTF8;
