@@ -56,7 +56,7 @@
       DumpTable(m_count, table); \
       puts("")
    #define DUMP_TRANS_TABLES(msg) \
-      printf("Translation tables state (count = %ld)", m_count); \
+      printf("Translation tables state (count = %ld) ", m_count); \
       printf msg ; \
       DumpTransTables(m_count, m_tableMsgno, m_tablePos); \
       puts("")
@@ -442,14 +442,39 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
 // HeaderInfoListImpl methods called by MailFolder
 // ----------------------------------------------------------------------------
 
-// TODO: OnRemove() is very inefficient, there are a few possible
-//       optimizations:
-//
-// 1. call it for a bunch of messages when there are several messages
-//    being expunged
-//
-// 2. don't modify the array but just mark the index being removed as
-//    being invalid (somehow...) and ignore it later (?)
+// TODO: OnRemove() is rather expensive operation, we shouldn't call it for
+//       each message being removed but rather for the whole sequence of them
+//       (this should be also done to minimize GUI updates...)
+
+// small OnRemove() helper: removes an element from the array
+static void
+RemoveElementFromTable(MsgnoType *table,
+                       MsgnoType idxRemoved,
+                       MsgnoType count)
+{
+   if ( idxRemoved < count - 1 )
+   {
+      // shift everything
+      MsgnoType *p = table + idxRemoved;
+      memmove(p, p + 1, sizeof(MsgnoType)*(count - idxRemoved - 1));
+   }
+   //else: the expunged msgno was the last one, nothing to do
+}
+
+// same as above but for size_t (yes, one day it will be a template...)
+static void
+RemoveElementFromTable(size_t *table,
+                       MsgnoType idxRemoved,
+                       MsgnoType count)
+{
+   if ( idxRemoved < count - 1 )
+   {
+      // shift everything
+      size_t *p = table + idxRemoved;
+      memmove(p, p + 1, sizeof(size_t)*(count - idxRemoved - 1));
+   }
+   //else: the expunged msgno was the last one, nothing to do
+}
 
 void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
@@ -466,83 +491,243 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
    }
    //else: we have never looked that far
 
-   if ( HasTransTable() )
+   // use this for convenience instead of writing "n + 1" everywhere
+   MsgnoType msgnoRemoved = n + 1;
+
+   // update the sorting table
+   if ( m_tableSort )
    {
-      DUMP_TRANS_TABLES(("before removing element %ld:", n));
+      DUMP_TABLE(m_tableSort, ("before removing msgno %ld", msgnoRemoved));
 
-      // we will determine the index of the message being expunged (in
-      // m_tableMsgno) below
       MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
-
-      MsgnoType posRemoved;
-      if ( m_tablePos )
-      {
-         posRemoved = m_tablePos[n];
-      }
-
-      // update the translation tables
       for ( MsgnoType i = 0; i < m_count; i++ )
       {
-         // first work with msgnos table
-         MsgnoType msgno = m_tableMsgno[i];
-         if ( msgno == n + 1 ) // +1 because n is an index, not msgno
+         MsgnoType msgno = m_tableSort[i];
+         if ( msgno == msgnoRemoved )
          {
             // found the position of msgno which was expunged, store it
             idxRemovedInMsgnos = i;
          }
-         else if ( msgno > n )
+         else if ( msgno > msgnoRemoved )
          {
-            // indices are shifted
-            m_tableMsgno[i]--;
+            // subsequent indices get shifted
+            m_tableSort[i]--;
          }
-         //else: leave it as is
+         //else: leave the msgnos preceding the one removed as is
+      }
 
-         // and also update the positions table if we have it
-         if ( m_tablePos )
+      // delete the removed element from the sort table
+      ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
+                  "expunged item not found in m_tableSort?" );
+
+      RemoveElementFromTable(m_tableSort, idxRemovedInMsgnos, m_count);
+
+      DUMP_TABLE(m_tableSort, ("after removing"));
+   }
+
+   // update the threading table
+   if ( m_thrData )
+   {
+      DUMP_TABLE(m_thrData->m_tableThread,
+                 ("before removing msgno %ld", msgnoRemoved));
+      DUMP_TABLE((MsgnoType *)m_thrData->m_indents, (" "));
+      DUMP_TABLE(m_thrData->m_children, (" "));
+
+      MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
+      for ( MsgnoType i = 0; i < m_count; i++ )
+      {
+         MsgnoType msgno = m_thrData->m_tableThread[i];
+         if ( msgno == msgnoRemoved )
          {
-            MsgnoType pos = m_tablePos[i];
-            if ( pos > posRemoved )
+            // found the position of msgno which was expunged, store it
+            idxRemovedInMsgnos = i;
+
+            // reduce indent of all its children unless it is a root item and
+            // we are configured to show indent for the root items which are not
+            // real thread roots
+            if ( m_thrData->m_indents[n] != 0 ||
+                  !m_thrParams.indentIfDummyNode )
             {
-               // here the indices shift too
-               m_tablePos[i]--;
+               // all of this item children immediately follow it
+               MsgnoType firstChild = i + 1;
+               MsgnoType lastChild = firstChild + m_thrData->m_children[n];
+               for ( MsgnoType j = firstChild; j < lastChild; j++ )
+               {
+                  // our children must have non zero indents!
+                  ASSERT_MSG( m_thrData->m_indents[j] > 0,
+                              "error in OnRemove() logic" );
+
+                  m_thrData->m_indents[j]--;
+               }
+            }
+
+            // also update the children count of the parent items to account
+            // for the fact that they have one child less
+            for ( MsgnoType nCur = i; ; )
+            {
+               // note the double indirection we have to use to access the
+               // indent from the index in the visible thread order!
+
+               MsgnoType idxCur = m_thrData->m_tableThread[nCur] - 1;
+               size_t indent = m_thrData->m_indents[idxCur];
+
+               if ( !indent )
+               {
+                  // it's a root, don't have to update anything [more]
+                  break;
+               }
+
+               // find the parent of this child: it is the first item preceding
+               // it with indent strictly less
+               //
+               // NB: actually we use parent + 1 as loop variable to avoid
+               //     problems with wrapping at 0
+               MsgnoType nParent;
+               for ( nParent = nCur; nParent > 0; nParent-- )
+               {
+                  MsgnoType idx = m_thrData->m_tableThread[nParent - 1] - 1;
+
+                  if ( m_thrData->m_indents[idx] < indent )
+                  {
+                     // found
+                     break;
+                  }
+               }
+
+               if ( !nParent )
+               {
+                  // actually I'm not completely sure it really can't happan
+                  FAIL_MSG( "no parent of the item with non null indent?" );
+
+                  break;
+               }
+
+               nCur = nParent - 1;
+
+               idxCur = m_thrData->m_tableThread[nCur] - 1;
+
+               ASSERT_MSG( m_thrData->m_children[idxCur] > 0,
+                           "our parent doesn't have any children?" );
+
+               m_thrData->m_children[idxCur]--;
             }
          }
-      }
-
-      // delete the removed element from the translation tables
-
-      ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
-                  "expunged item not found in m_tableMsgno?" );
-
-      if ( idxRemovedInMsgnos < m_count - 1 )
-      {
-         // shift everything
-         MsgnoType *p = m_tableMsgno + idxRemovedInMsgnos;
-         memmove(p, p + 1,
-                 sizeof(MsgnoType)*(m_count - idxRemovedInMsgnos - 1));
-      }
-      //else: the expunged msgno was the last one
-
-      if ( m_tablePos )
-      {
-         if ( n < m_count - 1 )
+         else if ( msgno > msgnoRemoved )
          {
-            MsgnoType *p = m_tablePos + n;
-            memmove(p, p + 1, sizeof(MsgnoType)*(m_count - n - 1));
+            // subsequent indices get shifted
+            m_thrData->m_tableThread[i]--;
          }
-         //else: the removed element was at the last position
+         //else: leave the msgnos preceding the one removed as is
       }
+
+      // delete the removed element from the thread table
+      ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
+                  "expunged item not found in m_thrData->m_tableThread?" );
+
+      RemoveElementFromTable(m_thrData->m_tableThread,
+                             idxRemovedInMsgnos, m_count);
+
+      // delete the removed element from the other table too (this is easy as
+      // they are indexed directly by msgnos)
+      RemoveElementFromTable(m_thrData->m_indents, n, m_count);
+      RemoveElementFromTable(m_thrData->m_children, n, m_count);
 
 #ifdef DEBUG_SORTING
       // last index is invalid now, don't let CHECK_TABLES() check it
       m_count--;
 
-      DUMP_TRANS_TABLES(("after removing"));
-      CHECK_TABLES();
+      DUMP_TABLE(m_thrData->m_tableThread, ("after removing"));
+      DUMP_TABLE((MsgnoType *)m_thrData->m_indents, (" "));
+      DUMP_TABLE(m_thrData->m_children, (" "));
 
-      // restore for -- below
       m_count++;
 #endif // DEBUG_SORTING
+   }
+
+   // update the actual mappings if we already have them - otherwise they are
+   // going to be recalculated from the sort and thread data the next time we
+   // need them anyhow
+   if ( HasTransTable() )
+   {
+      if ( m_dontFreeMsgnos )
+      {
+         // the trans table is really the same as either thread table or sort
+         // table which were already updated above, don't try to update it
+         // once again - but do update the inverse table
+         if ( m_tablePos )
+         {
+            free(m_tablePos);
+            m_tablePos = NULL;
+         }
+
+         BuildInverseTable();
+      }
+      else // the trans tables are independent of the other ones, do update
+      {
+         DUMP_TRANS_TABLES(("before removing msgno %ld", msgnoRemoved));
+
+         // we will determine the index of the message being expunged (in
+         // m_tableMsgno) below
+         MsgnoType idxRemovedInMsgnos = INDEX_ILLEGAL;
+
+         MsgnoType posRemoved;
+         if ( m_tablePos )
+         {
+            posRemoved = m_tablePos[n];
+         }
+
+         // update the translation tables
+         for ( MsgnoType i = 0; i < m_count; i++ )
+         {
+            // first work with msgnos table
+            MsgnoType msgno = m_tableMsgno[i];
+            if ( msgno == msgnoRemoved )
+            {
+               // found the position of msgno which was expunged, store it
+               idxRemovedInMsgnos = i;
+            }
+            else if ( msgno > msgnoRemoved )
+            {
+               // indices are shifted
+               m_tableMsgno[i]--;
+            }
+            //else: leave it as is
+
+            // and also update the positions table if we have it
+            if ( m_tablePos )
+            {
+               MsgnoType pos = m_tablePos[i];
+               if ( pos > posRemoved )
+               {
+                  // here the indices shift too
+                  m_tablePos[i]--;
+               }
+            }
+         }
+
+         // delete the removed element from the translation tables
+
+         ASSERT_MSG( idxRemovedInMsgnos != INDEX_ILLEGAL,
+                     "expunged item not found in m_tableMsgno?" );
+
+         RemoveElementFromTable(m_tableMsgno, idxRemovedInMsgnos, m_count);
+
+         if ( m_tablePos )
+         {
+            RemoveElementFromTable(m_tablePos, n, m_count);
+         }
+
+#ifdef DEBUG_SORTING
+         // last index is invalid now, don't let CHECK_TABLES() check it
+         m_count--;
+
+         DUMP_TRANS_TABLES(("after removing"));
+         CHECK_TABLES();
+
+         // restore for -- below
+         m_count++;
+#endif // DEBUG_SORTING
+      }
    }
 
    // always update the count
@@ -951,16 +1136,25 @@ void HeaderInfoListImpl::BuildTables()
    //     just m_reverseOrder
    if ( m_tableMsgno && !m_tablePos )
    {
-      m_tablePos = AllocTable();
-
-      // build the inverse table from the direct one
-      for ( MsgnoType n = 0; n < m_count; n++ )
-      {
-         m_tablePos[m_tableMsgno[n] - 1] = n;
-      }
+      BuildInverseTable();
    }
 
    CHECK_TABLES();
+}
+
+void HeaderInfoListImpl::BuildInverseTable()
+{
+   CHECK_RET( m_tableMsgno, "can't build inverse table without direct one" );
+
+   ASSERT_MSG( !m_tablePos, "rebuilding inverse table (and leaking memory)?" );
+
+   m_tablePos = AllocTable();
+
+   // build the inverse table from the direct one
+   for ( MsgnoType n = 0; n < m_count; n++ )
+   {
+      m_tablePos[m_tableMsgno[n] - 1] = n;
+   }
 }
 
 void HeaderInfoListImpl::FreeTables()
