@@ -107,6 +107,7 @@ extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_FONT;
 extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
+extern const MOption MP_DRAFTS_AUTODELETE;
 extern const MOption MP_DRAFTS_FOLDER;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_HOSTNAME;
@@ -127,6 +128,7 @@ extern const MOption MP_USE_SENDMAIL;
 extern const MPersMsgBox *M_MSGBOX_ASK_FOR_EXT_EDIT;
 extern const MPersMsgBox *M_MSGBOX_ASK_VCARD;
 extern const MPersMsgBox *M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
+extern const MPersMsgBox *M_MSGBOX_DRAFT_AUTODELETE;
 extern const MPersMsgBox *M_MSGBOX_DRAFT_SAVED;
 extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
 extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
@@ -1066,6 +1068,25 @@ Composer::EditMessage(Profile *profile, Message *msg)
          if ( names[n] == DRAFT_HEADER )
          {
             cv->SetDraft(msg);
+
+            // the default value is "on", don't give the message if the user
+            // had already changed it to "off" - this means he knows what he is
+            // doing
+            if ( !READ_CONFIG(profile, MP_DRAFTS_AUTODELETE) )
+            {
+               MDialog_Message
+               (
+                  _("You are starting to edit a draft message. When you\n"
+                    "send it, the draft will be deleted. If you don't want\n"
+                    "this to happen you may either do \"Send and keep\" and\n"
+                    "\"Save as draft\" later or change the value of the\n"
+                    "corresponding option in the \"Folders\" page of the\n"
+                    "preferences dialog."),
+                  cv->GetFrame(),
+                  M_MSGBOX_DRAFT_AUTODELETE,
+                  M_DLG_DISABLE
+               );
+            }
          }
          else // just another header
          {
@@ -3391,7 +3412,8 @@ bool wxComposeView::SaveAsDraft() const
          nameDrafts.c_str()
       ),
       self->GetFrame(),
-      M_MSGBOX_DRAFT_SAVED
+      M_MSGBOX_DRAFT_SAVED,
+      M_DLG_DISABLE
    );
 
    return true;

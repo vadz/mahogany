@@ -153,6 +153,7 @@ static const struct
    { "AskForVCard",              gettext_noop("propose to attach a vCard if none specified") },
    { "ReenableHint",             gettext_noop("hint about how to reenable disabled message boxes") },
    { "DraftSaved",               gettext_noop("confirm saving the message as a draft") },
+   { "DraftAutoDel",             gettext_noop("show a warning when \"automatically delete drafts\" option is on") },
 };
 
 // ============================================================================

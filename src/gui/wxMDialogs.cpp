@@ -752,6 +752,7 @@ MDialog_Message(const char *message,
 void MDialog_Message(char const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
+                     int flags,
                      char const *title)
 {
    String configPath;
@@ -759,7 +760,7 @@ void MDialog_Message(char const *message,
       configPath = GetPersMsgBoxName(persMsg);
 
    MDialog_Message(message, parent, title,
-                   persMsg ? configPath.c_str() : NULL);
+                   persMsg ? configPath.c_str() : NULL, flags);
 }
 
 MDlgResult MDialog_YesNoCancel(char const *message,

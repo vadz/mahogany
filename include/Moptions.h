@@ -218,6 +218,7 @@ extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_DRAFTS_FOLDER;
+extern const MOption MP_DRAFTS_AUTODELETE;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_UPDATEINTERVAL;
@@ -798,6 +799,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_USE_TRASH_FOLDER_NAME   "UseTrash"
 /// Name of the Drafts folder
 #define MP_DRAFTS_FOLDER_NAME "DraftsFolder"
+/// Delete the drafts automatically after the message was sent?
+#define MP_DRAFTS_AUTODELETE_NAME "DraftsDelete"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_NAME         "Path"
 /// comment
@@ -1582,6 +1585,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_USE_TRASH_FOLDER_DEFVAL   1l
 /// Name of the Drafts folder
 #define MP_DRAFTS_FOLDER_DEFVAL ""
+/// Delete the drafts automatically after the message was sent?
+#define MP_DRAFTS_AUTODELETE_DEFVAL  1l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_DEFVAL      ((const char *)NULL) // don't change this!
 /// comment

@@ -253,6 +253,7 @@ void MDialog_ShowText(wxWindow *parent,
 void MDialog_Message(char const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
+                     int flags = 0,
                      char const *title = MDIALOG_MSGTITLE);
 
 
