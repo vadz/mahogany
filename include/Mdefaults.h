@@ -1196,7 +1196,7 @@
 /**@name  Font settings for message view */
 //@{
 /// which font to use
-#define   MP_MVIEW_FONT_D         0L
+#define   MP_MVIEW_FONT_D         6L
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_D         12L
 // which foreground colour for the font
@@ -1228,7 +1228,7 @@
 /**@name  Font settings for message view */
 //@{
 /// which font to use
-#define   MP_FVIEW_FONT_D         6L
+#define   MP_FVIEW_FONT_D         4L
 /// which font size
 #define   MP_FVIEW_FONT_SIZE_D         12L
 /// don't show full e-mail, only sender's name
@@ -1249,7 +1249,7 @@
 /**@name Font settings for compose view */
 //@{
 /// which font to use
-#define   MP_CVIEW_FONT_D         0L
+#define   MP_CVIEW_FONT_D         6L
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_D    12L
 // which foreground colour for the font
@@ -1327,7 +1327,7 @@
 /**@name message view settings */
 //@{
 /// which font to use
-#define   MP_MV_FONT_FAMILY_D   0L
+#define   MP_MV_FONT_FAMILY_D   6L
 /// which font size
 #define   MP_MV_FONT_SIZE_D     12L
 /// support efax style incoming faxes
