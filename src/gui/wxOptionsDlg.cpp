@@ -772,6 +772,10 @@ void wxOptionsPage::Refresh()
 // read the data from config
 bool wxOptionsPage::TransferDataToWindow()
 {
+  // disable environment variable expansion here
+  bool bDoesExpand = Profile::GetAppConfig()->IsExpandingEnvVars();
+  Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
+
   // check that we didn't forget to update one of the arrays...
   wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
   wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
@@ -847,6 +851,9 @@ bool wxOptionsPage::TransferDataToWindow()
         wxFAIL_MSG("unexpected field type");
     }
   }
+
+  // restore the old setting
+  Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
 
   return TRUE;
 }
