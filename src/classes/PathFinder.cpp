@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * PathFinder - a class for finding files or directories            *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *

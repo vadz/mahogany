@@ -213,22 +213,6 @@ public:
 
    //@}
 
-   /** Toggle sending of new mail events.
-       @param send if true, send them
-       @param update if true, update internal message count
-   */
-   virtual void EnableNewMailEvents(bool send = true, bool update = true)
-      {
-         m_GenerateNewMailEvents = send;
-         m_UpdateMsgCount = update;
-      }
-
-   /** Query whether foldre is sending new mail events.
-       @return if true, folder sends them
-   */
-   virtual bool SendsNewMailEvents(void) const
-      { return m_GenerateNewMailEvents; }
-
    /**@name Subscription management */
    //@{
    /** Subscribe to a given mailbox (related to the
@@ -334,12 +318,6 @@ private:
    unsigned long m_OldNumOfMessages;
    /// set to true before we get the very first folder info
    bool m_FirstListing;
-   /** Do we want to generate new mail events?
-       Used to supporess new mail events when first opening the folder
-       and when copying to it. */
-   bool m_GenerateNewMailEvents;
-   /** Do we want to update the message count? */
-   bool m_UpdateMsgCount;
    /// Path to mailbox
    String   m_MailboxPath;
 
@@ -393,8 +371,6 @@ private:
    inline MAILSTREAM   *Stream(void) const{  return m_MailStream; }
    friend class MessageCC;
 
-   /// To display progress while reading message headers:
-   class MProgressDialog *m_ProgressDialog;
    // return the folder type
    FolderType GetType(void) const { return m_folderType; }
 protected:

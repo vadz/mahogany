@@ -271,6 +271,7 @@ public:
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
+   virtual size_t SizeOf(void) const { return sizeof(HeaderInfoCC); }
 
 protected:
    String m_Subject, m_From, m_Date, m_Id, m_References;
@@ -298,6 +299,8 @@ public:
    /// Returns the n-th entry.
    virtual HeaderInfo * operator[](size_t n) 
       { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
+   /// Returns pointer to array of data:
+   virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
 
    /// For use by folder only: corrects size downwards:
    void SetCount(size_t newcount)
@@ -331,6 +334,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &server,
                            String const &login,
                            String const &password)
+   : MailFolderCmn(profile)
 {
    m_MailStream = NIL;
 
@@ -352,10 +356,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
 
 #undef SET_TO
 
-   //FIXME: server is ignored for now
    SetRetrievalLimit(0); // no limit
-   m_Profile = profile;
-   m_Profile->IncRef(); // we use it now
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
@@ -363,10 +364,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
    m_FirstListing = true;
-   m_GenerateNewMailEvents = false; // for now don't!
-   m_UpdateMsgCount = true; // normal operation
    m_UpdateNeeded = true;
-   m_ProgressDialog = 0;
    m_PingReopenSemaphore = false;
    m_BuildListingSemaphore = false;
    m_FolderListing = NULL;
@@ -406,7 +404,6 @@ MailFolderCC::~MailFolderCC()
    }
    // note that RemoveFromMap already removed our node from streamList, so
    // do not do it here again!
-   GetProfile()->DecRef();
 }
 
 /*
@@ -643,12 +640,6 @@ MailFolderCC::Open(void)
    AddToMap(m_MailStream); // now we are known
 
    // listing already built
-#if 0
-   BuildListing();
-#endif
-
-   // from now on we want to know when new messages appear
-   m_GenerateNewMailEvents = true;
 
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
    return true;   // success
@@ -1042,10 +1033,6 @@ extern "C"
 HeaderInfoList *
 MailFolderCC::BuildListing(void)
 {
-//FIXME: leads to missing updates??
-//   if(m_BuildListingSemaphore)
-//      return;
-
    m_BuildListingSemaphore = true;
    m_UpdateNeeded = false;
 
@@ -1084,7 +1071,7 @@ MailFolderCC::BuildListing(void)
                  m_NumOfMessages, m_RetrievalLimit);
       String confpath;
       confpath << m_Profile->GetName() << '/' << "RetrieveAll";
-      if ( ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, false,
+      if ( ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true,
                                confpath) )
       {
          numMessages = m_RetrievalLimit;
@@ -1139,34 +1126,12 @@ MailFolderCC::BuildListing(void)
    // for NNTP, it will not show all messages
    //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);
    m_NumOfMessages = m_BuildNextEntry;
-
-   unsigned long oldNum = m_OldNumOfMessages;
-   if(m_UpdateMsgCount) // this will suppress more new mail events
-      m_OldNumOfMessages = m_NumOfMessages;
-
    m_Listing->SetCount(m_NumOfMessages);
-   // now we sent an update event to update folderviews etc
-   MEventManager::Send( new MEventFolderUpdateData (this) );
-
 
    /*** FROM HERE ON, WE NEED TO BE RECURSION SAFE!!! ***/
    /* Sending events can cause calls to this function, so we need to
       be reentrant.
    */
-   /* Now check whether we need to send new mail notifications: */
-   if(m_GenerateNewMailEvents && m_NumOfMessages > oldNum) // new mail has arrived
-   {
-      unsigned long n = m_NumOfMessages - oldNum;
-      unsigned long *messageIDs = new unsigned long[n];
-
-      // actually these are no IDs, but indices into the listing
-      for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = (*m_Listing)[oldNum + i]->GetUId();
-
-      MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
-
-      delete [] messageIDs;
-   }
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
 

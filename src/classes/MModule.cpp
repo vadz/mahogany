@@ -175,11 +175,11 @@ MModule *FindModule(const String & name)
 
 
 static
-MModule *LoadModuleInternal(const String & name)
+MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
    // No, load it:
    bool success = false;
-   wxDllType dll = wxDllLoader::LoadLibrary(name, &success);
+   wxDllType dll = wxDllLoader::LoadLibrary(pathname, &success);
    if(! success) return NULL;
 
    MModule *module = MModuleImpl::Create(dll);
@@ -244,7 +244,7 @@ MModule::LoadModule(const String & name)
          pathname = dirs[i];
          pathname << name << moduleExt;
          if(wxFileExists(pathname))
-            module = LoadModuleInternal(pathname);
+            module = LoadModuleInternal(name, pathname);
       }
       return module;
    }

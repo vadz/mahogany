@@ -838,7 +838,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, 4*LAYOUT_Y_MARGIN);
    box->SetConstraints(c);
 
    return box;
@@ -890,7 +890,7 @@ void wxNotebookDialog::CreateAllControls()
       c->top.SameAs(last, wxBottom, 2*LAYOUT_Y_MARGIN);
    else
       c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(panel, wxBottom, 2*LAYOUT_Y_MARGIN + hBtn);
+   c->bottom.SameAs(panel, wxBottom, 4*LAYOUT_Y_MARGIN + hBtn);
    m_notebook->SetConstraints(c);
 
    // create the buttons

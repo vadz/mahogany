@@ -78,7 +78,7 @@ static const char *wxFLC_DEFAULT_SIZES = "80:80:80:80:80";
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-   wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
+//   wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
 
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
    {

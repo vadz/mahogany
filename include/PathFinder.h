@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * PathFinder - a class for finding files or directories            *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$             *
  ********************************************************************/
@@ -34,8 +34,6 @@
 */
 class PathFinder : public MObject
 {
-   /// the list of absolute paths
-   class kbStringList *pathList;
 public:
    /**
       Constructor.
@@ -113,6 +111,9 @@ public:
       @return true if file
    */
    static bool IsFile(const String & pathname);
+private:
+   /// the list of absolute paths
+   class kbStringList *pathList;
 };
 
 //@}

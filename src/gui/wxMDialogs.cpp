@@ -912,6 +912,10 @@ void MDialog_ShowText(MWindow *parent,
 #include "gui/wxDialogLayout.h"
 
 #define NUM_SORTLEVELS 6
+
+/* These must not be more than 16, as they are stored in a 4-bit
+   value! They must be in sync with the enum in MailFolderCmn.h.
+*/
 static wxString sortCriteria[] =
 {
    gettext_noop("None"),
@@ -925,10 +929,11 @@ static wxString sortCriteria[] =
    gettext_noop("Status (reverse)"),
    gettext_noop("Score"),
    gettext_noop("Score (reverse)"),
-   gettext_noop("Thread")
+   gettext_noop("Thread"),
+   gettext_noop("Thread (reverse)")
 };
 
-// dedining it liek this makes it much more difficult to forget to update it
+// defining it like this makes it much more difficult to forget to update it
 static const int NUM_CRITERIA  = WXSIZEOF(sortCriteria);
 
 #define NUM_LABELS 2
@@ -947,10 +952,12 @@ public:
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow(); 
    virtual bool TransferDataToWindow();
-   bool WasChanged(void) { return FALSE;};
+   bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
 protected:
    ProfileBase *m_Profile;
    wxChoice    *m_Choices[NUM_CRITERIA];
+   long         m_OldSortOrder;
+   long         m_SortOrder;
 };
 
 wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent)
@@ -961,7 +968,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
    m_Profile = profile;
    profile->IncRef(); // paranoid
    
-   SetDefaultSize(380,400);
+   SetDefaultSize(380,280);
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"),MH_DIALOG_SORTING);
 
@@ -1015,11 +1022,35 @@ wxMessageSortingDialog::~wxMessageSortingDialog()
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
 {
+   m_SortOrder = 0;
+   for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
+   {
+      m_SortOrder <<= 4;
+      m_SortOrder += m_Choices[n]->GetSelection();
+   }
+
+   m_Profile->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
    return TRUE;
 }
 
 bool wxMessageSortingDialog::TransferDataToWindow()
 {
+   long sortOrder = READ_CONFIG(m_Profile, MP_MSGS_SORTBY);
+   /* Sort order is stored as 4 bits per hierarchy:
+      0xdcba --> 1. sort by "a", then by "b", ...
+   */
+
+   m_OldSortOrder = m_SortOrder = sortOrder;
+
+   long num;
+   for( int n = 0; n < NUM_SORTLEVELS; n++)
+   {
+      num = sortOrder & 0x00000F; // lowest four bits
+      ASSERT(n < NUM_SORTLEVELS);
+      m_Choices[n]->SetSelection(num);
+      sortOrder >>= 4;
+   }
+   
    return TRUE;
 }
 

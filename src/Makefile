@@ -52,7 +52,7 @@ doc:
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(RM) core
+	$(RM) core libM.so
 
 dep depend:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done

@@ -136,8 +136,7 @@ enum ConfigFields
    ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
    ConfigField_AutoShowFirstMessage,
-   ConfigField_SortMessagesBy,
-   ConfigField_FoldersLast = ConfigField_SortMessagesBy,
+   ConfigField_FoldersLast = ConfigField_AutoShowFirstMessage,
 
 #ifdef USE_PYTHON
    // python
@@ -176,7 +175,8 @@ enum ConfigFields
    ConfigField_MessageViewMaxMsgSize,
    ConfigField_MessageViewMaxHeadersNum,
    ConfigField_MessageViewHeaders,
-   ConfigField_MessageViewLast = ConfigField_MessageViewHeaders,
+   ConfigField_MessageViewSortMessagesBy,
+   ConfigField_MessageViewLast = ConfigField_MessageViewSortMessagesBy,
 
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
@@ -443,7 +443,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
-   { gettext_noop("&Sort messages by..."),      Field_SubDlg,  -1},
 
 
 #ifdef USE_PYTHON
@@ -488,6 +487,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                                                    Field_Number,   -1 },
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
+   { gettext_noop("&Sort messages by..."),      Field_SubDlg,  -1},
 
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
@@ -602,7 +602,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
-   CONFIG_ENTRY(MP_MSGS_SORTBY),
 
    // python
 #ifdef USE_PYTHON
@@ -636,6 +635,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
+   CONFIG_ENTRY(MP_MSGS_SORTBY),
 
    // autocollect
    CONFIG_NONE(),
@@ -1179,18 +1179,22 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
 
 void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 {
-   // FIXME there is only one button for now, but if we had several of them,
-   //       how would we know which one was clicked?
-   wxASSERT_MSG( event.GetEventObject() ==
-                 GetControl(ConfigField_MessageViewHeaders), "alien button" );
-
-   if ( ConfigureMsgViewHeaders(m_Profile, this) )
+   bool dirty = false;
+   
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_MessageViewSortMessagesBy) )
+      dirty = ConfigureSorting(m_Profile, this);
+   else if(obj == GetControl(ConfigField_MessageViewHeaders))
+      dirty = ConfigureMsgViewHeaders(m_Profile, this);
+   else
+   {
+      wxASSERT_MSG( 0, "alien button" );
+   }
+   if(dirty)
    {
       // something changed - make us dirty
       wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
-
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
-
       dialog->SetDirty();
    }
 }
@@ -1424,9 +1428,7 @@ void wxOptionsPageFolders::OnButton(wxCommandEvent& event)
    case wxOptionsPage_BtnModify: OnModifyFolder(event); break;
    case wxOptionsPage_BtnDelete: OnDeleteFolder(event); break;
    default:
-      wxObject *obj = event.GetEventObject();
-      if ( obj == GetControl(ConfigField_SortMessagesBy) )
-         dirty = ConfigureSorting(m_Profile, this);
+      ;
    }
 
    wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);

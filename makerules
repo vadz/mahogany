@@ -69,4 +69,4 @@ msgcat:
 	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
-	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo libM.so $(ODIR)/.libs
+	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs

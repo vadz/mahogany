@@ -8,17 +8,24 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	Implement functions to	enumerate profile sub-groups.
-	     !-> Is this still needed?	
-9	KB	Do we need FolderView/ComposeView profiles? 
 9	KB	When retrieving only N our of M messages, Mah. will
 		later say that there are M-N new messages :-(
+		BROKEN COMPLETELY NOW -- FIX IT!
+		CHECK ABORT BUTTON!
+9	KB	Modify mail_fetch_overview() to work backwards.
+9	KB	-> add date sorting, score sorting and threading
+                -> Do we want to re-sort on flags change?
+9	KB	ADB frame help button
+8	KB	Why is module not found at exit???
 9	KB	wxLayout editing glitches & cursor positioning bug
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
+
+6	KB	Implement functions to	enumerate profile sub-groups.
+	     !-> Is this still needed?	 YES
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 

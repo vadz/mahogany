@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: handling of Unix mail folders                  *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -17,6 +17,9 @@
 #   include "guidef.h"    // only for high-level functions
 #   include "strutil.h"
 #   include "Profile.h"
+#   include "MEvent.h"
+
+#   include <stdlib.h>
 #endif
 
 #include "MDialogs.h" // for the password prompt...
@@ -428,6 +431,52 @@ MailFolder::ForwardMessage(class Message *msg,
 /*-------------------------------------------------------------------*
  * Higher level functionality, collected in MailFolderCmn class.
  *-------------------------------------------------------------------*/
+
+class MFCmnEventReceiver : public MEventReceiver
+{
+public:
+   inline MFCmnEventReceiver(MailFolderCmn *mf)
+      {
+         m_Mf = mf;
+         m_MEventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
+         ASSERT_MSG( m_MEventCookie, "can't reg folder with event manager");
+      }
+   virtual inline ~MFCmnEventReceiver()
+      {
+         MEventManager::Deregister(m_MEventCookie);
+      }
+   virtual inline bool OnMEvent(MEventData& event)
+      {  m_Mf->UpdateConfig(); m_Mf->UpdateListing(); return true; }
+private:
+   MailFolderCmn *m_Mf;
+   void *m_MEventCookie;
+};
+
+
+MailFolderCmn::MailFolderCmn(ProfileBase *profile)
+{
+   // We need to know if we are building the first folder listing ever 
+   // or not, to suppress NewMail events.
+   m_FirstListing = true;
+   m_OldMessageCount = 0;
+   m_ProgressDialog = NULL;
+   m_GenerateNewMailEvents = true; // for now don't!
+   m_UpdateMsgCount = true; // normal operation
+   ASSERT(profile);
+   m_Profile = profile;
+   m_Profile->IncRef();
+
+   m_MEventReceiver = new MFCmnEventReceiver(this);
+   
+   UpdateConfig(); // read profile settings
+}
+
+MailFolderCmn::~MailFolderCmn()
+{
+   delete m_MEventReceiver;
+   m_Profile->DecRef();
+}
+
 bool
 MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections,
                                String const & fileName0)
@@ -648,10 +697,178 @@ MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
    }
 }
 
+
+static MMutex gs_SortListingMutex;
+
+static long gs_SortOrder = 0;
+
+
+static int CompareStatus(int stat1, int stat2, int flag)
+{
+   int
+      score1 = 0,
+      score2 = 0;
+
+   if( stat1 & MailFolder::MSG_STAT_DELETED )
+   {
+      if( ! (stat2 & MailFolder::MSG_STAT_DELETED ))
+         return -flag;
+   }
+   else if( stat2 & MailFolder::MSG_STAT_DELETED )
+      return flag;
+
+   /* We use a scoring system:
+      recent = +1
+      unseen   = +1
+      answered = -1
+   */
+   
+   if(stat1 & MailFolder::MSG_STAT_RECENT)
+      score1 += 1;
+   if( !(stat1 & MailFolder::MSG_STAT_SEEN) )
+      score1 += 1;
+   if( stat1 & MailFolder::MSG_STAT_ANSWERED )
+      score1 -= 1;
+
+   if(stat2 & MailFolder::MSG_STAT_RECENT)
+      score2 += 1;
+   if( !(stat2 & MailFolder::MSG_STAT_SEEN) )
+      score2 += 1;
+   if( stat2 & MailFolder::MSG_STAT_ANSWERED )
+      score2 -= 1;
+
+   return (score1 > score2) ? flag : (score1 < score2) ? -flag : 0;
+}
+
+extern "C"
+{
+   static int ComparisonFunction(const void *a, const void *b)
+   {
+      HeaderInfo
+         *i1 = (HeaderInfo *)a,
+         *i2 = (HeaderInfo *)b;
+
+      long sortOrder = gs_SortOrder, criterium;
+
+      int result = 0;
+      
+      while(result == 0 && sortOrder != 0 )
+      {
+         criterium = sortOrder & 0xF;
+         sortOrder >>= 4;
+
+         switch(criterium)
+         {
+         case MSO_NONE:
+            break;
+         case MSO_DATE:
+         case MSO_DATE_REV:
+            ASSERT_MSG(0,"sorting by date not implemented yet");
+            break;
+         case MSO_SUBJECT:
+            result = Stricmp(i1->GetSubject(), i2->GetSubject());
+            break;
+       case MSO_SUBJECT_REV:
+            result = - Stricmp(i1->GetSubject(), i2->GetSubject());
+            break;
+         case MSO_AUTHOR:
+            result = Stricmp(i1->GetFrom(), i2->GetFrom());
+            break;
+         case MSO_AUTHOR_REV:
+            result = -Stricmp(i1->GetFrom(), i2->GetFrom());
+            break;
+         case MSO_STATUS_REV:
+         case MSO_STATUS:
+         {
+            int flag =
+               (criterium == MSO_STATUS_REV) ? 1 : -1;
+            int
+               stat1 = i1->GetStatus(),
+               stat2 = i2->GetStatus();
+            // msg1 new?
+            result = CompareStatus(stat1, stat2, flag);
+            break;
+         }
+         case MSO_SCORE:
+         case MSO_SCORE_REV:
+            ASSERT_MSG(0,"scoring not implemented yet");
+            break;
+         case MSO_THREAD:
+         case MSO_THREAD_REV:
+            ASSERT_MSG(0,"threading not implemented yet");
+            break;
+         default:
+            ASSERT_MSG(0,"unknown sorting criterium");
+            break;
+         }
+      }
+      return result;
+     }
+}
+
+static void SortListing(HeaderInfoList *hil, long SortOrder)
+{
+   gs_SortListingMutex.Lock();
+
+   gs_SortOrder = SortOrder;
+   
+   // no need to incref/decref, done in UpdateListing()
+   if(hil->Count() > 1)
+      qsort(hil->GetArray(),
+            hil->Count(),
+            (*hil)[0]->SizeOf(),
+            ComparisonFunction);
+
+   gs_SortListingMutex.Unlock();
+}
+
+
+
 void
 MailFolderCmn::UpdateListing(void)
 {
    HeaderInfoList *hil = BuildListing();
+
    if(hil)
+   {
+      SortListing(hil, m_Config.m_ListingSortOrder);
+
+      /* Now check whether we need to send new mail notifications: */
+      if(!m_FirstListing && m_GenerateNewMailEvents
+         && hil->Count() > m_OldMessageCount)
+      {
+         UIdType n = hil->Count() - m_OldMessageCount;
+         UIdType *messageIDs = new UIdType[n];
+         // Find the new messages:
+         UIdType nextIdx = 0;
+         int status;
+         for ( UIdType i = 0; i < n; i++ )
+         {
+            status =(*hil)[i]->GetStatus();
+            ASSERT(nextIdx < n);
+            if( (status & MSG_STAT_RECENT) &&
+                !(status & MSG_STAT_SEEN))
+               messageIDs[nextIdx++] = (*hil)[i]->GetUId();
+         }
+         ASSERT(nextIdx == n);
+
+         MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
+         delete [] messageIDs;
+      }
+
+      // now we sent an update event to update folderviews etc
+      MEventManager::Send( new MEventFolderUpdateData (this) );
+
+      if(m_UpdateMsgCount) // this will suppress more new mail events
+         m_OldMessageCount = hil->Count();
+
       hil->DecRef();
+   }
 }
+
+void
+MailFolderCmn::UpdateConfig(void)
+{
+   m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
+}
+

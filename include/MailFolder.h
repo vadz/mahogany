@@ -430,10 +430,12 @@ public:
    virtual UIdType GetUId(void) const = 0;
    virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
+   virtual size_t SizeOf(void) const = 0;
    virtual ~HeaderInfo() {}
 };
 
-/** This class holds a complete list of all messages in the folder. */
+/** This class holds a complete list of all messages in the folder.
+    It must be an array!*/
 class HeaderInfoList : public MObjectRC
 {
 public:
@@ -441,6 +443,8 @@ public:
    virtual size_t Count(void) const = 0;
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const = 0;
+   /// Returns pointer to array of data:
+   virtual HeaderInfo * GetArray(void) = 0;
 };
 
 /** This class holds information about a single folder. */

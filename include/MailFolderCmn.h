@@ -139,8 +139,31 @@ public:
        @return Pointer to the profile.
    */
    virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
+   /** Toggle sending of new mail events.
+       @param send if true, send them
+       @param update if true, update internal message count
+   */
+   virtual void EnableNewMailEvents(bool send = true, bool update = true)
+      {
+         m_GenerateNewMailEvents = send;
+         m_UpdateMsgCount = update;
+      }
+
+   /** Query whether foldre is sending new mail events.
+       @return if true, folder sends them
+   */
+   virtual bool SendsNewMailEvents(void) const
+      { return m_GenerateNewMailEvents; }
+
    //@}
 protected:
+   /// Constructor
+   MailFolderCmn(class ProfileBase *profile);
+
+   /// Destructor
+   ~MailFolderCmn();
+   /**@name All used to build listings */
+   //@{
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
 
@@ -149,6 +172,20 @@ protected:
    */
    virtual HeaderInfoList *BuildListing(void) = 0;
 
+   /// To display progress while reading message headers:
+   class MProgressDialog *m_ProgressDialog;
+
+   /// Have we not build a listing before?
+   bool m_FirstListing;
+   /// Number of messages in last listing:
+   UIdType m_OldMessageCount;
+   /** Do we want to generate new mail events?
+       Used to supporess new mail events when first opening the folder
+       and when copying to it. */
+   bool m_GenerateNewMailEvents;
+   /** Do we want to update the message count? */
+   bool m_UpdateMsgCount;
+   //@}
    /**@name Common variables might or might not be used */
    //@{
    /// Login for password protected mail boxes.
@@ -158,7 +195,36 @@ protected:
    /// a profile
    ProfileBase *m_Profile;
    //@}
+
+   /**@name Config information used */
+   //@{
+   struct MFCmnOptions
+   {
+      long m_ListingSortOrder;
+   } m_Config;
+   //@}
+
+private:
+   /// Update Config info from profile.
+   void UpdateConfig(void);
+   friend class MFCmnEventReceiver;
+   /// We react to config change events.
+   class MEventReceiver *m_MEventReceiver;
 };
 
+
+/** Sort order enum for sorting message listings. */
+enum MessageSortOrder
+{
+   /// no sorting
+   MSO_NONE,
+   /// date or reverse date
+   MSO_DATE, MSO_DATE_REV,
+   MSO_SUBJECT, MSO_SUBJECT_REV,
+   MSO_AUTHOR, MSO_AUTHOR_REV,
+   MSO_STATUS, MSO_STATUS_REV,
+   MSO_SCORE, MSO_SCORE_REV,
+   MSO_THREAD, MSO_THREAD_REV
+};
 
 #endif
