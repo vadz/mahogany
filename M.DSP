@@ -1630,37 +1630,37 @@ InputPath=".\src\Python\swiglib.cpp-swig"
 # Begin Source File
 
 SOURCE=.\src\Python\HeaderInfo_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MailFolder_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MDialogs_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\Message_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MimePart_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\SendMessage_swig.cpp
-# ADD CPP /W1 /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
+# ADD CPP /W1 /D "STATIC_LINKED"
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
