@@ -759,8 +759,8 @@ match:
    {
       // '@' matches may result in false positives, as not every '@' character
       // is inside a mailto URL so try to weed them out by requiring that the
-      // mail address has a reasonable minimal length ("ab@cd.com" and
-      // "www.xy.fr" are probably the shortest ones we can have, hence 10)
+      // mail address has a reasonable minimal length ("ab@cd.fr" and
+      // "www.xy.fr" are probably the shortest ones we can have, hence 8)
       // which at least avoids matching the bare '@'s
       bool good = (p - start) >= 8;
 
