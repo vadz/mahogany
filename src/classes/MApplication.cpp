@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.26  1998/07/20 12:23:06  KB
+ * Adopted MApplication for new wxConfig.
+ *
  * Revision 1.25  1998/07/12 15:05:25  KB
  * some fixes and ugly fix to work with std::string again
  *
@@ -245,7 +248,7 @@ MAppBase::OnStartup()
    }
 
 #  ifdef   USE_WXCONFIG
-      localDir = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+      localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else
       char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
       localDir = String(cptr);
