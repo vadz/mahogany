@@ -278,6 +278,7 @@ private:
 // event tables
 // ----------------------------------------------------------------------------
 
+#ifndef EVT_UPDATE_UI_RANGE
 #define EVT_UPDATE_UI_RANGE(id1, id2, func) \
    {\
       wxEVT_UPDATE_UI,\
@@ -285,6 +286,7 @@ private:
       (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)&func,\
       (wxObject *) NULL\
    },
+#endif
 
 BEGIN_EVENT_TABLE(wxComposeHeadersDialog, wxOptionsPageSubdialog)
    EVT_UPDATE_UI_RANGE(TextCtrlId,
