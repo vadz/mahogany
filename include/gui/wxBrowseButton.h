@@ -44,7 +44,7 @@ public:
       : wxButton(parent, -1, _T(">>"))
    {
 #if wxUSE_TOOLTIPS
-      SetToolTip(tooltip); 
+      SetToolTip(tooltip);
 #endif // wxUSE_TOOLTIPS
    }
 
