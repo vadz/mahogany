@@ -31,6 +31,9 @@
 
 #ifdef DEBUG
 
+// trace mask for MObject ref counting
+#define TRACE_REFCOUNT _T("refcnt")
+
 // ----------------------------------------------------------------------------
 // this module global variables
 // ----------------------------------------------------------------------------
@@ -108,7 +111,9 @@ void MObjectRC::IncRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace(_T("Object %p: IncRef() called, m_nRef = %lu."), this, (unsigned long)m_nRef);
+      wxLogTrace(TRACE_REFCOUNT,
+                 _T("Object %p: IncRef() called, m_nRef = %lu."),
+                 this, (unsigned long)m_nRef);
    }
 }
 
@@ -121,7 +126,9 @@ bool MObjectRC::DecRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace(_T("Object %p: DecRef() called, m_nRef = %lu."), this, (unsigned long)m_nRef);
+      wxLogTrace(TRACE_REFCOUNT,
+                 _T("Object %p: DecRef() called, m_nRef = %lu."),
+                 this, (unsigned long)m_nRef);
    }
 
    if ( m_nRef == 0 )
