@@ -70,7 +70,7 @@
 #ifdef OS_WIN
 #   include <winnls.h>
 
-#   include "wx/html/helpctrl.h"
+#   include "wx/msw/helpbest.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -973,7 +973,7 @@ wxString wxMApp::BuildHelpInitString(const wxString& dir)
    wxString helpfile = dir;
 
 #ifdef OS_WIN
-   helpfile += "\\Manual.hhp";
+   helpfile += "\\Manual.chm";
 #endif // Windows
 
    return helpfile;
@@ -987,9 +987,9 @@ wxString wxMApp::GetHelpDir()
       helpdir += wxFILE_SEP_PATH;
 
 #ifdef OS_WIN
-   helpdir += "\\help";
+   helpdir += "help";
 #else // !Windows
-   helpdir += "/doc";
+   helpdir += "doc";
 #endif // Windows/!Windows
 
    return helpdir;
@@ -1011,7 +1011,7 @@ bool wxMApp::InitHelp()
 #ifdef OS_UNIX
       m_HelpController = new wxHelpController;
 #else // Windows
-      m_HelpController = new wxHtmlHelpController;
+      m_HelpController = new wxBestHelpController;
 #endif // Unix/Windows
 
       // try to initialise the help system
