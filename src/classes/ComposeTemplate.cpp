@@ -141,7 +141,7 @@ public:
    {
       Var_Date,            // insert the date in the default format
       Var_Cursor,          // position the cursor here after template expansion
-      Var_To,              // the recepient name
+      Var_To,              // the recipient name
       Var_Subject,         // the message subject (without any "Re"s)
 
       // all entries from here only apply to the reply/forward/followup
@@ -156,7 +156,7 @@ public:
 
    // the variables in "message" category
    //
-   // NB: the values should be identical to wxComposeView::RecepientType enum
+   // NB: the values should be identical to wxComposeView::RecipientType enum
    //     (or the code in ExpandMessage should be changed)
    enum MessageHeader
    {
@@ -833,7 +833,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          {
             // FIXME: this won't work if there are several addresses!
 
-            wxString to = m_cv.GetRecepients(wxComposeView::Recepient_To);
+            wxString to = m_cv.GetRecipients(wxComposeView::Recipient_To);
             if ( header == MessageHeader_FirstName )
                *value = Message::GetFirstNameFromAddress(to);
             else
@@ -845,9 +845,9 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          CHECK( header <= MessageHeader_LastControl, FALSE,
                 "unexpected macro in message category" );
 
-         // the MessageHeader enum values are the same as RecepientType ones,
+         // the MessageHeader enum values are the same as RecipientType ones,
          // so no translation is needed
-         *value = m_cv.GetRecepients((wxComposeView::RecepientType)header);
+         *value = m_cv.GetRecipients((wxComposeView::RecipientType)header);
    }
 
    return TRUE;

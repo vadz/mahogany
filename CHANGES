@@ -28,7 +28,7 @@ Release 0.62 'Mars' March 22, 2001
 15.03.01 VZ: added "Synchronize" page to the options dialog
 14.03.01 VZ: propose to retrieve all mailboxes from IMAP servers when opening
 12.03.01 VZ: MIME parsing is finally (almost) correct - and more efficient, too
-07.03.01 VZ: quick filter enhancements: now can filter on recepients too
+07.03.01 VZ: quick filter enhancements: now can filter on recipients too
 28.02.01 VZ: indicate the external editor status in the composer window title
              filters don't get applied to deleted messages any more
 21.02.01 VZ: added hard limit on the number of headers retrieved

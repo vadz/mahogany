@@ -93,7 +93,7 @@ class Rfc822OutputRedirector
 public:
    // the ctor may redirect rfc822 output to write bcc as well or to not do
    // it, it is important to get it right or BCC might be sent as a message
-   // header and be seen by the recepient!
+   // header and be seen by the recipient!
    Rfc822OutputRedirector(bool outputBcc, SendMessageCC *msg);
    ~Rfc822OutputRedirector();
 

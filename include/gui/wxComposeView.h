@@ -64,15 +64,15 @@ class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
 public:
    // constants
 
-   /// recepient address types
-   enum RecepientType
+   /// recipient address types
+   enum RecipientType
    {
-      Recepient_To,
-      Recepient_Cc,
-      Recepient_Bcc,
-      Recepient_Newsgroup,
-      Recepient_None,
-      Recepient_Max
+      Recipient_To,
+      Recipient_Cc,
+      Recipient_Bcc,
+      Recipient_Newsgroup,
+      Recipient_None,
+      Recipient_Max
    };
 
    /// Do we want to send mail or post a news article?
@@ -188,18 +188,18 @@ public:
    /// sets Subject field
    void SetSubject(const String &subj);
 
-   /// adds recepients from addr (Recepient_None means to reuse the last)
-   void AddRecepients(const String& addr,
-                      RecepientType rcptType = Recepient_None);
+   /// adds recipients from addr (Recipient_None means to reuse the last)
+   void AddRecipients(const String& addr,
+                      RecipientType rcptType = Recipient_None);
 
-   /// adds a "To" recepient
-   void AddTo(const String& addr) { AddRecepients(addr, Recepient_To); }
+   /// adds a "To" recipient
+   void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }
 
-   /// adds a "Cc" recepient
-   void AddCc(const String& addr) { AddRecepients(addr, Recepient_Cc); }
+   /// adds a "Cc" recipient
+   void AddCc(const String& addr) { AddRecipients(addr, Recipient_Cc); }
 
-   /// adds a "Bcc" recepient
-   void AddBcc(const String& addr) { AddRecepients(addr, Recepient_Bcc); }
+   /// adds a "Bcc" recipient
+   void AddBcc(const String& addr) { AddRecipients(addr, Recipient_Bcc); }
 
    /// get the subject value
    String GetSubject() const;
@@ -208,7 +208,7 @@ public:
    String GetFrom() const;
 
    /// get (all) addresses of this type
-   String GetRecepients(RecepientType type) const;
+   String GetRecipients(RecipientType type) const;
 
    /// inserts a text
    void InsertText(const String &txt);
@@ -247,9 +247,9 @@ public:
    void OnFirstTimeFocus();
 
       /// called when rcpt type is changed
-   void OnRcptTypeChange(RecepientType type);
+   void OnRcptTypeChange(RecipientType type);
 
-      /// called to remove the recepient with this index
+      /// called to remove the recipient with this index
    void OnRemoveRcpt(size_t index);
    //@}
 
@@ -260,7 +260,7 @@ public:
    Profile *GetProfile(void) const { return m_Profile; }
 
    // is the control with this index enabled?
-   bool IsRecepientEnabled(size_t index) const;
+   bool IsRecipientEnabled(size_t index) const;
 
    /** Adds an extra header line.
        @param entry name of header entry
@@ -374,17 +374,17 @@ private:
                                         wxTextCtrl **ppText = NULL,
                                         TextField tf = TextField_Normal);
 
-   // add a place holder to the recepients sizer
+   // add a place holder to the recipients sizer
    void CreatePlaceHolder();
 
    // delete the controls created by CreatePlaceHolder()
    void DeletePlaceHolder();
 
-   // create the new controls for another recepient
-   void AddRecepientControls(const String& value, RecepientType rt);
+   // create the new controls for another recipient
+   void AddRecipientControls(const String& value, RecipientType rt);
 
-   // adds one recepient, helper of AddRecepients()
-   void AddRecepient(const String& addr, RecepientType rcptType);
+   // adds one recipient, helper of AddRecipients()
+   void AddRecipient(const String& addr, RecipientType rcptType);
 
    /// enable/disable editing of the message text
    void EnableEditing(bool enable);
@@ -417,29 +417,29 @@ private:
    wxTextCtrl *m_txtSubject;
 
       /// the address field
-   wxNewAddressTextCtrl *m_txtRecepient;
+   wxNewAddressTextCtrl *m_txtRecipient;
 
-      /// the sizer containing all recepients
+      /// the sizer containing all recipients
    wxSizer *m_sizerRcpts;
 
       /// the panel containing already entered addresses
-   wxEnhancedPanel *m_panelRecepients;
+   wxEnhancedPanel *m_panelRecipients;
 
-      /// the additional recepients: array of correpsonding controls
+      /// the additional recipients: array of corresponding controls
    ArrayRcptControls m_rcptControls;
 
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
    //@}
 
-   /// the last focused address field: index of -1 means m_txtRecepient itself
+   /// the last focused address field: index of -1 means m_txtRecipient itself
    int m_indexLast;
 
    /// the index of the next text control to create (-1 initially)
    int m_indexRcpt;
 
-   /// the type of the last recepient
-   RecepientType m_rcptTypeLast;
+   /// the type of the last recipient
+   RecipientType m_rcptTypeLast;
 
    /// composer font
    int m_font, m_size;

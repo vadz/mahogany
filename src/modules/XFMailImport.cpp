@@ -624,7 +624,7 @@ typedef struct _xf_rule {
          "Message",
          "To",
          "Sender",
-         "Recepients"
+         "Recipients"
       };
       MFDialogTarget where = ORC_W_Illegal;
       for ( size_t n = 0; n < WXSIZEOF(headers); n++ )

@@ -744,8 +744,8 @@ MailFolder::ReplyMessage(class Message *msg,
       else // don't reply to all
       {
          // but still add addresses  to allow easily adding them to the
-         // recepient list - just disable them by default
-         cv->AddRecepients(uniqueAddresses[n], wxComposeView::Recepient_None);
+         // recipient list - just disable them by default
+         cv->AddRecipients(uniqueAddresses[n], wxComposeView::Recipient_None);
       }
    }
 
