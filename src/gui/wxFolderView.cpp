@@ -1794,7 +1794,7 @@ void wxFolderListCtrl::CreateColumns()
       item.m_format = wxLIST_FORMAT_LEFT;
       item.m_width = width;
       item.m_text = GetColumnName(col);
-      item.m_image = -2;
+      item.m_image = -1;
       InsertColumn(n, item);
    }
 }
@@ -2114,7 +2114,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 
 int wxFolderListCtrl::OnGetItemImage(long item) const
 {
-   return -2;
+   return -1;
 }
 
 wxColour
