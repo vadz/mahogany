@@ -155,8 +155,19 @@ CCStreamCleaner::~CCStreamCleaner()
    }
 }
 
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+/// global cclient lock (FIXME: MT)
+static int gs_lockCclient = 0;
+
 /// exactly one object
 static CCStreamCleaner *gs_CCStreamCleaner = NULL;
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
 
 void CC_Cleanup(void)
 {
@@ -1319,6 +1330,9 @@ MailFolderCC::PingReopenAll(void)
 void
 MailFolderCC::Ping(void)
 {
+   if ( gs_lockCclient ) // FIXME: MT
+      return;
+
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
@@ -2762,11 +2776,6 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
 
-   // VZ: is this really needed?
-#if 0
-   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
-#endif
-
    // create the event corresponding to the folder
    ASMailFolder::ResultFolderExists *result =
       ASMailFolder::ResultFolderExists::Create
@@ -2785,6 +2794,14 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    // don't forget to free the result - MEventASFolderResultData makes a copy
    // (i.e. calls IncRef) of it
    result->DecRef();
+
+   // wxYield() is needed to send the events resulting from (previous) calls
+   // to MEventManager::Send(), but don't forget to prevent any other calls to
+   // c-client from happening - this will result in a fatal error as it is not
+   // reentrant
+   gs_lockCclient++;  // FIXME: MT
+   wxYield();
+   gs_lockCclient--;
 }
 
 
