@@ -1197,9 +1197,19 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_keepOpen->SetValue(m_originalKeepOpenValue);
 
-   // get the folder icon
-   MFolder_obj folder(m_folderPath);
-   m_originalFolderIcon = GetFolderIconForDisplay(folder);
+   // update the folder icon
+   if ( m_isCreating )
+   {
+      // use default icon for the chosen folder type
+      m_originalFolderIcon = GetDefaultFolderTypeIcon(typeFolder);
+   }
+   else
+   {
+      // use the folders icon
+      MFolder_obj folder(m_folderPath);
+      m_originalFolderIcon = GetFolderIconForDisplay(folder);
+   }
+
    m_browseIcon->SetIcon(m_originalFolderIcon);
 }
 
@@ -1351,8 +1361,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    m_profile->DecRef();
    m_profile = ProfileBase::CreateProfile(fullname);
 
-   // common for all folders
-   if ( hasUsername && !(flags & MF_FLAGS_ANON) )
+   // common for all folders: remember the login info for the folders for which
+   // it makes sense or for folder groups (for which we always remember
+   // everything)
+   if ( (hasUsername && !(flags & MF_FLAGS_ANON)) || typeFolder == FolderGroup )
    {
       WriteEntryIfChanged(Username, loginName);
       WriteEntryIfChanged(Password, strutil_encrypt(password));
@@ -1360,10 +1372,18 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    m_profile->writeEntry(MP_FOLDER_TYPE, typeFolder | flags);
 
+   String server = m_server->GetValue();
    if ( FolderTypeHasServer(typeFolder) )
    {
-      WriteEntryIfChanged(typeFolder == Nntp ? ServerNews : Server,
-                          m_server->GetValue());
+      WriteEntryIfChanged(typeFolder == Nntp ? ServerNews : Server, server);
+   }
+   else if ( typeFolder == FolderGroup )
+   {
+      // the right thing to do is to write the server value into both profile
+      // entries: for POP/IMAP server and for NNTP one because like this
+      // everybody will inherit it
+      WriteEntryIfChanged(ServerNews, server);
+      WriteEntryIfChanged(Server, server);
    }
 
    switch ( typeFolder )
@@ -1386,6 +1406,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          if ( !m_dlgCreate )
             break;
          //else: can't create INBOX folder!
+
+      case FolderGroup:
+         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
+         WriteEntryIfChanged(Path, m_path->GetValue());
+         break;
 
       default:
          wxFAIL_MSG("Unexpected folder type.");

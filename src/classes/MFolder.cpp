@@ -319,8 +319,14 @@ bool MFolderFromProfile::Exists(const String& fullname)
    Profile_obj profile(fullname);
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
-   bool exists = (READ_CONFIG(profile, MP_PROFILE_TYPE) ==
-                  ProfileBase::PT_FolderProfile);
+   bool found;
+   bool exists = profile->readEntry(MP_PROFILE_TYPE, MP_PROFILE_TYPE_D, &found)
+                 == ProfileBase::PT_FolderProfile;
+   if ( !found )
+   {
+      // if the value was just inherited from parent, it doesn't count
+      exists = FALSE;
+   }
 
    return exists;
 }
@@ -364,7 +370,12 @@ int MFolderFromProfile::GetIcon() const
    Profile_obj profile(m_folderName);
    CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
 
-   return READ_CONFIG(profile, MP_FOLDER_ICON);
+   // it doesn't make sense to inherit the icon from parent profile (does it?),
+   // so check that the value we read was taken from ours
+   bool found;
+   int icon = profile->readEntry(MP_FOLDER_ICON, MP_FOLDER_ICON_D, &found);
+
+   return found ? icon : MP_FOLDER_ICON_D;
 }
 
 void MFolderFromProfile::SetIcon(int icon)

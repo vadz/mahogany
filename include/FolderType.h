@@ -131,4 +131,7 @@ extern String GetFolderIconName(size_t n);
 /// get the icon for this folder or default icon for this folder type (or -1)
 int GetFolderIconForDisplay(const class MFolder* folder);
 
+/// get the default icon for folders of this type
+int GetDefaultFolderTypeIcon(FolderType folderType);
+
 #endif //  _FOLDERTYPE_H

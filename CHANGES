@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+05.07.99 VZ: "folder already exists" bug when creating POP3 folder fixed
 04.07.99 VZ: folder icons can now be customized
 03.07.99 VZ: support for adding custom headers from compose view
 
@@ -8,6 +9,8 @@
 0.20a
 
 0.10a
+
+Initial public release.
 
 $Id$
 

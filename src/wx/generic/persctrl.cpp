@@ -96,6 +96,13 @@ END_EVENT_TABLE()
 #define LAYOUT_Y_MARGIN       5
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// wxID_FOO -> wxFOO
+static int TranslateBtnIdToMsgBox(int rc);
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -1072,7 +1079,6 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
         case wxID_YES:
         case wxID_NO:
         case wxID_OK:
-            EndModal(event.GetId());
             break;
 
         default:
@@ -1084,10 +1090,14 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
             // "Yes/No" type dialog
             if ( (m_dialogStyle & wxYES_NO) != wxYES_NO ||
                  (m_dialogStyle & wxCANCEL) ) {
-                EndModal(wxID_CANCEL);
+                break;
             }
-            break;
+
+            // skip EndModal()
+            return;
     }
+
+    EndModal(TranslateBtnIdToMsgBox(event.GetId()));
 }
 
 static const char *gs_MessageBoxPath = "MessageBox";
@@ -1122,7 +1132,7 @@ int wxPMessageBox(const wxString& configPath,
          rc = dlg.ShowModal();
 
          // ignore checkbox value if the dialog was cancelled
-         if ( config && rc != wxID_CANCEL && dlg.DontShowAgain() ) {
+         if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
             config->Write(configValue, rc);
          }
@@ -1140,7 +1150,7 @@ int wxPMessageBox(const wxString& configPath,
       wxPMessageDialog dlg(parent, message, caption, style, false);
 #endif
 
-      return dlg.ShowModal();
+      return TranslateBtnIdToMsgBox(dlg.ShowModal());
    }
 }
 
@@ -1257,4 +1267,25 @@ wxString wxPFileSelector(const wxString& configPath,
     }
 
     return filename;
+}
+
+static int TranslateBtnIdToMsgBox(int rc)
+{
+    switch ( rc ) {
+        case wxID_YES:
+            return wxYES;
+
+        case wxID_NO:
+            return wxNO;
+
+        case wxID_OK:
+            return wxOK;
+
+        default:
+            wxFAIL_MSG("unexpected button id in TranslateBtnIdToMsgBox.");
+            // fall through nevertheless
+
+        case wxID_CANCEL:
+            return wxCANCEL;
+    }
 }

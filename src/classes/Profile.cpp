@@ -457,14 +457,19 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
       keypath << m_ProfilePath << '/';
    keypath << key;
    String str;
-   bool f = ms_GlobalConfig->Read(keypath,&str, def);
-   bool ff = f;
-   while(! f && (ms_GlobalConfig->GetPath()) != M_PROFILE_CONFIG_SECTION)
+
+   bool foundHere = ms_GlobalConfig->Read(keypath,&str, def);
+   bool foundAnywhere = foundHere;
+   while ( !foundAnywhere &&
+           (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      f = ms_GlobalConfig->Read(keypath,&str, def);
+      foundAnywhere = ms_GlobalConfig->Read(keypath,&str, def);
    }
-   if(found) *found = ff;
+
+   if ( found )
+      *found = foundHere;
+
    return str;
 }
 
@@ -479,14 +484,17 @@ Profile::readEntry(const String & key, long def, bool * found) const
       keypath << m_ProfilePath << '/';
    keypath << key;
    long val;
-   bool f = ms_GlobalConfig->Read(keypath,&val,def);
-   while(! f && (ms_GlobalConfig->GetPath()) != M_PROFILE_CONFIG_SECTION)
+   bool foundHere = ms_GlobalConfig->Read(keypath,&val,def);
+   bool foundAnywhere = foundHere;
+   while ( !foundAnywhere &&
+           (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      f = ms_GlobalConfig->Read(keypath,&val,def);
+      foundAnywhere = ms_GlobalConfig->Read(keypath,&val,def);
    }
-   if(found)
-       *found = f;
+
+   if ( found )
+       *found = foundHere;
 
    return val;
 }

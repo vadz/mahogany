@@ -181,10 +181,20 @@ public:
    }
 
 protected:
-   // is the root item chosen?
-   bool IsRootChosen() const
+   // return TRUE if the current folder may be opened
+   bool CanOpen() const
    {
-      return wxTreeCtrl::GetSelection() == GetRootItem();
+      // is the root item chosen?
+      if ( wxTreeCtrl::GetSelection() == GetRootItem() )
+         return FALSE;
+
+      wxFolderTreeNode *node = GetSelection();
+
+      CHECK( node, FALSE, "shouldn't be called if no selection" );
+
+      MFolder *folder = node->GetFolder();
+
+      return folder->GetType() != FolderGroup;
    }
 
    // this is the real handler for double-click and enter events
@@ -580,10 +590,12 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       }
 
       // disable the items which don't make sense for some kinds of folders
-      bool isRoot = folder->GetType() == FolderRoot;
+      FolderType folderType = folder->GetType();
+      bool isRoot = folderType == FolderRoot,
+           isGroup = folderType == FolderGroup;
 
       // you can't open nor delete the root folder and it has no properties
-      m_menu->Enable(FolderMenu::Open, !isRoot);
+      m_menu->Enable(FolderMenu::Open, !isRoot && !isGroup);
       m_menu->Enable(FolderMenu::Delete, !isRoot);
       m_menu->Enable(FolderMenu::Properties, !isRoot);
 
@@ -751,7 +763,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnDoubleClick()
 {
-   if ( IsRootChosen() )
+   if ( !CanOpen() )
    {
       wxLogStatus(GetFrame(this), _("Cannot open this folder."));
 
@@ -796,7 +808,7 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
       pt.y = (rect.GetY() + rect.GetHeight())/2;
    }
 #endif
-   
+
    // show menu in any case
    DoPopupMenu(pt);
 
@@ -1072,6 +1084,22 @@ String GetFolderIconName(size_t n)
 
 int GetFolderIconForDisplay(const MFolder* folder)
 {
+   // first of all, try to ask the folder itself - this will return something
+   // if this folder has its own "special" icon
+   int image = folder->GetIcon();
+
+   if ( image == -1 )
+   {
+      // if there is no special icon for this folder, use a default one for its
+      // type
+      image = GetDefaultFolderTypeIcon(folder->GetType());
+   }
+
+   return image;
+}
+
+int GetDefaultFolderTypeIcon(FolderType folderType)
+{
    // each folder type has its own icon
    static const struct
    {
@@ -1089,17 +1117,11 @@ int GetFolderIconForDisplay(const MFolder* folder)
       { iconGroup, FolderGroup},
    };
 
-   // first of all, try to ask the folder itself - this will return something
-   // if this folder has its own "special" icon
-   int image = folder->GetIcon();
-
-   // if there is no special icon for this folder, use a default one for its
-   // type
-   FolderType type = folder->GetType();
+   int image = -1;
    size_t n;
    for ( n = 0; (image == -1) && (n < WXSIZEOF(FolderIcons)); n++ )
    {
-      if ( type == FolderIcons[n].type )
+      if ( folderType == FolderIcons[n].type )
       {
          image = FolderIcons[n].icon;
       }

@@ -463,14 +463,9 @@ MDialog_YesNoDialog(const char *message,
    
    MGuiLocker lock;
    CloseSplash();
-   if(configPath)
-      return wxPMessageBox(configPath, message, caption,
+   return wxPMessageBox(configPath, message, caption,
                         style,
-                           GetDialogParent(parent)) == wxID_YES;
-   else
-      return wxMessageBox(message, caption,
-                          style,
-                          GetDialogParent(parent)) == wxID_YES;
+                        GetDialogParent(parent)) == wxYES;
 }
 
 
