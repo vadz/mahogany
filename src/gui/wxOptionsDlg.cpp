@@ -175,6 +175,7 @@ enum ConfigFields
    ConfigField_WrapMargin,
    ConfigField_WrapAuto,
    ConfigField_ReplyString,
+   ConfigField_ForwardString,
    ConfigField_ReplyCollapse,
    ConfigField_ReplyQuoteOrig,
    ConfigField_ReplyCharacters,
@@ -820,6 +821,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
    { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
+   { gettext_noop("Forward string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
    { gettext_noop("Quote &original message in reply"), Field_Action,   -1,                        },
@@ -1247,6 +1249,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_WRAPMARGIN),
    CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
+   CONFIG_ENTRY(MP_FORWARD_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_QUOTE_ORIG),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),

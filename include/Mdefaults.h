@@ -431,6 +431,8 @@ enum MFolderIndex
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT   "DialUpNetSupport"
 
+/// set reply string from To: field?
+#define MP_SET_REPLY_FROM_TO   "ReplyEqualsTo"
 /// should we attach vCard to outgoing messages?
 #define MP_USEVCARD "UseVCard"
 /// the vCard to use
@@ -441,9 +443,9 @@ enum MFolderIndex
 #define MP_NET_CONNECTION "RasConnection"
 #elif defined(OS_UNIX)
 /// the command to go online
-#define MP_NET_ON_COMMAND   "NetOffCommand"
+#define MP_NET_ON_COMMAND   "NetOnCommand"
 /// the command to go offline
-#define MP_NET_OFF_COMMAND   "NetOnCommand"
+#define MP_NET_OFF_COMMAND   "NetOffCommand"
 #endif // platform
 
 /// show CC field in message composition?
@@ -484,22 +486,35 @@ enum MFolderIndex
 #define   MP_COMPOSE_CC         "ComposeCcDefault"
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC         "ComposeBccDefault"
-/// use signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE   "ComposeInsertSignature"
-/// use "--" to separate signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
-/// filename of signature file
-#define   MP_COMPOSE_SIGNATURE      "SignatureFile"
+
+/// prefix for subject in replies
+#define   MP_REPLY_PREFIX         "ReplyPrefix"
+/// prefix for subject in forwards
+#define   MP_FORWARD_PREFIX         "ForwardPrefix"
+/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
+#define   MP_REPLY_COLLAPSE_PREFIX "CollapseReplyPrefix"
+/// include the original message in the reply [no,ask,yes]
+#define MP_REPLY_QUOTE_ORIG "ReplyQuoteInsert" 
+/// include only the selected text (if any) in the reply?
+#define MP_REPLY_QUOTE_SELECTION "ReplyQuoteSelection"
+/// prefix for text in replies
+#define   MP_REPLY_MSGPREFIX      "ReplyQuote"
+/// prepend the initials of the sender to the reply prefix?
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER "ReplyQuoteUseSender"
+/// quote the empty lines when replying?
+#define   MP_REPLY_QUOTE_EMPTY      "ReplyQuoteEmpty"
 /// detect and remove signature when replying?
 #define MP_REPLY_DETECT_SIG "DetectSig"
 #if wxUSE_REGEX
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR "SigSeparator"
 #endif
-/// include the original message in the reply [no,ask,yes]
-#define MP_REPLY_QUOTE_ORIG "ReplyQuoteInsert" 
-/// include only the selected text (if any) in the reply?
-#define MP_REPLY_QUOTE_SELECTION "ReplyQuoteSelection"
+/// use signature in composition?
+#define   MP_COMPOSE_USE_SIGNATURE   "ComposeInsertSignature"
+/// filename of signature file
+#define   MP_COMPOSE_SIGNATURE      "SignatureFile"
+/// use "--" to separate signature in composition?
+#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
@@ -543,20 +558,6 @@ enum MFolderIndex
 #define   MP_PLAIN_IS_TEXT      "PlainIsText"
 /// show MESSAGE/RFC822 as inlined text?
 #define   MP_RFC822_IS_TEXT      "Rfc822IsText"
-/// prefix for subject in replies
-#define   MP_REPLY_PREFIX         "ReplyPrefix"
-/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
-#define   MP_REPLY_COLLAPSE_PREFIX "CollapseReplyPrefix"
-/// prefix for text in replies
-#define   MP_REPLY_MSGPREFIX      "ReplyQuote"
-/// prepend the initials of the sender to thereply prefix?
-#define   MP_REPLY_MSGPREFIX_FROM_SENDER "ReplyQuoteUseSender"
-/// quote the empty lines when replying?
-#define   MP_REPLY_QUOTE_EMPTY      "ReplyQuoteEmpty"
-/// set reply string from To: field?
-#define MP_SET_REPLY_FROM_TO   "ReplyEqualsTo"
-/// prefix for subject in forwards
-#define   MP_FORWARD_PREFIX         "ForwardPrefix"
 /// show XFaces?
 #define   MP_SHOW_XFACES         "ShowXFaces"
 /// show graphics inline
@@ -1094,6 +1095,10 @@ enum MFolderIndex
 #define   MP_HOSTNAME_D         M_EMPTYSTRING
 /// Add this hostname for addresses without hostname?
 #define   MP_ADD_DEFAULT_HOSTNAME_D 1L
+/// (the username for returned mail) E-mail address
+#define   MP_FROM_ADDRESS_D      M_EMPTYSTRING
+/// Reply address
+#define   MP_REPLY_ADDRESS_D      M_EMPTYSTRING
 /// the default POP3 host
 #define   MP_POPHOST_D          "pop"
 /// the default IMAP4 host
@@ -1124,7 +1129,7 @@ enum MFolderIndex
 #else
 #  define MP_USE_SENDMAIL_D 0l
 #endif
-/// tyhe mail server fallback
+/// the mail server fallback
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server
 #define   MP_NNTPHOST_D      "news"
@@ -1136,11 +1141,15 @@ enum MFolderIndex
 #define   MP_NNTPHOST_USE_SSL_D   0l
 /// check ssl-certs for NNTP connections?
 #define   MP_NNTPHOST_USE_SSL_UNSIGNED_D   0l
+/// the news server fallback
+#define   MP_NNTPHOST_FB        "news"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""
 /// does Mahogany control dial-up networking?
 #define MP_DIALUP_SUPPORT_D   0L
 
+/// set reply string from To: field?
+#define MP_SET_REPLY_FROM_TO_D   0l
 /// should we attach vCard to outgoing messages?
 #define MP_USEVCARD_D 0l
 /// the vCard to use
@@ -1156,12 +1165,6 @@ enum MFolderIndex
 #define MP_NET_OFF_COMMAND_D   "killall pppd"
 #endif // platform
 
-/// the news server fallback
-#define   MP_NNTPHOST_FB        "news"
-/// (the username for returned mail) E-mail address
-#define   MP_FROM_ADDRESS_D      M_EMPTYSTRING
-/// Reply address
-#define   MP_REPLY_ADDRESS_D      M_EMPTYSTRING
 /// show CC field in message composition?
 #define   MP_SHOWCC_D         1
 /// show BCC field in message composition?
@@ -1196,26 +1199,39 @@ enum MFolderIndex
 #define   MP_COMPOSE_CC_D         M_EMPTYSTRING
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_D      M_EMPTYSTRING
-/// use signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE_D   1
-/// use "--" to separate signature in composition?
-#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D   1
-/// filename of signature file
-#ifdef OS_WIN
-#  define   MP_COMPOSE_SIGNATURE_D      M_EMPTYSTRING
-#else
-#  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
-#endif
+
+/// prefix for subject in replies
+#define   MP_REPLY_PREFIX_D      "Re: "
+/// prefix for subject in forwards
+#define   MP_FORWARD_PREFIX_D      _("Forwarded message: ")
+/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
+#define   MP_REPLY_COLLAPSE_PREFIX_D 2l
+/// include the original message in the reply [no,ask,yes]
+#define MP_REPLY_QUOTE_ORIG_D M_ACTION_ALWAYS
+/// include only the selected text (if any) in the reply?
+#define MP_REPLY_QUOTE_SELECTION_D true
+/// prefix for text in replies
+#define   MP_REPLY_MSGPREFIX_D      "> "
+/// prepend the initials of the sender to the reply prefix?
+#define   MP_REPLY_MSGPREFIX_FROM_SENDER_D 0l
+/// quote the empty lines when replying?
+#define   MP_REPLY_QUOTE_EMPTY_D      1l
 /// detect and remove signature when replying?
 #define MP_REPLY_DETECT_SIG_D   1
 #if wxUSE_REGEX
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR_D "((_____*)|(-- ?))"
 #endif
-/// include the original message in the reply [no,ask,yes]
-#define MP_REPLY_QUOTE_ORIG_D M_ACTION_ALWAYS
-/// include only the selected text (if any) in the reply?
-#define MP_REPLY_QUOTE_SELECTION_D true
+/// use signature in composition?
+#define   MP_COMPOSE_USE_SIGNATURE_D   1
+/// filename of signature file
+#ifdef OS_WIN
+#  define   MP_COMPOSE_SIGNATURE_D      M_EMPTYSTRING
+#else
+#  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
+#endif
+/// use "--" to separate signature in composition?
+#define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D   1
 
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1
@@ -1259,20 +1275,6 @@ enum MFolderIndex
 #define   MP_PLAIN_IS_TEXT_D      1l
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0l
-/// prefix for subject in replies
-#define   MP_REPLY_PREFIX_D      "Re: "
-/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
-#define   MP_REPLY_COLLAPSE_PREFIX_D 2l
-/// prefix for text in replies
-#define   MP_REPLY_MSGPREFIX_D      "> "
-/// prepend the initials of the sender to thereply prefix?
-#define   MP_REPLY_MSGPREFIX_FROM_SENDER_D 0l
-/// quote the empty lines when replying?
-#define   MP_REPLY_QUOTE_EMPTY_D      1l
-/// set reply string from To: field?
-#define MP_SET_REPLY_FROM_TO_D   0l
-/// prefix for subject in forwards
-#define   MP_FORWARD_PREFIX_D      _("Forwarded message: ")
 /// show XFaces?
 #define   MP_SHOW_XFACES_D      1
 /// show graphics inline
