@@ -787,11 +787,40 @@ bool wxFolderCreateDialog::TransferDataToWindow()
 
 bool wxFolderCreateDialog::TransferDataFromWindow()
 {
-   wxString folderName = m_folderName->GetValue();
-
    bool ok = TRUE;
 
-   if ( wxNotebookDialog::TransferDataFromWindow() )
+   wxString folderName = m_folderName->GetValue();
+
+   // due to a cclient limitation, only 7bit ASCII chars may be used in the
+   // folder names (notice that it's important to use unsigned chars here as
+   // we compare them to 127!)
+   unsigned char ch = 0;
+   for ( const unsigned char *p = folderName.c_str(); *p; p++ )
+   {
+      // do *not* use isalpha() here because it returns TRUE for the second
+      // half of ASCII table as well in some locales
+      if ( *p > 127 )
+      {
+         ch = *p;
+         break;
+      }
+   }
+
+   if ( ch )
+   {
+      wxLogError(_("Sorry, international characters (like '%c') are "
+                   "not supported in the mailbox folder names, please "
+                   "don't use them."), ch);
+
+      ok = FALSE;
+   }
+
+   if ( ok )
+   {
+      ok = wxNotebookDialog::TransferDataFromWindow();
+   }
+
+   if ( ok )
    {
       CHECK( m_parentFolder, false, "should have created parent folder" );
 
@@ -800,8 +829,6 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 
       CHECK( m_newFolder, false, "new folder not created" );
    }
-   else
-      ok = false;
 
    return ok;
 }
