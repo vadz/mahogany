@@ -236,7 +236,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"),
      gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\Ctrl-D"),
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"),
      gettext_noop("Shutdown dial-up networking")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window\tCtrl-W"),     gettext_noop("Close this window")        , FALSE },
