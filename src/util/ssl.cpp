@@ -29,6 +29,9 @@
    which are all in "C" */
 extern "C" {
 
+// defined in cclient auth_ssl.c (but not declared in any public header)
+extern void ssl_onceonlyinit();
+
 #define SSL_DEF(returnval, name, args) \
    typedef returnval (* name##_TYPE) args ; \
    name##_TYPE stub_##name = NULL
