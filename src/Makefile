@@ -8,8 +8,10 @@ MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o adb/*.o
 
 include ../makeopts
 
+ifdef USE_PYTHON
 SUB_DIRS += Python
 MOBJS += Python/*.o
+endif
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
