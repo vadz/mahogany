@@ -718,9 +718,10 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                {
                   if(m_WrapMargin > 0 && isspace(keyCode))
                   {
-                     m_llist->WrapLine(m_WrapMargin);
-                     // don´t insert space as first thing in line:
-                     if(m_llist->GetCursorPos().x != 0)
+                     bool wrapped = m_llist->WrapLine(m_WrapMargin);
+                     // don´t insert space as first thing in line
+                     // after wrapping:
+                     if(! wrapped || m_llist->GetCursorPos().x != 0)
                         m_llist->Insert((char)keyCode);
                   }
                   else
