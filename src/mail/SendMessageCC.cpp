@@ -1699,11 +1699,16 @@ SendMessageCC::Send(int flags)
 #ifdef OS_UNIX
          case Prot_Sendmail:
          {
-            if ( msgText.empty() )
-            {
-               WriteToString(msgText);
-            }
-            //else: already done for preview above
+            String lfOnly;
+            
+            // We gotta translate CRLF to LF, because string generated
+            // by c-client has network newlines (CRLF) and sendmail pipe
+            // must have Unix newlines (LF). Maybe WriteToString could do
+            // it before, but WriteToFolder (or MailFolderCC method?) would
+            // then have to translate back to CRLF before passing it to
+            // c-client.
+            WriteToString(lfOnly);
+            lfOnly = strutil_enforceLF(lfOnly);
 
             // write to temp file:
 #if 0 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now
@@ -1724,9 +1729,9 @@ SendMessageCC::Send(int flags)
                if ( out.Create(filename, FALSE /* don't overwrite */,
                                wxS_IRUSR | wxS_IWUSR) )
                {
-                  size_t written = out.Write(msgText, msgText.Length());
+                  size_t written = out.Write(lfOnly, lfOnly.Length());
                   out.Close();
-                  if ( written == msgText.Length() )
+                  if ( written == lfOnly.Length() )
                   {
                      String command;
                      command.Printf("%s < '%s'; exec /bin/rm -f '%s'",

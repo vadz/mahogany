@@ -951,6 +951,9 @@ void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
    if(insMode == Insert_Replace)
       m_textControl->Clear();
    m_textControl->Freeze();
+   // Translate CRLF to LF. Internal strings should have only LF, but
+   // obviously they don't. All strings returned from c-client have CRLF
+   // and not all code translates it to LF, so we have to do it here.
    m_textControl->WriteText(strutil_enforceLF(text));
    m_textControl->Thaw();
 }
@@ -962,6 +965,10 @@ void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
 EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
+   // Translate LF to CRLF. All internal strings should have only LF, but
+   // due to long bug tradition, many strings that contain messages have
+   // CRLF newlines. They are passed to c-client, which expects CRLF, so
+   // think twice before changing it.
    return new EditorContentPart(strutil_enforceCRLF(
       m_textControl->GetValue()));
 }
