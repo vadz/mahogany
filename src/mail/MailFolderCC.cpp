@@ -2745,8 +2745,29 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
                                  mfolder->GetPath(),
                                  mfolder->GetServer(),
                                  mfolder->GetLogin());
+
+   String password = mfolder->GetPassword();
+   if ( FolderTypeHasUserName( mfolder->GetType() )
+        && ((mfolder->GetFlags() & MF_FLAGS_ANON) == 0)
+        && (password.Length() == 0)
+      )
+   {
+      String prompt;
+      prompt.Printf(_("Please enter the password for folder '%s':"), 
+                    mfolder->GetName().c_str()); 
+      if(! MInputBox(&password,
+                     _("Password required"),
+                     prompt, NULL,
+                     NULL,NULL, true))
+      {
+          ERRORMESSAGE((_("Cannot access this folder without a password.")));
+          mApplication->SetLastError(M_ERROR_AUTH);
+          return FALSE;
+      }
+   }
+
    MCclientLocker lock;
-   SetLoginData(mfolder->GetLogin(), mfolder->GetPassword());
+   SetLoginData(mfolder->GetLogin(), password);
    bool rc = mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
    lock.Unlock();
    ProcessEventQueue();
