@@ -1269,8 +1269,8 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
          _("You may check the filters you want to use in\n"
            "the list above. Additionally, use the buttons\n"
            "to the right of it to choose the filter priority.\n"
-           "Use the buttons to the right to modify an\n"
-           "existing filter or create or delete one."));
+           "Use the buttons to the right to create, delete\n"
+           "or modify a filter."));
    c = new wxLayoutConstraints();
    c->left.SameAs(boxBottom, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
