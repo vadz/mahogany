@@ -406,6 +406,7 @@ extern const MOption MP_AWAY_AUTO_EXIT;
 extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
+extern const MOption MP_CONFIG_SOURCE_TYPE;
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -1213,6 +1214,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_NAME   "CreateInternalMessage"
+
+#define MP_CONFIG_SOURCE_TYPE_NAME "ConfigSource"
 
 //@}
 
@@ -2206,6 +2209,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
+
+#define MP_CONFIG_SOURCE_TYPE_DEFVAL "local"
 
 //@}
 
