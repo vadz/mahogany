@@ -1356,10 +1356,12 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
    // the value is fixed (whatever it is) by the folder type
    m_isGroup->Disable();
 
+#if 0 // FIXME
    // file folders come in several flavours, so choose the default one if no
    // selection yet
    if ( m_folderSubtype->GetSelection() != -1 )
       return;
+#endif // 0
 
    int subtype;
    switch ( m_folderType )
@@ -1374,7 +1376,17 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
          subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MFile
                                             : FileFolderSubtype_Mbx;
 #else // !EXPERIMENTAL_MFormat
-         subtype = FileFolderSubtype_Mbx;
+      if ( m_isCreating )
+      {
+         subtype = READ_CONFIG ( m_profile, MP_FOLDER_FILE_DRIVER );
+         if ( subtype < 0  || (size_t)subtype > FileFolderSubtype_Max )
+         {
+            FAIL_MSG( "invalid mailbox format" );
+            subtype = 1;
+         }
+      }
+      else // existing folder
+         subtype = FileFolderSubtype_Mbx;  //FIXME
 #endif
 
          m_browsePath->BrowseForFiles();
