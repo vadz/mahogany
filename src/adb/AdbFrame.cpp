@@ -372,7 +372,7 @@ public:
 
   // accessors
     // return the file name (NB: not really always a file name...)
-  const char *GetFileName() const { return m_pBook->GetName(); }
+  const char *GetName() const { return m_pBook->GetName(); }
     // for compatibility with existing code we have these functions instead of
     // directly calling AdbBook methods
   void SetNameAndDescription(const wxString& strName, const wxString& strDesc)
@@ -1549,7 +1549,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   wxString strProv = szProvName;
   AdbTreeBook *adb = new AdbTreeBook(m_root, strPath, pProvider, &strProv);
 
-  m_astrAdb.Add(adb->GetFileName());
+  m_astrAdb.Add(adb->GetName());
   m_astrProviders.Add(strProv);
 
   if ( m_root->WasExpanded() )
@@ -1664,30 +1664,42 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     // FIXME should deleting the address book also delete the file??
 
     strWhat = _("Address book");
-    strName = ((AdbTreeBook *)m_current)->GetFileName();
 
-    // found the book index in m_astrAdb array: note that we have to take
-    // account of the fact that either string may be relative or absolute
-    // filename
-    wxASSERT_MSG( IsAbsPath(strName), "book name should be absolute" );
+    AdbTreeBook *adbBook = (AdbTreeBook *)m_current;
+    strName = adbBook->GetName();
+
+    // find the book index in m_astrAdb array
+    int nIndex;
+
+    // FIXME should keep the name format for this ADB somewhere instead of
+    //       just assuming that anything is a file name!
+    if ( strName.empty() ) {
+      // FIXME and what if we have several books without name??
+      nIndex = m_astrAdb.Index(strName);
+    }
+    else {
+      // for file based books we have to take account of the fact that either
+      // string may be relative or absolute filename
+      wxASSERT_MSG( IsAbsPath(strName), "book name should be absolute" );
 
 #ifdef __WXMSW__
-    strName.Replace("\\", "/");
+      strName.Replace("\\", "/");
 #endif
 
-    int nIndex = wxNOT_FOUND;
-    size_t count = m_astrAdb.Count();
-    for ( size_t n = 0; n < count; n++ ) {
-      wxString bookname = m_astrAdb[n];
-      if ( !IsAbsPath(bookname) ) {
-        bookname = mApplication->GetLocalDir() + '/' + bookname;
-      }
+      nIndex = wxNOT_FOUND;
+      size_t count = m_astrAdb.Count();
+      for ( size_t n = 0; n < count; n++ ) {
+        wxString bookname = m_astrAdb[n];
+        if ( !IsAbsPath(bookname) ) {
+          bookname = mApplication->GetLocalDir() + '/' + bookname;
+        }
 #ifdef __WXMSW__
-      bookname.Replace("\\", "/");
+        bookname.Replace("\\", "/");
 #endif
-      if ( strName == bookname ) {
-        nIndex = n;
-        break;
+        if ( strName == bookname ) {
+          nIndex = n;
+          break;
+        }
       }
     }
 
@@ -1991,7 +2003,7 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
     case WXMENU_ADBBOOK_FLUSH:
       if ( m_current->IsBook() ) {
          AdbTreeBook *book = (AdbTreeBook *)m_current;
-         wxString name = book->GetFileName();
+         wxString name = book->GetName();
          if ( !book->Flush() )
             wxLogError("Couldn't flush book '%s'!", name.c_str());
          else
@@ -3024,14 +3036,17 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
 
 bool wxADBPropertiesDialog::TransferDataToWindow()
 {
+  wxString name = m_book->GetName();
+
   wxString str;
 
   // get the file size
+  if ( !name.empty() )
   {
     // suppress log messages because the file might not yet exist and it's
     // perfectly normal
     wxLogNull nolog;
-    wxFile file(m_book->GetFileName());
+    wxFile file(name);
     if ( file.IsOpened() ) {
       str.Printf("%d", file.Length());
     }
@@ -3041,7 +3056,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   }
 
   m_staticFileSize->SetLabel(str);
-  m_staticFileName->SetLabel(m_book->GetFileName());
+  m_staticFileName->SetLabel(name);
 
   str.Printf("%d", m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);

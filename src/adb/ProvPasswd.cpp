@@ -108,7 +108,7 @@ public:
 
    // AdbEntryGroup
    virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
-   virtual String GetName() const { return ""; }
+   virtual String GetName() const { return _("Local Users"); }
 
    virtual size_t GetEntryNames(wxArrayString& aNames) const;
    virtual size_t GetGroupNames(wxArrayString& aNames) const;
@@ -413,7 +413,7 @@ bool PasswdBook::IsSameAs(const String& name) const
 
 String PasswdBook::GetName() const
 {
-   return _("Local Users");
+   return "";
 }
 
 void PasswdBook::SetUserName(const String& strUserName)
@@ -422,7 +422,7 @@ void PasswdBook::SetUserName(const String& strUserName)
 
 String PasswdBook::GetUserName() const
 {
-   return GetName();
+   return m_pRootGroup->GetName();
 }
 
 void PasswdBook::SetDescription(const String& strDesc)
