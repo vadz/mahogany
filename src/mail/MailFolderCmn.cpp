@@ -376,8 +376,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
    // it is about to be deleted and it can't be deleted if we're holding
    // to it (MfCloseEntry has a lock), so this would be an error in ref
    // counting (extra DecRef()) elsewhere
-   ASSERT_MSG( !GetCloseEntry(mf),
-               _T("adding a folder to MfCloser twice??") );
+   ASSERT_MSG( !HasFolder(mf), _T("adding a folder to MfCloser twice??") );
 #endif // DEBUG_FOLDER_CLOSE
 
    CHECK_RET( mf, _T("NULL MailFolder in MfCloser::Add()"));
@@ -504,7 +503,7 @@ bool
 MailFolderCmn::DecRef()
 {
    // don't keep folders alive artificially if we're going to terminate soon
-   // anyhow - or if we didn't start up fully yet and gs_MailFolderCloser
+   // anyhow -- or if we didn't start up fully yet and gs_MailFolderCloser
    // hadn't been created
    if ( gs_MailFolderCloser && !mApplication->IsShuttingDown() )
    {
@@ -561,19 +560,6 @@ MailFolderCmn::IncRef()
               (unsigned long)GetNRef() + 1);
 
    MObjectRC::IncRef();
-
-   // if the folder had been kept alive artificially before this IncRef(),
-   // remove it from the keep alive list as now it will stay opened without our
-   // help (notice that we must do it after closing base class IncRef or the
-   // object would have been deleted when DecRef() is called implicitly below)
-   if ( GetNRef() == 2 && gs_MailFolderCloser )
-   {
-      MfCloseEntry *entry = gs_MailFolderCloser->GetCloseEntry(this);
-      if ( entry )
-      {
-         gs_MailFolderCloser->Remove(entry);
-      }
-   }
 }
 
 bool
@@ -589,7 +575,7 @@ MailFolderCmn::RealDecRef()
    // we're going to delete it
    if ( GetNRef() == 1 )
    {
-      if ( gs_MailFolderCloser && gs_MailFolderCloser->GetCloseEntry(this) )
+      if ( gs_MailFolderCloser && gs_MailFolderCloser->HasFolder(this) )
       {
          // we will crash later when removing it from the list!
          FAIL_MSG(_T("deleting folder still in MfCloser list!"));
