@@ -1152,6 +1152,7 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
 
    // position the dialog
    SetDefaultSize(6*wBtn, 20*hBtn);
+   Layout();
 }
 
 MFolderDialog::~MFolderDialog()
@@ -1170,7 +1171,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
          m_FileName = wxPFileSelector("FolderDialogFile",
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
-                                      0, this);
+                                      wxSAVE | wxOVERWRITE_PROMPT, this);
          if ( !!m_FileName )
          {
             // folder (file) chosen
