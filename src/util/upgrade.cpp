@@ -1716,7 +1716,7 @@ CopyEntries(wxConfigBase *src,
    // we count the groups copied, not entries (the former is more interesting
    // as it corresponds to the number of filters/folders/identities, for
    // example)
-   size_t numCopied = 1;
+   int numCopied = 1;
 
    if ( !dest )
    {
