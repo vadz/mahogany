@@ -194,34 +194,37 @@ dnl   defines CXX with the compiler to use
 dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 
-dnl disable support for exceptions if the compiler is g++ and
-dnl new enough to support it.
-case "$GXX" in yes)
-	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
-		m_cv_gxx_exceptions,
-		[echo 'void f(){}' >conftest.cc
-		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
-		'')	m_cv_gxx_exceptions=yes ;;
-		*)	m_cv_gxx_exceptions=no ;;
-		esac
-		rm -f conftest*])
-	case "$m_cv_gxx_exceptions" in yes)
-		CXXFLAGS="$CXXFLAGS -fno-exceptions"
-	esac
-
-	dnl the same for RTTI - we don't use it neither
-	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
-		m_cv_gxx_rtti,
-		[echo 'void f(){}' >conftest.cc
-		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
-		'')	m_cv_gxx_rtti=yes ;;
-		*)	m_cv_gxx_rtti=no ;;
-		esac
-		rm -f conftest*])
-	case "$m_cv_gxx_rtti" in yes)
-		CXXFLAGS="$CXXFLAGS -fno-rtti"
-	esac
-esac
+dnl don't do this any longer, these switches come from wx-config, so if you
+dnl really want to use them, just build wxWin with them
+dnl
+dnl ### disable support for exceptions if the compiler is g++ and
+dnl ### new enough to support it.
+dnl ### case "$GXX" in yes)
+dnl ### 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
+dnl ### 		m_cv_gxx_exceptions,
+dnl ### 		[echo 'void f(){}' >conftest.cc
+dnl ### 		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+dnl ### 		'')	m_cv_gxx_exceptions=yes ;;
+dnl ### 		*)	m_cv_gxx_exceptions=no ;;
+dnl ### 		esac
+dnl ### 		rm -f conftest*])
+dnl ### 	case "$m_cv_gxx_exceptions" in yes)
+dnl ### 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
+dnl ### 	esac
+dnl ### 
+dnl ### 	dnl the same for RTTI - we don't use it neither
+dnl ### 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
+dnl ### 		m_cv_gxx_rtti,
+dnl ### 		[echo 'void f(){}' >conftest.cc
+dnl ### 		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
+dnl ### 		'')	m_cv_gxx_rtti=yes ;;
+dnl ### 		*)	m_cv_gxx_rtti=no ;;
+dnl ### 		esac
+dnl ### 		rm -f conftest*])
+dnl ### 	case "$m_cv_gxx_rtti" in yes)
+dnl ### 		CXXFLAGS="$CXXFLAGS -fno-rtti"
+dnl ### 	esac
+dnl ### esac
 
 dnl check whether the C++ supports the new logical operator names
 dnl c-client library uses some of them as field names
@@ -502,6 +505,22 @@ case "$USE_SSL" in
 
 	if test "$ssl_option" != "no"; then
 	    ssl_lib=`echo $ssl_inc | sed 's/include$/lib/'`
+
+	    LIBS_SSL=""
+
+	    dnl check for -lcrypto first as libssl needs it under some
+	    dnl platforms (notably FreeBSD)
+	    M_CHECK_MYLIB(crypto, main,
+		[ \
+		    $ssl_lib \
+		    /usr/lib \
+		    /usr/local/lib \
+		    /home/local/lib \
+		],
+		LIBS_SSL="$libpath_crypto_main -lcrypto"
+	    )
+
+	    dnl now we can check for -lssl itself
 	    M_CHECK_MYLIB(ssl, main,
 		[ \
 		    $ssl_lib \
@@ -509,24 +528,9 @@ case "$USE_SSL" in
 		    /usr/local/lib \
 		    /home/local/lib \
 		],
-		LIBS_SSL="$libpath_ssl_main -lssl",
-		[
-		    # try linking with libcrypto - on some systems (notably
-		    # FreeBSD) it must always be linked with -lssl
-		    LIBS_SAVE=$LIBS
-		    LIBS="$LIBS -lcrypto"
-		    M_CHECK_MYLIB(ssl, main,
-			[ \
-			    $ssl_lib \
-			    /usr/lib \
-			    /usr/local/lib \
-			    /home/local/lib \
-			],
-			LIBS_SSL="$libpath_ssl_main -lcrypto -lssl",
-			ssl_option=no
-		    )
-		    LIBS="$LIBS_SAVE";;
-		]
+		LIBS_SSL="$LIBS_SSL $libpath_ssl_main -lssl",
+		ssl_option=no,
+		$LIBS_SSL
 	    )
 	fi
 
@@ -578,9 +582,6 @@ if test "$ssl_option" = "yes"; then
 	dnl although we're loading libssl dynamically, cclient uses it
 	dnl statically, so we still need it in LIBS
 	LIBS="$LIBS $LIBS_SSL"
-	if test "$m_cv_ssl_needs_crypto" = "yes"; then
-            LIBS="$LIBS -lcrypto"
-        fi
 fi
 
 AC_SUBST(MAKE_USESSL)
@@ -593,7 +594,7 @@ dnl --------------------------------------------------------------------------
 
 dnl we might need dl (depending on wxGTK and python config),
 dnl so link with it if it is available 
-AC_CHECK_LIB(dl,main,,AC_MSG_WARN(dl library might be needed.))
+AC_CHECK_LIB(dl,main)
 
 dnl c-client library needs the crypt() function which is either in the 
 dnl c library or in libcrypt
@@ -638,39 +639,48 @@ dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
         M_CHECK_MYHEADER(Python.h,
-        [ \
-	    $prefix/include/python2.1 \
-	    /usr/include/python2.1 \
-	    /usr/local/include/python2.1 \
-        ],
-	[
-	    PYTHON_VER=2.1
-	],
-        [
-	    M_CHECK_MYHEADER(Python.h,
 	    [ \
-		$prefix/include/python2.0 \
-		/usr/include/python2.0 \
-		/usr/local/include/python2.0 \
+		$prefix/include/python2.1 \
+		/usr/include/python2.1 \
+		/usr/local/include/python2.1 \
 	    ],
 	    [
-		PYTHON_VER=2.0
+		PYTHON_VER=2.1
 	    ],
 	    [
 		M_CHECK_MYHEADER(Python.h,
-		[ \
-		    $prefix/include/python1.5 \
-		    /usr/include/python1.5 \
-		    /usr/local/include/python1.5 \
-		],
-		[
-		    PYTHON_VER=1.5
-		],
-		[
-		    USE_PYTHON=0
-		])
-	    ])
-	])
+		    [ \
+			$prefix/include/python2.0 \
+			/usr/include/python2.0 \
+			/usr/local/include/python2.0 \
+		    ],
+		    [
+			PYTHON_VER=2.0
+		    ],
+		    [
+			M_CHECK_MYHEADER(Python.h,
+			    [ \
+				$prefix/include/python1.5 \
+				/usr/include/python1.5 \
+				/usr/local/include/python1.5 \
+			    ],
+			    [
+				PYTHON_VER=1.5
+			    ],
+			    [
+				USE_PYTHON=0
+			    ],
+			    [ (for Python 1.5)],
+			    15,
+			)
+		    ],
+		    [ (for Python 2.0)],
+		    20,
+		)
+	    ],
+	    [ (for Python 2.1)],
+	    21,
+	)
 	;;
 
 *)
@@ -744,7 +754,9 @@ case "$USE_PYTHON" in
 	AC_PATH_PROG(SWIG,swig)
 	case "$SWIG" in '')
 	    AC_MSG_WARN([cannot find SWIG - will try to use intermediate files
-	    to compile Python support.  If possible, please install SWIG.]) ;;
+		    to compile Python support.
+		    If possible, please install SWIG.])
+	    ;;
 	esac
 	;;
 esac
@@ -755,8 +767,8 @@ MAKE_XLATE='TRANSLATIONS := yes'
 AC_PATH_PROG(XGETTEXT,xgettext)
 AC_PATH_PROG(MSGMERGE,msgmerge)
 case ".$XGETTEXT.$MSGMERGE." in *..*)
-	AC_MSG_WARN([cannot rebuild message translations.  You must
-	install xgettext/msgmerge in order to rebuild translations.])
+	AC_MSG_WARN([cannot rebuild message translations.
+		    You must install xgettext/msgmerge in order to do it.])
 	MAKE_XLATE='TRANSLATIONS := no'
 esac
 AC_SUBST(MAKE_XLATE)
@@ -765,8 +777,8 @@ AC_SUBST(MAKE_XLATE)
 AC_PATH_PROG(MSGFMT,msgfmt)
 case "$MSGFMT" in '')
 	AC_MSG_WARN([cannot compile message translations.
-	Binary translations will not be installed.  You need
-	the 'msgfmt' program to compile message translations.]) ;;
+		    Binary translations will not be installed.  You need
+		    the 'msgfmt' program to compile message translations.]) ;;
 esac
 
 dnl --------------------------------------------------------------------------
@@ -830,7 +842,7 @@ case "$USE_THREADS" in 1)
 	no)	m_cv_USE_THREADS=0	# turn off our option
 		AC_MSG_WARN([Threads configured but not available]) ;;
 	x)	AC_MSG_WARN([Cross-compiling are we?
-		Geeze, I hope you know what you're doing...])
+		    Geeze, I hope you know what you're doing...])
 		m_cv_wx_threads=yes
 		AC_DEFINE(USE_THREADS) ;;
 	esac
@@ -980,10 +992,11 @@ M_DOC_TOOL(MAKEINDEX,makeindex)
 M_DOC_TOOL(DVIPS,dvips)
 M_DOC_TOOL(PSTOPDF,ps2pdf)
 M_DOC_TOOL(LATEX2HTML,latex2html)
-case "$MAKE_HAVE_DOCTOOLS" in '')
-AC_MSG_WARN([One of the tools required to build documentation
-is missing.  Documentation cannot be built on this system and you will need
-a pre-built Mdocs.tar.gz instead.]) ;;
+case "$MAKE_HAVE_DOCTOOLS" in
+    '') AC_MSG_WARN([One of the tools required to build documentation
+		    is missing.  Documentation cannot be built on this
+		    system and you will need a pre-built Mdocs.tar.gz instead.])
+    ;;
 esac
 AC_SUBST(MAKE_HAVE_DOCTOOLS)
 
@@ -1028,12 +1041,12 @@ dnl for now, we just support -MD on g++
 case "$GXX" in
 yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
 *)	AC_MSG_WARN([*** dependencies not supported ***
-	Dependencies are not supported for this compiler.  If this
-	message appears, then we need to talk---we think we know
-	how to fix this, but we don't have a machine where we can
-	test it.  Please go to http://mahogany.sourceforge.net/bugz
-	and submit a bug against the Build component so we can give
-	you some code to try.]);;
+		    Dependencies are not supported for this compiler.  If this
+		    message appears, then we need to talk---we think we know
+		    how to fix this, but we don't have a machine where we can
+		    test it.  Please go to http://mahogany.sourceforge.net/bugz
+		    and submit a bug against the Build component so we can give
+		    you some code to try.]);;
 esac
 
 dnl Python code produces warnings, so don't break compilation:

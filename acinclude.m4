@@ -30,10 +30,10 @@ case "$m_cv_$3" in
 esac])
 
 dnl M_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
-dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES]]])
+dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES [, EXTRA-MSG]]]])
 
 AC_DEFUN(M_CHECK_MYLIB,
-[AC_MSG_CHECKING([for $2 in -l$1])
+[AC_MSG_CHECKING([for $2 in -l$1$7])
 dnl Use a cache variable name containing both the library and function name,
 dnl because the test really is for library $1 defining function $2, not
 dnl just for library $1.  Separate tests with the same $1 and different $2s
@@ -65,9 +65,11 @@ LIBS="$m_save_LIBS"
 done
 ])dnl
 if eval "test \"`echo '$m_cv_lib_'$m_lib_var`\" != no"; then
-  AC_MSG_RESULT(yes (in $j))
+  if test x$j = "x."; then
+    unset j
+  fi
+  AC_MSG_RESULT(yes (in ${j-standard location}))
   eval eval "`echo '$m_cv_lib_'$m_lib_var`"
-  dnl  LIBS="`echo '$libpath_'$m_lib_var` -l$1 $LIBS"
   ifelse([$4], ,
          [ changequote(, )dnl
 	   m_tr_lib=HAVE_LIB`echo $1 | sed -e 's/[^a-zA-Z0-9_]/_/g' \
@@ -84,10 +86,18 @@ fi
 ])
 
 
-dnl M_CHECK_MYHEADER(HEADER-FILE, LIBPATHLIST, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl M_CHECK_MYHEADER(HEADER-FILE, LIBPATHLIST, [ACTION-IF-FOUND
+dnl 	[, ACTION-IF-NOT-FOUND [, EXTRA-MSG [, EXTRA-SUFFIX]]]])
+dnl
+dnl Explanation of not obvious arguments:
+dnl	EXTRA-MSG is an additional message printed after standardd one
+dnl		  ("checking for header")
+dnl	EXTRA-SUFFIX is the extra suffix to add to the cache variable, useful
+dnl		  when you need to check for the same header in different
+dnl		  paths (example: Python.h)
 AC_DEFUN(M_CHECK_MYHEADER,
-  [ m_safe=`echo "$1" | sed 'y%./+-%__p_%'`
-    AC_MSG_CHECKING([for $1])
+  [ m_safe=`echo "$1$6" | sed 'y%./+-%__p_%'`
+    AC_MSG_CHECKING([for $1$5])
     AC_CACHE_VAL(m_cv_header_$m_safe,
       [ m_save_CPPFLAGS="$CPPFLAGS"
         for j in "." $2 ; do
@@ -111,7 +121,10 @@ AC_DEFUN(M_CHECK_MYHEADER,
     if eval "test \"`echo '$m_cv_header_'$m_safe`\" != no"; then
        dnl FIXME surely there must be a simpler way? (VZ)
        dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
-       AC_MSG_RESULT(yes (in $dir))
+       if test x$dir != x"/usr/include"; then
+         dirshow=$dir
+       fi
+       AC_MSG_RESULT(yes (in ${dirshow-standard location}))
        eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
        ifelse([$3], , :, [$3])
     else
