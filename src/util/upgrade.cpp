@@ -242,13 +242,11 @@ UpgradeFrom010()
       }
    }
 
-   // Delete obsolete groups:
-   //FIXME broken wxFileConfig
    //FIXME paths need adjustment for windows?
    wxConfigBase *c = mApplication->GetProfile()->GetConfig();
+   // Delete obsolete groups:
    c->DeleteGroup("/M/Profiles/Folders");
    c->DeleteGroup("/AdbEditor");
-
    
    /* Encrypt passwords in new location and make sure we have no
       illegal old profiles around. */
@@ -280,7 +278,7 @@ UpgradeFrom010()
       {
          p->ResetPath();
          p->DeleteGroup(group);
-         String msg = _("Deleted illegal folder profile:\n'");
+         String msg = _("Deleted illegal folder profile:'");
          msg << p->GetName() << '/' << group << '\'';
          wxLogMessage(msg);
       }

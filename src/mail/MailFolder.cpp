@@ -216,8 +216,7 @@ MailFolder::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
    MFolder *folder = MDialog_FolderChoose(parent);
    if ( folder )
    {
-      //FIXME +1 is apparently needed to skip the '/'
-      rc = SaveMessages(selections, folder->GetFullName().c_str() + 1);
+      rc = SaveMessages(selections, folder->GetFullName());
       folder->DecRef();
    }
    return rc;

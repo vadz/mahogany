@@ -195,10 +195,16 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    if(parent)
       parent->GetClientSize(&w,&h);
 
-   wxString name = fv->GetFullName();
-   name = ProfileBase::FilterProfileName(name);
-   if( name.IsEmpty() )
-      name = "FolderView";
+   wxString name;
+
+   if(fv->GetProfile())
+   {
+      name = fv->GetProfile()->GetName();
+      name << '/' << "FolderListCtrl";
+   }
+   else
+      name = "FolderListCtrl";
+   // name is relative to /Setting section, nothing we can do about
    wxPListCtrl::Create(name, parent, -1,
                        wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
 

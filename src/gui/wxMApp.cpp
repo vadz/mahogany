@@ -202,6 +202,14 @@ wxMApp::OnInit()
    else
       m_Locale = NULL;
 
+#ifdef wxUSE_LIBPNG
+   wxImage::AddHandler( new wxPNGHandler );
+#endif
+   
+#ifdef wxUSE_LIBJPEG
+// we don't use it yet, broken   wxImage::AddHandler( new wxJPEGHandler );
+#endif
+
    m_IconManager = new wxIconManager();
 
    if ( OnStartup() )
