@@ -689,6 +689,7 @@ void EditorContentPart::SetMimeType(const String& mimeType)
 
 void EditorContentPart::SetData(void *data,
                                 size_t length,
+                                const char *name,
                                 const char *filename)
 {
    ASSERT_MSG( data != NULL, _T("NULL data is invalid in EditorContentPart::SetData!") );
@@ -697,9 +698,15 @@ void EditorContentPart::SetData(void *data,
    m_Length = length;
    m_Type = Type_Data;
 
+   if ( name )
+   {
+      m_Name = name;
+      m_FileName = name;
+   }
    if ( filename )
    {
-      m_Name =
+      if ( !name )
+         m_Name = filename;
       m_FileName = filename;
    }
 
@@ -3173,6 +3180,7 @@ void
 wxComposeView::InsertData(void *data,
                           size_t length,
                           const char *mimetype,
+                          const char *name, 
                           const char *filename)
 {
    String mt = mimetype;
@@ -3189,7 +3197,7 @@ wxComposeView::InsertData(void *data,
    }
 
    EditorContentPart *mc = new EditorContentPart();
-   mc->SetData(data, length, filename);
+   mc->SetData(data, length, name, filename);
 
    DoInsertAttachment(mc, mimetype);
 }
@@ -3362,7 +3370,7 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
             memcpy(data2, data, len);
 
             InsertData(data2, len,
-                       mimePart->GetType().GetFull(), mimePart->GetFilename());
+                       mimePart->GetType().GetFull(), mimePart->GetFilename(), mimePart->GetParam(_T("NAME")));
          }
          break;
 
@@ -3558,7 +3566,7 @@ wxComposeView::BuildMessage() const
 
                      // and some mailers want "NAME" in parameters (we can use
                      // the full name here)
-                     p = new MessageParameter("NAME", name);
+                     p = new MessageParameter("NAME", filename);
                      plist.push_back(p);
 
                      const MimeType& mt = part->GetMimeType();

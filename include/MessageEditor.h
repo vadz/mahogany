@@ -231,7 +231,7 @@ public:
    //@{
 
    /// give us the data to attach, we will free() it (must be !NULL)
-   void SetData(void *data, size_t length, const char *filename = NULL);
+   void SetData(void *data, size_t length, const char* name = NULL, const char *filename = NULL);
 
    /// give us a file to attach - will be done only when we'll be sent
    void SetFile(const String& filename);

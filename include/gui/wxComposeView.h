@@ -106,6 +106,7 @@ public:
    virtual void InsertData(void *data,
                            size_t length,
                            const char *mimetype = NULL,
+                           const char *name     = NULL,
                            const char *filename = NULL);
 
    virtual void InsertText(const String &txt);
