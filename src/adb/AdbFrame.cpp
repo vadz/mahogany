@@ -2406,7 +2406,7 @@ void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
   }
   else {
     wxString str;
-    str.Printf(_("Editing entry '%s'"), m_current->GetName().c_str());
+    str.Printf(_("Editing entry '%s' %s"), m_current->GetName().c_str(), m_current->GetParent()->GetWhere().c_str());
     SetStatusText(str, 1);
   }
 
