@@ -115,7 +115,6 @@ DONE:
 
 
 CHECK:
-- printer settings seem to have no effect : are persistent, do they get used?
 - MailFolderCC:
    -if mailfolder has been closed due to timeout, reopen it.
  - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
@@ -135,7 +134,8 @@ CHECK:
 
 
 TODO:
-
+- message status etc in title bar
+- printer settings seem to have no effect : are persistent, do they get used?
 - MFolder.i
 
 for release:
