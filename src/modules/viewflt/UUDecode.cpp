@@ -329,7 +329,6 @@ UUDecodeFilter::DoProcess(String& text,
               && start[3] == _T(' ') ) )
       {
          wxLogWarning(_("The BEGIN line is not correctly formed."));
-         start -= lenBegin;
          continue;
       }
 
