@@ -1628,11 +1628,8 @@ SendMessageCC::WriteToString(String& output)
 bool
 SendMessageCC::WriteToFile(const String &filename, bool append)
 {
-   int flags = ios::out | ios::binary;
-   if ( !append )
-      flags |= ios::trunc;
-
-   ofstream ostr(filename.c_str(), flags);
+   ofstream ostr(filename.c_str(),
+                 ios::out | ios::binary | (append ? 0 : ios:trunc));
 
    bool ok = !(!ostr || ostr.bad());
    if ( ok )
