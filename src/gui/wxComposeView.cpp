@@ -375,7 +375,7 @@ bool wxAddressTextCtrl::DoExpand()
       for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
       {
          char c = text[nLastAddr];
-         if ( isspace(c) || (c == ',') || (c == ';') )
+         if ( (c == ',') || (c == ';') )
             break;
       }
 
