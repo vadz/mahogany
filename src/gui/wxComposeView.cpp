@@ -2696,6 +2696,7 @@ wxComposeView::Send(bool schedule)
    }
 
    wxBusyCursor bc;
+   wxLogStatus(this, _("Sending message..."));
    Disable();
 
    // compose the body

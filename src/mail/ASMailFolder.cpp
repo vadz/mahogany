@@ -273,6 +273,9 @@ public:
                      m_UserData
                     )
                    );
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
       }
 };
 
@@ -299,6 +302,9 @@ public:
                      m_UserData
                     )
                    );
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
       }
 
 protected:

@@ -307,9 +307,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("Ne&xt flagged"), gettext_noop("Select next flagged message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as F&ile..."), gettext_noop("Export message to a file")   , FALSE },
-   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder..."),gettext_noop("Save message to another folder")   , FALSE },
-   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder..."),gettext_noop("Move message to another folder")   , FALSE },
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as f&ile..."), gettext_noop("Export message to a file")   , FALSE },
+   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , FALSE },
+   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
    { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
@@ -331,7 +331,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
-                                gettext_noop("Insert a file")            , FALSE },
+                                gettext_noop("Attach a file to the message")            , FALSE },
    { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
    { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-X"),             gettext_noop("Send the message now")     , FALSE },
    { WXMENU_COMPOSE_SEND_LATER, gettext_noop("Send &Later\tShift-Ctrl-L"),

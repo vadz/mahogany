@@ -218,6 +218,15 @@ protected:
       return fullname;
    }
 
+   // update m_nChildren when a subfolder is deleted
+   void OnSubfolderDelete()
+   {
+      if ( m_nChildren != INVALID_CHILDREN_COUNT )
+      {
+         m_nChildren--;
+      }
+   }
+
 private:
    // the full folder name
    String m_folderName;
@@ -830,11 +839,27 @@ void MFolderFromProfile::Delete()
 {
    CHECK_RET( !m_folderName.IsEmpty(), "can't delete the root pseudo-folder" );
 
-   // Get parent profile:
-   Profile_obj profile(m_folderName.BeforeLast('/'));
+   // delete this folder from the parent profile
+   String parentName = m_folderName.BeforeLast('/');
+   Profile_obj profile(parentName);
    CHECK_RET( profile, "panic in MFolder: no profile" );
 
    profile->DeleteGroup(GetName());
+
+   // let the parent now that its number of children changed
+   MFolderFromProfile *parent = (MFolderFromProfile *)Get(parentName);
+   if ( parent )
+   {
+      parent->OnSubfolderDelete();
+
+      parent->DecRef();
+   }
+   else
+   {
+      // either we have managed to delete the root folder (bad) or something is
+      // seriously wrong (even worse)
+      FAIL_MSG( "no parent for deleted folder?" );
+   }
 
    // notify everybody about the disappearance of the folder
    MEventManager::Send(

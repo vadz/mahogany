@@ -159,19 +159,8 @@ public:
    virtual ~wxFolderTreeNode() { SafeDecRef(m_folder); }
 
    // accessors
-      // has the side effect of setting a flag which tells us that we were
-      // expanded - the overall result is this it only returns false once,
-      // subsequent calls will always return true.
-   bool WasExpanded()
-   {
-      bool wasExpanded = m_wasExpanded;
-      m_wasExpanded = true;   // because we're called from OnExpand()
-
-      return wasExpanded;
-   }
-      // reset the "was expanded" flag (useful when the subtree must be
-      // recreated)
-   void ResetExpandedFlag() { m_wasExpanded = false; }
+      // has the tree item been already expanded?
+   bool WasExpanded() const { return m_wasExpanded; }
 
       // get the associated folder
       //
@@ -189,6 +178,14 @@ public:
 #else
       { return m_folder->GetName(); }
 #endif
+
+   // expanded flag
+      // must be called from OnTreeExpanding() only!
+   void SetExpandedFlag() { m_wasExpanded = true; }
+
+      // reset the "was expanded" flag (useful when the subtree must be
+      // recreated)
+   void ResetExpandedFlag() { m_wasExpanded = false; }
 
 
    // the folder status functions
@@ -721,12 +718,7 @@ void wxFolderTree::OnOpen(MFolder *folder)
 {
    if ( CanOpen(folder) )
    {
-      (void)wxFolderViewFrame::Create(
-         // we need to pass relative names (profile names) into
-         // the MailFolder class, or it will be interpreted as an
-         // absolute path on the filesystem
-         folder->GetFullName(),
-         mApplication->TopLevelFrame());
+      (void)wxFolderViewFrame::Create(folder);
    }
    else
    {
@@ -1844,7 +1836,9 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
       // only add the subfolders the _first_ time!
       return;
    }
-   //else: calling WasExpanded() sets the expanded flag
+
+   // now we are
+   parent->SetExpandedFlag();
 
    MFolder *folder = parent->GetFolder();
    size_t nSubfolders = folder->GetSubfolderCount();
@@ -2284,20 +2278,33 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             wxTreeItemId parent = GetTreeItemFromName(parentName);
             CHECK_RET( parent.IsOk(), "no such item in the tree??" );
 
-            // the folder is given to wxFolderTreeNode, hence no DecRef() here
-            MFolder *folder = MFolder::Get(folderName);
+            wxFolderTreeNode *nodeParent = GetFolderTreeNode(parent);
+            if ( nodeParent->WasExpanded() )
+            {
+               // the folder is given to wxFolderTreeNode, hence don't DecRef()
+               // it (and don't use MFolder_obj)
+               MFolder *folder = MFolder::Get(folderName);
 
-            CHECK_RET( folder, "just created folder doesn't exist?" );
+               CHECK_RET( folder, "just created folder doesn't exist?" );
 
-            wxFolderTreeNode *nodeNew =
-               new wxFolderTreeNode(this, folder, GetFolderTreeNode(parent));
+               // create the entry as the tree won't do it for us any more
+               (void)new wxFolderTreeNode(this, folder, nodeParent);
+            }
+            else // parent has never been expanded
+            {
+               // no need to add the item to the tree, Expand() below will do
+               // it for us
 
-            // if the parent hadn't had any children before, it would be
-            // impossible to open it now if we don't do this
-            SetItemHasChildren(parent, TRUE);
+               // if the parent hadn't had any children before, it would be
+               // impossible to open it now if we don't do this
+               SetItemHasChildren(parent, TRUE);
+
+               // force creation of the new item
+               Expand(parent);
+            }
 
             // expand/scroll if necessary to show the newly created item
-            EnsureVisible(nodeNew->GetId());
+            EnsureVisible(GetTreeItemFromName(folderName));
          }
          break;
 

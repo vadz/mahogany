@@ -6,6 +6,7 @@
 Release 0.63 'Saugus' June 7, 2001
 -------------------------------------------------------------------------------
 
+10.06.01 VZ: fixed opening of files as folders
 06.06.01 NB: added support for showing folder names containing letters encoded
              in modified UTF-7 (converts text to current locale's encoding only,
              requires wxWindows 2.3.x)

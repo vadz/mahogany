@@ -74,11 +74,11 @@ public:
    */
    virtual void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
 
-   /** Open folder from profile and display.
-       @param profilename the name of the folder profile
-       @return pointer to the folder or NULL
-   */
-   MailFolder * OpenFolder(String const &profilename);
+   /** Open the specified folder
+       @param folder the folder to open
+       @return true if opened ok, false otherwise
+    */
+   bool OpenFolder(MFolder *folder);
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);
@@ -217,10 +217,13 @@ public:
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
+
    /// return profile name for persistent controls
-   wxString const &GetFullName(void) const { return m_ProfileName; }
+   const wxString& GetFullName(void) const { return m_fullname; }
+
    /// for use by the listctrl:
    ASTicketList *GetTicketList(void) const { return m_TicketList; }
+
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
@@ -256,8 +259,8 @@ protected:
    void SelectInitialMessage(const HeaderInfoList_obj& hil);
 
 private:
-   /// profile name
-   wxString m_ProfileName;
+   /// the full name of the folder opened in this folder view
+   wxString m_fullname;
 
    /// the number of messages in the folder when last updated
    unsigned long m_NumOfMessages;
@@ -386,18 +389,14 @@ class wxFolderViewFrame : public wxMFrame
 {
 public:
    /* Opens a FolderView for a mail folder defined by a profile entry.
-      @param profileName name of the profile
-      @parent parent window
+      @param folder folder to open in the folder view
+      @parent parent window (use top level frame if NULL)
       @return pointer to FolderViewFrame or NULL
    */
-   static wxFolderViewFrame * Create(const String &profileName, wxMFrame *parent = NULL);
+   static wxFolderViewFrame *Create(MFolder *folder,
+                                    wxMFrame *parent = NULL);
 
-   /* Opens a FolderView for an already opened mail folder.
-      @param mf the mail folder to display
-      @parent parent window
-      @return pointer to FolderViewFrame or NULL
-   */
-   static wxFolderViewFrame * Create(MailFolder *mf, wxMFrame *parent = NULL);
+   /// dtor
    ~wxFolderViewFrame();
 
    // callbacks
@@ -411,8 +410,7 @@ public:
    */
    virtual Profile *GetFolderProfile(void)
       {
-         return m_FolderView ?
-            m_FolderView->GetProfile() : NULL;
+         return m_FolderView ? m_FolderView->GetProfile() : NULL;
       }
 
    /// don't even think of using this!
@@ -420,7 +418,11 @@ public:
 
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
+
+   /// ctor
    wxFolderViewFrame(String const &name, wxMFrame *parent);
+
+   /// the associated folder view
    wxFolderView *m_FolderView;
 
    DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)

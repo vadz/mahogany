@@ -76,6 +76,15 @@
    #define BROKEN_LISTCTRL
 #endif
 
+// the generic list control only refreshes itself during the idle time anyhow,
+// but with the native Win32 one we have to freeze/thaw it manually to avoid
+// horrible flicker
+#ifdef __WXMSW__
+   #define USE_SUSPEND_LISTCTRL
+
+   #include <wx/msw/private.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -303,8 +312,23 @@ public:
    /// update the info about focused item if it changed
    void UpdateFocus();
 
-   // for wxFolderView
+   /// for wxFolderView
    wxFolderMenu *GetFolderMenu() const { return m_menuFolders; }
+
+#ifdef USE_SUSPEND_LISTCTRL
+   /// temporarily disable redrawing the control
+   void Freeze() { if ( !m_isFrozen ) { m_isFrozen = true; SetRedraw(false); } }
+
+   /// reenable redrawing
+   void Thaw() { if ( m_isFrozen ) { m_isFrozen = false; SetRedraw(true); } }
+
+private:
+   /// tell Win32 control to redraw itself (or not)
+   void SetRedraw(bool enable);
+
+   /// is redrawing enabled?
+   bool m_isFrozen;
+#endif // USE_SUSPEND_LISTCTRL
 
 protected:
    /// read the column width string from profile or default one
@@ -1261,8 +1285,31 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       UpdateFocus();
    }
 
+#ifdef USE_SUSPEND_LISTCTRL
+   // redraw now
+   if ( m_isFrozen )
+   {
+      Thaw();
+   }
+#endif // USE_SUSPEND_LISTCTRL
+
    event.Skip();
 }
+
+#ifdef USE_SUSPEND_LISTCTRL
+
+void wxFolderListCtrl::SetRedraw(bool enable)
+{
+   // don't use SendMessage as we undef it to avoid conflicts with the class
+   // name!
+   ::SendMessageA(GetHwnd(), WM_SETREDRAW, enable, 0);
+}
+
+#endif // USE_SUSPEND_LISTCTRL
+
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl ctor/dtor
+// ----------------------------------------------------------------------------
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
@@ -1283,6 +1330,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 #ifdef BROKEN_LISTCTRL
    m_suppressFocusTracking = false;
 #endif // BROKEN_LISTCTRL
+
+#ifdef USE_SUSPEND_LISTCTRL
+   m_isFrozen = false;
+#endif // USE_SUSPEND_LISTCTRL
 
    // no item focused yet
    m_itemFocus = -1;
@@ -1321,6 +1372,10 @@ wxFolderListCtrl::~wxFolderListCtrl()
    delete m_menu;
 }
 
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl column width stuff
+// ----------------------------------------------------------------------------
+
 void wxFolderListCtrl::SaveColWidths()
 {
    // save the widths if they changed
@@ -1352,6 +1407,26 @@ wxString wxFolderListCtrl::GetColWidths() const
 
    return widthsString;
 }
+
+String wxFolderListCtrl::GetWidths() const
+{
+   String str;
+
+   int count = GetColumnCount();
+   for ( int col = 0; col < count; col++ )
+   {
+      if ( !str.IsEmpty() )
+         str << COLUMNS_WIDTHS_SEP;
+
+      str << GetColumnWidth(col);
+   }
+
+   return str;
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl focus/selection management
+// ----------------------------------------------------------------------------
 
 void wxFolderListCtrl::Focus(long index)
 {
@@ -1440,6 +1515,10 @@ wxFolderListCtrl::GetFocusedUId(long *idx) const
    return item == -1 ? UID_ILLEGAL : GetUIdFromIndex(item);
 }
 
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl items adding
+// ----------------------------------------------------------------------------
+
 void wxFolderListCtrl::CreateColumns()
 {
    // delete existing columns
@@ -1477,22 +1556,6 @@ void wxFolderListCtrl::CreateColumns()
 
       InsertColumn(n, GetColumnName(col), wxLIST_FORMAT_LEFT, width);
    }
-}
-
-String wxFolderListCtrl::GetWidths() const
-{
-   String str;
-
-   int count = GetColumnCount();
-   for ( int col = 0; col < count; col++ )
-   {
-      if ( !str.IsEmpty() )
-         str << COLUMNS_WIDTHS_SEP;
-
-      str << GetColumnWidth(col);
-   }
-
-   return str;
 }
 
 void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
@@ -1579,6 +1642,10 @@ wxFolderListCtrl::SetEntryStatus(long index, const String& status)
    if ( m_columns[WXFLC_STATUS] != -1 )
       SetItem(index, m_columns[WXFLC_STATUS], status);
 }
+
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl "select next" logic
+// ----------------------------------------------------------------------------
 
 bool
 wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
@@ -1936,7 +2003,7 @@ wxFolderView::~wxFolderView()
 String wxFolderView::GetFullPersistentKey(MPersMsgBox key)
 {
    String s;
-   s << Profile::FilterProfileName(m_ProfileName)
+   s << Profile::FilterProfileName(m_fullname)
      << '/'
      << GetPersMsgBoxName(key);
    return s;
@@ -2330,21 +2397,18 @@ wxFolderView::Update()
    m_MailFolder->SetInteractiveFrame(frameOld);
 }
 
+// ----------------------------------------------------------------------------
+// wxFolderView open a folder
+// ----------------------------------------------------------------------------
 
-MailFolder *
-wxFolderView::OpenFolder(const String &profilename)
+bool
+wxFolderView::OpenFolder(MFolder *folder)
 {
-   MFolder_obj folder(profilename);
-   if ( !folder.IsOk() )
-   {
-      wxLogError(_("The folder '%s' doesn't exist and can't be opened."),
-                 profilename.c_str());
-
-      return NULL;
-   }
+   CHECK( folder, false, "NULL folder in wxFolderView::OpenFolder" );
 
    // just a cast
    wxFrame *frame = m_Frame;
+   m_fullname = folder->GetFullName();
 
    int flags = folder->GetFlags();
 
@@ -2439,7 +2503,7 @@ wxFolderView::OpenFolder(const String &profilename)
          {
             // the dialog was cancelled
             wxLogStatus(frame, _("Opening the folder '%s' cancelled."),
-                        profilename.c_str());
+                        m_fullname.c_str());
 
             mApplication->SetLastError(M_ERROR_CANCEL);
             return NULL;
@@ -2448,12 +2512,11 @@ wxFolderView::OpenFolder(const String &profilename)
    }
 
    wxBeginBusyCursor();
-   MailFolder::SetInteractive(m_Frame, profilename);
+   MailFolder::SetInteractive(m_Frame, m_fullname);
 
-   MailFolder *mf = MailFolder::OpenFolder(profilename);
+   MailFolder *mf = MailFolder::OpenFolder(folder);
    SetFolder(mf);
    SafeDecRef(mf);
-   m_ProfileName = profilename;
 
    MailFolder::ResetInteractive();
    wxEndBusyCursor();
@@ -2472,7 +2535,7 @@ wxFolderView::OpenFolder(const String &profilename)
                            "the other folders and not the messages.\n"
                            "Please select \"Browse\" from the menu instead "
                            "to add its subfolders to the folder tree."),
-                         profilename.c_str());
+                         m_fullname.c_str());
             break;
 
          default:
@@ -2487,7 +2550,7 @@ wxFolderView::OpenFolder(const String &profilename)
 
             // FIXME propose to show the folder properties dialog right here
             wxLogError(_("The folder '%s' could not be opened, please check "
-                         "its settings."), profilename.c_str());
+                         "its settings."), m_fullname.c_str());
       }
    }
    else
@@ -2497,7 +2560,7 @@ wxFolderView::OpenFolder(const String &profilename)
       folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
    }
 
-   return mf;
+   return mf != NULL;
 }
 
 void
@@ -2877,7 +2940,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
             {
                InteractivelyCollectAddresses(addresses,
                                              READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
-                                             m_ProfileName,
+                                             m_fullname,
                                              (MFrame *)m_Frame);
             }
          }
@@ -3249,6 +3312,10 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    if ( event.GetFolder() != m_MailFolder )
       return;
 
+#ifdef USE_SUSPEND_LISTCTRL
+   m_FolderCtrl->Freeze();
+#endif // USE_SUSPEND_LISTCTRL
+
    // if we had exactly one message selected before, we want to keep the
    // selection after expunging
    bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
@@ -3325,6 +3392,10 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    m_NumOfMessages -= count;
    m_nDeleted = 0;
 
+#ifdef USE_SUSPEND_LISTCTRL
+   m_FolderCtrl->Thaw();
+#endif // USE_SUSPEND_LISTCTRL
+
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 }
 
@@ -3352,6 +3423,13 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
          String strStatus =
             MailFolder::ConvertMessageStatusToString(status);
 
+         // it is common to chaneg status of many messages at once, then we're
+         // going to have many such events - only refresh the list control when
+         // we process all of them
+#ifdef USE_SUSPEND_LISTCTRL
+         m_FolderCtrl->Freeze();
+#endif // USE_SUSPEND_LISTCTRL
+
          m_FolderCtrl->SetEntryStatus(index, strStatus);
 
          SetEntryColour(index, hi);
@@ -3362,6 +3440,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
             m_nDeleted++;
          }
 
+         // TODO: should also do it only once, after all status changes
          UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
       }
       //else: this can happen if we didn't have to update the control yet, just
@@ -3482,9 +3561,9 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    ASMailFolder::Result *result = event.GetResult();
    const Ticket& t = result->GetTicket();
 
-   if ( m_TicketList->Contains(t) )
+   if ( result->GetUserData() == this )
    {
-      ASSERT_MSG( result->GetUserData() == this, "got unexpected result" );
+      ASSERT_MSG( m_TicketList->Contains(t), "unexpected async result ticket" );
 
       m_TicketList->Remove(t);
 
@@ -3665,6 +3744,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          case ASMailFolder::Op_ReplyMessages:
          case ASMailFolder::Op_ForwardMessages:
          case ASMailFolder::Op_DeleteMessages:
+         case ASMailFolder::Op_DeleteOrTrashMessages:
          case ASMailFolder::Op_UnDeleteMessages:
             break;
 
@@ -3711,7 +3791,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             break;
 
          default:
-            FAIL_MSG( "MEvent handling not implemented yet" );
+            FAIL_MSG( "unexpected async operation result" );
       }
    }
    //else: not out result at all
@@ -3759,42 +3839,40 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
    m_FolderView = fv;
    SetTitle(m_FolderView->GetFolder()->GetName());
+
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
    AddToolbarButtons(CreateToolBar(), WXFRAME_FOLDER);
+
    Show(true);
 }
 
 wxFolderViewFrame *
-wxFolderViewFrame::Create(MailFolder *mf, wxMFrame *parent)
+wxFolderViewFrame::Create(MFolder *folder, wxMFrame *parent)
 {
-   CHECK( mf, NULL, "NULL folder passed to wxFolderViewFrame::Create" );
+   if ( !parent )
+   {
+      parent = mApplication->TopLevelFrame();
+   }
 
-   wxFolderViewFrame *f = new wxFolderViewFrame(mf->GetName(),parent);
-   wxFolderView *fv = wxFolderView::Create(f);
-   fv->SetFolder(mf);
-   f->InternalCreate(fv,parent);
-   return f;
-}
+   wxFolderViewFrame *
+      frame = new wxFolderViewFrame(folder->GetFullName(), parent);
 
-wxFolderViewFrame *
-wxFolderViewFrame::Create(const String &folderName, wxMFrame *parent)
-{
-   wxFolderViewFrame *f = new wxFolderViewFrame(folderName, parent);
-   wxFolderView *fv = wxFolderView::Create(f);
-   if(fv->OpenFolder(folderName))
-      f->InternalCreate(fv,parent);
-   else
+   wxFolderView *fv = wxFolderView::Create(frame);
+   if ( !fv->OpenFolder(folder) )
    {
       delete fv;
-      delete f;
+      delete frame;
       return NULL;
    }
-   return f;
+
+   frame->InternalCreate(fv, parent);
+
+   return frame;
 }
 
-wxFolderViewFrame::wxFolderViewFrame(const String &name, wxMFrame *parent)
-   : wxMFrame(name,parent)
+wxFolderViewFrame::wxFolderViewFrame(const String& name, wxMFrame *parent)
+                 : wxMFrame(name, parent)
 {
    m_FolderView = NULL;
 
@@ -3816,7 +3894,7 @@ wxFolderViewFrame::wxFolderViewFrame(const String &name, wxMFrame *parent)
 
 wxFolderViewFrame::~wxFolderViewFrame()
 {
-   if(m_FolderView) delete m_FolderView;
+   delete m_FolderView;
 }
 
 void
@@ -3866,9 +3944,10 @@ IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
 // other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
 
-bool OpenFolderViewFrame(const String& name, wxWindow *parent)
+bool OpenFolderViewFrame(MFolder *folder, wxWindow *parent)
 {
-   return wxFolderViewFrame::Create(name, (wxMFrame *)GetFrame(parent)) != NULL;
+   return wxFolderViewFrame::Create(folder, (wxMFrame *)GetFrame(parent))
+            != NULL;
 }
 
 // TODO: this code probably should be updated to avoid writing columns width

@@ -490,13 +490,41 @@ MAppBase::OnStartup()
       kbStringList openFoldersList;
       strutil_tokenise(folders,";",openFoldersList);
       delete [] folders;
+
+      bool ok = true;
+
       kbStringList::iterator i;
       for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
       {
-         if((*i)->length() == 0) // empty token
-            continue;
+         String *name = *i;
 
-         OpenFolderViewFrame(**i, m_topLevelFrame);
+         if ( name->empty() )
+         {
+            FAIL_MSG( "empty folder name in the list of folders to open?" );
+            continue;
+         }
+
+         MFolder_obj folder(*name);
+         if ( folder.IsOk() )
+         {
+            if ( !OpenFolderViewFrame(folder, m_topLevelFrame) )
+            {
+               // error message must be already given by OpenFolderViewFrame
+               ok = false;
+            }
+         }
+         else
+         {
+            wxLogWarning(_("Failed to reopen folder '%s', it doesn't seem "
+                           "to exist any more."), name->c_str());
+
+            ok = false;
+         }
+      }
+
+      if ( !ok )
+      {
+         wxLogWarning(_("Not all folders could be reopened."));
       }
    }
 

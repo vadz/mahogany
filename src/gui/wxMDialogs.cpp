@@ -206,8 +206,7 @@ END_EVENT_TABLE()
 class MFolderDialog : public wxManuallyLaidOutDialog
 {
 public:
-   MFolderDialog(wxWindow *parent,
-                 MFolder *folder);
+   MFolderDialog(wxWindow *parent, MFolder *folder, bool open = false);
    virtual ~MFolderDialog();
 
    // accessors
@@ -228,7 +227,11 @@ private:
    MFolder      *m_folder;
    wxFolderTree *m_tree;
 
-   bool          m_userChoseFolder;
+   // has the user chosen a folder?
+   bool m_userChoseFolder;
+
+   // are we going to open this folder or save to it?
+   bool m_selectForOpening;
 
    DECLARE_EVENT_TABLE();
 };
@@ -1201,12 +1204,11 @@ MDialog_FolderProfile(const MWindow *parent, const String& folderName)
 void
 MDialog_FolderOpen(const MWindow *parent)
 {
-   MFolder *folder = MDialog_FolderChoose(parent);
+   MFolder *folder = MDialog_FolderChoose(parent, NULL, true /* open */);
    if ( folder != NULL )
    {
       // open a view on this folder
-      (void)wxFolderViewFrame::Create(folder->GetFullName(),
-                                      mApplication->TopLevelFrame());
+      (void)wxFolderViewFrame::Create(folder);
       folder->DecRef();
    }
    //else: cancelled
@@ -1216,11 +1218,12 @@ MDialog_FolderOpen(const MWindow *parent)
 // folder dialog stuff
 // ----------------------------------------------------------------------------
 
-MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
+MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder, bool open)
              : wxManuallyLaidOutDialog(parent,
                                        _("Choose folder"),
                                        "FolderSelDlg")
 {
+   m_selectForOpening = open;
    m_userChoseFolder = false;
 
    m_folder = folder;
@@ -1285,7 +1288,8 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
          m_FileName = wxPFileSelector("FolderDialogFile",
                                       _("Mahogany: Please choose a folder file"),
                                       NULL, NULL, NULL, NULL,
-                                      wxSAVE, this);
+                                      m_selectForOpening ? wxOPEN : wxSAVE,
+                                      this);
          if ( !!m_FileName )
          {
             // folder (file) chosen
@@ -1424,10 +1428,10 @@ bool MFolderDialog::TransferDataFromWindow()
 }
 
 MFolder *
-MDialog_FolderChoose(const MWindow *parent, MFolder *folder)
+MDialog_FolderChoose(const MWindow *parent, MFolder *folder, bool open)
 {
    // TODO store the last folder in config
-   MFolderDialog dlg((wxWindow *)parent, folder);
+   MFolderDialog dlg((wxWindow *)parent, folder, open);
 
    return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
 }

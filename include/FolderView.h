@@ -84,9 +84,9 @@ private:
 };
 
 /// open a new frame containing the folder view of this folder
-extern bool OpenFolderViewFrame(const String& name, wxWindow *parent);
+extern bool OpenFolderViewFrame(MFolder *folder, wxWindow *parent);
 
 /// show a dialog allowing to choose the order of headers in the folder view
-extern bool ConfigureFolderViewHeaders(class Profile *profile, wxWindow *parent);
+extern bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent);
 
 #endif // FOLDERVIEW_H

@@ -271,8 +271,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
       // we want save the full folder name in m_folderName
       ASSERT( folder->GetFullName() == m_folderName );
 
-      MailFolder *mailFolder = m_FolderView->OpenFolder(folder->GetFullName());
-      if ( !mailFolder )
+      if ( !m_FolderView->OpenFolder(folder) )
       {
          if ( mApplication->GetLastError() == M_ERROR_CANCEL )
          {

@@ -285,9 +285,15 @@ extern void CloseSplash();
 void
 MDialog_FolderProfile(const MWindow *parent, const String& folderName);
 
-/// choose a folder from the list of all folders, returns NULL if cancelled
-MFolder *
-MDialog_FolderChoose(const MWindow *parent, MFolder *folder = NULL);
+/** choose a folder from the list of all folders, returns NULL if cancelled
+
+  @param parent the parent window for the dialog
+  @param folder the default folder to use
+  @param open true if the folder is going to be opened (used for file dialog)
+ */
+MFolder *MDialog_FolderChoose(const MWindow *parent,
+                              MFolder *folder = NULL,
+                              bool open = false);
 
 /// choose a folder and open a view on it
 void MDialog_FolderOpen(const MWindow *parent);
