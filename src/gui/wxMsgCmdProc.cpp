@@ -179,7 +179,7 @@ protected:
 
    Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
    Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = NULL);
-   void SaveMessagesToFile(const UIdArray& selections);
+   Ticket SaveMessagesToFile(const UIdArray& selections);
 
    void ExtractAddresses(const UIdArray& selections);
 
@@ -1338,7 +1338,7 @@ MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
    return t;
 }
 
-void
+Ticket
 MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
 {
    AsyncStatusHandler *status =
@@ -1347,6 +1347,8 @@ MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
 
    Ticket t = m_asmf->SaveMessagesToFile(&selections, GetFrame(), this);
    status->Monitor(t, _("Saving messages to file failed."));
+
+   return t;
 }
 
 // ----------------------------------------------------------------------------
