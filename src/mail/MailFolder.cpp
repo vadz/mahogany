@@ -143,11 +143,17 @@ MLogCircle::GuessError(void) const
    bool addLog = false;
    bool addErr = false;
    
-   if(Find("No such host"), &err)
+   if(Find("No such host", &err))
    {
       guess = _("The server name could not be resolved.\n"
                 "Maybe the network connection or the DNS servers are down?");
       addErr = true;
+   }
+   if(Find("username", &err))
+   {
+      guess = _("There was a problem with a username or email address.\n");
+      addErr = true;
+      addLog = true;
    }
    
    if(addErr)
