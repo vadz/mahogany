@@ -1326,8 +1326,9 @@ wxString wxFolderTreeNode::GetName() const
             text7->data = (unsigned char *) nameutf7.c_str();
             text7->size = nameutf7.Length();
 
-            // FIXME: this looks suspicious, can we really pass NULL table
-            //        to cclient?
+            // cclient doesn't use the table parameter in utf8_text_utf7
+            // function but still has it (for future extensions? or just
+            // because other conversion functions have it?)
             void *tab = NULL;
             utf8_text_utf7 ( text7, text8, tab );
 
