@@ -452,7 +452,12 @@ MailFolderCC::Open(void)
       return false;
 
    AddToMap(m_MailStream); // now we are known
+
+   // listing already built
+#if 0
    BuildListing();
+#endif
+
    // from now on we want to know when new messages appear
    m_GenerateNewMailEvents = true;
 
@@ -814,7 +819,9 @@ MailFolderCC::BuildListing(void)
    m_UpdateNeeded = false;
 
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
-   m_NumOfMessages = m_MailStream->nmsgs;
+
+   if ( m_FirstListing )
+      m_NumOfMessages = m_MailStream->nmsgs;
 
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
@@ -863,7 +870,8 @@ MailFolderCC::BuildListing(void)
       msg.Printf(_("Reading %lu message headers..."), numMessages);
       m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
-                                             100, NULL);// open a status window:
+                                             numMessages,
+                                             NULL);// open a status window:
    }
 
    // mail_fetch_overview() will now fill the m_Listing array with
@@ -1007,7 +1015,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    // This is 1 if we don't want any further updates.
    if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
-      m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_NumOfMessages);
+      m_ProgressDialog->Update( m_BuildNextEntry - 1 );
 }
 
 
