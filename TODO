@@ -99,7 +99,8 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
-- add configurable python search path to configure!!!
+- foldername in password prompt
+- URL highlighting in Headers
 - fix printing overlap
 - test whether dialog for collecting from INBOX works
 
