@@ -117,4 +117,7 @@
 /** The top level build directory */
 #undef M_TOP_BUILDDIR
 
+/** Define this to typedef UIdType as unsigned int instead of unsigned long */
+#undef UIDTYPE_IS_UINT
+
 //@}

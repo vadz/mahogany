@@ -318,6 +318,23 @@ case "$m_cv_cxx_opernames" in yes)
 	esac
 esac
 
+dnl check if size_t is different from unsigned long - this is used to define
+dnl UIdType in a way which would allow it to compile everywhere
+AC_CACHE_CHECK([if size_t is different from unsigned long],
+    m_cv_size_t_not_ulong,
+    AC_TRY_COMPILE([#include <stddef.h>],
+	[
+	    struct Foo { void foo(size_t); void foo(unsigned long); };
+	],
+	m_cv_size_t_not_ulong=yes,
+	m_cv_size_t_not_ulong=no
+    )
+)
+
+if test "$m_cv_size_t_not_ulong" != "yes"; then
+    AC_DEFINE(UIDTYPE_IS_UINT)
+fi
+
 dnl Various other commands needed
 dnl =============================
 
