@@ -639,7 +639,8 @@ wxMessageView::ClearWithoutReset(void)
    wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
                          (int)wxNORMAL, (int)wxNORMAL, 0,
                          &m_ProfileValues.FgCol,
-                         &m_ProfileValues.BgCol);
+                         &m_ProfileValues.BgCol,
+                         true /* no update */);
    SetBackgroundColour( m_ProfileValues.BgCol );
    GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion of text
 }
@@ -648,6 +649,7 @@ void
 wxMessageView::Clear()
 {
    ClearWithoutReset();
+   RequestUpdate();
 
    m_uid = UID_ILLEGAL;
    if ( m_mailMessage )

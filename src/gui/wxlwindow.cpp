@@ -216,7 +216,8 @@ wxLayoutWindow::Clear(int family,
                       int weight,
                       int underline,
                       wxColour *fg,
-                      wxColour *bg)
+                      wxColour *bg,
+                      bool noUpdate)
 {
    GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
    SetBackgroundColour(GetLayoutList()->GetDefaultStyleInfo().GetBGColour());
@@ -232,7 +233,10 @@ wxLayoutWindow::Clear(int family,
       GetCaret()->Show();
 #endif // WXLAYOUT_USE_CARET
 
-   RequestUpdate((wxRect *)NULL);
+   if ( !noUpdate )
+   {
+      RequestUpdate((wxRect *)NULL);
+   }
 }
 
 void wxLayoutWindow::Refresh(bool eraseBackground, const wxRect *rect)

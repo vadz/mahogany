@@ -65,12 +65,13 @@ public:
    //@{
    /// Clears the window and sets default parameters.
    void Clear(int family = wxROMAN,
-              int size=12,
-              int style=wxNORMAL,
-              int weight=wxNORMAL,
-              int underline=0,
-              wxColour *fg=NULL,
-              wxColour *bg=NULL);
+              int size = 12,
+              int style = wxNORMAL,
+              int weight = wxNORMAL,
+              int underline = 0,
+              wxColour *fg = NULL,
+              wxColour *bg = NULL,
+              bool noUpdate = false);
 
    /// override base class virtual to also refresh the scrollbar position
    virtual void Refresh(bool eraseBackground = TRUE,
