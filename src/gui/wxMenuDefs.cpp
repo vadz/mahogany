@@ -208,7 +208,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &New Message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
    { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
                            gettext_noop("Compose with &template...\tShift-Ctrl-N"),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
-   { WXMENU_FILE_POST,     gettext_noop("Post News &Article\tCtrl-A"),   gettext_noop("Write a news article and post it")      , FALSE },
+   { WXMENU_FILE_POST,     gettext_noop("Post News &Article"),   gettext_noop("Write a news article and post it")      , FALSE },
    { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tShift-Ctrl-C"), gettext_noop("Check all incoming folders for new mail and download it now") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  , FALSE },
@@ -228,8 +228,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-K"), gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"), gettext_noop("Shutdown dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network"), gettext_noop("Activate dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network"), gettext_noop("Shutdown dial-up networking")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_SUBMENU,       gettext_noop("&Identity"), "", FALSE },
@@ -267,7 +267,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , FALSE },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-A"), gettext_noop("Edit the address book(s)") , FALSE },
+   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , FALSE },
    { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },

@@ -1367,6 +1367,14 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    CHECK( isProfile, false, "obsolete version of SaveMessages called" );
 
    MFolder_obj folder(folderName);
+   if ( !folder.IsOk() )
+   {
+      wxLogError(_("Impossible to save messages to not existing folder '%s'."),
+                 folderName.c_str());
+
+      return false;
+   }
+
    return SaveMessages(selections, folder, updateCount);
 }
 

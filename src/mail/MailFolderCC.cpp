@@ -3329,7 +3329,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    // to MEventManager::Send(), but don't forget to prevent any other calls to
    // c-client from happening - this will result in a fatal error as it is not
    // reentrant (FIXME!!!)
-   wxYield();
+   wxYieldIfNeeded();
 }
 
 

@@ -1651,19 +1651,24 @@ UpgradeFrom001()
     @param from  absolute group from where to copy entries
     @param to    absolute group where to copy to
     @param recursive if true, copy all subgroups, too
-    @param dest      if non-NULL, use that config as the destination otherwise use this
-    @return false on error
+    @param dest      if NULL, the global config will be used
+    @return false on error, true if ok
 */
 static bool
 CopyEntries(wxConfigBase *_this,
-            const wxString &from, const wxString &to,
+            const wxString &from,
+            const wxString &to,
             bool recursive = TRUE,
             wxConfigBase *dest = NULL)
 {
    wxString oldPath = _this->GetPath();
    bool rc = TRUE;
 
-   if(dest == NULL) dest = _this;
+   if ( !dest )
+   {
+      // use the global config by default
+      dest = mApplication->GetProfile()->GetConfig();
+   }
 
    // Build a list of all entries to copy:
    _this->SetPath(from);
@@ -1746,10 +1751,10 @@ UpgradeFrom010()
 
    //FIXME paths need adjustment for windows?
    rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                     "/M/Profiles/Folders","/M/Profiles", true);
+                     "/M/Profiles/Folders","/M/Profiles");
 
    rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
-                     "/AdbEditor","/M/Profiles/AdbEditor", true);
+                     "/AdbEditor","/M/Profiles/AdbEditor");
 
    Profile
       *p = Profile::CreateProfile(""),
@@ -2659,11 +2664,16 @@ bool RetrieveRemoteConfigSettings(bool confirm)
            return TRUE;
    }
 
-   MailFolder *mf =
-      MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
+   String foldername = READ_APPCONFIG(MP_SYNC_FOLDER);
+   MailFolder *mf = MailFolder::OpenFolder(foldername);
 
    if(! mf)
+   {
+      wxLogError(_("Please check that the folder '%s' where the remote "
+                   "configuration is stored exists."), foldername.c_str());
+
       return FALSE;
+   }
 
    if(mf->CountMessages() != 1)
    {
@@ -2714,31 +2724,37 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    bool rc = TRUE;
    if(fc)
    {
+      // the config file is supposed to be in Unix format, so we use _UNIX
+      // versions of profile paths as from parameter
       if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+      {
          rc &= CopyEntries(fc,
-                           M_FILTERS_CONFIG_SECTION,
-                           M_FILTERS_CONFIG_SECTION_UNIX, TRUE,
-                           mApplication->GetProfile()->GetConfig());
+                           M_FILTERS_CONFIG_SECTION_UNIX,
+                           M_FILTERS_CONFIG_SECTION);
+      }
 
       if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+      {
          rc &= CopyEntries(fc,
-                           M_IDENTITY_CONFIG_SECTION,
-                           M_IDENTITY_CONFIG_SECTION_UNIX, TRUE,
-                           mApplication->GetProfile()->GetConfig());
+                           M_IDENTITY_CONFIG_SECTION_UNIX,
+                           M_IDENTITY_CONFIG_SECTION);
+      }
 
       if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
       {
          String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
          String src, dest;
-         src << M_PROFILE_CONFIG_SECTION << '/' << group;
-         dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
-         rc &= CopyEntries(fc,
-                           src, dest, TRUE,
-                           mApplication->GetProfile()->GetConfig());
+         src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+         dest << M_PROFILE_CONFIG_SECTION << '/' << group;
+
+         rc &= CopyEntries(fc, src, dest);
       }
    }
    else
+   {
       rc = FALSE;
+   }
+
    delete  fc;
    wxRemoveFile(filename);
    return rc;
@@ -2834,29 +2850,39 @@ bool SaveRemoteConfigSettings(bool confirm)
    }
 
    bool rc = TRUE;
+
+   // always create the config file in Unix format
    if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+   {
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                        M_FILTERS_CONFIG_SECTION,
                         M_FILTERS_CONFIG_SECTION_UNIX,
-                        M_FILTERS_CONFIG_SECTION, TRUE,
+                        TRUE,
                         fc);
+   }
 
    if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+   {
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                        M_IDENTITY_CONFIG_SECTION,
                         M_IDENTITY_CONFIG_SECTION_UNIX,
-                        M_IDENTITY_CONFIG_SECTION, TRUE,
+                        TRUE,
                         fc);
+   }
 
    if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
       String src, dest;
-      src << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
-      dest << M_PROFILE_CONFIG_SECTION << '/' << group;
+      src << M_PROFILE_CONFIG_SECTION << '/' << group;
+      dest << M_PROFILE_CONFIG_SECTION_UNIX << '/' << group;
+
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                         src, dest, TRUE,
                         fc);
    }
-   delete  fc;
+   delete fc;
+
    if(rc == FALSE)
    {
       wxLogError(_("Could not export configuration information."));

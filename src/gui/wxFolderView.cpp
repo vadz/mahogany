@@ -2245,7 +2245,7 @@ wxFolderView::UpdateSelectionInfo(void)
    long curSel = m_FolderCtrl->GetUniqueSelection();
    if ( curSel != -1 )
    {
-      m_FolderCtrl->Select(curSel, false);
+      m_FolderCtrl->Select(curSel);
 
       // do preview the message if we had another one previewed before (like
       // this we don't have to press <space> after deleting a message or

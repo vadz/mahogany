@@ -2345,17 +2345,50 @@ bool wxOptionsPageSync::TransferDataFromWindow()
 void wxOptionsPageSync::OnButton(wxCommandEvent& event)
 {
    wxObject *obj = event.GetEventObject();
-   if ( obj == GetControl(ConfigField_SyncStore) )
+   bool save = obj == GetControl(ConfigField_SyncStore);
+   if ( !save && (obj != GetControl(ConfigField_SyncRetrieve)) )
    {
-      SaveRemoteConfigSettings(false /* don't ask confirmation */);
+      // nor save nor restore, not interesting
+      event.Skip();
+
+      return;
    }
-   else if ( obj == GetControl(ConfigField_SyncRetrieve) )
+
+   // maybe the user changed the folder setting but didn't press [Apply] ye
+   // - still use the current setting, not the one from config
+   String foldernameOld = READ_APPCONFIG(MP_SYNC_FOLDER);
+
+   wxTextCtrl *text = wxStaticCast(GetControl(ConfigField_RSConfigFolder),
+                                   wxTextCtrl);
+   String foldername = text->GetValue();
+
+   if ( foldername != foldernameOld )
    {
-      RetrieveRemoteConfigSettings(false /* don't ask confirmation */);
+      mApplication->GetProfile()->writeEntry(MP_SYNC_FOLDER, foldername);
+   }
+
+   // false means don't ask confirmation
+   bool ok = save ? SaveRemoteConfigSettings(false)
+                  : RetrieveRemoteConfigSettings(false);
+   if ( !ok )
+   {
+      wxLogError(_("Failed to %s remote configuration %s '%s'."),
+                 save ? _("save") : _("retrieve"),
+                 save ? _("to") : _("from"),
+                 foldername.c_str());
    }
    else
    {
-      event.Skip();
+      wxLogMessage(_("Successfully %s remote configuration %s '%s'."),
+                   save ? _("saved") : _("retrieved"),
+                   save ? _("to") : _("from"),
+                   foldername.c_str());
+   }
+
+   // restore old value regardless
+   if ( foldername != foldernameOld )
+   {
+      mApplication->GetProfile()->writeEntry(MP_SYNC_FOLDER, foldernameOld);
    }
 }
 

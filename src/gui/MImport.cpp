@@ -402,7 +402,7 @@ static bool FindAllImporters(wxArrayImporters& importers,
 
    listing->DecRef();
 
-   return count > 0;
+   return importers.GetCount() > 0;
 }
 
 // frees all importers in the array

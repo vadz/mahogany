@@ -1345,7 +1345,7 @@ enum MFolderIndex
 /// colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR_D      "purple"
 /// update the folder view status bar to show the msg info?
-#define   MP_FVIEW_STATUS_UPDATE_D 1L
+#define   MP_FVIEW_STATUS_UPDATE_D 0L
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_D "Date: $date, Subject: $subject, From: $from"
 //@}

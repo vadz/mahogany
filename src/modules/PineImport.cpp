@@ -28,10 +28,10 @@
    #include "MFolder.h"
 
    #include <wx/log.h>
-   #include <wx/file.h>       // for wxFile::Exists
-   #include <wx/textfile.h>
 #endif // USE_PCH
 
+#include <wx/file.h>          // for wxFile::Exists
+#include <wx/textfile.h>
 #include <wx/dir.h>
 #include <wx/confbase.h>      // for wxExpandEnvVars
 

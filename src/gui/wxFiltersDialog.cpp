@@ -969,13 +969,9 @@ public:
    void OnAddFiter(wxCommandEvent& event);
    void OnEditFiter(wxCommandEvent& event);
    void OnDeleteFiter(wxCommandEvent& event);
-
-   void OnListboxChange(wxCommandEvent& event) { DoUpdate(); }
+   void OnUpdateButtons(wxUpdateUIEvent& event);
 
 protected:
-   // update the buttons state depending on the lbox selection
-   void DoUpdate();
-
    // listbox contains the names of all filters
    wxListBox *m_lboxFilters;
 
@@ -996,7 +992,9 @@ BEGIN_EVENT_TABLE(wxFiltersDialog, wxManuallyLaidOutDialog)
    EVT_BUTTON(Button_Edit, wxFiltersDialog::OnEditFiter)
    EVT_BUTTON(Button_Delete, wxFiltersDialog::OnDeleteFiter)
 
-   EVT_LISTBOX(-1, wxFiltersDialog::OnListboxChange)
+   EVT_UPDATE_UI(Button_Edit, wxFiltersDialog::OnUpdateButtons)
+   EVT_UPDATE_UI(Button_Delete, wxFiltersDialog::OnUpdateButtons)
+
    EVT_LISTBOX_DCLICK(-1, wxFiltersDialog::OnEditFiter)
 END_EVENT_TABLE()
 
@@ -1064,6 +1062,8 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
    m_lboxFilters->SetConstraints(c);
 
    SetDefaultSize(5*wBtn, 9*hBtn);
+   Layout();
+
    m_lboxFilters->SetFocus();
 }
 
@@ -1113,8 +1113,6 @@ wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
    //else: it already exists in the message box
 
    m_hasChanges = true;
-
-   DoUpdate();
 }
 
 void
@@ -1141,19 +1139,13 @@ wxFiltersDialog::OnDeleteFiter(wxCommandEvent &event)
       m_hasChanges = true;
 
       m_lboxFilters->Delete(m_lboxFilters->GetSelection());
-
-      DoUpdate();
    }
 }
 
 void
-wxFiltersDialog::DoUpdate()
+wxFiltersDialog::OnUpdateButtons(wxUpdateUIEvent& event)
 {
-   bool hasSel = m_lboxFilters->GetSelection() != -1;
-
-   // Add is always enabled
-   m_btnEdit->Enable(hasSel);
-   m_btnDelete->Enable(hasSel);
+   event.Enable( m_lboxFilters->GetSelection() != -1 );
 }
 
 bool
@@ -1165,8 +1157,6 @@ wxFiltersDialog::TransferDataToWindow()
    {
       m_lboxFilters->Append(allFilters[n]);
    }
-
-   DoUpdate();
 
    return true;
 }
@@ -1281,7 +1271,7 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
    c->left.SameAs(boxBottom, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->top.SameAs(boxBottom, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(boxBottom, wxBottom, -2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(boxBottom, wxBottom, 2*LAYOUT_Y_MARGIN);
    statText->SetConstraints(c);
 
    m_btnDelete = new wxButton(this, Button_Delete, _("&Delete"));
@@ -1310,6 +1300,7 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
 
    // increase min horz size
    SetDefaultSize(5*wBtn, 19*hBtn);
+   Layout();
 }
 
 wxFolderFiltersDialog::~wxFolderFiltersDialog()

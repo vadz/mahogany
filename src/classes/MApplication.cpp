@@ -446,6 +446,11 @@ MAppBase::OnStartup()
       ShowLog();
    }
 
+   // after opening the folder, show the frame
+   m_topLevelFrame->Show(true);
+   // FIXME: ugly, need wxMApp method for this
+   ((wxMApp *)this)->SetTopWindow(m_topLevelFrame);
+
    // open all default mailboxes
    // --------------------------
 

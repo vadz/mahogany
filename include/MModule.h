@@ -31,17 +31,17 @@
 
 // this is compiler dependent
 #ifdef USE_MODULES_STATIC
-#   define MDLLEXPORT static
+#  define MDLLEXPORT static
 #else
-#   ifdef OS_WIN
-#      ifdef _MSC_VER
-#            define MDLLEXPORT __declspec( dllexport )
-#   else
-#         error "don't know how export functions from DLL with this compiler"
-#      endif
-#   else
-#      define MDLLEXPORT extern
-#   endif
+#  ifdef OS_WIN
+#     ifdef _MSC_VER
+#        define MDLLEXPORT __declspec( dllexport )
+#     else
+#        error "don't know how export functions from DLL with this compiler"
+#     endif
+#  else
+#     define MDLLEXPORT extern
+#  endif
 #endif
 
 

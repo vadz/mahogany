@@ -408,9 +408,15 @@ private:
    /// forbidden:
    MModuleListingEntryImpl(const MModuleListingEntryImpl &);
 
-   String m_Name, m_Interface, m_ShortDesc,
-         m_Desc, m_Version, m_Author;
+   String m_Name,
+          m_Interface,
+          m_ShortDesc,
+          m_Desc,
+          m_Version,
+          m_Author;
+
    MModule *m_Module;
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -453,45 +459,56 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
 static MModuleListing * DoListLoadedModules(void)
 #endif
 {
-   MModuleListingImpl *listing = MModuleListingImpl::Create(GetMModuleList()->size());
+   MModuleListingImpl *listing =
+      MModuleListingImpl::Create(GetMModuleList()->size());
+
    size_t count = 0;
-   MModuleList::iterator i;
-   for(i = GetMModuleList()->begin();
-       i != GetMModuleList()->end();
-       i++)
+   for ( MModuleList::iterator i = GetMModuleList()->begin();
+         i != GetMModuleList()->end();
+         i++ )
 #ifdef USE_MODULES_STATIC
    {
+      MModuleListEntry *me = *i;
+
       // we have unloaded modules in the list, ignore them unless listall is
       // TRUE
-      if( ((**i).m_Module || listall) &&
-          (!interfaceName || (**i).m_Interface == interfaceName) )
+      if ( (listall || me->m_Module) &&
+           (interfaceName.empty() || me->m_Interface == interfaceName) )
       {
-         MModuleListingEntryImpl entry(
-            (**i).m_Name, // module name
-            (**i).m_Interface,
-            (**i).m_Description,
-            "", // long description
-            String((**i).m_Version)+ _(" (builtin)"),
-            "mahogany-developers@lists.sourceforge.net",
-            (**i).m_Module);
+         MModuleListingEntryImpl entry
+                                 (
+                                    me->m_Name, // module name
+                                    me->m_Interface,
+                                    me->m_Description,
+                                    "", // long description
+                                    String(me->m_Version) + _(" (builtin)"),
+                                    "mahogany-developers@lists.sourceforge.net",
+                                    me->m_Module
+                                 );
+
          (*listing)[count++] = entry;
       }
    }
+
    listing->SetCount(count); // we might have less than we thought at first
 #else // !USE_MODULES_STATIC
    {
       MModule *m = (**i).m_Module;
       ASSERT(m);
-      MModuleListingEntryImpl entry(
-         m->GetName(), // module name
-         m->GetInterface(),
-         m->GetDescription(),
-         "", // long description
-         m->GetVersion(),
-         "", m);
+      MModuleListingEntryImpl entry
+                              (
+                                 m->GetName(), // module name
+                                 m->GetInterface(),
+                                 m->GetDescription(),
+                                 "", // long description
+                                 m->GetVersion(),
+                                 "",
+                                 m
+                              );
       (*listing)[count++] = entry;
    }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
+
    return listing;
 }
 
