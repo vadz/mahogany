@@ -2742,9 +2742,8 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   // we are ignoring the errflg and always put these at level 1 (WARN)
-   // don't know exactly what to do with them
-   mm_log(str, WARN, MailFolderCC::LookupObject(stream));
+   // I don't really know what the difference with mm_log is...
+   mm_log(str, errflg, MailFolderCC::LookupObject(stream));
 }
 
 
