@@ -1268,7 +1268,38 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
       }
       else if ( !login.empty() )
       {
-         spec << _T("/user=") << login;
+         spec << _T("/user=");
+
+         // we need to quote the user name if it contains slashes or colons
+         // which have special meaning in remote spec for c-client
+         bool needQuotes = false;
+         String loginQuoted;
+         const size_t len = login.length();
+         for ( size_t n = 0; n < len; n++ )
+         {
+            const wxChar ch = login[n];
+            if ( ch == _T(':') || ch == _T('/') )
+            {
+               // were we already quoting before?
+               if ( !needQuotes )
+               {
+                  // no, but we do need to quote
+                  loginQuoted.reserve(len + 2);
+                  loginQuoted.assign(login, 0, n);
+                  needQuotes = true;
+               }
+
+               loginQuoted += _T('\\');
+            }
+
+            if ( needQuotes )
+               loginQuoted += ch;
+         }
+
+         if ( needQuotes )
+            spec << _T('"') << loginQuoted << _T('"');
+         else
+            spec << login;
       }
       //else: we'll ask the user about his login later
    }
