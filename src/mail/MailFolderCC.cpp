@@ -1224,11 +1224,11 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
       }
 #endif // USE_SSL
 
-      // if it has server, it must have a login as well
-      if ( !login.empty() )
-         spec << "/user=" << login;
-      else if ( flags & MF_FLAGS_ANON )
+      // if it has server, it should normally have a login as well
+      if ( flags & MF_FLAGS_ANON )
          spec << "/anonymous";
+      else if ( !login.empty() )
+         spec << "/user=" << login;
       //else: we'll ask the user about his login later
    }
 
