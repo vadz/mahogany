@@ -679,7 +679,7 @@ public:
 
          // construct the label
          String label;
-         label << m_msgProgress << _T('\n');
+         label << m_msgProgress;
          
          // Don't show subject/sender if the mail is going to be filtered.
          // There may be heaps of spam and whatever garbage. It's
