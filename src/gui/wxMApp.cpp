@@ -39,6 +39,7 @@
 
 #include <wx/msgdlg.h>   // for wxMessageBox
 #include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
+#include <wx/ffile.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
@@ -97,6 +98,15 @@ public:
 
 private:
    bool m_hasWindow;
+};
+
+// a wxLogStderr version which closes the file it logs to
+class MLogFile : public wxLogStderr
+{
+public:
+   MLogFile(FILE *fp) : wxLogStderr(fp) { }
+
+   virtual ~MLogFile() { fclose(m_fp); }
 };
 
 // a timer used to periodically autosave profile settings
@@ -361,11 +371,16 @@ wxMApp::wxMApp(void)
    m_IdleTimer = NULL;
    m_OnlineManager = NULL;
    m_DialupSupport = FALSE;
+
    m_logWindow = NULL;
+   m_logChain = NULL;
 }
 
 wxMApp::~wxMApp()
 {
+#ifdef wxHAS_LOG_CHAIN
+   delete m_logChain;
+#endif // wxHAS_LOG_CHAIN
 }
 
 void
@@ -516,6 +531,9 @@ wxMApp::OnInit()
 #ifndef DEBUG
    wxHandleFatalExceptions();
 #endif
+
+   if ( !wxApp::OnInit() )
+      return false;
 
 #ifdef OS_WIN
    // stupidly enough wxWin resets the default timestamp under Windows :-(
@@ -1408,6 +1426,9 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    m_topLevelFrame->GetStatusBar()->SetStatusText(msg, field);
 }
 
+// ----------------------------------------------------------------------------
+// dial up support
+// ----------------------------------------------------------------------------
 
 void
 wxMApp::SetupOnlineManager(void)
@@ -1541,6 +1562,48 @@ wxMApp::SetAwayMode(bool isAway)
 // log window support (see also wxMLogWindow)
 // ----------------------------------------------------------------------------
 
+void wxMApp::SetLogFile(const String& filename)
+{
+#ifdef wxHAS_LOG_CHAIN
+   if ( filename.empty() )
+   {
+      if ( m_logChain )
+      {
+         // just disable logging to the old file and only pass messages
+         // through to the next log target
+         m_logChain->SetLog(NULL);
+      }
+   }
+   else // log to file
+   {
+      wxFFile file(filename, "w");
+      if ( !file.IsOpened() )
+      {
+         wxLogError(_("Failed to open log file for writing."));
+      }
+      else
+      {
+         wxLog *log = new MLogFile(file.fp());
+
+         // leave the file opened
+         file.Detach();
+
+         if ( m_logChain )
+         {
+            m_logChain->SetLog(log);
+         }
+         else
+         {
+            m_logChain = new wxLogChain(log);
+         }
+
+         wxLogVerbose(_("Started logging to the log file '%s'."),
+                      filename.c_str());
+      }
+   }
+#endif // wxHAS_LOG_CHAIN
+}
+
 bool wxMApp::IsLogShown() const
 {
    return m_logWindow && m_logWindow->IsShown();
@@ -1575,3 +1638,4 @@ void wxMApp::ShowLog(bool doShow)
       m_logWindow->Show(doShow);
    }
 }
+

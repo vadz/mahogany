@@ -1064,10 +1064,10 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
      varName.Trim(); varName.Trim(FALSE);
 
      // clean away eventual quotes
-     if (varName[0] == '"' && varName[varName.Len()-1] == '"')
+     if (varName[0u] == '"' && varName[varName.Len()-1] == '"')
       varName = varName(1,varName.Len()-2);
 
-     if (value[0] == '"' && value[value.Len()-1] == '"')
+     if (value[0u] == '"' && value[value.Len()-1] == '"')
       value = value(1,value.Len()-2);
 
      // and now the white space again, e.g. " \" the value \""

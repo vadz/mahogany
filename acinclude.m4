@@ -123,9 +123,9 @@ AC_DEFUN(M_CHECK_MYHEADER,
        dir=`eval echo $\`eval echo m_cv_header_$m_safe\``
        if test x$dir != x"/usr/include"; then
          dirshow=$dir
+         eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
        fi
        AC_MSG_RESULT(yes (in ${dirshow-standard location}))
-       eval "CPPFLAGS=\"-I$dir $CPPFLAGS\""
        ifelse([$3], , :, [$3])
     else
        AC_MSG_RESULT(no)

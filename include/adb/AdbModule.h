@@ -95,7 +95,7 @@ public:
    virtual const char *GetDescription() const = 0;
 
 private:
-   friend AdbModuleInfo; // give it access to ms_listModules
+   friend struct AdbModuleInfo; // give it access to ms_listModules
    static AdbModuleInfo *ms_listModules;
 };
 

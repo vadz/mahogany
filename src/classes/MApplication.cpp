@@ -428,6 +428,9 @@ MAppBase::OnStartup()
       ShowLog();
    }
 
+   // also start file logging if configured
+   SetLogFile(READ_APPCONFIG(MP_LOGFILE));
+
    // now we have finished the vital initialization and so can assume
    // everything mostly works
    m_cycle = Running;

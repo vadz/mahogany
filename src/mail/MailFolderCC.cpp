@@ -1198,8 +1198,8 @@ void MailFolderCC::Init()
    m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
-   m_expungedIndices = NULL;
 
+   m_expungedIndices = NULL;
    m_statusNew = NULL;
 
    // currently not used, but might be in the future
@@ -1224,9 +1224,20 @@ MailFolderCC::~MailFolderCC()
    Close();
 
    // these should have been deleted before
-   ASSERT(m_expungedIndices == NULL);
    ASSERT(m_SearchMessagesFound == NULL);
    ASSERT(m_statusNew == NULL);
+
+   // normally this one should be deleted as well but POP3 server never sends
+   // us mm_expunged() (well, because it never expunges the messages until we
+   // close the folder but by this time the notifications are blocked) so in
+   // this case it may be left lying around
+   if ( m_expungedIndices )
+   {
+      ASSERT_MSG(GetType() == MF_POP, "m_expungedIndices unexpectedly !NULL");
+
+      delete m_expungedIndices;
+      m_expungedIndices = NULL;
+   }
 
    // we might still be listed, so we better remove ourselves from the
    // list to make sure no more events get routed to this (now dead) object
@@ -1731,6 +1742,12 @@ MailFolderCC::CloseFolder(const MFolder *folder)
    {
       mf->m_Listing->DecRef();
       mf->m_Listing = NULL;
+   }
+
+   if ( mf->m_expungedIndices )
+   {
+      delete mf->m_expungedIndices;
+      mf->m_expungedIndices = NULL;
    }
 
    mf->Init();

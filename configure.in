@@ -255,7 +255,7 @@ AC_DEFUN([M_OPER_NAMES],
 
 dnl really a subroutine to avoid nesting source lines too deeply
 AC_DEFUN([M_GCC_BUGGY_NO_OPERATOR_NAMES],
-[AC_CACHE_CHECK(if disabling the logical operator names works,
+[AC_CACHE_CHECK(if disabling the logical operator names is buggy,
 	m_cv_gcc_buggy_fno_operator_names,
 	[case "$GCC" in
 	yes)	echo '#define TEST 1
@@ -316,7 +316,9 @@ case "$m_cv_cxx_opernames" in yes)
 			AC_MSG_ERROR([Sorry, it seems that you have a buggy gcc version which is
 	not able to compile Mahogany (gcc-2.96-69 shipped by Red Hat with Red
 	Hat Linux 7.0 is one of them). Please upgrade it.$workaroundmsg]) ;;
-			esac ;;
+			no)
+            CXXFLAGS="$CXXFLAGS $m_cv_cxx_disableopernames"
+            esac ;;
 		esac ;;
 	esac
 esac
@@ -1043,7 +1045,7 @@ dnl	c-client
 CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/c-client"
 LIBS="$BUILDDIR/extra/src/c-client/c-client.a $LIBS"
 dnl	compface
-CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface"
+CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface -I$SOURCEDIR/src/wx/vcard"
 LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
 
 dnl --------------------------------------------------------------------------

@@ -168,6 +168,8 @@ enum MFolderIndex
 
 /// show log window?
 #define   MP_SHOWLOG          "ShowLog"
+/// the file to save log messages to (if not empty)
+#define   MP_LOGFILE          "LogFile"
 /// debug protocols and folder access?
 #define   MP_DEBUG_CCLIENT   "MailDebug"
 
@@ -844,6 +846,8 @@ enum MFolderIndex
 #define   MP_MAXIMISED_D 0l
 /// show log window?
 #define   MP_SHOWLOG_D  1
+/// the file to save log messages to (if not empty)
+#define   MP_LOGFILE_D ""
 /// debug protocols and folder access?
 #define   MP_DEBUG_CCLIENT_D   0l
 /// open ADB editor on startup?

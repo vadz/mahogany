@@ -254,7 +254,7 @@ public:
       { return StopTimer(timer) && StartTimer(timer); }
    //@}
 
-   /** @name Log window */
+   /** @name Logging */
    //@{
 
    /// return TRUE if the log window is currently shown
@@ -263,6 +263,8 @@ public:
    /// show or hide the log window
    virtual void ShowLog(bool doShow = TRUE) = 0;
 
+   /// set the name of the file to use for logging (disable if empty)
+   virtual void SetLogFile(const String& filename) = 0;
    //@}
 
    /** @name Thread control */

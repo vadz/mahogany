@@ -24,6 +24,7 @@
 class WXDLLEXPORT wxDialUpManager;
 class WXDLLEXPORT wxLocale;
 class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxLogChain;
 class WXDLLEXPORT wxHelpControllerBase;
 class WXDLLEXPORT wxPrintData;
 class WXDLLEXPORT wxTimer;
@@ -60,6 +61,7 @@ public:
 
    virtual bool IsLogShown() const;
    virtual void ShowLog(bool doShow = TRUE);
+   virtual void SetLogFile(const String& filename);
 
    // override this to return true only if all frames can close
    virtual bool CanClose() const;
@@ -184,6 +186,9 @@ private:
 
    /// the log window (may be NULL)
    class wxMLogWindow *m_logWindow;
+
+   /// the chaining log target for file logging (may be NULL)
+   wxLogChain *m_logChain;
 
    DECLARE_EVENT_TABLE()
 };

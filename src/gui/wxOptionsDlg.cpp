@@ -365,7 +365,10 @@ enum ConfigFields
 
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
+   ConfigField_LogHelp,
    ConfigField_ShowLog,
+   ConfigField_LogToFile,
+   ConfigField_MailLog,
    ConfigField_ShowTips,
    ConfigField_Splash,
    ConfigField_SplashDelay,
@@ -374,7 +377,6 @@ enum ConfigFields
    ConfigField_ConfirmExit,
    ConfigField_OpenOnClick,
    ConfigField_ShowHiddenFolders,
-   ConfigField_DebugCClient,
    ConfigField_HelpDir,
 #ifdef USE_SSL
    ConfigField_SslHelp,
@@ -1045,7 +1047,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
 
    // other options
+   { gettext_noop("Mahogany may log everything into the log window, a file\n"
+                  "or both simultaneously. Additionally, you may enable mail\n"
+                  "debugging option to get much more detailed messages about\n"
+                  "mail folder accesses: although this slows down the program\n"
+                  "a lot, it is very useful to diagnose the problems.\n\n"
+                  "Please turn it on and join the log output to any bug\n"
+                  "reports you send us (of course, everybody knows that there\n"
+                  "are no bugs in Mahogany, but just in case :-)"),             Field_Message,    -1,                    },
    { gettext_noop("Show &log window"),             Field_Bool,    -1,                    },
+   { gettext_noop("Log to &file"),                 Field_File,    -1,                    },
+   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1                     },
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
@@ -1056,7 +1068,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
-   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1 },
 
    { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 
@@ -1090,7 +1101,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "mail arrival temporarily without having to shut down."), Field_Message, -1 },
    { gettext_noop("Enter awa&y mode when idle during (min):"), Field_Number, -1 },
    { gettext_noop("E&xit away mode automatically"), Field_Bool, -1 },
-   { gettext_noop("Rememeber a&way status (otherwise always reset it)"), Field_Bool, -1 },
+   { gettext_noop("Rememeber a&way status"), Field_Bool, -1 },
 
    // sync page
    { gettext_noop("Mahogany can synchronise part of its configuration\n"
@@ -1353,7 +1364,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
 
    // other
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_SHOWLOG),
+   CONFIG_ENTRY(MP_LOGFILE),
+   CONFIG_ENTRY(MP_DEBUG_CCLIENT),
    CONFIG_ENTRY(MP_SHOWTIPS),
    CONFIG_ENTRY(MP_SHOWSPLASH),
    CONFIG_ENTRY(MP_SPLASHDELAY),
@@ -1362,7 +1376,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
-   CONFIG_ENTRY(MP_DEBUG_CCLIENT),
    CONFIG_ENTRY(MP_HELPDIR),
 #ifdef USE_SSL
    CONFIG_NONE(),
@@ -2634,6 +2647,8 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       {
          mApplication->ShowLog(showLog);
       }
+
+      mApplication->SetLogFile(READ_CONFIG(m_Profile, MP_LOGFILE));
    }
 
    return rc;

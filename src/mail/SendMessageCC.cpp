@@ -1288,7 +1288,7 @@ SendMessageCC::Send(void)
       else // failed to send/post
       {
          String tmpbuf = MailFolder::GetLogCircle().GuessError();
-         if(tmpbuf[0])
+         if(tmpbuf[0u])
             ERRORMESSAGE((tmpbuf));
          tmpbuf.Printf(_("Failed to send - %s\n"),
                        (reply.Length() > 0) ? reply.c_str()
@@ -1299,7 +1299,7 @@ SendMessageCC::Send(void)
    else // error in opening stream
    {
       String tmpbuf = MailFolder::GetLogCircle().GuessError();
-      if(tmpbuf[0])
+      if(tmpbuf[0u])
          ERRORMESSAGE((tmpbuf));
       ERRORMESSAGE((_("Cannot open connection to any server.\n")));
       success = false;
@@ -1346,7 +1346,8 @@ void
 SendMessageCC::WriteToFile(const String &filename, bool append)
 {
    ofstream *ostr = new ofstream(filename.c_str(),
-                                 ios::out | (append ? 0 : ios::trunc));
+                                 append ? ios::out : ios::out | ios::trunc);
+
    bool ok = !(!ostr || ostr->bad());
    if ( ok )
       ok = WriteMessage(write_stream_output, ostr);

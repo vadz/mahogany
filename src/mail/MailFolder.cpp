@@ -339,7 +339,7 @@ MailFolder::OpenFolder(int folderType,
    else // type != PROFILE
    {
       //      String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
-      if(symbolicName[0] == '/')
+      if(symbolicName[0u] == '/')
         profile = Profile::CreateEmptyProfile(parentProfile);
       else
         profile = Profile::CreateProfile(symbolicName, parentProfile);

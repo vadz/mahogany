@@ -1350,7 +1350,7 @@ strutil_getMailAddress(const String &inputline,
       }
       if(personal.Length())
       {
-         if(personal[0] == '"')
+         if(personal[0u] == '"')
          {
             personal = personal.c_str() + 1;
             personal = personal.BeforeLast('"');

@@ -3119,7 +3119,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                MFilterDesc fd = filter->GetDesc();
                filterString += fd.GetRule();
             }
-            if(filterString[0]) // not empty
+            if(filterString[0u]) // not empty
             {
                // translate filter program:
                FilterRule * filterRule = filterModule->GetFilter(filterString);

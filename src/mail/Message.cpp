@@ -278,13 +278,13 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
    host    = strutil_after(email1, '@');
    strutil_tolower(host);
    email1 = mailbox;
-   if(host[0]) email1 << '@' << host;
+   if(host[0u]) email1 << '@' << host;
 
    mailbox = strutil_before(email2,'@');
    host    = strutil_after(email2, '@');
    strutil_tolower(host);
    email2 = mailbox;
-   if(host[0]) email2 << '@' << host;
+   if(host[0u]) email2 << '@' << host;
 
    // TODO the address foo.bar@baz.com should be considered the same as
    //      bar@baz.com, for now it is not...

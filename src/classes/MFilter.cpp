@@ -616,7 +616,7 @@ protected:
          m_Settings = NULL;
          // we now prefer to parse the filter code:
          m_Rule = p->readEntry("Rule", "");
-         if( m_Rule[0] )
+         if( m_Rule[0u] )
          {
             MFDialogSettingsImpl *control = new MFDialogSettingsImpl;
             bool rc = control->ReadSettingsFromRule(m_Rule);

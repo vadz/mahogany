@@ -355,7 +355,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    {
       if ( !!m_folderPath )
       {
-         if ( m_folderPath[0] == '/' )
+         if ( m_folderPath[0u] == '/' )
          {
             m_folderPath.erase(0, 1);
          }
@@ -523,7 +523,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
       {
          if ( m_chDelimiter )
          {
-            if ( !!name && name[0] == m_chDelimiter )
+            if ( !!name && name[0u] == m_chDelimiter )
             {
                name = name.c_str() + 1;
             }

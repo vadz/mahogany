@@ -182,7 +182,7 @@ protected:
     // create properties corresponding to our flags in vObject
     static void SetFlags(VObject *vObj, int flags);
 
-    friend wxVCard; // calls SetFlags
+    friend class wxVCard; // calls SetFlags
 };
 
 // this is the broken-down address

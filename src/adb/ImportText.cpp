@@ -207,7 +207,7 @@ bool AdbTextImporter::TestDelimiter(char chDelimiter)
       size_t maxDiff = nDelimitersAverage / 10;
       for ( nLine = 0; m_lastTestResult && (nLine < nLines); nLine++ )
       {
-         if ( abs(nDelimiters[nLine] - nDelimitersAverage) > (int)maxDiff )
+         if ( abs((int)(nDelimiters[nLine] - nDelimitersAverage)) > (int)maxDiff )
          {
             // this line looks strange...
             return FALSE;
