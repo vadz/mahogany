@@ -377,7 +377,7 @@ MailFolderCC::GetName(void) const
    case MF_IMAP:
       symbolicName << "imap_" << m_Login; break;
    case MF_NNTP:
-      symbolicName << "news_" << m_Login;
+      symbolicName << "news_" << m_Login; break;
    default:
       ASSERT(0);
    }
