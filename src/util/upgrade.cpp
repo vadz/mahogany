@@ -2242,6 +2242,31 @@ RemoveProfileTypes(wxConfigBase *config)
    }
 }
 
+static void
+RemoveNonFolderProfiles(wxConfigBase *config)
+{
+   String name;
+   long cookie;
+   bool cont = config->GetFirstGroup(name, cookie);
+   while ( cont )
+   {
+      if ( config->Read(name + "/ProfileType", 0l) != 1 )
+      {
+         wxLogWarning(_("Invalid config settings group '%s' was removed."),
+                      name.c_str());
+         config->DeleteGroup(name);
+      }
+      else // valid folder group, descend into it
+      {
+         config->SetPath(name);
+         RemoveNonFolderProfiles(config);
+         config->SetPath("..");
+      }
+
+      cont = config->GetNextGroup(name, cookie);
+   }
+}
+
 static bool
 UpgradeFrom061()
 {
@@ -2287,25 +2312,12 @@ UpgradeFrom061()
       config->DeleteGroup(pathOld);
    }
 
-   // delete all top level groups without ProfileType=1 in them: normally,
-   // there shouldn't be any, but somehow in my own ~/.M/config there is osme
-   // junk (maybe left from some very old version?) and if we leave them in
-   // config we'd have all kinds of problems with them because they don't
-   // represent the real folders
-   String name;
-   long cookie;
-   bool cont = config->GetFirstGroup(name, cookie);
-   while ( cont )
-   {
-      if ( config->Read(name + "/ProfileType", 0l) != 1 )
-      {
-         wxLogWarning(_("Invalid config settings group '%s' was removed."),
-                      name.c_str());
-         config->DeleteGroup(name);
-      }
-
-      cont = config->GetNextGroup(name, cookie);
-   }
+   // delete all groups under M_PROFILE_CONFIG_SECTION without ProfileType=1 in
+   // them: normally, there shouldn't be any, but somehow in my own ~/.M/config
+   // there is some junk (maybe left from some very old version?) and if we
+   // leave them in config we'd have all kinds of problems with them because
+   // they don't represent the real folders
+   RemoveNonFolderProfiles(config);
 
    // finally remove all ProfileType entries which are unused any more
    RemoveProfileTypes(config);

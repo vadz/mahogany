@@ -16,6 +16,12 @@ $Id$
 
 ************ bugs
 
+1. templates:
+ a) upgrading from 0.63
+ b) new ones?
+2. custom headers
+3. identities??
+
 ************ optimize
 
 HeaderInfo::GetFromOrTo() is called *all* the time and is awfully slow as it
