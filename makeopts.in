@@ -27,8 +27,8 @@ ODIR=.
 # canonical host
 CANONICAL_HOST=@host@
 
-# DOC++/kdoc
-DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
+# DOC++/kdoc (doc++ is preferred, -r to do short filenames to avoid dpkg bug)
+DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
 DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/classes.tex
 KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M  
 KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
