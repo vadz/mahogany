@@ -732,13 +732,13 @@ int TwoFishCrypt(
    BYTE * output = (BYTE *) calloc(byteCnt,1);
    memcpy(input, data_in->data, byteCnt);
 
-   if (makeKey(&ki,DIR_ENCRYPT,keySize,NULL) != TRUE)
+   if ( !makeKey(&ki,DIR_ENCRYPT,keySize,NULL) )
    {
       free(input);
       free(output);
       return 0;
    }
-   if (cipherInit(&ci,MODE_ECB,NULL) != TRUE)
+   if ( !cipherInit(&ci,MODE_ECB,NULL) )
    {
       free(input);
       free(output);
