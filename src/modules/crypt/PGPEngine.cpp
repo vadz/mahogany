@@ -559,6 +559,10 @@ PGPEngine::DoExecCommand(const String& options,
                status = BAD_ARGUMENT_ERROR;
                wxLogWarning(_("The PGP message is malformed, "
                               "processing aborted."));
+               // If the message is not correctly formatted, GPG does not 
+               // output the resulting message, so we must copy the input
+               // into the output
+               messageOut = messageIn;
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
