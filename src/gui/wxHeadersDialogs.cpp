@@ -54,6 +54,8 @@
 #  include <wx/statbmp.h>
 
 #  include <wx/utils.h>  // wxMax()
+
+#  include "strutil.h"   // strutil_flatten_array()
 #endif
 
 #include <wx/imaglist.h>
