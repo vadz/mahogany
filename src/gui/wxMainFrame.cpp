@@ -76,8 +76,10 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
 
-   m_ToolBar->CreateTools();
-#endif
+#	ifdef OS_WIN
+		m_ToolBar->CreateTools();
+#	endif // Windows
+#endif // wxWin 2
    
 #ifndef  USE_WXWINDOWS2
    CreateStatusLine(1);
