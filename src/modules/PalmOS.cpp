@@ -255,6 +255,8 @@ private:
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
 
+   int GetPalmDBList(wxArrayString &dblist, bool getFilenames);
+
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
    int CreateFileList(char *** list, DIR * dir, wxString directory);
    void DeleteFileList(char **list, int filecount);
@@ -833,6 +835,49 @@ PalmOSModule::DeleteFileList(char **list, int filecount)
 }
 
 
+int
+PalmOSModule::GetPalmDBList(wxArrayString &dblist, bool getFilenames) 
+{
+   dblist.Empty();
+
+   // connect to the Palm
+   PiConnection conn(this);
+   if( ! IsConnected())
+      return 0;
+
+   int i = 0;
+   int max = 0;
+
+   while (true) {
+      struct DBInfo info;
+      if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
+         break;
+
+      char     name[256];
+      wxString dbname;
+
+      if (getFilenames) {
+         // construct filename
+         protect_name(name, info.name);
+         if (info.flags & dlpDBFlagResource)
+            strcat(name, ".prc");
+         else
+            strcat(name, ".pdb");
+            
+         dbname.Printf("%s", name);
+      } else
+         dbname.Printf("%s", info.name);
+
+      dblist.Add(dbname);
+
+      ++max;
+      i = info.index + 1;
+   }
+
+   return max;
+}
+
+
 // ----------------------------------------------------------------------------
 // Backup
 // ----------------------------------------------------------------------------
@@ -941,13 +986,20 @@ PalmOSModule::Backup(void)
       f = pi_file_create(name, &info);
 
       if (f == 0) {
-         ErrorMessage(_("Unable to create file!"));
-         break;
+         wxString msg;
+         msg.Printf(_("Unable to create file %s!"),
+                       name);
+         ErrorMessage(_(msg));
+         continue;
       }
 
-      if (pi_file_retrieve(f, m_PiSocket, 0) < 0)
-         ErrorMessage(_("Unable to back up database!"));
-
+      if (pi_file_retrieve(f, m_PiSocket, 0) < 0) {
+         wxString msg;
+         msg.Printf(_("Unable to backup database %s!"),
+                       name);
+         ErrorMessage(_(msg));
+      }
+      
       pi_file_close(f);
 
       /* Note: This is no guarantee that the times on the host system
@@ -1022,10 +1074,11 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
       f = pi_file_open(db[dbcount]->name);
 
       if (f==0) {
-         // TODO: show filename
-         ErrorMessage(_("Could not open file or file invalid!"));
-         ErrorMessage(_(db[dbcount]->name));
-         break;
+         wxString msg;
+         msg.Printf(_("Could not open file %s or file invalid."),
+                       db[dbcount]->name);
+         ErrorMessage(_(msg));
+         continue;
       }
 
       pi_file_get_info(f, &info);
@@ -1083,10 +1136,11 @@ PalmOSModule::InstallFiles(char **fnames, int files_total, bool delFile)
       f = pi_file_open(db[i]->name);
       if (f == 0)
       {
-         // TODO: display filename
-         ErrorMessage(_("Could not open file or file invalid!"));
-         ErrorMessage(_(db[dbcount]->name));
-         break;
+         wxString msg;
+         msg.Printf(_("Could not open file %s or file invalid!"),
+                       db[dbcount]->name);
+         ErrorMessage(_(msg));
+         continue;
       }
 
       fflush(stdout);
@@ -1139,7 +1193,10 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
 
    dir = opendir(directory);
    if (dir <= 0) {
-      ErrorMessage(_("Couldn´t access directory.")); //TODO : add directory name
+      wxString msg;
+      msg.Printf(_("Could not access directory %s!"),
+                   directory.c_str());
+      ErrorMessage(_(msg));
       return;
    }
 
@@ -1228,7 +1285,7 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 
    /* Open the Address database, store access handle in db */
    if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
-      ErrorMessage(_(" AddressDB"));
+      ErrorMessage(_("Could not open AddressDB."));
       dlp_AddSyncLogEntry(m_PiSocket, "Unable to open AddressDB.\n");
       exit(1);
    }
