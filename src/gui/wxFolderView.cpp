@@ -274,7 +274,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             {
                if(idx != focused)  // allow us to toggle the focused item
                   SetItemState(idx,0,wxLIST_STATE_SELECTED);
-               idx++;
+               //new wxGTK semantics idx++;
             }
          }
          break;
@@ -296,8 +296,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
    // there is exactly one item with the focus on  it:
    long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   if(focused == -1) // how can this happen?
-      return;
+   wxASSERT(focused != -1) // testing for wxGTK bug
    // in this case we operate on the highlighted  message
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    if(hil)
@@ -446,7 +445,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
                                    wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
                != -1 && (unsigned long)item < hil->Count())
          {
-            hi = (*hil)[item++];
+            hi = (*hil)[item]; // no more ++, wxGTK changed
             if(hi)
                selections.Add(hi->GetUId());
          }
@@ -457,7 +456,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
             item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
             if(item != -1 && (unsigned long)item < hil->Count())
             {
-               hi = (*hil)[item++];
+               hi = (*hil)[item]; // no more ++ wxGTK semantics changed
                if(hi)
                   selections.Add(hi->GetUId());
             }
@@ -564,7 +563,7 @@ wxFolderListCtrl::SelectNextUnread()
       }
       if(hi->GetUId() == focusedUId)
             foundFocused = true;
-      idx++;
+      // semantics changed idx++;
    }
    SafeDecRef(hil);
 }
