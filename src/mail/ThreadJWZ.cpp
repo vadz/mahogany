@@ -1523,14 +1523,16 @@ static Threadable *BuildThreadableList(const HeaderInfoList *hilp)
 // Scan the Threadable tree and fill the arrays needed to
 // correctly display the threads
 //
-static void FlushThreadable(Threadable *t,
+static size_t FlushThreadable(Threadable *t,
                             MsgnoType *indices,
-                            size_t *indents
+                            size_t *indents, 
+                            MsgnoType *children
 #if defined(DEBUG)
                             , bool seen[]
 #endif
                             )
 {
+  size_t number = 0;    // For this one
    if (!t->isDummy())
    {
       size_t threadedIndex = t->getThreadedIndex();
@@ -1541,18 +1543,25 @@ static void FlushThreadable(Threadable *t,
       seen[index] = true;
 #endif
    }
-   if (t->getChild())
+
+   if (t->getChild()) {
+      number +=
 #if defined(DEBUG)
-      FlushThreadable(t->getChild(), indices, indents, seen);
+         FlushThreadable(t->getChild(), indices, indents, children, seen);
 #else
-      FlushThreadable(t->getChild(), indices, indents);
+         FlushThreadable(t->getChild(), indices, indents, children);
 #endif
-   if (t->getNext())
+   }
+   children[t->getIndex()] = number;
+   if (t->getNext()) {
+     number +=
 #if defined(DEBUG)
-      FlushThreadable(t->getNext(), indices, indents, seen);
+         FlushThreadable(t->getNext(), indices, indents, children, seen);
 #else
-   FlushThreadable(t->getNext(), indices, indents);
+         FlushThreadable(t->getNext(), indices, indents, children);
 #endif
+   }
+   return number + 1;   // +1 for counting current message
 }
 
 // ----------------------------------------------------------------------------
@@ -1599,7 +1608,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
       bool *seen = new bool[count];
       for (i = 0; i < count; ++i)
          seen[i] = false;
-      FlushThreadable(threadableRoot, indices, indents, seen);
+      FlushThreadable(threadableRoot, indices, indents, thrData->m_children, seen);
       for (i = 0; i < count; ++i)
          ASSERT(seen[i]);
       for (i = 0; i < count; ++i)
@@ -1611,10 +1620,10 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
       delete [] seen;
 
 #else
-      FlushThreadable(threadableRoot, indices, indents);
+      FlushThreadable(threadableRoot, indices, thrData->m_children, indents);
 #endif
       threadableRoot->destroy();
-
+/*
       // compute the number of children for each message
       //
       // TODO: again, it surely may be done far simpler in the code above
@@ -1636,7 +1645,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
          // save the number of children
          thrData->m_children[indices[i]] = j - i - 1;
       }
-
+*/
       // convert to msgnos from indices
       //
       // TODO: compute directly msgnos, not indices in the code above
