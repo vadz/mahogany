@@ -14,8 +14,9 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-- ADB lookups take to long, delay in switching between messages, add a 
-  "message/collect address" menu and keyboard binding
+- A problem with expunging message from MailFolderCC: as the messages
+  are queued, they cause fetches of messages which no longer exist
+  because the count has not yet been updated.
 - suspected bug in LoadImageXpm in wxIconmanager leading to crashes
 - make wxFolderView::Update() a bit more intelligent. Clicking on
   unread mails changes the flags and therefore resets selection.
@@ -32,10 +33,6 @@ $Id$
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog?
 
- - investigate problem of empty message bodies (e.g. on Micky's mails
-   from the Scottish Office).
- - ADB: does not use substring??? (Joen_Doedoe no expansion for
-   "doe" or "Doe")
  - folderview listctrl has extra Subject column behind Size field ???
  - when inserting filetype of unknown MIME type, prompt for it,
    possibly have a MIME types editor (similar to netscape's?)
@@ -87,8 +84,13 @@ $Id$
   - trying to exit M when wxMessageViews are open doesn't work, message 
     view remains there
   - add "Inline" option for MIME popup on graphics
+  - The "Specify global M directory" dialog doesn't save its value.
 
 - ADB:
+  - ADB: does not use substring??? (Joen_Doedoe no expansion for
+    "doe" or "Doe")
+  - ADB lookups take to long, delay in switching between messages, add a 
+    "message/collect address" menu and keyboard binding
   + make AdbEdit auto-generate a formatted name from first/family-name
     and prefix/title. 
   + for names without entries, use the same method for name generation 
@@ -420,6 +422,8 @@ classes in the hierarchy.
  - clear MessageView, for this:
  - modify wxMessageView to only temporarily use Profile when needed, so 
    it doesn't stay with the old folderview profile
+ - investigate problem of empty message bodies (e.g. on Micky's mails
+   from the Scottish Office).  SEEMS GONE!?
 
 
 

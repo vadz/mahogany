@@ -13,9 +13,6 @@ $Id$
          from the spool M crashes with meaningless backtrace.
 0010  KB Using a global /etc/M.conf file leads to lots of strange results.
 0014  KB Sometimes program doesn't react to Exit button/menu. 
-0015  KB POP mail folders are a bit broken: "large" messages don't
-         show up or corrupt other message contents --> are we really fetching
-         all the required data from the server?
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
@@ -42,4 +39,6 @@ $Id$
          headers, no content, same for save to file. Now even
          causes segfaults.
 0016  KB "Show raw message text" broken: only gets called from message 
-         view and then only shows empty window
+          view and then only shows empty window
+0015  KB POP mail folders are a bit broken: "large" messages don't
+         show up or corrupt other message contents
