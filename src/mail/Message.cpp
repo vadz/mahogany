@@ -439,13 +439,13 @@ bool Message::GetHeaderLine(const String& line,
    if ( values.IsEmpty() )
    {
       value.clear();
-
-      return false;
+   }
+   else
+   {
+      value = values[0];
    }
 
-   value = values[0];
-
-   return true;
+   return !value.empty();
 }
 
 // ----------------------------------------------------------------------------
