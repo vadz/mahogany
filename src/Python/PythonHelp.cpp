@@ -47,6 +47,7 @@ extern "C"
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_PYTHONMODULE_TO_LOAD;
 extern const MOption MP_USEPYTHON;
 
 // ----------------------------------------------------------------------------
@@ -69,50 +70,13 @@ private:
    PyObject *m_pyObj;
 };
 
-// ----------------------------------------------------------------------------
-// private functions prototypes
-// ----------------------------------------------------------------------------
-
-/**
-   Converts a PyObject to a C++ variable in a safe way.
-
-   This function takes ownership of pyResult (i.e. it calls Py_DECREF() on it if
-   it is not non-NULL) unless it is returned in result.
-
-   @param pyResult the object to convert
-   @param format the format string
-   @param result where to store it
-   @return true if ok, false on error
-*/
-static bool
-PythonConvertResultToC(PyObject *pyResult, const char *format, void *result);
-
 // ============================================================================
 // implementation
 // ============================================================================
 
-bool
-PythonConvertResultToC(PyObject *pyResult, const char *format, void *result)
-{
-   CHECK( result && format && format[0], false,
-            _T("PythonConvertResultToC: invalid parameters") );
-
-   if ( !pyResult )
-      return false;
-
-   // try to convert
-   if ( !PyArg_Parse(pyResult, (char *)format, result) )
-   {
-      Py_DECREF(pyResult);
-      return false;
-   }
-
-   // free the object unless we return it as our result
-   if ( format[0] != 'O' )
-      Py_DECREF(pyResult);
-
-   return true;
-}
+// ----------------------------------------------------------------------------
+// calling Python functions
+// ----------------------------------------------------------------------------
 
 int
 PythonCallback(const char *name,
@@ -154,87 +118,103 @@ PythonCallback(const char *name,
    return result;
 }
 
+// common part of PythonFunction() and PythonStringFunction()
+static
 bool
-PythonFunction(const char *func,
-                   void *obj,
-                   const char *classname,
-                   const char *resultfmt,
-                   void *result)
+FindPythonFunction(const char *func, PyObject **module, PyObject **function)
 {
    // first check if Python is not disabled
    if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
       ERRORMESSAGE(( _("Python support is disabled, please enable it in "
                        "the \"Preferences\" dialog.") ));
+      return false;
    }
-   else
+
+   // next determine which module should we load the function from
+   String functionName = func;
+
+   // does function name contain module name?
+   String modname;
+   if(strchr(func,'.') != NULL)
    {
-      // next determine which module should we load the function from
-      String functionName = func;
+      const char *cptr = func;
+      while(*cptr != '.')
+         modname += *cptr++;
+      functionName = "";
+      cptr++;
+      while(*cptr)
+         functionName += *cptr++;
+   }
+   else // no explicit module, use the default one
+   {
+      modname = GetStringDefault(MP_PYTHONMODULE_TO_LOAD);
+   }
 
-      // does function name contain module name?
-      String modname;
-      if(strchr(func,'.') != NULL)
+   // load the module containing the function
+   *module = PyImport_ImportModule((char *)modname.c_str());
+
+   if ( !module )
+   {
+      ERRORMESSAGE(( _("Module \"%s\" couldn't be loaded."),
+                     modname.c_str() ));
+      return false;
+   }
+
+   // we want to allow modifying the Python code on the fly, so try to
+   // reload the module here -- this is nice for playing with Python even
+   // if possibly very slow...
+   PyObject *moduleRe = PyImport_ReloadModule(*module);
+   if ( moduleRe )
+   {
+      Py_XDECREF(*module);
+      *module = moduleRe;
+   }
+   //else: if reloading failed, fall back to the original module
+
+   *function = PyObject_GetAttrString(*module,
+                     const_cast<char *>(functionName.c_str()));
+   if ( !*function )
+   {
+      Py_XDECREF(*module);
+
+      ERRORMESSAGE(( _("Function \"%s\" not found in module \"%s\"."),
+                     functionName.c_str(), modname.c_str() ));
+      return false;
+   }
+
+   return true;
+}
+
+bool
+PythonFunction(const char *func,
+               void *obj,
+               const char *classname,
+               const char *resultfmt,
+               void *result)
+{
+   PyObject *module,
+            *function;
+
+   if ( FindPythonFunction(func, &module, &function) )
+   {
+      // this ensures we always release them
+      M_PyObject pyModule(module),
+                 pyFunc(function);
+
+      // now build object reference argument:
+      String ptrCls(classname);
+      ptrCls += _T(" *");
+      PyObject *object = SWIG_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
+
+      // and do call the function
+      M_PyObject rc(PyObject_CallFunction(function, "O", object));
+
+      // translate result back to C
+      if ( PyArg_Parse(rc, const_cast<char *>(resultfmt), result) )
       {
-         const char *cptr = func;
-         while(*cptr != '.')
-            modname += *cptr++;
-         functionName = "";
-         cptr++;
-         while(*cptr)
-            functionName += *cptr++;
-      }
-      else // no explicit module, use the default one
-      {
-         modname = MP_PYTHONMODULE_TO_LOAD_DEFVAL;
-      }
-
-      M_PyObject module(PyImport_ImportModule((char *)modname.c_str()));
-
-      if ( !module )
-      {
-         ERRORMESSAGE(( _("Module \"%s\" couldn't be loaded."),
-                        modname.c_str() ));
-      }
-      else
-      {
-         // we want to allow modifying the Python code on the fly, so try to
-         // reload the module here -- this is nice for playing with Python even
-         // if possibly very slow...
-         PyObject *moduleRe = PyImport_ReloadModule(module);
-         if ( moduleRe )
-         {
-            // if reloading failed, fall back to the original module
-            module = moduleRe;
-         }
-
-         PyObject *function = PyObject_GetAttrString
-                              (
-                                 module,
-                                 const_cast<char *>(functionName.c_str())
-                              );
-         if ( !function )
-         {
-            ERRORMESSAGE(( _("Function \"%s\" not found in module \"%s\"."),
-                           functionName.c_str(), modname.c_str() ));
-         }
-         else // ok
-         {
-            // now build object reference argument:
-            String ptrCls(classname);
-            ptrCls += _T(" *");
-            PyObject *object = SWIG_NewPointerObj(obj, SWIG_TypeQuery(ptrCls), 0);
-
-            // and do call the function
-            PyObject *rc = PyObject_CallFunction(function, "O", object);
-
-            // translate result back to C
-            if ( PythonConvertResultToC(rc, resultfmt, result) )
-            {
-               // everything ok, skip error messages below
-               return true;
-            }
-         }
+         // everything ok, skip error messages below
+         return true;
       }
 
       String err = PythonGetErrorMessage();
@@ -248,6 +228,80 @@ PythonFunction(const char *func,
 
    return false;
 }
+
+bool
+PythonStringFunction(const String& func,
+                     const wxArrayString& arguments,
+                     String *value)
+{
+   PyObject *module,
+            *function;
+
+   if ( FindPythonFunction(func, &module, &function) )
+   {
+      // this ensures we always release them
+      M_PyObject pyModule(module),
+                 pyFunc(function);
+
+      // do call the function
+      PyObject *rc;
+      switch ( arguments.size() )
+      {
+         case 0:
+            rc = PyObject_CallFunction(function, NULL);
+            break;
+
+         case 1:
+            rc = PyObject_CallFunction(function, "s", arguments[0].c_str());
+            break;
+
+         case 2:
+            rc = PyObject_CallFunction(function, "ss",
+                                       arguments[0].c_str(),
+                                       arguments[1].c_str());
+            break;
+
+         case 3:
+            rc = PyObject_CallFunction(function, "sss",
+                                       arguments[0].c_str(),
+                                       arguments[1].c_str(),
+                                       arguments[2].c_str());
+            break;
+
+         default:
+            ERRORMESSAGE((_("Too many arguments to Python function \"%s\"."),
+                          func.c_str()));
+            rc = NULL;
+      }
+
+      M_PyObject pyRc(rc);
+
+      // translate result back to C, if we expect to get any result back
+      char *p = NULL;
+      if ( !value || PyArg_Parse(rc, "s", &p) )
+      {
+         if ( value )
+            *value = p;
+
+         // everything ok, skip error messages below
+         return true;
+      }
+
+      String err = PythonGetErrorMessage();
+      if ( !err.empty() )
+      {
+         ERRORMESSAGE((_T("%s"), err.c_str()));
+      }
+   }
+
+   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
+
+   return false;
+}
+
+// ----------------------------------------------------------------------------
+// running Python scripts
+// ----------------------------------------------------------------------------
 
 bool
 PythonRunScript(const char *filename)
@@ -318,6 +372,10 @@ PythonRunScript(const char *filename)
    return true;
 }
 
+
+// ----------------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------------
 
 String PythonGetErrorMessage()
 {

@@ -53,12 +53,23 @@ PythonCallback(const char *name,
   @param result Pointer where to store the result
   @return true on success
 */
-
 bool PythonFunction(const char *func,
                     void *obj,
                     const char *classname,
                     const char *resultfmt,
                     void *result);
+
+/**
+   Call a Python function taking string parameters and returning string value.
+
+   @param func the function name, possible module.name
+   @param arguments the string arguments, array may be empty
+   @param value the string receiving output, none if NULL
+   @return true if function could be called, false on error
+ */
+bool PythonStringFunction(const String& func,
+                          const wxArrayString& arguments,
+                          String *value);
 
 /**
    Function to run a simple python script in the global namespace.
