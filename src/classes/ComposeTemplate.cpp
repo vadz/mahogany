@@ -329,6 +329,15 @@ protected:
                        const wxArrayString& arguments,
                        String *value) const;
 
+   // handle quoting the original message
+   void DoQuoteOriginal(bool isQuote, String *value) const;
+
+   // quote a single MimePart, return true if we quoted it or false if we
+   // ignored it (because we can't put such data in the composer...)
+   bool DoQuotePart(const MimePart *mimePart,
+                    const String& prefix,
+                    String *value) const;
+
    // get the signature to use (including the signature separator, if any)
    String GetSignature() const;
 
@@ -1104,83 +1113,10 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
             // it isn't a variable which maps directly onto header, check the
             // others
-            if ( name == _T("text") || name == _T("quote") )
+            bool isQuote = name == _T("quote");
+            if ( isQuote || name == _T("text") )
             {
-               // insert the original text (optionally prefixed by reply
-               // string)
-               String prefix;
-               if ( name == _T("quote") )
-               {
-                  prefix = GetReplyPrefix();
-               }
-               //else: name == text, so no reply prefix at all
-
-               // do we include everything or just the selection?
-
-               // first: can we get the selection?
-               bool justSelection = m_msgview != NULL;
-
-               // second: should we use the selection?
-               if ( justSelection &&
-                     !READ_CONFIG(m_profile, MP_REPLY_QUOTE_SELECTION) )
-               {
-                  justSelection = false;
-               }
-
-               // third: do we have any selection?
-               if ( justSelection )
-               {
-                  String selection = m_msgview->GetSelection();
-                  if ( selection.empty() )
-                  {
-                     // take everything if no selection
-                     justSelection = false;
-                  }
-                  else
-                  {
-                     // include the selection only in the template expansion
-                     ExpandOriginalText(selection, prefix, value, NoDetectSig);
-                  }
-               }
-
-               // quote everything
-               if ( !justSelection )
-               {
-                  // was the last message part a text one?
-                  bool lastWasPlainText = false;
-
-                  int nParts = m_msg->CountParts();
-                  for ( int nPart = 0; nPart < nParts; nPart++ )
-                  {
-                     if ( m_msg->GetPartType(nPart) == MimeType::TEXT )
-                     {
-                        // FIXME: we lack propert multipart/alternative support -
-                        //        until we have it we can at least avoid
-                        //        inserting all parts of such messages when
-                        //        replying in the most common case (2 parts:
-                        //        text/plain and text/html)
-                        String mimeType = m_msg->GetPartMimeType(nPart).Lower();
-                        if ( mimeType == _T("text/html") && lastWasPlainText )
-                        {
-                           // skip it
-                           continue;
-                        }
-
-                        lastWasPlainText = mimeType == _T("text/plain");
-
-                        ExpandOriginalText
-                        (
-                           (const wxChar *)m_msg->GetPartContent(nPart),
-                           prefix,
-                           value
-                        );
-                     }
-                     else
-                     {
-                        lastWasPlainText = false;
-                     }
-                  }
-               }
+               DoQuoteOriginal(isQuote, value);
             }
             else if ( name == _T("quote822") )
             {
@@ -1339,8 +1275,120 @@ String VarExpander::GetSignature() const
 }
 
 // ----------------------------------------------------------------------------
-// ExpandOriginal helpers
+// Quoting helpers
 // ----------------------------------------------------------------------------
+
+bool
+VarExpander::DoQuotePart(const MimePart *mimePart,
+                         const String& prefix,
+                         String *value) const
+{
+   if ( !mimePart )
+   {
+      // this can only happen if the top level MIME part is NULL (when we call
+      // ourselves recursively the pointer is never NULL) and in this case we
+      // must let the user know that something is wrong
+      wxLogError(_("Failed to quote the original message."));
+
+      return false;
+   }
+
+   bool quoted = false;
+
+   const MimeType mimeType = mimePart->GetType();
+   switch ( mimeType.GetPrimary() )
+   {
+      case MimeType::TEXT:
+         ExpandOriginalText
+         (
+            (const char *)mimePart->GetContent(),
+            prefix,
+            value
+         );
+
+         quoted = true;
+         break;
+
+      case MimeType::MULTIPART:
+         // to process multipart/alternative correctly we should really iterate
+         // from the end to the beginning so that we could take the best
+         // representation of the data but knowing that currently we only
+         // really handle plain/text anyhow, it doesn't matter -- but it will
+         // if/when we extend the composer to deal with other kinds of data
+         {
+            for ( MimePart *mimePartNested = mimePart->GetNested();
+                  mimePartNested;
+                  mimePartNested = mimePartNested->GetNext() )
+            {
+               if ( DoQuotePart(mimePartNested, prefix, value) )
+               {
+                  quoted = true;
+
+                  if ( mimeType.GetSubType() == _T("ALTERNATIVE") )
+                  {
+                     // only one of the alternative parts should be used
+                     break;
+                  }
+               }
+            }
+         }
+         break;
+
+      default:
+         // ignore all the others -- we don't want to quote pictures, do we?
+         ;
+   }
+
+   return quoted;
+}
+
+void
+VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
+{
+   // insert the original text (optionally prefixed by reply
+   // string)
+   String prefix;
+   if ( isQuote )
+   {
+      prefix = GetReplyPrefix();
+   }
+   //else: template "text", so no reply prefix at all
+
+
+   // do we include everything or just the selection?
+
+   // first: can we get the selection?
+   bool justSelection = m_msgview != NULL;
+
+   // second: should we use the selection?
+   if ( justSelection && !READ_CONFIG(m_profile, MP_REPLY_QUOTE_SELECTION) )
+   {
+      justSelection = false;
+   }
+
+   // third: do we have any selection?
+   if ( justSelection )
+   {
+      String selection = m_msgview->GetSelection();
+      if ( selection.empty() )
+      {
+         // take everything if no selection
+         justSelection = false;
+      }
+      else
+      {
+         // include the selection only in the template expansion
+         ExpandOriginalText(selection, prefix, value, NoDetectSig);
+      }
+   }
+
+
+   // quote everything
+   if ( !justSelection )
+   {
+      DoQuotePart(m_msg->GetTopMimePart(), prefix, value);
+   }
+}
 
 String VarExpander::GetReplyPrefix() const
 {
