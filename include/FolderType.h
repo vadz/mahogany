@@ -39,15 +39,18 @@ class UIdArray;
 // define it as unsigned int instead
 #if !defined(wxSIZE_T_IS_ULONG)
    typedef unsigned long UIdType;
+
+   /// An illegal, never happening UId number:
+   #define UID_ILLEGAL   ULONG_MAX
 #elif !defined(wxSIZE_T_IS_UINT)
    typedef unsigned int UIdType;
+
+   /// An illegal, never happening UId number:
+   #define UID_ILLEGAL   UINT_MAX
 #else
    // how can size_t be both uint and ulong simultaneously??
    #error "Don't know how to define UIdType!"
 #endif
-
-/// An illegal, never happening UId number:
-#define UID_ILLEGAL   ULONG_MAX
 
 // use this with AND to obtain pure type from an int which also contains
 // the folder flags (see FolderFlags enum)
