@@ -97,7 +97,7 @@ install_rpm:
 	@# the second subsitution takes care of RPM_BUILD_ROOT
 	@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
-install: install_bin install_locale # install_doc
+install: install_bin install_locale install_doc
 
 install_locale:
 	$(MAKE) -C locale install
