@@ -2334,7 +2334,7 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
 class MModule_FiltersImpl : public MModule_Filters
 {
    /// standard MModule functions
-   MMODULE_DEFINE()
+   MMODULE_DEFINE();
 
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
