@@ -2307,11 +2307,11 @@ after you re-started Mahogany!}
 \section{The Address Database\_3000\_\label{AddressDatabase}}
 
 Mahogany has a built-in address book system with flexible support
-for different addressbook formats. It can easily expanded to handle
-other programs' file formats and at present supports three formats,
+for different addressbook formats. It can be easily expanded to handle
+other programs' file formats and at present supports three formats -
 it's own ADB format (\ref{ADB}), (X)Emacs' BBDB (\ref{BBDB}) address
 book format, and simple one address per line file (\ref{LineADB}).
-Generally the address books are ordered hierarchical,
+Generally the address books are ordered hierarchically,
 with the possibility to order entries in groups and sub-groups in
 a tree-like fashion. Alias expansion is configurable and also handles
 group names, to expand to the full list of email addresses within
