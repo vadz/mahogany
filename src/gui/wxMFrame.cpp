@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/12 12:19:03  VZ
+ * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
+ *
  * Revision 1.5  1998/05/11 20:57:33  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -53,7 +56,7 @@
 //     or it doesn't compile under VC++ (don't yet know why @@@)
 #include "Adb.h"
 
-#include "message.h"
+#include "Message.h"
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h"

@@ -7,6 +7,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/12 12:19:04  VZ
+ * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
+ *
  * Revision 1.2  1998/03/26 23:05:43  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -169,7 +172,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    STRINGLIST	slist;
    slist.next = NULL;
    slist.text.size = line.length();
-   slist.text.data = (unsigned char *)strutil_strdup(line);
+   slist.text.data = strutil_strdup(line);
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/12 12:18:56  VZ
+ * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
+ *
  * Revision 1.4  1998/05/02 15:21:32  KB
  * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
@@ -29,10 +32,10 @@
 #   pragma interface "PathFinder.h"
 #endif
 
-#ifdef USE_PCH
-#   include	<Mcommon.h>
-#   include	<CommonBase.h>
-#   include	<list>
+#ifndef USE_PCH
+#  include	<Mcommon.h>
+#  include	<CommonBase.h>
+#  include	<list>
 #endif
 
 /**@name PathFinder class for finding files */
@@ -54,7 +57,7 @@
 class PathFinder : public CommonBase
 {
    /// the list of absolute paths
-  std::list<String> *pathList;
+   STL_LIST<String> *pathList;
 public:
    /**
       Constructor.

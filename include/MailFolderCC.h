@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/12 12:18:54  VZ
+ * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
+ *
  * Revision 1.3  1998/04/22 19:54:47  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -30,12 +33,15 @@
 #endif
 
 #ifndef	USE_PCH
+#  include  <list>
+
 #	include	"MailFolder.h"
-// includes for c-client library
-extern "C"
-{
-#	include	<mail.h>
-}
+
+   // includes for c-client library
+   extern "C"
+   {
+#	   include	<mail.h>
+   }
 #endif
 
 struct __docxxfix;
@@ -55,7 +61,7 @@ struct StreamConnection
   IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
 };
 /// map type for mapping mailstreams to objects:
-typedef	std::list<StreamConnection> StreamListType;
+typedef	STL_LIST<StreamConnection> StreamListType;
 
 /**
    MailFolder class, implemented with the C-client library.

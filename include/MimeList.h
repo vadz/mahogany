@@ -28,6 +28,10 @@
 #	define	MIME_DEFAULT_FLAGS 	""
 #endif
 
+#ifndef  USE_PCH
+#  include <list>
+#endif
+
 /**
    MimeEntry - holds information about a Mime type
 */
@@ -60,7 +64,7 @@ public:
    MimeList - mapping of Mime types to icons and handlers
 */
 
-class MimeList : public std::list<MimeEntry>, public CommonBase
+class MimeList : public STL_LIST<MimeEntry>, public CommonBase
 {
 //   DECLARE_CLASS(MimeList)
    

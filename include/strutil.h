@@ -10,6 +10,10 @@
 
 #include  "Mpch.h"
 
+#ifndef  USE_PCH
+#  include <list>
+#endif
+
 /**@name String class helper functions */
 //@{
 

@@ -13,6 +13,10 @@
 #pragma interface "Profile.h"
 #endif
 
+#ifndef  USE_PCH
+#  include  <list>
+#endif
+
 #ifndef	USE_WXCONFIG
 #	include	"appconf.h"
 #endif
@@ -83,7 +87,7 @@ struct	FCData
 /** A list of all known icons.
    @see FCData
 */
-typedef std::list<FCData>	FCDataList;
+typedef STL_LIST<FCData>	FCDataList;
 
 class ConfigFileManager : public CommonBase
 {

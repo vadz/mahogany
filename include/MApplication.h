@@ -35,7 +35,7 @@ class Adb;
 */
 
 class MApplication : public CommonBase
-#ifndef  USE_WXWINDOWS2
+#ifndef  USE_WXCONFIG
                    , public AppConfig
 #endif
 {
@@ -183,7 +183,7 @@ public:
    void Log(int level, String const &message);
    CB_DECLARE_CLASS(MApplication, CommonBase)
 
-#ifdef   USE_WXWINDOWS2
+#ifdef   USE_WXCONFIG
    // AppConf functions are implemented using built-in wxConfig class in wxWin2
    inline
    const char *readEntry(const char *szKey, const char *szDefault = NULL) const

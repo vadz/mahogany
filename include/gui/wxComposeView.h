@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/12 12:19:00  VZ
+ * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
+ *
  * Revision 1.5  1998/05/02 15:21:33  KB
  * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
@@ -32,14 +35,15 @@
 #endif
 
 #ifndef USE_PCH
-#   include	<map>
+#  undef    T
+#  include	<map>
 
-#   include	<Message.h>
-#   include	<wxMenuDefs.h>
-#   include	<wxMFrame.h>
-#   include	<Profile.h>
+#  include	<Message.h>
+#  include	<wxMenuDefs.h>
+#  include	<wxMFrame.h>
+#  include	<Profile.h>
 
-  using namespace std;
+   using namespace std;
 #endif
 
 class wxFTOList;

@@ -14,15 +14,15 @@
 #endif
 
 #ifndef USE_PCH
-
-using namespace std;
-
+#  undef    T
 #	include	<map>
 #	include	<list>
 
 #	include	<Profile.h>
 #	include	<wxFontManager.h>
 #	include	<wxIconManager.h>
+
+   using namespace std;
 #endif
 
 /// describing a FTObject's type
