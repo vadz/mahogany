@@ -25,8 +25,6 @@
 #  include "strutil.h"
 #  include "kbList.h"
 #  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
@@ -35,13 +33,11 @@
 
 #  include <wx/log.h>
 #  include <wx/config.h>
-#  include <wx/intl.h>
 #  include <wx/generic/dcpsg.h>
 #  include <wx/thread.h>
 #endif
 
 #include <wx/msgdlg.h>   // for wxMessageBox
-#include <wx/cmndata.h>  // for wxPageSetupData
 #include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
 #include <wx/menu.h>
 #include <wx/statusbr.h>
@@ -484,6 +480,8 @@ wxMApp::OnInit()
 #endif
 
    m_topLevelFrame = NULL;
+
+#ifdef USE_I18N
    // Set up locale first, so everything is in the right language.
    bool hasLocale = false;
 
@@ -566,6 +564,10 @@ wxMApp::OnInit()
          String localePath;
          localePath << M_BASEDIR << "/locale";
 #elif defined(OS_WIN)
+         // we can't use InitGlobalDir() here as the profile is not created yet,
+         // but I don't have time to fix it right now - to do later!!
+         #error "this code is broken and will crash"  // FIXME
+
          InitGlobalDir();
          String localePath;
          localePath << m_globalDir << "/locale";
@@ -591,6 +593,7 @@ wxMApp::OnInit()
    {
       m_Locale = NULL;
    }
+#endif // USE_I18N
 
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
@@ -612,6 +615,7 @@ wxMApp::OnInit()
 
    if ( OnStartup() )
    {
+#ifdef USE_I18N
       // only now we can use profiles
       if ( failedToSetLocale || failedToLoadMsgs )
       {
@@ -649,6 +653,7 @@ wxMApp::OnInit()
          //else: the user had previously answered "no" to the question above,
          //      don't complain any more about missing catalogs
       }
+#endif // USE_I18N
 
       // we want the main window to be above the log frame
       if ( IsLogShown() )
@@ -658,20 +663,6 @@ wxMApp::OnInit()
 
       // at this moment we're fully initialized, i.e. profile and log
       // subsystems are working and the main window is created
-
-#if 0
-      // If we are not in the default location:
-      if(GetGlobalDir() != wxString(M_BASEDIR)+"/Mahogany") // broken?
-      {
-         if( locale && (strcmp(locale, "C") != 0) )
-         {
-            String localePath;
-            localePath << GetGlobalDir() << "/locale";
-            m_Locale->AddCatalogLookupPathPrefix(localePath);
-            m_Locale->AddCatalog(M_APPLICATIONNAME);
-         }
-      }
-#endif
 
       // restore our favourite preferred printer settings
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
@@ -796,7 +787,11 @@ int wxMApp::OnExit()
 
    MModule_Cleanup();
    delete m_IconManager;
+
+#ifdef USE_I18N
    delete m_Locale;
+#endif // USE_I18N
+
    delete m_OnlineManager;
 
    // FIXME this is not the best place to do it, but at least we're safe

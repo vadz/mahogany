@@ -28,6 +28,10 @@
 #ifndef  USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
+
+#  include <wx/string.h>
+#  include <wx/log.h>
+#  include <wx/dynarray.h>
 #endif //USE_PCH
 
 #include "MDialogs.h"
@@ -36,12 +40,6 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
-
-// wxWindows
-#include <wx/string.h>
-#include <wx/log.h>
-#include <wx/intl.h>
-#include <wx/dynarray.h>
 
 // ----------------------------------------------------------------------------
 // private classes

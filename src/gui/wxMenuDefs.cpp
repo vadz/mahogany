@@ -35,7 +35,6 @@
 #endif
 
 #include <wx/menu.h>
-#include <wx/intl.h>
 
 #include "Mdefaults.h"
 

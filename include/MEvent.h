@@ -17,6 +17,8 @@
 #ifndef MEVENT_H
 #define MEVENT_H
 
+#include "MObject.h"
+
 // ----------------------------------------------------------------------------
 /**    MEvent ids for all kinds of events used in M. The name in the comment is the
        MEventData-derived class which is used with this event

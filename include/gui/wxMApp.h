@@ -9,21 +9,25 @@
 #define WXMAPP_H
 
 #ifndef USE_PCH
-#  include  <wx/app.h>
-#  include  <wx/help.h>
-#  include  <wx/icon.h>
-#  include  "MApplication.h"
+#  include "MApplication.h"
+
+#  include <wx/app.h>
+#  include <wx/help.h>
+#  include <wx/icon.h>
 
 #  include <wx/cmndata.h>  // for wxPageSetupData, can't fwd declare it
 #endif  //USE_PCH
 
-#  include  <wx/dialup.h>
+#include  <wx/dialup.h>
 
 // fwd decl
 class WXDLLEXPORT wxDialUpManager;
+class WXDLLEXPORT wxLocale;
 class WXDLLEXPORT wxLog;
 class WXDLLEXPORT wxHelpControllerBase;
 class WXDLLEXPORT wxPrintData;
+class WXDLLEXPORT wxTimer;
+
 class wxIconManager;
 
 /// Define this to have an online status icon in the statusbar
@@ -156,8 +160,12 @@ private:
    wxIconManager *m_IconManager;
    /// a help controller instance
    wxHelpControllerBase *m_HelpController;
+
+#ifdef USE_I18N
    /// a locale for translation
-   class wxLocale *m_Locale;
+   wxLocale *m_Locale;
+#endif // USE_I18N
+
    /// data for printing
    wxPrintData *m_PrintData;
    /// page setup for printing
@@ -165,7 +173,7 @@ private:
    /// to recylce the last CanClose() result
    bool m_CanClose;
    /// timer used to call OnIdle for MEvent handling
-   class wxTimer *m_IdleTimer;
+   wxTimer *m_IdleTimer;
    /// online manager
    wxDialUpManager *m_OnlineManager;
    /// are we currently online?

@@ -22,14 +22,8 @@
 /** Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
-/** Define to `unsigned' if <sys/types.h> doesn't define.  */
-#undef size_t
-
 /** Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
-
-/** Define if you have the strsep function.  */
-#undef HAVE_STRSEP
 
 /** Define if you have the <compface.h> header file.  -- we always have it */
 #define HAVE_COMPFACE_H 1
@@ -45,27 +39,6 @@
 
 /** Do we need to redefine logical operator names for c-client? */
 #undef M_LOGICAL_OP_NAMES
-
-/*@name These are obsolete and always defined. Other configurations
-  are no longer supported.
-*/
-//@{
-/** Define if you use wxWindows. */
-#define   USE_WXWINDOWS 1
-
-/** Define if you use wxWindows, version 2. */
-#define    USE_WXWINDOWS2 1
-
-/** Define if you use wxWindows, wxGTK port. */
-#define   USE_WXGTK 1
-
-/** Define if you want to use wxString instead of C++ string */
-#define   USE_WXSTRING 1
-
-/** Define this if you want to use wxConfig instead of AppConfig.
-    Note that this is only available for wxWindows version 2 */
-#define   USE_WXCONFIG 1
-//@}
 
 /** Define if you use Python. */
 #undef USE_PYTHON
@@ -113,6 +86,9 @@
 
 /** Define this to use dmalloc debugging library */
 #undef USE_DMALLOC
+
+/** Define this to use built-in i18n support */
+#undef USE_I18N
 
 /** This define contains the installation prefix where Mahogany
     is installed.

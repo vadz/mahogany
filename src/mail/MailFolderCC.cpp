@@ -882,11 +882,19 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
             }
          }
 
-         // get the encoded text
          p += 2; // skip "Q?" or "B?"
+
+         // get the encoded text
+         bool hasUnderscore = false;
          const char *pEncTextStart = p;
          while ( *p && *p != '?' )
+         {
+            // this is needed for QP hack below
+            if ( *p == '_' )
+               hasUnderscore = true;
+
             p++;
+         }
 
          unsigned long lenEncWord = p - pEncTextStart;
 
@@ -910,8 +918,20 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
          {
             text = (char *)rfc822_base64(start, lenEncWord, &len);
          }
-         else
+         else // QP
          {
+            // cclient rfc822_qprint() behaves correctly and leaves '_' in the
+            // QP encoded text because this is what RFC says, however many
+            // broken clients replace spaces with underscores and so we undo it
+            // here - better user-friendly than standard conformant
+            String strWithoutUnderscores;
+            if ( hasUnderscore )
+            {
+               strWithoutUnderscores = String(pEncTextStart, lenEncWord);
+               strWithoutUnderscores.Replace("_", " ");
+               start = (unsigned char *)strWithoutUnderscores.c_str();
+            }
+
             text = (char *)rfc822_qprint(start, lenEncWord, &len);
          }
 

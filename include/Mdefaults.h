@@ -13,10 +13,6 @@
 #include "Mcallbacks.h"
 #include "Mversion.h"
 
-#ifndef gettext_noop
-#   define    gettext_noop(x) x
-#endif
-
 // under Windows 12pt font looks too huge, letters are like in a book for
 // children
 #ifdef OS_WIN
@@ -944,11 +940,11 @@ enum MFolderIndex
 #define MP_MODULES_D   "Filters"
 
 /// the format string for the folder tree display
-#define MP_FOLDERSTATUS_TREE_D "%f (%t, %u)"
+#define MP_FOLDERSTATUS_TREE_D _("%f (%t, %u)")
 /// the format string for status bar folder status display
-#define MP_FOLDERSTATUS_STATBAR_D "%f (%t messages, %u unread, %n new)"
+#define MP_FOLDERSTATUS_STATBAR_D _("%f (%t messages, %u unread, %n new)")
 /// the format string for title bar folder status display
-#define MP_FOLDERSTATUS_TITLEBAR_D "%f (%u unread, %n new)"
+#define MP_FOLDERSTATUS_TITLEBAR_D _("%f (%u unread, %n new)")
 
 /**@name Printer settings */
 //@{
@@ -1299,7 +1295,7 @@ enum MFolderIndex
 /**@name  Font settings for message view */
 //@{
 /// message view title
-#define   MP_MVIEW_TITLE_FMT_D   "from $from about \"$subject\""
+#define   MP_MVIEW_TITLE_FMT_D   _("from $from about \"$subject\"")
 /// which font to use
 #define   MP_MVIEW_FONT_D         6L
 /// which font size
@@ -1355,7 +1351,7 @@ enum MFolderIndex
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_D 0L
 /// folder view status bar string
-#define   MP_FVIEW_STATUS_FMT_D "Date: $date, Subject: $subject, From: $from"
+#define   MP_FVIEW_STATUS_FMT_D _("Date: $date, Subject: $subject, From: $from")
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -1554,7 +1550,7 @@ enum MFolderIndex
 /** @name other defines used in M */
 //@{
 /// title for main window
-#define   M_TOPLEVELFRAME_TITLE   "Copyright (C) 1997-2001 The Mahogany Developers Team"
+#define   M_TOPLEVELFRAME_TITLE   _("Copyright (C) 1997-2001 The Mahogany Developers Team")
 /// do we want variable expansion for profiles?
 #define   M_PROFILE_VAREXPAND      1
 /// c-client lib needs a char buffer to write header data
@@ -1562,6 +1558,6 @@ enum MFolderIndex
 /// file name prefix for lock files
 #define   LOCK_PREFIX         "M-lock"
 /// postfix for News outbox
-#define M_NEWSOUTBOX_POSTFIX gettext_noop("_News")
+#define M_NEWSOUTBOX_POSTFIX _("_News")
 //@}
 #endif // MDEFAULTS_H

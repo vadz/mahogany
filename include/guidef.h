@@ -10,29 +10,25 @@
 #ifndef GUIDEF_H
 #define GUIDEF_H
 
-#ifdef  USE_WXWINDOWS
-
 /// define the class to use for implementing MFrame objects
-#   define   MFrame        wxMFrame
-#   define   MWindow       wxWindow
-#   define   MainFrame     wxMainFrame
-#   define   MDialogs      wxMDialogs
+#define   MFrame        wxMFrame
+#define   MWindow       wxWindow
+#define   MainFrame     wxMainFrame
+#define   MDialogs      wxMDialogs
 
-#include   <wx/defs.h>
-#include   <wx/frame.h>
-#include   <wx/button.h>
-#include   <wx/filefn.h>
-#include   <wx/filedlg.h>
-#include   <wx/textctrl.h> //wxBrowsebutton
-#   include  "gui/wxMenuDefs.h"
-/// how much space to leave in frame around other items
-#   define   WXFRAME_WIDTH_DELTA   16
-/// how much space to leave in frame around other items
-#   define   WXFRAME_HEIGHT_DELTA   64
+#include <wx/defs.h>
+#include <wx/frame.h>
+#include <wx/button.h>
+#include <wx/filefn.h>
+#include <wx/filedlg.h>
+#include <wx/textctrl.h> // wxBrowsebutton
 
-#else
-#  error "Implemented only for wxWindows."
-#endif // USE_WXWINDOWS
+#include "gui/wxMenuDefs.h"
+
+/// how much space to leave in frame around other items
+#define   WXFRAME_WIDTH_DELTA   16
+/// how much space to leave in frame around other items
+#define   WXFRAME_HEIGHT_DELTA   64
 
 // minimal space to leave between dialog/panel items: tune them if you want,
 // but use these constants everywhere instead of raw numbers to make the look

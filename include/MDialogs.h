@@ -29,8 +29,6 @@
 #define   MDIALOG_YESNOTITLE     _("Please choose")
 //@}
 
-#ifdef USE_WXWINDOWS
-#   include   "gui/wxMDialogs.h"
-#endif
+#include   "gui/wxMDialogs.h"
 
 #endif

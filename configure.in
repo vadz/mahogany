@@ -17,7 +17,9 @@ if test "x$OSTYPE" = "x"; then
         OSTYPE=`uname`
 fi
 
-echo "Configuring Mahogany for $OSTYPE"
+echo ""
+echo "*** Configuring Mahogany for $OSTYPE ***"
+echo ""
 
 AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR(extra/scripts)
@@ -35,32 +37,17 @@ dnl Mahogany parameter evaluation
 dnl Usage: M_OVERRIDES(package,message,variable,default,help)
 dnl --------------------------------------------------------------------------
 
-M_OVERRIDES(python,Python,USE_PYTHON,1,
---disable-python        no Python scripting)
-
-M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
---with-strict         strict compiler flags - may not work on all systems)
-
 M_OVERRIDES(opt,optimization,USE_OPT,1,
 --disable-opt           no compiler optimisations - may not be effective)
 
 M_OVERRIDES(debug,debug code,USE_DEBUG,0,
---with-debug          compile debug code)
+--with-debug            compile debug code)
 
 M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
---with-debuginfo      include debug info from compiler)
+--with-debuginfo        include debug info from compiler)
 
 M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
-
-M_OVERRIDES(prof,profiling,USE_PROFILER,0,
---with-prof           generate profiling code)
-
-M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
---with-experimental   compile experimental code)
-
-M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
---with-threads        multi-threaded version)
 
 M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
 --with-dmalloc          use dmalloc library for debugging)
@@ -70,6 +57,24 @@ M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
 
 M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
 --with-efence           use ElectricFence for debugging)
+
+M_OVERRIDES(prof,profiling,USE_PROFILER,0,
+--with-prof             generate profiling code)
+
+M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
+--with-strict           strict compiler flags - may not work on all systems)
+
+M_OVERRIDES(nls,i18n support,USE_I18N,1,
+--disable-nls           no internationalization support)
+
+M_OVERRIDES(python,Python,USE_PYTHON,1,
+--disable-python        no Python scripting)
+
+M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
+--with-experimental     compile experimental code)
+
+M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
+--with-threads          multi-threaded version (EXPERIMENTAL))
 
 M_OVERRIDES(ccostype,c-client OS type,USE_CCOSTYPE,,
 --with-ccostype=xxx     use OS type xxx for c-client compilation)
@@ -402,23 +407,28 @@ if test "$USE_WXDEBUG" = 1; then
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
-1.yes.*)	MYFLAGS="$MYFLAGS -g3" 
+1.yes.*)	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -g3" 
 		USE_OPT=0 ;;
-1.no.yes)	MYFLAGS="$MYFLAGS -g" ;;
+1.no.yes)	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -g" ;;
 esac
+
+dnl i18n support
+if test "$USE_I18N" = 1; then
+   AC_DEFINE(USE_I18N)
+fi
 
 dnl --------------------------------------------------------------------------
 dnl check for misc other compilation options
 dnl --------------------------------------------------------------------------
 
 case "$USE_OPT" in
-1)	MYFLAGS="$MYFLAGS -O2" ;;
-*)	MYFLAGS="$MYFLAGS -O0" ;;
+1)	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -O2" ;;
+*)	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -O0" ;;
 esac
 
 
 case "$USE_PROFILER" in 1)
-	MYFLAGS="$MYFLAGS -pg"
+	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -pg"
 esac
 
 case "$USE_EXPERIMENTAL" in
@@ -455,7 +465,7 @@ case "$USE_SSL" in
 	*)	ssl_inc="$prefix/include" ;;
 	esac
 
-	M_CHECK_MYHEADER(openssl/ssl.h,
+	M_CHECK_HEADER(openssl/ssl.h,
 	[ \
 		$ssl_inc \
 		/include \
@@ -465,12 +475,26 @@ case "$USE_SSL" in
 		/home/local/include \
 		/home/local/ssl/include \
 	],
-        [
+	[
 	   ssl_option=yes
-           ssl_inc=$m_cv_header_openssl_ssl_h
-        ],
+	   ssl_inc=$m_cv_header_openssl_ssl_h
+	],
 	   ssl_option=no
 	)
+
+	if test "$ssl_option" != "no"; then
+	    ssl_lib=`echo $ssl_inc | sed 's/include$/lib/'`
+	    M_CHECK_LIB(ssl, main,
+		    [ \
+			$ssl_lib \
+			/usr/lib \
+			/usr/local/lib \
+			/home/local/lib \
+		    ],
+		    LIBS_SSL="$libpath_ssl_main -lssl",
+		    ssl_option=no
+	    )
+	fi
 
 	dnl only test for other functions if ssl.h was found
 	if test "$ssl_option" != "no"; then
@@ -487,30 +511,30 @@ case "$USE_SSL" in
 		;;
 	*)  	dnl must check if ssl needs libcrypto
 		LIBS_SAVE=$LIBS
-		LIBS="$LIBS -lssl"
+		LIBS="$LIBS $LIBS_SSL"
 		AC_CACHE_CHECK(if libssl needs libcrypto, m_cv_ssl_needs_crypto,
                     [
-                        dnl FIXME why AC_TRY_LINK and not AC_CHECK_LIB? (VZ)
-                        AC_TRY_LINK([#include <openssl/ssl.h>],
-                            [
-                                    SSLv2_client_method();
-                                    return 0;
-                            ],
-                            m_cv_ssl_needs_crypto="no",
+			dnl FIXME why AC_TRY_LINK and not AC_CHECK_LIB? (VZ)
+			AC_TRY_LINK([#include <openssl/ssl.h>],
+			    [
+				SSLv2_client_method();
+				return 0;
+			    ],
+			    m_cv_ssl_needs_crypto="no",
 			    m_cv_ssl_needs_crypto="yes"
-                        )
+			)
 
-                        if test "$m_cv_ssl_needs_crypto" = "yes"; then
-                            LIBS="$LIBS -lcrypto"
-                            AC_TRY_LINK([#include <openssl/ssl.h>],
-                                [
-                                        SSLv2_client_method();
-                                        return 0;
-                                ],
-                                m_cv_ssl_needs_crypto="yes"
-                            )
-                        fi
-                    ]
+			if test "$m_cv_ssl_needs_crypto" = "yes"; then
+			    LIBS="$LIBS -lcrypto"
+			    AC_TRY_LINK([#include <openssl/ssl.h>],
+				[
+				    SSLv2_client_method();
+				    return 0;
+				],
+				m_cv_ssl_needs_crypto="yes"
+			    )
+			fi
+		    ]
                 )
 		LIBS="$LIBS_SAVE";;
 	esac
@@ -533,7 +557,7 @@ if test "$ssl_option" = "yes"; then
 	dnl (starting with imap2000) or auth_ssl.cpp wouldn't compile!)
 	IMAP_CPPFLAGS="-DNO_IDEA -DNO_DSA"
 
-        dnl have to give the location of SSL headers to cclient if it is in a
+	dnl have to give the location of SSL headers to cclient if it is in a
 	dnl non standard place: note that imap2000 includes <ssl.h> and not
 	dnl <openssl/ssl.h> but SSL headers themselves use the second form, so
 	dnl we need both
@@ -547,7 +571,7 @@ if test "$ssl_option" = "yes"; then
 
 	dnl although we're loading libssl dynamically, cclient uses it
 	dnl statically, so we still need it in LIBS
-	LIBS="$LIBS -lssl"
+	LIBS="$LIBS $LIBS_SSL"
 	if test "$m_cv_ssl_needs_crypto" = "yes"; then
             LIBS="$LIBS -lcrypto"
         fi
@@ -601,7 +625,7 @@ dnl check for python (a bit lengthy thanks to its stupid installation)
 dnl --------------------------------------------------------------------------
 
 case "$USE_PYTHON" in 1)
-   M_CHECK_MYHEADER(Python.h,
+   M_CHECK_HEADER(Python.h,
        [ \
        	 $prefix/include \
          /usr/include/python1.5 \
@@ -610,7 +634,7 @@ case "$USE_PYTHON" in 1)
          /home/local/include \
          /home/local/include/python1.5 \
        ],
-       [ M_CHECK_MYLIB(python1.5,main,
+       [ M_CHECK_LIB(python1.5,main,
            [ /usr \
              /usr/lib \
              /usr/lib/python1.5 \
@@ -911,8 +935,8 @@ dnl final settings, concatenation of args, etc
 dnl --------------------------------------------------------------------------
 
 dnl add other flags
-CFLAGS="$CFLAGS $MYFLAGS"
-CXXFLAGS="$CXXFLAGS $MYFLAGS"
+CFLAGS="$CFLAGS $CODE_GEN_FLAGS"
+CXXFLAGS="$CXXFLAGS $CODE_GEN_FLAGS"
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
 dnl Only now can we add them, or otherwise some tests would have failed
@@ -941,7 +965,8 @@ LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
 
 OUTPUT="makeopts"
-COPY=Makefile DIR=
+COPY=Makefile
+DIR=
 for dir in `cd $srcdir; find include extra src locale doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
@@ -949,8 +974,8 @@ do	case "$dir" in
 	extra/src/libmal)	DIR="$DIR $dir"; continue ;;
 	extra/src/libmal*)	continue ;;
 	esac
-	if test -f $srcdir/$dir/Makefile.in
-	then	OUTPUT="$OUTPUT $dir/Makefile"
+	if test -f $srcdir/$dir/Names.mk
+	then
 		DIR="$DIR $dir"
 	elif test -f $srcdir/$dir/Makefile
 	then	COPY="$COPY $dir/Makefile"
@@ -966,37 +991,46 @@ case "$MAKE_HAVE_LIBMAL" in '') ;; *)
 esac
 
 AC_OUTPUT_COMMANDS(
-[case "$SRC" in
-"$OBJ")	# source and object jumbled together
-	for dir in . $DIR
-	do	rm -f $dir/.src
-		ln -s . $dir/.src
-	done ;;
-*)	# using separate object directories
-	rm -f .src Makefile makerules
-	ln -s $src .src
-	ln -s .src/Makefile Makefile
-	ln -s .src/makerules makerules
-	for dir in $DIR
-	do	test -d $dir || mkdir $dir
-		rm -f $dir/.src
-		case "$src" in
-		/*)	ln -s $src/$dir $dir/.src ;;
-		*)	lnk=`echo "$dir" | sed 's,\([^/][^/]*\),..,g'`
+[
+	case "$SRC" in
+	    "$OBJ")	# source and object jumbled together
+		for dir in . $DIR
+		do
+		    rm -f $dir/.src
+		    ln -s . $dir/.src
+		done
+		;;
+
+	    *)	# using separate object directories
+		rm -f .src Makefile makerules
+		ln -s $src .src
+		ln -s .src/Makefile Makefile
+		ln -s .src/makerules makerules
+		for dir in $DIR
+		do
+		    test -d $dir || mkdir $dir
+		    rm -f $dir/.src
+		    case "$src" in
+		    /*)	ln -s $src/$dir $dir/.src ;;
+		    *)	lnk=`echo "$dir" | sed 's,\([^/][^/]*\),..,g'`
 			ln -s $lnk/$src/$dir $dir/.src ;;
-		esac
-	done
-	for mf in $COPY
-	do	echo "linking $mf"
-		rm -f $mf
-		ln -s .src/Makefile $mf
-	done
-	;;
-esac
-sh .src/makeversion.in],
+		    esac
+		done
+		for mf in $COPY
+		do
+		    echo "linking $mf"
+		    rm -f $mf
+		    ln -s .src/Makefile $mf
+		done
+		;;
+	esac
+	sh .src/makeversion.in
+],
 src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"
 DIR="$DIR"
 COPY="$COPY")
 
 AC_OUTPUT($OUTPUT)
 exit
+
+dnl vi: set noet ts=8 sw=4 nolist sta:

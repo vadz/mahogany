@@ -30,8 +30,6 @@
 #  include "MFrame.h"
 #  include "MLogFrame.h"
 #  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "Profile.h"
 #  include "Mdefaults.h"
 #  include "MApplication.h"

@@ -19,8 +19,6 @@
 #   include "MFrame.h"
 #   include "kbList.h"
 #   include "PathFinder.h"
-#   include "MimeList.h"
-#   include "MimeTypes.h"
 #   include "Profile.h"
 #   include "Mdefaults.h"
 #   include "MApplication.h"
@@ -170,9 +168,7 @@ wxMFrame::AddFileMenu(void)
 
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
 
-#ifdef USE_WXWINDOWS2
    wxWindow *parent = GetParent();
-#endif
 
    int n = WXMENU_FILE_CLOSE;
    if ( parent != NULL )

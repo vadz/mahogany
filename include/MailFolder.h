@@ -19,6 +19,7 @@
 #   pragma interface "MailFolder.h"
 #endif
 
+#include "MObject.h"
 #include "FolderType.h"
 #include "kbList.h"
 

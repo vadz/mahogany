@@ -28,8 +28,6 @@
 #  include "guidef.h"
 
 #  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "Profile.h"
 
 #  include "MFrame.h"

@@ -25,14 +25,13 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Profile.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
 #  include "kbList.h"
 #  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "Mpers.h"
-#  include  <wx/dynarray.h>
 #  include "MPython.h"
+
+#  include  <wx/dynarray.h>
 #endif   // USE_PCH
 
 #include <errno.h>

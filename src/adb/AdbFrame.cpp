@@ -45,14 +45,20 @@
 #undef   CreateListBox
 
 // wxWindows
-#include <wx/wx.h>
-#include <wx/log.h>
-#include <wx/intl.h>
-#include <wx/confbase.h>
-#include <wx/dynarray.h>
+#ifndef USE_PCH
+#   include <wx/frame.h>
+#   include <wx/log.h>
+#   include <wx/confbase.h>
+#   include <wx/dynarray.h>
+#   include <wx/toolbar.h>
+#   include <wx/menu.h>
+#   include <wx/layout.h>
+#   include <wx/statbox.h>
+#   include <wx/choicdlg.h>
+#endif // USE_PCH
+
 #include <wx/notebook.h>
 #include <wx/treectrl.h>
-#include <wx/toolbar.h>
 #include <wx/file.h>
 #include <wx/imaglist.h>
 

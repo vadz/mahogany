@@ -40,9 +40,8 @@ public:
 
 };
 
-#ifdef	USE_WXWINDOWS
-#	define	MainFrame	wxMainFrame
-#	include	"gui/wxMainFrame.h"
-#endif
+#define	MainFrame	wxMainFrame
+#include	"gui/wxMainFrame.h"
 
-#endif
+#endif // MMAINFRAME_H
+

@@ -15,6 +15,7 @@
 #   pragma interface "PathFinder.h"
 #endif
 
+#include "MObject.h"
 
 /**@name PathFinder class for finding files */
 //@{

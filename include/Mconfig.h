@@ -124,12 +124,6 @@
 
 #define   M_STRBUFLEN      1024
 
-#ifndef   USE_WXSTRING
-#   define   USE_STD_STRING
-#else
-#   undef    USE_STD_STRING
-#endif
-
 #ifdef USE_STD_STRING
 #   include   <string>
     typedef   std::string String;
@@ -138,10 +132,6 @@
 #   include   <wx/string.h>
     typedef   wxString String;
 #   define    Str(str) str
-#   ifndef USE_WXWINDOWS2
-#      define  c_str() GetData()
-#      define  length() Length()       //FIXME dangerous!
-#   endif
 #endif
 
 // you can't mix iostream.h and iostream, the former doesn't compile
@@ -151,43 +141,19 @@
 #  define USE_IOSTREAMH   1
 #endif
 
-// Microsoft Visual C++
-#ifdef  CC_MSC
-   // suppress the warning "identifier was truncated to 255 characters
-   // in the debug information"
-#  pragma warning(disable: 4786)
-
-  // <string> includes <istream> (Grrr...)
-#   ifdef USE_IOSTREAMH
-#      undef  USE_WXSTRING
-#      define USE_WXSTRING    1
-#   endif
-#endif  // VC++
-
-#ifdef           USE_IOSTREAMH
-#       include <iostream.h>
-#       include <fstream.h>
+#ifdef USE_IOSTREAMH
+#  include <iostream.h>
+#  include <fstream.h>
 #else
-#       include <iostream>
-#       include <fstream>
+#  include <iostream>
+#  include <fstream>
 #endif
 
-#ifdef           USE_IOSTREAMH
+#ifdef USE_IOSTREAMH
   // can't use namespace std because old iostream doesn't compile with it
   // and can't use std::list because it's a template class
 #else
   using namespace std;
-#endif
-
-#ifdef  USE_WXWINDOWS
-# ifdef   USE_WXWINDOWS2
-# define  WXCPTR      /**/
-# define  WXSTR(str)  str
-#else
-# define  WXCPTR      (char *)
-# define  WXSTR(str)  ((char *)str.c_str())
-#endif
-
 #endif
 
 // set the proper STL class names
@@ -198,15 +164,6 @@
 #endif
 
 #define Bool    int
-
-// use builtin wxConfig by default in wxWin2 and appconf otherwise
-#if !defined(USE_APPCONF) && !defined(USE_WXCONFIG)
-#  if defined(USE_WXWINDOWS2)
-#     define  USE_WXCONFIG 1
-#  else
-#     define  USE_APPCONF  1
-#  endif
-#endif
 
 // macro which marks strings for later extraction with xgettext(1): it
 // intentionally does nothing else!

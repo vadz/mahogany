@@ -33,6 +33,12 @@
 #  include "MApplication.h"
 #  include "strutil.h"
 #  include "sysutil.h"
+
+#  include <wx/string.h>
+#  include <wx/log.h>
+#  include <wx/dynarray.h>
+#  include <wx/filefn.h>
+#  include <wx/app.h>
 #endif //USE_PCH
 
 #include "MDialogs.h"
@@ -43,19 +49,13 @@
 #include "adb/AdbDataProvider.h"
 
 // wxWindows
-#include <wx/string.h>
-#include <wx/log.h>
-#include <wx/intl.h>
-#include <wx/dynarray.h>
-#include <wx/filefn.h>
-#include <wx/app.h>
 #include <wx/utils.h>
 #include <wx/minifram.h>
 #include <wx/file.h>
+
 #include "kbList.h"
+
 #include <fstream.h>
-
-
 
 /** BBDB Adressbook format:
     Record Vectors

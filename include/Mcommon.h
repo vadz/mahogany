@@ -1,39 +1,25 @@
-/*-*- c++ -*-********************************************************
- * Mcommon.h: common typedefs etc for M                             *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
-
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M
+// File name:   Mcommon.h - the common declarations included by everyone
+// Purpose:     contains debugging and logging macros, mainly, which everyone
+//              needs
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     11.07.99
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MCOMMON_H
-#define  MCOMMON_H
+#define MCOMMON_H
 
-#include   "Mconfig.h"
-#include   "MObject.h"
-
-/// defines an empty string for argument lists, needed for scandoc
-#define   M_EMPTYSTRING   ""
-
-/// macro which defines compare operators needed for std::list
-#define IMPLEMENT_DUMMY_COMPARE_OPERATORS(classname)                          \
-    bool operator==(const classname&) const { assert(0); return false; }      \
-    bool operator!=(const classname&) const { assert(0); return false; }      \
-    bool operator< (const classname&) const { assert(0); return false; }      \
-    bool operator> (const classname&) const { assert(0); return false; }
-
-// screen coordinates type
-typedef int coord_t;
-
-// @@: in both wxGTK/wxMSW 'long' and 'int' are used for the same things in
-//     different contexts
-typedef long int lcoord_t;
+#include "Mconfig.h"
 
 // ----------------------------------------------------------------------------
 // debugging macros
-//
 // ----------------------------------------------------------------------------
+
 #ifdef ASSERT
 #   undef ASSERT
 #endif
@@ -63,11 +49,22 @@ typedef long int lcoord_t;
 #define CHECK_RET(x, msg)  wxCHECK_RET(x, msg)
 
 // ----------------------------------------------------------------------------
+// i18n
+// ----------------------------------------------------------------------------
+
+// override wxWin setting if necessary
+#ifndef USE_I18N
+#  undef wxUSE_INTL
+#  define wxUSE_INTL 0
+#endif // USE_I18N
+
+#include <wx/intl.h>
+
+// ----------------------------------------------------------------------------
 // message logging macros
 // ----------------------------------------------------------------------------
 
 // wxWindows 2 has built in logging capabilities
-#  include <wx/intl.h>
 #  include <wx/log.h>
 
 #  define M_LOG_DEBUG   wxLOG_Debug
@@ -97,13 +94,27 @@ typedef long int lcoord_t;
 #  endif
 
 #ifdef   OS_UNIX
-#  include  "Munix.h"
+#  include "Munix.h"
 #elif   defined(OS_WIN)
 #  include "Mwin.h"
 #endif
 
+// ----------------------------------------------------------------------------
+// misc macros
+// ----------------------------------------------------------------------------
+
 /// for convenience, get an icon:
 #define   ICON(name) (mApplication->GetIconManager()->GetIcon(name))
+
+/// define a NULL for strings (FIXME: is this valid for std::string ?)
+#define   NULLstring String((const char *)NULL)
+
+/// defines an empty string for argument lists, needed for scandoc
+#define   M_EMPTYSTRING   ""
+
+// ----------------------------------------------------------------------------
+// Python macros
+// ----------------------------------------------------------------------------
 
 /**@name Macros for calling callback functions.
 
@@ -138,9 +149,6 @@ typedef long int lcoord_t;
 #   define   PY_CALLBACKVA(arg,default)      PythonCallback((int)default)
 #endif
 //@}
-
-/// define a NULL for strings (FIXME: is this valid for std::string ?)
-#define   NULLstring String((const char *)NULL)
 
 #endif // MCOMMON_H
 

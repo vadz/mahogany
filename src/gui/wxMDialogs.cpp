@@ -1022,6 +1022,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #ifdef USE_PYTHON
                    "Python<br>"
 #endif
+#ifdef USE_I18N
+                   "Internationalization<br>"
+#endif
 #endif // USE_XXX
 
 #ifdef EXPERIMENTAL
@@ -1155,9 +1158,12 @@ MDialog_ShowTip(const MWindow *parent)
 
    filename = "Tips";
 
+#ifdef USE_I18N
    wxLocale * locale = wxGetLocale();
    if(locale)
       filename << '_' << locale->GetLocale();
+#endif // USE_I18N
+
    filename << ".txt";
 
    if(! wxFileExists(dir+filename))

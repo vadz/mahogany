@@ -49,13 +49,13 @@
 #  include "sysutil.h"
 #  include "MApplication.h"
 #  include <ctype.h>
+
+#  include <wx/string.h>
+#  include <wx/log.h>
+#  include <wx/dynarray.h>
 #endif //USE_PCH
 
 // wxWindows
-#include <wx/string.h>
-#include <wx/log.h>
-#include <wx/intl.h>
-#include <wx/dynarray.h>
 #include <wx/file.h>
 #include <wx/textfile.h>
 #include <wx/confbase.h>

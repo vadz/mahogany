@@ -2450,21 +2450,21 @@ wxComposeView::SetAddresses(const String &to,
    {
       text = m_txtFields[Field_To];
       if ( text )
-         text->SetValue(WXCPTR to.c_str());
+         text->SetValue(to.c_str());
    }
 
    if ( !!cc )
    {
       text = m_txtFields[Field_Cc];
       if ( text )
-         text->SetValue(WXCPTR cc.c_str());
+         text->SetValue(cc.c_str());
    }
 
    if ( !!bcc )
    {
       text = m_txtFields[Field_Bcc];
       if ( text )
-         text->SetValue(WXCPTR bcc.c_str());
+         text->SetValue(bcc.c_str());
    }
 }
 
@@ -2472,7 +2472,7 @@ wxComposeView::SetAddresses(const String &to,
 void
 wxComposeView::SetSubject(const String &subj)
 {
-   m_txtFields[Field_Subject]->SetValue(WXCPTR subj.c_str());
+   m_txtFields[Field_Subject]->SetValue(subj.c_str());
 }
 
 void wxComposeView::ResetDirty()
