@@ -316,7 +316,6 @@ enum ConfigFields
    ConfigField_ToolbarsFlatButtons,
    ConfigField_ReenableDialog,
 
-#ifdef EXPERIMENTAL
    ConfigField_RemoteSynchroniseMessage,
    ConfigField_RSynchronise,
    ConfigField_RSConfigFolder,
@@ -325,9 +324,6 @@ enum ConfigFields
    ConfigField_RSFolders,
    ConfigField_RSFolderGroup,
    ConfigField_OthersLast = ConfigField_RSFolderGroup,
-#else
-   ConfigField_OthersLast = ConfigField_ReenableDialog,
-#endif
    
 
    // the end
