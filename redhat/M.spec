@@ -2,7 +2,7 @@
 # Version:  $Id$
 
 # version and release
-%define VERSION 0.23a
+%define VERSION 0.50
 %define RELEASE 1
 
 # so far I didn't find how to make a relocatable package...
