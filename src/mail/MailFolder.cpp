@@ -1235,7 +1235,7 @@ char MailFolder::GetFolderDelimiter() const
       case MF_MDIR:
       case MF_MFILE:
          // the filenames use slash as separator
-         return '/';
+         return wxFILE_SEP_PATH;
 
       case MF_NNTP:
       case MF_NEWS:

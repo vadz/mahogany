@@ -34,6 +34,8 @@
 #  include <wx/textdlg.h>
 #endif // USE_PCH
 
+#include <wx/filename.h>
+
 #include "MFolder.h"
 
 #include "gui/wxDialogLayout.h"
@@ -235,7 +237,22 @@ void wxFolderRenameDialog::OnText(wxCommandEvent& event)
 
 void wxFolderRenameDialog::DoUpdateMboxPath(const String& folderName)
 {
-   String mboxName = m_textMbox->GetValue().BeforeLast(m_chDelim);
+   String mboxName,
+          path = m_textMbox->GetValue();
+   switch ( m_folder->GetType() )
+   {
+      case MF_FILE:
+      case MF_MH:
+         // the file names are more complicated: we have to deal with different
+         // delimiters depending on platform and so on
+         wxFileName::SplitPath(path, &mboxName, NULL, NULL);
+         break;
+
+      default:
+         // just take all components but the last one
+         mboxName = path.BeforeLast(m_chDelim);
+   }
+
    mboxName << m_chDelim << folderName;
 
    m_textMbox->SetValue(mboxName);
