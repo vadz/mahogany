@@ -91,6 +91,9 @@ public:
    virtual bool HasEntry(String const &key) const = 0;
    /// delete the entry group specified by path
    virtual void DeleteGroup(String const &path) = 0;
+protected:
+   /// why does egcs want this?
+   ProfileBase() {}  
 private:
    /// forbid copy construction
    ProfileBase(ProfileBase const &);

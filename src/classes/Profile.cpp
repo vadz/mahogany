@@ -58,13 +58,13 @@
 // ProfileBase
 // ----------------------------------------------------------------------------
 
-static ProfileBase *
+ProfileBase *
 ProfileBase::CreateProfile(String const &classname, ProfileBase const *parent)
 {
-   return new Profile(name, parent);
+   return new Profile(classname, parent);
 }
 
-static ProfileBase *
+ProfileBase *
 ProfileBase::CreateGlobalConfig(String const &filename)
 {
    return new wxConfigProfile(filename);
@@ -212,7 +212,7 @@ Profile::readEntry(String const &key, String const &defaultvalue) const
    // config object must be created
    CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
-   wxString &rc = fileConfig->Read(key.c_str(), String((const char *)NULL));
+   wxString rc = fileConfig->Read(key.c_str(), String((const char *)NULL));
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
@@ -253,7 +253,7 @@ Profile::readEntry(String const &key, long defaultvalue) const
 {
    long rc;
 
-   if ( !fileConfig->Read((long *)&rc, key, defaultvalue) )
+   if ( !fileConfig->Read(key, &rc, defaultvalue) )
    {
       if ( !parentProfile ||
            (rc = parentProfile->readEntry(key, defaultvalue)) == defaultvalue
