@@ -39,10 +39,16 @@ class MsgCmdProc;
 class wxMessageView : public MessageView
 {
 public:
-   /** Constructor
-       @param parent parent window
+   /**
+      Constructor
+
+      @param parent parent window
+      @param folderView associated folder view (may be NULL if standalone)
+      @param profile our profile (may be NULL if not standalone)
    */
-   wxMessageView(wxWindow *parent, FolderView *folderView = NULL);
+   wxMessageView(wxWindow *parent,
+                 FolderView *folderView = NULL,
+                 Profile *profile = NULL);
 
    /// Destructor
    ~wxMessageView();

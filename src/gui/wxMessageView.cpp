@@ -40,6 +40,7 @@
 #include "gui/wxMenuDefs.h"
 
 #include "UIdArray.h"
+#include "ASMailFolder.h"
 
 #include "MessageTemplate.h"
 #include "Message.h"
@@ -184,9 +185,11 @@ private:
 // ctor/dtor
 // ----------------------------------------------------------------------------
 
-wxMessageView::wxMessageView(wxWindow *parent, FolderView *folderView)
+wxMessageView::wxMessageView(wxWindow *parent,
+                             FolderView *folderView,
+                             Profile *profile)
 {
-   Init(parent);
+   Init(parent, profile);
 
    m_FolderView = folderView;
 }
@@ -199,6 +202,13 @@ wxMessageView::~wxMessageView()
 MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 {
    return new wxMessageView(parent, folderView);
+}
+
+/* static */
+MessageView *
+MessageView::CreateStandalone(wxWindow *parent, Profile *profile)
+{
+   return new wxMessageView(parent, NULL, profile);
 }
 
 // ----------------------------------------------------------------------------
@@ -415,7 +425,8 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
                                        UIdType uid)
                   : wxMFrame(_("Mahogany: Message View"), parent)
 {
-   m_MessageView = MessageView::Create(this);
+   Profile_obj profile(Profile::CreateTemp(asmf->GetProfile()));
+   m_MessageView = MessageView::CreateStandalone(this, profile);
 
    m_msgCmdProc = MsgCmdProc::Create(m_MessageView);
    m_msgCmdProc->SetFolder(asmf);
@@ -528,6 +539,8 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid)
 {
+   CHECK( asmf, NULL, _T("NULL folder in ShowMessageViewFrame()?") );
+
    wxMessageViewFrame *frame = new wxMessageViewFrame(parent, asmf, uid);
 
    return frame->GetMessageView();

@@ -148,6 +148,9 @@ public:
 
    //@}
 
+   /// do not call DecRef() on the returned pointer (which is never NULL)
+   Profile *GetProfile() const { return m_msgView->GetProfile(); }
+
    wxFrame *GetFrame() const { return m_frame; }
 
    MailFolder *GetMailFolder() const
@@ -570,6 +573,8 @@ MsgCmdProc *MsgCmdProc::Create(MessageView *msgView, wxWindow *winForDnd)
 
 MsgCmdProcImpl::MsgCmdProcImpl(MessageView *msgView, wxWindow *winForDnd)
 {
+   ASSERT_MSG( msgView, _T("NULL MessageView in MsgCmdProc -- will crash") );
+
    m_msgView = msgView;
    m_winForDnd = winForDnd;
    m_asmf = NULL;
@@ -733,7 +738,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
       case WXMENU_MSG_REPLY_LIST:
       case WXMENU_MSG_FOLLOWUP_TO_NEWSGROUP:
          {
-            int quote = READ_CONFIG(m_asmf->GetProfile(), MP_REPLY_QUOTE_ORIG);
+            int quote = READ_CONFIG(GetProfile(), MP_REPLY_QUOTE_ORIG);
 
             if ( quote == M_ACTION_PROMPT )
             {
@@ -1014,7 +1019,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
 
       SendMessage_obj sendMsg(SendMessage::CreateResent
                               (
-                                  m_asmf->GetProfile(),
+                                  GetProfile(),
                                   msg,
                                   GetFrame()
                               ));
@@ -1076,7 +1081,7 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
 
       SendMessage_obj sendMsg(SendMessage::CreateResent
                               (
-                                  m_asmf->GetProfile(),
+                                  GetProfile(),
                                   msg.Get(),
                                   GetFrame()
                               ));
@@ -1741,7 +1746,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                Message *msg =
                   ((ASMailFolder::ResultMessage *)result)->GetMessage();
 
-               Composer::EditMessage(m_asmf->GetProfile(), msg);
+               Composer::EditMessage(GetProfile(), msg);
             }
             else
             {

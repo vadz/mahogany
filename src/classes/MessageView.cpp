@@ -519,8 +519,12 @@ MessageView::MessageView()
 }
 
 void
-MessageView::Init(wxWindow *parent)
+MessageView::Init(wxWindow *parent, Profile *profile)
 {
+   m_profile = profile;
+   if ( m_profile )
+      m_profile->IncRef();
+
    m_viewer = CreateDefaultViewer();
    m_viewer->Create(this, parent);
 
@@ -530,6 +534,7 @@ MessageView::Init(wxWindow *parent)
 void
 MessageView::Init()
 {
+   m_profile = NULL;
    m_asyncFolder = NULL;
    m_mailMessage = NULL;
    m_viewer = NULL;
@@ -553,6 +558,7 @@ MessageView::~MessageView()
 
    SafeDecRef(m_mailMessage);
    SafeDecRef(m_asyncFolder);
+   SafeDecRef(m_profile);
 
    delete m_filters;
    delete m_viewer;
@@ -742,7 +748,6 @@ MessageView::InitializeViewFilters()
 
                   // finally, enable/disable it initially as configured
                   Profile *profile = GetProfile();
-                  CHECK_RET( profile, _T("no profile in InitializeViewFilters?") );
 
                   int enable = profile->readEntryFromHere(name, -1);
                   if ( enable != -1 )
@@ -772,7 +777,6 @@ MessageView::UpdateViewFiltersState()
    }
 
    Profile *profile = GetProfile();
-   CHECK_RET( profile, _T("no profile in UpdateViewFiltersState?") );
 
    // we never change the status of the last filter (transparent one), so stop
    // at one before last
@@ -879,8 +883,7 @@ MessageView::Clear()
 Profile *MessageView::GetProfile() const
 {
    // always return something non NULL
-   return m_asyncFolder ? m_asyncFolder->GetProfile()
-                        : mApplication->GetProfile();
+   return m_profile ? m_profile : mApplication->GetProfile();
 }
 
 // ----------------------------------------------------------------------------
@@ -2815,7 +2818,6 @@ MessageView::DoMenuCommand(int id)
    CHECK( GetFolder(), false, _T("no folder in message view?") );
 
    Profile *profile = GetProfile();
-   CHECK( profile, false, _T("no profile in message view?") );
 
    switch ( id )
    {

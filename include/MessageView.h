@@ -64,12 +64,29 @@ protected:
    /// default ctor: we have to use 2 step construction
    MessageView();
 
-   /// takes as argument the parent window for the message viewer one
-   void Init(wxWindow *parent);
+   /// same arguments as in ctor(s)
+   void Init(wxWindow *parent, Profile *profile = NULL);
 
 public:
-   /// create a new MessageView
-   static MessageView *Create(wxWindow *parent, FolderView *folderView = NULL);
+   /**
+      Create a new MessageView as part of a FolderView.
+
+      @param parent the parent window for the GUI control
+      @param folderView the associated folder view, must not be NULL
+      @return new MessageView object to be deleted by the caller or NULL
+    */
+   static MessageView *Create(wxWindow *parent, FolderView *folderView);
+
+   /**
+      Create a new standalone MessageView.
+
+      @param parent the parent window for the GUI control
+      @param profile our own (temp) profile, must not be NULL; note that we
+                     do not take ownership of this pointer
+      @return new MessageView object to be deleted by the caller or NULL
+    */
+   static MessageView *CreateStandalone(wxWindow *parent, Profile *profile);
+
 
    /// dtor
    virtual ~MessageView();
@@ -214,10 +231,23 @@ public:
     */
    //@{
 
-   /// get the profile to read settings from: DO NOT CALL DecRef() ON RESULT
+   /**
+      Get the profile to read settings from.
+
+      If we don't have any profile, this returns a pointer to the global one.
+      In any case, it must never return NULL pointer.
+
+      @return profile pointer, never NULL. DO NOT CALL DecRef() ON RESULT
+    */
    Profile *GetProfile() const;
 
-   /// get the folder we use: DO NOT CALL DecRef() ON RESULT
+   /**
+      Get the folder we use
+
+      Note that this may return NULL.
+
+      @return async mail folder or NULL. DO NOT CALL DecRef() ON RESULT
+    */
    ASMailFolder *GetFolder() const { return m_asyncFolder; }
 
    //@}
@@ -511,6 +541,12 @@ private:
    /// the mail folder
    ASMailFolder *m_asyncFolder;
 
+   /// the obejct to which we delegate the menu command processing
+   MsgCmdProc *m_msgCmdProc;
+
+   /// our profile object (use GetProfile() instead of accessing directly!)
+   Profile *m_profile;
+
    //@}
 
    /** @name Event manager stuff
@@ -633,9 +669,6 @@ private:
 
    //@}
 
-
-   /// the obejct to which we delegate the menu command processing
-   MsgCmdProc *m_msgCmdProc;
 
    friend class ProcessEvtHandler;
    friend class MessageViewer;
