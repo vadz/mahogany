@@ -21,6 +21,7 @@ class wxConfigBase;
 class wxPHelper;
 
 // the headers we really need
+#include <wx/defs.h>
 #include <wx/notebook.h>
 #include <wx/checkbox.h>
 #include <wx/control.h>
