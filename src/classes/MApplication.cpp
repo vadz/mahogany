@@ -99,7 +99,6 @@ extern const MOption MP_USEPYTHON;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_USERDIR;
-extern const MOption MP_USER_MDIR;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 #ifdef OS_UNIX
@@ -910,45 +909,66 @@ MAppBase::OnChangeCreateInternalMessage(MEventData& event)
 void
 MAppBase::InitDirectories()
 {
-   // first the local one
+   // first the local one: this one contains user-specific files
    m_localDir = READ_APPCONFIG_TEXT(MP_USERDIR);
    if ( m_localDir.empty() )
    {
-      m_localDir = wxGetHomeDir();
-
 #ifdef OS_WIN
-      wxDynamicLibrary dllShell32(_T("shell32.dll"));
-      if ( dllShell32.IsLoaded() )
+      // normally we store the user files under APPDATA directory which is
+      // something like "C:\Documents and Settings\username\Application Data"
+
+      // suppress errors if shell32.dll can't be loaded or if it doesn't have
+      // SHGetSpecialFolderPath (as is the case on Windows 95)
       {
-         typedef BOOL (WINAPI *SHGetSpecialFolderPathA_t)(HWND, LPTSTR, int, BOOL);
+         wxLogNull noLog;
 
-         wxDYNLIB_FUNCTION(SHGetSpecialFolderPathA_t, SHGetSpecialFolderPathA,
-                           dllShell32);
-
-         if ( pfnSHGetSpecialFolderPathA )
+         wxDynamicLibrary dllShell32(_T("shell32.dll"));
+         if ( dllShell32.IsLoaded() )
          {
-            String pathAppData;
-            if ( pfnSHGetSpecialFolderPathA
-                    (
-                     NULL,                                  // owner hwnd
-                     wxStringBuffer(pathAppData, MAX_PATH), // [out] buffer
-                     CSIDL_APPDATA,                         // which to get
-                     FALSE                                  // don't create
-                    ) )
+            typedef BOOL
+               (WINAPI *SHGetSpecialFolderPathA_t)(HWND, LPTSTR, int, BOOL);
+
+            wxDYNLIB_FUNCTION(SHGetSpecialFolderPathA_t,
+                              SHGetSpecialFolderPathA,
+                              dllShell32);
+
+            if ( pfnSHGetSpecialFolderPathA )
             {
-               m_localDir = pathAppData;
+               String pathAppData;
+               if ( pfnSHGetSpecialFolderPathA
+                       (
+                        NULL,                                  // owner hwnd
+                        wxStringBuffer(pathAppData, MAX_PATH), // [out] buffer
+                        CSIDL_APPDATA,                         // which to get
+                        FALSE                                  // don't create
+                       ) )
+               {
+                  m_localDir = pathAppData + _T("\\Mahogany");
+               }
             }
          }
       }
-#endif // OS_WIN
 
-      m_localDir << DIR_SEPARATOR << READ_APPCONFIG_TEXT(MP_USER_MDIR);
+      // but if we couldn't determine APPDATA directory...
+      if ( m_localDir.empty() )
+      {
+         // ... store the files in the program directory itself and in this
+         // case use the users name in the subdirectory part to still try to
+         // make it possible for several users to use the same installation
+         m_localDir = wxGetHomeDir() + _T('\\') + wxGetUserName();
+      }
+
+#elif defined(OS_UNIX)
+      m_localDir = wxGetHomeDir() + _T("/.M");
+#else
+      #error "Don't know where to put per-user Mahogany files on this system"
+#endif // OS_WIN
 
       // save it for the next runs
       m_profile->writeEntry(MP_USERDIR, m_localDir);
    }
 
-   // and now the global
+   // and now the global directory: this one is shared by all users
    m_globalDir = READ_APPCONFIG_TEXT(MP_GLOBALDIR);
    if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
