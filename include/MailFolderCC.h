@@ -40,6 +40,16 @@ class MMutex;
 struct mail_address;
 struct OVERVIEW_X;
 
+// supported formats for the local mailboxes (MH not counted)
+enum FileMailboxFormat
+{
+   FileMbox_MBX,   // the default format, must be 0!
+   FileMbox_MBOX,  // traditional Unix one
+   FileMbox_MMDF,  // SCO default format
+   FileMbox_TNX,   // MM-compatible fast format
+   FileMbox_Max
+};
+
 // ----------------------------------------------------------------------------
 // helper classes
 // ----------------------------------------------------------------------------
@@ -478,9 +488,9 @@ protected:
 
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
+
    /// apply all timeout values
    void ApplyTimeoutValues(void);
-   void SetType(FolderType type) { m_folderType = type; }
 
    /// Check if this message is a "New Message":
    virtual bool IsNewMessage(const HeaderInfo * hi);
@@ -493,6 +503,9 @@ protected:
 
    /// Close the folder
    void Close(void);
+
+   /// physically create the file (MF_FILE or MF_MH) folder
+   void CreateFileFolder();
 
    /// Build the sequence string from the array of message uids
    static String BuildSequence(const UIdArray& messages);

@@ -408,7 +408,6 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
    if ( !MFolderFromProfile::Create(fullname) )
    {
       // error message already given
-
       return NULL;
    }
 
@@ -420,6 +419,13 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
    CHECK( profile, NULL, "panic in MFolder: no profile" );
 
    profile->writeEntry(MP_FOLDER_TYPE, type);
+
+   // the physical folder might not exist yet, we will try to create it when
+   // opening fails the next time
+   if ( folder->CanOpen() )
+   {
+      profile->writeEntry(MP_FOLDER_TRY_CREATE, 1);
+   }
 
    return folder;
 }

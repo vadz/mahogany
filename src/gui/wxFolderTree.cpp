@@ -457,6 +457,9 @@ private:
    // the bg colour name
    wxString m_colBgName;
 
+   // the temporarily saved suffix part of the tree item label being edited
+   wxString m_suffix;
+
 #ifdef USE_TREE_ACTIVATE_BUGFIX
    bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
 
@@ -1458,7 +1461,31 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
    }
 
    if ( !allow )
+   {
+      // can't rename this one
       event.Veto();
+   }
+   else
+   {
+      // leave only the label itself, get rid of suffix showing the number of
+      // messages
+      long item = event.GetItem();
+      wxFolderTreeNode *node = GetFolderTreeNode(item);
+
+      wxString label = GetItemText(item);
+      wxString name = node->GetName();
+
+      if ( label.StartsWith(name, &m_suffix) )
+      {
+         // remember m_suffix for OnEndLabelEdit()
+         SetItemText(item, name);
+      }
+      else
+      {
+         // what's going on? label is normally composed of name and suffix
+         FAIL_MSG( "unexpected tree item label" );
+      }
+   }
 }
 
 void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
@@ -1472,10 +1499,15 @@ void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
    }
    else
    {
-      if ( !m_sink->OnRename(folder, event.GetLabel()) )
+      wxString label = event.GetLabel();
+      if ( !m_sink->OnRename(folder, label) )
       {
          event.Veto();
       }
+
+      // restore the suffix
+      SetItemText(event.GetItem(), label + m_suffix);
+      m_suffix.clear();
 
       folder->DecRef();
    }

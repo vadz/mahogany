@@ -46,6 +46,7 @@
 #include "MDialogs.h"
 #include "MFolderDialogs.h"
 #include "MailFolder.h"
+#include "MailFolderCC.h" // only for FileMbox_Max :-(
 #include "MFolder.h"
 
 #include "Mdefaults.h"
@@ -255,7 +256,7 @@ protected:
    // the radiobox indices
    enum RadioIndex
    {
-      Radio_File,    // MBOX/MH/INBOX
+      Radio_File,    // MBX/MH/INBOX
       Radio_Pop,     // POP3
       Radio_Imap,    // IMAP4
       Radio_News,    // NNTP/NEWS
@@ -267,12 +268,15 @@ protected:
       // valid subtypes for Radio_File
    enum
    {
+      FileFolderSubtype_Mbx,        // default format for Mahogany folders
       FileFolderSubtype_Mbox,       // a standard MBOX style file folder
+      FileFolderSubtype_Mmdf,       // SCO Unix format
+      FileFolderSubtype_Tenex,      // Tenex format
       FileFolderSubtype_MH,         // an MH directoryfolder
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
       FileFolderSubtype_MDir,       // Mahogany folder directory format
       FileFolderSubtype_MFile,      // Mahogany folder file format
-#endif
+#endif // EXPERIMENTAL_MFormat
       FileFolderSubtype_Max
    };
       // valid subtypes for type Radio_News
@@ -305,6 +309,7 @@ protected:
       Path,       // path for file based folders, newsgroup for NEWS/NNTP
       MaxProperty
    };
+
    void WriteEntryIfChanged(FolderProperty entry, const wxString& value);
 
    // fills the subtype combobox with the available values for the
@@ -1108,12 +1113,12 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    // if the path text changed, try to set the folder name automatically
    switch ( GetCurrentFolderType() )
    {
-   case MF_FILE:
-   case MF_MH:
-#ifdef EXPERIMENTAL
-   case MF_MDIR:
-   case MF_MFILE:
-#endif
+      case MF_FILE:
+      case MF_MH:
+#ifdef EXPERIMENTAL_MFormat
+      case MF_MDIR:
+      case MF_MFILE:
+#endif // EXPERIMENTAL_MFormat
          // set the file name as the default folder name
          if ( objEvent == m_path )
          {
@@ -1140,8 +1145,8 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
       case MF_IMAP:
          if ( objEvent == m_mailboxname )
          {
-            // FIXME this is completely bogus as IMAP folders can have _any_
-            //       symbol as separator
+            // this is completely bogus as IMAP folders can have _any_ symbol
+            // as separator, but these two are the only ones in common use
             wxString name, path = m_mailboxname->GetValue();
             if ( strchr(path, '/') )
                name = path.AfterLast('/');
@@ -1192,9 +1197,9 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
          // MH folder should be created under its parent by default
          if ( folderType == MF_MH
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
               || folderType == MF_MDIR
-#endif
+#endif // EXPERIMENTAL_MFormat
             )
          {
             // AfterFirst() removes the MH root prefix
@@ -1280,7 +1285,14 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
    m_canBeOpened->SetValue(TRUE);
    m_canBeOpened->Disable();
 
-   // file folders come in several flavours
+   // the value is fixed (whatever it is) by the folder type
+   m_isGroup->Disable();
+
+   // file folders come in several flavours, so choose the default one if no
+   // selection yet
+   if ( m_folderSubtype->GetSelection() != -1 )
+      return;
+
    int subtype;
    switch ( m_folderType )
    {
@@ -1289,24 +1301,25 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
          // fall through
 
       case MF_FILE:
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
       case MF_MFILE:
          subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MFile
-                                            : FileFolderSubtype_Mbox;
-#else
-         subtype = FileFolderSubtype_Mbox;
+                                            : FileFolderSubtype_Mbx;
+#else // !EXPERIMENTAL_MFormat
+         subtype = FileFolderSubtype_Mbx;
 #endif
+
          m_browsePath->BrowseForFiles();
 
          m_isGroup->SetValue(FALSE);
          break;
 
       case MF_MH:
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
       case MF_MDIR:
          subtype = m_folderType == MF_MFILE ? FileFolderSubtype_MDir
                                             : FileFolderSubtype_MH;
-#else
+#else // !EXPERIMENTAL_MFormat
          subtype = FileFolderSubtype_MH;
 #endif
          {
@@ -1316,9 +1329,6 @@ wxFolderPropertiesPage::EnableControlsForFileFolder(FolderType folderType)
          }
          break;
    }
-
-   // the value is fixed (whatever it is) by the folder type
-   m_isGroup->Disable();
 
    m_folderSubtype->SetSelection(subtype);
 }
@@ -1430,10 +1440,10 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
       case MF_FILE:
       case MF_MH:
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
       case MF_MFILE:
       case MF_MDIR:
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_MFormat
          EnableControlsForFileFolder(m_folderType);
 
          if ( m_folderType == MF_MH || m_folderType == MF_MDIR )
@@ -1489,6 +1499,15 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 void
 wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
 {
+#ifdef __WXGTK__
+   // this is a work around wxGTK bug: if the control is disabled before the
+   // items are added, reenabling it later doesn't work properly, so enable it
+   // ourselves if needed
+   bool wasDisabled = !m_folderSubtype->IsEnabled();
+   if ( wasDisabled )
+      m_folderSubtype->Enable();
+#endif // __WXGTK__
+
    // do it first anyhow - it might have contained something before
    m_folderSubtype->Clear();
 
@@ -1496,12 +1515,15 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
    {
       case Radio_File:
          // NB: the strings should be in sync with FileFolderSubtype_XXX enum
-         m_folderSubtype->Append(_("MBOX folder"));
+         m_folderSubtype->Append(_("MBX folder (best)"));
+         m_folderSubtype->Append(_("MBOX (traditional Unix)"));
+         m_folderSubtype->Append(_("MMDF (SCO Unix)"));
+         m_folderSubtype->Append(_("Tenex folder"));
          m_folderSubtype->Append(_("MH folder"));
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
          m_folderSubtype->Append(_("Mahogany MH folder"));
          m_folderSubtype->Append(_("Mahogany file folder"));
-#endif
+#endif // EXPERIMENTAL_MFormat
          break;
 
       case Radio_News:
@@ -1513,6 +1535,12 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
       default:
          // nothing to do - leave the wxChoice empty and return, skipping
          // SetSelection() below
+
+#ifdef __WXGTK__
+         // disable it back if we should
+         if ( wasDisabled )
+            m_folderSubtype->Disable();
+#endif // __WXGTK__
          return;
    }
 
@@ -1547,22 +1575,26 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
          // one anyhow
          switch ( selChoice )
          {
-         default:
-            FAIL_MSG("invalid file folder subtype");
-            // fall through
+            default:
+               FAIL_MSG("invalid file folder subtype");
+               // fall through
 
-#ifdef EXPERIMENTAL
-         case FileFolderSubtype_MFile:
-            return MF_MFILE;
+#ifdef EXPERIMENTAL_MFormat
+            case FileFolderSubtype_MFile:
+               return MF_MFILE;
 
-         case FileFolderSubtype_MDir:
-            return MF_MDIR;
-#endif
-         case FileFolderSubtype_Mbox:
-            return MF_FILE;
+            case FileFolderSubtype_MDir:
+               return MF_MDIR;
+#endif // EXPERIMENTAL_MFormat
 
-         case FileFolderSubtype_MH:
-            return MF_MH;
+            case FileFolderSubtype_Mbx:
+            case FileFolderSubtype_Mbox:
+            case FileFolderSubtype_Mmdf:
+            case FileFolderSubtype_Tenex:
+               return MF_FILE;
+
+            case FileFolderSubtype_MH:
+               return MF_MH;
          }
 
       case Radio_Pop:
@@ -1607,47 +1639,48 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
 
    switch ( type )
    {
-   case MF_INBOX:
-   case MF_FILE:
-   case MF_MH:
-      if ( choiceIndex )
-      {
-         *choiceIndex = type == MF_MH ? FileFolderSubtype_MH
-            : FileFolderSubtype_Mbox;
-      }
-      return Radio_File;
-#ifdef EXPERIMENTAL
-   case MF_MFILE:
-   case MF_MDIR:
-      if ( choiceIndex )
-      {
-         *choiceIndex = type == MF_MDIR ? FileFolderSubtype_MDir
-            : FileFolderSubtype_MFile;
-      }
-      return Radio_File;
-#endif
+      case MF_INBOX:
+      case MF_FILE:
+      case MF_MH:
+         if ( choiceIndex )
+         {
+            *choiceIndex = type == MF_MH ? FileFolderSubtype_MH
+                                         : FileFolderSubtype_Mbx;
+         }
+         return Radio_File;
 
-   case MF_POP:
-      return Radio_Pop;
+#ifdef EXPERIMENTAL_MFormat
+      case MF_MFILE:
+      case MF_MDIR:
+         if ( choiceIndex )
+         {
+            *choiceIndex = type == MF_MDIR ? FileFolderSubtype_MDir
+               : FileFolderSubtype_MFile;
+         }
+         return Radio_File;
+#endif // EXPERIMENTAL_MFormat
 
-   case MF_IMAP:
-      return Radio_Imap;
+      case MF_POP:
+         return Radio_Pop;
 
-   case MF_NNTP:
-   case MF_NEWS:
-      if ( choiceIndex )
-      {
-         *choiceIndex = type == MF_NNTP ? NewsFolderSubtype_Nntp
-            : NewsFolderSubtype_News;
-      }
-      return Radio_News;
+      case MF_IMAP:
+         return Radio_Imap;
 
-   case MF_GROUP:
-      return Radio_Group;
+      case MF_NNTP:
+      case MF_NEWS:
+         if ( choiceIndex )
+         {
+            *choiceIndex = type == MF_NNTP ? NewsFolderSubtype_Nntp
+               : NewsFolderSubtype_News;
+         }
+         return Radio_News;
 
-   default:
-      FAIL_MSG("unexpected folder type value");
-      return Radio_Max;
+      case MF_GROUP:
+         return Radio_Group;
+
+      default:
+         FAIL_MSG("unexpected folder type value");
+         return Radio_Max;
    }
 }
 
@@ -1668,7 +1701,7 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
 
    if ( value != m_originalValues[property] )
    {
-      if(property ==  Password)
+      if ( property == Password )
          m_profile->writeEntry(profileKeys[property], strutil_encrypt(value));
       else
          m_profile->writeEntry(profileKeys[property], value);
@@ -1924,14 +1957,14 @@ wxFolderPropertiesPage::IsOk() const
 {
    switch ( GetCurrentFolderType() )
    {
-      case Nntp:
-      case News:
+      case MF_NNTP:
+      case MF_NEWS:
          // it's valid to have an empty name for the newsgroup hierarchy - the
          // entry will represent the whole news server - but not for a
          // newsgroup
          return m_isGroup->GetValue() || !!m_newsgroup->GetValue();
 
-      case File:
+      case MF_FILE:
          // file should have a non empty name
          return !!m_path->GetValue();
 
@@ -2020,10 +2053,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // is the folder name valid?
    wxString path;
    if ( folderType == MF_MH
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
         || folderType == MF_MDIR
-#endif
-)
+#endif // EXPERIMENTAL_MFormat
+      )
    {
       // MH folder name must be relative to MH root, check it
       path = m_path->GetValue();
@@ -2255,16 +2288,28 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          break;
 
       case MF_FILE:
-#ifdef EXPERIMENTAL
+         // write the folder format if needed
+         {
+            int format = m_folderSubtype->GetSelection();
+            ASSERT_MSG( format >= 0 && format < FileMbox_Max,
+                        "invalid folder format selection" );
+
+            if ( format != MP_FOLDER_FILE_DRIVER_D )
+            {
+               m_profile->writeEntry(MP_FOLDER_FILE_DRIVER, format);
+            }
+         }
+
+#ifdef EXPERIMENTAL_MFormat
       case MF_MFILE:
-#endif
+#endif // EXPERIMENTAL_MFormat
          path = m_path->GetValue();
          // fall through
 
       case MF_MH:
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_MFormat
       case MF_MDIR:
-#endif
+#endif // EXPERIMENTAL_MFormat
          WriteEntryIfChanged(Path, path);
          break;
 
