@@ -1,0 +1,22 @@
+Known issues with release 0.01 (pre-alpha)
+==========================================
+
+Missing/badly implemented features:
+-----------------------------------
+
+1. Windows python support doesn't work well, unless you have complete Python distribution
+   installed (and perhaps even then), especially with Windows 95 (not NT)
+
+2. NNTP support is not really usable
+
+Bugs:
+-----
+
+1. Compose view: when inserting a file, the icon doesn't appear unless you enter something
+
+UI glitches:
+------------
+
+1. Closing the application doesn't prompt to save the changes in the compose window
+
+2. Keyboard interface in compose view is half working (and half broken)
