@@ -1,5 +1,7 @@
 (next release) on (date of next release)
 
+15.07.99 VZ: dialogs now have vertical scrollbars and should be usable in any
+             screen resolution now and not only 1024*768 or greater
 11.07.99 VZ: import of Eudora address books added
 08.07.99 VZ: import of XFMail, .mailrc and PINE (Unix) address books added
 09.07.99 KB: made python work again
@@ -21,4 +23,4 @@ Initial public release.
 
 $Id$
 
-vi: set si ts=8 sw=8 noet nolist tw=80:
+vi: set si ts=8 sw=8 et nolist tw=80:

@@ -1288,7 +1288,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
-   CHECK_RET(mf->FolderListing,"NULL mailfolder listing");
+   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
    mf->m_FolderListing->SetDelimiter(delim);
    mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }
@@ -1308,7 +1308,7 @@ MailFolderCC::mm_lsub(MAILSTREAM * stream,
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
-   CHECK_RET(mf->FolderListing,"NULL mailfolder listing");
+   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
    mf->m_FolderListing->SetDelimiter(delim);
    mf->m_FolderListing->Add(new FolderListingEntryCC(name, attrib));
 }

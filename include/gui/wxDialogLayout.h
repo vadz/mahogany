@@ -332,6 +332,10 @@ public:
       // enable/disable the text control with label and button
    void EnableTextWithButton(wxTextCtrl *control, bool enable);
 
+   // get the canvas - all the controls should be created as children of this
+   // canvas, not of the page itself
+   wxScrolledWindow *GetCanvas() const { return m_canvas; }
+
 private:
    // called from CreateXXX() functions to set up the top constraint which is
    // either just below the "last", or below the page top (with some

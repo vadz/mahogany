@@ -736,16 +736,16 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                   // all the others
    radioChoices[n++] = _("Group");
 
-   m_radio = new wxRadioBox(this, -1, _("Folder Type"),
+   m_radio = new wxRadioBox(GetCanvas(), -1, _("Folder Type"),
                             wxDefaultPosition,wxDefaultSize,
                             n, radioChoices,
                             // create a horizontal radio box
                             n, wxRA_SPECIFY_COLS);
 
    c = new wxLayoutConstraints();
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(this, wxTop, 2*LAYOUT_Y_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(GetCanvas(), wxTop, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN);
 #ifdef __WXGTK__
    c->height.Absolute(40); // FIXME: AsIs() doesn't work for wxGTK
 #else
@@ -811,7 +811,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    m_browseIcon = new wxFolderIconBrowseButtonInDialog(
                                                        dlgParent,
-                                                       this,
+                                                       GetCanvas(),
                                                        _("Choose folder icon")
                                                       );
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_isAnonymous, m_browseIcon);
