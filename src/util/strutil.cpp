@@ -263,6 +263,7 @@ strutil_findurl(String &str, String &url)
          {
             while(strutil_isurlchar(*cptr))
                url += *cptr++;
+#pragma warning this code uses memcpy() on overlapping memory areas, fix it!
             str = cptr;
             return before;
          }
@@ -651,7 +652,7 @@ strutil_decrypt(const String &original)
 {
    if(original.Length() == 0)
       return "";
-   CHECK(original.Length() % 4 == 0, "", _("Decrypt function called with illegal string."));
+   CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");
       
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
