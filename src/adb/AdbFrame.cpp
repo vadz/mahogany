@@ -1513,6 +1513,9 @@ ask_name:
   // add to the tree
   AddNewTreeElement(element);
 
+  // and focus it
+  m_treeAdb->SelectItem(element->GetId());
+
   wxLogStatus(this, _("Created new %s '%s' %s."),
               strWhat.c_str(), m_strLastNewEntry.c_str(), strWhere.c_str());
 }
