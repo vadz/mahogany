@@ -1422,8 +1422,6 @@ size_t IsEndOfLine(const wxChar *p)
    return 0;
 }
 
-IMPLEMENT_BOUND_POINTER(DetectSignature::RegExPointer)
-
 DetectSignature::DetectSignature()
 {
 #if wxUSE_REGEX
@@ -1431,6 +1429,9 @@ DetectSignature::DetectSignature()
    m_useRE = false;
 #endif
 }
+
+// Don't inline it with wxRegEx destructor call
+DetectSignature::~DetectSignature() {}
 
 bool DetectSignature::Initialize(Profile *profile)
 {
@@ -1440,7 +1441,7 @@ bool DetectSignature::Initialize(Profile *profile)
    if ( sig != GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
    {
       // we have no choice but to use the user-supplied RE
-      m_reSig.Initialize();
+      m_reSig.Initialize(new wxRegEx);
 
       // we implicitly anchor the RE at start/end of line
       //

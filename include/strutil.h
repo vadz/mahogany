@@ -16,6 +16,7 @@
 #include <time.h>          // for time_t
 
 #include "FolderType.h"    // for strutil_expandfoldername
+#include "pointers.h"
 
 class kbStringList;
 class Profile;
@@ -364,6 +365,7 @@ class DetectSignature
 {
 public:
    DetectSignature();
+   ~DetectSignature();
    
    bool Initialize(Profile *profile);
    bool StartsHere(const wxChar *cptr);
@@ -372,8 +374,7 @@ private:
 #if wxUSE_REGEX
    bool m_useRE;
    // a RE to detect the start of the signature
-   BOUND_POINTER(wxRegEx,RegExPointer);
-   RegExPointer m_reSig;
+   AutoPtr<wxRegEx> m_reSig;
 #endif
 };
 

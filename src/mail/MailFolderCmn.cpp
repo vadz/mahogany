@@ -768,9 +768,6 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    return rc;
 }
 
-BOUND_POINTER(MProgressDialog,MProgressDialogPointer);
-IMPLEMENT_BOUND_POINTER(MProgressDialogPointer)
-
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
                             MFolder *folder)
@@ -806,7 +803,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   MProgressDialogPointer pd;
+   AutoPtr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )

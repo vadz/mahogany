@@ -89,47 +89,6 @@ protected:
       return m_array[offset]; \
    } \
 
-#define BOUND_POINTER(type,name) \
-   class name \
-   { \
-   public: \
-      typedef type HostType; \
-   \
-      name() : m_pointer(NULL) {} \
-      ~name() { Destroy(); } \
-   \
-      void Initialize(); \
-      void Initialize(HostType *pointer); \
-      type *operator->() { return m_pointer; } \
-      operator bool() const { return m_pointer != NULL; } \
-   \
-   private: \
-      void Destroy(); \
-   \
-      type *m_pointer; \
-   }
-
-#define IMPLEMENT_BOUND_POINTER_COMMON(name) \
-   void name::Destroy() { delete m_pointer; } \
-   \
-   void name::Initialize(name::HostType *pointer) \
-   { \
-      ASSERT( !m_pointer ); \
-      m_pointer = pointer; \
-   } \
-
-#define IMPLEMENT_BOUND_POINTER_DEFAULT(name) \
-   IMPLEMENT_BOUND_POINTER_COMMON(name) \
-   \
-   void name::Initialize() \
-      { Initialize(new name::HostType); } \
-
-#define IMPLEMENT_BOUND_POINTER(name) \
-   IMPLEMENT_BOUND_POINTER_COMMON(name) \
-   \
-   void name::Initialize() \
-      { FAIL_MSG(_T("No default constructor")); } \
-
 
 class TreeIteratorNode
 {

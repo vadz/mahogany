@@ -19,10 +19,12 @@ class RefCounter
 {
 public:
    RefCounter() { NewDefault(); }
+   // Expects IncRef-ed object
    RefCounter(ClassName *copy) { NewBare(copy); }
    RefCounter(const RefCounter<ClassName> &copy) { NewCopy(copy); }
    ~RefCounter() { Destroy(); }
-   
+
+   // Expects object that has not been IncRef-ed yet, don't use if possible
    void AttachAndIncRef(ClassName *pointer)
    {
       RefCounterAssign(m_pointer,pointer);
@@ -38,9 +40,8 @@ public:
 private:
    void NewDefault() { m_pointer = 0; }
    void NewCopy(const RefCounter<ClassName> &copy)
-      { NewBare(copy.m_pointer); }
-   void NewBare(ClassName *copy)
-      { RefCounterIncrement(m_pointer = copy); }
+      { RefCounterIncrement(m_pointer = copy.m_pointer); }
+   void NewBare(ClassName *copy) { m_pointer = copy; }
    void Destroy() { RefCounterDecrement(m_pointer); }
    
    RefCounter<ClassName>& Assign(const RefCounter<ClassName> &copy)
@@ -72,8 +73,41 @@ private:
          static_cast<MObjectRC *>(source)); \
    }
 
+class MObjectRC;
 extern void RefCounterIncrement(MObjectRC *pointer);
 extern void RefCounterDecrement(MObjectRC *pointer);
 extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
+
+
+// Equivalent of auto_ptr, but with private copy constructor and assignment
+template <class ClassName>
+class AutoPtr
+{
+public:
+   AutoPtr() { NewDefault(); }
+   AutoPtr(ClassName *copy) { NewCopy(); }
+   ~AutoPtr() { Destroy(); }
+   
+   void Initialize(ClassName *copy)
+   {
+      Destroy();
+      m_pointer = copy;
+   }
+
+   operator ClassName *() { return Get(); }
+   ClassName *operator->() { return Get(); }
+   
+private:
+   void NewDefault() { m_pointer = 0; }
+   void NewCopy(ClassName *copy) { m_pointer = copy; }
+   void Destroy() { if( m_pointer ) delete m_pointer; }
+   
+   ClassName *Get() { return m_pointer; }
+
+   ClassName *m_pointer;
+   
+   AutoPtr(const AutoPtr<ClassName>& copy) {}
+   void operator=(const AutoPtr<ClassName>& copy) {}
+};
 
 #endif // M_POINTERS_H

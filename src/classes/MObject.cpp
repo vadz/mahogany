@@ -167,10 +167,10 @@ extern void RefCounterDecrement(MObjectRC *pointer)
 
 extern void RefCounterAssign(MObjectRC *target,MObjectRC *source)
 {
-   if( target )
-      target->DecRef();
    if( source )
       source->IncRef();
+   if( target )
+      target->DecRef();
 }
 
 #endif //DEBUG
