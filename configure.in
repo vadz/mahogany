@@ -673,7 +673,7 @@ dnl Check for Python headers first: we need this for both dynamic and static
 dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
-        M_CHECK_MYHEADER(Python.h,
+        M_CHECK_MYHEADER_VER(Python.h, 2.1,
 	    [ \
 		$prefix/include/python2.1 \
 		/usr/include/python2.1 \
@@ -683,7 +683,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 		PYTHON_VER=2.1
 	    ],
 	    [
-		M_CHECK_MYHEADER(Python.h,
+		M_CHECK_MYHEADER_VER(Python.h, 2.0,
 		    [ \
 			$prefix/include/python2.0 \
 			/usr/include/python2.0 \
@@ -693,7 +693,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 			PYTHON_VER=2.0
 		    ],
 		    [
-			M_CHECK_MYHEADER(Python.h,
+			M_CHECK_MYHEADER_VER(Python.h, 1.5,
 			    [ \
 				$prefix/include/python1.5 \
 				/usr/include/python1.5 \
