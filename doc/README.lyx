@@ -1,0 +1,349 @@
+#This file was created by <karsten> Sun Apr 26 13:53:06 1998
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+\lyxformat 2.15
+\textclass article
+\language english
+\inputencoding default
+\fontscheme palatino
+\graphics default
+\paperfontsize 12
+\spacing single 
+\papersize Default
+\paperpackage a4wide
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+
+\shape slanted 
+M
+\shape default 
+ - Release Notes 
+\layout Author
+
+Karsten Ballüder
+\latex latex 
+
+\backslash 
+
+\backslash 
+
+\latex default 
+ (
+\family typewriter 
+Ballueder@usa.net, http://Ballueder.home.ml.org
+\family default 
+)
+\layout Abstract
+
+This document is a set of notes about how to compile and install M.
+ It also covers some frequently asked questions.
+ 
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents
+
+\end_inset 
+
+
+\layout Section
+
+Introduction 
+\layout Standard
+
+M is intended to be a powerful mail and news client.
+ The following points were significant in the development of it 
+\layout Itemize
+
+it should have an easy to use graphical user interface 
+\layout Itemize
+
+it should be powerful, being able to replace awkward tools such as procmail,
+ thus it must have a built in scripting language 
+\layout Itemize
+
+it should have full support for a wide range of standards, including full
+ MIME support 
+\layout Itemize
+
+it should run on a wide variety of systems </enum>
+\layout Section
+
+Compilation notes
+\layout Subsection
+
+Operating systems specific
+\layout Subsubsection
+
+Linux
+\layout Standard
+
+If compiling with a non-default compiler like egcs, make sure that 
+\family typewriter 
+/usr/include
+\family default 
+ is not in the include path, neither should 
+\family typewriter 
+/usr/lib
+\family default 
+ be explicitly listed.
+\layout Subsubsection
+
+Solaris/SunOS
+\layout Standard
+
+M has been successfully compiled with 
+\family typewriter 
+gcc-2.8.0
+\family default 
+ on Solaris.
+ Currently it does not compile with the standard 
+\family typewriter 
+C++
+\family default 
+ compiler.
+\layout Subsubsection
+
+Microsoft Windows 
+\layout Standard
+
+M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
+ Visual C++.
+\layout Standard
+
+
+\emph on 
+FIXME: VADIM?
+\layout Subsection
+
+Other issues/libraries
+\layout Subsubsection
+
+STL 
+\layout Standard
+
+M uses the STL, so you need a sufficiently recent compiler, i.e.
+ 
+\family typewriter 
+egcs 
+\family default 
+or 
+\family typewriter 
+gcc-2.8
+\family default 
+.
+\layout Subsubsection
+
+C-client library
+\layout Standard
+
+The 
+\family typewriter 
+c-client library
+\family default 
+ is required and is available from
+\latex latex 
+
+\backslash 
+
+\backslash 
+
+\latex default 
+ 
+\family typewriter 
+ftp://ftp.cac.washington.edu/imap/imap.tar.Z
+\family default 
+.
+ Before compiling it with M, you need to patch it.
+ 
+\layout Standard
+
+First, install the 
+\family typewriter 
+rfc822.c.patch
+\family default 
+ on c-client's 
+\family typewriter 
+rfc822.c
+\family default 
+ file from the 
+\family typewriter 
+extra/patches
+\family default 
+ subdirectory of M.
+ Then run the 
+\family typewriter 
+c-client++
+\family default 
+ script from the 
+\family typewriter 
+extra/scripts
+\family default 
+ subdirectory in the c-client source directory, which will rename variables
+ in the c-client code to make it C++ compliant.
+\layout Subsubsection
+
+Python 
+\layout Standard
+
+
+\family typewriter 
+configure
+\family default 
+ looks for Python in 
+\family typewriter 
+/usr/local/src/Python-1.5
+\family default 
+.
+ If your Python is installed in a different location, change the variable
+ 
+\family typewriter 
+PYTHON_PATH
+\family default 
+ at the beginning of 
+\family typewriter 
+configure
+\family default 
+.
+ 
+\layout Subsubsection
+
+XFaces 
+\layout Standard
+
+If you have the 
+\family typewriter 
+compface
+\family default 
+ library and header file installed, it will be used to support XFaces.
+ To install it, unpack it under the main M directory and apply the patch
+ 
+\family typewriter 
+compface.patch
+\family default 
+ from the 
+\family typewriter 
+extra/patches
+\family default 
+ directory to its sources.
+ Compile it and link its header and library to the 
+\family typewriter 
+extra/include
+\family default 
+ and 
+\family typewriter 
+extra/lib
+\family default 
+ directories.
+\layout Section
+
+Installation
+\layout Subsection
+
+Configuration and Compilation
+\layout Standard
+
+Follow these steps: 
+\layout Enumerate
+
+Edit 
+\family typewriter 
+configure
+\family default 
+ so it will find your installation of Python.
+ If you do not have it, just skip this step.
+\layout Enumerate
+
+Run 
+\family typewriter 
+configure
+\family default 
+ to create the 
+\family typewriter 
+include/config.h
+\family default 
+ and 
+\family typewriter 
+makeopts
+\family default 
+ file.
+ It may be required to edit 
+\family typewriter 
+makeopts
+\family default 
+ by hand.
+\layout Enumerate
+
+Run 
+\family typewriter 
+make dep
+\family default 
+ and 
+\family typewriter 
+cd src
+\family default 
+ and 
+\family typewriter 
+make
+\family default 
+ to compile and link M.
+ Compiling some of the source files will take an enormous amount of memory,
+ so make sure you have enough virtual memory.
+ 
+\layout Section
+
+Further Information
+\layout Itemize
+
+You can download the latest version of M from 
+\family typewriter 
+\latex latex 
+
+\backslash 
+
+\backslash 
+
+\latex default 
+http://Ballueder.home.ml.org/M/
+\family default 
+ 
+\layout Itemize
+
+You can also get up-to-date information on M from the M WWW Page:
+\latex latex 
+
+\backslash 
+
+\backslash 
+
+\family typewriter 
+\latex default 
+ http://Ballueder.home.ml.org/M/
+\layout Itemize
+
+wxWindows is available from
+\latex latex 
+ 
+\backslash 
+
+\backslash 
+
+\family typewriter 
+\latex default 
+http://web.ukonline.co.uk/julian.smart/
+\layout Section
+
+FAQ
+\the_end

@@ -1,0 +1,398 @@
+#This file was created by <karsten> Sun Apr 26 16:13:19 1998
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+\lyxformat 2.15
+\textclass article
+\language english
+\inputencoding default
+\fontscheme palatino
+\graphics default
+\paperfontsize 12
+\spacing single 
+\papersize Default
+\paperpackage a4wide
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+C++ Coding Style Guide
+\layout Author
+
+Karsten Ballüder
+\latex latex 
+
+\backslash 
+
+\backslash 
+
+\latex default 
+ (
+\family typewriter 
+Ballueder@usa.net, http://Ballueder.home.ml.org
+\family default 
+)
+\layout Abstract
+
+This document is a set of notes explaining my preferred style of coding
+ for C++, as it should be used throughout M in order to avoid unnecessary
+ reformatting between different developers.
+ The following guidelines have proven themselves to be useful during several
+ cross-platform projects.
+\layout Section
+
+Preprocessor Usage
+\layout Subsection
+
+#define's
+\layout Subsubsection
+
+features and compile time defines
+\layout Standard
+
+As most platforms use the GNU 
+\family typewriter 
+configure
+\family default 
+ system to set defines, we have to follow its way of doing things.
+ Therefor all defines which enable or disable features, should follow the
+ following conventions:
+\layout Enumerate
+
+If they define a compile time option, they should be called 
+\family typewriter 
+USE_XXX
+\family default 
+, if they define the availability of something, they should be called 
+\family typewriter 
+HAVE_XXX
+\family default 
+.
+\layout Enumerate
+
+If defined, they must have the value 1.
+ Never define it to be 0, but use 
+\family typewriter 
+#undef
+\family default 
+ instead.
+\layout Subsubsection
+
+Operating system identifiers
+\layout Standard
+
+The source code must never reference any prdefined symbols such as 
+\family typewriter 
+__unix__
+\family default 
+ or 
+\family typewriter 
+__WINDOWS__
+\family default 
+.
+ Instead, the global source configuration header file should check for them
+ and define appropriate 
+\family typewriter 
+OS_XX
+\family default 
+ values.
+ Examples are: 
+\family typewriter 
+OS_WIN
+\family default 
+, 
+\family typewriter 
+OS_UNIX
+\family default 
+, 
+\family typewriter 
+OS_LINUX
+\family default 
+, 
+\family typewriter 
+OS_SOLARIS
+\family default 
+.
+ Obviously, more than one of them can be defined at the same time, e.g.
+ 
+\family typewriter 
+OS_UNIX
+\family default 
+ and 
+\family typewriter 
+OS_SOLARIS
+\family default 
+.
+ Also, 
+\family typewriter 
+OS_POSIX
+\family default 
+ may be helpful.
+ All of thes are either defined to 1 or undefined.
+\layout Subsubsection
+
+Compiler identifiers
+\layout Standard
+
+For identifying different compilers rules analog to operating systems hold.
+ I.e.
+ there should be defines of the type 
+\family typewriter 
+CC_XXX
+\family default 
+ defined.
+ So far, M supports the following two compilers:
+\layout Itemize
+
+GNU gcc: 
+\family typewriter 
+CC_GCC
+\family default 
+, including egcs.
+\layout Itemize
+
+Microsoft Visual C++: 
+\family typewriter 
+CC_MSC
+\layout Subsection
+
+#include's
+\layout Subsubsection
+
+precompiled headers
+\layout Standard
+
+To support precompiled headers and to avoid unnecessarily compiling headers
+ multiple times, one global header file 
+\family typewriter 
+Mpch.h
+\family default 
+ exists and should be used in the following way:
+\layout Itemize
+
+On systems that support precompiled headers: it includes 
+\family typewriter 
+Mconfig.h
+\family default 
+ and all other header files which are used reasonably often.
+\layout Itemize
+
+On systems without precompiled headers, it only includes 
+\family typewriter 
+Mconfig.h
+\family default 
+.
+\layout Standard
+
+All source files should include 
+\family typewriter 
+Mpch.h
+\family default 
+, all header files should include 
+\family typewriter 
+Mconfig.h
+\family default 
+.
+\layout Subsection
+
+Indentation
+\layout Itemize
+
+All preprocessor directives must start at column 0.
+ Indentation should happen between the leading hash (#) and the directive.
+\layout Itemize
+
+Indentation is by a TAB characters, or by eight spaces.
+\layout Itemize
+
+Between a 
+\family typewriter 
+#include
+\family default 
+ and the file name, there should be a TAB, not a space.
+\layout Standard
+
+Example:
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#ifdef OS_UNIX|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#        include <unistd.h>|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#endif|
+\layout Section
+
+Naming conventions
+\layout Subsection
+
+General
+\layout Itemize
+
+Do not use names starting with underscores, like 
+\family typewriter 
+_malloc
+\family default 
+ or 
+\family typewriter 
+__malloc
+\family default 
+.
+\layout Itemize
+
+Class names always start with capital letters, variable names start with
+ lower case letters, i.e.
+ 
+\family typewriter 
+MApplication
+\family default 
+ is a class name, 
+\family typewriter 
+mApplication
+\family default 
+ is a variable name.
+\layout Itemize
+
+Do not use 
+\family typewriter 
+hungarian
+\family default 
+ notation.
+\layout Itemize
+
+When using names consisting of several words, use mixed capitalisation,
+ not underscores, i.e.
+ use 
+\family typewriter 
+MyNewClass
+\family default 
+, not 
+\family typewriter 
+My_new_class
+\family default 
+.
+\layout Itemize
+
+Avoid duplicating names of classes as variable names, i.e.
+ 
+\family typewriter 
+MApplication
+\family default 
+ and 
+\family typewriter 
+mApplication
+\family default 
+, unless when there is only one instance of that class, then it should be
+ the same name, e.g.
+ 
+\family typewriter 
+MyApp myApp;
+\family default 
+.
+\layout Itemize
+
+Use 
+\family typewriter 
+const
+\family default 
+ wherever possible, both for parameters and for methods.
+\layout Itemize
+
+Try to avoid templates.
+\layout Section
+
+Formatting of C/C++ code
+\layout Subsection
+
+Rule of thumb
+\layout Standard
+
+Format your code like seen in Bjarne Stroustrup's 
+\shape italic 
+The C++ Programming Language.
+\layout Subsection
+
+braces
+\layout Standard
+
+Always put braces on a line by themselves.
+ 
+\layout Standard
+
+Do not write code like:
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|if(foo == bar) {|
+\latex default 
+ 
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb| printf("foo is bar
+\backslash 
+n");|
+\layout Standard
+
+but write
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|if(foo == bar)|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|{|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb| printf("foo is bar
+\backslash 
+n");|
+\layout Subsection
+
+Use DOC++ comments
+\layout Standard
+
+It's pretty buggy, but maybe some day there will be a working version of
+ it, so use it.
+\layout Standard
+
+\the_end
