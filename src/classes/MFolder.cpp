@@ -32,6 +32,8 @@
 #  include "MApplication.h"
 #endif // USE_PCH
 
+#include "Mdefaults.h"
+
 #include "MFolder.h"
 
 // ----------------------------------------------------------------------------

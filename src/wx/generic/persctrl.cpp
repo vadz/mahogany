@@ -464,6 +464,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             if ( width > widthTextMax )
                 widthTextMax = width;
 
+            lines.Add(curLine);
+
             if ( *pc == '\n' ) {
                curLine.Empty();
             }
@@ -527,6 +529,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     }
 
     // now we can place the buttons
+    widthBtnMax += 6;
     long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) +
                              LAYOUT_X_MARGIN;
     if ( widthTextMax < widthButtonsTotal ) {
@@ -569,7 +572,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                 c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
             else
                 c->left.SameAs(this, wxLeft, 3*LAYOUT_X_MARGIN);
-            c->width.Absolute(widthTextMax);
+            c->width.Absolute(widthBtnMax);
             c->top.Below(text, 2*LAYOUT_Y_MARGIN);
             c->height.AsIs();
             buttons[nBtn]->SetConstraints(c);
@@ -594,9 +597,13 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     m_checkBox = new wxCheckBox(this, -1, _("Don't show this message again"));
     m_checkBox->SetConstraints(c);
 
-    // it's almost done...
+    // position the controls and the dialog itself
+    // -------------------------------------------
+
+    SetSize(widthTextMax + 2*LAYOUT_X_MARGIN,
+            20*LAYOUT_Y_MARGIN);  // FIXME
     Layout();
-    Centre(wxBOTH);
+    Centre(wxCENTER_FRAME | wxBOTH);
 }
 
 void wxPMessageDialog::OnButton(wxCommandEvent& event)

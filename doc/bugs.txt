@@ -12,7 +12,10 @@ Missing/badly implemented features:
 Bugs:
 -----
 
-1. Compose view: when inserting a file, the icon doesn't appear unless you enter something
+1. Compose view sometimes doesn't get updated until the next key press
+
+2. Problems with using non-english characters have been reported (but I couldn't
+   reproduce them yet)
 
 UI glitches:
 ------------
@@ -20,3 +23,7 @@ UI glitches:
 1. Closing the application doesn't prompt to save the changes in the compose window
 
 2. Keyboard interface in compose view is half working (and half broken)
+
+3. In general, compose screen lacks many features, such as positioning the cursor,
+   selecting (either with the mouse or keyboard), clipboard support &c -- all this
+   will be implemented in near future

@@ -171,13 +171,14 @@ SetupInitialConfig(void)
 {
    ProfileBase *parent = mApplication->GetProfile();
 
-   ProfilePathChanger(parent,M_PROFILE_CONFIG_SECTION);
-   // Do we need to create an INBOX profile?
+   ProfilePathChanger pathChanger(parent, M_PROFILE_CONFIG_SECTION);
+
+   // Do we need to create the INBOX (special folder for incoming mail)?
    if(! parent->HasEntry("INBOX"))
    {
-      ProfileBase *ibp = ProfileBase::CreateProfile("INBOX",parent);
-      ibp->writeEntry(MP_PROFILE_TYPE,ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE,MailFolder::MF_INBOX);
+      ProfileBase *ibp = ProfileBase::CreateProfile("INBOX", parent);
+      ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+      ibp->writeEntry(MP_FOLDER_TYPE, MailFolder::MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail.")); 
       ibp->DecRef();

@@ -47,12 +47,12 @@ BackColor=clNavy
 "MProfile.py",		"{app}\lib\MProfile.py", copy_normal, 
 
 ; standard Python modules used
-"exceptions.py",	"{app}\lib.pyc\exceptions.pyc", copy_normal, 
-"ntpath.py",		"{app}\lib.pyc\ntpath.pyc", copy_normal, 
-"os.py",		"{app}\lib.pyc\os.pyc", copy_normal, 
-"stat.py",		"{app}\lib.pyc\stat.pyc", copy_normal, 
-"string.py",		"{app}\lib.pyc\string.pyc", copy_normal, 
-"UserDict.py",		"{app}\lib.pyc\UserDict.pyc", copy_normal, 
+"exceptions.py",	"{app}\lib\exceptions.py", copy_normal, 
+"ntpath.py",		"{app}\lib\ntpath.py", copy_normal, 
+"os.py",		"{app}\lib\os.py", copy_normal, 
+"stat.py",		"{app}\lib\stat.py", copy_normal, 
+"string.py",		"{app}\lib\string.py", copy_normal, 
+"UserDict.py",		"{app}\lib\UserDict.py", copy_normal, 
 
 ; --- documentation
 "readme_win.txt", 	"{app}\readme_win.txt", copy_normal, flag_isreadme

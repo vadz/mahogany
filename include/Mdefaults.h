@@ -36,11 +36,7 @@
     folder profiles (trailing '/' required).
 */
 #ifndef M_FOLDER_CONFIG_SECTION
-#  ifdef OS_WIN
-#     define   M_FOLDER_CONFIG_SECTION   "/Folders/"
-#  else  // Unix
-#     define   M_FOLDER_CONFIG_SECTION   "/M/Folders/"
-#  endif // Unix/Win
+#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION "Folders/"
 #endif
 
 /** The section in the global configuration file used for storing
