@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/05/06 17:39:25  VZ
+ * changed the menu ids to start from 1 (workaround for wxGTK where control
+ * id of 0 is still special and matches any id)
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -15,7 +19,7 @@
 
 enum
 {
-   WXMENU_FILE_OPEN,
+   WXMENU_FILE_OPEN = 1,
    WXMENU_FILE_COMPOSE,
    WXMENU_FILE_TEST,
    WXMENU_FILE_CLOSE,
