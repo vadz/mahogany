@@ -440,6 +440,8 @@ enum MFolderIndex
 #define   MP_LOGLEVEL      "LogLevel"
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD   "FolderProgressThreshold"
+/// threshold for displaying message retrieval progress dialog
+#define   MP_MESSAGEPROGRESS_THRESHOLD   "MsgProgress"
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH      "SavePath"
 /// the default filename for saving files
@@ -1075,6 +1077,8 @@ enum MFolderIndex
 #define   MP_LOGLEVEL_D         0l
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD_D 20L
+/// threshold for displaying message retrieval progress dialog (seconds)
+#define   MP_MESSAGEPROGRESS_THRESHOLD_D  2l
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH_D      M_EMPTYSTRING
 /// the default filename for saving files

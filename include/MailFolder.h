@@ -109,6 +109,17 @@ struct MailFolderStatus
                  searched;
 };
 
+// how to show the message size in the viewer?
+enum MessageSizeShow
+{
+   MessageSize_Automatic,  // choose lines/bytes/kbytes/mbytes automatically
+   MessageSize_AutoBytes,  // always show bytes/kbytes/mbytes
+   MessageSize_Bytes,      // always show size in bytes
+   MessageSize_KBytes,     //                     Kb
+   MessageSize_MBytes,     //                     Mb
+   MessageSize_Max
+};
+
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -263,6 +274,19 @@ public:
        @return string representation
    */
    static String ConvertMessageStatusToString(int status);
+
+   /**
+     Returns the string containing the size as it should be shown to the user.
+
+     @param sizeBytes the size of the message in bytes
+     @param sizeLines the size of message in lines (only if text)
+     @param show how should we show the size?
+     @return string containing the text for display
+    */
+   static String SizeToString(unsigned long sizeBytes,
+                              unsigned long sizeLines,
+                              MessageSizeShow show,
+                              bool verbose = false);
 
    /** Forward one message.
        @param message message to forward

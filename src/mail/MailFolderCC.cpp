@@ -137,6 +137,9 @@ extern "C"
    #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
 }
 
+#define USE_READ_PROGRESS
+//#define USE_BLOCK_NOTIFY
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -250,40 +253,20 @@ extern "C"
    static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov);
    void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
    void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
+
+#ifdef USE_READ_PROGRESS
+   void mahogany_read_progress(GETS_DATA *md, unsigned long count);
+#endif
+
+#ifdef USE_BLOCK_NOTIFY
+   void *mahogany_block_notify(int reason, void *data);
+#endif
 };
 
 typedef void (*mm_list_handler)(MAILSTREAM * stream,
                                 char delim,
                                 String  name,
                                 long  attrib);
-
-#ifdef USE_BLOCK_NOTIFY
-
-#include <wx/datetime.h>
-
-void *mahogany_block_notify(int reason, void *data)
-{
-   #define LOG_BLOCK_REASON(what) \
-      if ( reason == BLOCK_##what ) \
-         printf("%s: mm_blocknotify(%s, %p)\n", \
-                wxDateTime::Now().FormatTime().c_str(), #what, data); \
-      else \
-
-   LOG_BLOCK_REASON(NONE)
-   LOG_BLOCK_REASON(SENSITIVE)
-   LOG_BLOCK_REASON(NONSENSITIVE)
-   LOG_BLOCK_REASON(DNSLOOKUP)
-   LOG_BLOCK_REASON(TCPOPEN)
-   LOG_BLOCK_REASON(TCPREAD)
-   LOG_BLOCK_REASON(TCPWRITE)
-   LOG_BLOCK_REASON(TCPCLOSE)
-   LOG_BLOCK_REASON(FILELOCK)
-   printf("mm_blocknotify(UNKNOWN, %p)\n", data);
-
-   return NULL;
-}
-
-#endif // USE_BLOCK_NOTIFY
 
 // ----------------------------------------------------------------------------
 // globals
@@ -514,6 +497,85 @@ public:
       gs_mmListRedirect = NULL;
    }
 };
+
+// ----------------------------------------------------------------------------
+// ReadProgressInfo: create an instance of this object to start showing progress
+// info, delete it to make it disappear
+// ----------------------------------------------------------------------------
+
+#ifdef USE_READ_PROGRESS
+
+class ReadProgressInfo
+{
+public:
+   // totalToRead is the amount of data to be read, in byts, while secondsToWait
+   // is the time we wait before popping up the dialog at all
+   ReadProgressInfo(unsigned long totalToRead, int secondsToWait)
+   {
+      // never set m_readTotal to 0
+      m_readTotal = totalToRead ? totalToRead : 1;
+      m_readSoFar = 0ul;
+
+      m_dlgProgress = NULL;
+
+      m_timeStart = time(NULL) + secondsToWait * 1000; // in ms
+   }
+
+   ~ReadProgressInfo()
+   {
+      delete m_dlgProgress;
+   }
+
+   void OnProgress(unsigned long count)
+   {
+      m_readSoFar = count;
+
+      if ( !m_dlgProgress )
+      {
+         if ( time(NULL) > m_timeStart )
+         {
+            String msg;
+            msg.Printf(_("Reading %s..."),
+                       MailFolder::SizeToString(m_readTotal, 0,
+                                                MessageSize_AutoBytes,
+                                                true /* verbose */).c_str()
+                      );
+
+            m_dlgProgress = new MProgressDialog
+                                (
+                                 _("Retrieving data from server"),
+                                 msg
+                                );
+         }
+         else // too early to show it yet
+         {
+            // skip SetValue() below
+            return;
+         }
+      }
+
+      int percentDone = (m_readSoFar * 100) / m_readTotal;
+      if ( percentDone > 100 )
+      {
+         // I don't know if this can happen, but if, by chance, it does, don't
+         // look silly - cheat the user instead
+         percentDone = 99;
+      }
+
+      m_dlgProgress->Update(percentDone);
+   }
+
+private:
+   MProgressDialog *m_dlgProgress;
+
+   unsigned long m_readSoFar,
+                 m_readTotal;
+
+   // the moment when we started reading
+   time_t m_timeStart;
+} *gs_readProgressInfo = NULL;
+
+#endif // USE_READ_PROGRESS
 
 // ============================================================================
 // implementation
@@ -3339,8 +3401,9 @@ MailFolderCC::CClientInit(void)
    mail_parameters(NULL, SET_BLOCKNOTIFY, (void *)mahogany_block_notify);
 #endif // USE_BLOCK_NOTIFY
 
-   // VZ: use this later to show IMAP reading progress
-   //mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
+#ifdef USE_READ_PROGRESS
+   mail_parameters(NULL, SET_READPROGRESS, (void *)mahogany_read_progress);
+#endif // USE_READ_PROGRESS
 
 #ifdef OS_UNIX
    // install our own sigpipe handler:
@@ -4344,6 +4407,39 @@ MailFolderCC::HasInferiors(const String &imapSpec,
 }
 
 // ----------------------------------------------------------------------------
+// network operations progress
+// ----------------------------------------------------------------------------
+
+void MailFolderCC::StartReading(unsigned long total)
+{
+#ifdef USE_READ_PROGRESS
+   ASSERT_MSG( !gs_readProgressInfo, "can't start another read operation" );
+
+   gs_readProgressInfo = new ReadProgressInfo
+                             (
+                              total,
+                              READ_CONFIG(m_Profile,
+                                          MP_MESSAGEPROGRESS_THRESHOLD)
+                             );
+#endif // USE_READ_PROGRESS
+}
+
+void MailFolderCC::EndReading()
+{
+#ifdef USE_READ_PROGRESS
+   if ( gs_readProgressInfo )
+   {
+      delete gs_readProgressInfo;
+      gs_readProgressInfo = NULL;
+   }
+   else
+   {
+      FAIL_MSG( "unexpected call to EndReading" );
+   }
+#endif // USE_READ_PROGRESS
+}
+
+// ----------------------------------------------------------------------------
 // replacements of some cclient functions
 // ----------------------------------------------------------------------------
 
@@ -4431,49 +4527,8 @@ void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
    }
 }
 
-// VZ: this doesn't seem to be used (any more?) ...
-#if 0
-
-/* Mail fetch message overview using sequence numbers instead of UIDs!
- * Accepts: mail stream
- *    sequence to fetch (no-UIDs but sequence numbers)
- *    pointer to overview return function
- */
-
-void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn)
-{
-   if (stream->dtb &&
-       !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,ofn)) &&
-       mail_sequence (stream,sequence) &&
-       mail_ping (stream))
-   {
-      MESSAGECACHE *elt;
-      ENVELOPE *env = NULL;  // keep compiler happy
-      OVERVIEW_X ov;
-      unsigned long i;
-      ov.optional.lines = 0;
-      ov.optional.xref = NIL;
-      for (i = 1; i <= stream->nmsgs; i++)
-         if (((elt = mail_elt (stream,i))->sequence) &&
-             (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
-         {
-            ov.subject = env->subject;
-            ov.from = env->from;
-            ov.to = env->to;
-            ov.newsgroups = env->newsgroups; // no need to strcpy()
-            ov.date = env->date;
-            ov.message_id = env->message_id;
-            ov.references = env->references;
-            ov.optional.octets = elt->rfc822_size;
-            (*ofn) (stream,mail_uid (stream,i),&ov);
-         }
-   }
-}
-
-#endif // 0
-
 // ----------------------------------------------------------------------------
-// C-Client callbacks
+// C-Client callbacks: the ones which must be implemented
 // ----------------------------------------------------------------------------
 
 // define a macro TRACE_CALLBACKn() for tracing a callback with n + 1 params
@@ -4699,6 +4754,49 @@ mm_overview_header (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov)
 
    return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
+
+// ----------------------------------------------------------------------------
+// some more cclient callbacks: these are optional but we set them up to have
+// more control over cclient operation
+// ----------------------------------------------------------------------------
+
+#ifdef USE_BLOCK_NOTIFY
+
+#include <wx/datetime.h>
+
+void *mahogany_block_notify(int reason, void *data)
+{
+   #define LOG_BLOCK_REASON(what) \
+      if ( reason == BLOCK_##what ) \
+         printf("%s: mm_blocknotify(%s, %p)\n", \
+                wxDateTime::Now().FormatTime().c_str(), #what, data); \
+      else \
+
+   LOG_BLOCK_REASON(NONE)
+   LOG_BLOCK_REASON(SENSITIVE)
+   LOG_BLOCK_REASON(NONSENSITIVE)
+   LOG_BLOCK_REASON(DNSLOOKUP)
+   LOG_BLOCK_REASON(TCPOPEN)
+   LOG_BLOCK_REASON(TCPREAD)
+   LOG_BLOCK_REASON(TCPWRITE)
+   LOG_BLOCK_REASON(TCPCLOSE)
+   LOG_BLOCK_REASON(FILELOCK)
+   printf("mm_blocknotify(UNKNOWN, %p)\n", data);
+
+   return NULL;
+}
+
+#endif // USE_BLOCK_NOTIFY
+
+#ifdef USE_READ_PROGRESS
+
+void mahogany_read_progress(GETS_DATA *md, unsigned long count)
+{
+   if ( gs_readProgressInfo )
+      gs_readProgressInfo->OnProgress(count);
+}
+
+#endif // USE_READ_PROGRESS
 
 } // extern "C"
 

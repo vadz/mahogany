@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+17.04.01 VZ: added message progress display
 17.04.01 VZ: added (configurable) limit on the size of inline graphics
 17.04.01 VZ: added possibility to show message size in bytes/kb/mb
 09.04.01 VZ: Mahogany now uses imap2000b which fixes several mail related bugs

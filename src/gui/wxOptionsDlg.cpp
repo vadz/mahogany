@@ -253,6 +253,8 @@ enum ConfigFields
    ConfigField_MessageViewQuotedColour1,
    ConfigField_MessageViewQuotedColour2,
    ConfigField_MessageViewQuotedColour3,
+   ConfigField_MessageViewProgressHelp,
+   ConfigField_MessageViewProgressThreshold,
    ConfigField_MessageViewInlineGraphics,
    ConfigField_MessageViewInlineGraphicsSize,
    ConfigField_MessageViewAutoDetectEncoding,
@@ -877,6 +879,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &1st level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for &2nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for &3nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("A progress dialog can be shown during the message\n"
+                  "download if it takes longer than the specified time\n"
+                  "(use -1 to disable progress dialog entirely)"), Field_Message, -1 },
+   { gettext_noop("Progress dialog &delay (seconds)"),             Field_Number,    -1 },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
    { gettext_noop("Only if their size is less than"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
@@ -1178,6 +1184,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR1),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR2),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR3),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_INLINE_GFX),
    CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
    CONFIG_ENTRY(MP_MSGVIEW_AUTO_ENCODING),

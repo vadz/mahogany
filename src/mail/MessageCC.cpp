@@ -863,10 +863,14 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
 
    if(! m_folder->Lock())
       return NULL;
+
+   m_folder->StartReading(GetPartInfo(n)->size_bytes);
    char *cptr = mail_fetchbody_full(m_folder->Stream(),
                                     m_uid,
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
+   m_folder->EndReading();
+
    m_folder->UnLock();
 
    if(lenptr == NULL)

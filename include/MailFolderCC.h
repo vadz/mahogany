@@ -206,7 +206,7 @@ public:
 
    /** Expunge messages.
      */
-   void ExpungeMessages(void);
+   virtual void ExpungeMessages(void);
 
    /** Search Messages for certain criteria.
        @return UIdArray with UIds of matching messages
@@ -337,6 +337,21 @@ public:
                             const String &user,
                             const String &pw);
 
+   /** @name Functions used by MessageCC for read progress. */
+   //@{
+   /**
+     Prepare for reading the given amount of data from folder.
+
+     @param total the amount of bytes to be read
+    */
+   void StartReading(unsigned long total);
+
+   /**
+     Called when data is read
+    */
+   void EndReading();
+   //@}
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -444,6 +459,7 @@ private:
 
    /// return the folder type
    FolderType GetType(void) const { return m_folderType; }
+
    /// return the folder flags
    int GetFlags(void) const { return m_FolderFlags; }
 

@@ -1952,8 +1952,9 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
                           strutil_ftime(hi->GetDate(),
                                         m_settings.dateFormat,
                                         m_settings.dateGMT),
-                          SizeToString(hi->GetSize(), hi->GetLines(),
-                                       m_settings.showSize));
+                          MailFolder::SizeToString(hi->GetSize(),
+                                                   hi->GetLines(),
+                                                   m_settings.showSize));
 
    if ( status & MailFolder::MSG_STAT_DELETED )
    {

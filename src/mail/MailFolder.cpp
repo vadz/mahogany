@@ -495,6 +495,69 @@ MailFolder::CreateFolder(const String &name,
 }
 
 // ----------------------------------------------------------------------------
+// message size
+// ----------------------------------------------------------------------------
+
+/* static */
+String MailFolder::SizeToString(unsigned long sizeBytes,
+                                unsigned long sizeLines,
+                                MessageSizeShow show,
+                                bool verbose)
+{
+   String s;
+
+   switch ( show )
+   {
+      case MessageSize_Max: // to silence gcc warning
+         FAIL_MSG( "unexpected message size format" );
+         // fall through
+
+      case MessageSize_Automatic:
+         if ( sizeLines > 0 )
+         {
+            s.Printf(_("%lu lines"),  sizeLines);
+            break;
+         }
+         // fall through
+
+      case MessageSize_AutoBytes:
+         if ( sizeBytes == 0 )
+         {
+            s = _("empty");
+         }
+         else if ( sizeBytes < 10*1024 )
+         {
+            s = SizeToString(sizeBytes, 0, MessageSize_Bytes);
+         }
+         else if ( sizeBytes < 10*1024*1024 )
+         {
+            s = SizeToString(sizeBytes, 0, MessageSize_KBytes);
+         }
+         else // Mb
+         {
+            s = SizeToString(sizeBytes, 0, MessageSize_MBytes);
+         }
+         break;
+
+      case MessageSize_Bytes:
+         s.Printf("%lu%s", sizeBytes, verbose ? _(" bytes") : "");
+         break;
+
+      case MessageSize_KBytes:
+         s.Printf(_("%lu%s"), sizeBytes / 1024,
+                              verbose ? _(" kilobytes") : _("Kb"));
+         break;
+
+      case MessageSize_MBytes:
+         s.Printf(_("%lu%s"), sizeBytes / (1024*1024),
+                              verbose ? _(" megabytes") : _("Mb"));
+         break;
+   }
+
+   return s;
+}
+
+// ----------------------------------------------------------------------------
 // message flags
 // ----------------------------------------------------------------------------
 
