@@ -754,7 +754,7 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
       (
        new MEventFolderTreeChangeData
        (
-        folderParent ? folderParent->GetFullName() : _T(""),
+        folderParent ? folderParent->GetFullName() : String(),
         MEventFolderTreeChangeData::CreateUnder
         )
        );

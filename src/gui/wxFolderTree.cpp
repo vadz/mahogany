@@ -2579,7 +2579,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    }
 
    m_selectedFolderName = m_current ? m_current->GetFolder()->GetFullName()
-                                    : _T("");
+                                    : String();
 }
 
 bool wxFolderTreeImpl::OnDoubleClick()

@@ -2743,7 +2743,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
                         )
 {
    // use the parent profile for the default values if we have any
-   Profile_obj profile(dlg ? dlg->GetParentFolderName() : _T(""));
+   Profile_obj profile(dlg ? dlg->GetParentFolderName() : String());
    CHECK_RET( profile, _T("failed to create profile in wxFolderCreateNotebook") );
 
    // create and add the pages

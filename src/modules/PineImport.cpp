@@ -214,7 +214,7 @@ bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
           (
             new MEventFolderTreeChangeData
                (
-                parent ? parent->GetFullName() : _T(""),
+                parent ? parent->GetFullName() : String(),
                 MEventFolderTreeChangeData::CreateUnder
                )
           );
