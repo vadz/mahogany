@@ -401,6 +401,10 @@ AC_CHECK_LIB(shadow,main)
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 AC_CHECK_HEADERS(pi-source.h, ,
   AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled."))
+HAVE_PI_SETMAXSPEED=0
+AC_CHECK_LIB(pisock, pi_setmaxspeed,HAVE_PI_SETMAXSPEED=1,
+AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
+AC_DEFINE(HAVE_PI_SETMAXSPEED)
 
 dnl libresolv or libbind
 USE_RBL=1

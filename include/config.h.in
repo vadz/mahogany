@@ -69,6 +69,9 @@
 #   undef USE_PISOCK
 #endif
 
+/** Do we have a pisock library with setmaxspeed? */
+#undef HAVE_PI_SETMAXSPEED
+
 /*@name These are obsolete and always defined. Other configurations
   are no longer supported.
 */

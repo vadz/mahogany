@@ -355,7 +355,9 @@ PalmOSModule::Connect(void)
               m_PilotDev.c_str(),
               sizeof(addr.pi_device)); 
 
+#ifdef HAVE_PI_SETMAXSPEED
       pi_setmaxspeed(m_PiSocket, m_Speed, 0 /* overclock */); 
+#endif
       
       rc = pi_bind(m_PiSocket, (struct sockaddr*)&addr, sizeof(addr));
       if(rc == -1)
