@@ -882,7 +882,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("\nWhat happens when the folder is opened? If selecting\n"
                   "unread message is on, Mahogany will select the first or\n"
                   "last unread message depending on the next option. If there\n"
-                  "are no unread messanes, it will just select first or last\n"
+                  "are no unread messages, it will just select first or last\n"
                   "message."), Field_Message,  -1 },
    { gettext_noop("&Select first message (or the last one)"), Field_Bool, -1 },
    { gettext_noop("Select first &unread"), Field_Bool, -1 },
