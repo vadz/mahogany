@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.187 2000/09/07 03:43:55 gregnoel Exp 
+# From configure.in Id: configure.in,v 1.188 2000/09/16 07:25:16 gregnoel Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -2782,7 +2782,7 @@ fi
 #define USE_THREADS 1
 EOF
 
-	LDFLAGS="$LDFLAGS -lpthread"
+	LIBS="$LIBS -lpthread"
 esac
 
 
@@ -4219,7 +4219,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
 #define USE_PISOCK 1
 EOF
 
-    MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
+    MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
     echo $ac_n "checking for pi_setmaxspeed in -lpisock""... $ac_c" 1>&6
 echo "configure:4225: checking for pi_setmaxspeed in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_setmaxspeed | sed 'y%./+-%__p_%'`
@@ -4323,7 +4323,7 @@ fi
 
 else
   echo "$ac_t""no" 1>&6
-echo "configure: warning: Cannot find pisock library headers - support for PalmOS disabled." 1>&2
+echo "configure: warning: Cannot find pisock headers - support for PalmOS disabled." 1>&2
 
 fi
 
@@ -4657,18 +4657,25 @@ CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface"
 LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
 
 
-case "$GXX" in yes)
-	case "$USE_STRICT" in
-	1)	CXXFLAGS="$CXXFLAGS -Werror -pedantic" ;;
-	*)	CXXFLAGS="$CXXFLAGS -Wall" ;;
-	esac ;;	
-esac
-
 CFLAGS="$CFLAGS $MYFLAGS"
 CXXFLAGS="$CXXFLAGS $MYFLAGS"
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
-CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
+case "$GCC" in yes)
+	case "$USE_STRICT" in
+	1)	CFLAGS="$CFLAGS -Werror -pedantic" ;;
+	*)	CFLAGS="$CFLAGS -Wall" ;;
+	esac ;;	
+esac
+CXXFLAGS_RELAXED="$CXXFLAGS"
+case "$GXX" in yes)
+	case "$USE_STRICT" in
+	1)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall -pedantic"
+		CXXFLAGS="$CXXFLAGS -Werror -pedantic" ;;
+	*)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall"
+		CXXFLAGS="$CXXFLAGS -Wall" ;;
+	esac ;;	
+esac
 
 
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
@@ -4681,6 +4688,7 @@ for dir in `cd $srcdir; find include extra src locale doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
 	extra/src)		DIR="$DIR $dir" ;;   # no Makefile in this dir
+	extra/src/libmal)	DIR="$DIR $dir"; continue ;;
 	extra/src/libmal*)	continue ;;
 	esac
 	if test -f $srcdir/$dir/Makefile.in
