@@ -4038,46 +4038,88 @@ MailFolderCC::HasInferiors(const String &imapSpec,
  We have our version of cclient mail_fetch_overview() because:
 
  1. we need the "To" header which is not retrieved by mail_fetch_overview()
+    (and also "Newsgroups" now)
 
  2. we want to allow the user to abort retrieving the headers
 
  3. we want to retrieve the headers from larger msgnos down to lower ones,
-    i.e. in the reverse order to mail_fetch_overview() - this is useful if we're
-    aborted
+    i.e. in the reverse order to mail_fetch_overview() - this is useful if
+    we're aborted as the user will see the most recent messages then and not
+    the oldest ones
 
  Note that now the code elsewhere relies on messages being fetched in reverse
  order, so it shouldn't be changed!
+
+ Note II: we assume we have sequences of one interval only, this allows us to
+ optimize the loop slightly using insideSequence (see below)
 */
 
 void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
 {
+   CHECK_RET( ofn, "must have overview function in mail_fetch_overview_x" );
+
    if ( mail_uid_sequence (stream,sequence) && mail_ping (stream) )
    {
+      bool insideSequence = false;
+
       OVERVIEW_X ov;
       ov.optional.lines = 0;
       ov.optional.xref = NIL;
 
-      for ( unsigned long i = stream->nmsgs; i>= 1; i-- )
+      for ( unsigned long i = stream->nmsgs; i >= 1; i-- )
       {
-         MESSAGECACHE *elt;
-         ENVELOPE *env = NULL;
-         if (((elt = mail_elt (stream,i))->sequence) &&
-               (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
+         MESSAGECACHE *elt = mail_elt(stream, i);
+         if ( !elt )
          {
-            ov.subject = env->subject;
-            ov.from = env->from;
-            ov.to = env->to;
-            ov.newsgroups = env->newsgroups; // no need to strcpy()
-            ov.date = env->date;
-            ov.message_id = env->message_id;
-            ov.references = env->references;
-            ov.optional.octets = elt->rfc822_size;
-            if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+            FAIL_MSG( "failed to get sequence element?" );
+            continue;
+         }
+
+         if ( elt->sequence )
+         {
+            // set the flag used by the code below
+            insideSequence = true;
+         }
+         else // it's not in the sequence we're overviewing, ignore it
+         {
+            // we assume here that we only have the sequences of one interval
+            // and so if we had already had an element from the sequence and
+            // this one is not from it, then all the next elements are not in
+            // it neither, so we can skip them safely
+            if ( insideSequence )
                break;
+
+            // just skip this one
+            continue;
+         }
+
+         ENVELOPE *env = mail_fetch_structure(stream, i, NULL, NULL);
+         if ( !env )
+         {
+            FAIL_MSG( "failed to get sequence element envelope?" );
+
+            continue;
+         }
+
+         ov.subject = env->subject;
+         ov.from = env->from;
+         ov.to = env->to;
+         ov.newsgroups = env->newsgroups; // no need to strcpy()
+         ov.date = env->date;
+         ov.message_id = env->message_id;
+         ov.references = env->references;
+         ov.optional.octets = elt->rfc822_size;
+         if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+         {
+            // cancelled
+            break;
          }
       }
    }
 }
+
+// VZ: this doesn't seem to be used (any more?) ...
+#if 0
 
 /* Mail fetch message overview using sequence numbers instead of UIDs!
  * Accepts: mail stream
@@ -4114,6 +4156,8 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
          }
    }
 }
+
+#endif // 0
 
 // ----------------------------------------------------------------------------
 // C-Client callbacks
