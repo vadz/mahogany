@@ -1238,6 +1238,12 @@ void MAppBase::RemoveStatusField(StatusFields field)
 {
    for ( size_t n = 0; n < WXSIZEOF(m_statusPanes); n++ )
    {
+      if ( m_statusPanes[n] == SF_ILLEGAL )
+      {
+         // no more (initialized) fields
+         break;
+      }
+
       if ( m_statusPanes[n] == field )
       {
          for ( size_t m = n + 1; m <= WXSIZEOF(m_statusPanes); m++ )
