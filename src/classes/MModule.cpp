@@ -197,11 +197,13 @@ MModule::LoadModule(const String & name)
       $HOME/.M/CANONICAL_HOST/modules/
       $HOME/.M/modules/
    */
+      #define STRINGIZE(x) #x
+
       dirs[0] = mApplication->GetGlobalDir();
-      dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
+      dirs[0] << DIR_SEPARATOR << STRINGIZE(M_CANONICAL_HOST)
               << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
       dirs[1] = mApplication->GetLocalDir();
-      dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
+      dirs[1] << DIR_SEPARATOR << STRINGIZE(M_CANONICAL_HOST)
               << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
       dirs[2] = mApplication->GetLocalDir();
       dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;

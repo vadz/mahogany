@@ -45,6 +45,8 @@ $Id$
 		is created
 2	VZ	default value for "custom header" comboboxes wrong?
 
+4 gtk	VZ	icon selector suffers from several appearance problems
+
 *********************************************************************
 *** PROJECTS
 *********************************************************************

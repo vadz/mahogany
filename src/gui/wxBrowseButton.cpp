@@ -235,9 +235,9 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       if ( (w1 != w2) || (h1 != h2) )
       {
          wxImage image(bmp);
-         image.Scale(w1, h1);
+         image.Rescale(w1, h1);
          bmp = image.ConvertToBitmap();
-         }
+      }
       //else: the size is already correct
 
       m_staticBitmap->SetBitmap(bmp);
@@ -262,7 +262,7 @@ void wxIconBrowseButton::DoBrowse()
       {
          // must resize the icon
          wxImage image(bmp);
-         image.Scale(size, size);
+         image.Rescale(size, size);
          bmp = image.ConvertToBitmap();
       }
 
@@ -335,6 +335,10 @@ void wxIconView::OnPaint(wxPaintEvent& WXUNUSED(event))
    wxPaintDC dc(this);
    PrepareDC(dc);
 
+#ifdef __WXGTK__
+   Clear();
+#endif // GTK
+
    int x0, y0;
    ViewStart(&x0, &y0);
 
@@ -355,11 +359,7 @@ void wxIconView::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 void wxIconView::OnClick(wxMouseEvent& event)
 {
-#ifdef __WXMSW__
    int x;
-#else
-   float x;
-#endif
    CalcUnscrolledPosition(event.GetX(), 0, &x, NULL);
 
    int selection = (int) (x / ms_iconSize);

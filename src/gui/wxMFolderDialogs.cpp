@@ -951,7 +951,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
       // only enable password and login fields if anonymous access is disabled
       bool isAnon = m_isAnonymous->GetValue();
-      bool enableLogin = hasPassword && !isAnon;
+      enableLogin = hasPassword && !isAnon;
    }
 
    m_isAnonymous->Enable(enableAnonymous);
