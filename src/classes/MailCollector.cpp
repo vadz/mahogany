@@ -290,7 +290,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    {
       wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
                   mf->GetName().c_str());
-      wxSafeYield(); // normal wxYield() is not ok here
+//      wxSafeYield(); // normal wxYield() is not ok here
       int updateFlags = mf->GetUpdateFlags();
       mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
       UIdArray selections;
