@@ -579,6 +579,15 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    {
       case WXK_PRIOR:
       case WXK_NEXT:
+         // Shift-PageUp/Down have a predefined meaning in the wxListCtrl, so
+         // let it have it
+         if ( event.ShiftDown() )
+         {
+            event.Skip();
+            return;
+         }
+         // fall through
+
       case WXK_BACK:
       case '*':
          // leave as is
@@ -1611,7 +1620,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          }
       }
 
-      m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
+      m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
       if(m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl)
          m_FolderCtrl->SetFocus(); // so we can react to keyboard events
    }
