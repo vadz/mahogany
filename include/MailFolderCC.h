@@ -703,17 +703,21 @@ private:
    /** @name Global settings, timeouts for c-client lib */
    //@{
    /// TCP/IP open timeout in seconds.
-   int ms_TcpOpenTimeout;
+   int m_TcpOpenTimeout;
    /// TCP/IP read timeout in seconds.
-   int ms_TcpReadTimeout;
+   int m_TcpReadTimeout;
    /// TCP/IP write timeout in seconds.
-   int ms_TcpWriteTimeout;
+   int m_TcpWriteTimeout;
    /// TCP/IP close timeout in seconds.
-   int ms_TcpCloseTimeout;
+   int m_TcpCloseTimeout;
    /// rsh connection timeout in seconds.
-   int ms_TcpRshTimeout;
+   int m_TcpRshTimeout;
    /// ssh connection timeout in seconds.
-   int ms_TcpSshTimeout;
+   int m_TcpSshTimeout;
+   /// the path to rsh 
+   String m_RshPath;
+   /// the path to ssh 
+   String m_SshPath;
    //@}
 
    /// Used by the subscription management.

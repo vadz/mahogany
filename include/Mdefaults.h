@@ -615,6 +615,10 @@
 #define MP_TCP_RSHTIMEOUT "TCPRshTimeout"
 /// ssh connection timeout in seconds.
 #define MP_TCP_SSHTIMEOUT "TCPSshTimeout"
+/// the path to rsh
+#define MP_RSH_PATH "RshPath"
+/// the path to ssh
+#define MP_SSH_PATH "SshPath"
 //@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
@@ -1173,6 +1177,10 @@
 #define MP_TCP_RSHTIMEOUT_D 0l
 /// ssh connection timeout in seconds.
 #define MP_TCP_SSHTIMEOUT_D 0l
+/// the path to rsh
+#define MP_RSH_PATH_D "rsh"
+/// the path to ssh
+#define MP_SSH_PATH_D "ssh"
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for

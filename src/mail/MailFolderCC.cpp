@@ -812,12 +812,18 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 void
 MailFolderCC::ApplyTimeoutValues(void)
 {
-   (void) mail_parameters(NIL, SET_OPENTIMEOUT, (void *) ms_TcpOpenTimeout);
-   (void) mail_parameters(NIL, SET_READTIMEOUT, (void *) ms_TcpReadTimeout);
-   (void) mail_parameters(NIL, SET_WRITETIMEOUT, (void *) ms_TcpWriteTimeout);
-   (void) mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) ms_TcpCloseTimeout);
-   (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) ms_TcpRshTimeout);
-   (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) ms_TcpSshTimeout);
+   (void) mail_parameters(NIL, SET_OPENTIMEOUT, (void *) m_TcpOpenTimeout);
+   (void) mail_parameters(NIL, SET_READTIMEOUT, (void *) m_TcpReadTimeout);
+   (void) mail_parameters(NIL, SET_WRITETIMEOUT, (void *) m_TcpWriteTimeout);
+   (void) mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) m_TcpCloseTimeout);
+   (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) m_TcpRshTimeout);
+   (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) m_TcpSshTimeout);
+
+   // only set the paths if we do use rsh/ssh
+   if ( m_TcpRshTimeout )
+      (void) mail_parameters(NIL, SET_RSHPATH, (char *)m_RshPath.c_str());
+   if ( m_TcpSshTimeout )
+      (void) mail_parameters(NIL, SET_SSHPATH, (char *)m_SshPath.c_str());
 }
 
 
@@ -828,17 +834,23 @@ MailFolderCC::UpdateTimeoutValues(void)
    Profile *p = GetProfile();
 
    // We now use only one common config setting for all TCP timeout
-   ms_TcpOpenTimeout = READ_CONFIG(p, MP_TCP_OPENTIMEOUT);
-   ms_TcpReadTimeout = ms_TcpOpenTimeout;
-   ms_TcpWriteTimeout = ms_TcpOpenTimeout;
-   ms_TcpCloseTimeout = ms_TcpOpenTimeout;
+   m_TcpOpenTimeout = READ_CONFIG(p, MP_TCP_OPENTIMEOUT);
+   m_TcpReadTimeout = m_TcpOpenTimeout;
+   m_TcpWriteTimeout = m_TcpOpenTimeout;
+   m_TcpCloseTimeout = m_TcpOpenTimeout;
 
    // but a separate one for rsh timeout to allow enabling/disabling rsh
    // independently of TCP timeout
-   ms_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
+   m_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
 
    // and another one for SSH
-   ms_TcpSshTimeout = READ_CONFIG(p, MP_TCP_SSHTIMEOUT);
+   m_TcpSshTimeout = READ_CONFIG(p, MP_TCP_SSHTIMEOUT);
+
+   // also read the paths for the commands if we use them
+   if ( m_TcpRshTimeout )
+      m_RshPath = READ_CONFIG(p, MP_RSH_PATH);
+   if ( m_TcpSshTimeout )
+      m_SshPath = READ_CONFIG(p, MP_SSH_PATH);
 
    ApplyTimeoutValues();
 }
