@@ -338,9 +338,9 @@
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory
-#define   MC_PATHLIST_D M_PREFIX":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+#define   MC_PATHLIST_D M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
 /// path to M directory
-#define   MC_ROOTPATH_D   M_PREFIX"/share/M"
+#define   MC_ROOTPATH_D   M_PREFIX "/share/M"
 /// the name of M's root directory
 #define   MC_ROOTDIRNAME_D   "M"
 /// the user's M directory

@@ -123,7 +123,7 @@ protected:
       // called just before we're deleted in Delete()
    virtual void OnDelete() { }
       // called just before Rename() changes the m_name variable
-   virtual void OnRename(const String& name) { }
+   virtual void OnRename(const String& /* name */) { }
 
    // folder characterstics
    String          m_name;

@@ -33,9 +33,9 @@ String MailFolderCC::MF_pwd;
 static bool mm_ignore_errors = false;
 
 // be quiet
-static void CCQuiet(void) { mm_ignore_errors = true; }
+static inline void CCQuiet(void) { mm_ignore_errors = true; }
 // normal logging
-static void CCVerbose(void) { mm_ignore_errors = false; }
+static inline void CCVerbose(void) { mm_ignore_errors = false; }
 
 
 MailFolderCC::MailFolderCC(MailFolder::Type type,
