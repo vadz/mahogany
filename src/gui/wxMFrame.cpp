@@ -30,8 +30,10 @@
 #   include "MHelp.h"
 #endif
 
-#include   <Python.h>
-#include "PythonHelp.h"
+#ifdef USE_PYTHON
+#  include <Python.h>
+#  include "PythonHelp.h"
+#endif // Python
 
 #include "FolderView.h"
 #include "MDialogs.h"
