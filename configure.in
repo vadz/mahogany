@@ -678,6 +678,7 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 esac
 
 dnl now check for the Python lib but only if linking statically
+USE_PYTHON2=0
 case "$USE_PYTHON" in
 dynamic|Dynamic|DYNAMIC|1)
 	dnl FIXME
@@ -703,6 +704,7 @@ static|Static|STATIC)
 	],
         [
 	    PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
+	    USE_PYTHON2=1
 	],
         [
 	    M_CHECK_MYLIB(python2.0, main,
@@ -719,6 +721,7 @@ static|Static|STATIC)
 	    ],
 	    [
 		PYTHON_LIBS="$libpath_python2_0_main -lpython2.0"
+		USE_PYTHON2=1
 	    ],
 	    [
 		M_CHECK_MYLIB(python2.1, main,
@@ -747,6 +750,13 @@ static|Static|STATIC)
 		LIBS="-lreadline $LIBS"
 		;;
 	    esac
+
+	    dnl Python2 uses forkpty() and openpty() which are not in libc
+	    dnl under Linux but in libutil
+	    if test "$USE_PYTHON2" != 0; then
+		AC_CHECK_FUNC(openpty,,
+			AC_CHECK_LIB(util,openpty,LIBS="-lutil $LIBS"))
+	    fi
 	fi
 	;;
 
