@@ -115,9 +115,12 @@ extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USEVCARD;
-extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VCARD;
 extern const MOption MP_WRAPMARGIN;
+
+#ifdef OS_UNIX
+extern const MOption MP_USE_SENDMAIL;
+#endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1357,7 +1360,7 @@ wxComposeView::CreateFTCanvas(void)
    // others
 #ifndef OS_WIN
    m_LayoutWindow->
-      SetFocusFollowMode(READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
+      SetFocusFollowMode(READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE));
 #endif
 
    EnableEditing(true);
@@ -1366,7 +1369,7 @@ wxComposeView::CreateFTCanvas(void)
 
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
    m_LayoutWindow->
-      SetWordWrap(READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
+      SetWordWrap(READ_CONFIG_BOOL(m_Profile, MP_AUTOMATIC_WORDWRAP));
 
    // tell it which status bar pane to use
    m_LayoutWindow->SetStatusBar(GetStatusBar(), 0, 1);
@@ -2794,11 +2797,15 @@ wxComposeView::Send(bool schedule)
    m_sending = true;
 
    Protocol proto;
-   switch(m_mode)
+   switch ( m_mode )
    {
       case Mode_Mail:
-         proto = READ_CONFIG(m_Profile, MP_USE_SENDMAIL) ? Prot_Sendmail
-                                                         : Prot_SMTP;
+#ifdef OS_UNIX
+         if ( READ_CONFIG_BOOL(m_Profile, MP_USE_SENDMAIL) )
+            proto = Prot_Sendmail;
+         else
+#endif // OS_UNIX
+            proto = Prot_SMTP;
          break;
 
       case Mode_News:

@@ -1185,7 +1185,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    // it would be surprizing for the novice user as he'd see one thing in the
    // options dialog and another thing on the screen (the sorting page is not
    // shown in the folder dialog in this mode)
-   Profile *profile = READ_APPCONFIG(MP_USERLEVEL) == M_USERLEVEL_NOVICE
+   Profile *profile = READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_NOVICE
                         ? mApplication->GetProfile()
                         : m_FolderView->GetProfile();
 
@@ -2127,7 +2127,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 #endif // OS_WIN
 
    settings->dateFormat = READ_CONFIG_TEXT(m_Profile, MP_DATE_FMT);
-   settings->dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
+   settings->dateGMT = READ_CONFIG_BOOL(m_Profile, MP_DATE_GMT);
 
    GetColourByName(&settings->FgCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_FGCOLOUR),
@@ -2161,12 +2161,14 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 
    settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
-   settings->senderOnlyNames = READ_CONFIG(m_Profile, MP_FVIEW_NAMES_ONLY) != 0;
+   settings->senderOnlyNames =
+       READ_CONFIG_BOOL(m_Profile, MP_FVIEW_NAMES_ONLY);
 
    settings->showSize =
       (MessageSizeShow)(long)READ_CONFIG(m_Profile, MP_FVIEW_SIZE_FORMAT);
 
-   settings->replaceFromWithTo = READ_CONFIG(m_Profile, MP_FVIEW_FROM_REPLACE) != 0;
+   settings->replaceFromWithTo =
+       READ_CONFIG_BOOL(m_Profile, MP_FVIEW_FROM_REPLACE);
    if ( settings->replaceFromWithTo )
    {
       String returnAddrs = READ_CONFIG(m_Profile, MP_FROM_REPLACE_ADDRESSES);
@@ -2180,7 +2182,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    }
 
    settings->previewOnSingleClick =
-      READ_CONFIG(GetProfile(), MP_PREVIEW_ON_SELECT) != 0;
+      READ_CONFIG_BOOL(GetProfile(), MP_PREVIEW_ON_SELECT);
 
    ReadColumnsInfo(m_Profile, settings->columns);
 }
@@ -2377,7 +2379,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    SelectInitialMessage(m_ASMailFolder->GetHeaders());
    m_FolderCtrl->Thaw();
 
-   m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+   m_FocusFollowMode = READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
 
    // so we can react to keyboard events
    m_FolderCtrl->SetFocus();

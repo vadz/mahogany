@@ -84,21 +84,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mtest"="M:\wxWindows\wxWindows\src\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name cclient
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "png"=M:\wxWindows\wxWindows\src\png\png.dsp - Package Owner=<4>
 
 Package=<5>

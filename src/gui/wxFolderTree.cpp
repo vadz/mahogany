@@ -105,7 +105,7 @@ extern const MOption MP_SHOW_HIDDEN_FOLDERS;
 // return true if we're showing all folders, even hidden ones, in the tree
 static bool ShowHiddenFolders()
 {
-   return READ_APPCONFIG(MP_SHOW_HIDDEN_FOLDERS) != 0;
+   return READ_APPCONFIG_BOOL(MP_SHOW_HIDDEN_FOLDERS);
 }
 
 // can this folder be opened?

@@ -2238,7 +2238,7 @@ MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 
 void MailFolderCC::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 {
-   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT) != 0;
+   mm_show_debug = READ_APPCONFIG_BOOL(MP_DEBUG_CCLIENT);
 
    MailFolderCmn::ReadConfig(config);
 }

@@ -1313,8 +1313,8 @@ bool RunInstallWizard()
    gs_installWizardData.hangupCommand = READ_APPCONFIG_TEXT(MP_NET_OFF_COMMAND);
 #endif // platform
 
-   gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX);
-   gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER);
+   gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX) != 0;
+   gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER) != 0;
 #ifdef USE_MAIL_COLLECT
    gs_installWizardData.collectAllMail = TRUE;
 #endif // USE_MAIL_COLLECT
@@ -2803,7 +2803,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
 {
    if ( confirm )
    {
-      if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+      if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
          return TRUE; // nothing to do
 
       if (! MDialog_YesNoDialog(
@@ -2874,7 +2874,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
 
    // the config file is supposed to be in Unix format, so we use _UNIX
    // versions of profile paths as from parameter
-   if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_FILTERS) )
    {
       int nFilters = CopyEntries(&fc,
                                  M_FILTERS_CONFIG_SECTION_UNIX,
@@ -2891,7 +2891,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       }
    }
 
-   if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_IDS) )
    {
       int nIds = CopyEntries(&fc,
                              M_IDENTITY_CONFIG_SECTION_UNIX,
@@ -2908,7 +2908,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       }
    }
 
-   if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_FOLDERS) )
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
       String src, dest;
@@ -2946,7 +2946,7 @@ bool SaveRemoteConfigSettings(bool confirm)
 {
    if ( confirm )
    {
-      if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+      if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
          return TRUE; // nothing to do
 
       if (! MDialog_YesNoDialog(
@@ -3028,7 +3028,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    bool rc = TRUE;
 
    // always create the config file in Unix format
-   if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_FILTERS) )
    {
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
                          M_FILTERS_CONFIG_SECTION,
@@ -3037,7 +3037,7 @@ bool SaveRemoteConfigSettings(bool confirm)
                          &fc) != -1);
    }
 
-   if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_IDS) )
    {
       rc &= (CopyEntries(mApplication->GetProfile()->GetConfig(),
                          M_IDENTITY_CONFIG_SECTION,
@@ -3046,7 +3046,7 @@ bool SaveRemoteConfigSettings(bool confirm)
                          &fc) != -1);
    }
 
-   if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_SYNC_FOLDERS) )
    {
       String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
       String src, dest;
@@ -3112,7 +3112,7 @@ CheckConfiguration(void)
 {
    Profile *profile = mApplication->GetProfile();
 
-   if ( READ_APPCONFIG(MP_LICENSE_ACCEPTED) == 0 ) // not accepted
+   if ( !READ_APPCONFIG_BOOL(MP_LICENSE_ACCEPTED) ) // not accepted
    {
       bool accepted = ShowLicenseDialog();
       if(accepted)
@@ -3133,7 +3133,7 @@ CheckConfiguration(void)
    // and other M files from it
    VerifyUserDir();
 
-   bool firstRun = READ_APPCONFIG(MP_FIRSTRUN) != 0;
+   bool firstRun = READ_APPCONFIG_BOOL(MP_FIRSTRUN);
    if ( firstRun != 0 )
    {
       // make sure the essential things have proper values

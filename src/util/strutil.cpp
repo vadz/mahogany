@@ -991,7 +991,7 @@ strutil_encrypt(const String &original)
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
-   if(READ_APPCONFIG(MP_CRYPTALGO) == 1)
+   if ( READ_APPCONFIG(MP_CRYPTALGO) )
       return strutil_encrypt_tf(original);
 
 

@@ -92,7 +92,6 @@ extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_PREVIEW_SEND;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_SENDER;
-extern const MOption MP_SENDMAILCMD;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_SMTPHOST_LOGIN;
 extern const MOption MP_SMTPHOST_PASSWORD;
@@ -100,7 +99,11 @@ extern const MOption MP_SMTPHOST_USE_SSL;
 extern const MOption MP_SMTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USE_OUTBOX;
+
+#ifdef OS_UNIX
 extern const MOption MP_USE_SENDMAIL;
+extern const MOption MP_SENDMAILCMD;
+#endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
 // prototypes
@@ -231,18 +234,20 @@ SendMessageCC::Create(Protocol protocol,
       m_Sender = READ_CONFIG_TEXT(prof, MP_SENDER);
    }
 
-   if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
-      m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
-   if(READ_CONFIG(prof, MP_USE_OUTBOX) != 0)
+   if ( READ_CONFIG_BOOL(prof, MP_COMPOSE_USE_XFACE) )
+      m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE, "");
+   if ( READ_CONFIG_BOOL(prof, MP_USE_OUTBOX) )
       m_OutboxName = READ_CONFIG_TEXT(prof,MP_OUTBOX_NAME);
-   if(READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
+   if ( READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
       m_SentMailName = READ_CONFIG_TEXT(prof,MP_OUTGOINGFOLDER);
    m_CharSet = READ_CONFIG_TEXT(prof,MP_CHARSET);
 
+#ifdef OS_UNIX
    if ( READ_CONFIG(prof, MP_USE_SENDMAIL) )
    {
       m_SendmailCmd = READ_CONFIG_TEXT(prof, MP_SENDMAILCMD);
    }
+#endif // OS_UNIX
 
    if ( protocol == Prot_SMTP )
    {
@@ -1152,7 +1157,7 @@ SendMessageCC::Send(void)
    }
    else
    {
-      confirmSend = READ_APPCONFIG(MP_CONFIRM_SEND) != 0;
+      confirmSend = READ_APPCONFIG_BOOL(MP_CONFIRM_SEND);
    }
 
    if ( confirmSend )

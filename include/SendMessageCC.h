@@ -129,7 +129,7 @@ protected:
    bool HasHeaderEntry(const String &entry);
    /// Get a header entry:
    String GetHeaderEntry(const String &key);
-   
+
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
 
@@ -189,9 +189,12 @@ private:
    String m_CharSet;
    /// default hostname
    String m_DefaultHost;
+
+#ifdef OS_UNIX
    /// command for Sendmail if needed
    String m_SendmailCmd;
-   
+#endif // OS_UNIX
+
    /// the header encoding (wxFONTENCODING_SYSTEM if none)
    wxFontEncoding m_encHeaders;
 

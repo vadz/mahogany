@@ -237,6 +237,10 @@ SOURCE=.\src\classes\MObject.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\Moptions.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\PathFinder.cpp
 # End Source File
 # Begin Source File

@@ -368,7 +368,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
 
    // for advanced users only: a button to invoke the dialog for configuring
    // other headers
-   if ( READ_APPCONFIG(MP_USERLEVEL) == M_USERLEVEL_ADVANCED )
+   if ( READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_ADVANCED )
    {
       wxButton *btnEditCustom = new wxButton(this, Button_EditCustom,
                                              _("&More..."));

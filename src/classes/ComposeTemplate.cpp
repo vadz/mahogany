@@ -1190,7 +1190,7 @@ void VarExpander::ExpandOriginalText(const String& text,
    }
 
    // should we detect the signature and discard it?
-   bool detectSig = READ_CONFIG(m_profile, MP_REPLY_DETECT_SIG) != 0;
+   bool detectSig = READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
 
 #if wxUSE_REGEX
    // a RE to detect the start of the signature

@@ -102,13 +102,13 @@ extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_USEPYTHON;
 extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_USE_OUTBOX;
-extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_USE_TRASH_FOLDER;
 
 #ifdef OS_UNIX
 extern const MOption MP_ETCPATH;
 extern const MOption MP_PREFIXPATH;
 extern const MOption MP_ROOTDIRNAME;
+extern const MOption MP_USE_SENDMAIL;
 #endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
@@ -302,7 +302,7 @@ MAppBase::OnStartup()
    // speeds up things relatively significantly under Windows - and as few
    // people use evironment variables there, it is disabled for Windows by
    // default)
-   m_profile->SetExpandEnvVars(READ_CONFIG(m_profile, MP_EXPAND_ENV_VARS) != 0);
+   m_profile->SetExpandEnvVars(READ_CONFIG_BOOL(m_profile, MP_EXPAND_ENV_VARS));
 
 #ifdef OS_UNIX
    /* Check whether other users can read our config file. This must
@@ -375,7 +375,7 @@ MAppBase::OnStartup()
 
    // do it first to avoid any interactive stuff from popping up if configured
    // to start up in the unattended mode
-   SetAwayMode(READ_APPCONFIG(MP_AWAY_STATUS) != 0);
+   SetAwayMode(READ_APPCONFIG_BOOL(MP_AWAY_STATUS));
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from) unless this is our first run in which case it will
@@ -578,7 +578,7 @@ MAppBase::OnStartup()
 
    // only do it if we are using the NewMail folder at all
    m_MailCollector = MailCollector::Create();
-   if( READ_APPCONFIG(MP_COLLECTATSTARTUP) != 0)
+   if( READ_APPCONFIG_BOOL(MP_COLLECTATSTARTUP) )
       m_MailCollector->Collect();
 
    // show the ADB editor if it had been shown the last time when we ran
@@ -590,7 +590,7 @@ MAppBase::OnStartup()
    }
 
    // cache the auto away flag as it will be checked often in UpdateAwayMode
-   m_autoAwayOn = READ_APPCONFIG(MP_AWAY_AUTO_ENTER) != 0;
+   m_autoAwayOn = READ_APPCONFIG_BOOL(MP_AWAY_AUTO_ENTER);
 
    return TRUE;
 }
@@ -1063,7 +1063,6 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 {
    CHECK_RET( outbox.length(), "missing outbox folder name" );
 
-   Protocol protocol;
    UIdType count = 0;
    MailFolder *mf = MailFolder::OpenFolder(outbox);
    if(! mf)
@@ -1124,11 +1123,15 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          String target;
          bool alreadyCounted = false;
          msg->GetHeaderLine("To", target);
-         protocol = Prot_Illegal;
+         Protocol protocol = Prot_Illegal;
          if(target.Length() > 0)
          {
-            protocol = READ_APPCONFIG(MP_USE_SENDMAIL) ?
-               Prot_Sendmail : Prot_SMTP;
+#ifdef OS_UNIX
+            if ( READ_APPCONFIG(MP_USE_SENDMAIL) )
+               protocol = Prot_Sendmail;
+            else
+#endif // OS_UNIX
+               protocol = Prot_SMTP;
             STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
                             (unsigned long)(i+1),
                             (unsigned long)(hil->Count()),

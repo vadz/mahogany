@@ -232,9 +232,9 @@ wxToolBar *
 wxMFrame::CreateToolBar(void)
 {
    int style = wxTB_HORIZONTAL | wxNO_BORDER;
-   if(READ_APPCONFIG(MP_DOCKABLE_TOOLBARS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_DOCKABLE_TOOLBARS) )
       style |= wxTB_DOCKABLE;
-   if(READ_APPCONFIG(MP_FLAT_TOOLBARS) != 0)
+   if ( READ_APPCONFIG_BOOL(MP_FLAT_TOOLBARS) )
       style |= wxTB_FLAT;
 
    wxToolBar *tb = wxFrame::CreateToolBar(style, -1, _("Mahogany Toolbar"));
@@ -399,9 +399,9 @@ bool wxMFrame::RestorePosition(const char *name,
       *h = GetOptionValue(pConf, MP_HEIGHT);
 
       if ( i )
-          *i = GetOptionValue(pConf, MP_ICONISED) != 0;
+          *i = GetOptionValue(pConf, MP_ICONISED).GetBoolValue();
       if ( m )
-          *m = GetOptionValue(pConf, MP_MAXIMISED) != 0;
+          *m = GetOptionValue(pConf, MP_MAXIMISED).GetBoolValue();
 
       // assume that if one entry existed, then the other existed too
       return pConf->HasEntry(GetOptionName(MP_XPOS));
@@ -414,9 +414,9 @@ bool wxMFrame::RestorePosition(const char *name,
       *w = GetNumericDefault(MP_WIDTH);
       *h = GetNumericDefault(MP_HEIGHT);
       if ( i )
-         *i = GetNumericDefault(MP_ICONISED);
+         *i = GetNumericDefault(MP_ICONISED) != 0;
       if ( m )
-         *m = GetNumericDefault(MP_MAXIMISED);
+         *m = GetNumericDefault(MP_MAXIMISED) != 0;
 
       return FALSE;
    }

@@ -175,6 +175,11 @@ public:
       return m_number;
    }
 
+   bool GetBoolValue() const
+   {
+      return GetNumberValue() != 0;
+   }
+
    String GetTextValue() const
    {
       ASSERT_MSG( m_kind == Text, "MOptionValue type mismatch" );
@@ -306,11 +311,19 @@ inline String operator+(const String& s, const MOption& opt)
 
 extern MOptionValue GetOptionValue(Profile *profile, const MOption opt);
 
+extern long GetNumericOptionValue(Profile *profile, const MOption opt);
+
 // from the given profile
 #define READ_CONFIG(profile, opt) GetOptionValue(profile, opt)
 
 // from the main profile
 #define READ_APPCONFIG(opt) GetOptionValue(mApplication->GetProfile(), opt)
+
+// with (sometimes) required cast to bool
+#define READ_CONFIG_BOOL(profile, opt) \
+   (GetNumericOptionValue(profile, opt) != 0)
+#define READ_APPCONFIG_BOOL(opt) \
+   READ_CONFIG_BOOL(mApplication->GetProfile(), opt)
 
 // with (sometimes) required cast to string
 #define READ_CONFIG_TEXT(profile, opt) READ_CONFIG(profile, opt).GetTextValue()

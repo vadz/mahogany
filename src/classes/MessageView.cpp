@@ -755,9 +755,12 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    #undef GET_COLOUR_FROM_PROFILE
    #undef GET_COLOUR_FROM_PROFILE_IF_NOT_FG
 
-   settings->quotedColourize = READ_CONFIG(profile, MP_MVIEW_QUOTED_COLOURIZE) != 0;
-   settings->quotedCycleColours = READ_CONFIG(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS) != 0;
-   settings->quotedMaxWhitespace = READ_CONFIG(profile, MP_MVIEW_QUOTED_MAXWHITESPACE) != 0;
+   settings->quotedColourize =
+       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_COLOURIZE);
+   settings->quotedCycleColours =
+       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS);
+   settings->quotedMaxWhitespace =
+       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
    settings->quotedMaxAlpha = READ_CONFIG(profile,MP_MVIEW_QUOTED_MAXALPHA);
 
    static const int fontFamilies[] =
@@ -783,10 +786,10 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 
    settings->fontFamily = fontFamilies[idx];
    settings->fontSize = READ_CONFIG(profile, MP_MVIEW_FONT_SIZE);
-   settings->showHeaders = READ_CONFIG(profile, MP_SHOWHEADERS) != 0;
-   settings->inlinePlainText = READ_CONFIG(profile, MP_PLAIN_IS_TEXT) != 0;
-   settings->inlineRFC822 = READ_CONFIG(profile, MP_RFC822_IS_TEXT) != 0;
-   settings->highlightURLs = READ_CONFIG(profile, MP_HIGHLIGHT_URLS) != 0;
+   settings->showHeaders = READ_CONFIG_BOOL(profile, MP_SHOWHEADERS);
+   settings->inlinePlainText = READ_CONFIG_BOOL(profile, MP_PLAIN_IS_TEXT);
+   settings->inlineRFC822 = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
+   settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
 
    // we set inlineGFX to 0 if we don't inline graphics at all and to the
    // max size limit of graphics to show inline otherwise (-1 if no limit)
@@ -795,11 +798,11 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX_SIZE);
 
    settings->browser = READ_CONFIG_TEXT(profile, MP_BROWSER);
-   settings->browserInNewWindow = READ_CONFIG(profile, MP_BROWSER_INNW) != 0;
+   settings->browserInNewWindow = READ_CONFIG_BOOL(profile, MP_BROWSER_INNW);
    settings->autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
-   settings->showFaces = READ_CONFIG(profile, MP_SHOW_XFACES) != 0;
+   settings->showFaces = READ_CONFIG_BOOL(profile, MP_SHOW_XFACES);
 
    // these settings are used under Unix only
 #ifdef OS_UNIX

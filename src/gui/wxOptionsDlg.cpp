@@ -2656,7 +2656,7 @@ bool wxOptionsPageSync::TransferDataFromWindow()
    bool rc = wxOptionsPage::TransferDataFromWindow();
    if ( rc )
    {
-      bool syncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE) != 0;
+      bool syncRemote = READ_CONFIG_BOOL(m_Profile, MP_SYNC_REMOTE);
       if ( syncRemote && !m_SyncRemote )
       {
          if ( MDialog_YesNoDialog
@@ -2790,7 +2790,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       // now if the user checked "confirm exit" checkbox we must reenable
       // the message box by erasing the stored answer to it
       wxPMessageBoxEnable(MP_CONFIRMEXIT,
-                          READ_CONFIG(m_Profile, MP_CONFIRMEXIT) != 0);
+                          READ_CONFIG_BOOL(m_Profile, MP_CONFIRMEXIT));
 
       // restart the timer if the timeout changed
       long delayNew = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
@@ -2817,7 +2817,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
       }
 
       // show/hide the log window depending on the new setting value
-      bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG) != 0;
+      bool showLog = READ_CONFIG_BOOL(m_Profile, MP_SHOWLOG);
       if ( showLog != mApplication->IsLogShown() )
       {
          mApplication->ShowLog(showLog);

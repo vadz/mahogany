@@ -685,7 +685,8 @@ void wxFolderBaseDialog::CreateNotebook(wxPanel *panel)
    //      statically, so it involves changing wxOptionsPage code (currently,
    //      it adds itself with the icon corresponding to the position of the
    //      page in the notebook instead of the fixed number)
-   bool isAdvancedUser = READ_APPCONFIG(MP_USERLEVEL) == M_USERLEVEL_ADVANCED;
+   bool isAdvancedUser =
+       READ_APPCONFIG(MP_USERLEVEL) == (long)M_USERLEVEL_ADVANCED;
 
    m_notebook = new wxFolderCreateNotebook
                     (

@@ -1239,7 +1239,7 @@ MDialog_ShowTip(const MWindow *parent)
    bool showOnStarup = wxShowTip((wxWindow *)parent, tipProvider);
 
    Profile *profile = mApplication->GetProfile();
-   if ( showOnStarup != (READ_APPCONFIG(MP_SHOWTIPS) != 0) )
+   if ( showOnStarup != READ_APPCONFIG_BOOL(MP_SHOWTIPS) )
    {
       profile->writeEntry(MP_SHOWTIPS, showOnStarup);
    }
@@ -1659,7 +1659,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
 
    // remmeber the initial values
    m_SortOrder = sortOrder;
-   m_ReSortOnChange = READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE) != 0;
+   m_ReSortOnChange = READ_CONFIG_BOOL(GetProfile(), MP_MSGS_RESORT_ON_CHANGE);
 
    /* Sort order is stored as 4 bits per hierarchy:
       0xdcba --> 1. sort by "a", then by "b", ...
@@ -2146,7 +2146,7 @@ wxDateFmtDialog::TransferDataToWindow()
 #endif // OS_WIN
 
    m_DateFmt = READ_CONFIG_TEXT(GetProfile(), MP_DATE_FMT);
-   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
+   m_UseGMT->SetValue( READ_CONFIG_BOOL(GetProfile(), MP_DATE_GMT));
    m_textctrl->SetValue(m_DateFmt);
 
    return TRUE;
@@ -2308,7 +2308,7 @@ bool
 wxXFaceDialog::TransferDataToWindow()
 {
    m_Button->SetFile(READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE));
-   m_Checkbox->SetValue( READ_CONFIG(GetProfile(), MP_COMPOSE_USE_XFACE) != 0);
+   m_Checkbox->SetValue(READ_CONFIG_BOOL(GetProfile(), MP_COMPOSE_USE_XFACE));
    m_Button->Enable(m_Checkbox->GetValue() != 0);
    return TRUE;
 }
@@ -2559,7 +2559,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
 bool
 wxGlobalPasswdDialog::TransferDataToWindow()
 {
-   m_UseGlobalPassword->SetValue(READ_APPCONFIG(MP_CRYPTALGO) != 0);
+   m_UseGlobalPassword->SetValue(READ_APPCONFIG_BOOL(MP_CRYPTALGO));
    DoUpdateUI();
 
    return TRUE;
@@ -2571,7 +2571,7 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
    Profile * p = mApplication->GetProfile();
 
    wxString oldPw = strutil_getpasswd();
-   bool oldUseCrypt = READ_CONFIG(p, MP_CRYPTALGO) != 0;
+   bool oldUseCrypt = READ_CONFIG_BOOL(p, MP_CRYPTALGO);
 
    if ( m_oPassword )
    {

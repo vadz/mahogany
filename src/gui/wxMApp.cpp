@@ -1448,7 +1448,7 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    // only enable menu item if outbox is used and contains messages:
    ASSERT(m_topLevelFrame->GetMenuBar());
 
-   bool useOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
+   bool useOutbox = READ_APPCONFIG_BOOL(MP_USE_OUTBOX);
    m_topLevelFrame->GetMenuBar()->Enable(
       (int)WXMENU_FILE_SEND_OUTBOX,enable && useOutbox);
 
@@ -1478,7 +1478,7 @@ void
 wxMApp::SetupOnlineManager(void)
 {
    // only create dial up manager if needed
-   m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
+   m_DialupSupport = READ_APPCONFIG_BOOL(MP_DIALUP_SUPPORT);
 
    if ( m_DialupSupport )
    {

@@ -779,6 +779,13 @@ extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
    return value;
 }
 
+extern long GetNumericOptionValue(Profile *profile, const MOption opt)
+{
+   const MOptionData& optdata = MOptions[opt.GetId()];
+
+   return profile->readEntry(optdata.name, optdata.value.n);
+}
+
 extern const char *GetOptionName(const MOption opt)
 {
    ASSERT_MSG( (size_t)opt.GetId() < WXSIZEOF(MOptions),

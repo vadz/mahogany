@@ -2995,22 +2995,30 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 {
    Profile *profile = GetProfile();
    config.m_ListingSortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
-   config.m_ReSortOnChange = READ_CONFIG(profile, MP_MSGS_RESORT_ON_CHANGE) != 0;
+   config.m_ReSortOnChange =
+       READ_CONFIG_BOOL(profile, MP_MSGS_RESORT_ON_CHANGE);
    config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
-   config.m_UseThreading = READ_CONFIG(profile, MP_MSGS_USE_THREADING) != 0;
+   config.m_UseThreading = READ_CONFIG_BOOL(profile, MP_MSGS_USE_THREADING);
 #if defined(EXPERIMENTAL_JWZ_THREADING)
-   config.m_GatherSubjects = READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) != 0;
-   config.m_BreakThread = READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) != 0;
+   config.m_GatherSubjects =
+       READ_CONFIG_BOOL(profile, MP_MSGS_GATHER_SUBJECTS);
+   config.m_BreakThread = READ_CONFIG_BOOL(profile, MP_MSGS_BREAK_THREAD);
 #if wxUSE_REGEX
-   config.m_SimplifyingRegex = READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
-   config.m_ReplacementString = READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
+   config.m_SimplifyingRegex =
+       READ_CONFIG(profile, MP_MSGS_SIMPLIFYING_REGEX);
+   config.m_ReplacementString =
+       READ_CONFIG(profile, MP_MSGS_REPLACEMENT_STRING);
 #else
-   config.m_RemoveListPrefixGathering = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_GATHERING) != 0;
-   config.m_RemoveListPrefixBreaking = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING) != 0;
+   config.m_RemoveListPrefixGathering =
+       READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX_GATHERING);
+   config.m_RemoveListPrefixBreaking =
+       READ_CONFIG_BOOL(profile, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING);
 #endif
-   config.m_IndentIfDummyNode = READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) != 0;
+   config.m_IndentIfDummyNode =
+       READ_CONFIG_BOOL(profile, MP_MSGS_INDENT_IF_DUMMY);
 #endif // EXPERIMENTAL_JWZ_THREADING
-   config.m_replaceFromWithTo = READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) != 0;
+   config.m_replaceFromWithTo =
+       READ_CONFIG_BOOL(profile, MP_FVIEW_FROM_REPLACE);
    if ( config.m_replaceFromWithTo )
    {
       String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
