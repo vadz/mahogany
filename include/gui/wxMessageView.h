@@ -149,6 +149,7 @@ public:
    void PageDown(void);
    /// scroll up one page:
    void PageUp(void);
+
    /// intercept character events
    void OnChar(wxKeyEvent& event);
 
@@ -161,6 +162,9 @@ private:
 
    /// just clear the window without forgetting m_mailMessage
    void ClearWithoutReset();
+
+   /// call mkey processing code in wxScrolledWindow, used by PageDown/Up
+   void EmulateKeyPress(int keycode);
 
    /// the parent window
    wxWindow   *m_Parent;

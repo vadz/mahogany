@@ -2192,30 +2192,6 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
    result->DecRef();
 }
 
-/// scroll down one line:
-void
-wxMessageView::LineDown(void)
-{
-   GetLayoutList()->MoveCursorVertically(1);
-   ScrollToCursor();
-}
-
-/// scroll down one page:
-void
-wxMessageView::PageDown(void)
-{
-   GetLayoutList()->MoveCursorVertically(20); // FIXME: ugly hard-coded line count
-   ScrollToCursor();
-}
-
-/// scroll up one page:
-void
-wxMessageView::PageUp(void)
-{
-   GetLayoutList()->MoveCursorVertically(-20); // FIXME: ugly hard-coded line count
-   ScrollToCursor();
-}
-
 void
 wxMessageView::UpdateShowHeadersInMenu()
 {
@@ -2226,6 +2202,39 @@ wxMessageView::UpdateShowHeadersInMenu()
    CHECK_RET( mbar, "message view frame without menu bar?" );
 
    mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
+}
+
+// ----------------------------------------------------------------------------
+// scrolling
+// ----------------------------------------------------------------------------
+
+void wxMessageView::EmulateKeyPress(int keycode)
+{
+   wxKeyEvent event;
+   event.m_keyCode = keycode;
+
+   wxScrolledWindow::OnChar(event);
+}
+
+/// scroll down one line:
+void
+wxMessageView::LineDown(void)
+{
+   EmulateKeyPress(WXK_DOWN);
+}
+
+/// scroll down one page:
+void
+wxMessageView::PageDown(void)
+{
+   EmulateKeyPress(WXK_PAGEDOWN);
+}
+
+/// scroll up one page:
+void
+wxMessageView::PageUp(void)
+{
+   EmulateKeyPress(WXK_PAGEUP);
 }
 
 // ----------------------------------------------------------------------------

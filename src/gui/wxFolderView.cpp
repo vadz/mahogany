@@ -251,7 +251,7 @@ public:
    void OnMouseMove(wxMouseEvent &event);
 
    /// called by wxFolderView before previewing the focused message
-   void OnPreview() { m_uidScrolled = UID_ILLEGAL; SelectFocused(); }
+   void OnPreview() { SelectFocused(); }
    //@}
 
    /// change the options governing our appearance
@@ -312,10 +312,6 @@ protected:
 
    /// and the folder submenu for it
    wxMenu *m_menuFolders;
-
-   // temp hack around the message preview window bug, only used by WXK_NEXT
-   // handling code in our OnChar(), see comments there
-   UIdType m_uidScrolled;
 
 private:
    // allow it to use EnableOnSelect()
@@ -674,24 +670,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          // scroll down the preview window
          if ( IsPreviewed(focused) )
          {
-            // wxMessageView is broken as its PageDown() doesn't really
-            // scrolls the window one page down - instead if moves the cursor
-            // a page down.
-            //
-            // As initially the cursor is at (0, 0), pressing PageDown the
-            // first time doesn't scroll the window at all as the cursor stays
-            // inside the visible area, so we have to press PageDown _twice_
-            // to make it scroll - to avoid frustrating the user we do it here
-            // automatically by calling PageDown() twice when we scroll the
-            // given message for the first time
-            UIdType uid = m_FolderView->GetPreviewUId();
-            if ( uid != m_uidScrolled )
-            {
-               m_FolderView->m_MessagePreview->PageDown();
-
-               m_uidScrolled = uid;
-            }
-
             m_FolderView->m_MessagePreview->PageDown();
          }
          else
@@ -880,15 +858,7 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
    if ( IsPreviewed(event.m_itemIndex) )
    {
-      // see the comment near WXK_NEXT handler in OnChar()
-      if ( uid != m_uidScrolled )
-      {
-         m_FolderView->m_MessagePreview->PageDown();
-
-         m_uidScrolled = uid;
-      }
-
-      // just scroll down
+      // scroll down one line
       m_FolderView->m_MessagePreview->LineDown();
    }
    else // do preview
@@ -1014,9 +984,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // no item focused yet
    m_itemFocus = -1;
-
-   // no preview item neither
-   m_uidScrolled = UID_ILLEGAL;
 
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
