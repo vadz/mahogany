@@ -208,7 +208,7 @@ void ClassName::GetMVersion(int *version_major, int *version_minor, \
 } \
 extern "C" \
 {\
-   static MModule *InitMModule(int version_major,\
+   MDLLEXPORT MModule *InitMModule(int version_major,\
                            int version_minor,\
                            int version_release,\
                            class MInterface * interface,\

@@ -144,11 +144,14 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       wxDllLoader::GetSymbol(dll, MMODULE_INITMODULE_FUNCTION);
 
 
-      
-   int errorCode = 0;
-   MModule *module = (*initFunc)(
+   int errorCode = 255;
+   MModule *module = NULL;
+   if(initFunc)
+   {
+      module = (*initFunc)(
       M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
       &gs_MInterface, &errorCode);
+   }
    
    if(module)
    {
