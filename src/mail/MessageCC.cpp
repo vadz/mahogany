@@ -596,6 +596,10 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
    // we are first looking for the name (before ':') and the value (after)
    bool inName = true;
 
+   // the index of the header name for the current header in names or
+   // wxNOT_FOUND if this is a header we hadn't seen yet
+   int idxName = wxNOT_FOUND;
+
    // note that we can stop when *pc == 0 as the header must be terminated
    // by "\r\n" preceding it anyhow
    for ( const char *pc = hdr; *pc ; pc++ )
@@ -642,7 +646,15 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
                // with a space or tab - check if it does
                if ( pc[1] != ' ' && pc[1] != '\t' )
                {
-                  values.Add(s);
+                  if ( idxName == wxNOT_FOUND )
+                  {
+                     values.Add(s);
+                  }
+                  else // add to the previous value
+                  {
+                     values[(size_t)idxName] << "\r\n" << s;
+                  }
+
                   inName = true;
 
                   s.clear();
@@ -659,7 +671,14 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
          case ':':
             if ( inName )
             {
-               names.Add(s);
+               idxName = names.Index(s);
+               if ( idxName == wxNOT_FOUND )
+               {
+                  // a new header
+                  names.Add(s);
+               }
+               //else: will append to the previous value
+
                if ( *++pc != ' ' )
                {
                   // oops... skip back
