@@ -213,7 +213,6 @@ private:
        reference and check if everything is set up properly.
    */
    PalmOSModule(MInterface *interface);
-   ~PalmOSModule();
 
    bool ProcessMenuEvent(int id);
    bool Connect(void);
