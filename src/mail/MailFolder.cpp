@@ -545,6 +545,89 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 // reply/forward messages
 // ----------------------------------------------------------------------------
 
+// extract the address string from List-Post header, return an empty string if
+// none found
+static String
+ExtractListPostAddress(const String& listPostHeader)
+{
+   // the format of List-Post is described in the RFC 2369 but basicly
+   // it's an address-like field except that it may also have a special
+   // value "NO" if posting to this list is prohibited
+
+   // FIXME: it would be nice to use c-client functions for parsing instead
+
+   for ( const wxChar *p = listPostHeader; ; p++ )
+   {
+      switch ( *p )
+      {
+         case '<':
+            {
+               static const size_t MAILTO_LEN = 7; // strlen("mailto:")
+
+               // start of an URL, get it
+               if ( strncmp(++p, "mailto:", MAILTO_LEN) != 0 )
+               {
+                  wxLogDebug("Unknown URL scheme in List-Post (%s)",
+                             listPostHeader.c_str());
+                  return "";
+               }
+
+               String listPostAddress;
+               for ( p += MAILTO_LEN; *p && *p != '>'; p++ )
+               {
+                  if ( *p == '?' )
+                  {
+                     // start of URL parameters - ignore them for now (TODO)
+                     break;
+                  }
+
+                  listPostAddress += *p;
+               }
+
+               if ( !*p )
+               {
+                  // so that p++ in the loop sets it at '\0' during next iteration
+                  p--;
+               }
+               else // successfully extracted an URL
+               {
+                  return listPostAddress;
+               }
+            }
+            break;
+
+         case '(':
+            // start of the comment, skip it
+            for ( p++; *p && *p != ')'; p++ )
+               ;
+
+            if ( !*p )
+            {
+               // so that p++ in the loop sets it at '\0' during next iteration
+               p--;
+            }
+            break;
+
+         case 'N':
+            // possible "NO"
+            if ( p[1] == 'O' )
+            {
+               // posting is forbidden, hence no list posting address
+               return "";
+            }
+            //else: fall through
+
+         // catches "case '\0':", so the loop always exits
+         default:
+            // this is just for me, so that I could check for possible bugs in
+            // this code
+            wxLogDebug("Malformed List-Post header '%s'!",
+                       listPostHeader.c_str());
+            return "";
+      }
+   }
+}
+
 // add the recipients addresses extracted from the message being replied to to
 // the composer according to the MailFolder::Params::replyKind value
 static void
@@ -672,8 +755,20 @@ InitRecipients(Composer *cv,
    wxArrayString listAddresses;
    if ( replyKind == MailFolder::REPLY_LIST )
    {
+      // the manually configured mailing lists
       listAddresses = strutil_restore_array(READ_CONFIG(profile,
                                                         MP_LIST_ADDRESSES));
+
+      // also check if we can't find some in the message itself
+      String listPostAddress;
+      if ( msg->GetHeaderLine("List-Post", listPostAddress) )
+      {
+         listPostAddress = ExtractListPostAddress(listPostAddress);
+         if ( !listPostAddress.empty() )
+         {
+            listAddresses.Add(listPostAddress);
+         }
+      }
    }
 
    // some addresses may appear also in Reply-To (assuming we used it) and

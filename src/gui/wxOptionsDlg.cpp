@@ -1090,9 +1090,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "excluded from the list of your reply recipients)"),
                                                    Field_Message, -1 },
    { gettext_noop("&Addresses to replace with \"To\""),  Field_List, -1,           },
-   { gettext_noop("If you want to take advantage of \"Reply to list\" command,\n"
-                  "you need to specify the addresses of the mailing lists\n"
-                  "you are subscribed to below\n"),
+   { gettext_noop("Mahogany will usually extract the mailing list addresses\n"
+                  "from messages sent to a list automatically but if this\n"
+                  "doesn't work, you may manually specify the addresses of\n"
+                  "the lists you are subscribed to below."),
                                                    Field_Message, -1 },
    { gettext_noop("&Mailing list addresses"),  Field_List, -1,           },
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
