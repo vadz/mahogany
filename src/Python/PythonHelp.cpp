@@ -154,7 +154,7 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    // load the module containing the function
    *module = PyImport_ImportModule((char *)modname.c_str());
 
-   if ( !module )
+   if ( !*module )
    {
       ERRORMESSAGE(( _("Module \"%s\" couldn't be loaded."),
                      modname.c_str() ));
