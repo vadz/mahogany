@@ -213,6 +213,7 @@ extern const MOption MP_REPLY_COLLAPSE_PREFIX;
 extern const MOption MP_REPLY_QUOTE_ORIG;
 extern const MOption MP_REPLY_QUOTE_SELECTION;
 extern const MOption MP_REPLY_MSGPREFIX;
+extern const MOption MP_REPLY_MSGPREFIX_FROM_XATTR;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
 extern const MOption MP_REPLY_QUOTE_EMPTY;
 extern const MOption MP_REPLY_DETECT_SIG;
@@ -806,6 +807,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 #define MP_REPLY_QUOTE_SELECTION_NAME "ReplyQuoteSelection"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_NAME      "ReplyQuote"
+/// use the value of X-Attribution header as the prefix
+#define   MP_REPLY_MSGPREFIX_FROM_XATTR_NAME "ReplyQuoteXAttr"
 /// prepend the initials of the sender to the reply prefix?
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_NAME "ReplyQuoteUseSender"
 /// quote the empty lines when replying?
@@ -1640,6 +1643,8 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 #define MP_REPLY_QUOTE_SELECTION_DEFVAL true
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_DEFVAL      "> "
+/// use the value of X-Attribution header as the prefix
+#define   MP_REPLY_MSGPREFIX_FROM_XATTR_DEFVAL 1l
 /// prepend the initials of the sender to the reply prefix?
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_DEFVAL 0l
 /// quote the empty lines when replying?

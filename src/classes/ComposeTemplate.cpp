@@ -67,6 +67,7 @@ extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
 extern const MOption MP_DATE_FMT;
 extern const MOption MP_REPLY_DETECT_SIG;
 extern const MOption MP_REPLY_MSGPREFIX;
+extern const MOption MP_REPLY_MSGPREFIX_FROM_XATTR;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
 extern const MOption MP_REPLY_QUOTE_EMPTY;
 extern const MOption MP_REPLY_QUOTE_SELECTION;
@@ -1394,9 +1395,16 @@ String VarExpander::GetReplyPrefix() const
 {
    String prefix;
 
+   // X-Attribution header value overrides everything else if it exists
+   if ( m_msg && READ_CONFIG_BOOL(m_profile, MP_REPLY_MSGPREFIX_FROM_XATTR) )
+   {
+      m_msg->GetHeaderLine("X-Attribution", prefix);
+   }
+
    // prepend the senders initials to the reply prefix (this
    // will make reply prefix like "VZ>")
-   if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
+   if ( prefix.empty() &&
+            READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
    {
       // take from address, not reply-to which can be set to
       // reply to a mailing list, for example
