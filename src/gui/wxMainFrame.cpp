@@ -52,7 +52,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetMenuBar(menuBar);
 
 #ifdef USE_WXWINDOWS2
-   m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
+   
+   m_ToolBar = CreateToolBar();
+   m_ToolBar->SetSize( -1, -1, width-2, 30 );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_FILE_OPEN, "Open Folder");
@@ -109,6 +111,6 @@ wxMainFrame::OnSize( wxSizeEvent &event )
    int x = 0;
    int y = 0;
    GetClientSize( &x, &y );
-   if(m_ToolBar)  m_ToolBar->SetSize( 1, 0, x-2, 30 );
-   if(m_splitter) m_splitter->SetSize(0,31,x-2,y);
+//   if(m_ToolBar)  m_ToolBar->SetSize( 1, 0, x-2, 30 );
+   if(m_splitter) m_splitter->SetSize(0,0,x,y);
 };

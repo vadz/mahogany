@@ -4,8 +4,6 @@ $Id$
 *** things to fix/implement next ***
 
 - MessageView:
-  + some code in wxMessageView relies on unix unlink() behaviour 
-    (file is still open and in use when deleted)
   + fix MessageCC::GetParameters()
   + extraction of parameter list and filenames for mime handling/saving
   + add a "save as html" option, using wxLayoutWindow functionality

@@ -122,7 +122,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
 
    if(!parentProfile)
       parentProfile = mApplication.GetProfile();
-   profile = new Profile(iname,parentProfile);
+   m_Profile = new Profile(iname,parentProfile);
 
    // build menu
    // ----------
@@ -186,8 +186,8 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
       bDoShow[Field_Subject] = TRUE;  // To and subject always there
-   bDoShow[Field_Cc] = READ_CONFIG(profile, MP_SHOWCC);
-   bDoShow[Field_Bcc] = READ_CONFIG(profile, MP_SHOWBCC);
+   bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC);
+   bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC);
 
    // first determine the longest label caption
    static const char *aszLabels[Field_Max] =
@@ -269,27 +269,27 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // set def values for the headers
    if(m_txtFields[Field_To])
       m_txtFields[Field_To]->SetValue(
-         strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) : to.c_str());
+         strutil_isempty(to) ? READ_CONFIG(m_Profile, MP_COMPOSE_TO) : to.c_str());
    if(m_txtFields[Field_Cc])
       m_txtFields[Field_Cc]->SetValue(
-         strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) : cc.c_str());
+         strutil_isempty(cc) ? READ_CONFIG(m_Profile, MP_COMPOSE_CC) : cc.c_str());
    if(m_txtFields[Field_Bcc])
       m_txtFields[Field_Bcc]->SetValue(
-         strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC) : bcc.c_str());
+         strutil_isempty(bcc) ? READ_CONFIG(m_Profile, MP_COMPOSE_BCC) : bcc.c_str());
 
    // append signature
-   if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
+   if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
       size_t size;
       ifstream istr;
       char *buffer;
-      istr.open(READ_CONFIG(profile, MP_COMPOSE_SIGNATURE));
+      istr.open(READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE));
       if(istr)
       {
          istr.seekg(0,ios::end);
          size = istr.tellg();
          buffer = new char [size+1];
-         if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
+         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
             m_LayoutWindow->GetLayoutList().Insert("--");
             m_LayoutWindow->GetLayoutList().LineBreak();;
@@ -318,8 +318,15 @@ void
 wxComposeView::CreateFTCanvas(void)
 {
    m_LayoutWindow = new wxLayoutWindow(m_panel);
+   m_LayoutWindow->Clear(
+      m_Profile->readEntry(MP_FTEXT_FONT,MP_FTEXT_FONT_D),
+      m_Profile->readEntry(MP_FTEXT_SIZE,MP_FTEXT_SIZE_D),
+      m_Profile->readEntry(MP_FTEXT_STYLE,MP_FTEXT_STYLE_D),
+      m_Profile->readEntry(MP_FTEXT_WEIGHT,MP_FTEXT_WEIGHT_D),
+      0,
+      m_Profile->readEntry(MP_FTEXT_FGCOLOUR,MP_FTEXT_FGCOLOUR_D),
+      m_Profile->readEntry(MP_FTEXT_BGCOLOUR,MP_FTEXT_BGCOLOUR_D));
    m_LayoutWindow->GetLayoutList().SetEditable(true);
-
    //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }
 
@@ -469,7 +476,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
 
    if(filename == NULL)
    {
-      filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,profile);
+      filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,m_Profile);
       if(! filename)
          return;
       mc->m_NumericMimeType = TYPEAPPLICATION;
@@ -507,9 +514,9 @@ wxComposeView::Send(void)
          mApplication.GetProfile(),
          (const char *)m_txtFields[Field_Subject]->GetValue(),
          (const char *)m_txtFields[Field_To]->GetValue(),
-         READ_CONFIG(profile, MP_SHOWCC) ? m_txtFields[Field_Cc]->GetValue().c_str()
+         READ_CONFIG(m_Profile, MP_SHOWCC) ? m_txtFields[Field_Cc]->GetValue().c_str()
          : (const char *)NULL,
-         READ_CONFIG(profile, MP_SHOWBCC) ? m_txtFields[Field_Bcc]->GetValue().c_str()
+         READ_CONFIG(m_Profile, MP_SHOWBCC) ? m_txtFields[Field_Bcc]->GetValue().c_str()
          : (const char *)NULL
          );
 

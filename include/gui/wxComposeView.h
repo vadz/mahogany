@@ -142,7 +142,7 @@ public:
 #endif //wxWin1/2
 private:
    /// a profile
-   Profile * profile;
+   Profile * m_Profile;
 
    /// the panel
    wxPanel *m_panel;

@@ -41,31 +41,21 @@
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 	EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-	EVT_LIST_ITEM_DESELECTED(-1, wxFolderListCtrl::OnDeselected)
-        EVT_SET_FOCUS   (wxFolderListCtrl::OnSetFocus)
 END_EVENT_TABLE()
-
-
-void wxFolderListCtrl::OnSetFocus( wxFocusEvent &event )
-{
-  event.Skip();
-};
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   m_Selections.Add((int)event.m_itemIndex);
    m_FolderView->PreviewMessage(event.m_itemIndex);
-}
-
-void wxFolderListCtrl::OnDeselected(wxListEvent& event)
-{
-   m_Selections.Remove((int)event.m_itemIndex);
 }
 
 int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
-   selections = m_Selections;
+   long item = -1;
+
+   while( (item = ((wxFolderListCtrl
+                    *)this)->GetNextItem(item,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED)) != -1) 
+      selections.Add(item);
    return selections.Count();
 }
    
@@ -73,8 +63,8 @@ void
 wxFolderListCtrl::Clear(void)
 {
    DeleteAllItems();
-   m_NextIndex = 0;
-   for (int i = 0; i < 5; i++) DeleteColumn( 0 );
+   for (int i = 0; i < 5; i++)
+      DeleteColumn( i );
    if (m_Style & wxLC_REPORT)
    {
       InsertColumn( 0, "Status",  wxLIST_FORMAT_LEFT, 50 );
@@ -83,20 +73,21 @@ wxFolderListCtrl::Clear(void)
       InsertColumn( 3, "Size",    wxLIST_FORMAT_LEFT, 50 );
       InsertColumn( 4, "Subject", wxLIST_FORMAT_LEFT, 120 );
    };
-   m_Selections.Empty();
 }
 
 void
-wxFolderListCtrl::AddEntry(String const &status, String const &sender, String
-                                const &subject, String const &date,
-                                String const &size)
+wxFolderListCtrl::SetEntry(long index,
+                           String const &status,
+                           String const &sender,
+                           String const &subject,
+                           String const &date,
+                           String const &size)
 {
-   InsertItem(m_NextIndex, status); // column 0
-   SetItem(m_NextIndex, 1, sender);
-   SetItem(m_NextIndex, 2, date);
-   SetItem(m_NextIndex, 3, size);
-   SetItem(m_NextIndex, 4, subject);
-   m_NextIndex++;
+   InsertItem(index, status); // column 0
+   SetItem(index, 1, sender);
+   SetItem(index, 2, date);
+   SetItem(index, 3, size);
+   SetItem(index, 4, subject);
 }
 
 
@@ -104,7 +95,8 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
-
+   m_NumOfMessages = 0; // At the beginning there was nothing.
+   
    mailFolder = MailFolderCC::OpenFolder(folderName);
    wxCHECK_RET(mailFolder, "can't open folder in wxFolderView ctor" );
    
@@ -143,15 +135,13 @@ wxFolderView::Update(void)
    char  buffer[200];
    const char *format;
    int n = mailFolder->CountMessages();
-
+   String status, sender, subject, date, size;
+   bool selected;
+   
    format = READ_APPCONFIG(MC_DATE_FMT);
 
-//   listBox->Clear();
-//   listBoxEntriesCount = mailFolder->CountMessages();
-   m_FolderCtrl->Clear();
-   
-
-   String status, sender, subject, date, size;
+   if(n < m_NumOfMessages)  // messages have been deleted, start over
+      m_FolderCtrl->Clear();
    
    for(i = 0; i < n; i++)
    {
@@ -169,10 +159,11 @@ wxFolderView::Update(void)
       date = buffer;
       size = strutil_ultoa(nsize);
 
-      m_FolderCtrl->AddEntry(status, sender, subject, date, size);
-
-      //listBox->Append((char *) line.c_str());
+      selected = (i <= m_NumOfMessages) ?m_FolderCtrl->IsSelected(n) : false;
+      m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
+      m_FolderCtrl->Select(i,selected);
    }
+   m_NumOfMessages = n;
 }
 
 wxFolderView::~wxFolderView()
@@ -219,12 +210,12 @@ wxFolderView::OnMenuCommand(int id)
       DeleteMessages(selections);
       break;
    case WXMENU_MSG_SELECTALL:
-      for(n = 0; n < listBox->Number(); n++)
-         listBox->SetSelection(n);
+      for(n = 0; n < m_NumOfMessages; n++)
+         m_FolderCtrl->Select(n,true);
       break;
    case WXMENU_MSG_DESELECTALL:
-      for(n = 0; n < listBox->Number(); n++)
-         listBox->Deselect(n);
+      for(n = 0; n < m_NumOfMessages; n++)
+         m_FolderCtrl->Select(n,false);
       break;
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
@@ -234,7 +225,6 @@ wxFolderView::OnMenuCommand(int id)
 int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
-//   return listBox->GetSelections(selections);
    return m_FolderCtrl->GetSelections(selections);
 }
 
@@ -386,7 +376,6 @@ END_EVENT_TABLE()
 {
    VAR(folderName);
    m_FolderView = NULL;
-//   wxMFrame::Create(folderName, parent);
    AddFileMenu();
    AddEditMenu();
    AddMessageMenu();
@@ -397,7 +386,8 @@ END_EVENT_TABLE()
 #ifdef USE_WXWINDOWS2
    int width, height;
    GetClientSize(&width, &height);
-   m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
+   m_ToolBar = CreateToolBar();
+   m_ToolBar->SetSize( -1, -1, width, 30 );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_MSG_OPEN, "Open message");
@@ -438,8 +428,8 @@ wxFolderViewFrame::OnSize( wxSizeEvent &event )
    int x = 0;
    int y = 0;
    GetClientSize( &x, &y );
-   if(m_ToolBar)
-      m_ToolBar->SetSize( 1, 0, x-2, 30 );
+//   if(m_ToolBar)
+//      m_ToolBar->SetSize( 1, 0, x-2, 30 );
    if(m_FolderView)
-      m_FolderView->SetSize(0,31,x-2,y);
+      m_FolderView->SetSize(0,0,x,y);
 };

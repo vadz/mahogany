@@ -247,9 +247,8 @@ wxMessageView::Update(void)
    MessageParameterList::iterator plist_it;
    
    GetLayoutList().SetEditable(true);
-   //GetLayoutList().Clear(wxROMAN,16);
-   
-   GetLayoutList().Clear(
+      
+   Clear(
       m_Profile->readEntry(MP_FTEXT_FONT,MP_FTEXT_FONT_D),
       m_Profile->readEntry(MP_FTEXT_SIZE,MP_FTEXT_SIZE_D),
       m_Profile->readEntry(MP_FTEXT_STYLE,MP_FTEXT_STYLE_D),
@@ -516,12 +515,12 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    {
      if(mimetype == "MESSAGE/RFC822")
      {
-       char *filename = wxGetTempFileName("Mtemp");
-       MimeSave(mimeDisplayPart,filename);
-       MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
-       (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
-       wxRemoveFile(filename);//FIXME: does this work for non-UNIX systems?
-       mf->Close();
+        char *filename = wxGetTempFileName("Mtemp");
+        MimeSave(mimeDisplayPart,filename);
+        MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
+        (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
+        mf->Close();
+        wxRemoveFile(filename);
      }
    }
 }

@@ -124,8 +124,8 @@ private:
    bool ownsFolder;
    /// the mail folder being displayed
    class MailFolder  *mailFolder;
-   /// the listbox with the mail messages
-   wxListBox   *listBox;
+   /// the number of messages in the folder when last updated
+   int m_NumOfMessages;
    /// the number of messages in box
    long  listBoxEntriesCount;
    /// the array to hold the strings for the listbox
@@ -189,23 +189,23 @@ public:
          Clear();
       }
    void Clear(void);
-   void AddEntry(String const &status, String const &sender, String
+   void SetEntry(long index,String const &status, String const &sender, String
                  const &subject, String const &date, String const
                  &size);
 
+   void Select(long index, bool on=true)
+      { SetItemState(index,wxLIST_STATE_SELECTED, on ? wxLIST_STATE_SELECTED : 0); }
+      
    int GetSelections(wxArrayInt &selections) const;
-
+   bool IsSelected(long index)
+      { return GetItemState(index,wxLIST_STATE_SELECTED); }
    void OnSelected(wxListEvent& event);
-   void OnDeselected(wxListEvent& event);
-   void OnSetFocus( wxFocusEvent &event );
 
    DECLARE_EVENT_TABLE()
 
 protected:
    long m_Style;
    long m_NextIndex;
-   wxListCtrl m_Control;
-   wxArrayInt m_Selections;
    /// parent window
    wxWindow *m_Parent;
    /// the folder view

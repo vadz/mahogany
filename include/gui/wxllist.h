@@ -17,10 +17,15 @@
 #include   <wx/wx.h>
 
 // skip the following defines if embedded in M application
-#ifndef   MCONFIG_H
-// for testing only:
+#ifdef   M_BASEDIR
+#   ifdef   DEBUG
+#      define   WXLAYOUT_DEBUG
+#   endif
+#else
+    // for testing only:
 #   define WXLAYOUT_DEBUG
-//#   define USE_STD_STRING
+    // The wxLayout classes can be compiled with std::string instead of wxString
+    //#   define USE_STD_STRING
 #endif
 
 #ifdef USE_STD_STRING

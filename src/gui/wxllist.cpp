@@ -855,6 +855,9 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_ColourFG = wxTheColourDatabase->FindColour(fg);
    m_ColourBG = wxTheColourDatabase->FindColour(bg);
 
+   if(! m_ColourFG) m_ColourFG = wxBLACK;
+   if(! m_ColourBG) m_ColourBG = wxWHITE;
+   
    m_Position = wxPoint(0,0);
    m_CursorPosition = wxPoint(0,0);
    m_MaxLine = 0;
