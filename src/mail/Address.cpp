@@ -40,6 +40,7 @@
 
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_HOSTNAME;
 extern const MOption MP_LIST_ADDRESSES;
 
 // ============================================================================
@@ -287,28 +288,43 @@ bool ContainsOwnAddress(const String& str, Profile *profile)
                                );
    WX_APPEND_ARRAY(addresses, addressesML);
 
+   const size_t count = addresses.GetCount();
 
    // now check whether any of these addresses occurs in str
-   size_t count = addresses.GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      if ( str.find(addresses[n]) != String::npos )
-         return true;
-   }
+   String mailbox,
+          domain;
 
-#if 0 // do we really need to do this? IMHO dumb text search is enough
-   AddressList_obj addrList(str);
-   Address *addr = addrList->GetFirst();
-   while ( addr )
+   AddressList_obj addrList(str, READ_CONFIG(profile, MP_HOSTNAME));
+   for ( Address *addr = addrList->GetFirst();
+         addr;
+         addr = addrList->GetNext(addr) )
    {
-      if ( addr->IsSameAs() )
+      for ( size_t n = 0; n < count; n++ )
       {
-         return true;
-      }
+         // first tokenize this string: it can be a full address or domain name
+         // only and it may contain '?' and '*' shell pattern metacharacters
+         const wxChar * const start = addresses[n];
 
-      addr = addrList->GetNext(addr);
+         const wxChar *p = wxStrchr(start, _T('@'));
+         if ( p )
+         {
+            mailbox.assign(start, p - start);
+            domain = p + 1;
+         }
+         else // no mailbox part, domain only given
+         {
+            mailbox = _T('*');
+            domain = start;
+         }
+
+         // now we can finally compare the addresses
+         if ( addr->GetMailbox().Matches(mailbox) &&
+                  addr->GetDomain().Matches(domain) )
+         {
+            return true;
+         }
+      }
    }
-#endif // 0
 
    return false;
 }
