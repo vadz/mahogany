@@ -187,6 +187,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          FAIL_MSG("unknown folder type");
    }
 
+#if 0
    // ask the password for the folders which need it but for which it hadn't been
    // specified during creation
    if ( FolderTypeHasUserName(type) && !(flags & MF_FLAGS_ANON) && !passwd )
@@ -207,7 +208,8 @@ MailFolder::OpenFolder(int typeAndFlags,
          return NULL;
       }
    }
-
+#endif
+   
    // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    typeAndFlags = CombineFolderTypeAndFlags(type, flags);
 

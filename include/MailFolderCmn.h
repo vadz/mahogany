@@ -169,7 +169,7 @@ protected:
 
    /// Call this before actually closing the folder.
    void PreClose(void);
-   
+
    /** This function should be called by the driver when the status of 
        some message changed. It will cause all listings to be updated.
        The driver should make sure that its listing is updated before

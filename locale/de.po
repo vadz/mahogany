@@ -11,7 +11,7 @@ msgstr ""
 
 #: strutil.cpp:738
 msgid "Re"
-msgstr ""
+msgstr "Aw"
 
 #: upgrade.cpp:275
 msgid "Deleted illegal folder profile: '"
@@ -123,7 +123,7 @@ msgstr "Mailbox in der Mahogany Kopien gesendeter Nachrichten speichert."
 #: upgrade.cpp:601
 #, fuzzy
 msgid "Sent Mail"
-msgstr "Neue Nachrichten"
+msgstr "Nachrichten senden"
 
 #: MApplication.cpp:763 MailCollector.cpp:187 upgrade.cpp:602
 msgid "New Mail"

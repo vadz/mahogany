@@ -583,8 +583,26 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       return mf;
    }
 
+
+   String pword = password;
+   // ask the password for the folders which need it but for which it hadn't been
+   // specified during creation
+   if ( FolderTypeHasUserName( (FolderType) typeAndFlags)
+        && !(typeAndFlags & MF_FLAGS_ANON) && ! pword)
+   {
+      String prompt;
+      prompt.Printf(_("Please enter the password for folder '%s':"), name.c_str());
+      if(! MInputBox(&pword,
+                     _("Password needed"),
+                     prompt, NULL,
+                     NULL,NULL, true))
+      {
+         ERRORMESSAGE((_("Cannot access this folder without a password.")));
+         return NULL; // cannot open it
+      }
+   } 
    mf = new
-      MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
+      MailFolderCC(typeAndFlags,mboxpath,profile,server,login,pword);
    mf->SetName(symname);
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));

@@ -976,10 +976,26 @@ MAppBase::SendOutbox(const String & outbox, Protocol protocol,
 int
 MAppBase::GetStatusField(enum StatusFields function) const
 {
+   // re-setting the statusbar causes crashes on wxGTK, keep it with
+   // three fields always for now:
+   switch(function)
+   {
+   case SF_STANDARD:
+      return 0;
+   case SF_ONLINE:
+      return 1;
+   case SF_OUTBOX:
+      return 2;
+   default:
+      ASSERT(0);
+      return 0;
+   }
+#if 0
    int field = 0;
    if( function > SF_STANDARD)
       field++;
    if(function > SF_ONLINE && m_DialupSupport)
       field++;
    return field;
+#endif
 }

@@ -8,9 +8,8 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	duplicate password prompt: only ask on demand when
-		needed, then set it. Like it is now, re-opening an
-		open folder prompts again - not necessary.
+
+9		crash after going online?
 
 9		wxLayout PS printing text overlaps as font sizes are
 		wrong. Install different AFM set?
@@ -19,11 +18,10 @@ $Id$
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
 
-9		immediate crash when switching tabs in options dialog
-		wxGTK bug??
-
 3		wxDialUpManager ping method is broken and does not
 		work, need source code of ping command.
+
+7	KB	selecting/deselecting only message in folder
 
 9	KB	wxLayout:
 		- speed up by only running Layout() for recalculations 
@@ -49,9 +47,7 @@ $Id$
 9		exiting program does not call auto-expunge
 		functionality in main folder
 
-9	KB	Check before reopening a closed MailFolder in
-		MailCollector, some kind of MailFolder::IsOK()?
-		-->failure counter in Ping() ?
+		Keep Statusbar static with three fields?
 
 9	VZ	can we have *all* log messages (incl status) appear in 
 		the log window?
@@ -83,7 +79,6 @@ $Id$
 5	VZ	"hidden" flag for folder treecontrol
 
 
-7	KB	selecting/deselecting only message in folder
 
 7		show headers menu entry is inverted ??
 

@@ -117,8 +117,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    item = m_MenuBar->FindItem(WXMENU_EDIT_PASTE);
    wxASSERT(item);
    item->Enable(FALSE); // no cut for viewer
-   CreateStatusBar();
-
+   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
+   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
+   GetStatusBar()->SetFieldsCount(3, widths);
    int x,y;
    GetClientSize(&x, &y);
 

@@ -987,7 +987,7 @@ wxMApp::UpdateOnlineDisplay(void)
 void
 wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 {
-   ASSERT(nfields < SF_MAXIMUM);
+   ASSERT(nfields <= SF_MAXIMUM);
    ASSERT(nfields >= 0);
    ASSERT(m_topLevelFrame);
    ASSERT(m_topLevelFrame->GetStatusBar());
@@ -1002,7 +1002,7 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
       widths[GetStatusField(SF_ONLINE)] = 70;
    if(m_UseOutbox)
       widths[GetStatusField(SF_OUTBOX)] = 100;
-   sbar->SetFieldsCount(n, widths);
+//FIXME: causes crash after a while   sbar->SetFieldsCount(n, widths);
 }
 
 void
@@ -1017,7 +1017,7 @@ wxMApp::UpdateOutboxStatus(void) const
    ASSERT(m_topLevelFrame->GetMenuBar());
    m_topLevelFrame->GetMenuBar()->Enable(
       (int)WXMENU_FILE_SEND_OUTBOX,enable && m_UseOutbox);
-
+   
    if(! m_UseOutbox)
          return;
    // update status bar
