@@ -461,23 +461,15 @@ public:
          m_Mf = mf;
          m_MEventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
          ASSERT_MSG( m_MEventCookie, "can't reg folder with event manager");
-         cerr << "MFCmnEventReceiver created, this = " << this << endl;
       }
    virtual inline ~MFCmnEventReceiver()
       {
          MEventManager::Deregister(m_MEventCookie);
-         cerr << "MFCmnEventReceiver destroyed, this = " << this << endl;
       }
    virtual inline bool OnMEvent(MEventData& event)
       {
-         cerr << "MFCmnEventReceiver" << endl;
-         cerr << "MFCmnEventReceiver(): mf= " << m_Mf
-              << " name: " << m_Mf->GetName()
-              << endl;
          m_Mf->UpdateConfig();
-         cerr << "Now calling UpdateListing():" << endl;
          m_Mf->UpdateListing();
-         cerr << "done" << endl;
          return true;
       }
 private:
