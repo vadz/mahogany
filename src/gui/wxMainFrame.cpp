@@ -42,8 +42,8 @@
 
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder
 #include "gui/wxIdentityCombo.h" // for IDC_IDENT_COMBO
+#include "MFolderDialogs.h"      // for ShowFolderCreateDialog
 
-#include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 #include "MHelp.h"
@@ -352,44 +352,10 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
    // don't do anything if there is nothing to change
    if ( folder.IsOk() && (m_folderName == folder->GetFullName()) )
    {
-      // ... unless opening the folder previously failed, in which case we'll
-      // try to reopen it (may be the user changed some of its settings)
-      bool reopen = FALSE;
+      wxLogStatus(this, _("The folder '%s' is already opened."),
+                  m_folderName.c_str());
 
-      int flags = folder->GetFlags();
-      if ( flags & MF_FLAGS_MODIFIED )
-      {
-         // user changed some settings, try opening the folder again without
-         // asking all sorts of dumb questions (like below)
-         reopen = TRUE;
-      }
-      else if ( flags & MF_FLAGS_UNACCESSIBLE )
-      {
-         if ( MDialog_YesNoDialog(_("This folder couldn't be opened last time, "
-                                    "do you still want to try to open it (it "
-                                    "will probably fail again)?"),
-                                  this,
-                                  MDIALOG_YESNOTITLE,
-                                  FALSE,
-                                  "OpenUnaccessibleFolder") )
-         {
-            if ( MDialog_YesNoDialog(_("Would you like to change folder "
-                                       "settings before trying to open it?"),
-                                     this,
-                                     MDIALOG_YESNOTITLE,
-                                     FALSE,
-                                     "ChangeUnaccessibleFolderSettings") )
-            {
-               // invoke the folder properties dialog
-               (void)ShowFolderPropertiesDialog(folder, this);
-            }
-
-            reopen = TRUE;
-         }
-      }
-
-      if ( !reopen )
-         return;
+      return;
    }
    else if ( folder )
       m_folderName = folder->GetFullName();
@@ -407,9 +373,6 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
       if ( mailFolder )
       {
          mailFolder->IncRef();
-         // reset the unaccessible and modified flags this folder might have
-         // had
-         folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
 
          UpdateTitleAndStatusBars("", _("Opened folder: "), this, mailFolder);
          mailFolder->DecRef();
@@ -422,12 +385,6 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
       }
       else
       {
-         // it's not modified any more...
-         folder->ResetFlags(MF_FLAGS_MODIFIED);
-
-         // ... and it is unacessible because we couldn't open it
-         folder->AddFlags(MF_FLAGS_UNACCESSIBLE);
-
          m_folderName.clear();
       }
   }

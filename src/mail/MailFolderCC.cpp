@@ -130,9 +130,7 @@ private:
 
 CCStreamCleaner::~CCStreamCleaner()
 {
-#ifdef DEBUG
-      LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: checking for left-over streams"));
-#endif
+   DBGMESSAGE(("CCStreamCleaner: checking for left-over streams"));
 
    if(! mApplication->IsOnline())
    {
@@ -141,9 +139,7 @@ CCStreamCleaner::~CCStreamCleaner()
       StreamList::iterator i;
       for(i = m_List.begin(); i != m_List.end(); i++)
       {
-#ifdef DEBUG
-         LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: freeing stream offline"));
-#endif
+         DBGMESSAGE(("CCStreamCleaner: freeing stream offline"));
          stream = *i;
          // copied from c-client mail.c:
          if (stream->mailbox) fs_give ((void **) &stream->mailbox);
@@ -161,9 +157,7 @@ CCStreamCleaner::~CCStreamCleaner()
       StreamList::iterator i;
       for(i = m_List.begin(); i != m_List.end(); i++)
       {
-#ifdef DEBUG
-         LOGMESSAGE((M_LOG_DEBUG, "CCStreamCleaner: closing stream"));
-#endif
+         DBGMESSAGE(("CCStreamCleaner: closing stream"));
          mail_close(*i);
       }
    }
@@ -193,11 +187,13 @@ void CC_Cleanup(void)
       free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
    }
 
-   if(gs_CCStreamCleaner)
+   if ( gs_CCStreamCleaner )
    {
       delete gs_CCStreamCleaner;
       gs_CCStreamCleaner = NULL;
    }
+
+   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
 }
 
 static String GetImapFlags(int flag)
@@ -1121,6 +1117,7 @@ MailFolderCC::Open(void)
 
       // create the mailbox if it doesn't exist yet
       bool exists = TRUE;
+      bool alreadyTriedToCreate = FALSE;
       if ( GetType() == MF_FILE )
       {
          exists = wxFileExists(m_ImapSpec);
@@ -1140,6 +1137,7 @@ MailFolderCC::Open(void)
          // not to write to it, so we force a creation attempt
          CCQuiet(); // always try creation
          mail_create(NIL, (char *)m_ImapSpec.c_str());
+         alreadyTriedToCreate = TRUE;
          CCVerbose();
       }
 
@@ -1147,7 +1145,6 @@ MailFolderCC::Open(void)
       SetDefaultObj();
 
       // if the file folder doesn't exist, we should create it first
-      bool alreadyCreated = FALSE;
       if ( !exists
            && (GetType() == MF_FILE || GetType() == MF_MH))
       {
@@ -1172,7 +1169,7 @@ MailFolderCC::Open(void)
          tmp += m_ImapSpec;
          mail_create(NIL, (char *)tmp.c_str());
          //mail_create(NIL, (char *)m_ImapSpec.c_str());
-         alreadyCreated = TRUE;
+         alreadyTriedToCreate = TRUE;
       }
 
       // first try, don't log errors (except in debug mode)
@@ -1180,7 +1177,7 @@ MailFolderCC::Open(void)
                                mm_show_debug ? OP_DEBUG : NIL);
 
       // try to create it if hadn't tried yet
-      if ( !m_MailStream && !alreadyCreated )
+      if ( !m_MailStream && !alreadyTriedToCreate )
       {
          CCVerbose();
          mail_create(NIL, (char *)m_ImapSpec.c_str());

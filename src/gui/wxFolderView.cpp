@@ -62,6 +62,7 @@
 #include "gui/wxComposeView.h"
 #include "gui/wxFolderMenu.h"
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
+#include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
@@ -1487,6 +1488,39 @@ printf("Update ==> UpdateTitleAndStatusBars\n");
 MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
+   MFolder_obj folder(profilename);
+   int flags = folder->GetFlags();
+   if ( (flags & MF_FLAGS_UNACCESSIBLE) && !(flags & MF_FLAGS_MODIFIED) )
+   {
+      wxFrame *frame = GetFrame(m_Parent);
+      if ( MDialog_YesNoDialog(_("This folder couldn't be opened last time, "
+                                 "do you still want to try to open it (it "
+                                 "will probably fail again)?"),
+                               frame,
+                               MDIALOG_YESNOTITLE,
+                               FALSE,
+                               "OpenUnaccessibleFolder") )
+      {
+         if ( MDialog_YesNoDialog(_("Would you like to change folder "
+                                    "settings before trying to open it?"),
+                                  frame,
+                                  MDIALOG_YESNOTITLE,
+                                  FALSE,
+                                  "ChangeUnaccessibleFolderSettings") )
+         {
+            // invoke the folder properties dialog
+            if ( !ShowFolderPropertiesDialog(folder, frame) )
+            {
+               // the dialog was cancelled
+               wxLogStatus(frame, _("Opening the folder '%s' cancelled."),
+                           profilename.c_str());
+
+               return NULL;
+            }
+         }
+      }
+   }
+
    wxBeginBusyCursor();
    MailFolder *mf = MailFolder::OpenFolder(profilename);
    SetFolder(mf);
@@ -1513,10 +1547,25 @@ wxFolderView::OpenFolder(String const &profilename)
             break;
 
          default:
+            // set the flag saying that this folder couldn't be opened which
+            // will be used when the user tries to open it the next time
+
+            // it's not modified any more, even if it had been
+            folder->ResetFlags(MF_FLAGS_MODIFIED);
+
+            // ... and it is unacessible because we couldn't open it
+            folder->AddFlags(MF_FLAGS_UNACCESSIBLE);
+
             // FIXME propose to show the folder properties dialog right here
             wxLogError(_("The folder '%s' could not be opened, please check "
                          "its settings."), profilename.c_str());
       }
+   }
+   else
+   {
+      // reset the unaccessible and modified flags this folder might have had
+      // before as now we could open it
+      folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
    }
 
    return mf;

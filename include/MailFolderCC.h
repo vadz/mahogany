@@ -800,6 +800,8 @@ private:
    static void DebugStreams(void);
 #endif
 
+   friend void CC_Cleanup();
+
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)
