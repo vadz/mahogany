@@ -253,6 +253,8 @@ public:
 
       m_nMatchingMessages =
       m_nMatchingFolders = 0;
+
+      m_allScheduled = false;
    }
 
    ~AsyncSearchData()
@@ -276,6 +278,10 @@ public:
 
       return true;
    }
+
+   // tell us that AddSearchFolder() won't be called any more, must be called
+   // before the search results are shown!
+   void FinalizeSearch() { m_allScheduled = true; }
 
    // process the search result if it concerns this search, in which case true
    // is returned (even if there were errors), otherwise return false to
@@ -347,7 +353,8 @@ public:
 
    // if we're still waiting for the completion of [another] search, return
    // false, otherwise return true
-   bool IsSearchCompleted() const { return m_listSingleSearch.empty(); }
+   bool IsSearchCompleted() const
+      { return m_allScheduled && m_listSingleSearch.empty(); }
 
    // show the search results to the user
    void ShowSearchResults(wxFrame *frame)
@@ -456,6 +463,10 @@ private:
 
    // the number of folders containing the matching messages
    size_t m_nMatchingFolders;
+
+   // have all folders we search been already added to us using
+   // AddSearchFolder()?
+   bool m_allScheduled;
 };
 
 // ----------------------------------------------------------------------------
@@ -1049,6 +1060,12 @@ void wxMainFrame::DoFolderSearch()
             asmf->DecRef();
          }
          //else: silently skip this one
+      }
+
+      if ( searchData )
+      {
+         // no more calls to AddSearchFolder() scheduled
+         searchData->FinalizeSearch();
       }
    }
    //else: cancelled by user
