@@ -15,12 +15,12 @@ install:
 	$(INSTALL_DATA) `find $(DIR) -type f` $(DOCDIR)/$(DIR)/
 
 $(DIR).htex: ../$(DIR).htex
-	cp ../$(DIR).htex .
+	cp ../$(DIR).htex ../$(DIR).aux .
 
 ps: $(FILES_PS)
 	cp $(FILES_PS) ..
 
-index: $(DIR).htex
+index: $(DIR).htex $(DIR).aux
 	$(LATEX2HTML) -debug $(DIR).htex
 
 wxhelp.map: index

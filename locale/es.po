@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22a\n"
-"POT-Creation-Date: 1999-05-19 15:47+0100\n"
+"POT-Creation-Date: 1999-05-19 15:50+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Juan Pablo Ordonez <juordone@openway.com.co>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"

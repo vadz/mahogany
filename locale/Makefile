@@ -48,7 +48,7 @@ msgcat:
 mergecat:
 	cp ../messages.po messages_po
 #	cat messages_po extra_po | sed "1,$$ s/^\\#\\~ //g" > tmp && mv tmp messages_po
-#	cat extra_po >> messages_po
+	cat extra_po >> messages_po
 	$(RM) tmp.po ; for i in $(FILES_PO); do msgmerge $$i messages_po -o tmp.po && mv tmp.po $$i; done
 
 .PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files update check

@@ -1,5 +1,6 @@
-mahogany (0.21a) unstable; urgency=low
+mahogany (0.22a) unstable; urgency=low
 
+  * Bug fix release, improved message editor. 
   * Initial Release.
 
  -- Karsten Ballüder <karsten@phy.hw.ac.uk>  Sun, 25 Apr 1999 20:54:01 +0100

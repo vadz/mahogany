@@ -11,31 +11,21 @@ $Id$
 - completion of filtering rules/scoring code
 - subscription management for NNTP/IMAP/newsspool
 - DND with KDE/Gnome filemanagers (now supported by wxGTK)
-- Finish the new message editor code: selections, cut&paste,
-  rich-text editing
+- Finish the new message editor code: rich-text editing
 - Templates/style-sheets for message composition and flexible reply
   handling 
-- Windows version release (End of May?)
 - Messages sorting, threading, scoring and searching
-
-** Possibly that one or the release after that:
- 
+- fine tune printing to remove occasional printing of too many lines
+  around page breaks
 - multi-threading to avoid delays and timeouts
-- GPG/PGP support?
+- GPG/PGP support
 - built-in HTML viewer
 
 GENERAL ROADMAP/ORDER OF THINGS:
 
-  1. finish message editor/viewer improvements
-  2. fix remaining bugs in Windows version  ---> make new common release
-  3. finish filtering code
-  4. do multi-threading before adding sorting etc
-
-2/3/4 will happen in parallel as 2 is done by VZ and 3/4 by KB, 4 will 
-happen on a separate cvs branch to avoid breaking the stable release
-code. Some of the minor topics from the list above will happen as they 
-fit in (DND, templates, etc).
-
+  1. fix remaining bugs in Windows version  ---> make new common release
+  2. finish filtering code
+  3. do multi-threading before adding sorting etc
 
 *********************************************************************
 *** Currently being worked on:
