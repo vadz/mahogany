@@ -44,8 +44,6 @@
 #include "gui/wxIdentityCombo.h" // for IDC_IDENT_COMBO
 #include "MFolderDialogs.h"      // for ShowFolderCreateDialog
 
-#include "miscutil.h"            // for UpdateTitleAndStatusBars
-
 #include "MHelp.h"
 #include "MDialogs.h"
 

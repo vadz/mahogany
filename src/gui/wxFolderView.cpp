@@ -3056,84 +3056,86 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 void
 wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 {
-   if ( (event.GetFolder() == m_MailFolder) )
+   if ( event.GetFolder() != m_MailFolder )
+      return;
+
+   // if we had exactly one message selected before, we want to keep the
+   // selection after expunging
+   bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
+
+   // we might have to clear the preview if we delete the message
+   // being previewed
+   bool previewDeleted = false;
+
+#ifdef BROKEN_LISTCTRL
+   // wxGTK doesn't seem to keep focus correctly itself when we delete items,
+   // help it
+   long focus = m_FolderCtrl->GetFocusedItem();
+   bool focusDeleted = focus == -1;
+#endif // BROKEN_LISTCTRL
+
+   size_t count = event.GetCount();
+   for ( size_t n = 0; n < count; n++ )
    {
-      // if we had exactly one message selected before, we want to keep the
-      // selection after expunging
-      bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
-
-      // we might have to clear the preview if we delete the message
-      // being previewed
-      bool previewDeleted = false;
+      long item = event.GetItem(n);
 
 #ifdef BROKEN_LISTCTRL
-      // wxGTK doesn't seem to keep focus correctly itself when we delete items,
-      // help it
-      long focus = m_FolderCtrl->GetFocusedItem();
-      bool focusDeleted = focus == -1;
-#endif // BROKEN_LISTCTRL
-
-      size_t count = event.GetCount();
-      for ( size_t n = 0; n < count; n++ )
+      if ( !focusDeleted )
       {
-         long item = event.GetItem(n);
-
-#ifdef BROKEN_LISTCTRL
-         if ( !focusDeleted )
+         if ( item < focus )
          {
-            if ( item < focus )
-            {
-               focus--;
-            }
-            else if ( item == focus )
-            {
-               focusDeleted = true;
-            }
+            focus--;
          }
+         else if ( item == focus )
+         {
+            focusDeleted = true;
+         }
+      }
 #endif // BROKEN_LISTCTRL
 
-         UIdType uid = m_FolderCtrl->GetUIdFromIndex(item);
+      UIdType uid = m_FolderCtrl->GetUIdFromIndex(item);
 
-         if ( uid == m_uidPreviewed )
-            previewDeleted = true;
+      if ( uid == m_uidPreviewed )
+         previewDeleted = true;
 
-         m_FolderCtrl->DeleteItem(item);
-      }
+      m_FolderCtrl->DeleteItem(item);
+   }
 
 #ifdef BROKEN_LISTCTRL
-      // restore focus if we had it
-      if ( focusDeleted && (focus != -1) )
-      {
-         // take the next item as focus, if there is any - otherwise the last
-         long itemMax = m_FolderCtrl->GetItemCount() - 1;
-         if ( focus > itemMax )
-            focus = itemMax;
-      }
+   // restore focus if we had it
+   if ( focusDeleted && (focus != -1) )
+   {
+      // take the next item as focus, if there is any - otherwise the last
+      long itemMax = m_FolderCtrl->GetItemCount() - 1;
+      if ( focus > itemMax )
+         focus = itemMax;
+   }
 
-      // even if it wasn't deleted it might have changed because items before it
-      // were deleted
-      m_FolderCtrl->Focus(focus);
-      OnFocusChange();
+   // even if it wasn't deleted it might have changed because items before it
+   // were deleted
+   m_FolderCtrl->Focus(focus);
+   OnFocusChange();
 #endif // BROKEN_LISTCTRL
 
-      // clear preview window if the message showed there had been deleted
-      if ( previewDeleted )
-      {
-         m_MessagePreview->Clear();
-         InvalidatePreviewUID();
-      }
-
-      if ( hadUniqueSelection )
-      {
-         // restore the selection
-         m_FolderCtrl->SelectFocused();
-      }
-
-      // update the count of messages and deleted messages (of which there
-      // shouldn't be left any)
-      m_NumOfMessages -= count;
-      m_nDeleted = 0;
+   // clear preview window if the message showed there had been deleted
+   if ( previewDeleted )
+   {
+      m_MessagePreview->Clear();
+      InvalidatePreviewUID();
    }
+
+   if ( hadUniqueSelection )
+   {
+      // restore the selection
+      m_FolderCtrl->SelectFocused();
+   }
+
+   // update the count of messages and deleted messages (of which there
+   // shouldn't be left any)
+   m_NumOfMessages -= count;
+   m_nDeleted = 0;
+
+   UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 }
 
 // this function gets called when new mail appears in the folder

@@ -1003,14 +1003,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<font face=\"Times New Roman,times\">"
 
                    "<h4>Mahogany information</h4>"
-                   "Version " M_VERSION_STRING "<br>"
+                   "Version " M_VERSION_STRING
+                   "  (built with " wxVERSION_STRING ")<br>"
 #ifdef DEBUG
                    HTML_WARNING "This is a debug build<br>"
 #else
                    "Release build "
 #endif
-                   "(compiled at " __DATE__ ", " __TIME__ "<br>"
-                   "using " wxVERSION_STRING ")"
+                   "(compiled at " __DATE__ ", " __TIME__ ")<br>"
 
 #if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
                    "<h4>Extra features:</h4>"

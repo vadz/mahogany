@@ -66,8 +66,13 @@
 // ----------------------------------------------------------------------------
 
 /// check for dead mailstream
-#define CHECK_DEAD()   if( m_folder && m_folder->Stream() == NIL && ! m_folder->PingReopen() ) { ERRORMESSAGE((_("Cannot access inactive m_folder '%s'."), m_folder->GetName().c_str())); return; }
-#define CHECK_DEAD_RC(rc)   if( m_folder && m_folder->Stream() == NIL && ! m_folder->PingReopen()) {   ERRORMESSAGE((_("Cannot access inactive m_folder '%s'."), m_folder->GetName().c_str())); return rc; }
+#define CHECK_DEAD_RC(rc)                                                     \
+   if ( !m_folder->Stream() && !m_folder->PingReopen() )                      \
+   {                                                                          \
+      ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
+                   m_folder->GetName().c_str()));                             \
+      return rc;                                                              \
+   }
 
 // ----------------------------------------------------------------------------
 // types
@@ -100,6 +105,17 @@ static void decode_body(PartInfoArray& partInfos,
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// MessageCC creation
+// ----------------------------------------------------------------------------
+
+/* static */
+Message *
+Message::Create(const char *text, UIdType uid, Profile *profile)
+{
+   return MessageCC::Create(text, uid, profile);
+}
 
 MessageCC *
 MessageCC::Create(MailFolderCC *folder, const HeaderInfo& hi)
@@ -147,42 +163,27 @@ MessageCC::MessageCC(MailFolderCC *folder, const HeaderInfo& hi)
    }
    else
    {
-      // we must have one
+      // we must have one in this ctor
       FAIL_MSG( "no folder in MessageCC ctor" );
    }
 }
 
-MessageCC::~MessageCC()
-{
-   if ( m_partInfos )
-   {
-      WX_CLEAR_ARRAY((*m_partInfos));
-
-      delete m_partInfos;
-   }
-
-   delete [] m_partContentPtr;
-   delete [] m_msgText;
-   SafeDecRef(m_folder);
-   SafeDecRef(m_Profile);
-}
-
-MessageCC::MessageCC(const char * itext, UIdType uid, Profile *iprofile)
+MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
 {
    Init();
 
    m_uid = uid;
 
-   m_Profile = iprofile;
+   m_Profile = profile;
    if(m_Profile)
       m_Profile->IncRef();
    else
       m_Profile = Profile::CreateEmptyProfile();
 
    // move \n --> \r\n convention
-   m_msgText = strutil_strdup(strutil_enforceCRLF(itext));
+   m_msgText = strutil_strdup(strutil_enforceCRLF(text));
 
-   // find end of header "\012\012"
+   // find end of header "\012\012" (FIXME: not "\015\012"???)
    char
       *header = NULL,
       *bodycptr = NULL;
@@ -214,6 +215,25 @@ MessageCC::MessageCC(const char * itext, UIdType uid, Profile *iprofile)
                      &str, ""   /*defaulthostname */, 0);
    delete [] header;
 }
+
+MessageCC::~MessageCC()
+{
+   if ( m_partInfos )
+   {
+      WX_CLEAR_ARRAY((*m_partInfos));
+
+      delete m_partInfos;
+   }
+
+   delete [] m_partContentPtr;
+   delete [] m_msgText;
+   SafeDecRef(m_folder);
+   SafeDecRef(m_Profile);
+}
+
+// ----------------------------------------------------------------------------
+// sending
+// ----------------------------------------------------------------------------
 
 bool
 MessageCC::SendOrQueue(Protocol iprotocol, bool send)
@@ -328,15 +348,26 @@ String MessageCC::GetHeader(void) const
 {
    String str;
 
-   CHECK_DEAD_RC(str);
+   if ( m_folder )
+   {  
+      CHECK_DEAD_RC(str);
 
-   if( m_folder && m_folder->Lock() )
+      if ( m_folder->Lock() )
+      {
+         unsigned long len = 0;
+         const char *cptr = mail_fetchheader_full(m_folder->Stream(), m_uid,
+                                                  NULL, &len, FT_UID);
+         m_folder->UnLock();
+         str = String(cptr, (size_t)len);
+      }
+      else
+      {
+         ERRORMESSAGE(("Cannot fetch message header"));
+      }
+   }
+   else
    {
-      unsigned long len = 0;
-      const char *cptr = mail_fetchheader_full(m_folder->Stream(), m_uid,
-                                               NULL, &len, FT_UID);
-      m_folder->UnLock();
-      str = String(cptr, (size_t)len);
+      FAIL_MSG( "MessageCC::GetHeader() can't be called for this message" );
    }
 
    return str;
@@ -347,9 +378,12 @@ MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
 {
    wxArrayString values;
+   CHECK( m_folder, values,
+          "GetHeaderLines() can't be called for this message" );
 
    CHECK_DEAD_RC(values);
-   if ( !m_folder || !m_folder->Lock() )
+
+   if ( !m_folder->Lock() )
       return values;
 
    // construct the string list containing all the headers we're interested in
@@ -638,28 +672,33 @@ String MessageCC::Date(void) const
 String
 MessageCC::FetchText(void)
 {
-   CHECK_DEAD_RC("");
-   if(m_folder)
+   if ( m_folder )
    {
-      if(m_folder->Lock())
+      if ( !m_mailFullText )
       {
-         m_mailFullText = mail_fetchtext_full(m_folder->Stream(), m_uid,
-                                        &m_MailTextLen, FT_UID);
-         m_folder->UnLock();
-         ASSERT_MSG(strlen(m_mailFullText) == m_MailTextLen,
-                    "DEBUG: Mailfolder corruption detected");
+         CHECK_DEAD_RC("");
 
-         // there once has been an assert here checking that the message
-         // length was positive, but it makes no sense as 0 length messages do
-         // exist - so I removed it (VZ)
+         if ( m_folder->Lock() )
+         {
+            m_mailFullText = mail_fetchtext_full(m_folder->Stream(), m_uid,
+                                                 &m_MailTextLen, FT_UID);
+            m_folder->UnLock();
 
-         return m_mailFullText;
+            ASSERT_MSG(strlen(m_mailFullText) == m_MailTextLen,
+                       "DEBUG: Mailfolder corruption detected");
+
+            // there once has been an assert here checking that the message
+            // length was positive, but it makes no sense as 0 length messages
+            // do exist - so I removed it (VZ)
+         }
+         else
+         {
+            ERRORMESSAGE(("Cannot get lock for obtaining message text."));
+         }
       }
-      else
-      {
-         ERRORMESSAGE(("Cannot get lock for obtaining message text."));
-         return "";
-      }
+      //else: already have it, reuse as msg text doesn't change
+
+      return m_mailFullText;
    }
    else // from a text
    {
@@ -1210,50 +1249,40 @@ MessageCC::GetReferences(void) const
 bool
 MessageCC::WriteToString(String &str, bool headerFlag) const
 {
-   if(! headerFlag)
-   {
-      str = ((MessageCC*)this)->FetchText();
-      return str.Length() > 0;
-   }
-   else
-   {
-      unsigned long len;
+   str.clear();
 
-      ((MessageCC *)this)->CheckBody(); // const_cast<>
-
-      if(m_folder && m_folder->Lock())
+   // get the headers if asked for them
+   if ( headerFlag )
+   {
+      if ( m_folder )
       {
-         CHECK_DEAD_RC(FALSE);
-         char *headerPart =
-            mail_fetchheader_full(m_folder->Stream(),m_uid,NIL,&len,FT_UID);
-         m_folder->UnLock();
-         ASSERT_MSG(strlen(headerPart) == len,
-                    "DEBUG: Mailfolder corruption detected");
-#if 0
-         str.reserve(len + 1);
-         const char *cptr = headerPart;
-         for(size_t i = 0; i < len; i++)
-            str[i] = *cptr++;
-         str[len] = '\0';
-#else
-         str += String(headerPart, (size_t)len);
-#endif
-         str += ((MessageCC*)this)->FetchText();
+         ((MessageCC *)this)->CheckBody(); // const_cast<>
+
+         CHECK_DEAD_RC(false);
+
+         if ( m_folder->Lock())
+         {
+            unsigned long len;
+            char *header = mail_fetchheader_full(m_folder->Stream(),
+                                                 m_uid, NIL,
+                                                 &len, FT_UID);
+            m_folder->UnLock();
+
+            ASSERT_MSG(strlen(header) == len,
+                       "DEBUG: Mailfolder corruption detected");
+
+            str = String(header, (size_t)len);
+         }
       }
-      else
+      else // folder-less message doesn't have headers (why?)!
       {
-         str = m_msgText;
+         FAIL_MSG( "WriteToString can't be called for this message" );
       }
    }
 
-   return m_Body != NULL;
+   // and the text too
+   str += ((MessageCC*)this)->FetchText();
+
+   return true;
 }
 
-
-
-/* static */
-class Message *
-Message::Create(const char *text, UIdType uid, Profile *profile)
-{
-   return MessageCC::Create(text, uid, profile);
-}
