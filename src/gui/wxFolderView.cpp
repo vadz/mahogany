@@ -242,6 +242,7 @@ public:
    //@{
    void OnSelected(wxListEvent& event);
    void OnColumnClick(wxListEvent& event);
+   void OnListKeyDown(wxListEvent& event);
    void OnChar( wxKeyEvent &event);
    void OnRightClick(wxMouseEvent& event);
    void OnDoubleClick(wxMouseEvent &event);
@@ -289,6 +290,12 @@ protected:
       bool enableOld = m_enableOnSelect;
       m_enableOnSelect = enable;
       return enableOld;
+   }
+
+   // update our "unique selection" flag
+   void UpdateUniqueSelFlag()
+   {
+      m_selIsUnique = GetUniqueSelection() != -1;
    }
 
    /// parent window
@@ -542,6 +549,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_MOTION(wxFolderListCtrl::OnMouseMove)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
+   EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
 
    EVT_IDLE(wxFolderListCtrl::OnIdle)
 END_EVENT_TABLE()
@@ -923,8 +931,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   // update our "unique selection" flag
-   m_selIsUnique = GetUniqueSelection() != -1;
+   UpdateUniqueSelFlag();
 
    if ( m_enableOnSelect )
    {
@@ -1087,12 +1094,29 @@ void wxFolderListCtrl::UpdateFocus()
    }
 }
 
+void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
+{
+   switch ( event.GetCode() )
+   {
+      case WXK_UP:
+      case WXK_DOWN:
+      case WXK_PRIOR:
+      case WXK_NEXT:
+      case WXK_HOME:
+      case WXK_END:
+      case WXK_SPACE:
+         // update the unique selection flag as we can lose it now (the keys
+         // above can change the focus/selection)
+         UpdateUniqueSelFlag();
+   }
+
+   event.Skip();
+}
+
 void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 {
-   // wxGTK buggy wxListCtrl doesn't send unselect event so we have to update
-   // m_selIsUnique "manually"
-   m_selIsUnique = GetUniqueSelection() != -1;
-
+   // there is no "focus change" event in wxListCtrl so we have to track it
+   // ourselves
    UpdateFocus();
 
    event.Skip();

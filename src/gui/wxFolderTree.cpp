@@ -1879,6 +1879,8 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             // the folder is given to wxFolderTreeNode, hence no DecRef() here
             MFolder *folder = MFolder::Get(folderName);
 
+            CHECK_RET( folder, "just created folder doesn't exist?" );
+
             wxFolderTreeNode *nodeNew =
                new wxFolderTreeNode(this, folder, GetFolderTreeNode(parent));
 
