@@ -793,29 +793,6 @@ static PyObject *_wrap_Message_GetDisposition(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_Message_ExpandParameter(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Message *arg0 ;
-    MessageParameterList *arg1 ;
-    String *arg2 ;
-    String *arg3 ;
-    PyObject * argo0 =0 ;
-    PyObject * argo1 =0 ;
-    PyObject * argo2 =0 ;
-    PyObject * argo3 =0 ;
-    bool result ;
-    
-    if(!PyArg_ParseTuple(args,"OOOO:Message_ExpandParameter",&argo0,&argo1,&argo2,&argo3)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_MessageParameterList,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_String,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo3,(void **) &arg3,SWIGTYPE_p_String,1)) == -1) return NULL;
-    result = (bool )arg0->ExpandParameter(*arg1,*arg2,arg3);
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-}
-
-
 static PyObject *_wrap_Message_GetPartMimeType(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     Message *arg0 ;
@@ -944,7 +921,6 @@ static PyMethodDef MessagecMethods[] = {
 	 { "Message_GetPartSize", _wrap_Message_GetPartSize, METH_VARARGS },
 	 { "Message_GetParameters", _wrap_Message_GetParameters, METH_VARARGS },
 	 { "Message_GetDisposition", _wrap_Message_GetDisposition, METH_VARARGS },
-	 { "Message_ExpandParameter", _wrap_Message_ExpandParameter, METH_VARARGS },
 	 { "Message_GetPartMimeType", _wrap_Message_GetPartMimeType, METH_VARARGS },
 	 { "Message_GetPartDesc", _wrap_Message_GetPartDesc, METH_VARARGS },
 	 { "Message_GetPartSpec", _wrap_Message_GetPartSpec, METH_VARARGS },
@@ -987,16 +963,6 @@ static swig_const_info swig_const_table[] = {
     { SWIG_PY_INT,     "MAT_FROM", (long) MAT_FROM, 0, 0, 0},
     { SWIG_PY_INT,     "MAT_SENDER", (long) MAT_SENDER, 0, 0, 0},
     { SWIG_PY_INT,     "MAT_REPLYTO", (long) MAT_REPLYTO, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPETEXT", (long) Message::MSG_TYPETEXT, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEMULTIPART", (long) Message::MSG_TYPEMULTIPART, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEMESSAGE", (long) Message::MSG_TYPEMESSAGE, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEAPPLICATION", (long) Message::MSG_TYPEAPPLICATION, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEAUDIO", (long) Message::MSG_TYPEAUDIO, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEIMAGE", (long) Message::MSG_TYPEIMAGE, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEVIDEO", (long) Message::MSG_TYPEVIDEO, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEMODEL", (long) Message::MSG_TYPEMODEL, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEOTHER", (long) Message::MSG_TYPEOTHER, 0, 0, 0},
-    { SWIG_PY_INT,     "Message_MSG_TYPEMAX", (long) Message::MSG_TYPEMAX, 0, 0, 0},
 {0}};
 
 static PyObject *SWIG_globals;

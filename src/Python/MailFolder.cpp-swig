@@ -531,32 +531,13 @@ extern "C" {
 #endif
 static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
     PyObject *resultobj;
-    int arg0 ;
-    String *arg1 ;
-    Profile *arg2 = NULL ;
-    String *arg3 = (String *) &NULLstring ;
-    String *arg4 = (String *) &NULLstring ;
-    String *arg5 = (String *) &NULLstring ;
-    String *arg6 = (String *) &NULLstring ;
-    bool arg7 = FALSE ;
-    PyObject * argo1 =0 ;
-    PyObject * argo2 =0 ;
-    PyObject * argo3 =0 ;
-    PyObject * argo4 =0 ;
-    PyObject * argo5 =0 ;
-    PyObject * argo6 =0 ;
-    int tempbool7 = (int) FALSE ;
+    class MFolder *arg0 ;
+    PyObject * argo0 =0 ;
     MailFolder *result ;
     
-    if(!PyArg_ParseTuple(args,"iO|OOOOOi:MailFolder_OpenFolder",&arg0,&argo1,&argo2,&argo3,&argo4,&argo5,&argo6,&tempbool7)) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_String,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_Profile,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo3,(void **) &arg3,SWIGTYPE_p_String,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo4,(void **) &arg4,SWIGTYPE_p_String,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo5,(void **) &arg5,SWIGTYPE_p_String,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo6,(void **) &arg6,SWIGTYPE_p_String,1)) == -1) return NULL;
-    arg7 = (bool ) tempbool7;
-    result = (MailFolder *)MailFolder::OpenFolder(arg0,(String const &)*arg1,arg2,(String const &)*arg3,(String const &)*arg4,(String const &)*arg5,(String const &)*arg6,arg7);
+    if(!PyArg_ParseTuple(args,"O:MailFolder_OpenFolder",&argo0)) return NULL;
+    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MFolder,1)) == -1) return NULL;
+    result = (MailFolder *)MailFolder::OpenFolder((class MFolder const *)arg0);
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MailFolder);
     return resultobj;
 }
@@ -689,22 +670,6 @@ static PyObject *_wrap_MailFolder_GetName(PyObject *self, PyObject *args) {
     if(!PyArg_ParseTuple(args,"O:MailFolder_GetName",&argo0)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
     result = new String (arg0->GetName());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_String);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_MailFolder_CountMessages(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg0 ;
-    int arg1 ;
-    int arg2 ;
-    PyObject * argo0 =0 ;
-    unsigned long result ;
-    
-    if(!PyArg_ParseTuple(args,"Oii:MailFolder_CountMessages",&argo0,&arg1,&arg2)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    result = (unsigned long )arg0->CountMessages(arg1,arg2);
-    resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
 
@@ -1173,22 +1138,6 @@ static PyObject *_wrap_MailFolder_NeedsNetwork(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_MailFolder_SetRetrievalLimits(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg0 ;
-    unsigned long arg1 ;
-    unsigned long arg2 ;
-    PyObject * argo0 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"Oll:MailFolder_SetRetrievalLimits",&argo0,&arg1,&arg2)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    arg0->SetRetrievalLimits(arg1,arg2);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
-    return resultobj;
-}
-
-
 static PyObject *_wrap_MailFolder_GetAuthInfo(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg0 ;
@@ -1406,35 +1355,6 @@ static PyObject *_wrap_HeaderInfo_GetLines(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfo,1)) == -1) return NULL;
     result = (unsigned long )arg0->GetLines();
     resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetIndentation(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg0 ;
-    PyObject * argo0 =0 ;
-    unsigned int result ;
-    
-    if(!PyArg_ParseTuple(args,"O:HeaderInfo_GetIndentation",&argo0)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfo,1)) == -1) return NULL;
-    result = (unsigned int )arg0->GetIndentation();
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_HeaderInfo_SetIndentation(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg0 ;
-    unsigned int arg1 ;
-    PyObject * argo0 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"Oi:HeaderInfo_SetIndentation",&argo0,&arg1)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfo,1)) == -1) return NULL;
-    arg0->SetIndentation(arg1);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
     return resultobj;
 }
 
@@ -1700,7 +1620,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_Subscribe", _wrap_MailFolder_Subscribe, METH_VARARGS },
 	 { "MailFolder_ListFolders", _wrap_MailFolder_ListFolders, METH_VARARGS },
 	 { "MailFolder_GetName", _wrap_MailFolder_GetName, METH_VARARGS },
-	 { "MailFolder_CountMessages", _wrap_MailFolder_CountMessages, METH_VARARGS },
 	 { "MailFolder_CountNewMessages", _wrap_MailFolder_CountNewMessages, METH_VARARGS },
 	 { "MailFolder_CountRecentMessages", _wrap_MailFolder_CountRecentMessages, METH_VARARGS },
 	 { "MailFolder_Ping", _wrap_MailFolder_Ping, METH_VARARGS },
@@ -1729,7 +1648,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_GetType", _wrap_MailFolder_GetType, METH_VARARGS },
 	 { "MailFolder_GetFlags", _wrap_MailFolder_GetFlags, METH_VARARGS },
 	 { "MailFolder_NeedsNetwork", _wrap_MailFolder_NeedsNetwork, METH_VARARGS },
-	 { "MailFolder_SetRetrievalLimits", _wrap_MailFolder_SetRetrievalLimits, METH_VARARGS },
 	 { "MailFolder_GetAuthInfo", _wrap_MailFolder_GetAuthInfo, METH_VARARGS },
 	 { "MailFolder_ApplyFilterRules", _wrap_MailFolder_ApplyFilterRules, METH_VARARGS },
 	 { "MailFolder_RequestUpdate", _wrap_MailFolder_RequestUpdate, METH_VARARGS },
@@ -1745,8 +1663,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "HeaderInfo_GetStatus", _wrap_HeaderInfo_GetStatus, METH_VARARGS },
 	 { "HeaderInfo_GetSize", _wrap_HeaderInfo_GetSize, METH_VARARGS },
 	 { "HeaderInfo_GetLines", _wrap_HeaderInfo_GetLines, METH_VARARGS },
-	 { "HeaderInfo_GetIndentation", _wrap_HeaderInfo_GetIndentation, METH_VARARGS },
-	 { "HeaderInfo_SetIndentation", _wrap_HeaderInfo_SetIndentation, METH_VARARGS },
 	 { "HeaderInfoList_Count", _wrap_HeaderInfoList_Count, METH_VARARGS },
 	 { "HeaderInfoList_GetItem", _wrap_HeaderInfoList_GetItem, METH_VARARGS },
 	 { "FolderListingEntry_GetName", _wrap_FolderListingEntry_GetName, METH_VARARGS },
@@ -1842,7 +1758,7 @@ static swig_const_info swig_const_table[] = {
     { SWIG_PY_INT,     "MSO_SCORE_REV", (long) MSO_SCORE_REV, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_SIZE", (long) MSO_SIZE, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_SIZE_REV", (long) MSO_SIZE_REV, 0, 0, 0},
-    { SWIG_PY_INT,     "MailFolder_MSG_STAT_NONE", (long) MailFolder::MSG_STAT_NONE, 0, 0, 0},
+    { SWIG_PY_INT,     "MailFolder_MSG_STAT_NEW", (long) MailFolder::MSG_STAT_NEW, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_SEEN", (long) MailFolder::MSG_STAT_SEEN, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_DELETED", (long) MailFolder::MSG_STAT_DELETED, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_ANSWERED", (long) MailFolder::MSG_STAT_ANSWERED, 0, 0, 0},

@@ -127,15 +127,6 @@ public:
        @return list of parameters, must be freed by caller.
    */
    virtual const MessageParameterList & GetDisposition(int n = -1, String *disptype = NULL);
-   /** Get a parameter value from the list.
-       @param list a MessageParameterList
-       @param parameter parameter to look up
-       @param value set to new value if found
-       @return true if found
-   */
-   bool ExpandParameter(MessageParameterList & list,
-                        String &parameter,
-                        String *value);
 
    /** Query the MimeType of the content.
        @param  n part number
@@ -174,36 +165,6 @@ public:
    */
    virtual void WriteToString(String &str, bool headerFlag = true);
 
-   //@}
-
-   /**@name Constants (correspoding to c-client's mail.h */
-   //@{
-   /** Primary body types
-       If you change any of these you must also change body_types in
-       rfc822.c */
-   enum ContentType
-   {
-      /// unformatted text
-      MSG_TYPETEXT = 0,
-      /// multipart content
-      MSG_TYPEMULTIPART = 1,
-      /// encapsulated message
-      MSG_TYPEMESSAGE = 2,
-      /// application data
-      MSG_TYPEAPPLICATION = 3,
-      /// audio
-      MSG_TYPEAUDIO = 4,
-      /// static image
-      MSG_TYPEIMAGE = 5,
-      /// video
-      MSG_TYPEVIDEO = 6,
-      /// model
-      MSG_TYPEMODEL = 7,
-      /// unknown
-      MSG_TYPEOTHER = 8,
-      /// maximum type code
-      MSG_TYPEMAX = 15
-   };
    //@}
 };
 

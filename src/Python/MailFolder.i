@@ -62,8 +62,8 @@ public:
        looked at. */
    enum MessageStatus
    {
-      /// empty message status
-      MSG_STAT_NONE = 0,
+      /// message is new
+      MSG_STAT_NEW = 0,
       /// message has been seen
       MSG_STAT_SEEN = 1,
       /// message is deleted
@@ -88,35 +88,6 @@ public:
 
    /** @name Static functions, implemented in MailFolder.cpp */
    //@{
-
-   /**
-      Opens an existing mail folder of a certain type.
-      The path argument is as follows:
-      <ul>
-      <li>MF_INBOX: unused
-      <li>MF_FILE:  filename, either relative to MP_MBOXDIR (global
-                    profile) or absolute
-      <li>MF_POP:   unused
-      <li>MF_IMAP:  folder path
-      <li>MF_NNTP:  newgroup
-      </ul>
-      @param type one of the supported types
-      @param path either a hostname or filename depending on type
-      @param profile parent profile
-      @param server hostname
-      @param login only used for POP,IMAP and NNTP (as the newsgroup name)
-      @param password only used for POP, IMAP
-      @param halfopen to only half open the folder
-   */
-   static MailFolder * OpenFolder(int typeAndFlags,
-                                  const String &path,
-                                  Profile *profile = NULL,
-                                  const String &server = NULLstring,
-                                  const String &login = NULLstring,
-                                  const String &password = NULLstring,
-                                  const String &symbolicname =
-                                  NULLstring,
-                                  bool halfopen = FALSE);
 
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
@@ -191,15 +162,6 @@ public:
    */
    virtual String GetName(void);
 
-   /** Get number of messages which have a message status of value
-       when combined with the mask. When mask = 0, return total
-       message count.
-       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-       @param value the value of MessageStatus AND mask to be counted
-       @return number of messages
-   */
-   virtual unsigned long CountMessages(int mask, int value);
-
    /// Count number of new messages.
    virtual unsigned long CountNewMessages(void);
 
@@ -261,12 +223,6 @@ public:
        @return true on success
    */
    virtual bool AppendMessage(const Message &msg);
-
-   /** Appends the message to this folder.
-       @param msg text of the  message to append
-       @return true on success
-   */
-   virtual bool AppendMessage(const String &msg);
 
    /** Expunge messages.
      */
@@ -382,8 +338,6 @@ public:
             && ! (GetFlags() & MF_FLAGS_ISLOCAL);
       }
 
-   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard);
-
    /**@name Accessor methods */
    //@{
    /// Get authorisation information
@@ -439,10 +393,6 @@ public:
    virtual int GetStatus(void);
    virtual unsigned long GetSize(void);
    virtual unsigned long GetLines(void);
-   /// Return the indentation level for message threading.
-   virtual unsigned GetIndentation();
-   /// Set the indentation level for message threading.
-   virtual void SetIndentation(unsigned level);
 private:
    /// Disallow copy construction
    HeaderInfo(const HeaderInfo &);

@@ -106,8 +106,8 @@
 /// for convenience, get an icon:
 #define   ICON(name) (mApplication->GetIconManager()->GetIcon(name))
 
-/// define a NULL for strings (FIXME: is this valid for std::string ?)
-#define   NULLstring String((const char *)NULL)
+/// define a NULL for strings (used in SWIG *.i files)
+#define   NULLstring wxGetEmptyString()
 
 /// defines an empty string for argument lists, needed for scandoc
 #define   M_EMPTYSTRING   ""
