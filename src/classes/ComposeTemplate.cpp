@@ -946,17 +946,16 @@ VarExpander::SetHeaderValue(const String& name,
    String headerName = name.Lower();
    if ( headerName == _T("subject") )
       m_cv.SetSubject(headerValue);
+   else if ( headerName == _T("from") )
+      m_cv.SetFrom(headerValue);
    else if ( headerName == _T("to") )
       m_cv.AddTo(headerValue);
    else if ( headerName == _T("cc") )
       m_cv.AddCc(headerValue);
    else if ( headerName == _T("bcc") )
       m_cv.AddBcc(headerValue);
-   // TODO: we don't have SetFrom() yet in Composer
-#if 0
-   else if ( headerName == _T("from") )
-      m_cv.SetFrom(headerValue);
-#endif // 0
+   else if ( headerName == _T("fcc") )
+      m_cv.AddFcc(headerValue);
    else // some other header
       m_cv.AddHeaderEntry(headerName, headerValue);
 
