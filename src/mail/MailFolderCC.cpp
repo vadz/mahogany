@@ -2335,7 +2335,8 @@ MailFolderCC::UpdateAfterAppend()
    // it is needed
    if ( !IsUpdateSuspended() )
    {
-      RequestUpdate();
+      // make the folder notice the new messages
+      mail_ping(m_MailStream);
    }
 }
 
