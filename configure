@@ -568,7 +568,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.306 2004/07/09 12:33:07 vadz Exp 
+# From configure.in Id: configure.in,v 1.309 2004/07/21 11:29:20 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4533,7 +4533,7 @@ fi
     WX_VERSION=""
     no_wx=""
 
-    min_wx_version=2.5.1
+    min_wx_version=2.5.2
     echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
 echo "configure:4539: checking for wxWindows version >= $min_wx_version" >&5
 
@@ -4653,7 +4653,7 @@ if test "$wxOK" != 1; then
 	   Please check that wx-config is in PATH, the directory
 	   where wxWindows libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.5.1 or above.
+	   equivalent variable and wxWindows version is 2.5.2 or above.
    " 1>&2; exit 1; }
 fi
 
@@ -5195,8 +5195,8 @@ echo "configure:5192: checking how to link modules" >&5
 	    LDD="otool -L"
 	fi
 	echo "int main() { return 0; }" >conftest.c
-	if $CXX -o conftest $WX_LIBS conftest.c && \
-		$LDD conftest | fgrep libwx  >/dev/null
+	if $CXX -o conftest $WX_LIBS conftest.c 2>link.log >&2 && \
+		$LDD conftest | fgrep libwx 2>/dev/null >&2
 	then
 		m_cv_USE_MODULES=dynamic
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
@@ -6094,7 +6094,7 @@ echo "	Embedded Python:			${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
     echo "	      with swig:			${SWIG}"
 fi
-echo "  DSPAM spam filtering:			${using_dspam}"
+echo "	DSPAM spam filtering:			${using_dspam}"
 echo ""
 echo "Please look at config.log for more details."
 
