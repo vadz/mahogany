@@ -4287,7 +4287,10 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          // scroll up within the message viewer:
          if ( m_FolderCtrl->IsPreviewed(focused) )
          {
-            m_MessagePreview->PageUp();
+            if ( key == WXK_BACK )
+               m_MessagePreview->LineUp();
+            else // PageUp
+               m_MessagePreview->PageUp();
          }
          else
          {
