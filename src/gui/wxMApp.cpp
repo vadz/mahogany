@@ -1301,7 +1301,7 @@ wxString wxMApp::GetHelpDir()
 #ifdef OS_WIN
    helpdir += _T("help");
 #else // !Windows
-   helpdir += _T("doc");
+   helpdir += _T("doc/Manual");
 #endif // Windows/!Windows
 
    return helpdir;
