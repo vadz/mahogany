@@ -412,7 +412,9 @@ enum ConfigFields
    ConfigField_FolderTreePropagate,
    ConfigField_FolderTreeNeverUnreadHelp,
    ConfigField_FolderTreeNeverUnread,
-   ConfigField_FolderTreeLast = ConfigField_FolderTreeNeverUnread,
+   ConfigField_FolderTreeOpenOnClick,
+   ConfigField_FolderTreeShowHiddenFolders,
+   ConfigField_FolderTreeLast = ConfigField_FolderTreeShowHiddenFolders,
 
    // autocollecting and address books options
    ConfigField_AdbFirst = ConfigField_FolderTreeLast,
@@ -473,8 +475,6 @@ enum ConfigFields
    ConfigField_AutosaveHelp,
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
-   ConfigField_OpenOnClick,
-   ConfigField_ShowHiddenFolders,
    ConfigField_HelpDir,
 #ifdef USE_SSL
    ConfigField_SslHelp,
@@ -1324,6 +1324,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "unread mail (again, this is mainly useful for \"Trash\"\n"
                   "folder, for example)."), Field_Message, -1 },
    { gettext_noop("&Skip this folder:"), Field_Bool, -1 },
+   { gettext_noop("Open folder on single &click"), Field_Bool, -1 },
+   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,-1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
@@ -1410,9 +1412,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "of information"),               Field_Message, -1                     },
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
-   { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
-   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
-
    { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 
 #ifdef USE_SSL
@@ -1748,6 +1747,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FTREE_PROPAGATE),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_NEVER_UNREAD),
+   CONFIG_ENTRY(MP_OPEN_ON_CLICK),
+   CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
 
    // addresses
    CONFIG_NONE(),
@@ -1800,8 +1801,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
-   CONFIG_ENTRY(MP_OPEN_ON_CLICK),
-   CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
    CONFIG_ENTRY(MP_HELPDIR),
 #ifdef USE_SSL
    CONFIG_NONE(),
