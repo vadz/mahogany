@@ -13,7 +13,7 @@ static char *application_xpm[] = {
 "f c #a0a0a0",
 "g c #ff0000",
 "h c #ffbebe",
-"i c #ffffff",
+"i c None",
 "j c #ffff00",
 "k c #008000",
 "l c #003c3c",
