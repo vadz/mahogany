@@ -88,37 +88,30 @@ public:
 
    /** Constructor for posting news.
        @param parentProfile parent profile
-       @param parent parent window
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateNewArticle(const MailFolder::Params& params,
-                                           wxWindow *parent = NULL,
                                            Profile *parentProfile = NULL,
                                            bool hide = false);
 
    /** Constructor for sending mail.
-       @param parent parent window
        @param parentProfile parent profile
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateNewMessage(const MailFolder::Params& params,
-                                           wxWindow *parent = NULL,
                                            Profile *parentProfile = NULL,
                                            bool hide = false);
 
-
    /** Constructor for sending a reply to a message.
 
-       @param parent parent window
        @param parentProfile parent profile
        @param original message that we replied to
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateReplyMessage(const MailFolder::Params& params,
-                                             wxWindow *parent,
                                              Profile *parentProfile,
                                              Message * original = NULL,
                                              bool hide = false);
@@ -126,13 +119,11 @@ public:
    /** Constructor for forwarding a message.
 
        @param templ is the template to use
-       @param parent parent window
        @param parentProfile parent profile
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateFwdMessage(const MailFolder::Params& params,
-                                           wxWindow *parent,
                                            Profile *parentProfile,
                                            bool hide = false);
 
@@ -245,22 +236,18 @@ public:
    void ResetDirty();
 
    // these functions are for backwards compatibility only
-   static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
-                                           Profile *parentProfile = NULL,
+   static wxComposeView * CreateNewArticle(Profile *parentProfile = NULL,
                                            bool hide = false)
    {
       return CreateNewArticle(MailFolder::Params(""),
-                              parent,
                               parentProfile,
                               hide);
    }
 
-   static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
-                                           Profile *parentProfile = NULL,
+   static wxComposeView * CreateNewMessage(Profile *parentProfile = NULL,
                                            bool hide = false)
    {
       return CreateNewMessage(MailFolder::Params(""),
-                              parent,
                               parentProfile,
                               hide);
    }

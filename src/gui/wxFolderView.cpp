@@ -1679,7 +1679,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          wxComposeView *composeView = wxComposeView::CreateNewMessage
                                       (
                                        templ,
-                                       frame,
                                        GetProfile()
                                       );
          composeView->InitText();
@@ -1691,7 +1690,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    {
       wxComposeView *composeView = wxComposeView::CreateNewArticle
                                    (
-                                    GetFrame(m_Parent),
                                     GetProfile()
                                    );
       composeView->InitText();

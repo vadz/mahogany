@@ -245,8 +245,11 @@ wxMFrame::OnMenuCommand(int id)
                templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
             }
 
-            wxComposeView *composeView =
-               wxComposeView::CreateNewMessage(templ, this, GetFolderProfile());
+            wxComposeView *composeView = wxComposeView::CreateNewMessage
+                                         (
+                                          templ,
+                                          GetFolderProfile()
+                                         );
             composeView->InitText();
             composeView->Show();
          }
@@ -258,9 +261,10 @@ wxMFrame::OnMenuCommand(int id)
 
       case WXMENU_FILE_POST:
          {
-            wxComposeView *composeView =
-               wxComposeView::CreateNewArticle(this,
-                                               GetFolderProfile());
+            wxComposeView *composeView = wxComposeView::CreateNewArticle
+                                         (
+                                          GetFolderProfile()
+                                         );
             composeView->InitText();
             composeView->Show();
          }

@@ -730,7 +730,6 @@ MailFolder::ReplyMessage(class Message *msg,
    if(! profile) profile = mApplication->GetProfile();
 
    wxComposeView *cv = wxComposeView::CreateReplyMessage(params,
-                                                         parent,
                                                          profile,
                                                          msg);
 
@@ -906,7 +905,7 @@ MailFolder::ForwardMessage(class Message *msg,
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, parent, profile);
+   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, profile);
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX)+ msg->Subject());
    cv->InitText(msg);
    cv->Show(TRUE);

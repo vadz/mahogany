@@ -840,38 +840,36 @@ void wxComposeView::EnableEditing(bool enable)
 
 /** Constructor for posting news.
     @param parentProfile parent profile
-    @param parent parent window
     @param hide if true, do not show frame
     @return pointer to the new compose view
 */
 wxComposeView *
 wxComposeView::CreateNewArticle(const MailFolder::Params& params,
-                                wxWindow *parent,
                                 Profile *parentProfile,
                                 bool hide)
 {
+   wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
    cv->m_mode = Mode_NNTP;
    cv->m_kind = Message_New;
    cv->m_template = params.templ;
    cv->SetTitle(_("Article Composition"));
-   cv->Create(parent,parentProfile);
+   cv->Create(parent, parentProfile);
 
    return cv;
 }
 
 /** Constructor for sending mail.
     @param parentProfile parent profile
-    @param parent parent window
     @param hide if true, do not show frame
     @return pointer to the new compose view
 */
 wxComposeView *
 wxComposeView::CreateNewMessage(const MailFolder::Params& params,
-                                wxWindow *parent,
                                 Profile *parentProfile,
                                 bool hide)
 {
+   wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
    cv->m_mode = Mode_SMTP;
    cv->m_kind = Message_New;
@@ -884,14 +882,13 @@ wxComposeView::CreateNewMessage(const MailFolder::Params& params,
 
 wxComposeView *
 wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
-                                  wxWindow *parent,
                                   Profile *parentProfile,
                                   Message *original,
                                   bool hide)
 {
    // TODO set the encoding of the original message here for this message
 
-   wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
+   wxComposeView *cv = CreateNewMessage(parentProfile, hide);
 
    cv->m_kind = Message_Reply;
    cv->m_template = params.templ;
@@ -904,13 +901,12 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
 
 wxComposeView *
 wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
-                                wxWindow *parent,
                                 Profile *parentProfile,
                                 bool hide)
 {
    // TODO set the encoding of the original message here for this message
 
-   wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
+   wxComposeView *cv = CreateNewMessage(parentProfile, hide);
 
    cv->m_kind = Message_Forward;
    cv->m_template = params.templ;
