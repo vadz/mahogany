@@ -110,6 +110,10 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 
 ** started using/implementing ASMailFolder classes!
+- speed up wxLayout scrollbar setting, *way* too slow now
+- why does Message/Find no longer work?
+- implement listing of folders on remote servers!!
+- for NNTP only count unread/new messages
 
 - check handling of missing hostnames,
   suppress missing hostname c-client error message

@@ -20,6 +20,7 @@
 // ----------------------------------------------------------------------------
 #include "MObject.h"
 
+#include <wx/dynlib.h>
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -27,16 +28,8 @@
 /**@name Mahogany Module management classes. */
 //@{
 
-// ----------------------------------------------------------------------------
-// classes
-// ----------------------------------------------------------------------------
-
-class MModule;
-
-
 /**
-   This is an ABC that every MModule must implement.
-
+   This is the interface that every MModule must implement.
 */
 class MModule : public MObjectRC
 {
@@ -73,6 +66,18 @@ extern "C"
                                                      int version_minor,
                                                      int version_release);
 };
+
+/** Function to resolve main program symbols from modules.
+ */
+extern "C"
+{
+   void * MModule_GetSymbol(const char *name)
+   {
+      wxDllType prog = wxDllLoader::GetProgramHandle();
+      return (void *) wxDllLoader::GetSymbol(prog, name);
+   }
+}
+   
 
 /**@name Two macros to make testing for compatible versions easier. */
 //@{

@@ -85,7 +85,12 @@ DummyModule::DummyModule(void)
    Though, I'm still trying to find a more intelligent solution...
 */
 
-   MDialog_Message(
+   typedef void (*FptrT)(const char *msg, void *dummy, const char *title);
+
+   FptrT fptr = (FptrT) MModule_GetSymbol("MDialog_Message");
+   ASSERT(fptr);
+   
+   (*fptr)(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",
@@ -93,10 +98,6 @@ DummyModule::DummyModule(void)
       "Welcome from DummyModule!");
 
 }
-
-
-
-
 
 ///------------------------------
 /// Loader functions:

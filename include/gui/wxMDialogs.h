@@ -36,8 +36,8 @@ class wxCloseEvent;
    Dialog Boxes
 */
 
-/** Progress dialog which shows a moving progress bar. */
 
+/** Progress dialog which shows a moving progress bar. */
 class MProgressDialog : public wxProgressDialog
 {
 public:
@@ -65,6 +65,11 @@ public:
    }
 };
 
+
+/// This allows us to call them from modules.
+extern "C"
+{
+   
 /** display error message:
        @param message the text to display
        @param parent   the parent frame
@@ -220,4 +225,5 @@ void MDialog_ShowText(MWindow *parent,
                       const char *text,
                       const char *configPath = NULL);
 
+} // extern "C"
 #endif  //WXMDIALOGS_H

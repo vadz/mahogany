@@ -9,7 +9,7 @@ ifdef USE_LIBTOOL
 %.o: %.c
 	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CFLAGS) -c $<
 %.lo: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $< 
 %.so: %.lo
 	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CXXFLAGS) -o $@ $<
 else
@@ -21,7 +21,7 @@ else
 	$(CC)  -fPIC $(CFLAGS) -c $<
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -L.. -lM -o $@ $<
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src -lM 
 endif
 
 %.cpp: %.i
