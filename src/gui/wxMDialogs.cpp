@@ -1368,7 +1368,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
 wxString MFolderDialog::GetConfigPath()
 {
    wxString path;
-   path << M_SETTINGS_CONFIG_SECTION << "/LastPickedFolder";
+   path << '/' << M_SETTINGS_CONFIG_SECTION << "/LastPickedFolder";
    return path;
 }
 
