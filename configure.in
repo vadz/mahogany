@@ -504,7 +504,7 @@ AC_SUBST(MAKE_DEBUG)
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
    dnl FIXME: shouldn't hard code wxWin version here!
-   WX_CONFIG_NAME="wxgtkd-2.4-config"
+   WX_CONFIG_NAME="wxgtkd-2.5-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -929,7 +929,7 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wxWindows installation¤
-AM_PATH_WXCONFIG(2.4.0,wxOK=1)
+AM_PATH_WXCONFIG(2.5.1,wxOK=1)
 
 if test "$wxOK" != 1; then
    AC_MSG_ERROR([
@@ -939,7 +939,7 @@ if test "$wxOK" != 1; then
 	   Please check that wx-config is in PATH, the directory
 	   where wxWindows libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.4.0 or above.
+	   equivalent variable and wxWindows version is 2.5.1 or above.
    ])
 fi
 

@@ -27,7 +27,7 @@ Unix compilation instructions
 
 Required software:
 
-   - wxGTK (GTK+ port of wxWindows) 2.4.2 or above (note that 2.4.2
+   - wxGTK (GTK+ port of wxWindows) 2.5.1 or above (note that 2.5.1
      is not yet released as of time of this writing so you may need to use
      wxWindows sources from cvs, see below)
 
@@ -70,22 +70,11 @@ In addition:
 Before you can compile Mahogany, you will need to have installed
 wxWindows compiled for the GTK library (wxGTK).
 
-NOTE: there are unfortunately a few bugs in wxGTK 2.4.1 directly
-      affecting Mahogany which were fixed immediately after 2.4.1
-      release. If, by the time you are reading it, 2.4.2 is not
-      released yet please get a wxWindows daily snapshot or the cvs
-      sources (use "-r WX_2_4_BRANCH" to get the latest 2.4.x which
-      is the safest; but you may also get the sources from cvs HEAD
-      which would enable a few more features, in this case you may
-      want to use M_STABLE tag to get a wxWindows version known to
-      work well with Mahogany).
-
 The recommended switches for wxWindows compilation are:
 
-      ./configure --disable-threads --disable-joystick \
-                  --no-recursion --with-gtk
+      ./configure --with-gtk --disable-threads --disable-joystick
 
-(you may also use the usual --prefix switch, of course)
+(you may also use the usual --prefix switch, of course).
 
 After running configure, do "make" (or "gmake" if your make is not
 the GNU make) and "make install".
@@ -96,7 +85,7 @@ you have to add /usr/local/bin to your PATH.
 If you cannot run Mahogany and get an error
 
     mahogany: error while loading shared libraries:
-    libwx_gtk-2.4.so: cannot open shared object file:
+    libwx_gtk-2.5.so: cannot open shared object file:
     No such file or directory
 
 you have to add /usr/local/lib to /etc/ld.so.conf and run
