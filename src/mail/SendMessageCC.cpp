@@ -173,7 +173,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    switch(type)
    {
    case TYPEMESSAGE:
-      bdy->nested.msg = mail_newmsg(); // needed to allow c-client to free 
+      //FIXME: leads to empty body bdy->nested.msg = mail_newmsg(); // needed to allow c-client to free 
       // it again (stupid thing, tsts)
    case TYPETEXT:
       bdy->type = type;

@@ -169,15 +169,6 @@ public:
    virtual void WriteToString(String &str, bool headerFlag = true) ;
 
    //@}
-   /** virtual destructor */
-   virtual ~Message() {}
-
-   /// check whether object is initialised
-   virtual bool IsInitialised(void) ;
-
-   /// return class name
-   const char *GetClassName(void) 
-      { return "MailFolder"; }
 
    /**@name Constants (correspoding to c-client's mail.h */
    //@{

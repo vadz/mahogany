@@ -1173,6 +1173,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_CursorObject = iterator(NULL);
    m_CursorOffset = 0;
    m_CursorSize = wxPoint(2,(BASELINESTRETCH*m_FontPtSize)/10);
+   m_CursorMoved = true;
    
    m_MaxLine = 0;
    m_LineHeight = (BASELINESTRETCH*m_FontPtSize)/10;

@@ -323,7 +323,7 @@ wxFolderView::Update(void)
       selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
       m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
       m_FolderCtrl->Select(i,selected);
-      delete mptr;
+      SafeDecRef(mptr);
    }
    m_NumOfMessages = n;
    m_UpdateSemaphore = false;
@@ -373,6 +373,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_SAVE_TO_FOLDER:
       GetSelections(selections);
       SaveMessagesToFolder(selections);
+      break;
+   case WXMENU_MSG_MOVE_TO_FOLDER:
+      GetSelections(selections);
+      SaveMessagesToFolder(selections);
+      DeleteMessages(selections);  //FIXME: we should test for save being successful
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
       GetSelections(selections);
@@ -457,8 +462,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
       mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i]+1,
                                          this);
       mv->SetTitle(title);
-
-      delete mptr;
+      SafeDecRef(mptr);
    }
 }
 
@@ -521,6 +525,7 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
       }
    }
 }
+
 void
 wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderName)
 {
@@ -538,8 +543,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
       mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
       msg = m_MailFolder->GetMessage(selections[i]+1);
       mf->AppendMessage(*msg);
-      delete msg;
-      mf->DecRef();
+      SafeDecRef(msg);
    }
 
    wxLogStatus(GetFrame(m_Parent), _("%d messages saved"), n);
@@ -637,7 +641,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       cv->SetTo(email);
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
-      delete msg;
+      SafeDecRef(msg);
    }
 }
 
@@ -665,7 +669,7 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
       msg->WriteToString(str);
       cv->InsertData(strutil_strdup(str), str.Length(),
                      "MESSAGE/RFC822");
-      delete msg;
+      SafeDecRef(msg);
    }
 
    wxLogStatus(GetFrame(m_Parent), _("%d messages forwarded"), n);

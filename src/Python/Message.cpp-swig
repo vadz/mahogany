@@ -684,73 +684,7 @@ static PyObject *_wrap_Message_WriteToString(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
-#define delete_Message(_swigobj) (delete _swigobj)
-static PyObject *_wrap_delete_Message(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    Message * _arg0;
-    char * _argc0 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"s:delete_Message",&_argc0)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of delete_Message. Expected _Message_p.");
-        return NULL;
-        }
-    }
-    delete_Message(_arg0);
-    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
-#define Message_IsInitialised(_swigobj)  (_swigobj->IsInitialised())
-static PyObject *_wrap_Message_IsInitialised(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    bool  _result;
-    Message * _arg0;
-    char * _argc0 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"s:Message_IsInitialised",&_argc0)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_IsInitialised. Expected _Message_p.");
-        return NULL;
-        }
-    }
-    _result = (bool )Message_IsInitialised(_arg0);
-    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
-#define Message_GetClassName(_swigobj)  (_swigobj->GetClassName())
-static PyObject *_wrap_Message_GetClassName(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    char * _result;
-    Message * _arg0;
-    char * _argc0 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"s:Message_GetClassName",&_argc0)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_GetClassName. Expected _Message_p.");
-        return NULL;
-        }
-    }
-    _result = (char *)Message_GetClassName(_arg0);
-    _resultobj = Py_BuildValue("s", _result);
-    return _resultobj;
-}
-
 static PyMethodDef MessagecMethods[] = {
-	 { "Message_GetClassName", _wrap_Message_GetClassName, 1 },
-	 { "Message_IsInitialised", _wrap_Message_IsInitialised, 1 },
-	 { "delete_Message", _wrap_delete_Message, 1 },
 	 { "Message_WriteToString", _wrap_Message_WriteToString, 1 },
 	 { "Message_GetPartSpec", _wrap_Message_GetPartSpec, 1 },
 	 { "Message_GetPartDesc", _wrap_Message_GetPartDesc, 1 },

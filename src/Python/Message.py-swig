@@ -117,15 +117,6 @@ class MessagePtr :
     def WriteToString(self,arg0,*args):
         val = apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
         return val
-    def __del__(self):
-        if self.thisown == 1 :
-            Messagec.delete_Message(self.this)
-    def IsInitialised(self):
-        val = Messagec.Message_IsInitialised(self.this)
-        return val
-    def GetClassName(self):
-        val = Messagec.Message_GetClassName(self.this)
-        return val
     def __repr__(self):
         return "<C Message instance>"
 class Message(MessagePtr):

@@ -16,7 +16,6 @@
 
 #ifndef USE_PCH
 #   include "strutil.h"
-#   include "Profile.h"
 #endif // USE_PCH
 
 #include "gui/wxMFrame.h"
@@ -35,25 +34,49 @@
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
-MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
-                     unsigned long iuid)
+MessageCC *
+MessageCC::CreateMessageCC(MailFolderCC *ifolder,
+                           unsigned long iuid)
 {
-   Create(ifolder->GetProfile());
+   CHECK(ifolder, NULL, "NULL folder");
+   return new MessageCC(ifolder, iuid);
+}
 
+MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
+{
+   mailText = NULL;
+   body = NULL;
+   envelope = NULL;
+   partInfos = NULL; // this vector gets initialised when needed
+   numOfParts = -1;
+   partContentPtr = NULL;
+   text = NULL;
+   uid = 0;
    folder = ifolder;
    if(folder)
       folder->IncRef();
-   seq_no = msgno;
    uid = iuid;
-
    Refresh();
 }
 
+
+MessageCC::~MessageCC()
+{
+   if(partInfos != NULL)
+      GLOBAL_DELETE [] partInfos;
+   if(partContentPtr)
+      GLOBAL_DELETE  partContentPtr;
+   if(text)
+      GLOBAL_DELETE [] text;
+   if(folder)
+      folder->DecRef();
+}
+
+#if  0
 MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
 {
    Create(iprofile);
 
-#if  0
    char
       *header = NULL;
    unsigned long
@@ -84,61 +107,16 @@ MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
                      ""   /*defaulthostname */,  buf);
    GLOBAL_DELETE [] buf;
    initialisedFlag = true;
+}
 #endif
-}
 
-MessageCC::MessageCC(ProfileBase *iprofile)
-{
-   Create(iprofile);
-}
-
-void
-MessageCC::Create(ProfileBase *iprofile)
-{
-   initialisedFlag = false;
-   folder = NULL;
-   seq_no = 0;
-   uid = 0;
-   mailText = NULL;
-   body = NULL;
-   envelope = NULL;
-   partInfos = NULL; // this vector gets initialised when needed
-   numOfParts = -1;
-   partContentPtr = NULL;
-   profile = iprofile;  // this class does not have its own profile
-   text = NULL;
-}
-
-MessageCC::~MessageCC()
-{
-   if(partInfos != NULL)
-      GLOBAL_DELETE [] partInfos;
-   if(partContentPtr)
-      GLOBAL_DELETE  partContentPtr;
-   if(text)
-      GLOBAL_DELETE [] text;
-   if(folder)
-      folder->DecRef();
-}
 
 void
 MessageCC::Refresh(void)
 {
-   char strbuf[M_STRBUFLEN+1];
-
-   if(folder)
-   {
-      mail_fetchsubject(strbuf,folder->Stream(),seq_no,M_STRBUFLEN);
-      hdr_subject = String(strbuf);
-
-      GetBody();
-      if(envelope->date)
-         hdr_date = String(envelope->date);
-      else
-         hdr_date = "";
-   }
-
-   initialisedFlag = true;
+   GetBody();
+   hdr_date = envelope->date ? String(envelope->date) :  :: String("");
+   hdr_subject = envelope->subject ? String(envelope->subject) : String("");
 }
 
 String const &

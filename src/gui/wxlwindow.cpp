@@ -119,7 +119,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    TRACEMESSAGE(("wxLayoutWindow::OnMouse: (%d, %d) -> (%d, %d)",
                  event.GetX(), event.GetY(), findPos.x, findPos.y));
 
-   m_ClickPosition = findPos;
+   m_ClickPosition = wxPoint(event.GetX(), event.GetY()); //findPos;
    wxLayoutObjectBase *obj = m_llist.Find(findPos);
 
    // only do the menu if activated, editable and not on a clickable object

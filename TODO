@@ -23,8 +23,8 @@ $Id$
   switch off automatic notification of incoming emails.
   Currently, coying emails to another folder produces "New Mail" dialogs.
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
-  required for imap
-- wxListCtrl selection gets reset if message has to be fetched, if it 
+  required for imap  --> drop the dialog?
+ - wxListCtrl selection gets reset if message has to be fetched, if it 
    was already clicked on once, it won't reset the
    selection. Apparently fetching a message resets the listctrl. Maybe  
    some c-client update event?
@@ -34,9 +34,10 @@ $Id$
    on that?  --> Local network problem? Verify again later.
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).
- - Is POP3 really that slow or are we transferring more than needed?
+ - POP3: loading all message contents(why?) and twice(why?)
+ - ADB: does not use substring??? (Joen_Doedoe no expansion for
+   "doe" or "Doe")
  - folderview listctrl has extra Subject column behind Size field ???
- - add message/move to folder
  - wxlwindow: MIME menu appears at wrong position again
  - when inserting filetype of unknown MIME type, prompt for it,
    possibly have a MIME types editor (similar to netscape's?)
@@ -201,9 +202,6 @@ $Id$
 
 - KEYBOARD BINDINGS AND TAB TRAVERSAL (!!IMPORTANT!!)
 
-- toggle header display menu entry
-
-
 - add !(command) expansion to wxConfig, i.e.
   VAR=!(hostname):me would execute "hostname" and return "hydra.medieval.de:me"
 
@@ -333,15 +331,16 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
+ - make Message use refcount
  - sometimes mailfolders/messages seem empty
- - copying to other folder only writes headers, no content 
- - allow '=' in urls and don't allow ' '
+ - add message/move to folder
 
 
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
-
+ - copying to other folder only writes headers, no content 
+ - allow '=' in urls and don't allow ' '
  - help fails to find copyright
  - .mo files should be found in M_BASEDIR/locale
  - toolbars need to be a bit higher

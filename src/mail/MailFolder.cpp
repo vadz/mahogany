@@ -72,6 +72,7 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
       // stored in folder path config entry. Clear, eh?
       break;
    case MF_FILE:
+   case MF_MH:
       if( strutil_isempty(name) )
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
       if(name == "INBOX")

@@ -83,9 +83,6 @@ public:
    /// update it
    void   Update(void);
 
-   /// return true if initialised
-   bool   IsInitialised(void) const { return initialised; }
-
    /// prints the currently displayed message
    void Print(void);
 
@@ -116,12 +113,10 @@ public:
    /// OnCommandEvent() is cleaned up:
    wxFolderView *GetFolderView(void) { return m_FolderView; }
 private:
-   /// is initialised?
-   bool initialised;
    /// the parent window
    wxWindow   *m_Parent;
    /// number of the message
-   long m_uid;
+   long m_seqno;
    /// the current message
    Message   *mailMessage;
    /// the mail folder

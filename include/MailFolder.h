@@ -61,9 +61,11 @@ public:
       /// newsgroup
       MF_NNTP = 4,
       /// read type etc from profile
-      MF_PROFILE = 5,
+      MF_PROFILE = 10,
+      // like MF_FILE, but use MH mode, each mesage a file in a dir
+      MF_MH, 
       // profile, if it doesn't work, file
-      MF_PROFILE_OR_FILE = 6,
+      MF_PROFILE_OR_FILE,
       /// use this with AND to obtain pure type
       MF_TYPEMASK = 255,
       /// from here on it's flags

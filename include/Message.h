@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                *
+ * $Id$
  *
  *******************************************************************/
 
@@ -12,7 +12,8 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include   "kbList.h"
+#include "MObject.h"
+#include "kbList.h"
 
 // ----------------------------------------------------------------------------
 // C-client compatibility defines
@@ -49,7 +50,7 @@ KBLIST_DEFINE(MessageParameterList, MessageParameter);
 /**
    Message class, containing the most commonly used message headers.
    */
-class Message 
+class Message : public MObjectRC
 {   
 public:
    /**@name Constants (correspoding to c-client's mail.h */
@@ -203,15 +204,10 @@ public:
    virtual void WriteToString(String &str, bool headerFlag = true) const = 0;
 
    //@}
+protected:
    /** virtual destructor */
    virtual ~Message() {}
-
-   /// check whether object is initialised
-   virtual bool IsInitialised(void) const = 0;
-
-   /// return class name
-   const char *GetClassName(void) const
-      { return "MailFolder"; }
+   GCC_DTOR_WARN_OFF();
 };
 
 #endif

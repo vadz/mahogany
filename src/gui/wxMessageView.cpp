@@ -293,9 +293,6 @@ END_EVENT_TABLE()
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 {
-   if(initialised)
-      return; // ERROR!
-
    mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
@@ -303,7 +300,6 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
    m_Parent = parent;
    m_FolderView = fv;
    m_MimePopup = NULL;
-   m_uid = -1;
 
    SetFocus();
    SetMouseTracking();
@@ -311,14 +307,12 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
    SetBackgroundColour( wxColour("White") );
 
    m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
-   initialised = true;
 }
 
 
 wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent, const String &iname)
    : wxLayoutWindow(parent)
 {
-   initialised = false;
    m_folder = NULL;
    Create(fv,parent,iname);
    Show(TRUE);
@@ -331,7 +325,6 @@ wxMessageView::wxMessageView(MailFolder *folder,
                              const String &iname)
    : wxLayoutWindow(parent)
 {
-   initialised = false;
    m_folder = folder;
    Create(fv,parent,iname);
    ShowMessage(folder,num);
@@ -486,13 +479,20 @@ wxMessageView::Update(void)
          if(t == Message::MSG_TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
          {
             char *filename = wxGetTempFileName("Mtemp");
+            char **xpmarray = NULL;
             MimeSave(i,filename);
-            if(icn.LoadFile(filename,0))
+            xpmarray = wxIconManager::LoadImage(filename);
+            //if(icn.LoadFile(filename,0))
+            if(xpmarray)
+            {
+               icn = wxIcon(xpmarray);
                obj = new wxLayoutObjectIcon(icn);
+               wxIconManager::FreeImage(xpmarray);
+            }
             else
             {
                icn = mApplication->GetIconManager()->
-                        GetIconFromMimeType(mailMessage->GetPartMimeType(i));
+                  GetIconFromMimeType(mailMessage->GetPartMimeType(i));
             }
             wxRemoveFile(filename);
          }
@@ -568,10 +568,8 @@ wxMessageView::~wxMessageView()
       delete info;
    }
 
-   if( !initialised )
-      return;
-
-   GLOBAL_DELETE mailMessage;
+   if(mailMessage)
+      mailMessage->DecRef();
    if(xface)
       delete xface;
    if(xfaceXpm)
@@ -975,14 +973,8 @@ wxMessageView::ShowRawText(MailFolder *folder)
 
    CHECK( folder, false, "no MailFolder in message view" );
 
-   if ( m_uid == -1 )
-   {
-      wxLogError(_("Please choose a message first."));
-
-      return false;
-   }
-
-   String text = folder->GetRawMessage(m_uid);
+   String text;
+   mailMessage->WriteToString(text, true);
    if ( text.IsEmpty() )
    {
       wxLogError(_("Failed to get the raw text of the message."));
@@ -999,7 +991,7 @@ bool
 wxMessageView::DoMenuCommand(int id)
 {
    wxArrayInt msgs;
-   msgs.Add(m_uid);
+   msgs.Add(m_seqno);
    bool handled = true;
    switch(id)
    {
@@ -1011,28 +1003,28 @@ wxMessageView::DoMenuCommand(int id)
       break;
    case WXMENU_MSG_REPLY:
       // passed to folderview:
-      if(m_FolderView && m_uid != -1)
+      if(m_FolderView && m_seqno != -1)
          m_FolderView->ReplyMessages(msgs);
       break;
    case WXMENU_MSG_FORWARD:
-      if(m_FolderView && m_uid != -1)
+      if(m_FolderView && m_seqno != -1)
          m_FolderView->ForwardMessages(msgs);
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_FolderView && m_uid != -1)
+      if(m_FolderView && m_seqno != -1)
          m_FolderView->SaveMessagesToFolder(msgs);
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_FolderView && m_uid != -1)
+      if(m_FolderView && m_seqno != -1)
          m_FolderView->SaveMessagesToFile(msgs);
       break;
    case WXMENU_MSG_DELETE:
-      if(m_FolderView && m_uid != -1)
+      if(m_FolderView && m_seqno != -1)
          m_FolderView->DeleteMessages(msgs);
       break;
    case WXMENU_MSG_UNDELETE:
-     if(m_FolderView && m_uid != -1)
+     if(m_FolderView && m_seqno != -1)
          m_FolderView->UnDeleteMessages(msgs);
       break;
 #ifdef USE_PS_PRINTING
@@ -1065,21 +1057,11 @@ void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
    // don't redisplay the alread yshown message
-   if ( m_uid == num )
+   if ( m_seqno == num )
       return;
-
-   if(initialised) GLOBAL_DELETE mailMessage;
-
-   m_uid = num;
+   if(mailMessage) mailMessage->DecRef();
    mailMessage = folder->GetMessage(num);
-   if(mailMessage->IsInitialised())
-      initialised = true;
-   else
-   {
-      initialised = false;
-      GLOBAL_DELETE mailMessage;
-      return;
-   }
+   m_seqno = num;
 
    /* FIXME for now it's here, should go somewhere else: */
    ProfileBase *profile = folder->GetProfile();

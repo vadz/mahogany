@@ -47,20 +47,19 @@ scan_dir()
 		if [ $? != 0 ]
 		then
 			kill=0
-			(echo $i | egrep -q "^\.#") || \
-			(echo $i | egrep -q "~$" ) || \
-			(echo $i | egrep -q "\.bak$")
-			if [ $? = 0 ]
-			then
-				echo Removing $i...
-				rm $i
-			else
-				(echo $i | egrep -q "\.o$")
-				if [ $? != 0 ]
-				then
+#			(echo $i | egrep -q "^\.#") || \
+#			(echo $i | egrep -q "~$" ) || \
+#			(echo $i | egrep -q "\.bak$")
+#			if [ $? = 0 ]
+#			then
+#				rm $TOPDIR/$i
+#			else
+#				(echo $i | egrep -q "\.o$")
+#				if [ $? != 0 ]
+#				then
 					echo $path/$i >>$FILES
-				fi
-			fi
+#				fi
+#			fi
 		fi
 	done
 }
@@ -88,6 +87,6 @@ then
 	for i in $extra_files
 	do
 		echo Removing file $i ...
-#		rm $i
+		rm $i
 	done
 fi

@@ -791,7 +791,8 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
    if ( firstTime )
    {
       typeFolder = (MFolder::Type)READ_CONFIG(m_profile, MP_FOLDER_TYPE);
-
+      if(typeFolder == MFolder::Invalid)
+         typeFolder = MFolder::File;
       m_radio->SetSelection(typeFolder);
    }
    else

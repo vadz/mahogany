@@ -88,6 +88,9 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
    case MailFolder::MF_FILE:
       mboxpath = name;
       break;
+   case MailFolder::MF_MH:
+      mboxpath << "#mh/" << name;
+      break;
    case MailFolder::MF_POP:
       mboxpath << '{' << server << "/pop3}";
       break;
@@ -207,7 +210,9 @@ MailFolderCC::Open(void)
    AddToMap(m_MailStream); // now we are known
 
    mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
+   // load fast information of all messages, so we can use mail_elt
    String sequence = String("1:") + strutil_ultoa(numOfMessages);
+   // shall we use mail_fetchstructure here? Or drop mail_elt() below?
    mail_fetchfast(m_MailStream, (char *)sequence.c_str());
 
    okFlag = true;
@@ -354,7 +359,7 @@ MailFolderCC::GetMessageStatus(unsigned int msgno,
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   return new MessageCC(this,index,mail_uid(m_MailStream,index));
+   return MessageCC::CreateMessageCC(this,mail_uid(m_MailStream,index));
 }
 
 String
