@@ -3,16 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:35  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:10  karsten
- * first try at a complete archive
- *
+ * $Id$                    *
  *******************************************************************/
 
 #ifndef ADB_H
@@ -20,6 +11,18 @@
 
 #ifdef __GNUG__
 #pragma interface "Adb.h"
+#endif
+
+#ifndef	USE_PCH
+#include	<list>
+
+#include	<Mcommon.h>
+#include	<CommonBase.h>
+#include	<MFrame.h>
+#include	<guidef.h>
+#include	"gui/wxMFrame.h"
+#include	<time.h>
+#include	<iostream.h>
 #endif
 
 /**@name Adb classes */

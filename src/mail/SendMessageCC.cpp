@@ -1,27 +1,27 @@
 #include    "Mpch.h"
+
 #include    "Mcommon.h"
 
-#if         !USE_PCH
-  #include	<strutil.h>
-  #include	<strings.h>
+#ifndef	USE_PCH
+#include	<Profile.h>
+#include	<Mdefaults.h>
+#include	<strutil.h>
+#include	<strings.h>
+#include	<MApplication.h>
+#include	<SendMessageCC.h>
+#include	<MDialogs.h>
 
-  // includes for c-client library
-  extern "C"
-  {
-    #include	<stdio.h>
-    #include	<osdep.h>
-    #include	<rfc822.h>
-    #include	<smtp.h>
-    #include	<nntp.h>
-  }
-#endif
-
-extern "C" 
+// includes for c-client library
+extern "C"
 {
-  #include	<misc.h>
-
-  void rfc822_setextraheaders(const char **names, const char **values);
+#include	<stdio.h>
+#include	<osdep.h>
+#include	<rfc822.h>
+#include	<smtp.h>
+#include	<nntp.h>
+#include	<misc.h>
 }
+#else
 
 #include	"MFrame.h"
 #include	"MLogFrame.h"
@@ -42,6 +42,12 @@ extern "C"
 #include	"MessageCC.h"
 
 #include	"SendMessageCC.h"
+#endif
+
+extern "C"
+{
+   void rfc822_setextraheaders(const char **names, const char **values);
+}
 
 #define	CPYSTR(x)	cpystr(x)
 
@@ -131,7 +137,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = (unsigned char *)data;
+      bdy->contents.text.data = (char *)data;
       bdy->contents.text.size = len;
       bdy->encoding = ENC8BIT;
       break;
@@ -139,7 +145,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = (unsigned char *)data;
+      bdy->contents.text.data = (char *)data;
       bdy->contents.text.size = len;
       bdy->encoding = ENCBINARY;
       break;

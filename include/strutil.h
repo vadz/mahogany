@@ -3,19 +3,12 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:37  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:13  karsten
- * first try at a complete archive
- *
+ * $Id$                *
  *******************************************************************/
 #ifndef STRUTIL_H
 #define	STRUTIL_H
+
+#include	"Mpch.h"
 
 /**@name String class helper functions */
 //@{

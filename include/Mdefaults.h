@@ -3,23 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.4  1998/03/25 21:29:16  KB
- * - almost fixed handling/highlighting of URLs in messages
- * - added some (testing) python code and the required changes to configure stuff
- *
- * Revision 1.3  1998/03/22 20:41:16  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
- *
- * Revision 1.2  1998/03/16 18:22:40  karsten
- * started integration of python, fixed bug in wxFText/word wrapping
- *
- * Revision 1.1  1998/03/14 12:21:12  karsten
- * first try at a complete archive
- *
+ * $Id$              *
  *******************************************************************/
 
 #ifndef MDEFAULTS_H

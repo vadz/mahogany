@@ -13,11 +13,11 @@
 #endif
 
 #ifdef  USE_WXWINDOWS2
-  #include <wx/hash.h>
-  #include <wx/string.h>
+#	include <wx/hash.h>
+#	include <wx/string.h>
 #else //wxWin 1
-  #include <wx/wx_hash.h>
-  #include <wx/wxstring.h>
+#	include <wx/wx_hash.h>
+#	include <wx/wxstring.h>
 #endif
 
 class wxTabView;
@@ -249,7 +249,11 @@ class wxTabView: public wxObject
  * A dialog box class that is tab-friendly
  */
  
-class wxTabbedDialogBox: public wxDialog
+#ifdef USE_WXWINDOWS2
+class wxTabbedDialogBox : public wxDialog
+#else
+class wxTabbedDialogBox : public wxDialogBox
+#endif
 {
    DECLARE_DYNAMIC_CLASS(wxTabbedDialogBox)
  

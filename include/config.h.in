@@ -43,8 +43,8 @@
 /** Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
-/** Define if you have the <stlib.h> header file - required for
-/** Python.h .  */
+/** Define if you have the <stdlib.h> header file - required for 
+    Python.h .  */
 #undef HAVE_STDLIB_H
 
 /** Define if you have the <unistd.h> header file.  */
@@ -69,7 +69,11 @@
 #undef USE_PYTHON
 
 /** Define if the C++ compiler supports prototypes (of course it
-/** does!) - required for Python.h */
+    does!) - required for Python.h */
 #undef HAVE_PROTOTYPES
+
+/** Define if you want to use the global Mpch.h header file (e.g. for
+    precompiling headers */
+#undef USE_PCH
 
 //@}

@@ -1,18 +1,9 @@
 /*-*- c++ -*-********************************************************
  * MFrame.h : GUI independent frame/window representation           *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:36  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
- *
+ * $Id$                 *
  *******************************************************************/
 
 #ifndef MFRAME_H
@@ -45,10 +36,5 @@ public:
    virtual void Show(bool visible = true) = 0;
 #endif  // wxWin 2
 };
-
-#ifdef	USE_WXWINDOWS
-#	define	MFrame	wxMFrame
-#	include	"gui/wxMFrame.h"
-#endif
 
 #endif

@@ -3,24 +3,15 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:36  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:12  karsten
- * first try at a complete archive
- *
+ * $Id$                *
  *******************************************************************/
 
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#if     !USE_PCH
-  #include	<Mcommon.h>
-  #include	<list>
+#ifndef	USE_PCH
+#	include	<Mcommon.h>
+#	include	<list>
 #endif
 
 /// a type used by Address():

@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/04/22 19:56:32  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.3  1998/03/26 23:05:40  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -44,13 +51,12 @@ IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
 
 wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
-		       int iheight, long style)
+		       int iheight, long style,
+		       ProfileBase *profile)
 {
 #ifdef  USE_WXWINDOWS2
-  #define parent GetParent()
-
+#	define parent GetParent()
   SetParent(iparent);
-
   wxCanvas::Create(parent, -1, wxPoint(ix, iy), 
                    wxSize(iwidth, iheight), style);
 #else
@@ -58,7 +64,7 @@ wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
    wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
 #endif
 
-   ftoList = GLOBAL_NEW wxFTOList(this);
+   ftoList = GLOBAL_NEW wxFTOList(this, profile);
    wrapMargin = -1;
 }
 

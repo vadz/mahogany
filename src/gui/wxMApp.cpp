@@ -3,33 +3,28 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:41  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$                *
  *******************************************************************/
 
 #include	"Mpch.h"
-#include	"Mcommon.h"
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#ifndef	USE_PCH
+#	include	"Mcommon.h"
+#	include "guidef.h"
+#	include	"MFrame.h"
+#	include	"gui/wxMFrame.h"
+#	include	"MLogFrame.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#	include	"PathFinder.h"
+#	include	"MimeList.h"
+#	include	"MimeTypes.h"
+#	include "appconf.h"
+#	include	"Profile.h"
 
-#include  "MApplication.h"
+#	include  "MApplication.h"
 
-#include	"gui/wxMApp.h"
-#include	"gui/wxMFrame.h"
+#	include	"gui/wxMApp.h"
+#endif
 
 wxMApp::wxMApp(void)
 {
@@ -53,7 +48,8 @@ IMPLEMENT_APP(wxMApp);
 
 #else   // wxWin1
 
-wxFrame *wxMApp::OnInit(void)
+wxFrame *
+wxMApp::OnInit(void)
 {
    return mApplication.OnInit();
 }

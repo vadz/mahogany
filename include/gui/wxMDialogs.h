@@ -3,16 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:38  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:15  karsten
- * first try at a complete archive
- *
+ * $Id$             *
  *******************************************************************/
 
 #ifndef WXMDIALOGS_H
@@ -50,7 +41,7 @@
    */
 void	MDialog_ErrorMessage(char const *message,
 		     MFrame *parent = NULL,
-		     char const *title = MDIALOG_ERRTITLE,
+			     char const *title = MDIALOG_ERRTITLE,
 		     bool modal = false);
 
 /** display system error message:

@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:55:49  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:39  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -98,7 +105,7 @@ MimeTEntry::Match(String const & extension, String &mimeType)
    return false;
 }
 
-MimeTypes::MimeTypes(void) : std::list<MimeTEntry>()
+MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
 {
    bool	found;
    MimeTEntry	newEntry;

@@ -3,16 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/26 23:05:36  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
- *
+ * $Id$           *
  *******************************************************************/
 
 #ifndef MAPPLICATION_H
@@ -20,6 +11,20 @@
 
 #ifdef __GNUG__
 #pragma interface "MApplication.h"
+#endif
+
+#ifndef	USE_PCH
+#include	<Mcommon.h>
+#include	<appconf.h>
+#include	<Mdefaults.h>
+#include	<Adb.h>
+#include	<MFrame.h>
+#include	<PathFinder.h>
+#include	<MimeList.h>
+#include	<MimeTypes.h>
+#include	<guidef.h>
+#include	<Profile.h>
+#include	<MLogFrame.h>
 #endif
 
 class MApplication;

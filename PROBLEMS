@@ -3,7 +3,5 @@
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
 - paths for PATH and PYTHONPATH get set wrongly in MApplication::OnInit(), why?
-This is a test of the automated notification of changes in the
-M cvs repository. You should receive it as part of a mail containing
-logs made to the file PROBLEMS. 
+
 

@@ -3,31 +3,24 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.4  1998/03/26 23:05:42  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$         *
  *******************************************************************/
 
 #ifdef __GNUG__
 #pragma	implementation "wxMessageView.h"
 #endif
 
-#include	"Mpch.h"
+#ifdef	USE_PCH
+#	include	"Mpch.h"
+#endif
+
 #include	"Mcommon.h"
+#include	"Message.h"
 
-#if       !USE_PCH
-  #include	<strutil.h>
+#ifndef USE_PCH
+#	include	<strutil.h>
   // for testing only
-
-  #include	<MessageCC.h>
-
+#	include	<MessageCC.h>
   extern "C"
   {
     #include	<rfc822.h>
@@ -63,8 +56,6 @@
 #include	"gui/wxFText.h"
 #include	"gui/wxMessageView.h"
 
-//FIXME
-static char *Icondata[200];
 static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 
 IMPLEMENT_CLASS(wxMessageView, wxMFrame)
@@ -125,6 +116,7 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
    mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
+   xfaceXpm = NULL;
    
    wxMFrame::Create(iname, parent);
 
@@ -145,22 +137,23 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
    popupMenu->Append(WXMENU_MIME_HANDLE,(char *)_("&Handle"));
    popupMenu->Append(WXMENU_MIME_SAVE,(char *)_("&Save"));
    
-   ftoList = GLOBAL_NEW wxFTOList();
+   ftoList = GLOBAL_NEW wxFTOList((wxDC *)NULL, folder ?
+				  folder->GetProfile() : NULL);
    ftCanvas = GLOBAL_NEW wxMVCanvas(ftoList,this);
 
-   #ifdef  USE_WXWINDOWS2
-     // @@@@ GetDC
-   #else
-     ftoList->SetDC(ftCanvas->GetDC());
-   #endif
+#ifdef  USE_WXWINDOWS2
+// @@@@ GetDC
+#else
+   ftoList->SetDC(ftCanvas->GetDC());
+#endif
    
-   folder = NULL;
    initialised = true;
 }
 
 wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
 {
    initialised = false;
+   folder = NULL;
    Create(iname,parent);
    Show(TRUE);
 }
@@ -171,8 +164,8 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
 			      wxFrame *parent)
 {
    initialised = false;
-   Create(iname,parent);
    folder = ifolder;
+   Create(iname,parent);
    ShowMessage(folder,num);
 
    String
@@ -191,50 +184,41 @@ wxMessageView::Update(void)
    char const * cptr;
    String	tmp,from;
    bool		lastObjectWasIcon = false; // a flag
-   
-   ftoList->AddFormattedText(_("<bf>From:</bf> "));
+
+#ifdef	HAVE_XFACES
+   // need real XPM support in windows
+#	ifndef OS_WIN
+   if(folder->GetProfile() &&
+      folder->GetProfile()->readEntry(MP_SHOW_XFACES,
+				      MP_SHOW_XFACES_D))
+   {
+      mailMessage->GetHeaderLine("X-Face", tmp);
+      if(tmp.length() > 2)   //\r\n
+      {
+	 xface = GLOBAL_NEW XFace();
+	 tmp = tmp.c_str()+strlen("X-Face:");
+	 xface->CreateFromXFace(tmp.c_str());
+	 if(xface->CreateXpm(&xfaceXpm))
+	 {
+	    ftoList->AddIcon("XFACE", xfaceXpm);
+	    ftoList->AddFormattedText(" \n<IMG SRC=\"XFACE\">\n");
+	 }
+      }
+   }  
+#endif
+#endif
+   ftoList->AddFormattedText(_("<b>From:</b> "));
    from = mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
       from = tmp + String(" <") + from + '>';
    ftoList->AddText(from);
-   ftoList->AddFormattedText(_("\n<bf>Subject:</bf> "));
+   ftoList->AddFormattedText(_("\n<b>Subject:</b> "));
    ftoList->AddText(mailMessage->Subject());
-
-   // need real XPM support
-   #if  USE_XPM_IN_MSW
-     if(folder->GetProfile() &&
-        folder->GetProfile()->readEntry(MP_SHOW_XFACES, MP_SHOW_XFACES_D))
-     {
-        mailMessage->GetHeaderLine("X-Face", tmp);
-        if(tmp.length() > 2)   //\r\n
-        {
-          xface = GLOBAL_NEW XFace();
-          tmp = tmp.c_str()+strlen("X-Face:");
-          xface->CreateFromXFace(tmp.c_str());
-          xface->CreateXpm(tmp);
-          char **ipm = XFace::SplitXpm(tmp);
-          char *line;
-          int i;
-          for(i = 0; ipm[i]; i++)
-          {
-            icondata[i] = ipm[i];
-            line = Icondata[i];
-            VAR(line);
-          }
-     ftoList->AddIcon("XFACE", Icondata);
-     ftoList->AddFormattedText(" <bf>X-Face:</bf><IMG SRC=\"XFACE\">\n");
-     //FIXME: free allocated arrays
-        }
-     }  
-   #endif
-
-   ftoList->AddFormattedText(_("\n<bf>Date:</bf> "));
+   ftoList->AddFormattedText(_("\n<b>Date:</b> "));
    ftoList->AddText(mailMessage->Date());
    ftoList->AddText("\n\n");
 
-
    n = mailMessage->CountParts();
-   VAR(n);
    for(i = 0; i < n; i++)
    {
       t = mailMessage->GetPartType(i);
@@ -248,7 +232,16 @@ wxMessageView::Update(void)
 	    if(cptr)
 	    {
 	       ftoList->AddText("\n");
-	       ftoList->AddText(cptr);
+	       if(folder->GetProfile() &&
+		  folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
+						  MP_HIGHLIGHT_URLS_D))
+	       {
+		  tmp = "";
+		  HighLightURLs(cptr, tmp);
+		  ftoList->AddFormattedText(tmp);
+	       }
+	       else
+		  ftoList->AddText(tmp.c_str());
 	       lastObjectWasIcon = false;
 	    }
 	 }
@@ -273,6 +266,36 @@ wxMessageView::Update(void)
    #endif
 }
 
+void
+wxMessageView::HighLightURLs(const char *input, String &out)
+{
+   const char *cptr = input;
+
+   while(*cptr)
+   {
+      
+      if(strncmp(cptr, "http:", 5) == 0 || strncmp(cptr, "ftp:", 4) == 0)
+      {
+	 const char *cptr2 = cptr;
+	 out += " <a href=\"";
+	 out += "\"";
+	 while(*cptr2 && ! isspace(*cptr2))
+	    out += *cptr2++;
+	 out += "\"> ";
+      }
+      else
+      {
+	 // escape brackets:
+	 if(*cptr == '<')
+	    out += '<';
+	 else
+	    if(*cptr == '>')
+	       out += '>';
+      }
+      out += *cptr++;
+   }
+}
+
 wxMessageView::~wxMessageView()
 {
    if(! initialised)
@@ -281,6 +304,8 @@ wxMessageView::~wxMessageView()
       GLOBAL_DELETE mailMessage;
    if(xface)
       GLOBAL_DELETE xface;
+   if(xfaceXpm)
+      GLOBAL_DELETE [] xfaceXpm;
    if(popupMenu)
       GLOBAL_DELETE	popupMenu;
    GLOBAL_DELETE ftCanvas;
@@ -297,12 +322,13 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
    
    if(event.RightDown())
    {
-      #ifdef  USE_WXWINDOWS2
-        x = y = 0; // @@@@ ViewStart?  
-      #else
-        ftCanvas->ViewStart(&x,&y);
-      #endif
+#ifdef  USE_WXWINDOWS2
+      x = y = 0; // @@@@ ViewStart?  
       obj = ftoList->FindClickable(event.GetX() - x, event.GetY() - y);
+#else
+      ftCanvas->ViewStart(&x,&y);
+      obj = ftoList->FindClickable(event.x - x, event.y - y);
+#endif
       if(obj)
       {
 	 if(obj->GetType() == LI_ICON)
@@ -314,24 +340,29 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
 	    char *buf = strutil_strdup(type);
 	    char *token = strtok(buf,";");
 	    token = strtok(NULL,";");
-	    if(!token) abort(); // EH???
+	    if(!token) abort(); // e.g. a X-Face
 	    type = token;
 	    token = strtok(NULL,";");
-	    if(!token) abort(); // EH???
+	    if(!token) abort(); 
 	    mimeDisplayPart = atoi(token); // remember section to use it in
 				     // Popup menu
 	    GLOBAL_DELETE [] buf;
-	    VAR(type);
-	    VAR(mApplication.GetMimeList()->GetCommand(type,command,flags));
-	    VAR(command);
-	    VAR(flags);
-
+#ifdef	USE_WXWINDOWS2
 	    PopupMenu(popupMenu, event.GetX() - x, event.GetY() - y);
-
+#else
+	    PopupMenu(popupMenu, event.x - x, event.y - y);
+#endif
 	 }
 	 else if (obj->GetType() == LI_URL)
 	 {
-	    ERRORMESSAGE(("Object Type LI_URL not implemented yet."));
+ 	    String	cmd;
+ 	    if(folder)
+ 	       cmd = folder->GetProfile()->readEntry(MP_BROWSER,MP_BROWSER_D);
+ 	    else
+ 	       cmd = mApplication.readEntry(MP_BROWSER,MP_BROWSER_D);
+ 	    cmd += ' ';
+ 	    cmd += obj->GetText();
+ 	    wxExecute(WXCPTR cmd.c_str());
 	 }
       }
    }
@@ -439,18 +470,18 @@ wxMessageView::MimeHandle(void)
 	 fclose(out);
 	 command = ml->ExpandCommand(command,filename,mimetype);
 
-  #if     defined(OS_UNIX)
+#ifdef OS_UNIX
     // @@@@ what about error handling here (fork, system, ...)?
     if(fork() == 0)
     {
 	    system(command.c_str());
 	    unlink(command.c_str());
     }
-  #elif   defined(OS_WIN)
+#elif   defined(OS_WIN)
     system(command.c_str());
-  #else   // unknown OS
-    #error  "Command execution not implemented!"
-  #endif
+#else   // unknown OS
+#    error  "Command execution not implemented!"
+#endif
       }
    }
    else // what can we handle internally?

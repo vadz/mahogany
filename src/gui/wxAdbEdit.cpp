@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:56:31  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:40  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -601,35 +608,35 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    CreateLabel(panel1, "Formatted Name:");
    formattedName = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    CreateLabel(panel1, "Prefix:");
    strNamePrefix = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *fnFiLabel = CreateLabel(panel1, "First");
    strNameFirst = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *fnOtLabel = CreateLabel(panel1, "Other:");
    strNameOther = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *fnFaLabel = CreateLabel(panel1, "Family:");
    strNameFamily = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *fnPoLabel = CreateLabel(panel1, "Postfix:");
    strNamePostfix = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *tiLabel = CreateLabel(panel1, "Title:");
    title = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    wxMessage *orgLabel = CreateLabel(panel1, "Organisation:");
    organisation = CreateText(panel1, fieldpos, -1, fieldwidth, -1, "");
 
-   NewLine(panel1);
+   PanelNewLine(panel1);
    view->AddTabPanel(TAB_NAME, panel1);
 
    // Panel 2 - home address
@@ -638,39 +645,39 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    wxMessage *hApbLabel = CreateLabel(panel2, "PO Box:");
    hApb = CreateText(panel2, fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hAexLabel = CreateLabel(panel2, "Extra:");
    hAex = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hAstLabel = CreateLabel(panel2, "Street:");
    hAst = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hAloLabel = CreateLabel(panel2, "Locality:");
    hAlo = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hAreLabel = CreateLabel(panel2, "Region:");
    hAre = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hApcLabel = CreateLabel(panel2, "Postcode:");
    hApc = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hAcoLabel = CreateLabel(panel2, "Country:");
    hAco = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hPhLabel = CreateLabel(panel2, "Telephone:");
    hPh = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    wxMessage *hFaxLabel = CreateLabel(panel2, "Telefax:");
    hFax = CreateText(panel2,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel2);
+   PanelNewLine(panel2);
    view->AddTabPanel(TAB_HOME_ADDRESS, panel2);
 
 
@@ -680,39 +687,39 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    wxMessage *wApbLabel = CreateLabel(panel3,"PO Box:");
    wApb = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wAexLabel = CreateLabel(panel3,"Extra:");
    wAex = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wAstLabel = CreateLabel(panel3,"Street:");
    wAst = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wAloLabel = CreateLabel(panel3,"Locality:");
    wAlo = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wAreLabel = CreateLabel(panel3,"Region:");
    wAre = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wApcLabel = CreateLabel(panel3,"Postcode:");
    wApc = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wAcoLabel = CreateLabel(panel3,"Country:");
    wAco = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wPhLabel = CreateLabel(panel3,"Telephone:");
    wPh = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    wxMessage *wFaxLabel = CreateLabel(panel3,"Telefax:");
    wFax = CreateText(panel3,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel3);
+   PanelNewLine(panel3);
    view->AddTabPanel(TAB_WORK_ADDRESS, panel3);
    
    // Panel 4 - email
@@ -721,21 +728,21 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    wxMessage *emailLabel = CreateLabel(panel4,"e-mail:");
    email = CreateText(panel4,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel4);
+   PanelNewLine(panel4);
    wxMessage *aliasLabel = CreateLabel(panel4,"alias:");
    alias = CreateText(panel4,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel4);
+   PanelNewLine(panel4);
    wxMessage *urlLabel = CreateLabel(panel4,"URL:");
    url = CreateText(panel4,fieldpos, -1,fieldwidth,-1, "");
 
-   NewLine(panel4);
+   PanelNewLine(panel4);
    wxMessage *aeLabel = CreateLabel(panel4,"alternative e-mail addresses:");
 
-   NewLine(panel4);
+   PanelNewLine(panel4);
    listBox = CreateListBox(panel4, -1, -1, pwidth*0.8, -1);
    
-   NewLine(panel4);
+   PanelNewLine(panel4);
    view->AddTabPanel(TAB_EMAIL, panel4);
 
    // Don't know why this is necessary under Motif...

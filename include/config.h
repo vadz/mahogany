@@ -33,31 +33,32 @@
 #define HAVE_STRSTR 1
 
 /** Define if you have the strsep function.  */
-#undef HAVE_STRSEP
+#define HAVE_STRSEP 1
 
 /** Define if you have the <libintl.h> header file.  */
-/* #undef HAVE_LIBINTL_H */
+#define HAVE_LIBINTL_H 1
 
 /** Define if you have the <compface.h> header file.  */
-/* #undef HAVE_COMPFACE_H */
+#define HAVE_COMPFACE_H 1
 
 /** Define if you have the <strings.h> header file.  */
 #define HAVE_STRINGS_H 1
 
-/** Define if you have the <stlib.h> header file. (required for Python.h) */
+/** Define if you have the <stdlib.h> header file - required for 
+    Python.h .  */
 #define HAVE_STDLIB_H 1
 
 /** Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 0
+#define HAVE_UNISTD_H 1
 
 /** Define if you use wxWindows. */
 #define USE_WXWINDOWS 1
 
 /** Define if you use wxWindows, version 2. */
-#define USE_WXWINDOWS2 1
+/* #undef USE_WXWINDOWS2 */
 
 /** Define if you use wxWindows, wxXt port. */
-/* #undef USE_WXXT */
+#define USE_WXXT 1
 
 /** Define if you use wxWindows, wxGTK port. */
 /* #undef USE_WXGTK */
@@ -71,5 +72,9 @@
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */
 #define HAVE_PROTOTYPES 1
+
+/** Define if you want to use the global Mpch.h header file (e.g. for
+    precompiling headers */
+/* #undef USE_PCH */
 
 //@}

@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:55:48  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:39  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -22,11 +29,11 @@
 #include  "Mpch.h"
 #include "Mcommon.h"
 
-#include <time.h>
-
 #include "MFrame.h"
-#include  "Adb.h"
+#include "Adb.h"
+#include "MApplication.h"
 #include "MDialogs.h"
+#include "strutil.h"
 
 void
 AdbNameStruct::parse(String const &in)
@@ -344,7 +351,7 @@ Adb::Adb(String const &ifilename)
       else
     push_back(eptr);
    }
-   String tmp = "Adb: read " + strutil_ultoa(size()) + " database entries.";
+   String tmp = String("Adb: read ") + strutil_ultoa(size()) + String(" database entries.");
    LOGMESSAGE((LOG_INFO, tmp));
 }
 

@@ -3,19 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.3  1998/03/26 23:05:36  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.2  1998/03/16 18:22:40  karsten
- * started integration of python, fixed bug in wxFText/word wrapping
- *
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
- *
+ * $Id$               *
  *******************************************************************/
 
 #ifndef MDIALOGS_H

@@ -1,3 +1,4 @@
+dnl $Id$
 
 AC_DEFUN(AC_OVERRIDES_PREPARE,
 [
@@ -248,6 +249,10 @@ dnl   defines GCC empty if not using gcc
 dnl   defines CFLAGS
 
 CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
+if test "$GCC" = "yes"
+then
+	CFLAGS="$CFLAGS -DCC_GCC"
+fi
 
 dnl does compiler support -c and -o simultaniously
 AC_PROG_CC_C_O

@@ -12,11 +12,11 @@
 #include  "Mcommon.h"
 
 #ifdef    USE_WXWINDOWS2
-  #define COLOR_CAST(col)   (*col)
-
-  #define wxDialogBox       wxDialog
+#	define COLOR_CAST(col)   (*col)
+#	define wxDialogBox       wxDialog
 #else
-  #define COLOR_CAST(col)   (const_cast<wxColour &>(col))
+/*#	define COLOR_CAST(col)   (const_cast<wxColour &>(col))*/
+#	define	COLOR_CAST(col)		((wxColour *)col)
 #endif
 
 #ifdef __BORLANDC__

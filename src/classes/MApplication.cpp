@@ -3,23 +3,14 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.4  1998/03/26 23:05:39  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:19  karsten
- * first try at a complete archive
- *
+ * $Id$          *
  *******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation "MApplication.h"
 #endif
 
-#include  "Mpch.h"
+#include  	"Mpch.h"
 #include	"Mcommon.h"
 
 #include	<locale.h>
@@ -34,8 +25,9 @@
 #include	"MimeList.h"
 #include	"MimeTypes.h"
 #include	"Profile.h"
+#include	"strutil.h"
 
-#include	"Mapplication.h"
+#include	"MApplication.h"
 
 #include	"FolderView.h"
 #include	"MailFolder.h"
@@ -45,8 +37,13 @@
 
 #include	"Adb.h"
 
+#ifdef	USE_PYTHON
+#	include	"Python.h"
+#endif
+
 #ifdef OS_UNIX
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE, TRUE)
+MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
+					     FALSE, TRUE)
 #else
 MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
 #endif
@@ -74,6 +71,7 @@ MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
    //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
    textdomain (M_APPLICATIONNAME);
 #endif
+
 
 }
 
@@ -132,6 +130,7 @@ MFrame *
 MApplication::OnInit(void)
 {
    // this is being called from the GUI's initialisation function
+   String	tmp;
    topLevelFrame = GLOBAL_NEW MainFrame();
    if(topLevelFrame)
    {
@@ -161,6 +160,38 @@ MApplication::OnInit(void)
    char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
    localDir = String(cptr);
    GLOBAL_DELETE [] cptr;
+
+   // extend path for commands, look in M's dirs first
+   tmp="";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   if(getenv("PATH"))
+      tmp += getenv("PATH");
+   setenv("PATH", tmp.c_str(), 1);
+ 
+   // initialise python interpreter
+#ifdef	USE_PYTHON
+   tmp = "";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp += readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+   if(getenv("PYTHONPATH"))
+      tmp += getenv("PYTHONPATH");
+   setenv("PYTHONPATH", tmp.c_str(), 1);
+   Py_Initialize();
+   PyRun_SimpleString("import sys,os");
+   PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");
+#endif
+ 
+
    
    // now the icon is available, so do this again:
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);

@@ -13,15 +13,16 @@
 #pragma interface "wxFText.h"
 #endif
 
-#if !USE_PCH
-  using namespace std;
+#ifndef USE_PCH
 
-  #include	<map>
-  #include	<list>
+using namespace std;
 
-   #include	<Profile.h>
-  #include	<wxFontManager.h>
-  #include	<wxIconManager.h>
+#	include	<map>
+#	include	<list>
+
+#	include	<Profile.h>
+#	include	<wxFontManager.h>
+#	include	<wxIconManager.h>
 #endif
 
 /// describing a FTObject's type

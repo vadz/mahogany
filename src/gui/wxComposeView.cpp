@@ -3,19 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.4  1998/03/26 23:05:40  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.2  1998/03/16 18:22:43  karsten
- * started integration of python, fixed bug in wxFText/word wrapping
- *
- * Revision 1.1  1998/03/14 12:21:21  karsten
- * first try at a complete archive
- *
+ * $Id$         *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -25,6 +13,7 @@
 #include   "Mpch.h"
 #include	 "Mcommon.h"
 
+#include	<wx/wx.h>
 #include	"MFrame.h"
 #include	"MLogFrame.h"
 
@@ -35,16 +24,17 @@
 #include	"MimeTypes.h"
 #include	"Profile.h"
 
-#include  "MApplication.h"
+#include	"MApplication.h"
 
-#include  "FolderView.h"
+#include	"FolderView.h"
 #include	"MailFolder.h"
 #include	"MailFolderCC.h"
 #include	"Message.h"
 #include	"MessageCC.h"
 #include	"SendMessageCC.h"
-#include  "Adb.h"
-#include  "Mdialogs.h"
+#include  	"Adb.h"
+#include	"MDialogs.h"
+#include	"strutil.h"
 
 #include	"gui/wxFontManager.h"
 #include	"gui/wxIconManager.h"
@@ -257,7 +247,7 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   ftCanvas = new wxFTCanvas(panel);
+   ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->left.SameAs       (panel, wxLeft);

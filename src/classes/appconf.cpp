@@ -167,8 +167,8 @@ const char *SysError()
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
-//inline size_t Strlen(const char *pc) { return pc == NULL ? 0 : strlen(pc); }
-extern size_t Strlen(const char *pc);
+inline size_t Strlen(const char *pc) { return pc == NULL ? 0 : strlen(pc); }
+//WHY? does not exist on unix! extern size_t Strlen(const char *pc);
 inline Bool   IsValid(char c) { return isalnum(c) || strchr("_/-!.*%", c); }
 inline Bool   IsCSym (char c) { return isalnum(c) || ( c == '_');          }
 inline size_t Min(size_t n1, size_t n2) { return n1 < n2 ? n1 : n2; }

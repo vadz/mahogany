@@ -1,3 +1,6 @@
+#include	<MessageCC.h>
+#include	<Profile.h>
+
 class SendMessageCC
 {
    ProfileBase 	*profile;

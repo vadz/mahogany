@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:54:48  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:37  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -41,6 +48,9 @@
 #	define	Uses_wxTextWindow
 #	define	Uses_wxTimer
 #	define	Uses_wxMessage
+#	define	Uses_wxButton
+#	define	Uses_wxDialogBox
+#	define	Uses_wxDialog
 #	include	<wx/wx.h>
 #	include	"gui/wxMenuDefs.h"
 /// how much space to leave in frame around other items

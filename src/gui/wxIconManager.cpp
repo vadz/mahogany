@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/04/22 19:56:32  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.4  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -20,28 +27,37 @@
 #endif
 
 #include	"Mpch.h"
-#include  "Mcommon.h"
 
-#include	"gui/wxIconManager.h"
+#ifndef	USE_PCH
+#	include  "Mcommon.h"
+#	include	<CommonBase.h> // vAR() macro
+#	include	<Mdefaults.h>
+#	include	"gui/wxIconManager.h"
+#	include "strutil.h"
+#endif
 
 #ifdef    OS_WIN
-  #define   unknown_xpm     "unknown"
-  #define   txt_xpm         "txt"
-  #define   audio_xpm       "audio"
-  #define   application_xpm "application"
-  #define   image_xpm       "image"
-  #define   video_xpm       "video"
-  #define   postscript_xpm  "postscript"
-  #define   dvi_xpm         "dvi"
+#	define	unknown_xpm     "unknown"
+#	define	txt_xpm         "txt"
+#	define	audio_xpm       "audio"
+#	define	application_xpm "application"
+#	define	image_xpm       "image"
+#	define	video_xpm       "video"
+#	define	postscript_xpm  "postscript"
+#	define	dvi_xpm         "dvi"
+#	define	hlink_xpm	"hlink"
+#	define	ftplink_xpm	"ftplink"
 #else   //real XPMs
-  #include	"../src/icons/unknown.xpm"
-  #include	"../src/icons/txt.xpm"
-  #include	"../src/icons/audio.xpm"
-  #include	"../src/icons/application.xpm"
-  #include	"../src/icons/image.xpm"
-  #include	"../src/icons/video.xpm"
-  #include	"../src/icons/postscript.xpm"
-  #include	"../src/icons/dvi.xpm"
+#	include	"../src/icons/unknown.xpm"
+#	include	"../src/icons/txt.xpm"
+#	include	"../src/icons/audio.xpm"
+#	include	"../src/icons/application.xpm"
+#	include	"../src/icons/image.xpm"
+#	include	"../src/icons/video.xpm"
+#	include	"../src/icons/postscript.xpm"
+#	include	"../src/icons/dvi.xpm"
+#	include "../src/icons/hlink.xpm"
+#	include "../src/icons/ftplink.xpm"
 #endif  //Win/Unix
 
 wxIconManager::wxIconManager()
@@ -56,6 +72,8 @@ wxIconManager::wxIconManager()
    AddIcon("APPLICATION/DVI", dvi_xpm);
    AddIcon("IMAGE", image_xpm);
    AddIcon("VIDEO", video_xpm);
+   AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
+   AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
 
    unknownIcon = GLOBAL_NEW wxIcon(unknown_xpm);
 }

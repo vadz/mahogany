@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:54:47  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:37  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -48,7 +55,7 @@ public:
    MimeTypes - mapping of Mime types to icons and handlers
 */
 
-class MimeTypes : public std::list<MimeTEntry>, public CommonBase
+class MimeTypes : public STL_LIST<MimeTEntry>, public CommonBase
 {
 public:
    /** Constructor

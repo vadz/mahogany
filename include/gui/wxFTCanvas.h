@@ -3,20 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.3  1998/03/26 23:05:38  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.2  1998/03/22 20:41:28  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
- *
- * Revision 1.1  1998/03/14 12:21:15  karsten
- * first try at a complete archive
- *
+ * $Id$             *
  *******************************************************************/
 #ifndef	WXFTCANVAS_H
 #define WXFTCANVAS_H

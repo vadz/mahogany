@@ -6,6 +6,13 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/22 19:57:00  KB
+ * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
+ * precompiled headers. Compiles and runs again under Linux/wxXt. Header
+ * organisation is not optimal yet and needs further
+ * cleanup. Reintroduced some older fixes which apparently got lost
+ * before.
+ *
  * Revision 1.2  1998/03/26 23:05:43  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -20,17 +27,25 @@
 #endif
 
 #include  "Mpch.h"
-#include  "Mcommon.h"
 
-#include  "Profile.h"
-#include  "FolderView.h"
+#ifndef	USE_PCH
 
-#include	"Mdefaults.h"
-#include	"MailFolder.h"
-#include	"MailFolderCC.h"
+#include	<strutil.h>
+#include	<MApplication.h>
+#include	<MailFolderCC.h>
+#include	<MessageCC.h>
+#include	<MDialogs.h>
 
-#include	"Message.h"
-#include	"MessageCC.h"
+// includes for c-client library
+extern "C"
+{
+#include	<osdep.h>
+#include	<rfc822.h>
+#include	<smtp.h>
+#include	<nntp.h>
+}
+
+#endif
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
