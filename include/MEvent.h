@@ -31,6 +31,8 @@ enum MEventId
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData
    MEventId_FolderUpdate = 400,
+   /// MEventASFolderResult
+   MEventId_ASFolderResult = 800,
    /// (invalid id for an event)
    MEventId_Max                                 
 };
@@ -108,7 +110,7 @@ private:
 
 
 // ----------------------------------------------------------------------------
-/** MEventEmpty Data - Does not carry any data apart from pointer to mailfolder.*/
+/** MEventFolderUpdate Data - Does not carry any data apart from pointer to mailfolder.*/
 class MEventFolderUpdateData : public MEventData
 {
 public:
@@ -159,6 +161,27 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+/** MEventASFolderResult Data - Carries a ASMailFolder::Result object
+    with the result of an asynchronous operation on the folder. */
+class MEventASFolderResult : public MEventData
+{
+public:
+   /** Constructor.
+   */
+   MEventASFolderResult(MObjectRC *result)
+      : MEventData(MEventId_ASFolderResult)
+      {
+         m_ResultData = result;
+         m_ResultData->IncRef();
+      }
+   ~MEventASFolderResult()
+      { m_ResultData->DecRef(); }
+private:
+   MObjectRC  *m_ResultData;
+};
+
+
+// ----------------------------------------------------------------------------
 // Derive from this class to be able to process events.
 // ----------------------------------------------------------------------------
 class MEventReceiver
@@ -180,9 +203,12 @@ class MEventManager
 public:
    MEventManager();
 
-   // send an event
-   static void Send(MEventData& data);
+   /// send an event to the queue
+   static void Send(MEventData * data);
 
+   /// Dispatches all events in the queue.
+   static void DispatchPending(void);
+   
    // register the event receiever for the events "eventId", the returned
    // pointer is NULL if the function failed, otherwise it should be saved for
    // subsequent call to Deregister()
@@ -193,6 +219,9 @@ public:
    // events, Deregister() should be called for each (successful) call to
    // Register()
    static bool Deregister(void *handle);
+protected:
+   /// Dispatches a single event.
+   static void Dispatch(MEventData * data);
 };
 
 #endif // MEVENT_H

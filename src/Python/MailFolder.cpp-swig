@@ -128,38 +128,6 @@ static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
-#define MailFolder_RegisterView(_swigobj,_swigarg0,_swigarg1)  (_swigobj->RegisterView(_swigarg0,_swigarg1))
-static PyObject *_wrap_MailFolder_RegisterView(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    MailFolder * _arg0;
-    FolderView * _arg1;
-    bool  _arg2 = true;
-    char * _argc0 = 0;
-    char * _argc1 = 0;
-    int tempbool2;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"ss|i:MailFolder_RegisterView",&_argc0,&_argc1,&tempbool2)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_RegisterView. Expected _MailFolder_p.");
-        return NULL;
-        }
-    }
-    if (_argc1) {
-        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_FolderView_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MailFolder_RegisterView. Expected _FolderView_p.");
-        return NULL;
-        }
-    }
-    _arg2 = (bool ) tempbool2;
-    MailFolder_RegisterView(_arg0,_arg1,_arg2);
-    Py_INCREF(Py_None);
-    _resultobj = Py_None;
-    return _resultobj;
-}
-
 #define MailFolder_GetName(_swigobj)  (_swigobj->GetName())
 static PyObject *_wrap_MailFolder_GetName(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -553,7 +521,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_Ping", _wrap_MailFolder_Ping, 1 },
 	 { "MailFolder_CountMessages", _wrap_MailFolder_CountMessages, 1 },
 	 { "MailFolder_GetName", _wrap_MailFolder_GetName, 1 },
-	 { "MailFolder_RegisterView", _wrap_MailFolder_RegisterView, 1 },
 	 { "MailFolder_OpenFolder", _wrap_MailFolder_OpenFolder, 1 },
 	 { NULL, NULL }
 };

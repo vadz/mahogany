@@ -12,6 +12,10 @@ LINK = ../util/strutil.o ../classes/CommonBase.o $(CCLIENTLIB)
 
 TARGETS = $(OBJ)
 
+ifdef EXPERIMENTAL
+TARGETS += ASMailFolder.o
+endif
+
 all:	$(TARGETS)
 
 MailFolderCC: MailFolderCC.o MailFolder.o MessageCC.o $(LINK)

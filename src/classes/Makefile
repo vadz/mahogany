@@ -13,7 +13,7 @@ DEP = $(SRC:.cpp=.d)
 TARGETS = $(SRC:.cpp=.o)
 
 ifdef EXPERIMENTAL
-TARGETS += Filters.o
+TARGETS += Filters.o MModule.o
 endif
 
 all: $(TARGETS)

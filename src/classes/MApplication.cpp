@@ -543,7 +543,21 @@ MAppBase::GetText(const char *in) const
 bool
 MAppBase::CanClose() const
 {
-   return true;
+   String folders;
+   if(! MailFolder::CanExit(&folders) )
+   {
+      String msg = _("Some folders are in critical sections and should be allowed\n"
+                     "to finish whatever operation is pending on them before exiting\n"
+                     "the application.\n"
+                     "These folders are:\n");
+      msg += folders;
+      msg += _("Do you want to exit anyway?");
+      return MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+                                 FALSE /* no=default */,
+                                 "AskSpecifyDir");
+   }
+   else
+      return true;
 }
 
 void

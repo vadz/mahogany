@@ -269,6 +269,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_INSERTFILE,
                            gettext_noop("&Insert file..."),   gettext_noop("Insert a file")            },
    { WXMENU_COMPOSE_SEND,  gettext_noop("&Send"),             gettext_noop("Send the message now")     },
+   { WXMENU_COMPOSE_SEND_KEEP_OPEN,  gettext_noop("&Send and keep"),
+     gettext_noop("Send the message now and keep the editor open")     },
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print"),            gettext_noop("Print the message")        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save message text to file")},

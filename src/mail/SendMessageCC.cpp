@@ -61,6 +61,8 @@ ber)"
 #include "MDialogs.h"
 #include "gui/wxIconManager.h"
 
+#include <wx/utils.h> // wxGetFullHostName()
+
 extern "C"
 {
 #  include <misc.h>
@@ -99,8 +101,9 @@ SendMessageCC::Create(Protocol protocol,
       CPYSTR(profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
    env->from->mailbox =
       CPYSTR(profile->readEntry(MP_USERNAME, MP_USERNAME_D));
-   env->from->host =
-      CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+
+   tmpstr = profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   env->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
    env->return_path = mail_newaddr ();
 
    tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
@@ -115,7 +118,13 @@ SendMessageCC::Create(Protocol protocol,
       tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
    else
       tmpstr = strutil_after(tmpstr,'@');
-   env->return_path->host = CPYSTR(tmpstr);
+   if(tmpstr.Length() == 0)
+   {
+      // we need a valid return path!
+      env->return_path->host = CPYSTR(wxGetFullHostName());
+   }
+   else
+      env->return_path->host = CPYSTR(tmpstr);
 
    body->type = TYPEMULTIPART;
    body->nested.part = mail_newbody_part();
@@ -157,7 +166,7 @@ SendMessageCC::SetAddresses(const String &to,
       ASSERT(env->to == NIL);
       tmpstr = to;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = strutil_strdup(defaulthost);
+      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
       rfc822_parse_adrlist (&env->to,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -166,7 +175,7 @@ SendMessageCC::SetAddresses(const String &to,
       ASSERT(env->cc == NIL);
       tmpstr = cc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = strutil_strdup(defaulthost);
+      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
       rfc822_parse_adrlist (&env->cc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -175,7 +184,7 @@ SendMessageCC::SetAddresses(const String &to,
       ASSERT(env->bcc == NIL);
       tmpstr = bcc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = strutil_strdup(defaulthost);
+      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
       rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }

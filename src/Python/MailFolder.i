@@ -106,13 +106,6 @@ public:
    // nice. We need to change that.
    //@}
 
-   /** Register a FolderViewBase derived class to be notified when
-       folder contents change.
-       @param  view the FolderView to register
-       @param reg if false, unregister it
-   */
-   virtual void RegisterView(FolderView *view, bool reg = true);
-
    /** get name of mailbox
        @return the symbolic name of the mailbox
    */

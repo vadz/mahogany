@@ -75,11 +75,17 @@ public:
    virtual void OnAbnormalTermination();
 
    /**
-       asks all the opened frames whether it's ok for them to close: returns
-       true only if all of them returned true (base class version always
-       returns true because it knows nothing about GUI things like frames)
-     */
-   virtual bool CanClose() const;
+      Checks whether it is alright to exit the application now.
+      Asks all the opened frames whether it's ok for them to close: returns
+      true only if all of them returned true (base class version always
+      returns true because it knows nothing about GUI things like
+      frames).
+      It also checks whether any MailFolders are in critical sections
+      and will prompt the user whether to ignore this or not.
+      @return true if it is ok to exit the application
+      
+   */
+   virtual bool CanClose(void) const;
 
    /** add a frame to the list of frames which were already asked whether it
        was ok to close them and returned true - this prevents them from being

@@ -569,22 +569,25 @@ bool
 MDialog_YesNoDialog(const char *message,
                     const MWindow *parent,
                     const char *title,
-                    bool /* YesDefault */,
+                    bool yesDefault,
                     const char *configPath)
 {
    wxString caption = "Mahogany : ";
    caption += title;
 
+   int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
+   if(! yesDefault) style |= wxNO_DEFAULT;
+   
    if ( configPath != NULL )
    {
       return wxPMessageBox(configPath, message, caption,
-                           wxYES_NO | wxICON_QUESTION | wxCENTRE,
+                           style,
                            GetParent(parent)) == wxYES;
    }
    else
    {
       return wxMessageBox(message, caption,
-                          Style(wxYES_NO | wxICON_QUESTION),
+                          style,
                           GetParent(parent)) == wxYES;
    }
 }

@@ -281,26 +281,9 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
 bool
 wxMainFrame::CanClose() const
 {
-   bool ok;
-
-   // ask the user unless disabled
-   if ( MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"), this,
-                            MDIALOG_YESNOTITLE, false,
-                            MP_CONFIRMEXIT) )
-   {
-      // already asked
-      mApplication->AddToFramesOkToClose(this);
-
-      // closing the main frame will close the app so ask the other frames
-      // whether it's ok to close them
-      ok = mApplication->CanClose();
-   }
-   else
-   {
-      ok = false;
-   }
-
-   return ok;
+   // closing the main frame will close the app so ask the other frames
+   // whether it's ok to close them
+   return mApplication->CanClose();
 }
 
 void

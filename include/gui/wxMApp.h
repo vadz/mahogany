@@ -47,6 +47,10 @@ public:
    virtual int  OnRun();
    virtual int  OnExit();
 
+   /// OnIdle() handler to process Mahogany-specific MEvents which are 
+   // asynchronous.
+   void OnIdle(wxIdleEvent &event);
+   
    /** Gets help for a specific topic.
        @param id help id from MHelp.h
    */
@@ -75,8 +79,11 @@ private:
    class wxLocale *m_Locale;
    /// data for printing
    wxPrintData *m_PrintData;
-   // page setup for printing
+   /// page setup for printing
    wxPageSetupData *m_PageSetupData;
+   /// to recylce the last CanClose() result
+   bool m_CanClose;
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------

@@ -84,11 +84,13 @@ public:
    enum OperationId
    {
       Op_Ping,
-      Op_Delete, Op_UnDelete, Op_SetFlag, Op_Expunge,
       Op_GetMessage,
-      Op_AppendMessage,
+      Op_AppendMessage
       
    };
+   /**@name Result classes containing return values from
+      operations. */
+   //@{
    /** A structure containing the return values from an operation.
        This will get passed in an MEvent to notify other parts of the
        application that an operation has finished.
@@ -103,7 +105,68 @@ public:
          /// Returns an OperationId to tell what happened.
          virtual OperationId GetOperation(void) const = 0;
       };
+   /** Common code shared by all class Result implementations. */
+   class ResultImpl : public Result
+   {
+   public:
+      virtual OperationId   GetOperation(void) const { return m_Id; }
+      virtual ASMailFolder *GetFolder(void) const{ return m_Mf; }
+   protected:
+      ResultImpl(OperationId id, ASMailFolder *mf)
+         {
+            m_Id = id;
+            m_Mf = mf;
+            if(m_Mf) m_Mf->IncRef();
+         }
+      virtual ~ResultImpl()
+         { if(m_Mf) m_Mf->DecRef(); }
+   private:
+      OperationId   m_Id;
+      ASMailFolder *m_Mf;
+   };
+   /** Holds the result from an operation which can be expressed as an 
+       integer value. Used for all boolean success values.
+   */
+   class ResultInt : public ResultImpl
+   {
+   public:
+      int GetValue(void) const { return m_Value; }
+      static ResultInt *Create(OperationId id,
+                               ASMailFolder *mf,
+                               int value)
+         { return new ResultInt(id, mf, value); }
+   protected:
+      ResultInt(OperationId id, ASMailFolder *mf, int value)
+         : ResultImpl(id, mf) { m_Value = value; 
+      }
+   private:
+      int         m_Value;
+   };
+   /** Holds the result from a GetMessage() and returns the message pointer.
+   */
+   class ResultMessage : public ResultImpl
+   {
+   public:
+      static ResultMessage *Create(ASMailFolder *mf,
+                                   Message *msg, unsigned long uid)
+         { return new ResultMessage(mf, msg, uid); }
+      Message * GetMessage(void) const { return m_Message; }
+      unsigned long GetUId(void) const { return m_uid; }
+   protected:
+      ResultMessage(ASMailFolder *mf, Message *msg, unsigned long uid)
+         : ResultImpl(Op_GetMessage, mf)
+         {
+            m_Message = msg;
+            if(m_Message) m_Message->IncRef();
+            m_uid =  uid;
+         }
+      ~ResultMessage() { if(m_Message) m_Message->DecRef(); }
+   private:
+      Message *m_Message;
+      unsigned long m_uid;
+   };
    //@}
+
 
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
@@ -118,7 +181,6 @@ public:
 
    /** UnDelete a message.
        @param uid the message uid
-       @return ResultInt with boolean success value
    */
    virtual void UnDeleteMessage(unsigned long uid) = 0;
 
@@ -126,7 +188,7 @@ public:
        @param uid message uid
        @return ResultMessage with boolean success value
    */
-   virtual Message *GetMessage(unsigned long uid) = 0;
+   virtual void GetMessage(unsigned long uid) = 0;
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -253,7 +315,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline ProfileBase *GetProfile(void) const = 0;
+   virtual inline ProfileBase *GetProfile(void) const = 0;
 
    /// Get update interval in seconds
    virtual int GetUpdateInterval(void) const = 0;

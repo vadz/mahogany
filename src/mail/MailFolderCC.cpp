@@ -40,6 +40,22 @@
 #define QPRINT_MIDDLEMARKER "?Q?"
 
 
+/*
+ * Small function to translate c-client status flags into ours.
+ */
+static
+MailFolder::MessageStatus
+GetMsgStatus(MESSAGECACHE *elt)
+{
+   int status = MailFolder::MSG_STAT_NONE;
+   if(elt->recent)   status |= MailFolder::MSG_STAT_RECENT;
+   if(elt->seen)     status |= MailFolder::MSG_STAT_SEEN;
+   if(elt->flagged)  status |= MailFolder::MSG_STAT_FLAGGED;
+   if(elt->answered) status |= MailFolder::MSG_STAT_ANSWERED;
+   if(elt->deleted)  status |= MailFolder::MSG_STAT_DELETED;
+   return (MailFolder::MessageStatus) status;
+}
+
 #include <wx/timer.h>
 /** a timer class to regularly ping the mailfolder. */
 class MailFolderTimer : public wxTimer
@@ -544,24 +560,6 @@ MailFolderCC::~MailFolderCC()
    GetProfile()->DecRef();
 }
 
-void
-MailFolderCC::RegisterView(FolderView *view, bool reg)
-{
-   FolderViewList::iterator
-      i;
-   if(reg)
-      m_viewList.push_front(view);
-   else
-      for(i = m_viewList.begin(); i != m_viewList.end(); i++)
-      {
-         if((*i) == view)
-         {
-            // do _not_ erase() the entry, just remove it from the list
-            m_viewList.remove(i);
-            return;
-         }
-      }
-}
 
 
 bool
@@ -594,44 +592,6 @@ MailFolderCC::AppendMessage(Message const &msg)
    return AppendMessage(tmp);
 }
 
-void
-MailFolderCC::UpdateViews(void)
-{
-   FolderViewList::iterator
-      i;
-   for(i = m_viewList.begin(); i != m_viewList.end(); i++)
-      (*i)->Update();
-   PY_CALLBACK(MCB_FOLDERUPDATE, 0, GetProfile());
-}
-
-#if 0
-String
-MailFolderCC::GetName(void) const
-{
-   String symbolicName;
-   switch(GetType())
-   {
-   case MF_INBOX:
-      symbolicName = "INBOX"; break;
-   case MF_FILE:
-   case MF_POP:
-   case MF_IMAP:
-   case MF_NNTP:
-      symbolicName = m_MailboxPath; break;
-#if 0
-   case MF_POP:
-      symbolicName << "pop_" << m_Login; break;
-   case MF_IMAP:
-      symbolicName << "imap_" << m_Login; break;
-   case MF_NNTP:
-      symbolicName << "news_" << m_MailboxPath; break;
-#endif
-   default:
-      ASSERT(0);
-   }
-   return symbolicName;
-}
-#endif
 
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
@@ -915,8 +875,7 @@ MailFolderCC::BuildListing(void)
       m_OldNumOfMessages = m_NumOfMessages;
    
    // now we sent an update event to update folderviews etc
-   MEventFolderUpdateData data(this);
-   MEventManager::Send(data);
+   MEventManager::Send( new MEventFolderUpdateData (this) );
 
 
    /*** FROM HERE ON, WE NEED TO BE RECURSION SAFE!!! ***/
@@ -933,8 +892,7 @@ MailFolderCC::BuildListing(void)
       for ( unsigned long i = 0; i < n; i++ )
          messageIDs[i] = m_Listing[oldNum + i].GetUId();
 
-      MEventNewMailData data(this, n, messageIDs);
-      MEventManager::Send(data);
+      MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
 
       delete [] messageIDs;
    }
@@ -963,13 +921,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    MESSAGECACHE selt;
 
    // STATUS:
-   int status = MSG_STAT_NONE;
-   if(elt->recent) status |= MSG_STAT_RECENT;
-   if(elt->seen) status |= MSG_STAT_SEEN;
-   if(elt->flagged) status |= MSG_STAT_FLAGGED;
-   if(elt->answered) status |= MSG_STAT_ANSWERED;
-   if(elt->deleted) status |= MSG_STAT_DELETED;
-   entry.m_Status = (MailFolder::MessageStatus) status;
+   entry.m_Status = GetMsgStatus(elt);
 
    /* For NNTP, do not show deleted messages: */
    if(m_folderType == MF_NNTP && elt->deleted)
@@ -1078,6 +1030,21 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    streamList.push_front(conn);
 }
 
+/* static */
+bool
+MailFolderCC::CanExit(String *which)
+{
+   bool canExit = true;
+   *which = "";
+   StreamConnectionList::iterator i;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      if( (*i)->folder->InCritical() )
+      {
+         canExit = false;
+         *which << (*i)->folder->GetName() << '\n';
+      }
+   return canExit;
+}
 
 /// lookup object in Map
 /* static */ MailFolderCC *
@@ -1218,7 +1185,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 
    if(status->flags & SA_MESSAGES)
       mf->m_NumOfMessages  = status->messages;
-   mf->UpdateViews();
+   MEventManager::Send( new MEventFolderUpdateData (mf) );
 }
 
 
@@ -1297,18 +1264,34 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
        @param  stream   mailstream
    */
 void
-MailFolderCC::mm_critical(MAILSTREAM * /* stream */)
+MailFolderCC::mm_critical(MAILSTREAM * stream)
 {
-   // ignore
+   MailFolderCC *mf = LookupObject(stream);
+   if(mf)
+   {
+#ifdef DEBUG
+      String tmp = "MailFolderCC::mm_critical() for folder " + mf->m_MailboxPath;
+      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
+#endif
+      mf->m_InCritical = true;
+   }
 }
 
 /**   no longer running critical code
    @param   stream mailstream
      */
 void
-MailFolderCC::mm_nocritical(MAILSTREAM * /* stream */)
+MailFolderCC::mm_nocritical(MAILSTREAM *  stream )
 {
-   // ignore
+   MailFolderCC *mf = LookupObject(stream);
+   if(mf)
+   {
+#ifdef DEBUG
+      String tmp = "MailFolderCC::mm_nocritical() for folder " + mf->m_MailboxPath;
+      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
+#endif
+      mf->m_InCritical = false;
+   }
 }
 
 /** unrecoverable write error on mail file
@@ -1400,6 +1383,29 @@ MailFolderCC::ProcessEventQueue(void)
             processed later in this loop. */
       case Status:
       case Flags:
+      {
+         /* We just need to update the information for exactly one
+            message.
+         */
+         MailFolderCC *mf = LookupObject(evptr->m_stream);
+         ASSERT(mf);
+         // Find the listing entry for this message:
+         unsigned long uid = mail_uid(evptr->m_stream, evptr->m_args[0].m_ulong);
+         const HeaderInfo *hi;
+         for(hi = mf->GetFirstHeaderInfo();
+             hi && hi->GetUId() != uid;
+             hi = mf->GetNextHeaderInfo(hi))
+            ;
+         if(hi)
+         {
+            ASSERT(hi->GetUId() == uid);
+            MESSAGECACHE *elt = mail_elt (evptr->m_stream,evptr->m_args[0].m_ulong);
+            ((HeaderInfoCC *)hi)->m_Status = GetMsgStatus(elt);
+            // now we sent an update event to update folderviews etc
+            MEventManager::Send( new MEventFolderUpdateData (mf) );
+         }
+         break;
+      }
       case Expunged:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
@@ -1610,16 +1616,12 @@ mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 void
 mm_critical(MAILSTREAM *stream)
 {
-   if(mm_disable_callbacks)
-      return;
    MailFolderCC::mm_critical(stream);
 }
 
 void
 mm_nocritical(MAILSTREAM *stream)
 {
-   if(mm_disable_callbacks)
-      return;
    MailFolderCC::mm_nocritical(stream);
 }
 

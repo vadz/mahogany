@@ -19,9 +19,9 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-   #include "Mcommon.h"
-
-   #include <wx/dynarray.h>
+#   include "Mcommon.h"
+#   include "kbList.h"
+#   include <wx/dynarray.h>
 #endif // USE_PCH
 
 #include "MEvent.h"
@@ -56,6 +56,12 @@ static MEventManager gs_eventManager;
 // all registered event handlers
 static MEventReceiverInfoArray gs_receivers;
 
+
+KBLIST_DEFINE(MEventList, MEventData);
+
+/// the list of pending events
+static MEventList gs_EventList;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -64,12 +70,34 @@ static MEventReceiverInfoArray gs_receivers;
 // event manager
 // ----------------------------------------------------------------------------
 
+
 MEventManager::MEventManager()
 {
 }
 
-void MEventManager::Send(MEventData& data)
+void
+MEventManager::DispatchPending(void)
 {
+   MEventData *dataptr = NULL;
+   
+   while(! gs_EventList.empty() )
+   {
+      dataptr = gs_EventList.pop_front();
+      Dispatch(dataptr);
+      delete dataptr;
+   }
+}
+
+void
+MEventManager::Send(MEventData * data)
+{
+   gs_EventList.push_back(data);
+}
+
+void MEventManager::Dispatch(MEventData * dataptr)
+{
+   MEventData & data = *dataptr;
+   
    MEventId id = data.GetId();
 
    // make a copy of the array because some event handlers might remove

@@ -353,9 +353,20 @@ Parser::Create(const String &input)
 void
 ParserImpl::Error(const String &error)
 {
-   String tmp;
-   tmp.Printf(_("Parse error at input position %lu:\n  %s"),
-              (unsigned long) GetPos(), error.c_str());
+   unsigned long pos = GetPos();
+   String tmp, before, after;
+   if(pos < 40)
+      before = m_Input.Left(pos-1);
+   else
+      before = m_Input.Mid(pos-40,39);
+   if(m_Input.Length() >= pos+40)
+      after = m_Input.Mid(pos, 40);
+   else
+      after = m_Input.Mid(pos);
+   
+   tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s|%s"),
+              pos, error.c_str(), before.c_str(), after.c_str());
+
    ERRORMESSAGE((tmp));
 }
 

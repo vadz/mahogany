@@ -16,6 +16,7 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Profile.h"
+#   include "MEvent.h"
 #endif
 
 #include "Mdefaults.h"
@@ -36,64 +37,6 @@
 class ASMailFolderImpl : public ASMailFolder
 {
 public:
-   /**@name Different result types. */
-   //@{
-   /** Common code shared by all class Result implementations. */
-   class ResultImpl : public Result
-   {
-   public:
-      virtual OperationId   GetOperation(void) const { return m_Id; }
-      virtual ASMailFolder *GetFolder(void) const{ return m_Mf; }
-   protected:
-      ResultImpl(OperationId id, ASMailFolder *mf)
-         {
-            m_Id = id;
-            m_Ff = mf;
-            if(m_Mf) m_Mf->IncRef();
-         }
-      virtual ~ResultImpl()
-         { if(m_Mf) m_Mf->DecRef(); }
-   private:
-      OperationId   m_Id;
-      ASMailFolder *m_Mf;
-   };
-   /** Holds the result from an operation which can be expressed as an 
-       integer value. Used for all boolean success values.
-   */
-   class ResultInt : public ResultImpl
-   {
-   public:
-      int GetValue(void) const { return m_Value; }
-      static ResultInt *Create(OperationId id,
-                               ASMailFolder *mf,
-                               int value)
-         { return new ResultInt(id, mf, value); }
-   protected:
-      ResultBoolean(OperationId id, ASMailFolder *mf, int value)
-         : ResultImpl(id, mf) { m_Value = value; 
-      }
-   private:
-      int         m_Value;
-   };
-   /** Holds the result from a GetMessage() and returns the message pointer.
-   */
-   class ResultMessage : public ResultImpl
-   {
-   public:
-      static ResultMessage *Create(ASMailFolder *mf,
-                                   Message *msg)
-         { return new ResultMessage(mf, msg); }
-      int GetValue(void) const { return m_Message; }
-   protected:
-      ResultMessage(ASMailFolder *mf, Message *msg)
-         : ResultImpl(OperationId::Op_GetMessage, mf)
-         { m_Message = msg; if(m_Message) m_Message->IncRef(); }
-      ~ResultMessage() { if(m_Message) m_Message->DecRef(); }
-   private:
-      Message *m_Message;
-   };
-   //@}
-
    /** @name Constructors and destructor */
    //@{
 
@@ -134,7 +77,7 @@ public:
        @param uid message uid
        @return ResultMessage with boolean success value
    */
-   virtual Message *GetMessage(unsigned long uid) = 0;
+   virtual void GetMessage(unsigned long uid) = 0;
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -264,7 +207,7 @@ public:
        @return Pointer to the profile.
    */
    inline ProfileBase *GetProfile(void) const
-      { return m_MailFolder->m_Profile; }
+      { return m_MailFolder->GetProfile(); }
 
    /// Get update interval in seconds
    virtual int GetUpdateInterval(void) const
@@ -291,9 +234,9 @@ public:
       { return m_MailFolder->GetFirstHeaderInfo(); }
    /// Return a pointer to the next message's header info.
    virtual const class HeaderInfo *GetNextHeaderInfo(const class
-                                                     HeaderInfo*)
+                                                     HeaderInfo* hi)
       const
-      { return m_MailFolder->GetNextHeaderInfo(); }
+      { return m_MailFolder->GetNextHeaderInfo(hi); }
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const
@@ -315,7 +258,7 @@ private:
 };
 
 
-ASMailFolderImpl(MailFolder *mf)
+ASMailFolderImpl::ASMailFolderImpl(MailFolder *mf)
 {
    m_MailFolder = mf;
    m_Locked = false;
@@ -345,34 +288,77 @@ ASMailFolderImpl::UnLockFolder(void)
 void
 ASMailFolderImpl::SendEvent(Result *result)
 {
-   //FIXME put it into the event system
+   // now we sent an  event to update folderviews etc
+   MEventManager::Send(new MEventASFolderResult (result) );
    result->DecRef(); // we no longer need it
 }
 
-virtual void
+void
 ASMailFolderImpl::DeleteMessage(unsigned long uid)
 {
    LockFolder();
-   int rc = m_MailFolder->DeleteMessage(uid);
+   m_MailFolder->DeleteMessage(uid);
    UnLockFolder();
-   SendEvent(ResultInt::Create(Op_Delete, this, rc));
 }
 
-virtual void
+void
 ASMailFolderImpl::UnDeleteMessage(unsigned long uid)
 {
    LockFolder();
-   int rc = m_MailFolder->UnDeleteMessage(uid);
+   m_MailFolder->UnDeleteMessage(uid);
    UnLockFolder();
-   SendEvent(ResultInt::Create(Op_Delete, this, rc));
 }
 
-virtual Message *
-ASMAilFolderImpl::GetMessage(unsigned long uid)
+void
+ASMailFolderImpl::GetMessage(unsigned long uid)
 {
    LockFolder();
    Message *msg = m_MailFolder->GetMessage(uid);
    UnLockFolder();
-   SendEvent(ResultMessage::Create(this, msg));
+   SendEvent(ResultMessage::Create(this, msg, uid));
+}
+
+void
+ASMailFolderImpl::SaveMessages(const INTARRAY *selections,
+                             String const & folderName,
+                             bool isProfile,
+                               bool updateCount = true)
+{
+}
+
+void
+ASMailFolderImpl::DeleteMessages(const INTARRAY *messages)
+{
+}
+
+void
+ASMailFolderImpl::UnDeleteMessages(const INTARRAY *messages)
+{
+}
+
+void
+ASMailFolderImpl::SaveMessagesToFile(const INTARRAY *messages, MWindow
+                                     *parent = NULL)
+{
+}
+
+void
+ASMailFolderImpl::SaveMessagesToFolder(const INTARRAY *messages,
+                                       MWindow *parent = NULL)
+{
+}
+
+void
+ASMailFolderImpl::ReplyMessages(const INTARRAY *messages,
+                                MWindow *parent = NULL,
+                                ProfileBase *profile = NULL)
+{
+}
+
+void
+ASMailFolderImpl::ForwardMessages(const INTARRAY *messages,
+                                  MWindow *parent = NULL,
+                                  ProfileBase *profile = NULL)
+{
 }
 

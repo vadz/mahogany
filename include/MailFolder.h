@@ -113,13 +113,12 @@ public:
 
    //@}
 
-   /** Register a FolderViewBase derived class to be notified when
-       folder contents change.
-       @param  view the FolderView to register
-       @param reg if false, unregister it
+   /** Checks if it is OK to exit the application now.
+       @param which Will either be set to empty or a '\n' delimited
+       list of folders which are in critical sections.
    */
-   virtual void RegisterView(FolderView *view, bool reg = true) = 0;
-
+   static bool CanExit(String *which);
+   
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
@@ -305,7 +304,6 @@ public:
    */
    virtual void SetRetrievalLimit(unsigned long nmax) = 0;
 
-protected:
    /**@name Accessor methods */
    //@{
    /// Set update interval in seconds, 0 to disable
@@ -314,6 +312,8 @@ protected:
    inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
    //@}
+
+protected:
    /**@name Common variables might or might not be used */
    //@{
    /// Login for password protected mail boxes.

@@ -926,6 +926,18 @@ wxComposeView::OnMenuCommand(int id)
       }
       break;
 
+   case WXMENU_COMPOSE_SEND_KEEP_OPEN:
+      if ( IsReadyToSend() )
+      {
+         if ( Send() )
+         {
+            ResetDirty();
+            MDialog_Message(_("Message has been sent."),
+                            this, _("Message sent"), "MessageSent");
+
+         }
+      }
+      break;
    case WXMENU_COMPOSE_PRINT:
       Print();
       break;

@@ -5,8 +5,8 @@
 CWD = doc
 FILES_TXT=*.txt
 #FILES_TEX=$(wildcard *.tex)
-FILES_TEX=Manual.htex 
-FILES_PS=$(FILES_TEX:.htex=.ps) classes.ps
+FILES_TEX=HackersGuide.htex Manual.htex 
+FILES_PS=$(FILES_TEX:.htex=.ps) #classes.ps
 SUB_DIRS=$(FILES_TEX:.htex=)
 
 include ../makeopts
@@ -24,18 +24,23 @@ subdirs:
 	set -e; for i in $(SUB_DIRS); do ( cd $$i && $(MAKE) -f ../Makefile.sub all DIR=$$i ) ; done
 
 install2: 
-	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes $(DOCDIR)/classes/images
 	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i install ; done
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
+	$(INSTALL) -d $(DESTDIR)/doc
+#	ln -f -s ../share/Mahogany/doc $(DESTDIR)/doc/Mahogany
+
+install_classdoc:
+	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes $(DOCDIR)/classes/images
 	$(INSTALL_DATA) classes/*.htm $(DOCDIR)/classes
 	if [ "$(SCANDOCHTML)" = "$(DOCHTML)" ] ; then $(INSTALL_DATA) $(BUILDDIR)/extra/scandoc/images/* $(DOCDIR)/classes/images ; fi
 	$(INSTALL_DATA) classes/images/*.gif $(DOCDIR)/classes/images || echo no gifs to install
 	$(INSTALL_DATA) classes/images/*.jpg $(DOCDIR)/classes/images || echo no jpegs to install
-	$(INSTALL) -d $(DESTDIR)/doc
-#	ln -f -s ../share/Mahogany/doc $(DESTDIR)/doc/Mahogany
 
-ps: $(FILES_PS) 
+classdoc: classes.ps
+
+ps:
+	for i in $(FILES_PS); do $(MAKE) -k $$i; done   # one after another
 
 install:
 	if [ -f Mdoc.tar.gz ] ; then gzip -dc < Mdoc.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
@@ -65,7 +70,7 @@ test:
 	exit 1; \
 	fi 
 
-.PHONY: all install ps clean subdirs makemap install2 test
+.PHONY: all install ps clean subdirs makemap install2 test classdoc install_classdoc
 
 include ../makerules
 

@@ -176,16 +176,29 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 // wxMApp
 // ----------------------------------------------------------------------------
 
+
+BEGIN_EVENT_TABLE(wxMApp, wxApp)
+   EVT_IDLE              (wxMApp::OnIdle)
+END_EVENT_TABLE()
+
 wxMApp::wxMApp(void)
 {
    m_IconManager = NULL;
    m_HelpController = NULL;
+   m_CanClose = FALSE;
 }
 
 wxMApp::~wxMApp()
 {
    if(m_HelpController)
       delete m_HelpController;
+}
+
+void
+wxMApp::OnIdle(wxIdleEvent &event)
+{
+   MEventManager::DispatchPending();
+   event.Skip();
 }
 
 void
@@ -206,16 +219,29 @@ wxMApp::OnAbnormalTermination()
 bool
 wxMApp::CanClose() const
 {
+   // If we get called the second time, we just reuse our old value,
+   // but only if it was TRUE.
+   if(m_CanClose)
+      return m_CanClose;
+   
+   // ask the user unless disabled
+   if ( ! MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"), m_topLevelFrame,
+                            MDIALOG_YESNOTITLE, false,
+                            MP_CONFIRMEXIT) )
+      return false;
+
    wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
    while ( node )
    {
       wxWindow *win = node->GetData();
       node = node->GetNext();
 
-      if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
+      // We do not ask the toplevel frame as this would ask us again,
+      // leading to some recursion.
+      if ( win->IsKindOf(CLASSINFO(wxMFrame)) && win != m_topLevelFrame)
       {
          wxMFrame *frame = (wxMFrame *)win;
-
+         
          if ( !IsOkToClose(frame) )
          {
             if ( !frame->CanClose() )
@@ -228,7 +254,15 @@ wxMApp::CanClose() const
       //      frame?
    }
 
-   return MAppBase::CanClose();
+   
+   // We assume that we can always close the toplevel frame if we make 
+   // it until here. Attemps to close the toplevel frame will lead to
+   // this function being evaluated anyway. The frame itself does not
+   // do any tests.
+   ((MAppBase *)this)->AddToFramesOkToClose(m_topLevelFrame);
+
+   ((wxMApp *)this)->m_CanClose = MAppBase::CanClose();
+   return m_CanClose;
 }
 
 // do close the app by closing all frames

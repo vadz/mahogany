@@ -54,6 +54,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** VZ:
 *********************************************************************
 
+- All Folder create dialog pages have no HelpIDs set, why?
 - help button for first folder create page nees a help id
   KB: couldn't even find out where you create the button :-(
 - when user level is >=1 (advanced) show full preferences pages in
@@ -97,20 +98,22 @@ GENERAL ROADMAP/ORDER OF THINGS:
 
 - fix printing overlap
 - test whether dialog for collecting from INBOX works
+
+- document new configure system for wxGTK in HackersGuide
+
 - add goto_next_unread to folderview
 - add more buttons to folderview, such as
       next/previous/goto_next_unread
 - improve key bindings for message editor, page up/down whole page
 - check whether focus handling in folderview is fine now, does it get
   lost after update() ?
+
 - add button to browse for filename in folder selection dialog (asked
   vadim for this)
 - TUTORIAL, how to keep multiple folders open
 - if time permits: vcard-import
-- use mm_critical() and delay application exit if necessary
 - add a popup dialog to edit message headers in composeview
 
-- GetHeaderLine bug in messageCC somehow seems to drop a \0
 - drop classes documentation from archive/docs!!
 - add icons to doc++ generated docs
 - document python callback behaviour for incoming folders, possibly do 
@@ -129,6 +132,10 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - speed up copy mail to folder by cusing c-client functionality
 - wxComposeView: if replying, only mark message as answered if reply
   got sent --> difficult/ after ASMailFolder is there
+
+
+- update c-client patch several changes in smpt.c/rfc822.c
+
 *********************************************************************
 *** Miscellaneous Todo:
 *********************************************************************

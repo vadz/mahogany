@@ -179,6 +179,12 @@ MailFolder::ConvertMessageStatusToString(int status)
    return strstatus;
 }
 
+/* static */
+bool MailFolder::CanExit(String *which)
+{
+   return MailFolderCC::CanExit(which);
+}
+
 /*-------------------------------------------------------------------*
  * Higher level functionality, nothing else depends on this.
  *-------------------------------------------------------------------*/

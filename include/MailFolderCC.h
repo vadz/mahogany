@@ -109,22 +109,23 @@ public:
    /// enable/disable debugging:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 
-   // checks whether a folder with that path exists
+   /// checks whether a folder with that path exists
    static MailFolderCC *FindFolder(String const &path,
                                    String const &login);
 
-public:
-   /** Register a FolderView derived class to be notified when
-       folder contents change.
-       @param    view the FolderView to register
-       @param   reg if false, unregister it
+   /** Checks if it is OK to exit the application now.
+        @param which Will either be set to empty or a '\n' delimited
+        list of folders which are in critical sections.
    */
-   void RegisterView(FolderView *view, bool reg = true);
+   static bool CanExit(String *which);
 
    /** return a symbolic name for mail folder
        @return the folder's name
    */
-   String GetName(void) const { return m_Name; }
+   inline String GetName(void) const { return m_Name; }
+
+   /// Checks if the folder is in a critical section.
+   inline bool InCritical(void) const { return m_InCritical; }
 
    /** Sets the symbolic name.
     */
@@ -222,8 +223,6 @@ public:
    static bool PingReopenAll(void);
 
    //@}
-   /** Updates the associated FolderViews */
-   void UpdateViews(void);
 
    /** Toggle sending of new mail events.
        @param send if true, send them
@@ -280,9 +279,6 @@ private:
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
-
-   /// a list of FolderViews to be notified when this folder changes
-   FolderViewList   m_viewList;
 
    /// which type is this mailfolder?
    FolderType   m_folderType;
@@ -540,6 +536,8 @@ private:
    /// destructor
    ~MailFolderCC();
 
+   /// Is this folder in a critical c-client section?
+   bool m_InCritical;
    /** @name Global settings, timeouts for c-client lib */
    //@{
    /// TCP/IP open timeout in seconds.

@@ -42,6 +42,7 @@
 
 #include <wx/log.h>
 #include <wx/confbase.h>
+#include <wx/utils.h>         // wxGetFullHostName()
 
 #include "gui/wxOptionsDlg.h" // for ShowOptionsDialog()
 #include "gui/wxMDialogs.h"   // for CloseSplash()
@@ -421,6 +422,8 @@ VerifyInbox(void)
 {
    bool rc;
    ProfileBase *parent = mApplication->GetProfile();
+   // INBOX has no meaning under Windows
+#ifndef OS_WIN
    // Do we need to create the INBOX (special folder for incoming mail)?
    if ( parent->HasEntry("INBOX") )
       rc = TRUE;
@@ -429,13 +432,24 @@ VerifyInbox(void)
       rc = FALSE;
       ProfileBase *ibp = ProfileBase::CreateProfile("INBOX");
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      if(READ_APPCONFIG(MP_NEWMAIL_FOLDER) != "INBOX")
+      if(READ_APPCONFIG(MP_NEWMAIL_FOLDER) != "INBOX"
+         && MDialog_YesNoDialog(
+            _("Normally Mahogany will automatically collect all mail\n"
+              "from your system's default mail folder (INBOX,\n"
+              "representing your mail spool entry),\n"
+              "and move it to a special 'New Mail' folder.\n"
+              "\n"
+              "Is this ok? If you select No, your mail will remain in\n"
+              "INBOX and you need to check that folder manually."
+               ),
+            NULL, _("Collect mail from INBOX?"), true))
          ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING);
       else
          ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
    }
+#endif
 
    // Is the newmail folder properly configured?
    String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
@@ -463,6 +477,10 @@ VerifyInbox(void)
 extern bool
 SetupInitialConfig(void)
 {
+   String host = READ_APPCONFIG(MP_HOSTNAME);
+   if(host.Length() == 0)
+      mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
+   
    (void)VerifyInbox();
 
 #if 0
@@ -483,7 +501,9 @@ VerifyMailConfig(void)
 // we send a mail to ourself
 
    String me;
-   me << READ_APPCONFIG(MP_USERNAME) << '@' << READ_APPCONFIG(MP_HOSTNAME);
+   me = READ_APPCONFIG(MP_RETURN_ADDRESS);
+   if(me.Length() == 0)
+      me << READ_APPCONFIG(MP_USERNAME) << '@' << READ_APPCONFIG(MP_HOSTNAME);
 
 // FIXME we should make sure that hostname can be resolved - otherwise this
 // message will stay in sendmail queue _forever_ (at least it does happen
