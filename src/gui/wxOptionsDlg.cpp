@@ -123,6 +123,7 @@ enum ConfigFields
    ConfigField_IdentHelp,
    ConfigField_PersonalName,
    ConfigField_Organization,
+   ConfigField_UserName,
    ConfigField_AddressHelp,
    ConfigField_ReturnAddress,
    ConfigField_ReplyAddress,
@@ -782,6 +783,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "the value they expect."),       Field_Message, -1 },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("&Organization"),                Field_Text,    -1,                        },
+   { gettext_noop("&User name or login"),          Field_Text,    -1,                        },
    { gettext_noop("The e-mail address is the value of the \"From:\" header\n"
                   "while the reply address is used for the \"Reply-To\" one.\n"
                   "If you don't know whether you should set it, leave the\n"
@@ -1447,6 +1449,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // ident help
    CONFIG_ENTRY(MP_PERSONALNAME),
    CONFIG_ENTRY(MP_ORGANIZATION),
+   CONFIG_ENTRY(MP_USERNAME),
    CONFIG_NONE(), // return address help
    CONFIG_ENTRY(MP_FROM_ADDRESS),
    CONFIG_ENTRY(MP_REPLY_ADDRESS),
