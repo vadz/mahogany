@@ -79,6 +79,9 @@ protected:
    // do we need to be saved at all?
    bool IsDirty() const { return m_isDirty; }
 
+   // have we failed to save our contents the last time Save() was called?
+   bool HasFailedToSave() const { return m_hasFailedToSave; }
+
    // override some CacheFile methods
 
    virtual bool Save();
@@ -104,6 +107,10 @@ private:
 
    // the dirty flag, i.e. has anything changed since we were last saved?
    bool m_isDirty;
+
+   // this flag is set if our Save() failed and is used to prevent calling it
+   // again, and again, and again...
+   bool m_hasFailedToSave;
 };
 
 #endif // _MFCACHE_H_

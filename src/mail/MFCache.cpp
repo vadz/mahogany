@@ -99,7 +99,8 @@ MfStatusCache::MfStatusCache()
    m_evtmanHandle = MEventManager::Register(*this, MEventId_FolderTreeChange);
 
    // no changes yet
-   m_isDirty = false;
+   m_isDirty =
+   m_hasFailedToSave = false;
 }
 
 MfStatusCache::~MfStatusCache()
@@ -370,7 +371,14 @@ bool MfStatusCache::Save()
    if ( !m_folderNames.IsEmpty() )
    {
       if ( !CacheFile::Save() )
+      {
+         // set a flag to indicate that we shouldn't be called any more by
+         // Flush() -- but we'll still be called from our dtor for one last
+         // attempt to save our contents
+         m_hasFailedToSave = true;
+
          return false;
+      }
    }
 
    // reset the dirty flag - we're saved now
@@ -422,7 +430,11 @@ bool MfStatusCache::DoSave(wxTempFile& file)
 /* static */
 void MfStatusCache::Flush()
 {
-   if ( gs_mfStatusCache && gs_mfStatusCache->IsDirty() )
+   // don't flush the cache repeatedly if we failed to do it, this leads to a
+   // endless stream of annoying message boxes without any good effect
+   if ( gs_mfStatusCache &&
+         gs_mfStatusCache->IsDirty() &&
+           !gs_mfStatusCache->HasFailedToSave() )
    {
       (void)gs_mfStatusCache->Save();
    }
