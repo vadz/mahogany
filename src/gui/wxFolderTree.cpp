@@ -318,8 +318,11 @@ public:
       // go to the next folder with unread messages after the current one
    bool GoToNextUnreadFolder(bool next = true);
 
-      // go to the home folder, if any
-   bool GoToHomeFolder();
+      // go to home folder, give an error message if there is none
+   void GoToHomeFolder();
+
+      // go to the home folder, if any (return true in this case)
+   bool GoToHomeFolderIfAny();
 
       // go to the given tree item: select it and ensure it is visible
    void GoToItem(wxTreeItemId id)
@@ -1809,6 +1812,11 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
     {
         FAIL_MSG( _T("Failed to register folder tree with event manager") );
     }
+
+   // preselect the home folder: this is probably better then returning the
+   // selection to the last selected item although we could still do this if
+   // there is no home folder...
+   GoToHomeFolderIfAny();
 }
 
 void wxFolderTreeImpl::UpdateColours()
@@ -2333,7 +2341,7 @@ bool wxFolderTreeImpl::GoToNextUnreadFolder(bool next)
    return true;
 }
 
-bool wxFolderTreeImpl::GoToHomeFolder()
+bool wxFolderTreeImpl::GoToHomeFolderIfAny()
 {
    String folderHome = READ_APPCONFIG_TEXT(MP_FTREE_HOME);
    if ( !folderHome.empty() )
@@ -2347,9 +2355,15 @@ bool wxFolderTreeImpl::GoToHomeFolder()
       }
    }
 
-   wxLogStatus(GetFrame(this), _("No home folder configured."));
-
    return false;
+}
+
+void wxFolderTreeImpl::GoToHomeFolder()
+{
+   if ( !GoToHomeFolderIfAny() )
+   {
+      wxLogStatus(GetFrame(this), _("No home folder configured."));
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -3032,7 +3046,7 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
             break;
 
          case WXK_HOME:
-            (void)GoToHomeFolder();
+            GoToHomeFolder();
             break;
 
          default:
