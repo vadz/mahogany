@@ -8,6 +8,7 @@
 
 dep depend:
 	$(CXX) -M $(CXXFLAGS) $(SRC) >.depend
+#	$(CC) -M $(CXXFLAGS) $(CSRC) >>.depend
 
 .depend:
 	touch .depend ; $(MAKE) dep

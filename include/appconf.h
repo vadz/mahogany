@@ -256,9 +256,11 @@ public:
 
     // accessors
       /// return number of elements
-    size_t      Count()                   const { return m_nCount;          }
+     size_t      Count()                   const
+	{ return m_nCount;          } 
       /// return the element #nIndex
-    const char *operator[](size_t nIndex) const { return m_aszData[nIndex]; }
+     const char *operator[](size_t nIndex) const
+	{ return m_aszData[nIndex]; }	
 
   private:
     char    **m_aszData;
@@ -376,9 +378,11 @@ public:
   /** @name Other functions */
   //@{
     /// permanently writes changes, returns TRUE on success
-  virtual Bool flush(Bool /* bCurrentOnly */ = FALSE) { return TRUE; }
+   virtual Bool flush(Bool /* bCurrentOnly */ = FALSE)
+      { return TRUE; } 
     /// returns TRUE if object was correctly initialized
-  Bool isInitialized() const { return m_bOk; }
+   Bool isInitialized() const
+      { return m_bOk; }	
   //@}
 
   /** 
@@ -395,9 +399,11 @@ public:
     /// should be called from readEntry, returns pointer to dynamic buffer
   static char *filterIn(const char *szValue);
    /// should environment variables be automatically expanded?
-  void expandVariables(Bool bExpand = TRUE) { m_bExpandVariables = bExpand; }
+   void expandVariables(Bool bExpand = TRUE)
+      { m_bExpandVariables = bExpand; } 
    /// do environment variables get automatically expanded?
-  Bool doesExpandVariables(void) const { return m_bExpandVariables; }
+   Bool doesExpandVariables(void) const
+      { return m_bExpandVariables; } 
    //@}
 
 protected:
@@ -514,25 +520,19 @@ public:
     ///
   const char *readEntry(const char *szKey, const char *szDefault = NULL) const;
     ///
-  int readEntry(const char *szKey, int Default) const
-       { return BaseConfig::readEntry(szKey, Default); }
+  int readEntry(const char *szKey, int Default) const { return BaseConfig::readEntry(szKey, Default); } 
     ///
-  long int readEntry(const char *szKey, long int Default) const
-       { return BaseConfig::readEntry(szKey, Default); }
+  long int readEntry(const char *szKey, long int Default) const      { return BaseConfig::readEntry(szKey, Default); } 
     ///
-  double readEntry(const char *szKey, double Default) const
-      { return BaseConfig::readEntry(szKey, Default); }
+  double readEntry(const char *szKey, double Default) const      { return BaseConfig::readEntry(szKey, Default); } 
    ///
   Bool writeEntry(const char *szKey, const char *szValue);
    ///
-  Bool writeEntry(const char *szKey, int Value)
-     { return BaseConfig::writeEntry(szKey, Value);}
+  Bool writeEntry(const char *szKey, int Value)      { return BaseConfig::writeEntry(szKey, Value);} 
    ///
-  Bool writeEntry(const char *szKey, long int Value)
-     { return BaseConfig::writeEntry(szKey, Value);}
+  Bool writeEntry(const char *szKey, long int Value)     { return BaseConfig::writeEntry(szKey, Value);} 
    ///
-  Bool writeEntry(const char *szKey, double Value)
-     { return BaseConfig::writeEntry(szKey, Value); }
+  Bool writeEntry(const char *szKey, double Value)     { return BaseConfig::writeEntry(szKey, Value); } 
    ///
   Bool deleteEntry(const char *szKey);
     ///
@@ -580,11 +580,11 @@ public:
    ~ConfigEntry();
 
     // simple accessors
-    const char  *Name()         const { return m_szName;     }
-    const char  *Value()        const { return m_szValue;    }
-    const char  *Comment()      const { return m_szComment;  }
-    ConfigEntry *Next()         const { return m_pNext;      }
-    Bool         IsDirty()      const { return m_bDirty;     }
+     const char  *Name()         const	{ return m_szName;     } 
+     const char  *Value()        const	{ return m_szValue;    } 
+     const char  *Comment()      const	{ return m_szComment;  } 
+     ConfigEntry *Next()         const	{ return m_pNext;      } 
+     Bool         IsDirty()      const	{ return m_bDirty;     } 
 
     // expand environment variables and return the resulting string
     const char *ExpandedValue();
@@ -620,13 +620,13 @@ protected:
     ~ConfigGroup();
 
     // simple accessors
-    const char  *Name()     const { return m_szName;      }
-    const char  *Comment()  const { return m_szComment;   }
-    ConfigGroup *Next()     const { return m_pNext;       }
-    ConfigGroup *Parent()   const { return m_pParent;     }
-    ConfigGroup *Subgroup() const { return m_pSubgroups;  }
-    ConfigEntry *Entries()  const { return m_pEntries;    }
-    Bool         IsDirty()  const { return m_bDirty;      }
+     const char  *Name()     const	{ return m_szName;      } 
+     const char  *Comment()  const	{ return m_szComment;   } 
+     ConfigGroup *Next()     const	{ return m_pNext;       } 
+     ConfigGroup *Parent()   const	{ return m_pParent;     } 
+     ConfigGroup *Subgroup() const	{ return m_pSubgroups;  } 
+     ConfigEntry *Entries()  const	{ return m_pEntries;    } 
+     Bool         IsDirty()  const	{ return m_bDirty;      } 
 
     // full name ('/' separated path from top)
     // caller must free buffer
@@ -716,26 +716,20 @@ public:
     ///
    const char *readEntry(const char *szKey, const char *szDefault = NULL) const;
    ///
-   int readEntry(const char *szKey, int Default) const
-      { return BaseConfig::readEntry(szKey, Default); }
+   int readEntry(const char *szKey, int Default) const      { return BaseConfig::readEntry(szKey, Default); } 
    ///
-   long int readEntry(const char *szKey, long int Default) const
-      { return BaseConfig::readEntry(szKey, Default); }
+   long int readEntry(const char *szKey, long int Default) const      { return BaseConfig::readEntry(szKey, Default); } 
     ///
-   double readEntry(const char *szKey, double Default) const
-      { return BaseConfig::readEntry(szKey, Default); }
+   double readEntry(const char *szKey, double Default) const      { return BaseConfig::readEntry(szKey, Default); } 
 
     ///
    Bool writeEntry(const char *szKey, const char *szValue);
     ///
-   Bool writeEntry(const char *szKey, int Value)
-     { return BaseConfig::writeEntry(szKey, Default);}
+   Bool writeEntry(const char *szKey, int Value)     { return BaseConfig::writeEntry(szKey, Default);} 
     ///
-   Bool writeEntry(const char *szKey, long int Value)
-     { return BaseConfig::writeEntry(szKey, Default);}
+   Bool writeEntry(const char *szKey, long int Value)     { return BaseConfig::writeEntry(szKey, Default);} 
    ///
-   Bool writeEntry(const char *szKey, double Value)
-     { return BaseConfig::writeEntry(szKey, Default); }
+   Bool writeEntry(const char *szKey, double Value)     { return BaseConfig::writeEntry(szKey, Default); } 
 
     ///
   Bool deleteEntry(const char *szKey);

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:22:40  karsten
+ * started integration of python, fixed bug in wxFText/word wrapping
+ *
  * Revision 1.1  1998/03/14 12:21:11  karsten
  * first try at a complete archive
  *
@@ -36,7 +39,7 @@
 #define	MDIALOG_YESNOTITLE	_("Please choose")
 //@}
 
-#if USE_WXWINDOWS
+#ifdef USE_WXWINDOWS
 #	include	<wxMDialogs.h>
 #endif
 

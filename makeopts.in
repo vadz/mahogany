@@ -29,8 +29,8 @@ GUI_DEFS=$(WXDEFS)
 
 
 
-PYTHON_LINK = @PYTHON_LINK@
-PYTHON_INCLUDE = @PYTHON_INCLUDE@ # removed, as it is -I/usr/include and interferes with egcs @PYTHON_INCLUDE@
+PYTHON_LINK = @PYTHON_LINK@ @LIBDL_LINK@
+PYTHON_INCLUDE = @PYTHON_INCLUDE@ 
 
 # output dir for binaries:
 ODIR = .

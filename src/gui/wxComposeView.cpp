@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:22:43  karsten
+ * started integration of python, fixed bug in wxFText/word wrapping
+ *
  * Revision 1.1  1998/03/14 12:21:21  karsten
  * first try at a complete archive
  *
@@ -281,13 +284,17 @@ wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
-   if(strcmp(win.GetName(),"toField")==0 ||
+   String	tmp = txtTo->GetValue();
+   int l = tmp.length();
+
+   if(
+      (strcmp(win.GetName(),"toField")==0
+	 && tmp.substr(l-1,1) == " ")
+      ||
       strcmp(win.GetName(),"button") == 0)
    {
       const char *expStr = NULL;
-      String	tmp = txtTo->GetValue();
-      int l = tmp.length();
-      if(l > 0  &&  tmp.substr(l-1,1) == " ")
+      if(l > 0)
       {
 	 tmp = tmp.substr(0,l-1);
 	 txtTo->SetValue(WXCPTR tmp.c_str());

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:22:42  karsten
+ * started integration of python, fixed bug in wxFText/word wrapping
+ *
  * Revision 1.1  1998/03/14 12:21:14  karsten
  * first try at a complete archive
  *
@@ -58,6 +61,8 @@ private:
    /// The To: field
    wxText	*txtTo;
    wxMessage	*txtToLabel;
+   // last length of To field (for expansion)
+   int		txtToLastLength;
    /// The CC: field
    wxText	*txtCC;
    wxMessage	*txtCCLabel;

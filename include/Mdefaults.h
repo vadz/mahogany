@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/16 18:22:40  karsten
+ * started integration of python, fixed bug in wxFText/word wrapping
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -93,6 +96,8 @@
 #define	MC_ADBFILE			"AddressBook"
 /// names of folders to open at startup (semicolon separated list)
 #define	MC_OPENFOLDERS			"OpenFolders"
+/// path for Python
+#define	MC_PYTHONPATH			"PythonPath"
 /**@name For Profiles: */
 //@{
 /// the user's full name
@@ -222,6 +227,8 @@
 #define	MC_ADBFILE_D			"M.adb"
 /// names of folders to open at startup
 #define	MC_OPENFOLDERS_D		"INBOX"
+/// path for Python
+#define	MC_PYTHONPATH_D			""
 /**@name For Profiles: */
 //@{
 //@}

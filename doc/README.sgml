@@ -1,0 +1,97 @@
+<!-- This is a set of compilation/installation/release notes on M -->
+
+<!doctype linuxdoc system>
+
+<article>
+
+<title><em/M/ release notes
+<author>by Karsten Ball&uuml;der &lt;<tt/Ballueder@usa.net/&gt;
+<date>0.0 ($Revision$)
+<abstract>
+This document is a set of notes about how to compile and install M. It
+also covers some frequently asked questions.
+</abstract>
+
+<toc>
+
+<sect>Introduction
+<p>
+<em/M/ is intended to be a powerful mail and news client. The
+following points were significant in the development of it
+<enum>
+<item>
+it should have an easy to use graphical user interface
+<item>
+it should be powerful, being able to replace awkward tools such as
+procmail, thus it must have a built in scripting language
+<item>
+it should have full support for a wide range of standards, including
+full MIME support
+<item>
+it should run on a wide variety of systems
+</enum>
+
+<sect>Compilation notes
+
+<sect1>Operating systems specific
+
+<sect2>Linux
+
+If compiling with a non-default compiler like egcs, make sure that
+<tt>/usr/include</tt> is not in the include path, neither should
+<tt>/usr/lib</tt> be explicitly listed.
+
+<sect2>Solaris/SunOS
+
+<sect1>Other issues
+
+<sect2>STL
+<em/M/ uses the STL, so you need a sufficiently recent compiler,
+i.e. <tt/egcs/ or <tt/gcc-2.8/.
+
+<sect2>Python
+<tt/configure/ looks for Python in
+<tt>/usr/local/src/Python-1.3</tt>. If your Python is installed in a
+different location, change the variable <tt/PYTHON_PATH/ at the
+beginning of <tt/configure/. 
+
+<p>
+This document is the user's guide to the SGML-Tools document processing system.
+It contains more or less everything you need to know to set up
+SGML-Tools and write documents using it.  See <tt/example.sgml/ for
+an example of an SGML document that you can use as a model for your
+own documents.
+
+<sect>Installation
+<p>
+You can download the latest version of M from
+<itemize>
+<item><htmlurl url="http://Ballueder.home.ml.org/M/"
+name="http://Ballueder.home.ml.org/M/">
+</itemize>
+
+You can also get up-to-date information on M from the 
+<url url="http://Ballueder.home.ml.org/M/" name="M WWW Page">.
+
+<sect1>Requirements
+<p>
+The file <tt/sgml-tools-0.99.20.tar.gz/ contains everything that you
+need to write SGML documents and convert them to groff, LaTeX,
+PostScript, HTML, GNU info, LyX, and RTF.  In addition to this
+package, you will need some additional tools for generating formatted
+output.
+<enum>
+<item><tt/groff/.  You <em/need/ version 1.08 or greater.  You can get
+this from <htmlurl url="ftp://prep.ai.mit.edu/pub/gnu"
+name="ftp://prep.ai.mit.edu/pub/gnu">.  There is a Linux binary
+version at <htmlurl url="ftp://sunsite.unc.edu/pub/Linux/utils/text"
+name="ftp://sunsite.unc.edu/pub/Linux/utils/text"> as well.  You
+will need <tt/groff/ to produce plain text from your SGML documents.
+<tt/nroff/ will <em/not/ work!
+</enum>
+<sect1>Installing The Software
+<p>
+The steps needed to install and configure the SGML-Tools are:
+
+
+</article>

@@ -8,9 +8,11 @@ EXTRA = extra
 
 include makeopts
 
-all: 
+all: 	config program
+
+program:
 	echo $(BUILDDIR)
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
@@ -18,9 +20,15 @@ clean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
+config:	configure
+
+configure:	configure.in
+	autoconf
+	./configure
+
 bak backup:
 	tar cvf M-`date +"%y-%m-%d"`.tar $(SUB_DIRS) $(FILES) $(EXTRA)
 	gzip -9 M-`date +"%y-%m-%d"`.tar
 
-.PHONY: all dep clean bak backup
+.PHONY: all dep clean bak backup config program
 
