@@ -3600,13 +3600,19 @@ wxComposeView::BuildMessage() const
                MessageParameterList dlist, plist;
 
                String filename = part->GetFileName();
+               String name = part->GetName();
+
+               if ( !name.empty() )
+               {
+                  MessageParameter *p;
+
+                  p = new MessageParameter("FILENAME", wxFileNameFromPath(name));
+                  dlist.push_back(p);
+               }
 
                if ( !filename.empty() )
                {
                   MessageParameter *p;
-
-                  p = new MessageParameter("FILENAME", filename);
-                  dlist.push_back(p);
 
                   p = new MessageParameter("NAME", filename);
                   plist.push_back(p);
