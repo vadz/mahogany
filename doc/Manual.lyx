@@ -6164,11 +6164,7 @@ Folders
  be asked for the confirmation.
  They also allow to set a similar threshold for the number of message headers
  retrieved: you will be asked before retrieving more than the specified
- number of headers (default is 
-\begin_inset Formula \( 100 \)
-\end_inset 
-
-) from server.
+ number of headers (default is 100) from server.
  This limit is called 
 \begin_inset Quotes eld
 \end_inset 
@@ -6186,11 +6182,7 @@ hard
 \end_inset 
 
  one which can be set in the same page.
- The hard limit, if set (it has value 
-\begin_inset Formula \( 0 \)
-\end_inset 
-
-, i.e.
+ The hard limit, if set (it has value 0, i.e.
  disabled, by default) says that at most that many message headers will
  be downloaded.
  Unlike the soft limit, it is unconditional and no questions will be asked
@@ -6807,22 +6799,4 @@ Simple, press '#' or 'x' or select Message/Expunge from the menu.
  folder.
  If you use the Trash folder, this only applies to that one as all other
  folders will move messages straight to Trash instead of marking them deleted.
-\layout Subsection
-
-Commands in the folder viewer get executed twice, keybindings are funny
-\layout Standard
-
-
-\shape italic 
-When copying messages via the 'C' key, I get the folder tree dialog twice.
- Trying to toggle header display by pressing 'H' toggles it and immediately
- switches back.
- What is going on?
-\layout Standard
-
-It's caused by a last minute bug that sneaked into the stable release branch
- of wxWindows that we compiled our release with.
- We have reported it and it should be gone soon, so you could try to re-compile
- Mahogany with the very latest wxWindows version or try one of our daily
- recompiles which will have the fix in it as soon as it has been fixed.
 \the_end
