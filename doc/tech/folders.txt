@@ -1,0 +1,45 @@
+                   A brief introduction to folder classes
+                   ======================================
+
+0. About this note
+   ---------------
+
+This note briefly explains the classes used to handle mail folders
+in Mahogany and the relation between them.
+
+
+1. Classes
+   --------------------
+
+1. there is a very simple (well, I understand it  well since I wrote it :-)
+   MFolder class which is a "logical desription of the folder": it means
+   that you can use it to get the folder name, comment, type, flags, its
+   children (in the tree) &c. MFolder represents a folder in the folder
+   tree so when you delete/create/rename it, you delete/... an entry in the
+   tree. But MFolder is just a folder description - it doesn't do anything
+   non trivial like, say, contain messages.
+
+2. then there is a whole bunch of MailFolderXXX classes: MailFolder is the
+   ABC for all of them and most (all?) of its method are pure virtual.
+   MailFolderCmn implements some of MailFolder methods which will probably
+   be implemented in the same manner for all derived classes. Finally,
+   MailFolderCC is c-client specific implementation of MailFolder.
+
+   All these classes (you only see MailFolder in the user code ideally,
+   although it's not really the case now...) provide methods to really
+   work with folders: i.e. get the messages from them, add messages, delete
+   them...
+
+3. however, you usually don't use MailFolder directly: instead, you use
+   ASMailFolder ("AS" == "async"). Using MailFolder was easy (whatever you
+   thought about it :-) - you just called a method and it returned a result.
+   With ASMailFolder, you call a method with the same name (e.g. GetMessage)
+   but don't return a "Message *" back - instead you get a ticket.
+
+   Some time later, you will get the notification (in MMailFolderEvent) telling
+   you that the operation (which was running asynchronously, may be in another
+   thread) is completed and only then you get the method result.
+
+   As Mahogany will become fully MT sooner or later, you should always use
+   ASMailFolder (even though it's more complicated) instead of MailFolder. The
+   good example of using it is wxFolderView class.
