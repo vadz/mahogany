@@ -1253,7 +1253,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox("",MH_DIALOG_FOLDER_FILTERS);
+   wxStaticBox *box = CreateStdButtonsAndBox("",MH_DIALOG_QUICK_FILTERS);
 
    wxStaticText *msg = new wxStaticText
                            (
