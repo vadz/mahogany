@@ -988,7 +988,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                                                GetSize());
    wxHtmlWindow *top = new MyHtmlWindow(this, sp);
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
-   sp->SplitHorizontally(top,bottom,240);
+
+   // FIXME: have to hard code the size because there is no way to get the
+   //        size of HTML page
+   sp->SplitHorizontally(top, bottom, 260);
 
    wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
@@ -1093,22 +1096,21 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
                       wxDefaultPosition,
-                      // this is ugly, but having scrollbars is even uglier
-#ifdef __WXMSW__
-                      wxSize(400, 400),
-#else  // !MSW
-                      wxSize(400, 400),
-#endif // MSW/!MSW
+                      // hard coding the size is ugly but how to know how much space the HTML
+                      // page needs (vertically)? (FIXME)
+                      wxSize(400, 480),
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+
+   g_pSplashScreen = (wxMFrame *)this;
 
 #ifdef USE_SPLASH_LOG
    wxLog::SetActiveTarget(new SplashKillerLog);
 #endif // USE_SPLASH_LOG
 
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
-   g_pSplashScreen = (wxMFrame *)this;
+
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
 }
