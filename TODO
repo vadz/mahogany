@@ -9,14 +9,11 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-9		wxLayout PS printing text overlaps as font sizes are
-		wrong. Install different AFM set?
-
-
-3		wxDialUpManager ping method is broken and does not
-		work, need source code of ping command.
+9		New mail messages for non-"New Mail" folders don't
+		appear anymore
 
 9	KB	wxLayout:
+		- cannot type text when NUMLOCK is on
 		- speed up by only running Layout() for recalculations 
 		  rather than the full RequestUpdate()
 		- reduce the scrollbar flickering somehow
@@ -27,20 +24,22 @@ $Id$
 		- ctrl keys not recognised when CAPSLOCK is down
 		- garbage at end of messages is back
 		- add blinking cursor
-		- cannot type text when NUMLOCK is on
 		- accents don´t work??
+		- word wrap occasionally puts space at beginning of
+		  new line
+		- add import of own clipboard format
 
 	KB	MessageView:
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
 
+8	KB	integrate imap 4.6 and recently received patches
+
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
 
 7	KB	selecting/deselecting only message in folder
-
-		Keep Statusbar static with three fields?
 
 9	VZ	can we have *all* log messages (incl status) appear in 
 		the log window?
@@ -71,10 +70,6 @@ $Id$
 
 5	VZ	"hidden" flag for folder treecontrol
 
-
-
-7		show headers menu entry is inverted ??
-
 7		After setting date format and closing date fmt dialog, 
 		main config dialog remains completely disabled under
 		KDE and must be closed with window-close button
@@ -85,10 +80,11 @@ $Id$
 		changing option manually in config file does not work
 
 
-6	KB	Fix PalmExport: 1. strip illegal characters like '
-		                2. find out why "Fax" appears
+6	KB	Fix PalmExport: 1. handle illegal characters like '
+				2. use libpisock
 
 4	KB	add trash
+
 3		Add routine to write large headers.
 
 7	KB	group reply misses additional To entries
@@ -104,9 +100,9 @@ $Id$
 7	VZ/KB  UPGRADE.CPP/WIZARD:
 		- add support for Outbox and Trash folders
 		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
+		- choose INBOX/New Mail
 
 4		TABs in messages don't show (CRAC test message)
-
 
 		main window hides about-splash - not nice
 		--> 2nd timer to bring it to top and run wxYield() to
