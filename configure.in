@@ -248,9 +248,9 @@ DBGFLAGS=
 if test "$USE_DEBUG" = 1; then
 	if test "$GCC" = "yes"
 	then
-		DBGFLAGS="-O0 -g3 -DDEBUG"
+		DBGFLAGS="-O0 -g3 -DDEBUG -D__WXDEBUG__"
 	else
-		DBGFLAGS="-g -DDEBUG"
+		DBGFLAGS="-g -DDEBUG -D__WXDEBUG__"
 	fi
 fi
 
