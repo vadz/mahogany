@@ -86,6 +86,10 @@ extern "C"
 #define USE_READ_PROGRESS
 //#define USE_BLOCK_NOTIFY
 
+#ifdef USE_BLOCK_NOTIFY
+   #include <wx/datetime.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -498,6 +502,9 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
    }
    else
    {
+      wxLogTrace(TRACE_MF_CALLS, "Closing folder '%s'",
+                 folder->GetFullName().c_str());
+
       mail_close(stream);
    }
 }
@@ -506,15 +513,19 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
 static void CloseOrKeepStream(MAILSTREAM *stream,
                               const MFolder *folder)
 {
+   ServerInfoEntry *server;
    if ( IsReusableFolder(folder) )
    {
       // do look for the server
-      CloseOrKeepStream(stream, folder, ServerInfoEntry::GetOrCreate(folder));
+      server = ServerInfoEntry::GetOrCreate(folder);
    }
    else // no need
    {
-      mail_close(stream);
+      // this will just call mail_close() in CloseOrKeepStream() above
+      server = NULL;
    }
+
+   CloseOrKeepStream(stream, folder, server);
 }
 
 /**
@@ -2035,9 +2046,6 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
 
    String imapspec = ::GetImapSpec(folder);
 
-   wxLogTrace(TRACE_MF_CALLS, "Trying to create MailFolderCC '%s'.",
-              imapspec.c_str());
-
    String login, password;
    if ( !GetAuthInfoForFolder(folder, login, password) )
    {
@@ -2061,6 +2069,9 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    // disable the errors during the first try as it's normal for it to not
    // exist
    {
+      wxLogTrace(TRACE_MF_CALLS, "Trying to open MailFolderCC '%s' first.",
+                 imapspec.c_str());
+
       CCErrorDisabler noErrs;
       stream = mail_open(NULL, (char *)imapspec.c_str(),
                          mm_show_debug ? OP_DEBUG : NIL);
@@ -2079,6 +2090,9 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    // stream to allow us to reuse the connection here
    if ( !stream || stream->halfopen )
    {
+      wxLogTrace(TRACE_MF_CALLS, "Creating MailFolderCC '%s'.",
+                 imapspec.c_str());
+
       // stream may be NIL or not here
       mail_create(stream, (char *)imapspec.c_str());
 
@@ -2089,6 +2103,9 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       }
 
       // and try to open it again now
+      wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s' after creating it.",
+                 imapspec.c_str());
+
       stream = mail_open(stream, (char *)imapspec.c_str(),
                          mm_show_debug ? OP_DEBUG : NIL);
    }
@@ -2498,6 +2515,9 @@ MailFolderCC::Open(OpenMode openmode)
          // try to reuse an existing stream if possible
          ServerInfoEntry *server = ServerInfoEntry::Get(m_mfolder);
 
+         wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s'.",
+                    m_ImapSpec.c_str());
+
          m_MailStream = mail_open(server ? server->GetStream() : NIL,
                                   (char *)m_ImapSpec.c_str(), ccOptions);
       }
@@ -2521,6 +2541,9 @@ MailFolderCC::Open(OpenMode openmode)
       {
          SetLoginData(m_login, m_password);
       }
+
+      wxLogTrace(TRACE_MF_CALLS, "Half opening MailFolderCC '%s'.",
+                 m_ImapSpec.c_str());
 
       // redirect all notifications to us again
       CCDefaultFolder def(this);
@@ -3118,9 +3141,6 @@ MailFolderCC::Checkpoint(void)
       }
    }
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
-              GetName().c_str());
-
 #ifdef USE_DIALUP
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
@@ -3133,6 +3153,9 @@ MailFolderCC::Checkpoint(void)
    MailFolderLocker lock(this);
    if ( lock )
    {
+      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Checkpoint() on %s.",
+                 GetName().c_str());
+
       mail_check(m_MailStream); // update flags, etc, .newsrc
    }
 }
@@ -3140,9 +3163,6 @@ MailFolderCC::Checkpoint(void)
 bool
 MailFolderCC::Ping(void)
 {
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
-              GetName().c_str());
-
    // we don't want to reopen the folder from here, this leads to inifinite
    // loops if the network connection goes down because we are called from a
    // timer event and so if folder pinging taks too long, we will be called
@@ -3284,6 +3304,9 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
       SetLoginData(login, password);
 
       MMStatusRedirector statusRedir(spec, &mailstatus);
+
+      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::CheckStatus() on %s.",
+                 spec.c_str());
 
       mail_status(NULL, (char *)spec.c_str(), STATUS_FLAGS);
    }
@@ -4161,6 +4184,9 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
          opFlags |= ST_UID;
 
       CHECK( m_MailStream, 0, "DoSetSequenceFlag: folder is closed" );
+
+      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SetFlags(%s) = %s",
+                 sequence.c_str(), flags.c_str());
 
       mail_flag(m_MailStream,
                 (char *)sequence.c_str(),
@@ -6470,8 +6496,6 @@ mm_fatal(char *str)
 // ----------------------------------------------------------------------------
 
 #ifdef USE_BLOCK_NOTIFY
-
-#include <wx/datetime.h>
 
 void *mahogany_block_notify(int reason, void *data)
 {
