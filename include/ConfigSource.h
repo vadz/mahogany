@@ -339,7 +339,8 @@ public:
 
       @param filename the name of config file or empty to use the default one
     */
-   static ConfigSourceLocal *CreateDefault(const String& filename = _T(""));
+   static ConfigSourceLocal *CreateDefault(const String& filename = _T(""))
+      { return new ConfigSourceLocal(CreateDefaultConfig(filename), _T("")); }
 
    /**
       Create the config source associated with the given file.
@@ -397,7 +398,7 @@ public:
    // for internal use by ProfileImpl only, don't use elsewhere
    wxConfigBase *GetConfig() const { return m_config; }
 
-private:
+protected:
 #ifdef OS_WIN
    // create wxRegConfig we use under Windows
    static wxConfigBase *CreateRegConfig();
@@ -407,7 +408,11 @@ private:
    static wxConfigBase *CreateFileConfig(const String& fnameLocal,
                                          const String& fnameGlobal = _T(""));
 
+   // create either wxRegConfig or wxFileConfig using the same logic as
+   // CreateDefault()
+   static wxConfigBase *CreateDefaultConfig(const String& filename);
 
+private:
    // the config object we use
    wxConfigBase *m_config;
 };

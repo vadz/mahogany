@@ -1153,7 +1153,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
    CreateFolderWizard *wiz = (CreateFolderWizard*)GetWizard();
    CreateFolderWizard::FolderParams *params = wiz->GetParams();
 
-   MFolder_obj f = wiz->GetParentFolder();
+   MFolder_obj f(wiz->GetParentFolder());
    Profile *profile;
    if ( f )
    {

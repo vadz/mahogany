@@ -374,7 +374,7 @@ MailFolderVirt::GetHeaderInfo(ArrayHeaderInfo& headers, const Sequence& seq)
       if ( !msg )
          break;
 
-      HeaderInfoList_obj hil = msg->mf->GetHeaders();
+      HeaderInfoList_obj hil(msg->mf->GetHeaders());
 
       HeaderInfo * const hiDst = headers[n - 1]; // -1 to make index from msgno
       if ( !hiDst )
@@ -574,7 +574,7 @@ MailFolderVirt::DoSetMessageFlag(SequenceKind kind,
    const MsgnoType msgno = kind == SEQ_MSGNO ? uid : GetMsgnoFromUID(uid);
    CHECK( msgno != MSGNO_ILLEGAL, false, _T("SetMessageFlag: invalid UID") );
 
-   HeaderInfoList_obj headers = GetHeaders();
+   HeaderInfoList_obj headers(GetHeaders());
    CHECK( headers, false, _T("SetMessageFlag: couldn't get headers") );
 
    HeaderInfo *hi = headers->GetItemByMsgno(msgno);
@@ -624,7 +624,7 @@ bool MailFolderVirt::AppendMessage(const Message& msg)
    if ( !mf )
       return false;
 
-   HeaderInfoList_obj hil = mf->GetHeaders();
+   HeaderInfoList_obj hil(mf->GetHeaders());
    if ( !hil )
       return false;
 

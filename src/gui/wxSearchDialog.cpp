@@ -325,7 +325,7 @@ void wxMessageSearchDialog::OnUpdateUIRemove(wxUpdateUIEvent& event)
 
 void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& /* event */)
 {
-   MFolder_obj folder = MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles);
+   MFolder_obj folder(MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles));
    if ( folder )
    {
       m_lboxFolders->Append('/' + folder->GetFullName());

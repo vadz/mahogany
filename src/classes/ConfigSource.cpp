@@ -30,7 +30,7 @@
 
    #include <wx/utils.h>               // for wxGetHomeDir
 
-   #include "Profiles.h"               // for M_PROFILE_CONFIG_SECTION
+   #include "Profile.h"                // for M_PROFILE_CONFIG_SECTION
 #endif // USE_PCH
 
 #ifdef  OS_WIN
@@ -322,7 +322,8 @@ ConfigSourceLocal::ConfigSourceLocal(wxConfigBase *config, const String& name)
 }
 
 
-ConfigSourceLocal *ConfigSourceLocal::CreateDefault(const String& filename)
+/* static */
+wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
 {
    wxConfigBase *config = NULL;
 
@@ -354,7 +355,7 @@ ConfigSourceLocal *ConfigSourceLocal::CreateDefault(const String& filename)
          {
             wxLogError(_("Cannot create the directory for configuration "
                          "files '%s'."), localFilePath.c_str());
-            return;
+            return NULL;
          }
 
          wxLogInfo(_("Created directory '%s' for configuration files."),
@@ -514,7 +515,7 @@ ConfigSourceLocal *ConfigSourceLocal::CreateDefault(const String& filename)
       config = CreateFileConfig(localFilePath, globalFilePath);
    }
 
-   return new ConfigSourceLocal(config, _T(""));
+   return config;
 }
 
 /* static */

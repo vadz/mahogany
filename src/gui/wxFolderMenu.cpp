@@ -141,7 +141,7 @@ void wxFolderMenuData::AddSubFoldersToMenu(wxString& folderName,
    size_t nSubfolders = folder->GetSubfolderCount();
    for ( size_t n = 0; n < nSubfolders; n++ )
    {
-      MFolder_obj subfolder = folder->GetSubfolder(n);
+      MFolder_obj subfolder(folder->GetSubfolder(n));
       if ( !subfolder.IsOk() )
       {
          FAIL_MSG( _T("no subfolder?") );

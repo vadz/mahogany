@@ -216,10 +216,10 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    // VZ: I'm not sure at all about what exactly we're trying to do here so
    //     this is almost surely wrong - but the old code was even more wrong
    //     than the current one! (FIXME)
-   AddressList_obj addrListReplyTo = GetAddressList(MAT_REPLYTO);
+   AddressList_obj addrListReplyTo(GetAddressList(MAT_REPLYTO));
    Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : NULL;
 
-   AddressList_obj addrListFrom = GetAddressList(MAT_FROM);
+   AddressList_obj addrListFrom(GetAddressList(MAT_FROM));
    Address *addrFrom = addrListFrom ? addrListFrom->GetFirst() : NULL;
    if ( !addrFrom )
       addrFrom = addrReplyTo;

@@ -205,7 +205,7 @@ protected:
    Message *GetMessage(UIdType uid) const
    {
       // do it synchronously (FIXME should we?)
-      MailFolder_obj mf = GetMailFolder();
+      MailFolder_obj mf(GetMailFolder());
       CHECK( mf, NULL, _T("no folder in MsgCmdProcImpl::GetMessage()") );
 
       return mf->GetMessage(uid);
@@ -893,7 +893,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 void
 MsgCmdProcImpl::ShowUIDL(UIdType uid)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowUIDL") );
 
    String uidString = mf->GetMessageUID(GetFocus());
@@ -932,7 +932,7 @@ void
 MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
 {
    // do it synchronously (FIXME should we?)
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ShowMIMEDialog") );
 
    const MimePart *part = NULL;
@@ -1015,12 +1015,12 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
          continue;
       }
 
-      SendMessage_obj sendMsg = SendMessage::CreateResent
-                                (
-                                 m_asmf->GetProfile(),
-                                 msg,
-                                 GetFrame()
-                                );
+      SendMessage_obj sendMsg(SendMessage::CreateResent
+                              (
+                                  m_asmf->GetProfile(),
+                                  msg,
+                                  GetFrame()
+                              ));
       if ( !sendMsg )
       {
          ERRORMESSAGE((_("Failed to create a new message.")));
@@ -1070,19 +1070,19 @@ MsgCmdProcImpl::ResendMessages(const UIdArray& messages)
    size_t countOk = 0;
    for ( size_t n = 0; n < count; n++ )
    {
-      Message_obj msg = GetMessage(messages[n]);
+      Message_obj msg(GetMessage(messages[n]));
       if ( !msg )
       {
          ERRORMESSAGE((_("Failed to retrieve the message to be resent")));
          continue;
       }
 
-      SendMessage_obj sendMsg = SendMessage::CreateResent
-                                (
-                                 m_asmf->GetProfile(),
-                                 msg.Get(),
-                                 GetFrame()
-                                );
+      SendMessage_obj sendMsg(SendMessage::CreateResent
+                              (
+                                  m_asmf->GetProfile(),
+                                  msg.Get(),
+                                  GetFrame()
+                              ));
 
       if ( !sendMsg )
       {
@@ -1231,10 +1231,10 @@ MsgCmdProcImpl::UndeleteMessages(const UIdArray& selections)
 void
 MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK_RET( mf, _T("no folder in MsgCmdProcImpl::ToggleMessages") );
 
-   HeaderInfoList_obj hil = mf->GetHeaders();
+   HeaderInfoList_obj hil(mf->GetHeaders());
    CHECK_RET( hil, _T("can't toggle messages without folder listing") );
 
    size_t count = messages.GetCount();
@@ -1352,7 +1352,7 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
 {
    // FIXME: should this be implemented as async operation?
 
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK_RET( mf, _T("message preview without folder?") );
 
    // extract all addresses from the selected messages to this array
@@ -1449,7 +1449,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 #if wxUSE_DRAG_AND_DROP
    bool didDrop = false;
 
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
    MMessagesDataObject dropData(this, mf, selections);

@@ -1463,7 +1463,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    // "can't be opened" flag in the folder properties dialog...
    if ( folderType == MF_IMAP )
    {
-      MFolder_obj folderParent = folder->GetParent();
+      MFolder_obj folderParent(folder->GetParent());
 
       // are we're the child of the IMAP server entry?
       if ( folderParent &&

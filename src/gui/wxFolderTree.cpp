@@ -2038,7 +2038,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 
 void wxFolderTreeImpl::DoFolderClear()
 {
-   MFolder_obj folder = m_sink->GetSelection();
+   MFolder_obj folder(m_sink->GetSelection());
    if ( !folder )
    {
       wxLogError(_("Please select the folder to clear first."));
@@ -2051,7 +2051,7 @@ void wxFolderTreeImpl::DoFolderClear()
 
 void wxFolderTreeImpl::DoFolderUpdate()
 {
-   MFolder_obj folder = m_sink->GetSelection();
+   MFolder_obj folder(m_sink->GetSelection());
    if ( !folder.IsOk() )
    {
       wxLogError(_("Please select the folder to update first."));
@@ -2064,7 +2064,7 @@ void wxFolderTreeImpl::DoFolderUpdate()
 
 void wxFolderTreeImpl::DoFolderClose()
 {
-   MFolder_obj folder = m_sink->GetSelection();
+   MFolder_obj folder(m_sink->GetSelection());
    if ( !folder.IsOk() )
    {
       wxLogError(_("Please select the folder to close first."));
@@ -3052,7 +3052,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 
       // we don't have the status right now, count the messages (the folder
       // should be already opened, we don't want to open it just for this)
-      MailFolder_obj mf = MailFolder::GetOpenedFolderFor(folder);
+      MailFolder_obj mf(MailFolder::GetOpenedFolderFor(folder));
       if ( !mf )
       {
          wxLogDebug(_T("Failed to update status for '%s'"), folderName.c_str());

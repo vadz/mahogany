@@ -1035,7 +1035,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 void
 VarExpander::GetNameForAddress(String *value, MessageAddressType type) const
 {
-   AddressList_obj addrList = m_msg->GetAddressList(type);
+   AddressList_obj addrList(m_msg->GetAddressList(type));
    Address *addr = addrList ? addrList->GetFirst() : NULL;
    if ( addr )
       *value = addr->GetName();

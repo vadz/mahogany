@@ -662,7 +662,7 @@ void MailFolderCmn::CacheLastMessages(MsgnoType count)
 {
    if ( count > 1 )
    {
-      HeaderInfoList_obj hil = GetHeaders();
+      HeaderInfoList_obj hil(GetHeaders());
 
       CHECK_RET( hil, _T("Failed to cache messages because there are no headers") );
 
@@ -741,7 +741,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    String tmpstr;
    for ( int i = 0; i < n; i++ )
    {
-      Message_obj msg = GetMessage((*selections)[i]);
+      Message_obj msg(GetMessage((*selections)[i]));
 
       if ( msg )
       {
@@ -948,7 +948,7 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 
 UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
 {
-   HeaderInfoList_obj hil = GetHeaders();
+   HeaderInfoList_obj hil(GetHeaders());
    CHECK( hil, NULL, _T("no listing in SearchMessages") );
 
    // the search results
@@ -1004,7 +1004,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
       }
       else
       {
-         Message_obj msg = GetMessage(hi->GetUId());
+         Message_obj msg(GetMessage(hi->GetUId()));
          if ( !msg )
          {
             FAIL_MSG( _T("SearchMessages: can't get message") );
@@ -1271,7 +1271,7 @@ extern "C"
 bool
 MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 {
-   HeaderInfoList_obj hil = GetHeaders();
+   HeaderInfoList_obj hil(GetHeaders());
 
    CHECK( hil, false, _T("no listing to sort") );
 
@@ -1314,7 +1314,7 @@ MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 bool MailFolderCmn::ThreadMessages(const ThreadParams& thrParams,
                                    ThreadData *thrData)
 {
-   HeaderInfoList_obj hil = GetHeaders();
+   HeaderInfoList_obj hil(GetHeaders());
 
    CHECK( hil, false, _T("no listing to sort") );
 
@@ -1847,7 +1847,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
          return true;
    }
 
-   MFolder_obj folder = folderWithNewMail;
+   MFolder_obj folder(folderWithNewMail);
 
    return DoProcessNewMail
           (

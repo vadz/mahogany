@@ -1898,7 +1898,7 @@ void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
       pp->writeEntry("PalmBox", "PalmBox");
       pp->DecRef();
 
-      MFolder_obj folderPalm = MFolder::Create("PalmBox", MF_FILE);
+      MFolder_obj folderPalm(MFolder::Create("PalmBox", MF_FILE));
 
       if( !folderPalm )
       {
@@ -3426,12 +3426,12 @@ SetupServers(void)
    serverName = READ_APPCONFIG_TEXT(MP_NNTPHOST);
    if ( !serverName.empty() )
    {
-      MFolder_obj mfolder = CreateServerEntry
-                            (
+      MFolder_obj mfolder(CreateServerEntry
+                          (
                               _("NNTP Server"),
                               MF_NNTP,
                               MF_FLAGS_ANON | MF_FLAGS_GROUP
-                            );
+                          ));
 
       if ( !mfolder )
       {
@@ -3448,12 +3448,12 @@ SetupServers(void)
    serverName = READ_APPCONFIG_TEXT(MP_IMAPHOST);
    if ( !serverName.empty() )
    {
-      MFolder_obj mfolder = CreateServerEntry
-                            (
+      MFolder_obj mfolder(CreateServerEntry
+                          (
                               _("IMAP Server"),
                               MF_IMAP,
                               MF_FLAGS_GROUP
-                            );
+                          ));
 
       if ( !mfolder )
       {
@@ -3487,12 +3487,12 @@ SetupServers(void)
    {
       // the POP3 folder is created as incoming as otherwise it doesn't work
       // really well
-      MFolder_obj mfolder = CreateServerEntry
-                            (
-                             _("POP3 Server"),
-                             MF_POP,
-                             MF_FLAGS_INCOMING
-                            );
+      MFolder_obj mfolder(CreateServerEntry
+                          (
+                              _("POP3 Server"),
+                              MF_POP,
+                              MF_FLAGS_INCOMING
+                          ));
 
       if ( !mfolder )
       {
@@ -3509,12 +3509,12 @@ SetupServers(void)
    String newsspool = MailFolderCC::GetNewsSpool();
    if ( wxPathExists(newsspool) )
    {
-      MFolder_obj mfolder = CreateServerEntry
-                            (
+      MFolder_obj mfolder(CreateServerEntry
+                         (
                              _("News spool"),
                              MF_NEWS,
                              MF_FLAGS_GROUP
-                            );
+                         ));
       if ( !mfolder )
       {
          wxLogError(_("Could not create an entry for the local news spool."));

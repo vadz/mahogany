@@ -2384,7 +2384,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
          // check if the folder is still opened - the connection might have
          // been broken between the moment we realized we needed the headers
          // and now
-         MailFolder_obj mf = m_FolderView->GetMailFolder();
+         MailFolder_obj mf(m_FolderView->GetMailFolder());
          if ( !mf || !mf->IsOpened() )
          {
             return;
@@ -3269,7 +3269,7 @@ unsigned long wxFolderView::GetDeletedCount() const
 {
    if ( m_nDeleted == UID_ILLEGAL )
    {
-      MailFolder_obj mf = GetMailFolder();
+      MailFolder_obj mf(GetMailFolder());
 
       if ( !mf )
       {
@@ -3313,7 +3313,7 @@ bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 
 bool wxFolderView::SelectNextUnread(bool takeNextIfNoUnread)
 {
-   HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
+   HeaderInfoList_obj hil(m_ASMailFolder->GetHeaders());
 
    int idxFocused = m_FolderCtrl->GetFocusedItem();
    if ( idxFocused == -1 )
@@ -3386,7 +3386,7 @@ wxFolderView::SelectInitialMessage()
    {
       // don't waste time looking for unread messages if we already know that
       // there are none (as we often do)
-      MailFolder_obj mf = GetMailFolder();
+      MailFolder_obj mf(GetMailFolder());
 
       if ( mf )
       {
@@ -3608,7 +3608,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& /* event */)
 void
 wxFolderView::Update()
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
    CHECK_RET( mf, _T("wxFolderView::Update(): no folder") );
 
    m_FolderCtrl->UpdateListing(mf->GetHeaders());
@@ -3667,7 +3667,7 @@ wxFolderView::DoClear(bool keepTheViewer)
          // before checking if we have any messages to expunge, check that the
          // folder is still opened: otherwise we'd hit an assert in MailFolder
          // because we'd call CountDeletedMessages() on a closed folder
-         MailFolder_obj mf = GetMailFolder();
+         MailFolder_obj mf(GetMailFolder());
          if ( !!mf && mf->IsOpened() && mf->CountDeletedMessages() > 0 )
          {
             // optionally "catch up" (i.e. mark all existing articles in a
@@ -3699,7 +3699,7 @@ wxFolderView::DoClear(bool keepTheViewer)
       }
 
       // this folder is not associated with our frame any more
-      MailFolder_obj mf = m_ASMailFolder->GetMailFolder();
+      MailFolder_obj mf(m_ASMailFolder->GetMailFolder());
       mf->SetInteractiveFrame(NULL);
 
       m_ASMailFolder->DecRef();
@@ -4065,7 +4065,7 @@ void wxFolderView::SelectAllByStatus(MailFolder::MessageStatus status,
 {
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
-   HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+   HeaderInfoList_obj hil(GetFolder()->GetHeaders());
    CHECK_RET( hil, _T("can't select unread or flagged messages without folder listing") );
 
    MsgnoArray *indices = hil->GetAllHeadersByFlag(status, isSet);
@@ -4649,7 +4649,7 @@ wxFolderView::OnFocusChange(long idx, UIdType uid)
 
    if ( uid != UID_ILLEGAL && m_settings.updateStatus )
    {
-      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+      HeaderInfoList_obj hil(GetFolder()->GetHeaders());
       CHECK_RET( hil, _T("failed to get headers") );
 
       HeaderVarExpander expander(hil[idx],
@@ -4700,7 +4700,7 @@ void wxFolderView::OnMsgViewerChange(wxWindow *viewerNew)
 
 void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
 
    if ( event.GetFolder() == mf )
    {
@@ -4728,7 +4728,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 void
 wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
 
    if ( event.GetFolder() != mf )
       return;
@@ -4754,7 +4754,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    wxLogTrace(M_TRACE_FV_UPDATE, _T("wxFolderView::Expunge(%lu items), now %d"),
               (unsigned long)count, m_FolderCtrl->GetItemCount());
 
-   HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+   HeaderInfoList_obj hil(GetFolder()->GetHeaders());
 
    long itemPreviewed = m_FolderCtrl->GetPreviewedItem();
 
@@ -4813,7 +4813,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 void
 wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
 
    if ( event.GetFolder() == mf )
    {
@@ -4825,11 +4825,11 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 void
 wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 {
-   MailFolder_obj mf = GetMailFolder();
+   MailFolder_obj mf(GetMailFolder());
 
    if ( event.GetFolder() == mf )
    {
-      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+      HeaderInfoList_obj hil(GetFolder()->GetHeaders());
 
       CHECK_RET( hil, _T("no headers but msg status changed?") );
 

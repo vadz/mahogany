@@ -275,7 +275,7 @@ MailFolder::CloseFolder(const MFolder *folder, bool mayLinger)
    // find the associated open folder
    //
    // FIXME: using GetLogin() here is wrong, see comments before MFPool::Find()
-   MailFolder_obj mf = MFPool::Find(driver, folder, folder->GetLogin());
+   MailFolder_obj mf(MFPool::Find(driver, folder, folder->GetLogin()));
    if ( !mf )
    {
       // nothing to close
@@ -1113,7 +1113,7 @@ char MailFolder::GetFolderDelimiter(const MFolder *folder)
 
       case MF_IMAP:
          // for IMAP this depends on server
-         MailFolder_obj mfTmp = OpenFolder(folder, HalfOpen);
+         MailFolder_obj mfTmp(OpenFolder(folder, HalfOpen));
          if ( !mfTmp )
          {
             // guess :-(

@@ -309,7 +309,7 @@ public:
                      const MailFolder *mf = i->GetMailFolder();
 
                      // and append all matching messages to the results folder
-                     HeaderInfoList_obj hil = mf->GetHeaders();
+                     HeaderInfoList_obj hil(mf->GetHeaders());
                      if ( hil )
                      {
                         size_t nMatches = 0;
@@ -317,7 +317,7 @@ public:
                         size_t count = uidsMatching->GetCount();
                         for ( size_t n = 0; n < count; n++ )
                         {
-                           Message_obj msg = mf->GetMessage((*uidsMatching)[n]);
+                           Message_obj msg(mf->GetMessage((*uidsMatching)[n]));
                            if ( msg )
                            {
                               m_mfVirt->AppendMessage(*msg.Get());
@@ -616,7 +616,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ModulesMenu = NULL;
 
    // update the menu to match the initial selection
-   MFolder_obj folder = m_FolderTree->GetSelection();
+   MFolder_obj folder(m_FolderTree->GetSelection());
    if ( folder )
    {
       UpdateFolderMenuUI(folder);
@@ -830,12 +830,12 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
          case WXMENU_FOLDER_OPEN:
          case WXMENU_FOLDER_OPEN_RO:
             {
-               MFolder_obj folder = MDialog_FolderChoose
-                                    (
-                                       this, // parent window
-                                       NULL, // parent folder
-                                       true  // open
-                                    );
+               MFolder_obj folder(MDialog_FolderChoose
+                                  (
+                                      this, // parent window
+                                      NULL, // parent folder
+                                      true  // open
+                                  ));
                if ( folder )
                {
                   OpenFolderViewFrame
@@ -851,7 +851,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_FOLDER_CREATE:
             {
-               MFolder_obj parent = m_FolderTree->GetSelection();
+               MFolder_obj parent(m_FolderTree->GetSelection());
 
                wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
                bool wantsDialog;
@@ -877,7 +877,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_FOLDER_FILTERS:
             {
-               MFolder_obj folder = m_FolderTree->GetSelection();
+               MFolder_obj folder(m_FolderTree->GetSelection());
                if ( folder )
                   ConfigureFiltersForFolder(folder, this);
             }
@@ -934,7 +934,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_FOLDER_UPDATE:
             {
-               MFolder_obj folder = m_FolderTree->GetSelection();
+               MFolder_obj folder(m_FolderTree->GetSelection());
                if ( folder )
                {
                   if ( !MailFolder::CheckFolder(folder) )
@@ -1033,7 +1033,7 @@ void wxMainFrame::DoFolderSearch()
    SearchCriterium crit;
 
    Profile_obj profile(GetFolderProfile());
-   MFolder_obj folder = m_FolderTree->GetSelection();
+   MFolder_obj folder(m_FolderTree->GetSelection());
    if ( ConfigureSearchMessages(&crit, profile, folder, this) )
    {
       AsyncSearchData *searchData = NULL;
@@ -1044,7 +1044,7 @@ void wxMainFrame::DoFolderSearch()
       {
          const String& name = folderNames[n];
 
-         MFolder_obj folder = name;
+         MFolder_obj folder(name);
          if ( !folder )
          {
             wxLogError(_("Can't search for messages in a "
@@ -1221,7 +1221,7 @@ wxMainFrame::GetFolderProfile(void) const
    //
    // this also allows to use the settings of a folder which you can't open now
    // (e.g. because you're offline)
-   MFolder_obj folder = GetFolderTree()->GetSelection();
+   MFolder_obj folder(GetFolderTree()->GetSelection());
    if ( folder )
    {
       return Profile::CreateProfile(folder->GetFullName());

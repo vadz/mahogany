@@ -4193,7 +4193,7 @@ bool wxComposeView::SaveAsDraft() const
    if(!m_editor->FinishWork())
       return false;
    
-   SendMessage_obj msg = BuildDraftMessage();
+   SendMessage_obj msg(BuildDraftMessage());
    if ( !msg )
    {
       // error message already given by BuildDraftMessage()
@@ -4299,7 +4299,7 @@ wxComposeView::AutoSave()
       return true;
    }
 
-   SendMessage_obj msg = BuildDraftMessage();
+   SendMessage_obj msg(BuildDraftMessage());
    if ( !msg )
       return false;
 
@@ -4402,7 +4402,7 @@ bool Composer::RestoreAll()
 
       if ( folder )
       {
-         MailFolder_obj mf = MailFolder::OpenFolder(folder);
+         MailFolder_obj mf(MailFolder::OpenFolder(folder));
          if ( mf )
          {
             // FIXME: assume UID of the first message in a new MBX folder is

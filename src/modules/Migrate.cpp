@@ -873,7 +873,7 @@ bool IMAPServerPanel::TransferDataFromWindow()
 
 void IMAPServerPanel::OnText(wxCommandEvent& event)
 {
-   MFolder_obj folder = m_btnFolder->GetFolder();
+   MFolder_obj folder(m_btnFolder->GetFolder());
    if ( folder != m_folder )
    {
       if ( m_folder )
@@ -1543,7 +1543,7 @@ MigrateWizardProgressPage::CopyMessages(MailFolder *mfSrc, MFolder *folderDst)
    UIdArray uids;
    uids.Add(UID_ILLEGAL);
 
-   HeaderInfoList_obj headers = mfSrc->GetHeaders();
+   HeaderInfoList_obj headers(mfSrc->GetHeaders());
 
    m_countMessages = headers->Count();
    m_gaugeMsg->SetRange(m_countMessages);
@@ -1617,8 +1617,8 @@ bool MigrateWizardProgressPage::ProcessOneFolder(const String& name, int flags)
    }
 
    // create the folder to save the messages to
-   MFolder_obj folderDst = GetDstFolder(name, flags);
-   MailFolder_obj mfDst = MailFolder::OpenFolder(folderDst);
+   MFolder_obj folderDst(GetDstFolder(name, flags));
+   MailFolder_obj mfDst(MailFolder::OpenFolder(folderDst));
    if ( !mfDst )
    {
       wxLogError(_("Failed to create the target folder \"%s\""), name.c_str());

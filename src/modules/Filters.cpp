@@ -2416,7 +2416,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       return Value();
    }
 
-   Message_obj msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if ( !msg )
       return false;
 
@@ -2777,7 +2777,7 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
 {
    Value value = func_recipients(args, p);
 
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( !mf )
       return Value(false);
 
@@ -2791,7 +2791,7 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
    // to a mailing list and so we should let it pass (of course, a smart
    // spammer could always add a bogus List-Id but for now I didn't see this
    // happen)
-   Message_obj msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
 
    if ( msg )
    {
@@ -2814,7 +2814,7 @@ static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
    String flag_str = v1.ToString();
    if(flag_str.Length() != 1)
       return Value(false);
-   Message_obj msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if(! msg)
       return Value(false);
    int status = msg->GetStatus();
@@ -2976,13 +2976,13 @@ static Value func_score(ArgList *args, FilterRuleImpl *)
 
    int score = 0;
 #ifdef USE_HEADER_SCORE
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( mf )
    {
-      HeaderInfoList_obj hil = mf->GetHeaders();
+      HeaderInfoList_obj hil(mf->GetHeaders());
       if(hil)
       {
-         Message_obj msg = p->GetMessage();
+         Message_obj msg(p->GetMessage());
          if ( msg )
          {
             score = hil->GetEntryUId( msg->GetUId() )->GetScore();
@@ -3002,13 +3002,13 @@ static Value func_setscore(ArgList *args, FilterRuleImpl *)
    const Value d = args->GetArg(0)->Evaluate();
 
 #ifdef USE_HEADER_SCORE
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( mf )
    {
-      HeaderInfoList_obj hil = mf->GetHeaders();
+      HeaderInfoList_obj hil(mf->GetHeaders());
       if(hil)
       {
-         Message_obj msg = p->GetMessage();
+         Message_obj msg(p->GetMessage());
          if ( msg )
          {
             // MAC: I'd rather use ->SetScore() or something similar,
@@ -3031,13 +3031,13 @@ static Value func_addscore(ArgList *args, FilterRuleImpl *)
    const Value d = args->GetArg(0)->Evaluate();
 
 #ifdef USE_HEADER_SCORE
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( mf )
    {
-      HeaderInfoList_obj hil = mf->GetHeaders();
+      HeaderInfoList_obj hil(mf->GetHeaders());
       if(hil)
       {
-         Message_obj msg = p->GetMessage();
+         Message_obj msg(p->GetMessage());
          if ( msg )
          {
             hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
@@ -3057,13 +3057,13 @@ static Value func_setcolour(ArgList *args, FilterRuleImpl *)
 #ifdef USE_HEADER_COLOUR
    const Value c = args->GetArg(0)->Evaluate();
    String col = c.ToString();
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( mf )
    {
-      HeaderInfoList_obj hil = mf->GetHeaders();
+      HeaderInfoList_obj hil(mf->GetHeaders());
       if(hil)
       {
-         Message_obj msg = p->GetMessage();
+         Message_obj msg(p->GetMessage());
          if ( msg )
          {
             hil->GetEntryUId( msg->GetUId() )->SetColour(col);
@@ -3105,7 +3105,7 @@ static Value func_do_setflag(ArgList *args, FilterRuleImpl *p, bool set)
       return Value(false);
 
    // Set or clear the selected flag
-   MailFolder_obj mf = p->GetFolder();
+   MailFolder_obj mf(p->GetFolder());
    if ( ! mf )
       return Value(false);
    return Value(mf->SetMessageFlag(p->GetMessageUId(), flag, set));

@@ -71,7 +71,7 @@ SplitAddress(const String& address, String *fullname)
 {
    CHECK_RET( fullname, _T("SplitAddress(): fullname param can't be NULL") );
 
-   AddressList_obj addrList = address;
+   AddressList_obj addrList(address);
 
    fullname->clear();
 
@@ -101,7 +101,7 @@ ExtractAddress(const String& address, String *email)
 {
    CHECK_RET( email, _T("ExtractAddress(): email param can't be NULL") );
 
-   AddressList_obj addrList = address;
+   AddressList_obj addrList(address);
 
    Address *addr = addrList->GetFirst();
    if ( !addr )
@@ -321,7 +321,7 @@ Message::GetFirstNameFromAddress(const String& address)
 String Message::GetAddressesString(MessageAddressType type) const
 {
    String address;
-   AddressList_obj addrList = GetAddressList(type);
+   AddressList_obj addrList(GetAddressList(type));
    if ( addrList )
    {
       address = addrList->GetAddresses();

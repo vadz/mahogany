@@ -559,10 +559,14 @@ enum ConfigFields
    ConfigField_RSFolderGroup,
    ConfigField_SyncStore,
    ConfigField_SyncRetrieve,
+#ifdef OS_WIN
    ConfigField_SyncSeparator,
    ConfigField_SyncConfigFileHelp,
    ConfigField_SyncConfigFile,
    ConfigField_SyncLast = ConfigField_SyncConfigFile,
+#else // !OS_WIN
+   ConfigField_SyncLast = ConfigField_SyncRetrieve,
+#endif // OS_WIN/!OS_WIN
 
    // the end
    ConfigField_Max

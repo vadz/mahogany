@@ -3115,7 +3115,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    UIdArray uidsNew;
 
    // examine flags of all messages we copied
-   HeaderInfoList_obj headers = GetHeaders();
+   HeaderInfoList_obj headers(GetHeaders());
    for ( size_t n = 0; n < count; n++ )
    {
       MsgnoType msgno = GetMsgnoFromUID(selections->Item(n));
@@ -3330,7 +3330,7 @@ MailFolderCC::GetMessage(unsigned long uid) const
 {
    CHECK_DEAD_RC(_T("Cannot access closed folder '%s'."), NULL);
 
-   HeaderInfoList_obj headers = GetHeaders();
+   HeaderInfoList_obj headers(GetHeaders());
    CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
 
    UIdType idx = headers->GetIdxFromUId(uid);
@@ -3655,7 +3655,7 @@ void MailFolderCC::OnMsgStatusChanged()
 {
    CHECK_RET( m_statusChangeData, "OnMsgStatusChanged() shouldn't be called!" );
 
-   HeaderInfoList_obj headers = GetHeaders();
+   HeaderInfoList_obj headers(GetHeaders());
    CHECK_RET( headers, _T("OnMsgStatusChanged(): couldn't get headers") );
 
    // retrieve the new message flags: now we can do it as we're not inside
@@ -3733,7 +3733,7 @@ void MailFolderCC::HandleMsgFlags(MsgnoType msgno)
    if ( IsLocked() )
       return;
 
-   HeaderInfoList_obj headers = GetHeaders();
+   HeaderInfoList_obj headers(GetHeaders());
    CHECK_RET( headers, _T("HandleMsgFlags: couldn't get headers") );
 
    HeaderInfo *hi = headers->GetItemByMsgno(msgno);
@@ -4615,7 +4615,7 @@ void MailFolderCC::OnNewMail()
             // next time
             m_uidLastNew = uidsNew->Last();
 
-            HeaderInfoList_obj hil = GetHeaders();
+            HeaderInfoList_obj hil(GetHeaders());
             if ( hil )
             {
                // process the new mail, whatever it means (collecting,

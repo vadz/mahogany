@@ -1916,7 +1916,7 @@ SendMessageCC::WriteToFolder(String const &name)
       return false;
    }
 
-   MailFolder_obj mf = MailFolder::OpenFolder(folder);
+   MailFolder_obj mf(MailFolder::OpenFolder(folder));
    if ( !mf )
    {
       ERRORMESSAGE((_("Can't open folder '%s' to save the message to."),

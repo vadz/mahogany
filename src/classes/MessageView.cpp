@@ -2379,7 +2379,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
             wxString name;
             name.Printf(_("Attached message '%s'"), filenameOrig.c_str());
 
-            MFolder_obj mfolder = MFolder::CreateTempFile(name, filename);
+            MFolder_obj mfolder(MFolder::CreateTempFile(name, filename));
 
             if ( mfolder )
             {
