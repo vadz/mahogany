@@ -194,9 +194,6 @@ public:
    /// return the string containing ':' separated columns widths
    String GetWidths() const;
 
-   /// select the item currently focused
-   void SelectFocused() { Select(GetFocusedItem(), true); }
-
    /** select the next (after the current one) message in the control which
        has the given status bit on or off, depending on the second parameter
 
@@ -3518,7 +3515,11 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    if ( hadUniqueSelection )
    {
       // restore the selection
-      m_FolderCtrl->SelectFocused();
+      long focus = m_FolderCtrl->GetFocusedItem();
+      if ( focus != -1 )
+      {
+         Select(focus);
+      }
    }
 
    // we don't have any deleted messages any more

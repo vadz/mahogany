@@ -19,6 +19,7 @@
 #######################################################################
 
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/*.cpp))
+SRC	:= $(filter-out modules/LayoutViewer.cpp, $(SRC))
 MOD	:= $(SRC:.cpp=.so)
 
 ifdef PISOCK_LIB

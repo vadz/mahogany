@@ -1,0 +1,197 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   MessageViewer.h: declaration of MessageViewer ABC
+// Purpose:     MessageViewer is the interface which must be implemented by the
+//              GUI viewers used by MessageView
+// Author:      Vadim Zeitlin
+// Modified by:
+// Created:     24.07.01
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef _MESSAGEVIEWER_H_
+#define _MESSAGEVIEWER_H_
+
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxTextAttr;
+class WXDLLEXPORT wxWindow;
+
+class ClickableInfo;
+
+// use the standard wxWin class: even if it is not really intended for this, it
+// just what we need here as it combines text colours and font info
+typedef wxTextAttr TextStyle;
+
+#include "MModule.h"
+
+// ----------------------------------------------------------------------------
+// MessageViewer: interface for GUI viewers
+// ----------------------------------------------------------------------------
+
+class MessageViewer : public MModule
+{
+public:
+   /** @name Operations
+    */
+   //@{
+
+   /// create the window: this must be called before anything else!
+   virtual void Create(MessageView *msgView, wxWindow *parent) = 0;
+
+   /// clear the window
+   virtual void Clear() = 0;
+
+   /// update the window after clearing it
+   virtual void Update() = 0;
+
+   /// print the window contents
+   virtual bool Print() = 0;
+
+   /// show the print preview
+   virtual void PrintPreview() = 0;
+
+   /// get the viewer window
+   virtual wxWindow *GetWindow() const = 0;
+
+   //@}
+
+
+   /** @name Headers
+
+       These methods are called by MessageView to show various message headers.
+    */
+   //@{
+
+   /// start showing headers
+   virtual void StartHeaders() = 0;
+
+   /// show all headers in the raw form
+   virtual void ShowRawHeaders(const String& header) = 0;
+
+   /// show the header with given name/value in this encoding
+   virtual void ShowHeader(const String& name,
+                           const String& value,
+                           wxFontEncoding encoding) = 0;
+
+   /// show the X-Face for this message
+   virtual void ShowXFace(const wxBitmap& bitmap) = 0;
+
+   // finish showing headers
+   virtual void EndHeaders() = 0;
+
+   //@}
+
+
+   /** @name Body
+
+       These methods are called by MessageView sequentially to build the
+       message body on screen. The viewer may only store the information they
+       provide internally and show it when EndBody() is called.
+    */
+   //@{
+
+   /// start showing the body
+   virtual void StartBody() = 0;
+
+   /// start showing a new MIME part
+   virtual void StartPart() = 0;
+
+   /// insert an attechment (takes ownership of ClickableInfo)
+   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) = 0;
+
+   /// insert an inline image (only called if CanInlineImages() returned true)
+   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci) = 0;
+
+   /// insert raw message contents (only called if CanProcess() returned true)
+   virtual void InsertRawContents(const String& data) = 0;
+
+   /// insert a chunk of text and show it in this style
+   virtual void InsertText(const String& text, const TextStyle& style) = 0;
+
+   /// insert an URL
+   virtual void InsertURL(const String& url) = 0;
+
+   /// insert the signature (may be multiline)
+   virtual void InsertSignature(const String& signature) = 0;
+
+   /// mark the end of the MIME part
+   virtual void EndPart() = 0;
+
+   /// mark the end of body
+   virtual void EndBody() = 0;
+
+   //@}
+
+
+   /** @name Capabilities querying
+
+       All viewers are supposed to be able to show the text and the attachments
+       somehow but they may have extra features as well. MessageView queries
+       them to find the best way to show the given MIME part.
+    */
+   //@{
+
+   /// can this viewer show inline images? if not, show them as attachments
+   virtual bool CanInlineImages() const = 0;
+
+   /// can this viewer process this part directly?
+   virtual bool CanProcess(const String& mimetype) const = 0;
+
+   //@}
+
+protected:
+   /** @name Accessorts to MessageView data
+
+       We provide these methods for derived class usage which allows us to make
+       them private in MessageView and this class is its friend (unlike any
+       derived ones)
+    */
+   //@{
+
+   /// get the profile to use (NOT IncRef()'d!)
+   Profile *GetProfile() const { return m_msgView->GetProfile(); }
+
+   /// get the msg view options
+   const MessageView::AllProfileValues& GetOptions() const
+      { return m_msgView->GetProfileValues(); }
+   //@}
+
+   /// protected ctor as the objects of this class are never created directly
+   MessageViewer() { m_msgView = NULL; }
+
+   // back pointer to the message view (we need its profile)
+   MessageView *m_msgView;
+};
+
+// ----------------------------------------------------------------------------
+// Macros for loading the viewers from the modules
+// ----------------------------------------------------------------------------
+
+// this macro must be used inside MessageViewer-derived class declaration
+//
+// note that GetName() and GetDescription() declarations are inside
+// MMODULE_DEFINE macro
+#define DECLARE_MESSAGE_VIEWER()                                           \
+   virtual const char *GetFormatDesc() const;                              \
+   MMODULE_DEFINE();                                                       \
+   DEFAULT_ENTRY_FUNC
+
+// parameters of this macro are:
+//    cname    - the name of the class (derived from MessageViewer)
+//    desc     - the short description shown in the viewers dialog
+//    cpyright - the module author/copyright string
+#define IMPLEMENT_MESSAGE_VIEWER(cname, desc, cpyright)                    \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname, "MessageViewer", desc, "1.00")   \
+      MMODULE_PROP("author", cpyright)                                     \
+   MMODULE_END_IMPLEMENT(cname)                                            \
+   MModule *cname::Init(int version_major, int version_minor,              \
+                        int version_release, MInterface *minterface,       \
+                        int *errorCode)                                    \
+   {                                                                       \
+      return new cname();                                                  \
+   }
+
+#endif // _MESSAGEVIEWER_H_
+
