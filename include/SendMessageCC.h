@@ -167,6 +167,19 @@ protected:
    /// get the iterator pointing to the given header or m_extraHeaders.end()
    MessageHeadersList::iterator FindHeaderEntry(const String& name) const;
 
+   /**
+      Return the password needed to login to the SMTP server.
+
+      This function should be only called if m_UserName is non empty and must
+      be used instead of accessing m_Password directly because we might not
+      have it. In this case this function shows an interactive dialog asking
+      the user for the password which also means that it can block.
+
+      @param password the string filled with the password on successful return
+      @return true if ok, false if the user cancelled the password dialog
+    */
+   bool GetPassword(String& password) const;
+
 private:
    /** @name Description of the message being sent */
    //@{

@@ -311,19 +311,6 @@ SendMessageCC::SendMessageCC(Profile *profile,
    if ( READ_CONFIG(profile,MP_USEOUTGOINGFOLDER) )
       m_FccList.push_back(new String(READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER)));
 
-   // check that we have password if we use it
-   //
-   // FIXME: why do we do it here and not when sending??
-   if ( !m_UserName.empty() && m_Password.empty() )
-   {
-      MDialog_GetPassword(protocol, m_ServerHost,
-                          &m_Password, &m_UserName, m_frame);
-   }
-   else // we do have it stored
-   {
-      m_Password = strutil_decrypt(m_Password);
-   }
-
    // finally, special init for resent messages
    // -----------------------------------------
 
@@ -453,6 +440,33 @@ SendMessageCC::~SendMessageCC()
    }
 
    m_profile->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// SendMessageCC login/password handling
+// ----------------------------------------------------------------------------
+
+bool
+SendMessageCC::GetPassword(String& password) const
+{
+   ASSERT_MSG( !m_UserName.empty(),
+                  _T("password shouldn't be needed if no login") );
+
+   if ( m_Password.empty() )
+   {
+      // ask the user for the password (and allow him to change login, too)
+      String *username = &const_cast<SendMessageCC *>(this)->m_UserName;
+      return MDialog_GetPassword(m_Protocol, m_ServerHost,
+                                 &password, username, m_frame);
+   }
+   //else: we do have it stored
+
+   // do not remember the decrypted password, I prefer to not store it
+   // permanently in memory -- this is probably too paranoid or maybe not
+   // enough but in any case it doesn't hurt
+   password = strutil_decrypt(m_Password);
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1554,7 +1568,16 @@ SendMessageCC::Send(int flags)
    if ( !m_UserName.empty() )
    {
       server << _T("/user=\"") << m_UserName << _T('"');
-      MailFolderCC::SetLoginData(m_UserName, m_Password);
+
+      String password;
+      if ( !GetPassword(password) )
+      {
+         mApplication->SetLastError(M_ERROR_CANCEL);
+
+         return false;
+      }
+
+      MailFolderCC::SetLoginData(m_UserName, password);
    }
 
    // do we use SSL for SMTP/NNTP?
