@@ -173,15 +173,15 @@ CountQuoteLevel(const char *string, int max_white, int max_alpha)
 
       // check if we have a quoted line or not now: normally it is enough to
       // simply check whether the first character is one of the admitted
-      // "quoting characters" but for ')' (which some people do use to quote!)
-      // we have to also check the next character as otherwise it results in
-      // too many false positives
+      // "quoting characters" but for ')' and '*' (which some people do use to
+      // quote!) we have to also check the next character as otherwise it
+      // results in too many false positives
       //
       // TODO: make the string of "quoting characters" configurable
-      if ( *c != '>' && *c != '|' && *c != '}' && *c != '*' &&
-            (*c != ')' || c[1] != ' ') )
+      if ( *c != '>' && *c != '|' && *c != '}' &&
+            ((*c != ')' && *c != '*') || c[1] != ' ') )
       {
-         // yes (according to our heuristics anyhow)
+         // not quoted (according to our heuristics anyhow)
          break;
       }
 
