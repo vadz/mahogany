@@ -21,6 +21,9 @@ $Id$
 - show status dialog while importing graphics into messageview
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
 - fix status flag indicators (N/U seem to be wrong)
+  -> new messages are marked as N, when viewed, they change to U
+- new mail dialog shows empty folder name when more than one message
+  has arrived
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
 - add TO: field to folderview
@@ -52,6 +55,9 @@ $Id$
 
  - easy to implement but useful features:
   - "check for new mail now"
+- use mm_critical() and delay application exit if necessary
+- don't use XPM as intermediary format, but e.g. PNG and builtin wxWin 
+  PNG loader, specify image formats to convert "png:Mtempxxx"
 
  - wxLayout:
   + Refresh!!
@@ -106,6 +112,8 @@ $Id$
     event handling?)
 
 - ADB:
+  - entry names containing "+" will get created and garbled/lost on
+    re-load as they are illegal characters in wxConfig entry names
   - mail expansion bug: If I type  "John[TAB]", it expands to
     "JOHN_DOE <blabla>" I then continue:" JOHN_DOE <blabla>,
     Susan[TAB]" it will expand to
