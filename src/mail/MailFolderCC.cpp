@@ -4900,7 +4900,7 @@ MailFolderCC::mm_dlog(const String& str)
        @param  user    pointer where to return username
        @param  pwd   pointer where to return password
        @param  trial number of prior login attempts
-       */
+*/
 void
 MailFolderCC::mm_login(NETMBX * /* mb */,
                        char *user,
@@ -4912,6 +4912,11 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 
    strcpy(user, MF_user.c_str());
    strcpy(pwd, MF_pwd.c_str());
+
+   // they are used once only, don't keep them or they could be reused for
+   // another folder somehow
+   MF_user.clear();
+   MF_pwd.clear();
 }
 
 /* static */
