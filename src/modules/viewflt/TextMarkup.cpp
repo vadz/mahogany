@@ -89,10 +89,8 @@ TextMarkupFilter::DoProcess(String& text,
    // are we at the start of a new word?
    bool atWordStart = true;
 
-   // is the markup currently in progress continuation of the previous one,
-   // i.e. second or more highlighted word in a row?
-   bool isContinuation = false; // just to suppress the compiler warnings
-
+   // the strings containing the text for the current state (normal or
+   // highlighted)
    String textNormal,
           textSpecial;
    for ( const wxChar *pc = text.c_str(); ; pc++ )
@@ -114,7 +112,6 @@ TextMarkupFilter::DoProcess(String& text,
 
                   // change state and reset the associated info
                   chLastSpecial = *pc;
-                  isContinuation = false;
                   state = chLastSpecial == _T('*') ? Bold : Italic;
                }
                else // no, it's in the middle of the word
@@ -137,67 +134,57 @@ TextMarkupFilter::DoProcess(String& text,
                }
                else // matching tag
                {
-                  // output the highlighted text
-                  wxFont fontOld = style.GetFont();
-
-                  wxFont font = fontOld;
-                  if ( chLastSpecial == _T('*') )
-                     font.SetWeight(wxFONTWEIGHT_BOLD);
-                  else // italic
-                     font.SetStyle(wxFONTSTYLE_ITALIC);
-
-                  if ( isContinuation )
+                  // is it really the end of markup or can it continue further?
+                  if ( wxIsalnum(pc[1]) )
                   {
-                     // we should insert a space to separate the continuation
-                     // word from the previous one
-                     textSpecial.replace(0, 0, _T(" "));
+                     // it seems to continue, don't output anything for now
+
+                     // this will be replaced by a space later if it turns out
+                     // that it was indeed highlighted (i.e. if we find a
+                     // matchin markup terminator later)
+                     textSpecial += *pc;
                   }
-
-                  style.SetFont(font);
-                  m_next->Process(textSpecial, viewer, style);
-                  style.SetFont(fontOld);
-
-                  // to handle _the_multi_word_examples_ we suppose that the
-                  // markup may continue after the "end" symbol if the next one
-                  // is not a space
-                  if ( pc[1] != _T('\0') && !wxIsspace(pc[1]) )
+                  else // end of markup
                   {
-                     // maybe continuation, to be precise
-                     isContinuation = true;
-                  }
-                  else // surely end of markup
-                  {
+                     // output the highlighted text
+                     wxFont fontOld = style.GetFont();
+
+                     wxFont font = fontOld;
+                     if ( chLastSpecial == _T('*') )
+                        font.SetWeight(wxFONTWEIGHT_BOLD);
+                     else // italic
+                        font.SetStyle(wxFONTSTYLE_ITALIC);
+
+                     // replace intermediate markup characters with spaces to
+                     // render _the_multi_word_examples_ correctly
+                     textSpecial.Replace(String(chLastSpecial), _T(" "));
+
+                     style.SetFont(font);
+                     m_next->Process(textSpecial, viewer, style);
+                     style.SetFont(fontOld);
+
                      state = Normal;
+                     textSpecial.clear();
                   }
                }
-
-               textSpecial.clear();
             }
             break;
 
          default:
             if ( state != Normal )
             {
-               // only letters and some special symbols may appear inside a
-               // marked up word
+               // only letters, numbers and some special symbols may appear
+               // inside a marked up word
                //
                // apostrophe catches cases like "... *don't* do this ..."
-               if ( !wxIsalpha(*pc) && *pc != _T('\'') )
+               if ( !wxIsalnum(*pc) && *pc != _T('\'') )
                {
                   // we decide that the last special character wasn't meant
                   // to begin the markup after all
-                  if ( !isContinuation )
-                  {
-                     // don't forget to treat the markup symbol which isn't one
-                     // literally
-                     textNormal = chLastSpecial;
-                  }
-                  else // continuation
-                  {
-                     // the markup symbol did have special meaning -- it ended
-                     // the previous one, so don't take it
-                     textNormal.clear();
-                  }
+
+                  // don't forget to treat the markup symbol which isn't one
+                  // literally
+                  textNormal = chLastSpecial;
 
                   textNormal += textSpecial;
                   textSpecial.clear();
