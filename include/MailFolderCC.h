@@ -31,6 +31,8 @@
 #include  "FolderView.h"
 #include  "MFolder.h"
 
+#include  <wx/fontenc.h>
+
 /// To really clean up left over memory, call this function at program
 /// end:
 extern void CC_Cleanup();
@@ -272,13 +274,16 @@ public:
    virtual void SetRetrievalLimit(unsigned long nmax)
       { m_RetrievalLimit = nmax; }
 
-   /** Little helper function to convert iso8859 encoded header lines into
-       8 bit. This is a quick fix until wxWindows supports unicode.
-       Also used by MessageCC.
-       @param in the string with some embedded iso8859 encoding
+   /** RFC 2047 compliant message decoding: all encoded words from the header
+       are decoded, but only the encoding of the first of them is returned in
+       encoding output parameter (if non NULL).
+     
+       @param in the RFC 2047 header string
+       @param encoding the pointer to the charset of the string (may be NULL)
        @return the full 8bit decoded string
    */
-   static String qprint(const String &in);
+   static String DecodeHeader(const String &in,
+                              wxFontEncoding *encoding = NULL);
 
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return cclientInitialisedFlag; }

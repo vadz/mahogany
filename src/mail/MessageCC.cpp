@@ -237,7 +237,7 @@ MessageCC::Refresh(void)
       hdr_date = m_Envelope->date ? String(m_Envelope->date) :  :: String("");
       hdr_subject = m_Envelope->subject ? String(m_Envelope->subject) :
          String("");
-      hdr_subject = MailFolderCC::qprint(hdr_subject);
+      hdr_subject = MailFolderCC::DecodeHeader(hdr_subject);
    }
 }
 
@@ -313,7 +313,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    value = strutil_after(val,':');
    delete [] val;
    strutil_delwhitespace(value);
-   value = MailFolderCC::qprint(value);
+   value = MailFolderCC::DecodeHeader(value);
    delete [] slist.text.data;
    MailFolderCC::ProcessEventQueue();
 
@@ -382,11 +382,11 @@ MessageCC::Address(String &name, MessageAddressType type) const
    if(addr->personal && strlen(addr->personal))
       name = String(addr->personal);
 
-   name = MailFolderCC::qprint(name);
+   name = MailFolderCC::DecodeHeader(name);
 
    if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))
       name = String("\"") + name + String("\"");
-   return MailFolderCC::qprint(email);
+   return MailFolderCC::DecodeHeader(email);
 }
 
 String const &

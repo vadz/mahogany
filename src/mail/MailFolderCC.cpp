@@ -55,6 +55,9 @@
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
 
+// DecodeHeader() uses CharsetToEncoding()
+#include <wx/fontmap.h>
+
 #include <ctype.h>   // isspace()
 
 #ifdef OS_UNIX
@@ -72,11 +75,6 @@ static void sigpipe_handler(int)
 
 #define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
 #define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
-
-#define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
-#define QPRINT_MIDDLEMARKER_U "?Q?"
-#define QPRINT_MIDDLEMARKER_L "?q?"
-
 
 // ----------------------------------------------------------------------------
 // private types
@@ -188,47 +186,150 @@ GetMsgStatus(MESSAGECACHE *elt)
    return (MailFolder::MessageStatus) status;
 }
 
-/* Little helper function to convert iso8859 encoded header lines into
-   8 bit. This is a quick fix until wxWindows supports unicode.
-   Modified it now to not look at the charset argument but always do a
-   deoding for "=?xxxxx?Q?.....?=" with arbitrary xxxx. If someone has a
-   different character set, he will have different fonts, so it
-   should be ok.
-*/
+/*
+   See RFC 2047 for the description of the encodings used in the mail headers.
+   Briefly, "encoded words" can be inserted which have the form of
+
+      encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+
+   where charset and encoding can't contain space, control chars or "specials"
+   and encoded-text can't contain spaces nor "?".
+
+   NB: don't be confused by 2 meanings of encoding here: it is both the
+       charset encoding for us and also QP/Base64 encoding for RFC 2047
+ */
 
 /* static */
-String MailFolderCC::qprint(const String &in)
+String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
 {
-   int pos = in.Find(ISO8859MARKER);
-   if(pos == -1)
-      return in;
-   String out = in.substr(0,pos);
-   // try upper and lowercase versions of middlemarker: "?q?"
-   int pos2 = in.Find(QPRINT_MIDDLEMARKER_U);
-   if(pos2 == -1) pos2 = in.Find(QPRINT_MIDDLEMARKER_L);
-   if(pos2 == -1 || pos2 < pos)
-      return in;
+   // we don't enforce the sanity checks on charset and encoding - should we?
+   // const char *specials = "()<>@,;:\\\"[].?=";
 
-   String quoted;
-   const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER_U);
-   while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
-      quoted << (char) *cptr++;
-   if(*cptr)
+   wxFontEncoding encoding = wxFONTENCODING_SYSTEM;
+
+   String out;
+   out.reserve(in.length());
+   for ( const char *p = in.c_str(); *p; p++ )
    {
-      cptr += 2; // "?="
-      unsigned long unused_len;
-      char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), quoted.length(),
-                                          &unused_len);
-      out +=  cptr2;
-      fs_give((void **) &cptr2); // free memory allocated
-   }
-   out +=  cptr;
+      if ( *p == '=' && *(p + 1) == '?' )
+      {
+         // found encoded word
 
-   // Check whether we need to decode even more:
-   if(in.Find(ISO8859MARKER) != -1)
-      return qprint(out);
-   else
-      return out;
+         // save the start of it
+         const char *pEncWordStart = p++;
+
+         // get the charset
+         String csName;
+         for ( p++; *p && *p != '?'; p++ ) // initial "++" to skip '?'
+         {
+            csName += *p;
+         }
+
+         if ( !*p )
+         {
+            wxLogDebug("Invalid encoded word syntax in '%s': missing charset.",
+                       pEncWordStart);
+            out += pEncWordStart;
+
+            continue; // break, in fact
+         }
+
+         if ( encoding == wxFONTENCODING_SYSTEM )
+         {
+            encoding = wxTheFontMapper->CharsetToEncoding(csName);
+         }
+
+         // get the encoding in RFC 2047 sense
+         enum
+         {
+            Encoding_Unknown,
+            Encoding_Base64,
+            Encoding_QuotedPrintable
+         } enc2047 = Encoding_Unknown;
+
+         p++; // skip '?'
+         if ( *(p + 1) == '?' )
+         {
+            if ( *p == 'B' )
+               enc2047 = Encoding_Base64;
+            else if ( *p == 'Q' )
+               enc2047 = Encoding_QuotedPrintable;
+         }
+         //else: multi letter encoding unreckognized
+
+         if ( enc2047 == Encoding_Unknown )
+         {
+            wxLogDebug("Unreckognized header encoding in '%s'.",
+                       pEncWordStart);
+
+            // scan until the end of the encoded word
+            const char *pEncWordEnd = strstr(p, "?=");
+            if ( !pEncWordEnd )
+            {
+               wxLogDebug("Missing encoded word end marker in '%s'.",
+                          pEncWordStart);
+               out += pEncWordStart;
+
+               break;
+            }
+            else
+            {
+               out += String(pEncWordStart, pEncWordEnd);
+
+               p = pEncWordEnd;
+
+               continue;
+            }
+         }
+
+         // get the encoded text
+         p += 2; // skip "Q?" or "B?"
+         const char *pEncTextStart = p;
+         while ( *p && *p != '?' )
+            p++;
+
+         unsigned long lenEncWord = p - pEncTextStart;
+
+         if ( !*p || *++p != '=' )
+         {
+            wxLogDebug("Missing encoded word end marker in '%s'.",
+                       pEncWordStart);
+            if ( !*p )
+               out += pEncWordStart;
+            else
+               out += String(pEncWordStart, p);
+
+            continue;
+         }
+
+         // now decode the text using cclient functions
+         unsigned long len;
+         unsigned char *start = (unsigned char *)pEncTextStart; // for cclient
+         char *text;
+         if ( enc2047 == Encoding_Base64 )
+         {
+            text = (char *)rfc822_base64(start, lenEncWord, &len);
+         }
+         else
+         {
+            text = (char *)rfc822_qprint(start, lenEncWord, &len);
+         }
+
+         out += String(text, (size_t)len);
+
+         fs_give((void **)&text);
+      }
+      else
+      {
+         // just another normal char
+         out += *p;
+      }
+   }
+
+   if ( pEncoding )
+      *pEncoding = encoding;
+
+   return out;
 }
 
 
@@ -2037,7 +2138,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       }
       else
          entry.m_From = _("<address missing>");
-      entry.m_From = qprint(entry.m_From);
+      entry.m_From = DecodeHeader(entry.m_From);
 #if 0
       //FIXME: what on earth are user flags?
       if (i = elt->user_flags)
@@ -2052,7 +2153,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       }
 #endif
 
-      entry.m_Subject = qprint(ov->subject);
+      entry.m_Subject = DecodeHeader(ov->subject);
       entry.m_Size = ov->optional.octets;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
