@@ -102,6 +102,8 @@ PGPFilter::DoProcess(String& text,
       start = strchr(start + 1, '\n');
       if ( start )
          start++; // skip '\n' itself
+      else
+         break; // no more text
    }
 
    if ( foundBegin )

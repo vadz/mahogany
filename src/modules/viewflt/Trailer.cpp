@@ -100,7 +100,7 @@ TrailerFilter::DoProcess(String& text,
       }
 
       // (b) simply (and faster) if it's not a delimiter line anyhow
-      while ( *pc != '\n' && pc >= start )
+      while ( *pc != '\n' && pc > start )
       {
          pc--;
       }
