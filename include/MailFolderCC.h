@@ -493,14 +493,32 @@ public:
    /// The event structure.
    struct Event
    {
-      Event(MAILSTREAM *stream, EventType type)
-         { m_stream = stream; m_type = type; }
+#ifndef DEBUG
+      Event(MAILSTREAM *stream, EventType type, int /*caller*/)
+         {
+            m_stream = stream; m_type = type;
+         }
+#else
+      Event(MAILSTREAM *stream, EventType type,
+            int line)
+         {
+            m_stream = stream; m_type = type;
+            m_caller.Printf("line %d", line);
+            m_folderName = stream ? stream->mailbox : "no mailbox";
+#endif
+         }
       /// The type.
       EventType   m_type;
       /// The stream it relates to.
       MAILSTREAM *m_stream;
       /// The data structure, no more than three members needed
       EventArgument m_args[3];
+#ifdef DEBUG
+      /// where it was called from:
+      String m_caller;
+      /// the name of the folder:
+      String m_folderName;
+#endif
    };
    KBLIST_DEFINE(EventQueue, Event);
    /**    Add an event to the queue, called from (C) mm_ callback

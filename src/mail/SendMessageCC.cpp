@@ -386,7 +386,6 @@ SendMessageCC::Build(void)
 
    m_headerNames[h] = NULL;
    m_headerValues[h] = NULL;
-   rfc822_setextraheaders(m_headerNames,m_headerValues);
 
    mail_free_body_part(&m_LastPart->next);
    m_LastPart->next = NULL;
@@ -598,6 +597,7 @@ SendMessageCC::Send(void)
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
 
+
    String host;
    hostlist[1] = NIL;
    switch(m_Protocol)
@@ -638,6 +638,7 @@ SendMessageCC::Send(void)
 
    if (stream)
    {
+      rfc822_setextraheaders(m_headerNames,m_headerValues);
       switch(m_Protocol)
       {
       case Prot_SMTP:
@@ -651,6 +652,7 @@ SendMessageCC::Send(void)
          nntp_close (stream);
          break;
       }
+      rfc822_setextraheaders(NULL,NULL);
       if(success)
       {
          MDialog_Message(m_Protocol==Prot_SMTP?_("Message sent."):_("Article posted."),
@@ -698,8 +700,10 @@ SendMessageCC::WriteToString(String  &output)
 
    char *buffer = new char[HEADERBUFFERSIZE];
 
+   rfc822_setextraheaders(m_headerNames,m_headerValues);
    if(! rfc822_output(buffer, m_Envelope, m_Body, write_str_output,&output,NIL))
       ERRORMESSAGE (("[Can't write message to string.]"));
+   rfc822_setextraheaders(NULL,NULL);
    delete [] buffer;
 }
 
@@ -715,9 +719,11 @@ SendMessageCC::WriteToFile(String const &filename, bool append)
    char *buffer = new char[HEADERBUFFERSIZE];
    ofstream  *ostr = new ofstream(filename.c_str(), ios::out | (append ? 0 : ios::trunc));
 
+   rfc822_setextraheaders(m_headerNames,m_headerValues);
    if(! rfc822_output(buffer, m_Envelope, m_Body, write_output,ostr,NIL))
       ERRORMESSAGE (("[Can't write message to file %s]",
                      filename.c_str()));
+   rfc822_setextraheaders(NULL,NULL);
    delete [] buffer;
    delete ostr;
 }

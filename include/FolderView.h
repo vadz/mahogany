@@ -30,6 +30,8 @@ public:
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
          m_regCookieMsgStatus = MEventManager::Register(*this, MEventId_MsgStatus);
          ASSERT_MSG( m_regCookieMsgStatus, "can't reg folder view with event manager");
+         m_regCookieFolderStatus = MEventManager::Register(*this, MEventId_FolderStatus);
+         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
          m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
       }
@@ -41,6 +43,7 @@ public:
          MEventManager::Deregister(m_regCookieTreeChange);
          MEventManager::Deregister(m_regCookieFolderUpdate);
          MEventManager::Deregister(m_regCookieMsgStatus);
+         MEventManager::Deregister(m_regCookieFolderStatus);
          MEventManager::Deregister(m_regCookieASFolderResult);
          m_regCookieTreeChange = NULL;
       }
@@ -66,7 +69,8 @@ public:
          OnMsgStatusEvent((MEventMsgStatusData&)ev );
       else if ( ev.GetId() == MEventId_FolderUpdate )
          OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
-  
+      else if ( ev.GetId() == MEventId_FolderStatus )
+         OnFolderStatusEvent((MEventFolderStatusData&)ev );
       return true; // continue evaluating this event
    }
 
@@ -85,6 +89,8 @@ protected:
    /// the derived class should update their display
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
    /// the derived class should update their display
+   virtual void OnFolderStatusEvent(MEventFolderStatusData &event) = 0;
+   /// the derived class should update their display
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event) = 0;
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event) = 0;
@@ -99,6 +105,7 @@ protected:
    
 private:
    void *m_regCookieTreeChange, *m_regCookieFolderUpdate,
-      *m_regCookieASFolderResult, *m_regCookieMsgStatus;
+      *m_regCookieASFolderResult, *m_regCookieMsgStatus,
+      *m_regCookieFolderStatus;
 };
 #endif

@@ -887,7 +887,6 @@ MailFolderCC::Open(void)
 
    {
       MCclientLocker lock;
-      SetDefaultObj();
 
       // create the mailbox if it doesn't exist yet
       bool exists = TRUE;
@@ -904,6 +903,9 @@ MailFolderCC::Open(void)
          exists = wxFileExists(path);
       }
 
+      // Make sure the event handling code knows us:
+      SetDefaultObj();
+      
       // if the file folder doesn't exist, we should create it first
       bool alreadyCreated = FALSE;
       if ( !exists
@@ -955,6 +957,7 @@ MailFolderCC::Open(void)
    }
 
    AddToMap(m_MailStream); // now we are known
+   ProcessEventQueue();
 
    // listing already built
 
@@ -1105,7 +1108,7 @@ void
 MailFolderCC::Close(void)
 {
    // can cause references to this folder, cannot be allowd:
-   //ProcessEventQueue();
+//   ProcessEventQueue(); 
    CCQuiet(true); // disable all callbacks!
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
@@ -2112,7 +2115,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
       return streamListDefaultObj;
    }
-
+   ASSERT_MSG(0,"Cannot find mailbox for callback!");
    LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox for callback!"));
    return NULL;
 }
@@ -2174,7 +2177,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
          if(mf->m_MailStream != NULL)
             mf->RequestUpdate();
       }
-      MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists);
+      MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists,__LINE__);
       MailFolderCC::QueueEvent(evptr);
    }
    else
@@ -2746,7 +2749,7 @@ mm_searched(MAILSTREAM *stream, unsigned long number)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched,__LINE__);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
 }
@@ -2756,7 +2759,7 @@ mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged,__LINE__);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
 }
@@ -2774,7 +2777,7 @@ mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify,__LINE__);
    evptr->m_args[0].m_str = new String(str);
    evptr->m_args[1].m_long = errflg;
    MailFolderCC::QueueEvent(evptr);
@@ -2788,7 +2791,7 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 
    MailFolderCC::mm_list(stream, delim, name, attrib);
 /*
-  MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List);
+  MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List,__LINE__);
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
    evptr->m_args[2].m_long = attrib;
@@ -2801,7 +2804,7 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub,__LINE__);
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
    evptr->m_args[2].m_long = attrib;
@@ -2811,9 +2814,8 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
-//   if(mm_disable_callbacks)
-//      return;
-
+   if(mm_disable_callbacks)
+      return;
    // update count immediately to reflect change:
    MailFolderCC::mm_exists(stream, number);
 }
@@ -2823,7 +2825,7 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status,__LINE__);
    MailFolderCC::QueueEvent(evptr);
 }
 
@@ -2840,7 +2842,7 @@ mm_log(char *str, long errflg)
          *msg << _("\nAttempt to re-open all folders failed.");
    }
 
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log,__LINE__);
    evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;
    MailFolderCC::QueueEvent(evptr);
@@ -2851,7 +2853,7 @@ mm_dlog(char *str)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog,__LINE__);
    evptr->m_args[0].m_str = new String(str);
    MailFolderCC::QueueEvent(evptr);
 }
@@ -2888,8 +2890,6 @@ mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 void
 mm_fatal(char *str)
 {
-   if(mm_disable_callbacks)
-      return;
    MailFolderCC::mm_fatal(str);
 }
 

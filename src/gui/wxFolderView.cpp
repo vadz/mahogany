@@ -1335,6 +1335,17 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    }
 }
 
+void
+wxFolderView::OnFolderStatusEvent(MEventFolderStatusData &event)
+{
+   if(event.GetFolder() == m_MailFolder)
+   {
+      String statusMsg;
+      statusMsg.Printf(_("Folder '%s'"), m_folderName.c_str());
+      UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
+                               m_MailFolder);
+   }
+}
 
 /// update only one entry in listing:
 void

@@ -1466,11 +1466,11 @@ PalmOSModule::Configure(void)
 {
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
-//   ShowCustomOptionsDialog(gs_OptionsPageDesc, NULL);
-
-
+   ShowCustomOptionsDialog(gs_OptionsPageDesc, NULL);
+#if 0
    wxPalmOSDialog dlg(p);
    (void) dlg.ShowModal();
+#endif
    p->DecRef();
    
 }

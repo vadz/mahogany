@@ -905,7 +905,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 
    if(mf->Lock())
    {
-
+      
       HeaderInfoList *hil = mf->GetHeaders();
       if(! hil)
       {

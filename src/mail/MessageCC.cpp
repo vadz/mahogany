@@ -504,7 +504,7 @@ MessageCC::GetBody(void)
       {
          if(folder->Stream())
             m_Envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &m_Body,
-                                                FT_UID);
+                                                  FT_UID);
          else
          {
             folder->PingReopen();
