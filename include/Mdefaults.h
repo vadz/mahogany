@@ -210,6 +210,10 @@
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
 /// filename of signature file
 #define   MP_COMPOSE_SIGNATURE      "SignatureFile"   
+/// use XFace in composition?
+#define   MP_COMPOSE_USE_XFACE   "UseXFaces"
+/// Name from where to read XFace
+#define   MP_COMPOSE_XFACE_FILE   "XFace"
 /// the folder type for a mailbox (see FolderType enum)
 #define   MP_FOLDER_TYPE         "Type"
 /// the filename for a mailbox
@@ -437,6 +441,10 @@
 #else
 #  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
 #endif
+/// use XFace in composition?
+#define   MP_COMPOSE_USE_XFACE_D   1
+/// Name from where to read XFace
+#define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         MFolder::File
 /// the filename for a mailbox

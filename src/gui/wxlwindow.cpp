@@ -108,7 +108,13 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
                  event.GetX(), event.GetY(), findPos.x, findPos.y));
 
    m_ClickPosition = findPos;
-   if(eventId == WXLOWIN_MENU_RCLICK && m_DoPopupMenu && m_llist.IsEditable())
+   wxLayoutObjectBase *obj = m_llist.Find(findPos);
+
+   // only do the menu if activated, editable and not on a clickable object
+   if(eventId == WXLOWIN_MENU_RCLICK
+      && m_DoPopupMenu
+      && m_llist.IsEditable()
+      && obj && obj->GetUserData() == NULL)
    {
       // when does this menu get freed?
       // how do we handle toggling? FIXME
@@ -116,7 +122,6 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       return;
    }
    // find the object at this position
-   wxLayoutObjectBase *obj = m_llist.Find(findPos);
    if(obj)
    {
       wxCommandEvent commandEvent(wxEVENT_TYPE_MENU_COMMAND, eventId);

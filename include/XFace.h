@@ -66,6 +66,12 @@ class XFace
    */
    bool	CreateXpm(char ***xpm);
 
+   /**
+      Get header line data, including leading X-Face.
+      @return header line
+   */
+   String GetHeaderLine(void) const;
+   
    /// initialised == there is a list of paths
    bool	IsInitialised(void) const { return initialised; }
 };

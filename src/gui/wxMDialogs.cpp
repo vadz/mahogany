@@ -496,17 +496,14 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
-   SetBackgroundColour(wxColour("navy"));
-
    wxLayoutList &ll = GetLayoutList();
-   ll.SetFontColour("white", "navy");
+   Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "white", "navy");
+
    ll.SetEditable(true);
 
    ll.LineBreak();
    ll.LineBreak();
 
-   ll.SetFontSize(30);
-   ll.SetFontWeight(wxBOLD);
    ll.Insert("   Welcome");
    ll.LineBreak();
    ll.Insert("         to");

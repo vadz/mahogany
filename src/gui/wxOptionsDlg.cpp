@@ -78,7 +78,9 @@ enum ConfigFields
   ConfigField_Signature,
   ConfigField_SignatureFile,
   ConfigField_SignatureSeparator,
-  ConfigField_ComposeLast = ConfigField_SignatureSeparator,
+  ConfigField_XFace,
+  ConfigField_XFaceFile,
+  ConfigField_ComposeLast = ConfigField_XFaceFile,
 
   // folders
   ConfigField_FoldersFirst = ConfigField_ComposeLast,
@@ -406,7 +408,9 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "&Use signature",               Field_Bool,    -1,                        },
   { "&Signature file",              Field_File,    ConfigField_Signature      },
   { "Use signature se&parator",     Field_Bool,    ConfigField_Signature      },
-
+  { "Us&e XFace",                   Field_Bool,    -1,                        },
+  { "&XFace file",                  Field_File,    ConfigField_XFace},
+  
   // folders
   { "Folders to open on &startup",  Field_List,    -1,                        },
   { "&Folder opened in main frame", Field_Text,    -1,                        },
@@ -459,6 +463,8 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
   CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
   CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),
+  CONFIG_ENTRY(MP_COMPOSE_USE_XFACE),
+  CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
 
   // folders
   CONFIG_ENTRY(MC_OPENFOLDERS),

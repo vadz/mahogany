@@ -175,6 +175,7 @@ SetupInitialConfig(void)
       ibp->writeEntry(MP_FOLDER_TYPE,MailFolder::MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail.")); 
+      ibp->DecRef();
    }
 
 #if 0

@@ -92,6 +92,10 @@ public:
        @filename the name of the file
    */
    static char **LoadImage(String filename);
+   /** Load an xpm image file and return it as an xpm array.
+       @filename the name of the file
+   */
+   static char **LoadXpm(String filename);
    /** Free an xpm array returned by LoadImage
        @ptr pointer returned by LoadImage
    */

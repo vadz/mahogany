@@ -15,6 +15,7 @@ $Id$
 - wxLayout: --- working on this, KB ---
   + cut&paste, different cursor for focus/no focus
 
+- test xfaces
 - reply/forward buttons for messageview/folderview
 - only quote the selected text in reply/forward if there is any selection
   (as in XFMail) - very handy

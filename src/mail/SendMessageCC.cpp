@@ -30,7 +30,8 @@
 #include   "Message.h"
 #include   "MailFolderCC.h"
 #include   "SendMessageCC.h"
-
+#include   "XFace.h"
+#include   "wxIconManager.h"
 extern "C"
 {
 #  include <misc.h>
@@ -286,7 +287,29 @@ SendMessageCC::Build(void)
    headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
-   
+
+#ifdef HAVE_XFACES
+   // add an XFace?
+   if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
+   {
+      String xpmdata;
+      char **xpmarray =
+         wxIconManager::LoadImage(profile->readEntry(MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D));
+      if(xpmarray)
+      {
+         XFace xface;
+         String headerline;
+         for(int i = 0; xpmarray[i]; i++)
+            xpmdata += xpmarray[i];
+         wxIconManager::FreeImage(xpmarray);
+         if(xface.CreateFromXpm(xpmdata.c_str()))
+         {
+            headerline = xface.GetHeaderLine();
+            m_headerList.push_back(&headerline);
+         }
+      }
+   }
+#endif
    // +2: 1 for X-Mailer and 1 for the last NULL entry
    m_headerNames = new const char*[m_headerList.size()+2];
    m_headerValues = new const char*[m_headerList.size()+2];

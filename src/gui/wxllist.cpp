@@ -462,8 +462,9 @@ wxLayoutList::EraseAndDraw(wxDC &dc, iterator start)
 
    //FIXME: wxGTK: MaxX()/MaxY() broken
    //WXL_VAR(dc.MaxX()); WXL_VAR(dc.MaxY());
-   dc.SetBrush(*wxWHITE_BRUSH);
-   dc.SetPen(wxPen(*wxWHITE,0,wxTRANSPARENT));
+
+   dc.SetBrush(wxBrush(*m_ColourBG, wxSOLID));
+   dc.SetPen(wxPen(*m_ColourBG,0,wxTRANSPARENT));
    dc.DrawRectangle(p.x,p.y,2000,2000); //dc.MaxX(),dc.MaxY());
    Draw(dc,-1,-1,start,wxPoint(0,0));
    //dc.DrawRectangle(p.x,p.y,2000,2000); //dc.MaxX(),dc.MaxY());

@@ -329,7 +329,16 @@ XFace::CreateXpm(char ***xpm)
 #endif
 }
 
-
+String
+XFace::GetHeaderLine(void) const
+{
+   String header = "X-Face: ";
+   if(xface)
+      return header + xface;
+   else
+      return "";
+}
+   
 XFace::~XFace()
 {
    if(data)	delete[] data;

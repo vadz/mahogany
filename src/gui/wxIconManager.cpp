@@ -93,18 +93,20 @@ char **
 wxIconManager::LoadImage(String filename)
 {
    String tempfile;
+   String oldfilename = filename;
+   char **cpptr = NULL;
    
    // lets convert to xpm using image magick:
    if(! wxMatchWild("*.xpm",filename,FALSE))
    {
 #ifdef OS_UNIX
       int i;
-      tempfile.assign(filename,0,filename.length()-4); // -".xpm"
-      tempfile = tempfile + ".xpm";
+      tempfile = filename + ".xpm";
       // strip leading path
       i = tempfile.length();
       while(i && tempfile.c_str()[i] != '/')
          i--;
+      if(i > 0) i--; // skip the slash
       tempfile.assign(tempfile,i,tempfile.length()-1);
       tempfile << (getenv("TMP") ? getenv("TMP") : "/tmp")
                << '/' << tempfile;
@@ -112,11 +114,19 @@ wxIconManager::LoadImage(String filename)
       command << "convert " << filename << tempfile;
       system(command); // don't check for returncode, will fail later
       // if it didn't work
-      filename = tempfile;
-#else
-      return NULL; // fail
+      cpptr = LoadXpm(tempfile);
 #endif
    }
+   if(! cpptr)  // try loading the file itself as an xpm
+      cpptr = LoadXpm(filename);
+   if(tempfile.length()) // using a temporary file
+      wxRemoveFile(tempfile);
+   return cpptr;
+}
+
+char **
+wxIconManager::LoadXpm(String filename)
+{
    // this is the actual XPM loading:
    size_t maxlines = WXICONMANAGER_DEFAULTSIZE;
    size_t line = 0;
@@ -156,8 +166,6 @@ wxIconManager::LoadImage(String filename)
       free(cpptr);
       cpptr = NULL;
    }
-   if(tempfile.length()) // using a temporary file
-      wxRemoveFile(tempfile);
    return cpptr;
 }
 
