@@ -49,7 +49,7 @@
 
 #include "miscutil.h"   // GetFullEmailAddress
 
-#include "gui/wxComposeView.h"
+#include "Composer.h"
 #include "MApplication.h"
 
 /*-------------------------------------------------------------------*
@@ -787,9 +787,9 @@ MailFolder::ReplyMessage(class Message *msg,
    if(! profile)
       profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateReplyMessage(params,
-                                                         profile,
-                                                         msg);
+   Composer *cv = Composer::CreateReplyMessage(params,
+                                               profile,
+                                               msg);
 
    // set the recipient address: use Reply-To for this
    wxSortedArrayString replyToAddresses;
@@ -862,7 +862,7 @@ MailFolder::ReplyMessage(class Message *msg,
       {
          // but still add addresses  to allow easily adding them to the
          // recipient list - just disable them by default
-         cv->AddRecipients(uniqueAddresses[n], wxComposeView::Recipient_None);
+         cv->AddRecipients(uniqueAddresses[n], Composer::Recipient_None);
       }
    }
 
@@ -1023,7 +1023,6 @@ MailFolder::ReplyMessage(class Message *msg,
    }
 
    cv->InitText(msg);
-   cv->Show(TRUE);
 }
 
 /* static */
@@ -1038,10 +1037,9 @@ MailFolder::ForwardMessage(class Message *msg,
    if ( !profile )
       profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, profile, msg);
+   Composer *cv = Composer::CreateFwdMessage(params, profile, msg);
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) + msg->Subject());
    cv->InitText(msg);
-   cv->Show(TRUE);
 }
 
 char MailFolder::GetFolderDelimiter() const

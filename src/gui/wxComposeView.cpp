@@ -447,17 +447,36 @@ public:
       : wxLayoutWindow(parent)
    {
       m_composer = composer;
-      m_firstTime = TRUE;
+
+      m_firstTimeModify =
+      m_firstTimeFocus = TRUE;
    }
 
 protected:
+   void OnKeyDown(wxKeyEvent& event)
+   {
+      if ( m_firstTimeModify )
+      {
+         m_firstTimeModify = FALSE;
+
+         m_composer->OnFirstTimeModify();
+      }
+
+      event.Skip();
+   }
+
    void OnFocus(wxFocusEvent& event)
    {
-      if ( m_firstTime )
+      if ( m_firstTimeFocus )
       {
-         m_firstTime = FALSE;
+         m_firstTimeFocus = FALSE;
 
-         m_composer->OnFirstTimeFocus();
+         if ( m_composer->OnFirstTimeFocus() )
+         {
+            // composer doesn't need first modification notification any more
+            // because it modified the text itself
+            m_firstTimeModify = FALSE;
+         }
       }
 
       event.Skip();
@@ -465,7 +484,9 @@ protected:
 
 private:
    wxComposeView *m_composer;
-   bool m_firstTime;
+
+   bool m_firstTimeModify,
+        m_firstTimeFocus;
 
    DECLARE_EVENT_TABLE()
 };
@@ -511,6 +532,7 @@ BEGIN_EVENT_TABLE(wxRcptRemoveButton, wxButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
+   EVT_KEY_DOWN(wxComposerLayoutWindow::OnKeyDown)
    EVT_SET_FOCUS(wxComposerLayoutWindow::OnFocus)
 END_EVENT_TABLE()
 
@@ -894,15 +916,15 @@ void wxRcptTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
     @param hide if true, do not show frame
     @return pointer to the new compose view
 */
-wxComposeView *
-wxComposeView::CreateNewArticle(const MailFolder::Params& params,
-                                Profile *parentProfile,
-                                bool hide)
+Composer *
+Composer::CreateNewArticle(const MailFolder::Params& params,
+                           Profile *parentProfile,
+                           bool hide)
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
-   cv->m_mode = Mode_News;
-   cv->m_kind = Message_New;
+   cv->m_mode = wxComposeView::Mode_News;
+   cv->m_kind = wxComposeView::Message_New;
    cv->m_template = params.templ;
    cv->SetTitle(COMPOSER_TITLE);
    cv->Create(parent, parentProfile);
@@ -915,15 +937,15 @@ wxComposeView::CreateNewArticle(const MailFolder::Params& params,
     @param hide if true, do not show frame
     @return pointer to the new compose view
 */
-wxComposeView *
-wxComposeView::CreateNewMessage(const MailFolder::Params& params,
-                                Profile *parentProfile,
-                                bool hide)
+Composer *
+Composer::CreateNewMessage(const MailFolder::Params& params,
+                           Profile *parentProfile,
+                           bool hide)
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
-   cv->m_mode = Mode_Mail;
-   cv->m_kind = Message_New;
+   cv->m_mode = wxComposeView::Mode_Mail;
+   cv->m_kind = wxComposeView::Message_New;
    cv->m_template = params.templ;
    cv->SetTitle(COMPOSER_TITLE);
    cv->Create(parent,parentProfile);
@@ -931,15 +953,15 @@ wxComposeView::CreateNewMessage(const MailFolder::Params& params,
    return cv;
 }
 
-wxComposeView *
-wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
-                                  Profile *parentProfile,
-                                  Message *original,
-                                  bool hide)
+Composer *
+Composer::CreateReplyMessage(const MailFolder::Params& params,
+                             Profile *parentProfile,
+                             Message *original,
+                             bool hide)
 {
-   wxComposeView *cv = CreateNewMessage(parentProfile, hide);
+   wxComposeView *cv = CreateNewMessage(parentProfile, hide)->GetComposeView();
 
-   cv->m_kind = Message_Reply;
+   cv->m_kind = wxComposeView::Message_Reply;
    cv->m_template = params.templ;
 
    cv->m_OriginalMessage = original;
@@ -951,15 +973,15 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
    return cv;
 }
 
-wxComposeView *
-wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
-                                Profile *parentProfile,
-                                Message *original,
-                                bool hide)
+Composer *
+Composer::CreateFwdMessage(const MailFolder::Params& params,
+                           Profile *parentProfile,
+                           Message *original,
+                           bool hide)
 {
-   wxComposeView *cv = CreateNewMessage(parentProfile, hide);
+   wxComposeView *cv = CreateNewMessage(parentProfile, hide)->GetComposeView();
 
-   cv->m_kind = Message_Forward;
+   cv->m_kind = wxComposeView::Message_Forward;
    cv->m_template = params.templ;
 
    // preserve message encoding when forwarding it
@@ -1546,16 +1568,19 @@ wxComposeView::InitText(Message *msg)
                                          m_Profile);
       }
 
-      if ( !!m_template )
-      {
-         InsertText(_("--- Please choose evaluate template from ---\n"
-                      "--- the menu after filling the headers.  ---"));
-         ResetDirty();
-      }
-      else
+      if ( m_template.empty() )
       {
          // this will only insert the sig
          DoInitText(NULL);
+      }
+      else // we have a template
+      {
+         // but we can't evaluate it yet because the headers values are
+         // unknown, delay the evaluation
+         InsertText(_("--- Please choose evaluate template from ---\n"
+                      "--- the menu after filling the headers or ---\n"
+                      "--- just type something in the composer ---"));
+         ResetDirty();
       }
    }
    else
@@ -1586,13 +1611,15 @@ wxComposeView::InitText(Message *msg)
       case Message_Forward:
          m_LayoutWindow->SetFocus();
    }
+
+   Show();
 }
 
 void
-wxComposeView::DoInitText(Message *msg)
+wxComposeView::DoInitText(Message *mailmsg)
 {
    // first append signature - everything else will be inserted before it
-   if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
+   if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
       wxTextFile fileSig;
 
@@ -1737,7 +1764,7 @@ wxComposeView::DoInitText(Message *msg)
       templateChanged = FALSE;
 
       // do parse the template
-      if ( !ExpandTemplate(*this, m_Profile, templateValue, msg) )
+      if ( !ExpandTemplate(*this, m_Profile, templateValue, mailmsg) )
       {
          // first show any errors which the call to Parse() above could
          // generate
@@ -1847,6 +1874,17 @@ wxComposeView::DoInitText(Message *msg)
    }
 
    m_LayoutWindow->Refresh();
+}
+
+void wxComposeView::OnFirstTimeModify()
+{
+   // evaluate the template right now if we have one and it hadn't been done
+   // yet (for messages of kind other than new it is done on creation)
+   if ( m_kind == Message_New && !m_template.empty() )
+   {
+      DoClear();
+      DoInitText(NULL);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -2158,17 +2196,26 @@ wxComposeView::OnMenuCommand(int id)
 // external editor support
 // ----------------------------------------------------------------------------
 
-void wxComposeView::OnFirstTimeFocus()
+bool wxComposeView::OnFirstTimeFocus()
 {
    // now we can launch the ext editor if configured to do it
    if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
    {
+      // we're going to modify it even if the composer window doesn't know it
+      OnFirstTimeModify();
+
       if ( !StartExternalEditor() )
       {
-         // disable it for the next time
+         // disable it for the next time: it would be too annoying to
+         // automatically fail to start the editor every time
          m_Profile->writeEntry(MP_ALWAYS_USE_EXTERNALEDITOR, 0l);
       }
+
+      // don't call OnFirstTimeModify() as we already did
+      return true;
    }
+
+   return false;
 }
 
 bool wxComposeView::StartExternalEditor()
@@ -2245,7 +2292,7 @@ bool wxComposeView::StartExternalEditor()
             EnableEditing(false);
 
             // and reflect it in the title
-            wxFrame *frame = GetFrame(this);
+            wxFrame *frame = GetFrame();
             if ( frame )
             {
                wxString title;
@@ -2309,7 +2356,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    // reenable editing the text in the built-in editor
    EnableEditing(true);
 
-   wxFrame *frame = GetFrame(this);
+   wxFrame *frame = GetFrame();
    if ( frame )
    {
       frame->SetTitle(COMPOSER_TITLE);
@@ -2960,17 +3007,6 @@ wxComposeView::SetDefaultFrom()
       m_from = miscutil_GetFromAddress(m_Profile);
       m_txtFrom->SetValue(m_from);
    }
-}
-
-/// sets To/Cc/Bcc field
-void
-wxComposeView::SetAddresses(const String &to,
-                            const String &cc,
-                            const String &bcc)
-{
-   AddRecipients(to, Recipient_To);
-   AddRecipients(cc, Recipient_Cc);
-   AddRecipients(bcc, Recipient_Bcc);
 }
 
 /// sets Subject field

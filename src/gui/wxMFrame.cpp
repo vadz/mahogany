@@ -55,6 +55,7 @@
 #include "MessageTemplate.h"
 #include "TemplateDialog.h"
 
+#include "Composer.h"
 #include "FolderView.h"
 #include "MDialogs.h"
 
@@ -67,7 +68,6 @@
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"
 #include "gui/wxMFrame.h"
-#include "gui/wxComposeView.h"
 #include "gui/wxFolderView.h"
 #include "gui/wxIdentityCombo.h"
 
@@ -498,13 +498,10 @@ wxMFrame::OnMenuCommand(int id)
                }
             }
 
-            wxComposeView *composeView = wxComposeView::CreateNewMessage
-                                         (
-                                          templ,
-                                          GetFolderProfile()
-                                         );
+            Composer *composeView =
+               Composer::CreateNewMessage(templ, GetFolderProfile());
+
             composeView->InitText();
-            composeView->Show();
          }
          break;
 
@@ -514,12 +511,10 @@ wxMFrame::OnMenuCommand(int id)
 
       case WXMENU_FILE_POST:
          {
-            wxComposeView *composeView = wxComposeView::CreateNewArticle
-                                         (
-                                          GetFolderProfile()
-                                         );
+            Composer *composeView =
+               Composer::CreateNewArticle(GetFolderProfile());
+
             composeView->InitText();
-            composeView->Show();
          }
 
       case WXMENU_FILE_COLLECT:

@@ -55,6 +55,7 @@
 #include "sysutil.h"
 
 #include "MessageTemplate.h"
+#include "Composer.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
@@ -63,7 +64,6 @@
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 #include "gui/wxOptionsDlg.h"
-#include "gui/wxComposeView.h"
 
 #include <wx/dynarray.h>
 #include <wx/file.h>
@@ -2350,10 +2350,10 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
             wxString protocol = url.BeforeFirst(':');
             if ( protocol == "mailto" )
             {
-               wxComposeView *cv = wxComposeView::CreateNewMessage(m_Profile);
+               Composer *cv = Composer::CreateNewMessage(m_Profile);
+
                cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
                cv->InitText();
-               cv->Show(TRUE);
                break;
             }
 

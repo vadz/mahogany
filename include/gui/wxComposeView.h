@@ -30,7 +30,7 @@
 #   include   "kbList.h"
 #endif // USE_PCH
 
-#include "MailFolder.h"    // for MailFolder::Params
+#include "Composer.h"   // the base class
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -60,22 +60,9 @@ WX_DEFINE_ARRAY(wxRcptControls *, ArrayRcptControls);
 // wxComposeView: composer frame
 // ----------------------------------------------------------------------------
 
-class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
+class wxComposeView : public wxMFrame, public Composer
 {
 public:
-   // constants
-
-   /// recipient address types
-   enum RecipientType
-   {
-      Recipient_To,
-      Recipient_Cc,
-      Recipient_Bcc,
-      Recipient_Newsgroup,
-      Recipient_None,
-      Recipient_Max
-   };
-
    /// Do we want to send mail or post a news article?
    enum Mode
    {
@@ -92,48 +79,6 @@ public:
       Message_Forward   // this one is incompatible with Mode_NNTP
    };
 
-   /** Constructor for posting news.
-       @param parentProfile parent profile
-       @param hide if true, do not show frame
-       @return pointer to the new compose view
-    */
-   static wxComposeView * CreateNewArticle(const MailFolder::Params& params,
-                                           Profile *parentProfile = NULL,
-                                           bool hide = false);
-
-   /** Constructor for sending mail.
-       @param parentProfile parent profile
-       @param hide if true, do not show frame
-       @return pointer to the new compose view
-    */
-   static wxComposeView * CreateNewMessage(const MailFolder::Params& params,
-                                           Profile *parentProfile = NULL,
-                                           bool hide = false);
-
-   /** Constructor for sending a reply to a message.
-
-       @param parentProfile parent profile
-       @param original message that we replied to
-       @param hide if true, do not show frame
-       @return pointer to the new compose view
-    */
-   static wxComposeView * CreateReplyMessage(const MailFolder::Params& params,
-                                             Profile *parentProfile,
-                                             Message * original = NULL,
-                                             bool hide = false);
-
-   /** Constructor for forwarding a message.
-
-       @param templ is the template to use
-       @param parentProfile parent profile
-       @param hide if true, do not show frame
-       @return pointer to the new compose view
-    */
-   static wxComposeView * CreateFwdMessage(const MailFolder::Params& params,
-                                           Profile *parentProfile,
-                                           Message * original = NULL,
-                                           bool hide = false);
-
    /** Initializes the composer text: for example, if this is a reply, inserts
        the quoted contents of the message being replied to (except that, in
        fact, it may do whatever the user configured it to do using templates).
@@ -143,9 +88,6 @@ public:
        @param msg the message we're replying to or forwarding
     */
    void InitText(Message *msg = NULL);
-
-   /// Destructor
-   ~wxComposeView();
 
    /** insert a file into buffer
        @param filename file to insert
@@ -166,17 +108,11 @@ public:
                    const char *mimetype = NULL,
                    const char *filename = NULL);
 
+   /// inserts a text
+   void InsertText(const String &txt);
+
    /// move the cursor to the given position
    void MoveCursorTo(int x, int y);
-
-   /** Sets the address fields, To:, CC: and BCC:.
-       @param To primary address to send mail to
-       @param CC carbon copy addresses
-       @param BCC blind carbon copy addresses
-   */
-   void SetAddresses(const String &To,
-                     const String &Cc = "",
-                     const String &Bcc = "");
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
@@ -193,15 +129,6 @@ public:
    void AddRecipients(const String& addr,
                       RecipientType rcptType = Recipient_Max);
 
-   /// adds a "To" recipient
-   void AddTo(const String& addr) { AddRecipients(addr, Recipient_To); }
-
-   /// adds a "Cc" recipient
-   void AddCc(const String& addr) { AddRecipients(addr, Recipient_Cc); }
-
-   /// adds a "Bcc" recipient
-   void AddBcc(const String& addr) { AddRecipients(addr, Recipient_Bcc); }
-
    /// get the subject value
    String GetSubject() const;
 
@@ -209,10 +136,7 @@ public:
    String GetFrom() const;
 
    /// get (all) addresses of this type
-   String GetRecipients(RecipientType type) const;
-
-   /// inserts a text
-   void InsertText(const String &txt);
+   virtual String GetRecipients(RecipientType type) const;
 
    /// make a printout of input window
    void Print(void);
@@ -245,7 +169,10 @@ public:
    void OnExtEditorTerm(wxProcessEvent& event);
 
       /// called when composer window gets focus for the 1st time
-   void OnFirstTimeFocus();
+   bool OnFirstTimeFocus();
+
+      /// called just before text in composer is modified for the 1st time
+   void OnFirstTimeModify();
 
       /// called when rcpt type is changed
    void OnRcptTypeChange(RecipientType type);
@@ -272,22 +199,9 @@ public:
    /// reset the "dirty" flag
    void ResetDirty();
 
-   // these functions are for backwards compatibility only
-   static wxComposeView * CreateNewArticle(Profile *parentProfile = NULL,
-                                           bool hide = false)
-   {
-      return CreateNewArticle(MailFolder::Params(""),
-                              parentProfile,
-                              hide);
-   }
-
-   static wxComposeView * CreateNewMessage(Profile *parentProfile = NULL,
-                                           bool hide = false)
-   {
-      return CreateNewMessage(MailFolder::Params(""),
-                              parentProfile,
-                              hide);
-   }
+   // implement base class virtual
+   virtual wxComposeView *GetComposeView() { return this; }
+   virtual wxFrame *GetFrame() { return this; }
 
 protected:
    /** quasi-Constructor
@@ -341,6 +255,9 @@ protected:
 
    /// Launch the external editor
    bool StartExternalEditor();
+
+   /// Destructor
+   ~wxComposeView();
 
 private:
    /// initialize the menubar
@@ -483,6 +400,9 @@ private:
    int        m_pidEditor;    // pid of external editor (0 if none)
 
 private:
+   // it creates us
+   friend class Composer;
+
    // wxWindows macros
    DECLARE_EVENT_TABLE()
    DECLARE_CLASS(wxComposeView)
@@ -496,7 +416,7 @@ private:
 // if it is not a reply/follow up) and insert the result into the composer
 //
 // return true if ok, false if template contained errors
-extern bool ExpandTemplate(wxComposeView& cv,
+extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msgOriginal);

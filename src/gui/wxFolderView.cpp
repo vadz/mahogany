@@ -60,10 +60,10 @@
 #include "ASMailFolder.h"
 #include "MessageView.h"
 #include "TemplateDialog.h"
+#include "Composer.h"
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMessageView.h"
-#include "gui/wxComposeView.h"
 #include "gui/wxFolderMenu.h"
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
@@ -2887,24 +2887,18 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                }
             }
 
-            wxComposeView *composeView = wxComposeView::CreateNewMessage
-                                         (
-                                          templ,
-                                          GetProfile()
-                                         );
+            Composer *composeView =
+               Composer::CreateNewMessage(templ, GetProfile());
+
             composeView->InitText();
-            composeView->Show();
          }
          break;
 
       case WXMENU_FILE_POST:
          {
-            wxComposeView *composeView = wxComposeView::CreateNewArticle
-                                         (
-                                          GetProfile()
-                                         );
+            Composer *composeView = Composer::CreateNewArticle(GetProfile());
+
             composeView->InitText();
-            composeView->Show();
          }
          break;
 

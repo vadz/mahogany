@@ -31,7 +31,7 @@
 #include "TemplateDialog.h"
 #include "MApplication.h"
 
-#include "gui/wxComposeView.h"
+#include "Composer.h"
 #include "MDialogs.h"
 #include "Mdefaults.h"
 
@@ -83,7 +83,7 @@ public:
 
    // called after successful parsing of the template to insert the resulting
    // text into the compose view
-   void InsertTextInto(wxComposeView& cv) const;
+   void InsertTextInto(Composer& cv) const;
 
    // implement base class pure virtual function
    virtual bool Output(const String& text);
@@ -231,7 +231,7 @@ public:
    // And we also need the compose view to expand the macros in the "message"
    // category.
    VarExpander(ExpansionSink& sink,
-               wxComposeView& cv,
+               Composer& cv,
                Profile *profile = NULL,
                Message *msg = NULL)
       : m_sink(sink), m_cv(cv)
@@ -295,7 +295,7 @@ private:
 
    // the compose view is used for expansion of the variables in "message"
    // category
-   wxComposeView& m_cv;
+   Composer& m_cv;
 
    // the message used for expansion of variables pertaining to the original
    // message (may be NULL for new messages)
@@ -466,7 +466,7 @@ ExpansionSink::InsertAttachment(void *data,
 }
 
 void
-ExpansionSink::InsertTextInto(wxComposeView& cv) const
+ExpansionSink::InsertTextInto(Composer& cv) const
 {
    size_t nCount = m_texts.GetCount();
    ASSERT_MSG( m_attachments.GetCount() == nCount,
@@ -714,7 +714,7 @@ VarExpander::ExpandFile(const String& name,
    if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to insert"),
-                                       GetFrame(&m_cv),
+                                       m_cv.GetFrame(),
                                        filename);
    }
 
@@ -770,7 +770,7 @@ VarExpander::ExpandAttach(const String& name,
    if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to attach"),
-                                       GetFrame(&m_cv),
+                                       m_cv.GetFrame(),
                                        filename);
    }
 
@@ -853,7 +853,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          {
             // FIXME: this won't work if there are several addresses!
 
-            wxString to = m_cv.GetRecipients(wxComposeView::Recipient_To);
+            wxString to = m_cv.GetRecipients(Composer::Recipient_To);
             if ( header == MessageHeader_FirstName )
                *value = Message::GetFirstNameFromAddress(to);
             else
@@ -867,7 +867,7 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 
          // the MessageHeader enum values are the same as RecipientType ones,
          // so no translation is needed
-         *value = m_cv.GetRecipients((wxComposeView::RecipientType)header);
+         *value = m_cv.GetRecipients((Composer::RecipientType)header);
    }
 
    return TRUE;
@@ -1234,7 +1234,7 @@ void VarExpander::ExpandOriginalText(const String& text,
 // public API
 // ----------------------------------------------------------------------------
 
-extern bool ExpandTemplate(wxComposeView& cv,
+extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msg)
