@@ -34,12 +34,13 @@ extern const MOption MP_USEPYTHON;
 extern "C"
 {
    void init_MString();
+   void init_MProfile();
+   void init_MailFolder();
+   void init_MAppBase();
+   void init_Message();
    void init_MObject();
 };
-//   void init_MProfile();
-//   void init_MailFolder();
-//   void init_MAppBase();
-//   void init_Message();
+   
 
 
 /// used by PythonHelp.cc helper functions
@@ -136,10 +137,10 @@ InitPython(void)
 
    // initialise the modules
    init_MString();
-   //init_MProfile();
-   //init_MailFolder();
-   //init_MAppBase();
-   //init_Message();
+   init_MProfile();
+   init_MailFolder();
+   init_MAppBase();
+   init_Message();
    init_MObject();
 
    // the return code
