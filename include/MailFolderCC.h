@@ -181,21 +181,6 @@ public:
 
    //@}
 
-   /**@name Subscription management */
-   //@{
-   /** Subscribe to a given mailbox (related to the
-       mailfolder/mailstream underlying this folder.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
-       @param mailboxname name of the mailbox to subscribe to
-       @param bool if true, subscribe, else unsubscribe
-       @return true on success
-   */
-   static  bool Subscribe(const String &host,
-                          MFolderType protocol,
-                          const String &mailboxname,
-                          bool subscribe = true);
-
    /** Get a listing of all mailboxes.
 
        DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
@@ -212,7 +197,6 @@ public:
                     UserData ud = 0,
                     Ticket ticket = ILLEGAL_TICKET);
 
-   //@}
    /**@name Access control */
    //@{
    /** Locks a mailfolder for exclusive access. In multi-threaded mode

@@ -10,10 +10,12 @@
 #include "Mpch.h"
 
 #ifndef   USE_PCH
-#   include "Mcommon.h"
-#   include "MApplication.h"
-#   include "gui/wxIconManager.h"
-#   include "Mdefaults.h"
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "gui/wxIconManager.h"
+#  include "Mdefaults.h"
+
+#  include "wx/colour.h"
 #endif // USE_PCH
 
 #include "MFStatus.h"

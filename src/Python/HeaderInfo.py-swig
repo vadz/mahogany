@@ -1,0 +1,132 @@
+# This file was created automatically by SWIG.
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _HeaderInfo
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+class HeaderInfo(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, HeaderInfo, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, HeaderInfo, name)
+    def __init__(self,*args):
+        _swig_setattr(self, HeaderInfo, 'this', apply(_HeaderInfo.new_HeaderInfo,args))
+        _swig_setattr(self, HeaderInfo, 'thisown', 1)
+    def GetSubject(*args): return apply(_HeaderInfo.HeaderInfo_GetSubject,args)
+    def GetFrom(*args): return apply(_HeaderInfo.HeaderInfo_GetFrom,args)
+    def GetTo(*args): return apply(_HeaderInfo.HeaderInfo_GetTo,args)
+    def GetNewsgroups(*args): return apply(_HeaderInfo.HeaderInfo_GetNewsgroups,args)
+    def GetDate(*args): return apply(_HeaderInfo.HeaderInfo_GetDate,args)
+    def GetId(*args): return apply(_HeaderInfo.HeaderInfo_GetId,args)
+    def GetUId(*args): return apply(_HeaderInfo.HeaderInfo_GetUId,args)
+    def GetReferences(*args): return apply(_HeaderInfo.HeaderInfo_GetReferences,args)
+    def GetInReplyTo(*args): return apply(_HeaderInfo.HeaderInfo_GetInReplyTo,args)
+    def GetStatus(*args): return apply(_HeaderInfo.HeaderInfo_GetStatus,args)
+    def GetSize(*args): return apply(_HeaderInfo.HeaderInfo_GetSize,args)
+    def GetLines(*args): return apply(_HeaderInfo.HeaderInfo_GetLines,args)
+    def SetEncoding(*args): return apply(_HeaderInfo.HeaderInfo_SetEncoding,args)
+    def GetEncoding(*args): return apply(_HeaderInfo.HeaderInfo_GetEncoding,args)
+    def HasEncoding(*args): return apply(_HeaderInfo.HeaderInfo_HasEncoding,args)
+    def IsValid(*args): return apply(_HeaderInfo.HeaderInfo_IsValid,args)
+    Invalid = _HeaderInfo.HeaderInfo_Invalid
+    From = _HeaderInfo.HeaderInfo_From
+    To = _HeaderInfo.HeaderInfo_To
+    Newsgroup = _HeaderInfo.HeaderInfo_Newsgroup
+    __swig_getmethods__["GetFromOrTo"] = lambda x: _HeaderInfo.HeaderInfo_GetFromOrTo
+    if _newclass:GetFromOrTo = staticmethod(_HeaderInfo.HeaderInfo_GetFromOrTo)
+    def __del__(self, destroy= _HeaderInfo.delete_HeaderInfo):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C HeaderInfo instance at %s>" % (self.this,)
+
+class HeaderInfoPtr(HeaderInfo):
+    def __init__(self,this):
+        _swig_setattr(self, HeaderInfo, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, HeaderInfo, 'thisown', 0)
+        _swig_setattr(self, HeaderInfo,self.__class__,HeaderInfo)
+_HeaderInfo.HeaderInfo_swigregister(HeaderInfoPtr)
+HeaderInfo_GetFromOrTo = _HeaderInfo.HeaderInfo_GetFromOrTo
+
+
+class HeaderInfoList(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, HeaderInfoList, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, HeaderInfoList, name)
+    __swig_getmethods__["Create"] = lambda x: _HeaderInfo.HeaderInfoList_Create
+    if _newclass:Create = staticmethod(_HeaderInfo.HeaderInfoList_Create)
+    def Count(*args): return apply(_HeaderInfo.HeaderInfoList_Count,args)
+    def GetItemByIndex(*args): return apply(_HeaderInfo.HeaderInfoList_GetItemByIndex,args)
+    def GetItemByMsgno(*args): return apply(_HeaderInfo.HeaderInfoList_GetItemByMsgno,args)
+    def GetItem(*args): return apply(_HeaderInfo.HeaderInfoList_GetItem,args)
+    def GetIdxFromUId(*args): return apply(_HeaderInfo.HeaderInfoList_GetIdxFromUId,args)
+    def GetEntryUId(*args): return apply(_HeaderInfo.HeaderInfoList_GetEntryUId,args)
+    __swig_getmethods__["GetIdxFromMsgno"] = lambda x: _HeaderInfo.HeaderInfoList_GetIdxFromMsgno
+    if _newclass:GetIdxFromMsgno = staticmethod(_HeaderInfo.HeaderInfoList_GetIdxFromMsgno)
+    __swig_getmethods__["GetMsgnoFromIdx"] = lambda x: _HeaderInfo.HeaderInfoList_GetMsgnoFromIdx
+    if _newclass:GetMsgnoFromIdx = staticmethod(_HeaderInfo.HeaderInfoList_GetMsgnoFromIdx)
+    def GetIdxFromPos(*args): return apply(_HeaderInfo.HeaderInfoList_GetIdxFromPos,args)
+    def GetPosFromIdx(*args): return apply(_HeaderInfo.HeaderInfoList_GetPosFromIdx,args)
+    def GetOldPosFromIdx(*args): return apply(_HeaderInfo.HeaderInfoList_GetOldPosFromIdx,args)
+    def GetIndentation(*args): return apply(_HeaderInfo.HeaderInfoList_GetIndentation,args)
+    def OnRemove(*args): return apply(_HeaderInfo.HeaderInfoList_OnRemove,args)
+    def OnAdd(*args): return apply(_HeaderInfo.HeaderInfoList_OnAdd,args)
+    def OnClose(*args): return apply(_HeaderInfo.HeaderInfoList_OnClose,args)
+    def FindHeaderByFlag(*args): return apply(_HeaderInfo.HeaderInfoList_FindHeaderByFlag,args)
+    def FindHeaderByFlagWrap(*args): return apply(_HeaderInfo.HeaderInfoList_FindHeaderByFlagWrap,args)
+    def GetAllHeadersByFlag(*args): return apply(_HeaderInfo.HeaderInfoList_GetAllHeadersByFlag,args)
+    def SetSortOrder(*args): return apply(_HeaderInfo.HeaderInfoList_SetSortOrder,args)
+    def SetThreadParameters(*args): return apply(_HeaderInfo.HeaderInfoList_SetThreadParameters,args)
+    def GetLastMod(*args): return apply(_HeaderInfo.HeaderInfoList_GetLastMod,args)
+    def HasChanged(*args): return apply(_HeaderInfo.HeaderInfoList_HasChanged,args)
+    def CachePositions(*args): return apply(_HeaderInfo.HeaderInfoList_CachePositions,args)
+    def CacheMsgnos(*args): return apply(_HeaderInfo.HeaderInfoList_CacheMsgnos,args)
+    def IsInCache(*args): return apply(_HeaderInfo.HeaderInfoList_IsInCache,args)
+    def ReallyGet(*args): return apply(_HeaderInfo.HeaderInfoList_ReallyGet,args)
+    def __del__(self, destroy= _HeaderInfo.delete_HeaderInfoList):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<C HeaderInfoList instance at %s>" % (self.this,)
+
+class HeaderInfoListPtr(HeaderInfoList):
+    def __init__(self,this):
+        _swig_setattr(self, HeaderInfoList, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, HeaderInfoList, 'thisown', 0)
+        _swig_setattr(self, HeaderInfoList,self.__class__,HeaderInfoList)
+_HeaderInfo.HeaderInfoList_swigregister(HeaderInfoListPtr)
+HeaderInfoList_Create = _HeaderInfo.HeaderInfoList_Create
+
+HeaderInfoList_GetIdxFromMsgno = _HeaderInfo.HeaderInfoList_GetIdxFromMsgno
+
+HeaderInfoList_GetMsgnoFromIdx = _HeaderInfo.HeaderInfoList_GetMsgnoFromIdx
+
+
+

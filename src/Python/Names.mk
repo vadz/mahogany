@@ -4,21 +4,19 @@
 # only need to do this if we're including Python support
 ifdef USE_PYTHON
 
-POBJS	:= $(patsubst .src/%.py-swig,%.py,$(wildcard .src/Python/*.py-swig))
-POBJS	:= $(filter-out Python/MTest.py, $(POBJS))
+IFACE_DIR := .src/../include/interface
+
+IFILES	:= $(filter-out swigcmn.i, $(notdir $(wildcard $(IFACE_DIR)/*.i)))
 MSRC	:= Python/InitPython.cpp Python/PythonHelp.cpp Python/PythonDll.cpp
 
-MOBJS	+= $(POBJS:.py=.o) $(MSRC:.cpp=.o)
+MOBJS	+= $(patsubst %.i,Python/%.o,$(IFILES)) $(MSRC:.cpp=.o)
 MSGSRC	+= $(MSRC)
 
-# the rule below is used to build .o file from the SWIG .i source
-#
-# the goal of the sed line is to make *.o file to depend on the *.i source,
-# not on the intermediate *.cpp generated from it
+# build .o file from a temporary .cpp generated from SWIG .i source: we don't
+# want to keep .cpp around, so erase it after compiling
 define M_COMPILE_SWIG
-$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $*.cpp
-@rm -f $*.cpp
-@f=$(notdir $*); test ! -f $*.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $*.d >$*.t && rm -f $*.d && mv $*.t $*.d; }
+$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $(@:.o=.cpp)
+@rm -f $(@:.o=.cpp)
 endef
 
 # swiglib.i only exists for global stuff to be compiled in it and for this we
@@ -29,12 +27,21 @@ endef
 CXXFLAGS_Python_swiglib_o := -DSWIG_GLOBAL
 
 ifdef SWIG
+# the goal of this command is to make *.o file to depend on the *.i source,
+# not on the intermediate *.cpp generated from it
+define adjust_dep
+@cd Python && \
+test ! -f $*.d || { sed -e "s,$(@:.o=.cpp),$<," $*.d >$*.d2 && rm -f $*.d && mv $*.d2 $*.d; }
+endef
+
 SWIGFLAGS := -c++ -python -shadow
-vpath %.i .src
-%.o %.py: %.i
-	$(SWIG) -I$(dir $<) $(CPPFLAGS) $(SWIGFLAGS) \
-	 $(if $(subst swiglib,,$(notdir $*)),-c) -o $*.cpp $<
+vpath %.i $(IFACE_DIR)
+Python/%.o Python/%.py: %.i
+	cd Python && \
+	$(SWIG) -I../$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) \
+	 $(if $(subst swiglib,,$*),-c) -o $*.cpp $<
 	$(M_COMPILE_SWIG)
+	$(adjust_dep)
 else
 vpath %.cpp-swig .src
 %.o: %.cpp-swig
@@ -43,7 +50,7 @@ vpath %.cpp-swig .src
 	$(M_COMPILE_SWIG)
 endif
 
-CLEAN	+= Python/swiglib.cpp Python/swiglib.py Python/swiglib_wrap.html \
-	$(POBJS) $(POBJS:.py=.cpp) $(POBJS:.py=_wrap.html)
+#CLEAN	+= Python/swiglib.cpp Python/swiglib.py Python/swiglib_wrap.html \
+#	$(POBJS) $(POBJS:.py=.cpp) $(POBJS:.py=_wrap.html)
 
 endif	# USE_PYTHON

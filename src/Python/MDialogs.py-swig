@@ -29,4 +29,6 @@ except AttributeError:
 
 Message = _MDialogs.Message
 
+Status = _MDialogs.Status
+
 

@@ -27,56 +27,103 @@ except AttributeError:
     _newclass = 0
 
 
-import MString
-import MProfile
-import MObject
-class MessageParameter(_object):
+MAT_FROM = _Message.MAT_FROM
+MAT_SENDER = _Message.MAT_SENDER
+MAT_RETURNPATH = _Message.MAT_RETURNPATH
+MAT_REPLYTO = _Message.MAT_REPLYTO
+MAT_TO = _Message.MAT_TO
+MAT_CC = _Message.MAT_CC
+MAT_BCC = _Message.MAT_BCC
+class HeaderIterator(_object):
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, MessageParameter, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, HeaderIterator, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, MessageParameter, name)
-    __swig_setmethods__["name"] = _Message.MessageParameter_name_set
-    __swig_getmethods__["name"] = _Message.MessageParameter_name_get
-    if _newclass:name = property(_Message.MessageParameter_name_get,_Message.MessageParameter_name_set)
-    __swig_setmethods__["value"] = _Message.MessageParameter_value_set
-    __swig_getmethods__["value"] = _Message.MessageParameter_value_get
-    if _newclass:value = property(_Message.MessageParameter_value_get,_Message.MessageParameter_value_set)
-    def __init__(self): raise RuntimeError, "No constructor defined"
+    __getattr__ = lambda self, name: _swig_getattr(self, HeaderIterator, name)
+    def __init__(self,*args):
+        _swig_setattr(self, HeaderIterator, 'this', apply(_Message.new_HeaderIterator,args))
+        _swig_setattr(self, HeaderIterator, 'thisown', 1)
+    def GetNext(*args): return apply(_Message.HeaderIterator_GetNext,args)
+    def GetAll(*args): return apply(_Message.HeaderIterator_GetAll,args)
+    def Reset(*args): return apply(_Message.HeaderIterator_Reset,args)
+    def __del__(self, destroy= _Message.delete_HeaderIterator):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
     def __repr__(self):
-        return "<C MessageParameter instance at %s>" % (self.this,)
+        return "<C HeaderIterator instance at %s>" % (self.this,)
 
-class MessageParameterPtr(MessageParameter):
+class HeaderIteratorPtr(HeaderIterator):
     def __init__(self,this):
-        _swig_setattr(self, MessageParameter, 'this', this)
-        if not hasattr(self,"thisown"): _swig_setattr(self, MessageParameter, 'thisown', 0)
-        _swig_setattr(self, MessageParameter,self.__class__,MessageParameter)
-_Message.MessageParameter_swigregister(MessageParameterPtr)
+        _swig_setattr(self, HeaderIterator, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, HeaderIterator, 'thisown', 0)
+        _swig_setattr(self, HeaderIterator,self.__class__,HeaderIterator)
+_Message.HeaderIterator_swigregister(HeaderIteratorPtr)
 
 class Message(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, Message, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, Message, name)
+    __swig_getmethods__["Create"] = lambda x: _Message.Message_Create
+    if _newclass:Create = staticmethod(_Message.Message_Create)
     def GetHeaderLine(*args): return apply(_Message.Message_GetHeaderLine,args)
+    def GetHeaderLines(*args): return apply(_Message.Message_GetHeaderLines,args)
+    def GetHeaderIterator(*args): return apply(_Message.Message_GetHeaderIterator,args)
+    def GetAllHeaders(*args): return apply(_Message.Message_GetAllHeaders,args)
     def GetHeader(*args): return apply(_Message.Message_GetHeader,args)
+    def GetAddresses(*args): return apply(_Message.Message_GetAddresses,args)
+    def GetAddressList(*args): return apply(_Message.Message_GetAddressList,args)
+    def GetAddressesString(*args): return apply(_Message.Message_GetAddressesString,args)
+    def ExtractAddressesFromHeader(*args): return apply(_Message.Message_ExtractAddressesFromHeader,args)
     def Subject(*args): return apply(_Message.Message_Subject,args)
     def From(*args): return apply(_Message.Message_From,args)
     def Date(*args): return apply(_Message.Message_Date,args)
-    def FetchText(*args): return apply(_Message.Message_FetchText,args)
-    def CountParts(*args): return apply(_Message.Message_CountParts,args)
-    def GetPartContent(*args): return apply(_Message.Message_GetPartContent,args)
-    def GetPartType(*args): return apply(_Message.Message_GetPartType,args)
-    def GetTextPartEncoding(*args): return apply(_Message.Message_GetTextPartEncoding,args)
-    def GetPartSize(*args): return apply(_Message.Message_GetPartSize,args)
-    def GetParameters(*args): return apply(_Message.Message_GetParameters,args)
-    def GetDisposition(*args): return apply(_Message.Message_GetDisposition,args)
-    def GetPartMimeType(*args): return apply(_Message.Message_GetPartMimeType,args)
-    def GetPartDesc(*args): return apply(_Message.Message_GetPartDesc,args)
-    def GetPartSpec(*args): return apply(_Message.Message_GetPartSpec,args)
+    def GetId(*args): return apply(_Message.Message_GetId,args)
+    def GetReferences(*args): return apply(_Message.Message_GetReferences,args)
+    def GetInReplyTo(*args): return apply(_Message.Message_GetInReplyTo,args)
+    def GetNewsgroups(*args): return apply(_Message.Message_GetNewsgroups,args)
     def GetStatus(*args): return apply(_Message.Message_GetStatus,args)
     def GetSize(*args): return apply(_Message.Message_GetSize,args)
     def GetDate(*args): return apply(_Message.Message_GetDate,args)
+    def GetFolder(*args): return apply(_Message.Message_GetFolder,args)
+    def GetUId(*args): return apply(_Message.Message_GetUId,args)
+    def GetTopMimePart(*args): return apply(_Message.Message_GetTopMimePart,args)
+    def CountParts(*args): return apply(_Message.Message_CountParts,args)
+    def GetMimePart(*args): return apply(_Message.Message_GetMimePart,args)
+    def GetPartContent(*args): return apply(_Message.Message_GetPartContent,args)
+    def GetPartType(*args): return apply(_Message.Message_GetPartType,args)
+    def GetTextPartEncoding(*args): return apply(_Message.Message_GetTextPartEncoding,args)
+    def GetPartTransferEncoding(*args): return apply(_Message.Message_GetPartTransferEncoding,args)
+    def GetPartSize(*args): return apply(_Message.Message_GetPartSize,args)
+    def GetPartMimeType(*args): return apply(_Message.Message_GetPartMimeType,args)
+    def GetPartDesc(*args): return apply(_Message.Message_GetPartDesc,args)
+    def GetPartSpec(*args): return apply(_Message.Message_GetPartSpec,args)
+    def GetParameters(*args): return apply(_Message.Message_GetParameters,args)
+    def GetDisposition(*args): return apply(_Message.Message_GetDisposition,args)
+    def FetchText(*args): return apply(_Message.Message_FetchText,args)
     def WriteToString(*args): return apply(_Message.Message_WriteToString,args)
+    MSG_TYPETEXT = _Message.Message_MSG_TYPETEXT
+    MSG_TYPEMULTIPART = _Message.Message_MSG_TYPEMULTIPART
+    MSG_TYPEMESSAGE = _Message.Message_MSG_TYPEMESSAGE
+    MSG_TYPEAPPLICATION = _Message.Message_MSG_TYPEAPPLICATION
+    MSG_TYPEAUDIO = _Message.Message_MSG_TYPEAUDIO
+    MSG_TYPEIMAGE = _Message.Message_MSG_TYPEIMAGE
+    MSG_TYPEVIDEO = _Message.Message_MSG_TYPEVIDEO
+    MSG_TYPEMODEL = _Message.Message_MSG_TYPEMODEL
+    MSG_TYPEOTHER = _Message.Message_MSG_TYPEOTHER
+    MSG_TYPEINVALID = _Message.Message_MSG_TYPEINVALID
+    __swig_getmethods__["GetFirstNameFromAddress"] = lambda x: _Message.Message_GetFirstNameFromAddress
+    if _newclass:GetFirstNameFromAddress = staticmethod(_Message.Message_GetFirstNameFromAddress)
+    __swig_getmethods__["GetLastNameFromAddress"] = lambda x: _Message.Message_GetLastNameFromAddress
+    if _newclass:GetLastNameFromAddress = staticmethod(_Message.Message_GetLastNameFromAddress)
+    __swig_getmethods__["GetNameFromAddress"] = lambda x: _Message.Message_GetNameFromAddress
+    if _newclass:GetNameFromAddress = staticmethod(_Message.Message_GetNameFromAddress)
+    __swig_getmethods__["GetEMailFromAddress"] = lambda x: _Message.Message_GetEMailFromAddress
+    if _newclass:GetEMailFromAddress = staticmethod(_Message.Message_GetEMailFromAddress)
+    __swig_getmethods__["CompareAddresses"] = lambda x: _Message.Message_CompareAddresses
+    if _newclass:CompareAddresses = staticmethod(_Message.Message_CompareAddresses)
+    __swig_getmethods__["FindAddress"] = lambda x: _Message.Message_FindAddress
+    if _newclass:FindAddress = staticmethod(_Message.Message_FindAddress)
     def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C Message instance at %s>" % (self.this,)
@@ -87,5 +134,19 @@ class MessagePtr(Message):
         if not hasattr(self,"thisown"): _swig_setattr(self, Message, 'thisown', 0)
         _swig_setattr(self, Message,self.__class__,Message)
 _Message.Message_swigregister(MessagePtr)
+Message_Create = _Message.Message_Create
+
+Message_GetFirstNameFromAddress = _Message.Message_GetFirstNameFromAddress
+
+Message_GetLastNameFromAddress = _Message.Message_GetLastNameFromAddress
+
+Message_GetNameFromAddress = _Message.Message_GetNameFromAddress
+
+Message_GetEMailFromAddress = _Message.Message_GetEMailFromAddress
+
+Message_CompareAddresses = _Message.Message_CompareAddresses
+
+Message_FindAddress = _Message.Message_FindAddress
+
 
 

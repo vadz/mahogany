@@ -665,8 +665,6 @@ static swig_type_info *swig_types[1];
 #define SWIG_init    init_swiglib
 
 #define SWIG_name    "_swiglib"
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif

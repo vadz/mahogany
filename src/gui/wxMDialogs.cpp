@@ -86,10 +86,6 @@
 #include "gui/wxSelectionDlg.h"
 #include "gui/wxIdentityCombo.h"
 
-#ifdef USE_PYTHON
-   #include "interface/MDialogs.h"
-#endif // USE_PYTHON
-
 #include <errno.h>
 
 // ----------------------------------------------------------------------------
@@ -3436,22 +3432,4 @@ extern wxWindow *GetDialogParent(const wxWindow *parent)
   return parent == NULL ? mApplication->TopLevelFrame()
                         : GetFrame(parent);
 }
-
-// ----------------------------------------------------------------------------
-// implementations of the wrapper functions from interface/MDialogs.h
-// ----------------------------------------------------------------------------
-
-#ifdef USE_PYTHON
-
-bool MDialogs::Message(const char *message)
-{
-   return MDialog_Message(message, NULL);
-}
-
-void MDialogs::Status(const char *message)
-{
-   wxLogStatus(_T("%s"), message);
-}
-
-#endif // USE_PYTHON
 

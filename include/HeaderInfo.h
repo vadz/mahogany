@@ -407,11 +407,13 @@ public:
 };
 
 // declare an auto ptr class for HeaderInfoList which adds an operator[]
+#ifndef SWIG
 BEGIN_DECLARE_AUTOPTR(HeaderInfoList)
 public:
    const HeaderInfo *operator[](MsgnoType n) const { return (*m_ptr)[n]; }
    HeaderInfo *operator[](MsgnoType n) { return (*m_ptr)[n]; }
 END_DECLARE_AUTOPTR();
+#endif // SWIG
 
 #endif // HEADERINFO_H
 

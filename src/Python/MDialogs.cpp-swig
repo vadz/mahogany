@@ -666,8 +666,19 @@ static swig_type_info *swig_types[1];
 
 #define SWIG_name    "_MDialogs"
 
-#include "interface/MDialogs.h"
-using namespace MDialogs;
+#include "Mcommon.h"
+#include "gui/wxMDialogs.h"
+
+
+bool Message(const char *message)
+{
+   return MDialog_Message(message, NULL);
+}
+
+void Status(const char *message)
+{
+   wxLogStatus(_T("%s"), message);
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -687,8 +698,23 @@ static PyObject *_wrap_Message(PyObject *self, PyObject *args) {
 }
 
 
+static PyObject *_wrap_Status(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    char *arg1 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"s:Status",&arg1)) goto fail;
+    Status((char const *)arg1);
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"Message", _wrap_Message, METH_VARARGS },
+	 { (char *)"Status", _wrap_Status, METH_VARARGS },
 	 { NULL, NULL }
 };
 

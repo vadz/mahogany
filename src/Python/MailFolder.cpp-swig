@@ -654,27 +654,37 @@ SWIG_InstallConstants(PyObject *d, swig_const_info constants[]) {
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define  SWIGTYPE_p_MObjectRC swig_types[0] 
-#define  SWIGTYPE_p_MailFolder__Params swig_types[1] 
-#define  SWIGTYPE_p_size_t swig_types[2] 
-#define  SWIGTYPE_p_SearchCriterium swig_types[3] 
-#define  SWIGTYPE_p_HeaderInfoList swig_types[4] 
-#define  SWIGTYPE_p_wxWindow swig_types[5] 
-#define  SWIGTYPE_p_Profile swig_types[6] 
-#define  SWIGTYPE_p_time_t swig_types[7] 
-#define  SWIGTYPE_p_String swig_types[8] 
-#define  SWIGTYPE_p_Message swig_types[9] 
-#define  SWIGTYPE_p_MFolderType swig_types[10] 
-#define  SWIGTYPE_p_Ticket swig_types[11] 
-#define  SWIGTYPE_p_MFolder swig_types[12] 
-#define  SWIGTYPE_p_UIdArray swig_types[13] 
-#define  SWIGTYPE_p_UIdType swig_types[14] 
-#define  SWIGTYPE_p_ASMailFolder swig_types[15] 
-#define  SWIGTYPE_p_MailFolder swig_types[16] 
-#define  SWIGTYPE_p_HeaderInfo swig_types[17] 
-#define  SWIGTYPE_p_UserData swig_types[18] 
-#define  SWIGTYPE_p_MObject swig_types[19] 
-static swig_type_info *swig_types[21];
+#define  SWIGTYPE_p_wxFrame swig_types[0] 
+#define  SWIGTYPE_p_MObjectRC swig_types[1] 
+#define  SWIGTYPE_p_Params swig_types[2] 
+#define  SWIGTYPE_p_MailFolderStatus swig_types[3] 
+#define  SWIGTYPE_p_SearchCriterium swig_types[4] 
+#define  SWIGTYPE_p_ThreadData swig_types[5] 
+#define  SWIGTYPE_p_HeaderInfoList swig_types[6] 
+#define  SWIGTYPE_p_wxWindow swig_types[7] 
+#define  SWIGTYPE_p_Profile swig_types[8] 
+#define  SWIGTYPE_p_SortParams swig_types[9] 
+#define  SWIGTYPE_p_ThreadParams swig_types[10] 
+#define  SWIGTYPE_p_MFolderType swig_types[11] 
+#define  SWIGTYPE_p_String swig_types[12] 
+#define  SWIGTYPE_p_Message swig_types[13] 
+#define  SWIGTYPE_p_wxFontEncoding swig_types[14] 
+#define  SWIGTYPE_p_MFolder swig_types[15] 
+#define  SWIGTYPE_p_Ticket swig_types[16] 
+#define  SWIGTYPE_p_UIdArray swig_types[17] 
+#define  SWIGTYPE_p_SuspendFolderUpdates swig_types[18] 
+#define  SWIGTYPE_p_Composer swig_types[19] 
+#define  SWIGTYPE_p_UIdType swig_types[20] 
+#define  SWIGTYPE_p_ASMailFolder swig_types[21] 
+#define  SWIGTYPE_p_MailFolder swig_types[22] 
+#define  SWIGTYPE_p_ServerInfoEntry swig_types[23] 
+#define  SWIGTYPE_p_ArrayHeaderInfo swig_types[24] 
+#define  SWIGTYPE_p_UserData swig_types[25] 
+#define  SWIGTYPE_p_Sequence swig_types[26] 
+#define  SWIGTYPE_p_MsgnoType swig_types[27] 
+#define  SWIGTYPE_p_MLogCircle swig_types[28] 
+#define  SWIGTYPE_p_wxChar swig_types[29] 
+static swig_type_info *swig_types[31];
 
 /* -------- TYPES TABLE (END) -------- */
 
@@ -686,13 +696,14 @@ static swig_type_info *swig_types[21];
 
 #define SWIG_name    "_MailFolder"
 
-#include   "Mswig.h"
-#include   "Mcommon.h"
-#include   "MailFolder.h"
-#include   "Profile.h"
-#include   "HeaderInfo.h"
-#include   "UIdArray.h"
-#include   "Sequence.h"
+#include "Mcommon.h"
+#include "MailFolder.h"
+
+// SWIG doesn't work with nested classes/constants, this hack at least makes
+// the generated C code compile -- but probably not work...
+#define Params MailFolder::Params
+#define SEARCH_SET MailFolder::SEARCH_SET
+#define SEARCH_UNDELETED MailFolder::SEARCH_UNDELETED
 
 #ifdef __cplusplus
 extern "C" {
@@ -700,14 +711,137 @@ extern "C" {
 static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MFolder *arg1 = (MFolder *) 0 ;
+    int arg2 = (int) MailFolder::Normal ;
+    wxFrame *arg3 = (wxFrame *) NULL ;
+    MailFolder *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|iO:MailFolder_OpenFolder",&obj0,&arg2,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj2) {
+        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_wxFrame,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (MailFolder *)MailFolder::OpenFolder((MFolder const *)arg1,(MailFolder::OpenMode )arg2,arg3);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MailFolder, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_HalfOpenFolder(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    wxFrame *arg2 = (wxFrame *) NULL ;
+    MailFolder *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_HalfOpenFolder",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj1) {
+        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxFrame,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (MailFolder *)MailFolder::HalfOpenFolder((MFolder const *)arg1,arg2);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MailFolder, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CloseFolder(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    bool arg2 = (bool) true ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_CloseFolder",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj1) {
+        arg2 = PyInt_AsLong(obj1) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)MailFolder::CloseFolder((MFolder const *)arg1,arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CheckFolder(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    wxFrame *arg2 = (wxFrame *) NULL ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_CheckFolder",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj1) {
+        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxFrame,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (bool)MailFolder::CheckFolder((MFolder const *)arg1,arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetOpenedFolderFor(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
     MailFolder *result;
     PyObject * obj0 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_OpenFolder",&obj0)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetOpenedFolderFor",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (MailFolder *)MailFolder::OpenFolder((MFolder const *)arg1);
+    result = (MailFolder *)MailFolder::GetOpenedFolderFor((MFolder const *)arg1);
     
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MailFolder, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CloseAll(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    int result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_CloseAll")) goto fail;
+    result = (int)MailFolder::CloseAll();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_PingAllOpened(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    wxFrame *arg1 = (wxFrame *) NULL ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"|O:MailFolder_PingAllOpened",&obj0)) goto fail;
+    if (obj0) {
+        if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_wxFrame,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (bool)MailFolder::PingAllOpened(arg1);
+    
+    resultobj = PyInt_FromLong((long)result);
     return resultobj;
     fail:
     return NULL;
@@ -723,6 +857,46 @@ static PyObject *_wrap_MailFolder_DeleteFolder(PyObject *self, PyObject *args) {
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_DeleteFolder",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     result = (bool)MailFolder::DeleteFolder((MFolder const *)arg1);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_Rename(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    String *arg2 = 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_Rename",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    result = (bool)MailFolder::Rename((MFolder const *)arg1,(String const &)*arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ClearFolder(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    long result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_ClearFolder",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (long)MailFolder::ClearFolder((MFolder const *)arg1);
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -748,15 +922,153 @@ static PyObject *_wrap_MailFolder_CanExit(PyObject *self, PyObject *args) {
 }
 
 
+static PyObject *_wrap_MailFolder_SaveMessageAsMBOX(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = 0 ;
+    wxChar *arg2 = (wxChar *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_SaveMessageAsMBOX",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg1 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxChar,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)MailFolder::SaveMessageAsMBOX((String const &)*arg1,(wxChar const *)arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ForwardMessage(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    Message *arg1 = (Message *) 0 ;
+    Params *arg2 = 0 ;
+    Profile *arg3 = (Profile *) NULL ;
+    wxWindow *arg4 = (wxWindow *) NULL ;
+    Composer *arg5 = (Composer *) NULL ;
+    Composer *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj3 = 0 ;
+    PyObject * obj4 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO|OOO:MailFolder_ForwardMessage",&obj0,&obj1,&obj2,&obj3,&obj4)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj2) {
+        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    if (obj4) {
+        if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_Composer,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (Composer *)MailFolder::ForwardMessage(arg1,(Params const &)*arg2,arg3,arg4,arg5);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Composer, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ReplyMessage(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    Message *arg1 = (Message *) 0 ;
+    Params *arg2 = 0 ;
+    Profile *arg3 = (Profile *) NULL ;
+    wxWindow *arg4 = (wxWindow *) NULL ;
+    Composer *arg5 = (Composer *) NULL ;
+    Composer *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj3 = 0 ;
+    PyObject * obj4 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO|OOO:MailFolder_ReplyMessage",&obj0,&obj1,&obj2,&obj3,&obj4)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj2) {
+        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Profile,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    if (obj4) {
+        if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_Composer,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (Composer *)MailFolder::ReplyMessage(arg1,(Params const &)*arg2,arg3,arg4,arg5);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Composer, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_Subscribe(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = 0 ;
+    MFolderType arg2 ;
+    String *arg3 = 0 ;
+    bool arg4 = (bool) true ;
+    bool result;
+    MFolderType *argp2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj3 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_Subscribe",&obj0,&obj1,&obj2,&obj3)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg1 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_MFolderType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+    arg2 = *argp2; 
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg3 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj3) {
+        arg4 = PyInt_AsLong(obj3) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)MailFolder::Subscribe((String const &)*arg1,arg2,(String const &)*arg3,arg4);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     ASMailFolder *arg2 = (ASMailFolder *) 0 ;
-    String *arg3 = 0 ;
-    bool arg4 ;
-    String *arg5 = 0 ;
-    UserData arg6 ;
-    Ticket arg7 ;
+    String const &arg3_defvalue = _T("*") ;
+    String *arg3 = (String *) &arg3_defvalue ;
+    bool arg4 = (bool) false ;
+    String const &arg5_defvalue = _T("") ;
+    String *arg5 = (String *) &arg5_defvalue ;
+    UserData arg6 = (UserData) 0 ;
+    Ticket arg7 = (Ticket) ILLEGAL_TICKET ;
     UserData *argp6 ;
     Ticket *argp7 ;
     PyObject * obj0 = 0 ;
@@ -767,23 +1079,33 @@ static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
     PyObject * obj5 = 0 ;
     PyObject * obj6 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OOOOOOO:MailFolder_ListFolders",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OO|OOOOO:MailFolder_ListFolders",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_ASMailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg3 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    if (obj2) {
+        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+        if (arg3 == NULL) {
+            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        }
     }
-    arg4 = PyInt_AsLong(obj3) ? true : false;
-    if (PyErr_Occurred()) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if (arg5 == NULL) {
-        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    if (obj3) {
+        arg4 = PyInt_AsLong(obj3) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
     }
-    if ((SWIG_ConvertPtr(obj5,(void **) &argp6, SWIGTYPE_p_UserData,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
-    arg6 = *argp6; 
-    if ((SWIG_ConvertPtr(obj6,(void **) &argp7, SWIGTYPE_p_Ticket,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
-    arg7 = *argp7; 
+    if (obj4) {
+        if ((SWIG_ConvertPtr(obj4,(void **) &arg5, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+        if (arg5 == NULL) {
+            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        }
+    }
+    if (obj5) {
+        if ((SWIG_ConvertPtr(obj5,(void **) &argp6, SWIGTYPE_p_UserData,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+        arg6 = *argp6; 
+    }
+    if (obj6) {
+        if ((SWIG_ConvertPtr(obj6,(void **) &argp7, SWIGTYPE_p_Ticket,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+        arg7 = *argp7; 
+    }
     (arg1)->ListFolders(arg2,(String const &)*arg3,arg4,(String const &)*arg5,arg6,arg7);
     
     Py_INCREF(Py_None); resultobj = Py_None;
@@ -793,21 +1115,383 @@ static PyObject *_wrap_MailFolder_ListFolders(PyObject *self, PyObject *args) {
 }
 
 
+static PyObject *_wrap_MailFolder_IsOpened(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_IsOpened",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->IsOpened();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_IsReadOnly(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_IsReadOnly",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->IsReadOnly();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CanSetFlag(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    int arg2 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"Oi:MailFolder_CanSetFlag",&obj0,&arg2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->CanSetFlag(arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyObject *_wrap_MailFolder_GetName(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    SwigValueWrapper< String > result;
+    String result;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetName",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (arg1)->GetName();
+    result = ((MailFolder const *)arg1)->GetName();
     
     {
         String * resultptr;
         resultptr = new String((String &) result);
         resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
     }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetImapSpec__SWIG_0(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    String result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetImapSpec",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = ((MailFolder const *)arg1)->GetImapSpec();
+    
+    {
+        String * resultptr;
+        resultptr = new String((String &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetType(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    MFolderType result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetType",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = ((MailFolder const *)arg1)->GetType();
+    
+    {
+        MFolderType * resultptr;
+        resultptr = new MFolderType((MFolderType &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_MFolderType, 1);
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetFlags(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    int result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetFlags",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (int)((MailFolder const *)arg1)->GetFlags();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    Profile *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetProfile",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (Profile *)((MailFolder const *)arg1)->GetProfile();
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Profile, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_IsInCriticalSection(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_IsInCriticalSection",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->IsInCriticalSection();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetClassName(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    wxChar *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetClassName",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (wxChar *)((MailFolder const *)arg1)->GetClassName();
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_wxChar, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CreateServerInfo(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    MFolder *arg2 = (MFolder *) 0 ;
+    ServerInfoEntry *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_CreateServerInfo",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (ServerInfoEntry *)((MailFolder const *)arg1)->CreateServerInfo((MFolder const *)arg2);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_ServerInfoEntry, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetFolderDelimiter__SWIG_0(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    char result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetFolderDelimiter",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (char)((MailFolder const *)arg1)->GetFolderDelimiter();
+    
+    resultobj = Py_BuildValue((char*)"c",result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetFolderDelimiter__SWIG_1(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    char result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetFolderDelimiter",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (char)MailFolder::GetFolderDelimiter((MFolder const *)arg1);
+    
+    resultobj = Py_BuildValue((char*)"c",result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetFolderDelimiter(PyObject *self, PyObject *args) {
+    int argc;
+    PyObject *argv[2];
+    int ii;
+    
+    argc = PyObject_Length(args);
+    for (ii = 0; (ii < argc) && (ii < 1); ii++) {
+        argv[ii] = PyTuple_GetItem(args,ii);
+    }
+    if (argc == 1) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            return _wrap_MailFolder_GetFolderDelimiter__SWIG_0(self,args);
+        }
+    }
+    if (argc == 1) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            return _wrap_MailFolder_GetFolderDelimiter__SWIG_1(self,args);
+        }
+    }
+    
+    PyErr_SetString(PyExc_TypeError,"No matching function for overloaded 'MailFolder_GetFolderDelimiter'");
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_NeedsNetwork(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_NeedsNetwork",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->NeedsNetwork();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetHeaders(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    HeaderInfoList *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetHeaders",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (HeaderInfoList *)((MailFolder const *)arg1)->GetHeaders();
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfoList, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetHeaderInfo(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    ArrayHeaderInfo *arg2 = 0 ;
+    Sequence *arg3 = 0 ;
+    MsgnoType result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_GetHeaderInfo",&obj0,&obj1,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_ArrayHeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Sequence,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg3 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    result = (arg1)->GetHeaderInfo(*arg2,(Sequence const &)*arg3);
+    
+    {
+        MsgnoType * resultptr;
+        resultptr = new MsgnoType((MsgnoType &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_MsgnoType, 1);
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetMessageCount(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    unsigned long result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetMessageCount",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned long)((MailFolder const *)arg1)->GetMessageCount();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_IsEmpty(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_IsEmpty",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->IsEmpty();
+    
+    resultobj = PyInt_FromLong((long)result);
     return resultobj;
     fail:
     return NULL;
@@ -822,7 +1506,7 @@ static PyObject *_wrap_MailFolder_CountNewMessages(PyObject *self, PyObject *arg
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_CountNewMessages",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (unsigned long)(arg1)->CountNewMessages();
+    result = (unsigned long)((MailFolder const *)arg1)->CountNewMessages();
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -839,9 +1523,89 @@ static PyObject *_wrap_MailFolder_CountRecentMessages(PyObject *self, PyObject *
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_CountRecentMessages",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (unsigned long)(arg1)->CountRecentMessages();
+    result = (unsigned long)((MailFolder const *)arg1)->CountRecentMessages();
     
     resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CountUnseenMessages(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    unsigned long result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_CountUnseenMessages",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned long)((MailFolder const *)arg1)->CountUnseenMessages();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CountDeletedMessages(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    unsigned long result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_CountDeletedMessages",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (unsigned long)((MailFolder const *)arg1)->CountDeletedMessages();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CountAllMessages(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    MailFolderStatus *arg2 = (MailFolderStatus *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_CountAllMessages",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_MailFolderStatus,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)((MailFolder const *)arg1)->CountAllMessages(arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetMsgnoFromUID(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    UIdType arg2 ;
+    MsgnoType result;
+    UIdType *argp2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_GetMsgnoFromUID",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_UIdType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+    arg2 = *argp2; 
+    result = ((MailFolder const *)arg1)->GetMsgnoFromUID(arg2);
+    
+    {
+        MsgnoType * resultptr;
+        resultptr = new MsgnoType((MsgnoType &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_MsgnoType, 1);
+    }
     return resultobj;
     fail:
     return NULL;
@@ -851,11 +1615,28 @@ static PyObject *_wrap_MailFolder_CountRecentMessages(PyObject *self, PyObject *
 static PyObject *_wrap_MailFolder_Ping(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
+    bool result;
     PyObject * obj0 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_Ping",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    (arg1)->Ping();
+    result = (bool)(arg1)->Ping();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_Checkpoint(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_Checkpoint",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    (arg1)->Checkpoint();
     
     Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
@@ -876,7 +1657,7 @@ static PyObject *_wrap_MailFolder_GetMessage(PyObject *self, PyObject *args) {
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     arg2 = (unsigned long) PyInt_AsLong(obj1);
     if (PyErr_Occurred()) SWIG_fail;
-    result = (Message *)(arg1)->GetMessage(arg2);
+    result = (Message *)((MailFolder const *)arg1)->GetMessage(arg2);
     
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Message, 0);
     return resultobj;
@@ -955,6 +1736,189 @@ static PyObject *_wrap_MailFolder_SetMessageFlag(PyObject *self, PyObject *args)
 }
 
 
+static PyObject *_wrap_MailFolder_SetSequenceFlag__SWIG_0(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    int arg2 ;
+    Sequence *arg3 = 0 ;
+    int arg4 ;
+    bool arg5 = (bool) true ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj2 = 0 ;
+    PyObject * obj4 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OiOi|O:MailFolder_SetSequenceFlag",&obj0,&arg2,&obj2,&arg4,&obj4)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Sequence,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg3 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj4) {
+        arg5 = PyInt_AsLong(obj4) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)(arg1)->SetSequenceFlag((MailFolder::SequenceKind )arg2,(Sequence const &)*arg3,arg4,arg5);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SetSequenceFlag__SWIG_1(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    Sequence *arg2 = 0 ;
+    int arg3 ;
+    bool arg4 = (bool) true ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj3 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOi|O:MailFolder_SetSequenceFlag",&obj0,&obj1,&arg3,&obj3)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_Sequence,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj3) {
+        arg4 = PyInt_AsLong(obj3) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)(arg1)->SetSequenceFlag((Sequence const &)*arg2,arg3,arg4);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SetSequenceFlag(PyObject *self, PyObject *args) {
+    int argc;
+    PyObject *argv[6];
+    int ii;
+    
+    argc = PyObject_Length(args);
+    for (ii = 0; (ii < argc) && (ii < 5); ii++) {
+        argv[ii] = PyTuple_GetItem(args,ii);
+    }
+    if ((argc >= 3) && (argc <= 4)) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_Sequence, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                {
+                    _v = (PyInt_Check(argv[2]) || PyLong_Check(argv[2])) ? 1 : 0;
+                }
+                if (_v) {
+                    if (argc <= 3) {
+                        return _wrap_MailFolder_SetSequenceFlag__SWIG_1(self,args);
+                    }
+                    {
+                        _v = (PyInt_Check(argv[3]) || PyLong_Check(argv[3])) ? 1 : 0;
+                    }
+                    if (_v) {
+                        return _wrap_MailFolder_SetSequenceFlag__SWIG_1(self,args);
+                    }
+                }
+            }
+        }
+    }
+    if ((argc >= 4) && (argc <= 5)) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                _v = (PyInt_Check(argv[1]) || PyLong_Check(argv[1])) ? 1 : 0;
+            }
+            if (_v) {
+                {
+                    void *ptr;
+                    if (SWIG_ConvertPtr(argv[2], (void **) &ptr, SWIGTYPE_p_Sequence, 0) == -1) {
+                        _v = 0;
+                        PyErr_Clear();
+                    }else {
+                        _v = 1;
+                    }
+                }
+                if (_v) {
+                    {
+                        _v = (PyInt_Check(argv[3]) || PyLong_Check(argv[3])) ? 1 : 0;
+                    }
+                    if (_v) {
+                        if (argc <= 4) {
+                            return _wrap_MailFolder_SetSequenceFlag__SWIG_0(self,args);
+                        }
+                        {
+                            _v = (PyInt_Check(argv[4]) || PyLong_Check(argv[4])) ? 1 : 0;
+                        }
+                        if (_v) {
+                            return _wrap_MailFolder_SetSequenceFlag__SWIG_0(self,args);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    PyErr_SetString(PyExc_TypeError,"No matching function for overloaded 'MailFolder_SetSequenceFlag'");
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SetFlagForAll(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    int arg2 ;
+    bool arg3 = (bool) true ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"Oi|O:MailFolder_SetFlagForAll",&obj0,&arg2,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj2) {
+        arg3 = PyInt_AsLong(obj2) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)(arg1)->SetFlagForAll(arg2,arg3);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
 static PyObject *_wrap_MailFolder_SetFlag(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
@@ -982,7 +1946,7 @@ static PyObject *_wrap_MailFolder_SetFlag(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_AppendMessage__SWIG_0(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     Message *arg2 = 0 ;
@@ -1005,6 +1969,96 @@ static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) 
 }
 
 
+static PyObject *_wrap_MailFolder_AppendMessage__SWIG_1(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    String *arg2 = 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_AppendMessage",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    result = (bool)(arg1)->AppendMessage((String const &)*arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) {
+    int argc;
+    PyObject *argv[3];
+    int ii;
+    
+    argc = PyObject_Length(args);
+    for (ii = 0; (ii < argc) && (ii < 2); ii++) {
+        argv[ii] = PyTuple_GetItem(args,ii);
+    }
+    if (argc == 2) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_Message, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                return _wrap_MailFolder_AppendMessage__SWIG_0(self,args);
+            }
+        }
+    }
+    if (argc == 2) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_String, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                return _wrap_MailFolder_AppendMessage__SWIG_1(self,args);
+            }
+        }
+    }
+    
+    PyErr_SetString(PyExc_TypeError,"No matching function for overloaded 'MailFolder_AppendMessage'");
+    return NULL;
+}
+
+
 static PyObject *_wrap_MailFolder_ExpungeMessages(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
@@ -1021,18 +2075,24 @@ static PyObject *_wrap_MailFolder_ExpungeMessages(PyObject *self, PyObject *args
 }
 
 
-static PyObject *_wrap_MailFolder_SearchMessages(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_SearchByFlag(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    SearchCriterium *arg2 = (SearchCriterium *) 0 ;
+    int arg2 ;
+    int arg3 = (int) SEARCH_SET|SEARCH_UNDELETED ;
+    MsgnoType arg4 = (MsgnoType) 0 ;
     UIdArray *result;
+    MsgnoType *argp4 ;
     PyObject * obj0 = 0 ;
-    PyObject * obj1 = 0 ;
+    PyObject * obj3 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_SearchMessages",&obj0,&obj1)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"Oi|iO:MailFolder_SearchByFlag",&obj0,&arg2,&arg3,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_SearchCriterium,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (UIdArray *)(arg1)->SearchMessages((SearchCriterium const *)arg2);
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &argp4, SWIGTYPE_p_MsgnoType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+        arg4 = *argp4; 
+    }
+    result = (UIdArray *)((MailFolder const *)arg1)->SearchByFlag((MailFolder::MessageStatus )arg2,arg3,arg4);
     
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_UIdArray, 0);
     return resultobj;
@@ -1041,41 +2101,51 @@ static PyObject *_wrap_MailFolder_SearchMessages(PyObject *self, PyObject *args)
 }
 
 
-static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_SearchMessages(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    Profile *result;
+    SearchCriterium *arg2 = (SearchCriterium *) 0 ;
+    int arg3 = (int) MailFolder::SEARCH_UID ;
+    UIdArray *result;
     PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetProfile",&obj0)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OO|i:MailFolder_SearchMessages",&obj0,&obj1,&arg3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (Profile *)(arg1)->GetProfile();
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_SearchCriterium,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (UIdArray *)(arg1)->SearchMessages((SearchCriterium const *)arg2,arg3);
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Profile, 0);
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_UIdArray, 0);
     return resultobj;
     fail:
     return NULL;
 }
 
 
-static PyObject *_wrap_MailFolder_GetClassName(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_SaveMessages__SWIG_0(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    char *result;
+    UIdArray *arg2 = (UIdArray *) 0 ;
+    MFolder *arg3 = (MFolder *) 0 ;
+    bool result;
     PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetClassName",&obj0)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_SaveMessages",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (char *)(arg1)->GetClassName();
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)(arg1)->SaveMessages((UIdArray const *)arg2,arg3);
     
-    resultobj = result ? PyString_FromString(result) : Py_BuildValue((char*)"");
+    resultobj = PyInt_FromLong((long)result);
     return resultobj;
     fail:
     return NULL;
 }
 
 
-static PyObject *_wrap_MailFolder_SaveMessages(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_SaveMessages__SWIG_1(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
@@ -1101,26 +2171,117 @@ static PyObject *_wrap_MailFolder_SaveMessages(PyObject *self, PyObject *args) {
 }
 
 
+static PyObject *_wrap_MailFolder_SaveMessages(PyObject *self, PyObject *args) {
+    int argc;
+    PyObject *argv[4];
+    int ii;
+    
+    argc = PyObject_Length(args);
+    for (ii = 0; (ii < argc) && (ii < 3); ii++) {
+        argv[ii] = PyTuple_GetItem(args,ii);
+    }
+    if (argc == 3) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_UIdArray, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                {
+                    void *ptr;
+                    if (SWIG_ConvertPtr(argv[2], (void **) &ptr, SWIGTYPE_p_MFolder, 0) == -1) {
+                        _v = 0;
+                        PyErr_Clear();
+                    }else {
+                        _v = 1;
+                    }
+                }
+                if (_v) {
+                    return _wrap_MailFolder_SaveMessages__SWIG_0(self,args);
+                }
+            }
+        }
+    }
+    if (argc == 3) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_UIdArray, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                {
+                    void *ptr;
+                    if (SWIG_ConvertPtr(argv[2], (void **) &ptr, SWIGTYPE_p_String, 0) == -1) {
+                        _v = 0;
+                        PyErr_Clear();
+                    }else {
+                        _v = 1;
+                    }
+                }
+                if (_v) {
+                    return _wrap_MailFolder_SaveMessages__SWIG_1(self,args);
+                }
+            }
+        }
+    }
+    
+    PyErr_SetString(PyExc_TypeError,"No matching function for overloaded 'MailFolder_SaveMessages'");
+    return NULL;
+}
+
+
 static PyObject *_wrap_MailFolder_SaveMessagesToFile(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
     String *arg3 = 0 ;
-    wxWindow *arg4 = (wxWindow *) 0 ;
+    wxWindow *arg4 = (wxWindow *) NULL ;
     bool result;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     PyObject * obj3 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OOOO:MailFolder_SaveMessagesToFile",&obj0,&obj1,&obj2,&obj3)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_SaveMessagesToFile",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (arg3 == NULL) {
         PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
     result = (bool)(arg1)->SaveMessagesToFile((UIdArray const *)arg2,(String const &)*arg3,arg4);
     
     resultobj = PyInt_FromLong((long)result);
@@ -1134,14 +2295,15 @@ static PyObject *_wrap_MailFolder_DeleteOrTrashMessages(PyObject *self, PyObject
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
+    int arg3 = (int) MailFolder::DELETE_ALLOW_TRASH ;
     bool result;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_DeleteOrTrashMessages",&obj0,&obj1)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OO|i:MailFolder_DeleteOrTrashMessages",&obj0,&obj1,&arg3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (bool)(arg1)->DeleteOrTrashMessages((UIdArray const *)arg2);
+    result = (bool)(arg1)->DeleteOrTrashMessages((UIdArray const *)arg2,arg3);
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -1154,17 +2316,14 @@ static PyObject *_wrap_MailFolder_DeleteMessages(PyObject *self, PyObject *args)
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
-    bool arg3 ;
+    int arg3 = (int) MailFolder::DELETE_NO_EXPUNGE ;
     bool result;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
-    PyObject * obj2 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_DeleteMessages",&obj0,&obj1,&obj2)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OO|i:MailFolder_DeleteMessages",&obj0,&obj1,&arg3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    arg3 = PyInt_AsLong(obj2) ? true : false;
-    if (PyErr_Occurred()) SWIG_fail;
     result = (bool)(arg1)->DeleteMessages((UIdArray const *)arg2,arg3);
     
     resultobj = PyInt_FromLong((long)result);
@@ -1198,22 +2357,24 @@ static PyObject *_wrap_MailFolder_ReplyMessages(PyObject *self, PyObject *args) 
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
-    MailFolder::Params *arg3 = 0 ;
-    wxWindow *arg4 = (wxWindow *) 0 ;
+    Params *arg3 = 0 ;
+    wxWindow *arg4 = (wxWindow *) NULL ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     PyObject * obj3 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OOOO:MailFolder_ReplyMessages",&obj0,&obj1,&obj2,&obj3)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_ReplyMessages",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_MailFolder__Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (arg3 == NULL) {
         PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    (arg1)->ReplyMessages((UIdArray const *)arg2,(MailFolder::Params const &)*arg3,arg4);
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    (arg1)->ReplyMessages((UIdArray const *)arg2,(Params const &)*arg3,arg4);
     
     Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
@@ -1226,24 +2387,78 @@ static PyObject *_wrap_MailFolder_ForwardMessages(PyObject *self, PyObject *args
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     UIdArray *arg2 = (UIdArray *) 0 ;
-    MailFolder::Params *arg3 = 0 ;
-    wxWindow *arg4 = (wxWindow *) 0 ;
+    Params *arg3 = 0 ;
+    wxWindow *arg4 = (wxWindow *) NULL ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     PyObject * obj2 = 0 ;
     PyObject * obj3 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"OOOO:MailFolder_ForwardMessages",&obj0,&obj1,&obj2,&obj3)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OOO|O:MailFolder_ForwardMessages",&obj0,&obj1,&obj2,&obj3)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_MailFolder__Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_Params,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
     if (arg3 == NULL) {
         PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    (arg1)->ForwardMessages((UIdArray const *)arg2,(MailFolder::Params const &)*arg3,arg4);
+    if (obj3) {
+        if ((SWIG_ConvertPtr(obj3,(void **) &arg4, SWIGTYPE_p_wxWindow,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    (arg1)->ForwardMessages((UIdArray const *)arg2,(Params const &)*arg3,arg4);
     
     Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SortMessages(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    MsgnoType *arg2 = (MsgnoType *) 0 ;
+    SortParams *arg3 = 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_SortMessages",&obj0,&obj1,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_MsgnoType,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_SortParams,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg3 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    result = (bool)(arg1)->SortMessages(arg2,(SortParams const &)*arg3);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ThreadMessages(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    ThreadParams *arg2 = 0 ;
+    ThreadData *arg3 = (ThreadData *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_ThreadMessages",&obj0,&obj1,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_ThreadParams,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_ThreadData,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)(arg1)->ThreadMessages((ThreadParams const &)*arg2,arg3);
+    
+    resultobj = PyInt_FromLong((long)result);
     return resultobj;
     fail:
     return NULL;
@@ -1258,7 +2473,7 @@ static PyObject *_wrap_MailFolder_Lock(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_Lock",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (bool)(arg1)->Lock();
+    result = (bool)((MailFolder const *)arg1)->Lock();
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -1274,7 +2489,7 @@ static PyObject *_wrap_MailFolder_UnLock(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_UnLock",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    (arg1)->UnLock();
+    ((MailFolder const *)arg1)->UnLock();
     
     Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
@@ -1291,7 +2506,7 @@ static PyObject *_wrap_MailFolder_IsLocked(PyObject *self, PyObject *args) {
     
     if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_IsLocked",&obj0)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (bool)(arg1)->IsLocked();
+    result = (bool)((MailFolder const *)arg1)->IsLocked();
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -1300,53 +2515,26 @@ static PyObject *_wrap_MailFolder_IsLocked(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_MailFolder_GetHeaders(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_ProcessNewMail(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    HeaderInfoList *result;
+    UIdArray *arg2 = 0 ;
+    MFolder *arg3 = (MFolder *) NULL ;
+    bool result;
     PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetHeaders",&obj0)) goto fail;
+    if(!PyArg_ParseTuple(args,(char *)"OO|O:MailFolder_ProcessNewMail",&obj0,&obj1,&obj2)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (HeaderInfoList *)(arg1)->GetHeaders();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfoList, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_MailFolder_GetType(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg1 = (MailFolder *) 0 ;
-    MFolderType result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetType",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (arg1)->GetType();
-    
-    {
-        MFolderType * resultptr;
-        resultptr = new MFolderType((MFolderType &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_MFolderType, 1);
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
     }
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_MailFolder_GetFlags(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg1 = (MailFolder *) 0 ;
-    int result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetFlags",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (int)(arg1)->GetFlags();
+    if (obj2) {
+        if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = (bool)(arg1)->ProcessNewMail(*arg2,(MFolder const *)arg3);
     
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
@@ -1358,19 +2546,402 @@ static PyObject *_wrap_MailFolder_GetFlags(PyObject *self, PyObject *args) {
 static PyObject *_wrap_MailFolder_ApplyFilterRules(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
-    UIdArray arg2 ;
+    UIdArray *arg2 = 0 ;
     int result;
-    UIdArray *argp2 ;
     PyObject * obj0 = 0 ;
     PyObject * obj1 = 0 ;
     
     if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_ApplyFilterRules",&obj0,&obj1)) goto fail;
     if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
-    arg2 = *argp2; 
-    result = (int)(arg1)->ApplyFilterRules(arg2);
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_UIdArray,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg2 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    result = (int)(arg1)->ApplyFilterRules((UIdArray const &)*arg2);
     
     resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ExistsMH(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    bool result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_ExistsMH")) goto fail;
+    result = (bool)MailFolder::ExistsMH();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_InitializeMH(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_InitializeMH")) goto fail;
+    {
+        String const &_result_ref = MailFolder::InitializeMH();
+        result = (String *) &_result_ref;
+    }
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_InitializeNewsSpool(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_InitializeNewsSpool")) goto fail;
+    {
+        String const &_result_ref = MailFolder::InitializeNewsSpool();
+        result = (String *) &_result_ref;
+    }
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetImapSpec__SWIG_1(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MFolder *arg1 = (MFolder *) 0 ;
+    String const &arg2_defvalue = _T("") ;
+    String *arg2 = (String *) &arg2_defvalue ;
+    String result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_GetImapSpec",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (obj1) {
+        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+        if (arg2 == NULL) {
+            PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+        }
+    }
+    result = MailFolder::GetImapSpec((MFolder const *)arg1,(String const &)*arg2);
+    
+    {
+        String * resultptr;
+        resultptr = new String((String &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetImapSpec(PyObject *self, PyObject *args) {
+    int argc;
+    PyObject *argv[3];
+    int ii;
+    
+    argc = PyObject_Length(args);
+    for (ii = 0; (ii < argc) && (ii < 2); ii++) {
+        argv[ii] = PyTuple_GetItem(args,ii);
+    }
+    if (argc == 1) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MailFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            return _wrap_MailFolder_GetImapSpec__SWIG_0(self,args);
+        }
+    }
+    if ((argc >= 1) && (argc <= 2)) {
+        int _v;
+        {
+            void *ptr;
+            if (SWIG_ConvertPtr(argv[0], (void **) &ptr, SWIGTYPE_p_MFolder, 0) == -1) {
+                _v = 0;
+                PyErr_Clear();
+            }else {
+                _v = 1;
+            }
+        }
+        if (_v) {
+            if (argc <= 1) {
+                return _wrap_MailFolder_GetImapSpec__SWIG_1(self,args);
+            }
+            {
+                void *ptr;
+                if (SWIG_ConvertPtr(argv[1], (void **) &ptr, SWIGTYPE_p_String, 0) == -1) {
+                    _v = 0;
+                    PyErr_Clear();
+                }else {
+                    _v = 1;
+                }
+            }
+            if (_v) {
+                return _wrap_MailFolder_GetImapSpec__SWIG_1(self,args);
+            }
+        }
+    }
+    
+    PyErr_SetString(PyExc_TypeError,"No matching function for overloaded 'MailFolder_GetImapSpec'");
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SpecToFolderName(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = 0 ;
+    MFolderType arg2 ;
+    String *arg3 = (String *) 0 ;
+    bool result;
+    MFolderType *argp2 ;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    PyObject * obj2 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OOO:MailFolder_SpecToFolderName",&obj0,&obj1,&obj2)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg1 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if ((SWIG_ConvertPtr(obj1,(void **) &argp2, SWIGTYPE_p_MFolderType,SWIG_POINTER_EXCEPTION) == -1)) SWIG_fail;
+    arg2 = *argp2; 
+    if ((SWIG_ConvertPtr(obj2,(void **) &arg3, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)MailFolder::SpecToFolderName((String const &)*arg1,arg2,arg3);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetMHFolderName(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = (String *) 0 ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetMHFolderName",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (bool)MailFolder::GetMHFolderName(arg1);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ImportFoldersMH(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = 0 ;
+    bool arg2 = (bool) true ;
+    bool result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_ImportFoldersMH",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg1 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj1) {
+        arg2 = PyInt_AsLong(obj1) ? true : false;
+        if (PyErr_Occurred()) SWIG_fail;
+    }
+    result = (bool)MailFolder::ImportFoldersMH((String const &)*arg1,arg2);
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_DecodeHeader(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    String *arg1 = 0 ;
+    wxFontEncoding *arg2 = (wxFontEncoding *) NULL ;
+    String result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O|O:MailFolder_DecodeHeader",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_String,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if (arg1 == NULL) {
+        PyErr_SetString(PyExc_TypeError,"null reference"); SWIG_fail; 
+    }
+    if (obj1) {
+        if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxFontEncoding,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    }
+    result = MailFolder::DecodeHeader((String const &)*arg1,arg2);
+    
+    {
+        String * resultptr;
+        resultptr = new String((String &) result);
+        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_String, 1);
+    }
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_Init(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    bool result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_Init")) goto fail;
+    result = (bool)MailFolder::Init();
+    
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_CleanUp(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_CleanUp")) goto fail;
+    MailFolder::CleanUp();
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SetInteractiveFrame(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    wxFrame *arg2 = (wxFrame *) 0 ;
+    wxFrame *result;
+    PyObject * obj0 = 0 ;
+    PyObject * obj1 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"OO:MailFolder_SetInteractiveFrame",&obj0,&obj1)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    if ((SWIG_ConvertPtr(obj1,(void **) &arg2, SWIGTYPE_p_wxFrame,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (wxFrame *)(arg1)->SetInteractiveFrame(arg2);
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_wxFrame, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetInteractiveFrame(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    wxFrame *result;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_GetInteractiveFrame",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (wxFrame *)((MailFolder const *)arg1)->GetInteractiveFrame();
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_wxFrame, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_GetLogCircle(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MLogCircle *result;
+    
+    if(!PyArg_ParseTuple(args,(char *)":MailFolder_GetLogCircle")) goto fail;
+    {
+        MLogCircle &_result_ref = MailFolder::GetLogCircle();
+        result = (MLogCircle *) &_result_ref;
+    }
+    
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MLogCircle, 0);
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_RequestUpdate(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_RequestUpdate",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    (arg1)->RequestUpdate();
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_SuspendUpdates(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_SuspendUpdates",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    (arg1)->SuspendUpdates();
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_MailFolder_ResumeUpdates(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:MailFolder_ResumeUpdates",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    (arg1)->ResumeUpdates();
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
+    return resultobj;
+    fail:
+    return NULL;
+}
+
+
+static PyObject *_wrap_delete_MailFolder(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    PyObject * obj0 = 0 ;
+    
+    if(!PyArg_ParseTuple(args,(char *)"O:delete_MailFolder",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    delete arg1;
+    
+    Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
     fail:
     return NULL;
@@ -1384,250 +2955,98 @@ static PyObject * MailFolder_swigregister(PyObject *self, PyObject *args) {
     Py_INCREF(obj);
     return Py_BuildValue((char *)"");
 }
-static PyObject *_wrap_HeaderInfo_GetSubject(PyObject *self, PyObject *args) {
+static PyObject *_wrap_new_SuspendFolderUpdates(PyObject *self, PyObject *args) {
     PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    String *result;
+    MailFolder *arg1 = (MailFolder *) 0 ;
+    SuspendFolderUpdates *result;
     PyObject * obj0 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetSubject",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    {
-        String const &_result_ref = (arg1)->GetSubject();
-        result = (String *) &_result_ref;
-    }
+    if(!PyArg_ParseTuple(args,(char *)"O:new_SuspendFolderUpdates",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    result = (SuspendFolderUpdates *)new SuspendFolderUpdates(arg1);
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_SuspendFolderUpdates, 1);
     return resultobj;
     fail:
     return NULL;
 }
 
 
-static PyObject *_wrap_HeaderInfo_GetFrom(PyObject *self, PyObject *args) {
+static PyObject *_wrap_delete_SuspendFolderUpdates(PyObject *self, PyObject *args) {
     PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    String *result;
+    SuspendFolderUpdates *arg1 = (SuspendFolderUpdates *) 0 ;
     PyObject * obj0 = 0 ;
     
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetFrom",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    {
-        String const &_result_ref = (arg1)->GetFrom();
-        result = (String *) &_result_ref;
-    }
+    if(!PyArg_ParseTuple(args,(char *)"O:delete_SuspendFolderUpdates",&obj0)) goto fail;
+    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_SuspendFolderUpdates,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
+    delete arg1;
     
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
+    Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
     fail:
     return NULL;
 }
 
 
-static PyObject *_wrap_HeaderInfo_GetDate(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    time_t result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetDate",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (arg1)->GetDate();
-    
-    {
-        time_t * resultptr;
-        resultptr = new time_t((time_t &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_time_t, 1);
-    }
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetId(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    String *result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetId",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    {
-        String const &_result_ref = (arg1)->GetId();
-        result = (String *) &_result_ref;
-    }
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetReferences(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    String *result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetReferences",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    {
-        String const &_result_ref = (arg1)->GetReferences();
-        result = (String *) &_result_ref;
-    }
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_String, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetUId(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    UIdType result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetUId",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (arg1)->GetUId();
-    
-    {
-        UIdType * resultptr;
-        resultptr = new UIdType((UIdType &) result);
-        resultobj = SWIG_NewPointerObj((void *) resultptr, SWIGTYPE_p_UIdType, 1);
-    }
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetStatus(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    int result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetStatus",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (int)(arg1)->GetStatus();
-    
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetSize(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    unsigned long result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetSize",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (unsigned long)(arg1)->GetSize();
-    
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfo_GetLines(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    unsigned long result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfo_GetLines",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (unsigned long)(arg1)->GetLines();
-    
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject * HeaderInfo_swigregister(PyObject *self, PyObject *args) {
+static PyObject * SuspendFolderUpdates_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
-    SWIG_TypeClientData(SWIGTYPE_p_HeaderInfo, obj);
-    Py_INCREF(obj);
-    return Py_BuildValue((char *)"");
-}
-static PyObject *_wrap_HeaderInfoList_Count(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *arg1 = (HeaderInfoList *) 0 ;
-    size_t result;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:HeaderInfoList_Count",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfoList,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    result = (arg1)->Count();
-    
-    resultobj = PyInt_FromLong((long)result);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_HeaderInfoList_GetItem(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *arg1 = (HeaderInfoList *) 0 ;
-    size_t arg2 ;
-    HeaderInfo *result;
-    PyObject * obj0 = 0 ;
-    PyObject * obj1 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"OO:HeaderInfoList_GetItem",&obj0,&obj1)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfoList,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    arg2 = (size_t) PyInt_AsLong(obj1);
-    if (PyErr_Occurred()) SWIG_fail;
-    result = (HeaderInfo *)(arg1)->GetItem(arg2);
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfo, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject * HeaderInfoList_swigregister(PyObject *self, PyObject *args) {
-    PyObject *obj;
-    if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
-    SWIG_TypeClientData(SWIGTYPE_p_HeaderInfoList, obj);
+    SWIG_TypeClientData(SWIGTYPE_p_SuspendFolderUpdates, obj);
     Py_INCREF(obj);
     return Py_BuildValue((char *)"");
 }
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"MailFolder_OpenFolder", _wrap_MailFolder_OpenFolder, METH_VARARGS },
+	 { (char *)"MailFolder_HalfOpenFolder", _wrap_MailFolder_HalfOpenFolder, METH_VARARGS },
+	 { (char *)"MailFolder_CloseFolder", _wrap_MailFolder_CloseFolder, METH_VARARGS },
+	 { (char *)"MailFolder_CheckFolder", _wrap_MailFolder_CheckFolder, METH_VARARGS },
+	 { (char *)"MailFolder_GetOpenedFolderFor", _wrap_MailFolder_GetOpenedFolderFor, METH_VARARGS },
+	 { (char *)"MailFolder_CloseAll", _wrap_MailFolder_CloseAll, METH_VARARGS },
+	 { (char *)"MailFolder_PingAllOpened", _wrap_MailFolder_PingAllOpened, METH_VARARGS },
 	 { (char *)"MailFolder_DeleteFolder", _wrap_MailFolder_DeleteFolder, METH_VARARGS },
+	 { (char *)"MailFolder_Rename", _wrap_MailFolder_Rename, METH_VARARGS },
+	 { (char *)"MailFolder_ClearFolder", _wrap_MailFolder_ClearFolder, METH_VARARGS },
 	 { (char *)"MailFolder_CanExit", _wrap_MailFolder_CanExit, METH_VARARGS },
+	 { (char *)"MailFolder_SaveMessageAsMBOX", _wrap_MailFolder_SaveMessageAsMBOX, METH_VARARGS },
+	 { (char *)"MailFolder_ForwardMessage", _wrap_MailFolder_ForwardMessage, METH_VARARGS },
+	 { (char *)"MailFolder_ReplyMessage", _wrap_MailFolder_ReplyMessage, METH_VARARGS },
+	 { (char *)"MailFolder_Subscribe", _wrap_MailFolder_Subscribe, METH_VARARGS },
 	 { (char *)"MailFolder_ListFolders", _wrap_MailFolder_ListFolders, METH_VARARGS },
+	 { (char *)"MailFolder_IsOpened", _wrap_MailFolder_IsOpened, METH_VARARGS },
+	 { (char *)"MailFolder_IsReadOnly", _wrap_MailFolder_IsReadOnly, METH_VARARGS },
+	 { (char *)"MailFolder_CanSetFlag", _wrap_MailFolder_CanSetFlag, METH_VARARGS },
 	 { (char *)"MailFolder_GetName", _wrap_MailFolder_GetName, METH_VARARGS },
+	 { (char *)"MailFolder_GetType", _wrap_MailFolder_GetType, METH_VARARGS },
+	 { (char *)"MailFolder_GetFlags", _wrap_MailFolder_GetFlags, METH_VARARGS },
+	 { (char *)"MailFolder_GetProfile", _wrap_MailFolder_GetProfile, METH_VARARGS },
+	 { (char *)"MailFolder_IsInCriticalSection", _wrap_MailFolder_IsInCriticalSection, METH_VARARGS },
+	 { (char *)"MailFolder_GetClassName", _wrap_MailFolder_GetClassName, METH_VARARGS },
+	 { (char *)"MailFolder_CreateServerInfo", _wrap_MailFolder_CreateServerInfo, METH_VARARGS },
+	 { (char *)"MailFolder_GetFolderDelimiter", _wrap_MailFolder_GetFolderDelimiter, METH_VARARGS },
+	 { (char *)"MailFolder_NeedsNetwork", _wrap_MailFolder_NeedsNetwork, METH_VARARGS },
+	 { (char *)"MailFolder_GetHeaders", _wrap_MailFolder_GetHeaders, METH_VARARGS },
+	 { (char *)"MailFolder_GetHeaderInfo", _wrap_MailFolder_GetHeaderInfo, METH_VARARGS },
+	 { (char *)"MailFolder_GetMessageCount", _wrap_MailFolder_GetMessageCount, METH_VARARGS },
+	 { (char *)"MailFolder_IsEmpty", _wrap_MailFolder_IsEmpty, METH_VARARGS },
 	 { (char *)"MailFolder_CountNewMessages", _wrap_MailFolder_CountNewMessages, METH_VARARGS },
 	 { (char *)"MailFolder_CountRecentMessages", _wrap_MailFolder_CountRecentMessages, METH_VARARGS },
+	 { (char *)"MailFolder_CountUnseenMessages", _wrap_MailFolder_CountUnseenMessages, METH_VARARGS },
+	 { (char *)"MailFolder_CountDeletedMessages", _wrap_MailFolder_CountDeletedMessages, METH_VARARGS },
+	 { (char *)"MailFolder_CountAllMessages", _wrap_MailFolder_CountAllMessages, METH_VARARGS },
+	 { (char *)"MailFolder_GetMsgnoFromUID", _wrap_MailFolder_GetMsgnoFromUID, METH_VARARGS },
 	 { (char *)"MailFolder_Ping", _wrap_MailFolder_Ping, METH_VARARGS },
+	 { (char *)"MailFolder_Checkpoint", _wrap_MailFolder_Checkpoint, METH_VARARGS },
 	 { (char *)"MailFolder_GetMessage", _wrap_MailFolder_GetMessage, METH_VARARGS },
 	 { (char *)"MailFolder_DeleteMessage", _wrap_MailFolder_DeleteMessage, METH_VARARGS },
 	 { (char *)"MailFolder_UnDeleteMessage", _wrap_MailFolder_UnDeleteMessage, METH_VARARGS },
 	 { (char *)"MailFolder_SetMessageFlag", _wrap_MailFolder_SetMessageFlag, METH_VARARGS },
+	 { (char *)"MailFolder_SetSequenceFlag", _wrap_MailFolder_SetSequenceFlag, METH_VARARGS },
+	 { (char *)"MailFolder_SetFlagForAll", _wrap_MailFolder_SetFlagForAll, METH_VARARGS },
 	 { (char *)"MailFolder_SetFlag", _wrap_MailFolder_SetFlag, METH_VARARGS },
 	 { (char *)"MailFolder_AppendMessage", _wrap_MailFolder_AppendMessage, METH_VARARGS },
 	 { (char *)"MailFolder_ExpungeMessages", _wrap_MailFolder_ExpungeMessages, METH_VARARGS },
+	 { (char *)"MailFolder_SearchByFlag", _wrap_MailFolder_SearchByFlag, METH_VARARGS },
 	 { (char *)"MailFolder_SearchMessages", _wrap_MailFolder_SearchMessages, METH_VARARGS },
-	 { (char *)"MailFolder_GetProfile", _wrap_MailFolder_GetProfile, METH_VARARGS },
-	 { (char *)"MailFolder_GetClassName", _wrap_MailFolder_GetClassName, METH_VARARGS },
 	 { (char *)"MailFolder_SaveMessages", _wrap_MailFolder_SaveMessages, METH_VARARGS },
 	 { (char *)"MailFolder_SaveMessagesToFile", _wrap_MailFolder_SaveMessagesToFile, METH_VARARGS },
 	 { (char *)"MailFolder_DeleteOrTrashMessages", _wrap_MailFolder_DeleteOrTrashMessages, METH_VARARGS },
@@ -1635,27 +3054,34 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"MailFolder_UnDeleteMessages", _wrap_MailFolder_UnDeleteMessages, METH_VARARGS },
 	 { (char *)"MailFolder_ReplyMessages", _wrap_MailFolder_ReplyMessages, METH_VARARGS },
 	 { (char *)"MailFolder_ForwardMessages", _wrap_MailFolder_ForwardMessages, METH_VARARGS },
+	 { (char *)"MailFolder_SortMessages", _wrap_MailFolder_SortMessages, METH_VARARGS },
+	 { (char *)"MailFolder_ThreadMessages", _wrap_MailFolder_ThreadMessages, METH_VARARGS },
 	 { (char *)"MailFolder_Lock", _wrap_MailFolder_Lock, METH_VARARGS },
 	 { (char *)"MailFolder_UnLock", _wrap_MailFolder_UnLock, METH_VARARGS },
 	 { (char *)"MailFolder_IsLocked", _wrap_MailFolder_IsLocked, METH_VARARGS },
-	 { (char *)"MailFolder_GetHeaders", _wrap_MailFolder_GetHeaders, METH_VARARGS },
-	 { (char *)"MailFolder_GetType", _wrap_MailFolder_GetType, METH_VARARGS },
-	 { (char *)"MailFolder_GetFlags", _wrap_MailFolder_GetFlags, METH_VARARGS },
+	 { (char *)"MailFolder_ProcessNewMail", _wrap_MailFolder_ProcessNewMail, METH_VARARGS },
 	 { (char *)"MailFolder_ApplyFilterRules", _wrap_MailFolder_ApplyFilterRules, METH_VARARGS },
+	 { (char *)"MailFolder_ExistsMH", _wrap_MailFolder_ExistsMH, METH_VARARGS },
+	 { (char *)"MailFolder_InitializeMH", _wrap_MailFolder_InitializeMH, METH_VARARGS },
+	 { (char *)"MailFolder_InitializeNewsSpool", _wrap_MailFolder_InitializeNewsSpool, METH_VARARGS },
+	 { (char *)"MailFolder_GetImapSpec", _wrap_MailFolder_GetImapSpec, METH_VARARGS },
+	 { (char *)"MailFolder_SpecToFolderName", _wrap_MailFolder_SpecToFolderName, METH_VARARGS },
+	 { (char *)"MailFolder_GetMHFolderName", _wrap_MailFolder_GetMHFolderName, METH_VARARGS },
+	 { (char *)"MailFolder_ImportFoldersMH", _wrap_MailFolder_ImportFoldersMH, METH_VARARGS },
+	 { (char *)"MailFolder_DecodeHeader", _wrap_MailFolder_DecodeHeader, METH_VARARGS },
+	 { (char *)"MailFolder_Init", _wrap_MailFolder_Init, METH_VARARGS },
+	 { (char *)"MailFolder_CleanUp", _wrap_MailFolder_CleanUp, METH_VARARGS },
+	 { (char *)"MailFolder_SetInteractiveFrame", _wrap_MailFolder_SetInteractiveFrame, METH_VARARGS },
+	 { (char *)"MailFolder_GetInteractiveFrame", _wrap_MailFolder_GetInteractiveFrame, METH_VARARGS },
+	 { (char *)"MailFolder_GetLogCircle", _wrap_MailFolder_GetLogCircle, METH_VARARGS },
+	 { (char *)"MailFolder_RequestUpdate", _wrap_MailFolder_RequestUpdate, METH_VARARGS },
+	 { (char *)"MailFolder_SuspendUpdates", _wrap_MailFolder_SuspendUpdates, METH_VARARGS },
+	 { (char *)"MailFolder_ResumeUpdates", _wrap_MailFolder_ResumeUpdates, METH_VARARGS },
+	 { (char *)"delete_MailFolder", _wrap_delete_MailFolder, METH_VARARGS },
 	 { (char *)"MailFolder_swigregister", MailFolder_swigregister, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetSubject", _wrap_HeaderInfo_GetSubject, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetFrom", _wrap_HeaderInfo_GetFrom, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetDate", _wrap_HeaderInfo_GetDate, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetId", _wrap_HeaderInfo_GetId, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetReferences", _wrap_HeaderInfo_GetReferences, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetUId", _wrap_HeaderInfo_GetUId, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetStatus", _wrap_HeaderInfo_GetStatus, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetSize", _wrap_HeaderInfo_GetSize, METH_VARARGS },
-	 { (char *)"HeaderInfo_GetLines", _wrap_HeaderInfo_GetLines, METH_VARARGS },
-	 { (char *)"HeaderInfo_swigregister", HeaderInfo_swigregister, METH_VARARGS },
-	 { (char *)"HeaderInfoList_Count", _wrap_HeaderInfoList_Count, METH_VARARGS },
-	 { (char *)"HeaderInfoList_GetItem", _wrap_HeaderInfoList_GetItem, METH_VARARGS },
-	 { (char *)"HeaderInfoList_swigregister", HeaderInfoList_swigregister, METH_VARARGS },
+	 { (char *)"new_SuspendFolderUpdates", _wrap_new_SuspendFolderUpdates, METH_VARARGS },
+	 { (char *)"delete_SuspendFolderUpdates", _wrap_delete_SuspendFolderUpdates, METH_VARARGS },
+	 { (char *)"SuspendFolderUpdates_swigregister", SuspendFolderUpdates_swigregister, METH_VARARGS },
 	 { NULL, NULL }
 };
 
@@ -1665,66 +3091,68 @@ static PyMethodDef SwigMethods[] = {
 static void *_p_MailFolderTo_p_MObjectRC(void *x) {
     return (void *)((MObjectRC *)  ((MailFolder *) x));
 }
-static void *_p_ProfileTo_p_MObjectRC(void *x) {
-    return (void *)((MObjectRC *)  ((Profile *) x));
-}
-static void *_p_HeaderInfoListTo_p_MObjectRC(void *x) {
-    return (void *)((MObjectRC *)  ((HeaderInfoList *) x));
-}
-static void *_p_MailFolderTo_p_MObject(void *x) {
-    return (void *)((MObject *) (MObjectRC *) ((MailFolder *) x));
-}
-static void *_p_MObjectRCTo_p_MObject(void *x) {
-    return (void *)((MObject *)  ((MObjectRC *) x));
-}
-static void *_p_ProfileTo_p_MObject(void *x) {
-    return (void *)((MObject *) (MObjectRC *) ((Profile *) x));
-}
-static void *_p_HeaderInfoListTo_p_MObject(void *x) {
-    return (void *)((MObject *) (MObjectRC *) ((HeaderInfoList *) x));
-}
-static swig_type_info _swigt__p_MObjectRC[] = {{"_p_MObjectRC", 0, "MObjectRC *", 0},{"_p_MailFolder", _p_MailFolderTo_p_MObjectRC},{"_p_MObjectRC"},{"_p_Profile", _p_ProfileTo_p_MObjectRC},{"_p_HeaderInfoList", _p_HeaderInfoListTo_p_MObjectRC},{0}};
-static swig_type_info _swigt__p_MailFolder__Params[] = {{"_p_MailFolder__Params", 0, "MailFolder::Params *", 0},{"_p_MailFolder__Params"},{0}};
-static swig_type_info _swigt__p_size_t[] = {{"_p_size_t", 0, "size_t *", 0},{"_p_size_t"},{0}};
+static swig_type_info _swigt__p_wxFrame[] = {{"_p_wxFrame", 0, "wxFrame *", 0},{"_p_wxFrame"},{0}};
+static swig_type_info _swigt__p_MObjectRC[] = {{"_p_MObjectRC", 0, "MObjectRC *", 0},{"_p_MailFolder", _p_MailFolderTo_p_MObjectRC},{"_p_MObjectRC"},{0}};
+static swig_type_info _swigt__p_Params[] = {{"_p_Params", 0, "Params *", 0},{"_p_Params"},{0}};
+static swig_type_info _swigt__p_MailFolderStatus[] = {{"_p_MailFolderStatus", 0, "MailFolderStatus *", 0},{"_p_MailFolderStatus"},{0}};
 static swig_type_info _swigt__p_SearchCriterium[] = {{"_p_SearchCriterium", 0, "SearchCriterium *", 0},{"_p_SearchCriterium"},{0}};
+static swig_type_info _swigt__p_ThreadData[] = {{"_p_ThreadData", 0, "ThreadData *", 0},{"_p_ThreadData"},{0}};
 static swig_type_info _swigt__p_HeaderInfoList[] = {{"_p_HeaderInfoList", 0, "HeaderInfoList *", 0},{"_p_HeaderInfoList"},{0}};
 static swig_type_info _swigt__p_wxWindow[] = {{"_p_wxWindow", 0, "wxWindow *", 0},{"_p_wxWindow"},{0}};
 static swig_type_info _swigt__p_Profile[] = {{"_p_Profile", 0, "Profile *", 0},{"_p_Profile"},{0}};
-static swig_type_info _swigt__p_time_t[] = {{"_p_time_t", 0, "time_t *", 0},{"_p_time_t"},{0}};
+static swig_type_info _swigt__p_SortParams[] = {{"_p_SortParams", 0, "SortParams *", 0},{"_p_SortParams"},{0}};
+static swig_type_info _swigt__p_ThreadParams[] = {{"_p_ThreadParams", 0, "ThreadParams *", 0},{"_p_ThreadParams"},{0}};
+static swig_type_info _swigt__p_MFolderType[] = {{"_p_MFolderType", 0, "MFolderType *", 0},{"_p_MFolderType"},{0}};
 static swig_type_info _swigt__p_String[] = {{"_p_String", 0, "String *", 0},{"_p_String"},{0}};
 static swig_type_info _swigt__p_Message[] = {{"_p_Message", 0, "Message *", 0},{"_p_Message"},{0}};
-static swig_type_info _swigt__p_MFolderType[] = {{"_p_MFolderType", 0, "MFolderType *", 0},{"_p_MFolderType"},{0}};
-static swig_type_info _swigt__p_Ticket[] = {{"_p_Ticket", 0, "Ticket *", 0},{"_p_Ticket"},{0}};
+static swig_type_info _swigt__p_wxFontEncoding[] = {{"_p_wxFontEncoding", 0, "wxFontEncoding *", 0},{"_p_wxFontEncoding"},{0}};
 static swig_type_info _swigt__p_MFolder[] = {{"_p_MFolder", 0, "MFolder *", 0},{"_p_MFolder"},{0}};
+static swig_type_info _swigt__p_Ticket[] = {{"_p_Ticket", 0, "Ticket *", 0},{"_p_Ticket"},{0}};
 static swig_type_info _swigt__p_UIdArray[] = {{"_p_UIdArray", 0, "UIdArray *", 0},{"_p_UIdArray"},{0}};
+static swig_type_info _swigt__p_SuspendFolderUpdates[] = {{"_p_SuspendFolderUpdates", 0, "SuspendFolderUpdates *", 0},{"_p_SuspendFolderUpdates"},{0}};
+static swig_type_info _swigt__p_Composer[] = {{"_p_Composer", 0, "Composer *", 0},{"_p_Composer"},{0}};
 static swig_type_info _swigt__p_UIdType[] = {{"_p_UIdType", 0, "UIdType *", 0},{"_p_UIdType"},{0}};
 static swig_type_info _swigt__p_ASMailFolder[] = {{"_p_ASMailFolder", 0, "ASMailFolder *", 0},{"_p_ASMailFolder"},{0}};
 static swig_type_info _swigt__p_MailFolder[] = {{"_p_MailFolder", 0, "MailFolder *", 0},{"_p_MailFolder"},{0}};
-static swig_type_info _swigt__p_HeaderInfo[] = {{"_p_HeaderInfo", 0, "HeaderInfo *", 0},{"_p_HeaderInfo"},{0}};
+static swig_type_info _swigt__p_ServerInfoEntry[] = {{"_p_ServerInfoEntry", 0, "ServerInfoEntry *", 0},{"_p_ServerInfoEntry"},{0}};
+static swig_type_info _swigt__p_ArrayHeaderInfo[] = {{"_p_ArrayHeaderInfo", 0, "ArrayHeaderInfo *", 0},{"_p_ArrayHeaderInfo"},{0}};
 static swig_type_info _swigt__p_UserData[] = {{"_p_UserData", 0, "UserData *", 0},{"_p_UserData"},{0}};
-static swig_type_info _swigt__p_MObject[] = {{"_p_MObject", 0, "MObject *", 0},{"_p_MailFolder", _p_MailFolderTo_p_MObject},{"_p_MObjectRC", _p_MObjectRCTo_p_MObject},{"_p_Profile", _p_ProfileTo_p_MObject},{"_p_HeaderInfoList", _p_HeaderInfoListTo_p_MObject},{"_p_MObject"},{0}};
+static swig_type_info _swigt__p_Sequence[] = {{"_p_Sequence", 0, "Sequence *", 0},{"_p_Sequence"},{0}};
+static swig_type_info _swigt__p_MsgnoType[] = {{"_p_MsgnoType", 0, "MsgnoType *", 0},{"_p_MsgnoType"},{0}};
+static swig_type_info _swigt__p_MLogCircle[] = {{"_p_MLogCircle", 0, "MLogCircle *", 0},{"_p_MLogCircle"},{0}};
+static swig_type_info _swigt__p_wxChar[] = {{"_p_wxChar", 0, "wxChar *", 0},{"_p_wxChar"},{0}};
 
 static swig_type_info *swig_types_initial[] = {
+_swigt__p_wxFrame, 
 _swigt__p_MObjectRC, 
-_swigt__p_MailFolder__Params, 
-_swigt__p_size_t, 
+_swigt__p_Params, 
+_swigt__p_MailFolderStatus, 
 _swigt__p_SearchCriterium, 
+_swigt__p_ThreadData, 
 _swigt__p_HeaderInfoList, 
 _swigt__p_wxWindow, 
 _swigt__p_Profile, 
-_swigt__p_time_t, 
+_swigt__p_SortParams, 
+_swigt__p_ThreadParams, 
+_swigt__p_MFolderType, 
 _swigt__p_String, 
 _swigt__p_Message, 
-_swigt__p_MFolderType, 
-_swigt__p_Ticket, 
+_swigt__p_wxFontEncoding, 
 _swigt__p_MFolder, 
+_swigt__p_Ticket, 
 _swigt__p_UIdArray, 
+_swigt__p_SuspendFolderUpdates, 
+_swigt__p_Composer, 
 _swigt__p_UIdType, 
 _swigt__p_ASMailFolder, 
 _swigt__p_MailFolder, 
-_swigt__p_HeaderInfo, 
+_swigt__p_ServerInfoEntry, 
+_swigt__p_ArrayHeaderInfo, 
 _swigt__p_UserData, 
-_swigt__p_MObject, 
+_swigt__p_Sequence, 
+_swigt__p_MsgnoType, 
+_swigt__p_MLogCircle, 
+_swigt__p_wxChar, 
 0
 };
 
@@ -1744,6 +3172,20 @@ static swig_const_info swig_const_table[] = {
 { SWIG_PY_INT,     (char *)"MailFolder_REPLY_LIST", (long) MailFolder::REPLY_LIST, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"MailFolder_FOLLOWUP_TO_NEWSGROUP", (long) MailFolder::FOLLOWUP_TO_NEWSGROUP, 0, 0, 0},
 { SWIG_PY_INT,     (char *)"MailFolder_REPLY", (long) MailFolder::REPLY, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_Normal", (long) MailFolder::Normal, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_ReadOnly", (long) MailFolder::ReadOnly, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_HalfOpen", (long) MailFolder::HalfOpen, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEQ_UID", (long) MailFolder::SEQ_UID, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEQ_MSGNO", (long) MailFolder::SEQ_MSGNO, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEARCH_MSGNO", (long) MailFolder::SEARCH_MSGNO, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEARCH_SET", (long) MailFolder::SEARCH_SET, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEARCH_UNSET", (long) MailFolder::SEARCH_UNSET, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEARCH_UNDELETED", (long) MailFolder::SEARCH_UNDELETED, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_SEARCH_UID", (long) MailFolder::SEARCH_UID, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_DELETE_ALLOW_TRASH", (long) MailFolder::DELETE_ALLOW_TRASH, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_DELETE_NO_TRASH", (long) MailFolder::DELETE_NO_TRASH, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_DELETE_NO_EXPUNGE", (long) MailFolder::DELETE_NO_EXPUNGE, 0, 0, 0},
+{ SWIG_PY_INT,     (char *)"MailFolder_DELETE_EXPUNGE", (long) MailFolder::DELETE_EXPUNGE, 0, 0, 0},
 {0}};
 
 #ifdef __cplusplus

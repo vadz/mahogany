@@ -1,0 +1,80 @@
+# This file was created automatically by SWIG.
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _SendMessage
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+class SendMessage(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SendMessage, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SendMessage, name)
+    NeverQueue = _SendMessage.SendMessage_NeverQueue
+    Silent = _SendMessage.SendMessage_Silent
+    __swig_getmethods__["Create"] = lambda x: _SendMessage.SendMessage_Create
+    if _newclass:Create = staticmethod(_SendMessage.SendMessage_Create)
+    __swig_getmethods__["CreateResent"] = lambda x: _SendMessage.SendMessage_CreateResent
+    if _newclass:CreateResent = staticmethod(_SendMessage.SendMessage_CreateResent)
+    __swig_getmethods__["CreateFromMsg"] = lambda x: _SendMessage.SendMessage_CreateFromMsg
+    if _newclass:CreateFromMsg = staticmethod(_SendMessage.SendMessage_CreateFromMsg)
+    def SetSubject(*args): return apply(_SendMessage.SendMessage_SetSubject,args)
+    def SetAddresses(*args): return apply(_SendMessage.SendMessage_SetAddresses,args)
+    def SetFrom(*args): return apply(_SendMessage.SendMessage_SetFrom,args)
+    def SetNewsgroups(*args): return apply(_SendMessage.SendMessage_SetNewsgroups,args)
+    def SetFcc(*args): return apply(_SendMessage.SendMessage_SetFcc,args)
+    def SetHeaderEncoding(*args): return apply(_SendMessage.SendMessage_SetHeaderEncoding,args)
+    def AddHeaderEntry(*args): return apply(_SendMessage.SendMessage_AddHeaderEntry,args)
+    def RemoveHeaderEntry(*args): return apply(_SendMessage.SendMessage_RemoveHeaderEntry,args)
+    def HasHeaderEntry(*args): return apply(_SendMessage.SendMessage_HasHeaderEntry,args)
+    def GetHeaderEntry(*args): return apply(_SendMessage.SendMessage_GetHeaderEntry,args)
+    def AddPart(*args): return apply(_SendMessage.SendMessage_AddPart,args)
+    def WriteToString(*args): return apply(_SendMessage.SendMessage_WriteToString,args)
+    def WriteToFile(*args): return apply(_SendMessage.SendMessage_WriteToFile,args)
+    def WriteToFolder(*args): return apply(_SendMessage.SendMessage_WriteToFolder,args)
+    def SendOrQueue(*args): return apply(_SendMessage.SendMessage_SendOrQueue,args)
+    def Preview(*args): return apply(_SendMessage.SendMessage_Preview,args)
+    def __del__(self, destroy= _SendMessage.delete_SendMessage):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<C SendMessage instance at %s>" % (self.this,)
+
+class SendMessagePtr(SendMessage):
+    def __init__(self,this):
+        _swig_setattr(self, SendMessage, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, SendMessage, 'thisown', 0)
+        _swig_setattr(self, SendMessage,self.__class__,SendMessage)
+_SendMessage.SendMessage_swigregister(SendMessagePtr)
+SendMessage_Create = _SendMessage.SendMessage_Create
+
+SendMessage_CreateResent = _SendMessage.SendMessage_CreateResent
+
+SendMessage_CreateFromMsg = _SendMessage.SendMessage_CreateFromMsg
+
+
+

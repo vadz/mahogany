@@ -5275,10 +5275,10 @@ MailFolderCC::mm_fatal(char *str)
 
 /* static */
 bool
-MailFolderCC::Subscribe(const String &host,
-                        MFolderType protocol,
-                        const String &mailboxname,
-                        bool subscribe)
+MailFolder::Subscribe(const String &host,
+                      MFolderType protocol,
+                      const String &mailboxname,
+                      bool subscribe)
 {
    MFolder_obj folder(MFolder::CreateTemp(mailboxname, protocol));
    folder->SetServer(host);

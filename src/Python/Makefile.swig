@@ -17,11 +17,13 @@
 SWIG=swig
 SWIGFLAGS := -c++ -python -shadow
 
-IFACES := $(wildcard *.i)
-IFACES := $(filter-out SendMessageCC.i, $(IFACES))
+IFACES_DIR := ../../include/interface
+IFACES := $(filter-out swigcmn.i,$(notdir $(wildcard $(IFACES_DIR)/*.i)))
+
+vpath %.i $(IFACES_DIR)
 
 %.cpp %.py: %.i
-	$(SWIG) -I../../include $(SWIGFLAGS) -o $*.cpp $<
+	$(SWIG) -I../../include -I$(IFACES_DIR) $(SWIGFLAGS) -o $*.cpp $<
 
 %.cpp-swig: %.cpp
 	sed -e 's/"Python.h"/"MPython.h"/' $< > $@

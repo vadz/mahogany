@@ -430,7 +430,8 @@ PyH_RunScript(const char *filename)
       return false;
    }
 
-   M_PyObject rc = PyRun_String(execCmd, Py_file_input, dict, dict);
+   M_PyObject rc = PyRun_String(const_cast<char *>(execCmd.mb_str()),
+                                Py_file_input, dict, dict);
    if ( !rc )
    {
       String err = PyH_GetErrorMessage();

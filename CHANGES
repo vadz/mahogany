@@ -9,6 +9,7 @@
 Release 0.66 'Clio'
 -------------------
 
+28.12.03 VZ: exposed more classes to embedded Python interpreter
 27.12.03 VZ: added $header template variable (entire original message header)
 26.12.03 VZ: main program icon now indicates whether there is new mail anywhere
 18.12.03 VZ: added command to select all text in the viewer

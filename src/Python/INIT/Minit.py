@@ -13,6 +13,7 @@
 ####################################################################
 
 import MDialogs
+import MailFolder
 
 # helper function: return the username
 def GetUserName():

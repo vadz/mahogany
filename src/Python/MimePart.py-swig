@@ -1,0 +1,105 @@
+# This file was created automatically by SWIG.
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _MimePart
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+class MimeParameter(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MimeParameter, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, MimeParameter, name)
+    def __init__(self,*args):
+        _swig_setattr(self, MimeParameter, 'this', apply(_MimePart.new_MimeParameter,args))
+        _swig_setattr(self, MimeParameter, 'thisown', 1)
+    __swig_setmethods__["name"] = _MimePart.MimeParameter_name_set
+    __swig_getmethods__["name"] = _MimePart.MimeParameter_name_get
+    if _newclass:name = property(_MimePart.MimeParameter_name_get,_MimePart.MimeParameter_name_set)
+    __swig_setmethods__["value"] = _MimePart.MimeParameter_value_set
+    __swig_getmethods__["value"] = _MimePart.MimeParameter_value_get
+    if _newclass:value = property(_MimePart.MimeParameter_value_get,_MimePart.MimeParameter_value_set)
+    def __del__(self, destroy= _MimePart.delete_MimeParameter):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C MimeParameter instance at %s>" % (self.this,)
+
+class MimeParameterPtr(MimeParameter):
+    def __init__(self,this):
+        _swig_setattr(self, MimeParameter, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MimeParameter, 'thisown', 0)
+        _swig_setattr(self, MimeParameter,self.__class__,MimeParameter)
+_MimePart.MimeParameter_swigregister(MimeParameterPtr)
+
+MIME_ENC_7BIT = _MimePart.MIME_ENC_7BIT
+MIME_ENC_8BIT = _MimePart.MIME_ENC_8BIT
+MIME_ENC_BINARY = _MimePart.MIME_ENC_BINARY
+MIME_ENC_BASE64 = _MimePart.MIME_ENC_BASE64
+MIME_ENC_QUOTEDPRINTABLE = _MimePart.MIME_ENC_QUOTEDPRINTABLE
+MIME_ENC_OTHER = _MimePart.MIME_ENC_OTHER
+MIME_ENC_INVALID = _MimePart.MIME_ENC_INVALID
+class MimePart(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MimePart, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, MimePart, name)
+    def GetParent(*args): return apply(_MimePart.MimePart_GetParent,args)
+    def GetNext(*args): return apply(_MimePart.MimePart_GetNext,args)
+    def GetNested(*args): return apply(_MimePart.MimePart_GetNested,args)
+    def GetType(*args): return apply(_MimePart.MimePart_GetType,args)
+    def GetDescription(*args): return apply(_MimePart.MimePart_GetDescription,args)
+    def GetFilename(*args): return apply(_MimePart.MimePart_GetFilename,args)
+    def GetDisposition(*args): return apply(_MimePart.MimePart_GetDisposition,args)
+    def GetPartSpec(*args): return apply(_MimePart.MimePart_GetPartSpec,args)
+    def GetParam(*args): return apply(_MimePart.MimePart_GetParam,args)
+    def GetDispositionParam(*args): return apply(_MimePart.MimePart_GetDispositionParam,args)
+    def GetParameters(*args): return apply(_MimePart.MimePart_GetParameters,args)
+    def GetDispositionParameters(*args): return apply(_MimePart.MimePart_GetDispositionParameters,args)
+    def GetRawContent(*args): return apply(_MimePart.MimePart_GetRawContent,args)
+    def GetContent(*args): return apply(_MimePart.MimePart_GetContent,args)
+    def GetTextContent(*args): return apply(_MimePart.MimePart_GetTextContent,args)
+    def GetHeaders(*args): return apply(_MimePart.MimePart_GetHeaders,args)
+    def GetTransferEncoding(*args): return apply(_MimePart.MimePart_GetTransferEncoding,args)
+    def GetSize(*args): return apply(_MimePart.MimePart_GetSize,args)
+    def GetTextEncoding(*args): return apply(_MimePart.MimePart_GetTextEncoding,args)
+    def GetNumberOfLines(*args): return apply(_MimePart.MimePart_GetNumberOfLines,args)
+    def __del__(self, destroy= _MimePart.delete_MimePart):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
+    def __repr__(self):
+        return "<C MimePart instance at %s>" % (self.this,)
+
+class MimePartPtr(MimePart):
+    def __init__(self,this):
+        _swig_setattr(self, MimePart, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MimePart, 'thisown', 0)
+        _swig_setattr(self, MimePart,self.__class__,MimePart)
+_MimePart.MimePart_swigregister(MimePartPtr)
+
+
