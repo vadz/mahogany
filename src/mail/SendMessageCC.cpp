@@ -351,7 +351,9 @@ SendMessageCC::SetupAddresses(void)
       String email = Message::GetEMailFromAddress(m_Sender);
       mailbox = strutil_before(email, '@');
       mailhost = strutil_after(email,'@');
-      m_Envelope->sender->personal = CPYSTR(Message::GetNameFromAddress(m_Sender));
+      String tmp = Message::GetNameFromAddress(m_Sender);
+      if(tmp != email) // it might just be the same name@host
+         m_Envelope->sender->personal = CPYSTR(tmp); 
       m_Envelope->sender->mailbox = CPYSTR(mailbox);
       m_Envelope->sender->host = CPYSTR(mailhost);
    }
@@ -843,6 +845,7 @@ SendMessageCC::AddPart(Message::ContentType type,
       }
    }
 }
+
 bool
 SendMessageCC::SendOrQueue(void)
 {

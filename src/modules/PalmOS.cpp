@@ -747,8 +747,8 @@ PalmOSModule::Connect(void)
 #if HAVE_PI_ACCEPT_TO
       wxMiniFrame *mini = new wxMiniFrame(NULL,-1, "Mahogany");
       wxPanel *p = new wxPanel(mini, -1);
-      wxStaticText *t = new wxStaticText(
-         p,-1, _("Please press the HotSync button..."));
+      (void) new wxStaticText(p,-1,
+                              _("Please press the HotSync button..."));
       p->Fit(); mini->Fit();
       mini->Show(TRUE);
       wxSafeYield(mini);
@@ -902,7 +902,8 @@ static void protect_name(wxString &s)
 }
 
 int
-PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
+PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
+                             wxString directory)
 {
    struct dirent * dirent;
    int filecount = 0;
@@ -920,11 +921,9 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
 #undef _DIRENT_HAVE_D_TYPE
 #ifdef _DIRENT_HAVE_D_TYPE
       // ignore directories
-      if ( (dirent->d_type & DT_REG) != 0 
-         || (dirent->d_type & DT_LNK) != 0 
-         || (dirent->d_type & DT_UNKNOWN) != 0 )
-          name.Printf("%s%s", directory.c_str(), dirent->d_name);
-      else
+      if ( (dirent->d_type & DT_REG) == 0 
+         && (dirent->d_type & DT_LNK) == 0 
+         && (dirent->d_type & DT_UNKNOWN) == 0 )
       {
          wxString msg;
          msg.Printf(_("Ignoring entry '%s' which is not a regular file."),
@@ -946,16 +945,18 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
          continue;
       }
 
+      // now we need the full pathname:
+      name.Printf("%s%s", directory.c_str(), dirent->d_name);
       // now we open the file and see whether it is really a file for
       // the Palm. If yes, then we remember the filename.
       struct pi_file *f = pi_file_open((char*)name.c_str());
-      if (f > 0) {
+      if (f > 0)
+      {
          pi_file_close(f);
          list.Add(name);
          ++filecount;
       }
    }
-
    return filecount;
 }
 
