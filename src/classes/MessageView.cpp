@@ -1853,7 +1853,9 @@ MessageView::ProcessPart(const MimePart *mimepart)
 
                // show just the best one
                CHECK_RET(partBest != 0, _T("No part can be displayed !"));
-               ShowPart(partBest);
+               // The content of an alternative is not necessarily a single part.
+               // So process it as well.
+               ProcessPart(partBest);
             }
             else if ( subtype == "SIGNED" )
             {
