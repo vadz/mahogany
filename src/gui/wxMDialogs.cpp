@@ -186,7 +186,7 @@ MProgressDialog::EnableDisableEvents(bool enable)
 
 MProgressDialog::~MProgressDialog()
 {
-   EnableDisableEvents(false);
+   EnableDisableEvents(true);
 }
 
 void
