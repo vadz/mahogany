@@ -556,6 +556,9 @@ protected:
    unsigned long m_RetrievalLimit;
    //@}
 public:
+   /// re-read some cclient settings
+   static void UpdateCClientConfig(void);
+   
    /** @name common callback routines
        They all take a stram argument and the number of a message.
        Do not call them, they are only for use by the c-client library!

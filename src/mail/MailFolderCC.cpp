@@ -78,8 +78,6 @@ static void sigpipe_handler(int)
 #define QPRINT_MIDDLEMARKER_U "?Q?"
 #define QPRINT_MIDDLEMARKER_L "?q?"
 
-// set this to 0 or 1 to disable/enable debug logging
-#define CCLIENT_DLOG   0
 
 // ----------------------------------------------------------------------------
 // private types
@@ -161,6 +159,15 @@ extern void CC_Cleanup(void)
       delete gs_CCStreamCleaner;
       gs_CCStreamCleaner = NULL;
    }
+}
+
+
+
+/* static */
+void
+MailFolderCC::UpdateCClientConfig()
+{
+   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT);
 }
 
 // ============================================================================
@@ -309,6 +316,8 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
 static bool mm_ignore_errors = false;
 /// a variable disabling all events
 static bool mm_disable_callbacks = false;
+/// show cclient debug output
+static bool mm_show_debug = false;
 
 // be quiet
 static inline void CCQuiet(bool disableCallbacks = false)
@@ -836,6 +845,8 @@ MailFolderCC::UpdateTimeoutValues(void)
    ms_TcpRshTimeout = ms_TcpOpenTimeout;
    ApplyTimeoutValues();
 }
+
+
 
 bool MailFolderCC::HalfOpen()
 {
@@ -2441,8 +2452,10 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 void
 MailFolderCC::mm_dlog(String str)
 {
-#if CCLIENT_DLOG
-   String msg = _("c-client debug: ");
+   if(mm_show_debug == false)
+      return;
+   
+   String msg = _("Mail-debug: ");
    // check for PASS
    if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
    {
@@ -2467,7 +2480,6 @@ MailFolderCC::mm_dlog(String str)
    }
 
    LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
-#endif
 }
 
 /** get user name and password

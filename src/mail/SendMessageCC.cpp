@@ -120,21 +120,19 @@ SendMessageCC::Create(Protocol protocol,
    {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
       if(READ_CONFIG(prof,MP_SMTPHOST_LOGIN) != "")
-         m_ServerHost = String('{')
+         m_ServerHost = 
             << m_ServerHost
             << String("/user=")
-            << String(READ_CONFIG(prof,MP_SMTPHOST_LOGIN))
-            << String('}');
+            << String(READ_CONFIG(prof,MP_SMTPHOST_LOGIN));
    }
    else
    {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
       if(READ_CONFIG(prof,MP_USERNAME) != "")
-         m_ServerHost = String('{')
+         m_ServerHost = 
             << m_ServerHost
             << String("/user=")
-            << String(READ_CONFIG(prof,MP_USERNAME))
-            << String('}');
+            << String(READ_CONFIG(prof,MP_USERNAME));
    }
 #ifdef USE_SSL
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
@@ -647,10 +645,6 @@ SendMessageCC::Send(void)
    {
    case Prot_SMTP:
       service = "smtp";
-      if( m_ServerHost.Contains("/user=") )
-         service = "esmpt";
-      // notice that we _must_ assign the result to this string!
-
       hostlist[0] = m_ServerHost;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL

@@ -1365,6 +1365,8 @@ MailFolderCmn::UpdateConfig(void)
 
    m_Timer->Stop();
    m_Timer->Start(m_Config.m_UpdateInterval * 1000);
+
+   MailFolderCC::UpdateCClientConfig();
 }
 
 

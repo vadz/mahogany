@@ -268,6 +268,7 @@ enum ConfigFields
    ConfigField_OpenOnClick,
    ConfigField_ShowHiddenFolders,
    ConfigField_ShowNewMail,
+   ConfigField_DebugCClient,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
    ConfigField_FocusFollowsMouse,
@@ -667,6 +668,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
+   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1 },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
    { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
@@ -850,6 +852,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
+   CONFIG_ENTRY(MP_DEBUG_CCLIENT),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
    CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),

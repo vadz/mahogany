@@ -132,6 +132,8 @@
 
 /// show log window?
 #define   MP_SHOWLOG          "ShowLog"
+/// debug protocols and folder access?
+#define   MP_DEBUG_CCLIENT   "MailDebug"
 
 /// open ADB editor on startup?
 #define   MP_SHOWADBEDITOR    "ShowAdb"
@@ -616,6 +618,8 @@
 #define   MP_HEIGHT_D   400
 /// show log window?
 #define   MP_SHOWLOG_D  1
+/// debug protocols and folder access?
+#define   MP_DEBUG_CCLIENT_D   0l
 /// open ADB editor on startup?
 #define   MP_SHOWADBEDITOR_D 0L
 /// show tips at startup?
