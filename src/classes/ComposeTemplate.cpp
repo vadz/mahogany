@@ -487,7 +487,7 @@ ExpansionSink::Output(const String& text)
       // TODO: this supposes that there is no autowrap, to be changed if/when
       //       it appears
       int deltaX = 0, deltaY = 0;
-      for ( const char *pc = text.c_str(); *pc; pc++ )
+      for ( const wxChar *pc = text.c_str(); *pc; pc++ )
       {
          if ( *pc == '\n' )
          {
@@ -640,7 +640,7 @@ VarExpander::SlurpFile(const String& filename, String *value)
    // it's important that value is not empty even if we return FALSE because if
    // it's empty when Expand() returns the template parser will log a
    // misleading error message about "unknown variable"
-   *value = '?';
+   *value = _T('?');
 
    wxFFile file(filename);
 
@@ -787,7 +787,7 @@ VarExpander::ExpandFile(const String& name,
 {
    // first check if we don't want to ask user
    String filename = GetAbsFilename(name);
-   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
+   if ( arguments.Index(_T("ask"), FALSE /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to insert"),
                                        m_cv.GetFrame(),
@@ -806,13 +806,13 @@ VarExpander::ExpandFile(const String& name,
       }
 
       // do we want to quote the files contents before inserting?
-      if ( arguments.Index("quote", FALSE /* no case */) != wxNOT_FOUND )
+      if ( arguments.Index(_T("quote"), FALSE /* no case */) != wxNOT_FOUND )
       {
          String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
          String quotedValue;
          quotedValue.Alloc(value->length());
 
-         const char *cptr = value->c_str();
+         const wxChar *cptr = value->c_str();
          quotedValue = prefix;
          while ( *cptr )
          {
@@ -843,7 +843,7 @@ VarExpander::ExpandAttach(const String& name,
                           String *value) const
 {
    String filename = GetAbsFilename(name);
-   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
+   if ( arguments.Index(_T("ask"), FALSE /* no case */) != wxNOT_FOUND )
    {
       filename = MDialog_FileRequester(_("Select the file to attach"),
                                        m_cv.GetFrame(),
@@ -861,7 +861,7 @@ VarExpander::ExpandAttach(const String& name,
       }
 
       // guess MIME type from extension
-      m_sink.InsertAttachment(strdup(value->c_str()),
+      m_sink.InsertAttachment(wxStrdup(value->c_str()),
                               value->length(),
                               "", // will be determined from filename laer
                               filename);
@@ -898,14 +898,14 @@ VarExpander::ExpandCommand(const String& name,
       {
          // forbid further expansion in the arguments by quoting them
          wxString arg = arguments[n];
-         arg.Replace("'", "\\'");
+         arg.Replace(_T("'"), _T("\\'"));
 
          command << " '" << arg << '\'';
       }
 
       command << " > " << filename;
 
-      ok = system(command) == 0;
+      ok = wxSystem(command) == 0;
    }
 
    if ( ok )
@@ -917,7 +917,7 @@ VarExpander::ExpandCommand(const String& name,
 
       // make sure the value isn't empty to avoid message about unknown
       // variable from the parser
-      *value = '?';
+      *value = _T('?');
 
       return FALSE;
    }
@@ -935,7 +935,7 @@ VarExpander::SetHeaderValue(const String& name,
       wxLogError(_("${header:%s} requires exactly one argument."),
                  name.c_str());
 
-      *value = '?';
+      *value = _T('?');
 
       return FALSE;
    }
@@ -1179,7 +1179,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                // insert the original message as RFC822 attachment
                String str;
                m_msg->WriteToString(str);
-               m_sink.InsertAttachment(strdup(str), str.Length(),
+               m_sink.InsertAttachment(wxStrdup(str), str.Length(),
                                        "message/rfc822", "");
             }
             else
@@ -1255,8 +1255,8 @@ String VarExpander::GetSignature() const
             {
                strSignFile = wxPFileSelector("sig",
                                              _("Choose signature file"),
-                                             NULL, ".signature", NULL,
-                                             _(wxALL_FILES),
+                                             NULL, _T(".signature"), NULL,
+                                             wxALL_FILES,
                                              0, m_cv.GetFrame());
             }
             else
@@ -1300,7 +1300,7 @@ String VarExpander::GetSignature() const
             wxString msg;
             msg.Printf(_("Your signature is %stoo long: it should "
                          "not be more than %d lines."),
-                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
+                       nLineCount > 10 ? _("way ") : _T(""), nMaxSigLines);
             MDialog_Message(msg, m_cv.GetFrame(),
                             _("Signature is too long"),
                             GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
@@ -1384,7 +1384,7 @@ String VarExpander::GetReplyPrefix() const
 
 // return the length of the line terminator if we're at the end of line or 0
 // otherwise
-static inline size_t IsEndOfLine(const char *p)
+static inline size_t IsEndOfLine(const wxChar *p)
 {
    // although the text of the mail message itself has "\r\n" at the end of
    // each line, when we quote the selection only (which we got from the text
@@ -1481,7 +1481,7 @@ VarExpander::ExpandOriginalText(const String& text,
    // the last detected signature start
    int posSig = -1;
 
-   for ( const char *cptr = text.c_str(); ; cptr++ )
+   for ( const wxChar *cptr = text.c_str(); ; cptr++ )
    {
       // start of [real] new line?
       if ( lineCur.empty() )
@@ -1504,7 +1504,7 @@ VarExpander::ExpandOriginalText(const String& text,
                {
                   // there may be an optional space after "--" (in fact the
                   // space should be there but some people don't put it)
-                  const char *p = cptr + 2;
+                  const wxChar *p = cptr + 2;
                   if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
                   {
                      // looks like the start of the sig
@@ -1513,7 +1513,7 @@ VarExpander::ExpandOriginalText(const String& text,
                }
                else if ( cptr[0] == '_' )
                {
-                  const char *p = cptr + 1;
+                  const wxChar *p = cptr + 1;
                   while ( *p == '_' )
                      p++;
 
@@ -1630,7 +1630,7 @@ extern bool TemplateNeedsHeaders(const String& templateValue)
    //
    // TODO: really parse it using a specialized expanded and without any
    //       sink, just checking if message category appears in it
-   return templateValue.Lower().Find("message:") != wxNOT_FOUND;
+   return templateValue.Lower().Find(_T("message:")) != wxNOT_FOUND;
 }
 
 extern bool ExpandTemplate(Composer& cv,

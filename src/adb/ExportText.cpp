@@ -109,7 +109,7 @@ public:
 
 private:
    // the profile path for saving the last file used
-   static const char *ms_profilePathLastFile;
+   static const wxChar *ms_profilePathLastFile;
 
    // the data
    wxString m_filename,
@@ -288,8 +288,8 @@ bool AdbTextExporter::Export(const AdbEntry& entry, const String& dest)
 // wxAdbTextExporterConfigDialog
 // ----------------------------------------------------------------------------
 
-const char *wxAdbTextExporterConfigDialog::ms_profilePathLastFile
-   = "Settings/AdbTextExportFile";
+const wxChar *wxAdbTextExporterConfigDialog::ms_profilePathLastFile
+   = _T("Settings/AdbTextExportFile");
 
 wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
                                (

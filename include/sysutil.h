@@ -58,7 +58,7 @@ public:
    {
       if ( !m_ok && !!m_name ) // "!!" means "not empty"
       {
-         if ( remove(m_name) != 0 )
+         if ( wxRemove(m_name) != 0 )
          {
             wxLogDebug(_T("Stale temp file '%s' left."), m_name.c_str());
          }

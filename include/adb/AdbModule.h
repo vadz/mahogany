@@ -69,30 +69,30 @@ public:
       Constructor CreateModule;   // creator function
 
       // ctor for the struct
-      AdbModuleInfo(const char *name, Constructor ctor, const char *desc);
+      AdbModuleInfo(const wxChar *name, Constructor ctor, const wxChar *desc);
 #endif // USE_ADB_MODULES/!USE_ADB_MODULES
    };
 
    // access the linked list of AdbModuleInfo, you must call FreeAdbModuleInfo()
    // after you have used the list
-   static AdbModuleInfo *GetAdbModuleInfo(const char *kind);
+   static AdbModuleInfo *GetAdbModuleInfo(const wxChar *kind);
    static void FreeAdbModuleInfo(AdbModuleInfo *info);
 
    // enumerate all available importers: return the names (to make it possible
    // to create import objects) and the descriptions (to show to the user);
    // returns the number of different importers
-   static size_t EnumModules(const char *kind,
+   static size_t EnumModules(const wxChar *kind,
                              wxArrayString& names, wxArrayString& descs);
 
    // get importer by name (it's a new pointer, caller must DecRef() it)
-   static AdbModule *GetModuleByName(const char *kind, const String& name);
+   static AdbModule *GetModuleByName(const wxChar *kind, const String& name);
 
    // get the name and description (shown to the user) of the format imported
    // by this class (these functions are automatically generated during
    // IMPLEMENT_ADB_MODULE macro expansion
-   virtual const char *GetName() const = 0;
-   virtual const char *GetFormatDesc() const = 0;
-   virtual const char *GetDescription() const = 0;
+   virtual const wxChar *GetName() const = 0;
+   virtual const wxChar *GetFormatDesc() const = 0;
+   virtual const wxChar *GetDescription() const = 0;
 
 private:
    friend struct AdbModuleInfo; // give it access to ms_listModules
@@ -108,7 +108,7 @@ private:
 // note that GetName() and GetDescription() declarations are inside
 // MMODULE_DEFINE macro
 #define DECLARE_ADB_MODULE()                                               \
-   virtual const char *GetFormatDesc() const;                              \
+   virtual const wxChar *GetFormatDesc() const;                              \
    DEFAULT_ENTRY_FUNC                                                      \
    MMODULE_DEFINE()
 
@@ -123,7 +123,7 @@ private:
       MMODULE_PROP("author", Author)                                       \
       MMODULE_PROP("adbformat", format)                                    \
    MMODULE_END_IMPLEMENT(cname)                                            \
-   const char *cname::GetFormatDesc() const                                \
+   const wxChar *cname::GetFormatDesc() const                                \
    {                                                                       \
       return GetMModuleProperty(ms_properties, "adbformat");               \
    }                                                                       \
@@ -137,15 +137,15 @@ private:
 #else // !USE_ADB_MODULES
 
 #define DECLARE_ADB_MODULE()                                               \
-   const char *GetName() const;                                            \
-   const char *GetFormatDesc() const;                                      \
-   const char *GetDescription() const;                                     \
+   const wxChar *GetName() const;                                            \
+   const wxChar *GetFormatDesc() const;                                      \
+   const wxChar *GetDescription() const;                                     \
    static AdbModuleInfo ms_info
 
 #define IMPLEMENT_ADB_MODULE(modint, name, desc, format, author)           \
-   const char *name::GetName() const { return #name; }                     \
-   const char *name::GetFormatDesc() const { return _(format); }           \
-   const char *name::GetDescription() const { return _(desc); }            \
+   const wxChar *name::GetName() const { return #name; }                     \
+   const wxChar *name::GetFormatDesc() const { return _(format); }           \
+   const wxChar *name::GetDescription() const { return _(desc); }            \
    AdbModule *ConstructorFor##name() { return new name; }                  \
    AdbModule::AdbModuleInfo                                                \
       name::ms_info(#name, ConstructorFor##name, desc)

@@ -612,7 +612,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
                    _("Address book import"),
                    _("Native address book to create: "),
                    frame,
-                   "AdbImportBook",
+                   _T("AdbImportBook"),
                    adbname) )
    {
       // cancelled by user

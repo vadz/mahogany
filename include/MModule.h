@@ -157,8 +157,8 @@ public:
 
 struct ModuleProperty
 {
-   const char *name;
-   const char *value;
+   const wxChar *name;
+   const wxChar *value;
 };
 
 // ----------------------------------------------------------------------------
@@ -204,7 +204,7 @@ inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 
 /**
    This is the interface for Mahogany extension modules.
-   Only simple types like const char * are used to keep modules as
+   Only simple types like const char * (FIXME Nerijus wxChar * ?) are used to keep modules as
    simple as possible and reduce dependencies on other libraries
    (e.g. wxWindows or libstc++).
 */
@@ -216,13 +216,13 @@ public:
    /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
    /// Returns the Module's name as used in LoadModule().
-   virtual const char * GetName(void) const = 0;
+   virtual const wxChar * GetName(void) const = 0;
    /// Returns the name of the interface ABC that this module implements.
-   virtual const char * GetInterface(void) const = 0;
+   virtual const wxChar * GetInterface(void) const = 0;
    /// Returns a brief description of the module.
-   virtual const char * GetDescription(void) const = 0;
+   virtual const wxChar * GetDescription(void) const = 0;
    /// Returns a textual representation of the particular version of the module.
-   virtual const char * GetVersion(void) const = 0;
+   virtual const wxChar * GetVersion(void) const = 0;
 
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
@@ -312,10 +312,10 @@ extern "C"
 #ifdef USE_MODULES_STATIC
 /** Used by modules to register themselves statically. */
 extern
-void MModule_AddStaticModule(const char *Name,
-                             const char *Interface,
-                             const char *Description,
-                             const char *Version,
+void MModule_AddStaticModule(const wxChar *Name,
+                             const wxChar *Interface,
+                             const wxChar *Description,
+                             const wxChar *Version,
                              MModule_InitModuleFuncType init);
 
 #   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version) \
@@ -334,10 +334,10 @@ void MModule_AddStaticModule(const char *Name,
 /// this macro must be used inside the class declaration for any module class
 #define MMODULE_DEFINE() \
 public: \
-   virtual const char * GetName(void) const; \
-   virtual const char * GetInterface(void) const; \
-   virtual const char * GetDescription(void) const; \
-   virtual const char * GetVersion(void) const; \
+   virtual const wxChar * GetName(void) const; \
+   virtual const wxChar * GetInterface(void) const; \
+   virtual const wxChar * GetDescription(void) const; \
+   virtual const wxChar * GetVersion(void) const; \
    virtual void GetMVersion(int *version_major, \
                             int *version_minor, \
                             int *version_release) const; \
@@ -403,13 +403,13 @@ MDLLEXPORT const ModuleProperty *GetMModuleProperties() \
    return ClassName::ms_properties; \
 } \
 } \
-const char * ClassName::GetName(void) const \
+const wxChar * ClassName::GetName(void) const \
    { return GetMModuleProperty(GetMModuleProperties(), MMODULE_NAME_PROP); } \
-const char * ClassName::GetInterface(void) const \
+const wxChar * ClassName::GetInterface(void) const \
    { return GetMModuleProperty(GetMModuleProperties(), MMODULE_INTERFACE_PROP); } \
-const char * ClassName::GetDescription(void) const \
+const wxChar * ClassName::GetDescription(void) const \
    { return GetMModuleProperty(GetMModuleProperties(), MMODULE_DESC_PROP); } \
-const char * ClassName::GetVersion(void) const \
+const wxChar * ClassName::GetVersion(void) const \
    { return GetMModuleProperty(GetMModuleProperties(), MMODULE_VERSION_PROP); }
 
 // ----------------------------------------------------------------------------
@@ -418,7 +418,7 @@ const char * ClassName::GetVersion(void) const \
 
 /** Get a module property from the properties table */
 extern
-const char *GetMModuleProperty(const ModuleProperty *table, const char *name);
+const wxChar *GetMModuleProperty(const ModuleProperty *table, const wxChar *name);
 
 /** Call this before application exit. */
 extern

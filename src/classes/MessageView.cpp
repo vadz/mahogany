@@ -925,18 +925,18 @@ MessageView::ShowHeaders()
    if ( envelopHeaders.IsEmpty() )
    {
       // init it on first use
-      static const char *envelopHeadersNames[] =
+      static const wxChar *envelopHeadersNames[] =
       {
-         "From",
-         "To",
-         "Cc",
-         "Bcc",
-         "Subject",
-         "Date",
-         "Newsgroups",
-         "Message-Id",
-         "In-Reply-To",
-         "References",
+         _T("From"),
+         _T("To"),
+         _T("Cc"),
+         _T("Bcc"),
+         _T("Subject"),
+         _T("Date"),
+         _T("Newsgroups"),
+         _T("Message-Id"),
+         _T("In-Reply-To"),
+         _T("References"),
       };
 
       ASSERT_MSG( EnvelopHeader_Max == WXSIZEOF(envelopHeadersNames),
@@ -983,7 +983,7 @@ MessageView::ShowHeaders()
    wxArrayString headerNonEnvValues;
    if ( countNonEnvHeaders )
    {
-      const char **headerPtrs = new const char *[countNonEnvHeaders + 1];
+      const wxChar **headerPtrs = new const wxChar *[countNonEnvHeaders + 1];
 
       // have to copy the headers into a temp buffer unfortunately
       for ( nNonEnv = 0, n = 0; n < countHeaders; n++ )
@@ -1179,7 +1179,7 @@ MessageView::ShowHeaders()
       // in fact, are not ones (the test catches Message-Id and Content-Id
       // headers)
       bool highlightURLs = m_ProfileValues.highlightURLs &&
-                              !name.MakeUpper().Matches("*-ID");
+                              !name.MakeUpper().Matches(_T("*-ID"));
       do
       {
          String before,
@@ -1261,7 +1261,7 @@ MessageView::ShowHeaders()
 // ----------------------------------------------------------------------------
 
 size_t
-MessageView::GetQuotedLevel(const char *text) const
+MessageView::GetQuotedLevel(const wxChar *text) const
 {
    size_t qlevel = strutil_countquotinglevels
                    (
@@ -1416,8 +1416,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          // just insert '\0' as needed
 
          // lineCur is the start of the current line, lineNext of the next one
-         char *lineCur = (char *)before.c_str();
-         char *lineNext = strchr(lineCur, '\n');
+         wxChar *lineCur = (wxChar *)before.c_str();
+         wxChar *lineNext = wxStrchr(lineCur, '\n');
          while ( lineNext )
          {
             // skip '\n'
@@ -1438,7 +1438,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
                {
                   // although normally signature delimiter is just "--", allow for
                   // more dashes as people often put 4 or even 75 of them
-                  const char *p = lineNext + 2;
+                  const wxChar *p = lineNext + 2;
                   if ( *p == ' ' )
                   {
                      // "-- " is also a valid separator
@@ -1466,14 +1466,14 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
                      if ( before.length() - (p - before.c_str()) < 0x200 &&
                            textPart.length() < 0x200 )
                      {
-                        static const char *SIG_END_MARKER = "--\r\n";
-                        if ( !strstr(p + 1, SIG_END_MARKER) &&
-                              !strstr(textPart, SIG_END_MARKER) )
+                        static const wxChar *SIG_END_MARKER = _T("--\r\n");
+                        if ( !wxStrstr(p + 1, SIG_END_MARKER) &&
+                              !wxStrstr(textPart, SIG_END_MARKER) )
                         {
                            // Check that there is not another sig marker below
-                           static const char *OTHER_SIG_END_MARKER = "-- \r\n";
-                           if ( !strstr(p + 1, OTHER_SIG_END_MARKER) &&
-                                 !strstr(textPart, OTHER_SIG_END_MARKER) )
+                           static const wxChar *OTHER_SIG_END_MARKER = _T("-- \r\n");
+                           if ( !wxStrstr(p + 1, OTHER_SIG_END_MARKER) &&
+                                 !wxStrstr(textPart, OTHER_SIG_END_MARKER) )
                            {
                               // ok, it passed all our empirical tests
                               levelNew = LEVEL_SIG;
@@ -1514,7 +1514,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             }
 
             // FIXME: why +1 (bug?)?
-            lineNext = strchr(lineNext + 1, '\n');
+            lineNext = wxStrchr(lineNext + 1, '\n');
          }
 
          if ( lineCur )
@@ -1774,7 +1774,7 @@ MessageView::ShowPart(const MimePart *mimepart)
 
    // if the disposition is set to attachment we force the part to be shown
    // as an attachment
-   bool isAttachment = mimepart->GetDisposition().IsSameAs("attachment", false);
+   bool isAttachment = mimepart->GetDisposition().IsSameAs(_T("attachment"), false);
 
    // first check for viewer specific formats, next for text, then for
    // images and finally show all the rest as generic attachment
@@ -1794,7 +1794,7 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            String s((const char *)data, len);
+            String s((const wxChar *)data, len);
 
             m_viewer->InsertRawContents(s);
          }
@@ -2009,7 +2009,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
 
          // filenames are case-sensitive, don't modify them
          value = plist_it->value;
-         if ( name.CmpNoCase("name") != 0 )
+         if ( name.CmpNoCase(_T("name")) != 0 )
          {
             value.MakeLower();
          }
@@ -2034,7 +2034,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
          message << NormalizeString(name) << ": ";
 
          value = plist_it->value;
-         if ( name.CmpNoCase("filename") != 0 )
+         if ( name.CmpNoCase(_T("filename")) != 0 )
          {
             value.MakeLower();
          }
@@ -2279,7 +2279,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
       prompt.Printf(_("Please enter the command to handle '%s' data:"),
                     mimetype.c_str());
       if ( !MInputBox(&command, _("Unknown MIME type"), prompt,
-                      GetParentFrame(), "MimeHandler") )
+                      GetParentFrame(), _T("MimeHandler")) )
       {
          // cancelled by user
          return;
@@ -2373,7 +2373,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
    prompt.Printf(_("Please enter the command to handle '%s' data:"),
                  mimetype.c_str());
    if ( !MInputBox(&command, _("Open with"), prompt,
-                   GetParentFrame(), "MimeHandler") )
+                   GetParentFrame(), _T("MimeHandler")) )
    {
       // cancelled by user
       return;
@@ -2412,7 +2412,7 @@ MessageView::MimeOpenWith(const MimePart *mimepart)
 }
 
 bool
-MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
+MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
 {
    String filename;
 
@@ -2454,7 +2454,7 @@ MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
       {
          // saving the messages is special, we have a separate function for
          // this as it's also done from elsewhere
-         ok = MailFolder::SaveMessageAsMBOX(filename, (const char *)content);
+         ok = MailFolder::SaveMessageAsMBOX(filename, (const wxChar *)content);
       }
       else // not a message
       {
@@ -2503,7 +2503,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
       }
 
       MDialog_ShowText(GetParentFrame(), title,
-                       (const char *)content, "MimeView");
+                       (const wxChar *)content, _T("MimeView"));
    }
    else
    {
@@ -2618,7 +2618,7 @@ void MessageView::OpenURL(const String& url, int options)
 
          // cannot use wxFileExists here, because it's a link pointing to a
          // non-existing location!
-         if ( lstat(lockfile.c_str(), &statbuf) == 0 )
+         if ( lstat(lockfile.mb_str(), &statbuf) == 0 )
          {
             command << m_ProfileValues.browser << " -remote openURL(" << url;
             if ( inNewWindow )
@@ -2710,7 +2710,7 @@ MessageView::DoMenuCommand(int id)
                            _("Find text"),
                            _("   Find:"),
                            GetParentFrame(),
-                           "MsgViewFindString") )
+                           _T("MsgViewFindString")) )
             {
                if ( !m_viewer->Find(text) )
                {
@@ -2792,7 +2792,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
          // broken so remove them
          wxString url;
          url.reserve(ci->GetUrl().length());
-         for ( const char *p = ci->GetUrl().c_str(); *p; p++ )
+         for ( const wxChar *p = ci->GetUrl().c_str(); *p; p++ )
          {
             if ( *p != '\r' && *p != '\n' )
                url += *p;
@@ -2953,7 +2953,7 @@ MessageView::CheckMessageOrPartSize(unsigned long size, bool part) const
                 "more than the current threshold of %d Kbytes.\n"
                 "\n"
                 "Do you still want to download it?"),
-              part ? _(" part") : "", size, maxSize);
+              part ? _(" part") : _T(""), size, maxSize);
 
    return MDialog_YesNoDialog(msg, GetParentFrame());
 }
@@ -3096,7 +3096,7 @@ MessageView::LaunchProcess(const String& command,
       delete process;
 
       if ( !errormsg.empty() )
-         wxLogError("%s.", errormsg.c_str());
+         wxLogError(_T("%s."), errormsg.c_str());
 
       return false;
    }

@@ -322,7 +322,7 @@ public:
      @param contents the pointer to message contents, non NULL
      @return true if everything went ok, false on error
     */
-   static bool SaveMessageAsMBOX(const String& filename, const char *contents);
+   static bool SaveMessageAsMBOX(const String& filename, const wxChar *contents);
 
    //@}
 

@@ -65,7 +65,7 @@ extern const MPersMsgBox *M_MSGBOX_SUSPENDAUTOCOLLECT;
 static const int MC_MAX_FAIL = 5;
 
 // trace mask
-#define TRACE_MONITOR "monitor"
+#define TRACE_MONITOR _T("monitor")
 
 // folder state
 enum FolderState

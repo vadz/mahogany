@@ -54,8 +54,8 @@
 //
 // if quoted is true, we behave as if there were double quotes surrounding the
 // word
-static String ExtractWord(const char **ppc,
-                          char endOfWordMarker,
+static String ExtractWord(const wxChar **ppc,
+                          wxChar endOfWordMarker,
                           bool quoted = false);
 
 // ============================================================================
@@ -85,9 +85,9 @@ MessageTemplateVarExpander::~MessageTemplateVarExpander()
 // parse the template expansion starting at the given position, return false if
 // an error was encountered while processing it
 bool
-MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
+MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
 {
-   const char *pc = *ppc;
+   const wxChar *pc = *ppc;
 
    ASSERT_MSG( *pc == '$', _T("we should be called for $expression only") );
 
@@ -100,7 +100,7 @@ MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
    // still be quoted explicitly if they contain some special token)
    bool quoted = false;
 
-   char bracketClose,
+   wxChar bracketClose,
         bracketOpen = *++pc;
    switch ( bracketOpen )
    {
@@ -128,7 +128,7 @@ MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
       case '$':
          // it's just escaped '$' and not start of the expansion at all
          if ( m_expander )
-            *value = '$';
+            *value = _T('$');
          *ppc = ++pc;
          return TRUE;
 
@@ -287,7 +287,7 @@ MessageTemplateParser::ExpandTemplate(const char **ppc, String *value) const
                   pc++;
 
                // extract the number (should be non zero)
-               if ( (sscanf(pc, "%u", &alignWidth) != 1) || !alignWidth )
+               if ( (wxSscanf(pc, _T("%u"), &alignWidth) != 1) || !alignWidth )
                {
                   wxLogWarning(_("Incorrect alignment width value at line "
                                  "%d, position %d in the file '%s'."),
@@ -440,7 +440,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
    // it doesn't have some weird newline convention
    wxString templateText = wxTextFile::Translate(m_templateText,
                                                  wxTextFileType_Unix);
-   const char *pc = templateText.c_str();
+   const wxChar *pc = templateText.c_str();
    self->m_pStartOfLine = pc;
    while ( *pc )
    {
@@ -482,9 +482,9 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
 // private functions
 // ----------------------------------------------------------------------------
 
-String ExtractWord(const char **ppc, char endOfWordMarker, bool forceQuotes)
+String ExtractWord(const wxChar **ppc, wxChar endOfWordMarker, bool forceQuotes)
 {
-   const char *pc = *ppc;
+   const wxChar *pc = *ppc;
 
    bool quoted = *pc == '"';
    if ( quoted )

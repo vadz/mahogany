@@ -77,10 +77,10 @@ public:
     { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
   virtual void ClearExtraEMails();
 
-  virtual int Matches(const char *str, int where, int how) const;
+  virtual int Matches(const wxChar *str, int where, int how) const;
 
   // an easier to use GetName()
-  const char *GetName() const { return m_astrFields[0]; }
+  const wxChar *GetName() const { return m_astrFields[0]; }
 
   // get path to our entry in config file
   wxString GetPath() const;
@@ -121,7 +121,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const char *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName);
 
   // get the full path to our group (not '/' terminated)
   wxString GetPath() const;
@@ -170,7 +170,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const char *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName)
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
@@ -212,7 +212,7 @@ public:
   DECLARE_ADB_PROVIDER(DummyDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(DummyDataProvider, TRUE, "Dummy", Name_String);
+IMPLEMENT_ADB_PROVIDER(DummyDataProvider, TRUE, _T("Dummy"), Name_String);
 
 // ============================================================================
 // implementation
@@ -268,7 +268,7 @@ void DummyEntry::ClearExtraEMails()
 {
 }
 
-int DummyEntry::Matches(const char *what, int where, int how) const
+int DummyEntry::Matches(const wxChar *what, int where, int how) const
 {
   return 0;
 }
@@ -336,7 +336,7 @@ void DummyEntryGroup::DeleteGroup(const String& strName)
   wxFAIL_MSG(_T("Not implemented"));
 }
 
-AdbEntry *DummyEntryGroup::FindEntry(const char *szName)
+AdbEntry *DummyEntryGroup::FindEntry(const wxChar *szName)
 {
   return NULL;
 }

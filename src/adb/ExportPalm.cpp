@@ -103,13 +103,13 @@ public:
 
 private:
    // the profile path for saving the last file used
-   static const char *ms_profilePathLastFile;
+   static const wxChar *ms_profilePathLastFile;
    // the profile path for saving the last category used
-   static const char *ms_profilePathLastCategory;
+   static const wxChar *ms_profilePathLastCategory;
    // the profile path for saving the include empty flag
-   static const char *ms_profileIncludeEmpty;
+   static const wxChar *ms_profileIncludeEmpty;
    // the profile path for saving the include comments flag
-   static const char *ms_profileIncludeComments;
+   static const wxChar *ms_profileIncludeComments;
 
    // the data
    wxString
@@ -348,17 +348,17 @@ bool AdbPalmExporter::Export(const AdbEntry& entry, const String& dest)
 // wxAdbPalmExporterConfigDialog
 // ----------------------------------------------------------------------------
 
-const char *wxAdbPalmExporterConfigDialog::ms_profilePathLastFile
-   = "Settings/AdbPalmExportFile";
+const wxChar *wxAdbPalmExporterConfigDialog::ms_profilePathLastFile
+   = _T("Settings/AdbPalmExportFile");
 
-const char *wxAdbPalmExporterConfigDialog::ms_profilePathLastCategory
-   = "Settings/AdbPalmExportCategory";
+const wxChar *wxAdbPalmExporterConfigDialog::ms_profilePathLastCategory
+   = _T("Settings/AdbPalmExportCategory");
 
-const char *wxAdbPalmExporterConfigDialog::ms_profileIncludeEmpty
-   = "Settings/AdbPalmExportIncludeEmpty";
+const wxChar *wxAdbPalmExporterConfigDialog::ms_profileIncludeEmpty
+   = _T("Settings/AdbPalmExportIncludeEmpty");
 
-const char *wxAdbPalmExporterConfigDialog::ms_profileIncludeComments
-   = "Settings/AdbPalmExportIncludeComments";
+const wxChar *wxAdbPalmExporterConfigDialog::ms_profileIncludeComments
+   = _T("Settings/AdbPalmExportIncludeComments");
 
 wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
                                (

@@ -24,7 +24,7 @@ class AdbEntry;
 class AdbEntryGroup;
 
 // the interface we implement
-#define ADB_EXPORTER_INTERFACE "AdbExporter"
+#define ADB_EXPORTER_INTERFACE _T("AdbExporter")
 
 // ----------------------------------------------------------------------------
 // AdbExporter is a very simple interface: all it has to do is to implement

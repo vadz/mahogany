@@ -130,7 +130,7 @@ public:
    virtual AdbEntryGroup *GetGroup() const;
 
    // an easier to use GetName()
-   const char *GetName() const
+   const wxChar *GetName() const
       { return m_astrFields[0]; }
 
    /**@name the parser */
@@ -145,7 +145,7 @@ public:
 
    static bool ReadNil(String *line);
    static bool ReadHeader(String *version, String *line);
-   static bool ReadToken(char token, String *string);
+   static bool ReadToken(wxChar token, String *string);
 
    static int m_IgnoreAnonymous; // really a bool,set to -1 at beginnin
    static String m_AnonymousName;
@@ -190,7 +190,7 @@ public:
    virtual void DeleteEntry(const String& strName);
    virtual void DeleteGroup(const String& strName);
 
-   virtual AdbEntry *FindEntry(const char *szName);
+   virtual AdbEntry *FindEntry(const wxChar *szName);
 
 private:
    virtual ~BbdbEntryGroup();
@@ -236,7 +236,7 @@ public:
    virtual void DeleteGroup(const String& strName)
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const char *szName)
+   virtual AdbEntry *FindEntry(const wxChar *szName)
       { return m_pRootGroup->FindEntry(szName); }
 
       // AdbBook
@@ -284,7 +284,7 @@ public:
    DECLARE_ADB_PROVIDER(BbdbDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
+IMPLEMENT_ADB_PROVIDER(BbdbDataProvider, TRUE, _T("BBDB version 2"), Name_File);
 
 // ============================================================================
 // implementation
@@ -307,7 +307,7 @@ BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup)
 }
 
 bool
-BbdbEntry::ReadToken(char token, String * line)
+BbdbEntry::ReadToken(wxChar token, String * line)
 {
    if(!line || line->empty())
       return false;
@@ -366,7 +366,7 @@ BbdbEntry::ReadString(String * line, bool *success)
    if(! ReadToken('"', line))
    {
       // numbers are treated as strings, but have no quotes
-      if(line[0u]>='0' && line[0u] <= '9')
+      if(line[0u]>=_T('0') && line[0u] <= _T('9'))
          isnumber = true;
       else
       {
@@ -380,7 +380,7 @@ BbdbEntry::ReadString(String * line, bool *success)
 
    strutil_delwhitespace(*line);
    String str = "";
-   const char *cptr = line->c_str();
+   const wxChar *cptr = line->c_str();
    bool escaped = false;
 
    while(*cptr)
@@ -408,7 +408,7 @@ BbdbEntry::ReadString(String * line, bool *success)
 void
 BbdbEntry::WriteString(ostream &out, String const &string)
 {
-   const char *cptr;
+   const wxChar *cptr;
 
    if(string.empty())
    {
@@ -547,7 +547,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
       while((e_exists = pGroup->GetEntry(alias)) != NULL) // duplicate entry
       {
          e_exists->DecRef(); // GetEntry() does an IncRef()
-         tmp.Printf("%d", count);
+         tmp.Printf(_T("%d"), count);
          alias = temp;
          alias << "_" << tmp;
          count++;
@@ -675,7 +675,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    BbdbEntry *e;
    wxString line, version;
    int ignored = 0, entries_read = 0;
-   ifstream file(strName);
+   ifstream file(strName.mb_str());
    int length = 0;
 
    file.seekg(0, ios::end);
@@ -768,7 +768,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
                                       length, NULL);// open a status window:
 
          String str;
-         ofstream out(m_strName);
+         ofstream out(m_strName.mb_str());
          size_t n,m;
          out << ";;; file-version: 2" << endl;
          for(i = m_entries->begin(); i != m_entries->end(); i++)
@@ -948,7 +948,7 @@ BbdbEntryGroup::DeleteGroup(const String& strName)
 }
 
 AdbEntry *
-BbdbEntryGroup::FindEntry(const char *szName)
+BbdbEntryGroup::FindEntry(const wxChar *szName)
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::FindEntry() called with: %s"), szName);
@@ -1054,7 +1054,7 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
    if(wxFileExists(name))
    {
-      ifstream file(name);
+      ifstream file(name.mb_str());
       String line;
       strutil_getstrline(file, line);
       return BbdbEntry::ReadHeader(NULL, &line);

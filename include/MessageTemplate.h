@@ -166,7 +166,7 @@ public:
 
 private:
    // parse an expression starting with '$'
-   bool ExpandTemplate(const char **ppc, String *value) const;
+   bool ExpandTemplate(const wxChar **ppc, String *value) const;
 
    MessageTemplateVarExpander *m_expander;
 
@@ -179,7 +179,7 @@ private:
 
    // start of the current line (for calculating the offset in line for the
    // error messages)
-   const char *m_pStartOfLine;
+   const wxChar *m_pStartOfLine;
 };
 
 // ----------------------------------------------------------------------------

@@ -76,7 +76,7 @@ class XFace
       @param xfacedata buffer containing the xface line
       @return true on success
    */
-   bool	CreateFromXFace(const char *xfacedata);
+   bool	CreateFromXFace(const wxChar *xfacedata);
 
    /**
       Create an Xpm from an XFace, including all the declaration

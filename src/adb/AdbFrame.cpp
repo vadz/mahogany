@@ -117,16 +117,16 @@ enum
   ConfigName_FindOptions
 };
 
-static const char *aszConfigNames[] =
+static const wxChar *aszConfigNames[] =
 {
-  "LastNewEntry",
-  "LastNewWasGroup",
-  "AddressBooks",
-  "Providers",
-  "ExpandedBranches",
-  "TreeSelection",
-  "FindWhere",
-  "FindOptions"
+  _T("LastNewEntry"),
+  _T("LastNewWasGroup"),
+  _T("AddressBooks"),
+  _T("Providers"),
+  _T("ExpandedBranches"),
+  _T("TreeSelection"),
+  _T("FindWhere"),
+  _T("FindOptions")
 };
 
 // ----------------------------------------------------------------------------
@@ -415,7 +415,7 @@ public:
   AdbManager *GetAdbManager() const { return m_pManager; }
 
   // overriden base class virtuals
-  virtual AdbTreeElement *FindChild(const char *szName);
+  virtual AdbTreeElement *FindChild(const wxChar *szName);
   virtual void LoadChildren();
 
 private:
@@ -446,8 +446,8 @@ public:
   // a structure describing a field
   struct FieldInfo
   {
-    const char *label;  // or the caption
-    FieldType   type;   // and the type from the enum FieldType abvoe
+    const wxChar *label;  // or the caption
+    FieldType     type;   // and the type from the enum FieldType abvoe
   };
 
   // array of field descriptions: should be kept in sync with AdbField enum!
@@ -1979,7 +1979,7 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       {
         wxString strGoto;
         if ( MInputBox(&strGoto, _("Go to entry/group"),
-                       _("Full entry &name:"), this, "GoTo") ) {
+                       _("Full entry &name:"), this, _T("GoTo")) ) {
           MoveSelection(strGoto);
         }
       }
@@ -2139,7 +2139,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
     case AdbDataProvider::Name_String:
       {
         wxString strMsg = _("Enter the address book name");
-        if ( !MInputBox(&strAdbName, strTitle, strMsg, this, "LastAdbName") )
+        if ( !MInputBox(&strAdbName, strTitle, strMsg, this, _T("LastAdbName")) )
           return FALSE;
       }
       break;
@@ -2150,7 +2150,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   AdbDataProvider *pProvider = info->CreateProvider();
 
-  bool ok = OpenAdb(strAdbName, pProvider, String(info->szName)); //FIXME Nerijus String()?
+  bool ok = OpenAdb(strAdbName, pProvider, info->szName);
 
   if ( ok ) {
      // the book is in the cache, it won't be really recreated
@@ -3121,16 +3121,16 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
   m_menu = NULL;
 
   // add images to our image list
-  static const char *aszImages[] =
+  static const wxChar *aszImages[] =
   {
     // should be in sync with the corresponding enum in wxAdbTree
-    "adb_library",
-    "adb_book",
-    "adb_address",
-    "adb_opened",
-    "adb_closed",
-    "adb_palmos",
-    "adb_bbdb"
+    _T("adb_library"),
+    _T("adb_book"),
+    _T("adb_address"),
+    _T("adb_opened"),
+    _T("adb_closed"),
+    _T("adb_palmos"),
+    _T("adb_bbdb")
   };
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
@@ -3235,10 +3235,10 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
   m_bReadOnly = FALSE;
 
   // add images to our image list
-  static const char *aszImages[] =
+  static const wxChar *aszImages[] =
   {
     // should be in sync with the corresponding enum
-    "general", "email", "home", "work"
+    _T("general"), _T("email"), _T("home"), _T("work")
   };
 
   wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
@@ -3586,7 +3586,7 @@ void wxAdbPage::LayoutControls(size_t nCount,
         continue;
     }
 
-    dc.GetTextExtent(wxGetTranslation(String(fields[n].label)), &width, NULL);
+    dc.GetTextExtent(wxGetTranslation(fields[n].label), &width, NULL);
     if ( width > widthMax )
       widthMax = width;
   }
@@ -3601,19 +3601,19 @@ void wxAdbPage::LayoutControls(size_t nCount,
       case AdbTreeEntry::FieldNum:
         // fall through -- for now they're the same as text
       case AdbTreeEntry::FieldText:
-        last = CreateTextWithLabel(wxGetTranslation(String(fields[n].label)), widthMax, last);
+        last = CreateTextWithLabel(wxGetTranslation(fields[n].label), widthMax, last);
         break;
 
       case AdbTreeEntry::FieldMemo:
-        last = CreateMultiLineText(wxGetTranslation(String(fields[n].label)), last);
+        last = CreateMultiLineText(wxGetTranslation(fields[n].label), last);
         break;
 
       case AdbTreeEntry::FieldList:
-        last = CreateListBox(wxGetTranslation(String(fields[n].label)), last);
+        last = CreateListBox(wxGetTranslation(fields[n].label), last);
         break;
 
       case AdbTreeEntry::FieldBool:
-        last = CreateCheckBox(wxGetTranslation(String(fields[n].label)), last);
+        last = CreateCheckBox(wxGetTranslation(fields[n].label), last);
         break;
 
       default:
@@ -4202,14 +4202,14 @@ AdbTreeRoot::AdbTreeRoot(wxArrayString& astrAdb, wxArrayString& astrProviders)
 }
 
 // find the ADB by name
-AdbTreeElement *AdbTreeRoot::FindChild(const char *szName)
+AdbTreeElement *AdbTreeRoot::FindChild(const wxChar *szName)
 {
   size_t nCount = m_children.Count();
   wxString strAdbName;
   for ( size_t n = 0; n < nCount; n++ ) {
     strAdbName = ((AdbTreeBook *)m_children[n])->GetName();
 
-    if ( strAdbName.IsSameAs(String(szName)/*FIXME Nerijus*/, wxARE_FILENAMES_CASE_SENSITIVE) )
+    if ( strAdbName.IsSameAs(szName, wxARE_FILENAMES_CASE_SENSITIVE) )
       return m_children[n];
   }
 

@@ -85,7 +85,7 @@ Profile * parent
 
 
 virtual wxPListCtrl * CreatePListCtrl (
-const char * name,
+const wxChar * name,
 wxWindow * parent,
 long int id,
 long int style
@@ -101,7 +101,7 @@ wxDefaultSize, style);
 
 
 virtual Message * CreateMessage (
-const char * text,
+const wxChar * text,
 UIdType uid,
 Profile * profile
 )
@@ -114,9 +114,9 @@ Profile * profile
 
 
 virtual void  MessageDialog (
-const char * message, const wxWindow * parent,
+const wxChar * message, const wxWindow * parent,
 const wxChar * title,
-const char * configPath )
+const wxChar * configPath )
 
 {
 
@@ -128,7 +128,7 @@ const char * configPath )
 
 virtual void  Log (
 int level,
-const char * message
+const wxChar * message
 )
 
 {
@@ -140,7 +140,7 @@ const char * message
 
 
 virtual bool  YesNoDialog (
-const char * message, const wxWindow * parent,
+const wxChar * message, const wxWindow * parent,
 const wxChar * title
 )
 
@@ -152,7 +152,7 @@ const wxChar * title
 
 
 
-virtual void  StatusMessage ( const char * message )
+virtual void  StatusMessage ( const wxChar * message )
 
 {
 
@@ -175,7 +175,7 @@ Protocol  protocol
 
 
 virtual MFolder * GetMFolder (
-const char * name
+const wxChar * name
 )
 {
  return MFolder::Get(name); 
@@ -184,7 +184,7 @@ const char * name
 
 
 virtual MailFolder * OpenMailFolder (
-const char *  path
+const wxChar *  path
 )
 {
 
@@ -195,7 +195,7 @@ const char *  path
 
 
 virtual ASMailFolder * OpenASMailFolder (
-const char *  path
+const wxChar *  path
 )
 {
 

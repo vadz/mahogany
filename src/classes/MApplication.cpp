@@ -1247,7 +1247,7 @@ static bool FatalErrorSemaphore = false;
 /// Report a fatal error:
 extern "C"
 {
-   void FatalError(const char *message)
+   void FatalError(const wxChar *message)
    {
       if(FatalErrorSemaphore)
          abort();

@@ -28,14 +28,14 @@ public:
    virtual ~MainFrameBase() {};
 
       /// Appends the menu for a module to the menubar
-   virtual void AddModulesMenu(const char *name,
-                               const char *help,
+   virtual void AddModulesMenu(const wxChar *name,
+                               const wxChar *help,
                                class wxMenu *submenu,
                                int id = -1) = 0;
 
    /// Appends the menu entry for a module to the modules menu
-   virtual void AddModulesMenu(const char *name,
-                               const char *help,
+   virtual void AddModulesMenu(const wxChar *name,
+                               const wxChar *help,
                                int id) = 0;
 
 };

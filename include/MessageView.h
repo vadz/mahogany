@@ -211,7 +211,7 @@ public:
    void MimeOpenWith(const MimePart *part);
 
    /// saves the currently selected MIME content
-   bool MimeSave(const MimePart *part, const char *filename = NULL);
+   bool MimeSave(const MimePart *part, const wxChar *filename = NULL);
 
    /// view attachment as text
    void MimeViewText(const MimePart *part);
@@ -357,7 +357,7 @@ protected:
    void ShowImage(const MimePart *part);
 
    /// return the quoting level of this line, 0 if unquoted
-   size_t GetQuotedLevel(const char *text) const;
+   size_t GetQuotedLevel(const wxChar *text) const;
 
    /// return the colour to use for the given quoting level
    wxColour GetQuoteColour(size_t qlevel) const;

@@ -58,18 +58,18 @@ public:
   // list holding descriptions of all data providers
   static struct AdbProviderInfo
   {
-    const char *szName;     // internal name
+    const wxChar *szName;     // internal name
 
     bool bSupportsCreation;   // do we support creating new address books?
     AdbNameFormat nameFormat; // to know what ask the user for...
-    const char *szFmtName;    // NB: this name is shown to the user
+    const wxChar *szFmtName;    // NB: this name is shown to the user
 
     Constructor CreateProvider;
 
     AdbProviderInfo *pNext;
 
-    AdbProviderInfo(const char *name, Constructor ctor,
-                    bool canCreate, const char *formatName,
+    AdbProviderInfo(const wxChar *name, Constructor ctor,
+                    bool canCreate, const wxChar *formatName,
                     AdbNameFormat adbFormat);
   } *ms_listProviders;
 
@@ -120,7 +120,7 @@ public:
 #define IMPLEMENT_ADB_PROVIDER(name, bCanCreate, userName, fmt)               \
   String name::GetProviderName() const { return #name; }                      \
   AdbDataProvider *ConstructorFor##name() { return new name; }                \
-  AdbDataProvider::AdbProviderInfo name::ms_info(#name, ConstructorFor##name, \
+  AdbDataProvider::AdbProviderInfo name::ms_info(_T(#name), ConstructorFor##name, \
                                                  bCanCreate, userName,        \
                                                  AdbDataProvider::fmt)
 

@@ -126,7 +126,7 @@ void AdbEntryStoredInMemory::ClearExtraEMails()
 }
 
 int
-AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how) const
+AdbEntryStoredInMemory::Matches(const wxChar *szWhat, int where, int how) const
 {
   wxString strWhat;
 

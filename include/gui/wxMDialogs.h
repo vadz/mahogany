@@ -134,7 +134,7 @@ extern "C"
        @param title   title for message box window
        @param modal   true to make messagebox modal
    */
-void   MDialog_ErrorMessage(char const *message,
+void   MDialog_ErrorMessage(wxChar const *message,
                             const wxWindow *parent = NULL,
                             wxChar const *title = MDIALOG_ERRTITLE,
                             bool modal = false);
@@ -145,7 +145,7 @@ void   MDialog_ErrorMessage(char const *message,
        @param title   title for message box window
        @param modal   true to make messagebox modal
    */
-void   MDialog_SystemErrorMessage(char const *message,
+void   MDialog_SystemErrorMessage(wxChar const *message,
                                   const wxWindow *parent = NULL,
                                   wxChar const *title = MDIALOG_SYSERRTITLE,
                                   bool modal = false);
@@ -155,7 +155,7 @@ void   MDialog_SystemErrorMessage(char const *message,
        @param title   title for message box window
        @param parent   the parent frame
    */
-void   MDialog_FatalErrorMessage(char const *message,
+void   MDialog_FatalErrorMessage(wxChar const *message,
                                  const wxWindow *parent = NULL,
                                  wxChar const *title = MDIALOG_FATALERRTITLE);
 
@@ -169,10 +169,10 @@ void   MDialog_FatalErrorMessage(char const *message,
 
        @return TRUE if Ok was pressed, FALSE if Cancel
    */
-bool   MDialog_Message(char const *message,
+bool   MDialog_Message(wxChar const *message,
                        const wxWindow *parent = NULL,
                        wxChar const *title = MDIALOG_MSGTITLE,
-                       const char *configPath = NULL,
+                       const wxChar *configPath = NULL,
                        int flags = 0);
 
 /** profile-aware Yes/No dialog: if persMsg is not NULL, it has a "don't show
@@ -193,7 +193,7 @@ bool   MDialog_YesNoDialog(wxChar const *message,
                            wxChar const *title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
                            const MPersMsgBox *persMsg = NULL,
-                           const char *folderName = NULL);
+                           const wxChar *folderName = NULL);
 
 /**
   This is a 3 choice dialog: it has Yes, No and Cancel buttons. Unlile
@@ -207,7 +207,7 @@ bool   MDialog_YesNoDialog(wxChar const *message,
 
   @return M_DLG_ if yes was chosen, 0 if no and -1 if cancel
  */
-MDlgResult MDialog_YesNoCancel(char const *message,
+MDlgResult MDialog_YesNoCancel(wxChar const *message,
                                const wxWindow *parent = NULL,
                                wxChar const *title = MDIALOG_YESNOTITLE,
                                int flags = M_DLG_YES_DEFAULT,
@@ -224,7 +224,7 @@ MDlgResult MDialog_YesNoCancel(char const *message,
        @param profile   the profile to use
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
-const char *MDialog_FileRequester(const String &message,
+const wxChar *MDialog_FileRequester(const String &message,
                                   const wxWindow *parent = NULL,
                                   String path = NULLstring,
                                   String filename = NULLstring,
@@ -241,9 +241,9 @@ const char *MDialog_FileRequester(const String &message,
            and size and may be NULL
 */
 void MDialog_ShowText(wxWindow *parent,
-                      const char *title,
-                      const char *text,
-                      const char *configPath = NULL);
+                      const wxChar *title,
+                      const wxChar *text,
+                      const wxChar *configPath = NULL);
 
 } // extern "C"
 
@@ -258,7 +258,7 @@ void MDialog_ShowText(wxWindow *parent,
 
   @return TRUE if Ok was pressed, FALSE if Cancel
  */
-bool MDialog_Message(char const *message,
+bool MDialog_Message(wxChar const *message,
                      const wxWindow *parent,
                      const MPersMsgBox *persMsg,
                      int flags = 0,
@@ -276,7 +276,7 @@ bool MDialog_Message(char const *message,
 String MDialog_DirRequester(const String& message,
                             const String& path = NULLstring,
                             wxWindow *parent = NULL,
-                            const char *configPath = NULL);
+                            const wxChar *configPath = NULL);
 
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"
@@ -305,7 +305,7 @@ bool MInputBox(wxString *pstr,
                const wxString& caption,
                const wxString& prompt,
                const wxWindow *parent = NULL,
-               const char *key = NULL,
+               const wxChar *key = NULL,
                const wxChar *def = NULL,
                bool passwordflag = false);
 

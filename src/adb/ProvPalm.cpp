@@ -261,7 +261,7 @@ void PalmEntryGroup::DeleteGroup(const String& strName)
   // deleting groups (== categories on the Palm) is currently unsupported
 }
 
-AdbEntry *PalmEntryGroup::FindEntry(const char * /* szName */)
+AdbEntry *PalmEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   // currently not supported
   return NULL;

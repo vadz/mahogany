@@ -107,7 +107,7 @@ public:
   bool Save();
 
   // an easier to use GetName()
-  const char *GetName() const { return m_astrFields[0]; }
+  const wxChar *GetName() const { return m_astrFields[0]; }
 
   // get path to our entry in config file
   wxString GetPath() const;
@@ -155,7 +155,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const char *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName);
 
   // gte the config object
   wxFileConfig *GetConfig() const { return m_pConfig; }
@@ -249,7 +249,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const char *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName)
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
@@ -298,7 +298,7 @@ public:
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
+IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, _T("Native format"), Name_File);
 
 // ============================================================================
 // implementation
@@ -362,7 +362,7 @@ void FCEntry::Load(const String& strValue)
 
   // first read all the fields (up to AdbField_Max)
   wxString strCurrent;
-  for ( const char *pc = strValue; ; pc++ ) {
+  for ( const wxChar *pc = strValue; ; pc++ ) {
     if ( *pc == ':' || *pc == '\0' ) {
       SetField(nField++, strCurrent);
       strCurrent.Empty();
@@ -407,7 +407,7 @@ void FCEntry::Load(const String& strValue)
     strCurrent.Empty();
     wxString str;
     GetField(AdbField_OtherEMails, &str);
-    for ( const char *pc = str; ; pc++ ) {
+    for ( const wxChar *pc = str; ; pc++ ) {
       if ( *pc == ',' || *pc == '\0' ) {
         if ( !strCurrent.empty() )
           AddEMail(strCurrent);
@@ -468,7 +468,7 @@ bool FCEntry::Save()
       for ( size_t nEMail = 0; nEMail < nEMailCount; nEMail++ ) {
         if ( nEMail > 0 )
           strField += ',';
-        for ( const char *pc = m_astrEmails[nEMail]; *pc != '\0'; pc++ ) {
+        for ( const wxChar *pc = m_astrEmails[nEMail]; *pc != '\0'; pc++ ) {
           if ( *pc == ',' )
             strField +=  "\\,";
           else
@@ -483,7 +483,7 @@ bool FCEntry::Save()
     // escape special characters
     if ( nField > 1 )
       strValue += ':';
-    for ( const char *pc = strField; *pc != '\0'; pc++ ) {
+    for ( const wxChar *pc = strField; *pc != '\0'; pc++ ) {
       switch ( *pc ) {
         case ':':
           strValue << "\\:";
@@ -661,7 +661,7 @@ void FCEntryGroup::DeleteGroup(const String& strName)
   GetConfig()->DeleteGroup(strName);
 }
 
-AdbEntry *FCEntryGroup::FindEntry(const char * /* szName */)
+AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   return NULL;
 }
@@ -791,7 +791,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
     case Test_OpenReadOnly:
       {
         // the test is not 100% fool proof...
-        FILE *fp = fopen(fullname, "rt");
+        FILE *fp = wxFopen(fullname, _T("rt"));
         if ( fp != NULL )
         {
           char buf[1024];
@@ -833,7 +833,7 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
           ok = TRUE;
 
           file.Close();
-          remove(fullname);
+          wxRemove(fullname);
         }
       }
       break;

@@ -80,7 +80,7 @@ public:
 
    // return the name of the program we work with (generated during
    // DECLARE_M_IMPORTER and IMPLEMENT_M_IMPORTER macro expansion)
-   virtual const char *GetProgName() const = 0;
+   virtual const wxChar *GetProgName() const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 
 // this macro must be used inside the declaration of the importer class
 #define DECLARE_M_IMPORTER()                                                   \
-   virtual const char *GetProgName() const;                                    \
+   virtual const wxChar *GetProgName() const;                                    \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 
@@ -114,7 +114,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 
 #define MIMPORTER_END_IMPLEMENT(cname)                                         \
    MMODULE_END_IMPLEMENT(cname)                                                \
-   const char *cname::GetProgName() const                                      \
+   const wxChar *cname::GetProgName() const                                      \
    {                                                                           \
       return GetMModuleProperty(ms_properties, M_IMPORTER_PROG_NAME);          \
    }                                                                           \

@@ -235,8 +235,8 @@ public:
     */
    virtual void InsertData(void *data,
                            size_t length,
-                           const char *mimetype = NULL,
-                           const char *filename = NULL) = 0;
+                           const wxChar *mimetype = NULL,
+                           const wxChar *filename = NULL) = 0;
 
    /// inserts a text
    virtual void InsertText(const String& txt) = 0;

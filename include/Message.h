@@ -145,7 +145,7 @@ public:
        @param encodings if non NULL, filled with encodings of the headers
        @return the array containing the header values
    */
-   virtual wxArrayString GetHeaderLines(const char **headers,
+   virtual wxArrayString GetHeaderLines(const wxChar **headers,
                                         wxArrayInt *encodings = NULL) const = 0;
 
    /**

@@ -66,7 +66,7 @@ Profile * parent =NULL
 
 
 virtual wxPListCtrl * CreatePListCtrl (
-const char * name ,
+const wxChar * name ,
 wxWindow * parent =NULL,
 long int id =-1,
 long int style =0
@@ -76,7 +76,7 @@ long int style =0
 
 
 virtual Message * CreateMessage (
-const char * text ,
+const wxChar * text ,
 UIdType uid = UID_ILLEGAL,
 Profile * profile =NULL
 ) = 0;
@@ -84,30 +84,30 @@ Profile * profile =NULL
 
 
 virtual void  MessageDialog (
-const char * message , const wxWindow * parent =NULL,
+const wxChar * message , const wxWindow * parent =NULL,
 const wxChar * title =MDIALOG_MSGTITLE,
-const char * configPath =NULL )
+const wxChar * configPath =NULL )
  = 0;
 
 
 
 virtual void  Log (
 int level ,
-const char * message 
+const wxChar * message 
 )
  = 0;
 
 
 
 virtual bool  YesNoDialog (
-const char * message , const wxWindow * parent =NULL,
+const wxChar * message , const wxWindow * parent =NULL,
 const wxChar * title =MDIALOG_YESNOTITLE
 )
  = 0;
 
 
 
-virtual void  StatusMessage ( const char * message  )
+virtual void  StatusMessage ( const wxChar * message  )
  = 0;
 
 
@@ -120,19 +120,19 @@ Protocol  protocol =Prot_SMTP
 
 
 virtual MFolder * GetMFolder (
-const char * name 
+const wxChar * name 
 ) = 0;
 
 
 
 virtual MailFolder * OpenMailFolder (
-const char *  path 
+const wxChar *  path 
 ) = 0;
 
 
 
 virtual ASMailFolder * OpenASMailFolder (
-const char *  path 
+const wxChar *  path 
 ) = 0;
 
 

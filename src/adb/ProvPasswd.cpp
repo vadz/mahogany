@@ -88,7 +88,7 @@ public:
    virtual void AddEMail(const String& strEMail) { }
    virtual void ClearExtraEMails() { }
 
-   virtual int Matches(const char *str, int where, int how) const;
+   virtual int Matches(const wxChar *str, int where, int how) const;
 
 private:
    // user (==login) name and real name
@@ -126,7 +126,7 @@ public:
    virtual void DeleteEntry(const String& strName);
    virtual void DeleteGroup(const String& strName);
 
-   virtual AdbEntry *FindEntry(const char *szName);
+   virtual AdbEntry *FindEntry(const wxChar *szName);
 
 private:
    // read /etc/passwd
@@ -180,7 +180,7 @@ public:
    virtual void DeleteGroup(const String& strName)
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const char *szName)
+   virtual AdbEntry *FindEntry(const wxChar *szName)
       { return m_pRootGroup->FindEntry(szName); }
 
    // AdbBook
@@ -221,7 +221,7 @@ public:
    DECLARE_ADB_PROVIDER(PasswdDataProvider);
 };
 
-IMPLEMENT_ADB_PROVIDER(PasswdDataProvider, true, "Unix /etc/passwd", Name_No);
+IMPLEMENT_ADB_PROVIDER(PasswdDataProvider, true, _T("Unix /etc/passwd"), Name_No);
 
 // ============================================================================
 // implementation
@@ -273,7 +273,7 @@ void PasswdEntry::GetEMail(size_t n, String *pstr) const
    }
 }
 
-int PasswdEntry::Matches(const char *what, int where, int how) const
+int PasswdEntry::Matches(const wxChar *what, int where, int how) const
 {
    // substring lookup looks for a part of the string, "starts with" means
    // what is says, otherwise the entire string should be matched by the
@@ -387,7 +387,7 @@ void PasswdEntryGroup::DeleteGroup(const String& strName)
    // we're read only
 }
 
-AdbEntry *PasswdEntryGroup::FindEntry(const char *szName)
+AdbEntry *PasswdEntryGroup::FindEntry(const wxChar *szName)
 {
    // TODO
    return NULL;

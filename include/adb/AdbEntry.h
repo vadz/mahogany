@@ -224,7 +224,7 @@ public:
   virtual void DeleteGroup(const String& strName) = 0;
 
     /// find entry by name (returns NULL if not found)
-  virtual AdbEntry *FindEntry(const char *szName) = 0;
+  virtual AdbEntry *FindEntry(const wxChar *szName) = 0;
 
   // misc
     /// description of a group is just its name
@@ -251,7 +251,7 @@ public:
   virtual void GetEMail(size_t n, String *p) const { *p = m_astrEmails[n]; }
   virtual void ClearDirty() { m_bDirty = FALSE; }
   virtual bool IsDirty() const { return m_bDirty; }
-  virtual int Matches(const char *str, int where, int how) const;
+  virtual int Matches(const wxChar *str, int where, int how) const;
 
 protected:
   wxArrayString m_astrFields; // all text entries (some may be not present)

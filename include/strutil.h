@@ -165,7 +165,7 @@ strutil_findurl(String &str, String &url);
     @param max_alpha max number of A-Z characters before quotation mark
     @return number of quoting levels
   */
-int strutil_countquotinglevels(const char *string, int max_white, int max_alpha);
+int strutil_countquotinglevels(const wxChar *string, int max_white, int max_alpha);
 
 
 /*
@@ -179,7 +179,7 @@ int strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
    characters), which means that only 'c', 'h', 'd', 'l', 'e', 's' and 'p'
    chars will be returned (where 'h' and 'l' stand for short and long int).
  */
-String strutil_extract_formatspec(const char *format);
+String strutil_extract_formatspec(const wxChar *format);
 
 /// extracts the last path component from a path
 String strutil_getfilename(const String& path);

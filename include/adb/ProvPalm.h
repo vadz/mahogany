@@ -59,7 +59,7 @@ public:
   bool Save();
 
   // an easier to use GetName()
-  const char *GetName() const { return m_astrFields[0]; }
+  const wxChar *GetName() const { return m_astrFields[0]; }
 
   // if it's not, we will be deleted, so it really must be something fatal
   bool IsOk() const { return m_pGroup != NULL; }
@@ -108,7 +108,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const char *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName);
   virtual bool IsReadOnly() const
      {
         /*ASSERT(m_pParent); return m_pParent->IsReadOnly();*/
@@ -175,7 +175,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const char *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName)
     { return m_pRootGroup->FindEntry(szName); }
 
   // there can be only one PalmADB

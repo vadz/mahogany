@@ -445,7 +445,7 @@ public:
    virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const = 0;
 
    /// Report a fatal error:
-   virtual void FatalError(const char *message) = 0;
+   virtual void FatalError(const wxChar *message) = 0;
 
    /// remove the module from the list of all modules
    // (this is implemented in MModule.cpp actually)
@@ -577,7 +577,7 @@ private:
 /// Report a fatal error:
 extern "C"
 {
-   void FatalError(const char *message);
+   void FatalError(const wxChar *message);
 };
 
 
