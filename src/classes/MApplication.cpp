@@ -1003,7 +1003,10 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    // the loop)
    size_t totalNb = hil->Count();
    size_t nbOfMsgTried = 0;
+   Message *lastMsgTried = 0; 
    UIdType i = 0;
+   // FIXME: rewrite this loop as a for loop and do not try
+   // to delete messages inside the body of the loop ?
    while (i < hil->Count())
    {
       hi = (*hil)[i];
@@ -1012,6 +1015,14 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       ASSERT(msg);
       if(msg)
       {
+         // Temporary kludge because the same message is sent multiple
+         // time in some 'to-be-determined' cases...
+         if (lastMsgTried == msg) {
+            wxFAIL_MSG("Sending same message again !?");
+            i++;
+            continue;
+         }
+         lastMsgTried = msg;
          String msgText;
          String target;
          bool alreadyCounted = false;
