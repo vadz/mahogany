@@ -750,7 +750,7 @@ MsgCmdProcImpl::SaveMessagesToFile(const UIdArray& selections)
                              selections.GetCount());
 
    Ticket t = m_asmf->SaveMessagesToFile(&selections, GetFrame(), this);
-   status->Monitor(t, _("Saving message(s) to file failed."));
+   status->Monitor(t, _("Saving messages to file failed."));
 }
 
 // ----------------------------------------------------------------------------
@@ -959,11 +959,11 @@ MsgCmdProcImpl::ApplyFilters(const UIdArray& selections)
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this,
                              _("Applying filter rules to %u "
-                               "messages..."), count);
+                               "message(s)..."), count);
    Ticket t = m_asmf->ApplyFilterRules(&selections, this);
    if ( status->Monitor(t, _("Failed to apply filter rules.")) )
    {
-      status->SetSuccessMsg(_("Applied filters to %u messages, "
+      status->SetSuccessMsg(_("Applied filters to %u message(s), "
                               "see log window for details."),
                             count);
    }
@@ -1081,7 +1081,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                      }
                      //else: dropped and already marked for deletion, delete below
 
-                     msg.Printf(_("Dropped %lu messages."), count);
+                     msg.Printf(_("Dropped %lu message(s)."), count);
                   }
                   //else: not dropped
 
@@ -1092,7 +1092,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
 
                      if ( !wasDropped )
                      {
-                        msg.Printf(_("Moved %lu messages."), count);
+                        msg.Printf(_("Moved %lu message(s)."), count);
                      }
                      //else: message already given above
                   }
@@ -1100,7 +1100,7 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   {
                      if ( !hadStatusObject )
                      {
-                        msg.Printf(_("Copied %lu messages."), count);
+                        msg.Printf(_("Copied %lu message(s)."), count);
                      }
                      //else: message already given
                   }
