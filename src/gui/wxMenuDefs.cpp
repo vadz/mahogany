@@ -379,6 +379,10 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), gettext_noop(""), TRUE },
    { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+#if wxCHECK_VERSION(2, 3, 0)
+   { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), gettext_noop(""), TRUE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
+#endif // 2.3.0
    { WXMENU_LANG_SET_DEFAULT, gettext_noop("&Set default encoding..."), ""                         , FALSE },
 
    // ADB book management
@@ -673,6 +677,12 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
          id = WXMENU_LANG_KOI8;
          break;
 
+#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF8:
+         id = WXMENU_LANG_UTF8;
+         break;
+#endif // 2.3.0
+
       default:
          wxFAIL_MSG( "Unexpected encoding in CheckLanguageInMenu" );
 
@@ -708,6 +718,9 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_CP1256,
       WXMENU_LANG_CP1257,
       WXMENU_LANG_KOI8,
+#if wxCHECK_VERSION(2, 3, 0)
+      WXMENU_LANG_UTF8,
+#endif // 2.3.0
    };
 
    for ( size_t nId = 0; nId < WXSIZEOF(menuIds); nId++ )
@@ -763,6 +776,12 @@ extern wxFontEncoding GetEncodingFromMenuCommand(int id)
       case WXMENU_LANG_KOI8:
          encoding = wxFONTENCODING_KOI8;
          break;
+
+#if wxCHECK_VERSION(2, 3, 0)
+      case WXMENU_LANG_UTF8:
+         encoding = wxFONTENCODING_UTF8;
+         break;
+#endif // 2.3.0
    }
 
    return (wxFontEncoding)encoding;

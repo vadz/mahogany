@@ -184,6 +184,14 @@ void wxLayoutImportText(wxLayoutList *list,
 
    bool useConverter = FALSE;
    wxEncodingConverter conv;
+#if wxCHECK_VERSION(2, 3, 0)
+   if ( encoding == wxFONTENCODING_UTF8 )
+   {
+      // Convert from UTF-8 to environment's default encoding
+      str = wxString(str.wc_str(wxConvUTF8), wxConvLocal);
+      encoding = wxFONTENCODING_ISO8859_13; //FIXME
+   }
+#endif // 2.3.0
    SetEncoding(list, encoding, &useConverter, &conv);
    wxLayoutImportTextInternal(list, str, useConverter, conv);
 }

@@ -727,6 +727,9 @@ wxMFrame::OnMenuCommand(int id)
                wxFONTENCODING_CP1257,          // WinBaltic (same as Latin 7)
 
                wxFONTENCODING_KOI8,            // == KOI8-R
+#if wxCHECK_VERSION(2, 3, 0)
+               wxFONTENCODING_UTF8,            // == UTF-8
+#endif // 2.3.0
             };
 
             wxArrayString encDescs;

@@ -309,6 +309,11 @@ SendMessageCC::EncodeHeader(const String& header)
       case wxFONTENCODING_CP1250:
       case wxFONTENCODING_CP1252:
       case wxFONTENCODING_CP1257:
+
+#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF8:
+#endif // 2.3.0
+
          enc2047 = Encoding_QuotedPrintable;
          break;
 
@@ -692,6 +697,12 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
       case wxFONTENCODING_KOI8:
          cs = "koi8-r";
          break;
+
+#if wxCHECK_VERSION(2, 3, 0)
+      case wxFONTENCODING_UTF8:
+         cs = "utf8";
+         break;
+#endif // 2.3.0
 
       default:
          FAIL_MSG( "unknown encoding" );
