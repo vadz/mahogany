@@ -12,10 +12,11 @@
 
 #include "Mpch.h"
 
+#include "Mcommon.h"
+
 #ifdef USE_SSL
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
    #include "Mdefaults.h"
 
    // needed to get ssl_onceonlyinit() declaration

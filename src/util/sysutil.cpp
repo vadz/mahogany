@@ -13,6 +13,13 @@
 #   include "Mcommon.h"
 #   include "sysutil.h"
 #   include "strutil.h"
+
+#  ifdef OS_UNIX
+#     include <sys/types.h>
+#     include <sys/stat.h>               // needed by wxStructStat
+#     include <unistd.h>
+#     include <errno.h>
+#  endif // OS_UNIX
 #endif // USE_PCH
 
 #ifdef OS_UNIX

@@ -39,6 +39,8 @@
 #   include "gui/wxMFrame.h"
 #   include <wx/timer.h>                // for wxTimer
 #   include <wx/frame.h>                // for wxFrame
+
+#   include <sys/stat.h>               // needed by wxStructStat
 #endif // USE_PCH
 
 #include "UIdArray.h"
