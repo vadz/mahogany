@@ -759,31 +759,36 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // folders
    { gettext_noop("You may either choose to reopen all folders which were\n"
                   "when the program closed last time or explicitly specify\n"
-                  "the folders to reopen on each startup"), Field_Message, -1 },
-   { gettext_noop("Reopen last open folders"), Field_Bool, -1, },
+                  "the folders to reopen on each startup"), Field_Message | Field_AppWide, -1 },
+   { gettext_noop("Reopen last open folders"), Field_Bool | Field_AppWide, -1, },
    { gettext_noop("Folders to open on &startup"),  Field_List |
-                                                   Field_Restart,
+                                                   Field_Restart |
+                                                   Field_AppWide,
                                                    -ConfigField_ReopenLastFolder,           },
-   { gettext_noop("Folder opened in &main frame"), Field_Folder | Field_Restart,
+   { gettext_noop("Folder opened in &main frame"), Field_Folder |
+                                                   Field_Restart |
+                                                   Field_AppWide,
                                                    -ConfigField_ReopenLastFolder,                        },
-   { gettext_noop("Folder where to collect &new mail"), Field_Folder, -1},
+   { gettext_noop("Folder where to collect &new mail"), Field_Folder | Field_AppWide, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
-   { gettext_noop("Poll for new mail at s&tartup"), Field_Bool, -1},
+   { gettext_noop("Poll for new mail at s&tartup"), Field_Bool | Field_AppWide, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
-                  "This is useful for folders you often reopen."), Field_Message, -1},
-   { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
+                  "This is useful for folders you often reopen."),
+                                                   Field_Message |
+                                                   Field_AppWide, -1 },
+   { gettext_noop("&Keep open for (seconds)"), Field_Number | Field_AppWide, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
-   { gettext_noop("Folder to save &collected messages to"), Field_Folder, -1 },
+   { gettext_noop("Folder to save &collected messages to"), Field_Folder | Field_AppWide, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("Default format for mailbox files"
       ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
-     Field_Combo, -1},
-   { gettext_noop("Folder tree &background"), Field_Color, -1 },
+     Field_Combo | Field_AppWide, -1},
+   { gettext_noop("Folder tree &background"), Field_Color | Field_AppWide, -1 },
    { gettext_noop("You can specify the format for the strings shown in the\n"
                   "status and title bars. Use %f for the folder name and\n"
                   "%t, %r and %n for the number of all, recent and new\n"
@@ -1245,19 +1250,22 @@ void wxOptionsPage::CreateControls()
    // some fields are only shown in 'advanced' mode, so check if we're in it
    bool isAdvanced = READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
 
-   // some others are not shown when we're inside the identity dialog
+   // some others are not shown when we're inside an identity or folder dialog
+   // but only in the global one
    wxGlobalOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxGlobalOptionsDialog);
    bool isIdentDialog = dialog && !dialog->IsGlobalOptionsDialog();
+   bool isFolderDialog = !dialog;
 
    // first determine the longest label
    wxArrayString aLabels;
    for ( n = m_nFirst; n < m_nLast; n++ ) {
-      FieldFlags flags = GetFieldFlags(n);
+      int flags = GetFieldFlags(n);
 
       // don't show the global settings when editing the identity dialog and
       // don't show the advanced ones in the novice mode
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
-           (isIdentDialog && (flags & Field_Global)) )
+           (isIdentDialog && (flags & Field_Global)) ||
+           (isFolderDialog && (flags & Field_AppWide)) )
       {
          // skip this one
          continue;
@@ -1292,9 +1300,10 @@ void wxOptionsPage::CreateControls()
    int styleText = wxALIGN_RIGHT;
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
-      FieldFlags flags = GetFieldFlags(n);
+      int flags = GetFieldFlags(n);
       if ( (!isAdvanced && (flags & Field_Advanced)) ||
-           (isIdentDialog && (flags & Field_Global)) )
+           (isIdentDialog && (flags & Field_Global)) ||
+           (isFolderDialog && (flags & Field_AppWide)) )
       {
          // skip this one
          m_aControls.Add(NULL);
@@ -2347,18 +2356,25 @@ bool wxOptionsPageFolders::TransferDataToWindow()
 {
    bool bRc = wxOptionsPage::TransferDataToWindow();
 
-   if ( bRc ) {
+   if ( bRc )
+   {
       // we add the folder opened in the main frame to the list of folders
       // opened on startup if it's not yet among them
-      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-      wxString strMain = GetControlText(ConfigField_MainFolder);
-      int n = listbox->FindString(strMain);
-      if ( n == -1 ) {
-         listbox->Append(strMain);
-      }
+      wxControl *control = GetControl(m_idListbox);
+      if ( control )
+      {
+         wxListBox *listbox = wxStaticCast(control, wxListBox);
+         wxString strMain = GetControlText(ConfigField_MainFolder);
+         int n = listbox->FindString(strMain);
+         if ( n == -1 )
+         {
+            listbox->Append(strMain);
+         }
 
-      m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
-      m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+         m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
+         m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+      }
+      //else: the listbox is not created in this dialog at all
    }
 
    return bRc;
@@ -2368,11 +2384,16 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 {
    // undo what we did in TransferDataToWindow: remove the main folder from
    // the list of folders to be opened on startup
-   wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
-   wxString strMain = GetControlText(ConfigField_MainFolder);
-   int n = listbox->FindString(strMain);
-   if ( n != -1 ) {
-      listbox->Delete(n);
+   wxControl *control = GetControl(ConfigField_OpenFolders);
+   if ( control )
+   {
+      wxListBox *listbox = wxStaticCast(control, wxListBox);
+      wxString strMain = GetControlText(ConfigField_MainFolder);
+      int n = listbox->FindString(strMain);
+      if ( n != -1 )
+      {
+         listbox->Delete(n);
+      }
    }
 
    bool rc = wxOptionsPage::TransferDataFromWindow();

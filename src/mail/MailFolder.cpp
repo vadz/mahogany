@@ -1985,55 +1985,63 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
                                           bool newOnly)
 {
    // Maybe we are lucky and have nothing to do?
-   if(newOnly && CountRecentMessages() == 0)
+   if ( newOnly && CountRecentMessages() == 0 )
          return 0;
 
-   // Obtain pointer to the filtering module:
-   MModule_Filters *filterModule = MModule_Filters::GetModule();
+   // Has the folder got any filter rules set? Concat all its filters together
+   String filterString;
 
-   /* Has the folder got any filter rules set?
-      If so, apply the rules before collecting.
-   */
-   if(filterModule)
+   MFolder_obj folder(GetName());
+   wxArrayString filters = folder->GetFilters();
+   size_t count = filters.GetCount();
+
+   for ( size_t n = 0; n < count; n++ )
    {
-      int rc = 0;
-      String filterString;
+      MFilter_obj filter(filters[n]);
+      MFilterDesc fd = filter->GetDesc();
+      filterString += fd.GetRule();
+   }
 
-      MFolder_obj folder(GetName());
-      wxArrayString filters = folder->GetFilters();
-      size_t count = filters.GetCount();
+   int rc = 0;
+   if ( !filterString.empty() )
+   {
+      // Obtain pointer to the filtering module:
+      MModule_Filters *filterModule = MModule_Filters::GetModule();
 
-      for ( size_t n = 0; n < count; n++ )
+      if ( filterModule )
       {
-         MFilter_obj filter(filters[n]);
-         MFilterDesc fd = filter->GetDesc();
-//FIXME why?         wxLogVerbose("Using filter rule '%s'", fd.GetName().c_str());
-         filterString += fd.GetRule();
-      }
-      if(filterString[0]) // not empty
-      {
-         FilterRule * filterRule = filterModule->GetFilter(filterString);
+         FilterRule *filterRule = filterModule->GetFilter(filterString);
          if ( filterRule )
          {
             // This might change the folder contents, so we must set this
             // flag:
             m_FiltersCausedChange = true;
-            if(msgs)
+            if ( msgs )
                rc = filterRule->Apply(this, *msgs);
             else
                rc = filterRule->Apply(this, newOnly);
+
             filterRule->DecRef();
          }
-      }
-      filterModule->DecRef();
 
-      return rc;
+         filterModule->DecRef();
+      }
+      else // no filter module
+      {
+         wxLogWarning(_("Filter module couldn't be loaded, "
+                        "filters not applied"));
+      }
    }
-   else
+   else // no filters to apply
    {
-      wxLogVerbose("Filter module couldn't be loaded.");
-      return 0; // no filter module
+      if ( !newOnly )
+      {
+         wxLogVerbose(_("No filters configured for this folder."));
+      }
+      //else: we're doing this automatically, so avoid giving any messages
    }
+
+   return rc;
 }
 
 /** Checks for new mail and filters if necessary.

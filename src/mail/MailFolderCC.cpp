@@ -2891,8 +2891,12 @@ extern void CC_Cleanup(void)
 
    // FIXME: we really need to clean up these entries, so we just
    //        decrement the reference count until they go away.
-   while (!MailFolderCC::ms_StreamList.empty())
-      MailFolderCC::ms_StreamList.front()->folder->DecRef();
+   while ( !MailFolderCC::ms_StreamList.empty() )
+   {
+      MailFolderCC *folder = MailFolderCC::ms_StreamList.front()->folder;
+      DBGMESSAGE(("\tFolder '%s' leaked", folder->GetName().c_str()));
+      folder->DecRef();
+   }
 }
 
 CCStreamCleaner::~CCStreamCleaner()

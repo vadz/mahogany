@@ -103,7 +103,8 @@ public:
       Field_Restart = 0x20000000, // will only take effect during next run
       Field_Advanced= 0x40000000, // don't show this field in novice mode
       Field_Global  = 0x80000000, // no identity override for this field
-      Field_Flags   = 0xf0000000  // bit mask selecting the flags
+      Field_AppWide = 0x01000000, // same setting for all folders
+      Field_Flags   = 0xff000000  // bit mask selecting the flags
    };
 
    struct FieldInfo
@@ -119,8 +120,8 @@ public:
    FieldType GetFieldType(size_t n) const
       { return (FieldType)(m_aFields[n].flags & Field_Type); }
 
-   FieldFlags GetFieldFlags(size_t n) const
-      { return (FieldFlags)(m_aFields[n].flags & Field_Flags); }
+   int GetFieldFlags(size_t n) const
+      { return m_aFields[n].flags & Field_Flags; }
 
    // ctor will add this page to the notebook (with the image refering to the
    // notebook's imagelist)
@@ -264,8 +265,8 @@ public:
    static FieldType GetStandardFieldType(size_t n)
       { return (FieldType)(ms_aFields[n].flags & Field_Type); }
 
-   static FieldFlags GetStandardFieldFlags(size_t n)
-      { return (FieldFlags)(ms_aFields[n].flags & Field_Flags); }
+   static int GetStandardFieldFlags(size_t n)
+      { return ms_aFields[n].flags & Field_Flags; }
 
    // array of all field descriptions
    static const FieldInfo ms_aFields[];

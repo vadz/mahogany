@@ -61,7 +61,7 @@
 // control ids
 enum
 {
-   // for wxFiltersDialog
+   // for wxFiltersDialog and wxFolderFiltersDialog
    Button_Add = 100,
    Button_Delete,
    Button_Edit,
@@ -158,6 +158,9 @@ static bool FilterExists(const String& name);
 // create a new filter, return its name (or an empty string if the filter
 // creation was cancelled)
 static String CreateNewFilter(wxWindow *parent);
+
+// edit the filter with given name, return TRUE if anything changed
+static bool EditFilter(const String& name, wxWindow *parent);
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -986,7 +989,9 @@ BEGIN_EVENT_TABLE(wxFiltersDialog, wxManuallyLaidOutDialog)
    EVT_BUTTON(Button_Add, wxFiltersDialog::OnAddFiter)
    EVT_BUTTON(Button_Edit, wxFiltersDialog::OnEditFiter)
    EVT_BUTTON(Button_Delete, wxFiltersDialog::OnDeleteFiter)
+
    EVT_LISTBOX(-1, wxFiltersDialog::OnListboxChange)
+   EVT_LISTBOX_DCLICK(-1, wxFiltersDialog::OnEditFiter)
 END_EVENT_TABLE()
 
 wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
@@ -1112,19 +1117,11 @@ wxFiltersDialog::OnEditFiter(wxCommandEvent &event)
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, "must have selection in the listbox" );
 
-   MFilter_obj filter(name);
-   CHECK_RET( filter, "filter unexpectedly missing" );
-
-   MFilterDesc fd = filter->GetDesc();
-   if ( !ConfigureFilter(&fd, this) )
+   if ( EditFilter(name, this) )
    {
-      // cancelled
-      return;
+      // filter changed
+      m_hasChanges = true;
    }
-
-   m_hasChanges = true;
-
-   filter->Set(fd);
 }
 
 void
@@ -1192,7 +1189,9 @@ public:
 
 protected:
    // event handlers
-   void OnButton(wxCommandEvent& event);
+   void OnAddButton(wxCommandEvent& event);
+   void OnEditFiter(wxCommandEvent& event);
+   void OnUpdateEditBtn(wxUpdateUIEvent& event);
 
 private:
    // construct the caption for the dialog
@@ -1210,14 +1209,20 @@ private:
    // are different from the old settings
    wxArrayString m_filters;
 
-   // the button to add a new filter
-   wxButton *m_btnAdd;
+   // the buttons to add/edit a filter
+   wxButton *m_btnAdd,
+            *m_btnEdit;
 
    DECLARE_EVENT_TABLE();
 };
 
 BEGIN_EVENT_TABLE(wxFolderFiltersDialog, wxSelectionsOrderDialog)
-   EVT_BUTTON(-1, wxFolderFiltersDialog::OnButton)
+   EVT_BUTTON(Button_Add, wxFolderFiltersDialog::OnAddButton)
+   EVT_BUTTON(Button_Edit, wxFolderFiltersDialog::OnEditFiter)
+
+   EVT_UPDATE_UI(Button_Edit, wxFolderFiltersDialog::OnUpdateEditBtn)
+
+   EVT_LISTBOX_DCLICK(-1, wxFolderFiltersDialog::OnEditFiter)
 END_EVENT_TABLE()
 
 wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
@@ -1259,8 +1264,8 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
          _("You may check the filters you want to use in\n"
            "the list above. Additionally, use the buttons\n"
            "to the right of it to choose the filter priority.\n"
-           "Finally, click the \"Add\" button to create a\n"
-           "new filter."));
+           "Click the \"Edit\" or \"Add\" button to modify an\n"
+           "existing filter or create a new one."));
    c = new wxLayoutConstraints();
    c->left.SameAs(boxBottom, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
@@ -1268,16 +1273,24 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
    c->bottom.SameAs(boxBottom, wxBottom, -2*LAYOUT_Y_MARGIN);
    statText->SetConstraints(c);
 
-   m_btnAdd = new wxButton(this, -1, _("&Add..."));
+   m_btnEdit = new wxButton(this, Button_Edit, _("&Edit..."));
    c = new wxLayoutConstraints();
    c->right.SameAs(boxBottom, wxRight, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   c->centreY.SameAs(boxBottom, wxCentreY);
+   c->top.SameAs(boxBottom, wxTop, 6*LAYOUT_Y_MARGIN);
+   m_btnEdit->SetConstraints(c);
+
+   m_btnAdd = new wxButton(this, Button_Add, _("&Add..."));
+   c = new wxLayoutConstraints();
+   c->right.SameAs(boxBottom, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   c->bottom.SameAs(boxBottom, wxBottom, 5*LAYOUT_Y_MARGIN);
    m_btnAdd->SetConstraints(c);
 
    // increase min horz size
-   SetDefaultSize(5*wBtn, 18*hBtn);
+   SetDefaultSize(5*wBtn, 19*hBtn);
 }
 
 wxFolderFiltersDialog::~wxFolderFiltersDialog()
@@ -1338,7 +1351,7 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
    return TRUE;
 }
 
-void wxFolderFiltersDialog::OnButton(wxCommandEvent& event)
+void wxFolderFiltersDialog::OnAddButton(wxCommandEvent& event)
 {
    if ( event.GetEventObject() == m_btnAdd )
    {
@@ -1364,6 +1377,24 @@ void wxFolderFiltersDialog::OnButton(wxCommandEvent& event)
       // not our event
       event.Skip();
    }
+}
+
+void wxFolderFiltersDialog::OnEditFiter(wxCommandEvent& event)
+{
+   String name = m_checklstBox->GetStringSelection();
+   if ( name.empty() )
+   {
+      event.Skip();
+
+      return;
+   }
+
+   (void)EditFilter(name, this);
+}
+
+void wxFolderFiltersDialog::OnUpdateEditBtn(wxUpdateUIEvent& event)
+{
+   event.Enable( m_checklstBox->GetSelection() != -1 );
 }
 
 // ----------------------------------------------------------------------------
@@ -1592,6 +1623,23 @@ static String CreateNewFilter(wxWindow *parent)
    //else: cancelled
 
    return name;
+}
+
+static bool EditFilter(const String& name, wxWindow *parent)
+{
+   MFilter_obj filter(name);
+   CHECK( filter, false, "filter unexpectedly missing" );
+
+   MFilterDesc fd = filter->GetDesc();
+   if ( !ConfigureFilter(&fd, parent) )
+   {
+      // cancelled
+      return false;
+   }
+
+   filter->Set(fd);
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+09.02.01 VZ: added "Edit" button to folder filters dlg, also edit on dbl click
+             allow setting Trash/Outbox on per folder basis
 08.02.01 VZ: fixed creation of all folders from IMAP server once again
 07.02.01 VZ: fixed bug with incorrect name in the folder tree after renaming
              better handling of folder view columns widths setting
@@ -34,9 +36,7 @@ Release 0.61 'Hawkins' [UNRELEASED]
 01.12.00 VZ: "system" folders are now on the top of the folder tree
              fixed bug with messages boxes which couldn't be disabled in 0.61
 27.11.00 VZ: added "Import file folders" from directory command
-23.11.00 KB: Ping() requests now get ignored while folder listing is frozen, so that
-             we don't unnecessarily delay things when the Ping timer calls.
-             Ping timer interval <= 0 is now interpreted as "don't ping"
+23.11.00 KB: Ping timer interval <= 0 is now interpreted as "don't ping"
 20.11.00 KB: Added a miniframe with timeout as the dialog for starting PalmOS
              synchronisation. No more any need to press [OK] button.
 08.11.00 KB: Simplifications to folder update and filtering mechanism. Visible
