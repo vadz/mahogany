@@ -755,7 +755,7 @@ match:
       p--;
 
    // additional checks for the matches which didn't have an explicit scheme
-   if ( isMail || text[pos + len - 1] != _T(':') )
+   if ( isMail || text[pos + len - 3 /* len of "://" */ ] != _T(':') )
    {
       // '@' matches may result in false positives, as not every '@' character
       // is inside a mailto URL so try to weed them out by requiring that the
