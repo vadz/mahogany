@@ -354,6 +354,12 @@ public:
       m_pointer = copy;
    }
 
+   /// Return the n-th element
+   T& operator[](size_t n) const
+   {
+      return m_pointer[n];
+   }
+
    /// Return stored pointer.
    T *get() const { return m_pointer; }
 
