@@ -282,7 +282,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 
 static const char *urlnames[] =
 { "http:", "ftp:", "gopher:", "wysiwyg:", "telnet:", "wais:",
-  "mailto:", NULL };
+  "mailto:", "file:",NULL };
 
 String
 strutil_matchurl(const char *string)
