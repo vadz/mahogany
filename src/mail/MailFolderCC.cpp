@@ -1812,7 +1812,7 @@ MailFolderCC::GetHeaders(void) const
       information. */
 
    that->m_ListingFrozen = FALSE;
-
+   
    /* Some event processing might have been delayed because the
       listing was frozen. So now that it's thawed, we can flush the
       queue again to make sure everything is updated.
@@ -2837,8 +2837,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       // this test seems necessary for MH folders, otherwise we're going into
       // an infinite loop (and it shouldn't (?) break anything for other
       // folders)
-      if ( (mf->m_nMessages == 0 && number != 0) ||
-           (mf->m_nMessages != number) )
+      if ( mf->m_nMessages != number ) 
       {
          mf->m_nMessages = number;
          // This can be called from within mail_open(), before we have a
@@ -2846,9 +2845,10 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
          // to check here than in UpdateStatus().
          if(mf->m_MailStream != NULL)
             mf->RequestUpdate();
+
+         MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists,__LINE__);
+         MailFolderCC::QueueEvent(evptr);
       }
-      MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists,__LINE__);
-      MailFolderCC::QueueEvent(evptr);
    }
    else
    {
@@ -3240,7 +3240,7 @@ MailFolderCC::ProcessEventQueue(void)
             break;
          }
       }
-      case Exists:
+      case Exists: 
       case Status:
       case Expunged: // invalidate our header listing:
       {
