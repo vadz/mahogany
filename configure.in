@@ -460,7 +460,7 @@ AC_SUBST(MAKE_DEBUG)
 
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
-   WX_CONFIG="wxgtkd-config"
+   WX_CONFIG="wxgtkd-2.3-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -828,13 +828,13 @@ dnl --------------------------------------------------------------------------
 
 dnl check for wx-config
 
-dnl check for 2.2.6 first as it has separate --cppflags, --cflags and --cxxflags
+dnl check for 2.3.2 first as it has separate --cppflags, --cflags and --cxxflags
 dnl and so should work in any case while previous version return switches for
 dnl C++ compiler in --cflags which will lead to compilation errors sometimes
 dnl (i.e. if wxWin was built with --enable-no_rtti, CC can choke on -fno_rtti)
-AM_PATH_WXCONFIG(2.2.6, WX226=1)
+AM_PATH_WXCONFIG(2.3.2, WX232=1)
 
-if test "$WX226" != 1; then
+if test "$WX232" != 1; then
    # I'm not sure that it still works with 2.2.1, bump the version checked
    # here if needed
    AM_PATH_WXCONFIG(2.2.1, WX221=1)

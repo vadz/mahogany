@@ -2732,7 +2732,7 @@ esac
 
 if test "$USE_WXDEBUG" = 1; then
    USE_OPT=0
-   WX_CONFIG="wxgtkd-config"
+   WX_CONFIG="wxgtkd-2.3-config"
 fi
 
 case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
@@ -4420,7 +4420,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-  min_wx_version=2.2.6
+  min_wx_version=2.3.2
   echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
 echo "configure:4426: checking for wxWindows version >= $min_wx_version" >&5
 
@@ -4505,7 +4505,7 @@ echo "configure:4426: checking for wxWindows version >= $min_wx_version" >&5
 
   if test "x$no_wx" = x ; then
      echo "$ac_t""yes (version $WX_VERSION)" 1>&6
-     WX226=1
+     WX232=1
   else
      if test "x$WX_VERSION" = x; then
                 echo "$ac_t""no" 1>&6
@@ -4529,7 +4529,7 @@ echo "configure:4426: checking for wxWindows version >= $min_wx_version" >&5
   
 
 
-if test "$WX226" != 1; then
+if test "$WX232" != 1; then
    # I'm not sure that it still works with 2.2.1, bump the version checked
    # here if needed
    
