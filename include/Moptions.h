@@ -312,6 +312,7 @@ extern const MOption MP_FVIEW_FVIEW_TOP;
 extern const MOption MP_FTREE_LEFT;
 extern const MOption MP_FTREE_FGCOLOUR;
 extern const MOption MP_FTREE_BGCOLOUR;
+extern const MOption MP_FTREE_SHOWOPENED;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_PROPAGATE;
 extern const MOption MP_FTREE_NEVER_UNREAD;
@@ -1011,6 +1012,8 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 #define MP_FTREE_FGCOLOUR_NAME _T("FTreeFgColour")
 /// the background colour for the folder tree
 #define MP_FTREE_BGCOLOUR_NAME _T("FTreeBgColour")
+/// show the currently opened folder specially?
+#define MP_FTREE_SHOWOPENED_NAME _T("FTreeShowOpened")
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_NAME _T("FTreeFormat")
 /// reflect the folder status in its parent
@@ -1986,6 +1989,8 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 #define MP_FTREE_FGCOLOUR_DEFVAL wxEmptyString
 /// the background colour for the folder tree
 #define MP_FTREE_BGCOLOUR_DEFVAL wxEmptyString
+/// show the currently opened folder specially?
+#define MP_FTREE_SHOWOPENED_DEFVAL 1L
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_DEFVAL _T(" (%t, %u)")
 /// reflect the folder status in its parent?

@@ -437,6 +437,7 @@ enum ConfigFields
    ConfigField_FolderTreeColourHelp,
    ConfigField_FolderTreeFgColour,
    ConfigField_FolderTreeBgColour,
+   ConfigField_FolderTreeShowOpened,
    ConfigField_FolderTreeFormatHelp,
    ConfigField_FolderTreeFormat,
    ConfigField_FolderTreePropagateHelp,
@@ -1487,6 +1488,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "the normal folder colour in the \"Folder View\" page."), Field_Message | Field_AppWide, -1 },
    { gettext_noop("Tree &foreground colour"), Field_Color | Field_AppWide, -1 },
    { gettext_noop("Tree &background colour"), Field_Color | Field_AppWide, -1 },
+   { gettext_noop("Show &opened folder specially"), Field_Bool | Field_AppWide, -1 },
    { gettext_noop("Mahogany can show the number of messages in the folder\n"
                   "directly in the folder tree. You may wish to disable\n"
                   "this feature to speed it up slightly by leaving the text\n"
@@ -1498,8 +1500,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("By default, if the folder has new/recent/unread messages\n"
                   "its parent is shown in the same state as well. Disable\n"
                   "it below if you don't like it (this makes sense mostly\n"
-                  "for folders such as \"Trash\" or \"Sent Mail\")."), Field_Message, -1 },
-   { gettext_noop("&Parent shows status"), Field_Bool, -1 },
+                  "for folders such as \"Trash\" or \"Sent Mail\")."),
+                                                   Field_Message |
+                                                   Field_NotApp, -1 },
+   { gettext_noop("&Parent shows status"),         Field_Bool |
+                                                   Field_NotApp, -1 },
    { gettext_noop("You may check the option below to skip this folder when\n"
                   "navigating in the folder tree using Ctrl-Up/Down arrows\n"
                   "which normally selects the next folder with unread messages.\n"
@@ -1507,7 +1512,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "unread mail (again, this is mainly useful for \"Trash\"\n"
                   "folder, for example)."), Field_Message | Field_NotApp, -1 },
    { gettext_noop("&Skip this folder"), Field_Bool | Field_NotApp, -1 },
-   { gettext_noop("Open folder on single &click"), Field_Bool | Field_AppWide | Field_Global, -1 },
+   { gettext_noop("Open folders on single &click"), Field_Bool | Field_AppWide | Field_Global, -1 },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_AppWide | Field_Global,-1 },
    { gettext_noop("When you press Ctrl-Home in the tree Mahogany will go to\n"
                   "the home folder (usually Inbox or NewMail) if any."), Field_Message, -1 },
@@ -2004,6 +2009,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_FGCOLOUR),
    CONFIG_ENTRY(MP_FTREE_BGCOLOUR),
+   CONFIG_ENTRY(MP_FTREE_SHOWOPENED),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_FORMAT),
    CONFIG_NONE(),
