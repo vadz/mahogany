@@ -100,19 +100,19 @@
 /// name of the application
 #define   M_APPLICATIONNAME   "M"
 /// name of the vendor
-#define   M_VENDORNAME   "M-Team"
+#define   M_VENDORNAME   "Mahogany-Team"
 
 /// name of global config file
-#define   M_GLOBAL_CONFIG_NAME   "M.conf"
+#define   M_GLOBAL_CONFIG_NAME   "Mahogany.conf"
 
 /// path for etc directories
 #define   M_ETC_PATH   "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc"
 
 /// basic M installation directory
 #ifdef OS_UNIX
-#   define   M_BASEDIR M_PREFIX"share/M"
+#   define   M_BASEDIR M_PREFIX"share/Mahogany"
 #else
-#   define   M_BASEDIR M_PREFIX"\\M"
+#   define   M_BASEDIR M_PREFIX"\\Mahogany"
 #endif
 #ifdef   HAVE_COMPFACE_H
 #   define   HAVE_XFACES

@@ -93,16 +93,17 @@ DONE:
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
   done-->  // check whether enc8bit is needed or not
+- support for local news spool
+- gtk 1.2 support seems to work
+- add -ljpeg to linker options and JPG as intermediary image format
+- have a global "NewMail" folder setting and ensure its existence
+
 
 CHECK:
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
-- support for local news spool
-- gtk 1.2 support seems to work
 - do wxImage changes affect list of available handlers, etc?
-- add -ljpeg to linker options and JPG as intermediary image format
-
 - printer settings seem to have no effect : are persistent, do they get used?
 
 TODO:
@@ -110,12 +111,12 @@ TODO:
 for release:
 - make mailfolders collectable:
   - have a "collect" flag
-  - have a global "NewMail" folder setting and ensure its existence
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 
 - do we really need to scan /var/lib/news/active?
 
+doc: add note about news active file
 
 after release:
 

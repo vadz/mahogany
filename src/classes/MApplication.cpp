@@ -144,7 +144,7 @@ MAppBase::VerifySettings(void)
       char szFileName[MAX_PATH];
       if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
       {
-         wxLogError(_("Can't find your M directory, please specify it "
+         wxLogError(_("Cannot find your Mahogany directory, please specify it "
                       "in the options dialog."));
       }
       else
@@ -240,9 +240,9 @@ MAppBase::OnStartup()
                       "files '%s'."), strConfFile.c_str());
          return FALSE;
       }
-
-      wxLogInfo(_("Created directory '%s' for configuration files."),
-                strConfFile.c_str());
+      else
+         wxLogInfo(_("Created directory '%s' for configuration files."),
+                   strConfFile.c_str());
       //  Also, create an empty config file with the right
       //  permissions:
       String realFile = strConfFile + "/config";
@@ -255,7 +255,6 @@ MAppBase::OnStartup()
       }
       else
          close(fd);
-
    }
    strConfFile += "/config";
 #else  // Windows

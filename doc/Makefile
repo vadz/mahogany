@@ -17,6 +17,7 @@ all:
 
 subdirs: 
 	set -e; for i in $(SUB_DIRS); do if [ ! -d $$i ] ; then mkdir $$i ; fi ; done
+	set -e; for i in $(SUB_DIRS); do cp docxx.sty $$i ; done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) DIR=$$i -f ../Makefile.sub -C $$i setup ; done
 	set -e; for i in $(SUB_DIRS); do ( cd $$i && $(MAKE) -f ../Makefile.sub all DIR=$$i ) ; done
 

@@ -318,7 +318,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strConfigPath,
                                    const wxString& strDefault,
                                    bool passwordflag)
-   : wxDialog(parent, -1, wxString("M: ") + strCaption,
+   : wxDialog(parent, -1, wxString("Mahogany : ") + strCaption,
               wxDefaultPosition,
               wxDefaultSize,
               wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
@@ -453,7 +453,7 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
-   wxMessageBox(msg, wxString("M: ") + title, Style(wxOK|wxICON_EXCLAMATION),
+   wxMessageBox(msg, wxString("Mahogany : ") + title, Style(wxOK|wxICON_EXCLAMATION),
                 GetParent(parent));
 }
 
@@ -476,7 +476,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(_("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M: ")+title, modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString("Mahogany : ")+title, modal);
 }
 
 
@@ -492,7 +492,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString("M: ")+title,true);
+   MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
    mApplication->Exit();
 }
 
@@ -509,7 +509,7 @@ MDialog_Message(const char *message,
                 const char *title,
                 const char *configPath)
 {
-   wxString caption = "M: ";
+   wxString caption = "Mahogany : ";
    caption += title;
 
    if ( configPath != NULL )
@@ -542,7 +542,7 @@ MDialog_YesNoDialog(const char *message,
                     bool /* YesDefault */,
                     const char *configPath)
 {
-   wxString caption = "M: ";
+   wxString caption = "Mahogany : ";
    caption += title;
 
    if ( configPath != NULL )
@@ -645,7 +645,7 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
    else {
       return wxGetSingleChoiceIndex
              (
-               wxString("M: ")+_("Please choose an entry:"),
+               wxString("Mahogany : ")+_("Please choose an entry:"),
                _("Expansion options"),
                nEntryCount,
                &aChoices[0],

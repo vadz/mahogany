@@ -71,18 +71,10 @@ enum MVersion
 static bool
 UpgradeFromNone()
 {
-#if 0 // VZ: this code has no effect!
-   // we do it here and only once because it takes a long time
-   PathFinder pf(READ_APPCONFIG(MP_PATHLIST));
-   pf.AddPaths(M_PREFIX,true);
-   bool found;
-   String strRootPath = pf.FindDir(READ_APPCONFIG(MP_ROOTDIRNAME), &found);
-#endif // 0
-
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
       static const char *msg =
-         "As it seems that you're running M for the first\n"
+         "As it seems that you are running Mahogany for the first\n"
          "time, you should probably set up some of the options\n"
          "needed by the program (especially network parameters).";
       wxLogMessage(_(msg));

@@ -423,7 +423,7 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
 {
    wxComposeView *cv = new wxComposeView("_ComposeViewNews", parent);
    cv->m_mode = Mode_NNTP;
-   cv->SetTitle(_("Mahogany Mail : Article Composition"));
+   cv->SetTitle(_("Article Composition"));
    cv->Create(parent,parentProfile);
    return cv;
 }
@@ -441,7 +441,7 @@ wxComposeView::CreateNewMessage(wxWindow *parent,
 {
    wxComposeView *cv = new wxComposeView("_ComposeViewMail", parent);
    cv->m_mode = Mode_SMTP;
-   cv->SetTitle(_("Mahogany Mail : Message Composition"));
+   cv->SetTitle(_("Message Composition"));
    cv->Create(parent,parentProfile);
    return cv;
 }

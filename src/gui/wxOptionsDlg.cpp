@@ -401,7 +401,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
    { gettext_noop("&Autosave delay"),              Field_Number | Field_Restart, -1                     },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
-   { gettext_noop("&Click folder to open"),        Field_Bool,    -1                     },
+   { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("&Format for the date"),         Field_Text,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX

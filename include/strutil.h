@@ -267,7 +267,6 @@ strutil_enforceCRLF(String const &in);
      based encryption mechanism. TOTALLY UNSAFE!
      The table is always identical, so anyone using this function can
      encrypt/decrypt the string.
-     @see strutil_decrypt
      @param original the clear text to encrypt
      @return the printable encrypted text
 */
@@ -278,12 +277,12 @@ String strutil_encrypt(const String &original);
      The table is always identical, so anyone using this function can
      encrypt/decrypt the string.
      This function is the inverse of strutil_encrypt().
-     @see strutil_encrypt
      @param original the encrypted text to decrypt
      @return the clear text
 */
 String strutil_decrypt(const String &original);
 
 //@}
+
 //@}
 #endif

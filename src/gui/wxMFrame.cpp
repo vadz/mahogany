@@ -164,8 +164,9 @@ wxMFrame::~wxMFrame()
 void
 wxMFrame::SetTitle(String const &title)
 {
+   wxString t = "Mahogany : " + title;
    // the following (char *) is required to avoid a warning
-   wxFrame::SetTitle((char *)title.c_str());
+   wxFrame::SetTitle((char *)t.c_str());
 }
 
 void
