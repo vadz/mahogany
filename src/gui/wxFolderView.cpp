@@ -3849,8 +3849,15 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
 
       CHECK_RET( hil, "no headers but msg status changed?" );
 
-      size_t index = hil->GetPosFromIdx(event.GetIndex());
-      if ( index < (size_t)m_FolderCtrl->GetItemCount() )
+      size_t index = event.GetIndex();
+      if ( index >= hil->Count() )
+      {
+         // FIXME: message was expunged, what to do??
+         return;
+      }
+
+      size_t pos = hil->GetPosFromIdx(index);
+      if ( pos < (size_t)m_FolderCtrl->GetItemCount() )
       {
          const HeaderInfo *hi = event.GetHeaderInfo();
          int status = hi->GetStatus();
@@ -3865,7 +3872,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
             m_nDeleted++;
          }
 
-         m_FolderCtrl->RefreshItem(index);
+         m_FolderCtrl->RefreshItem(pos);
 
          // TODO: should do it only once, after all status changes
          UpdateTitleAndStatusBars("", "", m_Frame, mf);
