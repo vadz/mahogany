@@ -87,6 +87,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "pythoncore"="D:\Python\2.3.2-src\PCbuild\pythoncore.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
