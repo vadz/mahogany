@@ -1197,7 +1197,20 @@ String MailFolder::GetImapSpec(int typeOrig,
       }
    }
 
-   switch( type )
+   if ( FolderTypeHasServer(type) )
+   {
+      // remote spec starts with '{'
+      mboxpath << '{' << server << GetSSLOptions(flags);
+
+      // if it has server, it must have a login as well
+      if ( !login.empty() )
+         mboxpath << "/user=" << login;
+      else if ( flags & MF_FLAGS_ANON )
+         mboxpath << "/anonymous";
+      //else: we'll ask the user about his login later
+   }
+
+   switch ( type )
    {
       case MF_INBOX:
          mboxpath = "INBOX";
@@ -1245,23 +1258,11 @@ String MailFolder::GetImapSpec(int typeOrig,
          break;
 
       case MF_POP:
-         mboxpath << '{' << server << "/pop3" << GetSSLOptions(flags) << '}';
+         mboxpath << "/pop3}";
          break;
 
       case MF_IMAP:
-         mboxpath << '{' << server;
-         if ( flags & MF_FLAGS_ANON )
-         {
-            mboxpath << "/anonymous";
-         }
-         else
-         {
-            if( !login.empty() )
-               mboxpath << "/user=" << login ;
-            //else: we get asked  later
-         }
-
-         mboxpath << GetSSLOptions(flags) << '}' << name;
+         mboxpath << '}' << name;
          break;
 
       case MF_NEWS:
@@ -1269,8 +1270,7 @@ String MailFolder::GetImapSpec(int typeOrig,
          break;
 
       case MF_NNTP:
-         mboxpath << '{' << server << "/nntp"
-                  << GetSSLOptions(flags) << '}' << name;
+         mboxpath << "/nntp}" << name;
          break;
 
       default:
