@@ -415,7 +415,7 @@ private:
             // FIXME: a hack to prevent the same search results folder from
             //        being reused all the time
             static unsigned int s_countSearch = 0;
-            m_folderVirt->SetPath(String::Format("(%u)", ++s_countSearch));
+            m_folderVirt->SetPath(String::Format(_T("(%u)"), ++s_countSearch));
 
             m_mfVirt = MailFolder::OpenFolder(m_folderVirt);
             if ( !m_mfVirt )
@@ -565,13 +565,13 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_searchData = NULL;
 
    // set frame icon/title, create status bar
-   SetIcon(ICON("MainFrame"));
+   SetIcon(ICON(_T("MainFrame")));
    SetTitle(_("Copyright (C) 1997-2003 The Mahogany Developers Team"));
 
    CreateStatusBar();
 
    // create the child controls
-   m_splitter = new wxPSplitterWindow("MainSplitter", this, -1,
+   m_splitter = new wxPSplitterWindow(_T("MainSplitter"), this, -1,
                                       wxDefaultPosition, wxDefaultSize,
                                       0);
 
@@ -615,7 +615,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuDebug->Append(WXMENU_DEBUG_WIZARD, _T("Run install &wizard..."));
    menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
                               _T("Toggle &debug logging\tCtrl-Alt-D"));
-   GetMenuBar()->Append(menuDebug, "&Debug");
+   GetMenuBar()->Append(menuDebug, _T("&Debug"));
 #endif // debug
 
    AddHelpMenu();
@@ -917,7 +917,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                   if ( !folder )
                   {
                      // use root folder if no selection
-                     folder = MFolder::Get("");
+                     folder = MFolder::Get(_T(""));
                   }
 
                   // do create them
@@ -972,7 +972,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             {
                MFolder *folder = m_FolderTree->GetSelection();
                if ( !folder )
-                  folder = MFolder::Get("");
+                  folder = MFolder::Get(_T(""));
 
                int nUpdated = UpdateFoldersSubtree(*folder, this);
                if ( nUpdated < 0 )
@@ -1205,8 +1205,8 @@ wxMainFrame::MakeModulesMenu(void)
 
 /// Appends the menu for a module to the menubar
 void
-wxMainFrame::AddModulesMenu(const char *name,
-                            const char *help,
+wxMainFrame::AddModulesMenu(const wxChar *name,
+                            const wxChar *help,
                             class wxMenu *submenu,
                             int id)
 {
@@ -1220,8 +1220,8 @@ wxMainFrame::AddModulesMenu(const char *name,
 
 /// Appends the menu entry for a module to the modules menu
 void
-wxMainFrame::AddModulesMenu(const char *name,
-                            const char *help,
+wxMainFrame::AddModulesMenu(const wxChar *name,
+                            const wxChar *help,
                             int id)
 {
    MakeModulesMenu();

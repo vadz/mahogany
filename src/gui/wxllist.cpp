@@ -68,7 +68,7 @@
 
 
 /// This should never really get created
-#define   WXLLIST_TEMPFILE   "__wxllist.tmp"
+#define   WXLLIST_TEMPFILE   _T("__wxllist.tmp")
 
 #ifdef WXLAYOUT_DEBUG
 
@@ -106,7 +106,7 @@
 #define WXLO_MINIMUM_CURSOR_WIDTH   4
 
 /// Use this character to estimate a cursor size when none is available.
-#define WXLO_CURSORCHAR   "E"
+#define WXLO_CURSORCHAR   _T("E")
 /** @name Helper functions */
 //@{
 /// allows me to compare to wxPoints
@@ -178,8 +178,8 @@ bool Contains(const wxRect &r, const wxPoint &p)
 static
 void ReadString(wxString &to, wxString &from)
 {
-   to = "";
-   const char *cptr = from.c_str();
+   to = _T("");
+   const wxChar *cptr = from.c_str();
    while(*cptr && *cptr != '\n')
       to += *cptr++;
    if(*cptr) cptr++;
@@ -199,7 +199,7 @@ wxLayoutObject::Read(wxString &istr)
    wxString tmp;
    ReadString(tmp, istr);
    int type = WXLO_TYPE_INVALID;
-   sscanf(tmp.c_str(),"%d", &type);
+   wxSscanf(tmp.c_str(), _T("%d"), &type);
 
    switch(type)
    {
@@ -425,7 +425,7 @@ wxLayoutObjectIcon::Write(wxString &ostr)
 {
    /* Exports icon through a temporary file. */
 
-   wxString file = wxGetTempFileName("wxloexport");
+   wxString file = wxGetTempFileName(_T("wxloexport"));
 
    ostr << (int) WXLO_TYPE_ICON << '\n'
         << file << '\n';
@@ -645,44 +645,44 @@ wxLayoutObjectCmd::Read(wxString &istr)
 
    wxString tmp;
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->family);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->family);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->size);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->size);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->style);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->style);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->weight);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->weight);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->underline);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->underline);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->m_fg_valid);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->m_fg_valid);
    ReadString(tmp, istr);
-   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->m_bg_valid);
+   wxSscanf(tmp.c_str(), _T("%d"), &obj->m_StyleInfo->m_bg_valid);
    ReadString(tmp, istr);
    int enc;
-   sscanf(tmp.c_str(),"%d", &enc);
+   wxSscanf(tmp.c_str(), _T("%d"), &enc);
    obj->m_StyleInfo->enc = (wxFontEncoding)enc;
 
    if(obj->m_StyleInfo->m_fg_valid)
    {
       int red, green, blue;
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &red);
+      wxSscanf(tmp.c_str(), _T("%d"), &red);
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &green);
+      wxSscanf(tmp.c_str(), _T("%d"), &green);
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &blue);
+      wxSscanf(tmp.c_str(), _T("%d"), &blue);
       obj->m_StyleInfo->m_fg = wxColour(red, green, blue);
    }
    if(obj->m_StyleInfo->m_bg_valid)
    {
       int red, green, blue;
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &red);
+      wxSscanf(tmp.c_str(), _T("%d"), &red);
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &green);
+      wxSscanf(tmp.c_str(), _T("%d"), &green);
       ReadString(tmp, istr);
-      sscanf(tmp.c_str(),"%d", &blue);
+      wxSscanf(tmp.c_str(), _T("%d"), &blue);
       obj->m_StyleInfo->m_bg = wxColour(red, green, blue);
    }
    return obj;
@@ -1405,7 +1405,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    wxLOiterator copyObject = m_ObjectList.end();
    // if we split a text-object, we must pre-pend some text to the
    // next line later on, remember it here:
-   wxString prependText = "";
+   wxString prependText = _T("");
    // we might need to adjust the cursor position later, so remember it
    size_t xpos = llist->GetCursorPos().x;
    // by how much did we shorten the current line:
@@ -1806,7 +1806,7 @@ wxLayoutList::Read(wxString &istr)
       wxString tmp;
       tmp = istr.BeforeFirst('\n');
       int type = WXLO_TYPE_INVALID;
-      sscanf(tmp.c_str(),"%d", &type);
+      wxSscanf(tmp.c_str(), _T("%d"), &type);
       if(type == WXLO_TYPE_LINEBREAK)
       {
          LineBreak();
@@ -1858,7 +1858,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
 
 void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
-                      int underline, char const *fg, char const *bg,
+                      int underline, wxChar const *fg, wxChar const *bg,
                       wxFontEncoding encoding)
 
 {
@@ -2143,9 +2143,9 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
          if ( canAdvance )
          {
             const wxString& text = tobj->GetText();
-            const char *start = text.c_str();
-            const char *end = start + text.length();
-            const char *p = start + offset;
+            const wxChar *start = text.c_str();
+            const wxChar *end = start + text.length();
+            const wxChar *p = start + offset;
 
             if ( n < 0 )
             {
@@ -2747,14 +2747,14 @@ wxLayoutList::DrawCursor(wxDC& UNUSED_IF_USE_CARET(dc),
    coords += translate;
 
 #ifdef WXLAYOUT_DEBUG
-   WXLO_DEBUG(("Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld",
+   WXLO_DEBUG((_T("Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld"),
                (long)m_CursorPos.x, (long)m_CursorPos.y,
                (long)coords.x, (long)coords.y,
                (long)m_CursorSize.x, (long)m_CursorSize.y,
                (long)m_CursorLine->GetLineNumber(),
                (long)m_CursorLine->GetLength()));
 
-   wxLogStatus("Cursor is at (%d, %d)", m_CursorPos.x, m_CursorPos.y);
+   wxLogStatus(_T("Cursor is at (%d, %d)"), m_CursorPos.x, m_CursorPos.y);
 #endif
 
 #ifdef WXLAYOUT_USE_CARET

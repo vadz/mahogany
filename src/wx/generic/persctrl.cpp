@@ -269,7 +269,7 @@ void wxPHelper::RestorePath()
 // ----------------------------------------------------------------------------
 
 // the key where we store our last selected page
-const char *wxPNotebook::ms_path = "NotebookPages";
+const wxChar *wxPNotebook::ms_path = _T("NotebookPages");
 
 wxPNotebook::wxPNotebook()
 {
@@ -363,7 +363,7 @@ void wxPNotebook::SetConfigPath(const wxString& path)
 #if wxUSE_LISTBOOK
 
 // the key where we store our last selected page
-const char *wxPListbook::ms_path = "ListbookPages";
+const wxChar *wxPListbook::ms_path = _T("ListbookPages");
 
 wxPListbook::wxPListbook()
 {
@@ -592,7 +592,7 @@ void wxPTextEntry::SetConfigPath(const wxString& path)
 // wxPSplitterWindow
 // ----------------------------------------------------------------------------
 
-const char *wxPSplitterWindow::ms_path = "SashPositions";
+const wxChar *wxPSplitterWindow::ms_path = _T("SashPositions");
 
 wxPSplitterWindow::wxPSplitterWindow()
 {
@@ -720,7 +720,7 @@ void wxPSplitterWindow::SetConfigPath(const wxString& path)
 // wxPListCtrl
 // ----------------------------------------------------------------------------
 
-const char *wxPListCtrl::ms_path = "ListCtrlColumns";
+const wxChar *wxPListCtrl::ms_path = _T("ListCtrlColumns");
 
 // default ctor
 wxPListCtrl::wxPListCtrl()
@@ -866,7 +866,7 @@ void wxPListCtrl::SaveWidths()
 // persistent checkbox
 // ----------------------------------------------------------------------------
 
-const char *wxPCheckBox::ms_path = "Checkboxes";
+const wxChar *wxPCheckBox::ms_path = _T("Checkboxes");
 
 // default ctor
 wxPCheckBox::wxPCheckBox()
@@ -960,7 +960,7 @@ void wxPCheckBox::SaveValue()
 // wxPListBox
 // ----------------------------------------------------------------------------
 
-const char *wxPListBox::ms_path = "ListBoxSelection";
+const wxChar *wxPListBox::ms_path = _T("ListBoxSelection");
 
 // default ctor
 wxPListBox::wxPListBox()
@@ -1080,7 +1080,7 @@ void wxPListBox::SaveSelection()
 // wxPChoice
 // ----------------------------------------------------------------------------
 
-const char *wxPChoice::ms_path = "ChoiceSelection";
+const wxChar *wxPChoice::ms_path = _T("ChoiceSelection");
 
 // default ctor
 wxPChoice::wxPChoice()
@@ -1200,7 +1200,7 @@ void wxPChoice::SaveSelection()
 // wxPRadioBox
 // ----------------------------------------------------------------------------
 
-const char *wxPRadioBox::ms_path = "RadioBoxSelection";
+const wxChar *wxPRadioBox::ms_path = _T("RadioBoxSelection");
 
 // default ctor
 wxPRadioBox::wxPRadioBox()
@@ -1321,7 +1321,7 @@ void wxPRadioBox::SaveSelection()
 // wxPTreeCtrl
 // ----------------------------------------------------------------------------
 
-const char *wxPTreeCtrl::ms_path = "TreeCtrlExp";
+const wxChar *wxPTreeCtrl::ms_path = _T("TreeCtrlExp");
 
 // default ctor
 wxPTreeCtrl::wxPTreeCtrl()
@@ -1787,7 +1787,7 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
     EndModal(TranslateBtnIdToMsgBox(event.GetId()));
 }
 
-static const char *gs_MessageBoxPath = "MessageBox";
+static const wxChar *gs_MessageBoxPath = _T("MessageBox");
 static const int DONT_PREDISABLE = -1;
 
 int wxPMessageBox(const wxString& configPath,
@@ -1934,10 +1934,10 @@ void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
 // common part of wxPFileSelector and wxPFilesSelector
 static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
                                               const wxString& title,
-                                              const char *defpath,
-                                              const char *defname,
-                                              const char *defext,
-                                              const char *filter,
+                                              const wxChar *defpath,
+                                              const wxChar *defname,
+                                              const wxChar *defext,
+                                              const wxChar *filter,
                                               int flags,
                                               wxWindow *parent,
                                               wxConfigBase *config)
@@ -2049,10 +2049,10 @@ wxString wxPFileSelector(const wxString& configPath,
 size_t wxPFilesSelector(wxArrayString& filenames,
                         const wxString& configPath,
                         const wxString& title,
-                        const char *defpath,
-                        const char *defname,
-                        const char *defext,
-                        const char *filter,
+                        const wxChar *defpath,
+                        const wxChar *defname,
+                        const wxChar *defext,
+                        const wxChar *filter,
                         int flags,
                         wxWindow *parent,
                         wxConfigBase *config)

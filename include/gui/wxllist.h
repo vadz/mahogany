@@ -262,7 +262,7 @@ typedef wxLayoutObjectList::iterator wxLOiterator;
 class wxLayoutObjectText : public wxLayoutObject
 {
 public:
-   wxLayoutObjectText(const wxString &txt = "");
+   wxLayoutObjectText(const wxString &txt = _T(""));
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
    virtual void Layout(wxDC &dc, wxLayoutList *llist);
@@ -293,7 +293,7 @@ public:
    virtual wxString DebugDump(void) const;
 #endif
 
-   virtual CoordType GetLength(void) const { return strlen(m_Text.c_str()); }
+   virtual CoordType GetLength(void) const { return wxStrlen(m_Text.c_str()); }
 
    // for editing:
    wxString & GetText(void) { return m_Text; }
@@ -985,8 +985,8 @@ public:
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
-                char const *fg = NULL,
-                char const *bg = NULL,
+                wxChar const *fg = NULL,
+                wxChar const *bg = NULL,
                 wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
 
    /// changes to the next larger font size
@@ -1010,7 +1010,7 @@ public:
    void SetFontEncoding(wxFontEncoding enc)
       { SetFont(-1,-1,-1,-1,-1,(wxColour *)NULL,(wxColour *)NULL,enc); }
    /// set font colours by name
-   inline void SetFontColour(char const *fg, char const *bg = NULL)
+   inline void SetFontColour(wxChar const *fg, wxChar const *bg = NULL)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }
    /// set font colours by colour
    inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
@@ -1322,13 +1322,13 @@ class wxLayoutDataObject : public wxCustomDataObject
 public:
    wxLayoutDataObject()
       {
-         SetFormat("application/wxlayoutlist");
+         SetFormat(_T("application/wxlayoutlist"));
       }
 
    // type safe wrappers
    void SetLayoutData(const wxString& text)
       { SetData(text.length() + 1, text.c_str()); }
-   const char *GetLayoutData() const { return (const char *)GetData(); }
+   const wxChar *GetLayoutData() const { return (const wxChar *)GetData(); }
 
    DECLARE_NO_COPY_CLASS(wxLayoutDataObject)
 };

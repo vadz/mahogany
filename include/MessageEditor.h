@@ -30,7 +30,7 @@ struct ComposerOptions;
 #include "MModule.h"
 
 // the message editor module interface name
-#define MESSAGE_EDITOR_INTERFACE "MessageEditor"
+#define MESSAGE_EDITOR_INTERFACE _T("MessageEditor")
 
 // ----------------------------------------------------------------------------
 // MessageEditor: interface for an editor used by the composer
@@ -241,7 +241,7 @@ public:
    //@{
 
    /// give us the data to attach, we will free() it (must be !NULL)
-   void SetData(void *data, size_t length, const char* name = NULL, const char *filename = NULL);
+   void SetData(void *data, size_t length, const wxChar* name = NULL, const wxChar *filename = NULL);
 
    /// give us a file to attach - will be done only when we'll be sent
    void SetFile(const String& filename);

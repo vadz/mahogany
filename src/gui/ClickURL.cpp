@@ -269,7 +269,7 @@ bool ClickableURL::IsMail() const
 
       // protocol is either really the protocol or the whole URL if it didn't
       // contain ':'
-      m_isMail = protocol == "mailto" ? Yes : No;
+      m_isMail = protocol == _T("mailto") ? Yes : No;
       if ( m_isMail == Yes )
       {
          // leave only the mail address (7 == strlen("mailto:"))
@@ -406,22 +406,22 @@ void ClickableURL::OpenInBrowser(int options) const
          wxString lockfile;
          wxGetHomeDir(&lockfile);
          if ( !wxEndsWithPathSeparator(lockfile) )
-            lockfile += '/';
-         lockfile += ".netscape/lock";
+            lockfile += DIR_SEPARATOR;
+         lockfile << _T(".netscape") << DIR_SEPARATOR << _T("lock");
          struct stat statbuf;
 
          // cannot use wxFileExists here, because it's a link pointing to a
          // non-existing location!
          if ( lstat(lockfile.mb_str(), &statbuf) == 0 )
          {
-            command << browser << " -remote openURL(" << m_url;
+            command << browser << _T(" -remote openURL(") << m_url;
             if ( inNewWindow )
             {
-               command << ",new-window)";
+               command << _T(",new-window)");
             }
             else
             {
-               command << ")";
+               command << _T(")");
             }
             wxString errmsg;
             errmsg.Printf(_("Could not launch browser: '%s' failed."),
@@ -434,7 +434,7 @@ void ClickableURL::OpenInBrowser(int options) const
       if(! bOk)
       {
          command = browser;
-         command << ' ' << m_url;
+         command << _T(' ') << m_url;
 
          wxString errmsg;
          errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
@@ -458,7 +458,7 @@ void ClickableURL::OpenAddress() const
 {
    Composer *cv = Composer::CreateNewMessage(GetProfile());
 
-   CHECK_RET( cv, "creating new message failed?" );
+   CHECK_RET( cv, _T("creating new message failed?") );
 
    cv->SetAddresses(m_url);
    cv->InitText();

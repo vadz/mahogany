@@ -42,9 +42,9 @@
 
 #define MODULE_NAME    MMODULE_INTERFACE_CALENDAR
 
-#define MP_MOD_CALENDAR_BOX        "Calendar"
-#define MP_MOD_CALENDAR_BOX_D      "Calendar"
-#define MP_MOD_CALENDAR_SHOWONSTARTUP        "ShowOnStartup"
+#define MP_MOD_CALENDAR_BOX        _T("Calendar")
+#define MP_MOD_CALENDAR_BOX_D      _T("Calendar")
+#define MP_MOD_CALENDAR_SHOWONSTARTUP        _T("ShowOnStartup")
 #define MP_MOD_CALENDAR_SHOWONSTARTUP_D      1l
 
 extern const MOption MP_DATE_FMT;

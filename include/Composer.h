@@ -250,8 +250,8 @@ public:
        @param mimetype mimetype to use (auto detect if NULL)
        @param num_mimetype numeric mimetype
     */
-   virtual void InsertFile(const char *filename = NULL,
-                           const char *mimetype = NULL) = 0;
+   virtual void InsertFile(const wxChar *filename = NULL,
+                           const wxChar *mimetype = NULL) = 0;
 
    /** Insert MIME content data
        @param data pointer to data (we will free() it later)

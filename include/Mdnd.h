@@ -25,7 +25,7 @@ class MsgCmdProc;
 class MailFolder;
 
 /// the clipboard/dnd format for Mahogany messages
-#define MMESSAGE_FORMAT "MMessage"
+#define MMESSAGE_FORMAT _T("MMessage")
 
 /**
   MMessagesDataObject is used for the mail messages transfer. It has a

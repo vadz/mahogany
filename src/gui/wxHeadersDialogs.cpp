@@ -76,17 +76,17 @@ extern const MOption MP_ORGANIZATION;
 // ----------------------------------------------------------------------------
 
 // the prefix for custom headers values
-#define CUSTOM_HEADERS_PREFIX "CustomHeaders"
+#define CUSTOM_HEADERS_PREFIX _T("CustomHeaders")
 
 // the organization header
-#define ORGANIZATION "Organization"
+#define ORGANIZATION _T("Organization")
 
 // prefixes identifying headers of different types
-static const char *gs_customHeaderSubgroups[CustomHeader_Max] =
+static const wxChar *gs_customHeaderSubgroups[CustomHeader_Max] =
 {
-   "News",
-   "Mail",
-   "Both"
+   _T("News"),
+   _T("Mail"),
+   _T("Both")
 };
 
 // the dialog element ids
@@ -139,10 +139,10 @@ private:
    };
 
    // headers names
-   static const char *ms_headerNames[Header_Max];
+   static const wxChar *ms_headerNames[Header_Max];
 
    // profile key names
-   static const char *ms_profileNamesDefault[Header_Max];
+   static const wxChar *ms_profileNamesDefault[Header_Max];
 
    // the dialog controls
    wxTextCtrl *m_textvalues[Header_Max];
@@ -322,14 +322,14 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 // static data
-const char *wxComposeHeadersDialog::ms_headerNames[] =
+const wxChar *wxComposeHeadersDialog::ms_headerNames[] =
 {
    gettext_noop("&To"),
    gettext_noop("&Cc"),
    gettext_noop("&Bcc")
 };
 
-const char *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
+const wxChar *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
 
 void wxComposeHeadersDialog::InitStaticArrays()
 {
@@ -346,7 +346,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
                       : wxOptionsPageSubdialog(profile, parent,
                                                _("Configure headers for "
                                                  "message composition"),
-                                               "ComposeHeaders")
+                                               _T("ComposeHeaders"))
 {
    InitStaticArrays();
 
@@ -397,7 +397,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxControl *last = NULL;
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      wxStaticText *label = new wxStaticText(this, -1, _(ms_headerNames[header]));
+      wxStaticText *label = new wxStaticText(this, -1, wxGetTranslation(ms_headerNames[header]));
       m_textvalues[header] = new wxTextCtrl(this, TextCtrlId + header);
 
       // set the constraints
@@ -450,7 +450,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
 
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      def = m_profile->readEntry(ms_profileNamesDefault[header], "");
+      def = m_profile->readEntry(ms_profileNamesDefault[header], _T(""));
 
       m_textvalues[header]->SetValue(def);
       m_textvalues[header]->DiscardEdits();
@@ -488,7 +488,7 @@ wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
                                                _("&Headers"),
                                                _("Configure headers to show "
                                                  "in message view"),
-                                               "MsgViewHeaders")
+                                               _T("MsgViewHeaders"))
 {
    m_profile = profile;
    SafeIncRef(profile);
@@ -510,12 +510,12 @@ bool wxMsgViewHeadersDialog::TransferDataToWindow()
    // check very easily whether the header is shown or not: we just search for
    // ":<header>:" (of course, without the ':' in front this wouldn't work for
    // the first header)
-   wxString shownHeaders(':');
+   wxString shownHeaders(_T(':'));
    shownHeaders += READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS);
 
    size_t n = 0;
    wxString header;  // accumulator
-   for ( const char *p = allHeaders.c_str(); *p != '\0'; p++ )
+   for ( const wxChar *p = allHeaders.c_str(); *p != '\0'; p++ )
    {
       if ( *p == ':' )
       {
@@ -524,7 +524,7 @@ bool wxMsgViewHeadersDialog::TransferDataToWindow()
          m_checklstBox->Append(header);
 
          // check the item only if we show it
-         header.Prepend(':');
+         header.Prepend(_T(':'));
          header.Append(':');
          if ( shownHeaders.Find(header) != wxNOT_FOUND )
          {
@@ -593,7 +593,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
                                            bool letUserChooseType)
                      : wxOptionsPageSubdialog(profile, parent,
                                               _("Edit custom headers"),
-                                              "CustomHeader")
+                                              _T("CustomHeader"))
 {
    // init the member vars
    // --------------------
@@ -627,7 +627,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    wxStaticText *label;
 
    label = new wxStaticText(this, -1, labelName);
-   m_textctrlName = new wxPTextEntry("CustomHeaderName", this);
+   m_textctrlName = new wxPTextEntry(_T("CustomHeaderName"), this);
 
    c = new wxLayoutConstraints();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -645,7 +645,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
 
    // header value
    label = new wxStaticText(this, -1, labelValue);
-   m_textctrlValue = new wxPTextEntry("CustomHeaderValue", this);
+   m_textctrlValue = new wxPTextEntry(_T("CustomHeaderValue"), this);
 
    c = new wxLayoutConstraints();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -664,7 +664,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    int extraHeight;
    if ( letUserChooseType )
    {
-      static const char *radioItems[CustomHeader_Max] =
+      static const wxChar *radioItems[CustomHeader_Max] =
       {
          gettext_noop("news postings"),
          gettext_noop("mail messages"),
@@ -674,13 +674,13 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
       wxString *radioStrings = new wxString[ (size_t) CustomHeader_Max];
       for ( size_t n = 0; n < CustomHeader_Max; n++ )
       {
-         radioStrings[n] = _(radioItems[n]);
+         radioStrings[n] = wxGetTranslation(radioItems[n]);
       }
 
       // in this mode we always save the value in the profile, so we don't need
       // the checkbox - but we have instead a radio box allowing the user to
       // choose for which kind of message he wants to use this header
-      m_radioboxType = new wxPRadioBox("CurstomHeaderType",
+      m_radioboxType = new wxPRadioBox(_T("CurstomHeaderType"),
                                        this, -1, _("Use this header for:"),
                                        wxDefaultPosition, wxDefaultSize,
                                        CustomHeader_Max, radioStrings,
@@ -752,12 +752,12 @@ bool wxCustomHeaderDialog::TransferDataFromWindow()
    m_headerName = m_textctrlName->GetValue();
 
    // check that this is a valid header name
-   for ( const char *pc = m_headerName.c_str(); *pc; pc++ )
+   for ( const wxChar *pc = m_headerName.c_str(); *pc; pc++ )
    {
       // RFC 822 allows '/' but we don't because it has a special meaning for
       // the profiles/wxConfig; other characters are excluded in accordance
       // with the definition of the header name in the RFC
-      unsigned char c = *pc;
+      wxChar c = *pc;
       if ( c < 32 || c > 126 || c == ':' || c == '/' )
       {
          wxLogError(_("The character '%c' is invalid in the header name, "
@@ -791,7 +791,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
                                              wxWindow *parent)
                      : wxOptionsPageSubdialog(profile, parent,
                                               _("Configure custom headers"),
-                                              "CustomHeaders")
+                                              _T("CustomHeaders"))
 {
    // init member data
    // ----------------
@@ -837,7 +837,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    m_btnEdit->SetConstraints(c);
 
    // now the listctrl
-   m_listctrl = new wxPListCtrl("HeaderEditList", this, -1,
+   m_listctrl = new wxPListCtrl(_T("HeaderEditList"), this, -1,
                                 wxDefaultPosition, wxDefaultSize,
                                 wxLC_REPORT | wxBORDER_SUNKEN);
    c = new wxLayoutConstraints;
@@ -851,11 +851,11 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    // -----------------------
 
    // create the imagelist
-   static const char *iconNames[] =
+   static const wxChar *iconNames[] =
    {
-      "image_news",
-      "image_mail",
-      "image_both"
+      _T("image_news"),
+      _T("image_mail"),
+      _T("image_both")
    };
 
    wxIconManager *iconmanager = mApplication->GetIconManager();
@@ -1189,7 +1189,7 @@ bool ConfigureCustomHeader(Profile *profile,
       path.clear();
       path << CUSTOM_HEADERS_PREFIX << gs_customHeaderSubgroups[type];
       wxArrayString
-         headerNames = strutil_restore_array(profile->readEntry(path, ""));
+         headerNames = strutil_restore_array(profile->readEntry(path, _T("")));
       if ( headerNames.Index(*headerName) == wxNOT_FOUND )
       {
          headerNames.Add(*headerName);
@@ -1239,7 +1239,7 @@ size_t GetCustomHeaders(Profile *profile,
 
       // get the names of custom headers for this type
       String hdrs
-          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], "");
+          = profile->readEntry(pathBase + gs_customHeaderSubgroups[type], _T(""));
 
       // if we have any ...
       if ( !hdrs.empty() )
@@ -1256,7 +1256,7 @@ size_t GetCustomHeaders(Profile *profile,
                  << ':' << gs_customHeaderSubgroups[type];
 
             names->Add(name);
-            values->Add(profile->readEntry(path, ""));
+            values->Add(profile->readEntry(path, _T("")));
             if ( types )
                types->Add(type);
          }

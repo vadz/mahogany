@@ -99,7 +99,7 @@ public:
       // user wants to rename this folder to folderNewName, return TRUE if ok
    virtual bool OnRename(MFolder *folder,
                          const String& folderNewName,
-                         const String& mboxNewName = "");
+                         const String& mboxNewName = _T(""));
       // user wants to move this folder to a new parent, return TRUE if ok
    virtual bool OnMove(MFolder *folder,
                        MFolder *newParent);

@@ -376,7 +376,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
                if( m_StatusBar && m_StatusFieldLabel != -1 &&
                    s_hasPutMessageInStatusBar )
                {
-                  m_StatusBar->SetStatusText("", m_StatusFieldLabel);
+                  m_StatusBar->SetStatusText(_T(""), m_StatusFieldLabel);
                }
             }
          }
@@ -631,7 +631,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             Copy(WXLO_COPY_FORMAT, FALSE);
             break;
          case 's': // search
-            Find("");
+            Find(_T(""));
             break;
          case 't': // search again
             FindAgain();
@@ -680,7 +680,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   }
                   break;
                case 's': // search
-                  Find("");
+                  Find(_T(""));
                   break;
                case 't': // search again
                   FindAgain();
@@ -797,7 +797,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                         && m_llist->GetCursorPos().x > m_WrapMargin
                         && isspace(keyCode))
                         m_llist->WrapLine(m_WrapMargin);
-                     m_llist->Insert((char)keyCode);
+                     m_llist->Insert((wxChar)keyCode);
                      SetDirty();
                   }
                   else

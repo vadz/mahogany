@@ -158,9 +158,9 @@ void wxFileBrowseButton::DoBrowse()
    if ( m_existingOnly )
       style |= wxFILE_MUST_EXIST;
 
-   wxFileDialog dialog(this, "",
+   wxFileDialog dialog(this, _T(""),
                        strLastDir, strLastFile,
-                       _(wxALL_FILES),
+                       wxGetTranslation(wxALL_FILES),
                        style);
 
    if ( dialog.ShowModal() == wxID_OK )
@@ -405,7 +405,7 @@ String wxFontBrowseButton::FontDescFromUser(const String& user)
    String desc;
    if ( !user.empty() )
    {
-      desc = "0;";
+      desc = _T("0;");
    }
 
    desc += user;
@@ -593,7 +593,7 @@ wxIconSelectionDialog::wxIconSelectionDialog(wxWindow *parent,
                                              const wxString& title,
                                              const BitmapArray& icons,
                                              int selection)
-                     : wxManuallyLaidOutDialog(parent, title, "IconSelect")
+                     : wxManuallyLaidOutDialog(parent, title, _T("IconSelect"))
 {
    // layout the controls
    // -------------------

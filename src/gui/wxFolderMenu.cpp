@@ -187,7 +187,7 @@ void wxFolderMenuData::AddSubFoldersToMenu(wxString& folderName,
 void wxFolderMenuData::CreateMenu()
 {
    // get the root folder
-   MFolder_obj folder("");
+   MFolder_obj folder(_T(""));
 
    // and add all of its children to the menu recursively
    m_menu = new wxMenu;

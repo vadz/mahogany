@@ -31,10 +31,10 @@ class WXDLLEXPORT wxWindow;
 // ----------------------------------------------------------------------------
 
 // the importer interface name
-#define M_IMPORTER_INTERFACE "Importer"
+#define M_IMPORTER_INTERFACE _T("Importer")
 
 // the name of the property containing the name of the program we work with
-#define M_IMPORTER_PROG_NAME "progname"
+#define M_IMPORTER_PROG_NAME _T("progname")
 
 // ----------------------------------------------------------------------------
 // MImporter: class for importing everything

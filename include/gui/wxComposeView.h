@@ -94,14 +94,14 @@ public:
    // implement Composer pure virtuals
    virtual void InitText(Message *msg = NULL, const MessageView *msgview = NULL);
    virtual void Launch();
-   virtual void InsertFile(const char *filename = NULL,
-                           const char *mimetype = NULL);
+   virtual void InsertFile(const wxChar *filename = NULL,
+                           const wxChar *mimetype = NULL);
 
    virtual void InsertData(void *data,
                            size_t length,
-                           const char *mimetype = NULL,
-                           const char *name     = NULL,
-                           const char *filename = NULL);
+                           const wxChar *mimetype = NULL,
+                           const wxChar *name     = NULL,
+                           const wxChar *filename = NULL);
 
    virtual void InsertText(const String &txt);
 
@@ -270,7 +270,7 @@ protected:
    void DoInitText(Message *msgOrig = NULL);
 
    /// InsertData() and InsertFile() helper
-   void DoInsertAttachment(EditorContentPart *mc, const char *mimetype);
+   void DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype);
 
    /// set encoding to use
    void SetEncoding(wxFontEncoding encoding);

@@ -128,7 +128,7 @@ String ClickableAttachment::GetLabelFor(const MimePart *mimepart)
 {
    wxString label = mimepart->GetFilename();
    if ( !label.empty() )
-      label << " : ";
+      label << _T(" : ");
 
    MimeType type = mimepart->GetType();
    label << type.GetFull();
@@ -136,7 +136,7 @@ String ClickableAttachment::GetLabelFor(const MimePart *mimepart)
    // multipart always have size of 0, don't show
    if ( type.GetPrimary() != MimeType::MULTIPART )
    {
-      label << ", ";
+      label << _T(", ");
 
       size_t lines;
       if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) != 0 )
@@ -151,7 +151,7 @@ String ClickableAttachment::GetLabelFor(const MimePart *mimepart)
 
 #ifdef DEBUG
    // show the part spec in debug build
-   label << " (" << mimepart->GetPartSpec() << ')';
+   label << _T(" (") << mimepart->GetPartSpec() << _T(')');
 #endif // DEBUG
 
    return label;

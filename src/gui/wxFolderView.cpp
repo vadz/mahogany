@@ -213,7 +213,7 @@ enum
    WXMENU_FVIEW_POPUP_END
 };
 
-static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
+static const wxChar *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 {
    gettext_noop("Status"),
    gettext_noop("Date"),
@@ -225,16 +225,16 @@ static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 
 // the app profile key where the last column widths modified by user are
 // stored
-#define USER_COLUMNS_WIDTHS "UserColWidths"
+#define USER_COLUMNS_WIDTHS _T("UserColWidths")
 
 // the profile key where the columns widths of this folder are stored
-#define FOLDER_LISTCTRL_WIDTHS "FolderListCtrl"
+#define FOLDER_LISTCTRL_WIDTHS _T("FolderListCtrl")
 
 // the profile key telling us to use the default widths for this folder
-#define FOLDER_IGNORE_WIDTHS  "FolderDefWidths"
+#define FOLDER_IGNORE_WIDTHS  _T("FolderDefWidths")
 
 // the separator in column widths string
-#define COLUMNS_WIDTHS_SEP ':'
+#define COLUMNS_WIDTHS_SEP _T(':')
 
 // the default widths for the columns: the number of entries must be equal to
 // WXFLC_NUMENTRIES and they must be separated by COLUMNS_WIDTHS_SEP
@@ -242,14 +242,14 @@ static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 // note that the order here is the same as the order of WXFLC_XXX constants,
 // and not the appearance order, i.e. the default width of the subject field is
 // 300, not 80 (even if it appears second by default)
-static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:80:80:200:300:40";
+static const wxChar *FOLDER_LISTCTRL_WIDTHS_D = _T("60:80:80:200:300:40");
 
 
 // the trace mask for selection/focus handling
-#define M_TRACE_FV_SELECTION "msgsel"
+#define M_TRACE_FV_SELECTION _T("msgsel")
 
 // the trace mask folder view events handling tracing
-#define M_TRACE_FV_UPDATE    "fvupdate"
+#define M_TRACE_FV_UPDATE    _T("fvupdate")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -284,16 +284,16 @@ public:
          return false;
 
       String name = Name.Lower();
-      if ( name == "from" )
+      if ( name == _T("from") )
          *value = m_hi->GetFrom();
-      else if ( name == "subject" )
+      else if ( name == _T("subject") )
          *value = m_hi->GetSubject();
-      else if ( name == "date" )
+      else if ( name == _T("date") )
          *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
-      else if ( name == "size" )
+      else if ( name == _T("size") )
          *value = SizeToString(m_hi->GetSize());
 #ifdef USE_HEADER_SCORE
-      else if ( name == "score" )
+      else if ( name == _T("score") )
          *value = m_hi->GetScore();
 #endif // USE_HEADER_SCORE
       else
@@ -829,7 +829,7 @@ class wxFolderSplitterWindow : public wxPSplitterWindow
 {
 public:
    wxFolderSplitterWindow(wxWindow *parent)
-      : wxPSplitterWindow("FolderSplit", parent, -1,
+      : wxPSplitterWindow(_T("FolderSplit"), parent, -1,
                           wxDefaultPosition, parent->GetClientSize(),
                           wxSP_3D | wxSP_BORDER)
    {
@@ -882,7 +882,7 @@ static void WriteColumnsInfo(Profile *profile, const int columns[WXFLC_NUMENTRIE
 // return the name of the n-th columns
 static inline wxString GetColumnName(size_t n)
 {
-   return _(wxFLC_ColumnNames[n]);
+   return wxGetTranslation(wxFLC_ColumnNames[n]);
 }
 
 // return the columns index from name
@@ -1876,7 +1876,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
    // threading
    menu.AppendSeparator();
-   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), "", TRUE);
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), _T(""), TRUE);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    // add column-specific entries
@@ -1889,8 +1889,8 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_FROM:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), "", TRUE);
-         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), _T(""), TRUE);
+         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), _T(""), TRUE);
 
          if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
          {
@@ -1905,11 +1905,11 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 
       case WXFLC_SIZE:
          menu.AppendSeparator();
-         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), "", wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), "", wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), "", wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), "", wxITEM_RADIO);
-         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), "", wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), _T(""), wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), _T(""), wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), _T(""), wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), _T(""), wxITEM_RADIO);
+         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), _T(""), wxITEM_RADIO);
 
          {
             // we rely on the fact the SIZE_XXX menu items are in the same
@@ -2561,7 +2561,7 @@ String wxFolderListCtrl::GetWidths() const
          str << COLUMNS_WIDTHS_SEP;
 
       if ( m_columns[col] == -1 )
-         str << "-1";
+         str << _T("-1");
       else
          str << GetColumnWidth(m_columns[col]);
    }
@@ -2616,7 +2616,7 @@ void wxFolderListCtrl::SetSortOrder(Profile *profile,
 {
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
                GetColumnName(col).Lower().c_str(),
-               reverse ? _(" (reverse)") : "");
+               reverse ? _(" (reverse)") : _T(""));
 
    profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
 
@@ -3733,7 +3733,7 @@ wxFolderView::Update()
 
    m_nDeleted = UID_ILLEGAL;
 
-   UpdateTitleAndStatusBars("", "", m_Frame, mf);
+   UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
 }
 
 void
@@ -4110,7 +4110,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
             String key = GetPersMsgBoxName(M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL);
             if ( !wxPMessageBoxIsDisabled(key) &&
                   !wxPMessageBoxIsDisabled(
-                     Profile::FilterProfileName(m_fullname) + '/' + key) )
+                     Profile::FilterProfileName(m_fullname) + _T('/') + key) )
             {
                // flush the error messages from the MailFolder::Open() before
                // showing the dialog
@@ -4270,8 +4270,8 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
                 Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
                 View, Group reply (== followup), List reply, Next match
             */
-            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
-            static const char *keycodes = _(keycodes_en);
+            static const wxChar keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
+            static const wxChar *keycodes = wxGetTranslation(keycodes_en);
 
             long keyOrig = key;
             key = toupper(key);
@@ -4960,7 +4960,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    // we don't have any deleted messages any more
    m_nDeleted = 0;
 
-   UpdateTitleAndStatusBars("", "", m_Frame, mf);
+   UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
 }
 
 // this function gets called when new mail appears in the folder
@@ -5041,7 +5041,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
       }
 
       // update the number of unread messages showin in the title/status bars
-      UpdateTitleAndStatusBars("", "", m_Frame, mf);
+      UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
    }
 }
 
@@ -5075,7 +5075,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   MFolder_obj folder(m_folderName);
 
                   String to;
-                  (void)msg->GetHeaderLine("To", to);
+                  (void)msg->GetHeaderLine(_T("To"), to);
 
                   if ( CreateQuickFilter(folder,
                                          msg->From(), msg->Subject(), to,
@@ -5459,12 +5459,12 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
          if ( columns[n] == -1 )
          {
             // hidden column
-            strWidthsNew.Add("-1");
+            strWidthsNew.Add(_T("-1"));
             strWidthsDefNew.Add(strWidthsStandard[n]);
          }
          else // shown column
          {
-            String s = String::Format("%u", widths[columns[n]]);
+            String s = String::Format(_T("%u"), widths[columns[n]]);
             strWidthsNew.Add(s);
             strWidthsDefNew.Add(s);
 

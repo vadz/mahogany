@@ -69,7 +69,7 @@ extern const MOption MP_TMPGFXFORMAT;
 // constants
 // ----------------------------------------------------------------------------
 
-static const char *wxTraceIconLoading = "iconload";
+static const wxChar *wxTraceIconLoading = _T("iconload");
 
 /** @name built-in icon names */
 //@{
@@ -90,12 +90,12 @@ static const char *wxTraceIconLoading = "iconload";
 // ----------------------------------------------------------------------------
 
 /// the path where the last icon was found
-wxString wxIconManager::ms_IconPath = "";
+wxString wxIconManager::ms_IconPath = _T("");
 
 /// valid filename extensions for icon files
-static const char *wxIconManagerFileExtensions[] =
+static const wxChar *wxIconManagerFileExtensions[] =
 {
-   ".xpm", ".png", ".bmp", ".jpg",".gif",".pcx",".pnm", NULL
+   _T(".xpm"), _T(".png"), _T(".bmp"), _T(".jpg"), _T(".gif"), _T(".pcx"), _T(".pnm"), NULL
 };
 
 /// how many image handlers do we have
@@ -121,13 +121,13 @@ long wxIconManager::m_wxBitmapHandlers[] =
    -1
 };
 
-static const char *HandlerNames[]    =
+static const wxChar *HandlerNames[]    =
 {
-   "xpm", "png", "bmp", "jpg",
-   "gif",
-   "pnm", "pcx",
-   "tif",
-   "any", "cur", "ico"
+   _T("xpm"), _T("png"), _T("bmp"), _T("jpg"),
+   _T("gif"),
+   _T("pnm"), _T("pcx"),
+   _T("tif"),
+   _T("any"), _T("cur"), _T("ico")
 };
 
 // ----------------------------------------------------------------------------
@@ -198,7 +198,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          wxLogInfo(_("Unsupported intermediary image format '%s' specified,\n"
                      "reset to '%s'."),
                    ((format < 0 || format >NUMBER_OF_FORMATS) ?
-                    "unknown":HandlerNames[format]),
+                    _T("unknown") : HandlerNames[format]),
                    HandlerNames[0]);
          format = 0;
          mApplication->GetProfile()->writeEntry(MP_TMPGFXFORMAT,format);
@@ -210,14 +210,14 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          i--;
       tempfile.assign(tempfile,i+1,tempfile.length()-1-i);
       tempfile = String(
-         (getenv("TMP") && strlen(getenv("TMP")))
-         ? getenv("TMP"):"/tmp"
-         ) + String('/') + tempfile;
+         (wxGetenv(_T("TMP")) && wxStrlen(wxGetenv(_T("TMP"))))
+         ? wxGetenv(_T("TMP")) : _T("/tmp")
+         ) + _T('/') + tempfile;
       if(wxFile::Exists(filename))
       {
          String strConvertProgram = READ_APPCONFIG(MP_CONVERTPROGRAM);
          String strFormatSpec = strutil_extract_formatspec(strConvertProgram);
-         if ( strFormatSpec != "ss" )
+         if ( strFormatSpec != _T("ss") )
          {
             wxLogError(_("The setting for image conversion program should include "
                          "exactly two '%%s' format specificators.\n"
@@ -231,7 +231,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          wxLogTrace(wxTraceIconLoading,
                     _T("wxIconManager::LoadImage() calling '%s'..."),
                     command.c_str());
-         if(system(command) == 0)
+         if(wxSystem(command) == 0)
          {
             if(pdlg)
             {
@@ -305,27 +305,27 @@ wxIconManager::LoadImageXpm(String filename)
               filename.c_str());
 
    // lets convert to xpm using image magick:
-   if(! wxMatchWild("*.xpm",filename,FALSE))
+   if(! wxMatchWild(_T("*.xpm"),filename,FALSE))
    {
 #ifdef OS_UNIX
       int i;
-      tempfile = filename + ".xpm";
+      tempfile = filename + _T(".xpm");
       // strip leading path
       i = tempfile.length();
       while(i && tempfile.c_str()[i] != '/')
          i--;
       tempfile.assign(tempfile,i+1,tempfile.length()-1-i);
       tempfile = String(
-         (getenv("TMP") && strlen(getenv("TMP")))
-         ? getenv("TMP"):"/tmp"
-         ) + String('/') + tempfile;
+         (wxGetenv(_T("TMP")) && wxStrlen(wxGetenv(_T("TMP"))))
+         ? wxGetenv(_T("TMP")) : _T("/tmp")
+         ) + _T('/') + tempfile;
       String command;
       command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM),
                      filename.c_str(), tempfile.c_str());
       wxLogTrace(wxTraceIconLoading,
                  _T("wxIconManager::LoadImage() calling '%s'..."),
                  command.c_str());
-      if(system(command) == 0)
+      if(wxSystem(command) == 0)
          cpptr = LoadXpm(tempfile);
 #endif // OS_UNIX
    }
@@ -349,7 +349,7 @@ wxIconManager::LoadXpm(String filename)
    ASSERT(cpptr);
    bool found_xpm = false;
 
-   ifstream in(filename);
+   ifstream in(filename.fn_str());
    if(in)
    {
       String str;
@@ -363,7 +363,7 @@ wxIconManager::LoadXpm(String filename)
             ASSERT(cpptr);
          }
          strutil_getstrline(in,str);
-         if(line == 0 && strstr(str.c_str(),"/* XPM */")) // check whether
+         if(line == 0 && wxStrstr(str.c_str(), _T("/* XPM */"))) // check whether
             // it's an xpm file
             found_xpm = true;
          if(line > 0 && ! found_xpm)
@@ -421,10 +421,10 @@ wxIconManager::wxIconManager(wxString sub_dir)
 {
    m_iconList = new IconDataList;
 
-   m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << "icons";
-   m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << "icons";
+   m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << _T("icons");
+   m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << _T("icons");
 
-   if(sub_dir == "default" || sub_dir == _("default"))
+   if(sub_dir == _T("default") || sub_dir == _("default"))
       sub_dir.clear();
    SetSubDirectory(sub_dir);
 
@@ -475,8 +475,8 @@ wxIconManager::SetSubDirectory(wxString subDir)
 #endif // 0
 
       // frame icons
-      AddIcon("MFrame", MFrame_xpm);
-      AddIcon("MainFrame", MainFrame_xpm);
+      AddIcon(_T("MFrame"), MFrame_xpm);
+      AddIcon(_T("MainFrame"), MainFrame_xpm);
    }
 }
 
@@ -507,7 +507,7 @@ bool wxIconManager::FindInCache(const String& iconName, wxIcon *icon) const
    IconDataList::iterator i;
    for ( i = m_iconList->begin(); i != m_iconList->end(); i++ )
    {
-      if (strcmp((*i)->iconName.c_str(), iconName.c_str()) == 0 )
+      if (wxStrcmp((*i)->iconName.c_str(), iconName.c_str()) == 0 )
       {
          wxLogTrace(wxTraceIconLoading, _T("... icon was in the cache."));
          *icon = (*i)->iconRef;
@@ -622,7 +622,7 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
 #ifdef OS_UNIX
    // Then, try the extension with GNOME first:
    if(ext.Length() > 0 )
-      icon = GetIcon("file-dot-"+ext);
+      icon = GetIcon(_T("file-dot-") + ext);
 
    wxArrayString exts;
    if ( icon == m_unknownIcon )
@@ -650,7 +650,7 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
    for ( size_t i = 0; i < exts.Count(); i++ )
    {
       /// try the gnome style filenames "file-dot-wav.xpm"
-      icon = GetIcon("file-dot-"+exts[i]);
+      icon = GetIcon(_T("file-dot-") + exts[i]);
       if(icon != m_unknownIcon)
          return icon;
    }

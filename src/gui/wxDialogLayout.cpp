@@ -185,7 +185,7 @@ static void SetTopConstraint(wxWindow *parent,
 }
 
 wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
-                                const char *label,
+                                const wxChar *label,
                                 long widthMax,
                                 wxControl *last,
                                 wxCoord nRightMargin,
@@ -210,7 +210,7 @@ wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(parent, wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxTextCtrl *pText = new wxTextCtrl(parent, -1, "", wxDefaultPosition,
+   wxTextCtrl *pText = new wxTextCtrl(parent, -1, _T(""), wxDefaultPosition,
                                       wxDefaultSize, style);
    pText->SetConstraints(c);
 
@@ -218,7 +218,7 @@ wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
 }
 
 wxRadioBox *CreateRadioBox(wxWindow *parent,
-                           const char *labelFull,
+                           const wxChar *labelFull,
                            long widthMax,
                            wxControl *last,
                            wxCoord nRightMargin)
@@ -247,7 +247,7 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
    //       the options dialog, then only the first choice ("No" for the action
    //       choice) means that they should be disabled but this is really just
    //       a dirty hack
-   wxRadioBox *radiobox = new wxRadioBox(parent, -1, "",
+   wxRadioBox *radiobox = new wxRadioBox(parent, -1, _T(""),
                                          wxDefaultPosition, wxDefaultSize,
                                          choices.GetCount(), strings,
                                          1, wxRA_SPECIFY_ROWS);
@@ -277,7 +277,7 @@ wxRadioBox *CreateRadioBox(wxWindow *parent,
 
 wxTextCtrl *
 CreateEntryWithButton(wxWindow *parent,
-                      const char *label,
+                      const wxChar *label,
                       long widthMax,
                       wxControl *last,
                       wxCoord nRightMargin,
@@ -348,7 +348,7 @@ CreateEntryWithButton(wxWindow *parent,
 
 wxTextCtrl *
 CreateFileEntry(wxWindow *parent,
-                const char *label,
+                const wxChar *label,
                 long widthMax,
                 wxControl *last,
                 wxCoord nRightMargin,
@@ -439,7 +439,7 @@ void wxOptionsPageSubdialog::OnChange(wxEvent&)
 
 wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
                                            wxWindow *parent,
-                                           const char *aszImages[])
+                                           const wxChar *aszImages[])
                     : wxPNotebook(configPath, parent, -1)
 {
    // assume that if the user doesn't want to see the images in the toolbar, he
@@ -576,7 +576,7 @@ void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
 
 // create a text entry with some browse button
 wxTextCtrl *
-wxEnhancedPanel::CreateEntryWithButton(const char *label,
+wxEnhancedPanel::CreateEntryWithButton(const wxChar *label,
                                        long widthMax,
                                        wxControl *last,
                                        BtnKind kind,
@@ -588,7 +588,7 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
 
 // create a static bitmap with a label and position them and the browse button
 // passed to us
-wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const char *label,
+wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const wxChar *label,
                                                     long widthMax,
                                                     wxControl *last,
                                                     wxIconBrowseButton *btnIcon)
@@ -634,7 +634,7 @@ wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const char *label,
 }
 
 // create a single-line text control with a label
-wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
+wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const wxChar *label,
                                                  long widthMax,
                                                  wxControl *last,
                                                  wxCoord nRightMargin,
@@ -645,7 +645,7 @@ wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
 }
 
 // create just some text
-wxStaticText *wxEnhancedPanel::CreateMessage(const char *label,
+wxStaticText *wxEnhancedPanel::CreateMessage(const wxChar *label,
                                                 wxControl *last)
 {
    wxLayoutConstraints *c;
@@ -679,7 +679,7 @@ wxButton *wxEnhancedPanel::CreateButton(const wxString& labelAndId,
    wxString label(labelAndId.BeforeFirst(':')),
             strId(labelAndId.AfterFirst(':'));
    int id;
-   if ( !strId || !sscanf(strId, "%d", &id) )
+   if ( !strId || !wxSscanf(strId, _T("%d"), &id) )
       id = -1;
 
    wxButton *btn = new wxButton(GetCanvas(), id, label);
@@ -701,14 +701,14 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
    wxString label(labelAndId.BeforeFirst(':')),
             strId(labelAndId.AfterFirst(':'));
    int id;
-   if ( !strId || !sscanf(strId, "%d", &id) )
+   if ( !strId || !wxSscanf(strId, _T("%d"), &id) )
       id = -1;
 
    wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
 
-   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, wxString(""));
+   wxXFaceButton *btn = new wxXFaceButton(GetCanvas(), id, _T(""));
 
    // for the label
    c = new wxLayoutConstraints;
@@ -729,7 +729,7 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
 }
 
 // create a checkbox
-wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
+wxCheckBox *wxEnhancedPanel::CreateCheckBox(const wxChar *label,
                                               long widthMax,
                                               wxControl *last)
 {
@@ -757,7 +757,7 @@ wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
 
 // create a radiobox control with 3 choices and a label for it
 wxRadioBox *
-wxEnhancedPanel::CreateActionChoice(const char *label,
+wxEnhancedPanel::CreateActionChoice(const wxChar *label,
                                     long widthMax,
                                     wxControl *last,
                                     wxCoord nRightMargin)
@@ -770,7 +770,7 @@ wxEnhancedPanel::CreateActionChoice(const char *label,
 
 // create a generic radiobox control
 wxRadioBox *
-wxEnhancedPanel::CreateRadioBox(const char *label,
+wxEnhancedPanel::CreateRadioBox(const wxChar *label,
                                 long widthMax,
                                 wxControl *last,
                                 wxCoord nRightMargin)
@@ -780,7 +780,7 @@ wxEnhancedPanel::CreateRadioBox(const char *label,
 
 // create a combobox
 wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
-                                                   const char *labelFull,
+                                                   const wxChar *labelFull,
                                                    long widthMax,
                                                    wxControl *last,
                                                    wxCoord nRightMargin)
@@ -814,7 +814,7 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    wxControl *combobox;
    if ( createCombobox )
    {
-      combobox = new wxComboBox(GetCanvas(), -1, "",
+      combobox = new wxComboBox(GetCanvas(), -1, _T(""),
                                 wxDefaultPosition, wxDefaultSize,
                                 choices.GetCount(), strings,
                                 wxCB_DROPDOWN | wxCB_READONLY);
@@ -833,7 +833,7 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    return combobox;
 }
 
-wxColorBrowseButton *wxEnhancedPanel::CreateColorEntry(const char *label,
+wxColorBrowseButton *wxEnhancedPanel::CreateColorEntry(const wxChar *label,
                                                        long widthMax,
                                                        wxControl *last)
 {
@@ -846,7 +846,7 @@ wxColorBrowseButton *wxEnhancedPanel::CreateColorEntry(const char *label,
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxEnhancedPanel::CreateListbox(const char *label, wxControl *last)
+wxListBox *wxEnhancedPanel::CreateListbox(const wxChar *label, wxControl *last)
 {
    // a box around all this stuff
    wxStaticBox *box = new wxStaticBox(GetCanvas(), -1, label);
@@ -861,7 +861,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label, wxControl *last)
 
    // the buttons vertically on the right of listbox (note that the labels
    // correspond to the order of wxOptionsPage_BtnXXX enum)
-   static const char *aszLabels[] =
+   static const wxChar *aszLabels[] =
    {
       gettext_noop("&Add..."),
       gettext_noop("&Modify..."),
@@ -872,7 +872,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label, wxControl *last)
    wxArrayString labels;
    size_t nBtn;
    for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
-      labels.Add(_(aszLabels[nBtn]));
+      labels.Add(wxGetTranslation(aszLabels[nBtn]));
    }
 
    long widthMax = GetMaxLabelWidth(labels, this);
@@ -1050,7 +1050,7 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
                        : wxPDialog(
                                    profileKey,
                                    parent,
-                                   wxString("Mahogany: ") + title,
+                                   _T("Mahogany: ") + title,
                                    DIALOG_STYLE
                                   )
 {
@@ -1228,7 +1228,7 @@ void wxOptionsEditDialog::CreateAllControls()
 #ifdef DEBUG
    // this makes wxWin debug messages about unsatisfied constraints a bit more
    // informative
-   panel->SetName("MainNbookDlgPanel");
+   panel->SetName(_T("MainNbookDlgPanel"));
 #endif
 
    panel->SetAutoLayout(TRUE);
@@ -1531,7 +1531,7 @@ bool wxOptionsEditDialog::OnSettingsChange()
       MDialog_Message(_("Some of the changes to the program options will\n"
                         "only take effect when the progam will be run the\n"
                         "next time and not during this session."),
-                      this, MDIALOG_MSGTITLE, "WarnRestartOpt");
+                      this, MDIALOG_MSGTITLE, _T("WarnRestartOpt"));
       m_bRestartWarning = FALSE;
    }
 

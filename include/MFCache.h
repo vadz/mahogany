@@ -30,7 +30,7 @@ WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 
 // trace mask for logging MfStatusCache methods and other mailfolder
 // status-related activity
-#define M_TRACE_MFSTATUS "mfstatus"
+#define M_TRACE_MFSTATUS _T("mfstatus")
 
 // ----------------------------------------------------------------------------
 // MfStatusCache: this class caches MailFolderStatus info for each folder,

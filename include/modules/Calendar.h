@@ -25,6 +25,6 @@ public:
    virtual bool ScheduleMessage(class Message *msg) = 0;
 };
 
-#define MMODULE_INTERFACE_CALENDAR   "Calendar"
+#define MMODULE_INTERFACE_CALENDAR   _T("Calendar")
 
 #endif // CALENDARMODULE_H

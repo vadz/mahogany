@@ -502,7 +502,7 @@ private:
 
          if ( isRoot )
          {
-            Append(ShowHidden, _("Show &hidden folders"), "", true);
+            Append(ShowHidden, _("Show &hidden folders"), _T(""), true);
          }
 
          Append(Properties, _("&Properties"));
@@ -908,7 +908,7 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
    }
    else
    {
-      m_tree->SetOpenFolderName("");
+      m_tree->SetOpenFolderName(_T(""));
    }
 }
 
@@ -1565,8 +1565,8 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 
 #ifdef USE_UTF8
 
-//Folder names (IMAP, but can be used for local mailboxes also) may contain
-//characters encoded in "modified-UTF7" (RFC 2060)
+// Folder names (IMAP, but can be used for local mailboxes also) may contain
+// characters encoded in "modified-UTF7" (RFC 2060)
 
 wxString wxFolderTreeNode::GetName() const
 {
@@ -1591,9 +1591,9 @@ wxString wxFolderTreeNode::GetName() const
       }
 
       // validate IMAP modified UTF-7
-      if (s == '&')
+      if (s == _T('&'))
       {
-         String nameutf7 = '+';
+         String nameutf7 = _T('+');
          size_t j = i;
          while ( ((s = nameOrig[++j]) != '-') && isValid )
          {
@@ -1618,7 +1618,7 @@ wxString wxFolderTreeNode::GetName() const
                default:    /* must be alphanumeric */
                   if (!isalnum (s))
                   {
-                     wxLogDebug(_T(_T("invalid modified UTF-7 name")));
+                     wxLogDebug(_T("invalid modified UTF-7 name"));
                      isValid = false;
                      break;
                   }
@@ -1641,7 +1641,7 @@ wxString wxFolderTreeNode::GetName() const
          //UTF-7 to UTF-8 using c-client function and then convert
          //UTF-8 to current environment's encoding.
 
-         nameutf7 << "-";
+         nameutf7 << _T("-");
 
          SIZEDTEXT *text7 = new SIZEDTEXT;
          SIZEDTEXT *text8 = new SIZEDTEXT;
@@ -1683,7 +1683,7 @@ wxString wxFolderTreeNode::GetName() const
 wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                    wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos, const wxSize& size)
-                : wxPTreeCtrl("FolderTree", parent, id, pos, size,
+                : wxPTreeCtrl(_T("FolderTree"), parent, id, pos, size,
                               wxTR_HAS_BUTTONS | wxTR_EDIT_LABELS)
 {
    // init member vars
@@ -1731,7 +1731,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 #endif // wxUSE_DRAG_AND_DROP
 
    // create the root item
-   MFolder *folderRoot = MFolder::Get("");
+   MFolder *folderRoot = MFolder::Get(_T(""));
    m_current = new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
@@ -2532,7 +2532,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    }
 
    m_selectedFolderName = m_current ? m_current->GetFolder()->GetFullName()
-                                    : wxString("");
+                                    : _T("");
 }
 
 bool wxFolderTreeImpl::OnDoubleClick()
@@ -2935,7 +2935,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
                      // CompareFoldersByTreePos() doesn't look at the folder
                      // names as they are always sorted when it is called from
                      // OnTreeExpanding() but we should do it specially here
-                     rc = strcmp(folder->GetName(), folder2->GetName());
+                     rc = wxStrcmp(folder->GetName(), folder2->GetName());
                   }
 
                   if ( rc < 0 )
@@ -3239,31 +3239,31 @@ size_t GetNumberOfFolderIcons()
 
 String GetFolderIconName(size_t n)
 {
-   static const char *aszImages[] =
+   static const wxChar *aszImages[] =
    {
       // should be in sync with the corresponding enum (FolderIcon)!
-      "folder_inbox",
-      "folder_file",
-      "folder_file",
-      "folder_pop",
-      "folder_imap",
-      "folder_nntp",
-      "folder_news",
-      "folder_root",
-      "folder_group",
-      "folder_nntp",
-      "folder_imap",
-      "folder_newmail",
-      "folder_sentmail",
-      "folder_palmpilot",
-      "folder_outbox",
-      "folder_trash"
+      _T("folder_inbox"),
+      _T("folder_file"),
+      _T("folder_file"),
+      _T("folder_pop"),
+      _T("folder_imap"),
+      _T("folder_nntp"),
+      _T("folder_news"),
+      _T("folder_root"),
+      _T("folder_group"),
+      _T("folder_nntp"),
+      _T("folder_imap"),
+      _T("folder_newmail"),
+      _T("folder_sentmail"),
+      _T("folder_palmpilot"),
+      _T("folder_outbox"),
+      _T("folder_trash")
    };
 
    ASSERT_MSG( wxFolderTree::iconFolderMax == WXSIZEOF(aszImages),
                _T("bad number of icon names") );
 
-   CHECK( n < WXSIZEOF(aszImages), "", _T("invalid icon index") );
+   CHECK( n < WXSIZEOF(aszImages), _T(""), _T("invalid icon index") );
 
    return aszImages[n];
 }

@@ -150,21 +150,21 @@ extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 // ----------------------------------------------------------------------------
 
 // the header used to indicate that a message is our draft
-#define HEADER_IS_DRAFT "X-M-Draft"
+#define HEADER_IS_DRAFT _T("X-M-Draft")
 
 // the header used for storing the composer geometry
-#define HEADER_GEOMETRY "X-M-Geometry"
+#define HEADER_GEOMETRY _T("X-M-Geometry")
 
 // the possible values for HEADER_GEOMETRY
-#define GEOMETRY_ICONIZED "I"
-#define GEOMETRY_MAXIMIZED "M"
-#define GEOMETRY_FORMAT "%dx%d-%dx%d"
+#define GEOMETRY_ICONIZED _T("I")
+#define GEOMETRY_MAXIMIZED _T("M")
+#define GEOMETRY_FORMAT _T("%dx%d-%dx%d")
 
 // the composer frame title
 #define COMPOSER_TITLE _("Message Composition")
 
 // separate multiple addresses with commas
-#define CANONIC_ADDRESS_SEPARATOR   ", "
+#define CANONIC_ADDRESS_SEPARATOR   _T(", ")
 
 // code here was written with assumption that x and y margins are the same
 #define LAYOUT_MARGIN LAYOUT_X_MARGIN
@@ -194,7 +194,7 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
    if ( (fileType == NULL) || !fileType->GetMimeType(&strMimeType) )
    {
       // can't find MIME type from file extension, set some default one
-      strMimeType = "APPLICATION/OCTET-STREAM";
+      strMimeType = _T("APPLICATION/OCTET-STREAM");
    }
 
    delete fileType;  // may be NULL, ok
@@ -203,7 +203,7 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
 }
 
 // return a transparent bitmap
-static wxBitmap GetTransparentBitmap(const char *name)
+static wxBitmap GetTransparentBitmap(const wxChar *name)
 {
    wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(name);
 
@@ -532,7 +532,7 @@ public:
    wxRcptExpandButton(wxRcptControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
-                       GetTransparentBitmap("tb_lookup"),
+                       GetTransparentBitmap(_T("tb_lookup")),
                        wxDefaultPosition,
                        wxDefaultSize,
                        wxBORDER_NONE)
@@ -561,7 +561,7 @@ public:
    wxRcptAddButton(wxRcptMainControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
-                       GetTransparentBitmap("tb_new"),
+                       GetTransparentBitmap(_T("tb_new")),
                        wxDefaultPosition,
                        wxDefaultSize,
                        wxBORDER_NONE)
@@ -593,7 +593,7 @@ public:
    wxRcptRemoveButton(wxRcptExtraControl *rcptControl, wxWindow *parent)
       : wxBitmapButton(parent,
                        -1,
-                       GetTransparentBitmap("tb_trash"),
+                       GetTransparentBitmap(_T("tb_trash")),
                        wxDefaultPosition,
                        wxDefaultSize,
                        wxBORDER_NONE)
@@ -793,8 +793,8 @@ void ComposerOptions::Read(Profile *profile)
    CHECK_RET( profile, _T("NULL profile in Composer::Options::Read") );
 
    // colours
-   GetColourByName(&m_fg, READ_CONFIG(profile, MP_CVIEW_FGCOLOUR), "black");
-   GetColourByName(&m_bg, READ_CONFIG(profile, MP_CVIEW_BGCOLOUR), "white");
+   GetColourByName(&m_fg, READ_CONFIG(profile, MP_CVIEW_FGCOLOUR), _T("black"));
+   GetColourByName(&m_bg, READ_CONFIG(profile, MP_CVIEW_BGCOLOUR), _T("white"));
 
    // font
    m_font = READ_CONFIG_TEXT(profile, MP_CVIEW_FONT_DESC);
@@ -844,8 +844,8 @@ void EditorContentPart::SetMimeType(const String& mimeType)
 
 void EditorContentPart::SetData(void *data,
                                 size_t length,
-                                const char *name,
-                                const char *filename)
+                                const wxChar *name,
+                                const wxChar *filename)
 {
    ASSERT_MSG( data != NULL, _T("NULL data is invalid in EditorContentPart::SetData!") );
 
@@ -865,7 +865,7 @@ void EditorContentPart::SetData(void *data,
       m_FileName = filename;
    }
 
-   SetDisposition("INLINE");
+   SetDisposition(_T("INLINE"));
 }
 
 void EditorContentPart::SetFile(const String& filename)
@@ -877,7 +877,7 @@ void EditorContentPart::SetFile(const String& filename)
    m_Type = Type_File;
 
    if ( m_Disposition.empty() )
-      SetDisposition("ATTACHMENT");
+      SetDisposition(_T("ATTACHMENT"));
 }
 
 void EditorContentPart::SetName(const String& name)
@@ -892,12 +892,12 @@ void EditorContentPart::SetDisposition(const String& disposition)
 
 void EditorContentPart::SetText(const String& text)
 {
-   SetMimeType("TEXT/PLAIN");
+   SetMimeType(_T("TEXT/PLAIN"));
 
    m_Type = Type_Text;
    m_Text = text;
 
-   SetDisposition("INLINE");
+   SetDisposition(_T("INLINE"));
 }
 
 EditorContentPart::~EditorContentPart()
@@ -1120,7 +1120,7 @@ void wxRcptMainControl::OnAdd()
    m_composeView->AddRecipients(GetText()->GetValue(), addrType);
 
    // clear the entry zone as recipient(s) were moved elsewhere
-   GetText()->SetValue("");
+   GetText()->SetValue(_T(""));
 }
 
 wxRcptMainControl::~wxRcptMainControl()
@@ -1173,7 +1173,7 @@ wxRcptTypeChoice::wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent)
    wxString addrTypes[WXSIZEOF(ms_addrTypes)];
    for ( size_t n = 0; n < WXSIZEOF(ms_addrTypes); n++ )
    {
-      addrTypes[n] = _(ms_addrTypes[n]);
+      addrTypes[n] = wxGetTranslation(ms_addrTypes[n]);
    }
 
    Create(parent, -1,
@@ -1346,7 +1346,7 @@ CreateComposeView(Profile *profile,
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView
                            (
-                              "ComposeViewNews",
+                              _T("ComposeViewNews"),
                               mode,
                               kind,
                               parent
@@ -1438,7 +1438,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
    // first, create the composer
 
    // create dummy params object as we need one for CreateNewMessage()
-   MailFolder::Params params("");
+   MailFolder::Params params(_T(""));
 
    wxComposeView *cv = (wxComposeView *)CreateNewMessage(params, profile);
 
@@ -1452,17 +1452,17 @@ Composer::EditMessage(Profile *profile, Message *msg)
    // first ignore those which are generated by the transport layer as it
    // doesn't make sense to generate them at all a MUA
    wxSortedArrayString ignoredHeaders;
-   ignoredHeaders.Add("RECEIVED");
-   ignoredHeaders.Add("RETURN-PATH");
-   ignoredHeaders.Add("DELIVERED-TO");
+   ignoredHeaders.Add(_T("RECEIVED"));
+   ignoredHeaders.Add(_T("RETURN-PATH"));
+   ignoredHeaders.Add(_T("DELIVERED-TO"));
 
    // second, ignore some headers which we always generate ourselves and don't
    // allow the user to override anyhow
-   ignoredHeaders.Add("MESSAGE-ID");
-   ignoredHeaders.Add("MIME-VERSION");
-   ignoredHeaders.Add("CONTENT-TYPE");
-   ignoredHeaders.Add("CONTENT-DISPOSITION");
-   ignoredHeaders.Add("CONTENT-TRANSFER-ENCODING");
+   ignoredHeaders.Add(_T("MESSAGE-ID"));
+   ignoredHeaders.Add(_T("MIME-VERSION"));
+   ignoredHeaders.Add(_T("CONTENT-TYPE"));
+   ignoredHeaders.Add(_T("CONTENT-DISPOSITION"));
+   ignoredHeaders.Add(_T("CONTENT-TRANSFER-ENCODING"));
 
    wxString nameWithCase, value;
    HeaderIterator hdrIter = msg->GetHeaderIterator();
@@ -1472,17 +1472,17 @@ Composer::EditMessage(Profile *profile, Message *msg)
       value = MailFolder::DecodeHeader(value);
 
       // test for some standard headers which need special treatment
-      if ( name == "SUBJECT" )
+      if ( name == _T("SUBJECT") )
          cv->SetSubject(value);
-      else if ( name == "FROM" )
+      else if ( name == _T("FROM") )
          cv->SetFrom(value);
-      else if ( name == "TO" )
+      else if ( name == _T("TO") )
          cv->AddTo(value);
-      else if ( name == "CC" )
+      else if ( name == _T("CC") )
          cv->AddCc(value);
-      else if ( name == "BCC" )
+      else if ( name == _T("BCC") )
          cv->AddBcc(value);
-      else if ( name == "FCC" )
+      else if ( name == _T("FCC") )
       {
          // if we have any FCC recipients, they should replace the default ones
          // instead of being appended to them as then the default recipients
@@ -1533,13 +1533,13 @@ Composer::EditMessage(Profile *profile, Message *msg)
             else // not iconized, not maximized
             {
                int x, y, w, h;
-               if ( sscanf(value, GEOMETRY_FORMAT, &x, &y, &w, &h) == 4 )
+               if ( wxSscanf(value, GEOMETRY_FORMAT, &x, &y, &w, &h) == 4 )
                {
                   frame->SetSize(x, y, w, h);
                }
                else // bad header format
                {
-                  wxLogDebug(_T("Corrupted " HEADER_GEOMETRY " header '%s'."),
+                  wxLogDebug(_T("Corrupted "), HEADER_GEOMETRY, _T(" header '%s'."),
                              value.c_str());
                }
             }
@@ -1842,7 +1842,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
 
    // the panel which fills all the frame client area and contains all children
    // (we use it to make the tab navigation work)
-   m_splitter = new wxPSplitterWindow("ComposeSplit", this, -1,
+   m_splitter = new wxPSplitterWindow(_T("ComposeSplit"), this, -1,
                                       wxDefaultPosition, wxDefaultSize,
                                       wxSP_3D);
 
@@ -1904,7 +1904,7 @@ wxComposeView::CreateEditor(void)
    {
       // TODO: make it configurable
       //String name = (*listing)[0].GetName();
-      String name = "BareBonesEditor";
+      String name = _T("BareBonesEditor");
 
       MModule *editorFactory = MModule::LoadModule(name);
       if ( !editorFactory ) // failed to load the configured editor
@@ -2029,8 +2029,8 @@ wxComposeView::ExpandRecipient(String *textAddress)
    if ( quoted )
    {
       // just find the matching quote (not escaped)
-      const char *pStart = text.c_str();
-      const char *p;
+      const wxChar *pStart = text.c_str();
+      const wxChar *p;
       for ( p = pStart + text.length() - 2; p >= pStart; p-- )
       {
          if ( *p == '"' )
@@ -2051,7 +2051,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
       // search back until the last address separator
       for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
       {
-         char c = text[nLastAddr];
+         wxChar c = text[nLastAddr];
          if ( (c == ',') || (c == ';') )
             break;
       }
@@ -2085,7 +2085,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
          else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
             addrType = Composer::Recipient_Cc;
       }
-      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == "BCC" )
+      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == _T("BCC") )
       {
          addrType = Composer::Recipient_Bcc;
       }
@@ -2103,7 +2103,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
    // TODO: add support for the mailto URL parameters, i.e. should support
    //       things like "mailto:foo@bar.com?subject=Please%20help"
    String newText;
-   if ( !textOrig.StartsWith("mailto:", &newText) )
+   if ( !textOrig.StartsWith(_T("mailto:"), &newText) )
    {
       // if the text already has a '@' inside it and looks like a full email
       // address assume that it doesn't need to be expanded (this saves a lot
@@ -2114,7 +2114,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
       {
          // also check that the host part of the address is expanded - it
          // should contain at least one dot normally
-         if ( strchr(textOrig.c_str() + pos + 1, '.') )
+         if ( wxStrchr(textOrig.c_str() + pos + 1, '.') )
          {
             // looks like a valid address - nothing to do
             newText = textOrig;
@@ -2158,7 +2158,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
 
    for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
    {
-      char c = text[nPrevAddrEnd];
+      wxChar c = text[nPrevAddrEnd];
       if ( !isspace(c) && (c != ',') && (c != ';') )
       {
          // this character is a part of previous string, leave it there
@@ -2263,7 +2263,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
          {
             // tokenize the string possibly containing several newsgroups
             const wxArrayString
-               groups = wxStringTokenize(address, ",; \t", wxTOKEN_STRTOK);
+               groups = wxStringTokenize(address, _T(",; \t"), wxTOKEN_STRTOK);
 
             size_t count = groups.GetCount();
             for ( size_t n = 0; n < count; n++ )
@@ -2536,7 +2536,7 @@ wxComposeView::DoInitText(Message *msgOrig)
    // if we're replying to several messages at once
    if ( !IsEmpty() )
    {
-      InsertText("\n");
+      InsertText(_T("\n"));
    }
 
    // deal with templates: first decide what kind of template do we need
@@ -2589,20 +2589,20 @@ wxComposeView::DoInitText(Message *msgOrig)
          // this is surely not ideal, but I don't see how to do what we want
          // otherwise with the existing code
 
-         const char *pcEnd = NULL;
-         const char *pcStart = templateValue.c_str();
-         for ( const char *pc = pcStart; ; )
+         const wxChar *pcEnd = NULL;
+         const wxChar *pcStart = templateValue.c_str();
+         for ( const wxChar *pc = pcStart; ; )
          {
             // find and skip over the next macro occurence
-            pc = strchr(pc, '$');
+            pc = wxStrchr(pc, '$');
             if ( !pc++ )
                break;
 
-            static const char *QUOTE = "quote";
-            static const size_t LEN_QUOTE = strlen(QUOTE);
+            static const wxChar *QUOTE = _T("quote");
+            static const size_t LEN_QUOTE = wxStrlen(QUOTE);
 
-            static const char *TEXT = "text";
-            static const size_t LEN_TEXT = strlen(TEXT);
+            static const wxChar *TEXT = _T("text");
+            static const size_t LEN_TEXT = wxStrlen(TEXT);
 
             if ( wxStrnicmp(pc, QUOTE, LEN_QUOTE) == 0 )
             {
@@ -2719,10 +2719,10 @@ wxComposeView::DoInitText(Message *msgOrig)
                                      M_MSGBOX_ASK_VCARD) )
             {
                wxString pattern;
-               pattern << _("vCard files (*.vcf)|*.vcf") << '|' << wxALL_FILES;
-               filename = wxPFileSelector("vcard",
+               pattern << _("vCard files (*.vcf)|*.vcf") << _T('|') << wxGetTranslation(wxALL_FILES);
+               filename = wxPFileSelector(_T("vcard"),
                                           _("Choose vCard file"),
-                                          NULL, "vcard.vcf", NULL,
+                                          NULL, _T("vcard.vcf"), NULL,
                                           pattern,
                                           0, this);
             }
@@ -2743,7 +2743,7 @@ wxComposeView::DoInitText(Message *msgOrig)
       // now do attach it
       if ( hasCard )
       {
-         InsertData(strdup(vcard), vcard.length(), "text/x-vcard", filename);
+         InsertData(wxStrdup(vcard), vcard.length(), _T("text/x-vcard"), filename);
       }
    }
 
@@ -2819,7 +2819,7 @@ void wxComposeView::SetEncodingToSameAs(Message *msg)
 void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
-   SetStatusText(enable ? "" : _("RO"), 1);
+   SetStatusText(enable ? _T("") : _("RO"), 1);
 
    m_editor->Enable(enable);
 }
@@ -2966,10 +2966,10 @@ wxComposeView::OnMenuCommand(int id)
             size_t nFiles = wxPFilesSelector
                             (
                              filenames,
-                             "MsgInsert",
+                             _T("MsgInsert"),
                              _("Please choose files to insert."),
-                             NULL, "dead.letter", NULL,
-                             _(wxALL_FILES),
+                             NULL, _T("dead.letter"), NULL,
+                             wxGetTranslation(wxALL_FILES),
                              wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
                              this
                             );
@@ -3040,10 +3040,10 @@ wxComposeView::OnMenuCommand(int id)
          {
             String filename = wxPFileSelector
                               (
-                               "MsgInsertText",
+                               _T("MsgInsertText"),
                                _("Please choose a file to insert."),
-                               NULL, "dead.letter", NULL,
-                               _(wxALL_FILES),
+                               NULL, _T("dead.letter"), NULL,
+                               wxGetTranslation(wxALL_FILES),
                                wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
                                this
                               );
@@ -3069,10 +3069,10 @@ wxComposeView::OnMenuCommand(int id)
          {
             String filename = wxPFileSelector
                               (
-                               "MsgSaveText",
+                               _T("MsgSaveText"),
                                _("Choose file to append message to"),
-                               NULL, "dead.letter", NULL,
-                               _(wxALL_FILES),
+                               NULL, _T("dead.letter"), NULL,
+                               wxGetTranslation(wxALL_FILES),
                                wxSAVE,
                                this
                               );
@@ -3276,7 +3276,7 @@ bool wxComposeView::StartExternalEditor()
          // we have a handy function in wxFileType which will replace
          // '%s' with the file name or add the file name at the end if
          // there is no '%s'
-         wxFileType::MessageParameters params(tmpFileName.GetName(), "");
+         wxFileType::MessageParameters params(tmpFileName.GetName(), _T(""));
          String command = wxFileType::ExpandCommand(extEdit, params);
 
          // do start the external process
@@ -3394,7 +3394,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
       }
       else // InsertFileAsText() succeeded
       {
-         if ( remove(m_tmpFileName) != 0 )
+         if ( wxRemove(m_tmpFileName) != 0 )
          {
             wxLogDebug(_T("Stale temp file '%s' left."), m_tmpFileName.c_str());
          }
@@ -3445,7 +3445,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
 // common part of InsertData() and InsertFile()
 void
-wxComposeView::DoInsertAttachment(EditorContentPart *mc, const char *mimetype)
+wxComposeView::DoInsertAttachment(EditorContentPart *mc, const wxChar *mimetype)
 {
    mc->SetMimeType(mimetype);
 
@@ -3462,9 +3462,9 @@ wxComposeView::DoInsertAttachment(EditorContentPart *mc, const char *mimetype)
 void
 wxComposeView::InsertData(void *data,
                           size_t length,
-                          const char *mimetype,
-                          const char *name, 
-                          const char *filename)
+                          const wxChar *mimetype,
+                          const wxChar *name, 
+                          const wxChar *filename)
 {
    String mt = mimetype;
    if ( mt.empty() )
@@ -3475,7 +3475,7 @@ wxComposeView::InsertData(void *data,
       }
       else // default
       {
-         mt = "APPLICATION/OCTET-STREAM";
+         mt = _T("APPLICATION/OCTET-STREAM");
       }
    }
 
@@ -3487,7 +3487,7 @@ wxComposeView::InsertData(void *data,
 
 // insert file data
 void
-wxComposeView::InsertFile(const char *fileName, const char *mimetype)
+wxComposeView::InsertFile(const wxChar *fileName, const wxChar *mimetype)
 {
    CHECK_RET( !strutil_isempty(fileName), _T("filename can't be empty") );
 
@@ -3496,7 +3496,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    // decide otherwise?)
    String filename(fileName);
    String strExt = filename.AfterLast('.');
-   if ( strExt == filename || strchr(strExt, '/') )
+   if ( strExt == filename || wxStrchr(strExt, '/') )
       strExt.Empty();
 
    String strMimeType;
@@ -3576,7 +3576,7 @@ wxComposeView::InsertFileAsText(const String& filename,
       }
       else // non empty file
       {
-         char *p = text.GetWriteBuf(lenFile + 1);
+         wxChar *p = text.GetWriteBuf(lenFile + 1);
          p[lenFile] = '\0';
 
          ok = file.Read(p, lenFile) != wxInvalidOffset;
@@ -3617,7 +3617,7 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
             const MimePart *partChild = mimePart->GetNested();
 
             String subtype = type.GetSubType();
-            if ( subtype == "ALTERNATIVE" )
+            if ( subtype == _T("ALTERNATIVE") )
             {
                // assume that we can edit the first subpart, this must be the
                // most "rough" one and as we only support editing text, if we
@@ -3819,10 +3819,10 @@ wxComposeView::BuildMessage() const
                            MimeType::TEXT,
                            part->GetText(),
                            part->GetLength(),
-                           "PLAIN",
-                           "INLINE",   // disposition
-                           NULL,       // disposition parameters
-                           NULL,       // other parameters
+                           _T("PLAIN"),
+                           _T("INLINE"),  // disposition
+                           NULL,          // disposition parameters
+                           NULL,          // other parameters
                            m_encoding
                         );
             break;
@@ -3834,7 +3834,7 @@ wxComposeView::BuildMessage() const
                if ( file.Open(filename) )
                {
                   size_t size = file.Length();
-                  char *buffer = new char[size + 1];
+                  wxChar *buffer = new wxChar[size + 1];
                   if ( file.Read(buffer, size) )
                   {
                      // always NUL terminate it
@@ -3854,13 +3854,13 @@ wxComposeView::BuildMessage() const
                      // some mailers want "FILENAME" in disposition parameters
                      // (where only file name, i.e. without path, should be
                      // used for obvious security reasons)
-                     p = new MessageParameter("FILENAME",
+                     p = new MessageParameter(_T("FILENAME"),
                                               wxFileNameFromPath(name));
                      dlist.push_back(p);
 
                      // and some mailers want "NAME" in parameters (we can use
                      // the full name here)
-                     p = new MessageParameter("NAME", filename);
+                     p = new MessageParameter(_T("NAME"), filename);
                      plist.push_back(p);
 
                      const MimeType& mt = part->GetMimeType();
@@ -3900,7 +3900,7 @@ wxComposeView::BuildMessage() const
                {
                   MessageParameter *p;
 
-                  p = new MessageParameter("FILENAME", wxFileNameFromPath(name));
+                  p = new MessageParameter(_T("FILENAME"), wxFileNameFromPath(name));
                   dlist.push_back(p);
                }
 
@@ -3908,7 +3908,7 @@ wxComposeView::BuildMessage() const
                {
                   MessageParameter *p;
 
-                  p = new MessageParameter("NAME", filename);
+                  p = new MessageParameter(_T("NAME"), filename);
                   plist.push_back(p);
                }
 
@@ -3916,7 +3916,7 @@ wxComposeView::BuildMessage() const
                msg->AddPart
                     (
                       mt.GetPrimary(),
-                      (char *)part->GetData(),
+                      (wxChar *)part->GetData(),
                       part->GetSize(),
                       mt.GetSubType(),
                       part->GetDisposition(),
@@ -4077,7 +4077,7 @@ wxComposeView::Send(bool schedule)
       }
 
       // avoid crashes if the msg has any stray '%'s
-      wxLogStatus(this, "%s", msg.c_str());
+      wxLogStatus(this, _T("%s"), msg.c_str());
    }
    else // message not sent
    {
@@ -4297,7 +4297,7 @@ SendMessage *wxComposeView::BuildDraftMessage() const
    }
 
    // mark this message as our draft (the value doesn't matter)
-   msg->AddHeaderEntry(HEADER_IS_DRAFT, "Yes");
+   msg->AddHeaderEntry(HEADER_IS_DRAFT, _T("Yes"));
 
    // save the composer geometry info
    String value;
@@ -4322,7 +4322,7 @@ SendMessage *wxComposeView::BuildDraftMessage() const
    msg->AddHeaderEntry(HEADER_GEOMETRY, value);
 
    // also save the Fcc header contents because it's not a "real" header
-   msg->AddHeaderEntry("FCC", GetRecipients(Recipient_Fcc));
+   msg->AddHeaderEntry(_T("FCC"), GetRecipients(Recipient_Fcc));
 
    return msg;
 }
@@ -4431,7 +4431,7 @@ bool wxComposeView::SaveAsDraft() const
 static String GetComposerAutosaveDir()
 {
    String name = mApplication->GetLocalDir();
-   name += "/composer/";
+   name << DIR_SEPARATOR << _T("composer") << DIR_SEPARATOR;
 
    return name;
 }
@@ -4469,7 +4469,7 @@ wxComposeView::AutoSave()
       // we need a unique file name during the life time of this object as this
       // file is always going to be deleted if we're destroyed correctly, it
       // can only be left if the program crashes
-      m_filenameAutoSave = name + String::Format("%05d%p", (int)getpid(), this);
+      m_filenameAutoSave = name + String::Format(_T("%05d%p"), (int)getpid(), this);
    }
 
    String contents;
@@ -4535,7 +4535,7 @@ bool Composer::RestoreAll()
    size_t nResumed = 0;
 
    wxString filename;
-   bool cont = dir.GetFirst(&filename, "", wxDIR_FILES);
+   bool cont = dir.GetFirst(&filename, _T(""), wxDIR_FILES);
    while ( cont )
    {
       filename = name + filename;

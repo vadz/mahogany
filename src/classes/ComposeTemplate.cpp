@@ -1439,7 +1439,7 @@ String VarExpander::GetSignature() const
                strSignFile = wxPFileSelector(_T("sig"),
                                              _("Choose signature file"),
                                              NULL, _T(".signature"), NULL,
-                                             wxALL_FILES,
+                                             wxGetTranslation(wxALL_FILES),
                                              0, m_cv.GetFrame());
             }
             else

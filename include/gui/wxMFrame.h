@@ -43,13 +43,13 @@ public:
       // read the frame position and size from config (the variables needn't be
       // initialized, they will receive some values in any case), returns FALSE
       // if there is no config object to read settings from
-   static bool RestorePosition(const char *name,
+   static bool RestorePosition(const wxChar *name,
                                int *x, int *y, int *w, int *h,
                                bool *iconised = NULL, bool *maximised = NULL);
 
       //  save the given frame's position and size in config file
-   static void SavePosition(const char *name, wxFrame *frame);
-   static void SavePosition(const char *name, wxWindow *frame);
+   static void SavePosition(const wxChar *name, wxFrame *frame);
+   static void SavePosition(const wxChar *name, wxWindow *frame);
 
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
    wxMFrame() : MFrameBase(M_EMPTYSTRING) { FAIL_MSG(_T("unreachable")); }
@@ -108,7 +108,7 @@ public:
    void OnCloseWindow(wxCloseEvent& event);
 
 protected:
-   static void SavePositionInternal(const char *name, wxWindow *frame, bool isFrame);
+   static void SavePositionInternal(const wxChar *name, wxWindow *frame, bool isFrame);
 
    /// is it initialised?
    bool m_initialised;

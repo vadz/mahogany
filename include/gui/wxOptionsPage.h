@@ -47,29 +47,29 @@ enum
 // now)
 struct ConfigValueDefault
 {
-   ConfigValueDefault(const char *name_, long value)
+   ConfigValueDefault(const wxChar *name_, long value)
       { bNumeric = TRUE; name = name_; lValue = value; }
 
-   ConfigValueDefault(const char *name_, const char *value)
+   ConfigValueDefault(const wxChar *name_, const wxChar *value)
       { bNumeric = FALSE; name = name_; szValue = value; }
 
    long GetLong() const { wxASSERT( bNumeric ); return lValue; }
-   const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
+   const wxChar *GetString() const { wxASSERT( !bNumeric ); return szValue; }
 
    bool IsNumeric() const { return bNumeric; }
 
-   const char *name;
+   const wxChar *name;
    union
    {
       long        lValue;
-      const char *szValue;
+      const wxChar *szValue;
    };
    bool bNumeric;
 };
 
 struct ConfigValueNone : public ConfigValueDefault
 {
-   ConfigValueNone() : ConfigValueDefault("",0L) { }
+   ConfigValueNone() : ConfigValueDefault(_T(""),0L) { }
 };
 
 typedef const ConfigValueDefault *ConfigValuesArray;
@@ -120,9 +120,9 @@ public:
 
    struct FieldInfo
    {
-      const char *label;   // which is shown in the dialog
-      int         flags;   // containts the type and the flags (see above)
-      int         enable;  // disable this field if "enable" field is unchecked
+      const wxChar *label;   // which is shown in the dialog
+      int           flags;   // containts the type and the flags (see above)
+      int           enable;  // disable this field if "enable" field is unchecked
    };
 
    typedef const FieldInfo *FieldInfoArray;
@@ -140,7 +140,7 @@ public:
                  ConfigValuesArray aDefaults,
                  size_t nFirst, size_t nLast,
                  wxNotebook *parent,
-                 const char *title,
+                 const wxChar *title,
                  Profile *profile,
                  int helpID = -1,
                  int image = -1);
@@ -290,7 +290,7 @@ public:
    // ctor will create the controls corresponding to the fields from nFirst to
    // nLast in ms_aFields
    wxOptionsPageStandard(wxNotebook *parent,
-                         const char *title,
+                         const wxChar *title,
                          Profile *profile,
                          int nFirst,
                          size_t nLast,
@@ -323,7 +323,7 @@ class wxOptionsPageDynamic : public wxOptionsPage
 public:
    // the aFields array contains the controls descriptions
    wxOptionsPageDynamic(wxNotebook *parent,
-                        const char *title,
+                        const wxChar *title,
                         Profile *profile,
                         FieldInfoArray aFields,
                         ConfigValuesArray aDefaults,
@@ -346,8 +346,8 @@ struct wxOptionsPageDesc
       nFields = 0;
    }
 
-   wxOptionsPageDesc(const char *title_,
-                     const char *image_,
+   wxOptionsPageDesc(const wxChar *title_,
+                     const wxChar *image_,
                      int helpId_,
                      const wxOptionsPage::FieldInfo *aFields_,
                      ConfigValuesArray aDefaults_,

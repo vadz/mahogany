@@ -129,7 +129,7 @@ public:
     void OnSize(wxSizeEvent& event);
 
 protected:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     void RestorePage();
 
@@ -182,7 +182,7 @@ public:
     void OnSize(wxSizeEvent& event);
 
 protected:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     void RestorePage();
 
@@ -311,7 +311,7 @@ protected:
     void SaveSelection();
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPChoice)
@@ -375,7 +375,7 @@ protected:
 
 private:
     // the config key where we store the sash position
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_NO_COPY_CLASS(wxPSplitterWindow)
 };
@@ -435,7 +435,7 @@ protected:
     wxPHelper *m_persist;
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPListCtrl)
@@ -489,7 +489,7 @@ protected:
     wxPHelper *m_persist;
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_NO_COPY_CLASS(wxPCheckBox)
 };
@@ -551,7 +551,7 @@ protected:
     void SaveSelection();
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPListBox)
@@ -618,7 +618,7 @@ protected:
     void SaveSelection();
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPRadioBox)
@@ -689,7 +689,7 @@ protected:
     bool GetExpandedBranches(const wxTreeItemId& id, wxArrayString& branches);
 
 private:
-    static const char *ms_path;
+    static const wxChar *ms_path;
 
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPTreeCtrl)
@@ -727,10 +727,10 @@ extern WXDLLMAYEXP wxString wxPFileSelector(const wxString& configPath,
 extern WXDLLMAYEXP size_t wxPFilesSelector(wxArrayString& filenames,
                                            const wxString& configPath,
                                            const wxString& title,
-                                           const char *defpath = NULL,
-                                           const char *defname = NULL,
-                                           const char *extension = NULL,
-                                           const char *filter = NULL,
+                                           const wxChar *defpath = NULL,
+                                           const wxChar *defname = NULL,
+                                           const wxChar *extension = NULL,
+                                           const wxChar *filter = NULL,
                                            int flags = 0,
                                            wxWindow *parent = NULL,
                                            wxConfigBase *config = NULL);

@@ -37,10 +37,10 @@
 // ----------------------------------------------------------------------------
 
 // and the disposition strings
-static const char *DISPOSITIONS[AttachmentProperties::Disposition_Max] =
+static const wxChar *DISPOSITIONS[AttachmentProperties::Disposition_Max] =
 {
-   "INLINE",
-   "ATTACHMENT",
+   _T("INLINE"),
+   _T("ATTACHMENT"),
 };
 
 // ----------------------------------------------------------------------------
@@ -122,7 +122,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
                                        bool *allowDisable)
                   : wxManuallyLaidOutDialog(parent,
                                             _("Attachment properties"),
-                                            "AttachmentDialog"),
+                                            _T("AttachmentDialog")),
                     m_props(*properties)
 {
    // init the data
@@ -135,7 +135,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
    // -------------------
 
    // first the buttons and the optional checkbox
-   wxStaticBox *box = CreateStdButtonsAndBox("");
+   wxStaticBox *box = CreateStdButtonsAndBox(_T(""));
 
    if ( m_allowDisable )
    {
@@ -180,7 +180,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
                                    widthMax, m_txtFilename, MARGIN);
    m_radioDisposition = CreateRadioBox(this,
                                        labels[Label_Disposition] +
-                                       ":&inline:&attachment",
+                                       _T(":&inline:&attachment"),
                                        widthMax, m_txtName, MARGIN);
    m_txtMime = CreateTextWithLabel(this, labels[Label_MIME],
                                    widthMax, m_radioDisposition, MARGIN);

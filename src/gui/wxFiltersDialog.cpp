@@ -489,7 +489,7 @@ public:
    {
       MFDialogTest test = GetTest();
       if ( ! FilterTestNeedsArgument(test) )
-         return ""; // Don't return the value if it won't be used
+         return _T(""); // Don't return the value if it won't be used
 
       switch ( test )
       {
@@ -498,14 +498,14 @@ public:
          case ORC_T_HasFlag:
             switch ( m_choiceFlags->GetSelection() )
             {
-               case ORC_MF_Unseen:    return "U";
-               case ORC_MF_Deleted:   return "D";
-               case ORC_MF_Answered:  return "A";
-//             case ORC_MF_Searched:  return "S";
-               case ORC_MF_Important: return "*";
-               case ORC_MF_Recent:    return "R";
+               case ORC_MF_Unseen:    return _T("U");
+               case ORC_MF_Deleted:   return _T("D");
+               case ORC_MF_Answered:  return _T("A");
+//             case ORC_MF_Searched:  return _T("S");
+               case ORC_MF_Important: return _T("*");
+               case ORC_MF_Recent:    return _T("R");
             }
-            CHECK( false, "", _T("Invalid test message flag") );
+            CHECK( false, _T(""), _T("Invalid test message flag") );
 
          // Argument is used, but not for spam or message flag
          default: return m_Argument->GetValue();
@@ -575,7 +575,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
       wxString logicTrans[ORC_TypesCount];
       for ( size_t nLogical = 0; nLogical < ORC_LogicalCount; nLogical++ )
       {
-         logicTrans[nLogical] = _(ORC_Logical[nLogical]);
+         logicTrans[nLogical] = wxGetTranslation(ORC_Logical[nLogical]);
       }
 
       m_Logical = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
@@ -597,7 +597,7 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    wxString typesTrans[ORC_TypesCount];
    for ( size_t nType = 0; nType < ORC_TypesCountS; nType++ )
    {
-      typesTrans[nType] = _(ORC_Types[nType]);
+      typesTrans[nType] = wxGetTranslation(ORC_Types[nType]);
    }
 
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
@@ -606,17 +606,17 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    wxString msgflagsTrans[ORC_Msg_Flag_Count];
    for ( size_t nMsgFlag = 0; nMsgFlag < ORC_Msg_Flag_Count; nMsgFlag++ )
    {
-      msgflagsTrans[nMsgFlag] = _(ORC_Msg_Flag[nMsgFlag]);
+      msgflagsTrans[nMsgFlag] = wxGetTranslation(ORC_Msg_Flag[nMsgFlag]);
    }
 
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_Msg_Flag_Count, msgflagsTrans);
-   m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
+   m_Argument = new wxTextCtrl(parent,-1, _T(""), wxDefaultPosition);
 
    wxString whereTrans[ORC_WhereCount];
    for ( size_t nWhere = 0; nWhere < ORC_WhereCountS; nWhere++ )
    {
-      whereTrans[nWhere] = _(ORC_Where[nWhere]);
+      whereTrans[nWhere] = wxGetTranslation(ORC_Where[nWhere]);
    }
 
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
@@ -781,12 +781,12 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    if ( test == ORC_T_HasFlag )
    {
       MFDialogHasFlag flag = ORC_MF_Illegal; // silent the compiler warning
-      if      ( argument == "U" ) flag = ORC_MF_Unseen;
-      else if ( argument == "D" ) flag = ORC_MF_Deleted;
-      else if ( argument == "A" ) flag = ORC_MF_Answered;
-//    else if ( argument == "S" ) flag = ORC_MF_Searched;
-      else if ( argument == "*" ) flag = ORC_MF_Important;
-      else if ( argument == "R" ) flag = ORC_MF_Recent;
+      if      ( argument == _T("U") ) flag = ORC_MF_Unseen;
+      else if ( argument == _T("D") ) flag = ORC_MF_Deleted;
+      else if ( argument == _T("A") ) flag = ORC_MF_Answered;
+//    else if ( argument == _T("S") ) flag = ORC_MF_Searched;
+      else if ( argument == _T("*") ) flag = ORC_MF_Important;
+      else if ( argument == _T("R") ) flag = ORC_MF_Recent;
       else
       {
          CHECK_RET( false, _T("Invalid test message flag character") );
@@ -847,12 +847,12 @@ public:
       if ( FilterActionMsgFlag(action) )
       {
          MFDialogSetFlag flag = OAC_MF_Illegal; // silent the compiler warning
-         if      ( argument == "U" ) flag = OAC_MF_Unseen;
-         else if ( argument == "D" ) flag = OAC_MF_Deleted;
-         else if ( argument == "A" ) flag = OAC_MF_Answered;
-//       else if ( argument == "S" ) flag = OAC_MF_Searched;
-         else if ( argument == "*" ) flag = OAC_MF_Important;
-      // else if ( argument == "R" ) flag = OAC_MF_Recent; // can't set
+         if      ( argument == _T("U") ) flag = OAC_MF_Unseen;
+         else if ( argument == _T("D") ) flag = OAC_MF_Deleted;
+         else if ( argument == _T("A") ) flag = OAC_MF_Answered;
+//       else if ( argument == _T("S") ) flag = OAC_MF_Searched;
+         else if ( argument == _T("*") ) flag = OAC_MF_Important;
+      // else if ( argument == _T("R") ) flag = OAC_MF_Recent; // can't set
          else
          {
             CHECK_RET( false, _T("Invalid action message flag character") );
@@ -872,21 +872,21 @@ public:
    {
       MFDialogAction action = GetAction();
       if ( ! FilterActionNeedsArg(action) )
-         return ""; // Don't return the value if it won't be used
+         return _T(""); // Don't return the value if it won't be used
  
       // message flags are decoded separately
       if ( FilterActionMsgFlag(GetAction()) )
       {
          switch ( m_choiceFlags->GetSelection() )
          {
-            case OAC_MF_Unseen:    return "U";
-            case OAC_MF_Deleted:   return "D";
-            case OAC_MF_Answered:  return "A";
-//          case OAC_MF_Searched:  return "S";
-            case OAC_MF_Important: return "*";
-         // case OAC_MF_Recent:    return "R"; // can't set
+            case OAC_MF_Unseen:    return _T("U");
+            case OAC_MF_Deleted:   return _T("D");
+            case OAC_MF_Answered:  return _T("A");
+//          case OAC_MF_Searched:  return _T("S");
+            case OAC_MF_Important: return _T("*");
+         // case OAC_MF_Recent:    return _T("R"); // can't set
          }
-         CHECK( false, "", _T("Invalid action message flag") );
+         CHECK( false, _T(""), _T("Invalid action message flag") );
       }
 
       // Argument is used, but not for message flag
@@ -970,7 +970,7 @@ OneActionControl::OneActionControl(wxWindow *parent)
    wxString typesTrans[OAC_TypesCount];
    for ( size_t nType = 0; nType < OAC_TypesCountS; nType++ )
    {
-      typesTrans[nType] = _(OAC_Types[nType]);
+      typesTrans[nType] = wxGetTranslation(OAC_Types[nType]);
    }
 
    m_Type = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
@@ -979,12 +979,12 @@ OneActionControl::OneActionControl(wxWindow *parent)
    wxString msgflagsTrans[OAC_Msg_Flag_Count];
    for ( size_t nMsgFlag = 0; nMsgFlag < OAC_Msg_Flag_Count; nMsgFlag++ )
    {
-      msgflagsTrans[nMsgFlag] = _(OAC_Msg_Flag[nMsgFlag]);
+      msgflagsTrans[nMsgFlag] = wxGetTranslation(OAC_Msg_Flag[nMsgFlag]);
    }
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
                              OAC_Msg_Flag_Count, msgflagsTrans);
 
-   m_Argument = new wxTextCtrl(parent, -1, "");
+   m_Argument = new wxTextCtrl(parent, -1, _T(""));
    m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
 
@@ -1068,7 +1068,7 @@ OneActionControl::LayoutControls(wxWindow **last,
 wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Filter Rule"),
-                                           "OneFilterDialog")
+                                           _T("OneFilterDialog"))
 {
    m_isSimple = true;
    m_initializing = true;
@@ -1118,7 +1118,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
 
    // the control allowing to edit directly the filter program
    m_textProgram = new wxTextCtrl(this, Text_Program,
-                                  "",
+                                  _T(""),
                                   wxDefaultPosition, wxDefaultSize,
                                   wxTE_MULTILINE);
    c = new wxLayoutConstraints;
@@ -1512,13 +1512,13 @@ END_EVENT_TABLE()
 wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
                   : wxManuallyLaidOutDialog(parent,
                                             _("Configure Filter Rules"),
-                                            "FilterDialog")
+                                            _T("FilterDialog"))
 {
    m_hasChanges = false;
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox("", FALSE,
+   wxStaticBox *box = CreateStdButtonsAndBox(_T(""), FALSE,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
@@ -1585,7 +1585,7 @@ wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.LeftOf(btnEdit, 3*LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_lboxFilters = new wxPListBox("FiltersList",
+   m_lboxFilters = new wxPListBox(_T("FiltersList"),
                                   this, -1,
                                   wxDefaultPosition, wxDefaultSize,
                                   0, NULL,
@@ -1762,9 +1762,9 @@ wxAllFiltersDialog::OnRenameFiter(wxCommandEvent& /* event */)
                      "changed in the future version of the program)"),
                    this,
                    _("Filter renamed"),
-                   "FilterRenameWarn");
+                   _T("FilterRenameWarn"));
 #else
-   MFolder_obj folderRoot("");
+   MFolder_obj folderRoot(_T(""));
    RenameAFilterTraversal traverse(folderRoot, name, nameNew);
    traverse.Traverse();
 #endif
@@ -1942,7 +1942,7 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
                      : wxSelectionsOrderDialog(parent,
                                                _("Select the filters to use:"),
                                                GetCaption(folder),
-                                               "FolderFilters")
+                                               _T("FolderFilters"))
 {
    m_folder = folder;
    m_folder->IncRef();
@@ -2204,7 +2204,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
                                          wxWindow *parent)
                    : wxManuallyLaidOutDialog(parent,
                                              _("Create quick filter"),
-                                             "QuickFilter")
+                                             _T("QuickFilter"))
 {
    m_folder = folder;
    m_folder->IncRef();
@@ -2291,7 +2291,7 @@ void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
                                   FilterControl which)
 {
    // the part of the name of the filter for the specified criterium
-   static const char *names[Filter_Max] =
+   static const wxChar *names[Filter_Max] =
    {
       gettext_noop("from"),
       gettext_noop("subject"),
@@ -2317,7 +2317,7 @@ void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
       (*settings)->AddTest(ORC_L_And, false /* not inverted */,
                            ORC_T_Contains, where[which], text);
 
-      *name << _(names[which]) << ' ' << text;
+      *name << wxGetTranslation(names[which]) << ' ' << text;
    }
 }
 
@@ -2416,7 +2416,7 @@ static String CreateNewFilter(wxWindow *parent)
                                    M_DLG_NO_DEFAULT,
                                    M_MSGBOX_FILTER_REPLACE) )
          {
-            return "";
+            return _T("");
          }
       }
 

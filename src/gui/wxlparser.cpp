@@ -30,7 +30,7 @@
 
 #define   BASE_SIZE 12
 
-static inline bool LayoutParserIsEndOfLine(const char *p)
+static inline bool LayoutParserIsEndOfLine(const wxChar *p)
 {
    // the end of line is either just '\n' or "\r\n" or even '\r' - we
    // understand Unix, DOS and Mac conventions here as we get all kinds of text
@@ -86,7 +86,7 @@ static void wxLayoutImportTextInternal(wxLayoutList *list,
    wxString s;
    s.Alloc(str.length());
 
-   for ( const char *cptr = str.c_str(); *cptr; cptr++ )
+   for ( const wxChar *cptr = str.c_str(); *cptr; cptr++ )
    {
       while ( *cptr && !LayoutParserIsEndOfLine(cptr) )
       {
@@ -94,7 +94,7 @@ static void wxLayoutImportTextInternal(wxLayoutList *list,
       }
 
       // wxLayoutWindow doesn't show tabs correctly, so turn them into spaces
-      s.Replace("\t", "        ");
+      s.Replace(_T("\t"), _T("        "));
 
       if ( useConverter )
          list->Insert(conv.Convert(s));
@@ -136,7 +136,7 @@ void wxLayoutImportHTML(wxLayoutList *list,
 {
   // Strip URLs:
   wxString filtered;
-  const char *cptr = str.c_str();
+  const wxChar *cptr = str.c_str();
   bool inTag = FALSE;
   while(*cptr)
   {
@@ -155,7 +155,7 @@ void wxLayoutImportHTML(wxLayoutList *list,
      }
      if(*cptr == '&') // ignore it
      {
-        if( strncmp(cptr+1,"nbsp;", 5) == 0)
+        if( wxStrncmp(cptr+1, _T("nbsp;"), 5) == 0)
         {
            cptr += 6;
            filtered += ' ';
@@ -192,26 +192,26 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
                                  wxLayoutStyleInfo *styleInfo,
                                  bool firstTime)
 {
-   static char buffer[20];
+   static wxChar buffer[20];
    wxString html;
 
    wxLayoutStyleInfo *si = cmd.GetStyle();
 
    int size, sizecount;
 
-   html += "<font ";
+   html += _T("<font ");
 
    if(si->m_fg_valid)
    {
-      html +="color=";
-      sprintf(buffer,"\"#%02X%02X%02X\"", si->m_fg.Red(),si->m_fg.Green(),si->m_fg.Blue());
+      html += _T("color=");
+      wxSprintf(buffer, _T("\"#%02X%02X%02X\""), si->m_fg.Red(),si->m_fg.Green(),si->m_fg.Blue());
       html += buffer;
    }
 
    if(si->m_bg_valid)
    {
-      html += " bgcolor=";
-      sprintf(buffer,"\"#%02X%02X%02X\"", si->m_bg.Red(),si->m_bg.Green(),si->m_bg.Blue());
+      html += _T(" bgcolor=");
+      wxSprintf(buffer, _T("\"#%02X%02X%02X\""), si->m_bg.Red(),si->m_bg.Green(),si->m_bg.Blue());
       html += buffer;
    }
 
@@ -219,11 +219,11 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
    {
    case wxSWISS:
    case wxMODERN:
-      html += " face=\"Arial,Helvetica\""; break;
+      html += _T(" face=\"Arial,Helvetica\""); break;
    case wxROMAN:
-      html += " face=\"Times New Roman, Times\""; break;
+      html += _T(" face=\"Times New Roman, Times\""); break;
    case wxTELETYPE:
-      html += " face=\"Courier New, Courier\""; break;
+      html += _T(" face=\"Courier New, Courier\""); break;
    default:
       ;
    }
@@ -239,34 +239,34 @@ wxString wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
       sizecount --;
       size = (size*10)/12;
    }
-   html += "size=";
-   sprintf(buffer,"%+1d", sizecount);
+   html += _T("size=");
+   wxSprintf(buffer, _T("%+1d"), sizecount);
    html += buffer;
 
-   html +=">";
+   html += _T(">");
 
    if(styleInfo != NULL && ! firstTime)
-      html ="</font>"+html; // terminate any previous font command
+      html = _T("</font>") + html; // terminate any previous font command
 
    if((si->weight == wxBOLD) && ( (!styleInfo) || (styleInfo->weight != wxBOLD)))
-      html += "<b>";
+      html += _T("<b>");
    else
       if(si->weight != wxBOLD && ( styleInfo && (styleInfo->weight == wxBOLD)))
-         html += "</b>";
+         html += _T("</b>");
 
    if(si->style == wxSLANT)
       si->style = wxITALIC; // the same for html
 
    if((si->style == wxITALIC) && ( (!styleInfo) || (styleInfo->style != wxITALIC)))
-      html += "<i>";
+      html += _T("<i>");
    else
       if(si->style != wxITALIC && ( styleInfo && (styleInfo->style == wxITALIC)))
-         html += "</i>";
+         html += _T("</i>");
 
    if(si->underline && ( (!styleInfo) || ! styleInfo->underline))
-      html += "<u>";
+      html += _T("<u>");
    else if(si->underline == false && ( styleInfo && styleInfo->underline))
-      html += "</u>";
+      html += _T("</u>");
 
 
    *styleInfo = *si; // update last style info
@@ -342,11 +342,11 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       while(status->NULLIT())
       {
          if(mode & WXLO_EXPORT_AS_HTML)
-            *str += "<br>";
+            *str += _T("<br>");
          if(flags & WXLO_EXPORT_WITH_CRLF)
-            *str += "\r\n";
+            *str += _T("\r\n");
          else
-            *str += '\n';
+            *str += _T('\n');
 
          status->m_line = status->m_line->GetNextLine();
          if(!status->m_line)

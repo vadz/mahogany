@@ -146,7 +146,7 @@ wxFolderViewColumnsDialog(const String& folderName,
          String::Format(_("Configure columns for '%s'"), folderName.c_str()),
          names,
          status,
-         "FolderViewCol",
+         _T("FolderViewCol"),
          parent
       )
 {
@@ -188,7 +188,7 @@ wxFolderViewColumnsDialog(const String& folderName,
    for ( size_t n = 0; n < m_countCol; n++ )
    {
       // create and position the label
-      m_labels[n] = new wxStaticText(this, -1, m_choices->Item(n) + ": ");
+      m_labels[n] = new wxStaticText(this, -1, m_choices->Item(n) + _T(": "));
 
       c = new wxLayoutConstraints();
       c->left.SameAs(boxLower, wxLeft, LAYOUT_X_MARGIN);
@@ -211,7 +211,7 @@ wxFolderViewColumnsDialog(const String& folderName,
       // max value is, of course, arbitraty, but what can we do?
       int w = m_widths->Item(n);
       m_spins[n] = new wxSpinCtrl(this, -1,
-                                  wxString::Format("%d", w),
+                                  wxString::Format(_T("%d"), w),
                                   wxDefaultPosition, wxDefaultSize,
                                   wxSP_ARROW_KEYS,
                                   0, 1000, w);

@@ -148,7 +148,7 @@ public:
    virtual void DoLogString(const wxChar *szString, time_t t)
    {
       m_dialog->GetLogListBox()->Append(
-            wxString::Format("%s:\t%s",
+            wxString::Format(_T("%s:\t%s"),
                              wxDateTime(t).FormatTime().c_str(),
                              szString)
          );
@@ -188,7 +188,7 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
 
    wxBoxSizer *sizerText = new wxBoxSizer( wxHORIZONTAL );
    sizerText->Add( new wxStaticBitmap(this, -1,
-                     mApplication->GetIconManager()->GetBitmap("import")),
+                     mApplication->GetIconManager()->GetBitmap(_T("import"))),
          0, wxCENTRE | wxALL, 5 );
    sizerText->Add( CreateTextSizer(
             _("Please choose the actions below you would like to perform\n"
@@ -263,7 +263,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       wxLog *logOld = wxLog::GetActiveTarget();
       wxLog::SetActiveTarget(new wxImportDialogLog(this, logOld));
 
-      const char *progname = m_importer.GetProgName();
+      const wxChar *progname = m_importer.GetProgName();
 
       #define DO_IMPORT(what, desc) \
          if ( m_check##what->GetValue() ) \
@@ -316,7 +316,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
                                folderName,
                                MF_GROUP,
                                0,
-                               "",
+                               _T(""),
                                FALSE
                               );
             }
@@ -474,7 +474,7 @@ extern bool ShowImportDialog(wxWindow *parent)
                                  prognames,
                                  &selections,
                                  parent,
-                                 "Importers",
+                                 _T("Importers"),
                                  wxSize(150, 200)
                                 );
 
