@@ -116,6 +116,7 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_IDLE     (wxLayoutWindow::OnIdle)
 
    EVT_CHAR     (wxLayoutWindow::OnChar)
+   EVT_KEY_DOWN (wxLayoutWindow::OnKeyDown)
    EVT_KEY_UP   (wxLayoutWindow::OnKeyUp)
 
    EVT_LEFT_DOWN(wxLayoutWindow::OnLeftMouseDown)
@@ -829,6 +830,24 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    ScrollToCursor();
    // refresh the screen
    RequestUpdate(m_llist->GetUpdateRect());
+}
+
+void
+wxLayoutWindow::OnKeyDown(wxKeyEvent& event)
+{
+   if ( event.GetKeyCode() == WXK_TAB )
+   {
+      if ( !IsEditable() )
+      {
+         GetParent()->Navigate(event.ShiftDown()
+                                 ? wxNavigationKeyEvent::IsBackward
+                                 : wxNavigationKeyEvent::IsForward);
+      }
+   }
+   else
+   {
+      event.Skip();
+   }
 }
 
 void

@@ -155,6 +155,7 @@ public:
    void OnPaint(wxPaintEvent &event);
    void OnIdle(wxIdleEvent &event);
    void OnChar(wxKeyEvent& event);
+   void OnKeyDown(wxKeyEvent& event);
    void OnKeyUp(wxKeyEvent& event);
    void OnUpdateMenuUnderline(wxUpdateUIEvent& event);
    void OnUpdateMenuBold(wxUpdateUIEvent& event);
