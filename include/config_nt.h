@@ -35,7 +35,7 @@
 #undef USE_RBL
 
 /** Define this if you want to compile in SSL support. */
-#undef USE_SSL
+#define USE_SSL
 
 /** Define this to use built-in i18n support */
 #define USE_I18N
