@@ -209,6 +209,10 @@ public:
    virtual bool DeleteBook(AdbBook *book);
    virtual bool TestBookAccess(const String& name, AdbTests test);
 
+   virtual bool HasField(AdbField field) const
+      { return field == AdbField_EMail; }
+   virtual bool HasMultipleEMails() const { return false; }
+
    DECLARE_ADB_PROVIDER(LineDataProvider);
 };
 

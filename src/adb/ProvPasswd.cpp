@@ -215,6 +215,9 @@ public:
    virtual bool DeleteBook(AdbBook *book);
    virtual bool TestBookAccess(const String& name, AdbTests test);
 
+   virtual bool HasField(AdbField field) const;
+   virtual bool HasMultipleEMails() const { return false; }
+
    DECLARE_ADB_PROVIDER(PasswdDataProvider);
 };
 
@@ -482,6 +485,26 @@ bool PasswdDataProvider::TestBookAccess(const String& name, AdbTests test)
 bool PasswdDataProvider::DeleteBook(AdbBook *book)
 {
    return false;
+}
+
+bool PasswdDataProvider::HasField(AdbField field) const
+{
+   bool has;
+   
+   switch ( field )
+   {
+      case AdbField_NickName:
+      case AdbField_FullName:
+      case AdbField_EMail:
+         has = true;
+         break;
+
+      default:
+         has = false;
+         break;
+   }
+   
+   return has;
 }
 
 #endif // OS_UNIX
