@@ -59,12 +59,17 @@ extern const MOption MP_LICENSE_ACCEPTED;
 extern const MOption MP_GLOBALDIR;
 extern const MOption MP_RUNONEONLY;
 
+#ifdef OS_WIN
+extern const MOption MP_USE_CONFIG_FILE;
+#endif // OS_WIN
+
 extern const MOption MP_TBARIMAGES;
+
+extern const MOption MP_USER_MDIR;
 
 #ifdef OS_UNIX
 extern const MOption MP_PATHLIST;
 extern const MOption MP_ROOTDIRNAME;
-extern const MOption MP_USER_MDIR;
 extern const MOption MP_AFMPATH;
 extern const MOption MP_ETCPATH;
 extern const MOption MP_PREFIXPATH;
@@ -500,11 +505,19 @@ extern const MOption MP_WHITE_LIST;
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_NAME "RunOneOnly"
 
+#ifdef OS_WIN
+/// use config file even under Windows?
+#define MP_USE_CONFIG_FILE_NAME "UseConfigFile"
+#endif // OS_WIN
+
 /// show images in the toolbar
 #define MP_TBARIMAGES_NAME "ShowTbarImages"
 
 /// the directory containing the help files
 #define MP_HELPDIR_NAME "HelpDir"
+
+/// the name of the M directory
+#   define   MP_USER_MDIR_NAME         "MDirName"
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -512,8 +525,6 @@ extern const MOption MP_WHITE_LIST;
 #   define   MP_PATHLIST_NAME         "PathList"
 /// the name of M's root directory
 #   define   MP_ROOTDIRNAME_NAME         "RootDirectoryName"
-/// the name of the M directory
-#   define   MP_USER_MDIR_NAME         "MDirName"
 /// the path where to find .afm files
 #   define   MP_AFMPATH_NAME         "AfmPath"
 /// the path to the /etc directories (configuration files)
@@ -1328,8 +1339,20 @@ extern const MOption MP_WHITE_LIST;
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_DEFVAL 1l
 
+#ifdef OS_WIN
+/// use config file even under Windows?
+#define MP_USE_CONFIG_FILE_DEFVAL _T("")
+#endif // OS_WIN
+
 /// show images in the toolbar
 #define MP_TBARIMAGES_DEFVAL 0l // == TbarShow_Icons - 1
+
+#ifdef OS_UNIX
+/// the name of the M directory under users HOME
+#  define   MP_USER_MDIR_DEFVAL         _T(".M")
+#elif defined(OS_WIN)
+#  define   MP_USER_MDIR_DEFVAL         _T("Mahogany")
+#endif
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -1339,8 +1362,6 @@ extern const MOption MP_WHITE_LIST;
 #  define   MP_GLOBALDIR_DEFVAL      M_BASEDIR
 /// the name of M's root directory
 #  define   MP_ROOTDIRNAME_DEFVAL   _T("Mahogany")
-/// the name of the M directory
-#  define   MP_USER_MDIR_DEFVAL         _T(".M")
 /// the path where to find .afm files
 #  define   MP_AFMPATH_DEFVAL M_BASEDIR _T("/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript")
 /// the path to the /etc directories (configuration files)

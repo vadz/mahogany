@@ -567,8 +567,14 @@ public:
    void OnButton(wxCommandEvent& event);
 
 protected:
-   // may be true, false or -1 if unknown
-   int m_SyncRemote;
+   // do we want to use settings synchronization?
+   // (may be true, false or -1 if unknown)
+   int m_activateSync;
+
+#ifdef OS_WIN
+   // do we use config file (or registry, which is default) now?
+   int m_usingConfigFile;
+#endif // OS_WIN
 
 private:
    DECLARE_EVENT_TABLE()

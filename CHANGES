@@ -9,6 +9,7 @@
 Release 0.66 'Clio'
 -------------------
 
+28.09.03 VZ: added support for using files, not registry, by default under Win
 23.09.03 VZ: respect X-Attribution header when writing replies
 19.09.03 VZ: added "Reply/Forward To" commands to mail address popup menu
 17.09.03 VZ: show UTF-7/8-encoded headers [as] correctly [as possible]

@@ -46,6 +46,7 @@
 
 #include "Mpers.h"
 #include "Moptions.h"            // we need all MP_XXX for our arrays
+#include "ConfigSource.h"
 
 // we have to include these 3 headers just for wxOptionsPageNewMail... move it
 // to another file maybe?
@@ -558,7 +559,10 @@ enum ConfigFields
    ConfigField_RSFolderGroup,
    ConfigField_SyncStore,
    ConfigField_SyncRetrieve,
-   ConfigField_SyncLast = ConfigField_SyncRetrieve,
+   ConfigField_SyncSeparator,
+   ConfigField_SyncConfigFileHelp,
+   ConfigField_SyncConfigFile,
+   ConfigField_SyncLast = ConfigField_SyncConfigFile,
 
    // the end
    ConfigField_Max
@@ -1667,6 +1671,20 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Folder group to synchronise"), Field_Folder|Field_Global, ConfigField_RSFolders },
    { gettext_noop("&Store settings..."), Field_SubDlg | Field_Global, ConfigField_RSynchronise },
    { gettext_noop("&Retrieve settings..."), Field_SubDlg | Field_Global, ConfigField_RSynchronise },
+#ifdef OS_WIN
+   { "\n\n",      Field_Message, -1 },
+   { gettext_noop("If a non empty filename is specified here, Mahogany uses\n"
+                  "this file instead of the registry for storing all of its\n"
+                  "options. This may be useful if you want to share the same\n"
+                  "file among several Windows machines (warning: don't try\n"
+                  "to share it with Unix machines, this wouldn't work well)."),
+                  Field_Message, -1 },
+   { gettext_noop("&Config file"),           Field_File |
+                                             Field_FileSave |
+                                             Field_Global |
+                                             Field_AppWide |
+                                             Field_Restart, -1 },
+#endif // OS_WIN
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -2090,6 +2108,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SYNC_FOLDERGROUP),
    CONFIG_NONE(),
    CONFIG_NONE(),
+#ifdef OS_WIN
+   CONFIG_NONE(), // separator
+   CONFIG_NONE(), // help for config file setting
+   CONFIG_ENTRY(MP_USE_CONFIG_FILE),
+#endif // OS_WIN
 };
 
 #undef CONFIG_ENTRY
@@ -3764,7 +3787,10 @@ wxOptionsPageSync::wxOptionsPageSync(wxNotebook *parent,
                                          ConfigField_SyncLast,
                                          MH_OPAGE_SYNC)
 {
-   m_SyncRemote = -1;
+#ifdef OS_WIN
+   m_usingConfigFile =
+#endif // OS_WIN
+   m_activateSync = -1;
 }
 
 bool wxOptionsPageSync::TransferDataToWindow()
@@ -3772,7 +3798,12 @@ bool wxOptionsPageSync::TransferDataToWindow()
    bool rc = wxOptionsPage::TransferDataToWindow();
    if ( rc )
    {
-      m_SyncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
+      m_activateSync = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
+
+#ifdef OS_WIN
+      m_usingConfigFile =
+         !READ_CONFIG_TEXT(m_Profile, MP_USE_CONFIG_FILE).empty();
+#endif // OS_WIN
    }
 
    return rc;
@@ -3784,7 +3815,7 @@ bool wxOptionsPageSync::TransferDataFromWindow()
    if ( rc )
    {
       bool syncRemote = READ_CONFIG_BOOL(m_Profile, MP_SYNC_REMOTE);
-      if ( syncRemote && !m_SyncRemote )
+      if ( syncRemote && !m_activateSync )
       {
          if ( MDialog_YesNoDialog
               (
@@ -3801,6 +3832,56 @@ bool wxOptionsPageSync::TransferDataFromWindow()
             SaveRemoteConfigSettings();
          }
       }
+
+#ifdef OS_WIN
+      String filenameConfig = READ_CONFIG_TEXT(m_Profile, MP_USE_CONFIG_FILE);
+      const int usingConfigFile = !filenameConfig.empty();
+
+      if ( usingConfigFile != m_usingConfigFile )
+      {
+         String title(usingConfigFile ? _("Export settings?")
+                                      : _("Import settings?"));
+
+         String msg(_("You have changed the config file option.\n\n"));
+         if ( usingConfigFile )
+            msg += _("Do you want to export the registry settings "
+                     "to config file?");
+         else
+            msg += _("Do you want to import the existing contents of config "
+                     "file to the reigstry?");
+
+         msg << _T('\n')
+             << _("Note that this may overwrite the existing settings.");
+
+         if ( MDialog_YesNoDialog
+              (
+                  msg,
+                  this,
+                  title,
+                  M_DLG_YES_DEFAULT
+              ) )
+         {
+            ConfigSource_obj
+               configSrc(ConfigSourceLocal::CreateRegistry()),
+               configDst(ConfigSourceLocal::CreateFile(filenameConfig));
+            if ( !usingConfigFile )
+            {
+               // importing to registry, not exporting from it
+               configSrc.Swap(configDst);
+            }
+
+            if ( !ConfigSource::Copy(*configDst.Get(), *configSrc.Get()) )
+            {
+               if ( usingConfigFile )
+                  wxLogError(_("Failed to export settings to the file \"%s\"."),
+                             filenameConfig.c_str());
+               else
+                  wxLogError(_("Failed to import settings from the file \"%s\"."),
+                             filenameConfig.c_str());
+            }
+         }
+      }
+#endif // OS_WIN
    }
 
    return rc;
