@@ -485,6 +485,9 @@ protected:
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
 
+   /// update the folder status info after getting a new message
+   void UpdateFolderStatus(int status);
+
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
 
@@ -624,6 +627,9 @@ private:
 
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
+
+   /// status of the new messages in the folder, used by OverviewHeaderEntry
+   MailFolderStatus *m_statusNew;
 
    /** We remember the last folder to enter a critical section, helps
        to find crashes.*/

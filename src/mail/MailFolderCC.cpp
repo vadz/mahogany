@@ -998,6 +998,8 @@ MailFolderCC::Create(int typeAndFlags)
    m_Listing = NULL;
    m_expungedIndices = NULL;
 
+   m_statusNew = NULL;
+
    // currently not used, but might be in the future
    m_GotNewMessages = false;
    m_FirstListing = true;
@@ -1037,6 +1039,7 @@ MailFolderCC::~MailFolderCC()
    // these should have been deleted before
    ASSERT(m_expungedIndices == NULL);
    ASSERT(m_SearchMessagesFound == NULL);
+   ASSERT(m_statusNew == NULL);
 
    // we might still be listed, so we better remove ourselves from the
    // list to make sure no more events get routed to this (now dead) object
@@ -2160,6 +2163,34 @@ static MsgStatus AnalyzeStatus(int stat)
    return status;
 }
 
+// update the folder status to take a new message with this status into account
+void MailFolderCC::UpdateFolderStatus(int stat)
+{
+   if ( m_statusNew )
+   {
+      // total number of messages always increases
+      m_statusNew->total++;
+
+      // deal with recent/new
+      bool isRecent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
+      if ( isRecent )
+         m_statusNew->recent++;
+
+      if ( !(stat & MailFolder::MSG_STAT_SEEN) )
+      {
+         if ( isRecent )
+            m_statusNew->newmsgs++;
+         m_statusNew->unseen++;
+      }
+
+      // and also count flagged and searched messages
+      if (stat & MailFolder::MSG_STAT_FLAGGED)
+         m_statusNew->flagged++;
+      if ( stat & MailFolder::MSG_STAT_SEARCHED )
+         m_statusNew->searched++;
+   }
+}
+
 // are we asked to count recent messages in WantRecent()?
 static bool WantRecent(int mask, int value)
 {
@@ -2810,7 +2841,7 @@ MailFolderCC::BuildListing(void)
          // hard limit takes precedence over the soft one
          retrLimit = m_RetrievalLimitHard;
       }
-            
+
       if ( (retrLimit > 0) && (m_nMessages > retrLimit) )
       {
          // too many messages: if we exceeded hard limit, just use it instead
@@ -2898,6 +2929,9 @@ MailFolderCC::BuildListing(void)
                                              false, true);
    }
 
+   // remember the status of the new messages
+   m_statusNew = new MailFolderStatus;
+
    // do we have any messages to get?
    if ( m_nMessages )
    {
@@ -2917,14 +2951,15 @@ MailFolderCC::BuildListing(void)
       // do fill the listing by calling mail_fetch_overview_x() which will
       // call OverviewHeaderEntry() for each entry
 
-      // for some folders (MH) this call generates mm_exists notification
-      // resulting in an infinite recursion
-      bool oldCB = mm_disable_callbacks;
-      mm_disable_callbacks = true;
-      mail_fetch_overview_x(m_MailStream,
-                            (char *)sequence.c_str(),
-                            mm_overview_header);
-      mm_disable_callbacks = oldCB;
+      // for MH folders this call generates mm_exists notification
+      // resulting in an infinite recursion, so disable processing them
+      {
+         CCCallbackDisabler noCB;
+
+         mail_fetch_overview_x(m_MailStream,
+                               (char *)sequence.c_str(),
+                               mm_overview_header);
+      }
 
       // destroy the progress dialog if it had been shown
       if ( m_ProgressDialog != NO_PROGRESS_DLG )
@@ -2971,6 +3006,11 @@ MailFolderCC::BuildListing(void)
       }
    }
    //else: no messages, perfectly valid if the folder is empty
+
+   // remember the folder status data
+   GetStatusCache()->UpdateStatus(GetName(), *m_statusNew);
+   delete m_statusNew;
+   m_statusNew = NULL;
 
    m_FirstListing = false;
 
@@ -3047,7 +3087,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       }
    }
 
-   unsigned long msgno = mail_msgno (m_MailStream, uid);
+   unsigned long msgno = mail_msgno(m_MailStream, uid);
 
    // as we overview the messages in the reversed order (see comments before
    // mail_fetch_overview_x()) and msgnos are consecutive we should always have
@@ -3055,17 +3095,13 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
    ASSERT_MSG( msgno == m_msgnoMax - m_BuildNextEntry,
                "msgno and listing index out of sync" );
 
-   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
-   MESSAGECACHE selt;
+   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
 
    HeaderInfoImpl& entry = *(HeaderInfoImpl *)
                               m_Listing->GetItemByIndex(m_BuildNextEntry);
 
-   // STATUS:
-   entry.m_Status = GetMsgStatus(elt);
-
    // For NNTP, do not show deleted messages - they are marked as "read"
-   if(m_folderType == MF_NNTP && elt->deleted)
+   if ( m_folderType == MF_NNTP && elt->deleted )
    {
       // ignore but continue: don't forget to update the max number of
       // messages in the folder if we throw away this one!
@@ -3074,13 +3110,20 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       return 1;
    }
 
-   if(ov)
+   if ( ov )
    {
-      // DATE
+      // status
+      int status = GetMsgStatus(elt);
+      entry.m_Status = status;
+
+      UpdateFolderStatus(status);
+
+      // date
+      MESSAGECACHE selt;
       mail_parse_date(&selt, ov->date);
       entry.m_Date = (time_t) mail_longdate( &selt);
 
-      // FROM and TO
+      // from and to
       entry.m_From = ParseAddress(ov->from);
 
       if ( m_folderType == MF_NNTP || m_folderType == MF_NEWS )
@@ -3123,6 +3166,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
          }
       }
 
+      // subject
+
       entry.m_Subject = DecodeHeader(ov->subject, &encoding);
       if ( (encoding != wxFONTENCODING_SYSTEM) &&
            (encoding != encodingMsg) )
@@ -3138,6 +3183,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
          }
       }
 
+      // all the other fields
       entry.m_Size = ov->optional.octets;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
@@ -3349,19 +3395,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    // added
    if ( msgno != mf->m_msgnoMax )
    {
-      if ( msgno > mf->m_msgnoMax )
-      {
-         // update the number of new messages - we have some more of them
-         MailFolderStatus status;
-         MfStatusCache *mfStatusCache = mf->GetStatusCache();
-         if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
-         {
-            status.newmsgs += msgno - mf->m_msgnoMax;
-
-            mfStatusCache->UpdateStatus(mf->GetName(), status);
-         }
-      }
-      //else: I don't know what to do with the cache - invalidate completely?
+      // invalidate the cache - this is awfully inefficient but we don't know
 
       mf->m_msgnoMax = msgno;
 
