@@ -36,8 +36,9 @@
 #  include <wx/stattext.h>
 #  include <wx/statbmp.h>
 #  include <wx/textctrl.h>
+#  include <wx/textdlg.h>  // for wxGetTextFromUser()
 
-#  include <wx/utils.h>    // for wxStripMenuCodes
+#  include <wx/utils.h>    // for wxStripMenuCodes()
 #endif
 
 #include <wx/log.h>
@@ -239,6 +240,7 @@ enum ConfigFields
    ConfigField_FolderViewHelpText,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
+   ConfigField_FolderViewReplaceFromAddresses,
    ConfigField_FolderViewFontFamily,
    ConfigField_FolderViewFontSize,
    ConfigField_FolderViewFGColour,
@@ -541,6 +543,12 @@ BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxOptionsPage::OnControlChange)
    EVT_COMBOBOX(-1, wxOptionsPage::OnControlChange)
    EVT_TEXT(-1, wxOptionsPage::OnChange)
+
+   // listbox events handling
+   EVT_BUTTON(-1, wxOptionsPage::OnListBoxButton)
+
+   EVT_UPDATE_UI(wxOptionsPage_BtnModify, wxOptionsPage::OnUpdateUIListboxBtns)
+   EVT_UPDATE_UI(wxOptionsPage_BtnDelete, wxOptionsPage::OnUpdateUIListboxBtns)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageCompose, wxOptionsPage)
@@ -559,9 +567,6 @@ BEGIN_EVENT_TABLE(wxOptionsPageFolderView, wxOptionsPage)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
-   EVT_BUTTON(-1, wxOptionsPageFolders::OnButton)
-
-   EVT_IDLE(wxOptionsPageFolders::OnIdle)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
@@ -761,6 +766,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
+   { gettext_noop("&Addresses to replace with \"To\""),  Field_List, ConfigField_FolderViewReplaceFrom,           },
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1},
@@ -990,6 +996,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
+   CONFIG_ENTRY(MP_FROM_REPLACE_ADDRESSES),
    CONFIG_ENTRY(MP_FVIEW_FONT),
    CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_FVIEW_FGCOLOUR),
@@ -1078,6 +1085,8 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
                              int image)
              : wxNotebookPageBase(notebook)
 {
+   m_idListbox = -1; // no listbox by default
+
    m_aFields = aFields;
    m_aDefaults = aDefaults;
 
@@ -1177,19 +1186,15 @@ void wxOptionsPage::CreateControls()
 #ifdef OS_WIN
             if ( n == ConfigField_NetConnection )
             {
-               wxString connections = _(m_aFields[n].label);
+               wxString title = _(m_aFields[n].label);
 
                wxDialUpManager *dial = wxDialUpManager::Create();
                wxArrayString aConnections;
-               size_t nCount = dial->GetISPNames(aConnections);
+               dial->GetISPNames(aConnections);
                delete dial;
 
-               for ( size_t n = 0; n < nCount; n++ )
-               {
-                  connections << ':' << aConnections[n];
-               }
-
-               last = CreateComboBox(connections, widthMax, last);
+               last = CreateComboBox(title + strutil_flatten_array(aConnections),
+                                     widthMax, last);
             }
             else
 #endif // OS_WIN
@@ -1360,20 +1365,8 @@ void wxOptionsPage::UpdateUI()
                break;
 
             case Field_List:
-               // also disable the buttons
-            {
-               long i;
-               for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
-                  wxWindow *win = FindWindow(i);
-                  if ( win ) {
-                     win->Enable(bEnable);
-                  }
-                  else {
-                     wxFAIL_MSG("can't find listbox buttons by id");
-                  }
-               }
-            }
-            break;
+               EnableListBox(wxDynamicCast(control, wxListBox), bEnable);
+               break;
 
             default:
                ;
@@ -1455,25 +1448,19 @@ bool wxOptionsPage::TransferDataToWindow()
       case Field_List:
          wxASSERT( !m_aDefaults[n].IsNumeric() );
 
-         // split it (FIXME what if it contains ';'?)
          {
             wxListBox *lbox = wxStaticCast(control, wxListBox);
-            String str;
-            for ( size_t m = 0; m < strValue.Len(); m++ ) {
-               if ( strValue[m] == ';' ) {
-                  if ( !str.IsEmpty() ) {
-                     lbox->Append(str);
-                     str.Empty();
-                  }
-                  //else: nothing to do, two ';' one after another
-               }
-               else {
-                  str << strValue[m];
-               }
-            }
 
-            if ( !str.IsEmpty() ) {
-               lbox->Append(str);
+            // split it on the separator char: this is ':' for everything
+            // except ConfigField_OpenFolders where it is ';' for config
+            // backwards compatibility
+            char ch = n == ConfigField_OpenFolders ? ';' : ':';
+            wxArrayString entries = strutil_restore_array(ch, strValue);
+
+            size_t count = entries.GetCount();
+            for ( size_t m = 0; m < count; m++ )
+            {
+               lbox->Append(entries[m]);
             }
          }
          break;
@@ -1569,12 +1556,16 @@ bool wxOptionsPage::TransferDataFromWindow()
          wxASSERT( !m_aDefaults[n].IsNumeric() );
          wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
-            // join it (FIXME what if it contains ';'?)
+         // join it using a separator char: this is ':' for everything except
+         // ConfigField_OpenFolders where it is ';' for config backwards
+         // compatibility
          {
+            char ch = n == ConfigField_OpenFolders ? ';' : ':';
             wxListBox *listbox = (wxListBox *)control;
-            for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
+            size_t count = listbox->GetCount();
+            for ( size_t m = 0; m < count; m++ ) {
                if ( !strValue.IsEmpty() ) {
-                  strValue << ';';
+                  strValue << ch;
                }
 
                strValue << listbox->GetString(m);
@@ -1604,6 +1595,110 @@ bool wxOptionsPage::TransferDataFromWindow()
 
    // TODO life is easy as we don't check for errors...
    return TRUE;
+}
+
+// wxOptionsPage listbox handling
+
+void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
+{
+   bool dirty = FALSE;
+
+   switch ( event.GetId() )
+   {
+      case wxOptionsPage_BtnNew:
+         OnListBoxAdd();
+         break;
+
+      case wxOptionsPage_BtnModify:
+         OnListBoxModify();
+         break;
+
+      case wxOptionsPage_BtnDelete:
+         OnListBoxDelete();
+         break;
+
+      default:
+         return;
+   }
+
+   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+   if ( dirty && dialog )
+      dialog->SetDirty();
+}
+
+bool wxOptionsPage::OnListBoxAdd()
+{
+   // get the string from user
+   wxString str;
+   if ( !MInputBox(&str, m_lboxDlgTitle, m_lboxDlgPrompt,
+                   GET_PARENT_OF_CLASS(this, wxDialog), m_lboxDlgPers) ) {
+      return FALSE;
+   }
+
+   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   wxCHECK_MSG( listbox, FALSE, "expected a listbox" );
+
+   // check that it's not already there
+   if ( listbox->FindString(str) != -1 ) {
+      // it is, don't add it twice
+      wxLogError(_("String '%s' is already present in the list, not added."),
+                 str.c_str());
+
+      return FALSE;
+   }
+   else {
+      // ok, do add it
+      listbox->Append(str);
+
+      wxOptionsPage::OnChangeCommon(listbox);
+
+      return TRUE;
+   }
+}
+
+bool wxOptionsPage::OnListBoxModify()
+{
+   wxListBox *l = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   wxCHECK_MSG( l, FALSE, "expected a listbox" );
+   int nSel = l->GetSelection();
+
+   wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
+
+   wxString val = wxGetTextFromUser(m_lboxDlgPrompt,
+                                    m_lboxDlgTitle,
+                                    l->GetString(nSel),
+                                    GET_PARENT_OF_CLASS(this, wxDialog));
+   if ( !val || val == l->GetString(nSel) )
+   {
+      // cancelled or unchanged
+      return FALSE;
+   }
+
+   l->SetString(nSel, val);
+
+   return TRUE;
+}
+
+bool wxOptionsPage::OnListBoxDelete()
+{
+   wxListBox *l = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   wxCHECK_MSG( l, FALSE, "expected a listbox" );
+   int nSel = l->GetSelection();
+
+   wxCHECK_MSG( nSel != -1, FALSE, "should be disabled" );
+
+   l->Delete(nSel);
+   wxOptionsPage::OnChangeCommon(l);
+
+   return TRUE;
+}
+
+void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
+{
+   wxListBox *lbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   wxCHECK_RET( lbox, "expected a listbox here" );
+
+   event.Enable(lbox->GetSelection() != -1);
 }
 
 // ----------------------------------------------------------------------------
@@ -1789,6 +1884,46 @@ wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
                            ConfigField_FolderViewLast,
                            MH_OPAGE_MESSAGEVIEW)
 {
+   m_idListbox = ConfigField_FolderViewReplaceFromAddresses;
+   m_lboxDlgTitle = _("My own addresses");
+   m_lboxDlgPrompt = _("Address");
+   m_lboxDlgPers = "LastMyAddress";
+}
+
+bool wxOptionsPageFolderView::TransferDataToWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataToWindow();
+
+   if ( bRc )
+   {
+      // if the listbox is empty, add the reply-to address to it
+      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+      if ( !listbox->GetCount() )
+      {
+         listbox->Append(READ_CONFIG(m_Profile, MP_RETURN_ADDRESS));
+      }
+   }
+
+   return bRc;
+}
+
+bool wxOptionsPageFolderView::TransferDataFromWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataFromWindow();
+
+   if ( bRc )
+   {
+      // if the listbox contains just the return address, empty it: it is the
+      // default anyhow
+      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+      if ( listbox->GetCount() == 1 &&
+           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_RETURN_ADDRESS) )
+      {
+         listbox->Clear();
+      }
+   }
+
+   return bRc;
 }
 
 void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
@@ -1802,7 +1937,7 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
       dirty = ConfigureFolderViewHeaders(m_Profile, this);
    else
    {
-      wxFAIL_MSG( "alien button" );
+      event.Skip();
 
       dirty = false;
    }
@@ -1996,6 +2131,11 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
 {
    m_nIncomingDelay =
    m_nPingDelay = -1;
+
+   m_idListbox = ConfigField_OpenFolders;
+   m_lboxDlgTitle = _("Folders to open on startup");
+   m_lboxDlgPrompt = _("Folder name");
+   m_lboxDlgPers = "LastStartupFolder";
 }
 
 bool wxOptionsPageFolders::TransferDataToWindow()
@@ -2005,7 +2145,7 @@ bool wxOptionsPageFolders::TransferDataToWindow()
    if ( bRc ) {
       // we add the folder opened in the main frame to the list of folders
       // opened on startup if it's not yet among them
-      wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
+      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       wxString strMain = GetControlText(ConfigField_MainFolder);
       int n = listbox->FindString(strMain);
       if ( n == -1 ) {
@@ -2068,86 +2208,6 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
    }
 
    return rc;
-}
-
-void wxOptionsPageFolders::OnButton(wxCommandEvent& event)
-{
-   bool dirty = FALSE;
-
-   switch(event.GetId())
-   {
-   case wxOptionsPage_BtnNew: OnNewFolder(event); break;
-   case wxOptionsPage_BtnModify: OnModifyFolder(event); break;
-   case wxOptionsPage_BtnDelete: OnDeleteFolder(event); break;
-   default:
-      ;
-   }
-
-   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
-   if ( dirty && dialog )
-      dialog->SetDirty();
-}
-
-
-void wxOptionsPageFolders::OnNewFolder(wxCommandEvent& event)
-{
-   wxString str;
-   if ( !MInputBox(&str, _("Folders to open on startup"), _("Folder name"),
-                   GET_PARENT_OF_CLASS(this, wxDialog), "LastStartupFolder") ) {
-      return;
-   }
-
-   // check that it's not already there
-   wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
-   if ( listbox->FindString(str) != -1 ) {
-      wxLogError(_("Folder '%s' is already present in the list, not added."),
-                 str.c_str());
-   }
-   else {
-      // ok, do add it
-      listbox->Append(str);
-
-      wxOptionsPage::OnChangeCommon(listbox);
-   }
-}
-
-void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
-{
-   wxListBox *l = (wxListBox *)GetControl(ConfigField_OpenFolders);
-   int nSel = l->GetSelection();
-
-   wxCHECK_RET( nSel != -1, "should be disabled" );
-
-   MDialog_FolderProfile(GET_PARENT_OF_CLASS(this, wxDialog),
-                         l->GetString(nSel));
-}
-
-void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent& event)
-{
-   wxListBox *l = (wxListBox *)GetControl(ConfigField_OpenFolders);
-   int nSel = l->GetSelection();
-
-   wxCHECK_RET( nSel != -1, "should be disabled" );
-
-   l->Delete(nSel);
-   wxOptionsPage::OnChangeCommon(l);
-}
-
-void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
-{
-   bool bEnable = ((wxListBox *)GetControl(ConfigField_OpenFolders))
-      ->GetSelection() != -1;
-
-   long id;
-   for ( id = wxOptionsPage_BtnModify; id <= wxOptionsPage_BtnDelete; id++ ) {
-      wxWindow *win = FindWindow(id);
-      if ( win ) {
-         win->Enable(bEnable);
-      }
-      else {
-         wxFAIL_MSG("can't find listbox buttons by id");
-      }
-   }
 }
 
 // ----------------------------------------------------------------------------

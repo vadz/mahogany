@@ -663,7 +663,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_IfMessage = new wxStaticText(canvas, -1, _("If message..."));
    m_DoThis = new wxStaticText(canvas, -1, _("Then do this:"));
    m_ButtonMore = new wxButton(canvas, -1, _("&More"));
-   m_ButtonLess = new wxButton(canvas, -1, _("&Less"));
+   m_ButtonLess = new wxButton(canvas, -1, _("&Fewer"));
    m_ButtonMore->SetToolTip(_("Add another condition"));
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
 

@@ -443,6 +443,9 @@ public:
       // works for any control preceded by the label
    void EnableControlWithLabel(wxControl *control, bool enable);
 
+      // enable/disable listbox and its buttons
+   void EnableListBox(wxListBox *control, bool enable);
+
    // get the canvas - all the controls should be created as children of this
    // canvas, not of the page itself
    wxWindow *GetCanvas() const

@@ -981,7 +981,7 @@
 /// prepend the initials of the sender to thereply prefix?
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_D 0l
 /// set reply string from To: field?
-#define MP_SET_REPLY_FROM_TO_D   1l
+#define MP_SET_REPLY_FROM_TO_D   0l
 /// prefix for subject in forwards
 #define   MP_FORWARD_PREFIX_D      "Forwarded message: "
 /// show XFaces?
@@ -1142,7 +1142,7 @@
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_D 0L
 /// the ':' separated list of addresses which are "from oneself"
-#define MP_FROM_REPLACE_ADDRESSES_D ":"
+#define MP_FROM_REPLACE_ADDRESSES_D ""
 
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{

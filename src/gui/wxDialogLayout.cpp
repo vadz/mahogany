@@ -711,16 +711,15 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    SetTopConstraint(c, last);
    c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
    c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN);
-   c->height.PercentOf(GetCanvas(), wxHeight, 50);
+   c->height.Absolute(150);   // well, what else can we do here?
    box->SetConstraints(c);
 
    // the buttons vertically on the right of listbox
-   wxButton *button = NULL;
    static const char *aszLabels[] =
    {
-      "&Add",
-      "&Modify",
-      "&Delete",
+      gettext_noop("&Add"),
+      gettext_noop("&Modify"),
+      gettext_noop("&Delete"),
    };
 
    // determine the longest button label
@@ -733,25 +732,45 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    long widthMax = GetMaxLabelWidth(labels, this);
 
    widthMax += 15; // loks better like this
-   for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
-      c = new wxLayoutConstraints;
-      if ( nBtn == 0 )
-         c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
-      else
-         c->top.Below(button, LAYOUT_Y_MARGIN);
-      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      c->width.Absolute(widthMax);
-      c->height.AsIs();
-      button = new wxButton(GetCanvas(), wxOptionsPage_BtnNew + nBtn, labels[nBtn]);
-      button->SetConstraints(c);
-   }
+
+   // create the buttons: [Modify] in the middle, [Add] above it and [Delete]
+   // below
+   wxButton *buttonModify = new wxButton(GetCanvas(),
+                                         wxOptionsPage_BtnModify,
+                                         labels[wxOptionsPage_BtnModify]);
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(box, wxCentreY);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   buttonModify->SetConstraints(c);
+
+   wxButton *buttonNew = new wxButton(GetCanvas(),
+                                      wxOptionsPage_BtnNew,
+                                      labels[wxOptionsPage_BtnNew]);
+   c = new wxLayoutConstraints;
+   c->bottom.Above(buttonModify, -2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   buttonNew->SetConstraints(c);
+
+   wxButton *buttonDelete = new wxButton(GetCanvas(),
+                                         wxOptionsPage_BtnDelete,
+                                         labels[wxOptionsPage_BtnDelete]);
+   c = new wxLayoutConstraints;
+   c->top.Below(buttonModify, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   buttonDelete->SetConstraints(c);
 
    // and the listbox itself
    wxListBox *listbox = new wxListBox(GetCanvas(), -1);
    c = new wxLayoutConstraints;
    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, LAYOUT_X_MARGIN);
-   c->right.LeftOf(button, LAYOUT_X_MARGIN);;
+   c->right.LeftOf(buttonModify, LAYOUT_X_MARGIN);;
    c->bottom.SameAs(box, wxBottom, LAYOUT_Y_MARGIN);
    listbox->SetConstraints(c);
 
@@ -821,6 +840,22 @@ void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
       wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
 
       win->Enable(bEnable);
+   }
+}
+
+// enable/disable the listbox and its buttons
+void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
+{
+   wxCHECK_RET( control, "NULL pointer in EnableListBox" );
+
+   control->Enable(bEnable);
+
+   for ( int id = wxOptionsPage_BtnNew; id <= wxOptionsPage_BtnDelete; id++ )
+   {
+      wxWindow *btn = FindWindow(id);
+      wxASSERT_MSG( wxDynamicCast(btn, wxButton), "listbox btn not found" );
+      if ( btn )
+         btn->Enable(bEnable);
    }
 }
 

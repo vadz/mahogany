@@ -2145,7 +2145,11 @@ wxFolderView::SetLanguage(int id)
       case WXMENU_LANG_ISO8859_8:
       case WXMENU_LANG_ISO8859_9:
       case WXMENU_LANG_ISO8859_10:
+      case WXMENU_LANG_ISO8859_11:
+      case WXMENU_LANG_ISO8859_12:
       case WXMENU_LANG_ISO8859_13:
+      case WXMENU_LANG_ISO8859_14:
+      case WXMENU_LANG_ISO8859_15:
          encoding = wxFONTENCODING_ISO8859_1 + id - WXMENU_LANG_ISO8859_1;
          break;
 

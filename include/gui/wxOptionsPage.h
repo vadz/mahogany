@@ -197,7 +197,29 @@ protected:
       return ((wxTextCtrl *)GetControl(n))->GetValue();
    }
 
-   /// numeric help id
+   // methods to deal with handling the events from the listbox buttons: a
+   // listbox always has 3 (Add/Edit/Delete) buttons in an option page and
+   // these methods handle the events from them in a standard way
+
+   // handle the event: call one of OnXXX() below
+   void OnListBoxButton(wxCommandEvent& event);
+
+   // virtual functions called by OnListBoxButton(), the base class implements
+   // them by using a standard text input dialog
+   virtual bool OnListBoxAdd();
+   virtual bool OnListBoxModify();
+   virtual bool OnListBoxDelete();
+
+   // update the listbox buttons state
+   void OnUpdateUIListboxBtns(wxUpdateUIEvent& event);
+
+   // the listbox data
+   int m_idListbox;           // id (no listbox if -1)
+   wxString m_lboxDlgTitle,   // the title for Add/Modifydialogs
+            m_lboxDlgPrompt,  //     prompt
+            m_lboxDlgPers;    // the config location for dialog pers data
+
+   // numeric help id
    int m_HelpId;
 
 private:
@@ -344,6 +366,9 @@ class wxOptionsPageFolderView : public wxOptionsPageStandard
 public:
    wxOptionsPageFolderView(wxNotebook *parent, Profile *profile);
 
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
    void OnButton(wxCommandEvent&);
 
 private:
@@ -374,7 +399,7 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   void OnIdle(wxIdleEvent&);
+   void OnUpdateUIBtns(wxUpdateUIEvent&);
 
    void OnButton(wxCommandEvent&);
    void OnNewFolder(wxCommandEvent&);
