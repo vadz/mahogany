@@ -584,7 +584,7 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
    }
 
    viewer->Create(this, parent);
-  
+
    OnViewerChange(m_viewer, viewer);
    if ( m_viewer )
       delete m_viewer;
@@ -1869,151 +1869,181 @@ MessageView::ProcessAllNestedParts(const MimePart *mimepart)
 }
 
 void
+MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
+{
+   // find the best subpart we can show
+   //
+   // normally we'd have to iterate from end as the best
+   // representation (i.e. the most faithful) is the last one
+   // according to RFC 2046, but as we only have forward pointers
+   // we iterate from the start - not a big deal
+   const MimePart *partChild = mimepart->GetNested();
+
+   const MimePart *partBest = partChild;
+   while ( partChild )
+   {
+      String mimetype = partChild->GetType().GetFull();
+
+      if ( mimetype == _T("TEXT/PLAIN") ||
+            m_viewer->CanProcess(mimetype) )
+      {
+         // remember this one as the best so far
+         partBest = partChild;
+      }
+
+      partChild = partChild->GetNext();
+   }
+
+   // show just the best one
+   CHECK_RET(partBest != 0, _T("No part can be displayed !"));
+
+   // the content of an alternative is not necessarily a single
+   // part, so process it as well.
+   ProcessPart(partBest);
+}
+
+void
+MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
+{
+   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") )
+   {
+      MimePart * const signedPart = mimepart->GetNested();
+      MimePart * const signaturePart = signedPart->GetNext();
+      if ( !signedPart || !signaturePart )
+      {
+         wxLogError(_("This message pretends to be signed but "
+                      "doesn't have the correct MIME structure."));
+         return;
+      }
+
+      // Let's not be too strict on what we receive
+      //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
+      //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
+      //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
+      //           _T("Signed part should be 7 bits"));
+      //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
+      //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
+
+      if ( signaturePart->GetType().GetFull() != _T("APPLICATION/PGP-SIGNATURE") )
+      {
+         wxLogError(_("Signed message signature does not have a "
+                      "\"application/pgp-signature\" type, "
+                      "ignoring it."));
+         return;
+      }
+
+
+      // the signature is applied to both the headers and the body of the
+      // message and it is done after encoding the latter so we need to get it
+      // in the raw form
+      String signedText = signedPart->GetHeaders();
+
+      unsigned long signedTextLength = 0;
+      const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
+      signedText += String(wxConvertMB2WX(c), signedTextLength);
+
+      unsigned long signatureLength = 0;
+      c = (const char *)signaturePart->GetContent(&signatureLength);
+      String signature(wxConvertMB2WX(c), signatureLength);
+
+      MCryptoEngineFactory * const factory
+         = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
+      if ( factory )
+      {
+         MCryptoEngine* pgpEngine = factory->Get();
+
+         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
+
+         MCryptoEngine::Status status =
+               pgpEngine->VerifyDetachedSignature(signedText, signature, log);
+
+         ClickablePGPInfo *pgpInfo = NULL;
+         const String& user = log->GetUserID();
+         switch ( status )
+         {
+            case MCryptoEngine::OK:
+               // create an icon for the sig just to show that it was there
+               pgpInfo = new PGPInfoGoodSig(this, user);
+               break;
+
+            case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
+               pgpInfo = new PGPInfoExpiredSig(this, user);
+               break;
+
+            case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
+               pgpInfo = new PGPInfoUntrustedSig(this, user);
+               break;
+
+            case MCryptoEngine::NONEXISTING_KEY_ERROR:
+               pgpInfo = new PGPInfoKeyNotFoundSig(this, user);
+               break;
+
+            default:
+               pgpInfo = new PGPInfoBadSig(this, user);
+         }
+
+         ProcessPart(signedPart);
+
+         if ( pgpInfo )
+         {
+            pgpInfo->SetLog(log);
+            ShowText(_T("\r\n"));
+
+            m_viewer->InsertClickable(pgpInfo->GetBitmap(),
+                                      pgpInfo,
+                                      pgpInfo->GetColour());
+
+            ShowText(_T("\r\n"));
+         }
+         else
+         {
+            delete log;
+         }
+
+         factory->DecRef();
+      }
+      else
+      {
+         FAIL_MSG( _T("failed to create PGPEngineFactory") );
+
+         ProcessPart(signedPart);
+      }
+   }
+   else // unknown signature protocol, don't try to interpret it
+   {
+      ProcessAllNestedParts(mimepart);
+   }
+}
+
+void
+MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
+{
+   // TODO: support for DIGEST and RELATED
+
+   if ( subtype == _T("ALTERNATIVE") )
+   {
+      ProcessAlternativeMultiPart(mimepart);
+   }
+   else if ( subtype == _T("SIGNED") )
+   {
+      ProcessSignedMultiPart(mimepart);
+   }
+   else // process all unknown as MIXED (according to the RFC 2047)
+   {
+      ProcessAllNestedParts(mimepart);
+   }
+}
+
+void
 MessageView::ProcessPart(const MimePart *mimepart)
 {
    CHECK_RET( mimepart, _T("MessageView::ProcessPart: NULL mimepart") );
 
-   MimeType type = mimepart->GetType();
+   const MimeType type = mimepart->GetType();
    switch ( type.GetPrimary() )
    {
       case MimeType::MULTIPART:
-         {
-            String subtype = type.GetSubType();
-
-            // TODO: support for DIGEST, RELATED and SIGNED
-            if ( subtype == _T("ALTERNATIVE") )
-            {
-               // find the best subpart we can show
-               //
-               // normally we'd have to iterate from end as the best
-               // representation (i.e. the most faithful) is the last one
-               // according to RFC 2046, but as we only have forward pointers
-               // we iterate from the start - not a big deal
-               const MimePart *partChild = mimepart->GetNested();
-
-               const MimePart *partBest = partChild;
-               while ( partChild )
-               {
-                  String mimetype = partChild->GetType().GetFull();
-
-                  if ( mimetype == _T("TEXT/PLAIN") ||
-                        m_viewer->CanProcess(mimetype) )
-                  {
-                     // remember this one as the best so far
-                     partBest = partChild;
-                  }
-
-                  partChild = partChild->GetNext();
-               }
-
-               // show just the best one
-               CHECK_RET(partBest != 0, _T("No part can be displayed !"));
-               // The content of an alternative is not necessarily a single part.
-               // So process it as well.
-               ProcessPart(partBest);
-            }
-            else if ( subtype == _T("SIGNED") )
-            {
-               String protocol = mimepart->GetParam(_T("protocol"));
-               if ( protocol == _T("application/pgp-signature") )
-               {
-                  MimePart *signedPart = mimepart->GetNested();
-                  CHECK_RET( signedPart != 0, _T("Should have a signed part") );
-                  MimePart *signaturePart = signedPart->GetNext();
-                  CHECK_RET( signaturePart != 0, _T("Should have a signature part") );
-                  // Let's not be too strict on what we receive
-                  //CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
-                  //            signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
-                  //            signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
-                  //           _T("Signed part should be 7 bits"));
-                  //CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
-                  //CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
-                  MimeType signatureType = signaturePart->GetType();
-                  String fullSignatureType = signatureType.GetFull();
-                  CHECK_RET( fullSignatureType == _T("APPLICATION/PGP-SIGNATURE"),
-                             _T("Signature does not have a \"application/pgp-signature\" type"));
-
-                  // Get the raw content (with headers) of the signed part
-                  unsigned long signedTextLength = 0;
-                  const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
-                  String signedText(wxConvertMB2WX(c), signedTextLength);
-                  unsigned long signatureLength = 0;
-                  c = (const char *)signaturePart->GetContent(&signatureLength);
-                  String signature(wxConvertMB2WX(c), signatureLength);
-                  
-                  MCryptoEngineFactory * const factory
-                     = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
-                  if ( factory )
-                  {
-                     MCryptoEngine* pgpEngine = factory->Get();
-                     
-                     MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
-
-                     MCryptoEngine::Status status = pgpEngine->VerifyDetachedSignature(
-                        signedText, signature, log);
-
-                     ClickablePGPInfo *pgpInfo = NULL;
-                     const String& user = log->GetUserID();
-                     switch ( status ) 
-                     {
-                        case MCryptoEngine::OK:
-                           // create an icon for the sig just to show that it was there
-                           pgpInfo = new PGPInfoGoodSig(this, user);
-                           break;
-
-                        case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
-                           pgpInfo = new PGPInfoExpiredSig(this, user);
-                           break;
-
-                        case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
-                           pgpInfo = new PGPInfoUntrustedSig(this, user);
-                           break;
-
-                        case MCryptoEngine::NONEXISTING_KEY_ERROR:
-                           pgpInfo = new PGPInfoKeyNotFoundSig(this, user);
-                           break;
-
-                        default:
-                           pgpInfo = new PGPInfoBadSig(this, user);
-                     }
-
-                     ProcessPart(signedPart);
-
-                     if ( pgpInfo )
-                     {
-                        pgpInfo->SetLog(log);
-                        ShowText(_T("\r\n"));
-
-                        m_viewer->InsertClickable(pgpInfo->GetBitmap(),
-                                                pgpInfo,
-                                                pgpInfo->GetColour());
-
-                        ShowText(_T("\r\n"));
-                     }
-                     else
-                     {
-                        delete log;
-                     }
-
-                     factory->DecRef();
-                  }
-                  else
-                  {
-                     FAIL_MSG( _T("failed to create PGPEngineFactory") );
-                     ProcessPart(signedPart);
-                  }
-
-               } 
-               else
-               {
-                  ProcessAllNestedParts(mimepart);
-               }
-            }
-            else // assume MIXED for all unknown
-            {
-               ProcessAllNestedParts(mimepart);
-            }
-         }
+         ProcessMultiPart(mimepart, type.GetSubType());
          break;
 
       case MimeType::MESSAGE:

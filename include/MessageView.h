@@ -304,6 +304,15 @@ protected:
    /// process part and decided what to do with it (call ShowPart or skip)
    void ProcessPart(const MimePart *part);
 
+   /// process a multipart part
+   void ProcessMultiPart(const MimePart *part, const String& subtype);
+
+   /// process a multipart/alternative part
+   void ProcessAlternativeMultiPart(const MimePart *part);
+
+   /// process a multipart/signed part
+   void ProcessSignedMultiPart(const MimePart *part);
+
    /// call ProcessPart() for all subparts of this part
    void ProcessAllNestedParts(const MimePart *part);
 
