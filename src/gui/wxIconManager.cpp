@@ -36,11 +36,19 @@
 #  define   hlink_xpm   "hlink"
 #  define   ftplink_xpm "ftplink"
 #  define   mframe_xpm  "mframe"
+#  define   MainFrame_xpm          "MainFrame"
+#  define   tb_exit                "tb_exit"
+#  define   tb_help                "tb_help"
+#  define   tb_open                "tb_open"
+#  define   tb_mail_compose        "tb_mail_compose"
+#  define   tb_book_open           "tb_book_open"
+#  define   tb_preferences         "tb_preferences"
 #else   //real XPMs
 #  include  "../src/icons/unknown.xpm"
 #  include  "../src/icons/hlink.xpm"
 #  include  "../src/icons/ftplink.xpm"
 #  include  "../src/icons/MFrame.xpm"
+#  include  "../src/icons/MainFrame.xpm"
 #endif  //Win/Unix
 
 #include    "gui/wxIconManager.h"
@@ -57,7 +65,8 @@ wxIconManager::wxIconManager()
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
-   AddIcon("MFrame", ftplink_xpm);
+   AddIcon("MFrame", MFrame_xpm);
+   AddIcon("MainFrame", MainFrame_xpm);
    unknownIcon = new wxIcon(unknown_xpm,-1,-1);
 }
 
