@@ -368,6 +368,8 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
 
    CHECK_RET( mf, "NULL MailFolder in MfCloser::Add()");
 
+   CHECK_RET( delay > 0, "folder close timeout must be positive" );
+
    wxLogTrace(TRACE_MF_REF, "Adding '%s' to gs_MailFolderCloser",
               mf->GetName().c_str());
 
@@ -446,8 +448,11 @@ void MfCloser::RestartTimer()
    if ( m_timer.IsRunning() )
       m_timer.Stop();
 
-   // delay is in seconds, we need ms here
-   m_timer.Start(m_interval * 1000);
+   if ( m_interval )
+   {
+      // delay is in seconds, we need ms here
+      m_timer.Start(m_interval * 1000);
+   }
 }
 
 void MfCloseTimer::Notify(void)
