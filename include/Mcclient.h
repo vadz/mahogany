@@ -13,8 +13,10 @@
 extern "C"
 {
 #   define private cc__private
+#ifdef    M_LOGICAL_OP_NAMES
 #   define or cc_or
 #   define not cc_not
+#endif  //M_LOGICAL_OP_NAMES
 #     include <stdio.h>
 #     include <mail.h>
 #     include <osdep.h>
@@ -23,8 +25,10 @@ extern "C"
 #     include <nntp.h>
 #     include <misc.h>
 #   undef private   
+#ifdef    M_LOGICAL_OP_NAMES
 #   undef or
 #   undef not
+#endif  //M_LOGICAL_OP_NAMES
 // stupid c-client lib redefines utime() in an incompatible way
 #   undef utime
 }
