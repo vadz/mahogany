@@ -146,6 +146,8 @@ public:
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
+   /// update the folderview
+   virtual void OnMsgStatusEvent(MEventMsgStatusData &event);
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
    /// return profile name for persistent controls
@@ -242,6 +244,8 @@ private:
 private:
    void OnOptionsChange(MEventOptionsChangeData& event);
 
+   void SetEntry(HeaderInfoList *hi, size_t idx);
+   
    // MEventManager reg info
    void *m_regOptionsChange;
 };

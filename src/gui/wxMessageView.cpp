@@ -372,6 +372,7 @@ wxMessageView::OnChar(wxKeyEvent& event)
       SetEditable(TRUE);
       event.Skip();
       SetEditable(FALSE);
+      SetCursorVisibility(1);
    }
    else
       event.Skip();
@@ -816,6 +817,7 @@ wxMessageView::Update(void)
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
    SetEditable(FALSE); 
+   SetCursorVisibility(-1);
    RequestUpdate();
 }
 

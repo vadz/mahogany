@@ -943,7 +943,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    // update rectangle (although they are drawn on the memDC, this is
    // needed to erase it):
    m_llist->InvalidateUpdateRect();
-   if(m_CursorVisibility != 0)
+   if(m_CursorVisibility == 1)
    {
       // draw a thick cursor for editable windows with focus
       m_llist->DrawCursor(*m_memDC,

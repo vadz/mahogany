@@ -1199,6 +1199,13 @@ MailFolderCmn::UpdateListing(void)
 void
 MailFolderCmn::UpdateMessageStatus(UIdType uid)
 {
+   /* I thought we could be more clever here, but it seems that
+      c-client/imapd create *lots* of unnecessary status change
+      entries even when only one message status changes. So we just
+      tell the folder to send a single event and invalidate the
+      listing. That is more economical. */
+   RequestUpdate();
+#if 0
    if(m_Config.m_ReSortOnChange)
       RequestUpdate(); // we need a complete new listing
    else
@@ -1206,6 +1213,7 @@ MailFolderCmn::UpdateMessageStatus(UIdType uid)
       /// just tell them that we have an updated listing:
       MEventManager::Send( new MEventFolderUpdateData (this) );
    }
+#endif
 }
 
 void
@@ -1310,5 +1318,5 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
       return rc;
    }
    else
-      return -1; // no filter module
+      return 0; // no filter module
 }

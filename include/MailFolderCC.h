@@ -503,6 +503,8 @@ public:
       { ms_EventQueue.push_back(evptr); }
 
 protected:
+   /// Updates the status of a single message.
+   void UpdateMessageStatus(unsigned long seqno);
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
    /// The list of events to be processed.
@@ -600,6 +602,9 @@ public:
        @param   str   message string
        */
    static void mm_fatal(char *str);
+
+   /// gets called when flags for a message have changed
+   static void mm_flags(MAILSTREAM *stream, unsigned long number);
 
    /* Handles the mm_overview_header callback on a per folder basis. */
    static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov);

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * FolderView.h : a window which shows a MailFolder                 *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -28,6 +28,8 @@ public:
          ASSERT_MSG( m_regCookieTreeChange, "can't reg folder view with event manager");
          m_regCookieFolderUpdate = MEventManager::Register(*this, MEventId_FolderUpdate);
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
+         m_regCookieMsgStatus = MEventManager::Register(*this, MEventId_MsgStatus);
+         ASSERT_MSG( m_regCookieMsgStatus, "can't reg folder view with event manager");
          m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
       }
@@ -38,6 +40,7 @@ public:
       {
          MEventManager::Deregister(m_regCookieTreeChange);
          MEventManager::Deregister(m_regCookieFolderUpdate);
+         MEventManager::Deregister(m_regCookieMsgStatus);
          MEventManager::Deregister(m_regCookieASFolderResult);
          m_regCookieTreeChange = NULL;
       }
@@ -59,6 +62,8 @@ public:
       }
       else if ( ev.GetId() == MEventId_ASFolderResult )
          OnASFolderResultEvent((MEventASFolderResultData &) ev );
+      else if ( ev.GetId() == MEventId_MsgStatus )
+         OnMsgStatusEvent((MEventMsgStatusData&)ev );
       else if ( ev.GetId() == MEventId_FolderUpdate )
          OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
   
@@ -79,6 +84,8 @@ protected:
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;
    /// the derived class should update their display
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
+   /// the derived class should update their display
+   virtual void OnMsgStatusEvent(MEventMsgStatusData &event) = 0;
    /// the derived class should react to the result to an asynch operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event) = 0;
 
@@ -91,6 +98,7 @@ protected:
    MailFolder *m_MailFolder;
    
 private:
-   void *m_regCookieTreeChange, *m_regCookieFolderUpdate, *m_regCookieASFolderResult;
+   void *m_regCookieTreeChange, *m_regCookieFolderUpdate,
+      *m_regCookieASFolderResult, *m_regCookieMsgStatus;
 };
 #endif

@@ -856,20 +856,68 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
 }
 
+
+void
+wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
+{
+   ASSERT_RET(listing);
+   ASSERT_RET(index < listing->Count());
+
+   String   line;
+   UIdType nsize;
+   unsigned day, month, year;
+   String sender, subject, size;
+   bool selected;
+   bool namesOnly = m_settingsCurrent.senderOnlyNames;
+
+   HeaderInfo const *hi = (*listing)[index];
+
+   subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
+   nsize = day = month = year = 0;
+   size = strutil_ultoa(nsize);
+   selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
+   sender = hi->GetFrom();
+   if (namesOnly)
+   {
+      int pos = sender.Find(" <");
+      if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
+   }
+   m_FolderCtrl->SetEntry(index,
+                          MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
+                          sender,
+                          subject,
+                          strutil_ftime(hi->GetDate(),
+                                        m_settingsCurrent.dateFormat,
+                                        m_settingsCurrent.dateGMT),
+                          strutil_ultoa(hi->GetSize()));
+   m_FolderCtrl->Select(index,selected);
+   m_FolderCtrl->SetItemState(index, wxLIST_STATE_FOCUSED,
+                              (hi->GetUId() == m_FocusedUId)?
+                              wxLIST_STATE_FOCUSED : 0);
+   wxListItem info;
+   info.m_itemId = index;
+   m_FolderCtrl->GetItem(info);
+   int status = hi->GetStatus();
+   info.SetTextColour(
+      ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
+      : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
+          ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
+            : m_settingsCurrent.NewCol )
+          : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
+              m_settingsCurrent.FgCol :
+              m_settingsCurrent.UnreadCol)
+         )
+      );
+   m_FolderCtrl->SetItem(info);
+}
+
+   
+
 void
 wxFolderView::Update(HeaderInfoList *listing)
 {
    if ( !m_ASMailFolder )
       return;
-
-   long i;
-   String   line;
-   UIdType nsize;
-   unsigned day, month, year;
-   int n;
-   String status, sender, subject, size;
-   bool selected;
-   bool namesOnly = m_settingsCurrent.senderOnlyNames;
 
    if(m_UpdateSemaphore == true)
       return; // don't call this code recursively
@@ -887,12 +935,12 @@ wxFolderView::Update(HeaderInfoList *listing)
    }
    else
       listing->IncRef();
-
+   
    wxBeginBusyCursor();
 
-   n = listing->Count();
+   size_t n = listing->Count();
 
-   if(n < m_NumOfMessages)  // messages have been deleted, start over
+   if(n < (size_t) m_NumOfMessages)  // messages have been deleted, start over
    {
       m_FolderCtrl->Clear();
       m_NumOfMessages = 0;
@@ -903,48 +951,10 @@ wxFolderView::Update(HeaderInfoList *listing)
    focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
    bool foundFocus = false;
    HeaderInfo const *hi;
-   for(i = 0; i < n; i++)
+   for(size_t i = 0; i < n; i++)
    {
       hi = (*listing)[i];
-      subject = wxString(' ', 3*hi->GetIndentation());
-      subject << hi->GetSubject();
-      nsize = day = month = year = 0;
-      size = strutil_ultoa(nsize);
-      selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
-      sender = hi->GetFrom();
-      if (namesOnly)
-      {
-         int pos = sender.Find(" <");
-	 if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
-      }
-      m_FolderCtrl->SetEntry(i,
-                             MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
-                             sender,
-                             subject,
-                             strutil_ftime(hi->GetDate(),
-                                           m_settingsCurrent.dateFormat,
-                                           m_settingsCurrent.dateGMT),
-                             strutil_ultoa(hi->GetSize()));
-      m_FolderCtrl->Select(i,selected);
-      m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
-                                 (hi->GetUId() == m_FocusedUId)?
-                                 wxLIST_STATE_FOCUSED : 0);
-      wxListItem info;
-      info.m_itemId = i;
-      m_FolderCtrl->GetItem(info);
-      int status = hi->GetStatus();
-      info.SetTextColour(
-         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
-         : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
-             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
-               : m_settingsCurrent.NewCol )
-             : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
-                 m_settingsCurrent.FgCol :
-                 m_settingsCurrent.UnreadCol)
-             )
-         );
-      m_FolderCtrl->SetItem(info);
-
+      SetEntry(listing, i);
       if(hi->GetUId() == m_FocusedUId)
          foundFocus = true;
    }
@@ -1315,6 +1325,19 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 }
 
 
+/// update only one entry in listing:
+void
+wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
+{
+   if(event.GetFolder() == m_MailFolder)
+   {
+      m_FolderCtrl->Hide(); // optimise for speed under MSW
+      SetEntry(event.GetHeaders(), event.GetIndex());
+      m_FolderCtrl->Show();
+   }
+}
+   
+
 void
 wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
@@ -1385,8 +1408,10 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    }
    result->DecRef();
 
+#if 0 // SLOW; UNNEEDED
    if ( m_ASMailFolder )
       m_ASMailFolder->Ping(); // make sure our listing is updated if needed
+#endif
 }
 
 

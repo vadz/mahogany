@@ -29,8 +29,12 @@ enum MEventId
    MEventId_NewMail = 100,
    /// MEventFolderTreeChangeData
    MEventId_FolderTreeChange = 200,
-   /// MEventFolderUpdateData
+   /// MEventFolderUpdateData -- there's a new folder listing
    MEventId_FolderUpdate = 400,
+   /// MEventFolderStatusData -- folder status (e.g. no of new msgs) has changed
+   MEventId_FolderStatus = 401,
+   /// MEventMsgStatusData
+   MEventId_MsgStatus = 402,
    /// MEventASFolderResult
    MEventId_ASFolderResult = 800,
    /// MEventOptionsChangeData
@@ -149,6 +153,64 @@ public:
 private:
    MailFolder           *m_folder;
    HeaderInfoList       *m_listing;
+};
+// ----------------------------------------------------------------------------
+/** MEventFolderStatus Data - Does not carry any data apart from pointer to
+ * mailfolder.*/
+class MEventFolderStatusData : public MEventData
+{
+public:
+   /** Constructor.
+   */
+   MEventFolderStatusData(MailFolder *folder)
+      : MEventData(MEventId_FolderStatus)
+      {
+         m_folder = folder;
+         m_folder->IncRef();
+      }
+   ~MEventFolderStatusData()
+      {
+         m_folder->DecRef();
+      }
+   /// get the folder which changed
+   MailFolder *GetFolder() const { return m_folder; }
+private:
+   MailFolder           *m_folder;
+};
+// ----------------------------------------------------------------------------
+/** MEventMsgStatus Data - Carries folder pointer and index
+    in folder listing for data that changed.*/
+class MEventMsgStatusData : public MEventData
+{
+public:
+   /** Constructor.
+   */
+   MEventMsgStatusData(MailFolder *folder,
+                             size_t index,
+                             HeaderInfoList *listing)
+      : MEventData(MEventId_MsgStatus)
+      {
+         m_folder = folder;
+         m_folder->IncRef();
+         m_listing = listing;
+         m_listing->IncRef();
+         m_index = index;
+      }
+   ~MEventMsgStatusData()
+      {
+         m_folder->DecRef();
+         m_listing->DecRef();
+      }
+   /// get the folder which changed
+   MailFolder *GetFolder() const { return m_folder; }
+   /// Get the new listing. Don't IncRef/DecRef it, exists as long as event.
+   HeaderInfoList *GetHeaders() const { return m_listing; }
+   /// get the folder which changed
+   size_t GetIndex() const { return m_index; }
+private:
+   MailFolder           *m_folder;
+   HeaderInfoList       *m_listing;
+   size_t                m_index;
 };
 
 // ----------------------------------------------------------------------------

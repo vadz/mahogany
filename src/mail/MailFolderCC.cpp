@@ -75,6 +75,9 @@ extern "C"
 #define QPRINT_MIDDLEMARKER_U "?Q?"
 #define QPRINT_MIDDLEMARKER_L "?q?"
 
+// set this to 0 or 1 to disable/enable debug logging
+#define CCLIENT_DLOG   0
+
 // ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
@@ -635,17 +638,6 @@ static String GetImapSpec(int type, int flags,
 
 
 
-/** Builds an folder specification */
-static
-String BuildFolderSpec(const String &host,
-                       FolderType protocol,
-                       const String &mailbox = "")
-{
-   return GetImapSpec(protocol, 0, mailbox, host, "");
-}
-
-
-
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
@@ -692,7 +684,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       String prompt, fname;
       fname = name;
       if(! fname) fname = mboxpath;
-      prompt.Printf(_("Please enter the password for folder '%s':"), fname.c_str());
+      prompt.Printf(_("Please enter the password for folder '%s':"), symname.c_str());
       if(! MInputBox(&pword,
                      _("Password required"),
                      prompt, NULL,
@@ -1594,7 +1586,6 @@ void
 MailFolderCC::BuildListing(void)
 {
    m_BuildListingSemaphore = true;
-   m_UpdateNeeded = false;
 
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
 
@@ -1705,6 +1696,7 @@ MailFolderCC::BuildListing(void)
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
    m_NeedFreshListing = false;
+   m_UpdateNeeded = true;
 }
 
 int
@@ -2167,6 +2159,8 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
          if(mf->m_MailStream != NULL)
             mf->RequestUpdate();
       }
+      MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists);
+      MailFolderCC::QueueEvent(evptr);
    }
    else
    {
@@ -2296,6 +2290,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 void
 MailFolderCC::mm_dlog(String str)
 {
+#if CCLIENT_DLOG
    String msg = _("c-client debug: ");
    // check for PASS
    if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
@@ -2321,6 +2316,7 @@ MailFolderCC::mm_dlog(String str)
    }
 
    LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
+#endif
 }
 
 /** get user name and password
@@ -2406,6 +2402,38 @@ MailFolderCC::mm_fatal(char *str)
    FatalError(msg2);
 }
 
+void
+MailFolderCC::UpdateMessageStatus(unsigned long seqno)
+{
+   /* If a new listing is required, we don't need to do anything to
+      update the old one.: */
+   if(m_NeedFreshListing || m_Listing == NULL)
+      return; // will be regenerated anyway
+
+   // Otherwise: update the current listing information:
+   
+   // Find the listing entry for this message:
+   UIdType uid = mail_uid(m_MailStream, seqno);
+   size_t i;
+   for(i = 0; i < m_Listing->Count() && (*m_Listing)[i]->GetUId() != uid; i++)
+      ;
+   ASSERT_RET(i < m_Listing->Count());
+   
+   MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
+   ((HeaderInfoCC *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
+
+   // tell all interested that status changed
+   MEventManager::Send( new MEventMsgStatusData (this, i, m_Listing) );
+}
+
+/* static */
+void
+MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long number)
+{
+   MailFolderCC *mf = LookupObject(stream);
+   if(mf)
+      mf->UpdateMessageStatus(number);
+}
 
 /* static */
 MailFolderCC::EventQueue MailFolderCC::ms_EventQueue;
@@ -2455,70 +2483,41 @@ MailFolderCC::ProcessEventQueue(void)
          delete evptr->m_args[0].m_str;
          break;
       case Exists:
-         /* The Exists event is ignored here.
-            When the mm_exists() callback is called, the
-            m_nMessages counter is updated immediately,
-            circumvening the event queue. It should never appear.
-            The mm_exists() callback calls RequestUpdate() though.*/
-         ASSERT(0);
-         break;
-            /* These three events all notify us of changes to the folder
-            which we need to incorporate into our listing of the
-            folder. So we request an update which marks the folder to
-            be updated and generates an Update event which will be
-            processed later in this loop. */
       case Status:
-      case Flags:
       {
-         /* We just need to update the information for exactly one
-            message.
-         */
-         MailFolderCC *mf = LookupObject(evptr->m_stream);
-         CHECK_RET(mf,"NULL mailfolder");
-         // Find the listing entry for this message:
-         UIdType uid = mail_uid(evptr->m_stream,
-                                evptr->m_args[0].m_ulong);
-         HeaderInfoList *hil = mf->GetHeaders();
-         ASSERT(hil);
-         if(hil)
-         {
-            UIdType i;
-            for(i = 0; i < hil->Count() && (*hil)[i]->GetUId() != uid; i++)
-               ;
-            if(i < hil->Count())
-            {
-               ASSERT(((*hil)[i])->GetUId() == uid);
-               MESSAGECACHE *elt = mail_elt (evptr->m_stream,evptr->m_args[0].m_ulong);
-               ((HeaderInfoCC *)((*hil)[i]))->m_Status = GetMsgStatus(elt);
-               // now we sent an update event to update folderviews etc
-               mf->UpdateMessageStatus(uid);
-            }
-            hil->DecRef();
-         }
+         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
+         ASSERT(mf);
+         // tell all interested that the folder status has changed:
+         MEventManager::Send( new MEventFolderStatusData (mf) );
          break;
       }
-      case Expunged:
+      case Flags: // obsolete
+      case Update: // obsolete
+         ASSERT_MSG(0,"obsolete code called");
+         break;
+      case Expunged: // invalidate our header listing:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
          if(mf) mf->RequestUpdate();  // Queues an Update event.
          break;
       }
-      /* An update event is queued by callbacks which think that the
-         folder listing might be no longer valid now. */
-      case Update:
-      {
-         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT(mf);
-         if(mf && mf->UpdateNeeded())  // only call it once
-         {
-           // tell all interested that an update might be required
-            MEventManager::Send( new MEventFolderUpdateData (mf) );
-         }
-         break;
-      }
       }// switch
       delete evptr;
+   }
+
+   /* Now we check all folders if we need to send update events: */
+   StreamConnectionList::iterator i;
+   MailFolderCC *mf;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+   {
+      mf = (*i)->folder;
+      if( mf && mf->m_UpdateNeeded)
+      {
+         mf->m_UpdateNeeded = false;
+         // tell all interested that an update might be required
+         MEventManager::Send( new MEventFolderUpdateData (mf) );
+      }
    }
 }
 
@@ -2529,14 +2528,6 @@ MailFolderCC::RequestUpdate(void)
    // update event.
    if(! m_NeedFreshListing)
       m_NeedFreshListing = true;
-
-   // we want to queue only one update event:
-   if(! m_UpdateNeeded)
-   {
-      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
-      MailFolderCC::QueueEvent(evptr);
-      m_UpdateNeeded = true;
-   }
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
@@ -2556,7 +2547,7 @@ MailFolderCC::Subscribe(const String &host,
                         const String &mailboxname,
                         bool subscribe)
 {
-   String spec = BuildFolderSpec(host, protocol, mailboxname);
+   String spec = GetImapSpec(protocol, 0, mailboxname, host, "");
    return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
            : mail_unsubscribe (NIL, (char *)spec.c_str()) ) != NIL;
 }
@@ -2758,9 +2749,7 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 {
    if(mm_disable_callbacks)
       return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Flags);
-   evptr->m_args[0].m_ulong = number;
-   MailFolderCC::QueueEvent(evptr);
+   MailFolderCC::mm_flags(stream, number);
 }
 
 void

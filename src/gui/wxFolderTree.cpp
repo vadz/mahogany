@@ -310,7 +310,7 @@ private:
    // event registration handles
    void *m_eventFolderChange;    // for folder creatio/destruction
    void *m_eventOptionsChange;   // options change (update icons)
-
+   void *m_eventFolderStatus;    // when a folder's status changes
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
    String m_openFolderName,
@@ -682,8 +682,10 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                                  MEventId_FolderTreeChange);
    m_eventOptionsChange = MEventManager::Register(*this,
                                                   MEventId_OptionsChange);
+   m_eventFolderStatus = MEventManager::Register(*this,
+                                                  MEventId_FolderStatus);
 
-   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange,
+   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange && m_eventFolderStatus,
                "folder tree failed to register with event manager" );
 }
 
@@ -1228,7 +1230,15 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
-
+   else if ( ev.GetId() == MEventId_FolderStatus )
+   {
+      // FIXME: Vadim: here you can call MailFolder::CountMessages() to 
+      // count the recent messages, or CountNewMessages()
+      // Maybe we should drop the distinction between recent and new??
+      MEventFolderStatusData& event = (MEventFolderStatusData &)ev;
+      wxLogError("wxFolderTree need implementation of FolderStatus event handling (%s)",
+                 event.GetFolder()->GetName().c_str());
+   }
    return true;
 }
 
@@ -1300,6 +1310,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 {
    MEventManager::Deregister(m_eventFolderChange);
    MEventManager::Deregister(m_eventOptionsChange);
+   MEventManager::Deregister(m_eventFolderStatus);
 
    delete GetImageList();
 
