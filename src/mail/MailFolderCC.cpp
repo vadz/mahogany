@@ -4096,7 +4096,10 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 
             case MSO_SENDER:
                if ( !sortParams.detectOwnAddresses )
+               {
                   sortFunction = SORTFROM;
+                  break;
+               }
                //else: server side sorting doesn't support this, fall through
 
             case MSO_STATUS:
