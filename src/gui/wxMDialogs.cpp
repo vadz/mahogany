@@ -757,7 +757,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    // strings used for primitive alignment of text
    static const char *align = "                 ";
    static const char *align2 = "        ";
+#ifdef __WXMSW__
    static const char *align4 = "    ";
+#endif
 
    wxLayoutList *ll = GetLayoutList();
    wxBitmap *bm = new wxBitmap(background);
