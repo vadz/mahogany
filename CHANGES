@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+09.10.01 VZ: added "Rename" and "Copy" buttons in the filters dialog
 08.10.01 VZ: "Reply to list" command - thanks to SF for forcing me to add it
 26.09.01 VZ: allow renaming folders and mailboxes independently
 24.09.01 VZ: quickly select next unread folder in the tree with Ctrl-Up/Down

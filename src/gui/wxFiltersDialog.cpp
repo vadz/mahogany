@@ -1,10 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxMFilterDialog.cpp : dialog for setting up filter rules         *
- *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxFiltersDialog.cpp - GUI for editing mail filters
+// Purpose:     implements all the dialogs for configuring filters
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1999
+// CVS-ID:      $Id$
+// Copyright:   (c) 1999-2001 Mahogany Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -61,10 +65,12 @@
 // control ids
 enum
 {
-   // for wxFiltersDialog and wxFolderFiltersDialog
+   // for wxAllFiltersDialog and wxFolderFiltersDialog
    Button_Add = 100,
    Button_Delete,
    Button_Edit,
+   Button_Rename,
+   Button_Copy,
 
    // for wxOneFilterDialog
    Text_Program = 200
@@ -977,15 +983,19 @@ wxOneFilterDialog::TransferDataFromWindow()
    return DoTransferDataFromWindow(m_FilterData);
 }
 
+// ============================================================================
+// wxAllFiltersDialog - dialog for managing all filter rules in the program
+// ============================================================================
+
 // ----------------------------------------------------------------------------
-// wxFiltersDialog - dialog for managing all filter rules in the program
+// declaration
 // ----------------------------------------------------------------------------
 
-class wxFiltersDialog : public wxManuallyLaidOutDialog
+class wxAllFiltersDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor & dtor
-   wxFiltersDialog(wxWindow *parent);
+   wxAllFiltersDialog(wxWindow *parent);
 
    // transfer data to/from dialog
    virtual bool TransferDataToWindow();
@@ -996,18 +1006,18 @@ public:
 
    // event handlers
    void OnAddFiter(wxCommandEvent& event);
+   void OnCopyFiter(wxCommandEvent& event);
    void OnEditFiter(wxCommandEvent& event);
+   void OnRenameFiter(wxCommandEvent& event);
    void OnDeleteFiter(wxCommandEvent& event);
    void OnUpdateButtons(wxUpdateUIEvent& event);
 
 protected:
+   bool DoCopyFilter(const wxString& nameOld, const wxString& nameNew);
+   bool DoDeleteFilter(const wxString& name);
+
    // listbox contains the names of all filters
    wxListBox *m_lboxFilters;
-
-   // the Add/Edit/Delete buttons
-   wxButton *m_btnAdd,
-            *m_btnEdit,
-            *m_btnDelete;
 
    // did anything change?
    bool m_hasChanges;
@@ -1016,21 +1026,29 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(wxFiltersDialog, wxManuallyLaidOutDialog)
-   EVT_BUTTON(Button_Add, wxFiltersDialog::OnAddFiter)
-   EVT_BUTTON(Button_Edit, wxFiltersDialog::OnEditFiter)
-   EVT_BUTTON(Button_Delete, wxFiltersDialog::OnDeleteFiter)
+BEGIN_EVENT_TABLE(wxAllFiltersDialog, wxManuallyLaidOutDialog)
+   EVT_BUTTON(Button_Add, wxAllFiltersDialog::OnAddFiter)
+   EVT_BUTTON(Button_Copy, wxAllFiltersDialog::OnCopyFiter)
+   EVT_BUTTON(Button_Edit, wxAllFiltersDialog::OnEditFiter)
+   EVT_BUTTON(Button_Delete, wxAllFiltersDialog::OnDeleteFiter)
+   EVT_BUTTON(Button_Rename, wxAllFiltersDialog::OnRenameFiter)
 
-   EVT_UPDATE_UI(Button_Edit, wxFiltersDialog::OnUpdateButtons)
-   EVT_UPDATE_UI(Button_Delete, wxFiltersDialog::OnUpdateButtons)
+   EVT_UPDATE_UI(Button_Edit, wxAllFiltersDialog::OnUpdateButtons)
+   EVT_UPDATE_UI(Button_Copy, wxAllFiltersDialog::OnUpdateButtons)
+   EVT_UPDATE_UI(Button_Delete, wxAllFiltersDialog::OnUpdateButtons)
+   EVT_UPDATE_UI(Button_Rename, wxAllFiltersDialog::OnUpdateButtons)
 
-   EVT_LISTBOX_DCLICK(-1, wxFiltersDialog::OnEditFiter)
+   EVT_LISTBOX_DCLICK(-1, wxAllFiltersDialog::OnEditFiter)
 END_EVENT_TABLE()
 
-wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
-               : wxManuallyLaidOutDialog(parent,
-                                         _("Configure Filter Rules"),
-                                         "FilterDialog")
+// ----------------------------------------------------------------------------
+// wxAllFiltersDialog creation
+// ----------------------------------------------------------------------------
+
+wxAllFiltersDialog::wxAllFiltersDialog(wxWindow *parent)
+                  : wxManuallyLaidOutDialog(parent,
+                                            _("Configure Filter Rules"),
+                                            "FilterDialog")
 {
    m_hasChanges = false;
 
@@ -1042,46 +1060,66 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
    /* This dialog is supposed to look like this:
 
       +------------------+
-      |listbox of        |
-      |existing filters  |  [new]
-      |                  |  [mod]
-      |                  |  [del]
-      |                  |
+      |listbox of        |  [add]
+      |existing filters  |  [copy]
+      |                  |  [edit]
+      |                  |  [rename]
+      |                  |  [delete]
       +------------------+
 
                 [help][ok][cancel]
    */
 
    // start with the buttons
-   m_btnDelete = new wxButton(this, Button_Delete, _("&Delete"));
+
+   // position "Edit" in the middle and the others relatively to it
+   wxButton *btnEdit = new wxButton(this, Button_Edit, _("&Edit..."));
    c = new wxLayoutConstraints;
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
    c->centreY.SameAs(box, wxCentreY);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   m_btnDelete->SetConstraints(c);
+   btnEdit->SetConstraints(c);
 
-   m_btnAdd = new wxButton(this, Button_Add, _("&Add..."));
+   // above "Edit" we have "Add" and "Copy"
+   wxButton *btnCopy = new wxButton(this, Button_Copy, _("&Copy..."));
    c = new wxLayoutConstraints;
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
-   c->right.SameAs(m_btnDelete, wxRight);
-   c->bottom.Above(m_btnDelete, -LAYOUT_Y_MARGIN);
-   m_btnAdd->SetConstraints(c);
+   c->right.SameAs(btnEdit, wxRight);
+   c->bottom.Above(btnEdit, -LAYOUT_Y_MARGIN);
+   btnCopy->SetConstraints(c);
 
-   m_btnEdit = new wxButton(this, Button_Edit, _("&Edit..."));
+   wxButton *btnAdd = new wxButton(this, Button_Add, _("&Add..."));
    c = new wxLayoutConstraints;
    c->width.Absolute(wBtn);
    c->height.Absolute(hBtn);
-   c->right.SameAs(m_btnDelete, wxRight);
-   c->top.Below(m_btnDelete, LAYOUT_Y_MARGIN);
-   m_btnEdit->SetConstraints(c);
+   c->right.SameAs(btnEdit, wxRight);
+   c->bottom.Above(btnCopy, -LAYOUT_Y_MARGIN);
+   btnAdd->SetConstraints(c);
+
+   // and below - "Rename" and "Delete"
+   wxButton *btnRename = new wxButton(this, Button_Rename, _("&Rename..."));
+   c = new wxLayoutConstraints;
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->right.SameAs(btnEdit, wxRight);
+   c->top.Below(btnEdit, LAYOUT_Y_MARGIN);
+   btnRename->SetConstraints(c);
+
+   wxButton *btnDelete = new wxButton(this, Button_Delete, _("&Delete"));
+   c = new wxLayoutConstraints;
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->right.SameAs(btnEdit, wxRight);
+   c->top.Below(btnRename, LAYOUT_Y_MARGIN);
+   btnDelete->SetConstraints(c);
 
    // create the listbox in the left side of the dialog
    c = new wxLayoutConstraints;
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.LeftOf(m_btnDelete, 3*LAYOUT_X_MARGIN);
+   c->right.LeftOf(btnEdit, 3*LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_lboxFilters = new wxPListBox("FiltersList",
                                   this, -1,
@@ -1095,8 +1133,12 @@ wxFiltersDialog::wxFiltersDialog(wxWindow *parent)
    m_lboxFilters->SetFocus();
 }
 
+// ----------------------------------------------------------------------------
+// wxAllFiltersDialog event handlers
+// ----------------------------------------------------------------------------
+
 void
-wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnAddFiter(wxCommandEvent &event)
 {
    String name = CreateNewFilter(this);
    if ( !name )
@@ -1144,7 +1186,37 @@ wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
 }
 
 void
-wxFiltersDialog::OnEditFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnCopyFiter(wxCommandEvent &event)
+{
+   wxString name = m_lboxFilters->GetStringSelection();
+   CHECK_RET( !!name, "must have selection in the listbox" );
+
+   wxString nameNew = name;
+   for ( ;; )
+   {
+      if ( !MInputBox(&nameNew,
+                      _("Copy filter rule"),
+                      _("New filter name:"),
+                      this) )
+      {
+         // cancelled
+         return;
+      }
+
+      if ( nameNew != name )
+      {
+         break;
+      }
+
+      wxLogError(_("Impossible to copy the filter to itself, "
+                   "please enter a different name."));
+   }
+
+   (void)DoCopyFilter(name, nameNew);
+}
+
+void
+wxAllFiltersDialog::OnEditFiter(wxCommandEvent &event)
 {
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, "must have selection in the listbox" );
@@ -1157,27 +1229,128 @@ wxFiltersDialog::OnEditFiter(wxCommandEvent &event)
 }
 
 void
-wxFiltersDialog::OnDeleteFiter(wxCommandEvent &event)
+wxAllFiltersDialog::OnRenameFiter(wxCommandEvent &event)
+{
+   wxString name = m_lboxFilters->GetStringSelection();
+   CHECK_RET( !!name, "must have selection in the listbox" );
+
+   wxString nameNew = name;
+   if ( !MInputBox(&nameNew,
+                   _("Rename filter rule"),
+                   _("New filter name:"),
+                   this) ||
+        (nameNew == name) )
+   {
+      // cancelled or name unchanged
+      return;
+   }
+
+   if ( DoCopyFilter(name, nameNew) )
+   {
+      // delete the old one now that we copied it successfully
+      DoDeleteFilter(name);
+   }
+
+   MDialog_Message(_("Please note that the renamed filter is not used by "
+                     "any folder any more, you should probably go to the\n"
+                     "\"Folder|Filters\" dialog and change it later.\n"
+                     "\n"
+                     "(sorry for the inconvenience, this is going to be "
+                     "changed in the future version of the program)"),
+                   this,
+                   _("Filter renamed"),
+                   "FilterRenameWarn");
+}
+
+void
+wxAllFiltersDialog::OnDeleteFiter(wxCommandEvent &event)
 {
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, "must have selection in the listbox" );
 
-   if ( MFilter::DeleteFromProfile(name) )
-   {
-      m_hasChanges = true;
-
-      m_lboxFilters->Delete(m_lboxFilters->GetSelection());
-   }
+   (void)DoDeleteFilter(name);
 }
 
 void
-wxFiltersDialog::OnUpdateButtons(wxUpdateUIEvent& event)
+wxAllFiltersDialog::OnUpdateButtons(wxUpdateUIEvent& event)
 {
+   // only enable the buttons working with the current filter if we have any
    event.Enable( m_lboxFilters->GetSelection() != -1 );
 }
 
+// ----------------------------------------------------------------------------
+// wxAllFiltersDialog operations
+// ----------------------------------------------------------------------------
+
 bool
-wxFiltersDialog::TransferDataToWindow()
+wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
+                                 const wxString& nameNew)
+{
+   // caller is supposed to check for this
+   CHECK( nameOld != nameNew, false, "can't copy filter to itself" );
+
+   // check if the filter with the new name doesn't already exist
+   int idx = m_lboxFilters->FindString(nameNew);
+   if ( idx != wxNOT_FOUND )
+   {
+      String msg;
+      msg.Printf(_("Filter '%s' already exists, are you sure you want "
+                   "to overwrite it with the filter '%s'?"),
+                nameOld.c_str(), nameNew.c_str());
+      if ( !MDialog_YesNoDialog(msg,
+                                this,
+                                _("Overwrite filter?"),
+                                false /* no default */,
+                                GetPersMsgBoxName(M_MSGBOX_FILTER_CONFIRM_OVERWRITE)
+                               ) )
+      {
+         // cancelled
+         return false;
+      }
+   }
+
+   if ( !MFilter::Copy(nameOld, nameNew) )
+   {
+      return false;
+   }
+
+   m_hasChanges = true;
+
+   if ( idx == wxNOT_FOUND )
+   {
+      // insert it just after the original filter, this ensures that when we do a
+      // rename (== copy + delete) the filter doesn't jump to the end of the list
+      // (as it owuld do if we used simple Append() here)
+      idx = m_lboxFilters->FindString(nameOld);
+
+      ASSERT_MSG( idx != wxNOT_FOUND, "copied a filter which doesn't exist??" );
+
+      m_lboxFilters->Insert(nameNew, idx + 1);
+   }
+   //else: we already have the filter with this name in the listbox
+
+   return true;
+}
+
+bool
+wxAllFiltersDialog::DoDeleteFilter(const wxString& name)
+{
+   if ( !MFilter::DeleteFromProfile(name) )
+      return false;
+
+   m_hasChanges = true;
+
+   m_lboxFilters->Delete(m_lboxFilters->GetSelection());
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
+// wxAllFiltersDialog data transfer
+// ----------------------------------------------------------------------------
+
+bool
+wxAllFiltersDialog::TransferDataToWindow()
 {
    wxArrayString allFilters = Profile::GetAllFilters();
    size_t count = allFilters.GetCount();
@@ -1190,7 +1363,7 @@ wxFiltersDialog::TransferDataToWindow()
 }
 
 bool
-wxFiltersDialog::TransferDataFromWindow()
+wxAllFiltersDialog::TransferDataFromWindow()
 {
    // we don't do anything here as everything is done in the button handlers
    // anyhow...
@@ -1198,9 +1371,9 @@ wxFiltersDialog::TransferDataFromWindow()
    return true;
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // wxFolderFiltersDialog - dialog to configure filters to use for this folder
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 class wxFolderFiltersDialog : public wxSelectionsOrderDialog
 {
@@ -1754,7 +1927,7 @@ static bool EditFilter(const String& name, wxWindow *parent)
 extern
 bool ConfigureAllFilters(wxWindow *parent)
 {
-   wxFiltersDialog dlg(parent);
+   wxAllFiltersDialog dlg(parent);
    return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
 }
 

@@ -1,17 +1,28 @@
-/*-*- c++ -*-********************************************************
- * MFilter - a class for managing filter config settings            *
- *                                                                  *
- * (C) 2000 by Karsten Ballüder (ballueder@gmx.net)                 *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   classes/MFilter.cpp - implements MFilter and related classes
+// Purpose:     non GUI filter classes responsible for storing filters in
+//              profile
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     2000
+// CVS-ID:      $Id$
+// Copyright:   (c) 2000-2001 Mahogany Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
 #ifdef __GNUG__
 #   pragma implementation "MFilter.h"
 #endif
 
+// ============================================================================
+// declarations
+// ============================================================================
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include  "Mpch.h"
 
 #ifndef USE_PCH
@@ -23,7 +34,20 @@
 
 #include "MFilter.h"
 
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
 
+// profile entries names
+//
+// NB: don't forget to modify MFilter::Copy() when adding more entries here
+#define MP_FILTER_NAME     "Name"
+#define MP_FILTER_RULE     "Rule"
+#define MP_FILTER_GUIDESC  "Settings"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 
 struct MFDialogComponent
 {
@@ -612,10 +636,10 @@ protected:
    MFilterFromProfile(Profile *p)
       {
          m_Profile = p;
-         m_Name = p->readEntry("Name", "");
+         m_Name = p->readEntry(MP_FILTER_NAME, "");
          m_Settings = NULL;
          // we now prefer to parse the filter code:
-         m_Rule = p->readEntry("Rule", "");
+         m_Rule = p->readEntry(MP_FILTER_RULE, "");
          if( m_Rule[0u] )
          {
             MFDialogSettingsImpl *control = new MFDialogSettingsImpl;
@@ -624,10 +648,10 @@ protected:
             if(rc)
                m_SettingsStr = ""; // don't need them
             else
-               m_SettingsStr = p->readEntry("Settings", "");
+               m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
          }
          else
-            m_SettingsStr = p->readEntry("Settings", "");
+            m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
             m_dirty = false;
       }
    
@@ -636,17 +660,17 @@ protected:
          if ( m_dirty )
          {
             // write the values to the profile
-            m_Profile->writeEntry("Name", m_Name);
+            m_Profile->writeEntry(MP_FILTER_NAME, m_Name);
             if ( m_Settings )
             {
                // if we have matching dialog settings, we prefer to
                // write them as they are more compact in the config file
-               m_Profile->writeEntry("Settings", m_Settings->WriteSettings());
+               m_Profile->writeEntry(MP_FILTER_GUIDESC, m_Settings->WriteSettings());
             }
             else
             {
-               (void) m_Profile->DeleteEntry("Settings");
-               m_Profile->writeEntry("Rule", m_Rule);
+               (void) m_Profile->DeleteEntry(MP_FILTER_GUIDESC);
+               m_Profile->writeEntry(MP_FILTER_RULE, m_Rule);
             }
          }
          SafeDecRef(m_Settings);
@@ -703,14 +727,74 @@ bool
 MFilter::DeleteFromProfile(const String& name)
 {
    // get parent of all filters
-   Profile *p = Profile::CreateFilterProfile("");
-   bool rc = FALSE;
-   if(p)
+   Profile_obj p(Profile::CreateFilterProfile(""));
+
+   bool rc;
+   if ( p )
    {
       rc = p->DeleteGroup(name);
-      p->DecRef();
    }
+   else
+   {
+      rc = false;
+   }
+
    return rc;
+}
+
+// MFilter::Copy helper: copies entry from one profile to another if it's
+// present, returns false if an error occured
+static bool CopyFilterEntry(Profile *profileSrc,
+                            Profile *profileDst,
+                            const String& entry)
+{
+   String value = profileSrc->readEntry(entry, "");
+   if ( !value.empty() )
+   {
+      if ( !profileDst->writeEntry(entry, value) )
+         return false;
+   }
+
+   return true;
+}
+
+/* static */
+bool
+MFilter::Copy(const String& nameSrc, const String& nameDst)
+{
+   // GUI code is supposed to check for this
+   CHECK( nameSrc != nameDst, false, "can't copy filter over itself" );
+
+   Profile_obj profileSrc(Profile::CreateFilterProfile(nameSrc));
+   Profile_obj profileDst(Profile::CreateFilterProfile(nameDst));
+
+   bool rc = profileSrc && profileDst;
+   if ( rc )
+   {
+      // change the name
+      profileDst->writeEntry(MP_FILTER_NAME, nameDst);
+   }
+
+   // copy other entries as is
+   if ( rc )
+      rc = CopyFilterEntry(profileSrc, profileDst, MP_FILTER_RULE);
+   if ( rc )
+      rc = CopyFilterEntry(profileSrc, profileDst, MP_FILTER_GUIDESC);
+
+   if ( !rc )
+   {
+      ERRORMESSAGE((_("Failed to copy filter '%s' to '%s'")));
+
+      if ( profileDst )
+      {
+         // don't leave incomplete entries
+         (void)DeleteFromProfile(nameDst);
+      }
+
+      return false;
+   }
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -246,6 +246,9 @@ public:
    /// delete the filter by name
    static bool DeleteFromProfile(const String &name);
 
+   /// copy one filter to another (names must be different)
+   static bool Copy(const String& nameSrc, const String& nameDst);
+
    /// get the list of all defined filters
    static wxArrayString GetAllFilters();
 
