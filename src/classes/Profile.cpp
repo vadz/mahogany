@@ -329,9 +329,14 @@ ProfileBase::CreateGlobalConfig(const String & filename)
                                   wxCONFIG_USE_GLOBAL_FILE);
 #  else  // Unix
    mode_t um = umask(0077);
+   String globalFile;
+   globalFile << M_BASEDIR << '/'
+              << M_APPLICATIONNAME << ".conf";
+   if(! wxFileExists(globalFile))
+      globalFile = String(M_APPLICATIONNAME) + ".conf";
    // we don't need the config file manager for this profile
    ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                  filename, mApplication->GetGlobalDir(),
+                                  filename, globalFile,
                                   wxCONFIG_USE_LOCAL_FILE|
                                   wxCONFIG_USE_GLOBAL_FILE);
    umask(um);
