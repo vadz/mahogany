@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+12.10.01 XN: message sorting and threading now work together
 09.10.01 VZ: added "Rename" and "Copy" buttons in the filters dialog
 08.10.01 VZ: "Reply to list" command - thanks to SF for forcing me to add it
 26.09.01 VZ: allow renaming folders and mailboxes independently
