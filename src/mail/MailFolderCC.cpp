@@ -3493,28 +3493,37 @@ MailFolderCC::ParseAddress(ADDRESS *adr)
 {
    String from;
 
-   // ignore the addresses without host part, they can be only bogus
-   while ( adr && !adr->host )
+   // ignore the addresses without any interesting parts, they can be only
+   // bogus
+   while ( adr && !adr->host && !adr->mailbox && !adr->personal )
+   {
+      wxLogDebug("Ignoring empty address.");
+
       adr = adr->next;
+   }
 
    if ( adr )
    {
-      if (adr->personal) // a personal name is given
+      if ( adr->personal )
          from << adr->personal;
-      if(adr->mailbox)
+
+      if ( adr->mailbox )
       {
-         if(adr->personal)
+         if ( adr->personal )
             from << " <";
          from << adr->mailbox;
-         if(adr->host && strlen(adr->host)
-            && (strcmp(adr->host,BADHOST) != 0))
+         if ( adr->host && *adr->host && (strcmp(adr->host,BADHOST) != 0) )
             from << '@' << adr->host;
-         if(adr->personal)
+         if ( adr->personal )
             from << '>';
       }
    }
-   else
-      from = _("<address missing>");
+   else // no valid addresses at all
+   {
+      // poor c-client crashes if we pass it the string "address missing" as
+      // address, so use this one instead now
+      from = _("<address@missing>");
+   }
 
    return from;
 }
