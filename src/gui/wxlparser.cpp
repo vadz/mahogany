@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * wxlparser.h : parsers,  import/export for wxLayoutList           *
+ * wxlparser.cpp : parsers,  import/export for wxLayoutList           *
  *                                                                  *
  * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *

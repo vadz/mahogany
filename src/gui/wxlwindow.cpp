@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * wxLwindow.h : a scrolled Window for displaying/entering rich text*
+ * wxlwindow.cpp : a scrolled Window for displaying/entering rich text*
  *                                                                  *
  * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
@@ -170,7 +170,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
-   m_FocusFollowMode = true; //READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
+   m_FocusFollowMode = false; //READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
 #endif
    SetWordWrap(false);
    SetWrapMargin(0);
