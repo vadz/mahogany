@@ -44,6 +44,7 @@
 #include "Composer.h"         // for RestoreAll()
 #include "SendMessage.h"
 #include "ConfigSource.h"
+#include "MAtExit.h"
 
 #include "InitPython.h"
 
@@ -141,6 +142,10 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 
 MAppBase *mApplication = NULL;
 
+// there is no MAtExit.cpp (it wouldn't contain anything but this line) so do
+// it here
+MRunAtExit *MRunAtExit::ms_first = NULL;
+
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
 // ----------------------------------------------------------------------------
@@ -189,6 +194,12 @@ MAppBase::~MAppBase()
    Profile::DeleteGlobalConfig();
 
    delete m_framesOkToClose;
+
+   // execute MRunAtExit callbacks
+   for ( MRunAtExit *p = MRunAtExit::GetFirst(); p; p = p->GetNext() )
+   {
+      p->Do();
+   }
 
    MObjectRC::CheckLeaks();
    MObject::CheckLeaks();
