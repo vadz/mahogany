@@ -13,6 +13,10 @@ $Id$
 		Also: dialog: wrong handling of "all files" pattern as "*.*"
 		instead of just "*"
 
+5	KB	message searching for IMAP should use IMAP
+		functionality, document msgno usage in search sequence
+		rather than uid: returned numbers are msgnos
+
 7		opening folder with password prompts twice at startup
 
 8		changing password on remote folder while open results
@@ -349,7 +353,6 @@ from 32bitsonline review:
 				.... working on it right now
 
 4	VZ	test ADB importing more
-3	VZ	test ADB exporting more
 
 5	KB	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?

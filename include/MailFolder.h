@@ -270,6 +270,12 @@ public:
      */
    virtual void ExpungeMessages(void) = 0;
 
+   /** Search Messages for certain criteria.
+       @return INTARRAY with UIds of matching messages, caller must
+       free it
+   */
+   virtual INTARRAY *SearchMessages(const class SearchCriterium *crit) = 0;
+   
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -489,4 +495,20 @@ enum MessageSortOrder
    MSO_THREAD, MSO_THREAD_REV
 };
 
+
+/** Search criterium for searching folder for certain messages. */
+class SearchCriterium
+{
+public:
+   SearchCriterium()
+      {
+         m_What = SC_ILLEGAL;
+      }
+
+   enum Type { SC_ILLEGAL = -1,
+               SC_FULL = 0, SC_BODY, SC_HEADER, SC_SUBJECT, SC_TO,
+               SC_FROM, SC_CC} m_What;
+   bool m_Invert;
+   String m_Key;
+};
 #endif

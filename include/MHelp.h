@@ -54,6 +54,7 @@
 #define MH_DIALOG_DATEFMT    4220
 #define MH_DIALOG_FOLDERDLG  4230
 #define MH_DIALOG_XFACE      4240
+#define MH_DIALOG_SEARCHMSGS 4250
 
 #define MH_PYTHON            5000
 

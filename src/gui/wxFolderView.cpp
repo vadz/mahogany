@@ -749,6 +749,16 @@ wxFolderView::OpenFolder(String const &profilename)
 }
 
 void
+wxFolderView::SearchMessages(void)
+{
+   SearchCriterium criterium;
+
+   ConfigureSearchMessages(&criterium,GetProfile(),NULL);
+   Ticket t = m_ASMailFolder->SearchMessages(&criterium, this);
+   m_TicketList->Add(t);
+}
+
+void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    int n;
@@ -756,6 +766,9 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
    switch(event.GetId())
    {
+   case WXMENU_MSG_SEARCH:
+      SearchMessages();
+      break;
    case WXMENU_MSG_FIND:
    case WXMENU_MSG_TOGGLEHEADERS:
    case WXMENU_MSG_SHOWRAWTEXT:
@@ -1007,6 +1020,7 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    }
 }
 
+
 void
 wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
@@ -1027,7 +1041,8 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          else
             msg.Printf(_("Saving messages failed."));
          wxLogStatus(GetFrame(m_Parent), msg);
-         ;
+         break;
+
       case ASMailFolder::Op_SaveMessagesToFolder:
          ASSERT(result->GetSequence());
          if( ((ASMailFolder::ResultInt *)result)->GetValue() )
@@ -1042,6 +1057,25 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                result->GetSequence(),this));
          }
          break;
+
+      case ASMailFolder::Op_SearchMessages:
+         ASSERT(result->GetSequence());
+         if( ((ASMailFolder::ResultInt *)result)->GetValue() )
+         {
+            INTARRAY *ia = result->GetSequence();
+            msg.Printf(_("Found %lu messages."), (unsigned long)
+                       ia->Count());
+            bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+            for(unsigned long n = 0; n < ia->Count(); n++)
+               m_FolderCtrl->Select((*ia)[n]);
+            m_FolderCtrl->EnableSelectionCallbacks(tmp);
+
+         }
+         else
+            msg.Printf(_("No matching messages found."));
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
+
       // these cases don't have return values
       case ASMailFolder::Op_ReplyMessages:
       case ASMailFolder::Op_ForwardMessages:

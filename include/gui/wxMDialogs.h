@@ -265,7 +265,13 @@ void ShowModulesDialog(wxFrame *parent);
 /// Configure message/folder sorting
 extern
 bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
-/* Configuration dialog for sorting messages. */
+/* Configuration dialog for searching for messages. */
+extern
+bool
+ConfigureSearchMessages(class SearchCriterium *crit,
+                        ProfileBase *profile,
+                        wxWindow *parent);
+
 extern
 bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
 /* Pick an icon file: for XFace */

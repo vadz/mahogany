@@ -104,7 +104,8 @@ public:
       Op_ReplyMessages,
       Op_ForwardMessages,
       Op_Subscribe,
-      Op_ListFolders
+      Op_ListFolders,
+      Op_SearchMessages
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -322,7 +323,11 @@ public:
      */
    virtual Ticket ExpungeMessages(void) = 0;
 
-
+   
+   /** Search Messages for certain criteria.
+       @return INTARRAY with UIds of matching messages
+   */
+   virtual Ticket SearchMessages(const class SearchCriterium *crit, UserData ud) = 0;
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.

@@ -1329,6 +1329,161 @@ bool ConfigureSorting(ProfileBase *profile, wxWindow *parent)
 }
 
 
+//-----------------------------------------------------------------------------
+
+static wxString searchCriteria[] =
+{
+   gettext_noop("Full Message"),
+   gettext_noop("Message Content"),
+   gettext_noop("Message Header"),
+   gettext_noop("Subject Field"),
+   gettext_noop("To Field"),
+   gettext_noop("From Field"),
+   gettext_noop("CC Field"),
+};
+
+#define SEARCH_CRIT_INVERT_FLAG  0x1000
+#define SEARCH_CRIT_MASK  0x0FFF
+
+// defining it like this makes it much more difficult to forget to update it
+static const size_t NUM_SEARCHCRITERIA  = WXSIZEOF(searchCriteria);
+
+class wxMessageSearchDialog : public wxOptionsPageSubdialog
+{
+public:
+   wxMessageSearchDialog(SearchCriterium *crit,
+                         ProfileBase *profile, wxWindow *parent);
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+   bool WasChanged(void) { return m_Criterium != m_OldCriterium;};
+
+protected:
+
+   void UpdateCritStruct(void)
+      {
+         m_CritStruct->m_What = (SearchCriterium::Type)
+            (m_Choices->GetSelection()&SEARCH_CRIT_MASK);
+         m_CritStruct->m_Invert = m_Invert->GetValue();
+         m_CritStruct->m_Key = m_Keyword->GetValue();
+      }
+   SearchCriterium *m_CritStruct;
+   wxChoice    *m_Choices;
+   wxCheckBox  *m_Invert;
+   wxTextCtrl  *m_Keyword;
+   int         m_OldCriterium;
+   int         m_Criterium;
+};
+
+wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
+                                             ProfileBase *profile,
+                                             wxWindow *parent)
+                      : wxOptionsPageSubdialog(profile,parent,
+                                               _("Search folder for messages"),
+                                               "MessageSearchDialog")
+{
+   ASSERT(crit);
+   m_CritStruct = crit;
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Message search criteria"), FALSE,
+                                               MH_DIALOG_SEARCHMSGS);
+
+   wxClientDC dc(this);
+   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
+
+   wxLayoutConstraints *c;
+
+   wxStaticText *critlabel = new wxStaticText(this, -1,_("Search for text in"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   critlabel->SetConstraints(c);
+
+   m_Choices = new wxChoice(this, -1, wxDefaultPosition,
+                            wxDefaultSize, NUM_SEARCHCRITERIA,
+                            searchCriteria);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(critlabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_Choices->SetConstraints(c);
+
+   wxStaticText *keylabel = new wxStaticText(this, -1,_("Search for"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.AsIs();
+   c->top.Below(m_Choices, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   keylabel->SetConstraints(c);
+
+   m_Keyword = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(keylabel, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(keylabel, wxTop, 0);
+   c->height.AsIs();
+   m_Keyword->SetConstraints(c);
+
+   m_Invert = new wxCheckBox(this, -1, _("Invert selection"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(keylabel, 2*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   m_Invert->SetConstraints(c);
+
+   Layout();
+   SetDefaultSize(380,310);
+
+   TransferDataToWindow();
+   m_OldCriterium = m_Criterium;
+}
+
+
+bool wxMessageSearchDialog::TransferDataFromWindow()
+{
+   m_Criterium = m_Choices->GetSelection();
+   if(m_Invert->GetValue() != 0)
+      m_Criterium |= SEARCH_CRIT_INVERT_FLAG;
+   
+   GetProfile()->writeEntry(MP_MSGS_SEARCH_CRIT, m_Criterium);
+   GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Keyword->GetValue());
+
+   UpdateCritStruct();
+   return TRUE;
+}
+
+bool wxMessageSearchDialog::TransferDataToWindow()
+{
+   m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
+   m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
+   m_Invert->SetValue(m_Criterium & SEARCH_CRIT_INVERT_FLAG);
+   m_Keyword->SetValue(READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG));
+   UpdateCritStruct();
+   return TRUE;
+}
+
+/* Configuration dialog for sorting messages. */
+extern
+bool ConfigureSearchMessages(class SearchCriterium *crit,
+                             ProfileBase *profile, wxWindow *parent)
+{
+   wxMessageSearchDialog dlg(crit, profile, parent);
+   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
+   {
+      return TRUE;
+   }
+   else
+   {
+      return FALSE;
+   }
+}
+
+//-----------------------------------------------------------------------------
+
 
 static wxString DateFormatsLabels[] =
 {

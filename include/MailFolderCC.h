@@ -186,6 +186,11 @@ public:
      */
    void ExpungeMessages(void);
 
+   /** Search Messages for certain criteria.
+       @return INTARRAY with UIds of matching messages
+   */
+   virtual INTARRAY *SearchMessages(const class SearchCriterium *crit);
+
    /** Check whether mailbox has changed. */
    void Ping(void);
 
@@ -353,6 +358,11 @@ private:
    /// do we want c-client's debug messages?
    bool   debugFlag;
 
+   /** If we are searching, this points to an INTARRAY where to store
+       the entries found.
+   */
+   INTARRAY *m_SearchMessagesFound;
+   
    /** @name functions for mapping mailstreams and objects
        These functions enable the class to map incoming events from
        the  c-client library to the object associated with that event.
@@ -411,10 +421,11 @@ protected:
    /// closes the mailstream
    void Close(void);
 
-   /// A Mutex to control access to this folder.
 #ifdef USE_THREADS
+   /// A Mutex to control access to this folder.
    class MMutex *m_Mutex;
 #else
+   /// A Mutex to control access to this folder.
    bool m_Mutex;
 #endif    
    /*@name Handling of MailFolderCC internal events.

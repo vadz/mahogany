@@ -71,6 +71,7 @@ typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 // implementation
 // ============================================================================
 
+
 /*
  * Small function to translate c-client status flags into ours.
  */
@@ -401,7 +402,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_ASMailFolder = NULL;
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
-
+   m_SearchMessagesFound = NULL;
    SetType(type);
 
    if( !FolderTypeHasUserName(type) )
@@ -419,6 +420,9 @@ MailFolderCC::~MailFolderCC()
 
    CCQuiet(true); // disable all callbacks!
    Close();
+
+   ASSERT(m_SearchMessagesFound == NULL);
+
 #ifdef USE_THREADS
    delete m_Mutex;
 #endif
@@ -1006,6 +1010,111 @@ MailFolderCC::ExpungeMessages(void)
 }
 
 
+INTARRAY *
+MailFolderCC::SearchMessages(const class SearchCriterium *crit)
+{
+   ASSERT(m_SearchMessagesFound == NULL);
+   ASSERT(crit);
+   
+   HeaderInfoList *hil = GetHeaders();
+   if ( !hil )
+      return 0;
+
+   m_SearchMessagesFound = new INTARRAY;
+
+   String what;
+
+   bool error = false;
+
+   for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
+   {
+      if(crit->m_What == SearchCriterium::SC_SUBJECT)
+         what = (*hil)[msgno]->GetSubject();
+      else
+         if(crit->m_What == SearchCriterium::SC_FROM)
+            what = (*hil)[msgno]->GetFrom();
+         else
+         {
+            Message *msg = GetMessage((*hil)[msgno]->GetUId());
+            ASSERT(hil);
+            switch(crit->m_What)
+            {
+            case SearchCriterium::SC_FULL:
+            case SearchCriterium::SC_BODY:
+               // wrong for body as it checks the whole message
+               // including header
+               what = msg->FetchText();
+               break;
+            case SearchCriterium::SC_HEADER:
+               what = msg->GetHeader();
+               break;
+            case SearchCriterium::SC_TO:
+               msg->GetHeaderLine("To", what);
+               break;
+            case SearchCriterium::SC_CC:
+               msg->GetHeaderLine("CC", what);
+               break;
+            default:
+               LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
+               error = true;
+            }
+            msg->DecRef();
+         }
+      bool found =  what.Contains(crit->m_Key);
+      if(crit->m_Invert)
+         found = ! found;
+      if(found)
+         m_SearchMessagesFound->Add(msgno); // sequence number, not! uid!!!
+   }
+   hil->DecRef();
+   
+#if 0
+   /// TODO: Use this code for IMAP!
+   // c-client does not implement this for all drivers, so we do it ourselves
+   SEARCHPGM *pgm = mail_newsearchpgm();
+
+   STRINGLIST *slist = mail_newstringlist();
+   
+
+   slist->text.data = (unsigned char *)strutil_strdup(crit->m_Key);
+   slist->text.size = crit->m_Key.length();
+
+   bool error = false;
+   
+   switch(crit->m_What)
+   {
+   case SearchCriterium::SC_FULL:
+      pgm->subject = slist; break;
+   case SearchCriterium::SC_BODY:
+      pgm->subject = slist; break;
+   case SearchCriterium::SC_SUBJECT:
+      pgm->subject = slist; break;
+   case SearchCriterium::SC_TO:
+      pgm->subject = slist; break;
+   case SearchCriterium::SC_FROM:
+      pgm->subject = slist; break;
+   case SearchCriterium::SC_CC:
+      pgm->subject = slist; break;
+   default:
+      LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
+      error = true;
+   }
+   
+   if(! error)
+      mail_search_full (m_MailStream,
+                        /* charset */ NIL,
+                        pgm,
+                        SE_UID|SE_FREE);
+   else
+      mail_free_searchpgm(&pgm);
+#endif
+   
+   INTARRAY *rc = m_SearchMessagesFound; // will get freed by caller!
+   m_SearchMessagesFound = NULL;
+   return rc;
+}
+
+
 #ifdef DEBUG
 void
 MailFolderCC::Debug(void) const
@@ -1586,10 +1695,14 @@ MailFolderCC::SetDefaultObj(bool setit) const
 
 /// this message matches a search
 void
-MailFolderCC::mm_searched(MAILSTREAM * /* stream */,
-                          unsigned long /* number */)
+MailFolderCC::mm_searched(MAILSTREAM * stream,
+                          unsigned long number)
 {
-   //FIXME
+   MailFolderCC *mf = LookupObject(stream);
+   if(mf)
+   {
+      mf->m_SearchMessagesFound->Add(number);
+   }
 }
 
 /// tells program that there are this many messages in the mailbox

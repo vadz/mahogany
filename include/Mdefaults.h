@@ -438,6 +438,10 @@
 #define MP_MSGS_RESORT_ON_CHANGE         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING  "ThreadMessages"
+/// search criterium for searching in folders
+#define MP_MSGS_SEARCH_CRIT   "SearchCriterium"
+/// search argument
+#define MP_MSGS_SEARCH_ARG    "SearchArgument"
 /// open URLs with
 #define   MP_BROWSER         "Browser"
 /// Browser is netscape variant
@@ -853,6 +857,10 @@
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
 #define MP_MSGS_USE_THREADING_D  0l
+/// search criterium for searching in folders
+#define MP_MSGS_SEARCH_CRIT_D   0l
+/// search argument
+#define MP_MSGS_SEARCH_ARG_D   "foo"
 /// open URLs with
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"

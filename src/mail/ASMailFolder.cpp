@@ -306,6 +306,23 @@ public:
       { m_MailFolder->ExpungeMessages(); }
 };
 
+class MT_SearchMessages : public MailThread
+{
+public:
+   MT_SearchMessages(ASMailFolder *mf, UserData ud, const class SearchCriterium *crit)
+      : MailThread(mf, ud) { m_Criterium = *crit;}
+   virtual void WorkFunction(void)
+      {
+         INTARRAY *msgs = m_MailFolder->SearchMessages(&m_Criterium);
+         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
+                                                   m_Ticket,
+                                                   ASMailFolder::Op_SearchMessages,
+                                                   msgs,
+                                                   msgs->Count(), m_UserData));
+      }
+private:
+   SearchCriterium m_Criterium;
+};
 
 class MT_SaveMessages : public MailThreadSeq
 {
@@ -584,6 +601,15 @@ public:
          return (new MT_Expunge(this))->Start();
       }
 
+
+   /** Search Messages.
+       @return a Result with a sequence of matching uids.
+    */
+   virtual Ticket SearchMessages(const class SearchCriterium *crit, UserData ud)
+      {
+         return (new MT_SearchMessages(this, ud, crit))->Start();
+      }
+   
    /** Old-style interface on single messages. */
    //@{
    /** Delete a message.
