@@ -102,7 +102,7 @@ public:
                                     String const &server,
                                     String const &login,
                                     String const &password);
-   
+
    //@}
 
    /// enable/disable debugging:
@@ -128,7 +128,7 @@ public:
    /** get number of messages
        @return number of messages
    */
-   long      CountMessages(void) const;
+   virtual unsigned long CountMessages(int flag = 0) const;
 
    /** get message header
        @param uid mesage uid
@@ -141,7 +141,7 @@ public:
        @param msgno message sequence number, starting from 0
        @return a pointer to the messages current header info entry
    */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno);
+   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const;
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
@@ -160,7 +160,7 @@ public:
   virtual void SetMessageFlag(unsigned long uid,
                               int flag,
                               bool set = true);
-   
+
    /** Appends the message to this folder.
        @param msg the message to append
    */
@@ -205,8 +205,8 @@ public:
        @return if true, folder sends them
    */
    virtual bool SendsNewMailEvents(void) const
-      { return m_GenerateNewMailEvents; } 
-   
+      { return m_GenerateNewMailEvents; }
+
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
@@ -218,9 +218,9 @@ public:
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax)
-   { m_RetrievalLimit = nmax; }
+      { m_RetrievalLimit = nmax; }
 
-   /** Little helper function to convert iso8859 encoded header lines into 
+   /** Little helper function to convert iso8859 encoded header lines into
        8 bit. This is a quick fix until wxWindows supports unicode.
        Also used by MessageCC.
        @param in the string with some embedded iso8859 encoding
@@ -267,7 +267,7 @@ private:
    /// last number of messages
    unsigned long m_OldNumOfMessages;
    /** Do we want to generate new mail events?
-       Used to supporess new mail events when first opening the folder 
+       Used to supporess new mail events when first opening the folder
        and when copying to it. */
    bool m_GenerateNewMailEvents;
    /** Do we want to update the message count? */
@@ -306,7 +306,7 @@ private:
    static MailFolderCC * GetFirstMapEntry(StreamConnectionList::iterator &i);
    /// Gets next mailfolder in map or NULL
    static MailFolderCC * GetNextMapEntry(StreamConnectionList::iterator &i);
-   
+
    /** set the default object in Map
        @param setit if false, erase default object
    */
@@ -334,7 +334,7 @@ protected:
    void BuildListing(void);
    /* Handles the mm_overview_header callback on a per folder basis. */
    void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
-   
+
    /*@name Handling of MailFolderCC internal events.
      Callbacks from the c-client library cannot directly be used to
      call other functions as this might lead to a lock up or recursion
@@ -488,7 +488,7 @@ public:
 private:
    /// destructor
    ~MailFolderCC();
-   
+
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

@@ -77,7 +77,7 @@
 #   include <sys/stat.h>
 #endif
 
-// @@@@ for testing only
+// for testing only
 #ifndef USE_PCH
 //   extern "C"
 //   {
@@ -185,7 +185,7 @@ private:
 
    int    m_id;
    String m_url;
-   
+
    GCC_DTOR_WARN_OFF();
 };
 
@@ -222,11 +222,11 @@ class MailMessageParameters : public wxFileType::MessageParameters
 public:
    MailMessageParameters(const wxString& filename,
          const wxString& mimetype,
-         Message *mailMessage,
+         Message *m_mailMessage,
          int part)
       : wxFileType::MessageParameters(filename, mimetype)
       {
-         m_mailMessage = mailMessage;
+         m_mailMessage = m_mailMessage;
          m_part = part;
       }
 
@@ -313,7 +313,7 @@ END_EVENT_TABLE()
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
-   mailMessage = NULL;
+   m_mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
    xfaceXpm = NULL;
@@ -328,7 +328,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 
 
 wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
-   : wxLayoutWindow(parent)
+             : wxLayoutWindow(parent)
 {
    m_folder = NULL;
    m_Profile = NULL;
@@ -340,7 +340,7 @@ wxMessageView::wxMessageView(MailFolder *folder,
                              long num,
                              wxFolderView *fv,
                              wxWindow *parent)
-   : wxLayoutWindow(parent)
+             : wxLayoutWindow(parent)
 {
    m_folder = folder;
    m_Profile = NULL;
@@ -410,7 +410,7 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
    Clear();
 }
-   
+
 void
 wxMessageView::Update(void)
 {
@@ -425,14 +425,14 @@ wxMessageView::Update(void)
 
    Clear();
 
-   if(! mailMessage)  // no message to display
+   if(! m_mailMessage)  // no message to display
       return;
-   
+
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
       String
-         tmp = mailMessage->GetHeader();
+         tmp = m_mailMessage->GetHeader();
 #if 0
       /* I was trying to do something more clever here, to highlight
          the header names. I'll rewrite it rsn. */
@@ -474,7 +474,7 @@ wxMessageView::Update(void)
 #ifndef OS_WIN
    if(m_ProfileValues.showFaces)
    {
-      mailMessage->GetHeaderLine("X-Face", tmp);
+      m_mailMessage->GetHeaderLine("X-Face", tmp);
       if(tmp.length() > 2)   //\r\n
       {
          xface = GLOBAL_NEW XFace();
@@ -491,43 +491,43 @@ wxMessageView::Update(void)
    llist->SetFontWeight(wxBOLD);
    llist->Insert(_("From: "));
    llist->SetFontWeight(wxNORMAL);
-   from = mailMessage->Address(tmp,MAT_FROM);
+   from = m_mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
       from = tmp + String(" <") + from + '>';
    llist->Insert(from);
    llist->LineBreak();
    //Either To: or Newsgroup: header:
    llist->SetFontWeight(wxBOLD);
-   FolderType ftype = mailMessage->GetFolder()->GetType();
+   FolderType ftype = m_mailMessage->GetFolder()->GetType();
    if(ftype == MF_NEWS || ftype == MF_NNTP)
       llist->Insert(_("Newsgroups: "));
    else
-      llist->Insert(_("To: "));      
+      llist->Insert(_("To: "));
    llist->SetFontWeight(wxNORMAL);
    if( ftype == MF_NEWS || ftype == MF_NNTP )
-      mailMessage->GetHeaderLine("Newsgroups",tmp);
+      m_mailMessage->GetHeaderLine("Newsgroups",tmp);
    else
-      mailMessage->GetHeaderLine("To",tmp);
+      m_mailMessage->GetHeaderLine("To",tmp);
    llist->Insert(tmp);
    llist->LineBreak();
    llist->SetFontWeight(wxBOLD);
    llist->Insert(_("Subject: "));
    llist->SetFontWeight(wxNORMAL);
-   llist->Insert(mailMessage->Subject());
+   llist->Insert(m_mailMessage->Subject());
    llist->LineBreak();
    llist->SetFontWeight(wxBOLD);
    llist->Insert(_("Date: "));
    llist->SetFontWeight(wxNORMAL);
-   llist->Insert(mailMessage->Date());
+   llist->Insert(m_mailMessage->Date());
    llist->LineBreak();
    llist->LineBreak();
 
    // iterate over all parts
-   n = mailMessage->CountParts();
+   n = m_mailMessage->CountParts();
    for(i = 0; i < n; i++)
    {
-      t = mailMessage->GetPartType(i);
-      if(mailMessage->GetPartSize(i) == 0)
+      t = m_mailMessage->GetPartType(i);
+      if(m_mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
 
       // insert text:
@@ -535,7 +535,7 @@ wxMessageView::Update(void)
            (t == Message::MSG_TYPEMESSAGE &&
             m_ProfileValues.rfc822isText) )
       {
-         cptr = mailMessage->GetPartContent(i);
+         cptr = m_mailMessage->GetPartContent(i);
          if(cptr == NULL)
             continue; // error ?
          llist->LineBreak();
@@ -557,7 +557,7 @@ wxMessageView::Update(void)
                   ci->DecRef();
                   llist->SetFontColour(& m_ProfileValues.UrlCol);
                   llist->Insert(obj);
-                  llist->SetFontColour(& m_ProfileValues.FgCol); 
+                  llist->SetFontColour(& m_ProfileValues.FgCol);
                }
             }
             while( !strutil_isempty(tmp) );
@@ -583,13 +583,13 @@ wxMessageView::Update(void)
                icn = img.ConvertToBitmap();
             else
                icn = mApplication->GetIconManager()->
-                  GetIconFromMimeType(mailMessage->GetPartMimeType(i));
+                  GetIconFromMimeType(m_mailMessage->GetPartMimeType(i));
             obj = new wxLayoutObjectIcon(icn);
          }
          else
          {
             icn = mApplication->GetIconManager()->
-               GetIconFromMimeType(mailMessage->GetPartMimeType(i));
+               GetIconFromMimeType(m_mailMessage->GetPartMimeType(i));
          }
          obj = new wxLayoutObjectIcon(icn);
 
@@ -657,7 +657,7 @@ wxMessageView::~wxMessageView()
       delete info;
    }
 
-   if(mailMessage) mailMessage->DecRef();
+   if(m_mailMessage) m_mailMessage->DecRef();
    if(xface) delete xface;
    if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
    if(m_Profile) m_Profile->DecRef();
@@ -672,17 +672,17 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
 {
    String message;
    message << _("MIME type: ")
-           << mailMessage->GetPartMimeType(mimeDisplayPart)
+           << m_mailMessage->GetPartMimeType(mimeDisplayPart)
            << '\n';
 
-   String tmp = mailMessage->GetPartDesc(mimeDisplayPart);
+   String tmp = m_mailMessage->GetPartDesc(mimeDisplayPart);
    if(tmp.length() > 0)
       message << '\n' << _("Description: ") << tmp << '\n';
 
    message << _("Size: ")
-           << strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
+           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart));
 
-   Message::ContentType type = mailMessage->GetPartType(mimeDisplayPart);
+   Message::ContentType type = m_mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message << _(" lines");
    else
@@ -690,7 +690,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
    message << '\n';
 
    // debug output with all parameters
-   const MessageParameterList &plist = mailMessage->GetParameters(mimeDisplayPart);
+   const MessageParameterList &plist = m_mailMessage->GetParameters(mimeDisplayPart);
    MessageParameterList::iterator plist_it;
    if(plist.size() > 0)
    {
@@ -705,7 +705,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
       }
    }
    String disposition;
-   const MessageParameterList &dlist = mailMessage->GetDisposition(mimeDisplayPart,&disposition);
+   const MessageParameterList &dlist = m_mailMessage->GetDisposition(mimeDisplayPart,&disposition);
    if(! strutil_isempty(disposition))
       message << _("\nDisposition: ") << disposition << '\n';
    if(dlist.size() > 0)
@@ -726,14 +726,14 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    // we'll need this filename later
    wxString filenameOrig;
-   (void)mailMessage->ExpandParameter
+   (void)m_mailMessage->ExpandParameter
          (
-            mailMessage->GetDisposition(mimeDisplayPart),
+            m_mailMessage->GetDisposition(mimeDisplayPart),
             "FILENAME",
             &filenameOrig
          );
 
-   String mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
+   String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
    wxFileType *fileType = NULL;
@@ -796,7 +796,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       filename2 = "";
 
    MailMessageParameters
-      params(filename, mimetype, mailMessage, mimeDisplayPart);
+      params(filename, mimetype, m_mailMessage, mimeDisplayPart);
 
    // We might fake a file, so we need this:
    bool already_saved = false;
@@ -816,9 +816,9 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       delete [] faxlisting;
       bool isfax = false;
       wxString domain;
-      wxString fromline = mailMessage->From();
+      wxString fromline = m_mailMessage->From();
       strutil_tolower(fromline);
-      
+
       for(kbStringList::iterator i = faxdomains.begin();
           i != faxdomains.end(); i++)
       {
@@ -827,12 +827,12 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          if(fromline.Find(domain) != -1)
             isfax = true;
       }
-      
+
       if(isfax
          && MimeSave(mimeDisplayPart,filename))
       {
          wxLogDebug("Detected image/tiff fax content.");
-         // use TIFF2PS command to create a postscript file, open that 
+         // use TIFF2PS command to create a postscript file, open that
          // one with the usual ps viewer
          filename2 = filename + ".ps";
          String command;
@@ -854,7 +854,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
          // proceed as usual
          MailMessageParameters new_params(filename, mimetype,
-                                          mailMessage,
+                                          m_mailMessage,
                                           mimeDisplayPart);
          params = new_params;
          already_saved = true; // use this file instead!
@@ -916,7 +916,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             newFilename << filename << '.' << ext;
             if ( rename(filename, newFilename) != 0 )
                wxLogSysError(_("Can't rename temporary file."));
-            else 
+            else
                filename = newFilename;
          }
 #     endif // Win
@@ -936,9 +936,9 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
    if ( strutil_isempty(ifilename) )
    {
-      (void)mailMessage->ExpandParameter
+      (void)m_mailMessage->ExpandParameter
             (
-               mailMessage->GetDisposition(mimeDisplayPart),
+               m_mailMessage->GetDisposition(mimeDisplayPart),
                "FILENAME",
                &filename
             );
@@ -961,7 +961,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
    }
 
    unsigned long len;
-   char const *content = mailMessage->GetPartContent(mimeDisplayPart, &len);
+   char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
    if( !content )
    {
       wxLogError(_("Cannot get attachment content."));
@@ -1109,7 +1109,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      bOk = LaunchProcess(command, errmsg);
                   }
                }
-#endif
+#endif // Unix
                // either not netscape or ns isn't running or we have non-UNIX
                if(! bOk)
                {
@@ -1153,7 +1153,7 @@ wxMessageView::ShowRawText(MailFolder *folder)
    CHECK( folder, false, "no MailFolder in message view" );
 
    String text;
-   mailMessage->WriteToString(text, true);
+   m_mailMessage->WriteToString(text, true);
    if ( text.IsEmpty() )
    {
       wxLogError(_("Failed to get the raw text of the message."));
@@ -1170,97 +1170,138 @@ bool
 wxMessageView::DoMenuCommand(int id)
 {
    wxArrayInt msgs;
-   if(m_uid != -1)
-      msgs.Add(m_uid);  
-   bool handled = true;
-   switch(id)
-   {
-   case WXMENU_MSG_PRINT:
-      Print();
-      break;
-   case WXMENU_MSG_PRINT_PREVIEW:
-      PrintPreview();
-      break;
-   case WXMENU_MSG_REPLY:
-      if(m_uid != -1)
-         GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
-      break;
-   case WXMENU_MSG_FORWARD:
-      if(m_uid != -1)
-         GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
-      break;
+   if( m_uid != -1 )
+      msgs.Add(m_uid);
 
-   case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_uid != -1)
-         GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
-      break;
-   case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_uid != -1)
-         GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
-      break;
-   case WXMENU_MSG_DELETE:
-      if(m_uid != -1)
-         GetFolder()->DeleteMessages(&msgs);
-      break;
-   case WXMENU_MSG_UNDELETE:
-      if(m_uid != -1)
-         GetFolder()->UnDeleteMessages(&msgs);
-      break;
+   bool handled = true;
+   switch ( id )
+   {
+      case WXMENU_MSG_REPLY:
+         if(m_uid != -1)
+            GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
+         break;
+      case WXMENU_MSG_FORWARD:
+         if(m_uid != -1)
+            GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
+         break;
+
+      case WXMENU_MSG_SAVE_TO_FOLDER:
+         if(m_uid != -1)
+            GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
+         break;
+      case WXMENU_MSG_SAVE_TO_FILE:
+         if(m_uid != -1)
+            GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
+         break;
+
+      case WXMENU_MSG_DELETE:
+         if(m_uid != -1)
+            GetFolder()->DeleteMessages(&msgs);
+         break;
+
+      case WXMENU_MSG_UNDELETE:
+         if(m_uid != -1)
+            GetFolder()->UnDeleteMessages(&msgs);
+         break;
+
+      case WXMENU_MSG_PRINT:
+         Print();
+         break;
+      case WXMENU_MSG_PRINT_PREVIEW:
+         PrintPreview();
+         break;
 #ifdef USE_PS_PRINTING
-   case WXMENU_MSG_PRINT_PS:
-      break;
+      case WXMENU_MSG_PRINT_PS:
+         break;
 #endif
-   case WXMENU_HELP_CONTEXT:
-      mApplication->Help(MH_MESSAGE_VIEW,this);
-      break;
-   case WXMENU_MSG_TOGGLEHEADERS:
-      {
-         if(m_ProfileValues.showHeaders)
-            m_ProfileValues.showHeaders = false;
-         else
-            m_ProfileValues.showHeaders = true;
-         m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
-         Update();
-      }
-      break;
-   case WXMENU_MSG_SHOWRAWTEXT:
-      ShowRawText();
-      break;
-   default:
-      handled = false;
+
+      case WXMENU_HELP_CONTEXT:
+         mApplication->Help(MH_MESSAGE_VIEW,this);
+         break;
+
+      case WXMENU_MSG_TOGGLEHEADERS:
+         {
+            m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
+            m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+            Update();
+         }
+         break;
+
+      case WXMENU_MSG_SHOWRAWTEXT:
+         ShowRawText();
+         break;
+
+      default:
+         handled = false;
    }
+
    return handled;
 }
 
-
 void
-wxMessageView::ShowMessage(MailFolder *folder, long num)
+wxMessageView::ShowMessage(MailFolder *folder, long uid)
 {
-   if ( m_uid == num )
+   if ( m_uid == uid )
       return;
 
-   if(mailMessage) mailMessage->DecRef();
-   m_uid = num;
-   mailMessage = folder->GetMessage(m_uid);
+   // check the message size
+   Message *mailMessage = folder->GetMessage(uid);
+   CHECK_RET( mailMessage, "no message with such uid" );
 
-   if(! (mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
+   unsigned long size = 0,
+                 maxSize = (unsigned long)READ_CONFIG(m_Profile,
+                                                      MP_MAX_MESSAGE_SIZE);
+
+   // we're only interested in the size, not status flags
+   (void)mailMessage->GetStatus(&size);
+   size /= 1024;  // size is measured in KBytes
+
+   if ( size > maxSize )
+   {
+      wxString msg;
+      msg.Printf(_("The selected message is %u Kbytes long which is "
+                   "more than the current threshold of %d Kbytes.\n"
+                   "\n"
+                   "Do you still want to download it?"),
+                 size, maxSize);
+      if ( !MDialog_YesNoDialog(msg, this) )
+      {
+         // don't do anything
+         mailMessage->DecRef();
+
+         return;
+      }
+   }
+
+   // ok, make this our new current message
+   SafeDecRef(m_mailMessage);
+
+   m_uid = uid;
+   m_mailMessage = mailMessage;
+
+   if(! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
       folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )
    {
       String addr, name;
-      addr = mailMessage->Address(name, MAT_REPLYTO);
+      addr = m_mailMessage->Address(name, MAT_REPLYTO);
+
+      String folderName = folder->GetName();
+
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
                            m_ProfileValues.autocollectNamed != 0,
                            m_ProfileValues.autocollectBookName,
+                           folderName,
                            (MFrame *)GetFrame(this));
-      addr = mailMessage->Address(name, MAT_FROM);
+      addr = m_mailMessage->Address(name, MAT_FROM);
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
                            m_ProfileValues.autocollectNamed != 0,
                            m_ProfileValues.autocollectBookName,
+                           folderName,
                            (MFrame *)GetFrame(this));
    }
    Update();
@@ -1284,14 +1325,16 @@ wxMessageView::Print(void)
    if(found)
       wxSetAFMPath(afmpath);
 #endif // Win/Unix
-//   wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-   wxPrinter printer; //(data)
-   wxLayoutPrintout printout(GetLayoutList(),_("M: Printout"));
-   if (! printer.Print(this, &printout, TRUE))
-      wxMessageBox(
-         _("There was a problem with printing the message:\n"
-           "perhaps your current printer is not set up correctly?"),
-         _("Printing"), wxOK);
+
+   wxPrintDialogData &data = ((wxMApp *)mApplication)->GetPrintDialogData();
+   wxPrinter printer(&data);
+   wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
+   if ( !printer.Print(this, &printout, TRUE) )
+   {
+      wxMessageBox(_("There was a problem with printing the message:\n"
+                     "perhaps your current printer is not set up correctly?"),
+                   _("Printing"), wxOK);
+   }
 }
 
 void
@@ -1310,17 +1353,18 @@ wxMessageView::PrintPreview(void)
 #endif // in/Unix
 
    // Pass two printout objects: for preview, and possible printing.
+   wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
    wxPrintPreview *preview = new wxPrintPreview(
-	new wxLayoutPrintout(GetLayoutList()),
-        new wxLayoutPrintout(GetLayoutList()));
-   if(!preview->Ok())
+   new wxLayoutPrintout(GetLayoutList()),
+                        new wxLayoutPrintout(GetLayoutList()),
+                        &data);
+   if( !preview->Ok() )
    {
       delete preview;
-      wxMessageBox(
-         _("There was a problem with showing the preview:\n"
-           "perhaps your current printer is not set correctly?"),
-         _("Previewing"), wxOK);
-        return;
+      wxMessageBox(_("There was a problem with showing the preview:\n"
+                     "perhaps your current printer is not set correctly?"),
+                   _("Previewing"), wxOK);
+      return;
    }
 
    wxPreviewFrame *frame = new wxPreviewFrame(preview, GetFrame(m_Parent),
@@ -1391,7 +1435,7 @@ wxMessageView::OnProcessTermination(wxProcessEvent& event)
       //FIXME: Ok() tells it not to delete it!tempfile->Ok();
    }
 #endif
-   
+
    m_processes.Remove(n);
    delete info;
 }

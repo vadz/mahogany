@@ -847,7 +847,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                              LAYOUT_X_MARGIN;
     long widthDlg = MAX(widthTextMax, MAX(widthButtonsTotal, width)) +
                     6*LAYOUT_X_MARGIN,
-         heightDlg = 12*LAYOUT_Y_MARGIN + heightButton +
+         heightDlg = 13*LAYOUT_Y_MARGIN + heightButton +
                      heightTextLine*(lines.Count() + 1);
 
     // set default button
@@ -901,7 +901,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             }
 
             c->width.Absolute(widthBtnMax);
-            c->top.Below(text, 3*LAYOUT_Y_MARGIN);
+            c->top.Below(text, 4*LAYOUT_Y_MARGIN);
             c->height.Absolute(heightButton);
             buttons[nBtn]->SetConstraints(c);
 

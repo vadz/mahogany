@@ -139,10 +139,11 @@ enum ConfigFields
    ConfigField_MessageViewConvertGraphicsFormat,
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
-   ConfigField_MessageViewLast = ConfigField_MessageViewFaxDomains,
-#else // !Unix
-   ConfigField_MessageViewLast = ConfigField_MessageViewInlineGraphics,
-#endif // Unix/!Unix
+#endif // Unix
+   ConfigField_MessageViewMaxHelpText,
+   ConfigField_MessageViewMaxMsgSize,
+   ConfigField_MessageViewMaxHeadersNum,
+   ConfigField_MessageViewLast = ConfigField_MessageViewMaxHeadersNum,
 
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
@@ -314,23 +315,20 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    // network config and identity
    { gettext_noop("The user and host names are used to compose the return address, unless\n"
                   "a differenent return address is explicitly specified."),
-     Field_Message, -1},
-   { gettext_noop("&Username"),                    Field_Text,    -1,                        },
+                                                   Field_Message, -1 },
+   { gettext_noop("&Username"),                    Field_Text,    -1 },
    { gettext_noop("The host name is also used as a default host name for local mail addresses."),
-     Field_Message, -1},
-   { gettext_noop("&Hostname"),                    Field_Text |
-     Field_Vital,   -1,                        },
-   { gettext_noop("&Return/Reply address"),              Field_Text |
-     Field_Vital,   -1,                        },
-   { gettext_noop("SMTP (&mail) server"),          Field_Text |
-     Field_Vital,   -1,                        },
+                                                   Field_Message, -1 },
+   { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   -1, },
+   { gettext_noop("&Return/Reply address"),        Field_Text | Field_Vital,   -1, },
+   { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1, },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
-   { gettext_noop("User &level:novice:advanced"),  Field_Combo,    -1,                        },
+   { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
 
    // compose
-   { gettext_noop("Sa&ve sent messages"), Field_Bool,    -1,                        },
-   { gettext_noop("&Folder file for sent messages"),   Field_File,    ConfigField_UseOutgoingFolder        },
+   { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
+   { gettext_noop("&Folder file for sent messages"),Field_File,   ConfigField_UseOutgoingFolder        },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("&Reply character"),             Field_Text,    -1,                        },
 
@@ -339,19 +337,18 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
    { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
-   { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,    -1,                        },
+   { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,  -1,                        },
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
-                                                   Field_Combo,  -1},
-   { gettext_noop("Font si&ze"),                   Field_Number,   -1},
-   { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
-   { gettext_noop("Back&ground colour"),           Field_Color,    -1},
+                                                   Field_Combo,   -1},
+   { gettext_noop("Font si&ze"),                   Field_Number,  -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
+   { gettext_noop("Back&ground colour"),           Field_Color,   -1},
 
-   { gettext_noop("Configure &headers..."),        Field_SubDlg,   -1},
+   { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
 
    // folders
-   { gettext_noop("Folders to open on &startup"),  Field_List |
-                                                   Field_Restart, -1,                        },
+   { gettext_noop("Folders to open on &startup"),  Field_List | Field_Restart, -1,                        },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("&Poll for new mail delay in seconds"), Field_Number, -1},
@@ -378,23 +375,30 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1 },
    { gettext_noop("Font &size"),                   Field_Number,  -1 },
-   { gettext_noop("Foreground c&olour"),           Field_Color,   -1},
-   { gettext_noop("Back&ground colour"),           Field_Color,   -1},
-   { gettext_noop("Colour for &URLs"),             Field_Color,    -1},
+   { gettext_noop("Foreground c&olour"),           Field_Color,   -1 },
+   { gettext_noop("Back&ground colour"),           Field_Color,   -1 },
+   { gettext_noop("Colour for &URLs"),             Field_Color,   -1 },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
 #ifdef OS_UNIX
    { gettext_noop("Conversion &graphics format"
                   ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
-   { gettext_noop("Support special &fax mailers"), Field_Bool,    -1},
+   { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
 #endif
-
+   { gettext_noop("The following settings allow to limit the amount of data "
+                  "retrieved from remote server: if the message size or "
+                  "number is greater than the value specified here, you "
+                  "will be asked for confirmation before transfering data."),
+                                                   Field_Message,  -1 },
+   { gettext_noop("Maximum size of &message (in Kb)"),
+                                                   Field_Number,   -1 },
+   { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
                   "receive in a special addresss book. This is called 'address "
                   "autocollection' and may be turned on or off from this page"),
-                                     Field_Message, -1                     },
+                                                   Field_Message, -1                     },
    { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
@@ -455,13 +459,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USERLEVEL),
 
    // compose
-#if 0
-   CONFIG_ENTRY(MP_COMPOSE_TO),
-   CONFIG_ENTRY(MP_SHOWCC),
-   CONFIG_ENTRY(MP_COMPOSE_CC),
-   CONFIG_ENTRY(MP_SHOWBCC),
-   CONFIG_ENTRY(MP_COMPOSE_BCC),
-#endif
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
@@ -510,6 +507,9 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INCFAX_SUPPORT),
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
 #endif
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
+   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
 
    // autocollect
    CONFIG_NONE(),

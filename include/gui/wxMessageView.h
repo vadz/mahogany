@@ -122,13 +122,14 @@ public:
       }
    /// returns the mail folder
    MailFolder *GetFolder(void);
+
 private:
    /// the parent window
    wxWindow   *m_Parent;
    /// uid of the message
    long m_uid;
    /// the current message
-   Message   *mailMessage;
+   Message   *m_mailMessage;
    /// the mail folder (only used if m_FolderView is NULL)
    MailFolder   *m_folder;
    /// the folder view, which handles some actions for us

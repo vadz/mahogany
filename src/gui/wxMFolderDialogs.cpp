@@ -860,12 +860,17 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
    {
       m_profile->writeEntry(profileKeys[property], value);
 
-      // this function has a side effect: it also sets the "modified" flag so
-      // that the other functions know that the folder settings have been
-      // changed and so the "unaccessible" flag may be not valid any longer
-      MFolder_obj folder(m_folderPath);
+      if ( !m_isCreating )
+      {
+         // this function has a side effect: it also sets the "modified" flag
+         // so that the other functions know that the folder settings have
+         // been changed and so the "unaccessible" flag may be not valid any
+         // longer
+         MFolder_obj folder(m_folderPath);
 
-      folder->AddFlags(MF_FLAGS_MODIFIED);
+         folder->AddFlags(MF_FLAGS_MODIFIED);
+      }
+      //else: this flag is unnecessary for just created folder
    }
    //else: it didn't change, don't write it back
 }

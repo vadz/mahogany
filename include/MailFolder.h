@@ -17,7 +17,7 @@
 
 #include "FolderType.h"
 
-/** The INTARRAY define is a class which is an integer array. It needs 
+/** The INTARRAY define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
     We use wxArrayInt for this.
@@ -102,7 +102,7 @@ public:
       @param server hostname
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
-      
+
    */
    static MailFolder * OpenFolder(int typeAndFlags,
                                   const String &path,
@@ -127,20 +127,22 @@ public:
    */
    virtual String GetName(void) const = 0;
 
-   /** get number of messages
+   /** get number of messages which have the given flag set or the number of
+       all messages if the flag is 0 (default)
+       @param flag is a (combination of) MessageStatus value(s) or 0
        @return number of messages
    */
-   virtual long CountMessages(void) const = 0;
+   virtual unsigned long CountMessages(int flag = 0) const = 0;
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
-   
+
    /** Returns a HeaderInfo structure for a message with a given
        sequence number. This can be used to obtain the uid.
        @param msgno message sequence number, starting from 0
        @return a pointer to the messages current header info entry
    */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) = 0;
+   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const = 0;
 
    /** get the message with unique id uid
        @param uid message uid
@@ -222,7 +224,7 @@ public:
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
       These functions are not used by anything else in the MailFolder
-      class and can easily be removed if needed. 
+      class and can easily be removed if needed.
    */
    //@{
    /** Save the messages to a folder.
@@ -235,7 +237,7 @@ public:
                      String const & folderName,
                      bool isProfile);
 
-   /** Mark messages as deleted.   
+   /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
    */
    void DeleteMessages(const INTARRAY *messages);
@@ -248,14 +250,14 @@ public:
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
-       @return true if messages got saved 
+       @return true if messages got saved
    */
    bool SaveMessagesToFile(const INTARRAY *messages, MWindow *parent = NULL);
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
-       @return true if messages got saved 
+       @return true if messages got saved
    */
    bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL);
 
@@ -265,7 +267,7 @@ public:
        @param profile pointer for environment
    */
    void ReplyMessages(const INTARRAY *messages,
-                      MWindow *parent = NULL, 
+                      MWindow *parent = NULL,
                       ProfileBase *profile = NULL);
 
    /** Forward selected messages.
@@ -274,11 +276,11 @@ public:
        @param profile pointer for environment
    */
    void ForwardMessages(const INTARRAY *messages,
-                        MWindow *parent = NULL, 
+                        MWindow *parent = NULL,
                         ProfileBase *profile = NULL);
 
    //@}
-   
+
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
@@ -292,6 +294,7 @@ public:
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax) = 0;
+
 protected:
    /**@name Accessor methods */
    //@{

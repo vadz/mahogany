@@ -159,7 +159,7 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 
 void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {
-   if ( m_hasWindow && level == wxLOG_Info )
+   if ( m_hasWindow && level == wxLOG_User )
    {
       // this will call wxLogWindow::DoLogString()
       wxLog::DoLog(level, szString, t);

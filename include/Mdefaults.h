@@ -235,8 +235,6 @@
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
-//// the maximum number of messages to retrieve from mailbox or 0 for no limit
-#define MP_FOLDER_RETRIEVALLIMIT   "RetrievalLimit"
 /// show CC field in message composition?
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
@@ -372,6 +370,14 @@
 
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
+
+/** @name maximal amounts of data to retrieve from remote servers */
+//@{
+/// ask confirmation before retrieveing messages bigger than this (in Kb)
+#define MP_MAX_MESSAGE_SIZE   "MaxMsgSize"
+/// ask confirmation before retrieveing more headers than this
+#define MP_MAX_HEADERS_NUM    "MaxHeadersNum"
+//@}
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
@@ -561,8 +567,6 @@
 #define   MP_NNTPHOST_D         ""
 /// the news server fallback
 #define   MP_NNTPHOST_FB        "news"
-//// the maximum number of messages to retrieve from mailbox or 0 for no limit
-#define MP_FOLDER_RETRIEVALLIMIT_D   0l
 /// the username for returned mail
 #define   MP_RETURN_ADDRESS_D      M_EMPTYSTRING
 /// show CC field in message composition?
@@ -722,6 +726,14 @@
 //@}
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION_D 1l
+
+/** @name maximal amounts of data to retrieve from remote servers */
+//@{
+/// ask confirmation before retrieveing messages bigger than this (in Kb)
+#define MP_MAX_MESSAGE_SIZE_D 100l
+/// ask confirmation before retrieveing more headers than this
+#define MP_MAX_HEADERS_NUM_D  100l
+//@}
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */

@@ -135,12 +135,8 @@ public:
 
    /** Show a message in the preview window.
     */
-   void PreviewMessage(long messageno)
-      {
-         const class HeaderInfo *hi = m_MailFolder->GetHeaderInfo(messageno);
-         if(hi)
-            m_MessagePreview->ShowMessage(m_MailFolder,hi->GetUId());
-      }
+   void PreviewMessage(long messageno);
+
    void SetSize(const int x, const int y, const int width, int height);
 
    /// return full folder name
@@ -159,6 +155,7 @@ public:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
+
 protected:
    /** Save messages to a folder.
        @param n number of messages

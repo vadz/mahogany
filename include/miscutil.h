@@ -17,8 +17,8 @@
 
 /**@name Miscellaneous utility functions */
 //@{
-/** Automatic collection of an email address/name pair into a given
-    addressbook.
+/** Automatic collection of an email address/name pair into the given subgroup
+    of the given addressbook.
     @param email email address string
     @param name  User name or empty
     @param autocollectFlag the 0,1,2 value whether to do auto collection or not
@@ -30,7 +30,8 @@ void AutoCollectAddresses(const String &email,
                           String name,
                           int autocollectFlag,
                           bool collectNamed,
-                          const String &bookName,
+                          const String& bookName,
+                          const String& groupName,
                           MFrame *frame = NULL);
 
 //@}

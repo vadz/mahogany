@@ -31,7 +31,8 @@ AutoCollectAddresses(const String &email,
                      String name,
                      int autocollectFlag,
                      bool collectNamed,
-                     const String &bookName,
+                     const String& bookName,
+                     const String& groupName,
                      MFrame *frame)
 {
    // we need an address and a name
@@ -105,14 +106,26 @@ AutoCollectAddresses(const String &email,
                                    frame)
                )
             {
-               // filter invalid characters in the record name
-               wxString entryname;
-               for ( const char *pc = name; *pc != '\0'; pc++ )
+               // avoid creating groups with '/'s in the names - this will
+               // create nested groups!
+               wxString adbGroupName;
+               if ( groupName[0u] == '/' )
+                  adbGroupName = groupName.c_str() + 1;
+               else
+                  adbGroupName = groupName;
+               adbGroupName.Replace("/", "_");
+               // VZ: another possibility might be:
+               //adbGroupName = groupName.AfterLast('/')
+               // I don't know what's better...
+
+               AdbEntryGroup *group = autocollectbook->CreateGroup(adbGroupName);
+               if ( !group )
                {
-                  entryname << (isspace(*pc) ? '_' : *pc);
+                  // fall back to the root
+                  group = autocollectbook;
                }
 
-               AdbEntry *entry = autocollectbook->CreateEntry(entryname);
+               AdbEntry *entry = group->CreateEntry(name);
 
                if ( !entry )
                {
@@ -125,8 +138,8 @@ AutoCollectAddresses(const String &email,
                }
                else
                {
-                  entry->SetField(AdbField_NickName, entryname);
-                  entry->SetField(AdbField_FullName, entryname);
+                  entry->SetField(AdbField_NickName, name);
+                  entry->SetField(AdbField_FullName, name);
                   entry->SetField(AdbField_EMail, email);
 
                   wxString comment;
@@ -147,11 +160,20 @@ AutoCollectAddresses(const String &email,
                   entry->SetField(AdbField_Comments, comment);
                   entry->DecRef();
 
-                  if(frame)
+                  if ( frame )
+                  {
                      wxLogStatus(frame,
                                  _("Auto collected e-mail address '%s' "
-                                   "(created new entry '%s')."),
-                                 email.c_str(), entryname.c_str());
+                                   "(created new entry '%s' in group '%s')."),
+                                 email.c_str(),
+                                 name.c_str(),
+                                 group->GetName().c_str());
+                  }
+               }
+
+               if ( group != autocollectbook )
+               {
+                  group->DecRef();
                }
             }
          }
@@ -182,10 +204,12 @@ AutoCollectAddresses(const String &email,
    {
       // it's not very intrusive and the user might wonder why the address
       // wasn't autocollected otherwise
-      if(frame)
+      if ( frame )
+      {
          wxLogStatus(frame,
                   _("'%s': the name is missing, address was not "
                     "autocollected."), email.c_str());
+      }
    }
 }
 

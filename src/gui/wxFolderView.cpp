@@ -400,7 +400,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
 void
 wxFolderView::Update(void)
 {
-   if(! m_MailFolder)
+   if ( !m_MailFolder )
       return;
 
    long i;
@@ -416,7 +416,9 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-   wxBeginBusyCursor(); wxSafeYield();
+   wxBeginBusyCursor();
+   wxSafeYield();
+
    n = m_MailFolder->CountMessages();
 
    // mildly annoying, but have to do it in order to prevent the generation of
@@ -623,6 +625,15 @@ int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
    return m_FolderCtrl->GetSelections(selections);
+}
+
+void
+wxFolderView::PreviewMessage(long messageno)
+{
+   const HeaderInfo *hi = m_MailFolder->GetHeaderInfo(messageno);
+   CHECK_RET( hi, "no header info for msg preview" );
+
+   m_MessagePreview->ShowMessage(m_MailFolder, hi->GetUId());
 }
 
 void

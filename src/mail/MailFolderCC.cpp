@@ -207,7 +207,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    mf = new
       MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
    if(mf && profile)
-      mf->SetRetrievalLimit(READ_CONFIG(profile, MP_FOLDER_RETRIEVALLIMIT));
+      mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
    if( mf->Open() )
       return mf;
    else
@@ -471,10 +471,23 @@ MailFolderCC::GetName(void) const
    return symbolicName;
 }
 
-long
-MailFolderCC::CountMessages(void) const
+unsigned long
+MailFolderCC::CountMessages(int flag) const
 {
-   return m_NumOfMessages;
+   unsigned long numOfMessages = m_NumOfMessages;
+
+   if ( flag )
+   {
+      // FIXME there should probably be a much more efficient way (using
+      //       cclient functions?) to do it
+      for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
+      {
+         if ( !(GetHeaderInfo(msgno)->GetStatus() & flag) )
+            numOfMessages--;
+      }
+   }
+
+   return numOfMessages;
 }
 
 Message *
@@ -488,7 +501,7 @@ MailFolderCC::GetMessage(unsigned long uid)
 }
 
 const class HeaderInfo *
-MailFolderCC::GetHeaderInfo(unsigned long msgno)
+MailFolderCC::GetHeaderInfo(unsigned long msgno) const
 {
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
    ASSERT(m_Listing);
@@ -654,44 +667,67 @@ MailFolderCC::BuildListing(void)
    if(! m_Listing && m_NumOfMessages > 0)
       m_Listing = new HeaderInfoCC[m_NumOfMessages];
 
+   // we may retrieve not all messages in the folder, but only some of them if
+   // there are too many
+   unsigned long numMessages = m_NumOfMessages;
+
+   // the value of 0 disables the limit
+   if ( (m_RetrievalLimit > 0) && (m_NumOfMessages > m_RetrievalLimit) )
+   {
+      // TODO should really ask the user how many of them he wants (like slrn)
+      wxString msg;
+      msg.Printf(_("This folder contains %lu messages which is greater than "
+                   "the current threshold of %lu.\n"
+                   "\n"
+                   "Would you like to retrieve only the first %lu messages?\n"
+                   "(selecting [No] will retrieve all messages)"),
+                 m_NumOfMessages, m_RetrievalLimit, m_RetrievalLimit);
+
+      if ( MDialog_YesNoDialog(msg) )
+      {
+         numMessages = m_RetrievalLimit;
+      }
+   }
+
    m_BuildNextEntry = 0;
 
-   if(m_ProgressDialog == NULL
-      && m_NumOfMessages > READ_CONFIG(m_Profile,
-                                       MP_FOLDERPROGRESS_THRESHOLD))
+   if ( m_ProgressDialog == NULL &&
+        numMessages > (unsigned)READ_CONFIG(m_Profile,
+                                            MP_FOLDERPROGRESS_THRESHOLD) )
    {
       String msg;
-      msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_NumOfMessages);
+      msg.Printf(_("Reading %lu message headers..."), numMessages);
       m_ProgressDialog = new MProgressDialog(GetName(),
                                              msg,
                                              100, NULL);// open a status window:
    }
+
    // mail_fetch_overview() will now fill the m_Listing array with
    // info on the messages
    /* stream, sequence, header structure to fill */
-   if(m_RetrievalLimit && m_NumOfMessages > m_RetrievalLimit)
+   String sequence;
+   if ( numMessages != m_NumOfMessages )
    {
-      String sequence =
-         strutil_ultoa(mail_uid(m_MailStream, m_NumOfMessages-m_RetrievalLimit));
-      sequence << ":*";
-      mail_fetch_overview (m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+      sequence = strutil_ultoa(mail_uid(m_MailStream, m_NumOfMessages-numMessages+1));
+      sequence += ":*";
    }
    else
    {
-      if(GetType() == MF_NNTP)
-         // FIMXE: no idea why this works for NNTP
-         // but not for the other types
-         mail_fetch_overview (m_MailStream, (char *)"1-", mm_overview_header);
+      if( GetType() == MF_NNTP )
+         // FIXME: no idea why this works for NNTP but not for the other types
+         sequence = "1-";
       else
-         mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
+         sequence = "1:*";
    }
 
-   if(m_ProgressDialog != (MProgressDialog *)1)
+   mail_fetch_overview(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+
+   if ( m_ProgressDialog != (MProgressDialog *)1 )
       delete m_ProgressDialog;
-   // We set it to an illegal address here to suppress further
-   // updating. This value is checked against in OverviewHeader().
-   // The reason is that we only want it the first time that the
-   // folder is being opened.
+
+   // We set it to an illegal address here to suppress further updating. This
+   // value is checked against in OverviewHeader(). The reason is that we only
+   // want it the first time that the folder is being opened.
    m_ProgressDialog = (MProgressDialog *)1;
 
    // for NNTP, it will not show all messages
@@ -703,7 +739,7 @@ MailFolderCC::BuildListing(void)
    MEventManager::Send(data);
 
    /* Now check whether we need to send new mail notifications: */
-   if(m_GenerateNewMailEvents && m_NumOfMessages  > m_OldNumOfMessages) // new mail has arrived
+   if(m_GenerateNewMailEvents && m_NumOfMessages > m_OldNumOfMessages) // new mail has arrived
    {
       unsigned long n = m_NumOfMessages - m_OldNumOfMessages;
       unsigned long *messageIDs = new unsigned long[n];
@@ -725,7 +761,6 @@ MailFolderCC::BuildListing(void)
 void
 MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 {
-
    ASSERT(m_Listing);
 
    HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
@@ -1009,9 +1044,9 @@ MailFolderCC::mm_log(String str, long errflg )
    msg << _(" error level: ") << strutil_ultoa(errflg);
 #endif
    if(errflg)
-      INFOMESSAGE((msg));
+      ERRORMESSAGE((msg));
    else
-      LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
+      LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)
    {
@@ -1057,7 +1092,7 @@ MailFolderCC::mm_dlog(String str)
       msg += str;
    }
 
-   LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
+   LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
 }
 
 /** get user name and password
