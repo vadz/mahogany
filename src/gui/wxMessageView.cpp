@@ -1317,6 +1317,29 @@ wxMessageView::Print(void)
          = printer.GetPrintDialogData().GetPrintData();
 }
 
+// tiny class to restore and set the default zoom level
+class wxMVPreview : public wxPrintPreview
+{
+public:
+   wxMVPreview(ProfileBase *prof,
+               wxPrintout *p1, wxPrintout *p2,
+               wxPrintDialogData *dd)
+      : wxPrintPreview(p1, p2, dd)
+      {
+         ASSERT(prof);
+         m_Profile = prof;
+         m_Profile->IncRef();
+         SetZoom(READ_CONFIG(m_Profile, MP_PRINT_PREVIEWZOOM));
+      }
+   ~wxMVPreview()
+      {
+         m_Profile->writeEntry(MP_PRINT_PREVIEWZOOM, (long) GetZoom());
+         m_Profile->DecRef();
+      }
+private:
+   ProfileBase *m_Profile;
+};
+
 void
 wxMessageView::PrintPreview(void)
 {
@@ -1336,21 +1359,24 @@ wxMessageView::PrintPreview(void)
 
    // Pass two printout objects: for preview, and possible printing.
    wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
-   wxPrintPreview preview (
+   wxPrintPreview *preview = new wxMVPreview(
+      m_Profile,
       new wxLayoutPrintout(GetLayoutList()),
       new wxLayoutPrintout(GetLayoutList()),
-      &pdd);
-   if( !preview.Ok() )
+      &pdd
+      );
+   if( !preview->Ok() )
    {
       wxMessageBox(_("There was a problem with showing the preview:\n"
                      "perhaps your current printer is not set correctly?"),
                    _("Previewing"), wxOK);
       return;
    }
-   (* ((wxMApp *)mApplication)->GetPrintData())
-      = preview.GetPrintDialogData().GetPrintData();
 
-   wxPreviewFrame *frame = new wxPreviewFrame(&preview, GetFrame(m_Parent),
+   (* ((wxMApp *)mApplication)->GetPrintData())
+      = preview->GetPrintDialogData().GetPrintData();
+
+   wxPreviewFrame *frame = new wxPreviewFrame(preview, NULL, //GetFrame(m_Parent),
                                               _("Print Preview"),
                                               wxPoint(100, 100), wxSize(600, 650));
    frame->Centre(wxBOTH);

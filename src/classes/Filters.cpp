@@ -58,99 +58,269 @@ private:
    long      m_number;
 };
 
+
+/** A Parser class.
+ */
+class Parser : public MObjectRC
+{
+public:
+   virtual class SyntaxNode * Parse(void) = 0;
+  /** Reads the next token from the string and removes it from it.
+      @param str   string to parse
+      @param remove if true, move on in input
+  */
+   virtual Token GetToken(bool remove = true) = 0;
+   /// Returns the next token without removing it from the input.
+   virtual Token PeekToken(void) = 0;
+   /// Rewinds the input to the given position.
+   virtual void Rewind(size_t pos = 0) = 0;
+   /// Returns current position in input.
+   virtual size_t GetPos(void) const = 0;
+   /** Takes an error message and passes it to the program, sets error 
+       flag.
+       @param error message describing error
+   */
+   virtual void Error(const String &error) = 0;
+   /// virtual destructor
+   virtual ~Parser(void) {}
+   /** Constructor function, returns a valid Parser object.
+       @param input the input string holding the text to parse
+   */
+   static Parser * Create(const String &input);
+};
+
+
+// ----------------------------------------------------------------------------
+// A smart reference to Parser - an easy way to avoid memory leaks
+// ----------------------------------------------------------------------------
+
+class Parser_obj
+{
+public:
+   // ctor & dtor
+   Parser_obj(const String& name)
+      { m_Parser = Parser::Create(name); }
+   ~Parser_obj()
+      { SafeDecRef(m_Parser); }
+   // provide access to the real thing via operator->
+   Parser *operator->() const { return m_Parser; }
+private:
+   // no assignment operator/copy ctor
+   Parser_obj(const Parser_obj&);
+   Parser_obj& operator=(const Parser_obj&);
+   Parser *m_Parser;
+};
+
+// ----------------------------------------------------------------------------
+// An implementation of the Parser ABC
+// ----------------------------------------------------------------------------
+class ParserImpl : public Parser
+{
+public:
+   ParserImpl(const String &input)
+      {
+         m_Input = input;
+         Rewind();
+      }
+   class SyntaxNode * Parse(void);
+   class SyntaxNode * ParseExpression(void);
+   class FunctionCall *ParseFunctionCall(void);
+   virtual size_t GetPos(void) const { return m_Position; }
+   virtual inline void Rewind(size_t pos = 0) { m_Position = pos; }
+   virtual Token GetToken(bool remove = true);
+   virtual inline Token PeekToken(void) { return GetToken(false); }
+   virtual void Error(const String &error);
+protected:
+   inline void EatWhiteSpace(void)
+      { while(isspace(m_Input[m_Position])) m_Position++; }
+   inline const char Char(void) const
+      { return m_Input[m_Position]; }
+   inline const char CharInc(void)
+      { return m_Input[m_Position++]; }
+private:
+   String m_Input;
+   size_t m_Position;
+};
+
+// ----------------------------------------------------------------------------
+// ABC for syntax tree nodes.
+// ----------------------------------------------------------------------------
+/** This class is used to build a syntax tree.
+ */
+class SyntaxNode
+{
+   
+};
+
+class FunctionCall : public SyntaxNode
+{
+public:
+   String m_name;
+   String m_args;
+};
+
+
+/* static */
+Parser *
+Parser::Create(const String &input)
+{
+   return new ParserImpl(input);
+}
+
+void
+ParserImpl::Error(const String &error)
+{
+   String tmp;
+   tmp.Printf(_("Parse error at input position %lu:\n  %s"),
+              (unsigned long) GetPos(), error.c_str());
+   ERRORMESSAGE((tmp));
+}
+
 /** Reads the next token from the string and removes it from it.
     @param str   string to parse
 */
-Token ReadToken(String &str, bool remove = true)
+Token
+ParserImpl::GetToken(bool remove)
 {
    Token token;
-   strutil_delwhitespace(str);
    String tokstr;
-   const char *cptr = str.c_str();
 
-   if(strutil_isempty(str))
+   size_t OldPos = GetPos();
+
+   EatWhiteSpace();
+   
+   if(! Char())
    {
       token.SetEOF();
       return token;
    }
-   if(isalpha(str[0u])) // this must be an identifier
+
+   if(isalpha(Char())) // this must be an identifier
    {
-      while(isalpha(*cptr) || isdigit(*cptr) || *cptr == '_')
-         tokstr += *(cptr++);
+      while(isalpha(Char()) || isdigit(Char()) || Char() == '_')
+         tokstr += CharInc();
       token.SetIdentifier(tokstr);
    }
-   if(isdigit(str[0u])) // it is a number
+
+   if(isdigit(Char())) // it is a number
    {
-      while(isdigit(*cptr))
-         tokstr += *(cptr++);
+      while(isdigit(Char()))
+         tokstr += CharInc();
       token.SetNumber(atol(tokstr.c_str()));
    }
-   if(str[0u] == '"') // a quoted string
+
+   if(Char() == '"') // a quoted string
    {
-      cptr = str.c_str()+1;
+      m_Position++;
       bool escaped = false;
-      while(*cptr && (*cptr != '"' || escaped))
+      while(Char() && (Char() != '"' || escaped))
       {
-         if(*cptr == '\\')
+         if(Char() == '\\')
          {
             if(! escaped) // first backslash
             {
                escaped = true;
-               cptr++;
+               m_Position++;
                continue; // skip it
             }
          }               
-         tokstr += *(cptr++);
+         tokstr += CharInc();
          escaped = false;
       }
       token.SetString(tokstr);
    }
    // All other cases: return the character:
-   token.SetChar(*(cptr++));
+   token.SetChar(CharInc());
                   
-   if(remove)
-      str = String(cptr);
+   if(! remove)
+      Rewind(OldPos);
    return token;
 }
 
-/** This class is used to build a syntax tree.
- */
-class FilterNode
+SyntaxNode *
+ParserImpl::Parse(void)
 {
-   
-};
+   return ParseExpression();
+}
+
+FunctionCall *
+ParserImpl::ParseFunctionCall(void)
+{
+   Token t = GetToken();
+   ASSERT(t.GetType() == TT_Identifier);
+
+   FunctionCall *f = new FunctionCall();
+   f->m_name = t.GetIdentifier();
+
+   // Need to swallow argument list?
+   t = PeekToken();
+   if(t.GetType() != TT_Char || t.GetChar() != '(')
+   {
+      String err;
+      err.Printf(_("Functioncall expected '(' after '%s'."),
+                 f->m_name.c_str());
+      Error(err);
+      delete f;
+      return NULL;
+   }
+   (void) GetToken(); // swallow '('
+   EatWhiteSpace();
+   bool escaped = false;
+   while(Char() && (Char() != ')' || escaped))
+   {
+      if(Char() == '\\')
+      {
+         if(escaped)
+            f->m_args += CharInc();
+         else
+            escaped = true;
+      }
+      else
+         f->m_args += CharInc();
+   }
+   return f;
+}
+
+SyntaxNode *
+ParserImpl::ParseExpression(void)
+{
+   /* EXPRESSION :=
+        | IDENTIFIER( ARGLIST )
+        | ( EXPRESSION )
+        | EXPRESSION LOGICAL_OPERATOR EXPRESSION
+   */
+   // For now, we do only a simple function call for a test.
+   Token t = PeekToken();
+   if(t.GetType() == TT_Identifier)
+   {
+      // IDENTIFIER ( ARGLIST )
+      return ParseFunctionCall();
+   }
+   else if(t.GetType() == TT_Char && t.GetChar() == '(')
+   {
+      // ( EXPRESSION )
+   }
+   else
+   {
+      Error(_("No valid expression."));
+      return NULL;
+   }
+   return NULL;
+}
 
 /** A FUNCTIONCALL has a logical value:
     FUNCTIONCALL:
        IDENTIFIER ( args )
 */
 
-class Functioncall : public FilterNode
+class Functioncall : public SyntaxNode
 {
 public:
-   static Functioncall *Create(Token &token, String &str);
+   static Functioncall *Create(Token &token, Parser &p);
 private:
    String m_name;
 };
 
-Functioncall *
-Functioncall::Create(Token &token, String &str)
-{
-   ASSERT(token.GetType() == TT_Identifier);
-   Functioncall *i = new Functioncall();
-   i->m_name = token.GetIdentifier();
-
-   // Need to swallow argument list?
-   Token t = ReadToken(str, false);
-   if(t.GetType() == TT_Char && t.GetChar() == '(')
-   {
-      (void) ReadToken(str); // swallow it
-      do
-         t = ReadToken(str);
-      while(! (t.GetType() == TT_Char && t.GetChar() == ')'));
-   }
-   return i;
-}
 
 /** A CONDITION has a logical value:
     CONDITION:
@@ -159,29 +329,20 @@ Functioncall::Create(Token &token, String &str)
        ( CONDITION OPERATOR CONDITION )
 */
 
-class Condition : public FilterNode
+class Condition : public SyntaxNode
 {
 public:
    /** Create a condition from token+str */
-   static Condition *Create(Token &token, String str);
+   static Condition *Create(Token &token, Parser &p);
 private:
 };
 
 Condition *
-Condition::Create(Token &token, String str)
+Condition::Create(Token &token, Parser &p)
 {
    ASSERT(token.GetType() == TT_Identifier ||
           token.GetType() == TT_Char && token.GetChar() == '(');
    
+   return NULL;
 }
 
-/**
-   This function is the actual parser. It parses the string passed as
-   argument and returns a pointer to the root of the tree representing 
-   the expression.
-*/
-FilterNode *ParseString(String &str)
-{
-   Token t = ReadToken(str);
-   return Condition::Create(t,str);
-}

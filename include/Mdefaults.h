@@ -213,6 +213,8 @@
 #define MP_PRINT_BOTTOMMARGIN_X    "PrintMarginRight"
 /// right margin
 #define MP_PRINT_BOTTOMMARGIN_Y   "PrintMarginBottom"
+/// zoom level in print preview
+#define MP_PRINT_PREVIEWZOOM   "PrintPreviewZoom"
 //@}
 /**@name for BBDB address book support */
 //@{
@@ -565,6 +567,8 @@
 #define MP_PRINT_BOTTOMMARGIN_X_D   0l
 /// right margin
 #define MP_PRINT_BOTTOMMARGIN_Y_D 0l
+/// zoom level in print preview
+#define MP_PRINT_PREVIEWZOOM_D   100l
 //@}
 /**@name for BBDB address book support */
 //@{
