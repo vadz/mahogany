@@ -487,12 +487,12 @@ SWIG_InstallConstants(PyObject *d, swig_const_info constants[]) {
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define  SWIGTYPE_p_unsigned_long swig_types[0] 
-#define  SWIGTYPE_p_MessageParameter swig_types[1] 
-#define  SWIGTYPE_p_Message swig_types[2] 
-#define  SWIGTYPE_p_size_t swig_types[3] 
-#define  SWIGTYPE_p_String swig_types[4] 
-#define  SWIGTYPE_p_unsigned_int swig_types[5] 
+#define  SWIGTYPE_p_time_t swig_types[0] 
+#define  SWIGTYPE_p_unsigned_long swig_types[1] 
+#define  SWIGTYPE_p_MessageParameter swig_types[2] 
+#define  SWIGTYPE_p_Message swig_types[3] 
+#define  SWIGTYPE_p_size_t swig_types[4] 
+#define  SWIGTYPE_p_String swig_types[5] 
 #define  SWIGTYPE_p_MessageParameterList swig_types[6] 
 static swig_type_info *swig_types[8];
 
@@ -867,25 +867,40 @@ static PyObject *_wrap_Message_GetPartSpec(PyObject *self, PyObject *args) {
 static PyObject *_wrap_Message_GetStatus(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     Message *arg0 ;
-    unsigned long *arg1 = NULL ;
-    unsigned int *arg2 = NULL ;
-    unsigned int *arg3 = NULL ;
-    unsigned int *arg4 = NULL ;
     PyObject * argo0 =0 ;
-    PyObject * argo1 =0 ;
-    PyObject * argo2 =0 ;
-    PyObject * argo3 =0 ;
-    PyObject * argo4 =0 ;
     int result ;
     
-    if(!PyArg_ParseTuple(args,"O|OOOO:Message_GetStatus",&argo0,&argo1,&argo2,&argo3,&argo4)) return NULL;
+    if(!PyArg_ParseTuple(args,"O:Message_GetStatus",&argo0)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_unsigned_long,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_unsigned_int,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo3,(void **) &arg3,SWIGTYPE_p_unsigned_int,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo4,(void **) &arg4,SWIGTYPE_p_unsigned_int,1)) == -1) return NULL;
-    result = (int )arg0->GetStatus(arg1,arg2,arg3,arg4);
+    result = (int )arg0->GetStatus();
     resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+}
+
+
+static PyObject *_wrap_Message_GetSize(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    Message *arg0 ;
+    PyObject * argo0 =0 ;
+    unsigned long result ;
+    
+    if(!PyArg_ParseTuple(args,"O:Message_GetSize",&argo0)) return NULL;
+    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
+    result = (unsigned long )arg0->GetSize();
+    resultobj = PyInt_FromLong((long)result);
+    return resultobj;
+}
+
+
+static PyObject *_wrap_Message_GetDate(PyObject *self, PyObject *args) {
+    PyObject *resultobj;
+    Message *arg0 ;
+    PyObject * argo0 =0 ;
+    time_t *result ;
+    
+    if(!PyArg_ParseTuple(args,"O:Message_GetDate",&argo0)) return NULL;
+    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_Message,1)) == -1) return NULL;
+    result = new time_t (arg0->GetDate());    resultobj = SWIG_NewPointerObj((void *)result, SWIGTYPE_p_time_t);
     return resultobj;
 }
 
@@ -934,6 +949,8 @@ static PyMethodDef MessagecMethods[] = {
 	 { "Message_GetPartDesc", _wrap_Message_GetPartDesc, METH_VARARGS },
 	 { "Message_GetPartSpec", _wrap_Message_GetPartSpec, METH_VARARGS },
 	 { "Message_GetStatus", _wrap_Message_GetStatus, METH_VARARGS },
+	 { "Message_GetSize", _wrap_Message_GetSize, METH_VARARGS },
+	 { "Message_GetDate", _wrap_Message_GetDate, METH_VARARGS },
 	 { "Message_WriteToString", _wrap_Message_WriteToString, METH_VARARGS },
 	 { NULL, NULL }
 };
@@ -944,21 +961,21 @@ static PyMethodDef MessagecMethods[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static swig_type_info _swigt__p_time_t[] = {{"_p_time_t", 0, "time_t *"},{"_p_time_t"},{0}};
 static swig_type_info _swigt__p_unsigned_long[] = {{"_p_unsigned_long", 0, "unsigned long *"},{"_p_unsigned_long"},{0}};
 static swig_type_info _swigt__p_MessageParameter[] = {{"_p_MessageParameter", 0, "MessageParameter *"},{"_p_MessageParameter"},{0}};
 static swig_type_info _swigt__p_Message[] = {{"_p_Message", 0, "Message *"},{"_p_Message"},{0}};
 static swig_type_info _swigt__p_size_t[] = {{"_p_size_t", 0, "size_t *"},{"_p_size_t"},{0}};
 static swig_type_info _swigt__p_String[] = {{"_p_String", 0, "String *"},{"_p_String"},{0}};
-static swig_type_info _swigt__p_unsigned_int[] = {{"_p_unsigned_int", 0, "unsigned int *"},{"_p_unsigned_int"},{0}};
 static swig_type_info _swigt__p_MessageParameterList[] = {{"_p_MessageParameterList", 0, "MessageParameterList *"},{"_p_MessageParameterList"},{0}};
 
 static swig_type_info *swig_types_initial[] = {
+_swigt__p_time_t, 
 _swigt__p_unsigned_long, 
 _swigt__p_MessageParameter, 
 _swigt__p_Message, 
 _swigt__p_size_t, 
 _swigt__p_String, 
-_swigt__p_unsigned_int, 
 _swigt__p_MessageParameterList, 
 0
 };
