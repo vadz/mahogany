@@ -496,8 +496,11 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
                              image, image, this));
    }
 
-   // allow the user to expand us even though we don't have any children yet
-   tree->SetItemHasChildren(GetId());
+   // allow the user to expand us if we have any children
+   if ( folder )
+   {
+      tree->SetItemHasChildren(GetId(), folder->GetSubfolderCount() != 0);
+   }
 }
 
 // ----------------------------------------------------------------------------
