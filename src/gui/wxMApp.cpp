@@ -449,6 +449,15 @@ wxMApp::AllowBgProcessing() const
 void
 wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
 {
+   // don't provoke an assert from inside the assert (which would happen if we
+   // tried to lock an already locked mutex below)
+   if ( gs_mutexBlockBg.IsLocked() )
+   {
+      wxTrap();
+
+      return;
+   }
+
    // don't allow any calls to c-client while we're in the assert dialog
    // because we might be called from a c-client callback and another call to
    // it will result in a fatal error
@@ -462,6 +471,10 @@ wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
 bool
 wxMApp::Yield(bool onlyIfNeeded)
 {
+   // try to not crash...
+   if ( gs_mutexBlockBg.IsLocked() )
+      return false;
+
    // don't allow any calls to c-client from inside wxYield() neither as it is
    // implicitly (!) called by wxProgressDialog which is shown from inside some
    // c-client handlers and so calling c-client now would result in a crash
