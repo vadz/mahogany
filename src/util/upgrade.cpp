@@ -598,7 +598,7 @@ SetupInitialConfig(void)
    if(host.Length() == 0)
       mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
    
-   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent"));
+   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
    mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
 
    (void)VerifyInbox();
