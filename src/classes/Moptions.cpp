@@ -481,6 +481,10 @@ const MOption MP_CREATE_INTERNAL_MESSAGE;
 const MOption MP_WHITE_LIST;
 const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
+const MOption MP_OPTION_SHOW_ORIGIN;
+const MOption MP_OPTION_ORIGIN_HERE;
+const MOption MP_OPTION_ORIGIN_INHERITED;
+
 // ----------------------------------------------------------------------------
 // defaults
 // ----------------------------------------------------------------------------
@@ -883,6 +887,9 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_CREATE_INTERNAL_MESSAGE),
     DEFINE_OPTION(MP_WHITE_LIST),
     DEFINE_OPTION(MP_TREAT_AS_JUNK_MAIL_FOLDER),
+    DEFINE_OPTION(MP_OPTION_SHOW_ORIGIN),
+    DEFINE_OPTION(MP_OPTION_ORIGIN_HERE),
+    DEFINE_OPTION(MP_OPTION_ORIGIN_INHERITED),
 };
 
 // ============================================================================

@@ -81,6 +81,8 @@ any problems with building it.
 
 \begin{itemize}
    \item Folders can now be dragged in the folder tree
+   \item Options with non default values are now highlighted in the
+         preferences dialog (see \ref{optionshighlight})
 \end{itemize}
 
 \subsubsection{0.66 against 0.65}
@@ -1695,23 +1697,31 @@ otherwise it will fall back to the setting in the global preferences.
 
 One of the goals of the Mahogany project is to be as configurable
 as possible. Of course, it means that Mahogany has a lot of options
-- however we hope that it doesn't make the program more difficult
+-- however we hope that it doesn't make the program more difficult
 to use because you have the complete liberty to ignore all options
-until you need to use them. Moreover, some program options are completely
+until you need to use them. Moreover, many program options are completely
 transparent to the user because they are automatically remembered
 by the program. All the other ones may be changed from the main options
-dialog which may be invoked from the main window toolbar or from the
-menu. Generally, Mahogany configuration settings are inherited in
-a logical fashion. The settings in the preferences dialog are the
-global default settings and can be overridden on a per-folder basis.
-Subfolders inherit from their parent folders. Currently there is no
-full GUI support for this, but the next release will have the full
-set of program options available on the per-folder basis. Currently
-you can already achieve this by editing the configuration file manually.
-Also, system administrators can provide other defaults in a global
-/etc/Mahogany.conf file (also found in /usr/etc, /usr/local/etc, /opt/etc,
-...).
+dialog which may be invoked from the \MenuCmd{Edit} menu of any window.
 
+
+\subsection{Hierarchical options organization}\label{optionshighlight}
+
+Before starting to change options, it is important to understand that Mahogany
+configuration settings are inherited in a logical fashion. The settings in the
+preferences dialog are the global default settings and can be overridden on a
+per-folder basis. The top level folders in the tree use by default the same
+global options but you may also edit each folders options via
+\MenuCmd{Folder\|Properties...} menu item. Subfolders inherit from their
+parent folders and, again, you can change their options independently.
+
+To make visualizing this mechanism easier, the names of the options with non
+default values are highlighted in the options dialog. Those whose values are
+set at the level of the folder currently being edited are shown in bright
+blue, while those which inherit values from the parent folder are shown in
+darker shade of blue. Of coourse, this behaviour in itself is customizable and
+the colours may be changed (or disabled completely) in the ``Miscellaneous''
+page of the options dialog (\ref{miscellaneouspage}).
 
 \subsection{Automatically remembered options}
 
@@ -2199,7 +2209,7 @@ new mail. This can be used to play a sound to notify the user of incoming
 messages, or do something else to alert him.
 \end{itemize}
 
-\subsubsection{Miscellaneous\_4105\_}
+\subsubsection{Miscellaneous\_4105\_}\label{miscellaneouspage}
 
 All options which don't fit in any other pages are collected here.
 
@@ -2249,10 +2259,21 @@ to the already running instance instead of launching another one in parallel.
 This is especially useful when Mahogany is configured as your default mail
 client as otherwise another copy of it would have to be opened each time when
 you start writing a new message.
-\item \textbf{Format for the date}\\
-This controls how the dates are shown in the folder view window. The
-string here has the same format as an argument to strftime(), on a
-Unix system you may execute \noun{man strftime} to see them all.
+
+\item \textbf{Show option values origin}\\
+This item controls highlighting of the names of the options which have non
+default values. It is on by default.
+\item \textbf{Colour for options set here}\\
+Only used if the option above is on and allows to choose the colour used for
+highlighting the options set at this folder level.
+\item \textbf{Colour for inherited options}\\
+Same as the option above but for the options which have inherited their (non
+default) value from their parent folder.
+
+% \item \textbf{Format for the date}\\
+% This controls how the dates are shown in the folder view window. The
+% string here has the same format as an argument to strftime(), on a
+% Unix system you may execute \noun{man strftime} to see them all.
 \item \textbf{Show new mail notification}\\
 If this option is on, a message box will be shown each time new messages
 are received.

@@ -71,6 +71,8 @@
 
 #include "InitPython.h"
 
+#include "ColourNames.h"
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -539,6 +541,12 @@ enum ConfigFields
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
    ConfigField_RunOneOnly,
+
+   ConfigField_ShowOptionsOriginHelp,
+   ConfigField_ShowOptionsOrigin,
+   ConfigField_ShowOptionsOriginHere,
+   ConfigField_ShowOptionsOriginInherited,
+
    ConfigField_HelpDir,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
@@ -1651,8 +1659,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Always run only &one instance"),Field_Bool | Field_Restart, -1                     },
-   { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 
+   { gettext_noop("\n"
+                  "Mahogany may highlight the options having non default\n"
+                  "values, whether they are set specifically at this folder\n"
+                  "level or inherited from parent."), Field_Message, ConfigField_ShowOptionsOrigin },
+   { gettext_noop("Show option values &origin"),   Field_Bool, -1 },
+   { gettext_noop("Colour for options set here"),  Field_Color, ConfigField_ShowOptionsOrigin },
+   { gettext_noop("Colour for inherited options"), Field_Color, ConfigField_ShowOptionsOrigin },
+
+   { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Dir,    -1                     },
 #endif // OS_UNIX
@@ -2105,6 +2121,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_RUNONEONLY),
+
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_OPTION_SHOW_ORIGIN),
+   CONFIG_ENTRY(MP_OPTION_ORIGIN_HERE),
+   CONFIG_ENTRY(MP_OPTION_ORIGIN_INHERITED),
+
    CONFIG_ENTRY(MP_HELPDIR),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
@@ -2600,6 +2622,18 @@ bool wxOptionsPage::TransferDataToWindow()
    // edit the real value stored in the config
    ProfileEnvVarSave suspend(m_Profile, false);
 
+   // we may highlight the settings which have values different from default
+   // with colour
+   const bool showOrigin = READ_APPCONFIG_BOOL(MP_OPTION_SHOW_ORIGIN);
+   wxColour colOwn,
+            colInherited;
+   if ( showOrigin )
+   {
+      ReadColour(&colOwn, mApplication->GetProfile(), MP_OPTION_ORIGIN_HERE);
+      ReadColour(&colInherited, mApplication->GetProfile(),
+                     MP_OPTION_ORIGIN_INHERITED);
+   }
+
    Profile::ReadResult readResult;
    String strValue;
    long lValue = 0;
@@ -2721,18 +2755,55 @@ bool wxOptionsPage::TransferDataToWindow()
             wxFAIL_MSG(_T("unexpected field type"));
       }
 
-#ifdef EXPERIMENTAL_zeitlin
-      if ( readResult )
+      // indicate where does the value come from if enabled
+      if ( showOrigin )
       {
-         if ( !label )
-            label = GetLabelForControl(control);
+#if wxUSE_TOOLTIPS
+         wxString ttip;
+#endif // wxUSE_TOOLTIPS
 
-         if ( label )
-            label->SetForegroundColour(readResult == Profile::Read_FromHere
-                                          ? *wxRED
-                                          : *wxBLUE);
+         if ( readResult != Profile::Read_Default )
+         {
+            if ( !label )
+               label = GetLabelForControl(control);
+
+            if ( label )
+            {
+               wxColour col;
+               switch ( readResult )
+               {
+                  case Profile::Read_FromHere:
+                     col = colOwn;
+                     break;
+
+                  case Profile::Read_FromParent:
+                     col = colInherited;
+                     break;
+
+                  default:
+                     FAIL_MSG( _T("unexpected readResult") );
+               }
+
+               label->SetForegroundColour(col);
+            }
+
+#if wxUSE_TOOLTIPS
+            ttip = readResult == Profile::Read_FromHere
+                     ? _("Set at this level")
+                     : _("Inherited from parent");
+#endif // wxUSE_TOOLTIPS
+         }
+         else // this control has default value
+         {
+            ttip = _("Default value");
+         }
+
+#if wxUSE_TOOLTIPS
+         // don't overwrite an existing tooltip, if any
+         if ( !control->GetToolTip() )
+            control->SetToolTip(ttip);
+#endif // wxUSE_TOOLTIPS
       }
-#endif // EXPERIMENTAL_zeitlin
 
       // the dirty flag was set from the OnChange() callback, reset it!
       ClearDirty(n);

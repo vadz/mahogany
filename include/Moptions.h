@@ -417,6 +417,24 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 extern const MOption MP_WHITE_LIST;
 extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
+// miscellaneous
+// -------------
+
+// highlight the options according to their origin in the options dialog
+extern const MOption MP_OPTION_SHOW_ORIGIN;
+#define MP_OPTION_SHOW_ORIGIN_NAME _T("ShowOptionOrigin")
+#define MP_OPTION_SHOW_ORIGIN_DEFVAL 1l
+
+// the colour for the options set at this folder level
+extern const MOption MP_OPTION_ORIGIN_HERE;
+#define MP_OPTION_ORIGIN_HERE_NAME _T("OptionSetHereCol")
+#define MP_OPTION_ORIGIN_HERE_DEFVAL _T("blue")
+
+// the colour for the options inherited from parent (but non default)
+extern const MOption MP_OPTION_ORIGIN_INHERITED;
+#define MP_OPTION_ORIGIN_INHERITED_NAME _T("OptionInheritedCol")
+#define MP_OPTION_ORIGIN_INHERITED_DEFVAL _T("RGB(0, 0, 127)")
+
 // ----------------------------------------------------------------------------
 // the option names
 // ----------------------------------------------------------------------------
