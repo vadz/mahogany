@@ -52,7 +52,7 @@ void HeaderIterator::Reset()
 // the worker functions
 // ----------------------------------------------------------------------------
 
-bool HeaderIterator::GetNext(String *name, String *value)
+bool HeaderIterator::GetNext(String *name, String *value, int flags)
 {
    CHECK( name, false, _T("NULL header name in HeaderIterator::GetNext()") );
 
@@ -121,10 +121,20 @@ bool HeaderIterator::GetNext(String *name, String *value)
                }
                else // continued on the next line
                {
+                  if ( flags & MultiLineOk )
+                  {
+                     m_str += _T('\n');
+                     m_str += *m_pcCurrent;
+                  }
+
                   // continue with the current header and ignore all leading
                   // whitespace on the next line
                   while ( m_pcCurrent[1] == ' ' || m_pcCurrent[1] == '\t' )
+                  {
                      m_pcCurrent++;
+                     if ( flags & MultiLineOk )
+                        m_str += *m_pcCurrent;
+                  }
                }
             }
             break;
@@ -172,12 +182,13 @@ bool HeaderIterator::GetNext(String *name, String *value)
    return !name->empty();
 }
 
-size_t HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values)
+size_t
+HeaderIterator::GetAll(wxArrayString *names, wxArrayString *values, int flags)
 {
    CHECK( names && values, 0, _T("NULL pointer in HeaderIterator::GetAll()") );
 
    String name, value;
-   while ( GetNext(&name, &value) )
+   while ( GetNext(&name, &value, flags) )
    {
       int idxName = names->Index(name);
       if ( idxName == wxNOT_FOUND )

@@ -58,6 +58,17 @@ enum MessageAddressType
 class HeaderIterator
 {
 public:
+   /// flags for the last parameter to GetNext()/GetAll()
+   enum
+   {
+      /// collapse headers spanning multiple lines in one line
+      Collapse = 0,
+
+      /// return the headers spanning multiple lines in their original form
+      MultiLineOk = 1
+   };
+
+
    /**
      Ctor takes the full message header. Normally it is only used by the
      Message::GetHeaderIterator() function.
@@ -70,9 +81,10 @@ public:
 
      @param name is the pointer to the header name, can't be NULL
      @param value is the pointer which receives the header value and may be NULL
+     @param flags from the enum defined above
      @return true if ok, false if no more headers
     */
-   bool GetNext(String *name, String *value);
+   bool GetNext(String *name, String *value, int flags = Collapse);
 
    /**
      Get all headers at once. If a header occurs more than once, its values are
@@ -80,9 +92,12 @@ public:
 
      @param names the array to return the header names in
      @param values the array to return the header values in
+     @param flags from the enum defined above
      @return the number of headers in the arrays
     */
-   size_t GetAll(wxArrayString *names, wxArrayString *values);
+   size_t GetAll(wxArrayString *names,
+                 wxArrayString *values,
+                 int flags = Collapse);
 
    /**
      Resets the iterator so that the next call to GetNext() will return the
