@@ -1857,7 +1857,8 @@ MailFolderCC::PingReopenAll(bool fullPing)
 
    CHECK_STREAM_LIST();
 
-   /* Ping() might close/reopen a mailfolder, which means that some folder we
+   /*
+      Ping() might close/reopen a mailfolder, which means that some folder we
       had already pinged might be readded to the list, so we have to make a
       copy of the list before iterating
     */
@@ -1879,7 +1880,16 @@ MailFolderCC::PingReopenAll(bool fullPing)
       // don't ping locked folders, they will have to wait for the next time
       if ( !mf->IsLocked() )
       {
-         rc &= fullPing ? mf->PingReopen() : mf->Ping();
+         if ( fullPing ? mf->PingReopen() : mf->Ping() )
+         {
+            // retrieving the folder listing filters new messages
+            SafeDecRef(mf->GetHeaders());
+         }
+         else
+         {
+            // failed to ping at least one folder
+            rc = false;
+         }
       }
    }
 

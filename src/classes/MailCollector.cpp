@@ -219,7 +219,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
    // second case, mf==NULL, collect from all incoming folders:
    // maybe we've got nothing to do?
    if(m_list->empty())
-      return TRUE;
+      return true;
 
    // we can call RemoveIncomingFolder() inside the loop which
    // would invalidate our cursor, so we iterate using a fake
@@ -305,7 +305,6 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 {
    ReCreate();
    MOcheck();
-   ASSERT(mf);
 
    if ( mf->IsLocked() )
    {
@@ -315,7 +314,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       return true;
    }
 
-   if( mf->NeedsNetwork() && ! mApplication->IsOnline() )
+   if ( mf->NeedsNetwork() && ! mApplication->IsOnline() )
    {
       // this is not an error neither - ignore the inaccessbile folders
       return true;
