@@ -1908,12 +1908,12 @@ void MailFolderCC::CreateFileFolder()
       String tmp;
       if ( folderType == MF_FILE )
       {
-         static const char *cclient_drivers[] =
+         static const wxChar *cclient_drivers[] =
          {
-            "mbx",
-            "unix",
-            "mmdf",
-            "tenex"
+            _T("mbx"),
+            _T("unix"),
+            _T("mmdf"),
+            _T("tenex")
          };
 
          wxCOMPILE_TIME_ASSERT2( WXSIZEOF(cclient_drivers) == FileMbox_Max,
@@ -1921,22 +1921,21 @@ void MailFolderCC::CreateFileFolder()
 
          const FileMailboxFormat format = m_mfolder->GetFileMboxFormat();
 
-         tmp = "#driver.";
-         tmp << cclient_drivers[format] << '/';
+         tmp << _T("#driver.") << cclient_drivers[format] << _T('/');
 
-         wxLogDebug(_T("Trying to create folder '%s' in %s format."),
-                    GetName().c_str(), cclient_drivers[format]);
+         wxLogDebug(_T("Trying to create folder \"%s\" in %s format."),
+                    m_ImapSpec.c_str(), cclient_drivers[format]);
       }
       else // MF_MH folder
       {
          // the only one still not handled
          ASSERT_MSG( folderType == MF_MH, _T("unexpected folder type") );
 
-         tmp = "#driver.mh/";
+         tmp = _T("#driver.mh/");
       }
 
       tmp += m_ImapSpec;
-      mail_create(NIL, (char *)tmp.c_str());
+      mail_create(NIL, (char *)tmp.mb_str()); // const_cast for c-client
    }
 
    // we either already tried to create it once or it had existed even before
@@ -2000,62 +1999,69 @@ MailFolderCC::CheckForFileLock()
       return true;
    }
 
-   // TODO: we should be using c-client's lockname() here
-   String lockfile = wxFindFirstFile(file + ".lock*", wxFILE);
-   while ( !lockfile.empty() )
+   // it doesn't make sense to look for a lock on a folder which hasn't been
+   // created yet
+   if ( wxFileExists(file) )
    {
-      // outch, someone has a lock, opening the mailbox will fail as c-client
-      // checks for it -- propose to the user to remove the lock first
-      bool shouldRemove = MDialog_YesNoDialog
-                          (
-                           String::Format(
-                              _("Found lock-file '%s' for the mailbox '%s'.\n"
-                                "\n"
-                                "Some other process may be using the folder.\n"
-                                "Shall I forcefully override the lock?"),
-                              lockfile.c_str(), file.c_str()
-                           ),
-                           NULL,
-                           MDIALOG_YESNOTITLE,
-                           M_DLG_YES_DEFAULT
-                          );
-
-      if ( shouldRemove )
+      // TODO: we should be using c-client's lockname() here
+      String lockfile = wxFindFirstFile(file + ".lock*", wxFILE);
+      while ( !lockfile.empty() )
       {
-         // ask extra confirmation if the file is not empty to avoid deleting
-         // the important files erroneously
-         wxStructStat stBuf;
-         if ( wxStat(lockfile, &stBuf) != 0 || stBuf.st_size != 0 )
-         {
-            shouldRemove = MDialog_YesNoDialog
-                           (
+         // outch, someone has a lock, opening the mailbox will fail as c-client
+         // checks for it -- propose to the user to remove the lock first
+         bool shouldRemove = MDialog_YesNoDialog
+                             (
                               String::Format(
-                                 _("The file '%s' is not empty, still remove it?"),
-                                 lockfile.c_str()),
+                                 _("Found lock-file '%s' for the mailbox '%s'.\n"
+                                   "\n"
+                                   "Some other process may be using the folder.\n"
+                                   "Shall I forcefully override the lock?"),
+                                 lockfile.c_str(), file.c_str()
+                              ),
                               NULL,
                               MDIALOG_YESNOTITLE,
-                              M_DLG_NO_DEFAULT
+                              M_DLG_YES_DEFAULT
                              );
-         }
-      }
 
-      if ( shouldRemove )
-      {
-         // remove the file but be prepared to the fact that it could have
-         // already disappeared by itself
-         if ( remove(lockfile) != 0 && wxFile::Exists(lockfile) )
+         if ( shouldRemove )
          {
-            wxLogSysError(_("Failed to remove the lock file"));
-
-            return false;
+            // ask extra confirmation if the file is not empty to avoid deleting
+            // the important files erroneously
+            wxStructStat stBuf;
+            if ( wxStat(lockfile, &stBuf) != 0 || stBuf.st_size != 0 )
+            {
+               shouldRemove = MDialog_YesNoDialog
+                              (
+                                 String::Format
+                                 (
+                                    _("The file '%s' is not empty, still remove it?"),
+                                    lockfile.c_str()
+                                 ),
+                                 NULL,
+                                 MDIALOG_YESNOTITLE,
+                                 M_DLG_NO_DEFAULT
+                                );
+            }
          }
-      }
-      else if ( wxFile::Exists(lockfile) )
-      {
-         wxLogWarning(_("Lock file is present, opening the folder might fail."));
-      }
 
-      lockfile = wxFindNextFile();
+         if ( shouldRemove )
+         {
+            // remove the file but be prepared to the fact that it could have
+            // already disappeared by itself
+            if ( remove(lockfile) != 0 && wxFile::Exists(lockfile) )
+            {
+               wxLogSysError(_("Failed to remove the lock file"));
+
+               return false;
+            }
+         }
+         else if ( wxFile::Exists(lockfile) )
+         {
+            wxLogWarning(_("Lock file is present, opening the folder might fail."));
+         }
+
+         lockfile = wxFindNextFile();
+      }
    }
 #endif // OS_UNIX
 
@@ -4281,8 +4287,14 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    // shouldn't get them at all but somehow we do (ask c-client why...)
    if ( !stream || stream->halfopen )
    {
-      wxLogDebug(_T("mm_exists() for not opened folder '%s' ignored."),
-                 GetName().c_str());
+#ifdef DEBUG
+      if ( !GetName().empty() )
+      {
+         // this is strange...
+         wxLogDebug(_T("mm_exists() for not opened folder '%s' ignored."),
+                    GetName().c_str());
+      }
+#endif // DEBUG
 
       return;
    }
