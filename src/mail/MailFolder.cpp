@@ -637,11 +637,10 @@ public:
          ASSERT( m_MfList.empty() );
       }
 
-   void Add(MailFolderCmn *mf)
+   void Add(MailFolderCmn *mf, int delay)
       {
          CHECK_RET( mf, "NULL MailFolder in MailFolderCloser::Add()");
-         m_MfList.push_back(new MfCloseEntry(
-            mf,READ_CONFIG(mf->GetProfile(),MP_FOLDER_CLOSE_DELAY)));
+         m_MfList.push_back(new MfCloseEntry(mf,delay));
       }
    void OnTimer(void)
       {
@@ -677,14 +676,17 @@ bool
 MailFolderCmn::DecRef()
 {
    ASSERT_MSG(gs_MailFolderCloser, "DEBUG: this must not happen (harmless but should not be the case)");
+   int delay = READ_CONFIG(GetProfile(),MP_FOLDER_CLOSE_DELAY);
+
    if(gs_MailFolderCloser
+      && delay > 0
       && GetNRef() == 1  // only real closes get delayed
       && IsAlive() )     // and only if the folder was opened
                          // successfully and is still functional
    {
      wxLogTrace("mailfolder", "Mailfolder '%s': close delayed.", GetName().c_str());
      Checkpoint(); // flush data immediately
-     gs_MailFolderCloser->Add(this);
+     gs_MailFolderCloser->Add(this, delay);
      return FALSE;
    }
    else
