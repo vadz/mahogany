@@ -371,7 +371,10 @@ private:
             Append(Delete, _("&Delete folder"));
          }
          Append(Rename, _("Re&name folder..."));
-         Append(Close, _("&Close folder"));
+         if ( !isRoot )
+         {
+            Append(Close, _("&Close folder"));
+         }
 
          AppendSeparator();
 
@@ -571,11 +574,13 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
    if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
    {
       menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
-   }
 
-   if ( !isRoot )
-   {
+      // if Remove is there, Delete and Close are too
+      menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
       menu->Enable(WXMENU_FOLDER_DELETE, CanDeleteFolderOfType(folderType));
+
+      // TODO should check that it is really opened
+      menu->Enable(WXMENU_FOLDER_CLOSE, TRUE);
    }
 
    // browsing subfolders only makes sense if we have any and not for the
