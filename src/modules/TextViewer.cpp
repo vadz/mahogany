@@ -44,6 +44,10 @@ class TextViewerWindow;
    #include <wx/msw/private.h>
 #endif // __WXMSW__
 
+// only Win32 supports URLs in the text control natively so far, define this to
+// use this possibility
+//#define USE_AUTO_URL_DETECTION
+
 // ----------------------------------------------------------------------------
 // TextViewer: a wxTextCtrl-based MessageViewer implementation
 // ----------------------------------------------------------------------------
@@ -171,10 +175,11 @@ public:
    virtual bool AcceptsFocusFromKeyboard() const { return FALSE; }
 
 private:
-#ifdef __WXMSW__
-   // only Win32 supports URLs in the text control natively so far
+#ifdef USE_AUTO_URL_DETECTION
    void OnLinkEvent(wxTextUrlEvent& event);
+#endif // USE_AUTO_URL_DETECTION
 
+#ifdef __WXMSW__
    // get the text position from the coords
    long GetTextPositionFromCoords(const wxPoint& pt) const;
 #endif // __WXMSW__
@@ -198,9 +203,9 @@ private:
 // ============================================================================
 
 BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
-#ifdef __WXMSW__
+#ifdef USE_AUTO_URL_DETECTION
    EVT_TEXT_URL(-1, TextViewerWindow::OnLinkEvent)
-#endif // __WXMSW__
+#endif // USE_AUTO_URL_DETECTION
 
    EVT_RIGHT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_UP(TextViewerWindow::OnMouseEvent)
@@ -249,7 +254,7 @@ void TextViewerWindow::Clear()
    WX_CLEAR_ARRAY(m_clickables);
 }
 
-#ifdef __WXMSW__
+#ifdef USE_AUTO_URL_DETECTION
 
 void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 {
@@ -268,6 +273,10 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 
    event.Skip();
 }
+
+#endif // USE_AUTO_URL_DETECTION
+
+#ifdef __WXMSW__
 
 long TextViewerWindow::GetTextPositionFromCoords(const wxPoint& pt) const
 {
