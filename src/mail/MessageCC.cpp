@@ -355,9 +355,9 @@ MessageCC::Address(String &name, MessageAddressType type) const
          addr = m_Envelope->from;
       if(! addr)
          addr = m_Envelope->sender;
+/*
       if(addr && addr->personal && strlen(addr->personal))
          name = String(addr->personal);
-/*
   This is a rather nice hack which takes the "From:" personal name and
   combines it with the reply-to to return a complete mail address
   including name and email, but it seems to cause too much confusion
