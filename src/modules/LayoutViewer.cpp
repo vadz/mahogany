@@ -299,8 +299,8 @@ void LayoutViewer::Create(MessageView *msgView, wxWindow *parent)
    m_msgView = msgView;
    m_window = new LayoutViewerWindow(this, parent);
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
-   //m_window ->
-   //   SetFocusFollowMode(READ_CONFIG_BOOL(profile, MP_FOCUS_FOLLOWSMOUSE));
+   m_window ->
+      SetFocusFollowMode(READ_CONFIG_BOOL(GetProfile(), MP_FOCUS_FOLLOWSMOUSE));
 #endif
 }
 

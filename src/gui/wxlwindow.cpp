@@ -170,7 +170,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
 #if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
-   m_FocusFollowMode = false; //READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
+   m_FocusFollowMode = false;
 #endif
    SetWordWrap(false);
    SetWrapMargin(0);
