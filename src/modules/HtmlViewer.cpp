@@ -127,6 +127,9 @@ private:
    // calculate font size
    int CalculateFontSize(int diff);
 
+   // get the name of the virtual file for the n-th image we use
+   wxString GetVirtualFileName(size_t n) const;
+
    // create a new image in memory, returns its name
    wxString CreateImageInMemoryFS(const wxImage& image);
 
@@ -583,9 +586,16 @@ int HtmlViewer::CalculateFontSize(int diff)
    return diff;
 }
 
+wxString HtmlViewer::GetVirtualFileName(size_t n) const
+{
+   // the image file names must be globally unique, so concatenate the address
+   // of this object together with counter to obtain a really unique name
+   return wxString::Format("Mhtml%08x%d.png", this, n);
+}
+
 wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)
 {
-   wxString filename = wxString::Format("image%d.png", m_nImage++);
+   wxString filename = GetVirtualFileName(m_nImage++);
    wxMemoryFSHandler::AddFile(filename, image, wxBITMAP_TYPE_PNG);
    return filename;
 }
@@ -594,7 +604,7 @@ void HtmlViewer::FreeMemoryFS()
 {
    for ( size_t n = 0; n < m_nImage; n++ )
    {
-      wxMemoryFSHandler::RemoveFile(wxString::Format("image%d.png", n));
+      wxMemoryFSHandler::RemoveFile(GetVirtualFileName(n));
    }
 
    m_nImage = 0;
