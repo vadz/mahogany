@@ -145,7 +145,7 @@ public:
    virtual void CreateNotebook(wxPanel *panel);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxFolderCreateDialog() { }
+   wxFolderCreateDialog() { wxFAIL_MSG("not reached"); }
 
 private:
    DECLARE_DYNAMIC_CLASS(wxFolderCreateDialog)
@@ -161,6 +161,12 @@ public:
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
+
+   // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
+   wxFolderPropertiesDialog() { wxFAIL_MSG("not reached"); }
+
+private:
+   DECLARE_DYNAMIC_CLASS(wxFolderPropertiesDialog)
 };
 
 // A panel for defining a new Folder
@@ -267,6 +273,7 @@ private:
 
 IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxNotebookDialog)
 IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
 
 BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,

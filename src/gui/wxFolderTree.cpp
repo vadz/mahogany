@@ -548,10 +548,16 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    if ( cur != NULL )
    {
       MFolder *folder = cur->GetFolder();
+
+      wxString title(folder->GetName());
       if ( m_menu == NULL )
       {
          // create our popup menu if not done yet
-         m_menu = new FolderMenu(folder->GetName());
+         m_menu = new FolderMenu(title);
+      }
+      else
+      {
+         m_menu->SetTitle(title);
       }
 
       // disable the items which don't make sense for some kinds of folders
@@ -760,6 +766,19 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
    if ( item.IsOk() )
    {
       SelectItem(item);
+   }
+   else
+   {
+       item = wxTreeCtrl::GetSelection();
+   }
+
+   // try to popup the menu in some reasonabel position
+   if ( item.IsOk() )
+   {
+      wxRect rect;
+      GetBoundingRect(item, rect);
+      pt.x = (rect.GetX() + rect.GetWidth())/2;
+      pt.y = (rect.GetY() + rect.GetHeight())/2;
    }
 
    // show menu in any case
