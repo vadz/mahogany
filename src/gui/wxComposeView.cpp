@@ -1286,7 +1286,7 @@ wxComposeView::Send(void)
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
    /// The message to be composed.
-   class SendMessageCC * msg;
+   class SendMessageCC * msg = NULL;
 
    switch(m_mode)
    {
@@ -1298,7 +1298,7 @@ wxComposeView::Send(void)
       break;
    }
 
-
+   ASSERT(msg);
    while((export = wxLayoutExport( &status,
                                    WXLO_EXPORT_AS_TEXT,
                                    WXLO_EXPORT_WITH_CRLF)) != NULL)

@@ -164,8 +164,9 @@ public:
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
+       @return always true UNSUPPORTED!
    */
-   virtual void SetSequenceFlag(String const &sequence,
+   virtual bool SetSequenceFlag(String const &sequence,
                                 int flag,
                                 bool set = true);
 
@@ -173,8 +174,9 @@ public:
        @param uid mesage uid
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
+       @return always true UNSUPPORTED!
    */
-  virtual void SetMessageFlag(unsigned long uid,
+  virtual bool SetMessageFlag(unsigned long uid,
                               int flag,
                               bool set = true);
 
@@ -192,13 +194,20 @@ public:
 
    /** Delete a message.
        @param uid mesage uid
+       @return always true UNSUPPORTED!
    */
-   void DeleteMessage(unsigned long uid) { SetMessageFlag(uid, MSG_STAT_DELETED); }
+   bool DeleteMessage(unsigned long uid)
+   {
+     SetMessageFlag(uid,MSG_STAT_DELETED);
+     return true;
+   }
 
    /** UnDelete a message.
        @param uid mesage uid
+       @return always true UNSUPPORTED!
    */
-   void UnDeleteMessage(unsigned long uid) { SetMessageFlag(uid,MSG_STAT_DELETED, false); }
+   bool UnDeleteMessage(unsigned long uid)
+      { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
 
    /** Expunge messages.
      */

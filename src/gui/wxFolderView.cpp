@@ -40,6 +40,7 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
+#include "ASMailFolder.h"
 #include "MessageView.h"
 
 #include "gui/wxFolderView.h"
@@ -63,6 +64,15 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
 
 END_EVENT_TABLE()
 
+#ifdef USE_ASYNC
+#   define m_MF   m_ASMailFolder
+#   define USERDATA   ,this
+#else
+#   define m_MF   m_MailFolder
+#   define USERDATA   
+#endif
+
+   
 #define   LCFIX ((wxFolderListCtrl *)this)->
 
 static const char *wxFLC_ColumnNames[] =
@@ -336,7 +346,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 //   wxSafeYield();
 
 
-   if(m_MailFolder)  // clean up old folder
+   if(m_MF)  // clean up old folder
    {
       // NB: the test for m_InDeletion is needed because of wxMSW bug which
       //     prevents us from showing a dialog box when called from dtor
@@ -344,9 +354,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       {
          wxString msg;
          msg.Printf(_("Mark all articles in\n%s\nas read?"),
-                    m_MailFolder->GetName().c_str());
+                    m_MF->GetName().c_str());
 
-         if(m_NumOfMessages > 0 && m_MailFolder->GetType() == MF_NNTP
+         if(m_NumOfMessages > 0 && m_MF->GetType() == MF_NNTP
             && MDialog_YesNoDialog(msg,
                                    m_Parent,
                                    MDIALOG_YESNOTITLE,
@@ -356,15 +366,15 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             // build sequence
             wxString sequence;
             HeaderInfo const *hi;
-            for(hi = m_MailFolder->GetFirstHeaderInfo();
+            for(hi = m_MF->GetFirstHeaderInfo();
                 hi;
-                hi = m_MailFolder->GetNextHeaderInfo(hi))
+                hi = m_MF->GetNextHeaderInfo(hi))
             {
                sequence += strutil_ultoa(hi->GetUId());
                sequence += ',';
             }
             sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
-            m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
+            m_MF->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
          }
       }
 
@@ -372,6 +382,10 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       // events sent from the MailFolder destructor.
       MailFolder *mf = m_MailFolder;
       m_MailFolder = NULL;
+#ifdef USE_ASYNC
+      m_ASMailFolder->DecRef();
+      m_ASMailFolder = NULL; // shouldn't be needed
+#endif
       mf->DecRef();
    }
 
@@ -380,19 +394,22 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
    m_MailFolder = mf;
+#ifdef USE_ASYNC
+   m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
+#endif
    m_Profile = NULL;
 
-   if(m_MailFolder)
+   if(m_MF)
    {
       m_Profile = ProfileBase::CreateProfile("FolderView",
-                                             m_MailFolder ?
-                                             m_MailFolder->GetProfile() :
+                                             m_MF ?
+                                             m_MF->GetProfile() :
                                              NULL);
       m_MessagePreview->SetParentProfile(m_Profile);
       m_MessagePreview->Clear(); // again, to reflect profile changes
 
       m_MailFolder->IncRef();  // make sure it doesn't go away
-      m_folderName = m_MailFolder->GetName();
+      m_folderName = m_MF->GetName();
 
       if ( recreateFolderCtrl )
       {
@@ -430,6 +447,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_InDeletion = false;
    m_Parent = parent;
    m_MailFolder = NULL;
+#ifdef USE_ASYNC
+   m_ASMailFolder = NULL;
+#endif
    m_NumOfMessages = 0;
    m_Parent->GetClientSize(&x, &y);
    m_Profile = ProfileBase::CreateProfile("FolderView",NULL);
@@ -444,10 +464,18 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
 }
 
+wxFolderView::~wxFolderView()
+{
+   wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
+
+   m_InDeletion = true;
+   SetFolder(NULL, FALSE);
+}
+
 void
 wxFolderView::Update(void)
 {
-   if ( !m_MailFolder )
+   if ( !m_MF )
       return;
 
    long i;
@@ -465,7 +493,7 @@ wxFolderView::Update(void)
 
    wxBeginBusyCursor();// wxSafeYield();
 
-   n = m_MailFolder->CountMessages();
+   n = m_MF->CountMessages();
 
    // mildly annoying, but have to do it in order to prevent the generation of
    // error messages about failed env var expansion (this string contains '%'
@@ -503,13 +531,13 @@ wxFolderView::Update(void)
 
 /*FIXME! Seems not to cause strange access problems.
   long focused = m_FolderCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   if(focused >= (long) m_MailFolder->CountMessages()) //FIXME
+   if(focused >= (long) m_MF->CountMessages()) //FIXME
       focused = -1;
 */
    HeaderInfo const *hi;
    i = 0;
-   for(hi = m_MailFolder->GetFirstHeaderInfo(); hi != NULL;
-       hi = m_MailFolder->GetNextHeaderInfo(hi))
+   for(hi = m_MF->GetFirstHeaderInfo(); hi != NULL;
+       hi = m_MF->GetNextHeaderInfo(hi))
    {
       // FIXME vars are not initialised here!
       nsize = day = month = year = 0;
@@ -567,14 +595,6 @@ wxFolderView::OpenFolder(String const &profilename)
    return mf;
 }
 
-wxFolderView::~wxFolderView()
-{
-   wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
-
-   m_InDeletion = true;
-   SetFolder(NULL, FALSE);
-}
-
 void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
@@ -596,7 +616,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
 
    case  WXMENU_MSG_EXPUNGE:
-      m_MailFolder->ExpungeMessages();
+      m_MF->ExpungeMessages();
       Update();
       wxLogStatus(GetFrame(m_Parent), _("Deleted messages were expunged"));
       break;
@@ -612,7 +632,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_MOVE_TO_FOLDER:
       GetSelections(selections);
       if(SaveMessagesToFolder(selections))
-         m_MailFolder->DeleteMessages(&selections);
+         m_MF->DeleteMessages(&selections);
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
       GetSelections(selections);
@@ -620,19 +640,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_REPLY:
       GetSelections(selections);
-      m_MailFolder->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile);
+      m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile);
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      m_MailFolder->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile);
+      m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile);
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
-      m_MailFolder->UnDeleteMessages(&selections);
+      m_MF->UnDeleteMessages(&selections);
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
-      m_MailFolder->DeleteMessages(&selections);
+      m_MF->DeleteMessages(&selections);
       break;
    case WXMENU_MSG_PRINT:
       GetSelections(selections);
@@ -704,7 +724,7 @@ int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
    // in case there is an event pending:
-   if(m_FolderCtrl->GetItemCount() != (int)m_MailFolder->CountMessages())
+   if(m_FolderCtrl->GetItemCount() != (int)m_MF->CountMessages())
    {
       Update();
       return 0; // ignore current selection, so user has to re-issue command
@@ -715,7 +735,7 @@ wxFolderView::GetSelections(wxArrayInt& selections)
 void
 wxFolderView::PreviewMessage(long messageno)
 {
-   const HeaderInfo *hi = m_MailFolder->GetHeaderInfo(messageno);
+   const HeaderInfo *hi = m_MF->GetHeaderInfo(messageno);
    CHECK_RET( hi, "no header info for msg preview" );
 
    m_MessagePreview->ShowMessage(m_MailFolder, hi->GetUId());
@@ -725,19 +745,25 @@ void
 wxFolderView::OpenMessages(const wxArrayInt& selections)
 {
    String title;
+#ifndef USE_ASYNC
    Message *mptr;
    wxMessageViewFrame *mv;
-
+#endif
+   
    int n = selections.Count();
    int i;
    for(i = 0; i < n; i++)
    {
-      mptr = m_MailFolder->GetMessage(selections[i]);
+#ifdef USE_ASYNC
+      m_MF->GetMessage(selections[i], this);
+#else
+      mptr = m_MF->GetMessage(selections[i]);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i],
                                          this);
       mv->SetTitle(title);
       SafeDecRef(mptr);
+#endif
    }
 }
 
@@ -783,7 +809,7 @@ wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
 {
    String msg;
    bool rc;
-   rc = m_MailFolder->SaveMessagesToFolder(&selections,
+   rc = m_MF->SaveMessagesToFolder(&selections,
                                            GetFrame(m_Parent));
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
@@ -799,7 +825,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
    String msg;
    bool rc;
 
-   rc = m_MailFolder->SaveMessagesToFile(&selections,
+   rc = m_MF->SaveMessagesToFile(&selections,
                                          GetFrame(m_Parent));
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
@@ -844,6 +870,40 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    {
       Update();
    }
+}
+
+void
+wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
+{
+#ifndef USE_ASYNC
+   ASSERT_MSG(0, "unreachable code");
+#else
+
+   ASMailFolder::Result *result = event.GetResult();
+   if(result->GetFolder() == m_ASMailFolder)
+   {
+      switch(result->GetOperation())
+      {
+      case ASMailFolder::Op_GetMessage:
+         /* The only situation where we receive a Message, is if we
+            want to open it in a separate viewer. */
+         // Is it for us?
+         if(result->GetUserData() == this)
+         {
+            Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+            long uid = ((ASMailFolder::ResultMessage *)result)->GetUId();
+            (new
+             wxMessageViewFrame(m_MailFolder, uid, this)
+               )->SetTitle(mptr->Subject() + " - " + mptr->From());
+            // not needed, happens when event is processed:  SafeDecRef(mptr);
+         }
+         break;
+      default:
+         wxASSERT_MSG(0,"MEvent handling not implemented yet");
+      }
+   }
+   result->DecRef();
+#endif
 }
 
 

@@ -30,7 +30,10 @@ class FolderView;
 class ProfileBase;
 class INTARRAY;
 class MWindow;
-class Message;
+
+#include "Message.h"
+//class Message;
+
 
 /**
    ASMailFolder abstract base class, represents anything containig mails.
@@ -54,6 +57,12 @@ class ASMailFolder : public MObjectRC
 {
 public:
    /** @name Constants and Types */
+   /** Each operation returns a unique number, to identify it. */
+   typedef int Ticket;
+
+   /** Each operation can carry some user data. */
+   typedef void * UserData;
+   
    //@{
    /** What is the status of a given message in the folder?
        Recent messages are those that we never saw in a listing
@@ -78,6 +87,9 @@ public:
       MSG_STAT_FLAGGED = 64
    };
 
+   /**@name Result classes containing return values from
+   operations. */
+   //@{
    /** For the Result class, we need one identifier for every
        asynchronous operation to identify what happened.
    */
@@ -85,37 +97,49 @@ public:
    {
       Op_Ping,
       Op_GetMessage,
-      Op_AppendMessage
+      Op_AppendMessage,
+      Op_DeleteMessages,
+      Op_UnDeleteMessages,
+      Op_SaveMessages,
+      Op_SaveMessagesToFolder,
+      Op_SaveMessagesToFile
       
    };
-   /**@name Result classes containing return values from
-      operations. */
-   //@{
-   /** A structure containing the return values from an operation.
-       This will get passed in an MEvent to notify other parts of the
-       application that an operation has finished.
+    /** A structure containing the return values from an operation.
+        This will get passed in an MEvent to notify other parts of the
+        application that an operation has finished.
     */
    class Result : public MObjectRC
-      {
-      public:
-         /** Returns a pointer to the ASMailFolder from which this
-             event originated.
-         */
-         virtual ASMailFolder *GetFolder(void) const = 0;
-         /// Returns an OperationId to tell what happened.
-         virtual OperationId GetOperation(void) const = 0;
-      };
+   {
+   public:
+      /// Returns the user data.
+      virtual UserData GetUserData(void) const = 0;
+      /// Returns the ticket id.
+      virtual Ticket GetTicket(void) const = 0;
+      /** Returns a pointer to the ASMailFolder from which this
+          event originated.
+      */
+      virtual ASMailFolder *GetFolder(void) const = 0;
+      /// Returns an OperationId to tell what happened.
+      virtual OperationId GetOperation(void) const = 0;
+   };
+
    /** Common code shared by all class Result implementations. */
    class ResultImpl : public Result
    {
    public:
+      virtual UserData GetUserData(void) const { return m_UserData; }
+      virtual Ticket GetTicket(void) const { return m_Ticket; }
       virtual OperationId   GetOperation(void) const { return m_Id; }
       virtual ASMailFolder *GetFolder(void) const{ return m_Mf; }
    protected:
-      ResultImpl(OperationId id, ASMailFolder *mf)
+      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id,
+                 UserData ud)
          {
             m_Id = id;
+            m_Ticket = t;
             m_Mf = mf;
+            m_UserData = ud;
             if(m_Mf) m_Mf->IncRef();
          }
       virtual ~ResultImpl()
@@ -123,6 +147,8 @@ public:
    private:
       OperationId   m_Id;
       ASMailFolder *m_Mf;
+      Ticket        m_Ticket;
+      UserData      m_UserData;
    };
    /** Holds the result from an operation which can be expressed as an 
        integer value. Used for all boolean success values.
@@ -131,14 +157,20 @@ public:
    {
    public:
       int GetValue(void) const { return m_Value; }
-      static ResultInt *Create(OperationId id,
-                               ASMailFolder *mf,
-                               int value)
-         { return new ResultInt(id, mf, value); }
+      static ResultInt *Create(ASMailFolder *mf,
+                               Ticket t,
+                               OperationId id,
+                               int value,
+                               UserData ud)
+         { return new ResultInt(mf, t, id, value, ud); }
    protected:
-      ResultInt(OperationId id, ASMailFolder *mf, int value)
-         : ResultImpl(id, mf) { m_Value = value; 
-      }
+      ResultInt(ASMailFolder *mf,
+                Ticket t,
+                OperationId id,
+                int value, 
+                UserData ud)
+         : ResultImpl(mf, t, id, ud)
+         { m_Value = value; }
    private:
       int         m_Value;
    };
@@ -148,13 +180,17 @@ public:
    {
    public:
       static ResultMessage *Create(ASMailFolder *mf,
-                                   Message *msg, unsigned long uid)
-         { return new ResultMessage(mf, msg, uid); }
+                                   Ticket t,
+                                   Message *msg,
+                                   unsigned long uid,
+                                   UserData ud)
+         { return new ResultMessage(mf, t, msg, uid, ud); }
       Message * GetMessage(void) const { return m_Message; }
       unsigned long GetUId(void) const { return m_uid; }
    protected:
-      ResultMessage(ASMailFolder *mf, Message *msg, unsigned long uid)
-         : ResultImpl(Op_GetMessage, mf)
+      ResultMessage(ASMailFolder *mf, Ticket t, Message *msg, unsigned
+                    long uid, UserData ud)
+         : ResultImpl(mf, t, Op_GetMessage, ud)
          {
             m_Message = msg;
             if(m_Message) m_Message->IncRef();
@@ -165,9 +201,13 @@ public:
       Message *m_Message;
       unsigned long m_uid;
    };
+
    //@}
 
 
+   static ASMailFolder * Create(MailFolder *mf);
+
+   
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
    /** Check whether mailbox has changed.
@@ -186,9 +226,9 @@ public:
 
    /** get the message with unique id uid
        @param uid message uid
-       @return ResultMessage with boolean success value
+       @return ResultInt with boolean success value
    */
-   virtual void GetMessage(unsigned long uid) = 0;
+   virtual Ticket GetMessage(unsigned long uid, UserData ud = 0) = 0;
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -208,15 +248,15 @@ public:
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
-       @return true on success
+       @return ResultInt with boolean success value
    */
-   virtual bool AppendMessage(const Message &msg) = 0;
+   virtual Ticket AppendMessage( /* const */ Message *msg, UserData ud = 0) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
-       @return true on success
+       @return ResultInt with boolean success value
    */
-   virtual bool AppendMessage(const String &msg) = 0;
+   virtual Ticket AppendMessage(const String &msg, UserData ud = 0) = 0;
 
    /** Expunge messages.
      */
@@ -239,38 +279,39 @@ public:
        folder is updated. If false, they will be detected as new messages.
        @return ResultInt boolean
    */
-   virtual void SaveMessages(const INTARRAY *selections,
+   virtual Ticket SaveMessages(const INTARRAY *selections,
                              String const & folderName,
                              bool isProfile,
-                             bool updateCount = true) = 0;
+                               bool updateCount = true,
+                               UserData ud = 0) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual void DeleteMessages(const INTARRAY *messages) = 0;
+   virtual Ticket DeleteMessages(const INTARRAY *messages, UserData ud = 0) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual void UnDeleteMessages(const INTARRAY *messages) = 0;
+   virtual Ticket UnDeleteMessages(const INTARRAY *messages, UserData ud = 0) = 0;
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual void SaveMessagesToFile(const INTARRAY *messages, MWindow
-                                   *parent = NULL) = 0;
+   virtual Ticket SaveMessagesToFile(const INTARRAY *messages, MWindow
+                                   *parent = NULL, UserData ud = 0) = 0;
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual void SaveMessagesToFolder(const INTARRAY *messages, MWindow
-                                     *parent = NULL) = 0;
+   virtual Ticket SaveMessagesToFolder(const INTARRAY *messages, MWindow
+                                     *parent = NULL, UserData ud = 0) = 0;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -346,6 +387,5 @@ public:
    virtual void SetUpdateInterval(int secs) = 0;
    //@}
 };
-
 
 #endif

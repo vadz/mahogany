@@ -98,6 +98,13 @@
 /** Define if you want to use the global Mpch.h header file (e.g. for
     precompiling headers */
 #undef USE_PCH
+
+/** Define if you want to use the asynchronous mail folder code. (experimental) */
+#undef USE_ASYNC
+
+/** Define if you want to use wxThreads. (experimental) */
+#undef USE_THREADS
+
 /** This define carries some information about the operating system
     and release that M is compiled for.
 */

@@ -255,7 +255,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
 }
 
 
-void
+bool
 MailFolder::DeleteMessages(const INTARRAY *selections)
 {
    int n = selections->Count();
@@ -265,16 +265,18 @@ MailFolder::DeleteMessages(const INTARRAY *selections)
       sequence << strutil_ultoa((*selections)[i]) << ',';
    if(n)
       sequence << strutil_ultoa((*selections)[n-1]);
-   SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
+   return SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
 }
 
-void
+bool
 MailFolder::UnDeleteMessages(const INTARRAY *selections)
 {
    int n = selections->Count();
    int i;
+   bool rc = true;
    for(i = 0; i < n; i++)
-      UnDeleteMessage((*selections)[i]);
+      rc &= UnDeleteMessage((*selections)[i]);
+   return rc;
 }
 
 bool

@@ -155,20 +155,23 @@ public:
 
    /** Delete a message.
        @param uid the message uid
+       @return true on success
    */
-   virtual void DeleteMessage(unsigned long uid) = 0;
+   virtual bool DeleteMessage(unsigned long uid) = 0;
 
    /** UnDelete a message.
        @param uid the message uid
+       @return true on success
    */
-   virtual void UnDeleteMessage(unsigned long uid) = 0;
+   virtual bool UnDeleteMessage(unsigned long uid) = 0;
 
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
+       @return true on success
    */
-   virtual void SetMessageFlag(unsigned long uid,
+   virtual bool SetMessageFlag(unsigned long uid,
                                int flag,
                                bool set = true) = 0;
 
@@ -176,8 +179,9 @@ public:
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
+       @return true on success
    */
-   virtual void SetSequenceFlag(const String &sequence,
+   virtual bool SetSequenceFlag(const String &sequence,
                                 int flag,
                                 bool set = true) = 0;
    /** Appends the message to this folder.
@@ -248,13 +252,15 @@ public:
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
+       @return true on success
    */
-   void DeleteMessages(const INTARRAY *messages);
+   bool DeleteMessages(const INTARRAY *messages);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
+       @return true on success
    */
-   void UnDeleteMessages(const INTARRAY *messages);
+   bool UnDeleteMessages(const INTARRAY *messages);
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers

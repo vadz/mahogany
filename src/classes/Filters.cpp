@@ -154,10 +154,27 @@ class Operator : public MObject
 public:
    virtual long Evaluate(const class SyntaxNode *left,
                          const class SyntaxNode *right) const = 0;
+   /// Returns the priority  of the operator.
+   virtual int  Priority(void) const = 0;
 #ifdef DEBUG
    virtual String Debug(const class SyntaxNode *left,
                         const class SyntaxNode *right) const = 0;
 #endif
+};
+
+/// The numbers returned by Operator::Priority()
+enum OperatorPriorities
+{
+   /// standard, lowest
+   PRI_LOWEST,
+   /// boolean operators:
+   PRI_BOOLEAN,
+   /// for addition and substraction
+   PRI_PLUS_MINUS,
+   /// for multiplication and division
+   PRI_TIMES_DIV,
+   /// the exponential operator
+   PRI_EXPONENTIONAL
 };
 
 // ----------------------------------------------------------------------------
@@ -350,6 +367,8 @@ public:
          (void) left->Evaluate();
          return right->Evaluate();
       }
+   virtual int Priority(void) const
+      { return PRI_LOWEST; }
 #ifdef DEBUG
    String Debug(const class SyntaxNode *left, const class SyntaxNode
                 *right) const
@@ -365,13 +384,15 @@ public:
 };
 
 #ifdef DEBUG
-#define IMPLEMENT_OP(name, operator) \
+#define IMPLEMENT_OP(name, operator, priority) \
 class Operator##name : public Operator \
 { \
 public: \
    virtual long Evaluate(const class SyntaxNode *left, \
                         const class SyntaxNode *right) const \
       { MOcheck(); return left->Evaluate() operator right->Evaluate(); } \
+   virtual int Priority(void) const \
+      { return priority; } \
    virtual String Debug(const class SyntaxNode *left, \
                         const class SyntaxNode *right) const \
                            { MOcheck(); String s; if(left) s << left->Debug(); \
@@ -390,12 +411,12 @@ public: \
 #endif
 
 
-IMPLEMENT_OP(Or,||);
-IMPLEMENT_OP(And,&&);
-IMPLEMENT_OP(Plus,+);
-IMPLEMENT_OP(Minus,-);
-IMPLEMENT_OP(Times,*);
-IMPLEMENT_OP(Divide,/);
+IMPLEMENT_OP(Or,||, PRI_BOOLEAN);
+IMPLEMENT_OP(And,&&, PRI_BOOLEAN);
+IMPLEMENT_OP(Plus,+, PRI_PLUS_MINUS);
+IMPLEMENT_OP(Minus,-, PRI_PLUS_MINUS);
+IMPLEMENT_OP(Times,*, PRI_TIMES_DIV);
+IMPLEMENT_OP(Divide,/, PRI_TIMES_DIV);
 
 
 /* static */
@@ -688,7 +709,7 @@ Condition::Create(Token &token, Parser &p)
 
 /** FOR TESTING ONLY, called from MAppBase::OnStartup(): **/
 
-static const char *testprogram = " 5 + ( 3 * 4 )";
+static const char *testprogram = " 5 + 4 * ( 3 * 4 ) + print() ";
 
 void FilterTest(void)
 {

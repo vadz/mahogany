@@ -71,6 +71,9 @@ private:
 //forward decl
 class MailFolder;
 
+///FIXME: this shouldn't be needed! Opaque type?
+#include "ASMailFolder.h"
+
 // ----------------------------------------------------------------------------
 /// MEventNewMailData - the event notifying the app about "new mail"
 class MEventNewMailData : public MEventData
@@ -217,19 +220,24 @@ private:
 // ----------------------------------------------------------------------------
 /** MEventASFolderResult Data - Carries a ASMailFolder::Result object
     with the result of an asynchronous operation on the folder. */
-class MEventASFolderResult : public MEventData
+class MEventASFolderResultData : public MEventData
 {
 public:
    /** Constructor.
    */
-   MEventASFolderResult(MObjectRC *result)
+   MEventASFolderResultData(MObjectRC *result)
       : MEventData(MEventId_ASFolderResult)
       {
          m_ResultData = result;
          m_ResultData->IncRef();
       }
-   ~MEventASFolderResult()
+   ~MEventASFolderResultData()
       { m_ResultData->DecRef(); }
+   ASMailFolder::Result *GetResult(void) const
+      {
+         m_ResultData->IncRef();
+         return ( ASMailFolder::Result *) m_ResultData;
+      } 
 private:
    MObjectRC  *m_ResultData;
 };

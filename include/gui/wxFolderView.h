@@ -29,6 +29,7 @@ class wxFolderListCtrl;
 class wxMFrame;
 class wxMessageView;
 class MailFolder;
+class ASMailFolder;
 
 enum wxFolderListCtrlFields
 {
@@ -127,6 +128,8 @@ public:
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
+   /// the derived class should react to the result to an asynch operation
+   virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
 

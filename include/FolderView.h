@@ -14,6 +14,7 @@
 
 class MailFolder;
 class ProfileBase;
+class ASMailFolder;
 
 /**
    FolderView class, a window displaying a MailFolder.
@@ -27,6 +28,8 @@ public:
          ASSERT_MSG( m_regCookieTreeChange, "can't reg folder view with event manager");
          m_regCookieFolderUpdate = MEventManager::Register(*this, MEventId_FolderUpdate);
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
+         m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
+         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
       }
    /// update the user interface
    virtual void Update(void) = 0;
@@ -35,6 +38,7 @@ public:
       {
          MEventManager::Deregister(m_regCookieTreeChange);
          MEventManager::Deregister(m_regCookieFolderUpdate);
+         MEventManager::Deregister(m_regCookieASFolderResult);
       }
 
    /// event processing function
@@ -46,8 +50,10 @@ public:
          if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
             OnFolderDeleteEvent(event.GetFolderFullName());
       }
-      else if ( ev.GetId() == MEventId_FolderUpdate)
-         OnFolderUpdateEvent((MEventFolderUpdateData&)ev);
+      else if ( ev.GetId() == MEventId_ASFolderResult )
+         OnASFolderResultEvent((MEventASFolderResultData &) ev );
+      else if ( ev.GetId() == MEventId_FolderUpdate )
+         OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
   
       return true; // continue evaluating this event
    }
@@ -66,15 +72,18 @@ protected:
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;
    /// the derived class should update their display
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
+   /// the derived class should react to the result to an asynch operation
+   virtual void OnASFolderResultEvent(MEventASFolderResultData &event) = 0;
 
    /// the profile we use for our settings
    ProfileBase *m_Profile;
    /// full folder name of the folder we show
    String m_folderName;
    /// the mail folder being displayed
+   ASMailFolder *m_ASMailFolder;
    MailFolder *m_MailFolder;
-
+   
 private:
-   void *m_regCookieTreeChange, *m_regCookieFolderUpdate;
+   void *m_regCookieTreeChange, *m_regCookieFolderUpdate, *m_regCookieASFolderResult;
 };
 #endif

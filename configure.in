@@ -36,6 +36,7 @@ DEFAULT_USE_THREADS=1
 DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
+DEFAULT_USE_ASYNC=0
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_LIBTOOL=0
 
@@ -70,6 +71,10 @@ USE_WXCONFIG)
 M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
+
+M_OVERRIDES(async,async,
+--with-async    use ASMailFolder code,
+USE_ASYNC)
 
 M_OVERRIDES(libtool,libtool,
 --with-libtool    use GNU libtool,
@@ -271,6 +276,7 @@ fi
 if test "$USE_THREADS" = 1
 then
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
+	AC_DEFINE(USE_THREADS)
 fi
 
 dnl set debug/optimisation flags
@@ -305,6 +311,10 @@ if test "$USE_PCH" = 1; then
 	AC_DEFINE(USE_PCH)
 fi
 
+dnl async mail folder code
+if test "$USE_ASYNC" = 1; then
+	AC_DEFINE(USE_ASYNC)
+fi
 dnl kdoc/docxx have their own section further down
 
 dnl --------------------------------------------------------------------------

@@ -196,3 +196,4 @@ typedef long int lcoord_t;
 #define   NULLstring String((const char *)NULL)
 
 #endif // MCOMMON_H
+

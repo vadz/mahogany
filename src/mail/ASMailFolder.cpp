@@ -14,18 +14,27 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "guidef.h"    // only for high-level functions
 #   include "strutil.h"
 #   include "Profile.h"
 #   include "MEvent.h"
 #endif
 
 #include "Mdefaults.h"
-
 #include "Message.h"
 
 #include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
+
+
+/// Call this always before using it.
+#ifdef DEBUG
+#   define   AScheck()   { MOcheck(); ASSERT(m_MailFolder); }
+#else
+#   define   AScheck()
+#endif
+
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -45,6 +54,8 @@ public:
       one.
    */
    ASMailFolderImpl(MailFolder *mf);
+   /// destructor
+   ~ASMailFolderImpl();
    //@}
 
 
@@ -61,7 +72,7 @@ public:
    /** Check whether mailbox has changed.
        @return void, but causes update events to be sent if necessary.
    */
-   virtual void Ping(void) = 0;
+   virtual void Ping(void) { m_MailFolder->Ping(); } //FIXME
    /** Delete a message.
        @param uid the message uid
    */
@@ -71,13 +82,13 @@ public:
        @param uid the message uid
        @return ResultInt with boolean success value
    */
-   virtual void UnDeleteMessage(unsigned long uid) = 0;
+   virtual void UnDeleteMessage(unsigned long uid) ;
 
    /** get the message with unique id uid
        @param uid message uid
        @return ResultMessage with boolean success value
    */
-   virtual void GetMessage(unsigned long uid) = 0;
+   virtual Ticket GetMessage(unsigned long uid, UserData ud = 0);
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -85,7 +96,7 @@ public:
    */
    virtual void SetMessageFlag(unsigned long uid,
                                int flag,
-                               bool set = true) = 0;
+                               bool set = true) ;
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
@@ -94,22 +105,22 @@ public:
    */
    virtual void SetSequenceFlag(const String &sequence,
                                 int flag,
-                                bool set = true) = 0;
+                                bool set = true) ;
    /** Appends the message to this folder.
        @param msg the message to append
        @return true on success
    */
-   virtual bool AppendMessage(const Message &msg) = 0;
+   virtual Ticket AppendMessage(/* const */ Message *msg, UserData ud = 0) ;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
        @return true on success
    */
-   virtual bool AppendMessage(const String &msg) = 0;
+   virtual Ticket AppendMessage(const String &msg, UserData ud = 0) ;
 
    /** Expunge messages.
      */
-   virtual void ExpungeMessages(void) = 0;
+   virtual void ExpungeMessages(void) ;
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
@@ -126,36 +137,38 @@ public:
        folder is updated. If false, they will be detected as new messages.
        @return ResultInt boolean
    */
-   virtual void SaveMessages(const INTARRAY *selections,
-                             String const & folderName,
-                             bool isProfile,
-                             bool updateCount = true);
+   virtual Ticket SaveMessages(const INTARRAY *selections,
+                               String const & folderName,
+                               bool isProfile,
+                               bool updateCount = true,
+                               UserData ud = 0);
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual void DeleteMessages(const INTARRAY *messages);
+   virtual Ticket DeleteMessages(const INTARRAY *messages, UserData ud = 0);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual void UnDeleteMessages(const INTARRAY *messages);
+   virtual Ticket UnDeleteMessages(const INTARRAY *messages, UserData ud = 0);
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual void SaveMessagesToFile(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual Ticket SaveMessagesToFile(const INTARRAY *messages, MWindow
+                                     *parent = NULL, UserData ud = 0);
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual void SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual Ticket SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL, UserData ud = 0);
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -183,7 +196,7 @@ public:
        @return the symbolic name of the mailbox
    */
    virtual String GetName(void) const
-      { return m_MailFolder->GetName(); }
+      { AScheck(); return m_MailFolder->GetName(); }
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
        message count.
@@ -192,7 +205,7 @@ public:
        @return number of messages
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const
-      { return m_MailFolder->CountMessages(); }
+      { AScheck(); return m_MailFolder->CountMessages(); }
    
    /** Returns a HeaderInfo structure for a message with a given
        sequence number. This can be used to obtain the uid.
@@ -201,17 +214,17 @@ public:
    */
    virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno)
       const
-      { return m_MailFolder->GetHeaderInfo(msgno); }
+      { AScheck(); return m_MailFolder->GetHeaderInfo(msgno); }
    
    /** Get the profile.
        @return Pointer to the profile.
    */
    inline ProfileBase *GetProfile(void) const
-      { return m_MailFolder->GetProfile(); }
+      { AScheck(); return m_MailFolder->GetProfile(); }
 
    /// Get update interval in seconds
    virtual int GetUpdateInterval(void) const
-      { return m_MailFolder->GetUpdateInterval(); }
+      { AScheck(); return m_MailFolder->GetUpdateInterval(); }
 
    /** Toggle sending of new mail events.
        @param send if true, send them
@@ -219,51 +232,63 @@ public:
    */
    virtual void EnableNewMailEvents(bool send = true, bool update =
                                     true)
-      { m_MailFolder->EnableNewMailEvents(send, update); }
+      { AScheck(); m_MailFolder->EnableNewMailEvents(send, update); }
 
    /** Query whether folder is sending new mail events.
        @return if true, folder sends them
    */
    virtual bool SendsNewMailEvents(void) const
-      { return m_MailFolder->SendsNewMailEvents(); }
+      { AScheck(); return m_MailFolder->SendsNewMailEvents(); }
    
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
    virtual const class HeaderInfo *GetFirstHeaderInfo(void) const
-      { return m_MailFolder->GetFirstHeaderInfo(); }
+      { AScheck(); return m_MailFolder->GetFirstHeaderInfo(); }
    /// Return a pointer to the next message's header info.
    virtual const class HeaderInfo *GetNextHeaderInfo(const class
                                                      HeaderInfo* hi)
       const
-      { return m_MailFolder->GetNextHeaderInfo(hi); }
+      { AScheck(); return m_MailFolder->GetNextHeaderInfo(hi); }
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const
-      { return m_MailFolder->GetType(); }
+      { AScheck(); return m_MailFolder->GetType(); }
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax)
-      { m_MailFolder->SetRetrievalLimit(nmax); }
+      { AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
    /// Set update interval in seconds, 0 to disable
    virtual void SetUpdateInterval(int secs)
-      { m_MailFolder->SetUpdateInterval(secs); }
+      { AScheck(); m_MailFolder->SetUpdateInterval(secs); }
    //@}
+protected:
+   /** Used to obtain the next Ticked id for events. */
+   static Ticket GetTicket(void);
 private:
    /// The synchronous mailfolder that we map to.
    MailFolder *m_MailFolder;
    /// Temporary, to control access:
    bool m_Locked;
+   /// Next ticket Id to use.
+   static Ticket ms_Ticket;
 };
 
 
 ASMailFolderImpl::ASMailFolderImpl(MailFolder *mf)
 {
+   ASSERT(mf);
    m_MailFolder = mf;
+   m_MailFolder->IncRef();
    m_Locked = false;
 }
 
+ASMailFolderImpl::~ASMailFolderImpl()
+{
+   ASSERT(m_MailFolder);
+   m_MailFolder->DecRef();
+}
 
 /* For now the following lock/unlock functions don't do
    anything. Later, they need to control access to the same underlying 
@@ -274,6 +299,7 @@ ASMailFolderImpl::ASMailFolderImpl(MailFolder *mf)
 void
 ASMailFolderImpl::LockFolder(void)
 {
+   AScheck();
    ASSERT(m_Locked == false);
    m_Locked = true;
 }
@@ -281,6 +307,7 @@ ASMailFolderImpl::LockFolder(void)
 void
 ASMailFolderImpl::UnLockFolder(void)
 {
+   AScheck();
    ASSERT(m_Locked == true);
    m_Locked = false;
 }
@@ -288,10 +315,33 @@ ASMailFolderImpl::UnLockFolder(void)
 void
 ASMailFolderImpl::SendEvent(Result *result)
 {
+   ASSERT(result);
    // now we sent an  event to update folderviews etc
-   MEventManager::Send(new MEventASFolderResult (result) );
+   MEventManager::Send(new MEventASFolderResultData (result) );
    result->DecRef(); // we no longer need it
 }
+
+
+void
+ASMailFolderImpl::SetMessageFlag(unsigned long uid,
+                                 int flag,
+                                 bool set)
+{
+   LockFolder();
+   m_MailFolder->SetMessageFlag(uid, flag, set);
+   UnLockFolder();
+}
+
+void
+ASMailFolderImpl::SetSequenceFlag(const String &sequence,
+                                  int flag,
+                                  bool set)
+{
+   LockFolder();
+   m_MailFolder->SetSequenceFlag(sequence, flag, set);
+   UnLockFolder();
+}
+
 
 void
 ASMailFolderImpl::DeleteMessage(unsigned long uid)
@@ -309,56 +359,145 @@ ASMailFolderImpl::UnDeleteMessage(unsigned long uid)
    UnLockFolder();
 }
 
-void
-ASMailFolderImpl::GetMessage(unsigned long uid)
+
+ASMailFolder::Ticket
+ASMailFolderImpl::AppendMessage(/* const */ Message *msg, UserData ud)
 {
+   Ticket t = GetTicket();
+   msg->IncRef();
+   LockFolder();
+   int rc = m_MailFolder->AppendMessage(*msg);
+   SendEvent(ResultInt::Create(this, t, Op_AppendMessage, rc, ud));
+   UnLockFolder();
+   msg->DecRef();
+   return t;
+}
+
+ASMailFolder::Ticket
+ASMailFolderImpl::AppendMessage(const String &msg, UserData ud)
+{
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->AppendMessage(msg);
+   SendEvent(ResultInt::Create(this, t, Op_AppendMessage, rc, ud));
+   UnLockFolder();
+   return t;
+}
+
+
+void
+ASMailFolderImpl::ExpungeMessages(void)
+{
+   LockFolder();
+   m_MailFolder->ExpungeMessages();
+   UnLockFolder();
+}
+
+ASMailFolder::Ticket
+ASMailFolderImpl::GetMessage(unsigned long uid, UserData ud)
+{
+   Ticket t = GetTicket();
    LockFolder();
    Message *msg = m_MailFolder->GetMessage(uid);
    UnLockFolder();
-   SendEvent(ResultMessage::Create(this, msg, uid));
+   SendEvent(ResultMessage::Create(this, t, msg, uid, ud));
+   return t;
 }
 
-void
+ASMailFolder::Ticket
 ASMailFolderImpl::SaveMessages(const INTARRAY *selections,
-                             String const & folderName,
-                             bool isProfile,
-                               bool updateCount = true)
+                               String const & folderName,
+                               bool isProfile,
+                               bool updateCount, UserData ud)
 {
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->SaveMessages(selections, folderName, isProfile, updateCount);
+   SendEvent(ResultInt::Create(this, t, Op_SaveMessages, rc, ud));
+   UnLockFolder();
+   return t;
 }
 
-void
-ASMailFolderImpl::DeleteMessages(const INTARRAY *messages)
+ASMailFolder::Ticket
+ASMailFolderImpl::DeleteMessages(const INTARRAY *messages, UserData ud)
 {
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->DeleteMessages(messages);
+   SendEvent(ResultInt::Create(this, t, Op_DeleteMessages, rc, ud));
+   UnLockFolder();
+   return t;
 }
 
-void
-ASMailFolderImpl::UnDeleteMessages(const INTARRAY *messages)
+ASMailFolder::Ticket
+ASMailFolderImpl::UnDeleteMessages(const INTARRAY *messages, UserData ud)
 {
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->UnDeleteMessages(messages);
+   SendEvent(ResultInt::Create(this, t, Op_DeleteMessages, rc, ud));
+   UnLockFolder();
+   return t;
 }
 
-void
+ASMailFolder::Ticket
 ASMailFolderImpl::SaveMessagesToFile(const INTARRAY *messages, MWindow
-                                     *parent = NULL)
+                                     *parent, UserData ud)
 {
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->SaveMessagesToFile(messages, parent);
+   SendEvent(ResultInt::Create(this, t, Op_SaveMessagesToFile, rc, ud));
+   UnLockFolder();
+   return t;
 }
 
-void
+ASMailFolder::Ticket
 ASMailFolderImpl::SaveMessagesToFolder(const INTARRAY *messages,
-                                       MWindow *parent = NULL)
+                                       MWindow *parent, UserData ud)
 {
+   Ticket t = GetTicket();
+   LockFolder();
+   int rc = m_MailFolder->SaveMessagesToFolder(messages, parent);
+   SendEvent(ResultInt::Create(this, t, Op_SaveMessagesToFolder, rc, ud));
+   UnLockFolder();
+   return t;
 }
 
 void
 ASMailFolderImpl::ReplyMessages(const INTARRAY *messages,
-                                MWindow *parent = NULL,
-                                ProfileBase *profile = NULL)
+                                MWindow *parent,
+                                ProfileBase *profile)
 {
+   LockFolder();
+   m_MailFolder->ReplyMessages(messages, parent, profile);
+   UnLockFolder();
 }
 
 void
 ASMailFolderImpl::ForwardMessages(const INTARRAY *messages,
-                                  MWindow *parent = NULL,
-                                  ProfileBase *profile = NULL)
+                                  MWindow *parent,
+                                  ProfileBase *profile)
 {
+   LockFolder();
+   m_MailFolder->ForwardMessages(messages, parent, profile);
+   UnLockFolder();
+}
+
+/* static */
+ASMailFolder::Ticket
+ASMailFolderImpl::GetTicket(void)
+{
+   return ms_Ticket++;
+}
+
+ASMailFolder::Ticket
+ASMailFolderImpl::ms_Ticket = 0;
+
+/* static */
+ASMailFolder *
+ASMailFolder::Create(MailFolder *mf)
+{
+   return new ASMailFolderImpl(mf);
 }
 

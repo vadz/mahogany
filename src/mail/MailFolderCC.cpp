@@ -665,12 +665,12 @@ MailFolderCC::GetHeaderInfo(unsigned long msgno) const
    return m_Listing + msgno;
 }
 
-void
+bool
 MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
                               bool set)
 {
-   CHECK_DEAD("Cannot access closed folder\n'%s'.");
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
    String flags;
 
    if(flag & MSG_STAT_SEEN)
@@ -700,18 +700,20 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                         ST_UID);
       ProcessEventQueue();
    }
+   return true; /* not supported by c-client */
 }
 
-void
+bool
 MailFolderCC::SetMessageFlag(unsigned long uid,
                              int flag,
                              bool set)
 {
-   CHECK_DEAD("Cannot access closed folder\n'%s'.");
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
    ASSERT(m_Listing);
 //FIXME uid check   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
    String sequence = strutil_ultoa(uid);
    SetSequenceFlag(sequence,flag,set);
+   return true; /* not supported by c-client */
 }
 
 void
