@@ -827,7 +827,11 @@ String MailFolder::GetImapSpec(int typeOrig,
    case MF_POP:
       mboxpath << '{' << server << "/pop3";
       if(flags & MF_FLAGS_SSLAUTH)
+      {
          mboxpath << "/ssl";
+         if(flags & MF_FLAGS_SSLUNSIGNED)
+            mboxpath << "/novalidate-cert";
+      }
       mboxpath << '}';
       break;
    case MF_IMAP:  // do we need /imap flag?
@@ -841,7 +845,11 @@ String MailFolder::GetImapSpec(int typeOrig,
             mboxpath << '{' << server << '}'<< name;
       }
       if(flags & MF_FLAGS_SSLAUTH)
+      {
          mboxpath << "/ssl";
+         if(flags & MF_FLAGS_SSLUNSIGNED)
+            mboxpath << "/novalidate-cert";
+      }
       mboxpath << '}' << name;
       break;
    case MF_NEWS:
@@ -850,7 +858,11 @@ String MailFolder::GetImapSpec(int typeOrig,
    case MF_NNTP:
       mboxpath << '{' << server << "/nntp";
       if(flags & MF_FLAGS_SSLAUTH)
+      {
          mboxpath << "/ssl";
+         if(flags & MF_FLAGS_SSLUNSIGNED)
+            mboxpath << "/novalidate-cert";
+      }
       mboxpath << '}' << name;
       break;
    default:

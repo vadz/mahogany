@@ -423,7 +423,9 @@ protected:
 #ifdef USE_SSL
    /// Use SSL authentication for this folder?
    wxCheckBox *m_useSSL;
-#endif
+   /// Accept unsigned certificates?
+   wxCheckBox *m_acceptUnsignedSSL;
+#endif // USE_SSL
 
 #ifdef USE_LOCAL_CHECKBOX
    /// Is folder local?
@@ -452,7 +454,9 @@ protected:
 #ifdef USE_SSL
    /// the initial value of the "use SSL" flag
    bool m_originalUseSSL;
-#endif
+   /// the initial value of the "accept unsigned certificates" flag
+   bool m_originalAcceptUnsignedSSL;
+#endif // USE_SSL
    /// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
    /// the initial value of the "force re-open" flag
@@ -992,7 +996,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_IsAnonymous,
 #ifdef USE_SSL
       Label_UseSSL,
-#endif
+      Label_AcceptUnsignedSSL,
+#endif // USE_SSL
 #ifdef USE_LOCAL_CHECKBOX
       Label_IsLocal,
 #endif // USE_LOCAL_CHECKBOX
@@ -1005,7 +1010,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    };
 
    // the remaining unused accel letters (remove one if you add new label):
-   //    ADGJQVXZ
+   //    DGJQVXZ
    static const char *szLabels[Label_Max] =
    {
       gettext_noop("&User name: "),
@@ -1021,7 +1026,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("Anon&ymous access: "),
 #ifdef USE_SSL
       gettext_noop("Use Secure Sockets Layer (SS&L): "),
-#endif
+      gettext_noop("&Accept unsigned (self-signed) certificates: "),
+#endif // USE_SSL
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network: "),
 #endif // USE_LOCAL_CHECKBOX
@@ -1061,7 +1067,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    wxControl *lastCtrl = m_isAnonymous;
 #ifdef USE_SSL
    m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax, lastCtrl);
-   lastCtrl = m_useSSL;
+   m_acceptUnsignedSSL = CreateCheckBox(labels[Label_AcceptUnsignedSSL], widthMax, m_useSSL);
+   lastCtrl = m_acceptUnsignedSSL;
 #endif // USE_SSL
 
 #ifdef USE_LOCAL_CHECKBOX
@@ -1087,6 +1094,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #ifdef USE_SSL
    m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
                           "for communication with the server."));
+   m_acceptUnsignedSSL->SetToolTip(_("This will accept unsigned (self-signed) SSL certificates"));
 #endif // USE_SSL
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
@@ -2005,6 +2013,8 @@ wxFolderPropertiesPage::SetDefaultValues()
 #ifdef USE_SSL
    m_originalUseSSL = ((flags & MF_FLAGS_SSLAUTH) != 0);
    m_useSSL->SetValue(m_originalUseSSL);
+   m_originalAcceptUnsignedSSL = ((flags & MF_FLAGS_SSLUNSIGNED) != 0);
+   m_acceptUnsignedSSL->SetValue(m_originalAcceptUnsignedSSL);
 #endif // USE_SSL
 
    // update the folder icon
@@ -2185,8 +2195,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
 #ifdef USE_SSL
          if(m_useSSL->GetValue() != 0)
+         {
             flags |= MF_FLAGS_SSLAUTH;
-#endif
+            if(m_acceptUnsignedSSL->GetValue() != 0)
+               flags |= MF_FLAGS_SSLUNSIGNED;
+         }
+#endif // USE_SSL
          if ( anonymous )
             flags |= MF_FLAGS_ANON;
          else
@@ -2442,7 +2456,16 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       else
          folder->ResetFlags(MF_FLAGS_SSLAUTH);
    }
-#endif
+
+   bool acceptUnsignedSSL = m_acceptUnsignedSSL->GetValue();
+   if ( acceptUnsignedSSL != m_originalAcceptUnsignedSSL )
+   {
+      if ( acceptUnsignedSSL )
+         folder->AddFlags(MF_FLAGS_SSLUNSIGNED);
+      else
+         folder->ResetFlags(MF_FLAGS_SSLUNSIGNED);
+   }
+#endif // USE_SSL
 
    if ( canBeOpened != m_originalCanBeOpened )
    {
