@@ -100,6 +100,7 @@
 
 extern const MOption MP_AUTOSHOW_FIRSTMESSAGE;
 extern const MOption MP_AUTOSHOW_FIRSTUNREADMESSAGE;
+extern const MOption MP_AUTOSHOW_SELECT;
 extern const MOption MP_DATE_FMT;
 extern const MOption MP_DATE_GMT;
 extern const MOption MP_FLC_DATECOL;
@@ -3153,7 +3154,7 @@ wxFolderView::SelectInitialMessage()
 
    // the item is already focused, now preview it automatically too if we're
    // configured to do this
-   if ( m_settings.previewOnSingleClick )
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_SELECT) )
    {
       HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 

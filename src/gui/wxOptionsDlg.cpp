@@ -364,9 +364,10 @@ enum ConfigFields
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
    ConfigField_FolderViewShowHelpText,
-   ConfigField_FolderViewShowFirst,
-   ConfigField_FolderViewShowFirstUnread,
+   ConfigField_FolderViewShowInitially,
+   ConfigField_FolderViewPreviewHelp,
    ConfigField_FolderViewPreviewOnSelect,
+   ConfigField_FolderViewSelectInitially,
 
    ConfigField_FolderViewAutoNextHelp,
    ConfigField_FolderViewAutoNextMsg,
@@ -1064,7 +1065,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Forward string in subject"),   Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
-   { gettext_noop("Quote &original message in reply"), Field_Action,   -1,                        },
+   { gettext_noop("Quote &original message in reply"), Field_Radio,   -1,                        },
    { gettext_noop("Quote &selected part only"),    Field_Bool, ConfigField_ReplyQuoteOrig,                        },
    { gettext_noop("Reply prefi&x"),                Field_Text, ConfigField_ReplyQuoteOrig,                        },
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
@@ -1241,14 +1242,23 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Title of message view frame"),         Field_Text,    -1                     },
 
    // folder view
-   { gettext_noop("What happens when the folder is opened? If selecting\n"
-                  "unread message is on, Mahogany will select the first or\n"
-                  "last unread message depending on the next option. If there\n"
-                  "are no unread messages, it will just select first or last\n"
-                  "message."), Field_Message,  -1 },
-   { gettext_noop("&Select first message (or the last one)"), Field_Bool, -1 },
-   { gettext_noop("Select first &unread"), Field_Bool, -1 },
-   { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
+   { gettext_noop("What happens when the folder is opened? You may\n"
+                  "specify the message Mahogany will go to below\n"
+                  "(note that if there are no unread messages,\n"
+                  "just the first or last one will be taken)"),
+                                                   Field_Message,  -1 },
+   { gettext_noop("&Go to which message initially:First unread:First:Last"),
+                                                   Field_Radio, -1 },
+
+   { gettext_noop("\nWhen the message is selected Mahogany may preview\n"
+                  "it immediately or wait until you double click it\n"
+                  "or press <Return>. In this mode it may be convenient\n"
+                  "to avoid automatically previewing the message\n"
+                  "initially selected when you open the folder - to\n"
+                  "do this just uncheck the option below."),
+                                                   Field_Message,    -1 },
+   { gettext_noop("Preview message when &selected"), Field_Bool,  -1 },
+   { gettext_noop("&Select the initial message"),    Field_Bool,  ConfigField_FolderViewPreviewOnSelect },
 
    { gettext_noop("What happens message when you try to scroll down beyond\n"
                   "the end of the current message in the current folder?\n"
@@ -1257,7 +1267,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("    next unread &message"),     Field_Bool,    -1},
    { gettext_noop("    next unread &folder"),      Field_Bool,
                                                    ConfigField_FolderViewAutoNextMsg},
-   { gettext_noop("\n\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
+   { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
 #ifdef USE_FONT_DESC
@@ -1344,7 +1354,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "receive in a special address book. This is called 'address\n"
                   "autocollection' and may be turned on or off from this page."),
                                                    Field_Message, -1                     },
-   { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
+   { gettext_noop("&Autocollect addresses"),       Field_Radio,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
 #ifdef USE_BBDB
@@ -1355,7 +1365,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Ignore entries without names"), Field_Bool, -1 },
    { gettext_noop("&Generate unique aliases"),      Field_Bool, -1 },
    { gettext_noop("&Name for nameless entries"),    Field_Text, ConfigField_Bbdb_GenerateUnique },
-   { gettext_noop("&Save on exit"),                 Field_Action, -1 },
+   { gettext_noop("&Save on exit"),                 Field_Radio, -1 },
 #endif // USE_BBDB
 
    // helper programs
@@ -1702,9 +1712,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // folder view
    CONFIG_NONE(),
-   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
-   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTUNREADMESSAGE),
+   CONFIG_NONE(), // MP_AUTOSHOW_XXX radio
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
+   CONFIG_ENTRY(MP_AUTOSHOW_SELECT),
 
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
@@ -1931,7 +1942,7 @@ void wxOptionsPage::CreateControls()
          case Field_Bool:
             // fall through: for this purpose (finding the longest label)
             // they're the same as text
-         case Field_Action:
+         case Field_Radio:
          case Field_Text:
             break;
 
@@ -1983,8 +1994,11 @@ void wxOptionsPage::CreateControls()
             last = CreateFontEntry(_(m_aFields[n].label), widthMax, last);
             break;
 
-         case Field_Action:
-            last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
+         case Field_Radio:
+            if ( strchr(m_aFields[n].label, ':') )
+               last = CreateRadioBox(_(m_aFields[n].label), widthMax, last);
+            else
+               last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
             break;
 
          case Field_Combo:
@@ -2161,7 +2175,7 @@ void wxOptionsPage::UpdateUI()
 
                bEnable = checkbox->GetValue();
             }
-            else if ( GetFieldType(nCheck) == Field_Action )
+            else if ( GetFieldType(nCheck) == Field_Radio )
             {
                // only enable if the radiobox selection is 0 (meaning "yes")
                wxRadioBox *radiobox = wxStaticCast(controlDep, wxRadioBox);
@@ -2302,7 +2316,7 @@ bool wxOptionsPage::TransferDataToWindow()
          wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
          break;
 
-      case Field_Action:
+      case Field_Radio:
          wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
          break;
 
@@ -2418,7 +2432,7 @@ bool wxOptionsPage::TransferDataFromWindow()
             }
             break;
 
-         case Field_Action:
+         case Field_Radio:
             wxASSERT( m_aDefaults[n].IsNumeric() );
 
             lValue = wxStaticCast(control, wxRadioBox)->GetSelection();
@@ -2866,6 +2880,14 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
 // wxOptionsPageFolderView
 // ----------------------------------------------------------------------------
 
+// the possible values of the "Show initially" radiobox
+enum
+{
+   FolderViewPage_Show_Unread,
+   FolderViewPage_Show_First,
+   FolderViewPage_Show_Last
+};
+
 wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
                                                  Profile *profile)
                        : wxOptionsPageStandard(parent,
@@ -2875,6 +2897,64 @@ wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
                                                ConfigField_FolderViewLast,
                                                MH_OPAGE_MESSAGEVIEW)
 {
+}
+
+bool wxOptionsPageFolderView::TransferDataToWindow()
+{
+   if ( !wxOptionsPageStandard::TransferDataToWindow() )
+      return false;
+
+   wxRadioBox *radio =
+      wxStaticCast(GetControl(ConfigField_FolderViewShowInitially), wxRadioBox);
+
+   CHECK( radio, false, "where is the initial selection radio box?" );
+
+   int sel;
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+   {
+      sel = FolderViewPage_Show_Unread;
+   }
+   else
+   {
+      sel = READ_CONFIG_BOOL(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE)
+               ? FolderViewPage_Show_First
+               : FolderViewPage_Show_Last;
+   }
+
+   radio->SetSelection(sel);
+
+   return true;
+}
+
+bool wxOptionsPageFolderView::TransferDataFromWindow()
+{
+   if ( !wxOptionsPageStandard::TransferDataFromWindow() )
+      return false;
+
+   wxRadioBox *radio =
+      wxStaticCast(GetControl(ConfigField_FolderViewShowInitially), wxRadioBox);
+
+   CHECK( radio, false, "where is the initial selection radio box?" );
+
+   int sel = radio->GetSelection();
+   switch ( sel )
+   {
+      case FolderViewPage_Show_Last:
+      case FolderViewPage_Show_First:
+         m_Profile->writeEntry(MP_AUTOSHOW_FIRSTMESSAGE,
+                               sel == FolderViewPage_Show_First);
+         m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE, false);
+         break;
+
+      default:
+         FAIL_MSG( "unexpected initial selection radiobox value" );
+         // fall through
+
+      case FolderViewPage_Show_Unread:
+         m_Profile->writeEntry(MP_AUTOSHOW_FIRSTUNREADMESSAGE, true);
+   }
+
+   return true;
 }
 
 void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)

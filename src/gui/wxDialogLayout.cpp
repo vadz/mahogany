@@ -65,7 +65,13 @@
 // private functions
 // ----------------------------------------------------------------------------
 
+// returns the width of the ">>" button
 static size_t GetBrowseButtonWidth(wxWindow *win);
+
+// takes a label followed by a colon separated list of strings, i.e.
+// "LABEL:choice1:...:choiceN" and returns the array of choices and modifies
+// the passed in string to contain just the label
+static wxArrayString SplitLabelWithChoices(wxString *label);
 
 // ============================================================================
 // implementation
@@ -575,6 +581,7 @@ wxXFaceButton *wxEnhancedPanel::CreateXFaceButton(const wxString&
 
    return btn;
 }
+
 // create a checkbox
 wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
                                               long widthMax,
@@ -603,11 +610,30 @@ wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
 }
 
 // create a radiobox control with 3 choices and a label for it
-wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
-                                                   long widthMax,
-                                                   wxControl *last,
-                                                   size_t nRightMargin)
+wxRadioBox *
+wxEnhancedPanel::CreateActionChoice(const char *label,
+                                    long widthMax,
+                                    wxControl *last,
+                                    size_t nRightMargin)
 {
+   wxString labelFull = label;
+   labelFull << ':' << _("No") << ':' << _("Ask") << ':' << _("Yes");
+
+   return CreateRadioBox(labelFull, widthMax, last, nRightMargin);
+}
+
+// create a generic radiobox control
+wxRadioBox *
+wxEnhancedPanel::CreateRadioBox(const char *labelFull,
+                                long widthMax,
+                                wxControl *last,
+                                size_t nRightMargin)
+{
+   // split the "label" into the real label and the choices:
+   wxString label = labelFull;
+   wxArrayString choices = SplitLabelWithChoices(&label);
+   wxString *strings = choices.GetStringArray();
+
    wxLayoutConstraints *c;
 
    // for the radiobox
@@ -618,17 +644,15 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
    c->height.AsIs();
 
    // FIXME we assume that if there other controls dependent on this one in
-   //       the options dialog, then only the first choice ("No") means that
-   //       they should be disabled
-   wxString choices[3];
-   choices[0] = _("No");
-   choices[1] = _("Ask");
-   choices[2] = _("Yes");
+   //       the options dialog, then only the first choice ("No" for the action
+   //       choice) means that they should be disabled but this is really just
+   //       a dirty hack
    wxRadioBox *radiobox = new wxRadioBox(GetCanvas(), -1, "",
                                          wxDefaultPosition, wxDefaultSize,
-                                         3,
-                                         choices,
-                                         1,wxRA_SPECIFY_ROWS);
+                                         choices.GetCount(), strings,
+                                         1, wxRA_SPECIFY_ROWS);
+
+   delete [] strings;
 
    radiobox->SetConstraints(c);
 
@@ -648,28 +672,15 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
 
 // create a combobox
 wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
-                                                   const char *label,
+                                                   const char *labelFull,
                                                    long widthMax,
                                                    wxControl *last,
                                                    size_t nRightMargin)
 {
    // split the "label" into the real label and the choices:
-   kbStringList tlist;
-   char *buf = strutil_strdup(label);
-   strutil_tokenise(buf, ":", tlist);
-   delete [] buf;
-
-   size_t n = tlist.size(); // number of elements
-   wxString *choices = new wxString[n];
-   wxString *sptr;
-   size_t i = 0;
-   for(i = 0; i < n; i++)
-   {
-      sptr = tlist.pop_front();
-      choices[i] = *sptr;
-      delete sptr;
-   }
-   // the real choices start at 1, 0 is the label
+   wxString label = labelFull;
+   wxArrayString choices = SplitLabelWithChoices(&label);
+   wxString *strings = choices.GetStringArray();
 
    wxLayoutConstraints *c;
 
@@ -679,7 +690,7 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
    c->width.Absolute(widthMax);
    c->height.AsIs();
-   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, choices[0],
+   wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
                                            wxDefaultPosition, wxDefaultSize,
                                            wxALIGN_RIGHT);
    pLabel->SetConstraints(c);
@@ -697,20 +708,20 @@ wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
    {
       combobox = new wxComboBox(GetCanvas(), -1, "",
                                 wxDefaultPosition, wxDefaultSize,
-                                n-1,
-                                choices+1,
+                                choices.GetCount(), strings,
                                 wxCB_DROPDOWN | wxCB_READONLY);
    }
    else
    {
       combobox = new wxChoice(GetCanvas(), -1,
                               wxDefaultPosition, wxDefaultSize,
-                              n-1, choices+1);
+                              choices.GetCount(), strings);
    }
 
 
    combobox->SetConstraints(c);
-   delete [] choices;
+   delete [] strings;
+
    return combobox;
 }
 
@@ -1384,3 +1395,20 @@ static size_t GetBrowseButtonWidth(wxWindow *win)
 
    return s_widthBtn;
 }
+
+static wxArrayString SplitLabelWithChoices(wxString *label)
+{
+   wxArrayString choices;
+
+   CHECK( label, choices, "NULL label in SplitLabelWithChoices" );
+
+   choices = strutil_restore_array(*label);
+   if ( !choices.IsEmpty() )
+   {
+      *label = choices[0u];
+      choices.RemoveAt(0u);
+   }
+
+   return choices;
+}
+

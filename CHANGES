@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+25.01.02 VZ: more clear options for the initial message selection
 24.01.02 VZ: fixed crash in Win32 install wizard if user chose to use dialup
 23.01.02 TF: fixed "Preview message on select" bug when setting is off
 23.01.02 NB: fixed toggling of anonymous access in folder properties

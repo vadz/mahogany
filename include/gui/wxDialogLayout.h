@@ -317,17 +317,27 @@ public:
    // -----------------------------------------------------------------------
 
       // a listbox with 3 standard buttons: Add, Modify and Delete
-      // (FIXME this is probably not flexible enough)
+      // (TODO: this is probably not flexible enough)
    wxListBox  *CreateListbox(const char *label, wxControl *last);
+
       // a checkbox with a label
    wxCheckBox *CreateCheckBox(const char *label,
                               long widthMax,
                               wxControl *last);
+
       // a label with three choices: No, Ask, Yes
    wxRadioBox *CreateActionChoice(const char *label,
                                   long widthMax,
                                   wxControl *last,
                                   size_t nRightMargin = 0);
+
+      // a radiobox, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
+   wxRadioBox *CreateRadioBox(const char *label,
+                              long widthMax,
+                              wxControl *last,
+                              size_t nRightMargin = 0);
+
       // nRightMargin is the distance to the right edge of the panel to leave
       // (0 means deafult)
    wxTextCtrl *CreateTextWithLabel(const char *label,

@@ -100,6 +100,7 @@ extern const MOption MP_UMASK;
 extern const MOption MP_AUTOSHOW_FIRSTMESSAGE;
 extern const MOption MP_AUTOSHOW_FIRSTUNREADMESSAGE;
 extern const MOption MP_PREVIEW_ON_SELECT;
+extern const MOption MP_AUTOSHOW_SELECT;
 extern const MOption MP_CONVERTPROGRAM;
 extern const MOption MP_MODULES;
 extern const MOption MP_COMPOSETEMPLATEPATH_USER;
@@ -553,6 +554,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_NAME "AutoShowFirstUnread"
 /// open messages when they're clicked (otherwise - double clicked)
 #define   MP_PREVIEW_ON_SELECT_NAME     "PreviewOnSelect"
+/// select the initially focused message
+#define   MP_AUTOSHOW_SELECT_NAME "AutoShowSelect"
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_NAME      "ImageConverter"
 /// list of modules to load at startup
@@ -1308,6 +1311,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOSHOW_FIRSTUNREADMESSAGE_DEFVAL 1l
 /// open messages when they're clicked (otherwise - double clicked)
 #define   MP_PREVIEW_ON_SELECT_DEFVAL     1l
+/// select the initially focused message
+#define   MP_AUTOSHOW_SELECT_DEFVAL 0l
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_DEFVAL      "convert %s -compress None %s"
 /// list of modules to load at startup
