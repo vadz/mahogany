@@ -2952,7 +2952,7 @@ bool
 MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
-   CHECK_DEAD( "SaveMessages(): folder is closed", false );
+   CHECK_DEAD_RC( "SaveMessages(): folder is closed", false );
 
    size_t count = selections->Count();
    CHECK( count, true, "SaveMessages(): nothing to save" );
