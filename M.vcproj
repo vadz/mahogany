@@ -1275,6 +1275,24 @@
 				</File>
 				<File
 					RelativePath=".\src\util\strutil.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="lib/imap/src"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="lib/imap/src"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release With Debug Info|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="lib/imap/src"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\util\sysutil.cpp">
