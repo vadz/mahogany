@@ -56,18 +56,11 @@ VZ:
 
 
 TODO:
-- add NNTP posting:
-  From mtest.c:
-    if (stream = nntp_open (newslist,debug)) {
-      if (nntp_mail (stream,msg,body)) puts ("[Ok]");
-      else printf ("[Failed - %s]\n",stream->reply);
----> is there but unused
 
-- add references (and In-Reply-To: ?) headers to message replies
- --> should be there now
+- Modify MailFolder interface to take UIDs instead of listing indices
+  everywhere. This is important for "Views" to be implemented.
 
 - add a popup dialog to edit message headers in composeview
-
 - ISO8859 encoded message headers!
 - some html mail import/filtering of tags (easy, quick and dirty)
 - occasionally parts of xface header show up in following mail header
@@ -122,6 +115,9 @@ TODO:
 - Let Iconmanager chose handler by format! JPEG crashes program if fed 
   the wrong filetype! Handler can return extension, caller should do
   the same.
+
+  
+
 **************** end of KB priorities :-) *********************
 
 
