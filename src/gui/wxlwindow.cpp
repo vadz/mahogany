@@ -562,6 +562,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          /* First, handle control keys */
          if(ctrlDown && ! event.AltDown())
          {
+            if(keyCode >= 'A' && keyCode <= 'Z')
+               keyCode = tolower(keyCode);
             switch(keyCode)
             {
             case WXK_INSERT:
@@ -705,7 +707,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    RequestUpdate(m_llist->GetUpdateRect());
    ScrollToCursor();
    // refresh the screen
-   RequestUpdate(m_llist->GetUpdateRect());
+   //RequestUpdate(m_llist->GetUpdateRect());
 }
 
 void
@@ -825,7 +827,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
       WXLO_DEBUG(("InternalPaint, isdirty, list size: %ld,%ld",
                   (unsigned long) m_llist->GetSize().x,
                   (unsigned long) m_llist->GetSize().y));
-      m_llist->ForceTotalLayout();
+//      m_llist->ForceTotalLayout();
       m_llist->Layout(dc);
       WXLO_DEBUG(("InternalPaint, isdirty, list size after layout: %ld,%ld",
                   (unsigned long) m_llist->GetSize().x,
@@ -967,7 +969,7 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
    {
       wxClientDC dc( this );
       PrepareDC( dc );
-      m_llist->ForceTotalLayout();
+//      m_llist->ForceTotalLayout();
       m_llist->Layout(dc);
       ResetDirty();
       RequestUpdate();
