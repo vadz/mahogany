@@ -50,6 +50,7 @@
    #define _DEBUG
 #endif
 
+#ifdef USE_PYTHON_DYNAMIC
 
 // this function must be called before using any Python functions, it if
 // returns FALSE they can't be used
@@ -190,6 +191,8 @@ extern "C"
 #else
 #define Py_InitModule4 M_Py_InitModule4
 #endif
+
+#endif // USE_PYTHON_DYNAMIC
 
 #include "PythonHelp.h"
 

@@ -28,7 +28,7 @@
 
 #include "MPython.h"
 
-#ifdef USE_PYTHON
+#ifdef USE_PYTHON_DYNAMIC
 
 #include <wx/dynlib.h>
 
@@ -263,5 +263,5 @@ extern void FreePythonDll()
    }
 }
 
-#endif // USE_PYTHON
+#endif // USE_PYTHON_DYNAMIC
 
