@@ -551,7 +551,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       if(partContentPtr) delete [] partContentPtr;
       partContentPtr = new char [(*lenptr)+1];
       memcpy(partContentPtr, returnVal, *lenptr);
-      partContentPtr[(*lenptr)+1] = '\0';
+      partContentPtr[(*lenptr)] = '\0';
       fs_give((void **)&returnVal);
    }
    return partContentPtr;
