@@ -460,6 +460,8 @@
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
 /// prepend the initials of the sender to thereply prefix?
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER "ReplyQuoteUseSender"
+/// quote the empty lines when replying?
+#define   MP_REPLY_QUOTE_EMPTY      "ReplyQuoteEmpty"
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO   "ReplyEqualsTo"
 /// prefix for subject in forwards
@@ -1006,6 +1008,8 @@
 #define   MP_REPLY_MSGPREFIX_D      "> "
 /// prepend the initials of the sender to thereply prefix?
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_D 0l
+/// quote the empty lines when replying?
+#define   MP_REPLY_QUOTE_EMPTY_D      1l
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_D   0l
 /// prefix for subject in forwards

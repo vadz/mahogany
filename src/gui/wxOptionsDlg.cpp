@@ -155,6 +155,7 @@ enum ConfigFields
    ConfigField_ReplyCollapse,
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
+   ConfigField_ReplyQuoteEmpty,
 
    ConfigField_Signature,
    ConfigField_SignatureFile,
@@ -681,7 +682,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
    { gettext_noop("Reply prefi&x"),                Field_Text,    -1,                        },
-   { gettext_noop("Prepend &sender initials"),     Field_Bool,    -1,                        },
+   { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
+   { gettext_noop("&Quote empty lines too"),       Field_Bool |
+                                                   Field_Advanced,    ConfigField_ReplyCharacters,                        },
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
@@ -939,6 +942,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
+   CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
 
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),

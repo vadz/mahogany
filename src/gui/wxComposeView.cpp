@@ -3146,6 +3146,8 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                }
                //else: name == text, so no reply prefix at all
 
+               // should we quote the empty lines?
+               bool quoteEmpty = READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY) != 0;
                int nParts = m_msg->CountParts();
                for ( int nPart = 0; nPart < nParts; nPart++ )
                {
@@ -3165,7 +3167,11 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                         str2 += *cptr;
                         if( *cptr++ == '\n' && *cptr )
                         {
-                           str2 += prefix;
+                           if ( quoteEmpty ||
+                                (*cptr != '\r' && *cptr != '\n') )
+                           {
+                              str2 += prefix;
+                           }
                         }
                      }
 
