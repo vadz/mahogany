@@ -983,12 +983,14 @@ wxMApp::UpdateOnlineDisplay(void)
       bool online = IsOnline();
       if(online)
       {
-         mbar->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
+         mbar->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
+         mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
       }
       else
       {
-         mbar->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
+         mbar->Enable((int)WXMENU_FILE_NET_ON, TRUE);
+         mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
       }
       int field = GetStatusField(SF_ONLINE);

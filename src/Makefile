@@ -10,13 +10,14 @@ MOBJS:=$(UTILOBJ) classes/*.o gui/*.o  mail/*.o adb/*.o \
 
 include ../makeopts
 
+ifdef USE_LEAKTRACER
+MOBJS := $(MOBJS) util/LeakTracer.o
+endif
+
+
 ifdef USE_PYTHON
 SUB_DIRS += Python
 MOBJS += Python/*.o
-endif
-
-ifdef USE_LEAKTRACER
-MOBJS := $(MOBJS) util/LeakTracer.o
 endif
 
 # LeakTracer must be the last object on the linker line!
@@ -27,10 +28,10 @@ endif
 # build the dynamically linked binary by default
 all:	M
 
-M:	$(MOBJS)
+M:	subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
-$(MOBJS): subdirs
+#$(MOBJS): subdirs
 
 #
 #left over from my attempt to create a M.so shared lib

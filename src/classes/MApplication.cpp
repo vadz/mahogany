@@ -732,7 +732,7 @@ MAppBase::OnMEvent(MEventData& event)
       MEventNewMailData& mailevent = (MEventNewMailData &)event;
       MailFolder *folder = mailevent.GetFolder();
 
-   /* First, we need to check whether it is one of our incoming mail
+      /* First, we need to check whether it is one of our incoming mail
       folders and if so, move it to the global new mail folder and
       ignore the event. */
       if(m_MailCollector->IsIncoming(folder))

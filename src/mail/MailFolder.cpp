@@ -933,6 +933,7 @@ MailFolderCmn::UpdateListing(void)
          m_OldMessageCount = hil->Count();
 
       hil->DecRef();
+      m_FirstListing = false;
    }
 }
 

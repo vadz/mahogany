@@ -1320,7 +1320,8 @@ wxComposeView::CanClose() const
                   _("There are unsaved changes, close anyway?"),
                   this, // parent
                   MDIALOG_YESNOTITLE,
-                  false // "yes" not default
+                  false, // "yes" not default
+                  "UnsavedCloseAnyway"
                  );
    }
    else

@@ -86,6 +86,10 @@
 static const int X_SCROLL_PAGE = 10;
 static const int Y_SCROLL_PAGE = 20;
 
+
+
+#define wxUSE_PRIVATE_CLIPBOARD_FORMAT 0
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
@@ -394,7 +398,9 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    case WXLOWIN_MENU_LUP:
       if ( m_Selecting )
       {
-         m_llist->EndSelection();
+         // end selection at the cursor position corresponding to the
+         // current mouse position, but don´t move cursor there.
+         m_llist->EndSelection(cursorPos,m_ClickPosition);
          m_Selecting = false;
 
          RequestUpdate();     // TODO: we don't have to redraw everything!
@@ -457,7 +463,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    if(keyCode == WXK_F1)
    {
       m_llist->Debug();
-      event.skip();
       return;
    }
 #endif
@@ -571,6 +576,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             FindAgain();
             break;
          default:
+            // we don't handle it, maybe an accelerator?
+            event.Skip();
             ;
          }
       else if( IsEditable() )
@@ -636,7 +643,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
 #endif
             default:
-               ;
+            // we don't handle it, maybe an accelerator?
+            event.Skip();
             }
          }
          // ALT only:
@@ -650,7 +658,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                SetDirty();
                break;
             default:
-               ;
+               // we don't handle it, maybe an accelerator?
+               event.Skip();
             }
          }
          // no control keys:
@@ -702,10 +711,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
 
             default:
                if((!(event.ControlDown() || event.AltDown()
-//#if 0
-                     ///FIXME: wxGTK reports MetaDown always
-                     || event.MetaDown()
-//#endif
                   ))
                   && (keyCode < 256 && keyCode >= 32)
                   )
@@ -715,10 +720,16 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   m_llist->Insert((char)keyCode);
                   SetDirty();
                }
+               else
+                  // we don't handle it, maybe an accelerator?
+                  event.Skip();
                break;
             }
          }
       }// if(IsEditable())
+      else
+         // we don't handle it, maybe an accelerator?
+         event.Skip();
    }// first switch()
 
    if ( m_Selecting )
@@ -729,7 +740,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    ScrollToCursor();
    // refresh the screen
    RequestUpdate(m_llist->GetUpdateRect());
-   event.Skip();
 }
 
 void
@@ -848,19 +858,9 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                   updateRect->x+updateRect->width,
                   updateRect->y+updateRect->height));
    }
-   if(IsDirty())
-   {
-      WXLO_DEBUG(("InternalPaint, isdirty, list size: %ld,%ld",
-                  (unsigned long) m_llist->GetSize().x,
-                  (unsigned long) m_llist->GetSize().y));
-//      m_llist->ForceTotalLayout();
-      m_llist->Layout(dc);
-      WXLO_DEBUG(("InternalPaint, isdirty, list size after layout: %ld,%ld",
-                  (unsigned long) m_llist->GetSize().x,
-                  (unsigned long) m_llist->GetSize().y));
-      ResizeScrollbars();
-      ResetDirty();
-   }
+
+   ResizeScrollbars();
+
    
    /* Check whether the window has grown, if so, we need to reallocate
       the bitmap to be larger. */
@@ -985,20 +985,24 @@ wxLayoutWindow::OnSize(wxSizeEvent &event)
    event.Skip();
 }
 
-// change the range and position of scrollbars
+/*
+Change the range and position of scrollbars. Has evolved into a
+generic Update function which will at some time later cause a repaint
+as needed. 
+*/
+
 void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
 
-   if(IsDirty())
-   {
-      wxClientDC dc( this );
-      PrepareDC( dc );
+   if(! IsDirty())
+      return;
+   
+   wxClientDC dc( this );
+   PrepareDC( dc );
 //      m_llist->ForceTotalLayout();
-      m_llist->Layout(dc);
-      ResetDirty();
-      RequestUpdate();
-   }
+   m_llist->Layout(dc);
+   ResetDirty();
    
    wxPoint max = m_llist->GetSize();
    wxSize size = GetClientSize();
@@ -1014,7 +1018,11 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
 
    // check if the text hasn't become too big
    // TODO why do we set both at once? they're independent...
-   if( max.x > m_maxx - WXLO_ROFFSET || max.y > m_maxy - WXLO_BOFFSET || exact )
+   if( max.x > m_maxx - WXLO_ROFFSET
+       || max.y > m_maxy - WXLO_BOFFSET
+       || max.x < m_maxx - X_SCROLL_PAGE
+       || max.y < m_maxy - Y_SCROLL_PAGE
+       || exact )
    {
       // text became too large
       if ( !exact )
@@ -1024,50 +1032,39 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
          max.y += WXLO_BOFFSET;
       }
 
-      ViewStart(&m_ViewStartX, &m_ViewStartY);
-      SetScrollbars(X_SCROLL_PAGE, Y_SCROLL_PAGE,
-                    max.x / X_SCROLL_PAGE + 1, max.y / Y_SCROLL_PAGE + 1,
-                    m_ViewStartX, m_ViewStartY,
-                    true);
-
-      m_hasHScrollbar =
-      m_hasVScrollbar = true;
+      bool done = FALSE;
+      if(max.x < X_SCROLL_PAGE)
+      {
+         SetScrollbars(0,-1,0,-1,0,-1,true);
+         m_hasHScrollbar = FALSE;
+         done = TRUE;
+      }
+      if(max.y < Y_SCROLL_PAGE)
+      {
+         SetScrollbars(-1,0,-1,0,-1,0,true);
+         m_hasVScrollbar = FALSE;
+         done = TRUE;
+      }
+      if(! done)
+      {
+         ViewStart(&m_ViewStartX, &m_ViewStartY);
+         SetScrollbars(X_SCROLL_PAGE,
+                       Y_SCROLL_PAGE,
+                       max.x / X_SCROLL_PAGE + 1,
+                       max.y / Y_SCROLL_PAGE + 1,
+                       m_ViewStartX, m_ViewStartY,
+                       true);
+         m_hasHScrollbar =
+            m_hasVScrollbar = true;
+      }
 
       m_maxx = max.x + X_SCROLL_PAGE;
       m_maxy = max.y + Y_SCROLL_PAGE;
    }
-#if 0
-   //FIXME: this code is pretty broken, producing "arithmetic
-   //exception" crashes (div by 0??)
-   else
-   {
-      // check if the window hasn't become too big, thus making the scrollbars
-      // unnecessary
-      if ( !exact )
-      {
-         // add an extra bit to the sizes to avoid future updates
-         max.x -= WXLO_ROFFSET;
-         max.y -= WXLO_BOFFSET;
-      }
-
-      if ( m_hasHScrollbar && (max.x < m_maxx) )
-      {
-         // remove the horizontal scrollbar
-         SetScrollbars(0, -1, 0, -1, 0, -1, true);
-         m_hasHScrollbar = false;
-      }
-
-      if ( m_hasVScrollbar && (max.y < m_maxy) )
-      {
-         // remove the vertical scrollbar
-         SetScrollbars(-1, 0, -1, 0, -1, 0, true);
-         m_hasVScrollbar = false;
-      }
-   }
-#endif
 }
 
 // ----------------------------------------------------------------------------
+//
 // clipboard operations
 //
 // ----------------------------------------------------------------------------
@@ -1075,18 +1072,16 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
 void
 wxLayoutWindow::Paste(bool primary)
 {
+   // this only has an effect under X11:
+   if(primary) wxTheClipboard->UsePrimarySelection();
    // Read some text
    if (wxTheClipboard->Open())
    {
-#if __WXGTK__
-      if(primary)
-         wxTheClipboard->UsePrimarySelection();
-#endif
 #if wxUSE_PRIVATE_CLIPBOARD_FORMAT
       wxLayoutDataObject wxldo;
       if (wxTheClipboard->IsSupported( wxldo.GetFormat() ))
       {
-         wxTheClipboard->GetData(&wxldo);
+         wxTheClipboard->GetData(wxldo);
          {
          }
          //FIXME: missing functionality  m_llist->Insert(wxldo.GetList());
@@ -1094,16 +1089,14 @@ wxLayoutWindow::Paste(bool primary)
       else
 #endif
       {
-#if 0 //RE_ENABLE FIXME!!
          wxTextDataObject data;
-         if (wxTheClipboard->IsSupported( data.GetFormat() ))
+         if (wxTheClipboard->IsSupported( data.GetFormat() )
+             && wxTheClipboard->GetData(data) )
          {
-            wxTheClipboard->GetData(&data);
             wxString text = data.GetText();
             wxLayoutImportText( m_llist, text);
             SetDirty();
          }
-#endif
       }
       wxTheClipboard->Close();
    }
@@ -1120,7 +1113,6 @@ wxLayoutWindow::Copy(bool invalidate)
       m_llist->EndSelection();
    }
 
-#if 0 //FIXME CLIPBOARD
    wxLayoutDataObject wldo;
    wxLayoutList *llist = m_llist->GetSelection(&wldo, invalidate);
    if(! llist)
@@ -1147,7 +1139,6 @@ wxLayoutWindow::Copy(bool invalidate)
          text = text.Mid(0,len-1);
    }
 
-
    if (wxTheClipboard->Open())
    {
       wxTextDataObject *data = new wxTextDataObject( text );
@@ -1158,7 +1149,6 @@ wxLayoutWindow::Copy(bool invalidate)
       wxTheClipboard->Close();
       return rc;
    }
-#endif //FIXME CLIPBOARD
    
    return FALSE;
 }
@@ -1180,12 +1170,12 @@ wxLayoutWindow::Cut(void)
 // searching
 // ----------------------------------------------------------------------------
 
-#ifdef M_BASEDIR
 bool
 wxLayoutWindow::Find(const wxString &needle,
                      wxPoint * fromWhere,
                      const wxString &configPath)
 {
+#ifdef M_BASEDIR
    wxPoint found;
    
    if(needle.Length() == 0)
@@ -1217,6 +1207,7 @@ wxLayoutWindow::Find(const wxString &needle,
       RequestUpdate();
       return true;
    }
+#endif
    return false;
 }
 
@@ -1227,7 +1218,6 @@ wxLayoutWindow::FindAgain(void)
    bool rc = Find(m_FindString);
    return rc;
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // popup menu stuff
