@@ -60,6 +60,15 @@
 /** Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/** Do we have the pisock library and headers?
+ Use the USE_PISOCK define in the source, not the HAVE_ !*/
+#undef HAVE_PI_SOURCE_H
+#ifdef HAVE_PI_SOURCE_H
+#   define USE_PISOCK 1
+#else
+#   undef USE_PISOCK
+#endif
+
 /*@name These are obsolete and always defined. Other configurations
   are no longer supported.
 */

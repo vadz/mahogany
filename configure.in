@@ -364,6 +364,10 @@ dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
 
+dnl Check if we have the pi-sock library and headers for PalmOS support.
+
+AC_CHECK_HEADERS(pi-source.h, AC_CHECK_LIB(pisock,pi_file_open),
+  AC_MSG_WARN("Cannot find pisock library support for PalmOS disabled."))
 
 dnl --------------------------------------------------------------------------
 dnl check for python ( a bit lengthy thanks to its stupid installation)
