@@ -200,6 +200,16 @@ bool PyH_CallFunction(const char *func,
       presult =
          PyObject_CallFunction(function,"sO",name,object);
 
+   if ( !presult )
+   {
+      String err = PyH_GetErrorMessage();
+      if ( !err.empty() )
+      {
+         ERRORMESSAGE((_T("%s"), err.c_str()));
+      }
+      ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
+   }
+
    // expr val to C
    return PyH_ConvertResult(presult, resultfmt, result) != 0;
 }
