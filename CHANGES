@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+16.03.02 VZ: include all ADB importers in the Win32 binary
 13.03.02 VZ: return to last previously selected message when opening a folder
 13.03.02 VZ: added a command to jump to message by number
 13.03.02 VZ: added a new "message number" column to the folder view
