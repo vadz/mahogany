@@ -1893,13 +1893,15 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( !!m_folderPath )
       profile->SetPath(m_folderPath);
 
-   m_folderType = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
-   if ( m_folderType == FolderInvalid )
+   if ( m_isCreating )
    {
-      // this may only happen if we're creating the folder
-      ASSERT_MSG( m_isCreating, "invalid folder type" );
-
+      // use the type of the folder last created
       m_folderType = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+   }
+   else
+   {
+      // use the current folder type
+      m_folderType = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
    }
 
    if ( (m_folderType == MF_INBOX) && m_isCreating )
@@ -1912,6 +1914,9 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    if ( m_folderType == MF_INBOX )
    {
+      // this is checked for above!
+      wxASSERT_MSG( !m_isCreating, "can't create INBOX" );
+
       // we don't have any special properties for INBOX, so just treat it as
       // file folder
       m_folderType = MF_FILE;
