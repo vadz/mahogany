@@ -113,7 +113,7 @@ Profile * profile
 
 
 virtual void  MessageDialog (
-const char * message, const MWindow * parent,
+const char * message, const wxWindow * parent,
 const char * title,
 const char * configPath )
 
@@ -139,7 +139,7 @@ const char * message
 
 
 virtual bool  YesNoDialog (
-const char * message, const MWindow * parent,
+const char * message, const wxWindow * parent,
 const char * title,
 bool yesdefault,
 const char * configPath )
@@ -188,7 +188,7 @@ const char *  path
 )
 {
 
- return MailFolder::OpenFolder(path);
+ return MailFolder::OpenFolder(MFolder_obj(path));
 
 }
 
@@ -199,7 +199,7 @@ const char *  path
 )
 {
 
- return ASMailFolder::OpenFolder(path);
+ return ASMailFolder::OpenFolder(MFolder_obj(path));
 
 }
 
@@ -213,7 +213,7 @@ const char * path,
 const char * comment
 )
 {
- return MailFolder::CreateFolder(name,(FolderType)type,flags,path,comment); 
+ return MailFolder::CreateFolder(name,(MFolderType)type,flags,path,comment); 
 }
 
 

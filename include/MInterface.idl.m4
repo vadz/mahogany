@@ -70,7 +70,7 @@ in Profile * profile
 );
 
 void  MessageDialog (
-in string message, in const MWindow * parent,
+in string message, in const wxWindow * parent,
 in string title,
 in string configPath )
 ;
@@ -82,7 +82,7 @@ in string message
 ;
 
 bool  YesNoDialog (
-in string message, in const MWindow * parent,
+in string message, in const wxWindow * parent,
 in string title,
 in bool yesdefault,
 in string configPath )

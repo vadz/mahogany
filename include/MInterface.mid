@@ -136,7 +136,7 @@ ARG(INT, flags, = MF_FLAGS_DEFAULT),
 ARG(STRING, path, = ""),
 ARG(STRING, comment, = "")
 ),
-` return MailFolder::CreateFolder(name,(FolderType)type,flags,path,comment); ')
+` return MailFolder::CreateFolder(name,(MFolderType)type,flags,path,comment); ')
 
 
 
