@@ -50,6 +50,8 @@
 #include "UIdArray.h"
 #include "HeaderInfo.h"
 
+#include "ASMailFolder.h"
+
 #include "gui/wxDialogLayout.h"
 #include "gui/wxMainFrame.h"
 #include "gui/wxBrowseButton.h"

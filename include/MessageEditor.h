@@ -21,7 +21,7 @@ class WXDLLEXPORT wxWindow;
 class EditorContentPart;
 class Composer;
 class Profile;
-class ComposerOptions;
+struct ComposerOptions;
 
 #include <wx/fontenc.h>         // for wxFontEncoding
 

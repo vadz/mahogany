@@ -45,6 +45,8 @@
 #include "UIdArray.h"
 #include "Message.h"
 
+#include "gui/wxMDialogs.h"
+
 #include <wx/regex.h>   // wxRegEx::Flags
 
 // ----------------------------------------------------------------------------

@@ -30,13 +30,14 @@
 #include <wx/config.h>
 #include <wx/help.h>
 
+#include "Mcommon.h"
+
 #include "kbList.h"
 #include "guidef.h"
 
 #include "strutil.h"
 #include "sysutil.h"
 
-#include "Mcommon.h"
 #include "Merror.h"
 
 #include "Mdefaults.h"

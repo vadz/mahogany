@@ -408,7 +408,7 @@ public:
 protected:
    ASMailFolderResultImpl(ASMailFolder *mf,
               Ticket t,
-              ASMailFolder::ASMailFolder::OperationId id,
+              ASMailFolder::OperationId id,
               UIdArray * mc,
               UserData ud)
       {
@@ -436,7 +436,7 @@ private:
 /** Holds the result from an operation which can be expressed as an
     integer value. Used for all boolean success values.
 */
-class ASMailFolderResultInt : public ASMailFolder::ResultImpl
+class ASMailFolderResultInt : public ASMailFolderResultImpl
 {
 public:
    int GetValue(void) const { return m_Value; }
@@ -454,7 +454,7 @@ protected:
              UIdArray * mc,
              int value,
              UserData ud)
-      : ASMailFolder::ResultImpl(mf, t, id, mc, ud)
+      : ASMailFolderResultImpl(mf, t, id, mc, ud)
       { m_Value = value; }
 private:
    int         m_Value;
@@ -462,7 +462,7 @@ private:
 /** Holds the result from an operation which can be expressed as an
     UIdType value. Used for all boolean success values.
 */
-class ASMailFolderResultUIdType : public ASMailFolder::ResultImpl
+class ASMailFolderResultUIdType : public ASMailFolderResultImpl
 {
 public:
    UIdType GetValue(void) const { return m_Value; }
@@ -480,14 +480,14 @@ protected:
                  UIdArray * mc,
                  int value,
                  UserData ud)
-      : ASMailFolder::ResultImpl(mf, t, id, mc, ud)
+      : ASMailFolderResultImpl(mf, t, id, mc, ud)
       { m_Value = value; }
 private:
    UIdType         m_Value;
 };
 /** Holds the result from a GetMessage() and returns the message pointer.
 */
-class ASMailFolderResultMessage : public ASMailFolder::ResultImpl
+class ASMailFolderResultMessage : public ASMailFolderResultImpl
 {
 public:
    static ASMailFolder::ResultMessage *Create(ASMailFolder *mf,
@@ -503,7 +503,7 @@ protected:
    ASMailFolderResultMessage(ASMailFolder *mf, Ticket t,
                  UIdArray * mc, Message *msg,
                  UIdType uid, UserData ud)
-      : ASMailFolder::ResultImpl(mf, t, ASMailFolder::Op_GetMessage, mc, ud)
+      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_GetMessage, mc, ud)
       {
          m_Message = msg;
          if(m_Message) m_Message->IncRef();
@@ -516,7 +516,7 @@ private:
 };
 /** Holds a single folder name found in a ListFolders() call.
 */
-class ASMailFolderResultFolderExists : public ASMailFolder::ResultImpl
+class ASMailFolderResultFolderExists : public ASMailFolderResultImpl
 {
 public:
    static ASMailFolder::ResultFolderExists *Create(ASMailFolder *mf,
@@ -535,7 +535,7 @@ protected:
    ASMailFolderResultFolderExists(ASMailFolder *mf, Ticket t,
                        const String &name, char delimiter, long attrib,
                        UserData ud)
-      : ASMailFolder::ResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
+      : ASMailFolderResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
       {
          m_Name = name;
          m_Delim = delimiter;

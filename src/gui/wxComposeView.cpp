@@ -54,8 +54,10 @@
 #  include <process.h>        // for getpid()
 #endif
 
-#include <sys/types.h>
-#include <unistd.h>
+#ifdef OS_UNIX
+   #include <sys/types.h>
+   #include <unistd.h>
+#endif
 
 #include <ctype.h>            // for isspace
 
