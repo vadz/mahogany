@@ -31,19 +31,21 @@ $Id$
                 pressed), for example:
                 a) sorting order
                 b) ...
- 
+9	KB	finish filters dialog / up/down arrows, error messages
+		--> confusion between profile name and filter title
+		    must be resolved or we have a problem
+			--> array mapping profile<-->title?
+9	KB	debug filters, does '|' really work?
+
 9		disabling "collect mail" in properties has no effect!
 
-9	KB	fix mm_list, follow Vadim's mail
+9  	KB	check mm_list, use debugging wxWindows
 9	KB	only Filters appear in list of statically linked
                 modules -why?
-9	KB	only one new mail dialog at any given time, suppress
-		them while showing it
 
-8		new mail handling in MApplication should use
-		headerinfo for consistency (different from/reply-to lines)
-9	KB	finish filters dialog / up/down arrows, error messages
-9	KB	debug filters, does '|' really work?
+fixed?	KB	only one new mail dialog at any given time, suppress
+		them while showing it
+	
 
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
@@ -60,11 +62,8 @@ $Id$
 8	KB	modules:
 		- PalmOS: sync adb and check linkage on solaris
 		- use new config stuff / no direct gui calls (DEFERRED?)
-8	KB	integrate imap 4.7 and recently received patches
-7	KB	why do newsgroups seem empty after closing even if
-		I answered no to catchup? Mark undeleted?
-7	KB	crash after changing update times in prefs
 
+8	KB	integrate imap 4.7 and recently received patches
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
@@ -77,9 +76,10 @@ $Id$
 		from folder - at least don't use profile at sending
 		time, but before
 
-
 	KB	add python hook for filters
 
+3		new mail handling in MApplication should use
+		headerinfo for consistency (different from/reply-to lines)
 7	KB	selecting/deselecting only message in folder
 		--fixed?
 

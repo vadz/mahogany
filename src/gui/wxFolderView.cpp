@@ -296,7 +296,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
    // there is exactly one item with the focus on  it:
    long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   wxASSERT(focused != -1) // testing for wxGTK bug
+   wxASSERT(focused != -1); // testing for wxGTK bug
    // in this case we operate on the highlighted  message
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    if(hil)

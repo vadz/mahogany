@@ -1006,35 +1006,35 @@ void
 MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
    /* Now check whether we need to send new mail notifications: */
+   UIdType n = (*hilp).Count();
+   UIdType *messageIDs = new UIdType[n];
+   // Find the new messages:
+   UIdType nextIdx = 0;
+   UIdType highestId = UID_ILLEGAL;
+   for ( UIdType i = 0; i < n; i++ )
+   {
+      /* int status =(*hilp)[i]->GetStatus();
+         ASSERT(nextIdx < n);
+         if( (status & MSG_STAT_RECENT) &&
+         !(status & MSG_STAT_SEEN))
+      */
+      if( IsNewMessage( (*hilp)[i] ) )
+      {
+         UIdType uid = (*hilp)[i]->GetUId();
+         messageIDs[nextIdx++] = uid;
+         if(highestId == UID_ILLEGAL || uid > highestId)
+            highestId = uid;
+      }
+   }
+   if(highestId != UID_ILLEGAL && m_UpdateMsgCount)
+      m_LastNewMsgUId = highestId;
+   ASSERT(nextIdx <= n);
    if( m_GenerateNewMailEvents )
    {
-      UIdType n = (*hilp).Count();
-      UIdType *messageIDs = new UIdType[n];
-      // Find the new messages:
-      UIdType nextIdx = 0;
-      UIdType highestId = UID_ILLEGAL;
-      for ( UIdType i = 0; i < n; i++ )
-      {
-         /* int status =(*hilp)[i]->GetStatus();
-            ASSERT(nextIdx < n);
-            if( (status & MSG_STAT_RECENT) &&
-            !(status & MSG_STAT_SEEN))
-         */
-         if( IsNewMessage( (*hilp)[i] ) )
-         {
-            UIdType uid = (*hilp)[i]->GetUId();
-            messageIDs[nextIdx++] = uid;
-            if(highestId == UID_ILLEGAL || uid > highestId)
-               highestId = uid;
-         }
-      }
-      if(highestId != UID_ILLEGAL && m_UpdateMsgCount)
-         m_LastNewMsgUId = highestId;
-      ASSERT(nextIdx <= n);
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
-      delete [] messageIDs;
    }
+   delete [] messageIDs;
 }
 
 

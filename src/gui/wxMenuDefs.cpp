@@ -215,9 +215,9 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // file
    { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  , FALSE },
-   { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      , FALSE },
-   { WXMENU_FILE_POST,     gettext_noop("Post &News Article"),   gettext_noop("Write a news article and post it")      , FALSE },
-   { WXMENU_FILE_COLLECT,  gettext_noop("Check &mail"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
+   { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message\tAlt-C"),  gettext_noop("Start a new message")      , FALSE },
+   { WXMENU_FILE_POST,     gettext_noop("Post &News Article\tAlt-P"),   gettext_noop("Write a news article and post it")      , FALSE },
+   { WXMENU_FILE_COLLECT,  gettext_noop("Check &mail\tAlt-M"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  , FALSE },
    { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  , FALSE },
@@ -235,7 +235,7 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PYTHON
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages..."), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
+   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tAlt-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network"),
      gettext_noop("Activate dial-up networking")        , FALSE },
@@ -244,26 +244,26 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_EXIT,     gettext_noop("E&xit"),             gettext_noop("Quit the application")     , FALSE },
+   { WXMENU_FILE_EXIT,     gettext_noop("E&xit\tAlt-X"),             gettext_noop("Quit the application")     , FALSE },
 
    // normal edit
-   { WXMENU_EDIT_CUT,  gettext_noop("C&ut"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },
-   { WXMENU_EDIT_COPY, gettext_noop("&Copy"), gettext_noop("Copy selection to clipboard")           , FALSE },
-   { WXMENU_EDIT_PASTE,gettext_noop("&Paste"), gettext_noop("Paste from clipboard")           , FALSE },
+   { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },
+   { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , FALSE },
+   { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") , FALSE },
+   { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tAlt-A"), gettext_noop("Edit the address book(s)") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_EDIT_PREF,     gettext_noop("Pre&ferences..."),   gettext_noop("Change options")           , FALSE },
-   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
-   { WXMENU_EDIT_FILTERS,  gettext_noop("&Filter Rules..."), gettext_noop("Edit rules for message filtering")   , FALSE },
+   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tAlt-P"),   gettext_noop("Change options")           , FALSE },
+   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules...\tAlt-M"), gettext_noop("Choose which extension modules to use")           , FALSE },
+   { WXMENU_EDIT_FILTERS,  gettext_noop("&Filter Rules...\tAlt-F"), gettext_noop("Edit rules for message filtering")   , FALSE },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
 
    // msg
-   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
-   { WXMENU_MSG_PRINT,     gettext_noop("&Print"),            gettext_noop("Print this message")       , FALSE },
+   { WXMENU_MSG_OPEN,      gettext_noop("&Open\tCtrl-O"),             gettext_noop("View selected message")    , FALSE },
+   { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
 #ifdef USE_PS_PRINTING
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },

@@ -550,18 +550,17 @@ public:
    bool WasChanged(void) { return m_Filter != m_OldFilter;}
 
    // event handlers
-   void Update(wxCommandEvent& event) { }
+   void Update(wxCommandEvent& ) { DoUpdate(); }
+   void DoUpdate(void);
    void OnButton(wxCommandEvent & event );
 protected:
 
-   wxListBox *m_ListBox;
+   wxCheckListBox *m_ListBox;
    wxButton       *m_Buttons[WXSIZEOF(ButtonLabels)];
    
 // data
    wxString  m_Filter,
       m_OldFilter;
-   /// an array holding the names of all filters:
-   wxArrayString m_FilterGroups, m_FilterNames;
    ProfileBase *m_FiltersProfile;
 private:
    DECLARE_EVENT_TABLE()
@@ -626,7 +625,7 @@ wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
    c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_ListBox = new wxListBox(this, -1);
+   m_ListBox = new wxCheckListBox(this, -1);
    m_ListBox->SetConstraints(c);
 
    SetDefaultSize(380, 240, FALSE /* not minimal */);
@@ -638,36 +637,91 @@ void
 wxFiltersDialog::OnButton( wxCommandEvent &event )
 {
    wxObject *obj = event.GetEventObject();
-   
+   wxString name;
+   int pos = m_ListBox->GetSelection();
+   if(pos >= 0)
+      name = m_ListBox->GetString(pos);
+
    for(size_t idx = 0; ButtonLabels[idx]; idx++)
       if(obj == m_Buttons[idx])
       {
-         // Either edit an existing folder or create a new one:
-         wxString name;
-         if(idx == Button_New)
-            name = m_FiltersProfile->GetUniqueGroupName();
-         else if(idx == Button_Edit)
+         if(idx == Button_New || idx == Button_Edit)
          {
-            int idx = m_ListBox->GetSelection();
-            if(idx >= 0)
-               name = m_FilterGroups[idx];
+            // Either edit an existing folder or create a new one:
+            if(idx == Button_New)
+               name = m_FiltersProfile->GetUniqueGroupName();
             else
-               return; //FIXME: disable button if none is selected
+            {
+               if(name.Length() == 0)
+                  return; //FIXME: disable button if none is selected
+            }
+            // now we have a valid name:
+            ProfileBase *fprof = ProfileBase::CreateProfile(name, m_FiltersProfile);
+            ConfigureOneFilter(fprof, this);
+            fprof->DecRef();
+         }
+         else if(idx == Button_Delete)
+         {
+            wxASSERT(name.Length());
+            m_FiltersProfile->DeleteGroup(name);
+         }
+         else if(idx == Button_Up)
+         {
+            wxASSERT(pos > 0);
+            if(pos >= 1)
+            {
+               m_ListBox->Insert(name, pos-1);
+               m_ListBox->Delete(pos+1);
+            }
+         }
+         else if(idx == Button_Down)
+         {
+            wxASSERT(pos < m_ListBox->Number()-1);
+            m_ListBox->Insert(name, pos);
+            m_ListBox->Delete(pos+2);
          }
          else
+         {
+            // unknown button cannot happen
+            wxASSERT(0);
             return;
-         // now we have a valid name:
-         ProfileBase *fprof = ProfileBase::CreateProfile(name, m_FiltersProfile);
-         ConfigureOneFilter(fprof, this);
-         fprof->DecRef();
+         }
          TransferDataToWindow(); // update the view
       }
    event.Skip();
 }
 
+void
+wxFiltersDialog::DoUpdate(void )
+{
+   size_t nEntries = m_ListBox->Number();
+   int selection = m_ListBox->GetSelection();
+   
+   if(nEntries == 0)
+   {
+      m_Buttons[Button_Edit]->Enable(false);
+      m_Buttons[Button_Up]->Enable(false);
+      m_Buttons[Button_Down]->Enable(false);
+      m_Buttons[Button_Delete]->Enable(false);
+      return;
+   }
+   if( selection != -1)
+   {
+      m_Buttons[Button_Edit]->Enable(true);
+      m_Buttons[Button_Delete]->Enable(true);
+      if(selection > 0)
+         m_Buttons[Button_Up]->Enable(true);
+      if(selection < (int) (nEntries-1) )
+         m_Buttons[Button_Up]->Enable(true);
+   }
+}
+
 bool
 wxFiltersDialog::TransferDataFromWindow()
 {
+   /* We just write the priorities to get the order right- */
+   for(int idx = 0; idx < m_ListBox->Number(); idx++)
+      m_FiltersProfile->writeEntry(m_ListBox->GetString(idx)+"/Pri", idx);
    return TRUE;
 }
 
@@ -680,8 +734,6 @@ wxFiltersDialog::TransferDataToWindow()
       just created to be unique.
    */
 
-   m_FilterGroups.Clear();
-   m_FilterNames.Clear();
    m_ListBox->Clear();
    
    long ref;
@@ -690,11 +742,26 @@ wxFiltersDialog::TransferDataToWindow()
        found;
        found = m_FiltersProfile->GetNextGroup(name, ref))
    {
-      m_FilterGroups.Add(name);
       name = m_FiltersProfile->readEntry(name+"/Name",_("unnamed"));
-      m_FilterNames.Add(name);
-      m_ListBox->Append(name);
+      int pri = m_FiltersProfile->readEntry(name+"/Pri",0);
+      if(pri == 0)
+         m_ListBox->Insert(name,0);
+      else
+      {
+         bool done = false;
+         for(int idx = 0; idx < m_ListBox->Number(); idx++)
+            if(pri <= m_FiltersProfile->readEntry(
+               m_ListBox->GetString(idx)+"/Pri",0))
+            {
+               m_ListBox->Insert(name,0);
+               done = true;
+               break;
+            }
+         if(! done)
+            m_ListBox->Append(name);
+      }
    }
+   DoUpdate();
    return TRUE;
 }
 

@@ -65,6 +65,9 @@ KBLIST_DEFINE(MEventList, MEventData);
 /// the list of pending events
 static MEventList gs_EventList;
 
+/// are we currently dispatching events?
+static bool gs_IsDispatching = false;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -104,14 +107,18 @@ MEventManager::MEventManager()
 void
 MEventManager::DispatchPending(void)
 {
+   if(gs_IsDispatching)
+      return;
+   gs_IsDispatching = true;
    MEventData *dataptr = NULL;
-
+   
    while(! gs_EventList.empty() )
    {
       dataptr = gs_EventList.pop_front();
       Dispatch(dataptr);
       delete dataptr;
    }
+   gs_IsDispatching = false;
 }
 
 /* static */
