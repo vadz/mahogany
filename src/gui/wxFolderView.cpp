@@ -213,9 +213,6 @@ public:
                                     MailFolder::MSG_STAT_SEEN,
                                  bool isSet = FALSE);
 
-   /// focus the given item and ensure it is visible
-   void Focus(long index);
-
    /// return true if we preview this item
    bool IsPreviewed(long item) const
       { return item == m_itemPreviewed; }
@@ -1589,21 +1586,6 @@ void wxFolderListCtrl::UpdateFocus()
    }
 }
 
-void wxFolderListCtrl::Focus(long index)
-{
-   SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-
-   // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
-   // EnsureVisible() results in an assert failure which is harmless but
-   // _very_ annoying as it happens all the time
-#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,6)
-   // we don't want any events come here while we're inside EnsureVisible()
-   MEventManagerSuspender noEvents;
-
-   EnsureVisible(index);
-#endif // wxWin >= 2.2.6
-}
-
 long wxFolderListCtrl::GetUniqueSelection() const
 {
    long item = GetFirstSelected();
@@ -2076,6 +2058,10 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
       // note that idx is always a valid index because numMessages >= 1
 
       m_FolderCtrl->Focus(idx);
+
+      // avoid retrieving the header if we don't need its UID below
+      if ( !m_settings.previewOnSingleClick )
+         return;
 
       const HeaderInfo *hi = hil[idx];
       if ( hi )
