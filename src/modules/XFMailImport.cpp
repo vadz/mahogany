@@ -321,26 +321,34 @@ bool MXFMailImporter::ImportFolders()
       }
    }
 
-   if ( error && !nImported )
+   if ( !nImported )
    {
-      wxLogError(_("%s folder import from '%s' failed."), "XFMail",
-                 m_mailDir.BeforeLast('/').c_str());
+      if ( error )
+      {
+         wxLogError(_("%s folder import from '%s' failed."), "XFMail",
+                    m_mailDir.BeforeLast('/').c_str());
 
-      return FALSE;
+         return FALSE;
+      }
+      else
+      {
+         wxLogMessage(_("No %s folders to import were found."), "XFMail");
+      }
    }
-   //else: we did import some folders, so consider it as success
+   else // we did import something
+   {
+      // refresh the tree(s)
+      MEventManager::Send
+       (
+         new MEventFolderTreeChangeData
+            (
+             "",
+             MEventFolderTreeChangeData::CreateUnder
+            )
+       );
 
-   // refresh the tree(s)
-   MEventManager::Send
-    (
-      new MEventFolderTreeChangeData
-         (
-          "",
-          MEventFolderTreeChangeData::CreateUnder
-         )
-    );
-
-   wxLogMessage(_("Successfully imported %u %s folders."), nImported, "XFMail");
+      wxLogMessage(_("Successfully imported %u %s folders."), nImported, "XFMail");
+   }
 
    return TRUE;
 }
