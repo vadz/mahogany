@@ -382,7 +382,6 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
       return;
    }
 
-#if USE_PYTHON
 #if 0
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
 
@@ -395,7 +394,6 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
       else
          mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
    }
-#endif // USE_PYTHON
 }
 
 void
