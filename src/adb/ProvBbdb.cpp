@@ -723,7 +723,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          str.Printf(_("Save BBDB address book '%s'?\n"
                       "This might lead to loss of some of the original data."),
                     m_strName.c_str());
-         save = MDialog_YesNoDialog(str,NULL,_("BBDB"));
+         save = MDialog_YesNoDialog(str,NULL,_("BBDB"),true,"BbdbSaveDialog");
          break;
       }
       case M_ACTION_ALWAYS:
