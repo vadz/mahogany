@@ -1078,7 +1078,7 @@ enum MFolderIndex
 /// name for anonymous entries, when neither first nor family name are set
 #define   MP_BBDB_ANONYMOUS_D   "anonymous"
 /// save on exit, 0=no, 1=ask, 2=always
-#define   MP_BBDB_SAVEONEXIT_D  M_ACTION_PROMPT
+#define   MP_BBDB_SAVEONEXIT_D  (long)M_ACTION_PROMPT
 //@}
 /**@name For Profiles: */
 //@{
@@ -1207,7 +1207,7 @@ enum MFolderIndex
 /// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
 #define   MP_REPLY_COLLAPSE_PREFIX_D 2l
 /// include the original message in the reply [no,ask,yes]
-#define MP_REPLY_QUOTE_ORIG_D M_ACTION_ALWAYS
+#define MP_REPLY_QUOTE_ORIG_D (long)M_ACTION_ALWAYS
 /// include only the selected text (if any) in the reply?
 #define MP_REPLY_QUOTE_SELECTION_D true
 /// prefix for text in replies
@@ -1575,7 +1575,7 @@ enum MFolderIndex
 /// Show all message headers?
 #define   MP_SHOWHEADERS_D         0l
 /// Autocollect email addresses?
-#define   MP_AUTOCOLLECT_D     M_ACTION_ALWAYS
+#define   MP_AUTOCOLLECT_D     (long)M_ACTION_ALWAYS
 /// Name of the address books for autocollected addresses
 #define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 /// Autocollect entries with names only?
