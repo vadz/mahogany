@@ -70,7 +70,7 @@ void MObjectRC::CheckLeaks()
 
 String MObjectRC::DebugDump() const
 {
-   return MObject::DebugDump() + String::Format(" m_nRef = %lu: ", m_nRef);
+   return MObject::DebugDump() + String::Format(" m_nRef = %lu: ", (unsigned long)m_nRef);
 }
 
 void MObject::CheckLeaks()
@@ -105,7 +105,7 @@ void MObjectRC::IncRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object %p: IncRef() called, m_nRef = %lu.", this, m_nRef);
+      wxLogTrace("Object %p: IncRef() called, m_nRef = %lu.", this, (unsigned long)m_nRef);
    }
 }
 
@@ -118,7 +118,7 @@ bool MObjectRC::DecRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object %p: DecRef() called, m_nRef = %lu.", this, m_nRef);
+      wxLogTrace("Object %p: DecRef() called, m_nRef = %lu.", this, (unsigned long)m_nRef);
    }
 
    if ( m_nRef == 0 )
