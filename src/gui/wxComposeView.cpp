@@ -1119,7 +1119,9 @@ wxComposeView::OnMenuCommand(int id)
          bool storedInProfile;
          if ( ConfigureCustomHeader(m_Profile, this,
                                     &headerName, &headerValue,
-                                    &storedInProfile) )
+                                    &storedInProfile,
+                                    m_mode == Mode_NNTP ? CustomHeader_News
+                                                        : CustomHeader_Mail) )
          {
             if ( !storedInProfile )
             {
@@ -1427,27 +1429,16 @@ wxComposeView::Send(void)
    for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
       msg->AddHeaderEntry(**i, **i2);
 
-   m_Profile->SetPath(M_CUSTOM_HEADERS_CONFIG_SECTION);
-   String headerName, headerValue;
-   long dummy;
-   bool cont = m_Profile->GetFirstEntry(headerName, dummy);
-   while ( cont )
+   wxArrayString headerNames, headerValues;
+   size_t nHeaders = GetCustomHeaders(m_Profile,
+                                      m_mode == Mode_SMTP ? CustomHeader_Mail
+                                                          : CustomHeader_News,
+                                      &headerNames,
+                                      &headerValues);
+   for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
    {
-#ifdef DEBUG
-      bool found;
-#endif
-      headerValue = m_Profile->readEntry(headerName, ""
-#ifdef DEBUG
-                                         , &found
-#endif
-                                        );
-
-      ASSERT_MSG( found, "profile entry enumeration broken" );
-
-      msg->AddHeaderEntry(headerName, headerValue);
-      cont = m_Profile->GetNextEntry(headerName, dummy);
+      msg->AddHeaderEntry(headerNames[nHeader], headerValues[nHeader]);
    }
-   m_Profile->ResetPath();
 
    msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
    switch(m_mode)

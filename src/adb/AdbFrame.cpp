@@ -1891,12 +1891,12 @@ bool wxAdbEditFrame::ImportAdb()
         SafeDecRef(provider);
      }
 
-     wxLogStatus(_("Address book successfully imported into book '%s'."),
+     wxLogStatus(this, _("Address book successfully imported into book '%s'."),
                 adbname.c_str());
   }
   else
   {
-     wxLogStatus(_("Address book import abandoned."));
+     wxLogStatus(this, _("Address book import abandoned."));
   }
 
   return ok;

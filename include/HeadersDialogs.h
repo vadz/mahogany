@@ -28,6 +28,28 @@ enum CustomHeaderType
    CustomHeader_Invalid = CustomHeader_Max
 };
 
+// Not really a dialog function, but uses the same logic as custom dialogs, so
+// put here for now - if a better place is found, it should be moved there
+
+/** Get the list of names and values of all custom headers for the given
+    profile. The type parameter specifies to get only the headers of given
+    type except when it's equal to CustomHeader_Invalid which means to get all
+    the headers. If type is either Mail or News, it will also return the values
+    of headers of type "Both" - but the more specific value will override the
+    less specific one.
+
+    headerTypes parameter may be normally left NULL, except when type is
+    "Invalid" in which case it should not be NULL and will be filled in with
+    the types of headers.
+
+    @return the number of headers
+ */
+extern size_t GetCustomHeaders(ProfileBase *profile,
+                               CustomHeaderType type,
+                               wxArrayString *names,
+                               wxArrayString *values,
+                               wxArrayInt *types = NULL);
+
 /** Show the dialog to configure outgoing headers for given profile
 
     @return true if Ok button was pressed, false otherwise

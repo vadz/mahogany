@@ -43,7 +43,8 @@ $Id$
 		page
 2		adb addressbook extension appears twice when new book
 		is created
-2	VZ	default value for "custom header" comboboxes wrong?
+
+5	VZ	custom headers are not inherited
 
 4 gtk	VZ	icon selector suffers from several appearance problems
 
@@ -84,7 +85,9 @@ $Id$
 2	KB	add sub-directories support for different icon sets to 
 		wxIconManager, e.g. small/large style
 		More icons needed: INBOX, PopServer, IMAPServer,
-		FolderGroup 
+		FolderGroup, NewMail, SentMail, small icons (16x16) for the
+		custom headers dialog, AdbImport.
+
 7	VZ	document the new properties dialog entries/pages, please
 3	VZ	XFaces under Windows?
 		KB: no problem if you can read XPMs, use the lib included
@@ -124,6 +127,7 @@ $Id$
 
 2	VZ	printing from ADB
 2	VZ	save control values in ImportAdb dialog (wxPCheckBox?)
+3	VZ	LDIF format import
 
 2		fix es.po - many little errors
 2	KB	optionally activate tearoff menus
@@ -329,9 +333,6 @@ from 32bitsonline review:
 - creation of separate index files for mail folders
 
 - compressed mail folders / possibly together with index files
-
-- importing mail folders and address books from other clients:
-  Eudora, Outlook, XFMail, Netscape, The Bat! (in this order)
 
 *********************************************************************
 *** CHANGELOG SINCE LAST REVISION / TESTED AND FINE

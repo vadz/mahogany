@@ -272,6 +272,15 @@ private:
       return TRUE;
    }
 
+   // finds header by name in the listctrl, returns wxNOT_FOUND if not found
+   int FindHeaderByName(const String& headerName) const;
+
+   // modifies an existing header in the listctrl
+   void ModifyHeader(int index,
+                     const String& headerName,
+                     const String& headerValue,
+                     CustomHeaderType type);
+
    // adds a header to the listctrl
    void AddHeader(int index,
                   const String& headerName,
@@ -1018,6 +1027,46 @@ wxCustomHeadersDialog::~wxCustomHeadersDialog()
    delete m_listctrl->GetImageList(wxIMAGE_LIST_SMALL);
 }
 
+int wxCustomHeadersDialog::FindHeaderByName(const String& headerName) const
+{
+   for ( int index = -1; index = m_listctrl->GetNextItem(index); )
+   {
+      if ( m_listctrl->GetItemText(index) == headerName )
+      {
+         return index;
+      }
+   }
+
+   return wxNOT_FOUND;
+}
+
+void wxCustomHeadersDialog::ModifyHeader(int index,
+                                         const String& headerName,
+                                         const String& headerValue,
+                                         CustomHeaderType type)
+{
+   if ( m_listctrl->SetItem(index, 0, headerName) == -1 )
+   {
+      FAIL_MSG("can't set item info in listctrl");
+   }
+
+   if ( m_listctrl->SetItem(index, 1, headerValue) == -1 )
+   {
+      FAIL_MSG("can't set item info in listctrl");
+   }
+
+   wxListItem li;
+   li.m_mask = wxLIST_MASK_IMAGE;
+   li.m_itemId = index;
+   li.m_col = 0;
+   if ( !m_listctrl->SetItem(li) )
+   {
+      FAIL_MSG("can't change items icon in listctrl");
+   }
+
+   m_headerTypes[(size_t)index] = type;
+}
+
 void wxCustomHeadersDialog::AddHeader(int index,
                                       const String& headerName,
                                       const String& headerValue,
@@ -1056,25 +1105,20 @@ void wxCustomHeadersDialog::GetHeader(int index,
 
 bool wxCustomHeadersDialog::TransferDataToWindow()
 {
-   long index = 0;
-   String headerName, headerValue;
-   long dummy;
-   for ( int type = 0; type < CustomHeader_Max; type++ )
+   wxArrayString headerNames, headerValues;
+   wxArrayInt headerTypes;
+   size_t nHeaders = GetCustomHeaders(m_profile,
+                                      CustomHeader_Invalid,
+                                      &headerNames,
+                                      &headerValues,
+                                      &headerTypes);
+
+   for ( size_t nHeader = 0; nHeader < nHeaders; nHeader++ )
    {
-      String path;
-      path << M_CUSTOM_HEADERS_CONFIG_SECTION << '/'
-           << gs_customHeaderSubgroups[type];
-      ProfilePathChanger pathChanger(m_profile, path);
-
-      bool cont = m_profile->GetFirstEntry(headerName, dummy);
-      while ( cont )
-      {
-         headerValue = m_profile->readEntry(headerName, "");
-
-         AddHeader(index++, headerName, headerValue, (CustomHeaderType)type);
-
-         cont = m_profile->GetNextEntry(headerName, dummy);
-      }
+      AddHeader(nHeader,
+                headerNames[nHeader],
+                headerValues[nHeader],
+                (CustomHeaderType)headerTypes[nHeader]);
    }
 
    return TRUE;
@@ -1137,26 +1181,7 @@ void wxCustomHeadersDialog::OnEdit(wxCommandEvent& WXUNUSED(event))
       headerValue = dlg.GetHeaderValue();
       CustomHeaderType type = dlg.GetHeaderType();
 
-      if ( m_listctrl->SetItem(sel, 0, headerName) == -1 )
-      {
-         FAIL_MSG("can't set item info in listctrl");
-      }
-
-      if ( m_listctrl->SetItem(sel, 1, headerValue) == -1 )
-      {
-         FAIL_MSG("can't set item info in listctrl");
-      }
-
-      wxListItem li;
-      li.m_mask = wxLIST_MASK_IMAGE;
-      li.m_itemId = sel;
-      li.m_col = 0;
-      if ( !m_listctrl->SetItem(li) )
-      {
-         FAIL_MSG("can't change items icon in listctrl");
-      }
-
-      m_headerTypes[sel] = type;
+      ModifyHeader(sel, headerName, headerValue, type);
    }
 }
 
@@ -1166,8 +1191,20 @@ void wxCustomHeadersDialog::OnAdd(wxCommandEvent& WXUNUSED(event))
 
    if ( dlg.ShowModal() == wxID_OK )
    {
-      AddHeader(m_listctrl->GetItemCount(),
-                dlg.GetHeaderName(), dlg.GetHeaderValue(), dlg.GetHeaderType());
+      String headerName = dlg.GetHeaderName();
+      String headerValue = dlg.GetHeaderValue();
+      CustomHeaderType headerType = dlg.GetHeaderType();
+
+      int index = FindHeaderByName(headerName);
+      if ( index == wxNOT_FOUND )
+      {
+         AddHeader(m_listctrl->GetItemCount(),
+                   headerName, headerValue, headerType);
+      }
+      else
+      {
+         ModifyHeader(index, headerName, headerValue, headerType);
+      }
    }
 }
 
@@ -1264,4 +1301,58 @@ bool ConfigureCustomHeaders(ProfileBase *profile, wxWindow *parent)
    wxCustomHeadersDialog dlg(profile, parent);
 
    return dlg.ShowModal() == wxID_OK;
+}
+
+// TODO we should implement inheritance!!
+size_t GetCustomHeaders(ProfileBase *profile,
+                        CustomHeaderType typeWanted,
+                        wxArrayString *names,
+                        wxArrayString *values,
+                        wxArrayInt *types)
+{
+   // init
+   names->Empty();
+   values->Empty();
+   if ( types )
+      types->Empty();
+
+   // read headers of all types, select those which we need
+   String headerName, headerValue;
+   long dummy;
+   for ( int type = 0; type < CustomHeader_Max; type++ )
+   {
+      // check whether we're interested in the entries of this type at all
+      if ( (typeWanted < CustomHeader_Both) && (typeWanted != type) )
+      {
+         // no, we want only "Mail" entries and the current type is "News" (or
+         // vice versa), skip this type
+         continue;
+      }
+
+      // go to the subgroup
+      String path;
+      path << M_CUSTOM_HEADERS_CONFIG_SECTION << '/'
+           << gs_customHeaderSubgroups[type];
+      ProfilePathChanger pathChanger(profile, path);
+
+      // enum all entries in it
+      bool cont = profile->GetFirstEntry(headerName, dummy);
+      while ( cont )
+      {
+         if ( names->Index(headerName) == wxNOT_FOUND )
+         {
+            headerValue = profile->readEntry(headerName, "");
+
+            names->Add(headerName);
+            values->Add(headerValue);
+            if ( types )
+               types->Add(type);
+         }
+         //else: ignore all occurences except the first
+
+         cont = profile->GetNextEntry(headerName, dummy);
+      }
+   }
+
+   return names->GetCount();
 }
