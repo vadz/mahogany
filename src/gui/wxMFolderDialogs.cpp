@@ -17,11 +17,11 @@
    that even I understand any longer how it works but here is what I think it
    does:
 
-   0. on creation, TransferDataToWindow() calles SetDefaultValues() and
-      DoUpdateUIForFolder() to initialize the controls with the values
-      either read from profile (for the existing ones) or the reasonable
-      defaults (new ones) and then enable/disable settings depending on the
-      precise folder type
+   0. on creation, TransferDataToWindow() calles SetDefaultValues()
+      to initialize the controls with the values either read from profile (for
+      the existing ones) or the reasonable defaults (new ones) and then
+      SetDefaultValues() calls DoUpdateUIForFolder() to enable/disable settings
+      depending on the precise folder type
 
    1. when anything changes, DoUpdateUI() is called and does, roughly, this:
          if ( folder type changed )
@@ -30,8 +30,6 @@
                enable/disable entries depending on the radio selection
 
             SetDefaultValues()
-
-         DoUpdateUIForFolder()
 
    2. when creating a new folder the user may edit the folder name in the
       text control on top of the dialog which changes the value of the path
@@ -1147,8 +1145,8 @@ wxFolderPropertiesPage::OnEvent()
 
    dlg->SetDirty();
 
-   // folder might have changed, so call DoUpdateUI() which will just call
-   // DoUpdateUIForFolder() if this isn't the case
+   // folder might have changed, so call DoUpdateUI() which will call
+   // SetDefaultValues() if this is really the case
    DoUpdateUI();
 }
 
@@ -1328,10 +1326,30 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    m_isLocal->Enable(TRUE);
 #endif // USE_LOCAL_CHECKBOX
 
-   // this makes no sense for POP and for IMAP we will detect it ourselves
-   if ( m_isCreating && isIMAP )
-      m_isGroup->SetValue(TRUE);
-   m_isGroup->Enable(FALSE);
+   // this makes no sense for POP
+   if ( isIMAP )
+   {
+      if ( m_isCreating )
+      {
+         // we can't change this setting when creating an IMAP folder
+         m_isGroup->Enable(FALSE);
+      }
+      else
+      {
+         // we should have auto detected if this folder could have children or
+         // not
+         m_isGroup->SetValue(m_originalIsGroup);
+
+         // but allow the user to override it if we're mistaken
+         m_isGroup->Enable(TRUE);
+      }
+   }
+   else // POP
+   {
+      // no folder hierarchies under POP
+      m_isGroup->SetValue(FALSE);
+      m_isGroup->Enable(FALSE);
+   }
 }
 
 void
@@ -1417,8 +1435,6 @@ wxFolderPropertiesPage::DoUpdateUI()
       // set the defaults for this kind of folder
       SetDefaultValues();
    }
-
-   DoUpdateUIForFolder();
 }
 
 // this function only updates the controls for the current folder, it never
@@ -2058,6 +2074,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
 
    m_browseIcon->SetIcon(m_originalFolderIcon);
+
+   // enable/disable the controls for this folder type
+   DoUpdateUIForFolder();
 }
 
 bool
@@ -2137,9 +2156,6 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    }
 
    SetDefaultValues();
-
-   // now let it set the correct state of all controls
-   DoUpdateUIForFolder();
 
    return TRUE;
 }
