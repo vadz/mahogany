@@ -36,6 +36,7 @@
 
 #include <wx/mimetype.h>
 #include <wx/file.h>
+#include <wx/iconloc.h>
 
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
