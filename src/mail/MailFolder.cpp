@@ -538,8 +538,8 @@ ExtractListPostAddress(const String& listPostHeader)
 // find reply kind value replyKind, return true if it was set explicitly
 bool
 GetReplyKind(const MailFolder::Params& params,
-	     Profile *profile,
-	     MailFolder::ReplyKind& replyKind)
+             Profile *profile,
+             MailFolder::ReplyKind& replyKind)
 {
    // first get the real reply kind
    replyKind = params.replyKind;
