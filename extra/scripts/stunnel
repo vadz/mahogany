@@ -1,0 +1,17 @@
+#!/bin/sh
+# $Id$
+#
+# Run this script as root to set up SSL tunneling of
+# IMAP, POP and SMTP via the stunnel program.
+#
+# The PEM variable must point to a valid server certificate
+# which can be generated using the req command of the 
+# openssl program:
+# req -new -x509 -nodes -out server.pem -keyout server.pem -days 365
+#
+PEM=/home/karsten/server.pem
+sudo stunnel -p $PEM -d 993 -r localhost:143  # SIMAP
+sudo stunnel -p $PEM -d 995 -r localhost:110  # SPOP
+sudo stunnel -p $PEM -d 465 -r localhost:25   # SSMTP
+
+
