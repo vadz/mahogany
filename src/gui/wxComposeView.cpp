@@ -3146,7 +3146,7 @@ wxComposeView::BuildMessage() const
             FAIL_MSG( "Unknown editor content part type!" );
       }
 
-      delete part;
+      part->DecRef();
    }
 
    // setup the headers
@@ -3440,7 +3440,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
          }
       }
 
-      delete part;
+      part->DecRef();
    }
 
    ((wxComposeView *)this)->ResetDirty(); // const_cast

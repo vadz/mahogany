@@ -191,7 +191,7 @@ protected:
 // EditorContentPart represents text or an attachement in the composer
 // ----------------------------------------------------------------------------
 
-class EditorContentPart
+class EditorContentPart : public MObjectRC
 {
 public:
    // constants
@@ -213,9 +213,6 @@ public:
 
    /// ctor for text contents
    EditorContentPart(const String& text) { Init(); SetText(text); }
-
-   /// dtor non virtual, this class shouldn't be used polymorphically
-   ~EditorContentPart();
 
    //@}
 
@@ -293,6 +290,9 @@ private:
    // common part of all ctors
    void Init();
 
+   // private dtor, we're ref counted
+   virtual ~EditorContentPart();
+
    EditorContentType m_Type;
 
    void     *m_Data;
@@ -301,6 +301,8 @@ private:
              m_Text;
 
    MimeType m_MimeType;
+
+   GCC_DTOR_WARN_OFF
 };
 
 // ----------------------------------------------------------------------------

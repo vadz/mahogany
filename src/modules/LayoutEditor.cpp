@@ -184,11 +184,11 @@ public:
    }
 
    // get the real data back
-   EditorContentPart *GetContentPart() const { return m_mc; }
+   EditorContentPart *GetContentPart() const { m_mc->IncRef(); return m_mc; }
 
 protected:
    // nobody should delete us directly, we're ref counted
-   virtual ~LayoutEditData() { delete m_mc; }
+   virtual ~LayoutEditData() { m_mc->DecRef(); }
 
 private:
    EditorContentPart *m_mc;
@@ -538,6 +538,8 @@ EditorContentPart *LayoutEditor::GetNextPart()
                {
                   LayoutEditData *data = (LayoutEditData *)lo->GetUserData();
                   mc = data->GetContentPart();
+
+                  // undo IncRef() GetUserData() did
                   data->DecRef();
                }
                else // another object type
