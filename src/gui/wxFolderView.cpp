@@ -72,13 +72,20 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
    {
       long keyCode = event.KeyCode();
       wxArrayInt selections;
-      m_FolderView->GetSelections(selections);
+      long nselected = m_FolderView->GetSelections(selections);
+      // there is exactly one item with the focus on  it:
+      long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+      wxASSERT(focused != -1); // should never happen
+
+      // in this case we operate on the highlighted  message
+      if(nselected == 0)
+         selections.Add(focused);
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-          Movetofolder
+          Movetofolder, ReplyTo, Forward, Open, Print
       */
-      const char keycodes_en[] = gettext_noop("DUXCSMRNFOP ");
+      const char keycodes_en[] = gettext_noop("DUXCSMRFOP ");
       const char *keycodes = _(keycodes_en);
       
       int idx = 0;
@@ -86,7 +93,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
       for(;keycodes[idx] && keycodes[idx] != key;idx++)
          ;
 
-   // extra keys:
+      // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
    
       switch(keycodes_en[idx])
@@ -123,10 +130,18 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          m_FolderView->PrintMessages(selections);
          break;
       case ' ':
+         // If shift is not used, deselect all items before having
+         // wxListCtrl selects this one.
          if(!event.ShiftDown())
          {
-            for(int item = 0; item < LCFIX GetItemCount(); item++)
-               LCFIX SetItemState(item,0,wxLIST_STATE_SELECTED);
+            long idx = -1;
+            while((idx = GetNextItem(idx, wxLIST_NEXT_ALL,
+                                     wxLIST_STATE_SELECTED)) != -1)
+            {
+               if(idx != focused)  // allow us to toggle the focused item
+                  SetItemState(idx,0,wxLIST_STATE_SELECTED);
+               idx++;
+            }
          }
          event.Skip();
          break;
@@ -187,13 +202,10 @@ int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
-
-   for(item = 0; item < LCFIX GetItemCount(); item++)
-   {
-      if(LCFIX GetItemState(item,wxLIST_STATE_SELECTED))
-         selections.Add(item);
-   }
-
+   while((item = GetNextItem(item,
+                             wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
+         != -1) 
+      selections.Add(item++);
    return selections.Count();
 }
 void
