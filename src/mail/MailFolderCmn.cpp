@@ -3141,6 +3141,7 @@ MailFolderCmn::ApplyFilterRules(UIdArray msgs)
 }
 
 DECLARE_AUTOPTR(MModule_Filters);
+DECLARE_AUTOPTR(FilterRule);
 
 // Checks for new mail and filters if necessary.
 bool
@@ -3181,7 +3182,7 @@ MailFolderCmn::FilterNewMail()
       return true;
 
    // or if there is a syntax error in them
-   FilterRule *filterRule = filterModule->GetFilter(filterString);
+   FilterRule_obj filterRule = filterModule->GetFilter(filterString);
    if ( !filterRule )
       return false;
 
@@ -3269,8 +3270,6 @@ MailFolderCmn::FilterNewMail()
          ExpungeMessages();
       }
    }
-
-   filterRule->DecRef();
 
    delete messages;
 
