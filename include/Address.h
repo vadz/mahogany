@@ -148,9 +148,12 @@ public:
       { m_ptr = AddressList::Create(address, defhost); }
 END_DECLARE_AUTOPTR();
 
-/// declarae global comparison operator for addresses
+/// declare global comparison operator for addresses
 extern bool operator==(const AddressList_obj& addrList1,
                        const AddressList_obj& addrList2);
+
+/// check whether the given string contains at least one of our own addresses
+extern bool ContainsOwnAddress(const String& str, Profile *profile);
 
 #endif // _ADDRESS_H_
 

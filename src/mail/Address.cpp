@@ -26,9 +26,21 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+
+   #include "strutil.h"
 #endif // USE_PCH
 
 #include "Address.h"
+#include "Mdefaults.h"
+#include "Profile.h"
+
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FROM_REPLACE_ADDRESSES;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_LIST_ADDRESSES;
 
 // ============================================================================
 // implementation
@@ -246,9 +258,58 @@ bool AddressList::HasNext(const Address *addr) const
    return GetNext(addr) != NULL;
 }
 
-extern bool operator==(const AddressList_obj& addrList1,
-                       const AddressList_obj& addrList2)
+bool
+operator==(const AddressList_obj& addrList1, const AddressList_obj& addrList2)
 {
    return addrList1->IsSameAs(addrList2.operator->());
+}
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+bool ContainsOwnAddress(const String& str, Profile *profile)
+{
+   // get the list of our own addresses
+   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+   if ( returnAddrs == GetStringDefault(MP_FROM_REPLACE_ADDRESSES) )
+   {
+      // the default for this option is just the return address
+      returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
+   }
+
+   wxArrayString addresses = strutil_restore_array(returnAddrs);
+
+   // and also add the mailing list addresses because we consider them to be
+   // "own" as well -- after all we're probably subscribed to them
+   wxArrayString addressesML = strutil_restore_array(
+                                 READ_CONFIG(profile, MP_LIST_ADDRESSES)
+                               );
+   WX_APPEND_ARRAY(addresses, addressesML);
+
+
+   // now check whether any of these addresses occurs in str
+   size_t count = addresses.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( str.find(addresses[n]) != String::npos )
+         return true;
+   }
+
+#if 0 // do we really need to do this? IMHO dumb text search is enough
+   AddressList_obj addrList(str);
+   Address *addr = addrList->GetFirst();
+   while ( addr )
+   {
+      if ( addr->IsSameAs() )
+      {
+         return true;
+      }
+
+      addr = addrList->GetNext(addr);
+   }
+#endif // 0
+
+   return false;
 }
 

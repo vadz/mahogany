@@ -58,8 +58,12 @@
 // all recipient headers, more can be added (but always NULL terminate!)
 static const char *headersRecipients[] =
 {
-   "To", "CC", "Bcc",
-   "Resent-To", "Resent-Cc", "Resent-Bcc",
+   "To",
+   "CC",
+   "Bcc",
+   "Resent-To",
+   "Resent-Cc",
+   "Resent-Bcc",
    NULL
 };
 
@@ -1863,40 +1867,66 @@ static bool findIP(String &header,
 static Value func_checkSpam(ArgList *args, FilterRuleImpl *p)
 {
    // standard check:
-   if(args->Count() != 0) return Value("");
+   if(args->Count() != 0)
+      return Value("");
 
    bool rc = false;
+
+   Message_obj msg = p->GetMessage();
+   if ( msg )
+   {
 #ifdef USE_RBL
-   String received;
+      String value;
 
-   Message * msg = p->GetMessage();
-   if(! msg) return Value(0);
-   msg->GetHeaderLine("Received", received);
-   msg->DecRef();
+      msg->GetHeaderLine("Received", value);
 
-   int a,b,c,d;
-   String testHeader = received;
+      int a,b,c,d;
+      String testHeader = value;
 
-   while( (!rc) && (testHeader.Length() > 0) )
-   {
-      if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
+      while ( !rc && !testHeader.empty() )
       {
-         for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
-            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+         if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
+         {
+            for ( int i = 0; gs_RblSites[i]; ++i )
+            {
+               if ( CheckRBL(a,b,c,d,gs_RblSites[i]) )
+               {
+                  rc = true;
+                  break;
+               }
+            }
+         }
+      }
+
+      if ( !rc )
+      {
+         testHeader = value;
+         while ( !rc && !testHeader.empty() )
+         {
+            if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
+            {
+               for ( int i = 0; gs_RblSites[i] ; ++i )
+               {
+                  if ( CheckRBL(a,b,c,d,gs_RblSites[i]) )
+                  {
+                     rc = true;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+
+      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
+
+      if ( !rc )
+#endif // USE_RBL
+      {
+         // consider that only spams have this header
+         rc = msg->GetHeaderLine("X-Authentication-Warning", value);
       }
    }
-   testHeader = received;
-   while( (!rc) && (testHeader.Length() > 0) )
-   {
-      if(findIP(testHeader, '[', ']', &a, &b, &c, &d))
-      {
-         for(int i = 0; gs_RblSites[i] && ! rc ; ++i)
-            rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
-      }
-   }
 
-   /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
-#endif
    return rc;
 }
 
@@ -2003,6 +2033,34 @@ static Value func_matchregex(ArgList *args, FilterRuleImpl *p)
 static Value func_matchregexi(ArgList *args, FilterRuleImpl *p)
 {
    return DoMatchRegEx(args, p, wxRE_ICASE);
+}
+
+static Value func_subj8bit(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 0)
+      return Value(false);
+
+   Message_obj msg = p->GetMessage();
+   if(! msg)
+      return Value(false);
+
+   // consider that the subject is 8 bit if it contains more than half of 8 bit
+   // chars
+   String subject = msg->Subject();
+   size_t num8bit = 0,
+          max8bit = subject.length() / 2;
+   for ( const unsigned char *p = (unsigned char *)subject.c_str(); *p; p++ )
+   {
+      if ( *p > 127 )
+      {
+         if ( num8bit++ == max8bit )
+         {
+            return Value(true);
+         }
+      }
+   }
+
+   return Value(false);
 }
 
 #ifdef USE_PYTHON
@@ -2124,6 +2182,39 @@ static Value func_recipients(ArgList *args, FilterRuleImpl *p)
    //else: error in arg count!
 
    return Value(result);
+}
+
+static Value func_istome(ArgList *args, FilterRuleImpl *p)
+{
+   Value value = func_recipients(args, p);
+
+   MailFolder_obj mf = p->GetFolder();
+   if ( !mf )
+      return Value(false);
+
+   if ( p->GetInterface()->contains_own_address(value.GetString(),
+                                                mf->GetProfile()) )
+   {
+      return Value(true);
+   }
+
+   // check for List-Id header: this would mean that this message has been sent
+   // to a mailing list and so we should let it pass (of course, a smart
+   // spammer could always add a bogus List-Id but for now I didn't see this
+   // happen)
+   Message_obj msg = p->GetMessage();
+
+   if ( msg )
+   {
+      String value;
+      if ( msg->GetHeaderLine("List-Post", value) )
+      {
+         return Value(true);
+      }
+   }
+
+   // this message doesn't seem to be addresses to us
+   return Value(false);
 }
 
 static Value func_header(ArgList *args, FilterRuleImpl *p)
@@ -2264,17 +2355,24 @@ static Value func_score(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
       return Value(0);
+
    int score = 0;
-   Message *msg = p->GetMessage();
-   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-   if(hil)
-   {
 #ifdef USE_HEADER_SCORE
-      score = hil->GetEntryUId( msg->GetUId() )->GetScore();
-#endif
-      hil->DecRef();
+   MailFolder_obj mf = p->GetFolder();
+   if ( mf )
+   {
+      HeaderInfoList_obj hil = mf->GetHeaders();
+      if(hil)
+      {
+         Message_obj msg = p->GetMessage();
+         if ( msg )
+         {
+            score = hil->GetEntryUId( msg->GetUId() )->GetScore();
+         }
+      }
    }
-   msg->DecRef();
+#endif // USE_HEADER_SCORE
+
    return Value(score);
 }
 
@@ -2282,35 +2380,50 @@ static Value func_addscore(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
       return Value(-1);
+
    const Value d = args->GetArg(0)->Evaluate();
-   Message *msg = p->GetMessage();
-   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-   if(hil)
-   {
+
 #ifdef USE_HEADER_SCORE
-      hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
-#endif
-      hil->DecRef();
+   MailFolder_obj mf = p->GetFolder();
+   if ( mf )
+   {
+      HeaderInfoList_obj hil = mf->GetHeaders();
+      if(hil)
+      {
+         Message_obj msg = p->GetMessage();
+         if ( msg )
+         {
+            hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
+         }
+      }
    }
-   msg->DecRef();
+#endif // USE_HEADER_SCORE
+
    return Value(0);
 }
 static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
       return Value(-1);
+
+#ifdef USE_HEADER_COLOUR
    const Value c = args->GetArg(0)->Evaluate();
    String col = c.ToString();
-   Message *msg = p->GetMessage();
-   HeaderInfoList *hil = p->GetFolder()->GetHeaders();
-   if(hil)
+   MailFolder_obj mf = p->GetFolder();
+   if ( mf )
    {
-#ifdef USE_HEADER_COLOUR
-      hil->GetEntryUId( msg->GetUId() )->SetColour(col);
-#endif
-      hil->DecRef();
+      HeaderInfoList_obj hil = mf->GetHeaders();
+      if(hil)
+      {
+         Message_obj msg = p->GetMessage();
+         if ( msg )
+         {
+            hil->GetEntryUId( msg->GetUId() )->SetColour(col);
+         }
+      }
    }
-   msg->DecRef();
+#endif // USE_HEADER_COLOUR
+
    return Value(0);
 }
 
@@ -2389,6 +2502,8 @@ BuiltinFunctions(void)
          Define("setcolour", func_setcolour);
          Define("score", func_score);
          Define("addscore", func_addscore);
+         Define("istome", func_istome);
+         Define("subj8bit", func_subj8bit);
 #ifdef TEST
          Define("nargs", func_nargs);
          Define("arg", func_arg);

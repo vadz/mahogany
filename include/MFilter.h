@@ -22,27 +22,30 @@ class MModule_Filters;
 /**@name Some commonly used enums for the different parts of a simple
    dialog-constructed filter rule. */
 //@{
+
 /** Enum holding the different possible matching filter actions.
     Do not change the order of these without changing MFilter.cpp
     where corresponding strings are defined.
 */
 enum MFDialogTest
 {
-   ORC_T_Always = 0,
-   ORC_T_Match,
-   ORC_T_Contains,
-   ORC_T_MatchC,
-   ORC_T_ContainsC,
-   ORC_T_MatchRegExC,
-   ORC_T_LargerThan,
-   ORC_T_SmallerThan,
-   ORC_T_OlderThan,
-   ORC_T_NewerThan,
-   ORC_T_IsSpam,
-   ORC_T_Python,
-   ORC_T_MatchRegEx,
-   ORC_T_ScoreAbove,
-   ORC_T_ScoreBelow,
+   ORC_T_Always = 0,       // test is always true
+   ORC_T_Match,            // argument matches the target (case insensitive)
+   ORC_T_Contains,         // target contains the argument (case insensitive)
+   ORC_T_MatchC,           // as Match but case sensitive
+   ORC_T_ContainsC,        // as Contains but case sensitive
+   ORC_T_MatchRegExC,      // as RegEx but case sensitive
+   ORC_T_LargerThan,       // size of the message is larger than argument
+   ORC_T_SmallerThan,      //                        smaller
+   ORC_T_OlderThan,        // date of the message is older than argument
+   ORC_T_NewerThan,        //                        newer
+   ORC_T_IsSpam,           // doesn't pass RBL test [BROKEN]
+   ORC_T_Python,           // return value of Python script
+   ORC_T_MatchRegEx,       // target matches RE in argument
+   ORC_T_ScoreAbove,       // score of the message is greater than argument
+   ORC_T_ScoreBelow,       //                         less
+   ORC_T_IsToMe,           // the message is addresses to one of my addresses
+   ORC_T_8BitSubject,      // the message has too many 8 bit chars in subject
    ORC_T_Illegal,// illegal must not occur
    ORC_T_Max = ORC_T_Illegal
 };
@@ -85,6 +88,13 @@ enum MFDialogLogical
    ORC_L_And = 1,
    ORC_L_Max
 };
+
+/// return true if this filter test requires an argument
+extern bool FilterTestNeedsArgument(int test);
+
+/// return true if this filter test requires the target to operate on
+extern bool FilterTestNeedsTarget(int test);
+
 //@}
 
 /** This is a set of dialog settings representing a filter rule. A

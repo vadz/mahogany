@@ -15,6 +15,7 @@ INCLUDE(`"MFolder.h"')
 INCLUDE(`"MailFolder.h"')
 INCLUDE(`"Message.h"')
 INCLUDE(`"SendMessage.h"')
+INCLUDE(`"Address.h"')
 INCLUDE(`"wx/persctrl.h"')
 
 /* Define the MInterface ABC: */
@@ -153,6 +154,13 @@ ARG(int, flags)
 `return ::strutil_matchRegEx(regex, str, flags);')
 FUNCTION(strutil_freeRegEx, void, (
 ARG(strutil_RegEx *, re)), `::strutil_freeRegEx(re);')
+
+FUNCTION(contains_own_address, bool, (
+      ARG(const String &, str),
+      ARG(Profile *, profile)
+   ),
+   `return ::ContainsOwnAddress(str, profile);'
+)
 
 FUNCTION(RemoveModule, void, (ARG(MModuleCommon *, module)),
       `mApplication->RemoveModule(module);')

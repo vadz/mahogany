@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+18.06.02 VZ: added additional filter tests for the SPAM messages
 12.06.02 VZ: fixes for working with read only folders
 11.06.02 VZ: added "Bounce" (a.k.a. redirect) command
 18.05.02 VZ: added a toolbar button to check for new mail

@@ -131,21 +131,23 @@ const char * ORC_T_Names[] =
 {
    // NB: if the string is terminated with a '(' a matching ')' will be
    //     automatically added when constructing the filter expression
-   "1",                 // ORC_T_Always = 0,
-   "matchi(",           // ORC_T_Match,
-   "containsi(",        // ORC_T_Contains,
-   "match(",            // ORC_T_MatchC,
-   "contains(",         // ORC_T_ContainsC,
-   "matchregex(",       // ORC_T_MatchRegExC,
-   "size() > ",         // ORC_T_LargerThan,
-   "size() < ",         // ORC_T_SmallerThan,
-   "(now()-date()) > ", // ORC_T_OlderThan,
-   "(now()-date()) < ", // ORC_T_NewerThan,
-   "isspam()",          // ORC_T_IsSpam,
-   "python(",           // ORC_T_Python,
-   "matchregexi(",      // ORC_T_MatchRegEx,
-   "score() > ",        // ORC_T_ScoreAbove,
-   "score() < ",        // ORC_T_ScoreBelow,
+   "1",                 // ORC_T_Always
+   "matchi(",           // ORC_T_Match
+   "containsi(",        // ORC_T_Contains
+   "match(",            // ORC_T_MatchC
+   "contains(",         // ORC_T_ContainsC
+   "matchregex(",       // ORC_T_MatchRegExC
+   "size() > ",         // ORC_T_LargerThan
+   "size() < ",         // ORC_T_SmallerThan
+   "(now()-date()) > ", // ORC_T_OlderThan
+   "(now()-date()) < ", // ORC_T_NewerThan
+   "isspam()",          // ORC_T_IsSpam
+   "python(",           // ORC_T_Python
+   "matchregexi(",      // ORC_T_MatchRegEx
+   "score() > ",        // ORC_T_ScoreAbove
+   "score() < ",        // ORC_T_ScoreBelow
+   "istome()",        // ORC_T_IsToMe
+   "subj8bit()",        // ORC_T_8BitSubject
    NULL
 };
 
@@ -155,84 +157,132 @@ const char * ORC_T_Names[] =
 
 static unsigned char ORC_T_Flags[] =
 {
-   0, // ORC_T_Always = 0,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_Match,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_Contains,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchC,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_ContainsC,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchRegExC,
-      ORC_F_NeedsArg, // ORC_T_LargerThan,
-      ORC_F_NeedsArg, // ORC_T_SmallerThan,
-      ORC_F_NeedsArg, // ORC_T_OlderThan,
-      ORC_F_NeedsArg, // ORC_T_NewerThan,
-      0, // ORC   _T_IsSpam,
-      ORC_F_NeedsArg, // ORC_T_Python,
-      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchRegEx,
-      ORC_F_NeedsArg, // ORC_T_ScoreAbove,
-      ORC_F_NeedsArg, // ORC_T_ScoreBelow
-      };
+   0,                                  // ORC_T_Always = 0,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Match,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Contains,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchC,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_ContainsC,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegExC,
+   ORC_F_NeedsArg,                     // ORC_T_LargerThan,
+   ORC_F_NeedsArg,                     // ORC_T_SmallerThan,
+   ORC_F_NeedsArg,                     // ORC_T_OlderThan,
+   ORC_F_NeedsArg,                     // ORC_T_NewerThan,
+   0,                                  // ORC_T_IsSpam,
+   ORC_F_NeedsArg,                     // ORC_T_Python,
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegEx,
+   ORC_F_NeedsArg,                     // ORC_T_ScoreAbove,
+   ORC_F_NeedsArg,                     // ORC_T_ScoreBelow
+   0,                                  // ORC_T_IsToMe
+   0,                                  // ORC_T_8BitSubject
+};
+
+bool FilterTestNeedsArgument(int test)
+{
+   CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
+          "invalid filter test" );
+
+   return (ORC_T_Flags[test] & ORC_F_NeedsArg) != 0;
+}
+
+bool FilterTestNeedsTarget(int test)
+{
+   CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
+          "invalid filter test" );
+
+   return (ORC_T_Flags[test] & ORC_F_NeedsTarget) != 0;
+}
 
 static
 const char * ORC_W_Names[] =
 {
-   "subject()", "header()", "from()", "body()",
-   "message()", "to()", "header(\"Sender\")",
+   "subject()",
+   "header()",
+   "from()",
+   "body()",
+   "message()",
+   "to()",
+   "header(\"Sender\")",
    "recipients()",
    NULL
 };
 
 static const char * OAC_T_Names[] = 
 {
-   "delete(", "copy(", "move(", "expunge(",
-      "message(", "log(", "python(", "addscore(",
-      "setcolour(", "zap(", "print(", NULL
+   "delete(",
+   "copy(",
+   "move(",
+   "expunge(",
+   "message(",
+   "log(",
+   "python(",
+   "addscore(",
+   "setcolour(",
+   "zap(",
+   "print(",
+   NULL
 };
 
 #define OAC_F_NeedsArg   0x01
 static unsigned char OAC_T_Flags[] =
 {
-   0, OAC_F_NeedsArg, OAC_F_NeedsArg, 0,
-      OAC_F_NeedsArg, OAC_F_NeedsArg, OAC_F_NeedsArg, OAC_F_NeedsArg,
-      OAC_F_NeedsArg, 0 , 0
+   0,
+   OAC_F_NeedsArg,
+   OAC_F_NeedsArg,
+   0,
+   OAC_F_NeedsArg,
+   OAC_F_NeedsArg,
+   OAC_F_NeedsArg,
+   OAC_F_NeedsArg,
+   OAC_F_NeedsArg,
+   0,
+   0,
 };
+
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1,
+                       MismatchInCritArrays );
+
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max,
+                       MismatchInCritFlags );
+
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1,
+                       MismatchInTargetArray );
 
 String
 MFDialogComponent::WriteTest(void)
 {
-   ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1);
-   ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max);
-   ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1);
-
    String program;
+
+   CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program, "illegal filter test" );
+   
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
    switch(m_Logical)
    {
-   case ORC_L_Or: // OR:
-      program << '|';
-      break;
-   case ORC_L_And: // AND:
-      program << '&';
-      break;
-   case ORC_L_None:
-      break;
-   default:
-      ASSERT(0); // not possible
+      case ORC_L_Or: // OR:
+         program << '|';
+         break;
+
+      case ORC_L_And: // AND:
+         program << '&';
+         break;
+
+      default:
+         FAIL_MSG( "unknown logical filter operation" );
+
+      case ORC_L_None:
+         break;
    }
+
    program << '(';
-   if(m_Inverted)
+   if ( m_Inverted )
       program << '!';
          
-   if(m_Test < 0  || m_Test >= ORC_T_Max)
-   {
-      ASSERT_MSG(0, "Illegal test - must not happen");
-      return "";
-   }
-   
-   bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
-   bool needsArgument = (ORC_T_Flags[m_Test] & ORC_F_NeedsArg) != 0;
+
    program << ORC_T_Names[m_Test];
+
    bool needsClosingParen = program.Last() == '(';
+
+   bool needsTarget = FilterTestNeedsTarget(m_Test);
    if(needsTarget)
    {
       if(m_Target != ORC_W_Illegal && m_Target < ORC_W_Max)
@@ -243,6 +293,8 @@ MFDialogComponent::WriteTest(void)
          return "";
       }
    }
+
+   bool needsArgument = FilterTestNeedsArgument(m_Test);
    if(needsTarget && needsArgument)
       program << ',';
    if(needsArgument)
@@ -254,16 +306,13 @@ MFDialogComponent::WriteTest(void)
    if ( needsClosingParen )
       program << ')'; // end of function call
    program << ')';
+
    return program;
 }
 
 bool
 MFDialogComponent::ReadSettingsFromRule(String & rule)
 {
-   ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1);
-   ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max);
-   ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1);
-
    const char *cptr = rule.c_str();
 
    if(*cptr == '|')
@@ -300,8 +349,8 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
       }
    if(m_Test == ORC_T_Illegal)
       return FALSE;
-   bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
-   bool needsArgument = (ORC_T_Flags[m_Test] & ORC_F_NeedsArg) != 0;
+   bool needsTarget = FilterTestNeedsTarget(m_Test);
+   bool needsArgument = FilterTestNeedsArgument(m_Test);
    m_Target = ORC_W_Illegal;
    if(needsTarget)
    {
