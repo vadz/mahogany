@@ -282,11 +282,6 @@ MFolder *MFolder::Get(const String& fullname)
 {
    wxString name = fullname;
 
-   if(fullname[0] == '/') // called with a filename
-   {
-     return
-        MFolder::CreateTemp(fullname, MF_FILE, 0, fullname, "", "", "");
-   }
    // remove the trailing backslash if any
    size_t len = fullname.Len();
    if ( len != 0 && fullname[len - 1] == '/' )

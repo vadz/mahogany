@@ -73,9 +73,9 @@ public:
                               FolderType type,
                               int flags,
                               const String& path,
-                              const String& server,
-                              const String& login,
-                              const String& password);
+                              const String& server = "",
+                              const String& login = "",
+                              const String& password = "");
    //@}
 
    /**@name misc accessors */
@@ -177,7 +177,10 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// A smart pointer to MFolder
+// A smart pointer to MFolder: not only it takes care of the ref count itself,
+// but it also allows to create in the same way a folder for arbitrary file
+// name (if the absolute path is given) or for the folder tree entry
+// (otherwise)
 // ----------------------------------------------------------------------------
 
 class MFolder_obj
@@ -226,7 +229,21 @@ private:
    MFolder_obj& operator=(const MFolder_obj&);
 
    // create folder by name
-   void Init(const String& name) { m_folder = MFolder::Get(name); }
+   void Init(const String& name)
+   {
+      wxCHECK_RET( name.length(), "name can't be empty" );
+
+      if( name[0] == '/' )
+      {
+         // called with a filename, create a temp folder to access it
+         m_folder = MFolder::CreateTemp(name, MF_FILE, 0, name);
+      }
+      else
+      {
+         // called with a folder name, create a folder for the tree entry
+         m_folder = MFolder::Get(name);
+      }
+   }
 
    MFolder *m_folder;
 };
