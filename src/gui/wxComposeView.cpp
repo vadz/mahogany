@@ -1384,6 +1384,7 @@ wxComposeView::wxComposeView(const String &name,
    m_sending = false;
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
+   m_msgviewOrig = NULL;
 
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
@@ -2233,8 +2234,11 @@ String wxComposeView::GetSubject() const
 // ----------------------------------------------------------------------------
 
 void
-wxComposeView::InitText(Message *msg, const MessageView *msgview)
+wxComposeView::InitText(Message * /* msg */, const MessageView *msgview)
 {
+   // store it for the future use
+   m_msgviewOrig = msgview;
+
    if ( m_kind == Message_New )
    {
       // writing a new message/article: wait until the headers are filled
@@ -2250,7 +2254,7 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
       // if we can evaluate the template right now, do it
       if ( !TemplateNeedsHeaders(m_template) )
       {
-         DoInitText(NULL);
+         DoInitText();
       }
       else // we have a template involving the header values
       {
@@ -2262,12 +2266,11 @@ wxComposeView::InitText(Message *msg, const MessageView *msgview)
          ResetDirty();
       }
    }
-   else
+   else // replying or forwarding - evaluate the template right now
    {
-      // replying or forwarding - evaluate the template right now
-      CHECK_RET( msg, _T("no message in InitText") );
+      ASSERT_MSG( m_OriginalMessage, _T("what do we reply to?") );
 
-      DoInitText(msg, msgview);
+      DoInitText();
    }
 }
 
@@ -2300,7 +2303,7 @@ void wxComposeView::Launch()
 }
 
 void
-wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
+wxComposeView::DoInitText()
 {
    // position the cursor correctly and separate us from the previous message
    // if we're replying to several messages at once
@@ -2349,7 +2352,7 @@ wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
          break;
       }
 
-      if ( msgview == MailFolder::Params::NO_QUOTE )
+      if ( m_msgviewOrig == MailFolder::Params::NO_QUOTE )
       {
          // we don't want to quote anything at all, so remove all occurences of
          // $QUOTE and/or $TEXT templates in the string -- and also remove
@@ -2397,7 +2400,8 @@ wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
       templateChanged = FALSE;
 
       // do parse the template
-      if ( !ExpandTemplate(*this, m_Profile, templateValue, mailmsg, msgview) )
+      if ( !ExpandTemplate(*this, m_Profile, templateValue,
+                           m_OriginalMessage, m_msgviewOrig) )
       {
          // first show any errors which the call to Parse() above could
          // generate
@@ -2516,7 +2520,7 @@ wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
 
 void wxComposeView::OnFirstTimeModify()
 {
-   // don't clear the text below if we already have something there - but
+   // don't clear the text below if we already have something there -- but
    // normally we shouldn't
    CHECK_RET( !IsModified(),
               _T("shouldn't be called if we had been already changed!") );
@@ -2526,7 +2530,7 @@ void wxComposeView::OnFirstTimeModify()
    if ( m_kind == Message_New && !m_template.empty() )
    {
       DoClear();
-      DoInitText(NULL);
+      DoInitText();
    }
 }
 
@@ -2594,7 +2598,10 @@ void wxComposeView::EnableEditing(bool enable)
 void
 wxComposeView::OnIdentChange(wxCommandEvent& event)
 {
-   wxString ident = event.GetString();
+   // get the new identity
+   const wxString ident = event.GetString();
+
+   // is it the same as the current one?
    if ( ident != m_Profile->GetIdentity() )
    {
       if ( event.GetInt() == 0 )
@@ -2602,12 +2609,21 @@ wxComposeView::OnIdentChange(wxCommandEvent& event)
          // first one is always the default identity
          m_Profile->ClearIdentity();
       }
-      else
+      else // new identity chosen
       {
          m_Profile->SetIdentity(ident);
       }
 
       SetDefaultFrom();
+
+      // the signature could have changed, reinitalize the composer if it
+      // hadn't been modified by the user yet
+      if ( !IsModified() )
+      {
+         DoClear();
+
+         DoInitText();
+      }
    }
 }
 
@@ -2778,7 +2794,7 @@ wxComposeView::OnMenuCommand(int id)
             DoClear();
          }
 
-         DoInitText(NULL);
+         DoInitText();
          break;
 
       case WXMENU_COMPOSE_LOADTEXT:
