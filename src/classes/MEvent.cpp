@@ -68,6 +68,9 @@ static MEventList gs_EventList;
 // are we currently dispatching events?
 static bool gs_IsDispatching = false;
 
+/// are we suspended?
+static bool gs_IsSuspended = false;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -137,6 +140,9 @@ MEventManager::Send(MEventData * data)
 /* static */
 void MEventManager::Dispatch(MEventData * dataptr)
 {
+   if(gs_IsSuspended) // don't do anything
+      return;
+
    MEventData & data = *dataptr;
    MEventId id = data.GetId();
 
@@ -210,6 +216,17 @@ bool MEventManager::Deregister(void *handle)
    gs_receivers.Remove(n);
 
    return true;
+}
+
+void
+MEventManager::Suspend(bool suspend)
+{
+   MEventLocker mutex;
+   ASSERT_MSG( !(suspend == TRUE && gs_IsSuspended != FALSE),
+              "attempt to suspend already suspended MEvent queue");
+   ASSERT_MSG( !(suspend == FALSE && gs_IsSuspended != TRUE),
+              "attempt to release already not suspended MEvent queue");
+   gs_IsSuspended = suspend;
 }
 
 // ----------------------------------------------------------------------------

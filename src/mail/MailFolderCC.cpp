@@ -1669,9 +1669,16 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 void
 MailFolderCC::BuildListing(void)
 {
-   m_BuildListingSemaphore = true;
-
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
+
+   if(! Lock())
+      return;
+
+   // we don't want MEvents to be handled while we are in here, as
+   // they might query this folder:
+   MEventManager::Suspend(true);
+   
+   m_BuildListingSemaphore = true;
 
    if ( m_FirstListing )
    {
@@ -1702,8 +1709,9 @@ MailFolderCC::BuildListing(void)
    // all. The value of 0 disables the limit. Ask only once and never for file
    // folders (loading headers from them is quick)
    if ( !IsLocalQuickFolder(GetType()) &&
-        (m_RetrievalLimit > 0) && m_FirstListing &&
-        (m_nMessages > m_RetrievalLimit) )
+        (m_RetrievalLimit > 0)
+        && m_FirstListing
+        && (m_nMessages > m_RetrievalLimit) )
    {
       // too many messages - ask the user how many of them he really wants
       String msg, prompt, title;
@@ -1781,11 +1789,13 @@ MailFolderCC::BuildListing(void)
    m_nMessages = m_BuildNextEntry;
    m_Listing->SetCount(m_nMessages);
 
-
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
    m_NeedFreshListing = false;
    m_UpdateNeeded = true;
+   // now we must release the MEvent queue again:
+   MEventManager::Suspend(false);
+   UnLock();
 }
 
 int

@@ -357,6 +357,8 @@ public:
    // Register()
    static bool Deregister(void *handle);
 
+   /// Temporarily suspend (enable/disable) event dispatching:
+   static void Suspend(bool suspended = TRUE);
 protected:
    /// Dispatches a single event.
    static void Dispatch(MEventData * data);
