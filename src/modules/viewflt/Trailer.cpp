@@ -126,7 +126,7 @@ TrailerFilter::DoProcess(String& text,
 
          // and now show the trailer in special style
          wxColour colOld = style.GetTextColour();
-         style.SetTextColour(*wxGREEN);
+         style.SetTextColour(*wxLIGHT_GREY); // TODO: allow to customize
 
          m_next->Process(tail, viewer, style);
 
