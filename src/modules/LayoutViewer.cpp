@@ -420,7 +420,9 @@ String LayoutViewer::GetSelection() const
 
 bool LayoutViewer::Print()
 {
-   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
+   wxMApp *app = (wxMApp *)mApplication;
+
+   wxPrintDialogData pdd(*app->GetPrintData());
    wxPrinter printer(& pdd);
    wxLayoutPrintout printout(m_window->GetLayoutList(), _("Mahogany: Printout"));
 
@@ -434,16 +436,17 @@ bool LayoutViewer::Print()
    }
    else
    {
-      (*((wxMApp *)mApplication)->GetPrintData())
-         = printer.GetPrintDialogData().GetPrintData();
+      *app->GetPrintData() = printer.GetPrintDialogData().GetPrintData();
       return TRUE;
    }
 }
 
 void LayoutViewer::PrintPreview()
 {
+   wxMApp *app = (wxMApp *)mApplication;
+
    // Pass two printout objects: for preview, and possible printing.
-   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
+   wxPrintDialogData pdd(*app->GetPrintData());
    wxPrintPreview *preview = new wxMVPreview(
       GetProfile(),
       new wxLayoutPrintout(m_window->GetLayoutList()),
@@ -458,8 +461,7 @@ void LayoutViewer::PrintPreview()
       return;
    }
 
-   (* ((wxMApp *)mApplication)->GetPrintData())
-      = preview->GetPrintDialogData().GetPrintData();
+   *app->GetPrintData() = preview->GetPrintDialogData().GetPrintData();
 
    wxPreviewFrame *frame = new wxPreviewFrame(preview, NULL, //GetFrame(m_Parent),
                                               _("Print Preview"),

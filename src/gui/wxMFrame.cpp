@@ -697,17 +697,20 @@ wxMFrame::OnMenuCommand(int id)
       case WXMENU_FILE_PRINT_SETUP:
          OnPrintSetup();
          break;
-   //   case WXMENU_FILE_PAGE_SETUP:
-   //      OnPageSetup();
-   //      break;
+      case WXMENU_FILE_PAGE_SETUP:
+         OnPageSetup();
+         break;
+
 #ifdef USE_PS_PRINTING
       case WXMENU_FILE_PRINT_SETUP_PS:
          OnPrintSetup();
          break;
-#endif
-   //   case WXMENU_FILE_PAGE_SETUP_PS:
-   //      OnPageSetup();
-   //      break;
+
+      case WXMENU_FILE_PAGE_SETUP_PS:
+         OnPageSetup();
+         break;
+#endif // USE_PS_PRINTING
+
       case WXMENU_FILE_NET_ON:
          mApplication->GoOnline();
          break;
@@ -986,6 +989,10 @@ wxMFrame::OnCommandEvent(wxCommandEvent &event)
    OnMenuCommand(event.GetId());
 }
 
+// ----------------------------------------------------------------------------
+// printing
+// ----------------------------------------------------------------------------
+
 void
 wxMFrame::OnPrintSetup()
 {
@@ -1002,6 +1009,21 @@ wxMFrame::OnPrintSetup()
       = printerDialog.GetPrintDialogData().GetPrintData();
 }
 
+void wxMFrame::OnPageSetup()
+{
+   wxMApp *app = (wxMApp *)mApplication;
+
+   *app->GetPageSetupData() = *app->GetPrintData();
+
+   wxPageSetupDialog pageSetupDialog(this, app->GetPageSetupData());
+   pageSetupDialog.ShowModal();
+
+   *app->GetPrintData() = pageSetupDialog.GetPageSetupData().GetPrintData();
+   *app->GetPageSetupData() = pageSetupDialog.GetPageSetupData();
+}
+
+#ifdef USE_PS_PRINTING
+
 void wxMFrame::OnPrintSetupPS()
 {
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
@@ -1016,22 +1038,7 @@ void wxMFrame::OnPrintSetupPS()
       = printerDialog.GetPrintDialogData().GetPrintData();
 }
 
-
-void wxMFrame::OnPageSetup()
-{
-   *((wxMApp *)mApplication)->GetPageSetupData()
-      = *((wxMApp *)mApplication)->GetPrintData();
-
-      wxPageSetupDialog pageSetupDialog(this,
-                                        ((wxMApp *)mApplication)->GetPageSetupData()
-                                        );
-    pageSetupDialog.ShowModal();
-
-    *((wxMApp *)mApplication)->GetPrintData()
-       = pageSetupDialog.GetPageSetupData().GetPrintData();
-    *((wxMApp *)mApplication)->GetPageSetupData()
-       = pageSetupDialog.GetPageSetupData();
-}
+#endif // USE_PS_PRINTING
 
 /// Passes a menu id to modules for reacting to it.
 bool

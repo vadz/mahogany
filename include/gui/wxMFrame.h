@@ -90,9 +90,11 @@ public:
 
    /// wxMFrame handles all print setup
    void OnPrintSetup();
-   void OnPrintSetupPS();
    void OnPageSetup();
-   //void OnPageSetupPS();
+#ifdef USE_PS_PRINTING
+   void OnPrintSetupPS();
+   void OnPageSetupPS();
+#endif // USE_PS_PRINTING
 
    // callbacks
    virtual void OnMenuCommand(int id);

@@ -505,6 +505,11 @@ void HtmlViewer::InitPrinting()
       m_printHtml = new wxHtmlEasyPrinting(_("Mahogany Printing"),
                                            GetFrame(m_window));
    }
+
+   wxMApp *app = (wxMApp *)mApplication;
+
+   *m_printHtml->GetPrintData() = *app->GetPrintData();
+   *m_printHtml->GetPageSetupData() = *app->GetPageSetupData();
 }
 
 bool HtmlViewer::Print()
