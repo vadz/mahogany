@@ -161,7 +161,7 @@ public:
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
             mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-            if(mf)
+            if(mf || (!mApplication->IsOnline()))
             {
                MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
                e->m_name = folderName;
@@ -232,6 +232,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
+   UpdateFolderList(); 
+
    if(mf == NULL)
    {
       MailCollectorFolderList::iterator i;
@@ -239,7 +241,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
       {
          // set flags each time because they get reset by SaveMessages()
          m_NewMailFolder->EnableNewMailEvents(false,false);
-         rc &= CollectOneFolder((*i)->m_folder);
+	 if ((*i)->m_folder)
+             rc &= CollectOneFolder((*i)->m_folder);
       }
    }
    else
@@ -299,7 +302,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    MOcheck();
    ASSERT(mf);
    bool rc = true;
-   
+
    if(mf->NeedsNetwork() && ! mApplication->IsOnline())
       return false;
 
@@ -413,7 +416,8 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
    {
       if((**i).m_name == name)
       {
-         (**i).m_folder->DecRef();
+         if ((**i).m_folder) 
+	     (**i).m_folder->DecRef();
          m_list->erase(i);
          return true;
       }
@@ -439,7 +443,11 @@ MailCollectorImpl::UpdateFolderList(void)
       for(i = m_list->begin();i != m_list->end();i++)
       {
          if((**i).m_folder == NULL) // try to open:
+	 {
             (**i).m_folder = MailFolder::OpenFolder(MF_PROFILE,(**i).m_name);
+            if((**i).m_folder == NULL) // folder inaccessible:
+               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
+	 }
       }
    }
    else // we are offline, do we need to disable some folder:
