@@ -36,7 +36,7 @@ extern "C"
 }
 #endif
 
-#include  "MailFolder.h"
+#include  "MailFolderCmn.h"
 #include  "FolderView.h"
 #include  "MFolder.h"
 
@@ -70,7 +70,7 @@ KBLIST_DEFINE(FolderViewList, FolderView);
    relevant objects by using a static list of objects and associated
    MAILSTREAM pointers.
 */
-class MailFolderCC : public MailFolder
+class MailFolderCC : public MailFolderCmn
 {
 public:
    /** @name Constructors and destructor */

@@ -122,6 +122,11 @@ extern "C"
    typedef const char  * (* MModule_GetMVersionFuncType )
       (int *version_major, int *version_minor,
        int *version_release);
+   /** Function called just before DLL gets unloaded, i.e. when the
+       module gets deleted.
+       @return 0 if unloading the DLL is not permitted.
+    */
+   typedef int (* MModule_UnLoadModuleFuncType) (void);
 }
 //@}
 

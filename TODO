@@ -61,6 +61,8 @@ $Id$
 9	KB	Profile: add enumeration of entries for profile and
 		its subgroups
 
+5	KB	forward text-only messages as text rather than rfc822
+
 8	VZ	make the message templates work: GUI suport for configuring them
 		and (many) more macros should be added.
 
@@ -91,6 +93,7 @@ $Id$
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
+7		dnd for messages between folders and treectrl
 6	KB	implement temporary/fake Profile mode
 5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
@@ -144,6 +147,15 @@ from 32bitsonline review:
 
 2		Add code to collect split-up mime content from
 		multiple messages and decode it.
+
+4		Option to hide certain folders in treectrl, e.g. the
+		auto-collect ones
+4		reply unquoted, too
+4		composeview clear should re-insert signature
+4		auto-expunge on folder close option
+4		option to hide expunged messages
+4		confirm expunge dialog
+
 *********************************************************************
 *** TESTS
 *********************************************************************

@@ -303,6 +303,11 @@ public:
    void SetCount(size_t newcount)
       { MOcheck(); ASSERT(newcount <= m_NumEntries);
       m_NumEntries = newcount; }
+   //@}
+
+   static HeaderInfoListCC * Create(size_t n)
+      { return new HeaderInfoListCC(n); }
+protected:
    HeaderInfoListCC(size_t n)
       {
          m_Listing = new HeaderInfoCC[n];
@@ -313,8 +318,6 @@ public:
          MOcheck();
          delete [] m_Listing;
       }
-   //@}
-protected:
    /// The current listing of the folder
    class HeaderInfoCC *m_Listing;
    /// number of entries
@@ -877,10 +880,6 @@ MailFolderCC::GetHeaders(void) const
    return m_Listing;
 }
 
-
-
-
-
 bool
 MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
@@ -1060,8 +1059,8 @@ MailFolderCC::BuildListing(void)
       m_Listing = NULL;
    }
 
-   if(! m_Listing && m_NumOfMessages > 0)
-      m_Listing = new HeaderInfoListCC(m_NumOfMessages);
+   if(! m_Listing )
+      m_Listing =  HeaderInfoListCC::Create(m_NumOfMessages);
 
    // we may retrieve not all messages in the folder, but only some of them if
    // there are too many

@@ -795,7 +795,7 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
    c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, 2*LAYOUT_Y_MARGIN);
    box->SetConstraints(c);
 
    return box;

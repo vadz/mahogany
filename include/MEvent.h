@@ -123,7 +123,8 @@ public:
    MEventFolderUpdateData(MailFolder *folder)
       : MEventData(MEventId_FolderUpdate)
       {
-         m_folder = folder; m_folder->IncRef();
+         m_folder = folder;
+         m_folder->IncRef();
          m_listing = m_folder->GetHeaders();
       }
    ~MEventFolderUpdateData()

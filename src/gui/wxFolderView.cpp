@@ -206,6 +206,7 @@ void wxFolderListCtrl::OnMouse(wxListEvent& event)
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    const HeaderInfo *hi = (*hil)[event.m_itemIndex];
    m_FolderView->PreviewMessage(hi->GetUId());
+   hil->DecRef();
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
@@ -511,6 +512,8 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    if(listing == NULL)
       listing = m_ASMailFolder->GetHeaders();
+   else
+      listing->IncRef();
    
    wxBeginBusyCursor();// wxSafeYield();
 

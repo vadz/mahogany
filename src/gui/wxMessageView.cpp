@@ -1372,7 +1372,9 @@ wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 {
    if ( m_uid == uid )
       return;
+   if(m_folder) m_folder->DecRef();
    m_folder = folder;
+   m_folder->IncRef();
    (void) m_folder->GetMessage(uid, this); // file request
 }
 

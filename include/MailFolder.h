@@ -95,7 +95,7 @@ public:
    };
    //@}
 
-   /** @name Constructors and destructor */
+   /** @name Static functions, implemented in MailFolder.cpp */
    //@{
 
    /**
@@ -124,14 +124,66 @@ public:
                                   const String &login = NULLstring,
                                   const String &password = NULLstring);
 
-   //@}
-
    /** Checks if it is OK to exit the application now.
        @param which Will either be set to empty or a '\n' delimited
        list of folders which are in critical sections.
    */
    static bool CanExit(String *which);
    
+   /** Utiltiy function to get a textual representation of a message
+       status.
+       @param message status
+       @return string representation
+   */
+   static String ConvertMessageStatusToString(int status);
+   /** Forward one message.
+       @param message message to forward
+       @param profile environment
+       @param parent window for dialog
+   */
+   static void ForwardMessage(class Message *msg,
+                              ProfileBase *profile = NULL,
+                              MWindow *parent = NULL);
+   /** Reply to one message.
+       @param message message to reply to
+       @param flags 0, or REPLY_FOLLOWUP
+       @param profile environment
+       @param parent window for dialog
+   */
+   static void ReplyMessage(class Message *msg,
+                            int flags = 0,
+                            ProfileBase *profile = NULL,
+                            MWindow *parent = NULL);
+   /**@name Subscription management */
+   //@{
+   /** Subscribe to a given mailbox (related to the
+       mailfolder/mailstream underlying this folder.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
+       @param mailboxname name of the mailbox to subscribe to
+       @param bool if true, subscribe, else unsubscribe
+       @return true on success
+   */
+   static bool Subscribe(const String &host,
+                         FolderType protocol,
+                         const String &mailboxname,
+                         bool subscribe = true);
+   /** Get a listing of all mailboxes.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
+       @param pattern a wildcard matching the folders to list
+       @param subscribed_only if true, only the subscribed ones
+       @param reference implementation dependend reference
+    */
+   static class FolderListing *
+   ListFolders(const String &host,
+               FolderType protocol,
+               const String &pattern = "*",
+               bool subscribed_only = false,
+               const String &reference = "");
+   //@}
+   //@}
+
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
@@ -219,7 +271,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline ProfileBase *GetProfile(void) { return m_Profile; }
+   virtual inline ProfileBase *GetProfile(void) = 0;
 
    /// return class name
    const char *GetClassName(void) const
@@ -227,13 +279,6 @@ public:
 
    /// Get update interval in seconds
    virtual int GetUpdateInterval(void) const = 0;
-
-   /** Utiltiy function to get a textual representation of a message
-       status.
-       @param message status
-       @return string representation
-   */
-   static String ConvertMessageStatusToString(int status);
 
    /** Toggle sending of new mail events.
        @param send if true, send them
@@ -245,34 +290,6 @@ public:
    */
    virtual bool SendsNewMailEvents(void) const = 0;
 
-   /**@name Subscription management */
-   //@{
-   /** Subscribe to a given mailbox (related to the
-       mailfolder/mailstream underlying this folder.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
-       @param mailboxname name of the mailbox to subscribe to
-       @param bool if true, subscribe, else unsubscribe
-       @return true on success
-   */
-   static bool Subscribe(const String &host,
-                         FolderType protocol,
-                         const String &mailboxname,
-                         bool subscribe = true);
-   /** Get a listing of all mailboxes.
-       @param host the server host, or empty for local newsspool
-       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
-       @param pattern a wildcard matching the folders to list
-       @param subscribed_only if true, only the subscribed ones
-       @param reference implementation dependend reference
-    */
-   static class FolderListing *
-   ListFolders(const String &host,
-               FolderType protocol,
-               const String &pattern = "*",
-               bool subscribed_only = false,
-               const String &reference = "");
-   //@}
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
@@ -290,43 +307,45 @@ public:
        messages.
        @return true on success
    */
-   bool SaveMessages(const INTARRAY *selections,
-                     String const & folderName,
-                     bool isProfile,
-                     bool updateCount = true);
+   virtual bool SaveMessages(const INTARRAY *selections,
+                             String const & folderName,
+                             bool isProfile,
+                             bool updateCount = true) = 0;
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
        @return true on success
    */
-   bool SaveMessagesToFile(const INTARRAY *selections,
-                           String const & fileName);
+   virtual bool SaveMessagesToFile(const INTARRAY *selections,
+                                   String const & fileName) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   bool DeleteMessages(const INTARRAY *messages);
+   virtual bool DeleteMessages(const INTARRAY *messages) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   bool UnDeleteMessages(const INTARRAY *messages);
+   virtual bool UnDeleteMessages(const INTARRAY *messages) = 0;
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
        @return true if messages got saved
    */
-   bool SaveMessagesToFile(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual bool SaveMessagesToFile(const INTARRAY *messages, MWindow
+                                   *parent = NULL) = 0;
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @return true if messages got saved
    */
-   bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent
+                                     = NULL) = 0;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -334,35 +353,17 @@ public:
        @param profile pointer for environment
        @param flags 0, or REPLY_FOLLOWUP
    */
-   void ReplyMessages(const INTARRAY *messages,
-                      MWindow *parent = NULL,
-                      int flags = 0);
+   virtual void ReplyMessages(const INTARRAY *messages,
+                              MWindow *parent = NULL,
+                              int flags = 0) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   void ForwardMessages(const INTARRAY *messages,
-                        MWindow *parent = NULL);
+   virtual void ForwardMessages(const INTARRAY *messages,
+                                MWindow *parent = NULL) = 0;
 
-   /** Forward one message.
-       @param message message to forward
-       @param profile environment
-       @param parent window for dialog
-   */
-   static void ForwardMessage(class Message *msg,
-                              ProfileBase *profile = NULL,
-                              MWindow *parent = NULL);
-   /** Reply to one message.
-       @param message message to reply to
-       @param flags 0, or REPLY_FOLLOWUP
-       @param profile environment
-       @param parent window for dialog
-   */
-   static void ReplyMessage(class Message *msg,
-                            int flags = 0,
-                            ProfileBase *profile = NULL,
-                            MWindow *parent = NULL);
    //@}
 
    /**@name Access control */
@@ -393,20 +394,10 @@ public:
    /// Set update interval in seconds, 0 to disable
    virtual void SetUpdateInterval(int secs) = 0;
    /// Get authorisation information
-   inline void GetAuthInfo(String *login, String *password) const
-      { *login = m_Login; *password = m_Password; }
+   virtual inline void GetAuthInfo(String *login, String *password)
+      const = 0;
    //@}
 
-protected:
-   /**@name Common variables might or might not be used */
-   //@{
-   /// Login for password protected mail boxes.
-   String m_Login;
-   /// Password for password protected mail boxes.
-   String m_Password;
-   /// a profile
-   ProfileBase *m_Profile;
-   //@}
 };
 
 /** This class temporarily locks a mailfolder */

@@ -107,7 +107,7 @@ wxModulesDialog::wxModulesDialog(wxFrame *parent)
 
 
    m_textCtrl = new wxTextCtrl(this, -1, "", wxDefaultPosition,
-                               wxDefaultSize, wxTE_MULTILINE);
+                               wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -140,7 +140,7 @@ bool
 wxModulesDialog::Update(wxCommandEvent & ev)
 {
    int n = ev.GetInt(); // which one was clicked
-   return Update(n);
+   return InternalUpdate(n);
 }
 
 bool
@@ -149,12 +149,13 @@ wxModulesDialog::InternalUpdate(size_t n)
    ASSERT(n < m_Listing->Count());
    m_textCtrl->Clear();
    *m_textCtrl
-      << _("Module Name: ") << (*m_Listing)[n].GetName() << '\n'
+      << _("Module: ") << (*m_Listing)[n].GetName() << '\n'
       << _("Version: ") <<  (*m_Listing)[n].GetVersion() << '\n'
       << _("Author: ") <<   (*m_Listing)[n].GetAuthor() << '\n'
       << '\n'
       << (*m_Listing)[n].GetDescription() << '\n';
-
+   m_textCtrl->ShowPosition(0); // no effect for wxGTK :-(
+   m_textCtrl->SetInsertionPoint(0);
    return TRUE;
 }
    
@@ -166,8 +167,11 @@ bool wxModulesDialog::TransferDataFromWindow()
    size_t count = (size_t)m_checklistBox->Number();
    for ( size_t n = 0; n < count; n++ )
    {
-      setting << m_checklistBox->GetString(n);
-      if(n != count-1) setting << ':';
+      if(m_checklistBox->IsChecked(n))
+      {
+         setting << (*m_Listing)[n].GetName();
+         if(n != count-1) setting << ':';
+      }
    }
    mApplication->GetProfile()->writeEntry(MP_MODULES, setting);
    return TRUE;

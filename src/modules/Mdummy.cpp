@@ -42,6 +42,7 @@ static void DummyFunc(MInterface *minterface);
 
 extern "C"
 {
+   /// Gets called to initialise module:
    MDLLEXPORT int InitMModule(int version_major,
                               int version_minor,
                               int version_release,
@@ -62,25 +63,35 @@ extern "C"
       
       return MMODULE_ERR_NONE;;
    }
+   /// Gets called before module gets unloaded, return 0 to veto dll unloading:
+   MDLLEXPORT int
+   UnLoadMModule(void)
+   {
+      return 1;
+   }
 
+   /// Return module name, must be identical to filename without extension:
    MDLLEXPORT const char *
    GetName(void)
    {
       return "Mdummy";
    }
 
+   /// Return a short description (one line):
    MDLLEXPORT const char *
    GetDescription(void)
    {
       return "A simple demonstration of Mahogany's plugin modules.";
    }
 
+   /// Return module version as a string:
    MDLLEXPORT const char *
    GetModuleVersion(void)
    {
       return "0.00";
    }
 
+   /// Return the Mahogany version this module was compiled for:
    MDLLEXPORT void
    GetMVersion(int *version_major, int *version_minor,
                int *version_release)

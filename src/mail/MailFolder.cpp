@@ -24,14 +24,25 @@
 #include "Mdefaults.h"
 
 #include "Message.h"
-
 #include "MailFolder.h"
 #include "MailFolderCC.h"
 
 #include "miscutil.h"   // GetFullEmailAddress
 
 #include <wx/file.h>
+#include <wx/dynarray.h>
 
+#include "gui/wxComposeView.h"
+#include "wx/persctrl.h"
+#include "MDialogs.h"
+#include "MApplication.h"
+
+
+/*-------------------------------------------------------------------*
+ * static member functions of MailFolder.h
+ *-------------------------------------------------------------------*/
+
+/* static */
 MailFolder *
 MailFolder::OpenFolder(int typeAndFlags,
                        String const &i_name,
@@ -196,204 +207,24 @@ bool MailFolder::CanExit(String *which)
    return MailFolderCC::CanExit(which);
 }
 
-/*-------------------------------------------------------------------*
- * Higher level functionality, nothing else depends on this.
- *-------------------------------------------------------------------*/
-
-#include <wx/dynarray.h>
-
-#include "gui/wxComposeView.h"
-#include "wx/persctrl.h"
-#include "MDialogs.h"
-#include "MApplication.h"
-
+/* static */
 bool
-MailFolder::SaveMessagesToFile(const INTARRAY *selections,
-                               String const & fileName0)
+MailFolder::Subscribe(const String &host, FolderType protocol,
+                      const String &mailboxname, bool subscribe)
 {
-   int
-      n = selections->Count(),
-      i;
-   String fileName = strutil_expandpath(fileName0);
-   if(strutil_isempty(fileName))
-      return false;
-
-   wxFile file;
-   if ( !file.Create(fileName, TRUE /* overwrite */) )
-   {
-      wxLogError(_("Could not truncate the existing file."));
-      return false;
-   }
-
-   Message *msg;
-   MProgressDialog *pd = NULL;
-   int threshold = GetProfile() ?
-      READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : MP_FOLDERPROGRESS_THRESHOLD_D;
-   if(n > threshold)
-   {
-      String msg;
-      msg.Printf(_("Saving %d messages..."), n);
-      pd = new MProgressDialog(GetName(),
-                               msg,
-                               2*n, NULL);// open a status window:
-   }
-   int t,n2,j;
-   size_t size;
-   bool rc = true;
-   const char *cptr;
-   String tmpstr;
-   for(i = 0; i < n; i++)
-   {
-      msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         if(pd) pd->Update( 2*i + 1 );
-
-            // iterate over all parts
-         n2 = msg->CountParts();
-         for(j = 0; j < n2; j++)
-         {
-            t = msg->GetPartType(j);
-            if( ( size = msg->GetPartSize(j)) == 0)
-               continue; //    ignore empty parts
-            if ( (t == Message::MSG_TYPETEXT) ||
-                 (t == Message::MSG_TYPEMESSAGE ))
-            {
-               cptr = msg->GetPartContent(j);
-               if(cptr == NULL)
-                  continue; // error ?
-               tmpstr = strutil_enforceNativeCRLF(cptr);
-               rc &= (file.Write(tmpstr, tmpstr.length()) == size);
-            }
-         }
-         if(pd) pd->Update( 2*i + 2);
-         msg->DecRef();
-      }
-   }
-   if(pd) delete pd;
-   return rc;
-
+   return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
 }
 
-bool
-MailFolder::SaveMessages(const INTARRAY *selections,
-                         String const & folderName,
-                         bool isProfile,
-                         bool updateCount)
+/* static */
+class FolderListing *
+MailFolder::ListFolders(const String &host,
+                        FolderType protocol,
+                        const String &pattern,
+                        bool subscribed_only,
+                        const String &reference)
 {
-   int
-      n = selections->Count(),
-      i;
-   MailFolder
-      *mf;
-
-   if(strutil_isempty(folderName))
-      return false;
-
-   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE, folderName);
-   if(! mf)
-   {
-      String msg;
-      msg.Printf(_("Cannot open folder '%s'."), folderName.c_str());
-      ERRORMESSAGE((msg));
-      return false;
-   }
-   Message *msg;
-   bool events = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false, updateCount);
-
-   MProgressDialog *pd = NULL;
-   int threshold = mf->GetProfile() ?
-      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : MP_FOLDERPROGRESS_THRESHOLD_D;
-   if(n > threshold)
-   {
-      String msg;
-      msg.Printf(_("Saving %d messages..."), n);
-      pd = new MProgressDialog(mf->GetName(),
-                                             msg,
-                                             2*n, NULL);// open a status window:
-   }
-   bool rc = true;
-   for(i = 0; i < n; i++)
-   {
-      msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         if(pd) pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg);
-         if(pd) pd->Update( 2*i + 2);
-         msg->DecRef();
-      }
-   }
-   mf->Ping(); // update any views
-   mf->EnableNewMailEvents(events, true);
-   mf->DecRef();
-   if(pd) delete pd;
-   return rc;
-}
-
-
-bool
-MailFolder::DeleteMessages(const INTARRAY *selections)
-{
-   int n = selections->Count();
-   int i;
-   String sequence;
-   for(i = 0; i < n-1; i++)
-      sequence << strutil_ultoa((*selections)[i]) << ',';
-   if(n)
-      sequence << strutil_ultoa((*selections)[n-1]);
-   return SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
-}
-
-bool
-MailFolder::UnDeleteMessages(const INTARRAY *selections)
-{
-   int n = selections->Count();
-   int i;
-   bool rc = true;
-   for(i = 0; i < n; i++)
-      rc &= UnDeleteMessage((*selections)[i]);
-   return rc;
-}
-
-bool
-MailFolder::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
-{
-   bool rc = false;
-   MFolder *folder = MDialog_FolderChoose(parent);
-   if ( folder )
-   {
-      rc = SaveMessages(selections, folder->GetFullName(), true);
-      folder->DecRef();
-   }
-   return rc;
-}
-
-bool
-MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
-{
-
-   String filename = wxPFileSelector("MsgSave",
-                                     _("Choose file to save message to"),
-                                     NULL, NULL, NULL,
-                                     _("All files (*.*)|*.*"),
-                                     wxSAVE | wxOVERWRITE_PROMPT,
-                                     parent);
-   if(! filename.IsEmpty())
-   {
-      {
-         // truncate the file
-         wxFile fd;
-         if ( !fd.Create(filename, TRUE /* overwrite */) )
-            wxLogError(_("Could not truncate the existing file."));
-      }
-      return SaveMessagesToFile(selections,filename);
-   }
-   else
-      return false;
+   return MailFolderCC::ListFolders(host, protocol,pattern,
+                                    subscribed_only, reference);
 }
 
 /* static */
@@ -566,22 +397,6 @@ MailFolder::ReplyMessage(class Message *msg,
    SafeDecRef(msg);
 }
 
-void
-MailFolder::ReplyMessages(const INTARRAY *selections,
-                          MWindow *parent,
-                          int flags)
-{
-   Message *msg;
-
-   int n = selections->Count();
-   for( int i = 0; i < n; i++ )
-   {
-      msg = GetMessage((*selections)[i]);
-      ReplyMessage(msg, flags, GetProfile(), parent);
-      SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
-   }
-}
-
 /* static */
 void
 MailFolder::ForwardMessage(class Message *msg,
@@ -598,8 +413,217 @@ MailFolder::ForwardMessage(class Message *msg,
    SafeDecRef(msg);
 }
 
+/*-------------------------------------------------------------------*
+ * Higher level functionality, collected in MailFolderCmn class.
+ *-------------------------------------------------------------------*/
+bool
+MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections,
+                               String const & fileName0)
+{
+   int
+      n = selections->Count(),
+      i;
+   String fileName = strutil_expandpath(fileName0);
+   if(strutil_isempty(fileName))
+      return false;
+
+   wxFile file;
+   if ( !file.Create(fileName, TRUE /* overwrite */) )
+   {
+      wxLogError(_("Could not truncate the existing file."));
+      return false;
+   }
+
+   Message *msg;
+   MProgressDialog *pd = NULL;
+   int threshold = GetProfile() ?
+      READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   if(n > threshold)
+   {
+      String msg;
+      msg.Printf(_("Saving %d messages..."), n);
+      pd = new MProgressDialog(GetName(),
+                               msg,
+                               2*n, NULL);// open a status window:
+   }
+   int t,n2,j;
+   size_t size;
+   bool rc = true;
+   const char *cptr;
+   String tmpstr;
+   for(i = 0; i < n; i++)
+   {
+      msg = GetMessage((*selections)[i]);
+      if(msg)
+      {
+         if(pd) pd->Update( 2*i + 1 );
+
+            // iterate over all parts
+         n2 = msg->CountParts();
+         for(j = 0; j < n2; j++)
+         {
+            t = msg->GetPartType(j);
+            if( ( size = msg->GetPartSize(j)) == 0)
+               continue; //    ignore empty parts
+            if ( (t == Message::MSG_TYPETEXT) ||
+                 (t == Message::MSG_TYPEMESSAGE ))
+            {
+               cptr = msg->GetPartContent(j);
+               if(cptr == NULL)
+                  continue; // error ?
+               tmpstr = strutil_enforceNativeCRLF(cptr);
+               rc &= (file.Write(tmpstr, tmpstr.length()) == size);
+            }
+         }
+         if(pd) pd->Update( 2*i + 2);
+         msg->DecRef();
+      }
+   }
+   if(pd) delete pd;
+   return rc;
+
+}
+
+bool
+MailFolderCmn::SaveMessages(const INTARRAY *selections,
+                         String const & folderName,
+                         bool isProfile,
+                         bool updateCount)
+{
+   int
+      n = selections->Count(),
+      i;
+   MailFolder
+      *mf;
+
+   if(strutil_isempty(folderName))
+      return false;
+
+   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE, folderName);
+   if(! mf)
+   {
+      String msg;
+      msg.Printf(_("Cannot open folder '%s'."), folderName.c_str());
+      ERRORMESSAGE((msg));
+      return false;
+   }
+   Message *msg;
+   bool events = mf->SendsNewMailEvents();
+   mf->EnableNewMailEvents(false, updateCount);
+
+   MProgressDialog *pd = NULL;
+   int threshold = mf->GetProfile() ?
+      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   if(n > threshold)
+   {
+      String msg;
+      msg.Printf(_("Saving %d messages..."), n);
+      pd = new MProgressDialog(mf->GetName(),
+                                             msg,
+                                             2*n, NULL);// open a status window:
+   }
+   bool rc = true;
+   for(i = 0; i < n; i++)
+   {
+      msg = GetMessage((*selections)[i]);
+      if(msg)
+      {
+         if(pd) pd->Update( 2*i + 1 );
+         rc &= mf->AppendMessage(*msg);
+         if(pd) pd->Update( 2*i + 2);
+         msg->DecRef();
+      }
+   }
+   mf->Ping(); // update any views
+   mf->EnableNewMailEvents(events, true);
+   mf->DecRef();
+   if(pd) delete pd;
+   return rc;
+}
+
+
+bool
+MailFolderCmn::DeleteMessages(const INTARRAY *selections)
+{
+   int n = selections->Count();
+   int i;
+   String sequence;
+   for(i = 0; i < n-1; i++)
+      sequence << strutil_ultoa((*selections)[i]) << ',';
+   if(n)
+      sequence << strutil_ultoa((*selections)[n-1]);
+   return SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
+}
+
+bool
+MailFolderCmn::UnDeleteMessages(const INTARRAY *selections)
+{
+   int n = selections->Count();
+   int i;
+   bool rc = true;
+   for(i = 0; i < n; i++)
+      rc &= UnDeleteMessage((*selections)[i]);
+   return rc;
+}
+
+bool
+MailFolderCmn::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
+{
+   bool rc = false;
+   MFolder *folder = MDialog_FolderChoose(parent);
+   if ( folder )
+   {
+      rc = SaveMessages(selections, folder->GetFullName(), true);
+      folder->DecRef();
+   }
+   return rc;
+}
+
+bool
+MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
+{
+
+   String filename = wxPFileSelector("MsgSave",
+                                     _("Choose file to save message to"),
+                                     NULL, NULL, NULL,
+                                     _("All files (*.*)|*.*"),
+                                     wxSAVE | wxOVERWRITE_PROMPT,
+                                     parent);
+   if(! filename.IsEmpty())
+   {
+      {
+         // truncate the file
+         wxFile fd;
+         if ( !fd.Create(filename, TRUE /* overwrite */) )
+            wxLogError(_("Could not truncate the existing file."));
+      }
+      return SaveMessagesToFile(selections,filename);
+   }
+   else
+      return false;
+}
+
 void
-MailFolder::ForwardMessages(const INTARRAY *selections, MWindow *parent)
+MailFolderCmn::ReplyMessages(const INTARRAY *selections,
+                          MWindow *parent,
+                          int flags)
+{
+   Message *msg;
+
+   int n = selections->Count();
+   for( int i = 0; i < n; i++ )
+   {
+      msg = GetMessage((*selections)[i]);
+      ReplyMessage(msg, flags, GetProfile(), parent);
+      SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
+   }
+}
+
+
+void
+MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
 {
    int i;
    Message *msg;
@@ -610,24 +634,4 @@ MailFolder::ForwardMessages(const INTARRAY *selections, MWindow *parent)
       msg = GetMessage((*selections)[i]);
       ForwardMessage(msg, GetProfile(), parent);
    }
-}
-
-/* static */
-bool
-MailFolder::Subscribe(const String &host, FolderType protocol,
-                      const String &mailboxname, bool subscribe)
-{
-   return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
-}
-
-/* static */
-class FolderListing *
-MailFolder::ListFolders(const String &host,
-                        FolderType protocol,
-                        const String &pattern,
-                        bool subscribed_only,
-                        const String &reference)
-{
-   return MailFolderCC::ListFolders(host, protocol,pattern,
-                                    subscribed_only, reference);
 }

@@ -99,7 +99,7 @@ MModuleImpl::Create(wxDllType dll)
       wxDllLoader::GetSymbol(dll, "InitMModule"); 
    if(! initModuleFunc)
    {
-      //FIXME unload the DLL
+      wxDllLoader::UnloadLibrary(dll);
       return NULL;
    }
    if( (*initModuleFunc)(M_VERSION_MAJOR,
@@ -128,7 +128,14 @@ MModuleImpl::MModuleImpl(wxDllType dll)
 
 MModuleImpl::~MModuleImpl()
 {
-   wxDllLoader::UnloadLibrary(m_Dll);
+   MModule_UnLoadModuleFuncType
+      unLoadModuleFunc = (MModule_UnLoadModuleFuncType)
+      wxDllLoader::GetSymbol(m_Dll, "UnLoadMModule"); 
+   ASSERT(unLoadModuleFunc);
+   if(! unLoadModuleFunc)
+      return; // be careful
+   if(unLoadModuleFunc()) // check if we can safely unload it
+      wxDllLoader::UnloadLibrary(m_Dll);
 }
 
 
@@ -261,7 +268,7 @@ public:
                            const String &version = "",
                            const String &author = "")
       {
-         m_Name = name; m_Desc = shortdesc; m_Desc = desc;
+         m_Name = name; m_ShortDesc = shortdesc; m_Desc = desc;
          m_Version = version; m_Author = author;
       }
 private:
@@ -374,12 +381,14 @@ MModuleListing *MModule::GetListing(void)
                   description << tf[l] << '\n';
                String name = (**it).AfterLast(DIR_SEPARATOR);
                name = name.Mid(0, filename.Length()-strlen(".mmd"));
+               String tmp = tf[1].Mid(strlen("Name:")); // == short description
                MModuleListingEntryImpl entry(
-                  filename, // module name   
-                  tf[1].Mid(strlen("Name:")), // == short description
+                  name, // module name   
+                  tmp,
                   description,
                   tf[2].Mid(strlen("Version:")),
-                  tf[3].Mid(strlen("Author:")));
+                  tf[3].Mid(strlen("Author:"))
+                  );
                (*listing)[count++] = entry;
             }
          }
