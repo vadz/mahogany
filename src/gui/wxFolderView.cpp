@@ -1,10 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxFolderView.cc: a window displaying a mail folder               *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany
+// File name:   gui/wxFolderView.cpp - window with folder view inside
+// Purpose:     wxFolderView is used to show to the user folder contents
+// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -1265,6 +1269,7 @@ wxFolderListCtrl::SelectNextUnread()
       if( !(hi->GetStatus() & MailFolder::MSG_STAT_SEEN) )
       {
          Focus(idx);
+         EnsureVisible(idx);
 
          // always preview the selected message, if we did "Show next unread"
          // we really want to see it regardless of m_PreviewOnSingleClick
