@@ -14,6 +14,9 @@
 
 #ifdef USE_PYTHON
 
+// SWIG-generated files don't include Mpch.h themselves
+#include "Mpch.h"
+
 // before including Python.h, undef all these macros defined by our config.h
 // and redefined by Python's config.h under Windows to avoid the warnings
 #ifdef OS_WIN
@@ -33,9 +36,20 @@
    #endif // USE_PYTHON_DYNAMIC
 #endif // OS_WIN
 
+// Python.h detects _DEBUG setting and changes its behaviour depending on this,
+// we don't want this to happen as we don't need to debug Python code
+#ifdef _DEBUG
+   #undef _DEBUG
+   #define _DEBUG_WAS_DEFINED
+#endif
+
 #include <Python.h>
 
-#ifdef USE_PYTHON_DYNAMIC
+#ifdef _DEBUG_WAS_DEFINED
+   #undef _DEBUG_WAS_DEFINED
+   #define _DEBUG
+#endif
+
 
 // this function must be called before using any Python functions, it if
 // returns FALSE they can't be used
@@ -102,6 +116,11 @@ extern "C"
    extern PyObject *(*M_PyRun_String)(char *, int, PyObject *, PyObject *);
    extern PyObject *(*M_PyString_InternFromString)(const char *);
 
+   extern int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *);
+   extern int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *);
+   extern void *(*M_PyObject_Malloc)(size_t);
+   extern void (*M__Py_NegativeRefcount)(const char *fname, int lineno, PyObject *op);
+
    // variables
    extern long M__Py_RefTotal;
    extern PyTypeObject *M_PyModule_Type;
@@ -150,6 +169,13 @@ extern "C"
 #define PyRun_String M_PyRun_String
 #define PyString_InternFromString M_PyString_InternFromString
 
+// Python 2.3+
+#define PyType_IsSubtype M_PyType_IsSubtype
+#define PyObject_SetAttrString M_PyObject_SetAttrString
+#define PyObject_Malloc M_PyObject_Malloc
+#define PyInt_AsLong M_PyInt_AsLong
+#define _Py_NegativeRefcount M__Py_NegativeRefcount
+
 // special cases
 
 // _Py_Dealloc  may be defined as a macro or not (in debug builds)
@@ -158,13 +184,12 @@ extern "C"
 #endif
 
 // Py_InitModule4 may be defined as Py_InitModule4TraceRefs (in debug builds)
-#ifdef Py_InitModule4
+#ifdef Py_TRACE_REFS
 #define Py_InitModule4TraceRefs M_Py_InitModule4
+#define M_Py_InitModule4TraceRefs M_Py_InitModule4
 #else
 #define Py_InitModule4 M_Py_InitModule4
 #endif
-
-#endif // USE_PYTHON_DYNAMIC
 
 #include "PythonHelp.h"
 

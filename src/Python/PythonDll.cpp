@@ -28,36 +28,26 @@
 
 #include "MPython.h"
 
-#if defined(USE_PYTHON) && defined(USE_PYTHON_DYNAMIC)
+#ifdef USE_PYTHON
 
 #include <wx/dynlib.h>
 
 // ----------------------------------------------------------------------------
-// macros
+// local functions
 // ----------------------------------------------------------------------------
 
-// define the macro to return the name of the Python library
+// define the function to return the name of the Python library
+inline String GetDllName(const String& version)
+{
+   String
 #if defined(OS_WIN)
-    // we have to use the debug DLL in debug build under Windows
-    #ifdef DEBUG
-        #define PYTHON_LIB(ver)     "python" #ver "_d"
-    #else  // !Debug
-        #define PYTHON_LIB(ver)     "python" #ver
-    #endif // Debug/!Debug
+      basename = _T("python");
 #else // !Win
-    #define PYTHON_LIB(ver)         "libpython" #ver
+      basename = _T("libpython");
 #endif // Win/!Win
 
-inline String GetDllName(const String& basename)
-{
-    return basename + wxDllLoader::GetDllExt();
+   return basename + version + wxDynamicLibrary::GetDllExt();
 }
-
-#ifdef OS_WIN
-    #define PYTHON_PROC FARPROC
-#else
-    #define PYTHON_PROC void *
-#endif
 
 // ----------------------------------------------------------------------------
 // global data
@@ -121,6 +111,11 @@ extern "C"
    PyObject *(*M_PyRun_String)(char *, int, PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
+   int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *) = NULL;
+   int (*M_PyObject_SetAttrString)(PyObject *, char *, PyObject *) = NULL;
+   void *(*M_PyObject_Malloc)(size_t) = NULL;
+   void (*M__Py_NegativeRefcount)(const char *, int, PyObject *) = NULL;
+
    // variables
 #ifdef Py_REF_DEBUG
    long M__Py_RefTotal = 0;
@@ -137,57 +132,69 @@ extern "C"
 // private data
 // ----------------------------------------------------------------------------
 
-static struct
+#ifdef OS_WIN
+    #define PYTHON_PROC FARPROC
+#else
+    #define PYTHON_PROC void *
+#endif
+
+#define PYTHON_FUNC(func) { _T(#func), (PYTHON_PROC *)&M_ ## func },
+
+static struct PythonFunc
 {
     const char *name;
     PYTHON_PROC *ptr;
 } pythonFuncs[] =
 {
-   { "Py_Initialize", (PYTHON_PROC *)&M_Py_Initialize },
-   { "_Py_NoneStruct", (PYTHON_PROC *)&M__Py_NoneStruct},
+   PYTHON_FUNC(Py_Initialize)
+   PYTHON_FUNC(_Py_NoneStruct)
 #ifdef Py_TRACE_REFS
-   { "Py_InitModule4TraceRefs", (PYTHON_PROC *)&M_Py_InitModule4 },
+   PYTHON_FUNC(Py_InitModule4TraceRefs)
 #else
-   { "Py_InitModule4", (PYTHON_PROC *)&M_Py_InitModule4 },
+   PYTHON_FUNC(Py_InitModule4)
 #endif
-   { "Py_BuildValue", (PYTHON_PROC *)&M_Py_BuildValue },
-   { "Py_VaBuildValue", (PYTHON_PROC *)&M_Py_VaBuildValue },
+   PYTHON_FUNC(Py_BuildValue)
+   PYTHON_FUNC(Py_VaBuildValue)
 #ifdef Py_REF_DEBUG
-   { "_Py_RefTotal", (PYTHON_PROC *)&M__Py_RefTotal },
+   PYTHON_FUNC(_Py_RefTotal)
 #endif // Py_REF_DEBUG
-   { "PyModule_Type", (PYTHON_PROC *)&M_PyModule_Type },
+   PYTHON_FUNC(PyModule_Type)
 #ifdef Py_TRACE_REFS
-   { "_Py_Dealloc", (PYTHON_PROC *)&M__Py_Dealloc },
+   PYTHON_FUNC(_Py_Dealloc)
 #endif // Py_TRACE_REFS
-   { "PyErr_Fetch", (PYTHON_PROC *)&M_PyErr_Fetch },
-   { "PyErr_Restore", (PYTHON_PROC *)&M_PyErr_Restore },
-   { "PyErr_Print", (PYTHON_PROC *)&M_PyErr_Print },
-   { "PyArg_Parse", (PYTHON_PROC *)&M_PyArg_Parse },
-   { "PyArg_ParseTuple", (PYTHON_PROC *)&M_PyArg_ParseTuple },
-   { "PyDict_GetItemString", (PYTHON_PROC *)&M_PyDict_GetItemString },
-   { "PyDict_SetItemString", (PYTHON_PROC *)&M_PyDict_SetItemString },
-   { "PyErr_Occurred", (PYTHON_PROC *)&M_PyErr_Occurred },
-   { "PyErr_SetString", (PYTHON_PROC *)&M_PyErr_SetString },
-   { "PyInt_FromLong", (PYTHON_PROC *)&M_PyInt_FromLong },
-   { "PyImport_ImportModule", (PYTHON_PROC *)&M_PyImport_ImportModule },
-   { "PyModule_GetDict", (PYTHON_PROC *)&M_PyModule_GetDict },
-   { "PyString_AsString", (PYTHON_PROC *)&M_PyString_AsString },
-   { "PyString_FromString", (PYTHON_PROC *)&M_PyString_FromString },
-   { "PyEval_CallObjectWithKeywords", (PYTHON_PROC *)&M_PyEval_CallObjectWithKeywords },
-   { "PyExc_NameError", (PYTHON_PROC *)&M_PyExc_NameError },
-   { "PyExc_TypeError", (PYTHON_PROC *)&M_PyExc_TypeError },
-   { "PyFloat_FromDouble", (PYTHON_PROC *)&M_PyFloat_FromDouble },
-   { "PyImport_AddModule", (PYTHON_PROC *)&M_PyImport_AddModule },
-   { "PyImport_GetModuleDict", (PYTHON_PROC *)&M_PyImport_GetModuleDict },
-   { "PyImport_ReloadModule", (PYTHON_PROC *)&M_PyImport_ReloadModule },
-   { "PyObject_CallFunction", (PYTHON_PROC *)&M_PyObject_CallFunction },
-   { "PyObject_CallObject", (PYTHON_PROC *)&M_PyObject_CallObject },
-   { "PyObject_GetAttr", (PYTHON_PROC *)&M_PyObject_GetAttr },
-   { "PyObject_GetAttrString", (PYTHON_PROC *)&M_PyObject_GetAttrString },
-   { "PyRun_SimpleFile", (PYTHON_PROC *)&M_PyRun_SimpleFile },
-   { "PyRun_String", (PYTHON_PROC *)&M_PyRun_String },
-   { "PyString_InternFromString", (PYTHON_PROC *)&M_PyString_InternFromString },
-   {"", NULL}
+   PYTHON_FUNC(PyErr_Fetch)
+   PYTHON_FUNC(PyErr_Restore)
+   PYTHON_FUNC(PyErr_Print)
+   PYTHON_FUNC(PyArg_Parse)
+   PYTHON_FUNC(PyArg_ParseTuple)
+   PYTHON_FUNC(PyDict_GetItemString)
+   PYTHON_FUNC(PyDict_SetItemString)
+   PYTHON_FUNC(PyErr_Occurred)
+   PYTHON_FUNC(PyErr_SetString)
+   PYTHON_FUNC(PyInt_AsLong)
+   PYTHON_FUNC(PyInt_FromLong)
+   PYTHON_FUNC(PyImport_ImportModule)
+   PYTHON_FUNC(PyModule_GetDict)
+   PYTHON_FUNC(PyString_AsString)
+   PYTHON_FUNC(PyString_FromString)
+   PYTHON_FUNC(PyEval_CallObjectWithKeywords)
+   PYTHON_FUNC(PyExc_NameError)
+   PYTHON_FUNC(PyExc_TypeError)
+   PYTHON_FUNC(PyFloat_FromDouble)
+   PYTHON_FUNC(PyImport_AddModule)
+   PYTHON_FUNC(PyImport_GetModuleDict)
+   PYTHON_FUNC(PyImport_ReloadModule)
+   PYTHON_FUNC(PyObject_CallFunction)
+   PYTHON_FUNC(PyObject_CallObject)
+   PYTHON_FUNC(PyObject_GetAttr)
+   PYTHON_FUNC(PyObject_GetAttrString)
+   PYTHON_FUNC(PyRun_SimpleFile)
+   PYTHON_FUNC(PyRun_String)
+   PYTHON_FUNC(PyString_InternFromString)
+   PYTHON_FUNC(PyType_IsSubtype)
+   PYTHON_FUNC(PyObject_SetAttrString)
+   PYTHON_FUNC(PyObject_Malloc)
+   { "", NULL }
 };
 
 // the handle of Python DLL
@@ -201,42 +208,60 @@ extern bool InitPythonDll()
 {
    CHECK( !gs_dllPython, true, _T("shouldn't be called more than once") );
 
-   gs_dllPython = wxDllLoader::LoadLibrary(GetDllName(PYTHON_LIB(20)));
-   if ( !gs_dllPython )
+   // load the library
+   static const wxChar *versions[] =
    {
-      gs_dllPython = wxDllLoader::LoadLibrary(GetDllName(PYTHON_LIB(15)));
-   }
+      _T("23"), _T("22"), _T("20"), _T("15")
+   };
 
-   if ( !gs_dllPython )
-   {
-      return false;
-   }
+   wxDynamicLibrary dllPython;
 
-   // load all functions
-   for ( size_t i = 0; pythonFuncs[i].ptr; i++ )
+   // don't give errors about missing DLL here
    {
-      void *funcptr = wxDllLoader::GetSymbol(gs_dllPython, pythonFuncs[i].name);
-      if ( !funcptr )
+      wxLogNull noLog;
+      for ( size_t nVer = 0;
+            nVer < WXSIZEOF(versions) && !dllPython.IsLoaded();
+            nVer++ )
       {
-         FreePythonDll();
+         dllPython.Load(GetDllName(versions[nVer]));
+      }
+   }
 
-         return false;
+   if ( dllPython.IsLoaded() )
+   {
+      // load all functions
+      PythonFunc *pf = pythonFuncs;
+      while ( pf->ptr )
+      {
+         void *funcptr = dllPython.GetSymbol(pf->name);
+         if ( !funcptr )
+         {
+            // error message is already given by GetSymbol()
+            FreePythonDll();
+
+            break;
+         }
+
+         *(pf++->ptr) = (PYTHON_PROC)funcptr;
       }
 
-      *pythonFuncs[i].ptr = (PYTHON_PROC)funcptr;
+      if ( !pf->ptr )
+      {
+         gs_dllPython = dllPython.Detach();
+      }
    }
 
-   return true;
+   return gs_dllPython != NULL;
 }
 
 extern void FreePythonDll()
 {
    if ( gs_dllPython )
    {
-      wxDllLoader::UnloadLibrary(gs_dllPython);
+      wxDynamicLibrary::Unload(gs_dllPython);
       gs_dllPython = 0;
    }
 }
 
-#endif // USE_PYTHON_DYNAMIC
+#endif // USE_PYTHON
 
