@@ -2322,6 +2322,12 @@ MessageView::Update()
 
    m_encodingAuto = mimepart->GetTextEncoding();
 
+
+   //#define PROFILE_VIEWER
+#ifdef PROFILE_VIEWER
+   wxStopWatch timeViewer;
+#endif
+
    // show the headers first
    ShowHeaders();
 
@@ -2332,6 +2338,11 @@ MessageView::Update()
    ProcessPart(mimepart);
 
    m_viewer->EndBody();
+
+#ifdef PROFILE_VIEWER
+   wxLogStatus(_T("Message shown in %ldms"), timeViewer.Time());
+#endif
+
 
    // if user selects the language from the menu, m_encodingUser is set
    wxFontEncoding encoding;
