@@ -257,6 +257,9 @@ public:
          MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
                                                  profile, server, login,
                                                  password);
+         if ( !mf )
+            return NULL;
+
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
          return asmf;
@@ -419,7 +422,7 @@ public:
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   static Ticket ListFolders(const String &host,
+   /* static */ Ticket ListFolders(const String &host,
                              FolderType protocol,
                              const String &mailbox = "",
                              const String &pattern = "*",

@@ -27,6 +27,9 @@
 #  include "Profile.h"
 #  include "guidef.h"
 #  include "strutil.h"
+
+#  include <wx/listbox.h>
+#  include <wx/statbox.h>
 #endif
 
 #include "MFolder.h"
@@ -35,9 +38,89 @@
 #include "MailFolder.h"
 #include "MailFolderCC.h"
 
+#include "gui/wxDialogLayout.h"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+class wxSubscriptionDialog : public wxManuallyLaidOutDialog,
+                             public MEventReceiver
+{
+public:
+   wxSubscriptionDialog(wxWindow *parent, const wxString& title);
+   virtual ~wxSubscriptionDialog();
+
+   // event processing function
+   virtual bool OnMEvent(MEventData& event);
+
+private:
+   // the GUI controls
+   wxListBox *m_listbox;
+
+   // MEventReceiver cookie for the event manager
+   void *m_regCookie;
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxSubscriptionDialog
+// ----------------------------------------------------------------------------
+
+wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
+                                           const wxString& title)
+                    : wxManuallyLaidOutDialog(parent, title, "SubscribeDialog")
+{
+   m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
+   ASSERT_MSG( m_regCookie, "can't register with event manager");
+
+   // create controls
+   wxLayoutConstraints *c;
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Subfolders"));
+
+   m_listbox = new wxListBox(this, -1);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_listbox->SetConstraints(c);
+
+   SetDefaultSize(6*hBtn, 4*wBtn);
+   Centre();
+}
+
+wxSubscriptionDialog::~wxSubscriptionDialog()
+{
+   MEventManager::Deregister(m_regCookie);
+}
+
+bool wxSubscriptionDialog::OnMEvent(MEventData& event)
+{
+   // we're only subscribed to the ASFolder events
+   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+          "unexpected event type" );
+
+   ASMailFolder::Result *result = ((MEventASFolderResultData &)event).GetResult();
+
+   // is this message really for us?
+   if ( result->GetUserData() != this )
+   {
+      // no: conitnue with other event handlers
+      return TRUE;
+   }
+
+   CHECK( result->GetOperation() == ASMailFolder::Op_ListFolders, FALSE,
+          "unexpected operation notification" );
+
+   m_listbox->Append(((ASMailFolder::ResultFolderExists *)result)->GetName());
+
+   // we don't want anyone else to receive this message - it was for us only
+   return FALSE;
+}
 
 // ----------------------------------------------------------------------------
 // public interface
@@ -48,9 +131,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    Profile_obj profile(folder->GetFullName());
    CHECK( profile, FALSE, "can't create profile" );
 
-   String name;
-   MailFolderCC::CanonicalizeMHPath(&name);
-   name += READ_CONFIG(profile, MP_FOLDER_PATH);
+   String name = READ_CONFIG(profile, MP_FOLDER_PATH);
    CHECK( !!name, FALSE, "empty folder path?" );
 
    while ( name.Last() == '/' )
@@ -60,10 +141,17 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       name.Truncate(name.Length() - 1);
    }
 
-   MailFolder *mfDummy = MailFolder::OpenFolder(MF_FILE, "");
-   ASMailFolder *asmf = ASMailFolder::Create(mfDummy);
+   int typeAndFlags = CombineFolderTypeAndFlags(folder->GetType(),
+                                                folder->GetFlags());
+   ASMailFolder *asmf = ASMailFolder::OpenFolder(typeAndFlags,
+                                                 name,
+                                                 profile);
 
-   UserData ud = NULL; // what should this be?
+   wxString title;
+   title.Printf(_("Subfolders of folder '%s'"), folder->GetFullName().c_str()); 
+   wxSubscriptionDialog dlg(parent, title);
+
+   UserData ud = &dlg;
    Ticket ticket = asmf->ListFolders
                          (
                           "",       // host
@@ -75,24 +163,9 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
                           ud
                          );
 
-   // how can I build this folderListing now?
-
-#if 0
-   size_t nEntries = folderListing->CountEntries();
-   fprintf(stderr, "Folder '%s' has %u subfolders\n",
-           folder->GetFullName().c_str(), nEntries);
-
-   FolderListing::iterator i;
-   for ( const FolderListingEntry *entry = folderListing->GetFirstEntry(i);
-         entry;
-         entry = folderListing->GetNextEntry(i) )
-   {
-      fprintf(stderr, "\tSubfolder: %s\n", entry->GetName().c_str());
-   }
-#endif // 0
-
-   mfDummy->DecRef();
    asmf->DecRef();
+
+   dlg.ShowModal();
 
    return FALSE;
 }

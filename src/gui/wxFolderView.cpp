@@ -108,7 +108,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
       if(hil)
       {
-         const HeaderInfo *hi =(*hil)[focused]; 
+         const HeaderInfo *hi =(*hil)[focused];
          focused_uid = hi->GetUId();
          if(nselected == 0 && hi)
             selections.Add(focused_uid);
@@ -134,7 +134,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       {
       case 'D':
          m_FolderView->GetTicketList()->Add(
-            m_FolderView->GetFolder()->DeleteMessages(&selections, m_FolderView)); 
+            m_FolderView->GetFolder()->DeleteMessages(&selections, m_FolderView));
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
@@ -215,7 +215,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    if(hil)
    {
-      const HeaderInfo *hi =(*hil)[focused]; 
+      const HeaderInfo *hi =(*hil)[focused];
       UIdType focused_uid = hi->GetUId();
       m_FolderView->PreviewMessage(focused_uid);
       hil->DecRef();
@@ -224,7 +224,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
-   
+
 #if 0
    //FIXME: is this needed? I thought OnSelected() should do it?
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
@@ -313,14 +313,14 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    // Create popup menu:
 #ifndef wxMENU_TEAROFF
    ///FIXME WXWIN-COMPATIBILITY
-   m_menu = new wxMenu(); 
+   m_menu = new wxMenu();
 #else
    int style = 0;
    if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
       style = wxMENU_TEAROFF;
-   m_menu = new wxMenu("", style); 
+   m_menu = new wxMenu("", style);
 #endif
-   AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END); 
+   AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END);
 
    Clear();
 }
@@ -337,7 +337,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    const HeaderInfo *hi = NULL;
    if(hil)
-   {   
+   {
       while((item = GetNextItem(item,
                                 wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
             != -1)
@@ -487,6 +487,10 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_MessagePreview->SetParentProfile(m_Profile);
       m_MessagePreview->Clear(); // again, to reflect profile changes
 
+      // read in our profile settigns
+      ReadProfileSettings(&m_settingsCurrent);
+      m_hasOldSettings = FALSE;
+
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_ASMailFolder->GetName();
 
@@ -529,6 +533,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_Parent = parent;
    m_MailFolder = NULL;
    m_ASMailFolder = NULL;
+   m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
    m_TicketList =  ASTicketList::Create();
    m_NumOfMessages = 0;
    m_Parent->GetClientSize(&x, &y);
@@ -548,9 +553,81 @@ wxFolderView::~wxFolderView()
 {
    wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
 
+   MEventManager::Deregister(m_regOptionsChange);
+
    m_TicketList->DecRef();
    m_InDeletion = true;
    SetFolder(NULL, FALSE);
+}
+
+void
+wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
+{
+#ifdef OS_WIN
+   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
+   // expansion characters under Windows - prevent this from happening
+   ProfileEnvVarSave noEnvVars(m_Profile);
+#endif // OS_WIN
+
+   settings->dateFormat = READ_CONFIG(m_Profile, MP_DATE_FMT);
+   settings->dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
+}
+
+void
+wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
+{
+   AllProfileSettings settingsNew;
+   ReadProfileSettings(&settingsNew);
+
+   if ( settingsNew == m_settingsCurrent )
+   {
+      // we don't care
+      return;
+   }
+
+   switch ( event.GetChangeKind() )
+   {
+      case MEventOptionsChangeData::Apply:
+         if ( !m_hasOldSettings )
+         {
+            // save the original values
+            m_settingsOld = m_settingsCurrent;
+         }
+         //else: don't clobber the original values if Apply is pressed for
+         //      the second (or more) time
+
+         m_settingsCurrent = settingsNew;
+
+         m_hasOldSettings = true;
+         break;
+
+      case MEventOptionsChangeData::Ok:
+         m_settingsCurrent = settingsNew;
+
+         m_hasOldSettings = false;
+         break;
+
+      case MEventOptionsChangeData::Cancel:
+         // restore the old values
+         if ( !m_hasOldSettings )
+         {
+            // don't update
+            return;
+         }
+
+         m_settingsCurrent = m_settingsOld;
+
+         m_hasOldSettings = FALSE;  // no more
+         break;
+
+      default:
+         FAIL_MSG("unknown options change event");
+   }
+
+   // need to repopulate the list ctrl because the date format changed
+   m_FolderCtrl->Clear();
+   m_NumOfMessages = 0;
+   Update();
 }
 
 void
@@ -563,9 +640,8 @@ wxFolderView::Update(HeaderInfoList *listing)
    String   line;
    UIdType nsize;
    unsigned day, month, year;
-   String dateFormat;
    int n;
-   String status, sender, subject, date, size;
+   String status, sender, subject, size;
    bool selected;
 
    if(m_UpdateSemaphore == true)
@@ -587,23 +663,8 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    wxBeginBusyCursor();// wxSafeYield();
 
-
-   bool   dateGMT;
-   
    n = listing->Count();
 
-   {
-#ifdef OS_WIN
-   // MP_DATE_FMT contains '%' which are being (mis)interpreted as env var
-   // expansion characters under Windows
-   ProfileEnvVarSave noEnvVars1(m_Profile),
-                     noEnvVars2(mApplication->GetProfile());
-#endif // OS_WIN
-
-   dateFormat = READ_APPCONFIG(MP_DATE_FMT);
-   dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
-   }
-   
    if(n < m_NumOfMessages)  // messages have been deleted, start over
    {
       m_FolderCtrl->Clear();
@@ -621,14 +682,15 @@ wxFolderView::Update(HeaderInfoList *listing)
       hi = (*listing)[i];
       // FIXME vars are not initialised here!
       nsize = day = month = year = 0;
-      date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
       selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
       m_FolderCtrl->SetEntry(i,
                              MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
                              hi->GetFrom(),
                              hi->GetSubject(),
-                             strutil_ftime(hi->GetDate(),dateFormat, dateGMT),
+                             strutil_ftime(hi->GetDate(),
+                                           m_settingsCurrent.dateFormat,
+                                           m_settingsCurrent.dateGMT),
                              strutil_ultoa(hi->GetSize()));
       m_FolderCtrl->Select(i,selected);
 /*FIXME!      if(i == focused)
@@ -823,7 +885,7 @@ void
 wxFolderView::OpenMessages(const wxArrayInt& selections)
 {
    String title;
-   
+
    int n = selections.Count();
    int i;
    for(i = 0; i < n; i++)
@@ -917,7 +979,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
    else // main frame splitter
    {
-      SetFolder(NULL, TRUE); 
+      SetFolder(NULL, TRUE);
    }
 }
 
@@ -940,14 +1002,14 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    {
       ASSERT(result->GetUserData() == this);
       m_TicketList->Remove(result->GetTicket());
-      
+
       switch(result->GetOperation())
       {
       case ASMailFolder::Op_SaveMessagesToFile:
          ASSERT(result->GetSequence());
          if( ((ASMailFolder::ResultInt *)result)->GetValue() )
             msg.Printf(_("Saved %lu messages."), (unsigned long)
-                       result->GetSequence()->Count()); 
+                       result->GetSequence()->Count());
          else
             msg.Printf(_("Saving messages failed."));
          wxLogStatus(GetFrame(m_Parent), msg);
@@ -956,14 +1018,14 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          ASSERT(result->GetSequence());
          if( ((ASMailFolder::ResultInt *)result)->GetValue() )
             msg.Printf(_("Copied %lu messages."), (unsigned long)
-                       result->GetSequence()->Count()); 
+                       result->GetSequence()->Count());
          else
             msg.Printf(_("Copying messages failed."));
          wxLogStatus(GetFrame(m_Parent), msg);
          if(result->GetTicket() == m_DeleteSavedMessagesTicket)
          {
             m_TicketList->Add(m_ASMailFolder->DeleteMessages(
-               result->GetSequence(),this)); 
+               result->GetSequence(),this));
          }
          break;
       // these cases don't have return values

@@ -1142,15 +1142,15 @@ wxMessageView::OnMEvent(MEventData& ev)
 
          case MEventOptionsChangeData::Cancel:
             // restore the old values
-            if ( m_hasOldValues )
-            {
-               m_ProfileValues = m_oldProfileValue;
-            }
-            else
+            if ( !m_hasOldValues )
             {
                // don't update
                return true;
             }
+
+            m_ProfileValues = m_oldProfileValue;
+
+            m_hasOldValues = FALSE;
             break;
 
          default:

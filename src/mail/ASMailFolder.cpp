@@ -76,7 +76,7 @@ public:
       {
          m_ASMailFolder = mf;
          if(mf) mf->IncRef();
-         m_MailFolder = mf->GetMailFolder();
+         m_MailFolder = mf ? mf->GetMailFolder() : NULL;
          m_UserData = ud;
       }
 
@@ -99,9 +99,9 @@ public:
 protected:
    void SendEvent(ASMailFolder::Result *result);
    inline void LockFolder(void)
-      { m_ASMailFolder->LockFolder(); };
+      { if ( m_ASMailFolder ) m_ASMailFolder->LockFolder(); };
    inline void UnLockFolder(void)
-      { m_ASMailFolder->UnLockFolder(); };
+      { if ( m_ASMailFolder ) m_ASMailFolder->UnLockFolder(); };
 
    static Ticket GetTicket(void)
       { return ms_Ticket++;}
@@ -763,7 +763,7 @@ public:
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   static Ticket ListFolders(const String &host,
+   /* static */ Ticket ListFolders(const String &host,
                              FolderType protocol,
                              const String &mailbox,
                              const String &pattern,
@@ -771,7 +771,7 @@ public:
                              const String &reference,
                              UserData ud)
    {
-      return (new MT_ListFolders(NULL, ud,
+      return (new MT_ListFolders(this, ud,
                                  host, protocol,
                                  mailbox,
                                  pattern,
@@ -961,8 +961,9 @@ ASMailFolder::ListFolders(const String &host,
                           const String &reference,
                           UserData ud)
 {
-   return ASMailFolderImpl::ListFolders(host, protocol, mailbox, pattern,
-                                        subscribed_only, reference,
-                                        ud);
+   return ((ASMailFolderImpl *)this)->ListFolders(host, protocol, mailbox,
+                                                  pattern,
+                                                  subscribed_only,
+                                                  reference, ud);
 }
 

@@ -27,8 +27,9 @@
 #  include "Profile.h"
 #  include "PathFinder.h"
 #  include "MApplication.h"
-#  include "Mdefaults.h"
 #endif
+
+#include "Mdefaults.h"
 
 #include "gui/wxIconManager.h"
 #include "MDialogs.h"

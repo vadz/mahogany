@@ -145,6 +145,45 @@ bool MailFolderCC::CanonicalizeMHPath(String *path)
          CClientInit();
       }
 
+      // before trying to use MH driver we must ensure that it has a valid
+      // MHPATH
+      static bool s_hasMHpath = FALSE; // MT-UNSAFE (hopefully this is always
+                                       // called from the main thread, but what
+                                       // if not?)
+      if ( !s_hasMHpath )
+      {
+         // normally, the MH path is read by MH cclient driver from the
+         // MHPROFIle file (~/.mh_profile under Unix), but we can't rely on
+         // this because if this file is not found, it results in an error and
+         // the MH driver is disabled - though it's perfectly ok for this file
+         // to be empty... So we can use cclient MH logic if this file exists -
+         // but not if it doesn't (and never under Windows)
+
+#ifdef OS_UNIX
+         String home = getenv("HOME");
+         String filenameMHProfile = home + "/.mh_profile";
+         FILE *fp = fopen(filenameMHProfile, "r");
+         if ( fp )
+         {
+            fclose(fp);
+         }
+         else
+#endif // OS_UNIX
+         {
+            // need to find MH path ourself
+#ifdef OS_UNIX
+            // the standard location under Unix
+            String pathMH = home + "/Mail";
+#else // !Unix
+            // use the user directory by default
+            String pathMH = READ_APPCONFIG(MP_USERDIR);
+#endif // Unix/!Unix
+
+            // const_cast is harmless
+            mail_parameters(NULL, SET_MHPATH, (char *)pathMH.c_str());
+         }
+      }
+
       // force cclient to init the MH driver because it may be not inited yet
       char tmp[MAILTMPLEN];
       if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
@@ -154,7 +193,10 @@ bool MailFolderCC::CanonicalizeMHPath(String *path)
          return FALSE;
       }
 
-      // retrieve the MH path
+      s_hasMHpath = TRUE;
+
+      // retrieve the MH path (notice that we don't always find it ourself -
+      // sometimes its found onyl by the call to mh_isvalid)
 
       // calling mail_parameters doesn't work because of a compiler bug: gcc
       // mangles mh_parameters function completely and it never returns
@@ -176,7 +218,8 @@ bool MailFolderCC::CanonicalizeMHPath(String *path)
       {
          if ( !!pathMH )
          {
-            if ( strncmp(name, pathMH, pathMH.length()) == 0 )
+            wxString pathFolder(name, pathMH.length());
+            if ( strutil_compare_filenames(name, pathMH) )
             {
                // skip MH path (+1 for the '/')
                name = name.c_str() + pathMH.length() + 1;
@@ -680,9 +723,22 @@ MailFolderCC::Open(void)
       SetDefaultObj();
 
       // create the mailbox if it doesn't exist yet
-      if( (GetType() == MF_FILE
-           || GetType() == MF_MH )&&
-          !wxFileExists(m_MailboxPath) )
+      bool exists = TRUE;
+      if ( GetType() == MF_FILE )
+      {
+         exists = wxFileExists(m_MailboxPath);
+      }
+      else if ( GetType() == MF_MH )
+      {
+         // the real path for MH mailboxes is not just the mailbox name
+         String path;
+         CanonicalizeMHPath(&path);
+         path += '/';
+         path += m_MailboxPath.c_str() + 4;   // strlen("#mh/")
+         exists = wxFileExists(path);
+      }
+
+      if ( !exists )
       {
          mail_create(NIL, (char *)m_MailboxPath.c_str());
       }

@@ -66,6 +66,7 @@ struct MenuItemInfo
    int idMenu;
    const char *label;
    const char *helpstring;
+   bool isCheckable;
 };
 
 struct TbarItemInfo
@@ -206,130 +207,130 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 static const MenuItemInfo g_aMenuItems[] =
 {
    // filler for WXMENU_LAYOUT_CLICK
-   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 
    // file
-   { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  },
-   { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      },
-   { WXMENU_FILE_POST,     gettext_noop("Post &News Article"),   gettext_noop("Write a news article and post it")      },
-   { WXMENU_FILE_COLLECT,  gettext_noop("Check &mail"), gettext_noop("Check all incoming folder for new mail and download it now") },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  },
-   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  },
+   { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  , FALSE },
+   { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      , FALSE },
+   { WXMENU_FILE_POST,     gettext_noop("Post &News Article"),   gettext_noop("Write a news article and post it")      , FALSE },
+   { WXMENU_FILE_COLLECT,  gettext_noop("Check &mail"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("P&rint Setup"),     gettext_noop("Configure printing")  , FALSE },
+   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  , FALSE },
 #ifdef USE_PS_PRINTING
    // extra postscript printing
-   { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  },
-// { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  },
+   { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  , FALSE },
+// { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  , FALSE },
 #endif
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               , FALSE },
 
 #ifdef USE_PYTHON
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_SCRIPT,   gettext_noop("Run &Script..."),    gettext_noop("Run a simple python script")},
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_SCRIPT,   gettext_noop("Run &Script..."),    gettext_noop("Run a simple python script"), FALSE },
 #endif // USE_PYTHON
 
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_EXIT,     gettext_noop("E&xit"),             gettext_noop("Quit the application")     },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_EXIT,     gettext_noop("E&xit"),             gettext_noop("Quit the application")     , FALSE },
 
    // normal edit
-   { WXMENU_EDIT_CUT,  gettext_noop("C&ut"), gettext_noop("Cut selection and copy it to clipboard")           },
-   { WXMENU_EDIT_COPY, gettext_noop("&Copy"), gettext_noop("Copy selection to clipboard")           },
-   { WXMENU_EDIT_PASTE,gettext_noop("&Paste"), gettext_noop("Paste from clipboard")           },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_PREF,     gettext_noop("Pre&ferences..."),   gettext_noop("Change options")           },
-   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           },
+   { WXMENU_EDIT_CUT,  gettext_noop("C&ut"), gettext_noop("Cut selection and copy it to clipboard")           , FALSE },
+   { WXMENU_EDIT_COPY, gettext_noop("&Copy"), gettext_noop("Copy selection to clipboard")           , FALSE },
+   { WXMENU_EDIT_PASTE,gettext_noop("&Paste"), gettext_noop("Paste from clipboard")           , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_EDIT_PREF,     gettext_noop("Pre&ferences..."),   gettext_noop("Change options")           , FALSE },
+   { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
    { WXMENU_EDIT_RESTORE_PREF,
-                           gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             },
+                           gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
 
    // msg
-   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    },
-   { WXMENU_MSG_PRINT,     gettext_noop("&Print"),            gettext_noop("Print this message")       },
-   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       },
+   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
+   { WXMENU_MSG_PRINT,     gettext_noop("&Print"),            gettext_noop("Print this message")       , FALSE },
+   { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
 #ifdef USE_PS_PRINTING
-   { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       },
-   { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       },
+   { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
+   { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
 #endif
-   { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    },
-   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    },
-   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    , FALSE },
+   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
+   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("&Save as File"),
-     gettext_noop("Export message to a file")   },
-   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder"),gettext_noop("Save message to another folder")   },
-   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   },
-   { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      },
-   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         },
-   { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_MSG_SELECTALL, gettext_noop("Select &all"),       gettext_noop("Select all messages")      },
-   { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all"),    gettext_noop("Unselect all messages")    },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &header"),    gettext_noop("Toggle display of message header") },
-   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") },
-   { WXMENU_MSG_FIND,  gettext_noop("F&ind..."), gettext_noop("Find text in message") },
+     gettext_noop("Export message to a file")   , FALSE },
+   { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder"),gettext_noop("Save message to another folder")   , FALSE },
+   { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   , FALSE },
+   { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
+   { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
+   { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_SELECTALL, gettext_noop("Select &all"),       gettext_noop("Select all messages")      , FALSE },
+   { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all"),    gettext_noop("Unselect all messages")    , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
+   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
+   { WXMENU_MSG_FIND,  gettext_noop("F&ind..."), gettext_noop("Find text in message") , FALSE },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE,
-                           gettext_noop("&Insert file..."),   gettext_noop("Insert a file")            },
-   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send"),             gettext_noop("Send the message now")     },
+                           gettext_noop("&Insert file..."),   gettext_noop("Insert a file")            , FALSE },
+   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send"),             gettext_noop("Send the message now")     , FALSE },
    { WXMENU_COMPOSE_SEND_KEEP_OPEN,  gettext_noop("Send and &keep"),
-     gettext_noop("Send the message now and keep the editor open")     },
-   { WXMENU_COMPOSE_PRINT, gettext_noop("&Print"),            gettext_noop("Print the message")        },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save message text to file")},
-   { WXMENU_COMPOSE_LOADTEXT,gettext_noop("In&sert text..."), gettext_noop("Insert text file")         },
-   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor"),gettext_noop("Invoke alternative editor")},
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header..."), gettext_noop("Add/edit header fields not shown on the screen")},
+     gettext_noop("Send the message now and keep the editor open")     , FALSE },
+   { WXMENU_COMPOSE_PRINT, gettext_noop("&Print"),            gettext_noop("Print the message")        , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save message text to file"), FALSE },
+   { WXMENU_COMPOSE_LOADTEXT,gettext_noop("In&sert text..."), gettext_noop("Insert text file")         , FALSE },
+   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor"),gettext_noop("Invoke alternative editor"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header..."), gettext_noop("Add/edit header fields not shown on the screen"), FALSE },
 
    // ADB book management
-   { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book")},
-   { WXMENU_ADBBOOK_OPEN,  gettext_noop("&Open..."),          gettext_noop("Open an address book file")},
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format")},
-   { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format")},
-   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book"), FALSE },
+   { WXMENU_ADBBOOK_OPEN,  gettext_noop("&Open..."),          gettext_noop("Open an address book file"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format"), FALSE },
+   { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 #ifdef DEBUG
-   { WXMENU_ADBBOOK_FLUSH, "&Flush",                           "Save changes to disk"                         },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_ADBBOOK_FLUSH, "&Flush",                           "Save changes to disk"                         , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 #endif // debug
-   { WXMENU_ADBBOOK_PROP,  gettext_noop("&Properties..."), gettext_noop("View properties of the current address book")            },
+   { WXMENU_ADBBOOK_PROP,  gettext_noop("&Properties..."), gettext_noop("View properties of the current address book")            , FALSE },
 
    // ADB edit
-   { WXMENU_ADBEDIT_NEW,   gettext_noop("&New entry..."),     gettext_noop("Create new entry/group")   },
-   { WXMENU_ADBEDIT_DELETE,gettext_noop("&Delete"),           gettext_noop("Delete the selected items")},
-   { WXMENU_ADBEDIT_RENAME,gettext_noop("&Rename..."),        gettext_noop("Rename the selected items")},
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_ADBEDIT_CUT,   gettext_noop("Cu&t"),              gettext_noop("Copy and delete selected items")                    },
-   { WXMENU_ADBEDIT_COPY,  gettext_noop("&Copy"),             gettext_noop("Copy selected items")      },
-   { WXMENU_ADBEDIT_PASTE, gettext_noop("&Paste"),            gettext_noop("Paste here")               },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_ADBEDIT_UNDO,  gettext_noop("&Undo changes"),     gettext_noop("Undo all changes to the entry being edited")       },
+   { WXMENU_ADBEDIT_NEW,   gettext_noop("&New entry..."),     gettext_noop("Create new entry/group")   , FALSE },
+   { WXMENU_ADBEDIT_DELETE,gettext_noop("&Delete"),           gettext_noop("Delete the selected items"), FALSE },
+   { WXMENU_ADBEDIT_RENAME,gettext_noop("&Rename..."),        gettext_noop("Rename the selected items"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_ADBEDIT_CUT,   gettext_noop("Cu&t"),              gettext_noop("Copy and delete selected items")                    , FALSE },
+   { WXMENU_ADBEDIT_COPY,  gettext_noop("&Copy"),             gettext_noop("Copy selected items")      , FALSE },
+   { WXMENU_ADBEDIT_PASTE, gettext_noop("&Paste"),            gettext_noop("Paste here")               , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_ADBEDIT_UNDO,  gettext_noop("&Undo changes"),     gettext_noop("Undo all changes to the entry being edited")       , FALSE },
 
    // ADB search
-   { WXMENU_ADBFIND_FIND,  gettext_noop("&Find..."),          gettext_noop("Find entry by name or contents")                 },
-   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next"),        gettext_noop("Go to the next match")     },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    },
+   { WXMENU_ADBFIND_FIND,  gettext_noop("&Find..."),          gettext_noop("Find entry by name or contents")                 , FALSE },
+   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next"),        gettext_noop("Go to the next match")     , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    , FALSE },
 
    // help
-   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  },
-   { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  },
-   { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_HELP_CONTEXT, gettext_noop("&Help"),    gettext_noop("Help on current context...")},
-   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system...")},
-   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword...")},
-   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"),      gettext_noop("Show Copyright.")}
+   { WXMENU_HELP_ABOUT,    gettext_noop("&About..."),         gettext_noop("Displays the program information and copyright")  , FALSE },
+   { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , FALSE },
+   { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_HELP_CONTEXT, gettext_noop("&Help"),    gettext_noop("Help on current context..."), FALSE },
+   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system..."), FALSE },
+   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
+   { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE }
 };
 
 // ============================================================================
@@ -339,14 +340,17 @@ static const MenuItemInfo g_aMenuItems[] =
 // ----------------------------------------------------------------------------
 // menu stuff
 // ----------------------------------------------------------------------------
+
 void AppendToMenu(wxMenu *menu, int n)
 {
-   if ( g_aMenuItems[n].idMenu == WXMENU_SEPARATOR )
+   if ( g_aMenuItems[n].idMenu == WXMENU_SEPARATOR ) {
       menu->AppendSeparator();
+   }
    else {
       menu->Append(g_aMenuItems[n].idMenu,
                    wxGetTranslation(g_aMenuItems[n].label),
-                   wxGetTranslation(g_aMenuItems[n].helpstring));
+                   wxGetTranslation(g_aMenuItems[n].helpstring),
+                   g_aMenuItems[n].isCheckable);
    }
 }
 
@@ -455,18 +459,18 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 
 extern void
 CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &caption)
-{                                                                       
+{
 #ifndef wxMENU_TEAROFF
    ///FIXME WXWIN-COMPATIBILITY
-   wxMenu *pMenu = new wxMenu(); 
+   wxMenu *pMenu = new wxMenu();
 #else
    int style = 0;
    if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
       style = wxMENU_TEAROFF;
-   wxMenu *pMenu = new wxMenu("", style); 
+   wxMenu *pMenu = new wxMenu("", style);
 #endif
-   AppendToMenu(pMenu, menu_begin+1, menu_end); 
-   menubar->Append(pMenu, caption);                                     
+   AppendToMenu(pMenu, menu_begin+1, menu_end);
+   menubar->Append(pMenu, caption);
 }
 
 

@@ -147,7 +147,16 @@ MailFolder::OpenFolder(int typeAndFlags,
          break;
 
       case MF_MH:
-         // don't change the path
+         {
+            // call it now just to initialize the MH driver
+            String pathMH;
+            if ( !MailFolderCC::CanonicalizeMHPath(&pathMH) )
+            {
+               profile->DecRef();
+
+               return NULL;
+            }
+         }
          break;
 
       case MF_POP:

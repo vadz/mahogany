@@ -375,7 +375,22 @@ wxLayoutObjectText::Debug(void)
 
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
 {
+   if ( !icon.Ok() )
+   {
+      FAIL_MSG("invalid icon");
+
+      m_Icon = NULL;
+
+      return;
+   }
+
+#ifdef __WXMSW__
+   // FIXME ugly, ugly, ugly - but the only way to avoid slicing
+   m_Icon = icon.GetHBITMAP() ? new wxBitmap(icon)
+                              : new wxBitmap(wxIcon((const wxIcon &)icon));
+#else // !MSW
    m_Icon = new wxBitmap(icon);
+#endif // MSW/!MSW
 }
 
 
@@ -995,11 +1010,14 @@ wxLayoutLine::DeleteLine(bool update, wxLayoutList *llist)
 
    MarkDirty();
 
+   // we can't use m_Next after "delete this", so we must save this pointer
+   // first
+   wxLayoutLine *next = m_Next;
    delete this;
 
    llist->DecNumLines();
 
-   return m_Next;
+   return next;
 }
 
 void
@@ -2268,10 +2286,12 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
       line = line->GetNextLine();
    }
    
+#ifndef WXLAYOUT_USE_CARET
    // can only be 0 if we are on the first line and have no next line
    wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
                                     m_CursorLine->GetNextLine() == NULL &&
                                     m_CursorLine == m_FirstLine));
+#endif // WXLAYOUT_USE_CARET
    AddCursorPosToUpdateRect();
 }
 

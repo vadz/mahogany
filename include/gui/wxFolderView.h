@@ -62,7 +62,7 @@ public:
        @param folder the folder to display or NULL
    */
    void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
-   
+
    /** Open folder from profile and display.
        @param profilename the name of the folder profile
        @return pointer to the folder or NULL
@@ -124,6 +124,19 @@ public:
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
 
+   /// event processing
+   virtual bool OnMEvent(MEventData& event)
+   {
+      if ( event.GetId() == MEventId_OptionsChange )
+      {
+         OnOptionsChange((MEventOptionsChangeData &)event);
+
+         return TRUE;
+      }
+
+      return FolderView::OnMEvent(event);
+   }
+
    /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
@@ -135,9 +148,9 @@ public:
    /// for use by the listctrl:
    class ASTicketList *GetTicketList(void) const { return
                                                       m_TicketList; }
-   
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
+
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -184,6 +197,32 @@ private:
    Ticket m_DeleteSavedMessagesTicket;
    /// do we have focus-follow enabled?
    bool m_FocusFollowMode;
+
+   /// the data we store in the profile
+   struct AllProfileSettings
+   {
+      // default copy ctor is ok for now, add one if needed later!
+
+      bool operator==(const AllProfileSettings& other) const
+      {
+         return dateFormat == other.dateFormat && dateGMT == other.dateGMT;
+      }
+
+      String dateFormat;      // the strftime(3) format for date
+      bool dateGMT;           // TRUE => display time/date in GMT
+   } m_settingsCurrent, m_settingsOld;
+
+   /// if true, m_settingsOld is valid
+   bool m_hasOldSettings;
+
+   /// read the values from the profile into AllProfileSettings structure
+   void ReadProfileSettings(AllProfileSettings *settings);
+
+private:
+   void OnOptionsChange(MEventOptionsChangeData& event);
+
+   // MEventManager reg info
+   void *m_regOptionsChange;
 };
 
 
@@ -217,7 +256,7 @@ private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
    wxFolderViewFrame(String const &name, wxMFrame *parent);
    wxFolderView *m_FolderView;
-   
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -282,8 +321,6 @@ public:
       }
 #endif // wxGTK
 
-   DECLARE_EVENT_TABLE()
-
 protected:
    long m_Style;
    long m_NextIndex;
@@ -301,6 +338,8 @@ protected:
    bool m_Initialised;
    /// the popup menu
    wxMenu *m_menu;
+
+   DECLARE_EVENT_TABLE()
 };
 
 #endif // WXFOLDERVIEW_H
