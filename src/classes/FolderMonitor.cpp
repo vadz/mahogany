@@ -592,6 +592,7 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
 
       return false;
    }
+   MEventManager::DispatchPending();
 
    return true;
 }
