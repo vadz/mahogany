@@ -270,7 +270,7 @@ bool wxMessageSearchDialog::TransferDataToWindow()
    m_Arg = READ_CONFIG_TEXT(GetProfile(), MP_MSGS_SEARCH_ARG);
    m_textWhat->SetValue(m_Arg);
 
-   m_choiceWhere->SetFocus();
+   m_textWhat->SetFocus();
 
    return TRUE;
 }
