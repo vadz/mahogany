@@ -45,6 +45,11 @@ $Id$
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
 
 1	KB	copyright display accept/cancel dialog at fist startup
+1	KB	SendMessageCC should not use profile but get settings
+		told, so sending from queue can use original settings
+		from folder - at least don't use profile at sending
+		time, but before
+
 
 	KB	add python hook for filters
 

@@ -196,7 +196,8 @@ MessageCC::Send(Protocol protocol)
       // end of this line
       name = headerLine.BeforeFirst(':');
       value = headerLine.AfterFirst(':');
-      sendMsg.AddHeaderEntry(name, value);
+      if(name != "Date" && name != "From")
+         sendMsg.AddHeaderEntry(name, value);
       headerLine = "";
    }while(*cptr && *cptr != '\012');
    
