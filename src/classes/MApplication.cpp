@@ -766,10 +766,14 @@ MAppBase::OnMEvent(MEventData& event)
             GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
       }
 #endif
-      // re-generate the mailcollector object:
-      m_MailCollector->DecRef();;
+     // re-generate the mailcollector object:
+     m_MailCollector->RequestReInit();
+#if 0
+     m_MailCollector->DecRef();;
       m_MailCollector = MailCollector::Create();
       m_MailCollector->Collect(); // empty all at beginning
+#endif
+      
    }
    else if (event.GetId() == MEventId_FolderStatus)
    {

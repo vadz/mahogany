@@ -80,7 +80,8 @@ private:
 class MailCollectorImpl : public MailCollector
 {
 public:
-   MailCollectorImpl();
+   MailCollectorImpl()
+      { InternalCreate(); }
    /// Returns true if the mailfolder mf is an incoming folder.
    virtual bool IsIncoming(MailFolder *mf);
    /** Collect all mail from folder mf.
@@ -113,13 +114,33 @@ public:
    */
    virtual bool Lock(bool lock = true)
       { bool rc = m_IsLocked; m_IsLocked =lock; return rc; }
+   /** Ask the MailCollector to re-initialise on next collection.
+    */
+   virtual void RequestReInit(void)
+      {
+         m_ReInit = true;
+      }
 protected:
    /// Collect mail from this one folder.
    bool CollectOneFolder(MailFolder *mf);
-   ~MailCollectorImpl();
+   ~MailCollectorImpl()
+      { InternalDestroy(); }
    /// re-opens any closed folders, depending on network status
    void UpdateFolderList(void);
+   /// Re-initialise the MailCollector if needed
+   void ReCreate(void)
+      {
+         MOcheck();
+         if(m_ReInit) // re-init requested
+         {
+            InternalDestroy();
+            InternalCreate();
+            MOcheck();
+         }
+      }
 private:
+   void InternalCreate(void);
+   void InternalDestroy(void);
    /// a list of folder names and mailfolder pointers
    class MailCollectorFolderList *m_list;
    /// the folder to save new mail to
@@ -134,6 +155,8 @@ private:
    unsigned long  m_Count;
    /// we react to events
    MCEventReceiver *m_EventReceiver;
+   /// if this is set, we want to be re-initialised
+   bool m_ReInit;
 };
 
 /* static */
@@ -181,9 +204,10 @@ private:
 };
 
 
-
-MailCollectorImpl::MailCollectorImpl()
+void
+MailCollectorImpl::InternalCreate(void)
 {
+   MOcheck();
    m_IsLocked = false;
    m_list = new MailCollectorFolderList;
    MAppFolderTraversal t (m_list);
@@ -193,9 +217,11 @@ MailCollectorImpl::MailCollectorImpl()
    m_NewMailFolder = NULL;
    SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
    m_EventReceiver = new MCEventReceiver(this);
+   m_ReInit = FALSE;
 }
 
-MailCollectorImpl::~MailCollectorImpl()
+void
+MailCollectorImpl::InternalDestroy(void)
 {
    MOcheck();
    delete m_EventReceiver;
@@ -214,6 +240,7 @@ MailCollectorImpl::~MailCollectorImpl()
 bool
 MailCollectorImpl::IsIncoming(MailFolder *mf)
 {
+   ReCreate();
    MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
@@ -225,6 +252,8 @@ MailCollectorImpl::IsIncoming(MailFolder *mf)
 bool
 MailCollectorImpl::Collect(MailFolder *mf)
 {
+   ReCreate();
+
    MOcheck();
    m_Message = "";
    m_Count = 0;
@@ -264,6 +293,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
 bool
 MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 {
+   ReCreate();
    MOcheck();
    ASSERT(mf);
    bool rc = true;
@@ -345,6 +375,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 void
 MailCollectorImpl::SetNewMailFolder(const String &name)
 {
+   ReCreate();
    MOcheck();
    if(m_NewMailFolder)
    {
@@ -359,6 +390,7 @@ MailCollectorImpl::SetNewMailFolder(const String &name)
 bool
 MailCollectorImpl::AddIncomingFolder(const String &name)
 {
+   ReCreate();
    MOcheck();
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,name);
    if(mf == NULL)
@@ -373,6 +405,7 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
 bool
 MailCollectorImpl::RemoveIncomingFolder(const String &name)
 {
+   ReCreate();
    MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
@@ -397,6 +430,7 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
 void
 MailCollectorImpl::UpdateFolderList(void)
 {
+   ReCreate();
    MOcheck();
 
    MailCollectorFolderList::iterator i;

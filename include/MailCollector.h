@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailCollector.cpp                                                *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -54,6 +54,9 @@ public:
        @return the old state
    */
    virtual bool Lock(bool lock = true) = 0;
+   /** Ask the MailCollector to re-initialise on next collection.
+    */
+   virtual void RequestReInit(void) = 0;
 };
 
 #endif
