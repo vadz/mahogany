@@ -140,6 +140,7 @@ extern const MOption MP_SMTPHOST_LOGIN;
 extern const MOption MP_SMTPHOST_PASSWORD;
 extern const MOption MP_SMTPHOST_USE_SSL;
 extern const MOption MP_SMTPHOST_USE_SSL_UNSIGNED;
+extern const MOption MP_SMTP_USE_8BIT;
 
 #ifdef OS_UNIX
 extern const MOption MP_SENDMAILCMD;
@@ -634,6 +635,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SMTPHOST_USE_SSL_NAME         "MailHostSSL"
 /// check ssl-certs for SMTP connections?
 #define   MP_SMTPHOST_USE_SSL_UNSIGNED_NAME   "MailHostSSLUnsigned"
+/// use ESMTP 8BITMIME extension if available
+#define   MP_SMTP_USE_8BIT_NAME         "Mail8Bit"
 /// sendmail command
 #define MP_SENDMAILCMD_NAME "SendmailCmd"
 /// use sendmail?
@@ -1368,6 +1371,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SMTPHOST_USE_SSL_DEFVAL   0l
 /// check ssl-certs for SMTP connections?
 #define   MP_SMTPHOST_USE_SSL_UNSIGNED_DEFVAL   0l
+/// use ESMTP 8BITMIME extension if available
+#define   MP_SMTP_USE_8BIT_DEFVAL 1l
 /// sendmail command  FIXME - should be detected by configure
 #ifdef OS_LINUX
 #  define MP_SENDMAILCMD_DEFVAL "/usr/sbin/sendmail -t"

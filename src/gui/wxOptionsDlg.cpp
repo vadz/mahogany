@@ -145,6 +145,10 @@ enum ConfigFields
 #endif
    ConfigField_MailServer,
    ConfigField_NewsServer,
+
+   ConfigField_8BitHelp,
+   ConfigField_8Bit,
+
    ConfigField_MailServerLoginHelp,
    ConfigField_MailServerLogin,
    ConfigField_MailServerPassword,
@@ -242,6 +246,10 @@ enum ConfigFields
    ConfigField_ComposeViewFontSize,
    ConfigField_ComposeViewFGColour,
    ConfigField_ComposeViewBGColour,
+
+   ConfigField_ComposePreviewHelp,
+   ConfigField_ComposePreview,
+   ConfigField_ComposeConfirm,
 
    ConfigField_ComposeHeaders,
    ConfigField_ComposeTemplates,
@@ -796,8 +804,19 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    -1
 #endif
    },
-   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
-   },
+   { gettext_noop("NNTP (&news) server"),          Field_Text,    -1, },
+
+   { gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
+                  "Mahogany may send 8 bit data without encoding it. If\n"
+                  "the server doesn't support it, the data will be encoded\n"
+                  "properly, so there is normally no risk in setting this "
+                  "option."),                      Field_Message |
+                                                   Field_Advanced,
+                                                  -ConfigField_UseSendmail },
+   { gettext_noop("Send &8 bit data"),             Field_Bool |
+                                                   Field_Advanced,
+                                                  -ConfigField_UseSendmail },
+
    { gettext_noop(
       "Some SMTP or NNTP servers require a user Id or login.\n"
       "You might need to enter the e-mail address provided by\n"
@@ -819,12 +838,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
-                  "mail or news. Tick the following boxes to activate this.")
-     , Field_Message, -1 },
+                  "mail or news. Tick the following boxes to activate this.\n"
+                  "You may also have to tell Mahogany to accept unsigned (or\n"
+                  "self-signed) certificates if your organization uses them."),
+                                                   Field_Message, -1 },
    { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
-   { gettext_noop("Accept unsigned (self-signed) certificates"), Field_Bool, ConfigField_SmtpServerSSL,     },
+   { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool, ConfigField_SmtpServerSSL,     },
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
-   { gettext_noop("Accept unsigned (self-signed) certificates"), Field_Bool, ConfigField_NntpServerSSL,     },
+   { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },
 #endif // USE_SSL
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
@@ -1001,6 +1022,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Font si&ze"),                   Field_Number | Field_Global,  -1},
    { gettext_noop("Foreground c&olour"),           Field_Color | Field_Global,   -1},
    { gettext_noop("Back&ground colour"),           Field_Color | Field_Global,   -1},
+
+   { gettext_noop("The settings below allow you to have a last look at the\n"
+                  "message before sending it and/or change your mind about\n"
+                  "sending it even after pressing the \"Send\" button."),
+                                                   Field_Message |
+                                                   Field_Advanced, -1 },
+   { gettext_noop("P&review message before sending"), Field_Bool |
+                                                   Field_Advanced, -1 },
+   { gettext_noop("&Confirm sending mail"),        Field_Bool |
+                                                   Field_Advanced,
+                                                  -ConfigField_ComposeConfirm },
 
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
@@ -1378,6 +1410,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_SENDMAIL
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
+
+   CONFIG_NONE(), // 8 bit help
+   CONFIG_ENTRY(MP_SMTP_USE_8BIT),
+
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_LOGIN),
    CONFIG_ENTRY(MP_SMTPHOST_PASSWORD),
@@ -1476,6 +1512,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
+
+   CONFIG_NONE(), // preview help
+   CONFIG_ENTRY(MP_PREVIEW_SEND),
+   CONFIG_ENTRY(MP_CONFIRM_SEND),
+
    CONFIG_NONE(),
    CONFIG_NONE(),
 

@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+04.12.01 VZ: added an option to send 8 bit data directly
 23.11.01 VZ: added the viewer bar to quickly change the current viewer
 19.11.01 VZ: added support for playing sounds on new mail
 17.11.01 VZ: SSL support for Win32 version

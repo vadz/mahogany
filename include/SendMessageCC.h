@@ -148,10 +148,23 @@ protected:
    MessageHeadersList::iterator FindHeaderEntry(const String& name) const;
 
 private:
+   /** @name Description of the message being sent */
+   //@{
+
+   /// the envelope
    ENVELOPE *m_Envelope;
+
+   /// the body
    BODY     *m_Body;
+
+   /// the next and last body parts
    PART     *m_NextPart,
             *m_LastPart;
+
+   //@}
+
+   /// the profile containing our settings
+   Profile *m_profile;
 
    /// server name to use
    String m_ServerHost;

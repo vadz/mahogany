@@ -86,6 +86,7 @@ extern const MOption MP_CHARSET;
 extern const MOption MP_COMPOSE_USE_XFACE;
 extern const MOption MP_COMPOSE_XFACE_FILE;
 extern const MOption MP_CONFIRM_SEND;
+extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_GUESS_SENDER;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_NNTPHOST;
@@ -98,6 +99,7 @@ extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_PREVIEW_SEND;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_SENDER;
+extern const MOption MP_SMTP_USE_8BIT;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_SMTPHOST_LOGIN;
 extern const MOption MP_SMTPHOST_PASSWORD;
@@ -117,8 +119,8 @@ extern const MOption MP_SENDMAILCMD;
 
 // the encodings defined by RFC 2047
 //
-// NB: don't change the values of the enum elements, EncodeHeaderString() relies
-//     on them being what they are!
+// NB: don't change the values of the enum elements, EncodeHeaderString()
+//     relies on them being what they are!
 enum MimeEncoding
 {
    MimeEncoding_Unknown,
@@ -192,10 +194,10 @@ SendMessage::~SendMessage()
 {
 }
 
-SendMessageCC::SendMessageCC(Profile *iprof,
+SendMessageCC::SendMessageCC(Profile *prof,
                              Protocol protocol)
 {
-   Create(protocol, iprof);
+   Create(protocol, prof);
 }
 
 // ----------------------------------------------------------------------------
@@ -222,8 +224,16 @@ SendMessageCC::Create(Protocol protocol,
    m_NextPart = m_Body->nested.part;
    m_LastPart = m_NextPart;
 
-   CHECK_RET(prof,"SendMessageCC::Create() requires profile");
+   if ( !prof )
+   {
+      FAIL_MSG( "SendMessageCC::Create() requires profile" );
 
+      prof = mApplication->GetProfile();
+   }
+
+   m_profile = prof;
+   m_profile->IncRef();
+   
    // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG_TEXT(prof, MP_HOSTNAME);
 
@@ -322,6 +332,8 @@ SendMessageCC::~SendMessageCC()
       delete [] m_headerNames;
       delete [] m_headerValues;
    }
+
+   m_profile->DecRef();
 }
 
 // ----------------------------------------------------------------------------
@@ -970,8 +982,21 @@ SendMessageCC::AddPart(MimeType::Primary type,
                   // fall through
 
                case MimeEncoding_Base64:
-                  // automatically translated to Base64 by c-client
-                  bdy->encoding = ENCBINARY;
+                  if ( m_Protocol == Prot_SMTP &&
+                        READ_CONFIG_BOOL(m_profile, MP_SMTP_USE_8BIT) )
+                  {
+                     // c-client will encode it as QP if the SMTP server
+                     // doesn't support 8BITMIME extension and will send as is
+                     // otherwise
+                     bdy->encoding = ENC8BIT;
+                  }
+                  else // we send 7 bits always
+                  {
+                     // ENCBINARY is automatically translated to Base64 by
+                     // c-client so use it instead of ENC8BIT (which would be
+                     // encoded using QP) as it is more efficient
+                     bdy->encoding = ENCBINARY;
+                  }
             }
          }
          break;
@@ -1202,7 +1227,7 @@ SendMessageCC::Send(void)
    // preview message being sent if asked for it
    String msgText;
    bool confirmSend;
-   if ( READ_APPCONFIG(MP_PREVIEW_SEND) )
+   if ( READ_CONFIG(m_profile, MP_PREVIEW_SEND) )
    {
       WriteToString(msgText);
       MDialog_ShowText(NULL, "Outgoing message text", msgText, "SendPreview");
@@ -1212,7 +1237,7 @@ SendMessageCC::Send(void)
    }
    else
    {
-      confirmSend = READ_APPCONFIG_BOOL(MP_CONFIRM_SEND);
+      confirmSend = READ_CONFIG_BOOL(m_profile, MP_CONFIRM_SEND);
    }
 
    if ( confirmSend )
@@ -1225,7 +1250,8 @@ SendMessageCC::Send(void)
       }
    }
 
-   bool success = true;
+   int options = READ_CONFIG(m_profile, MP_DEBUG_CCLIENT) ? OP_DEBUG : 0;
+
    switch ( m_Protocol )
    {
       case Prot_SMTP:
@@ -1241,11 +1267,16 @@ SendMessageCC::Send(void)
                service << "/novalidate-cert";
          }
 #endif // USE_SSL
+         if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
+         {
+            options |= SOP_8BITMIME;
+         }
+
          stream = smtp_open_full(NIL,
                                  (char **)hostlist,
                                  (char *)service.c_str(),
                                  SMTPTCPPORT,
-                                 OP_DEBUG);
+                                 options);
          break;
 
       case Prot_NNTP:
@@ -1266,7 +1297,7 @@ SendMessageCC::Send(void)
                                  (char **)hostlist,
                                  (char *)service.c_str(),
                                  NNTPTCPPORT,
-                                 OP_DEBUG);
+                                 options);
          break;
 
 #ifdef OS_UNIX
@@ -1287,6 +1318,7 @@ SendMessageCC::Send(void)
             const char *filename = tmpnam(NULL);
 #endif
 
+            bool success;
             if ( filename )
             {
                wxFile out;
@@ -1315,14 +1347,26 @@ SendMessageCC::Send(void)
                   }
                }
             }
-            if(success)
+            else
+            {
+               ERRORMESSAGE((_("Failed to get a temporary file name")));
+
+               success = false;
+            }
+            
+            if ( success )
+            {
                MDialog_Message(_("Message sent."),
                                NULL, // parent window
                                MDIALOG_MSGTITLE,
                                "MailSentMessage");
+            }
             else
+            {
                ERRORMESSAGE((_("Failed to send message via '%s'"),
                              m_SendmailCmd.c_str()));
+            }
+
             return success;
          }
 #endif // OS_UNIX
@@ -1333,11 +1377,12 @@ SendMessageCC::Send(void)
             FAIL_MSG("illegal protocol");
    }
 
+   bool success;
    if ( stream )
    {
       Rfc822OutputRedirector redirect(false /* no bcc */, this);
 
-      switch(m_Protocol)
+      switch ( m_Protocol )
       {
          case Prot_SMTP:
             success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
@@ -1355,6 +1400,7 @@ SendMessageCC::Send(void)
          case Prot_Illegal:
          default:
             FAIL_MSG("illegal protocol");
+            success = false;
       }
 
       if ( success )
