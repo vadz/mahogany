@@ -206,8 +206,8 @@ class HeaderInfo:
     def GetSize(*args):
         val = apply(MailFolderc.HeaderInfo_GetSize,args)
         return val
-    def SizeOf(*args):
-        val = apply(MailFolderc.HeaderInfo_SizeOf,args)
+    def GetLines(*args):
+        val = apply(MailFolderc.HeaderInfo_GetLines,args)
         return val
     def GetIndentation(*args):
         val = apply(MailFolderc.HeaderInfo_GetIndentation,args)
