@@ -781,6 +781,11 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
                    const wxPoint& pos, const wxSize& size)
 {
    m_tree = new wxFolderTreeImpl(this, parent, id, pos, size);
+
+   // preselect the home folder: this is probably better then returning the
+   // selection to the last selected item although we could still do this if
+   // there is no home folder...
+   m_tree->GoToHomeFolderIfAny();
 }
 
 wxFolderTree::~wxFolderTree()
@@ -1812,11 +1817,6 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
     {
         FAIL_MSG( _T("Failed to register folder tree with event manager") );
     }
-
-   // preselect the home folder: this is probably better then returning the
-   // selection to the last selected item although we could still do this if
-   // there is no home folder...
-   GoToHomeFolderIfAny();
 }
 
 void wxFolderTreeImpl::UpdateColours()
