@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+22.05.00 VZ: template dialog allows to choose any kind of templates
 19.05.00 VZ: vCards can also be exported
 17.05.00 VZ: added possibility to attach vCards to outgoing messages
              added vCard import module for the address book editor
@@ -112,4 +113,4 @@ Initial public release.
 
 $Id$
 
-vi: set si ts=8 sw=8 et tw=80:
+vi: set nocin si ts=8 sw=8 et tw=80:
