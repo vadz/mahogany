@@ -2844,6 +2844,8 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 {
+   GetLogCircle().Add(str);
+
    if ( str.StartsWith("SELECT failed") )
    {
       // send this to the debug window anyhow, but don't show it to the user
@@ -2854,7 +2856,6 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
       return;
    }
 
-   GetLogCircle().Add(str);
    String  msg;
    if(mf)
       msg.Printf(_("Folder '%s' : "), mf->GetName().c_str());
@@ -2874,7 +2875,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 
       case BYE:
       case WARN:
-         loglevel = wxLOG_Warning;
+         loglevel = wxLOG_Status; // do not WARN user, it's annoying
          break;
 
       default:
