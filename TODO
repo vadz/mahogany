@@ -27,8 +27,12 @@ $Id$
 - cannot select only message in a folder or first message without
   chosing a different one first
 - add references (and In-Reply-To: ?) headers to message replies
+  wxComposeView: if replying, only mark message as answered if reply
+  got sent
+
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
-  required for imap  --> drop the dialog?
+  required for imap  --> drop the dialog!
+
 - folderview listctrl has extra Subject column behind Size field ???
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
@@ -53,7 +57,6 @@ $Id$
 - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
-
  - wxLayout: UNDERGOING REWRITE
  
 - save and restore printer settings in profile
@@ -84,6 +87,8 @@ $Id$
    folders/groups, subscribed folders/groups and to subscribe to them
      --> mainly a GUI issue
 
+ - toggle readonly status of mailboxes?
+
  - OptionsPanels:
    -add a help button which calls a help id depending on which page we're on
    - confirm exit button does have no effect and should be Yes No Ask
@@ -103,9 +108,8 @@ $Id$
   - typing keys while M starts up can cause segfault (startup-splash
     event handling?)
 
+
 - ADB:
-  - entry names containing "+" will get created and garbled/lost on
-    re-load as they are illegal characters in wxConfig entry names
   - ADB: does not use substring??? (Joen_Doe doe no expansion for
     "doe" or "Doe")
   - ADB lookups take to long, delay in switching between messages, add a 
@@ -114,9 +118,6 @@ $Id$
     and prefix/title. 
   + for names without entries, use the same method for name generation 
     as ProvBBDB for consistency
-  + config entry names should allow  ',' (needed for mail names which
-    might contain it, just received one from "john doe, archeology"),
-    the same for apostrophes  
   + add "add current address to ADB" to compose view
   + should be updated when new entries are created (can't be deleted from
     elsewhere for now...), add an event for this
@@ -460,6 +461,11 @@ classes in the hierarchy.
    position (looks better and it becomes easier to spot, for example, all
    unread messages)
     KB: done that.
+ - entry names containing "+" will get created and garbled/lost on
+   re-load as they are illegal characters in wxConfig entry names
+ + config entry names should allow  ',' (needed for mail names which
+   might contain it, just received one from "john doe, archeology"),
+   the same for apostrophes  
 
 
  vi: set si tw=80:

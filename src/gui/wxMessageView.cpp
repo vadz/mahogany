@@ -1095,8 +1095,8 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    if(mailMessage) mailMessage->DecRef();
    mailMessage = folder->GetMessage(num);
    m_seqno = num;
-   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, false);
 
+   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )

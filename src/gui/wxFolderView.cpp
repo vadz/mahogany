@@ -139,13 +139,13 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          // wxListCtrl selects this one.
          if(!event.ShiftDown())
          {
-            long idx = -1;
+            long idx;
             while((idx = GetNextItem(idx, wxLIST_NEXT_ALL,
                                      wxLIST_STATE_SELECTED)) != -1)
             {
                if(idx != focused)  // allow us to toggle the focused item
                   SetItemState(idx,0,wxLIST_STATE_SELECTED);
-               idx++;
+                 //FIXME this should be wrong  idx++;
             }
          }
          event.Skip();

@@ -1,6 +1,14 @@
 -*- text -*-
 $Id$
 
+
+This file documents bugs as reported. If you report a bug and receive
+a bug ID from us, it should show up here. For a more up to date list
+of things we are working on, see the TODO file which is used by the
+developers to take notes about bugs or features to change/implement on 
+a daily basis.
+
+
 *****************************************************************************
 ** List of known and reported bugs in M with bug-ID                        **
 ** ID ***********************************************************************
@@ -12,7 +20,6 @@ $Id$
       VZ when 2 mail clients are running simultaneously and the message is deleted
          from the spool M crashes with meaningless backtrace.
 0010  KB Using a global /etc/M.conf file leads to lots of strange results.
-0014  KB Sometimes program doesn't react to Exit button/menu. 
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
@@ -21,6 +28,7 @@ $Id$
 0005  KB Profile readEntry() needs interface extension to allow a boolean success
          value, remove hacks like 17 or "illegal value"!
          --> rewrite in progress
+0014  KB Sometimes program doesn't react to Exit button/menu. 
 
 *****************************************************************************
 ** Fixed   (only move entries here when tested)                            **
