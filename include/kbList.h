@@ -240,7 +240,7 @@ protected:
    /** Deletes the actual content if ownsflag is set.
        param iterator i
    */
-   inline void deleteContent(iterator i)
+   inline void deleteContent(iterator & /*unused i*/)
       { if(ownsEntries) { ASSERT(0); } /* delete *i; */ }
 
 
@@ -320,7 +320,7 @@ public: \
       ownsEntries = false; \
    } \
 protected: \
-   inline void deleteContent(iterator i) \
+   inline void deleteContent(iterator & i) \
       { if(ownsEntries) delete *i; } \
 }
 
