@@ -2707,7 +2707,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   size_t count = indicesDeleted.GetCount();
                   for ( size_t n = count; n > 0; n-- )
                   {
-                     msgs.RemoveAt(n - 1);
+                     msgs.RemoveAt(indicesDeleted[n - 1]);
                   }
                }
             }
