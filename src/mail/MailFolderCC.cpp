@@ -158,6 +158,7 @@ extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
 extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_MSGS_SERVER_THREAD;
 extern const MOption MP_MSGS_SERVER_THREAD_REF_ONLY;
+extern const MOption MP_NEWMAIL_UNSEEN;
 extern const MOption MP_NEWS_SPOOL_DIR;
 extern const MOption MP_POP_NO_AUTH;
 extern const MOption MP_RSH_PATH;
@@ -4547,9 +4548,17 @@ void MailFolderCC::OnNewMail()
 
       // only find the new new messages, i.e. the ones which we hadn't reported
       // yet by searching only the messages after m_uidLastNew
+      //
+      // explanation of MP_NEWMAIL_UNSEEN option: normally the recent messages
+      // in the folder should be also unread (this is what is called "new", in
+      // fact) but sometimes it may be desirable to process all messages, even
+      // already read (this allows to apply filters by simply moving the
+      // messages to this folder, for example)
       UIdArray *uidsNew = SearchByFlag
                           (
-                           MSG_STAT_RECENT,  // not necessarily unread
+                           READ_CONFIG(m_Profile, MP_NEWMAIL_UNSEEN)
+                              ? MSG_STAT_NEW
+                              : MSG_STAT_RECENT,
                            SEARCH_SET | SEARCH_UNDELETED | SEARCH_UID,
                            m_uidLastNew == UID_ILLEGAL ? 0 : m_uidLastNew
                           );
