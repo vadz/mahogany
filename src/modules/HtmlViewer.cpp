@@ -34,11 +34,15 @@
 #include "MessageView.h"
 #include "MessageViewer.h"
 
+#include <wx/dynarray.h>
+
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
 #include <wx/wxhtml.h>
 
 class HtmlViewerWindow;
+
+WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -244,10 +248,20 @@ class HtmlViewerWindow : public wxHtmlWindow
 {
 public:
    HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent);
+   virtual ~HtmlViewerWindow();
+
+   // store the clickable info for this URL (we take ownership of it)
+   void StoreClickable(ClickableInfo *ci, const String& url);
 
    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
 
 private:
+   // get the clickable info previousy stored by StoreClickable()
+   ClickableInfo *GetClickable(const String& url) const;
+
+   wxSortedArrayString m_urls;
+   ArrayClickInfo m_clickables;
+
    HtmlViewer *m_viewer;
 };
 
@@ -290,12 +304,37 @@ HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
    m_viewer = viewer;
 }
 
+HtmlViewerWindow::~HtmlViewerWindow()
+{
+   WX_CLEAR_ARRAY(m_clickables);
+}
+
+void HtmlViewerWindow::StoreClickable(ClickableInfo *ci, const String& url)
+{
+   m_clickables.Insert(ci, m_urls.Add(url));
+}
+
+ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
+{
+   int index = m_urls.Index(url);
+
+   return index == wxNOT_FOUND ? NULL : m_clickables[(size_t)index];
+}
+
 void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
-   // TODO: where should we store the associated ClickableInfo?
-   //m_viewer->DoMouseCommand(WXMENU_LAYOUT_DBLCLICK,
-   //                         GetClickableInfo(),
-   //                         link.GetEvent()->GetPosition());
+   String url = link.GetHref();
+   ClickableInfo *ci = GetClickable(url);
+
+   if ( !ci )
+   {
+      ci = new ClickableInfo(url);
+      StoreClickable(ci, url);
+   }
+
+   m_viewer->DoMouseCommand(WXMENU_LAYOUT_DBLCLICK,
+                            ci,
+                            link.GetEvent()->GetPosition());
 }
 
 // ============================================================================
@@ -627,24 +666,24 @@ void HtmlViewer::StartPart()
 
 void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
-   wxString filename = CreateImageInMemoryFS(wxImage(icon));
+   wxString url;
+   url << "memory:" << CreateImageInMemoryFS(wxImage(icon));
 
-   m_htmlText << "<img alt=\"" << ci->GetLabel() << "\" src=\"memory:"
-              << filename << "\">";
+   m_htmlText << "<img alt=\"" << ci->GetLabel() << "\" src=\""
+              << url << "\">";
 
-   // TODO: remember ClickableInfo
-   delete ci;
+   m_window->StoreClickable(ci, url);
 }
 
 void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
-   wxString filename = CreateImageInMemoryFS(image);
+   wxString url;
+   url << "memory:" << CreateImageInMemoryFS(wxImage(image));
 
-   m_htmlText << "<p><img alt=\"" << ci->GetLabel() << "\" src=\"memory:"
-              << filename << "\">";
+   m_htmlText << "<p><img alt=\"" << ci->GetLabel() << "\" src=\""
+              << url << "\">";
 
-   // TODO: remember ClickableInfo
-   delete ci;
+   m_window->StoreClickable(ci, url);
 }
 
 void HtmlViewer::InsertRawContents(const String& data)

@@ -603,6 +603,7 @@ wxMessageViewFrame::OnMenuCommand(int id)
 wxMessageViewFrame::~wxMessageViewFrame()
 {
    delete m_msgCmdProc;
+   delete m_MessageView;
 }
 
 extern MessageView *ShowMessageViewFrame(wxWindow *parent,

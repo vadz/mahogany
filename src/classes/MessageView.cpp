@@ -635,16 +635,20 @@ MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
       {
          case ASMailFolder::Op_GetMessage:
          {
-            /* The only situation where we receive a Message, is if we
-               want to open it in a separate viewer. */
             Message *mptr =
                ((ASMailFolder::ResultMessage *)result)->GetMessage();
 
-            if(mptr && mptr->GetUId() != m_uid)
+            if ( mptr )
             {
-               DoShowMessage(mptr);
+               // have we got the message we had asked for?
+               if ( mptr->GetUId() == m_uid )
+               {
+                  DoShowMessage(mptr);
+               }
+               //else: not, it is some other one
+
+               mptr->DecRef();
             }
-            SafeDecRef(mptr);
          }
          break;
 
@@ -688,22 +692,30 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    CHECK_RET( profile, "MessageView::ReadAllSettings: no profile" );
 
    // a macro to make setting many colour options less painful
-   #define GET_COLOUR_FROM_PROFILE(which, name) \
-      GetColourByName(&settings->which, \
+   #define GET_COLOUR_FROM_PROFILE(col, name) \
+      GetColourByName(&col, \
                       READ_CONFIG(profile, MP_MVIEW_##name), \
                       MP_MVIEW_##name##_D)
 
-   GET_COLOUR_FROM_PROFILE(FgCol, FGCOLOUR);
-   GET_COLOUR_FROM_PROFILE(BgCol, BGCOLOUR);
-   GET_COLOUR_FROM_PROFILE(UrlCol, URLCOLOUR);
-   GET_COLOUR_FROM_PROFILE(AttCol, ATTCOLOUR);
-   GET_COLOUR_FROM_PROFILE(QuotedCol[0], QUOTED_COLOUR1);
-   GET_COLOUR_FROM_PROFILE(QuotedCol[1], QUOTED_COLOUR2);
-   GET_COLOUR_FROM_PROFILE(QuotedCol[2], QUOTED_COLOUR3);
-   GET_COLOUR_FROM_PROFILE(HeaderNameCol, HEADER_NAMES_COLOUR);
-   GET_COLOUR_FROM_PROFILE(HeaderValueCol, HEADER_VALUES_COLOUR);
+   #define GET_COLOUR_FROM_PROFILE_IF_NOT_FG(which, name) \
+      GET_COLOUR_FROM_PROFILE(col, name); \
+      if ( col != settings->FgCol ) \
+         settings->which = col
+
+   GET_COLOUR_FROM_PROFILE(settings->FgCol, FGCOLOUR);
+   GET_COLOUR_FROM_PROFILE(settings->BgCol, BGCOLOUR);
+
+   wxColour col; // used by the macro
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(UrlCol, URLCOLOUR);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(AttCol, ATTCOLOUR);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[0], QUOTED_COLOUR1);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[1], QUOTED_COLOUR2);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[2], QUOTED_COLOUR3);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(HeaderNameCol, HEADER_NAMES_COLOUR);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(HeaderValueCol, HEADER_VALUES_COLOUR);
 
    #undef GET_COLOUR_FROM_PROFILE
+   #undef GET_COLOUR_FROM_PROFILE_IF_NOT_FG
 
    settings->quotedColourize = READ_CONFIG(profile, MP_MVIEW_QUOTED_COLOURIZE) != 0;
    settings->quotedCycleColours = READ_CONFIG(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS) != 0;
@@ -2547,6 +2559,7 @@ MessageView::ShowMessage(UIdType uid)
       ResetUserEncoding();
 
       // file request, our DoShowMessage() will be called later
+      m_uid = uid;
       (void)m_asyncFolder->GetMessage(uid, this);
    }
 }
