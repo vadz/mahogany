@@ -81,61 +81,61 @@ TrailerFilter::DoProcess(String& text,
    {
       // does this seem to be a separator line?
       char chDel = *pc;
-      if ( chDel != '-' && chDel != '_' )
+      if ( chDel == '-' || chDel == '_' )
       {
-         // no
-         chDel = '\0';
-      }
-
-      // look for the start of this line:
-      //
-      // (a) checking that it consists solely of delimiter characters
-      //     if there is a chance that this is a delimiter line
-      while ( chDel != '\0' && *pc != '\n' && pc > start )
-      {
-         if ( *pc-- != chDel )
+         // look for the start of this line checking if it has only delimiter
+         // characters:
+         size_t lenDel = 0;
+         while ( *pc != '\n' && pc > start )
          {
-            // it's not a delimiter line, finally
-            chDel = '\0';
+            if ( *pc-- != chDel )
+            {
+               // it's not a delimiter line, finally
+               lenDel = 0;
+               break;
+            }
+
+            lenDel++;
+         }
+
+         // did we find a delimiter line?
+         if ( lenDel >= 60 )
+         {
+            // yes, but it may start either at pc or at pc + 1
+            if ( *pc == '\n' )
+               pc++;
+
+            // remember the tail and cut it off
+            String tail = pc;
+            text.resize(pc - start);
+
+            // trailers may be embedded, so call ourselves recursively to check
+            // for them again
+            Process(text, viewer, style);
+
+            // the main message text ends here
+            m_next->EndText();
+
+            // and now show the trailer in special style
+            wxColour colOld = style.GetTextColour();
+            style.SetTextColour(*wxLIGHT_GREY); // TODO: allow to customize
+
+            m_next->Process(tail, viewer, style);
+
+            style.SetTextColour(colOld);
+
+            // done!
+            return;
          }
       }
-
-      // (b) simply (and faster) if it's not a delimiter line anyhow
-      while ( *pc != '\n' && pc > start )
+      else // not a delimiter line
       {
-         pc--;
+         // rewind to its beginning
+         while ( *pc != '\n' && pc > start )
+         {
+            pc--;
+         }
       }
-
-      // did we find a delimiter line?
-      if ( chDel )
-      {
-         // yes, but it may start either at pc or at pc + 1
-         if ( *pc == '\n' )
-            pc++;
-
-         // remember the tail and cut it off
-         String tail = pc;
-         text.resize(pc - start);
-
-         // trailers may be embedded, so call ourselves recursively to check
-         // for them again
-         Process(text, viewer, style);
-
-         // the main message text ends here
-         m_next->EndText();
-
-         // and now show the trailer in special style
-         wxColour colOld = style.GetTextColour();
-         style.SetTextColour(*wxLIGHT_GREY); // TODO: allow to customize
-
-         m_next->Process(tail, viewer, style);
-
-         style.SetTextColour(colOld);
-
-         // done!
-         return;
-      }
-      //else: no
 
       if ( pc <= start )
       {
