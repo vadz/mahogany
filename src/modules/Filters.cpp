@@ -2470,9 +2470,16 @@ String FilterRuleImpl::GetStatusString(Message *msg) const
    String text;
    if ( msg )
    {
-      // only subject is probably enough, no need to have from here
+      // TODO: make the format of the string inside the parentheses
+      //       configurable (i.e. allow showing, for example, "From:"
+      //       and not only subject)
+
+      // NB: the string we return is passed to wxLogStatus() and so shouldn't
+      //     contain any stray '%' in it or we could crash!
+      String subject = msg->Subject();
+      subject.Replace("%", "%%");
       text.Printf(_("Filtering message %u/%u (%s)"),
-                  m_msgno + 1, m_msgnoMax, msg->Subject().c_str());
+                  m_msgno + 1, m_msgnoMax, subject.c_str());
    }
 
    return text;
