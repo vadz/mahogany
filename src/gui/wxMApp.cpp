@@ -410,7 +410,10 @@ wxMApp::OnInit()
 
 #ifdef OS_UNIX
    const char *locale = getenv("LANG");
-   hasLocale = locale && (strcmp(locale, "C") != 0);
+   hasLocale = locale &&
+               (strcmp(locale, "C") != 0) &&
+               (strcmp(locale, "en") != 0) &&
+               (strcmp(locale, "us") != 0);
 #elif defined(OS_WIN)
    // this variable is not usually set under Windows, but give the user a
    // chance to override our locale detection logic in case it doesn't work
@@ -488,10 +491,10 @@ wxMApp::OnInit()
       m_Locale = NULL;
 
    wxInitAllImageHandlers();
-   
+
    m_IconManager = new wxIconManager();
 
-   m_OnlineManager = wxDialUpManager::Create();   
+   m_OnlineManager = wxDialUpManager::Create();
    m_PrintData = new wxPrintData;
    m_PageSetupData = new wxPageSetupDialogData;
 
@@ -591,13 +594,13 @@ wxMApp::OnInit()
 
       // another timer to do MEvent handling:
       m_IdleTimer = new IdleTimer;
-      
+
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
 
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
-      
+
       // enable/disable modules button:
       ((wxMainFrame *)m_topLevelFrame)->UpdateToolBar();
       return true;
@@ -919,7 +922,7 @@ wxMApp::GetStdIcon(int which) const
             if(mApplication->GetProfile())
                mApplication->GetProfile()->GetConfig()->SetPath(m_path);
          }
-      
+
    private:
       wxString m_path;
    } storeConfigPath;
@@ -930,7 +933,7 @@ wxMApp::GetStdIcon(int which) const
    // already been deleted or at startup before it is set up.
    if(! GetProfile() || GetGlobalDir().Length() == 0)
       return wxApp::GetStdIcon(which);
-   
+
    // this ugly "#ifdefs" are needed to silent warning about "switch without
    // any case" warning under Windows
 #ifndef OS_WIN
@@ -956,9 +959,9 @@ void
 wxMApp::UpdateOnlineDisplay(void)
 {
    // Can be called during  application startup, in this case do
-   // nothing: 
+   // nothing:
    if(! m_topLevelFrame)
-      return; 
+      return;
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
    ASSERT(sbar);
@@ -1015,15 +1018,15 @@ void
 wxMApp::UpdateOutboxStatus(void) const
 {
    ASSERT(m_topLevelFrame);
-   
+
    UIdType nNNTP, nSMTP;
    bool enable = CheckOutbox(&nSMTP, &nNNTP);
-   
+
    // only enable menu item if outbox is used and contains messages:
    ASSERT(m_topLevelFrame->GetMenuBar());
    m_topLevelFrame->GetMenuBar()->Enable(
       (int)WXMENU_FILE_SEND_OUTBOX,enable && m_UseOutbox);
-   
+
    if(! m_UseOutbox)
          return;
    // update status bar
