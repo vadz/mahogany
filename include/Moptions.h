@@ -1804,7 +1804,7 @@ extern const MOption MP_AWAY_STATUS;
 /// the maximum number of A-Z prepending >
 #define   MP_MVIEW_QUOTED_MAXALPHA_DEFVAL    3L
 /// the colour for header names in the message view
-#define   MP_MVIEW_HEADER_NAMES_COLOUR_DEFVAL  "blue"
+#define   MP_MVIEW_HEADER_NAMES_COLOUR_DEFVAL  "RGB(128,64,64)"
 /// the colour for header values in the message view
 #define   MP_MVIEW_HEADER_VALUES_COLOUR_DEFVAL "black"
 //@}
