@@ -1776,6 +1776,9 @@ bool wxMessageSearchDialog::TransferDataToWindow()
       m_Keyword->SetValue(m_Arg);
 
    UpdateCritStruct();
+
+   m_Choices->SetFocus();
+
    return TRUE;
 }
 
