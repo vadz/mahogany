@@ -473,7 +473,13 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       if(flags & MF_FLAGS_ANON)
          mboxpath << '{' << server << "/anonymous}" << name;
       else
-         mboxpath << '{' << server << "/user=" << login << '}'<< name;
+      {
+         if(login.Length())
+            mboxpath << '{' << server << "/user=" << login << '}'<<
+               name;
+         else // we get asked later FIXME!!
+            mboxpath << '{' << server << '}'<< name;
+      }
       break;
    case MF_NEWS:
       mboxpath << "#news." << name;
@@ -1969,9 +1975,28 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
-//   String spec = BuildFolderSpec(host, protocol, mailbox);
    String spec = m_MailboxPath;
 
+   /* Make sure that IMAP specifications are either
+      {...}pattern or {....}path/pattern
+      A spec like {....}pathpattern is useless.
+   */
+   if(GetType() == MF_IMAP
+      && spec.Length() > 0
+      && spec[spec.Length()-1] != '/'
+      && spec[spec.Length()-1] != '}')
+      spec += '/';
+
+   /*
+     The problem with listing IMAP folders is:
+      - It needs a valid mailstream to access the server, at least a
+        half-open one.
+      - Half-opening works, but opening
+      e.g. /home/karsten/MailFolders/ fails, because it is a
+      directory.
+   */
+
+   
    spec += pattern;
 
    ASSERT(asmf);
@@ -1981,7 +2006,9 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    m_Ticket = ticket;
    m_ASMailFolder = asmf;
    m_ASMailFolder->IncRef();
+
    char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
+
    if ( subscribedOnly )
    {
       mail_lsub (m_MailStream, ref, (char *) spec.c_str());

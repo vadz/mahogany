@@ -337,7 +337,12 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
                                                  name,
                                                  profile);
 
-
+   /// Maybe it's not a folder but a directory of folders?
+   /// FIXME we really need a separate entry for this!!!
+   if(asmf == NULL && folder->GetType() == MF_IMAP)
+   {
+      /// WHAT TO DO? we could half-open it here
+   }
    ///FIXME!!! needs to handle asmf == NULL  gracefully
    ASSERT(asmf);
    wxSubscriptionDialog dlg(GetFrame(parent), folder);
