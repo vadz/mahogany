@@ -8,6 +8,7 @@ $Id$
 
 ** These are the main topics planned for the next release(s):
 
+- support for working offline (will need wxWin API modifications?)
 - completion of filtering rules/scoring code
 - subscription management for NNTP/IMAP/newsspool
 - DND with KDE/Gnome filemanagers (now supported by wxGTK)
@@ -279,7 +280,6 @@ for release:
   + PGP
   + MD5 (see RFC-1544 for details)
 
-
 - Support for different charsets (Unicode/utf-7/8?)
   Being added to wxWindows at present.
 
@@ -297,6 +297,8 @@ for release:
 
 - compressed mail folders / possibly together with index files
 
+- importing mail folders and address books from other clients:
+  Eudora, Outlook, XFMail, Netscape, The Bat! (in this order)
 
 *********************************************************************
 *** New MailFolder classes will be roughly like this:
