@@ -564,7 +564,13 @@ MessageCC::GetHeaderLines(const char **headersOrig,
                   else
                   {
                      // blank line, header must end here
-                     ASSERT_MSG( pc[1] == '\0', "blank line inside header?" );
+                     //
+                     // update: apparently, sometimes it doesn't... it's non
+                     // fatal anyhow, but report it as this is weird
+                     if ( pc[1] != '\0' )
+                     {
+                        wxLogDebug("Blank line inside header?");
+                     }
                   }
                }
                else // we have a valid header name in this line
