@@ -3829,18 +3829,25 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
       m_headers->OnRemove(m_headers->GetIdxFromMsgno(msgno));
    }
 
-   // let all the others know that some messages were expunged: we don't do it
-   // right now but wait until mm_exists() which is sent after all
-   // mm_expunged() as it is much faster to delete all messages at once
-   // instead of one at a time
-   if ( !m_expungedIndices )
+   // if we're applying the filters to the new messages, the GUI hadn't been
+   // notified about existence of these messages yet, so we don't need to
+   // notify it about their disappearance neither - it just will never know
+   // they were there at all
+   if ( !m_InFilterCode->IsLocked() )
    {
-      // create a new array
-      m_expungedIndices = new wxArrayInt;
-   }
+      // let all the others know that some messages were expunged: we don't do it
+      // right now but wait until mm_exists() which is sent after all
+      // mm_expunged() as it is much faster to delete all messages at once
+      // instead of one at a time
+      if ( !m_expungedIndices )
+      {
+         // create a new array
+         m_expungedIndices = new wxArrayInt;
+      }
 
-   // add the msgno to the list of expunged messages
-   m_expungedIndices->Add(msgno);
+      // add the msgno to the list of expunged messages
+      m_expungedIndices->Add(msgno);
+   }
 
    // update the total number of messages
    ASSERT_MSG( m_nMessages > 0, "expunged message from an empty folder?" );
@@ -3879,6 +3886,13 @@ void MailFolderCC::OnNewMail()
    //        message...
    if ( m_MailStream->recent )
    {
+      // we don't want to process any events while we're filtering mail as
+      // there can be a lot of them and all of them can be processed later
+      MEventManagerSuspender suspendEvents;
+
+      // don't allow changing the folder while we're filtering it
+      MLocker filterLock(m_InFilterCode);
+
       FilterNewMail();
 
       CollectNewMail();
@@ -3892,17 +3906,6 @@ void MailFolderCC::OnNewMail()
 
 bool MailFolderCC::FilterNewMail()
 {
-   // the problem with filters is that they can both delete messages from
-   // the folder *and* show message boxes which can send requests from GUI,
-   // so we have to block sending events to the GUI while processing them
-
-   // we don't want to process any events while we're filtering mail as
-   // there can be a lot of them and all of them can be processed later
-   MEventManagerSuspender suspendEvents;
-
-   // don't allow changing the folder while we're filtering it
-   MLocker filterLock(m_InFilterCode);
-
    return MailFolderCmn::FilterNewMail();
 }
 
