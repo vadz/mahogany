@@ -105,7 +105,7 @@ UpgradeFrom001()
 
 #define COPYENTRY(type)  { type val; rc &= _this->Read(entry, &val); rc &= dest->Write(newentry,val); }
 
-/** Copies all entries and optionally subgroups from path from to path 
+/** Copies all entries and optionally subgroups from path from to path
     to in the wxConfig.
     NOTE: Currently both from and to should be absolute paths!
     @param from  absolute group from where to copy entries
@@ -124,7 +124,7 @@ CopyEntries(wxConfigBase *_this,
    bool rc = TRUE;
 
    if(dest == NULL) dest = _this;
-   
+
    // Build a list of all entries to copy:
    _this->SetPath(from);
 
@@ -150,7 +150,7 @@ CopyEntries(wxConfigBase *_this,
       case wxConfigBase::Type_Boolean:
          COPYENTRY(bool); break;
       case wxConfigBase::Type_Unknown:
-         wxASSERT(0);
+         wxFAIL_MSG("unexpected entry type");
       }
    }
    if(recursive)
@@ -159,7 +159,7 @@ CopyEntries(wxConfigBase *_this,
          fromgroup, togroup;
       wxString
          *groups;
-   
+
       size_t
          idx = 0,
          n = _this->GetNumberOfGroups(FALSE);
@@ -185,7 +185,7 @@ CopyEntries(wxConfigBase *_this,
          delete [] groups;
       }
    }
-   
+
    _this->SetPath(oldPath);
    return rc;
 }
@@ -203,7 +203,7 @@ UpgradeFrom010()
     */
 
    bool rc = true;
-   
+
    //FIXME paths need adjustment for windows?
    rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                      "/M/Profiles/Folders","/M/Profiles", true);
@@ -239,7 +239,7 @@ UpgradeFrom010()
    // Delete obsolete groups:
    c->DeleteGroup("/M/Profiles/Folders");
    c->DeleteGroup("/AdbEditor");
-   
+
    /* Encrypt passwords in new location and make sure we have no
       illegal old profiles around. */
    p->ResetPath(); // to be save
@@ -300,9 +300,9 @@ UpgradeFrom010()
          ok ;
          ok = p->GetNextGroup(group, index))
       folders.push_back(new String(group));
-      
+
    for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
-      
+
    {
       group = **i;
       wxLogMessage(_("Converting information for folder '%s'."),
@@ -382,7 +382,7 @@ UpgradeFrom010()
       for ( ok = cf->GetFirstEntry(entry, index);
             ok ;
             ok = cf->GetNextEntry(entry, index))
-         
+
          p->writeEntry(entry, cf->Read(entry,String("")));
       cf->SetPath("..");
       delete grp;
@@ -471,7 +471,7 @@ VerifyInbox(void)
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
    }
-   
+
    // Is the newmail folder properly configured?
    String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
    strutil_delwhitespace(foldername);

@@ -1199,7 +1199,7 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
-   if ( m_uid == folder->GetHeaderInfo(num)->GetUId() )
+   if ( m_uid == (long)folder->GetHeaderInfo(num)->GetUId() )
       return;
 
    if(mailMessage) mailMessage->DecRef();

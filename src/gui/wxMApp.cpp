@@ -202,11 +202,11 @@ wxMApp::OnInit()
    else
       m_Locale = NULL;
 
-#ifdef wxUSE_LIBPNG
+#if wxUSE_LIBPNG
    wxImage::AddHandler( new wxPNGHandler );
 #endif
    
-#ifdef wxUSE_LIBJPEG
+#if wxUSE_LIBJPEG
    wxImage::AddHandler( new wxJPEGHandler );
 #endif
 

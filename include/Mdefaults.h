@@ -399,13 +399,13 @@
 /** @name default values of configuration entries */
 //@{
 /// The Profile Type.
-#define   MP_PROFILE_TYPE_D      0
+#define   MP_PROFILE_TYPE_D      0l
 /// our version
 #define   MP_VERSION_D          M_EMPTYSTRING
 /// are we running for the first time?
 #define   MP_FIRSTRUN_D         1
 /// shall we record default values in configuration files
-#define   MP_RECORDDEFAULTS_D      0
+#define   MP_RECORDDEFAULTS_D      0l
 /// default window position x
 #define   MP_XPOS_D        20
 /// default window position y
@@ -492,7 +492,7 @@
 /// open folders when they're clicked (otherwise - double clicked)
 #define   MP_OPEN_ON_CLICK_D     1
 /// create .profile files?
-#define   MP_CREATE_PROFILES_D   0
+#define   MP_CREATE_PROFILES_D   0l
 /// umask setting for normal files
 #define   MP_UMASK_D               022
 /// automatically show first message in folderview?
@@ -545,7 +545,7 @@
 /// the news server fallback
 #define   MP_NNTPHOST_FB        "news"
 //// the maximum number of messages to retrieve from mailbox or 0 for no limit
-#define MP_FOLDER_RETRIEVALLIMIT_D   0
+#define MP_FOLDER_RETRIEVALLIMIT_D   0l
 /// the username for returned mail
 #define   MP_RETURN_ADDRESS_D      M_EMPTYSTRING
 /// show CC field in message composition?
@@ -559,9 +559,9 @@
 /// passwor for mailbox
 #define   MP_POP_PASSWORD_D      M_EMPTYSTRING
 /// log level
-#define   MP_LOGLEVEL_D         0
+#define   MP_LOGLEVEL_D         0l
 /// add extra headers
-#define   MP_ADD_EXTRAHEADERS_D      0
+#define   MP_ADD_EXTRAHEADERS_D      0l
 /// list of extra headers, semicolon separated name=value
 #define   MP_EXTRAHEADERS_D      M_EMPTYSTRING
 /// the default path for saving files
@@ -599,11 +599,11 @@
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
 /// Collect all mail from this folder?
-#define MP_FOLDER_IS_INCOMING_D   0
+#define MP_FOLDER_IS_INCOMING_D   0l
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "New Mail"
 /// the folder flags (see MFolder)
-#define   MP_FOLDER_FLAGS_D       0
+#define   MP_FOLDER_FLAGS_D       0l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
@@ -613,7 +613,7 @@
 /// wrapmargin for composition view (set to -1 to disable it)
 #define   MP_COMPOSE_WRAPMARGIN_D      60
 /// show MESSAGE/RFC822 as text?
-#define   MP_RFC822_IS_TEXT_D      0
+#define   MP_RFC822_IS_TEXT_D      0l
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_D      "Re:"
 /// prefix for text in replies
@@ -660,7 +660,7 @@
 #   define   MP_USE_NEWMAILCOMMAND_D   1
 #   define   MP_NEWMAILCOMMAND_D   "/usr/bin/play "M_BASEDIR"/newmail.wav"
 #else
-#   define   MP_USE_NEWMAILCOMMAND_D   0
+#   define   MP_USE_NEWMAILCOMMAND_D   0l
 #   define   MP_NEWMAILCOMMAND_D   M_EMPTYSTRING
 #endif
 /// show new mail messages?
@@ -711,7 +711,7 @@
 /** @name for folder list ctrls: column numbers */
 //@{
 /// status
-#define   MP_FLC_STATUSCOL_D  0
+#define   MP_FLC_STATUSCOL_D  0l
 /// subject
 #define   MP_FLC_SUBJECTCOL_D 1
 /// from

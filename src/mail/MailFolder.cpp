@@ -13,21 +13,22 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-#   include  "Mcommon.h"
-#   include  "guidef.h"    // only for high-level functions
-#   include  "strutil.h"
-#   include  "Profile.h"
-#   include  "MDialogs.h" // for the password prompt...
+#   include "Mcommon.h"
+#   include "guidef.h"    // only for high-level functions
+#   include "strutil.h"
+#   include "Profile.h"
 #endif
 
-#include  <wx/file.h>
+#include "MDialogs.h" // for the password prompt...
 
-#include  "Mdefaults.h"
+#include "Mdefaults.h"
 
-#include  "Message.h"
+#include "Message.h"
 
-#include  "MailFolder.h"
-#include  "MailFolderCC.h"
+#include "MailFolder.h"
+#include "MailFolderCC.h"
+
+#include <wx/file.h>
 
 MailFolder *
 MailFolder::OpenFolder(int typeAndFlags,

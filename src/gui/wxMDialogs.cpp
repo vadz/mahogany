@@ -62,7 +62,7 @@
 #include "gui/wxDialogLayout.h"
 
 #ifdef    OS_WIN
-//#  define M_32x32         "Micon"
+#  define mahogany   "Micon"
 #  define background "background"
 #else   //real XPMs
 #  include "../src/icons/background.xpm"
