@@ -18,8 +18,10 @@ $Id$
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
+
+- add references (and In-Reply-To: ?) headers to message replies
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
-  required for imap  --> drop the dialog?
+   required for imap  --> drop the dialog?
  - folderview listctrl: save sizes of columns
    Make types of columns (and  number?) configurable with the new Config_ComboBox
  - folderview listctrl has extra Subject column behind Size field ???
@@ -95,8 +97,16 @@ $Id$
     view remains there
   - add "Inline" option for MIME popup on graphics
   - The "Specify global M directory" dialog doesn't save its value.
+  - typing keys while M starts up can cause segfault (startup-splash
+    event handling?)
 
 - ADB:
+  - mail expansion bug: If I type  "John[TAB]", it expands to
+    "JOHN_DOE <blabla>" I then continue:" JOHN_DOE <blabla>,
+    Susan[TAB]" it will expand to
+    "JOHN_DOE <blabla, Susan_Miller <xxxxx>", removing the last ">"
+    before the comma, leading to delivery errors.
+
   - ADB: does not use substring??? (Joen_Doedoe no expansion for
     "doe" or "Doe")
   - ADB lookups take to long, delay in switching between messages, add a 
@@ -143,7 +153,9 @@ $Id$
 *********************************************************************
 *** things to fix/implement next ***
 *********************************************************************
-
+- drag and drop of messages between folders
+- configuration dialog for columns in folderview
+- alternative treecontrol instead of listctrl for folderview
 - anonymous IMAP access (VZ: I'll do it)
 
 - wxFolderCreateNotebook should be split into base class and 2 derivations:
