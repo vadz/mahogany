@@ -107,6 +107,7 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_SIZE    (wxLayoutWindow::OnSize)
 
    EVT_PAINT    (wxLayoutWindow::OnPaint)
+   EVT_IDLE     (wxLayoutWindow::OnIdle)
 
    EVT_CHAR     (wxLayoutWindow::OnChar)
    EVT_KEY_UP   (wxLayoutWindow::OnKeyUp)
@@ -154,7 +155,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
                                  wxHSCROLL | wxVSCROLL |
                                  wxBORDER |
                                  wxWANTS_CHARS),
-                m_llist(NULL), m_CanPaint(false)
+                m_llist(NULL)
 {
    SetStatusBar(NULL); // don't use statusbar
    m_Editable = false;
@@ -173,6 +174,8 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 #endif
    SetWordWrap(false);
    SetWrapMargin(0);
+
+   m_needsRedraw = true;
 
    // no scrollbars initially
    m_hasHScrollbar =
@@ -852,41 +855,37 @@ wxLayoutWindow::ScrollToCursor(void)
 void
 wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 {
-   m_CanPaint = true;
-#ifdef WXLO_PARTIAL_REFRESH
-   InternalPaint(NULL);
-#else
-   wxRect region = GetUpdateRegion().GetBox();
-   InternalPaint(&region);
+#ifdef __WXMSW__
+   // must create it under Windows
+   wxPaintDC dc(this);
 #endif
+
+   RequestUpdate();
 }
 
 void
 wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
 {
-#ifdef __WXGTK__
-#   ifdef WXLO_PARTIAL_REFRESH
-   // We cannot use region iterators unless called from within OnPaint()!!!
-   if(updateRect == NULL)
-      Refresh(FALSE);
-   else
-#   endif
-   // Calling Refresh() causes bad flicker under wxGTK!!!
-   InternalPaint(updateRect);
-#else
-   // shouldn't specify the update rectangle if it doesn't include all the
-   // changed locations - otherwise, they won't be repainted at all because
-   // the system clips the display to the update rect
-   Refresh(FALSE); //, updateRect);
-#endif
+   m_needsRedraw = true;
+}
+
+void
+wxLayoutWindow::OnIdle(wxIdleEvent &event)
+{
+   if ( m_needsRedraw )
+   {
+      InternalPaint(NULL);
+
+      m_needsRedraw = false;
+   }
+
+   event.Skip();
 }
 
 void
 wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 {
-   if (!m_CanPaint) return;
-
-   wxPaintDC dc( this );
+   wxClientDC dc( this );
    PrepareDC( dc );
 
 #ifdef WXLAYOUT_USE_CARET

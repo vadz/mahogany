@@ -47,7 +47,6 @@
 #include "gui/wxMIds.h"
 
 #include "MFolder.h"
-#include "gui/wxlwindow.h"
 
 #include "gui/wxIconManager.h"
 

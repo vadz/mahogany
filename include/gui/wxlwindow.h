@@ -148,6 +148,7 @@ public:
    //@{
    void OnSize(wxSizeEvent &event);
    void OnPaint(wxPaintEvent &event);
+   void OnIdle(wxIdleEvent &event);
    void OnChar(wxKeyEvent& event);
    void OnKeyUp(wxKeyEvent& event);
    void OnUpdateMenuUnderline(wxUpdateUIEvent& event);
@@ -261,6 +262,7 @@ protected:
       m_AutoDeleteSelection = enable;
       return old;
    }
+
 private:
    /// The layout list to be displayed.
    wxLayoutList *m_llist;
@@ -293,9 +295,10 @@ private:
 #endif
    /// For finding text and finding it again:
    wxString m_FindString;
-   /// InternalPaint cannot be called before first call to OnPaint:
-   bool m_CanPaint;
+   /// does hte window need to be repainted?
+   bool m_needsRedraw;
 //@}
+
    DECLARE_EVENT_TABLE()
 };
 
