@@ -864,7 +864,7 @@ bool wxMApp::StopTimer(Timer timer)
 #ifndef USE_THREADS
 
 void
-wxMApp::ThrEnterLeave(bool enter, SectionId what)
+wxMApp::ThrEnterLeave(bool /* enter */, SectionId /*what*/ )
 {
    // nothing to do
 }
