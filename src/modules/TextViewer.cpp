@@ -163,9 +163,8 @@ private:
    // only Win32 supports URLs in the text control natively so far
 #ifdef __WXMSW__
    void OnLinkEvent(wxTextUrlEvent& event);
-#else
+#endif // __WXMSW__
    void OnMouseEvent(wxMouseEvent& event);
-#endif
 
    // process the mouse click at the given text position
    void ProcessMouseEvent(const wxMouseEvent& event, long pos);
@@ -185,11 +184,11 @@ private:
 BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
 #ifdef __WXMSW__
    EVT_TEXT_URL(-1, TextViewerWindow::OnLinkEvent)
-#else
+#endif // __WXMSW__
+
    EVT_RIGHT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_DCLICK(TextViewerWindow::OnMouseEvent)
-#endif
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
@@ -249,7 +248,7 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
    }
 }
 
-#else // !__WXMSW__
+#endif // __WXMSW__
 
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
@@ -257,8 +256,6 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 
    event.Skip();
 }
-
-#endif // __WXMSW__/!__WXMSW__
 
 void TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 {
