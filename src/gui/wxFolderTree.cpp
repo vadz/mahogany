@@ -723,9 +723,11 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    }
    else
    {
-      // store this to send it later
-      ASSERT_MSG( !m_previousFolder, "can't have previous folder here" );
+      // it's not an error: happens when right click happens while popup menu
+      // is still shown
+      SafeDecRef(m_previousFolder);
 
+      // store this to send it later
       m_previousFolder = oldsel;
       SafeIncRef(m_previousFolder);
    }

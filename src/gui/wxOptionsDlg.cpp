@@ -127,9 +127,9 @@ enum ConfigFields
    ConfigField_MessageViewFaxSupport,
    ConfigField_MessageViewFaxDomains,
    ConfigField_MessageViewLast = ConfigField_MessageViewFaxDomains,
-#else
-   ConfigField_MessageViewLast = ConfigField_MessageViewFontSize,
-#endif
+#else // !Unix
+   ConfigField_MessageViewLast = ConfigField_MessageViewInlineGraphics,
+#endif // Unix/!Unix
    
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
@@ -171,9 +171,9 @@ enum ConfigFields
 #ifdef OS_UNIX
    ConfigField_AFMPath,
    ConfigField_OthersLast = ConfigField_AFMPath,
-#else
+#else // !Unix
    ConfigField_OthersLast = ConfigField_ShowNewMail,
-#endif
+#endif // Unix/!Unix
 
    // the end
    ConfigField_Max
