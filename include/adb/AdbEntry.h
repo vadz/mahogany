@@ -239,14 +239,13 @@ public:
 class AdbEntryStoredInMemory : public AdbEntryCommon
 {
 public:
-  AdbEntryStoredInMemory() { m_bDirty = FALSE; }
+  AdbEntryStoredInMemory() { m_bDirty = m_bEMailDirty = FALSE; }
 
   // we can implement some of the base class functions in the manner independent
   // of the exact nature of the derived class
   virtual void GetFieldInternal(size_t n, String *pstr) const;
   virtual void SetField(size_t n, const String& strValue);
-  virtual void AddEMail(const String& strEMail)
-    { m_astrEmails.Add(strEMail); m_bDirty = TRUE; }
+  virtual void AddEMail(const String& strEMail);
   virtual void ClearExtraEMails();
   virtual size_t GetEMailCount() const { return m_astrEmails.Count(); }
   virtual void GetEMail(size_t n, String *p) const { *p = m_astrEmails[n]; }
@@ -258,7 +257,8 @@ protected:
   wxArrayString m_astrFields; // all text entries (some may be not present)
   wxArrayString m_astrEmails; // all email addresses except for the first one
 
-  bool m_bDirty;              // dirty flag
+  bool m_bDirty:1;            // global dirty flag
+  bool m_bEMailDirty:1;       // was m_astrEmails modified?
 };
 
 #endif  //_ADBENTRY_H

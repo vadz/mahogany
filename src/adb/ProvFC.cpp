@@ -451,6 +451,11 @@ bool FCEntry::Save()
 
   nFieldMax++; // compensate for the last '--'
 
+  if ( nFieldMax <= AdbField_OtherEMails && m_bEMailDirty ) {
+     // otherwise we wouldn't save the emails at all even though we should
+     nFieldMax = AdbField_OtherEMails + 1;
+  }
+
   wxString strValue;
   for ( size_t nField = 1; nField < nFieldMax; nField++ ) {
     // FIXME in fact, it should be done if ms_aFields[nField].type == FieldList

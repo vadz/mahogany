@@ -106,11 +106,21 @@ void AdbEntryStoredInMemory::SetField(size_t n, const wxString& strValue)
   }
 }
 
+void AdbEntryStoredInMemory::AddEMail(const String& strEMail)
+{
+  m_astrEmails.Add(strEMail);
+
+  m_bDirty =
+  m_bEMailDirty = TRUE;
+}
+
 void AdbEntryStoredInMemory::ClearExtraEMails()
 {
   if ( !m_astrEmails.IsEmpty() ) {
     m_astrEmails.Empty();
-    m_bDirty = TRUE;
+
+    m_bDirty =
+    m_bEMailDirty = TRUE;
   }
   //else: don't set dirty flag if it didn't change anything
 }
