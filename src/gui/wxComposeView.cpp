@@ -1435,7 +1435,7 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
    }
 
    // split the string in addreses and add all of them
-   AddressList_obj addrList = address;
+   AddressList_obj addrList(address, READ_CONFIG(m_Profile, MP_HOSTNAME));
    Address *addr = addrList->GetFirst();
    while ( addr )
    {

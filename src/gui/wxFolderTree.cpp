@@ -310,7 +310,8 @@ public:
 
    void OnTreeExpanding(wxTreeEvent&);
    void OnTreeSelect(wxTreeEvent&);
-   void OnTreeActivate(wxTreeEvent& event) { OnDoubleClick(); }
+   void OnTreeActivate(wxTreeEvent& event)
+      { if ( !OnDoubleClick() ) event.Skip(); }
    void OnBeginLabelEdit(wxTreeEvent&);
    void OnEndLabelEdit(wxTreeEvent&);
 
@@ -349,7 +350,7 @@ protected:
    }
 
    // this is the real handler for double-click and enter events
-   void OnDoubleClick();
+   bool OnDoubleClick();
 
    // always opens the folder in a separate view
    void DoFolderOpen();
@@ -2193,8 +2194,10 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
                                     : wxString("");
 }
 
-void wxFolderTreeImpl::OnDoubleClick()
+bool wxFolderTreeImpl::OnDoubleClick()
 {
+   return
+
 #ifdef USE_TREE_ACTIVATE_BUGFIX
    m_openedFolderOnDblClick =
 #endif // USE_TREE_ACTIVATE_BUGFIX
@@ -2359,7 +2362,7 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
       else
       {
          // without Alt it's the same as double click
-         OnDoubleClick();
+         (void)OnDoubleClick();
       }
       break;
 

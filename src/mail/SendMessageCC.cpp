@@ -149,8 +149,6 @@ void
 SendMessageCC::Create(Protocol protocol,
                       Profile *prof)
 {
-   String tmpstr;
-
    m_encHeaders = wxFONTENCODING_SYSTEM;
 
    m_headerNames = NULL;
@@ -168,12 +166,8 @@ SendMessageCC::Create(Protocol protocol,
 
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
+   // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG(prof, MP_HOSTNAME);
-   if ( m_DefaultHost.empty() )
-   {
-      // trick c-client into accepting addresses without host names
-      m_DefaultHost = '@';
-   }
 
    // set up default values for From/Reply-To headers
    Address *addrFrom = Address::CreateFromAddress(prof);
@@ -494,16 +488,8 @@ SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
    String addressNoFCC = address;
    ExtractFccFolders(addressNoFCC);
 
-   // then feed all to c-client
-   //
-   // NB: rfc822_parse_adrlist() modifies the strings passed to it!
-   char *hostCopy = m_DefaultHost.empty() ? NULL : strdup(m_DefaultHost);
-   char *addressCopy = strdup(addressNoFCC);
-
-   rfc822_parse_adrlist(pAdr, addressCopy, hostCopy);
-
-   free(addressCopy);
-   free(hostCopy);
+   // parse into ADDRESS struct
+   *pAdr = ParseAddressList(addressNoFCC, m_DefaultHost);
 
    // finally filter out any invalid addressees
    CheckAddressFieldForErrors(*pAdr);
@@ -734,14 +720,6 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 void
 SendMessageCC::Build(bool forStorage)
 {
-   int
-      h = 0;
-   char
-      tmpbuf[MAILTMPLEN];
-   String tmpstr;
-   kbStringList::iterator
-      i, i2;
-
    if(m_headerNames != NULL) // message was already build
       return;
 
@@ -763,18 +741,14 @@ SendMessageCC::Build(bool forStorage)
       might have come from the Outbox queue, so we translate X-BCC
       back to a proper bcc setting: */
    {
-      if(HasHeaderEntry("X-BCC"))
+      if ( HasHeaderEntry("X-BCC") )
       {
-         if(m_Envelope->bcc)
-            mail_free_address(&(m_Envelope->bcc));
-         String tmpstr = GetHeaderEntry("X-BCC");
-         ExtractFccFolders(tmpstr);
-         char *tmp = strutil_strdup(tmpstr);
-         char *tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
-         rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
-         delete [] tmp;
-         delete [] tmp2;
-         EncodeAddressList(m_Envelope->bcc);
+         if ( m_Envelope->bcc )
+         {
+            mail_free_address(&m_Envelope->bcc);
+         }
+
+         SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
       }
    }
 
@@ -785,8 +759,9 @@ SendMessageCC::Build(bool forStorage)
    m_headerValues = new const char*[n];
 
    /* Add directly added additional header lines: */
-   i = m_ExtraHeaderLinesNames.begin();
-   i2 = m_ExtraHeaderLinesValues.begin();
+   kbStringList::iterator i = m_ExtraHeaderLinesNames.begin(),
+                          i2 = m_ExtraHeaderLinesValues.begin();
+   int h = 0;
    for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
    {
       m_headerNames[h] = strutil_strdup(**i);
@@ -855,6 +830,7 @@ SendMessageCC::Build(bool forStorage)
       mail_free_body(&oldbody);
    }
 
+   char tmpbuf[MAILTMPLEN];
    rfc822_date (tmpbuf);
    m_Envelope->date = (char *) fs_get (1+strlen (tmpbuf));
    strcpy (m_Envelope->date,tmpbuf);

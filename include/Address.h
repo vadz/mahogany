@@ -98,7 +98,8 @@ class AddressList : public MObjectRC
 {
 public:
    /// create the address list from string (may be empty)
-   static AddressList *Create(const String& address);
+   static AddressList *Create(const String& address,
+                              const String& defhost = "");
 
    /// get the first address in the list, return NULL if list is empty
    virtual Address *GetFirst() const = 0;
@@ -129,8 +130,8 @@ private:
 /// declare AddressList_obj class, smart reference to AddressList
 BEGIN_DECLARE_AUTOPTR(AddressList);
 public:
-   AddressList_obj(const String& address)
-      { m_ptr = AddressList::Create(address); }
+   AddressList_obj(const String& address, const String& defhost = "")
+      { m_ptr = AddressList::Create(address, defhost); }
 END_DECLARE_AUTOPTR();
 
 /// declarae global comparison operator for addresses

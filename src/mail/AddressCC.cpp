@@ -258,16 +258,13 @@ AddressList *AddressListCC::Create(const mail_address *adr)
 }
 
 /* static */
-AddressList *AddressList::Create(const String& address)
+AddressList *AddressList::Create(const String& address, const String& defhost)
 {
    ADDRESS *adr = NULL;
 
    if ( !address.empty() )
    {
-      // rfc822_parse_adrlist() modifies the string passed in
-      char *addressCopy = strdup(address);
-      rfc822_parse_adrlist(&adr, addressCopy, NULL /* default host */);
-      free(addressCopy);
+      adr = ParseAddressList(address, defhost);
 
       if ( !adr || adr->error )
       {
@@ -350,7 +347,7 @@ String AddressListCC::DebugDump() const
 #endif // DEBUG
 
 // ============================================================================
-// private functions implementation
+// global functions implementation
 // ============================================================================
 
 static String Adr2String(ADDRESS *adr, bool all)
@@ -377,5 +374,23 @@ static String Adr2String(ADDRESS *adr, bool all)
       adr->next = adrNextOld;
 
    return address;
+}
+
+extern ADDRESS *ParseAddressList(const String& address, const String& defhost)
+{
+   // NB: rfc822_parse_adrlist() modifies the string passed in, copy them!
+
+   char *addressCopy = strdup(address);
+
+   // use '@' to trick c-client into accepting addresses without host names
+   char *defhostCopy = strdup(defhost.empty() ? "@" : defhost.c_str());
+
+   ADDRESS *adr = NULL;
+   rfc822_parse_adrlist(&adr, addressCopy, defhostCopy);
+
+   free(defhostCopy);
+   free(addressCopy);
+
+   return adr;
 }
 

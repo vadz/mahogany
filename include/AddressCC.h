@@ -83,10 +83,14 @@ private:
    AddressCC *m_addrCC;
 
    // it uses our ctor
-   friend AddressList *AddressList::Create(const String&);
+   friend AddressList *AddressList::Create(const String&, const String&);
 
    MOBJECT_DEBUG(AddressListCC)
 };
+
+// wrapper around rfc822_parse_adrlist() c-client function
+extern
+mail_address *ParseAddressList(const String& address, const String& defhost);
 
 #endif // _ADDRESSCC_H_
 
