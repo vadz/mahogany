@@ -8,9 +8,9 @@
 #               Solaris/Sparc
 #		FreeBSD/x86
 #
-echo "####################################################################"
+echo "##############################################################################"
 echo "makeM_deb running on " `hostname` " date: " `date`
-echo "####################################################################"
+echo "##############################################################################"
 
 DOWXWIN=yes  # no or yes
 DOINSTALL=yes
@@ -79,7 +79,7 @@ MVERSION=0.23a
 WXNAME=wxGTK
 WXVERSION=2.1.11
 
-DOCHOST=ronnie
+DOCHOST=Matterhorn
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
@@ -214,51 +214,54 @@ HOST=`hostname`.`domainname`
 
 if [ $DOWXWIN = yes ]
 then
+  echo "##################################################################"
+  echo "Building Debian package."
+  echo "##################################################################"
 
-CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/wxcvs"
-export CVSROOT
-NAME=$WXNAME
-VERSION="-$WXVERSION"
-if [ $USESTABLE = yes ]
-then
-  TAG="-rM_STABLE"
-  echo "Using stable version of wxGTK."
-else
-  TAG="-A"
-  echo "Using latest version of wxGTK."
-fi
+  CVSROOT=":pserver:$CVSUSERID:/home/karsten/CVSSERVER/wxcvs"
+  export CVSROOT
+  NAME=$WXNAME
+  VERSION="-$WXVERSION"
+  if [ $USESTABLE = yes ]
+  then
+    TAG="-rM_STABLE"
+    echo "Using stable version of wxGTK."
+  else
+    TAG="-A"
+    echo "Using latest version of wxGTK."
+  fi
 
-echo REALHOME=$HOME
-if [ ! -d wxWindows ]
-then
-  echo "wxWindows directory does not exist. Doing fresh checkout."
-  ( HOME=$REALHOME; $CVS checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1)
-else
-  echo "Updating wxWindows sources."
-  (HOME=$REALHOME; cd wxWindows && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
-fi
-if [ $? -gt 1 ]
-then
-  echo "Calling CVS failed - exiting."
-  exit 2
-fi
+  echo REALHOME=$HOME
+  if [ ! -d wxWindows ]
+  then
+    echo "wxWindows directory does not exist. Doing fresh checkout."
+    ( HOME=$REALHOME; $CVS checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1)
+  else
+    echo "Updating wxWindows sources."
+    (HOME=$REALHOME; cd wxWindows && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+  fi
+  if [ $? -gt 1 ]
+  then
+    echo "Calling CVS failed - exiting."
+    exit 2
+  fi
 
-if [ "$DEBUG" = "yes" ] ; then
-	DEBUGOPTS="--enable-debug_flag --enable-debug_info"
-else
+  if [ "$DEBUG" = "yes" ] ; then
+  	DEBUGOPTS="--enable-debug_flag --enable-debug_info"
+  else
 	DEBUGOPTS="--disable-debug_flag --disable-debug_info"
-fi
+  fi
 
-if [ "$DOSHARED" = yes ]
-then
-	SHAREDFLAG="--with-shared --without-static"
-else
+  if [ "$DOSHARED" = yes ]
+  then
+ 	SHAREDFLAG="--with-shared --without-static"
+  else
 	SHAREDFLAG="--without-shared --with-static"
-fi
-
-rm -f wxWindows/*.cache
-cd wxWindows && \
-autoconf && \
+  fi
+ 
+  rm -f wxWindows/*.cache
+  cd wxWindows && \
+  autoconf && \
 	./configure \
 	--disable-threads \
 	$SHAREDFLAG \
@@ -273,16 +276,18 @@ autoconf && \
 	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
 	--disable-optimise >config.output && \
-($MAKE -k && $MAKE -k install) >/dev/null
-if [ $? != 0 ]
-then
-  echo "Building wxWindows failed - skipping installation."
-fi
-
+  ($MAKE -k && $MAKE -k install) >/dev/null
+  if [ $? != 0 ]
+  then
+    echo "Building wxWindows failed."
+  fi
 else
    echo "Skipping build of wxWindows."
 fi	# if $DOWXWIN
 
+echo "##################################################################"
+echo "Setting up Mahogany build."
+echo "##################################################################"
 
 PATH="$WXPREFIX/bin:$PATH"
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$WXPREFIX/lib   
@@ -320,6 +325,12 @@ if [ `hostname` != $DOCHOST ]
 then
   echo "Copying documentation Mdocs.tar.gz to $BUILDDIR/$NAME-$VERSION/doc"
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc
+else
+  if [ -f $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz ]
+  then
+    echo "Removing old documentation archive."
+    rm -f $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz
+  fi
 fi
 rm -f $NAME-$VERSION/*.cache
 
@@ -328,7 +339,9 @@ rm -f $NAME-$VERSION/*.cache
 ###########################
 if [ $DEBIAN = yes ]
 then
+  echo "##################################################################"
   echo "Building Debian package."
+  echo "##################################################################"
   rm -f $NAME_$VERSION_*.deb
   (cd $NAME-$VERSION && build)
   test -f $NAME_$VERSION_*.deb
@@ -357,7 +370,9 @@ if [ "$DEBUG" = "yes" ] ; then
 else
 	DEBUGOPTS="--without-debug"
 fi
+echo "##################################################################"
 echo "Building tar.gz package."
+echo "##################################################################"
 cd $BUILDDIR
 ( cd $NAME-$VERSION && ( $MAKE clean >/dev/null 2>&1 ; \
   autoconf && ./configure $DEBUGOPTS --prefix=$MPREFIX $MCONFOPT>config.output && \
@@ -366,17 +381,24 @@ cd $BUILDDIR
 if [ $? = 0 ]
 then
   rm -rf $DESTDIR; mkdir $DESTDIR
-  cd $NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR  >/dev/null && \
+  if [ `hostname` = $DOCHOST ]
+  then
+    echo "Building and packaging documentation..."
+    ( cd $BUILDDIR/$NAME-$VERSION && $MAKE doc && $MAKE install_all DESTDIR=$DESTDIR ) >/dev/null
+    echo "Copying docs in $DESTDIR/share/Mahogany/doc to WWW..."
+    ( cd $DESTDIR/share/Mahogany/doc &&  $SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc )
+    echo "Packing docs in $DESTDIR/share/Mahogany/doc..."
+    (cd $DESTDIR/share/Mahogany/doc && \
+	tar czvf /tmp/Mdocs.tar.gz * && $SCP /tmp/Mdocs.tar.gz $FTPLOCATION)
+    rm -f /tmp/Mdocs.tar.gz
+  else
+    echo "Copying documentation from ftp server."
+    $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc/
+  fi
+  cd $BUILDDIR/$NAME-$VERSION && $MAKE install_all DESTDIR=$DESTDIR  >/dev/null && \
   cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar * && \
   gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar
 
-  if [ `hostname` = $DOCHOST ]
-  then
-    cd $DESTDIR/share/Mahogany/doc && \
-    ( $SCP -r * karsten@nevis.phy.hw.ac.uk:$HOME/WWW/Mahogany/doc ; \
-      (tar czf Mdocs.tar.gz * && $SCP Mdocs.tar.gz $FTPLOCATION) ; \
-    rm -f Mdocs.tar.gz )
-  fi
 else
   echo "Build of $NAME-$VERSION.tar.gz, failed."
 fi
@@ -390,7 +412,9 @@ fi
 ############################
 if [ $REDHAT = yes ]
 then
+  echo "##################################################################"
   echo "Building RedHat package"
+  echo "##################################################################"
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
 #  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
