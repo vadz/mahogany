@@ -29,26 +29,26 @@ public:
 
 
 
-MAppBase * GetMApplication (void);
+    virtual MAppBase * GetMApplication (void) { }
 
 
 
-ProfileBase * CreateProfile (
+virtual ProfileBase * CreateProfile (
 const char * classname ,
 ProfileBase * parent =NULL
-);
+) { }
 
 
 
-ProfileBase * GetGlobalProfile (void);
+virtual ProfileBase * GetGlobalProfile (void) { }
 
 
 
-void  Message (
+virtual void  Message (
 const char * message , const MWindow * parent =NULL,
 const char * title =MDIALOG_MSGTITLE,
 const char * configPath =NULL )
-;
+{ }
 
 
 
