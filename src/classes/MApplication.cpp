@@ -274,7 +274,7 @@ MAppBase::OnStartup()
 #  ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
-   if ( ! InitPython() )
+   if ( READ_CONFIG(m_profile, MC_USEPYTHON) && !InitPython() )
    {
       // otherwise it would hide our message box
       CloseSplash();
