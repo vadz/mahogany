@@ -2297,7 +2297,7 @@ static wxArrayString GenerateSuperDomains(const String &domain)
       String super;
       for( size_t each = 0; each < count; ++each )
       {
-         if( !each )
+         if( each )
             super += _T('.');
          super += parts[parts.GetCount() - count + each];
       }
