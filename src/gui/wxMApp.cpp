@@ -1115,7 +1115,7 @@ const wxPrintData *wxMApp::GetPrintData()
       String afmpath = pf.FindDirFile("Cour.afm", &found);
       if(found)
       {
-         wxThePrintSetupData->SetAFMPath(afmpath);
+        wxThePrintSetupData->SetAFMPath(afmpath);
       }
 #endif // Win/Unix
 
@@ -1880,7 +1880,15 @@ void wxMApp::RecreateStatusBar()
    //
    // SF_STANDARD is the largest and takes thrice as much space as SF_FOLDER
    // while SF_ONLINE and SF_OUTBOX have fixed width
-   static const int s_statusWidths[] = { -3, -1, 70, 150 };
+   static const int s_statusWidths[] =
+   {
+      -3,               // main pane
+      -1,               // folder view status
+#ifdef USE_DIALUP
+      70,               // online/offline
+#endif // USE_DIALUP
+      150,              // outbox status
+   };
 
    wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_statusWidths) == SF_MAXIMUM,
                            StatusWidthsNotInSync, MAppStatus );
