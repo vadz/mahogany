@@ -3488,9 +3488,9 @@ void wxOptionsPageFolders::OnAddFolder(wxCommandEvent& event)
    // show the folder selection dialog instead of using the default text entry
    // dialog shown by the base wxOptionsPage class
    MFolder *folder = MDialog_FolderChoose(this);
-   if ( !folder )
+   if ( !folder || folder->GetType() == MF_GROUP || folder->GetType() == MF_ROOT )
    {
-      // cancelled by user
+      // cancelled by user or group or root ("All folders") selected
       return;
    }
 
