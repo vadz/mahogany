@@ -120,7 +120,7 @@ Known bugs:
 There are always some, listed on our bugtracker at
 http://mahogany.sourceforge.net/bugz/ and we are working on them.
 
- Hoping you will find Mahogany usefull,
+ Hoping you will find Mahogany useful,
 
 M dev-team
 
