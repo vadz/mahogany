@@ -34,6 +34,7 @@ DEFAULT_USE_THREADS=1
 DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
+DEFAULT_USE_WXCONFIG=1
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -54,6 +55,10 @@ USE_EFENCE)
 M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
+
+M_OVERRIDES(wxconfig,wxconfig,
+--without-wxconfig    do not use output from wx-config,
+USE_WXCONFIG)
 
 M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
@@ -377,11 +382,16 @@ dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
 dnl check for wx-config
-AC_PATH_PROG(WX_CONFIG,wx-config)
-if test "x$WX_CONFIG" != "x"
+if test $USE_WXCONFIG = 1
 then
-	GTK_CFLAGS=`$WX_CONFIG --cflags`
-	GTK_LDFLAGS=`$WX_CONFIG --libs`
+	AC_PATH_PROG(WX_CONFIG,wx-config)
+	if test "x$WX_CONFIG" != "x"
+	then
+		GTK_CFLAGS=`$WX_CONFIG --cflags`
+		GTK_LDFLAGS=`$WX_CONFIG --libs`
+	else
+		AC_MSG_ERROR("Cannot find wx-config program.")
+	fi
 else
 	dnl check for gtk-config
 	AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
