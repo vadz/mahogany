@@ -289,6 +289,9 @@ public:
    /// called to generate MsgStatus event for many messages at once
    void OnMsgStatusChanged();
 
+   /// called to process delayed mm_flags notifications
+   void OnMsgFlagsChange();
+
    //@}
 
 private:
@@ -501,18 +504,16 @@ private:
    //@{
 
    /**
-     This flag is set to true during the window between mm_exists()
-     notification and the moment we send an update request to the GUI (which
-     happens during the next idle time iteration normally).
+      If not NULL, this array contains the msgnos of the messages for which we
+      have pending mm_flags() notifications.
 
-     During this time span the listing (m_headers) is in an intermediate state
-     as its internal msgno <-> position mapping may be out of date and it
-     should be used with extreme care to avoid possible c-client reentrancies!
+      It is created/filled by mm_flags() and reset by OnMsgFlagsChange().
     */
-   bool m_gotUnprocessedNewMail;
+   MsgnoArray *m_msgnosFlagsChanged;
 
-   /** If we are searching, this points to an UIdArray where to store
-       the entries found.
+   /**
+      If we are searching, this points to an UIdArray where to store
+      the entries found.
    */
    UIdArray *m_SearchMessagesFound;
 

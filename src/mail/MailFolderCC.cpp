@@ -507,6 +507,14 @@ public:
       : MEventWithFolderData(MEventId_MailFolder_OnMsgStatus, folder) { }
 };
 
+/// MEventFolderOnFlagsChangeData - used to reflect mm_flags notification
+class MEventFolderOnFlagsChangeData : public MEventWithFolderData
+{
+public:
+   MEventFolderOnFlagsChangeData(MailFolder *folder)
+      : MEventWithFolderData(MEventId_MailFolder_OnFlagsChange, folder) { }
+};
+
 // ----------------------------------------------------------------------------
 // CCEventReflector
 // ----------------------------------------------------------------------------
@@ -521,8 +529,9 @@ public:
       MEventManager::RegisterAll
       (
          this,
-         MEventId_MailFolder_OnNewMail,   &m_cookieNewMail,
-         MEventId_MailFolder_OnMsgStatus, &m_cookieMsgStatus,
+         MEventId_MailFolder_OnNewMail,      &m_cookieNewMail,
+         MEventId_MailFolder_OnMsgStatus,    &m_cookieMsgStatus,
+         MEventId_MailFolder_OnFlagsChange,  &m_cookieFlagsChange,
          MEventId_Null
       );
    }
@@ -542,6 +551,10 @@ public:
             mfCC->OnMsgStatusChanged();
             break;
 
+         case MEventId_MailFolder_OnFlagsChange:
+            mfCC->OnMsgFlagsChange();
+            break;
+
          default:
             FAIL_MSG( _T("unexpected event in CCEventReflector!") );
             return true;
@@ -557,13 +570,15 @@ public:
       (
          &m_cookieNewMail,
          &m_cookieMsgStatus,
+         &m_cookieFlagsChange,
          NULL
       );
    }
 
 private:
    void *m_cookieNewMail,
-        *m_cookieMsgStatus;
+        *m_cookieMsgStatus,
+        *m_cookieFlagsChange;
 };
 
 #ifdef USE_DIALUP
@@ -1732,6 +1747,7 @@ MailFolderCC::Create(MFolderType type, int flags)
 
    m_ASMailFolder = NULL;
 
+   m_msgnosFlagsChanged = NULL;
    m_SearchMessagesFound = NULL;
 }
 
@@ -1775,6 +1791,13 @@ MailFolderCC::~MailFolderCC()
       FAIL_MSG( _T("m_SearchMessagesFound unexpectedly != NULL") );
 
       delete m_SearchMessagesFound;
+   }
+
+   if ( m_msgnosFlagsChanged )
+   {
+      FAIL_MSG( _T("m_msgnosFlagsChanged unexpectedly != NULL") );
+
+      delete m_msgnosFlagsChanged;
    }
 
    m_Profile->DecRef();
@@ -3131,7 +3154,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       HeaderInfo *hi = headers->GetItemByIndex(idx);
       if ( !hi )
       {
-         FAIL_MSG( _T("UpdateMessageStatus: no header info for the given msgno?") );
+         FAIL_MSG( _T("SaveMessages: no header info for the given msgno?") );
 
          continue;
       }
@@ -3653,27 +3676,32 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 }
 
 void
-MailFolderCC::UpdateMessageStatus(unsigned long msgno)
+MailFolderCC::OnMsgFlagsChange()
 {
-   // if we're retrieving the headers right now, we can't use
-   // headers->GetItemByIndex() below as this risks to reenter c-client which
-   // is a fatal error
-   //
-   // besides, we don't need to do it neither as mm_exists() will follow soon
-   // which will invalidate the current status anyhow
-   if ( IsLocked() )
-      return;
+   CHECK_RET( m_msgnosFlagsChanged, "OnMsgFlagsChange() shouldn't be called!" );
 
-   CHECK_RET( m_MailStream, _T("UpdateMessageStatus: folder is closed") );
+   const size_t count = m_msgnosFlagsChanged->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      UpdateMessageStatus(m_msgnosFlagsChanged->Item(n));
+   }
+
+   delete m_msgnosFlagsChanged;
+   m_msgnosFlagsChanged = NULL;
+}
+
+void MailFolderCC::UpdateMessageStatus(unsigned long msgno)
+{
+   CHECK_RET( m_MailStream, _T("OnMsgFlagsChange: folder is closed") );
 
    MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
-   CHECK_RET( elt, _T("UpdateMessageStatus: no elt for the given msgno?") );
+   CHECK_RET( elt, _T("OnMsgFlagsChange: no elt for the given msgno?") );
 
    HeaderInfoList_obj headers = GetHeaders();
-   CHECK_RET( headers, _T("UpdateMessageStatus: couldn't get headers") );
+   CHECK_RET( headers, _T("OnMsgFlagsChange: couldn't get headers") );
 
    HeaderInfo *hi = headers->GetItemByMsgno(msgno);
-   CHECK_RET( hi, _T("UpdateMessageStatus: no header info for the given msgno?") );
+   CHECK_RET( hi, _T("OnMsgFlagsChange: no header info for the given msgno?") );
 
    int statusNew = GetMsgStatus(elt),
        statusOld = hi->GetStatus();
@@ -4478,6 +4506,29 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    }
    //else: no headers, nothing to do
 
+   // adjust the stored msgnos which became invalid
+   if ( m_msgnosFlagsChanged )
+   {
+      int nRemove = -1;
+
+      const size_t count = m_msgnosFlagsChanged->GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         MsgnoType& m = m_msgnosFlagsChanged->Item(n);
+         if ( m == msgno )
+         {
+            nRemove = n;
+         }
+         else if ( m > msgno )
+         {
+            m--;
+         }
+      }
+
+      if ( nRemove != -1 )
+         m_msgnosFlagsChanged->RemoveAt(nRemove);
+   }
+
    // update the total number of messages
    if ( m_nMessages > 0 )
    {
@@ -5099,7 +5150,18 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long msgno)
    CHECK_RET(mf, _T("mm_flags for non existent folder"));
 
    // message flags really changed, cclient checks for it
-   mf->UpdateMessageStatus(msgno);
+
+   // as we're inside cclient right now we can't retrieve the message flags, so
+   // postpone it until better times
+   if ( !mf->m_msgnosFlagsChanged )
+   {
+      mf->m_msgnosFlagsChanged = new MsgnoArray;
+
+      // we only need to send the message once
+      MEventManager::Send(new MEventFolderOnFlagsChangeData(mf));
+   }
+
+   mf->m_msgnosFlagsChanged->Add(msgno);
 }
 
 /** alert that c-client will run critical code
