@@ -1306,7 +1306,7 @@ bool RunInstallWizard()
          // make the lines short enough to ensure they're not wrapped with the
          // default line wrap setting (60 columns)
          String msgFmt =
-            _("From: mahogany-users-help@lists.sourceforge.net\n"
+            _("From: mahogany-users-request@lists.sourceforge.net\n"
               "Subject: Welcome to Mahogany!\n"
               "Date: %s\n"
               "\n"
@@ -1324,7 +1324,8 @@ bool RunInstallWizard()
               "additional information, news about the latest releases\n"
               "and frequently asked questions."
               "\n"
-              "Also, if you reply to this e-mail message and you will\n"
+              "Also, if you reply to this e-mail message with the word\n"
+              "'subscribe' in the body or subject of the message, you will\n"
               "be automatically added to the mailing list of Mahogany\n"
               "users, where you will find other users happy to share\n"
               "their experiences with you and help you get started.\n"
