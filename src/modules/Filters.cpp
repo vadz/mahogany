@@ -2669,9 +2669,12 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   }
                }
 
-               pd->Update(count + idx, pdExecText + '\n' +
-                          wxString::Format(_("Copying messages to '%s'..."),
+               if ( pd )
+               {
+                  pd->Update(count + idx, pdExecText + '\n' +
+                             wxString::Format(_("Copying messages to '%s'..."),
                                            dst.c_str()));
+               }
 
                if ( !m_MailFolder->SaveMessages(&uidsToCopy, dst) )
                {
@@ -2691,8 +2694,11 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          {
             if ( !uidsToDelete.IsEmpty() )
             {
-               pd->Update(2*count, pdExecText + '\n' +
-                          wxString::Format(_("Deleting moved messages...")));
+               if ( pd )
+               {
+                  pd->Update(2*count, pdExecText + '\n' +
+                             wxString::Format(_("Deleting moved messages...")));
+               }
 
                if ( !m_MailFolder->DeleteMessages(&uidsToDelete) )
                {
