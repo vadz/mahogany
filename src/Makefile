@@ -17,6 +17,9 @@ endif
 # build the dynamically linked binary by default
 all: subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+
+M:	all
+
 #
 #left over from my attempt to create a M.so shared lib
 #
