@@ -1510,7 +1510,7 @@ static Threadable *BuildThreadableList(const HeaderInfoList *hilp)
    Threadable *root = 0;
    size_t count = hilp->Count();
    for (size_t i = 0; i < count; ++i) {
-      HeaderInfo *hi = hilp->GetItem(i);
+      HeaderInfo *hi = hilp->GetItemByIndex(i);
       Threadable *item = new Threadable(hi, i);
       item->setNext(root);
       root = item;
@@ -1525,7 +1525,7 @@ static Threadable *BuildThreadableList(const HeaderInfoList *hilp)
 //
 static size_t FlushThreadable(Threadable *t,
                             MsgnoType *indices,
-                            size_t *indents, 
+                            size_t *indents,
                             MsgnoType *children
 #if defined(DEBUG)
                             , bool seen[]
