@@ -168,9 +168,6 @@ extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
 // separate multiple addresses with commas
 #define CANONIC_ADDRESS_SEPARATOR   _T(", ")
 
-// code here was written with assumption that x and y margins are the same
-#define LAYOUT_MARGIN LAYOUT_X_MARGIN
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -4576,7 +4573,8 @@ wxComposeView::AutoSave()
       return false;
    }
 
-   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave, contents) )
+   if ( !MailFolder::SaveMessageAsMBOX(m_filenameAutoSave,
+                                        contents.c_str(), contents.length()) )
    {
       // TODO: disable autosaving? we risk to give many such messages if
       //       something is wrong...
