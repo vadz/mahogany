@@ -15,6 +15,8 @@
 #  include  "Mconfig.h"
 #endif
 
+#include <wx/filename.h>
+
 /**@name Operating system helper functions */
 //@{
 
@@ -39,7 +41,8 @@ class MTempFileName
 public:
    // def ctor: creates the temp file and doesn't delete it unless told to do
    // so (i.e. Ok() is called)
-   MTempFileName() { m_name = tmpnam(NULL); m_ok = false; }
+   MTempFileName() : m_name (wxFileName::CreateTempFileName(_T("Mahogany")))
+      { m_ok = false; }
 
    // ctor which takes a temp file name: still won't be deleted unless Ok() is
    // called
@@ -56,7 +59,7 @@ public:
 
    ~MTempFileName()
    {
-      if ( !m_ok && !!m_name ) // "!!" means "not empty"
+      if ( !m_ok && !m_name.empty() )
       {
          if ( wxRemove(m_name) != 0 )
          {
