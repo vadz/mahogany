@@ -98,7 +98,7 @@ static inline bool IsAddressField(size_t field)
 // private classes
 // ----------------------------------------------------------------------------
 
-class MimeContent : public wxLayoutObjectBase::UserData
+class MimeContent : public wxLayoutObject::UserData
 {
 public:
    // constants
@@ -110,13 +110,10 @@ public:
    };
 
    // ctor & dtor
-   MimeContent() { m_Type = MIMECONTENT_NONE; }
-   ~MimeContent()
+   MimeContent()
       {
-         if ( m_Type == MIMECONTENT_DATA )
-            delete [] m_Data;
+         m_Type = MIMECONTENT_NONE;
       }
-
    // initialize
    void SetMimeType(const String& mimeType);
    void SetData(char *data, size_t length,
@@ -136,6 +133,14 @@ public:
       { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Data; }
    size_t GetSize() const
       { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Length; }
+
+protected:
+   ~MimeContent()
+      {
+         if ( m_Type == MIMECONTENT_DATA )
+            delete [] m_Data;
+      }
+
 
 private:
    MimeContentType m_Type;
@@ -178,11 +183,11 @@ public:
    void OnChar(wxKeyEvent& event);
    void OnEnter(wxCommandEvent& event);
 
-   #ifdef __WXMSW__
+#ifdef __WXMSW__
       // if we don't return this, we won't get TABs in OnChar() events
       long wxAddressTextCtrl::MSWGetDlgCode()
         { return DLGC_WANTTAB | wxTextCtrl::MSWGetDlgCode(); }
-   #endif //MSW
+#endif //MSW
 
 private:
    wxComposeView              *m_composeView;
@@ -395,7 +400,7 @@ void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
    SetStatusText(enable ? "" : "RO", 1);
-   m_LayoutWindow->GetLayoutList().SetEditable(enable);
+   m_LayoutWindow->SetEditable(enable);
 }
 
 // ----------------------------------------------------------------------------
@@ -641,19 +646,19 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
 
       if ( hasSign )
       {
-         wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
+         wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
          // insert separator optionally
          if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
-            layoutList.LineBreak();
-            layoutList.Insert("--");
-            layoutList.LineBreak();
+            layoutList->LineBreak();
+            layoutList->Insert("--");
+            layoutList->LineBreak();
          }
 
          // read the whole file
          size_t nLineCount = fileSig.GetLineCount();
          for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
-            layoutList.Insert(fileSig[nLine]);
-            layoutList.LineBreak();;
+            layoutList->Insert(fileSig[nLine]);
+            layoutList->LineBreak();;
          }
 
          // let's respect the netiquette
@@ -664,8 +669,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
                          nLineCount > 10 ? _("way ") : "", nMaxSigLines);
          }
 
-         layoutList.SetCursor(wxPoint(0,0));
-         layoutList.ResetDirty();
+         layoutList->MoveCursorTo(wxPoint(0,0));
       }
       else
       {
@@ -698,8 +702,7 @@ wxComposeView::CreateFTCanvas(void)
 
    m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, m_bg);
    EnableEditing(true);
-   m_LayoutWindow->GetLayoutList().SetWrapMargin( READ_CONFIG(m_Profile,
-                                                  MP_COMPOSE_WRAPMARGIN)); 
+   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN)); 
 }
 
 wxComposeView::wxComposeView(const String &iname,
@@ -1040,7 +1043,8 @@ wxComposeView::InsertData(char *data,
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
-   m_LayoutWindow->GetLayoutList().Insert(obj);
+   mc->DecRef();
+   m_LayoutWindow->GetLayoutList()->Insert(obj);
 
    Refresh();
 }
@@ -1101,8 +1105,8 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
-
-   m_LayoutWindow->GetLayoutList().Insert(obj);
+   mc->DecRef();
+   m_LayoutWindow->GetLayoutList()->Insert(obj);
 
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
                filename.c_str(), strMimeType.c_str());
@@ -1128,13 +1132,12 @@ wxComposeView::Send(void)
          : (const char *)NULL
          );
 
-   wxLayoutExportObject *export;
-   wxLayoutList::iterator i = m_LayoutWindow->GetLayoutList().begin();
-   wxLayoutObjectBase *lo = NULL;
+   wxLayoutObject *lo = NULL;
    MimeContent *mc = NULL;
-
-   while((export = wxLayoutExport(m_LayoutWindow->GetLayoutList(),
-                                  i,WXLO_EXPORT_AS_TEXT|WXLO_EXPORT_WITH_CRLF)) != NULL)
+   wxLayoutExportObject *export;
+   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
+   while((export = wxLayoutExport( &status,
+                                   WXLO_EXPORT_AS_TEXT|WXLO_EXPORT_WITH_CRLF)) != NULL) 
    {
       if(export->type == WXLO_EXPORT_TEXT)
       {
@@ -1221,6 +1224,7 @@ wxComposeView::Send(void)
             default:
                FAIL_MSG(_("Unknwown part type"));
             }
+            mc->DecRef();
          }
       }
 
@@ -1265,9 +1269,9 @@ wxComposeView::SetSubject(const String &subj)
 void
 wxComposeView::InsertText(const String &txt)
 {
-   m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
-   m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
 }
 
 /// print the message
@@ -1416,28 +1420,37 @@ wxComposeView::InsertFileAsText(const String& filename,
       // the text which was in the beginning of the message and it's not one
       // text object, but possibly several text objects and line break
       // objects, so now we must delete them and then recreate the new ones...
-      wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
-      wxLayoutObjectList::iterator i = layoutList.begin();
-      wxLayoutObjectBase *object = *i;
-      while ( i != layoutList.end() &&
-            (object->GetType() == WXLO_TYPE_TEXT ||
-             object->GetType() == WXLO_TYPE_LINEBREAK) )
+
+      wxLayoutList * layoutList = m_LayoutWindow->GetLayoutList();
+      wxLayoutList * other_list = new wxLayoutList;
+      wxLayoutObject *obj;
+      wxLayoutExportStatus status(layoutList);
+      wxLayoutExportObject *export;
+      while((export = wxLayoutExport( &status,
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
       {
-         // replace the old contents of the text objects with the new one: of
-         // course, it means that the user's changes to this text will be
-         // lost, but if we don't do it (and the text wasn't changed) we would
-         // have 2 copies of this text, the original one and the edited one
-         // and it's not a lot better...
-         layoutList.erase(i);
-
-         // NB: erase() will advance the iterator, so no "i++" needed
-         if ( i != layoutList.end() )
-            object = *i;
+         obj = export->content.object;
+         switch(obj->GetType())
+         {
+         case WXLO_TYPE_TEXT:
+            ; // do nothing
+            break;
+         case WXLO_TYPE_ICON:
+            other_list->Insert(obj->Copy());
+            break;
+         default:
+            ; // cmd objects get ignored
+         }
+         delete export;
       }
-
-      // if we're replacing the first text part, move the cursor to the
-      // beginning before inserting new text
-      layoutList.SetCursor(wxPoint(0, 0));
+      layoutList->Empty();
+      //now we move the non-text objects back:
+      wxLayoutExportStatus status2(other_list);
+      while((export = wxLayoutExport( &status2,
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+         layoutList->Insert(export->content.object->Copy());
+      layoutList->MoveCursorTo(wxPoint(0, 0));
+      delete other_list;
    }
 
    // now insert the new text
@@ -1445,7 +1458,7 @@ wxComposeView::InsertFileAsText(const String& filename,
 
    delete [] text;
 
-   m_LayoutWindow->Update();
+   m_LayoutWindow->Refresh();
    return true;
 }
 
@@ -1460,52 +1473,24 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
    wxFile file(filename, wxFile::write);
 
    // export first text part of the message
-   wxLayoutList& layoutList = m_LayoutWindow->GetLayoutList();
-   wxLayoutList::iterator i = layoutList.begin();
-   wxLayoutExportObject *export = NULL;
-   bool textPart = false;
-   while ( !textPart )
+
+   wxLayoutExportObject *export;
+   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
+
+   while((export = wxLayoutExport( &status, WXLO_EXPORT_AS_TEXT)) != NULL)
    {
-      // NB: wxLayoutExport will do "i++" itself
-      export = wxLayoutExport(layoutList, i);
-
-      if ( !export )
-      {
-         // error?
-         break;
-      }
-
-      textPart = export->type == WXLO_EXPORT_TEXT;
-   }
-
-   if ( export )
-   {
-      if ( !file.Write(*export->content.text) )
-      {
-         wxLogError(_("Can not write message to file '%s'."),
-                    filename.c_str());
-
-         return false;
-      }
-   }
-   else // nothing to export
-   {
-      if ( errorIfNoText )
-      {
-         wxLogWarning(_("There is no text to save."));
-
-         // remove the empty file
-         if ( !remove(filename) )
+      // non text objects get ignored
+      if(export->type == WXLO_EXPORT_TEXT)
+         if ( !file.Write(*export->content.text) )
          {
-            wxLogLastError("remove");
+            wxLogError(_("Cannot write message to file '%s'."),
+                       filename.c_str());
+            
+            return false;
          }
-
-         return false;
-      }
-      //else: leave the empty file and don't give error messages
    }
 
-   layoutList.ResetDirty();
+   m_LayoutWindow->ResetDirty();
 
    return true;
 }

@@ -64,6 +64,9 @@
 #  define M_32x32         "Micon"
 #else   //real XPMs
 #  include "../src/icons/M_32x32.xpm"
+#  include "../src/icons/progress0.xpm"
+#  include "../src/icons/progress1.xpm"
+#  include "../src/icons/progress2.xpm"
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
@@ -197,6 +200,7 @@ MProgressDialog::MProgressDialog(wxString const &title,
    EnableDisableEvents(false);
    wxYield();
 }
+
 
 void
 MProgressDialog::EnableDisableEvents(bool enable)
@@ -694,32 +698,30 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
-   wxLayoutList &ll = GetLayoutList();
+   wxLayoutList *ll = GetLayoutList();
    Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "white", "navy");
 
-   ll.SetEditable(true);
+   ll->LineBreak();
+   ll->LineBreak();
 
-   ll.LineBreak();
-   ll.LineBreak();
+   ll->Insert(_("   Welcome"));
+   ll->LineBreak();
+   ll->Insert(_("         to"));
+   ll->LineBreak();
+   ll->Insert("         ");
+   ll->Insert(new wxLayoutObjectIcon(wxIcon(M_32x32)));
+   ll->Insert("!");
+   ll->SetFontWeight(wxNORMAL);
+   ll->SetFontSize(10);
 
-   ll.Insert(_("   Welcome"));
-   ll.LineBreak();
-   ll.Insert(_("         to"));
-   ll.LineBreak();
-   ll.Insert("         ");
-   ll.Insert(new wxLayoutObjectIcon(wxIcon(M_32x32)));
-   ll.Insert("!");
-   ll.SetFontWeight(wxNORMAL);
-   ll.SetFontSize(10);
-
-   ll.LineBreak();
-   ll.LineBreak();
-   ll.LineBreak();
+   ll->LineBreak();
+   ll->LineBreak();
+   ll->LineBreak();
 
    String version = _("    Version: ");
    version += M_VERSION_STRING;
-   ll.Insert(version);
-   ll.LineBreak();
+   ll->Insert(version);
+   ll->LineBreak();
    version = _("        compiled for: ");
 #ifdef OS_UNIX
    version += M_OSINFO;
@@ -728,20 +730,19 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    version += "Windows";
 #endif // Unix/Windows
 
-   ll.Insert(version);
-   ll.LineBreak();
-   ll.LineBreak();
-   ll.LineBreak();
-   ll.Insert(_("  Copyright (c) 1999 by Karsten Ballüder"));
-   ll.LineBreak();
-   ll.LineBreak();
-   ll.Insert(_("          Written by Karsten Ballüder"));
-   ll.LineBreak();
-   ll.Insert(_("                      and Vadim Zeitlin"));
-   ll.LineBreak();
-   ll.SetEditable(false);
+   ll->Insert(version);
+   ll->LineBreak();
+   ll->LineBreak();
+   ll->LineBreak();
+   ll->Insert(_("  Copyright (c) 1999 by Karsten Ballüder"));
+   ll->LineBreak();
+   ll->LineBreak();
+   ll->Insert(_("          Written by Karsten Ballüder"));
+   ll->LineBreak();
+   ll->Insert(_("                      and Vadim Zeitlin"));
+   ll->LineBreak();
    DoPaint();
-   UpdateScrollbars(true); // let them disappear
+   ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
      m_pTimer = new CloseTimer(this);

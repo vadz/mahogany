@@ -146,7 +146,7 @@ private:
 };
 
 // data associated with the clickable objects
-class ClickableInfo : public wxLayoutObjectBase::UserData
+class ClickableInfo : public wxLayoutObject::UserData
 {
 public:
    enum Type
@@ -155,8 +155,14 @@ public:
       CI_URL
    };
 
-   ClickableInfo(const String& url) : m_url(url) { m_type = CI_URL; }
-   ClickableInfo(int id) { m_id = id; m_type = CI_ICON; }
+   ClickableInfo(const String& url)
+      : m_url(url)
+      { m_type = CI_URL; }
+   ClickableInfo(int id)
+      {
+         m_id = id;
+         m_type = CI_ICON;
+      }
 
    // accessors
    Type          GetType() const { return m_type; }
@@ -164,6 +170,7 @@ public:
    int           GetPart() const { return m_id;   }
 
 private:
+   ~ClickableInfo() {}
    Type   m_type;
 
    int    m_id;
@@ -375,10 +382,8 @@ wxMessageView::Update(void)
 
    ClickableInfo *ci;
 
-   wxLayoutList &llist = GetLayoutList();
-   wxLayoutObjectBase *obj = NULL;
-
-   llist.SetEditable(true);
+   wxLayoutList *llist = GetLayoutList();
+   wxLayoutObject *obj = NULL;
 
    Clear();
    if(! mailMessage)  // no message to display
@@ -387,9 +392,38 @@ wxMessageView::Update(void)
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
-      String tmp = mailMessage->GetHeader();
+      String
+         tmp = mailMessage->GetHeader();
+#if 0
+         *sptr;
+      kbStringList sl;
+      bool istitle = true;
+      char *cptr = strutil_strdup(tmp);
+      strutil_tokenise(cptr, ":", sl);
+      delete [] cptr;
+      size_t n = sl.size(); // number of elements
+      size_t i = 0;
+      for(i = 0; i < n; i++)
+      {
+         sptr = sl.pop_front();
+         if(istitle)
+         {
+            llist->SetFontWeight(wxBOLD);
+            *sptr << ": ";
+            llist->Insert(*sptr);
+            llist->SetFontWeight(wxNORMAL);
+            istitle = false;
+         }
+         else
+         {
+            llist->Insert(*sptr);
+            istitle = true;
+         }
+         delete sptr;
+      }
+#endif
       wxLayoutImportText(llist,tmp);
-      llist.LineBreak();
+      llist->LineBreak();
    }
 
 #ifdef HAVE_XFACES
@@ -401,36 +435,41 @@ wxMessageView::Update(void)
       if(tmp.length() > 2)   //\r\n
       {
          xface = GLOBAL_NEW XFace();
-         tmp = tmp.c_str()+strlen("X-Face:");
          xface->CreateFromXFace(tmp.c_str());
          if(xface->CreateXpm(&xfaceXpm))
          {
-            llist.Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
-            llist.LineBreak();
+            llist->Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
+            llist->LineBreak();
          }
       }
    }
 #endif
 #endif
-   llist.SetFontWeight(wxBOLD);
-   llist.Insert(_("From: "));
-   llist.SetFontWeight(wxNORMAL);
+   llist->SetFontWeight(wxBOLD);
+   llist->Insert(_("From: "));
+   llist->SetFontWeight(wxNORMAL);
    from = mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
       from = tmp + String(" <") + from + '>';
-   llist.Insert(from);
-   llist.LineBreak();
-   llist.SetFontWeight(wxBOLD);
-   llist.Insert(_("Subject: "));
-   llist.SetFontWeight(wxNORMAL);
-   llist.Insert(mailMessage->Subject());
-   llist.LineBreak();
-   llist.SetFontWeight(wxBOLD);
-   llist.Insert(_("Date: "));
-   llist.SetFontWeight(wxNORMAL);
-   llist.Insert(mailMessage->Date());
-   llist.LineBreak();
-   llist.LineBreak();
+   llist->Insert(from);
+   llist->LineBreak();
+   llist->SetFontWeight(wxBOLD);
+   llist->Insert(_("To: "));
+   llist->SetFontWeight(wxNORMAL);
+   mailMessage->GetHeaderLine("To",tmp);
+   llist->Insert(tmp);
+   llist->LineBreak();
+   llist->SetFontWeight(wxBOLD);
+   llist->Insert(_("Subject: "));
+   llist->SetFontWeight(wxNORMAL);
+   llist->Insert(mailMessage->Subject());
+   llist->LineBreak();
+   llist->SetFontWeight(wxBOLD);
+   llist->Insert(_("Date: "));
+   llist->SetFontWeight(wxNORMAL);
+   llist->Insert(mailMessage->Date());
+   llist->LineBreak();
+   llist->LineBreak();
 
 // iterate over all parts
    n = mailMessage->CountParts();
@@ -448,7 +487,7 @@ wxMessageView::Update(void)
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
             continue; // error ?
-         llist.LineBreak();
+         llist->LineBreak();
          if( m_ProfileValues.highlightURLs )
          {
             tmp = cptr;
@@ -464,10 +503,10 @@ wxMessageView::Update(void)
                   ci = new ClickableInfo(url);
                   obj = new wxLayoutObjectText(url);
                   obj->SetUserData(ci);
-
-                  llist.SetFontColour("BLUE");  // @@PERS
-                  llist.Insert(obj);
-                  llist.SetFontColour("BLACK"); // @@PERS
+                  ci->DecRef();
+                  llist->SetFontColour("BLUE");  // @@PERS
+                  llist->Insert(obj);
+                  llist->SetFontColour("BLACK"); // @@PERS
                }
             }
             while( !strutil_isempty(tmp) );
@@ -500,16 +539,16 @@ wxMessageView::Update(void)
 
          ci = new ClickableInfo(i);
          obj->SetUserData(ci); // gets freed by list
-         llist.Insert(obj);
+         ci->DecRef();
+         llist->Insert(obj);
 
          lastObjectWasIcon = true;
       }
    }
 
-   llist.LineBreak();
-   llist.SetEditable(false);
+   llist->LineBreak();
    Refresh();
-   UpdateScrollbars(true);
+   ResizeScrollbars(true);
 }
 
 String
@@ -852,8 +891,8 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 {
    ClickableInfo *ci;
 
-   wxLayoutObjectBase *obj;
-   obj = (wxLayoutObjectBase *)event.GetClientData();
+   wxLayoutObject *obj;
+   obj = (wxLayoutObject *)event.GetClientData();
    ci = (ClickableInfo *)obj->GetUserData();
    if(ci)
    {
@@ -991,6 +1030,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
          default:
             FAIL_MSG("unknown embedded object type");
       }
+   ci->DecRef();
    }
 }
 

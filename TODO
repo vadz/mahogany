@@ -165,6 +165,7 @@ $Id$
       usage of static vars. I always name them with "s_" prefix (for this
       reason too) so it should be quite easy to do a grep for them later
   - MT-problem: rfc822_extraheaders()
+  - MT-problem: wxlparser export function uses static variable
 
 - add "Send Digest"
 

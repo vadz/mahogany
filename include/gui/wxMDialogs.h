@@ -18,7 +18,7 @@
 #endif
 
 #include "MDialogs.h"
-
+#include <wx/icon.h>
 #include <wx/frame.h>
 
 // fwd decl
