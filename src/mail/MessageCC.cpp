@@ -849,6 +849,67 @@ const MimePart *MessageCC::GetMimePart(int n) const
    return mimepart;
 }
 
+char *
+MessageCC::GetRawPartData(const MimePart& mimepart, unsigned long *lenptr)
+{
+   CHECK( m_folder, NULL, _T("MessageCC::GetPartData() without folder?") );
+
+   CheckMIME();
+
+   MAILSTREAM *stream = m_folder->Stream();
+   if ( !stream )
+   {
+      ERRORMESSAGE((_("Impossible to retrieve message text: "
+                      "folder '%s' is closed."),
+                    m_folder->GetName().c_str()));
+      return NULL;
+   }
+
+   if ( !m_folder->Lock() )
+   {
+      ERRORMESSAGE((_("Impossible to retrieve message text: "
+                      "failed to lock folder '%s'."),
+                    m_folder->GetName().c_str()));
+      return NULL;
+   }
+
+   unsigned long size = mimepart.GetSize();
+   m_folder->StartReading(size);
+
+   const String& sp = mimepart.GetPartSpec();
+   unsigned long len = 0;
+
+   // NB: this pointer shouldn't be freed
+   char *cptr = mail_fetch_mime(stream,
+                                    m_uid,
+                                    (char *)sp.c_str(),
+                                    &len, FT_UID);
+   m_folder->EndReading();
+
+   m_folder->UnLock();
+
+   // ensure that lenptr is always valid
+   if ( lenptr == NULL )
+   {
+      lenptr = &len;
+   }
+
+   // have we succeeded in retrieveing anything?
+   if ( len == 0 )
+   {
+      *lenptr = 0;
+
+      return NULL;
+   } else {
+      *lenptr = len;
+   }
+
+   // free old text
+   fs_give(&m_partContentPtr);
+   
+   return cptr;
+}
+   
 const void *
 MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 {
@@ -1030,6 +1091,11 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
    }
 
    return m_partContentPtr;
+}
+
+const void *MimePartCC::GetRawContent(unsigned long *len) const
+{
+   return GetMessage()->GetRawPartData(*this, len);
 }
 
 const void *MimePartCC::GetContent(unsigned long *len) const

@@ -75,6 +75,10 @@ public:
    */
    virtual String FetchText(void) const;
 
+   /** get the raw part text, with MIME headers
+    */
+   char *GetRawPartData(const MimePart& mimepart, unsigned long *len = NULL);
+
    /** get the decoded part text
     */
    const void *GetPartData(const MimePart& mimepart, unsigned long *len = NULL);

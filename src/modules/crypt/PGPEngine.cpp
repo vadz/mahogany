@@ -524,9 +524,10 @@ PGPEngine::ExecCommand(const String& options,
                  code == _T("SIG_ID") ||
                  code == _T("DECRYPTION_OKAY") )
             {
-               status = OK;
-               wxLogStatus(_("Valid signature for public key \"%s\""), pc);
-
+               if ( status != SIGNATURE_EXPIRED_ERROR ) {
+                  status = OK;
+                  wxLogStatus(_("Valid signature for public key \"%s\""), pc);
+               }
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
@@ -548,7 +549,13 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code.StartsWith(_T("TRUST_")) )
             {
-               // TODO: something
+               if ( code == _T("TRUST_UNDEFINED") ||
+                    code == _T("TRUST_NEVER") )
+               {
+                  status = SIGNATURE_UNTRUSTED_WARNING;
+                  //wxLogWarning(_("Signature from untrusted public key \"%s\""), pc);
+               }
+               // else: "_MARGINAL, _FULLY and _ULTIMATE" do not trigger a warning
             }
             else if ( code == _T("USERID_HINT") )
             {

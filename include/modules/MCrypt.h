@@ -51,6 +51,7 @@ public:
       KEYRING_CHECK_ERROR,
       KEYRING_SIGNATURE_ERROR,
       SIGNATURE_EXPIRED_ERROR,
+      SIGNATURE_UNTRUSTED_WARNING,
       SIGNATURE_ERROR,
       PUBLIC_KEY_ENCRIPTION_ERROR,
       ENCRYPTION_ERROR,
@@ -126,7 +127,9 @@ public:
       Verifies the message signature.
 
       On success, returns OK and puts the message text without the signature in
-      messageOut. If no signature was found, returns NO_SIG_ERROR
+      messageOut. If no signature was found, returns NO_SIG_ERROR.
+      If the signature is good, but from an untrusted key, returns 
+      SIGNATURE_UNTRUSTED_WARNING
     */
    virtual Status VerifySignature(const String& messageIn,
                                   String& messageOut,

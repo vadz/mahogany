@@ -1847,6 +1847,40 @@ MessageView::ProcessPart(const MimePart *mimepart)
                CHECK_RET(partBest != 0, _T("No part can be displayed !"));
                ShowPart(partBest);
             }
+            else if ( subtype == "SIGNED" )
+            {
+               String protocol = mimepart->GetParam("protocol");
+               if ( protocol == _T("application/pgp-signature") )
+               {
+                  //wxLogWarning("There is a PGP/MIME signed part");
+                  MimePart *signedPart = mimepart->GetNested();
+                  CHECK_RET( signedPart != 0, _T("Should have a signed part") );
+                  CHECK_RET( (signedPart->GetTransferEncoding() == MIME_ENC_7BIT ||
+                              signedPart->GetTransferEncoding() == MIME_ENC_BASE64 ||
+                              signedPart->GetTransferEncoding() == MIME_ENC_QUOTEDPRINTABLE),
+                             _T("Signed part should be 7 bits"));
+                  MimePart *signaturePart = signedPart->GetNext();
+                  CHECK_RET( signaturePart != 0, _T("Should have a signature part") );
+                  CHECK_RET( signaturePart->GetNext() == 0, _T("Signature should be the last part") );
+                  CHECK_RET( signaturePart->GetNested() == 0, _T("Signature should not have nested parts") );
+                  MimeType signatureType = signaturePart->GetType();
+                  String fullSignatureType = signatureType.GetFull();
+                  CHECK_RET( fullSignatureType == _T("APPLICATION/PGP-SIGNATURE"),
+                             _T("Signature does not have a \"application/pgp-signature\" type"));
+
+                  // Get the raw content (with headers) of the signed part
+                  String signedText = (const char *)signedPart->GetRawContent();
+                  String signature = (const char *)signaturePart->GetContent();
+                  
+                  // XNOTODO: Call GPG, instead of doing as usual.
+                  ProcessAllNestedParts(mimepart);
+
+               } 
+               else
+               {
+                  ProcessAllNestedParts(mimepart);
+               }
+            }
             else // assume MIXED for all unknown
             {
                ProcessAllNestedParts(mimepart);

@@ -110,6 +110,16 @@ public:
                          wxColour(0, 255, 255)) { }
 };
 
+class PGPInfoUntrustedSig : public ClickablePGPInfo
+{
+public:
+   PGPInfoUntrustedSig(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("PGP Signature from untrusted key"),
+                         _T("pgpsig_exp"),
+                         wxColour(255, 128, 0)) { }
+};
+
 class PGPInfoBadSig : public ClickablePGPInfo
 {
 public:
@@ -408,6 +418,10 @@ PGPFilter::DoProcess(String& text,
 
                case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
                   pgpInfo = new PGPInfoExpiredSig(m_msgView);
+                  break;
+
+               case MCryptoEngine::SIGNATURE_UNTRUSTED_WARNING:
+                  pgpInfo = new PGPInfoUntrustedSig(m_msgView);
                   break;
 
                default:
