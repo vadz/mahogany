@@ -6,8 +6,8 @@ $Id$
 
 (I've sorted them a bit by "responsible person". :-) )
 
-- fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
 - fix Adb auto-collection
+  + auto-collection needs testing, better lookup  -- doesn't work yet
 
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
@@ -15,7 +15,6 @@ $Id$
 - wxLayout: --- working on this, KB ---
   + cut&paste, different cursor for focus/no focus
 
-- auto-collection needs testing, better lookup  -- doesn't work yet
 - reply/forward buttons for messageview/folderview
 - update FolderView if mailbox has shrunk  (which callback gets called?)
 - New Mail indicator
@@ -29,6 +28,7 @@ $Id$
       list.
 
 - Python
+  + fix Python problems -- what's wrong? No idea why Setup.py doesn't work.
   + add remaining (important) interface definitions
   + user/global Minit files, security issues
   + add OnNewMail callback by counting messages in mailbox
