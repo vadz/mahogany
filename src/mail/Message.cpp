@@ -141,6 +141,7 @@ static void ExtractAddress(const String& addr,
    const char *addrEnd;
    if ( addrStart )
    {
+      addrStart++; // pointed at '<'
       // return the part before the next '>'
       addrEnd = strchr(addrStart, '>');
       if ( !addrEnd )
@@ -153,7 +154,7 @@ static void ExtractAddress(const String& addr,
    }
    else // no '<' in address
    {
-      // address starts in the very beginning
+      // address starts at the very beginning
       addrStart = addr.c_str();
 
       addrEnd = strchr(addr, '(');
@@ -253,6 +254,9 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
 
    ExtractAddress(adr1, &email1);
    ExtractAddress(adr2, &email2);
+ 
+   strutil_tolower(email1);
+   strutil_tolower(email2);
 
    // TODO the address foo.bar@baz.com should be considered the same as
    //      bar@baz.com, for now it is not...
