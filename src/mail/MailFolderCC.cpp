@@ -3481,8 +3481,6 @@ bool MailFolderCC::CanThread() const
 bool
 MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 {
-   FAIL_MSG( "TODO" );
-
    /*
       if the server supports sorting at all
          if it can sort with the criteria from sortParams
@@ -3493,7 +3491,8 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
       call base class version to do local sorting
     */
 
-   return false;
+   // call base class version to do local sorting
+   return MailFolderCmn::SortMessages(msgnos, sortParams);
 }
 
 // ----------------------------------------------------------------------------

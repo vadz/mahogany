@@ -330,11 +330,6 @@ String strutil_ftime(time_t time, const String & format = "%c",
                      bool gmtflag = false);
 
 
-/* Removes Re: Re[n]: Re(n): and the local translation of
-   it from the beginning of a subject line, used by sorting routines. */
-String
-strutil_removeReplyPrefix(const String &isubject);
-
 /* Read and remove the next number from string. */
 long
 strutil_readNumber(String &string, bool *success = NULL);
@@ -345,24 +340,6 @@ strutil_readString(String &string, bool *success = NULL);
 /* Return an escaped string. */
 String
 strutil_escapeString(const String &string);
-
-/**
-   Combine personal name and mailaddress into a mailaddress line.
-*/
-String
-strutil_makeMailAddress(const String &personal,
-                        const String &mailaddress);
-
-/**
-   Parse a mail address line and return personal/mailbox/hostname
-   bits.
-   @return true on success
-*/
-bool
-strutil_getMailAddress(const String &inputline,
-                       String * personal = NULL,
-                       String * mailbox = NULL,
-                       String * hostname = NULL);
 
 /// Check if text is 7bit only:
 bool strutil_is7bit(const char *text);

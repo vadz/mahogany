@@ -70,6 +70,13 @@ public:
    /// compare address with a string
    bool operator==(const String& address) const;
 
+   /**
+     Removes Re: Re[n]: Re(n): and the local translation of
+     it from the beginning of a subject line - used to convert the subject to
+     the canonical form
+    */
+   static String NormalizeSubject(const String& subject);
+
 protected:
    /// must have default ctor because we declarae copy ctor private
    Address() { }

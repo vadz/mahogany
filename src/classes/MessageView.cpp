@@ -1479,9 +1479,30 @@ MessageView::ShowPart(const MimePart *mimepart)
 
    String fileName = mimepart->GetFilename();
 
-   // let's guess a little if we have unknown encoding such as
-   // APPLICATION/OCTET_STREAM
    MimeType::Primary primaryType = type.GetPrimary();
+
+   // deal with unknown MIME types: some broken mailers use unregistered
+   // primary MIME types - try to do something with them here (even though
+   // breaking the neck of the author of the software which generated them
+   // would be more satisfying)
+   if ( primaryType > MimeType::OTHER )
+   {
+      wxString typeName = type.GetType();
+
+      if ( typeName == "OCTET" )
+      {
+         // I have messages with "Content-Type: OCTET/STREAM", convert them
+         // to "APPLICATION/OCTET-STREAM"
+         primaryType = MimeType::APPLICATION;
+      }
+      else
+      {
+         wxLogDebug("Invalid MIME type '%s'!", typeName.c_str());
+      }
+   }
+
+   // let's guess a little if we have generic APPLICATION MIME type, we may
+   // know more about this file type from local sources
    if ( primaryType == MimeType::APPLICATION )
    {
       // get the MIME type for the files of this extension
@@ -1626,6 +1647,12 @@ MessageView::ProcessPart(const MimePart *mimepart)
       case MimeType::VIDEO:
       case MimeType::MODEL:
       case MimeType::OTHER:
+      case MimeType::CUSTOM1:
+      case MimeType::CUSTOM2:
+      case MimeType::CUSTOM3:
+      case MimeType::CUSTOM4:
+      case MimeType::CUSTOM5:
+      case MimeType::CUSTOM6:
          // a simple part, show it (ShowPart() decides how exactly)
          ShowPart(mimepart);
          break;

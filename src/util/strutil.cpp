@@ -1164,61 +1164,6 @@ strutil_ftime(time_t time, const String & format, bool gmtflag)
    return strTime;
 }
 
-
-String
-strutil_removeReplyPrefix(const String &isubject)
-{
-   /* Removes Re: Re[n]: Re(n): and the local translation of
-      it. */
-   String subject = isubject;
-   strutil_delwhitespace(subject);
-
-   String trPrefix = _("Re");
-
-   size_t idx = 0;
-
-   if(subject.Length() > strlen("Re")
-      && Stricmp(subject.Left(strlen("Re")), "Re") == 0)
-      idx = strlen("Re");
-   else if(subject.Length() > trPrefix.Length()
-           && Stricmp(subject.Left(trPrefix.Length()), trPrefix) == 0)
-      idx = trPrefix.Length();
-
-   if(idx == 0)
-      return subject;
-
-   char needs = '\0';
-   while(idx < subject.Length())
-   {
-      if(subject[idx] == '(')
-      {
-         if(needs == '\0')
-            needs = ')';
-         else
-            return subject; // syntax error
-      }
-      else if(subject[idx] == '[')
-      {
-         if(needs == '\0')
-            needs = ']';
-         else
-            return subject; // syntax error
-      }
-      else if(subject[idx] == ':' && needs == '\0')
-         break; //done
-      else if(! isdigit(subject[idx]))
-      {
-         if(subject[idx] != needs)
-            return subject; // syntax error
-         else
-            needs = '\0';
-      }
-      idx++;
-   }
-   subject = subject.Mid(idx+1);
-   strutil_delwhitespace(subject);
-   return subject;
-}
 /* Read and remove the next number from string. */
 long
 strutil_readNumber(String &string, bool *success)

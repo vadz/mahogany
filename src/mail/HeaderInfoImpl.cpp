@@ -460,7 +460,7 @@ void HeaderInfoListImpl::Sort()
    else // we do need to sort messages
    {
       // not yet
-#if 0
+#if 1
       m_tableMsgno = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
       m_tablePos = (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
 

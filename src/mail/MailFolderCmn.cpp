@@ -45,6 +45,7 @@
 #include "MDialogs.h"         // for MProgressDialog
 
 #include "HeaderInfo.h"
+#include "Address.h"
 
 #include "MThread.h"
 
@@ -911,13 +912,14 @@ static int CompareStatus(int stat1, int stat2)
 
 extern "C"
 {
-   static int ComparisonFunction(const void *p1, const void *p2)
+   static int SortComparisonFunction(const void *p1, const void *p2)
    {
       // check that the caller didn't forget to acquire the global data lock
       ASSERT_MSG( gs_SortData.mutex.IsLocked(), "using unlocked gs_SortData" );
 
-      size_t n1 = *(size_t *)p1,
-             n2 = *(size_t *)p2;
+      // convert msgnos to indices
+      MsgnoType n1 = *(MsgnoType *)p1 - 1,
+                n2 = *(MsgnoType *)p2 - 1;
 
       HeaderInfo *i1 = gs_SortData.hil->GetItemByIndex(n1),
                  *i2 = gs_SortData.hil->GetItemByIndex(n2);
@@ -926,10 +928,10 @@ extern "C"
       long sortOrder = gs_SortData.sortParams.sortOrder;
 
       int result = 0;
-      while ( result == 0 && sortOrder != 0 )
+      while ( !result && sortOrder != 0 )
       {
-         long criterium = sortOrder & 0xF;
-         sortOrder >>= 4;
+         long criterium = GetSortCrit(sortOrder);
+         sortOrder = GetSortNextCriterium(sortOrder);
 
          // we rely on MessageSortOrder values being what they are: as _REV
          // version immediately follows the normal order constant, we should
@@ -947,8 +949,8 @@ extern "C"
             case MSO_SUBJECT:
                {
                   String
-                     subj1 = strutil_removeReplyPrefix(i1->GetSubject()),
-                     subj2 = strutil_removeReplyPrefix(i2->GetSubject());
+                     subj1 = Address::NormalizeSubject(i1->GetSubject()),
+                     subj2 = Address::NormalizeSubject(i2->GetSubject());
 
                   result = Stricmp(subj1, subj2);
                }
@@ -990,6 +992,8 @@ extern "C"
                // we don't store score any more in HeaderInfo
 #ifdef USE_HEADER_SCORE
                result = CmpNumeric(i1->GetScore(), i2->GetScore());
+#else
+               FAIL_MSG("unimplemented");
 #endif // USE_HEADER_SCORE
                break;
 
@@ -1019,9 +1023,48 @@ extern "C"
 bool
 MailFolderCmn::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
 {
-   FAIL_MSG( "TODO" );
+   HeaderInfoList_obj hil = GetHeaders();
 
-   return false;
+   CHECK( hil, false, "no listing to sort" );
+
+   MsgnoType count = hil->Count();
+
+   // HeaderInfoList::Sort() is supposed to check for these cases
+   ASSERT_MSG( GetSortCritDirect(sortParams.sortOrder) != MSO_NONE,
+               "nothing to do in Sort() - shouldn't be called" );
+
+   ASSERT_MSG( count > 1,
+               "nothing to sort in Sort() - shouldn't be called" );
+
+   MFrame *frame = GetInteractiveFrame();
+   if ( frame )
+   {
+      wxLogStatus(frame, _("Sorting %u messages..."), count);
+   }
+
+   MLocker lock(gs_SortData.mutex);
+   gs_SortData.sortParams = sortParams;
+   gs_SortData.hil = hil.operator->();
+
+   // start with unsorted listing
+   for ( MsgnoType n = 0; n < count; n++ )
+   {
+      // +1 because we want the msgnos, not indices
+      msgnos[n] = n + 1;
+   }
+
+   // now sort it
+   qsort(msgnos, count, sizeof(MsgnoType), SortComparisonFunction);
+
+   // don't leave dangling pointers around
+   gs_SortData.hil = NULL;
+
+   if ( frame )
+   {
+      wxLogStatus(frame, _("Sorting %u messages... done."), count);
+   }
+
+   return true;
 }
 
 // sorting/threading is going to be done by HeaderInfoList itself now
@@ -2784,57 +2827,6 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    {
       wxLogStatus(frame, _("Threading %lu messages... done."), count);
    }
-}
-
-static void SortListing(MailFolder *mf,
-                        HeaderInfoList *hil,
-                        const SortParams& sortParams)
-{
-   CHECK_RET( hil, "no listing to sort" );
-
-   // don't sort the listing if we don't have any sort criterium (so sorting
-   // "by arrival order" will be much faster!)
-   if ( sortParams.sortOrder != 0 )
-   {
-      size_t count = hil->Count();
-      if ( count > 1 )
-      {
-         MFrame *frame = mf->GetInteractiveFrame();
-         if ( frame )
-         {
-            wxLogStatus(frame, _("Sorting %u messages..."), count);
-         }
-
-         MLocker lock(gs_SortData.mutex);
-         gs_SortData.sortParams = sortParams;
-         gs_SortData.hil = hil;
-
-         // start with unsorted listing
-         size_t *transTable = new size_t[count];
-         for ( size_t n = 0; n < count; n++ )
-         {
-            transTable[n] = n;
-         }
-
-         // now sort it
-         qsort(transTable, count, sizeof(size_t), ComparisonFunction);
-
-         // and tell the listing to use it (it will delete it)
-         hil->SetTranslationTable(transTable);
-
-         // just in case
-         gs_SortData.hil = NULL;
-
-         if ( frame )
-         {
-            wxLogStatus(frame, _("Sorting %u messages... done."), count);
-         }
-      }
-      //else: avoid sorting empty listing or listing of 1 element
-   }
-   //else: configured not to do any sorting
-
-   hil->DecRef();
 }
 
 void

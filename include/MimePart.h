@@ -56,6 +56,18 @@ public:
       MODEL = 7,
       /// unknown
       OTHER = 8,
+      /// custom MIME type
+      CUSTOM1 = 9,
+      /// custom MIME type
+      CUSTOM2 = 10,
+      /// custom MIME type
+      CUSTOM3 = 11,
+      /// custom MIME type
+      CUSTOM4 = 12,
+      /// custom MIME type
+      CUSTOM5 = 13,
+      /// custom MIME type
+      CUSTOM6 = 14,
       /// invalid type code
       INVALID = 15
    };
