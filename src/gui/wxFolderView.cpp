@@ -3148,6 +3148,15 @@ unsigned long wxFolderView::GetDeletedCount() const
    return m_nDeleted;
 }
 
+bool wxFolderView::GoToMessage(MsgnoType msgno)
+{
+   CHECK( msgno < GetHeadersCount(), false, "invalid item in GoToMessage" );
+
+   m_FolderCtrl->GoToItem(msgno);
+
+   return true;
+}
+
 bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
 {
    if ( !READ_CONFIG(m_Profile, MP_FVIEW_AUTONEXT_UNREAD_MSG) )
@@ -4148,6 +4157,41 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
       case WXMENU_MSG_QUICK_FILTER:
          // create a filter for the (first of) currently selected message(s)
          m_TicketList->Add(m_ASMailFolder->GetMessage(GetFocus(), this));
+         break;
+
+      case WXMENU_MSG_GOTO_MSGNO:
+         {
+            long max = GetHeadersCount() + 1;
+
+            if ( max == 1 )
+            {
+               // we're empty
+               wxLogStatus(m_Frame, _("No messages to jump to."));
+               break;
+            }
+
+            long num = m_FolderCtrl->GetPreviewedItem();
+            if ( num == -1 )
+               num = 1;
+
+            num = MGetNumberFromUser
+                  (
+                     String::Format(_("Enter the number of the message "
+                                      "to go to, from 1 to %ld"), max),
+                     _("Message: "),
+                     _("Jump to a message"),
+                     num, 1, max,
+                     m_Frame
+                  );
+
+            if ( num == -1 )
+            {
+               // cancelled by user
+               break;
+            }
+
+            GoToMessage(num - 1);
+         }
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:

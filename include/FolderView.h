@@ -44,6 +44,12 @@ public:
    virtual void SetFolder(MailFolder *mf) = 0;
 
    /**
+      Move to the message with this number (this refers to the on screen order,
+      not the internal msgno).
+    */
+   virtual bool GoToMessage(MsgnoType msgno) = 0;
+
+   /**
       Move to the next unread message, if any.
 
       @param takeNextIfNoUnread if true, select next msg if no more unread

@@ -205,7 +205,7 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 //     should end with an ellipsis (`...')
 //
 // The following accelerators are still unused:
-//    with Ctrl:           E    JK M      T      
+//    with Ctrl:           E     K M      T      
 //    with Shift-Ctrl:  B DE  HIJK M OPQ  T VWXY 
 static const MenuItemInfo g_aMenuItems[] =
 {
@@ -388,6 +388,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
    { WXMENU_MSG_EXPUNGE,   gettext_noop("E&xpunge"), gettext_noop("Remove all messages marked as deleted from the folder.")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_GOTO_MSGNO,   gettext_noop("&Jump to message...\tCtrl-J"), gettext_noop("Select the message by its number")     , FALSE },
    { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_MSG_NEXT_FLAGGED,   gettext_noop("N&ext flagged"), gettext_noop("Select next flagged message")     , FALSE },
    { WXMENU_MSG_SEARCH,  gettext_noop("Searc&h..."), gettext_noop("Search and select messages") , FALSE },

@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+13.03.02 VZ: added a command to jump to message by number
 13.03.02 VZ: added a new "message number" column to the folder view
 13.03.02 VZ: new and improved folder view columns configuration dialog
 11.03.02 VZ: many fixes to persistent message box handling

@@ -68,6 +68,8 @@ public:
    /// Destructor
    virtual ~wxFolderView();
 
+   virtual bool GoToMessage(MsgnoType msgno);
+
    virtual bool MoveToNextUnread(bool takeNextIfNoUnread = true);
 
    /** Set the associated folder.
