@@ -422,7 +422,7 @@ strutil_expandpath(const String &ipath)
          struct passwd *entry;
          do
          {
-            entry = getpwent(void);
+            entry = getpwent();
             if(entry && entry->pw_name == user)
                break;
          }while(entry);
