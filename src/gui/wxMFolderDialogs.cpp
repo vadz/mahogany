@@ -1258,41 +1258,113 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
    // name
    if ( !m_userModifiedPath )
    {
+      // ... try to set it from the folder name
+      wxFolderCreateDialog *dlg =
+         GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
+
+      CHECK_RET( dlg, "we should be only called when creating" );
+
+      wxString parentName = dlg->GetParentFolderName();
+
+      // NB: we modify the text even if the folder name is empty because
+      //     otherwise entering a character into "Folder name" field and
+      //     erasing it wouldn't restore the original "Path" value
+      wxString folderName;
+
+      // the control whose value we will automatically set
+      wxTextCtrl *text = NULL;
+
       FolderType folderType = GetCurrentFolderType();
-      if ( IsFileOrDirFolder(folderType) )
+      switch ( folderType )
       {
-         // ... try to set it from the folder name
-         wxFolderCreateDialog *dlg =
-            GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
-
-         CHECK_RET( dlg, "we should be only called when creating" );
-
-         // modify the text even if the folder name is empty because
-         // otherwise entering a character into "Folder name" field and
-         // erasing it wouldn't restore the original "Path" value
-         wxString folderName;
-
-         // MH folder should be created under its parent by default
-         if ( folderType == MF_MH )
-         {
+         case MF_MH:
+            // MH folder should be created under its parent by default
+            //
             // AfterFirst() removes the MH root prefix
-            folderName = dlg->GetParentFolderName().AfterFirst('/');
+            folderName = parentName.AfterFirst('/');
             if ( !folderName.empty() )
               folderName += '/';
-         }
-         //else: MBOX folders don't have hierarchical structure
 
-         folderName += dlg->GetFolderName();
+            // fall through
 
-         // this will tell SetValue() that we modified it ourselves, not the
-         // user
-         m_userModifiedPath = -1;
+         case MF_FILE:
+            // MBOX folders don't have hierarchical structure, use as is
+            text = m_path;
+            break;
 
-         // strutil_expandfoldername() will normalize the path, i.e. make it
-         // absolute prepending the correct prefix depending on the folder
-         // type
-         m_path->SetValue(strutil_expandfoldername(folderName, folderType));
+         case MF_NNTP:
+         case MF_NEWS:
+            text = m_newsgroup;
+            // fall through
+
+         case MF_IMAP:
+            if ( !text )
+               text = m_mailboxname;
+
+            folderName = parentName;
+            if ( !folderName.empty() )
+            {
+               // we have a problem with the IMAP delimiters here as don't
+               // have the MailFolder to query - use this simple heuristic
+               // and hope for the best
+               char chDelim;
+
+               if ( folderType == MF_IMAP )
+               {
+                  if ( strchr(folderName, '/') )
+                  {
+                     // if it already has a slash, chances are that it is
+                     // used as the path separator
+                     chDelim = '/';
+                  }
+                  else if ( strchr(folderName, '.') )
+                  {
+                     // same as above
+                     chDelim = '.';
+                  }
+                  else
+                  {
+                     // can't set the name automatically, better not to do
+                     // anything than generating a wrong folder path
+                     return;
+                  }
+               }
+               else // news
+               {
+                  chDelim = '.';
+               }
+
+               folderName += chDelim;
+            }
+            break;
+
+         default:
+            FAIL_MSG( "unexpected folder type in UpdateOnFolderNameChange" );
+            // fall through
+
+         case MF_POP:
+         case MF_GROUP:
+            // don't modify the mailbox name at all: either because there ius
+            // nothing to modify (MF_POP) or because it doesn't make sense
+            // (MF_GROUP)
+            return;
       }
+
+      CHECK_RET( text, "must have been set above" );
+
+      folderName += dlg->GetFolderName();
+
+      if ( folderType == MF_MH || folderType == MF_FILE )
+      {
+         // strutil_expandfoldername() will normalize the path, i.e. make it
+         // absolute prepending the correct prefix depending on the folder type
+         folderName = strutil_expandfoldername(folderName, folderType);
+      }
+
+      // this will tell SetValue() that we modified it ourselves, not the user
+      m_userModifiedPath = -1;
+
+      text->SetValue(folderName);
    }
 }
 
@@ -2416,10 +2488,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          }
 #endif // 0
 
-         // fall through
+         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+         break;
 
       case MF_POP:
-         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
          break;
 
       case MF_NNTP:
