@@ -105,7 +105,7 @@ class MWindow;
 class Message;
 class MessageView;
 class Sequence;
-class SortParams;
+struct SortParams;
 
 // ----------------------------------------------------------------------------
 // MLogCircle
