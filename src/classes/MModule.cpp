@@ -489,7 +489,7 @@ protected:
          m_entries = m_count > 0 ? new MModuleListingEntryImpl[m_count] : NULL;
       }
    ~MModuleListingImpl()
-      { if ( m_count ) delete [] m_entries; }
+      { delete [] m_entries; }
 private:
    MModuleListingEntryImpl *m_entries;
    size_t m_count;
