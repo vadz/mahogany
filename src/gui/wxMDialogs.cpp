@@ -1497,8 +1497,12 @@ public:
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
-   bool WasChanged(void) { return m_Criterium != m_OldCriterium;};
-
+   bool WasChanged(void)
+      {
+         return m_Criterium != m_OldCriterium ||
+            m_Arg != m_OldArg;
+      };
+   
 protected:
 
    void UpdateCritStruct(void)
@@ -1514,6 +1518,7 @@ protected:
    wxTextCtrl  *m_Keyword;
    int         m_OldCriterium;
    int         m_Criterium;
+   String      m_Arg, m_OldArg;
 };
 
 wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
@@ -1580,6 +1585,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 
    TransferDataToWindow();
    m_OldCriterium = m_Criterium;
+   m_OldArg = m_Arg;
 }
 
 
@@ -1589,8 +1595,9 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
    if(m_Invert->GetValue() != 0)
       m_Criterium |= SEARCH_CRIT_INVERT_FLAG;
 
+   m_Arg = m_Keyword->GetValue();
    GetProfile()->writeEntry(MP_MSGS_SEARCH_CRIT, m_Criterium);
-   GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Keyword->GetValue());
+   GetProfile()->writeEntry(MP_MSGS_SEARCH_ARG, m_Arg);
 
    UpdateCritStruct();
    return TRUE;
@@ -1599,9 +1606,10 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
 bool wxMessageSearchDialog::TransferDataToWindow()
 {
    m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
+   m_Arg = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG);
    m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
    m_Invert->SetValue((m_Criterium & SEARCH_CRIT_INVERT_FLAG) != 0);
-   m_Keyword->SetValue(READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG));
+   m_Keyword->SetValue(m_Arg);
    UpdateCritStruct();
    return TRUE;
 }
