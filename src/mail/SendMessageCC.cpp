@@ -1171,7 +1171,7 @@ SendMessageCC::Send(void)
          if(m_UseSSL)
          {
             STATUSMESSAGE(("Sending message via SSL..."));
-            service << "/ssl";
+            service << "ssl";
          }
 #endif // USE_SSL
          stream = smtp_open_full(NIL,
@@ -1189,7 +1189,7 @@ SendMessageCC::Send(void)
          if( m_UseSSL )
          {
             STATUSMESSAGE(("Posting message via SSL..."));
-            service << "/ssl";
+            service << "ssl";
          }
 #endif // USE_SSL
 
