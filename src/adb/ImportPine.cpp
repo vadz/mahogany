@@ -96,12 +96,14 @@ protected:
    // It should be called after finishing with parsing of a field, '*ppc' is
    // supposed to point at the '\t' character which separates the fields.
    bool CheckHasNextField(size_t *index,
-                           wxString *line,
-                           const char **ppc) const;
+                          wxString *line,
+                          const char **ppc) const;
 
    // another ParsePineADBEntry helper: extracts one field which is supposed to
    // start at the current position
-   wxString ExtractField(const char **ppc) const;
+   wxString ExtractField(size_t *index,
+                         wxString *line,
+                         const char **ppc) const;
 
    // the starting lines for the entries and groups
    wxArrayInt m_entriesLineNumbers,
@@ -131,13 +133,42 @@ IMPLEMENT_ADB_IMPORTER(AdbPineImporter,
 // helpers
 // ----------------------------------------------------------------------------
 
-wxString AdbPineImporter::ExtractField(const char **ppc) const
+wxString AdbPineImporter::ExtractField(size_t *index,
+                                       wxString *line,
+                                       const char **ppc) const
 {
    wxString field;
    const char *pc = *ppc;
-   while ( *pc && *pc != '\t' )
+
+   bool cont = TRUE;
+
+   while ( cont )
    {
-      field += *pc++;
+      while ( *pc && *pc != '\t' )
+      {
+         field += *pc++;
+      }
+
+      cont = FALSE;
+
+      // the mailing list addresses field may be split on several lines at
+      // commas - check for this
+      if ( !*pc && *(pc - 1) == ',' )
+      {
+         // the line should continue
+         pc--;
+
+         if ( CheckHasNextField(index, line, &pc) )
+         {
+            cont = TRUE;
+         }
+         else
+         {
+            wxLogWarning(_("Unterminated mailing address list at line %d "
+                           "in the PINE address book file '%s'."),
+                         *index, line->c_str());
+         }
+      }
    }
 
    *ppc = pc;
@@ -146,8 +177,8 @@ wxString AdbPineImporter::ExtractField(const char **ppc) const
 }
 
 bool AdbPineImporter::CheckHasNextField(size_t *index,
-                                         wxString *line,
-                                         const char **ppc) const
+                                        wxString *line,
+                                        const char **ppc) const
 {
    const char *pc = *ppc;
 
@@ -246,15 +277,15 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
    wxString tmp ;
 
    // first extract the nickname
-   tmp = ExtractField(&pc);
+   tmp = ExtractField(index, &line, &pc);
    if ( nickname )
-      *nickname = ExtractField(&pc);
+      *nickname = tmp;
 
    if ( !CheckHasNextField(index, &line, &pc) )
       return FALSE;
 
    // extract fullname?
-   tmp = ExtractField(&pc);
+   tmp = ExtractField(index, &line, &pc);
    if ( fullname )
       *fullname = tmp;
 
@@ -262,7 +293,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       return FALSE;
 
    // extract addresses
-   tmp = ExtractField(&pc);
+   tmp = ExtractField(index, &line, &pc);
    if ( addresses )
       *addresses = tmp;
 
@@ -277,10 +308,13 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
       if ( CheckHasNextField(index, &line, &pc) )
       {
          // FCC field - we're not interested in it
-         (void)ExtractField(&pc);
+         (void)ExtractField(index, &line, &pc);
 
-         if ( CheckHasNextField(index, &line, &pc) && comment )
-            *comment = ExtractField(&pc);
+         if ( CheckHasNextField(index, &line, &pc) )
+         {
+            if ( comment )
+               *comment = ExtractField(index, &line, &pc);
+         }
       }
    }
 
@@ -301,6 +335,8 @@ size_t AdbPineImporter::GetEntriesOrGroups(wxArrayString& names,
    size_t nLines = m_textfile.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
+      size_t nStartLine = nLine;
+
       wxString nickname, addresses;
       if ( ParsePineADBEntry(&nLine, &nickname, &addresses) )
       {
@@ -320,7 +356,7 @@ size_t AdbPineImporter::GetEntriesOrGroups(wxArrayString& names,
             }
 
             // remember the starting line index
-            lineNumbers.Add(nLine);
+            lineNumbers.Add(nStartLine);
 
             names.Add(nickname);
          }

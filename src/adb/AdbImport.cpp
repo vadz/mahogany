@@ -61,11 +61,21 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
                            const String& path)       // starting at
 {
    // import entries
+   size_t nAnonIndex = 0;
    wxArrayString entries;
    size_t nEntryCount = importer->GetEntryNames(path, entries);
    for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
    {
       String entryName = entries[nEntry];
+
+      if ( !entryName )
+      {
+         wxLogDebug("Autogenerating nickname for nameless address "
+                    "entry %d in '%s'", nEntry, path.c_str());
+
+         entryName.Printf(_("Nameless entry %d"), ++nAnonIndex);
+      }
+
       AdbEntry *entry = group->CreateEntry(entryName);
       if ( !entry )
       {

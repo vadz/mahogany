@@ -782,8 +782,23 @@ wxMApp::GetStdIcon(int which) const
 {
    // this function may be (and is) called from the persistent controls code
    // which uses the global config object for its own needs, so avoid changing
-   // its path here
-   ProfilePathChanger changePath(mApplication->GetProfile(), "");
+   // its path here - or rather restore it on funciton exit
+   class ConfigPathRestorer
+   {
+   public:
+      ConfigPathRestorer()
+      {
+         m_path = mApplication->GetProfile()->GetConfig()->GetPath();
+      }
+
+      ~ConfigPathRestorer()
+      {
+         mApplication->GetProfile()->GetConfig()->SetPath(m_path);
+      }
+
+   private:
+      wxString m_path;
+   } storeConfigPath;
 
    // Set our icons for the dialogs.
    switch(which)

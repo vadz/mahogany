@@ -586,6 +586,8 @@ AdbEntryGroup *FCEntryGroup::GetGroup(const String& name) const
 
 AdbEntry *FCEntryGroup::CreateEntry(const String& name)
 {
+  CHECK( !!name, NULL, "can't create entries with empty names" );
+
   FCEntry *pEntry = new FCEntry((FCEntryGroup *)this, name, TRUE /* new */);
   if ( !pEntry->IsOk() ) {
     pEntry->DecRef();
