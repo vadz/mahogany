@@ -351,7 +351,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
          addr = m_Envelope->from;
       if(! addr)
          addr = m_Envelope->sender;
-      if(addr->personal && strlen(addr->personal))
+      if(addr && addr->personal && strlen(addr->personal))
          name = String(addr->personal);
 /*
   This is a rather nice hack which takes the "From:" personal name and 

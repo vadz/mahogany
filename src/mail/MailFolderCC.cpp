@@ -57,6 +57,16 @@
 
 #include <ctype.h>   // isspace()
 
+#ifdef OS_UNIX
+#include <signal.h>
+
+static void sigpipe_handler(int)
+{
+   // do nothing
+}
+#endif
+
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -2017,6 +2027,20 @@ MailFolderCC::CClientInit(void)
    // 1 try is enough, the default (3) is too slow
    mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
 
+#ifdef OS_UNIX
+   // install our own sigpipe handler:
+   struct sigaction sa;
+   sigset_t sst;
+   sigemptyset(&sst);
+   sa.sa_handler = sigpipe_handler;
+   sa.sa_mask = sst;
+   sa.sa_flags = SA_RESTART;
+   if( sigaction(SIGPIPE,  &sa, NULL) != 0)
+   {
+      LOGMESSAGE((M_LOG_ERROR, _("Cannot set signal handler for SIGPIPE.")));
+   }
+#endif
+   
    cclientInitialisedFlag = true;
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();

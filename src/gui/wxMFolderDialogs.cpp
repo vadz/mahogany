@@ -1740,21 +1740,20 @@ wxFolderPropertiesPage::SetDefaultValues()
          // take the global server setting for this protocol
          switch ( folderType )
          {
-            case MF_NNTP:
-               value = READ_CONFIG(profile, MP_NNTPHOST);
-               break;
-
-            case MF_POP:
-               value = READ_CONFIG(profile, MP_POPHOST);
-               break;
-
-            case MF_IMAP:
-               value = READ_CONFIG(profile, MP_IMAPHOST);
-               break;
-
-            default:
-               ASSERT_MSG(0,"new remote foldertype was added");
-               // suppress warnings
+         case MF_NNTP:
+            value = READ_CONFIG(profile, MP_NNTPHOST);
+            break;
+         case MF_POP:
+            value = READ_CONFIG(profile, MP_POPHOST);
+            break;
+         case MF_IMAP:
+            value = READ_CONFIG(profile, MP_IMAPHOST);
+            break;
+         default:
+            ASSERT_MSG(0,"new remote foldertype was added");
+         case MF_GROUP:
+            break;
+            // suppress warnings
                break;
          }
       }
@@ -2103,6 +2102,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          break;
       case MF_IMAP:
          serverType = ServerImap;
+         break;
+      case MF_GROUP:
          break;
       default:
          ASSERT_MSG(0,"new foldertype with server added");

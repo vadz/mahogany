@@ -1161,7 +1161,8 @@ wxComposeView::DoInitText(Message *msg)
             {
                wxLog::FlushActive();
 
-               msg = _("Couldn't read vCard file '%s'.");
+               msg.Printf(_("Couldn't read vCard file '%s'."),
+                          filename.c_str());
             }
          }
 

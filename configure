@@ -5666,15 +5666,8 @@ echo "configure:5656: checking for libmal library source in ./extra/src" >&5
 	
 	
 	
-	PILOT_FLAGS=-DHAVE_LIBMAL
-	
 	PILOT_LIBS=$PISOCK_LIB
 	
-	USE_LIBMAL=1
-	cat >> confdefs.h <<\EOF
-#define USE_LIBMAL 1
-EOF
-
 	MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
     else
       echo "$ac_t""not found - MAL synchronisation for PalmOS not available" 1>&6
@@ -5749,7 +5742,7 @@ EOF
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5753: checking for $ac_word" >&5
+echo "configure:5746: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5784,7 +5777,7 @@ if test "x$USE_DOCXX" != "x"; then
 	# Extract the first word of "doc++", so it can be a program name with args.
 set dummy doc++; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5788: checking for $ac_word" >&5
+echo "configure:5781: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DOCXX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5823,7 +5816,7 @@ fi
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5827: checking for $ac_word" >&5
+echo "configure:5820: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5854,7 +5847,7 @@ fi
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5858: checking for $ac_word" >&5
+echo "configure:5851: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5885,7 +5878,7 @@ fi
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5889: checking for $ac_word" >&5
+echo "configure:5882: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5916,7 +5909,7 @@ fi
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5920: checking for $ac_word" >&5
+echo "configure:5913: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5964,7 +5957,7 @@ LATEX2HTML="echo \"No doc generator(html) available.\""
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5968: checking for $ac_word" >&5
+echo "configure:5961: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6215,7 +6208,6 @@ s%@cflags@%$cflags%g
 s%@libs@%$libs%g
 s%@llibs@%$llibs%g
 s%@ccoptions@%$ccoptions%g
-s%@PILOT_FLAGS@%$PILOT_FLAGS%g
 s%@PILOT_LIBS@%$PILOT_LIBS%g
 s%@MAKE_HAVE_LIBMAL@%$MAKE_HAVE_LIBMAL%g
 s%@MAKE_USE_MODULES@%$MAKE_USE_MODULES%g
