@@ -288,8 +288,8 @@ bool UUdecodeFile(const wxChar* input, String& output, const wxChar** endOfEncod
 
 void
 UUDecodeFilter::DoProcess(String& text,
-                     MessageViewer *viewer,
-                     MTextStyle& style)
+                          MessageViewer *viewer,
+                          MTextStyle& style)
 {
    // do we have something looking like UUencoded data?
    static const size_t lenBegin = wxStrlen(UU_BEGIN_PREFIX);
@@ -371,7 +371,7 @@ UUDecodeFilter::DoProcess(String& text,
       if ( ok )
       {
          // output the part before the BEGIN line, if any
-         String prolog(nextToOutput, startBeginLine - lenEOL);
+         String prolog(nextToOutput, startBeginLine);
          if ( !prolog.empty() )
          {
             m_next->Process(prolog, viewer, style);
