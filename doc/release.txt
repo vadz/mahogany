@@ -68,6 +68,8 @@ To upload.sourceforge.net, then create the release from SF project admin page.
 Use doc/relnotes.txt for the release notes and the "Changes" part of
 doc/Mannounce.txt for the change log.
 
+Don't forget to upload Mdocs.tar.gz!
+
 6. Announcing the release
 -------------------------
 
@@ -76,7 +78,6 @@ a) mailing lists and newsgroups
 Edit and send the announcement (doc/Mannounce.txt) to the following addresses:
 
 lg@ssc.com
-lsm@execpc.com
 c-client@u.washington.edu
 linux-announce@news.ornl.gov
 editor@32bitsonline.com
@@ -92,6 +93,10 @@ b) IMAP software database
 Write to software-list@imap.org to update the information in the IMAP software
 database.
 
+Update: apparently now they have a Web interface at
+
+              http://www.imap.org/products/submit.php
+
 c) Freshmeat
 
 Update the FM record
@@ -102,4 +107,23 @@ e) GNU Free Software Directory: http://www.gnu.org/directory/mahogany.html
 
 f) OSD: http://www.opensourcedirectory.org/ (not sure if really needed)
 
+g) Linux Software Map:
+
+Update the following template and send it to lsm@execpc.com:
+
+Begin4
+Title:          Mahogany
+Version:        0.64
+Entered-date:   2002-01-14
+Description:    A powerful and flexible cross-platform GUI email client
+Keywords:       mail news SMTP POP IMAP NNTP MIME Python vCard Palm
+Author:         Vadim Zeitlin <vadim@wxwindows.org>
+                Karsten Ball|der <ballueder@gmx.net>
+Primary-site:   http://sourceforge.net/project/showfiles.php?group_id=3100&release_id=69878
+Platforms:      Unix/GTK+ and Win32
+Copying-policy: Mahogany Artistic License or GPL
+End
+
+
+----------------------------------------------------------------------------
 vi: ts=8 nolist:
