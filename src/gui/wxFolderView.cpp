@@ -1874,27 +1874,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          Update();
       }
 
-      // select some "interesting" message initially: the logic here is a bit
-      // hairy, but, hopefully, this does what expected.
-      //
-      // explanations: if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we
-      // just select either the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or
-      // the last one (otherwise). If it is on and we have an unread message,
-      // we always select first unread message, but if there are no unread
-      // messages, we revert to the previous behaviour, i.e. select the first
-      // or the last one
-      if ( m_NumOfMessages > 0 )
-      {
-         HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
-         if ( hil )
-         {
-            SelectInitialMessage(hil);
-         }
-      }
-
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
-      if(m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl)
-         m_FolderCtrl->SetFocus(); // so we can react to keyboard events
+      if ( m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl )
+      {
+         // so we can react to keyboard events
+         m_FolderCtrl->SetFocus();
+      }
    }
    //else: no new folder
 
@@ -1905,6 +1890,15 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 void
 wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
 {
+   // select some "interesting" message initially: the logic here is a bit
+   // hairy, but, hopefully, this does what expected.
+   //
+   // explanations: if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we
+   // just select either the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or
+   // the last one (otherwise). If it is on and we have an unread message,
+   // we always select first unread message, but if there are no unread
+   // messages, we revert to the previous behaviour, i.e. select the first
+   // or the last one
    if ( !m_NumOfMessages )
    {
       // nothing to select anyhow
