@@ -209,7 +209,7 @@ inline bool FolderTypeHasUserName(MFolderType type)
    case MF_ROOT:
    case MF_ILLEGAL:
    case MF_PROFILE:
-      FAIL_MSG("this is not supposed to be called for this type");
+      FAIL_MSG(_T("this is not supposed to be called for this type"));
       // fall through nevertheless
 
    case MF_INBOX:
@@ -238,7 +238,7 @@ inline bool FolderTypeHasServer(MFolderType type)
 /// combine type and flags into one int
 inline int CombineFolderTypeAndFlags(MFolderType type, int flags)
 {
-   ASSERT_MSG( !(flags & MF_TYPEMASK), "flags shouldn't contain type" );
+   ASSERT_MSG( !(flags & MF_TYPEMASK), _T("flags shouldn't contain type") );
 
    return type | flags;
 }
@@ -331,7 +331,7 @@ inline bool CanCreateMessagesInFolder(MFolderType folderType)
 
       case MF_ILLEGAL:
       case MF_PROFILE:
-         FAIL_MSG("this is not supposed to be called for this type");
+         FAIL_MSG(_T("this is not supposed to be called for this type"));
          // fall through nevertheless
 
          // don't use "default:" - like this, the compiler will warn us if we
@@ -369,7 +369,7 @@ inline bool CanOpenFolder(MFolderType folderType, int folderFlags)
 
       case MF_ILLEGAL:
       case MF_PROFILE:
-         FAIL_MSG("this is not supposed to be called for this type");
+         FAIL_MSG(_T("this is not supposed to be called for this type"));
          // fall through nevertheless
 
          // don't use "default:" - like this, the compiler will warn us if we

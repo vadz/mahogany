@@ -100,7 +100,7 @@ public:
 
    long GetNumberValue() const
    {
-      ASSERT_MSG( m_kind == Number, "MOptionValue type mismatch" );
+      ASSERT_MSG( m_kind == Number, _T("MOptionValue type mismatch") );
 
       return m_number;
    }
@@ -112,7 +112,7 @@ public:
 
    String GetTextValue() const
    {
-      ASSERT_MSG( m_kind == Text, "MOptionValue type mismatch" );
+      ASSERT_MSG( m_kind == Text, _T("MOptionValue type mismatch") );
 
       return m_string;
    }

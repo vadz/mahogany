@@ -121,7 +121,7 @@ public:
    String GetSubType() const { return m_subtype; }
 
    /// get the full MIME string ("MESSAGE/RFC822")
-   String GetFull() const { return GetType() + '/' + GetSubType(); }
+   String GetFull() const { return GetType() + _T('/') + GetSubType(); }
 
    //@}
 
