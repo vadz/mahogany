@@ -1144,7 +1144,7 @@ MessageView::ShowHeaders()
       if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
       {
          // special handling for the UTF-7|8 if it's not supported natively
-         if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7)
+         if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7 )
          {
             encHeader = ConvertUnicodeToSystem(&value, encHeader == wxFONTENCODING_UTF7);
          }
