@@ -258,11 +258,8 @@ public:
 
       if ( !gs_installWizardData.email )
       {
-         String email = READ_APPCONFIG(MP_USERNAME);
-         email << '@' << READ_APPCONFIG(MP_HOSTNAME);
-
-         gs_installWizardData.email = strutil_makeMailAddress(
-               gs_installWizardData.name, email);
+         gs_installWizardData.email = READ_APPCONFIG(MP_USERNAME);
+         gs_installWizardData.email << '@' << READ_APPCONFIG(MP_HOSTNAME);
       }
 
       m_name->SetValue(gs_installWizardData.name);
