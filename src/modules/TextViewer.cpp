@@ -450,16 +450,7 @@ void TextViewer::Copy()
 
 String TextViewer::GetSelection() const
 {
-   long from, to;
-   m_window->GetSelection(&from, &to);
-
-   String sel;
-   if ( from < to )
-   {
-      sel = m_window->GetValue().Mid(from, to - from);
-   }
-
-   return sel;
+   return m_window->GetStringSelection();
 }
 
 // ----------------------------------------------------------------------------
