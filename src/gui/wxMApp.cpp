@@ -131,6 +131,18 @@ public:
     bool m_started;
 };
 
+// a timer used to do idle processing
+class IdleTimer : public wxTimer
+{
+public:
+   IdleTimer() : wxTimer() { Start(); }
+   virtual bool Start() { return wxTimer::Start(100); }
+
+   virtual void Notify()
+      { MEventManager::DispatchPending(); }
+};
+
+
 // ----------------------------------------------------------------------------
 // global vars
 // ----------------------------------------------------------------------------
@@ -216,6 +228,7 @@ wxMApp::wxMApp(void)
    m_IconManager = NULL;
    m_HelpController = NULL;
    m_CanClose = FALSE;
+   m_IdleTimer = NULL;
 }
 
 wxMApp::~wxMApp()
@@ -339,6 +352,15 @@ wxMApp::DoExit()
       hf = ((wxHelpControllerHtml *)m_HelpController)->GetFrameParameters();
    if(hf) hf->Close(TRUE);
 #endif // wxHTML-based help
+
+   // shut down MEvent handling
+
+   if(m_IdleTimer)
+   {
+      m_IdleTimer->Stop();
+      delete m_IdleTimer;
+      m_IdleTimer = NULL; // paranoid
+   }
 }
 
 // app initilization
@@ -537,6 +559,9 @@ wxMApp::OnInit()
       // start another timer to poll for new mail:
       StartTimer(Timer_PollIncoming);
 
+      // another timer to do MEvent handling:
+      m_IdleTimer = new IdleTimer;
+      
       // restore the normal behaviour (see the comments above)
       SetExitOnFrameDelete(TRUE);
 

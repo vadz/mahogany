@@ -109,6 +109,8 @@ private:
    wxPageSetupData *m_PageSetupData;
    /// to recylce the last CanClose() result
    bool m_CanClose;
+   /// timer used to call OnIdle for MEvent handling
+   class wxTimer *m_IdleTimer;
    DECLARE_EVENT_TABLE()
 };
 
