@@ -441,37 +441,32 @@ wxMApp::CanClose() const
 void
 wxMApp::DoExit()
 {
+   // shut down MEvent handling
+   if(m_IdleTimer)
+   {
+      m_IdleTimer->Stop();
+      delete m_IdleTimer;
+      m_IdleTimer = NULL; // paranoid
+   }
+
+   // before deleting the frames, make sure that all dialogs which could be
+   // still hanging around don't do it any more
+   wxTheApp->DeletePendingObjects();
+
+   // close all windows
    wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
    while ( node )
    {
       wxWindow *win = node->GetData();
       node = node->GetNext();
 
-      if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
+      if ( win->IsKindOf(CLASSINFO(wxFrame)) )
       {
          wxMFrame *frame = (wxMFrame *)win;
 
          // force closing the frame
          frame->Close(TRUE);
       }
-   }
-
-#if defined(OS_UNIX) && wxUSE_HELP && wxUSE_HTML
-   /// Close the help frame if it is open:
-   wxFrame *hf = NULL;
-   if(m_HelpController
-      && m_HelpController->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
-      hf = ((wxHelpControllerHtml *)m_HelpController)->GetFrameParameters();
-   if(hf) hf->Close(TRUE);
-#endif // wxHTML-based help
-
-   // shut down MEvent handling
-
-   if(m_IdleTimer)
-   {
-      m_IdleTimer->Stop();
-      delete m_IdleTimer;
-      m_IdleTimer = NULL; // paranoid
    }
 }
 
@@ -814,90 +809,130 @@ int wxMApp::OnExit()
    return 0;
 }
 
+// ----------------------------------------------------------------------------
+// Help subsystem
+// ----------------------------------------------------------------------------
+
+/* static */
+wxString wxMApp::BuildHelpInitString(const wxString& dir)
+{
+   wxString helpfile = dir;
+
+#ifdef OS_WIN
+   helpfile += "\\Manual.hhp";
+#endif // Windows
+
+   return helpfile;
+}
+
+/* static */
+wxString wxMApp::GetHelpDir()
+{
+   wxString helpdir = mApplication->GetGlobalDir();
+   if ( !helpdir.empty() )
+      helpdir += wxFILE_SEP_PATH;
+
+#ifdef OS_WIN
+   helpdir += "\\doc\\HtmlHelp";
+#else // !Windows
+   helpdir += "/doc";
+#endif // Windows/!Windows
+
+   return helpdir;
+}
+
+bool wxMApp::InitHelp()
+{
+   wxString helpdir = READ_APPCONFIG(MP_HELPDIR);
+   if ( helpdir.empty() )
+   {
+      helpdir = GetHelpDir();
+   }
+
+   while ( !m_HelpController )
+   {
+      // we hardcode the help controller class we use instead of using the
+      // default wxHelpController everywhere as we don't have docs in all
+      // possible formats, just HTML and CHM
+#ifdef OS_UNIX
+      m_HelpController = new wxHelpController;
+#else // Windows
+      m_HelpController = new wxHtmlHelpController;
+#endif // Unix/Windows
+
+      // try to initialise the help system
+      if ( !m_HelpController->Initialize(BuildHelpInitString(helpdir)) )
+      {
+         // failed
+         delete m_HelpController;
+         m_HelpController = NULL;
+
+         // ask the user if we want to look elsewhere?
+         wxString msg;
+         msg << _("Cannot initialise help system:\n")
+             << _("Help files not found in the directory '") << helpdir << "'\n"
+             << "\n"
+             << _("Would you like to specify another help files location?");
+
+         if ( !MDialog_YesNoDialog(msg, NULL, _("Mahogany Help")) )
+         {
+            // can't do anything more
+            return false;
+         }
+
+         String dir = MDialog_DirRequester
+                      (
+                       _("Please choose the directory containing "
+                         "the Mahogany help files."),
+                       helpdir
+                      );
+
+         if ( dir.empty() )
+         {
+            // dialog cancelled
+            return false;
+         }
+
+         // try again with another location
+         helpdir = dir;
+      }
+   }
+
+   // set help viewer options
+
+#if defined(OS_UNIX) && !wxUSE_HTML
+   ((wxExtHelpController *)m_HelpController)->SetBrowser(
+      READ_APPCONFIG(MP_HELPBROWSER),
+      READ_APPCONFIG(MP_HELPBROWSER_ISNS));
+#endif // using wxExtHelpController
+
+   wxSize size = wxSize(READ_APPCONFIG(MP_HELPFRAME_WIDTH),
+                        READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
+   wxPoint pos = wxPoint(READ_APPCONFIG(MP_HELPFRAME_XPOS),
+                         READ_APPCONFIG(MP_HELPFRAME_YPOS));
+
+   m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
+
+   // remember the dir where we found the files
+   if ( helpdir != GetHelpDir() )
+   {
+      mApplication->GetProfile()->writeEntry(MP_HELPDIR, helpdir);
+   }
+
+   // we do have m_HelpController now
+   return true;
+}
+
 void
 wxMApp::Help(int id, wxWindow *parent)
 {
    // first thing: close splash if it's still there
    CloseSplash();
 
-   if ( !m_HelpController )
+   if ( !m_HelpController && !InitHelp() )
    {
-      wxString helpfile = GetGlobalDir();
-      if ( !helpfile.empty() )
-         helpfile += '/';
-
-#ifdef OS_UNIX
-      m_HelpController = new wxHelpController;
-      helpfile += "doc";
-#else // Windows
-      m_HelpController = new wxHtmlHelpController;
-      helpfile += "doc/HtmlHlp/Manual.hhp";
-#endif // Unix/Windows
-
-      while ( !m_HelpController )
-      {
-         // we hardcode the help controller class we use instead of using the
-         // default wxHelpController everywhere as we don't have docs in all
-         // possible formats, just HTML and CHM
-#ifdef OS_UNIX
-         m_HelpController = new wxHelpController;
-#else // Windows
-         m_HelpController = new wxHtmlHelpController;
-#endif // Unix/Windows
-
-         // try to initialise the help system
-         if ( !m_HelpController->Initialize(helpfile) )
-         {
-            // failed
-            delete m_HelpController;
-            m_HelpController = NULL;
-
-            // ask the user if we want to look elsewhere?
-            wxString msg;
-            msg << _("Cannot initialise help system.\n")
-                << _("Help file '") << helpfile << _("' not found.\n")
-                << "\n"
-                << _("Would you like to specify help files location now?");
-
-            if ( !MDialog_YesNoDialog(msg, NULL, _("Mahogany Help")) )
-            {
-               // can't do anything more
-               return;
-            }
-
-            String dir = MDialog_DirRequester
-                         (
-                          _("Please choose the directory containing "
-                            "the Mahogany help files.")
-                         );
-            if ( dir.empty() )
-            {
-               // dialog cancelled
-               return;
-            }
-
-            // try again with another location
-            helpfile = dir;
-#ifdef OS_WIN
-            helpfile += "Manual.hhp";
-#endif // OS_WIN
-         }
-      }
-
-      // set help viewer options
-
-#if defined(OS_UNIX) && !wxUSE_HTML
-      ((wxExtHelpController *)m_HelpController)->SetBrowser(
-         READ_APPCONFIG(MP_HELPBROWSER),
-         READ_APPCONFIG(MP_HELPBROWSER_ISNS));
-#endif // using wxExtHelpController
-
-      wxSize size = wxSize(READ_APPCONFIG(MP_HELPFRAME_WIDTH),
-                           READ_APPCONFIG(MP_HELPFRAME_HEIGHT));
-      wxPoint pos = wxPoint(READ_APPCONFIG(MP_HELPFRAME_XPOS),
-                            READ_APPCONFIG(MP_HELPFRAME_YPOS));
-
-      m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
+      // help controller couldn't be initialized, so no help available
+      return;
    }
 
    // by now we should have either created it or returned
@@ -935,6 +970,10 @@ wxMApp::Help(int id, wxWindow *parent)
          }
    }
 }
+
+// ----------------------------------------------------------------------------
+// Loadable modules
+// ----------------------------------------------------------------------------
 
 void
 wxMApp::LoadModules(void)

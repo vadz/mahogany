@@ -424,7 +424,7 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_HELP_CONTEXT, gettext_noop("&Help\tCtrl-H"),    gettext_noop("Help on current context..."), FALSE },
-   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system..."), FALSE },
+   { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents\tF1"),    gettext_noop("Contents of help system..."), FALSE },
    { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE },
 

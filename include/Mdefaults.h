@@ -131,10 +131,6 @@ enum MFolderIndex
    MFolderIndex_Max
 };
 
-/**
- NOTICE: the distinction between MP_xxx and MP_xxx config entries no
- longer exists. They are now treated identically.
-**/
 /** @name built-in icon names */
 //@{
 /// for hyperlinks/http
@@ -214,6 +210,9 @@ enum MFolderIndex
 
 /// the complete path to the glocal M directory
 #   define   MP_GLOBALDIR      "GlobalDir"
+
+/// the directory containing the help files
+#define MP_HELPDIR "HelpDir"
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -840,6 +839,9 @@ enum MFolderIndex
 /// the complete path to the glocal M directory
 #  define   MP_GLOBALDIR_D  ""
 #endif // Unix/!Unix
+
+/// the directory containing the help files
+#define MP_HELPDIR_D ""
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
 #define MP_CRYPTALGO_D   0L

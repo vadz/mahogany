@@ -1845,34 +1845,57 @@ size_t wxPFilesSelector(wxArrayString& filenames,
 // Persistent directory selector dialog box
 // ----------------------------------------------------------------------------
 
-wxString wxPDirSelector(const wxString& configPath,
-                        const wxString& message,
-                        const wxString& pathDefault,
-                        wxWindow *parent = NULL,
-                        wxConfigBase *config = NULL)
+// wxPDirSelector helper
+static wxString wxGetDirectory(wxWindow *parent,
+                               const wxString& message,
+                               const wxString& path)
 {
-    wxPHelper persist(configPath, _T("DirPrompt"), config);
-    wxString configKey = persist.GetKey();
-
-    // if config was NULL, wxPHelper already has the global one
-    config = persist.GetConfig();
-
-    wxString path = pathDefault;
-    if ( path.empty() && !configPath.empty() )
-    {
-        // use the last directory
-        path = config->Read(configKey, _T(""));
-    }
-
+    wxString dir;
     wxDirDialog dlg(parent, message, path);
 
-    wxString dir;
     if ( dlg.ShowModal() == wxID_OK )
     {
         dir = dlg.GetPath();
+    }
 
-        persist.ChangePath();
-        config->Write(configKey, dir);
+    return dir;
+}
+
+wxString wxPDirSelector(const wxString& configPath,
+                        const wxString& message,
+                        const wxString& pathDefault,
+                        wxWindow *parent,
+                        wxConfigBase *config)
+{
+    // the directory the user chooses
+    wxString dir;
+
+    if ( !configPath.empty() )
+    {
+        wxPHelper persist(configPath, _T("DirPrompt"), config);
+        wxString configKey = persist.GetKey();
+
+        // if config was NULL, wxPHelper already has the global one
+        config = persist.GetConfig();
+
+        wxString path = pathDefault;
+        if ( path.empty() && !configPath.empty() )
+        {
+            // use the last directory
+            path = config->Read(configKey, _T(""));
+        }
+
+        dir = wxGetDirectory(parent, message, path);
+
+        if ( !dir.empty() )
+        {
+            persist.ChangePath();
+            config->Write(configKey, dir);
+        }
+    }
+    else
+    {
+        dir = wxGetDirectory(parent, message, pathDefault);
     }
 
     return dir;

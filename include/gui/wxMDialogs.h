@@ -176,19 +176,6 @@ const char *MDialog_FileRequester(const String &message,
                                   bool save = false,
                                   Profile *profile = NULL);
 
-/** Ask user for a directory
-
-  @param message the explanatory message
-  @param path the initially selected directory (if not empty)
-  @param parent the parent frame
-  @param configPath the profile path to use (may be NULL)
-  @return the path of the selected directory or an empty string
- */
-String MDialog_DirRequester(const String& message,
-                            const String& path = NULLstring,
-                            MWindow *parent = NULL,
-                            const char *configPath = NULL);
-
 /** show a (modal) dialog with the given text
 
     @param title is the title of the dialog
@@ -203,6 +190,19 @@ void MDialog_ShowText(MWindow *parent,
 
 } // extern "C"
 
+
+/** Ask user for a directory
+
+  @param message the explanatory message
+  @param path the initially selected directory (if not empty)
+  @param parent the parent frame
+  @param configPath the profile path to use (may be NULL)
+  @return the path of the selected directory or an empty string
+ */
+String MDialog_DirRequester(const String& message,
+                            const String& path = NULLstring,
+                            MWindow *parent = NULL,
+                            const char *configPath = NULL);
 
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"

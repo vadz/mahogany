@@ -115,6 +115,7 @@ public:
 
    /// Report a fatal error:
    virtual void FatalError(const char *message);
+
 protected:
    /// makes sure the status bar has enough fields
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;
@@ -131,8 +132,18 @@ protected:
 
    /// update display of online connection status
    void UpdateOnlineDisplay();
+
+   /// initialize the help controller, return true only if ok
+   bool InitHelp();
+
 private:
-   // implement base class pure virtual
+   /// construct the helpfile name from the dir name
+   static wxString BuildHelpInitString(const wxString& dir);
+
+   /// get the default help directory
+   static wxString GetHelpDir();
+
+   /// implement base class pure virtual
    virtual void DoExit();
 
    /// an iconmanager instance
