@@ -212,7 +212,15 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
 }
 
 /* static */
-bool MailFolder::CheckNetwork(const MFolder *folder, wxFrame *frame)
+bool MailFolder::CheckNetwork(const MFolder *
+#ifdef USE_DIALUP
+                              folder
+#endif
+                              , wxFrame *
+#ifdef USE_DIALUP
+                              frame
+#endif
+                              )
 {
 #ifdef USE_DIALUP
    // check if we need to dial up to open this folder

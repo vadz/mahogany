@@ -1155,7 +1155,11 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
 }
 
 void
-MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
+MAppBase::SendOutbox(const String & outbox, bool 
+#ifdef USE_DIALUP
+                     checkOnline 
+#endif
+                     ) const
 {
    CHECK_RET( outbox.length(), _T("missing outbox folder name") );
 
