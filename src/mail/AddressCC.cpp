@@ -220,6 +220,17 @@ AddressListCC::AddressListCC(mail_address *adr)
       }
       else // good address, store
       {
+         // c-client mungles unqualified addresses, undo it
+         if ( adr->host && !strcmp(adr->host, BADHOST) )
+         {
+            // the only way to get an address without the hostname is to use
+            // '@' as hostname (try to find this in c-client docs!)
+            fs_give((void **)&(adr->host));
+            adr->host = (char *)fs_get(2);
+            adr->host[0] = '@';
+            adr->host[1] = '\0';;
+         }
+
          AddressCC *addr = new AddressCC(adr);
 
          if ( !addrCur )
