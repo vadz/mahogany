@@ -5,7 +5,6 @@ RESCOMP         = windres
 RCINPUTSWITCH   = -i
 RCOUTPUTSWITCH  = -o
 RCINCSWITCH     = --include-dir
-RESFLAGS        = $(RCINCSWITCH)=$(WX_DIR)/include $(RCINCSWITCH)=../include $(RCINCSWITCH)=.src
 
 all :		$(NAME)
 

@@ -962,11 +962,6 @@ case "$USE_THREADS" in 1)
 	esac
 esac
 
-dnl wx installation directory is needed for cygwin resources
-WX_INSTALL_DIR=`$WX_CONFIG_WITH_ARGS --prefix`
-WX_DIR="$WX_INSTALL_DIR"
-AC_SUBST(WX_DIR)
-
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
@@ -1175,6 +1170,18 @@ CPPFLAGS="-I$SOURCEDIR/include $CPPFLAGS -I$SOURCEDIR/extra/include"
 case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
 esac
+
+dnl set include flags for cygwin resources
+dnl wx installation directory is needed for cygwin resources
+WX_INSTALL_DIR=`$WX_CONFIG_WITH_ARGS --prefix`
+
+RESFLAGS="--include-dir=$WX_INSTALL_DIR/include --include-dir=$SOURCEDIR/res"
+
+RESFLAGS="--include-dir=$SOURCEDIR/include $RESFLAGS"
+case "$BUILDDIR" in "$SOURCEDIR") ;; *)
+	RESFLAGS="--include-dir=$BUILDDIR/include $RESFLAGS" ;;
+esac
+AC_SUBST(RESFLAGS)
 
 dnl add all extra/src directories to the search paths
 dnl	c-client
