@@ -667,7 +667,7 @@ MAppBase::OnShutDown()
 
       // suppress memory leak reports in debug mode - it is not a real memory
       // leak as memory is allocated only once but still
-#if defined(OS_WIN) && defined(DEBUG)
+#if defined(OS_WIN) && defined(DEBUG) && !defined(__CYGWIN__)
       // clean up after cclient (order is important as sysinbox() uses the
       // username)
       free(sysinbox());
