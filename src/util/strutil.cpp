@@ -274,31 +274,37 @@ strutil_matchurl(const char *string)
 String
 strutil_findurl(String &str, String &url)
 {
-   int i;
-   String before = "";
-   const char *cptr = str.c_str();
-   String tmp;
+   String before;
+   before.reserve(str.length());
 
-   url = "";
+   url.clear();
+
+   const char *cptr = str.c_str();
    while(*cptr)
    {
-      for(i = 0; urlnames[i]; i++)
+      for(int i = 0; urlnames[i]; i++)
       {
          if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0
             && strutil_isurlchar(cptr[strlen(urlnames[i])])
             && ((cptr == str.c_str() || !strutil_isurlchar(*(cptr-1))))
            )
          {
-            while(strutil_isurlchar(*cptr))
+            // found the start of the URL, now find its end
+            while( *cptr && strutil_isurlchar(*cptr) )
                url += *cptr++;
+
+            String tmp;
             tmp = cptr; // cannot assign directly as cptr points into
             str = tmp;  // str, so using a temporary string in between
+
             return before;
          }
       }
       before += *cptr++;
    }
-   str = cptr;
+
+   // no URLs found, return the copy of the whole string as "before URL" part
+   str.clear();
    return before;
 }
 
