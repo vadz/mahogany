@@ -2699,7 +2699,7 @@ of wxWindows installed. Also, make sure to rebuild everything (ideally,
 create a new build directory) after installing or uninstalling a new
 wxWindows or Mahogany version. If the problem still persists, please
 try building the debug version of the program (you need debug wxWindows
-library and run configure --with-debug switch), run it under \noun{gdb}
+library and run configure with --enable-debug switch), run it under \noun{gdb}
 and send us the output of {}``bt{}'' command in the debugger when
 it crashes.
 \item If your problem is related to receiving or sending mail, please look

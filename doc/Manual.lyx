@@ -6949,8 +6949,8 @@ Before asking for the help on our mailing lists, please try to see if you
  Also, make sure to rebuild everything (ideally, create a new build directory)
  after installing or uninstalling a new wxWindows or Mahogany version.
  If the problem still persists, please try building the debug version of
- the program (you need debug wxWindows library and run configure --with-debug
- switch), run it under 
+ the program (you need debug wxWindows library and run configure with
+ --enable-debug switch), run it under 
 \noun on 
 gdb
 \noun default 
