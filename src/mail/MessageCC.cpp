@@ -936,7 +936,7 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
             {
                // we do *not* want to use the locale-specific settings here,
                // hence don't use isalpha()
-               unsigned char ch = *p;
+               const unsigned char ch = *p;
                if ( (ch >= 'A' && ch <= 'Z') ||
                      (ch >= 'a' && ch <= 'z') ||
                       (ch >= '0' && ch <= '9') ||
@@ -948,9 +948,19 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 
                if ( ch == '=' )
                {
-                  // valid, but can only occur at the end as padding, so still
-                  // break below
                   p++;
+
+                  // valid, but can only occur at the end of data as padding,
+                  // so still break below -- but not before:
+
+                  // a) skipping a possible second '=' (can't be more than 2 of
+                  // them)
+                  if ( *p == '=' )
+                     p++;
+
+                  // b) skipping the terminating "\r\n"
+                  if ( p[0] == '\r' && p[1] == '\n' )
+                     p += 2;
                }
 
                // what (if anything) follows can't appear in a valid Base64
