@@ -3700,6 +3700,7 @@ static void ThreadMessagesHelper(THREADNODE *thr,
       }
 
       // do we have subtree?
+      MsgnoType numChildren;
       if ( thr->next )
       {
          // process it and count the number of children
@@ -3709,11 +3710,17 @@ static void ThreadMessagesHelper(THREADNODE *thr,
 
          ASSERT_MSG( n > nOld, "no children in a subthread?" );
 
-         thrData->m_children[msgno - 1] = n - nOld;
+         numChildren = n - nOld;
       }
       else
       {
-         thrData->m_children[msgno - 1] = 0;
+         numChildren = 0;
+      }
+
+      if ( msgno )
+      {
+         // remember the number of children under this message, used later
+         thrData->m_children[msgno - 1] = number;
       }
 
       // pass to the next sibling
