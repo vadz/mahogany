@@ -519,7 +519,7 @@ void ReverseRoundSubkeys(keyInstance *key,BYTE newDir)
 		{ Xor32(dst,src,i  ); Xor32(dst,src,i+1); Xor32(dst,src,i+2); Xor32(dst,src,i+3); }	\
 	}
 #else						/* do it as a function call */
-void Xor256(void *dst,void *src,BYTE b)
+void Xor256(void *dst,const void *src,BYTE b)
 	{
 	register DWORD	x=b*0x01010101u;	/* replicate byte to all four bytes */
 	register DWORD *d=(DWORD *)dst;
