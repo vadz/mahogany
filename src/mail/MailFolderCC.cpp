@@ -3286,7 +3286,14 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    {
       // msgno should never be less than m_nMessages because we adjust the
       // latter in mm_expunged immediately when a message is expunged
-      ASSERT_MSG( msgno == mf->m_msgnoMax, "msg number unexpected changed" );
+      if ( msgno != mf->m_msgnoMax )
+      {
+         // can't use FAIL_MSG() here as it pops up a modal dialog which leads
+         // to a crash later because of different reentrancies which usually
+         // can't happe, so break into debugger directly
+         extern void Trap();
+         Trap();
+      }
 
       // only request update below if something happened: the only thing which
       // can happen to us in this case is that messages were expunged from the

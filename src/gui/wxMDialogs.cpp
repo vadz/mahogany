@@ -3233,6 +3233,9 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
             m_checklstBox->Check(selectionNew, wasChecked);
             m_checklstBox->SetSelection(selectionNew);
 
+            // the item could have gone out of the visible part of the listbox
+            m_checklstBox->SetFirstItem(selectionNew);
+
             // something changed, remember it
             m_hasChanges = true;
         }

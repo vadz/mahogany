@@ -631,10 +631,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          {
             // don't delete the messages if we couldn't save them!
             newFocus = -1;
-
-            break;
          }
-         // fall through
+         break;
 
       case 'D': // delete
          m_FolderView->DeleteOrTrashMessages(selections);
@@ -2830,14 +2828,14 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
    if ( !count )
       return ILLEGAL_TICKET;
 
-   wxStatusProgress(m_Frame, _("Saving %d message(s) to '%s'..."),
-                    count, folder->GetFullName().c_str());
+   // note that folder can be NULL if it is to be choosed interactively so we
+   // can't use its name in the status message string
+   wxStatusProgress(m_Frame, _("Saving %d message(s)..."), count);
 
-   Ticket t =
-      m_ASMailFolder->SaveMessagesToFolder(&selections,
-                                           m_Frame,
-                                           folder,
-                                           this);
+   Ticket t = m_ASMailFolder->SaveMessagesToFolder(&selections,
+                                                   m_Frame,
+                                                   folder,
+                                                   this);
    m_TicketList->Add(t);
    if ( del )
    {
