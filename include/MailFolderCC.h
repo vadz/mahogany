@@ -251,6 +251,13 @@ private:
    */
    bool   Open(void);
 
+   /** Most of the Ping() functionality, but without updating the
+       mailbox status (mail_check()), a bit quicker. Returns true if
+       mailstream is still valid.
+       Just pings the stream and tries to reopen it if needed
+       @return true if stream still valid
+   */
+   bool PingReopen(void) const;
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
@@ -265,6 +272,8 @@ private:
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
 
+   /// PingReopen() protection against recursion
+   bool m_PingReopenSemaphore;
    /// Do we need to update folder listing?
    bool m_UpdateNeeded;
    /// Request update
@@ -310,10 +319,10 @@ private:
    static void CClientInit(void);
 
    /// adds this object to Map
-   void   AddToMap(MAILSTREAM const *stream);
+   void   AddToMap(MAILSTREAM const *stream) const;
 
    /// remove this object from Map
-   void   RemoveFromMap(MAILSTREAM const *stream);
+   void   RemoveFromMap(MAILSTREAM const *stream) const;
 
    /// Gets first mailfolder in map or NULL.
    static MailFolderCC * GetFirstMapEntry(StreamConnectionList::iterator &i);
@@ -324,7 +333,7 @@ private:
        @param setit if false, erase default object
    */
 
-   void SetDefaultObj(bool setit = true);
+   void SetDefaultObj(bool setit = true) const;
 
    /// lookup object in Map
    static MailFolderCC *LookupObject(MAILSTREAM const *stream,

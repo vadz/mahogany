@@ -783,10 +783,10 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 
          m_Parent->Close();
       }
-      else
-      {
-         FAIL_MSG("I thought folder view parent must be a frame.");
-      }
+   }
+   else // main frame splitter
+   {
+      SetFolder(NULL, TRUE); 
    }
 }
 

@@ -49,7 +49,6 @@ wxMSW bugs:
    + ...
  - CR/LF problems when replying to the messages
 
-
 VZ:
 - wxConfig does not like entries like:
   Key=Value
@@ -73,7 +72,6 @@ VZ:
   KB: only if no other window is open
 
 ******* Priorities for KB: ******************************
-
 
 doc: add note about news active file
 

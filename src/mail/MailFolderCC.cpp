@@ -33,8 +33,8 @@
 
 #include <ctype.h>   // isspace()
 
-#define CHECK_DEAD(msg)   if(m_MailStream == NIL) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
-#define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
+#define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
+#define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
 
 #define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
 #define QPRINT_MIDDLEMARKER "?Q?"
@@ -140,6 +140,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_UpdateMsgCount = true; // normal operation
    m_UpdateNeeded = true;
    m_ProgressDialog = 0;
+   m_PingReopenSemaphore = false;
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
 
@@ -348,36 +349,56 @@ MailFolderCC::FindFolder(String const &path, String const &login)
    return NULL;
 }
 
-void
-MailFolderCC::Ping(void)
+bool
+MailFolderCC::PingReopen(void) const
 {
-   if(! m_MailStream)
-      return;
-   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", GetName().c_str()));
-
-   if(! mail_ping(m_MailStream))
+   DBGMESSAGE(("MailFolderCC::PingReopen() on Folder %s.", GetName().c_str()));
+   if(m_PingReopenSemaphore)
    {
+      DBGMESSAGE(("MailFolderCC::PingReopen() avoiding recursion!"));
+      return false;  // or would true be better?
+   }
+
+   MailFolderCC *t = (MailFolderCC *)this; // we need to change a few
+   // things
+   
+   t->m_PingReopenSemaphore = true;
+   bool rc = true;
+
+   if(! m_MailStream || ! mail_ping(m_MailStream))
+   {
+      RemoveFromMap(m_MailStream); // will be added again by Open()
       DBGMESSAGE(( _("Mailstream for folder '%s' has been closed, trying to reopen it."),
-                  GetName().c_str()));
-      bool rc = Open();
+                   GetName().c_str()));
+      rc = t->Open();
       if(rc == false)
       {
          ERRORMESSAGE((_("Re-opening folder '%s' failed."),GetName().c_str()));
-      }
-      else
-      {
-         RemoveFromMap(m_MailStream);
-         m_MailStream = NIL;
+         t->m_MailStream = NIL;
       }
    }
-   if(! m_MailStream)
-      return;
+   if(m_MailStream)
+   {
+      ProcessEventQueue();
+      rc = true;
+   }
+   else
+      rc = false;
+   t->m_PingReopenSemaphore = false;
+   return rc;
+}
 
-//   ProcessEventQueue();
-   CCQuiet();
-   mail_check(m_MailStream); // update flags, etc, .newsrc
-   CCVerbose();
-   ProcessEventQueue();
+void
+MailFolderCC::Ping(void)
+{
+   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", GetName().c_str()));
+   if(PingReopen())
+   {
+      CCQuiet();
+      mail_check(m_MailStream); // update flags, etc, .newsrc
+      CCVerbose();
+      ProcessEventQueue();
+   }
 }
 
 MailFolderCC::~MailFolderCC()
@@ -607,7 +628,7 @@ MailFolderCC::DebugDump() const
 
 /// remove this object from Map
 void
-MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
+MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */) const
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
@@ -888,10 +909,10 @@ MailFolderCC::CClientInit(void)
 
 /// adds this object to Map
 void
-MailFolderCC::AddToMap(MAILSTREAM const *stream)
+MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
    StreamConnection  *conn = new StreamConnection;
-   conn->folder = this;
+   conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
    conn->name = m_MailboxPath;
    conn->login = m_Login;
@@ -900,7 +921,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
 
 
 /// lookup object in Map
-MailFolderCC *
+/* static */ MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
    StreamConnectionList::iterator i;
@@ -936,10 +957,10 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 }
 
 void
-MailFolderCC::SetDefaultObj(bool setit)
+MailFolderCC::SetDefaultObj(bool setit) const
 {
    if(setit)
-      streamListDefaultObj = this;
+      streamListDefaultObj = (MailFolderCC *)this;
    else
       streamListDefaultObj = NULL;
 }
