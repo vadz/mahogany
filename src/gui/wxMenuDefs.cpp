@@ -322,7 +322,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // jqwz
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
-   { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
+   { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer\tCtrl-E"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , wxITEM_NORMAL },
    { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , wxITEM_NORMAL },
 #ifdef USE_PS_PRINTING
