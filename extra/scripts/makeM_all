@@ -148,6 +148,8 @@ WXVERSION=2.1.11
 
 DOCHOST=phyw164
 
+RPM_ROOT=$HOME/build/rpm
+
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
 UPLOADWXGTK=no
@@ -525,16 +527,19 @@ then
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
-  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
-  cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
-  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
-  cd /usr/src/redhat/ && \
-  rpm -ba SPECS/M.spec
+  (cd $NAME-$VERSION && make rpm RPM_ROOT=$RPM_ROOT 2>/dev/null 2>&1) && \  
   if [ "$DOINSTALL" = "yes" ] ; then
-	  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
-	  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
+	  $SCP $RPM_ROOT/RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
+	  $SCP $RPM/ROOT/SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
   fi
 fi
+
+# old stuff
+#  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
+#  cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
+#  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
+#  cd /usr/src/redhat/ && \
+#  rpm -ba SPECS/M.spec
 
 ###########################
 # .tar.gz
