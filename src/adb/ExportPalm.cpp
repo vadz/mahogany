@@ -145,6 +145,8 @@ IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
 
 #undef ADD
 #define ADD(n)       entry.GetField(n, &val); s << '"'<< EscapeQuotes(val) << "\","
+#define ADDP(prefix,n)  entry.GetField(n, &val); \
+if(strlen(val)) s << prefix; s << '"'<< EscapeQuotes(val) << "\","
 
 bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
                                     wxFFile& file, const wxString &
@@ -197,11 +199,11 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    ADD(AdbField_Organization);
 
    s << "\"\","; // unknown field after company
-   s << "\"E-mail\";"; ADD(AdbField_EMail);
-   s << "\"Home\";"; ADD(AdbField_H_Phone);
-   s << "\"Fax\";"; ADD(AdbField_H_Fax);
-   s << "\"Work\";"; ADD(AdbField_O_Phone);
-   s << "\"Fax"; ADD(AdbField_O_Fax);
+   ADDP("\"E-mail\";", AdbField_EMail);
+   ADDP("\"Home\";", AdbField_H_Phone);
+   ADDP("\"Fax\";", AdbField_H_Fax);
+   ADDP("\"Work\";", AdbField_O_Phone);
+   ADDP("\"Fax\";", AdbField_O_Fax);
 
    entry.GetField(AdbField_H_City, &val);
    if(val.Length()) // has home address?
@@ -253,6 +255,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    return file.Write(s);
 }
 #undef ADD
+#undef ADDP
 
 bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
                                     wxFFile& file, const wxString &
