@@ -1349,7 +1349,7 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-//         if(mf->UpdateNeeded())  // only call it once
+         if(mf->UpdateNeeded())  // only call it once
             mf->BuildListing();
          break;
       }
@@ -1361,13 +1361,10 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(void)
 {
-//   if(! m_UpdateNeeded)
-   {
-      // we want only one update event
-      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
-      MailFolderCC::QueueEvent(evptr);
-      m_UpdateNeeded = true;
-   }
+   // we want only one update event
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
+   MailFolderCC::QueueEvent(evptr);
+   m_UpdateNeeded = true;
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
