@@ -24,10 +24,52 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
-#include "pointers.h"
+#include <wx/imaglist.h>
+
 #include "MAtExit.h"
 
+#include "gui/wxOptionsPage.h"
+#include "gui/wxOptionsDlg.h"
+
 #include "SpamFilter.h"
+
+// ----------------------------------------------------------------------------
+// local types
+// ----------------------------------------------------------------------------
+
+class SpamOptionsDialog : public wxOptionsEditDialog
+{
+public:
+   SpamOptionsDialog(wxFrame *parent, wxImageList *imagelist)
+      : wxOptionsEditDialog(parent,
+                            _("Spam filters options"),
+                            _T("SpamDlg"))
+   {
+      m_imagelist = imagelist;
+
+      CreateAllControls();
+      Layout();
+   }
+
+   virtual void CreateNotebook(wxPanel *panel)
+   {
+      m_notebook = new wxPNotebook(_T("SpamOptions"), panel);
+      if ( m_imagelist )
+         m_notebook->SetImageList(m_imagelist);
+
+      // now we can put the pages into it
+      for ( SpamFilter *p = SpamFilter::ms_first; p; p = p->m_next )
+      {
+         p->CreateOptionPage(m_notebook);
+      }
+   }
+
+protected:
+   virtual Profile *GetProfile() const { return mApplication->GetProfile(); }
+
+private:
+   wxImageList *m_imagelist;
+};
 
 // ----------------------------------------------------------------------------
 // local globals
@@ -120,6 +162,44 @@ SpamFilter::CheckIfSpam(const Message& msg,
    }
 
    return false;
+}
+
+// ----------------------------------------------------------------------------
+// spam filters configuration
+// ----------------------------------------------------------------------------
+
+/* static */
+void SpamFilter::Configure(wxFrame *parent)
+{
+   LoadAll();
+
+   // first get all the icon names: we need them to create the notebook
+   wxImageList *imagelist = wxNotebookWithImages::ShouldShowIcons()
+                              ? new wxImageList(32, 32)
+                              : NULL;
+
+   size_t nPages = 0;
+   for ( SpamFilter *p = ms_first; p; p = p->m_next )
+   {
+      const wxChar *iconname = p->GetOptionPageIconName();
+      if ( iconname )
+      {
+         nPages++;
+         if ( imagelist )
+            imagelist->Add(mApplication->GetIconManager()->GetBitmap(iconname));
+      }
+   }
+
+   if ( !nPages )
+   {
+      wxLogMessage(_("There are no configurable spam filters."));
+      return;
+   }
+
+   // do create the dialog and show it
+   SpamOptionsDialog dlg(parent, imagelist);
+
+   (void)dlg.ShowModal();
 }
 
 // ----------------------------------------------------------------------------

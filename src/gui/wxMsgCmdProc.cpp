@@ -896,6 +896,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          CheckIfSpam(messages);
          break;
 
+      case WXMENU_MSG_SPAM_CONFIG:
+         SpamFilter::Configure(GetFrame());
+         break;
+
       default:
          // try passing it to message view
          if ( !m_msgView->DoMenuCommand(cmd) )

@@ -437,6 +437,8 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_MSG_SPAM_MARK, gettext_noop("Dispose as &spam\tShift-Ctrl-Del"), gettext_noop("Classify the message as spam and treat it accordingly"), wxITEM_NORMAL },
       { WXMENU_MSG_SPAM_UNMARK, gettext_noop("Mark as &ham"), gettext_noop("Classify the message as non-spam"), wxITEM_NORMAL },
       { WXMENU_MSG_SPAM_CHECK, gettext_noop("Chec&k message...\tShift-Ctrl-K"), gettext_noop("Check if this message is spam"), wxITEM_NORMAL },
+      { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
+      { WXMENU_MSG_SPAM_CONFIG, gettext_noop("&Configure spam filters..."), gettext_noop("Set the options for spam detection"), wxITEM_NORMAL },
    { WXMENU_SUBMENU,       wxEmptyString, wxEmptyString, wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extract &addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), wxITEM_NORMAL },

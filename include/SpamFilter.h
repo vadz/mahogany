@@ -23,7 +23,13 @@
 
 #include "MModule.h"
 
+#include "gui/listbook.h"
+
 class Message;
+class wxOptionsPage;
+
+class WXDLLEXPORT wxFrame;
+
 
 /*
    Abstract base class for all concrete spam filters.
@@ -101,6 +107,13 @@ public:
                            String *result);
 
    /**
+      Show a GUI dialog allowing the user to configure all spam filters.
+
+      @param parent the parent frame for the dialog
+    */
+   static void Configure(wxFrame *parent);
+
+   /**
       Unload all loaded spam filters.
 
       This should be called at least before the program termination to free
@@ -110,11 +123,26 @@ public:
     */
    static void UnloadAll();
 
+
+#if 0
+   /// Get the head of the linked list of the loaded filters
+   static SpamFilter *GetFirst() { return ms_first; }
+
+   /// Get the next filter in the list or NULL
+   SpamFilter *GetNext() const { return m_next; }
+#endif
+
+
 protected:
    /**
       Default ctor.
     */
    SpamFilter() { m_next = NULL; }
+
+   /**
+      Virtual dtor for the base class.
+    */
+   virtual ~SpamFilter() { }
 
    /**
       Loads all available spam filters.
@@ -164,6 +192,29 @@ protected:
                               String *result) = 0;
 
    /**
+      Return the name of the icon used by the option page.
+
+      This is rather ugly but unfortunately we need to have all the icons names
+      first (to initialize the notebook image list) and we need a notebook in
+      CreateOptionPage() so we can't combine these 2 functions into 1.
+
+      @return the name of the icon to use or NULL
+    */
+   virtual const wxChar *GetOptionPageIconName() const { return NULL; }
+
+   /**
+      Return a pointer to the option page used for editing this spam filter
+      options.
+
+      @param notebook the parent for the page
+      @return pointer to the page (which will be deleted by the caller) ot NULL
+    */
+   virtual wxOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook) const
+   {
+      return NULL;
+   }
+
+   /**
       Return the internal name of this spam filter.
 
       This method is implemented by DECLARE_SPAM_FILTER() macro below.
@@ -197,6 +248,8 @@ private:
 
    // the next filter in the linked list or NULL
    SpamFilter *m_next;
+
+   friend class SpamOptionsDialog;
 };
 
 

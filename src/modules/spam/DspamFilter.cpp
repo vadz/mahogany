@@ -30,6 +30,8 @@
 
 #include "SpamFilter.h"
 
+#include "gui/wxOptionsPage.h"
+
 extern "C"
 {
    #include <libdspam.h>
@@ -81,6 +83,8 @@ protected:
    virtual bool DoCheckIfSpam(const Message& msg,
                               const String& param,
                               String *result);
+   virtual const wxChar *GetOptionPageIconName() const { return _T("dspam"); }
+   virtual wxOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook) const;
 
 private:
    // helper: used as DoProcess() argument to initialize the context or to get
@@ -237,5 +241,61 @@ DspamFilter::DoCheckIfSpam(const Message& msg,
    }
 
    return true;
+}
+
+// ----------------------------------------------------------------------------
+// DspamFilter user-configurable options
+// ----------------------------------------------------------------------------
+
+enum
+{
+   DspamPageField_Help,
+   DspamPageField_ShowStats,
+   DspamPageField_Max
+};
+
+wxOptionsPage *DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook) const
+{
+   static const wxOptionsPage::FieldInfo s_fields[] =
+   {
+      {
+         gettext_noop("This page allows you to configure DSPAM,\n"
+                      "a powerful statistical hybrid anti-spam filter."),
+         wxOptionsPage::Field_Message,
+         -1
+      },
+      {
+         gettext_noop("Show &statistics"),
+         wxOptionsPage::Field_SubDlg,
+         -1
+      },
+   };
+
+   wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_fields) == DspamPageField_Max,
+                              FieldsNotInSync, DspamFields );
+
+
+   static const ConfigValueDefault s_values[] =
+   {
+      ConfigValueNone(),
+      ConfigValueNone(),
+   };
+
+   wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_fields) == DspamPageField_Max,
+                              ValuesNotInSync, DspamValues );
+
+
+   return new wxOptionsPageDynamic
+              (
+                  notebook,
+                  gettext_noop("DSPAM"),
+                  mApplication->GetProfile(),
+                  s_fields,
+                  s_values,
+                  DspamPageField_Max,
+                  0,          // offset
+                  -1,         // help id
+                  notebook->GetPageCount()      // image id
+              );
 }
 
