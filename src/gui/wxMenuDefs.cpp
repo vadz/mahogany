@@ -288,7 +288,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_CLOSEALL,  gettext_noop("Close &all"), gettext_noop("Close all opened folders")               , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_UPDATE,    gettext_noop("&Update"), gettext_noop("Update the shown status of this folder"), wxITEM_NORMAL },
-   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update sub&tree..."), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), wxITEM_NORMAL },
+   { WXMENU_FOLDER_UPDATEALL, gettext_noop("Update sub&tree"), gettext_noop("Update the status of all folders under the currently selected one in the folder tree"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,        "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_FOLDER_IMPORTTREE,gettext_noop("&Import file folders..."),
                               gettext_noop("Create folders for all files in a directory"), wxITEM_NORMAL },
