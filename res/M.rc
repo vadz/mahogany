@@ -135,9 +135,9 @@ folder_sentmail		BITMAP "folder_sentmail.bmp"
 folder_palmpilot	BITMAP "folder_trash.bmp"
 folder_trash		BITMAP "folder_trash.bmp"
 
-// folder list ctrl column images
-sortdown	ICON	"sortdown.ico"
-sortup		ICON	"sortup.ico"
+// folder list ctrl column images (11x11)
+sortdown	BITMAP	"sortdown.bmp"
+sortup		BITMAP	"sortup.bmp"
 
 // Custom headers dialog image list (16x16)
 image_news	BITMAP	"image_news.bmp"
