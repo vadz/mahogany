@@ -1255,7 +1255,7 @@ MAppBase::GetStatusField(StatusFields field)
       if ( m_statusPanes[n] > field || m_statusPanes[n] == SF_ILLEGAL )
       {
          // we insert the status field here to keep the array sorted
-         for ( size_t m = n + 1; m < WXSIZEOF(m_statusPanes); m++ )
+         for ( size_t m = WXSIZEOF(m_statusPanes) - 1; m > n; m-- )
          {
             m_statusPanes[m] = m_statusPanes[m - 1];
          }
