@@ -1589,6 +1589,15 @@ extern bool ExpandTemplate(Composer& cv,
                            Message *msg,
                            const MessageView *msgview)
 {
+   // we need to show text in the message view to be able to quote it
+   if ( msg && msgview )
+   {
+      const_cast<MessageView *>(msgview)->ShowMessage(msg->GetUId());
+
+      // needed for the message to appear in the message view (FIXME)
+      MEventManager::DispatchPending();
+   }
+
    ExpansionSink sink;
    VarExpander expander(sink, cv, profile, msg, msgview);
    MessageTemplateParser parser(templateValue, _("template"), &expander);
