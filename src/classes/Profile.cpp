@@ -59,10 +59,10 @@
 
 /** Name for the subgroup level used for suspended profiles. Must
     never appear as part of a profile path name. */
-#define SUSPEND_PATH "__suspended__" 
+#define SUSPEND_PATH "__suspended__"
 
 #ifdef DEBUG
-   // there are t many of profile trace messages - filter them. They won't
+   // there are too many of profile trace messages - filter them. They won't
    // appear by default, if you do want them change the wxLog::ms_ulTraceMask
    // to include wxTraceProfileClass bit
    static const int wxTraceProfileClass = 0x200;
@@ -157,9 +157,12 @@ public:
    virtual void Suspend(void)
       {
          PCHECK();
-         ASSERT(m_Suspended == false);
+
+         // as we don't have IsSuspended(), it's not an error to call Suspend()
+         // twice
          m_Suspended = true;
       }
+
    /// Commit changes from suspended mode.
    virtual void Commit(void);
    /// Discard changes from suspended mode.
@@ -491,6 +494,14 @@ Profile::DeleteGroup(const String & path)
    ms_GlobalConfig->DeleteGroup(path);
 }
 
+// FIXME there is currently some duplicated code in 2 versions of readEntry() -
+//       it should somehow be factorized into another function
+
+// Notice that we always look first under SUSPEND_PATH: if the profile is not
+// in suspend mode, the entry there simply doesn't exist, so it doesn't harm,
+// and if it is it should override the "normal" entry. This is *necessary* for
+// all parent profiles because they may be suspended without us knowing about
+// it.
 
 String
 Profile::readEntry(const String & key, const String & def, bool * found) const
@@ -504,25 +515,32 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
 
-   String str, localpath;
-   if(m_Suspended)
-   {
-      localpath << SUSPEND_PATH << '/' << key;
-      if(m_ProfilePath.Length())
-         localpath << m_ProfilePath << '/';
-   }
-
    keypath << key;
-   bool foundHere= ms_GlobalConfig->Read(m_Suspended ?
-                                         localpath : keypath,
-                                         &str, def);
+
+   String keypathSuspended;
+   keypathSuspended << SUSPEND_PATH << '/' << keypath;
+
+   String str;
+   bool foundHere = FALSE;
+   if ( m_Suspended )
+   {
+      foundHere = ms_GlobalConfig->Read(keypathSuspended, &str, def);
+   }
+   if ( !foundHere )
+   {
+      foundHere = ms_GlobalConfig->Read(keypath, &str, def);
+   }
 
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      foundAnywhere = ms_GlobalConfig->Read(keypath,&str, def);
+      foundAnywhere = ms_GlobalConfig->Read(keypathSuspended, &str, def);
+      if ( !foundAnywhere )
+      {
+         foundAnywhere = ms_GlobalConfig->Read(keypath, &str, def);
+      }
    }
 
    if ( found )
@@ -540,22 +558,33 @@ Profile::readEntry(const String & key, long def, bool * found) const
    String keypath, localpath;
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
-   if(m_Suspended)
-   {
-      localpath << SUSPEND_PATH << '/' << key;
-      if(m_ProfilePath.Length())
-         keypath << m_ProfilePath << '/';
-   }
+
    keypath << key;
+
+   String keypathSuspended;
+   keypathSuspended << SUSPEND_PATH << '/' << keypath;
+
    long val;
-   bool foundHere = ms_GlobalConfig->Read(m_Suspended ?
-                                          localpath : keypath,&val,def);
+   bool foundHere = FALSE;
+   if ( m_Suspended )
+   {
+      foundHere = ms_GlobalConfig->Read(localpath, &val, def);
+   }
+   if ( !foundHere )
+   {
+      foundHere = ms_GlobalConfig->Read(keypath, &val, def);
+   }
+
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
    {
       ms_GlobalConfig->SetPath("..");
-      foundAnywhere = ms_GlobalConfig->Read(keypath,&val,def);
+      foundAnywhere = ms_GlobalConfig->Read(keypathSuspended, &val, def);
+      if ( !foundAnywhere )
+      {
+         foundAnywhere = ms_GlobalConfig->Read(keypath, &val, def);
+      }
    }
 
    if ( found )
@@ -599,47 +628,57 @@ void
 Profile::Commit(void)
 {
    PCHECK();
-   ASSERT(m_Suspended == true);
-   ms_GlobalConfig->SetPath(GetName());
 
-   String truePath, suspPath;
-   if(m_ProfilePath)
+   if ( !m_Suspended )
+   {
+      // as we don't provide IsSuspended() function, just silently ignore this
+      // call instead of giving an error
+      return;
+   }
+
+   String truePath = GetName();
+   truePath << '/';
+
+   if( m_ProfilePath.length() > 0 )
       truePath << m_ProfilePath << '/';
-   suspPath = truePath;
+
+   String suspPath = truePath;
    suspPath << SUSPEND_PATH << '/';
    ms_GlobalConfig->SetPath(suspPath);
 
-
    String strValue;
    long   numValue;
-   
+
    long index;
    String name;
    bool cont = ms_GlobalConfig->GetFirstEntry(name, index);
    while(cont)
    {
-      if(ms_GlobalConfig->Read(name, &strValue)) // try to read it as a string
+      switch ( ms_GlobalConfig->GetEntryType(name) )
       {
-#ifdef DEBUG
-         bool rc =
-            ms_GlobalConfig->Write(truePath+name, strValue);
-#endif
-         ASSERT(rc);
+         case wxConfig::Type_String:
+            if ( !ms_GlobalConfig->Read(name, &strValue) ||
+                 !ms_GlobalConfig->Write(truePath + name, strValue) )
+            {
+               FAIL_MSG("failed to copy config entry");
+            }
+            break;
+
+         case wxConfig::Type_Integer:
+            if ( !ms_GlobalConfig->Read(name, &numValue) ||
+                 !ms_GlobalConfig->Write(truePath + name, numValue) )
+            {
+               FAIL_MSG("failed to copy config entry");
+            }
+            break;
+
+         default:
+            FAIL_MSG("unsupported config entry type");
       }
-      else if(ms_GlobalConfig->Read(name, &numValue)) // it MUST be a number then!
-      {
-#ifdef DEBUG
-         bool rc =
-#endif
-            ms_GlobalConfig->Write(truePath+name, numValue);
-         ASSERT(rc);
-      }
-      else
-      {
-         ASSERT(0); // neither a string nor a number -> impossible!
-      }
+
       cont = ms_GlobalConfig->GetNextEntry(name, index);
    }
+
    Discard(); // now we just forget the suspended sub-group
 }
 
@@ -647,10 +686,17 @@ void
 Profile::Discard(void)
 {
    PCHECK();
-   ASSERT(m_Suspended == true);
+
+   if ( !m_Suspended )
+   {
+      // as we don't provide IsSuspended() function, just silently ignore this
+      // call instead of giving an error
+      return;
+   }
+
    String path;
    ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath)
+   if( m_ProfilePath.length() > 0 )
       path << m_ProfilePath << '/';
    path << SUSPEND_PATH;
 #ifdef DEBUG
