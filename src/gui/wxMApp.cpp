@@ -486,12 +486,13 @@ wxMApp::OnInit()
 
    m_IconManager = new wxIconManager();
 
-   m_OnlineManager = wxDialUpManager::Create();
-   
+   m_OnlineManager = wxDialUpManager::Create();   
    if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
    {
       wxLogError(_("Cannot activate auto-check for dial-up network status."));
    }
+   m_PrintData = new wxPrintData;
+   m_PageSetupData = new wxPageSetupDialogData;
 
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
@@ -556,8 +557,6 @@ wxMApp::OnInit()
 #endif
 
       // restore our preferred printer settings
-    m_PrintData = new wxPrintData;
-    m_PageSetupData = new wxPageSetupDialogData;
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
     (*m_PrintData) = * wxThePrintSetupData;
 #endif

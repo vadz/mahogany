@@ -264,6 +264,7 @@ MailFolder::ReplyMessage(class Message *msg,
                          MWindow *parent)
 {
    ASSERT_RET(msg);
+   msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
    wxComposeView *cv = wxComposeView::CreateReplyMessage(parent, profile);
@@ -436,6 +437,7 @@ MailFolder::ForwardMessage(class Message *msg,
                            MWindow *parent)
 {
    ASSERT_RET(msg);
+   msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
    
    wxComposeView *cv = wxComposeView::CreateFwdMessage(parent, profile);
