@@ -72,9 +72,9 @@ static const size_t LEVEL_INVALID = (size_t)-1;
 // private functions
 // ----------------------------------------------------------------------------
 
-/** Count levels of quoting on the first line of passed string
-    (i.e. before the first \n). It understands standard e-mail
-    quoting methods such as ">" and "XY>"
+/** Count levels of quoting on the first line of passed string.
+
+    It understands standard e-mail quoting methods such as ">" and "XY>".
 
     @param string the string to check
     @param prev the start of previous line or NULL if start of text
@@ -86,7 +86,8 @@ static int
 CountQuoteLevel(const char *string,
                 const char *prev,
                 int max_white,
-                int max_alpha);
+                int max_alpha,
+                bool *nextWrapped);
 
 /**
    Check if there is only whitespace until the end of line.
@@ -163,7 +164,9 @@ protected:
    void ReadOptions(Options& options, Profile *profile);
 
    // get the quote level for the line (prev is for CountQuoteLevel() only)
-   size_t GetQuotedLevel(const char *line, const char *prev) const;
+   size_t GetQuotedLevel(const char *line,
+                         const char *prev,
+                         bool *nextWrapped) const;
 
    // get the colour for the given quote level
    wxColour GetQuoteColour(size_t qlevel) const;
@@ -227,20 +230,17 @@ int
 CountQuoteLevel(const char *string,
                 const char *prev,
                 int max_white,
-                int max_alpha)
+                int max_alpha,
+                bool *nextWrapped)
 {
+   *nextWrapped = false;
+
    // find the beginning of the and next line
-   const char *next = strchr(string, '\n');
-   if ( !next )
-   {
-      // it's simpler to pretend that the next line is the same as this one
-      // instead of checking for it all the time below
-      next = string;
-   }
-   else // skip '\n'
-   {
-      next++;
-   }
+   const char *nextStart = strchr(string, '\n');
+
+   // it's simpler to pretend that the next line is the same as this one
+   // instead of checking for it all the time below
+   const char *next = nextStart ? nextStart + 1 /* skip '\n' */ : string;
 
    if ( !prev )
    {
@@ -251,7 +251,7 @@ CountQuoteLevel(const char *string,
 
    // look at the beginning of this string and count (nested) quoting levels
    LineResult sameAsNext = Line_Unknown,
-                 sameAsPrev = Line_Unknown;
+              sameAsPrev = Line_Unknown;
    int levels = 0;
    for ( const char *c = string; *c != 0 && *c != '\n'; c++, prev++, next++ )
    {
@@ -301,13 +301,38 @@ CountQuoteLevel(const char *string,
          if ( *next != *c && !IsBlankLine(next) )
          {
             // but then it diverges, so this is unlikely to be a quote marker
-            break;
+            sameAsNext = Line_Different;
          }
       }
-      else // not the same one, but maybe the next line is blank?
+      else // not the same one
       {
-         if ( !IsBlankLine(next + 1) )
+         // if the next line is blank, this one is considered to be quoted
+         // (otherwise the last line of a quoted paragraph would never be
+         // recognized as quoted)
+         sameAsNext = IsBlankLine(next + 1) ? Line_Blank : Line_Different;
+      }
+
+      // last chance: it is possible that the next line is a wrapped part of
+      // this one, so check the line after it too
+      //
+      // as this has a lot of potential for false positives, only do it for the
+      // most common quoting character
+      if ( sameAsNext == Line_Different && nextStart && *c == '>' )
+      {
+         const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
+         if ( !nextnext ||
+               (!IsBlankLine(nextnext + 1) &&
+                strncmp(string, nextnext + 1, next - nextStart + 1) != 0) )
+         {
+            // the line after next doesn't start with the same prefix as
+            // this one so it's improbable that the next line was garbled
+            // because of quoting -- chances are this line is simply not
+            // quoted at all
             break;
+         }
+
+         // it does look like the next line is wrapped tail of this one
+         *nextWrapped = true;
       }
 
       // finally check the previous line
@@ -386,14 +411,17 @@ bool QuoteURLFilter::UpdateOptions(Profile *profile)
 // ----------------------------------------------------------------------------
 
 size_t
-QuoteURLFilter::GetQuotedLevel(const char *line, const char *prev) const
+QuoteURLFilter::GetQuotedLevel(const char *line,
+                               const char *prev,
+                               bool *nextWrapped) const
 {
    size_t qlevel = CountQuoteLevel
                    (
                      line,
                      prev,
                      m_options.quotedMaxWhitespace,
-                     m_options.quotedMaxAlpha
+                     m_options.quotedMaxAlpha,
+                     nextWrapped
                    );
 
    // note that qlevel is counted from 1, really, as 0 means unquoted and that
@@ -439,7 +467,10 @@ QuoteURLFilter::DoProcess(String& text,
    String url,
           before;
 
-   size_t levelBeforeURL = LEVEL_INVALID;
+   size_t level = LEVEL_INVALID,
+          levelBeforeURL = LEVEL_INVALID;
+
+   bool nextWrapped = false;
 
    do
    {
@@ -459,8 +490,6 @@ QuoteURLFilter::DoProcess(String& text,
 
       if ( m_options.quotedColourize )
       {
-         size_t level;
-
          // if we have just inserted an URL, restore the same level we were
          // using before as otherwise foo in a line like "> URL foo" wouldn't
          // be highlighted correctly
@@ -471,7 +500,10 @@ QuoteURLFilter::DoProcess(String& text,
          }
          else // no preceding URL, we're really at the start of line
          {
-            level = GetQuotedLevel(before, NULL);
+            if ( nextWrapped )
+               nextWrapped = false;
+            else
+               level = GetQuotedLevel(before, NULL, &nextWrapped);
          }
 
          style.SetTextColour(GetQuoteColour(level));
@@ -485,18 +517,26 @@ QuoteURLFilter::DoProcess(String& text,
             lineNext++;
 
             // calculate the quoting level for this line
-            size_t levelNew = GetQuotedLevel(lineNext, lineCur);
-            if ( levelNew != level )
+            if ( nextWrapped )
             {
-               String line(lineCur, lineNext);
-               m_next->Process(line, viewer, style);
-
-               level = levelNew;
-               style.SetTextColour(GetQuoteColour(level));
-
-               lineCur = lineNext;
+               // quoting level doesn't change anyhow
+               nextWrapped = false;
             }
-            //else: same level as the previous line, just continue
+            else
+            {
+               size_t levelNew = GetQuotedLevel(lineNext, lineCur, &nextWrapped);
+               if ( levelNew != level )
+               {
+                  String line(lineCur, lineNext);
+                  m_next->Process(line, viewer, style);
+
+                  level = levelNew;
+                  style.SetTextColour(GetQuoteColour(level));
+
+                  lineCur = lineNext;
+               }
+               //else: same level as the previous line, just continue
+            }
 
             if ( !*lineNext )
             {
