@@ -37,6 +37,7 @@ public:
    virtual String const & GetId(void) const { return m_Id; }
    virtual UIdType GetUId(void) const { return m_UId; }
    virtual String const &GetReferences(void) const { return m_References; }
+   virtual String const &GetInReplyTo(void) const { return m_InReplyTo; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long GetSize(void) const { return m_Size; }
    virtual unsigned long GetLines(void) const { return m_Lines; }
@@ -74,7 +75,8 @@ protected:
           m_From,
           m_To,
           m_NewsGroups,
-          m_References;
+          m_References,
+          m_InReplyTo;
 
    String m_Id;
 

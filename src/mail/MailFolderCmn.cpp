@@ -1103,7 +1103,9 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
          for ( size_t j = 0; j < count; j++ )
          {
             String references = hil[j]->GetReferences();
-            if ( references.Find(id) != wxNOT_FOUND )
+            String inReplyTo = hil[j]->GetInReplyTo();
+            if ( (references.Find(id) != wxNOT_FOUND) ||
+                 (inReplyTo.Find(id) != wxNOT_FOUND))
             {
                dependents[i].push_back(new size_t(j));
                hil[j]->SetIndentation(MFCMN_INDENT2_MARKER);
@@ -1168,7 +1170,7 @@ static void SortListing(MailFolder *mf,
    if ( sortParams.order != 0 )
    {
       size_t count = hil->Count();
-      if ( count >= 1 )
+      if ( count > 1 )
       {
          MFrame *frame = mf->GetInteractiveFrame();
          if ( frame )
@@ -1572,7 +1574,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                int status = hi->GetStatus();
 
                // only take NEW (== RECENT && !SEEN) and ignore DELETED
-               if ( (status & 
+               if ( (status &
                      (MSG_STAT_RECENT | MSG_STAT_SEEN | MSG_STAT_DELETED))
                      == MSG_STAT_RECENT )
                {
@@ -1642,16 +1644,21 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                }
             }
 
-            if ( SaveMessages(&messages, newMailFolder) )
+            // it is possible that all new messages had MSG_STAT_DELETED flag
+            // set and so we have nothing to copy
+            if ( !messages.IsEmpty() )
             {
-               // delete and expunge
-               DeleteMessages(&messages, true);
+               if ( SaveMessages(&messages, newMailFolder) )
+               {
+                  // delete and expunge
+                  DeleteMessages(&messages, true);
 
-               rc |= FilterRule::Expunged;
-            }
-            else // don't delete them if we failed to move
-            {
-               ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+                  rc |= FilterRule::Expunged;
+               }
+               else // don't delete them if we failed to move
+               {
+                  ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+               }
             }
          }
       }

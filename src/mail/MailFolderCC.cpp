@@ -221,6 +221,9 @@ struct OVERVIEW_X : public mail_overview
 
    // the "Newsgroups:" header
    const char *newsgroups;
+
+   // the "In-Reply-To:" header
+   const char *inReplyTo;
 };
 
 // type of the callback for mail_fetch_overview()
@@ -3643,6 +3646,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       entry.m_Lines = ov->optional.lines;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
+      entry.m_InReplyTo = ov->inReplyTo;
       entry.m_UId = uid;
 
       // set the font encoding to be used for displaying this entry
@@ -4959,6 +4963,7 @@ void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
          ov.date = env->date;
          ov.message_id = env->message_id;
          ov.references = env->references;
+         ov.inReplyTo = env->in_reply_to;
          ov.optional.octets = elt->rfc822_size;
          if(! (*ofn) (stream,mail_uid (stream,i),&ov))
          {

@@ -42,6 +42,7 @@ public:
    virtual time_t GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
+   virtual const String &GetInReplyTo(void) const = 0;
    virtual UIdType GetUId(void) const = 0;
    virtual int GetStatus(void) const = 0;
    virtual unsigned long GetSize(void) const = 0;

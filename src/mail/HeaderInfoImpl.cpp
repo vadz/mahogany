@@ -107,6 +107,7 @@ HeaderInfo * HeaderInfoImpl::Clone() const
    hi->m_Date = GetDate();
    hi->m_UId = GetUId();
    hi->m_References = GetReferences();
+   hi->m_InReplyTo = GetInReplyTo();
    hi->m_Status = GetStatus();
    hi->m_Size = GetSize();
    hi->m_Lines = GetLines();
