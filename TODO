@@ -22,11 +22,17 @@ $Id$
 - GPG/PGP support
 - built-in HTML viewer
 
+** for VZ
+- add wxWizard for the first time run
+- add tips on startup (a wxTipDialog class?)
+- when installing, create a welcome message in "New Mail". Also, create
+  a default address book with m-users/m-developers entries in it.
+
 GENERAL ROADMAP/ORDER OF THINGS:
 
-  1. fix remaining bugs in Windows version  ---> make new common release
-  2. finish filtering code
-  3. do multi-threading before adding sorting etc
+  1. finish filtering code
+  2. do multi-threading before adding sorting etc
+  3. sorting/threading/scoring of messages
 
 *********************************************************************
 *** Currently being worked on:
@@ -34,22 +40,30 @@ GENERAL ROADMAP/ORDER OF THINGS:
 ***    noticeboard where we list whatever comes to our mind.)
 *********************************************************************
 
+
+*********************************************************************
+*** buglets (may be fixed by anybody, shouldn't take long to do it)
+*********************************************************************
+
+- changing the value of "autocollect" timer doesn't take effect until
+  next run - either add a message saying or, better, recreate timer
+  when the option changes.
+
+- "Hostname" in identity options page is misleading - should be "default
+  server for POP/IMAP". Also, move TCP params somewhere else - what does
+  it have to do with identity??
+
+- there should be no [Expand] button in "Post news message" window,
+  or may be there should be [choose newsgroup] one instead.
+
 *********************************************************************
 *** wxMSW bugs:
 *********************************************************************
- - memory leaks (some from cclient, others - not sure)
- - radiobox doesn't respect constraints, adjusts its size as it thinks is better
- - in folder create/properties dialog there is missing UpdateUI() right
-   after creation - add it somewhere
- - lock file checking for INBOX:
-   + it does locking under Windows too, but the lock file names are different
-     Testing for FOLDER.lock* now, is that fine?
- - wxLayout completely broken:
-   + scrollbars are not updated nor even drawn at all
-   + vertical and horizontal lines across the window
-   + some areas are duplicated (displayed twice with some small shift)
-   + ...
- - CR/LF problems when replying to the messages
+
+- lock files are sometimes left
+
+- keyboard navigation is somewhat strange in the options dialog, can't
+  TAB to the buttons from the notebook page.
 
 *********************************************************************
 *** VZ:
@@ -61,12 +75,9 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - when user level is >=1 (advanced) show full preferences pages in
   folder notbook
 
-- closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
-  VZ: can't reproduce this
-  KB: only if no other window is open
-
 - Clicking on splashscreen or closing it while M starts up leads to
   segfault
+  + should be fixed now, never happens under Windows
 
 - foldertreectrl in folder selection dialog should have keyboard focus 
   and should not open folder when pressed return, but select it :-)
@@ -160,21 +171,18 @@ for release:
   prefix/Mahogany/M.conf.
 - merge in settings from some remote location, possibly using ftp/http 
 - use wxHtmlHelp classes ? use gtkxmhtml widget?
-- remove classes documentation from normal docs and no longer include
-  it in the archive, create separate make target for it. It's too large!
-- add closing delay for sentmail folder to avoid reopening it each time
+
 - add SIGSEGV handler for safe exit, to attempt and safe things
-- change of settings in the msg view section of the options dlg should generate
-  an event which would propagete to all open msg views.
-- make [Apply] work too!
+  + VZ: this should pass by wxWindows, my old idea about wxApp::OnException().
+
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
  - easy to implement but useful feature: "check for new mail now"
  - possibly have a MIME types editor (similar to netscape's?)
-  - easy: add support for email-to-fax gateway at www.tpc.int and
-    their coverpage
+ - easy: add support for email-to-fax gateway at www.tpc.int and
+   their coverpage
  - document scripts in extra/scripts
  - somehow allow different configs for different hosts, maybe a
    [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
@@ -195,6 +203,7 @@ for release:
   - fix remaining BBDB/ADB problems (low priority)
 
 - alternative treecontrol instead of listctrl for folderview
+  + VZ: don't think it's a good idea, too confusing to the user
 
 - use wxURL to retrieve remote configuration files and import them,
   maybe even retrieve files to use as folders or address books`?
@@ -323,6 +332,10 @@ for release:
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+
+- change of settings in the msg view section of the options dlg should generate
+  an event which would propagete to all open msg views.
+- make [Apply] work too!
 - add "double click to open" profile option support to folder list ctrl
 
 vi: set si tw=80:
