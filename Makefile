@@ -101,7 +101,7 @@ install_locale:
 
 install_doc:
 	$(MAKE) -C doc install
-	set -e; for i in TODO README; \
+	set -e; for i in CHANGES COPYING CREDITS INSTALL README; \
 	do $(INSTALL_DATA) .src/$$i $(DOCDIR); \
 	done
 
