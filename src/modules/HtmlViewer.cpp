@@ -739,7 +739,7 @@ void HtmlViewer::ShowHeader(const String& headerName,
 void HtmlViewer::ShowXFace(const wxBitmap& bitmap)
 {
    // make a new table inside the header table for the headers
-   m_htmlText += "<td><table cellspacing=1 cellpadding=1 border=0>";
+   m_htmlText += "<table cellspacing=1 cellpadding=1 border=0><td>";
 
    m_bmpXFace = bitmap;
 }
