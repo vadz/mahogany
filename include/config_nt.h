@@ -77,7 +77,4 @@
 /** Define if you want to use the global Mpch.h header file (e.g. for
     precompiling headers */
 #define USE_PCH 1
-
-// always use modules statically under Windows
-#define USE_MODULES_STATIC
 //@}

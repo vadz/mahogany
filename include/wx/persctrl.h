@@ -33,15 +33,18 @@ class wxPHelper;
 #include <wx/radiobox.h>
 #include <wx/treectrl.h>
 
-// when we're in M, we are not in a DLL - to be removed!
-#undef WXDLLEXPORT
-#define WXDLLEXPORT
+// we can be compiled inside wxWin or not
+#ifdef WXMAKINGDLL
+    #define WXDLLMAYEXP WXDLLEXPORT
+#else
+    #define WXDLLMAYEXP
+#endif
 
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPControls
+class WXDLLMAYEXP wxPControls
 {
 public:
     // static functions
@@ -85,7 +88,7 @@ private:
 // persistent notebook remembers the last active page
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPNotebook : public wxNotebook
+class WXDLLMAYEXP wxPNotebook : public wxNotebook
 {
 public:
     // ctors and dtor
@@ -139,7 +142,7 @@ private:
 // rather as a (single line) text entry, as its name suggests. In particular,
 // you shouldn't add/remove strings from this combobox manually (but using
 // SetValue (and, of course, GetValue) is perfectly ok).
-class WXDLLEXPORT wxPTextEntry : public wxComboBox
+class WXDLLMAYEXP wxPTextEntry : public wxComboBox
 {
 public:
     // ctors
@@ -191,7 +194,7 @@ protected:
 // A splitter control which remembers its last position
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPSplitterWindow : public wxSplitterWindow
+class WXDLLMAYEXP wxPSplitterWindow : public wxSplitterWindow
 {
 public:
     // ctors
@@ -252,7 +255,7 @@ private:
 // a list control which remembers the widths of its columns
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPListCtrl : public wxListCtrl
+class WXDLLMAYEXP wxPListCtrl : public wxListCtrl
 {
 public:
     // ctors
@@ -312,7 +315,7 @@ private:
 // persistent checkbox remembers its last value
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPCheckBox : public wxCheckBox
+class WXDLLMAYEXP wxPCheckBox : public wxCheckBox
 {
 public:
     // ctors
@@ -363,7 +366,7 @@ private:
 // persistent listbox remembers its last selection
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPListBox : public wxListBox
+class WXDLLMAYEXP wxPListBox : public wxListBox
 {
 public:
     // ctors
@@ -425,7 +428,7 @@ private:
 // persistent radiobox remembers its last selection
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPRadioBox : public wxRadioBox
+class WXDLLMAYEXP wxPRadioBox : public wxRadioBox
 {
 public:
     // ctors
@@ -491,7 +494,7 @@ private:
 // wxPTreeCtrl: remembers which of tree branches were expanded
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPTreeCtrl : public wxTreeCtrl
+class WXDLLMAYEXP wxPTreeCtrl : public wxTreeCtrl
 {
 public:
     // ctors
@@ -574,7 +577,7 @@ enum
     wxFILEDLG_USE_FILENAME = 0x2000 // don't override with config setting
 };
 
-extern WXDLLEXPORT wxString wxPFileSelector(const wxString& configPath,
+extern WXDLLMAYEXP wxString wxPFileSelector(const wxString& configPath,
                                             const wxString& title,
                                             const char *defpath = NULL,
                                             const char *defname = NULL,
@@ -586,7 +589,7 @@ extern WXDLLEXPORT wxString wxPFileSelector(const wxString& configPath,
 
 // return the number of filenames selected, the filenames themselves are in
 // the array passed by reference
-extern WXDLLEXPORT size_t wxPFilesSelector(wxArrayString& filenames,
+extern WXDLLMAYEXP size_t wxPFilesSelector(wxArrayString& filenames,
                                            const wxString& configPath,
                                            const wxString& title,
                                            const char *defpath = NULL,
@@ -617,7 +620,7 @@ extern WXDLLEXPORT size_t wxPFilesSelector(wxArrayString& filenames,
 // will be true if the user checked the check box.
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT int wxPMessageBox(const wxString& configPath,
+extern WXDLLMAYEXP int wxPMessageBox(const wxString& configPath,
                                      const wxString& message,
                                      const wxString& caption,
                                      long style = wxYES_NO | wxICON_QUESTION,
@@ -625,13 +628,13 @@ extern WXDLLEXPORT int wxPMessageBox(const wxString& configPath,
                                      wxConfigBase *config = NULL);
 
 // was the message box disabled?
-extern WXDLLEXPORT bool wxPMessageBoxEnabled(const wxString& configPath,
+extern WXDLLMAYEXP bool wxPMessageBoxEnabled(const wxString& configPath,
                                              wxConfigBase *config = NULL);
 
 // make sure that the next call to wxPMessageBox(configPath) will show the
 // message box (by erasing the stored answer in it) or disable it to now
 // show the message box
-extern WXDLLEXPORT void wxPMessageBoxEnable(const wxString& configPath,
+extern WXDLLMAYEXP void wxPMessageBoxEnable(const wxString& configPath,
                                             bool enable = TRUE,
                                             wxConfigBase *config = NULL);
 

@@ -40,6 +40,7 @@
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
 #include "gui/wxMDialogs.h"
+#include "gui/wxMainFrame.h"
 
 #include <wx/menu.h>
 #include <wx/calctrl.h>
@@ -699,7 +700,7 @@ CalendarFrame::GetConfig(void)
    m_FolderName = m_Profile->readEntry(MP_MOD_CALENDAR_BOX,
                                        MP_MOD_CALENDAR_BOX_D);
    m_Show = m_Profile->readEntry(MP_MOD_CALENDAR_SHOWONSTARTUP,
-                                 MP_MOD_CALENDAR_SHOWONSTARTUP_D);
+                                 MP_MOD_CALENDAR_SHOWONSTARTUP_D) != 0;
 
    // settings read from folder profile:
    Profile *fp = m_MInterface->CreateProfile(m_FolderName);

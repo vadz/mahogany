@@ -23,9 +23,16 @@
 #include "wx/string.h"
 #include "wx/dynarray.h"
 
+// we can be compiled inside wxWin or not
+#ifdef WXMAKINGDLL
+    #define WXDLLMAYEXP WXDLLEXPORT
+#else
+    #define WXDLLMAYEXP
+#endif
+
 class WXDLLEXPORT wxDateTime;
-class WXDLLEXPORT wxVCardObject;
-class WXDLLEXPORT wxVCard;
+class WXDLLMAYEXP wxVCardObject;
+class WXDLLMAYEXP wxVCard;
 
 #ifndef VOBJECT_DEFINED
    typedef struct VObject VObject;
@@ -40,7 +47,7 @@ WX_DEFINE_ARRAY(wxVCard *, wxArrayCards);
 // are also wxVCardObjects
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardObject
+class WXDLLMAYEXP wxVCardObject
 {
 public:
     // types of wxVCardObject properties
@@ -129,7 +136,7 @@ protected:
 // inside it or points to the image location (e.g. contains an URL)
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardImage : public wxVCardObject
+class WXDLLMAYEXP wxVCardImage : public wxVCardObject
 {
 public:
 };
@@ -138,7 +145,7 @@ public:
 // wxVCardSound class currently can only handle string values
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardSound : public wxVCardObject
+class WXDLLMAYEXP wxVCardSound : public wxVCardObject
 {
 public:
 };
@@ -149,7 +156,7 @@ public:
 // its label
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardAddrOrLabel : public wxVCardObject
+class WXDLLMAYEXP wxVCardAddrOrLabel : public wxVCardObject
 {
 public:
     enum
@@ -179,7 +186,7 @@ protected:
 };
 
 // this is the broken-down address
-class WXDLLEXPORT wxVCardAddress : public wxVCardAddrOrLabel
+class WXDLLMAYEXP wxVCardAddress : public wxVCardAddrOrLabel
 {
 public:
     // address parts accessors: return empty string if the field wasn't
@@ -204,7 +211,7 @@ protected:
 };
 
 // this is the combined address as it would appear on an envelop
-class WXDLLEXPORT wxVCardAddressLabel : public wxVCardAddrOrLabel
+class WXDLLMAYEXP wxVCardAddressLabel : public wxVCardAddrOrLabel
 {
 public:
     wxString GetLabel() const { return GetValue(); }
@@ -221,7 +228,7 @@ protected:
 // wxVCardAddrOrLabel does
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardPhoneNumber : public wxVCardObject
+class WXDLLMAYEXP wxVCardPhoneNumber : public wxVCardObject
 {
 public:
     enum
@@ -258,7 +265,7 @@ protected:
 // wxVCardEmail is a email address with the type of email
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCardEMail : public wxVCardObject
+class WXDLLMAYEXP wxVCardEMail : public wxVCardObject
 {
 public:
     enum Type
@@ -283,7 +290,7 @@ protected:
 // wxVCard class encapsulates an entire vCard record
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxVCard : public wxVCardObject
+class WXDLLMAYEXP wxVCard : public wxVCardObject
 {
 public:
     // create an array of card objects from the contents of the given file
@@ -434,10 +441,10 @@ protected:
 #if wxUSE_GUI
 
 // edit an existing vCard, return TRUE if [Ok] was chosen, FALSE otherwise
-extern bool WXDLLEXPORT wxEditVCard(wxVCard *vcard);
+extern WXDLLMAYEXP bool wxEditVCard(wxVCard *vcard);
 
 // create a new vCard, return a pointer to the new object or NULL
-extern wxVCard * WXDLLEXPORT wxCreateVCard();
+extern WXDLLMAYEXP wxVCard *wxCreateVCard();
 
 #endif // wxUSE_GUI
 

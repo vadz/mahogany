@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "M"=.\M.DSP - Package Owner=<4>
+Project: "Filters"=.\Filters.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -11,21 +11,42 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name cclient
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name python15
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name compface
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name wxWindows
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name versit
-    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ImportEudora"=.\ImportEudora.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "Mdummy"=.\Mdummy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "Mdyn"=.\Mdyn.DSP - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
 }}}
 
 ###############################################################################
@@ -81,18 +102,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "python15"=L:\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
@@ -105,7 +114,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWindows"=l:\wxwindows\wxWindows.dsp - Package Owner=<4>
+Project: "wxWinDll"=L:\wxWindows\wxWinDll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -113,6 +122,15 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name png
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name zlib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name xpm
+    End Project Dependency
 }}}
 
 ###############################################################################

@@ -64,9 +64,7 @@ static wxArrayString BuildListOfModulesDirs();
 // Actual MModule code
 // ----------------------------------------------------------------------------
 
-
-/// #define DLL_EXTENSION wxDllHandler::GetDllExt()
-#define DLL_EXTENSION ".so"
+#define DLL_EXTENSION wxDllLoader::GetDllExt()
 
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
@@ -87,7 +85,7 @@ struct MModuleListEntry
    String m_Version;
    /// The init function to call.
    MModule_InitModuleFuncType m_InitFunc;
-#endif
+#endif // USE_MODULES_STATIC
 };
 
 /// A list of all loaded modules.
@@ -175,7 +173,7 @@ MModule *FindModule(const String & name)
                M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
                &gs_MInterface, &errorCode);
          }
-#endif
+#endif // USE_MODULES_STATIC
          if( (**i).m_Module )
             (**i).m_Module->IncRef();
 
@@ -296,18 +294,28 @@ MModule::GetProvider(const wxString &interfaceName)
    for(i = GetMModuleList()->begin();
        i != GetMModuleList()->end();
        i++)
-      if( (**i).m_Interface == interfaceName )
+   {
+      MModuleListEntry *me = *i;
+      if( me->m_Interface == interfaceName )
       {
 #ifdef USE_MODULES_STATIC
-         if( (**i).m_Module == NULL ) // static case not loaded yet
-            return NULL; 
-            //WRONG! (**i).m_Module = FindModule( (**i).m_Name ); // this will
-         // initialise it
-         else
+         if( !me->m_Module )
+         {
+            // create the module on the fly
+            int errorCode;
+            me->m_Module = (*(me->m_InitFunc))(
+               M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
+               &gs_MInterface, &errorCode);
+         }
 #endif
-            (**i).m_Module->IncRef();
-         return (**i).m_Module;
+         if ( me->m_Module )
+         {
+            me->m_Module->IncRef();
+            return me->m_Module;
+         }
       }
+   }
+
    return NULL; // not found
 }
 
@@ -696,7 +704,7 @@ static wxArrayString BuildListOfModulesDirs()
 #endif // Unix
 
    // make it possible to use modules without installing them in debug builds
-#ifdef DEBUG
+#if defined(DEBUG) && defined(OS_UNIX)
    dirs.Add("./adb/");
    dirs.Add("./modules/");
 #endif // DEBUG

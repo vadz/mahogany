@@ -203,7 +203,7 @@ MFDialogComponent::WriteTest(void)
    }
    
    bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
-   bool needsArgument = ORC_T_Flags[m_Test] & ORC_F_NeedsArg;
+   bool needsArgument = (ORC_T_Flags[m_Test] & ORC_F_NeedsArg) != 0;
    program << ORC_T_Names[m_Test];
    if(needsTarget)
    {
@@ -268,7 +268,7 @@ MFDialogComponent::ReadSettingsFromRule(String & rule)
    if(m_Test == ORC_T_Illegal)
       return FALSE;
    bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
-   bool needsArgument = ORC_T_Flags[m_Test] & ORC_F_NeedsArg;
+   bool needsArgument = (ORC_T_Flags[m_Test] & ORC_F_NeedsArg) != 0;
    m_Target = ORC_W_Illegal;
    if(needsTarget)
    {

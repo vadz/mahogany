@@ -431,7 +431,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
 void AppendToMenu(wxMenu *menu, int& n)
 {
-   int id = g_aMenuItems[n].idMenu;
+   int id = n > 0 ? g_aMenuItems[n].idMenu : WXMENU_SEPARATOR;
    if ( id == WXMENU_SEPARATOR ) {
       menu->AppendSeparator();
    }

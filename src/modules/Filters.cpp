@@ -105,16 +105,23 @@ private:
 /// Own functionality:
 ///------------------------------
 
-
-/// Type of tokens
-enum TokenType
-{ TT_Invalid = -1, TT_Char, TT_Identifier, TT_Keyword, TT_String, TT_Number, TT_EOF };
-
-/** Tokens are either an ASCII character or a value greater >255.
+/** Tokens are either an ASCII character or a value greater > 255.
  */
 class Token
 {
 public:
+   /// Type of tokens
+   enum TokenType
+   {
+      TT_Invalid = -1,
+      TT_Char,
+      TT_Identifier,
+      TT_Keyword,
+      TT_String,
+      TT_Number,
+      TT_EOF
+   };
+
    Token() { m_type = TT_Invalid; }
    inline TokenType GetType(void) const
       { return m_type; }
@@ -1150,7 +1157,7 @@ ParserImpl::GetToken(bool remove)
       Rewind(OldPos);
    /* Now check for keywords, which so far have been treated as normal
       identifiers. */
-   if(token.GetType() == TT_Identifier)
+   if(token.GetType() == Token::TT_Identifier)
    {
       if(token.GetIdentifier() == "if")
          token.SetKeyword("if");
@@ -1184,7 +1191,7 @@ ParserImpl::ParseIfElse(void)
    ASSERT(t.GetKeyword() == "if");
    (void) GetToken(); // swallow "if"
    t = PeekToken();
-   if(t.GetType() != TT_Char || t.GetChar() != '(')
+   if(t.GetType() != Token::TT_Char || t.GetChar() != '(')
    {
       Error(_("'(' expected after 'if'."));
       return NULL;
@@ -1196,7 +1203,7 @@ ParserImpl::ParseIfElse(void)
       goto ifElseBailout;
 
    t = PeekToken();
-   if(t.GetType() != TT_Char || t.GetChar() != ')')
+   if(t.GetType() != Token::TT_Char || t.GetChar() != ')')
    {
       Error(_("')' expected after condition in if statement."));
       goto ifElseBailout;
@@ -1208,7 +1215,7 @@ ParserImpl::ParseIfElse(void)
       goto ifElseBailout;
 
    t = PeekToken();
-   if(t.GetType() == TT_Keyword && t.GetKeyword() == "else")
+   if(t.GetType() == Token::TT_Keyword && t.GetKeyword() == "else")
    {
       // we must parse the else branch, too:
       (void) GetToken(); // swallow the "else"
@@ -1238,7 +1245,7 @@ ParserImpl::ParseArgList(void)
    for(;;)
    {
       // end of arglist?
-      if(t.GetType() == TT_Char && t.GetChar() == ')')
+      if(t.GetType() == Token::TT_Char && t.GetChar() == ')')
          break;
       SyntaxNode *expr = ParseExpression();
       if(expr)
@@ -1246,7 +1253,7 @@ ParserImpl::ParseArgList(void)
       else
          Error(_("Expected an expression in argument list."));
       t = PeekToken();
-      if(t.GetType() != TT_Char)
+      if(t.GetType() != Token::TT_Char)
       {
          Error(_("Expected ',' or ')' behind argument."));
          delete arglist;
@@ -1266,13 +1273,13 @@ ParserImpl::ParseFunctionCall(void)
 {
    MOcheck();
    Token t = GetToken();
-   ASSERT(t.GetType() == TT_Identifier);
+   ASSERT(t.GetType() == Token::TT_Identifier);
 
    String functionName = t.GetIdentifier();
 
    // Need to swallow argument list?
    t = PeekToken();
-   if(t.GetType() != TT_Char || t.GetChar() != '(')
+   if(t.GetType() != Token::TT_Char || t.GetChar() != '(')
    {
       String err;
       err.Printf(_("Functioncall expected '(' after '%s'."),
@@ -1326,14 +1333,14 @@ ParserImpl::ParseFactor(void)
    Token t = PeekToken();
 
    /* First case, expression in brackets: */
-   if(t.GetType() == TT_Char)
+   if(t.GetType() == Token::TT_Char)
    {
       if( t.GetChar() == '(')
       {
          t = GetToken();
          sn = ParseExpression();
          t = PeekToken();
-         if(t.GetType() == TT_Char && t.GetChar() == ')')
+         if(t.GetType() == Token::TT_Char && t.GetChar() == ')')
             GetToken();
          else
          {
@@ -1358,7 +1365,7 @@ ParserImpl::ParseFactor(void)
       { // might be a number
          int factor = t.GetChar() == '-' ? -1 : +1;
          GetToken();
-         if(t.GetType() != TT_Number)
+         if(t.GetType() != Token::TT_Number)
             Error(_("Expected a number."));
          else
          {
@@ -1367,19 +1374,19 @@ ParserImpl::ParseFactor(void)
          }
       }
    }
-   else if( t.GetType() == TT_String )
+   else if( t.GetType() == Token::TT_String )
    {
       GetToken();
       return new StringConstant(t.GetString(), this);
    }
-   else if(t.GetType() == TT_Identifier)
+   else if(t.GetType() == Token::TT_Identifier)
    {
       // IDENTIFIER ( ARGLIST )
       sn = ParseFunctionCall();
    }
    else
    {
-      if(t.GetType() != TT_Number)
+      if(t.GetType() != Token::TT_Number)
          Error(_("Expected a number or a function call."));
       else
       {
@@ -1405,8 +1412,8 @@ ParserImpl::ParseRestCondition(Expression *condition)
    */
    Token t = PeekToken();
 
-   if(t.GetType() == TT_EOF
-      || ( t.GetType() == TT_Char
+   if(t.GetType() == Token::TT_EOF
+      || ( t.GetType() == Token::TT_Char
            && t.GetChar() != '&'
            && t.GetChar() != '|')
       )
@@ -1444,8 +1451,8 @@ ParserImpl::ParseRestExpression(Expression *expression)
    */
    Token t = PeekToken();
 
-   if(t.GetType() == TT_EOF
-      || (t.GetType() == TT_Char
+   if(t.GetType() == Token::TT_EOF
+      || (t.GetType() == Token::TT_Char
           && t.GetChar() != '+'
           && t.GetChar() != '-')
       )
@@ -1481,9 +1488,9 @@ ParserImpl::ParseRestTerm(Expression *expression)
       | EMPTY
    */
    Token t = PeekToken();
-   if(t.GetType() == TT_EOF
+   if(t.GetType() == Token::TT_EOF
       ||
-      ( t.GetType() == TT_Char
+      ( t.GetType() == Token::TT_Char
         && t.GetChar() != '/'
         && t.GetChar() != '*'))
       return;
@@ -1550,7 +1557,7 @@ ParserImpl::ParseProgram(void)
    for(;;)
    {
       t = PeekToken();
-      if(t.GetType() == TT_EOF)
+      if(t.GetType() == Token::TT_EOF)
          break;
       block = ParseBlock();
       if(block == NULL)
@@ -1582,7 +1589,7 @@ ParserImpl::ParseBlock(void)
    Token t = PeekToken();
 
    // Is there an IF() ELSE statement?
-   if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
+   if(t.GetType() == Token::TT_Keyword && t.GetKeyword() == "if")
    {
       SyntaxNode *ifelse = ParseIfElse();
       if(! ifelse)
@@ -1593,7 +1600,7 @@ ParserImpl::ParseBlock(void)
    }
 
    // Normal block:
-   if(t.GetType() == TT_Char && t.GetChar() == '{')
+   if(t.GetType() == Token::TT_Char && t.GetChar() == '{')
    {
       GetToken();
       Block * stmt = ParseBlock();
@@ -1604,7 +1611,7 @@ ParserImpl::ParseBlock(void)
       }
       ParseRestBlock(stmt);
       t = PeekToken();
-      if(t.GetType() != TT_Char || t.GetChar() != '}')
+      if(t.GetType() != Token::TT_Char || t.GetChar() != '}')
       {
          Error(_("Expected Condition after conditional operator."));
          delete stmt;
@@ -1620,7 +1627,7 @@ ParserImpl::ParseBlock(void)
       if(! cond)
          return NULL;
       t = PeekToken();
-      if(t.GetType() != TT_Char || t.GetChar() != ';')
+      if(t.GetType() != Token::TT_Char || t.GetChar() != ';')
       {
          Error(_("Expected ';' at end of condition."));
          delete cond;
@@ -1816,9 +1823,11 @@ static bool findIP(String &header,
 
 #endif
 
-
+// VZ: VC++ doesn't allow to have extern "C" functions returning a class
+#ifndef _MSC_VER
 extern "C"
 {
+#endif // VC++
    static Value func_checkSpam(ArgList *args, Parser *p)
    {
       // standard check:
@@ -2282,7 +2291,9 @@ extern "C"
       mf->DecRef();
       return 1;
    }
+#ifndef _MSC_VER
 };
+#endif // VC++
 
 
 
