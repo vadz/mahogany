@@ -684,8 +684,9 @@ MailFolder::ReplyMessage(class Message *msg,
                          MWindow *parent)
 {
    CHECK_RET(msg, "no message to reply to");
-   msg->IncRef();
-   if(! profile) profile = mApplication->GetProfile();
+
+   if(! profile)
+      profile = mApplication->GetProfile();
 
    wxComposeView *cv = wxComposeView::CreateReplyMessage(params,
                                                          profile,
@@ -848,8 +849,6 @@ MailFolder::ReplyMessage(class Message *msg,
 
    cv->InitText(msg);
    cv->Show(TRUE);
-
-   SafeDecRef(msg);
 }
 
 /* static */
@@ -860,14 +859,14 @@ MailFolder::ForwardMessage(class Message *msg,
                            MWindow *parent)
 {
    CHECK_RET(msg, "no message to forward");
-   msg->IncRef();
-   if(! profile) profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, profile);
-   cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX)+ msg->Subject());
+   if ( !profile )
+      profile = mApplication->GetProfile();
+
+   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, profile, msg);
+   cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) + msg->Subject());
    cv->InitText(msg);
    cv->Show(TRUE);
-   SafeDecRef(msg);
 }
 
 char MailFolder::GetFolderDelimiter() const

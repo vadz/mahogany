@@ -125,6 +125,7 @@ public:
     */
    static wxComposeView * CreateFwdMessage(const MailFolder::Params& params,
                                            Profile *parentProfile,
+                                           Message * original = NULL,
                                            bool hide = false);
 
    /** Initializes the composer text: for example, if this is a reply, inserts
@@ -283,6 +284,12 @@ protected:
    /// InitText() helper
    void DoInitText(Message *msg);
 
+   /// set the message encoding to be equal to the encoding of this msg
+   void SetEncodingToSameAs(Message *msg);
+
+   /// set encoding to use
+   void SetEncoding(wxFontEncoding encoding);
+
    /// verify that the message can be sent
    bool IsReadyToSend() const;
 
@@ -308,19 +315,16 @@ protected:
 private:
    /// a profile
    Profile * m_Profile;
+
    /// the name of the class
    String m_name;
 
    /// the initial from/reply-to address
    String m_from;
-   
+
    /// the panel
    wxPanel *m_panel;
 
-   /// compose menu
-   wxMenu *composeMenu;
-
-   
    /// the edit/cut menu item
    class wxMenuItem *m_MItemCut;
    /// the edit/copy menu item
@@ -336,28 +340,10 @@ private:
 
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
-      /// the alias expand button
-   wxButton *aliasButton;
-   /// the button showing the xface
-   class wxXFaceButton *m_XFaceButton;
    //@}
 
    int m_font, m_size;
    wxColour m_fg, m_bg;
-   /// the popup menu
-   wxMenu *popupMenu;
-   /**@name The interface to its canvas. */
-   //@{
-   /// the ComposeView canvas class
-   friend class wxCVCanvas;
-   //@}
-
-   /// a list mapping IDs to filenames
-   wxCVFileMapType fileMap;
-   /// for assigning IDs
-   unsigned long nextFileID;
-   /// find the filename for an ID
-   const char *LookupFileName(unsigned long id);
 
    /// makes the canvas
    void CreateFTCanvas(void);
@@ -398,6 +384,8 @@ private:
 
    DECLARE_EVENT_TABLE()
    DECLARE_CLASS(wxComposeView)
+
+   friend class wxCVCanvas;
 };
 
 #endif

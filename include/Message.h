@@ -221,7 +221,7 @@ public:
 
    /** Query the type of the content.
        @param  n part number
-       @return content type ID (ENCBASE64, ENCQUOTEDPRINTABLE, ...)
+       @return font encoding (ASCII-7, ISO8859-1, KOI8-R, ...)
    */
    virtual wxFontEncoding GetTextPartEncoding(int n = 0) = 0;
 

@@ -925,8 +925,6 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
                                   Message *original,
                                   bool hide)
 {
-   // TODO set the encoding of the original message here for this message
-
    wxComposeView *cv = CreateNewMessage(parentProfile, hide);
 
    cv->m_kind = Message_Reply;
@@ -935,20 +933,25 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
    cv->m_OriginalMessage = original;
    SafeIncRef(cv->m_OriginalMessage);
 
+   // write reply by default in the same encoding as the original message
+   cv->SetEncodingToSameAs(original);
+
    return cv;
 }
 
 wxComposeView *
 wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
                                 Profile *parentProfile,
+                                Message *original,
                                 bool hide)
 {
-   // TODO set the encoding of the original message here for this message
-
    wxComposeView *cv = CreateNewMessage(parentProfile, hide);
 
    cv->m_kind = Message_Forward;
    cv->m_template = params.templ;
+
+   // preserve message encoding when forwarding it
+   cv->SetEncodingToSameAs(original);
 
    return cv;
 }
@@ -1263,8 +1266,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    CHECK_RET( !m_initialised, "wxComposeView created twice" );
 
    m_LayoutWindow = NULL;
-   nextFileID = 0;
-   m_encoding = wxFONTENCODING_SYSTEM;
+   m_encoding = wxFONTENCODING_DEFAULT;
 
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
@@ -1544,12 +1546,8 @@ void wxComposeView::DoClear()
                          &m_fg, &m_bg);
 
    // set the default encoding if any
-   m_encoding = (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
-   if ( m_encoding != wxFONTENCODING_DEFAULT )
-   {
-      CheckLanguageInMenu(this, m_encoding);
-      m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
-   }
+   SetEncoding(
+         (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING));
 
    ResetDirty();
 }
@@ -1566,6 +1564,37 @@ wxComposeView::wxComposeView(const String &iname,
    m_fieldLast = Field_Max;
    m_sent = false;
    m_OriginalMessage = NULL;
+}
+
+void wxComposeView::SetEncoding(wxFontEncoding encoding)
+{
+   m_encoding = encoding;
+   if ( m_encoding != wxFONTENCODING_DEFAULT )
+   {
+      m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
+      CheckLanguageInMenu(this, m_encoding);
+   }
+}
+
+void wxComposeView::SetEncodingToSameAs(Message *msg)
+{
+   if ( !msg )
+      return;
+
+   // find the first text part with non default encoding
+   int count = msg->CountParts();
+   for ( int part = 0; part < count; part++ )
+   {
+      if ( msg->GetPartType(part) == Message::MSG_TYPETEXT )
+      {
+         wxFontEncoding enc = msg->GetTextPartEncoding(part);
+         if ( enc != wxFONTENCODING_SYSTEM )
+         {
+            SetEncoding(enc);
+            break;
+         }
+      }
+   }
 }
 
 wxComposeView::~wxComposeView()
@@ -1810,9 +1839,7 @@ wxComposeView::OnMenuCommand(int id)
    default:
       if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
       {
-         m_encoding = GetEncodingFromMenuCommand(id);
-         m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
-         CheckLanguageInMenu(this, m_encoding);
+         SetEncoding(GetEncodingFromMenuCommand(id));
       }
       else
       {

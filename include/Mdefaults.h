@@ -1156,7 +1156,7 @@ enum MFolderIndex
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_D   0l
 /// prefix for subject in forwards
-#define   MP_FORWARD_PREFIX_D      "Forwarded message: "
+#define   MP_FORWARD_PREFIX_D      _("Forwarded message: ")
 /// show XFaces?
 #define   MP_SHOW_XFACES_D      1
 // show graphics inline
