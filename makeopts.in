@@ -4,6 +4,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.8  1998/05/30 17:54:52  KB
+# Python integration mostly complete, added hooks and sample callbacks.
+# Wrote documentation on how to use it.
+#
 # Revision 1.7  1998/05/24 14:46:47  KB
 # lots of progress on Python, but cannot call functions yet
 # kbList fixes again?
@@ -71,13 +75,15 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 
 # SWIG
-SWIG = swig
+SWIG = @SWIG@
+SWIG_LINK = @SWIG_LINK@
 SWIGFLAGS = -c++ -python -shadow
+ifdef SWIG_LINK
+SWIGFLAGS := $(SWIGFLAGS) -c
+endif
 
 # other stuff
 RM = rm -f
-LEX = @LEX@
-LEXLIB = @LEXLIB@
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
@@ -111,7 +117,7 @@ DEF = $(GUI_DEFS)
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
       $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC)
 CFLAGS = @CFLAGS@ $(OPT) $(DBG) $(DEF) $(INC)
-CXXFLAGS = @CXXFLAGS@ $(OPT) $(DBG) $(DEF) $(INC)
+CXXFLAGS = @CFLAGS@ $(OPT) $(DBG) $(DEF) $(INC)
 LDFLAGS  = $(OPT) $(GUI_LDFLAGS) 
 
 LIBS= \
@@ -119,7 +125,7 @@ LIBS= \
   $(EXTRALIBS) $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
   $(GUI_LINK) \
   $(XPM_LINK) \
-  $(PYTHON_LINK) \
+  $(PYTHON_LINK) $(SWIG_LINK) \
   $(X_EXTRA_LIBS) \
   $(X_PRE_LIBS) \
   $(X_LIBS) -lX11 -lm
@@ -128,7 +134,7 @@ SLIBS= \
   $(EXTRALIBS) $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
   $(GUI_SLINK) \
   $(XPM_LINK) \
-  $(PYTHON_LINK) \
+  $(PYTHON_LINK) $(SWIG_LINK) \
   $(X_EXTRA_LIBS) \
   $(X_PRE_LIBS) \
   $(X_LIBS) -lX11 -lm

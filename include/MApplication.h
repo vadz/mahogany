@@ -159,6 +159,11 @@ public:
    void Log(int level, String const &message);
    CB_DECLARE_CLASS(MApplication, CommonBase)
 
+   /// return class name
+   const char *GetClassName(void) const
+      { return "MailFolder"; }
+   
+
 #ifdef   USE_WXCONFIG
       // AppConf functions are implemented using built-in wxConfig class in wxWin2
       inline

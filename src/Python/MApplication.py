@@ -21,17 +21,17 @@ class MApplicationPtr :
     def ErrorMessage(self,arg0,arg1,arg2):
         val = MApplicationc.MApplication_ErrorMessage(self.this,arg0.this,arg1,arg2)
         return val
-    def SystemErrorMessage(self,arg0,arg1,arg2):
-        val = MApplicationc.MApplication_SystemErrorMessage(self.this,arg0.this,arg1,arg2)
+    def SystemErrorMessage(self,arg0):
+        val = MApplicationc.MApplication_SystemErrorMessage(self.this,arg0.this)
         return val
-    def FatalErrorMessage(self,arg0,arg1):
-        val = MApplicationc.MApplication_FatalErrorMessage(self.this,arg0.this,arg1)
+    def FatalErrorMessage(self,arg0):
+        val = MApplicationc.MApplication_FatalErrorMessage(self.this,arg0.this)
         return val
-    def Message(self,arg0,arg1,arg2):
-        val = MApplicationc.MApplication_Message(self.this,arg0.this,arg1,arg2)
+    def Message(self,arg0):
+        val = MApplicationc.MApplication_Message(self.this,arg0.this)
         return val
-    def YesNoDialog(self,arg0,arg1,arg2,*args):
-        val = apply(MApplicationc.MApplication_YesNoDialog,(self.this,arg0.this,arg1,arg2,)+args)
+    def YesNoDialog(self,arg0):
+        val = MApplicationc.MApplication_YesNoDialog(self.this,arg0.this)
         return val
     def GetGlobalDir(self):
         val = MApplicationc.MApplication_GetGlobalDir(self.this)

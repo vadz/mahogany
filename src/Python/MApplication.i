@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/30 17:55:52  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.4  1998/05/24 07:54:13  KB
  * works?
  *
@@ -49,18 +53,10 @@ public:
    MFrame *TopLevelFrame(void) ;
     char *GetText( char *in);
    void	ErrorMessage(String &message, MFrame *parent, bool modal);
-   void	SystemErrorMessage(String  &message,
-		     MFrame *parent,
-			int modal);
-   void	FatalErrorMessage(String  &message,
-		   MFrame *parent);
-   void	Message(String  &message,
-		MFrame *parent,
-		int modal);
-   int	YesNoDialog(String  &message,
-		    MFrame *parent,
-		    int modal,
-		    int YesDefault = true);
+   void	SystemErrorMessage(String  &message);
+   void	FatalErrorMessage(String  &message);
+   void	Message(String  &message);
+   int	YesNoDialog(String  &message);
    String  & GetGlobalDir(void) ;
    String  & GetLocalDir(void) ;
    MimeList * GetMimeList(void) ;

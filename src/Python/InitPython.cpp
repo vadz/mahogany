@@ -6,6 +6,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  1998/05/30 17:55:50  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.3  1998/05/24 14:47:31  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -19,6 +23,7 @@
  *******************************************************************/
 
 #include   "Mpch.h"
+#include   "Mcommon.h"
 #include   "Python.h"
 #include   "PythonHelp.h"
 
@@ -35,7 +40,13 @@ extern "C"
    void initProfilec();
    void initMailFolderc();
    void initMApplicationc();
+   void initMessagec();
 };
+
+
+/// used by PythonHelp.cc helper functions
+PyObject *Python_MinitModule = NULL;
+
 
 void
 InitPython(void)
@@ -67,29 +78,27 @@ InitPython(void)
    initProfilec();
    initMailFolderc();
    initMApplicationc();
-
-   // run the init script
-   PyRun_SimpleString("from Minit import *");
-   PyRun_SimpleString("from MApplication import *");
-   PyRun_SimpleString("from String import *");
-
-   // try running a method:
-   PyObject *pobj, *presult;
-   char *cptr = NULL;
-   if(PyH_Expression("mApplication.GetGlobalDir()", "MApplication", "O", &pobj))
-   {
-      presult = PyObject_CallMethod(pobj, "c_str","");
-      if(presult && PyH_ConvertResult(presult, "s", &cptr))
-         VAR(cptr);
-   }
-
-   PyH_Statement("print \"Hello World!\"","Minit","",NULL);
-   PyH_Statement("callback_func","Minit","",NULL);
+   initMessagec();
    
-   // this doesn't work:
-   //pobj = PyObject_GetAttrString(PyImport_ImportModule("Minit"),"Minit");
-   //PyObject_CallFunction(pobj,"Minit","",NULL);
-      
-   //PyH_RunFunction("callback_func","Minit","",NULL,"",NULL);
+   // run the init script
 
+   Python_MinitModule = PyImport_ImportModule("Minit");
+   VAR(Python_MinitModule);
+
+   Py_INCREF(Python_MinitModule);
+   
+   PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
+   if(minit)
+      PyObject_CallObject(minit,NULL);
+   else
+      mApplication.ErrorMessage("Cannot find Minit.py initialisation script.");
+
+
+/* example code for calling a callback function:
+  String teststring = "Hello World";
+   PyH_CallFunction("StringPrint",
+                      "StringPrint",
+                      &teststring, "String",
+                      "",NULL);
+*/
 }

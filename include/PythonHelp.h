@@ -6,6 +6,10 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.2  1998/05/30 17:55:34  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.1  1998/05/24 14:47:16  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -16,6 +20,48 @@
 #ifndef   PYTHONHELP_H
 #   define PYTHONHELP_H
 
+#include   "Profile.h"
+
+/** Function to call a callback function.
+    The callback will be called with its name and the object as first arguments.
+    @param name name of the callback name in the profiles
+    @param obj pointer to the object calling it
+    @param class classname of the object
+    @param profile (optional) profile to evaluate
+    @param argfmt format for additional arguments
+    @return an integer value
+*/
+int
+PythonCallback(const char *name, void *obj, const char *classname,
+               ProfileBase *profile = NULL, const char *argfmt = NULL,
+               ...);
+
+/** Function to create a Python object being a pointer to a C++
+    object, e.g. a StringPtr object from a String * in C++.
+    @param obj - Pointer to a C++ object
+    @param classname - Name of the class
+    @return the Python Object
+*/
+
+PyObject *PyH_makeObjectFromPointer(void *obj,const char *classname);
+
+/** Call a callback function:
+    @param func Name of the python function, possibly Module.name
+    @param name  Name of the callback
+    @param obj  Pointer to a C++ object initiating the callback
+    @param classname  Name of the object's class
+    @param resultfmt Format string for the result pointer
+    @param result Pointer where to store the result
+    @param parg A Python object to pass as additional argument
+    @return true on success
+*/
+
+bool PyH_CallFunction(const char *func,
+                      const char *name,
+                      void *obj, const char *classname,
+                      const char *resultfmt, void *result,
+                      PyObject *parg = NULL);
+   
 /// the two possible modes for PyH_Run_Codestr():
 enum PyH_RunModes { PY_STATEMENT, PY_EXPRESSION };
 
@@ -30,8 +76,7 @@ enum PyH_RunModes { PY_STATEMENT, PY_EXPRESSION };
 int
 PyH_RunCodestr(enum PyH_RunModes mode, const char *code,      /* expr or stmt string */
                 const char *modname,                     /* loads module if needed */
-                const char *resfmt, void *cresult);       /* converts expr
-                                                    /* result to C */
+                const char *resfmt, void *cresult);       /* converts expr result to C */
 
 /** Function to call a python function
     @param funcname the function to call
@@ -62,5 +107,4 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     @return 0 on error
 */
 int PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget);
-
 #endif

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon May  4 17:03:54 1998
+#This file was created by <karsten> Sat May 30 17:27:36 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -410,6 +410,203 @@ MailHost
 \family default 
  setting to tell it where to send the mail.
  
+\layout Section
+
+Scripting and Python integration
+\layout Subsection
+
+Introduction
+\layout Standard
+
+M uses Python as an embedded scripting language.
+ A large number of user definable callback functions are available.
+ Scripts have access most objects living in M.
+\layout Subsection
+
+Initialisation 
+\layout Standard
+
+At startup, M will load a file called 
+\family typewriter 
+Minit.py
+\family default 
+ and call the 
+\family typewriter 
+Minit()
+\family default 
+ function defined in there, without any arguments.
+\layout Subsection
+
+Callback Functions (Hooks)
+\layout Standard
+
+There are a large number of callbacks available which will be called from
+ different places withing M.
+ These are documented in 
+\family typewriter 
+Mcallbacks.h
+\family default 
+.
+ All of these callbacks are called with at least two arguments:
+\layout Enumerate
+
+The name of the hook for which the function got called, e.g.
+ 
+\family typewriter 
+FolderOpenHook
+\layout Enumerate
+
+A pointer to the object from which it was called.
+ E.g.
+ for 
+\family typewriter 
+FolderOpenHook
+\family default 
+, this would be a pointer to a 
+\family typewriter 
+MailFolder
+\family default 
+ object.
+ This object does not carry a useable type with it and needs to be converted
+ in the callback, e.g.
+ if the argument is called 
+\family typewriter 
+arg
+\family default 
+ and the object is a 
+\family typewriter 
+MailFolder
+\family default 
+, the object must either be used as 
+\family typewriter 
+MailFolder.MailFolder(arg)
+\family default 
+ or be converted as 
+\family typewriter 
+mf = MailFolder.MailFolder(arg)
+\family default 
+.
+ 
+\layout Enumerate
+
+Some callbacks have a third argument.
+ This is either a single value or a tuple holding several values.
+\layout Subsection
+
+Namespaces
+\layout Standard
+
+To avoid repeatedly typing in the name of the module (
+\family typewriter 
+MailFolder
+\family default 
+ in this case), it can be imported into the global namespace with 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+from~MailFolder~import~*
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ By default modules are not imported into the global namespace and must
+ be explicitly named.
+\layout Subsection
+
+List of Callbacks
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol4
+5 5 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+2 1 0 
+8 1 0 
+8 1 0 
+8 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+
+Callback Name
+\newline 
+Object Type
+\newline 
+Additional Arguments/Types
+\newline 
+Return Value
+\newline 
+Documentaion
+\newline 
+FolderOpenHook
+\newline 
+MailFolder
+\newline 
+-
+\newline 
+void
+\newline 
+Called after a folder has been opened.
+\newline 
+FolderUpdateHook
+\newline 
+MailFolder
+\newline 
+-
+\newline 
+void
+\newline 
+Called after a folder has been updated.
+\newline 
+FolderDeleteMessageHook
+\newline 
+MailFolder
+\newline 
+(long) index of message to be deleted
+\newline 
+1 if delete is ok,0 otherwise
+\newline 
+Called before deleting a mesage.
+\newline 
+FolderExpungeHook
+\newline 
+MailFolder
+\newline 
+-
+\newline 
+1 to expunge, 0 to abort
+\newline 
+Called before expunging messages.
 \layout Section
 
 Further Information

@@ -1,0 +1,80 @@
+# This file was created automatically by SWIG.
+import Messagec
+
+from String import *
+class MessagePtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def GetHeaderLine(self,arg0,arg1):
+        val = Messagec.Message_GetHeaderLine(self.this,arg0.this,arg1.this)
+        return val
+    def Subject(self):
+        val = Messagec.Message_Subject(self.this)
+        val = StringPtr(val)
+        return val
+    def From(self):
+        val = Messagec.Message_From(self.this)
+        val = StringPtr(val)
+        val.thisown = 1
+        return val
+    def Date(self):
+        val = Messagec.Message_Date(self.this)
+        val = StringPtr(val)
+        return val
+    def FetchText(self):
+        val = Messagec.Message_FetchText(self.this)
+        return val
+    def CountParts(self):
+        val = Messagec.Message_CountParts(self.this)
+        return val
+    def GetPartContent(self,*args):
+        val = apply(Messagec.Message_GetPartContent,(self.this,)+args)
+        return val
+    def GetPartType(self,*args):
+        val = apply(Messagec.Message_GetPartType,(self.this,)+args)
+        return val
+    def GetPartEncoding(self,*args):
+        val = apply(Messagec.Message_GetPartEncoding,(self.this,)+args)
+        return val
+    def GetPartSize(self,*args):
+        val = apply(Messagec.Message_GetPartSize,(self.this,)+args)
+        return val
+    def GetPartMimeType(self,*args):
+        val = apply(Messagec.Message_GetPartMimeType,(self.this,)+args)
+        val = StringPtr(val)
+        return val
+    def GetPartDesc(self,*args):
+        val = apply(Messagec.Message_GetPartDesc,(self.this,)+args)
+        val = StringPtr(val)
+        return val
+    def GetPartSpec(self,*args):
+        val = apply(Messagec.Message_GetPartSpec,(self.this,)+args)
+        val = StringPtr(val)
+        return val
+    def WriteToString(self,arg0,*args):
+        val = apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
+        return val
+    def __del__(self):
+        if self.thisown == 1 :
+            Messagec.delete_Message(self.this)
+    def IsInitialised(self):
+        val = Messagec.Message_IsInitialised(self.this)
+        return val
+    def __repr__(self):
+        return "<C Message instance>"
+class Message(MessagePtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+

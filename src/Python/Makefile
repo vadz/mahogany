@@ -3,6 +3,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.7  1998/05/30 17:55:54  KB
+# Python integration mostly complete, added hooks and sample callbacks.
+# Wrote documentation on how to use it.
+#
 # Revision 1.6  1998/05/24 14:47:33  KB
 # lots of progress on Python, but cannot call functions yet
 # kbList fixes again?
@@ -23,7 +27,7 @@
 
 CWD = Python
 
-SWIGSRC = MApplication.i MailFolder.i String.i Profile.i 
+SWIGSRC = MApplication.i MailFolder.i String.i Profile.i Message.i
 CXXSRC = InitPython.cc PythonHelp.cc
 SRC=$(CXXSRC) *.cpp
 
@@ -41,3 +45,5 @@ clean:
 	$(RM) *.o *.so *.pyc *.py *.doc
 	ln -s INIT/Minit.py .
 
+#%.py: %.i
+#	$(SWIG) $(SWIGFLAGS) $<

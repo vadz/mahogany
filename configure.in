@@ -248,6 +248,9 @@ AC_OVERRIDES(wxConfig,wxConfig,
 --with-wxConfig           use wxConfig,
 USE_WXCONFIG)
 
+
+AC_CONFIG_AUX_DIR(extra/scripts)
+
 dnl ###################
 dnl # checks programs #
 dnl ###################
@@ -279,6 +282,9 @@ AC_PROG_GCC_TRADITIONAL
 dnl   adds -traditional for gcc if needed
 
 AC_LANG_SAVE
+
+AC_PROG_INSTALL
+
 
 dnl C++-compiler checks
 dnl ===================
@@ -454,6 +460,8 @@ AC_SUBST(XPM_LINK)
 AC_SUBST(XPM_INCLUDE)
 
 PYTHON_LINK=
+SWIG=
+SWIG_LINK=
 AC_MSG_CHECKING(for Python)
 AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
 if test "$ac_find_includes" != "" ; then
@@ -480,6 +488,22 @@ fi
 AC_SUBST(PYTHON_LINK)
 AC_SUBST(PYTHON_INCLUDE)
 
+HAVE_SWIGLIB=0
+AC_PATH_PROG(SWIG,swig)
+if test -n "$SWIG"; then
+  AC_MSG_CHECKING(for libswigpy)
+  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,swigpy)
+  if test "$ac_find_libraries" != "" ; then
+    AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
+    SWIG_LINK="$ac_path_to_link -lswigpy"
+    AC_MSG_RESULT(yes)
+    HAVE_SWIGLIB=1
+    AC_DEFINE(HAVE_SWIGLIB)
+  else
+    AC_MSG_RESULT(no)
+  fi
+fi
+AC_SUBST(SWIG_LINK)
 
 
 LIBDL_LINK=

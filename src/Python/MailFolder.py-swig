@@ -1,0 +1,59 @@
+# This file was created automatically by SWIG.
+import MailFolderc
+
+from String import *
+class MailFolderPtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def IsInitialised(self):
+        val = MailFolderc.MailFolder_IsInitialised(self.this)
+        return val
+    def RegisterView(self,arg0,*args):
+        val = apply(MailFolderc.MailFolder_RegisterView,(self.this,arg0,)+args)
+        return val
+    def IsOk(self):
+        val = MailFolderc.MailFolder_IsOk(self.this)
+        return val
+    def GetName(self):
+        val = MailFolderc.MailFolder_GetName(self.this)
+        val = StringPtr(val)
+        return val
+    def CountMessages(self):
+        val = MailFolderc.MailFolder_CountMessages(self.this)
+        return val
+    def Ping(self):
+        val = MailFolderc.MailFolder_Ping(self.this)
+        return val
+    def GetMessageStatus(self,arg0,*args):
+        val = apply(MailFolderc.MailFolder_GetMessageStatus,(self.this,arg0,)+args)
+        return val
+    def GetMessage(self,arg0):
+        val = MailFolderc.MailFolder_GetMessage(self.this,arg0)
+        return val
+    def DeleteMessage(self,arg0):
+        val = MailFolderc.MailFolder_DeleteMessage(self.this,arg0)
+        return val
+    def ExpungeMessages(self):
+        val = MailFolderc.MailFolder_ExpungeMessages(self.this)
+        return val
+    def GetProfile(self):
+        val = MailFolderc.MailFolder_GetProfile(self.this)
+        return val
+    def __repr__(self):
+        return "<C MailFolder instance>"
+class MailFolder(MailFolderPtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+

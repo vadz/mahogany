@@ -6,6 +6,10 @@
  * $Id$                *
  *
  * $Log$
+ * Revision 1.6  1998/05/30 17:55:32  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.5  1998/05/18 17:48:18  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -139,6 +143,10 @@ public:
 
    /// check whether object is initialised
    virtual bool IsInitialised(void) const = 0;
+
+   /// return class name
+   const char *GetClassName(void) const
+      { return "MailFolder"; }
 };
 
 #endif

@@ -66,7 +66,7 @@ public:
        @return  true if everything succeeded
    */
    virtual bool	IsOk(void) const = 0;
-   
+
    /** get name of mailbox
        @return	the symbolic name of the mailbox
    */
@@ -115,6 +115,10 @@ public:
    */
    inline Profile *GetProfile(void) { return profile; }
 
+   /// return class name
+   const char *GetClassName(void) const
+      { return "MailFolder"; }
+   
    CB_DECLARE_CLASS(MailFolder, CommonBase);
 };
 

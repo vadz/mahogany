@@ -132,7 +132,61 @@ filename relative to the folder directory.
 Before being able to send mail, you need to configure the MailHost
 setting to tell it where to send the mail. 
 
-5 Further Information
+5 Scripting and Python integration
+
+5.1 Introduction
+
+M uses Python as an embedded scripting language. A large number of
+user definable callback functions are available. Scripts have access
+most objects living in M.
+
+5.2 Initialisation 
+
+At startup, M will load a file called Minit.py and call the Minit()
+function defined in there, without any arguments.
+
+5.3 Callback Functions (Hooks)
+
+There are a large number of callbacks available which will be called
+from different places withing M. These are documented in Mcallbacks.h.
+All of these callbacks are called with at least two arguments:
+
+1. The name of the hook for which the function got called, e.g. FolderOpenHook
+
+2. A pointer to the object from which it was called. E.g. for FolderOpenHook,
+  this would be a pointer to a MailFolder object. This object does
+  not carry a useable type with it and needs to be converted in the
+  callback, e.g. if the argument is called arg and the object is a
+  MailFolder, the object must either be used as MailFolder.MailFolder(arg)
+  or be converted as mf = MailFolder.MailFolder(arg). 
+
+3. Some callbacks have a third argument. This is either a single value
+  or a tuple holding several values.
+
+5.4 Namespaces
+
+To avoid repeatedly typing in the name of the module (MailFolder in
+this case), it can be imported into the global namespace with ``from~MailFolder~import~*''.
+By default modules are not imported into the global namespace and
+must be explicitly named.
+
+5.5 List of Callbacks
+
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+|Callback Name           | Object Type |      Additional Arguments/Types       |         Return Value          | Documentaion                            |
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+|FolderOpenHook          | MailFolder  |                   -                   |             void              | Called after a folder has been opened.  |
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+|FolderUpdateHook        | MailFolder  |                   -                   |             void              | Called after a folder has been updated. |
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+|FolderDeleteMessageHook | MailFolder  | (long) index of message to be deleted | 1 if delete is ok,0 otherwise | Called before deleting a mesage.        |
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+|FolderExpungeHook       | MailFolder  |                   -                   |   1 to expunge, 0 to abort    | Called before expunging messages.       |
++------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
+
+
+6 Further Information
 
 * You can download the latest version of M from http://Ballueder.home.ml.org/M/ 
 
@@ -141,4 +195,4 @@ setting to tell it where to send the mail.
 
 * wxWindows is available fromhttp://web.ukonline.co.uk/julian.smart/
 
-6 FAQ
+7 FAQ

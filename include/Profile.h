@@ -81,9 +81,7 @@ struct   FCData
 {
    String   fileName;
    FileConfig   *fileConfig;
-
-   IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
-      };
+};
 
 /** A list of all known icons.
    @see FCData
@@ -285,6 +283,11 @@ public:
    /// Write back the bool value.
    bool writeEntry(const char *szKey, bool Value);
    //@}
+
+   /// return class name
+   const char *GetClassName(void) const
+      { return "MailFolder"; }
+   
    CB_DECLARE_CLASS(Profile, CommonBase);
 };
 //@}

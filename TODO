@@ -3,10 +3,7 @@ $Id$
 
 *** bugs to fix ***
 
-- Calling python objects does not work yet. Also, how do I create a shadow class object for
-  my callback functions to work on?
-
-- segfault on program exit
+- occasional segfaults on exit
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
   Ignored for now, until wxFText/wxFTCanvas get rewritten.

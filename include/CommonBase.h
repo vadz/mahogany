@@ -6,6 +6,10 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/30 17:55:27  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.5  1998/05/20 13:32:15  KB
  * Eventually fixed that Doc++ core dump problem and added a note about
  * this in the StyleGuide.
@@ -49,15 +53,15 @@
 
 #ifdef USE_COMMONBASE
 #ifndef	USE_CLASSINFO
-#	define	CB_IMPLEMENT_CLASS(newclass, parent)	
+#	define	CB_IMPLEMENT_CLASS(newclass, parent) 
 #	define	CB_DECLARE_CLASS(newclass, parent)	
 #else
 #	ifdef	USE_WXOBJECT
 #		define	CB_IMPLEMENT_CLASS(newclass, parent) IMPLEMENT_CLASS(newclass, parent)	
 #		define CB_DECLARE_CLASS(newclass) DECLARE_CLASS(newclass,  parent)
 #	else
-#		define	CB_IMPLEMENT_CLASS(newclass, parent)	
-#		define CB_DECLARE_CLASS(newclass,parent) virtual const char *GetClassName(void)const { return #newclass; }
+#		define	CB_IMPLEMENT_CLASS(newclass, parent) 
+#		define CB_DECLARE_CLASS(newclass,parent)
 #	endif
 #endif
 

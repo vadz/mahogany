@@ -208,4 +208,37 @@
 
 #include	"CommonBase.h"
 
+/**@name Macros for calling callback functions.
+
+  These macros do nothing and return the default returnvalue when
+  Python is disabled.
+*/
+//@{
+#ifdef   USE_PYTHON
+/** This macro takes three arguments: the callback function name to
+    look up in a profile, a profile pointer (can be NULL) and a
+    default return value.
+    It can only be called from within object member functions and the
+    object needs to support the GetClasName() method to get the Python
+    class name for the argument.
+*/
+#   define   CALLBACK(name,profile,default)        PythonCallback(name,this,this->GetClassName(),profile)
+/** This macro takes multiple arguments.
+    The last argument is the default return value.
+    The first argument is a list of arguments in brackets, it must
+    contain the name of the callback to look up in the profiles, the
+    object pointer, the object's class name, a profile pointer (or
+    NULL) and a format string for one further argument. The additional
+    argument can be a tuple, i.e. the format string can be set to
+    something like "(iis)" (two ints and a string) and the arguments
+    must follow the format string.
+    
+*/
+#   define   CALLBACKVA(arg,default)            PythonCallback arg
+#else
+#   define   CALLBACK(name)       PythonCallback((int)default)
+    inline int PythonCallBack(int def) { return def; }
+#   define   CALLBACKVA(arg,default)      PythonCallback((int)default)
+#endif
+//@}
 #endif	// MCOMMON_H

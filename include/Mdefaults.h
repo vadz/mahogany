@@ -6,6 +6,10 @@
  * $Id$              *
  *
  * $Log$
+ * Revision 1.8  1998/05/30 17:55:31  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.7  1998/05/24 14:47:10  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -19,6 +23,8 @@
 
 #ifndef MDEFAULTS_H
 #define   MDEFAULTS_H
+
+#include   "Mcallbacks.h"
 
 /** @name The sections of the configuration file. */
 //@{
@@ -174,8 +180,6 @@
 #define   MP_FOLDER_TYPE         "Type"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
-/// a python callback function for this folder
-#define   MP_FOLDER_OPEN_CALLBACK   "FolderOpenCallback"
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL      "UpdateInterval"
 /// wrapmargin for composition view (set to -1 to disable it)
@@ -317,8 +321,6 @@
 #define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
 /// the folder type for a mailbox (0 = system inbox, 1 = file, 2 =pop3, 3 = imap, 4 = nntp
 #define   MP_FOLDER_TYPE_D         1
-/// a python callback function for this folder
-#define   MP_FOLDER_OPEN_CALLBACK_D   NULL
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// update interval for folders in seconds

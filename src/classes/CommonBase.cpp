@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/30 17:56:04  KB
+ * Python integration mostly complete, added hooks and sample callbacks.
+ * Wrote documentation on how to use it.
+ *
  * Revision 1.3  1998/05/11 20:57:25  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -31,11 +35,6 @@ void
 CommonBase::Debug(void) const
 {
    cerr << "DebugInfo for class \""
-#if USE_CLASSINFO
-      << GetClassName() << "\", initialised from constructor in"
-      << endl
-      << GetClassName() << endl
-#endif
 	<< "this = " << this << endl
 	<< "size = " << sizeof (*this) << endl;
 }
