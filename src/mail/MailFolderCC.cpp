@@ -2124,7 +2124,8 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       return streamListDefaultObj;
    }
    ASSERT_MSG(0,"Cannot find mailbox for callback!");
-   LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox (%s) for callback!", name.c_str()));
+   LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox (%s) for callback!", 
+      name));
    return NULL;
 }
 
