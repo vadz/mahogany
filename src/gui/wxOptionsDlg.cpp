@@ -667,8 +667,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
-   { gettext_noop("&Folder file for sent messages"),
-                                                   Field_File,    ConfigField_UseOutgoingFolder },
+   { gettext_noop("&Folder for sent messages"),
+                                                   Field_Folder,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
