@@ -478,6 +478,7 @@ MAppBase::OnEvent(EventData& event)
                   message << _("Subject: ") << msg->Subject() << '\n'
                           << _("From: ") << msg->From() << '\n'
                           << _("in folder '") << folder->GetName() << "'\n\n";
+                  delete msg;
                }
                else
                   FAIL_MSG("new mail received but no new message?");
