@@ -1832,8 +1832,8 @@ SetupServers(void)
    serverName = READ_APPCONFIG(MP_POPHOST);
    mfolder = CreateFolderTreeEntry(NULL,
                                    _("POP3 Server"),
-                                   MF_POP                   ,
-                                   MF_FLAGS_GROUP,
+                                   MF_POP,
+                                   0,
                                    "",
                                    FALSE);
    p = ProfileBase::CreateProfile(mfolder->GetName());
