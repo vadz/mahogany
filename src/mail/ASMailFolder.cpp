@@ -1139,6 +1139,10 @@ class DummyListReceiver : public MEventReceiver
 public:
    DummyListReceiver()
    {
+      m_chDelimiter = '\0';
+
+      m_gotAny = FALSE;
+
       m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    }
    virtual ~DummyListReceiver()
@@ -1148,6 +1152,7 @@ public:
 
    virtual bool OnMEvent(MEventData& event);
 
+   bool GotAny() const { return m_gotAny; }
    char GetDelimiter() const { return m_chDelimiter; }
 
 private:
@@ -1156,6 +1161,9 @@ private:
 
    // the delimiterwe get from OnMEvent
    char m_chDelimiter;
+
+   // have we got anything in reply?
+   bool m_gotAny;
 };
 
 // needed to be able to use DECLARE_AUTOREF() macro
@@ -1187,36 +1195,65 @@ bool DummyListReceiver::OnMEvent(MEventData& event)
       return FALSE;
    }
 
-   m_chDelimiter = result->GetDelimiter();
+   // the problem here is that we can get an entry for IMAP INBOX with NUL
+   // delimiter but we don't know when we're going to get it (in the beginning
+   // or in the end or in the middle of the list), so we just wait for the
+   // first event with a non NUL delimiter, remember it and ignore any
+   // subsequent ones
+   if ( !m_chDelimiter )
+   {
+      m_gotAny = TRUE;
+      m_chDelimiter = result->GetDelimiter();
+   }
 
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
 }
 
-char ASMailFolder::GetFolderDelimiter()
+char ASMailFolder::GetFolderDelimiter() const
 {
    switch ( GetType() )
    {
+      default:
+         FAIL_MSG( "Don't call GetHierarchyDelimiter() for this type" );
+         // fall through nevertheless
+
+      case MF_FILE:
+      case MF_MFILE:
+      case MF_POP:
+         // the folders of this type don't have subfolders at all
+         return '\0';
+
       case MF_MH:
+      case MF_MDIR:
+         // the filenames use slash as separator
          return '/';
 
       case MF_NNTP:
       case MF_NEWS:
+         // newsgroups components are separated by periods
          return '.';
 
       case MF_IMAP:
+         // ah, the really interesting case: we need to query the server for
+         // this one: to do it we issue 'LIST "" ""' command which is
+         // guaranteed by RFC 2060 to return the delimiter
          {
             DummyListReceiver rcv;
             MailFolder *mf = GetMailFolder();
             mf->ListFolders(this, "", false, "", &rcv);
+
+            // well, except that in practice some IMAP servers do *not* return
+            // anything in reply to this command! try working around this bug
+            if ( !rcv.GotAny() )
+            {
+               mf->ListFolders(this, "%", false, "", &rcv);
+            }
+
             mf->DecRef();
 
             return rcv.GetDelimiter();
          }
-
-      default:
-         FAIL_MSG( "this folder doesn't have any separator" );
-         return '\0';
    }
 }
 

@@ -278,7 +278,6 @@ public:
    /// Return IMAP spec
    virtual String GetImapSpec(void) const = 0;
 
-
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
        message count.

@@ -513,7 +513,7 @@ public:
 
       @return character dependind on the folder type and server
     */
-   char GetFolderDelimiter();
+   char GetFolderDelimiter() const;
 
    /** Get name of mailbox.
        @return the symbolic name of the mailbox

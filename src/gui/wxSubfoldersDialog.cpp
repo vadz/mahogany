@@ -211,9 +211,6 @@ private:
    // the folder itself
    MFolder *m_folder;
 
-   // the folder name separator
-   char m_chDelimiter;
-
    // returns the separator of the folder name components
    char GetFolderNameSeparator() const
    {
@@ -333,11 +330,13 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder = mailFolder;
    m_mailFolder->IncRef();
 
+   m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetImapSpec();
+
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    ASSERT_MSG( m_regCookie, "can't register with event manager");
 
    m_progressInfo = (MProgressInfo *)NULL;
-   m_chDelimiter = '\0';
+   m_chDelimiter = m_mailFolder->GetFolderDelimiter();
    m_idParent = wxTreeItemId();
 
    m_folderType = m_folder->GetType();
@@ -412,20 +411,24 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // folders
       m_nFoldersRetrieved = 0;
 
-      // start from the folder being expanded
-      wxString reference = GetRelativePath(m_idParent);
-
       // disable the tree right now to prevent it from getting other events
       // (possible as we call wxYield)
       Disable();
 
-      // this is the IMAP spec of the folder whose children we enum
-      m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetImapSpec();
-      if ( !m_reference.empty() &&
-               (reference.empty() || reference[0u] != m_chDelimiter) )
+      // construct the IMAP spec of the folder whose children we enum
+      wxString refOld = m_reference;
+      wxString reference = GetRelativePath(m_idParent);
+
+      // we may need a separator
+      if ( !m_reference.empty() )
       {
-         // insert a delimiter if we don't have it already
-         m_reference += m_chDelimiter;
+         char chLast = m_reference.Last();
+         if ( chLast != '}' && chLast != m_chDelimiter )
+         {
+            ASSERT_MSG( m_chDelimiter, "should have folder name separator" );
+
+            m_reference += m_chDelimiter;
+         }
       }
 
       m_reference += reference;
@@ -447,6 +450,9 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
          wxYield();
       }
       while ( m_idParent.IsOk() );
+
+      // restore the old value
+      m_reference = refOld;
    }
    //else: this branch had already been expanded
 
@@ -483,17 +489,10 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
    }
 
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
-   // for everything else), but IMAP INBOX is special
-   //
-   // FIXME the much better way to do it is to issue 'LIST "" ""' command
-   //       which will always return the delimiter (and nothing else), however
-   //       I don't know if it is supported by all cclient drivers?
+   // for everything else), but IMAP INBOX is special and can have a NUL one
    char chDelimiter = result->GetDelimiter();
-   if ( chDelimiter )
-   {
-      // avoid setting m_chDelimiter to NUL
-      m_chDelimiter = chDelimiter;
-   }
+   ASSERT_MSG( chDelimiter == m_chDelimiter || !chDelimiter,
+               "unexpected delimiter returned by ListFolders" );
 
    // is it the special event which signals that there will be no more of
    // folders?
@@ -707,7 +706,6 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    m_folder->IncRef();
    m_folderType = folder->GetType();
    m_settingFromProgram = false;
-   m_chDelimiter = '\0';
 
    // create controls
    wxLayoutConstraints *c;

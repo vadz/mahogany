@@ -3179,7 +3179,10 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       switch ( GetType() )
       {
          case MF_IMAP:
-            if ( ch != '/' && ch != '}' )
+            // FIXME: this is totally bogus, IMAP delimiter may be any char,
+            //        not only '/' or '.' even if they are the most common
+            //        ones - why do we do this at all?
+            if ( ch != '/' && ch != '.' && ch != '}' )
                spec += '/';
             break;
 
