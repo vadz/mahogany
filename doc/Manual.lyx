@@ -75,7 +75,7 @@ Using Mahogany
 
 \series bold 
 \size large 
-Please note that the manual is signifcantly out of date
+Please note that the manual is significantly out of date
 \layout Standard
 \align center 
 
@@ -96,33 +96,33 @@ Release Notes_1001_
 \layout Standard
 
 Welcome to the new Mahogany release! If you haven't installed the program
- yet,you probably want to start by doing it.
- Please check if we don't have prebuiltbinaries for your platform (currently
+ yet, you probably want to start by doing it.
+ Please check if we don't have prebuilt binaries for your platform (currently
  we only provide binaries for Linux andWin32).
  If not, you'll have to build it from the sources: please refer to the README
  file for the compilation instructions.
  Mahogany should generally work on any modern Unix flavour but, of course,
- you can alwats contact us if you have any problems with building it.
+ you can always contact us if you have any problems with building it.
 \layout Subsection
 
-Changes against the previous version
+Changes against the previous versions
 \layout Subsubsection
 
 0.64 against 0.63
 \layout Standard
 
-This time the most important changes have happened to the already existingfeatur
-es many of which were dramatically improved.
+This time the most important changes have happened to the already existing
+ features many of which were dramatically improved.
  Support for both IMAP4 andPOP3 has got better, many UI improvements were
- done and too many bugs to mentionthem here were fixed.
+ done and too many bugs to mention here were fixed.
 \layout Standard
 
-The main change without doubt is the complete reorganisation of the programinter
-nals which now allows us to only download the headers shown on the screenfrom
- server instead of getting all of them.
- This means that the time needed toopen a folder is now almost independent
+The main change without doubt is the complete reorganisation of the program
+ internals which now allows us to only download the headers shown on the
+ screen from server instead of getting all of them.
+ This means that the time needed to open a folder is now almost independent
  of the folder size and Mahogany can be used without troubles with folders
- containing 50000 messages (and maybe more -but this wasn't tested yet).
+ containing 50000 messages (and maybe more - but this wasn't tested yet).
 \layout Standard
 
 But what would be a new release without some new features? So here they
@@ -134,31 +134,32 @@ Added optional support for viewing and printing the HTML messages.
  the current viewer.
 \layout Itemize
 
-Added possibility to monitor a folder (or server) in the background justupdading
- the number of messages in it but without actually downloading them.
+Added possibility to monitor a folder (or server) in the background just
+ updading the number of messages in it but without actually downloading
+ them.
 \layout Itemize
 
 IMAP server-side sorting and threading can now be used if available.
- It is alsopossible to sort and thread messages simultaneously.
- Both are now also done muchmore efficiently and more correctly.
+ It is also possible to sort and thread messages simultaneously.
+ Both are now also done much more efficiently and more correctly.
 \layout Itemize
 
 Mahogany now remembers the flags for the POP3 servers and new mail detection
- forthem works much more reliably which now makes Mahogany a much better
- POP3 client(provided your server supports UIDL POP command).
- POP3 code also tries to befaster by optionally using TOP instead of downloading
- the entire messages.
+ for them works much more reliably which now makes Mahogany a much better
+ POP3 client (provided your server supports UIDL POP command).
+ POP3 code also tries to be faster by optionally using TOP instead of downloadin
+g the entire messages.
 \layout Itemize
 
 Support for List-Post header and the possibility to configure the program
- toautomatically reply to the mailing list only.
+ to automatically reply to the mailing list only.
 \layout Itemize
 
 Added rename and copy buttons to the filter editing dialog.
 \layout Itemize
 
 Added "Open as readonly" command - this can be significantly faster than
- "Open"for the local folders and also works for the read only files.
+ "Open" for the local folders and also works for the read only files.
 \layout Itemize
 
 Added a command to permanently delete messages instead of moving them to
@@ -179,38 +180,38 @@ Some of the notable UI improvements are:
 \layout Itemize
 
 Quoting the original text when replying is now optional, you can also choose
- toinclude only the text selected in the viewer in the reply.
+ to include only the text selected in the viewer in the reply.
 \layout Itemize
 
-Progress dialogs are shown while Mahogany is performing some long operations.The
- existing progress dialogs shown while retrieving the message headers nowshow
- the details of the messages being retrieved.
+Progress dialogs are shown while Mahogany is performing some long operations.
+ The existing progress dialogs shown while retrieving the message headers
+ now show the details of the messages being retrieved.
 \layout Itemize
 
-Password handling in case they are not stored in the config file has beenimprove
-d - Mahogany can now remember them for this session only instead ofkeeping
- prompting for them.
+Password handling in case they are not stored in the config file has been
+ improved - Mahogany can now remember them for this session only instead
+ of keeping prompting for them.
 \layout Itemize
 
-Clicking on the header in the folder view window gives fast access to thesorting
-/threading menu with many useful items.
+Clicking on the header in the folder view window gives fast access to the
+ sorting/threading menu with many useful items.
 \layout Itemize
 
 Scrolling beyond the end of the current messages (optionally) selects the
- nextunread message or folder.
+ next unread message or folder.
 \layout Itemize
 
 It is possible to rename the folder in the tree and the underlying folder
- fileor mailbox independently of each other.
+ file or mailbox independently of each other.
 \layout Standard
 
 The Win32 version has now some more of the possibilities of the Unix one:
 \layout Itemize
 
-SSL support is now available under Windows
+SSL support is now available under Windows.
 \layout Itemize
 
-Mahogany can play a sound on receiving a new mail (optionally, of course)
+Mahogany can play a sound on receiving a new mail (optionally, of course).
 \layout Subsubsection
 
 0.63 against 0.62
@@ -6382,9 +6383,6 @@ Mahogany
 ´s functionality.
  These modules can be loaded at runtime and do not need to be part of the
  main executable.
- At the time of release 0.5 we are still linking them statically, but they
- can be loaded dynamically and future releases are likely to use this feature
- to keep the size of the main executable down.
 \layout Subsection
 
 The Filters Module
@@ -6992,7 +6990,7 @@ Debug server and mailbox access
 
  option in the same page.
  It may also be useful to enable logging to a file if the program crashes
- as the file contents,unlike the log window, is not lost in this case.
+ as the file contents, unlike the log window, is not lost in this case.
 \layout Section
 
 WWW Support
@@ -7182,46 +7180,6 @@ Folders
  These options allow you to specify a threshold for message size: before
  downloading a message of size bigger than the specified (in Kb), you will
  be asked for the confirmation.
- They also allow to set a similar threshold for the number of message headers
- retrieved: you will be asked before retrieving more than the specified
- number of headers (default is 100) from server.
- This limit is called 
-\begin_inset Quotes eld
-\end_inset 
-
-soft limit
-\begin_inset Quotes erd
-\end_inset 
-
- and there is, of course, also a 
-\begin_inset Quotes eld
-\end_inset 
-
-hard
-\begin_inset Quotes erd
-\end_inset 
-
- one which can be set in the same page.
- The hard limit, if set (it has value 0, i.e.
- disabled, by default) says that at most that many message headers will
- be downloaded.
- Unlike the soft limit, it is unconditional and no questions will be asked
- if it is exceeded.
-\layout Standard
-
-The hard limit is mostly useful for 
-\begin_inset Quotes eld
-\end_inset 
-
-write only
-\begin_inset Quotes erd
-\end_inset 
-
- folders, such as SentMail.
- Indeed, Mahogany accesses it very often (each time a message is sent) and
- it quickly grows big resulting in delays after message sending.
- Unconditionally limiting the number of messages retrieved from the server
- helps a lot in this situation.
 \layout Chapter
 
 FAQ - Frequently Asked Questions_1002_
@@ -7386,8 +7344,9 @@ Do a "make install" for wxWindows and watch the output, it should copy lots
 Do a "which wx-config", it should report wx-config to be in /usr/local/bin
 \layout Enumerate
 
-Just type "wx-config --cflags", it should run the wx-config script and report
- the compiler flags, which should include something like "-I/usr/local/include".
+Just type "wx-config --cxxflags", it should run the wx-config script and
+ report the compiler flags, which should include something like "-I/usr/local/in
+clude".
 \layout Enumerate
 
 Then go to the Mahogany directory and "rm *cache*" to remove old configuration
@@ -7459,6 +7418,11 @@ wxGTK has a problem with constraint handling which can cause this dialog
  This seems to depend on the platform and window manager.
  Also, wxGTK does not seem to work correctly with OpenLook which does not
  allow you to enter anything.
+\layout Standard
+
+Sometimes there may be some dialog window opened behind Mahogany window
+ or on another desktop.
+ Please check this (with Alt-Tab) if you think Mahogany got stuck.
 \layout Subsection
 
 How to use Mahogany with fetchmail/procmail?
@@ -7672,6 +7636,7 @@ advanced
 
  in the main configuration dialog, otherwise only a small subset of configuratio
 n options is available.
+ You can also create global identities which are available in all folders.
 \layout Subsection
 
 Can I run Mahogany as root?
@@ -7785,8 +7750,8 @@ How can I delete messages?
 
 
 \shape italic 
-If I press 'D' or use the menu to delete messages, they get marked as deleted
- but never disappear.
+If I press 'D' or 'Del' or use the menu to delete messages, they get marked
+ as deleted but never disappear.
  How can I delete them?
 \layout Standard
 
@@ -7803,4 +7768,49 @@ How can I forward a message with attachments?
 Do "Forward with template" and create a new template containing $quote822
  - this will forward the entire message.
  You can also change the default forward template to do it.
+\layout Subsection
+
+How can I customize the position of folders in the tree?
+\layout Standard
+
+Just add 
+\begin_inset Quotes eld
+\end_inset 
+
+Index=N
+\begin_inset Quotes erd
+\end_inset 
+
+ entry in the folder profile section of the config file (or registry under
+ Windows).
+ I.e.:
+\layout Standard
+
+[IMAP/Inbox]
+\layout Standard
+
+Index=0
+\layout Standard
+
+...
+\layout Standard
+
+[IMAP/Mahogany]
+\layout Standard
+
+Index=1
+\layout Standard
+
+...
+\layout Standard
+
+[IMAP/Junk]
+\layout Standard
+
+Index=100
+\layout Paragraph
+
+
+\series medium 
+then Inbox and Mahogany will appear first and Junk last in the tree.
 \the_end
