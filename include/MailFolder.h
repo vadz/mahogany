@@ -879,5 +879,24 @@ String FormatFolderStatusString(const String& format,
                                 MailFolderStatus *status,
                                 const MailFolder *mf = NULL);
 
+// ----------------------------------------------------------------------------
+// global (but private to MailFolder) functions
+//
+// unfortunately for now these functions have to live here, it would be much
+// better to have some less clumsy initialization code... (FIXME)
+// ----------------------------------------------------------------------------
+
+/// init common MF code
+extern bool MailFolderCmnInit();
+
+// clean up common MF code data
+extern void MailFolderCmnCleanup();
+
+/// init cclient
+extern bool MailFolderCCInit();
+
+/// shutdown cclient
+extern void MailFolderCCCleanup();
+
 #endif /// MAILFOLDER_H
 

@@ -1989,11 +1989,13 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    bool ok = false;
 
    // check the return code of the editor process
-   if ( event.GetExitCode() != 0 )
+   int exitcode = event.GetExitCode();
+   if ( exitcode != 0 )
    {
-      wxLogError(_("External editor terminated with non null exit code."));
+      wxLogError(_("External editor terminated with non null exit code %d."),
+                 exitcode);
    }
-   else
+   else // exit code ok
    {
       // 'true' means "replace the first text part"
       if ( !InsertFileAsText(m_tmpFileName, true) )

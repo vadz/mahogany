@@ -10,13 +10,16 @@
 #ifndef MAILFOLDERCMN_H
 #define MAILFOLDERCMN_H
 
-//#ifdef __GNUG__
-//#   pragma interface "MailFolderCMN.h"
-//#endif
+#ifdef __GNUG__
+#   pragma interface "MailFolderCmn.h"
+#endif
 
-#include "MailFolder.h"
+#include "MailFolder.h" // the base class
 
-#include "MEvent.h"
+#include "MEvent.h"     // for MEventOptionsChangeData
+
+// define this for some additional checks of folder closing logic
+#undef DEBUG_FOLDER_CLOSE
 
 /**
    MailFolderCmn  class, common code shared by all implementations of
@@ -231,11 +234,13 @@ protected:
    //@}
 
    /// Use the new options from m_Config
-   void DoUpdate();
-   /// Update Config info from profile.
+   virtual void DoUpdate();
+
+   /// Update m_Config info from profile.
    void UpdateConfig(void);
+
    /// Read options from profile into the options struct
-   void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+   virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
 
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void) = 0;
@@ -296,9 +301,9 @@ private:
        link correctly: */
    MailFolderCmn(const MailFolderCmn &) { ASSERT(0); }
 
-#ifdef DEBUG
+#ifdef DEBUG_FOLDER_CLOSE
    bool m_PreCloseCalled;
-#endif
+#endif // DEBUG_FOLDER_CLOSE
 
    friend class MfCloseEntry;
    friend class MFCmnEventReceiver;

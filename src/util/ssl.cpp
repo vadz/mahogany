@@ -29,7 +29,18 @@
    which are all in "C" */
 extern "C" {
 
-extern long ssl_init_Mahogany();
+extern long ssl_init_Mahogany()
+#if 1 // VZ: my test code
+{
+   extern void ssl_onceonlyinit(void);
+
+   ssl_onceonlyinit();
+
+   return 0;
+}
+#else
+;
+#endif
 
 
 #define SSL_DEF(returnval, name, args) \

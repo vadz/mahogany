@@ -936,11 +936,11 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
    MailFolderCC::MF_pwd = pw;
 }
 
-/* static */
-void
-MailFolderCC::UpdateCClientConfig()
+void MailFolderCC::ReadConfig(MailFolderCmn::MFCmnOptions& config)
 {
    mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT) != 0;
+
+   MailFolderCmn::ReadConfig(config);
 }
 
 // ----------------------------------------------------------------------------
@@ -2969,6 +2969,14 @@ int
 MailFolderCC::OverviewHeaderEntry (unsigned long uid,
                                    OVERVIEW_X *ov)
 {
+   // the listing could be deleted if we got another mm_exists() while
+   // rebuilding the listing - abandon it then as we're going to rebuild it
+   // again anyhow
+   if  ( !m_Listing )
+   {
+      return 0;
+   }
+
    // it is possible that new messages have arrived in the meantime, ignore
    // them
    if ( m_BuildNextEntry == m_nMessages )
@@ -3153,41 +3161,6 @@ MailFolderCC::CClientInit(void)
    gs_CCStreamCleaner = new CCStreamCleaner();
 }
 
-extern bool CC_Init(void)
-{
-   MailFolderCC::CClientInit();
-
-   return true;
-}
-
-extern void CC_Cleanup(void)
-{
-   if ( MailFolderCC::IsInitialized() )
-   {
-      // as c-client lib doesn't seem to think that deallocating memory is
-      // something good to do, do it at it's place...
-      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
-      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
-   }
-
-   if ( gs_CCStreamCleaner )
-   {
-      delete gs_CCStreamCleaner;
-      gs_CCStreamCleaner = NULL;
-   }
-
-   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
-
-   // FIXME: we really need to clean up these entries, so we just
-   //        decrement the reference count until they go away.
-   while ( !MailFolderCC::ms_StreamList.empty() )
-   {
-      MailFolderCC *folder = MailFolderCC::ms_StreamList.front()->folder;
-      wxLogDebug("\tFolder '%s' leaked", folder->GetName().c_str());
-      folder->DecRef();
-   }
-}
-
 CCStreamCleaner::~CCStreamCleaner()
 {
    wxLogTrace(TRACE_MF_CALLS, "CCStreamCleaner: checking for left-over streams");
@@ -3224,6 +3197,45 @@ CCStreamCleaner::~CCStreamCleaner()
 }
 
 // ----------------------------------------------------------------------------
+// functions used by MailFolder initialization/shutdown code
+// ----------------------------------------------------------------------------
+
+extern bool MailFolderCCInit(void)
+{
+   MailFolderCC::CClientInit();
+
+   return true;
+}
+
+extern void MailFolderCCCleanup(void)
+{
+   if ( MailFolderCC::IsInitialized() )
+   {
+      // as c-client lib doesn't seem to think that deallocating memory is
+      // something good to do, do it at it's place...
+      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
+      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   }
+
+   if ( gs_CCStreamCleaner )
+   {
+      delete gs_CCStreamCleaner;
+      gs_CCStreamCleaner = NULL;
+   }
+
+   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
+
+   // FIXME: we really need to clean up these entries, so we just
+   //        decrement the reference count until they go away.
+   while ( !MailFolderCC::ms_StreamList.empty() )
+   {
+      MailFolderCC *folder = MailFolderCC::ms_StreamList.front()->folder;
+      wxLogDebug("\tFolder '%s' leaked", folder->GetName().c_str());
+      folder->DecRef();
+   }
+}
+
+// ----------------------------------------------------------------------------
 // Some news spool support (TODO: move out from here)
 // ----------------------------------------------------------------------------
 
@@ -3243,7 +3255,7 @@ const String& MailFolder::InitializeNewsSpool()
    if ( !gs_NewsSpoolDir )
    {
       // first, init cclient
-      CC_Init();
+      MailFolderCCInit();
 
       gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
       if ( !gs_NewsSpoolDir )

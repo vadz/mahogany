@@ -44,12 +44,6 @@ struct OVERVIEW_X;
 // helper classes
 // ----------------------------------------------------------------------------
 
-/// init cclient
-extern bool CC_Init();
-
-/// shutdown cclient
-extern void CC_Cleanup();
-
 /// structure to hold MailFolder pointer and associated mailstream pointer
 class StreamConnection
 {
@@ -518,9 +512,6 @@ protected:
    MailFolderStatus m_status;
 
 public:
-   /// re-read some cclient settings
-   static void UpdateCClientConfig(void);
-
    /** @name common callback routines
        They all take a stram argument and the number of a message.
        Do not call them, they are only for use by the c-client library!
@@ -685,8 +676,11 @@ private:
    static void DebugStreams(void);
 #endif
 
-   friend bool CC_Init();
-   friend void CC_Cleanup();
+   virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+
+   friend bool MailFolderCCInit();
+   friend void MailFolderCCCleanup();
+
    friend class CCDefaultFolder;
 
 public:

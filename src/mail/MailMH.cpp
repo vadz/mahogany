@@ -220,7 +220,7 @@ MailFolder::InitializeMH()
          // calling mail_parameters doesn't work because of a compiler bug: gcc
          // mangles mh_parameters function completely and it never returns
          // anything for GET_MHPATH - I didn't find another workaround
-#if 0
+#if 1
          (void)mail_parameters(NULL, GET_MHPATH, &tmp);
 
          gs_MHRootDir = tmp;
