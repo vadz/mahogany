@@ -57,7 +57,6 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOLDER_PATH;
-extern const MOption MP_FOLDER_TRY_CREATE;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1269,11 +1268,6 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
             // check if the folder really already exists, if not - create it
             if ( READ_CONFIG_TEXT(profile, MP_FOLDER_PATH).empty() )
             {
-               // don't try to create this folder - we know that it already
-               // exists
-               if ( profile->HasEntry(MP_FOLDER_TRY_CREATE) )
-                  profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
-
                int flags = m_flagsParent;
                long attr = result->GetAttributes();
                if ( attr & ASMailFolder::ATT_NOINFERIORS )
