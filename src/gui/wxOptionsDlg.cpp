@@ -923,7 +923,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
      gettext_noop(
       "Some SMTP or NNTP servers require a user name/login.\n"
       "You might need to enter the e-mail address provided by\n"
-      "your ISP either with or without thep art after '@':\n"
+      "your ISP either with or without the part after '@':\n"
       "please follow the ISP instructions about this."),
                                                    Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,
@@ -987,7 +987,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
 #ifdef USE_DIALUP
    { "\n"
-     gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
+     gettext_noop("Mahogany has support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
