@@ -309,13 +309,14 @@ static const MenuItemInfo g_aMenuItems[] =
       { WXMENU_LANG_ISO8859_1, gettext_noop("&West European (Latin1)"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_2, gettext_noop("&Central European (Latin2)"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_3, gettext_noop("&Esperanto (Latin3)"), gettext_noop(""), TRUE },
-      { WXMENU_LANG_ISO8859_4, gettext_noop("&Baltic (Latin4)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_4, gettext_noop("Baltic old (Latin4)"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_5, gettext_noop("C&yrillic"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_6, gettext_noop("&Arabic"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_7, gettext_noop("&Greek"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_8, gettext_noop("&Hebrew"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_9, gettext_noop("&Turkish (Latin5)"), gettext_noop(""), TRUE },
       { WXMENU_LANG_ISO8859_10, gettext_noop("&Nordic (Latin6)"), gettext_noop(""), TRUE },
+      { WXMENU_LANG_ISO8859_13, gettext_noop("&Baltic (Latin7)"), gettext_noop(""), TRUE },
       { WXMENU_SEPARATOR,     "",                  ""                         , TRUE },
       { WXMENU_LANG_CP1250, gettext_noop("MS C&entral European (WinLatin2)"), gettext_noop(""), TRUE },
       { WXMENU_LANG_CP1251, gettext_noop("MS Cyri&llic"), gettext_noop(""), TRUE },
@@ -604,6 +605,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       case wxFONTENCODING_ISO8859_8:
       case wxFONTENCODING_ISO8859_9:
       case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_13:
          id = WXMENU_LANG_ISO8859_1 + encoding - wxFONTENCODING_ISO8859_1;
          break;
 
@@ -644,6 +646,7 @@ extern void CheckLanguageInMenu(wxWindow *win, wxFontEncoding encoding)
       WXMENU_LANG_ISO8859_8,
       WXMENU_LANG_ISO8859_9,
       WXMENU_LANG_ISO8859_10,
+      WXMENU_LANG_ISO8859_13,
       WXMENU_LANG_CP1250,
       WXMENU_LANG_CP1251,
       WXMENU_LANG_CP1252,
