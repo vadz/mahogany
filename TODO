@@ -103,7 +103,11 @@ for release:
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
 
+-HTML mail
 -------------------------
+
+- eventually add a Drafts folder and toggable Online/Offline mode
+  - Use MessageCC(const String &) constructor for this!
 - add icons to doc++ generated docs
 - add new mail and group reply/followup buttons (and menu entry for
    the latter) to folderview

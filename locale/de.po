@@ -55,17 +55,6 @@ msgstr ""
 "zentrale Mailbox für neue Nachrichten markiert ist.\n"
 "Wird ignoriert."
 
-#: upgrade.cpp:445
-#, c-format
-msgid ""
-"Cannot auto-collect mail from the new mail folder\n"
-"'%s'\n"
-"Corrected configuration data."
-msgstr ""
-"Kann Nachrichen nicht von der zentralen Mailbox\n"
-"'%s' einsammeln.\n"
-"Einstellungen korrigiert."
-
 #: upgrade.cpp:480 upgrade.cpp:481
 msgid ""
 "Normally Mahogany will automatically collect all mail\n"
@@ -225,15 +214,6 @@ msgstr ""
 msgid "Failed to set up initial configuration."
 msgstr "Kann Ausgangskonfiguration nicht einrichten."
 
-#: MApplication.cpp:290 MApplication.cpp:295
-msgid ""
-"You are trying to run Mahogany as the super-user (root).\n"
-"For security reasons this is not possible, please log in\n"
-"as an ordinary user and try again."
-msgstr ""
-"Sie versuchen, Mahogany als Superuser (root) zu benutzen.\n"
-"Aus Sicherheitsgründen ist dies nicht möglich. Bitte melden\n"
-"Sie sich als normaler Benutzer an, und versuchen es nochmal."
 
 #: MApplication.cpp:310 MApplication.cpp:315
 #, c-format
@@ -3261,27 +3241,6 @@ msgstr ""
 "werden alle neuen Nachrichten in INBOX verbleiben, und\n"
 "Sie müssen die Mailbox selbst prüfen."
 
-#: upgrade.cpp:454 upgrade.cpp:498
-msgid ""
-"Mahogany will not automatically collect mail from your\n"
-"system's default INBOX.\n"
-"You can change this in the INBOX folder's preferences\n"
-"dialog at any time."
-msgstr ""
-"Mahogany wird nicht automatisch alle Nachrichten aus\n"
-"der Systemmailbox INBOX abholen.\n"
-"Sie können dies jederzeit in den Einstellungen für\n"
-"die INBOX Mailbox ändern."
-
-#: upgrade.cpp:435
-#, c-format
-msgid ""
-"Found additional folder '%s'\n"
-"marked as central new mail folder. Ignoring it."
-msgstr ""
-"Zusätzliche Mailbox '%s' gefunden, die als\n"
-"zentrale Mailbox für neue Nachrichten markiert ist.\n"
-"Wird ignoriert."
 
 #: upgrade.cpp:445
 #, c-format
@@ -3298,9 +3257,6 @@ msgstr ""
 msgid "Sent"
 msgstr "Gesendet"
 
-#: upgrade.cpp:571
-msgid "Folder where Mahogany will store copies of outgoing messages."
-msgstr "Mailbox in der Mahogany Kopien gesendeter Nachrichten speichert."
 
 #: MApplication.cpp:290
 msgid ""

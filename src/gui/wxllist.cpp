@@ -2956,8 +2956,8 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 
    psdc.GetSize(&m_PageWidth, &m_PageHeight);
 
-   // This sets a left/top origin of 15% and 20%:
-   m_Offset = wxPoint((15*m_PageWidth)/100, (20*m_PageHeight)/100);
+   // This sets a left/top origin of 15% and 5%:
+   m_Offset = wxPoint((15*m_PageWidth)/100, (5*m_PageHeight)/100);
 
    // This is the length of the printable area.
    m_PrintoutHeight = m_PageHeight - 2*m_Offset.y;
