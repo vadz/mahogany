@@ -1297,7 +1297,7 @@
 #   define   MP_NEWMAILCOMMAND_D   M_EMPTYSTRING
 #endif
 /// show new mail messages?
-#define   MP_SHOW_NEWMAILMSG_D      1
+#define   MP_SHOW_NEWMAILMSG_D      0
 /// show detailed info about how many new mail messages?
 #define   MP_SHOW_NEWMAILINFO_D      10
 /// keep copies of outgoing mail?

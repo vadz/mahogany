@@ -1375,7 +1375,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       flagNewMail = MF_FLAGS_HIDDEN;
    }
 
-   // create hidden INBOX
+   // create INBOX
    if(! MailFolder::CreateFolder("INBOX",
                                  MF_INBOX,
                                  MF_FLAGS_DONTDELETE |
@@ -1385,6 +1385,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       wxLogError(_("Could not create INBOX mailbox."));
    }
+
 
    // create New Mail folder:
    wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
@@ -1403,6 +1404,13 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
    }
+
+   // by default, activate new mail notification for the folder which
+   // is used and user visible, default for all other folders is "off"
+   Profile_obj prof(
+      gs_installWizardData.collectAllMail ? foldername : "INBOX" );
+   prof->writeEntry(MP_SHOW_NEWMAILMSG, 1);
+   
 
    // TRASH
    if(gs_installWizardData.useTrash)

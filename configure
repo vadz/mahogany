@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.190 2000/10/03 09:14:10 gregnoel Exp 
+# From configure.in Id: configure.in,v 1.191 2000/10/17 11:55:28 ballueder Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
