@@ -190,7 +190,6 @@ MailFolder::InitializeMH()
       // disabled - though it's perfectly ok for this file to be empty... So
       // we can use cclient MH logic if this file exists - but not if it
       // doesn't (and never under Windows)
-
 #ifdef OS_UNIX
       String home = getenv("HOME");
       String filenameMHProfile = home + "/.mh_profile";
@@ -223,19 +222,9 @@ MailFolder::InitializeMH()
       }
       else
       {
-         // retrieve the MH path (notice that we don't always find it ourself -
-         // sometimes it's found only by the call to mh_isvalid)
-
-         // calling mail_parameters doesn't work because of a compiler bug: gcc
-         // mangles mh_parameters function completely and it never returns
-         // anything for GET_MHPATH - I didn't find another workaround
-#if 1
-         (void)mail_parameters(NULL, GET_MHPATH, &tmp);
-
-         gs_MHRootDir = tmp;
-#else // 1
-         gs_MHRootDir = mh_getpath();
-#endif // 0/1
+         // retrieve the MH path (notice that we don't always find it ourself
+         // as sometimes it's found only by the call to mh_isvalid)
+         gs_MHRootDir = (char *)mail_parameters(NULL, GET_MHPATH, &tmp);
 
          // the path should have a trailing [back]slash
          if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
