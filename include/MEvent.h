@@ -145,7 +145,7 @@ class MEventNewMailData : public MEventWithFolderData
 public:
    /** Constructor.
        @param folder the mail folder where the new mail was detected
-       @param n number o fnew messages
+       @param n number of new messages
        @param messageIDs points to an array of the sequence numbers of
        the new messages in that folder, freed by the caller
    */
