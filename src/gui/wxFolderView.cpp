@@ -321,7 +321,11 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
       if ( GetSelections(selections) > 0 )
       {
          MMessagesDataObject dropData(m_FolderView, selections);
-         wxDropSource dropSource(dropData, this);
+         wxIconManager *iconManager = mApplication->GetIconManager();
+         wxIcon icon = iconManager->GetIcon(selections.GetCount() > 1
+                                            ? "dnd_msgs"
+                                            : "dnd_msg");
+         wxDropSource dropSource(dropData, this, icon);
 
          switch ( dropSource.DoDragDrop(TRUE /* allow move */) )
          {
