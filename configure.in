@@ -565,8 +565,19 @@ case "$USE_SSL" in
 	dnl other files as <openssl/foo.h> so when testing the headers
 	dnl existence with -Iprefix/openssl we must *also* have -Iprefix or it
 	dnl doesn't risk to work.
+	dnl
+	dnl also, RH9 install of OpenSSL is broken and krb5.h file included by
+	dnl ssl.h is in a non standard directory and this breaks compilation.
+	dnl Luckily we don't need it anyhow so we can just disable using
+	dnl Kerberos completely.
+	dnl
+	dnl the others -DNO_XXX don't seem to exist any more in the new
+	dnl OpenSSL versions anyhow but we keep them here as apparently they
+	dnl were needed for the older versions, for whatever reasons...
+	SSL_CPPFLAGS="-DNO_IDEA -DNO_DSA -DOPENSSL_NO_KRB5"
+
 	CPPFLAGS_OLD=$CPPFLAGS
-	CPPFLAGS="${CPPFLAGS} -I${ssl_inc} -I/usr/ssl/include -I/usr/local/ssl/include"
+	CPPFLAGS="${CPPFLAGS} ${SSL_CPPFLAGS} -I${ssl_inc} -I/usr/ssl/include -I/usr/local/ssl/include"
 	M_CHECK_MYHEADER(ssl.h,
 	[ \
 		$ssl_inc/openssl \
@@ -639,15 +650,6 @@ IMAP_CPPFLAGS=
 
 if test "$ssl_option" = "yes"; then
     AC_DEFINE(USE_SSL)
-
-    dnl RH9 install of OpenSSL is broken and krb5.h file included by ssl.h is
-    dnl in a non standard directory and this breaks compilation -- luckily we
-    dnl don't need it anyhow so we can just disable using Kerberos completely
-    dnl
-    dnl the others don't seem to exist any more in the new OpenSSL versions
-    dnl anyhow but we keep them here as apparently they were needed for the
-    dnl older versions, for whatever reasons...
-    SSL_CPPFLAGS="-DNO_IDEA -DNO_DSA -DOPENSSL_NO_KRB5"
 
     dnl have to give the location of SSL headers to cclient if it is in a
     dnl non standard place: note that imap2000 includes <ssl.h> and not
