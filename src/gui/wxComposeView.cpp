@@ -323,7 +323,15 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          }
 
          // take what was there before...
-         wxString newText(text, nPrevAddrEnd + 1);  // first nPrevAddrEnd chars
+
+         if ( nPrevAddrEnd > 0 )
+         {
+            // skip last character
+            nPrevAddrEnd++;
+         }
+         //else: the expanded string started at the very beginning
+
+         wxString newText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
          if ( !newText.IsEmpty() )
          {
             // there was something before, add separator
