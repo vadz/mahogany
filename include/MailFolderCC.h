@@ -23,6 +23,8 @@
 #  include "Mcclient.h"
 #endif
 
+#include "MThread.h"
+
 #include "MFolder.h"
 
 #include "MailFolderCmn.h"
@@ -32,7 +34,6 @@
 
 // fwd decls
 class MailFolderCC;
-class MMutex;
 
 // ----------------------------------------------------------------------------
 // helper classes
@@ -547,6 +548,11 @@ private:
    /// the array containing the positions of expunged messages or NULL
    wxArrayInt *m_expungedPositions;
 
+#ifdef EXPERIMENTAL_expunging_mutex
+   /// the number of new messages received while we were in ExpungeMessages()
+   size_t m_countNewWhileExpunging;
+#endif // EXPERIMENTAL_expunging_mutex
+
    //@}
 
    /**
@@ -584,14 +590,21 @@ private:
 
    /** @name Locking and other semaphores */
    //@{
+
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
 
    /// when this mutex is locked, this folder can't be accessed at all
-   MMutex *m_Mutex;
+   MMutex m_mutexExclLock;
 
    /// locked while we're processing the new mail which just arrived
-   MMutex *m_mutexNewMail;
+   MMutex m_mutexNewMail;
+
+#ifdef EXPERIMENTAL_expunging_mutex
+   /// locked while we're inside our ExpungeMessages()
+   MMutex m_mutexExpunging;
+#endif // EXPERIMENTAL_expunging_mutex
+
    //@}
 
    /** @name functions for mapping mailstreams and objects

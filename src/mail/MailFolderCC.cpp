@@ -41,7 +41,6 @@
 #include "MessageCC.h"
 
 #include "MEvent.h"
-#include "MThread.h"
 #include "ASMailFolder.h"
 #include "Mpers.h"
 
@@ -1386,9 +1385,6 @@ MailFolderCC::Create(FolderType type, int flags)
    m_ASMailFolder = NULL;
 
    m_SearchMessagesFound = NULL;
-
-   m_Mutex = new MMutex;
-   m_mutexNewMail = new MMutex;
 }
 
 void MailFolderCC::Init()
@@ -1448,9 +1444,6 @@ MailFolderCC::~MailFolderCC()
    // we might still be listed, so we better remove ourselves from the
    // list to make sure no more events get routed to this (now dead) object
    RemoveFromMap();
-
-   delete m_Mutex;
-   delete m_mutexNewMail;
 
    m_Profile->DecRef();
    m_mfolder->DecRef();
@@ -2615,7 +2608,7 @@ MailFolderCC::Ping(void)
 bool
 MailFolderCC::Lock(void) const
 {
-   m_Mutex->Lock();
+   ((MailFolderCC *)this)->m_mutexExclLock.Lock();
 
    return true;
 }
@@ -2623,13 +2616,13 @@ MailFolderCC::Lock(void) const
 bool
 MailFolderCC::IsLocked(void) const
 {
-   return m_Mutex->IsLocked() || m_mutexNewMail->IsLocked();
+   return m_mutexExclLock.IsLocked() || m_mutexNewMail.IsLocked();
 }
 
 void
 MailFolderCC::UnLock(void) const
 {
-   m_Mutex->Unlock();
+   ((MailFolderCC *)this)->m_mutexExclLock.Unlock();
 }
 
 // ----------------------------------------------------------------------------
@@ -2888,7 +2881,42 @@ MailFolderCC::ExpungeMessages(void)
       wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ExpungeMessages()",
                  GetName().c_str());
 
+#ifdef EXPERIMENTAL_expunging_mutex
+      {
+         m_countNewWhileExpunging = 0;
+
+         MLocker expungeLock(m_mutexExpunging);
+
+         mail_expunge(m_MailStream);
+
+         if ( m_countNewWhileExpunging )
+         {
+            // we got some new messages which we ignored in OnMailExists() for
+            // the reasons explained there, now update the headers
+            if ( m_headers )
+            {
+               ASSERT_MSG( m_nMessages >= m_countNewWhileExpunging,
+                           "total number of messages less than number of "
+                           "new ones?" );
+
+               for ( size_t n = m_nMessages - m_countNewWhileExpunging + 1;
+                     n <= m_nMessages;
+                     n++ )
+               {
+                  m_headers->OnAdd(n);
+               }
+            }
+            else
+            {
+               FAIL_MSG( "m_countNewWhileExpunging set but no headers?" );
+            }
+
+            m_countNewWhileExpunging = 0;
+         }
+      }
+#else // !EXPERIMENTAL_expunging_mutex
       mail_expunge(m_MailStream);
+#endif // EXPERIMENTAL_expunging_mutex/!EXPERIMENTAL_expunging_mutex
 
       // for some types of folders (IMAP) mm_exists() is called from
       // mail_expunge() but for the others (POP) it isn't and we have to call
@@ -4188,7 +4216,29 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // update the number of headers in the listing
       if ( m_headers )
       {
-         m_headers->OnAdd(msgnoMax);
+#ifdef EXPERIMENTAL_expunging_mutex
+         if ( m_mutexExpunging.IsLocked() )
+         {
+            // we can't call HeaderInfoList::OnAdd() from here if we're
+            // expunging the messages because it invalidatest the tables
+            // m_headers maintains internally to map msgnos to positions and
+            // which OnMailExpunge() uses - if we called OnAdd(), they would
+            // have to be rebuilt when OnMailExpunge() would have been called
+            // possibly resulting in another call to c-client (if we use server
+            // side sorting/threading) which would generate a fatal error as it
+            // is not reentrant
+            //
+            // so just remember that we need to adjust the number of messages
+            // later but don't call it now
+            m_countNewWhileExpunging++;
+         }
+         else // not inside ExpungeMessages()
+#endif // EXPERIMENTAL_expunging_mutex
+         {
+            wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", msgnoMax);
+
+            m_headers->OnAdd(msgnoMax);
+         }
       }
 
       // our cached idea of the number of messages we have doesn't correspond
@@ -4196,11 +4246,11 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       MfStatusCache *mfStatusCache = MfStatusCache::Get();
 
       // the code inside "#if 0" doesn't work because some dumb IMAP servers
-      // (IMApd 12.264 to not name it) generate two untagged EXISTS in a row
+      // (IMAPd 12.264 to not name it) generate two untagged EXISTS in a row
       // when you open a folder which used to be empty but later got a message
       // into it, i.e. it says:
       //
-      //    2 select wxWindows/CVS
+      //    2 SELECT wxWindows/CVS
       //    * 0 EXISTS
       //    * 1 EXISTS
       //    * 1 RECENT
@@ -4278,38 +4328,68 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
 {
    size_t idx = msgno - 1;
 
-   // if we're applying the filters to the new messages, the GUI hadn't been
-   // notified about existence of these messages yet, so we don't need to
-   // notify it about their disappearance neither - it just will never know
-   // they were there at all
-   if ( !m_mutexNewMail->IsLocked() )
-   {
-      // let all the others know that some messages were expunged: we don't do it
-      // right now but wait until mm_exists() which is sent after all
-      // mm_expunged() as it is much faster to delete all messages at once
-      // instead of one at a time
-      if ( !m_expungedMsgnos )
-      {
-         // create new arrays
-         m_expungedMsgnos = new wxArrayInt;
-         m_expungedPositions = new wxArrayInt;
-      }
-
-      // add the msgno to the list of expunged messages
-      m_expungedMsgnos->Add(msgno);
-
-      // and remember its position as well if we have it
-      m_expungedPositions->Add(m_headers ? m_headers->GetPosFromIdx(idx)
-                                         : INDEX_ILLEGAL);
-   }
-
    // remove the message from the header info list if we have headers
    // (it would be wasteful to create them just to do it)
    if ( m_headers )
    {
-      wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", msgno);
+      if ( idx < m_headers->Count() )
+      {
+         // if we're applying the filters to the new messages, the GUI hadn't
+         // been notified about existence of these messages yet, so we don't
+         // need to notify it about their disappearance neither - it just will
+         // never know they were there at all
+         //
+         // otherwise prepare for sending event from RequestUpdateAfterExpunge()
+         // a bit later
+         if ( !m_mutexNewMail.IsLocked() )
+         {
+            // let all the others know that some messages were expunged: we
+            // don't do it right now but wait until mm_exists() which is sent
+            // after all mm_expunged() as it is much faster to delete all
+            // messages at once instead of one at a time
+            if ( !m_expungedMsgnos )
+            {
+               // create new arrays
+               m_expungedMsgnos = new wxArrayInt;
+               m_expungedPositions = new wxArrayInt;
+            }
 
-      m_headers->OnRemove(idx);
+            // add the msgno to the list of expunged messages
+            m_expungedMsgnos->Add(msgno);
+
+            // and remember its position as well
+            m_expungedPositions->Add(m_headers->GetPosFromIdx(idx));
+         }
+
+         wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", msgno);
+
+         m_headers->OnRemove(idx);
+      }
+      else // expunged message not in m_headers
+      {
+#ifdef EXPERIMENTAL_expunging_mutex
+         // this probably can happen if we had previously decided not to call
+         // m_headers->OnAdd() in OnMailExists() (see comment there for the
+         // reason why we might have to do it)
+         if ( m_mutexExpunging.IsLocked() )
+         {
+            if ( m_countNewWhileExpunging )
+            {
+               // just compensate for the one we had previously added
+               m_countNewWhileExpunging--;
+            }
+            else
+            {
+               FAIL_MSG( "unexpectedly invalid msgno in mm_expunged" );
+            }
+         }
+         else
+#endif // EXPERIMENTAL_expunging_mutex
+         {
+            // but otherwise it shouldn't happen!
+            FAIL_MSG( "invalid msgno in mm_expunged" );
+         }
+      }
    }
 
    // update the total number of messages
@@ -4338,7 +4418,7 @@ void MailFolderCC::OnNewMail()
 
    // see if we have any new messages
    //
-   // FIXME: having recent messages doesn't mean havign new ones and although
+   // FIXME: having recent messages doesn't mean having new ones and although
    //        FilterNewMail() does count new messages before doing anything,
    //        this is still not very efficient - we'd better try to determine if
    //        we have any really new new messages. The trouble is that it just
