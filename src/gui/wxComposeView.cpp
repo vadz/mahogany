@@ -2029,10 +2029,9 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
                 "MIME type '%s'.\n"
                 "Is this correct?"),
               filename.c_str(), strMimeType.c_str());
-   if(MDialog_YesNoDialog( msg, this, _("Content MIME type"),
-                           true,
-                           GetProfile()->GetName()+"/MimeTypeCorrect")
-      == false)
+   if ( !MDialog_YesNoDialog( msg, this, _("Content MIME type"),
+                              true,
+                              GetProfile()->GetName()+"/MimeTypeCorrect") )
    {
       wxString newtype = strMimeType;
       if(MInputBox(&newtype, _("MIME type"),
@@ -2054,7 +2053,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
                filename.c_str(), strMimeType.c_str());
 
-   Refresh();
+   m_LayoutWindow->Refresh();
 }
 
 bool
