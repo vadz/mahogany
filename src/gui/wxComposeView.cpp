@@ -200,9 +200,8 @@ static wxBitmap GetTransparentBitmap(const char *name)
 {
    wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(name);
 
-   // FIXME: bg colour still wrong
 #ifdef OS_WIN
-   bmp.SetMask(new wxMask(bmp, *wxLIGHT_GREY));
+   bmp.SetMask(new wxMask(bmp, wxColour(0xc6, 0xc6, 0xc6)));
 #endif // OS_WIN
 
    return bmp;
