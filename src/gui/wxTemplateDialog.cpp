@@ -404,8 +404,10 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
 {
    // init members
    // ------------
+
    m_kind = MessageTemplate_Max;
    m_profile = profile;
+   m_textctrl = NULL;
 
    // layout the controls
    // -------------------
@@ -429,6 +431,11 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    c->height.AsIs();
    msg->SetConstraints(c);
 
+   // we have to create the text control before the listbox as wxPListBox
+   // restores the listbox selection which results in a call to our
+   // OnListboxSelection() which uses m_textctrl
+   m_textctrl = new TemplateEditor(menu, this);
+
    // on the left side is the listbox with all available templates
    wxListBox *listbox = new wxPListBox("MsgTemplate", this, -1);
 
@@ -448,7 +455,6 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    listbox->SetConstraints(c);
 
    // to the right of it is the text control where template file can be edited
-   m_textctrl = new TemplateEditor(menu, this);
    c = new wxLayoutConstraints;
    c->top.SameAs(listbox, wxTop);
    c->height.SameAs(listbox, wxHeight);
@@ -456,7 +462,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textctrl->SetConstraints(c);
 
-   SetDefaultSize(6*wBtn, 10*hBtn);
+   SetDefaultSize(6*wBtn, 11*hBtn);
 }
 
 void wxFolderTemplatesDialog::UpdateText()
@@ -480,6 +486,8 @@ void wxFolderTemplatesDialog::SaveChanges()
 
 void wxFolderTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
 {
+   CHECK_RET( m_textctrl, "unexpected listbox selection event" );
+
    if ( m_textctrl->IsModified() )
    {
       // save it if the user doesn't veto it
