@@ -1321,7 +1321,11 @@ bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
     bool hasExpandedChildren = FALSE;
 
     size_t nChild = 0;
+#if wxCHECK_VERSION(2, 5, 0)
+    wxTreeItemIdValue cookie;
+#else
     long cookie;
+#endif
     wxTreeItemId idChild = GetFirstChild(id, cookie);
     while ( idChild.IsOk() )
     {
@@ -1408,7 +1412,11 @@ void wxPTreeCtrl::RestoreExpandedBranches(const wxTreeItemId& itemRoot,
             }
 
             // get the child with the given index
+#if wxCHECK_VERSION(2, 5, 0)
+            wxTreeItemIdValue cookie;
+#else
             long cookie;
+#endif
             wxTreeItemId idChild = GetFirstChild(id, cookie);
             while ( idChild.IsOk() )
             {

@@ -598,7 +598,11 @@ wxTreeItemId wxSubfoldersTree::InsertInOrder(wxTreeItemId parent,
                                              const wxString& name)
 {
    // insert in alphabetic order under the parent
+#if wxCHECK_VERSION(2, 5, 0)
+   wxTreeItemIdValue cookie;
+#else
    long cookie;
+#endif
    wxTreeItemId childPrev,
                 child = GetFirstChild(parent, cookie);
    while ( child.IsOk() )
@@ -810,7 +814,11 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
          wxTreeItemId itemNew;
          wxString subStr = component.Left(n + 1);
 
+#if wxCHECK_VERSION(2, 5, 0)
+         wxTreeItemIdValue cookie;
+#else
          long cookie;
+#endif
          wxTreeItemId child = m_treectrl->GetFirstChild(item, cookie);
          while ( child.IsOk() )
          {
