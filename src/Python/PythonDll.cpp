@@ -141,7 +141,7 @@ static struct
 {
    { "Py_Initialize", (PYTHON_PROC *)&M_Py_Initialize },
    { "_Py_NoneStruct", (PYTHON_PROC *)&M__Py_NoneStruct},
-#ifdef Py_InitModule4
+#ifdef Py_TRACE_REFS
    { "Py_InitModule4TraceRefs", (PYTHON_PROC *)&M_Py_InitModule4 },
 #else
    { "Py_InitModule4", (PYTHON_PROC *)&M_Py_InitModule4 },
