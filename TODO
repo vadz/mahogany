@@ -28,7 +28,7 @@ VZ:
 
 - upgrade.cpp causes three problems that I hope you can understand:
   - p2->DeleteGroup("Folders") triggers an assert deep inside the
-    wxFileConfig/wxDynArray code. The group "Folders" exists, the path 
+    wxFileConfig/wxDynArray code. The group "Folders" exists, the path
     is set to M/Profiles before deleting it, so it's apparently a
     wxFileConfig bug. (line 165 in upgrade.cpp)
 
@@ -37,20 +37,21 @@ VZ:
     before calling wxConfig::GetXXXGroup() but, obviously, always to the
     same path, not causing any change.
     This seems to be a bug in wxFileConfig, or at least, some
-    undocumented behaviour. 
+    undocumented behaviour.
     I worked around it in CopyEntries(), building a list of all groups
     first and then traversing them afterwards. Not important for M anymore.
 
 - Initially selected folder is not highlighted in treectrl.
 
-- How can I make wxLogXXx message have appear in the order they were
+- How can I make wxLogXXX message have appear in the order they were
   generated?
+  + VZ: derive your own log target :-) But I think the default order
+        is more sensible
 
 - wxComboBox textctrl allows editing!
 - MTempFileName is broken: all files remain in /tmp!!!
 - .mailcap should override /etc/mailcap, not other way round
-- MimeManager::ReadXXX should have returncode and not print error
-  message
+- help button and more fields for folder creation dialog
 
 - MailFolder now reads the "RetrievalLimit" config value and will not
   retrieve more messages than that from server. Need support for it and
@@ -60,18 +61,17 @@ VZ:
   {xxxx/yyy}newsgroup
   After accessing them, the next program start produces an error
   because there is more than one entry for their column sizes in the
-  config file. 
+  config file.
   I am now using static ProfileBase::FilterProfileName() to avoid that.
   Not ideal, though.
-
-- Folder config/create dialog:
-  - anonymous access
 
 - If any top level window is open (messageview/composeview), the
   application will not exit. Happened after you changed the exit
   behaviour, has been a bug for months.
+    VZ: can't reproduce this
 
 - closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
+    VZ: can't reproduce this
 
 ******* Priorities for KB: ******************************
 
@@ -114,20 +114,47 @@ for release:
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 
-- do we really need to scan /var/lib/news/active?
+<<<<<<< TODO
+<<<<<<< TODO
+TODO:
+- support for local news spool
+  (Waiting for VZ to support MF_NEWS) then implement /service=news
+  DONE?
 
+TESTING!!
+=======
+>>>>>>> 1.178
+
+<<<<<<< TODO
+- do we really need to scan /var/lib/news/active?
+- more configurability for news
+=======
+- do wxImage changes affect list of available handlers, etc?
+- printer settings seem to have no effect
+=======
+>>>>>>> 1.181
+- do we really need to scan /var/lib/news/active?
+>>>>>>> 1.178
+
+<<<<<<< TODO
+<<<<<<< TODO
+- gtk 1.2 support
+=======
+=======
 doc: add note about news active file
+>>>>>>> 1.181
 
 after release:
 
 - more configurability for news
+>>>>>>> 1.178
 - add auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
 - copying message to non-existing folder gives error message but works
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message. (REALLY REQUIRED?)
-  Is already like this, but fetch_overview() does an extra fetch, even 
+  Is already like this, but fetch_overview() does an extra fetch, even
   in mtest.
 STRANGE....
 
@@ -179,7 +206,7 @@ STRANGE....
 
 - support for local news spool
 
-- Let Iconmanager chose handler by format! JPEG crashes program if fed 
+- Let Iconmanager chose handler by format! JPEG crashes program if fed
   the wrong filetype! Handler can return extension, caller should do
   the same.
 - make message view use the new font settings.
@@ -212,7 +239,7 @@ STRANGE....
 - delete temporary files (esp. from image conversion!)
   - easy: add support for email-to-fax gateway at www.tpc.int and
     their coverpage
- 
+
  - Memory leaks whenever using wxMessageView (there are some from
   cclient) still there?
 
@@ -243,7 +270,7 @@ STRANGE....
   - log window occasionally doesn't layout menu correctly (here too, no
     idea) wxGTK bug
 
-  - replace the ugly "Insert File" icon with one looking more like the 
+  - replace the ugly "Insert File" icon with one looking more like the
     other icons
   - folder tree control should (configurable on a per-folder basis)
     highlight and count the number of new messages
@@ -254,11 +281,11 @@ STRANGE....
 
 
 - ADB:
-  - ADB lookups take to long, delay in switching between messages, add a 
+  - ADB lookups take to long, delay in switching between messages, add a
     "message/collect address" menu and keyboard binding
   + make AdbEdit auto-generate a formatted name from first/family-name
-    and prefix/title. 
-  + for names without entries, use the same method for name generation 
+    and prefix/title.
+  + for names without entries, use the same method for name generation
     as ProvBBDB for consistency
   + add "add current address to ADB" to compose view
   + should be updated when new entries are created (can't be deleted from
@@ -273,7 +300,7 @@ STRANGE....
   - copying between address books and groups
   - BBDB: sort entries by surname
   - add ADB support for $HOME/.mailrc
-    ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...") 
+    ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...")
 
 
 (Windows)
@@ -281,7 +308,6 @@ STRANGE....
  - options dlg layout looks ugly (radiobox is way too big)
  - in folder create/properties dialog there is missing UpdateUI() right
    after creation - add it somewhere
- - kbd doesn't work in the options dialog
  - lock file checking for INBOX:
    + it does locking under Windows too, but the lock file names are different
      Testing for FOLDER.lock* now, is that fine?
@@ -475,7 +501,7 @@ classes in the hierarchy.
 *********************************************************************
  - wxLayout:
    + clicking before begin of line (wrongly) gives assert
-  
+
 
 *********************************************************************
 *** Fixed and tested:
@@ -506,7 +532,7 @@ classes in the hierarchy.
    because the count has not yet been updated.
  - make Message use refcount
  - add message/move to folder
- - copying to other folder only writes headers, no content 
+ - copying to other folder only writes headers, no content
  - allow '=' in urls and don't allow ' '
  - help fails to find copyright
  - .mo files should be found in M_BASEDIR/locale
@@ -578,7 +604,7 @@ classes in the hierarchy.
    folder caused crash
  - when calling netscape to view URL, M locked up (after writing
    "done"), top showed two M processes and after a while it terminated
-   with an IO trap 
+   with an IO trap
  - wxlwindow: MIME menu appears at wrong position again
  - make Message class use reference counting !
  - new mail dialog:
@@ -597,7 +623,7 @@ classes in the hierarchy.
  - POP3: loading all message contents(why?) and twice(why?)
  wxFolderView:
  - clear MessageView, for this:
- - modify wxMessageView to only temporarily use Profile when needed, so 
+ - modify wxMessageView to only temporarily use Profile when needed, so
    it doesn't stay with the old folderview profile
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).  SEEMS GONE!?
@@ -612,7 +638,7 @@ classes in the hierarchy.
    re-load as they are illegal characters in wxConfig entry names
  + config entry names should allow  ',' (needed for mail names which
    might contain it, just received one from "john doe, archeology"),
-   the same for apostrophes  
+   the same for apostrophes
 DONE:
 
 Add choice of intermediary image format:
