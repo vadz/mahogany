@@ -57,6 +57,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_IMAP_BROKEN_LIST;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -448,12 +449,35 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
 
       wxBusyCursor bc;
 
+      // a workaround for some my broken IMAP server (imap.free.fr): doing
+      // 'LIST "" Foo' shows internal subdirs not exposed via IMAP under Foo
+      // (it uses maildir, so it shows cur, new and tmp subdirs, for example)
+      // but 'LIST "" /Foo' works as expected!
+      //
+      // NB: this also forces us to put everything in the pattern instead of
+      //     using the reference which would have been more natural
+      wxString pattern;
+
+      Profile_obj profile(m_folder->GetProfile());
+      if ( READ_CONFIG(profile, MP_IMAP_BROKEN_LIST) )
+      {
+         pattern = m_chDelimiter;
+      }
+
+      pattern += reference;
+      if ( !pattern.empty() && !reference.empty() )
+      {
+         pattern += m_chDelimiter;
+      }
+
+      pattern += '%';
+
       // now OnNewFolder() and OnNoMoreFolders() will be called
       (void)m_mailFolder->ListFolders
                           (
-                             "%",         // everything at this tree level
+                             pattern,     // everything at this tree level
                              FALSE,       // subscribed only?
-                             reference,   // path relative to the folder
+                             "",          // starting path
                              this         // data to pass to the callback
                           );
 
