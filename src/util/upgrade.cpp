@@ -443,7 +443,7 @@ Upgrade(const String& fromVersion)
 
       case Version_Unknown:
          wxLogError(_("The previously installed version of M was probably "
-                      "newer than this one. Can not upgrade."));
+                      "newer than this one. Cannot upgrade."));
          return FALSE;
    }
 

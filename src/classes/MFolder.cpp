@@ -238,7 +238,7 @@ MFolder *MFolder::Create(const String& fullname, Type type)
    MFolder *folder = Get(fullname);
    if ( folder )
    {
-      wxLogError(_("Can not create a folder '%s' which already exists."),
+      wxLogError(_("Cannot create a folder '%s' which already exists."),
                  fullname.c_str());
 
       folder->DecRef();
@@ -331,7 +331,7 @@ bool MFolderFromProfile::Create(const String& fullname)
    //PFIXME
    if ( GroupExists(profile, fullname) )
    {
-      wxLogError(_("Can not create profile folder '%s' because a group "
+      wxLogError(_("Cannot create profile folder '%s' because a group "
                    "with this name already exists."), fullname.c_str());
 
       return FALSE;

@@ -647,8 +647,8 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
    else {
       return wxGetSingleChoiceIndex
              (
-               wxString("Mahogany : ")+_("Please choose an entry:"),
-               _("Expansion options"),
+               _("Please choose an entry:"),
+               wxString("Mahogany : ")+_("Expansion options"),
                nEntryCount,
                &aChoices[0],
                (wxWindow *)parent,

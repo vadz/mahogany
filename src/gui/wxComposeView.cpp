@@ -965,7 +965,7 @@ wxComposeView::OnMenuCommand(int id)
                MTempFileName tmpFileName;
                if ( !tmpFileName.IsOk() )
                {
-                  wxLogSysError(_("Can not create temporary file"));
+                  wxLogSysError(_("Cannot create temporary file"));
 
                   break;
                }
@@ -1492,7 +1492,7 @@ wxComposeView::InsertFileAsText(const String& filename,
 
    if ( !ok )
    {
-      wxLogError(_("Can not insert text file into the message."));
+      wxLogError(_("Cannot insert text file into the message."));
 
       if ( text )
          delete [] text;

@@ -744,7 +744,7 @@ void wxFolderTreeImpl::OnDoubleClick()
 {
    if ( IsRootChosen() )
    {
-      wxLogStatus(GetFrame(this), _("Can not open this folder."));
+      wxLogStatus(GetFrame(this), _("Cannot open this folder."));
 
       return;
    }
