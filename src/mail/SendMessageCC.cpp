@@ -163,10 +163,10 @@ SendMessageCC::SetupAddresses(void)
 
    String mailbox, mailhost;
 
-   mailbox = Message::GetNameFromAddress(m_FromAddress);
-   mailhost = Message::GetEMailFromAddress(m_FromAddress);
-   if(! mailhost.Length()) mailhost = wxGetFullHostName();
-   
+   String email = Message::GetEMailFromAddress(m_FromAddress);
+   mailbox = strutil_before(email, '@');
+   mailhost = strutil_after(email,'@');
+
    m_Envelope->from->personal = CPYSTR(m_FromPersonal);
    m_Envelope->from->mailbox = CPYSTR(mailbox);
    m_Envelope->from->host = CPYSTR(mailhost);
