@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat May 30 17:27:36 1998
+#This file was created by <karsten> Thu Aug  6 12:47:32 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -70,15 +70,20 @@ M is intended to be a powerful mail and news client.
 it should have an easy to use graphical user interface 
 \layout Itemize
 
-it should be powerful, being able to replace awkward tools such as procmail,
- thus it must have a built in scripting language 
+it should be as powerful and extensible as possible, being able to replace
+ awkward tools such as procmail, thus it must have a built in scripting
+ language 
 \layout Itemize
 
 it should have full support for a wide range of standards, including full
- MIME support 
+ and intuitive MIME support 
 \layout Itemize
 
-it should run on a wide variety of systems </enum>
+it should interact with other programs intuitively, sending MIME mails should
+ be as easy as dropping files from a file manager in the message window
+\layout Itemize
+
+it should run on a wide variety of systems 
 \layout Section
 
 Compilation notes
@@ -90,7 +95,11 @@ Operating systems specific
 Linux
 \layout Standard
 
-If compiling with a non-default compiler like egcs, make sure that 
+If compiling with a non-default compiler like 
+\family typewriter 
+egcs
+\family default 
+, make sure that 
 \family typewriter 
 /usr/include
 \family default 
@@ -99,6 +108,23 @@ If compiling with a non-default compiler like egcs, make sure that
 /usr/lib
 \family default 
  be explicitly listed.
+ M has been compiled with 
+\family typewriter 
+egcs
+\family default 
+ and 
+\family typewriter 
+gcc-2.8.x
+\family default 
+ on both, 
+\family typewriter 
+libc5
+\family default 
+ and 
+\family typewriter 
+glibc2
+\family default 
+ systems.
 \layout Subsubsection
 
 Solaris/SunOS
@@ -121,39 +147,20 @@ Microsoft Windows
 
 M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
  Visual C++.
-\layout Standard
-
-
-\emph on 
-FIXME: VADIM?
 \layout Subsection
 
 Other issues/libraries
 \layout Subsubsection
 
-STL 
-\layout Standard
-
-M uses the STL, so you need a sufficiently recent compiler, i.e.
- 
-\family typewriter 
-egcs 
-\family default 
-or 
-\family typewriter 
-gcc-2.8
-\family default 
-.
-\layout Subsubsection
-
 C-client library
 \layout Standard
 
-The 
+A copy of the
 \family typewriter 
-c-client library
+ c-client library
 \family default 
- is required and is available from
+ is required and is included with the M sources.
+ It is available separately from
 \latex latex 
 
 \backslash 
@@ -168,6 +175,13 @@ ftp://ftp.cac.washington.edu/imap/imap.tar.Z
 .
  Before compiling it with M, you need to patch it.
  
+\layout Standard
+
+The following information only applies if you use a separate 
+\family typewriter 
+c-client
+\family default 
+ library source:
 \layout Standard
 
 Unpack the archive in the main M directory, then change into the IMAP directory
@@ -521,16 +535,19 @@ List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
 multicol4
-5 5 0 0 -1 -1 -1 -1
+8 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
 1 0 0 0
 1 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
 1 1 0 0
 2 1 0 
 8 1 0 
-8 1 0 
-8 1 0 
+2 1 0 
+2 1 0 
 2 1 1 
 0 8 1 0 0 0 0
 0 8 1 0 0 0 0
@@ -538,6 +555,21 @@ multicol4
 0 8 1 0 0 0 0
 0 2 1 0 0 0 0
 0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 0 8 1 0 0 0 0
 0 8 1 0 0 0 0
 0 8 1 0 0 0 0
@@ -572,7 +604,7 @@ FolderOpenHook
 \newline 
 MailFolder
 \newline 
--
+
 \newline 
 void
 \newline 
@@ -582,27 +614,57 @@ FolderUpdateHook
 \newline 
 MailFolder
 \newline 
--
+
 \newline 
 void
 \newline 
 Called after a folder has been updated.
 \newline 
-FolderDeleteMessageHook
+FolderSetMessageFlag
 \newline 
 MailFolder
 \newline 
-(long) index of message to be deleted
+(long) index of message
 \newline 
-1 if delete is ok,0 otherwise
+1 if changing flags is ok,0 otherwise
 \newline 
-Called before deleting a mesage.
+Called before changing flags for a mesage.
+\newline 
+
+\newline 
+
+\newline 
+(string)name of flag
+\newline 
+
+\newline 
+
+\newline 
+FolderClearMessageFlag
+\newline 
+MailFolder
+\newline 
+(long) index of message
+\newline 
+1 if changing flags is ok,0 otherwise
+\newline 
+Called before changing flags for a mesage.
+\newline 
+
+\newline 
+
+\newline 
+(string) name of flag
+\newline 
+
+\newline 
+
 \newline 
 FolderExpungeHook
 \newline 
 MailFolder
 \newline 
--
+
 \newline 
 1 to expunge, 0 to abort
 \newline 
@@ -614,40 +676,26 @@ Further Information
 
 You can download the latest version of M from 
 \family typewriter 
-\latex latex 
-
-\backslash 
-
-\backslash 
-
-\latex default 
 http://Ballueder.home.ml.org/M/
 \family default 
  
 \layout Itemize
 
 You can also get up-to-date information on M from the M WWW Page:
-\latex latex 
-
-\backslash 
-
-\backslash 
-
 \family typewriter 
-\latex default 
  http://Ballueder.home.ml.org/M/
 \layout Itemize
 
 wxWindows is available from
 \latex latex 
  
-\backslash 
-
-\backslash 
-
 \family typewriter 
 \latex default 
 http://web.ukonline.co.uk/julian.smart/
+\layout Itemize
+
+The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~
+wxxt/
 \layout Section
 
 FAQ

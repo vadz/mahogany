@@ -67,7 +67,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    }
    
    long keyCode = event.KeyCode();
-
+   wxPoint p;
+   
    switch(event.KeyCode())
    {
       case WXK_RIGHT:
@@ -87,6 +88,16 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       break;
    case WXK_NEXT:
       m_llist.MoveCursor(0,20);
+      break;
+   case WXK_HOME:
+      p = m_llist.GetCursor();
+      p.x = 0;
+      m_llist.SetCursor(p);
+      break;
+   case WXK_END:
+      p = m_llist.GetCursor();
+      p.x = m_llist.GetLineLength(m_llist.FindCurrentObject(NULL));
+      m_llist.SetCursor(p);
       break;
    case WXK_DELETE :
       m_llist.Delete(1);

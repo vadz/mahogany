@@ -11,11 +11,11 @@
 #pragma implementation "MessageCC.h"
 #endif
 
-#include  "Mpch.h"
-#include "Mcommon.h"
+#include   "Mpch.h"
+#include   "Mcommon.h"
 
-#include  "Profile.h"
-#include  "FolderView.h"
+#include   "Profile.h"
+#include   "FolderView.h"
 
 #include "Mdefaults.h"
 
@@ -38,6 +38,10 @@ extern "C"
 #include   <nntp.h>
 }
 #endif
+
+/// temporary buffer for storing message headers, be generous:
+#define   HEADERBUFFERSIZE 100*1024
+
 
 MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
                      unsigned long iuid)
@@ -245,6 +249,7 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
    String   mimeId, type, desc, parms, id;
    MessageParameter *parameter;
    MessageParameterList plist(false); // temporary, doesn't own entries
+   MessageParameterList dispPlist(false); // temporary, doesn't own entries
    MessageParameterList::iterator plist_iterator;
    
    /* multipart doesn't have a row to itself */
@@ -289,6 +294,20 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
          while ((par = par->next) != NULL);
          line  += parms;
       }
+      if ((par = body->disposition.parameter) != NULL)
+      {
+         do
+         {
+            if(write)
+            {
+               parameter = new MessageParameter();
+               parameter->name = par->attribute;
+               parameter->value = par->value;
+               dispPlist.push_back(parameter);
+            }
+         }
+         while ((par = par->next) != NULL);
+      }
       if (body->id)
       {
          id = body->id;
@@ -321,6 +340,10 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
          for(plist_iterator = plist.begin(); plist_iterator !=
                 plist.end(); plist_iterator++)
             pi.parameterList.push_back(*plist_iterator);
+         pi.dispositionType = body->disposition.type;
+         for(plist_iterator = dispPlist.begin(); plist_iterator !=
+                dispPlist.end(); plist_iterator++)
+            pi.dispositionParameterList.push_back(*plist_iterator);
       }
       (*count)++;
 
@@ -429,16 +452,24 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
 //   return partContentPtr;
 }
 
-MessageParameterList *
-MessageCC::GetParameters(int n = -1)
+MessageParameterList const &
+MessageCC::GetParameters(int n)
 {
    DecodeMIME();
-   MessageParameterList *l = new MessageParameterList();
-   MessageParameter *p;
 
-   
+   return partInfos[n].parameterList;
 }
 
+
+MessageParameterList const &
+MessageCC::GetDisposition(int n = -1,String *disptype)
+{
+   DecodeMIME();
+
+   if(disptype)
+      *disptype = partInfos[n].dispositionType;
+   return partInfos[n].dispositionParameterList;
+}
 
 int
 MessageCC::GetPartType(int n) 
@@ -521,5 +552,23 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
    
    cerr << str << endl;
    cerr << "Len: " << fulllen << endl;
+}
+
+
+static long write_output(void *stream, char *string)
+{
+   String *o = (String *)stream;
+   *o << string;
+   return T;
+}
+
+void
+MessageCC::WriteString(String &str) const
+{
+   char *buffer = new char[HEADERBUFFERSIZE];
+
+   if(! rfc822_output(buffer, envelope, body, write_output,&str,NIL))
+      ERRORMESSAGE (("[Can't write message to string.]"));
+   delete [] buffer;
 }
 

@@ -50,13 +50,10 @@ extern "C"
 
 #define  CPYSTR(x)   cpystr(x)
 
-#ifdef   OS_WIN
-#  define   TEXT_DATA_CAST(x)    ((unsigned char *)x)
-#else
-#  define   TEXT_DATA_CAST(x)    ((char *)x)
-#endif
-
 #define   StringCast(iterator)   ((String *)*i)
+
+/// temporary buffer for storing message headers, be generous:
+#define   HEADERBUFFERSIZE 100*1024
 
 SendMessageCC::SendMessageCC(ProfileBase *iprof)
 {
@@ -76,6 +73,8 @@ SendMessageCC::Create(ProfileBase *iprof)
      
    profile = iprof;
 
+   m_headerNames = NULL;
+   m_headerValues = NULL;
 }
       
 void
@@ -125,14 +124,17 @@ SendMessageCC::Create(ProfileBase *iprof,
 
 void
 SendMessageCC::AddPart(int type, const char *buf, size_t len,
-                       String const &subtype)
+                       String const &subtype,
+                       String const &disposition,
+                       MessageParameterList const *dlist,
+                       MessageParameterList const *plist)
 {
    BODY
       *bdy;
-   char
+   unsigned char
       *data;
 
-   data = (char *) fs_get (len);
+   data = (unsigned char *) fs_get (len);
    memcpy(data,buf,len);
 
    bdy = &(nextpart->body);
@@ -144,7 +146,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = TEXT_DATA_CAST(data);
+      bdy->contents.text.data = data;
       bdy->contents.text.size = len;
       bdy->encoding = ENC8BIT;
       break;
@@ -152,7 +154,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = TEXT_DATA_CAST(data);
+      bdy->contents.text.data = data;
       bdy->contents.text.size = len;
       bdy->encoding = ENCBINARY;
       break;
@@ -161,51 +163,56 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
    lastpart = nextpart;
    nextpart = nextpart->next;
    nextpart->next = NULL;
-}
 
+   if(plist)
+   {
+      MessageParameterList::iterator i;
+      PARAMETER *lastpar = NULL, *par;
+      
+      for(i=plist->begin(); i != plist->end(); i++)
+      {
+         par = mail_newbody_parameter();
+         par->attribute = strutil_strdup((*i)->name);
+         par->value     = strutil_strdup((*i)->value);
+         par->next      = NULL;
+         if(lastpar)
+            lastpar->next = par;
+         else
+            bdy->parameter = par;
+      }
+   }
+   bdy->disposition.type = strutil_strdup(disposition);
+   bdy->parameter = NULL;
+   if(dlist)
+   {
+      MessageParameterList::iterator i;
+      PARAMETER *lastpar = NULL, *par;
+      
+      for(i=dlist->begin(); i != dlist->end(); i++)
+      {
+         par = mail_newbody_parameter();
+         par->attribute = strutil_strdup((*i)->name);
+         par->value     = strutil_strdup((*i)->value);
+         par->next      = NULL;
+         if(lastpar)
+            lastpar->next = par;
+         else
+            bdy->disposition.parameter = par;
+      }
+   }
+}
 void
 SendMessageCC::Send(void)
 {
+   Build();
+
    SENDSTREAM
       *stream = NIL;
-   int
-      j;
-   char
-      *headers,
-      tmpbuf[MAILTMPLEN];
    const char
-      *hostlist [2],
-      **headerNames,
-      **headerValues;
-   kbStringList
-      headerList;
-   kbStringList::iterator
-      i;
-   
-   headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));
-   strutil_tokenise(headers,";",headerList);
+      *hostlist[2];
+   char
+      tmpbuf[MAILTMPLEN];
 
-   headerNames = new const char*[headerList.size()+1];
-   headerValues = new const char*[headerList.size()+1];
-   for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++)
-   {
-      headerNames[j] = strutil_strdup(StringCast(i)->c_str());
-      headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
-   }
-   //always add mailer header:
-   headerNames[j] = strutil_strdup("X-Mailer:");
-   headerValues[j++] = strutil_strdup(String("M, ")+M_RELEASE_STRING);
-   headerNames[j] = NULL;
-   headerValues[j] = NULL;
-   rfc822_setextraheaders(headerNames,headerValues);
-   
-   mail_free_body_part(&lastpart->next);
-   lastpart->next = NULL;
-   rfc822_date (tmpbuf);
-   env->date = (char *) fs_get (1+strlen (tmpbuf));
-   strcpy (env->date,tmpbuf);
-
-   
    hostlist[0] = profile->readEntry(MP_SMTPHOST, MP_SMTPHOST_D);
    hostlist[1] = NIL;
    if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
@@ -224,18 +231,91 @@ SendMessageCC::Send(void)
    else
       ERRORMESSAGE (("[Can't open connection to any server]"));
 
-   for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++) {
-      // @ const cast
-      delete [] (char *)headerNames[j];
-   }
+}
 
-   delete [] headerNames;
-   delete [] headerValues;
+void
+SendMessageCC::Build(void)
+{
+   int
+      j;
+   char
+      tmpbuf[MAILTMPLEN];
+   char
+      *headers;
+   kbStringList::iterator
+      i;
+
+   if(m_headerNames != NULL) // message was already build
+      return;
+   
+   headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));
+   strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
+   
+   m_headerNames = new const char*[m_headerList.size()+1];
+   m_headerValues = new const char*[m_headerList.size()+1];
+   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, j++)
+   {
+      m_headerNames[j] = strutil_strdup(StringCast(i)->c_str());
+      m_headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
+   }
+   //always add mailer header:
+   m_headerNames[j] = strutil_strdup("X-Mailer:");
+   m_headerValues[j++] = strutil_strdup(String("M, ")+M_RELEASE_STRING);
+   m_headerNames[j] = NULL;
+   m_headerValues[j] = NULL;
+   rfc822_setextraheaders(m_headerNames,m_headerValues);
+   
+   mail_free_body_part(&lastpart->next);
+   lastpart->next = NULL;
+   rfc822_date (tmpbuf);
+   env->date = (char *) fs_get (1+strlen (tmpbuf));
+   strcpy (env->date,tmpbuf);
+}
+
+static long write_output(void *stream, char *string)
+{
+   ostream *o = (ostream *)stream;
+   *o << string;
+   if(o->fail())
+      return NIL;
+   else
+      return T;
+}
+
+/** Writes the message to a file
+    @param filename file where to write to
+    */
+void
+SendMessageCC::Write(String const &filename, bool append)
+{
+   Build();
+
+   // buffer for message header, be generous:
+   char *buffer = new char[HEADERBUFFERSIZE];
+   ofstream  *ostr = new ofstream(filename.c_str(), ios::out | (append ? 0 : ios::trunc));
+      
+   if(! rfc822_output(buffer, env, body, write_output,ostr,NIL))
+      ERRORMESSAGE (("[Can't write message to file %s]",
+                     filename.c_str()));
+   delete [] buffer;
+   delete ostr;
 }
 
 SendMessageCC::~SendMessageCC()
 {
    mail_free_envelope (&env);
    mail_free_body (&body);
+
+   int j;
+   kbStringList::iterator i;
+   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++,
+          j++)
+   {
+      // @ const cast
+      delete [] (char *)m_headerNames[j];
+   }
+
+   if(m_headerNames)  delete [] m_headerNames;
+   if(m_headerValues) delete [] m_headerValues;
 }

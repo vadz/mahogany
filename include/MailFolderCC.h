@@ -153,6 +153,11 @@ public:
    */
    void SetMessageFlag(unsigned long index, int flag, bool set = true);
 
+   /** Appends the message to this folder.
+       @param msg the message to append
+   */
+   void AppendMessage(Message const &msg);
+
    /** Delete a message.
        @param index the sequence number
    */
@@ -340,48 +345,10 @@ public:
        */
    static void mm_fatal(char *str);
 
-   void AppendMessage(const char *msg);
    //@}
    
 public:
    DEBUG_DEF
-};
-
-/* FIXME: are these actully used ???? */
-
-class MailFolderPopCC : public MailFolderCC
-{
-private:
-   String   popHost;
-   String   popLogin;
-   String   popPassword;
-   
-protected:
-   MailFolderPopCC(String const & name);
-   void Create(String const &name);
-   bool Open(void);
-   ~MailFolderPopCC() {};
-};
-
-class MailFolderIMAPCC : public MailFolder
-{
-protected:
-   MailFolderIMAPCC();
-   ~MailFolderIMAPCC() {};
-};
-
-class MailFolderFileCC : public MailFolder
-{
-protected:
-   MailFolderFileCC();
-   ~MailFolderFileCC() {};
-};
-
-class MailFolderINBOXCC : public MailFolder
-{
-protected:
-   MailFolderINBOXCC();
-   ~MailFolderINBOXCC() {};
 };
 
 #endif

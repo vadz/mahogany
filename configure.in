@@ -151,6 +151,8 @@ DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DEBUG=1
 DEFAULT_USE_DOCXX=0
 DEFAULT_USE_KDOC=1
+DEFAULT_USE_SHADOW=1
+DEFAULT_USE_OLDLIBC=0
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
@@ -278,13 +280,20 @@ AC_OVERRIDES(debug,debug,
 USE_DEBUG)
 
 AC_OVERRIDES(docxx,docxx,
---with-docxx               use doc++,
+--with-docxx              use doc++,
 USE_DOCXX)
 
 AC_OVERRIDES(kdoc,kdoc,
 --with-kdoc               use kdoc,
 USE_KDOC)
 
+AC_OVERRIDES(shadow,shadow,
+--with-shadow             use shadow passwd file,
+USE_SHADOW)
+
+AC_OVERRIDES(libc5,libc5,
+--with-libc5              compile for old libc5 on Linux,
+USE_OLDLIBC)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
@@ -674,26 +683,36 @@ dnl supported OSTYPE values are linux* and solaris* and freebsd*
 AC_MSG_CHECKING(for c-client library OS type)
 CCOSTYPE=
 case "${OSTYPE}" in
-linux*)
+linux*libc5*)
   CCOSTYPE=lnx
-  AC_MSG_RESULT(lnx)
+  if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
+  if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=sl5 ; fi
+  ;;
+linux*)
+  CCOSTYPE=slx
+  if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
+  if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=slx ; fi
+  if test "$USE_OLDLIBC" = "1"
+  then
+    CCOSTYPE=lnx
+    if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
+    if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=sl5 ; fi
+  fi
   ;;
 solaris*)
   if test "$GCC" = "yes"
   then
     CCOSTYPE=gso
-    AC_MSG_RESULT(gso)
   else
     CCOSTYPE=sol
-    AC_MSG_RESULT(sol)
   fi
   ;;
 freebsd*)
   CCOSTYPE=bsf
-  AC_MSG_RESULT(bsf)
   ;;
 esac
 
+AC_MSG_RESULT($CCOSTYPE)
 if test "x$CCOSTYPE" = "x" ; then
   echo "Cannot determine OS type for c-client library. Supported are linux, solaris, freebsd."
   exit 1

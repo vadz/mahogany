@@ -121,7 +121,12 @@ public:
    */
    virtual void SetMessageFlag(unsigned long index, int flag, bool set =
                 true) = 0;
-   
+
+   /** Appends the message to this folder.
+       @param msg the message to append
+   */
+   virtual void AppendMessage(Message const &msg) = 0;
+
    /** Expunge messages.
      */
    virtual void ExpungeMessages(void) = 0;
@@ -136,32 +141,5 @@ public:
       { return "MailFolder"; }
    
    CB_DECLARE_CLASS(MailFolder, CommonBase);
-};
-
-class MailFolderPOP : public MailFolder
-{
-public:
-   virtual void SetParameters(String const &host,
-		      String const &login,
-		      String const &password) = 0; 
-   ~MailFolderPOP() {};
-};
-
-class MailFolderIMAP : public MailFolder
-{
-public:
-   ~MailFolderIMAP() {};
-};
-
-class MailFolderFile : public MailFolder
-{
-public:
-   ~MailFolderFile() {};
-};
-
-class MailFolderINBOX : public MailFolder
-{
-public:
-   ~MailFolderINBOX() {};
 };
 #endif

@@ -1,7 +1,7 @@
 # Makefile for src/mail directory
 
 CWD = mail 
-SRC = MailFolder.cpp MailFolderCC.cpp MessageCC.cpp SendMessageCC.cpp
+SRC = MailFolder.cpp Message.cpp MailFolderCC.cpp MessageCC.cpp SendMessageCC.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 OBJ = $(SRC:.cpp=.o)

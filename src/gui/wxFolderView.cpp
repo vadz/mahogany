@@ -22,6 +22,7 @@
 #  include "MimeTypes.h"
 #  include "Profile.h"
 #  include "gui/wxMApp.h"
+#  include "MDialogs.h"
 #endif
 
 #include <XFace.h>
@@ -97,7 +98,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
 
-   for(item = 1; item <= LCFIX GetItemCount(); item++)
+   for(item = 0; item < LCFIX GetItemCount(); item++)
       if(LCFIX GetItemState(item,wxLIST_STATE_SELECTED))
          selections.Add(item);
    return selections.Count();
@@ -142,7 +143,7 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &date,
                            String const &size)
 {
-   if(index <= GetItemCount())
+   if(index < GetItemCount())
    {
       DeleteItem(index);
       InsertItem(index, status); // column 0, set to something
@@ -276,9 +277,13 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       GetSelections(selections);
       OpenMessages(selections);
       break;
-   case WXMENU_MSG_SAVE:
+   case WXMENU_MSG_SAVE_TO_FOLDER:
       GetSelections(selections);
-      SaveMessages(selections);
+      SaveMessagesToFolder(selections);
+      break;
+   case WXMENU_MSG_SAVE_TO_FILE:
+      GetSelections(selections);
+      SaveMessagesToFile(selections);
       break;
    case WXMENU_MSG_REPLY:
       GetSelections(selections);
@@ -287,6 +292,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
       ForwardMessages(selections);
+      break;
+   case WXMENU_MSG_UNDELETE:
+      GetSelections(selections);
+      UnDeleteMessages(selections);
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
@@ -341,11 +350,37 @@ wxFolderView::DeleteMessages(const wxArrayInt& selections)
 }
 
 void
-wxFolderView::SaveMessages(const wxArrayInt& selections)
+wxFolderView::UnDeleteMessages(const wxArrayInt& selections)
+{
+   int n = selections.Count();
+   int i;
+   for(i = 0; i < n; i++)
+      mailFolder->UnDeleteMessage(selections[i]+1);
+   Update();
+}
+
+void
+wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderName)
 {
    int i;
-   String str;
 
+   MailFolderCC   *mf;
+   
+   if(strutil_isempty(folderName))
+      return;
+   
+   int n = selections.Count();
+   for(i = 0; i < n; i++)
+   {
+      mf = MailFolderCC::OpenFolder(Str(folderName));
+      mf->AppendMessage(*(mailFolder->GetMessage(selections[i]+1)));
+      mf->Close();
+   }
+}
+
+void
+wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
+{
 #  ifdef  USE_WXWINDOWS2
    wxString 
 #  else
@@ -353,20 +388,18 @@ wxFolderView::SaveMessages(const wxArrayInt& selections)
 #  endif
       folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
                                      _("Save Message"),"",parent);
-   MailFolderCC   *mf;
-   
-   if(! folderName || strlen(folderName) == 0)
-      return;
-   
-   int n = selections.Count();
-   for(i = 0; i < n; i++)
-   {
-      str = "";
-      mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      mf = MailFolderCC::OpenFolder(Str(folderName));
-      mf->AppendMessage(str.c_str());
-      mf->Close();
-   }
+   SaveMessages(selections,folderName);
+}
+
+void
+wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
+{
+   String
+      filename =
+      MDialog_FileRequester(NULL,parent,NULL,NULL,NULL,NULL,true,mailFolder->GetProfile());
+   ofstream out(filename,ios::out|ios::trunc|ios::create);
+   out.close(); // now we have truncated the file
+   SaveMessages(selections,filename);
 }
 
 void

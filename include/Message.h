@@ -118,7 +118,23 @@ public:
        @param n part number, if -1, for the top level.
        @return list of parameters, must be freed by caller.
    */
-   virtual MessageParameterList *GetParameters(int n = -1) = 0;
+   virtual MessageParameterList const & GetParameters(int n = -1) = 0;
+   
+   /** Get the list of disposition parameters for a given part.
+       @param n part number, if -1, for the top level.
+       @param disptype string where to store disposition type
+       @return list of parameters, must be freed by caller.
+   */
+   virtual MessageParameterList const & GetDisposition(int n = -1, String *disptype = NULL) = 0;
+   /** Get a parameter value from the list.
+       @param list a MessageParameterList
+       @param parameter parameter to look up
+       @param value set to new value if found
+       @return true if found
+   */
+   bool ExpandParameter(MessageParameterList const & list,
+                        String const &parameter,
+                        String *value);
    
    /** Query the MimeType of the content.
        @param  n part number
@@ -137,6 +153,11 @@ public:
        @return MIME/IMAP4 section specifier #.#.#.#
    */
    virtual String const & GetPartSpec(int n = 0) = 0;
+
+   /** Append the message to a String.
+       @param str the string to write message text to
+   */
+   virtual void WriteString(String &str) const = 0;
 
    /** Append the message to a String.
        @param str the string to write message text to

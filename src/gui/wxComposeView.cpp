@@ -291,8 +291,9 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
          buffer = new char [size+1];
          if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
          {
+            m_LayoutWindow->GetLayoutList().LineBreak();
             m_LayoutWindow->GetLayoutList().Insert("--");
-            m_LayoutWindow->GetLayoutList().LineBreak();;
+            m_LayoutWindow->GetLayoutList().LineBreak();
          }
          istr.seekg(0,ios::beg);
          istr.read(buffer, size);
@@ -549,9 +550,14 @@ wxComposeView::Send(void)
                   istr.seekg(0,ios::beg);
                   istr.read(buffer, size);
 
+                  MessageParameterList dlist;
+                  MessageParameter *p = new MessageParameter;
+                  p->name = "FILENAME"; p->value=wxFileNameFromPath(mc->m_FileName);
+                  dlist.push_back(p);
                   if(! istr.fail())
                      sm.AddPart(mc->m_NumericMimeType, buffer, size,
-                                strutil_after(mc->m_MimeType,'/')  //subtype
+                                strutil_after(mc->m_MimeType,'/'), //subtype
+                                "INLINE",&dlist,NULL
                         );
                   else
                      SYSERRMESSAGE((_("Cannot read file."),this));
@@ -566,16 +572,35 @@ wxComposeView::Send(void)
                }
                break;
             case MimeContent::MIMECONTENT_DATA:
+            {
+               MessageParameterList dlist;
+               MessageParameter *p = new MessageParameter;
+               p->name = "FILENAME"; p->value=wxFileNameFromPath(mc->m_FileName);
+               dlist.push_back(p);
                sm.AddPart(mc->m_NumericMimeType, mc->m_Data, mc->m_Length,
-                          strutil_after(mc->m_MimeType,'/')  //subtype
+                          strutil_after(mc->m_MimeType,'/'),  //subtype
+                          "INLINE",&dlist,NULL
                   );
                break;
+            }
             }
          }
       }
       delete export;
    }
    sm.Send();
+   if(READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
+   {
+      String file;
+      MailFolderCC *mf =
+         MailFolderCC::OpenFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+      file = READ_CONFIG(mf->GetProfile(),MP_FOLDER_PATH);
+      if(strutil_isempty(file))
+         file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
+         
+      sm.Write(file,true/*append*/);
+      mf->Close();
+   }
 }
 
 /// sets To field

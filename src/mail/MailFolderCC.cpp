@@ -159,16 +159,6 @@ MailFolderCC::Ping(void)
 }
 
 
-void
-MailFolderCC::AppendMessage(const char *msg)
-{
-   STRING str;
-
-   INIT(&str, mail_string, (void *) msg, strlen(msg));
-   //mail_string_init(&str, (char *) msg, strlen(msg));
-   mail_append(mailstream, (char *)realName.c_str(), &str);
-
-}
 
 MailFolderCC::MailFolderCC(String const & iname)
 {
@@ -197,6 +187,19 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
       }
 }
 
+void
+MailFolderCC::AppendMessage(Message const &msg)
+{
+   String tmp;
+   STRING str;
+
+   msg.WriteString(tmp);
+
+   INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+
+   if(! mail_append(NIL,(char *)realName.c_str(),&str))
+      ERRORMESSAGE(("cannot append message"));
+}
 
 void
 MailFolderCC::UpdateViews(void)
@@ -276,7 +279,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
 
    if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
-                     profile, "l", (signed long) index),1)  )
+                     profile, "ls", (signed long) index, flagstr),1)  )
    {
       if(set)
          mail_setflag(mailstream, (char *)seq.c_str(), (char *)flagstr);
@@ -587,6 +590,7 @@ MailFolderCC::mm_fatal(char *str)
    LOGMESSAGE((M_LOG_ERROR, Str(msg)));
 }
 
+#if 0
 //-------------------------------------------------------------------
 
 MailFolderPopCC::MailFolderPopCC(String const &name)
@@ -613,6 +617,7 @@ MailFolderPopCC::Open(void)
    
    return MailFolderCC::Open(mboxname.c_str());
 }
+#endif
 
 
 // the callbacks:

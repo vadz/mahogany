@@ -175,7 +175,9 @@ wxMFrame::AddMessageMenu(void)
    messageMenu->Append(WXMENU_MSG_REPLY, (char *)_("&Reply"));
    messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
    messageMenu->Append(WXMENU_MSG_DELETE,(char *)_("&Delete"));
-   messageMenu->Append(WXMENU_MSG_SAVE,(char *)_("&Save"));
+   messageMenu->Append(WXMENU_MSG_UNDELETE,(char *)_("&Undelete"));
+   messageMenu->Append(WXMENU_MSG_SAVE_TO_FOLDER,(char *)_("&Save to Folder"));
+   messageMenu->Append(WXMENU_MSG_SAVE_TO_FILE,(char *)_("&Save to File"));
    messageMenu->Append(WXMENU_MSG_PRINT,(char *)_("&Print"));
    messageMenu->Append(WXMENU_MSG_SELECTALL, (char *)_("Select &all"));
    messageMenu->Append(WXMENU_MSG_DESELECTALL, (char *)_("&Deselect all"));

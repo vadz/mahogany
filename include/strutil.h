@@ -82,7 +82,6 @@ void strutil_tolower(String &str);
     @param offs1 at which position to start in string 1
     @param str2 the second string
     @param offs2 at which position to start in string 2
-    @param ignorecase true to ignore case
     @return true if they are identical
 */
 bool strutil_cmp(String const & str1, String const & str2,
@@ -95,7 +94,6 @@ bool strutil_cmp(String const & str1, String const & str2,
     @param n the number of characters to compare
     @param offs1 at which position to start in string 1
     @param offs2 at which position to start in string 2
-    @param ignorecase true to ignore case
     @return true if they are identical
 */
 bool

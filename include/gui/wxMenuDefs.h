@@ -3,26 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.5  1998/07/05 12:20:09  KB
- * wxMessageView works and handles mime (segfault on deletion)
- * wsIconManager loads files
- * install target
- *
- * Revision 1.4  1998/06/19 08:05:08  KB
- * restructured FolderView, menu handling and added toolbars
- *
- * Revision 1.3  1998/06/14 21:33:42  KB
- * fixed the menu/callback problem, wxFolderView is now a panel
- *
- * Revision 1.2  1998/05/06 17:39:25  VZ
- * changed the menu ids to start from 1 (workaround for wxGTK where control
- * id of 0 is still special and matches any id)
- *
- * Revision 1.1  1998/03/14 12:21:15  karsten
- * first try at a complete archive
+ * $Id$
  *
  *******************************************************************/
 #ifndef	WXMENUDEFS_H
@@ -54,7 +35,9 @@ enum
    WXMENU_MSG_BEGIN,
    WXMENU_MSG_PRINT,
    WXMENU_MSG_DELETE,
-   WXMENU_MSG_SAVE,
+   WXMENU_MSG_UNDELETE,
+   WXMENU_MSG_SAVE_TO_FILE,
+   WXMENU_MSG_SAVE_TO_FOLDER,
    WXMENU_MSG_OPEN,
    WXMENU_MSG_REPLY,
    WXMENU_MSG_FORWARD,

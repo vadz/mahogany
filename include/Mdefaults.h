@@ -200,6 +200,10 @@
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
 /// open URLs with
 #define   MP_BROWSER         "Browser"
+/// keep copies of outgoing mail?
+#define   MP_USEOUTGOINGFOLDER   "KeepCopies"
+/// write outgoing mail to folder:
+#define   MP_OUTGOINGFOLDER      "SentMailFolder"
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -380,6 +384,11 @@
 #define   MP_HIGHLIGHT_URLS_D      1
 /// open URLs with
 #define   MP_BROWSER_D         "Mnetscape"
+/// keep copies of outgoing mail?
+#define   MP_USEOUTGOINGFOLDER_D  1
+/// write outgoing mail to folder:
+#define   MP_OUTGOINGFOLDER_D  "SentMail"
+
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{

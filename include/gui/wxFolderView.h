@@ -89,16 +89,26 @@ public:
    */
    void DeleteMessages(wxArrayInt const &messages);
 
+   /** Mark messages as no longer deleted.
+       @param n number of messages to undelete
+       @messages pointer to an array holding the message numbers
+   */
+   void UnDeleteMessages(wxArrayInt const &messages);
+
    /** Save messages to a file.
-       
        @param n number of messages 
        @messages pointer to an array holding the message numbers
    */
-   void SaveMessages(wxArrayInt const &messages);
+   void SaveMessagesToFile(wxArrayInt const &messages);
+
+   /** Save messages to a folder.
+       @param n number of messages 
+       @messages pointer to an array holding the message numbers
+   */
+   void SaveMessagesToFolder(wxArrayInt const &messages);
 
    /** Reply to selected messages.
-       
-       @param n number of messages 
+              @param n number of messages 
        @messages pointer to an array holding the message numbers
    */
    void ReplyMessages(wxArrayInt const &messages);
@@ -127,6 +137,13 @@ public:
    /// return a profile pointer:
    ProfileBase *GetProfile(void)
       { return mailFolder ? mailFolder->GetProfile() : NULL; }
+protected:
+   /** Save messages to a folder.
+       @param n number of messages
+       @param file filename
+       @messages pointer to an array holding the message numbers
+   */
+   void SaveMessages(wxArrayInt const &messages, String const &file);
 private:
    /// is initialised?
    bool initialised;

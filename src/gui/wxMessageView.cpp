@@ -243,8 +243,6 @@ wxMessageView::Update(void)
    wxLayoutList &llist = GetLayoutList();
    wxLayoutObjectBase *obj = NULL;
 
-   MessageParameterList *plist;
-   MessageParameterList::iterator plist_it;
    
    GetLayoutList().SetEditable(true);
       
@@ -303,9 +301,20 @@ wxMessageView::Update(void)
       if(mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
 #ifdef DEBUG
-      plist = mailMessage->GetParameters(i);
+      const MessageParameterList &plist = mailMessage->GetParameters(i);
+      MessageParameterList::iterator plist_it;
       VAR(i);
-      for(plist_it = plist->begin(); plist_it != plist->end();
+      for(plist_it = plist.begin(); plist_it != plist.end();
+          plist_it++)
+      {
+         VAR( (*plist_it)->name);
+         VAR( (*plist_it)->value);
+      }
+      String disposition;
+      const MessageParameterList &dlist =
+         mailMessage->GetDisposition(i,&disposition);
+      VAR(disposition);
+      for(plist_it = dlist.begin(); plist_it != dlist.end();
           plist_it++)
       {
          VAR( (*plist_it)->name);
@@ -641,9 +650,13 @@ wxMessageView::OnMenuCommand(int id)
       if(m_FolderView && m_uid != -1)
          m_FolderView->ForwardMessages(msgs);
       break;
-   case WXMENU_MSG_SAVE:
+   case WXMENU_MSG_SAVE_TO_FOLDER:
       if(m_FolderView && m_uid != -1)
-         m_FolderView->SaveMessages(msgs);
+         m_FolderView->SaveMessagesToFolder(msgs);
+      break;
+   case WXMENU_MSG_SAVE_TO_FILE:
+      if(m_FolderView && m_uid != -1)
+         m_FolderView->SaveMessagesToFile(msgs);
       break;
    case WXMENU_MSG_DELETE:
       if(m_FolderView && m_uid != -1)

@@ -240,12 +240,13 @@ public:
    /**@name Functionality for editing */
    //@{
    /// set list editable or read only
-   void SetEditable(bool editable = true) { m_Editable = true; }
+   void SetEditable(bool editable = true) { m_Editable = editable; }
    /// return true if list is editable
    bool IsEditable(void) const { return m_Editable; }
    /// move cursor
    void MoveCursor(int dx = 0, int dy = 0);
    void SetCursor(wxPoint const &p) { m_CursorPosition = p; }
+   wxPoint GetCursor(void) const { return m_CursorPosition; }
    /// delete one or more cursor positions
    void Delete(CoordType count = 1);
    void Insert(String const &text);
@@ -256,7 +257,10 @@ public:
    /// return a pointer to the default settings:
    wxLayoutObjectCmd const *GetDefaults(void) const { return m_DefaultSetting ; }
 
-   //@}
+   wxLayoutObjectList::iterator FindCurrentObject(CoordType *offset = NULL);
+   // get the length of the line with the object pointed to by i
+   CoordType GetLineLength(wxLayoutObjectList::iterator i);
+//@}
 protected:
    /// font parameters:
    int m_FontFamily, m_FontStyle, m_FontWeight;
@@ -291,9 +295,6 @@ protected:
    /// find the object to the cursor position and returns the offset
    /// in there
    wxLayoutObjectList::iterator FindObjectCursor(wxPoint const &cpos, CoordType *offset = NULL);
-   wxLayoutObjectList::iterator FindCurrentObject(CoordType *offset = NULL);
-   // get the length of the line with the object pointed to by i
-   CoordType GetLineLength(wxLayoutObjectList::iterator i);
    
 };
 

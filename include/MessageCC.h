@@ -78,6 +78,10 @@ private:
       String   params;
       /// list of parameters
       MessageParameterList parameterList;
+      /// disposition type
+      String dispositionType;
+      /// list of disposition parameters
+      MessageParameterList dispositionParameterList;
       /// description
       String   description;
       /// id
@@ -212,8 +216,16 @@ public:
        @param n part number, if -1, for the top level.
        @return list of parameters, must be freed by caller.
    */
-   MessageParameterList *GetParameters(int n = -1);
-   
+   MessageParameterList const & GetParameters(int n = -1);
+      
+   /** Get the list of disposition parameters for a given part.
+       @param n part number, if -1, for the top level.
+       @param disptype string where to store disposition type
+       @return list of parameters, must be freed by caller.
+   */
+   MessageParameterList const & GetDisposition(int n = -1,
+                                               String *disptype = NULL);
+
    /** Query the MimeType of the content.
        @param  n part number
        @return string describing the Mime type
@@ -231,6 +243,11 @@ public:
        @return MIME/IMAP4 section specifier #.#.#.#
    */
    String const & GetPartSpec(int n = 0);
+
+   /** Append the message to a String.
+       @param str the string to write message text to
+   */
+   void WriteString(String &str) const;
 
    /** Append the message to a String.
        @param str the string to write message text to

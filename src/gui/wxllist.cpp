@@ -376,6 +376,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
             dc.GetTextExtent(Str(str), &width,&height, &descent);
             VAR(height);
             VAR(width); VAR(descent);
+            if(width < 1) width = 1;
             dc.DrawLine(position.x+width,
                         position.y+(baseLineSkip-height),
                         position.x+width, position.y+baseLineSkip);
@@ -527,11 +528,10 @@ wxLayoutList::FindObjectCursor(wxPoint const &cpos, CoordType *offset)
       width = 0;
       if((*i)->GetType() == WXLO_TYPE_LINEBREAK)
       {
-         if(cpos.y == cursor.y)
+         if(cpos.y == cursor.y && i != begin())
          {
             --i;
-            if(offset)
-               *offset = (*i)->CountPositions();
+            if(offset) *offset = i != end() ? (*i)->CountPositions() : 0;
             return i;
          }
          cursor.x = 0; cursor.y ++;
@@ -694,7 +694,7 @@ wxLayoutList::Delete(CoordType count)
          if(offs == len)
          {
             i++;
-            if((*i)->GetType() == WXLO_TYPE_TEXT)
+            if(i != end() && (*i)->GetType() == WXLO_TYPE_TEXT)
             {
                offs = 0;  // delete from begin of next string
                tobj = (wxLayoutObjectText *)*i;
