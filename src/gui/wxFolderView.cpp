@@ -1213,7 +1213,14 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 void
 wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
-   bool previewOnSingleClick = READ_CONFIG(GetProfile(), MP_PREVIEW_ON_SELECT) != 0;
+   Profile *profile = GetProfile();
+   if ( !profile )
+   {
+      // we're empty
+      return;
+   }
+
+   bool previewOnSingleClick = READ_CONFIG(profile, MP_PREVIEW_ON_SELECT) != 0;
    m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
 
    AllProfileSettings settings;

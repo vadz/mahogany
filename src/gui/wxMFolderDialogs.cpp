@@ -1260,8 +1260,10 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    m_isLocal->Enable(TRUE);
 #endif // USE_LOCAL_CHECKBOX
 
-   // POP3 doesn't have directories, IMAP4 does
-   m_isDir->Enable(isIMAP);
+   // this makes no sense for POP and for IMAP we will detect it ourselves and
+   // reset the MF_FLAGS_GROUP if the folder has \Noinferiors flag
+   m_isDir->SetValue(isIMAP);
+   m_isDir->Enable(FALSE);
 }
 
 // called when radiobox/choice selection changes

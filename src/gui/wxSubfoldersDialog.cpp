@@ -316,6 +316,9 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    // OnNoMoreFolders)
    Disable();
 
+   // but leave the static text enabled
+   m_msgBusy->Enable();
+
    SetDefaultSize(4*wBtn, 10*hBtn);
 }
 
@@ -577,7 +580,14 @@ wxTreeItemId wxSubscriptionDialog::InsertInOrder(wxTreeItemId parent,
 
 void wxSubscriptionDialog::OnNewFolder(String& name)
 {
+   // count the number of folders retrieved and show progress
    m_nSubfolders++;
+   if ( !(m_nSubfolders % 100) )
+   {
+      m_msgBusy->SetLabel(wxString::Format(_("%u folders retrieved"), m_nSubfolders));
+
+      wxYield();
+   }
 
    // remove trailing backslashes if any
    size_t len = name.length();

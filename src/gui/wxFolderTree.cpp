@@ -236,8 +236,7 @@ protected:
 
       MFolder *folder = node->GetFolder();
 
-      return (folder->GetType() != MF_GROUP) &&
-            !(folder->GetFlags() & MF_FLAGS_GROUP);
+      return CanOpenFolder(folder->GetType(), folder->GetFlags());
    }
 
    // this is the real handler for double-click and enter events
