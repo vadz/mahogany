@@ -117,6 +117,7 @@ extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_MSGS_SORTBY;
+extern const MOption MP_MSGS_USE_THREADING;
 extern const MOption MP_PREVIEW_ON_SELECT;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USE_TRASH_FOLDER;
@@ -125,8 +126,12 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // constants
 // ----------------------------------------------------------------------------
 
-static const int WXMENU_FVIEW_CONFIG_SORT = 3000;
-static const int WXMENU_FVIEW_RESET_SORT = 3001;
+enum
+{
+   WXMENU_FVIEW_CONFIG_SORT = 3000,
+   WXMENU_FVIEW_RESET_SORT,
+   WXMENU_FVIEW_TOGGLE_THREAD
+};
 
 static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 {
@@ -1292,13 +1297,23 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 {
    // TODO: add items to sort by this column in direct/reverse order
    wxMenu menu;
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"),
+               "", TRUE /* checkable */);
+   menu.AppendSeparator();
    menu.Append(WXMENU_FVIEW_RESET_SORT, _("&Don't sort at all"));
    menu.Append(WXMENU_FVIEW_CONFIG_SORT, _("Configure &sort order..."));
 
-   if ( !READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY) )
+   Profile *profile = m_FolderView->GetProfile();
+
+   if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
       // we're already unsorted, this command doesn't make sense
       menu.Enable(WXMENU_FVIEW_RESET_SORT, FALSE);
+   }
+
+   if ( READ_CONFIG(profile, MP_MSGS_USE_THREADING) )
+   {
+      menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, TRUE);
    }
 
    PopupMenu(&menu, event.GetPoint());
@@ -3379,6 +3394,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
       case WXMENU_FVIEW_CONFIG_SORT:
       case WXMENU_FVIEW_RESET_SORT:
+      case WXMENU_FVIEW_TOGGLE_THREAD:
          if ( cmd == WXMENU_FVIEW_RESET_SORT )
          {
             // we try to keep our profiles tidy and clean, so first just delete
@@ -3391,13 +3407,18 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                m_Profile->writeEntry(MP_MSGS_SORTBY, 0l);
             }
          }
+         else if ( cmd == WXMENU_FVIEW_TOGGLE_THREAD )
+         {
+            bool thread = READ_CONFIG_BOOL(m_Profile, MP_MSGS_USE_THREADING);
+            m_Profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
+         }
          else if ( !ConfigureSorting(m_Profile, GetWindow()) )
          {
             // nothing changed
             break;
          }
 
-         // this will resort the messages refresh us a bit later
+         // this will resort the messages and refresh us a bit later
          MEventManager::Send(
                               new MEventOptionsChangeData
                                   (
