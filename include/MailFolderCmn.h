@@ -29,6 +29,10 @@ public:
       class and can easily be removed if needed.
    */
    //@{
+   virtual bool SaveMessages(const UIdArray *selections,
+                             MFolder *folder,
+                             bool updateCount = true);
+
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
@@ -50,7 +54,7 @@ public:
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    String const & fileName);
-   
+
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
        @return true on success
@@ -72,7 +76,7 @@ public:
 
    /**@name Old-style functions, try to avoid. */
    //@{
-   
+
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid mesage uid
        @param flag flag to be set, e.g. "\\Deleted"
@@ -99,7 +103,7 @@ public:
    virtual inline bool UnDeleteMessage(unsigned long uid)
       { SetMessageFlag(uid,MSG_STAT_DELETED, false); return true; }
 
-   //@}   
+   //@}
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
@@ -198,7 +202,7 @@ protected:
        filters to it. Will eventually replace the UpdateListing
        mechanism. */
    void ProcessHeaderListing(HeaderInfoList *hilp);
-   
+
    /// generate NewMail messages if needed
    void CheckForNewMail(HeaderInfoList *hilp);
 
@@ -209,7 +213,7 @@ protected:
    /// Call this before actually closing the folder.
    void PreClose(void);
 
-   /** This function should be called by the driver when the status of 
+   /** This function should be called by the driver when the status of
        some message changed. It will cause all listings to be updated.
        The driver should make sure that its listing is updated before
        this function is called. It does not do much more than send an
@@ -217,7 +221,7 @@ protected:
        @param uid uid of the message which changed status
    */
    void UpdateMessageStatus(UIdType uid);
-   
+
    /// To display progress while reading message headers:
    class MProgressDialog *m_ProgressDialog;
 
@@ -242,7 +246,7 @@ protected:
 
    /// a timer to update information
    class MailFolderTimer *m_Timer;
-   
+
 
    /**@name Config information used */
    //@{
@@ -269,8 +273,7 @@ private:
    /// just to notice if the filter code did any work
    bool m_FiltersCausedChange;
 
-
-   /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to 
+   /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to
        link correctly: */
    MailFolderCmn(const MailFolderCmn &) { ASSERT(0); }
 #ifdef DEBUG

@@ -81,15 +81,17 @@ protected:
 MailFolder *
 MailFolder::OpenFolder(const MFolder *mfolder, ProfileBase *profile)
 {
-   ASSERT(mfolder);
-   ASSERT_MSG(0,"OpenFolder(MFolder *) is incomplete and needs access to the server/login/passwd");
+   CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
+
    int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
                                                 mfolder->GetFlags());
-   
+
    return OpenFolder( typeAndFlags,
-                      mfolder->GetName(),
-                      profile);
-                      
+                      mfolder->GetPath(),
+                      profile,
+                      mfolder->GetServer(),
+                      mfolder->GetLogin(),
+                      mfolder->GetPassword() );
 }
 
 /* static */
@@ -264,7 +266,7 @@ MailFolder::CreateFolder(const String &name,
                          const String &comment)
 {
    bool valid;
-   
+
    switch(type)
       {
       case MF_INBOX:
@@ -681,6 +683,73 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
+                            MFolder *folder,
+                            bool updateCount)
+{
+   CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
+
+   int n = selections->Count();
+
+   CHECK( n, true, "SaveMessages(): nothing to save" );
+
+   /* It could be that we are trying to open the very folder we are
+      getting our messages from, so we need to temporarily unlock this
+      folder. */
+   bool locked = IsLocked();
+   if(locked)
+      UnLock(); // release our own lock
+
+   MailFolder *mf = MailFolder::OpenFolder(folder);
+   if ( !mf )
+   {
+      String msg;
+      msg.Printf(_("Cannot save messages to folder '%s'."),
+                 folder->GetFullName().c_str());
+      ERRORMESSAGE((msg));
+      return false;
+   }
+
+   Message *msg;
+
+   int updateFlags = mf->GetUpdateFlags();
+   mf->SetUpdateFlags( updateCount ? UF_UpdateCount : 0 );
+
+   MProgressDialog *pd = NULL;
+   int threshold = mf->GetProfile() ?
+      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   if(n > threshold)
+   {
+      String msg;
+      msg.Printf(_("Saving %d messages..."), n);
+      pd = new MProgressDialog(mf->GetName(),
+                                             msg,
+                                             2*n, NULL);// open a status window:
+   }
+
+   bool rc = true;
+   for ( int i = 0; i < n; i++ )
+   {
+      msg = GetMessage((*selections)[i]);
+      if(msg)
+      {
+         if(pd) pd->Update( 2*i + 1 );
+         rc &= mf->AppendMessage(*msg);
+         if(pd) pd->Update( 2*i + 2);
+         msg->DecRef();
+      }
+   }
+   mf->Ping(); // with our flags
+   mf->SetUpdateFlags(updateFlags); // restore old flags
+   mf->DecRef();
+   if(pd) delete pd;
+   if(locked)
+      Lock();
+   return rc;
+}
+
+bool
+MailFolderCmn::SaveMessages(const UIdArray *selections,
                             String const & folderName,
                             bool isProfile,
                             bool updateCount)
@@ -695,7 +764,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
 
    /* It could be that we are trying to open the very folder we are
-      getting our messages from, so we need to temporarily unlock this 
+      getting our messages from, so we need to temporarily unlock this
       folder. */
    bool locked = IsLocked();
    if(locked)
@@ -768,7 +837,7 @@ MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections, MWindow *parent)
    MFolder *folder = MDialog_FolderChoose(parent);
    if ( folder )
    {
-      rc = SaveMessages(selections, folder->GetFullName(), true);
+      rc = SaveMessages(selections, folder, true);
       folder->DecRef();
    }
    return rc;
@@ -1085,7 +1154,7 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
 }
 
 /*
-  This function is called by GetHeaders() immediately after building a 
+  This function is called by GetHeaders() immediately after building a
   new folder listing. It checks for new mails and, if required, sends
   out new mail events.
 */
@@ -1128,7 +1197,7 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
    if(highestId != UID_ILLEGAL && (m_UpdateFlags & UF_UpdateCount) )
       m_LastNewMsgUId = highestId;
-   
+
    DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
                GetName().c_str(), (unsigned long) highestId));
 
@@ -1150,7 +1219,7 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    SortListing(this, hilp, m_Config.m_ListingSortOrder);
    if(m_Config.m_UseThreading)
       ThreadMessages(this, hilp);
-   
+
    hilp->DecRef();
 }
 

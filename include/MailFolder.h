@@ -49,6 +49,8 @@ class Message;
    To open a MailFolder via OpenFolder() one must do either of the
    following:
    <ul>
+   <li>New and preferred way which will soon be the only one: pass it
+       a pointer to MFolder
    <li>Use it with a MF_PROFILE type and provide a profile name to be
        used.
    <li>Use it with a different type and set other options such as
@@ -128,13 +130,13 @@ public:
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder,
-                                  ProfileBase *profile);
+                                  ProfileBase *profile = NULL);
 
    /** Phyically deletes this folder.
        @return true on success
    */
    static bool DeleteFolder(const MFolder *mfolder);
-   /**   
+   /**
          Creates a mailbox profile and checks the settings to be
          sensible.
          @param name name of new folder profile
@@ -312,7 +314,7 @@ public:
        free it
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit) = 0;
-   
+
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -340,13 +342,21 @@ public:
    virtual void SetUpdateFlags(int updateFlags) = 0;
    /// Get the current update flags
    virtual int  GetUpdateFlags(void) const = 0;
-   
+
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
       These functions are not used by anything else in the MailFolder
       class and can easily be removed if needed.
    */
    //@{
+   /** Save messages to a folder identified by MFolder
+
+       NB: this function should eventually replace the other SaveMessages()
+   */
+   virtual bool SaveMessages(const UIdArray *selections,
+                             MFolder *folder,
+                             bool updateCount = true) = 0;
+
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
@@ -504,7 +514,7 @@ private:
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
 
-    IMPORTANT: When sorting messages, the instances of this class will 
+    IMPORTANT: When sorting messages, the instances of this class will
     be copied around in memory bytewise, but not duplicates of the
     object will be created. So the reference counting in wxString
     objects should be compatible with this, as at any time only one

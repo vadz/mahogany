@@ -63,6 +63,7 @@ public:
       : m_type(type),
         m_flags(flags),
         m_fullname(fullname),
+        m_path(path),
         m_server(server), m_login(login), m_password(password)
         {
         }
