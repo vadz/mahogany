@@ -133,7 +133,7 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
    c->height.AsIs();
    m_labelCommand->SetConstraints(c);
 
-   m_txtCommand = new wxPTextEntry(_T("OpenWith"), this, wxID_ANY);
+   m_txtCommand = new wxPTextEntry(_T("/Prompts/MimeHandler"), this, wxID_ANY);
    c = new wxLayoutConstraints;
    c->centreY.SameAs(m_labelCommand, wxCentreY);
    c->left.RightOf(m_labelCommand, LAYOUT_X_MARGIN);
