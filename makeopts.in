@@ -84,7 +84,7 @@ M4	:= @M4@
 #INSTALL	:= @INSTALL@
 #INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
 #INSTALL_DATA	:= @INSTALL_DATA@
-INSTALL	:= $(BUILDDIR)/extra/scripts/install-sh -c
+INSTALL	:= $(SOURCEDIR)/extra/scripts/install-sh -c
 INSTALL_PROGRAM	:= $(INSTALL) -s
 INSTALL_DATA	:= $(INSTALL) -c -m 644
 
