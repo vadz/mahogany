@@ -70,7 +70,21 @@ source files of M project in the IDE (simply set "Excluded from build" to true
 in its properties).
 
 
-c) Build process
+c) Python
+---------
+
+   If you want to build Mahogany with an embedded Python interpreter, you need
+to download the source distribution of Python from http://www.python.org/,
+built it using the provided project file (in versions up to 2.3.3 it is for
+VC++ 6 but can be imported without problems in VC++ 7.x) in PCbuild
+subdirectory and add the path to include subdirectory to your global VC++
+settings.
+
+   Otherwise you may set USE_PYTHON to 0 in include/config_nt.h to disable
+embedded Python.
+
+
+d) Build process
 ----------------
 
    Before loading M.sln file, you will need to open it in your favourite text
@@ -81,11 +95,11 @@ set to point to the same location (as per wxWindows installation instructions).
    After this you can open the solution file M.sln in Visual C++ IDE. Here is a
 brief description of various projects in the solution:
 
-* cclient - the mail routines support library
-* compface - the library for X-Face handling
-* dspam - the spam filtering library
 * M - the main Mahogany project
-* versit - vCard handling routines
+* imap - the mail routines support library
+* compface - the library for X-Face handling
+* versit - vCard library
+* dspam - the spam filtering library
 * base, core, ... - wxWindows projects
 
    Finally, just build everything. Before running M.exe, copy the file
@@ -97,7 +111,7 @@ the debug configuration and run it under debugger, this often provides valuable
 additional information.
 
 
-d) Common problems
+e) Common problems
 ------------------
 
 - dspam doesn't compile
@@ -147,4 +161,4 @@ SSL does not work with cygwin.
 
 IMAP does not work with mingw.
 
-vi: ts=8 nolist nocin ai:
+vi: ts=8 sw=3 nolist nocin ai:
