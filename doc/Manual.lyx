@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed Mar 10 09:42:53 1999
+#This file was created by <karsten> Mon Mar 22 10:29:05 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -6281,4 +6281,28 @@ thedistributionfile
 tar
 \family default 
  should show you a list of all files being installed as it unpacks them.
+\layout Subsection
+
+How do I access mail downloaded via fetchpop/procmail?
+\layout Standard
+
+
+\shape italic 
+I use fetchpop and procmail do deliver my mail (Redhat Linux).
+ I'm reading mail with Netscape right now and I want to move to M.
+ I cannot for the life of me get M to open my files when it loads.
+ I have to open them manually.
+ Can someone please help me (if its possible) to get M to open all of my
+ Linux Folders at startup.
+\layout Standard
+
+You should be able to right-click on the folder treecontrol on the left
+ of the main screen and "Create a new folder".
+ Make it of type "file" and specify the path to the the folder file as the
+ filename.
+ Your normal mailspool /var/spool/mail/username is available under the name
+ INBOX anyway, but I guess you have fetchpop/procmail deliver your mail
+ to some other place.
+\layout Standard
+
 \the_end
