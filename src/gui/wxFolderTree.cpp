@@ -68,11 +68,17 @@ extern "C"
 // process the activate message
 #ifdef __WXMSW__
    #define USE_TREE_ACTIVATE_BUGFIX
+
+   #include <commctrl.h>      // for NM_DBLCLK
 #endif // __WXMSW__
 
-#ifdef USE_TREE_ACTIVATE_BUGFIX
-   #include <commctrl.h>      // for NM_DBLCLK
-#endif
+// we can make the middle mouse work like a double click using the generic
+// version and I think it is so convenient that I'm even ready to use this
+// ugly hack to achieve this - unfortunately, this still doesn't work with the
+// native Win32 control
+#ifdef __WXGTK__
+   #define USE_MIDDLE_CLICK_HACK
+#endif // __WXGTK__
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -287,6 +293,9 @@ public:
    void OnChar(wxKeyEvent&);
 
    void OnRightDown(wxMouseEvent& event);
+#ifdef USE_MIDDLE_CLICK_HACK
+   void OnMiddleDown(wxMouseEvent& event);
+#endif // USE_MIDDLE_CLICK_HACK
 
    void OnMenuCommand(wxCommandEvent&);
 
@@ -541,6 +550,9 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    EVT_TREE_END_LABEL_EDIT(-1,   wxFolderTreeImpl::OnEndLabelEdit)
 
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
+#ifdef USE_MIDDLE_CLICK_HACK
+   EVT_MIDDLE_DOWN(wxFolderTreeImpl::OnMiddleDown)
+#endif // USE_MIDDLE_CLICK_HACK
 
    EVT_CHAR(wxFolderTreeImpl::OnChar)
 
@@ -2000,6 +2012,21 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 
    m_suppressSelectionChange = FALSE;
 }
+
+#ifdef USE_MIDDLE_CLICK_HACK
+
+void wxFolderTreeImpl::OnMiddleDown(wxMouseEvent& event)
+{
+   // translate middle mouse click into left double click
+   wxMouseEvent event2 = event;
+   event2.SetEventType(wxEVT_LEFT_DCLICK);
+   wxTreeCtrl::OnMouse(event2);
+
+   if ( event2.GetSkipped() )
+      event.Skip();
+}
+
+#endif // USE_MIDDLE_CLICK_HACK
 
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 {
