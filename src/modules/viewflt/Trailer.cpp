@@ -145,9 +145,14 @@ TrailerFilter::DoProcess(String& text,
 
       // continue going backwards after skipping the new line ("\r\n")
       ASSERT_MSG( *pc == '\n', _T("why did we stop then?") );
-      ASSERT_MSG( pc[-1] == '\r', _T("line doesn't end in\"\\r\\n\"?") );
 
-      pc -= 2;
+      // skip '\n' and '\r' if it's present -- surprizingly enough, we might
+      // not have it (this happens to me inside a PGP encrypted message)
+      if ( *--pc == '\r' )
+      {
+         // skip '\r' as well
+         --pc;
+      }
    }
 
    // nothing found, process the rest normally
