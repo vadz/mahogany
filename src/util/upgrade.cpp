@@ -115,6 +115,7 @@ extern const MOption MP_NET_CONNECTION;
 extern const MOption MP_NET_OFF_COMMAND;
 extern const MOption MP_NET_ON_COMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
+extern const MOption MP_NEWMAIL_PLAY_SOUND;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_ORGANIZATION;
 extern const MOption MP_OUTBOX_NAME;
@@ -2787,8 +2788,14 @@ SetReplaceFromOption(const String& folderName)
    else
    {
       Profile_obj profile(folder->GetProfile());
-
-      profile->writeEntry(MP_FVIEW_FROM_REPLACE, 1);
+      if ( !profile )
+      {
+         FAIL_MSG( _T("profile must exist") );
+      }
+      else
+      {
+         profile->writeEntry(MP_FVIEW_FROM_REPLACE, 1);
+      }
    }
 }
 
@@ -2935,17 +2942,53 @@ VerifyStdFolders(void)
 
    if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
    {
-      if ( !VerifyStdFolder
-            (
-               MP_TRASH_FOLDER,
-               _("Trash"),
-               MF_FLAGS_KEEPOPEN,
-               _("Folder where Mahogany will store deleted messages."),
-               MFolderIndex_Trash,
-               wxFolderTree::iconTrash
-            ) )
+      switch ( VerifyStdFolder
+               (
+                  MP_TRASH_FOLDER,
+                  _("Trash"),
+                  MF_FLAGS_KEEPOPEN,
+                  _("Folder where Mahogany will store deleted messages."),
+                  MFolderIndex_Trash,
+                  wxFolderTree::iconTrash
+               ) )
       {
-         return false;
+         case 0:
+            // failed to create
+            return false;
+
+         case -1:
+            // it doesn't make sense to notify the user about new mail in the
+            // trash folder (this would be triggered by deleting any message)
+            {
+               MFolder_obj folder(READ_APPCONFIG(MP_TRASH_FOLDER));
+               if ( !folder )
+               {
+                  FAIL_MSG( _T("trash folder must exist") );
+               }
+               else
+               {
+                  Profile_obj profile(folder->GetProfile());
+                  if ( !profile )
+                  {
+                     FAIL_MSG( _T("Trash folder profile must exist") );
+                  }
+                  else
+                  {
+                     profile->writeEntry(MP_NEWMAIL_PLAY_SOUND, 0l);
+                     profile->writeEntry(MP_SHOW_NEWMAILMSG, 0l);
+                  }
+               }
+            }
+            break;
+
+         default:
+            FAIL_MSG( _T("unexpected VerifyStdFolder return value") );
+            // fall through
+
+         case 1:
+            // already existed, don't change the options -- don't do anything
+            // in fact
+            ;
       }
    }
 
