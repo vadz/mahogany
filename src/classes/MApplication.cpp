@@ -39,6 +39,13 @@
 #	include	"Python.h"
 #endif
 
+#if USE_WXGTK
+  // @@@@ no wxBell in wxGTK
+  void wxBell(void) { }
+  
+  IMPLEMENT_WXWIN_MAIN
+#endif
+
 #ifdef OS_UNIX
 MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
 					     FALSE, TRUE)
