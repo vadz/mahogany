@@ -83,18 +83,18 @@ UIdArray MMessagesDataObject::GetMessages() const
 }
 
 // ----------------------------------------------------------------------------
-// MMessagesDropTarget
+// MMessagesDropTargetBase
 // ----------------------------------------------------------------------------
 
-MMessagesDropTarget::MMessagesDropTarget(MMessagesDropWhere *where, wxWindow *win)
-                   : wxDropTarget(new MMessagesDataObject)
+MMessagesDropTargetBase::MMessagesDropTargetBase(wxWindow *win)
+                       : wxDropTarget(new MMessagesDataObject)
 {
-   m_where = where;
    m_frame = GetFrame(win);
    win->SetDropTarget(this);
 }
 
-wxDragResult MMessagesDropTarget::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
+wxDragResult
+MMessagesDropTargetBase::OnEnter(wxCoord x, wxCoord y, wxDragResult def)
 {
    if ( m_frame )
    {
@@ -104,7 +104,7 @@ wxDragResult MMessagesDropTarget::OnEnter(wxCoord x, wxCoord y, wxDragResult def
    return OnDragOver(x, y, def);
 }
 
-void MMessagesDropTarget::OnLeave()
+void MMessagesDropTargetBase::OnLeave()
 {
    if ( m_frame )
    {
@@ -112,7 +112,8 @@ void MMessagesDropTarget::OnLeave()
    }
 }
 
-wxDragResult MMessagesDropTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
+wxDragResult
+MMessagesDropTargetBase::OnData(wxCoord x, wxCoord y, wxDragResult def)
 {
    if ( !GetData() )
    {
@@ -121,10 +122,27 @@ wxDragResult MMessagesDropTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
       return wxDragNone;
    }
 
+   return OnMsgDrop(x, y, (MMessagesDataObject *)GetDataObject(), def);
+}
+
+// ----------------------------------------------------------------------------
+// MMessagesDropTarget
+// ----------------------------------------------------------------------------
+
+MMessagesDropTarget::MMessagesDropTarget(MMessagesDropWhere *where,
+                                         wxWindow *win)
+                   : MMessagesDropTargetBase(win)
+{
+   m_where = where;
+}
+
+wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
+                                            MMessagesDataObject *data,
+                                            wxDragResult def)
+{
    MFolder_obj folder(m_where->GetFolder(x, y));
    if ( folder )
    {
-      MMessagesDataObject *data = (MMessagesDataObject *)GetDataObject();
       UIdArray messages = data->GetMessages();
 
       wxFolderView *folderView = data->GetFolderView();

@@ -76,28 +76,48 @@ public:
    virtual ~MMessagesDropWhere();
 };
 
-/** MMessagesDropTarget is the drop target object to work with
-    MMessagesDataObjects. It needs a window to register itself with and an
-    object of class MMessagesDropWhere which is used to retrieve the folder to
-    drop messages to (and which will be deleted by the drop target)
- */
-class MMessagesDropTarget : public wxDropTarget
+/** MMessagesDropTargetBase is a common base class for drop targets and is not
+    used directly itself */
+class MMessagesDropTargetBase : public wxDropTarget
 {
 public:
-   /// ctor
-   MMessagesDropTarget(MMessagesDropWhere *where, wxWindow *win);
+   MMessagesDropTargetBase(wxWindow *win);
 
    /// overridden base class virtuals
    virtual wxDragResult OnEnter(wxCoord x, wxCoord y, wxDragResult def);
    virtual void OnLeave();
    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
 
+   /// the method to override in the derived classes
+   virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
+                                  MMessagesDataObject *data,
+                                  wxDragResult def) = 0;
+
+protected:
+   // the frame to sue for status messages
+   wxFrame *m_frame;
+};
+
+/** MMessagesDropTarget is the drop target object to work with
+    MMessagesDataObjects. It needs a window to register itself with and an
+    object of class MMessagesDropWhere which is used to retrieve the folder to
+    drop messages to (and which will be deleted by the drop target)
+ */
+class MMessagesDropTarget : public MMessagesDropTargetBase
+{
+public:
+   /// ctor
+   MMessagesDropTarget(MMessagesDropWhere *where, wxWindow *win);
+
+   /// overridden base class virtuals
+   virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
+                                  MMessagesDataObject *data, wxDragResult def);
+
    /// will delete the MMessagesDropWhere object
    virtual ~MMessagesDropTarget();
 
 private:
    MMessagesDropWhere *m_where;
-   wxFrame *m_frame;
 };
 
 #endif // _MDND_H_

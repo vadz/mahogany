@@ -59,6 +59,8 @@
 #define MP_MOD_CALENDAR_SHOWONSTARTUP_D      1l
 
 
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 class wxDateTimeWithRepeat : public wxDateTime
 {
@@ -171,7 +173,6 @@ public:
    class CalendarModule *m_Module;
    bool m_started;
 };
-
 
 ///------------------------------
 /// MModule interface:
@@ -523,6 +524,26 @@ private:
    wxListCtrl     *m_ListCtrl;
 };
 
+// ----------------------------------------------------------------------------
+// drop target for the calendar frame
+// ----------------------------------------------------------------------------
+
+class MMessagesCalDropTarget : public MMessagesDropTargetBase
+{
+public:
+   MMessagesCalDropTarget(CalendarFrame *frame)
+      : MMessagesDropTargetBase(frame) { }
+
+   // overridden base class pure virtual
+   virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
+                                  MMessagesDataObject *data,
+                                  wxDragResult def)
+   {
+      // TODO: call ScheduleMessage() for data->GetMessages()
+      return def;
+   }
+};
+
 
 class CalEventReceiver : public MEventReceiver
 {
@@ -610,7 +631,7 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    panel->SetAutoLayout(TRUE);
    SetAutoLayout(TRUE);
 
-   new MMessagesDropTarget(NULL, this); // TODO
+   new MMessagesCalDropTarget(this);
 
    CreateStatusBar();
    GetConfig();
