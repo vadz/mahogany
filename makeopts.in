@@ -39,10 +39,16 @@ LIBMAL_DIR=$(BUILDDIR)/extra/src/libmal
 PISOCK_LIB:=$(PISOCK_LIB) -L$(LIBMAL_DIR)/.libs -lmal
 endif
 
+
+
 # libraries needed by the modules, linked against individually in the modules
 # directory, but listed here in case we build a static library:
 ifeq ($(USE_MODULES),static)
+# for MAL:
+ifdef HAVE_LIBMAL
+PISOCK_LIB := $(PISOCK_LIB) -L $(LIBMAL_DIR)/.libs -lmal
 MODULES_LIBS=$(PISOCK_LIB)
+endif
 else
 MODULES_LIBS=
 endif

@@ -393,15 +393,6 @@ public:
          // we do not clean this up as it will clean us up from GUI
          // deletion 
          m_LWin = new wxMEditCtrlLWindow(this,parent);
-         wxLayoutConstraints *c = new wxLayoutConstraints;
-         c->left.SameAs(parent, wxLeft, 0);
-         c->right.SameAs(parent, wxRight, 0);
-         c->top.SameAs(parent, wxTop, 0);
-         c->bottom.SameAs(parent, wxBottom, 0);
-         m_LWin->SetConstraints(c);
-         m_LWin->SetAutoLayout(TRUE);
-         parent->SetAutoLayout(TRUE);
-         m_LWin->SetMouseTracking();
          
       }
    ~wxMEditCtrl()
@@ -803,14 +794,14 @@ bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
 BEGIN_EVENT_TABLE(wxMessageView, wxWindow)
    // process termination notification
    EVT_END_PROCESS(-1, wxMessageView::OnProcessTermination)
-
+   EVT_SIZE(wxMessageView::OnSize)
    // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
-//   EVT_CHAR(wxMessageView::OnChar)
-   END_EVENT_TABLE()
+   //   EVT_CHAR(wxMessageView::OnChar)
+END_EVENT_TABLE()
 
-   /// teeny, weeny class to link MessageView and edit ctrl
+/// teeny, weeny class to link MessageView and edit ctrl
 class wxMessageViewCbHandler : public MEditCtrlCbHandler
 {
 public:
@@ -825,6 +816,13 @@ private:
    wxMessageView *m_MV;
 };
 
+void
+wxMessageView::OnSize( wxSizeEvent & WXUNUSED(event) )
+{
+   int x, y;
+   GetClientSize( &x, &y );
+   m_EditCtrl->SetSize(0,0,x,y);
+}
 
 void
 wxMessageView::OnChar(wxKeyEvent& event)

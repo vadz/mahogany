@@ -97,7 +97,8 @@ public:
 
    // callbacks
    // ---------
-
+   /// when resized
+   void OnSize(wxSizeEvent & event);
    /// called on Menu selection
    void OnMenuCommand(wxCommandEvent& event) { (void) DoMenuCommand(event.GetId()); }
    /// returns true if it handled the command

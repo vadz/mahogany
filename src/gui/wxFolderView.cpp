@@ -1559,7 +1559,9 @@ wxFolderView::DragAndDropMessages()
    size_t countSel = m_FolderCtrl->GetSelections(selections);
    if ( countSel > 0 )
    {
-      MMessagesDataObject dropData(this, selections);
+      MMessagesDataObject dropData(this,
+                                   GetFolder()->GetMailFolder(),
+                                   selections);
 #ifdef __WXMSW__
       wxDropSource dropSource(dropData, m_FolderCtrl,
                               wxCursor("msg_copy"),

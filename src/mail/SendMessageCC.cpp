@@ -636,15 +636,18 @@ SendMessageCC::Send(void)
    String service;
 
    String server = m_ServerHost;
-
+   hostlist[0] = server;
+   
    if(m_UserName.Length() > 0) // activate authentication
+   {
       server << "/user=\"" << m_UserName << '"';
+      MailFolderCC::SetLoginData(m_UserName, m_Password);
+   }
    
    switch(m_Protocol)
    {
    case Prot_SMTP:
       service = "smtp";
-      hostlist[0] = server;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
       if(m_UseSSL)
@@ -653,16 +656,12 @@ SendMessageCC::Send(void)
          service << "/ssl";
       }
 #endif
-      if(m_UserName.Length() > 0)
-         MailFolderCC::SetLoginData(m_UserName, m_Password);
       stream = smtp_open_full
          (NIL,(char **)hostlist, (char *)service.c_str(),
           SMTPTCPPORT, OP_DEBUG); 
       break;
    case Prot_NNTP:
       service = "nntp";
-      // notice that we _must_ assign the result to this string!
-      hostlist[0] = server;
       DBGMESSAGE(("Trying to open connection to NNTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
       if( m_UseSSL )
@@ -671,12 +670,9 @@ SendMessageCC::Send(void)
          service << "/ssl";
       }
 #endif
-      if(m_UserName.Length() > 0)
-         MailFolderCC::SetLoginData(m_UserName, m_Password);
       stream = nntp_open_full
          (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
       break;
-
       // make gcc happy
       case Prot_Illegal:
       default:

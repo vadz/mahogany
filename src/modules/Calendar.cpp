@@ -187,6 +187,7 @@ class CalendarModule : public MModule_Calendar
    MMODULE_DEFINE();
 
    virtual bool ScheduleMessage(class SendMessageCC *msg);
+   virtual bool ScheduleMessage(class Message *msg);
 
    void OnTimer(void);
    bool OnASFolderResultEvent(MEventASFolderResultData & ev );
@@ -487,6 +488,7 @@ public:
                     ActionEnum action = CAL_ACTION_REMIND,
                     const wxDateTimeWithRepeat &when = wxDefaultDateTime);
    bool ScheduleMessage(SendMessageCC *msg);
+   bool ScheduleMessage(Message *msg);
 
    /** checks if anything needs to be done:
        @param mf if non-NULL, react to change in this folder if is ours
@@ -532,16 +534,34 @@ class MMessagesCalDropTarget : public MMessagesDropTargetBase
 {
 public:
    MMessagesCalDropTarget(CalendarFrame *frame)
-      : MMessagesDropTargetBase(frame) { }
+      : MMessagesDropTargetBase(frame) { m_Frame = frame; }
 
    // overridden base class pure virtual
    virtual wxDragResult OnMsgDrop(wxCoord x, wxCoord y,
                                   MMessagesDataObject *data,
                                   wxDragResult def)
    {
-      // TODO: call ScheduleMessage() for data->GetMessages()
+      MailFolder *mf = data->GetFolder();
+      if(mf)
+      {
+         UIdArray msgsToDelete;
+         for(size_t i = 0; i < data->GetMessageCount(); i++)
+         {
+            Message *msg = mf->GetMessage(data->GetMessageUId(i));
+            if(msg)
+            {
+               if(m_Frame->ScheduleMessage(msg))
+                  msgsToDelete.Add(data->GetMessageUId(i));
+               msg->DecRef();
+            }
+         }
+         mf->DeleteOrTrashMessages(&msgsToDelete);
+         mf->DecRef();
+      }
       return def;
    }
+private:
+   CalendarFrame *m_Frame;
 };
 
 
@@ -768,6 +788,22 @@ CalendarFrame::ScheduleMessage(SendMessageCC *msg)
       wxString str;
       msg->WriteToString(str);
       AddReminder(str,CAL_ACTION_SEND, dt);
+      Show(TRUE); // make ourselves visible
+      return TRUE;
+   }
+   else
+      return FALSE;
+}
+
+bool
+CalendarFrame::ScheduleMessage(Message *msg)
+{
+   wxDateTimeWithRepeat dt = m_CalCtrl->GetDate();
+   if(PickDateDialog(dt))
+   {
+      wxString str;
+      msg->WriteToString(str);
+      AddReminder(str,CAL_ACTION_REMIND, dt);
       Show(TRUE); // make ourselves visible
       return TRUE;
    }
@@ -1128,6 +1164,13 @@ CalendarModule::ScheduleMessage(class SendMessageCC *msg)
    return m_Frame->ScheduleMessage(msg);
 }
 
+bool
+CalendarModule::ScheduleMessage(class Message *msg)
+{
+   CreateFrame();
+   m_Frame->Raise();
+   return m_Frame->ScheduleMessage(msg);
+}
 
 
 void

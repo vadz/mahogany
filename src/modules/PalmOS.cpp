@@ -8,6 +8,10 @@
  *******************************************************************/
 
 /**
+   This module supports synchronisation, backup and install facilities
+   for PalmOS based handheld devices.
+   
+
    AvantGo / MAL server support:
 
    To get this enabled, "libmal" is needed, which is a small wrapper

@@ -35,11 +35,8 @@ DEFAULT_USE_DEBUG_FLAG=0
 DEFAULT_USE_WXDEBUG=0
 DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=0
-DEFAULT_USE_KDOC=0
-DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
 dnl DEFAULT_USE_LIBTOOL=0
-DEFAULT_USE_DOCXX=0
 DEFAULT_USE_MODULES=auto
 DEFAULT_USE_LEAKTRACER=0
 DEFAULT_USE_STRICT=0
@@ -109,10 +106,6 @@ USE_MODULES)
 M_OVERRIDES(strict, strict,
 --with-strict            Strict compiler flags - may not work on all systems,
 USE_STRICT)
-
-M_OVERRIDES(docxx,docxx,
---with-doc++      use DOC++ for class documentation generation,
-USE_DOCXX)
 
 M_OVERRIDES(ssl,ssl,
 --with-ssl      compile in SSL support (requires openSSL),
@@ -446,8 +439,6 @@ AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
 AC_SUBST(CCLIENT_EXTRACFLAGS)
 AC_SUBST(SSL_LIBS)
 
-dnl kdoc/docxx have their own section further down
-
 dnl --------------------------------------------------------------------------
 dnl check for other libraries
 dnl --------------------------------------------------------------------------
@@ -758,13 +749,6 @@ AC_PATH_PROG(PERL,perl)
 dnl use scandoc
 DOCHTML="\$(SCANDOCHTML)"
 
-if test "x$USE_DOCXX" != "x"; then
-	AC_PATH_PROG(DOCXX,doc++)
-	if test "x$DOCXX" != "x"
-	then
-		DOCHTML="\$(DOCXXHTML)"
-	fi
-fi
 AC_SUBST(DOCHTML)
 
 dnl check for latex/dvips

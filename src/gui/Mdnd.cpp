@@ -47,6 +47,7 @@
 // ----------------------------------------------------------------------------
 
 MMessagesDataObject::MMessagesDataObject(wxFolderView *view,
+                                         MailFolder *folder,
                                          const UIdArray& messages)
                    : wxCustomDataObject(MMESSAGE_FORMAT)
 {
@@ -58,7 +59,8 @@ MMessagesDataObject::MMessagesDataObject(wxFolderView *view,
    Data *data = (Data *)buf;
    data->view = view;
    data->number = messages.GetCount();
-
+   data->folder = folder;
+   
    UIdType *p = GetUIDs(data);
    for ( size_t n = 0; n < data->number; n++ )
    {

@@ -281,7 +281,7 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     wxBoxSizer *sizerPanel = new wxBoxSizer(wxVERTICAL);
     wxStaticBoxSizer *sizerName = new wxStaticBoxSizer
                                        (
-                                        new wxStaticBox(panel, -1, _("&Name")),
+                                        new wxStaticBox(panel, -1, _("&Name:")),
                                         wxVERTICAL
                                        );
 

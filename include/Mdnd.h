@@ -38,10 +38,17 @@ class MMessagesDataObject : public wxCustomDataObject
 public:
    MMessagesDataObject() : wxCustomDataObject(MMESSAGE_FORMAT) { }
 
-   MMessagesDataObject(wxFolderView *view, const UIdArray& messages);
-
+   MMessagesDataObject(wxFolderView *view,
+                       MailFolder *folder,
+                       const UIdArray& messages);
    // accessors
    wxFolderView *GetFolderView() const { return GetMData()->view; }
+   /// return the inc-refed folder pointer
+   MailFolder *GetFolder() const
+      {
+         SafeIncRef(GetMData()->folder);
+         return GetMData()->folder;
+      }
    size_t GetMessageCount() const { return GetMData()->number; }
    size_t GetMessageUId(size_t n) const { return GetUIDs(GetMData())[n]; }
 
@@ -50,6 +57,7 @@ public:
 private:
    struct Data
    {
+      MailFolder *folder;
       wxFolderView *view;
       size_t number;
 
