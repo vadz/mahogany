@@ -778,8 +778,8 @@ void
 MailFolderCC::BuildListing(void)
 {
 //FIXME: leads to missing updates??
-   if(m_BuildListingSemaphore)
-      return;
+//   if(m_BuildListingSemaphore)
+//      return;
 
    m_BuildListingSemaphore = true;
    m_UpdateNeeded = false;
@@ -875,6 +875,11 @@ MailFolderCC::BuildListing(void)
    MEventFolderUpdateData data(this);
    MEventManager::Send(data);
 
+
+   /*** FROM HERE ON, WE NEED TO BE RECURSION SAFE!!! ***/
+   /* Sending events can cause calls to this function, so we need to
+      be reentrant.
+   */
    /* Now check whether we need to send new mail notifications: */
    if(m_GenerateNewMailEvents && m_NumOfMessages > oldNum) // new mail has arrived
    {
