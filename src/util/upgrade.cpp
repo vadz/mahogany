@@ -2558,25 +2558,19 @@ VerifyStdFolder(const MOption& optName,
    }
    else // already exists
    {
-      // check that it has right flags
+      // check that it has right flags: we allow the user to change all the
+      // flags except the ones below
+      static const int flagsToCheck = MF_FLAGS_INCOMING |
+                                      MF_FLAGS_NEWMAILFOLDER;
+
       int flagsCur = folder->GetFlags();
 
-      // i.e. it should have all the flags specified except for MF_FLAGS_HIDDEN
-      // because we want to allow the user to unhide the folders
-      int flagsNew = flagsCur | (flags & ~MF_FLAGS_HIDDEN);
-
-      // and it shouldn't have the incoming flag unless explicitly given
-      // because it doesn't make sense to collect mail from any of the system
-      // folders and, especially, it's downright stupid to try to collect it
-      // from NewMail one itself
-      if ( (flagsCur & MF_FLAGS_INCOMING) && !(flags & MF_FLAGS_INCOMING) )
+      if ( (flagsCur & flagsToCheck) != (flags & flagsToCheck) )
       {
-         flagsNew ^= MF_FLAGS_INCOMING;
-      }
+         flagsCur &= ~flagsToCheck;
+         flagsCur |= flags & flagsToCheck;
 
-      if ( flagsNew != flagsCur )
-      {
-         folder->SetFlags(flagsNew);
+         folder->SetFlags(flagsCur);
       }
 
       // it already was there
