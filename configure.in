@@ -1118,9 +1118,57 @@ dnl how to generate dependencies...
 dnl
 dnl for now, we just support -MD on g++ and also OSF/1 Compaq cc compiler which
 dnl supports the same options
+DEPFLAGS=
 if test "x$GXX" = "xyes" -o "x$CCOSTYPE" = "xosf"; then
-    CXXFLAGS="$CXXFLAGS -MD"
-    CFLAGS="$CFLAGS -MMD"
+    DEPFLAGS="-MMD"
+elif test "x$CCOSTYPE" = "xsol"; then
+    dnl Sun Forte C/C++ compiler is reported to have these
+    DEPFLAGS="-xM1"
+fi
+
+dnl now check that these flags are really supported by the compiler
+if test "x$DEPFLAGS" != "x"; then
+    dnl check that the compiler really accepts it unless it is gcc for which
+    dnl we're sure that it always does
+    if test "x$GXX" != "xyes"; then
+	AC_CACHE_CHECK(whether ${CXX} accepts ${DEPFLAGS},
+		m_cv_cxx_depflags,
+		[
+		    echo 'void f(){}' >conftest.cc
+		    case "`${CXX} ${DEPFLAGS} -c conftest.cc 2>&1`" in
+			'')	m_cv_cxx_depflags=yes ;;
+			*)	m_cv_cxx_depflags=no ;;
+		    esac
+		    rm -f conftest*
+		])
+	if test "x$m_cv_cxx_depflags" != "xyes"; then
+	    DEPFLAGS=""
+	fi
+    fi
+
+    if test "x$DEPFLAGS" != "x"; then
+	if test "x$GCC" != "xyes"; then
+	    AC_CACHE_CHECK(whether ${CC} accepts ${DEPFLAGS},
+		    m_cv_c_depflags,
+		    [
+			echo 'void f(){}' >conftest.cc
+			case "`${CXX} ${DEPFLAGS} -c conftest.cc 2>&1`" in
+			    '')	m_cv_c_depflags=yes ;;
+			    *)	m_cv_c_depflags=no ;;
+			esac
+			rm -f conftest*
+		    ])
+	    if test "x$m_cv_c_depflags" != "xyes"; then
+		DEPFLAGS=""
+	    fi
+	fi
+    fi
+fi
+
+dnl finally use the DEPFLAGS we found above
+if test "x$DEPFLAGS" != "x"; then
+    CXXFLAGS="$CXXFLAGS $DEPFLAGS"
+    CFLAGS="$CFLAGS $DEPFLAGS"
 else
     AC_MSG_WARN([*** dependencies not supported ***
 		    Dependencies are not supported for this compiler.  If this
