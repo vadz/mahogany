@@ -1020,7 +1020,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "to be replaced with the total number of messages and the\n"
                   "number of unseen messages respectively."),
                   Field_Message, -1 },
-   { gettext_noop("Folder tree format:"), Field_Text, -1 },
+   { gettext_noop("Folder tree format:"), Field_Text | Field_Restart, -1 },
    { gettext_noop("By default, if the folder has new/recent/unread messages\n"
                   "its parent is shown in the same state as well. Disable\n"
                   "it below if you don't like it (this makes sense mostly\n"
