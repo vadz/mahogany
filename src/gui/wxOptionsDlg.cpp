@@ -486,9 +486,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "Leave these fields empty unless told to set it up by your ISP."),
      Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,   -1,           },
-   { gettext_noop("SMTP server pa&ssword"),         Field_Passwd,   -1,           },
+   { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
-   { gettext_noop("NNTP server pass&word"),         Field_Passwd,   -1,           },
+   { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
@@ -1094,25 +1094,33 @@ void wxOptionsPage::UpdateUI()
 
          // avoid signed/unsigned mismatch in expressions
          size_t nCheck = (size_t)nCheckField;
-         wxASSERT( GetFieldType(nCheck) == Field_Bool ||
-                   GetFieldType(nCheck) == Field_Action );
-         wxASSERT( nCheck >= m_nFirst && nCheck < m_nLast );
+         wxCHECK_RET( nCheck >= m_nFirst && nCheck < m_nLast,
+                      "control index out of range" );
 
-         // enable only if the checkbox is checked
          bool bEnable = true;
          if ( GetFieldType(nCheck) == Field_Bool )
          {
-            wxCheckBox *checkbox = (wxCheckBox *)GetControl(nCheck);
-            wxASSERT( checkbox->IsKindOf(CLASSINFO(wxCheckBox)) );
+            // enable only if the checkbox is checked
+            wxCheckBox *checkbox = wxStaticCast(GetControl(nCheck), wxCheckBox);
 
             bEnable = checkbox->GetValue();
          }
-         else
+         else if ( GetFieldType(nCheck) == Field_Action )
          {
-            wxRadioBox *radiobox = (wxRadioBox *)GetControl(nCheck);
+            // only enable if the radiobox selection is 0 (meaning "yes")
+            wxRadioBox *radiobox = wxStaticCast(GetControl(nCheck), wxRadioBox);
 
             if ( radiobox->GetSelection() == 0 ) // FIXME hardcoded!
                bEnable = false;
+         }
+         else
+         {
+            // assume that this is one of the text controls
+            wxTextCtrl *text = wxStaticCast(GetControl(nCheck), wxTextCtrl);
+            wxCHECK_RET( text, "can't depend on this control type" );
+
+            // only enable if the text control has something
+            bEnable = !text->GetValue().IsEmpty();
          }
 
          wxControl *control = GetControl(n);
@@ -1211,7 +1219,6 @@ bool wxOptionsPage::TransferDataToWindow()
             break;
 
          case Field_Action:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
             wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
             break;
 
