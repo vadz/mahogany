@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Mar 22 10:29:05 1999
+#This file was created by <karsten> Sun Mar 28 19:02:20 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -324,6 +324,8 @@ The intent of this document is to state the conditions under which this
 This license is based on Perl's ``Artistic License'' and has been adapted
  to better suit Mahogany.
  It aims to confirm with the Open-Source specification.
+ If you should have any questions about this license, are unhappy with it
+ or simply would like to comment on it, please get in touch with us.
 \layout Subsubsection
 
 Definitions
@@ -761,7 +763,7 @@ All other options except those mentioned in the previous subsection can
  This dialog has several pages which are described in more details below:
 \layout Subsubsection
 
-Identity page
+Identity page_4102_
 \layout Standard
 
 
@@ -830,19 +832,13 @@ This is the server used for reading USENET newsgroups.
 Personal name
 \layout Subsubsection
 
-Network page
+Folders page_4107_
 \layout Standard
 
 TODO
 \layout Subsubsection
 
-Folders page
-\layout Standard
-
-TODO
-\layout Subsubsection
-
-Python page
+Python page_4103_
 \layout Standard
 
 (only if you have a Python-enabled version of Mahogany)
@@ -856,7 +852,7 @@ Python page
 
 \layout Subsubsection
 
-Addressbook page
+Addressbook page_4104_
 \layout Standard
 
 Mahogany may automatically remember all addresses from all e-mail messages
@@ -1014,7 +1010,7 @@ As saving BBDB addressbook can potentially lead to some loss of information
  database.
 \layout Paragraph
 
-Helpers
+Helpers_4106_
 \layout Standard
 
 On this page you can customise which external helper applications Mahogany
@@ -1089,7 +1085,7 @@ The line in this field will be executed whenever Mahogany receives new mail.
  or do something else to alert him.
 \layout Subsubsection
 
-Miscellaneous
+Miscellaneous_4105_
 \layout Standard
 
 All options which don't fit in any other pages areb collected here.
@@ -1918,6 +1914,10 @@ Of course, feel free to change the two debug options to
 --with-debug
 \family default 
 , or it will fail.
+ 
+\shape italic 
+Note: the --with/--without arguments are prefixed with a double hyphen,
+ not just a single one, as it might show up in some version of this document.
 \layout Subsubsection
 
 Compile and install wxGTK
@@ -1993,6 +1993,10 @@ configure
 wx-config
 \family default 
  program to call.
+ 
+\shape italic 
+Note: the --with/--without arguments are prefixed with a double hyphen,
+ not just a single one, as it might show up in some version of this document.
 \layout Subsection
 
 Compiling Mahogany

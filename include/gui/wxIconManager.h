@@ -113,6 +113,8 @@ private:
    static bool m_knowHandlers;
    /// list of supported types, terminated with -1
    static long m_wxBitmapHandlers[];
+   /// check this path first
+   static wxString ms_IconPath;
 };
 
 #endif

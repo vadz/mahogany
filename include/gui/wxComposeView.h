@@ -85,9 +85,6 @@ public:
    void Create(const String &iname = String("wxComposeView"),
         wxWindow *parent = NULL,
         ProfileBase *parentProfile = NULL,
-        String const &to = M_EMPTYSTRING,
-        String const &cc = M_EMPTYSTRING,
-        String const &bcc = M_EMPTYSTRING,
         bool hide = false);
 
    /** Constructor
@@ -126,11 +123,14 @@ public:
                    const char *mimetype = NULL,
                    const char *filename = NULL);
 
-   /// sets To field
-   void SetTo(const String &to);
-
-   /// sets CC field
-   void SetCC(const String &cc);
+   /** Sets the address fields, To:, CC: and BCC:.
+       @param To primary address to send mail to
+       @param CC carbon copy addresses
+       @param BCC blind carbon copy addresses
+   */
+   void SetAddresses(const String &To,
+                     const String &CC = "",
+                     const String & = "");
 
    /// sets Subject field
    void SetSubject(const String &subj);
@@ -167,6 +167,12 @@ public:
 
    /// for wxAddressTextCtrl usage:
    ProfileBase *GetProfile(void) const { return m_Profile; }
+
+   /** Adds an extra header line.
+       @param entry name of header entry
+       @param value value of header entry
+   */
+   void AddHeaderEntry(const String &entry, const String &value);
 protected:
    // helpers
    // -------
@@ -192,6 +198,9 @@ private:
    /// compose menu
    wxMenu *composeMenu;
 
+   /// The message to be composed.
+   class SendMessageCC * m_msg;
+   
    /**@name Input fields (arranged into an array) */
    //@{
       /// The text fields

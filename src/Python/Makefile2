@@ -9,7 +9,7 @@
 
 CWD = Python
 
-SWIGSRC = MAppBase.i MailFolder.i MString.i Profile.i Message.i MObject.i
+SWIGSRC = MAppBase.i MailFolder.i MString.i Profile.i Message.i MObject.i #SendMessageCC.i
 CPPSRC = InitPython.cpp PythonHelp.cpp
 SRC=$(CXXSRC) *.cpp
 

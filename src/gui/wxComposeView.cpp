@@ -414,7 +414,6 @@ void wxComposeView::EnableEditing(bool enable)
 void
 wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
                       ProfileBase *parentProfile,
-                      String const &to, String const &cc, String const &bcc,
                       bool hide)
 {
    CHECK_RET( !initialised, "wxComposeView created twice" );
@@ -576,18 +575,12 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // -----------------------
 
    // set def values for the headers
-   if(m_txtFields[Field_To]) {
-      m_txtFields[Field_To]->SetValue(
-         strutil_isempty(to) ? READ_CONFIG(m_Profile, MP_COMPOSE_TO) : to);
-   }
-   if(m_txtFields[Field_Cc]) {
-      m_txtFields[Field_Cc]->SetValue(
-         strutil_isempty(cc) ? READ_CONFIG(m_Profile, MP_COMPOSE_CC) : cc);
-   }
-   if(m_txtFields[Field_Bcc]) {
-      m_txtFields[Field_Bcc]->SetValue(
-         strutil_isempty(bcc) ? READ_CONFIG(m_Profile, MP_COMPOSE_BCC) : bcc);
-   }
+   if(m_txtFields[Field_To]) 
+      m_txtFields[Field_To]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
+   if(m_txtFields[Field_Cc]) 
+      m_txtFields[Field_Cc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
+   if(m_txtFields[Field_Bcc]) 
+      m_txtFields[Field_Bcc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
 
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
@@ -719,9 +712,9 @@ wxComposeView::wxComposeView(const String &iname,
 
    m_pidEditor = 0;
    m_procExtEdit = NULL;
-
    m_fieldLast = Field_Max;
-   Create(iname,parent,parentProfile, "","","",hide);
+   Create(iname,parent,parentProfile);
+   m_msg = new SendMessageCC(m_Profile);
    SetTitle(_("M : Message Composition"));
 }
 
@@ -732,6 +725,7 @@ wxComposeView::~wxComposeView()
       m_Profile->DecRef();
       delete m_LayoutWindow;
    }
+   delete m_msg;
 }
 
 // ----------------------------------------------------------------------------
@@ -1125,17 +1119,6 @@ wxComposeView::Send(void)
    String
       tmp2, mimeType, mimeSubType;
 
-   SendMessageCC sm
-      (
-         mApplication->GetProfile(),
-         (const char *)m_txtFields[Field_Subject]->GetValue(),
-         (const char *)m_txtFields[Field_To]->GetValue(),
-         READ_CONFIG(m_Profile, MP_SHOWCC) ? m_txtFields[Field_Cc]->GetValue().c_str()
-         : (const char *)NULL,
-         READ_CONFIG(m_Profile, MP_SHOWBCC) ? m_txtFields[Field_Bcc]->GetValue().c_str()
-         : (const char *)NULL
-         );
-
    wxLayoutObject *lo = NULL;
    MimeContent *mc = NULL;
    wxLayoutExportObject *export;
@@ -1147,7 +1130,7 @@ wxComposeView::Send(void)
       if(export->type == WXLO_EXPORT_TEXT)
       {
          String* text = export->content.text;
-         sm.AddPart
+         m_msg->AddPart
          (
             Message::MSG_TYPETEXT,
             text->c_str(), text->length(),
@@ -1179,7 +1162,7 @@ wxComposeView::Send(void)
                         p->value = wxFileNameFromPath(filename);
                         dlist.push_back(p);
 
-                        sm.AddPart
+                        m_msg->AddPart
                         (
                            mc->GetMimeCategory(),
                            buffer, size,
@@ -1214,7 +1197,7 @@ wxComposeView::Send(void)
                      p->value = wxFileNameFromPath(mc->GetFileName());
                      dlist.push_back(p);
                   }
-                  sm.AddPart
+                  m_msg->AddPart
                   (
                      mc->GetMimeCategory(),
                      mc->GetData(), mc->GetSize(),
@@ -1236,31 +1219,41 @@ wxComposeView::Send(void)
       delete export;
    }
 
-   success = sm.Send();  // true if sent
+   m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
+   m_msg->SetAddresses(
+      m_txtFields[Field_To]->GetValue(),
+      m_txtFields[Field_Cc]->GetValue(),
+      m_txtFields[Field_Bcc]->GetValue());
+      success = m_msg->Send();  // true if sent
 
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
-      sm.WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
+      m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
                        MF_PROFILE_OR_FILE);
 
    return success;
+}
+
+void
+wxComposeView::AddHeaderEntry(const String &entry,
+                              const String &value)
+{
+   m_msg->AddHeaderEntry(entry, value);
 }
 
 // -----------------------------------------------------------------------------
 // simple GUI accessors
 // -----------------------------------------------------------------------------
 
+
 /// sets To field
 void
-wxComposeView::SetTo(const String &to)
+wxComposeView::SetAddresses(const String &to,
+                            const String &cc,
+                            const String &bcc)
 {
    m_txtFields[Field_To]->SetValue(WXCPTR to.c_str());
-}
-
-/// sets CC field
-void
-wxComposeView::SetCC(const String &cc)
-{
    m_txtFields[Field_Cc]->SetValue(WXCPTR cc.c_str());
+   m_txtFields[Field_Bcc]->SetValue(WXCPTR bcc.c_str());
 }
 
 /// sets Subject field

@@ -17,9 +17,18 @@
 
 #include "FolderType.h"
 
+/** The INTARRAY define is a class which is an integer array. It needs 
+    to provide a int Count() method to return the number of elements
+    and an int operator[int] to access them.
+    We use wxArrayInt for this.
+*/
+#define INTARRAY wxArrayInt
+
 // forward declarations
 class FolderView;
 class ProfileBase;
+class INTARRAY;
+class MWindow;
 
 /**
    MailFolder base class, represents anything containig mails.
@@ -199,6 +208,66 @@ public:
        @return if true, folder sends them
    */
    virtual bool SendsNewMailEvents(void) const = 0;
+
+
+   /**@name Some higher level functionality implemented by the
+      MailFolder class on top of the other functions.
+      These functions are not used by anything else in the MailFolder
+      class and can easily be removed if needed. 
+   */
+   //@{
+   /** Save the messages to a folder.
+       @param selections the message indices which will be converted using the current listing
+       @param folderName the name of the folder to save to
+       @param profile optional profile pointer
+       @return true on success
+   */
+   bool SaveMessages(const INTARRAY *selections,
+                     String const & folderName);
+
+   /** Mark messages as deleted.   
+       @param messages pointer to an array holding the message numbers
+   */
+   void DeleteMessages(const INTARRAY *messages);
+
+   /** Mark messages as no longer deleted.
+       @param messages pointer to an array holding the message numbers
+   */
+   void UnDeleteMessages(const INTARRAY *messages);
+
+   /** Save messages to a file.
+       @param messages pointer to an array holding the message numbers
+       @parent parent window for dialog
+       @return true if messages got saved 
+   */
+   bool SaveMessagesToFile(const INTARRAY *messages, MWindow *parent = NULL);
+
+   /** Save messages to a folder.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @return true if messages got saved 
+   */
+   bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL);
+
+   /** Reply to selected messages.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @param profile pointer for environment
+   */
+   void ReplyMessages(const INTARRAY *messages,
+                      MWindow *parent = NULL, 
+                      ProfileBase *profile = NULL);
+
+   /** Forward selected messages.
+       @param messages pointer to an array holding the message numbers
+       @param parent window for dialog
+       @param profile pointer for environment
+   */
+   void ForwardMessages(const INTARRAY *messages,
+                        MWindow *parent = NULL, 
+                        ProfileBase *profile = NULL);
+
+   //@}
    
    /**@name Functions to get an overview of messages in the folder. */
    //@{

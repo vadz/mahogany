@@ -122,7 +122,7 @@ typedef long int lcoord_t;
 #  define FATALERROR(arg)     wxLogFatalError arg
 #  define INFOMESSAGE(arg)    wxLogInfo arg
 #  define LOGMESSAGE(arg)     wxLogGeneric arg
-
+#  define STATUSMESSAGE(arg)  wxLogStatus arg
 #  ifdef DEBUG
 #     define   DBGMESSAGE(arg)    wxLogDebug arg
 #     define   TRACEMESSAGE(arg)  wxLogTrace arg

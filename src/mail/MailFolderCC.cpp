@@ -52,7 +52,7 @@ static inline void CCVerbose(void) { mm_ignore_errors = false; }
     which holds information for showing lists of messages.
     The m_uid member is also used to map any access to the n-th message in 
     the folder to the correct message. I.e. when requesting
-    GetMessage(5), it will use the message with the m_uid from the 5th 
+    GetMessage(5), it will use the message with the m_uid from the 6th 
     entry in the list.
 */
 class HeaderInfoCC : public HeaderInfo
@@ -403,8 +403,8 @@ MailFolderCC::CountMessages(void) const
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   ASSERT(index <= m_NumOfMessages && index >= 1);
-   MessageCC *m = MessageCC::CreateMessageCC(this,m_Listing[index-1].m_Uid);
+   ASSERT(index < m_NumOfMessages && index >= 0);
+   MessageCC *m = MessageCC::CreateMessageCC(this,m_Listing[index].m_Uid);
    ProcessEventQueue();
    return m;
 }
@@ -451,8 +451,8 @@ MailFolderCC::SetMessageFlag(unsigned long msgno,
                              bool set)
 {
    ASSERT(m_Listing);
-   ASSERT(msgno >= 1 && msgno <= m_NumOfMessages);
-   String sequence = strutil_ultoa(m_Listing[msgno-1].m_Uid);
+   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
+   String sequence = strutil_ultoa(m_Listing[msgno].m_Uid);
    SetSequenceFlag(sequence,flag,set);
 }
 
@@ -551,11 +551,7 @@ void
 MailFolderCC::BuildListing(void)
 {
    m_NumOfMessages = m_MailStream->nmsgs;
-//   if(GetType() == MF_NNTP) // only list RECENT messages
-//      m_NumOfMessages = m_MailStream->recent;
    
-   // now we know how many messages there are
-
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
       delete [] m_Listing;
@@ -617,9 +613,9 @@ MailFolderCC::BuildListing(void)
       unsigned long n = m_NumOfMessages - m_OldNumOfMessages;
       unsigned long *messageIDs = new unsigned long[n];
 
-      // actually these are no IDs, but sequence numbers, which is fine.
+      // actually these are no IDs, but indices into the listing
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_OldNumOfMessages + i + 1;
+         messageIDs[i] = m_OldNumOfMessages + i;
 
       MEventNewMailData data(this, n, messageIDs);
       MEventManager::Send(data);

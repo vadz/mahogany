@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: handling of Unix mail folders                  *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -14,6 +14,7 @@
 
 #ifndef USE_PCH
 #   include  "Mcommon.h"
+#   include  "guidef.h"    // only for high-level functions
 #   include  "strutil.h"
 #   include  "Profile.h"
 #endif
@@ -137,3 +138,206 @@ MailFolder::ConvertMessageStatusToString(int status)
 
    return strstatus;
 }
+
+/*-------------------------------------------------------------------*
+ * Higher level functionality, nothing else depends on this.
+ *-------------------------------------------------------------------*/
+ 
+
+#include "wx/dynarray.h"
+#include "gui/wxComposeView.h"
+#include "wx/persctrl.h"
+#include "MDialogs.h"
+#include "MApplication.h"
+
+bool
+MailFolder::SaveMessages(const INTARRAY *selections,
+                         String const & folderName)
+{
+   int
+      n = selections->Count(),
+      i;
+   MailFolder
+      *mf;
+   
+   if(strutil_isempty(folderName))
+      return false;
+
+   Message *msg;
+   mf = MailFolder::OpenFolder(MF_PROFILE, folderName);
+   if(! mf)
+   {
+      String msg;
+      msg << _("Cannot open folder '") << folderName << "'.";
+      ERRORMESSAGE((msg));
+      return false;
+   }
+   bool events = mf->SendsNewMailEvents();
+   mf->EnableNewMailEvents(false);
+   for(i = 0; i < n; i++)
+   {
+      msg = GetMessage((*selections)[i]);
+      mf->AppendMessage(*msg);
+      msg->DecRef();
+   }
+   mf->Ping(); // update any views
+   mf->EnableNewMailEvents(events);
+   mf->DecRef();
+   return true;
+}
+
+
+void
+MailFolder::DeleteMessages(const INTARRAY *selections)
+{
+   int n = selections->Count();
+   int i;
+   for(i = 0; i < n; i++)
+      DeleteMessage((*selections)[i]);
+}
+
+void
+MailFolder::UnDeleteMessages(const INTARRAY *selections)
+{
+   int n = selections->Count();
+   int i;
+   for(i = 0; i < n; i++)
+      UnDeleteMessage((*selections)[i]);
+}
+
+bool
+MailFolder::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
+{
+   bool rc = false;
+   MFolder *folder = MDialog_FolderChoose(parent);
+   if ( folder )
+   {
+      //FIXME +1 is apparently needed to skip the '/'
+      rc = SaveMessages(selections, folder->GetFullName().c_str() + 1);
+      folder->DecRef();
+   }
+   return rc;
+}
+
+bool
+MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
+{
+
+   String filename = wxPFileSelector("MsgSave",
+                                     _("Choose file to save message to"),
+                                     NULL, NULL, NULL,
+                                     _("All files (*.*)|*.*"),
+                                     wxSAVE | wxOVERWRITE_PROMPT,
+                                     parent);
+   if(filename)
+   {
+      // truncate the file
+      int fd = open(filename, O_CREAT|O_TRUNC, 0666);
+      if(fd != -1) close(fd);
+      return SaveMessages(selections,filename);
+   }
+   else
+      return false;
+}
+
+void
+MailFolder::ReplyMessages(const INTARRAY *selections,
+                          MWindow *parent, 
+                          ProfileBase *profile)
+{
+   int i,np,p;
+   String str;
+   String str2, prefix;
+   const char *cptr;
+   wxComposeView *cv;
+   Message *msg;
+
+   if(! profile) profile = mApplication->GetProfile();
+   int n = selections->Count();
+   prefix = READ_CONFIG(profile, MP_REPLY_MSGPREFIX);
+   for(i = 0; i < n; i++)
+   {
+      cv = GLOBAL_NEW wxComposeView(_("Reply"), parent, profile);
+      str = "";
+      msg = GetMessage((*selections)[i]);
+      np = msg->CountParts();
+      for(p = 0; p < np; p++)
+      {
+         if(msg->GetPartType(p) == Message::MSG_TYPETEXT)
+         {
+            str = msg->GetPartContent(p);
+            cptr = str.c_str();
+            str2 = prefix;
+            while(*cptr)
+            {
+               if(*cptr == '\r')
+               {
+                  cptr++;
+                  continue;
+               }
+               str2 += *cptr;
+               if(*cptr == '\n' && *(cptr+1))
+               {
+                  str2 += prefix;
+               }
+               cptr++;
+            }
+            cv->InsertText(str2);
+         }
+      }
+      cv->Show(TRUE);
+      String
+         name, email;
+      email = msg->Address(name, MAT_REPLYTO);
+      if(name.length() > 0)
+         email = name + String(" <") + email + String(">");
+      cv->SetAddresses(email);
+      cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
+                     + msg->Subject());
+      String references;
+      msg->GetHeaderLine("References", references);
+      references = references.AfterFirst(':');
+      cv->AddHeaderEntry("References:",references);
+      String messageid;
+      msg->GetHeaderLine("Message-ID", messageid);
+      messageid = messageid.AfterFirst(':');
+      cv->AddHeaderEntry("In-Reply-To:",messageid);
+      
+      SafeDecRef(msg);
+      wxString seq;
+      seq << (*selections)[i];
+      SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
+   }
+}
+
+
+void
+MailFolder::ForwardMessages(const INTARRAY *selections,
+                            MWindow *parent,
+                            ProfileBase *profile)
+{
+   int i;
+   String str;
+   String str2, prefix;
+   wxComposeView *cv;
+   Message *msg;
+
+   if(! profile) profile = mApplication->GetProfile();
+   int n = selections->Count();
+   prefix = READ_CONFIG(GetProfile(), MP_REPLY_MSGPREFIX);
+   for(i = 0; i < n; i++)
+   {
+      str = "";
+      msg = GetMessage((*selections)[i]);
+      cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
+                                    GetProfile());
+      cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
+                                 + msg->Subject());
+
+      msg->WriteToString(str);
+      cv->InsertData(strutil_strdup(str), str.Length(),
+                     "MESSAGE/RFC822");
+      SafeDecRef(msg);
+   }
+}
+

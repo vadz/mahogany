@@ -72,26 +72,104 @@ extern "C"
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
-SendMessageCC::SendMessageCC(ProfileBase *iprof)
+SendMessageCC::SendMessageCC(ProfileBase *iprof,
+                             Protocol protocol)
 {
-   Create(iprof);
-}
-
-SendMessageCC::SendMessageCC(ProfileBase *iprof, String const &subject,
-                             String const &to, String const &cc,
-                             String const &bcc)
-{
-   Create(iprof, subject, to, cc, bcc);
+   Create(protocol, iprof);
 }
 
 void
-SendMessageCC::Create(ProfileBase *iprof)
+SendMessageCC::Create(Protocol protocol,
+                      ProfileBase *iprof)
 {
-     
+   String tmpstr;
+   
    profile = iprof;
    profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
    m_headerValues = NULL;
+   m_protocol = protocol;
+
+   env = mail_newenvelope();
+   body = mail_newbody();
+
+   env->from = mail_newaddr();
+   env->from->personal =
+      CPYSTR(profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
+   env->from->mailbox =
+      CPYSTR(profile->readEntry(MP_USERNAME, MP_USERNAME_D));
+   env->from->host =
+      CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   env->return_path = mail_newaddr ();
+
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(strutil_isempty(tmpstr))
+      tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
+   else
+      tmpstr = strutil_before(tmpstr,'@');
+   env->return_path->mailbox = CPYSTR(tmpstr);
+
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(strutil_isempty(tmpstr))
+      tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+   else
+      tmpstr = strutil_after(tmpstr,'@');
+   env->return_path->host = CPYSTR(tmpstr);
+
+   body->type = TYPEMULTIPART;
+   body->nested.part = mail_newbody_part();
+   body->nested.part->next = NULL;
+   nextpart = body->nested.part;
+   lastpart = nextpart;
+}
+
+void
+SendMessageCC::SetSubject(const String &subject)
+{
+   if(env->subject) delete [] env->subject;
+   env->subject = CPYSTR(subject.c_str());
+}
+   
+void
+SendMessageCC::SetAddresses(const String &to,
+                            const String &cc,
+                            const String &bcc)
+{
+   String
+      tmpstr;
+   char
+      * tmp,
+      * tmp2;
+
+   // If Build() has already been called, then it's too late to change 
+   // anything.
+   ASSERT(m_headerNames == NULL);
+   
+   if(to.Length())
+   {
+      ASSERT(env->to == NIL);
+      tmpstr = to;   ExtractFccFolders(tmpstr);
+      tmp = strutil_strdup(tmpstr);
+      tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      rfc822_parse_adrlist (&env->to,tmp,tmp2);
+      delete [] tmp; delete [] tmp2;
+   }
+   if(cc.Length())
+   {
+      ASSERT(env->cc == NIL);
+      tmpstr = cc;   ExtractFccFolders(tmpstr);
+      tmp = strutil_strdup(tmpstr);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      rfc822_parse_adrlist (&env->cc,tmp,tmp2);
+      delete [] tmp; delete [] tmp2;
+   }
+   if(bcc.Length())
+   {
+      ASSERT(env->bcc == NIL);
+      tmpstr = bcc;   ExtractFccFolders(tmpstr);
+      tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+      rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
+      delete [] tmp; delete [] tmp2;
+   }
 }
 
 void
@@ -118,65 +196,6 @@ SendMessageCC::ExtractFccFolders(String &addresses)
       }
    }
 }
-
-void
-SendMessageCC::Create(ProfileBase *iprof,
-                      String const &subject,
-                      String const &to, String const &cc, String const &bcc)
-{
-   char  *tmp, *tmp2;
-   String tmpstr;
-   
-   Create(iprof);
-   env = mail_newenvelope();
-   body = mail_newbody();
-   env->from = mail_newaddr();
-   env->from->personal =
-      CPYSTR(profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
-   env->from->mailbox =
-      CPYSTR(profile->readEntry(MP_USERNAME, MP_USERNAME_D));
-   env->from->host =
-      CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-   env->return_path = mail_newaddr ();
-
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(strutil_isempty(tmpstr))
-      tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
-   else
-      tmpstr = strutil_before(tmpstr,'@');
-   env->return_path->mailbox = CPYSTR(tmpstr);
-
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(strutil_isempty(tmpstr))
-      tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
-   else
-      tmpstr = strutil_after(tmpstr,'@');
-   env->return_path->host = CPYSTR(tmpstr);
-
-   tmpstr = to;   ExtractFccFolders(tmpstr);
-   tmp = strutil_strdup(tmpstr);
-   tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-   rfc822_parse_adrlist (&env->to,tmp,tmp2);
-   delete [] tmp; delete [] tmp2;
-  
-   tmpstr = cc;   ExtractFccFolders(tmpstr);
-   tmp = strutil_strdup(tmpstr);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-   rfc822_parse_adrlist (&env->cc,tmp,tmp2);
-   delete [] tmp; delete [] tmp2;
-
-   tmpstr = bcc;   ExtractFccFolders(tmpstr);
-   tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
-   rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
-   delete [] tmp; delete [] tmp2;
-
-   env->subject = CPYSTR(subject.c_str());
-   body->type = TYPEMULTIPART;
-   body->nested.part = mail_newbody_part();
-   body->nested.part->next = NULL;
-   nextpart = body->nested.part;
-   lastpart = nextpart;
-}
-
 
 /** Adds an extra header line.
     @param entry name of header entry
@@ -426,16 +445,39 @@ SendMessageCC::Send(void)
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
-   
-   // notice that we _must_ assign the result to this string!
-   String host = READ_CONFIG(profile, MP_SMTPHOST);
-   hostlist[0] = host;
-   hostlist[1] = NIL;
 
-   if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
+   String host;
+   hostlist[1] = NIL;
+   switch(m_protocol)
    {
-      if (smtp_mail (stream,"MAIL",env,body))
-         LOGMESSAGE((M_LOG_DEFAULT,"SMTP: MAIL [Ok]"));
+   case Prot_SMTP:
+      // notice that we _must_ assign the result to this string!
+      host = READ_CONFIG(profile, MP_SMTPHOST);
+      hostlist[0] = host;
+      stream = smtp_open ((char **)hostlist,NIL);
+      break;
+   case Prot_NNTP:
+      // notice that we _must_ assign the result to this string!
+      host = READ_CONFIG(profile, MP_NNTPHOST);
+      hostlist[0] = host;
+      stream = nntp_open ((char **)hostlist,NIL); break;
+   }
+
+   if (stream)
+   {
+      switch(m_protocol)
+      {
+      case Prot_SMTP:
+         success = smtp_mail (stream,"MAIL",env,body);
+         smtp_close (stream);
+         break;
+      case Prot_NNTP:
+         success = nntp_mail (stream,env,body); 
+         nntp_close (stream);
+         break;
+      }
+      if(success)
+         LOGMESSAGE((M_LOG_DEFAULT,"MAIL [Ok]"));
       else
       {
          sprintf (tmpbuf, "[Failed - %s]",stream->reply);
@@ -443,12 +485,9 @@ SendMessageCC::Send(void)
          success = false;
       }
    }
-
-   if (stream)
-      smtp_close (stream);
    else
-   {
-      ERRORMESSAGE (("[Can't open connection to any server]"));
+   {   
+      ERRORMESSAGE (("[Cannot open connection to any server]"));
       success = false;
    }
    return success;

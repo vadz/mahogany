@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -82,6 +82,9 @@ static const int wxTraceIconLoading = 0x000;
 // ----------------------------------------------------------------------------
 // private data
 // ----------------------------------------------------------------------------
+
+/// the path where the last icon was found
+wxString wxIconManager::ms_IconPath = "";
 
 /// valid filename extensions for icon files
 static const char *wxIconManagerFileExtensions[] =
@@ -451,7 +454,9 @@ wxIconManager::GetIcon(String const &_iconName)
    PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
    pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
    pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-
+   if(ms_IconPath.Length() > 0) pf.AddPaths(ms_IconPath,
+                                           true /*prepend */);
+   
    IconData *id;
 
    String name;
@@ -477,6 +482,7 @@ wxIconManager::GetIcon(String const &_iconName)
       if( found )
       {
 #ifdef   OS_UNIX
+         ms_IconPath = name.BeforeLast('/');
          char **ptr = LoadImageXpm(name);
          if(ptr)
          {
@@ -484,6 +490,7 @@ wxIconManager::GetIcon(String const &_iconName)
             FreeImage(ptr);
 #else
          // Windows:
+         ms_IconPath = name.BeforeLast('\\');
          if(icn.LoadFile(Str(name),0))
          {
 #endif   

@@ -316,7 +316,6 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 
    SetBackgroundColour( wxColour("White") );
 
-   
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 }
 
@@ -343,6 +342,12 @@ wxMessageView::wxMessageView(MailFolder *folder,
    Show(TRUE);
 }
 
+MailFolder *
+wxMessageView::GetFolder(void)
+{
+   return m_FolderView ? m_FolderView->GetFolder() : m_folder;
+}
+
 /// Tell it a new parent profile - in case folder changed.
 void
 wxMessageView::SetParentProfile(ProfileBase *profile)
@@ -365,13 +370,13 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    m_ProfileValues.inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
    m_ProfileValues.browser = READ_CONFIG(m_Profile, MP_BROWSER);
    m_ProfileValues.browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
-   m_ProfileValues.autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
-   m_ProfileValues.autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
-   m_ProfileValues.autoCollectBookName = READ_CONFIG(profile, MP_AUTOCOLLECT_ADB);
+   m_ProfileValues.autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
+   m_ProfileValues.autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
+   m_ProfileValues.autoCollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
 #ifdef OS_UNIX
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
-   m_ProfileValues.showFaces = READ_CONFIG(profile, MP_SHOW_XFACES) != 0;
+   m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
 }
    
 void
@@ -729,7 +734,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 
    /* First, we check for those contents that we handle in M itself: */
    // this we handle internally
-   //if(mimetype == "MESSAGE/RFC822")
    if(mimetype.length() >= strlen("MESSAGE") &&
       mimetype.Left(strlen("MESSAGE")) == "MESSAGE")
    {
@@ -739,7 +743,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
                                                  filename);
          wxMessageViewFrame * f = GLOBAL_NEW
-            wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
+            wxMessageViewFrame(mf, 1, NULL, m_Parent);
          f->SetTitle("M : " + mimetype);
          mf->DecRef();
       }
@@ -1004,7 +1008,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
             {
                wxEndBusyCursor();
                wxComposeView *cv = new wxComposeView("Reply",frame,m_Profile);
-               cv->SetTo(ci->GetUrl().Right(ci->GetUrl().Length()-7));
+               cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
                cv->Show(TRUE);
                break;
             }
@@ -1135,30 +1139,29 @@ wxMessageView::DoMenuCommand(int id)
       PrintPreview();
       break;
    case WXMENU_MSG_REPLY:
-      // passed to folderview:
-      if(m_FolderView && m_seqno != -1)
-         m_FolderView->ReplyMessages(msgs);
+      if(m_seqno != -1)
+         GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
       break;
    case WXMENU_MSG_FORWARD:
-      if(m_FolderView && m_seqno != -1)
-         m_FolderView->ForwardMessages(msgs);
+      if(m_seqno != -1)
+         GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_FolderView && m_seqno != -1)
-         m_FolderView->SaveMessagesToFolder(msgs);
+      if(m_seqno != -1)
+         GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_FolderView && m_seqno != -1)
-         m_FolderView->SaveMessagesToFile(msgs);
+      if(m_seqno != -1)
+         GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_DELETE:
-      if(m_FolderView && m_seqno != -1)
-         m_FolderView->DeleteMessages(msgs);
+      if(m_seqno != -1)
+         GetFolder()->DeleteMessages(&msgs);
       break;
    case WXMENU_MSG_UNDELETE:
-     if(m_FolderView && m_seqno != -1)
-         m_FolderView->UnDeleteMessages(msgs);
+      if(m_seqno != -1)
+         GetFolder()->UnDeleteMessages(&msgs);
       break;
 #ifdef USE_PS_PRINTING
    case WXMENU_MSG_PRINT_PS:

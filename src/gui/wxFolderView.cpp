@@ -65,6 +65,7 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
+
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
@@ -106,10 +107,10 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
       switch(keycodes_en[idx])
       {
       case 'D':
-         m_FolderView->DeleteMessages(selections);
+         m_FolderView->GetFolder()->DeleteMessages(&selections);
          break;
       case 'U':
-         m_FolderView->UnDeleteMessages(selections);
+         m_FolderView->GetFolder()->UnDeleteMessages(&selections);
          break;
       case 'X':
          m_FolderView->GetFolder()->ExpungeMessages();
@@ -122,13 +123,19 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          break;
       case 'M':
          m_FolderView->SaveMessagesToFolder(selections);
-         m_FolderView->DeleteMessages(selections);
+         m_FolderView->GetFolder()->DeleteMessages(&selections);
          break;
       case 'R':
-         m_FolderView->ReplyMessages(selections);
+         m_FolderView->GetFolder()->ReplyMessages(
+            &selections,
+            GetFrame(this),
+            m_FolderView->GetProfile());
          break;
       case 'F':
-         m_FolderView->ForwardMessages(selections);
+         m_FolderView->GetFolder()->ForwardMessages(
+            &selections,
+            GetFrame(this),
+            m_FolderView->GetProfile());
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
@@ -504,8 +511,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_MOVE_TO_FOLDER:
       GetSelections(selections);
-      SaveMessagesToFolder(selections);
-      DeleteMessages(selections);  //FIXME: we should test for save being successful
+      if(SaveMessagesToFolder(selections))
+         m_MailFolder->DeleteMessages(&selections);
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
       GetSelections(selections);
@@ -513,19 +520,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_REPLY:
       GetSelections(selections);
-      ReplyMessages(selections);
+      m_MailFolder->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile);
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      ForwardMessages(selections);
+      m_MailFolder->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile);
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
-      UnDeleteMessages(selections);
+      m_MailFolder->UnDeleteMessages(&selections);
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
-      DeleteMessages(selections);
+      m_MailFolder->DeleteMessages(&selections);
       break;
    case WXMENU_MSG_PRINT:
       GetSelections(selections);
@@ -589,37 +596,13 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
    int i;
    for(i = 0; i < n; i++)
    {
-      mptr = m_MailFolder->GetMessage(selections[i]+1);
+      mptr = m_MailFolder->GetMessage(selections[i]);
       title = mptr->Subject() + " - " + mptr->From();
-      mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i]+1,
+      mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i],
                                          this);
       mv->SetTitle(title);
       SafeDecRef(mptr);
    }
-}
-
-void
-wxFolderView::DeleteMessages(const wxArrayInt& selections)
-{
-   int n = selections.Count();
-   int i;
-   for(i = 0; i < n; i++)
-      m_MailFolder->DeleteMessage(selections[i]+1);
-   Update();
-
-   wxLogStatus(GetFrame(m_Parent), _("%d messages deleted"), n);
-}
-
-void
-wxFolderView::UnDeleteMessages(const wxArrayInt& selections)
-{
-   int n = selections.Count();
-   int i;
-   for(i = 0; i < n; i++)
-      m_MailFolder->UnDeleteMessage(selections[i]+1);
-   Update();
-
-   wxLogStatus(GetFrame(m_Parent), _("%d messages undeleted"), n);
 }
 
 void
@@ -658,167 +641,36 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
    }
 }
 
-void
-wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderName)
-{
-   int i;
 
-   MailFolder   *mf;
-
-   if(strutil_isempty(folderName))
-      return;
-   Message *msg;
-   
-   int n = selections.Count();
-   mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-   if(! mf)
-   {
-      wxString msg;
-      msg << _("Cannot open folder '") << folderName << "'.";
-      wxLogError(msg);
-      return;
-   }
-   bool events = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false);
-   for(i = 0; i < n; i++)
-   {
-      msg = m_MailFolder->GetMessage(selections[i]+1);
-      mf->AppendMessage(*msg);
-      SafeDecRef(msg);
-   }
-   mf->Ping(); // update any views
-   mf->EnableNewMailEvents(events);
-   mf->DecRef();
-   wxLogStatus(GetFrame(m_Parent), _("%d messages saved"), n);
-}
-
-void
+bool
 wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
 {
-   MFolder *folder = MDialog_FolderChoose(m_Parent);
-   if ( folder )
-   {
-      // +1 is apparently needed to skip the '/'
-      SaveMessages(selections, folder->GetFullName().c_str() + 1);
-
-      folder->DecRef();
-   }
+   String msg;
+   bool rc;
+   rc = m_MailFolder->SaveMessagesToFolder(&selections,
+                                           GetFrame(m_Parent));
+   if(rc)
+     msg.Printf(_("%d messages saved"), selections.Count());
    else
-   {
-      wxLogStatus(GetFrame(m_Parent), _("Cancelled"));
-   }
+      msg.Printf(_("Saving messages failed."));
+   wxLogStatus(GetFrame(m_Parent), msg);
+   return rc;
 }
 
-void
+bool
 wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
 {
-   String filename = wxPFileSelector("MsgSave",
-                                     _("Choose file to save message to"),
-                                     NULL, NULL, NULL,
-                                     _("All files (*.*)|*.*"),
-                                     wxSAVE | wxOVERWRITE_PROMPT,
-                                     m_Parent);
-
-   if ( !filename )
-   {
-      wxLogStatus(GetFrame(m_Parent), _("Cancelled"));
-   }
+   String msg;
+   bool rc;
+   
+   rc = m_MailFolder->SaveMessagesToFile(&selections,
+                                         GetFrame(m_Parent));
+   if(rc)
+     msg.Printf(_("%d messages saved"), selections.Count());
    else
-   {
-      // truncate the file
-      wxFile file(filename, wxFile::write);
-      file.Close();
-
-      SaveMessages(selections,filename);
-   }
-}
-
-void
-wxFolderView::ReplyMessages(const wxArrayInt& selections)
-{
-   int i,np,p;
-   String str;
-   String str2, prefix;
-   const char *cptr;
-   wxComposeView *cv;
-   Message *msg;
-
-   int n = selections.Count();
-   prefix = READ_CONFIG(m_Profile, MP_REPLY_MSGPREFIX);
-   for(i = 0; i < n; i++)
-   {
-      cv = GLOBAL_NEW wxComposeView(_("Reply"),m_Parent, m_Profile);
-      str = "";
-      msg = m_MailFolder->GetMessage(selections[i]+1);
-      np = msg->CountParts();
-      for(p = 0; p < np; p++)
-      {
-         if(msg->GetPartType(p) == Message::MSG_TYPETEXT)
-         {
-            str = msg->GetPartContent(p);
-            cptr = str.c_str();
-            str2 = prefix;
-            while(*cptr)
-            {
-               if(*cptr == '\r')
-               {
-                  cptr++;
-                  continue;
-               }
-               str2 += *cptr;
-               if(*cptr == '\n' && *(cptr+1))
-               {
-                  str2 += prefix;
-               }
-               cptr++;
-            }
-            cv->InsertText(str2);
-         }
-      }
-      cv->Show(TRUE);
-      String
-         name, email;
-      email = msg->Address(name, MAT_REPLYTO);
-      if(name.length() > 0)
-         email = name + String(" <") + email + String(">");
-      cv->SetTo(email);
-      cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
-                     + msg->Subject());
-      SafeDecRef(msg);
-      wxString seq;
-      seq << selections[i]+1;
-      m_MailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
-   }
-}
-
-
-void
-wxFolderView::ForwardMessages(const wxArrayInt& selections)
-{
-   int i;
-   String str;
-   String str2, prefix;
-   wxComposeView *cv;
-   Message *msg;
-
-   int n = selections.Count();
-   prefix = READ_CONFIG(GetProfile(), MP_REPLY_MSGPREFIX);
-   for(i = 0; i < n; i++)
-   {
-      str = "";
-      msg = m_MailFolder->GetMessage(selections[i]+1);
-      cv = GLOBAL_NEW wxComposeView(_("Forward"),m_Parent,
-                                    GetProfile());
-      cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
-                                 + msg->Subject());
-
-      msg->WriteToString(str);
-      cv->InsertData(strutil_strdup(str), str.Length(),
-                     "MESSAGE/RFC822");
-      SafeDecRef(msg);
-   }
-
-   wxLogStatus(GetFrame(m_Parent), _("%d messages forwarded"), n);
+      msg.Printf(_("Saving messages failed."));
+   wxLogStatus(GetFrame(m_Parent), msg);
+   return rc;
 }
 
 void

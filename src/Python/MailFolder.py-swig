@@ -8,74 +8,54 @@ from MProfile import *
 from MObject import *
 
 from Message import *
-class MailFolderPtr(MObjectRCPtr):
-    MSG_STAT_NONE = MailFolderc.MailFolder_MSG_STAT_NONE
-    MSG_STAT_SEEN = MailFolderc.MailFolder_MSG_STAT_SEEN
-    MSG_STAT_DELETED = MailFolderc.MailFolder_MSG_STAT_DELETED
-    MSG_STAT_ANSWERED = MailFolderc.MailFolder_MSG_STAT_ANSWERED
-    MSG_STAT_RECENT = MailFolderc.MailFolder_MSG_STAT_RECENT
-    MSG_STAT_SEARCHED = MailFolderc.MailFolder_MSG_STAT_SEARCHED
-    MSG_STAT_FLAGGED = MailFolderc.MailFolder_MSG_STAT_FLAGGED
+class SendMessageCCPtr :
+    Prot_SMTP = MailFolderc.SendMessageCC_Prot_SMTP
+    Prot_NNTP = MailFolderc.SendMessageCC_Prot_NNTP
+    Prot_Default = MailFolderc.SendMessageCC_Prot_Default
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def RegisterView(self,arg0,*args):
-        val = apply(MailFolderc.MailFolder_RegisterView,(self.this,arg0.this,)+args)
+    def SetSubject(self,arg0):
+        val = MailFolderc.SendMessageCC_SetSubject(self.this,arg0.this)
         return val
-    def GetName(self):
-        val = MailFolderc.MailFolder_GetName(self.this)
-        val = StringPtr(val)
-        val.thisown = 1
-        return val
-    def CountMessages(self):
-        val = MailFolderc.MailFolder_CountMessages(self.this)
-        return val
-    def Ping(self):
-        val = MailFolderc.MailFolder_Ping(self.this)
-        return val
-    def GetMessage(self,arg0):
-        val = MailFolderc.MailFolder_GetMessage(self.this,arg0)
-        val = MessagePtr(val)
-        return val
-    def DeleteMessage(self,arg0):
-        val = MailFolderc.MailFolder_DeleteMessage(self.this,arg0)
-        return val
-    def UnDeleteMessage(self,arg0):
-        val = MailFolderc.MailFolder_UnDeleteMessage(self.this,arg0)
-        return val
-    def SetMessageFlag(self,arg0,arg1,*args):
-        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self.this,arg0,arg1,)+args)
-        return val
-    def SetSequenceFlag(self,arg0,arg1,*args):
-        val = apply(MailFolderc.MailFolder_SetSequenceFlag,(self.this,arg0.this,arg1,)+args)
-        return val
-    def AppendMessage(self,arg0):
-        val = MailFolderc.MailFolder_AppendMessage(self.this,arg0.this)
-        return val
-    def ExpungeMessages(self):
-        val = MailFolderc.MailFolder_ExpungeMessages(self.this)
+    def SetAddresses(self,arg0,arg1,arg2):
+        val = MailFolderc.SendMessageCC_SetAddresses(self.this,arg0.this,arg1.this,arg2.this)
         return val
     def GetProfile(self):
-        val = MailFolderc.MailFolder_GetProfile(self.this)
+        val = MailFolderc.SendMessageCC_GetProfile(self.this)
         val = ProfileBasePtr(val)
         return val
-    def GetClassName(self):
-        val = MailFolderc.MailFolder_GetClassName(self.this)
+    def AddPart(self,arg0,arg1,arg2,arg3,*args):
+        argl = map(None,args)
+        try: argl[0] = argl[0].this
+        except: pass
+        args = tuple(argl)
+        val = apply(MailFolderc.SendMessageCC_AddPart,(self.this,arg0,arg1,arg2,arg3.this,)+args)
         return val
-    def GetUpdateInterval(self):
-        val = MailFolderc.MailFolder_GetUpdateInterval(self.this)
+    def WriteToString(self,arg0):
+        val = MailFolderc.SendMessageCC_WriteToString(self.this,arg0.this)
         return val
-    def GetFirstHeaderInfo(self):
-        val = MailFolderc.MailFolder_GetFirstHeaderInfo(self.this)
+    def WriteToFile(self,arg0,*args):
+        val = apply(MailFolderc.SendMessageCC_WriteToFile,(self.this,arg0.this,)+args)
         return val
-    def GetNextHeaderInfo(self,arg0):
-        val = MailFolderc.MailFolder_GetNextHeaderInfo(self.this,arg0)
+    def WriteToFolder(self,arg0,*args):
+        val = apply(MailFolderc.SendMessageCC_WriteToFolder,(self.this,arg0.this,)+args)
         return val
+    def AddHeaderEntry(self,arg0,arg1):
+        val = MailFolderc.SendMessageCC_AddHeaderEntry(self.this,arg0.this,arg1.this)
+        return val
+    def Send(self):
+        val = MailFolderc.SendMessageCC_Send(self.this)
+        return val
+    def __del__(self):
+        if self.thisown == 1 :
+            MailFolderc.delete_SendMessageCC(self.this)
     def __repr__(self):
-        return "<C MailFolder instance>"
-class MailFolder(MailFolderPtr):
-    def __init__(self,this):
-        self.this = this
+        return "<C SendMessageCC instance>"
+class SendMessageCC(SendMessageCCPtr):
+    def __init__(self,arg0,*args) :
+        self.this = apply(MailFolderc.new_SendMessageCC,(arg0.this,)+args)
+        self.thisown = 1
 
 
 
@@ -84,18 +64,8 @@ class MailFolder(MailFolderPtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-def MailFolder_OpenFolder(arg0,arg1,arg2,arg3,arg4,arg5):
-    val = MailFolderc.MailFolder_OpenFolder(arg0,arg1.this,arg2.this,arg3.this,arg4.this,arg5.this)
-    val = MailFolderPtr(val)
-    return val
-
-def MailFolder_ConvertMessageStatusToString(arg0):
-    val = MailFolderc.MailFolder_ConvertMessageStatusToString(arg0)
-    val = StringPtr(val)
-    val.thisown = 1
-    return val
-
 
 
 #-------------- VARIABLE WRAPPERS ------------------
 
+SM_INLINE = MailFolderc.SM_INLINE

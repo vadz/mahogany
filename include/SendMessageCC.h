@@ -31,21 +31,31 @@ class SendMessageCC
    BODY		*body;
    PART		*nextpart, *lastpart;
 public:
-   /** Creates an empty object.
-       @param iprof optional pointer for a parent profile
-   */
-   SendMessageCC(ProfileBase *iprof = NULL);
+   /** SendMessageCC supports two different protocols:
+    */
+   enum Protocol { Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
+   
    /** Creates an empty object, setting some initial values.
        @param iprof optional pointer for a parent profile
-       @param subject message subject
-       @param to message To: field
-       @param cc message CC: field
-       @param bcc message BCC: field
+       @param protocol which protocol to use for sending
    */
-   SendMessageCC(ProfileBase *iprof, String const &subject,
-		 String const &to, String const &cc, String const
-		 &bcc);
+   SendMessageCC(ProfileBase *iprof,
+                 Protocol protocol = Prot_Default);
 
+   /** Sets the message subject.
+       @param subject the subject
+   */
+   void SetSubject(const String &subject);
+   
+   /** Sets the address fields, To:, CC: and BCC:.
+       @param To primary address to send mail to
+       @param CC carbon copy addresses
+       @param BCC blind carbon copy addresses
+   */
+   void SetAddresses(const String &To,
+                     const String &CC = "",
+                     const String & = "");
+   
    /** Get the profile.
        @return pointer to the profile
    */
@@ -61,8 +71,8 @@ public:
    */
    void	AddPart(MessageContentType type,
                  const char *buf, size_t len,
-                String const &subtype = M_EMPTYSTRING,
-                String const &disposition = SM_INLINE,
+                const String &subtype = M_EMPTYSTRING,
+                const String &disposition = SM_INLINE,
                 MessageParameterList const *dlist = NULL,
                 MessageParameterList const *plist = NULL);
 
@@ -75,20 +85,20 @@ public:
        @param filename file where to write to
        @param append if false, overwrite existing contents
    */
-   void WriteToFile(String const &filename, bool append = true);
+   void WriteToFile(const String &filename, bool append = true);
    
    /** Writes the message to a folder.
        @param foldername file where to write to
        @param type folder type
    */
-   void WriteToFolder(String const &foldername,
+   void WriteToFolder(const String &foldername,
                       MailFolder::Type type = MF_PROFILE );
 
    /** Adds an extra header line.
        @param entry name of header entry
        @param value value of header entry
    */
-   void AddHeaderEntry(String const &entry, String const &value);
+   void AddHeaderEntry(const String &entry, const String &value);
    
    /** Sends the message.
        @return true on success
@@ -102,11 +112,10 @@ protected:
    /// Builds the message, i.e. prepare to send it.
    void Build(void);
 private:
-/// 2nd stage constructor, see constructor
-   void Create(ProfileBase *iprof = NULL);
    /// 2nd stage constructor, see constructor
-   void	Create(ProfileBase *iprof, String const &subject,
-	       String const &to, String const &cc, String const &bcc);
+   void	Create(Protocol protocol, ProfileBase *iprof);
+   /// Protocol used for sending
+   Protocol m_protocol;
    /** @name variables managed by Build() */
    //@{
    /// names of header lines

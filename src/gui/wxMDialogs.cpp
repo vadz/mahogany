@@ -752,6 +752,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->LineBreak();
    ll->Insert(_("                      and Vadim Zeitlin"));
    ll->LineBreak();
+   ll->SetFontSize(8);
+   ll->Insert(_("This software is provied 'as is' and without any express or implied"));
+   ll->LineBreak();
+   ll->Insert(_("warranties, including, without limitation, the implied warranties"));
+   ll->LineBreak();
+   ll->Insert(_("of merchantibility and fitness for a particular purpose."));
+   ll->LineBreak();
+   ll->Insert(_("This is OpenSource(TM) software."));
    DoPaint();
    ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)

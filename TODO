@@ -48,27 +48,33 @@ VZ:
     (Just add a folder type News and I'll do the rest in MailFolder to 
      support it).
 
+- If any top level window is open (messageview/composeview), the
+  application will not exit. Happened after you changed the exit
+  behaviour, has been a bug for months.
+
 ******* Priorities for KB: ******************************
 
 
 TODO:
+- add NNTP posting:
+  From mtest.c:
+    if (stream = nntp_open (newslist,debug)) {
+      if (nntp_mail (stream,msg,body)) puts ("[Ok]");
+      else printf ("[Failed - %s]\n",stream->reply);
+---> is there but unused
 
-BUG:- saving message from messageview (called from embedded rfc822) saves
-  first message in parent folder instead. (Uses m_folderview which in
-  this case points to a different folder!) Maybe that functionality
-  should really be moved to MailFolder ??
+- add references (and In-Reply-To: ?) headers to message replies
+ --> should be there now
+
+- add a popup dialog to edit message headers in composeview
 
 - ISO8859 encoded message headers!
 - some html mail import/filtering of tags (easy, quick and dirty)
 - occasionally parts of xface header show up in following mail header
   lines (content type/parameters)
-- add note about --with instead of -with to docs.
 - copying message to non-existing folder gives error message but works
-- add references (and In-Reply-To: ?) headers to message replies
-- modify wxIconManager to recycle last found path for icons first, to
-  avoid unnecessary filesystem traversals
 - Change MessageCC code to first look for a mail cache entry via
-  mail_elt() instead of always fetching message.
+  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
 - speed up copy mail to folder by cusing c-client functionality
   wxComposeView: if replying, only mark message as answered if reply
   got sent
@@ -96,13 +102,6 @@ BUG:- saving message from messageview (called from embedded rfc822) saves
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
 - add progress indicator to image loading
-- add ext editor icon to toolbar in composeview
-
-- add NNTP posting:
-  From mtest.c:
-    if (stream = nntp_open (newslist,debug)) {
-      if (nntp_mail (stream,msg,body)) puts ("[Ok]");
-      else printf ("[Failed - %s]\n",stream->reply);
 
 - make mailfolders collectable:
   - have a "collect" flag

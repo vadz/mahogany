@@ -92,6 +92,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_print",     WXMENU_COMPOSE_PRINT,     gettext_noop("Print")         },
    { "tb_new",       WXMENU_COMPOSE_CLEAR,     gettext_noop("Clear Window")  },
    { "tb_attach",    WXMENU_COMPOSE_INSERTFILE,gettext_noop("Insert File")   },
+   { "tb_editor",    WXMENU_COMPOSE_EXTEDIT,   gettext_noop("Call external editor")   },
    { "tb_mail_send", WXMENU_COMPOSE_SEND,      gettext_noop("Send Message")  },
 
    // folder and message view frames
@@ -129,6 +130,7 @@ static const int g_aComposeTbar[] =
    WXTBAR_COMPOSE_PRINT,
    WXTBAR_COMPOSE_CLEAR,
    WXTBAR_COMPOSE_INSERT,
+   WXTBAR_COMPOSE_EXTEDIT,
    WXTBAR_SEP,
    WXTBAR_COMPOSE_SEND,
    WXTBAR_SEP,

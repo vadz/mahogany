@@ -95,18 +95,6 @@ public:
    */
    void OpenMessages(wxArrayInt const &messages);
 
-   /** Mark messages as deleted.
-       @param n number of messages to delete
-       @messages pointer to an array holding the message numbers
-   */
-   void DeleteMessages(wxArrayInt const &messages);
-
-   /** Mark messages as no longer deleted.
-       @param n number of messages to undelete
-       @messages pointer to an array holding the message numbers
-   */
-   void UnDeleteMessages(wxArrayInt const &messages);
-
    /** Print messages.
        @param n number of messages to print
        @messages pointer to an array holding the message numbers
@@ -122,27 +110,16 @@ public:
    /** Save messages to a file.
        @param n number of messages
        @messages pointer to an array holding the message numbers
+       @return true if all messages got saved
    */
-   void SaveMessagesToFile(wxArrayInt const &messages);
+   bool SaveMessagesToFile(wxArrayInt const &messages);
 
    /** Save messages to a folder.
        @param n number of messages
        @messages pointer to an array holding the message numbers
+       @return true if all messages got saved
    */
-   void SaveMessagesToFolder(wxArrayInt const &messages);
-
-   /** Reply to selected messages.
-              @param n number of messages
-       @messages pointer to an array holding the message numbers
-   */
-   void ReplyMessages(wxArrayInt const &messages);
-
-   /** Forward selected messages.
-
-       @param n number of messages
-       @messages pointer to an array holding the message numbers
-   */
-   void ForwardMessages(wxArrayInt const &messages);
+   bool SaveMessagesToFolder(wxArrayInt const &messages);
 
    /** Returns false if no items are selected
    */
@@ -158,7 +135,7 @@ public:
    /** Show a message in the preview window.
     */
    void PreviewMessage(long messageno)
-      { m_MessagePreview->ShowMessage(m_MailFolder,messageno+1); }
+      { m_MessagePreview->ShowMessage(m_MailFolder,messageno); }
    void SetSize(const int x, const int y, const int width, int height);
 
    /// return full folder name
