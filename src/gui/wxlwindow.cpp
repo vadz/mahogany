@@ -154,7 +154,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
                                  wxHSCROLL | wxVSCROLL |
                                  wxBORDER |
                                  wxWANTS_CHARS),
-                m_llist(NULL)
+                m_llist(NULL), m_CanPaint(false)
 {
    SetStatusBar(NULL); // don't use statusbar
    m_Editable = false;
@@ -847,6 +847,7 @@ wxLayoutWindow::ScrollToCursor(void)
 void
 wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 {
+   m_CanPaint = true;
 #ifdef WXLO_PARTIAL_REFRESH
    InternalPaint(NULL);
 #else
@@ -878,6 +879,7 @@ wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
 void
 wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 {
+   if (!m_CanPaint) return;
 
    wxPaintDC dc( this );
    PrepareDC( dc );

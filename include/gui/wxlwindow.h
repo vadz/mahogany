@@ -293,6 +293,8 @@ private:
 #endif
    /// For finding text and finding it again:
    wxString m_FindString;
+   /// InternalPaint cannot be called before first call to OnPaint:
+   bool m_CanPaint;
 //@}
    DECLARE_EVENT_TABLE()
 };
