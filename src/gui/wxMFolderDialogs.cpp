@@ -965,7 +965,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    {
       m_newsgroup->SetValue(value);
    }
-
+   else if (typeFolder == IMAP)
+      m_mailboxname->SetValue(value);
+   
    m_originalValues[Path] = value;
 
    if ( !m_isCreating )
