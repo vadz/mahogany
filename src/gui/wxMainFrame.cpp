@@ -75,7 +75,8 @@
 
 enum
 {
-   WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1
+   WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
+   WXMENU_DEBUG_TOGGLE_LOG
 };
 
 #endif // DEBUG
@@ -606,7 +607,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
 #ifdef DEBUG
    wxMenu *menuDebug = new wxMenu;
-   menuDebug->Append(WXMENU_DEBUG_WIZARD, "Run install &wizard...");
+   menuDebug->Append(WXMENU_DEBUG_WIZARD, _T("Run install &wizard..."));
+   menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
+                              _T("Toggle &debug logging\tCtrl-Alt-D"));
    GetMenuBar()->Append(menuDebug, "&Debug");
 #endif // debug
 
@@ -1012,6 +1015,12 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
             wxLogMessage("Wizard returned %s",
                           RunInstallWizard() ? "true" : "false");
+            break;
+
+         case WXMENU_DEBUG_TOGGLE_LOG:
+            extern bool g_debugMailForceOn;
+
+            g_debugMailForceOn = event.IsChecked();
             break;
 
          default:

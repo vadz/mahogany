@@ -1312,10 +1312,21 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
     return *m_mimeManager;
 }
 
+#ifdef DEBUG
+
+// only used from wxMainFrame.cpp to toggle debug on/off
+extern bool g_debugMailForceOn = false;
+
+#endif // DEBUG
+
 bool MAppBase::IsMailDebuggingEnabled() const
 {
    ASSERT_MSG( m_debugMail != -1, _T("command line not parsed yet!") );
 
-   return m_debugMail == 1; // don't use TRUE to avoid VC++ warning
+   return
+#ifdef DEBUG
+         g_debugMailForceOn ||
+#endif // DEBUG
+         m_debugMail == 1; // don't use TRUE to avoid VC++ warning
 }
 
