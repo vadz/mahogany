@@ -25,6 +25,14 @@
 
 #ifdef USE_PISOCK
 
+#define HAVE_LIBMAL
+
+#ifdef HAVE_LIBMAL
+ extern "C"
+ {
+#   include "mal/libmal.h"
+ }
+#endif
 
 #include "MModule.h"
 #include "Mversion.h"
@@ -85,6 +93,8 @@
 #define MP_MOD_PALMOS_SCRIPT1_D              ""
 #define MP_MOD_PALMOS_SCRIPT2                "Script2"
 #define MP_MOD_PALMOS_SCRIPT2_D              ""
+#define MP_MOD_PALMOS_SYNCMAL                "Sync to MAL server"
+#define MP_MOD_PALMOS_SYNCMAL_D              0l
 
 #define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
 
@@ -242,7 +252,10 @@ private:
    void SyncMail(void);
    void SendEMails(void);
    void StoreEMails(void);
-
+#ifdef HAVE_LIBMAL
+   void SyncMAL(void);
+#endif
+   
    void Backup(void);
 
    void Install(void);
@@ -282,6 +295,9 @@ private:
    String m_BackupExcludeList;
    String m_BackupDir;
    String m_AutoInstallDir;
+#ifdef HAVE_LIBMAL
+   String m_SyncMAL;
+#endif
 
    class wxDeviceLock *m_Lock;
 };
@@ -423,6 +439,9 @@ PalmOSModule::GetConfig(void)
    m_BackupExcludeList = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_EXCLUDELIST);
    m_AutoInstall    = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALL);
    m_AutoInstallDir = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALLDIR);
+#ifdef HAVE_LIBMAL
+   m_SyncMAL = READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAL);
+#endif
 
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
       m_Speed = speeds[0];
@@ -740,6 +759,11 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       if(m_AutoInstall)
          AutoInstall();
 
+#ifdef HAVE_LIBMAL
+      if(m_SyncMAL)
+         SyncMAL();
+#endif
+      
       m_Profile->DecRef();
       m_Profile=NULL;
    }
@@ -1649,6 +1673,107 @@ PalmOSModule::StoreEMails(void)
    SafeDecRef(mf);
 }
 
+#ifdef HAVE_LIBMAL
+void
+PalmOSModule::SyncMAL(void)
+{
+   PiConnection conn(this);
+   if ( ! IsConnected())
+      return;
+
+    PalmSyncInfo * pInfo = syncInfoNew();
+    if (NULL == pInfo)
+        return; 
+
+    /* are we using a proxy? */
+#if 0
+//jp_get_pref (syncmal_prefs, SMPREF_USE_PROXY, &ivalue, &svalue);
+    if (ivalue)
+    {
+       StatusMessage("plugin_sync - using http proxy\n");
+       jp_get_pref (syncmal_prefs, SMPREF_PROXY_ADDRESS, &ivalue, &svalue);
+        if (svalue) {
+            jp_logf (LOG_DEBUG, "plugin_sync - setting http proxy: %s\n", svalue);
+            setHttpProxy ((char *)svalue);
+        }
+        else {
+            jp_logf (LOG_FATAL,
+                     "--------------------------------------------\n"
+                     "ERROR: Proxy enabled but no proxy specified.\n"
+                     "Please specify a proxy address or unselect\n"
+                     "the Use Proxy checkbox.\n"
+                     "--------------------------------------------\n");
+            return 1;
+        }
+
+        jp_get_pref (syncmal_prefs, SMPREF_PROXY_PORT, &ivalue, &svalue);
+        if (svalue) {
+            jp_logf (LOG_DEBUG, "plugin_sync - setting http proxy port: %s\n", svalue);
+            setHttpProxyPort (atoi (svalue));
+        }
+        else {
+            jp_logf (LOG_INFO | LOG_GUI,
+                     "SyncMAL: Using default proxy port 80\n");
+            setHttpProxyPort (80);
+        }
+
+        jp_get_pref (syncmal_prefs, SMPREF_PROXY_USERNAME, &ivalue, &svalue);
+        if (svalue) {
+            if (strlen (svalue)) {
+                jp_logf (LOG_DEBUG, "plugin_sync - setting proxy username: %s\n", svalue);
+                setProxyUsername ((char *)svalue);
+            }
+        }
+
+        jp_get_pref (syncmal_prefs, SMPREF_PROXY_PASSWORD, &ivalue, &svalue);
+        if (svalue) {
+            if (strlen (svalue)) {
+                jp_logf (LOG_DEBUG, "plugin_sync - setting proxy password: xxxxxxxx\n");
+                setProxyPassword ((char *)svalue);
+            }
+        }
+    }
+
+    /* are we using SOCKS? */
+    jp_get_pref (syncmal_prefs, SMPREF_USE_SOCKS, &ivalue, &svalue);
+    if (ivalue) {
+        jp_get_pref (syncmal_prefs, SMPREF_SOCKS_ADDRESS, &ivalue, &svalue);
+        if (svalue) {
+            jp_logf (LOG_DEBUG, "plugin_sync - setting socks address: %s\n", svalue);
+            setSocksProxy ((char *)svalue);
+        }
+        else {
+            jp_logf (LOG_FATAL,
+                     "----------------------------------------------\n"
+                     "ERROR: SOCKS enabled but no address specified.\n"
+                     "Please specify an address or unselect the\n"
+                     "Use SOCKS checkbox.\n"
+                     "----------------------------------------------\n");
+            return 1;
+        }
+
+        jp_get_pref (syncmal_prefs, SMPREF_SOCKS_PORT, &ivalue, &svalue);
+        if (svalue) {
+            jp_logf (LOG_DEBUG, "plugin_sync - setting socks port: %s\n", svalue);
+            setSocksProxyPort (atoi (svalue));
+        }
+        else {
+            jp_logf (LOG_INFO | LOG_GUI,
+                     "SyncMAL: Using default SOCKS port 80\n");
+            setSocksProxyPort (80);
+        }
+
+
+
+#endif
+        
+    malsync (m_PiSocket, pInfo);
+    syncInfoFree(pInfo);
+}
+#endif
+   
+
+
 //---------------------------------------------------------
 // The configuration dialog
 //---------------------------------------------------------
@@ -1675,7 +1800,8 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D)
+   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
+   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
 };
 
 static wxOptionsPage::FieldInfo gs_FieldInfos[] =
@@ -1699,7 +1825,8 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
-   { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 }
+   { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
+   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 },
 };
 
 static

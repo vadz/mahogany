@@ -1,8 +1,8 @@
-#: PalmOS.cpp:689
+#: PalmOS.cpp:708
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22\n"
-"POT-Creation-Date: 2000-05-10 21:47+0100\n"
+"POT-Creation-Date: 2000-05-11 20:03+0100\n"
 "PO-Revision-Date: 2000-01-30 19:50+0200\n"
 "Last-Translator: Arthur Muller <muller@cybercomm.nl>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -909,49 +909,50 @@ msgid "Checking for queued messages..."
 msgstr "Controleren op berichten in wachtrij..."
 
 # MApplication.cpp:900 MApplication.cpp:931
-#: MApplication.cpp:883 MApplication.cpp:928
+#: MApplication.cpp:883 MApplication.cpp:884 MApplication.cpp:928
+#: MApplication.cpp:937
 #, c-format
 msgid "Cannot open outbox ´%s´"
 msgstr "Kan Postvak uit '%s' niet openen"
 
 # MApplication.cpp:945
-#: MApplication.cpp:942
+#: MApplication.cpp:942 MApplication.cpp:951
 msgid ""
 "Cannot send queued messages while dialup network is down.\n"
 "Do you want to go online now?"
 msgstr ""
 
 # MApplication.cpp:951
-#: MApplication.cpp:948
+#: MApplication.cpp:948 MApplication.cpp:957
 msgid "Going online..."
 msgstr "Verbinding maken..."
 
 # MApplication.cpp:975
-#: MApplication.cpp:977
+#: MApplication.cpp:977 MApplication.cpp:986
 #, c-format
 msgid "Sending message %lu/%lu: %s"
 msgstr "Bericht %lu/%lu versturen: %s"
 
 # MApplication.cpp:990
-#: MApplication.cpp:990
+#: MApplication.cpp:990 MApplication.cpp:999
 #, c-format
 msgid "Cannot send message ´%s´."
 msgstr "Kan bericht '%s' niet versturen."
 
 # PalmOS.cpp:651
-#: MApplication.cpp:1000
+#: MApplication.cpp:1000 MApplication.cpp:1009
 #, fuzzy, c-format
 msgid "Posting article %lu/%lu: %s"
 msgstr "Opslaan van bericht %lu/%lu: %s"
 
 # MApplication.cpp:991
-#: MApplication.cpp:1013
+#: MApplication.cpp:1013 MApplication.cpp:1022
 #, c-format
 msgid "Cannot post article ´%s´."
 msgstr "Kan artikel '%s' niet posten."
 
 # MApplication.cpp:1003
-#: MApplication.cpp:1026
+#: MApplication.cpp:1026 MApplication.cpp:1035
 #, c-format
 msgid "Sent %lu messages from outbox ´%s´."
 msgstr "%lu berichten uit postvak Uit '%s' verstuurd."
@@ -3035,103 +3036,103 @@ msgid "Reject"
 msgstr "Onderwerp"
 
 # wxlwindow.cpp:978
-#: wxlwindow.cpp:1006
+#: wxlwindow.cpp:1006 wxlwindow.cpp:1024
 #, c-format
 msgid "Ln:%d Col:%d"
 msgstr "R:%d K:%d"
 
 # wxlwindow.cpp:1230
-#: wxlwindow.cpp:1273
+#: wxlwindow.cpp:1273 wxlwindow.cpp:1291
 msgid "Find text"
 msgstr "Tekst zoeken"
 
 # wxlwindow.cpp:1231
-#: wxlwindow.cpp:1274
+#: wxlwindow.cpp:1274 wxlwindow.cpp:1292
 msgid "   Find:"
 msgstr "   Zoeken:"
 
 # wxlwindow.cpp:1275
-#: wxlwindow.cpp:1318
+#: wxlwindow.cpp:1318 wxlwindow.cpp:1336
 msgid "Layout Menu"
 msgstr "Layout menu"
 
 # wxlwindow.cpp:1277
-#: wxlwindow.cpp:1320
+#: wxlwindow.cpp:1320 wxlwindow.cpp:1338
 msgid "&Larger"
 msgstr "&Groter"
 
 # wxlwindow.cpp:1277
-#: wxlwindow.cpp:1320
+#: wxlwindow.cpp:1320 wxlwindow.cpp:1338
 msgid "Switch to larger font."
 msgstr "Schakel naar groter lettertype."
 
 # wxlwindow.cpp:1278
-#: wxlwindow.cpp:1321
+#: wxlwindow.cpp:1321 wxlwindow.cpp:1339
 msgid "&Smaller"
 msgstr "&Kleiner"
 
 # wxlwindow.cpp:1278
-#: wxlwindow.cpp:1321
+#: wxlwindow.cpp:1321 wxlwindow.cpp:1339
 msgid "Switch to smaller font."
 msgstr "Schakel naar kleiner lettertype."
 
 # wxlwindow.cpp:1280
-#: wxlwindow.cpp:1323
+#: wxlwindow.cpp:1323 wxlwindow.cpp:1341
 msgid "&Underline"
 msgstr "&Onderlijnen aan"
 
 # wxlwindow.cpp:1280
-#: wxlwindow.cpp:1323
+#: wxlwindow.cpp:1323 wxlwindow.cpp:1341
 msgid "Underline mode."
 msgstr "&Onderlijnmodus"
 
 # wxlwindow.cpp:1281
-#: wxlwindow.cpp:1324
+#: wxlwindow.cpp:1324 wxlwindow.cpp:1342
 msgid "&Bold"
 msgstr "&Vet aan"
 
 # wxlwindow.cpp:1281
-#: wxlwindow.cpp:1324
+#: wxlwindow.cpp:1324 wxlwindow.cpp:1342
 msgid "Bold mode."
 msgstr "Vetmodus."
 
 # wxlwindow.cpp:1282
-#: wxlwindow.cpp:1325
+#: wxlwindow.cpp:1325 wxlwindow.cpp:1343
 msgid "&Italics"
 msgstr "&Cursief aan"
 
 # wxlwindow.cpp:1282
-#: wxlwindow.cpp:1325
+#: wxlwindow.cpp:1325 wxlwindow.cpp:1343
 msgid "Italics mode."
 msgstr "Cursiefmodus"
 
 # wxlwindow.cpp:1284
-#: wxlwindow.cpp:1327
+#: wxlwindow.cpp:1327 wxlwindow.cpp:1345
 msgid "&Roman"
 msgstr "&Roman"
 
 # wxlwindow.cpp:1284
-#: wxlwindow.cpp:1327
+#: wxlwindow.cpp:1327 wxlwindow.cpp:1345
 msgid "Switch to roman font."
 msgstr "Omschakelen naar roman lettertype."
 
 # wxlwindow.cpp:1285
-#: wxlwindow.cpp:1328
+#: wxlwindow.cpp:1328 wxlwindow.cpp:1346
 msgid "&Typewriter"
 msgstr "&Schrijfmachine"
 
 # wxlwindow.cpp:1285
-#: wxlwindow.cpp:1328
+#: wxlwindow.cpp:1328 wxlwindow.cpp:1346
 msgid "Switch to typewriter font."
 msgstr "Omschakelen naar Courier lettertype."
 
 # wxlwindow.cpp:1286
-#: wxlwindow.cpp:1329
+#: wxlwindow.cpp:1329 wxlwindow.cpp:1347
 msgid "&Sans Serif"
 msgstr "&Schreefloos"
 
 # wxlwindow.cpp:1286
-#: wxlwindow.cpp:1329
+#: wxlwindow.cpp:1329 wxlwindow.cpp:1347
 msgid "Switch to sans serif font."
 msgstr "Schakel naar schreefloos lettertype."
 
@@ -6403,31 +6404,32 @@ msgid "System is offline, cannot access mailbox ´%s´"
 msgstr "Systeem is offline, kan mailbox '%s' niet openen"
 
 # PalmOS.cpp:711
-#: MailFolderCC.cpp:1355
+#: MailFolderCC.cpp:1355 MailFolderCC.cpp:1364
 #, fuzzy, c-format
 msgid "Cannot get listing for closed mailbox '%s'."
 msgstr "Kon geen lock krijgen voor mailbox '%s'."
 
 # MailFolderCC.cpp:1251 MailFolderCC.cpp:1309
-#: MailFolderCC.cpp:1479 MailFolderCC.cpp:1537
+#: MailFolderCC.cpp:1479 MailFolderCC.cpp:1488 MailFolderCC.cpp:1537
+#: MailFolderCC.cpp:1546
 #, c-format
 msgid "Searching in %lu messages..."
 msgstr "Zoeken in %lu berichten..."
 
 # MailFolderCC.cpp:1315
-#: MailFolderCC.cpp:1543
+#: MailFolderCC.cpp:1543 MailFolderCC.cpp:1552
 #, c-format
 msgid " - %lu matches found."
 msgstr " - %lu matches gevonden."
 
 # MailFolderCC.cpp:1506
-#: MailFolderCC.cpp:1755
+#: MailFolderCC.cpp:1755 MailFolderCC.cpp:1764
 #, c-format
 msgid "How many messages to retrieve from folder '%s'?"
 msgstr "Hoeveel berichten ophalen uit map '%s'?"
 
 # MailFolderCC.cpp:1508
-#: MailFolderCC.cpp:1757
+#: MailFolderCC.cpp:1757 MailFolderCC.cpp:1766
 #, fuzzy, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
@@ -6438,50 +6440,50 @@ msgstr ""
 "the current threshold of %lu (set it to 0 to avoid this question)."
 
 # MailFolderCC.cpp:1512
-#: MailFolderCC.cpp:1762
+#: MailFolderCC.cpp:1762 MailFolderCC.cpp:1771
 msgid "How many of them do you want to retrieve?"
 msgstr "Hoeveel daarvan wilt u ophalen?"
 
 # MailFolderCC.cpp:1533
-#: MailFolderCC.cpp:1784
+#: MailFolderCC.cpp:1784 MailFolderCC.cpp:1793
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "%lu berichtkoppen worden gelezen..."
 
 # MailFolderCC.cpp:1647
-#: MailFolderCC.cpp:1928
+#: MailFolderCC.cpp:1928 MailFolderCC.cpp:1937
 msgid "<address missing>"
 msgstr "<adres ontbreekt>"
 
 # MailFolderCC.cpp:2105
-#: MailFolderCC.cpp:2371
+#: MailFolderCC.cpp:2371 MailFolderCC.cpp:2380
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Map '%s' : "
 
 # MailFolderCC.cpp:2107
-#: MailFolderCC.cpp:2373
+#: MailFolderCC.cpp:2373 MailFolderCC.cpp:2382
 msgid "Folder Log: "
 msgstr "Map log: "
 
 # MailFolderCC.cpp:2110
-#: MailFolderCC.cpp:2376
+#: MailFolderCC.cpp:2376 MailFolderCC.cpp:2385
 msgid ", error level: "
 msgstr ", fout niveau: "
 
 # MailFolderCC.cpp:2124
-#: MailFolderCC.cpp:2392
+#: MailFolderCC.cpp:2392 MailFolderCC.cpp:2401
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:2498
+#: MailFolderCC.cpp:2498 MailFolderCC.cpp:2507
 msgid ""
 "\n"
 "Last folder in a critical section was: "
 msgstr ""
 
 # MailFolderCC.cpp:2612
-#: MailFolderCC.cpp:2925
+#: MailFolderCC.cpp:2925 MailFolderCC.cpp:2934
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -6490,7 +6492,7 @@ msgstr ""
 "Poging alle mappen te heropenen mislukt."
 
 # MessageCC.cpp:287 MessageCC.cpp:515
-#: MessageCC.cpp:328 MessageCC.cpp:569
+#: MessageCC.cpp:326 MessageCC.cpp:328 MessageCC.cpp:567 MessageCC.cpp:569
 msgid "Non-existent message data."
 msgstr "Niet-bestaande bericht data."
 
@@ -6561,7 +6563,7 @@ msgid "Cannot open folder to save to:"
 msgstr "Kan map om in te bewaren niet openen:"
 
 # wxComposeView.cpp:1460
-#: ASMailFolder.cpp:91 PalmOS.cpp:622
+#: ASMailFolder.cpp:91 PalmOS.cpp:622 PalmOS.cpp:641
 #, fuzzy
 msgid "Cannot create thread!"
 msgstr "Kan tijdelijk bestand niet maken"
@@ -7529,217 +7531,217 @@ msgid ""
 msgstr ""
 
 # PalmOS.cpp:141
-#: PalmOS.cpp:185
+#: PalmOS.cpp:185 PalmOS.cpp:195
 #, c-format
 msgid "Could not obtain lock for '/dev/%s'"
 msgstr "Kon geen lock krijgen voor '/dev/%s'."
 
-#: PalmOS.cpp:458
+#: PalmOS.cpp:458 PalmOS.cpp:477
 msgid "This module provides PalmOS connectivity"
 msgstr ""
 
 # PalmOS.cpp:785 PalmOS.cpp:977
-#: PalmOS.cpp:495
+#: PalmOS.cpp:495 PalmOS.cpp:514
 #, fuzzy
 msgid "&Synchronise"
 msgstr "Mail synchroniseren"
 
-#: PalmOS.cpp:497
+#: PalmOS.cpp:497 PalmOS.cpp:516
 msgid "&Backup"
 msgstr ""
 
-#: PalmOS.cpp:498
+#: PalmOS.cpp:498 PalmOS.cpp:517
 msgid "&Restore"
 msgstr ""
 
 # wxlwindow.cpp:1282
-#: PalmOS.cpp:499
+#: PalmOS.cpp:499 PalmOS.cpp:518
 #, fuzzy
 msgid "&Install"
 msgstr "&Cursief aan"
 
 # ExportPalm.cpp:359 ExportText.cpp:295
-#: Calendar.cpp:731 Calendar.cpp:733 PalmOS.cpp:501
+#: Calendar.cpp:731 Calendar.cpp:733 PalmOS.cpp:501 PalmOS.cpp:520
 #, fuzzy
 msgid "&Configure"
 msgstr "Exporteren configureren"
 
 # PalmOS.cpp:768
-#: PalmOS.cpp:504
+#: PalmOS.cpp:504 PalmOS.cpp:523
 #, fuzzy
 msgid "&PalmOS Module"
 msgstr "PalmOS module"
 
-#: PalmOS.cpp:505
+#: PalmOS.cpp:505 PalmOS.cpp:524
 msgid "Functionality to interact with your PalmOS based palmtop."
 msgstr ""
 
 # PalmOS.cpp:326 PalmOS.cpp:405
-#: PalmOS.cpp:563 PalmOS.cpp:682
+#: PalmOS.cpp:563 PalmOS.cpp:582 PalmOS.cpp:682 PalmOS.cpp:701
 #, c-format
 msgid "Executing command ´%s´ returned an error code (%d)."
 msgstr "Uitvoer van commando '%s' levert een foutcode (%d)."
 
 # PalmOS.cpp:338
-#: PalmOS.cpp:573
+#: PalmOS.cpp:573 PalmOS.cpp:592
 #, fuzzy
 msgid "Please press HotSync button and click on OK!"
 msgstr "Druk op de HotSync knop en klik op OK."
 
 # PalmOS.cpp:338
-#: PalmOS.cpp:574
+#: PalmOS.cpp:574 PalmOS.cpp:593
 msgid "Please press HotSync button and click on OK."
 msgstr "Druk op de HotSync knop en klik op OK."
 
-#: PalmOS.cpp:577
+#: PalmOS.cpp:577 PalmOS.cpp:596
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not open socket."
 msgstr ""
 
-#: PalmOS.cpp:591
+#: PalmOS.cpp:591 PalmOS.cpp:610
 msgid "Connecting to Palm ..."
 msgstr ""
 
-#: PalmOS.cpp:595
+#: PalmOS.cpp:595 PalmOS.cpp:614
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not bind to socket."
 msgstr ""
 
-#: PalmOS.cpp:606
+#: PalmOS.cpp:606 PalmOS.cpp:625
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Listening on socket failed."
 msgstr ""
 
-#: PalmOS.cpp:644
+#: PalmOS.cpp:644 PalmOS.cpp:663
 msgid "Failed to connect to PalmOS device."
 msgstr ""
 
 # PalmOS.cpp:415
-#: PalmOS.cpp:725
+#: PalmOS.cpp:725 PalmOS.cpp:744
 msgid "Do you want synchronise with your PalmOS device?"
 msgstr "Wilt u synchroniseren met uw PalmOS apparaat?"
 
-#: PalmOS.cpp:768
+#: PalmOS.cpp:768 PalmOS.cpp:792
 msgid "Reading local directory ..."
 msgstr ""
 
-#: PalmOS.cpp:809 PalmOS.cpp:870
+#: PalmOS.cpp:809 PalmOS.cpp:833 PalmOS.cpp:870 PalmOS.cpp:894
 msgid "Reading list of databases ..."
 msgstr ""
 
 # XFace.cpp:196
-#: PalmOS.cpp:853
+#: PalmOS.cpp:853 PalmOS.cpp:877
 #, fuzzy, c-format
 msgid "Could not access backup directory '%s'."
 msgstr "Kon XFace bestand '%s' niet laden."
 
-#: PalmOS.cpp:880
+#: PalmOS.cpp:880 PalmOS.cpp:904
 msgid "Palm Backup"
 msgstr ""
 
-#: PalmOS.cpp:880
+#: PalmOS.cpp:880 PalmOS.cpp:904
 msgid "Backing up files"
 msgstr ""
 
-#: PalmOS.cpp:901
+#: PalmOS.cpp:901 PalmOS.cpp:925
 msgid "Exiting on cancel, backup process incomplete!"
 msgstr ""
 
-#: PalmOS.cpp:921
+#: PalmOS.cpp:921 PalmOS.cpp:945
 msgid "Backup´ing ..."
 msgstr ""
 
 # PalmOS.cpp:455
-#: PalmOS.cpp:979
+#: PalmOS.cpp:979 PalmOS.cpp:1003
 #, fuzzy, c-format
 msgid "Unable to create file %s!"
 msgstr "Kon MailDB niet openen"
 
 # PalmOS.cpp:455
-#: PalmOS.cpp:987
+#: PalmOS.cpp:987 PalmOS.cpp:1011
 #, fuzzy, c-format
 msgid "Unable to backup database %s!"
 msgstr "Kon MailDB niet openen"
 
-#: PalmOS.cpp:1058
+#: PalmOS.cpp:1058 PalmOS.cpp:1082
 msgid "Checking files to install ..."
 msgstr ""
 
 # PalmOS.cpp:711
-#: PalmOS.cpp:1068
+#: PalmOS.cpp:1068 PalmOS.cpp:1092
 #, fuzzy, c-format
 msgid "Could not open file %s or file invalid."
 msgstr "Kon geen lock krijgen voor mailbox '%s'."
 
-#: PalmOS.cpp:1107
+#: PalmOS.cpp:1107 PalmOS.cpp:1131
 msgid "Palm Install"
 msgstr ""
 
 # wxMenuDefs.cpp:300
-#: PalmOS.cpp:1107
+#: PalmOS.cpp:1107 PalmOS.cpp:1131
 #, fuzzy
 msgid "Installing files"
 msgstr "Voeg een bestand in"
 
 # wxMenuDefs.cpp:300
-#: PalmOS.cpp:1112
+#: PalmOS.cpp:1112 PalmOS.cpp:1136
 #, fuzzy
 msgid "Installing Files ..."
 msgstr "Voeg een bestand in"
 
-#: PalmOS.cpp:1120
+#: PalmOS.cpp:1120 PalmOS.cpp:1144
 msgid "Exiting on cancel, all data not restored/installed"
 msgstr ""
 
 # PalmOS.cpp:711
-#: PalmOS.cpp:1128
+#: PalmOS.cpp:1128 PalmOS.cpp:1152
 #, fuzzy, c-format
 msgid "Could not open file %s or file invalid!"
 msgstr "Kon geen lock krijgen voor mailbox '%s'."
 
 # XFace.cpp:196
-#: PalmOS.cpp:1173
+#: PalmOS.cpp:1173 PalmOS.cpp:1197
 #, fuzzy, c-format
 msgid "Could not access directory %s!"
 msgstr "Kon XFace bestand '%s' niet laden."
 
 # wxMDialogs.cpp:1918
-#: PalmOS.cpp:1204
+#: PalmOS.cpp:1204 PalmOS.cpp:1228
 #, fuzzy
 msgid "Please pick databases to install"
 msgstr "Kies een bestand met plaatje"
 
 # PalmOS.cpp:455
-#: PalmOS.cpp:1256
+#: PalmOS.cpp:1256 PalmOS.cpp:1280
 #, fuzzy
 msgid "Could not open AddressDB."
 msgstr "Kon MailDB niet openen"
 
-#: PalmOS.cpp:1266
+#: PalmOS.cpp:1266 PalmOS.cpp:1290
 msgid "ADB not correctly initialized!"
 msgstr ""
 
 # PalmOS.cpp:455
-#: PalmOS.cpp:1367
+#: PalmOS.cpp:1367 PalmOS.cpp:1391
 msgid "Unable to open MailDB"
 msgstr "Kon MailDB niet openen"
 
 # PalmOS.cpp:456
-#: PalmOS.cpp:1368
+#: PalmOS.cpp:1368 PalmOS.cpp:1392
 msgid "Unable to open MailDB.\n"
 msgstr "Kon MailDB niet openen.\n"
 
 # PalmOS.cpp:546
-#: PalmOS.cpp:1462
+#: PalmOS.cpp:1462 PalmOS.cpp:1486
 #, c-format
 msgid "Transferred message %d: \"%s\" for \"%s\"."
 msgstr "Overdracht bericht %d: \"%s\" voor \"%s\"."
 
 # PalmOS.cpp:567
-#: PalmOS.cpp:1483
+#: PalmOS.cpp:1483 PalmOS.cpp:1507
 #, c-format
 msgid ""
 "Failed to transfer message\n"
@@ -7751,127 +7753,127 @@ msgstr ""
 "voor \"%s\"."
 
 # PalmOS.cpp:577
-#: PalmOS.cpp:1493
+#: PalmOS.cpp:1493 PalmOS.cpp:1517
 #, c-format
 msgid "Transferred %d/%d messages."
 msgstr "Overgedragen %d/%d berichten."
 
 # PalmOS.cpp:584
-#: PalmOS.cpp:1500
+#: PalmOS.cpp:1500 PalmOS.cpp:1524
 msgid "No messages found in PalmOS-Outbox."
 msgstr "Geen berichten in PalmOS-Outbox gevonden."
 
 # PalmOS.cpp:602
-#: PalmOS.cpp:1524
+#: PalmOS.cpp:1524 PalmOS.cpp:1548
 #, c-format
 msgid "Cannot open PalmOS synchronisation mailbox ´%s´"
 msgstr "Kan PalmOS synchronisatie mailbox '%s' niet openen"
 
 # PalmOS.cpp:630
-#: PalmOS.cpp:1552
+#: PalmOS.cpp:1552 PalmOS.cpp:1576
 #, c-format
 msgid "Skipping deleted message %lu/%lu"
 msgstr "Overslaan van verwijderd bericht %lu/%lu"
 
 # PalmOS.cpp:651
-#: PalmOS.cpp:1573
+#: PalmOS.cpp:1573 PalmOS.cpp:1597
 #, c-format
 msgid "Storing message %lu/%lu: %s"
 msgstr "Opslaan van bericht %lu/%lu: %s"
 
 # PalmOS.cpp:686
-#: PalmOS.cpp:1621
+#: PalmOS.cpp:1621 PalmOS.cpp:1645
 #, c-format
 msgid "Could not store message %lu/%lu: %s"
 msgstr "Kon bericht %lu/%lu niet opslaan: %s"
 
 # PalmOS.cpp:702
-#: PalmOS.cpp:1637
+#: PalmOS.cpp:1637 PalmOS.cpp:1661
 #, c-format
 msgid "Stored %lu/%lu messages on PalmOS device."
 msgstr "Opgeslagen; %lu/%lu berichten op PalmOS apparaat."
 
 # PalmOS.cpp:711
-#: PalmOS.cpp:1646
+#: PalmOS.cpp:1646 PalmOS.cpp:1670
 #, c-format
 msgid "Could not obtain lock for mailbox '%s'."
 msgstr "Kon geen lock krijgen voor mailbox '%s'."
 
 # PalmOS.cpp:785 PalmOS.cpp:977
-#: PalmOS.cpp:1683
+#: PalmOS.cpp:1683 PalmOS.cpp:1809
 msgid "Synchronise Mail"
 msgstr "Mail synchroniseren"
 
-#: PalmOS.cpp:1684
+#: PalmOS.cpp:1684 PalmOS.cpp:1810
 msgid "Mailbox for exchange"
 msgstr ""
 
-#: PalmOS.cpp:1685
+#: PalmOS.cpp:1685 PalmOS.cpp:1811
 msgid "Mail disposal mode:keep:delete:file"
 msgstr ""
 
-#: PalmOS.cpp:1687
+#: PalmOS.cpp:1687 PalmOS.cpp:1813
 msgid "Always do Backup"
 msgstr ""
 
-#: PalmOS.cpp:1688
+#: PalmOS.cpp:1688 PalmOS.cpp:1814
 msgid "Directory for backup files"
 msgstr ""
 
-#: PalmOS.cpp:1689
+#: PalmOS.cpp:1689 PalmOS.cpp:1815
 msgid "Delete no longer existing backup files"
 msgstr ""
 
-#: PalmOS.cpp:1691
+#: PalmOS.cpp:1691 PalmOS.cpp:1817
 msgid "Make incremental backup only"
 msgstr ""
 
-#: PalmOS.cpp:1692
+#: PalmOS.cpp:1692 PalmOS.cpp:1818
 msgid "Backup all databases"
 msgstr ""
 
-#: PalmOS.cpp:1693
+#: PalmOS.cpp:1693 PalmOS.cpp:1819
 msgid "Exclude these databases"
 msgstr ""
 
-#: PalmOS.cpp:1694
+#: PalmOS.cpp:1694 PalmOS.cpp:1820
 msgid "Do auto-install"
 msgstr ""
 
 # wxMDialogs.cpp:1918
-#: PalmOS.cpp:1695
+#: PalmOS.cpp:1695 PalmOS.cpp:1821
 #, fuzzy
 msgid "Directory for databases to auto-install"
 msgstr "Kies een bestand met plaatje"
 
 # PalmOS.cpp:844
-#: PalmOS.cpp:1696
+#: PalmOS.cpp:1696 PalmOS.cpp:1822
 #, fuzzy
 msgid "Pilot device"
 msgstr "Serieel apparaat"
 
-#: PalmOS.cpp:1699
+#: PalmOS.cpp:1699 PalmOS.cpp:1825
 msgid "Connection speed:9600:19200:38400:57600:115200"
 msgstr ""
 
 # PalmOS.cpp:883
-#: PalmOS.cpp:1700
+#: PalmOS.cpp:1700 PalmOS.cpp:1826
 #, fuzzy
 msgid "Try to lock device"
 msgstr "Poging apparaat te locken"
 
-#: PalmOS.cpp:1701
+#: PalmOS.cpp:1701 PalmOS.cpp:1827
 msgid "Script to run before"
 msgstr ""
 
 # wxlwindow.cpp:1284
-#: PalmOS.cpp:1702
+#: PalmOS.cpp:1702 PalmOS.cpp:1828
 #, fuzzy
 msgid "Script to run after"
 msgstr "Omschakelen naar roman lettertype."
 
 # PalmOS.cpp:983
-#: PalmOS.cpp:1708
+#: PalmOS.cpp:1708 PalmOS.cpp:1835
 msgid "PalmOS module preferences"
 msgstr "PalmOS module voorkeuren"
 
@@ -7998,6 +8000,22 @@ msgstr "PalmOS module voorkeuren"
 
 #: Filters.cpp:1974
 msgid "Python-Unterstützung für Filter ist nicht verfügbar."
+msgstr ""
+
+#: wxMDialogs.cpp:2155
+msgid "ask whether to send unsent messages on exit"
+msgstr ""
+
+#: wxMDialogs.cpp:2189
+msgid "ask for confirmation before importing unrecognized address book files"
+msgstr ""
+
+#: wxMDialogs.cpp:2468
+msgid "Fingerprint : "
+msgstr ""
+
+#: PalmOS.cpp:1829
+msgid "Sync to MAL server (e.g. AvantGo)"
 msgstr ""
 
 # MDialogs.h

@@ -1116,7 +1116,10 @@ MailFolderCC::Ping(void)
       int ccl = CC_SetLogLevel(M_LOG_WINONLY);
       // This is terribly inefficient to do, but needed for some sick
       // POP3 servers.
-      if(m_FolderFlags & MF_FLAGS_REOPENONPING)
+      if( (m_FolderFlags & MF_FLAGS_REOPENONPING)
+          // c-client 4.7-bug: MH folders don't immediately notice new 
+          // messages:
+          || GetType() == MF_MH)
       {
          DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
                      GetName().c_str()));
@@ -1273,17 +1276,6 @@ MailFolderCC::CountNewMessagesQuick(void) const
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
-#if 0
-   // This is needed to update the m_nMessages.
-   if(m_nMessages == 0)
-   {
-      HeaderInfoList *hil = GetHeaders();
-      if ( !hil )
-         return 0;
-      hil->DecRef();
-   }
-#endif
-
    if(mask == MSG_STAT_NONE)
       return m_nMessages;
    else if(mask == MSG_STAT_RECENT && value == MSG_STAT_RECENT)

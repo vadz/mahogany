@@ -876,12 +876,21 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       mf->IncRef();
    }
    else
-      mf = MailFolder::OpenFolder(outbox);
-   if(mf == NULL)
    {
-      String msg;
-      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
-      ERRORMESSAGE((msg));
+      mf = MailFolder::OpenFolder(outbox);
+      if(mf == NULL)
+      {
+         String msg;
+         msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+         ERRORMESSAGE((msg));
+      }
+   }
+
+   if(mfi == NULL) // just trigger events on it, we will be called again
+   {
+      mf->Ping();
+      mf->DecRef();
+      return;
    }
    else
    {

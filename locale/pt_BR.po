@@ -1,9 +1,9 @@
 # KTranslator Generated File
-#: PalmOS.cpp:689
+#: PalmOS.cpp:708
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.21\n"
-"POT-Creation-Date: 2000-05-10 21:47+0100\n"
+"POT-Creation-Date: 2000-05-11 20:03+0100\n"
 "PO-Revision-Date: 1999-07-16 12:00-0300\n"
 "Last-Translator: Carlos Henrique Bauer <bauer@atlas.unisinos.tche.br>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -787,43 +787,44 @@ msgstr "Você recebeu %lu novas mensagens na pasta `%s'."
 msgid "Checking for queued messages..."
 msgstr "Verificando se novas mensagens chegaram..."
 
-#: MApplication.cpp:883 MApplication.cpp:928
+#: MApplication.cpp:883 MApplication.cpp:884 MApplication.cpp:928
+#: MApplication.cpp:937
 #, fuzzy, c-format
 msgid "Cannot open outbox ´%s´"
 msgstr "Não é possível abrir a URL `%s'."
 
-#: MApplication.cpp:942
+#: MApplication.cpp:942 MApplication.cpp:951
 msgid ""
 "Cannot send queued messages while dialup network is down.\n"
 "Do you want to go online now?"
 msgstr ""
 
-#: MApplication.cpp:948
+#: MApplication.cpp:948 MApplication.cpp:957
 #, fuzzy
 msgid "Going online..."
 msgstr "Carregando imagem..."
 
-#: MApplication.cpp:977
+#: MApplication.cpp:977 MApplication.cpp:986
 #, c-format
 msgid "Sending message %lu/%lu: %s"
 msgstr ""
 
-#: MApplication.cpp:990
+#: MApplication.cpp:990 MApplication.cpp:999
 #, fuzzy, c-format
 msgid "Cannot send message ´%s´."
 msgstr "Não é possível salvar a mensagem no arquivo `%s'."
 
-#: MApplication.cpp:1000
+#: MApplication.cpp:1000 MApplication.cpp:1009
 #, c-format
 msgid "Posting article %lu/%lu: %s"
 msgstr ""
 
-#: MApplication.cpp:1013
+#: MApplication.cpp:1013 MApplication.cpp:1022
 #, fuzzy, c-format
 msgid "Cannot post article ´%s´."
 msgstr "Não é possível carregar o módulo `%s'."
 
-#: MApplication.cpp:1026
+#: MApplication.cpp:1026 MApplication.cpp:1035
 #, c-format
 msgid "Sent %lu messages from outbox ´%s´."
 msgstr ""
@@ -2637,85 +2638,85 @@ msgstr "Acesso"
 msgid "Reject"
 msgstr "Título"
 
-#: wxlwindow.cpp:1006
+#: wxlwindow.cpp:1006 wxlwindow.cpp:1024
 #, c-format
 msgid "Ln:%d Col:%d"
 msgstr "Lin:%d Col:%d"
 
-#: wxlwindow.cpp:1273
+#: wxlwindow.cpp:1273 wxlwindow.cpp:1291
 #, fuzzy
 msgid "Find text"
 msgstr "Encontrar o próximo"
 
-#: wxlwindow.cpp:1274
+#: wxlwindow.cpp:1274 wxlwindow.cpp:1292
 msgid "   Find:"
 msgstr "   Procurar:"
 
-#: wxlwindow.cpp:1318
+#: wxlwindow.cpp:1318 wxlwindow.cpp:1336
 msgid "Layout Menu"
 msgstr "Menu de formatação"
 
-#: wxlwindow.cpp:1320
+#: wxlwindow.cpp:1320 wxlwindow.cpp:1338
 msgid "&Larger"
 msgstr "Ma&ior"
 
-#: wxlwindow.cpp:1320
+#: wxlwindow.cpp:1320 wxlwindow.cpp:1338
 msgid "Switch to larger font."
 msgstr "Mudar para uma fonte maior."
 
-#: wxlwindow.cpp:1321
+#: wxlwindow.cpp:1321 wxlwindow.cpp:1339
 msgid "&Smaller"
 msgstr "&Menor"
 
-#: wxlwindow.cpp:1321
+#: wxlwindow.cpp:1321 wxlwindow.cpp:1339
 msgid "Switch to smaller font."
 msgstr "Mudar para uma fonte menor."
 
-#: wxlwindow.cpp:1323
+#: wxlwindow.cpp:1323 wxlwindow.cpp:1341
 msgid "&Underline"
 msgstr "&Sublinhado"
 
-#: wxlwindow.cpp:1323
+#: wxlwindow.cpp:1323 wxlwindow.cpp:1341
 msgid "Underline mode."
 msgstr "Modo sublinhado"
 
-#: wxlwindow.cpp:1324
+#: wxlwindow.cpp:1324 wxlwindow.cpp:1342
 msgid "&Bold"
 msgstr "&Negrito"
 
-#: wxlwindow.cpp:1324
+#: wxlwindow.cpp:1324 wxlwindow.cpp:1342
 msgid "Bold mode."
 msgstr "Modo negrito"
 
-#: wxlwindow.cpp:1325
+#: wxlwindow.cpp:1325 wxlwindow.cpp:1343
 msgid "&Italics"
 msgstr "Itál&ico"
 
-#: wxlwindow.cpp:1325
+#: wxlwindow.cpp:1325 wxlwindow.cpp:1343
 msgid "Italics mode."
 msgstr "Modo itálico"
 
-#: wxlwindow.cpp:1327
+#: wxlwindow.cpp:1327 wxlwindow.cpp:1345
 msgid "&Roman"
 msgstr "&Romana"
 
-#: wxlwindow.cpp:1327
+#: wxlwindow.cpp:1327 wxlwindow.cpp:1345
 msgid "Switch to roman font."
 msgstr "Mudar para uma fonte romana."
 
-#: wxlwindow.cpp:1328
+#: wxlwindow.cpp:1328 wxlwindow.cpp:1346
 msgid "&Typewriter"
 msgstr "&Courier"
 
-#: wxlwindow.cpp:1328
+#: wxlwindow.cpp:1328 wxlwindow.cpp:1346
 msgid "Switch to typewriter font."
 msgstr "Mudar para uma fonte de máquina de escrever."
 
-#: wxlwindow.cpp:1329
+#: wxlwindow.cpp:1329 wxlwindow.cpp:1347
 msgid "&Sans Serif"
 msgstr "&Helvética"
 
-#: wxlwindow.cpp:1329
+#: wxlwindow.cpp:1329 wxlwindow.cpp:1347
 msgid "Switch to sans serif font."
 msgstr "Mudar para uma fonte sem serifas."
 
@@ -5533,27 +5534,28 @@ msgstr "Pasta `%s' está ativa. "
 msgid "System is offline, cannot access mailbox ´%s´"
 msgstr ""
 
-#: MailFolderCC.cpp:1355
+#: MailFolderCC.cpp:1355 MailFolderCC.cpp:1364
 #, fuzzy, c-format
 msgid "Cannot get listing for closed mailbox '%s'."
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: MailFolderCC.cpp:1479 MailFolderCC.cpp:1537
+#: MailFolderCC.cpp:1479 MailFolderCC.cpp:1488 MailFolderCC.cpp:1537
+#: MailFolderCC.cpp:1546
 #, fuzzy, c-format
 msgid "Searching in %lu messages..."
 msgstr "Salvando %d mensagens..."
 
-#: MailFolderCC.cpp:1543
+#: MailFolderCC.cpp:1543 MailFolderCC.cpp:1552
 #, c-format
 msgid " - %lu matches found."
 msgstr ""
 
-#: MailFolderCC.cpp:1755
+#: MailFolderCC.cpp:1755 MailFolderCC.cpp:1764
 #, c-format
 msgid "How many messages to retrieve from folder '%s'?"
 msgstr "Quantas mensagens ler da pasta `%s'?"
 
-#: MailFolderCC.cpp:1757
+#: MailFolderCC.cpp:1757 MailFolderCC.cpp:1766
 #, fuzzy, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
@@ -5565,43 +5567,43 @@ msgstr ""
 "perguntas)."
 
 #
-#: MailFolderCC.cpp:1762
+#: MailFolderCC.cpp:1762 MailFolderCC.cpp:1771
 msgid "How many of them do you want to retrieve?"
 msgstr "Quantas você deseja ler?"
 
-#: MailFolderCC.cpp:1784
+#: MailFolderCC.cpp:1784 MailFolderCC.cpp:1793
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "Lendo %lu cabeçalhos de mensagem..."
 
-#: MailFolderCC.cpp:1928
+#: MailFolderCC.cpp:1928 MailFolderCC.cpp:1937
 msgid "<address missing>"
 msgstr "<falta o endereço>"
 
-#: MailFolderCC.cpp:2371
+#: MailFolderCC.cpp:2371 MailFolderCC.cpp:2380
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Pasta `%s' : "
 
-#: MailFolderCC.cpp:2373
+#: MailFolderCC.cpp:2373 MailFolderCC.cpp:2382
 msgid "Folder Log: "
 msgstr "Registro de pasta:"
 
-#: MailFolderCC.cpp:2376
+#: MailFolderCC.cpp:2376 MailFolderCC.cpp:2385
 msgid ", error level: "
 msgstr ", nível de erro: "
 
-#: MailFolderCC.cpp:2392
+#: MailFolderCC.cpp:2392 MailFolderCC.cpp:2401
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:2498
+#: MailFolderCC.cpp:2498 MailFolderCC.cpp:2507
 msgid ""
 "\n"
 "Last folder in a critical section was: "
 msgstr ""
 
-#: MailFolderCC.cpp:2925
+#: MailFolderCC.cpp:2925 MailFolderCC.cpp:2934
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -5609,7 +5611,7 @@ msgstr ""
 "\n"
 "Tentativa de abrir todos as pastas falhou."
 
-#: MessageCC.cpp:328 MessageCC.cpp:569
+#: MessageCC.cpp:326 MessageCC.cpp:328 MessageCC.cpp:567 MessageCC.cpp:569
 msgid "Non-existent message data."
 msgstr "Dados da mensagem não existem."
 
@@ -5667,7 +5669,7 @@ msgstr "Impossível abrir uma conexão para qualquer servidor"
 msgid "Cannot open folder to save to:"
 msgstr "Impossível abrir a pasta a ser salva:"
 
-#: ASMailFolder.cpp:91 PalmOS.cpp:622
+#: ASMailFolder.cpp:91 PalmOS.cpp:622 PalmOS.cpp:641
 #, fuzzy
 msgid "Cannot create thread!"
 msgstr "Não é possível a criação de um arquivo temporário."
@@ -6499,198 +6501,198 @@ msgid ""
 "moving them automatically."
 msgstr ""
 
-#: PalmOS.cpp:185
+#: PalmOS.cpp:185 PalmOS.cpp:195
 #, fuzzy, c-format
 msgid "Could not obtain lock for '/dev/%s'"
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:458
+#: PalmOS.cpp:458 PalmOS.cpp:477
 msgid "This module provides PalmOS connectivity"
 msgstr ""
 
 #
-#: PalmOS.cpp:495
+#: PalmOS.cpp:495 PalmOS.cpp:514
 #, fuzzy
 msgid "&Synchronise"
 msgstr "Livro de endereços"
 
-#: PalmOS.cpp:497
+#: PalmOS.cpp:497 PalmOS.cpp:516
 msgid "&Backup"
 msgstr ""
 
-#: PalmOS.cpp:498
+#: PalmOS.cpp:498 PalmOS.cpp:517
 msgid "&Restore"
 msgstr ""
 
-#: PalmOS.cpp:499
+#: PalmOS.cpp:499 PalmOS.cpp:518
 #, fuzzy
 msgid "&Install"
 msgstr "Itál&ico"
 
 #
-#: Calendar.cpp:731 Calendar.cpp:733 PalmOS.cpp:501
+#: Calendar.cpp:731 Calendar.cpp:733 PalmOS.cpp:501 PalmOS.cpp:520
 #, fuzzy
 msgid "&Configure"
 msgstr "Configurar exportação"
 
-#: PalmOS.cpp:504
+#: PalmOS.cpp:504 PalmOS.cpp:523
 #, fuzzy
 msgid "&PalmOS Module"
 msgstr "Módulos disponíveis"
 
-#: PalmOS.cpp:505
+#: PalmOS.cpp:505 PalmOS.cpp:524
 msgid "Functionality to interact with your PalmOS based palmtop."
 msgstr ""
 
-#: PalmOS.cpp:563 PalmOS.cpp:682
+#: PalmOS.cpp:563 PalmOS.cpp:582 PalmOS.cpp:682 PalmOS.cpp:701
 #, c-format
 msgid "Executing command ´%s´ returned an error code (%d)."
 msgstr ""
 
-#: PalmOS.cpp:573
+#: PalmOS.cpp:573 PalmOS.cpp:592
 msgid "Please press HotSync button and click on OK!"
 msgstr ""
 
-#: PalmOS.cpp:574
+#: PalmOS.cpp:574 PalmOS.cpp:593
 msgid "Please press HotSync button and click on OK."
 msgstr ""
 
-#: PalmOS.cpp:577
+#: PalmOS.cpp:577 PalmOS.cpp:596
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not open socket."
 msgstr ""
 
-#: PalmOS.cpp:591
+#: PalmOS.cpp:591 PalmOS.cpp:610
 #, fuzzy
 msgid "Connecting to Palm ..."
 msgstr "Verificando se novas mensagens chegaram..."
 
-#: PalmOS.cpp:595
+#: PalmOS.cpp:595 PalmOS.cpp:614
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Could not bind to socket."
 msgstr ""
 
-#: PalmOS.cpp:606
+#: PalmOS.cpp:606 PalmOS.cpp:625
 msgid ""
 "Failed to connect to PalmOS device:\n"
 "Listening on socket failed."
 msgstr ""
 
-#: PalmOS.cpp:644
+#: PalmOS.cpp:644 PalmOS.cpp:663
 msgid "Failed to connect to PalmOS device."
 msgstr ""
 
-#: PalmOS.cpp:725
+#: PalmOS.cpp:725 PalmOS.cpp:744
 msgid "Do you want synchronise with your PalmOS device?"
 msgstr ""
 
-#: PalmOS.cpp:768
+#: PalmOS.cpp:768 PalmOS.cpp:792
 msgid "Reading local directory ..."
 msgstr ""
 
-#: PalmOS.cpp:809 PalmOS.cpp:870
+#: PalmOS.cpp:809 PalmOS.cpp:833 PalmOS.cpp:870 PalmOS.cpp:894
 msgid "Reading list of databases ..."
 msgstr ""
 
-#: PalmOS.cpp:853
+#: PalmOS.cpp:853 PalmOS.cpp:877
 #, fuzzy, c-format
 msgid "Could not access backup directory '%s'."
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:880
+#: PalmOS.cpp:880 PalmOS.cpp:904
 msgid "Palm Backup"
 msgstr ""
 
-#: PalmOS.cpp:880
+#: PalmOS.cpp:880 PalmOS.cpp:904
 msgid "Backing up files"
 msgstr ""
 
-#: PalmOS.cpp:901
+#: PalmOS.cpp:901 PalmOS.cpp:925
 msgid "Exiting on cancel, backup process incomplete!"
 msgstr ""
 
-#: PalmOS.cpp:921
+#: PalmOS.cpp:921 PalmOS.cpp:945
 msgid "Backup´ing ..."
 msgstr ""
 
-#: PalmOS.cpp:979
+#: PalmOS.cpp:979 PalmOS.cpp:1003
 #, fuzzy, c-format
 msgid "Unable to create file %s!"
 msgstr "Impossível criar a pasta MH `%s'."
 
-#: PalmOS.cpp:987
+#: PalmOS.cpp:987 PalmOS.cpp:1011
 #, c-format
 msgid "Unable to backup database %s!"
 msgstr ""
 
-#: PalmOS.cpp:1058
+#: PalmOS.cpp:1058 PalmOS.cpp:1082
 #, fuzzy
 msgid "Checking files to install ..."
 msgstr "Verificando se novas mensagens chegaram..."
 
-#: PalmOS.cpp:1068
+#: PalmOS.cpp:1068 PalmOS.cpp:1092
 #, fuzzy, c-format
 msgid "Could not open file %s or file invalid."
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:1107
+#: PalmOS.cpp:1107 PalmOS.cpp:1131
 msgid "Palm Install"
 msgstr ""
 
-#: PalmOS.cpp:1107
+#: PalmOS.cpp:1107 PalmOS.cpp:1131
 #, fuzzy
 msgid "Installing files"
 msgstr "Inserir um arquivo"
 
-#: PalmOS.cpp:1112
+#: PalmOS.cpp:1112 PalmOS.cpp:1136
 #, fuzzy
 msgid "Installing Files ..."
 msgstr "Inserir um arquivo"
 
-#: PalmOS.cpp:1120
+#: PalmOS.cpp:1120 PalmOS.cpp:1144
 msgid "Exiting on cancel, all data not restored/installed"
 msgstr ""
 
-#: PalmOS.cpp:1128
+#: PalmOS.cpp:1128 PalmOS.cpp:1152
 #, fuzzy, c-format
 msgid "Could not open file %s or file invalid!"
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:1173
+#: PalmOS.cpp:1173 PalmOS.cpp:1197
 #, fuzzy, c-format
 msgid "Could not access directory %s!"
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:1204
+#: PalmOS.cpp:1204 PalmOS.cpp:1228
 #, fuzzy
 msgid "Please pick databases to install"
 msgstr "Por favor, selecione um arquivo de imagem"
 
-#: PalmOS.cpp:1256
+#: PalmOS.cpp:1256 PalmOS.cpp:1280
 #, fuzzy
 msgid "Could not open AddressDB."
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:1266
+#: PalmOS.cpp:1266 PalmOS.cpp:1290
 msgid "ADB not correctly initialized!"
 msgstr ""
 
-#: PalmOS.cpp:1367
+#: PalmOS.cpp:1367 PalmOS.cpp:1391
 msgid "Unable to open MailDB"
 msgstr ""
 
-#: PalmOS.cpp:1368
+#: PalmOS.cpp:1368 PalmOS.cpp:1392
 msgid "Unable to open MailDB.\n"
 msgstr ""
 
-#: PalmOS.cpp:1462
+#: PalmOS.cpp:1462 PalmOS.cpp:1486
 #, c-format
 msgid "Transferred message %d: \"%s\" for \"%s\"."
 msgstr ""
 
-#: PalmOS.cpp:1483
+#: PalmOS.cpp:1483 PalmOS.cpp:1507
 #, fuzzy, c-format
 msgid ""
 "Failed to transfer message\n"
@@ -6698,113 +6700,113 @@ msgid ""
 "for \"%s\"."
 msgstr "O salvamento da mensagem falhou."
 
-#: PalmOS.cpp:1493
+#: PalmOS.cpp:1493 PalmOS.cpp:1517
 #, fuzzy, c-format
 msgid "Transferred %d/%d messages."
 msgstr "%lu mensagens salvas."
 
-#: PalmOS.cpp:1500
+#: PalmOS.cpp:1500 PalmOS.cpp:1524
 msgid "No messages found in PalmOS-Outbox."
 msgstr ""
 
-#: PalmOS.cpp:1524
+#: PalmOS.cpp:1524 PalmOS.cpp:1548
 #, c-format
 msgid "Cannot open PalmOS synchronisation mailbox ´%s´"
 msgstr ""
 
-#: PalmOS.cpp:1552
+#: PalmOS.cpp:1552 PalmOS.cpp:1576
 #, fuzzy, c-format
 msgid "Skipping deleted message %lu/%lu"
 msgstr "Cancelar remoção da mensagem"
 
-#: PalmOS.cpp:1573
+#: PalmOS.cpp:1573 PalmOS.cpp:1597
 #, c-format
 msgid "Storing message %lu/%lu: %s"
 msgstr ""
 
-#: PalmOS.cpp:1621
+#: PalmOS.cpp:1621 PalmOS.cpp:1645
 #, c-format
 msgid "Could not store message %lu/%lu: %s"
 msgstr ""
 
-#: PalmOS.cpp:1637
+#: PalmOS.cpp:1637 PalmOS.cpp:1661
 #, c-format
 msgid "Stored %lu/%lu messages on PalmOS device."
 msgstr ""
 
-#: PalmOS.cpp:1646
+#: PalmOS.cpp:1646 PalmOS.cpp:1670
 #, fuzzy, c-format
 msgid "Could not obtain lock for mailbox '%s'."
 msgstr "Não é possível carregar o arquivo XFace `%s'."
 
-#: PalmOS.cpp:1683
+#: PalmOS.cpp:1683 PalmOS.cpp:1809
 msgid "Synchronise Mail"
 msgstr ""
 
-#: PalmOS.cpp:1684
+#: PalmOS.cpp:1684 PalmOS.cpp:1810
 msgid "Mailbox for exchange"
 msgstr ""
 
-#: PalmOS.cpp:1685
+#: PalmOS.cpp:1685 PalmOS.cpp:1811
 msgid "Mail disposal mode:keep:delete:file"
 msgstr ""
 
-#: PalmOS.cpp:1687
+#: PalmOS.cpp:1687 PalmOS.cpp:1813
 msgid "Always do Backup"
 msgstr ""
 
-#: PalmOS.cpp:1688
+#: PalmOS.cpp:1688 PalmOS.cpp:1814
 msgid "Directory for backup files"
 msgstr ""
 
-#: PalmOS.cpp:1689
+#: PalmOS.cpp:1689 PalmOS.cpp:1815
 msgid "Delete no longer existing backup files"
 msgstr ""
 
-#: PalmOS.cpp:1691
+#: PalmOS.cpp:1691 PalmOS.cpp:1817
 msgid "Make incremental backup only"
 msgstr ""
 
-#: PalmOS.cpp:1692
+#: PalmOS.cpp:1692 PalmOS.cpp:1818
 msgid "Backup all databases"
 msgstr ""
 
-#: PalmOS.cpp:1693
+#: PalmOS.cpp:1693 PalmOS.cpp:1819
 msgid "Exclude these databases"
 msgstr ""
 
-#: PalmOS.cpp:1694
+#: PalmOS.cpp:1694 PalmOS.cpp:1820
 msgid "Do auto-install"
 msgstr ""
 
-#: PalmOS.cpp:1695
+#: PalmOS.cpp:1695 PalmOS.cpp:1821
 #, fuzzy
 msgid "Directory for databases to auto-install"
 msgstr "Por favor, selecione um arquivo de imagem"
 
-#: PalmOS.cpp:1696
+#: PalmOS.cpp:1696 PalmOS.cpp:1822
 #, fuzzy
 msgid "Pilot device"
 msgstr "Previsão da impressão"
 
-#: PalmOS.cpp:1699
+#: PalmOS.cpp:1699 PalmOS.cpp:1825
 msgid "Connection speed:9600:19200:38400:57600:115200"
 msgstr ""
 
-#: PalmOS.cpp:1700
+#: PalmOS.cpp:1700 PalmOS.cpp:1826
 msgid "Try to lock device"
 msgstr ""
 
-#: PalmOS.cpp:1701
+#: PalmOS.cpp:1701 PalmOS.cpp:1827
 msgid "Script to run before"
 msgstr ""
 
-#: PalmOS.cpp:1702
+#: PalmOS.cpp:1702 PalmOS.cpp:1828
 #, fuzzy
 msgid "Script to run after"
 msgstr "Mudar para uma fonte romana."
 
-#: PalmOS.cpp:1708
+#: PalmOS.cpp:1708 PalmOS.cpp:1835
 #, fuzzy
 msgid "PalmOS module preferences"
 msgstr "Editar preferências"
@@ -6919,6 +6921,22 @@ msgstr "Editar preferências"
 
 #: Filters.cpp:1974
 msgid "Python-Unterstützung für Filter ist nicht verfügbar."
+msgstr ""
+
+#: wxMDialogs.cpp:2155
+msgid "ask whether to send unsent messages on exit"
+msgstr ""
+
+#: wxMDialogs.cpp:2189
+msgid "ask for confirmation before importing unrecognized address book files"
+msgstr ""
+
+#: wxMDialogs.cpp:2468
+msgid "Fingerprint : "
+msgstr ""
+
+#: PalmOS.cpp:1829
+msgid "Sync to MAL server (e.g. AvantGo)"
 msgstr ""
 
 # MDialogs.h

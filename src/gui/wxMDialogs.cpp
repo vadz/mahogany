@@ -2152,7 +2152,7 @@ static const struct
 } gs_persMsgBoxData[] =
 {
    { "AskSpecifyDir",            gettext_noop("prompt for global directory if not found") },
-   { "SendOutboxOnExit",         gettext_noop("ask whether to send unset messages on exit") },
+   { "SendOutboxOnExit",         gettext_noop("ask whether to send unsent messages on exit") },
    { "AbandonCriticalFolders",   gettext_noop("prompt before abandoning critical folders ") },
    { "GoOnlineToSendOutbox",     gettext_noop("ask whether to go online to send Outbox") },
    { "FixTemplate",              gettext_noop("propose to fix template with errors") },
@@ -2186,7 +2186,7 @@ static const struct
    { "MailSentMessage",          gettext_noop("show notification for sent messages") },
    { "TestMailSent",             gettext_noop("show succesful test message") },
    { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleing the address book entries") },
-   { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unreckognized address book files") },
+   { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unrecognized address book files") },
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
    { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
@@ -2465,7 +2465,7 @@ extern "C"
            << '\n'
            << _("Name : ") << subject << '\n'
            << _("Issuer : ") << issuer << '\n'
-           << _("Fingerprint: ") << fingerprint << '\n'
+           << _("Fingerprint : ") << fingerprint << '\n'
            << '\n'
            << _("Do you accept this certificate?");
       return (int) MDialog_YesNoDialog(info,

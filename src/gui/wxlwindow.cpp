@@ -68,6 +68,9 @@
 #endif
 
 
+// define this to enable (broken) update speedups
+//#define WXLO_PARTIAL_REFRESH
+
 // for profiling in debug mode:
 WXLO_TIMER_DEFINE(UpdateTimer);
 WXLO_TIMER_DEFINE(BlitTimer);
@@ -839,14 +842,24 @@ wxLayoutWindow::ScrollToCursor(void)
 void
 wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))
 {
+#ifdef WXLO_PARTIAL_REFRESH
+   InternalPaint(NULL);
+#else
    wxRect region = GetUpdateRegion().GetBox();
    InternalPaint(&region);
+#endif
 }
 
 void
 wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
 {
 #ifdef __WXGTK__
+#   ifdef WXLO_PARTIAL_REFRESH
+   // We cannot use region iterators unless called from within OnPaint()!!!
+   if(updateRect == NULL)
+      Refresh(FALSE);
+   else
+#   endif
    // Calling Refresh() causes bad flicker under wxGTK!!!
    InternalPaint(updateRect);
 #else
@@ -961,7 +974,11 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 #ifdef WXLO_PARTIAL_REFRESH
    // This somehow doesn't work, but even the following bit with the
    // whole rect at once is still a bit broken I think.
-   wxRegionIterator ri ( GetUpdateRegion() );
+   wxRegionIterator ri;
+   if(updateRect)
+      ri = wxRegionIterator(*updateRect);
+   else
+      ri = wxRegionIterator(GetUpdateRegion());
    if(ri)
       while(ri)
       {
