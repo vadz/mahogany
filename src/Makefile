@@ -40,11 +40,11 @@ endif
 
 include ../makerules
 
-# under Mac OS we need to build a bundle in addition to the main binary
+# under Mac OS we need to build a bundle and not just a single binary
 ifdef USE_MAC
-M_BUNDLE := bundle
+M_APP := M_bundle
 else
-M_BUNDLE :=
+M_APP := M
 endif
 
 # for cygwin/mingw we need to add resources to the main binary
@@ -64,7 +64,7 @@ endif
 
 # OK, we've got all the names and the rules to generate them; we can
 # now actually specify the dependencies.
-binary:	M $(MSOS) $(M_BUNDLE)
+binary:	$(M_APP) $(MSOS)
 	@true
 
 M:	$(MOBJS)
@@ -80,9 +80,8 @@ include ../makeversion
 
 BUNDLE := M.app/Contents
 
-# Targets to build a Mac OS X application bundle
-# (copied from wxWindows makefiles)
-bundle: $(BUNDLE)/MacOS/M \
+# Target to build a Mac OS X application bundle
+M_bundle: $(BUNDLE)/MacOS/M \
         $(BUNDLE)/Info.plist \
         $(BUNDLE)/PkgInfo \
         $(BUNDLE)/Resources/M.rsrc \
@@ -98,7 +97,7 @@ $(BUNDLE)/PkgInfo:
 
 $(BUNDLE)/MacOS/M: M
 	@$(INSTALL) -d `dirname $@`
-	@cp $< $@
+	@mv $< $@
 
 $(BUNDLE)/Resources/M.rsrc: $(SOURCEDIR)/macosx/M.rsrc
 	@$(INSTALL) -d `dirname $@`
