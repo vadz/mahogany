@@ -163,7 +163,15 @@ MProgressDialog::MProgressDialog(wxString const &title,
    m_gauge->SetValue(0);
    Fit();
    Show(TRUE);
+   wxFrame *f = mApplication->TopLevelFrame();
+   if(f) f->Enable(false);
    wxYield();
+}
+
+MProgressDialog::~MProgressDialog()
+{
+   wxFrame *f = mApplication->TopLevelFrame();
+   if(f) f->Enable(true);
 }
 
 void

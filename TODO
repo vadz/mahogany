@@ -7,26 +7,20 @@ $Id$
 *********************************************************************
 
  - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
- -  new mail dialog getting stuck?
- - mAppBase::OnExit() gets called twice
- - sometimes M is very slow sending a message, why?
+- mAppBase::OnExit() gets called twice
+
+ - is leading * for NNTP folders a good idea? NO - why does PINE do it?
 
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-- send new mail events again - why have they disappeared?
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
-- fix status flag indicators (N/U seem to be wrong)
-  -> new messages are marked as N, when viewed, they change to U
-- new mail dialog shows empty folder name when more than one message
-  has arrived
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
-- add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
@@ -35,17 +29,12 @@ $Id$
 - add references (and In-Reply-To: ?) headers to message replies
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog?
-- folderview listctrl: save sizes of columns
-   Make types of columns (and  number?) configurable with the new Config_ComboBox
 - folderview listctrl has extra Subject column behind Size field ???
 - when inserting filetype of unknown MIME type, prompt for it,
   possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
 - add "double click to open" profile option support to folder list ctrl
-- Printout scaling is a bit broken. Does ScaleDC() affect the
-  calculaton of the DC size and number of pages?
-
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolde r
   deletes them in any case. Trivial to add.
@@ -64,7 +53,7 @@ $Id$
 - delete temporary files (esp. from image conversion!)
 
  - wxLayout: UNDERGOING REWRITE
-
+ 
 - save and restore printer settings in profile
  - M takes ages to send a message
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
@@ -354,7 +343,16 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
- - Solaris: all helpers need absolute path or won't get found
+-  new mail dialog getting stuck?
+- sometimes M is very slow sending a message, why? (was server)
+- fix status flag indicators (N/U seem to be wrong)
+  -> new messages are marked as N, when viewed, they change to U
+- is leading * for NNTP folders a good idea? NO - why does PINE do it?
+- add TO: field to folderview
+- send new mail events again - why have they disappeared?
+- new mail dialog shows empty folder name when more than one message
+  has arrived
+- Solaris: all helpers need absolute path or won't get found
 - Proper NNTP support and POP3 fetch solution are the same thing:
   - Use mail_fetch_overview() and implement it on the MailFolder
     interface. Use that new function in wxFolderView::Update() to

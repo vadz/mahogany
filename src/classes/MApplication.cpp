@@ -527,7 +527,7 @@ MAppBase::OnMEvent(MEventData& event)
             // it seems like a better idea to give this brief message in case
             // of several messages
             message.Printf(_("You have received %lu new messages\nin folder '%s'."),
-                           number, folder->GetName());
+                           number, folder->GetName().c_str());
          }
 
          // TODO make it a wxPMessageBox to let the user shut if off from here?

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Feb 20 16:03:20 1999
+#This file was created by <karsten> Tue Mar  2 15:26:25 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -6196,4 +6196,55 @@ wxGTK has a problem with constraint handling which can cause this dialog
  This seems to depend on the platform and windowmanager.
  Also, wxGTK does not seem to work correctly with OpenLook which does not
  allow you to enter anything.
+\layout Subsection
+
+How do I unpack the compressed files?
+\layout Standard
+
+The distribution files for Solaris and some of the other ones, are in compressed
+ tar format, having the ending 
+\family typewriter 
+.tar.gz
+\family default 
+ .
+ To unpack them, you need 
+\family typewriter 
+gzip
+\family default 
+ and 
+\family typewriter 
+tar
+\family default 
+.
+ Change to the directory where you want to install M, e.g to 
+\family typewriter 
+/usr
+\family default 
+ or 
+\family typewriter 
+/opt
+\family default 
+ or 
+\family typewriter 
+/usr/local
+\family default 
+ and issue the following command: 
+\layout Quote
+
+
+\family typewriter 
+gzip -dc < thedistributionfile | tar xvof -
+\layout Standard
+
+Where 
+\family typewriter 
+thedistributionfile
+\family default 
+ is the complete path to the file you downloaded.
+ You will need to have proper write access to the directory where you install
+ it and 
+\family typewriter 
+tar
+\family default 
+ should show you a list of all files being installed as it unpacks them.
 \the_end

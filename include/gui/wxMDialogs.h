@@ -38,6 +38,7 @@ public:
    MProgressDialog(wxString const &title, wxString const &message,
                    int maximum = 100,
                    wxWindow *parent = NULL);
+   ~MProgressDialog();
    void Update(int value);
 private:
    class wxGauge *m_gauge;
