@@ -416,7 +416,7 @@ if test "$USE_MAC" = 1; then
     AC_PATH_PROG(SETFILE, SetFile, true, [$PATH:/Developer/Tools])
 
     REZFLAGS=`$WX_CONFIG_WITH_ARGS --rezflags`
-    AC_SUBNST(REZFLAGS)
+    AC_SUBST(REZFLAGS)
 fi
 
 dnl --------------------------------------------------------------------------
