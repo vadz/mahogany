@@ -214,6 +214,7 @@ MessageCC::~MessageCC()
 // sending
 // ----------------------------------------------------------------------------
 
+// TODO: this should be moved into SendMessage probably and cleaned up
 bool
 MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 {
@@ -313,14 +314,15 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
          continue;
       }
       // end of this line
-      name = headerLine.BeforeFirst(':');
+      name = headerLine.BeforeFirst(':').Lower();
       value = headerLine.AfterFirst(':');
-      if ( name != "Date" && 
-           name != "From" && 
-           name != "MIME-Version" &&
-           name != "Content-Type" &&
-           name != "Content-Disposition" &&
-           name != "Content-Transfer-Encoding" )
+      if ( name != "date" && 
+           name != "from" && 
+           name != "message-id" &&
+           name != "mime-version" &&
+           name != "content-type" &&
+           name != "content-disposition" &&
+           name != "content-transfer-encoding" )
          sendMsg->AddHeaderEntry(name, value);
       headerLine = "";
    }while(*cptr && *cptr != '\012');
