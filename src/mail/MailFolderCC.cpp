@@ -60,7 +60,8 @@
 // DecodeHeader() uses CharsetToEncoding()
 #include <wx/fontmap.h>
 
-#include <ctype.h>   // isspace()
+#include <ctype.h>      // isspace()
+#include <sys/stat.h>   // struct stat
 
 #ifdef OS_UNIX
    #include <signal.h>
@@ -2343,19 +2344,22 @@ GetOperationName(MailFolder::OpenMode openmode)
 bool
 MailFolderCC::CheckForFileLock()
 {
-   String lockfile;
+   // this code doesn't work under Windows anyhow because lockname() doesn't
+   // use ".lock" suffix there
+#ifdef OS_UNIX
+   String file;
 
    MFolderType folderType = GetType();
    if( folderType == MF_FILE )
-      lockfile = m_ImapSpec;
+      file = m_ImapSpec;
 #ifdef OS_UNIX
    else if ( folderType == MF_INBOX )
    {
       // get INBOX path name
       MCclientLocker lock;
-      lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-      if(lockfile.empty()) // another c-client stupidity
-         lockfile = (char *) sysinbox();
+      file = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+      if(file.empty()) // another c-client stupidity
+         file = (char *) sysinbox();
    }
 #endif // OS_UNIX
    else
@@ -2364,39 +2368,64 @@ MailFolderCC::CheckForFileLock()
       return true;
    }
 
-   lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
-   lockfile = wxFindFirstFile(lockfile, wxFILE);
+   // TODO: we should be using c-client's lockname() here
+   String lockfile = wxFindFirstFile(file + ".lock*", wxFILE);
    while ( !lockfile.empty() )
    {
-      FILE *fp = fopen(lockfile,"r");
-      if(fp) // outch, someone has a lock
+      // outch, someone has a lock, opening the mailbox will fail as c-client
+      // checks for it -- propose to the user to remove the lock first
+      bool shouldRemove = MDialog_YesNoDialog
+                          (
+                           String::Format(
+                              _("Found lock-file '%s' for the mailbox '%s'.\n"
+                                "\n"
+                                "Some other process may be using the folder.\n"
+                                "Shall I forcefully override the lock?"),
+                              lockfile.c_str(), file.c_str()
+                           ),
+                           NULL,
+                           MDIALOG_YESNOTITLE,
+                           M_DLG_YES_DEFAULT
+                          );
+
+      if ( shouldRemove )
       {
-         fclose(fp);
-         String msg;
-         msg.Printf(_("Found lock-file:\n"
-                    "'%s'\n"
-                    "Some other process may be using the folder.\n"
-                    "Shall I forcefully override the lock?"),
-                    lockfile.c_str());
-         if(MDialog_YesNoDialog(msg, NULL,
-                                MDIALOG_YESNOTITLE, M_DLG_YES_DEFAULT))
+         // ask extra confirmation if the file is not empty to avoid deleting
+         // the important files erroneously
+         wxStructStat stBuf;
+         if ( wxStat(lockfile, &stBuf) != 0 || stBuf.st_size != 0 )
          {
-            int success = remove(lockfile);
-            if(success != 0) // error!
-               wxLogWarning(_("Could not remove lock-file.\n"
-                              "Other process may have terminated.\n"
-                              "Will try to continue as normal."));
+            shouldRemove = MDialog_YesNoDialog
+                           (
+                              String::Format(
+                                 _("The file '%s' is not empty, still remove it?"),
+                                 lockfile.c_str()),
+                              NULL,
+                              MDIALOG_YESNOTITLE,
+                              M_DLG_NO_DEFAULT
+                             );
          }
-         else
+      }
+
+      if ( shouldRemove )
+      {
+         // remove the file but be prepared to the fact that it could have
+         // already disappeared by itself
+         if ( remove(lockfile) != 0 && wxFile::Exists(lockfile) )
          {
-            wxLogError(_("Cannot open the folder while lock-file exists."));
-            wxLogError(_("Could not open mailbox %s."), GetName().c_str());
+            wxLogSysError(_("Failed to remove the lock file"));
 
             return false;
          }
       }
+      else if ( wxFile::Exists(lockfile) )
+      {
+         wxLogWarning(_("Lock file is present, opening the folder might fail."));
+      }
+
       lockfile = wxFindNextFile();
    }
+#endif // OS_UNIX
 
    return true;
 }
