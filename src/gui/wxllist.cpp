@@ -24,8 +24,10 @@
 
 #ifdef M_BASEDIR
 #   include "gui/wxllist.h"
+#   define  SHOW_SELECTIONS 0
 #else
 #   include "wxllist.h"
+#   define SHOW_SELECTIONS 1
 #endif
 
 #ifndef USE_PCH
@@ -1074,12 +1076,15 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_FontFamily = family;
    m_FontStyle = style;
    m_FontWeight = weight;
-   if(fg) m_ColourFG = *fg;
-   if(bg) m_ColourBG = *bg;
-
-   m_ColourFG = *wxBLACK;
-   m_ColourBG = *wxWHITE;
-   
+   if(fg)
+      m_ColourFG = *fg;
+   else
+      m_ColourFG = *wxBLACK;
+   if(bg)
+      m_ColourBG = *bg;
+   else
+      m_ColourBG = *wxWHITE;
+      
    if(m_DefaultSetting)
       delete m_DefaultSetting;
 
@@ -1631,23 +1636,27 @@ wxLayoutList::IsSelected(const wxLayoutLine *line, CoordType *from,
 void
 wxLayoutList::StartHighlighting(wxDC &dc)
 {
+#if SHOW_SELECTIONS
    dc.SetTextForeground(m_ColourBG);
    dc.SetTextBackground(m_ColourFG);
+#endif
 }
 
 /// Ends highlighting the selection
 void
 wxLayoutList::EndHighlighting(wxDC &dc)
 {
+#if SHOW_SELECTIONS
    dc.SetTextForeground(m_ColourFG);
    dc.SetTextBackground(m_ColourBG);
+#endif
 }
 
 
 #ifdef WXLAYOUT_DEBUG
 
 void
-wxLayoutList::Debug(void)
+wxLayoutList::Debug(void) 
 {
    wxLayoutLine *line;
 
