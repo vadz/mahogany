@@ -30,7 +30,7 @@
 
 #define   BASE_SIZE 12
 
-static inline bool IsEndOfLine(const char *p)
+static inline bool LayoutParserIsEndOfLine(const char *p)
 {
    // the end of line is either just '\n' or "\r\n" or even '\r' - we
    // understand Unix, DOS and Mac conventions here as we get all kinds of text
@@ -88,7 +88,7 @@ static void wxLayoutImportTextInternal(wxLayoutList *list,
 
    for ( const char *cptr = str.c_str(); *cptr; cptr++ )
    {
-      while ( *cptr && !IsEndOfLine(cptr) )
+      while ( *cptr && !LayoutParserIsEndOfLine(cptr) )
       {
          s += *cptr++;
       }
