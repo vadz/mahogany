@@ -987,6 +987,34 @@ inline bool CheckStatusBit(int status, int bit, bool isSet)
    return !(status & bit) == !isSet;
 }
 
+static String GetShortFolderNameFromProfile(const Profile *profile)
+{
+   String name = profile->GetName();
+   if ( !name.StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
+   {
+      if ( name != M_PROFILE_CONFIG_SECTION )
+      {
+         FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
+      }
+      else
+      {
+         // editing global settings
+         name.clear();
+      }
+   }
+
+   if ( name.empty() )
+   {
+      name = _("Default");
+   }
+   else // we're changing options for some folder
+   {
+      name = name.AfterLast('/');
+   }
+
+   return name;
+}
+
 // ============================================================================
 // wxFolderMsgWindow and wxFolderMsgViewerEvtHandler implementation
 // ============================================================================
@@ -1750,31 +1778,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    // get some non NULL profile
    Profile_obj profile(m_FolderView->GetFolderProfile());
 
-   String name = profile->GetName();
-   if ( !name.StartsWith(String(M_PROFILE_CONFIG_SECTION) + '/', &name) )
-   {
-      if ( name != M_PROFILE_CONFIG_SECTION )
-      {
-         FAIL_MSG( "unexpected profile - what folder does it correspond to?" );
-      }
-      else
-      {
-         // editing global settings
-         name.clear();
-      }
-   }
-
-   wxString menuTitle;
-   if ( name.empty() )
-   {
-      menuTitle = _("Default");
-   }
-   else // we're changing options for some folder
-   {
-      menuTitle = name.AfterLast('/');
-   }
-
-   wxMenu menu(menuTitle);
+   wxMenu menu(GetShortFolderNameFromProfile(profile));
 
    // add items to sort by this column in direct/reverse order if we have a
    // valid column and if we can sort by it
@@ -4992,7 +4996,8 @@ bool OpenFolderViewFrame(MFolder *folder,
 }
 
 extern
-bool ShowFolderViewColumnDialog(wxArrayString *names,
+bool ShowFolderViewColumnDialog(const String& folderName,
+                                wxArrayString *names,
                                 wxArrayInt *status,
                                 wxArrayInt *widths,
                                 bool *asDefault,
@@ -5059,7 +5064,8 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 
    // do show the dialog
    bool def;
-   if ( !ShowFolderViewColumnDialog(&colNames, &status, &widths, &def, parent) )
+   if ( !ShowFolderViewColumnDialog(GetShortFolderNameFromProfile(profile),
+                                    &colNames, &status, &widths, &def, parent) )
    {
       // nothing changed
       return false;

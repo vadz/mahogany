@@ -54,7 +54,8 @@ enum
 class wxFolderViewColumnsDialog : public wxSelectionsOrderDialogSimple
 {
 public:
-   wxFolderViewColumnsDialog(wxArrayString *names,
+   wxFolderViewColumnsDialog(const String& folderName,
+                             wxArrayString *names,
                              wxArrayInt *status,
                              wxArrayInt *widths,
                              bool *asDefault,
@@ -131,18 +132,22 @@ END_EVENT_TABLE()
 // wxFolderViewColumnsDialog
 // ----------------------------------------------------------------------------
 
-wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
-                                                     wxArrayInt* status,
-                                                     wxArrayInt* widths,
-                                                     bool *asDefault,
-                                                     wxWindow *parent)
-    : wxSelectionsOrderDialogSimple(_("&Select the columns to show:"),
-                                    // TODO: show folder name in the caption
-                                    _("Configure folder view columns"),
-                                    names,
-                                    status,
-                                    "FolderViewCol",
-                                    parent)
+wxFolderViewColumnsDialog::
+wxFolderViewColumnsDialog(const String& folderName,
+                          wxArrayString* names,
+                          wxArrayInt* status,
+                          wxArrayInt* widths,
+                          bool *asDefault,
+                          wxWindow *parent)
+    : wxSelectionsOrderDialogSimple
+      (
+         _("&Select the columns to show:"),
+         String::Format(_("Configure columns for '%s'"), folderName.c_str()),
+         names,
+         status,
+         "FolderViewCol",
+         parent
+      )
 {
    m_countCol = m_choices->GetCount();
    m_idxTrans = new size_t[m_countCol];
@@ -356,7 +361,8 @@ void wxFolderViewColumnsDialog::OnReset(wxCommandEvent& event)
 // ----------------------------------------------------------------------------
 
 extern
-bool ShowFolderViewColumnDialog(wxArrayString *names,
+bool ShowFolderViewColumnDialog(const String& folderName,
+                                wxArrayString *names,
                                 wxArrayInt *status,
                                 wxArrayInt *widths,
                                 bool *asDefault,
@@ -365,7 +371,8 @@ bool ShowFolderViewColumnDialog(wxArrayString *names,
    CHECK( names && status && widths && asDefault, false,
           "NULL pointer in ShowFolderViewColumnDialog" );
 
-   wxFolderViewColumnsDialog dlg(names, status, widths, asDefault, parent);
+   wxFolderViewColumnsDialog dlg(folderName, names, status, widths,
+                                 asDefault, parent);
 
    // don't return false if either checkbox was checked as otherwise
    // the caller is not going to do anything at all, although it should
