@@ -99,12 +99,12 @@ bool ParseColourString(const String& name, wxColour* colour)
    }
    else // a colour name
    {
-      wxColour *col = wxTheColourDatabase->FindColour(name);
-      if ( !col )
+      wxColour col = wxTheColourDatabase->Find(name);
+      if ( !col.Ok() )
          return FALSE;
 
       if ( colour )
-         *colour = *col;
+         *colour = col;
    }
 
    return TRUE;
