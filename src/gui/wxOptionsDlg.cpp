@@ -786,9 +786,6 @@ public:
    virtual bool IsGlobalOptionsDialog() const { return FALSE; }
 
 protected:
-   // handle button clicks
-   void OnButton(wxCommandEvent& event);
-
    enum
    {
       Page_Ident,
@@ -809,7 +806,6 @@ private:
    size_t m_nPages;
    wxOptionsPageDesc *m_aPages;
 
-   DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxIdentityOptionsDialog)
 };
 
@@ -885,10 +881,6 @@ BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageOthers::OnButton)
 END_EVENT_TABLE()
 
-
-BEGIN_EVENT_TABLE(wxIdentityOptionsDialog, wxCustomOptionsDialog)
-   EVT_BUTTON(-1, wxIdentityOptionsDialog::OnButton)
-END_EVENT_TABLE()
 
 // ============================================================================
 // data: both of these arrays *must* be in sync with ConfigFields enum!
@@ -3232,6 +3224,22 @@ wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
    ASSERT_MSG( nFirst >= -1, _T("bad parameret in wxOptionsPageStandard ctor") );
 }
 
+wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *parent,
+                                             const wxChar *title,
+                                             Profile *profile,
+                                             FieldInfoArray aFields,
+                                             ConfigValuesArray aDefaults,
+                                             size_t nFields,
+                                             size_t nOffset,
+                                             int helpId,
+                                             int image)
+                     : wxOptionsPage(aFields - nOffset,
+                                     aDefaults - nOffset,
+                                     nOffset, nOffset + nFields,
+                                     parent, title, profile, helpId, image)
+{
+}
+
 // ----------------------------------------------------------------------------
 // wxOptionsPageCompose
 // ----------------------------------------------------------------------------
@@ -3249,48 +3257,42 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
 
 void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 {
-   if ( !HandleButton(m_Profile, event.GetEventObject(), this) )
-      event.Skip();
-}
-
-/* static */ bool
-wxOptionsPageCompose::HandleButton(Profile *profile,
-                                   wxObject *obj,
-                                   wxOptionsPage *win)
-{
    bool dirty = false;
 
-   if ( win->IsControl(obj, ConfigField_ComposeHeaders) )
+   wxObject * const obj = event.GetEventObject();
+   if ( IsControl(obj, ConfigField_ComposeHeaders) )
    {
       // create and show the "outgoing headers" config dialog
-      dirty = ConfigureComposeHeaders(profile, win);
+      dirty = ConfigureComposeHeaders(m_Profile, this);
    }
-   else if ( win->IsControl(obj, ConfigField_ComposeTemplates) )
+   else if ( IsControl(obj, ConfigField_ComposeTemplates) )
    {
-      dirty = ConfigureTemplates(profile, win);
+      dirty = ConfigureTemplates(m_Profile, this);
    }
-   else if ( win->IsControl(obj, ConfigField_XFaceFile) )
+   else if ( IsControl(obj, ConfigField_XFaceFile) )
    {
-      if ( PickXFaceDialog(profile, win) )
+      if ( PickXFaceDialog(m_Profile, this) )
       {
          dirty = true;
 
          wxXFaceButton *btn = (wxXFaceButton*)obj;
-         btn->SetFile(READ_CONFIG_BOOL(profile, MP_COMPOSE_USE_XFACE)
-                        ? READ_CONFIG(profile, MP_COMPOSE_XFACE_FILE)
+         btn->SetFile(READ_CONFIG_BOOL(m_Profile, MP_COMPOSE_USE_XFACE)
+                        ? READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE)
                         : String());
       }
    }
    else // not our button
    {
-      return false;
+      event.Skip();
+
+      return;
    }
 
    if ( dirty )
    {
       // something changed - make us dirty
       wxOptionsEditDialog *
-         dialog = GET_PARENT_OF_CLASS(win, wxOptionsEditDialog);
+         dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
 
       if ( dialog )
       {
@@ -3301,8 +3303,6 @@ wxOptionsPageCompose::HandleButton(Profile *profile,
          FAIL_MSG( _T("options page without a parent dialog?") );
       }
    }
-
-   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -4474,17 +4474,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
    {
       // the page ctor will add it to the notebook
       const wxOptionsPageDesc& desc = pageDesc[n];
-      wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
-                                                            this,
-                                                            wxGetTranslation(desc.title),
-                                                            profile,
-                                                            desc.aFields,
-                                                            desc.aDefaults,
-                                                            desc.nFields,
-                                                            desc.nOffset,
-                                                            desc.helpId,
-                                                            n  // image index
-                                                           );
+      wxOptionsPage *page = desc.New(this, profile, n);
       page->Layout();
    }
 
@@ -4500,7 +4490,7 @@ wxCustomOptionsNotebook::GetImagesArray(size_t nPages,
 
    for ( size_t n = 0; n < nPages; n++ )
    {
-      m_aImages[n] = pageDesc[n].image;
+      m_aImages[n] = pageDesc[n].GetImage();
    }
 
    m_aImages[nPages] = NULL;
@@ -4607,7 +4597,8 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
       wxOptionsPageStandard::ms_aFields + nOffset,
       wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
       ConfigField_NetworkLast - ConfigField_NetworkFirst,
-      nOffset
+      nOffset,
+      wxOptionsPageNetwork::New
    );
 
    // compose page
@@ -4620,24 +4611,9 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
       wxOptionsPageStandard::ms_aFields + nOffset,
       wxOptionsPageStandard::ms_aConfigDefaults + nOffset,
       ConfigField_ComposeLast - ConfigField_ComposeFirst,
-      nOffset
+      nOffset,
+      wxOptionsPageCompose::New
    );
-}
-
-void wxIdentityOptionsDialog::OnButton(wxCommandEvent& event)
-{
-   // for now the only buttons we have in this dialog are in the compose page
-   wxObject * const btn = event.GetEventObject();
-   if ( !wxOptionsPageCompose::HandleButton
-         (
-            GetProfile(),
-            btn,
-            (wxOptionsPage *)m_notebook->GetPage(Page_Compose)
-         ) )
-   {
-      // must be one of the std buttons
-      event.Skip();
-   }
 }
 
 // ----------------------------------------------------------------------------

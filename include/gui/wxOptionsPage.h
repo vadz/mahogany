@@ -190,12 +190,6 @@ public:
    /// Returns the numeric help id.
    int HelpId(void) const { return m_HelpId; }
 
-   /// only for HandleButton() hack, don't call directly
-   bool IsControl(wxObject *obj, size_t n) const
-   {
-      return GetControl(n) == obj;
-   }
-
 protected:
    /// get the name of the folder we're editing the options of
    String GetFolderName() const;
@@ -219,6 +213,12 @@ protected:
    // get the control with "right" index
    wxControl *GetControl(size_t /* ConfigFields */ n) const
       { return m_aControls[n - m_nFirst]; }
+
+   // check whether the given object is the field with this index
+   bool IsControl(wxObject *obj, size_t n) const
+   {
+      return GetControl(n) == obj;
+   }
 
    // get the dirty flag for the control with index n
    bool IsDirty(size_t n) const
@@ -333,6 +333,18 @@ public:
    // and of their default values
    static const ConfigValueDefault ms_aConfigDefaults[];
 
+protected:
+   // ctor for pages created via static New()
+   wxOptionsPageStandard(wxNotebook *parent,
+                         const wxChar *title,
+                         Profile *profile,
+                         FieldInfoArray aFields,
+                         ConfigValuesArray aDefaults,
+                         size_t nFields,
+                         size_t nOffset = 0,
+                         int helpID = -1,
+                         int image = -1);
+
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageStandard)
 };
@@ -370,6 +382,22 @@ public:
                         int helpID = -1,
                         int image = -1);
 
+   // for wxOptionsPageDesc usage
+   static wxOptionsPage *New(wxNotebook *parent,
+                             const wxChar *title,
+                             Profile *profile,
+                             FieldInfoArray aFields,
+                             ConfigValuesArray aDefaults,
+                             size_t nFields,
+                             size_t nOffset = 0,
+                             int helpID = -1,
+                             int image = -1)
+   {
+      return new wxOptionsPageDynamic(parent, title, profile,
+                                      aFields, aDefaults, nFields, nOffset,
+                                      helpID, image);
+   }
+
 private:
    DECLARE_NO_COPY_CLASS(wxOptionsPageDynamic)
 };
@@ -377,39 +405,84 @@ private:
 // the data from which wxOptionsPageDynamic may be created by the notebook -
 // using this structure is more convenient than passing all these parameters
 // around separately
+//
+// this used to be a dummy struct, now it is a real class but we'd have to
+// change all fwd declarations if we changed it here, so leave it alone
 struct wxOptionsPageDesc
 {
+public:
+   // a pointer to creation function may be specified to create a page of given
+   // type instead of generic wxOptionsPageDynamic
+   typedef wxOptionsPage *(*NewFunc_t)
+                           (
+                              wxNotebook *parent,
+                              const wxChar *title,
+                              Profile *profile,
+                              wxOptionsPage::FieldInfoArray aFields,
+                              ConfigValuesArray aDefaults,
+                              size_t nFields,
+                              size_t nOffset,
+                              int helpID,
+                              int image
+                           );
+
+   // default ctor needed to be able to create arrays of these objects, but it
+   // really should never be used
    wxOptionsPageDesc()
    {
-      nFields = 0;
    }
 
-   wxOptionsPageDesc(const wxChar *title_,
-                     const wxChar *image_,
-                     int helpId_,
-                     const wxOptionsPage::FieldInfo *aFields_,
-                     ConfigValuesArray aDefaults_,
-                     size_t nFields_,
-                     size_t nOffset_ = 0)
-      : title(title_),
-        image(image_),
-        helpId(helpId_),
-        aFields(aFields_),
-        aDefaults(aDefaults_),
-        nFields(nFields_),
-        nOffset(nOffset_)
+   wxOptionsPageDesc(const wxChar *title,
+                     const wxChar *image,
+                     int helpId,
+                     const wxOptionsPage::FieldInfo *aFields,
+                     ConfigValuesArray aDefaults,
+                     size_t nFields,
+                     size_t nOffset = 0,
+                     NewFunc_t createFunc = wxOptionsPageDynamic::New)
+      : m_title(title),
+        m_image(image),
+        m_helpId(helpId),
+        m_aFields(aFields),
+        m_aDefaults(aDefaults),
+        m_nFields(nFields),
+        m_nOffset(nOffset),
+        m_pfnNew(createFunc)
    {
    }
 
-   String title;        // the page title in the notebook
-   String image;        // image
+   // create a page from this description
+   wxOptionsPage *New(wxNotebook *parent, Profile *profile, int image) const
+   {
+      return (*m_pfnNew)
+             (
+                parent,
+                wxGetTranslation(m_title),
+                profile,
+                m_aFields,
+                m_aDefaults,
+                m_nFields,
+                m_nOffset,
+                m_helpId,
+                image
+             );
+   }
 
-   int helpId;
+   const String& GetImage() const { return m_image; }
+
+private:
+   String m_title;        // the page title in the notebook
+   String m_image;        // image
+
+   int m_helpId;
 
    // the fields description
-   const wxOptionsPage::FieldInfo *aFields;
-   ConfigValuesArray aDefaults;
-   size_t nFields, nOffset;
+   const wxOptionsPage::FieldInfo *m_aFields;
+   ConfigValuesArray m_aDefaults;
+   size_t m_nFields,
+          m_nOffset;
+
+   NewFunc_t m_pfnNew;
 };
 
 // ----------------------------------------------------------------------------
@@ -438,7 +511,40 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+   // for wxOptionsPageDesc
+   static wxOptionsPage *New(wxNotebook *parent,
+                             const wxChar *title,
+                             Profile *profile,
+                             FieldInfoArray aFields,
+                             ConfigValuesArray aDefaults,
+                             size_t nFields,
+                             size_t nOffset = 0,
+                             int helpID = -1,
+                             int image = -1)
+   {
+      return new wxOptionsPageNetwork(parent, title, profile,
+                                      aFields, aDefaults, nFields, nOffset,
+                                      helpID, image);
+   }
+
 private:
+   // ctor for New()
+   wxOptionsPageNetwork(wxNotebook *parent,
+                        const wxChar *title,
+                        Profile *profile,
+                        FieldInfoArray aFields,
+                        ConfigValuesArray aDefaults,
+                        size_t nFields,
+                        size_t nOffset = 0,
+                        int helpID = -1,
+                        int image = -1)
+      : wxOptionsPageStandard(parent, title, profile,
+                              aFields, aDefaults, nFields, nOffset,
+                              helpID, image)
+   {
+   }
+
+
    wxString m_oldAuthsDisabled;
 
    DECLARE_NO_COPY_CLASS(wxOptionsPageNetwork)
@@ -482,14 +588,39 @@ public:
 
    void OnButton(wxCommandEvent& event);
 
-   // the meat of OnButton(): also used by the identity dialog
-   //
-   // return true if btn is one of our buttons, false if we didn't handle it
-   static bool HandleButton(Profile *profile,
-                            wxObject *btn,
-                            wxOptionsPage *win);
+   // for wxOptionsPageDesc
+   static wxOptionsPage *New(wxNotebook *parent,
+                             const wxChar *title,
+                             Profile *profile,
+                             FieldInfoArray aFields,
+                             ConfigValuesArray aDefaults,
+                             size_t nFields,
+                             size_t nOffset = 0,
+                             int helpID = -1,
+                             int image = -1)
+   {
+      return new wxOptionsPageCompose(parent, title, profile,
+                                      aFields, aDefaults, nFields, nOffset,
+                                      helpID, image);
+   }
 
 private:
+   // ctor for New()
+   wxOptionsPageCompose(wxNotebook *parent,
+                        const wxChar *title,
+                        Profile *profile,
+                        FieldInfoArray aFields,
+                        ConfigValuesArray aDefaults,
+                        size_t nFields,
+                        size_t nOffset = 0,
+                        int helpID = -1,
+                        int image = -1)
+      : wxOptionsPageStandard(parent, title, profile,
+                              aFields, aDefaults, nFields, nOffset,
+                              helpID, image)
+   {
+   }
+
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxOptionsPageCompose)
 };
