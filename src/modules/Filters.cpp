@@ -7,8 +7,6 @@
  *
  *******************************************************************/
 
-// TODO add support to Expression for comparison
-
 #ifdef __GNUG__
 #   pragma implementation "Filters.h"
 #endif
@@ -48,18 +46,33 @@
 // for the func_print() function:
 #include "gui/wxMessageView.h"
 
-class Value;
+// forward declare all of our classes
 class ArgList;
+class Block;
+class Expression;
+class FunctionCall;
+class FunctionDefinition;
+class FunctionList;
+class IfElse;
+class Negation;
+class Number;
+class Operator;
 class Parser;
-
-
-
-
+class StringConstant;
+class SyntaxNode;
+class Token;
+class Value;
 
 /// Type for functions to be called.
 extern "C" {
    typedef Value (* FunctionPointer)(ArgList *args, Parser *p);
 };
+
+/// some macro to save typing
+#define OPERATOR_CASE(oper) \
+   case Operator_##oper: \
+      expression->SetOperator(new Operator##oper); \
+      break
 
 
 /** Parsed representation of a filtering rule to be applied to a
@@ -68,11 +81,11 @@ extern "C" {
 class FilterRuleImpl : public FilterRule
 {
 public:
-   virtual int Apply(class MailFolder *mf, UIdType uid,
+   virtual int Apply(MailFolder *mf, UIdType uid,
                      bool *changeflag) const;
-   virtual int Apply(class MailFolder *folder, bool NewOnly,
+   virtual int Apply(MailFolder *folder, bool NewOnly,
                      bool *changeflag) const;
-   virtual int Apply(class MailFolder *folder,
+   virtual int Apply(MailFolder *folder,
                      UIdArray msgs,
                      bool ignoreDeleted,
                      bool *changeflag) const;
@@ -89,14 +102,14 @@ protected:
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
    /// common code for the two Apply() functions
-   int ApplyCommonCode(class MailFolder *folder,
+   int ApplyCommonCode(MailFolder *folder,
                        UIdArray *msgs,
                        bool newOnly,
                        bool ignoreDeleted,
                        bool *changeflag) const;
 private:
-   class Parser     *m_Parser;
-   class SyntaxNode *m_Program;
+   Parser     *m_Parser;
+   SyntaxNode *m_Program;
    MModule_Filters *m_FilterModule;
 };
 
@@ -111,10 +124,12 @@ enum OperatorType
 {
    // the values of the constants shouldn't be changed as parsing code in
    // GetToken() relies on them being in this order
+   Operator_Or,
    Operator_Plus,
    Operator_Minus,
    Operator_Times,
    Operator_Divide,
+   Operator_And,
    Operator_Less,
    Operator_Leq,
    Operator_Greater,
@@ -123,6 +138,22 @@ enum OperatorType
    Operator_Neq,
    Operator_Max
 };
+
+// some tests for the operators
+static inline bool IsRelOp(OperatorType op)
+{
+   return (op >= Operator_Less) && (op <= Operator_Neq);
+}
+
+static inline bool IsAddOp(OperatorType op)
+{
+   return (op >= Operator_Or) && (op <= Operator_Minus);
+}
+
+static inline bool IsMultOp(OperatorType op)
+{
+   return (op >= Operator_Times) && (op <= Operator_And);
+}
 
 /** Tokens are either an ASCII character or a value greater > 255.
  */
@@ -251,7 +282,7 @@ private:
 class Parser : public MObjectRC
 {
 public:
-   virtual class SyntaxNode * Parse(void) = 0;
+   virtual SyntaxNode * Parse(void) = 0;
   /** Reads the next token from the string and removes it from it.
       @param str   string to parse
       @param remove if true, move on in input
@@ -273,25 +304,25 @@ public:
    /// Print out a message.
    virtual void Log(const String &imsg, int level = M_LOG_DEFAULT) = 0;
    /** Returns a list of known function definitions. */
-   virtual class FunctionList *GetFunctionList(void) = 0;
+   virtual FunctionList *GetFunctionList(void) = 0;
    /// check if a function is already defined
-   virtual class FunctionDefinition *FindFunction(const String &name) = 0;
+   virtual FunctionDefinition *FindFunction(const String &name) = 0;
    /// Defines a function and overrides a given one
-   virtual class FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr) = 0;
+   virtual FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr) = 0;
 
 
    /**@name for runtime information */
    //@{
    /// Set the message and folder to operate on:
-   virtual void SetMessage(class MailFolder *folder,
+   virtual void SetMessage(MailFolder *folder,
                            UIdType uid = UID_ILLEGAL) = 0;
    virtual bool GetChanged(void) const = 0;
    /// Obtain the mailfolder to operate on:
-   virtual class MailFolder * GetFolder(void) = 0;
+   virtual MailFolder * GetFolder(void) = 0;
    /// Obtain the message UId to operate on:
    virtual UIdType GetMessageUId(void) = 0;
    /// Obtain the message itself:
-   virtual class Message * GetMessage(void) = 0;
+   virtual Message * GetMessage(void) = 0;
    /// tell parser that msg or folder got changed
    virtual void SetChanged(void) = 0;
    //@}
@@ -330,7 +361,7 @@ private:
    Parser *m_Parser;
 };
 
-/* The syntax:
+/* Here is the grammar of the filter language:
 
    PROGRAM :=
      | BLOCK [ BLOCK ]
@@ -344,58 +375,51 @@ private:
      | EMPTY
 
    CONDITION :=
-     | CONDITION & EXPRESSION
-     | CONDITION | EXPRESSION
+     | EXPRESSION RELOP EXPRESSION
      | EXPRESSION
 
    EXPRESSION :=
-     | EXPR COMPOP EXPR
-     | EXPR + TERM
-     | EXPR - TERM
+     | EXPRESSION ADDOP TERM
      | TERM
 
    TERM :=
-     | TERM * CONDITION
-     | TERM / CONDITION
+     | TERM MULTOP TERM
+     | SIGNOP TERM
      | FACTOR
-
 
    FACTOR :=
      | NUMBER
      | IDENTIFIER ( EXPRESSION )
      | ( EXPRESSION )
-     | ! FACTOR
+     | NEGOP FACTOR
 
-     With the following rewritten rules being used:
+  RELOP := < | > | <= | >= | == | !=
+  ADDOP := + | - | |
+  MULTOP := * | / | &
+  SIGNOP := + | -
+  NEGOP := !
 
-     CONDITION :=
-       | EXPRESSION RESTCONDITION
+  With the following rewritten rules being used:
 
-     RESTCONDITION :=
-       | & CONDITION
-       | | CONDITION
-       | EMPTY
+  CONDITION :=
+    | EXPRESSION RESTCONDITION
 
-     EXPRESSION := TERM RESTEXPRESSION
-     RESTEXPRESSION :=
-       | + EXPRESSION
-       | - EXPRESSION
-       | COMPOP EXPRESSION
-       | EMPTY
+  RESTCONDITION :=
+    | RELOP EXPRESSION
+    | EMPTY
 
-     TERM := FACTOR RESTTERM
-     RESTTERM :=
-       | * TERM
-       | / TERM
-       | EMPTY
+  EXPRESSION :=
+    | EXPRESSION RESTEXPRESSION
 
-     COMPOP := 
-       | <
-       | >
-       | <=
-       | >=
-       | ==
-       | !=
+  RESTEXPRESSION :=
+    | ADDOP TERM
+    | EMPTY
+
+  TERM := FACTOR RESTTERM
+  RESTTERM :=
+    | * TERM
+    | / TERM
+    | EMPTY
 */
 
 
@@ -403,23 +427,24 @@ private:
 // ----------------------------------------------------------------------------
 // An implementation of the Parser ABC
 // ----------------------------------------------------------------------------
+
 class ParserImpl : public Parser
 {
 public:
-   class SyntaxNode * Parse(void);
-   class SyntaxNode * ParseExpression(void);
-   class Block      * ParseBlock(void);
-   class Block      * ParseProgram(void);
-   class SyntaxNode * ParseIfElse(void);
-   class SyntaxNode * ParseCondition(void);
-   void  ParseRestBlock(class Block *statement);
-   void  ParseRestExpression(class Expression *expression);
-   void  ParseRestTerm(class Expression *expression);
-   void  ParseRestCondition(class Expression *expression);
-   class ArgList    * ParseArgList(void);
-   class SyntaxNode *ParseFunctionCall(void);
-   class SyntaxNode * ParseTerm(void);
-   class SyntaxNode * ParseFactor(void);
+   SyntaxNode * Parse(void);
+   SyntaxNode * ParseExpression(void);
+   Block      * ParseBlock(void);
+   Block      * ParseProgram(void);
+   SyntaxNode * ParseIfElse(void);
+   SyntaxNode * ParseCondition(void);
+   void  ParseRestBlock(Block *statement);
+   void  ParseRestExpression(Expression *expression);
+   void  ParseRestTerm(Expression *expression);
+   void  ParseRestCondition(Expression *expression);
+   ArgList    * ParseArgList(void);
+   SyntaxNode *ParseFunctionCall(void);
+   SyntaxNode * ParseTerm(void);
+   SyntaxNode * ParseFactor(void);
    virtual size_t GetPos(void) const { return m_Position; }
    virtual inline void Rewind(size_t pos = 0) { m_Position = pos; }
    virtual Token GetToken(bool remove = true);
@@ -436,18 +461,18 @@ public:
          m_MInterface->Log(level, msg);
       }
    /// Returns a list of known function definitions.
-   virtual class FunctionList *GetFunctionList(void)
+   virtual FunctionList *GetFunctionList(void)
       { return m_FunctionList; }
    /// check if a function is already defined
-   virtual class FunctionDefinition *FindFunction(const String &name);
+   virtual FunctionDefinition *FindFunction(const String &name);
    /// Defines a function and overrides a given one
-   virtual class FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr);
+   virtual FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr);
 
 
    /**@name for runtime information */
    //@{
    /// Set the message and folder to operate on:
-   virtual void SetMessage(class MailFolder *folder = NULL,
+   virtual void SetMessage(MailFolder *folder = NULL,
                            UIdType uid = UID_ILLEGAL)
       {
          SafeDecRef(m_MailFolder);
@@ -463,11 +488,11 @@ public:
          return m_MfWasChanged;
       }
    /// Obtain the mailfolder to operate on:
-   virtual class MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
+   virtual MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
    /// Obtain the message UId to operate on:
    virtual UIdType GetMessageUId(void) { return m_MessageUId; }
    /// Obtain the message itself:
-   virtual class Message * GetMessage(void)
+   virtual Message * GetMessage(void)
    {
       return m_MailFolder ?
          m_MailFolder->GetMessage(m_MessageUId) :
@@ -488,12 +513,12 @@ protected:
    ~ParserImpl();
 
    void AddBuiltinFunctions(void);
-   friend class Parser;
+   friend Parser;
 private:
    String m_Input;
    size_t m_Position;
    MInterface *m_MInterface;
-   class FunctionList *m_FunctionList;
+   FunctionList *m_FunctionList;
 
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
@@ -510,7 +535,7 @@ private:
 class Operator : public MObject
 {
 public:
-   virtual Value Evaluate(class SyntaxNode *left, class SyntaxNode * right) const = 0;
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode * right) const = 0;
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
@@ -662,7 +687,7 @@ private:
 class Negation : public SyntaxNode
 {
 public:
-   Negation(class SyntaxNode *sn, Parser *p) : SyntaxNode(p) { m_Sn = sn; }
+   Negation(SyntaxNode *sn, Parser *p) : SyntaxNode(p) { m_Sn = sn; }
    ~Negation() { MOcheck(); delete m_Sn; }
    virtual Value Evaluate() const
       {
@@ -789,6 +814,73 @@ FunctionCall::Evaluate() const
    return (*m_function)(m_args, GetParser());
 }
 
+#if 0 // this is the same as Expression finally
+/** A condition is either a single expression or 2 expressions combined using
+    a comparison operator */
+class Condition : public SyntaxNode
+{
+public:
+   Condition(SyntaxNode *left,
+             Operator *op,
+             SyntaxNode *right,
+             Parser *p)
+      : SyntaxNode(p)
+   {
+      m_Left = left;
+      m_Op = op;
+      m_Right = right;
+   }
+
+   virtual Value Evaluate(void) const
+   {
+      if ( m_Op )
+      {
+         ASSERT_MSG( m_Left && m_Right, "must have both parts of condition" );
+         return m_Op->Evaluate(m_Left, m_Right);
+      }
+      else // no rel operator
+      {
+         ASSERT_MSG( m_Left && !m_Right, "must have only left part" );
+         return m_Left->Evaluate();
+      }
+   }
+
+   void SetLeft(SyntaxNode *left)
+      { MOcheck(); ASSERT(m_Left == NULL); m_Left = left; }
+   void SetRight(SyntaxNode *right)
+      { MOcheck(); ASSERT(m_Right == NULL); m_Right = right; }
+   void SetOperator(Operator *op)
+      { MOcheck(); ASSERT(m_Op == NULL); m_Op = op; }
+
+   virtual ~Condition()
+   {
+      MOcheck();
+      delete m_Left;
+      delete m_Op;
+      delete m_Right;
+   }
+
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         MOcheck();
+         String s = "(";
+         s << m_Left->Debug() ;
+         if(m_Op)
+            s << m_Op->Debug() << m_Right->Debug();
+         s << ')';
+         return s;
+      }
+#endif
+
+private:
+   SyntaxNode *m_Left,
+              *m_Right;
+   Operator *m_Op;
+
+   MOBJECT_NAME(Condition)
+};
+#endif // 0
 
 /** An expression consisting of more than one token. */
 class Expression : public SyntaxNode
@@ -849,9 +941,7 @@ private:
    // may be            "foo()   +   bar()       <      17"
    SyntaxNode *m_Left,
               *m_Right;
-   Operator *m_Op,
-            *m_CompOp;
-   Value m_Value;
+   Operator *m_Op;
 
    MOBJECT_NAME(Expression)
 };
@@ -1213,7 +1303,7 @@ ParserImpl::GetToken(bool remove)
          Error(_("Unterminated string."));
       token.SetString(tokstr);
    }
-   else if ( strchr("+-*/<>=!", Char()) ) // it must be an operator
+   else if ( strchr("+-*/<>=!&|", Char()) ) // it must be an operator
    {
       int opType;
       static const char *ARITHM_OPERATORS = "+-*/";
@@ -1223,6 +1313,10 @@ ParserImpl::GetToken(bool remove)
          // the +, -, * and / are in this order
          opType = Operator_Plus + (p - ARITHM_OPERATORS);
          (void)CharInc();
+      }
+      else if ( Char() == '|' >> Char() == '&' )
+      {
+         opType = CharInc() == '|' ? Operator_Or : Operator_And;
       }
       else if ( Char() == '<' >> Char() == '>' )
       {
@@ -1501,41 +1595,45 @@ ParserImpl::ParseFactor(void)
 
 
 void
-ParserImpl::ParseRestCondition(Expression *condition)
+ParserImpl::ParseRestCondition(Expression *expression)
 {
    MOcheck();
-   ASSERT(condition);
+   ASSERT(expression);
 
-   /* RESTCONDITION :=
-      | & CONDITION
-      | | CONDITION
-      | EMPTY
+   /*
+      RESTCONDITION :=
+         | RELOP EXPRESSION
+         | EMPTY
+
+      RELOP := < | > | <= | >= | == | !=
    */
    Token t = PeekToken();
 
-   if(t.GetType() == Token::TT_EOF
-      || ( t.GetType() == Token::TT_Char
-           && t.GetChar() != '&'
-           && t.GetChar() != '|')
-      )
+   if ( t.GetType() == Token::TT_EOF ||
+        t.GetType() != Token::TT_Operator ||
+        !IsRelOp(t.GetOperator()) )
       return;
 
    GetToken();
-   SyntaxNode * cond = ParseCondition();
-   if(! cond)
+   SyntaxNode *expr = ParseExpression();
+   if ( !expr )
    {
-      Error(_("Expected Condition after conditional operator."));
+      Error(_("Expected expression after comparison operator."));
       return;
    }
-   condition->SetRight(cond);
-   switch(t.GetChar())
+   expression->SetRight(expr);
+
+   switch( t.GetOperator() )
    {
-   case '&':
-      condition->SetOperator(new OperatorAnd);break;
-   case '|':
-      condition->SetOperator(new OperatorOr);break;
-   default:
-      ASSERT(0);
+      OPERATOR_CASE(Less);
+      OPERATOR_CASE(Leq);
+      OPERATOR_CASE(Greater);
+      OPERATOR_CASE(Geq);
+      OPERATOR_CASE(Equal);
+      OPERATOR_CASE(Neq);
+
+      default:
+         FAIL_MSG("unexpected rel op");
    }
 }
 
@@ -1545,10 +1643,9 @@ ParserImpl::ParseRestExpression(Expression *expression)
    MOcheck();
    ASSERT(expression);
 
-   /* RESTEXPRESSION :=
-      | + EXPRESSION
-      | - EXPRESSION
-      | COMPOP EXPRESSION
+   /*
+      RESTEXPRESSION :=
+      | ADDOP EXPRESSION
       | EMPTY
    */
    Token t = PeekToken();
@@ -1556,39 +1653,27 @@ ParserImpl::ParseRestExpression(Expression *expression)
    // the only operators disallowed here are * and /
    if ( t.GetType() == Token::TT_EOF ||
         t.GetType() != Token::TT_Operator ||
-        t.GetOperator() == Operator_Times ||
-        t.GetOperator() == Operator_Divide )
+        !IsAddOp(t.GetOperator()) )
       return;
 
    GetToken();
-   SyntaxNode * exp = ParseExpression();
-   if(! exp)
+   SyntaxNode *expr = ParseExpression();
+   if( !expr )
    {
       Error(_("Expected expression after operator."));
       return;
    }
-   expression->SetRight(exp);
-
-#define OPERATOR_CASE(oper) \
-   case Operator_##oper: \
-      expression->SetOperator(new Operator##oper); \
-      break
+   expression->SetRight(expr);
 
    switch(t.GetOperator())
    {
       OPERATOR_CASE(Plus);
       OPERATOR_CASE(Minus);
-      OPERATOR_CASE(Less);
-      OPERATOR_CASE(Leq);
-      OPERATOR_CASE(Greater);
-      OPERATOR_CASE(Geq);
-      OPERATOR_CASE(Equal);
-      OPERATOR_CASE(Neq);
-   default:
-      ASSERT(0);
-   }
+      OPERATOR_CASE(Or);
 
-#undef OPERATOR_CASE
+   default:
+      FAIL_MSG("unexpected add op");
+   }
 }
 
 
@@ -1604,8 +1689,7 @@ ParserImpl::ParseRestTerm(Expression *expression)
    Token t = PeekToken();
    if ( t.GetType() == Token::TT_EOF ||
         t.GetType() != Token::TT_Operator ||
-        (t.GetOperator() != Operator_Divide &&
-         t.GetOperator() != Operator_Times) )
+        !IsMultOp(t.GetOperator()) )
       return;
 
    t = GetToken(); // eat operator
@@ -1618,12 +1702,12 @@ ParserImpl::ParseRestTerm(Expression *expression)
    expression->SetRight(term);
    switch(t.GetOperator())
    {
-   case Operator_Times:
-      expression->SetOperator(new OperatorTimes);break;
-   case Operator_Divide:
-      expression->SetOperator(new OperatorDivide);break;
-   default:
-      ASSERT(0);
+      OPERATOR_CASE(Times);
+      OPERATOR_CASE(Divide);
+      OPERATOR_CASE(And);
+
+      default:
+         FAIL_MSG("unexpected mult op");
    }
 }
 
@@ -1632,26 +1716,24 @@ SyntaxNode *
 ParserImpl::ParseCondition(void)
 {
    MOcheck();
-   /* CONDITION :=
-      | EXPRESSION & EXPRESSION
-      | EXPRESSION | EXPRESSION
-      | EXPRESSION
+   /*
+      CONDITION :=
+         | EXPRESSION RELOP EXPRESSION
+         | EXPRESSION
 
       Which is identical to the following expression, resolving the
       left recursion problem:
 
       CONDITION := EXPRESSION RESTCONDITION
-
    */
 
    SyntaxNode *expr = ParseExpression();
-   if(expr)
-   {
-      Expression *cond = new Expression(expr, NULL, NULL,this);
-      ParseRestCondition(cond);
-      return cond;
-   }
-   return expr;
+   if ( !expr )
+      return NULL;
+
+   Expression *cond = new Expression(expr, NULL, NULL, this);
+   ParseRestCondition(cond);
+   return cond;
 }
 
 
@@ -1774,26 +1856,24 @@ SyntaxNode *
 ParserImpl::ParseExpression(void)
 {
    MOcheck();
-   /* EXPRESSION :=
-      | EXPRESSION + TERM
-      | EXPRESSION - TERM
-      | TERM
+   /*
+      EXPRESSION :=
+         | EXPRESSION ADDOP TERM
+         | TERM
 
       Which is identical to the following expression, resolving the
       left recursion problem:
 
-      EXPRESSION :=
-      | TERM RESTEXPRESSION
+      EXPRESSION := TERM RESTEXPRESSION
 
    */
    SyntaxNode *sn = ParseTerm();
-   if(sn)
-   {
-      Expression *exp = new Expression(sn, NULL, NULL, this);
-      ParseRestExpression(exp);
-      return exp;
-   }
-   return NULL;
+   if(!sn)
+      return NULL;
+
+   Expression *exp = new Expression(sn, NULL, NULL, this);
+   ParseRestExpression(exp);
+   return exp;
 }
 
 SyntaxNode *
@@ -2077,8 +2157,7 @@ extern "C"
       Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
-      class strutil_RegEx * re =
-         p->GetInterface()->strutil_compileRegEx(needle);
+      strutil_RegEx * re = p->GetInterface()->strutil_compileRegEx(needle);
       if(! re) return FALSE;
       bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, flags);
       p->GetInterface()->strutil_freeRegEx(re);
@@ -2479,7 +2558,7 @@ ParserImpl::AddBuiltinFunctions(void)
  * FilterRuleImpl - the class representing a program
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid,
+int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid,
                           bool *changeflag) const
 {
    if(! m_Program || ! m_Parser)
@@ -2498,14 +2577,14 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid,
 }
 
 int
-FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly,
+FilterRuleImpl::Apply(MailFolder *mf, bool NewOnly,
                       bool *changeflag) const
 {
    return ApplyCommonCode(mf, NULL, NewOnly, NewOnly, changeflag);
 }
 
 int
-FilterRuleImpl::Apply(class MailFolder *folder,
+FilterRuleImpl::Apply(MailFolder *folder,
                       UIdArray msgs,
                       bool ignoreDeleted,
                       bool *changeflag) const
@@ -2531,7 +2610,7 @@ CheckStatusMatch(int status, bool newOnly, bool ignoreDeleted)
 }
 
 int
-FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
+FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
                                 UIdArray *msgs,
                                 bool newOnly,
                                 bool ignoreDeleted,
@@ -2663,7 +2742,7 @@ class MModule_FiltersImpl : public MModule_Filters
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
    */
-   virtual class FilterRule * GetFilter(const String &filterrule) const;
+   virtual FilterRule * GetFilter(const String &filterrule) const;
    DEFAULT_ENTRY_FUNC
 protected:
    MModule_FiltersImpl()
