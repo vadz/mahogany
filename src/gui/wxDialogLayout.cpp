@@ -1186,12 +1186,27 @@ void wxOptionsEditDialog::CreateAllControls()
 
 bool wxOptionsEditDialog::TransferDataToWindow()
 {
+#ifdef OS_WIN
+   // we have a problem under Windows: although initially the focus is set
+   // correctly in the dialog, when we call wxRadioBox::SetSelection from one
+   // of the pages TransferDataToWindow(), it is changed to the radio box which
+   // is wrong as it might go to a hidden page
+   //
+   // this should be somehow fixed in wxMSW but for now do it here
+   wxWindow *focusOld = FindFocus();
+#endif // OS_WIN
+
    for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataToWindow() ) {
          return FALSE;
       }
    }
+
+#ifdef OS_WIN
+   if ( focusOld )
+      focusOld->SetFocus();
+#endif // OS_WIN
 
    ResetDirty();
 
