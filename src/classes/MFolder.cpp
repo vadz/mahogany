@@ -836,6 +836,13 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    MFolder *folder = parent ? parent->CreateSubfolder(name, folderType)
                             : MFolder::Create(name, folderType);
 
+   if(folder == NULL)
+   {
+      wxLogError(_("Cannot create a folder '%s'.\n"
+                   "Maybe a folder of this name already exists?"),
+                 name.c_str());
+      return NULL;
+   }
    Profile_obj profile(folder->GetFullName());
    profile->writeEntry(MP_FOLDER_PATH, path);
 

@@ -918,7 +918,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       if(! MailFolder::CreateFolder(_("Trash"),
                                     MF_FILE,
                                     MF_FLAGS_DONTDELETE|MF_FLAGS_KEEPOPEN,
-                                    "",
+                                    _("Trash"),
                                     _("Trash folder for deleted messages.") ) )
          wxLogError(_("Could not create Trash mailbox."));
       // the rest is done in Update()
@@ -1598,6 +1598,59 @@ void VerifyUserDir(void)
 
 }
 
+/*
+  This function sets up folder entries for the servers, which can then 
+  be used for browsing them. Called only once when the application is
+  initialised for the first time. */
+static
+void
+SetupServers(void)
+{
+   String serverName;
+   MFolder *mfolder;
+   ProfileBase *p;
+   
+   /* The NNTP server: */
+   serverName = READ_APPCONFIG(MP_NNTPHOST);
+   mfolder = CreateFolderTreeEntry(NULL,
+                                   _("NNTP Server"),
+                                   MF_NNTP,
+                                   MF_FLAGS_ANON|MF_FLAGS_GROUP,
+                                   "",
+                                   FALSE);
+   p = ProfileBase::CreateProfile(mfolder->GetName());
+   p->writeEntry(MP_NNTPHOST, serverName);
+   p->DecRef();
+   SafeDecRef(mfolder);
+   
+   /* The IMAP server: */
+   serverName = READ_APPCONFIG(MP_IMAPHOST);
+   mfolder = CreateFolderTreeEntry(NULL,
+                                   _("IMAP Server"),
+                                   MF_IMAP                   ,
+                                   MF_FLAGS_ANON|MF_FLAGS_GROUP,
+                                   "",
+                                   FALSE);
+   p = ProfileBase::CreateProfile(mfolder->GetName());
+   p->writeEntry(MP_NNTPHOST, serverName);
+   p->DecRef();
+   SafeDecRef(mfolder);
+
+   /* The POP3 server: */
+   serverName = READ_APPCONFIG(MP_POPHOST);
+   mfolder = CreateFolderTreeEntry(NULL,
+                                   _("POP3 Server"),
+                                   MF_POP                   ,
+                                   MF_FLAGS_GROUP,
+                                   "",
+                                   FALSE);
+   p = ProfileBase::CreateProfile(mfolder->GetName());
+   p->writeEntry(MP_NNTPHOST, serverName);
+   p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
+   p->DecRef();
+   SafeDecRef(mfolder);
+}
+
 /* Make sure we have the minimal set of things set up:
 
    MP_USERNAME, MP_PERSONALNAME,
@@ -1674,6 +1727,7 @@ SetupMinimalConfig(void)
          profile->writeEntry(MP_IMAPHOST, cptr);
    }
 
+   SetupServers();
 #if 0
    
    mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
