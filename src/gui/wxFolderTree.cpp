@@ -147,8 +147,12 @@ private:
          Properties,
       };
 
-      FolderMenu(const String& folderName) : wxMenu(folderName)
+      FolderMenu(const String& folderName)
       {
+         String title;
+         title << _("Folder '") << folderName << '\'';
+         SetTitle(title);
+
          Append(Open, _("&Open"));
 
          AppendSeparator();
@@ -381,7 +385,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    if ( cur != NULL )
    {
       MFolder *folder = cur->GetFolder();
-      if ( folder == NULL )
+      if ( folder->GetType() == MFolder::Root )
       {
          // it's the root pseudo-folder
          MDialog_Message(_("No properties available for this item."));
