@@ -604,6 +604,10 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c->height.AsIs();
    combo->SetConstraints(c);
 
+   // between the listbox and the buttons there is the text control where
+   // template file can be edited
+   m_textctrl = new TemplateEditor(menu, this);
+
    // fill the listbox now to let it auto adjust the width before setting the
    // constraints
    FillListBox();
@@ -632,9 +636,6 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_btnDelete->SetConstraints(c);
 
-   // between the listbox and the buttons there is the text control where
-   // template file can be edited
-   m_textctrl = new TemplateEditor(menu, this);
    c = new wxLayoutConstraints;
    c->top.SameAs(combo, wxTop);
    c->bottom.SameAs(m_listbox, wxBottom);
