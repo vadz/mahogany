@@ -88,8 +88,12 @@
 //@{
 /// minimal user level, prefer simplicity over flexibility
 #define M_USERLEVEL_NOVICE 0L
-/// advanced user
+/// advanced user, more configurability features available
 #define M_USERLEVEL_ADVANCED 1L
+/// expert user, all features available
+#define M_USERLEVEL_EXPERT 2L
+/// for the developers themselves
+#define M_USERLEVEL_WIZARD 3L
 //@}
 
 /** @name Levels of  interaction, do something or not? */

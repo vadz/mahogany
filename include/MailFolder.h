@@ -616,8 +616,8 @@ public:
 /** Sort order enum for sorting message listings. */
 enum MessageSortOrder
 {
-   /// no sorting
-   MSO_NONE,
+   /// no sorting (i.e. sorting in the arrival order or reverse arrival order)
+   MSO_NONE, MSO_NONE_REV,
 
    /// date or reverse date
    MSO_DATE, MSO_DATE_REV,

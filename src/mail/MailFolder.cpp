@@ -1350,6 +1350,9 @@ extern "C"
          {
          case MSO_NONE:
             break;
+         case MSO_NONE_REV:
+            result = 1; // reverse the order
+            break;
          case MSO_DATE:
          case MSO_DATE_REV:
             flag = criterium == MSO_DATE ? -1 : 1;

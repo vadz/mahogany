@@ -1315,17 +1315,12 @@ void MDialog_ShowText(MWindow *parent,
 */
 static wxString sortCriteria[] =
 {
-   gettext_noop("None"),
+   gettext_noop("Arrival order"),
    gettext_noop("Date"),
-   gettext_noop("Date (reverse)"),
    gettext_noop("Subject"),
-   gettext_noop("Subject (reverse)"),
    gettext_noop("Author"),
-   gettext_noop("Author (reverse)"),
    gettext_noop("Status"),
-   gettext_noop("Status (reverse)"),
    gettext_noop("Score"),
-   gettext_noop("Score (reverse)"),
 };
 
 static const size_t NUM_CRITERIA  = WXSIZEOF(sortCriteria);
@@ -1348,7 +1343,9 @@ public:
    bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
 
 protected:
-   wxChoice    *m_Choices[NUM_CRITERIA];
+   wxChoice    *m_Choices[NUM_CRITERIA];     // sort by what?
+   wxCheckBox  *m_Checkboxes[NUM_CRITERIA];  // reverse sort order?
+
    wxCheckBox  *m_UseThreading;
    wxCheckBox  *m_ReSortOnChange;
    long         m_OldSortOrder;
@@ -1398,16 +1395,22 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       c->height.AsIs();
       txt->SetConstraints(c);
 
-      m_Choices[n] = new wxChoice(this, -1, wxDefaultPosition,
-                                  wxDefaultSize, NUM_CRITERIA,
-                                  sortCriteria);
+      m_Checkboxes[n] = new wxCheckBox(this, -1, _("in reverse order"),
+                                       wxDefaultPosition, wxDefaultSize);
+      c = new wxLayoutConstraints;
+      c->width.AsIs();
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+      c->centreY.SameAs(txt, wxCentreY);
+      c->height.AsIs();
+      m_Checkboxes[n]->SetConstraints(c);
+
+      m_Choices[n] = new wxChoice(this, -1,
+                                  wxDefaultPosition, wxDefaultSize,
+                                  NUM_CRITERIA, sortCriteria);
       c = new wxLayoutConstraints;
       c->left.RightOf(txt, 2*LAYOUT_X_MARGIN);
-      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      if(n == 0)
-         c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-      else
-         c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
+      c->right.SameAs(m_Checkboxes[n], wxLeft, 2*LAYOUT_X_MARGIN);
+      c->centreY.SameAs(txt, wxCentreY);
       c->height.AsIs();
       m_Choices[n]->SetConstraints(c);
    }
@@ -1445,9 +1448,15 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
    {
       m_SortOrder <<= 4;
       selection = m_Choices[n]->GetSelection();
-      if(selection == MSO_SCORE
-         || selection == MSO_SCORE_REV)
+      if( selection == MSO_SCORE )
          uses_scoring = true;
+
+      if ( m_Checkboxes[n]->GetValue() )
+      {
+         // reverse the sort order: MSO_XXX_REV == MSO_XXX + 1
+         selection++;
+      }
+         
       m_SortOrder += selection;
    }
 
@@ -1474,7 +1483,15 @@ bool wxMessageSortingDialog::TransferDataToWindow()
    {
       num = sortOrder & 0x00000F; // lowest four bits
       ASSERT(n < NUM_SORTLEVELS);
-      m_Choices[n]->SetSelection(num);
+
+      if ( num % 2 )
+      {
+         // it is MSO_XXX_REV
+         m_Checkboxes[n]->SetValue(TRUE);
+         num--;
+      }
+
+      m_Choices[n]->SetSelection(num / 2);
       sortOrder >>= 4;
    }
    m_UseThreading->SetValue(
