@@ -680,9 +680,14 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
       // check that it's a folder - this is the reason why we can't call
       // GetGroupCount() directly
       {
+         // check that the special MP_PROFILE_TYPE key is set in *this*
+         // profile - this is why we test for "found"
+         bool found;
          ProfilePathChanger changePath2(profile, name);
-         if ( READ_CONFIG(profile, MP_PROFILE_TYPE) ==
-                  ProfileBase::PT_FolderProfile )
+         if ( (profile->readEntry(MP_PROFILE_TYPE,
+                                  0l,
+                                  &found) == ProfileBase::PT_FolderProfile)
+              && found )
          {
             wxString fullname(rootName);
             fullname += name;
