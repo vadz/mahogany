@@ -1931,12 +1931,20 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
    if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") )
    {
+      static const char *sigIgnoredMsg =
+         gettext_noop("\n\nSignature will be ignored");
+
       MimePart * const signedPart = mimepart->GetNested();
       MimePart * const signaturePart = signedPart->GetNext();
       if ( !signedPart || !signaturePart )
       {
-         wxLogError(_("This message pretends to be signed but "
-                      "doesn't have the correct MIME structure."));
+         wxLogWarning(String(_("This message pretends to be signed but "
+                               "doesn't have the correct MIME structure.")) +
+                      _(sigIgnoredMsg));
+
+         // still show the message contents
+         ProcessAllNestedParts(mimepart);
+
          return;
       }
 
@@ -1950,9 +1958,12 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 
       if ( signaturePart->GetType().GetFull() != _T("APPLICATION/PGP-SIGNATURE") )
       {
-         wxLogError(_("Signed message signature does not have a "
-                      "\"application/pgp-signature\" type, "
-                      "ignoring it."));
+         wxLogWarning(String(_("Signed message signature does not have a "
+                               "\"application/pgp-signature\" type.")) +
+                      _(sigIgnoredMsg));
+
+         ProcessAllNestedParts(mimepart);
+
          return;
       }
 
