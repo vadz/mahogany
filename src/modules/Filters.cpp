@@ -1926,13 +1926,41 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       }
       else if ( test == "korean" )
       {
-         rc = msg->GetHeaderLine("Content-Type", value) &&
-               value.Lower().find("ks_c_5601-1987") != String::npos;
+         if ( msg->GetHeaderLine("Content-Type", value) )
+         {
+            // extract the charset parameter
+            static const char *CHARSET_STRING = "charset=";
+            static const size_t CHARSET_LEN = strlen(CHARSET_STRING);
+
+            const char *pc = strstr(value.MakeLower(), CHARSET_STRING);
+            if ( !pc )
+            {
+               // no charset at all, don't filter
+               continue;
+            }
+
+            pc += CHARSET_LEN;
+            if ( *pc == '"' )
+               pc++;
+
+#define STARTS_WITH(p, what) (!(wxStrncmp((p), (what), strlen(what))))
+
+            // detect all Korean charsets
+            if ( STARTS_WITH(pc, "ks_c_5601-1987") ||
+                    STARTS_WITH(pc, "euc-kr") )
+            {
+               rc = true;
+            }
+
+#undef STARTS_WITH
+         }
       }
       else if ( test == "xauthwarn" )
       {
-         // consider that only spams have this header
-         rc = msg->GetHeaderLine("X-Authentication-Warning", value);
+         // unfortunately not only spams have this header but we consider that
+         // only spammers change their address in such way
+         rc = msg->GetHeaderLine("X-Authentication-Warning", value) &&
+                  value.Matches("Host * claimed to be *");
       }
 #ifdef USE_RBL
       else if ( test == "rbl" )
