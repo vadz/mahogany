@@ -29,7 +29,17 @@
 class UIdArray;
 
 /// A Type used for message UIds
-typedef unsigned long UIdType;
+
+// we must define it to be different from size_t to avoid compilation problems
+// with UIdArray which has both methods Remove(UIdType) and Remove(size_t), so
+// if configure determined that size_t was the same type as unsigned long we
+// define it as unsigned int instead
+#ifdef UIDTYPE_IS_UINT
+   typedef unsigned int UIdType;
+#else
+   typedef unsigned long UIdType;
+#endif
+
 /// An illegal, never happening UId number:
 #define UID_ILLEGAL   ULONG_MAX
 
