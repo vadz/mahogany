@@ -65,7 +65,7 @@ clean:
 	$(RM) core libM.so M M.static
 
 install:
-	$(INSTALL_PROGRAM) -s -m 555 M $(DATADIR)/$(CANONICAL_HOST)/bin
+	$(INSTALL_PROGRAM) -s -m 755 M $(DATADIR)/$(CANONICAL_HOST)/bin
 	if test -f libM.so; \
 	then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; \
 	fi
