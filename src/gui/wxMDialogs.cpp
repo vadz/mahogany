@@ -349,7 +349,7 @@ private:
     {
        String filename = wxPFileSelector
                          (
-                           "RawText", 
+                           "RawText",
                            _("Mahogany: Please choose where to save the text"),
                            NULL, NULL, NULL, NULL,
                            wxSAVE | wxOVERWRITE_PROMPT,
@@ -419,7 +419,7 @@ static inline wxWindow *GetDialogParent(const wxWindow *parent)
 
 // under Windows we don't use wxCENTRE style which uses the generic message box
 // instead of the native one (and thus it doesn't have icons, for example)
-static inline long Style(long style)
+static inline long GetMsgBoxStyle(long style)
 {
 # ifdef OS_WIN
     return style;
@@ -637,8 +637,8 @@ MDialog_ErrorMessage(const char *msg,
    CloseSplash();
    NoBusyCursor no;
    wxMessageBox(msg, wxString("Mahogany : ") + title,
-                Style(wxOK|wxICON_EXCLAMATION),
-                 GetDialogParent(parent));
+                GetMsgBoxStyle(wxOK|wxICON_EXCLAMATION),
+                GetDialogParent(parent));
 }
 
 
@@ -705,7 +705,7 @@ MDialog_Message(const char *message,
    NoBusyCursor noBC;
 
    wxPMessageBox(configPath, message, caption,
-                 Style(wxOK | wxICON_INFORMATION),
+                 GetMsgBoxStyle(wxOK | wxICON_INFORMATION),
                  GetDialogParent(parent));
 }
 
@@ -728,7 +728,7 @@ MDialog_YesNoDialog(const char *message,
    wxString caption = "Mahogany : ";
    caption += title;
 
-   int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
+   int style = GetMsgBoxStyle(wxYES_NO | wxICON_QUESTION);
    if(! yesDefault)
       style |= wxNO_DEFAULT;
 
