@@ -1183,7 +1183,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    wxString ext;
    if ( fileType != NULL ) {
       wxArrayString exts;
-      if ( fileType->GetExtensions(exts) ) {
+      if ( fileType->GetExtensions(exts) && exts.GetCount() ) {
          ext = exts[0u];
       }
    }
