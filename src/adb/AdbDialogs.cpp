@@ -123,13 +123,25 @@ public:
    // get the index of the selected item in the listbox
    int GetSelection() const { return m_listbox->GetSelection(); }
 
+   enum
+   {
+      Btn_More = 100
+   };
+
 protected:
    // event handlers
    void OnLboxDblClick(wxCommandEvent& /* event */) { EndModal(wxID_OK); }
+   void OnBtnMore(wxCommandEvent& event);
 
 private:
    // the listbox containing the expansion possibilities
    wxListBox *m_listbox;
+
+   // the button to show more entries (may be NULL)
+   wxButton *m_btnMore;
+
+   // the entries array
+   ArrayAdbEntries& m_aMoreEntries;
 
    DECLARE_EVENT_TABLE()
 };
@@ -145,6 +157,7 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAdbExpandDialog, wxManuallyLaidOutDialog)
    EVT_LISTBOX_DCLICK(-1, wxAdbExpandDialog::OnLboxDblClick)
+   EVT_BUTTON(wxAdbExpandDialog::Btn_More, wxAdbExpandDialog::OnBtnMore)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -367,7 +380,8 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
                                      wxFrame *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Expansion options"),
-                                           "AdrListSelect")
+                                           "AdrListSelect"),
+                   m_aMoreEntries(aMoreEntries)
 {
    /*
       the dialog layout is like this:
@@ -384,6 +398,11 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 
    m_listbox = new wxListBox(this, -1);
 
+   // don't show the "More" button if there are no more matches
+   m_btnMore = aMoreEntries.IsEmpty()
+                  ? NULL
+                  : new wxButton(this, Btn_More, _("&More matches"));
+
    // we have to fill the listbox here or it won't have the correct size
    size_t nEntryCount = aEverything.GetCount();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
@@ -392,14 +411,42 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    }
 
    wxLayoutConstraints *c;
+
+   if ( m_btnMore )
+   {
+      m_btnMore->SetToolTip(_("Show more matching entries"));
+
+      c = new wxLayoutConstraints;
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+      c->width.AsIs();
+      c->centreY.SameAs(box, wxCentreY);
+      c->height.AsIs();
+      m_btnMore->SetConstraints(c);
+   }
+
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   if ( m_btnMore )
+      c->right.LeftOf(m_btnMore, LAYOUT_X_MARGIN);
+   else
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
    SetDefaultSize(5*wBtn, 10*hBtn);
+}
+
+void wxAdbExpandDialog::OnBtnMore(wxCommandEvent& event)
+{
+   size_t nEntryCount = m_aMoreEntries.GetCount();
+   for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
+   {
+      m_listbox->Append(m_aMoreEntries[nEntry]->GetDescription());
+   }
+
+   // nothing more to add
+   m_btnMore->Disable();
 }
 
 // ----------------------------------------------------------------------------
