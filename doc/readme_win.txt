@@ -52,7 +52,7 @@ Version: the information in this file applies to alpha 0.23
     context-sensitive help. The help file is included in the distribution
     though - it's a translation to Windows help format of Mahogany HTML
     documentation which may always be found at
-       http://www.wxwindows.org/Mahogany/doc/Manual/Manual.html.
+       http://mahogany.sourceforge.net/doc/Manual/Manual.html.
 
     The future versions of the program will include help in MS HTML format and
     the context-sensitive help will work too, of course.

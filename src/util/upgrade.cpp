@@ -1316,7 +1316,7 @@ bool RunInstallWizard()
               "We also rely on you to report any bugs or wishes for improvements\n"
               "that you may have.\n"
               "\n"
-              "Please visit our web pages at http://www.wxwindows.org/Mahogany/\n"
+              "Please visit our web pages at http://mahogany.sourceforge.net/\n"
               "\n"
               "Also, reply to this e-mail message and you will automatically be\n"
               "added to the mailing list of Mahogany users, where you will find\n"
