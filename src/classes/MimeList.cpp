@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$              
+ * $Id$
  *
  *******************************************************************/
 
@@ -12,20 +12,22 @@
 #endif
 
 #include  "Mpch.h"
-#include  "Mcommon.h"
 
 #ifndef   USE_PCH
-#   include   <string.h>
-#   include   "strutil.h"
-#   include   "Mdefaults.h"
+#  include  "Mcommon.h"
 
-#   include  <wx/file.h>
-#   include  <wx/textfile.h>
-#   include  <wx/config.h>
-#   include  <wx/fileconf.h>
-#   include   "Profile.h"
+#  include  <string.h>
+#  include  "strutil.h"
+#  include  "Mdefaults.h"
 
-#   include   "MApplication.h"
+#  include  <wx/file.h>
+#  include  <wx/textfile.h>
+#  include  <wx/config.h>
+#  include  <wx/fileconf.h>
+
+#  include  "Profile.h"
+
+#  include  "MApplication.h"
 #endif
 
 #include   "PathFinder.h"
@@ -33,7 +35,7 @@
 
 
 //IMPLEMENT_CLASS2(MimeList, CommonBase, list<MimeEntry>)
-   
+
 MimeEntry::MimeEntry(void)
 {
    type = "";
@@ -55,12 +57,12 @@ MimeEntry::Parse(String const & str)
 {
    if(*str.c_str() == '#')
       return false;
-   
+
    char *cptr = new char[str.length()+1];
    char *token;
 
    strcpy(cptr, str.c_str());
-   
+
    token = strtok(cptr, ";");
    if(! token) goto bailout;
    type = token;
@@ -71,12 +73,12 @@ MimeEntry::Parse(String const & str)
    strutil_delwhitespace(command);
 
    token = strtok(NULL, ";");
-   if(! token) 
+   if(! token)
       flags = "";
    else
       flags = token;
    strutil_delwhitespace(flags);
-  
+
    strutil_toupper(type);
    return true;
  bailout:
@@ -91,7 +93,7 @@ MimeList::MimeList(void)
       bool   found;
       MimeEntry   *newEntry;
       String   tmp;
-   
+
       PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
 
       String file = pf.FindFile(READ_APPCONFIG(MC_MAILCAP), &found);
@@ -130,7 +132,7 @@ MimeList::GetCommand(String const & type,
          flags  = (*i)->flags;
          return true;
       }
-   
+
    // now look for first type match only:
    String   a,b;
    a = strutil_before(type,'/');

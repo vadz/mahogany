@@ -305,7 +305,7 @@ FCEntry::FCEntry(FCEntryGroup *pGroup, const String& strName, bool bNew)
   else {
     // we already exist in the config file, load our value
     wxString strValue;
-    pGroup->GetConfig()->Read(&strValue, GetPath());
+    pGroup->GetConfig()->Read(GetPath(), &strValue);
     Load(strValue);
   }
 

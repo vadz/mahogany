@@ -212,7 +212,7 @@ Profile::readEntry(String const &key, String const &defaultvalue) const
    // config object must be created
    CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
-   wxString rc = fileConfig->Read(key.c_str(), String((const char *)NULL));
+   wxString rc = fileConfig->Read(key.c_str());
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
