@@ -161,4 +161,13 @@ extern bool AdbLookup(ArrayAdbEntries& aEntries,
                       int how = AdbLookup_Substring,
                       const ArrayAdbBooks *paBooks = NULL);
 
+/**
+  Expand the abbreviated address: i.e. looks for an address entry which starts
+  with the specified text and returns it if found. Returns empty string if no
+  match. The frame parameter is used as parent for possible dialog boxes and
+  also to log status messages.
+*/
+class wxFrame;
+extern String AdbExpand(const String& what, wxFrame *frame);
+
 #endif  //_ADBMANAGER_H

@@ -8,6 +8,10 @@
 #ifndef WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
 
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
 #pragma interface "wxComposeView.h"
 #endif
@@ -21,14 +25,25 @@
 #   include   "kbList.h"
 #endif
 
+// ----------------------------------------------------------------------------
+// forward declarations
+// ----------------------------------------------------------------------------
 class wxFTOList;
 class wxComposeView;
 class wxFTCanvas;
 class wxLayoutWindow;
-class AdbManager;
+class wxAddressTextCtrl;
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
 
 /// just for now, FIXME!
 #define WXCOMPOSEVIEW_FTCANVAS_YPOS 80
+
+// ----------------------------------------------------------------------------
+// types and classes
+// ----------------------------------------------------------------------------
 
 struct wxCVFileMapEntry
 {
@@ -43,8 +58,16 @@ KBLIST_DEFINE(wxCVFileMapType,wxCVFileMapEntry);
 
 class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
 {
-   DECLARE_DYNAMIC_CLASS(wxComposeView)
 public:
+   enum AddressField
+   {
+      Field_To,
+      Field_Subject,
+      Field_Cc,
+      Field_Bcc,
+      Field_Max
+   };
+   
    /** quasi-Constructor
        @param iname  name of windowclass
        @param parent parent window
@@ -69,9 +92,9 @@ public:
        @param hide if true, do not show frame
    */
    wxComposeView(const String &iname = String("wxComposeView"),
-   wxWindow *parent = NULL,
-   ProfileBase *parentProfile = NULL,
-   bool hide = false);
+                 wxWindow *parent = NULL,
+                 ProfileBase *parentProfile = NULL,
+                 bool hide = false);
 
    /// Destructor
    ~wxComposeView();
@@ -113,14 +136,21 @@ public:
    */
    bool Send(void);
 
-   /// called on Menu selection
+   /** wxWindows callbacks
+   */
+   //@{
+      /// called when text zone contents changes
+   void OnTextChange(wxCommandEvent &event);
+
+      /// called when TAB is pressed
+   void OnNavigationKey(wxNavigationKeyEvent&);
+
+      /// called on Menu selection
    void OnMenuCommand(int id);
 
-   /// for button
+      /// for button
    void OnExpand(wxCommandEvent &event);
 
-#ifdef  USE_WXWINDOWS2
-   //@{ Menu callbacks
       ///
    void OnInsertFile(wxCommandEvent&)
       { OnMenuCommand(WXMENU_COMPOSE_INSERTFILE); }
@@ -131,17 +161,12 @@ public:
       ///
    void OnClear(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_CLEAR); }
 
-   /// can we close now?
+      /// can we close now?
    void OnCloseWindow(wxCloseEvent& event);
+   //@}
 
-   DECLARE_EVENT_TABLE()
-#else //wxWin1
-   /// resize callback
-   void OnSize(int w, int h);
-
-   /// for button
-   void OnCommand(wxWindow &win, wxCommandEvent &event);
-#endif //wxWin1/2
+   // for wxAddressTextCtrl usage
+   void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
 
 private:
    /// a profile
@@ -155,18 +180,10 @@ private:
    
    /**@name Input fields (arranged into an array) */
    //@{
-      /// last length of To field (for expansion)
-   int  txtToLastLength;
       /// The text fields
-   enum
-   {
-      Field_To,
-      Field_Subject,
-      Field_Cc,
-      Field_Bcc,
-      Field_Max
-   };
-   wxTextCtrl *m_txtFields[Field_Max];
+   AddressField       m_fieldLast;            // which had the focus last time
+   wxAddressTextCtrl *m_txtFields[Field_Max];
+
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
       /// the alias expand button
@@ -179,8 +196,6 @@ private:
    //@{
    /// the ComposeView canvas class
    friend class wxCVCanvas;
-   /// Process a Mouse Event.
-   void ProcessMouse(wxMouseEvent &event);
    //@}
 
    /// a list mapping IDs to filenames
@@ -193,9 +208,8 @@ private:
    /// makes the canvas
    void CreateFTCanvas(void);
 
-   // we create it only when it's needed for the first time, but then we keep
-   // it until the end
-   AdbManager *m_pManager;
+   DECLARE_EVENT_TABLE()
+   DECLARE_DYNAMIC_CLASS(wxComposeView)
 };
 
 #endif

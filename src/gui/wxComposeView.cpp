@@ -41,7 +41,6 @@
 #include "MessageCC.h"
 #include "SendMessageCC.h"
 
-
 #include "MDialogs.h"
 
 #include "gui/wxFontManager.h"
@@ -68,35 +67,10 @@ enum
    IDB_EXPAND = 100
 };
 
+#define CANONIC_ADDRESS_SEPARATOR   ", "
+
 // code here was written with assumption that x and y margins are the same
 #define LAYOUT_MARGIN LAYOUT_X_MARGIN
-
-// ----------------------------------------------------------------------------
-// other types
-// ----------------------------------------------------------------------------
-//WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
-//X_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
-
-// ----------------------------------------------------------------------------
-// event tables &c
-// ----------------------------------------------------------------------------
-IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
-
-#ifdef USE_WXWINDOWS2
-   BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
-      // wxComposeView menu events
-      EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
-      EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
-      EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
-      EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
-
-      // button notifications
-      EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
-
-      // can we close now?
-      EVT_CLOSE(wxComposeView::OnCloseWindow)
-   END_EVENT_TABLE()
-#endif
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -151,6 +125,65 @@ private:
    String               m_MimeType;
 };
 
+// specialized text control which processes TABs to expand the text it
+// contains and also notifies parent (i.e. wxComposeView) when it is
+// modified
+class wxAddressTextCtrl : public wxTextCtrl
+{
+public:
+   // ctor
+   wxAddressTextCtrl(wxComposeView *composeView,
+                     wxComposeView::AddressField id,
+                     wxWindow *parent)
+      : wxTextCtrl(parent, -1, "")
+   {
+      m_composeView = composeView;
+      m_id = id;
+   }
+
+   // callbacks
+   void OnChar(wxKeyEvent& event);
+
+   #ifdef __WXMSW__
+      // if we don't return this, we won't get TABs in OnChar() events
+      long wxAddressTextCtrl::MSWGetDlgCode()
+         { return DLGC_WANTTAB | DLGC_WANTCHARS; }
+   #endif //MSW
+
+private:
+   wxComposeView              *m_composeView;
+   wxComposeView::AddressField m_id;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// event tables &c
+// ----------------------------------------------------------------------------
+IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
+
+BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
+   // wxComposeView menu events
+   EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
+   EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
+   EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
+   EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
+
+   // and we also want to intercept TABs
+   EVT_NAVIGATION_KEY(wxComposeView::OnNavigationKey)
+
+   // button notifications
+   EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
+
+   // can we close now?
+   EVT_CLOSE(wxComposeView::OnCloseWindow)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
+   // we wish to process TAB
+   EVT_CHAR(wxAddressTextCtrl::OnChar)
+END_EVENT_TABLE()
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -201,7 +234,61 @@ void MimeContent::SetFile(const String& filename)
 }
 
 // ----------------------------------------------------------------------------
-// wxComposeView
+// wxAddressTextCtrl
+// ----------------------------------------------------------------------------
+
+void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
+{
+   ASSERT( event.GetEventObject() == this ); // how can we get anything else?
+
+   m_composeView->SetLastAddressEntry(m_id);
+
+   if ( event.KeyCode() == WXK_TAB )
+   {
+      // try to expand the last component
+      String text = GetValue();
+      if ( text.IsEmpty() )
+      {
+         // don't do anything
+         event.Skip();
+
+         return;
+      }
+
+      size_t n;
+      for ( n = text.length() - 1; n > 0; n-- )
+      {
+         char c = text[n];
+         if ( isspace(c) || (c == ',') || (c == ';') )
+            break;
+      }
+
+      String expansion = AdbExpand(text.c_str() + n, m_composeView);
+      if ( !expansion.IsEmpty() )
+      {
+         wxString newText(text, n);   // take first n letters only
+         if ( n > 0 )
+         {
+            // there is something before, add separator
+            newText += CANONIC_ADDRESS_SEPARATOR;
+         }
+
+         newText += expansion;
+
+         SetValue(newText);
+      }
+      //else
+      //  don't change the text
+   }
+   else
+   {
+      // let the text control process it normally
+      event.Skip();
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView creation
 // ----------------------------------------------------------------------------
 void
 wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
@@ -213,7 +300,6 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
-   m_pManager = NULL;
 
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
@@ -278,10 +364,14 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    {
       "To:", "Subject:", "CC:", "BCC:",
    };
+
+   // don't forget to update the labels when you add a new field
+   ASSERT( WXSIZEOF(aszLabels) == Field_Max );
+
    wxClientDC dc(this);
    long width, widthMax = 0;
    size_t n;
-   for ( n = 0; n < WXSIZEOF(aszLabels); n++ )
+   for ( n = 0; n < Field_Max; n++ )
    {
       if ( !bDoShow[n] )
          continue;
@@ -301,7 +391,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
          // text entry goes from right border of the label to the right border
          // of the box except for the first one where we must also leave space
          // for the button
-         m_txtFields[n] = new wxTextCtrl(m_panel, -1, "");
+         m_txtFields[n] = new wxAddressTextCtrl(this, (AddressField)n, m_panel);
          c = new wxLayoutConstraints;
          c->left.Absolute(widthMax + LAYOUT_MARGIN);
          if ( last )
@@ -450,69 +540,109 @@ wxComposeView::wxComposeView(const String &iname,
    : wxMFrame(iname,parent)
 {
    initialised = false;
+   m_fieldLast = Field_Max;
    Create(iname,parent,parentProfile, "","","",hide);
 }
 
 wxComposeView::~wxComposeView()
 {
-   if ( m_pManager )
-      AdbManager::Unget();
-
-   if(!initialised)
-      return;
-
-   m_Profile->DecRef();
-   delete m_LayoutWindow;
+   if ( initialised )
+   {
+      m_Profile->DecRef();
+      delete m_LayoutWindow;
+   }
 }
 
+// ----------------------------------------------------------------------------
+// wxComposeView callbacks
+// ----------------------------------------------------------------------------
 
 void
-wxComposeView::ProcessMouse(wxMouseEvent &WXUNUSED(event))
+wxComposeView::OnNavigationKey(wxNavigationKeyEvent& event)
 {
+   // FIXME just to see what goes on there...
+   wxLogDebug("Got %s navigation event.",
+              event.GetDirection() ? "forward" : "backward");
 }
 
+// expand (using the address books) the value of the last active text zone
 void
 wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
 {
-   String what = Str(m_txtFields[Field_To]->GetValue());
-   int l = what.length();
+   if ( m_fieldLast == Field_Max )
+   {
+      // assume "To:" by default
+      m_fieldLast = Field_To;
+   }
 
-   if ( l == 0 ) {
+   String what = Str(m_txtFields[m_fieldLast]->GetValue());
+   if ( what.IsEmpty() )
+   {
      wxLogStatus(this, _("Nothing to expand - please enter something."));
 
      return;
    }
 
-   if ( ! m_pManager )
+   // split the text into entries: they may be separated by commas, semicolons
+   // or just whitespace (any amount of whitespace counts as one separator)
+   wxArrayString addresses;
+   String current;
+   for ( const char *pc = what; ; pc++ )
    {
-     m_pManager = AdbManager::Get();
-     m_pManager->LoadAll();
+      switch ( *pc )
+      {
+         case ' ':
+         case '\t':
+            if ( current.IsEmpty() )
+            {
+               // repeated space, ignore
+               continue;
+            }
+            // fall through, it's a separator
+
+         case ',':
+         case ';':
+         case '\0':
+            addresses.Add(current);
+            if ( *pc == '\0' )
+            {
+               // will exit the loop
+               break;
+            }
+
+            current.Empty();
+            continue;
+
+         default:
+            // normal character
+            current += *pc;
+            continue;
+      }
+
+      break;
    }
 
-   ArrayAdbEntries aEntries;
-   if ( AdbLookup(aEntries, what) )
+   // expand all entries (TODO: some may be already expanded??)
+   String expansion, total;
+   size_t nEntries = addresses.Count();
+   for ( size_t n = 0; n < nEntries; n++ )
    {
-     int rc = MDialog_AdbLookupList(aEntries, this);
+      expansion = AdbExpand(addresses[n], this);
+      if ( expansion.IsEmpty() )
+      {
+         // expansion failed, leave as is
+         total += addresses[n];
+      }
+      else
+      {
+         // replace with expanded address
+         total += expansion;
+      }
 
-     if ( rc != -1 ) {
-        wxString str;
-        AdbEntry *pEntry = aEntries[rc];
-        pEntry->GetField(AdbField_EMail, &str);
-        m_txtFields[Field_To]->SetValue(str);
-
-        pEntry->GetField(AdbField_NickName, &str);
-        wxLogStatus(this, _("Expanded using entry '%s'"), str.c_str());
-     }
-
-     // free all entries
-     size_t nCount = aEntries.Count();
-     for ( size_t n = 0; n < nCount; n++ ) {
-       aEntries[n]->DecRef();
-     }
+      total += CANONIC_ADDRESS_SEPARATOR;
    }
-   else {
-     wxLogStatus(this, _("No matches for '%s'."), what.c_str());
-   }
+
+   m_txtFields[m_fieldLast]->SetValue(total);
 }
 
 void
@@ -561,6 +691,10 @@ wxComposeView::OnMenuCommand(int id)
       wxMFrame::OnMenuCommand(id);
    }
 }
+
+// ----------------------------------------------------------------------------
+// wxComposeView operations
+// ----------------------------------------------------------------------------
 
 void
 wxComposeView::InsertData(char *data,

@@ -94,7 +94,8 @@ enum
 {
   AdbLookup_Match         = 0x0000, // default: case insensitive match
   AdbLookup_CaseSensitive = 0x0001,
-  AdbLookup_Substring     = 0x0002  // match "foo" as "*foo*"
+  AdbLookup_Substring     = 0x0002, // match "foo" as "*foo*"
+  AdbLookup_StartsWith    = 0x0004  // match "foo" as "foo*"
 };
 
 // ============================================================================

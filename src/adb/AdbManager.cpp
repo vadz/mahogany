@@ -22,7 +22,7 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Profile.h"
-#   include   "MApplication.h"
+#   include "MApplication.h"
 #endif // USE_PCH
 
 #include <wx/log.h>
@@ -32,6 +32,9 @@
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
 #include "adb/AdbDataProvider.h"
+
+#include "guidef.h"
+#include "MDialogs.h"
 
 // ----------------------------------------------------------------------------
 // types
@@ -111,6 +114,49 @@ bool AdbLookup(ArrayAdbEntries& aEntries,
   return !aEntries.IsEmpty();
 }
 
+String AdbExpand(const String& what, wxFrame *frame)
+{
+  String result;
+
+  AdbManager_obj manager;
+  CHECK( manager, result, "can't expand address: no AdbManager" );
+  
+  manager->LoadAll();
+
+  ArrayAdbEntries aEntries;
+  if ( AdbLookup(aEntries, what) )
+  {
+    int rc = MDialog_AdbLookupList(aEntries, frame);
+    
+    if ( rc != -1 )
+    {
+      AdbEntry *pEntry = aEntries[rc];
+      pEntry->GetField(AdbField_EMail, &result);
+      
+      wxString str;
+      pEntry->GetField(AdbField_NickName, &str);
+      if ( frame )
+      {
+        wxLogStatus(frame, _("Expanded '%s' using entry '%s'"),
+                    what.c_str(), str.c_str());
+      }
+    }
+    
+    // free all entries
+    size_t nCount = aEntries.Count();
+    for ( size_t n = 0; n < nCount; n++ )
+    {
+      aEntries[n]->DecRef();
+    }
+  }
+  else
+  {
+    if ( frame )
+      wxLogStatus(frame, _("No matches for '%s'."), what.c_str());
+  }
+
+  return result;
+}
 
 // ----------------------------------------------------------------------------
 // AdbManager static functions and variables

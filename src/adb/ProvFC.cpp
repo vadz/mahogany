@@ -371,10 +371,12 @@ bool FCEntry::Matches(const char *szWhat, int where, int how)
 {
   wxString strWhat;
 
-  // substring lookup looks for a part of the string, otherwise the entire
-  // string should be matched by the pattern
+  // substring lookup looks for a part of the string, "starts with" means
+  // what is says, otherwise the entire string should be matched by the pattern
   if ( how & AdbLookup_Substring )
     strWhat << '*' << szWhat << '*';
+  else if ( how & AdbLookup_StartsWith )
+    strWhat << szWhat << '*';
   else
     strWhat = szWhat;
 
