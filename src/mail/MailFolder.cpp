@@ -251,7 +251,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
 
             // iterate over all parts
          n2 = msg->CountParts();
-         for(j = 0; j < n; j++)
+         for(j = 0; j < n2; j++)
          {
             t = msg->GetPartType(j);
             if( ( size = msg->GetPartSize(j)) == 0)
@@ -259,7 +259,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
             if ( (t == Message::MSG_TYPETEXT) ||
                  (t == Message::MSG_TYPEMESSAGE ))
             {
-               cptr = msg->GetPartContent(i);
+               cptr = msg->GetPartContent(j);
                if(cptr == NULL)
                   continue; // error ?
                rc &= (file.Write(cptr, size) == size);
