@@ -230,13 +230,9 @@ extern class MFrame *g_pSplashScreen;
 /// function which will close the splash screen if it's (still) opened
 extern void CloseSplash();
 
-/// dialog to creat a new folder
+/// edit an existing folder profile (wrapper around ShowFolderPropertiesDialog)
 void
-MDialog_FolderCreate(const MWindow *parent);
-
-/// edit an existing folder profile
-void
-MDialog_FolderProfile(const MWindow *parent, ProfileBase *profile);
+MDialog_FolderProfile(const MWindow *parent, const String& folderName);
 
 /// choose a folder from the list of all folders, returns NULL if cancelled
 // TODO store the last folder in config

@@ -12,6 +12,9 @@
 
 #include "MEvent.h"
 
+class MailFolder;
+class ProfileBase;
+
 /**
    FolderView class, a window displaying a MailFolder.
 */
@@ -49,11 +52,27 @@ public:
       return true; // continue evaluating this event
    }
 
+   /// return full folder name
+   const String& GetFullName() { return m_folderName; }
+
+   /// return a profile pointer:
+   ProfileBase *GetProfile(void) const { return m_Profile; }
+
+   /// return pointer to folder
+   MailFolder * GetFolder(void) const { return m_MailFolder; }
+
 protected:
    /// the derived class should close when our folder is deleted
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;
    /// the derived class should update their display
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
+
+   /// the profile we use for our settings
+   ProfileBase *m_Profile;
+   /// full folder name of the folder we show
+   String m_folderName;
+   /// the mail folder being displayed
+   MailFolder *m_MailFolder;
 
 private:
    void *m_regCookieTreeChange, *m_regCookieFolderUpdate;

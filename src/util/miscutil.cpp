@@ -50,7 +50,7 @@ AutoCollectAddresses(const String &email,
       // if there is no name and we want to autocollect such addresses
       // (it's a global option), take the first part of the e-mail address
       // for the name
-      if ( ! collectNamed )
+      if ( !collectNamed )
       {
          // will return the whole string if '@' not found - ok
          name = email.BeforeFirst('@');
@@ -141,7 +141,6 @@ AutoCollectAddresses(const String &email,
                              bookName.c_str());
 
                   // TODO ask the user if he wants to disable autocollec?
-
                }
                else
                {
@@ -187,13 +186,8 @@ AutoCollectAddresses(const String &email,
       else
       {
          // there is already an entry which has this e-mail, don't create
-         // another one (even if the name is different it's more than
-         // likely that it's the same person)
-
-         // clear the status line
-         // uncommented to avoid unnecessary refresh
-         //if(frame)
-         //wxLogStatus(frame, "");
+         // another one (even if the name is different it's more than likely
+         // that it's the same person)
       }
 
       // release the found items (if any)

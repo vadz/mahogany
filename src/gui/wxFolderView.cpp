@@ -885,16 +885,17 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
    int id = event.GetId();
    switch(id)
    {
-   case WXMENU_EDIT_PREF: // edit folder profile
-      MDialog_FolderProfile(this, m_FolderView->GetProfile());
-      break;
-   default:
-      if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-          || id == WXMENU_HELP_CONTEXT
-          || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST)
-         m_FolderView->OnCommandEvent(event);
-      else
-         wxMFrame::OnMenuCommand(id);
+      case WXMENU_EDIT_PREF: // edit folder profile
+         MDialog_FolderProfile(this, m_FolderView->GetFullName());
+         break;
+
+      default:
+         if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
+             || id == WXMENU_HELP_CONTEXT
+             || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST)
+            m_FolderView->OnCommandEvent(event);
+         else
+            wxMFrame::OnMenuCommand(id);
    }
 }
 

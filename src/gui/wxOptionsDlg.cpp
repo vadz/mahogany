@@ -1314,10 +1314,8 @@ void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
 
    wxCHECK_RET( nSel != -1, "should be disabled" );
 
-   ProfileBase *profile = ProfileBase::CreateProfile(l->GetString(nSel), NULL);
    MDialog_FolderProfile(GET_PARENT_OF_CLASS(this, wxDialog),
-                         profile);
-   profile->DecRef();
+                         l->GetString(nSel));
 }
 
 void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent& event)

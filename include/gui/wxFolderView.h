@@ -120,15 +120,8 @@ public:
 
    void SetSize(const int x, const int y, const int width, int height);
 
-   /// return full folder name
-   const String& GetFullName() { return m_folderName; }
-
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
-   /// return a profile pointer:
-   ProfileBase *GetProfile(void) const { return m_Profile; }
-   /// return pointer to folder
-   MailFolder * GetFolder(void) const { return m_MailFolder; }
 
    /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
@@ -136,6 +129,7 @@ public:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
+
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -151,8 +145,6 @@ private:
    wxFolderView(wxWindow *parent);
    /// are we to deallocate the folder?
    bool ownsFolder;
-   /// the mail folder being displayed
-   class MailFolder  *m_MailFolder;
    /// the number of messages in the folder when last updated
    int m_NumOfMessages;
    /// the number of messages in box
@@ -160,7 +152,7 @@ private:
    /// the array to hold the strings for the listbox
    char  **listBoxEntries;
    /// width of window
-   int   width;
+   int width;
    /// height of window
    int height;
    /// its parent
@@ -173,10 +165,6 @@ private:
    wxMessageView *m_MessagePreview;
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
-   /// Profile:
-   ProfileBase *m_Profile;
-   /// full folder name
-   String m_folderName;
 
    /// allow it to access m_MessagePreview;
    friend class wxFolderListCtrl;

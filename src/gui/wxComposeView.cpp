@@ -334,7 +334,10 @@ bool wxAddressTextCtrl::DoExpand()
    text.Trim(FALSE); // trim spaces from both sides
    text.Trim(TRUE);
 
-   if ( text.IsEmpty() )
+   // check for the lone '"' simplifies the code for finding the starting
+   // position below: it should be done here, otherwise the following loop
+   // will crash!
+   if ( text.IsEmpty() || text == '"' )
    {
       // don't do anything
       wxLogStatus(m_composeView,
@@ -345,17 +348,42 @@ bool wxAddressTextCtrl::DoExpand()
 
    // find the starting position of the last address in the address list
    size_t nLastAddr;
-   for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
+   bool quoted = text.Last() == '"';
+   if ( quoted )
    {
-      char c = text[nLastAddr];
-      if ( isspace(c) || (c == ',') || (c == ';') )
-         break;
-   }
+      // just find the matching quote (not escaped)
+      const char *pStart = text.c_str();
+      const char *p;
+      for ( p = pStart + text.length() - 2; p >= pStart; p-- )
+      {
+         if ( *p == '"' )
+         {
+            // check that it's not escaped
+            if ( (p == pStart) || (*(p - 1) != '\\') )
+            {
+               // ok, found it!
+               break;
+            }
+         }
+      }
 
-   if ( nLastAddr > 0 )
+      nLastAddr = p - pStart;
+   }
+   else
    {
-      // move beyond the ' ', ',' or ';' which stopped the scan
-      nLastAddr++;
+      // search back until the last address separator
+      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
+      {
+         char c = text[nLastAddr];
+         if ( isspace(c) || (c == ',') || (c == ';') )
+            break;
+      }
+
+      if ( nLastAddr > 0 )
+      {
+         // move beyond the ' ', ',' or ';' which stopped the scan
+         nLastAddr++;
+      }
    }
 
    wxArrayString expansions;
@@ -396,7 +424,24 @@ bool wxAddressTextCtrl::DoExpand()
          if ( nExp > 0 )
             newText += CANONIC_ADDRESS_SEPARATOR;
 
-         newText += expansions[nExp];
+         wxString address(expansions[nExp]);
+
+         // sometimes we must quote the address
+         bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
+         if ( doQuote )
+         {
+            newText += '"';
+
+            // escape all quotes
+            address.Replace("\"", "\\\"");
+         }
+
+         newText += address;
+
+         if ( doQuote )
+         {
+            newText += '"';
+         }
       }
 
       SetValue(newText);
@@ -1318,17 +1363,27 @@ wxComposeView::Send(void)
       m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
       switch(m_mode)
       {
-      case Mode_SMTP:
-         m_msg->SetAddresses(
-            m_txtFields[Field_To]->GetValue(),
-            m_txtFields[Field_Cc]->GetValue(),
-            m_txtFields[Field_Bcc]->GetValue());
-         break;
-      case Mode_NNTP:
-         m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
-         break;
+         case Mode_SMTP:
+            {
+               // although 'To' field is always present, the others may not be
+               // shown (nor created) at all
+               String to = m_txtFields[Field_To]->GetValue();
+               String cc, bcc;
+               if ( m_txtFields[Field_Cc] )
+                  cc = m_txtFields[Field_Cc]->GetValue();
+               if ( m_txtFields[Field_Bcc] )
+                  bcc = m_txtFields[Field_Bcc]->GetValue();
+
+               m_msg->SetAddresses(to, cc, bcc);
+            }
+            break;
+
+         case Mode_NNTP:
+            m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+            break;
       }
    }// if(m_sent)
+
    success = m_msg->Send();  // true if sent
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
       m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),

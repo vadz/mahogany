@@ -42,8 +42,12 @@ public:
    // enable/disable associated text control with us
    virtual bool Enable(bool enable)
    {
+      if ( !wxButton::Enable(enable) )
+         return FALSE;
+
       m_text->Enable(enable);
-      return wxButton::Enable(enable);
+
+      return TRUE;
    }
 
 protected:

@@ -140,6 +140,10 @@ wxMSW bugs:
 - folder set message flag update hook takes too long for really large folders
    ==> code commented out in MailFolderCC.cpp
 
+- easy to implement but useful feature: "check for new mail now"
+
+- delete temporary files (esp. from image conversion!)
+
  - easy to implement but useful feature: "check for new mail now"
  - possibly have a MIME types editor (similar to netscape's?)
  - delete temporary files (esp. from image conversion!)
@@ -175,6 +179,7 @@ wxMSW bugs:
     ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...")
   - fix remaining BBDB/ADB problems (low priority)
 
+
 *********************************************************************
 *** things to fix/implement next ***
 *********************************************************************
@@ -200,6 +205,7 @@ wxMSW bugs:
   - MT-problem: wxlparser export function uses static variable
 
 - add "Send Digest"
+- add "Send bug report"
 
 - detect one's own messages (i.e. mark "Myself" in "From:" or, as XFMail
   does, mark "To: ..." in "From:" column for them) and optionally suppress them
@@ -305,6 +311,11 @@ wxMSW bugs:
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
+
+ - wxComboBox textctrl allows editing!
+   + VZ: I think RR fixed it
+
+ - .mailcap should override /etc/mailcap, not other way round
 
 *********************************************************************
 *** Fixed and tested:

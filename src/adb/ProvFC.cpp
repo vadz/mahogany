@@ -422,9 +422,9 @@ bool FCEntry::Save()
 
   wxString strValue;
   for ( size_t nField = 1; nField < nFieldMax; nField++ ) {
-    // @@ in fact, it should be done if ms_aFields[nField].type == FieldList
-    //    and not only for the emails, but so far it's the only list field we
-    //    have
+    // FIXME in fact, it should be done if ms_aFields[nField].type == FieldList
+    //       and not only for the emails, but so far it's the only list field
+    //       we have
     if ( nField == AdbField_OtherEMails ) {
       // concatenate all e-mail addresses
       size_t nEMailCount = GetEMailCount();
