@@ -1654,8 +1654,15 @@ bool RunInstallWizard(
    gs_wizardPages[InstallWizard_WelcomePage] = welcomePage;
 
 #if wxCHECK_VERSION(2,5,0)
+   // we need to add to the sizer all pages not reachable from the initial one
+   // by calling GetNext()
    wizard->GetPageAreaSizer()->Add(welcomePage);
-#endif
+   #ifdef USE_DIALUP
+      wizard->GetPageAreaSizer()->Add(
+            welcomePage->GetPageById(InstallWizard_DialUpPage)
+      );
+   #endif // USE_DIALUP
+#endif // wxWindows 2.5.0+
 
    // the wizard may be either cancelled or a checkbox may be used to skip it
    // entirely (besides, this is confusing - the checkbox is probably useless,
