@@ -2045,16 +2045,14 @@ static bool CheckReceivedHeaders(const String& value)
    // the number of false positives by checking the last header only as this is
    // normally the only one which the spammer directly controls
    pc = strstr(pc + FROM_UNKNOWN_LEN, "\r\n");
-   if ( !pc )
+   if ( pc )
    {
-      // the header must always be "\r\n" terminated anyhow!
-      FAIL_MSG( _T("no \"\\r\\n\" at the end of header?") );
-
-      return false;
+      // skip the line end
+      pc += 2;
    }
 
    // and there shouldn't be any more lines after this one
-   return !pc[2];
+   return *pc == '\0';
 }
 
 // check if we have an HTML-only message
