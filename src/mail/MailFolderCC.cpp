@@ -4492,6 +4492,14 @@ MailFolderCC::RequestUpdate()
    }
    else // new mail
    {
+      // we don't need to send the expunge event if we don't have the listing,
+      // just reset m_expungedIndices
+      if ( m_expungedIndices )
+      {
+         delete m_expungedIndices;
+         m_expungedIndices = NULL;
+      }
+
       // tell all interested that the listing changed
       wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
                  GetName().c_str());

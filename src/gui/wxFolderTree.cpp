@@ -953,6 +953,10 @@ bool wxFolderTree::OnClose(MFolder *folder)
 {
    (void)MailFolder::CloseFolder(folder);
 
+   wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+               _("Folder '%s' closed."),
+               folder->GetFullName().c_str());
+
    return TRUE;
 }
 
