@@ -481,7 +481,7 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
    {
       ((HeaderInfoListImpl *)this)->FreeSortAndThreadData(); // const_cast
 
-      return true;
+      return m_count >= 2;
    }
 
    // if we already have the tables, we don't have to rebuild them (unless the
