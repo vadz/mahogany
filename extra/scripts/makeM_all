@@ -211,7 +211,7 @@ MCONFOPT="--with-modules=static"
 ## Host/OS specific setups
 ##
 #################################################################################
-if [ `hostname` = bidean ]
+if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = nevis]
 then
   OSTYPE=SunOS
   OSTYPE_ADDON="-sparc"
@@ -238,7 +238,7 @@ then
   MPREFIX=/opt
 fi
 
-if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = bidean ]
+if [ `hostname` = dearg ]
 then
   OSTYPE=SunOS
   OSTYPE_ADDON="-sparc"
