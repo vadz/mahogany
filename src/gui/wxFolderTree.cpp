@@ -454,19 +454,19 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    static const struct
    {
       wxFolderTreeImpl::Icon icon;
-      MFolder::Type          type;
+      FolderType             type;
    } FolderIcons[] =
    {
-      { wxFolderTreeImpl::iconInbox, Inbox },
-      { wxFolderTreeImpl::iconFile,  File  },
-      { wxFolderTreeImpl::iconPOP,   POP   },
-      { wxFolderTreeImpl::iconIMAP,  IMAP  },
-      { wxFolderTreeImpl::iconNNTP,  MF_NNTP  },
-      { wxFolderTreeImpl::iconNews,  News  },
-      { wxFolderTreeImpl::iconRoot,  FolderRoot  }
+      { wxFolderTreeImpl::iconInbox, Inbox      },
+      { wxFolderTreeImpl::iconFile,  File       },
+      { wxFolderTreeImpl::iconPOP,   POP        },
+      { wxFolderTreeImpl::iconIMAP,  IMAP       },
+      { wxFolderTreeImpl::iconNNTP,  Nntp       },
+      { wxFolderTreeImpl::iconNews,  News       },
+      { wxFolderTreeImpl::iconRoot,  FolderRoot }
    };
 
-   MFolder::Type type = folder->GetType();
+   FolderType type = folder->GetType();
    int image = -1;
 
    size_t n;

@@ -137,7 +137,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // called by the page to create the new folder
-   MFolder *DoCreateFolder(MFolder::Type typeFolder);
+   MFolder *DoCreateFolder(FolderType typeFolder);
 
    // callbacks
    void OnFolderNameChange(wxEvent&);
@@ -425,7 +425,7 @@ wxFolderCreateDialog::wxFolderCreateDialog(wxWindow *parent,
    SetParentFolder(parentFolder);
 }
 
-MFolder *wxFolderCreateDialog::DoCreateFolder(MFolder::Type typeFolder)
+MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType typeFolder)
 {
    if ( !m_parentFolder )
    {
@@ -811,17 +811,17 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
    ProfileBase *profile = ProfileBase::CreateProfile("");
    if(m_defaultsPath) profile->SetPath(m_defaultsPath);
 
-   MFolder::Type typeFolder;
+   FolderType typeFolder;
    if ( firstTime )
    {
-      typeFolder = (MFolder::Type)GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
+      typeFolder = (FolderType)GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
       if(typeFolder == FolderInvalid)
          typeFolder = File;
       m_radio->SetSelection(typeFolder);
    }
    else
    {
-      typeFolder = (MFolder::Type)m_radio->GetSelection();
+      typeFolder = (FolderType)m_radio->GetSelection();
    }
 
    if ( FolderTypeHasUserName(typeFolder) )
@@ -865,7 +865,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 {
    // even though we propose the choice of INBOX it can't be created currently
    // FIXME may be should remove it from the radiobox then?
-   MFolder::Type typeFolder = (MFolder::Type)m_radio->GetSelection();
+   FolderType typeFolder = (FolderType)m_radio->GetSelection();
 
    // ... but its properties (comment) may still be changed, so check for this
    // only if we're creating it

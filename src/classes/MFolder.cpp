@@ -76,20 +76,20 @@ public:
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
-   virtual Type GetType() const;
+   virtual FolderType GetType() const;
 
    virtual String GetComment() const;
    virtual void SetComment(const String& comment);
 
-   virtual unsigned int GetFlags() const;
-   virtual void SetFlags(unsigned int flags);
+   virtual int GetFlags() const;
+   virtual void SetFlags(int flags);
 
    virtual size_t GetSubfolderCount() const;
    virtual MFolder *GetSubfolder(size_t n) const;
    virtual MFolder *GetSubfolder(const String& name) const;
    virtual MFolder *GetParent() const;
 
-   virtual MFolder *CreateSubfolder(const String& name, Type type);
+   virtual MFolder *CreateSubfolder(const String& name, FolderType type);
    virtual void Delete();
    virtual bool Rename(const String& newName);
 
@@ -132,8 +132,8 @@ public:
    virtual void SetComment(const String& /* comment */)
       { FAIL_MSG("can not set root folder attributes."); }
 
-   virtual unsigned int GetFlags() const { return 0u; }
-   virtual void SetFlags(unsigned int /* flags */)
+   virtual int GetFlags() const { return 0u; }
+   virtual void SetFlags(int /* flags */)
       { FAIL_MSG("can not set root folder attributes."); }
 
    virtual MFolder *GetParent() const { return NULL; }
@@ -233,7 +233,7 @@ MFolder *MFolder::Get(const String& fullname)
    return folder;
 }
 
-MFolder *MFolder::Create(const String& fullname, Type type)
+MFolder *MFolder::Create(const String& fullname, FolderType type)
 {
    MFolder *folder = Get(fullname);
    if ( folder )
@@ -257,10 +257,9 @@ MFolder *MFolder::Create(const String& fullname, Type type)
 
    CHECK( folder, NULL, "Get() must succeed if Create() succeeded!" );
 
-   ProfileBase *profile = ProfileBase::CreateProfile(folder->GetFullName());
-   CHECK( profile != NULL, NULL, "panic in MFolder: no profile" );
+   Profile_obj profile(folder->GetFullName());
+   CHECK( profile, NULL, "panic in MFolder: no profile" );
    profile->writeEntry(MP_FOLDER_TYPE, type);
-   profile->DecRef();
 
    return folder;
 }
@@ -314,19 +313,19 @@ MFolderFromProfile::GroupExists(ProfileBase *profile, const String& fullname)
 
 bool MFolderFromProfile::Exists(const String& fullname)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(fullname);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
+   Profile_obj profile(fullname);
+   CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
    bool exists = (READ_CONFIG(profile, MP_PROFILE_TYPE) ==
                   ProfileBase::PT_FolderProfile);
-   profile->DecRef();
+
    return exists;
 }
 
 bool MFolderFromProfile::Create(const String& fullname)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(fullname);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
+   Profile_obj profile(fullname);
+   CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
    //PFIXME
    if ( GroupExists(profile, fullname) )
@@ -349,47 +348,51 @@ String MFolderFromProfile::GetName() const
 
 FolderType MFolderFromProfile::GetType() const
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no profile" );
+   Profile_obj profile(m_folderName);
+   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
+
    FolderType t = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
-   profile->DecRef();
+
    return t;
 }
 
 String MFolderFromProfile::GetComment() const
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, "", "panic in MFolder: no profile" );
+   Profile_obj profile(m_folderName);
+   CHECK( profile, "", "panic in MFolder: no profile" );
+
    String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
-   profile->DecRef();
+
    return str;
 }
 
 void MFolderFromProfile::SetComment(const String& comment)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
-   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
    profile->writeEntry(MP_FOLDER_COMMENT, comment);
-   profile->DecRef();
 }
 
-unsigned int MFolderFromProfile::GetFlags() const
+int MFolderFromProfile::GetFlags() const
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no profile" );
-   unsigned int f = (unsigned int)READ_CONFIG(profile, MP_FOLDER_FLAGS);
-   profile->DecRef();
+   Profile_obj profile(m_folderName);
+   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
+
+   int f = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
+
    return f;
 }
 
-void MFolderFromProfile::SetFlags(unsigned int flags)
+void MFolderFromProfile::SetFlags(int flags)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
-   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
-   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
-   profile->writeEntry(MP_FOLDER_FLAGS, flags);
-   profile->DecRef();
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   int typeAndFlags = READ_CONFIG(profile, MP_FOLDER_TYPE);
+   typeAndFlags = CombineFolderTypeAndFlags(GetFolderType(typeAndFlags),
+                                            flags);
+   profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
 }
 
 size_t MFolderFromProfile::GetSubfolderCount() const
@@ -466,7 +469,7 @@ MFolder *MFolderFromProfile::GetParent() const
    return Get(path);
 }
 
-MFolder *MFolderFromProfile::CreateSubfolder(const String& name, Type type)
+MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type)
 {
    // first of all, check if the name is valid
    MFolder *folder = GetSubfolder(name);
@@ -489,10 +492,10 @@ void MFolderFromProfile::Delete()
    CHECK_RET( !m_folderName.IsEmpty(), "can't delete the root pseudo-folder" );
 
    // Get parent profile:
-   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName.BeforeLast('/'));
-   CHECK_RET( profile != NULL, "panic in MFolder: no profile" );
+   Profile_obj profile(m_folderName.BeforeLast('/'));
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
    profile->DeleteGroup(GetName());
-   profile->DecRef();
 
    // notify everybody about the disappearance of the folder
    MEventFolderTreeChangeData event(GetFullName(),
@@ -528,17 +531,17 @@ bool MFolderFromProfile::Rename(const String& newName)
    }
 
 
-   ProfileBase *profile = ProfileBase::CreateProfile(path);
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
+   Profile_obj profile(path);
+   CHECK( profile, FALSE, "panic in MFolder: no profile" );
    if ( profile->Rename(name, newName) )
    {
       m_folderName = newFullName;
-      profile->DecRef();
+
       return TRUE;
    }
    else
    {
-      profile->DecRef();
+
       return FALSE;
    }
 }
@@ -599,11 +602,8 @@ bool MFolderTraversal::Traverse(bool recurse)
 // returns TRUE if all folders were visited or FALSE if traversal was aborted
 bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 {
-   ProfileBase *profile = ProfileBase::CreateProfile(start);
-   CHECK( profile != NULL, FALSE, "panic in MFolderTraversal: no profile" );
-
-   // return code
-   bool rc = TRUE;
+   Profile_obj profile(start);
+   CHECK( profile, FALSE, "panic in MFolderTraversal: no profile" );
 
    // enumerate all groups
    String name;
@@ -627,18 +627,13 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
                   fullname += '/';
                fullname += name;
 
-               rc = DoTraverse(fullname, TRUE);
+               if ( !DoTraverse(fullname, TRUE) )
+                  return FALSE;
             }
 
             if ( !OnVisitFolder(name) )
             {
-               rc = FALSE;
-            }
-
-            if ( !rc )
-            {
-               // don't return because profile->DecRef() should be done
-               break;
+               return FALSE;
             }
          }
       }
@@ -646,7 +641,5 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
       cont = profile->GetNextGroup(name, dummy);
    }
 
-   profile->DecRef();
-
-   return rc;
+   return TRUE;
 }

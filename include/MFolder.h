@@ -51,9 +51,6 @@
 class MFolder : public MObjectRC
 {
 public:
-   // compatibility
-   typedef FolderType Type;
-
    // constants
    enum Flags
    {
@@ -67,7 +64,7 @@ public:
    static MFolder *Get(const String& fullname);
       // create a new folder of specified type, it's an error to call it with
       // the folder name which already exists (NULL will be returned)
-   static MFolder *Create(const String& fullname, Type type);
+   static MFolder *Create(const String& fullname, FolderType type);
 
    // misc accessors
       // the folder name must be unique among its siblings
@@ -77,7 +74,7 @@ public:
    virtual wxString GetFullName() const = 0;
 
       // folder type can't be changed once it's created
-   virtual Type GetType() const = 0;
+   virtual FolderType GetType() const = 0;
 
       // folder may have an arbitrary comment associated with it - get it
    virtual String GetComment() const = 0;
@@ -85,9 +82,9 @@ public:
    virtual void SetComment(const String& comment) = 0;
 
       // get the folder flags (see Flags enum)
-   virtual unsigned int GetFlags() const = 0;
+   virtual int GetFlags() const = 0;
       // set the flags (no consitency checks made here!)
-   virtual void SetFlags(unsigned int flags) = 0;
+   virtual void SetFlags(int flags) = 0;
 
    // sub folders access
       // get the number of subfolders
@@ -101,7 +98,7 @@ public:
 
    // operations
       // create a new subfolder
-   virtual MFolder *CreateSubfolder(const String& name, Type type) = 0;
+   virtual MFolder *CreateSubfolder(const String& name, FolderType type) = 0;
       // delete this folder (does not delete the C++ object!)
    virtual void Delete() = 0;
       // rename this folder: FALSE returned if it failed

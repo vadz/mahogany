@@ -41,7 +41,7 @@ class kbStringList;
                (assert(0), mApplication->GetProfile()->readEntry(key, key##_D)) : \
               mApplication->GetProfile()->readEntry(key, key##_D))
 //#else
-#endif 
+#endif
 #   define READ_APPCONFIG(key) \
       (mApplication->GetProfile()->readEntry(key, key##_D))
 //#endif
@@ -78,7 +78,7 @@ public:
        @return a pointer to kbStringList of profile names to be freed by caller.
    */
    static kbStringList * ListProfiles(int type = PT_Any);
-   
+
    /// Flush all (disk-based) profiles now
    static void FlushAll();
 
@@ -114,7 +114,7 @@ public:
    /// Read an integer value.
    virtual long readEntry(String const & key,
                           long defaultvalue,
-                          bool *found = NULL) const = 0; 
+                          bool *found = NULL) const = 0;
    /// Read an integer value.
    int readEntry(String const & key,
                  int defaultvalue,
@@ -169,11 +169,11 @@ public:
    // used for reading/writing the entries!
    wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
 
-   virtual void SetPath(const String &path) = 0; 
+   virtual void SetPath(const String &path) = 0;
    virtual void ResetPath(void) = 0;
 /*     virtual const String GetPath() const = 0;
 */
-   
+
 protected:
    /// why does egcs want this?
    ProfileBase() {}
@@ -190,6 +190,37 @@ private:
 // ============================================================================
 // Helper classes
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// A smart reference to Profile - an easy way to avoid memory leaks
+// ----------------------------------------------------------------------------
+
+class Profile_obj
+{
+public:
+   // ctor & dtor
+   Profile_obj(const String& name)
+      { m_profile = ProfileBase::CreateProfile(name); }
+   ~Profile_obj()
+      { SafeDecRef(m_profile); }
+
+   // provide access to the real thing via operator->
+   ProfileBase *operator->() const { return m_profile; }
+
+   // testing for validity
+   operator bool() const { return m_profile != NULL; }
+
+   // implicit conversion to the real pointer (dangerous, but necessary for
+   // backwards compatibility)
+   operator ProfileBase *() const { return m_profile; }
+
+private:
+   // no assignment operator/copy ctor
+   Profile_obj(const Profile_obj&);
+   Profile_obj& operator=(const Profile_obj&);
+
+   ProfileBase *m_profile;
+};
 
 // ----------------------------------------------------------------------------
 // a small class to temporarily suspend env var expansion
@@ -241,7 +272,7 @@ public:
 private:
    ProfileBase *m_config;
 };
-   
+
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
