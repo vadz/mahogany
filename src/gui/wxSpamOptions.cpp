@@ -46,9 +46,9 @@ class SpamOption
 {
 public:
    virtual bool DefaultValue() const = 0;
-   virtual const char *Token() const = 0;
-   virtual const char *ProfileHackName() const = 0;
-   virtual const char *Title() const = 0;
+   virtual const wxChar *Token() const = 0;
+   virtual const wxChar *ProfileHackName() const = 0;
+   virtual const wxChar *Title() const = 0;
    
    bool m_active;
 };
@@ -58,11 +58,11 @@ class SpamOptionAssassin : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return true; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_SPAMASSASSIN; }
-   virtual const char *ProfileHackName() const
-      { return "SpamAssassin"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamAssassin"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Been tagged as spam by Spam&Assassin"); }
 };
 
@@ -71,11 +71,11 @@ class SpamOption8Bit : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return true; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJ8BIT; }
-   virtual const char *ProfileHackName() const
-      { return "Spam8BitSubject"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("Spam8BitSubject"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Too many &8 bit characters in subject"); }
 };
 
@@ -84,11 +84,11 @@ class SpamOptionCaps : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return true; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJCAPS; }
-   virtual const char *ProfileHackName() const
-      { return "SpamCapsSubject"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamCapsSubject"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Only &capitals in subject"); }
 };
 
@@ -97,11 +97,11 @@ class SpamOptionJunkSubject : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return true; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJENDJUNK; }
-   virtual const char *ProfileHackName() const
-      { return "JunkEndSubject"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("JunkEndSubject"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("&Junk at end of subject"); }
 };
 
@@ -110,11 +110,11 @@ class SpamOptionKorean : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return true; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_KOREAN; }
-   virtual const char *ProfileHackName() const
-      { return "SpamKoreanCharset"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamKoreanCharset"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("&Korean charset"); }
 };
 
@@ -123,11 +123,11 @@ class SpamOptionXAuth : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_XAUTHWARN; }
-   virtual const char *ProfileHackName() const
-      { return "SpamXAuthWarning"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamXAuthWarning"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("X-Authentication-&Warning header"); }
 };
 
@@ -136,11 +136,11 @@ class SpamOptionReceived : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_RECEIVED; }
-   virtual const char *ProfileHackName() const
-      { return "SpamReceived"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamReceived"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Suspicious \"&Received\" headers"); }
 };
 
@@ -149,11 +149,11 @@ class SpamOptionHtml : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_HTML; }
-   virtual const char *ProfileHackName() const
-      { return "SpamHtml"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamHtml"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Only &HTML content"); }
 };
 
@@ -162,11 +162,11 @@ class SpamOptionMime : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_MIME; }
-   virtual const char *ProfileHackName() const
-      { return "SpamMime"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamMime"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Unusual &MIME structure"); }
 };
 
@@ -175,11 +175,11 @@ class SpamOptionWhiteList : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_WHITE_LIST; }
-   virtual const char *ProfileHackName() const
-      { return "SpameWhiteList"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpameWhiteList"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("No match in &whitelist"); }
 };
 
@@ -190,11 +190,11 @@ class SpamOptionRbl : public SpamOption
 {
 public:
    virtual bool DefaultValue() const { return false; }
-   virtual const char *Token() const
+   virtual const wxChar *Token() const
       { return SPAM_TEST_RBL; }
-   virtual const char *ProfileHackName() const
-      { return "SpamIsInRBL"; }
-   virtual const char *Title() const
+   virtual const wxChar *ProfileHackName() const
+      { return _T("SpamIsInRBL"); }
+   virtual const wxChar *Title() const
       { return gettext_noop("Been &blacklisted by RBL"); }
 };
 
@@ -465,7 +465,7 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
    const wxOptionsPageDesc page(
          // title and image
          gettext_noop("Details of spam detection"),
-         "spam",
+         _T("spam"),
    
          // help id (TODO)
          -1,

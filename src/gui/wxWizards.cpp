@@ -129,7 +129,7 @@ public:
                   // using bitmap before '?' results in a compile error with
                   // Borland C++ - go figure
                   !bitmap ? mApplication->GetIconManager()->
-                              GetBitmap("install_welcome")
+                              GetBitmap(_T("install_welcome"))
                           : *bitmap)
       {
          m_Type = type;
@@ -1078,7 +1078,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
       // TODO better check if the hostname resolves to the same address as
       //      localhost - my machine name is faster to type than localhost, so I
       //      always use it instead, yet the folders on this machien are local
-      if(server== "localhost")
+      if(server== _T("localhost"))
          params->m_FolderFlags |= MF_FLAGS_ISLOCAL;
    }
 
@@ -1122,7 +1122,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
             if ( params->m_Path.StartsWith(root, &name) )
             {
                // remove extra slashes
-               const char *p = name.c_str();
+               const wxChar *p = name.c_str();
                while ( *p == '/' )
                   p++;
                if ( p != name.c_str() )
@@ -1216,7 +1216,7 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
             FAIL_MSG(_T("This folder has no server setting!"));
       }
 
-      m_Server->SetValue(p->readEntry(serverKey, ""));
+      m_Server->SetValue(p->readEntry(serverKey, _T("")));
    }
 
    if ( m_UserId && m_UserId->GetValue().empty() )

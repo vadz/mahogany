@@ -68,7 +68,7 @@ class AsyncStatusHandler;
 WX_DEFINE_ARRAY(AsyncStatusHandler *, ArrayAsyncStatus);
 
 // the trace mask for dnd messages
-#define M_TRACE_DND "msgdnd"
+#define M_TRACE_DND _T("msgdnd")
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -279,11 +279,11 @@ private:
 class AsyncStatusHandler
 {
 public:
-   AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc, const char *fmt, ...);
+   AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc, const wxChar *fmt, ...);
 
    // monitor the given ticket, give error message if the corresponding
    // operation terminates with an error
-   bool Monitor(Ticket ticket, const char *fmt, ...);
+   bool Monitor(Ticket ticket, const wxChar *fmt, ...);
 
    // used by OnASFolderResultEvent() to find the matching progress indicator
    Ticket GetTicket() const { return m_ticket; }
@@ -292,7 +292,7 @@ public:
    void Fail() { m_ticket = ILLEGAL_TICKET; }
 
    // use different message on success (default is initial message + done)
-   void SetSuccessMsg(const char *fmt, ...);
+   void SetSuccessMsg(const wxChar *fmt, ...);
 
    // give the appropariate message
    ~AsyncStatusHandler();
@@ -392,13 +392,13 @@ void wxMIMETreeCtrl::InitImageLists()
    for ( int i = MimeType::TEXT; i <= MimeType::OTHER; i++ )
    {
       // this is a big ugly: we need to get just the primary MIME type
-      MimeType mt((MimeType::Primary)i, "");
+      MimeType mt((MimeType::Primary)i, _T(""));
       wxIcon icon = iconManager->GetIconFromMimeType(mt.GetType());
       imaglist->Add(icon);
    }
 
    // and the last icon for the unknown MIME images
-   imaglist->Add(iconManager->GetIcon("unknown"));
+   imaglist->Add(iconManager->GetIcon(_T("unknown")));
 
    AssignImageList(imaglist);
 }
@@ -412,7 +412,7 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
                                    MessageView *msgView)
                 : wxManuallyLaidOutDialog(parent,
                                           _("MIME structure of the message"),
-                                          "MimeTreeDialog")
+                                          _T("MimeTreeDialog"))
 {
    // init members
    m_msgView = msgView;
@@ -424,7 +424,7 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
    wxLayoutConstraints *c;
 
    // label will be set later below
-   m_box = CreateStdButtonsAndBox("", StdBtn_NoCancel);
+   m_box = CreateStdButtonsAndBox(_T(""), StdBtn_NoCancel);
 
    m_treectrl = new wxMIMETreeCtrl(this);
    c = new wxLayoutConstraints;
@@ -488,7 +488,7 @@ void wxMIMETreeDialog::OnTreeItemRightClick(wxTreeEvent& event)
 // ----------------------------------------------------------------------------
 
 AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
-                                       const char *fmt, ...)
+                                       const wxChar *fmt, ...)
 {
    m_msgCmdProc = msgCmdProc;
    m_ticket = ILLEGAL_TICKET;
@@ -504,7 +504,7 @@ AsyncStatusHandler::AsyncStatusHandler(MsgCmdProcImpl *msgCmdProc,
    MBeginBusyCursor();
 }
 
-bool AsyncStatusHandler::Monitor(Ticket ticket, const char *fmt, ...)
+bool AsyncStatusHandler::Monitor(Ticket ticket, const wxChar *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
@@ -529,7 +529,7 @@ bool AsyncStatusHandler::Monitor(Ticket ticket, const char *fmt, ...)
    return TRUE;
 }
 
-void AsyncStatusHandler::SetSuccessMsg(const char *fmt, ...)
+void AsyncStatusHandler::SetSuccessMsg(const wxChar *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
@@ -926,7 +926,7 @@ MsgCmdProcImpl::ShowRawText(UIdType uid)
    }
    else
    {
-      MDialog_ShowText(GetFrame(), _("Raw message text"), text, "RawMsgPreview");
+      MDialog_ShowText(GetFrame(), _("Raw message text"), text, _T("RawMsgPreview"));
    }
 }
 
@@ -1000,7 +1000,7 @@ MsgCmdProcImpl::BounceMessages(const UIdArray& messages)
                    _("Please enter the address"),
                    _("Bounce the message to:"),
                    GetFrame(),
-                   "BounceAddress") )
+                   _T("BounceAddress")) )
    {
       // cancelled by user
       return;
@@ -1459,12 +1459,12 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    // setting up the dnd icons can't be done in portable way :-(
 #if defined(__WXMSW__) || defined(__WXMAC__)
    wxDropSource dropSource(dropData, m_winForDnd,
-                           wxCursor("msg_copy"),
-                           wxCursor("msg_move"));
+                           wxCursor(_T("msg_copy")),
+                           wxCursor(_T("msg_move")));
 #else // Unix
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxIcon icon = iconManager->GetIcon(selections.Count() > 1 ? "dnd_msgs"
-                                                             : "dnd_msg");
+   wxIcon icon = iconManager->GetIcon(selections.Count() > 1 ? _T("dnd_msgs")
+                                                             : _T("dnd_msg"));
    wxDropSource dropSource(dropData, m_winForDnd, icon);
 #endif // OS
 

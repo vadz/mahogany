@@ -169,7 +169,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
                         : wxOptionsPageSubdialog(profile,
                                                  parent,
                                                  _("Message threading"),
-                                                 "MsgThrDlg")
+                                                 _T("MsgThrDlg"))
 {
    m_wasChanged = false;
 
@@ -184,7 +184,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_panel->SetConstraints(c);
 
-   static const char *fieldLabels[Field_Max] =
+   static const wxChar *fieldLabels[Field_Max] =
    {
       gettext_noop("Thread messages on &server"),
       gettext_noop("Thread messages by &references only"),
@@ -205,7 +205,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    wxArrayString aLabels;
    for ( size_t n = 0; n < Field_Max; n++ )
    {
-      aLabels.Add(_(fieldLabels[n]));
+      aLabels.Add(wxGetTranslation(fieldLabels[n]));
    }
    long widthMax = GetMaxLabelWidth(aLabels, this);
 

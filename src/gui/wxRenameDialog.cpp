@@ -118,7 +118,7 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
                                            String *mboxName)
                     : wxManuallyLaidOutDialog(parent,
                                               GetRenameDialogTitle(folder),
-                                              "RenameDialog")
+                                              _T("RenameDialog"))
 {
    // init members
    m_folder = folder;
@@ -135,7 +135,7 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
    // created before the text controls or we'd crash
    m_chkRenameMbox = new wxPCheckBox
                          (
-                           "RenameMbox",
+                           _T("RenameMbox"),
                            this,
                            -1,
                            _("Rename mailbox &separately")

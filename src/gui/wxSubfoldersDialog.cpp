@@ -77,7 +77,7 @@ static const size_t PROGRESS_THRESHOLD = 10;
 // private functions
 // ----------------------------------------------------------------------------
 
-static void RemoveTrailingDelimiters(wxString *s, char chDel = '/')
+static void RemoveTrailingDelimiters(wxString *s, wxChar chDel = '/')
 {
    // now remove trailing backslashes if any
    size_t len = s->length();
@@ -109,7 +109,7 @@ public:
    // dtor
    virtual ~wxSubfoldersTree();
 
-   char GetDelimiter() const { return m_chDelimiter; }
+   wxChar GetDelimiter() const { return m_chDelimiter; }
 
    // event handlers
    // --------------
@@ -118,7 +118,7 @@ public:
    void OnTreeExpanding(wxTreeEvent& event);
 
    // list event processing functions
-   virtual void OnListFolder(const String& path, char delim, long flags);
+   virtual void OnListFolder(const String& path, wxChar delim, long flags);
 
    // called when the last folder is received
    virtual void OnNoMoreFolders();
@@ -153,7 +153,7 @@ private:
    size_t m_nFoldersRetrieved;
 
    // the folder name separator
-   char m_chDelimiter;
+   wxChar m_chDelimiter;
 
    // the full spec of the folder whose children we're currently listing
    wxString m_reference;
@@ -221,7 +221,7 @@ private:
    MFolder *m_folder;
 
    // returns the separator of the folder name components
-   char GetFolderNameSeparator() const
+   wxChar GetFolderNameSeparator() const
    {
       return m_treectrl->GetDelimiter();
    }
@@ -236,7 +236,7 @@ class wxFolderNameTextCtrl : public wxTextCtrl
 public:
    // ctor
    wxFolderNameTextCtrl(wxSubscriptionDialog *dialog)
-      : wxTextCtrl(dialog, -1, "",
+      : wxTextCtrl(dialog, -1, _T(""),
                    wxDefaultPosition, wxDefaultSize,
                    wxTE_PROCESS_TAB)
    {
@@ -273,7 +273,7 @@ public:
    size_t AddAllFolders(MFolder *folder, ASMailFolder *mailFolder);
 
    // list folder events processing function
-   virtual void OnListFolder(const String& path, char delim, long flags);
+   virtual void OnListFolder(const String& path, wxChar delim, long flags);
    virtual void OnNoMoreFolders();
 
 private:
@@ -434,7 +434,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // we may need a separator
       if ( !m_reference.empty() )
       {
-         char chLast = m_reference.Last();
+         wxChar chLast = m_reference.Last();
          if ( chLast != '}' && chLast != m_chDelimiter )
          {
             ASSERT_MSG( m_chDelimiter, _T("should have folder name separator") );
@@ -454,7 +454,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       //     different from our "this" as we use multiple inheritance
       m_mailFolder->ListFolders
                     (
-                       "%",         // everything at this tree level
+                       _T("%"),         // everything at this tree level
                        FALSE,       // subscribed only?
                        reference,   // path relative to the folder
                        (ListEventReceiver *)this  // data for the callback
@@ -477,7 +477,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
 
 void
 wxSubfoldersTree::OnListFolder(const String& spec,
-                               char WXUNUSED_UNLESS_DEBUG(delim),
+                               wxChar WXUNUSED_UNLESS_DEBUG(delim),
                                long attr)
 {
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
@@ -506,7 +506,7 @@ wxSubfoldersTree::OnListFolder(const String& spec,
 
       // ignore the folder itself and any grand children - we only want the
       // direct children here
-      if ( !!name && (!m_chDelimiter || !strchr(name, m_chDelimiter)) )
+      if ( !!name && (!m_chDelimiter || !wxStrchr(name, m_chDelimiter)) )
       {
          wxTreeItemId id = OnNewFolder(name);
          if ( id.IsOk() )
@@ -684,7 +684,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
                                           ASMailFolder *mailFolder)
                     : wxManuallyLaidOutDialog(parent,
                                               _("Select subfolders to add to the tree"),
-                                              "SubscribeDialog")
+                                              _T("SubscribeDialog"))
 {
    // init members
    m_folder = folder;
@@ -694,7 +694,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 
    // create controls
    wxLayoutConstraints *c;
-   m_box = CreateStdButtonsAndBox(""); // label will be set later
+   m_box = CreateStdButtonsAndBox(_T("")); // label will be set later
 
    // first create the label, then the text control - we rely on it in
    // OnNoMoreFolders()
@@ -747,7 +747,7 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
       return;
    }
 
-   char sep = GetFolderNameSeparator();
+   wxChar sep = GetFolderNameSeparator();
    wxString name;
    if ( !m_folderPath )
    {
@@ -1120,9 +1120,9 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
 
    (void)mailFolder->ListFolders
                      (
-                        "*",         // everything
+                        _T("*"),     // everything
                         FALSE,       // subscribed only?
-                        "",          // path relative to the folder
+                        _T(""),      // path relative to the folder
                         this         // data to pass to the callback
                      );
 
@@ -1161,7 +1161,7 @@ ListFolderEventReceiver::OnNoMoreFolders()
 
 void
 ListFolderEventReceiver::OnListFolder(const String& spec,
-                                      char chDelimiter,
+                                      wxChar chDelimiter,
                                       long attr)
 {
    // count the number of folders retrieved and show progress
@@ -1190,7 +1190,7 @@ ListFolderEventReceiver::OnListFolder(const String& spec,
    {
       wxString relpath = name;
       if ( chDelimiter != '\0' )
-         name.Replace(wxString(chDelimiter), "/");
+         name.Replace(wxString(chDelimiter), _T("/"));
 
       MFolder *folderNew = m_folder->GetSubfolder(name);
       if ( !folderNew )

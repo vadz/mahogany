@@ -126,7 +126,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
                          const wxChar *configPath)
            : wxDialog(parent,
                       -1,
-                      wxString("Mahogany: ") + title,
+                      _T("Mahogany: ") + title,
                       wxDefaultPosition,
                       wxDefaultSize,
                       wxDEFAULT_DIALOG_STYLE |
@@ -163,7 +163,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
    // create controls
    // ---------------
 
-   m_text = new wxTextCtrl(this, -1, "",
+   m_text = new wxTextCtrl(this, -1, _T(""),
                            wxPoint(0, 0),
                            wxSize(w, h),
                            wxTE_MULTILINE |
@@ -233,7 +233,7 @@ void MTextDialog::OnSave(wxCommandEvent&)
 {
    String filename = wxPFileSelector
                      (
-                       "RawText",
+                       _T("RawText"),
                        _("Mahogany: Please choose where to save the text"),
                        NULL, NULL, NULL, NULL,
                        wxSAVE | wxOVERWRITE_PROMPT,
@@ -241,7 +241,7 @@ void MTextDialog::OnSave(wxCommandEvent&)
                      );
    if ( !filename.empty() )
    {
-      wxFFile fileOut(filename, "w");
+      wxFFile fileOut(filename, _T("w"));
       if ( !fileOut.IsOpened() || !fileOut.Write(m_text->GetValue()) )
       {
          wxLogError(_("Failed to save the dialog contents."));
@@ -340,9 +340,9 @@ void MTextDialog::OnFindDialogClose(wxFindDialogEvent&)
 
 extern "C"
 void MDialog_ShowText(wxWindow *parent,
-                      const char *title,
-                      const char *text,
-                      const char *configPath)
+                      const wxChar *title,
+                      const wxChar *text,
+                      const wxChar *configPath)
 {
    // show the dialog modelessly because otherwise we wouldn't be able to show
    // a find dialog from it

@@ -117,7 +117,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                                                wxWindow *parent)
                       : wxOptionsPageSubdialog(profile,parent,
                                                _("Message sorting"),
-                                               "MessageSortingDialog")
+                                               _T("MessageSortingDialog"))
 {
    wxStaticBox *box = CreateStdButtonsAndBox(_("&Sort messages by"), FALSE,
                                              MH_DIALOG_SORTING);
@@ -163,8 +163,8 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    {
       wxStaticText *txt = new wxStaticText(this, -1,
                                            n < NUM_LABELS
-                                           ? _(labels[n])
-                                           : _(labels[NUM_LABELS-1]));
+                                           ? wxGetTranslation(labels[n])
+                                           : wxGetTranslation(labels[NUM_LABELS-1]));
       c = new wxLayoutConstraints;
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
       c->width.Absolute(widthMax);
@@ -187,7 +187,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       wxString sortCriteriaTrans[NUM_CRITERIA];
       for ( size_t i = 0; i < NUM_CRITERIA; i++ )
       {
-         sortCriteriaTrans[i] = _(sortCriteria[i]);
+         sortCriteriaTrans[i] = wxGetTranslation(sortCriteria[i]);
       }
 
       m_Choices[n] = new wxChoice(this, -1,

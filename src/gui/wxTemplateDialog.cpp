@@ -51,7 +51,7 @@ extern const MPersMsgBox *M_MSGBOX_SAVE_TEMPLATE;
 // constants
 // ----------------------------------------------------------------------------
 
-static const char *gs_templateNames[MessageTemplate_Max] =
+static const wxChar *gs_templateNames[MessageTemplate_Max] =
 {
    gettext_noop("New message"),
    gettext_noop("New article"),
@@ -71,7 +71,7 @@ class TemplateEditor : public wxTextCtrl
 public:
    // ctor
    TemplateEditor(const TemplatePopupMenuItem& menu, wxWindow *parent)
-      : wxTextCtrl(parent, -1, "", wxDefaultPosition, wxDefaultSize,
+      : wxTextCtrl(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                    wxTE_MULTILINE),
         m_menuInfo(menu)
    {
@@ -278,7 +278,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
       case TemplatePopupMenuItem::File:
          // choose the file (can't be more specific in messages because we
          // don't really know what is it for...)
-         value = wxPFileSelector("TemplateFile",
+         value = wxPFileSelector(_T("TemplateFile"),
                                  _("Please choose a file"),
                                  NULL, NULL, NULL, NULL,
                                  wxOPEN | wxFILE_MUST_EXIST,
@@ -296,7 +296,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          {
             // get some text from user (FIXME the prompts are really stupid)
             if ( !MInputBox(&value, _("Value for template variable"),
-                            "Value", this, "TemplateText") )
+                            _T("Value"), this, _T("TemplateText")) )
             {
                // user cancelled
                return;
@@ -307,7 +307,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          // quote the value if needed - that is if it contains anything but
          // alphanumeric characters
          bool needsQuotes = FALSE;
-         for ( const char *pc = value.c_str(); *pc; pc++ )
+         for ( const wxChar *pc = value.c_str(); *pc; pc++ )
          {
             if ( !isalnum(*pc) )
             {
@@ -319,8 +319,8 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
 
          if ( needsQuotes )
          {
-            String value2('"');
-            for ( const char *pc = value.c_str(); *pc; pc++ )
+            String value2(_T('"'));
+            for ( const wxChar *pc = value.c_str(); *pc; pc++ )
             {
                if ( *pc == '"' || *pc == '\\' )
                {
@@ -337,7 +337,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          }
 
          // check that the format string contains exactly what it must
-         ASSERT_MSG( strutil_extract_formatspec(menuitem->format) == "s",
+         ASSERT_MSG( strutil_extract_formatspec(menuitem->format) == _T("s"),
                      _T("incorrect format string") );
 
          value.Printf(menuitem->format, value.c_str());
@@ -356,7 +356,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          {
             // first create the entry for the submenu
             wxMenu *submenu = new wxMenu;
-            menu->Append(m_items.GetCount(), _(menuitem.label), submenu);
+            menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label), submenu);
 
             // next subitems
             for ( size_t n = 0; n < menuitem.nSubItems; n++ )
@@ -375,7 +375,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
       case TemplatePopupMenuItem::Normal:
       case TemplatePopupMenuItem::File:
       case TemplatePopupMenuItem::Text:
-         menu->Append(m_items.GetCount(), _(menuitem.label));
+         menu->Append(m_items.GetCount(), wxGetTranslation(menuitem.label));
          break;
 
       default:
@@ -416,7 +416,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
                                    wxWindow *parent)
                 : wxOptionsPageSubdialog(profile, parent,
                                          _("Configure message templates"),
-                                         "ComposeTemplates")
+                                         _T("ComposeTemplates"))
 {
    // init members
    // ------------
@@ -430,7 +430,7 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    wxLayoutConstraints *c;
 
    // first the box around everything
-   wxStaticBox *box = CreateStdButtonsAndBox("");
+   wxStaticBox *box = CreateStdButtonsAndBox(_T(""));
 
    // then a short help message
    wxStaticText *msg =
@@ -453,14 +453,14 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    m_textctrl = new TemplateEditor(menu, this);
 
    // on the left side is the listbox with all available templates
-   wxListBox *listbox = new wxPListBox("MsgTemplate", this, -1);
+   wxListBox *listbox = new wxPListBox(_T("MsgTemplate"), this, -1);
 
    // this array should be in sync with MessageTemplateKind enum
    ASSERT_MSG( WXSIZEOF(gs_templateNames) == MessageTemplate_Max,
                _T("forgot to update the labels array?") );
    for ( size_t n = 0; n < WXSIZEOF(gs_templateNames); n++ )
    {
-      listbox->Append(_(gs_templateNames[n]));
+      listbox->Append(wxGetTranslation(gs_templateNames[n]));
    }
 
    c = new wxLayoutConstraints;
@@ -495,8 +495,8 @@ void wxFolderTemplatesDialog::SaveChanges()
 
    // TODO: give the user the possibility to change the auto generated name
    wxString name;
-   name << m_profile->GetName() << '_' << _(gs_templateNames[m_kind]);
-   name.Replace("/", "_"); // we want it flat
+   name << m_profile->GetName() << '_' << wxGetTranslation(gs_templateNames[m_kind]);
+   name.Replace(_T("/"), _T("_")); // we want it flat
    SetMessageTemplate(name, m_textctrl->GetValue(), m_kind, m_profile);
 }
 
@@ -544,7 +544,7 @@ bool wxFolderTemplatesDialog::TransferDataFromWindow()
 wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
                                            const TemplatePopupMenuItem& menu,
                                            wxWindow *parent)
-                    : wxManuallyLaidOutDialog(parent, "", "AllTemplates")
+                    : wxManuallyLaidOutDialog(parent, _T(""), _T("AllTemplates"))
 {
    // init member vars
    // ----------------
@@ -574,7 +574,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
 
    // on the left side there is a combo allowing to choose the template type
    // and a listbox with all available templates for this type
-   m_listbox = new wxPListBox("AllTemplates", this, -1);
+   m_listbox = new wxPListBox(_T("AllTemplates"), this, -1);
 
    // this array should be in sync with MessageTemplateKind enum
    ASSERT_MSG( WXSIZEOF(gs_templateNames) == MessageTemplate_Max,
@@ -582,7 +582,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    wxString choices[MessageTemplate_Max];
    for ( size_t n = 0; n < WXSIZEOF(gs_templateNames); n++ )
    {
-      choices[n] = _(gs_templateNames[n]);
+      choices[n] = wxGetTranslation(gs_templateNames[n]);
    }
 
    wxComboBox *combo = new wxComboBox(this, -1,
@@ -801,7 +801,7 @@ void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
                    _("Create new template"),
                    _("Name for the new template:"),
                    this,
-                   "AddTemplate"
+                   _T("AddTemplate")
                   ) )
    {
       // cancelled
@@ -867,7 +867,7 @@ void EditTemplates(wxWindow *parent,
                    const TemplatePopupMenuItem& menu)
 {
    String path;
-   path << '/' << M_SETTINGS_CONFIG_SECTION << "/TemplateEditKind";
+   path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T("/TemplateEditKind");
 
    wxConfigBase *config = wxConfigBase::Get();
 

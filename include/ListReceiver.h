@@ -48,7 +48,7 @@ public:
      @param delim the folder hierarchy delimiter
      @param flags the attributes (combination of ASMailFolder::ATT_XXX values)
     */
-   virtual void OnListFolder(const String& path, char delim, long flags) = 0;
+   virtual void OnListFolder(const String& path, wxChar delim, long flags) = 0;
 
    /**
      Override this to handle the end of the folder enumeration.

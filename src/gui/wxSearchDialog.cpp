@@ -131,7 +131,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
                                              wxWindow *parent)
                      : wxOptionsPageSubdialog(profile, parent,
                                               _("Search for messages"),
-                                              "MessageSearchDialog")
+                                              _T("MessageSearchDialog"))
 {
    ASSERT_MSG( crit, _T("NULL SearchCriterium pointer in wxMessageSearchDialog") );
 
@@ -144,7 +144,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    wxStaticText *label;
 
    // the buttons at the bottom
-   CreateStdButtonsAndBox("", StdBtn_NoBox, MH_DIALOG_SEARCHMSGS);
+   CreateStdButtonsAndBox(_T(""), StdBtn_NoBox, MH_DIALOG_SEARCHMSGS);
 
    // the "where to search" box
    wxStaticBox *box = new wxStaticBox(this, -1, _("&Search for messages"));
@@ -173,7 +173,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    c->height.AsIs();
    label->SetConstraints(c);
 
-   m_textWhat = new wxPTextEntry("SearchFor", this, -1);
+   m_textWhat = new wxPTextEntry(_T("SearchFor"), this, -1);
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -185,10 +185,10 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    wxString searchCriteriaTrans[WXSIZEOF(searchCriteria)];
    for ( size_t n = 0; n < WXSIZEOF(searchCriteria); n++ )
    {
-      searchCriteriaTrans[n] = _(searchCriteria[n]);
+      searchCriteriaTrans[n] = wxGetTranslation(searchCriteria[n]);
    }
 
-   m_choiceWhere = new wxPChoice("SearchWhere", this, -1,
+   m_choiceWhere = new wxPChoice(_T("SearchWhere"), this, -1,
                                  wxDefaultPosition, wxDefaultSize,
                                  WXSIZEOF(searchCriteria), searchCriteriaTrans);
    c = new wxLayoutConstraints;
@@ -235,7 +235,7 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 
    m_lboxFolders = new wxListBox(this, -1);
    if ( folder )
-      m_lboxFolders->Append('/' + folder->GetFullName());
+      m_lboxFolders->Append(_T('/') + folder->GetFullName());
 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -328,7 +328,7 @@ void wxMessageSearchDialog::OnButtonAdd(wxCommandEvent& /* event */)
    MFolder_obj folder(MDialog_FolderChoose(this, NULL, MDlg_Folder_NoFiles));
    if ( folder )
    {
-      m_lboxFolders->Append('/' + folder->GetFullName());
+      m_lboxFolders->Append(_T('/') + folder->GetFullName());
    }
 }
 
