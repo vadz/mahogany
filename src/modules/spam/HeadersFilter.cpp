@@ -22,8 +22,13 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-
    #include "MApplication.h"
+
+   #include "Moptions.h"
+   #include "strutil.h"       // for strutil_restore_array
+   #include "Mdefaults.h"     // for READ_APPCONFIG_TEXT
+
+   #include <wx/filefn.h>     // for wxSplitPath
 #endif //USE_PCH
 
 #include "MailFolder.h"

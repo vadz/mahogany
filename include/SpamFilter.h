@@ -238,7 +238,7 @@ public:
   @param desc     the short description (shown to the user)
   @param cpyright the module author/copyright string
  */
-#define IMPLEMENT_SPAM_FILTER(cname, cost, desc, cpyright)                    \
+#define IMPLEMENT_SPAM_FILTER(cname, desc, cpyright)                          \
    class cname##Factory : public SpamFilterFactory                            \
    {                                                                          \
    public:                                                                    \
