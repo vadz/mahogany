@@ -54,10 +54,10 @@ extern void ssl_onceonlyinit();
 
 #define SSL_LOOKUP(name) \
       stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(slldll, #name); \
-      if(stub_##name == NULL) success = FALSE
+      if ( !stub_##name ) return FALSE
 #define CRYPTO_LOOKUP(name) \
       stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(cryptodll, #name); \
-      if(stub_##name == NULL) success = FALSE
+      if ( stub_##name ) return FALSE
 
 SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx) );
 SSL_DEF( void, SSL_free, (SSL *ssl) );
@@ -157,6 +157,8 @@ bool InitSSL(void) /* FIXME: MT */
                   ssl_dll.c_str()));
 #endif // 0
 
+   // FIXME: when are we going to unload these DLLs?
+
    wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll);
    if ( !cryptodll )
       return FALSE;
@@ -189,20 +191,17 @@ bool InitSSL(void) /* FIXME: MT */
 #else
    SSL_LOOKUP(SSLv23_client_method );
 #   endif
-   gs_SSL_available = success;
+   gs_SSL_available =
    gs_SSL_loaded = TRUE;
 
-   if(success) // only now is it safe to call this
-   {
-      STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
-                       "SSL authentification now available."),
-                     crypto_dll.c_str(),
-                     ssl_dll.c_str()));
+   STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
+                    "SSL authentification now available."),
+                  crypto_dll.c_str(),
+                  ssl_dll.c_str()));
 
-      ssl_onceonlyinit();
-   }
+   ssl_onceonlyinit();
 
-   return success;
+   return TRUE;
 }
 
 #undef SSL_LOOKUP
