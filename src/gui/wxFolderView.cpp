@@ -5037,9 +5037,8 @@ bool ShowSearchResults(MailFolder *mf, const UIdArray& uids, wxFrame *frame)
 {
    MFolder_obj folder = MFolder::CreateTemp
                         (
-                           "virtual",
                            _("Search results"),
-                           MF_FILE,
+                           MF_VIRTUAL,
                            mf->GetProfile()
                         );
    if ( !folder )

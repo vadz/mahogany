@@ -110,8 +110,7 @@ public:
      @param profile associated with this folder, use global one if NULL
      @return folder (should be DecRef()'d by caller) or NULL on error
     */
-   static MFolder *CreateTemp(const String& kind,
-                              const String& fullname,
+   static MFolder *CreateTemp(const String& fullname,
                               MFolderType type,
                               Profile *profile = NULL);
 

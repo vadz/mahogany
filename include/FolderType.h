@@ -30,7 +30,9 @@
 enum MFolderType
 {
    // the MF_XXX constants have the same values as c-client folder types
-   MF_ILLEGAL = 0xff,            // illegal type - cannot use -1 because of bitmask
+   MF_ILLEGAL = 0xff,            // illegal (don't use -1 because of bitmask)
+
+   // real folder types
    MF_INBOX = 0,                 // system inbox
    MF_FILE = 1,                  // mbox file
    MF_POP = 2,                   // pop3
@@ -39,26 +41,16 @@ enum MFolderType
    MF_NEWS = 5,                  // newsgroup in local newsspool
    MF_MH = 6,                    // MH folder (directory/files)
 
-   // these two are still experimental and not always compiled in:
+   // these two are experimental
    MF_MFILE = 7,                 // the Mahogany file type
    MF_MDIR = 8,                  // the Mahogany dir type
 
-// no longer used   MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
    MF_PROFILE = 10,              // read type etc from profile
-
-   // real folder types
-   Inbox = MF_INBOX,     // system inbox
-   File  = MF_FILE,      // local file (MBOX format)
-   POP   = MF_POP,       // POP3 server
-   IMAP  = MF_IMAP,      // IMAP4 server
-   Nntp  = MF_NNTP,      // NNTP server
-   News  = MF_NEWS,
+   MF_VIRTUAL,                   // virtual folder
 
    // pseudo types
-   MF_GROUP = 0x20,            // only used for grouping other folders
-   MF_ROOT = 0xfe,             // this is the the special root pseudo-folder
-
-   FolderInvalid = MF_ILLEGAL  // folder not initialized properly
+   MF_GROUP = 0x20,              // only used for grouping other folders
+   MF_ROOT = 0xfe                // this is the special root pseudo-folder
 };
 
 /// supported formats for the local file mailboxes (hence MH not counted)

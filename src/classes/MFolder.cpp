@@ -76,6 +76,18 @@ extern const MOption MP_USERNAME;
 static const size_t INVALID_CHILDREN_COUNT = (size_t)-1;
 
 // ----------------------------------------------------------------------------
+// functions
+// ----------------------------------------------------------------------------
+
+// return the folder class name from its type: currently we don't store the
+// class sepaartely simply because we have only one non default class and only
+// for the folders of one type
+static String GetClassForType(MFolderType type)
+{
+   return type == MF_VIRTUAL ? "virtual" : "cclient";
+}
+
+// ----------------------------------------------------------------------------
 // MFolder implementations
 // ----------------------------------------------------------------------------
 
@@ -84,18 +96,17 @@ static const size_t INVALID_CHILDREN_COUNT = (size_t)-1;
 class MTempFolder : public MFolder
 {
 public:
-   MTempFolder(const String& kind,
-               const String& fullname,
+   MTempFolder(const String& fullname,
                MFolderType type,
                Profile *profile)
-      : m_kind(kind),
-        m_fullname(fullname),
-        m_type(type),
-        m_flags(0)
-        {
-           m_profile = profile ? profile : mApplication->GetProfile();
-           m_profile->IncRef();
-        }
+      : m_fullname(fullname)
+   {
+      m_type = type;
+      m_flags = 0;
+
+      m_profile = profile ? profile : mApplication->GetProfile();
+      m_profile->IncRef();
+   }
 
    ~MTempFolder()
    {
@@ -135,7 +146,7 @@ public:
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual MFolderType GetType() const { return m_type; }
-   virtual String GetClass() const { return m_kind; }
+   virtual String GetClass() const { return GetClassForType(m_type); }
 
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
@@ -171,8 +182,7 @@ public:
       { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
 
 private:
-   String m_kind,
-          m_fullname,
+   String m_fullname,
           m_path,
           m_server,
           m_login,
@@ -530,19 +540,18 @@ MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
 
 /* static */
 MFolder *
-MFolder::CreateTemp(const String& kind,
-                    const String& fullname,
+MFolder::CreateTemp(const String& fullname,
                     MFolderType type,
                     Profile *profile)
 {
-   return new MTempFolder(kind, fullname, type, profile);
+   return new MTempFolder(fullname, type, profile);
 }
 
 /* static */
 MFolder *
 MFolder::CreateTempFile(const String& fullname, const String& path, int flags)
 {
-   MFolder *folder = CreateTemp("", fullname, MF_FILE);
+   MFolder *folder = CreateTemp(fullname, MF_FILE);
    if ( folder )
    {
       folder->SetPath(path);
@@ -737,17 +746,7 @@ MFolderType MFolderFromProfile::GetType() const
 
 String MFolderFromProfile::GetClass() const
 {
-   String kind = READ_CONFIG_TEXT(m_profile, MP_FOLDER_CLASS);
-
-   // this is a hack needed for backwards compatibility and which also allows
-   // to have the empty default value for the folder class which saves quite
-   // some bytes in the profile
-   if ( kind.empty() )
-   {
-      kind = "cclient";
-   }
-
-   return kind;
+   return GetClassForType(GetType());
 }
 
 bool MFolderFromProfile::NeedsNetwork() const
