@@ -109,9 +109,10 @@
 //   (If I hold my breath until I turn blue, can I have exceptions?)
 //
 // - Misc folders, i.e. foo in foo.sbd
-//    + create only if they are not empty
-//    + if the group folder with the same name is empty, create only a mailbox folder
-//    + rename to 'AAA Misc' to make it appear in the first slot in the folder [ASK]
+//    + create only if they are not empty [No]
+//    + if the group folder with the same name is empty, create only a mailbox folder [DONE]
+//    + rename to 'AAA Misc' to make it appear in the first slot in the folder [NO]
+//      use SetTreeIndex(10) to position after system folders. [DONE]
 //
 // - implement importing of IMAP server stuff [ASK]
 
@@ -864,7 +865,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
         wxString tmpPath;
         tmpPath << dir << DIR_SEPARATOR << fileList[i];
         subFolder = CreateFolderTreeEntry ( folder,    // parent may be NULL
-                                   "AAA Misc",      // the folder name
+                                   "Misc",      // the folder name
                                    MF_FILE,   //            type
                                    0,         //            flags
                                    tmpPath,      //            path
@@ -874,6 +875,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
         if ( subFolder )
          {
+           subFolder->SetTreeIndex(10);   // popsition folder after system folders
            folderList.Add(subFolder);
            fileList.Remove(i);      // this one has been created, remove from filelist
            wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
