@@ -1068,29 +1068,40 @@ String MailFolder::GetImapSpec(int typeOrig,
 #ifdef USE_SSL
       if ( !InitSSL() )
       {
-#else // !USE_SSL
-         ERRORMESSAGE((_("This version of the program doesn't support SSL "
-                         "authentification.")));
-#endif // USE_SSL/!USE_SSL
+#endif // USE_SSL
+         static bool s_errMsgGiven = false;
 
-         ERRORMESSAGE((_("SSL authentication is not available.")));
+         if ( !s_errMsgGiven )
+         {
+#ifndef USE_SSL
+            ERRORMESSAGE((_("This version of the program doesn't support SSL "
+                            "authentification.")));
+#endif // !USE_SSL
+
+            ERRORMESSAGE((_("SSL authentication is not available.")));
+
+            s_errMsgGiven = true;
+
+#ifdef USE_SSL
+            // show the log dialog first
+            wxLog::FlushActive();
+
+            MDialog_Message
+            (
+               _("You can change the locations of the SSL and crypto "
+                 "libraries in the last page of the preferences dialog\n"
+                 "if you have these libraries in non default location"
+                 " or if they have some other names on your system."),
+               NULL,
+               "SSL tip",
+               "SSLLibTip"
+            );
+#endif // USE_SSL
+         }
 
          flags ^= MF_FLAGS_SSLAUTH;
 
 #ifdef USE_SSL
-         // show the log dialog first
-         wxLog::FlushActive();
-
-         MDialog_Message
-         (
-            _("You can change the locations of the SSL and crypto "
-              "libraries in the last page of the preferences dialog\n"
-              "if you have these libraries in non default location"
-              " or if they have some other names on your system."),
-            NULL,
-            "SSL tip",
-            "SSLLibTip"
-         );
       }
 #endif // USE_SSL
    }
