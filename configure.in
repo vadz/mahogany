@@ -530,6 +530,7 @@ esac
 
 case "$USE_PROFILER" in 1)
 	CODE_GEN_FLAGS="$CODE_GEN_FLAGS -pg"
+	LDFLAGS="$LDFLAGS -pg"
 esac
 
 case "$USE_EXPERIMENTAL" in
