@@ -77,7 +77,7 @@ END_EVENT_TABLE()
 #endif
 
 bool wxMFrame::RestorePosition(const char *name,
-                               int *x, int *y, int *w, int *h)
+                               int *x, int *y, int *w, int *h, bool *i)
 {
    wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
 
@@ -89,6 +89,7 @@ bool wxMFrame::RestorePosition(const char *name,
       *y = pConf->Read(MP_YPOS,MP_YPOS_D);
       *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
       *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
+      if(i) *i= pConf->Read(MP_ICONISED, MP_ICONISED_D);
 
       // assume that if one entry existed, then the other existed too
       return pConf->HasEntry(MP_XPOS);
@@ -100,6 +101,7 @@ bool wxMFrame::RestorePosition(const char *name,
       *y = MP_YPOS_D;
       *w = MP_WIDTH_D;
       *h = MP_HEIGHT_D;
+      if(i) *i = MP_ICONISED_D;
       return FALSE;
    }
 }
@@ -120,11 +122,14 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
 
    const char *name = MFrameBase::GetName();
    int xpos, ypos, width, height;
-   RestorePosition(name, &xpos, &ypos, &width, &height);
+   bool iconised;
+   RestorePosition(name, &xpos, &ypos, &width, &height, &iconised);
 
    // use name as default title
    wxFrame::Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
    //Show(true);
+
+   Iconize(iconised);
 
    SetIcon(ICON("MFrame"));
 
@@ -204,6 +209,17 @@ wxMFrame::SetTitle(String const &title)
 void
 wxMFrame::SavePosition(const char *name, wxWindow *frame)
 {
+	SavePositionInternal(name, frame, FALSE);
+}
+
+void
+wxMFrame::SavePosition(const char *name, wxFrame *frame)
+{
+	SavePositionInternal(name, frame, TRUE);
+}
+void
+wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
+{
    int x,y;
 
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
@@ -217,6 +233,9 @@ wxMFrame::SavePosition(const char *name, wxWindow *frame)
       frame->GetSize(&x,&y);
       pConf->Write(MP_WIDTH, (long)x);
       pConf->Write(MP_HEIGHT, (long)y);
+
+      if(isFrame)
+        pConf->Write(MP_ICONISED, ((wxFrame *)frame)->IsIconized());
    }
 }
 

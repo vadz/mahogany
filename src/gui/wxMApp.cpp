@@ -186,14 +186,15 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
             : wxLogWindow(pParent, szTitle, FALSE)
 {
    int x, y, w, h;
-   wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
+   bool i;
+   wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h, &i);
    wxFrame *frame = GetFrame();
 
    frame->SetSize(x, y, w, h);
    frame->SetIcon(ICON("MLogFrame"));
-
    m_hasWindow = true;
    Show();
+   frame->Iconize(i);
 }
 
 bool wxMLogWindow::IsShown() const
