@@ -370,7 +370,7 @@ public:
    /** Locks a mailfolder for exclusive access. In multi-threaded mode
        it really locks it and always returns true. In single-threaded
        mode it returns false if we cannot get a lock.
-       @return TRUE if we have the lock
+       @return TRUE if we have obtained the lock
    */
    virtual bool Lock(void) const = 0;
    /** Releases the lock on the mailfolder. */
