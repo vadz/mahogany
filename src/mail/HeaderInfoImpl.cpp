@@ -723,7 +723,7 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
          // once again - but do update the inverse table
          if ( m_tablePos )
          {
-            free(m_tablePos);
+            delete [] m_tablePos;
             m_tablePos = NULL;
          }
 
