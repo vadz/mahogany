@@ -197,6 +197,22 @@ public:
    /** Check whether mailbox has changed. */
    void Ping(void);
 
+   /**@name Semi-public functions, shouldn't usually be called by
+      normal code. */
+   //@{
+   /** Most of the Ping() functionality, but without updating the
+       mailbox status (mail_check()), a bit quicker. Returns true if
+       mailstream is still valid.
+       Just pings the stream and tries to reopen it if needed
+       @return true if stream still valid
+   */
+   bool PingReopen(void) const;
+   /** Like PingReopen() but works on all folders, returns true if all 
+       folders are fine.
+   */
+   static bool PingReopenAll(void);
+
+   //@}
    /** Updates the associated FolderViews */
    void UpdateViews(void);
 
@@ -251,13 +267,6 @@ private:
    */
    bool   Open(void);
 
-   /** Most of the Ping() functionality, but without updating the
-       mailbox status (mail_check()), a bit quicker. Returns true if
-       mailstream is still valid.
-       Just pings the stream and tries to reopen it if needed
-       @return true if stream still valid
-   */
-   bool PingReopen(void) const;
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
@@ -404,7 +413,8 @@ public:
           @param pointer to a new MailFolderCC::Event structure, will be freed by event handling mechanism.
    */
    static void QueueEvent(Event *evptr)
-          { ms_EventQueue.push_back(evptr); }
+      { ms_EventQueue.push_back(evptr); }
+
 protected:
    /// The list of events to be processed.
    static EventQueue ms_EventQueue;
@@ -415,7 +425,7 @@ protected:
    unsigned long      m_BuildNextEntry;
    /// The maximum number of messages to retrive or 0
    unsigned long m_RetrievalLimit;
-//@}
+   //@}
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.

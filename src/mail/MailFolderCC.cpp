@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$         *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -201,11 +201,13 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       FAIL_MSG("Unsupported folder type.");
    }
 
+   //FIXME: This should somehow be done in MailFolder.cc
    mf = FindFolder(mboxpath,login);
    if(mf)
    {
       mf->IncRef();
-      mf->SetName(symname);
+      mf->Ping(); // make sure it's updated
+//      mf->SetName(symname);
       return mf;
    }
 
@@ -368,12 +370,12 @@ MailFolderCC::PingReopen(void) const
    if(! m_MailStream || ! mail_ping(m_MailStream))
    {
       RemoveFromMap(m_MailStream); // will be added again by Open()
-      DBGMESSAGE(( _("Mailstream for folder '%s' has been closed, trying to reopen it."),
-                   GetName().c_str()));
+      LOGMESSAGE((M_LOG_WINONLY, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
+                  GetName().c_str()));
       rc = t->Open();
       if(rc == false)
       {
-         ERRORMESSAGE((_("Re-opening folder '%s' failed."),GetName().c_str()));
+         ERRORMESSAGE((_("Re-opening closed folder '%s' failed."),GetName().c_str()));
          t->m_MailStream = NIL;
       }
    }
@@ -381,6 +383,7 @@ MailFolderCC::PingReopen(void) const
    {
       ProcessEventQueue();
       rc = true;
+      LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."), GetName().c_str()));
    }
    else
       rc = false;
@@ -388,6 +391,20 @@ MailFolderCC::PingReopen(void) const
    return rc;
 }
 
+/* static */ bool
+MailFolderCC::PingReopenAll(void)
+{
+   // try to reopen all streams
+   bool rc = true;
+   StreamConnectionList::iterator i;
+   const MailFolderCC *mf;
+   for(mf = MailFolderCC::GetFirstMapEntry(i);
+       mf;
+       mf = MailFolderCC::GetNextMapEntry(i))
+      rc &= mf->PingReopen();
+   return rc;
+}
+   
 void
 MailFolderCC::Ping(void)
 {
@@ -1079,19 +1096,6 @@ MailFolderCC::mm_log(String str, long errflg )
       ERRORMESSAGE((msg));
    else
       LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
-   const char *unexpected = "Unexpected change";
-   if(strstr(str,unexpected) != NULL)
-   {
-      // try to reopen the stream
-      // Problem: we don't know the stream, so we need to ping them
-      // all
-      StreamConnectionList::iterator i;
-      MailFolderCC *mf;
-      for(mf = MailFolderCC::GetFirstMapEntry(i);
-          mf;
-          mf = MailFolderCC::GetNextMapEntry(i))
-         mf->Ping();
-   }
 }
 
 /** log a debugging message
@@ -1405,11 +1409,20 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
-   if(mm_ignore_errors)
+   String *msg = new String(str);
+   if(errflg >= 4) // fatal imap error, reopen-mailbox
+   {
+      if(!MailFolderCC::PingReopenAll())
+         *msg << _("\nAttempt to re-open all folders failed.");
+   }
+   else if(mm_ignore_errors)
+   {
+      delete msg;
       return;
-
+   }
+   
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
-   evptr->m_args[0].m_str = new String(str);
+   evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;
    MailFolderCC::QueueEvent(evptr);
 }

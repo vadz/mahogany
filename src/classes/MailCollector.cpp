@@ -24,6 +24,7 @@
 #  include  "MApplication.h"
 
 #  include  <wx/dynarray.h>
+#  include  <wx/utils.h> // wxYield
 #endif   // USE_PCH
 
 #include "Mdefaults.h"
@@ -163,8 +164,9 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    bool rc = true;
    
    m_IsCollecting = true;
-   wxLogDebug(_("Auto-collecting mail from incoming folder '%s'."),
-                mf->GetName().c_str());
+   wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
+               mf->GetName().c_str());
+   wxSafeYield(); // normal wxYield() should be ok here
    long oldcount = m_NewMailFolder->CountMessages();
    bool sendsEvents = mf->SendsNewMailEvents();
    mf->EnableNewMailEvents(false,true);
