@@ -1284,7 +1284,7 @@ that you send. This makes sure that the same person sending you mail
 will always see the same mail address for you. It is especially useful,
 if you collect mail from several different incoming mail folders.
 An example: Someone sends you mail to \texttt{John.Doe@mycompany.com}.
-If you reply to this message, it will appear as coming from \texttt{John.Doe@mycompany.}com,
+If you reply to this message, it will appear as coming from \texttt{John.Doe@mycompany.com},
 even if you read this mail from home, on a machine called \texttt{MyBox.fun.org}.
 On the other hand, if someone sends you mail to \texttt{MyAlias@writeme.com},
 your reply will carry that as a return address, so that person will

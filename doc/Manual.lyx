@@ -3272,9 +3272,9 @@ John.Doe@mycompany.com
 .
  If you reply to this message, it will appear as coming from 
 \family typewriter 
-John.Doe@mycompany.
+John.Doe@mycompany.com
 \family default 
-com, even if you read this mail from home, on a machine called 
+, even if you read this mail from home, on a machine called 
 \family typewriter 
 MyBox.fun.org
 \family default 
