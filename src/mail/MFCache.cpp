@@ -34,6 +34,8 @@
 #include <wx/file.h>
 #include <wx/textfile.h>
 
+#include "MFolder.h"
+
 #include "MFCache.h"
 
 // ----------------------------------------------------------------------------
@@ -333,9 +335,21 @@ bool MfStatusCache::Load(const String& filename)
             break;
          }
 
-         // do add the entry to the cache
-         size_t entry = m_folderNames.Add(name);
-         m_folderData.Insert(new MailFolderStatus(status), entry);
+         // ignore the folders which were deleted during the last program run
+         MFolder *folder = MFolder::Get(name);
+         if ( folder )
+         {
+            folder->DecRef();
+
+            // do add the entry to the cache
+            size_t entry = m_folderNames.Add(name);
+            m_folderData.Insert(new MailFolderStatus(status), entry);
+         }
+         else
+         {
+            wxLogDebug("Removing deleted folder '%s' from status cache.",
+                       name.c_str());
+         }
       }
    }
 
