@@ -2,6 +2,16 @@
 TODO list for Mahogany
 $Id$
 
+*** going back to using this file temporarily until bug tracker is back online
+
+1. why folder is opened and its listing is built when a message is appended to
+   it? very time consuming, can we avoid it?
+
+2. fix the bug in folder tree status change logic: we don't mark the folder
+   as new when we open it and there are new messages in it
+
+3. problems with calling wxYield() multiple times (under wxGTK) - what to do?
+
 *********************************************************************
 *** BUGS
 *********************************************************************
@@ -43,14 +53,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 		name or file name) and a dialog to choose among all of them
 
 5	VZ	appending to log file (Log Window/Save) fails
-
-7		after deleting a folder from the tree, the opened message from
-		it stays shown in the main frame - this is confusing and
-		dangerous
-
-6	VZ	"Browse subfolders" under root folder should give a choice:
-		subscribe to newsgroups, import MH folders, mirror server IMAP
-		folders...
 
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
