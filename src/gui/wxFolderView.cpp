@@ -513,6 +513,8 @@ public:
       CHECK( (size_t)item < GetHeadersCount(), UID_ILLEGAL,
              _T("invalid listctrl index") );
 
+      MLocker lock(((wxFolderListCtrl *)this)->m_mutexHeaders);
+
       return m_headers->GetItem((size_t)item)->GetUId();
    }
 
@@ -3393,12 +3395,7 @@ wxFolderView::SelectInitialMessage()
    // configured to do this
    if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_SELECT) )
    {
-      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-
-      const HeaderInfo *hi = hil[idx];
-      CHECK_RET( hi, _T("Failed to get the uid of preselected message") );
-
-      UIdType uid = hi->GetUId();
+      UIdType uid = m_FolderCtrl->GetUIdFromIndex(idx);
       if ( uid != UID_ILLEGAL )
       {
          m_FolderCtrl->SetPreviewMsg(idx, uid);
