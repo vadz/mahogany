@@ -141,7 +141,8 @@ MProgressDialog::MProgressDialog(wxString const &title,
                                  wxString const &message,
                                  int maximum,
                                  wxWindow *parent,
-                                 bool parentOnly)
+                                 bool parentOnly,
+                                 bool abortButton)
 {
    if(! parent)
       parent = wxTheApp->GetTopWindow();
@@ -161,7 +162,7 @@ MProgressDialog::MProgressDialog(wxString const &title,
          parent = parent->GetParent();
       }
    }
-
+   m_continue = true;
    m_Parent = parent;
    m_disableParentOnly = parentOnly;
    wxFrame::Create(m_Parent,-1,_(title),p,
