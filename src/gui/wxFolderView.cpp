@@ -3429,7 +3429,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->updateStatus = READ_CONFIG_BOOL(profile, MP_FVIEW_STATUS_UPDATE);
    if ( settings->updateStatus )
    {
-      settings->statusFormat = READ_CONFIG(profile, MP_FVIEW_STATUS_FMT);
+      settings->statusFormat = READ_CONFIG_TEXT(profile, MP_FVIEW_STATUS_FMT);
    }
 
    ReadColumnsInfo(profile, settings->columns);
