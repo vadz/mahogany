@@ -430,6 +430,10 @@ PalmOSModule::GetConfig(void)
       && m_BackupDir[m_BackupDir.Length()-1] != DIR_SEPARATOR)
       m_BackupDir << DIR_SEPARATOR;
 
+   if(m_AutoInstallDir.Length()
+      && m_AutoInstallDir[m_AutoInstallDir.Length()-1] != DIR_SEPARATOR)
+      m_AutoInstallDir << DIR_SEPARATOR;
+
    String dev;
    dev = m_PilotDev;
    if(strncmp(m_PilotDev,"/dev/",5)==0)
