@@ -654,6 +654,9 @@ public:
 
    virtual ~wxNotebookWithImages();
 
+   // should we show icons in the notebooks (uses MP_TBARIMAGES)?
+   static bool ShouldShowIcons();
+
 private:
    DECLARE_NO_COPY_CLASS(wxNotebookWithImages)
 };

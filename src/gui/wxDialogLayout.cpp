@@ -437,17 +437,23 @@ void wxOptionsPageSubdialog::OnChange(wxCommandEvent&)
 // wxNotebookWithImages
 // ----------------------------------------------------------------------------
 
-wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
-                                           wxWindow *parent,
-                                           const wxChar *aszImages[])
-                    : wxPNotebook(configPath, parent, -1)
+/* static */
+bool wxNotebookWithImages::ShouldShowIcons()
 {
    // assume that if the user doesn't want to see the images in the toolbar, he
    // doesn't want to see them elsewhere, in particular in the notebook tabs
    // neither
    //
    // NB: the config values are shifted related to the enum values, hence "+1"
-   if ( (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 != TbarShow_Text )
+   return (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 != TbarShow_Text;
+}
+
+wxNotebookWithImages::wxNotebookWithImages(const wxString& configPath,
+                                           wxWindow *parent,
+                                           const wxChar *aszImages[])
+                    : wxPNotebook(configPath, parent, -1)
+{
+   if ( ShouldShowIcons() )
    {
       wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
       wxIconManager *iconmanager = mApplication->GetIconManager();
