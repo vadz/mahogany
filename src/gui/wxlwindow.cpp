@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLwindow.h : a scrolled Window for displaying/entering rich text*
  *                                                                  *
- * (C) 1998, 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)        *
+ * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -636,9 +636,18 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
             case 'x':
                Cut();
                break;
+            case 'w':
+               m_llist->WrapLine(m_WrapMargin);
+               break;
+            case 'q':
+               m_llist->WrapAll(m_WrapMargin);
+               break;
 #ifdef WXLAYOUT_DEBUG
             case WXK_F1:
                m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
+               break;
+            case 'l':
+               Refresh(TRUE);
                break;
 #endif
             default:
@@ -690,8 +699,13 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                break;
             case WXK_RETURN:
                if(m_WrapMargin > 0)
-                  m_llist->WrapLine(m_WrapMargin);
-               m_llist->LineBreak();
+               {
+                  if(! m_llist->WrapLine(m_WrapMargin)
+                     || m_llist->GetCursorPos().x > 0)
+                     m_llist->LineBreak();
+               }
+               else
+                  m_llist->LineBreak();
                SetDirty();
                break;
 
@@ -707,7 +721,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   SetDirty();
                }
                break;
-
+               
             default:
                if((!(event.ControlDown() || event.AltDown()
                   ))
@@ -716,11 +730,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                {
                   if(m_WrapMargin > 0 && isspace(keyCode))
                   {
-                     bool wrapped = m_llist->WrapLine(m_WrapMargin);
-                     // don´t insert space as first thing in line
-                     // after wrapping:
-                     if(! wrapped || m_llist->GetCursorPos().x != 0)
-//                       m_llist->Insert('X');
+                     if(! m_llist->WrapLine(m_WrapMargin)
+                        || m_llist->GetCursorPos().x > 0)
                         m_llist->Insert((char)keyCode);
                   }
                   else

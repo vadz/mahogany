@@ -60,6 +60,7 @@
 
 #include <ctype.h>
 
+
 /// This should never really get created
 #define   WXLLIST_TEMPFILE   "__wxllist.tmp"
 
@@ -72,10 +73,12 @@
    {
       "invalid", "text", "cmd", "icon"
    };
-   void
-   wxLayoutObject::Debug(void)
+   wxString
+   wxLayoutObject::DebugDump(void) const
    {
-      WXLO_DEBUG(("%s",g_aTypeStrings[GetType()]));
+      wxString str;
+      str.Printf("%s",g_aTypeStrings[GetType()]);
+      return str;
    }
 #else
 #  define   TypeString(t)        ""
@@ -165,6 +168,7 @@ bool Contains(const wxRect &r, const wxPoint &p)
 //@}
 
 
+static
 void ReadString(wxString &to, wxString &from)
 {
    to = "";
@@ -187,7 +191,7 @@ wxLayoutObject::Read(wxString &istr)
 {
    wxString tmp;
    ReadString(tmp, istr);
-   int type = -1;
+   int type = WXLO_TYPE_INVALID;
    sscanf(tmp.c_str(),"%d", &type);
 
    switch(type)
@@ -370,11 +374,14 @@ wxLayoutObjectText::Layout(wxDC &dc, class wxLayoutList *llist)
 
 
 #ifdef WXLAYOUT_DEBUG
-void
-wxLayoutObjectText::Debug(void)
+wxString
+wxLayoutObjectText::DebugDump(void) const
 {
-   wxLayoutObject::Debug();
-   WXLO_DEBUG((" `%s`", m_Text.c_str()));
+   wxString str;
+   str = wxLayoutObject::DebugDump();
+   wxString str2;
+   str2.Printf(" `%s`", m_Text.c_str());
+   return str+str2;
 }
 #endif
 
@@ -1302,6 +1309,105 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
    return newLine;
 }
 
+bool
+wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
+{
+   if(GetLength() < wrapmargin)
+      return FALSE; // nothing to do
+   
+   // find the object which covers the wrapmargin:
+   CoordType offset;
+   wxLOiterator i = FindObject(wrapmargin, &offset);
+   wxCHECK_MSG( i != NULLIT, FALSE, "Cannot find object covering wrapmargin.");
+
+   // from this object on, the rest of the line must be copied to the
+   // next one:
+   wxLOiterator copyObject = NULLIT;
+   // if we split a text-object, we must pre-pend some text to the
+   // next line later on, remember it here:
+   wxString prependText = "";
+   // we might need to adjust the cursor position later, so remember it
+   size_t xpos = llist->GetCursorPos().x;
+   // by how much did we shorten the current line:
+   size_t shorter = 0;
+   
+   size_t breakpos = offset;
+   if( (**i).GetType() != WXLO_TYPE_TEXT )
+   {
+      // break before a non-text object
+      copyObject = i;
+   }
+   else
+   {
+      bool foundSpace = FALSE;
+      do
+      {
+         // try to find a suitable place to split the object:
+         wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
+         while( (! (foundSpace = isspace(tobj->GetText()[breakpos])))
+                && breakpos > 0)
+            breakpos--;
+         if(! foundSpace) // breakpos == 0!
+         {
+            if(i == m_ObjectList.begin())
+               return FALSE; // could not break line
+            else
+            {
+               i--;
+               while(i != m_ObjectList.begin()
+                     && (**i).GetType() != WXLO_TYPE_TEXT ) 
+                  i--;
+               breakpos = (**i).GetLength();
+            }
+         }
+      }while(! foundSpace);
+      // now we know where to break it:
+      wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
+      shorter = tobj->GetLength() - breakpos;
+      // remember text to copy from this object
+      prependText = tobj->GetText().Mid(breakpos+1);
+      tobj->SetText(tobj->GetText().Left(breakpos));
+      // copy every following object:
+      copyObject = i; copyObject ++;
+   }
+
+   // make sure there is a m_Next line:
+   if(! m_Next)
+   {
+      (void) new wxLayoutLine(this, llist);
+      wxASSERT(m_Next);
+   }
+   
+   // We need to move this and all following objects to the next
+   // line. Starting from the end of line, to keep the order right. 
+   if(copyObject != NULLIT)
+   {
+      wxLOiterator j;
+      for(j = m_ObjectList.tail(); j != copyObject; j--)
+         m_Next->Prepend(*j);
+      m_Next->Prepend(*copyObject);
+      // and now remove them from this list:
+      while( copyObject != m_ObjectList.end() )
+      {
+         shorter += (**copyObject).GetLength();
+         m_ObjectList.remove(copyObject); // remove without deleting it
+      }
+   }
+   m_Length -= shorter;
+
+   if(prependText.Length() > 0)
+      m_Next->Insert(0, prependText);
+
+   // do we need to adjust the cursor position?
+   if( this == llist->GetCursorLine() && xpos >= breakpos)
+   {
+      xpos = xpos - breakpos - 1;
+      wxASSERT(xpos > 0);
+      llist->MoveCursorTo( wxPoint( xpos, m_Next->GetLineNumber()) );
+   }
+   return TRUE; // we wrapped the line
+}
+
 void
 wxLayoutLine::ReNumber(void)
 {
@@ -1431,9 +1537,8 @@ wxLayoutLine::GetWrapPosition(CoordType column)
 
 #ifdef WXLAYOUT_DEBUG
 void
-wxLayoutLine::Debug(void)
+wxLayoutLine::Debug(void) const
 {
-   wxString tmp;
    wxPoint pos = GetPosition();
    WXLO_DEBUG(("Line %ld, Pos (%ld,%ld), Height %ld, BL %ld, Font: %d",
                (long int) GetLineNumber(),
@@ -1442,7 +1547,9 @@ wxLayoutLine::Debug(void)
                (long int) m_BaseLine,
                (int) m_StyleInfo.family));
    if(m_ObjectList.begin() != NULLIT)
-      (**m_ObjectList.begin()).Debug();
+   {
+      WXLO_DEBUG(((**m_ObjectList.begin()).DebugDump().c_str()));
+   }
 
 }
 #endif
@@ -1589,9 +1696,22 @@ wxLayoutList::Read(wxString &istr)
 
    while(istr.Length())
    {
-      wxLayoutObject *obj = wxLayoutObject::Read(istr);
-      if(obj)
-         Insert(obj);
+      // check for a linebreak:
+      wxString tmp;
+      tmp = istr.BeforeFirst('\n');
+      int type = WXLO_TYPE_INVALID;
+      sscanf(tmp.c_str(),"%d", &type);
+      if(type == WXLO_TYPE_LINEBREAK)
+      {
+         LineBreak();
+         istr = istr.AfterFirst('\n');
+      }
+      else
+      {
+         wxLayoutObject *obj = wxLayoutObject::Read(istr);
+         if(obj)
+            Insert(obj);
+      }
    }
    /* Now we use the current_si to restore our last font settings: */
    Insert(new wxLayoutObjectCmd(current_si));
@@ -1981,9 +2101,10 @@ wxLayoutList::Insert(wxString const &text)
 
    AddCursorPosToUpdateRect();
 
+   wxASSERT(m_CursorLine->GetLength() >= m_CursorPos.x);
+
    if ( !m_CursorLine->Insert(m_CursorPos.x, text) )
       return false;
-
    m_CursorPos.x += text.Length();
 
    m_movedCursor = true;
@@ -2074,35 +2195,22 @@ wxLayoutList::LineBreak(void)
 bool
 wxLayoutList::WrapLine(CoordType column)
 {
-   if(m_CursorPos.x <= column || column < 1)
-      return false; // do nothing yet
-   else
-   {
-      CoordType xpos = m_CursorLine->GetWrapPosition(column);
-      if(xpos == -1)
-         return false; // cannot break line
-      //else:
-      CoordType newpos = m_CursorPos.x - xpos;
-      m_CursorPos.x = xpos;
-
-      AddCursorPosToUpdateRect();
-
-      LineBreak();
-      Delete(1); // delete the space
-      m_CursorPos.x = newpos;
-
-      m_CursorLine->MarkDirty();
-
-      m_movedCursor = true;
-
-      return true;
-   }
+   return m_CursorLine->Wrap(column, this);
 }
 
 bool
 wxLayoutList::WrapAll(CoordType column)
 {
-   return false;
+   wxLayoutLine *line = m_FirstLine;
+   if( line)
+      return FALSE;
+   bool rc = FALSE;
+   while(line)
+   {
+      rc |= line->Wrap(column, this);
+      line = line->GetNextLine();
+   }
+   return rc;
 }
 
 bool
@@ -2526,7 +2634,8 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
       dc.DrawRectangle(coords.x, coords.y,
                        m_CursorSize.x, m_CursorSize.y);
       SetUpdateRect(coords.x, coords.y);
-      SetUpdateRect(coords.x+m_CursorSize.x, coords.y+m_CursorSize.y);
+      SetUpdateRect(coords.x+m_CursorSize.x,
+                    coords.y+m_CursorSize.y);
    }
    else
    {
@@ -2887,7 +2996,7 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
       while((exp = wxLayoutExport( &status, WXLO_EXPORT_AS_OBJECTS)) != NULL)
       {
          if(exp->type == WXLO_EXPORT_EMPTYLINE)
-            ; //FIXME missing support for linebreaks in string format
+            string << (int) WXLO_TYPE_LINEBREAK << '\n';
          else
             exp->content.object->Write(string);
          delete exp;

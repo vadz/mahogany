@@ -43,6 +43,8 @@
 #   define   WXLAYOUT_DEBUG
 #endif
 
+#define WXLAYOUT_DEBUG
+
 #ifdef WXLAYOUT_DEBUG
 #   define WXLO_TRACE(x)   wxLogDebug(x)
 #else
@@ -71,7 +73,9 @@ enum wxLayoutObjectType
    /// command object, containing font or colour changes
    WXLO_TYPE_CMD,
    /// icon object, any kind of image
-   WXLO_TYPE_ICON
+   WXLO_TYPE_ICON,
+   /// a linebreak, does not exist as an object
+   WXLO_TYPE_LINEBREAK
 };
 
 /// Type used for coordinates in drawing. Must be signed.
@@ -171,7 +175,7 @@ public:
    virtual ~wxLayoutObject() { if(m_UserData) m_UserData->DecRef(); }
 
 #ifdef WXLAYOUT_DEBUG
-   virtual void Debug(void);
+   virtual wxString DebugDump(void) const;
 #endif
 
    /** Tells the object about some user data. This data is associated
@@ -266,7 +270,7 @@ public:
    static wxLayoutObjectText *Read(wxString &istr);
 
 #ifdef WXLAYOUT_DEBUG
-   virtual void Debug(void);
+   virtual wxString DebugDump(void) const;
 #endif
 
    virtual CoordType GetLength(void) const { return strlen(m_Text.c_str()); }
@@ -475,11 +479,18 @@ public:
    void Append(wxLayoutObject * obj)
       {
          wxASSERT(obj);
-
          m_ObjectList.push_back(obj);
          m_Length += obj->GetLength();
       }
 
+   /** This function prepends an object to the line. */
+   void Prepend(wxLayoutObject * obj)
+      {
+         wxASSERT(obj);
+         m_ObjectList.push_front(obj);
+         m_Length += obj->GetLength();
+      }
+       
    /** This function appens the next line to this, i.e. joins the two
        lines into one.
    */
@@ -498,6 +509,13 @@ public:
    */
    wxLayoutLine *Break(CoordType xpos, wxLayoutList *llist);
 
+   /** This function wraps the line: breaks it at  a suitable point
+       and merges it with the next.
+       @param wrapmargin
+       @return TRUE if broken
+   */
+   bool Wrap(CoordType wrapmargin, wxLayoutList *llist);
+   
    /** Deletes the next word from this position, including leading
        whitespace.
        This function does not delete over font changes, i.e. a word
@@ -662,7 +680,7 @@ public:
              CoordType to = -1);
 
 #ifdef WXLAYOUT_DEBUG
-   void Debug(void);
+   void Debug(void) const;
 #endif
    wxLayoutStyleInfo const & GetStyleInfo() const { return m_StyleInfo; }
 
@@ -815,7 +833,8 @@ public:
    /// Returns current cursor position.
    const wxPoint &GetCursorPos(wxDC &dc) const { return m_CursorPos; }
    const wxPoint &GetCursorPos() const { return m_CursorPos; }
-
+   wxLayoutLine * GetCursorLine(void) { return m_CursorLine; }
+   
    /// move cursor to the end of text
    void MoveCursorToEnd(void)
    {
@@ -1148,7 +1167,8 @@ public:
    /// get the line by number
    wxLayoutLine *GetLine(CoordType index) const;
 
-   /** Reads objects from a string and inserts them.
+   /** Reads objects from a string and inserts them. Returns NULL if
+       string is empty or a linebreak was  found.
        @param istr stream to read from, will bee changed
    */
    void Read(wxString &istr);

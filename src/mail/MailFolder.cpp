@@ -1090,7 +1090,26 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 }
 
 
+/* This will do the work in the new mechanism:
 
+   - For now it only sorts or threads the headerinfo list
+   - Filtering will be done before this is caused and is independent
+     of the header listing processing.
+ */
+void
+MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
+{
+   ASSERT(hilp);
+   hilp->IncRef();
+
+   SortListing(this, hilp, m_Config.m_ListingSortOrder);
+   if(m_Config.m_UseThreading)
+      ThreadMessages(this, hilp);
+   
+   hilp->DecRef();
+}
+
+/* This will disappear: */
 void
 MailFolderCmn::UpdateListing(void)
 {
@@ -1113,10 +1132,13 @@ MailFolderCmn::UpdateListing(void)
    }
    if(hilp)
    {
+#if 0
       SortListing(this, hilp, m_Config.m_ListingSortOrder);
       if(m_Config.m_UseThreading)
          ThreadMessages(this, hilp);
-
+#endif
+      ProcessHeaderListing(hilp);
+      
 
       // now we sent an update event to update folderviews etc
       MEventManager::Send( new MEventFolderUpdateData (this) );

@@ -183,6 +183,12 @@ protected:
    //@{
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
+
+   /** This function takes a header listing and sorts it or applies
+       filters to it. Will eventually replace the UpdateListing
+       mechanism. */
+   void ProcessHeaderListing(HeaderInfoList *hilp);
+   
    /// generate NewMail messages if needed
    void CheckForNewMail(HeaderInfoList *hilp);
 
