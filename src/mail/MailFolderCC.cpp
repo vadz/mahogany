@@ -1221,6 +1221,9 @@ MailFolderCC::FindFolder(String const &path, String const &login)
 void
 MailFolderCC::Checkpoint(void)
 {
+   if(m_MailStream == NULL)
+     return; // nothing we can do anymore
+
    DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
