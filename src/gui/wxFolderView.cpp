@@ -1939,7 +1939,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       return;
    }
 
-   Profile_obj profile = m_FolderView->GetFolderProfile();
+   Profile_obj profile(m_FolderView->GetFolderProfile());
 
    // sort by this column: if we already do this, then toggle the sort
    // direction
