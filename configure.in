@@ -347,8 +347,9 @@ if test "$USE_DEBUG_FLAG" = 1; then
 fi
 
 if test "$USE_OPT" != 1; then
-	DBFLAGS="$DBGFLAGS -O0"
+	OPT="-O0"
 fi
+
 
 dnl experimental code (unstable!)
 MAKE_EXPERIMENTAL=
@@ -689,8 +690,8 @@ LIBS="$LIBS -lMcompface"
 
 dnl add other flags
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
-CXXFLAGS="$CXXFLAGS $DBGFLAGS"
-CFLAGS="$CFLAGS $DBGFLAGS"
+CXXFLAGS="$CXXFLAGS $DBGFLAGS $OPT"
+CFLAGS="$CFLAGS $DBGFLAGS $OPT"
 
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
