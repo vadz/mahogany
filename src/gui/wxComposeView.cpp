@@ -2794,6 +2794,10 @@ wxComposeView::CanClose() const
       }
    }
 
+   if ( canClose )
+   {
+      ((wxComposeView*)this)->m_closing = true; // const_cast
+   }
    return canClose;
 }
 
@@ -3007,6 +3011,11 @@ bool wxComposeView::OnFirstTimeFocus()
    // it may happen that the message is sent before the composer gets focus,
    // avoid starting the external editor by this time!
    if ( m_sending )
+      return true;
+
+   // and it may also happen that the user asked for closing the composer when
+   // it gets focus
+   if ( m_closing )
       return true;
 
    // now we can launch the ext editor if configured to do it

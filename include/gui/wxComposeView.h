@@ -486,6 +486,9 @@ private:
 
    /// true if the ext editor had been already invoked before
    bool       m_alreadyExtEdited;
+
+   /// true if the user asked to close this window (do not launch the composer)
+   bool       m_closing;
    //@}
 
 private:
