@@ -41,10 +41,7 @@ Very high priority:
 
 High priority:
 
-1. split compose classes like the message view ones into the purely GUI
-   module and all the rest
-
-2. multi threading: it's impossible to have deterministic response time
+1. multi threading: it's impossible to have deterministic response time
    with c-client otherwise (it uses blocking DNS lookup, mail_open may
    take arbitrarily long time with slow server, ...)
 
