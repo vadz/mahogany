@@ -38,6 +38,7 @@
 
 #include <wx/mimetype.h>
 #include <wx/file.h>
+#include <wx/filename.h>
 
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
@@ -296,28 +297,25 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 char **
 wxIconManager::LoadImageXpm(String filename)
 {
-   String tempfile;
-   String oldfilename = filename;
    char **cpptr = NULL;
 
    wxLogTrace(wxTraceIconLoading, _T("wxIconManager::LoadImage(%s) called..."),
               filename.c_str());
 
-   // lets convert to xpm using image magick:
-   if(! wxMatchWild(_T("*.xpm"),filename,FALSE))
+   wxFileName fn(filename);
+   if ( fn.GetExt() == _T("xpm") )
    {
+      // try loading the file itself as an xpm
+      cpptr = LoadXpm(filename);
+   }
 #ifdef OS_UNIX
-      int i;
-      tempfile = filename + _T(".xpm");
-      // strip leading path
-      i = tempfile.length();
-      while(i && tempfile.c_str()[i] != '/')
-         i--;
-      tempfile.assign(tempfile,i+1,tempfile.length()-1-i);
-      tempfile = String(
-         (wxGetenv(_T("TMP")) && wxStrlen(wxGetenv(_T("TMP"))))
-         ? wxGetenv(_T("TMP")) : _T("/tmp")
-         ) + _T('/') + tempfile;
+   else // lets convert to xpm using image magick:
+   {
+      wxFileName fnXPM;
+      fnXPM.AssignTempFileName(_T("Mimg"));
+      fnXPM.SetExt(_T("xpm"));
+
+      String tempfile(fnXPM.GetFullPath());
       String command;
       command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM),
                      filename.c_str(), tempfile.c_str());
@@ -326,13 +324,11 @@ wxIconManager::LoadImageXpm(String filename)
                  command.c_str());
       if(wxSystem(command) == 0)
          cpptr = LoadXpm(tempfile);
-#endif // OS_UNIX
-   }
 
-   if(! cpptr)  // try loading the file itself as an xpm
-      cpptr = LoadXpm(filename);
-   if(tempfile.length()) // using a temporary file
       wxRemoveFile(tempfile);
+   }
+#endif // OS_UNIX
+
    return cpptr;
 }
 
@@ -591,11 +587,20 @@ wxIconManager::GetIcon(const String &iconNameOrig)
          if( found )
          {
             ms_IconPath = name.BeforeLast('/');
-            char **ptr = LoadImageXpm(name);
-            if(ptr)
+
+            if ( !icon.LoadFile(name, wxBITMAP_TYPE_ANY) )
             {
-               icon = wxIcon(ptr);
-               FreeImage(ptr);
+               // try to load it via conversion to XPM
+               char **ptr = LoadImageXpm(name);
+               if(ptr)
+               {
+                  icon = wxIcon(ptr);
+                  FreeImage(ptr);
+               }
+            }
+
+            if ( icon.Ok() )
+            {
                id = new IconData;
                id->iconRef = icon;
                id->iconName = iconName;
