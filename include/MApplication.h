@@ -193,6 +193,18 @@ public:
 
    /** Returns TRUE if the application has started to shut down */
    bool IsShuttingDown() const { return m_cycle == ShuttingDown; }
+
+   /**
+     Sometimes we need to disable many kinds of backround tasks usually going
+     on in (such as checking for new mails, expired closed folders, ...)
+     because the program is in some critical section. This method provides a
+     way to simply check if this is the case for the code preforming the
+     backround tasks - if it returns false, nothing should/can be done!
+
+     @return true if it is safe to proceed with backround tasks
+    */
+   virtual bool AllowBgProcessing() const = 0;
+
    //@}
 
    /// @name "Away" or unattended mode support

@@ -118,6 +118,8 @@ public:
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
 
+   virtual bool AllowBgProcessing() const;
+
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const;
 
@@ -128,6 +130,10 @@ public:
 
    /// access the wxDialUpManager directly (wxMApp-specific method)
    wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
+
+#ifdef __WXDEBUG__
+    virtual void OnAssert(const wxChar *file, int line, const wxChar *msg);
+#endif // __WXDEBUG__
 
 protected:
    /// makes sure the status bar has enough fields

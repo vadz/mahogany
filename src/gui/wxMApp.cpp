@@ -57,6 +57,7 @@
 #include "gui/wxIconManager.h"
 #include "MailCollector.h"
 #include "MModule.h"
+#include "MThread.h"
 #include "Mpers.h"
 
 #include "MFCache.h"
@@ -178,25 +179,7 @@ public:
 class MailCollectionTimer : public wxTimer
 {
 public:
-   MailCollectionTimer() { m_started = FALSE; }
-
-   virtual bool Start( int millisecs = -1, bool oneShot = FALSE )
-      { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
-
-   virtual void Notify()
-      {
-         wxLogTrace(TRACE_TIMER, "Collection timer expired.");
-         mApplication->UpdateOutboxStatus();
-         MailCollector *collector = mApplication->GetMailCollector();
-         if ( collector )
-            collector->Collect();
-      }
-
-    virtual void Stop()
-      { if ( m_started ) wxTimer::Stop(); }
-
-public:
-    bool m_started;
+   virtual void Notify();
 };
 
 // a timer used to wake up idle loop to force generation of the idle events
@@ -215,7 +198,7 @@ class AwayTimer : public wxTimer
 public:
    virtual void Notify()
    {
-      wxLogTrace(TRACE_TIMER, "Going awya on timer");
+      wxLogTrace(TRACE_TIMER, "Going away on timer");
 
       mApplication->SetAwayMode(TRUE);
    }
@@ -245,12 +228,33 @@ KBLIST_DEFINE(ModulesList, MModuleEntry);
 // a list of modules loaded at startup:
 static ModulesList gs_GlobalModulesList;
 
+// the mutex we lock to block any background processing temporarily
+static MMutex gs_mutexBlockBg;
+
 // ============================================================================
 // implementation
 // ============================================================================
 
 // this creates the one and only application object
 IMPLEMENT_APP(wxMApp);
+
+// ----------------------------------------------------------------------------
+// MailCollectionTimer
+// ----------------------------------------------------------------------------
+
+void MailCollectionTimer::Notify()
+{
+   if ( !mApplication->AllowBgProcessing() )
+      return;
+
+   wxLogTrace(TRACE_TIMER, "Collection timer expired.");
+
+   mApplication->UpdateOutboxStatus();
+
+   MailCollector *collector = mApplication->GetMailCollector();
+   if ( collector )
+      collector->Collect();
+}
 
 // ----------------------------------------------------------------------------
 // wxMLogWindow
@@ -426,8 +430,29 @@ wxMApp::~wxMApp()
 void
 wxMApp::OnIdle(wxIdleEvent &event)
 {
-   MEventManager::DispatchPending();
+   if ( AllowBgProcessing() )
+   {
+      MEventManager::DispatchPending();
+   }
+
    event.Skip();
+}
+
+bool
+wxMApp::AllowBgProcessing() const
+{
+   return !gs_mutexBlockBg.IsLocked();
+}
+
+void
+wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
+{
+   // don't allow any calls to c-client while we're in the assert dialog
+   // because we might be called from a c-client callback and another call to
+   // it will result in a fatal error
+   MLocker lock(gs_mutexBlockBg);
+
+   wxApp::OnAssert(file, line, msg);
 }
 
 void

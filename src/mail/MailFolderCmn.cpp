@@ -220,7 +220,11 @@ public:
    }
 
    /// get called on timeout and pings the mailfolder
-   void Notify(void) { if(! m_mf->IsLocked() ) m_mf->Ping(); }
+   void Notify(void)
+   {
+      if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
+         m_mf->Ping();
+   }
 
 protected:
    /// the mailfolder to update
@@ -388,7 +392,8 @@ void MfCloser::RestartTimer()
 
 void MfCloseTimer::Notify(void)
 {
-   m_mfCloser->OnTimer();
+   if ( mApplication->AllowBgProcessing() )
+      m_mfCloser->OnTimer();
 }
 
 // ----------------------------------------------------------------------------
