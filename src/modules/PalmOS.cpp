@@ -582,7 +582,7 @@ PalmOSModule::Connect(void)
          int oldPiSocket = m_PiSocket;
          acceptThread->Run();
          time_t now = time(NULL);
-         while(time(NULL)-now < 5)
+         while(m_PiSocket < 0 && time(NULL)-now < 5)
             ;
          //wxThread::Sleep(5000);
 
