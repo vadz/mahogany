@@ -323,6 +323,24 @@ strutil_readString(String &string, bool *success = NULL);
 String
 strutil_escapeString(const String &string);
 
+/**
+   Combine personal name and mailaddress into a mailaddress line.
+*/
+String
+strutil_makeMailAddress(const String &personal, const String
+                        &mailaddress);
+
+/**
+   Parse a mail address line and return personal/mailbox/hostname
+   bits.
+   @return true on success
+*/
+bool
+strutil_getMailAddress(const String &inputline,
+                       String * personal = NULL,
+                       String * mailbox = NULL,
+                       String * hostname = NULL);
+
 /** @name regular expression matching */
 //@{
 /// compile a string into a regular expression

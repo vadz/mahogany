@@ -883,6 +883,89 @@ strutil_escapeString(const String &string)
    return newstr;
 }
 
+
+String
+strutil_makeMailAddress(const String &personal,
+                        const String &mailaddress)
+{
+   String output;
+   bool quotesRequired = FALSE;
+   const char *cptr = personal.c_str();
+   while(*cptr)
+   {
+      if(*cptr == '"' || *cptr == '<' || *cptr == '>')
+         quotesRequired = TRUE;
+      if(*cptr == '"' || *cptr == '\\')
+         output << '\\';
+      output << *cptr++;
+   }
+   if(quotesRequired)
+      output = String('"') + output + String('"'); 
+   output << ' ';
+   output << mailaddress;
+   return output;
+}
+
+/**
+   Parse a mail address line and return personal/mailbox/hostname
+   bits.
+   @return true on success
+*/
+bool
+strutil_getMailAddress(const String &inputline,
+                       String * opersonal = NULL,
+                       String * omailbox = NULL,
+                       String * ohostname = NULL)
+{
+   if(inputline.Length() == 0)
+      return FALSE;
+
+   String personal, mailbox, hostname;
+   // We parse from the end which is easier:
+   
+   const char *last = inputline.c_str() + inputline.Length() - 1;
+   const char *first = inputline.c_str();
+
+   while(last > first && *last != '@')
+      last --;
+   if(*last != '@')
+      return FALSE;
+   hostname = last+1;
+   const char *pos = last;
+   last --;
+   while(last > first && ! isspace(*last))
+      last --;
+   for(const char *cptr = last+1; cptr < pos; cptr++)
+      mailbox << *cptr;
+   pos = last;
+   if(pos > first) // read personal name
+   {
+      bool quoted = FALSE;
+      for(const char *cptr = first; cptr < pos; cptr++)
+      {
+         if(*cptr == '\\' && ! quoted)
+            quoted = TRUE;
+         else
+         {
+            personal << *cptr;
+            quoted = FALSE;
+         }
+      }
+      if(personal.Length())
+      {
+         if(personal[0] == '"')
+         {
+            personal = personal.c_str() + 1;
+            personal = personal.BeforeLast('"');
+         }
+      }
+   }
+   if(opersonal) *opersonal = personal;
+   if(omailbox)  *omailbox = mailbox;
+   if(ohostname) *ohostname = hostname;
+   return TRUE;
+}
+
 /* **********************************************************
  *  Regular expression matching, using wxRegEx class
  * *********************************************************/

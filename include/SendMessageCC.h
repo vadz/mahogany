@@ -59,11 +59,7 @@ public:
                         const String & returnaddress = "");
 
    virtual void SetNewsgroups(const String &groups);
-   
-   /** Get the profile.
-       @return pointer to the profile
-   */
-   virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
+
    /** Adds a part to the message.
        @param type numeric mime type
        @param buf  pointer to data
@@ -118,6 +114,7 @@ protected:
        @return true on success
    */
    bool Send(void);
+   void SetupAddresses(void);
    friend class MessageCC; // allowed to call Send() directly
    
    /** Builds the message, i.e. prepare to send it. */
@@ -125,14 +122,33 @@ protected:
    /// Checks for existence of a header entry
    bool HasHeaderEntry(const String &entry);
 private:
-   ProfileBase 	*m_Profile;
-
    ENVELOPE	*m_Envelope;
    BODY		*m_Body;
    PART		*m_NextPart, *m_LastPart;
 
-   /// address strings
-   String m_From, m_ReplyTo;
+   /// server name to use
+   String m_ServerHost;
+#ifdef USE_SSL
+   /// use SSL ?
+   bool m_UseSSL;
+#endif
+   
+   /// Address bits
+   String m_FromAddress, m_FromPersonal;
+   String m_ReturnAddress;
+   String m_ReplyTo;
+
+   /// if not empty, name of xface file
+   String m_XFaceFile;
+   /// Outgoing folder name or empty
+   String m_OutboxName;
+   /// "Sent" folder name or empty
+   String m_SentMailName;
+   /// Default charset
+   String m_CharSet;
+   /// default hostname
+   String m_DefaultHost;
+   
    /// 2nd stage constructor, see constructor
    void	Create(Protocol protocol, ProfileBase *iprof);
    /// Protocol used for sending

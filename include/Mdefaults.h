@@ -355,10 +355,6 @@
 #define   MP_LOGLEVEL      "LogLevel"
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD   "FolderProgressThreshold"
-/// add extra headers
-#define   MP_ADD_EXTRAHEADERS   "AddExtraHeaders"
-/// list of extra headers, semicolon separated name=value
-#define   MP_EXTRAHEADERS      "ExtraHeaders"
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH      "SavePath"
 /// the default filename for saving files
@@ -832,10 +828,6 @@
 #define   MP_LOGLEVEL_D         0l
 /// threshold for displaying mailfolder progress dialog
 #define   MP_FOLDERPROGRESS_THRESHOLD_D 20L
-/// add extra headers
-#define   MP_ADD_EXTRAHEADERS_D      0l
-/// list of extra headers, semicolon separated name=value
-#define   MP_EXTRAHEADERS_D      M_EMPTYSTRING
 /// the default path for saving files
 #define   MP_DEFAULT_SAVE_PATH_D      M_EMPTYSTRING
 /// the default filename for saving files

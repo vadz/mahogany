@@ -77,12 +77,10 @@ SendMessageCC::SendMessageCC(ProfileBase *iprof,
 
 void
 SendMessageCC::Create(Protocol protocol,
-                      ProfileBase *iprof)
+                      ProfileBase *prof)
 {
    String tmpstr;
 
-   m_Profile = iprof;
-   m_Profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
    m_headerValues = NULL;
    m_Protocol = protocol;
@@ -95,6 +93,36 @@ SendMessageCC::Create(Protocol protocol,
    m_Body->nested.part->next = NULL;
    m_NextPart = m_Body->nested.part;
    m_LastPart = m_NextPart;
+
+
+   CHECK_RET(prof,"SendMessageCC::Create() requires profile");
+
+   m_FromPersonal = prof->readEntry(MP_PERSONALNAME,MP_PERSONALNAME_D);
+   m_FromAddress = prof->readEntry(MP_USERNAME, MP_USERNAME_D);
+   m_FromAddress << '@' << prof->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+
+   m_ReturnAddress = m_FromAddress;
+   m_ReplyTo = prof->readEntry(MP_RETURN_ADDRESS,
+                               MP_RETURN_ADDRESS_D);
+
+   if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
+      m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
+   if(READ_CONFIG(prof, MP_USE_OUTBOX) != 0)
+      m_OutboxName = READ_CONFIG(prof,MP_OUTBOX_NAME);
+   if(READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
+      m_SentMailName = READ_CONFIG(prof,MP_OUTGOINGFOLDER);
+   m_CharSet = READ_CONFIG(prof, MP_CHARSET);
+
+   if(READ_CONFIG(prof, MP_ADD_DEFAULT_HOSTNAME))
+      m_DefaultHost = prof->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+
+   if(protocol == Prot_SMTP)
+      m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
+   else
+      m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
+#ifdef USE_SSL
+   m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
+#endif
 }
 
 void
@@ -109,6 +137,17 @@ SendMessageCC::SetFrom(const String & from,
                        const String & ipersonal,
                        const String & returnaddress)
 {
+   if(from.Length())
+      m_FromAddress = from;
+   if(ipersonal.Length())
+      m_FromPersonal = ipersonal;
+   if(returnaddress.Length())
+      m_ReplyTo = returnaddress;
+}
+
+void
+SendMessageCC::SetupAddresses(void)
+{
    if(m_Envelope->from != NIL)
       mail_free_address(&m_Envelope->from);
    if(m_Envelope->return_path != NIL)
@@ -118,34 +157,18 @@ SendMessageCC::SetFrom(const String & from,
    m_Envelope->from = mail_newaddr();
    m_Envelope->return_path = mail_newaddr ();
 
-   String personal, mailbox, mailhost;
-   
-   personal = ipersonal.Length() == 0 ?
-      m_Profile->readEntry(MP_PERSONALNAME,
-                           MP_PERSONALNAME_D)
-      : ipersonal ;
-   
-   if(from.Length() == 0)
-   {
-      mailbox = m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D);
-      
-      mailhost = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-   }
-   else
-   {
-      mailbox  = strutil_before(from,'@');
-      mailhost = strutil_after(from,'@');
-   }
+   String mailbox, mailhost;
+
+   mailbox = strutil_before(m_FromAddress,'@');
+   mailhost = strutil_after(m_FromAddress,'@');
    if(! mailhost.Length()) mailhost = wxGetFullHostName();
    
-   m_Envelope->from->personal = CPYSTR(personal);
+   m_Envelope->from->personal = CPYSTR(m_FromPersonal);
    m_Envelope->from->mailbox = CPYSTR(mailbox);
    m_Envelope->from->host = CPYSTR(mailhost);
 
    m_Envelope->return_path->mailbox = CPYSTR(mailbox);
    m_Envelope->return_path->host = CPYSTR(mailhost);
-
-   m_ReplyTo = returnaddress;
 }
 
 void
@@ -164,17 +187,12 @@ SendMessageCC::SetAddresses(const String &to,
    ASSERT(m_headerNames == NULL);
    ASSERT(m_Protocol == Prot_SMTP);
 
-   String
-      defaulthost;
-   if(READ_CONFIG(m_Profile, MP_ADD_DEFAULT_HOSTNAME))
-        defaulthost = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-
    if(to.Length())
    {
       ASSERT(m_Envelope->to == NIL);
       tmpstr = to;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
+      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->to,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -183,7 +201,7 @@ SendMessageCC::SetAddresses(const String &to,
       ASSERT(m_Envelope->cc == NIL);
       tmpstr = cc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
+      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->cc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -192,7 +210,7 @@ SendMessageCC::SetAddresses(const String &to,
       ASSERT(m_Envelope->bcc == NIL);
       tmpstr = bcc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
-      tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
+      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
       rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
@@ -306,22 +324,18 @@ void
 SendMessageCC::Build(void)
 {
    int
-      j, h = 0;
+      h = 0;
    char
       tmpbuf[MAILTMPLEN];
    String tmpstr;
-   char
-      *headers;
    kbStringList::iterator
       i, i2;
 
    if(m_headerNames != NULL) // message was already build
       return;
 
-   headers = strutil_strdup(READ_CONFIG(m_Profile, MP_EXTRAHEADERS));
-   strutil_tokenise(headers,";",m_headerList);
-   delete [] headers;
-
+   SetupAddresses();
+   
    bool replyToSet = false;
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
@@ -329,6 +343,8 @@ SendMessageCC::Build(void)
    size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
    m_headerNames = new const char*[n];
    m_headerValues = new const char*[n];
+
+#if 0  // obsolete
    /* Add the extra headers as defined in list of extra headers in
       m_Profile (backward compatibility): */
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
@@ -339,7 +355,8 @@ SendMessageCC::Build(void)
       // this is clever: read header value from m_Profile:
       m_headerValues[h] = strutil_strdup(m_Profile->readEntry(**i,""));
    }
-
+#endif
+   
    /* Add directly added additional header lines: */
    i = m_ExtraHeaderLinesNames.begin();
    i2 = m_ExtraHeaderLinesValues.begin();
@@ -370,22 +387,22 @@ SendMessageCC::Build(void)
       {
          //always add reply-to header:
          if(m_ReplyTo.Length() > 0)
-            tmpstr = m_ReplyTo;
-         else
-            tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-         if(!strutil_isempty(tmpstr))
          {
-            m_headerNames[h] = strutil_strdup("Reply-To");
-            m_headerValues[h++] = strutil_strdup(tmpstr);
+            tmpstr = m_ReplyTo;
+            if(!strutil_isempty(tmpstr))
+            {
+               m_headerNames[h] = strutil_strdup("Reply-To");
+               m_headerValues[h++] = strutil_strdup(tmpstr);
+            }
          }
       }
    }
 #ifdef HAVE_XFACES
    // add an XFace?
-   if(READ_CONFIG(m_Profile,MP_COMPOSE_USE_XFACE) && ! HasHeaderEntry("X-Face"))
+   if(! HasHeaderEntry("X-Face") && m_XFaceFile.Length() > 0)
    {
       XFace xface;
-      xface.CreateFromFile(m_Profile->readEntry(MP_COMPOSE_XFACE_FILE,""));
+      xface.CreateFromFile(m_XFaceFile);
       m_headerNames[h] = strutil_strdup("X-Face");
       m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
       if(strlen(m_headerValues[h]))  // paranoid, I know.
@@ -490,12 +507,11 @@ SendMessageCC::AddPart(Message::ContentType type,
 
       if(type == TYPETEXT)
       {
-         String charSet = READ_CONFIG(m_Profile, MP_CHARSET);
-         if(charSet.Length() != 0)
+         if(m_CharSet.Length() != 0)
          {
             par = mail_newbody_parameter();
             par->attribute = strutil_strdup("CHARSET");
-            par->value     = strutil_strdup(charSet);
+            par->value     = strutil_strdup(m_CharSet);
             par->next      = NULL;
             lastpar = par;
          }
@@ -538,7 +554,7 @@ SendMessageCC::SendOrQueue(void)
    bool success;
    // send directly?
    bool send_directly = TRUE;
-   if(READ_CONFIG(m_Profile,MP_USE_OUTBOX))
+   if(m_OutboxName.Length())
       send_directly = FALSE;
    else if(! mApplication->IsOnline())
    {
@@ -554,12 +570,11 @@ SendMessageCC::SendOrQueue(void)
       success = Send();
    else // store in outbox
    {
-      String outbox = READ_CONFIG(m_Profile,MP_OUTBOX_NAME);
-      if( outbox.Length() == 0)
+      if( m_OutboxName.Length() == 0)
          success = FALSE;
       else
       {
-         WriteToFolder(outbox);
+         WriteToFolder(m_OutboxName);
          // increment counter in statusbar immediately
          mApplication->UpdateOutboxStatus();
          success = TRUE;
@@ -570,17 +585,17 @@ SendMessageCC::SendOrQueue(void)
          wxString msg;
          if(m_Protocol == Prot_SMTP)
             msg.Printf(_("Message queued in ´%s´."),
-                       outbox.c_str());
+                       m_OutboxName.c_str());
          else
             msg.Printf(_("Article queued in '%s'."),
-                    outbox.c_str());
+                    m_OutboxName.c_str());
          STATUSMESSAGE((msg));
       }
    }
    // make copy to "Sent" folder?
-   if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
+   if ( success && m_SentMailName.Length() )
    {
-      WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+      WriteToFolder(m_SentMailName);
    }
    return success;
 }
@@ -609,17 +624,15 @@ SendMessageCC::Send(void)
       WriteToFolder(**i);
 
 
-   String host;
    hostlist[1] = NIL;
    switch(m_Protocol)
    {
    case Prot_SMTP:
       // notice that we _must_ assign the result to this string!
-      host = READ_CONFIG(m_Profile, MP_SMTPHOST);
-      hostlist[0] = host;
-      DBGMESSAGE(("Trying to open connection to SMTP server '%s'", host.c_str()));
+      hostlist[0] = m_ServerHost;
+      DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
-      if(READ_CONFIG(m_Profile, MP_SMTPHOST_USE_SSL) != 0)
+      if(m_UseSSL)
       {
          STATUSMESSAGE(("Sending message via SSL..."));
          stream = smtp_open_full
@@ -631,11 +644,10 @@ SendMessageCC::Send(void)
       break;
    case Prot_NNTP:
       // notice that we _must_ assign the result to this string!
-      host = READ_CONFIG(m_Profile, MP_NNTPHOST);
-      hostlist[0] = host;
-      DBGMESSAGE(("Trying to open connection to NNTP server '%s'", host.c_str()));
+      hostlist[0] = m_ServerHost;
+      DBGMESSAGE(("Trying to open connection to NNTP server '%s'", m_ServerHost.c_str()));
 #ifdef USE_SSL
-      if(READ_CONFIG(m_Profile, MP_SMTPHOST_USE_SSL) != 0)
+      if( m_UseSSL )
       {
          STATUSMESSAGE(("Posting message via SSL..."));
          stream = nntp_open_full
@@ -777,5 +789,4 @@ SendMessageCC::~SendMessageCC()
       delete [] m_headerNames;
       delete [] m_headerValues;
    }
-   m_Profile->DecRef();
 }
