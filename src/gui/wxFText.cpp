@@ -6,6 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/05/14 16:47:28  VZ
+ * TempDC hack added: in wxWin2 creates a temporary wxClientDC each time a dc
+ * is needed. This is wrapped in macros which work the same as previously in
+ * wxWin1 version.
+ *
  * Revision 1.7  1998/05/02 15:21:35  KB
  * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
@@ -58,6 +63,57 @@
 
 #include   "gui/wxFText.h"
 
+// ----------------------------------------------------------------------------
+// FIXME @@@ dirty hack to make the code using wxWindow::GetDC() work with
+// wxWindows 2 where this method doesn't exist any more. An object of this
+// class should be initialized in the beginning of each function using
+// FTObject::dc (with appropriate macro which does nothing in wxWin1): it then
+// uses FTObject::dc if it's !NULL (set with SetDC() for printing, for
+// example), or creates a temporary wxClientDC(FTObject::canvase).
+// ----------------------------------------------------------------------------
+class TempDC
+{
+public:
+   // ctor
+   TempDC(wxFTOList *p);
+
+   // accessor to retrieve the dc
+   wxDC *GetDC() const { return m_dcClient == NULL ? m_dc : m_dcClient; }
+
+   // dtor
+   ~TempDC() { delete m_dcClient; } // might be NULL, ok
+
+private:
+   wxClientDC *m_dcClient;    // used if !NULL
+   wxDC       *m_dc;          // used if m_dcClient == NULL
+};
+
+TempDC::TempDC(wxFTOList *p)
+{
+   wxCHECK( p != NULL );
+   
+   if ( p->GetDC() != NULL ) {
+      // use DC
+      m_dcClient = NULL;
+      m_dc = p->GetDC();
+   }
+   else {
+      // create temp DC
+      m_dcClient = new wxClientDC(p->GetCanvas());
+   }
+}
+
+#ifdef   USE_WXWINDOWS2
+   #define  CREATE_DC(p)   TempDC dcTmp(p);
+   #define  GET_DC         (dcTmp.GetDC())
+#else  //wxWin1
+   #define  CREATE_DC(p)   const wxFTOList *pFTOList = p;
+   #define  GET_DC         (pFTOList->dc)
+#endif //wxWin1/2
+
+// ----------------------------------------------------------------------------
+// FTObject implementation
+// ----------------------------------------------------------------------------
 void
 FTObject::Create(void)
 {
@@ -210,12 +266,12 @@ FTObject::Update(wxDC *dc, coord_t &x, coord_t &y, wxFTOList *ftc)
    {
       if(type == LI_TEXT)
       {
-#ifdef USE_WXWINDOWS2
+#     ifdef USE_WXWINDOWS2
          dc->GetTextExtent(text, (lcoord_t *)&width, (lcoord_t *)&height,
                            (lcoord_t *)&descent, (lcoord_t *)&leading);
-#else  // wxWin 1
+#     else  // wxWin 1
          dc->GetTextExtent(text.c_str(), &width, &height, &descent, &leading);
-#endif // wxWin 1/2i
+#     endif // wxWin 1/2i
 
          height += leading;          // baselinestretch 1.2
          posY2 = posY + height;
@@ -269,11 +325,11 @@ FTObject::Debug(void) const
 void
 FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
 {
-   wxDC *dc = ftc.dc;
+   CREATE_DC(&ftc);
 
    // only interesting for printer/PS output
    coord_t pageWidth, pageHeight;
-   dc->GetSize(&pageWidth, &pageHeight);
+   GET_DC->GetSize(&pageWidth, &pageHeight);
 
    coord_t y = posY, x = posX;
 
@@ -287,29 +343,34 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
 
       if(y >= 9*pageHeight / 10)
       {
-         dc->EndPage();
+         GET_DC->EndPage();
          (*pageno)++;
          y = posY - 9*(*pageno)*pageHeight/10 + pageHeight/20;
-         dc->StartPage();
+         GET_DC->StartPage();
       }
    }
 
    switch(type)
    {
    case LI_TEXT:
-#ifndef USE_WXWINDOWS2
-      if(!dc->IsExposed(posX, posY, posX2, posY2))
-         return;
-#endif  
+#     ifndef USE_WXWINDOWS2
+         if(!dc->IsExposed(posX, posY, posX2, posY2))
+            return;
+#     endif  
 
       //dc->DrawRectangle(posX,posY,posX2-posX, posY2-posY);
-      dc->SetFont(font);
-      dc->DrawText(text.c_str(), x, y+posYdelta);
+      if ( font == NULL ) {
+         // @@ const_cast
+         ((FTObject *)this)->font = ftc.GetFont();
+      }
+      
+      GET_DC->SetFont(font);
+      GET_DC->DrawText(text.c_str(), x, y+posYdelta);
       break;
    case LI_ICON:
    case LI_URL:
       if(icon)
-         dc->DrawIcon(icon,x, y);
+         GET_DC->DrawIcon(icon,x, y);
       break;
    case LI_NEWLINE:
    case LI_COMMAND:
@@ -514,21 +575,22 @@ wxFTOList::SetDC(wxDC *idc, bool isPostScriptflag)
       pageingFlag = isPostScriptflag;
       //dc->SetPen(wxBLACK_PEN);
       dc->SetUserScale(1.0,1.0);
-//      dc->SetMapMode(MM_POINTS);   // breaks postscript printing
-   
+      //dc->SetMapMode(MM_POINTS);   // breaks postscript printing
+
       drawInfo.Apply(dc);
    }
 }
+
 void
 wxFTOList::SetCanvas(wxCanvas *ic)
 {
    coord_t width, height;
 
-#ifdef  USE_WXWINDOWS2
-   // @@@@ GetDC
-#else
-   SetDC(ic->GetDC(), false);
-#endif
+#  ifdef  USE_WXWINDOWS2
+      // @@@@ GetDC
+#  else
+      SetDC(ic->GetDC(), false);
+#  endif
 
    canvas = ic;
    ReCalculateLines(&width, &height);
@@ -537,37 +599,18 @@ wxFTOList::SetCanvas(wxCanvas *ic)
    scrollPixelsY = scrollPixelsX;
    scrollLengthX = 50;
    scrollLengthY = 5;
-#ifdef  USE_WXWINDOWS2
-   canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
-   canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
-#else
-   canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
-                         scrollLengthX, scrollLengthY,
-                         WXFTEXT_SCROLLSTEPS_PER_PAGE,
-                         WXFTEXT_SCROLLSTEPS_PER_PAGE);
-#endif
+   
+#  ifdef  USE_WXWINDOWS2
+      canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
+      canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
+#  else
+      canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
+                            scrollLengthX, scrollLengthY,
+                            WXFTEXT_SCROLLSTEPS_PER_PAGE,
+                            WXFTEXT_SCROLLSTEPS_PER_PAGE);
+#  endif
 
    DrawCursor();
-}
-
-wxFTOList::wxFTOList(wxDC *idc, ProfileBase *profile)
-{
-   pageingFlag = false;
-   listOfLines = NULL;
-   listOfClickables = NULL;
-   editable = false;
-   Clear();
-
-   if(profile)
-   {
-      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
-      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
-      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
-      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
-   }
-   SetDC(idc);
-   
-   //SetCursor(canvas_cursor = DEBUG_NEW wxCursor(wxCURSOR_PENCIL));
 }
 
 wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
@@ -587,6 +630,26 @@ wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
    }
 
    SetCanvas(ic);
+   
+   //SetCursor(canvas_cursor = DEBUG_NEW wxCursor(wxCURSOR_PENCIL));
+}
+
+wxFTOList::wxFTOList(wxDC *idc, ProfileBase *profile)
+{
+   pageingFlag = false;
+   listOfLines = NULL;
+   listOfClickables = NULL;
+   editable = false;
+   Clear();
+
+   if(profile)
+   {
+      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
+      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
+      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
+      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
+   }
+   SetDC(idc);
    
    //SetCursor(canvas_cursor = DEBUG_NEW wxCursor(wxCURSOR_PENCIL));
 }
@@ -620,6 +683,8 @@ wxFTOList::Clear()
 void
 wxFTOList::Draw(void)
 {
+   CREATE_DC(this);
+   
    FTOListType::iterator i;
    int pagecount = 0;
 
@@ -638,7 +703,7 @@ wxFTOList::Draw(void)
          //    canvas->SetScrollRange(wxHORIZONTAL,1000);
          DrawCursor();
       }
-      dc->Clear();
+      GET_DC->Clear();
    }
 
 #if 0
@@ -650,16 +715,18 @@ wxFTOList::Draw(void)
       begin = listOfLines->begin();
 #endif
 
-   dc->StartPage();
+   GET_DC->StartPage();
    for(i = listOfLines->begin(); i != listOfLines->end(); i++)
       (*i).Draw(*this, pageingFlag, &pagecount);
-   dc->EndPage();
+   GET_DC->EndPage();
    DrawCursor();
 }
 
 void
 wxFTOList::AddText(String const &newline, bool formatFlag)
 {
+   CREATE_DC(this);
+
    String   str = newline;
    FTObject   fo;
    
@@ -674,6 +741,8 @@ wxFTOList::AddText(String const &newline, bool formatFlag)
 void
 wxFTOList::Wrap(int margin)
 {
+   CREATE_DC(this);
+
    if(cursorX <= margin)
       return;
    int offset;
@@ -705,8 +774,9 @@ wxFTOList::Wrap(int margin)
 void
 wxFTOList::DrawText(const char *text, int x, int y)
 {
-
-   dc->DrawText((char *)text, x, y);
+   CREATE_DC(this);
+   
+   GET_DC->DrawText((char *)text, x, y);
 }
 
 void
@@ -779,7 +849,9 @@ wxFTOList::ProcessCommand(String const &command, FTObject *fto)
       return;
    }
 
-   drawInfo.Apply(dc);
+   CREATE_DC(this);
+
+   drawInfo.Apply(GET_DC);
 }
 
 
@@ -818,6 +890,7 @@ wxFTOList::ReCalculateLines(coord_t *maxW, coord_t *maxY)
    coord_t x,y;
    coord_t maxWidth = 0, maxYpos = 0;
 
+   CREATE_DC(this);
    int cX, cY; // cursor coordinates
 
    i = first;
@@ -1115,6 +1188,8 @@ wxFTOList::SetEditable(bool enable)
 void
 wxFTOList::InsertText(String const &str, bool format)
 {
+   CREATE_DC(this);
+
    if(! IsEditable())
       return;
 
@@ -1250,7 +1325,7 @@ wxFTOList::InsertText(String const &str, bool format)
    SimplifyLine(i);
 
    if(dc)
-      dc->Clear();
+      GET_DC->Clear();
 
    contentChanged = true;
    Draw();
@@ -1260,6 +1335,8 @@ wxFTOList::InsertText(String const &str, bool format)
 void
 wxFTOList::DrawCursor(void)
 {
+   CREATE_DC(this);
+
    if(! dc || ! editable)
       return;
 
@@ -1284,9 +1361,9 @@ wxFTOList::DrawCursor(void)
          height = (*i).GetHeight();
          String tmp = (*i).GetText().substr(0,xoffset);
 #if USE_WXWINDOWS2
-         dc->GetTextExtent(tmp, (lcoord_t *)&width, (lcoord_t *)&height);
+         GET_DC->GetTextExtent(tmp, (lcoord_t *)&width, (lcoord_t *)&height);
 #else  // wxWin 1
-         dc->GetTextExtent(tmp.c_str(), &width, &height);
+         GET_DC->GetTextExtent(tmp.c_str(), &width, &height);
 #endif // wxWin 1/2                               
          x += width;
       }
@@ -1302,10 +1379,10 @@ wxFTOList::DrawCursor(void)
       height = drawInfo.TextHeight();
    }
 
-   dc->SetLogicalFunction(wxSRC_INVERT);
-   dc->DrawLine(lastCursor.x,lastCursor.y1,lastCursor.x,lastCursor.y2);
-   dc->SetLogicalFunction(wxCOPY);
-   dc->DrawLine(x,y,x,y+height);
+   GET_DC->SetLogicalFunction(wxSRC_INVERT);
+   GET_DC->DrawLine(lastCursor.x,lastCursor.y1,lastCursor.x,lastCursor.y2);
+   GET_DC->SetLogicalFunction(wxCOPY);
+   GET_DC->DrawLine(x,y,x,y+height);
    lastCursor.x = x;
    lastCursor.y1 = y;
    lastCursor.y2 = y+height;
