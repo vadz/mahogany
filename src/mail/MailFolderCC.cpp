@@ -688,28 +688,32 @@ MailFolderCC::PingReopenAll(void)
 void
 MailFolderCC::Ping(void)
 {
-   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
-               GetName().c_str()));
-
-   int ccl = CC_SetLogLevel(M_LOG_WINONLY);
-   
-   ProcessEventQueue();
-
-   // This is terribly inefficient to do, but needed for some sick
-   // POP3 servers.
-   if(m_FolderFlags && MF_FLAGS_REOPENONPING)
+   if(Lock())
    {
-      DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
+      DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
                   GetName().c_str()));
-      Close();
-   }
+
+      int ccl = CC_SetLogLevel(M_LOG_WINONLY);
    
-   if(PingReopen())
-   {
-      mail_check(m_MailStream); // update flags, etc, .newsrc
       ProcessEventQueue();
+
+      // This is terribly inefficient to do, but needed for some sick
+      // POP3 servers.
+      if(m_FolderFlags & MF_FLAGS_REOPENONPING)
+      {
+         DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
+                     GetName().c_str()));
+         Close();
+      }
+   
+      if(PingReopen())
+      {
+         mail_check(m_MailStream); // update flags, etc, .newsrc
+         ProcessEventQueue();
+      }
+      CC_SetLogLevel(ccl);
+      UnLock();
    }
-   CC_SetLogLevel(ccl);
 }
 
 void
