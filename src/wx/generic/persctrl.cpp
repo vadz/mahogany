@@ -46,6 +46,7 @@
 #   include  "wx/dirdlg.h"
 #   include  "wx/app.h"
 #   include  "wx/msgdlg.h"
+#   include  "wx/artprov.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"
@@ -1501,12 +1502,35 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     // create an icon
 #ifdef USE_ICON
-    int which = style & wxICON_MASK;
+    wxArtID id;
+    switch ( style & wxICON_MASK )
+    {
+        case wxICON_WARNING:
+            id = wxART_WARNING;
+            break;
+
+        case wxICON_ERROR:
+            id = wxART_ERROR;
+            break;
+
+        case wxICON_QUESTION:
+            id = wxART_QUESTION;
+            break;
+
+        default:
+            wxFAIL_MSG( _T("unknown icon flag") );
+            // fall through
+
+        case wxICON_INFORMATION:
+            id = wxART_INFORMATION;
+            break;
+    }
+
     wxStaticBitmap *icon = new wxStaticBitmap
                                (
                                 this,
                                 -1,
-                                ((wxMApp *)mApplication)->GetStdIcon(which)
+                                wxArtProvider::GetBitmap(id)
                                );
     const int iconSize = icon->GetIcon().GetWidth();
 #else
