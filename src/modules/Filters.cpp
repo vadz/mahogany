@@ -1680,15 +1680,23 @@ extern "C"
 #ifdef USE_RBL
       String received;
       msg->GetHeaderLine("Received", received);
-      if(received.Find('[') == wxNOT_FOUND)
-         return true; // no IP number in Received line, suspicious
+      char found = '\0';
+      int pos;
+      if((pos = received.Find('[')) != wxNOT_FOUND)
+         found = ']';
+      else if((pos = received.Find('(')) != wxNOT_FOUND)
+         found = ')';
+      else
+         return false; // no IP number in Received line, suspicious,
+      // but not good enough
       String ip;
-      ip = received.Mid(received.Find('[')+1);
-      if(ip.Find(']') == wxNOT_FOUND)
-         return true; // no closing bracket, suspicious
+      ip = received.Mid(pos+1);
+      if(ip.Find(found) == wxNOT_FOUND)
+         return false; // no closing bracket, suspicious?
       int a,b,c,d;
       if(sscanf(ip.c_str(), "%d.%d.%d.%d", &a,&b,&c,&d) != 4)
-         return true; // no properly formatted IP number, suspicious
+         return false; // no properly formatted IP number, suspicious?
+      /*FIXME: if it is a hostname, maybe do a DNS lookup first? */
       for(int i = 0; gs_RblSites[i] && ! rc ; i++)
          rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
 #endif
@@ -1922,22 +1930,22 @@ extern "C"
 void
 ParserImpl::AddBuiltinFunctions(void)
 {
-   ASSERT(DefineFunction("message", func_msgbox) != NULL);
-   ASSERT(DefineFunction("log", func_log) != NULL);
-   ASSERT(DefineFunction("matchi", func_matchi) != NULL);
-   ASSERT(DefineFunction("subject", func_subject) != NULL);
-   ASSERT(DefineFunction("to", func_to) != NULL);
-   ASSERT(DefineFunction("from", func_from) != NULL);
-   ASSERT(DefineFunction("header", func_header) != NULL);
-   ASSERT(DefineFunction("body", func_body) != NULL);
-   ASSERT(DefineFunction("text", func_text) != NULL);
-   ASSERT(DefineFunction("delete", func_delete) != NULL);
-   ASSERT(DefineFunction("copy", func_copytofolder) != NULL);
-   ASSERT(DefineFunction("move", func_copytofolder) != NULL);
-   ASSERT(DefineFunction("date", func_date) != NULL);
-   ASSERT(DefineFunction("size", func_size) != NULL);
-   ASSERT(DefineFunction("now", func_now) != NULL);
-   ASSERT(DefineFunction("isspam", func_checkSpam) != NULL);
+   DefineFunction("message", func_msgbox);
+   DefineFunction("log", func_log);
+   DefineFunction("matchi", func_matchi);
+   DefineFunction("subject", func_subject);
+   DefineFunction("to", func_to);
+   DefineFunction("from", func_from);
+   DefineFunction("header", func_header);
+   DefineFunction("body", func_body);
+   DefineFunction("text", func_text);
+   DefineFunction("delete", func_delete);
+   DefineFunction("copy", func_copytofolder);
+   DefineFunction("move", func_copytofolder);
+   DefineFunction("date", func_date);
+   DefineFunction("size", func_size);
+   DefineFunction("now", func_now);
+   DefineFunction("isspam", func_checkSpam);
 }
 
 
