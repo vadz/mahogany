@@ -51,6 +51,7 @@
 #include "gui/wxIconManager.h"
 
 #include <wx/dynarray.h>
+#include <wx/ffile.h>
 #include <wx/window.h>
 #include <wx/radiobox.h>
 #include <wx/confbase.h>
@@ -276,45 +277,66 @@ public:
                 const wxSize& size)
     : wxDialog(parent, -1, wxString("Mahogany: ") + title, position, size,
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
-               | wxSYSTEM_MENU| wxMINIMIZE_BOX
+               | wxSYSTEM_MENU | wxMINIMIZE_BOX
                | wxMAXIMIZE_BOX | wxTHICK_FRAME) // make it resizealbe
     {
-        m_text = new wxTextCtrl(this, -1, text, wxPoint(0, 0), size,
-                                wxTE_MULTILINE | wxTE_READONLY);
-        m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
-                               wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+       // create controls
+       m_text = new wxTextCtrl(this, -1, text,
+                               wxPoint(0, 0), size,
+                               wxTE_MULTILINE | wxTE_READONLY);
+       m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
+                              wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 
-        m_btn = new wxButton(this, wxID_CANCEL, _("Close"));
+       wxButton *btnClose = new wxButton(this, wxID_CANCEL, _("Close")),
+                *btnSave = new wxButton(this, wxID_SAVE, _("&Save..."));
 
-        Resize();
-    }
 
-    void Resize()
-    {
-       wxSize size = GetClientSize(),
-              sizeBtn = m_btn->GetSize();
+       // layout them
+       wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL),
+               *sizerBtns = new wxBoxSizer(wxHORIZONTAL);
 
-       m_text->SetSize(0, 0, size.x, size.y - sizeBtn.y - 2*LAYOUT_Y_MARGIN);
-       m_btn->Move((size.x - sizeBtn.x) / 2, size.y - sizeBtn.y - LAYOUT_Y_MARGIN);
-    }
+       sizerBtns->Add(btnSave, 0, wxRIGHT, LAYOUT_X_MARGIN);
+       sizerBtns->Add(btnClose, 0, wxLEFT, LAYOUT_X_MARGIN);
 
-    void OnSize(wxSizeEvent& WXUNUSED(event))
-    {
-        Resize();
+       sizerTop->Add(m_text, 1, wxEXPAND);
+       sizerTop->Add(sizerBtns, 0, wxCENTRE | wxTOP | wxBOTTOM, LAYOUT_Y_MARGIN);
+
+       // set the sizer &c
+       sizerTop->Fit(this);
+       sizerTop->SetSizeHints(this);
+       SetSizer(sizerTop);
+       SetAutoLayout(TRUE);
     }
 
 private:
-    // text control showing the text
-    wxTextCtrl *m_text;
+    // save the text controls contents to file
+    void OnSave(wxCommandEvent&)
+    {
+       String filename = wxPFileSelector
+                         (
+                           "RawText", 
+                           _("Mahogany: Please choose where to save the text"),
+                           NULL, NULL, NULL, NULL,
+                           wxSAVE,
+                           this
+                         );
+       if ( !filename.empty() )
+       {
+          wxFFile fileOut(filename, "w");
+          if ( !fileOut.IsOpened() || !fileOut.Write(m_text->GetValue()) )
+          {
+             wxLogError(_("Failed to save the dialog contents."));
+          }
+       }
+    }
 
-    // the button to close the dialog
-    wxButton *m_btn;
+    wxTextCtrl *m_text;
 
     DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(MTextDialog, wxDialog)
-    EVT_SIZE(MTextDialog::OnSize)
+   EVT_BUTTON(wxID_SAVE, MTextDialog::OnSave)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
