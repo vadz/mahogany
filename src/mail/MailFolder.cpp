@@ -1970,6 +1970,8 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
 void
 MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
+   CHECK_RET( hilp, "no listing in CheckForNewMail" );
+
    UIdType n = hilp->Count();
    if ( !n )
       return;

@@ -350,6 +350,15 @@ OneCritControl::OneCritControl(wxWindow *parent,
    wxASSERT_MSG( ORC_WhereCount == ORC_W_Max, "forgot to update something" );
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCount, ORC_Where);
+
+   // set up the initial values or the code in UpdateProgram() would complain
+   // about invalid values
+   //
+   // TODO: take the values from the preceding control instead of defaults?
+   if ( m_Logical )
+      m_Logical->Select(ORC_L_Or);
+   m_Type->Select(ORC_T_Contains);
+   m_Where->Select(ORC_W_Subject);
 }
 
 OneCritControl::~OneCritControl()
@@ -683,6 +692,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
 
    SetDefaultSize(8*wBtn, 18*hBtn);
+   m_Panel->Layout();
 }
 
 void
@@ -732,10 +742,10 @@ wxOneFilterDialog::LayoutControls()
 
       last = m_DoThis;
       m_ActionControl->LayoutControls(&last);
-
-      m_Panel->ForceLayout();
-      Layout();
    }
+
+   Layout();
+   m_Panel->Layout();
 }
 
 void

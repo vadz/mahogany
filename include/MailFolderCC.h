@@ -388,8 +388,8 @@ private:
    /// number or recent messages in mailbox
    unsigned long m_nRecent;
 
-   /// the array containing msgnos of expunged messages or NULL
-   wxArrayInt *m_expungedMsgnos;
+   /// the array containing indices of expunged messages or NULL
+   wxArrayInt *m_expungedIndices;
 
    /// last seen UID
    UIdType m_LastUId;

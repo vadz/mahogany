@@ -2925,10 +2925,10 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 void
 wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 {
-   if ( event.GetFolder() == m_MailFolder )
+   if ( (event.GetFolder() == m_MailFolder) )
    {
-      HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-      CHECK_RET( hil, "no headers list in OnFolderExpungeEvent" );
+      // preserve selection if unique
+      long selOld = m_FolderCtrl->GetUniqueSelection();
 
       // we might need to move focus if the focused item was deleted
       long focus = m_FolderCtrl->GetFocusedItem();
@@ -2967,6 +2967,12 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
          }
 
          m_FolderCtrl->Focus(focus);
+
+         // if it was (unique) selected before, reselect it now
+         if ( selOld != -1 )
+         {
+            m_FolderCtrl->Select(focus);
+         }
       }
 
       // clear preview window if the message showed there had been deleted

@@ -149,7 +149,7 @@ extern "C"
    CHECK( !m_InListingRebuild->IsLocked() && !m_InFilterCode->IsLocked(), \
           rc, "folder is busy" )
 
-// check if the folder is still available
+// check if the folder is still available trying to reopen it if not
 #define CHECK_DEAD(msg) \
    if ( m_MailStream == NIL && !PingReopen() ) \
    { \
@@ -994,7 +994,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
    m_Listing = NULL;
-   m_expungedMsgnos = NULL;
+   m_expungedIndices = NULL;
 
    // currently not used, but might be in the future
    m_GotNewMessages = false;
@@ -1033,7 +1033,7 @@ MailFolderCC::~MailFolderCC()
    Close();
 
    // these should have been deleted before
-   ASSERT(m_expungedMsgnos == NULL);
+   ASSERT(m_expungedIndices == NULL);
    ASSERT(m_SearchMessagesFound == NULL);
 
    // we might still be listed, so we better remove ourselves from the
@@ -2073,10 +2073,7 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   CHECK_DEAD("Cannot access closed folder\n'%s'.");
-
-   // don't try to modify the listing while it's being built!
-   CHECK_NOT_BUSY()
+   CHECK_DEAD("Cannot expunge messages from closed folder '%s'.");
 
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
@@ -2686,17 +2683,15 @@ void MailFolderCC::FilterNewMailAndUpdate()
    // states)
 
    m_Listing->IncRef();
-   int rc;
-   {
-      // we don't want to process any events while we're filtering mail as
-      // there can be a lot of them and all of them can be processed later
-      MEventManagerSuspender suspendEvents;
 
-      // also tell everyone not to modify the listing while we're filtering it
-      MLocker filterLock(m_InFilterCode);
+   // we don't want to process any events while we're filtering mail as
+   // there can be a lot of them and all of them can be processed later
+   MEventManagerSuspender suspendEvents;
 
-      rc = FilterNewMail(m_Listing);
-   }
+   // also tell everyone not to modify the listing while we're filtering it
+   MLocker filterLock(m_InFilterCode);
+
+   int rc = FilterNewMail(m_Listing);
 
    // avoid doing anything harsh (like expunging the messages) if an error
    // occurs
@@ -2734,9 +2729,9 @@ void
 MailFolderCC::BuildListing(void)
 {
    // shouldn't be done unless it's really needed
-   CHECK_RET( !m_Listing, "BuildListing() called but we have listing" );
+   CHECK_RET( !m_Listing, "BuildListing() called but we already have listing" );
 
-   CHECK_DEAD("Cannot access closed folder\n'%s'.");
+   CHECK_DEAD("Cannot get headers of closed folder '%s'.");
 
    MailFolderLocker lockFolder(this);
 
@@ -3262,21 +3257,8 @@ const String& MailFolder::InitializeNewsSpool()
 }
 
 // ----------------------------------------------------------------------------
-// callbacks called asynchronously by cclient
+// callbacks called by cclient
 // ----------------------------------------------------------------------------
-
-/// this message matches a search
-void
-MailFolderCC::mm_searched(MAILSTREAM * stream,
-                          unsigned long msgno)
-{
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
-   {
-      ASSERT(mf->m_SearchMessagesFound);
-      mf->m_SearchMessagesFound->Add(msgno);
-   }
-}
 
 /// tells program that there are this many messages in the mailbox
 void
@@ -3284,6 +3266,16 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
+
+   // we can call ExpungeMessages() from FilterNewMailAndUpdate() which results
+   // in mm_exists() (after messages are expunged) but we should not reset do
+   // anything in this case as the listing is already up to date - just ignore
+   // it (FIXME: and what if really new mail arrives in the meanwhile? will we
+   // lose it completely or just have to wait for next ping?)
+   if ( mf->m_InFilterCode->IsLocked() )
+   {
+      return;
+   }
 
    // normally msgno should never be less than m_nMessages because we adjust
    // the latter in mm_expunged immediately when a message is expunged and so
@@ -3312,6 +3304,17 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
          mf->m_Listing->DecRef();
          mf->m_Listing = NULL;
 
+         // no need to send event about deleted messages as the listing is
+         // going to be regenerated anyhow
+         //
+         // moreover, the indices become invalid now as they were for the old
+         // listing
+         if ( mf->m_expungedIndices )
+         {
+            delete mf->m_expungedIndices;
+            mf->m_expungedIndices = NULL;
+         }
+
          // invalidate it as the number of messages changed and we don't have
          // the status of the new message(s) here unfortunately
          mf->m_status.total = UID_ILLEGAL;
@@ -3325,7 +3328,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       // of a checkpoint or something and it just confirms that the number of
       // messages in the folder didn't change (why send it then? ask
       // cclient author...)
-      if ( !mf->m_expungedMsgnos )
+      if ( !mf->m_expungedIndices )
       {
          // no, they were not - don't refresh everything!
          return;
@@ -3340,6 +3343,75 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    {
       mf->RequestUpdate();
    }
+}
+
+/* static */
+void
+MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
+{
+   MailFolderCC *mf = LookupObject(stream);
+   CHECK_RET(mf, "mm_expunged for non existent folder");
+
+   if ( mf->HaveListing() )
+   {
+      // remove one message from listing
+      wxLogTrace(TRACE_MF_CALLBACK,
+                 "Removing element %lu from listing", msgno);
+
+      HeaderInfoList_obj hil = mf->GetHeaders();
+
+      size_t idx = hil->GetIdxFromMsgno(msgno);
+      CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
+
+      // we shouldn't send the expunge event if we're expunging messages while
+      // filtering them: the reason is that the messages are not
+      // sorted/threaded at this moment yet (and the ones we expunge will never
+      // be) so the indices would become invalid very soon - and, besides,
+      // there is really no need for this event as the lsiting is being rebuilt
+      // anyhow and so the GUI code will get a folder update event
+      if ( !mf->m_InFilterCode->IsLocked() )
+      {
+         if ( !mf->m_expungedIndices )
+         {
+            // create a new array
+            mf->m_expungedIndices = new wxArrayInt;
+         }
+
+         // add the msgno to the list of expunged messages
+         mf->m_expungedIndices->Add(hil->GetPosFromIdx(idx));
+      }
+
+      // remove it now (do it after calling GetPosFromIdx() above or the
+      // position would be wrong!)
+      mf->m_Listing->Remove(idx);
+
+      ASSERT_MSG( mf->m_nMessages > 0,
+                  "expunged a message when we don't have any?" );
+
+      mf->m_nMessages--;
+      mf->m_msgnoMax--;
+
+      // it is not necessary to update the other m_status fields because they
+      // were already updated when the message was deleted, but this one must
+      // be kept in sync manually as it wasn't updated before
+      if ( mf->m_status.IsValid() )
+         mf->m_status.total--;
+   }
+   //else: no need to do anything right now
+}
+
+/// this message matches a search
+void
+MailFolderCC::mm_searched(MAILSTREAM * stream,
+                          unsigned long msgno)
+{
+   MailFolderCC *mf = LookupObject(stream);
+   CHECK_RET( mf, "messages found in unknown mail folder" );
+
+   // this must have been allocated before starting the search
+   CHECK_RET( mf->m_SearchMessagesFound, "logic error in search code" );
+
+   mf->m_SearchMessagesFound->Add(msgno);
 }
 
 /** this mailbox name matches a listing request
@@ -3569,61 +3641,6 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 
 /* static */
 void
-MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
-{
-   MailFolderCC *mf = LookupObject(stream);
-   CHECK_RET(mf, "mm_expunged for non existent folder");
-
-   // don't do anything while executing the filter code, the listing is going
-   // to be rebuilt anyhow
-   if ( !mf->CanSendUpdateEvents() )
-   {
-      DBGMESSAGE(("Ignoring mm_expunged() for folder '%s'",
-                  mf->GetName().c_str()));
-      return;
-   }
-
-   if ( mf->HaveListing() )
-   {
-      // remove one message from listing
-      wxLogTrace(TRACE_MF_CALLBACK,
-                 "Removing element %lu from listing", msgno);
-
-      HeaderInfoList_obj hil = mf->GetHeaders();
-
-      size_t idx = hil->GetIdxFromMsgno(msgno);
-      CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
-
-      if ( !mf->m_expungedMsgnos )
-      {
-         // create a new array
-         mf->m_expungedMsgnos = new wxArrayInt;
-      }
-
-      // add the msgno to the list of expunged messages
-      mf->m_expungedMsgnos->Add(hil->GetPosFromIdx(idx));
-
-      // remove it now (do it after calling GetPosFromIdx() above or the
-      // position would be wrong!)
-      mf->m_Listing->Remove(idx);
-
-      ASSERT_MSG( mf->m_nMessages > 0,
-                  "expunged a message when we don't have any?" );
-
-      mf->m_nMessages--;
-      mf->m_msgnoMax--;
-
-      // it is not necessary to update the other m_status fields because they
-      // were already updated when the message was deleted, but this one must
-      // be kept in sync manually as it wasn't updated before
-      if ( mf->m_status.IsValid() )
-         mf->m_status.total--;
-   }
-   //else: no need to do anything right now
-}
-
-/* static */
-void
 MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
 {
    MailFolderCC *mf = LookupObject(stream);
@@ -3720,12 +3737,11 @@ bool MailFolderCC::CanSendUpdateEvents() const
 void
 MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
-   /* If a new listing is required, we don't need to do anything to
-      update the old one. Only exception is if the listing is frozen,
-      in that case we try to update it but don't sent a status change
-      event. */
    if( !HaveListing() )
-      return; // will be regenerated anyway
+   {
+      // will be regenerated anyway
+      return;
+   }
 
    // Otherwise: update the current listing information:
    HeaderInfoList_obj hil = GetHeaders();
@@ -3777,12 +3793,18 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 
       ((HeaderInfoImpl *)hi)->m_Status = status;
 
-      // tell all interested that status changed
-      wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
-                 GetName().c_str());
+      // tell all interested that status changed unless we're inside the
+      // filtering code: in this case we stay silent as the listing is
+      // not completely built yet and so we risk sending wrong info to the GUI
+      // code
+      if ( !m_InFilterCode->IsLocked() )
+      {
+         wxLogTrace(TRACE_MF_EVENTS, "Sending MsgStatus event for folder '%s'",
+                    GetName().c_str());
 
-      size_t pos = hil->GetPosFromIdx(idx);
-      MEventManager::Send(new MEventMsgStatusData(this, pos, hi->Clone()));
+         size_t pos = hil->GetPosFromIdx(idx);
+         MEventManager::Send(new MEventMsgStatusData(this, pos, hi->Clone()));
+      }
    }
    //else: flags didn't really change
 }
@@ -3806,19 +3828,19 @@ MailFolderCC::RequestUpdate()
       return;
    }
 
-   // if we have m_expungedMsgnos and the listing is valid it can only mean that
-   // some messages were expunged but no new ones arrived (as then we'd have
-   // invalidated the listing), in which case we don't send the "total refresh"
-   // event but just one telling that the messages were expunged
-   if ( HaveListing() && m_expungedMsgnos )
+   // if we have m_expungedIndices and the listing is valid it can only mean
+   // that some messages were expunged but no new ones arrived (as then we'd
+   // have invalidated the listing), in which case we don't send the "total
+   // refresh" event but just one telling that the messages were expunged
+   if ( HaveListing() && m_expungedIndices )
    {
       wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
                  GetName().c_str());
 
-      MEventManager::Send(new MEventFolderExpungeData(this, m_expungedMsgnos));
+      MEventManager::Send(new MEventFolderExpungeData(this, m_expungedIndices));
 
       // MEventFolderExpungeData() will delete it
-      m_expungedMsgnos = NULL;
+      m_expungedIndices = NULL;
    }
    else // new mail
    {

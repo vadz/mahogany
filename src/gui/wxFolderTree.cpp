@@ -125,9 +125,9 @@ public:
    enum Status
    {
       Folder_Normal,       // normal state
+      Folder_Flagged,      // folder has flagged messages
       Folder_Unseen,       // folder has unread/unseen messages
       Folder_New,          // folder has new messages
-      Folder_Flagged,      // folder has flagged messages
       Folder_StatusMax
    };
 
@@ -165,23 +165,30 @@ public:
 
    // the folder status functions
 
-      // get the current status
-   Status GetStatus() const { return m_status; }
-
-      // set the status for this folder - this might not have the expected
-      // effect if the folder has children with status greater than the given
-      // (i.e. a folder with children which have NEW status will have NEW
-      // status even if SetStatus(NORMAL) is called for it)
+      // set the "own" status for this folder, this doesn't always change the
+      // folder appearance as GetShownStatus() might stay unchanged
    void SetStatus(wxTreeCtrl *tree, Status status);
+
+protected:
+      // get the current "own" status, i.e. don't take children into account
+   Status GetStatus() const { return m_status; }
 
       // get the status induced by children: new if any child has new
       // status, unseen if any child has unseen status and normal otherwise
    Status GetChildrenStatus() const;
 
+      // get the status shown in the tree: the most important of the folder
+      // status and the status of its children
+   Status GetShownStatus() const
+      { return wxMax(GetStatus(), GetChildrenStatus()); }
+
       // called whenever the status of one of the children changes from
       // statusOld to statusNew and allows the parent to update its own status
    void OnChildStatusChange(wxTreeCtrl *tree,
                             Status statusOld, Status statusNew);
+
+      // update the status of the folder shown on screen
+   void UpdateShownStatus(wxTreeCtrl *tree, Status statusShownBefore);
 
 private:
    // not implemented
@@ -912,6 +919,8 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
       return;
    }
 
+   Status statusShownBefore = GetShownStatus();
+
    // first account for the fact that the child lost its special status
    switch ( statusOld )
    {
@@ -959,43 +968,51 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
    }
 
    // update our own status
-   SetStatus(tree, GetChildrenStatus());
+   UpdateShownStatus(tree, statusShownBefore);
 }
 
 void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
 {
-   // the status can never become less than our own status nor less than status
-   // of our children: i.e. if we have UNSEEN status and a child with NEW
-   // status, any request to change status will be ignored until the childs
-   // status changes to, say, NORMAL and then SetStatus(NORMAL) will be done
-   // but the status will only change to RECENT then.
-   Status statusMin = wxMin(GetStatus(), GetChildrenStatus());
-   if ( status < statusMin )
-      status = statusMin;
+   if ( status == m_status )
+   {
+      // nothing changed
+      return;
+   }
 
-   // only do something if the status really changed
-   if ( GetStatus() != status )
+   Status statusShownBefore = GetShownStatus();
+
+   m_status = status;
+
+   UpdateShownStatus(tree, statusShownBefore);
+}
+
+void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
+                                         Status statusShownBefore)
+{
+   // do we need to update the item on screen?
+   Status statusShown = GetShownStatus();
+   if ( statusShown != statusShownBefore )
    {
       // config entries names for the colours
       static const char *colorNames[Folder_StatusMax] =
       {
          MP_FVIEW_FGCOLOUR,
+         MP_FVIEW_FLAGGEDCOLOUR,
          MP_FVIEW_UNREADCOLOUR,
          MP_FVIEW_NEWCOLOUR,
-         MP_FVIEW_FLAGGEDCOLOUR,
       };
 
       static const char *colorDefaults[Folder_StatusMax] =
       {
          MP_FVIEW_FGCOLOUR_D,
+         MP_FVIEW_FLAGGEDCOLOUR_D,
          MP_FVIEW_UNREADCOLOUR_D,
          MP_FVIEW_NEWCOLOUR_D,
-         MP_FVIEW_FLAGGEDCOLOUR_D,
       };
 
       wxString colorName = mApplication->GetProfile()
-                              ->readEntry(colorNames[status],
-                                          colorDefaults[status]);
+                              ->readEntry(colorNames[statusShown],
+                                          colorDefaults[statusShown]);
       wxColour col;
       if ( !ParseColourString(colorName, &col) )
       {
@@ -1005,11 +1022,10 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
 
       tree->SetItemTextColour(GetId(), col);
 
-      // propagate the change to the parent: if the folder has new messages,
-      // its parent folder should be highlighted as new too
-      GetParent()->OnChildStatusChange(tree, m_status, status);
-
-      m_status = status;
+      // propagate the change to the parent: when the child status changes,
+      // the parent status may change as well (if we just got new messages,
+      // parent should show them, for example)
+      GetParent()->OnChildStatusChange(tree, statusShownBefore, statusShown);
    }
 }
 
