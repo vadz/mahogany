@@ -91,10 +91,8 @@ public:
    
    /** Writes the message to a folder.
        @param foldername file where to write to
-       @param type folder type
    */
-   virtual void WriteToFolder(const String &foldername,
-                              MailFolder::Type type = MF_PROFILE );
+   virtual void WriteToFolder(const String &foldername);
 
    /** Adds an extra header line.
        @param entry name of header entry

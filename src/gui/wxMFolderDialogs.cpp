@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   wxMFolderDialogs.cpp - implementation of functions from
 //              MFolderDialogs.h (ShowFolderSubfoldersDialog is in a separate
@@ -275,6 +275,10 @@ protected:
    {
       FileFolderSubtype_Mbox,       // a standard MBOX style file folder
       FileFolderSubtype_MH,         // an MH directoryfolder
+#ifdef EXPERIMENTAL
+      FileFolderSubtype_MDir,       // Mahogany folder directory format
+      FileFolderSubtype_MFile,      // Mahogany folder file format
+#endif
       FileFolderSubtype_Max
    };
       // valid subtypes for type Radio_News
@@ -300,7 +304,8 @@ protected:
    {
       Username,   // login name
       Password,   // password
-      Server,     // server (for POP3 and IMAP4)
+      ServerPop,  // server (for POP3)
+      ServerImap, // server (for IMAP)
       ServerNews, // server (for NNTP)
       Path,       // path for file based folders, newsgroup for NEWS/NNTP
       MaxProperty
@@ -1128,9 +1133,13 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    // if the path text changed, try to set the folder name automatically
    switch ( GetCurrentFolderType() )
    {
-      case MF_FILE:
-      case MF_MH:
-         // set the file name as the default folder name
+   case MF_FILE:
+   case MF_MH:
+#ifdef EXPERIMENTAL
+   case MF_MDIR:
+   case MF_MFILE:
+#endif
+      // set the file name as the default folder name
          if ( objEvent == m_path )
          {
             wxString name, fullname = m_path->GetValue();
@@ -1183,7 +1192,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
    if ( !m_userModifiedPath )
    {
       FolderType folderType = GetCurrentFolderType();
-      if ( folderType == MF_FILE || folderType == MF_MH )
+      if ( IsFileOrDirFolder(folderType) )
       {
          // ... try to set it from the folder name
          wxFolderCreateDialog *dlg =
@@ -1197,7 +1206,11 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
          wxString folderName;
 
          // MH folder should be created under its parent by default
-         if ( folderType == MF_MH )
+         if ( folderType == MF_MH
+#ifdef EXPERIMENTAL
+              || folderType == MF_MDIR
+#endif
+            )
          {
             // AfterFirst() removes the MH root prefix
             folderName << dlg->GetParentFolderName().AfterFirst('/') << '/';
@@ -1342,85 +1355,96 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
    switch ( m_folderType )
    {
-      case MF_IMAP:
-      case MF_POP:
-         EnableControlsForImapOrPop(m_folderType == MF_IMAP);
-         break;
+   case MF_IMAP:
+   case MF_POP:
+      EnableControlsForImapOrPop(m_folderType == MF_IMAP);
+      break;
 
-      case MF_NNTP:
-      case MF_NEWS:
-         EnableControlsForNewsGroup(m_folderType == MF_NNTP);
-         break;
+   case MF_NNTP:
+   case MF_NEWS:
+      EnableControlsForNewsGroup(m_folderType == MF_NNTP);
+      break;
 
-      case MF_FILE:
-      case MF_MH:
-         EnableTextWithLabel(m_mailboxname, FALSE);
-         EnableTextWithLabel(m_server, FALSE);
-         EnableTextWithLabel(m_newsgroup, FALSE);
+   case MF_FILE:
+   case MF_MH:
+#ifdef EXPERIMENTAL
+   case MF_MFILE:
+   case MF_MDIR:
+#endif
+      
+      EnableTextWithLabel(m_mailboxname, FALSE);
+      EnableTextWithLabel(m_server, FALSE);
+      EnableTextWithLabel(m_newsgroup, FALSE);
 
-         // this can not be changed for an already existing folder
-         EnableTextWithButton(m_path, m_isCreating);
-         m_forceReOpen->SetValue(FALSE);
-         m_forceReOpen->Enable(FALSE);
+      // this can not be changed for an already existing folder
+      EnableTextWithButton(m_path, m_isCreating);
+      m_forceReOpen->SetValue(FALSE);
+      m_forceReOpen->Enable(FALSE);
 
 #ifdef USE_LOCAL_CHECKBOX
-         m_isLocal->Enable(FALSE);
-         m_isLocal->SetValue(FALSE);
+      m_isLocal->Enable(FALSE);
+      m_isLocal->SetValue(FALSE);
 #endif // USE_LOCAL_CHECKBOX
 
-         // file folders come in several flavours
-         switch ( m_folderType )
-         {
-            case MF_FILE:
-               m_browsePath->BrowseForFiles();
-               m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
-               m_isDir->Enable(FALSE);
-               break;
-
-            case MF_MH:
-               {
-                  m_browsePath->BrowseForDirectories();
-                  m_folderSubtype->SetSelection(FileFolderSubtype_MH);
-
-                  MFolder_obj folderParent(dlg->GetParentFolderName());
-                  Profile_obj profile(folderParent->GetFullName());
-
-                  wxString path;
-                  path << MailFolderCC::InitializeMH()
-                     << READ_CONFIG(profile, MP_FOLDER_PATH);
-                  if ( !!path && !wxIsPathSeparator(path.Last()) )
-                     path << '/';
-                  path << dlg->GetFolderName().AfterLast('/');
-
-                  m_path->SetValue(path);
-
-                  m_isDir->Enable(TRUE);
-               }
-               break;
-
-            default:
-               FAIL_MSG( "new file folder type?" );
-         }
-
-         // not yet
-         m_userModifiedPath = false;
-
+      // file folders come in several flavours
+      switch ( m_folderType )
+      {
+      case MF_FILE:
+#ifdef EXPERIMENTAL
+      case MF_MFILE:
+#endif
+         m_browsePath->BrowseForFiles();
+         m_folderSubtype->SetSelection(FileFolderSubtype_MFile);
+         m_isDir->Enable(FALSE);
          break;
 
-      case MF_GROUP:
-         // for a simple grouping folder, all fields make sense because
-         // they will be inherited by the children and the children
-         // folders may have any type
-         EnableTextWithLabel(m_mailboxname, TRUE);
-         EnableTextWithLabel(m_server, TRUE);
-         EnableTextWithLabel(m_newsgroup, TRUE);
-         EnableTextWithButton(m_path, TRUE);
-         m_forceReOpen->Enable(TRUE);
+      case MF_MH:
+#ifdef EXPERIMENTAL
+      case MF_MDIR:
+#endif
+      {
+         m_browsePath->BrowseForDirectories();
+         m_folderSubtype->SetSelection(FileFolderSubtype_MDir);
+
+         MFolder_obj folderParent(dlg->GetParentFolderName());
+         Profile_obj profile(folderParent->GetFullName());
+
+         wxString path;
+         path << MailFolderCC::InitializeMH()
+              << READ_CONFIG(profile, MP_FOLDER_PATH);
+         if ( !!path && !wxIsPathSeparator(path.Last()) )
+            path << '/';
+         path << dlg->GetFolderName().AfterLast('/');
+
+         m_path->SetValue(path);
+
          m_isDir->Enable(TRUE);
-         break;
+      }
+      break;
 
       default:
-         wxFAIL_MSG("Unexpected folder type.");
+         FAIL_MSG( "new file folder type?" );
+      }
+
+      // not yet
+      m_userModifiedPath = false;
+
+      break;
+
+   case MF_GROUP:
+      // for a simple grouping folder, all fields make sense because
+      // they will be inherited by the children and the children
+      // folders may have any type
+      EnableTextWithLabel(m_mailboxname, TRUE);
+      EnableTextWithLabel(m_server, TRUE);
+      EnableTextWithLabel(m_newsgroup, TRUE);
+      EnableTextWithButton(m_path, TRUE);
+      m_forceReOpen->Enable(TRUE);
+      m_isDir->Enable(TRUE);
+      break;
+
+   default:
+      wxFAIL_MSG("Unexpected folder type.");
    }
 
    // enable folder subtype combobox only if we're creating because (folder
@@ -1443,6 +1467,10 @@ wxFolderPropertiesPage::FillSubtypeCombo(RadioIndex sel)
          // NB: the strings should be in sync with FileFolderSubtype_XXX enum
          m_folderSubtype->Append(_("MBOX folder"));
          m_folderSubtype->Append(_("MH folder"));
+#ifdef EXPERIMENTAL
+         m_folderSubtype->Append(_("Mahogany MH folder"));
+         m_folderSubtype->Append(_("Mahogany file folder"));
+#endif
          break;
 
       case Radio_News:
@@ -1488,15 +1516,22 @@ wxFolderPropertiesPage::GetCurrentFolderType(RadioIndex selRadio,
          // one anyhow
          switch ( selChoice )
          {
-            default:
-               FAIL_MSG("invalid file folder subtype");
-               // fall through
+         default:
+            FAIL_MSG("invalid file folder subtype");
+            // fall through
 
-            case FileFolderSubtype_Mbox:
-               return MF_FILE;
+#ifdef EXPERIMENTAL
+         case FileFolderSubtype_MFile:
+            return MF_MFILE;
 
-            case FileFolderSubtype_MH:
-               return MF_MH;
+         case FileFolderSubtype_MDir:
+            return MF_MDIR;
+#endif
+         case FileFolderSubtype_Mbox:
+            return MF_FILE;
+
+         case FileFolderSubtype_MH:
+            return MF_MH;
          }
 
       case Radio_Pop:
@@ -1541,37 +1576,47 @@ wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type,
 
    switch ( type )
    {
-      case MF_INBOX:
-      case MF_FILE:
-      case MF_MH:
-         if ( choiceIndex )
-         {
-            *choiceIndex = type == MF_MH ? FileFolderSubtype_MH
-                                         : FileFolderSubtype_Mbox;
-         }
-         return Radio_File;
+   case MF_INBOX:
+   case MF_FILE:
+   case MF_MH:
+      if ( choiceIndex )
+      {
+         *choiceIndex = type == MF_MH ? FileFolderSubtype_MH
+            : FileFolderSubtype_Mbox;
+      }
+      return Radio_File;
+#ifdef EXPERIMENTAL
+   case MF_MFILE:
+   case MF_MDIR:
+      if ( choiceIndex )
+      {
+         *choiceIndex = type == MF_MDIR ? FileFolderSubtype_MDir
+            : FileFolderSubtype_MFile;
+      }
+      return Radio_File;
+#endif
 
-      case MF_POP:
-         return Radio_Pop;
+   case MF_POP:
+      return Radio_Pop;
 
-      case MF_IMAP:
-         return Radio_Imap;
+   case MF_IMAP:
+      return Radio_Imap;
 
-      case MF_NNTP:
-      case MF_NEWS:
-         if ( choiceIndex )
-         {
-            *choiceIndex = type == MF_NNTP ? NewsFolderSubtype_Nntp
-                                           : NewsFolderSubtype_News;
-         }
-         return Radio_News;
+   case MF_NNTP:
+   case MF_NEWS:
+      if ( choiceIndex )
+      {
+         *choiceIndex = type == MF_NNTP ? NewsFolderSubtype_Nntp
+            : NewsFolderSubtype_News;
+      }
+      return Radio_News;
 
-      case MF_GROUP:
-         return Radio_Group;
+   case MF_GROUP:
+      return Radio_Group;
 
-      default:
-         FAIL_MSG("unexpected folder type value");
-         return Radio_Max;
+   default:
+      FAIL_MSG("unexpected folder type value");
+      return Radio_Max;
    }
 }
 
@@ -1583,7 +1628,8 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
    {
       MP_FOLDER_LOGIN,
       MP_FOLDER_PASSWORD,
-      MP_FOLDER_HOST,
+      MP_POPHOST,
+      MP_IMAPHOST,
       MP_NNTPHOST,
       MP_FOLDER_PATH,
    };
@@ -1681,7 +1727,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    if ( FolderTypeHasServer(folderType) )
    {
-      value = profile->readEntry(MP_FOLDER_HOST, "");
+      value = "";
       if ( !value )
       {
          // take the global server setting for this protocol
@@ -1700,6 +1746,7 @@ wxFolderPropertiesPage::SetDefaultValues()
                break;
 
             default:
+               ASSERT_MSG(0,"new remote foldertype was added");
                // suppress warnings
                break;
          }
@@ -1712,7 +1759,21 @@ wxFolderPropertiesPage::SetDefaultValues()
       }
 
       m_server->SetValue(value);
-      m_originalValues[Server] = value;
+         switch ( folderType )
+         {
+         case MF_NNTP:
+            m_originalValues[ServerNews] = value;
+            break;
+         case MF_POP:
+            m_originalValues[ServerPop] = value;
+            break;
+         case MF_IMAP:
+            m_originalValues[ServerImap] = value;
+            break;
+         default:
+            // suppress warnings
+            break;
+         }
    }
 
    value = READ_CONFIG(profile, MP_FOLDER_PATH);
@@ -1877,7 +1938,11 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // is the folder name valid?
    wxString path;
-   if ( folderType == MF_MH )
+   if ( folderType == MF_MH
+#ifdef EXPERIMENTAL
+        || folderType == MF_MDIR
+#endif
+)
    {
       // MH folder name is always relative to the MH root path
       path = m_path->GetValue();
@@ -2021,15 +2086,20 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    if ( FolderTypeHasServer(folderType) )
    {
       FolderProperty serverType;
-      if ( folderType == MF_NNTP )
+      switch(folderType)
       {
+      case MF_NNTP:
          serverType = ServerNews;
+         break;
+      case MF_POP:
+         serverType = ServerPop;
+         break;
+      case MF_IMAP:
+         serverType = ServerImap;
+         break;
+      default:
+         ASSERT_MSG(0,"new foldertype with server added");
       }
-      else
-      {
-         serverType = Server;
-      }
-
       WriteEntryIfChanged(serverType, server);
    }
    else if ( folderType == MF_GROUP )
@@ -2038,43 +2108,50 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       // entries: for POP/IMAP server and for NNTP one because like this
       // everybody will inherit it
       WriteEntryIfChanged(ServerNews, server);
-      WriteEntryIfChanged(Server, server);
+      WriteEntryIfChanged(ServerPop, server);
+      WriteEntryIfChanged(ServerImap, server);
    }
 
    switch ( folderType )
    {
-      case MF_POP:
-      case MF_IMAP:
-         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+   case MF_POP:
+   case MF_IMAP:
+      WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+      break;
+
+   case MF_NNTP:
+   case MF_NEWS:
+      WriteEntryIfChanged(Path, m_newsgroup->GetValue());
+      break;
+
+   case MF_FILE:
+#ifdef EXPERIMENTAL
+   case MF_MFILE:
+#endif
+      path = m_path->GetValue();
+      // fall through
+
+   case MF_MH:
+#ifdef EXPERIMENTAL
+   case MF_MDIR:
+#endif
+      // for MH path had been set in thevery beginning
+      WriteEntryIfChanged(Path, path);
+      break;
+
+   case MF_INBOX:
+      if ( !m_dlgCreate )
          break;
+      //else: can't create INBOX folder!
 
-      case MF_NNTP:
-      case MF_NEWS:
-         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
-         break;
+   case MF_GROUP:
+      WriteEntryIfChanged(Path, m_mailboxname->GetValue());
+      WriteEntryIfChanged(Path, m_newsgroup->GetValue());
+      WriteEntryIfChanged(Path, m_path->GetValue());
+      break;
 
-      case MF_FILE:
-         path = m_path->GetValue();
-         // fall through
-
-      case MF_MH:
-         // for MH path had been set in thevery beginning
-         WriteEntryIfChanged(Path, path);
-         break;
-
-      case MF_INBOX:
-         if ( !m_dlgCreate )
-            break;
-         //else: can't create INBOX folder!
-
-      case MF_GROUP:
-         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
-         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
-         WriteEntryIfChanged(Path, m_path->GetValue());
-         break;
-
-      default:
-         wxFAIL_MSG("Unexpected folder type.");
+   default:
+      wxFAIL_MSG("Unexpected folder type.");
    }
 
    // mark the folder as being autocollectable or not

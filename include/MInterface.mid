@@ -87,11 +87,10 @@ ARG(Protocol , protocol, =Prot_SMTP)
 ')
 
 FUNCTION(OpenFolder, MailFolder *, (
-ARG(int, typeAndFlags),
 ARG(STRING , path)
 ),
 `
- return MailFolder::OpenFolder(typeAndFlags,path);
+ return MailFolder::OpenFolder(path);
 ')
 
 

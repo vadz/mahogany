@@ -1424,7 +1424,7 @@ PalmOSModule::StoreEMails(void)
    unsigned char buffer[0xffff];
 
    UIdType count = 0;
-   MailFolder *mf = m_MInterface->OpenFolder(MF_PROFILE_OR_FILE,m_PalmBox);
+   MailFolder *mf = m_MInterface->OpenFolder(m_PalmBox);
    if(! mf)
    {
       String tmpstr;

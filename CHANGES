@@ -1,5 +1,6 @@
 (next release) on (date of next release)
-
+29.04.00 KB: MailFolder API cleanup, server config setting fixes,
+             wxLayout fixes
 26.04.00 VZ: drag and drop works with other folder views (frames) too
 23.04.00 VZ: added drag and drop of messages to the folder tree
 23.04.00 VZ: added "Quick move" submenu to folder popup menu

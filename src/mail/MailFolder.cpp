@@ -31,6 +31,9 @@
 #include "Message.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h"
+#ifdef EXPERIMENTAL
+#include "MMailFolder.h"
+#endif
 
 #include "miscutil.h"   // GetFullEmailAddress
 
@@ -77,21 +80,49 @@ protected:
  * static member functions of MailFolder.h
  *-------------------------------------------------------------------*/
 
+
 /* static */
 MailFolder *
-MailFolder::OpenFolder(const MFolder *mfolder, ProfileBase *profile)
+MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
+{
+   MFolder *mf = MFolder::Get(name);
+   if(mf )
+   {
+      MailFolder *m = OpenFolder(mf);
+      mf->DecRef();
+      return m;
+   }
+   else
+   { // profile entry does not exist
+      ProfileBase *profile =
+         ProfileBase::CreateProfile(name, parentProfile);
+      return OpenFolder( MF_FILE, name, profile);
+   }
+}
+
+/* static */
+MailFolder *
+MailFolder::OpenFolder(const MFolder *mfolder)
 {
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
 
+#ifdef EXPERIMENTAL
+   if( mfolder->GetType() == MF_MFILE
+       || mfolder->GetType() == MF_MDIR )
+      return MMailFolder::OpenFolder(mfolder);
+#endif
+      
    int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
                                                 mfolder->GetFlags());
 
-   return OpenFolder( typeAndFlags,
-                      mfolder->GetPath(),
-                      profile,
-                      mfolder->GetServer(),
-                      mfolder->GetLogin(),
-                      mfolder->GetPassword() );
+   MailFolder *mf = OpenFolder( typeAndFlags,
+                                mfolder->GetPath(),
+                                NULL,
+                                mfolder->GetServer(),
+                                mfolder->GetLogin(),
+                                mfolder->GetPassword(),
+                                mfolder->GetName());
+   return mf;
 }
 
 /* static */
@@ -109,34 +140,43 @@ MailFolder::HalfOpenFolder(const MFolder *mfolder, ProfileBase *profile)
                       mfolder->GetServer(),
                       mfolder->GetLogin(),
                       mfolder->GetPassword(),
+                      mfolder->GetName(),
                       true );
 }
 
 /* static */
 MailFolder *
 MailFolder::OpenFolder(int folderType,
-                       String const &i_name,
+                       String const &i_path,
                        ProfileBase *parentProfile,
                        String const &i_server,
                        String const &i_login,
                        String const &i_passwd,
+                       String const &i_name,
                        bool halfopen)
 {
-   // open a folder:
+   FolderType type = GetFolderType(folderType);
+#ifdef EXPERIMENTAL
+   CHECK( type != MF_MFILE && type != MF_MDIR,
+          NULL, "Obsolete MailFolder::OpenFolder() called." );
+#endif
+   
+// open a folder:
    ProfileBase *profile = NULL;
    String login, passwd, name, server;
-   FolderType type = GetFolderType(folderType);
    int flags = GetFolderFlags(folderType);
 
    String symbolicName = i_name;
-
+   if(strutil_isempty(symbolicName))
+      symbolicName = i_path;
+      
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
       if(type == MF_PROFILE)
-         profile = ProfileBase::CreateProfile(i_name, parentProfile);
+         profile = ProfileBase::CreateProfile(i_path, parentProfile);
       else
       {
-         String pname = (i_name[0] == '/') ? String(i_name.c_str()+1) : i_name;
+         String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
          profile = ProfileBase::CreateProfile(pname, parentProfile);
       }
       CHECK(profile, NULL, "can't create profile");   // return if it fails
@@ -145,7 +185,7 @@ MailFolder::OpenFolder(int folderType,
       {
          type = MF_FILE;
          flags = 0;
-         name = i_name;
+         name = i_path;
       }
       else
       {
@@ -161,109 +201,87 @@ MailFolder::OpenFolder(int folderType,
    }
    else // type != PROFILE
    {
-      profile = ProfileBase::CreateEmptyProfile(parentProfile);
+      profile = ProfileBase::CreateProfile(symbolicName, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       server = i_server;
-      name = i_name;
+      name = i_path;
       passwd = i_passwd;
       login = i_login;
    }
 
    switch( type )
    {
-      case MF_NNTP:
-         if(strutil_isempty(i_server))
-            server = READ_CONFIG(profile, MP_NNTPHOST);
-         break;
+   case MF_NNTP:
+      if(strutil_isempty(i_server))
+         server = READ_CONFIG(profile, MP_NNTPHOST);
+      break;
 
-      case MF_FILE:
-         if( strutil_isempty(name) )
-            name = READ_CONFIG(profile, MP_FOLDER_PATH);
-         if(name == "INBOX")
-            type = MF_INBOX;
-         name = strutil_expandfoldername(name);
-         break;
+   case MF_FILE:
+      if( strutil_isempty(name) )
+         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+      if(name == "INBOX")
+         type = MF_INBOX;
+      name = strutil_expandfoldername(name);
+      break;
 
-      case MF_MH:
-         // initialize the MH driver now to get the MHPATH until cclient
-         // has a chance to complain about it
-         if ( !MailFolderCC::InitializeMH() )
-         {
-            profile->DecRef();
-            return NULL;
-         }
-         break;
-
-      case MF_POP:
-      case MF_IMAP:
-         if(strutil_isempty(server))
-            server = READ_CONFIG(profile, MP_FOLDER_HOST);
-         if(strutil_isempty(server))
-         {
-            if ( type == MF_POP )
-               server = READ_CONFIG(profile, MP_POPHOST);
-            else
-               server = READ_CONFIG(profile, MP_IMAPHOST);
-         }
-         if(strutil_isempty(login))
-            login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
-         if(strutil_isempty(passwd))
-            passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
-         if(strutil_isempty(name))
-            name = READ_CONFIG(profile, MP_FOLDER_PATH);
-         break;
-
-      case MF_NEWS:
-         // initialize news spool
-         if ( !MailFolderCC::InitializeNewsSpool() )
-         {
-            profile->DecRef();
-            return NULL;
-         }
-         break;
-
-      case MF_INBOX:
-         // nothing special to do
-         break;
-
-      default:
-         profile->DecRef();
-         FAIL_MSG("unknown folder type");
-         return NULL;
-   }
-
-#if 0
-   // ask the password for the folders which need it but for which it hadn't been
-   // specified during creation
-   if ( FolderTypeHasUserName(type) && !(flags & MF_FLAGS_ANON) && !passwd )
-   {
-      String prompt;
-      prompt.Printf( _("Password for '%s':"),
-                     strutil_isempty(name) ? i_name.c_str() : name.c_str());
-      if(! MInputBox(&passwd,
-                     _("Password prompt"),
-                     prompt,
-                     NULL, NULL, NULL, // parent win, key, default,
-                     true) // password mode
-         || strutil_isempty(passwd))
+   case MF_MH:
+      // initialize the MH driver now to get the MHPATH until cclient
+      // has a chance to complain about it
+      if ( !MailFolderCC::InitializeMH() )
       {
-         String msg = _("Cannot access this folder without a password.");
-         ERRORMESSAGE((msg));
          profile->DecRef();
          return NULL;
       }
+      break;
+
+   case MF_POP:
+   case MF_IMAP:
+      if(strutil_isempty(server))
+      {
+         if ( type == MF_POP )
+            server = READ_CONFIG(profile, MP_POPHOST);
+         else
+            server = READ_CONFIG(profile, MP_IMAPHOST);
+      }
+      if(strutil_isempty(login))
+         login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+      if(strutil_isempty(passwd))
+         passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
+      if(strutil_isempty(name))
+         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+      break;
+
+   case MF_NEWS:
+      // initialize news spool
+      if ( !MailFolderCC::InitializeNewsSpool() )
+      {
+         profile->DecRef();
+         return NULL;
+      }
+      break;
+
+#ifdef EXPERIMENTAL
+   case MF_MFILE:
+   case MF_MDIR:
+#endif   
+   case MF_INBOX:
+      // nothing special to do
+      break;
+      
+   default:
+      profile->DecRef();
+      FAIL_MSG("unknown folder type");
+      return NULL;
    }
-#endif
 
-   // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
+   MailFolder *mf;
+   // all other types handles by c-client implementation:
    folderType = CombineFolderTypeAndFlags(type, flags);
-
-   MailFolder *mf = MailFolderCC::OpenFolder(folderType, name, profile,
-                                             server, login, passwd,
-                                             symbolicName, halfopen);
+   mf = MailFolderCC::OpenFolder(folderType, name, profile,
+                                 server, login, passwd,
+                                 symbolicName, halfopen);
    profile->DecRef();
-
    return mf;
 }
 
@@ -294,6 +312,10 @@ MailFolder::CreateFolder(const String &name,
       case MF_NNTP:
       case MF_NEWS:
       case MF_MH:
+#ifdef EXPERIMENTAL
+      case MF_MDIR:
+      case MF_MFILE:
+#endif
          valid = true;
          break;
       default:
@@ -607,7 +629,7 @@ private:
 };
 
 
-MailFolderCmn::MailFolderCmn(ProfileBase *profile)
+MailFolderCmn::MailFolderCmn()
 {
 #ifdef DEBUG
    m_PreCloseCalled = false;
@@ -618,15 +640,10 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    m_FirstListing = true;
    m_ProgressDialog = NULL;
    m_UpdateFlags = UF_Default;
-   ASSERT(profile);
-   m_Profile = profile;
-   if(m_Profile) m_Profile->IncRef();
    m_Timer = new MailFolderTimer(this);
    m_LastNewMsgUId = UID_ILLEGAL;
 
    m_MEventReceiver = new MFCmnEventReceiver(this);
-
-   UpdateConfig(); // read profile settings
 }
 
 MailFolderCmn::~MailFolderCmn()
@@ -635,8 +652,6 @@ MailFolderCmn::~MailFolderCmn()
    ASSERT(m_PreCloseCalled == true);
 #endif
    delete m_Timer;
-   if(m_Profile)
-      m_Profile->DecRef();
    delete m_MEventReceiver;
 }
 

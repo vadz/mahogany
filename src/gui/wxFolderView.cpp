@@ -1106,8 +1106,7 @@ MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
    wxBeginBusyCursor();
-
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
+   MailFolder *mf = MailFolder::OpenFolder(profilename);
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;

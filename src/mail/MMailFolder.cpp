@@ -29,26 +29,25 @@
 #define MMAILFOLDER_MISSING() \
    ASSERT_MSG(0, "Missing MMailFolder functionality");
 
-
+// ----------------------------------------------------------------------
 /** This class is responsible for retrieving and writing a mail
     message and for retrieving and writing the message cache.
     Two implementations will exist in the end, one having cache and
     all messages in a single mailbox file, the other one using a MH
     style directory with a separate cache file.
 */
-class IOHandler : public MObject
+class MsgHandler : public MObject
 {
 public:
    virtual Message * GetMessage(UIdType uid) = 0;
    virtual bool      StoreMessage(UIdType uid) = 0;
 
-   virtual ~IOHandler()
+   virtual ~MsgHandler()
       { }
 };
 
-/** IOHandler implementation using a directory of message files with a 
-    separate index file. */
-class IOHandlerMH : public IOHandler
+/** MsgHandler implementation using a one large file with index. */
+class MsgHandlerFile : public MsgHandler
 {
 public:
    virtual Message * GetMessage(UIdType uid);
@@ -56,7 +55,7 @@ public:
 };
 
 Message *
-IOHandlerMH::GetMessage(UIdType uid)
+MsgHandlerFile::GetMessage(UIdType uid)
 {
    MOcheck();
    MMAILFOLDER_MISSING();
@@ -64,29 +63,109 @@ IOHandlerMH::GetMessage(UIdType uid)
 }
 
 bool
-IOHandlerMH::StoreMessage(UIdType uid)
+MsgHandlerFile::StoreMessage(UIdType uid)
+{
+   MOcheck();
+   MMAILFOLDER_MISSING();
+   return FALSE;
+}
+/** MsgHandler implementation using a directory of message files with a 
+    separate index file. */
+class MsgHandlerMH : public MsgHandler
+{
+public:
+   virtual Message * GetMessage(UIdType uid);
+   virtual bool      StoreMessage(UIdType uid);
+};
+
+Message *
+MsgHandlerMH::GetMessage(UIdType uid)
+{
+   MOcheck();
+   MMAILFOLDER_MISSING();
+   return NULL;
+}
+
+bool
+MsgHandlerMH::StoreMessage(UIdType uid)
 {
    MOcheck();
    MMAILFOLDER_MISSING();
    return FALSE;
 }
 
+// ----------------------------------------------------------------------
 
-
-/* FIXME: */
-MMailFolder::MMailFolder()
-   : MMailFolderBase(NULL)
+/** This class is responsible for maintaining the mailfolder cache
+    information.
+*/
+class MCache : public MObject
 {
+public:
+   unsigned long CountMessages(int mask = 0, int value = 0) const;
+private:
+   /// number of messages
+   unsigned long m_Number;
+};
+
+
+unsigned long
+MCache::CountMessages(int mask, int value) const
+{
+   MOcheck();
+   if(mask == 0 && value == 0)
+      return m_Number;
+   MMAILFOLDER_MISSING();
+   return 0;
 }
 
+// ----------------------------------------------------------------------
+
+
+
+
+// ----------------------------------------------------------------------
+
+MMailFolder::MMailFolder(const MFolder *mfolder)
+   : MMailFolderBase(mfolder)
+{
+   m_Cache = new MCache;
+
+   m_MsgHandler = mfolder->GetType() == MF_MFILE ?
+      new MsgHandlerFile : new MsgHandlerMH;
+}
+
+MMailFolder::~MMailFolder()
+{
+   delete m_MsgHandler;
+   delete m_Cache;
+}
+
+
+/** Get a MMailFolder object */
+/* static */
+MailFolder *
+MMailFolder::OpenFolder(const MFolder *mfolder)
+{
+   CHECK(mfolder &&
+         ( mfolder->GetType() == MF_MFILE
+           || mfolder->GetType() == MF_MDIR),
+         NULL, "MMailFolder::OpenFolder() called with wrong arguments"
+         );
+   return new MMailFolder(mfolder);
+}
 
 /* static */
 bool
 MMailFolder::CreateFolder(const String &name,
-                              FolderType type = MF_FILE,
-                              int flags = MF_FLAGS_DEFAULT,
+                              FolderType type,
+                              int flags,
                               const String &path = "",
-                              const String &comment = ""){ MMAILFOLDER_MISSING(); }
+                          const String &comment = "")
+{
+   MMAILFOLDER_MISSING();
+   return FALSE;
+}
 
 /** Checks if it is OK to exit the application now.
     @param which Will either be set to empty or a '\n' delimited
@@ -109,7 +188,11 @@ MMailFolder::CanExit(String *which)
 /* static */
 String
 MMailFolder::ConvertMessageStatusToString(int status,
-                                              MailFolder *mf = NULL){ MMAILFOLDER_MISSING(); }
+                                          MailFolder *mf = NULL)
+{
+   MMAILFOLDER_MISSING();
+   return "unknown";
+}
 /** Forward one message.
     @param message message to forward
     @param profile environment
@@ -145,9 +228,13 @@ MMailFolder::ReplyMessage(class Message *msg,
 /* static */
 bool
 MMailFolder::Subscribe(const String &host,
-                           FolderType protocol,
-                           const String &mailboxname,
-                           bool subscribe = true){ MMAILFOLDER_MISSING(); }
+                       FolderType protocol,
+                       const String &mailboxname,
+                       bool subscribe = true)
+{
+   MMAILFOLDER_MISSING();
+   return FALSE;
+}
 
 /** Get a listing of all mailboxes.
 
@@ -160,24 +247,16 @@ MMailFolder::Subscribe(const String &host,
 */
 void
 MMailFolder::ListFolders(class ASMailFolder *asmf,
-                             const String &pattern = "*",
-                             bool subscribed_only = false,
-                             const String &reference = "",
-                             UserData ud = 0,
-                             Ticket ticket = ILLEGAL_TICKET){ MMAILFOLDER_MISSING(); }
+                         const String &pattern = "*",
+                         bool subscribed_only = false,
+                         const String &reference = "",
+                         UserData ud = 0,
+                         Ticket ticket = ILLEGAL_TICKET)
+{
+   MMAILFOLDER_MISSING();
+}
 //@}
 //@}
-
-/** Get name of mailbox.
-    @return the symbolic name of the mailbox
-*/
-String
-MMailFolder::GetName(void) const{ MMAILFOLDER_MISSING(); }
-
-/** Sets the symbolic name.
- */
-void
-MMailFolder::SetName(const String &name){ MMAILFOLDER_MISSING(); }
 
 /** Get number of messages which have a message status of value
     when combined with the mask. When mask = 0, return total
@@ -187,17 +266,27 @@ MMailFolder::SetName(const String &name){ MMAILFOLDER_MISSING(); }
     @return number of messages
 */
 unsigned long
-MMailFolder::CountMessages(int mask = 0, int value = 0) const{ MMAILFOLDER_MISSING(); }
+MMailFolder::CountMessages(int mask = 0, int value = 0) const
+{
+   return m_Cache->CountMessages(mask, value);
+}
 
 /// Count number of recent messages.
 unsigned long
-MMailFolder::CountRecentMessages(void) const{ MMAILFOLDER_MISSING(); }
+MMailFolder::CountRecentMessages(void) const
+{
+   MMAILFOLDER_MISSING();
+}
 
 /** Count number of new messages but only if a listing is
     available, returns UID_ILLEGAL otherwise.
 */
 unsigned long
-MMailFolder::CountNewMessagesQuick(void) const{ MMAILFOLDER_MISSING(); }
+MMailFolder::CountNewMessagesQuick(void) const
+{
+   MMAILFOLDER_MISSING();
+   return UID_ILLEGAL;
+}
 
 /** Check whether mailbox has changed. */
 void

@@ -969,7 +969,7 @@ bool RunInstallWizard()
    if(gs_installWizardData.collectAllMail)
    {
       mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
-      mf = MailFolder::OpenFolder(MF_PROFILE,READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+      mf = MailFolder::OpenFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
    }
    else
    {
@@ -1384,7 +1384,8 @@ public:
                FAIL_MSG( "profile without config - can't delete entry" );
             }
 
-            profile->writeEntry(MP_FOLDER_HOST, hostname);
+            profile->writeEntry(MP_IMAPHOST, hostname);
+            profile->writeEntry(MP_POPHOST, hostname);
          }
 
          return TRUE;

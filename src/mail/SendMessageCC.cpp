@@ -577,7 +577,7 @@ SendMessageCC::SendOrQueue(void)
          success = FALSE;
       else
       {
-         WriteToFolder(outbox, MF_PROFILE_OR_FILE);
+         WriteToFolder(outbox);
          // increment counter in statusbar immediately
          mApplication->UpdateOutboxStatus();
          success = TRUE;
@@ -598,8 +598,7 @@ SendMessageCC::SendOrQueue(void)
    // make copy to "Sent" folder?
    if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
    {
-      WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
-                    MF_PROFILE_OR_FILE);
+      WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
    }
    return success;
 }
@@ -759,7 +758,7 @@ SendMessageCC::WriteToFile(String const &filename, bool append)
 }
 
 void
-SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
+SendMessageCC::WriteToFolder(String const &name)
 {
    Build();
 
@@ -767,7 +766,7 @@ SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
 
    WriteToString(str);
    MailFolder *mf =
-      MailFolder::OpenFolder(type,name);
+      MailFolder::OpenFolder(name);
    CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
 
    // we don't want this to create new mail events

@@ -190,7 +190,7 @@ public:
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
-            mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
+            mf = MailFolder::OpenFolder(folderName);
             if(mf || (!mApplication->IsOnline()))
             {
                MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
@@ -384,7 +384,7 @@ MailCollectorImpl::SetNewMailFolder(const String &name)
       m_NewMailProfile->DecRef();
    }
    m_NewMailProfile = ProfileBase::CreateProfile(name);
-   m_NewMailFolder = MailFolder::OpenFolder(MF_PROFILE, name);
+   m_NewMailFolder = MailFolder::OpenFolder(name);
 }
 
 
@@ -393,7 +393,7 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
 {
    ReCreate();
    MOcheck();
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,name);
+   MailFolder *mf = MailFolder::OpenFolder(name);
    if(mf == NULL)
       return false;
    MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
@@ -443,7 +443,7 @@ MailCollectorImpl::UpdateFolderList(void)
       {
          if((**i).m_folder == NULL) // try to open:
 	 {
-            (**i).m_folder = MailFolder::OpenFolder(MF_PROFILE,(**i).m_name);
+            (**i).m_folder = MailFolder::OpenFolder((**i).m_name);
             if((**i).m_folder == NULL) // folder inaccessible:
                ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
 	 }

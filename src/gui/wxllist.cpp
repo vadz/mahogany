@@ -669,10 +669,9 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
    m_Length = 0;
 
    m_updateLeft = -1;
-   MarkDirty(0);
-
    m_Previous = prev;
    m_Next = NULL;
+   MarkDirty(0);
 
    m_LineNumber = 0;
    RecalculatePosition(llist);
@@ -2401,6 +2400,9 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    // If one line was dirty, we need to re-calculate all
    // following lines, too.
    bool wasDirty = forceAll;
+   // we need to layout until we reach at least the cursor line,
+   // otherwise we won't be able to scroll to it
+   bool cursorReached = false;
    wxLayoutLine *line = m_FirstLine;
    while(line)
    {
@@ -2410,6 +2412,8 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
          // if any previous line was dirty, we need to layout all
          // following lines:   
          wasDirty
+         // go on until we find the cursorline
+         || ! cursorReached
          // layout dirty lines:
          || line->IsDirty()
          // always layout the cursor line toupdate the cursor
@@ -2438,14 +2442,20 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                if ( csize )
                   *csize = m_CursorSize;
             }
+            cursorReached = TRUE;
          } 
          else
+         {
             if(cpos && line->GetLineNumber() == cpos->y)
+            {
                line->Layout(dc, this,
                             cpos,
                             csize, NULL, cpos->x);
-         else
-            line->Layout(dc, this);
+               cursorReached = TRUE;
+            }
+            else
+               line->Layout(dc, this);
+         }
          // little condition to speed up redrawing:
          if(bottom != -1 && line->GetPosition().y > bottom)
             break;

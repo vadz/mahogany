@@ -130,7 +130,7 @@ public:
    void RequestUpdate(const wxRect *updateRect = NULL);
 
    /// if exact == false, assume 50% extra size for the future
-   void ResizeScrollbars(bool exact = false, CoordType bottom = -1);  // don't change this to true!
+   void ResizeScrollbars(bool exact = false);  // don't change this to true!
 
    /// if the flag is true, we send events when user clicks on embedded objects
    inline void SetMouseTracking(bool doIt = true) { m_doSendEvents = doIt; }

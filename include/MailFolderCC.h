@@ -71,12 +71,6 @@ public:
    /** @name Constructors and destructor */
    //@{
 
-   /** opens a mail folder in a save way.
-       @param name name of the folder
-       @param profile profile to use
-   */
-   static MailFolderCC* OpenFolder(String const &name, ProfileBase *profile);
-
    /**
       Opens an existing mail folder of a certain type.
       The path argument is as follows:
@@ -134,12 +128,13 @@ public:
    */
    inline String GetName(void) const { return m_Name; }
 
+   /** Get the profile.
+       @return Pointer to the profile.
+   */
+   virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
+
    /// Checks if the folder is in a critical section.
    inline bool InCritical(void) const { return m_InCritical; }
-
-   /** Sets the symbolic name.
-    */
-   virtual void SetName(const String &name) { m_Name = name; };
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
@@ -648,6 +643,8 @@ private:
    /// destructor
    ~MailFolderCC();
 
+   /// a profile
+   ProfileBase *m_Profile;
    /// The current listing of the folder
    class HeaderInfoListCC *m_Listing;
    /// Do we need to generate a new listing?

@@ -347,8 +347,6 @@
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
 #define   MP_SHOWBCC         "ShowBCC"
-/// hostname for mailbox
-#define   MP_FOLDER_HOST      "ServerName"
 /// login for mailbox
 #define   MP_FOLDER_LOGIN      "Login"
 /// password for mailbox
@@ -826,8 +824,6 @@
 #define   MP_SHOWCC_D         1
 /// show BCC field in message composition?
 #define   MP_SHOWBCC_D         1
-/// hostname for mailbox
-#define   MP_FOLDER_HOST_D      "localhost"
 /// login for mailbox
 #define   MP_FOLDER_LOGIN_D      M_EMPTYSTRING
 /// passwor for mailbox

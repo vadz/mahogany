@@ -114,12 +114,13 @@ public:
                                   const String &server = NULLstring,
                                   const String &login = NULLstring,
                                   const String &password = NULLstring,
+                                  const String &symbolicname =
+                                  NULLstring,
                                   bool halfopen = FALSE);
-
+   
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
-   static MailFolder * OpenFolder(const class MFolder *mfolder,
-                                  ProfileBase *profile);
+   static MailFolder * OpenFolder(const class MFolder *mfolder);
 
    /** Phyically deletes this folder.
        @return true on success
@@ -189,10 +190,6 @@ public:
        @return the symbolic name of the mailbox
    */
    virtual String GetName(void);
-
-   /** Sets the symbolic name.
-    */
-   virtual void SetName(const String &name);
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total

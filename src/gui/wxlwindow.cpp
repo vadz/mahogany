@@ -885,7 +885,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                   updateRect->y+updateRect->height));
    }
 
-   ResizeScrollbars(true, y0+y1);
+   ResizeScrollbars(true);
 
    WXLO_TIMER_START(TmpTimer);
    /* Check whether the window has grown, if so, we need to reallocate
@@ -1026,7 +1026,7 @@ as needed.
 */
 
 void
-wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
+wxLayoutWindow::ResizeScrollbars(bool exact)
 {
 
    if(! IsDirty())
@@ -1034,9 +1034,9 @@ wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
    
    wxClientDC dc( this );
    PrepareDC( dc );
-//      m_llist->ForceTotalLayout();
+//   m_llist->ForceTotalLayout();
    WXLO_TIMER_START(LayoutTimer);
-   m_llist->Layout(dc, bottom);
+   m_llist->Layout(dc, -1);
    WXLO_TIMER_STOP(LayoutTimer);
    ResetDirty();
    

@@ -109,7 +109,7 @@ public:
    MailFolderEntry(const String name)
       {
          m_name = name;
-         m_folder = MailFolder::OpenFolder(MF_PROFILE, m_name);
+         m_folder = MailFolder::OpenFolder(m_name);
       }
    ~MailFolderEntry()
       {
@@ -607,8 +607,8 @@ MAppBase::CanClose() const
       // don´t ask twice:
       && READ_APPCONFIG(MP_TRASH_FOLDER) != ((wxMainFrame *)m_topLevelFrame)->GetFolderName())
    {
-      ASMailFolder *mf = ASMailFolder::OpenFolder(MF_PROFILE_OR_FILE,
-                                READ_APPCONFIG(MP_TRASH_FOLDER));
+      ASMailFolder *mf = ASMailFolder::OpenFolder(
+         READ_APPCONFIG(MP_TRASH_FOLDER));
       if(mf)
       {
          // make sure they are all marked as deleted:
@@ -834,7 +834,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       mf->IncRef();
    }
    else
-      mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+      mf = MailFolder::OpenFolder(outbox);
    if(mf == NULL)
    {
       String msg;
@@ -879,7 +879,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 {
    Protocol protocol;
    UIdType count = 0;
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+   MailFolder *mf = MailFolder::OpenFolder(outbox);
    if(! mf)
    {
       String msg;

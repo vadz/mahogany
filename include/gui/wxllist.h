@@ -717,6 +717,7 @@ public:
       }
 
       m_Dirty = true;
+      if(m_Next) m_Next->MarkDirty();
    }
    /// Reset the dirty flag
    void MarkClean() { m_Dirty = false; m_updateLeft = -1; }

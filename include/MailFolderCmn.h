@@ -153,11 +153,6 @@ public:
    virtual inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
 
-   /** Get the profile.
-       @return Pointer to the profile.
-   */
-   virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
-
    /** Toggle update behaviour flags.
        @param updateFlags the flags to set
    */
@@ -189,12 +184,14 @@ public:
    */
    virtual int ApplyFilterRules(UIdArray msgs);
 protected:
+   /// Update Config info from profile.
+   void UpdateConfig(void);
    /// common code for ApplyFilterRules:
    int ApplyFilterRulesCommonCode(UIdArray *msgs, bool NewOnly = FALSE);
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void) = 0;
    /// Constructor
-   MailFolderCmn(class ProfileBase *profile);
+   MailFolderCmn();
 
    /// Destructor
    ~MailFolderCmn();
@@ -243,8 +240,6 @@ protected:
    String m_Login;
    /// Password for password protected mail boxes.
    String m_Password;
-   /// a profile
-   ProfileBase *m_Profile;
    //@}
 
    /// a timer to update information
@@ -267,8 +262,6 @@ protected:
    //@}
 
 private:
-   /// Update Config info from profile.
-   void UpdateConfig(void);
    friend class MFCmnEventReceiver;
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;

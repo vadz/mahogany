@@ -125,13 +125,20 @@ public:
                                   const String &server = NULLstring,
                                   const String &login = NULLstring,
                                   const String &password = NULLstring,
+                                  const String &symbolicname = NULLstring,
                                   bool halfopen = FALSE);
-
+   
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
-   static MailFolder * OpenFolder(const class MFolder *mfolder,
-                                  ProfileBase *profile = NULL);
+   static MailFolder * OpenFolder(const class MFolder *mfolder);
 
+   /** This opens a mailfolder from either a profile of that name, or, 
+       if it is an absolute path, from a file of that name.
+       Profile parameter is only used when name is a filename.
+   */
+   static MailFolder * OpenFolder(const String &name,
+                                  ProfileBase *profile = NULL);
+   
    /** Half open the folder using paremeters from MFolder object. */
    static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
                                       ProfileBase *profile = NULL);
@@ -224,10 +231,6 @@ public:
        @return the symbolic name of the mailbox
    */
    virtual String GetName(void) const = 0;
-
-   /** Sets the symbolic name.
-    */
-   virtual void SetName(const String &name) = 0;
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total

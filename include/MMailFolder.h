@@ -33,17 +33,38 @@
 class MMailFolderBase : public MailFolderCmn
 {
 public:
+   /** Get name of mailbox.
+       @return the symbolic name of the mailbox
+   */
+   virtual String GetName(void) const { return m_MFolder->GetName(); }
+
 protected:
    /// Constructor
-   MMailFolderBase(class ProfileBase *profile)
-      : MailFolderCmn(profile)
+   MMailFolderBase(const MFolder *mfolder)
+      : MailFolderCmn()
       {
+         m_MFolder = mfolder;
+         SafeIncRef((MFolder *)m_MFolder);
+         m_Profile = ProfileBase::CreateProfile(mfolder->GetName());
+         UpdateConfig();
       }
 
    /// Destructor
    virtual ~MMailFolderBase()
       {
+         SafeDecRef((MFolder *)m_MFolder);
+         SafeDecRef(m_Profile);
       }
+
+   /** Get the profile.
+       @return Pointer to the profile.
+   */
+   virtual inline ProfileBase *GetProfile(void)
+      { return m_Profile; }
+      
+private:
+   const MFolder *m_MFolder;
+   ProfileBase *m_Profile;
 };
 
 /**
@@ -52,6 +73,9 @@ protected:
 class MMailFolder : public MMailFolderBase
 {
 public:
+   /** Get a MMailFolder object */
+   static MailFolder * OpenFolder(const MFolder *mfolder);
+
    /** Phyically deletes this folder.
        @return true on success
    */
@@ -67,7 +91,7 @@ public:
          @return false on error or true on success
    */
    static bool CreateFolder(const String &name,
-                            FolderType type = MF_FILE,
+                            FolderType type = MF_MFILE,
                             int flags = MF_FLAGS_DEFAULT,
                             const String &path = "",
                             const String &comment = "");
@@ -135,15 +159,6 @@ public:
                             Ticket ticket = ILLEGAL_TICKET);
    //@}
    //@}
-
-   /** Get name of mailbox.
-       @return the symbolic name of the mailbox
-   */
-   virtual String GetName(void) const;
-
-   /** Sets the symbolic name.
-    */
-   virtual void SetName(const String &name);
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
@@ -246,9 +261,10 @@ public:
    /// Request update
    virtual void RequestUpdate(void);
 protected:
+   MMailFolder(const MFolder *mf);
+   ~MMailFolder();
 
-   MMailFolder();
-
+   
    /**@name MailFolderCmn API: */
    //@{
    /// Update the folder status, number of messages, etc
@@ -258,5 +274,10 @@ protected:
        mail event. */
    virtual bool IsNewMessage(const HeaderInfo * hi);
    //@}
+
+   /// MailFolder listing cache
+   class MCache * m_Cache;
+   /// IO handler for reading/writing messages
+   class MsgHandler *m_MsgHandler;
 };
 #endif

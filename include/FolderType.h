@@ -47,6 +47,10 @@ enum FolderType
    MF_NNTP = 4,                  // newsgroup
    MF_NEWS = 5,                  // newsgroup in local newsspool
    MF_MH = 6,                    // MH folder (directory/files)
+#ifdef EXPERIMENTAL
+   MF_MFILE = 7,                 // the Mahogany file type
+   MF_MDIR = 8,                  // the Mahogany dir type
+#endif
    MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
    MF_PROFILE = 10,              // read type etc from profile
 
@@ -150,26 +154,30 @@ inline bool FolderTypeHasUserName(FolderType type)
 
    switch ( type )
    {
-      case MF_POP:
-      case MF_IMAP:
-      case MF_NNTP:
-      case MF_GROUP:
-         return true;
+   case MF_POP:
+   case MF_IMAP:
+   case MF_NNTP:
+   case MF_GROUP:
+      return true;
 
       // don't use "default:" - like this, the compiler will warn us if we add
       // a new type to the FolderType enum and forget to add it here
-      case MF_ROOT:
-      case MF_ILLEGAL:
-      case MF_PROFILE_OR_FILE:
-      case MF_PROFILE:
-         FAIL_MSG("this is not supposed to be called for this type");
-         // fall through nevertheless
+   case MF_ROOT:
+   case MF_ILLEGAL:
+   case MF_PROFILE_OR_FILE:
+   case MF_PROFILE:
+      FAIL_MSG("this is not supposed to be called for this type");
+      // fall through nevertheless
 
-      case MF_INBOX:
-      case MF_FILE:
-      case MF_MH:
-      case MF_NEWS:
-         ; // don't put return false here to avoid VC++ warnings
+   case MF_INBOX:
+   case MF_FILE:
+   case MF_MH:
+   case MF_NEWS:
+#ifdef EXPERIMENTAL
+   case MF_MFILE:
+   case MF_MDIR:
+#endif
+      ; // don't put return false here to avoid VC++ warnings
    }
 
    return false;
@@ -268,6 +276,16 @@ inline bool CanDeleteFolderOfType(FolderType folderType)
           folderType == MF_IMAP;
 }
 
+/// is it a file or directory local folder
+inline bool IsFileOrDirFolder(FolderType folderType)
+{
+   FolderType ft = GetFolderType(folderType);
+   return ft == MF_FILE || ft == MF_MH
+#ifdef EXPERIMENTAL
+      || ft == MF_MFILE || ft == MF_MDIR
+#endif
+      ;
+}
 // ----------------------------------------------------------------------------
 // Icon functions: the associated icon for the folder is shown in the folder
 // tree control, folder options dialog &c

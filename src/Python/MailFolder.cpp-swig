@@ -82,17 +82,19 @@ static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
     String * _arg3 = &NULLstring;
     String * _arg4 = &NULLstring;
     String * _arg5 = &NULLstring;
-    bool  _arg6 = FALSE;
+    String * _arg6 = &NULLstring;
+    bool  _arg7 = FALSE;
     char * _argc1 = 0;
     char * _argc2 = 0;
     char * _argc3 = 0;
     char * _argc4 = 0;
     char * _argc5 = 0;
-    int tempbool6;
+    char * _argc6 = 0;
+    int tempbool7;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"is|ssssi:MailFolder_OpenFolder",&_arg0,&_argc1,&_argc2,&_argc3,&_argc4,&_argc5,&tempbool6)) 
+    if(!PyArg_ParseTuple(args,"is|sssssi:MailFolder_OpenFolder",&_arg0,&_argc1,&_argc2,&_argc3,&_argc4,&_argc5,&_argc6,&tempbool7)) 
         return NULL;
     if (_argc1) {
         if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
@@ -124,8 +126,14 @@ static PyObject *_wrap_MailFolder_OpenFolder(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _arg6 = (bool ) tempbool6;
-    _result = (MailFolder *)MailFolder::OpenFolder(_arg0,*_arg1,_arg2,*_arg3,*_arg4,*_arg5,_arg6);
+    if (_argc6) {
+        if (SWIG_GetPtr(_argc6,(void **) &_arg6,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 7 of MailFolder_OpenFolder. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _arg7 = (bool ) tempbool7;
+    _result = (MailFolder *)MailFolder::OpenFolder(_arg0,*_arg1,_arg2,*_arg3,*_arg4,*_arg5,*_arg6,_arg7);
     SWIG_MakePtr(_ptemp, (char *) _result,"_MailFolder_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
@@ -354,35 +362,6 @@ static PyObject *_wrap_MailFolder_GetName(PyObject *self, PyObject *args) {
     _result = new String (MailFolder_GetName(_arg0));
     SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
-    return _resultobj;
-}
-
-#define MailFolder_SetName(_swigobj,_swigarg0)  (_swigobj->SetName(_swigarg0))
-static PyObject *_wrap_MailFolder_SetName(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    MailFolder * _arg0;
-    String * _arg1;
-    char * _argc0 = 0;
-    char * _argc1 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"ss:MailFolder_SetName",&_argc0,&_argc1)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_SetName. Expected _MailFolder_p.");
-        return NULL;
-        }
-    }
-    if (_argc1) {
-        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MailFolder_SetName. Expected _String_p.");
-        return NULL;
-        }
-    }
-    MailFolder_SetName(_arg0,*_arg1);
-    Py_INCREF(Py_None);
-    _resultobj = Py_None;
     return _resultobj;
 }
 
@@ -2236,7 +2215,6 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_CountRecentMessages", _wrap_MailFolder_CountRecentMessages, 1 },
 	 { "MailFolder_CountNewMessages", _wrap_MailFolder_CountNewMessages, 1 },
 	 { "MailFolder_CountMessages", _wrap_MailFolder_CountMessages, 1 },
-	 { "MailFolder_SetName", _wrap_MailFolder_SetName, 1 },
 	 { "MailFolder_GetName", _wrap_MailFolder_GetName, 1 },
 	 { "MailFolder_ListFolders", _wrap_MailFolder_ListFolders, 1 },
 	 { "MailFolder_Subscribe", _wrap_MailFolder_Subscribe, 1 },

@@ -495,8 +495,15 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &server,
                            String const &login,
                            String const &password)
-   : MailFolderCmn(profile)
+   : MailFolderCmn()
 {
+   m_Profile = profile;
+   if(m_Profile)
+      m_Profile->IncRef();
+   else
+      m_Profile = ProfileBase::CreateEmptyProfile();
+   UpdateConfig();
+   
    if(! cclientInitialisedFlag)
       CClientInit();
    Create(typeAndFlags);
@@ -506,6 +513,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
          m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
+
 }
 
 void
@@ -541,7 +549,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_FolderFlags = GetFolderFlags(typeAndFlags);
    m_SearchMessagesFound = NULL;
    SetType(type);
-
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 #ifdef USE_THREADS
@@ -571,6 +578,8 @@ MailFolderCC::~MailFolderCC()
    }
    // note that RemoveFromMap already removed our node from streamList, so
    // do not do it here again!
+   if(m_Profile)
+      m_Profile->DecRef();
 }
 
 
@@ -655,8 +664,6 @@ static String GetImapSpec(int type, int flags,
    return mboxpath;
 }
 
-
-
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
@@ -719,7 +726,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    }
    mf = new
       MailFolderCC(typeAndFlags,mboxpath,profile,server,login,pword);
-   mf->SetName(symname);
+   mf->m_Name = symname;
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
 

@@ -2313,7 +2313,7 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
       interface->GetMApplication()->GetProfile()->
       readEntry(MP_NEWMAIL_FOLDER,MP_NEWMAIL_FOLDER_D);
 
-   MailFolder * mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, folderName);
+   MailFolder * mf = MailFolder::OpenFolder(folderName);
 
    int rc = -1;
    if(mf)

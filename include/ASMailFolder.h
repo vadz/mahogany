@@ -244,18 +244,10 @@ public:
 
 
    static ASMailFolder * Create(MailFolder *mf);
-   //FIXME: temporary kludge till we have a nicer interface
-   static ASMailFolder * OpenFolder(int typeAndFlags,
-                                const String &path,
-                                ProfileBase *profile = NULL,
-                                const String &server = NULLstring,
-                                const String &login = NULLstring,
-                                const String &password = NULLstring,
-                                bool halfopen = FALSE)
+
+   static ASMailFolder * OpenFolder(const String &path)
       {
-         MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
-                                                 profile, server, login,
-                                                 password, halfopen);
+         MailFolder *mf = MailFolder::OpenFolder(path);
          if ( !mf ) return NULL;
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
@@ -264,10 +256,9 @@ public:
 
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
-   static ASMailFolder * OpenFolder(const class MFolder *mfolder,
-                                    ProfileBase *profile)
+   static ASMailFolder * OpenFolder(const class MFolder *mfolder)
       {
-         MailFolder *mf = MailFolder::OpenFolder(mfolder, profile);
+         MailFolder *mf = MailFolder::OpenFolder(mfolder);
          if ( !mf ) return NULL;
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
@@ -466,7 +457,7 @@ public:
                       bool subscribed_only = false,
                       const String &reference = "",
                       UserData ud = 0);
-   //@}
+   //@}   
    //@}
    //@}
    /**@name Synchronous Access Functions */

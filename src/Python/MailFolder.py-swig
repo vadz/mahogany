@@ -33,9 +33,6 @@ class MailFolderPtr(MObjectRCPtr):
         val = StringPtr(val)
         val.thisown = 1
         return val
-    def SetName(self,arg0):
-        val = MailFolderc.MailFolder_SetName(self.this,arg0.this)
-        return val
     def CountMessages(self,arg0,arg1):
         val = MailFolderc.MailFolder_CountMessages(self.this,arg0,arg1)
         return val
@@ -354,6 +351,8 @@ def MailFolder_OpenFolder(arg0,arg1,*args):
     try: argl[2] = argl[2].this
     except: pass
     try: argl[3] = argl[3].this
+    except: pass
+    try: argl[4] = argl[4].this
     except: pass
     args = tuple(argl)
     val = apply(MailFolderc.MailFolder_OpenFolder,(arg0,arg1.this,)+args)

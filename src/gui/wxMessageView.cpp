@@ -997,7 +997,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       char *filename = wxGetTempFileName("Mtemp");
       if(MimeSave(mimeDisplayPart,filename))
       {
-         ASMailFolder *mf = ASMailFolder::OpenFolder(MF_FILE, filename);
+         ASMailFolder *mf = ASMailFolder::OpenFolder(filename);
          wxMessageViewFrame * f = new wxMessageViewFrame(mf, 1, NULL, m_Parent);
          f->SetTitle(mimetype);
          mf->DecRef();
