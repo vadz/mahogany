@@ -10,7 +10,11 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "Mpch.h"
+
 #ifdef USE_SSL
+
+#include <wx/dynlib.h>
 
 /* These functions will serve as stubs for the real openSSL library
    and must be initialised at runtime as c-client actually links
@@ -114,8 +118,6 @@ SSL_METHOD * SSLv23_client_method(void)
 #   endif
 
 } // extern "C"
-
-#include <wx/dynlib.h>
 
 bool gs_SSL_loaded = FALSE;
 bool gs_SSL_available = FALSE;

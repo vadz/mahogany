@@ -73,7 +73,7 @@ extern "C"
 #include "MInterface.h"
 #include "Message.h"
 
-#include "SendMessageCC.h"
+#include "SendMessage.h"
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
@@ -1642,7 +1642,7 @@ PalmOSModule::SendEMails(void)
          continue; // skip deleted records
       unpack_Mail(&mail, buffer, len);
 
-      SendMessageCC *smsg = m_MInterface->CreateSendMessageCC(m_Profile,Prot_SMTP);
+      SendMessage *smsg = m_MInterface->CreateSendMessage(m_Profile,Prot_SMTP);
       smsg->SetSubject(mail.subject);
       smsg->SetAddresses(mail.to, mail.cc, mail.bcc);
       if(mail.replyTo)
