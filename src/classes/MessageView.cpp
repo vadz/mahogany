@@ -2447,10 +2447,6 @@ MessageView::DoMenuCommand(int id)
          Update();
          break;
 
-      case WXMENU_MSG_SHOWMIME:
-         ShowMIMEDialog(m_mailMessage->GetTopMimePart());
-         break;
-
       default:
          if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
          {

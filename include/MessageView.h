@@ -293,9 +293,6 @@ protected:
                               const MimePart *part,
                               const wxPoint& pt) = 0;
 
-   /// show the MIME structure dialog
-   virtual void ShowMIMEDialog(const MimePart *part) = 0;
-
    //@}
 
    /** @name Update
@@ -578,6 +575,9 @@ private:
 
    friend class ProcessEvtHandler;
    friend class MessageViewer;
+
+   // it calls our PopupMIMEMenu()
+   friend class wxMIMETreeDialog;
 };
 
 // ----------------------------------------------------------------------------

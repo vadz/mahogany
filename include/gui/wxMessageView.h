@@ -64,9 +64,6 @@ public:
                               const MimePart *part,
                               const wxPoint& pt);
 
-   /// show the MIME tree
-   virtual void ShowMIMEDialog(const MimePart *part);
-
 protected:
    virtual MessageViewer *CreateDefaultViewer() const;
 

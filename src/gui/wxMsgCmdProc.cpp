@@ -25,6 +25,10 @@
 
 #ifndef USE_PCH
    #include <wx/utils.h>      // for wxBeginBusyCursor()
+
+   #include <wx/layout.h>
+   #include <wx/statbox.h>
+   #include <wx/stattext.h>
 #endif // USE_PCH
 
 #include "strutil.h"          // for strutil_uniq_array()
@@ -43,6 +47,11 @@
 #include "gui/wxMenuDefs.h"
 #include "Mdnd.h"
 #include "MDialogs.h"         // for MDialog_ShowText
+
+#include "gui/wxDialogLayout.h"
+
+#include <wx/imaglist.h>
+#include <wx/treectrl.h>
 
 class AsyncStatusHandler;
 
@@ -160,6 +169,9 @@ protected:
    /// Show the raw text of the specified message
    void ShowRawText(UIdType uid);
 
+   /// Show the MIME structure of the specified message
+   void ShowMIMEDialog(UIdType uid);
+
 #ifdef EXPERIMENTAL_show_uid
    /// Show the string uniquely identifying the message
    void ShowUIDL(UIdType uid);
@@ -257,9 +269,159 @@ private:
             m_msgError;
 };
 
+// ----------------------------------------------------------------------------
+// MIME dialog classes
+// ----------------------------------------------------------------------------
+
+class wxMIMETreeCtrl : public wxTreeCtrl
+{
+public:
+   wxMIMETreeCtrl(wxWindow *parent) : wxTreeCtrl(parent, -1)
+   {
+      InitImageLists();
+   }
+
+private:
+   void InitImageLists();
+};
+
+class wxMIMETreeData : public wxTreeItemData
+{
+public:
+   wxMIMETreeData(const MimePart *mimepart) { m_mimepart = mimepart; }
+
+   const MimePart *GetMimePart() const { return m_mimepart; }
+
+private:
+   const MimePart *m_mimepart;
+};
+
+class wxMIMETreeDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxMIMETreeDialog(const MimePart *partRoot,
+                    wxWindow *parent,
+                    MessageView *msgView);
+
+protected:
+   // event handlers
+   void OnTreeItemRightClick(wxTreeEvent& event);
+
+private:
+   // fill the tree
+   void AddToTree(wxTreeItemId id, const MimePart *mimepart);
+
+   // total number of parts
+   size_t m_countParts;
+
+   // GUI controls
+   wxStaticBox *m_box;
+   wxTreeCtrl *m_treectrl;
+
+   // the parent message view
+   MessageView *m_msgView;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxMIMETreeDialog, wxManuallyLaidOutDialog)
+   EVT_TREE_ITEM_RIGHT_CLICK(-1, wxMIMETreeDialog::OnTreeItemRightClick)
+END_EVENT_TABLE()
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxMIMETreeCtrl
+// ----------------------------------------------------------------------------
+
+void wxMIMETreeCtrl::InitImageLists()
+{
+   wxIconManager *iconManager = mApplication->GetIconManager();
+
+   wxImageList *imaglist = new wxImageList(32, 32);
+
+   for ( int i = MimeType::TEXT; i <= MimeType::OTHER; i++ )
+   {
+      // this is a big ugly: we need to get just the 
+      MimeType mt((MimeType::Primary)i, "");
+      wxIcon icon = iconManager->GetIconFromMimeType(mt.GetType());
+      imaglist->Add(icon);
+   }
+
+   AssignImageList(imaglist);
+}
+
+// ----------------------------------------------------------------------------
+// wxMIMETreeDialog
+// ----------------------------------------------------------------------------
+
+wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
+                                   wxWindow *parent,
+                                   MessageView *msgView)
+                : wxManuallyLaidOutDialog(parent,
+                                          _("MIME structure of the message"),
+                                          "MimeTreeDialog")
+{
+   // init members
+   m_msgView = msgView;
+   m_countParts = 0;
+   m_box = NULL;
+   m_treectrl = NULL;
+
+   // create controls
+   wxLayoutConstraints *c;
+   m_box = CreateStdButtonsAndBox(""); // label will be set later
+
+   m_treectrl = new wxMIMETreeCtrl(this);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_treectrl->SetConstraints(c);
+
+   // initialize them
+   AddToTree(wxTreeItemId(), partRoot);
+
+   m_treectrl->Expand(m_treectrl->GetRootItem());
+
+   m_box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
+
+   SetDefaultSize(4*wBtn, 10*hBtn);
+}
+
+void
+wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
+{
+   int image = mimepart->GetType().GetPrimary();
+   wxTreeItemId id  = m_treectrl->AppendItem(idParent,
+                                             MessageView::GetLabelFor(mimepart),
+                                             image, image,
+                                             new wxMIMETreeData(mimepart));
+
+   m_countParts++;
+
+   const MimePart *partChild = mimepart->GetNested();
+   while ( partChild )
+   {
+      AddToTree(id, partChild);
+
+      partChild = partChild->GetNext();
+   }
+}
+
+void wxMIMETreeDialog::OnTreeItemRightClick(wxTreeEvent& event)
+{
+   if ( m_msgView )
+   {
+      wxMIMETreeData *data =
+         (wxMIMETreeData *)m_treectrl->GetItemData(event.GetItem());
+
+      m_msgView->PopupMIMEMenu(m_treectrl, data->GetMimePart(), event.GetPoint());
+   }
+}
 
 // ----------------------------------------------------------------------------
 // AsyncStatusHandler
@@ -612,6 +774,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 #endif // EXPERIMENTAL_show_uid
 
+      case WXMENU_MSG_SHOWMIME:
+         ShowMIMEDialog(messages[0]);
+         break;
+
       default:
          // try passing it to message view
          if ( !m_msgView->DoMenuCommand(cmd) )
@@ -669,6 +835,37 @@ MsgCmdProcImpl::ShowRawText(UIdType uid)
    {
       MDialog_ShowText(GetFrame(), _("Raw message text"), text, "RawMsgPreview");
    }
+}
+
+void
+MsgCmdProcImpl::ShowMIMEDialog(UIdType uid)
+{
+   // do it synchronously (FIXME should we?)
+   MailFolder_obj mf = GetMailFolder();
+   CHECK_RET( mf, "no folder in MsgCmdProcImpl::ShowMIMEDialog" );
+
+   const MimePart *part = NULL;
+   Message *msg = mf->GetMessage(uid);
+   if ( msg )
+   {
+      part = msg->GetTopMimePart();
+   }
+
+   if ( !part )
+   {
+      wxLogError(_("Failed to retrieve the MIME structure of the message."));
+
+      return;
+   }
+
+   // only pass message view to the dialog to allow showing the context menu
+   // for the MIME parts - but for this we must be previewing this message!
+   wxMIMETreeDialog dialog(part, GetFrame(),
+                           m_msgView->GetUId() == uid ? m_msgView : NULL);
+
+   dialog.ShowModal();
+
+   msg->DecRef();
 }
 
 void
