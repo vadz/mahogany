@@ -525,7 +525,14 @@ public:
 
       m_isFrozen = false;
 
+      // FIXME: there seems to be some horrible bug in wxGTK - refreshing
+      //        from here simply doesn't do anything at all!!
+#ifndef __WXGTK__
       Refresh();
+#else
+      Hide();
+      Show();
+#endif
    }
 
 protected:
