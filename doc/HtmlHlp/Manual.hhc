@@ -146,6 +146,10 @@
 <param name="Local" value="Manual.html#SECTION00256000000000000000">
 <param name="Name" value="Filters">
 </OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00257000000000000000">
+<param name="Name" value="Spam filtering">
+</OBJECT>
 </UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00260000000000000000">
@@ -180,22 +184,26 @@
 <UL>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00271000000000000000">
-<param name="Name" value="Automatically remembered options">
+<param name="Name" value="Hierarchical options organization">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00272000000000000000">
-<param name="Name" value="Other options">
+<param name="Name" value="Automatically remembered options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00273000000000000000">
-<param name="Name" value="Remote configuration synchronisation">
+<param name="Name" value="Other options">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00274000000000000000">
-<param name="Name" value="Some Other Dialogs You May Encounter">
+<param name="Name" value="Remote configuration synchronisation">
 </OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 <param name="Local" value="Manual.html#SECTION00275000000000000000">
+<param name="Name" value="Some Other Dialogs You May Encounter">
+</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+<param name="Local" value="Manual.html#SECTION00276000000000000000">
 <param name="Name" value="Mahogany Plugin Modules">
 </OBJECT>
 </UL>
