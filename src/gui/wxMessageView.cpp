@@ -190,8 +190,13 @@ wxMessageView::wxMessageView(wxWindow *parent,
                              FolderView *folderView,
                              Profile *profile)
 {
+   // set it to NULL initially to avoid sending notification in
+   // OnViewerChange() for the initial dummy viewer
+   m_FolderView = NULL;
+
    Init(parent, profile);
 
+   // now really set it
    m_FolderView = folderView;
 }
 

@@ -552,8 +552,7 @@ MessageView::Init(wxWindow *parent, Profile *profile)
    if ( m_profile )
       m_profile->IncRef();
 
-   m_viewer = CreateDefaultViewer();
-   m_viewer->Create(this, parent);
+   SetViewer(NULL, parent);
 
    m_usingDefViewer = true;
 }
