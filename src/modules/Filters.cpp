@@ -2105,6 +2105,31 @@ static bool CheckForHTMLOnly(const Message *msg)
    return false;
 }
 
+// check if we have a message with "suspicious" MIME structure
+static bool CheckForSuspiciousMIME(const Message *msg)
+{
+   // we consider multipart/alternative message with one part only suspicious:
+   // although formally valid, there is really no legitimate reason to send
+   // them
+   //
+   // note that although other multipart messages with a single are weird too,
+   // there *is* some reason to send them, namely to protect the Base 64
+   // encoded parts from being corrupted by the mailing list trailers and
+   // although no client known to me does this currently it may happen in the
+   // future
+   const MimePart *part = msg->GetTopMimePart();
+   if ( !part || 
+            part->GetType() != MimeType(MimeType::MULTIPART, "alternative") )
+   {
+      // not multipart/alternative at all
+      return false;
+   }
+
+   // only return true if we have exactly one subpart
+   const MimePart *subpart = part->GetNested();
+   return subpart && !subpart->GetNext();
+}
+
 static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 {
    String arg;
@@ -2178,9 +2203,13 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          rc = msg->GetHeaderLine("Received", value) &&
                   CheckReceivedHeaders(value);
       }
+      else if ( test == SPAM_TEST_MIME )
+      {
+         rc = CheckForSuspiciousMIME(msg.Get());
+      }
       else if ( test == SPAM_TEST_HTML )
       {
-         rc = CheckForHTMLOnly(msg.operator->());
+         rc = CheckForHTMLOnly(msg.Get());
       }
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )

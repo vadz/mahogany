@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+16.12.02 VZ: yet another SPAM filter test: single part multipart/alternative
 16.12.02 VZ: added possibility to use '?' and '*' in address lists
 05.12.02 VZ: added trivial text markup (*bold* and _italic_ conventions) filter
 03.12.02 VZ: decrypting and verifying PGP messages starts to work

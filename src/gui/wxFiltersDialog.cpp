@@ -570,6 +570,7 @@ private:
    bool m_checkXAuthWarn:1;
    bool m_checkReceived:1;
    bool m_checkHtml:1;
+   bool m_checkMime:1;
 #ifdef USE_RBL
    bool m_checkRBL:1;
 #endif // USE_RBL
@@ -816,6 +817,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 #define MP_SPAM_HTML  "SpamHtml"
 #define MP_SPAM_HTML_D  0l
 
+#define MP_SPAM_MIME  "SpamMime"
+#define MP_SPAM_MIME_D  0l
+
 #ifdef USE_RBL
 #define MP_SPAM_RBL          "SpamIsInRBL"
 #define MP_SPAM_RBL_D          0l
@@ -834,6 +838,7 @@ static const ConfigValueDefault gs_SpamPageConfigValues[] =
    CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
    CONFIG_ENTRY(MP_SPAM_RECEIVED),
    CONFIG_ENTRY(MP_SPAM_HTML),
+   CONFIG_ENTRY(MP_SPAM_MIME),
 #ifdef USE_RBL
    CONFIG_ENTRY(MP_SPAM_RBL),
 #endif // USE_RBL
@@ -862,10 +867,17 @@ static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
    { gettext_noop("Suspicious \"&Received\" headers"),
      wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Unusual &MIME structure"), wxOptionsPage::Field_Bool, -1 },
 #ifdef USE_RBL
-   { gettext_noop("been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
+   { gettext_noop("Been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
 #endif // USE_RBL
 };
+
+wxCOMPILE_TIME_ASSERT
+(
+      WXSIZEOF(gs_SpamPageFieldInfos) == WXSIZEOF(gs_SpamPageConfigValues),
+      MismatchInSpamTests
+);
 
 static const wxOptionsPageDesc gs_SpamPageDesc =
    wxOptionsPageDesc(
@@ -901,6 +913,7 @@ OneCritControl::InitSpamOptions(const String& rule)
       m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
       m_checkReceived = MP_SPAM_RECEIVED_D;
       m_checkHtml = MP_SPAM_HTML_D;
+      m_checkMime = MP_SPAM_MIME_D;
 
 #ifdef USE_RBL
       m_checkRBL = MP_SPAM_RBL_D;
@@ -919,7 +932,8 @@ OneCritControl::InitSpamOptions(const String& rule)
 
       m_checkXAuthWarn =
       m_checkReceived =
-      m_checkHtml = false;
+      m_checkHtml =
+      m_checkMime = false;
 
       const wxArrayString tests = strutil_restore_array(testString);
       const size_t count = tests.GetCount();
@@ -940,6 +954,8 @@ OneCritControl::InitSpamOptions(const String& rule)
             m_checkReceived = true;
          else if ( t == SPAM_TEST_HTML )
             m_checkHtml = true;
+         else if ( t == SPAM_TEST_MIME )
+            m_checkMime = true;
 #ifdef USE_RBL
          else if ( t == SPAM_TEST_RBL )
             m_checkReceived = true;
@@ -966,6 +982,7 @@ OneCritControl::ShowDetails()
    profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
    profile->writeEntry(MP_SPAM_RECEIVED, m_checkReceived);
    profile->writeEntry(MP_SPAM_HTML, m_checkHtml);
+   profile->writeEntry(MP_SPAM_MIME, m_checkMime);
 #ifdef USE_RBL
    profile->writeEntry(MP_SPAM_RBL, m_checkRBL);
 #endif // USE_RBL
@@ -979,6 +996,7 @@ OneCritControl::ShowDetails()
       m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
       m_checkReceived = profile->readEntry(MP_SPAM_RECEIVED, 0l) != 0;
       m_checkHtml = profile->readEntry(MP_SPAM_HTML, 0l) != 0;
+      m_checkMime = profile->readEntry(MP_SPAM_MIME, 0l) != 0;
 #ifdef USE_RBL
       m_checkRBL = profile->readEntry(MP_SPAM_RBL, 0l) != 0;
 #endif // USE_RBL
@@ -1033,6 +1051,8 @@ OneCritControl::GetSpamTestArgument() const
       AddToSpamArgument(s, SPAM_TEST_RECEIVED);
    if ( m_checkHtml )
       AddToSpamArgument(s, SPAM_TEST_HTML);
+   if ( m_checkMime )
+      AddToSpamArgument(s, SPAM_TEST_MIME);
 #ifdef USE_RBL
    if ( m_checkRBL )
       AddToSpamArgument(s, SPAM_TEST_RBL);

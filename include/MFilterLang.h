@@ -39,6 +39,9 @@
 /// HTML contents at top level?
 #define SPAM_TEST_HTML "html"
 
+/// suspicious MIME structure?
+#define SPAM_TEST_MIME "badmime"
+
 /// blacklisted by the RBL?
 #define SPAM_TEST_RBL "rbl"
 
