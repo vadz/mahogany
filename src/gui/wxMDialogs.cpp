@@ -61,7 +61,7 @@
 #include <wx/choice.h>
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
-
+#include <wx/utils.h>
 #include <wx/help.h>
 
 #include "MFolderDialogs.h"
