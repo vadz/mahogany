@@ -16,6 +16,8 @@ $Id$
   + cut&paste, different cursor for focus/no focus
 
 - reply/forward buttons for messageview/folderview
+- only quote the selected text in reply/forward if there is any selection
+  (as in XFMail) - very handy
 - update FolderView if mailbox has shrunk  (which callback gets called?)
 - New Mail indicator
 - Check for new mail button
@@ -51,6 +53,9 @@ KB: Vadim, could you check the following ADB-wxOptionsDlg please?
   make AdbEdit textctrl accept pasted text
   make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
   add Picture field to Adb
+  + implement "internal clipboard" for
+    - cut-&-paste
+    - drag-&-drop
 
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
   + should have "restore defaults", would be nice to be able to do it for
