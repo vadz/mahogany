@@ -1,9 +1,10 @@
 A new release of Mahogany has been made.
-Binaries for Linux-x86-glibc2.0 and source are available immediately,
-binaries for Solaris and Linux-axp as well as RedHat rpm  and Debian
-deb packages are following soon.
 
-Announcing Mahogany Version 0.22a 
+Binaries for Debian Linux i386, Debian Linux AXP, Sun Solaris and
+source are available immediately, binaries for RedHat Linux 5.2 and
+6.0 will follow within the next two days.
+
+Announcing Mahogany Version 0.23a 
 ===================================================================== 
 
 Mahogany is an OpenSource(TM) cross-platform mail and news client. It
@@ -28,27 +29,22 @@ framework, building on the GTK+ toolkit on Unix.
 
 Mahogany is constantly being tested on Linux-x86, Linux-alpha,
 Solaris-sparc and MS Windows. It should compile and work on any major
-Unix platform. A binary release for MS Windows will follow soon.
+Unix platform.
 
-CHANGES AGAINST RELEASE 0.21a:
+CHANGES AGAINST RELEASE 0.22a / UPDATE :
 ===================================================================== 
 
-Release 0.22a is mainly a bugfix release against 0.21a.
+For the Unix versions, there are few differences, minor bug fixes and
+improvements, especially in the message editor, which behaves almost
+perfectly now. The major new addition is the Windows version, built
+from the same source as the Unix one. We hope to keep both platforms
+in sync for the future, making common releases. Also, work on a MacOS
+port has left the early stages and is making progress.
 
+- First useable, public Windows release for Windows NT/95/98.
 - All known (crash-inducing) bugs fixed.
-- Message editor/viewer improvements, adding clipboard support and
-  selections.
-- Message editor bug fixes
-- wxGTK layout bug fixes
-- German, French, Spanish translations
-- Text-search in messages
-- Several minor usability fixes, sub-folder support fixed.
-- Addressbook fixes
-- TCP timeouts configurable
-- Support for setting the Reply-To: header from
-  To: field in message replies.
-- Minor addressbook bug fixes (better handling of special characters
-  in address or name)
+- Significant message editor/viewer improvements.
+- Several minor usability fixes and some significant speed-ups.
 
 DOWNLOAD 
 ===================================================================== 
@@ -64,12 +60,12 @@ NEXT
 
 For the next release we are currently working on the following:
 
-     completion of filtering rules/scoring code 
+     completion of filtering rules/scoring code     
+     asynchoronous folder access and multi-threading
      subscription management for NNTP/IMAP/newsspool 
-     DND with KDE/Gnome filemanagers (now supported by wxGTK) 
      Templates/style-sheets for message composition and flexible reply handling 
+     DND with KDE/Gnome filemanagers (now supported by wxGTK) 
      Messages sorting, threading, scoring and searching 
-     multi-threading to avoid delays and timeouts 
  possibly also:
      GPG/PGP support 
      built-in HTML viewer
