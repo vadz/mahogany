@@ -1242,6 +1242,9 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 
 #ifdef USE_UTF8
 
+//Folder names (IMAP, but can be used for local mailboxes also) may contain
+//characters encoded in "modified-UTF7" (RFC 2060)
+
 wxString wxFolderTreeNode::GetName() const
 {
    wxString name, nameutf7, nameutf8;
@@ -1303,9 +1306,13 @@ wxString wxFolderTreeNode::GetName() const
          {
             // valid IMAP modified UTF-7 mailbox name, converting to
             // environment's default encoding for now (FIXME)
-            nameutf7 << "-";
 
-            //convert UTF-7 to UTF-8:
+            //Convert UTF-7 to UTF-8. Instead of this we could just use
+            //wxString(nameutf7.wc_str(wxConvUTF7), wxConvLocal);
+            //but wxWindows does not support UTF-7 yet, so we first convert
+            //UTF-7 to UTF-8 using c-client function and then convert
+            //UTF-8 to current environment's encoding.
+            nameutf7 << "-";
             SIZEDTEXT *text7 = new SIZEDTEXT;
             SIZEDTEXT *text8 = new SIZEDTEXT;
             text7->data = (unsigned char *) nameutf7.c_str();
