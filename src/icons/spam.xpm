@@ -23,7 +23,7 @@ static char *spam_xpm[] = {
 "< c #9b9b96969696",
 "1 c #7d7d7a7a7a7a",
 "2 c #aeaeacacacac",
-"3 c None,
+"3 c None",
 "4 c Gray99",
 "5 c #efefefefefef",
 "6 c #e4e4e4e4e4e4",
