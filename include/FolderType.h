@@ -150,6 +150,15 @@ inline bool FolderTypeHasUserName(FolderType type)
    return false;
 }
 
+/// is this folder a group?
+inline bool FolderTypeIsGroup(FolderType type)
+{
+   return
+      type == MF_GROUP 
+      || type == MF_GROUP_NEWS 
+      || type == MF_GROUP_IMAP ;
+
+}
 /// is this a folder type for which server field makes sense?
 inline bool FolderTypeHasServer(FolderType type)
 {

@@ -208,7 +208,7 @@ public:
       { return m_DialupSupport; }
 protected:
    /// Send all messages from the outbox "name"
-   void SendOutbox(String name, Protocol prot);
+   void SendOutbox(String name, Protocol prot, bool checkOnline);
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 

@@ -8,9 +8,6 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	add some error detection, online detection to
-		SendOutbox()
-
 9		exiting program does not call auto-expunge
 		functionality in main folder
 
@@ -18,21 +15,14 @@ $Id$
 		the log window?
 
 7		selecting/deselecting only message in folder
+
 7		show headers menu entry is inverted ??
 
 7		After setting date format and closing date fmt dialog, 
 		main config dialog remains completely disabled under
 		KDE and must be closed with window-close button
 
-9		create folder group demands password and sets server
-		name
-
-9		file browse button for folder creation demands an
-		existing file name -> makes little sense when creating
-		a new folder  
-9		cannot create new file from folder create dialog (M
-		bug, not wxGTK, save-as-file works!)
-
+9		create folder group sets server name
 
 9		Option to set central new mail folder is missing -
 		changing option manually in config file does not work
@@ -56,15 +46,14 @@ $Id$
 
 7		opening folder with password prompts twice at startup
 
-8		changing password on remote folder while open results
+8?		changing password on remote folder while open results
 		in empty folder, but no error message, as login no
-		longer works. 
+		longer works.  (still true_??)
 
 7	VZ/KB  UPGRADE.CPP/WIZARD:
 		- add support for Outbox and Trash folders
 		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
 
-4		cannot type text when NUMLOCK is on
 4		TABs in messages don't show (CRAC test message)
 
 6		implement temporary/fake Profile mode
@@ -81,9 +70,10 @@ $Id$
 		- write editor plugin translating keysyms to actions
 		- scroll to cursor after Find()
 		- ctrl keys not recognised when CAPSLOCK is down
-		- accents don´t work
-		garbage at end of messages is back
-	KB	add blinking cursor
+		- garbage at end of messages is back
+		- add blinking cursor
+		- cannot type text when NUMLOCK is on
+		- accents don´t work??
 
 	KB	MessageView:
 		 - should show cursor only on demand
@@ -124,13 +114,8 @@ $Id$
 		MailCollector, some kind of MailFolder::IsOK()?
 		-->failure counter in Ping() ?
 
-9	KB	check new mail after startup -- should be done already
-		--> seems problem with first folder listing not
-		    updating listing? CHECK
-
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
-
 
 4	KB	Nicer icons for some tabs and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
@@ -142,9 +127,6 @@ $Id$
 
 4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
-
-		When MailFolderCC is called from wxSubfolderDialog, it 
-		has no username in the IMAP spec. WHY??
 
 7      ?        We need a generic way to re-enable disabled pControls
 
@@ -184,8 +166,6 @@ $Id$
 		tooltip. Does this work under MSW? A wxGTK bug?
 		VZ: yes, it's a wxGTK bug.
 
-7 gtk		Mahogany occasionally doesn't terminate but remains in
-		gtk event loop without any open windows.
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5		File/Page Setup does nothing
 3		foldername in password prompt seems wrong

@@ -331,22 +331,23 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
    wxTextBrowseButton *btn;
    switch ( kind )
    {
-      case FileBtn:
-      case FileSaveBtn:
-         btn = new wxFileBrowseButton(text, GetCanvas(), kind == FileBtn);
-         break;
-
-      case FileOrDirBtn:
-         btn = new wxFileOrDirBrowseButton(text, GetCanvas());
-         break;
-
-      case ColorBtn:
-         btn = new wxColorBrowseButton(text, GetCanvas());
-         break;
-
-      default:
-         wxFAIL_MSG("unknown browse button kind");
-         return NULL;
+   case FileBtn:
+   case FileSaveBtn:
+      btn = new wxFileBrowseButton(text, GetCanvas(), kind == FileBtn);
+      break;
+      
+   case FileOrDirBtn:
+   case FileOrDirSaveBtn:
+      btn = new wxFileOrDirBrowseButton(text, GetCanvas(), kind == FileOrDirBtn);
+      break;
+      
+   case ColorBtn:
+      btn = new wxColorBrowseButton(text, GetCanvas());
+      break;
+      
+   default:
+      wxFAIL_MSG("unknown browse button kind");
+      return NULL;
    }
 
    wxLayoutConstraints *c = new wxLayoutConstraints;

@@ -818,15 +818,17 @@ MAppBase::InitGlobalDir()
 void
 MAppBase::SendOutbox(void)
 {
+   STATUSMESSAGE((_("Checking for queued messages...")));
    // get name of SMTP outbox:
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-   SendOutbox(outbox, Prot_SMTP);
+   SendOutbox(outbox, Prot_SMTP, true);
    outbox << _(M_NEWSOUTBOX_POSTFIX);
-   SendOutbox(outbox, Prot_NNTP);
+   SendOutbox(outbox, Prot_NNTP, false);
 }
 
 void
-MAppBase::SendOutbox(String outbox, Protocol protocol)
+MAppBase::SendOutbox(String outbox, Protocol protocol,
+                     bool checkOnline )
 {
    UIdType count = 0;
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
@@ -837,12 +839,34 @@ MAppBase::SendOutbox(String outbox, Protocol protocol)
       ERRORMESSAGE((msg));
       return;
    }
+
+   if(mf->CountMessages() == 0)
+   {  // nothing to do
+      mf->DecRef();
+      return;
+   }
+   
+   if(checkOnline && ! IsOnline())
+   {
+      if ( MDialog_YesNoDialog(
+         _("Cannot send queued messages while dialup network is down.\n"
+           "Do you want to go online now?"),
+         NULL,
+         MDIALOG_YESNOTITLE,
+         TRUE /* yes default */, "GoOnlineToSendOutbox") )
+      {
+         STATUSMESSAGE((_("Going online...")));
+         GoOnline();
+      }
+   }
+   
    HeaderInfoList *hil = mf->GetHeaders();
    if(! hil)
    {
       mf->DecRef();
       return; // nothing to do
    }
+
    const HeaderInfo *hi;
    
    Message *msg;

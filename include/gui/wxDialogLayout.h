@@ -373,9 +373,12 @@ public:
    wxTextCtrl *CreateFileOrDirEntry(const char *label,
                                     long widthMax,
                                     wxControl *last,
-                                    wxFileOrDirBrowseButton **ppButton = NULL)
+                                    wxFileOrDirBrowseButton **ppButton
+                                    = NULL,
+                                    bool open = TRUE)
    {
-      return CreateEntryWithButton(label, widthMax, last, FileOrDirBtn,
+      return CreateEntryWithButton(label, widthMax, last,
+                                   open ? FileOrDirBtn : FileOrDirSaveBtn,
                                    (wxTextBrowseButton **)ppButton);
    }
 
@@ -427,7 +430,8 @@ public:
                          size_t extraSpace = 0);
 
    // create an entry with a browse button
-   enum BtnKind { FileBtn, FileSaveBtn, FileOrDirBtn, ColorBtn };
+   enum BtnKind { FileBtn, FileSaveBtn, FileOrDirBtn,
+                  FileOrDirSaveBtn, ColorBtn };
    wxTextCtrl *CreateEntryWithButton(const char *label,
                                      long widthMax,
                                      wxControl *last,

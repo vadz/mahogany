@@ -898,7 +898,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_mailboxname = CreateTextWithLabel(labels[Label_Mailboxname], widthMax, m_server);
    m_newsgroup = CreateTextWithLabel(labels[Label_Newsgroup], widthMax, m_mailboxname);
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
-   m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
+   m_path = CreateFileOrDirEntry(labels[Label_Path], widthMax,
+                                 m_comment, &m_browsePath,
+                                 FALSE /* open = allow non existing file */);
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
@@ -1086,10 +1088,10 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
             "All the fields shown in this dialog have a slightly different\n"
             "meaning for the folders of type \"Group\". Instead of applying\n"
             "to this folder (which wouldn't make sense, as such folders don't\n"
-            "contain any mail messages at all, but only other folders, these\n"
+            "contain any mail messages at all, but only other folders) these\n"
             "values will be used as defaults for all folders created under\n"
-            "this group folder."
-                         ), this, _("Group folders hint"), "FolderGroupHint");
+            "this group folder."),
+                         this, _("Group folders hint"), "FolderGroupHint");
       }
 
       // set the defaults for this kind of folder
@@ -1608,7 +1610,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // check that we have the username/password
    String loginName = m_login->GetValue(),
           password = m_password->GetValue();
+
+   // For normal folders, we make sure that a password is specified if 
+   // needed:
    bool hasUsername = FolderTypeHasUserName(folderType);
+   if(! FolderTypeIsGroup(folderType))
+   {
    if ( hasUsername )
    {
       // anonymous access?
@@ -1655,7 +1662,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          }
       }
    }
-
+   }
    // 1st step: create the folder in the MFolder sense. For this we need only
    // the name and the type
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);

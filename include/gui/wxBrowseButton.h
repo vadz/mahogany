@@ -149,8 +149,9 @@ private:
 class wxFileOrDirBrowseButton : public wxFileBrowseButton
 {
 public:
-   wxFileOrDirBrowseButton(wxTextCtrl *text, wxWindow *parent)
-      : wxFileBrowseButton(text, parent) { m_browseForFile = TRUE; }
+   wxFileOrDirBrowseButton(wxTextCtrl *text, wxWindow *parent,
+                           bool open = TRUE)
+      : wxFileBrowseButton(text, parent, open) { m_browseForFile = TRUE; }
 
    // get or change the current browsing mode
       // returns TRUE if in "file" mode, FALSE if in "directory" one
