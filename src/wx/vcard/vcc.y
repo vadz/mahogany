@@ -101,10 +101,6 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 /* give function prototypes to suppress warnings from gcc */
 int yylex();
 
-#if defined(WIN32) || defined(_WIN32)
-#define snprintf _snprintf
-#endif
-
 #include <string.h>
 #if !defined(__MWERKS__) && !defined(__FreeBSD__)
 #include <malloc.h>
@@ -1182,9 +1178,13 @@ DLLEXPORT(VObject*) Parse_MIME_FromFileName(char *fname)
 	return o;
 	}
     else {
-	char msg[256];
-	snprintf(msg, sizeof(msg), "can't open file '%s' for reading\n", fname);
-	mime_error_(msg);
+	char *msg;
+	msg = (char *)malloc(strlen(fname) + 256);
+	if ( msg ) {
+	    sprintf(msg, "can't open file '%s' for reading\n", fname);
+	    mime_error_(msg);
+	    free(msg);
+	    }
 	return 0;
 	}
     }
