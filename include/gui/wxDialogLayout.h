@@ -353,7 +353,7 @@ public:
                                   const wxString& label,
                                   const wxString& windowName);
 
-   virtual void OnChange(wxEvent& event);
+   virtual void OnChange(wxCommandEvent& event);
 
 private:
    DECLARE_EVENT_TABLE()
@@ -628,7 +628,7 @@ protected:
    // callbacks which will set the parent's dirty flag whenever
    // something changes
    // ---------------------------------------------------------
-   void OnChange(wxEvent& event);
+   void OnChange(wxCommandEvent& event);
 
 private:
    DECLARE_EVENT_TABLE()

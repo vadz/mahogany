@@ -26,7 +26,7 @@
 #undef HAVE_PI_ACCEPT_TO
 
 /** Define if you use Python. */
-//#define USE_PYTHON 1
+#define USE_PYTHON 1
 
 /** Define if you have libswigpy */
 #undef HAVE_SWIGLIB

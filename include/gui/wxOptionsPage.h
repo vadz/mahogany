@@ -158,10 +158,10 @@ public:
    void OnChange(wxEvent& event);
 
       // called when a {radio/combo/check}box value changes
-   void OnControlChange(wxEvent& event);
+   void OnControlChange(wxCommandEvent& event);
 
       // called when a textctrl value changes
-   void OnTextChange(wxEvent& event);
+   void OnTextChange(wxCommandEvent& event);
 
    // enable/disable controls (better than OnUpdateUI here)
    void UpdateUI();

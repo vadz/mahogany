@@ -426,7 +426,7 @@ wxOptionsPageSubdialog::wxOptionsPageSubdialog(Profile *profile,
 {
 }
 
-void wxOptionsPageSubdialog::OnChange(wxEvent&)
+void wxOptionsPageSubdialog::OnChange(wxCommandEvent&)
 {
    // we don't do anything, but just eat these messages - otherwise they will
    // confuse wxOptionsPage which is our parent because it only processes
@@ -1031,7 +1031,7 @@ void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
 // wxNotebookPageBase
 // ----------------------------------------------------------------------------
 
-void wxNotebookPageBase::OnChange(wxEvent& /* event */)
+void wxNotebookPageBase::OnChange(wxCommandEvent& /* event */)
 {
    wxOptionsEditDialog *dlg = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
    if ( dlg )

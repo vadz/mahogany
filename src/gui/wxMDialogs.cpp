@@ -242,7 +242,11 @@ public:
 
    // if using a textctrl and not a combobox, this will process the
    // ENTER key
-   void OnEnter(wxEvent&) { TransferDataFromWindow(); EndModal(wxID_OK); }
+   void OnEnter(wxCommandEvent&)
+   {
+      TransferDataFromWindow();
+      EndModal(wxID_OK);
+   }
 
 private:
    wxString      m_strText;

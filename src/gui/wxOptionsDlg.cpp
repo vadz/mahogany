@@ -2430,7 +2430,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
    return TRUE;
 }
 
-void wxOptionsPage::OnTextChange(wxEvent& event)
+void wxOptionsPage::OnTextChange(wxCommandEvent& event)
 {
    // special case of text controls associated with the colour browsing
    // buttons: we have to translate this event into one from the button itself
@@ -2460,7 +2460,7 @@ void wxOptionsPage::OnChange(wxEvent& event)
    }
 }
 
-void wxOptionsPage::OnControlChange(wxEvent& event)
+void wxOptionsPage::OnControlChange(wxCommandEvent& event)
 {
    OnChange(event);
 }

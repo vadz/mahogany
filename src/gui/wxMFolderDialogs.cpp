@@ -305,7 +305,7 @@ public:
    void DoUpdateUIForFolder();
 
    // handlers
-   void OnChange(wxKeyEvent& event);
+   void OnChange(wxCommandEvent& event);
    void OnRadioBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnChoice(wxCommandEvent& event);
@@ -1182,7 +1182,7 @@ wxFolderPropertiesPage::OnEvent()
 }
 
 void
-wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
+wxFolderPropertiesPage::OnChange(wxCommandEvent& event)
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
 
