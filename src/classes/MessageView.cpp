@@ -1651,6 +1651,7 @@ MessageView::ProcessPart(const MimePart *mimepart)
                }
 
                // show just the best one
+               CHECK_RET(partBest != 0, "No part can be displayed !");
                ShowPart(partBest);
             }
             else // assume MIXED for all unknown
