@@ -2506,8 +2506,9 @@ VerifyStdFolder(const MOption& optName,
       // check that it has right flags
       int flagsCur = folder->GetFlags();
 
-      // i.e. it should have all the flags specified
-      int flagsNew = flagsCur | flags;
+      // i.e. it should have all the flags specified except for MF_FLAGS_HIDDEN
+      // because we want to allow the user to unhide the folders
+      int flagsNew = flagsCur | (flags & ~MF_FLAGS_HIDDEN);
 
       // and it shouldn't have the incoming flag unless explicitly given
       // because it doesn't make sense to collect mail from any of the system
