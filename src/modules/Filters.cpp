@@ -2442,10 +2442,10 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   (
                      wxString::Format
                      (
-                        _("Filtering %u messages in folder '%s'...\n\n\n"),
+                        _("Filtering %u messages in folder '%s'..."),
                         count, m_MailFolder->GetName().c_str()
                      ),
-                     "",
+                     "\n\n",  // must be tall enough for 3 lines
                      2*count,
                      frame,
                      false,   // !"disable parent only"
