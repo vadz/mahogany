@@ -37,11 +37,9 @@
 #   include "Mcommon.h"
 #   include "gui/wxllist.h"
 #   include "gui/wxlparser.h"
-#   define  SHOW_SELECTIONS 1
 #else
 #   include "wxllist.h"
 #   include "wxlparser.h"
-#   define SHOW_SELECTIONS 1
 #endif
 
 #ifndef USE_PCH
@@ -2906,22 +2904,22 @@ wxLayoutList::DeleteSelection(void)
 void
 wxLayoutList::StartHighlighting(wxDC &dc)
 {
-#if SHOW_SELECTIONS
-   dc.SetTextForeground(m_CurrentStyleInfo.m_bg);
-   dc.SetTextBackground(m_CurrentStyleInfo.m_fg);
+   wxColour col = m_CurrentStyleInfo.m_bg;
+   dc.SetTextForeground(col);
+
+   wxColour colInv(0xff ^ col.Red(), 0xff ^ col.Green(), 0xff ^ col.Blue());
+   dc.SetTextBackground(colInv);
+
    dc.SetBackgroundMode(wxSOLID);
-#endif
 }
 
 /// Ends highlighting the selection
 void
 wxLayoutList::EndHighlighting(wxDC &dc)
 {
-#if SHOW_SELECTIONS
    dc.SetTextForeground(m_CurrentStyleInfo.m_fg);
-   dc.SetTextBackground(m_CurrentStyleInfo.m_bg);
+   dc.SetTextBackground(m_CurrentStyleInfo.m_bg); // needed?
    dc.SetBackgroundMode(wxTRANSPARENT);
-#endif
 }
 
 

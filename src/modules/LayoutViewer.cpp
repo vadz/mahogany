@@ -296,9 +296,12 @@ LayoutViewer::LayoutViewer()
 
 void LayoutViewer::SetTextColour(const wxColour& col)
 {
-    // const_cast is harmless but needed because of the broken wxLayoutWindow
-    // API
-    m_window->GetLayoutList()->SetFontColour((wxColour *)&col);
+   if ( !col.Ok() )
+      col = GetOptions().FgCol;
+
+   // const_cast is harmless but needed because of the broken
+   // wxLayoutWindow API
+   m_window->GetLayoutList()->SetFontColour((wxColour *)&col);
 }
 
 // ----------------------------------------------------------------------------
@@ -324,10 +327,8 @@ void LayoutViewer::Clear()
                    (int)wxNORMAL,
                    0,
                    (wxColour *)&profileValues.FgCol,
-                   NULL, //(wxColour *)&profileValues.BgCol,
+                   (wxColour *)&profileValues.BgCol,
                    true /* no update */);
-
-   //m_window->SetBackgroundColour( profileValues.BgCol );
 
    // speeds up insertion of text
    m_window->GetLayoutList()->SetAutoFormatting(FALSE);
@@ -579,10 +580,15 @@ void LayoutViewer::InsertText(const String& text, const TextStyle& style)
    wxColour colFg, colBg;
    if ( style.HasTextColour() )
       colFg = style.GetTextColour();
+   else
+      colFg = GetOptions().FgCol;
    if ( style.HasBackgroundColour() )
       colBg = style.GetBackgroundColour();
+   else
+      colBg = GetOptions().BgCol;
 
-   llist->SetFontColour(&colFg, &colBg);
+   llist->SetFontColour(colFg.Ok() ? &colFg : NULL,
+                        colBg.Ok() ? &colBg : NULL);
 
    wxFontEncoding enc = style.HasFont() ? style.GetFont().GetEncoding()
                                         : wxFONTENCODING_SYSTEM;
