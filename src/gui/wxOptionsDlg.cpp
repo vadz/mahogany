@@ -885,7 +885,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
       "your ISP here but please only do it if told to do so\n"
       "by your ISP as it is not usually required and may lead\n"
       "problems if specified when it is not needed."),
-     Field_Message, -1,                        },
+     Field_Message | Field_AppWide, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text | Field_AppWide,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
@@ -904,7 +904,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "mail or news. Tick the following boxes to activate this.\n"
                   "You may also have to tell Mahogany to accept unsigned (or\n"
                   "self-signed) certificates if your organization uses them."),
-                                                   Field_Message, -1 },
+                                                   Field_Message | Field_AppWide, -1 },
    { gettext_noop("SMTP server uses SS&L"),        Field_Bool | Field_AppWide,
 #ifdef USE_SENDMAIL
                                                   -ConfigField_UseSendmail,
@@ -1163,7 +1163,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
-                  "This is useful for the folders which you often reopen."), Field_Message, -1 },
+                  "This is useful for the folders which you often reopen.\n"
+                  "Note that this option is ignored for POP3 folders."), Field_Message, -1 },
    { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
    { gettext_noop("Send outgoing messages later"), Field_Bool |
                                                    Field_Restart |

@@ -2871,12 +2871,9 @@ MailFolderCC::Ping(void)
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
    {
-      // This is terribly inefficient to do, but needed for some sick
-      // POP3 servers which don't report new mail otherwise
-      if( (GetFlags() & MF_FLAGS_REOPENONPING)
-          // c-client 4.7-bug: MH folders don't notice new
-          // messages without reopening them
-          || GetType() == MF_MH )
+       // c-client 4.7-bug: MH folders don't notice new messages without
+      // reopening them: check if this is still needed with imap2000 (TODO)
+      if ( GetType() == MF_POP || GetType() == MF_MH )
       {
          wxLogTrace(TRACE_MF_CALLS,
                     "MailFolderCC::Ping() forcing close on folder %s.",

@@ -494,23 +494,30 @@ MailFolderCmn::DecRef()
       {
          int delay;
 
-         if ( GetFlags() & MF_FLAGS_KEEPOPEN )
+         // we shouldn't keep connection to the POP folders whatever the
+         // options for it are (the new versions of Mahogany don't allow the
+         // user to set them in this way anyhow but the settings could come
+         // from an older version) as POP3 protocol doesn't really support this
+         if ( GetType() != MF_POP )
          {
-            // never close it at all
-            delay = MfCloseEntry::NEVER_EXPIRES;
-         }
-         else
-         {
-            // don't close it only if the linger delay is set
-            delay = READ_CONFIG(GetProfile(), MP_FOLDER_CLOSE_DELAY);
-         }
+            if ( GetFlags() & MF_FLAGS_KEEPOPEN )
+            {
+               // never close it at all
+               delay = MfCloseEntry::NEVER_EXPIRES;
+            }
+            else
+            {
+               // don't close it only if the linger delay is set
+               delay = READ_CONFIG(GetProfile(), MP_FOLDER_CLOSE_DELAY);
+            }
 
-         if ( delay > 0 )
-         {
-            Checkpoint(); // flush data immediately
+            if ( delay > 0 )
+            {
+               Checkpoint(); // flush data immediately
 
-            // this calls IncRef() on us so we won't be deleted right now
-            gs_MailFolderCloser->Add(this, delay);
+               // this calls IncRef() on us so we won't be deleted right now
+               gs_MailFolderCloser->Add(this, delay);
+            }
          }
       }
    }

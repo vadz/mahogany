@@ -98,7 +98,7 @@ enum FolderFlags
    MF_FLAGS_NEWMAILFOLDER = 0x00001000, // the central new mail folder
    MF_FLAGS_DONTDELETE    = 0x00002000, // forbid deletion of this folder
    MF_FLAGS_KEEPOPEN      = 0x00004000, // keep this folder open at all times
-   MF_FLAGS_REOPENONPING  = 0x00008000, // force a close and re-open on a ping
+   MF_FLAGS_REOPENONPING  = 0x00008000, // -- value unused any more --
    MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
    MF_FLAGS_HIDDEN        = 0x00020000, // don't show in the folder tree
    MF_FLAGS_GROUP         = 0x00040000, // contains subfolders

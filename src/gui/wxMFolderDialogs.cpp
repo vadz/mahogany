@@ -454,8 +454,6 @@ protected:
    wxCheckBox *m_keepOpen;
    /// Is folder hidden?
    wxCheckBox *m_isHidden;
-   /// Force re-open on ping?
-   wxCheckBox *m_forceReOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
 #ifdef USE_SSL
@@ -498,8 +496,6 @@ protected:
    /// the initial value of the "accept unsigned certificates" flag
    bool m_originalAcceptUnsignedSSL;
 #endif // USE_SSL
-   /// the initial value of the "force re-open" flag
-   bool m_originalForceReOpenValue;
 #ifdef USE_LOCAL_CHECKBOX
    /// the initial value of the "is local" flag
    bool m_originalIsLocalValue;
@@ -1045,7 +1041,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_IsHidden,
       Label_CanBeOpened,
       Label_IsGroup,
-      Label_ForceReOpen,
       Label_FolderSubtype,
       Label_FolderIcon,
       Label_Max
@@ -1074,7 +1069,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Hide folder in tree"),
       gettext_noop("Can &be opened"),
       gettext_noop("Contains subfold&ers"),
-      gettext_noop("&Reopen on ping (broken POP3 servers only)"),
       gettext_noop("Folder sub&type"),
       gettext_noop("&Icon for this folder"),
    };
@@ -1117,19 +1111,18 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, lastCtrl);
    m_canBeOpened = CreateCheckBox(labels[Label_CanBeOpened], widthMax, m_isHidden);
    m_isGroup = CreateCheckBox(labels[Label_IsGroup], widthMax, m_canBeOpened);
-   m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_isGroup);
-   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_forceReOpen);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isGroup);
 
    // the checkboxes might not be very clear, so add some explanations in the
    // form of tooltips
-   m_forceReOpen->SetToolTip(_("Tick this box if Mahogany appears to have "
-                               "problems updating the folder listing.\n"
-                               "This is needed for some broken POP3 servers.\n"
-                               "Normally this is not needed."));
+   m_keepOpen->SetToolTip(_("Check this to always maintain connection "
+                            "to the server once it was established."));
+
    m_isAnonymous->SetToolTip(_("For the types of folders which require user "
                                "name and password check this to try to connect\n"
                                "without any - this might work or fail depending "
                                "on the server settings."));
+
 #ifdef USE_SSL
    m_useSSL->SetToolTip(_("This will use SSL authentication and encryption\n"
                           "for communication with the server."));
@@ -1441,12 +1434,9 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
       // no folder hierarchies under POP
       m_isGroup->SetValue(FALSE);
       m_isGroup->Enable(FALSE);
-   }
 
-   // this option only makes sense for POP, enable it for it
-   if ( !isIMAP )
-   {
-      m_forceReOpen->Enable(TRUE);
+      // can't keep a POP3 folder always opened
+      m_keepOpen->Enable(TRUE);
    }
 }
 
@@ -1572,14 +1562,13 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 #ifdef USE_SSL
       enableSSL = FolderTypeSupportsSSL(m_folderType);
 #endif // USE_SSL
-
-      // this only makes sense for POP3 so disable it by default
-      m_forceReOpen->Disable();
    }
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
 #endif // USE_SSL
+
+   m_keepOpen->Enable(TRUE);
 
    m_isAnonymous->Enable(enableAnonymous);
    m_login->Enable(enableLogin);
@@ -1638,7 +1627,6 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
          EnableTextWithLabel(m_server, TRUE);
          EnableTextWithLabel(m_newsgroup, TRUE);
          EnableTextWithButton(m_path, TRUE);
-         m_forceReOpen->Enable(TRUE);
          m_isGroup->Enable(TRUE);
 
          // a group can never be opened
@@ -2118,9 +2106,6 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    m_keepOpen->SetValue((flags & MF_FLAGS_KEEPOPEN) != 0);
 
-   m_originalForceReOpenValue = (flags & MF_FLAGS_REOPENONPING) != 0;
-   m_forceReOpen->SetValue(m_originalForceReOpenValue);
-
 #ifdef USE_LOCAL_CHECKBOX
    m_originalIsLocalValue = (flags & MF_FLAGS_ISLOCAL) != 0;
    m_isLocal->SetValue(m_originalIsLocalValue);
@@ -2306,8 +2291,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    if ( m_keepOpen->IsEnabled() && m_keepOpen->GetValue() )
       flags |= MF_FLAGS_KEEPOPEN;
-   if ( m_forceReOpen->GetValue() )
-      flags |= MF_FLAGS_REOPENONPING;
    if ( m_isHidden->GetValue() )
       flags |= MF_FLAGS_HIDDEN;
    if ( isGroup )
