@@ -62,18 +62,19 @@ FTPLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily"
 DOCSLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily/Mdocs.tar.gz"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
-HOME=/home/karsten
+REALHOME=$HOME
+KBHOME=/home/karsten
+HOME=$KBHOME
 WWWDIR=$HOME/WWW/Mahogany/daily
+
+LOGNAME="Mahogany Developers <m-developers@egroups.com>"
+export LOGNAME
 
 MNAME=mahogany
 MVERSION=0.23a
 
 WXNAME=wxGTK
 WXVERSION=2.1.11
-
-# obtain central options file from ftp server
-$SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
-( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
 
 if [ -f /etc/debian_version ]
 then
@@ -133,8 +134,9 @@ fi
 # our experimental web server / RH box
 if [ `hostname` = web.phy.hw.ac.uk ]
 then
-  WXPREFIX=$BUILDDIR/WXOPT
+  WXPREFIX=/usr
   MPREFIX=$BUILDDIR/MOPT
+  SCP=scp1
 fi
 
 # FreeBSD box
@@ -163,6 +165,12 @@ if [ "x$MAKE" = x ] ; then MAKE=make; fi
 
 CVSUSERID=KB@wxcvs.dhs.org
 
+# obtain central options file from ftp server
+$SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
+( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
+
+
+
 echo "OSTYPE=$OSTYPE"
 echo "BUILDDIR=$BUILDDIR"
 echo "DEBIAN=$DEBIAN"
@@ -173,6 +181,7 @@ echo "DESTDIR=$DESTDIR"
 echo "CVSUSERID=$CVSUSERID"
 echo "DOWXWIN=$DOWXWIN"
 echo "DEBUG=$DEBUG"
+echo "SCP=$SCP"
 
 export OSTYPE
 
@@ -205,13 +214,14 @@ else
   echo "Using latest version of wxGTK."
 fi
 
+echo REALHOME=$HOME
 if [ ! -d wxWindows ]
 then
   echo "wxWindows directory does not exist. Doing fresh checkout."
-  cvs checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1
+  ( HOME=$REALHOME; $CVS checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1)
 else
   echo "Updating wxWindows sources."
-  (cd wxWindows && cvs update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+  (HOME=$REALHOME; cd wxWindows && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
 fi
 if [ $? -gt 1 ]
 then
@@ -269,11 +279,11 @@ if [ ! -d $NAME-$VERSION ]
 then
   echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
   rm -rf M
-  cvs checkout M >>$BUILDDIR/cvs.log 2>&1 && \
+  (HOME=$REALHOME; $CVS checkout M >>$BUILDDIR/cvs.log 2>&1) && \
   mv M $NAME-$VERSION
 else
   echo "Updating Mahogany sources."
-  (cd $NAME-$VERSION && cvs update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
+  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS update -d $TAG >>$BUILDDIR/cvs.log 2>&1)
 fi
 if [ $? -gt 1 ]
 then
