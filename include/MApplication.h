@@ -186,7 +186,7 @@ public:
    virtual class wxIconManager *GetIconManager(void) const = 0;
 
    /// called by the main frame when it's closed
-   void OnMainFrameClose() { m_topLevelFrame = NULL; }
+   void OnMainFrameClose() { m_topLevelFrame = NULL; m_cycle = ShuttingDown; }
 
    /// @name What are we doing?
    //@{
