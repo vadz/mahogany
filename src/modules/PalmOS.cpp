@@ -209,7 +209,7 @@ class PalmOSModule : public MModule
    void Disconnect(void);
    friend class PiConnection;
 
-   bool IsConnected(void) const { return m_PiSocket != -1; }
+   bool IsConnected(void) const { return m_PiSocket >= 0; }
    
    void GetConfig(void);
 
@@ -543,10 +543,13 @@ PalmOSModule::Connect(void)
       {
          int oldPiSocket = m_PiSocket;
          acceptThread->Run();
-         wxThread::Sleep(5000);
+         time_t now = time(NULL);
+         while(time(NULL)-now < 5)
+            ;
+         //wxThread::Sleep(5000);
          if(m_PiSocket < 0)
          {
-            acceptThread->Kill();
+            //acceptThread->Kill();
             pi_close(oldPiSocket);
          }
       }
