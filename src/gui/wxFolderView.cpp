@@ -106,7 +106,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers
+          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers, View
       */
       const char keycodes_en[] = gettext_noop("DUXCSMRFOPHV ");
       const char *keycodes = _(keycodes_en);
