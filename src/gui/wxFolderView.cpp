@@ -67,9 +67,12 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
+#define wxFLC_DEFAULT_SIZES "80:80:80:80:80"
 
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
+   wxLogDebug("FolderListCtrl::OnKey, this=%p", this);
+
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
       return; // nothing to do
 
@@ -194,6 +197,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Parent = parent;
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
+   m_Initialised = false;
+
    EnableSelectionCallbacks(true);
 
    int
@@ -212,12 +217,13 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       // If there is no entry for the listctrl, force one by
       // inheriting from NewMail folder.
       String entry = fv->GetProfile()->readEntry("FolderListCtrl","");
-      if(! entry.Length())
+      if(! entry.Length() || entry == wxFLC_DEFAULT_SIZES)
       {
          String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
          ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
-         fv->GetProfile()->writeEntry("FolderListCtrl",
-                                      p->readEntry("FolderListCtrl",""));
+         entry = p->readEntry("FolderListCtrl","");
+         if(entry.Length() && entry != wxFLC_DEFAULT_SIZES)
+            fv->GetProfile()->writeEntry("FolderListCtrl", entry);
          p->DecRef();
       }
    }
@@ -268,7 +274,8 @@ wxFolderListCtrl::Clear(void)
    int x,y;
    GetClientSize(&x,&y);
 
-   SaveWidths();
+   if(m_Initialised)
+      SaveWidths(); // save widths of old columns
 
    ClearAll();
 
@@ -281,6 +288,8 @@ wxFolderListCtrl::Clear(void)
    }
 
    RestoreWidths();
+   m_Initialised = true; // now we have proper columns set up
+
    SetFocus(); // otherwise we lose it...strange
 }
 
