@@ -93,18 +93,24 @@ public:
    /**
       Check if the message is a spam.
 
+      If param argument is empty, all filters are used with default options.
+      Otherwise only the filters whose names appear in "param" are used so if
+      you want the dspam filter to be used you must have "dspam=" in the param
+      string, i.e. it must be present even though it currently has no options.
+
       @param msg the message to check
-      @param params array containing the stringified options for the filters
-                    (each element is of the form "name=options" where "name" is
-                    the name of the filter and options depend on filter)
+      @param param either empty or contains the stringified options for the
+                   filters of the form "name1=options1;...;nameN=optionsN"
+                   where "name"s are the same as GetName() return values and
+                   "options" may be empty
       @param result place holder for the message explaining why the message was
                     deemed to be spam, if the filter can tell it, ignored if
-                    the return value is false
+                    the return value is false (may be NULL)
       @return true if the message is deemed to be a spam, false otherwise
     */
    static bool CheckIfSpam(const Message& msg,
-                           const wxArrayString& params,
-                           String *result);
+                           const String& param = _T(""),
+                           String *result = NULL);
 
    /**
       Show a GUI dialog allowing the user to configure all spam filters.

@@ -117,31 +117,40 @@ void SpamFilter::Train(const Message& msg, bool isSpam)
 /* static */
 bool
 SpamFilter::CheckIfSpam(const Message& msg,
-                        const wxArrayString& params,
+                        const String& paramsAll,
                         String *result)
 {
    LoadAll();
 
-   // break down the parameters into names and parameters
+   // break down the parameters (if we have any) into names and values
    wxSortedArrayString names;
    wxArrayString values;
-   const size_t count = params.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   if ( !paramsAll.empty() )
    {
-      wxString param = params[n];
-      int pos = param.Find(_T('='));
-      if ( pos == wxNOT_FOUND )
-      {
-         // hack: for backwards compatibility with older versions when there
-         // was only one spam filter
-         param = _T("headers=") + param;
-         pos = 7;
-      }
+      // hack: for backwards compatibility with older versions when there was
+      // only one spam filter
+      String paramsAllReal(paramsAll.Find(_T(';')) == wxNOT_FOUND
+                              ? _T("headers=") + paramsAll + _T(";dspam=")
+                              : paramsAll);
 
-      // insert the value in the same position in values array as name is going
-      // to have in the names one (as it's sorted we don't know where will it
-      // be)
-      values.Insert(param.c_str() + pos + 1, names.Add(wxString(param, pos)));
+      wxArrayString params(strutil_restore_array(paramsAll, _T(';')));
+      const size_t count = params.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const wxString& param = params[n];
+         int pos = param.Find(_T('='));
+         if ( pos == wxNOT_FOUND )
+         {
+            wxLogDebug(_T("Bogus spam function argument \"%s\" ignored."),
+                       param.c_str());
+            continue;
+         }
+
+         // insert the value in the same position in values array as name is
+         // going to have in the names one (as it's sorted we don't know where
+         // will it be)
+         values.Insert(param.c_str() + pos + 1, names.Add(wxString(param, pos)));
+      }
    }
 
 
@@ -150,10 +159,19 @@ SpamFilter::CheckIfSpam(const Message& msg,
    {
       const String& name(p->GetName());
 
-      int n = names.Index(name);
       String param;
-      if ( n != wxNOT_FOUND )
+      if ( !paramsAll.empty() )
+      {
+         int n = names.Index(name);
+         if ( n == wxNOT_FOUND )
+         {
+            // skip filters not appearing in paramsAll
+            continue;
+         }
+
          param = values[(size_t)n];
+      }
+      //else: use all filters
 
       if ( p->DoCheckIfSpam(msg, param, result) )
       {

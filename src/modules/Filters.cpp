@@ -1870,15 +1870,13 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       return false;
 
    wxArrayString params;
-   const size_t count = args->Count();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      params.Add(args->GetArg(n)->Evaluate().GetString());
-   }
+   if ( args->Count() != 1 )
+      return 0;
 
+   const wxString param(args->GetArg(0)->Evaluate().GetString());
    gs_spamTest.clear();
 
-   return SpamFilter::CheckIfSpam(*msg, params, &gs_spamTest);
+   return SpamFilter::CheckIfSpam(*msg, param, &gs_spamTest);
 }
 
 static Value func_msgbox(ArgList *args, FilterRuleImpl *p)
