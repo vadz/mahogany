@@ -83,18 +83,17 @@ M_OVERRIDES(modules,modules,USE_MODULES,auto,
 --with-modules=xxx      one of static/none/dynamic)
 
 M_OVERRIDES(ssl,SSL support,USE_SSL,1,
---without-ssl           do not include SSL support (requires openSSL))
+--with-ssl=DIR          path to SSL directories (requires openSSL))
 
 AC_MSG_CHECKING(for install location)
-m_default_prefix=/usr
 case "$prefix" in
-NONE)	AC_CACHE_VAL(m_cv_prefix,m_cv_prefix=$m_default_prefix);;
+NONE)	AC_CACHE_VAL(m_cv_prefix,m_cv_prefix=$ac_default_prefix);;
 *)	m_cv_prefix=$prefix ;;
 esac
 AC_MSG_RESULT($m_cv_prefix)
 case "$m_cv_prefix" in /*) ;; *)
-	AC_MSG_WARN([--prefix=$prefix must be an absolute path name, using $m_default_prefix])
-	m_cv_prefix=$m_default_prefix
+	AC_MSG_WARN([--prefix=$prefix must be an absolute path name, using $ac_default_prefix])
+	m_cv_prefix=$ac_default_prefix
 esac
 prefix=$m_cv_prefix
 
@@ -369,31 +368,47 @@ case "$USE_PCH" in 1)
 esac
 
 dnl Use SSL (requires openSSL)
+case "$USE_SSL" in
+0)	ssl_option=nope ;;
+1)	AC_CHECK_HEADER(openssl/ssl.h, ssl_option=ok, ssl_option=fail) ;;
+/*)	AC_CHECK_HEADER(openssl/ssl.h, ssl_option=ok,
+	[AC_MSG_CHECKING(for openssl/ssl.h in $USE_SSL/include)
+	if test -f "$USE_SSL"/include/openssl/ssl.h
+	then	AC_MSG_RESULT(yes)
+		ssl_option=oklib
+		CPPFLAGS="$CPPFLAGS -I$USE_SSL/include"
+	else	AC_MSG_RESULT(no)
+		ssl_option=fail
+	fi]) ;;
+*)	AC_MSG_WARN([Did not understand --with-ssl=$USE_SSL])
+	ssl_option=fail ;;
+esac
 MAKE_USESSL=
 CCLIENT_EXTRAAUTHENTICATORS=
-case "$USE_SSL" in
-1)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
+CCLIENT_EXTRACFLAGS=
+case "$ssl_option" in
+nope)	;;
+fail)	AC_MSG_WARN([Cannot find openssl/ssl.h - SSL support disabled])
+	m_cv_USE_SSL=0 ;;
+ok*)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
 	AC_CHECK_FUNC(gethostname,, AC_CHECK_LIB(resolv,gethostname))
 	AC_CHECK_FUNC(gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
-	AC_CHECK_HEADERS(openssl/ssl.h,[
-		MAKE_USESSL="USESSL=yes"
-		CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
-		AC_DEFINE(USE_SSL)
-		dnl We assume no idea/no dsa/no rsa as this is easiest
-		dnl to compile. It doesn't matter anyway as we load openssl
-		dnl later, but we must be able to compile the header file.
-		AC_DEFINE(NO_IDEA)
-		AC_DEFINE(NO_DSA)
-		AC_DEFINE(NO_RSA)
-	], AC_MSG_WARN(Cannot find openssl/ssl.h - SSL support disabled.))
+	LIBS="-lssl -lcrypto $LIBS" 
+	case "$ssl_option" in oklib) LIBS="-L$USE_SSL/lib $LIBS" ;; esac
+	MAKE_USESSL="USESSL=yes"
+	CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
+	AC_DEFINE(USE_SSL)
+	# We assume no idea/no dsa/no rsa as this is easiest
+	# to compile. It doesn't matter anyway as we load openssl
+	# later, but we must be able to compile the header file.
+	AC_DEFINE(NO_IDEA)
+	AC_DEFINE(NO_DSA)
+	AC_DEFINE(NO_RSA)
 	CCLIENT_EXTRACFLAGS="\"EXTRACFLAGS=-DNO_IDEA -DNO_DSA -DNO_RSA\""
-	;;
-*)	CCLIENT_EXTRACFLAGS=
 esac
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
 AC_SUBST(CCLIENT_EXTRACFLAGS)
-AC_SUBST(SSL_LIBS)
 
 dnl --------------------------------------------------------------------------
 dnl check for other libraries
