@@ -238,6 +238,8 @@ enum ConfigFields
    ConfigField_NewMailNotify,
    ConfigField_NewMailNotifyThresholdHelp,
    ConfigField_NewMailNotifyDetailsThreshold,
+   ConfigField_NewMailNewOnlyIfUnseenHelp,
+   ConfigField_NewMailNewOnlyIfUnseen,
    ConfigField_NewMailUpdateHelp,
    ConfigField_NewMailUpdateInterval,
    ConfigField_NewMailMonitorIntervalDefault,
@@ -1096,6 +1098,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Number,
                                                    ConfigField_NewMailNotify },
 
+   { gettext_noop("Normally only unread messages are considered as \"new\" mail.\n"
+                  "You can uncheck this checkbox to apply new mail processing\n"
+                  "to all messages appearing in the folder, even already read ones."), Field_Message, -1 },
+   { gettext_noop("New messages must be &unread"), Field_Bool, -1 },
+
    { gettext_noop("The first setting below specifies how often should Mahogany\n"
                   "update the currently opened folders while the second one\n"
                   "specifies the default polling interval for the folders which\n"
@@ -1739,6 +1746,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_NONE(), // details threshold help
    CONFIG_ENTRY(MP_SHOW_NEWMAILINFO),
+
+   CONFIG_NONE(), // "new mail must be unread" help
+   CONFIG_ENTRY(MP_NEWMAIL_UNSEEN),
 
    CONFIG_NONE(), // update help
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
