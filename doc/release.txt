@@ -24,7 +24,7 @@ a) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
 
 b) doc/Mannounce.txt
 
-c) README, CHANGES
+c) README, CHANGES, doc/relnotes.txt
 
 d) doc/release.txt to add any steps which are not yet in this file :-)
 
@@ -54,6 +54,8 @@ d) Win32 binaries
 ----------------------
 
 To upload.sourceforge.net, then create the release from SF project admin page.
+Use doc/relnotes.txt for the release notes and the "Changes" part of
+doc/Mannounce.txt for the change log.
 
 5. Announcing the release
 -------------------------

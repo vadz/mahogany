@@ -1,12 +1,13 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 10.03.01
-Version: the information in this file applies to alpha 0.62
+Date: 14.06.01
+Version: the information in this file applies to alpha 0.63
 
 0. Requirments
 --------------
 
- a) Win95/98/NT 4.0. Mahogany has been tested the most under NT 4.0, but it
-    also works (with very minor shortcomings) under Windows 9x.
+ a) Win95/98/NT 4.0/W2K. Mahogany has been tested the most under NT 4.0, but
+    it is also known to work under Windows 9x and Windows 2000. It does not
+    run under Windows 3.1.
 
  b) You need a POP3 or IMAP4 (recommended, especially for slow connection!)
     server to read e-mail and an SMTP server to send it. Reading and sending
@@ -15,8 +16,8 @@ Version: the information in this file applies to alpha 0.62
     want to try it out.
 
  c) If you plan to use Python scripting with Mahogany, you need to have Python
-    2.0 installed on your system, please refer to http://www.python.org/ for
-    details.
+    1.5, 2.0 (preferred) or 2.1 installed on your system, please refer to
+    http://www.python.org/ for details.
 
 1. Installation
 ---------------
@@ -38,11 +39,11 @@ Version: the information in this file applies to alpha 0.62
     HKCU\Software\wxWindows\M, so they will have to be deleted manually if you
     later want to uninstall the program.
 
- c) installation over previous versions: if you're one of courageous people
-    who have tried pre-alpha 0.23, please delete/uninstall it before
-    installing this version. The registry settings will be updated
-    automatically and so may be left, but you should not try to install the
-    program in the same directory.
+ c) upgrading: don't uninstall Mahogany 0.62 if you want to keep your existing
+    settings. You may install 0.63 either into the same directory as 0.62 or
+    in another one (in which case you should move your existing mailbox files
+    to the new directory before running the program if you wish to continue
+    using them)
 
 2. Miscellaneous remarks
 ------------------------
@@ -69,11 +70,9 @@ Version: the information in this file applies to alpha 0.62
 3. Differences from the Unix version
 ------------------------------------
 
- All of features enumerated below work in the Unix version, but are not
-yet implemented under Windows:
+ The features enumerated below work in the Unix version, but are not yet
+implemented under Windows:
 
- a) there is no XFace support yet
-
- b) Windows version doesn't support encrypted communications using SSL
-
- c) no Palm support (synchronization with hand held devices)
+ a) Windows version doesn't support encrypted communications using SSL
+ b) no Palm support (synchronization with hand held devices)
+ c) no support for local MTA, mail can be sent only using SMTP
