@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * PalmOS - a PalmOS connectivity module for Mahogany               *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@gmx.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -520,7 +520,11 @@ PalmOSModule::SendEMails(void)
   Message(msg);
 #endif
 
-  /* Check outbox of pilot: */
+  /**
+   **
+   ** Check outbox of pilot and send messages out:
+   **
+   **/
   struct Mail mail;
   int attr;
   int size, len;
@@ -595,6 +599,11 @@ PalmOSModule::SendEMails(void)
 }
 
 
+/**
+ **
+ ** Copy messages from palmbox folder to handheld:
+ **
+ **/
 void
 PalmOSModule::StoreEMails(void)
 {
@@ -675,7 +684,20 @@ PalmOSModule::StoreEMails(void)
             time(&tt);
             t.date = *localtime(&tt);
 
-            msg->WriteToString(content, false /* headers */);
+            content = "";
+            for(int partNo = 0; partNo < msg->CountParts(); partNo++)
+            {
+               if(msg->GetPartType(partNo) == Message::MSG_TYPETEXT
+                  && ( msg->GetPartMimeType(partNo) == "TEXT/PLAIN"
+                       || msg->GetPartMimeType(partNo) == "TEXT/plain" 
+                     )
+                  )
+                  content << msg->GetPartContent(partNo);
+               else
+                  content << '[' << msg->GetPartMimeType(partNo) <<
+                     ']' << '\n';
+            }
+            // msg->WriteToString(content, false /* headers */);
             String content2;
             const char *cptr = content.c_str();
             while(*cptr)
