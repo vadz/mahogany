@@ -3725,8 +3725,6 @@ String FilterRuleApply::ResultsMessage()
       {
          textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
                    << m_parent->m_copiedTo;
-
-         m_parent->m_copiedTo.clear();
       }
       else if ( wasDeleted )
       {
@@ -3781,6 +3779,9 @@ FilterRuleApply::UpdateProgressDialog()
       // see comment above
       wxLogStatus(_T("%s"), textLog.c_str());
    }
+
+   // We don't need this anymore
+   m_parent->m_copiedTo.clear();
 
    return true;
 }
