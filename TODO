@@ -13,6 +13,13 @@ $Id$
 		Also: dialog: wrong handling of "all files" pattern as "*.*"
 		instead of just "*"
 
+7		opening folder with password prompts twice at startup
+
+8		changing password on remote folder while open results
+		in empty folder, but no error message, as login no
+		longer works. 
+
+
 4		BBDB save on exit dialog needs "don't show again" box
 
 4		cannot type text when NUMLOCK is on
@@ -73,6 +80,9 @@ $Id$
 
 9	VZ	deleting groups from an ADB book messes up the book and
 		deletes other non-selected groups and entries, too
+
+9	VZ/KB	deleting entry from an ADB book can cause leak of
+		MObjectRC (FCEntryGroup) (from BBDB book)
 
 6	VZ	Adbframe: when creating new entry, the selection
 		should move to that, so it is displayed and can be
