@@ -45,7 +45,7 @@
 class AdbVCardExporter : public AdbExporter
 {
 public:
-   virtual bool Export(const AdbEntryGroup& group, const String& dest);
+   virtual bool Export(AdbEntryGroup& group, const String& dest);
    virtual bool Export(const AdbEntry& entry, const String& dest);
 
 protected:
@@ -53,7 +53,7 @@ protected:
    static bool DoExportEntry(const AdbEntry& entry,
                              const wxString& filename);
 
-   static bool DoExportGroup(const AdbEntryGroup& group,
+   static bool DoExportGroup(AdbEntryGroup& group,
                              const wxString& dirname);
 
    DECLARE_ADB_EXPORTER();
@@ -224,7 +224,7 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    return TRUE;
 }
 
-bool AdbVCardExporter::DoExportGroup(const AdbEntryGroup& group,
+bool AdbVCardExporter::DoExportGroup(AdbEntryGroup& group,
                                      const wxString& dirname)
 {
    // before doing anything, ensure that the directory exists
@@ -280,7 +280,7 @@ bool AdbVCardExporter::DoExportGroup(const AdbEntryGroup& group,
 // AdbVCardExporter public API
 // ----------------------------------------------------------------------------
 
-bool AdbVCardExporter::Export(const AdbEntryGroup& group, const String& dest)
+bool AdbVCardExporter::Export(AdbEntryGroup& group, const String& dest)
 {
    wxString dirname = dest;
    if ( !dirname )

@@ -29,6 +29,7 @@
 #endif //USE_PCH
 
 #include <wx/file.h>
+#include <wx/hashmap.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -40,8 +41,9 @@
 
 // fwd decl
 class LineEntry;
+class LineEntryData;
 
-WX_DEFINE_SORTED_ARRAY(LineEntry *,LineEntryArray);
+WX_DECLARE_STRING_HASH_MAP(RefCounter<LineEntryData>,LineEntryArray);
 
 class LineBook : public AdbBook
 {
@@ -59,9 +61,9 @@ public:
    virtual AdbEntryGroup *GetGroup() const { return NULL; }
 
    // AdbEntryGroup
-   virtual AdbEntry *GetEntry(const String& name) const;
+   virtual AdbEntry *GetEntry(const String& name);
 
-   virtual bool Exists(const String& path) const;
+   virtual bool Exists(const String& path);
 
    virtual size_t GetEntryNames(wxArrayString& names) const;
    virtual size_t GetGroupNames(wxArrayString& names) const
@@ -82,7 +84,7 @@ public:
    virtual void DeleteGroup(const String&)
       { FAIL_MSG( _T("LineBook::DeleteGroup was called.") ); }
 
-   virtual AdbEntry *FindEntry(const wxChar *name) const;
+   virtual AdbEntry *FindEntry(const wxChar *name);
 
    // AdbBook
    virtual bool IsSameAs(const String& name) const;
@@ -102,15 +104,12 @@ public:
    }
    virtual String GetDescription() const { return m_file; }
 
-   virtual size_t GetNumberOfEntries() const { return m_entries.GetCount(); }
+   virtual size_t GetNumberOfEntries() const { return m_entries.size(); }
 
    virtual bool IsLocal() const { return true; }
    virtual bool IsReadOnly() const;
    
    virtual bool Flush();
-   
-   int IndexByName(const String &name) const;
-   LineEntry *FindLineEntry(const String& name) const;
    
    bool IsBad() const { return m_bad; }
    
@@ -130,51 +129,74 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
+// Separated from LineEntry to avoid cyclic links with LineBook
+class LineEntryData : public MObjectRC
+{
+public:
+   LineEntryData() : m_dirty(false) {}
+   
+   void GetField(size_t n, String *pstr) const;
+
+   void ClearDirty() { m_dirty = false; }
+   bool IsDirty() const { return m_dirty; }
+
+   void SetField(size_t n, const String& strValue);
+
+   int Matches(const wxChar *str, int where, int how) const;
+
+   WeakRef<LineEntry> m_handle;
+
+private:
+   String m_address;
+   bool m_dirty;
+};
+
+ostream& operator << (ostream& out, const LineEntryData& entry);
+
 // our AdbEntryData implementation
 class LineEntry : public AdbEntry
 {
 public:
    // ctor
-   LineEntry(LineBook *parent,const String& name);
+   LineEntry(RefCounter<LineBook> parent,RefCounter<LineEntryData> data);
 
    // implement interface methods
 
    // AdbEntry
-   virtual AdbEntryGroup *GetGroup() const { return m_book; }
+   
+   // Don't call IncRef
+   virtual AdbEntryGroup *GetGroup() const { return m_book.Get(); }
 
    virtual void GetFieldInternal(size_t n, String *pstr) const
       { GetField(n, pstr); }
-   virtual void GetField(size_t n, String *pstr) const;
+   virtual void GetField(size_t n, String *pstr) const
+      { m_data->GetField(n, pstr); }
 
    virtual size_t GetEMailCount() const { return 0; }
    virtual void GetEMail(size_t, String *) const
       { FAIL_MSG( _T("LineEntry::GetEMail was called.") ); }
 
-   virtual void ClearDirty() { m_dirty = false; }
-   virtual bool IsDirty() const { return m_dirty; }
+   virtual void ClearDirty() { m_data->ClearDirty(); }
+   virtual bool IsDirty() const { return m_data->IsDirty(); }
 
-   virtual void SetField(size_t n, const String& strValue);
+   virtual void SetField(size_t n, const String& strValue)
+      { m_data->SetField(n, strValue); }
+
    virtual void AddEMail(const String&)
    {
       FAIL_MSG( _T("Nobody asked LineBook whether it supports AddEMail.") );
    }
    virtual void ClearExtraEMails() { }
 
-   virtual int Matches(const wxChar *str, int where, int how) const;
-
-   int Compare(LineEntry *right) { return m_name.compare(right->m_name); }
-   const String& GetName() const { return m_name; }
+   virtual int Matches(const wxChar *str, int where, int how) const
+      { return m_data->Matches(str, where, how); }
    
    static String StripSpace(const String &address);
 
 private:
-   LineBook *m_book;
-   String m_name;
-   String m_address;
-   bool m_dirty;
+   RefCounter<LineBook> m_book;
+   RefCounter<LineEntryData> m_data;
 };
-
-ostream& operator << (ostream& out, const LineEntry& entry);
 
 // our AdbDataProvider implementation
 class LineDataProvider : public AdbDataProvider
@@ -200,11 +222,6 @@ IMPLEMENT_ADB_PROVIDER(LineDataProvider, true,
 // LineBook
 // ----------------------------------------------------------------------------
 
-static int LineEntryCompare(LineEntry *left, LineEntry *right)
-{
-   return left->Compare(right);
-}
-
 // Duplicate of FCBook::GetFullAdbPath. It should be shared somehow.
 String LineBook::GetFullAdbPath(const String& filename)
 {
@@ -220,7 +237,7 @@ String LineBook::GetFullAdbPath(const String& filename)
 }
 
 LineBook::LineBook(const String& file)
-   : m_file(GetFullAdbPath(file)), m_entries(LineEntryCompare)
+   : m_file(GetFullAdbPath(file))
 {
    m_bad = false;
    m_dirty = false;
@@ -250,37 +267,28 @@ FileError:
 LineBook::~LineBook()
 {
    Flush();
-   
-   for ( size_t eachEntry = m_entries.GetCount(); eachEntry > 0;
-      --eachEntry )
-   {
-      LineEntry *deleted = m_entries.Item(eachEntry-1);
-      m_entries.RemoveAt(eachEntry-1);
-      deleted->DecRef();
-   }
 }
 
-AdbEntry *LineBook::GetEntry(const String& name) const
+AdbEntry *LineBook::GetEntry(const String& name)
 {
-   LineEntry *found = FindLineEntry(name);
+   AdbEntry *found = FindEntry(name.c_str());
    CHECK( found != NULL, NULL, _T("Asked for non-existent entry.") );
-   
    return found;
 }
 
-bool LineBook::Exists(const String& path) const
+bool LineBook::Exists(const String& path)
 {
-   return IndexByName(path) != wxNOT_FOUND;
+   return m_entries.find(path) != m_entries.end();
 }
 
 size_t LineBook::GetEntryNames(wxArrayString& names) const
 {
    names.Empty();
    
-   for ( size_t eachEntry = 0; eachEntry < m_entries.GetCount();
-      ++eachEntry )
+   for( LineEntryArray::const_iterator each = m_entries.begin();
+      each != m_entries.end(); ++each )
    {
-      names.Add(m_entries.Item(eachEntry)->GetName());
+      names.Add(each->first);
    }
    
    return names.GetCount();
@@ -288,34 +296,45 @@ size_t LineBook::GetEntryNames(wxArrayString& names) const
 
 AdbEntry *LineBook::CreateEntry(const String& name)
 {
-   CHECK( IndexByName(name) == wxNOT_FOUND, GetEntry(name),
+   CHECK( !Exists(name), GetEntry(name),
       _T("Create entry with duplicate name.") );
    
-   LineEntry *newEntry = new LineEntry(this,name);
+   RefCounter<LineEntryData> data(new LineEntryData);
+   RefCounter<LineEntry> entry(new LineEntry(
+      RefCounter<LineBook>::Convert(this),data));
    
-   m_entries.Add(newEntry);
+   LineEntryArray::value_type pair(name,data);
+   m_entries.insert(pair);
+
    m_dirty = true;
    
-   newEntry->IncRef();
-   return newEntry;
+   return entry.Release();
 }
 
 void LineBook::DeleteEntry(const String& name)
 {
-   int index = IndexByName(name);
-   ASSERT( index != wxNOT_FOUND );
-   
-   LineEntry *reference = m_entries.Item(index);
-   
-   m_entries.RemoveAt(index);
+   LineEntryArray::iterator index = m_entries.find(name);
+   CHECK_RET( index != m_entries.end(), _T("Deleted non-existent entry") );
+
+   m_entries.erase(index);
+
    m_dirty = true;
-   
-   reference->DecRef();
 }
 
-AdbEntry *LineBook::FindEntry(const wxChar *name) const
+AdbEntry *LineBook::FindEntry(const wxChar *name)
 {
-   return FindLineEntry(name);
+   LineEntryArray::iterator found = m_entries.find(name);
+   if( found == m_entries.end() )
+      return NULL;
+      
+   RefCounter<LineEntry> entry(found->second->m_handle);
+   if( !entry )
+   {
+      entry.Attach(new LineEntry(
+            RefCounter<LineBook>::Convert(this),found->second));
+   }
+
+   return entry.Release();
 }
 
 bool LineBook::IsSameAs(const String& name) const
@@ -347,10 +366,10 @@ bool LineBook::Flush()
       if ( !stream.good() )
          goto FileError;
       
-      for ( size_t eachEntry = 0; eachEntry < m_entries.GetCount();
-         ++eachEntry )
+      for( LineEntryArray::iterator each = m_entries.begin();
+         each != m_entries.end(); ++each )
       {
-         stream << *m_entries.Item(eachEntry);
+         stream << *each->second;
          if ( !stream.good() )
             goto FileError;
       }
@@ -371,60 +390,13 @@ FileError:
    return false;
 }
 
-int LineBook::IndexByName(const String& name) const
-{
-   LineEntry *key = new LineEntry(NULL,name);
-
-#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows 2.4 version of Index()
-   int index = m_entries.Index(key);
-#else
-   int low = 0; // Key is at position greater or equal to "low"
-   int high = m_entries.GetCount(); // Key is below "high"
-   while ( low < high - 1 ) // There are items to compare
-   {
-      int middle = (low + high) / 2; // Candidate key match
-      int compare = LineEntryCompare(key,m_entries.Item(middle));
-      if ( compare < 0 ) // Key is below "middle"
-         high = middle; // "high" changes
-      else if ( compare > 0 ) // Key is above "middle"
-         low = middle + 1; // "low" changes
-      else // Key is at "middle", we can set "low" and "high" exactly
-      {
-         low = middle;
-         high = middle + 1;
-      }
-   }
-   
-   int index;
-   if ( low < high && LineEntryCompare(key,m_entries.Item(low)) == 0 )
-      index = low;
-   else
-      index = wxNOT_FOUND;
-#endif
-   key->DecRef();
-   
-   return index;
-}
-
-LineEntry *LineBook::FindLineEntry(const String& name) const
-{
-   int index = IndexByName(name);
-   if ( index == wxNOT_FOUND )
-      return NULL;
-   
-   LineEntry *found = m_entries.Item(index);
-   found->IncRef();
-   
-   return found;
-}
-
 bool LineBook::IsDirty() const
 {
    bool anythingDirty = m_dirty;
-   for ( size_t eachEntry = 0; eachEntry < m_entries.GetCount();
-      ++eachEntry )
+   for( LineEntryArray::const_iterator each = m_entries.begin();
+      each != m_entries.end(); ++each )
    {
-      anythingDirty = anythingDirty || m_entries.Item(eachEntry)->IsDirty();
+      anythingDirty = anythingDirty || each->second->IsDirty();
    }
    return anythingDirty;
 }
@@ -432,10 +404,10 @@ bool LineBook::IsDirty() const
 void LineBook::ClearDirty()
 {
    m_dirty = false;
-   for ( size_t eachEntry = 0; eachEntry < m_entries.GetCount();
-      ++eachEntry )
+   for( LineEntryArray::iterator each = m_entries.begin();
+      each != m_entries.end(); ++each )
    {
-      m_entries.Item(eachEntry)->ClearDirty();
+      each->second->ClearDirty();
    }
 }
 
@@ -454,10 +426,9 @@ bool LineBook::ReadFromStream(istream &stream)
       String nonspace = LineEntry::StripSpace(line);
       if ( nonspace.size() > 0 && !Exists(nonspace) )
       {
-         AdbEntry *add = CreateEntry(nonspace);
+         RefCounter<AdbEntry> add(CreateEntry(nonspace));
          add->SetField(AdbField_EMail, nonspace);
          add->ClearDirty();
-         add->DecRef();
       }
    }
    
@@ -470,14 +441,31 @@ bool LineBook::ReadFromStream(istream &stream)
 // LineEntry
 // ----------------------------------------------------------------------------
 
-LineEntry::LineEntry(LineBook *parent,const String& name)
+LineEntry::LineEntry(RefCounter<LineBook> parent,
+   RefCounter<LineEntryData> data)
+   : m_book(parent), m_data(data)
 {
-   m_book = parent;
-   m_name = name;
-   m_dirty = false;
+   m_data->m_handle = RefCounter<LineEntry>::Convert(this);
 }
 
-void LineEntry::GetField(size_t n, String *pstr) const
+String LineEntry::StripSpace(const String &address)
+{
+   String nonspace;
+   
+   for ( size_t character = 0; character < address.size(); ++character )
+   {
+      if ( !isspace(address[character]) )
+         nonspace.append(1, address[character]);
+   }
+
+   return nonspace;
+}
+
+// ----------------------------------------------------------------------------
+// LineEntryData
+// ----------------------------------------------------------------------------
+
+void LineEntryData::GetField(size_t n, String *pstr) const
 {
    switch ( n )
    {
@@ -490,7 +478,7 @@ void LineEntry::GetField(size_t n, String *pstr) const
    }
 }
 
-void LineEntry::SetField(size_t n, const String& strValue)
+void LineEntryData::SetField(size_t n, const String& strValue)
 {
    switch ( n )
    {
@@ -506,7 +494,7 @@ void LineEntry::SetField(size_t n, const String& strValue)
    }
 }
 
-int LineEntry::Matches(const wxChar *what, int /* where */, int how) const
+int LineEntryData::Matches(const wxChar *what, int /*where*/, int how) const
 {
    wxString whatCopy(what);
    wxString addressCopy(m_address);
@@ -535,7 +523,7 @@ int LineEntry::Matches(const wxChar *what, int /* where */, int how) const
    return match ? AdbLookup_EMail : 0;
 }
 
-ostream& operator << (ostream& out, const LineEntry& entry)
+ostream& operator << (ostream& out, const LineEntryData& entry)
 {
    String address;
    entry.GetField(AdbField_EMail, &address);
@@ -548,32 +536,15 @@ ostream& operator << (ostream& out, const LineEntry& entry)
    return out;
 }
 
-String LineEntry::StripSpace(const String &address)
-{
-   String nonspace;
-   
-   for ( size_t character = 0; character < address.size(); ++character )
-   {
-      if ( !isspace(address[character]) )
-         nonspace.append(1, address[character]);
-   }
-
-   return nonspace;
-}
-
 // ----------------------------------------------------------------------------
 // LineDataProvider
 // ----------------------------------------------------------------------------
 
 AdbBook *LineDataProvider::CreateBook(const String& name)
 {
-   LineBook *book = new LineBook(name);
-   if ( book->IsBad() )
-   {
-      book->DecRef();
-      return NULL;
-   }
-   return book;
+   RefCounter<LineBook> book(new LineBook(name));
+   CHECK ( !book->IsBad(), NULL, _T("Cannot create LineBook") )
+   return book.Release();
 }
 
 bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)

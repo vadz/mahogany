@@ -33,7 +33,7 @@ extern bool AdbShowImportDialog(wxWindow *parent = NULL,
 
   @return TRUE on success
  */
-extern bool AdbShowExportDialog(const AdbEntryGroup& group);
+extern bool AdbShowExportDialog(AdbEntryGroup& group);
 
 /**
   Show the ADB expansion dialog allowing the user to choose one of the entries

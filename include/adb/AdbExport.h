@@ -52,7 +52,7 @@ public:
    // not - this can be tested for) to the specified "destination" which can bea
    // filename, directory name or whatever else (if empty, the exporter should
    // ask the user)
-   virtual bool Export(const AdbEntryGroup& group, const String& dest) = 0;
+   virtual bool Export(AdbEntryGroup& group, const String& dest) = 0;
 
    // export one entry only
    virtual bool Export(const AdbEntry& entry, const String& dest) = 0;

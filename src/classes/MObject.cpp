@@ -27,6 +27,7 @@
 #endif // USE_PCH
 
 #include "MObject.h"
+#include "pointers.h"
 
 #ifdef DEBUG
 
@@ -96,7 +97,7 @@ MObjectRC::MObjectRC()
 {
    gs_aObjects.Add(this);
    m_nRef = 1;
-   m_weak = 0;
+   m_weakRef = 0;
 }
 
 void MObjectRC::IncRef()
@@ -126,7 +127,9 @@ bool MObjectRC::DecRef()
    if ( m_nRef == 0 )
    {
       gs_aObjects.Remove(this);
-      delete this;
+      this->~MObjectRC();
+      if( !m_weakRef )
+         ::operator delete(this);
 
       return FALSE;
    }
@@ -173,30 +176,31 @@ extern void RefCounterAssign(MObjectRC *target,MObjectRC *source)
       target->DecRef();
 }
 
-class WeakRefCounter : public MObjectRC
+extern void WeakRefIncrement(MObjectRC *pointer)
 {
-public:
-   WeakRefCounter() : m_deleted(false) {}
-   bool m_deleted;
-};
-
-extern WeakRefCounter *WeakRefAdd(MObjectRC *pointer)
-{
-   if( !pointer->m_weak )
-      pointer->m_weak = new WeakRefCounter;
-   else
-      pointer->m_weak->IncRef();
-
-   return pointer->m_weak;
+   if( pointer )
+      ++pointer->m_weakRef;
 }
 
-extern void WeakRefRemove(WeakRefCounter *counter)
+extern void WeakRefDecrement(MObjectRC *pointer)
 {
-   counter->DecRef();
+   if( pointer )
+   {
+      --pointer->m_weakRef;
+      if( !pointer->m_weakRef && !pointer->m_nRef )
+      {
+         ::operator delete(pointer);
+      }
+   }
 }
 
-extern void WeakRefDeleted(WeakRefCounter *counter)
+extern void WeakRefAssign(MObjectRC *target,MObjectRC *source)
 {
-   if( counter )
-      counter->m_deleted = true;
+   WeakRefIncrement(source);
+   WeakRefDecrement(target);
+}
+
+extern bool WeakRefExpired(const MObjectRC *pointer)
+{
+   return pointer->m_nRef == 0;
 }

@@ -47,7 +47,7 @@
 class AdbPalmExporter : public AdbExporter
 {
 public:
-   virtual bool Export(const AdbEntryGroup& group, const String& dest);
+   virtual bool Export(AdbEntryGroup& group, const String& dest);
    virtual bool Export(const AdbEntry& entry, const String& dest);
 
    DECLARE_ADB_EXPORTER();
@@ -58,7 +58,7 @@ protected:
                              wxFFile& file, wxString const &category,
                              bool includeEmpty, bool includeComments);
 
-   static bool DoExportGroup(const AdbEntryGroup& group,
+   static bool DoExportGroup(AdbEntryGroup& group,
                              wxFFile& file, wxString const &category,
                              bool includeEmpty, bool includeComments);
 
@@ -254,7 +254,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
 #undef ADD
 #undef ADDP
 
-bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
+bool AdbPalmExporter::DoExportGroup(AdbEntryGroup& group,
                                     wxFFile& file, const wxString &
                                     category, bool includeEmpty,
                                     bool includeComments)
@@ -296,7 +296,7 @@ bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
    return TRUE;
 }
 
-bool AdbPalmExporter::Export(const AdbEntryGroup& group, const String& dest)
+bool AdbPalmExporter::Export(AdbEntryGroup& group, const String& dest)
 {
    // try to guess a reasonable default name for the file to create
    wxString filename = dest;

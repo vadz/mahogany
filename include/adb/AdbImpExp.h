@@ -48,7 +48,7 @@ extern bool AdbImport(const String& filename,
 
 // export the given ADB group (recursively) using the specified exporter,
 // returns TRUE on success
-extern bool AdbExport(const AdbEntryGroup& group,
+extern bool AdbExport(AdbEntryGroup& group,
                       AdbExporter& exporter);
 
 #endif // _ADBIMPEXP_H

@@ -187,7 +187,7 @@ size_t PalmEntryGroup::GetGroupNames(wxArrayString& aNames) const
   return aNames.Count();
 }
 
-AdbEntry *PalmEntryGroup::GetEntry(const String& name) const
+AdbEntry *PalmEntryGroup::GetEntry(const String& name)
 {
   PalmEntryList::iterator i;
   for(i = m_entries->begin(); i != m_entries->end(); i++)
@@ -201,7 +201,7 @@ AdbEntry *PalmEntryGroup::GetEntry(const String& name) const
   return NULL;
 } 
 
-bool PalmEntryGroup::Exists(const String& path) const
+bool PalmEntryGroup::Exists(const String& path)
 {
    // TODO
    return FALSE;
@@ -262,7 +262,7 @@ void PalmEntryGroup::DeleteGroup(const String& strName)
   // deleting groups (== categories on the Palm) is currently unsupported
 }
 
-AdbEntry *PalmEntryGroup::FindEntry(const wxChar * /* szName */) const
+AdbEntry *PalmEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   // currently not supported
   return NULL;

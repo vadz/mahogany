@@ -15,7 +15,6 @@
 #ifndef   MOBJECT_H
 #define   MOBJECT_H
 
-class WeakRefCounter;
 class MObjectRC;
 
 // ----------------------------------------------------------------------------
@@ -25,8 +24,10 @@ class MObjectRC;
 extern void RefCounterIncrement(MObjectRC *pointer);
 extern void RefCounterDecrement(MObjectRC *pointer);
 extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
-extern WeakRefCounter *WeakRefAdd(MObjectRC *pointer);
-extern void WeakRefDeleted(WeakRefCounter *counter);
+extern void WeakRefIncrement(MObjectRC *pointer);
+extern void WeakRefDecrement(MObjectRC *pointer);
+extern void WeakRefAssign(MObjectRC *target,MObjectRC *source);
+extern bool WeakRefExpired(const MObjectRC *pointer);
 
 // ----------------------------------------------------------------------------
 // MObject: the mother of all classes
@@ -148,7 +149,7 @@ public:
 #ifdef   DEBUG
   MObjectRC();
 #else
-  MObjectRC() { m_nRef = 1; m_weak = 0; }
+  MObjectRC() { m_nRef = 1; m_weakRef = 0; }
 #endif
 
   /// debugging support
@@ -180,13 +181,21 @@ public:
    virtual void IncRef()
     { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
    virtual bool DecRef()
-    { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+   {
+      MOcheck();
+      if ( --m_nRef )
+         return TRUE;
+      this->~MObjectRC();
+      if( !m_weakRef )
+         ::operator delete(this);
+      return FALSE;
+   }
 #endif ///debug/release
 
 protected:
    //// dtor is protected because only DecRef() can delete us
    virtual ~MObjectRC()
-      { MOcheck(); wxASSERT(m_nRef == 0); WeakRefDeleted(m_weak); }
+      { MOcheck(); wxASSERT(m_nRef == 0); }
    //// return the reference count:
    size_t GetNRef(void) const { return m_nRef; }
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
@@ -196,8 +205,12 @@ private:
    size_t m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
 
    // Support for WeakRef
-   friend WeakRefCounter *WeakRefAdd(MObjectRC *pointer);
-   WeakRefCounter *m_weak;
+   friend void WeakRefIncrement(MObjectRC *pointer);
+   friend void WeakRefDecrement(MObjectRC *pointer);
+   friend void WeakRefAssign(MObjectRC *target,MObjectRC *source);
+   friend bool WeakRefExpired(const MObjectRC *pointer);
+   
+   size_t m_weakRef; // Delay call to ::operator delete() while > 0
 };
 
 #ifdef   DEBUG

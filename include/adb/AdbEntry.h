@@ -118,6 +118,7 @@ class AdbElement : public MObjectRC
 {
 public:
   /// the group this entry/group belongs to (never NULL for these classes)
+  /// It's not IncRef-ed
   virtual AdbEntryGroup *GetGroup() const = 0;
 
   /// get the text describing the user to present the user with
@@ -203,10 +204,10 @@ public:
   virtual size_t GetEntryNames(wxArrayString& aNames) const = 0;
 
     /// get entry by name
-  virtual AdbEntry *GetEntry(const String& name) const = 0;
+  virtual AdbEntry *GetEntry(const String& name) = 0;
 
     /// check whether an entry or group by this name exists
-  virtual bool Exists(const String& path) const = 0;
+  virtual bool Exists(const String& path) = 0;
 
     /// get the names of all groups, returns the number of them
   virtual size_t GetGroupNames(wxArrayString& aNames) const = 0;
@@ -224,7 +225,7 @@ public:
   virtual void DeleteGroup(const String& strName) = 0;
 
     /// find entry by name (returns NULL if not found)
-  virtual AdbEntry *FindEntry(const wxChar *szName) const = 0;
+  virtual AdbEntry *FindEntry(const wxChar *szName) = 0;
 
   // misc
     /// description of a group is just its name

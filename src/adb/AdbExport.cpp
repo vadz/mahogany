@@ -39,7 +39,7 @@
 // public interface
 // ----------------------------------------------------------------------------
 
-bool AdbExport(const AdbEntryGroup& group,
+bool AdbExport(AdbEntryGroup& group,
                AdbExporter& exporter)
 {
    // simple...

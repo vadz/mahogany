@@ -51,7 +51,7 @@
 class AdbTextExporter : public AdbExporter
 {
 public:
-   virtual bool Export(const AdbEntryGroup& group, const String& dest);
+   virtual bool Export(AdbEntryGroup& group, const String& dest);
    virtual bool Export(const AdbEntry& entry, const String& dest);
 
    DECLARE_ADB_EXPORTER();
@@ -68,7 +68,7 @@ protected:
                              wxFFile& file,
                              const wxString& delimiter);
 
-   static bool DoExportGroup(const AdbEntryGroup& group,
+   static bool DoExportGroup(AdbEntryGroup& group,
                              wxFFile& file,
                              const wxString& delimiter);
 };
@@ -200,7 +200,7 @@ bool AdbTextExporter::DoExportEntry(const AdbEntry& entry,
    return file.Write(s);
 }
 
-bool AdbTextExporter::DoExportGroup(const AdbEntryGroup& group,
+bool AdbTextExporter::DoExportGroup(AdbEntryGroup& group,
                                     wxFFile& file,
                                     const wxString& delimiter)
 {
@@ -239,7 +239,7 @@ bool AdbTextExporter::DoExportGroup(const AdbEntryGroup& group,
    return TRUE;
 }
 
-bool AdbTextExporter::Export(const AdbEntryGroup& group, const String& dest)
+bool AdbTextExporter::Export(AdbEntryGroup& group, const String& dest)
 {
    // try to guess a reasonable default name for the file to create
    wxString filename = dest;

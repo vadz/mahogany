@@ -93,7 +93,7 @@ public:
   virtual size_t GetEntryNames(wxArrayString& aNames) const;
   virtual size_t GetGroupNames(wxArrayString& aNames) const;
 
-  virtual AdbEntry *GetEntry(const String& name) const;
+  virtual AdbEntry *GetEntry(const String& name);
   virtual AdbEntryGroup *GetGroup(const String& name) const;
 
   virtual bool Exists(const String& path) const;
@@ -105,7 +105,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const wxChar *szName) const;
+  virtual AdbEntry *FindEntry(const wxChar *szName);
   virtual bool IsReadOnly() const
      {
         /*ASSERT(m_pParent); return m_pParent->IsReadOnly();*/
@@ -148,7 +148,7 @@ public:
   virtual AdbEntryGroup *GetGroup() const { return m_pRootGroup; }
 
     // AdbEntryGroup
-  virtual AdbEntry *GetEntry(const String& name) const
+  virtual AdbEntry *GetEntry(const String& name)
     { return m_pRootGroup->GetEntry(name); }
 
   virtual bool Exists(const String& path) const
@@ -172,7 +172,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName) const
+  virtual AdbEntry *FindEntry(const wxChar *szName)
     { return m_pRootGroup->FindEntry(szName); }
 
   // there can be only one PalmADB

@@ -15,10 +15,6 @@
 #ifndef M_POINTERS_H
 #define M_POINTERS_H
 
-class WeakRefCounter;
-
-extern void WeakRefRemove(WeakRefCounter *counter);
-
 /**
    An MObjectRC-based smart pointer implementation.
 
@@ -59,7 +55,7 @@ public:
 
       @param pointer the pointer to take ownership of, may be NULL
     */
-   RefCounter(T *pointer) { m_pointer = pointer; }
+   explicit RefCounter(T *pointer) { m_pointer = pointer; }
 
    /**
       Copy constructor.
@@ -108,6 +104,12 @@ public:
        return m_pointer ? &RefCounter<T>::Get : NULL;
    }
 
+   void Attach(T *pointer)
+   {
+      RefCounterDecrement(m_pointer);
+      m_pointer = pointer;
+   }
+   
    /**
       Releases ownership of the held pointer and returns it.
 
@@ -120,6 +122,13 @@ public:
       m_pointer = NULL;
 
       return pointer;
+   }
+
+   static RefCounter<T> Convert(T *pointer)
+   {
+      RefCounter<T> result;
+      result.AttachAndIncRef(pointer);
+      return result;
    }
 
    /// Expects object that has not been IncRef-ed yet, don't use if possible
@@ -137,30 +146,49 @@ private:
 // Used to resolve cyclic references. RefCounter goes in one direction
 // and WeakRef goes in the opposite direction. WeakRef (seems that it)
 // contains NULL if all RefCounter instances are gone (and the object
-// is deleted).
-template <class ClassName>
+// is deleted). WeakRef is a bit inefficient. That's why you should
+// always convert it to RefCounter when you want to use object it points to.
+template <class T>
 class WeakRef
 {
 public:
-   WeakRef() { InitNull(); }
-   WeakRef(RefCounter<ClassName> pointer) { Init(pointer); }
-   ~WeakRef() { Destroy(); }
+   WeakRef() : m_pointer(NULL) {}
+   WeakRef(const WeakRef<T> &copy)
+      : m_pointer(copy.m_pointer)
+      { WeakRefIncrement(m_pointer); }
+   ~WeakRef() { WeakRefDecrement(m_pointer); }
 
-private:
-   // not implemented
-   WeakRef<ClassName> operator=(const WeakRef<ClassName> &copy) { return *this; }
-   WeakRef(const WeakRef<ClassName> &copy) {}
+   WeakRef(RefCounter<T> pointer)
+      : m_pointer(pointer.Get())
+      { WeakRefIncrement(m_pointer); }
 
-   void InitNull() { m_pointer = 0; m_counter = 0; }
-   void Init(RefCounter<ClassName> pointer)
+   WeakRef<T>& operator=(const WeakRef<T> &copy)
    {
-      m_pointer = static_cast<ClassName *>(pointer);
-      m_counter = WeakRefAdd(m_pointer);
+      WeakRefAssign(m_pointer,copy.m_pointer);
+      m_pointer = copy.m_pointer;
+      return *this;
    }
-   void Destroy() { WeakRefRemove(m_counter); }
+
+   WeakRef<T>& operator=(RefCounter<T> pointer)
+   {
+      m_pointer = pointer.Get();
+      WeakRefIncrement(m_pointer);
+      return *this;
+   }
+
+   bool Expired() const { return WeakRefExpired(m_pointer); }
    
-   ClassName *m_pointer;
-   WeakRefCounter *m_counter;
+   RefCounter<T> Get() const
+   {
+      RefCounter<T> result;
+      result.AttachAndIncRef(Expired() ? NULL : m_pointer);
+      return result;
+   }
+   
+   operator RefCounter<T>() const { return Get(); }
+   
+private:
+   T *m_pointer;
 };
 
 
@@ -197,13 +225,16 @@ private:
 
 
 // Use instead of forward declaration to make RefCounter and WeakRef
-// instantiable without knowledge that ClassName derives from MObjectRC.
+// instantiable without knowledge that T derives from MObjectRC.
 #define DECLARE_REF_COUNTER(T) \
    class T; \
    extern void RefCounterIncrement(T *pointer); \
    extern void RefCounterDecrement(T *pointer); \
    extern void RefCounterAssign(T *target,T *source); \
-   extern WeakRefCounter *WeakRefAdd(T *pointer);
+   extern void WeakRefIncrement(T *pointer); \
+   extern void WeakRefDecrement(T *pointer); \
+   extern void WeakRefAssign(T *target,T *source); \
+   extern bool WeakRefExpired(const T *pointer);
 
 
 // If DECLARE_REF_COUNTER is used anywhere, DEFINE_REF_COUNTER must be
@@ -218,8 +249,17 @@ private:
       RefCounterAssign(static_cast<MObjectRC *>(target), \
          static_cast<MObjectRC *>(source)); \
    } \
-   extern WeakRefCounter *WeakRefAdd(T *pointer) \
-      { return WeakRefAdd(static_cast<MObjectRC *>(pointer)); }
+   extern void WeakRefIncrement(T *pointer) \
+      { WeakRefIncrement(static_cast<MObjectRC *>(pointer)); } \
+   extern void WeakRefDecrement(T *pointer) \
+      { WeakRefDecrement(static_cast<MObjectRC *>(pointer)); } \
+   extern void WeakRefAssign(T *target,T *source) \
+   { \
+      WeakRefAssign(static_cast<MObjectRC *>(target), \
+         static_cast<MObjectRC *>(source)); \
+   } \
+   extern bool WeakRefExpired(const T *pointer) \
+      { return WeakRefExpired(static_cast<const MObjectRC *>(pointer)); } \
 
 
 #endif // M_POINTERS_H

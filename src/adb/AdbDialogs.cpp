@@ -636,7 +636,7 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
    return ok;
 }
 
-bool AdbShowExportDialog(const AdbEntryGroup& group)
+bool AdbShowExportDialog(AdbEntryGroup& group)
 {
    wxArrayString names, descs;
    wxString name;

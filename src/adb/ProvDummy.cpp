@@ -105,10 +105,10 @@ public:
   virtual size_t GetEntryNames(wxArrayString& aNames) const;
   virtual size_t GetGroupNames(wxArrayString& aNames) const;
 
-  virtual AdbEntry *GetEntry(const String& name) const;
+  virtual AdbEntry *GetEntry(const String& name);
   virtual AdbEntryGroup *GetGroup(const String& name) const;
 
-  virtual bool Exists(const String& path) const;
+  virtual bool Exists(const String& path);
 
   virtual AdbEntry *CreateEntry(const String& strName);
   virtual AdbEntryGroup *CreateGroup(const String& strName);
@@ -116,7 +116,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const wxChar *szName) const;
+  virtual AdbEntry *FindEntry(const wxChar *szName);
 
   // get the full path to our group (not '/' terminated)
   wxString GetPath() const;
@@ -141,10 +141,10 @@ public:
   virtual AdbEntryGroup *GetGroup() const { return NULL; }
 
     // AdbEntryGroup
-  virtual AdbEntry *GetEntry(const String& name) const
+  virtual AdbEntry *GetEntry(const String& name)
     { return m_pRootGroup->GetEntry(name); }
 
-  virtual bool Exists(const String& path) const
+  virtual bool Exists(const String& path)
     { return m_pRootGroup->Exists(path); }
 
   virtual size_t GetEntryNames(wxArrayString& aNames) const
@@ -165,7 +165,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName) const
+  virtual AdbEntry *FindEntry(const wxChar *szName)
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
@@ -298,12 +298,12 @@ size_t DummyEntryGroup::GetGroupNames(wxArrayString& aNames) const
   return aNames.Count();
 }
 
-AdbEntry *DummyEntryGroup::GetEntry(const String& /* name */) const
+AdbEntry *DummyEntryGroup::GetEntry(const String& /* name */)
 {
   return new DummyEntry((DummyEntryGroup *)this, _T("Dummy entry"));
 }
 
-bool DummyEntryGroup::Exists(const String& path) const
+bool DummyEntryGroup::Exists(const String& path)
 {
   return path == _T("Dummy entry");
 }
@@ -333,7 +333,7 @@ void DummyEntryGroup::DeleteGroup(const String& /* strName */)
   wxFAIL_MSG(_T("Not implemented"));
 }
 
-AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */) const
+AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */)
 {
   return NULL;
 }
