@@ -503,15 +503,6 @@ URLDetector::URLDetector()
  */
 static bool CanBeWrapped(const wxChar *p)
 {
-   // first check: if the last character on the previous line is a slash,
-   // suppose that it's the trailing slash at the end of URL.
-   //
-   // Rationale: slashes are relatively rare in the URLs and so it's unlikely
-   // that an URL is accidentally wrapped at one of them, but many URLs end in
-   // a slash
-   if ( p[-1] == '/' )
-      return false;
-
    // we consider any alphanumeric string of 3 characters an extension
    // but we have separate arrays of known extensions of other lengths
    static const wxChar *extensions1 =
@@ -694,20 +685,6 @@ match:
             break;
          }
 
-         // this test doesn't reduce the number of false positives all that
-         // much, finally, but does result in non recognizing some wrapped URLs
-#if 0
-         // even with all the checks below we still get too many false
-         // positives so consider that only "long" URLs are wrapped where long
-         // URLs are defined as the ones containing the CGI script parameters
-         // or some '%' chars (i.e. escaped characters)
-         if ( strcspn(start + len, "%?&\r") == (size_t)(p - start - len) )
-         {
-            // no CGI parameters, suppose it can't wrap
-            break;
-         }
-#endif // 0
-
          // heuristic text for end of URL detection
          if ( p - start > 5 && !CanBeWrapped(p) )
          {
@@ -715,17 +692,35 @@ match:
             break;
          }
 
+         p += 2; // go to the start of next line
+
          // Check that the beginning of next line is not the start of
          // another URL.
          //
          // Note that although '@' alone is recognized as the beginning
          // of an URL: here it should not be the case.
          int nextlen = 0;
-         int nextpos = scan(p + 2, nextlen);
-         if ( nextlen && nextpos == 0 && p[2] != '@')
+         int nextpos = scan(p, nextlen);
+         if ( nextlen && nextpos == 0 && *p != '@')
          {
+            p -= 2;
+
             // The start of the next line being the start of an URL on its own,
             // do not join the two.
+            break;
+         }
+
+         // check whether the next line starts with a word -- this is a good
+         // indication that the URL hasn't wrapped
+         const wxChar *q = p;
+         while ( wxIsalpha(*q) )
+            q++;
+
+         if ( *q == _T(' ') )
+         {
+            // looks like we've a word (i.e. sequence of letters terminated by
+            // space) at the start of the next line
+            p -= 2;
             break;
          }
 
@@ -734,7 +729,7 @@ match:
          // the case... so restrict the wrapped URLs detection to the case
          // when they occur at the beginning of the line, possibly after some
          // white space as this is how people usually format them
-         const wxChar *q = start;
+         q = start;
          while ( q >= text && *q != '\n' )
          {
             q--;
@@ -749,9 +744,9 @@ match:
             break;
 
          // it did occur at the start (or after '<'), suppose the URL is
-         // wrapped and so continue on the next line (no need to test the first
-         // character, it had been already done above)
-         p += 3;
+         // wrapped and so we continue on the next line (and no need to test
+         // the first character, it had been already done above)
+         p++;
       }
    }
 
