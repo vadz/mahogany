@@ -298,9 +298,23 @@ Release 0.50 'Meadows' March 27, 2000
 03.07.99 VZ: support for adding custom headers from compose view
 
 
-Release 0.23a
-Release 0.22a
-Release 0.20a
+Release 0.23a June 29, 1999
+-------------------------------------------------------------------------------
+Now includes a Windows version, too. Minor fixes and improvements for the Unix
+version. MacOS port progressing but not available yet.
+
+Release 0.22a May 20, 1999
+-------------------------------------------------------------------------------
+All known (crash-inducing) bugs fixed, message editor/viewer improvements,
+clipboard support and selections added, wxGTK layout bug fixes, German/French/
+Spanish translations, text-search in messages, several minor usability fixes,
+sub-folder support fixed, addressbook fixes, TCP timeouts configurable and
+support for setting Reply-To: header from To: field.
+
+Release 0.21a April 27, 1999
+-------------------------------------------------------------------------------
+Full working IMAP and NNTP support, support for EFax.com fax mails, improved
+message editor, countless bug fixes and now uses gtk 1.2.1.
 
 Release 0.10a August 24, 1998
 -------------------------------------------------------------------------------
