@@ -120,6 +120,7 @@ public:
       /// set the position in the tree (used by wxFolderTree only)
    virtual void SetTreeIndex(int pos) { }
    //@}
+
    /**@name flags */
    //@{
        /// get the folder flags (see Flags enum)
@@ -131,9 +132,24 @@ public:
    void AddFlags(int flags) { SetFlags(GetFlags() | flags); }
       /// clear the specified flags
    void ResetFlags(int flags) { SetFlags(GetFlags() & ~flags); }
+
+      /// can we open the folder of this type and flags?
+   bool CanOpen() const { return CanOpenFolder(GetType(), GetFlags()); }
+
+      /// can we delete this folder?
+   bool CanDelete() const { return CanDeleteFolderOfType(GetType()); }
+
+      /// can we delete messages from this folder?
+   bool CanDeleteMsgs() const { return CanDeleteMessagesInFolder(GetType()); }
+
+      /// can this folder have a login/password?
+   bool MayHaveLogin() const { return FolderTypeHasUserName(GetType()); }
+
+      /// does this folder need net connection?
+   bool NeedsNetwork() const { return FolderNeedsNetwork(GetType(), GetFlags()); }
    //@}
 
-   /**@name flags */
+   /**@name Filters */
    //@{
       /// get the array of filters to use for this folder
    virtual wxArrayString GetFilters() const = 0;

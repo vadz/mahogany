@@ -1502,6 +1502,7 @@ wxMApp::SetAwayMode(bool isAway)
 {
    MAppBase::SetAwayMode(isAway);
 
+   // update the frame menu
    if ( m_topLevelFrame )
    {
       wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
@@ -1513,6 +1514,16 @@ wxMApp::SetAwayMode(bool isAway)
       wxLogStatus(m_topLevelFrame,
                   isAway ? _("Mahogany is now in unattended mode")
                          : _("Mahogany is not in unattended mode any more"));
+   }
+
+   // also change the mode of the log target: in away mode we only show the
+   // messages in the log window and don't popup the dialogs
+   if ( m_logWindow )
+   {
+      // show all old messages normally (including the one logged above)
+      m_logWindow->Flush();
+
+      m_logWindow->PassMessages(!isAway);
    }
 }
 

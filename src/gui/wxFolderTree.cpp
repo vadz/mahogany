@@ -569,8 +569,11 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 {
    int folderFlags = folder->GetFlags();
    FolderType folderType = folder->GetType();
-   bool isRoot = folderType == MF_ROOT,
-        isGroup = folderType == MF_GROUP;
+
+   bool isRoot = folderType == MF_ROOT;
+
+   // root is a group, too
+   bool isGroup = isRoot || (folderType == MF_GROUP);
 
    // TODO we should allow "renaming" the root folder, i.e. changing the
    //      default 'All folders' label for it, but for now we don't
@@ -578,21 +581,24 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 
    if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
    {
+      // root folder can't be removed
       menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
 
-      // if Remove is there, Delete and Close are too
-      menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
+      // NB: if Remove is there, Delete and Close are too and vice versa, so we
+      //     don't call FindItem() to check for this, but we should if it ever
+      //     changes
+
       menu->Enable(WXMENU_FOLDER_DELETE, CanDeleteFolderOfType(folderType));
 
       // TODO should check that it is really opened
-      menu->Enable(WXMENU_FOLDER_CLOSE, !isRoot);
+      menu->Enable(WXMENU_FOLDER_CLOSE, !isGroup);
    }
 
    // browsing subfolders only makes sense if we have any and not for the
    // simple groups which can contain anything - so browsing is impossible
-   bool mayHaveSubfolders = isRoot || isGroup
-                              ? FALSE
-                              : CanHaveSubfolders(folderType, folderFlags);
+   bool mayHaveSubfolders =
+      !isGroup && CanHaveSubfolders(folderType, folderFlags);
+
    menu->Enable(WXMENU_FOLDER_BROWSESUB, mayHaveSubfolders);
 }
 

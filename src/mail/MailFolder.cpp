@@ -428,6 +428,12 @@ MailFolder::OpenFolder(int folderType,
 bool
 MailFolder::CloseFolder(const MFolder *mfolder)
 {
+   // don't try to close the folder which can't be opened
+   if ( mfolder->CanOpen() )
+   {
+      return true;
+   }
+
    // for now there is only one implementation to call:
    return MailFolderCC::CloseFolder(mfolder);
 }
