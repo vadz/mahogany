@@ -1218,6 +1218,23 @@ MailFolderCC::FindFolder(String const &path, String const &login)
    return NULL;
 }
 
+void
+MailFolderCC::Checkpoint(void)
+{
+   DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
+   if(NeedsNetwork() && ! mApplication->IsOnline())
+   {
+      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
+      return;
+   }
+   if(Lock())
+   {
+     mail_check(m_MailStream); // update flags, etc, .newsrc
+     UnLock();
+     ProcessEventQueue();
+   }
+}
+
 bool
 MailFolderCC::PingReopen(void) const
 {
@@ -1319,6 +1336,7 @@ MailFolderCC::Ping(void)
 
       if(PingReopen())
       {
+         mail_ping(m_MailStream);
          //mail_check(m_MailStream); // update flags, etc, .newsrc
          UnLock();
          ProcessEventQueue();
@@ -2536,7 +2554,9 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   mm_log(str,errflg, MailFolderCC::LookupObject(stream));
+   //we are ignoring the errflg and always put these at level 1
+   // don't know exactly what to do with them
+   mm_log(str,1, MailFolderCC::LookupObject(stream));
 }
 
 

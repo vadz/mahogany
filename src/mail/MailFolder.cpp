@@ -603,14 +603,15 @@ static CloseTimer *gs_CloseTimer = NULL;
 bool
 MailFolderCmn::DecRef()
 {
-   /// just in case some folder is kept open until after we cleaned up
-   if(gs_MailFolderCloser)
+   ASSERT_MSG(gs_MailFolderCloser, "DEBUG: this must not happen (harmless but should not be the case)");
+   if(gs_MailFolderCloser && GetNRef() == 1) // only real closes get delayed
    {
      wxLogDebug("Mailfolder '%s': close delayed.", GetName().c_str());
+     Checkpoint(); // flush data immediately
      gs_MailFolderCloser->Add(this);
      return FALSE;
    }
-   else  // shouldn't happen, but who knows...
+   else
 	return RealDecRef();
 }
 
