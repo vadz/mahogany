@@ -66,7 +66,7 @@ public:
        @param sub_dir if not empty a favourite subdirectory to use for the icons
     */
    void SetSubDirectory(wxString sub_dir);
-   
+
    /** Get an Icon.
        If the iconName is not known, a default icon will be returned.
        @param iconName  the name of the icon
@@ -102,12 +102,12 @@ public:
    static wxImage & LoadImage(String filename,
                               bool *success,
                               bool showDlg = false);
-   
+
    /** Load an image file and return it as an xpm array.
        @filename the name of the file
    */
    static char **LoadImageXpm(String filename);
-   
+
    /** Load an xpm image file and return it as an xpm array.
        @filename the name of the file
    */
@@ -117,12 +117,16 @@ public:
    */
    static void FreeImage(char **ptr);
 
+protected:
+   /// look up an icon in the cache
+   bool FindInCache(const String& iconName, wxIcon *icon) const;
+
 private:
    /** A list of all known icons.
        @see IconData
    */
    IconDataList *m_iconList;
-   
+
    /// An Icon to return for unknown lookup strings.
    wxIcon m_unknownIcon;
 

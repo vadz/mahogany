@@ -750,8 +750,16 @@ wxMessageView::Update(void)
 
    // iterate over all parts
    n = m_mailMessage->CountParts();
-   for(i = 0; i < n; i++)
+   for (i = 0; i < n; i++ )
    {
+      if ( m_mailMessage->GetPartSpec(i).find('.') != wxString::npos )
+      {
+         // this is a part of embedded message, don't show it
+         //
+         // TODO: maybe have an option for it?
+         continue;
+      }
+
       t = m_mailMessage->GetPartType(i);
       if(m_mailMessage->GetPartSize(i) == 0)
       {

@@ -85,7 +85,7 @@ public:
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
-   virtual MailFolder * GetFolder(void) { return folder; }
+   virtual MailFolder * GetFolder(void) { return m_folder; }
 
    /**@name Methods accessing individual parts of a message. */
    //@{
@@ -227,24 +227,25 @@ protected:
    void AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email);
 
 private:
+   /// refresh information in this structure
+   void  Refresh(void);
+
    /// reference to the folder this mail is stored in
-   MailFolderCC   *folder;
+   MailFolderCC   *m_folder;
    /// text of the mail if not linked to a folder
-   char *text;
+   char *m_msgText;
    /// unique message id
    UIdType  m_uid;
    /// holds the pointer to a text buffer allocated by cclient lib
-   char *mailText;
-   /// length of mailText
+   char *m_mailFullText;
+   /// length of m_mailFullText
    unsigned long m_MailTextLen;
-   /// refresh information in this structure
-   void  Refresh(void);
    /// Subject line
-   String   hdr_subject;
+   String m_headerSubject;
    /// date line
-   String   hdr_date;
+   String m_headerDate;
    /// number of parts
-   int   numOfParts;
+   int   m_numOfParts;
    /// body of message
    BODY  *m_Body;
    /// m_Envelope for messages to be sent
@@ -293,20 +294,19 @@ private:
    };
 
    /// a vector of all the body part information
-   PartInfo *partInfos;
+   PartInfo *m_partInfos;
 
    /** A function to recursively collect information about all the
-       body parts. It is taken from the IMAP/mtest example.
+       body parts.
        @param  body the body part to look at
-       @param   pfx  the prefix part of the spec
-       @param  i    the running index ??
-       @param   count an integer variable to be used for indexing the partInfos array
+       @param  pfx  the current MIME part string
+       @param  i    the last MIME part subindex
+       @param  count an integer variable to be used for indexing the partInfos array
        @param  write whether to write data to the partInfos structure or just count the parts
-       @param  firsttime an internal flag used to decide if to use prefix
 
    */
-   void decode_body(BODY *body, String &pfx,long i, int *count,
-          bool write, bool firsttime = true);
+   void decode_body(BODY *body, const String &pfx, long i,
+                    int *count, bool write);
 };
 
 #ifndef  MESSAGECC_FROMLEN

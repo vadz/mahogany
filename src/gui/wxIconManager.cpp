@@ -510,6 +510,23 @@ wxIconManager::GetBitmap(const String& bmpName)
    return GetIcon(bmpName);
 }
 
+bool wxIconManager::FindInCache(const String& iconName, wxIcon *icon) const
+{
+   IconDataList::iterator i;
+   for ( i = m_iconList->begin(); i != m_iconList->end(); i++ )
+   {
+      if (strcmp((*i)->iconName.c_str(), iconName.c_str()) == 0 )
+      {
+         wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
+         *icon = (*i)->iconRef;
+
+         return true;
+      }
+   }
+
+   return false;
+}
+
 /*
   We now always return a newly created wxIcon using the copy
   constructor. Such we make sure that the original icon exists
@@ -523,55 +540,41 @@ wxIconManager::GetBitmap(const String& bmpName)
 */
 
 wxIcon
-wxIconManager::GetIcon(String const &_iconName)
+wxIconManager::GetIcon(const String &iconNameOrig)
 {
-   IconDataList::iterator i;
-   String iconName = _iconName;
-   String key;
+   String iconName = iconNameOrig;
 
    strutil_tolower(iconName);
-   wxLogTrace(wxTraceIconLoading,
-              "wxIconManager::GetIcon(%s) called...",
-              iconName.c_str());
+   wxLogTrace(wxTraceIconLoading, "wxIconManager::GetIcon(%s) called...",
+              iconNameOrig.c_str());
+
+   wxIcon icon;
 
    // first always look in the cache
-   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-   {
-      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
-      {
-        wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
-        return (*i)->iconRef;
-      }
-   }
+   if ( FindInCache(iconName, &icon) )
+      return icon;
 
+   // for the MIME icons of the form type/subtype we also look up the generic
+   // version
    if ( IsMimeType(iconName) )
    {
-     // not found, now look for MIME subtype, after '/':
-     key = strutil_after(iconName, '/');
-     for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-     {
-        if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-          wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
+      // VZ: why do we do this? replacing a particular icon (i.e. image/xyz)
+      //     with a generic one (image) makes sense, but not the other way
+      //     round (why should text/xyz have the same icon as image/xyz?)
+#if 0
+      // not found, now look for MIME subtype, after '/':
+      icon = GetIcon(strutil_after(iconName, '/'));
+      if ( icon != m_unknownIcon )
+         return icon;
+#endif // 0
 
-          return (*i)->iconRef;
-        }
-     }
-
-     // not found, now look for iconName without '/':
-     key = strutil_before(iconName, '/');
-     for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-     {
-        if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-          wxLogTrace(wxTraceIconLoading, "... icon was in the cache.");
-
-          return (*i)->iconRef;
-        }
-     }
+      // not found, now look for iconName without '/':
+      icon = GetIcon(strutil_before(iconName, '/'));
+      if ( icon != m_unknownIcon )
+         return icon;
    }
 
    // next step: try to load the icon files .png,.xpm,.gif:
-   wxIcon icn;
-   int c;
    bool found = false;
    if(m_GlobalDir.Length())
    {
@@ -589,10 +592,10 @@ wxIconManager::GetIcon(String const &_iconName)
       IconData *id;
 
       String name;
-      for(c = 0; wxIconManagerFileExtensions[c]; c++)
+      for ( int ext = 0; wxIconManagerFileExtensions[ext]; ext++ )
       {
-         // Use _iconName to preserve captialisation:
-         name = _iconName + wxIconManagerFileExtensions[c];
+         // Use iconNameOrig to preserve captialisation:
+         name = iconNameOrig + wxIconManagerFileExtensions[ext];
          name = pf.FindFile(name, &found);
 
          if( found )
@@ -601,24 +604,24 @@ wxIconManager::GetIcon(String const &_iconName)
             char **ptr = LoadImageXpm(name);
             if(ptr)
             {
-               icn = wxIcon(ptr);
+               icon = wxIcon(ptr);
                FreeImage(ptr);
                id = new IconData;
-               id->iconRef = icn;
+               id->iconRef = icon;
                id->iconName = iconName;
                wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
                           name.c_str());
                m_iconList->push_front(id);
-               return icn;
+               return icon;
             }
-            }
-     } // for
-   }// if globaldir
+         }
+     } // for all extensions
+   } // if globaldir is not empty
 
 #  ifdef    USE_ICONS_FROM_RESOURCES
    // last, look in the resources
    {
-      wxIcon icon(_iconName);
+      wxIcon icon(iconNameOrig);
       if ( icon.Ok() ) {
          wxLogTrace(wxTraceIconLoading, "... icon found in the ressources.");
          return icon;

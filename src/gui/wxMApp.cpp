@@ -608,9 +608,10 @@ wxMApp::OnInit()
    gs_timerAutoSave = new AutoSaveTimer;
    gs_timerMailCollection = new MailCollectionTimer;
 
-#ifdef DEBUG
-  wxLog::AddTraceMask("mime");
-#endif
+#ifdef DEBUG_zeitlin
+   wxLog::AddTraceMask("mime");     // for wxMimeTypesManager trace
+   wxLog::AddTraceMask("msgparse"); // for msg parsing code in MessageCC
+#endif // DEBUG_zeitlin
 
    if ( OnStartup() )
    {
