@@ -2354,7 +2354,7 @@ void CheckExpungeDialog(ASMailFolder *asmf, wxWindow *parent)
                     mf->GetName().c_str());
 
          if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE,
-                                  M_DLG_YES_DEFAULT,
+                                  M_DLG_YES_DEFAULT | M_DLG_DISABLE,
                                   M_MSGBOX_AUTOEXPUNGE,
                                   mf->GetName()) )
          {
