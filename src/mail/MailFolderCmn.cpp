@@ -206,9 +206,6 @@ protected:
 // the unique MfCloser object
 static MfCloser *gs_MailFolderCloser = NULL;
 
-// the mail folder status cache
-static MfStatusCache *gs_MfStatusCache = NULL;
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -1620,20 +1617,16 @@ MailFolderCmn::DeleteDuplicates()
 // MailFolderCmn message counting
 // ----------------------------------------------------------------------------
 
-MfStatusCache *MailFolderCmn::GetStatusCache() const
-{
-   return gs_MfStatusCache;
-}
-
 bool MailFolderCmn::CountInterestingMessages(MailFolderStatus *status) const
 {
    String name = GetName();
-   if ( !gs_MfStatusCache->GetStatus(name, status) )
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   if ( !mfStatusCache->GetStatus(name, status) )
    {
       if ( !DoCountMessages(status) )
          return false;
 
-      gs_MfStatusCache->UpdateStatus(name, *status);
+      mfStatusCache->UpdateStatus(name, *status);
    }
 
    return true;
@@ -1692,8 +1685,6 @@ extern bool MailFolderCmnInit()
    if ( !gs_MailFolderCloser )
    {
       gs_MailFolderCloser = new MfCloser;
-
-      gs_MfStatusCache = MfStatusCache::Get();
    }
 
    return true;
@@ -1711,8 +1702,7 @@ extern void MailFolderCmnCleanup()
       delete mfCloser;
 
       // save the cache
-      gs_MfStatusCache->DecRef();
-      gs_MfStatusCache = NULL;
+      MfStatusCache::CleanUp();
    }
 }
 

@@ -2049,7 +2049,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections,
    }
 
    // update status of the target folder
-   MfStatusCache *mfStatusCache = GetStatusCache();
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
    MailFolderStatus status;
    String nameDst = folder->GetFullName();
    if ( !mfStatusCache->GetStatus(nameDst, &status) )
@@ -2282,7 +2282,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 {
    CHECK( status, false, "NULL pointer in CountInterestingMessages" );
 
-   MfStatusCache *mfStatusCache = GetStatusCache();
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
 
    // do we already have the number of messages?
    if ( mfStatusCache->GetStatus(GetName(), status) )
@@ -3045,7 +3045,7 @@ MailFolderCC::BuildListing(void)
    //else: no messages, perfectly valid if the folder is empty
 
    // remember the folder status data
-   GetStatusCache()->UpdateStatus(GetName(), *m_statusNew);
+   MfStatusCache::Get()->UpdateStatus(GetName(), *m_statusNew);
    delete m_statusNew;
    m_statusNew = NULL;
 
@@ -3536,7 +3536,7 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
    // were already updated when the message was deleted, but this one must
    // be kept in sync manually as it wasn't updated before
    MailFolderStatus status;
-   MfStatusCache *mfStatusCache = mf->GetStatusCache();
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
    if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
    {
       ASSERT_MSG( status.total, "total number of messages miscached" );
@@ -3690,15 +3690,14 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
       return;
    }
 
-   String  msg;
-   if(mf)
-      msg.Printf(_("Folder '%s' : "), mf->GetName().c_str());
-   else
-      msg = _("Folder Log: ");
-   msg += str;
+   String msg = _("Mail log");
+   if( mf )
+      msg << " (" << mf->GetName() << ')';
+   msg << ':' << str
 #ifdef DEBUG
-   msg << _(", error level: ") << strutil_ultoa(errflg);
+       << _(", error level: ") << strutil_ultoa(errflg)
 #endif
+      ;
 
    wxLogLevel loglevel;
    switch ( errflg )
@@ -3736,37 +3735,50 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 void
 MailFolderCC::mm_dlog(const String& str)
 {
-   String msg;
+   GetLogCircle().Add(str);
 
-   // replace the passwords in the log output with stars if plain text
-   // authentification is used (TODO: check for IMAP "LOGIN" too)
-   if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
-   {
-      msg = "PASS";
-
-      size_t n = 4;
-      while ( isspace(str[n]) )
-      {
-         msg += str[n++];
-      }
-
-      // hide the password
-      while ( n < str.length() )
-      {
-         msg += '*';
-         n++;
-      }
-   }
-   else
-   {
-      msg = str;
-   }
-
-   GetLogCircle().Add(msg);
-
+   // replace the passwords in the log window output (which can be seen by
+   // others or be cut-and-pasted to show some problems) with stars if plain
+   // text authentification is used: PASS for POP or LOGIN for IMAP
    if ( mm_show_debug )
    {
-      wxLogGeneric(wxLOG_User, _("Mail debug: %s"), msg.c_str());
+      String msg, username, password;
+      unsigned long seq;
+
+      // the max len of username/password
+      size_t len = str.length();
+
+      bool isPopLogin = sscanf(str, "PASS %s", password.GetWriteBuf(len)) == 1;
+      password.UngetWriteBuf();
+
+      if ( isPopLogin )
+      {
+         msg << "PASS " << wxString('*', password.length());
+      }
+      else
+      {
+         bool isImapLogin = sscanf(str, "%08lx LOGIN %s %s",
+                                   &seq,
+                                   username.GetWriteBuf(len),
+                                   password.GetWriteBuf(len)) == 3;
+         username.UngetWriteBuf();
+         password.UngetWriteBuf();
+
+         if ( isImapLogin )
+         {
+            msg.Printf("%08lx LOGIN %s %s",
+                       seq,
+                       username.c_str(),
+                       wxString('*', password.length()).c_str());
+         }
+         else
+         {
+            msg = str;
+         }
+      }
+
+      // send it to the window
+      wxLogGeneric(wxLOG_User, _("Mail log: %s"), msg.c_str());
    }
 }
 
@@ -3907,7 +3919,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    {
       // update the cached status
       MailFolderStatus status;
-      MfStatusCache *mfStatusCache = GetStatusCache();
+      MfStatusCache *mfStatusCache = MfStatusCache::Get();
       if ( mfStatusCache->GetStatus(GetName(), &status) )
       {
          bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,

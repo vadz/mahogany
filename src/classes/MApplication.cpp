@@ -537,21 +537,31 @@ MAppBase::OnShutDown()
    }
 
     if (m_MailCollector)
+    {
       m_MailCollector->DecRef();
+      m_MailCollector = NULL;
+    }
 
    // clean up
    MEventManager::DispatchPending();
    AdbManager::Delete();
    Profile::FlushAll();
+
    // The following little hack allows us to decref and delete the
    // global profile without triggering an assert, as this is not
    // normally allowed.
    Profile *p = m_profile;
    m_profile = NULL;
    p->DecRef();
+
+   // misc cleanup
    delete m_mimeManager;
+
    MailFolder::CleanUp();
-   // there might have been events queued, get rid of them:
+
+   // there might have been events queued, get rid of them
+   //
+   // FIXME: there should be no events by now, is this really needed? (VZ)
    MEventManager::DispatchPending();
 
 #ifdef OS_WIN

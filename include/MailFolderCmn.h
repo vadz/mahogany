@@ -209,9 +209,6 @@ protected:
    /// really count messages
    virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
 
-   /// get the mail folder status cache
-   class MfStatusCache *GetStatusCache() const;
-
    /**@name Config information used */
    //@{
    struct MFCmnOptions

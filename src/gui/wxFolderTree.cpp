@@ -906,7 +906,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
 
    // restore cached status
    MailFolderStatus status;
-   if ( MfStatusCache_obj()->GetStatus(folder->GetFullName(), &status) )
+   if ( MfStatusCache::Get()->GetStatus(folder->GetFullName(), &status) )
    {
       SetStatus(tree, GetTreeStatusFromMf(status));
    }
@@ -1865,7 +1865,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
 
    // get the status of the folder
    MailFolderStatus status;
-   if ( !MfStatusCache_obj()->GetStatus(folderName, &status) )
+   if ( !MfStatusCache::Get()->GetStatus(folderName, &status) )
    {
       // this is not supposed to happen - when MEventFolderStatusData is sent,
       // the status of the folder it is sent for should be cached

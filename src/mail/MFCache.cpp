@@ -75,12 +75,18 @@ MfStatusCache *MfStatusCache::Get()
    {
       gs_mfStatusCache = new MfStatusCache;
    }
-   else
-   {
-      gs_mfStatusCache->IncRef();
-   }
 
    return gs_mfStatusCache;
+}
+
+/* static */
+void MfStatusCache::CleanUp()
+{
+   if ( gs_mfStatusCache )
+   {
+      delete gs_mfStatusCache;
+      gs_mfStatusCache = NULL;
+   }
 }
 
 MfStatusCache::MfStatusCache()
@@ -91,8 +97,6 @@ MfStatusCache::MfStatusCache()
 
 MfStatusCache::~MfStatusCache()
 {
-   gs_mfStatusCache = NULL;
-
    Save(GetFileName());
 
    // delete the elements too

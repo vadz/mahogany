@@ -31,12 +31,17 @@ WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 // tree)
 // ----------------------------------------------------------------------------
 
-class MfStatusCache : public MObjectRC
+class MfStatusCache
 {
 public:
    // this is a singleton class and this function is the only way to access it
-   // (you have to call DecRef() on the returned pointer, of course)
    static MfStatusCache *Get();
+
+   // MfStatusCache is not ref counted, instead a single object is kept alive
+   // all the time and someone must call this method exactly once before the
+   // program termination to delete it (it's ok to call it even if Get() had
+   // been never called)
+   static void CleanUp();
 
    // query the status info: return true and fill the provided pointer with
    // info if we have it, return false otherwise
@@ -49,7 +54,7 @@ protected:
    // protected ctor for CreateStatusCache()
    MfStatusCache();
 
-   // and protected dtor as always in MObjectRC
+   // and protected dtor - CleanUp() should be called instead
    virtual ~MfStatusCache();
 
    // get the full cache file name
@@ -67,30 +72,6 @@ private:
 
    // the data for the folders above
    MfStatusArray m_folderData;
-};
-
-// ----------------------------------------------------------------------------
-// MfStatusCache_obj: a smart reference to MfStatusCache
-// ----------------------------------------------------------------------------
-
-class MfStatusCache_obj
-{
-public:
-   // ctor & dtor
-   MfStatusCache_obj() { m_cache = MfStatusCache::Get(); }
-  ~MfStatusCache_obj() { m_cache->DecRef(); }
-
-   // provide access to the real thing via operator->
-   MfStatusCache *operator->() const { return m_cache; }
-
-private:
-#if 1 // ndef __GNUG__ -- if this doesn't compile, restore ifndef
-   // no copy ctor/assignment operator
-   MfStatusCache_obj(const MfStatusCache_obj&);
-   MfStatusCache_obj& operator=(const MfStatusCache_obj&);
-#endif // __GNUG__
-
-   MfStatusCache *m_cache;
 };
 
 #endif // _MFCACHE_H_

@@ -33,6 +33,7 @@
 
 class wxMimeTypesManager;
 class MailFolder;
+class MailCollector;
 class MModuleCommon;
 class ArrayFrames;
 
@@ -176,7 +177,7 @@ public:
    /** Get the MailCollector object, not reference counted.
        @return reference to the mailcollector object.
    */
-   virtual class MailCollector *GetMailCollector(void) const { return m_MailCollector; }
+   virtual MailCollector *GetMailCollector(void) const { return m_MailCollector; }
    /** Toggle display of log output window
        @param display true to show it
    */
@@ -334,7 +335,7 @@ protected:
    MError m_error;
 
    /// the list of all constantly open folders to check for new mail
-   class MailCollector *m_MailCollector;
+   MailCollector *m_MailCollector;
 
    /// registration seed for EventManager
    void *m_eventNewMailReg;
