@@ -210,26 +210,6 @@ MDlgResult MDialog_YesNoCancel(wxChar const *message,
                                int flags = M_DLG_YES_DEFAULT,
                                const MPersMsgBox *persMsg = NULL);
 
-/** File requester dialog: asks user for a file name
-       @param message the text to display
-       @param parent   the parent frame
-       @param path   default path
-       @param filename   default filename
-       @param extension   default extension
-       @param wildcard   pattern matching expression
-       @param save   if true, saving a file
-       @param profile   the profile to use
-       @return string with the filename or empty if cancelled
-   */
-String MDialog_FileRequester(const String &message,
-                             wxWindow *parent = NULL,
-                             String path = NULLstring,
-                             String filename = NULLstring,
-                             String extension = NULLstring,
-                             String wildcard = NULLstring,
-                             bool save = false,
-                             Profile *profile = NULL);
-
 /** show a (modal) dialog with the given text
 
     @param title is the title of the dialog
@@ -261,6 +241,25 @@ bool MDialog_Message(wxChar const *message,
                      int flags = 0,
                      wxChar const *title = MDIALOG_MSGTITLE);
 
+/** File requester dialog: asks user for a file name
+       @param message the text to display
+       @param parent   the parent frame
+       @param path   default path
+       @param filename   default filename
+       @param extension   default extension
+       @param wildcard   pattern matching expression
+       @param save   if true, saving a file
+       @param profile   the profile to use
+       @return string with the filename or empty if cancelled
+   */
+String MDialog_FileRequester(const String &message,
+                             wxWindow *parent = NULL,
+                             String path = NULLstring,
+                             String filename = NULLstring,
+                             String extension = NULLstring,
+                             String wildcard = NULLstring,
+                             bool save = false,
+                             Profile *profile = NULL);
 
 /** Ask user for a directory
 
