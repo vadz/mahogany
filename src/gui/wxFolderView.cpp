@@ -113,8 +113,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             return;
       // in this case we operate on the highlighted  message
       const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
+      unsigned long focused_uid = hi->GetUId();
       if(nselected == 0 && hi)
-         selections.Add(hi->GetUId());
+         selections.Add(focused_uid);
 
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
@@ -177,7 +178,8 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
       case 'V':
-         m_FolderView->PreviewMessage(focused);
+         
+         m_FolderView->PreviewMessage(focused_uid);
          break;
       case ' ':
          // If shift is not used, deselect all items before having
@@ -207,13 +209,17 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
 void wxFolderListCtrl::OnMouse(wxListEvent& event)
 {
-   m_FolderView->PreviewMessage(event.m_itemIndex);
+   const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(event.m_itemIndex);
+   m_FolderView->PreviewMessage(hi->GetUId());
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    if(m_SelectionCallbacks)
-      m_FolderView->PreviewMessage(event.m_itemIndex);
+   {
+      const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(event.m_itemIndex);
+      m_FolderView->PreviewMessage(hi->GetUId());
+   }
 }
 
 
@@ -298,7 +304,8 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
       if(hi)
          selections.Add(hi->GetUId());
    }
-   if(selections.Count())
+   // If none is selected, use the focused entry
+   if(selections.Count() == 0)
    {
       item = -1;
       item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
@@ -756,12 +763,9 @@ wxFolderView::GetSelections(wxArrayInt& selections)
 }
 
 void
-wxFolderView::PreviewMessage(long messageno)
+wxFolderView::PreviewMessage(long uid)
 {
-   const HeaderInfo *hi = m_MF->GetHeaderInfo(messageno);
-   CHECK_RET( hi, "no header info for msg preview" );
-
-   m_MessagePreview->ShowMessage(m_MailFolder, hi->GetUId());
+   m_MessagePreview->ShowMessage(m_MailFolder, uid);
 }
 
 void
