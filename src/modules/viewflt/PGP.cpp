@@ -276,7 +276,7 @@ PGPFilter::DoProcess(String& text,
          else // encrypted
          {
             // try to decrypt
-            MCryptoEngine::Status rc = m_engine->Decrypt(in, out);
+            MCryptoEngine::Status rc = (MCryptoEngine::Status) m_engine->Decrypt(in, out);
             if ( rc != MCryptoEngine::OK )
             {
                // if the user cancelled decryption, don't complain about it

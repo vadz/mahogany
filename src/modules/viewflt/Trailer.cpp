@@ -90,7 +90,7 @@ TrailerFilter::DoProcess(String& text,
       //
       // (a) checking that it consists solely of delimiter characters
       //     if there is a chance that this is a delimiter line
-      while ( chDel != '\0' && *pc != '\n' && pc >= start )
+      while ( chDel != '\0' && *pc != '\n' && pc > start )
       {
          if ( *pc-- != chDel )
          {
@@ -133,7 +133,7 @@ TrailerFilter::DoProcess(String& text,
       }
       //else: no
 
-      if ( pc == start )
+      if ( pc <= start )
       {
          // we came to the very beginning of the message and found nothing
          break;
