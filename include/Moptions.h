@@ -1503,7 +1503,7 @@ extern const MOption MP_AWAY_STATUS;
 /// comment
 #define   MP_FOLDER_COMMENT_DEFVAL      M_EMPTYSTRING
 /// update interval for folders in seconds
-#define   MP_UPDATEINTERVAL_DEFVAL      180
+#define   MP_UPDATEINTERVAL_DEFVAL      60
 /// close of folders delayed by
 #define MP_FOLDER_CLOSE_DELAY_DEFVAL    30
 /// do automatic word wrap?
