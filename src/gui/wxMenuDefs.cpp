@@ -301,10 +301,11 @@ static const MenuItemInfo g_aMenuItems[] =
    // normal edit
 
    // the available accelerators for this menu:
-   // BHJKLNOQVWYZ
+   // BHJKLNOVWYZ
    { WXMENU_EDIT_CUT,  gettext_noop("C&ut\tCtrl-X"), gettext_noop("Cut selection and copy it to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_COPY, gettext_noop("&Copy\tCtrl-C"), gettext_noop("Copy selection to clipboard")           , wxITEM_NORMAL },
    { WXMENU_EDIT_PASTE,gettext_noop("&Paste\tCtrl-V"), gettext_noop("Paste from clipboard")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_PASTE_QUOTED,gettext_noop("Paste &quoted\tShift-Ctrl-V"), gettext_noop("Paste from clipboard as quoted text")           , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_EDIT_FIND,  gettext_noop("&Find...\tF3"), gettext_noop("Find text in message") , wxITEM_NORMAL },
    { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , wxITEM_NORMAL },

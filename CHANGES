@@ -9,6 +9,7 @@
 Release 0.66 'Clio'
 -------------------
 
+06.10.03 VZ: added "Paste quoted" menu command in the composer
 03.10.03 VZ: added "isfromme()" filter function
 02.10.03 VZ: text viewer now supports printing
 01.10.03 VZ: added quick search commands in the folder view ('/', '?', 'n', 'N')

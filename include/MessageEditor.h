@@ -51,7 +51,10 @@ public:
       Insert_Append,
 
       /// replace the (text part of the) current contents with text
-      Insert_Replace
+      Insert_Replace,
+
+      /// insert text at the cursor position
+      Insert_Insert
    };
 
    //@}

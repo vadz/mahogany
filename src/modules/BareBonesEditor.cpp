@@ -1078,18 +1078,24 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
    //else: don't change the font, encoding is not supported anyhow
 
 
-   if ( insMode == Insert_Replace )
+   switch ( insMode )
    {
-      m_textControl->SetValue(text);
+      case Insert_Replace:
+         m_textControl->SetValue(text);
 
 #if wxCHECK_VERSION(2, 5, 1)
-      // we want our IsModified() to return true when new text is added
-      m_textControl->MarkDirty();
+         // we want our IsModified() to return true when new text is added
+         m_textControl->MarkDirty();
 #endif
-   }
-   else // Insert_Append
-   {
-      m_textControl->AppendText(text);
+         break;
+
+      case Insert_Append:
+         m_textControl->AppendText(text);
+         break;
+
+      case Insert_Insert:
+         m_textControl->WriteText(text);
+         break;
    }
 }
 

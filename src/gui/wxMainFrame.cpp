@@ -613,6 +613,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    wxMenuBar *menuBar = GetMenuBar();
    menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
    menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
+   menuBar->Enable(WXMENU_EDIT_PASTE_QUOTED, FALSE);
 
    m_ModulesMenu = NULL;
 

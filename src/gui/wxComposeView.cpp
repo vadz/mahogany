@@ -61,6 +61,7 @@
 
 #include <ctype.h>            // for isspace
 
+#include <wx/clipbrd.h>
 #include <wx/process.h>
 #include <wx/file.h>
 #include <wx/ffile.h>
@@ -1598,6 +1599,10 @@ void wxComposeView::SetOriginal(Message *original)
    m_OriginalMessage = original;
    m_OriginalMessage->IncRef();
 
+   // enable "Paste Quoted" command now that we have message to get the
+   // attribution from
+   GetMenuBar()->Enable(WXMENU_EDIT_PASTE_QUOTED, true);
+
    // write reply by default in the same encoding as the original message
    SetEncodingToSameAs(original);
 }
@@ -1667,14 +1672,7 @@ wxComposeView::CreateMenu()
    AddLanguageMenu();
    AddHelpMenu();
 
-   // currently unused
-   //
-   // TODO: provide some visual feedback for them, like enabling/disabling
-#if 0
-   m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
-   m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
-   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_PASTE);
-#endif // 0
+   GetMenuBar()->Enable(WXMENU_EDIT_PASTE_QUOTED, m_OriginalMessage != NULL);
 
    // check if we can schedule messages:
    MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
@@ -3121,13 +3119,30 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_HELP_CONTEXT:
-         mApplication->Help(
-            (m_mode == Mode_Mail)?
-            MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
+         mApplication->Help(m_mode == Mode_Mail ? MH_COMPOSE_MAIL
+                                                : MH_COMPOSE_NEWS, this);
          break;
 
       case WXMENU_EDIT_PASTE:
          m_editor->Paste();
+         break;
+
+      case WXMENU_EDIT_PASTE_QUOTED:
+         {
+            wxClipboardLocker clipboardLock;
+            if ( !clipboardLock )
+               break;
+
+            wxTextDataObject data;
+            if ( wxTheClipboard->GetData(data) )
+            {
+               m_editor->InsertText(QuoteText(data.GetText(),
+                                              m_Profile,
+                                              m_OriginalMessage
+                                             ),
+                                    MessageEditor::Insert_Insert);
+            }
+         }
          break;
 
       case WXMENU_EDIT_COPY:
