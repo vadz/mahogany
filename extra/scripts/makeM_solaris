@@ -1,0 +1,52 @@
+#!/bin/sh
+
+MAKE="make -s"
+export MAKE  
+BUILDDIR=/home/karsten/TMPBUILD
+export BUILDDIR
+
+CVSROOT=:pserver:anoncvs@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs
+export CVSROOT
+OS=`uname -s`-`uname -m`
+export OS
+HOST=`hostname`.`domainname`
+CVS=cvs
+
+NAME=wxGTK
+VERSION=-2.1.0-b7
+
+PREFIX=/tmp/MBUILD
+
+rm -rf /tmp/MBUILD
+mkdir /tmp/MBUILD    
+    
+rm -rf $BUILDDIR 
+mkdir $BUILDDIR && \
+cd $BUILDDIR && \
+cvs checkout -A wxWindows >/dev/null 2>&1 && \
+cd wxWindows && \
+(cd testconf; ./apply || true) && \
+mkdir BUILD && cd BUILD     && \
+../configure --with-gtk --disable-shared --with-threads --with-libjpeg --enable-accel --with-libpng --prefix=$PREFIX && \
+(cd src && make && make install)
+make install
+
+PATH=$PREFIX/bin:$PATH
+LD_LIBRARY_PATH=$PREFIX/lib   
+export LD_LIBRARY_PATH
+CVSROOT=:pserver:anoncvs@wxcvs.dhs.org:/home/karsten/CVSSERVER/mcvs
+NAME=mahogany
+VERSION=0.23a    
+rm -rf $BUILDDIR 
+mkdir $BUILDDIR && \
+cd $BUILDDIR && \
+cvs checkout -A M >/dev/null 2>&1 && \
+mv M $NAME-$VERSION && \
+cd $NAME-$VERSION && \
+cp $HOME/WWW/Mahogany/daily/Mdocs.tar.gz $NAME-$VERSION/doc && \
+mkdir $PREFIX/MMM && \    
+./configure --prefix=/opt && make && make install DESTDIR=$PREFIX/MMM && \
+(cd $PREFIX/MMM && tar cvf ../$NAME-$VERSION.tar * && cd $PREFIX && gzip -9 $NAME-$VERSION.tar) &&\
+mv $PREFIX/$NAME-$VERSION.tar.gz $HOME/WWW/Mahogany/daily/$NAME-$VERSION-Solaris.tar.gz
+rm -rf $BUILDDIR
+    

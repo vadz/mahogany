@@ -1,0 +1,52 @@
+#!/bin/sh
+
+MAKE="make -s"
+export MAKE  
+BUILDDIR=/usr/local/src/Mbuild
+export BUILDDIR
+
+CVSROOT=:pserver:anoncvs@wxcvs.dhs.org:/home/karsten/CVSSERVER/wxcvs
+export CVSROOT
+OS=`uname -s`-`uname -m`
+export OS
+HOST=`hostname`.`domainname`
+CVS=cvs
+
+NAME=wxGTK
+VERSION=-2.1.0-b7
+
+PREFIX=/usr/local/stow/wxWindows
+
+rm -rf $BUILDDIR 
+mkdir $BUILDDIR && \
+cd $BUILDDIR && \
+cvs checkout -A wxWindows >/dev/null 2>&1 && \
+cd wxWindows && \
+(cp modules $HOME/CVSSERVER/wxcvs/CVSROOT || true) && \    
+(cd testconf; ./apply || true) && \
+mkdir BUILD && cd BUILD     && \    
+../configure --with-gtk --disable-shared --with-threads --with-libjpeg --enable-accel --with-libpng --prefix=$PREFIX && \
+(cd src && make -k && make -k install) && make -k install
+# ugly hack to make it install cleanly:
+cp -r $BUILDDIR/wxWindows/include/wx/* $PREFIX/include/wx
+    
+PATH=$PREFIX/bin:$PATH
+export LD_LIBRARY_PATH=$PREFIX/lib   
+CVSROOT=:pserver:anoncvs@wxcvs.dhs.org:/home/karsten/CVSSERVER/mcvs
+NAME=mahogany
+VERSION=0.23a    
+rm -rf $BUILDDIR 
+mkdir $BUILDDIR && \
+cd $BUILDDIR && \
+cvs checkout -A M >/dev/null 2>&1 && \
+mv M $NAME-$VERSION && \
+cd $NAME-$VERSION && build
+export PATH=/sbin:/usr/sbin:$PATH
+super debi && ( \
+(cd $BUILDDIR && mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz /usr/local/ftp/pub/Mahogany/daily); \
+(cd /usr/share/Mahogany/doc && (cp -r * $HOME/WWW/Mahogany/doc ; tar czf $HOME/WWW/Mahogany/daily/Mdocs.tar.gz * ) ) )&& \
+cd $BUILDDIR && cp $HOME/WWW/Mahogany/daily/Mdocs.tar.gz /usr/local/ftp/pub/Mahogany/daily && \
+cp -ar /usr/share/Mahogany/doc/* $HOME/WWW/Mahogany/doc/
+cd /
+rm -rf $BUILDDIR
+    
