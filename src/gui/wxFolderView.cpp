@@ -1858,9 +1858,14 @@ wxFolderView::~wxFolderView()
       m_TicketList->DecRef();
 
    delete m_MessagePreview;
+
+   // set it to NULL so that Clear() knows we are being destroyed - see the
+   // code there
    m_MessagePreview = NULL;
 
    Clear();
+
+   delete m_msgCmdProc;
 }
 
 // ----------------------------------------------------------------------------

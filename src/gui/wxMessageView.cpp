@@ -600,6 +600,11 @@ wxMessageViewFrame::OnMenuCommand(int id)
    }
 }
 
+wxMessageViewFrame::~wxMessageViewFrame()
+{
+   delete m_msgCmdProc;
+}
+
 extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid)
