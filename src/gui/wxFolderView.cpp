@@ -1792,7 +1792,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          }
          break;
 
-#ifdef EXPERIMENTAL_zeitlin
+#ifdef EXPERIMENTAL_show_uid
       case WXMENU_MSG_SHOWUID:
          GetSelections(selections);
          if ( selections.Count() > 0 )
@@ -1809,7 +1809,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             mf->DecRef();
          }
          break;
-#endif // EXPERIMENTAL_zeitlin
+#endif // EXPERIMENTAL_show_uid
 
       default:
          if ( WXMENU_CONTAINS(LANG, cmd) )
