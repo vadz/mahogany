@@ -169,7 +169,8 @@ MModule *FindModule(const String & name)
                &gs_MInterface, &errorCode);
          }
 #endif
-         (**i).m_Module->SafeIncRef();
+         if( (**i).m_Module )
+            (**i).m_Module->IncRef();
 
          return (**i).m_Module;
       }
@@ -312,7 +313,7 @@ public:
       { return m_Author; }
    virtual MModule *GetModule(void) const
       {
-         m_Module->SafeIncRef();
+         if(m_Module) m_Module->IncRef();
          return m_Module;
       }
    MModuleListingEntryImpl(const String &name = "",
@@ -330,7 +331,7 @@ public:
          m_Version = version;
          m_Author = author;
          m_Module = module;
-         m_Module->SafeIncRef();
+         if(m_Module) m_Module->IncRef();
          strutil_delwhitespace(m_Name);
          strutil_delwhitespace(m_Interface);
          strutil_delwhitespace(m_Desc);
@@ -340,19 +341,19 @@ public:
       }
    ~MModuleListingEntryImpl()
       {
-         m_Module->SafeDecRef();
+         if(m_Module) m_Module->DecRef();
       }
    /// must be implemented to handle refcount of MModule pointer:
    MModuleListingEntryImpl & operator=(
       const MModuleListingEntryImpl & newval)
       {
-         m_Module->SafeDecRef();
+         if(m_Module) m_Module->DecRef();
          m_Name = newval.m_Name; m_Interface = newval.m_Interface;
          m_ShortDesc = newval.m_ShortDesc;
          m_Desc = newval.m_Desc; m_Author = newval.m_Author;
          m_Version = newval.m_Version;
          m_Module = newval.m_Module;
-         m_Module->SafeIncRef();
+         if(m_Module) m_Module->IncRef();
          return *this;
       }
 private:
