@@ -421,7 +421,10 @@ MailFolderCC::Ping(void)
 MailFolderCC::~MailFolderCC()
 {
    ProcessEventQueue();
+   CCQuiet();
+   mail_check(m_MailStream); // update flags, etc, .newsrc
    if( m_MailStream ) mail_close(m_MailStream);
+   CCVerbose();
    if( m_Listing ) delete [] m_Listing;
 
    RemoveFromMap(m_MailStream);
