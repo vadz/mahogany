@@ -189,6 +189,8 @@
 
 /// the locale for translation to national languages
 #define   MP_LOCALE               "Locale"
+/// the default character set
+#define MP_CHARSET      "CharSet"
 /// the default icon for frames
 #define   MP_ICON_MFRAME         "MFrameIcon"
 /// the icon for the main frame
@@ -605,6 +607,8 @@
 
 /// the locale for translation to national languages
 #define   MP_LOCALE_D               M_EMPTYSTRING
+/// the default character set
+#define MP_CHARSET_D               "ISO-8859-1"
 /// the default icon for frames
 #define   MP_ICON_MFRAME_D      "mframe.xpm"
 /// the icon for the main frame

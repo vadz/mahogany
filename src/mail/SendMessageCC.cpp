@@ -426,6 +426,21 @@ SendMessageCC::AddPart(Message::ContentType type,
       MessageParameterList::iterator i;
       PARAMETER *lastpar = NULL, *par;
 
+      // set default charset, currently we always use ISO-8859-1,
+      // which is latin1
+
+      if(type == TYPETEXT)
+      {
+         String charSet = READ_CONFIG(profile, MP_CHARSET);
+         if(charSet.Length() != 0)
+         {
+            par = mail_newbody_parameter();
+            par->attribute = strutil_strdup("CHARSET");
+            par->value     = strutil_strdup(charSet);
+            par->next      = NULL;
+            lastpar = par;
+         }
+      }
       for(i=plist->begin(); i != plist->end(); i++)
       {
          par = mail_newbody_parameter();
@@ -437,6 +452,7 @@ SendMessageCC::AddPart(Message::ContentType type,
          else
             bdy->parameter = par;
       }
+      
    }
    bdy->disposition.type = strutil_strdup(disposition);
    bdy->parameter = NULL;
