@@ -13,6 +13,8 @@ $Id$
 		  UID for comparison? CheckNewMail() function?
 		Does it work?
 		The dialog is not working properly, empty message!
+		Call filtering for new mails before building listing,
+		remove recursion/unnecessary threading, etc.
 
 9	KB	finish filters dialog
 
