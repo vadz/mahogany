@@ -9,7 +9,7 @@
 Release 0.65 'Claire' ???, 2003
 -------------------------------
 
-11.04.03 VZ: debugged the "Migarate" tool which is now half-usable
+11.04.03 VZ: debugged the "Migrate" tool which is now half-usable
 03.04.03 VZ: added a new spam test for junk at the end of subject
 01.04.03 VZ: options to disable SMTP auth methods (broken servers workaround)
 30.03.03 VZ: speed up of header retrieval for POP and IMAP
