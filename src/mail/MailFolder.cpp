@@ -533,7 +533,7 @@ public:
          else // options change
          {
             m_Mf->UpdateConfig();
-            m_Mf->UpdateListing();
+            m_Mf->RequestUpdate();
          }
          return true;
       }
@@ -1063,12 +1063,14 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    UIdType highestId = UID_ILLEGAL;
    for ( UIdType i = 0; i < n; i++ )
    {
-      if( (m_LastNewMsgUId == UID_ILLEGAL
-           || (*hilp)[i]->GetUId() > m_LastNewMsgUId )
-          && IsNewMessage( (*hilp)[i] ) )
+      if( ( m_LastNewMsgUId == UID_ILLEGAL
+            || (*hilp)[i]->GetUId() > m_LastNewMsgUId ))
       {
          UIdType uid = (*hilp)[i]->GetUId();
-         messageIDs[nextIdx++] = uid;
+         if(IsNewMessage( (*hilp)[i] ) )
+         {
+            messageIDs[nextIdx++] = uid;
+         }
          if(highestId == UID_ILLEGAL || uid > highestId)
             highestId = uid;
       }
@@ -1113,6 +1115,10 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 void
 MailFolderCmn::UpdateListing(void)
 {
+#ifdef EXPERIMENTAL
+   ASSERT_MSG(0,"obsolete UpdateListing() called");
+#endif
+
    // We must make sure that we have called BuildListing() at least
    // once, or ApplyFilterRules() will get into an endless recursion
    // when it tries to obtain a listing and then gets called from
@@ -1132,14 +1138,7 @@ MailFolderCmn::UpdateListing(void)
    }
    if(hilp)
    {
-#if 0
-      SortListing(this, hilp, m_Config.m_ListingSortOrder);
-      if(m_Config.m_UseThreading)
-         ThreadMessages(this, hilp);
-#endif
       ProcessHeaderListing(hilp);
-      
-
       // now we sent an update event to update folderviews etc
       MEventManager::Send( new MEventFolderUpdateData (this) );
 
@@ -1154,7 +1153,7 @@ void
 MailFolderCmn::UpdateMessageStatus(UIdType uid)
 {
    if(m_Config.m_ReSortOnChange)
-      UpdateListing(); // we need a complete new listing
+      RequestUpdate(); // we need a complete new listing
    else
    {
       /// just tell them that we have an updated listing:

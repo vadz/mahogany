@@ -79,27 +79,15 @@
 #include <errno.h>
 
 
-#define NEW_SPLASH
-
-
-#ifndef NEW_SPLASH
-#   ifdef    OS_WIN
-#     define mahogany   "mahogany"
-#     define background "background"
-#   else   //real XPMs
-#     include "../src/icons/background.xpm"
-#     include "../src/icons/mahogany.xpm"
-#     ifdef USE_PYTHON
-#        include "../src/icons/pythonpower.xpm"
-#     endif // USE_PYTHON
-#   endif  //Win/Unix
-#else
-#   ifdef    OS_WIN
-#     define mahogany   "mahogany"
-#   else   //real XPMs
-#     include "../src/icons/mahogany.xpm"
-#   endif  //Win/Unix
-#endif
+#ifdef    OS_WIN
+#   define Mahogany      "Mahogany"
+#   define PythonPowered "PythonPowered"
+#else   //real XPMs
+#   include "../src/icons/Msplash.xpm"
+#   ifdef USE_PYTHON
+#     include "../src/icons/PythonPowered.xpm"
+#   endif
+#endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
 // global vars and functions
@@ -685,7 +673,6 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
 
 // simple AboutDialog to be displayed at startup
 
-#ifdef NEW_SPLASH
 // timer which calls our DoClose() when it expires
 class LogCloseTimer : public wxTimer
 {
@@ -840,13 +827,21 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,200);
 
-   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(mahogany), wxBITMAP_TYPE_PNG);
+   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
+                              wxBITMAP_TYPE_PNG); 
+#ifdef USE_PYTHON
+   wxMemoryFSHandler::AddFile("pythonpowered.png", wxBITMAP(PythonPowered),
+                              wxBITMAP_TYPE_PNG); 
+#endif
+   
+   top->SetPage("<body text=#000000 bgcolor=#ffffff>"
+                "<center><img src=\"memory:splash.png\"><br>"
+#ifdef USE_PYTHON
+                "<img src=\"memory:pythonpowered.png\">"
+#endif
+                "</center>");
 
-   top->SetPage("<body text=#ffffff bgcolor=#000000>"
-                "<center><img src=\"memory:splash.png\"></center><br>"
-                "<center>Welcome to Mahogany!</center>");
-
-   bottom->SetPage("<body text=#ffffff bgcolor=#000000>"
+   bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
 #ifdef DEBUG
                    "<h3>Debug information:</h3>"
                    "<h4>Features:</h4>"
@@ -900,7 +895,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    
 
    wxMemoryFSHandler::RemoveFile("splash.png");
-
+#ifdef USE_PYTHON
+   wxMemoryFSHandler::RemoveFile("pythonpowered.png");
+#endif
+   
    bottom->SetFocus();
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
@@ -919,7 +917,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 #ifdef __WXMSW__
                       wxSize(400, 350),
 #else  // !MSW
-                      wxSize(320, 270),
+                      wxSize(400, 370),
 #endif // MSW/!MSW
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
@@ -935,7 +933,6 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 
 
 
-#endif
 
 
 class wxMFrame *g_pSplashScreen = NULL;
@@ -945,198 +942,6 @@ extern void CloseSplash()
    if ( g_pSplashScreen )
      ((wxAboutFrame *)g_pSplashScreen)->Close();
 }
-
-
-#ifndef NEW_SPLASH   
-// the main difference is that it goes away as soon as you click it
-// or after some time (if not disabled in the ctor).
-//
-// It is also unique and must be removed before showing any message boxes
-// (because it has on top attribute) with CloseSplash() function.
-class wxAboutWindow : public wxLayoutWindow
-{
-public:
-  // fills the window with some pretty text
-  wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout = true);
-
-  // mouse event handler closes the parent window
-  void OnClick(wxMouseEvent&) { DoClose(); }
-
-  /// stop the timer
-  void StopTimer(void)
-  {
-     if(m_pTimer)
-     {
-        delete m_pTimer;
-        m_pTimer = NULL;
-     }
-  }
-
-  // close the about frame
-  void DoClose()
-  {
-     if(GetParent()) GetParent()->Close(true);
-     StopTimer();
-  }
-
-private:
-  LogCloseTimer  *m_pTimer;
-
-  DECLARE_EVENT_TABLE();
-};
-
-void
-LogCloseTimer::Notify()
-{
-   m_window->DoClose();
-}
-
-class wxAboutFrame : public wxFrame
-{
-public:
-   wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame()
-   {
-      // remove our temp log redirector
-      delete wxLog::GetActiveTarget();
-
-      g_pSplashScreen = NULL;
-   }
-
-   void Close(void) { m_Window->StopTimer(); wxWindow::Close(); }
-
-private:
-   wxAboutWindow *m_Window;
-};
-
-BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
-  EVT_LEFT_DOWN(wxAboutWindow::OnClick)
-  EVT_MIDDLE_DOWN(wxAboutWindow::OnClick)
-  EVT_RIGHT_DOWN(wxAboutWindow::OnClick)
-END_EVENT_TABLE()
-
-#endif
-
-
-
-#ifndef NEW_SPLASH
-wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
-             : wxLayoutWindow(parent)
-{
-   // strings used for primitive alignment of text
-   static const char *align = "                 ";
-   static const char *align2 = "        ";
-#ifdef __WXMSW__
-   static const char *align4 = "    ";
-#endif
-
-   wxLayoutList *ll = GetLayoutList();
-   wxBitmap *bm = new wxBitmap(background);
-   SetBackgroundBitmap(bm);
-
-   SetCursorVisibility(0);
-   wxColour col("blue");
-   Clear(wxDECORATIVE, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
-
-   // unfortunately, I can't make it transparent under Windows, so it looks
-   // really ugly - disabling for now
-#ifdef __WXMSW__
-   ll->Insert(align4);
-   ll->Insert("Welcome to ");
-   ll->LineBreak();
-   ll->Insert(align2);
-   ll->Insert("Mahogany!");
-   ll->LineBreak();
-#else
-   ll->Insert(new wxLayoutObjectIcon(wxBitmap(mahogany)));
-   ll->LineBreak();
-#endif // 0
-
-   ll->SetFont(wxROMAN, 10, wxNORMAL, wxNORMAL, FALSE, "yellow");
-   ll->LineBreak();
-   String version = _("Version: ");
-   version += M_VERSION_STRING;
-   ll->Insert(align);
-   ll->Insert(align);
-   ll->Insert(version);
-   ll->LineBreak();
-
-   ll->Insert(align);
-   version = _("compiled for ");
-   version += wxGetOsDescription();
-   ll->Insert(version);
-   ll->LineBreak();
-   ll->LineBreak();
-
-   ll->SetFontSize(12);
-   ll->Insert(align);
-   ll->Insert(_("Copyright (c) 1997-2000 by Karsten Ballüder"));
-   ll->LineBreak();
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(align2);
-   ll->Insert(_("Written by Karsten Ballüder"));
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(align);
-   ll->Insert(_("and Vadim Zeitlin"));
-   ll->LineBreak();
-   ll->LineBreak();
-   ll->SetFontSize(8);
-   ll->Insert(align);
-   ll->Insert(_("This software is provied 'as is' and without any expressed or implied"));
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(_("warranties, including, without limitation, the implied warranties"));
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(_("of merchantibility and fitness for a particular purpose."));
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(_("This is OpenSource(TM) software."));
-#ifdef USE_PYTHON
-   ll->LineBreak();
-   ll->LineBreak();
-   ll->Insert(align);
-   ll->Insert(align);
-   ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
-#endif // Python
-
-   Refresh();
-   ResizeScrollbars(true); // let them disappear
-   // start a timer which will close us (if not disabled)
-   if ( bCloseOnTimeout ) {
-     m_pTimer = new LogCloseTimer(this);
-   }
-   else {
-     // must initialize to NULL because we delete it later unconditionally
-     m_pTimer = NULL;
-   }
-}
-
-wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
-            : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition,
-                      // this is ugly, but having scrollbars is even uglier
-#ifdef __WXMSW__
-                      wxSize(400, 350),
-#else  // !MSW
-                      wxSize(320, 270),
-#endif // MSW/!MSW
-                      /* no border styles at all */ wxSTAY_ON_TOP )
-{
-   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
-
-   wxLog::SetActiveTarget(new SplashKillerLog);
-
-   m_Window = new wxAboutWindow(this, bCloseOnTimeout);
-   
-   g_pSplashScreen = (wxMFrame *)this;
-   Centre(wxCENTER_FRAME | wxBOTH);
-   Show(TRUE);
-}
-#endif
-
 
 
 

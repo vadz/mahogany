@@ -448,9 +448,9 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(bool NewOnly = true) = 0;
-protected:
    /// Request update
    virtual void RequestUpdate(void) = 0;
+protected:
 };
 
 /** This class temporarily locks a mailfolder */

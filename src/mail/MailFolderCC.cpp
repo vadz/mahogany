@@ -6,6 +6,20 @@
  * $Id$
  *******************************************************************/
 
+
+/*
+  Some attempt to document the update behaviour.
+
+  When a callback (mm_xxxx()) thinks that the folder listing needs
+  updating, i.e. a message status changed, new messages got detected,
+  etc, it calls RequestUpdate(). This function updates the available
+  information immediately (the number of messages) and queues a
+  MailFolderCC::Event which will cause the folder listing update
+  MEvent to be sent out to the application after the current folder
+  operation is done. To update all immediately available information,
+  UpdateStatus() is used which will also generate new mail events if
+  necessary. 
+ */
 // ============================================================================
 // declarations
 // ============================================================================
@@ -1264,9 +1278,7 @@ MailFolderCC::GetHeaders(void) const
 #ifdef NEW_UPDATE
    if(m_NeedFreshListing)
    {
-      ///FIXME: these numbers don't change here but at any time, so we 
-      // need to make this member variables and send the appropriate
-      // events when needed.
+      UpdateStatus();
       
       unsigned long nMessages, nRecent;
       UIdType lastUId;
@@ -1285,6 +1297,8 @@ MailFolderCC::GetHeaders(void) const
       // one extra incref, to make sure it won't go away:
       // BuildListing() does not incref it internally!
       m_Listing->IncRef();
+
+      CheckForNewMail(m_Listing);
 
 #ifdef DEBUG
       String msg;
@@ -2085,16 +2099,29 @@ MailFolderCC::UpdateStatus(void)
       nRecent = m_nRecent;
    UIdType lastUId = m_LastUId;
    
-   m_nMessages = m_MailStream->nmsgs;
-   m_nRecent = m_MailStream->recent;
-   m_LastUId = m_MailStream->uid_last;
-
+   
+      m_nMessages = m_MailStream->nmsgs;
+      m_nRecent = m_MailStream->recent;
+      m_LastUId = m_MailStream->uid_last;
+   
+#if 0
    if(nMessages != m_nMessages
       || nRecent != m_nRecent
       || lastUId != m_LastUId)
       //FIXME: sent a folder status change event instead!
-      MEventManager::Send( new MEventFolderUpdateData (this) );
+   {
+      // Check if we have new mails:
+      if(lastUId != UID_ILLEGAL && m_LastUId > lastUId)
+      {
+//         MEventManager::Send( new MEventFolderUpdateData (this) );
+         HeaderInfoList *hilp = GetHeaders();
+         CheckForNewMail(hilp);
+         hilp->DecRef();
+      }
+   }
+#endif
 }
+
 /* static */
 bool
 MailFolderCC::CanExit(String *which)
@@ -2193,7 +2220,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-
+      
       // this test seems necessary for MH folders, otherwise we're going into
       // an infinite loop (and it shouldn't (?) break anything for other
       // folders)
@@ -2201,7 +2228,11 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
            (mf->m_nMessages != number) )
       {
          mf->m_nMessages = number;
-         mf->RequestUpdate();
+         // This can be called from within mail_open(), before we have a
+         // valid m_MailStream, so check. It's slightly more efficient 
+         // to check here than in UpdateStatus().
+         if(mf->m_MailStream != NULL)
+            mf->RequestUpdate();
       }
    }
    else
@@ -2300,7 +2331,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
               mf->m_MailboxPath.c_str(), status->messages);
 
    if(status->flags & SA_MESSAGES)
-      mf->UpdateStatus();
+      mf->RequestUpdate();
 }
 
 /** log a message
@@ -2532,15 +2563,17 @@ MailFolderCC::ProcessEventQueue(void)
          if(mf) mf->RequestUpdate();  // Queues an Update event.
          break;
       }
-      /* The Update event is not caused by c-client callbacks but
-         by this very event handling mechanism itself. It causes
-         BuildListing() to fetch a new listing. */
+      /* An update event is queued by callbacks which think that the
+         folder listing might be no longer valid now. */
       case Update:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
          if(mf && mf->UpdateNeeded())  // only call it once
-            mf->UpdateListing();
+         {
+           // tell all interested that an update might be required
+            MEventManager::Send( new MEventFolderUpdateData (mf) );
+         }
          break;
       }
       }// switch
@@ -2556,15 +2589,14 @@ MailFolderCC::RequestUpdate(void)
    // update event.
    if(! m_NeedFreshListing)
       m_NeedFreshListing = true;
-#else
-   // we want only one update event
+#endif
+   // we want to queue only one update event:
    if(! m_UpdateNeeded)
    {
       MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
       MailFolderCC::QueueEvent(evptr);
       m_UpdateNeeded = true;
    }
-#endif
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
@@ -2813,8 +2845,9 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
-   if(mm_disable_callbacks)
-      return;
+//   if(mm_disable_callbacks)
+//      return;
+
    // update count immediately to reflect change:
    MailFolderCC::mm_exists(stream, number);
 }

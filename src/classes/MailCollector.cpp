@@ -251,6 +251,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
    /* We might have filter rules set on the NewMail folder, so we
       apply these as well: */
    m_NewMailFolder->ApplyFilterRules(true);
+   m_NewMailFolder->RequestUpdate();
+
 /*
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
