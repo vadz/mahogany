@@ -36,6 +36,7 @@ HeaderInfoImpl::operator= ( const HeaderInfo &old)
 {
    m_Subject = old.GetSubject();
    m_From = old.GetFrom();
+   m_To = old.GetTo();
    m_Date = old.GetDate();
    m_UId = old.GetUId();
    m_References = old.GetReferences();
