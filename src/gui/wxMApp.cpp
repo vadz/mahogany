@@ -597,23 +597,25 @@ wxMApp::CanClose() const
    }
 
    // ask the user for confirmation
-   bool rc = MDialog_YesNoDialog
-             (
-               _("Do you really want to exit Mahogany?"),
-               m_topLevelFrame,
-               MDIALOG_YESNOTITLE,
-               M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
-               M_MSGBOX_CONFIRM_EXIT
-             );
+   bool okToClose = MDialog_YesNoDialog
+                    (
+                        _("Do you really want to exit Mahogany?"),
+                        m_topLevelFrame,
+                        MDIALOG_YESNOTITLE,
+                        M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
+                        M_MSGBOX_CONFIRM_EXIT
+                    );
 
-   if ( rc )
+   if ( okToClose )
    {
       // now check for anything else which may require the user intervention
-      if ( !MAppBase::CanClose() )
-         return false;
+      okToClose = MAppBase::CanClose();
+   }
 
+   if ( okToClose )
+   {
       wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
-      while ( node && rc )
+      while ( node && okToClose )
       {
          wxWindow *win = node->GetData();
          node = node->GetNext();
@@ -626,7 +628,7 @@ wxMApp::CanClose() const
 
             if ( !IsOkToClose(frame) )
             {
-               rc = frame->CanClose();
+               okToClose = frame->CanClose();
             }
             //else: had been asked before
          }
@@ -636,17 +638,15 @@ wxMApp::CanClose() const
       }
    }
 
-   if ( !rc )
+   if ( !okToClose )
    {
       // when we will try to close the next time, we shouldn't assume that
       // these frames still don't mind being closed - may be the user will
       // modify the compose view contents or something else changes
       ((MAppBase *)this)->ResetFramesOkToClose();  // const_cast
-
-      return false;
    }
 
-   return MAppBase::CanClose();
+   return okToClose;
 }
 
 void wxMApp::OnQueryEndSession(wxCloseEvent& event)
