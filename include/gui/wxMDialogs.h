@@ -406,7 +406,7 @@ bool MDialog_GetPassword(const wxString& folderName,
                          wxString *username,
                          wxWindow *parent = NULL);
 
-#ifdef OS_WIN
+#if 1 //def OS_WIN
 #  undef USE_SEMIMODAL
 
 #  define wxSMDialog wxDialog

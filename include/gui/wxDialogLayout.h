@@ -104,7 +104,7 @@ protected:
    virtual wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
                                                bool noBox = FALSE,
                                                int helpId = -1);
-   
+
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
    // compatibility with existing code)
@@ -132,11 +132,11 @@ private:
 // via virtual GetProfile() function - and it is only used for this purpose.
 // ----------------------------------------------------------------------------
 
-class wxNotebookDialog : public wxManuallyLaidOutDialog
+class wxOptionsEditDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor
-   wxNotebookDialog(wxFrame *parent,
+   wxOptionsEditDialog(wxFrame *parent,
                     const wxString& title,
                     const wxString& profileKey = "");
 
@@ -156,7 +156,7 @@ public:
    // function called when the user chooses Apply or Ok button and something
    // has really changed in the dialog: return TRUE from it to allow change
    // (and close the dialog), FALSE to forbid it and keep the dialog opened.
-   virtual bool OnSettingsChange() { return TRUE; }
+   virtual bool OnSettingsChange();
 
    // set the page (if -1 not changed)
    void SetNotebookPage(int page)
@@ -165,13 +165,14 @@ public:
          m_notebook->SetSelection(page);
    }
 
-   // something changed, set the dirty flag (must be called to enable the
-   // Apply button)
-   void SetDirty()
-   {
-      m_bDirty = TRUE;
-      EnableButtons(TRUE);
-   }
+   // notifications from the notebook pages
+      // something changed, set the dirty flag (must be called to enable the
+      // Apply button)
+   virtual void SetDirty() { m_bDirty = TRUE; EnableButtons(TRUE); }
+      // something important change
+   virtual void SetDoTest() { SetDirty(); m_bTest = TRUE; }
+      // some setting changed, but won't take effect until restart
+   virtual void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
 
    // get/set the dialog data
    virtual bool TransferDataToWindow();
@@ -184,7 +185,7 @@ public:
    void OnCancel(wxCommandEvent& event);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxNotebookDialog() { wxFAIL_MSG("unaccessible"); }
+   wxOptionsEditDialog() { wxFAIL_MSG("unaccessible"); }
 
    // disable or reenable Ok and Apply buttons
    void EnableButtons(bool enable)
@@ -200,6 +201,8 @@ protected:
    // clear the dirty flag
    virtual void ResetDirty()
    {
+      m_bTest =
+      m_bRestartWarning =
       m_bDirty = FALSE;
       m_btnApply->Enable(FALSE);
    }
@@ -227,12 +230,16 @@ private:
    // with the same path
    Profile *m_profileForButtons;
 
-   bool m_bDirty;
+   // flags
+   bool m_bDirty,           // something changed
+        m_bTest,            // test new settings?
+        m_bRestartWarning;  // changes will take effect after restart
+
 
    // Ok/Cancel/Apply depending on the last button pressed
    MEventOptionsChangeData::ChangeKind m_lastBtn;
 
-   DECLARE_ABSTRACT_CLASS(wxNotebookDialog)
+   DECLARE_ABSTRACT_CLASS(wxOptionsEditDialog)
    DECLARE_EVENT_TABLE()
 };
 

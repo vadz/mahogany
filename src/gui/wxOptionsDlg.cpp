@@ -58,7 +58,6 @@
 #include "Mpers.h"
 #include "MDialogs.h"
 #include "Mdefaults.h"
-#include "Mupgrade.h"
 #include "Mcallbacks.h"
 
 #include "gui/wxIconManager.h"
@@ -395,36 +394,25 @@ private:
 // dialog classes
 // -----------------------------------------------------------------------------
 
-class wxOptionsDialog : public wxNotebookDialog
+class wxGlobalOptionsDialog : public wxOptionsEditDialog
 {
 public:
-   wxOptionsDialog(wxFrame *parent, const wxString& configKey = "OptionsDlg");
+   wxGlobalOptionsDialog(wxFrame *parent, const wxString& configKey = "OptionsDlg");
 
-   ~wxOptionsDialog();
-
-   // notifications from the notebook pages
-      // something important change
-   virtual void SetDoTest() { SetDirty(); m_bTest = TRUE; }
-      // some setting changed, but won't take effect until restart
-   virtual void SetGiveRestartWarning() { m_bRestartWarning = TRUE; }
+   virtual ~wxGlobalOptionsDialog();
 
    // override base class functions
    virtual void CreateNotebook(wxPanel *panel);
    virtual bool TransferDataToWindow();
 
-   virtual bool OnSettingsChange();
-
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxOptionsDialog() { wxFAIL_MSG("should be never used"); }
+   wxGlobalOptionsDialog() { wxFAIL_MSG("should be never used"); }
 
    // return TRUE if this dialog edits global options for the program, FALSE
    // if this is another kind of dialog
    virtual bool IsGlobalOptionsDialog() const { return TRUE; }
 
 protected:
-   // unset the dirty flag
-   virtual void ResetDirty();
-
    // implement base class pure virtual
    virtual Profile *GetProfile() const
    {
@@ -432,22 +420,19 @@ protected:
    }
 
 private:
-   bool  m_bTest,            // test new settings?
-         m_bRestartWarning;  // changes will take effect after restart
-
-   DECLARE_DYNAMIC_CLASS(wxOptionsDialog)
+   DECLARE_DYNAMIC_CLASS(wxGlobalOptionsDialog)
 };
 
-// just like wxOptionsDialog but uses the given wxOptionsPage and not the
+// just like wxGlobalOptionsDialog but uses the given wxOptionsPage and not the
 // standard ones
-class wxCustomOptionsDialog : public wxOptionsDialog
+class wxCustomOptionsDialog : public wxGlobalOptionsDialog
 {
 public:
    // minimal ctor, use SetPagesDesc() and SetProfile() later
    wxCustomOptionsDialog(wxFrame *parent,
                          const wxString& configForDialog = "CustomOptions",
                          const wxString& configForNotebook = "CustomNotebook")
-      : wxOptionsDialog(parent, configForDialog),
+      : wxGlobalOptionsDialog(parent, configForDialog),
         m_configForNotebook(configForNotebook)
    {
       SetProfile(NULL);
@@ -461,7 +446,7 @@ public:
                          wxFrame *parent,
                          const wxString& configForDialog = "CustomOptions",
                          const wxString& configForNotebook = "CustomNotebook")
-      : wxOptionsDialog(parent, configForDialog),
+      : wxGlobalOptionsDialog(parent, configForDialog),
         m_configForNotebook(configForNotebook)
    {
       m_profile = profile;
@@ -513,7 +498,7 @@ private:
 };
 
 // an identity edit dialog: works with settings in an identity profile, same as
-// wxOptionsDialog otherwise
+// wxGlobalOptionsDialog otherwise
 class wxIdentityOptionsDialog : public wxCustomOptionsDialog
 {
 public:
@@ -579,7 +564,7 @@ private:
 // event tables and such
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxOptionsDialog, wxNotebookDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxGlobalOptionsDialog, wxOptionsEditDialog)
 
 BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    // any change should make us dirty
@@ -1258,7 +1243,7 @@ void wxOptionsPage::CreateControls()
    bool isAdvanced = READ_APPCONFIG(MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
 
    // some others are not shown when we're inside the identity dialog
-   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+   wxGlobalOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxGlobalOptionsDialog);
    bool isIdentDialog = dialog && !dialog->IsGlobalOptionsDialog();
 
    // first determine the longest label
@@ -1423,19 +1408,15 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
       return FALSE;
    }
 
+   // mark this control as being dirty
    m_aDirtyFlags[(size_t)index] = true;
 
-   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
-
+   // update this page controls state
    UpdateUI();
 
-   if ( !dialog )
-   {
-      // we don't put an assert here because this does happen when we're a
-      // page in the folder properties dialog, but we must have event.Skip()
-      // here to allow the base class version mark the dialog as being dirty
-      return FALSE;
-   }
+   // mark the dialog as being dirty
+   wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
+   CHECK( dialog, "option page without option dialog?", FALSE );
 
    if ( m_aVitalControls.Index(control) != -1 )
       dialog->SetDoTest();
@@ -1793,33 +1774,22 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
 {
-   // has the listbox contents changed?
-   bool dirty;
-
    switch ( event.GetId() )
    {
       case wxOptionsPage_BtnNew:
-         dirty = OnListBoxAdd();
+         OnListBoxAdd();
          break;
 
       case wxOptionsPage_BtnModify:
-         dirty = OnListBoxModify();
+         OnListBoxModify();
          break;
 
       case wxOptionsPage_BtnDelete:
-         dirty = OnListBoxDelete();
+         OnListBoxDelete();
          break;
 
       default:
-         return;
-   }
-
-   if ( dirty )
-   {
-      // mark the dialog as being dirty too
-      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
-      if ( dialog )
-         dialog->SetDirty();
+         ;
    }
 }
 
@@ -1872,6 +1842,8 @@ bool wxOptionsPage::OnListBoxModify()
    }
 
    l->SetString(nSel, val);
+
+   wxOptionsPage::OnChangeCommon(l);
 
    return TRUE;
 }
@@ -1994,7 +1966,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
 
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
 
@@ -2062,7 +2034,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
       dialog->SetDirty();
    }
@@ -2106,21 +2078,16 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
 
 bool wxOptionsPageFolderView::TransferDataFromWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataFromWindow();
-
-   if ( bRc )
+   // if the listbox contains just the return address, empty it: it is the
+   // default anyhow and this avoids remembering it in config
+   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   if ( listbox->GetCount() == 1 &&
+        listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
    {
-      // if the listbox contains just the return address, empty it: it is the
-      // default anyhow
-      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-      if ( listbox->GetCount() == 1 &&
-           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
-      {
-         listbox->Clear();
-      }
+      listbox->Clear();
    }
 
-   return bRc;
+   return wxOptionsPage::TransferDataFromWindow();
 }
 
 void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
@@ -2142,7 +2109,7 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
    if ( dirty )
    {
       // something changed - make us dirty
-      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
       wxCHECK_RET( dialog, "options page without a parent dialog?" );
       dialog->SetDirty();
    }
@@ -2252,7 +2219,7 @@ void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
    {
       if ( ReenablePersistentMessageBoxes(this) )
       {
-         wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+         wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
          wxCHECK_RET( dialog, "options page without a parent dialog?" );
          dialog->SetDirty();
       }
@@ -2446,18 +2413,18 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
-// wxOptionsDialog
+// wxGlobalOptionsDialog
 // ----------------------------------------------------------------------------
 
-wxOptionsDialog::wxOptionsDialog(wxFrame *parent, const wxString& configKey)
-               : wxNotebookDialog(parent, _("Program options"), configKey)
+wxGlobalOptionsDialog::wxGlobalOptionsDialog(wxFrame *parent, const wxString& configKey)
+               : wxOptionsEditDialog(parent, _("Program options"), configKey)
 {
 }
 
 bool
-wxOptionsDialog::TransferDataToWindow()
+wxGlobalOptionsDialog::TransferDataToWindow()
 {
-   if ( !wxNotebookDialog::TransferDataToWindow() )
+   if ( !wxOptionsEditDialog::TransferDataToWindow() )
       return FALSE;
 
    int nPageCount = m_notebook->GetPageCount();
@@ -2468,58 +2435,12 @@ wxOptionsDialog::TransferDataToWindow()
    return TRUE;
 }
 
-bool
-wxOptionsDialog::OnSettingsChange()
-{
-   if ( m_bTest )
-   {
-      if ( MDialog_YesNoDialog(_("Some important program settings were changed.\n"
-                                 "\nWould you like to test the new setup "
-                                 "(recommended)?"),
-                               this,
-                               _("Test setup?"),
-                               true,
-                               "OptTestAsk") )
-      {
-         if ( !VerifyMailConfig() )
-         {
-            return FALSE;
-         }
-      }
-      else
-      {
-         // no test was done, assume it's ok...
-         m_bTest = FALSE;
-      }
-   }
-
-   if ( m_bRestartWarning )
-   {
-      MDialog_Message(_("Some of the changes to the program options will\n"
-                        "only take effect when the progam will be run the\n"
-                        "next time and not during this session."),
-                      this, MDIALOG_MSGTITLE, "WarnRestartOpt");
-      m_bRestartWarning = FALSE;
-   }
-
-   return TRUE;
-}
-
-void wxOptionsDialog::CreateNotebook(wxPanel *panel)
+void wxGlobalOptionsDialog::CreateNotebook(wxPanel *panel)
 {
    m_notebook = new wxOptionsNotebook(panel);
 }
 
-// reset the dirty flag
-void wxOptionsDialog::ResetDirty()
-{
-   wxNotebookDialog::ResetDirty();
-
-   m_bTest =
-   m_bRestartWarning = FALSE;
-}
-
-wxOptionsDialog::~wxOptionsDialog()
+wxGlobalOptionsDialog::~wxGlobalOptionsDialog()
 {
    // save settings
    Profile::FlushAll();
@@ -2788,7 +2709,7 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
 
 void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
 {
-   wxOptionsDialog dlg(parent);
+   wxGlobalOptionsDialog dlg(parent);
    dlg.CreateAllControls();
    dlg.SetNotebookPage(page);
    dlg.Layout();

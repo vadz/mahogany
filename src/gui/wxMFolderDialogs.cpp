@@ -70,7 +70,7 @@
 // -----------------------------------------------------------------------------
 
 // base class for folder creation and properties dialog
-class wxFolderBaseDialog : public wxNotebookDialog
+class wxFolderBaseDialog : public wxOptionsEditDialog
 {
 public:
    wxFolderBaseDialog(wxWindow *parent, const wxString& title);
@@ -483,11 +483,11 @@ private:
 // event tables
 // -----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxNotebookDialog)
+IMPLEMENT_DYNAMIC_CLASS(wxFolderBaseDialog, wxOptionsEditDialog)
 IMPLEMENT_DYNAMIC_CLASS(wxFolderCreateDialog, wxFolderBaseDialog)
 IMPLEMENT_DYNAMIC_CLASS(wxFolderPropertiesDialog, wxFolderBaseDialog)
 
-BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxNotebookDialog)
+BEGIN_EVENT_TABLE(wxFolderCreateDialog, wxOptionsEditDialog)
    EVT_TEXT(wxFolderCreateDialog::Folder_Name,
             wxFolderCreateDialog::OnFolderNameChange)
    EVT_UPDATE_UI(wxID_OK,    wxFolderCreateDialog::OnUpdateButton)
@@ -508,7 +508,7 @@ END_EVENT_TABLE()
 
 wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
                                        const wxString& title)
-                  : wxNotebookDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
+                  : wxOptionsEditDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
                                      title,
                                      "FolderProperties")
 {
@@ -785,7 +785,7 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    }
    //else: the parent folder is fixed, don't let user change it
 
-   return wxNotebookDialog::TransferDataToWindow();
+   return wxOptionsEditDialog::TransferDataToWindow();
 }
 
 bool wxFolderCreateDialog::TransferDataFromWindow()
@@ -832,7 +832,7 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 
    if ( ok )
    {
-      ok = wxNotebookDialog::TransferDataFromWindow();
+      ok = wxOptionsEditDialog::TransferDataFromWindow();
    }
 
    if ( ok )

@@ -58,6 +58,7 @@
 #include "gui/wxBrowseButton.h"
 
 #include "MEvent.h"
+#include "Mupgrade.h"      // for VerifyMailConfig()
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -79,11 +80,11 @@ BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxProfileSettingsEditDialog)
    EVT_TEXT(-1,     wxOptionsPageSubdialog::OnChange)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxNotebookDialog, wxDialog)
-   EVT_BUTTON(M_WXID_HELP, wxNotebookDialog::OnHelp)
-   EVT_BUTTON(wxID_OK,     wxNotebookDialog::OnOK)
-   EVT_BUTTON(wxID_APPLY,  wxNotebookDialog::OnApply)
-   EVT_BUTTON(wxID_CANCEL, wxNotebookDialog::OnCancel)
+BEGIN_EVENT_TABLE(wxOptionsEditDialog, wxDialog)
+   EVT_BUTTON(M_WXID_HELP, wxOptionsEditDialog::OnHelp)
+   EVT_BUTTON(wxID_OK,     wxOptionsEditDialog::OnOK)
+   EVT_BUTTON(wxID_APPLY,  wxOptionsEditDialog::OnApply)
+   EVT_BUTTON(wxID_CANCEL, wxOptionsEditDialog::OnCancel)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxEnhancedPanel, wxPanel)
@@ -102,7 +103,7 @@ BEGIN_EVENT_TABLE(wxManuallyLaidOutDialog, wxDialog)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxManuallyLaidOutDialog, wxDialog)
-IMPLEMENT_ABSTRACT_CLASS(wxNotebookDialog, wxManuallyLaidOutDialog)
+IMPLEMENT_ABSTRACT_CLASS(wxOptionsEditDialog, wxManuallyLaidOutDialog)
 
 // ----------------------------------------------------------------------------
 // global functions
@@ -867,7 +868,7 @@ void wxEnhancedPanel::EnableListBox(wxListBox *control, bool bEnable)
 
 void wxNotebookPageBase::OnChange(wxEvent& event)
 {
-   wxNotebookDialog *dlg = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+   wxOptionsEditDialog *dlg = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
    if ( dlg )
       dlg->SetDirty();
 }
@@ -996,10 +997,10 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
 }
 
 // -----------------------------------------------------------------------------
-// wxNotebookDialog
+// wxOptionsEditDialog
 // -----------------------------------------------------------------------------
 
-wxNotebookDialog::wxNotebookDialog(wxFrame *parent,
+wxOptionsEditDialog::wxOptionsEditDialog(wxFrame *parent,
                                    const wxString& title,
                                    const wxString& profileKey)
                 : wxManuallyLaidOutDialog(parent, title, profileKey)
@@ -1012,7 +1013,7 @@ wxNotebookDialog::wxNotebookDialog(wxFrame *parent,
    m_lastBtn = MEventOptionsChangeData::Invalid;
 }
 
-void wxNotebookDialog::CreateAllControls()
+void wxOptionsEditDialog::CreateAllControls()
 {
    wxLayoutConstraints *c;
 
@@ -1101,7 +1102,7 @@ void wxNotebookDialog::CreateAllControls()
 // transfer the data to/from notebook pages
 // ----------------------------------------
 
-bool wxNotebookDialog::TransferDataToWindow()
+bool wxOptionsEditDialog::TransferDataToWindow()
 {
    for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
@@ -1122,7 +1123,7 @@ bool wxNotebookDialog::TransferDataToWindow()
    return TRUE;
 }
 
-bool wxNotebookDialog::TransferDataFromWindow()
+bool wxOptionsEditDialog::TransferDataFromWindow()
 {
    for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ )
    {
@@ -1154,7 +1155,7 @@ bool wxNotebookDialog::TransferDataFromWindow()
 */
 
 void
-wxNotebookDialog::SendOptionsChangeEvent()
+wxOptionsEditDialog::SendOptionsChangeEvent()
 {
    ASSERT_MSG( m_lastBtn != MEventOptionsChangeData::Invalid,
                "this should be only called when a button is pressed" );
@@ -1178,7 +1179,7 @@ wxNotebookDialog::SendOptionsChangeEvent()
 // button event handlers
 // ---------------------
 
-void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
+void wxOptionsEditDialog::OnOK(wxCommandEvent& /* event */)
 {
    m_lastBtn = MEventOptionsChangeData::Ok;
 
@@ -1203,7 +1204,7 @@ void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
    //      a more successful call to OnOk)
 }
 
-void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
+void wxOptionsEditDialog::OnApply(wxCommandEvent& /* event */)
 {
    ASSERT_MSG( m_bDirty, "'Apply' should be disabled!" );
 
@@ -1212,7 +1213,7 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
    (void)DoApply();
 }
 
-bool wxNotebookDialog::DoApply()
+bool wxOptionsEditDialog::DoApply()
 {
    if ( TransferDataFromWindow() )
    {
@@ -1236,7 +1237,7 @@ bool wxNotebookDialog::DoApply()
    return FALSE;
 }
 
-void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
+void wxOptionsEditDialog::OnCancel(wxCommandEvent& /* event */)
 {
    // discard any changes
    if ( m_profileForButtons )
@@ -1267,7 +1268,7 @@ void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
    EndModal(FALSE);
 }
 
-void wxNotebookDialog::OnHelp(wxCommandEvent& /* event */)
+void wxOptionsEditDialog::OnHelp(wxCommandEvent& /* event */)
 {
    int pid = m_notebook->GetSelection();
    if(pid == -1) // no page selected??
@@ -1275,6 +1276,46 @@ void wxNotebookDialog::OnHelp(wxCommandEvent& /* event */)
    else
       mApplication->Help(((wxOptionsPage *)m_notebook->GetPage(pid))->HelpId(),this);
 }
+
+bool wxOptionsEditDialog::OnSettingsChange()
+{
+   if ( m_bTest )
+   {
+      if ( MDialog_YesNoDialog(_("Some important program settings were changed.\n"
+                                 "\nWould you like to test the new setup "
+                                 "(recommended)?"),
+                               this,
+                               _("Test setup?"),
+                               true,
+                               "OptTestAsk") )
+      {
+         if ( !VerifyMailConfig() )
+         {
+            return FALSE;
+         }
+      }
+      else
+      {
+         // no test was done, assume it's ok...
+         m_bTest = FALSE;
+      }
+   }
+
+   if ( m_bRestartWarning )
+   {
+      MDialog_Message(_("Some of the changes to the program options will\n"
+                        "only take effect when the progam will be run the\n"
+                        "next time and not during this session."),
+                      this, MDIALOG_MSGTITLE, "WarnRestartOpt");
+      m_bRestartWarning = FALSE;
+   }
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------------
 
 static size_t GetBrowseButtonWidth(wxWindow *win)
 {
