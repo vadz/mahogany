@@ -15,6 +15,18 @@
 // headers
 // ----------------------------------------------------------------------------
 
+/* can't leave this or VC++ fails to compile because it is confused by ifdefs
+   before the PCH inclusion, so uncomment this manually to test
+
+// define this to test strutil_removeAllReplyPrefixes() function
+#ifdef TEST_SUBJECT_NORMALIZE
+   #include <string>
+
+   using namespace std;
+   #define String std::string
+#else // !TEST_SUBJECT_NORMALIZE
+*/
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -27,13 +39,17 @@
 
 #include "HeaderInfo.h"
 
-#if wxUSE_REGEX 
+#if wxUSE_REGEX
   #if defined(JWZ_USE_REGEX)
     #include <wx/regex.h>
   #endif
 #else
   #undef JWZ_USE_REGEX
 #endif // wxUSE_REGEX
+
+/*
+#endif // TEST_SUBJECT_NORMALIZE/!TEST_SUBJECT_NORMALIZE
+*/
 
 // ----------------------------------------------------------------------------
 // constants
@@ -44,6 +60,256 @@
 
 /// Used for wxLogTrace calls
 #define TRACE_JWZ "jwz"
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+#if !defined(JWZ_USE_REGEX)
+
+// XNOFIXME: put this code in strutil.cpp.
+//
+// Removes all occurences of Re: Re[n]: Re(n):
+// without considering the case, and remove unneeded
+// spaces (start, end, or multiple consecutive spaces).
+// Reply prefixes are removed only at the start of the
+// string or just after a list prefix (i.e. [ListName]).
+//
+// Returns the resulting string. replyPrefixSeen is set
+// to true if at least one occurence of 'Re: ', 'Re[n]: '
+// or 'Re(n): ' has been removed. It is set to false
+// otherwise.
+//
+// This code is much more complicated than using a regex,
+// but it is much more efficient also, at least with the
+// implementation of regex in wxWindows.
+
+String
+strutil_removeAllReplyPrefixes(const String& subject,
+                               bool& replyPrefixSeen)
+{
+   // the current state is one of:
+   enum State
+   {
+      notInPrefix,               // initial state, before prefix
+      inListPrefix,              // inside "[...]" part
+      rSeen,                     // just seen the possible start of "Re:"
+      eSeen,                     // just seen the possible 'e' of "Re:"
+      parenSeen,                 // just seen opening parenthese
+      bracketSeen,               //                   bracket
+      closingSeen,               //           matching closing ')' or ']'
+      colonSeen,                 // ':' of "Re:"
+      normalText                 // the rest is the subject body
+   } stateOld,
+     state = notInPrefix;
+
+   size_t length = subject.length();
+   String subjectNorm;
+   subjectNorm.reserve(length);
+
+   // have we seen the list/reply prefix already?
+   bool listPrefixAlreadySeen = false;
+   replyPrefixSeen = false;
+
+   // where does the interesting (i.e. what we don't discard) part starts
+   size_t startIndex = 0;
+   for ( size_t i = 0; i < length; i++ )
+   {
+      // by default consider that we don't have anything special
+      stateOld = state;
+      state = normalText;
+
+      const char c = subject[i];
+      switch ( stateOld )
+      {
+         case notInPrefix:
+            if ( c == 'r' || c == 'R' )
+            {
+               state = rSeen;
+
+               // rememeber it in case we discover it is not a "Re" later
+               startIndex = i;
+            }
+            else if ( !listPrefixAlreadySeen )
+            {
+               if ( c == ' ' )
+               {
+                  // skip leading whitespace and stay in the current state
+                  state = notInPrefix;
+
+                  startIndex = i + 1;
+               }
+               else if ( c == '[' )
+               {
+                  // we'll copy the list prefix into output
+                  subjectNorm += c;
+
+                  state = inListPrefix;
+                  listPrefixAlreadySeen = true;
+               }
+            }
+            break;
+
+         case inListPrefix:
+            subjectNorm += c;
+            if ( c == ']' )
+            {
+               state = notInPrefix;
+
+               // notInPrefix skips leading whitespace but here it is
+               // significant
+               while ( subject[i + 1] == ' ' )
+               {
+                  subjectNorm += ' ';
+                  i++;
+               }
+
+               // the stuff before already copied
+               startIndex = i + 1;
+            }
+            else
+            {
+               state = inListPrefix;
+            }
+            break;
+
+         case rSeen:
+            if ( c == 'e' || c == 'E' )
+               state = eSeen;
+            else
+               state = normalText;
+            break;
+
+         case eSeen:
+            // what do we have after "Re"?
+            switch ( c )
+            {
+               case ':':
+                  state = colonSeen;
+                  break;
+
+               case '[':
+                  state = bracketSeen;
+                  break;
+
+               case '(':
+                  state = parenSeen;
+                  break;
+            }
+            break;
+
+         case parenSeen:
+         case bracketSeen:
+            // just skip all digits inside "()" or "[]" following "Re"
+            if ( isdigit(c) )
+            {
+               state = stateOld;
+            }
+            else // end of the reply depth indicator?
+            {
+               if ( c == (stateOld == parenSeen ? ')' : ']') )
+                  state = closingSeen;
+            }
+            break;
+
+         case closingSeen:
+            if ( c == ':' )
+               state = colonSeen;
+            break;
+
+         case colonSeen:
+            // "Re:" must be followed by a space to be recognized
+            if ( c == ' ' )
+            {
+               replyPrefixSeen = true;
+               state = notInPrefix;
+               startIndex = i + 1;
+            }
+            break;
+
+         default:
+#ifndef TEST_SUBJECT_NORMALIZE
+            FAIL_MSG( "unknown parser state" );
+#endif
+            // fall through
+
+         case normalText:
+            // force the exit from the loop
+            i = length;
+      }
+   }
+
+   // just copy the rest to the output and bail out
+   subjectNorm += subject.c_str() + startIndex;
+
+   return subjectNorm;
+}
+
+#endif // JWZ_USE_REGEX
+
+#ifdef TEST_SUBJECT_NORMALIZE
+
+#include <stdio.h>
+
+static String ShowSubject(const String& s, bool& replySeen)
+{
+   String sNorm = strutil_removeAllReplyPrefixes(s, replySeen);
+   printf("'%s' -> '%s'%s",
+          s.c_str(), sNorm.c_str(), replySeen ? " (reply)" : "");
+
+   return sNorm;
+}
+
+int main(int argc, char **argv)
+{
+   static const struct
+   {
+      const char *in;
+      const char *out;
+      bool reply;
+   }
+   testSubjects[] =
+   {
+      { "",                               "",            false },
+      { "foo",                            "foo",         false },
+      { "Re: foo",                        "foo",         true  },
+      { "Re: ",                           "",            true  },
+      { "[bar] foo",                      "[bar] foo",   false },
+      { "[bar] Re: foo",                  "[bar] foo",   true },
+      { "Re: [bar] foo",                  "[bar] foo",   true  },
+      { "Re(2): [bar] Re[4]: Re: foo",    "[bar] foo",   true  },
+   };
+
+   bool replySeen;
+
+   puts("Example subjects test:");
+   for ( size_t n = 0; n < sizeof(testSubjects)/sizeof(testSubjects[0]); n++ )
+   {
+      if ( ShowSubject(testSubjects[n].in, replySeen) != testSubjects[n].out )
+      {
+         printf(" (ERROR: should be '%s')\n", testSubjects[n].out);
+      }
+      else if ( replySeen != testSubjects[n].reply )
+      {
+         printf(" (ERROR: should %sbe reply)\n", replySeen ? "not " : "");
+      }
+      else
+      {
+         puts(" (ok)");
+      }
+   }
+
+   puts("\nCommand line arguments test:");
+   for ( int i = 1; i < argc; i++ )
+   {
+      ShowSubject(argv[i], replySeen);
+      putchar('\n');
+   }
+
+   return 0;
+}
+
+#else // !TEST_SUBJECT_NORMALIZE
 
 //---------------
 // JWZ algorithm: see http://www.jwz.org/doc/threading.html
@@ -172,13 +438,13 @@ String Threadable::messageThreadID() const
 
    // Scan the provided id to remove the garbage
    const char *s = m_hi->GetId().c_str();
-   
+
    enum State {
       notInRef,
       openingSeen,
       atSeen
    } state = notInRef;
-   
+
    size_t start = 0;
    size_t nbChar = m_hi->GetId().Len();
    size_t i = 0;
@@ -213,7 +479,7 @@ String Threadable::messageThreadID() const
    if (that->m_id->empty()) {
       *that->m_id = String("<emptyId:") << (int)this << ">";
    }
-   
+
    return *that->m_id;
 }
 
@@ -322,153 +588,6 @@ String RemoveListPrefix(const String &subject)
 #endif // !wxUSE_REGEX
 
 
-#if !defined(JWZ_USE_REGEX)
-
-// XNOFIXME: put this code in strutil.cpp.
-//
-// Removes all occurences of Re: Re[n]: Re(n):
-// without considering the case, and remove unneeded
-// spaces (start, end, or multiple consecutive spaces).
-// Reply prefixes are removed only at the start of the
-// string or just after a list prefix (i.e. [ListName]).
-//
-// Returns the resulting string. replyPrefixSeen is set
-// to true if at least one occurence of 'Re: ', 'Re[n]: '
-// or 'Re(n): ' has been removed. It is set to false
-// otherwise.
-//
-// This code is much more complicated than using a regex,
-// but it is much more efficient also, at least with the
-// implementation of regex in wxWindows.
-
-String
-strutil_removeAllReplyPrefixes(const String &isubject,
-                               bool &replyPrefixSeen)
-{
-   enum State {
-      notInPrefix,
-      inListPrefix,
-      rSeen,
-      eSeen,
-      parenSeen,
-      bracketSeen,
-      closingSeen,
-      colonSeen,
-      becomeGarbage,
-      garbage
-   } state = notInPrefix;
-
-   String subject = isubject;
-   size_t length = subject.Len();
-   size_t startIndex = 0;
-   char *s = new char[length+1];
-   size_t nextPos = 0;
-   bool listPrefixAlreadySeen = false;
-   replyPrefixSeen = false;
-   for (size_t i = 0; subject[i] != '\0'; i++)
-   {
-      if (state == garbage)
-         startIndex = i;
-
-      char c = subject[i];
-      switch (state)
-      {
-         // make gcc happy by including all enum elements in the switch
-      case becomeGarbage:
-         break;
-
-      case notInPrefix:
-         if (c == 'r' || c == 'R')
-         {
-            state = rSeen;
-            startIndex = i;
-         } else if (c == ' ')
-            startIndex = i+1;
-         else if (!listPrefixAlreadySeen && c == '[')
-         {
-            s[nextPos++] = c;
-            state = inListPrefix;
-            listPrefixAlreadySeen = true;
-         }
-         else
-            state = becomeGarbage;
-         break;
-      case inListPrefix:
-         s[nextPos++] = c;
-         if (c == ']')
-         {
-            state = notInPrefix;
-            // notInPrefix will skip the next space, but we want it
-            s[nextPos++] = ' ';
-         }
-         break;
-      case rSeen:
-         if (c == 'e' || c == 'E')
-            state = eSeen;
-         else
-            state = becomeGarbage;
-         break;
-      case eSeen:
-         if (c == ':')
-            state = colonSeen;
-         else if (c == '[')
-            state = bracketSeen;
-         else if (c == '(')
-            state = parenSeen;
-         else
-            state = becomeGarbage;
-         break;
-      case parenSeen:
-      case bracketSeen:
-         if (c == (state == parenSeen ? ')' : ']'))
-            state = closingSeen;
-         else if (!isdigit(c))
-            state = becomeGarbage;
-         break;
-      case closingSeen:
-         if (c == ':')
-            state = colonSeen;
-         else
-            state = becomeGarbage;
-         break;
-      case colonSeen:
-         if (c == ' ')
-         {
-            replyPrefixSeen = true;
-            state = notInPrefix;
-            startIndex = i+1;
-         }
-         else
-            state = becomeGarbage;
-         break;
-      case garbage:
-         for (size_t j = startIndex; j <= i; ++j)
-            s[nextPos++] = subject[j];
-         if (c == ' ') {
-            //state = notInPrefix;
-            //startIndex = i+1;
-         }
-         break;
-      }
-
-      if (state == becomeGarbage)
-      {
-         for (size_t j = startIndex; j <= i; ++j)
-            s[nextPos++] = subject[j];
-         state = garbage;
-      }
-   }
-
-   s[nextPos] = '\0';
-   if (nextPos > 0 && s[nextPos-1] == ' ')
-      s[nextPos-1] = '\0';
-   String result(s);
-   delete [] s;
-   return result;
-}
-#endif
-
-
 #if defined(JWZ_USE_REGEX)
 String Threadable::getSimplifiedSubject(wxRegEx *replyRemover,
                                         const String &replacementString) const
@@ -515,7 +634,7 @@ String Threadable::getSimplifiedSubject(bool removeListPrefix) const
       that->m_isReply = (that->m_simplifiedSubject->Len() != len);
    else
       that->m_isReply = 0;
-#else 
+#else
    *that->m_simplifiedSubject =
       strutil_removeAllReplyPrefixes(m_hi->GetSubject(),
                                      that->m_isReply);
@@ -840,11 +959,11 @@ public:
    void setGatherSubjects(bool x) { m_gatherSubjects = x; }
    void setBreakThreadsOnSubjectChange(bool x) { m_breakThreadsOnSubjectChange = x; }
    void setIndentIfDummyNode(bool x) { m_indentIfDummyNode = x; }
-   
+
 #if defined(JWZ_USE_REGEX)
    void setSimplifyingRegex(const String &x);
    void setReplacementString(const String &x) { m_replacementString = x; }
-#else 
+#else
    void setRemoveListPrefixGathering(bool x) { m_removeListPrefixGathering = x; }
    void setRemoveListPrefixBreaking(bool x) { m_removeListPrefixBreaking = x; }
 #endif
@@ -1062,7 +1181,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    // this root.
    findRootSet();
    ASSERT(m_root->getNext() == 0); // root node has a next ?!
-   
+
    // We are finished with this hash-table
    destroy(&m_idTable);
 
@@ -1070,14 +1189,14 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    // in the root-set, have no message, but have a child)
    pruneEmptyContainers(m_root, false);
    ASSERT(m_root->getNext() == 0); // root node has a next ?!
-   
+
    // Build dummy messages for the nodes that have no message.
    // Those can only appear in the root set.
    ThreadContainer *thr;
    for (thr = m_root->getChild(); thr != 0; thr = thr->getNext())
       if (thr->getThreadable() == 0)
          thr->setThreadable(thr->getChild()->getThreadable()->makeDummy());
-      
+
    wxLogTrace(TRACE_JWZ, "Entering BreakThreads");
    if (m_breakThreadsOnSubjectChange)
       breakThreads(m_root);
@@ -1089,7 +1208,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
       gatherSubjects();
       ASSERT(m_root->getNext() == 0); // root node has a next ?!
    }
-   
+
    // Prepare the result to be returned: the root of the
    // *Threadable* tree that we will build by flushing the
    // ThreadContainer tree structure.
@@ -1194,9 +1313,9 @@ void Threader::buildContainer(Threadable *th)
             refCont->setNext(parentRefCont->getChild());
             parentRefCont->setChild(refCont);
 #endif
-         } 
+         }
          // else: they are linked as refCont being a parent of parentRefCont.
-         // This must be because the references of this message contradict 
+         // This must be because the references of this message contradict
          // those of another previous message. Let's consider the first one
          // is the right one (minimizes work ;) )
       }
@@ -1406,7 +1525,7 @@ void Threader::gatherSubjects()
 #if defined(JWZ_USE_REGEX)
       String subject = th->getSimplifiedSubject(m_replyRemover,
                                                 m_replacementString);
-#else 
+#else
       String subject = th->getSimplifiedSubject(m_removeListPrefixGathering);
 #endif
 
@@ -1484,10 +1603,10 @@ void Threader::gatherSubjects()
                                                   m_replacementString) &&   // c has "Re:"
                 !old->getThreadable()->subjectIsReply(m_replyRemover,
                                                       m_replacementString))) // and old does not
-#else 
+#else
                c->getThreadable()->subjectIsReply(m_removeListPrefixGathering) &&   // c has "Re:"
                 !old->getThreadable()->subjectIsReply(m_removeListPrefixGathering))) // and old does not
-#endif 
+#endif
       {
          // Make this message be a child of the other.
 
@@ -1581,9 +1700,9 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
 #if defined(JWZ_USE_REGEX)
       String subject = th->getSimplifiedSubject(m_replyRemover,
                                                 m_replacementString);
-#else 
+#else
       String subject = th->getSimplifiedSubject(m_removeListPrefixGathering);
-#endif 
+#endif
       if (subject.empty())
          continue;
 
@@ -1603,13 +1722,13 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
 #if defined(JWZ_USE_REGEX)
            old->getThreadable()->subjectIsReply(m_replyRemover,
                                                 m_replacementString) &&
-#else 
+#else
            old->getThreadable()->subjectIsReply(m_removeListPrefixGathering) &&
 #endif
            cTh != 0 &&
 #if defined(JWZ_USE_REGEX)
            !cTh->subjectIsReply(m_replyRemover, m_replacementString)
-#else 
+#else
            !cTh->subjectIsReply(m_removeListPrefixGathering)
 #endif
          ))
@@ -1659,7 +1778,7 @@ void Threader::breakThreads(ThreadContainer* c)
                                                    m_replacementString) !=
           parent->getThreadable()->getSimplifiedSubject(m_replyRemover,
                                                         m_replacementString))
-#else 
+#else
       if (c->getThreadable()->getSimplifiedSubject(m_removeListPrefixGathering) !=
           parent->getThreadable()->getSimplifiedSubject(m_removeListPrefixGathering))
 #endif
@@ -1801,7 +1920,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
 {
    wxLogTrace(TRACE_JWZ, "Entering JWZThreadMessages");
    Threadable *threadableRoot = BuildThreadableList(hilp);
-   
+
    Threader *threader = new Threader(thrParams);
 
    // Do the work
@@ -1809,7 +1928,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
 
    // Map to needed output format
    thrData->m_root =  MapToThreadNode(threadableRoot);
-   
+
    // Clean up
    threadableRoot->destroy();
    delete threadableRoot;
@@ -1817,4 +1936,5 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    wxLogTrace(TRACE_JWZ, "Leaving JWZThreadMessages");
 }
 
+#endif // TEST_SUBJECT_NORMALIZE/!TEST_SUBJECT_NORMALIZE
 
