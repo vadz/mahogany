@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.197 2000/11/03 16:11:59 ballueder Exp 
+# From configure.in Id: configure.in,v 1.198 2000/11/03 19:43:14 ballueder Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -1520,7 +1520,7 @@ else
 int main() {
 
 /* Ultrix mips cc rejects this.  */
-typedef int charset[2]; const charset x = {0,0};
+typedef int charset[2]; const charset x;
 /* SunOS 4.1.1 cc rejects this.  */
 char const *const *ccp;
 char **p;
@@ -1595,7 +1595,7 @@ for ac_kw in inline __inline__ __inline; do
 #include "confdefs.h"
 
 int main() {
-} int $ac_kw foo() {
+} $ac_kw foo() {
 ; return 0; }
 EOF
 if { (eval echo configure:1602: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
@@ -3953,7 +3953,7 @@ EOF
 
 	MAKE_USE_PYTHON="USE_PYTHON=yes"
 		case "$OSTYPE" in freebsd* | FreeBSD*)
-		LIBS="-readline $LIBS" ;;
+		LIBS="-lreadline $LIBS" ;;
 	esac ;;
 *)	MAKE_USE_PYTHON=
 	echo "configure: warning: Building M without Python leads to reduced functionality!" 1>&2

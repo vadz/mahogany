@@ -530,7 +530,7 @@ case "$USE_PYTHON" in
 	MAKE_USE_PYTHON="USE_PYTHON=yes"
 	dnl extra libs required by python on freebsd
 	case "$OSTYPE" in freebsd* | FreeBSD*)
-		LIBS="-readline $LIBS" ;;
+		LIBS="-lreadline $LIBS" ;;
 	esac ;;
 *)	MAKE_USE_PYTHON=
 	AC_MSG_WARN(Building M without Python leads to reduced functionality!)
