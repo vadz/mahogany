@@ -87,57 +87,57 @@ SendMessageCC::Create(Protocol protocol,
 {
    String tmpstr;
 
-   profile = iprof;
-   profile->IncRef(); // make sure it doesn't go away
+   m_Profile = iprof;
+   m_Profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
    m_headerValues = NULL;
    m_protocol = protocol;
 
-   env = mail_newenvelope();
-   body = mail_newbody();
+   m_Envelope = mail_newenvelope();
+   m_Body = mail_newbody();
 
-   env->from = mail_newaddr();
-   env->from->personal =
-      CPYSTR(profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
-   env->from->mailbox =
-      CPYSTR(profile->readEntry(MP_USERNAME, MP_USERNAME_D));
+   m_Envelope->from = mail_newaddr();
+   m_Envelope->from->personal =
+      CPYSTR(m_Profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
+   m_Envelope->from->mailbox =
+      CPYSTR(m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D));
 
-   tmpstr = profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-   env->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
-   env->return_path = mail_newaddr ();
+   tmpstr = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   m_Envelope->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
+   m_Envelope->return_path = mail_newaddr ();
 
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
    if(strutil_isempty(tmpstr))
-      tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
+      tmpstr = m_Profile->readEntry(MP_USERNAME,MP_USERNAME_D);
    else
       tmpstr = strutil_before(tmpstr,'@');
-   env->return_path->mailbox = CPYSTR(tmpstr);
+   m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
 
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
    if(strutil_isempty(tmpstr))
-      tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+      tmpstr = m_Profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
    else
       tmpstr = strutil_after(tmpstr,'@');
    if(tmpstr.Length() == 0)
    {
       // we need a valid return path!
-      env->return_path->host = CPYSTR(wxGetFullHostName());
+      m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
    }
    else
-      env->return_path->host = CPYSTR(tmpstr);
+      m_Envelope->return_path->host = CPYSTR(tmpstr);
 
-   body->type = TYPEMULTIPART;
-   body->nested.part = mail_newbody_part();
-   body->nested.part->next = NULL;
-   nextpart = body->nested.part;
-   lastpart = nextpart;
+   m_Body->type = TYPEMULTIPART;
+   m_Body->nested.part = mail_newbody_part();
+   m_Body->nested.part->next = NULL;
+   m_NextPart = m_Body->nested.part;
+   m_LastPart = m_NextPart;
 }
 
 void
 SendMessageCC::SetSubject(const String &subject)
 {
-   if(env->subject) delete [] env->subject;
-   env->subject = CPYSTR(subject.c_str());
+   if(m_Envelope->subject) delete [] m_Envelope->subject;
+   m_Envelope->subject = CPYSTR(subject.c_str());
 }
 
 void
@@ -158,34 +158,34 @@ SendMessageCC::SetAddresses(const String &to,
 
    String
       defaulthost;
-   if(READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME))
-        defaulthost = profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   if(READ_CONFIG(m_Profile, MP_ADD_DEFAULT_HOSTNAME))
+        defaulthost = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
 
    if(to.Length())
    {
-      ASSERT(env->to == NIL);
+      ASSERT(m_Envelope->to == NIL);
       tmpstr = to;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
-      rfc822_parse_adrlist (&env->to,tmp,tmp2);
+      rfc822_parse_adrlist (&m_Envelope->to,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
    if(cc.Length())
    {
-      ASSERT(env->cc == NIL);
+      ASSERT(m_Envelope->cc == NIL);
       tmpstr = cc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
-      rfc822_parse_adrlist (&env->cc,tmp,tmp2);
+      rfc822_parse_adrlist (&m_Envelope->cc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
    if(bcc.Length())
    {
-      ASSERT(env->bcc == NIL);
+      ASSERT(m_Envelope->bcc == NIL);
       tmpstr = bcc;   ExtractFccFolders(tmpstr);
       tmp = strutil_strdup(tmpstr);
       tmp2 = defaulthost.Length() ? strutil_strdup(defaulthost) : NIL;
-      rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
+      rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
       delete [] tmp; delete [] tmp2;
    }
 }
@@ -200,8 +200,8 @@ SendMessageCC::SetNewsgroups(const String &groups)
 
    if(groups.Length())
    {
-      ASSERT(env->newsgroups == NIL);
-      env->newsgroups = strutil_strdup(groups);
+      ASSERT(m_Envelope->newsgroups == NIL);
+      m_Envelope->newsgroups = strutil_strdup(groups);
    }
 
 }
@@ -265,7 +265,7 @@ SendMessageCC::Build(void)
    if(m_headerNames != NULL) // message was already build
       return;
 
-   headers = strutil_strdup(READ_CONFIG(profile, MP_EXTRAHEADERS));
+   headers = strutil_strdup(READ_CONFIG(m_Profile, MP_EXTRAHEADERS));
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
@@ -277,14 +277,14 @@ SendMessageCC::Build(void)
    m_headerNames = new const char*[n];
    m_headerValues = new const char*[n];
    /* Add the extra headers as defined in list of extra headers in
-      profile (backward compatibility): */
+      m_Profile (backward compatibility): */
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
    {
       m_headerNames[h] = strutil_strdup(**i);
       if(strcmp(m_headerNames[h], "Reply-To") == 0)
          replyToSet = true;
-      // this is clever: read header value from profile:
-      m_headerValues[h] = strutil_strdup(profile->readEntry(**i,""));
+      // this is clever: read header value from m_Profile:
+      m_headerValues[h] = strutil_strdup(m_Profile->readEntry(**i,""));
    }
 
    /* Add directly added additional header lines: */
@@ -313,7 +313,7 @@ SendMessageCC::Build(void)
    //always add reply-to header:
    if(! replyToSet)
    {
-      tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
       if(!strutil_isempty(tmpstr))
       {
          m_headerNames[h] = strutil_strdup("Reply-To");
@@ -322,10 +322,10 @@ SendMessageCC::Build(void)
    }
 #ifdef HAVE_XFACES
    // add an XFace?
-   if(READ_CONFIG(profile,MP_COMPOSE_USE_XFACE))
+   if(READ_CONFIG(m_Profile,MP_COMPOSE_USE_XFACE))
    {
       XFace xface;
-      xface.CreateFromFile(READ_CONFIG(profile, MP_COMPOSE_XFACE_FILE));
+      xface.CreateFromFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
       m_headerNames[h] = strutil_strdup("X-Face");
       m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
       if(strlen(m_headerValues[h]))  // paranoid, I know.
@@ -339,22 +339,22 @@ SendMessageCC::Build(void)
    m_headerValues[h] = NULL;
    rfc822_setextraheaders(m_headerNames,m_headerValues);
 
-   mail_free_body_part(&lastpart->next);
-   lastpart->next = NULL;
+   mail_free_body_part(&m_LastPart->next);
+   m_LastPart->next = NULL;
 
    /* Check if there is only one part, then we don't need
       multipart/mixed: */
-   if(lastpart == body->nested.part)
+   if(m_LastPart == m_Body->nested.part)
    {
-      BODY *oldbody = body;
-      body = &(lastpart->body);
+      BODY *oldbody = m_Body;
+      m_Body = &(m_LastPart->body);
       oldbody->nested.part = NULL;
       mail_free_body(&oldbody);
    }
 
    rfc822_date (tmpbuf);
-   env->date = (char *) fs_get (1+strlen (tmpbuf));
-   strcpy (env->date,tmpbuf);
+   m_Envelope->date = (char *) fs_get (1+strlen (tmpbuf));
+   strcpy (m_Envelope->date,tmpbuf);
 }
 
 void
@@ -390,7 +390,7 @@ SendMessageCC::AddPart(Message::ContentType type,
       }
    }
 
-   bdy = &(nextpart->body);
+   bdy = &(m_NextPart->body);
 
    switch(type)
    {
@@ -416,10 +416,10 @@ SendMessageCC::AddPart(Message::ContentType type,
       bdy->encoding = ENCBINARY;
       break;
    }
-   nextpart->next = mail_newbody_part();
-   lastpart = nextpart;
-   nextpart = nextpart->next;
-   nextpart->next = NULL;
+   m_NextPart->next = mail_newbody_part();
+   m_LastPart = m_NextPart;
+   m_NextPart = m_NextPart->next;
+   m_NextPart->next = NULL;
 
    if(plist)
    {
@@ -431,7 +431,7 @@ SendMessageCC::AddPart(Message::ContentType type,
 
       if(type == TYPETEXT)
       {
-         String charSet = READ_CONFIG(profile, MP_CHARSET);
+         String charSet = READ_CONFIG(m_Profile, MP_CHARSET);
          if(charSet.Length() != 0)
          {
             par = mail_newbody_parameter();
@@ -480,6 +480,9 @@ SendMessageCC::Send(void)
 {
    Build();
 
+
+   MCclientLocker locker();
+   
    SENDSTREAM
       *stream = NIL;
    const char
@@ -499,14 +502,14 @@ SendMessageCC::Send(void)
    {
    case Prot_SMTP:
       // notice that we _must_ assign the result to this string!
-      host = READ_CONFIG(profile, MP_SMTPHOST);
+      host = READ_CONFIG(m_Profile, MP_SMTPHOST);
       hostlist[0] = host;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", host.c_str()));
       stream = smtp_open ((char **)hostlist,NIL);
       break;
    case Prot_NNTP:
       // notice that we _must_ assign the result to this string!
-      host = READ_CONFIG(profile, MP_NNTPHOST);
+      host = READ_CONFIG(m_Profile, MP_NNTPHOST);
       hostlist[0] = host;
       DBGMESSAGE(("Trying to open connection to NNTP server '%s'", host.c_str()));
       stream = nntp_open ((char **)hostlist,NIL);
@@ -518,17 +521,17 @@ SendMessageCC::Send(void)
       switch(m_protocol)
       {
       case Prot_SMTP:
-         success = smtp_mail (stream,"MAIL",env,body) != 0;
+         success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
          smtp_close (stream);
          break;
       case Prot_NNTP:
-         success = nntp_mail (stream,env,body) != 0;
+         success = nntp_mail (stream,m_Envelope,m_Body) != 0;
          nntp_close (stream);
          break;
       }
       if(success)
       {
-         MDialog_Message(m_protocol==Prot_SMTP?_("Mail sent."):_("Article posted."),
+         MDialog_Message(m_protocol==Prot_SMTP?_("Message sent."):_("Article posted."),
                          NULL, // parent window
                          MDIALOG_MSGTITLE,
                          "MailSentMessage");
@@ -573,7 +576,7 @@ SendMessageCC::WriteToString(String  &output)
 
    char *buffer = new char[HEADERBUFFERSIZE];
 
-   if(! rfc822_output(buffer, env, body, write_str_output,&output,NIL))
+   if(! rfc822_output(buffer, m_Envelope, m_Body, write_str_output,&output,NIL))
       ERRORMESSAGE (("[Can't write message to string.]"));
    delete [] buffer;
 }
@@ -590,7 +593,7 @@ SendMessageCC::WriteToFile(String const &filename, bool append)
    char *buffer = new char[HEADERBUFFERSIZE];
    ofstream  *ostr = new ofstream(filename.c_str(), ios::out | (append ? 0 : ios::trunc));
 
-   if(! rfc822_output(buffer, env, body, write_output,ostr,NIL))
+   if(! rfc822_output(buffer, m_Envelope, m_Body, write_output,ostr,NIL))
       ERRORMESSAGE (("[Can't write message to file %s]",
                      filename.c_str()));
    delete [] buffer;
@@ -620,8 +623,8 @@ SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
 
 SendMessageCC::~SendMessageCC()
 {
-   mail_free_envelope (&env);
-   mail_free_body (&body);
+   mail_free_envelope (&m_Envelope);
+   mail_free_body (&m_Body);
 
    rfc822_setextraheaders(NULL,NULL);
 
@@ -635,5 +638,5 @@ SendMessageCC::~SendMessageCC()
       delete [] m_headerNames;
       delete [] m_headerValues;
    }
-   profile->DecRef();
+   m_Profile->DecRef();
 }

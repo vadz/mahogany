@@ -15,6 +15,8 @@
 #   pragma interface "SendMessageCC.h"
 #endif
 
+#include "FolderType.h"
+
 class ProfileBase;
 
 /// another scandoc fix
@@ -25,16 +27,12 @@ class ProfileBase;
 
 class SendMessageCC
 {
-   ProfileBase 	*profile;
+   ProfileBase 	*m_Profile;
 
-   ENVELOPE	*env;
-   BODY		*body;
-   PART		*nextpart, *lastpart;
+   ENVELOPE	*m_Envelope;
+   BODY		*m_Body;
+   PART		*m_NextPart, *m_LastPart;
 public:
-   /** SendMessageCC supports two different protocols:
-    */
-   enum Protocol { Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
-   
    /** Creates an empty object, setting some initial values.
        @param iprof optional pointer for a parent profile
        @param protocol which protocol to use for sending
@@ -61,7 +59,7 @@ public:
    /** Get the profile.
        @return pointer to the profile
    */
-   inline ProfileBase *GetProfile(void) { return profile; }
+   inline ProfileBase *GetProfile(void) { return m_Profile; }
    /** Adds a part to the message.
        @param type numeric mime type
        @param buf  pointer to data

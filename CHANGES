@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+21.10.99 KB: dialup network handling and optional Outbox added
 15.08.99 KB: wxLayout scrolls when selecting with mouse, editing bugfree(?),
              changed wxIcon/wxBitmap handling -> do icons appear again under wxMSW?
 12.08.99 KB: message sorting now ignores reply prefix in sort by subject

@@ -114,6 +114,7 @@ public:
 private:
    /// the list of absolute paths
    class kbStringList *pathList;
+   MOBJECT_NAME(PathFinder)
 };
 
 //@}

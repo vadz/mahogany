@@ -171,6 +171,7 @@ public:
    wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile);
 
    void OnButton(wxCommandEvent&);
+   virtual bool TransferDataFromWindow();
 
 private:
    DECLARE_EVENT_TABLE()

@@ -29,6 +29,11 @@
 #include "Message.h"
 #include "MessageCC.h"
 
+#include "SendMessageCC.h"
+
+#include "MApplication.h"
+#include "MDialogs.h"
+
 #include <ctype.h>
 
 /// temporary buffer for storing message headers, be generous:
@@ -49,8 +54,8 @@ MessageCC::CreateMessageCC(MailFolderCC *ifolder,
 MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
 {
    mailText = NULL;
-   body = NULL;
-   envelope = NULL;
+   m_Body = NULL;
+   m_Envelope = NULL;
    partInfos = NULL; // this vector gets initialised when needed
    numOfParts = -1;
    partContentPtr = NULL;
@@ -58,6 +63,8 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
    folder = ifolder;
    folder->IncRef();
    m_uid = iuid;
+   m_Profile=ifolder->GetProfile();
+   m_Profile->IncRef();
    Refresh();
 }
 
@@ -72,6 +79,7 @@ MessageCC::~MessageCC()
       delete [] text;
    if(folder)
       folder->DecRef();
+   SafeDecRef(m_Profile);
 }
 
 MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
@@ -82,10 +90,15 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
    unsigned long
       headerLen;
 
-   body = NULL;
+   m_Body = NULL;
    mailText = NULL;
    bodycptr = NULL;
-   envelope = NULL;
+   m_Envelope = NULL;
+   m_Profile = iprofile;
+   if(m_Profile)
+      m_Profile->IncRef();
+   else
+      m_Profile = ProfileBase::CreateEmptyProfile();
    partInfos = NULL; // this vector gets initialised when needed
    numOfParts = -1;
    partContentPtr = NULL;
@@ -114,18 +127,85 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
 
    STRING str;
    INIT(&str, mail_string, (void *) bodycptr, strlen(bodycptr));
-   rfc822_parse_msg (&envelope, &body, header, headerLen,
+   rfc822_parse_msg (&m_Envelope, &m_Body, header, headerLen,
                      &str, ""   /*defaulthostname */, 0);
 }
 
+bool
+MessageCC::Send(Protocol protocol)
+{
+   SendMessageCC sendMsg(m_Profile, protocol);
+
+   sendMsg.SetSubject(Subject());
+   switch(protocol)
+   {
+      case Prot_SMTP:
+      {
+         String to, cc, bcc;
+         GetHeaderLine("To", to);
+         GetHeaderLine("CC", cc);
+         GetHeaderLine("BCC",bcc);
+         sendMsg.SetAddresses(to, cc, bcc);
+      }
+      break;
+
+      case Prot_NNTP:
+      {
+         String newsgroups;
+         GetHeaderLine("Newsgroups",newsgroups);
+         sendMsg.SetNewsgroups(newsgroups);
+      }
+      break;
+   }
+   
+   for(int i = 0; i < CountParts(); i++)
+   {
+      unsigned long len;
+      const char *data = GetPartContent(i, &len);
+      String dispType;
+      MessageParameterList const &dlist = GetDisposition(i, &dispType);
+      MessageParameterList const &plist = GetParameters(i);
+
+      sendMsg.AddPart(GetPartType(i),
+                       data, len,
+                       strutil_after(GetPartMimeType(i),'/'), //subtype
+                       dispType,
+                       &dlist, &plist);
+   }
+
+   const char *header = GetHeader();
+   String headerLine;
+   const char *cptr = header;
+   String name, value;
+   do
+   {
+      while(*cptr && *cptr != '\r' && *cptr != '\n')
+         headerLine << *cptr++;
+      while(*cptr == '\r' || *cptr == '\n')
+         cptr ++;
+      if(*cptr == ' ' || *cptr == '\t') // continue
+      {
+         while(*cptr == ' ' || *cptr == '\t')
+            cptr++;
+         continue;
+      }
+      // end of this line
+      name = headerLine.BeforeFirst(':');
+      value = headerLine.AfterFirst(':');
+      sendMsg.AddHeaderEntry(name, value);
+      headerLine = "";
+   }while(*cptr && *cptr != '\012');
+   
+   return sendMsg.Send();
+}
 
 void
 MessageCC::Refresh(void)
 {
    if(GetBody())
    {
-      hdr_date = envelope->date ? String(envelope->date) :  :: String("");
-      hdr_subject = envelope->subject ? String(envelope->subject) :
+      hdr_date = m_Envelope->date ? String(m_Envelope->date) :  :: String("");
+      hdr_subject = m_Envelope->subject ? String(m_Envelope->subject) :
          String("");
       hdr_subject = MailFolderCC::qprint(hdr_subject);
    }
@@ -194,7 +274,7 @@ String const
 MessageCC::Address(String &name, MessageAddressType type) const
 {
    ((MessageCC *)this)->GetBody();
-   CHECK(envelope, "", _("Non-existent message data."))
+   CHECK(m_Envelope, "", _("Non-existent message data."))
 
    ADDRESS
       * addr = NULL;
@@ -204,23 +284,23 @@ MessageCC::Address(String &name, MessageAddressType type) const
    switch(type)
    {
    case MAT_FROM:
-      addr = envelope->from;
+      addr = m_Envelope->from;
       break;
    case MAT_TO:
-      addr = envelope->to;
+      addr = m_Envelope->to;
       break;
    case MAT_CC:
-      addr = envelope->cc;
+      addr = m_Envelope->cc;
       break;
    case MAT_SENDER:
-      addr = envelope->sender;
+      addr = m_Envelope->sender;
       break;
    case MAT_REPLYTO:
-      addr = envelope->reply_to;
+      addr = m_Envelope->reply_to;
       if(! addr)
-         addr = envelope->from;
+         addr = m_Envelope->from;
       if(! addr)
-         addr = envelope->sender;
+         addr = m_Envelope->sender;
       break;
    }
 
@@ -400,13 +480,13 @@ MessageCC::GetBody(void)
    int retry = 1;
 
    // Forget what we  know and re-fetch the body, it is cached anyway.
-   body = NULL;
+   m_Body = NULL;
    do
    {
-      if(body == NULL && folder)
+      if(m_Body == NULL && folder)
       {
          if(folder->Stream())
-            envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
+            m_Envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &m_Body,
                                                 FT_UID);
          else
          {
@@ -416,12 +496,12 @@ MessageCC::GetBody(void)
       }
       else
          retry = 0;
-   }while(retry-- && ! (envelope && body));
+   }while(retry-- && ! (m_Envelope && m_Body));
    MailFolderCC::ProcessEventQueue();
 
-   CHECK(body && envelope, NULL, _("Non-existent message data."));
+   CHECK(m_Body && m_Envelope, NULL, _("Non-existent message data."));
 
-   return body;
+   return m_Body;
 }
 
 
@@ -467,7 +547,7 @@ MessageCC::DecodeMIME(void)
       partInfos = new PartInfo[nparts];
       int count = 0;
       String tmp = "" ;
-      decode_body(body,tmp, 0, &count, true);
+      decode_body(m_Body,tmp, 0, &count, true);
    }
 }
 
@@ -480,7 +560,7 @@ MessageCC::CountParts(void)
          return -1 ;
       // don't gather info, just count the parts
       String a = "";
-      decode_body(body,a, 0l, &numOfParts, false);
+      decode_body(m_Body,a, 0l, &numOfParts, false);
       numOfParts ++;
    }
    return numOfParts;
@@ -601,7 +681,7 @@ MessageCC::GetPartSize(int n, bool forceBytes)
 {
    DecodeMIME();
 
-   if((body->type == TYPEMESSAGE || body->type == TYPETEXT)
+   if((m_Body->type == TYPEMESSAGE || m_Body->type == TYPETEXT)
       && ! forceBytes)
       return partInfos[n].size_lines;
    else
@@ -635,11 +715,11 @@ MessageCC::GetPartDesc(int n)
 String
 MessageCC::GetId(void) const
 {
-   if(body == NULL)
+   if(m_Body == NULL)
       ((MessageCC *)this)-> GetBody();
-   ASSERT(body);
-   if(body)
-      return String(body->id);
+   ASSERT(m_Body);
+   if(m_Body)
+      return String(m_Body->id);
    else
       return "";
 }
@@ -647,11 +727,11 @@ MessageCC::GetId(void) const
 String 
 MessageCC::GetReferences(void) const
 {
-   if(body == NULL)
+   if(m_Body == NULL)
       ((MessageCC *)this)-> GetBody();
-   ASSERT(body);
-   if(body)
-      return String(envelope->references);
+   ASSERT(m_Body);
+   if(m_Body)
+      return String(m_Envelope->references);
    else
       return "";
 }

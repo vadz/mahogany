@@ -378,8 +378,12 @@
 #define   MP_FOLDER_TYPE         "Type"
 /// the folder icon for a mailbox (see icon functions in FolderType.h)
 #define   MP_FOLDER_ICON         "Icon"
-/// Where to store all new mail
+/// Where to store all new mail (obsolete)
 #define MP_NEWMAIL_FOLDER      "NewMailFolder"
+/// Where to store outgoing mail
+#define MP_OUTBOX_NAME       "OutBoxName"
+/// Use outbox?
+#define MP_USE_OUTBOX          "UseOutBox"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
 /// comment
@@ -807,6 +811,10 @@
 #define   MP_FOLDER_ICON_D         (int)-1        // no special icon
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "" // obsolete
+/// Which folder to use as Outbox
+#define MP_OUTBOX_NAME_D         _("Outbox")
+/// Use Outbox?
+#define MP_USE_OUTBOX_D            1l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
@@ -1003,6 +1011,7 @@
 #define   CC_HEADERBUFLEN         1000000
 /// file name prefix for lock files
 #define   LOCK_PREFIX         "M-lock"
-
+/// postfix for News outbox
+#define M_NEWSOUTBOX_POSTFIX gettext_noop("_News")
 //@}
 #endif // MDEFAULTS_H

@@ -109,6 +109,8 @@ enum ConfigFields
 
    // compose
    ConfigField_ComposeFirst = ConfigField_NetworkLast,
+   ConfigField_UseOutbox,
+   ConfigField_OutboxName,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
@@ -414,7 +416,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                   "server of your ISP. Leave it empty to use the SMTP server for this.")
      , Field_Message, -1 },
    { gettext_noop("&Dial-up network support"),    Field_Bool,    -1,                        },
-   { gettext_noop("&Beacon host:port (e.g. www.yahoo.com:80)"),Field_Text,   ConfigField_DialUpSupport},
+   { gettext_noop("&Beacon host (e.g. www.yahoo.com)"),Field_Text,   ConfigField_DialUpSupport},
    { gettext_noop("Command to &activate network"),   Field_Text, ConfigField_DialUpSupport},
    { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
    { gettext_noop("The following timeout values are used for TCP connections to\n"
@@ -428,6 +430,10 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
 
    // compose
+   { gettext_noop("Store outgoing messages and send only when asked to"), 
+     Field_Bool, -1 },
+   { gettext_noop("Folder where to store outgoing messages"),
+     Field_Text, ConfigField_UseOutbox },
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
@@ -604,7 +610,11 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 
    // compose
-   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
+   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before
+                                // sending them
+   CONFIG_ENTRY(MP_OUTBOX_NAME),
+   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
+                                       // messages send 
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
@@ -1221,6 +1231,32 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    }
 }
 
+bool wxOptionsPageCompose::TransferDataFromWindow()
+{
+   bool rc = wxOptionsPage::TransferDataFromWindow();
+   if ( rc && READ_CONFIG(m_Profile, MP_USE_OUTBOX) )
+   {
+      /* Make sure the Outbox setting is consistent across all
+         folders! */
+      wxString outbox = READ_CONFIG(m_Profile, MP_OUTBOX_NAME);
+      wxString globalOutbox = READ_APPCONFIG(MP_OUTBOX_NAME);
+      if(outbox != globalOutbox)
+      {
+         /* Erasing the local value should be good enough, but let´s
+            play it safe. */
+         m_Profile->writeEntry(MP_OUTBOX_NAME, globalOutbox);
+         wxString msg;
+         msg.Printf(_("You set the name of the outbox for temporarily storing messages\n"
+                      "before sending them to be ´%s´. This is different from the\n"
+                      "setting in the global options, which is ´%s´. A you can have\n"
+                      "only a single outbox, the value has been restored to be ´%s´."),
+                    outbox.c_str(), globalOutbox.c_str(), globalOutbox.c_str());
+         wxLogError(msg);
+      }
+   }
+   return rc;
+}
+
 // ----------------------------------------------------------------------------
 // wxOptionsPageMessageView
 // ----------------------------------------------------------------------------
@@ -1477,6 +1513,7 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
 
    return rc;
 }
+
 
 
 void wxOptionsPageFolders::OnButton(wxCommandEvent& event)

@@ -84,6 +84,11 @@ enum FolderFlags
    MF_FLAGS_REOPENONPING  = 0x8000  // force a close and re-open on a ping
 };
 
+/** SendMessageCC supports two different protocols:
+ */
+enum Protocol { Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
+   
+
 // ----------------------------------------------------------------------------
 // For asynchronous operations:
 // ----------------------------------------------------------------------------

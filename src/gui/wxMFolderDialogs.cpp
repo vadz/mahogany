@@ -1974,7 +1974,7 @@ wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
 void wxFolderSelectionDialog::OnFile(wxCommandEvent& /* event */)
 {
    wxFileDialog dialog(this, "", "", "",
-                       _("All files (*.*)|*.*"),
+                       _(wxALL_FILES),
                        wxHIDE_READONLY | wxFILE_MUST_EXIST);
 
    if ( dialog.ShowModal() == wxID_OK )

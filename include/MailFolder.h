@@ -457,6 +457,7 @@ public:
    virtual const HeaderInfo * operator[](size_t n) const = 0;
    /// Returns pointer to array of data:
    virtual HeaderInfo * GetArray(void) = 0;
+   MOBJECT_NAME(HeaderInfoList)
 };
 
 /** This class holds information about a single folder. */

@@ -168,6 +168,14 @@ public:
    */
    void WriteToString(String &str, bool headerFlag = true) const;
 
+
+   /** Takes this message and tries to send it. Only useful for
+       messages in some kind of Outbox folder.
+       @param protocol how to send the message
+       @return true on success
+   */
+   virtual bool Send(Protocol protocol = Prot_SMTP);
+
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
    //@}
@@ -218,14 +226,16 @@ private:
    /// number of parts
    int   numOfParts;
    /// body of message
-   BODY  *body;
-   /// envelope for messages to be sent
-   ENVELOPE *envelope;
+   BODY  *m_Body;
+   /// m_Envelope for messages to be sent
+   ENVELOPE *m_Envelope;
    /** Get the body information and update body variable.
        @return the body value, NULL on failure.
    */
    BODY * GetBody(void);
-
+   /// Profile pointer, may be NULL
+   ProfileBase *m_Profile;
+   
    /** A temporarily allocated buffer for GetPartContent().
        It holds the information returned by that function and is only
        valid until its next call.

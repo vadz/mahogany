@@ -187,7 +187,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          FAIL_MSG("unknown folder type");
    }
 
-   // ask the password for the folders which need but for which it hadn't been
+   // ask the password for the folders which need it but for which it hadn't been
    // specified during creation
    if ( FolderTypeHasUserName(type) && !(flags & MF_FLAGS_ANON) && !passwd )
    {

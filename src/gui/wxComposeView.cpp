@@ -494,7 +494,7 @@ static TemplatePopupMenuItem gs_popupMenu[] =
    TemplatePopupMenuItem(_("&Execute command..."), "${cmd:%s}", FALSE),
 };
 
-TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
+const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
    TemplatePopupMenuItem("", gs_popupMenu, WXSIZEOF(gs_popupMenu));
 
 // ----------------------------------------------------------------------------
@@ -1025,7 +1025,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
       if ( width > widthMax )
          widthMax = width;
    }
-   widthMax += LAYOUT_MARGIN;
+   widthMax += 2*LAYOUT_MARGIN;
 
    wxStaticText *label;
    wxWindow  *last = NULL;
@@ -1157,7 +1157,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
                strSignFile = wxPFileSelector("sig",
                                              _("Choose signature file"),
                                              NULL, ".signature", NULL,
-                                             _("All files (*.*)|*.*"),
+                                             _(wxALL_FILES),
                                              0, this);
             }
             else
@@ -1379,7 +1379,7 @@ wxComposeView::OnMenuCommand(int id)
          String filename = wxPFileSelector("MsgInsertText",
                                            _("Please choose a file to insert."),
                                            NULL, "dead.letter", NULL,
-                                           _("All files (*.*)|*.*"),
+                                           _(wxALL_FILES),
                                            wxOPEN | wxHIDE_READONLY,
                                            this);
 
@@ -1404,7 +1404,7 @@ wxComposeView::OnMenuCommand(int id)
          String filename = wxPFileSelector("MsgSaveText",
                                            _("Choose file to save message to"),
                                            NULL, "dead.letter", NULL,
-                                           _("All files (*.*)|*.*"),
+                                           _(wxALL_FILES),
                                            wxSAVE | wxOVERWRITE_PROMPT,
                                            this);
 
@@ -1668,7 +1668,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
       filename = wxPFileSelector("MsgInsert",
                                  _("Please choose a file to insert."),
                                  NULL, "dead.letter", NULL,
-                                 _("All files (*.*)|*.*"),
+                                 _(wxALL_FILES),
                                  wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
                                  this);
 
@@ -1739,10 +1739,10 @@ wxComposeView::Send(void)
    switch(m_mode)
    {
    case Mode_SMTP:
-      msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_SMTP);
+      msg = new SendMessageCC(m_Profile, Prot_SMTP);
       break;
    case Mode_NNTP:
-      msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_NNTP);
+      msg = new SendMessageCC(m_Profile, Prot_NNTP);
       break;
    }
 
@@ -1884,8 +1884,45 @@ wxComposeView::Send(void)
          break;
    }
 
-   success = msg->Send();  // true if sent
+   // send directly?
+   bool send_directly = TRUE;
+   if(READ_CONFIG(m_Profile,MP_USE_OUTBOX))
+      send_directly = FALSE;
+   else if(! mApplication->IsOnline())
+   {
+      
+      MDialog_Message(
+         _("No network connection available at present.\n"
+           "Message will be queued in outbox."),
+         this, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
+      send_directly = FALSE;
+   }
+   if( send_directly )
+      success = msg->Send();
+   else // store in outbox
+   {
+      String outbox = READ_CONFIG(m_Profile,MP_OUTBOX_NAME);
+      if( outbox.Length() == 0)
+         success = FALSE;
+      else
+      {
+         outbox << ((m_mode == Mode_SMTP) ? "" : _(M_NEWSOUTBOX_POSTFIX));
+         msg->WriteToFolder(outbox, MF_PROFILE_OR_FILE);
+         success = TRUE;
+      }
 
+      if(success)
+      {
+         wxString msg;
+         if(m_mode == Mode_SMTP)
+            msg.Printf(_("Message queued in ´%s´."),
+                       outbox.c_str());
+         else
+            msg = _("Article posted."),
+         MDialog_Message(msg, this, MDIALOG_MSGTITLE,"MailQueuedMessage");
+      }
+   }
+   // make copy to "Sent" folder?
    if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
    {
       msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),

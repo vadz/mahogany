@@ -125,6 +125,8 @@ public:
    */
    static MModule *GetProvider(const wxString &interfaceName);
    //@}
+
+   MOBJECT_NAME(MModule)
 };
 
 

@@ -25,6 +25,7 @@
 #   include   "MFrame.h"
 #   include   "gui/wxMFrame.h"
 #   include   "MLogFrame.h"
+#   include   "FolderType.h"
 #endif
 
 #include "MEvent.h"
@@ -162,6 +163,8 @@ public:
    virtual void GoOnline(void) = 0;
    virtual void GoOffline(void) = 0;
 
+   /// Send all messages from the outbox
+   virtual void SendOutbox(void);
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
@@ -204,6 +207,8 @@ public:
    bool SupportsDialUpNetwork(void) const
       { return m_DialupSupport; }
 protected:
+   /// Send all messages from the outbox "name"
+   void SendOutbox(String name, Protocol prot);
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
 

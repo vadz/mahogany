@@ -231,9 +231,11 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PYTHON
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages..."), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network"),
      gettext_noop("Activate dial-up networking")        , FALSE },
-   { WXMENU_FILE_NET_OFF,   gettext_noop("&Shutdown Network"),
+   { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network"),
      gettext_noop("Shutdown dial-up networking")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_FILE_CLOSE,    gettext_noop("&Close Window"),     gettext_noop("Close this window")        , FALSE },

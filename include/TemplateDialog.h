@@ -74,7 +74,7 @@ struct TemplatePopupMenuItem
 };
 
 /// the popup menu for the compose view templates
-extern TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu;
+extern const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu;
 
 /** Show the dialog allowing the user to configure the message templates.
 

@@ -239,6 +239,9 @@ wxMFrame::OnMenuCommand(int id)
          composeView->Show();
       }
       break;
+   case WXMENU_FILE_SEND_OUTBOX:
+      mApplication->SendOutbox();
+      break;
    case WXMENU_FILE_POST:
       {
          wxComposeView *composeView = wxComposeView::CreateNewArticle(this);

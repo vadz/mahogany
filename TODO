@@ -8,27 +8,48 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9		exiting program does not call auto-expunge
+		functionality in main folder
+
+9	VZ	can we have *all* log messages (incl status) appear in 
+		the log window?
+
+7		selecting/deselecting only message in folder
+7		show headers menu entry is inverted ??
+
+7		After setting date format and closing date fmt dialog, 
+		main config dialog remains completely disabled under
+		KDE and must be closed with window-close button
+
+9		create folder group demands password and sets server
+		name
+
+9		file browse button for folder creation demands an
+		existing file name -> makes little sense when creating
+		a new folder  
+9		cannot create new file from folder create dialog (M
+		bug, not wxGTK, save-as-file works!)
+
+
+9		Option to set central new mail folder is missing -
+		changing option manually in config file does not work
+
+9	VZ	deleting groups from an ADB book messes up the book and
+		deletes other non-selected groups and entries, too
+
+9	VZ/KB	deleting entry from an ADB book can cause leak of
 
 9	KB	Fix PalmExport: 1. strip illegal characters like '
 		                2. find out why "Fax" appears
 
-	KB	add trash/outbox
-9		Add routine to write large headers.
+4	KB	add trash
+3		Add routine to write large headers.
 
 7	KB	group reply misses additional To entries
 
-	KB	add blinking cursor
 
 	VZ	"hidden" flag for folder treecontrol
 
-9		cannot create new file from folder create dialog (M
-		bug, not wxGTK, save-as-file works!)
-		Also: dialog: wrong handling of "all files" pattern as "*.*"
-		instead of just "*"
-
-5	KB	message searching for IMAP should use IMAP
-		functionality, document msgno usage in search sequence
-		rather than uid: returned numbers are msgnos
 
 7		opening folder with password prompts twice at startup
 
@@ -36,8 +57,9 @@ $Id$
 		in empty folder, but no error message, as login no
 		longer works. 
 
-
-4		BBDB save on exit dialog needs "don't show again" box
+7	VZ/KB  UPGRADE.CPP/WIZARD:
+		- add support for Outbox and Trash folders
+		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
 
 4		cannot type text when NUMLOCK is on
 4		TABs in messages don't show (CRAC test message)
@@ -58,6 +80,7 @@ $Id$
 		- ctrl keys not recognised when CAPSLOCK is down
 		- accents don´t work
 		garbage at end of messages is back
+	KB	add blinking cursor
 
 	KB	MessageView:
 		 - should show cursor only on demand
@@ -73,32 +96,6 @@ $Id$
 
 		posting news article --> cannot find mailbox for callback
 
-9		exiting program does not call auto-expunge
-		functionality in main folder
-
-7		After setting date format and closing date fmt dialog, 
-		main config dialog remains completely disabled under
-		KDE and must be closed with window-close button
-
-9		APPLY button doesn't work and no config change event
-		gets sent anymmmore
-
-9		create folder group demands password and sets server
-		name
-
-9		file browse button for folder creation demands an
-		existing file name -> makes little sense when creating
-		a new folder  
-
-9		Option to set central new mail folder is missing -
-		changing option manually in config file does not work
-
-7	KB	adbframe: unknown icon
-
-9	VZ	deleting groups from an ADB book messes up the book and
-		deletes other non-selected groups and entries, too
-
-9	VZ/KB	deleting entry from an ADB book can cause leak of
 		MObjectRC (FCEntryGroup) (from BBDB book)
 
 6	VZ	Adbframe: when creating new entry, the selection
@@ -201,6 +198,9 @@ $Id$
 4 gtk	VZ	icon selector suffers from several appearance problems
 3 gtk	??	menu acceleratos don't work if we process char events
 
+2	KB	message searching for IMAP should use IMAP
+		functionality, document msgno usage in search sequence
+		rather than uid: returned numbers are msgnos
 
 *********************************************************************
 *** PROJECTS
@@ -577,12 +577,5 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 - compressed mail folders / possibly together with index files
 
-*********************************************************************
-*** CHANGELOG SINCE LAST REVISION / TESTED AND FINE
-*********************************************************************
-5	KB	group reply/followup functionality
-5	KB	clicking in startup dialog no longer causes crash
-5	KB	check mail now in File... menu
-5	KB	check "Unread" status flag
 
 vi: set si ts=8 sw=8 noet nolist tw=80:

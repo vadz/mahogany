@@ -131,7 +131,7 @@ void wxFileBrowseButton::DoBrowse()
 
    wxFileDialog dialog(this, "",
                        strLastDir, strLastFile,
-                       _("All files (*.*)|*.*"),
+                       _(wxALL_FILES),
                        m_open ? wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST
                               : wxSAVE | wxOVERWRITE_PROMPT);
 
@@ -277,12 +277,12 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       int w1, h1; // size of the icon on the screen
       m_staticBitmap->GetSize(&w1, &h1);
 
+#if 0
+      //UGLY! disabled for now         image.Rescale(w1, h1);
       // size of the icon
       int w2 = bmp.GetWidth(),
           h2 = bmp.GetHeight();
 
-#if 0
-      //UGLY! disabled for now         image.Rescale(w1, h1);
       if ( (w1 != w2) || (h1 != h2) )
       {
          wxImage image(bmp);

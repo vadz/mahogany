@@ -604,6 +604,10 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   // Try to send outgoing messages:
+   
+   SendOutbox();
+   
    // don't want events any more
    if ( m_eventNewMailReg )
    {
@@ -809,3 +813,71 @@ MAppBase::InitGlobalDir()
    //else: already done once
 }
 #endif
+
+/// Send all messages from the outbox
+void
+MAppBase::SendOutbox(void)
+{
+   // get name of SMTP outbox:
+   String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
+   SendOutbox(outbox, Prot_SMTP);
+   outbox << _(M_NEWSOUTBOX_POSTFIX);
+   SendOutbox(outbox, Prot_NNTP);
+}
+
+void
+MAppBase::SendOutbox(String outbox, Protocol protocol)
+{
+   UIdType count = 0;
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+   if(! mf)
+   {
+      String msg;
+      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+      ERRORMESSAGE((msg));
+      return;
+   }
+   HeaderInfoList *hil = mf->GetHeaders();
+   if(! hil)
+   {
+      mf->DecRef();
+      return; // nothing to do
+   }
+   const HeaderInfo *hi;
+   
+   Message *msg;
+   for(UIdType i = 0; i < hil->Count(); i++)
+   {
+      hi = (*hil)[i];
+      ASSERT(hi);
+      msg = mf->GetMessage(hi->GetUId());
+      ASSERT(msg);
+      String msgText;
+      if(msg->Send(protocol))
+      {
+         count++;
+         mf->DeleteMessage(hi->GetUId());
+      }
+      else
+      {
+         String msg;
+         msg.Printf( protocol == Prot_SMTP ?
+                     _("Cannot send message ´%s´.")
+                     :_("Cannot post article ´%s´."),
+                     hi->GetSubject().c_str());
+         ERRORMESSAGE((msg));
+      }
+      //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
+      SafeDecRef(msg);
+      mf->ExpungeMessages();
+   }
+   SafeDecRef(hil);
+   if(count > 0)
+   {
+      String msg;
+      msg.Printf(_("Send %lu messages from outbox ´%s´."),
+                 (unsigned long) count, mf->GetName().c_str());
+      STATUSMESSAGE((msg));
+   }
+   SafeDecRef(mf);
+}

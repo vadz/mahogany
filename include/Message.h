@@ -231,6 +231,13 @@ public:
    */
    virtual void WriteToString(String &str, bool headerFlag = true) const = 0;
 
+   /** Takes this message and tries to send it. Only useful for
+       messages in some kind of Outbox folder.
+       @param protocol how to send the message
+       @return true on success
+   */
+   virtual bool Send(Protocol protocol = Prot_SMTP) = 0;
+
    /// Return the numeric uid
    virtual UIdType GetUId(void) const = 0;
    //@}
@@ -238,6 +245,7 @@ protected:
    /** virtual destructor */
    virtual ~Message() {}
    GCC_DTOR_WARN_OFF();
+   MOBJECT_NAME(Message)
 };
 
 #endif

@@ -162,7 +162,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    // finish constructing the menu and toolbar
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
-
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
 

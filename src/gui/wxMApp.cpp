@@ -222,8 +222,8 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 
 
 BEGIN_EVENT_TABLE(wxMApp, wxApp)
-   EVT_IDLE              (wxMApp::OnIdle)
-   EVT_DIALUP_CONNECTED (wxMApp::OnConnected)
+   EVT_IDLE                (wxMApp::OnIdle)
+   EVT_DIALUP_CONNECTED    (wxMApp::OnConnected)
    EVT_DIALUP_DISCONNECTED (wxMApp::OnDisconnected)
 END_EVENT_TABLE()
 
