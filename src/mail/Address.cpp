@@ -345,10 +345,11 @@ extern String FilterAddressList(const String& original)
             bool alpha = true;
             for( size_t word = each+1; alpha && word < colon; ++word )
             {
-               // VZ: not sure that we want to use (locale-dependent)
-               //     wxIsalpha() here, please check
-               if ( !wxIsalpha(original[word]) )
+               if ( !( original[word] >= _T('a')
+                  && original[word] <= _T('z') ) )
+               {
                   alpha = false;
+               }
             }
 
             if( alpha )
