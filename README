@@ -1,7 +1,7 @@
 $Id$
 
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.50 "Meadows"
+README file for Mahogany, Release 0.60 "???"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -18,7 +18,7 @@ in the user manual, included in HTML and PostScript format, or the
 online help system. Some quick compilation notes can be found below,
 more in the manual. All the information, including the full online
 docs, are also available on the Mahogany web page:
-http://wxwindows.org/Mahogany/
+http://mahogany.sourceforge.net/
 
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
@@ -27,10 +27,14 @@ original working title for "Mahogany".
 Internet resources
 --------------------------------------------------------------------
 
-The Mahogany web page is http://wxwindows.org/Mahogany/ or
+The Mahogany web page is http://mahogany.sourceforge.net/ or
 http://mahogany.home.dhs.org/
 
 The wxWindows home page is http://wxwindows.org/
+
+More info on Mahogany can be found on the SourceForge project page,
+including links to the FAQ, docs and mailing lists:
+http://sourceforge.net/projects/mahogany
 
 --------------------------------------------------------------------
 Required software
@@ -50,11 +54,7 @@ Compilation notes
 These are some very brief notes about how to compile Mahogany.  More
 detailed step-for-step instructions can be found in the Manual, which
 is contained in the Mdoc.tar.gz file in the doc directory.  You can
-also view it online at http://wxwindows.org/Mahogany/
-
-Mahogany is known to work with wxGTK 2.2.0.  Some code uses functions
-from wxWindows 2.2, so it may not work with earlier versions, depending
-upon the configuration options chosen.
+also view it online at http://mahogany.sourceforge.net/
 
 Before you can compile Mahogany, you will need to have installed
 wxWindows compiled for the GTK library (wxGTK).
