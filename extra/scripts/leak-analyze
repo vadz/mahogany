@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+# (c) 1999 Erwin S. Andreasen <erwin@andreasen.org>
+# Homepage: http://www.andreasen.org/LeakTracer/
+
+die "You must supply at least one argument.\n" unless $#ARGV >= 0;
+
+$ExeFile = shift @ARGV;
+$LeaksFile = $#ARGV >= 0 ? shift @ARGV : "leak.out";
+open (LEAKS, $LeaksFile) or die "Could not open leaks data file $LeaksFile: $!";
+
+if ($#ARGV >= 0) {
+    $BreakOn = shift @ARGV;
+    # Rest in @ARGV are program arguments
+}
+
+$n = $u = 0;
+while (<LEAKS>) {
+    chop;
+    #       1                2       3          4
+    if (/^\s*(0x)?[0-9a-f]+\s+(0x)?([0-9a-f]+)\s+(\d+)/) {
+        $addr = $3;
+        $u++ if not exists $Size{$addr};
+        $Size{$addr} += $4;
+        $Count{$addr}++;
+        $n++;
+    }
+}
+
+print STDERR "Gathered $n ($u unique) points of data.\n";
+
+close (LEAKS);
+
+
+open (PIPE, "|gdb -batch -n -q $ExeFile -x -") or die "Cannot start gdb";
+
+# Change set listsize 2 to something else to show more lines
+print PIPE "set prompt\nset listsize 2\nset height 0\n";
+
+if (defined($BreakOn)) {
+    print PIPE "break $BreakOn\n";
+    print PIPE "run ", join(" ", @ARGV), " \n";
+}
+
+# Optionally, run the program
+
+foreach (sort keys %Size) {
+    print PIPE "echo \\nAllocations: $Count{$_} / Size: $Size{$_} $Comment{$_}\\n\nl \*0x$_\n";
+}
+
+if (defined($BreakOn)) {
+    print PIPE "kill\n";
+}
+
+close (PIPE);
