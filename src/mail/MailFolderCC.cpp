@@ -4652,10 +4652,6 @@ void MailFolderCC::OnNewMail()
       // don't allow changing the folder while we're filtering it
       MLocker filterLock(m_mutexNewMail);
 
-      // use "%ld" to print UID_ILLEGAL as -1 although it's really unsigned
-      wxLogTrace(TRACE_MF_NEWMAIL, "Folder %s: last new UID %ld -> %ld",
-                 GetName().c_str(), m_uidLastNew, m_uidLast);
-
       // only find the new new messages, i.e. the ones which we hadn't reported
       // yet
       UIdArray *uidsNew = SearchByFlag
@@ -4665,15 +4661,20 @@ void MailFolderCC::OnNewMail()
                            m_uidLastNew == UID_ILLEGAL ? 0 : m_uidLastNew
                           );
 
-      // update m_uidLastNew to avoid finding the same messages again the next
-      // time
-      m_uidLastNew = m_uidLast;
-
       if ( uidsNew )
       {
          size_t count = uidsNew->GetCount();
          if ( count )
          {
+            // use "%ld" to print UID_ILLEGAL as -1 although it's really
+            // unsigned
+            wxLogTrace(TRACE_MF_NEWMAIL, "Folder %s: last new UID %ld -> %ld",
+                       GetName().c_str(), m_uidLastNew, uidsNew->Last());
+
+            // update m_uidLastNew to avoid finding the same messages again the
+            // next time
+            m_uidLastNew = uidsNew->Last();
+
             HeaderInfoList_obj hil = GetHeaders();
             if ( hil )
             {
