@@ -1988,7 +1988,7 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_INCFAX_DOMAINS_DEFVAL      "efax.com"
 //@}
 /// Use substrings in address expansion?
-#define   MP_ADB_SUBSTRINGEXPANSION_DEFVAL 1l
+#define   MP_ADB_SUBSTRINGEXPANSION_DEFVAL 0l
 
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_DEFVAL 0L
