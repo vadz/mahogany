@@ -10,11 +10,11 @@ Architecture: any
 Depends: ${shlibs:Depends}
 Recommends: libssl09
 Suggests: python
-Description: Mahogany, powerful and user-friendly mail/news client for X11.
- Mahogany is a mail and news client for X11, using the gtk toolkit. It
- supports a wide range of standards and protocols, including IMAP and POP3.
- The aim of Mahogany is to be both as user friendly as possible and at the
- same time to provide the functionality and efficiency required from a daily
- used tool. Mahogany is a cross-platform project, allowing you to use the
- same program on MS Windows, too.
- Thanks to its built-in Python interpreter it can be extended by the user.
+Description: Mahogany, powerful and user-friendly GUI mail/news client.
+ This package contains Mahogany, a powerful, flexible GUI mail and news client
+ using GTK+ toolkit. Mahogany supports remote POP3, IMAP4, NNTP servers as well
+ as local MBX, MBOX, MH and news spool folders and sending mail using SMTP or
+ local MTA. SSL and TLS are supported for all of the protocols above.
+ Mahogany is a cross-platform project, allowing you to use the same program on
+ MS Windows, too. Finally, thanks to its built-in Python interpreter it can be
+ extended by the user.
