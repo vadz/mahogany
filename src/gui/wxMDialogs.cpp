@@ -1096,7 +1096,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<h4>List of contributors:</h4>"
                    "<p>"
                    "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
-                   "Greg Noel, Nerijus Baliunas,<br>"
+                   "Greg Noel, Nerijus Baliunas, Xavier Noder,<br>"
                    "Vaclav Slavik, Daniel Seifert, Michele Ravani<br>"
                    "and many others<br>"
                    "<br>"
