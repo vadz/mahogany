@@ -910,10 +910,15 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          if ( !!what )
          {
             wxString msg;
-            msg.Printf(_("You didn't specify the %s for this folder "
-                         "although it requires one.\n"
+            msg.Printf(_("You didn't specify the %s for this folder although it requires one.\n"
                          "\n"
-                         "Would you like to do it now?"), what.c_str());
+                         "Would you like to do it now?"),
+                       what.c_str());
+            if(keyname == "AskPwd")
+               msg << _("\n\n"
+                        "Notice that the password will be stored in your configuration with\n"
+                        "very weak encryption. f you are concerned about security, leave it\n"
+                        "empty and Mahogany will prompt you for it whenever needed.");
 
             if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
                                      true, keyname) )
