@@ -216,6 +216,9 @@ static MfCloser *gs_MailFolderCloser = NULL;
 
 MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 {
+   wxLogTrace(TRACE_MF_CLOSE, "Delaying closing of folder '%s' for %d seconds.",
+              mf->GetName().c_str(), secs);
+
    m_mf = mf;
 
    // keep it for now
@@ -236,7 +239,7 @@ MfCloseEntry::~MfCloseEntry()
    if ( m_mf )
    {
       wxLogTrace(TRACE_MF_CLOSE, "Really closing mailfolder '%s'",
-            m_mf->GetName().c_str());
+                 m_mf->GetName().c_str());
 
 #ifdef DEBUG_FOLDER_CLOSE
       m_deleting = true;
@@ -249,6 +252,9 @@ MfCloseEntry::~MfCloseEntry()
 // restart the expire timer
 void MfCloseEntry::ResetTimeout()
 {
+   wxLogTrace(TRACE_MF_CLOSE, "Reset close timeout for folder '%s'",
+              m_mf->GetName().c_str());
+
    if ( m_expires )
    {
       m_dt = wxDateTime::Now() + wxTimeSpan::Seconds(m_timeout);
@@ -289,7 +295,7 @@ void MfCloser::Add(MailFolderCmn *mf, int delay)
 #endif // DEBUG_FOLDER_CLOSE
 
    CHECK_RET( mf, "NULL MailFolder in MfCloser::Add()");
-   m_MfList.push_back(new MfCloseEntry(mf,delay));
+   m_MfList.push_back(new MfCloseEntry(mf, delay));
 }
 
 void MfCloser::OnTimer(void)
@@ -384,10 +390,6 @@ MailFolderCmn::DecRef()
 
                if ( delay > 0 )
                {
-                  wxLogTrace(TRACE_MF_CLOSE,
-                             "Mailfolder '%s': close delayed for %d seconds.",
-                             GetName().c_str(), delay);
-
                   Checkpoint(); // flush data immediately
 
                   gs_MailFolderCloser->Add(this, delay);

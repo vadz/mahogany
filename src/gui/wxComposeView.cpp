@@ -1267,7 +1267,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    if ( !hide )
    {
       Show(TRUE);
-      m_txtRecipient->SetFocus();
    }
 }
 
@@ -1558,6 +1557,27 @@ wxComposeView::InitText(Message *msg)
       CHECK_RET( msg, "no message in InitText" );
 
       DoInitText(msg);
+   }
+
+   // we also use this method to initialize the focus as we can't do it before
+   // the composer text is inited
+
+   // if the subject is already not empty (which it is when
+   // replying/forwarding), put the cursor directly into the compose window,
+   // otherwise let the user enter the subject first
+   switch ( m_kind )
+   {
+      default:
+         FAIL_MSG( "unknown message kind" );
+         // fall through
+
+      case Message_New:
+         m_txtSubject->SetFocus();
+         break;
+
+      case Message_Reply:
+      case Message_Forward:
+         m_LayoutWindow->SetFocus();
    }
 }
 
@@ -2819,8 +2839,8 @@ wxComposeView::Send(bool schedule)
    String from = GetFrom();
    if ( !from.empty() && from != m_from )
    {
-      msg->SetFrom(from,
-                   "" /* don't change the personal name */
+      msg->SetFrom(Message::GetEMailFromAddress(from),
+                   Message::GetNameFromAddress(from)
                    /* don't set Reply-To yet FIXME?*/);
    }
 
@@ -2887,9 +2907,13 @@ wxComposeView::Send(bool schedule)
       mApplication->UpdateOutboxStatus();
       wxLogStatus(this, _("Message has been sent."));
    }
-   else
+   else // message not sent
    {
-      wxLogError(_("The message couldn't be sent."));
+      if ( mApplication->GetLastError() != M_ERROR_CANCEL )
+      {
+         wxLogError(_("The message couldn't be sent."));
+      }
+      //else: cancelled by user, don't give the error
    }
 
    // reenable the window disabled previously

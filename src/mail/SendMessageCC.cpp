@@ -423,18 +423,18 @@ SendMessageCC::SetSubject(const String &subject)
 }
 
 void
-SendMessageCC::SetFrom(const String & from,
-                       const String & ipersonal,
-                       const String & replyaddress,
-                       const String & sender)
+SendMessageCC::SetFrom(const String& from,
+                       const String& personal,
+                       const String& replyaddress,
+                       const String& sender)
 {
-   if(from.Length())
+   if( !from.empty() )
       m_FromAddress = EncodeAddress(from);
-   if(ipersonal.Length())
-      m_FromPersonal = ipersonal;
-   if(replyaddress.Length())
+   if( !personal.empty() )
+      m_FromPersonal = personal;
+   if ( !replyaddress.empty() )
       m_ReplyTo = EncodeAddress(replyaddress);
-   if(sender.Length())
+   if( !sender.empty() )
       m_Sender = EncodeAddress(sender);
 }
 
@@ -1129,7 +1129,7 @@ SendMessageCC::Send(void)
    if ( READ_APPCONFIG(MP_PREVIEW_SEND) )
    {
       WriteToString(msgText);
-      MDialog_ShowText(NULL, "Outgoing message text", msgText);
+      MDialog_ShowText(NULL, "Outgoing message text", msgText, "SendPreview");
 
       // if we preview it, we want to confirm it too
       confirmSend = true;
@@ -1143,6 +1143,8 @@ SendMessageCC::Send(void)
    {
       if ( !MDialog_YesNoDialog(_("Send this message?")) )
       {
+         mApplication->SetLastError(M_ERROR_CANCEL);
+
          return false;
       }
    }

@@ -125,6 +125,10 @@ enum ConfigFields
    ConfigField_ServersHelp,
    ConfigField_PopServer,
    ConfigField_ImapServer,
+#ifdef USE_SENDMAIL
+   ConfigField_UseSendmail,
+   ConfigField_SendmailCmd,
+#endif
    ConfigField_MailServer,
    ConfigField_NewsServer,
    ConfigField_MailServerLoginHelp,
@@ -138,10 +142,6 @@ enum ConfigFields
    ConfigField_SSLtext,
    ConfigField_SmtpServerSSL,
    ConfigField_NntpServerSSL,
-#endif
-#ifdef USE_SENDMAIL
-   ConfigField_UseSendmail,
-   ConfigField_SendmailCmd,
 #endif
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
@@ -680,7 +680,7 @@ END_EVENT_TABLE()
 // there too
 const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
-   // network config and identity
+   // general config and identity
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("&E-mail address"),              Field_Text | Field_Vital,   -1, },
    { gettext_noop("&Reply address"),               Field_Text | Field_Advanced,   -1, },
@@ -712,6 +712,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "here"),                         Field_Message, -1,                        },
    { gettext_noop("&POP server"),                  Field_Text,    -1,                        },
    { gettext_noop("&IMAP server"),                 Field_Text,    -1,                        },
+#ifdef USE_SENDMAIL
+   { gettext_noop("Use local mail transfer a&gent"), Field_Bool, -1,           },
+   { gettext_noop("Local MTA &command"), Field_Text, ConfigField_UseSendmail },
+#endif // USE_SENDMAIL
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
@@ -746,11 +750,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
      , Field_Message, -1 },
    { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
-#endif
-#ifdef USE_SENDMAIL
-   { gettext_noop("Use local mail transfer a&gent"), Field_Bool, -1,           },
-   { gettext_noop("Local MTA &command"), Field_Text, ConfigField_UseSendmail },
-#endif
+#endif // USE_SSL
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
@@ -1129,6 +1129,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_POPHOST),
    CONFIG_ENTRY(MP_IMAPHOST),
+#ifdef USE_SENDMAIL
+   CONFIG_ENTRY(MP_USE_SENDMAIL),
+   CONFIG_ENTRY(MP_SENDMAILCMD),
+#endif // USE_SENDMAIL
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_NONE(),
@@ -1142,11 +1146,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
    CONFIG_ENTRY(MP_NNTPHOST_USE_SSL),
-#endif
-#ifdef OS_UNIX
-   CONFIG_ENTRY(MP_USE_SENDMAIL),
-   CONFIG_ENTRY(MP_SENDMAILCMD),
-#endif
+#endif // USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),
@@ -1315,7 +1315,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    // helper programs
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BROWSER),
+#ifndef OS_WIN
    CONFIG_ENTRY(MP_BROWSER_ISNS),
+#endif // OS_WIN
    CONFIG_ENTRY(MP_BROWSER_INNW),
 #ifdef USE_EXT_HTML_HELP
    CONFIG_NONE(),

@@ -35,6 +35,7 @@ class wxMessageView;
 class MailFolder;
 class ASMailFolder;
 class ASTicketList;
+class HeaderInfoList_obj;
 
 enum wxFolderListCtrlFields
 {
@@ -239,6 +240,9 @@ protected:
    /// invalidate the last previewed UID
    void InvalidatePreviewUID() { SetPreviewUID(UID_ILLEGAL); }
 
+   /// select the first interesting message in the folder
+   void SelectInitialMessage(const HeaderInfoList_obj& hil);
+
 private:
    /// profile name
    wxString m_ProfileName;
@@ -340,7 +344,6 @@ private:
    /// get the full key to use in persistent message boxes
    String GetFullPersistentKey(MPersMsgBox key);
 
-private:
    /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
 

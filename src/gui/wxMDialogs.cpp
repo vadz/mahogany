@@ -1451,8 +1451,7 @@ void MDialog_ShowText(MWindow *parent,
       h = 300;
    }
 
-
-   MTextDialog dlg(parent, title, text,
+   MTextDialog dlg(GetDialogParent(parent), title, text,
                    wxPoint(x, y), wxSize(w, h));
    (void)dlg.ShowModal();
 

@@ -1725,43 +1725,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
          if ( hil )
          {
-            UIdType uid;
-            if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
-            {
-               uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
-            }
-            else
-            {
-               uid = UID_ILLEGAL;
-            }
-
-            if ( uid == UID_ILLEGAL )
-            {
-               // select first unread is off or no unread message
-               unsigned long idx
-                  = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE)
-                     ? 0
-                     : m_NumOfMessages - 1;
-
-               m_FolderCtrl->Focus(idx);
-
-               HeaderInfo *hi = hil[idx];
-               if ( hi )
-               {
-                  uid = hi->GetUId();
-               }
-               else
-               {
-                  wxFAIL_MSG("Failed to get the uid of preselected message");
-               }
-            }
-
-            // the item is already focused, now preview it automatically too
-            // if we're configured to do this automatically
-            if ( (uid != UID_ILLEGAL) && m_settings.previewOnSingleClick )
-            {
-               PreviewMessage(uid);
-            }
+            SelectInitialMessage(hil);
          }
       }
 
@@ -1773,6 +1737,57 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    EnableMMenu(MMenu_Message, m_FolderCtrl, (m_ASMailFolder != NULL) );
    m_SetFolderSemaphore = false;
+}
+
+void
+wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
+{
+   if ( !m_NumOfMessages )
+   {
+      // nothing to select anyhow
+      return;
+   }
+
+   UIdType uid;
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+   {
+      uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
+   }
+   else
+   {
+      uid = UID_ILLEGAL;
+   }
+
+   if ( uid == UID_ILLEGAL )
+   {
+      // select first unread is off or no unread message, so select the first
+      // or the last one depending on the options
+      unsigned long idx
+         = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE)
+            ? 0
+            : m_NumOfMessages - 1;
+
+      // note that idx is always a valid index because m_NumOfMessages >= 1
+
+      m_FolderCtrl->Focus(idx);
+
+      const HeaderInfo *hi = hil[idx];
+      if ( hi )
+      {
+         uid = hi->GetUId();
+      }
+      else
+      {
+         wxFAIL_MSG("Failed to get the uid of preselected message");
+      }
+   }
+
+   // the item is already focused, now preview it automatically too
+   // if we're configured to do this automatically
+   if ( (uid != UID_ILLEGAL) && m_settings.previewOnSingleClick )
+   {
+      PreviewMessage(uid);
+   }
 }
 
 wxFolderView *
@@ -2126,8 +2141,6 @@ wxFolderView::SetEntryColour(size_t index, const HeaderInfo *hi)
    }
 }
 
-#include "MFCache.h"
-
 void
 wxFolderView::Update()
 {
@@ -2219,15 +2232,20 @@ wxFolderView::Update()
    // message to start with, we have nothing to do here)
    if ( itemFocus != -1 )
    {
-      m_FolderCtrl->Focus(itemFocus);
       m_FolderCtrl->Select(itemFocus);
+      m_FolderCtrl->Focus(itemFocus);
    }
-   else if ( searchForFocus )
+   else // no new focus
    {
-      m_MessagePreview->Clear();
-      InvalidatePreviewUID();
+      if ( searchForFocus )
+      {
+         m_MessagePreview->Clear();
+         InvalidatePreviewUID();
+      }
+      //else: we didn't have preview at all
+
+      SelectInitialMessage(listing);
    }
-   //else: we didn't have preview at all
 
    m_UpdateSemaphore = false;
 
