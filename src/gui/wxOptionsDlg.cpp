@@ -322,6 +322,7 @@ enum ConfigFields
    ConfigField_EnablePython,
    ConfigField_PythonPath,
    ConfigField_StartupScript,
+   ConfigField_CallbackHelp,
    ConfigField_CallbackFolderOpen,
    ConfigField_CallbackFolderUpdate,
    ConfigField_CallbackFolderExpunge,
@@ -1309,14 +1310,21 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // python
    { gettext_noop("Python is the built-in scripting language which can be\n")
      gettext_noop("used to extend Mahogany's functionality. It is not essential\n")
-     gettext_noop("for the program's normal operation."), Field_Message, -1},
+     gettext_noop("for the program's normal operation."),
+                                                   Field_Message |
+                                                   Field_AppWide, -1 },
    { gettext_noop("&Enable Python"),               Field_Bool |
                                                    Field_AppWide, -1,                        },
    { gettext_noop("Python &path"),                 Field_Text |
                                                    Field_AppWide, ConfigField_EnablePython   },
    { gettext_noop("&Startup script"),              Field_File |
                                                    Field_AppWide, ConfigField_EnablePython   },
-   { gettext_noop("&Folder open callback"),        Field_Text,    ConfigField_EnablePython   },
+
+   { gettext_noop("You may define below the Python function which will be\n"
+                  "called when the corresponding event happens. You may\n"
+                  "enter just the functions names or use \"module\".\"function\"\n"
+                  "notation."),                    Field_Message, -1 },
+   { gettext_noop("Folder &open callback"),        Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("Folder &update callback"),      Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("Folder e&xpunge callback"),     Field_Text,    ConfigField_EnablePython   },
    { gettext_noop("Flag &set callback"),           Field_Text,    ConfigField_EnablePython   },
@@ -1903,6 +1911,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEPYTHON),
    CONFIG_ENTRY(MP_PYTHONPATH),
    CONFIG_ENTRY(MP_STARTUPSCRIPT),
+   CONFIG_NONE(),
    ConfigValueDefault(MCB_FOLDEROPEN, ""),
    ConfigValueDefault(MCB_FOLDERUPDATE, ""),
    ConfigValueDefault(MCB_FOLDEREXPUNGE, ""),
@@ -4317,15 +4326,15 @@ const wxChar *wxOptionsNotebook::ms_aszImages[] =
    _T("newmail"),
    _T("compose"),
    _T("folders"),
-#ifdef USE_PYTHON
-   _T("python"),
-#endif
    _T("msgview"),
    _T("folderview"),
    _T("foldertree"),
    _T("adrbook"),
    _T("helpers"),
    _T("sync"),
+#ifdef USE_PYTHON
+   _T("python"),
+#endif
 #ifdef USE_TEST_PAGE
    _T("unknown"),
 #endif // USE_TEST_PAGE
@@ -4352,15 +4361,15 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageNewMail(this, profile);
    new wxOptionsPageCompose(this, profile);
    new wxOptionsPageFolders(this, profile);
-#ifdef USE_PYTHON
-   new wxOptionsPagePython(this, profile);
-#endif
    new wxOptionsPageMessageView(this, profile);
    new wxOptionsPageFolderView(this, profile);
    new wxOptionsPageFolderTree(this, profile);
    new wxOptionsPageAdb(this, profile);
    new wxOptionsPageHelpers(this, profile);
    new wxOptionsPageSync(this, profile);
+#ifdef USE_PYTHON
+   new wxOptionsPagePython(this, profile);
+#endif
 #ifdef USE_TEST_PAGE
    new wxOptionsPageTest(this, profile);
 #endif // USE_TEST_PAGE

@@ -2724,6 +2724,9 @@ const wxChar *wxFolderCreateNotebook::s_aszImages[] =
    _T("foldertree"),
    _T("adrbook"),
    _T("helpers"),
+#ifdef USE_PYTHON
+   _T("python"),
+#endif // USE_PYTHON
    NULL
 };
 
@@ -2753,6 +2756,9 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
    (void)new wxOptionsPageFolderTree(this, profile);
    (void)new wxOptionsPageAdb(this, profile);
    (void)new wxOptionsPageHelpers(this, profile);
+#ifdef USE_PYTHON
+   (void)new wxOptionsPagePython(this, profile);
+#endif // USE_PYTHON
 }
 
 // ----------------------------------------------------------------------------
