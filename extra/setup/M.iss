@@ -99,6 +99,9 @@ Source: "src\Python\SendMessage.py-swig"; DestName: "SendMessage.py"; DestDir: "
 ; case is important (should be Minit) or Python complains!!
 Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
 
+; this is just an example but install it nevertheless, can be useful
+Source: "src\Python\Scripts\spam.py"; DestDir: "{app}\Python"; Components: python
+
 ; --- translations
 Source: "locale\de.mo"; DestDir: "{app}\locale\de"; DestName: "M.mo"; Components: i18n
 Source: "locale\es.mo"; DestDir: "{app}\locale\es"; DestName: "M.mo"; Components: i18n
