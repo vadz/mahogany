@@ -539,13 +539,10 @@ public:
 
    /// Does the folder need a working network to be accessed?
    virtual bool NeedsNetwork(void) const
-      {
-         return
-            (GetType() == MF_NNTP
-             || GetType() == MF_IMAP
-             || GetType() == MF_POP)
-            && ! (GetFlags() & MF_FLAGS_ISLOCAL);
-      }
+   {
+      return FolderNeedsNetwork(GetType(), GetFlags());
+   }
+
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
@@ -554,8 +551,7 @@ public:
    /**@name Accessor methods */
    //@{
    /// Get authorisation information
-   virtual inline void GetAuthInfo(String *login, String *password)
-      const = 0;
+   virtual inline void GetAuthInfo(String *login, String *password) const = 0;
    //@}
 
    /** Apply any filter rules to the folder. Only does anything if a
@@ -569,16 +565,82 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(UIdArray msgs) = 0;
+
    /** Request update. Causes the mailfolder to update its internal
-       status information when required. If sendEvent is TRUE, it will
-       send out an event that its info changed to cause immediate
-       update. */
-   virtual void RequestUpdate(bool sendEvent = FALSE) = 0;
-   /// Process all internal update events in the queue.
-   static void ProcessEventQueue(void);
+       status information when required. */
+   virtual void RequestUpdate() = 0;
+
+   /** @name Various static functions
+
+       They are implemented elsewhere but declared here to minimize the header
+       dependencies.
+    */
+   //@{
+   /// returns TRUE if we have any MH folders on this system
+   static bool ExistsMH();
+
+   /**
+      initialize the MH driver (it's safe to call it more than once) - has a
+      side effect of returning the MHPATH which is the root path under which
+      all MH folders should be situated on success. Returns empty string on
+      failure.
+
+      If the string is not empty it will be '/' terminated.
+   */
+   static const String& InitializeMH();
+
+   /**
+      initialize the NEWS driver (it's safe to call it more than once).
+
+      @return the path to local news spool or empty string on failure
+   */
+   static const String& InitializeNewsSpool();
+
+   /**
+      build the IMAP spec for its components
+
+      @return the full IMAP spec for the folder
+   */
+   static String GetImapSpec(int type, int flags,
+                             const String &name,
+                             const String &server,
+                             const String &login);
+
+   /** Extracts the folder name from the folder specification string used by
+       cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
+       => Foo)
+
+       @param specification the full cclient folder specification
+       @param folderType the (supposed) type of the folder
+       @param name the variable where the folder name will be returned
+       @return TRUE if folder name could be successfully extracted
+    */
+   static bool SpecToFolderName(const String& specification,
+                                FolderType folderType,
+                                String *name);
+
+   /** A helper function: remove the MHPATH prefix from the path and return
+       TRUE or return FALSE if the path is absolute but doesn't start with
+       MHPATH. Don't change anything for relative paths.
+
+       @param path: full path to the MH folder on input, folder name on output
+       @return TRUE if path was a valid MH folder
+   */
+   static bool GetMHFolderName(String *path);
+
+   /** imports either just the top-level MH folder or it and all MH subfolders
+       under it
+   */
+   static bool ImportFoldersMH(const String& root, bool allUnder = true);
+
+   //@}
+
+   /// Initialize the underlying mail library
+   static bool Init();
 
    /// Clean up for program exit.
    static void CleanUp(void);
+
 protected:
    static MLogCircle ms_LogCircle;
 };
@@ -674,4 +736,5 @@ public:
 
 #include "HeaderInfo.h"
 
-#endif
+#endif /// MAILFOLDER_H
+

@@ -20,7 +20,7 @@ class MModule_Calendar : public MModule
 {
 public:
    /// schedule a message to be sent later
-   virtual bool ScheduleMessage(class SendMessageCC *msg) = 0;
+   virtual bool ScheduleMessage(class SendMessage *msg) = 0;
    /// move a message to the calendar to be shown again later
    virtual bool ScheduleMessage(class Message *msg) = 0;
 };

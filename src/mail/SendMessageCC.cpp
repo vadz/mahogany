@@ -50,7 +50,10 @@
 #include "MApplication.h"
 #include "Message.h"
 #include "MailFolderCC.h"
+
+#include "SendMessage.h"
 #include "SendMessageCC.h"
+
 #include "XFace.h"
 #include "MDialogs.h"
 #include "gui/wxIconManager.h"
@@ -69,6 +72,15 @@ extern "C"
 
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
+
+SendMessage *SendMessage::Create(Profile *prof, Protocol protocol)
+{
+   return new SendMessageCC(prof, protocol);
+}
+
+SendMessage::~SendMessage()
+{
+}
 
 SendMessageCC::SendMessageCC(Profile *iprof,
                              Protocol protocol)
@@ -1119,7 +1131,6 @@ SendMessageCC::Send(void)
       default:
          FAIL_MSG("illegal protocol");
       }
-      MailFolderCC::ProcessEventQueue();
       rfc822_setextraheaders(NULL,NULL);
       if(success)
       {

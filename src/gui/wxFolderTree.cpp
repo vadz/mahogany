@@ -276,6 +276,10 @@ protected:
                   : FALSE;
    }
 
+   // process the event which can result in changing of a tree item colour due
+   // to change in new/recent messages
+   void ProcessMsgNumberChange(MailFolder *folder);
+
 private:
    class FolderMenu : public wxMenu
    {
@@ -333,6 +337,8 @@ private:
    void *m_eventFolderChange;    // for folder creatio/destruction
    void *m_eventOptionsChange;   // options change (update icons)
    void *m_eventFolderUpdate;    // when a folder's status changes
+   void *m_eventMsgStatusChange; // or even a status of a message in it
+
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
    String m_openFolderName,
@@ -882,14 +888,14 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
       {
          MP_FVIEW_FGCOLOUR,
          MP_FVIEW_NEWCOLOUR,
-         MP_FVIEW_RECENTCOLOUR,
+         MP_FVIEW_UNREADCOLOUR,
       };
 
       static const char *colorDefaults[Folder_StatusMax] =
       {
          MP_FVIEW_FGCOLOUR_D,
          MP_FVIEW_NEWCOLOUR_D,
-         MP_FVIEW_RECENTCOLOUR_D,
+         MP_FVIEW_UNREADCOLOUR_D,
       };
 
       wxString colorName = mApplication->GetProfile()
@@ -969,15 +975,18 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_current = new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
-   m_eventFolderChange = MEventManager::Register(*this,
-                                                 MEventId_FolderTreeChange);
-   m_eventOptionsChange = MEventManager::Register(*this,
-                                                  MEventId_OptionsChange);
-   m_eventFolderUpdate = MEventManager::Register(*this,
-                                                  MEventId_FolderUpdate);
-
-   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange && m_eventFolderUpdate,
-               "folder tree failed to register with event manager" );
+   if ( !MEventManager::RegisterAll
+         (
+            this,
+            MEventId_FolderTreeChange, &m_eventFolderChange,
+            MEventId_OptionsChange, &m_eventOptionsChange,
+            MEventId_FolderUpdate, &m_eventFolderUpdate,
+            MEventId_MsgStatus, &m_eventMsgStatusChange,
+            MEventId_Null
+         ) )
+    {
+        FAIL_MSG( "Failed to register folder tree with event manager" );
+    }
 }
 
 void wxFolderTreeImpl::UpdateBackground()
@@ -1660,43 +1669,47 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
-   else if ( ev.GetId() == MEventId_FolderUpdate )
+   else if ( ev.GetId() == MEventId_FolderUpdate ||
+             ev.GetId() == MEventId_MsgStatus )
    {
-      MEventFolderUpdateData& event = (MEventFolderUpdateData &)ev;
-      MailFolder *folder = event.GetFolder();
+      MEventWithFolderData& event = (MEventWithFolderData &)ev;
 
-      wxString folderName = folder->GetName();
-      wxTreeItemId item = GetTreeItemFromName(folderName);
-
-      // it's not an error: MTempFolder objects are not in the tree, yet they
-      // generate MEventId_FolderUpdate events as well
-      if ( !item.IsOk() )
-      {
-         return true;
-      }
-
-      // change the folder colour depending on whether it has any recent
-      // messages, any new messages or neither at all
-      wxFolderTreeNode::Status status;
-      UIdType newMsgs = folder->CountNewMessagesQuick();
-      if ( newMsgs != UID_ILLEGAL && newMsgs > 0 )
-      {
-         status = wxFolderTreeNode::Folder_New;
-      }
-      else if ( folder->CountRecentMessages() )
-      {
-         status = wxFolderTreeNode::Folder_Recent;
-      }
-      else // no recent, no new
-      {
-         status = wxFolderTreeNode::Folder_Normal;
-      }
-
-      wxFolderTreeNode *node = GetFolderTreeNode(item);
-      node->SetStatus(this, status);
+      ProcessMsgNumberChange(event.GetFolder());
    }
 
    return true;
+}
+
+void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
+{
+   wxTreeItemId item = GetTreeItemFromName(folder->GetName());
+
+   // it's not an error: MTempFolder objects are not in the tree, yet they
+   // generate MEventId_FolderUpdate events as well
+   if ( !item.IsOk() )
+   {
+      return;
+   }
+
+   // change the folder colour depending on whether it has any recent
+   // messages, any new messages or neither at all
+   wxFolderTreeNode::Status status;
+   UIdType newMsgs = folder->CountNewMessages();
+   if ( newMsgs != UID_ILLEGAL && newMsgs > 0 )
+   {
+      status = wxFolderTreeNode::Folder_New;
+   }
+   else if ( folder->CountRecentMessages() )
+   {
+      status = wxFolderTreeNode::Folder_Recent;
+   }
+   else // no recent, no new
+   {
+      status = wxFolderTreeNode::Folder_Normal;
+   }
+
+   wxFolderTreeNode *node = GetFolderTreeNode(item);
+   node->SetStatus(this, status);
 }
 
 // update the icon of the selected folder: called with tmp == FALSE when [Ok]
@@ -1765,9 +1778,11 @@ bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
 
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
-   MEventManager::Deregister(m_eventFolderChange);
-   MEventManager::Deregister(m_eventOptionsChange);
-   MEventManager::Deregister(m_eventFolderUpdate);
+   MEventManager::DeregisterAll(&m_eventFolderChange,
+                                &m_eventOptionsChange,
+                                &m_eventFolderUpdate,
+                                &m_eventMsgStatusChange,
+                                NULL);
 
    delete GetImageList();
 

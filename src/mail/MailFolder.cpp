@@ -19,6 +19,7 @@
 #   include "Profile.h"
 #   include "MEvent.h"
 #   include "MModule.h"
+#   include "MThread.h"
 #   include <stdlib.h>
 #   include <errno.h>
 #endif
@@ -36,7 +37,8 @@
 
 #include "Message.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h"
+#include "MailFolderCC.h" // CC_Cleanup (FIXME: shouldn't be there!)
+
 #ifdef EXPERIMENTAL
 #include "MMailFolder.h"
 #endif
@@ -198,16 +200,6 @@ MLogCircle::Clear(void)
 /// called to make sure everything is set up
 static void InitStatic(void);
 static void CleanStatic(void);
-
-/* Flush all event queues for all MailFolder drivers. */
-
-/* static */
-void
-MailFolder::ProcessEventQueue(void)
-{
-   InitStatic();
-   MailFolderCC::ProcessEventQueue();
-}
 
 /*
  * This function guesses: it checks if such a profile exists,
@@ -748,7 +740,7 @@ MailFolder::ReplyMessage(class Message *msg,
                          Profile *profile,
                          MWindow *parent)
 {
-   ASSERT_RET(msg);
+   CHECK_RET(msg, "no message to reply to");
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
@@ -924,7 +916,7 @@ MailFolder::ForwardMessage(class Message *msg,
                            Profile *profile,
                            MWindow *parent)
 {
-   ASSERT_RET(msg);
+   CHECK_RET(msg, "no message to forward");
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
@@ -1584,12 +1576,24 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
 void
 MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
-   /* Now check whether we need to send new mail notifications: */
    UIdType n = (*hilp).Count();
+   if ( !n )
+      return;
+
    UIdType *messageIDs = new UIdType[n];
 
    DBGMESSAGE(("CheckForNewMail(): folder: %s highest seen uid: %lu.",
                GetName().c_str(), (unsigned long) m_LastNewMsgUId));
+
+   // new messages are supposed to have UIDs greater than the last new message
+   // seen, but not all messages with greater UID are new, so we have to first
+   // find all messages with such UIDs and then check if they're really new
+
+   // when we check for the new mail the first time, m_LastNewMsgUId is still
+   // invalid and so we must reset it before comparing with it
+   bool firstTime = m_LastNewMsgUId == UID_ILLEGAL;
+   if ( firstTime )
+      m_LastNewMsgUId = 0;
 
    // Find the new messages:
    UIdType nextIdx = 0;
@@ -1608,17 +1612,18 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
             highestId = uid;
       }
    }
-   ASSERT(nextIdx <= n);
 
-   if( (m_UpdateFlags & UF_DetectNewMail) // do we want new mail events?
-       && m_LastNewMsgUId != UID_ILLEGAL) // is it not the first time
-                                          // that we look at this folder?
+   ASSERT_MSG( nextIdx <= n, "more new messages than total?" );
+
+   // do we want new mail events?
+   if ( m_UpdateFlags & UF_DetectNewMail )
    {
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
+      //else: no new messages found
    }
 
-   if( m_UpdateFlags & UF_UpdateCount )
+   if ( m_UpdateFlags & UF_UpdateCount )
       m_LastNewMsgUId = highestId;
 
    DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
@@ -1694,8 +1699,7 @@ MailFolderCmn::DoUpdate()
       if(interval > 0) // interval of zero == disable ping timer
          m_Timer->Start(interval);
    }
-   RequestUpdate(true);
-   MailFolder::ProcessEventQueue();
+   RequestUpdate();
 }
 
 void
@@ -1729,31 +1733,38 @@ MailFolderCmn::DeleteMessage(unsigned long uid)
 bool
 MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
 {
-   bool reallyDelete = ! READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
-   // If we are the trash folder, we *really* delete.
-   if(!reallyDelete && GetName() == READ_CONFIG(GetProfile(),
-                                                MP_TRASH_FOLDER))
+   CHECK( CanDeleteMessagesInFolder(GetType()), FALSE,
+          "can't delete messages in this folder" );
+
+   // we can either "really delete" the messages (in fact, just mark them as
+   // deleted) or move them to trash which implies deleting and expunging them
+   bool reallyDelete = !READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
+
+   // If we are the trash folder, we *really* delete
+   wxString trashFolderName = READ_CONFIG(GetProfile(), MP_TRASH_FOLDER);
+   if ( !reallyDelete && GetName() == trashFolderName )
       reallyDelete = true;
 
-   // newsgroups really delete:
-   if(GetType() == MF_NNTP || GetType() == MF_NEWS)
-      reallyDelete = true;
-
-   if(!reallyDelete)
+   bool rc;
+   if ( reallyDelete )
+   {
+      // delete without expunging
+      rc = DeleteMessages(selections, FALSE);
+   }
+   else // move to trash
    {
       bool rc = SaveMessages(selections,
-                             READ_CONFIG(GetProfile(), MP_TRASH_FOLDER),
+                             trashFolderName,
                              true /* is profile */,
                              false /* don´t update */);
-      if(rc)
-         SetSequenceFlag(GetSequenceString(selections),MSG_STAT_DELETED);
-      ExpungeMessages();
-//      RequestUpdate();
-      Ping();
-      return rc;
+      if ( rc )
+      {
+         // delete and expunge
+         rc = DeleteMessages(selections, TRUE);
+      }
    }
-   else
-      return DeleteMessages(selections);
+
+   return rc;
 }
 
 bool
@@ -1761,8 +1772,9 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 {
    bool rc = SetSequenceFlag(GetSequenceString(selections),
                              MailFolder::MSG_STAT_DELETED);
-   if(rc && expunge)
+   if ( rc && expunge )
       ExpungeMessages();
+
    return rc;
 }
 
@@ -1841,13 +1853,7 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
 bool
 MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
 {
-   if(hil == NULL)
-   {
-      hil = GetHeaders();
-      CHECK(hil, FALSE, "NULL HeaderInfoList");
-   }
-   else
-      hil->IncRef();
+   CHECK(hil, FALSE, "NULL HeaderInfoList");
 
    // Maybe we are lucky and have nothing to do?
    if(hil->Count() == 0)
@@ -1866,8 +1872,8 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
       {
          // Build an array of NEW message UIds to apply the filters to:
          UIdArray messages;
-         CHECK(hil, FALSE, "no header listing?");
-         for(UIdType idx = 0; idx < hil->Count(); idx++)
+         UIdType count = hil->Count();
+         for(UIdType idx = 0; idx < count; idx++)
          {
             // the first two condidions: only take NEW=RECENT&&!SEEN messages
             if( ( (*hil)[idx]->GetStatus() &  MSG_STAT_RECENT )
@@ -1882,7 +1888,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          String filterString;
          MFolder_obj folder(GetName());
          wxArrayString filters = folder->GetFilters();
-         size_t count = filters.GetCount();
+         count = filters.GetCount();
          for ( size_t n = 0; n < count; n++ )
          {
             MFilter_obj filter(filters[n]);
@@ -1999,13 +2005,21 @@ static void CleanStatic()
 }
 
 /* static */
+bool
+MailFolder::Init()
+{
+   InitStatic();
+
+   return CC_Init();
+}
+
+/* static */
 void
 MailFolder::CleanUp(void)
 {
    CleanStatic();
 
    // clean up CClient driver memory
-   extern void CC_Cleanup(void);
    CC_Cleanup();
 }
 

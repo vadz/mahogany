@@ -102,15 +102,12 @@ void UpdateTitleAndStatusBars(const String& title,
    // we could probably optimize this somewhat by only counting the messages if
    // we need them, but is it worth it?
    String folderName = mailFolder->GetName();
-#ifdef DEBUG_greg
-printf("UpdateTitleAndStatusBars ==> CountMessages (thrice)\n");
-#endif
    unsigned long total = mailFolder->CountMessages(),
       recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
                                           MailFolder::MSG_STAT_SEEN,
                                           MailFolder::MSG_STAT_RECENT |
                                           MailFolder::MSG_STAT_SEEN),
-      // recent & !seen --> new   
+      // recent & !seen --> new
       newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
                                           MailFolder::MSG_STAT_SEEN,
                                           MailFolder::MSG_STAT_RECENT);
@@ -123,7 +120,7 @@ printf("UpdateTitleAndStatusBars ==> CountMessages (thrice)\n");
                                  total, recent, newmsgs, folderName);
 
    // show them
-   wxLogStatus(frame, statusMsg);
+   frame->SetStatusText(statusMsg);
    frame->SetTitle(titleMsg);
 
    if ( newmsgs > 0 )
@@ -284,7 +281,7 @@ extern String miscutil_ExpandLocalAddress(Profile *p, const String &mbox)
       return mbox; // contains a host name
 
    String mbox2 = mbox;
-   
+
    String personal = Message::GetNameFromAddress(mbox2);
 
 

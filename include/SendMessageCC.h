@@ -17,13 +17,10 @@
 
 class Profile;
 
-/// another scandoc fix
-#define   SM_INLINE "INLINE"
-
 /** A class representing a message during composition.
  */
 
-class SendMessageCC
+class SendMessageCC : public SendMessage
 {
 public:
    /** Creates an empty object, setting some initial values.
@@ -73,7 +70,7 @@ public:
    virtual void AddPart(MessageContentType type,
                         const char *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = SM_INLINE,
+                        const String &disposition = "INLINE",
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM);
@@ -201,7 +198,6 @@ private:
    /// Parses string for folder aliases, removes them and stores them in m_FccList.
    void ExtractFccFolders(String &addresses);
 //@}
-
 };
 
 

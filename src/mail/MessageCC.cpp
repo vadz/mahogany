@@ -47,14 +47,14 @@
 #define CHECK_DEAD_RC(rc)   if( m_folder && m_folder->Stream() == NIL && ! m_folder->PingReopen()) {   ERRORMESSAGE((_("Cannot access inactive m_folder '%s'."), m_folder->GetName().c_str())); return rc; }
 
 MessageCC *
-MessageCC::CreateMessageCC(MailFolderCC *ifolder,
-                           unsigned long iuid)
+MessageCC::CreateMessageCC(MailFolderCC *folder,
+                           unsigned long uid)
 {
-   CHECK(ifolder, NULL, "NULL m_folder");
-   return new MessageCC(ifolder, iuid);
+   CHECK(folder, NULL, "NULL m_folder");
+   return new MessageCC(folder, uid);
 }
 
-MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
+MessageCC::MessageCC(MailFolderCC *folder,unsigned long uid)
 {
    m_mailFullText = NULL;
    m_Body = NULL;
@@ -63,10 +63,10 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
    m_numOfParts = -1;
    partContentPtr = NULL;
    m_msgText = NULL;
-   m_folder = ifolder;
+   m_folder = folder;
    m_folder->IncRef();
-   m_uid = iuid;
-   m_Profile=ifolder->GetProfile();
+   m_uid = uid;
+   m_Profile= folder->GetProfile();
    m_Profile->IncRef();
    Refresh();
 }
@@ -275,7 +275,6 @@ MessageCC::GetHeader(void) const
                                                NULL, &len, FT_UID);
       m_folder->UnLock();
       str = String(cptr, (size_t)len);
-      MailFolderCC::ProcessEventQueue();
    }
 
    return str;
@@ -323,7 +322,6 @@ MessageCC::GetHeaderLine(const String &line,
    strutil_delwhitespace(value);
    value = MailFolderCC::DecodeHeader(value, encoding);
    delete [] slist.text.data;
-   MailFolderCC::ProcessEventQueue();
 
    return value.length() != 0;
 }
@@ -463,7 +461,6 @@ MessageCC::FetchText(void)
          // length was positive, but it makes no sense as 0 length messages do
          // exist - so I removed it (VZ)
 
-         MailFolderCC::ProcessEventQueue();
          return m_mailFullText;
       }
       else
@@ -697,13 +694,12 @@ MessageCC::GetBody(void)
          else
          {
             m_folder->PingReopen();
-            MailFolderCC::ProcessEventQueue();
          }
       }
       else
          retry = 0;
-   }while(retry-- && ! (m_Envelope && m_Body));
-   MailFolderCC::ProcessEventQueue();
+   }
+   while (retry-- && ! (m_Envelope && m_Body));
 
    CHECK(m_Body && m_Envelope, NULL, _("Non-existent message data."));
    return m_Body;
@@ -798,7 +794,6 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
    m_folder->UnLock();
-   MailFolderCC::ProcessEventQueue();
 
    if(lenptr == NULL)
       lenptr  = &len;   // so to give c-client lib a place where to write to
@@ -999,7 +994,6 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          str += String(headerPart, (size_t)len);
 #endif
          str += ((MessageCC*)this)->FetchText();
-         MailFolderCC::ProcessEventQueue();
       }
       else
       {

@@ -29,8 +29,6 @@ class MailFolder;
 
 #include "MailFolder.h"
 #include "Message.h"
-//class Message;
-
 
 /**
    ASMailFolder abstract base class, represents anything containig mails.
@@ -76,6 +74,16 @@ public:
       MSG_STAT_SEARCHED = 16,
       /// message has been flagged for something
       MSG_STAT_FLAGGED = 64
+   };
+
+   // the enum values are the same as cclient LATT_XXX constants
+   enum
+   {
+      ATT_NOINFERIORS = 1,
+      ATT_NOSELECT = 2,
+      ATT_MARKED = 4,
+      ATT_UNMARKED = 8,
+      ATT_REFERRAL = 16
    };
 
    /**@name Result classes containing return values from

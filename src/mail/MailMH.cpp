@@ -29,14 +29,18 @@
 #  include "ASMailFolder.h"
 #endif // USE_PCH
 
-#include "MailFolderCC.h"
+#include "MailFolder.h"
+#include "MFolder.h"
+#include "MEvent.h"
 
 #include <wx/dir.h>
 #include <wx/filefn.h>
 
-// including mh.h doesn't seem to work...
 extern "C"
 {
+   #include "Mcclient.h"
+
+   // including mh.h doesn't seem to work...
    int mh_isvalid(char *name, char *tmp, long synonly);
 
    char *mh_getpath(void);
@@ -47,7 +51,7 @@ extern "C"
 // ----------------------------------------------------------------------------
 
 // the root of MH folders
-String MailFolderCC::ms_MHpath;
+static String gs_MHRootDir;
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -140,7 +144,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
       // string)
       wxString name,
                spec = result->GetName();
-      if ( MailFolderCC::SpecToFolderName(spec, MF_MH, &name) )
+      if ( MailFolder::SpecToFolderName(spec, MF_MH, &name) )
       {
          OnNewFolder(name);
       }
@@ -160,19 +164,16 @@ void MHFoldersImporter::OnNewFolder(String& name)
 }
 
 // ----------------------------------------------------------------------------
-// public MailFolderCC API
+// implement MailFolder API
 // ----------------------------------------------------------------------------
 
 const String&
-MailFolderCC::InitializeMH()
+MailFolder::InitializeMH()
 {
-   if ( !ms_MHpath )
+   if ( !gs_MHRootDir )
    {
       // first, init cclient
-      if ( !ms_CClientInitialisedFlag )
-      {
-         CClientInit();
-      }
+      MailFolder::Init();
 
       // normally, the MH path is read by MH cclient driver from the MHPROFIle
       // file (~/.mh_profile under Unix), but we can't rely on this because if
@@ -222,24 +223,24 @@ MailFolderCC::InitializeMH()
 #if 0
          (void)mail_parameters(NULL, GET_MHPATH, &tmp);
 
-         ms_MHpath = tmp;
+         gs_MHRootDir = tmp;
 #else // 1
-         ms_MHpath = mh_getpath();
+         gs_MHRootDir = mh_getpath();
 #endif // 0/1
 
          // the path should have a trailing [back]slash
-         if ( !!ms_MHpath && !wxIsPathSeparator(ms_MHpath.Last()) )
+         if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
          {
-            ms_MHpath << wxFILE_SEP_PATH;
+            gs_MHRootDir << wxFILE_SEP_PATH;
          }
       }
    }
 
-   return ms_MHpath;
+   return gs_MHRootDir;
 }
 
 bool
-MailFolderCC::GetMHFolderName(String *path)
+MailFolder::GetMHFolderName(String *path)
 {
    String& name = *path;
 
@@ -251,18 +252,18 @@ MailFolderCC::GetMHFolderName(String *path)
          return FALSE;
       }
 
-      wxString pathFolder(name, ms_MHpath.length());
-      if ( strutil_compare_filenames(pathFolder, ms_MHpath) )
+      wxString pathFolder(name, gs_MHRootDir.length());
+      if ( strutil_compare_filenames(pathFolder, gs_MHRootDir) )
       {
          // skip MH path (and trailing slash which follows it)
-         name = name.c_str() + ms_MHpath.length();
+         name = name.c_str() + gs_MHRootDir.length();
       }
       else
       {
          wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
                       "be under '%s' directory."),
                     name.c_str(),
-                    ms_MHpath.c_str());
+                    gs_MHRootDir.c_str());
 
          return FALSE;
       }
@@ -272,7 +273,7 @@ MailFolderCC::GetMHFolderName(String *path)
    return TRUE;
 }
 
-bool MailFolderCC::ExistsMH()
+bool MailFolder::ExistsMH()
 {
    // check if any MH folders exist
    wxString rootMH = InitializeMH();
@@ -297,7 +298,7 @@ bool MailFolderCC::ExistsMH()
    }
 }
 
-bool MailFolderCC::ImportFoldersMH(const String& root, bool allUnder)
+bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
 {
    bool ok = TRUE;
 

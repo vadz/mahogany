@@ -33,6 +33,10 @@
 class HeaderInfoImpl : public HeaderInfo
 {
 public:
+   HeaderInfoImpl();
+
+   // implement base class pure virtuals
+
    virtual String const &GetSubject(void) const { return m_Subject; }
    virtual String const &GetFrom(void) const { return m_From; }
    virtual String const &GetTo(void) const { return m_To; }
@@ -58,16 +62,14 @@ public:
    virtual void SetEncoding(wxFontEncoding enc) { m_Encoding = enc; }
    virtual wxFontEncoding GetEncoding() const { return m_Encoding; }
 
-   /// Assignment operator.
-   HeaderInfo & operator= (const HeaderInfo &);
-
-   HeaderInfoImpl();
+   virtual HeaderInfo *Clone() const;
 
    /// folder internal use:
    virtual FolderDataType GetFolderData(void) const
       { return m_FolderData; }
    virtual void SetFolderData(const FolderDataType & fd)
       { m_FolderData = fd; }
+
 protected:
    String m_Subject, m_From, m_To, m_References;
    String m_Id;

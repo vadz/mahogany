@@ -290,7 +290,7 @@ private:
 private:
    void OnOptionsChange(MEventOptionsChangeData& event);
 
-   void SetEntry(HeaderInfoList *hi, size_t idx);
+   void SetEntry(const HeaderInfo *hi, size_t idx);
 
    // MEventManager reg info
    void *m_regOptionsChange;

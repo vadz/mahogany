@@ -12,9 +12,9 @@ INCLUDE(`"strutil.h"')
 INCLUDE(`"miscutil.h"')
 INCLUDE(`"MDialogs.h"')
 INCLUDE(`"MFolder.h"')
-INCLUDE(`"MailFolderCC.h"')
-INCLUDE(`"MessageCC.h"')
-INCLUDE(`"SendMessageCC.h"')
+INCLUDE(`"MailFolder.h"')
+INCLUDE(`"Message.h"')
+INCLUDE(`"SendMessage.h"')
 INCLUDE(`"wx/persctrl.h"')
 
 /* Define the MInterface ABC: */
@@ -102,12 +102,12 @@ FUNCTION(StatusMessage, void , ( ARG(STRING, message) )
   STATUSMESSAGE((message));
 ')
 
-FUNCTION(CreateSendMessageCC, SendMessageCC *, (
+FUNCTION(CreateSendMessage, SendMessage *, (
 ARG(Profile, *profile),
 ARG(Protocol , protocol, =Prot_SMTP)
 ),
 `
- return new SendMessageCC(profile,protocol);
+ return SendMessage::Create(profile,protocol);
 ')
 
 FUNCTION(GetMFolder, MFolder *, (

@@ -970,7 +970,7 @@ strutil_decrypt(const String &original)
 #include   "Profile.h"
 #include   "Mdefaults.h"
 #include   "MApplication.h"
-#include   "MailFolderCC.h"   // for InitializeMH
+#include   "MailFolder.h"   // for InitializeMH
 
 /// A small helper function to expand mailfolder names:
 String
@@ -992,7 +992,7 @@ strutil_expandfoldername(const String &name, FolderType folderType)
    else // if ( folderType == MF_MH )
    {
       // the name is a misnomer, it is used here just to get MHPATH value
-      String mhpath = MailFolderCC::InitializeMH();
+      String mhpath = MailFolder::InitializeMH();
       if ( !mhpath )
       {
          // oops - failed to init MH

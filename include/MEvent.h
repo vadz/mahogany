@@ -181,34 +181,38 @@ public:
 private:
    MailFolder           *m_folder;
 };
+
 // ----------------------------------------------------------------------------
-/** MEventMsgStatus Data - Carries folder pointer and index
-    in folder listing for data that changed.*/
+// MEventMsgStatus Data - carries folder pointer and HeaderInfo object with
+// its index in the folder list
+// ----------------------------------------------------------------------------
+
 class MEventMsgStatusData : public MEventWithFolderData
 {
 public:
-   /** Constructor.
-   */
+   // ctor
    MEventMsgStatusData(MailFolder *folder,
-                             size_t index,
-                             HeaderInfoList *listing)
+                       size_t index,
+                       HeaderInfo *hi)
       : MEventWithFolderData(MEventId_MsgStatus, folder)
       {
-         m_listing = listing;
-         m_listing->IncRef();
          m_index = index;
+         m_hi = hi;
       }
    ~MEventMsgStatusData()
       {
-         m_listing->DecRef();
+         delete m_hi;
       }
-   /// Get the new listing. Don't IncRef/DecRef it, exists as long as event.
-   HeaderInfoList *GetHeaders() const { return m_listing; }
-   /// get the folder which changed
+
+   /// Get the changed header info
+   const HeaderInfo *GetHeaderInfo() const { return m_hi; }
+
+   /// Get the index of the changed header in the listing
    size_t GetIndex() const { return m_index; }
+
 private:
-   size_t                m_index;
-   class HeaderInfoList  *m_listing;
+   size_t            m_index;
+   class HeaderInfo *m_hi;
 };
 
 // ----------------------------------------------------------------------------

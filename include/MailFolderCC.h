@@ -33,33 +33,21 @@
 
 #include  <wx/fontenc.h>
 
-// ----------------------------------------------------------------------------
-// global functions
-// ----------------------------------------------------------------------------
-
-// build the IMAP spec for its components
-extern String GetImapSpec(int type, int flags,
-                          const String &name,
-                          const String &iserver,
-                          const String &login);
+// fwd decls
+class MailFolderCC;
+class MMutex;
+struct mail_address;
+struct OVERVIEW_X;
 
 // ----------------------------------------------------------------------------
 // helper classes
 // ----------------------------------------------------------------------------
 
-/// To really clean up left over memory, call this function at program
-/// end:
+/// init cclient
+extern bool CC_Init();
+
+/// shutdown cclient
 extern void CC_Cleanup();
-
-// fwd decl needed to define StreamListType before MailFolderCC
-// (can't be defined inside the class - VC++ 5.0 can't compile it)
-class MailFolderCC;
-
-// cclient struct representing an address
-struct mail_address;
-
-// our extension of cclient OVERVIEW struct
-struct OVERVIEW_X;
 
 /// structure to hold MailFolder pointer and associated mailstream pointer
 class StreamConnection
@@ -259,7 +247,7 @@ public:
        Just pings the stream and tries to reopen it if needed
        @return true if stream still valid
    */
-   bool PingReopen(void) const;
+   bool PingReopen(void);
    /** Like PingReopen() but works on all folders, returns true if all
        folders are fine.
        @param fullPing does a full Ping() instead of a PingReopen()
@@ -343,60 +331,6 @@ public:
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return ms_CClientInitialisedFlag; }
 
-   /** @name Folder names and specifications */
-   //@{
-
-   /** Extracts the folder name from the folder specification string used by
-       cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
-       => Foo)
-
-       @param specification the full cclient folder specification
-       @param folderType the (supposed) type of the folder
-       @param name the variable where the folder name will be returned
-       @return TRUE if folder name could be successfully extracted
-    */
-   static bool SpecToFolderName(const String& specification,
-                                FolderType folderType,
-                                String *name);
-
-   /** A helper function: remove the MHPATH prefix from the path and return
-       TRUE or return FALSE if the path is absolute but doesn't start with
-       MHPATH. Don't change anything for relative paths.
-
-       @param path: full path to the MH folder on input, folder name on output
-       @return TRUE if path was a valid MH folder
-   */
-   static bool GetMHFolderName(String *path);
-   //@}
-
-   /** @name MH folders support */
-   //@{
-   /// returns TRUE if we have any MH folders on this system
-   static bool ExistsMH();
-
-   /** imports either just the top-level MH folder or it and all MH subfolders
-       under it
-   */
-   static bool ImportFoldersMH(const String& root, bool allUnder = true);
-
-   /**
-      initialize the MH driver (it's safe to call it more than once) - has a
-      side effect of returning the MHPATH which is the root path under which
-      all MH folders should be situated on success. Returns empty string on
-      failure.
-
-      If the string is not empty it will be '/' terminated.
-   */
-   static const String& InitializeMH();
-   //@}
-
-   /**
-      initialize the NEWS driver (it's safe to call it more than once).
-
-      @return the path to local news spool or empty string on failure
-   */
-   static const String& InitializeNewsSpool();
-
    /**
       check whether a folder can have subfolders
    */
@@ -441,24 +375,16 @@ private:
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
 
-   /// PingReopen() protection against recursion
-   bool m_PingReopenSemaphore;
-   /// BuildListing() protection against recursion
-   bool m_BuildListingSemaphore;
-   /// Do we need to update folder listing?
-   bool m_UpdateNeeded;
-   /// Do we need an update?
-   bool UpdateNeeded(void) const { return m_UpdateNeeded; }
+   /// set to true before we get the very first folder info
+   bool m_FirstListing;
+
    /// number of messages in mailbox
    unsigned long m_nMessages;
    /// number or recent messages in mailbox
    unsigned long m_nRecent;
    /// last seen UID
    UIdType m_LastUId;
-   /// last number of messages
-   unsigned long m_OldNumOfMessages;
-   /// set to true before we get the very first folder info
-   bool m_FirstListing;
+
    /// Full IMAP spec
    String   m_ImapSpec;
    /// The symbolic name of the folder
@@ -498,12 +424,6 @@ private:
    /// Gets next mailfolder in map or NULL
    static MailFolderCC * GetNextMapEntry(StreamConnectionList::iterator &i);
 
-   /** set the default object in Map
-       @param setit if false, erase default object
-   */
-
-   void SetDefaultObj(bool setit = true) const;
-
    /// lookup object in Map
    static MailFolderCC *LookupObject(MAILSTREAM const *stream,
                                      const char *name = NULL);
@@ -518,18 +438,12 @@ private:
    FolderType GetType(void) const { return m_folderType; }
    /// return the folder flags
    int GetFlags(void) const { return m_FolderFlags; }
+
 protected:
-   /// Is the mailfolder still connected to a server or file?
-   bool IsAlive(void) const
-      { return m_MailStream != NULL; }
-   /** Request update.
-       @param sendEvents If this is true, the next call to
-       ProcessEvents() will send an event out to the application. This
-       can be set to FALSE to suppress updates.
-   */
-   virtual void RequestUpdate(bool sendEvents = TRUE);
-   /// Update the folder status, number of messages, etc
+   virtual void RequestUpdate(void);
    virtual void UpdateStatus(void);
+   virtual bool IsAlive(void) const;
+
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
    /// apply all timeout values
@@ -545,93 +459,29 @@ protected:
 
    void Close(void);
 
-#ifdef USE_THREADS
    /// A Mutex to control access to this folder.
-   class MMutex *m_Mutex;
-#else
-   /// A Mutex to control access to this folder.
-   bool m_Mutex;
-#endif
-   /*@name Handling of MailFolderCC internal events.
-     Callbacks from the c-client library cannot directly be used to
-     call other functions as this might lead to a lock up or recursion
-     in the mail handling routines. Therefore all callbacks add events
-     to a queue which will be processed after calls to c-client
-     return.
-   */
-   //@{
+   MMutex *m_Mutex;
 
-public:
-   /// Process all events in the queue.
-   static void ProcessEventQueue(void);
+   /// PingReopen() protection against recursion
+   MMutex *m_PingReopenSemaphore;
 
-   /// Type of the event, one for each callback.
-   enum EventType
-   {
-      Searched, Exists, Expunged, Flags, Notify, List,
-      LSub, Status, Log, DLog, Update, MsgStatus
-   };
-   /// A structure for passing arguments.
-   union EventArgument
-   {
-      char            m_char;
-      String        * m_str;
-      int             m_int;
-      long            m_long;
-      unsigned long   m_ulong;
-      MAILSTATUS    * m_status;
-   };
-   /// The event structure.
-   struct Event
-   {
-#ifndef DEBUG
-      Event(MAILSTREAM *stream, EventType type, int /*caller*/)
-         {
-            m_stream = stream; m_type = type;
-         }
-#else
-      Event(MAILSTREAM *stream, EventType type,
-            int line)
-         {
-            m_stream = stream; m_type = type;
-            m_caller.Printf("line %d", line);
-            m_folderName = stream ? stream->mailbox : "no mailbox";
-         }
-#endif
-      /// The type.
-      EventType   m_type;
-      /// The stream it relates to.
-      MAILSTREAM *m_stream;
-      /// The data structure, no more than three members needed
-      EventArgument m_args[3];
-#ifdef DEBUG
-      /// where it was called from:
-      String m_caller;
-      /// the name of the folder:
-      String m_folderName;
-#endif
-   };
-   KBLIST_DEFINE(EventQueue, Event);
-   /**    Add an event to the queue, called from (C) mm_ callback
-          routines.
-          @param pointer to a new MailFolderCC::Event structure, will be freed by event handling mechanism.
-   */
-   static void QueueEvent(Event *evptr)
-      { ms_EventQueue.push_back(evptr); }
+   /// set to true while we're building new listing
+   MMutex *m_InListingRebuild;
 
-protected:
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
-   /// The list of events to be processed.
-   static EventQueue ms_EventQueue;
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long      m_BuildNextEntry;
    /// The maximum number of messages to retrive or 0
    unsigned long m_RetrievalLimit;
    //@}
+
+   /// do we have a listing?
+   bool HaveListing() const { return m_Listing != NULL; }
+
 public:
    /// re-read some cclient settings
    static void UpdateCClientConfig(void);
@@ -723,6 +573,9 @@ public:
        */
    static void mm_fatal(char *str);
 
+   /// gets called when messages were deleted
+   static void mm_expunged(MAILSTREAM *stream, unsigned long number);
+
    /// gets called when flags for a message have changed
    static void mm_flags(MAILSTREAM *stream, unsigned long number);
 
@@ -733,6 +586,7 @@ public:
    static String ParseAddress(struct mail_address *adr);
 
 //@}
+
 private:
    /// destructor
    ~MailFolderCC();
@@ -741,19 +595,23 @@ private:
    Profile *m_Profile;
    /// The current listing of the folder
    class HeaderInfoList *m_Listing;
-   /// Do we need to generate a new listing?
-   bool m_NeedFreshListing;
+
+   /// Have any new messages arrived?
+   bool m_GotNewMessages;
+
    /// do we suppress listing udpates?
    bool m_ListingFrozen;
-   /// do we need to run ExpungeMessages() on this folder?
-   bool m_ExpungeRequested;
+
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
+
    /** We remember the last folder to enter a critical section, helps
        to find crashes.*/
    static String ms_LastCriticalFolder;
+
    /// folder flags
    int  m_FolderFlags;
+
    /** @name Global settings, timeouts for c-client lib */
    //@{
    /// IMAP lookahead value
@@ -789,18 +647,14 @@ private:
    class ASMailFolder *m_ASMailFolder;
    //@}
 
-   // used by InitializeMH() only
-   static String ms_MHpath;
-
-   // used by InitializeNewsSpool() only
-   static String ms_NewsPath;
-
 #ifdef DEBUG
    /// print a list of all streams
    static void DebugStreams(void);
 #endif
 
+   friend bool CC_Init();
    friend void CC_Cleanup();
+   friend class CCDefaultFolder;
 
 public:
    DEBUG_DEF

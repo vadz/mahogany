@@ -19,6 +19,7 @@
 // ----------------------------------------------------------------------------
 // Type of a mail folder
 // ----------------------------------------------------------------------------
+
 /** The UIdArray define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
@@ -115,21 +116,6 @@ enum FolderFlags
    MF_FLAGS_NOSELECT      = 0x00100000  // folder can't be opened
 };
 
-/** SendMessageCC supports two different protocols:
- */
-enum Protocol {
-   /// invalid value
-   Prot_Illegal,
-   /// use SMTP
-   Prot_SMTP,
-   /// use NNTP
-   Prot_NNTP,
-   /// use local sendmail agent
-   Prot_Sendmail,
-   /// default delivery mode
-   Prot_Default = Prot_SMTP
-};
-
 // ----------------------------------------------------------------------------
 // For asynchronous operations:
 // ----------------------------------------------------------------------------
@@ -142,6 +128,27 @@ typedef int Ticket;
 
 /** Each operation can carry some user data. */
 typedef void * UserData;
+
+// ----------------------------------------------------------------------------
+// Message::Send() and SendMessage flags
+// ----------------------------------------------------------------------------
+
+/**
+   All supported protocols for sending mail
+ */
+enum Protocol
+{
+   /// invalid value
+   Prot_Illegal,
+   /// use SMTP
+   Prot_SMTP,
+   /// use NNTP
+   Prot_NNTP,
+   /// use local sendmail agent
+   Prot_Sendmail,
+   /// default delivery mode
+   Prot_Default = Prot_SMTP
+};
 
 // ----------------------------------------------------------------------------
 // helper functions
@@ -367,6 +374,13 @@ inline bool CanOpenFolder(FolderType folderType, int folderFlags)
    }
 
    return true;
+}
+
+/// does this folder require network to be up?
+inline bool FolderNeedsNetwork(FolderType type, int flags)
+{
+   return (type == MF_NNTP || type == MF_IMAP || type == MF_POP) &&
+          !(flags & MF_FLAGS_ISLOCAL);
 }
 
 // ----------------------------------------------------------------------------

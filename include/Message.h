@@ -15,13 +15,14 @@
 #include "FolderType.h"
 #include "MObject.h"
 #include "kbList.h"
-#include "MailFolder.h"
 
 class WXDLLEXPORT wxArrayString;
+class MailFolder;
 
 // ----------------------------------------------------------------------------
 // C-client compatibility defines
 // ----------------------------------------------------------------------------
+
 #ifdef   OS_WIN
 #  define   TEXT_DATA_CAST(x)    ((unsigned char *)x)
 #else

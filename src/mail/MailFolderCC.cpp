@@ -1,25 +1,61 @@
-/*-*- C++ -*-********************************************************
-* MailFolderCC class: handling of mail folders with c-client lib   *
-*                                                                  *
-* (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
-*                                                                  *
-* $Id$
-*******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   mail/MailFolderCC.cpp: implements MailFolderCC class
+// Purpose:     handling of mail folders with c-client lib
+// Author:      Karsten Ballüuder
+// Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (C) 1997-2000 by Karsten Ballüuder (ballueder@gmx.net)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
+/* TODO: several things are still unclear...
+
+   1. is mm_status() ever called? we never use mail_status(), but maybe
+      cclient does this internally?
+
+   2. mm_expunged() definitely shouldn't rebuild the entire listing (by
+      callling RequestUpdate) but should just remove the expunged entries from
+      the existing one
+
+   3. moreover, maybe mm_exists() doesn't need to do it neither but just add
+      the entries to the existing listing?
+
+   4. there might be problems with limiting number of messages in
+      BuildListing(), this has to be tested
+ */
 
 /*
-  Some attempt to document the update behaviour.
+   Update logic documentation:
 
-  When a callback (mm_xxxx()) thinks that the folder listing needs
-  updating, i.e. a message status changed, new messages got detected,
-  etc, it calls RequestUpdate(). This function updates the available
-  information immediately (the number of messages) and queues a
-  MailFolderCC::Event which will cause the folder listing update
-  MEvent to be sent out to the application after the current folder
-  operation is done. To update all immediately available information,
-  UpdateStatus() is used which will also generate new mail events if
-  necessary.
+   The mail folder maintains the listing containing the information about all
+   messages in the folder in m_Listing. The listing is modified only by
+   BuildListing() function or, more precisely, by OverviewHeaderEntry() called
+   from it through a number of others (partly ours, partly c-client)
+   functions. While the listing is being built, m_InListingRebuild is locked
+   and nothing else can be done!
+
+   The listing has to be rebuilt when the number of the messages in the
+   mailbox changes (either because the new messages arrived or because the
+   existing messages are expunged). In this case mm_exists is called - note
+   that it happens after mm_expunged is called one or more times in the latter
+   case.
+
+   mm_exists() deletes the current listing and any mailbox operation on this
+   folder will rebuild it the next time it is called.
+
+   So we have 3 states for the folder:
+
+   a) normal: we have a valid listing and can use it
+   b) dirty: we don't have listing, we will build it the next it is needed
+   c) busy: we're building the listing right now
+
+   The folder is created in the dirty state and transits to the normal state
+   via the busy state when it is used for the first time non trivially. A call
+   to mm_exists() puts it to the dirty state again.
  */
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -38,6 +74,7 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
+#   include "MThread.h"
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -65,15 +102,16 @@
 #include <ctype.h>   // isspace()
 
 #ifdef OS_UNIX
-#include <signal.h>
+   #include <signal.h>
 
-static void sigpipe_handler(int)
-{
-   // do nothing
-}
+   static void sigpipe_handler(int)
+   {
+      // do nothing
+   }
 #endif // OS_UNIX
 
-extern "C" {
+extern "C"
+{
    #undef LOCAL         // previously defined in other cclient headers
    #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
 }
@@ -82,8 +120,28 @@ extern "C" {
 // macros
 // ----------------------------------------------------------------------------
 
-#define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
-#define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
+// check that the folder is not in busy state - if it is, no external calls
+// are allowed
+#define CHECK_NOT_BUSY() \
+   CHECK_RET( !m_InListingRebuild->IsLocked(), "folder is busy" )
+
+#define CHECK_NOT_BUSY_RC(rc) \
+   CHECK( !m_InListingRebuild->IsLocked(), rc, "folder is busy" )
+
+// check if the folder is still available
+#define CHECK_DEAD(msg) \
+   if ( m_MailStream == NIL && !PingReopen() ) \
+   { \
+      ERRORMESSAGE((_(msg), GetName().c_str()));\
+      return;\
+   }
+
+#define CHECK_DEAD_RC(msg, rc) \
+   if ( m_MailStream == NIL && !PingReopen() )\
+   { \
+      ERRORMESSAGE((_(msg), GetName().c_str()));\
+      return rc; \
+   }
 
 // enable this as needed as it produces *lots* of outputrun
 #ifdef DEBUG_STREAMS
@@ -93,13 +151,21 @@ extern "C" {
 #endif // DEBUG/!DEBUG
 
 // ----------------------------------------------------------------------------
-// private types
+// constants
 // ----------------------------------------------------------------------------
 
-
 static const char * cclient_drivers[] =
-{ "mbx", "unix", "mmdf", "tenex" };
-#define CCLIENT_MAX_DRIVER 3
+{
+   "mbx", "unix", "mmdf", "tenex"
+};
+
+#define CCLIENT_MAX_DRIVER (sizeof(cclient_drivers)/sizeof(cclient_drivers[0]))
+
+#define NO_PROGRESS_DLG ((MProgressDialog *)1)
+
+// ----------------------------------------------------------------------------
+// private types
+// ----------------------------------------------------------------------------
 
 typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW_X *ov);
 
@@ -128,40 +194,16 @@ private:
    StreamList  m_List;
 };
 
-CCStreamCleaner::~CCStreamCleaner()
-{
-   DBGMESSAGE(("CCStreamCleaner: checking for left-over streams"));
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
 
-   if(! mApplication->IsOnline())
-   {
-      // brutally free all memory without closing stream:
-      MAILSTREAM *stream;
-      StreamList::iterator i;
-      for(i = m_List.begin(); i != m_List.end(); i++)
-      {
-         DBGMESSAGE(("CCStreamCleaner: freeing stream offline"));
-         stream = *i;
-         // copied from c-client mail.c:
-         if (stream->mailbox) fs_give ((void **) &stream->mailbox);
-         stream->sequence++;  /* invalidate sequence */
-         /* flush user flags */
-         for (int n = 0; n < NUSERFLAGS; n++)
-            if (stream->user_flags[n]) fs_give ((void **) &stream->user_flags[n]);
-         mail_free_cache (stream);  /* finally free the stream's storage */
-         /*if (!stream->use)*/ fs_give ((void **) &stream);
-      }
-   }
-   else
-   {
-      // we are online, so we can close it properly:
-      StreamList::iterator i;
-      for(i = m_List.begin(); i != m_List.end(); i++)
-      {
-         DBGMESSAGE(("CCStreamCleaner: closing stream"));
-         mail_close(*i);
-      }
-   }
-}
+extern "C"
+{
+   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov);
+   void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
+   void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
+};
 
 // ----------------------------------------------------------------------------
 // globals
@@ -173,28 +215,193 @@ static int gs_lockCclient = 0;
 /// exactly one object
 static CCStreamCleaner *gs_CCStreamCleaner = NULL;
 
+/// This allows us to temporarily redirect mm_list calls
+static void (*gs_mmListRedirect)(MAILSTREAM * stream,
+                                 char delim,
+                                 String  name,
+                                 long  attrib) = NULL;
+
+// a variable telling c-client to shut up
+static bool mm_ignore_errors = false;
+
+/// a variable disabling most events (not mm_list, mm_lsub, mm_overview_header)
+static bool mm_disable_callbacks = false;
+
+/// show cclient debug output
+#ifdef DEBUG
+static bool mm_show_debug = true;
+#else
+static bool mm_show_debug = false;
+#endif
+
+// loglevel for cclient error messages:
+static int cc_loglevel = wxLOG_Error;
+
+// ============================================================================
+// private classes
+// ============================================================================
+
 // ----------------------------------------------------------------------------
-// global functions
+// FolderListing stuff (TODO: move elsewhere)
 // ----------------------------------------------------------------------------
 
-void CC_Cleanup(void)
+class FolderListingEntryCC : public FolderListingEntry
 {
-   if ( MailFolderCC::IsInitialized() )
+public:
+   /// The folder's name.
+   virtual const String &GetName(void) const
+      { return m_Name;}
+   /// The folder's attribute.
+   virtual long GetAttribute(void) const
+      { return m_Attr; }
+   FolderListingEntryCC(const String &name, long attr)
+      : m_Name(name)
+      { m_Attr = attr; }
+private:
+   const String &m_Name;
+   long          m_Attr;
+};
+
+/** This class holds the listings of a server's folders. */
+class FolderListingCC : public FolderListing
+{
+public:
+   /// Return the delimiter character for entries in the hierarchy.
+   virtual char GetDelimiter(void) const
+      { return m_Del; }
+   /// Returns the number of entries.
+   virtual size_t CountEntries(void) const
+      { return m_list.size(); }
+   /// Returns the first entry.
+   virtual const FolderListingEntry * GetFirstEntry(iterator &i) const
+      {
+         i = m_list.begin();
+         if ( i != m_list.end() )
+            return (*i);
+         else
+            return NULL;
+      }
+   /// Returns the next entry.
+   virtual const FolderListingEntry * GetNextEntry(iterator &i) const
+      {
+         i++;
+         if ( i != m_list.end())
+            return (*i);
+         else
+            return NULL;
+      }
+   /** For our use only. */
+   void SetDelimiter(char del)
+      { m_Del = del; }
+   void Add( FolderListingEntry *entry )
+      {
+         m_list.push_back(entry);
+      }
+private:
+   char m_Del;
+   FolderListingList m_list;
+};
+
+// ----------------------------------------------------------------------------
+// Various locker classes
+// ----------------------------------------------------------------------------
+
+// lock the folder in ctor, unlock in dtor
+class MailFolderLocker
+{
+public:
+   MailFolderLocker(MailFolderCC *mf) : m_mf(mf) { m_mf->Lock(); }
+   ~MailFolderLocker() { m_mf->UnLock(); }
+
+   operator bool() const { return m_mf->IsLocked(); }
+
+private:
+   MailFolderCC *m_mf;
+};
+
+// temporarily disable (most) cclient callbacks
+class CCCallbackDisabler
+{
+public:
+   CCCallbackDisabler()
    {
-      // as c-client lib doesn't seem to think that deallocating memory is
-      // something good to do, do it at it's place...
-      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
-      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+      m_old = mm_disable_callbacks;
+      mm_disable_callbacks = true;
    }
 
-   if ( gs_CCStreamCleaner )
+   ~CCCallbackDisabler() { mm_disable_callbacks = m_old; }
+
+private:
+   bool m_old;
+};
+
+// temporarily disable error messages from cclient
+class CCErrorDisabler
+{
+public:
+   CCErrorDisabler()
    {
-      delete gs_CCStreamCleaner;
-      gs_CCStreamCleaner = NULL;
+      m_old = mm_ignore_errors;
+      mm_ignore_errors = true;
    }
 
-   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
-}
+   ~CCErrorDisabler() { mm_ignore_errors = m_old; }
+
+private:
+   bool m_old;
+};
+
+// temporarily disable callbacks and errors from cclient
+class CCAllDisabler : public CCCallbackDisabler, public CCErrorDisabler
+{
+};
+
+// temporarily change cclient log level for all messages
+class CCLogLevelSetter
+{
+public:
+   CCLogLevelSetter(int level)
+   {
+      m_level = cc_loglevel;
+      cc_loglevel = level;
+   }
+
+   ~CCLogLevelSetter() { cc_loglevel = m_level; }
+
+private:
+   int m_level;
+};
+
+// temporarily set the given as the default folder to use for cclient
+// callbacks
+class CCDefaultFolder
+{
+public:
+   CCDefaultFolder(MailFolderCC *mf)
+   {
+      m_mfOld = MailFolderCC::ms_StreamListDefaultObj;
+      MailFolderCC::ms_StreamListDefaultObj = mf;
+   }
+
+   ~CCDefaultFolder() { MailFolderCC::ms_StreamListDefaultObj = m_mfOld; }
+
+private:
+   MailFolderCC *m_mfOld;
+};
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// various MailFolderCC statics
+// ----------------------------------------------------------------------------
+
+String MailFolderCC::ms_LastCriticalFolder = "";
+
+// ----------------------------------------------------------------------------
+// functions working with IMAP specs and flags
+// ----------------------------------------------------------------------------
 
 static String GetImapFlags(int flag)
 {
@@ -215,32 +422,35 @@ static String GetImapFlags(int flag)
    return flags;
 }
 
-extern String GetImapSpec(int type, int flags,
-                          const String &name,
-                          const String &iserver,
-                          const String &login)
+/* static */
+String MailFolder::GetImapSpec(int typeOrig,
+                               int flags,
+                               const String &name,
+                               const String &iserver,
+                               const String &login)
 {
    String mboxpath;
 
    String server = iserver;
    strutil_tolower(server);
 
+   FolderType type = (FolderType)typeOrig;
+
 #ifdef USE_SSL
-   bool InitSSL(void);
+   extern bool InitSSL(void);
 
    // SSL only for NNTP/IMAP/POP:
-   if(((flags & MF_FLAGS_SSLAUTH) != 0)
-      && ! FolderTypeSupportsSSL( (FolderType) type))
+   if( (flags & MF_FLAGS_SSLAUTH) && !FolderTypeSupportsSSL(type) )
    {
       flags ^= MF_FLAGS_SSLAUTH;
-      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
+      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"),
+                     name.c_str()));
    }
 
-   if( (flags & MF_FLAGS_SSLAUTH) != 0
-       && ! InitSSL() )
-#else
+   if( (flags & MF_FLAGS_SSLAUTH) != 0 && ! InitSSL() )
+#else // !USE_SSL
    if( (flags & MF_FLAGS_SSLAUTH) != 0 )
-#endif
+#endif // USE_SSL/!USE_SSL
    {
       ERRORMESSAGE((_("SSL authentication is not available.")));
       flags ^= MF_FLAGS_SSLAUTH;
@@ -253,7 +463,7 @@ extern String GetImapSpec(int type, int flags,
       break;
 
    case MF_FILE:
-      mboxpath = strutil_expandfoldername(name, (FolderType) type);
+      mboxpath = strutil_expandfoldername(name, type);
       break;
 
    case MF_MH:
@@ -328,18 +538,86 @@ extern String GetImapSpec(int type, int flags,
    return mboxpath;
 }
 
-/*
-static
-String GetHostFromImapSpec(const String &imap)
+bool MailFolder::SpecToFolderName(const String& specification,
+                                  FolderType folderType,
+                                  String *pName)
 {
-   if(imap[0] != '{') return "";
-   String host;
-   const char *cptr = imap.c_str()+1;
-   while(*cptr && *cptr != '/' && *cptr != '}')
-      host << *cptr++;
-   return host;
+   CHECK( pName, FALSE, "NULL name in MailFolderCC::SpecToFolderName" );
+
+   String& name = *pName;
+   switch ( folderType )
+   {
+   case MF_MH:
+   {
+      static const int lenPrefix = 4;  // strlen("#mh/")
+      if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
+      {
+         FAIL_MSG("invalid MH folder specification - no #mh/ prefix");
+
+         return FALSE;
+      }
+
+      // make sure that the folder name does not start with s;ash
+      const char *start = specification.c_str() + lenPrefix;
+      while ( wxIsPathSeparator(*start) )
+      {
+         start++;
+      }
+
+      name = start;
+   }
+   break;
+
+   case MF_NNTP:
+   case MF_NEWS:
+   {
+      int startIndex = wxNOT_FOUND;
+
+      // Why this code? The spec is {hostname/nntp} not
+      // {nntp/hostname}, I leave it in for now, but add correct(?)
+      // code underneath:
+      if ( specification[0u] == '{' )
+      {
+         wxString protocol(specification.c_str() + 1, 4);
+         protocol.MakeLower();
+         if ( protocol == "nntp" || protocol == "news" )
+         {
+            startIndex = specification.Find('}');
+         }
+         //else: leave it to be wxNOT_FOUND
+      }
+      if ( startIndex == wxNOT_FOUND )
+      {
+         wxString lowercase = specification;
+         lowercase.MakeLower();
+         if( lowercase.Contains("/nntp") ||
+             lowercase.Contains("/news") )
+         {
+            startIndex = specification.Find('}');
+         }
+      }
+
+      if ( startIndex == wxNOT_FOUND )
+      {
+         FAIL_MSG("invalid folder specification - no {nntp/...}");
+
+         return FALSE;
+      }
+
+      name = specification.c_str() + (size_t)startIndex + 1;
+   }
+   break;
+   case MF_IMAP:
+      name = specification.AfterFirst('}');
+      return TRUE;
+   default:
+      FAIL_MSG("not done yet");
+      return FALSE;
+   }
+
+   return TRUE;
 }
-*/
+
 // This does not return driver prefixes such as #mh/ which are
 // considered part of the pathname for now.
 static
@@ -368,71 +646,15 @@ String GetPathFromImapSpec(const String &imap)
       return ""; // error
 }
 
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-/* This allows us to temporarily redirect mm_list calls: */
-static void (*gs_mmListRedirect)(MAILSTREAM * stream,
-                                 char delim,
-                                 String  name,
-                                 long  attrib) = NULL;
-
-/*
-  Small function to check if the mailstream has \inferiors flag set or
-  not, i.e. if it is a mailbox or a directory on the server.
-*/
-
-static int gs_HasInferiorsFlag;
-
-static void HasInferiorsMMList(MAILSTREAM *stream,
-                               char delim,
-                               String name,
-                               long attrib)
-{
-   gs_HasInferiorsFlag = ((attrib & LATT_NOINFERIORS) == 0);
-}
-
-/* static */
-bool
-MailFolderCC::HasInferiors(const String &imapSpec,
-                           const String &login,
-                           const String &passwd)
-{
-   // We lock the complete c-client code as we need to immediately
-   // redirect the mm_list() callback to tell us what we want to know.
-
-   MCclientLocker lock;
-
-   SetLoginData(login, passwd);
-   MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
-                                      OP_HALFOPEN);
-   ProcessEventQueue();
-   if(mailStream != NIL)
-   {
-     gs_HasInferiorsFlag = -1;
-     gs_mmListRedirect = HasInferiorsMMList;
-     mail_list (mailStream, NULL, (char *) imapSpec.c_str());
-     gs_mmListRedirect = NULL;
-     /* This does happen for for folders where the server does not know
-        if they have inferiors, i.e. if they don't exist yet.
-        I.e. -1 is an unknown/undefined status
-        ASSERT(gs_HasInferiorsFlag != -1);
-     */
-     mail_close(mailStream);
-   }
-   return gs_HasInferiorsFlag == 1;
-}
+// ----------------------------------------------------------------------------
+// misc helpers
+// ----------------------------------------------------------------------------
 
 /*
  * Small function to translate c-client status flags into ours.
  */
-static
-MailFolder::MessageStatus
-GetMsgStatus(MESSAGECACHE *elt)
+static MailFolder::MessageStatus GetMsgStatus(MESSAGECACHE *elt)
 {
-   ASSERT(elt);
    int status = MailFolder::MSG_STAT_NONE;
    if(elt->recent)   status |= MailFolder::MSG_STAT_RECENT;
    if(elt->seen)     status |= MailFolder::MSG_STAT_SEEN;
@@ -441,6 +663,10 @@ GetMsgStatus(MESSAGECACHE *elt)
    if(elt->deleted)  status |= MailFolder::MSG_STAT_DELETED;
    return (MailFolder::MessageStatus) status;
 }
+
+// ----------------------------------------------------------------------------
+// header decoding
+// ----------------------------------------------------------------------------
 
 /*
    See RFC 2047 for the description of the encodings used in the mail headers.
@@ -588,71 +814,10 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
    return out;
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCC
+// ----------------------------------------------------------------------------
 
-class FolderListingEntryCC : public FolderListingEntry
-{
-public:
-   /// The folder's name.
-   virtual const String &GetName(void) const
-      { return m_Name;}
-   /// The folder's attribute.
-   virtual long GetAttribute(void) const
-      { return m_Attr; }
-   FolderListingEntryCC(const String &name, long attr)
-      : m_Name(name)
-      { m_Attr = attr; }
-private:
-   const String &m_Name;
-   long          m_Attr;
-};
-
-
-/** This class holds the listings of a server's folders. */
-class FolderListingCC : public FolderListing
-{
-public:
-   /// Return the delimiter character for entries in the hierarchy.
-   virtual char GetDelimiter(void) const
-      { return m_Del; }
-   /// Returns the number of entries.
-   virtual size_t CountEntries(void) const
-      { return m_list.size(); }
-   /// Returns the first entry.
-   virtual const FolderListingEntry * GetFirstEntry(iterator &i) const
-      {
-         i = m_list.begin();
-         if ( i != m_list.end() )
-            return (*i);
-         else
-            return NULL;
-      }
-   /// Returns the next entry.
-   virtual const FolderListingEntry * GetNextEntry(iterator &i) const
-      {
-         i++;
-         if ( i != m_list.end())
-            return (*i);
-         else
-            return NULL;
-      }
-   /** For our use only. */
-   void SetDelimiter(char del)
-      { m_Del = del; }
-   void Add( FolderListingEntry *entry )
-      {
-         m_list.push_back(entry);
-      }
-private:
-   char m_Del;
-   FolderListingList m_list;
-};
-
-
-
-
-/*----------------------------------------------------------------------------------------
- * MailFolderCC code
- *---------------------------------------------------------------------------------------*/
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
 
@@ -665,31 +830,6 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
    MailFolderCC::MF_pwd = pw;
 }
 
-// a variable telling c-client to shut up
-static bool mm_ignore_errors = false;
-/// a variable disabling all events
-static bool mm_disable_callbacks = false;
-/// show cclient debug output
-#ifdef DEBUG
-static bool mm_show_debug = true;
-#else
-static bool mm_show_debug = false;
-#endif
-
-
-// be quiet
-static inline void CCQuiet(bool disableCallbacks = false)
-{
-   mm_ignore_errors = true;
-   if(disableCallbacks) mm_disable_callbacks = true;
-}
-
-// normal logging
-static inline void CCVerbose(void)
-{
-   mm_ignore_errors = mm_disable_callbacks = false;
-}
-
 /* static */
 void
 MailFolderCC::UpdateCClientConfig()
@@ -697,19 +837,9 @@ MailFolderCC::UpdateCClientConfig()
    mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT) != 0;
 }
 
-// loglevel for cclient error messages:
-static int cc_loglevel = wxLOG_Error;
-
-static int CC_GetLogLevel(void) { return cc_loglevel; }
-static int CC_SetLogLevel(int arg)
-{
-   MCclientLocker lock;
-   int ccl = cc_loglevel;
-   cc_loglevel =  arg;
-   return ccl;
-}
-
-
+// ----------------------------------------------------------------------------
+// MailFolderCC construction/opening
+// ----------------------------------------------------------------------------
 
 MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &path,
@@ -717,14 +847,13 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &server,
                            String const &login,
                            String const &password)
-   : MailFolderCmn()
+            : MailFolderCmn()
 {
    m_Profile = profile;
    if(m_Profile)
       m_Profile->IncRef();
    else
       m_Profile = Profile::CreateEmptyProfile();
-   UpdateConfig();
 
    if(! ms_CClientInitialisedFlag)
       CClientInit();
@@ -732,9 +861,13 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    if(GetType() == MF_FILE)
       m_ImapSpec = strutil_expandpath(path);
    else
-         m_ImapSpec = path;
+      m_ImapSpec = path;
    m_Login = login;
    m_Password = password;
+
+   // do this at the very end as it calls RequestUpdate() and so anything may
+   // happen from now on
+   UpdateConfig();
 }
 
 void
@@ -748,17 +881,15 @@ MailFolderCC::Create(int typeAndFlags)
 
    SetRetrievalLimit(0); // no limit
    m_nMessages = 0;
-   m_nRecent = 0;
+   m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
-   m_OldNumOfMessages = 0;
    m_Listing = NULL;
-   m_NeedFreshListing = true;
+
+   // currently not used, but might be in the future
    m_ListingFrozen = false;
-   m_ExpungeRequested = FALSE;
+   m_GotNewMessages = false;
    m_FirstListing = true;
-   m_UpdateNeeded = true;
-   m_PingReopenSemaphore = false;
-   m_BuildListingSemaphore = false;
+
    m_FolderListing = NULL;
    m_InCritical = false;
    m_ASMailFolder = NULL;
@@ -768,18 +899,18 @@ MailFolderCC::Create(int typeAndFlags)
    SetType(type);
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
-#ifdef USE_THREADS
+
    m_Mutex = new MMutex;
-#else
-   m_Mutex = false;
-#endif
+   m_PingReopenSemaphore = new MMutex;
+   m_InListingRebuild = new MMutex;
 }
 
 MailFolderCC::~MailFolderCC()
 {
    PreClose();
 
-   CCQuiet(true); // disable all callbacks!
+   CCAllDisabler ccDis;
+
    Close();
 
    ASSERT(m_SearchMessagesFound == NULL);
@@ -792,20 +923,15 @@ MailFolderCC::~MailFolderCC()
    delete m_Mutex;
 #endif
 
-   if( m_Listing )
-   {
-      m_Listing->DecRef();
-      m_Listing = NULL;
-   }
-   if(m_Profile)
-      m_Profile->DecRef();
+   SafeDecRef(m_Listing);
+   SafeDecRef(m_Profile);
 }
-
 
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
 */
+
 /* static */
 MailFolderCC *
 MailFolderCC::OpenFolder(int typeAndFlags,
@@ -819,7 +945,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 {
    CClientInit();
 
-   MailFolderCC *mf;
    String mboxpath;
 
    ASSERT(profile);
@@ -828,10 +953,10 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    int type = GetFolderType(typeAndFlags);
 
    String login = loginGiven;
-   mboxpath = ::GetImapSpec(type, flags, name, server, login);
+   mboxpath = MailFolder::GetImapSpec(type, flags, name, server, login);
 
-   //FIXME: This should somehow be done in MailFolder.cc
-   mf = FindFolder(mboxpath,login);
+   //FIXME: This should somehow be done in MailFolder.cpp
+   MailFolderCC *mf = FindFolder(mboxpath,login);
    if(mf)
    {
       mf->IncRef();
@@ -863,14 +988,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       userEnteredPwd = true;
    }
 
-/* DEBUG only to test
-  if(type == MF_IMAP)
-   {
-      bool inferiors = HasInferiors(mboxpath, login, password);
-   }
-*/
-   mf = new
-      MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
+   mf = new MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
@@ -906,17 +1024,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
          }
       }
    }
-
-#if 0
-   // check if our folder flags are suitable or not
-   if( GetFolderType(typeAndFlags) == MF_IMAP )
-   {
-      Ticket ticket = ASMailFolder::GetTicket();
-      ListFolders(NULL /* asmf */,
-                  mboxpath, FALSE, "" /* reference */,
-                  NULL /* userdata */, ticket/* Ticket */);
-   }
-#endif
 
    // try to really open it
    if ( ok )
@@ -957,9 +1064,225 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       }
    }
 
-   //FIXME: is this really needed if(mf) mf->PingReopen();
    return mf;
 }
+
+bool MailFolderCC::HalfOpen()
+{
+   // well, we're not going to tell the user we're half opening it...
+   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+
+   if( FolderTypeHasUserName(GetType()) )
+      SetLoginData(m_Login, m_Password);
+
+   MCclientLocker lock;
+
+   {
+      CCDefaultFolder def(this);
+      m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
+                               (mm_show_debug ? OP_DEBUG : NIL)|OP_HALFOPEN);
+   }
+
+   if ( !m_MailStream )
+      return false;
+
+   AddToMap(m_MailStream);
+
+   return true;
+}
+
+bool
+MailFolderCC::Open(void)
+{
+   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+
+
+   /** Now, we apply the very latest c-client timeout values, in case
+       they have changed.
+   */
+   UpdateTimeoutValues();
+
+   if( FolderTypeHasUserName(GetType()) )
+      SetLoginData(m_Login, m_Password);
+
+   // for files, check whether mailbox is locked, c-client library is
+   // to dumb to handle this properly
+   if ( GetType() == MF_FILE
+#ifdef OS_UNIX
+         || GetType() == MF_INBOX
+#endif
+      )
+      {
+         String lockfile;
+         if(GetType() == MF_FILE)
+            lockfile = m_ImapSpec;
+#ifdef OS_UNIX
+         else // INBOX
+         {
+            // get INBOX path name
+            {
+               MCclientLocker lock;
+               lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+               if(lockfile.IsEmpty()) // another c-client stupidity
+                  lockfile = (char *) sysinbox();
+            }
+         }
+#endif
+      lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
+      lockfile = wxFindFirstFile(lockfile, wxFILE);
+      while ( !lockfile.IsEmpty() )
+      {
+         FILE *fp = fopen(lockfile,"r");
+         if(fp) // outch, someone has a lock
+         {
+            fclose(fp);
+            String msg;
+            msg.Printf(_("Found lock-file:\n"
+                       "'%s'\n"
+                       "Some other process may be using the folder.\n"
+                       "Shall I forcefully override the lock?"),
+                       lockfile.c_str());
+            if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
+            {
+               int success = remove(lockfile);
+               if(success != 0) // error!
+                  MDialog_Message(
+                     _("Could not remove lock-file.\n"
+                     "Other process may have terminated.\n"
+                     "Will try to continue as normal."));
+            }
+            else
+            {
+               MDialog_Message(_("Cannot open the folder while "
+                                 "lock-file exists."));
+               STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
+               return false;
+            }
+         }
+         lockfile = wxFindNextFile();
+      }
+   }
+
+   {
+      MCclientLocker lock;
+
+      // create the mailbox if it doesn't exist yet
+      bool exists = TRUE;
+      bool alreadyTriedToCreate = FALSE;
+      if ( GetType() == MF_FILE )
+      {
+         exists = wxFileExists(m_ImapSpec);
+      }
+      else if ( GetType() == MF_MH )
+      {
+         // construct the filename from MH folder name
+         String path;
+         path << InitializeMH()
+              << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
+         exists = wxFileExists(path);
+      }
+      else
+      {
+         // for all other types we assume that it doesn't exist, as
+         // IMAP servers allow us to open a non-existing mailbox but
+         // not to write to it, so we force a creation attempt
+         CCErrorDisabler noErrors;
+         mail_create(NIL, (char *)m_ImapSpec.c_str());
+         alreadyTriedToCreate = TRUE;
+      }
+
+      // Make sure that all events to unknown folder go to us
+      CCDefaultFolder def(this);
+
+      // if the file folder doesn't exist, we should create it first
+      if ( !exists
+           && (GetType() == MF_FILE || GetType() == MF_MH))
+      {
+         // This little hack makes it root (uid 0) safe and allows us
+         // to choose the file format, too:
+         String tmp;
+         if(GetType() == MF_FILE)
+         {
+            long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
+            if ( format < 0  || (size_t)format > CCLIENT_MAX_DRIVER )
+            {
+               FAIL_MSG( "invalid mailbox format" );
+               format = 0;
+            }
+
+            tmp = "#driver.";
+            tmp << cclient_drivers[format] << '/';
+               STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
+                           GetName().c_str(),
+                           cclient_drivers[format]
+                  ));
+         }
+         else
+            tmp = "#driver.mh/";
+         tmp += m_ImapSpec;
+         mail_create(NIL, (char *)tmp.c_str());
+         //mail_create(NIL, (char *)m_ImapSpec.c_str());
+         alreadyTriedToCreate = TRUE;
+      }
+
+      // first try, don't log errors (except in debug mode)
+      {
+#ifndef DEBUG
+         CCErrorDisabler noErrors;
+#endif // DEBUG
+         m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
+                                  mm_show_debug ? OP_DEBUG : NIL);
+      }
+
+      // try to create it if hadn't tried yet
+      if ( !m_MailStream && !alreadyTriedToCreate )
+      {
+         mail_create(NIL, (char *)m_ImapSpec.c_str());
+         m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
+                                  mm_show_debug ? OP_DEBUG : NIL);
+      }
+   }
+
+   if ( m_MailStream == NIL )
+   {
+      STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
+      return false;
+   }
+
+   AddToMap(m_MailStream); // now we are known
+
+   // listing already built
+
+   // for some folders (notably the IMAP ones), mail_open() will return a
+   // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
+   // really want to open it here and not halfopen, this is an error for us
+   ASSERT(m_MailStream);
+   if ( m_MailStream->halfopen )
+   {
+      MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
+
+      mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
+
+      RemoveFromMap();
+      return false;
+   }
+   else // folder really opened
+   {
+      STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
+      PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+      return true;   // success
+   }
+}
+
+bool
+MailFolderCC::IsAlive() const
+{
+   return m_MailStream != NULL;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolderCC timeouts
+// ----------------------------------------------------------------------------
 
 void
 MailFolderCC::ApplyTimeoutValues(void)
@@ -1010,217 +1333,100 @@ MailFolderCC::UpdateTimeoutValues(void)
    ApplyTimeoutValues();
 }
 
+// ----------------------------------------------------------------------------
+// Working with the list of all open mailboxes
+// ----------------------------------------------------------------------------
 
-bool MailFolderCC::HalfOpen()
+StreamConnectionList MailFolderCC::ms_StreamList(FALSE);
+
+bool MailFolderCC::ms_CClientInitialisedFlag = false;
+
+MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
+
+/// adds this object to Map
+void
+MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
-   // well, we're not going to tell the user we're half opening it...
-   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
+   CHECK_STREAM_LIST();
 
-   if( FolderTypeHasUserName(GetType()) )
-      SetLoginData(m_Login, m_Password);
+   StreamConnection  *conn = new StreamConnection;
+   conn->folder = (MailFolderCC *) this;
+   conn->stream = stream;
+   conn->name = m_ImapSpec;
+   conn->login = m_Login;
+   ms_StreamList.push_front(conn);
 
-   MCclientLocker lock;
-   SetDefaultObj();
-   CCVerbose();
-   m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
-                            (mm_show_debug ? OP_DEBUG : NIL)|OP_HALFOPEN);
-   ProcessEventQueue();
-   SetDefaultObj(false);
-
-   if ( !m_MailStream )
-      return false;
-
-   AddToMap(m_MailStream);
-
-   return true;
+   CHECK_STREAM_LIST();
 }
 
+/* static */
 bool
-MailFolderCC::Open(void)
+MailFolderCC::CanExit(String *which)
 {
-   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+   CHECK_STREAM_LIST();
 
-
-   /** Now, we apply the very latest c-client timeout values, in case
-       they have changed.
-   */
-   UpdateTimeoutValues();
-
-   if( FolderTypeHasUserName(GetType()) )
-      SetLoginData(m_Login, m_Password);
-
-   // for files, check whether mailbox is locked, c-client library is
-   // to dumb to handle this properly
-   if(GetType() == MF_FILE
-#ifdef OS_UNIX
-         || GetType() == MF_INBOX
-#endif
-         )
-      {
-         String lockfile;
-         if(GetType() == MF_FILE)
-            lockfile = m_ImapSpec;
-#ifdef OS_UNIX
-         else // INBOX
-         {
-            // get INBOX path name
-            {
-               MCclientLocker lock;
-               lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
-               if(lockfile.IsEmpty()) // another c-client stupidity
-                  lockfile = (char *) sysinbox();
-               ProcessEventQueue();
-            }
-         }
-#endif
-      lockfile << ".lock*"; //FIXME: is this fine for MS-Win?
-      lockfile = wxFindFirstFile(lockfile, wxFILE);
-      while ( !lockfile.IsEmpty() )
-      {
-         FILE *fp = fopen(lockfile,"r");
-         if(fp) // outch, someone has a lock
-         {
-            fclose(fp);
-            String msg;
-            msg.Printf(_("Found lock-file:\n"
-                       "'%s'\n"
-                       "Some other process may be using the folder.\n"
-                       "Shall I forcefully override the lock?"),
-                       lockfile.c_str());
-            if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
-            {
-               int success = remove(lockfile);
-               if(success != 0) // error!
-                  MDialog_Message(
-                     _("Could not remove lock-file.\n"
-                     "Other process may have terminated.\n"
-                     "Will try to continue as normal."));
-            }
-            else
-            {
-               MDialog_Message(_("Cannot open the folder while "
-                                 "lock-file exists."));
-               STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
-               return false;
-            }
-         }
-         lockfile = wxFindNextFile();
-      }
-   }
-
-#ifndef DEBUG
-   CCQuiet(); // first try, don't log errors (except in debug mode)
-#endif // DEBUG
-
+   bool canExit = true;
+   *which = "";
+   StreamConnectionList::iterator i;
+   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
    {
-      MCclientLocker lock;
-
-      // create the mailbox if it doesn't exist yet
-      bool exists = TRUE;
-      bool alreadyTriedToCreate = FALSE;
-      if ( GetType() == MF_FILE )
+      if( (*i)->folder->InCritical() )
       {
-         exists = wxFileExists(m_ImapSpec);
+         canExit = false;
+         *which << (*i)->folder->GetName() << '\n';
       }
-      else if ( GetType() == MF_MH )
-      {
-         // construct the filename from MH folder name
-         String path;
-         path << InitializeMH()
-              << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
-         exists = wxFileExists(path);
-      }
-      else
-      {
-         // for all other types we assume that it doesn't exist, as
-         // IMAP servers allow us to open a non-existing mailbox but
-         // not to write to it, so we force a creation attempt
-         CCQuiet(); // always try creation
-         mail_create(NIL, (char *)m_ImapSpec.c_str());
-         alreadyTriedToCreate = TRUE;
-         CCVerbose();
-      }
-
-      // Make sure the event handling code knows us:
-      SetDefaultObj();
-
-      // if the file folder doesn't exist, we should create it first
-      if ( !exists
-           && (GetType() == MF_FILE || GetType() == MF_MH))
-      {
-         // This little hack makes it root (uid 0) safe and allows us
-         // to choose the file format, too:
-         String tmp;
-         if(GetType() == MF_FILE)
-         {
-            long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
-            ASSERT(! (format < 0  || format > CCLIENT_MAX_DRIVER));
-            if(format < 0  || format > CCLIENT_MAX_DRIVER)
-               format = 0;
-            tmp = "#driver.";
-            tmp << cclient_drivers[format] << '/';
-               STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
-                           GetName().c_str(),
-                           cclient_drivers[format]
-                  ));
-         }
-         else
-            tmp = "#driver.mh/";
-         tmp += m_ImapSpec;
-         mail_create(NIL, (char *)tmp.c_str());
-         //mail_create(NIL, (char *)m_ImapSpec.c_str());
-         alreadyTriedToCreate = TRUE;
-      }
-
-      // first try, don't log errors (except in debug mode)
-      m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
-                               mm_show_debug ? OP_DEBUG : NIL);
-
-      // try to create it if hadn't tried yet
-      if ( !m_MailStream && !alreadyTriedToCreate )
-      {
-         CCVerbose();
-         mail_create(NIL, (char *)m_ImapSpec.c_str());
-         m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
-                                  mm_show_debug ? OP_DEBUG : NIL);
-      }
-
-      ProcessEventQueue();
-      SetDefaultObj(false);
    }
 
-   if ( m_MailStream == NIL )
-   {
-      STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
-      return false;
-   }
-
-   AddToMap(m_MailStream); // now we are known
-   ProcessEventQueue();
-
-   // listing already built
-
-   // for some folders (notably the IMAP ones), mail_open() will return a
-   // NULL pointer but set halfopen flag if it couldn't be SELECTed - as we
-   // really want to open it here and not halfopen, this is an error for us
-   ASSERT(m_MailStream);
-   if ( m_MailStream->halfopen )
-   {
-      MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
-
-      mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
-
-      RemoveFromMap();
-      return false;
-   }
-   else // folder really opened
-   {
-      STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
-      PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
-      return true;   // success
-   }
+   return canExit;
 }
 
+/// lookup object in Map
+/* static */ MailFolderCC *
+MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
+{
+   CHECK_STREAM_LIST();
+
+   StreamConnectionList::iterator i;
+   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   {
+      StreamConnection *conn = *i;
+      if( conn->stream == stream )
+         return conn->folder;
+   }
+
+   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
+      for e.g. mail_status(), that is difficult to handle here, we
+      must compare the name parameter which might not be 100%
+      identical, but we can check the hostname for identity and the
+      path. However, that seems a bit far-fetched for now, so I just
+      make sure that ms_StreamListDefaultObj gets set before any call to
+      mail_status(). If that doesn't work, we need to parse the name
+      string for hostname, portnumber and path and compare these.
+      //FIXME: This might be an issue for MT code.
+   */
+   if(name)
+   {
+      for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+      {
+         StreamConnection *conn = *i;
+         if( conn->name == name )
+            return conn->folder;
+      }
+   }
+   if(ms_StreamListDefaultObj)
+   {
+      LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
+      return ms_StreamListDefaultObj;
+   }
+
+   FAIL_MSG("Cannot find mailbox for callback!");
+
+   return NULL;
+}
+
+
+/* static */
 MailFolderCC *
 MailFolderCC::FindFolder(String const &path, String const &login)
 {
@@ -1244,10 +1450,76 @@ MailFolderCC::FindFolder(String const &path, String const &login)
    return NULL;
 }
 
+/// remove this object from Map
+void
+MailFolderCC::RemoveFromMap(void) const
+{
+   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
+   CHECK_STREAM_LIST();
+
+   StreamConnectionList::iterator i;
+   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   {
+      if( (*i)->folder == this )
+      {
+         StreamConnection *conn = *i;
+         delete conn;
+         ms_StreamList.erase(i);
+
+         break;
+      }
+   }
+
+   CHECK_STREAM_LIST();
+
+   if( ms_StreamListDefaultObj == this )
+   {
+      // no more
+      ms_StreamListDefaultObj = NULL;
+   }
+}
+
+
+/// Gets first mailfolder in map.
+/* static */
+MailFolderCC *
+MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
+{
+   CHECK_STREAM_LIST();
+
+   i = ms_StreamList.begin();
+   if( i != ms_StreamList.end())
+      return (**i).folder;
+   else
+      return NULL;
+}
+
+/// Gets next mailfolder in map.
+/* static */
+MailFolderCC *
+MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
+{
+   CHECK_STREAM_LIST();
+
+   ASSERT( i != ms_StreamList.end());
+   DBGMESSAGE(( i.Debug() ));
+   i++;
+   DBGMESSAGE(( i.Debug() ));
+   if( i != ms_StreamList.end())
+      return (**i).folder;
+   else
+      return NULL;
+}
+
+
+// ----------------------------------------------------------------------------
+// MailFolderCC pinging
+// ----------------------------------------------------------------------------
+
 void
 MailFolderCC::Checkpoint(void)
 {
-   if(m_MailStream == NULL)
+   if ( m_MailStream == NULL )
      return; // nothing we can do anymore
 
    // nothing to do for halfopened folders (and doing CHECK on a half opened
@@ -1267,73 +1539,86 @@ MailFolderCC::Checkpoint(void)
    }
 
    DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
-   if(NeedsNetwork() && ! mApplication->IsOnline())
+   if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
-      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
+      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"),
+                   GetName().c_str()));
       return;
    }
-   if(Lock())
+
+   MailFolderLocker lock(this);
+   if ( lock )
    {
-     mail_check(m_MailStream); // update flags, etc, .newsrc
-     UnLock();
-     ProcessEventQueue();
+      mail_check(m_MailStream); // update flags, etc, .newsrc
    }
 }
 
 bool
-MailFolderCC::PingReopen(void) const
+MailFolderCC::PingReopen(void)
 {
    DBGMESSAGE(("MailFolderCC::PingReopen() on Folder %s.", GetName().c_str()));
-   if(m_PingReopenSemaphore)
+
+   bool rc = false;
+
+   MailFolderLocker lockFolder(this);
+   if ( lockFolder )
    {
-      DBGMESSAGE(("MailFolderCC::PingReopen() avoiding recursion!"));
-      return false;  // or would true be better?
-   }
+      MLocker lockPing(m_PingReopenSemaphore);
+      bool rc = true;
 
-   // just to circumvene the "const":
-   MailFolderCC *t = (MailFolderCC *)this;
-
-   t->m_PingReopenSemaphore = true;
-   bool rc = true;
-
-   String msg;
-   msg.Printf(_("Dial-Up network is down.\n"
-                "Do you want to try and check folder '%s' anyway?"), GetName().c_str());
-   if(NeedsNetwork()
-      && ! mApplication->IsOnline()
-      && ! MDialog_YesNoDialog(msg,
-                               NULL, MDIALOG_YESNOTITLE,
-                               false, GetName()+"/NoNetPingAnyway"))
-   {
-      ((MailFolderCC *)this)->Close(); // now folder is dead
-      return false;
-   }
-
-
-   if(! m_MailStream || ! mail_ping(m_MailStream))
-   {
-      if(m_MailStream)
-         ProcessEventQueue(); // flush queue
-      RemoveFromMap(); // will be added again by Open()
-      STATUSMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
-                  GetName().c_str()));
-      rc = t->Open();
-      if(rc == false)
+      // This is terribly inefficient to do, but needed for some sick
+      // POP3 servers which don't report new mail otherwise
+      if( (m_FolderFlags & MF_FLAGS_REOPENONPING)
+          // c-client 4.7-bug: MH folders don't immediately notice new
+          // messages:
+          || GetType() == MF_MH )
       {
-         ERRORMESSAGE((_("Re-opening closed folder '%s' failed."),GetName().c_str()));
-         t->m_MailStream = NIL;
+         DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
+                     GetName().c_str()));
+         Close();
+      }
+
+      if( NeedsNetwork() && ! mApplication->IsOnline() &&
+          !MDialog_YesNoDialog
+           (
+            wxString::Format
+            (
+               _("Dial-Up network is down.\n"
+                 "Do you want to try and check folder '%s' anyway?"),
+               GetName().c_str()
+            ),
+            NULL,
+            MDIALOG_YESNOTITLE,
+            false,
+            GetName()+"/NoNetPingAnyway")
+        )
+      {
+         Close(); // now folder is dead
+
+         return false;
+      }
+
+      if ( !m_MailStream || !mail_ping(m_MailStream) )
+      {
+         RemoveFromMap(); // will be added again by Open()
+         STATUSMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
+                        GetName().c_str()));
+
+         rc = Open();
+         if( !rc )
+         {
+            ERRORMESSAGE((_("Re-opening closed folder '%s' failed."), GetName().c_str()));
+            m_MailStream = NIL;
+         }
+      }
+
+      if ( m_MailStream )
+      {
+         rc = true;
+         LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."),
+                     GetName().c_str()));
       }
    }
-   if(m_MailStream)
-   {
-      ProcessEventQueue();
-      rc = true;
-      LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."),
-                  GetName().c_str()));
-   }
-   else
-      rc = false;
-   t->m_PingReopenSemaphore = false;
 
    return rc;
 }
@@ -1346,18 +1631,30 @@ MailFolderCC::PingReopenAll(bool fullPing)
 
    CHECK_STREAM_LIST();
 
-   /* Ping() might close/reopen a mailfolder, which would invalidate
-      the cursor, so the iterating cursor points to the next element */
-   for ( StreamConnectionList::iterator j = ms_StreamList.begin();
-         j != ms_StreamList.end(); )
+   /* Ping() might close/reopen a mailfolder, which means that some folder we
+      had already pinged might be readded to the list, so we have to make a
+      copy of the list before iterating
+    */
+   size_t count = ms_StreamList.size();
+   StreamConnection **connections = new StreamConnection *[count];
+
+   size_t n = 0;
+   for ( StreamConnectionList::iterator i = ms_StreamList.begin();
+         i != ms_StreamList.end();
+         i++ )
    {
-      StreamConnectionList::iterator i = j;
-      ++j;
-      StreamConnection *conn = *i;
-      MailFolderCC *mf = conn->folder;
+      connections[n++] = *i;
+   }
+
+   for ( n = 0; n < count; n++ )
+   {
+      MailFolderCC *mf = connections[n]->folder;
 
       rc &= fullPing ? mf->PingReopen() : mf->Ping();
    }
+
+   delete [] connections;
+
    return rc;
 }
 
@@ -1387,53 +1684,29 @@ MailFolderCC::Ping(void)
 
    bool rc = FALSE;
 
-   if(Lock())
+   CCLogLevelSetter logLevel(M_LOG_WINONLY); // TODO: why?
+
+   rc = PingReopen();
+
+   if ( CountMessages() != count )
+      RequestUpdate();
+
+#if 0
+   // Check if we want to collect all mail from this folder:
+   if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
    {
-      int ccl = CC_SetLogLevel(M_LOG_WINONLY);
-      // This is terribly inefficient to do, but needed for some sick
-      // POP3 servers.
-      if( (m_FolderFlags & MF_FLAGS_REOPENONPING)
-          // c-client 4.7-bug: MH folders don't immediately notice new
-          // messages:
-          || GetType() == MF_MH)
-      {
-         DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
-                     GetName().c_str()));
-         Close();
-      }
-
-      if(PingReopen())
-      {
-         ASSERT(m_MailStream);
-         rc = TRUE;
-         if(! mail_ping(m_MailStream))
-            rc = FALSE;
-         //mail_check(m_MailStream); // update flags, etc, .newsrc
-         UnLock();
-         ProcessEventQueue();
-         Lock();
-      }
-
-      CC_SetLogLevel(ccl);
-      if(CountMessages() != count)
-         RequestUpdate();
-      UnLock();
-      ProcessEventQueue();
-
-      // Check if we want to collect all mail from this folder:
-      if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
-      {
-         // this triggers the mail collection code
-         HeaderInfoList *hil = GetHeaders();
-         hil->DecRef();
-      }
+      // this triggers the mail collection code
+      HeaderInfoList *hil = GetHeaders();
+      hil->DecRef();
    }
-   else
-   {
-      ASSERT_MSG(0,"Ping() called on locked folder");
-   }
+#endif // 0
+
    return rc;
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCC closing
+// ----------------------------------------------------------------------------
 
 void
 MailFolderCC::Close()
@@ -1443,15 +1716,8 @@ MailFolderCC::Close()
      THE OBJECT *WILL* DISAPPEAR!
    */
 
-   // can cause references to this folder, cannot be allowd:
-//   UpdateStatus(); // send last status event before closing
-//   ProcessEventQueue();  //FIXMe: is this safe or not?
-//   MEventManager::DispatchPending();
+   CCAllDisabler no;
 
-   CCQuiet(true); // disable all callbacks!
-   // We cannot run ProcessEventQueue() here as we must not allow any
-   // Message to be created from this stream. If we miss an event -
-   // that's a pity.
    if( m_MailStream )
    {
       if(!NeedsNetwork() || mApplication->IsOnline())
@@ -1468,55 +1734,35 @@ MailFolderCC::Close()
          gs_CCStreamCleaner->Add(m_MailStream); // delay closing
       m_MailStream = NIL;
    }
-   CCVerbose();
 }
+
+// ----------------------------------------------------------------------------
+// MailFolderCC locking
+// ----------------------------------------------------------------------------
 
 bool
 MailFolderCC::Lock(void) const
 {
-#ifdef USE_THREADS
    ((MailFolderCC *)this)->m_Mutex->Lock();
+
    return true;
-#else
-   if(!m_Mutex)
-   {
-      ((MailFolderCC *)this)->m_Mutex = true;
-      return true;
-   }
-   else
-   {
-#ifdef EXPERIMENTAL_log_callbacks
-      printf("**********Attempt to lock locked folder\n");        // FIXME
-      //mm_log("Attempt to lock locked folder.", 0, (MailFolderCC *)this);
-#endif
-      return false;
-   }
-#endif
 }
 
 bool
 MailFolderCC::IsLocked(void) const
 {
-#ifdef USE_THREADS
    return m_Mutex->IsLocked();
-#else
-   return m_Mutex;
-#endif
 }
 
 void
 MailFolderCC::UnLock(void) const
 {
-#ifdef USE_THREADS
    ((MailFolderCC *)this)->m_Mutex->Unlock();
-#else
-   ASSERT_MSG(m_Mutex, "Attempt to unlock unlocked folder.");
-   ((MailFolderCC *)this)->m_Mutex = false;
-#endif
 }
 
-
-
+// ----------------------------------------------------------------------------
+// Adding and removing (expunging) messages
+// ----------------------------------------------------------------------------
 
 bool
 MailFolderCC::AppendMessage(String const &msg, bool update)
@@ -1526,10 +1772,8 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
    STRING str;
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
-   if(update) ProcessEventQueue();
 
-   bool rc = mail_append(
-      m_MailStream, (char *)m_ImapSpec.c_str(), &str) != 0;
+   bool rc = mail_append(m_MailStream, (char *)m_ImapSpec.c_str(), &str) != 0;
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    else
@@ -1545,8 +1789,7 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
    }
    if(update)
    {
-     ProcessEventQueue();
-     FilterNewMail(m_Listing);
+     FilterNewMail(GetHeaders());
    }
    return rc;
 }
@@ -1624,300 +1867,149 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       return TRUE;
 }
 
-
-/// return number of recent messages
-unsigned long
-MailFolderCC::CountRecentMessages(void) const
-{
-   return m_nRecent;
-}
-
-unsigned long
-MailFolderCC::CountNewMessagesQuick(void) const
-{
-   if(m_Listing)
-      return CountNewMessages();
-   else
-      return UID_ILLEGAL;
-}
-
-unsigned long
-MailFolderCC::CountMessages(int mask, int value) const
-{
-   if(mask == MSG_STAT_NONE)
-      return m_nMessages;
-   else if(mask == MSG_STAT_RECENT && value == MSG_STAT_RECENT)
-      return m_nRecent;
-   else
-   {
-#ifdef DEBUG_greg
-printf("CountMessages ==> GetHeaders\n");
-#endif
-      HeaderInfoList *hil = GetHeaders();
-      if ( !hil )
-         return 0;
-      unsigned long numOfMessages = m_nMessages;
-
-      // FIXME there should probably be a much more efficient way (using
-      //       cclient functions?) to do it
-      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
-      {
-         if ( ((*hil)[msgno]->GetStatus() & mask) != value)
-            numOfMessages--;
-      }
-      hil->DecRef();
-      return numOfMessages;
-   }
-}
-
-Message *
-MailFolderCC::GetMessage(unsigned long uid)
-{
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
-
-   // This is a test to see if the UID is valid:
-
-   bool uidValid = false;
-   HeaderInfoList *hil = GetHeaders();
-   if ( !hil ) return NULL;
-   for ( unsigned long msgno = 0; msgno < hil->Count() && ! uidValid; msgno++ )
-   {
-      if ( (*hil)[msgno]->GetUId() == uid)
-         uidValid = true;
-   }
-   hil->DecRef();
-   ASSERT_MSG(uidValid, "DEBUG: Attempting to get a non-existing message.\n"
-              "(OK when filtering as message might have disappeared)");
-   if(! uidValid) return NULL;
-
-   MessageCC *m = MessageCC::CreateMessageCC(this,uid);
-   ProcessEventQueue();
-   return m;
-}
-
-
-/// Counts the number of new mails
-UIdType
-MailFolderCC::CountNewMessages(void) const
-{
-   const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
-   const int value = MSG_STAT_RECENT;
-
-   UIdType num = 0;
-   if( m_Listing )
-   {
-      for ( UIdType msgno = 0; msgno < m_Listing->Count(); msgno++ )
-      {
-         int status = (*m_Listing)[msgno]->GetStatus();
-         if( (status & mask) == value )
-            num ++;
-      }
-   }
-   return num;
-}
-
-/* FIXME-MT: we must add some clever locking to this function! */
-
-/*
-  This function looks much more complicated than it is. All it does is
-  to return a folder listing.
-  Before doing so it checks if the listing must be rebuild, if so it
-  does that.
-
-  In addition, a listing can be marked as "frozen". This means it
-  should not yet be rebuild, no matter whether it is out of date or
-  not. This is to avoid recursion and unnecessary intermediate
-  updates, e.g. when filtering messages.
- */
-class HeaderInfoList *
-MailFolderCC::GetHeaders(void) const
-{
-#ifdef DEBUG_greg
-//printf("GetHeaders:%s%s%s\n", m_ListingFrozen ? " ListingFrozen" : "",
-//        m_ExpungeRequested ? " ExpungeRequested" : "",
-//        m_NeedFreshListing ? " NeedFreshListing" : "");
-#endif
-   /* A listing can be frozen if we want to suppress updates at
-      present to avoid recursion. */
-   if(m_ListingFrozen)
-   {
-      //ASSERT_MSG(!m_ListingFrozen,
-      //           "GetHeaders() returning frozen listing - "
-      //           "should be harmless");
-      if(m_Listing) m_Listing->IncRef();
-      ASSERT_MSG(m_Listing, "GetHeaders() returning NULL listing - dubious");
-      return m_Listing;
-   }
-
-   // remove const from this:
-   MailFolderCC *that = (MailFolderCC *)this;
-
-   // Listing is not frozen, check if we still need to expunge some
-   // messages:
-   if( m_ExpungeRequested == TRUE )
-   {
-      that->ExpungeMessages();
-      //that->m_ExpungeRequested = FALSE;
-   }
-
-   // check if we are still alive:
-   if(m_MailStream == NIL)
-   {
-      if(! PingReopen())
-      {
-         ERRORMESSAGE((_("Cannot get listing for closed mailbox '%s'."),
-                       GetName().c_str()));
-         return NULL;
-      }
-      //that->m_NeedFreshListing = true; // re-build it!
-   }
-   else if( m_NeedFreshListing == FALSE )
-   // if nothing needs to be done, just return current listing
-   {
-#ifdef DEBUG_greg
-//printf("No fresh listing required; returning current listing\n");
-#endif
-      m_Listing->IncRef();
-      return m_Listing;
-   }
-
-   /*
-     OK, we need to rebuild the current folder listing.
-     This involves retrieving it, filtering it and re-retrieving it if
-     the filters caused any change. */
-
-   /* What we are about to do might calls GetHeaders(), so we must
-      freeze the listing. We leave it frozen until we are done. */
-   that-> m_ListingFrozen = TRUE;
-
-   // we need to re-generate the listing:
-#ifdef DEBUG_greg
-printf("GetHeaders ==> BuildListing\n");
-#endif
-   that->BuildListing();
-
-   /* The filter code returns a TRUE if there is a chance that the
-      folder has been changed. */
-   bool changed = that->FilterNewMail(m_Listing);
-
-   if(changed)
-      that->BuildListing();
-
-   // sort/thread listing:
-   that->ProcessHeaderListing(m_Listing);
-
-   // enforce consistency:
-   ASSERT_MSG(m_nMessages == m_Listing->Count(),
-              "(DEBUG, harmless): Inconsistend message counts");
-   that->m_nMessages = m_Listing->Count();
-
-   // check if we need to update our data structures or send new
-   // mail events:
-   that->CheckForNewMail(m_Listing);
-   that->UpdateStatus();
-
-   /* Now we are done with rebuilding the listing and internal folder
-      data and can safely tell the application to use this
-      information. */
-   that->m_ListingFrozen = FALSE;
-   
-   /* Some event processing might have been delayed because the
-      listing was frozen. So now that it's thawed, we can flush the
-      queue again to make sure everything is updated.
-   */
-#ifdef DEBUG_greg
-printf("GetHeaders ==> ProcessEventQueue\n");
-#endif
-   ProcessEventQueue();
-   m_Listing->IncRef(); // for the caller who uses it
-   return m_Listing;
-}
-
-bool
-MailFolderCC::SetSequenceFlag(String const &sequence,
-                              int flag,
-                              bool set)
-{
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
-   String flags = GetImapFlags(flag);
-
-   if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
-                     1, this, this->GetClassName(),
-                     GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
-   {
-      if(set)
-         mail_setflag_full(m_MailStream,
-                           (char *)sequence.c_str(),
-                           (char *)flags.c_str(),
-                           ST_UID);
-      else
-         mail_clearflag_full(m_MailStream,
-                        (char *)sequence.c_str(),
-                        (char *)flags.c_str(),
-                        ST_UID);
-      ProcessEventQueue();
-   }
-   return true; /* not supported by c-client */
-}
-
-
-bool
-MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
-{
-   int n = selections->Count();
-   int i;
-   String sequence;
-   for(i = 0; i < n-1; i++)
-      sequence << strutil_ultoa((*selections)[i]) << ',';
-   if(n)
-      sequence << strutil_ultoa((*selections)[n-1]);
-   return SetSequenceFlag(sequence, flag, set);
-}
-
 void
 MailFolderCC::ExpungeMessages(void)
 {
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
+
    /* We must not expunge messages while the listing is
       frozen. Otherwise it can happen that a message disappears and
       thus c-client bombs when we try to retrieve that message. So we
       simply set a flag which causes ExpungeMessages() to be called
       when the listing is no longer frozen.
    */
-   if(m_ListingFrozen)
-   {
-      //set a flag to tell the next update to run an expunge first
-      m_ExpungeRequested = TRUE;
-      return;
-   }
+   CHECK_NOT_BUSY()
 
-   m_ExpungeRequested = FALSE;
-   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
+   if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
       mail_expunge (m_MailStream);
-
-      // VZ: I think the update request will/should be requested from
-      //     mm_expunged() only if it is needed, right now we even refresh the
-      //     listing if nothing was done
-#if 0
-      RequestUpdate();
-#endif // 0
-
-      // this hopefully won't do anything if there are no events in the queue
-      ProcessEventQueue();
    }
 }
 
 
-UIdArray *
-MailFolderCC::SearchMessages(const class SearchCriterium *crit)
+// ----------------------------------------------------------------------------
+// Counting messages
+// ----------------------------------------------------------------------------
+
+/// return number of recent messages
+unsigned long
+MailFolderCC::CountRecentMessages(void) const
 {
-   ASSERT(m_SearchMessagesFound == NULL);
-   ASSERT(crit);
+   return CountMessages(MSG_STAT_RECENT, MSG_STAT_RECENT);
+}
+
+unsigned long
+MailFolderCC::CountNewMessagesQuick(void) const
+{
+   return CountNewMessages();
+}
+
+/// Counts the number of new mails
+UIdType
+MailFolderCC::CountNewMessages(void) const
+{
+   UIdType num;
+   if ( HaveListing() )
+   {
+      CHECK_NOT_BUSY_RC(UID_ILLEGAL);
+
+      const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
+      const int value = MSG_STAT_RECENT;
+
+      num = 0;
+
+      HeaderInfoList_obj listing(GetHeaders());
+      UIdType count = listing->Count();
+      for ( UIdType msgno = 0; msgno < count; msgno++ )
+      {
+         int status = listing[msgno]->GetStatus();
+         if( (status & mask) == value )
+            num++;
+      }
+   }
+   {
+      num = UID_ILLEGAL;
+   }
+
+   return num;
+}
+
+static inline bool WantRecent(int mask, int value)
+{
+   return mask == MailFolder::MSG_STAT_RECENT && value == mask;
+}
+
+unsigned long
+MailFolderCC::CountMessages(int mask, int value) const
+{
+   CHECK_NOT_BUSY_RC(UID_ILLEGAL);
+
+   // we need to rebuild listing if we don't have it because either we use it
+   // anyhow or we need to ensure that m_nMessages and m_nRecent have correct
+   // values
+   HeaderInfoList_obj hil(GetHeaders());
+   CHECK( hil, UID_ILLEGAL, "no listing in CountMessages" );
+
+   if ( mask == MSG_STAT_NONE )
+      return m_nMessages;
+   else if ( WantRecent(mask, value) && m_nRecent != UID_ILLEGAL )
+      return m_nRecent;
+   else // general case or we were asked for recent messages and we don't have
+   {
+      // FIXME there should probably be a much more efficient way (using
+      //       cclient functions?) to do it
+      unsigned long numOfMessages = m_nMessages;
+      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
+      {
+         if ( (hil[msgno]->GetStatus() & mask) != value )
+            numOfMessages--;
+      }
+
+      // if we were asked for recent messages, cache them
+      if ( WantRecent(mask, value) )
+      {
+         ((MailFolderCC *)this)->m_nRecent = numOfMessages;
+      }
+
+      return numOfMessages;
+   }
+}
+
+// ----------------------------------------------------------------------------
+// Getting messages
+// ----------------------------------------------------------------------------
+
+Message *
+MailFolderCC::GetMessage(unsigned long uid)
+{
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
+
+   HeaderInfoList_obj hil(GetHeaders());
+   CHECK( hil, NULL, "no listing in GetMessage" );
+
+   // test to see if the UID is valid:
+   bool uidValid = false;
+   unsigned long count = hil->Count();
+   for ( unsigned long msgno = 0; msgno < count && !uidValid; msgno++ )
+   {
+      if ( hil[msgno]->GetUId() == uid )
+         uidValid = true;
+   }
+
+   CHECK( uidValid, NULL, "invalid UID in GetMessage" );
+
+   MessageCC *m = MessageCC::CreateMessageCC(this, uid);
+   return m;
+}
+
+UIdArray *
+MailFolderCC::SearchMessages(const SearchCriterium *crit)
+{
+   CHECK( !m_SearchMessagesFound, NULL, "SearchMessages reentered" );
+   CHECK( crit, NULL, "no criterium in SearchMessages" );
 
    HeaderInfoList *hil = GetHeaders();
-   if ( !hil )
-      return 0;
+   CHECK( hil, NULL, "no listing in SearchMessages" );
 
    unsigned long lastcount = 0;
    MProgressDialog *progDlg = NULL;
@@ -2061,6 +2153,8 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 String
 MailFolderCC::GetMessageUID(unsigned long msgno) const
 {
+   CHECK( m_MailStream, "", "can't get message UID - folder is closed" );
+
    String uidString;
 
    if ( GetType() == MF_POP )
@@ -2103,6 +2197,72 @@ MailFolderCC::GetMessageUID(unsigned long msgno) const
 
    return uidString;
 }
+
+// ----------------------------------------------------------------------------
+// Message flags
+// ----------------------------------------------------------------------------
+
+bool
+MailFolderCC::SetSequenceFlag(String const &sequence,
+                              int flag,
+                              bool set)
+{
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
+   String flags = GetImapFlags(flag);
+
+   if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
+                     1, this, this->GetClassName(),
+                     GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
+   {
+      if(set)
+         mail_setflag_full(m_MailStream,
+                           (char *)sequence.c_str(),
+                           (char *)flags.c_str(),
+                           ST_UID);
+      else
+         mail_clearflag_full(m_MailStream,
+                        (char *)sequence.c_str(),
+                        (char *)flags.c_str(),
+                        ST_UID);
+   }
+   return true; /* not supported by c-client */
+}
+
+
+bool
+MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
+{
+   int n = selections->Count();
+   int i;
+   String sequence;
+   for(i = 0; i < n-1; i++)
+      sequence << strutil_ultoa((*selections)[i]) << ',';
+   if(n)
+      sequence << strutil_ultoa((*selections)[n-1]);
+   return SetSequenceFlag(sequence, flag, set);
+}
+
+bool
+MailFolderCC::IsNewMessage(const HeaderInfo *hi)
+{
+   UIdType msgId = hi->GetUId();
+   bool isNew = false;
+   int status = hi->GetStatus();
+
+   if( (status & MSG_STAT_SEEN) == 0
+       && ( status & MSG_STAT_RECENT)
+       && ! ( status & MSG_STAT_DELETED) )
+      isNew = true;
+   if(m_LastNewMsgUId != UID_ILLEGAL
+      && m_LastNewMsgUId >= msgId)
+      isNew = false;
+
+   return isNew;
+}
+
+// ----------------------------------------------------------------------------
+// Debug only helpers
+// ----------------------------------------------------------------------------
 
 #ifdef DEBUG
 
@@ -2155,135 +2315,101 @@ MailFolderCC::DebugDump() const
 
 #endif // DEBUG
 
-/// remove this object from Map
-void
-MailFolderCC::RemoveFromMap(void) const
+// ----------------------------------------------------------------------------
+// Working with the listing
+// ----------------------------------------------------------------------------
+
+/* FIXME-MT: we must add some clever locking to this function! */
+HeaderInfoList *
+MailFolderCC::GetHeaders(void) const
 {
-   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
-   CHECK_STREAM_LIST();
-
-   StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
+   /* A listing can be frozen if we want to suppress updates temporarily,
+      like, for example, when moving a few messages at once */
+   if ( m_ListingFrozen )
    {
-      if( (*i)->folder == this )
-      {
-         StreamConnection *conn = *i;
-         delete conn;
-         ms_StreamList.erase(i);
+      CHECK( m_Listing, NULL, "NULL listing can't be frozen" );
+   }
+   else if ( !m_Listing )
+   {
+      // remove const from this:
+      MailFolderCC *that = (MailFolderCC *)this;
 
-         break;
+      // check if we are still alive
+      if ( !m_MailStream )
+      {
+         if( !that->PingReopen() )
+         {
+            ERRORMESSAGE((_("Cannot get listing for closed mailbox '%s'."),
+                          GetName().c_str()));
+            return NULL;
+         }
+      }
+
+      // get the new listing
+      that->BuildListing();
+
+      CHECK(m_Listing, NULL, "failed to build folder listing");
+
+      // TODO: find a way to make filters work safely: the problem is that
+      //       they can both delete messages from the folder *and* show
+      //       message boxes which can send requests from GUI
+#if 0
+      // if we have any new messages, reapply filters to them
+      if ( m_GotNewMessages )
+      {
+         // filter code returns true if something might have changed
+         if ( that->FilterNewMail(m_Listing) )
+            that->BuildListing();
+      }
+#endif // 0
+
+      // sort/thread listing:
+      that->ProcessHeaderListing(m_Listing);
+
+      // enforce consistency:
+      ASSERT_MSG( m_nMessages == m_Listing->Count(), "message count mismatch" );
+
+      if ( m_GotNewMessages )
+      {
+         // check if we need to update our data structures or send new
+         // mail events:
+         that->CheckForNewMail(m_Listing);
+
+         that->m_GotNewMessages = false;
       }
    }
+   //else: we already have the listing
 
-   CHECK_STREAM_LIST();
+   m_Listing->IncRef(); // for the caller who uses it
 
-   if(ms_StreamListDefaultObj == this)
-      SetDefaultObj(false);
+   return m_Listing;
 }
 
-
-/// Gets first mailfolder in map.
-/* static */
-MailFolderCC *
-MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
-{
-   CHECK_STREAM_LIST();
-
-   i = ms_StreamList.begin();
-   if( i != ms_StreamList.end())
-      return (**i).folder;
-   else
-      return NULL;
-}
-
-/// Gets next mailfolder in map.
-/* static */
-MailFolderCC *
-MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
-{
-   CHECK_STREAM_LIST();
-
-   ASSERT( i != ms_StreamList.end());
-   DBGMESSAGE(( i.Debug() ));
-   i++;
-   DBGMESSAGE(( i.Debug() ));
-   if( i != ms_StreamList.end())
-      return (**i).folder;
-   else
-      return NULL;
-}
-
-
-extern "C"
-{
-   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov);
-   void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
-   void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
-};
-
-
-bool
-MailFolderCC::IsNewMessage(const HeaderInfo *hi)
-{
-   UIdType msgId = hi->GetUId();
-   bool isNew = false;
-   int status = hi->GetStatus();
-
-   if( (status & MSG_STAT_SEEN) == 0
-       && ( status & MSG_STAT_RECENT)
-       && ! ( status & MSG_STAT_DELETED) )
-      isNew = true;
-   if(m_LastNewMsgUId != UID_ILLEGAL
-      && m_LastNewMsgUId >= msgId)
-      isNew = false;
-
-   return isNew;
-}
-
-/* This is called by the UpdateListing method of the common code. */
+// rebuild the folder listing completely
 void
 MailFolderCC::BuildListing(void)
 {
+   // shouldn't be done unless it's really needed
+   CHECK_RET( !m_Listing, "BuildListing() called but we have listing" );
+
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
 
-   if(! Lock())
-      return;
+   MailFolderLocker lockFolder(this);
 
-   String tmp;
-   tmp.Printf("Building listing for folder '%s'...", GetName().c_str());
-   LOGMESSAGE((M_LOG_DEBUG, tmp));
-
-   // make sure our message counts are up to date
-   UpdateStatus();
+   wxLogTrace("cclient", "Building listing for folder '%s'...",
+              GetName().c_str());
 
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
    MEventLocker locker;
    MEventManager::Suspend(true);
 
-   m_BuildListingSemaphore = true;
+   MLocker lockListing(m_InListingRebuild);
 
-   if ( m_FirstListing )
-   {
-      // Hopefully this will only count really existing messages for
-      // NNTP connections.
-//      if(GetType() == MF_NNTP)
-//         m_nMessages = m_MailStream->recent;
-//      else
-         m_nMessages = m_MailStream->nmsgs;
-   }
+   // update the number of total and recent messages first
+   m_nMessages = m_MailStream->nmsgs;
+   m_nRecent = m_MailStream->recent;
 
-   if(m_Listing)
-   {
-      m_Listing->DecRef();
-      m_Listing = NULL;
-   }
-
-   if(! m_Listing )
-      m_Listing =  HeaderInfoListImpl::Create(m_nMessages);
-
-   // by default, we retrieve all messages
-   unsigned long numMessages = m_nMessages;
    // if the number of the messages in the folder is bigger than the
    // configured limit, ask the user whether he really wants to retrieve them
    // all. The value of 0 disables the limit. Ask only once and never for file
@@ -2307,123 +2433,110 @@ MailFolderCC::BuildListing(void)
       long nRetrieve;
       {
          MGuiLocker locker;
-        nRetrieve = MGetNumberFromUser(msg, prompt, title,
-                                            m_RetrievalLimit,
-                                            1, m_nMessages);
+         nRetrieve = MGetNumberFromUser(msg, prompt, title,
+                                        m_RetrievalLimit,
+                                        1, m_nMessages);
       }
-      if ( nRetrieve != -1 )
+
+      if ( nRetrieve > 0 && (unsigned long)nRetrieve < m_nMessages )
       {
-         numMessages = nRetrieve;
-         if(numMessages > m_nMessages)
-            numMessages = m_nMessages;
+         m_nMessages = nRetrieve;
+
+         // FIXME: how to calculate the number of recent messages now? we
+         //        clearly can't leave it as it is/was because not all recent
+         //        messages are among the ones we retrieved
+         m_nRecent = UID_ILLEGAL;
       }
-      //else: cancelled, retrieve all
+      //else: cancelled or 0 or invalid number entered, retrieve all
    }
 
+   // create the new listing
+   m_Listing = HeaderInfoListImpl::Create(m_nMessages);
+
+   // set the entry listing we're currently building to 0 in the beginning
    m_BuildNextEntry = 0;
-   if(numMessages > 0) // anything to do at all?
+
+   // show the progress dialog if there are many messages to retrieve
+   // (see below for the reason of the m_ProgressDialog == NULL check)
+   if ( m_ProgressDialog == NULL &&
+        m_nMessages > (unsigned)READ_CONFIG(m_Profile,
+                                            MP_FOLDERPROGRESS_THRESHOLD) )
    {
-      if ( m_ProgressDialog == NULL &&
-           numMessages > (unsigned)READ_CONFIG(m_Profile,
-                                               MP_FOLDERPROGRESS_THRESHOLD) )
+      String msg;
+      msg.Printf(_("Reading %lu message headers..."), m_nMessages);
+      MGuiLocker locker;
+      m_ProgressDialog = new MProgressDialog(GetName(),
+                                             msg,
+                                             m_nMessages,
+                                             NULL,
+                                             false, true);// open a status window:
+   }
+
+   // do we have any messages to get?
+   if ( m_nMessages )
+   {
+      // find the first and last messages to retrieve
+      UIdType from = mail_uid(m_MailStream,
+                              m_MailStream->nmsgs - m_nMessages + 1),
+              to = mail_uid(m_MailStream, m_nMessages);
+
+      String sequence = strutil_ultoa(from);
+
+      // don't produce sequences like "1:1" or "1:*"
+      if ( to != from )
       {
-         String msg;
-         msg.Printf(_("Reading %lu message headers..."), numMessages);
-         MGuiLocker locker;
-         m_ProgressDialog = new MProgressDialog(GetName(),
-                                                msg,
-                                                numMessages,
-                                                NULL,
-                                                false, true);// open a status window:
-      }
-
-      // mail_fetch_overview() will now fill the m_Listing array with
-      // info on the messages
-      /* stream, sequence, header structure to fill */
-      String sequence;
-
-      UIdType uid;
-      if(numMessages <= m_nMessages)
-         uid = m_nMessages-numMessages+1;
-      else
-         uid = m_nMessages;
-
-
-/*      if ( numMessages != m_nMessages )
-      {
-      // the first one to retrieve
-      unsigned long firstMessage = 1;
-
-      sequence = strutil_ultoa(mail_uid(m_MailStream, uid));
-      sequence += ":*";
-      }
-      else
-      {
-         sequence.Printf("%lu", firstMessage);
-         if( GetType() == MF_NNTP )
-         {  // FIXME: no idea why this works for NNTP but not for the other types
-            //  sequence << '-';
-         }
-         else
-            sequence << ":*";
-      }
-
-*/
-      UIdType from, to;
-      from = mail_uid(m_MailStream, uid);
-      to = mail_uid(m_MailStream,m_nMessages);
-      sequence = strutil_ultoa(from);
-      if(to != from) // don't produce sequences like "1:1"
-      {
-/*         if( GetType() == MF_NNTP)
-            sequence << '-' << strutil_ultoa(to);
-         else
-*/
          sequence << ":*";
       }
+
+      // do fill the listing by calling mail_fetch_overview_x() which will
+      // call OverviewHeaderEntry() for each entry
 
       // for some folders (MH) this call generates mm_exists notification
       // resulting in an infinite recursion
       bool oldCB = mm_disable_callbacks;
       mm_disable_callbacks = true;
-#ifdef DEBUG_greg
-printf("BuildListing ==> mail_fetch_overview_x ==> mm_overview_header\n");
-#endif
       mail_fetch_overview_x(m_MailStream,
                             (char *)sequence.c_str(),
                             mm_overview_header);
       mm_disable_callbacks = oldCB;
 
-      if ( m_ProgressDialog != (MProgressDialog *)1 )
+      // destroy the progress dialog if it had been shown
+      if ( m_ProgressDialog != NO_PROGRESS_DLG )
       {
          MGuiLocker locker;
          delete m_ProgressDialog;
       }
+
+      // We set it to an illegal address here to suppress further updating.
+      // This value is checked against in OverviewHeader() and also when we're
+      // called for the next time. The reason is that we only want it the
+      // first time that the folder is being opened because the subsequent
+      // calls are supposed to be fast as cclient caches the listing
+      // internally
+      m_ProgressDialog = NO_PROGRESS_DLG;
+
+      // it is possible that we didn't retrieve all messages if the progress
+      // dialog was shown and cancelled, but we shouldn't have retrieved more
+      // than we had aske for
+      if ( m_BuildNextEntry < m_nMessages )
+      {
+         m_Listing->SetCount(m_BuildNextEntry);
+         m_nMessages = m_BuildNextEntry;
+      }
+      else
+      {
+         ASSERT_MSG( m_BuildNextEntry == m_nMessages, "message count mismatch" );
+      }
    }
-
-   // We set it to an illegal address here to suppress further updating. This
-   // value is checked against in OverviewHeader(). The reason is that we only
-   // want it the first time that the folder is being opened.
-   m_ProgressDialog = (MProgressDialog *)1;
-
-   // for NNTP, it will not show all messages
-   //ASSERT(m_BuildNextEntry == m_nMessages || m_folderType == MF_NNTP);
-   m_nMessages = m_BuildNextEntry;
-   m_Listing->SetCount(m_nMessages);
+   //else: no messages, perfectly valid if the folder is empty
 
    m_FirstListing = false;
-   m_BuildListingSemaphore = false;
-#ifdef DEBUG_greg
-printf("Current listing is fresh\n");
-#endif
-   m_NeedFreshListing = false;
-   m_UpdateNeeded = true;
+
    // now we must release the MEvent queue again:
    MEventManager::Suspend(false);
-   UnLock();
-   tmp.Printf("Finished building listing for folder '%s'...",
+
+   wxLogTrace("cclient", "Finished building listing for folder '%s'...",
               GetName().c_str());
-   LOGMESSAGE((M_LOG_DEBUG, tmp));
 }
 
 /* static */
@@ -2463,33 +2576,34 @@ int
 MailFolderCC::OverviewHeaderEntry (unsigned long uid,
                                    OVERVIEW_X *ov)
 {
-   ASSERT(m_Listing);
+   // it is possible that new messages have arrived in the meantime, ignore
+   // them
+   if ( m_BuildNextEntry == m_nMessages )
+   {
+      wxLogDebug("New message(s) appeared in folder while overviewing it, "
+                 "ignored.");
 
-   /* Ignore all entries that have arrived in the meantime to avoid
-      overflowing the array.
-   */
-   if(m_BuildNextEntry >= m_nMessages)
+      // stop overviewing
       return 0;
+   }
 
-   // This is 1 if we don't want any further updates.
-   if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
+   // after the check above this is not supposed to happen
+   CHECK( m_BuildNextEntry < m_nMessages, 0, "too many messages" );
+
+   if ( m_ProgressDialog && m_ProgressDialog != NO_PROGRESS_DLG )
    {
       MGuiLocker locker;
       if(! m_ProgressDialog->Update( m_BuildNextEntry ))
+      {
+         // cancelled by user
          return 0;
+      }
    }
 
-   // This seems to occasionally happen. Some race condition?
-   if(m_BuildNextEntry >= m_Listing->Count())
-   {
-      m_nMessages = m_Listing->Count();
-      return 0;
-   }
+   HeaderInfoImpl& entry = *(HeaderInfoImpl *)(*m_Listing)[m_BuildNextEntry];
 
-   HeaderInfoImpl & entry = *(HeaderInfoImpl *)(*m_Listing)[m_BuildNextEntry];
-
-   unsigned long msgno = mail_msgno (m_MailStream,uid);
-   MESSAGECACHE *elt = mail_elt (m_MailStream,msgno);
+   unsigned long msgno = mail_msgno (m_MailStream, uid);
+   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
    MESSAGECACHE selt;
 
    // STATUS:
@@ -2507,8 +2621,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
 
       // FROM and TO
       entry.m_From = ParseAddress(ov->from);
-      if(m_folderType == MF_NNTP
-            || m_folderType == MF_NEWS)
+      if(m_folderType == MF_NNTP || m_folderType == MF_NEWS)
       {
          entry.m_To = ""; // no To: for news postings
       }
@@ -2539,20 +2652,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
          }
       }
 
-#if 0
-      //FIXME: what on earth are user flags?
-      if (i = elt->user_flags)
-      {
-         strcat (tmp,"{");
-         while (i)
-         {
-            strcat (tmp,stream->user_flags[find_rightmost_bit (&i)]);
-            if (i) strcat (tmp," ");
-         }
-         strcat (tmp,"} ");
-      }
-#endif
-
       entry.m_Subject = DecodeHeader(ov->subject, &encoding);
       if ( (encoding != wxFONTENCODING_SYSTEM) &&
            (encoding != encodingMsg) )
@@ -2576,41 +2675,38 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       // set the font encoding to be used for displaying this entry
       entry.m_Encoding = encodingMsg;
 
-      m_BuildNextEntry++;
-
-      // This is 1 if we don't want any further updates.
-      if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
+      if ( m_ProgressDialog && m_ProgressDialog != NO_PROGRESS_DLG )
       {
          MGuiLocker locker;
-         m_ProgressDialog->Update( m_BuildNextEntry - 1 );
+         m_ProgressDialog->Update(m_BuildNextEntry);
       }
+
+      m_BuildNextEntry++;
    }
    else
    {
       // parsing the message failed in c-client lib. Why?
-      ASSERT_MSG(0,"DEBUG (harmless, don't worry): parsing folder overview failed");
+      wxLogDebug("Parsing folder overview failed for message %lu", uid);
+
       // don't do anything
    }
+
+   // continue
    return 1;
 }
 
-
-
-//-------------------------------------------------------------------
-// static class member functions:
-//-------------------------------------------------------------------
-
-StreamConnectionList MailFolderCC::ms_StreamList(FALSE);
-
-bool MailFolderCC::ms_CClientInitialisedFlag = false;
-
-MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
+// ----------------------------------------------------------------------------
+// CClient initialization and clean up
+// ----------------------------------------------------------------------------
 
 void
 MailFolderCC::CClientInit(void)
 {
    if(ms_CClientInitialisedFlag == true)
       return;
+
+   // TODO: remove this
+   wxLog::AddTraceMask("cccallback");
 
    // do further initialisation
 #include <linkage.c>
@@ -2643,9 +2739,72 @@ MailFolderCC::CClientInit(void)
    gs_CCStreamCleaner = new CCStreamCleaner();
 }
 
-String MailFolderCC::ms_NewsPath;
+extern bool CC_Init(void)
+{
+   MailFolderCC::CClientInit();
 
-String MailFolderCC::ms_LastCriticalFolder = "";
+   return true;
+}
+
+extern void CC_Cleanup(void)
+{
+   if ( MailFolderCC::IsInitialized() )
+   {
+      // as c-client lib doesn't seem to think that deallocating memory is
+      // something good to do, do it at it's place...
+      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
+      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   }
+
+   if ( gs_CCStreamCleaner )
+   {
+      delete gs_CCStreamCleaner;
+      gs_CCStreamCleaner = NULL;
+   }
+
+   ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
+}
+
+CCStreamCleaner::~CCStreamCleaner()
+{
+   DBGMESSAGE(("CCStreamCleaner: checking for left-over streams"));
+
+   if(! mApplication->IsOnline())
+   {
+      // brutally free all memory without closing stream:
+      MAILSTREAM *stream;
+      StreamList::iterator i;
+      for(i = m_List.begin(); i != m_List.end(); i++)
+      {
+         DBGMESSAGE(("CCStreamCleaner: freeing stream offline"));
+         stream = *i;
+         // copied from c-client mail.c:
+         if (stream->mailbox) fs_give ((void **) &stream->mailbox);
+         stream->sequence++;  /* invalidate sequence */
+         /* flush user flags */
+         for (int n = 0; n < NUSERFLAGS; n++)
+            if (stream->user_flags[n]) fs_give ((void **) &stream->user_flags[n]);
+         mail_free_cache (stream);  /* finally free the stream's storage */
+         /*if (!stream->use)*/ fs_give ((void **) &stream);
+      }
+   }
+   else
+   {
+      // we are online, so we can close it properly:
+      StreamList::iterator i;
+      for(i = m_List.begin(); i != m_List.end(); i++)
+      {
+         DBGMESSAGE(("CCStreamCleaner: closing stream"));
+         mail_close(*i);
+      }
+   }
+}
+
+// ----------------------------------------------------------------------------
+// Some news spool support (TODO: move out from here)
+// ----------------------------------------------------------------------------
+
+static String gs_NewsSpoolDir;
 
 /// return the directory of the newsspool:
 /* static */
@@ -2653,245 +2812,30 @@ String
 MailFolderCC::GetNewsSpool(void)
 {
    CClientInit();
-   return (const char *)mail_parameters
-      (NIL,GET_NEWSSPOOL,NULL);
+   return (const char *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
 }
 
-const String& MailFolderCC::InitializeNewsSpool()
+const String& MailFolder::InitializeNewsSpool()
 {
-   if ( !ms_NewsPath )
+   if ( !gs_NewsSpoolDir )
    {
       // first, init cclient
-      if ( !ms_CClientInitialisedFlag )
-      {
-         CClientInit();
-      }
+      CC_Init();
 
-      ms_NewsPath = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
-      if ( !ms_NewsPath )
+      gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
+      if ( !gs_NewsSpoolDir )
       {
-         ms_NewsPath = READ_APPCONFIG(MP_NEWS_SPOOL_DIR);
-         mail_parameters(NULL, SET_NEWSSPOOL, (char *)ms_NewsPath.c_str());
+         gs_NewsSpoolDir = READ_APPCONFIG(MP_NEWS_SPOOL_DIR);
+         mail_parameters(NULL, SET_NEWSSPOOL, (char *)gs_NewsSpoolDir.c_str());
       }
    }
 
-   return ms_NewsPath;
+   return gs_NewsSpoolDir;
 }
 
-bool MailFolderCC::SpecToFolderName(const String& specification,
-                                    FolderType folderType,
-                                    String *pName)
-{
-   CHECK( pName, FALSE, "NULL name in MailFolderCC::SpecToFolderName" );
-
-   String& name = *pName;
-   switch ( folderType )
-   {
-   case MF_MH:
-   {
-      static const int lenPrefix = 4;  // strlen("#mh/")
-      if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
-      {
-         FAIL_MSG("invalid MH folder specification - no #mh/ prefix");
-
-         return FALSE;
-      }
-
-      // make sure that the folder name does not start with s;ash
-      const char *start = specification.c_str() + lenPrefix;
-      while ( wxIsPathSeparator(*start) )
-      {
-         start++;
-      }
-
-      name = start;
-   }
-   break;
-
-   case MF_NNTP:
-   case MF_NEWS:
-   {
-      int startIndex = wxNOT_FOUND;
-
-      // Why this code? The spec is {hostname/nntp} not
-      // {nntp/hostname}, I leave it in for now, but add correct(?)
-      // code underneath:
-      if ( specification[0u] == '{' )
-      {
-         wxString protocol(specification.c_str() + 1, 4);
-         protocol.MakeLower();
-         if ( protocol == "nntp" || protocol == "news" )
-         {
-            startIndex = specification.Find('}');
-         }
-         //else: leave it to be wxNOT_FOUND
-      }
-      if ( startIndex == wxNOT_FOUND )
-      {
-         wxString lowercase = specification;
-         lowercase.MakeLower();
-         if( lowercase.Contains("/nntp") ||
-             lowercase.Contains("/news") )
-         {
-            startIndex = specification.Find('}');
-         }
-      }
-
-      if ( startIndex == wxNOT_FOUND )
-      {
-         FAIL_MSG("invalid folder specification - no {nntp/...}");
-
-         return FALSE;
-      }
-
-      name = specification.c_str() + (size_t)startIndex + 1;
-   }
-   break;
-   case MF_IMAP:
-      name = specification.AfterFirst('}');
-      return TRUE;
-   default:
-      FAIL_MSG("not done yet");
-      return FALSE;
-   }
-
-   return TRUE;
-}
-
-/// adds this object to Map
-void
-MailFolderCC::AddToMap(MAILSTREAM const *stream) const
-{
-   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
-   CHECK_STREAM_LIST();
-
-   StreamConnection  *conn = new StreamConnection;
-   conn->folder = (MailFolderCC *) this;
-   conn->stream = stream;
-   conn->name = m_ImapSpec;
-   conn->login = m_Login;
-   /** A push_front() would be slightly faster as the folder is likely
-       to be accessed often after opening it, but PingReopenAll()
-       relies on the fact that newly (re-)opened folders are appended
-       to the list, not pre-pended.
-   */
-   ms_StreamList.push_back(conn);
-
-   CHECK_STREAM_LIST();
-}
-
-
-void
-MailFolderCC::UpdateStatus(void)
-{
-   if(m_MailStream == NIL && ! PingReopen())
-      return; // fail
-
-   if(m_nMessages != m_MailStream->nmsgs ||
-      m_nRecent != m_MailStream->recent)
-   {
-#ifdef DEBUG_greg
-printf("UpdateStatus: m_nMessages %ld, nmsgs %ld, m_nRecent %ld, recent %ld\n",
-       m_nMessages, m_MailStream->nmsgs, m_nRecent, m_MailStream->recent);
-#endif
-      m_nMessages = m_MailStream->nmsgs;
-      m_nRecent = m_MailStream->recent;
-      // Little sanity check, needed as c-client is insane:
-      if(m_nMessages < m_nRecent)
-         m_nRecent = m_nMessages;
-      // Tell program that number of messages has changed:
-      MailFolderCC::Event *evptr = new
-         MailFolderCC::Event(m_MailStream,
-                             MailFolderCC::Status,__LINE__);
-      MailFolderCC::QueueEvent(evptr);
-   }
-   m_LastUId = m_MailStream->uid_last;
-   // and another sanity check:
-   if(m_nMessages < m_nRecent)
-      m_nRecent = m_nMessages;
-}
-
-/* static */
-bool
-MailFolderCC::CanExit(String *which)
-{
-   CHECK_STREAM_LIST();
-
-   bool canExit = true;
-   *which = "";
-   StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
-   {
-      if( (*i)->folder->InCritical() )
-      {
-         canExit = false;
-         *which << (*i)->folder->GetName() << '\n';
-      }
-   }
-
-   return canExit;
-}
-
-/// lookup object in Map
-/* static */ MailFolderCC *
-MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
-{
-   CHECK_STREAM_LIST();
-
-   StreamConnectionList::iterator i;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
-   {
-      StreamConnection *conn = *i;
-      if( conn->stream == stream )
-         return conn->folder;
-   }
-
-   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
-      for e.g. mail_status(), that is difficult to handle here, we
-      must compare the name parameter which might not be 100%
-      identical, but we can check the hostname for identity and the
-      path. However, that seems a bit far-fetched for now, so I just
-      make sure that ms_StreamListDefaultObj gets set before any call to
-      mail_status(). If that doesn't work, we need to parse the name
-      string for hostname, portnumber and path and compare these.
-      //FIXME: This might be an issue for MT code.
-   */
-   if(name)
-   {
-      for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
-      {
-         StreamConnection *conn = *i;
-         if( conn->name == name )
-            return conn->folder;
-      }
-   }
-   if(ms_StreamListDefaultObj)
-   {
-      LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
-      return ms_StreamListDefaultObj;
-   }
-   ASSERT_MSG(0,"DEBUG (harmless): Cannot find mailbox for callback!");
-   return NULL;
-}
-
-void
-MailFolderCC::SetDefaultObj(bool setit) const
-{
-   if(setit)
-   {
-      CHECK_RET(ms_StreamListDefaultObj == NULL,
-                "conflicting mail folder default object access (trying to override non-NULL)!");
-      ms_StreamListDefaultObj = (MailFolderCC *)this;
-   }
-   else
-   {
-      CHECK_RET(ms_StreamListDefaultObj == this,
-                "conflicting mail folder default object access (trying to re-set to NULL)!");
-      ms_StreamListDefaultObj = NULL;
-   }
-}
-
-
+// ----------------------------------------------------------------------------
+// callbacks called asynchronously by cclient
+// ----------------------------------------------------------------------------
 
 /// this message matches a search
 void
@@ -2911,29 +2855,17 @@ void
 MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
 {
    MailFolderCC *mf = LookupObject(stream);
-   if(mf)
+   if ( mf )
    {
-#ifdef DEBUG
-      String tmp = "MailFolderCC::mm_exists() for folder " + mf->m_ImapSpec
-                   + String(" n: ") + strutil_ultoa(number);
-      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
-#endif
+      // if a new message has arrived, we need to reapply the filters
+      if ( number > mf->m_nMessages )
+         mf->m_GotNewMessages = true;
 
-      // this test seems necessary for MH folders, otherwise we're going into
-      // an infinite loop (and it shouldn't (?) break anything for other
-      // folders)
-      if ( mf->m_nMessages != number ) 
-      {
-         mf->m_nMessages = number;
-         // This can be called from within mail_open(), before we have a
-         // valid m_MailStream, so check. It's slightly more efficient
-         // to check here than in UpdateStatus().
-         if(mf->m_MailStream != NULL)
-            mf->RequestUpdate();
+      // TODO: if the messages were only expunged, we could avoid rebuilding
+      //       the entire listing but just remove some entries from the
+      //       existing one!
 
-         MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists,__LINE__);
-         MailFolderCC::QueueEvent(evptr);
-      }
+      mf->RequestUpdate();
    }
    else
    {
@@ -3035,13 +2967,12 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
                         MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream, mailbox);
-   if(mf == NULL)
-      return;  // oops?!
+   CHECK_RET(mf, "mm_status for non existent folder");
 
    wxLogDebug("mm_status: folder '%s', %lu messages",
               mf->m_ImapSpec.c_str(), status->messages);
 
-   if(status->flags & SA_MESSAGES)
+   if ( status->flags & SA_MESSAGES )
       mf->RequestUpdate();
 }
 
@@ -3050,7 +2981,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
+MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf)
 {
    GetLogCircle().Add(str);
 
@@ -3093,7 +3024,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
       case ERROR:
          // usually just wxLOG_Error but may be set to something else to
          // temporarily suppress the errors
-         loglevel = CC_GetLogLevel();
+         loglevel = cc_loglevel;
          break;
 
       case PARSE:
@@ -3156,21 +3087,48 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
    strcpy(pwd,MF_pwd.c_str());
 }
 
+/* static */
+void
+MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long number)
+{
+   MailFolderCC *mf = LookupObject(stream);
+   CHECK_RET(mf, "mm_expunged for non existent folder");
+
+   if ( mf->HaveListing() )
+   {
+      // TODO: we shouldn't need to rebuild the listing entirely, we could
+      //       just remove the specified entry from it
+      mf->RequestUpdate();
+   }
+   //else: it is not the first mm_expunged() we as we had to have the listing
+   //      when it was called for the first time - hence, we don't need to
+   //      generate any more update requests, one is enough
+}
+
+/* static */
+void
+MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long number)
+{
+   MailFolderCC *mf = LookupObject(stream);
+   CHECK_RET(mf, "mm_flags for non existent folder");
+
+   mf->UpdateMessageStatus(number);
+}
+
 /** alert that c-client will run critical code
        @param  stream   mailstream
    */
 void
 MailFolderCC::mm_critical(MAILSTREAM * stream)
 {
-   ms_LastCriticalFolder = stream ? stream->mailbox : NULL;
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
+   ms_LastCriticalFolder = stream ? stream->mailbox : "";
+   if ( stream )
    {
-#ifdef DEBUG
-      String tmp = "MailFolderCC::mm_critical() for folder " + mf->m_ImapSpec;
-      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
-#endif
-      mf->m_InCritical = true;
+      MailFolderCC *mf = LookupObject(stream);
+      if(mf)
+      {
+         mf->m_InCritical = true;
+      }
    }
 }
 
@@ -3181,14 +3139,13 @@ void
 MailFolderCC::mm_nocritical(MAILSTREAM *  stream )
 {
    ms_LastCriticalFolder = "";
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
+   if ( stream )
    {
-#ifdef DEBUG
-      String tmp = "MailFolderCC::mm_nocritical() for folder " + mf->m_ImapSpec;
-      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
-#endif
-      mf->m_InCritical = false;
+      MailFolderCC *mf = LookupObject(stream);
+      if(mf)
+      {
+         mf->m_InCritical = false;
+      }
    }
 }
 
@@ -3203,7 +3160,6 @@ MailFolderCC::mm_diskerror(MAILSTREAM *stream,
                            long /* errcode */,
                            long /* serious */)
 {
-//   MailFolderCC *mf = LookupObject(stream);
    return 1;   // abort!
 }
 
@@ -3224,6 +3180,10 @@ MailFolderCC::mm_fatal(char *str)
    FatalError(msg2);
 }
 
+// ----------------------------------------------------------------------------
+// listing updating
+// ----------------------------------------------------------------------------
+
 void
 MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 {
@@ -3231,191 +3191,52 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
       update the old one. Only exception is if the listing is frozen,
       in that case we try to update it but don't sent a status change
       event. */
-   if( (m_NeedFreshListing && ! m_ListingFrozen )
-       || m_Listing == NULL )
+   if( !HaveListing() )
       return; // will be regenerated anyway
 
    // Otherwise: update the current listing information:
+   HeaderInfoList_obj hil(GetHeaders());
 
    // Find the listing entry for this message:
    UIdType uid = mail_uid(m_MailStream, seqno);
-   size_t i;
-   for(i = 0; i < m_Listing->Count() && (*m_Listing)[i]->GetUId() != uid; i++)
+   size_t i,
+          count = hil->Count();
+   for ( i = 0; i < count && hil[i]->GetUId() != uid; i++ )
       ;
-   ASSERT_RET(i < m_Listing->Count());
 
-   MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
-   ((HeaderInfoImpl *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
+   CHECK_RET(i < count, "message not found in the listing");
 
-   if(m_NeedFreshListing || m_Listing == NULL)
-      return; // will be regenerated anyway
+   MESSAGECACHE *elt = mail_elt (m_MailStream, seqno);
 
-   MailFolderCC::Event *evptr = new
-      MailFolderCC::Event(m_MailStream,
-                          MailFolderCC::MsgStatus, __LINE__);
-   evptr->m_args[0].m_ulong = i;
-   MailFolderCC::QueueEvent(evptr);
-}
+   HeaderInfo *hi = hil[i];
+   ((HeaderInfoImpl *)hi)->m_Status = GetMsgStatus(elt);
 
-/* static */
-void
-MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long number)
-{
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
-      mf->UpdateMessageStatus(number);
-}
+   // tell all interested that status changed
+   DBGMESSAGE(("Sending MsgStatus event for folder '%s'", GetName().c_str()));
 
-/* static */
-MailFolderCC::EventQueue MailFolderCC::ms_EventQueue;
-
-/* static */
-void
-MailFolderCC::ProcessEventQueue(void)
-{
-   Event *evptr;
-   while(! ms_EventQueue.empty())
-   {
-      evptr = ms_EventQueue.pop_front();
-#ifdef DEBUG_greg
-{ static char *evt[] = { "Searched", "Exists", "Expunged", "Flags",
-                        "Notify", "List", "LSub", "Status",
-                        "Log", "DLog", "Update", "MsgStatus" };
-printf("ProcessEventQueue: Removed %s event from queue\n", evt[evptr->m_type]);
-}
-#endif
-      switch(evptr->m_type)
-      {
-      case Notify:
-         MailFolderCC::mm_notify(evptr->m_stream,
-                                 *(evptr->m_args[0].m_str),
-                                 evptr->m_args[1].m_long);
-         delete evptr->m_args[0].m_str;
-         break;
-      case List:
-         MailFolderCC::mm_list(evptr->m_stream,
-                               evptr->m_args[0].m_int,
-                               *(evptr->m_args[1].m_str),
-                               evptr->m_args[2].m_long);
-         delete evptr->m_args[1].m_str;
-         break;
-      case LSub:
-         MailFolderCC::mm_lsub(evptr->m_stream,
-                               evptr->m_args[0].m_int,
-                               *(evptr->m_args[1].m_str),
-                               evptr->m_args[2].m_long);
-         delete evptr->m_args[1].m_str;
-         break;
-      case Log:
-         MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
-                              evptr->m_args[1].m_long,
-                              NULL);
-         delete evptr->m_args[0].m_str;
-         break;
-      case DLog:
-         MailFolderCC::mm_dlog(*(evptr->m_args[0].m_str));
-         delete evptr->m_args[0].m_str;
-         break;
-      case MsgStatus:
-      {
-         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT_MSG(mf,"got msg status event for unknown folder");
-         if(mf && ! mf->m_UpdateNeeded && ! mf->m_ListingFrozen)
-         {
-            // tell all interested that status changed
-            DBGMESSAGE(("Sending MsgStatusData event for folder '%s'",
-                        mf->GetName().c_str()));
-            ASSERT_MSG(mf->m_Listing, "FATAL bug: m_Listing == NULL");
-            MEventManager::Send( new MEventMsgStatusData (
-               mf, evptr->m_args[0].m_ulong, mf->m_Listing) );
-            break;
-         }
-      }
-      case Exists:
-      case Status:
-         /* I believe these two events can safely be
-            ignored. Previously, they did the same as "Expunged:".
-            If I should be wrong, just remove the "break;". (KB) */
-         break;
-      case Expunged: // invalidate our header listing:
-      {
-         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT_MSG(mf,"DEBUG (harmless): got expunge event for unknown folder");
-         if(mf)
-         {
-            //causes recursion mf->UpdateStatus();
-            mf->RequestUpdate();
-         }
-         break;
-      }
-      case Searched: // obsolete
-      case Flags: // obsolete
-      case Update: // obsolete
-         ASSERT_MSG(0,"obsolete code called");
-         break;
-      }// switch
-      delete evptr;
-   }
-
-   /* Now we check all folders if we need to send update events: */
-   CHECK_STREAM_LIST();
-
-   StreamConnectionList::iterator i;
-   MailFolderCC *mf;
-   for(i = ms_StreamList.begin(); i != ms_StreamList.end(); i++)
-   {
-      mf = (*i)->folder;
-      if(
-         // do we need to send an update event for this folder?
-         mf && mf->m_UpdateNeeded)
-      {
-         /* If our current listing is frozen we postpone the processing of
-            events until it no longer is. Repeatedly sending events about a
-            folder without the listing having been updated hardly makes any
-            sense. */
-          if(! mf->m_ListingFrozen)
-          {
-             DBGMESSAGE((
-                "Sending update event for folder '%s'",
-                mf->GetName().c_str() ));
-             // tell all interested that an update might be required
-#ifdef DEBUG_greg
-printf("ProcessEventQueue ==> Send!!!\n");
-#endif
-             MEventManager::Send( new MEventFolderUpdateData (mf) );
-             mf->m_UpdateNeeded = false;
-          }
-          else
-          {
-             DBGMESSAGE((
-                "Postponing event processing for frozen folder '%s'",
-                mf->GetName().c_str() ));
-          }
-      }
-   }
+   MEventManager::Send(new MEventMsgStatusData(this, i, hi->Clone()));
 }
 
 void
-MailFolderCC::RequestUpdate(bool sendEvent)
+MailFolderCC::UpdateStatus(void)
 {
-#ifdef DEBUG_greg
-printf("RequestUpdate%s\n", m_ListingFrozen ? " (frozen)" : "");
-#endif
-   // no need to do anything if the listing is frozen, as it will have
-   // to be regenerated after unfreezing it anyway
-   if(m_ListingFrozen)
+   // TODO: what is this supposed to do?
+}
+
+void
+MailFolderCC::RequestUpdate()
+{
+   if ( m_Listing )
    {
-      DBGMESSAGE((
-         "Ignoring RequestUpdate() for frozen folder '%s'",
-         GetName().c_str() ));
-      return;
+      m_Listing->DecRef();
+      m_Listing = NULL;
    }
-   
-   // invalidate current folder listing and queue at least one folder
-   // update event.
-   m_NeedFreshListing = true;
-   if(sendEvent)
-      m_UpdateNeeded = true;
+
+   // tell all interested that the listing changed
+   DBGMESSAGE(("Sending FolderUpdate event for folder '%s'",
+               GetName().c_str()));
+
+   MEventManager::Send(new MEventFolderUpdateData(this));
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
@@ -3425,11 +3246,16 @@ MailFolderCC::OverviewHeader(MAILSTREAM *stream,
                              OVERVIEW_X *ov)
 {
    CHECK_STREAM_LIST();
+
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
-   CHECK(mf, 0, "trying to build overview for non-existent");
+   CHECK(mf, 0, "trying to build overview for non-existent folder");
+
    return mf->OverviewHeaderEntry(uid, ov);
 }
 
+// ----------------------------------------------------------------------------
+// Listing/subscribing/deleting the folders
+// ----------------------------------------------------------------------------
 
 /* static */
 bool
@@ -3438,7 +3264,7 @@ MailFolderCC::Subscribe(const String &host,
                         const String &mailboxname,
                         bool subscribe)
 {
-   String spec = ::GetImapSpec(protocol, 0, mailboxname, host, "");
+   String spec = MailFolder::GetImapSpec(protocol, 0, mailboxname, host, "");
    return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
            : mail_unsubscribe (NIL, (char *)spec.c_str()) ) != NIL;
 }
@@ -3532,11 +3358,11 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   String mboxpath = ::GetImapSpec(mfolder->GetType(),
-                                   mfolder->GetFlags(),
-                                   mfolder->GetPath(),
-                                   mfolder->GetServer(),
-                                   mfolder->GetLogin());
+   String mboxpath = MailFolder::GetImapSpec(mfolder->GetType(),
+                                             mfolder->GetFlags(),
+                                             mfolder->GetPath(),
+                                             mfolder->GetServer(),
+                                             mfolder->GetLogin());
 
    String password = mfolder->GetPassword();
    if ( FolderTypeHasUserName( mfolder->GetType() )
@@ -3562,9 +3388,71 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
    SetLoginData(mfolder->GetLogin(), password);
    bool rc = mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
    lock.Unlock();
-   ProcessEventQueue();
    return rc;
 }
+
+// ----------------------------------------------------------------------------
+// HasInferiors() function: check if the folder has subfolders
+// ----------------------------------------------------------------------------
+
+/*
+  Small function to check if the mailstream has \inferiors flag set or
+  not, i.e. if it is a mailbox or a directory on the server.
+*/
+
+static int gs_HasInferiorsFlag;
+
+static void HasInferiorsMMList(MAILSTREAM *stream,
+                               char delim,
+                               String name,
+                               long attrib)
+{
+   gs_HasInferiorsFlag = ((attrib & LATT_NOINFERIORS) == 0);
+}
+
+/* static */
+bool
+MailFolderCC::HasInferiors(const String &imapSpec,
+                           const String &login,
+                           const String &passwd)
+{
+   // We lock the complete c-client code as we need to immediately
+   // redirect the mm_list() callback to tell us what we want to know.
+   MCclientLocker lock;
+
+   // we want to disable all the usual callbacks as we might not have the
+   // folder corresponding to imapSpec yet (as this function is called from
+   // the folder creation dialog) and, even if we did, we are not interested
+   // in them for now
+   CCCallbackDisabler noCallbacks;
+
+   SetLoginData(login, passwd);
+   MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
+                                      OP_HALFOPEN);
+
+   if(mailStream != NIL)
+   {
+     gs_HasInferiorsFlag = -1;
+     gs_mmListRedirect = HasInferiorsMMList;
+     mail_list (mailStream, NULL, (char *) imapSpec.c_str());
+     gs_mmListRedirect = NULL;
+     /* This does happen for for folders where the server does not know
+        if they have inferiors, i.e. if they don't exist yet.
+        I.e. -1 is an unknown/undefined status
+        ASSERT(gs_HasInferiorsFlag != -1);
+     */
+     mail_close(mailStream);
+   }
+   return gs_HasInferiorsFlag == 1;
+}
+
+// ----------------------------------------------------------------------------
+// replacements of some cclient functions
+// ----------------------------------------------------------------------------
+
+// we need to do all this because we want the "To" header in the overview and
+// cclient doesn't put it there, if it ever changes, we wouldn't need all this
+// any more
 
 extern "C"
 {
@@ -3649,392 +3537,231 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
          }
    }
 }
+
 } // extern "C"
 
-// the callbacks:
+// ----------------------------------------------------------------------------
+// C-Client callbacks
+// ----------------------------------------------------------------------------
+
+// define a macro TRACE_CALLBACKn() for tracing a callback with n + 1 params
+#if 1 // def EXPERIMENTAL_log_callbacks
+   #define TRACE_CALLBACK0(name) \
+      wxLogTrace("cccallback", "%s(%s)", \
+                 #name, stream ? stream->mailbox : "<no stream>")
+
+   #define TRACE_CALLBACK1(name, fmt, parm) \
+      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+                 #name, stream->mailbox, parm)
+
+   #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
+      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+                 #name, stream->mailbox, parm1, parm2)
+
+   #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
+      wxLogTrace("cccallback", "%s(%s, " fmt ")", \
+                 #name, stream->mailbox, parm1, parm2, parm3)
+
+   #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
+      wxLogTrace("cccallback", "%s(" fmt ")", \
+                 #name, parm1)
+
+   #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, parm1, parm2) \
+      wxLogTrace("cccallback", "%s(" fmt ")", \
+                 #name, parm1, parm2)
+
+   #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
+      wxLogTrace("cccallback", "%s(" fmt ")", \
+                 #name, parm1, parm2, parm3, parm4, parm5)
+
+   static const char *GetErrorLevel(long errflg)
+   {
+      return errflg == ERROR ? "error"
+                             : errflg == WARN ? "warn"
+                                              : errflg == PARSE ? "parse"
+                                                                : "other";
+   }
+#else // !EXPERIMENTAL_log_callbacks
+   #define TRACE_CALLBACK0(name)
+   #define TRACE_CALLBACK0(name)
+   #define TRACE_CALLBACK1(name, fmt, p1)
+   #define TRACE_CALLBACK2(name, fmt, p1, p2)
+   #define TRACE_CALLBACK3(name, fmt, p1, p2, p3)
+
+   #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, p1)
+   #define TRACE_CALLBACK_NOSTREAM_2(name, fmt, p1, p2)
+   #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, p1, p2, p3, p4, p5)
+#endif
+
+// they're called from C code
 extern "C"
 {
 
 void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_searched(`%s', %lu) %d\n", stream->mailbox, number,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::mm_searched(stream,  number);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK1(mm_searched, "%lu", number);
+
+      MailFolderCC::mm_searched(stream,  number);
+   }
 }
 
 void
 mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_expunged(`%s', %lu) %d\n", stream->mailbox, number,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged,__LINE__);
-   evptr->m_args[0].m_ulong = number;
-   MailFolderCC::QueueEvent(evptr);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK1(mm_expunged, "%lu", number);
+
+      MailFolderCC::mm_expunged(stream, number);
+   }
 }
 
 void
 mm_flags(MAILSTREAM *stream, unsigned long number)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_flags(`%s', %lu) %d\n", stream->mailbox, number,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::mm_flags(stream, number);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK1(mm_flags, "%lu", number);
+
+      MailFolderCC::mm_flags(stream, number);
+   }
 }
 
 void
 mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_notify(`%s', `%s', %lu) %d\n", stream->mailbox, str, errflg,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify,__LINE__);
-   evptr->m_args[0].m_str = new String(str);
-   evptr->m_args[1].m_long = errflg;
-   MailFolderCC::QueueEvent(evptr);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK2(mm_notify, "%s (%s)", str, GetErrorLevel(errflg));
+
+      MailFolderCC::mm_notify(stream, str, errflg);
+   }
 }
 
 void
 mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_list(`%s', %d, `%s', %ld) %d\n", stream->mailbox, delim, name,
-           attrib, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
+   TRACE_CALLBACK3(mm_list, "%d, `%s', %ld", delim, name, attrib);
+
    MailFolderCC::mm_list(stream, delim, name, attrib);
 }
 
 void
 mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_lsub(`%s', %d, `%s', %ld) %d\n", stream->mailbox, delim, name,
-           attrib, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub,__LINE__);
-   evptr->m_args[0].m_int = delim;
-   evptr->m_args[1].m_str = new String(name);
-   evptr->m_args[2].m_long = attrib;
-   MailFolderCC::QueueEvent(evptr);
+   TRACE_CALLBACK3(mm_lsub, "%d, `%s', %ld", delim, name, attrib);
+
+   MailFolderCC::mm_lsub(stream, delim, name, attrib);
 }
 
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_EXISTS(%lu, `%s') %d\n", number, stream->mailbox,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   // update count immediately to reflect change:
-   MailFolderCC::mm_exists(stream, number);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK1(mm_exists, "%lu", number);
+
+      MailFolderCC::mm_exists(stream, number);
+   }
 }
 
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_status(`%s', `%s', %p) %d\n", stream->mailbox, mailbox, status,
-           mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status,__LINE__);
-   MailFolderCC::QueueEvent(evptr);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK1(mm_status, "%s", mailbox);
+
+      MailFolderCC::mm_status(stream, mailbox, status);
+   }
 }
 
 void
 mm_log(char *str, long errflg)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_log(`%s', %ld) %d\n", str, errflg, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks || mm_ignore_errors)
+   if ( mm_disable_callbacks || mm_ignore_errors )
       return;
+
+   TRACE_CALLBACK_NOSTREAM_2(mm_log, "%s (%s)", str, GetErrorLevel(errflg));
+
    String *msg = new String(str);
+
+   // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
       if(!MailFolderCC::PingReopenAll())
          *msg << _("\nAttempt to re-open all folders failed.");
    }
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log,__LINE__);
-   evptr->m_args[0].m_str = msg;
-   evptr->m_args[1].m_long = errflg;
-   MailFolderCC::QueueEvent(evptr);
+
+   MailFolderCC::mm_log(str, errflg);
 }
 
 void
 mm_dlog(char *str)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_dlog(`%s') %d\n", str, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog,__LINE__);
-   evptr->m_args[0].m_str = new String(str);
-   MailFolderCC::QueueEvent(evptr);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s (%s)", str);
+
+      MailFolderCC::mm_dlog(str);
+   }
 }
 
 void
 mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_login({%s, %s@%s:%ld, %s}, %ld) %d\n", mb->service, mb->user,
-           mb->host, mb->port , mb->mailbox, trial, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
-      return;
-   // Cannot use event system, has to be called while c-client is working.
-   MailFolderCC::mm_login(mb, user, pwd, trial);
+   if ( !mm_disable_callbacks )
+   {
+      TRACE_CALLBACK_NOSTREAM_5(mm_login, "%s %s@%s:%ld, try #%ld",
+                                mb->service, mb->user, mb->host, mb->port,
+                                trial);
+
+      MailFolderCC::mm_login(mb, user, pwd, trial);
+   }
 }
 
 void
 mm_critical(MAILSTREAM *stream)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_critical(`%s') %d\n",
-          stream ? stream->mailbox : "<no stream>", mm_disable_callbacks);
-#endif
+   TRACE_CALLBACK0(mm_critical);
+
    MailFolderCC::mm_critical(stream);
 }
 
 void
 mm_nocritical(MAILSTREAM *stream)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_nocritical(`%s') %d\n",
-          stream ? stream->mailbox : "<no stream>", mm_disable_callbacks);
-#endif
+   TRACE_CALLBACK0(mm_nocritical);
+
    MailFolderCC::mm_nocritical(stream);
 }
 
 long
 mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_diskerror(`%s', %ldl, %ld) %d\n", stream->mailbox, errorcode,
-           serious, mm_disable_callbacks);
-#endif
-   if(mm_disable_callbacks)
+   if ( mm_disable_callbacks )
       return 1;
+
    return MailFolderCC::mm_diskerror(stream,  errorcode, serious);
 }
 
 void
 mm_fatal(char *str)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-   printf("mm_fatal(`%s') %d\n", str, mm_disable_callbacks);
-#endif
    MailFolderCC::mm_fatal(str);
 }
 
-/* This callback needs to be processed immediately or ov will become
-   invalid. */
 static int
-mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov)
+mm_overview_header (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov)
 {
-#ifdef EXPERIMENTAL_log_callbacks
-#ifndef DEBUG_greg        // TEMPORARY!!!
-   printf("mm_overview_header(`%s', %lu, %p)\n", stream->mailbox, uid, ov);
-#else
-   putchar('.'); if (uid == 1) putchar('\n'); fflush(stdout);
-#endif
-#endif
+   // this one is never ignored as it always is generated at our request
+   TRACE_CALLBACK1(mm_overview_header, "%lu", uid);
+
    return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
 
 } // extern "C"
 
-
-#ifdef USE_SSL
-
-/* These functions will serve as stubs for the real openSSL library
-   and must be initialised at runtime as c-client actually links
-   against these. */
-
-#include <openssl/ssl.h>
-/* This is our interface to the library and auth_ssl.c in c-client
-   which are all in "C" */
-extern "C" {
-
-extern long ssl_init_Mahogany();
-
-
-#define SSL_DEF(returnval, name, args) \
-   typedef returnval (* name##_TYPE) args ; \
-   name##_TYPE stub_##name = NULL
-
-#define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(slldll, #name); \
-      if(stub_##name == NULL) success = FALSE
-#define CRYPTO_LOOKUP(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(cryptodll, #name); \
-      if(stub_##name == NULL) success = FALSE
-
-SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx) );
-SSL_DEF( void, SSL_free, (SSL *ssl) );
-SSL_DEF( int,  SSL_set_rfd, (SSL *s, int fd) );
-SSL_DEF( int,  SSL_set_wfd, (SSL *s, int fd) );
-SSL_DEF( void, SSL_set_read_ahead, (SSL *s, int yes) );
-SSL_DEF( int,  SSL_connect, (SSL *ssl) );
-SSL_DEF( int,  SSL_read, (SSL *ssl,char *buf,int num) );
-SSL_DEF( int,  SSL_write, (SSL *ssl,const char *buf,int num) );
-SSL_DEF( int,  SSL_pending, (SSL *s) );
-SSL_DEF( int,  SSL_library_init, (void ) );
-SSL_DEF( void, SSL_load_error_strings, (void ) );
-SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
-SSL_DEF( unsigned long, ERR_get_error, (void) );
-SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p));
-//extern SSL_get_cipher_bits();
-SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
-SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits) );
-//extern SSL_get_cipher();
-SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_DEF(SSL_METHOD *, SSLv3_client_method, (void) );
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-SSL_DEF(int, TLSv1_client_method, () );
-#   else
-SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void) );
-#   endif
-
-#undef SSL_DEF
-
-SSL     * SSL_new(SSL_CTX *ctx)
-{ return (*stub_SSL_new)(ctx); }
-void  SSL_free(SSL *ssl)
-{ (*stub_SSL_free)(ssl); }
-int  SSL_set_rfd(SSL *s, int fd)
-{ return (*stub_SSL_set_rfd)(s,fd); }
-int  SSL_set_wfd(SSL *s, int fd)
-{ return (*stub_SSL_set_wfd)(s,fd); }
-void  SSL_set_read_ahead(SSL *s, int yes)
-{ (*stub_SSL_set_read_ahead)(s,yes); }
-int   SSL_connect(SSL *ssl)
-{ return (*stub_SSL_connect)(ssl); }
-int   SSL_read(SSL *ssl,char * buf, int num)
-{ return (*stub_SSL_read)(ssl, buf, num); }
-int   SSL_write(SSL *ssl,const char *buf,int num)
-{ return (*stub_SSL_write)(ssl, buf, num); }
-int  SSL_pending(SSL *s)
-{ return (*stub_SSL_pending)(s); }
-int       SSL_library_init(void )
-{ return (*stub_SSL_library_init)(); }
-void  SSL_load_error_strings(void )
-{ (*stub_SSL_load_error_strings)(); }
-SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
-{ return (*stub_SSL_CTX_new)(meth); }
-unsigned long ERR_get_error(void)
-{ return (*stub_ERR_get_error)(); }
-char * ERR_error_string(unsigned long e, char *p)
-{ return (*stub_ERR_error_string)(e,p); }
-const char * SSL_CIPHER_get_name(SSL_CIPHER *c)
-{ return (*stub_SSL_CIPHER_get_name)(c); }
-SSL_CIPHER * SSL_get_current_cipher(SSL *s)
-{ return (*stub_SSL_get_current_cipher)(s); }
-int SSL_CIPHER_get_bits(SSL_CIPHER *c, int *alg_bits)
-{
-  return (*stub_SSL_CIPHER_get_bits)(c,alg_bits);
-}
-
-
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_METHOD *  SSLv3_client_method(void)
-{ return (*stub_SSLv3_client_method)(); }
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-int TLSv1_client_method(void)
-{ (* stub_TLSv1_client_method)(); }
-#   else
-SSL_METHOD * SSLv23_client_method(void)
-{ return (* stub_SSLv23_client_method)(); }
-#   endif
-
-} // extern "C"
-
-#include <wx/dynlib.h>
-
-bool gs_SSL_loaded = FALSE;
-bool gs_SSL_available = FALSE;
-
-
-
-bool InitSSL(void) /* FIXME: MT */
-{
-   if(gs_SSL_loaded)
-      return gs_SSL_available;
-
-   String ssl_dll = READ_APPCONFIG(MP_SSL_DLL_SSL);
-   String crypto_dll = READ_APPCONFIG(MP_SSL_DLL_CRYPTO);
-
-   STATUSMESSAGE((_("Trying to load '%s' and '%s'..."),
-                  crypto_dll.c_str(),
-                  ssl_dll.c_str()));
-
-   bool success = FALSE;
-   wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll, &success);
-   if(! success) return FALSE;
-   wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll, &success);
-   if(! success) return FALSE;
-
-   SSL_LOOKUP(SSL_new );
-   SSL_LOOKUP(SSL_free );
-   SSL_LOOKUP(SSL_set_rfd );
-   SSL_LOOKUP(SSL_set_wfd );
-   SSL_LOOKUP(SSL_set_read_ahead );
-   SSL_LOOKUP(SSL_connect );
-   SSL_LOOKUP(SSL_read );
-   SSL_LOOKUP(SSL_write );
-   SSL_LOOKUP(SSL_pending );
-   SSL_LOOKUP(SSL_library_init );
-   SSL_LOOKUP(SSL_load_error_strings );
-   SSL_LOOKUP(SSL_CTX_new );
-   SSL_LOOKUP(SSL_CIPHER_get_name );
-   SSL_LOOKUP(SSL_get_current_cipher );
-   CRYPTO_LOOKUP(ERR_get_error);
-   CRYPTO_LOOKUP(ERR_error_string);
-   SSL_LOOKUP(SSL_CIPHER_get_bits);
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-   SSL_LOOKUP(SSLv3_client_method );
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-   SSL_LOOKUP(TLSv1_client_method );
-#else
-   SSL_LOOKUP(SSLv23_client_method );
-#   endif
-   gs_SSL_available = success;
-   gs_SSL_loaded = TRUE;
-
-   if(success) // only now is it safe to call this
-   {
-      STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
-                       "SSL authentification now available."),
-                     crypto_dll.c_str(),
-                     ssl_dll.c_str()));
-
-      ssl_init_Mahogany();
-   }
-   return success;
-}
-
-#undef SSL_LOOKUP
-#endif

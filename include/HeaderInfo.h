@@ -18,6 +18,7 @@
 #ifdef __GNUG__
 #   pragma interface "HeaderInfo.h"
 #endif
+
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
 
@@ -30,6 +31,11 @@
 class HeaderInfo
 {
 public:
+   // we have to have the default ctor even though it doesn't do anything
+   // because of copy ctor declaration below
+   HeaderInfo() { }
+
+   // accessors
    virtual const String &GetSubject(void) const = 0;
    virtual const String &GetFrom(void) const = 0;
    virtual const String &GetTo(void) const = 0;
@@ -40,8 +46,7 @@ public:
    virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
    virtual size_t SizeOf(void) const = 0;
-   HeaderInfo() {}
-   virtual ~HeaderInfo() {}
+
    /// Return the indentation level for message threading.
    virtual unsigned GetIndentation() const = 0;
    /// Set the indentation level for message threading.
@@ -64,9 +69,15 @@ public:
    /// Return some extra data which is folder driver specific
    virtual FolderDataType GetFolderData(void) const = 0;
 
+   /// Create and return the copy of this object (allocated with new)
+   virtual HeaderInfo *Clone() const = 0;
+
+   virtual ~HeaderInfo() {}
+
 private:
-   /// Disallow copy construction
+   /// Disallow copy construction, use Clone() instead
    HeaderInfo(const HeaderInfo &);
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -79,6 +90,7 @@ public:
    virtual size_t Count(void) const = 0;
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const = 0;
+   const HeaderInfo *GetItem(size_t n) const { return (*this)[n]; }
    /// Returns the n-th entry.
    virtual HeaderInfo * operator[](size_t n) = 0;
    /// Returns pointer to array of data:
@@ -98,5 +110,12 @@ public:
    virtual void SetCount(size_t newcount) = 0;
    MOBJECT_NAME(HeaderInfoList)
 };
+
+// declare an auto ptr class for HeaderInfoList which adds an operator[]
+BEGIN_DECLARE_AUTOPTR(HeaderInfoList)
+public:
+   const HeaderInfo *operator[](size_t n) const { return (*m_ptr)[n]; }
+   HeaderInfo *operator[](size_t n) { return (*m_ptr)[n]; }
+END_DECLARE_AUTOPTR();
 
 #endif

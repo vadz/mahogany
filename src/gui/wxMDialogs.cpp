@@ -3318,21 +3318,17 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 
    m_frame->CentreOnParent();
    m_frame->Show();
-
-   wxYield();
 }
 
 void MProgressInfo::SetValue(size_t numDone)
 {
    m_label->SetLabel(wxString::Format(_("%u done"), numDone));
-   wxYield();
 }
 
 MProgressInfo::~MProgressInfo()
 {
    m_frame->Show(FALSE);
    m_frame->Close();
-   wxYield();
 }
 
 // ----------------------------------------------------------------------------

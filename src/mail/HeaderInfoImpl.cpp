@@ -31,24 +31,25 @@ HeaderInfoImpl::HeaderInfoImpl()
    // it
 }
 
-HeaderInfo &
-HeaderInfoImpl::operator= ( const HeaderInfo &old)
+HeaderInfo * HeaderInfoImpl::Clone() const
 {
-   m_Subject = old.GetSubject();
-   m_From = old.GetFrom();
-   m_To = old.GetTo();
-   m_Date = old.GetDate();
-   m_UId = old.GetUId();
-   m_References = old.GetReferences();
-   m_Status = old.GetStatus();
-   m_Size = old.GetSize();
-   SetIndentation(old.GetIndentation());
-   SetEncoding(old.GetEncoding());
-   m_Colour = old.GetColour();
-   m_Score = old.GetScore();
-   SetFolderData(old.GetFolderData());
+   HeaderInfoImpl *hi = new HeaderInfoImpl();
 
-   return *this;
+   hi->m_Subject = GetSubject();
+   hi->m_From = GetFrom();
+   hi->m_To = GetTo();
+   hi->m_Date = GetDate();
+   hi->m_UId = GetUId();
+   hi->m_References = GetReferences();
+   hi->m_Status = GetStatus();
+   hi->m_Size = GetSize();
+   hi->SetIndentation(GetIndentation());
+   hi->SetEncoding(GetEncoding());
+   hi->m_Colour = GetColour();
+   hi->m_Score = GetScore();
+   hi->SetFolderData(GetFolderData());
+
+   return hi;
 }
 
 

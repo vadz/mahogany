@@ -394,23 +394,6 @@ public:
    MCclientLocker() : MMutexLocker(MAppBase::CCLIENT) {};
 };
 
-/** Our own Mutex type, must support the calls
-    Lock() and Unlock() and Locked().
-*/
-#ifdef USE_THREADS
-// use inheritance and not typedef to allow forward declaring it
-class MMutex : public wxMutex { };
-#else
-/// Dummy implementation of MMutex.
-class MMutex
-{
-public:
-   void Lock(void) {}
-   void Unlock(void) {}
-   bool IsLocked(void) const{ return false; }
-};
-#endif
-
 // upgrade.cpp:
 extern bool RetrieveRemoteConfigSettings(void);
 extern bool SaveRemoteConfigSettings(void);

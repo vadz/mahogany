@@ -53,9 +53,7 @@
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "Message.h"
-#include "MailFolderCC.h"
-#include "MessageCC.h"
-#include "SendMessageCC.h"
+#include "SendMessage.h"
 
 #include "MDialogs.h"
 #include "HeadersDialogs.h"
@@ -2069,18 +2067,18 @@ wxComposeView::Send(bool schedule)
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
 
    /// The message to be composed.
-   class SendMessageCC * msg = NULL;
+   SendMessage * msg = NULL;
 
    switch(m_mode)
    {
    case Mode_Mail:
       if( READ_CONFIG(m_Profile, MP_USE_SENDMAIL) != 0)
-         msg = new SendMessageCC(m_Profile, Prot_Sendmail);
+         msg = SendMessage::Create(m_Profile, Prot_Sendmail);
       else
-         msg = new SendMessageCC(m_Profile, Prot_SMTP);
+         msg = SendMessage::Create(m_Profile, Prot_SMTP);
       break;
    case Mode_News:
-      msg = new SendMessageCC(m_Profile, Prot_NNTP);
+      msg = SendMessage::Create(m_Profile, Prot_NNTP);
       break;
    }
 
@@ -2089,7 +2087,6 @@ wxComposeView::Send(bool schedule)
       msg->SetHeaderEncoding(m_encoding);
    }
 
-   ASSERT(msg);
    while((exp = wxLayoutExport( &status,
                                    WXLO_EXPORT_AS_TEXT,
                                    WXLO_EXPORT_WITH_CRLF)) != NULL)
@@ -2101,7 +2098,7 @@ wxComposeView::Send(bool schedule)
                         Message::MSG_TYPETEXT,
                         text->c_str(), text->length(),
                         "PLAIN",
-                        SM_INLINE,  // disposition
+                        "INLINE",   // disposition
                         NULL,       // disposition parameters
                         NULL,       // other parameters
                         m_encoding

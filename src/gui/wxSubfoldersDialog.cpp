@@ -43,8 +43,6 @@
 #include "Mpers.h"
 
 #include "ASMailFolder.h"
-#include "MailFolder.h"
-#include "MailFolderCC.h"
 
 #include "gui/wxDialogLayout.h"
 
@@ -530,13 +528,13 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
             if ( id.IsOk() )
             {
                long attr = result->GetAttributes();
-               if ( !(attr & LATT_NOINFERIORS) )
+               if ( !(attr & ASMailFolder::ATT_NOINFERIORS) )
                {
                   // this node can have children too
                   SetItemHasChildren(id);
                }
 
-               if ( attr & LATT_NOSELECT )
+               if ( attr & ASMailFolder::ATT_NOSELECT )
                {
                   SetItemData(id, new wxTreeItemData());
                }
@@ -546,7 +544,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
                // maybe the folders not existing in the tree) - this might be
                // more useful (TODO?)
 #if 0
-               if ( attr & LATT_MARKED )
+               if ( attr & ASMailFolder::ATT_MARKED )
                {
                   SetItemBold(id);
                }
@@ -1238,7 +1236,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 
             long flags = folderNew->GetFlags();
             long attr = result->GetAttributes();
-            if ( attr & LATT_NOINFERIORS )
+            if ( attr & ASMailFolder::ATT_NOINFERIORS )
             {
                flags &= ~MF_FLAGS_GROUP;
             }
@@ -1247,7 +1245,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
                flags |= MF_FLAGS_GROUP;
             }
 
-            if ( attr & LATT_NOSELECT )
+            if ( attr & ASMailFolder::ATT_NOSELECT )
             {
                flags |= MF_FLAGS_NOSELECT;
             }

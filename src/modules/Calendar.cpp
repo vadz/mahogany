@@ -34,7 +34,7 @@
 #include "ASMailFolder.h"
 #include "Message.h"
 
-#include "SendMessageCC.h"
+#include "SendMessage.h"
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
@@ -187,7 +187,7 @@ class CalendarModule : public MModule_Calendar
    void Configure(void);
    MMODULE_DEFINE();
 
-   virtual bool ScheduleMessage(class SendMessageCC *msg);
+   virtual bool ScheduleMessage(class SendMessage *msg);
    virtual bool ScheduleMessage(class Message *msg);
 
    void OnTimer(void);
@@ -488,7 +488,7 @@ public:
    void AddReminder(const wxString &text,
                     ActionEnum action = CAL_ACTION_REMIND,
                     const wxDateTimeWithRepeat &when = wxDefaultDateTime);
-   bool ScheduleMessage(SendMessageCC *msg);
+   bool ScheduleMessage(SendMessage *msg);
    bool ScheduleMessage(Message *msg);
 
    /** checks if anything needs to be done:
@@ -776,7 +776,7 @@ CalendarFrame::ParseDateLine(const wxString &line)
 }
 
 bool
-CalendarFrame::ScheduleMessage(SendMessageCC *msg)
+CalendarFrame::ScheduleMessage(SendMessage *msg)
 {
    wxDateTimeWithRepeat dt = m_CalCtrl->GetDate();
    if(PickDateDialog(dt))
@@ -1155,7 +1155,7 @@ CalendarModule::Entry(int arg, ...)
 }
 
 bool
-CalendarModule::ScheduleMessage(class SendMessageCC *msg)
+CalendarModule::ScheduleMessage(class SendMessage *msg)
 {
    CreateFrame();
    m_Frame->Raise();

@@ -599,9 +599,11 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
    // called by RETURN press
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   ASSERT_RET(hil);
+   CHECK_RET(hil, "no header listing in wxFolderListCtrl");
+
    const HeaderInfo *hi = (*hil)[event.m_itemIndex];
-   ASSERT_RET(hi);
+   CHECK_RET(hi, "no header entry in wxFolderListCtrl");
+
    if(m_FolderView->GetPreviewUId() == hi->GetUId())
       m_FolderView->m_MessagePreview->PageDown();
    else
@@ -1283,18 +1285,13 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
 
 void
-wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
+wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
 {
-   ASSERT_RET(listing);
-   ASSERT_RET(index < listing->Count());
-
    String   line;
    UIdType nsize;
    unsigned day, month, year;
    String sender, subject, size;
    bool selected;
-
-   HeaderInfo const *hi = (*listing)[index];
 
    subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
    nsize = day = month = year = 0;
@@ -1438,6 +1435,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 #ifdef __WXMSW__
    m_FolderCtrl->Hide(); // optimise for speed under MSW
 #endif
+
    long focusedIndex, tmp = -1;
    focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
 
@@ -1452,7 +1450,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    for(size_t i = 0; i < n; i++)
    {
       hi = (*listing)[i];
-      SetEntry(listing, i);
+      SetEntry(hi, i);
       if(hi->GetUId() == m_FocusedUId)
       {
          foundFocus = true;
@@ -1460,14 +1458,13 @@ wxFolderView::Update(HeaderInfoList *listing)
       }
    }
    if(! foundFocus) // old focused UId is gone, so we use the list
+   {
       // index instead
       if(focusedIndex != -1 && focusedIndex < (long) n)
          m_FolderCtrl->SetItemState(focusedIndex,
                                     wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+   }
 
-#ifdef DEBUG_greg
-printf("Update ==> UpdateTitleAndStatusBars\n");
-#endif
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
 
    if(focusedIndex != -1 && focusedIndex < (long) n)
@@ -1476,11 +1473,18 @@ printf("Update ==> UpdateTitleAndStatusBars\n");
 #ifdef __WXMSW__
    m_FolderCtrl->Show();
 #endif
+
    m_NumOfMessages = n;
    wxEndBusyCursor();
    listing->DecRef();
+
    // the previously focused uid might be gone now:
-   //PreviewMessage(m_FolderCtrl->GetFocusedUId());
+   if ( !foundFocus )
+   {
+      m_MessagePreview->Clear();
+      m_previewUId = UID_ILLEGAL;
+   }
+
    m_UpdateSemaphore = false;
 }
 
@@ -2072,20 +2076,13 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
 }
 
-/* This function gets called when the folder contents changed */
+// This function gets called when the folder contents changed
 void
 wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
-   if(event.GetFolder() == m_MailFolder)
+   if ( event.GetFolder() == m_MailFolder )
    {
-#ifdef DEBUG_greg
-printf("OnFolderUpdateEvent ==> Update()\n");
-#endif
       Update();
-#ifdef DEBUG_greg
-printf("OnFolderUpdateEvent ==> UpdateTitleAndStatusBars()\n");
-#endif
-      UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
    }
 }
 
@@ -2098,7 +2095,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 #ifdef __WXMSW__
       m_FolderCtrl->Hide(); // optimise for speed under MSW
 #endif
-      SetEntry(event.GetHeaders(), event.GetIndex());
+      SetEntry(event.GetHeaderInfo(), event.GetIndex());
 #ifdef __WXMSW__
       m_FolderCtrl->Show();
 #endif

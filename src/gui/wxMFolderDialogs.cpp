@@ -51,7 +51,7 @@
 #include "Mdefaults.h"
 #include "MailCollector.h"
 
-#include "MailFolderCC.h"        // for GetMHFolderName
+#include "MailFolderCC.h"        // for HasInferiors()
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
@@ -1443,7 +1443,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
                Profile_obj profile(folderParent->GetFullName());
 
                wxString path;
-               path << MailFolderCC::InitializeMH()
+               path << MailFolder::InitializeMH()
                     << READ_CONFIG(profile, MP_FOLDER_PATH);
                if ( !!path && !wxIsPathSeparator(path.Last()) )
                   path << '/';
@@ -1819,7 +1819,7 @@ wxFolderPropertiesPage::SetDefaultValues()
       // MH complications: must prepend MHROOT to relative paths
       if ( folderType == MF_MH )
       {
-         wxString mhRoot = MailFolderCC::InitializeMH();
+         wxString mhRoot = MailFolder::InitializeMH();
          if ( !value.StartsWith(mhRoot) && !IsAbsPath(value) )
          {
             value.Prepend(mhRoot);
@@ -2026,7 +2026,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       // MH folder name must be relative to MH root, check it
       path = m_path->GetValue();
       wxString mhName = path;
-      if ( !MailFolderCC::GetMHFolderName(&mhName) )
+      if ( !MailFolder::GetMHFolderName(&mhName) )
       {
          wxLogError(_("Impossible to create MH folder '%s'."),
                     path.c_str());
@@ -2222,10 +2222,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                String server = folder->GetServer();
 
                // got them all, build the spec and check the flag
-               String spec = GetImapSpec(MF_IMAP, flags,
-                                         m_mailboxname->GetValue(),
-                                         server,
-                                         loginName);
+               String spec = MailFolder::GetImapSpec
+                             (
+                              MF_IMAP,
+                              flags,
+                              m_mailboxname->GetValue(),
+                              server,
+                              loginName
+                             );
 
                wxLogStatus(_("Connecting to the IMAP server %s..."),
                            server.c_str());

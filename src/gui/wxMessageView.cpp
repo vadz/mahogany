@@ -44,7 +44,7 @@
 #include "MHelp.h"
 #include "Message.h"
 #include "FolderView.h"
-#include "MailFolderCC.h"     // for DecodeHeader() only
+//#include "MailFolderCC.h"     // for DecodeHeader() only
 #include "ASMailFolder.h"
 #include "MDialogs.h"
 #include "MessageView.h"
