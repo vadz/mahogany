@@ -639,7 +639,7 @@ public:
 
 private:
     String m_output;
-} sink;
+};
 
 extern String
 ParseMessageTemplate(const String& templateText,
@@ -648,6 +648,8 @@ ParseMessageTemplate(const String& templateText,
    MessageTemplateParser parser(templateText, _("no file"), &expander);
 
    String text;
+
+   StringTemplateSink sink;
    if ( parser.Parse(sink) )
       text = sink.GetOutput();
 
