@@ -501,13 +501,21 @@ static String GetTemplateNamePath(MessageTemplateKind kind)
    return path;
 }
 
+// returns the path to the section containing the templates of the given kind
+static String GetTemplateKindSection(MessageTemplateKind kind)
+{
+   String path;
+   path << M_TEMPLATES_CONFIG_SECTION << '/' << GetTemplateKindPath(kind);
+
+   return path;
+}
+
 // returns the path to the value of the template of the given kind and name in
 // the profile
 static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
 {
    String path;
-   path << M_TEMPLATES_CONFIG_SECTION << '/' << GetTemplateKindPath(kind)
-        << '/' << name;
+   path << GetTemplateKindSection(kind) << '/' << name;
 
    return path;
 }
@@ -613,9 +621,7 @@ GetMessageTemplateNames(MessageTemplateKind kind)
 
    wxConfigBase *config = mApplication->GetProfile()->GetConfig();
 
-   wxString path;
-   path << M_TEMPLATES_CONFIG_SECTION << GetTemplateKindPath(kind);
-   config->SetPath(path);
+   config->SetPath(GetTemplateKindSection(kind));
 
    wxString name;
    long cookie;
