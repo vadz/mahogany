@@ -491,8 +491,9 @@ enum ConfigFields
    ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
+   ConfigField_PGPCommand,
 
-   ConfigField_HelpersLast = ConfigField_AutoLaunchExtEditor,
+   ConfigField_HelpersLast = ConfigField_PGPCommand,
 
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
@@ -1495,6 +1496,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                   Field_Message, -1                      },
    { gettext_noop("&External editor"),            Field_Text,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
+   { gettext_noop("&PGP command"),                Field_Text,    -1                      },
 
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
@@ -1925,6 +1927,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
    CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
+   CONFIG_ENTRY(MP_PGP_COMMAND),
 
    // other
    CONFIG_NONE(),

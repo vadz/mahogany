@@ -332,6 +332,7 @@ extern const MOption MP_BROWSER_ISNS;
 extern const MOption MP_BROWSER_INNW;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
+extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_USE_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
@@ -1026,6 +1027,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_EXTERNALEDITOR_NAME    "ExternalEditor"
 /// start external editor automatically?
 #define MP_ALWAYS_USE_EXTERNALEDITOR_NAME    "AlwaysUseExtEditor"
+/// PGP/GPG application
+#define MP_PGP_COMMAND_NAME    "PGPCommand"
 /// execute a command when new mail arrives?
 #define   MP_USE_NEWMAILCOMMAND_NAME      "CommandOnNewMail"
 /// command to execute when new mail arrives
@@ -1953,6 +1956,13 @@ extern const MOption MP_AWAY_STATUS;
 
 /// start external editor automatically?
 #define MP_ALWAYS_USE_EXTERNALEDITOR_DEFVAL    0l
+
+/// PGP/GPG application
+#ifdef OS_UNIX
+#  define   MP_PGP_COMMAND_DEFVAL  "gpg"
+#else
+#  define   MP_PGP_COMMAND_DEFVAL  "gpg.exe"
+#endif // Unix/Win
 
 /// command to execute when new mail arrives
 #define   MP_USE_NEWMAILCOMMAND_DEFVAL   0l

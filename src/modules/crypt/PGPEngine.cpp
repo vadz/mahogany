@@ -37,6 +37,12 @@
 #include <wx/textdlg.h>
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_PGP_COMMAND;
+
+// ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
@@ -476,12 +482,15 @@ PGPEngine::ExecCommand(const String& options,
                        const String& messageIn,
                        String& messageOut)
 {
+   Profile *profile = mApplication->GetProfile();
+
    PGPProcess process;
    long pid = wxExecute
               (
                wxString::Format
                (
                 "%s --status-fd=2 --command-fd 0 --output - -a %s",
+//                String(READ_CONFIG_TEXT(profile, MP_PGP_COMMAND)), //FIXME
 #ifdef OS_WIN
                 "G:\\Internet\\PGP\\GPG-1.2.1\\gpg.exe", // TODO
 #else
