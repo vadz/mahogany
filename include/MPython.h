@@ -67,12 +67,10 @@ extern "C"
    extern void (*M__Py_Dealloc)(PyObject *);
    extern void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **);
    extern void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *);
-   extern void (*M_PyErr_Print)(void);
    extern int(*M_PyArg_Parse)(PyObject *, char *, ...);
    extern int(*M_PyArg_ParseTuple)(PyObject *, char *, ...);
    extern int(*M_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item);
    extern int(*M_PyErr_BadArgument)(void);
-   extern void(*M_PyErr_Clear)(void);
    extern PyObject*(*M_PyErr_NoMemory)(void);
    extern PyObject*(*M_PyErr_Occurred)(void);
    extern void(*M_PyErr_SetNone)(PyObject *);
@@ -90,7 +88,6 @@ extern "C"
    extern PyObject*(*M_PyImport_ImportModule)(const char *);
    extern PyObject*(*M_PyDict_GetItemString)(PyObject *, const char *);
    extern PyObject*(*M_PyModule_GetDict)(PyObject *);
-   extern int(*M_PyRun_SimpleString)(char *);
    extern char*(*M_PyString_AsString)(PyObject *);
    extern PyObject*(*M_PyString_FromString)(const char *);
    extern PyObject*(*M_PyString_FromStringAndSize)(const char *, int);
@@ -113,8 +110,7 @@ extern "C"
    extern PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *);
    extern PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *);
    extern PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *);
-   extern int (*M_PyRun_SimpleFile)(FILE *, char *);
-   extern PyObject *(*M_PyRun_String)(char *, int, PyObject *, PyObject *);
+   extern PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *);
    extern PyObject *(*M_PyString_InternFromString)(const char *);
 
    extern int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *);
@@ -141,7 +137,6 @@ extern "C"
 #define PyModule_Type (*M_PyModule_Type)
 #define PyErr_Fetch M_PyErr_Fetch
 #define PyErr_Restore M_PyErr_Restore
-#define PyErr_Print M_PyErr_Print
 #define PyArg_Parse M_PyArg_Parse
 #define PyArg_ParseTuple M_PyArg_ParseTuple
 #define PyDict_GetItemString M_PyDict_GetItemString
@@ -166,7 +161,6 @@ extern "C"
 #define PyObject_CallObject M_PyObject_CallObject
 #define PyObject_GetAttr M_PyObject_GetAttr
 #define PyObject_GetAttrString M_PyObject_GetAttrString
-#define PyRun_SimpleFile M_PyRun_SimpleFile
 #define PyRun_String M_PyRun_String
 #define PyString_InternFromString M_PyString_InternFromString
 

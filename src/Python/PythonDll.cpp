@@ -61,12 +61,10 @@ extern "C"
 #endif // Py_TRACE_REFS
    void (*M_PyErr_Fetch)(PyObject **, PyObject **, PyObject **) = NULL;
    void (*M_PyErr_Restore)(PyObject *, PyObject *, PyObject *) = NULL;
-   void (*M_PyErr_Print)(void) = NULL;
    int(*M_PyArg_Parse)(PyObject *, char *, ...) = NULL;
    int(*M_PyArg_ParseTuple)(PyObject *, char *, ...) = NULL;
    int(*M_PyDict_SetItemString)(PyObject *dp, char *key, PyObject *item) = NULL;
    int(*M_PyErr_BadArgument)(void) = NULL;
-   void(*M_PyErr_Clear)(void) = NULL;
    PyObject*(*M_PyErr_NoMemory)(void) = NULL;
    PyObject*(*M_PyErr_Occurred)(void) = NULL;
    void(*M_PyErr_SetNone)(PyObject *) = NULL;
@@ -84,7 +82,6 @@ extern "C"
    PyObject*(*M_PyImport_ImportModule)(const char *) = NULL;
    PyObject*(*M_PyDict_GetItemString)(PyObject *, const char *) = NULL;
    PyObject*(*M_PyModule_GetDict)(PyObject *) = NULL;
-   int(*M_PyRun_SimpleString)(char *) = NULL;
    char*(*M_PyString_AsString)(PyObject *) = NULL;
    PyObject*(*M_PyString_FromString)(const char *) = NULL;
    PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
@@ -107,8 +104,7 @@ extern "C"
    PyObject *(*M_PyObject_CallObject)(PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyObject_GetAttr)(PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyObject_GetAttrString)(PyObject *, char *) = NULL;
-   int (*M_PyRun_SimpleFile)(FILE *, char *) = NULL;
-   PyObject *(*M_PyRun_String)(char *, int, PyObject *, PyObject *) = NULL;
+   PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *) = NULL;
    PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *) = NULL;
@@ -138,21 +134,19 @@ extern "C"
     #define PYTHON_PROC void *
 #endif
 
-#define PYTHON_FUNC(func) { _T(#func), (PYTHON_PROC *)&M_ ## func },
+#define PYTHON_FUNC(func) { _T(#func), NULL, (PYTHON_PROC *)&M_ ## func },
+#define PYTHON_FUNC_ALT(func, alt) { _T(#func), _T(#alt), (PYTHON_PROC *)&M_ ## func },
 
 static struct PythonFunc
 {
-    const char *name;
-    PYTHON_PROC *ptr;
+    const wxChar *name;       // normal function name
+    const wxChar *nameAlt;    // alternative name for Debug build
+    PYTHON_PROC *ptr;         // function pointer
 } pythonFuncs[] =
 {
    PYTHON_FUNC(Py_Initialize)
    PYTHON_FUNC(_Py_NoneStruct)
-#ifdef Py_TRACE_REFS
-   PYTHON_FUNC(Py_InitModule4TraceRefs)
-#else
-   PYTHON_FUNC(Py_InitModule4)
-#endif
+   PYTHON_FUNC_ALT(Py_InitModule4, Py_InitModule4TraceRefs)
    PYTHON_FUNC(Py_BuildValue)
    PYTHON_FUNC(Py_VaBuildValue)
 #ifdef Py_REF_DEBUG
@@ -164,7 +158,6 @@ static struct PythonFunc
 #endif // Py_TRACE_REFS
    PYTHON_FUNC(PyErr_Fetch)
    PYTHON_FUNC(PyErr_Restore)
-   PYTHON_FUNC(PyErr_Print)
    PYTHON_FUNC(PyArg_Parse)
    PYTHON_FUNC(PyArg_ParseTuple)
    PYTHON_FUNC(PyDict_GetItemString)
@@ -188,7 +181,6 @@ static struct PythonFunc
    PYTHON_FUNC(PyObject_CallObject)
    PYTHON_FUNC(PyObject_GetAttr)
    PYTHON_FUNC(PyObject_GetAttrString)
-   PYTHON_FUNC(PyRun_SimpleFile)
    PYTHON_FUNC(PyRun_String)
    PYTHON_FUNC(PyString_InternFromString)
    PYTHON_FUNC(PyType_IsSubtype)
@@ -230,10 +222,27 @@ extern bool InitPythonDll()
    if ( dllPython.IsLoaded() )
    {
       // load all functions
+      void *funcptr;
       PythonFunc *pf = pythonFuncs;
       while ( pf->ptr )
       {
-         void *funcptr = dllPython.GetSymbol(pf->name);
+         if ( pf->nameAlt )
+         {
+            // try alt name and fail silently if it is not found
+            wxLogNull noLog;
+
+            funcptr = dllPython.GetSymbol(pf->nameAlt);
+         }
+         else
+         {
+            funcptr = NULL;
+         }
+
+         if ( !funcptr )
+         {
+            funcptr = dllPython.GetSymbol(pf->name);
+         }
+
          if ( !funcptr )
          {
             // error message is already given by GetSymbol()
