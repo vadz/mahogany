@@ -559,25 +559,34 @@ case "$USE_SSL" in
 	*)	ssl_inc="$prefix/include" ;;
 	esac
 
-	M_CHECK_MYHEADER(openssl/ssl.h,
+	dnl there is a subtlety here: we have to look for ssl.h and not for
+	dnl openssl/ssl.h directly because if the latter is in a standard
+	dnl location (e.g. /usr/include) we have no way of knowing which -I
+	dnl option we should use for c-client which wants to directly include
+	dnl <ssl.h> and not <openssl/ssl.h> -- using /usr/include/openssl
+	dnl as we used to do doesn't work in case when the SSL headers live
+	dnl under /usr/local
+	M_CHECK_MYHEADER(ssl.h,
 	[ \
-		$ssl_inc \
-		/include \
-		/usr/ssl/include \
-		/usr/local/include \
-		/usr/local/ssl/include \
-		/home/local/include \
-		/home/local/ssl/include \
+		$ssl_inc/openssl \
+		/include/openssl \
+		/usr/ssl/include/openssl \
+		/usr/local/include/openssl \
+		/usr/local/ssl/include/openssl \
+		/home/local/include/openssl \
+		/home/local/ssl/include/openssl \
 	],
 	[
 	   ssl_option=yes
-	   ssl_inc=$m_cv_header_openssl_ssl_h
+	   ssl_inc=$m_cv_header_ssl_h
 	],
 	   ssl_option=no
 	)
 
 	if test "$ssl_option" != "no"; then
-	    ssl_lib=`echo $ssl_inc | sed 's/include$/lib/'`
+	    dnl remove the openssl suffix now
+	    ssl_inc=`echo $ssl_inc | sed 's@/openssl$@@'`
+	    ssl_lib=`echo $ssl_inc | sed 's@include$@lib@'`
 
 	    LIBS_SSL=""
 
