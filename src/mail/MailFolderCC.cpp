@@ -666,8 +666,12 @@ public:
 
       m_msgProgress.Printf(_("Retrieving %lu message headers..."), m_nTotal);
 
-      m_progdlg = new MProgressDialog(name, m_msgProgress + _T("\n\n"), m_nTotal,
-                                      NULL, false, true);
+      m_progdlg = new MProgressDialog
+                      (
+                        name,
+                        m_msgProgress + _T("\n\n"),
+                        m_nTotal
+                      );
    }
 
    // get the progress dialog we use (may be NULL)
@@ -1096,7 +1100,10 @@ private:
       m_dlgProgress = new MProgressDialog
                           (
                            _("Retrieving data from server"),
-                           msg
+                           msg,
+                           100,
+                           NULL,
+                           0        // no flags
                           );
    }
 

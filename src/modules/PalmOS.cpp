@@ -1069,8 +1069,7 @@ PalmOSModule::Backup(void)
 
    // open progress dialog
    MProgressDialog *pd;
-   pd = new MProgressDialog(_("Palm Backup"), _("Backing up files"),
-                            max, NULL, false, true);
+   pd = new MProgressDialog(_("Palm Backup"), _("Backing up files"), max);
 
    // resetting values
    max = 0;
@@ -1296,8 +1295,7 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
             db[j] = temp;
          }
 
-   pd = new MProgressDialog(_("Palm Install"), _("Installing files"),
-                            dbcount, NULL, false, true);
+   pd = new MProgressDialog(_("Palm Install"), _("Installing files"), dbcount);
 
    // Install files
    StatusMessage(_("Installing Files ..."));

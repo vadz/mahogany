@@ -2801,9 +2801,7 @@ FilterRuleApply::CreateProgressDialog()
                   ),
                   _T("\n\n"),  // must be tall enough for 3 lines
                   2*m_msgs.GetCount(),
-                  frame,
-                  false,   // !"disable parent only"
-                  true     // show "cancel" button
+                  frame
                );
    }
    // else: don't show the progress dialog, just log in the status bar

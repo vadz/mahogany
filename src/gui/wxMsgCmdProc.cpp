@@ -1477,9 +1477,8 @@ MsgCmdProcImpl::ExtractAddresses(const UIdArray& selections)
                   _("Extracting addresses"),
                   _("Scanning messages..."),
                   count,
-                  GetFrame(),  // parent
-                  true,        // disable parent only
-                  true         // abort button
+                  GetFrame(),       // parent
+                  wxPD_CAN_ABORT
                 );
    }
    else

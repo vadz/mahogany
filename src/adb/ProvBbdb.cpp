@@ -700,8 +700,14 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
       LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version.c_str()));
    }
 
-   MProgressDialog status_frame(_T("BBDB import"), _T("Importing..."),
-                                 length, NULL);// open a status window:
+   MProgressDialog status_frame
+                   (
+                     _T("BBDB import"),
+                     _T("Importing..."),
+                     length,
+                     NULL,
+                     wxPD_APP_MODAL
+                   );
    do
    {
       strutil_getstrline(file, line);
@@ -769,7 +775,7 @@ BbdbEntryGroup::~BbdbEntryGroup()
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
          MProgressDialog status_frame(_T("BBDB"), _T("Saving..."),
-                                      length, NULL);// open a status window:
+                                      length, NULL, wxPD_APP_MODAL);
 
          String str;
          ofstream out(m_strName.mb_str());

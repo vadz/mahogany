@@ -164,7 +164,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    if(showDlg)
    {
       pdlg = new MProgressDialog(_("Please wait"), _("Loading image..."),
-                                 ms_NumOfHandlers+3, NULL, false, true);
+                                 ms_NumOfHandlers+3);
    }
    // suppress any error logging from image handlers, some of them
    // will fail.

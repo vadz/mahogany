@@ -740,7 +740,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the file '%s'..."),
                  n, fileName0.empty() ? fileName.c_str() : fileName0.c_str());
 
-      pd.reset(new MProgressDialog(GetName(), msg, 2*n, NULL));
+      pd.reset(new MProgressDialog(GetName(), msg, 2*n));
    }
 
    bool rc = true;
@@ -751,8 +751,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
       if ( msg )
       {
-         if ( pd )
-            pd->Update( 2*i + 1 );
+         if ( pd && !pd->Update( 2*i + 1 ) )
+            break;
 
          if ( !msg->WriteToString(tmpstr) )
          {
@@ -764,8 +764,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
             rc &= file.Write(tmpstr);
          }
 
-         if ( pd )
-            pd->Update( 2*i + 2);
+         if ( pd && !pd->Update( 2*i + 2) )
+            break;
       }
    }
 
@@ -821,10 +821,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
                    (
                      mf->GetName(),   // title
                      msg,             // label message
-                     2*n,             // range
-                     NULL,            // parent
-                     false,           // disable parent only
-                     true             // allow aborting
+                     2*n              // range
                    ));
    }
 
@@ -952,12 +949,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
       String msg;
       msg.Printf(_("Searching in %lu messages..."), nMessages);
 
-      progDlg = new MProgressDialog(GetName(),
-                                    msg,
-                                    nMessages,
-                                    NULL,
-                                    false /* disable parent only */,
-                                    true /* allow to abort */);
+      progDlg = new MProgressDialog(GetName(), msg, nMessages);
    }
 
    // check all messages
