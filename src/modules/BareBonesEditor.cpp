@@ -378,7 +378,7 @@ static bool CanConvert(wxFontEncoding encIn, wxFontEncoding encOut)
 // ----------------------------------------------------------------------------
 
 FormattedParagraph::FormattedParagraph(wxTextCtrl *control,
-   BareBonesEditor *editor)
+                                       BareBonesEditor *editor)
    : m_control(control), m_from(0), m_to(0), m_profile(editor->GetProfile())
 {
    m_margin = READ_CONFIG(m_profile,MP_WRAPMARGIN);
@@ -764,12 +764,16 @@ void wxBareBonesEditorNotebook::OnFormatParagraph(wxCommandEvent& /* event */)
 
    paragraph.FromCursor();
    paragraph.Format();
+
+   m_textControl->SetFocus();
 }
 
 void wxBareBonesEditorNotebook::OnFormatAll(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
    paragraph.FormatAll();
+
+   m_textControl->SetFocus();
 }
 
 void wxBareBonesEditorNotebook::OnUnformatParagraph(wxCommandEvent& /* event */)
@@ -778,12 +782,16 @@ void wxBareBonesEditorNotebook::OnUnformatParagraph(wxCommandEvent& /* event */)
 
    paragraph.FromCursor();
    paragraph.Unformat();
+
+   m_textControl->SetFocus();
 }
 
 void wxBareBonesEditorNotebook::OnUnformatAll(wxCommandEvent& /* event */)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
    paragraph.UnformatAll();
+
+   m_textControl->SetFocus();
 }
 
 void wxBareBonesEditorNotebook::OnAttachFile(wxCommandEvent& /* event */)
@@ -874,12 +882,17 @@ END_EVENT_TABLE()
 
 wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
                                                wxWindow *parent)
-                      : wxTextCtrl(parent,-1,_T(""),
-                                   wxDefaultPosition,wxDefaultSize,
+                      : wxTextCtrl(parent,
+                                   -1,
+                                   _T(""),
+                                   wxDefaultPosition,
+                                   wxDefaultSize,
                                    // use wxTE_RICH to allow for more than 64Kb
                                    // of text under Win9x and wxTE_RICH2 for
                                    // better charset support (also for Win32)
-                                   wxTE_MULTILINE | wxTE_RICH2)
+                                   wxTE_MULTILINE |
+                                   wxTE_RICH2 |
+                                   wxTE_PROCESS_TAB)
 {
    m_editor = editor;
 
