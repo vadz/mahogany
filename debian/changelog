@@ -1,15 +1,16 @@
 mahogany (0.66.0) stable; urgency=low
 
   * new text-only composer
+  * built-in Python interpreter works again
   * better UI for disablable dialog boxes
   * added support for using files, not registry, by default under Win
   * respect X-Attribution header when writing replies
   * added "Reply/Forward To" commands to mail address popup menu
   * show UTF-7/8-encoded headers [as] correctly [as possible]
 
- -- Vadim Zeitlin <vadim@wxwindows.org>  Tue, 30 Sep 2003 02:50:53 +0200
+ -- Vadim Zeitlin <vadim@wxwindows.org>  Mon, 05 Jan 2004 02:50:53 +0200
 
-mahogany (0.60) stable; urgency=medium
+mahogany (0.65) stable; urgency=medium
 
   * there was no Debian 0.65 release
 
