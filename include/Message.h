@@ -203,6 +203,14 @@ public:
    /** Return message references. */
    virtual String GetReferences(void) const = 0;
 
+   /** Return In-Reply-To header value or empty string */
+   virtual String GetInReplyTo(void) const = 0;
+
+   /** Return the list of newsgroups the messages was posted to or empty
+       string
+    */
+   virtual String GetNewsgroups() const = 0;
+
    /** Get message text.
        @return the uninterpreted message body
    */

@@ -320,17 +320,6 @@ public:
 
    virtual char GetFolderDelimiter() const;
 
-   /** RFC 2047 compliant message decoding: all encoded words from the header
-       are decoded, but only the encoding of the first of them is returned in
-       encoding output parameter (if non NULL).
-
-       @param in the RFC 2047 header string
-       @param encoding the pointer to the charset of the string (may be NULL)
-       @return the full 8bit decoded string
-   */
-   static String DecodeHeader(const String &in,
-                              wxFontEncoding *encoding = NULL);
-
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return ms_CClientInitialisedFlag; }
 

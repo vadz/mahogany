@@ -268,11 +268,7 @@ public:
       { m_FolderView->OnCommandEvent(event); }
 
    /// called by wxFolderView before previewing the focused message
-   void OnPreview()
-   {
-      m_itemPreviewed = GetFocusedItem();
-      Select(m_itemPreviewed, true);
-   }
+   void OnPreview();
    //@}
 
    /// change the options governing our appearance
@@ -1373,6 +1369,15 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
    UpdateFocus();
 
    event.Skip();
+}
+
+void wxFolderListCtrl::OnPreview()
+{
+   m_itemPreviewed = GetFocusedItem();
+
+   // as folder view calls us itself, no need to notify it
+   wxFolderListCtrlBlockOnSelect noselect(this);
+   Select(m_itemPreviewed, true);
 }
 
 // ----------------------------------------------------------------------------
@@ -3111,14 +3116,15 @@ wxFolderView::PreviewMessage(long uid)
 {
    if ( (unsigned long)uid != m_uidPreviewed )
    {
+      // remember which item we preview first as OnPreview() can call us back
+      // under wxGTK!
+      SetPreviewUID(uid);
+
       // select the item we preview in the folder control
       m_FolderCtrl->OnPreview();
 
       // show it in the preview window
       m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
-
-      // remember which item we preview
-      SetPreviewUID(uid);
    }
 }
 

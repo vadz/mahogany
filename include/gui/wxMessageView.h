@@ -176,9 +176,9 @@ private:
    /// the message part selected for MIME display
    // -- unused? int      mimeDisplayPart;
    /// this can hold an xface
-   XFace   *xface;
+   XFace   *m_xface;
    /// and the xpm for it
-   char **xfaceXpm;
+   char **m_xfaceXpm;
    /// string used for last search in message
    wxString m_FindString;
    /// Profile
@@ -226,6 +226,22 @@ protected:
 
    /// open the URL
    void OpenURL(const String& url, bool inNewWindow);
+
+   /// show all configured headers, returns "main" header encoding
+   wxFontEncoding ShowHeaders();
+
+   // NB: the functions below should be replaced with the calls to message
+   //     view interface methods soon (TODO!)
+
+   /// show all headers in the raw form
+   void DoShowRawHeaders(const String& header);
+
+   /// this function is called to show one header field
+   void DoShowHeader(const String& name, const String& value,
+                     wxFontEncoding encoding);
+
+   /// this function is called to show an X-Face
+   void DoShowXFace(char **xpmData);
 
    /// All values read from the profile
    struct AllProfileValues

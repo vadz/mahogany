@@ -1,14 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxMessageView.cc : a wxWindows look at a message                 *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
-
-#ifdef __GNUG__
-#   pragma implementation "wxMessageView.h"
-#endif
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxMessageView.cpp - message viewer window
+// Purpose:     implementation of msg viewer using wxWindows
+// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 M Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -17,6 +17,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
+#ifdef __GNUG__
+#   pragma implementation "wxMessageView.h"
+#endif
 
 #include "Mpch.h"
 
@@ -527,8 +531,8 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
    m_mailMessage = NULL;
    // mimeDisplayPart = 0; -- unused
-   xface = NULL;
-   xfaceXpm = NULL;
+   m_xface = NULL;
+   m_xfaceXpm = NULL;
    m_Parent = parent;
    m_FolderView = fv;
    m_MimePopup = NULL;
@@ -603,8 +607,8 @@ wxMessageView::~wxMessageView()
    }
 
    if(m_mailMessage) m_mailMessage->DecRef();
-   if(xface) delete xface;
-   if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
+   if(m_xface) delete m_xface;
+   if(m_xfaceXpm) wxIconManager::FreeImage(m_xfaceXpm);
    if(m_Profile) m_Profile->DecRef();
    if(m_folder) m_folder->DecRef();
 
@@ -758,7 +762,345 @@ wxMessageView::SetEncoding(wxFontEncoding encoding)
    }
 }
 
-// FIXME: this function is 565 lines long!!! split it!
+void wxMessageView::DoShowHeader(const String& headerName,
+                                 const String& headerValue,
+                                 wxFontEncoding encHeader)
+{
+   wxLayoutList *llist = GetLayoutList();
+
+   // don't show the header at all if there is no value
+   if ( !headerValue.empty() )
+   {
+      // insert the header name
+      llist->SetFontWeight(wxBOLD);
+      llist->SetFontColour(&m_ProfileValues.HeaderNameCol);
+
+      // always terminate the header names with ": " - configurability
+      // cannot be endless neither
+      llist->Insert(headerName + ": ");
+
+      // insert the header value
+      llist->SetFontWeight(wxNORMAL);
+      llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
+
+      wxLayoutImportText(llist, headerValue, encHeader);
+
+      if ( encHeader != wxFONTENCODING_SYSTEM )
+      {
+         // restore the default encoding
+         GetLayoutList()->SetFontEncoding(wxFONTENCODING_DEFAULT);
+      }
+
+      llist->LineBreak();
+   }
+}
+
+void wxMessageView::DoShowXFace(char **xpmData)
+{
+   wxLayoutList *llist = GetLayoutList();
+   llist->Insert(new wxLayoutObjectIcon(new wxBitmap(xpmData)));
+   llist->LineBreak();
+}
+
+void wxMessageView::DoShowRawHeaders(const String& header)
+{
+   wxLayoutList *llist = GetLayoutList();
+   wxLayoutImportText(llist, header);
+   llist->LineBreak();
+}
+
+wxFontEncoding
+wxMessageView::ShowHeaders()
+{
+   // if wanted, display all header lines
+   if ( m_ProfileValues.showHeaders )
+   {
+      DoShowRawHeaders(m_mailMessage->GetHeader());
+   }
+
+   // retrieve all headers at once instead of calling Message::GetHeaderLine()
+   // many times: this is incomparably faster with remote servers (one round
+   // trip to server is much less expensive than a dozen of them!)
+
+   // all the headers the user configured
+   wxArrayString headersUser =
+      strutil_restore_array(':', READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
+
+   // X-Face is handled separately
+#ifdef HAVE_XFACES
+   if ( m_ProfileValues.showFaces )
+   {
+      headersUser.Insert("X-Face", 0);
+   }
+#endif // HAVE_XFACES
+
+   size_t countHeaders = headersUser.GetCount();
+
+   // stupidly, MP_MSGVIEW_HEADERS_D is terminated with a ':' so there
+   // is a dummy empty header at the end - just ignore it for compatibility
+   // with existing config files
+   if ( countHeaders && headersUser.Last().empty() )
+   {
+      countHeaders--;
+   }
+
+   if ( !countHeaders )
+   {
+      // no headers at all, don't waste time below
+      return wxFONTENCODING_SYSTEM;
+   }
+
+   // these headers can be taken from the envelope instead of retrieving them
+   // from server, so exclude them from headerNames which is the array of
+   // headers we're going to retrieve from server
+   //
+   // the trouble is that we want to keep the ordering of headers correct,
+   // hence all the contorsions below: we rmemeber the indices and then inject
+   // them back into the code processing headers in the loop
+   enum EnvelopHeader
+   {
+      EnvelopHeader_From,
+      EnvelopHeader_To,
+      EnvelopHeader_Cc,
+      EnvelopHeader_Bcc,
+      EnvelopHeader_Subject,
+      EnvelopHeader_Date,
+      EnvelopHeader_Newsgroups,
+      EnvelopHeader_MessageId,
+      EnvelopHeader_InReplyTo,
+      EnvelopHeader_References,
+      EnvelopHeader_Max
+   };
+
+   size_t n;
+
+   // put the stuff into the array to be able to use Index() below: a bit
+   // silly but not that much as it also gives us index checking in debug
+   // builds
+   static wxArrayString envelopHeaders;
+   if ( envelopHeaders.IsEmpty() )
+   {
+      // init it on first use
+      static const char *envelopHeadersNames[] =
+      {
+         "From",
+         "To",
+         "Cc",
+         "Bcc",
+         "Subject",
+         "Date",
+         "Newsgroups",
+         "Message-Id",
+         "In-Reply-To",
+         "References",
+      };
+
+      ASSERT_MSG( EnvelopHeader_Max == WXSIZEOF(envelopHeadersNames),
+                  "forgot to update something - should be kept in sync!" );
+
+      for ( n = 0; n < WXSIZEOF(envelopHeadersNames); n++ )
+      {
+         envelopHeaders.Add(envelopHeadersNames[n]);
+      }
+   }
+
+   // the index of the envelop headers if we have to show it, -1 otherwise
+   int envelopIndices[EnvelopHeader_Max];
+   for ( n = 0; n < EnvelopHeader_Max; n++ )
+   {
+      envelopIndices[n] = wxNOT_FOUND;
+   }
+
+   // a boolean array, in fact
+   wxArrayInt headerIsEnv;
+   headerIsEnv.Alloc(countHeaders);
+
+   wxArrayString headerNames;
+
+   size_t countNonEnvHeaders = 0;
+   for ( n = 0; n < countHeaders; n++ )
+   {
+      const wxString& h = headersUser[n];
+
+      // we don't need to retrieve envelop headers
+      int index = envelopHeaders.Index(h, false /* case insensitive */);
+      if ( index == wxNOT_FOUND )
+      {
+         countNonEnvHeaders++;
+      }
+
+      headerIsEnv.Add(index != wxNOT_FOUND);
+      headerNames.Add(h);
+   }
+
+   // any non envelop headers to retrieve?
+   size_t nNonEnv;
+   wxArrayInt headerNonEnvEnc;
+   wxArrayString headerNonEnvValues;
+   if ( countNonEnvHeaders )
+   {
+      const char **headerPtrs = new const char *[countNonEnvHeaders + 1];
+
+      // have to copy the headers into a temp buffer unfortunately
+      for ( nNonEnv = 0, n = 0; n < countHeaders; n++ )
+      {
+         if ( !headerIsEnv[n] )
+         {
+            headerPtrs[nNonEnv++] = headerNames[n].c_str();
+         }
+      }
+
+      // did their number change from just recounting?
+      ASSERT_MSG( nNonEnv == countNonEnvHeaders, "logic error" );
+
+      headerPtrs[countNonEnvHeaders] = NULL;
+
+      // get them all at once
+      headerNonEnvValues = m_mailMessage->GetHeaderLines(headerPtrs,
+                                                         &headerNonEnvEnc);
+
+      delete [] headerPtrs;
+   }
+
+   // combine the values of the headers retrieved above with those of the
+   // envelop headers into one array
+   wxArrayInt headerEncodings;
+   wxArrayString headerValues;
+   for ( nNonEnv = 0, n = 0; n < countHeaders; n++ )
+   {
+      if ( headerIsEnv[n] )
+      {
+         int envhdr = envelopHeaders.Index(headerNames[n]);
+         if ( envhdr == wxNOT_FOUND )
+         {
+            // if headerIsEnv, then it must be in the array
+            FAIL_MSG( "logic error" );
+
+            continue;
+         }
+
+         // get the raw value
+         String value;
+         switch ( envhdr )
+         {
+            case EnvelopHeader_From:
+            case EnvelopHeader_To:
+            case EnvelopHeader_Cc:
+            case EnvelopHeader_Bcc:
+               {
+                  MessageAddressType mat;
+                  switch ( envhdr )
+                  {
+                     default: FAIL_MSG( "forgot to add header here ");
+                     case EnvelopHeader_From: mat = MAT_FROM; break;
+                     case EnvelopHeader_To: mat = MAT_TO; break;
+                     case EnvelopHeader_Cc: mat = MAT_CC; break;
+                     case EnvelopHeader_Bcc: mat = MAT_BCC; break;
+                  }
+
+                  String name;
+                  String addr = m_mailMessage->Address(name, mat);
+                  value = GetFullEmailAddress(name, addr);
+               }
+               break;
+
+            case EnvelopHeader_Subject:
+               value = m_mailMessage->Subject();
+               break;
+
+            case EnvelopHeader_Date:
+               // don't read the header line directly because Date() function
+               // might return date in some format different from RFC822 one
+               value = m_mailMessage->Date();
+               break;
+
+            case EnvelopHeader_Newsgroups:
+               value = m_mailMessage->GetNewsgroups();
+               break;
+
+            case EnvelopHeader_MessageId:
+               value = m_mailMessage->GetId();
+               break;
+
+            case EnvelopHeader_InReplyTo:
+               value = m_mailMessage->GetInReplyTo();
+               break;
+
+            case EnvelopHeader_References:
+               value = m_mailMessage->GetReferences();
+               break;
+
+
+            default:
+               FAIL_MSG( "unknown envelop header" );
+         }
+
+         // extract encoding info from it
+         wxFontEncoding enc;
+         headerValues.Add(MailFolder::DecodeHeader(value, &enc));
+         headerEncodings.Add(enc);
+      }
+      else // non env header
+      {
+         headerValues.Add(headerNonEnvValues[nNonEnv]);
+         headerEncodings.Add(headerNonEnvEnc[nNonEnv]);
+
+         nNonEnv++;
+      }
+   }
+
+   // for the loop below: we start it at 0 normally but at 1 if we have an
+   // X-Face as we don't want to show it verbatim ...
+   n = 0;
+
+   // ... instead we show an icon for it
+   if ( m_ProfileValues.showFaces )
+   {
+      wxString xfaceString = headerValues[n++];
+      if ( xfaceString.length() > 2 )   //\r\n
+      {
+         m_xface = new XFace();
+         m_xface->CreateFromXFace(xfaceString.c_str());
+         if ( m_xface->CreateXpm(&m_xfaceXpm) )
+         {
+            DoShowXFace(m_xfaceXpm);
+         }
+      }
+   }
+
+   // show the headers using the correct encoding now
+   wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
+   for ( ; n < countHeaders; n++ )
+   {
+      wxFontEncoding encHeader = (wxFontEncoding)headerEncodings[n];
+
+      // remember the encoding that we have found in the headers: some mailers
+      // are broken in so weird way that they use correct format for the
+      // headers but fail to specify charset parameter in Content-Type (the
+      // best of the Web mailers do this - the worst/normal just send 8 bit in
+      // the headers too)
+      if ( encHeader != wxFONTENCODING_SYSTEM )
+      {
+         // we deal with them by supposing that the body has the same encoding
+         // as the headers by default, so we remember encInHeaders here and
+         // use it later when showing the body
+         encInHeaders = encHeader;
+      }
+      else // no encoding in the header
+      {
+         // use the user specified encoding if none specified in the header
+         // itself
+         if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+            encHeader = m_encodingUser;
+      }
+
+      DoShowHeader(headerNames[n], headerValues[n], encHeader);
+   }
+
+   return encInHeaders;
+}
+
+// FIXME: this function is horribly long!!! split it!
 void
 wxMessageView::Update(void)
 {
@@ -775,160 +1117,13 @@ wxMessageView::Update(void)
 
    m_uid = m_mailMessage->GetUId();
 
-   // if wanted, display all header lines
-   if(m_ProfileValues.showHeaders)
-   {
-      wxLayoutImportText(llist, m_mailMessage->GetHeader());
-      llist->LineBreak();
-   }
+   // deal with the headers first
+   wxFontEncoding encInHeaders = ShowHeaders();
 
-   // retrieve all headers at once instead of calling Message::GetHeaderLine()
-   // many times: this is incomparably faster with remote servers (one round
-   // trip to server is much less expensive than a dozen of them!)
-   wxArrayString headerNames;
-
-#ifdef HAVE_XFACES
-   if(m_ProfileValues.showFaces)
-   {
-      headerNames.Add("X-Face");
-   }
-#endif // HAVE_XFACES
-
-   // all the others the user configured
-   wxArrayString headersUser =
-      strutil_restore_array(':', READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
-
-   size_t n,
-          countUser = headersUser.GetCount();
-   
-   for ( n = 0; n < countUser; n++ )
-   {
-      const wxString& h = headersUser[n];
-
-      // these 2 headers are handled in special way in the loop below so we
-      // don't need to retrieve them here
-      //
-      // TODO: we probably should take subject, newsgroups, to, cc and bcc
-      //       from the envelope too as c-client does ask the server for them
-      //       even if we already have them locally
-      if ( h != "From" && h != "Date" )
-         headerNames.Add(h);
-   }
-
-   wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
-
-   size_t countHeaders = headerNames.GetCount();
-   if ( countHeaders )
-   {
-      const char **headerPtrs = new const char *[countHeaders + 1];
-
-      // have to copy the headers into a temp buffer unfortunately
-      for ( n = 0; n < countHeaders; n++ )
-      {
-         headerPtrs[n] = headerNames[n].c_str();
-      }
-
-      headerPtrs[countHeaders] = NULL;
-
-      // get them all at once
-      wxArrayInt headerEncodings;
-      wxArrayString headerValues =
-         m_mailMessage->GetHeaderLines(headerPtrs, &headerEncodings);
-
-      delete [] headerPtrs;
-
-      // for the loop below
-      n = 0;
-
-      // show X-Face if any
-      if ( m_ProfileValues.showFaces )
-      {
-         wxString xfaceString = headerValues[n++];
-         if ( xfaceString.length() > 2 )   //\r\n
-         {
-            xface = new XFace();
-            xface->CreateFromXFace(xfaceString.c_str());
-            if(xface->CreateXpm(&xfaceXpm))
-            {
-               llist->Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
-               llist->LineBreak();
-            }
-         }
-      }
-
-      // show the headers using the correct encoding now
-      wxString headerName, headerValue;
-      for ( ; n < countHeaders; n++ )
-      {
-         wxFontEncoding encHeader = (wxFontEncoding)headerEncodings[n];
-         headerName = headerNames[n];
-
-         // we will usually detect the encoding in the headers properly (if a
-         // mailer does use RFC 2047, it will use it properly too), but if we
-         // found none it might be because the mailer is broken and sends 8
-         // bit strings (almost all Web mailers do!) in headers in which case
-         // we shall take the user-specified encoding
-         if ( m_encodingUser != wxFONTENCODING_SYSTEM &&
-              encHeader == wxFONTENCODING_SYSTEM )
-         {
-            encHeader = m_encodingUser;
-         }
-
-         // check for several special cases
-         if ( headerName == "From" )
-         {
-            String name;
-            String from = m_mailMessage->Address(name, MAT_FROM);
-            headerValue = GetFullEmailAddress(name, from);
-         }
-         else if ( headerName == "Date" )
-         {
-            // don't read the header line directly because Date() function
-            // might return date in some format different from RFC822 one
-            headerValue = m_mailMessage->Date();
-         }
-         else // any other header
-         {
-            headerValue = headerValues[n];
-         }
-
-         // don't show the header if there is no value
-         if ( !headerValue.empty() )
-         {
-            // always terminate the header names with ": " - configurability
-            // cannot be endless neither
-            headerName += ": ";
-
-            // insert the header name
-            llist->SetFontWeight(wxBOLD);
-            llist->SetFontColour(&m_ProfileValues.HeaderNameCol);
-            llist->Insert(headerName);
-
-            // insert the header value
-            llist->SetFontWeight(wxNORMAL);
-            llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
-
-            wxLayoutImportText(llist, headerValue, encHeader);
-
-            llist->LineBreak();
-
-            if ( encHeader != wxFONTENCODING_SYSTEM )
-            {
-               // remember that we had such encoding in the headers
-               if ( encInHeaders == wxFONTENCODING_SYSTEM )
-                  encInHeaders = encHeader;
-
-               // restore the default encoding
-               GetLayoutList()->SetFontEncoding(wxFONTENCODING_DEFAULT);
-            }
-         }
-      }
-   }
-
-   // restore the normal colour
+   // restore the normal colour as ShowHeaders() may change it
    llist->SetFontColour(&m_ProfileValues.FgCol);
 
-   // get the encoding rom the message headers
+   // get/guess the body encoding
    wxFontEncoding encBody;
    if ( m_encodingUser != wxFONTENCODING_SYSTEM )
    {

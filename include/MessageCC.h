@@ -65,10 +65,26 @@ public:
    */
    virtual String GetHeader(void) const;
 
+   /** @name Envelop headers */
+   //@{
    /** get Subject line
        @return Subject entry
    */
    virtual String Subject(void) const;
+
+   /** return the date of the message */
+   virtual time_t GetDate() const;
+
+   /** Return message id. */
+   virtual String GetId(void) const ;
+
+   /** Return message references. */
+   virtual String GetReferences(void) const;
+
+   virtual String GetInReplyTo(void) const;
+
+   virtual String GetNewsgroups() const;
+   //@}
 
    virtual size_t GetAddresses(MessageAddressType type,
                                wxArrayString& addresses) const;
@@ -176,15 +192,6 @@ public:
 
    // get the size in bytes
    virtual unsigned long GetSize() const;
-
-   /** return the date of the message */
-   virtual time_t GetDate() const;
-
-   /** Return message id. */
-   virtual String GetId(void) const ;
-
-   /** Return message references. */
-   virtual String GetReferences(void) const;
 
    /** Query the section specification string of body part.
        @param  n part number

@@ -1048,7 +1048,7 @@ static MsgStatus AnalyzeStatus(int stat)
  */
 
 /* static */
-String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
+String MailFolder::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
 {
    // we don't enforce the sanity checks on charset and encoding - should we?
    // const char *specials = "()<>@,;:\\\"[].?=";
@@ -2274,6 +2274,8 @@ MailFolderCC::PingReopen(void)
          wxLogTrace(TRACE_MF_CALLS,
                     "MailFolderCC::Ping() forcing close on folder %s.",
                     GetName().c_str());
+
+         // FIXME!!!!
          Close();
       }
 

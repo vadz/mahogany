@@ -338,12 +338,31 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 }
 
 // ----------------------------------------------------------------------------
-// headers access
+// MessageCC: envelop (i.e. fast) headers access
 // ----------------------------------------------------------------------------
 
 String MessageCC::Subject(void) const
 {
    return m_subject;
+}
+
+time_t
+MessageCC::GetDate() const
+{
+   return m_date;
+}
+
+String MessageCC::Date(void) const
+{
+   CheckEnvelope();
+
+   String date;
+   if ( m_Envelope )
+      date = m_Envelope->date;
+   else
+      FAIL_MSG( "should have envelop in Date()" );
+
+   return date;
 }
 
 String MessageCC::From(void) const
@@ -352,6 +371,90 @@ String MessageCC::From(void) const
    String email = Address(name, MAT_FROM);
    return GetFullEmailAddress(name, email);
 }
+
+String
+MessageCC::GetId(void) const
+{
+   CheckEnvelope();
+
+   String id;
+
+   if ( !m_Body )
+   {
+      FAIL_MSG( "no envelope in GetId" );
+   }
+   else
+   {
+      id = m_Envelope->message_id;
+   }
+
+   return id;
+}
+
+String
+MessageCC::GetNewsgroups(void) const
+{
+   CheckEnvelope();
+
+   String newsgroups;
+
+   if ( !m_Envelope )
+   {
+      FAIL_MSG( "no envelope in GetNewsgroups" );
+   }
+   else
+   {
+      if ( !m_Envelope->ngbogus )
+      {
+         newsgroups = m_Envelope->references;
+      }
+      //else: what does ngbogus really mean??
+   }
+
+   return newsgroups;
+}
+
+String
+MessageCC::GetReferences(void) const
+{
+   CheckEnvelope();
+
+   String ref;
+
+   if ( !m_Envelope )
+   {
+      FAIL_MSG( "no envelope in GetReferences" );
+   }
+   else
+   {
+      ref = m_Envelope->references;
+   }
+
+   return ref;
+}
+
+String
+MessageCC::GetInReplyTo(void) const
+{
+   CheckEnvelope();
+
+   String inreplyto;
+
+   if ( !m_Envelope )
+   {
+      FAIL_MSG( "no envelope in GetReferences" );
+   }
+   else
+   {
+      inreplyto = m_Envelope->references;
+   }
+
+   return inreplyto;
+}
+
+// ----------------------------------------------------------------------------
+// MessageCC: any header access (may require a trip to server)
+// ----------------------------------------------------------------------------
 
 String MessageCC::GetHeader(void) const
 {
@@ -665,18 +768,9 @@ MessageCC::Address(String &nameAll, MessageAddressType type) const
    return emailAll;
 }
 
-String MessageCC::Date(void) const
-{
-   CheckEnvelope();
-
-   String date;
-   if ( m_Envelope )
-      date = m_Envelope->date;
-   else
-      FAIL_MSG( "should have envelop in Date()" );
-
-   return date;
-}
+// ----------------------------------------------------------------------------
+// message text
+// ----------------------------------------------------------------------------
 
 String
 MessageCC::FetchText(void)
@@ -1039,12 +1133,6 @@ MessageCC::GetSize() const
    return mc->rfc822_size;
 }
 
-time_t
-MessageCC::GetDate() const
-{
-   return m_date;
-}
-
 bool
 MessageCC::ParseMIMEStructure()
 {
@@ -1254,43 +1342,9 @@ MessageCC::GetPartDesc(int n)
    return GetPartInfo(n)->description;
 }
 
-String
-MessageCC::GetId(void) const
-{
-   CheckEnvelope();
-
-   String id;
-
-   if ( !m_Body )
-   {
-      FAIL_MSG( "no envelope in GetId" );
-   }
-   else
-   {
-      id = m_Envelope->message_id;
-   }
-
-   return id;
-}
-
-String
-MessageCC::GetReferences(void) const
-{
-   CheckEnvelope();
-
-   String ref;
-
-   if ( !m_Body )
-   {
-      FAIL_MSG( "no envelope in GetReferences" );
-   }
-   else
-   {
-      ref = m_Envelope->references;
-   }
-
-   return ref;
-}
+// ----------------------------------------------------------------------------
+// MessageCC::WriteToString
+// ----------------------------------------------------------------------------
 
 bool
 MessageCC::WriteToString(String &str, bool headerFlag) const
