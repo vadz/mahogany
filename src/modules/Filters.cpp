@@ -2004,7 +2004,9 @@ static bool CheckSubjectFor8Bit(const String& subject)
 static bool CheckSubjectForCapitals(const String& subject)
 {
    bool hasSpace = false;
-   for ( const wxChar *pc = subject; *pc; pc++ )
+   for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
+         *pc;
+         pc++ )
    {
       if ( (*pc > 127) || islower(*pc) )
       {
