@@ -341,7 +341,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
-   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear\tCtrl-C"),            gettext_noop("Delete message contents")  , FALSE },
+   { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , FALSE },
    { WXMENU_COMPOSE_EVAL_TEMPLATE, gettext_noop("E&valuate template"), gettext_noop("Use the template to create skeleton of a message")  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor\tCtrl-E"),gettext_noop("Invoke alternative editor"), FALSE },
