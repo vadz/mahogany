@@ -116,13 +116,17 @@ extern const MOption MP_WIDTH;
 // ----------------------------------------------------------------------------
 
 #ifdef    OS_WIN
-#   define Mahogany      "Mahogany"
-#   define PythonPowered "PythonPowered"
+#  define Mahogany      "Mahogany"
+#  define PythonPowered "PythonPowered"
 #else   //real XPMs
-#   include "../src/icons/Msplash.xpm"
-#   ifdef USE_PYTHON
+#  include "../src/icons/Msplash.xpm"
+#  include "../src/icons/wxlogo.xpm"
+#  ifdef USE_SSL
+#     include "../src/icons/ssllogo.xpm"
+#  endif
+#  ifdef USE_PYTHON
 #     include "../src/icons/PythonPowered.xpm"
-#   endif
+#  endif
 #endif  //Win/Unix
 
 // under Windows, we might not have PNG support compiled in, btu we always have
@@ -1049,9 +1053,15 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
+   wxMemoryFSHandler::AddFile("wxlogo" MEMORY_FS_FILE_EXT, wxBITMAP(wxlogo), MEMORY_FS_FILE_FMT);
+
+#ifdef USE_SSL
+   wxMemoryFSHandler::AddFile("ssllogo" MEMORY_FS_FILE_EXT, wxBITMAP(ssllogo), MEMORY_FS_FILE_FMT);
+#endif // USE_SSL
+
 #ifdef USE_PYTHON
    wxMemoryFSHandler::AddFile("pythonpowered" MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
-#endif
+#endif // USE_PYTHON
 
    top->SetPage("<body text=#000000 bgcolor=#ffffff>"
                 "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
@@ -1104,21 +1114,32 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<font size=2>"
                    "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
                    "</font>"
-                   "<p>"
-                   "And we couldn't have done it without the "
-                   "wxWindows toolkit (http://www.wxwindows.org/)!"
                    "<hr>"
-                   "This Product includes software developed and copyright "
-                   "by the University of Washington."
+                   "<img src=\"memory:wxlogo" MEMORY_FS_FILE_EXT "\"><br>"
+                   "Mahogany is built on the cross-platform C++ framework "
+                   "wxWindows (http://www.wxwindows.org/)."
+                   "<p>"
+                   "This product includes software developed and copyright "
+                   "by the University of Washington written by Mark Crispin."
 #ifdef USE_SSL
                    "<p>"
+                   "<img src=\"memory:ssllogo" MEMORY_FS_FILE_EXT "\"><br>"
                    "This product includes software developed by the OpenSSL Project "
                    "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
                    "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
                    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
 #endif // USE_SSL
+
+#ifdef USE_PYTHON
                    "<p>"
-                   "The Mahogany Team would like to acknowledge the support of "
+                   "<img src=\"memory:pythonpowered" MEMORY_FS_FILE_EXT "\"><br>"
+                   "This program contains an embedded Python interpreter."
+#endif // USE_PYTHON
+                   "<hr>"
+                   "Special thanks to Daniel Lord for hardware donations."
+                   "<p>"
+                   "The Mahogany Team would also like to acknowledge "
+                   "the support of "
                    "Anthemion Software, "
                    "Heriot-Watt University, "
                    "SourceForge.net, "
