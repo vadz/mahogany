@@ -1460,7 +1460,7 @@ void wxOptionsPage::UpdateUI()
       if ( nCheckField != -1 ) {
          wxControl *control = GetControl(n);
 
-         // the control might be NULL if it is an advancement control and the
+         // the control might be NULL if it is an advanced control and the
          // user level is novice
          if ( !control )
             continue;
@@ -1546,8 +1546,11 @@ void wxOptionsPage::UpdateUI()
                EnableListBox(wxDynamicCast(control, wxListBox), bEnable);
                break;
 
-            default:
+            case Field_Combo:
                EnableControlWithLabel(control, bEnable);
+
+            default:
+                ;
          }
       }
       // this field is always enabled

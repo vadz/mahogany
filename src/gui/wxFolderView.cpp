@@ -1820,12 +1820,16 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
             // it might be a folder from popup menu
-            MFolder *folder = wxFolderMenu::GetFolder(m_FolderCtrl->GetFolderMenu(),
-                                                      cmd);
+            MFolder *folder = wxFolderMenu::GetFolder
+                              (
+                                 m_FolderCtrl->GetFolderMenu(),
+                                 cmd
+                              );
             if ( folder )
             {
                GetSelections(selections);
                SaveMessagesToFolder(selections, folder, true /* move */);
+
                folder->DecRef();
             }
          }
