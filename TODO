@@ -25,9 +25,18 @@ $Id$
 		  window? Should speed up things N*(N-1) fold...
 		- scrollbars don't appear immediately in long
 		  composeview messages
+
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
+
+		Write proper ASMailFolder constructor
+
+		Check before reopening a closed MailFolder in
+		MailCollector, some kind of MailFolder::IsOK()?
+
+		Auto-Expunge question appears even when we have no
+                deleted messages??
 
 	KB	Finish XFace dialog:
 		- check image for correct size
