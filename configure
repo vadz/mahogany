@@ -4580,7 +4580,7 @@ echo "configure:4539: checking for wxWindows version >= $min_wx_version" >&5
         wx_libs_arg="--libs="
       fi
       WX_LIBS=`$WX_CONFIG_WITH_ARGS $wx_libs_arg`
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static $wx_libs_arg`
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static $wx_libs_arg 2>&1 > /dev/null`
 
             wx_has_cppflags=""
       if test $wx_config_major_version -gt 2; then
