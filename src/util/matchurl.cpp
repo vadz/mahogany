@@ -764,20 +764,26 @@ match:
    // mail address has a reasonable minimal length ("ab@foo.com" and
    // "www.xyz.fr" are probably the shortest ones we can have, hence 10) which
    // at least avoids matching the bare '@'s
-   //
-   // also check that we have at least one dot in the domain part for the mail
-   // addresses and two dots for the other URLs, otherwise it probably isn't an
-   // address/URL neither
    bool good = (p - start) >= 10;
 
    if ( good )
    {
+      // also check that we have at least one dot in the domain part for the
+      // mail addresses
       const char *
          pDot = (char *)memchr(text + pos + 1, '.', p - text - pos - 1);
       if ( !pDot )
+      {
          good = false;
+      }
       else if ( !isMail )
-         good = memchr(pDot + 1, '.', p - pDot - 1) != NULL;
+      {
+         // and has either two dots or at least a slash the other URLs,
+         // otherwise it probably isn't an address/URL neither (stuff like
+         // "... using ftp.If you ... " shouldn't be recognized as an URL)
+         good = memchr(pDot + 1, '.', p - pDot - 1) != NULL ||
+                  memchr(pDot + 1, '/', p - pDot - 1) != NULL;
+      }
    }
 
    if ( !good )
