@@ -115,9 +115,6 @@ public:
    const char *GetName() const
       { return m_astrFields[0]; }
 
-   // get path to our entry in config file
-   wxString GetPath() const;
-
    /**@name the parser */
    //@{
    enum FieldTypes { Field_String, Field_Integer};
@@ -176,9 +173,6 @@ public:
    virtual void DeleteGroup(const String& strName);
 
    virtual AdbEntry *FindEntry(const char *szName);
-
-   // get the full path to our group (not '/' terminated)
-   wxString GetPath() const;
 
 private:
    virtual ~BbdbEntryGroup();
@@ -861,6 +855,7 @@ BbdbEntryGroup::GetEntry(const String& name) const
 
    BbdbEntryList::iterator i;
 
+   wxLogDebug("BbdbEntryGroup::GetEntry() called with: %s", name.c_str());
    for(i = m_entries->begin(); i != m_entries->end(); i++)
    {
       (**i).MOcheck();
@@ -883,6 +878,7 @@ BbdbEntryGroup::Exists(const String& path) const
 AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
 {
    MOcheck();
+   wxLogDebug("BbdbEntryGroup::GetGroup() called with: %s", name.c_str());
    return NULL;
 }
 
@@ -927,6 +923,7 @@ AdbEntry *
 BbdbEntryGroup::FindEntry(const char *szName)
 {
    MOcheck();
+   wxLogDebug("BbdbEntryGroup::FindEntry() called with: %s", szName);
    return NULL;
 }
 
