@@ -152,6 +152,14 @@ public:
    */
    bool SaveAsDraft() const;
 
+   /**
+     Delete the draft of this message from the drafts folder, if any (i.e. it
+     is safe to call this function unconditionally)
+
+     @return true if the draft message was deleted, false otherwise
+   */
+   bool DeleteDraft();
+
    /** Send the message.
        @param schedule if TRUE, call calendar module to schedule sending
        @return true if successful, false otherwise
@@ -210,9 +218,6 @@ public:
    /// reset the "dirty" flag
    void ResetDirty();
 
-   /// set the message encoding to be equal to the encoding of this msg
-   void SetEncodingToSameAs(Message *msg);
-
    // implement base class virtual
    virtual wxComposeView *GetComposeView() { return this; }
    virtual wxFrame *GetFrame() { return this; }
@@ -252,6 +257,12 @@ protected:
 
    /// set encoding to use
    void SetEncoding(wxFontEncoding encoding);
+
+   /// set the message encoding to be equal to the encoding of this msg
+   void SetEncodingToSameAs(Message *msg);
+
+   /// set the draft message we were started with
+   void SetDraft(Message *msg);
 
    /// verify that the message can be sent
    bool IsReadyToSend() const;
@@ -411,6 +422,9 @@ private:
    /// If replying, this is the original message
    Message *m_OriginalMessage;
 
+   /// if we're continuing to edit a draft, the original draft message
+   Message *m_DraftMessage;
+
    /// the template to use or an empty string
    String m_template;
 
@@ -452,6 +466,9 @@ private:
                                            wxComposeView::Mode mode,
                                            wxComposeView::MessageKind kind,
                                            bool hide);
+
+   // it uses our m_DraftMessage
+   friend Composer *Composer::EditMessage(Profile *profile, Message *msg);
 
    // wxWindows macros
    DECLARE_EVENT_TABLE()
