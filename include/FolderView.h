@@ -32,7 +32,7 @@ public:
          ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
       }
    /// update the user interface
-   virtual void Update(void) = 0;
+   virtual void Update(class HeaderInfoList *list = NULL) = 0;
    /// virtual destructor
    virtual ~FolderView()
       {

@@ -56,7 +56,7 @@ public:
    ~wxFolderView();
 
    /// update it
-   void  Update(void);
+   void  Update(class HeaderInfoList *listing = NULL);
 
    /** Set the associated folder.
        @param folder the folder to display or NULL

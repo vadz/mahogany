@@ -50,18 +50,20 @@ public:
    virtual bool TransferDataFromWindow();
 
    bool Update(wxCommandEvent & ev);
+   bool InternalUpdate(size_t n);
    ~wxModulesDialog();
 protected:
    MModuleListing *m_Listing;
    kbStringList    m_Modules;
    wxCheckListBox *m_checklistBox;
-   
+   wxTextCtrl     *m_textCtrl;
    kbStringList::iterator FindInList(const wxString &module) const;
    DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxModulesDialog, wxDialog)
-   EVT_CHECKLISTBOX(-1, wxModulesDialog::Update)
+//   EVT_CHECKLISTBOX(-1, wxModulesDialog::Update)
+   EVT_LISTBOX(-1, wxModulesDialog::Update)
 END_EVENT_TABLE()
 
 
@@ -98,23 +100,34 @@ wxModulesDialog::wxModulesDialog(wxFrame *parent)
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->height.PercentOf(box, wxHeight, 60);
 
    m_checklistBox = new wxCheckListBox(this, -1);
    m_checklistBox->SetConstraints(c);
 
 
+   m_textCtrl = new wxTextCtrl(this, -1, "", wxDefaultPosition,
+                               wxDefaultSize, wxTE_MULTILINE);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_checklistBox, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_textCtrl->SetConstraints(c);
+   
    size_t count = m_Listing ? m_Listing->Count() : 0;
 
    kbStringList::iterator i;
    // add the items to the checklistbox
    for ( size_t n = 0; n < count; n++ )
    {
-      m_checklistBox->Append((*m_Listing)[n].GetName());
+      m_checklistBox->Append((*m_Listing)[n].GetShortDescription());
       i = FindInList((*m_Listing)[n].GetName());
       if(i != m_Modules.end())
          m_checklistBox->Check(n, TRUE);
    }
+   if(count)
+      InternalUpdate(0);
 }
 
 wxModulesDialog::~wxModulesDialog()
@@ -127,14 +140,21 @@ bool
 wxModulesDialog::Update(wxCommandEvent & ev)
 {
    int n = ev.GetInt(); // which one was clicked
-   bool selected = m_checklistBox->IsChecked(n);
-   kbStringList::iterator i =
-      FindInList(m_checklistBox->GetString(n)); 
+   return Update(n);
+}
 
-   if(selected && i == m_Modules.end())
-      m_Modules.push_back(new wxString(m_checklistBox->GetString(n)));
-   if(! selected && i != m_Modules.end())
-      m_Modules.erase(i);
+bool
+wxModulesDialog::InternalUpdate(size_t n)
+{
+   ASSERT(n < m_Listing->Count());
+   m_textCtrl->Clear();
+   *m_textCtrl
+      << _("Module Name: ") << (*m_Listing)[n].GetName() << '\n'
+      << _("Version: ") <<  (*m_Listing)[n].GetVersion() << '\n'
+      << _("Author: ") <<   (*m_Listing)[n].GetAuthor() << '\n'
+      << '\n'
+      << (*m_Listing)[n].GetDescription() << '\n';
+
    return TRUE;
 }
    

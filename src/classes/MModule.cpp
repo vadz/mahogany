@@ -66,7 +66,6 @@ public:
    /// Returns the Module's name as used in LoadModule().
    virtual const char * GetName(void)
       { return (*m_GetName)(); }
-   /// Returns a brief description of the module.
    virtual const char * GetDescription(void)
       { return (*m_GetDescription)(); }
    /// Returns a textual representation of the particular version of the module.
@@ -247,6 +246,8 @@ class MModuleListingEntryImpl : public MModuleListingEntry
 public:
    virtual const String &GetName(void) const
       { return m_Name; }
+   virtual const String &GetShortDescription(void) const
+      { return m_ShortDesc; }
    virtual const String &GetDescription(void) const
       { return m_Desc; }
    virtual const String &GetVersion(void) const
@@ -255,15 +256,16 @@ public:
       { return m_Author; }
 
    MModuleListingEntryImpl(const String &name = "",
+                           const String &shortdesc = "",
                            const String &desc = "",
                            const String &version = "",
                            const String &author = "")
       {
-         m_Name = name; m_Desc = desc;
+         m_Name = name; m_Desc = shortdesc; m_Desc = desc;
          m_Version = version; m_Author = author;
       }
 private:
-   String m_Name, m_Desc, m_Version, m_Author;
+   String m_Name, m_ShortDesc, m_Desc, m_Version, m_Author;
    GCC_DTOR_WARN_OFF();
 };
 
@@ -340,9 +342,12 @@ MModuleListing *MModule::GetListing(void)
    size_t count = 0;
    for(it = modules.begin(); it != modules.end(); it ++)
    {
-      filename = **it << ".mmd";
+      filename = **it;
+      filename << ".mmd";
       errorflag = false;
       wxTextFile tf(filename);
+      if(! tf.Open())
+         errorflag = true;
       /*
         We need at least the following lines:
         Mahogany-Module-Definition"
@@ -350,20 +355,33 @@ MModuleListing *MModule::GetListing(void)
         Version:
         Author:
       */
-      if(tf.GetLineCount() < 4)
-         errorflag = true;
       else
       {
-         String first = tf[0].Mid(0,strlen(MMD_SIGNATURE));
-         if(first != MMD_SIGNATURE)
+         if(tf.GetLineCount() < 4)
             errorflag = true;
          else
          {
-            String description;
-            for(size_t l = 5; l < tf.GetLineCount(); l++)
-               description << tf[l] << '\n';
-            MModuleListingEntryImpl entry(tf[1], tf[2], tf[3], description);
-            (*listing)[count++] = entry;
+            String first = tf[0].Mid(0,strlen(MMD_SIGNATURE));
+            if(first != MMD_SIGNATURE ||
+               tf[1].Mid(0,strlen("Name:")) != "Name:" ||
+               tf[2].Mid(0,strlen("Version:")) != "Version:" ||
+               tf[3].Mid(0,strlen("Author:")) != "Author:")
+                         errorflag = true;
+            else
+            {
+               String description;
+               for(size_t l = 5; l < tf.GetLineCount(); l++)
+                  description << tf[l] << '\n';
+               String name = (**it).AfterLast(DIR_SEPARATOR);
+               name = name.Mid(0, filename.Length()-strlen(".mmd"));
+               MModuleListingEntryImpl entry(
+                  filename, // module name   
+                  tf[1].Mid(strlen("Name:")), // == short description
+                  description,
+                  tf[2].Mid(strlen("Version:")),
+                  tf[3].Mid(strlen("Author:")));
+               (*listing)[count++] = entry;
+            }
          }
       }
       if(errorflag)

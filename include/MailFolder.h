@@ -153,13 +153,6 @@ public:
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
 
-   /** Returns a HeaderInfo structure for a message with a given
-       sequence number. This can be used to obtain the uid.
-       @param msgno message sequence number, starting from 0
-       @return a pointer to the messages current header info entry
-   */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const = 0;
-
    /** get the message with unique id uid
        @param uid message uid
        @return message handler
@@ -385,10 +378,8 @@ public:
    //@}
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Return a pointer to the first message's header info.
-   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const = 0;
-   /// Return a pointer to the next message's header info.
-   virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const = 0;
+   /** Returns a listing of the folder. Must be DecRef'd by caller. */
+   virtual class HeaderInfoList *GetHeaders(void) const = 0;
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;
@@ -445,12 +436,23 @@ public:
    virtual const String &GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
-   virtual unsigned long GetUId(void) const = 0;
+   virtual UIdType GetUId(void) const = 0;
    virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
    virtual ~HeaderInfo() {}
 };
 
+/** This class holds a complete list of all messages in the folder. */
+class HeaderInfoList : public MObjectRC
+{
+public:
+   /// Count the number of messages in listing.
+   virtual size_t Count(void) const = 0;
+   /// Returns the n-th entry.
+   virtual const HeaderInfo * operator[](size_t n) const = 0;
+};
+
+/** This class holds information about a single folder. */
 class FolderListingEntry
 {
 public:

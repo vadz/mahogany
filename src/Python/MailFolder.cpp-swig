@@ -450,63 +450,31 @@ static PyObject *_wrap_MailFolder_ConvertMessageStatusToString(PyObject *self, P
     return _resultobj;
 }
 
-#define MailFolder_GetFirstHeaderInfo(_swigobj)  (_swigobj->GetFirstHeaderInfo())
-static PyObject *_wrap_MailFolder_GetFirstHeaderInfo(PyObject *self, PyObject *args) {
+#define MailFolder_GetHeaders(_swigobj)  (_swigobj->GetHeaders())
+static PyObject *_wrap_MailFolder_GetHeaders(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    class HeaderInfo * _result;
+    class HeaderInfoList * _result;
     MailFolder * _arg0;
     char * _argc0 = 0;
     char _ptemp[128];
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s:MailFolder_GetFirstHeaderInfo",&_argc0)) 
+    if(!PyArg_ParseTuple(args,"s:MailFolder_GetHeaders",&_argc0)) 
         return NULL;
     if (_argc0) {
         if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_GetFirstHeaderInfo. Expected _MailFolder_p.");
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_GetHeaders. Expected _MailFolder_p.");
         return NULL;
         }
     }
-    _result = (class HeaderInfo *)MailFolder_GetFirstHeaderInfo(_arg0);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_class_HeaderInfo_p");
-    _resultobj = Py_BuildValue("s",_ptemp);
-    return _resultobj;
-}
-
-#define MailFolder_GetNextHeaderInfo(_swigobj,_swigarg0)  (_swigobj->GetNextHeaderInfo(_swigarg0))
-static PyObject *_wrap_MailFolder_GetNextHeaderInfo(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    class HeaderInfo * _result;
-    MailFolder * _arg0;
-    class HeaderInfo * _arg1;
-    char * _argc0 = 0;
-    char * _argc1 = 0;
-    char _ptemp[128];
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"ss:MailFolder_GetNextHeaderInfo",&_argc0,&_argc1)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_GetNextHeaderInfo. Expected _MailFolder_p.");
-        return NULL;
-        }
-    }
-    if (_argc1) {
-        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_class_HeaderInfo_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MailFolder_GetNextHeaderInfo. Expected _class_HeaderInfo_p.");
-        return NULL;
-        }
-    }
-    _result = (class HeaderInfo *)MailFolder_GetNextHeaderInfo(_arg0,_arg1);
-    SWIG_MakePtr(_ptemp, (char *) _result,"_class_HeaderInfo_p");
+    _result = (class HeaderInfoList *)MailFolder_GetHeaders(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_class_HeaderInfoList_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 
 static PyMethodDef MailFoldercMethods[] = {
-	 { "MailFolder_GetNextHeaderInfo", _wrap_MailFolder_GetNextHeaderInfo, 1 },
-	 { "MailFolder_GetFirstHeaderInfo", _wrap_MailFolder_GetFirstHeaderInfo, 1 },
+	 { "MailFolder_GetHeaders", _wrap_MailFolder_GetHeaders, 1 },
 	 { "MailFolder_ConvertMessageStatusToString", _wrap_MailFolder_ConvertMessageStatusToString, 1 },
 	 { "MailFolder_GetUpdateInterval", _wrap_MailFolder_GetUpdateInterval, 1 },
 	 { "MailFolder_GetClassName", _wrap_MailFolder_GetClassName, 1 },

@@ -158,13 +158,6 @@ public:
    */
    class Message *GetMessage(unsigned long uid);
 
-   /** Returns a HeaderInfo structure for a message with a given
-       sequence number. This can be used to obtain the uid.
-       @param msgno message sequence number, starting from 0
-       @return a pointer to the messages current header info entry
-   */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const;
-
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
@@ -305,10 +298,8 @@ public:
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Return a pointer to the first message's header info.
-   virtual HeaderInfo const *GetFirstHeaderInfo(void) const;
-   /// Return a pointer to the next message's header info.
-   virtual HeaderInfo const *GetNextHeaderInfo(HeaderInfo const*) const;
+   /** Returns a listing of the folder. Must be DecRef'd by caller. */
+   virtual class HeaderInfoList *GetHeaders(void) const;
    //@}
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
@@ -503,8 +494,6 @@ public:
 protected:
    /// The list of events to be processed.
    static EventQueue ms_EventQueue;
-   /// The current listing of the folders, updated continually.
-   class HeaderInfoCC *m_Listing;
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long      m_BuildNextEntry;
@@ -607,6 +596,8 @@ private:
    /// destructor
    ~MailFolderCC();
 
+   /// The current listing of the folder
+   class HeaderInfoListCC *m_Listing;
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
    /// folder flags

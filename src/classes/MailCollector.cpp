@@ -219,48 +219,46 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       mf->EnableNewMailEvents(false,true);
       mf->Ping(); //update it
       INTARRAY selections;
-   
-      const HeaderInfo *hi = mf->GetFirstHeaderInfo();
-      if(hi)
+
+      HeaderInfoList *hil = mf->GetHeaders();
+      const HeaderInfo *hi;
+      m_Message << _("From folder '") << mf->GetName() << "':\n";
+      for(size_t i = 0; i < hil->Count(); i++)
       {
-         m_Message << _("From folder '") << mf->GetName() << "':\n";
-         for(;
-             hi;
-             hi = mf->GetNextHeaderInfo(hi))
-         {
-            selections.Add(hi->GetUId());
-            m_Count ++;
-            m_Message << _("  Subject: ") << hi->GetSubject()
-                      << _("  From: ") << hi->GetFrom()
-                      << '\n';
-         }
-         if(mf->SaveMessages(&selections,
-                             READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                             true /* isProfile */, true /* update count */))
-         {
-            mf->DeleteMessages(&selections);
-            mf->ExpungeMessages();
-            rc = true;
-         }
-         else
-            rc = false;
-         long i = 0;
-         String seq;
-         for(hi = m_NewMailFolder->GetFirstHeaderInfo();
-             hi;
-             hi = m_NewMailFolder->GetNextHeaderInfo(hi))
-         {
-            if(i >= oldcount)
-            {
-               if(seq.Length()) seq << ',';
-               seq << strutil_ultoa(hi->GetUId());
-            }
-            i++;
-         }
-         // mark new messages as new:
-         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
+         hi=(*hil)[i];
+         selections.Add(hi->GetUId());
+         m_Count ++;
+         m_Message << _("  Subject: ") << hi->GetSubject()
+                   << _("  From: ") << hi->GetFrom()
+                   << '\n';
       }
+      hil->DecRef();
+      if(mf->SaveMessages(&selections,
+                          READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                          true /* isProfile */, true /* update count */))
+      {
+         mf->DeleteMessages(&selections);
+         mf->ExpungeMessages();
+         rc = true;
+      }
+      else
+         rc = false;
+      size_t i = 0;
+      String seq;
+      hil = m_NewMailFolder->GetHeaders();
+      for(i = 0; i < hil->Count(); i++)
+      {
+         if(i >= oldcount)
+         {
+            if(seq.Length()) seq << ',';
+            seq << strutil_ultoa((*hil)[i]->GetUId());
+         }
+      }
+      hil->DecRef();
+      // mark new messages as new:
+      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
+      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
+      
       mf->EnableNewMailEvents(sendsEvents);
       mf->Ping(); //update it
    }

@@ -66,7 +66,7 @@ extern "C"
    MDLLEXPORT const char *
    GetName(void)
    {
-      return "DummyModule";
+      return "Mdummy";
    }
 
    MDLLEXPORT const char *

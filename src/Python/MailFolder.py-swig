@@ -62,11 +62,8 @@ class MailFolderPtr(MObjectRCPtr):
     def GetUpdateInterval(self):
         val = MailFolderc.MailFolder_GetUpdateInterval(self.this)
         return val
-    def GetFirstHeaderInfo(self):
-        val = MailFolderc.MailFolder_GetFirstHeaderInfo(self.this)
-        return val
-    def GetNextHeaderInfo(self,arg0):
-        val = MailFolderc.MailFolder_GetNextHeaderInfo(self.this,arg0)
+    def GetHeaders(self):
+        val = MailFolderc.MailFolder_GetHeaders(self.this)
         return val
     def __repr__(self):
         return "<C MailFolder instance>"

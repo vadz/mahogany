@@ -41,6 +41,7 @@ class MModuleListingEntry
 public:
    virtual const String &GetName(void) const = 0;
    virtual const String &GetDescription(void) const = 0;
+   virtual const String &GetShortDescription(void) const = 0;
    virtual const String &GetVersion(void) const = 0;
    virtual const String &GetAuthor(void) const = 0;
    virtual ~MModuleListingEntry() {}

@@ -187,10 +187,8 @@ public:
    
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Return a pointer to the first message's header info.
-   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const;
-   /// Return a pointer to the next message's header info.
-   virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const;
+   /** Returns a listing of the folder. Must be DecRef'd by caller. */
+   virtual const class HeaderInfoList *GetHeaders(void) const = 0;
    //@}
 };
    

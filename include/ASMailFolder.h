@@ -448,12 +448,6 @@ public:
        @return number of messages
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
-   /** Returns a HeaderInfo structure for a message with a given
-       sequence number. This can be used to obtain the uid.
-       @param msgno message sequence number, starting from 0
-       @return a pointer to the messages current header info entry
-   */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const = 0;
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -473,10 +467,8 @@ public:
    virtual bool SendsNewMailEvents(void) const = 0;
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Return a pointer to the first message's header info.
-   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const = 0;
-   /// Return a pointer to the next message's header info.
-   virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const = 0;
+   /** Returns a listing of the folder. Must be DecRef'd by caller. */
+   virtual class HeaderInfoList *GetHeaders(void) const = 0;
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;

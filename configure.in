@@ -36,7 +36,6 @@ DEFAULT_USE_THREADS=0
 DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
-DEFAULT_USE_ASYNC=1
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_DOCXX=0
@@ -81,7 +80,7 @@ M_OVERRIDES(ccostype,ccostype,
 --with-ccostype=xxx    use OS type xxx for c-client compilation,
 USE_CCOSTYPE)
 
-M_OVERRIDES(doc++,doc++,
+M_OVERRIDES(docxx,docxx,
 --with-doc++      use DOC++ for class documentation generation,
 USE_DOCXX)
 
@@ -319,10 +318,6 @@ if test "$USE_PCH" = 1; then
 	AC_DEFINE(USE_PCH)
 fi
 
-dnl async mail folder code
-if test "$USE_ASYNC" = 1; then
-	AC_DEFINE(USE_ASYNC)
-fi
 dnl kdoc/docxx have their own section further down
 
 dnl --------------------------------------------------------------------------

@@ -280,6 +280,46 @@ protected:
    friend class MailFolderCC;
 };
 
+/** This class holds a complete list of all messages in the folder. */
+class HeaderInfoListCC : public HeaderInfoList
+{
+public:
+   ///@name Interface
+   //@{
+   /// Count the number of messages in listing.
+   virtual size_t Count(void) const
+      { return m_NumEntries; }
+   /// Returns the n-th entry.
+   virtual const HeaderInfo * operator[](size_t n) const
+      { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
+   //@}
+   ///@name Implementation
+   //@{
+   /// Returns the n-th entry.
+   virtual HeaderInfo * operator[](size_t n) 
+      { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
+
+   /// For use by folder only: corrects size downwards:
+   void SetCount(size_t newcount)
+      { MOcheck(); ASSERT(newcount <= m_NumEntries);
+      m_NumEntries = newcount; }
+   HeaderInfoListCC(size_t n)
+      {
+         m_Listing = new HeaderInfoCC[n];
+         m_NumEntries = n;
+      }
+   ~HeaderInfoListCC()
+      {
+         MOcheck();
+         delete [] m_Listing;
+      }
+   //@}
+protected:
+   /// The current listing of the folder
+   class HeaderInfoCC *m_Listing;
+   /// number of entries
+   size_t              m_NumEntries;
+};
 
 
 MailFolderCC::MailFolderCC(int typeAndFlags,
@@ -358,7 +398,7 @@ MailFolderCC::~MailFolderCC()
 
    if( m_Listing )
    {
-      delete [] m_Listing;
+      m_Listing->DecRef();
       m_Listing = NULL;
    }
    // note that RemoveFromMap already removed our node from streamList, so
@@ -803,13 +843,15 @@ MailFolderCC::CountMessages(int mask, int value) const
 
    if ( mask )
    {
+      HeaderInfoList *hil = GetHeaders();
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
       for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
       {
-         if ( (GetHeaderInfo(msgno)->GetStatus() & mask) != value)
+         if ( ((*hil)[msgno]->GetStatus() & mask) != value)
             numOfMessages--;
       }
+      hil->DecRef();
    }
 
    return numOfMessages;
@@ -825,14 +867,19 @@ MailFolderCC::GetMessage(unsigned long uid)
    return m;
 }
 
-const class HeaderInfo *
-MailFolderCC::GetHeaderInfo(unsigned long msgno) const
+
+
+class HeaderInfoList *
+MailFolderCC::GetHeaders(void) const
 {
-   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
    ASSERT(m_Listing);
-   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
-   return m_Listing + msgno;
+   m_Listing->IncRef();
+   return m_Listing;
 }
+
+
+
+
 
 bool
 MailFolderCC::SetSequenceFlag(String const &sequence,
@@ -1009,12 +1056,12 @@ MailFolderCC::BuildListing(void)
 
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
-      delete [] m_Listing;
+      m_Listing->DecRef();
       m_Listing = NULL;
    }
 
    if(! m_Listing && m_NumOfMessages > 0)
-      m_Listing = new HeaderInfoCC[m_NumOfMessages];
+      m_Listing = new HeaderInfoListCC(m_NumOfMessages);
 
    // we may retrieve not all messages in the folder, but only some of them if
    // there are too many
@@ -1112,7 +1159,7 @@ MailFolderCC::BuildListing(void)
 
       // actually these are no IDs, but indices into the listing
       for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_Listing[oldNum + i].GetUId();
+         messageIDs[i] = (*m_Listing)[oldNum + i]->GetUId();
 
       MEventManager::Send( new MEventNewMailData (this, n, messageIDs) );
 
@@ -1133,7 +1180,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    if(m_BuildNextEntry >= m_NumOfMessages)
       return;
    
-   HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
+   HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
    char tmp[MAILTMPLEN];
    ADDRESS *adr;
@@ -1203,24 +1250,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       m_ProgressDialog->Update( m_BuildNextEntry - 1 );
 }
 
-
-/// Return a pointer to the first message's header info.
-HeaderInfo const *
-MailFolderCC::GetFirstHeaderInfo(void) const
-{
-   return (m_NumOfMessages > 0 ) ? m_Listing : NULL;
-}
-
-/// Return a pointer to the next message's header info.
-HeaderInfo const *
-MailFolderCC::GetNextHeaderInfo(HeaderInfo const* last) const
-{
-   ASSERT(m_Listing);
-   HeaderInfoCC const *lastCC = (HeaderInfoCC *)last;
-
-   if(lastCC >= m_Listing+m_NumOfMessages-1) return NULL;
-   return (lastCC+1);
-}
 
 
 //-------------------------------------------------------------------
@@ -1629,19 +1658,19 @@ MailFolderCC::ProcessEventQueue(void)
          CHECK_RET(mf,"NULL mailfolder");
          // Find the listing entry for this message:
          unsigned long uid = mail_uid(evptr->m_stream, evptr->m_args[0].m_ulong);
-         const HeaderInfo *hi;
-         for(hi = mf->GetFirstHeaderInfo();
-             hi && hi->GetUId() != uid;
-             hi = mf->GetNextHeaderInfo(hi))
+         HeaderInfoList *hil = mf->GetHeaders();
+         UIdType i;
+         for(i = 0; i < hil->Count() && (*hil)[i]->GetUId() != uid; i++)
             ;
-         if(hi)
+         if(i < hil->Count())
          {
-            ASSERT(hi->GetUId() == uid);
+            ASSERT(((*hil)[i])->GetUId() == uid);
             MESSAGECACHE *elt = mail_elt (evptr->m_stream,evptr->m_args[0].m_ulong);
-            ((HeaderInfoCC *)hi)->m_Status = GetMsgStatus(elt);
+            ((HeaderInfoCC *)((*hil)[i]))->m_Status = GetMsgStatus(elt);
             // now we sent an update event to update folderviews etc
             MEventManager::Send( new MEventFolderUpdateData (mf) );
          }
+         hil->DecRef();
          break;
       }
       case Expunged:

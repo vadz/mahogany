@@ -124,12 +124,20 @@ public:
       : MEventData(MEventId_FolderUpdate)
       {
          m_folder = folder; m_folder->IncRef();
+         m_listing = m_folder->GetHeaders();
       }
-   ~MEventFolderUpdateData() { m_folder->DecRef(); }
+   ~MEventFolderUpdateData()
+      {
+         m_folder->DecRef();
+         m_listing->DecRef();
+      }
    /// get the folder which changed
    MailFolder *GetFolder() const { return m_folder; }
+   /// Get the new listing. Don't IncRef/DecRef it, exists as long as event.
+   HeaderInfoList *GetHeaders() const { return m_listing; }
 private:
-   MailFolder *m_folder;
+   MailFolder           *m_folder;
+   HeaderInfoList       *m_listing;
 };
 
 // ----------------------------------------------------------------------------

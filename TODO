@@ -20,7 +20,11 @@ $Id$
 		2. add a [Cancel] button to abort retrieval
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
+8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
+		app won't termiante but keeps running without windows.
 
+6 gtk   VZ?     The force-reopen checkbox doesn't display its
+		tooltip. Does this work under MSW? A wxGTK bug?
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 6	VZ	All Folder create dialog pages have no HelpIDs set.

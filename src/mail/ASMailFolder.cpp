@@ -222,6 +222,10 @@ public:
    virtual void WorkFunction(void)
       {
          m_MailFolder->SetFlag(m_Seq, m_Flag, m_Set);
+         delete m_Seq;
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif 
       }
 protected:
    int m_Flag;
@@ -415,6 +419,10 @@ public:
             m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Flags);
          else
             m_MailFolder->ForwardMessages(m_Seq, m_Parent);
+         delete m_Seq;
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
       }
 private:
    ASMailFolder::OperationId m_Op;
@@ -793,14 +801,6 @@ public:
    virtual unsigned long CountMessages(int mask, int value) const
       { AScheck(); return m_MailFolder->CountMessages(); }
    
-   /** Returns a HeaderInfo structure for a message with a given
-       sequence number. This can be used to obtain the uid.
-       @param msgno message sequence number, starting from 0
-       @return a pointer to the messages current header info entry
-   */
-   virtual const class HeaderInfo *GetHeaderInfo(unsigned long msgno) const
-      { AScheck(); return m_MailFolder->GetHeaderInfo(msgno); }
-
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -827,13 +827,9 @@ public:
    
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Return a pointer to the first message's header info.
-   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const
-      { AScheck(); return m_MailFolder->GetFirstHeaderInfo(); }
-   /// Return a pointer to the next message's header info.
-   virtual const class HeaderInfo *GetNextHeaderInfo(const class
-                                                     HeaderInfo* hi) const
-      { AScheck(); return m_MailFolder->GetNextHeaderInfo(hi); }
+   /** Returns a listing of the folder. Must be DecRef'd by caller. */
+   virtual class HeaderInfoList *GetHeaders(void) const
+      { AScheck(); return m_MailFolder->GetHeaders(); }
    //@}   
    /// Return the folder's type.
    virtual FolderType GetType(void) const
