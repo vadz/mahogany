@@ -758,16 +758,16 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxColour col("blue");
    Clear(wxDECORATIVE, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
 
-   ll->Insert(justify2);
-   ll->Insert("Welcome to ");
-   ll->LineBreak();
-   ll->Insert(justify2);
-   ll->Insert("Mahogany!");
-   ll->LineBreak();
-
    // unfortunately, I can't make it transparent under Windows, so it looks
    // really ugly - disabling for now
-#if 0
+#ifdef __WXMSW__
+   ll->Insert(align2);
+   ll->Insert("Welcome to ");
+   ll->LineBreak();
+   ll->Insert(align2);
+   ll->Insert("Mahogany!");
+   ll->LineBreak();
+#else
    ll->Insert(new wxLayoutObjectIcon(wxBitmap(mahogany)));
    ll->LineBreak();
 #endif // 0
@@ -776,8 +776,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->LineBreak();
    String version = _("Version: ");
    version += M_VERSION_STRING;
-   ll->Insert(justify);
-   ll->Insert(justify);
+   ll->Insert(align);
+   ll->Insert(align);
    ll->Insert(version);
    ll->LineBreak();
    version = _("compiled for ");
@@ -788,43 +788,43 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    version += "Windows";
 #endif // Unix/Windows
 
-   ll->Insert(justify);
-   ll->Insert(justify);
+   ll->Insert(align);
+   ll->Insert(align);
    ll->Insert(version);
    ll->LineBreak();
    ll->LineBreak();
 
    ll->SetFontSize(12);
-   ll->Insert(justify);
+   ll->Insert(align);
    ll->Insert(_("Copyright (c) 1999 by Karsten Ballüder"));
    ll->LineBreak();
    ll->LineBreak();
-   ll->Insert(justify);
-   ll->Insert(justify2);
+   ll->Insert(align);
+   ll->Insert(align2);
    ll->Insert(_("Written by Karsten Ballüder"));
    ll->LineBreak();
-   ll->Insert(justify);
-   ll->Insert(justify);
+   ll->Insert(align);
+   ll->Insert(align);
    ll->Insert(_("and Vadim Zeitlin"));
    ll->LineBreak();
    ll->LineBreak();
    ll->SetFontSize(8);
-   ll->Insert(justify);
+   ll->Insert(align);
    ll->Insert(_("This software is provied 'as is' and without any expressed or implied"));
    ll->LineBreak();
-   ll->Insert(justify);
+   ll->Insert(align);
    ll->Insert(_("warranties, including, without limitation, the implied warranties"));
    ll->LineBreak();
-   ll->Insert(justify);
+   ll->Insert(align);
    ll->Insert(_("of merchantibility and fitness for a particular purpose."));
    ll->LineBreak();
-   ll->Insert(justify);
+   ll->Insert(align);
    ll->Insert(_("This is OpenSource(TM) software."));
 #ifdef USE_PYTHON
    ll->LineBreak();
    ll->LineBreak();
-   ll->Insert(justify);
-   ll->Insert(justify);
+   ll->Insert(align);
+   ll->Insert(align);
    ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
 #endif // Python
    

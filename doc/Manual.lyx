@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun Jun 13 16:11:27 1999
+#This file was created by <karsten> Sun Jun 20 21:10:35 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -1013,6 +1013,20 @@ New Mail
 \end_inset 
 
  folder.
+\layout Itemize
+
+
+\series bold 
+Keep folder always open
+\series default 
+
+\newline 
+If selected, Mahogany will attempt to open the folder at program start and
+ keep it open all the time.
+ This can significantly speed up access to large folders as opening them
+ can take some time.
+ A very useful option for frequently used folders, such as, for example,
+ the folder where you save copies of outgoing messages.
 \layout Itemize
 
 
@@ -2083,19 +2097,6 @@ Folder file for sent messages
 
 \newline 
 Where you want Mahogany to save the copies of sent messages.
-\layout Itemize
-
-
-\series bold 
-Keep this folder always open
-\series default 
-
-\newline 
-To avoid the delay in opening a potentially large folder and re-scanning
- all its message headers, you can tell Mahogany to keep this folder open
- all the time.
- It will be opened at startup and closed again on program termination.
- If you have a lot of messages in it, this significantly speeds up operation.
 \layout Itemize
 
 

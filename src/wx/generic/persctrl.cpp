@@ -808,8 +808,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     static const int iconSize = 32; // x32 pixels
 
-    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
-
+    //FIXME-GTK wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+    
     // split the message in lines
     // --------------------------
     wxClientDC dc(this);
@@ -938,7 +938,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     c->height.Absolute(iconSize);
     c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
     c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-    icon->SetConstraints(c);
+//FIXME-GTK    icon->SetConstraints(c);
 
     wxStaticText *text = NULL;
     for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
@@ -947,7 +947,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
         else
             c->top.Below(text);
-        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
+//FIXME-GTK        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
+        c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
         c->width.Absolute(widthTextMax);
         c->height.Absolute(heightTextLine);
         text = new wxStaticText(this, -1, lines[nLine]);

@@ -25,6 +25,7 @@
 #endif // USE_PCH
 
 #include "MEvent.h"
+#include "Profile.h"
 
 // ----------------------------------------------------------------------------
 // private types
@@ -162,4 +163,23 @@ bool MEventManager::Deregister(void *handle)
    gs_receivers.Remove(n);
 
    return true;
+}
+
+
+MEventOptionsChangeData::MEventOptionsChangeData(class ProfileBase
+                                                 *profile, ChangeKind
+                                                 what)
+   
+   : MEventData(MEventId_OptionsChange)
+{
+   SafeIncRef(profile);
+   
+   m_profile = profile;
+   m_what = what;
+   m_vetoed = false;
+}
+
+MEventOptionsChangeData::~MEventOptionsChangeData()
+{
+   SafeDecRef(m_profile);
 }

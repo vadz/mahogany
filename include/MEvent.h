@@ -157,21 +157,14 @@ public:
    };
 
    // ctor
-   MEventOptionsChangeData(ProfileBase *profile, ChangeKind what)
-      : MEventData(MEventId_OptionsChange)
-      {
-         SafeIncRef(profile);
-
-         m_profile = profile;
-         m_what = what;
-         m_vetoed = false;
-      }
-
+   MEventOptionsChangeData(class ProfileBase *profile,
+                           ChangeKind what);
+   
    // what happened?
    ChangeKind GetChangeKind() const { return m_what; }
 
    // which profile was modified?
-   ProfileBase *GetProfile() const { return m_profile; }
+   class ProfileBase *GetProfile() const { return m_profile; }
 
    // veto the event - "Apply" will be forbidden (logging a message explaining
    // why this happened together with calling this function is probably a good
@@ -182,12 +175,12 @@ public:
    bool IsAllowed() const { return !m_vetoed; }
 
    // dtor releases profile
-   virtual ~MEventOptionsChangeData() { SafeDecRef(m_profile); }
+   virtual ~MEventOptionsChangeData(); 
 
 private:
-   ProfileBase *m_profile;
-   ChangeKind   m_what;
-   bool         m_vetoed;
+   class ProfileBase *m_profile;
+   ChangeKind         m_what;
+   bool               m_vetoed;
 };
 
 // ----------------------------------------------------------------------------
@@ -198,7 +191,7 @@ private:
 class MEventFolderTreeChangeData : public MEventData
 {
 public:
-   // what happened?
+   /// what happened?
    enum ChangeKind
    {
       Create,
@@ -212,10 +205,10 @@ public:
          m_what = what;
       }
 
-   // get the fullname of the folder
+   /// get the fullname of the folder
    const String& GetFolderFullName() const { return m_fullname; }
 
-   // get the kind of the operation which just happened
+   /// get the kind of the operation which just happened
    ChangeKind GetChangeKind() const { return m_what; }
 
 private:
