@@ -122,9 +122,12 @@ void MAppBase::UnloadDLLs()
       // FIXME: if we do unload the library, M crashes because modules are
       //        unloaded too soon -- they should really remain in memory for as
       //        long as they're used
-      m_dllsToUnload.begin()->Detach(); // prevent the DLL from being unloaded
+#if wxCHECK_VERSION(2, 5, 0)
+      (*m_dllsToUnload.begin())->Detach(); // prevent DLL from being unloaded
 
       delete *m_dllsToUnload.begin();
+#endif // wxGTK 2.5.0+
+
       m_dllsToUnload.pop_front();
    }
 }
