@@ -18,6 +18,13 @@
 
 #ifdef USE_SSL
 
+// needed to get ssl_onceonlyinit() declaration
+#include "Mcclient.h"
+
+// under Unix we have to load libssl and libcrypto to provide access to them to
+// c-client
+#ifdef OS_UNIX
+
 #ifndef USE_PCH
    #include "Profile.h"
    #include "MApplication.h"
@@ -49,9 +56,6 @@ extern const MOption MP_SSL_DLL_SSL;
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
 extern "C" {
-
-// defined in cclient auth_ssl.c (but not declared in any public header)
-extern void ssl_onceonlyinit();
 
 /*
    This macro is used to do the following things:
@@ -237,6 +241,17 @@ error:
 }
 
 #undef SSL_LOOKUP
+
+#else // !OS_UNIX
+
+bool InitSSL()
+{
+   ssl_onceonlyinit();
+
+   return true;
+}
+
+#endif // OS_UNIX/!OS_UNIX
 
 #else // !USE_SSL
 
