@@ -12,7 +12,7 @@
 #                                                                  #
 ####################################################################
 
-import MString, MAppBase, MailFolder, MProfile, Message
+import MDialogs
 
 # helper function: return the username
 def GetUserName():
@@ -44,7 +44,7 @@ def GetUserName():
 
 def Minit():
     msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
-    MAppBase.MDialog_StatusMessage(msg)
+    MDialogs.Status(msg, 1)
 
 ####################################################################
 #                                                                  #
@@ -54,11 +54,11 @@ def Minit():
     
 def callback_func(arg):
     msg = "This is a Python Callback Function!\nThe argument is: " + arg
-    MAppBase.MDialog_Message(msg);
+    MDialogs.Message(msg);
     
 def OpenFolderCallback(name, arg):
     msg = "This is the Python OpenFolderCallback function!\n" + "  called on the hook: " +  name 
     mf = MailFolder.MailFolder(arg)
     msg = msg + "\n  from the mailfolder called:" + mf.GetName().c_str()
     msg = msg + "\n  The folder contains " + mf.CountMessages() + " messages."
-    MAppBase.MDialog_Message(msg);
+    MDialogs.Message(msg);
