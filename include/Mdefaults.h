@@ -846,7 +846,7 @@
 /// sort criterium for folder listing (55=0x37 = status/subject)
 #define MP_MSGS_SORTBY_D         55l 
 /// re-sort messages on status change?
-#define MP_MSGS_RESORT_ON_CHANGE_D 1l
+#define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
 #define MP_MSGS_USE_THREADING_D  0l
 /// open URLs with

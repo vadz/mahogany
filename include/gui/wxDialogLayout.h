@@ -417,7 +417,9 @@ public:
        return m_canvas ? m_canvas : (wxWindow *)this;   // const_cast
    }
 
-private:
+   /// forces a call to layout() to get everything nicely laid out
+   inline bool Layout(void) { return GetCanvas()->Layout(); }
+ private:
    // called from CreateXXX() functions to set up the top constraint which is
    // either just below the "last", or below the page top (with some
    // additional margin possibly specified by the 3rd argument)

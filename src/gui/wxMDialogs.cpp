@@ -858,10 +858,8 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
-   g_pSplashScreen = (wxMFrame *)this;
-
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
-
+   g_pSplashScreen = (wxMFrame *)this;
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
 }
@@ -1243,7 +1241,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
    m_ReSortOnChange->SetConstraints(c);
 
    Layout();
-   SetDefaultSize(380,280);
+   SetDefaultSize(380,310);
 
    TransferDataToWindow();
    m_OldSortOrder = m_SortOrder;
@@ -1416,7 +1414,7 @@ class wxDateFmtDialog : public wxOptionsPageSubdialog
 public:
    // ctor & dtor
    wxDateFmtDialog(ProfileBase *profile, wxWindow *parent);
-   virtual ~wxDateFmtDialog() { m_timer.Stop(); }
+   virtual ~wxDateFmtDialog() { m_timer->Stop(); delete m_timer; }
 
    // transfer data to/from dialog
    virtual bool TransferDataFromWindow();
@@ -1431,6 +1429,7 @@ public:
    // event handlers
    void OnUpdate(wxCommandEvent& event) { UpdateExample(); }
 
+   void StopTimer(void) { m_timer->Stop(); }
 protected:
    // update timer
    class ExampleUpdateTimer : public wxTimer
@@ -1445,7 +1444,7 @@ protected:
 
    private:
       wxDateFmtDialog *m_dialog;
-   } m_timer;
+   } *m_timer;
 
    // data
    wxString  m_DateFmt,
@@ -1474,8 +1473,7 @@ wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
                : wxOptionsPageSubdialog(profile,
                                         parent,
                                         _("Date Format"),
-                                        "DateFormatDialog"),
-                 m_timer(this)
+                                        "DateFormatDialog")
 {
    wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
 
@@ -1533,6 +1531,10 @@ wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
    SetDefaultSize(380, 240, FALSE /* not minimal */);
    TransferDataToWindow();
    m_OldDateFmt = m_DateFmt;
+
+   m_timer = new ExampleUpdateTimer(this);
+   // update each second
+   m_timer->Start(1000);
 }
 
 #ifdef _MSC_VER
@@ -1573,9 +1575,6 @@ wxDateFmtDialog::TransferDataToWindow()
    m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
    m_textctrl->SetValue(m_DateFmt);
 
-   // update each second
-   m_timer.Start(1000);
-
    return TRUE;
 }
 
@@ -1587,10 +1586,12 @@ bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent)
    wxDateFmtDialog dlg(profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
    {
+      dlg.StopTimer();
       return TRUE;
    }
    else
    {
+      dlg.StopTimer();
       return FALSE;
    }
 }
@@ -1601,8 +1602,9 @@ wxXFaceButton::SetFile(const wxString &filename)
    wxBitmap bmp;
    if(filename.Length() != 0)
    {
-      bool success;
-      bmp = XFace::GetXFaceImg(filename, &success, m_Parent).ConvertToBitmap();
+      bool success = FALSE;
+      if(wxFileExists(filename))
+         bmp = XFace::GetXFaceImg(filename, &success, m_Parent).ConvertToBitmap();
       if(! success)
       {
          bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("msg_error");

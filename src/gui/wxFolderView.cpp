@@ -217,7 +217,12 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    {
       const HeaderInfo *hi =(*hil)[focused];
       UIdType focused_uid = hi->GetUId();
-      m_FolderView->PreviewMessage(focused_uid);
+      if(m_PreviewOnSingleClick)
+      {
+         new wxMessageViewFrame(m_FolderView->GetFolder(), focused_uid, m_FolderView);
+      }
+      else
+         m_FolderView->PreviewMessage(focused_uid);
       hil->DecRef();
    }
 }
@@ -256,7 +261,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_SelectionCallbacks = true;
    m_Initialised = false;
 
-   if(READ_CONFIG(fv->GetProfile(), MP_PREVIEW_ON_SELECT))
+   m_PreviewOnSingleClick = READ_CONFIG(fv->GetProfile(),
+                                        MP_PREVIEW_ON_SELECT);
+   
+   if(m_PreviewOnSingleClick)
       EnableSelectionCallbacks(true);
    else
       EnableSelectionCallbacks(false);

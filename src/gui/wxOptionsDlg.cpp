@@ -1648,17 +1648,17 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    ProfileBase *profile = GetProfile();
 
    // create and add the pages
-   (void)new wxOptionsPageIdent(this, profile);
-   (void)new wxOptionsPageNetwork(this, profile);
-   (void)new wxOptionsPageCompose(this, profile);
-   (void)new wxOptionsPageFolders(this, profile);
+   (new wxOptionsPageIdent(this, profile))->Layout();
+   (new wxOptionsPageNetwork(this, profile))->Layout();
+   (new wxOptionsPageCompose(this, profile))->Layout();
+   (new wxOptionsPageFolders(this, profile))->Layout();
 #ifdef USE_PYTHON
-   (void)new wxOptionsPagePython(this, profile);
+   (new wxOptionsPagePython(this, profile))->Layout();
 #endif
-   (void)new wxOptionsPageMessageView(this, profile);
-   (void)new wxOptionsPageAdb(this, profile);
-   (void)new wxOptionsPageHelpers(this, profile);
-   (void)new wxOptionsPageOthers(this, profile);
+   (new wxOptionsPageMessageView(this, profile))->Layout();
+   (new wxOptionsPageAdb(this, profile))->Layout();
+   (new wxOptionsPageHelpers(this, profile))->Layout();
+   (new wxOptionsPageOthers(this, profile))->Layout();
 
    profile->DecRef();
 }

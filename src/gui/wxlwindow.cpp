@@ -110,7 +110,7 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_SET_FOCUS(wxLayoutWindow::OnSetFocus)
    EVT_KILL_FOCUS(wxLayoutWindow::OnKillFocus)
 
-   EVT_IDLE(wxLayoutWindow::ResizeScrollbars)
+//   EVT_IDLE(wxLayoutWindow::ResizeScrollbars)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------

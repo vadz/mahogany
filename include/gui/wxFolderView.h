@@ -208,8 +208,10 @@ private:
          return dateFormat == other.dateFormat && dateGMT == other.dateGMT;
       }
 
-      String dateFormat;      // the strftime(3) format for date
-      bool dateGMT;           // TRUE => display time/date in GMT
+      /// the strftime(3) format for date
+      String dateFormat;      
+      /// TRUE => display time/date in GMT
+      bool dateGMT;           
    } m_settingsCurrent, m_settingsOld;
 
    /// if true, m_settingsOld is valid
@@ -310,7 +312,6 @@ public:
          m_SelectionCallbacks = enabledisable;
          return rc;
       }
-
    // this is a workaround for focus handling under GTK but it should not be
    // enabled under other platforms
 #ifndef OS_WIN
@@ -334,6 +335,8 @@ protected:
    int m_firstColumn;
    /// do we want OnSelect() callbacks?
    bool m_SelectionCallbacks;
+   /// do we preview a message on a single mouse click?
+   bool m_PreviewOnSingleClick;
    /// have we been used previously?
    bool m_Initialised;
    /// the popup menu

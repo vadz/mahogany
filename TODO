@@ -8,6 +8,7 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+		make depend must first create MInterface.h
 
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
@@ -44,7 +45,6 @@ $Id$
 
 9	KB	changing any properties, etc crashes immediately
 		in non-DEBUG for Micky
-9	KB	add xface button to composeview
 
 9	KB	Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
@@ -136,6 +136,8 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+9	KB	add xface button to composeview
+
 		configure "From" format
 		align headers in messageview (separation line?)
 		colour settings for listctrl/treectrl
