@@ -1476,6 +1476,7 @@ wxMApp::SetupOnlineManager(void)
    else // no dialup support
    {
       delete m_OnlineManager;
+      m_OnlineManager = NULL; // Cleanup will try to delete it.
 
       m_IsOnline = TRUE;
    }
