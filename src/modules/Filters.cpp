@@ -1674,6 +1674,15 @@ ParserImpl::ParseTerm(void)
 #include <resolv.h>
 #include <netdb.h>
 
+#ifdef OS_SOLARIS
+   extern "C" {
+   // Solaris 2.5.1 has no prototypes for it:
+   extern int res_init(void);
+   extern int res_query(const char *, int , int ,
+                        unsigned char *, int);
+   };
+#endif
+
 #define BUFLEN 512
 
 /* rblcheck()
@@ -1684,6 +1693,8 @@ ParserImpl::ParseTerm(void)
 static
 bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 {
+   
+
    char * answerBuffer = new char[ BUFLEN ];
    int len;
    
@@ -1701,7 +1712,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
          delete [] answerBuffer;
          answerBuffer = new char [ len ];
          // and again:
-         len = res_query( domain, C_IN, T_A,
+         len = res_query( domain.c_str(), C_IN, T_A,
                           (unsigned char *) answerBuffer, len );
       }
    }

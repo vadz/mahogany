@@ -884,45 +884,71 @@ MAppBase::SendOutbox(void) const
    STATUSMESSAGE((_("Checking for queued messages...")));
    // get name of SMTP outbox:
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-   SendOutbox(outbox, Prot_SMTP, true);
+   SendOutbox(outbox, true);
    UpdateOutboxStatus();
-   outbox << _(M_NEWSOUTBOX_POSTFIX);
-   SendOutbox(outbox, Prot_NNTP, false);
-   UpdateOutboxStatus();
-}
-
-UIdType MAppBase::CheckOutbox(const String &outbox) const
-{
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
-   if(! mf)
-   {
-      String msg;
-      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
-      ERRORMESSAGE((msg));
-      return FALSE;
-   }
-   UIdType rc = mf->CountMessages();
-   mf->DecRef();
-   return rc;
 }
 
 bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
 {
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
 
-   UIdType smtp, nntp;
-   
+   UIdType
+      smtp = 0,
+      nntp = 0;
+
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
+   if(! mf)
+   {
+      String msg;
+      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+      ERRORMESSAGE((msg));
+   }
+   else if(mf->Lock())
+   {
+      
+      HeaderInfoList *hil = mf->GetHeaders();
+      if(! hil)
+         mf->DecRef();
+      else
+      {
+         const HeaderInfo *hi;
+         Message *msg;
+         for(UIdType i = 0; i < hil->Count(); i++)
+         {
+            hi = (*hil)[i];
+            ASSERT(hi);
+            msg = mf->GetMessage(hi->GetUId());
+            ASSERT(msg);
+            String newsgroups;
+            msg->GetHeaderLine("Newsgroups", newsgroups);
+            if(newsgroups.Length() > 0)
+               nntp++;
+            else
+               smtp++;
+            SafeDecRef(msg);
+         }
+         SafeDecRef(hil);
+      }
+   }
+   else
+   {
+      ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
+                    mf->GetName().c_str()));
+   }
+   SafeDecRef(mf);
+#if 0
    smtp = CheckOutbox(outbox);
    nntp = CheckOutbox(outbox+M_NEWSOUTBOX_POSTFIX);
+#endif
    if(nSMTP) *nSMTP = smtp;
    if(nNNTP) *nNNTP = nntp;
    return smtp != 0 || nntp != 0;
 }
 
 void
-MAppBase::SendOutbox(const String & outbox, Protocol protocol,
-                     bool checkOnline ) const
+MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 {
+   Protocol protocol;
    UIdType count = 0;
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
    if(! mf)
@@ -972,25 +998,54 @@ MAppBase::SendOutbox(const String & outbox, Protocol protocol,
          ASSERT(hi);
          msg = mf->GetMessage(hi->GetUId());
          ASSERT(msg);
-         STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                         (unsigned long)(i+1),
-                         (unsigned long)(hil->Count()),
-                         msg->Subject().c_str()));
-         wxYield();
          String msgText;
-         if(msg->Send(protocol))
+         String target;
+         bool alreadyCounted = false;
+         msg->GetHeaderLine("To", target);
+         protocol = Prot_SMTP; // default
+         if(target.Length() > 0)
          {
-            count++;
-            mf->DeleteMessage(hi->GetUId());
+            protocol = Prot_SMTP;
+            STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
+                            (unsigned long)(i+1),
+                            (unsigned long)(hil->Count()),
+                            msg->Subject().c_str()));
+            wxYield();
+            if(msg->Send(protocol))
+            {
+               count++; alreadyCounted = true;
+               mf->DeleteMessage(hi->GetUId());
+            }
+            else
+            {
+               String msg;
+               msg.Printf(_("Cannot send message ´%s´."),
+                          hi->GetSubject().c_str());
+               ERRORMESSAGE((msg));
+            }
          }
-         else
+         msg->GetHeaderLine("Newsgroups", target);
+         protocol = Prot_NNTP; // default
+         if(target.Length() > 0)
          {
-            String msg;
-            msg.Printf( protocol == Prot_SMTP ?
-                        _("Cannot send message ´%s´.")
-                        :_("Cannot post article ´%s´."),
-                        hi->GetSubject().c_str());
-            ERRORMESSAGE((msg));
+            protocol = Prot_NNTP;
+            STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
+                            (unsigned long)(i+1),
+                            (unsigned long)(hil->Count()),
+                            msg->Subject().c_str()));
+            wxYield();
+            if(msg->Send(protocol))
+            {
+               if(! alreadyCounted) count++;
+               mf->DeleteMessage(hi->GetUId());
+            }
+            else
+            {
+               String msg;
+               msg.Printf(_("Cannot post article ´%s´."),
+                           hi->GetSubject().c_str());
+               ERRORMESSAGE((msg));
+            }
          }
          //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
          SafeDecRef(msg);

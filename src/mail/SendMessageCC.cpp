@@ -550,7 +550,7 @@ SendMessageCC::SendOrQueue(void)
          success = FALSE;
       else
       {
-         outbox << ((m_Protocol == Prot_SMTP) ? "" : _(M_NEWSOUTBOX_POSTFIX));
+         //always the same now outbox << ((m_Protocol == Prot_SMTP) ? "" : _(M_NEWSOUTBOX_POSTFIX));
          WriteToFolder(outbox, MF_PROFILE_OR_FILE);
          success = TRUE;
       }

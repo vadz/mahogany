@@ -68,6 +68,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include <pi-source.h>
 #include <pi-socket.h>
@@ -89,6 +90,12 @@
 
 #include <wx/log.h>
 #include <wx/textfile.h>
+
+#ifdef OS_SOLARIS
+extern "C" {
+   extern int kill(pid_t, int);
+};
+#endif
 
 class wxDeviceLock
 {

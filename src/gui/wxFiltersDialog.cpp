@@ -322,14 +322,14 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
    c->top.SameAs(criteria, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   OneCritControls * orc = new OneCritControls(this, c);
+   (void) new OneCritControls(this, c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(actions, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(actions, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   OneActionControls * oac = new OneActionControls(this, c);
+   (void)new OneActionControls(this, c);
    
    TransferDataToWindow();
    m_OldFilter = m_Filter;

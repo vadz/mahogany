@@ -232,9 +232,7 @@ protected:
    virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE)
       const = 0;
    /// Send all messages from the outbox "name"
-   void SendOutbox(const String &name, Protocol prot, bool checkOnline) const;
-   /// Check if we have messages to send.
-   virtual UIdType CheckOutbox(const String &name) const;
+   void SendOutbox(const String &name, bool checkOnline) const;
    
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;

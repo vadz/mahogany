@@ -1005,7 +1005,6 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
       UIdType *messageIDs = new UIdType[n];
       // Find the new messages:
       UIdType nextIdx = 0;
-      int status;
       UIdType highestId = UID_ILLEGAL;
       for ( UIdType i = 0; i < n; i++ )
       {

@@ -429,6 +429,10 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 #endif // USE_HELPERS_PAGE
          CREATE_PAGE(Import);
          CREATE_PAGE(Final);
+      case InstallWizard_WelcomePage:
+      case InstallWizard_Done:
+      case InstallWizard_PagesMax:
+         ASSERT(0);
       }
 
 #undef CREATE_PAGE
