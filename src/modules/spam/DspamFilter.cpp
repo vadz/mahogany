@@ -360,7 +360,7 @@ DspamFilter::DoCheckIfSpam(const Message& msg,
 
       virtual void OnDone(DSPAM_CTX *ctx)
       {
-         *m_probability = ctx->probability;
+         *m_probability = ctx->confidence;
          *m_rc = ctx->result == DSR_ISSPAM;
       }
 
