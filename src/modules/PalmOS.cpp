@@ -966,6 +966,7 @@ PalmOSModule::Backup(void)
    max = 0;
    i = 0;
 
+   StatusMessage(_("Backing up..."));
    // for each file on the palm do ...
    while (true) {
       struct DBInfo   info;
@@ -1000,7 +1001,6 @@ PalmOSModule::Backup(void)
       name.Printf("%s%s", m_BackupDir.c_str(), fname.c_str());
 
       // update progress dialog, exit on "cancel"
-      StatusMessage(_("Backing up..."));
       if( ! pd->Update(max++, name) )
       {
          delete pd;
