@@ -553,7 +553,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.209 2001/01/13 22:07:33 gregnoel Exp 
+# From configure.in Id: configure.in,v 1.210 2001/02/02 20:55:57 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -3857,7 +3857,7 @@ case "$WX_CONFIG" in '')
 	--with-wxconfigprg option to specify it." 1>&2; exit 1; }
 esac
 
-CPPFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
+CXXFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
 
 GTK_LDFLAGS=`$WX_CONFIG --libs`
 

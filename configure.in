@@ -636,7 +636,7 @@ case "$WX_CONFIG" in '')
 	--with-wxconfigprg option to specify it.])
 esac
 
-CPPFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
+CXXFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
 
 GTK_LDFLAGS=`$WX_CONFIG --libs`
 AC_SUBST(GTK_LDFLAGS)
