@@ -81,10 +81,8 @@ protected:
    /// menu bar
    wxMenuBar *m_MenuBar;
 
-#ifdef   USE_WXWINDOWS2
    /// toolbar:
-   wxMToolBar *m_ToolBar;
-#endif
+   wxToolBar *m_ToolBar;
 
    /// is it initialised?
    bool  initialised;
