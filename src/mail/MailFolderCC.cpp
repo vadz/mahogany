@@ -1,4 +1,4 @@
-/*-*- c++ -*-********************************************************
+/*-*- C++ -*-********************************************************
 * MailFolderCC class: handling of mail folders with c-client lib   *
 *                                                                  *
 * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
@@ -2030,7 +2030,13 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 
       // FROM and TO
       entry.m_From = ParseAddress(ov->from);
-      entry.m_To = ParseAddress(ov->to);
+      if(m_folderType == MF_NNTP 
+	|| m_folderType == MF_NEWS)
+      {
+	entry.m_To = ""; // no To: for news postings
+      }
+      else
+        entry.m_To = ParseAddress(ov->to);
 
       wxFontEncoding encodingFrom;
       entry.m_From = DecodeHeader(entry.m_From, &encodingFrom);
