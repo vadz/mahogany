@@ -54,7 +54,7 @@ mergecat:
 .PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files update check
 
 %.mo: %.po
-	$(MSGFMT) -o $@ $<
+	$(MSGFMT) -v -o $@ $<
 
 
 

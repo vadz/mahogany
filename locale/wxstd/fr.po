@@ -1,0 +1,67 @@
+msgid " (error %ld: %s)"
+msgstr " (erreur %ld: %s)"
+
+msgid "'%s' is not a valid message catalog."
+msgstr "'%s' n'est pas un catalogue de messages valid."
+
+msgid "Assert failed in file %s at line %d"
+msgstr "Assertion est fausse dans le fichier %s à la ligne %d"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Debug: "
+msgstr "Debug: "
+
+msgid "Error: "
+msgstr "Erreur: "
+
+msgid "Fatal error: "
+msgstr "Erreur fatale: "
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Program aborted.\n"
+msgstr "Programme abandonné.\n"
+
+msgid "Warning: "
+msgstr "Attention: "
+
+msgid "can't close file descriptor %d"
+msgstr "impossible de fermer le descripteur %d"
+
+msgid "can't find length of file on file descriptor %d"
+msgstr ""
+"impossible de trouver la taille du fichier ouvert sur le descripteur %d"
+
+msgid "can't flush file descriptor %d"
+msgstr "impossible de mettre à jour le descripteur %d"
+
+msgid "can't get seek position on file descriptor %d"
+msgstr "impossible d'obtenir la position courante sur le descripteur %d"
+
+msgid "can't open file '%s'"
+msgstr "impossible d'ouvrir le fichier '%s'"
+
+msgid "can't read from file descriptor %d"
+msgstr "impossible de lire à partir de descripteur %d"
+
+msgid "can't seek on file descriptor %d"
+msgstr "impossible de changer la position sur le descripteur %d"
+
+msgid "can't write to file descriptor %d"
+msgstr "impossible d'écrire sur le descripteur %d"
+
+msgid "catalog file for domain '%s' not found."
+msgstr "impossible de trouver le catalogue de messages pour le domaine '%s'."
+
+msgid "locale '%s' can not be set."
+msgstr "impossible de passer à locale '%s'."
+
+msgid "string '%s' not found in domain '%s' for locale '%s'."
+msgstr ""
+"chaîne '%s' n'a pas été trouvée dans le domaine '%s' pour le locale '%s'."
+
+msgid "string '%s' not found in locale '%s'."
+msgstr "chaîne '%s' n'a pas été trouvée dans le locale '%s'."

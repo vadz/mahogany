@@ -3333,7 +3333,7 @@ msgstr "Zeigt Programminformation und Lizenz an."
 
 #: wxFolderTree.cpp:405
 msgid "You cannot delete the '%s' folder.\n"
-msgstr "Kann den '%s' Eintrag nicht löschen."
+msgstr "Kann den '%s' Eintrag nicht löschen.\n"
 
 #: wxMFolderDialogs.cpp:677
 msgid "&Keep folder always open: "
