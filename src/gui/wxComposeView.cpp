@@ -2638,9 +2638,11 @@ wxComposeView::IsReadyToSend() const
    m_txtRecipient->AddNewRecipients(true /* quiet */);
 
    // did we forget the recipients?
-   if ( GetRecipients(Recipient_To).empty() )
+   if ( GetRecipients(Recipient_To).empty() &&
+         GetRecipients(Recipient_Newsgroup).empty() )
    {
-      wxLogError(_("Please specify at least one \"To:\" recipient!"));
+      wxLogError(_("Please specify at least one \"To:\" or "
+                   "\"Newsgroup:\" recipient!"));
 
       return false;
    }
