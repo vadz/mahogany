@@ -553,6 +553,8 @@ EditorContentPart *LayoutEditor::GetNextPart()
             continue;
       }
 
+      delete exp;
+
       return mc;
    }
 
