@@ -2829,7 +2829,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    m_TicketList = ASTicketList::Create();
 
-   m_nDeleted = 0;
+   m_nDeleted = UID_ILLEGAL;
 
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
@@ -2883,6 +2883,19 @@ wxFolderView::~wxFolderView()
 inline size_t wxFolderView::GetHeadersCount() const
 {
    return m_FolderCtrl->GetHeadersCount();
+}
+
+unsigned long wxFolderView::GetDeletedCount() const
+{
+   if ( m_nDeleted == UID_ILLEGAL )
+   {
+      MailFolder_obj mf = GetMailFolder();
+
+      // const_cast
+      ((wxFolderView *)this)->m_nDeleted = mf->CountDeletedMessages();
+   }
+
+   return m_nDeleted;
 }
 
 bool wxFolderView::MoveToNextUnread()
@@ -3152,7 +3165,7 @@ wxFolderView::Update()
    wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Update(): %ld headers.",
               m_FolderCtrl->GetItemCount());
 
-   m_nDeleted = mf->CountDeletedMessages();
+   m_nDeleted = UID_ILLEGAL;
 
    UpdateTitleAndStatusBars("", "", m_Frame, mf);
 }
@@ -3535,7 +3548,7 @@ wxFolderView::SearchMessages(void)
 
 void wxFolderView::ExpungeMessages()
 {
-   if ( m_nDeleted )
+   if ( GetDeletedCount() )
    {
       m_ASMailFolder->ExpungeMessages();
 
@@ -4231,8 +4244,12 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
              statusNew = event.GetStatusNew(n);
 
          // what we do here is "+= isDeleted - wasDeleted"
-         m_nDeleted += (statusNew & MailFolder::MSG_STAT_DELETED)
-                    -  (statusOld & MailFolder::MSG_STAT_DELETED);
+         int deletedChange = (statusNew & MailFolder::MSG_STAT_DELETED)
+                           - (statusOld & MailFolder::MSG_STAT_DELETED);
+         if ( deletedChange )
+         {
+            m_nDeleted = GetDeletedCount() + deletedChange;
+         }
 
          // remember the items to update
          if ( pos < posMin )

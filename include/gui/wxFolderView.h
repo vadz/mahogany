@@ -205,6 +205,11 @@ protected:
    /// get the number of the messages we show
    inline size_t GetHeadersCount() const;
 
+   /** get the number of deleted messages: always use this, never access
+       m_nDeleted directly as it is calculated on demand
+    */
+   unsigned long GetDeletedCount() const;
+
 private:
    /// the full name of the folder opened in this folder view
    wxString m_fullname;
