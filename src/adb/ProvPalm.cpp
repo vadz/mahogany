@@ -17,8 +17,6 @@
 // M
 #include "Mpch.h"
 
-#if EXPERIMENTAL
-
 #ifdef USE_PISOCK
 
 #ifndef  USE_PCH
@@ -431,4 +429,3 @@ String PalmDataProvider::DebugDump() const
 
 #endif // USE_PISOCK
 
-#endif // EXPERIMENTAL

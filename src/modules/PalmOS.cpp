@@ -39,9 +39,8 @@
 #include <wx/menu.h>
 
 class PalmBook;
-#ifdef EXPERIMENTAL
-#   include "adb/ProvPalm.h"
-#endif
+
+#include "adb/ProvPalm.h"
 
 #define MODULE_NAME    "PalmOS"
 
@@ -221,9 +220,7 @@ class PalmOSModule : public MModule
    void SendEMails(void);
    void StoreEMails(void);
 
-#ifdef EXPERIMENTAL
    void Backup(void);
-#endif
 
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
@@ -235,10 +232,8 @@ MInterface * m_MInterface;
 
 private:
 
-#if EXPERIMENTAL
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
    void RemoveFromList(char *name, char **list, int max);
-#endif
 
    int m_PiSocket;
    int m_MailDB;
@@ -421,9 +416,9 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
 
    wxMenu * palmOsMenu = new wxMenu("", wxMENU_TEAROFF);
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_SYNC, _("&Synchronise"));
-#ifdef EXPERIMENTAL
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_BACKUP, _("&Backup"));
+#ifdef EXPERIMENTAL
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_RESTORE, _("&Restore"));
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_INSTALL, _("&Install"));
 #endif
@@ -445,7 +440,7 @@ PalmOSModule::~PalmOSModule()
    SafeDecRef(m_Profile);
 }
 
-#ifdef wxUSE_THREADS
+#if defined( wxUSE_THREADS ) && defined( OS_UNIX )
 class PalmOSAcceptThread : public wxThread
 {
 public:
@@ -532,7 +527,8 @@ PalmOSModule::Connect(void)
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
-#ifdef wxUSE_THREADS
+      // the following code is unsafe under Windows:
+#if defined( wxUSE_THREADS ) && defined( OS_UNIX )
       // We interrupt the connection attempt after some seconds, to
       // provide some kind of timeout that the stupid pilot-link code
       // doesn't. Ugly hack, really. KB
@@ -551,7 +547,8 @@ PalmOSModule::Connect(void)
             ;
          // wxSleep(5);  // using wxSleep() here crashes wxWindows when 
          // thread gets Killed()
-         acceptThread->Kill();
+         if(acceptThread->IsAlive())
+            acceptThread->Kill();
          if(m_PiSocket == -1)
             pi_close(oldPiSocket);
       }
@@ -651,7 +648,6 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
 }
 
 
-#ifdef EXPERIMENTAL
 /* Protect = and / in filenames */
 static void protect_name(char *d, char *s)
 {
@@ -823,13 +819,10 @@ PalmOSModule::Backup(void)
    
 }
 
-#endif
-
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
 {
-#ifdef EXPERIMENTAL
    int    l;
    char   buf[0xffff];
    struct AddressAppInfo aai;
@@ -864,10 +857,8 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    }
 
    createEntries(m_AddrDB, &aai, rootGroup);
-#endif
 }
 
-#if EXPERIMENTAL
 int 
 PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_TopGroup)
 {
@@ -939,7 +930,6 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
    // everything worked fine
    return 0;
 }
-#endif
 
 void
 PalmOSModule::SendEMails(void)
