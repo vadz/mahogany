@@ -1632,7 +1632,7 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
    // refuses to compile it as it converts everything to int and then fails
    ofstream ostr(filename.c_str(),
                  append ? ios::out | ios::binary
-                        : ios::out | ios::binary | ios:trunc);
+                        : ios::out | ios::binary | ios::trunc);
 
    bool ok = !(!ostr || ostr.bad());
    if ( ok )
