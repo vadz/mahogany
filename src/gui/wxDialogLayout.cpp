@@ -56,6 +56,12 @@
 
 #include "MEvent.h"
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static size_t GetBrowseButtonWidth(wxWindow *win);
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -201,25 +207,21 @@ void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
    }
 }
 
+// create a text entry with some browse button
 wxTextCtrl *
 wxNotebookPageBase::CreateEntryWithButton(const char *label,
                                           long widthMax,
                                           wxControl *last,
                                           wxNotebookPageBase::BtnKind kind,
-                                          wxBrowseButton **ppButton)
+                                          wxTextBrowseButton **ppButton)
 {
-   static size_t widthBtn = 0;
-   if ( widthBtn == 0 ) {
-      // calculate it only once, it's almost a constant
-      widthBtn = 2*GetCharWidth();
-   }
-
    // create the label and text zone, as usually
    wxTextCtrl *text = CreateTextWithLabel(label, widthMax, last,
-                                          widthBtn + 2*LAYOUT_X_MARGIN);
+                                          GetBrowseButtonWidth(this) +
+                                          2*LAYOUT_X_MARGIN);
 
    // and also create a button for browsing for file
-   wxBrowseButton *btn;
+   wxTextBrowseButton *btn;
    switch ( kind )
    {
       case FileBtn:
@@ -248,6 +250,53 @@ wxNotebookPageBase::CreateEntryWithButton(const char *label,
    }
 
    return text;
+}
+
+// create a static bitmap with a label and position them and the browse button
+// passed to us
+wxStaticBitmap *wxNotebookPageBase::CreateIconEntry(const char *label,
+                                                    long widthMax,
+                                                    wxControl *last,
+                                                    wxIconBrowseButton *btnIcon)
+{
+   wxLayoutConstraints *c;
+
+   // create controls
+   wxStaticBitmap *bitmap = new wxStaticBitmap(this, -1, wxNullBitmap);
+   wxStaticText *pLabel = new wxStaticText(this, -1, label,
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxALIGN_RIGHT);
+
+   // for the label
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(bitmap, wxCentreY);
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   pLabel->SetConstraints(c);
+
+   // for the static bitmap
+   int sizeIcon = 32;      // this is the standard icon size
+
+   c = new wxLayoutConstraints;
+   SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
+   c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
+   c->width.Absolute(sizeIcon);
+   c->height.Absolute(sizeIcon);
+   bitmap->SetConstraints(c);
+
+   // for the browse button
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(bitmap, wxCentreY);
+   c->left.RightOf(bitmap, LAYOUT_X_MARGIN);
+   c->width.Absolute(GetBrowseButtonWidth(this) + LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   btnIcon->SetConstraints(c);
+
+   // the browse button will now update the bitmap when the icon changes
+   btnIcon->SetAssociatedStaticBitmap(bitmap);
+
+   return bitmap;
 }
 
 // create a single-line text control with a label
@@ -846,4 +895,15 @@ void wxNotebookDialog::OnHelp(wxCommandEvent& /* event */)
       mApplication->Help(MH_OPTIONSNOTEBOOK,this);
    else
       mApplication->Help(((wxOptionsPage *)m_notebook->GetPage(pid))->HelpId(),this);
+}
+
+static size_t GetBrowseButtonWidth(wxWindow *win)
+{
+   static size_t s_widthBtn = 0;
+   if ( s_widthBtn == 0 ) {
+      // calculate it only once, it's almost a constant
+      s_widthBtn = 2*win->GetCharWidth();
+   }
+
+   return s_widthBtn;
 }

@@ -96,6 +96,7 @@ typedef long int lcoord_t;
 #define FAIL_MSG(msg)  ASSERT_MSG(0, msg)
 
 // these definitions work in both modes (debug and release)
+#define VERIFY(x, msg)     if ( !(x) ) { wxFAIL_MSG(msg); }
 #define CHECK(x, rc, msg)  wxCHECK_MSG(x, rc, msg)
 #define CHECK_RET(x, msg)  wxCHECK_RET(x, msg)
 

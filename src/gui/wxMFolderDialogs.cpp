@@ -225,6 +225,14 @@ protected:
    };
    void WriteEntryIfChanged(FolderProperty entry, const wxString& value);
 
+   // get the type of the folder chosen from the current radiobox value or from
+   // the given one (which is supposed to be the radiobox selection)
+   FolderType GetCurrentFolderType(int sel = -1) const;
+
+   // inverse function of the above one: get the radiobox index from the folder
+   // type
+   int GetRadioIndexFromFolderType(FolderType type) const;
+
    // hack: this flag tells whether we're in process of creating the folder or
    // just showing the properties for it. Ultimately, it shouldn't be
    // necessary, but for now we use it to adjust our behaviour depending on
@@ -263,6 +271,8 @@ protected:
    wxCheckBox *m_keepOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
+   /// browse button for the icon
+   wxIconBrowseButton *m_browseIcon;
 
    /// the path to the profile section with values for this folder
    wxString m_folderPath;
@@ -278,8 +288,11 @@ protected:
    /// the initial value of the "keep open" flag
    bool m_originalKeepOpenValue;
 
+   /// the original value for the folder icon index (-1 if nothing special)
+   int m_originalFolderIcon;
+
    /// the current folder type or -1 if none
-   int m_selection;
+   int m_folderType;
 
    DECLARE_EVENT_TABLE()
 };
@@ -344,6 +357,25 @@ private:
    wxFolderTree *m_tree;
 
    DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// small utility class: a folder icon browse button which makes the dialog
+// containing it dirty when the icon changes
+// ----------------------------------------------------------------------------
+
+class wxFolderIconBrowseButtonInDialog : public wxFolderIconBrowseButton
+{
+public:
+   wxFolderIconBrowseButtonInDialog(wxFolderBaseDialog *dlg,
+                                    wxWindow *parent,
+                                    const wxString& tooltip)
+      : wxFolderIconBrowseButton(parent, tooltip) { m_dlg = dlg; }
+
+private:
+   virtual void OnIconChange() { m_dlg->SetDirty(); }
+
+   wxFolderBaseDialog *m_dlg;
 };
 
 // ============================================================================
@@ -667,12 +699,14 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    int image = FolderCreatePage_Folder;
    notebook->AddPage(this, _("Access"), FALSE /* don't select */, image);
 
+   // are we in "view properties" or "create" mode?
    m_dlgCreate = dlg;
+   m_isCreating = m_dlgCreate != NULL;
 
    // init members
    // ------------
    m_notebook = notebook;
-   m_selection = -1;
+   m_folderType = -1;
    m_profile = profile;
    m_profile->IncRef();
 
@@ -681,25 +715,31 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    // create controls
    // ---------------
 
-   // radiobox of folder type
-   // The indices into this array must match the folder types MF_XXX
-   wxString radioChoices[6];
-   radioChoices[0] = _("INBOX");
-   radioChoices[1] = _("File");
-   radioChoices[2] = _("POP3");
-   radioChoices[3] = _("IMAP");
-   radioChoices[4] = _("NNTP");
-   radioChoices[5] = _("News"); // don't call this newsspool because under
-                                // Windows all items in a radiobox have the
-                                // same width and this one is much wider than
-                                // all the others
+   // radiobox of folder types
 
-   m_radio = new wxRadioBox(this,-1,_("Folder Type"),
+   // NB: the indices into this array must match the folder types MF_XXX
+   //     except for the last entry ("Group") and that if we're creating a
+   //     folder (and not just viewing its properties), we don't allow INBOX
+   //     type thus shifting all values by 1.
+   wxString radioChoices[7];
+   size_t n = 0;
+   if ( !m_isCreating )
+      radioChoices[n++] = _("INBOX");
+   radioChoices[n++] = _("File");
+   radioChoices[n++] = _("POP3");
+   radioChoices[n++] = _("IMAP");
+   radioChoices[n++] = _("NNTP");
+   radioChoices[n++] = _("News"); // don't call this newsspool because under
+                                  // Windows all items in a radiobox have the
+                                  // same width and this one is much wider than
+                                  // all the others
+   radioChoices[n++] = _("Group");
+
+   m_radio = new wxRadioBox(this, -1, _("Folder Type"),
                             wxDefaultPosition,wxDefaultSize,
-                            WXSIZEOF(radioChoices), radioChoices,
-                            // this 5 is not WXSIZEOF(radioChoices), it's just
-                            // the number of radiobuttons per line
-                            6, wxRA_SPECIFY_COLS);
+                            n, radioChoices,
+                            // create a horizontal radio box
+                            n, wxRA_SPECIFY_COLS);
 
    c = new wxLayoutConstraints();
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
@@ -725,6 +765,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_IsIncoming,
       Label_KeepOpen,
       Label_IsAnonymous,
+      Label_FolderIcon,
       Label_Max
    };
 
@@ -739,11 +780,12 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Comment: "),
       gettext_noop("C&ollect all mail from this folder: "),
       gettext_noop("&Keep folder always open: "),
-      gettext_noop("&Anonymous access: ")
+      gettext_noop("&Anonymous access: "),
+      gettext_noop("Icon for this folder: "),
    };
 
    wxArrayString labels;
-   for ( size_t n = 0; n < Label_Max; n++ )
+   for ( n = 0; n < Label_Max; n++ )
    {
       labels.Add(_(szLabels[n]));
    }
@@ -763,8 +805,16 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
 
-   // are we in "view properties" or "create" mode?
-   m_isCreating = m_dlgCreate != NULL;
+   wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+   ASSERT_MSG( dlgParent, "should have a parent dialog!" );
+
+   m_browseIcon = new wxFolderIconBrowseButtonInDialog(
+                                                       dlgParent,
+                                                       this,
+                                                       _("Choose folder icon")
+                                                      );
+   (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_isAnonymous, m_browseIcon);
+
    m_radio->Enable(m_isCreating);
 }
 
@@ -805,20 +855,20 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    wxObject *objEvent = event.GetEventObject();
    if ( objEvent == m_path || objEvent == m_newsgroup )
    {
-      switch ( m_radio->GetSelection() )
+      switch ( GetCurrentFolderType() )
       {
          case File:
             // set the file name as the default folder name
-         {
-            wxString name;
-            wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
+            {
+               wxString name;
+               wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
 
-            dlg->SetFolderName(name);
-         }
-         break;
+               dlg->SetFolderName(name);
+            }
+            break;
 
          case News:
-         case MF_NNTP:
+         case Nntp:
             // set the newsgroup name as the default folder name
             dlg->SetFolderName(m_newsgroup->GetValue());
             break;
@@ -830,17 +880,16 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    }
 }
 
+// our argument here is the radiobox selection
 void
 wxFolderPropertiesPage::UpdateUI(int sel)
 {
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    CHECK_RET( dlg, "wxFolderPropertiesPage without parent dialog?" );
 
-   bool enableOk = true;
+   FolderType folderType = GetCurrentFolderType(sel);
 
-   int selection = sel == -1 ? m_radio->GetSelection() : sel;
-
-   if ( selection != m_selection )
+   if ( folderType != m_folderType )
    {
       // clear all fields because some of them won't make sense for new
       // selection unless the selection didn't change
@@ -850,9 +899,9 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_password->SetValue("");
       m_server->SetValue("");
       m_mailboxname->SetValue("");
-      m_selection = selection;
+      m_folderType = folderType;
 
-      if ( selection == MF_NNTP )
+      if ( folderType == MF_NNTP )
       {
          // although NNTP servers do support password-protected access, this
          // is so rare that anonymous is the default
@@ -864,20 +913,51 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          m_isAnonymous->SetValue(FALSE);
       }
 
+      if ( folderType == FolderGroup )
+      {
+         // explain to the user the "special" meaning of the fields in this
+         // case (it may be helpful - and if the user finds it annoying, he may
+         // always disable it)
+         MDialog_Message(_(
+            "All the fields shown in this dialog have a slightly different\n"
+            "meaning for the folders of type \"Group\". Instead of applying\n"
+            "to this folder (which wouldn't make sense, as such folders don't\n"
+            "contain any mail messages at all, but only other folders, these\n"
+            "values will be used as defaults for all folders created under\n"
+            "this group folder."
+                         ), this, _("Group folders hint"), "FolderGroupHint");
+      }
+
       // set the defaults for this kind of folder
       SetDefaultValues();
    }
 
-   // if it has user name, it has password as well
-   bool hasPassword = FolderTypeHasUserName((FolderType)selection);
+   bool enableAnonymous, enableLogin;
 
-   m_isAnonymous->Enable(hasPassword);
+   if ( folderType == FolderGroup )
+   {
+      // enable all fields for these folders (see the message above)
+      enableAnonymous =
+      enableLogin = true;
+   }
+   else
+   {
+      // if it has user name, it has password as well
+      bool hasPassword = FolderTypeHasUserName(folderType);
 
-   // only enable password and login fields if anonymous access is disabled
-   EnableTextWithLabel(m_password, hasPassword && !m_isAnonymous->GetValue());
-   EnableTextWithLabel(m_login, hasPassword && !m_isAnonymous->GetValue());
+      // and if it has password, there must be anon access too
+      enableAnonymous = hasPassword;
 
-   switch ( selection )
+      // only enable password and login fields if anonymous access is disabled
+      bool isAnon = m_isAnonymous->GetValue();
+      bool enableLogin = hasPassword && !isAnon;
+   }
+
+   m_isAnonymous->Enable(enableAnonymous);
+   EnableTextWithLabel(m_password, enableLogin);
+   EnableTextWithLabel(m_login, enableLogin);
+
+   switch ( folderType )
    {
       case MF_IMAP:
          EnableTextWithLabel(m_mailboxname, TRUE); // only difference from POP
@@ -912,18 +992,81 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          EnableTextWithLabel(m_newsgroup, FALSE);
 
          EnableTextWithButton(m_path, FALSE);
-         if ( m_isCreating )
-         {
-            // INBOX folder can't be created by the user
-            enableOk = false;
-         }
+         break;
+
+      case FolderGroup:
+         EnableTextWithLabel(m_mailboxname, TRUE);
+         EnableTextWithLabel(m_server, TRUE);
+         EnableTextWithLabel(m_newsgroup, TRUE);
+         EnableTextWithButton(m_path, TRUE);
          break;
 
       default:
          wxFAIL_MSG("Unexpected folder type.");
    }
 
-   dlg->SetMayEnableOk(enableOk);
+   dlg->SetMayEnableOk(TRUE);
+}
+
+FolderType
+wxFolderPropertiesPage::GetCurrentFolderType(int sel) const
+{
+   if ( sel == -1 )
+   {
+      sel = m_radio->GetSelection();
+   }
+
+   if ( m_isCreating )
+   {
+      // no entry 0 (INBOX) in this case
+      sel++;
+   }
+
+   switch ( sel )
+   {
+      case Inbox:
+      case File:
+      case POP:
+      case IMAP:
+      case Nntp:
+      case News:
+         return (FolderType)sel;
+
+      case -1:
+         return FolderInvalid;
+
+      default:
+         return FolderGroup;
+   }
+}
+
+int
+wxFolderPropertiesPage::GetRadioIndexFromFolderType(FolderType type) const
+{
+   switch ( type )
+   {
+      case Inbox:
+         ASSERT_MSG( !m_isCreating, "can't set radiobox selection to INBOX" );
+         // still fall through - this will result in returning -1
+
+      case File:
+      case POP:
+      case IMAP:
+      case Nntp:
+      case News:
+         // -1 because when we're creating folder, there is no INBOX entry
+         return m_isCreating ? type - 1 : type;
+
+      case FolderGroup:
+         // assume it follows "News"
+         return m_isCreating ? News : News + 1;
+
+      case FolderInvalid:
+      default:
+         FAIL_MSG("invalid folder type in GetRadioIndexFromFolderType");
+
+         return -1;
+   }
 }
 
 void
@@ -976,7 +1119,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
 
-   FolderType typeFolder = (FolderType)m_radio->GetSelection();
+   FolderType typeFolder = GetCurrentFolderType();
 
    String value;
    if ( FolderTypeHasUserName(typeFolder) )
@@ -1048,10 +1191,16 @@ wxFolderPropertiesPage::SetDefaultValues()
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
    m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
    m_isIncoming->SetValue(m_originalIncomingValue);
+
    // set the keepOpen value and remember it: we will only write it back if it
    // changes later
    m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_keepOpen->SetValue(m_originalKeepOpenValue);
+
+   // get the folder icon
+   MFolder_obj folder(m_folderPath);
+   m_originalFolderIcon = GetFolderIconForDisplay(folder);
+   m_browseIcon->SetIcon(m_originalFolderIcon);
 }
 
 bool
@@ -1068,23 +1217,28 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       typeFolder = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
-   // this will also call SetDefaultValues()
-   m_radio->SetSelection(typeFolder);
+   if ( typeFolder == Inbox && m_isCreating )
+   {
+      FAIL_MSG("how did we manage to create an INBOX folder?");
 
-   if(m_folderPath)
-   {  // set incoming checkbox to right value
+      typeFolder = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
+   }
+
+   // this will also call SetDefaultValues()
+   m_radio->SetSelection(GetRadioIndexFromFolderType(typeFolder));
+
+   if ( m_folderPath )
+   {
+      // set incoming checkbox to right value
       MFolder_obj folder(m_folderPath);
-      m_isIncoming->SetValue(
-         (folder->GetFlags() & MF_FLAGS_INCOMING) ? TRUE : FALSE
-         );
-      m_keepOpen->SetValue(
-         (folder->GetFlags() & MF_FLAGS_KEEPOPEN) ? TRUE : FALSE
-         );
+
+      m_isIncoming->SetValue( (folder->GetFlags() & MF_FLAGS_INCOMING) != 0 );
+      m_keepOpen->SetValue( (folder->GetFlags() & MF_FLAGS_KEEPOPEN) != 0 );
    }
 
 #ifdef __WXMSW__
    // the notification is sent automatically under GTK
-   UpdateUI(typeFolder);
+   UpdateUI(m_radio->GetSelection());
 #endif // MSW
 
    return TRUE;
@@ -1093,12 +1247,9 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 bool
 wxFolderPropertiesPage::TransferDataFromWindow(void)
 {
-   // even though we propose the choice of INBOX it can't be created currently
-   // FIXME may be should remove it from the radiobox then?
-   FolderType typeFolder = (FolderType)m_radio->GetSelection();
+   FolderType typeFolder = GetCurrentFolderType();
 
-   // ... but its properties (comment) may still be changed, so check for this
-   // only if we're creating it
+   // it's impossible to create INBOX folder
    CHECK( !m_dlgCreate || typeFolder != Inbox, false,
           "Ok button should be disabled" );
 
@@ -1266,6 +1417,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
       }
    }
+
    bool isKeepOpen = m_keepOpen->GetValue();
    if ( m_originalKeepOpenValue != isKeepOpen )
    {
@@ -1273,14 +1425,17 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          mApplication->AddKeepOpenFolder(fullname);
       else
       {
-#ifdef DEBUG
-         ASSERT(mApplication->RemoveKeepOpenFolder(fullname));
-#else
-         mApplication->RemoveKeepOpenFolder(fullname);
-#endif
+         VERIFY(mApplication->RemoveKeepOpenFolder(fullname),
+                "failed to reset 'keep open' property");
       }
    }
    //else: nothing changed, nothing to do
+
+   int folderIcon = m_browseIcon->GetIconIndex();
+   if ( folderIcon != m_originalFolderIcon )
+   {
+      folder->SetIcon(folderIcon);
+   }
 
    if ( m_dlgCreate )
    {

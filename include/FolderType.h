@@ -44,6 +44,7 @@ enum FolderType
    News  = MF_NEWS,
 
    // pseudo types
+   FolderGroup,                // doesn't contain mail, but other folders
    FolderInvalid = MF_ILLEGAL, // folder not initialized properly
    FolderRoot = 999            // this is the the special pseudo-folder
 };
@@ -113,5 +114,21 @@ inline int CombineFolderTypeAndFlags(FolderType type, int flags)
 
    return type | flags;
 }
+
+// ----------------------------------------------------------------------------
+// Icon functions: the associated icon for the folder is shown in the folder
+// tree control, folder options dialog &c
+//
+// NB: these functions are implemented for now in wxFolderTree.cpp
+// ----------------------------------------------------------------------------
+
+/// get the number of icons from which we may choose folder icon from
+extern size_t GetNumberOfFolderIcons();
+
+/// get the name of the folder icon with given index
+extern String GetFolderIconName(size_t n);
+
+/// get the icon for this folder or default icon for this folder type (or -1)
+int GetFolderIconForDisplay(const class MFolder* folder);
 
 #endif //  _FOLDERTYPE_H

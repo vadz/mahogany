@@ -76,11 +76,19 @@ public:
       // folder type can't be changed once it's created
    virtual FolderType GetType() const = 0;
 
+      // the icon index for this folder or -1 if there is no specific icon
+      // associated to it (the icon index should be used to pass it to
+      // GetFolderIconName())
+   virtual int GetIcon() const = 0;
+      // set the icon
+   virtual void SetIcon(int icon) = 0;
+
       // folder may have an arbitrary comment associated with it - get it
    virtual String GetComment() const = 0;
       // change the comment
    virtual void SetComment(const String& comment) = 0;
 
+   // flags
       // get the folder flags (see Flags enum)
    virtual int GetFlags() const = 0;
       // set the flags (this replaces the old value of flags)

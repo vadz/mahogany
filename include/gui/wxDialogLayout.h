@@ -15,16 +15,22 @@
 #define _GUI_WXDIALOGLAYOUT_H
 
 // -----------------------------------------------------------------------------
+// headers we have to include
+// -----------------------------------------------------------------------------
+
+#include <wx/persctrl.h>
+
+// -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
 
-class wxPNotebook;
 class wxFrame;
 class wxControl;
 class wxListBox;
 class wxCheckBox;
 class wxFileBrowseButton;
-class wxBrowseButton;
+class wxIconBrowseButton;
+class wxTextBrowseButton;
 class wxStaticText;
 class wxStaticBox;
 class wxCheckListBox;
@@ -288,7 +294,7 @@ protected:
                                wxFileBrowseButton **ppButton = NULL)
    {
       return CreateEntryWithButton(label, widthMax, last, FileBtn,
-                                   (wxBrowseButton **)ppButton);
+                                   (wxTextBrowseButton **)ppButton);
    }
 
       // another entry with a browse button
@@ -298,6 +304,12 @@ protected:
    {
       return CreateEntryWithButton(label, widthMax, last, ColorBtn);
    }
+
+      // creates a static bitmap with a label and a browse button
+   wxStaticBitmap *CreateIconEntry(const char *label,
+                                   long widthMax,
+                                   wxControl *last,
+                                   wxIconBrowseButton *btnIcon);
 
    // UpdateUI helpers: enable disable several controls at once
    //
@@ -330,7 +342,7 @@ private:
                                      long widthMax,
                                      wxControl *last,
                                      wxNotebookPageBase::BtnKind kind,
-                                     wxBrowseButton **ppButton = NULL);
+                                     wxTextBrowseButton **ppButton = NULL);
 
    DECLARE_EVENT_TABLE()
 };

@@ -323,6 +323,8 @@
 #define   MP_COMPOSE_XFACE_FILE   "XFace"
 /// the folder type for a mailbox (see enum in MFolder class)
 #define   MP_FOLDER_TYPE         "Type"
+/// the folder icon for a mailbox (see icon functions in FolderType.h)
+#define   MP_FOLDER_ICON         "Icon"
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER      "NewMailFolder"
 /// the filename for a mailbox
@@ -704,6 +706,8 @@
 #define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
+/// the folder icon for a mailbox (see icon functions in FolderType.h)
+#define   MP_FOLDER_ICON_D         (int)-1        // no special icon
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_D      "" // obsolete
 /// the filename for a mailbox

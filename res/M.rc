@@ -106,6 +106,9 @@ folder_imap	BITMAP "folder_imap.bmp"
 folder_news	BITMAP "folder_news.bmp"
 folder_nntp	BITMAP "folder_news.bmp"
 folder_root	BITMAP "folder_root.bmp"
+folder_group	BITMAP "folder_group.bmp"
+folder_newmail	BITMAP "folder_newmail.bmp"
+folder_sentmail	BITMAP "folder_sentmail.bmp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources

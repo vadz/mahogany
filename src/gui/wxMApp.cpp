@@ -655,6 +655,7 @@ wxMApp::Help(int id, wxWindow *parent)
 void
 wxMApp::LoadModules(void)
 {
+#ifdef EXPERIMENTAL
    wxString
       pathname,
       globalDir,
@@ -709,16 +710,19 @@ wxMApp::LoadModules(void)
 #endif
       }
    }
+#endif // EXPERIMENTAL
 }
 
 void
 wxMApp::UnloadModules(void)
 {
+#ifdef EXPERIMENTAL
    ModulesList::iterator i;
    for(i = gs_GlobalModulesList.begin();
        i != gs_GlobalModulesList.end();
        i++)
       (**i).m_Module->DecRef();
+#endif // EXPERIMENTAL
 }
 
 // ----------------------------------------------------------------------------
@@ -742,7 +746,8 @@ bool wxMApp::StartTimer(Timer timer)
          return (delay == 0) || gs_timerMailCollection.Start(delay);
 
       case Timer_PingFolder:
-         // TODO!!!
+         // TODO - just sending an event "restart timer" which all folders
+         //        would be subscribed too should be enough
          return true;
 
       default:

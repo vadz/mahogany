@@ -282,7 +282,7 @@ public:
 /** Our own Mutex type, must support the calls
     Lock() and Unlock().
 */
-typedef wxMutex MMutex;
+typedef class WXDLLEXPORT wxMutex MMutex;
 
 
 #endif   // MAPPLICATION_H

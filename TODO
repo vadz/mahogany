@@ -294,4 +294,4 @@ $Id$
 5	KB	check mail now in File... menu
 5	KB	check "Unread" status flag
 
-vi: set si tw=80:
+vi: set si ts=8 sw=8 noet nolist tw=80:

@@ -13,10 +13,7 @@
 /*
    TODO
 
- + 1. Check this new code for memory leaks
-   2. Implement OnCreate/Delete
- + 3. Add popup menu (on right click) with all operations
-   4. Renaming
+   1. Renaming
  */
 
 // ============================================================================
@@ -49,8 +46,46 @@
 #include "gui/wxMainFrame.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+enum FolderIcon
+{
+   iconInbox,
+   iconFile,
+   iconPOP,
+   iconIMAP,
+   iconNNTP,
+   iconNews,
+   iconRoot,
+   iconGroup,
+   iconNewMail,
+   iconSentMail,
+   iconFolderMax
+};
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
+
+// a tree item whose icon was changed (used internally by wxFolderTreeImpl::
+// UpdateIcon() and RestoreIcon())
+struct ItemWithChangedIcon
+{
+   ItemWithChangedIcon(const wxTreeItemId& item_, int image_)
+   {
+      item = item_;
+      image = image_;
+   }
+
+   wxTreeItemId item;      // the tree item id
+   int          image;     // the (old) icon
+};
+
+// and the array of such things
+WX_DECLARE_OBJARRAY(ItemWithChangedIcon, ArrayOfItemsWithChangedIcon);
+#include <wx/arrimpl.cpp>
+WX_DEFINE_OBJARRAY(ArrayOfItemsWithChangedIcon);
 
 // tree element
 class wxFolderTreeNode : public wxTreeItemData
@@ -103,19 +138,6 @@ private:
 class wxFolderTreeImpl : public wxTreeCtrl, public MEventReceiver
 {
 public:
-   // constants
-   enum Icon
-   {
-      iconInbox,
-      iconFile,
-      iconPOP,
-      iconIMAP,
-      iconNNTP,
-      iconNews,
-      iconRoot,
-      iconMax
-   };
-
    // ctor
    wxFolderTreeImpl(wxFolderTree *sink, wxWindow *parent, wxWindowID id,
                 const wxPoint& pos, const wxSize& size);
@@ -151,6 +173,12 @@ public:
 #ifdef __WXGTK__
    void OnMouseMove(wxMouseEvent &event) { SetFocus(); }
 #endif // wxGTK
+
+   // get the folder tree node object from item id
+   wxFolderTreeNode *GetFolderTreeNode(const wxTreeItemId& item)
+   {
+      return (wxFolderTreeNode *)GetItemData(item);
+   }
 
 protected:
    // is the root item chosen?
@@ -210,12 +238,29 @@ private:
    wxFolderTree      *m_sink;     // for sending events
    wxFolderTreeNode  *m_current;  // current selection (NULL if none)
 
-   void              *m_eventReg; // event registration handle
+   // event registration handles
+   void *m_eventFolderChange;    // for folder creatio/destruction
+   void *m_eventOptionsChange;   // options change (update icons)
 
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
    String m_openFolderName,
           m_selectedFolderName;
+
+   // icon management
+      // update the icon for the selected folder, if "tmp" is TRUE remember the
+      // old value to be able to restore it later with RestoreIcon()
+   void UpdateIcon(const wxTreeItemId item, bool tmp = FALSE);
+
+      // restore the icon previously changed by UpdateIcon(FALSE)
+   void RestoreIcon(const wxTreeItemId item);
+
+      // find item in m_itemsWithChangedIcons and return its index in the out
+      // parameter and TRUE if found (otherwise return FALSE)
+   bool FindItemWithChangedIcon(const wxTreeItemId& item, size_t *index);
+
+      // all the items whose icons were changed by UpdateIcon()
+   ArrayOfItemsWithChangedIcon m_itemsWithChangedIcons;
 
    // an ugly hack to prevent sending of the "selection changed" notification
    // when the folder is selected from the program: this is needed because
@@ -289,8 +334,7 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
       // the item which is returned should correspond to the folder we started
       // with, otherwise there is something wrong
       ASSERT_MSG(
-                  ((wxFolderTreeNode *)m_tree->GetItemData(item))->
-                  GetFolder() == folder,
+                  m_tree->GetFolderTreeNode(item)->GetFolder() == folder,
                   "GetTreeItemFromName() is buggy"
                 );
 
@@ -455,36 +499,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_folder = folder;
    m_wasExpanded = false;
 
-   // each folder type has its own icon
-   static const struct
-   {
-      wxFolderTreeImpl::Icon icon;
-      FolderType             type;
-   } FolderIcons[] =
-   {
-      { wxFolderTreeImpl::iconInbox, Inbox      },
-      { wxFolderTreeImpl::iconFile,  File       },
-      { wxFolderTreeImpl::iconPOP,   POP        },
-      { wxFolderTreeImpl::iconIMAP,  IMAP       },
-      { wxFolderTreeImpl::iconNNTP,  Nntp       },
-      { wxFolderTreeImpl::iconNews,  News       },
-      { wxFolderTreeImpl::iconRoot,  FolderRoot }
-   };
-
-   FolderType type = folder->GetType();
-   int image = -1;
-
-   size_t n;
-   for ( n = 0; n < WXSIZEOF(FolderIcons); n++ )
-   {
-      if ( type == FolderIcons[n].type )
-      {
-         image = FolderIcons[n].icon;
-         break;
-      }
-   }
-
-   ASSERT_MSG( n < WXSIZEOF(FolderIcons), "no icon for this folder type" );
+   int image = GetFolderIconForDisplay(folder);
 
    // add this item to the tree
    if ( folder->GetType() == FolderRoot )
@@ -521,25 +536,13 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_previousFolder = NULL;
 
    // create an image list and associate it with this control
-   static const char *aszImages[] =
+   size_t nIcons = GetNumberOfFolderIcons();
+   wxImageList *imageList = new wxImageList(16, 16, FALSE, nIcons);
+
+   wxIconManager *iconManager = mApplication->GetIconManager();
+   for ( size_t n = 0; n < nIcons; n++ )
    {
-      // should be in sync with the corresponding enum!
-      "folder_inbox",
-      "folder_file",
-      "folder_pop",
-      "folder_imap",
-      "folder_nntp",
-      "folder_news",
-      "folder_root"
-   };
-
-   ASSERT_MSG( iconMax == WXSIZEOF(aszImages), "bad number of icon names" );
-
-   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
-
-   for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ )
-   {
-      imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
+      imageList->Add(iconManager->GetBitmap(GetFolderIconName(n)));
    }
 
    SetImageList(imageList);
@@ -549,8 +552,13 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    (void)new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
-   m_eventReg = MEventManager::Register(*this, MEventId_FolderTreeChange);
-   ASSERT_MSG( m_eventReg, "can't register for folder tree change event" );
+   m_eventFolderChange = MEventManager::Register(*this,
+                                                 MEventId_FolderTreeChange);
+   m_eventOptionsChange = MEventManager::Register(*this,
+                                                  MEventId_OptionsChange);
+
+   ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange,
+               "folder tree failed to register with event manager" );
 }
 
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
@@ -607,7 +615,7 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
          // expand it first
          Expand(child);
 
-         wxFolderTreeNode *node = (wxFolderTreeNode *)GetItemData(child);
+         wxFolderTreeNode *node = GetFolderTreeNode(child);
          CHECK( node, false, "tree folder node without folder?" );
 
          if ( node->GetFolder()->GetFullName() == currentPath )
@@ -636,7 +644,7 @@ void wxFolderTreeImpl::DoFolderCreate()
       // now done in OnMEvent()
 #if 0
      wxTreeItemId idCurrent = wxTreeCtrl::GetSelection();
-     wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(idCurrent);
+     wxFolderTreeNode *parent = GetFolderTreeNode(idCurrent);
 
      wxASSERT_MSG( parent, "can't get the parent of current tree item" );
 
@@ -682,7 +690,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
    wxTreeItemId itemId = event.GetItem();
-   wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(itemId);
+   wxFolderTreeNode *parent = GetFolderTreeNode(itemId);
 
    if ( parent->WasExpanded() )
    {
@@ -715,7 +723,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    ASSERT_MSG( event.GetEventObject() == this, "got other treectrls event?" );
 
    wxTreeItemId itemId = event.GetItem();
-   wxFolderTreeNode *newCurrent = (wxFolderTreeNode *)GetItemData(itemId);
+   wxFolderTreeNode *newCurrent = GetFolderTreeNode(itemId);
 
    MFolder *oldsel = m_current ? m_current->GetFolder() : NULL;
    if ( !m_suppressSelectionChange )
@@ -880,7 +888,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       Collapse(parent);
       DeleteChildren(parent);
-      ((wxFolderTreeNode *)GetItemData(parent))->ResetExpandedFlag();
+      GetFolderTreeNode(parent)->ResetExpandedFlag();
       SetItemHasChildren(parent, TRUE);
 
       Expand(parent);
@@ -896,15 +904,208 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          }
       }
    }
+   else if ( ev.GetId() == MEventId_OptionsChange )
+   {
+      MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
+
+      ProfileBase *profileChanged = event.GetProfile();
+      if ( !profileChanged )
+      {
+         // it's some profile which has nothing to do with us
+         return true;
+      }
+
+      // find the folder which has been changed
+      wxTreeItemId item;
+
+      wxString profileName = profileChanged->GetName();
+      int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
+      if ( pos != 0 )
+      {
+         // don't know how to get folder name...
+         FAIL_MSG("weird profile path");
+
+         // test for item.IsOk() will fail below, so just do nothing
+      }
+      else
+      {
+         // skip the M_PROFILE_CONFIG_SECTION prefix
+         wxString folderName = profileName.c_str() +
+                               strlen(M_PROFILE_CONFIG_SECTION);
+
+         item = GetTreeItemFromName(folderName);
+      }
+
+      if ( item.IsOk() )
+      {
+         switch ( event.GetChangeKind() )
+         {
+            case MEventOptionsChangeData::Apply:
+               UpdateIcon(item, TRUE /* temporary change, may be undone */);
+               break;
+
+            case MEventOptionsChangeData::Ok:
+               UpdateIcon(item, FALSE /* definitive change, no undo */);
+               break;
+
+            case MEventOptionsChangeData::Cancel:
+               // restore the old values
+               RestoreIcon(item);
+               break;
+
+            default:
+               FAIL_MSG("unknown options change event");
+         }
+      }
+   }
 
    return true;
 }
 
+// update the icon of the selected folder: called with tmp == FALSE when [Ok]
+// button is pressed or TRUE if it was the [Apply] button
+void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
+{
+   wxFolderTreeNode *node = GetFolderTreeNode(item);
+   CHECK_RET( node, "can't update icon of non existing node" );
+
+   // first remember the old icon to be able to restore it
+   if ( tmp )
+   {
+      int imageOld = GetItemImage(item);
+      m_itemsWithChangedIcons.Add(new ItemWithChangedIcon(item, imageOld));
+   }
+   else
+   {
+      // some cleanup: if we "Applied" this change before, now we can remove
+      // the undo information because we can't undo anymore after "Ok"
+      size_t n;
+      if ( FindItemWithChangedIcon(item, &n) )
+      {
+         m_itemsWithChangedIcons.Remove(n);
+      }
+   }
+
+   // and now set the new one
+   MFolder *folder = node->GetFolder();
+   int image = GetFolderIconForDisplay(folder);
+   SetItemImage(item, image);
+}
+
+// restore the icon previously changed by UpdateIcon(FALSE)
+void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
+{
+   size_t n;
+   if ( FindItemWithChangedIcon(item, &n) )
+   {
+      // restore icon
+      SetItemImage(item, m_itemsWithChangedIcons[n].image);
+
+      // and delete the record - can't cancel the same action more than once
+      m_itemsWithChangedIcons.Remove(n);
+   }
+   //else: the icon wasn't changed, so nothing to do
+}
+
+// find the item in the list of items whose icons were changed, return TRUE if
+// found or FALSE otherwise
+bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
+                                               size_t *index)
+{
+   size_t nCount = m_itemsWithChangedIcons.GetCount();
+   for ( size_t n = 0; n < nCount; n++ )
+   {
+      if ( m_itemsWithChangedIcons[n].item == item )
+      {
+         *index = n;
+
+         return TRUE;
+      }
+   }
+
+   return FALSE;
+}
+
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
-   MEventManager::Deregister(m_eventReg);
+   MEventManager::Deregister(m_eventFolderChange);
+   MEventManager::Deregister(m_eventOptionsChange);
 
    delete GetImageList();
 
    delete m_menu;
+}
+
+// ----------------------------------------------------------------------------
+// global functions from include/FolderType.h implemented here
+// ----------------------------------------------------------------------------
+
+size_t GetNumberOfFolderIcons()
+{
+   return iconFolderMax;
+}
+
+String GetFolderIconName(size_t n)
+{
+   static const char *aszImages[] =
+   {
+      // should be in sync with the corresponding enum (FolderIcon)!
+      "folder_inbox",
+      "folder_file",
+      "folder_pop",
+      "folder_imap",
+      "folder_nntp",
+      "folder_news",
+      "folder_root",
+      "folder_group",
+      "folder_newmail",
+      "folder_sentmail",
+   };
+
+   ASSERT_MSG( iconFolderMax == WXSIZEOF(aszImages),
+               "bad number of icon names" );
+
+   CHECK( n < WXSIZEOF(aszImages), "", "invalid icon index" );
+
+   return aszImages[n];
+}
+
+int GetFolderIconForDisplay(const MFolder* folder)
+{
+   // each folder type has its own icon
+   static const struct
+   {
+      FolderIcon icon;
+      FolderType type;
+   } FolderIcons[] =
+   {
+      { iconInbox, Inbox      },
+      { iconFile,  File       },
+      { iconPOP,   POP        },
+      { iconIMAP,  IMAP       },
+      { iconNNTP,  Nntp       },
+      { iconNews,  News       },
+      { iconRoot,  FolderRoot },
+      { iconGroup, FolderGroup},
+   };
+
+   // first of all, try to ask the folder itself - this will return something
+   // if this folder has its own "special" icon
+   int image = folder->GetIcon();
+
+   // if there is no special icon for this folder, use a default one for its
+   // type
+   FolderType type = folder->GetType();
+   size_t n;
+   for ( n = 0; (image == -1) && (n < WXSIZEOF(FolderIcons)); n++ )
+   {
+      if ( type == FolderIcons[n].type )
+      {
+         image = FolderIcons[n].icon;
+      }
+   }
+
+   ASSERT_MSG( image != -1, "no icon for this folder type" );
+
+   return image;
 }

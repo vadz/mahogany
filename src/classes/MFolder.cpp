@@ -78,6 +78,9 @@ public:
 
    virtual FolderType GetType() const;
 
+   virtual int GetIcon() const;
+   virtual void SetIcon(int icon);
+
    virtual String GetComment() const;
    virtual void SetComment(const String& comment);
 
@@ -354,6 +357,22 @@ FolderType MFolderFromProfile::GetType() const
    FolderType t = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
 
    return t;
+}
+
+int MFolderFromProfile::GetIcon() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
+
+   return READ_CONFIG(profile, MP_FOLDER_ICON);
+}
+
+void MFolderFromProfile::SetIcon(int icon)
+{
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   profile->writeEntry(MP_FOLDER_ICON, icon);
 }
 
 String MFolderFromProfile::GetComment() const
