@@ -165,9 +165,11 @@ public:
    /** Utiltiy function to get a textual representation of a message
        status.
        @param message status
+       @param mf optional pointer to folder to treat e.g. NNTP separately
        @return string representation
    */
-   static String ConvertMessageStatusToString(int status);
+   static String ConvertMessageStatusToString(int status,
+                                              MailFolder *mf = NULL);
    /** Forward one message.
        @param message message to forward
        @param profile environment

@@ -321,23 +321,43 @@ MailFolder::CreateFolder(const String &name,
 
 
 /* static */ String
-MailFolder::ConvertMessageStatusToString(int status)
+MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
 {
    String strstatus = "";
 
-   if(status & MSG_STAT_RECENT)
+   // We treat news differently:
+   bool isNews = FALSE;
+   if(mf && mf->GetType() == MF_NEWS  || mf->GetType() == MF_NNTP)
+      isNews = TRUE;
+   
+   if(isNews)
    {
-      if(status & MSG_STAT_SEEN)
-         strstatus << 'R'; // seen but not read -->RECENT
-      else
-         strstatus << 'N'; // not seen yet  --> really new
-   }
-   else
-      if(! (status & MSG_STAT_SEEN))
-         strstatus << 'U';
+      if((status & MSG_STAT_SEEN) == 0)
+      {
+         if(status & MSG_STAT_RECENT)
+            strstatus << 'U'; // unread or new!
+         else
+            strstatus << 'O'; // old messages, whatever that is
+      }
       else
          strstatus << ' ';
-
+   }
+   else
+   {
+      if(status & MSG_STAT_RECENT)
+      {
+         if(status & MSG_STAT_SEEN)
+            strstatus << 'R'; // seen but not read -->RECENT
+         else
+            strstatus << 'N'; // not seen yet  --> really new
+      }
+      else
+         if(! (status & MSG_STAT_SEEN))
+            strstatus << 'U';
+         else
+            strstatus << ' ';
+   }
+   
    strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
    strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
    strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
@@ -1340,6 +1360,10 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
                                                 MP_TRASH_FOLDER))
       reallyDelete = true;
 
+   // newsgroups really delete:
+   if(GetType() == MF_NNTP || GetType() == MF_NEWS)
+      reallyDelete = true;
+   
    if(!reallyDelete)
    {
       bool rc = SaveMessages(selections,

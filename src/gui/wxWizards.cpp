@@ -333,7 +333,7 @@ MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wiza
 
    m_checkNoWizard = panel->CreateCheckBox(labels[0], maxwidth, NULL);
 
-   panel->Layout();
+   panel->ForceLayout();
 }
 
 MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
@@ -401,7 +401,7 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
                                       "NNTP Newsgroup:Local News Hierarchy:"
                                       "Local Newsgroup:Folder Group"),
                                     maxwidth, NULL);
-   panel->Layout();
+   panel->ForceLayout();
 }
 
 MWizardPageId
@@ -450,10 +450,11 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
               "the following access parameters\n"
               "are needed:\n");
       bool
-      needsServer = FALSE,
-      needsUserId = FALSE,
-      needsPassword = FALSE,
-      needsPath = FALSE;
+         needsServer = FALSE,
+         needsUserId = FALSE,
+         needsPassword = FALSE,
+         needsPath = FALSE,
+         canBrowse = TRUE;
 
    switch(type)
    {
@@ -469,28 +470,33 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       needsUserId = TRUE;
       needsPassword = TRUE;
       needsPath = TRUE;
+      canBrowse = FALSE;
       break;
    case ET_POP3:
       entry = _("a POP3 mailbox");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
+      canBrowse = FALSE;
       break;
    case ET_NNTP:
       entry = _("a NNTP newsgroup");
       needsServer = TRUE;
       needsPath = TRUE;
       pathName = _("Newsgroup");
+      canBrowse = FALSE;
       break;
    case ET_IMAP_SERVER:
       entry = _("an IMAP server");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;
+      canBrowse = FALSE;
       break;
    case ET_NNTP_SERVER:
       entry = _("a NNTP newsserver");
       needsServer = TRUE;
+      canBrowse = FALSE;
       break;
    case ET_IMAP_HIER:
       entry = _("an IMAP mail hierarchy");
@@ -499,23 +505,27 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       needsPassword = TRUE;
       needsPath = TRUE;
       pathName = _("Path on IMAP server");
+      canBrowse = FALSE;
       break;
    case ET_NNTP_HIER:
       entry = _("a NNTP news hierarchy");
       needsServer = TRUE;
       needsPath = TRUE;
       pathName = _("Hierarchy name");
+      canBrowse = FALSE;
       break;
    case ET_NEWS:
       entry = _("a local newsgroup");
       needsPath = TRUE;
       pathName = _("Newsgroup");
+      canBrowse = FALSE;
       break;
    case ET_NEWS_HIER:
       entry = _("a local news hierarchy");
       needsServer = FALSE;
       needsPath = TRUE;
       pathName = _("Hierarchy name");
+      canBrowse = FALSE;
       break;
    case ET_FILE:
       entry = _("a local mailbox file");
@@ -567,7 +577,10 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
                panel->CreateTextWithLabel(labels[2],maxwidth,last, 0,
                                           wxPASSWORD));
    CREATE_CTRL(Path, panel->CreateFileOrDirEntry(labels[3], maxwidth,
-                                  last,&m_browsePath,TRUE,FALSE));
+                                                 last,
+                                                 canBrowse ?
+                                                 &m_browsePath : NULL,
+                                                 TRUE,FALSE));
 #undef CREATE_CTRL
    wxStaticText * msg2 = panel->CreateMessage(
       _("\n"
@@ -578,12 +591,13 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
 
    if ( type == ET_MH )
    {
+      ASSERT(m_browsePath);
       // the browser button should allow to select directories, not folders
       // then
       m_browsePath->BrowseForDirectories();
    }
 
-   panel->Layout();
+   panel->ForceLayout();
 }
 
 bool
@@ -616,6 +630,14 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    params->m_FolderType = 0;
    params->m_FolderFlags = MF_FLAGS_DEFAULT;
 
+   if(m_Server)
+   {
+      String server = params->m_Server;
+      strutil_tolower(server);
+      if(server== "localhost")
+         params->m_FolderFlags |= MF_FLAGS_ISLOCAL;
+   }
+   
    switch(m_Type)
    {
    case ET_IMAP:
@@ -693,8 +715,9 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
          ASSERT_MSG(0,"This folder has no server setting!");
       }
       if(GetPageId() != MWizard_CreateFolder_Nntp
-         && GetPageId() != MWizard_CreateFolder_News
          && GetPageId() != MWizard_CreateFolder_NntpHier
+         && GetPageId() != MWizard_CreateFolder_NntpServer
+         && GetPageId() != MWizard_CreateFolder_News
          && GetPageId() != MWizard_CreateFolder_NewsHier)
       {
          m_UserId->SetValue(READ_CONFIG(p, MP_USERNAME));

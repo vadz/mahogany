@@ -1557,8 +1557,8 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    // array in GetConfig() further up:
    { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Script to run before"), wxOptionsPage::Field_Text,    -1 },
-   { gettext_noop("Script to run after"), wxOptionsPage::Field_Text,    -1 }
+   { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
+   { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 }
 };
 
 static

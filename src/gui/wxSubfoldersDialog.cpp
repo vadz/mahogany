@@ -469,8 +469,14 @@ void wxSubscriptionDialog::InsertRecursively(const String& path)
    }
    else // normal case of non empty m_folderPath
    {
-      CHECK_RET( (path.length() > len) && (path[len] == sep),
-                 "folder name separator expected in the folder name" );
+      // the following isn't necessarily an error, as trying to browse 
+      // all folders under "ed." also retrieves the ones under "edm.", 
+      // something I rather would call jaccb (just another c-client
+      // bug), so we simply ignore them:
+      if(! (path.length() > len) && (path[len] == sep))
+         return;
+      //CHECK_RET( (path.length() > len) && (path[len] == sep),
+      //           "folder name separator expected in the folder name" );
 
       // +1 for trailing separator
       name = path.c_str() + len + 1;

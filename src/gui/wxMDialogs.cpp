@@ -958,8 +958,28 @@ MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 void
 MDialog_ShowTip(const MWindow *parent)
 {
+   String dir, filename;
+
+   // Tips files are in @prefix@/share/Mahogany/doc/Tips/
+   dir = mApplication->GetGlobalDir();
+   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR
+       << "Tips" << DIR_SEPARATOR; 
+
+   // Tips files are either Tips_LOCALENAME.txt, e.g. Tips_de.txt or
+   // simply Tips.txt
+   
+   filename = "Tips";
+
+   wxLocale * locale = wxGetLocale();
+   if(locale)
+      filename << '_' << locale->GetLocale();
+   filename << ".txt";
+
+   if(! wxFileExists(dir+filename))
+      filename = "Tips.txt";
+   
    wxTipProvider *tipProvider =
-      wxCreateFileTipProvider("tips.txt", READ_APPCONFIG(MP_LASTTIP));
+      wxCreateFileTipProvider(dir+filename, READ_APPCONFIG(MP_LASTTIP));
 
    bool showOnStarup = wxShowTip((wxWindow *)parent, tipProvider);
 

@@ -1071,6 +1071,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
    m_radio->Enable(m_isCreating);
+
+   ForceLayout(); // make sure wxEnhancedPanel sees an OnSize event
+   // after creating all controls
 }
 
 void

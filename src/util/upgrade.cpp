@@ -31,6 +31,7 @@
 #  include "MailFolder.h"
 #  include "MailFolderCC.h"
 #  include "SendMessageCC.h"
+#  include "MessageCC.h"
 
 #ifdef USE_PYTHON
 #  include <Python.h>
@@ -124,6 +125,10 @@ struct InstallWizardData
    int    useDialUp; // initially -1
    bool   useOutbox;
    bool   useTrash;
+   bool   usePalmOs;
+#ifdef USE_PYTHON
+   bool   usePython;
+#endif
    bool   collectAllMail;
    // dial up page
    
@@ -292,7 +297,11 @@ public:
             // networking, but if we don't, then we probably do
             gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
          }
+#ifdef USE_PYTHON
+         m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
+#endif
          m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
+         m_UsePalmOsCheckbox->SetValue(gs_installWizardData.usePalmOs != 0);
          m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
          m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
          m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
@@ -301,6 +310,10 @@ public:
 
    virtual bool TransferDataFromWindow()
       {
+#ifdef USE_PYTHON
+         gs_installWizardData.usePython  = m_UsePythonCheckbox->GetValue();
+#endif
+         gs_installWizardData.usePalmOs  = m_UsePalmOsCheckbox->GetValue();
          gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
          gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
          gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
@@ -309,7 +322,12 @@ public:
       }
 private:
    wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
-      *m_UseOutboxCheckbox, *m_UseDialUpCheckbox;
+         *m_UseOutboxCheckbox, *m_UseDialUpCheckbox,
+         *m_UsePalmOsCheckbox
+#ifdef USE_PYTHON
+   , *m_UsePythonCheckbox
+#endif
+   ;
 };
 
 #ifdef USE_HELPERS_PAGE
@@ -470,7 +488,7 @@ wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 //   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
 
-   wxEnhancedPanel *panel = new wxEnhancedPanel(this, FALSE /* no scrolling */);
+   wxEnhancedPanel *panel = new wxEnhancedPanel(this, TRUE /* scrolling */);
    panel->SetSize(0, y, sizePage.x, sizePage.y - y);
 
    panel->SetAutoLayout(TRUE);
@@ -547,7 +565,7 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
    m_name = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
    m_email = panel->CreateTextWithLabel(labels[1], widthMax, m_name);
 
-   panel->Layout();
+   panel->ForceLayout();
 }
 
 // InstallWizardServersPage
@@ -587,7 +605,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
    m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
 
-   panel->Layout();
+   panel->ForceLayout();
 }
 
 // InstallWizardDialUpPage
@@ -616,7 +634,7 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
    m_connect = panel->CreateTextWithLabel(labels[0], widthMax, NULL);
    m_disconnect = panel->CreateTextWithLabel(labels[1], widthMax, m_connect);
 
-   panel->Layout();
+   panel->ForceLayout();
    
 #else
 #   pragma warning TODO ask for the connection name under
@@ -641,12 +659,13 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
-
    wxArrayString labels;
    labels.Add(_("&Collect new mail:"));
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queue:"));
    labels.Add(_("Use dial-up network:"));
+   labels.Add(_("Load PalmOS support:"));
+   labels.Add(_("Enable Python:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
@@ -681,8 +700,28 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          ), m_UseOutboxCheckbox);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
 
-   panel->Layout();
-   Layout();
+   wxStaticText *text5 = panel->CreateMessage(
+      _(
+         "\n"
+         "Do you have a PalmOS based handheld computer?\n"
+         "Mahogany has special support build in to connect\n"
+         "to these."
+         ), m_UseDialUpCheckbox);
+   m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
+
+#ifdef USE_PYTHON
+   wxStaticText *text6 = panel->CreateMessage(
+      _(
+         "\n"
+         "Mahogany contains a built-in interpreter for\n"
+         "the scripting language `Python'.\n"
+         "This can be used to further customise and\n"
+         "expand Mahogany.\n"
+         "Would you like to enable it?"), m_UsePalmOsCheckbox);
+   m_UsePythonCheckbox = panel->CreateCheckBox(labels[5], widthMax, text6);
+#endif
+
+   panel->ForceLayout();
 }
 
 #ifdef USE_HELPERS_PAGE
@@ -764,6 +803,8 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
 static
 void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData);
 
+static void SetupServers(void);
+
 bool RunInstallWizard()
 {
    // as we use a static array, make sure that only one install wizard is
@@ -829,14 +870,65 @@ bool RunInstallWizard()
       profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
       profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
 
-
+      // load all modules by default:
+      if(gs_installWizardData.usePalmOs)
+         profile->writeEntry(MP_MODULES,"Filters:PalmOS");
+      else
+         profile->writeEntry(MP_MODULES,"Filters");
+      
       CompleteConfiguration(gs_installWizardData);
    }
 
    wizard->Destroy();
 
    gs_isWizardRunning = false;
+   SetupServers();
 
+   // create a welcome message:
+
+   //MessageCC *msg = Create(
+   String msgFmt =
+      _("From: m-users-subscribe@egroups.com\015\012"
+        "Subject: Welcome to Mahogany!\015\012"
+        "Date: %s\015\012"
+        "\015\012"
+        "Thank you for trying Mahogany!\015\012"
+        "\015\012"
+        "This mail and news client is developed as an OpenSource project by a\015\012"
+        "team of volunteers from around the world.\015\012"
+        "If you would like to contribute to its development, you are\015\012"
+        "always welcome to join in.\015\012"
+        "\015\012"
+        "We also rely on you to report any bugs or wishes for improvements\015\012"
+        "that you may have.\015\012"
+        "\015\012"
+        "Please visit our web pages at http://www.wxwindows.org/Mahogany/\015\012"
+        "\015\012"
+        "Also, reply to this e-mail message and you will automatically be\015\012"
+        "added to the mailing list of Mahogany users, where you will find\015\012"
+        "other users happy to share their experiences with you and help you\015\012"
+        "get started.\015\012"
+        "\015\012"
+        "Your Mahogany Developers Team\015\012"
+        );
+   String msgString; msgString.Printf(msgFmt, __DATE__);
+   MailFolder *mf = NULL;
+   if(gs_installWizardData.collectAllMail)
+   {
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+      mf = MailFolder::OpenFolder(MF_PROFILE,READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+   }
+   else
+   {
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, "INBOX");
+      mf = MailFolder::OpenFolder(MF_INBOX,"INBOX");
+   }
+   ASSERT_MSG(mf,"Cannot get main folder?");
+   if(mf)
+   {
+      mf->AppendMessage(msgString);
+      mf->DecRef();
+   }
    return true;
 }
 
@@ -932,6 +1024,36 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    {
       profile->writeEntry(MP_NET_ON_COMMAND,gs_installWizardData.dialCommand);
       profile->writeEntry(MP_NET_OFF_COMMAND,gs_installWizardData.hangupCommand);
+   }
+
+   // PalmOS-box
+   if(gs_installWizardData.usePalmOs)
+   {
+      ProfileBase *pp = ProfileBase::CreateModuleProfile("PalmOS");
+      pp->writeEntry("PalmBox", "PalmBox");
+      pp->DecRef();
+      if(! MailFolder::CreateFolder("PalmBox",
+                                    MF_FILE,
+                                    0,
+                                    "PalmBox",
+                                    _("This folder and its configuration settings\n"
+                                      "are used to synchronise with your PalmOS\n"
+                                      "based handheld computer.") ) ) 
+         wxLogError(_("Could not create PalmOS mailbox."));
+      else
+      {
+         pp = ProfileBase::CreateProfile("PalmBox");
+         pp->writeEntry("Icon", wxFolderTree::iconPalmPilot);
+         pp->DecRef();
+         MDialog_Message(_(
+            "Set up the `PalmBox' mailbox used to synchronise\n"
+            "e-mail with your handheld computer.\n"
+            "Please use the Plugin-menu to configure\n"
+            "the PalmOS support."));
+
+      }
+
+      // the rest is done in Update()
    }
 }
 
@@ -1369,7 +1491,6 @@ VerifyInbox(void)
       }
       ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
       ibp->DecRef();
-      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, "INBOX");
    }
 #endif
 
@@ -1403,7 +1524,6 @@ VerifyInbox(void)
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
       ibp->writeEntry(MP_FOLDER_COMMENT,
                       _("Folder where Mahogany will collect all new mail."));
-      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, foldername);
       rc = FALSE;
    }
 
@@ -1531,6 +1651,9 @@ VerifyInbox(void)
       p->DecRef();
    }
 
+   // Set up the treectrl to be expanded at startup:
+   wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
+   conf->Write("Settings/TreeCtrlExp/FolderTree", 1L);
    return rc;
 }
 
@@ -1731,7 +1854,6 @@ SetupMinimalConfig(void)
          profile->writeEntry(MP_IMAPHOST, cptr);
    }
 
-   SetupServers();
 #if 0
    
    mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent Mail"));
@@ -1748,8 +1870,6 @@ SetupMinimalConfig(void)
 #endif
 #endif
 #endif
-   // load all modules by default:
-   mApplication->GetProfile()->writeEntry(MP_MODULES,"Filters:PalmOS");
 
 }
 

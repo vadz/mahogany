@@ -1702,9 +1702,9 @@ MailFolderCC::BuildListing(void)
    {
       // Hopefully this will only count really existing messages for
       // NNTP connections.
-      if(GetType() == MF_NNTP)
-         m_nMessages = m_MailStream->recent;
-      else
+//      if(GetType() == MF_NNTP)
+//         m_nMessages = m_MailStream->recent;
+//      else
          m_nMessages = m_MailStream->nmsgs;
    }
 
@@ -1719,9 +1719,6 @@ MailFolderCC::BuildListing(void)
 
    // by default, we retrieve all messages
    unsigned long numMessages = m_nMessages;
-   // the first one to retrieve
-   unsigned long firstMessage = 1; //m_nMessages - numMessages + 1;
-
    // if the number of the messages in the folder is bigger than the
    // configured limit, ask the user whether he really wants to retrieve them
    // all. The value of 0 disables the limit. Ask only once and never for file
@@ -1754,49 +1751,71 @@ MailFolderCC::BuildListing(void)
    }
 
    m_BuildNextEntry = 0;
-
-   if ( m_ProgressDialog == NULL &&
-        numMessages > (unsigned)READ_CONFIG(m_Profile,
-                                            MP_FOLDERPROGRESS_THRESHOLD) )
+   if(numMessages > 0) // anything to do at all?
    {
-      String msg;
-      msg.Printf(_("Reading %lu message headers..."), numMessages);
-      m_ProgressDialog = new MProgressDialog(GetName(),
-                                             msg,
-                                             numMessages,
-                                             NULL,
-                                             false, true);// open a status window:
-   }
+      if ( m_ProgressDialog == NULL &&
+           numMessages > (unsigned)READ_CONFIG(m_Profile,
+                                               MP_FOLDERPROGRESS_THRESHOLD) )
+      {
+         String msg;
+         msg.Printf(_("Reading %lu message headers..."), numMessages);
+         m_ProgressDialog = new MProgressDialog(GetName(),
+                                                msg,
+                                                numMessages,
+                                                NULL,
+                                                false, true);// open a status window:
+      }
+      
+      // mail_fetch_overview() will now fill the m_Listing array with
+      // info on the messages
+      /* stream, sequence, header structure to fill */
+      String sequence;
 
-   // mail_fetch_overview() will now fill the m_Listing array with
-   // info on the messages
-   /* stream, sequence, header structure to fill */
-   String sequence;
-   if ( numMessages != m_nMessages )
-   {
       UIdType uid;
       if(numMessages <= m_nMessages)
          uid = m_nMessages-numMessages+1;
       else
          uid = m_nMessages;
+
+      
+/*      if ( numMessages != m_nMessages )
+      {
+      // the first one to retrieve
+      unsigned long firstMessage = 1;
+
       sequence = strutil_ultoa(mail_uid(m_MailStream, uid));
       sequence += ":*";
-   }
-   else
-   {
-      sequence.Printf("%lu", firstMessage);
-      if( GetType() == MF_NNTP )
-         // FIXME: no idea why this works for NNTP but not for the other types
-         sequence << '-';
+      }
       else
+      {
+         sequence.Printf("%lu", firstMessage);
+         if( GetType() == MF_NNTP )
+         {  // FIXME: no idea why this works for NNTP but not for the other types
+            //  sequence << '-';
+         }
+         else
+            sequence << ":*";
+      }
+      
+*/
+      UIdType from, to;
+      from = mail_uid(m_MailStream, uid);
+      to = mail_uid(m_MailStream,m_nMessages);
+      sequence = strutil_ultoa(from);
+      if(to != from) // don't produce sequences like "1:1" 
+      {
+/*         if( GetType() == MF_NNTP)
+            sequence << '-' << strutil_ultoa(to);
+         else
+*/
          sequence << ":*";
+      }
+      
+      mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+      if ( m_ProgressDialog != (MProgressDialog *)1 )
+         delete m_ProgressDialog;
    }
-
-   mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
-
-   if ( m_ProgressDialog != (MProgressDialog *)1 )
-      delete m_ProgressDialog;
-
+   
    // We set it to an illegal address here to suppress further updating. This
    // value is checked against in OverviewHeader(). The reason is that we only
    // want it the first time that the folder is being opened.
@@ -1856,57 +1875,66 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    if(m_folderType == MF_NNTP && elt->deleted)
       return 1; // ignore but continue
 
-   // DATE
-   mail_parse_date (&selt,ov->date);
-   entry.m_Date = (time_t) mail_longdate( &selt);
-
-   // FROM
-   /* get first from address from envelope */
-   for (adr = ov->from; adr && !adr->host; adr = adr->next);
-   if(adr)
+   if(ov)
    {
-      entry.m_From = "";
-      if (adr->personal) // a personal name is given
-         entry.m_From << adr->personal;
-      if(adr->mailbox)
+      // DATE
+      mail_parse_date (&selt,ov->date);
+      entry.m_Date = (time_t) mail_longdate( &selt);
+      
+      // FROM
+      /* get first from address from envelope */
+      for (adr = ov->from; adr && !adr->host; adr = adr->next);
+      if(adr)
       {
-         if(adr->personal)
-            entry.m_From << " <";
-         entry.m_From << adr->mailbox;
-         if(adr->host && strlen(adr->host)
-            && (strcmp(adr->host,BADHOST) != 0))
-            entry.m_From << '@' << adr->host;
-         if(adr->personal)
-            entry.m_From << '>';
+         entry.m_From = "";
+         if (adr->personal) // a personal name is given
+            entry.m_From << adr->personal;
+         if(adr->mailbox)
+         {
+            if(adr->personal)
+               entry.m_From << " <";
+            entry.m_From << adr->mailbox;
+            if(adr->host && strlen(adr->host)
+               && (strcmp(adr->host,BADHOST) != 0))
+               entry.m_From << '@' << adr->host;
+            if(adr->personal)
+               entry.m_From << '>';
+         }
       }
-   }
-   else
-      entry.m_From = _("<address missing>");
-   entry.m_From = qprint(entry.m_From);
+      else
+         entry.m_From = _("<address missing>");
+      entry.m_From = qprint(entry.m_From);
 #if 0
-   //FIXME: what on earth are user flags?
-   if (i = elt->user_flags)
-   {
-      strcat (tmp,"{");
-      while (i)
+      //FIXME: what on earth are user flags?
+      if (i = elt->user_flags)
       {
-         strcat (tmp,stream->user_flags[find_rightmost_bit (&i)]);
-         if (i) strcat (tmp," ");
+         strcat (tmp,"{");
+         while (i)
+         {
+            strcat (tmp,stream->user_flags[find_rightmost_bit (&i)]);
+            if (i) strcat (tmp," ");
+         }
+         strcat (tmp,"} ");
       }
-      strcat (tmp,"} ");
-   }
 #endif
 
-   entry.m_Subject = qprint(ov->subject);
-   entry.m_Size = ov->optional.octets;
-   entry.m_Id = ov->message_id;
-   entry.m_References = ov->references;
-   entry.m_Uid = uid;
-   m_BuildNextEntry++;
+      entry.m_Subject = qprint(ov->subject);
+      entry.m_Size = ov->optional.octets;
+      entry.m_Id = ov->message_id;
+      entry.m_References = ov->references;
+      entry.m_Uid = uid;
+      m_BuildNextEntry++;
 
-   // This is 1 if we don't want any further updates.
-   if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
-      m_ProgressDialog->Update( m_BuildNextEntry - 1 );
+      // This is 1 if we don't want any further updates.
+      if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
+         m_ProgressDialog->Update( m_BuildNextEntry - 1 );
+   }
+   else
+   {
+      // parsing the message failed in c-client lib. Why?
+      ASSERT_MSG(0,"DEBUG (harmless?): parsing folder overview failed");
+      // don't do anything
+   }
    return 1;
 }
 

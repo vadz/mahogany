@@ -446,6 +446,13 @@ public:
        return m_canvas ? m_canvas->Layout() : wxPanel::Layout();
    }
 
+   // this forces a re-calculation of the panel:
+   void ForceLayout()
+      {
+         int x,y;
+         GetClientSize(&x,&y);
+         SetClientSize(x,y); // provoke OnSize event
+      }
    // show or hide the vertical scrollbar depending on whether there is enough
    // place or not
    void RefreshScrollbar(const wxSize& size);

@@ -805,7 +805,7 @@ wxOneFilterDialog::LayoutControls()
    c->height.AsIs();
    m_ButtonLess->SetConstraints(c);
 
-   m_Panel->Layout();
+   m_Panel->ForceLayout();
    Layout();
 }
 

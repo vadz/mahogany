@@ -631,7 +631,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
                     m_ASMailFolder->GetName().c_str());
 
-         if(m_NumOfMessages > 0 && m_ASMailFolder->GetType() == MF_NNTP
+         if(m_NumOfMessages > 0
+            && (m_ASMailFolder->GetType() == MF_NNTP ||
+                m_ASMailFolder->GetType() == MF_NEWS)
             && MDialog_YesNoDialog(msg,
                                    m_Parent,
                                    MDIALOG_YESNOTITLE,
@@ -649,11 +651,11 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       // This little trick makes sure that we don't react to any final
       // events sent from the MailFolder destructor.
-      MailFolder *mf = m_MailFolder;
+      MailFolder *mf2 = m_MailFolder;
       m_MailFolder = NULL;
       m_ASMailFolder->DecRef();
       m_ASMailFolder = NULL; // shouldn't be needed
-      mf->DecRef();
+      mf2->DecRef();
    }
 
    SafeDecRef(m_Profile);
@@ -894,7 +896,8 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
       if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
    }
    m_FolderCtrl->SetEntry(index,
-                          MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
+                          MailFolder::ConvertMessageStatusToString(hi->GetStatus(),
+                                                                   m_ASMailFolder->GetMailFolder()),
                           sender,
                           subject,
                           strutil_ftime(hi->GetDate(),
