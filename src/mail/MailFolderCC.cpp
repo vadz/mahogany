@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/15 22:00:46  VZ
+ * TEXT_DATA_CAST macro
+ *
  * Revision 1.4  1998/05/11 20:57:36  VZ
  * compiles again under Windows + new compile option USE_WXCONFIG
  *
@@ -31,21 +34,21 @@
 
 #include  "Mpch.h"
 
-#ifndef	USE_PCH
+#ifndef  USE_PCH
 
-#include	<strutil.h>
-#include	<MApplication.h>
-#include	<MailFolderCC.h>
-#include	<MessageCC.h>
-#include	<MDialogs.h>
+#include <strutil.h>
+#include <MApplication.h>
+#include <MailFolderCC.h>
+#include <MessageCC.h>
+#include <MDialogs.h>
 
 // includes for c-client library
 extern "C"
 {
-#include	<osdep.h>
-#include	<rfc822.h>
-#include	<smtp.h>
-#include	<nntp.h>
+#include <osdep.h>
+#include <rfc822.h>
+#include <smtp.h>
+#include <nntp.h>
 }
 
 #endif
@@ -71,16 +74,16 @@ MailFolderCC::Open(String const & filename)
       MF_pwd = profile->readEntry(MP_POP_PASSWORD,MP_POP_PASSWORD_D);
    }
 
-   if(GetType() == MF_FILE)	   // this will fail if file already
+   if(GetType() == MF_FILE)      // this will fail if file already
       mail_create(NIL, (char *)filename.c_str());  // exists, but it makes sure we can
-	 			   // open it
+               // open it
    
    SetDefaultObj();
    mailstream = mail_open(mailstream,(char *)realName.c_str(),
-			  debugFlag ? OP_DEBUG : NIL);
+           debugFlag ? OP_DEBUG : NIL);
    SetDefaultObj(false);
    if(mailstream == NIL)
-      return false;	// failed
+      return false;  // failed
 
    AddToMap(mailstream);
 
@@ -89,7 +92,7 @@ MailFolderCC::Open(String const & filename)
    mail_fetchfast(mailstream, (char *)sequence.c_str());
    
    okFlag = true;
-   return true;	// success
+   return true;   // success
 }
 
 void
@@ -113,15 +116,15 @@ MailFolderCC::Create(String const & iname)
    else
    {
       const char *filename = profile->readEntry(MP_FOLDER_PATH,MP_FOLDER_PATH_D);
-      if(filename == NULL)	// assume we are a file
+      if(filename == NULL) // assume we are a file
       {
-	 SetType(MF_FILE);
-	 Open(iname);
+    SetType(MF_FILE);
+    Open(iname);
       }
       else
       {
-	 SetType((FolderType)profile->readEntry(MP_FOLDER_TYPE,MP_FOLDER_TYPE_D));
-	 Open(filename);
+    SetType((FolderType)profile->readEntry(MP_FOLDER_TYPE,MP_FOLDER_TYPE_D));
+    Open(filename);
       }
    }
 }
@@ -165,14 +168,14 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
   std::list<FolderViewBase *>::iterator i;
    if(reg)
       viewList.push_front(view);
-   else	
+   else  
       for(i = viewList.begin(); i != viewList.end(); i++)
       {
-	 if((*i) == view)
-	 {
-	    viewList.erase(i);
-	    return;
-	 }
+    if((*i) == view)
+    {
+       viewList.erase(i);
+       return;
+    }
       }
 }
 
@@ -199,24 +202,24 @@ MailFolderCC::CountMessages(void) const
 
 int
 MailFolderCC::GetMessageStatus(unsigned int msgno,
-			       unsigned long *size,
-			       unsigned int *day,
-			       unsigned int *month,
-			       unsigned int *year)
+                unsigned long *size,
+                unsigned int *day,
+                unsigned int *month,
+                unsigned int *year)
 {
    int status;
    MESSAGECACHE *mc = mail_elt(mailstream, msgno);
 
-   if(size) 	*size = mc->rfc822_size;
-   if(day)	*day = mc->day;
-   if(month)	*month = mc->month;
-   if(year)	*year = mc->year + BASEYEAR;
+   if(size)    *size = mc->rfc822_size;
+   if(day)  *day = mc->day;
+   if(month)   *month = mc->month;
+   if(year) *year = mc->year + BASEYEAR;
    status = 0;
-   if(!mc->seen)	status += MSG_STAT_UNREAD;
-   if(mc->answered)	status += MSG_STAT_REPLIED;
-   if(mc->deleted)	status += MSG_STAT_DELETED;
-   if(mc->searched)	status += MSG_STAT_SEARCHED;
-   if(mc->recent)	status += MSG_STAT_RECENT;
+   if(!mc->seen)  status += MSG_STAT_UNREAD;
+   if(mc->answered)  status += MSG_STAT_REPLIED;
+   if(mc->deleted)   status += MSG_STAT_DELETED;
+   if(mc->searched)  status += MSG_STAT_SEARCHED;
+   if(mc->recent) status += MSG_STAT_RECENT;
    return status;
 }
 
@@ -250,15 +253,15 @@ MailFolderCC::Debug(void) const
    CBDEBUG();
    VAR(numOfMessages);
    VAR(realName);
-   LogMsg("--list of streams and objects--");
+   DBGLOG("--list of streams and objects--");
    StreamListType::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
       sprintf(buffer,"\t%p -> %p \"%s\"",
-	      (*i).stream, (*i).folder, (*i).folder->GetName().c_str());
-      LogMsg(buffer);
+              (*i).stream, (*i).folder, (*i).folder->GetName().c_str());
+      DBGLOG(buffer);
    }
-   LogMsg("--end of list--");
+   DBGLOG("--end of list--");
 }
 #endif
 
@@ -270,8 +273,8 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
    for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i).stream == stream )
       {
-	 streamList.erase(i);
-	 break;
+    streamList.erase(i);
+    break;
       }
    if(streamListDefaultObj == this)
       SetDefaultObj(false);
@@ -291,7 +294,7 @@ MailFolderCC *MailFolderCC::streamListDefaultObj = NULL;
 void
 MailFolderCC::CClientInit(void)
 {
-#include	<linkage.c>
+#include <linkage.c>
    cclientInitialisedFlag = true;
 }
 
@@ -299,7 +302,7 @@ MailFolderCC::CClientInit(void)
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream)
 {
-   StreamConnection	conn;
+   StreamConnection  conn;
    conn.folder = this;
    conn.stream = stream;
    streamList.push_front(conn);
@@ -313,7 +316,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream)
    StreamListType::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i).stream == stream )
-	 return (*i).folder;
+    return (*i).folder;
    if(streamListDefaultObj)
    {
       LOGMESSAGE((LOG_DEBUG, "Routing call to default mailfolder."));
@@ -333,7 +336,7 @@ MailFolderCC::SetDefaultObj(bool setit)
 }
    
 
-			  
+           
 /// this message matches a search
 void
 MailFolderCC::mm_searched(MAILSTREAM *stream, unsigned long number)
@@ -350,8 +353,8 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
    {
 #if DEBUG
       String
-	 tmp = "MailFolderCC::mm_exists() for folder " + mf->realName
-	 + String(" n: ") + strutil_ultoa(number);
+    tmp = "MailFolderCC::mm_exists() for folder " + mf->realName
+    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((LOG_DEBUG, tmp));
 #endif
      
@@ -394,7 +397,7 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
        */
 void
 MailFolderCC::mm_notify(MAILSTREAM *stream, char *str, long
-		       errflg)
+             errflg)
 {
    mm_log(str,errflg);
 }
@@ -402,46 +405,46 @@ MailFolderCC::mm_notify(MAILSTREAM *stream, char *str, long
    
 /** this mailbox name matches a listing request
        @param stream mailstream
-       @param delim	character that separates hierarchies
-       @param name 	mailbox name
-       @param attrib	mailbox attributes
+       @param delim  character that separates hierarchies
+       @param name   mailbox name
+       @param attrib mailbox attributes
        */
 void
 MailFolderCC::mm_list(MAILSTREAM *stream, char delim, char *name,
-		     long attrib)
+           long attrib)
 {
    //FIXME
 }
 
 
 /** matches a subscribed mailbox listing request
-       @param stream	mailstream
-       @param delim	character that separates hierarchies
-       @param name	mailbox name
-       @param attrib	mailbox attributes
+       @param stream mailstream
+       @param delim  character that separates hierarchies
+       @param name   mailbox name
+       @param attrib mailbox attributes
        */
 void
 MailFolderCC::mm_lsub(MAILSTREAM *stream, char delim, char *name,
-		     long attrib)
+           long attrib)
 {
    //FIXME
 }
 
 /** status of mailbox has changed
-    @param stream	mailstream
-    @param mailbox 	mailbox name for this status
-    @param status	structure with new mailbox status
+    @param stream mailstream
+    @param mailbox   mailbox name for this status
+    @param status structure with new mailbox status
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
-		       *status)
+             *status)
 {
    MailFolderCC *mf = LookupObject(stream);
    if(mf == NULL)
-      return;	// oops?!
+      return;  // oops?!
 
 #if DEBUG
-   String	tmp = "MailFolderCC::mm_status() for folder " +
+   String   tmp = "MailFolderCC::mm_status() for folder " +
       mf->realName;
    LOGMESSAGE((LOG_DEBUG, tmp));
 #endif
@@ -453,32 +456,32 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 
 
 /** log a message
-    @param str	message str
-    @param errflg	error level
+    @param str message str
+    @param errflg error level
 */
 void
 MailFolderCC::mm_log(const char *str, long errflg)
 {
-   String	msg = (String) "c-client " + (String) str;
+   String   msg = (String) "c-client " + (String) str;
    LOGMESSAGE((LOG_INFO, msg));
 }
 
 /** log a debugging message
-    @param str 	message str
+    @param str    message str
 */
 void
 MailFolderCC::mm_dlog(const char *str)
 {
-   String 	msg = (String) "c-client debug: " + (String) str;
+   String   msg = (String) "c-client debug: " + (String) str;
    //mApplication.Message(msg.c_str());
    LOGMESSAGE((LOG_DEBUG, msg));
 }
 
 /** get user name and password
-       @param	mb	parsed mailbox specification
-       @param	user    pointer where to return username
-       @param	pwd	pointer where to return password
-       @param 	trial	number of prior login attempts
+       @param  mb parsed mailbox specification
+       @param  user    pointer where to return username
+       @param  pwd   pointer where to return password
+       @param  trial number of prior login attempts
        */
 void
 MailFolderCC::mm_login(NETMBX *mb, char *user, char *pwd, long trial)
@@ -488,7 +491,7 @@ MailFolderCC::mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 }
 
 /** alert that c-client will run critical code
-       @param	stream	mailstream
+       @param  stream   mailstream
    */
 void
 MailFolderCC::mm_critical(MAILSTREAM *stream)
@@ -496,8 +499,8 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
    // ignore
 }
 
-/**	no longer running critical code
-	@param	stream mailstream
+/**   no longer running critical code
+   @param   stream mailstream
      */
 void
 MailFolderCC::mm_nocritical(MAILSTREAM *stream)
@@ -506,27 +509,27 @@ MailFolderCC::mm_nocritical(MAILSTREAM *stream)
 }
 
 /** unrecoverable write error on mail file
-       @param	stream	mailstream
-       @param	errcode	OS error code
-       @param	serious	non-zero: c-client cannot undo error
-       @return	abort flag: if serious error and abort non-zero: abort, else retry
+       @param  stream   mailstream
+       @param  errcode  OS error code
+       @param  serious  non-zero: c-client cannot undo error
+       @return abort flag: if serious error and abort non-zero: abort, else retry
        */
 long
 MailFolderCC::mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
 {
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
-      mf->okFlag = false;	// signal error
-   return 1;	// abort!
+      mf->okFlag = false;  // signal error
+   return 1;   // abort!
 }
 
 /** program is about to crash!
-    @param	str	message str
+    @param  str   message str
 */
 void
 MailFolderCC::mm_fatal(char *str)
 {
-   String	msg = (String) "Fatal Error:" + (String) str;
+   String   msg = (String) "Fatal Error:" + (String) str;
    LOGMESSAGE((LOG_ERROR, msg));
 }
 
@@ -588,7 +591,7 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 
 void
 mm_notify(MAILSTREAM *stream, char *str, long
-		       errflg)
+             errflg)
 {
    MailFolderCC::mm_notify(stream, str,  errflg);
 }
@@ -607,7 +610,7 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
-		       *status)
+             *status)
 {
    MailFolderCC::mm_status(stream, mailbox, status);
 }
@@ -615,14 +618,14 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 void
 mm_log(char *str, long errflg)
 {
-   String	tmp = String(_("log: ")) + str;
+   String   tmp = String(_("log: ")) + str;
    MailFolderCC::mm_log(tmp.c_str(),errflg);
 }
 
 void
 mm_dlog(char *str)
 {
-   String	tmp = String(_("debug: ")) + str;
+   String   tmp = String(_("debug: ")) + str;
    MailFolderCC::mm_dlog(tmp.c_str());
 }
 
@@ -658,26 +661,26 @@ mm_fatal(char *str)
 
 } // extern "C"
 
-//#define TESTCLASS	
+//#define TESTCLASS  
 
-#ifdef	TESTCLASS
+#ifdef   TESTCLASS
 
 int main(void)
 {
    // testing the MailFolderCC class:
 
-   MailFolderCC	mf("DemoBox");
+   MailFolderCC   mf("DemoBox");
    if(! mf.Open("/home/karsten/src/Projects/M/test/testbox"))
       cerr << "Open() returned error." << endl;
    
-   mf.DoDebug();	// enable debugging
+   mf.DoDebug();  // enable debugging
    
    if(mf.IsOk())
       cerr << "Object initialised correctly." << endl;
    else
       cerr << "Object initialisation failed." << endl;
    
-   mf.Debug();		// show debug info
+   mf.Debug();    // show debug info
    cout << "----------------------------------------------------------" << endl;
    
    MailFolder &m = mf;
@@ -692,7 +695,7 @@ int main(void)
 #endif
 
    int  i;
-   Message	*msg;
+   Message  *msg;
    for(i = 1; i <= m.CountMessages(); i++)
    {
       msg = m[i];

@@ -1,10 +1,10 @@
 #include  "Mcommon.h"
 
-#if       !USE_PCH
-  #include	<Profile.h>
-  #include	<Mdefaults.h>
-  #include	<strutil.h>
-  #include	<wx.h>
+#ifndef  USE_PCH
+#  include <Profile.h>
+#  include <Mdefaults.h>
+#  include <strutil.h>
+#  include <wx.h>
 #endif
 
 // defined in windows.h
@@ -12,10 +12,10 @@
 
 class SendMessageCC
 {
-   Profile 	*profile;
+   Profile  *profile;
 
-   ENVELOPE	*env;
-   BODY		*body;
+   ENVELOPE *env;
+   BODY     *body;
 public:
    SendMessageCC(Profile *iprof = NULL);
    void Create(void);
@@ -24,7 +24,7 @@ public:
 };
 
 
-#define	CPYSTR(x)	cpystr((char *)(x.c_str()))
+#define  CPYSTR(x)   cpystr((char *)(x.c_str()))
 
 SendMessageCC::SendMessage(Profile *iprof)
 {
@@ -33,10 +33,10 @@ SendMessageCC::SendMessage(Profile *iprof)
 
 void
 SendMessageCC::Create(Profile *iprof,
-		      String const &subject,
-		      String const &to, String const &cc, String const &bcc)
+            String const &subject,
+            String const &to, String const &cc, String const &bcc)
 {
-   char	*tmp;
+   char  *tmp;
    char tmpbuf[MAILTMPLEN];
    SENDSTREAM *stream = NIL;
    
@@ -55,10 +55,10 @@ SendMessageCC::Create(Profile *iprof,
   env->return_path = mail_newaddr ();
   env->return_path->mailbox =
      CPYSTR(profile->readEntry(MP_RETURN_USERNAME,
-					profile->readEntry(MP_USERNAME,MP_USERNAME_D)));
+               profile->readEntry(MP_USERNAME,MP_USERNAME_D)));
   env->return_path->host =
      CPYSTR(profile->readEntry(MP_RETURN_HOSTNAME,
-			       profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
+                profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
   tmp = strutil_strdup(to);
   rfc822_parse_adrlist (&env->to,tmp,profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D).c_str());
   delete [] tmp;
@@ -74,7 +74,7 @@ SendMessageCC::Create(Profile *iprof,
 
   char text = "DEMO CONTENT FOR A MAIL MESSAGE\n2nd Line\n\r\n";
   
-  //  strcat (text,"\r\n");	//\015\012
+  //  strcat (text,"\r\n");   //\015\012
   
   body->contents.text.data = text;
   body->contents.text.size = strlen (text);
@@ -83,12 +83,12 @@ SendMessageCC::Create(Profile *iprof,
   strcpy (env->date,tmpbuf);
 
   if (stream = smtp_open (profile->readEntry(MP_SMTPHOST,
-					     MP_SMTPHOST_D).c_str(),0))
+                    MP_SMTPHOST_D).c_str(),0))
   {
      if (smtp_mail (stream,"MAIL",env,body))
-	puts ("[Ok]");
+   puts ("[Ok]");
      else
-	printf ("[Failed - %s]\n",stream->reply);
+   printf ("[Failed - %s]\n",stream->reply);
     }
 
   if (stream)
