@@ -116,7 +116,7 @@ public:
        false, the entries themselves will not get deleted. Do not use
        this with array types!
    */
-   kbList(bool ownsEntriesFlag = false);
+   kbList(bool ownsEntriesFlag = true);
 
    /** Destructor.
        If entries are owned, they will all get deleted from here.
