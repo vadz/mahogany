@@ -309,19 +309,23 @@ public:
    void OnRadioBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnChoice(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
-#ifdef USE_SSL
+
    void OnCheckBox(wxCommandEvent& event)
    {
+      if ( event.GetEventObject() == m_isAnonymous )
+      {
+         m_login->Enable( !m_isAnonymous->GetValue() );
+         m_password->Enable( !m_isAnonymous->GetValue() );
+      }
+#ifdef USE_SSL
       if ( event.GetEventObject() == m_useSSL )
       {
          m_acceptUnsignedSSL->Enable( m_useSSL->GetValue() );
       }
+#endif // USE_SSL
 
       OnEvent();
    }
-#else // !USE_SSL
-   void OnCheckBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
-#endif // USE_SSL
 
    void UpdateOnFolderNameChange();
 
@@ -896,6 +900,7 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 
    if ( ch )
    {
+      //TODO Nerijus  we should convert them to UTF-7
       wxLogError(_("Sorry, international characters (like '%c') are "
                    "not supported in the mailbox folder names, please "
                    "don't use them."), ch);
@@ -1353,7 +1358,7 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
          case MF_POP:
          case MF_GROUP:
-            // don't modify the mailbox name at all: either because there ius
+            // don't modify the mailbox name at all: either because there is
             // nothing to modify (MF_POP) or because it doesn't make sense
             // (MF_GROUP)
             return;
@@ -1577,8 +1582,8 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 #endif // USE_SSL
 
    m_isAnonymous->Enable(enableAnonymous);
-   EnableTextWithLabel(m_password, enableLogin);
-   EnableTextWithLabel(m_login, enableLogin);
+   m_login->Enable(enableLogin);
+   m_password->Enable(enableLogin);
 
    switch ( m_folderType )
    {
