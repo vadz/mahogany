@@ -44,6 +44,10 @@
 #include "SpamFilter.h"
 #include "gui/SpamOptionsPage.h"
 
+#ifdef OS_MAC
+   #undef USE_RBL
+#endif
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
