@@ -121,6 +121,9 @@ UrlPopup::UrlPopup(const ClickableURL *clickableURL)
    if ( m_clickableURL->IsMail() )
    {
       Append(WXMENU_URL_COMPOSE, _("&Write to"));
+      Append(WXMENU_URL_REPLYTO, _("&Reply to"));
+      Append(WXMENU_URL_FORWARDTO, _("&Forward to"));
+      AppendSeparator();
       Append(WXMENU_URL_ADD_TO_ADB, _("&Add to address book..."));
    }
    else // !mailto
@@ -129,13 +132,14 @@ UrlPopup::UrlPopup(const ClickableURL *clickableURL)
       Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
    }
 
+   AppendSeparator();
    Append(WXMENU_URL_COPY, _("&Copy to clipboard"));
 }
 
 void
 UrlPopup::OnCommandEvent(wxCommandEvent &event)
 {
-   int id = event.GetId();
+   const int id = event.GetId();
    switch ( id )
    {
       case WXMENU_URL_OPEN:
@@ -149,6 +153,31 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
 
       case WXMENU_URL_COMPOSE:
          m_clickableURL->OpenAddress();
+         break;
+
+      case WXMENU_URL_REPLYTO:
+      case WXMENU_URL_FORWARDTO:
+         {
+            MessageView *msgview = m_clickableURL->GetMessageView();
+
+            MailFolder::Params params;
+            params.msgview = msgview;
+
+            Composer *cv = (id == WXMENU_URL_REPLYTO
+                              ? MailFolder::ReplyMessage
+                              : MailFolder::ForwardMessage)
+                                (
+                                  msgview ? msgview->GetMessage() : NULL,
+                                  params,
+                                  m_clickableURL->GetProfile(),
+                                  msgview ? msgview->GetWindow() : NULL
+                                );
+
+            if ( cv )
+            {
+               cv->SetAddresses(m_clickableURL->GetUrl());
+            }
+         }
          break;
 
       case WXMENU_URL_ADD_TO_ADB:
@@ -428,6 +457,8 @@ void ClickableURL::OpenInBrowser(int options) const
 void ClickableURL::OpenAddress() const
 {
    Composer *cv = Composer::CreateNewMessage(GetProfile());
+
+   CHECK_RET( cv, "creating new message failed?" );
 
    cv->SetAddresses(m_url);
    cv->InitText();
