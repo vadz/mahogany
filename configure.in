@@ -1,4 +1,5 @@
 dnl $Id$
+dnl Process this file with autoconf to produce a configure script.
 
 AC_DEFUN(AC_OVERRIDES_PREPARE,
 [
@@ -38,91 +39,7 @@ else
 fi
 ])
 
-dnl package,message,helpmessage,variable
-AC_DEFUN(AC_OVERRIDES_OLD,
-[
-AC_MSG_CHECKING("for $2")
-AC_CACHE_VAL(ac_cv_use_$1,
-[
-AC_ARG_WITH($1,$3,
-[if test "x$with_$1" = xyes; then
-  ac_cv_use_$1='$4="1"'
-else
-  ac_cv_use_$1='$4="0"'
-fi],[ac_cv_use_$1='$4=$DEFAULT_$4'])
-])
-eval "$ac_cv_use_$1"
-
-if test "$$4" = 1; then
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-])
-
-
-
-AC_DEFUN(AC_PATH_FIND_INCLUDES,
-[
-ac_find_includes=
-for ac_dir in $1;
-  do
-    if test -f "$ac_dir/$2"; then
-      ac_find_includes=$ac_dir
-      break
-    fi
-  done
-])
-
-AC_DEFUN(AC_PATH_FIND_LIBRARIES,
-[
-ac_find_libraries=
-for ac_dir in $1;
-  do
-    for ac_extension in a so sl; do
-      if test -f "$ac_dir/lib$2.$ac_extension"; then
-        ac_find_libraries=$ac_dir
-        break 2
-      fi
-    done
-  done
-])
-
-dnl Path to include, already defined
-AC_DEFUN(AC_INCLUDE_PATH_EXIST,
-[
-  ac_path_to_include=$1
-  echo "$2" | grep "\-I$1" > /dev/null
-  result=$?
-  if test $result = 0; then
-    ac_path_to_include=""
-  else
-    ac_path_to_include="-I$1"    
-  fi
-])
-
-dnl Path to link, already defined
-AC_DEFUN(AC_LINK_PATH_EXIST,
-[
-  echo "$2" | grep "\-L$1" > /dev/null
-  result=$?
-  if test $result = 0; then
-    ac_path_to_link=""
-    ac_pure_path_to_link=""
-  else
-    ac_path_to_link="-L$1"    
-    ac_pure_path_to_link="$1"
-  fi
-])
-
-dnl ------------------------------------------------------------------------
-dnl ========================================================================
-dnl ########################################################################
-dnl ========================================================================
-dnl ------------------------------------------------------------------------
-dnl Process this file with autoconf to produce a configure script.
 AC_INIT(configure.in)
-
 OS="${OSTYPE}"
 
 if test "x$OS" = "x"; then
@@ -136,179 +53,36 @@ if test "x$OS" = "x"; then
               )
 fi
 
-
 AC_OVERRIDES_PREPARE
 
-DEFAULT_USE_WXGTK=1
-DEFAULT_USE_PYTHON=1
-DEFAULT_USE_WXXT=0
-DEFAULT_USE_WXWINDOWS=0
-DEFAULT_USE_WXWINDOWS2=1
-DEFAULT_USE_WXSTRING=1
-DEFAULT_USE_WXCONFIG=1
-DEFAULT_USE_APPCONF=0
 DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=1
 DEFAULT_USE_DEBUG=1
-DEFAULT_USE_DOCXX=0
-DEFAULT_USE_KDOC=1
-DEFAULT_USE_SHADOW=0
-DEFAULT_USE_OLDLIBC=0
-DEFAULT_USE_LIBINTL=0
-DEFAULT_USE_THREADS=1
+DEFAULT_USE_PYTHON=1
 
-MAKE_USE_WXTAB="USE_WXTAB=1"
+
+AC_OVERRIDES(python,python,
+--with-python   use python scripting,
+USE_PYTHON)
+
+AC_OVERRIDES(dmalloc,dmalloc,
+--with-dmalloc  use dmalloc library for debugging,
+USE_DMALLOC)
+
+AC_OVERRIDES(efence,efence,
+--with-efence   use ElectricFence,
+USE_EFENCE)
+
+AC_OVERRIDES(debug,debug,
+--with-debug    use debug info/code,
+USE_DEBUG)
+
 MAKE_LOCAL_LIBS_DEFINE="junk"
-
-dnl ================ User editable settings ============================
-dnl where to find Python source
-PYTHON_PATH="/usr/local/src/Python-1.5.1"
-dnl name of the python library, omit "lib" and ".a" or ".so"
-PYTHON_LIB="python1.5"
-dnl which extra compiler flags to use
-MYCXXFLAGS="-pedantic -Wall"
-dnl ================ do not edit below here ============================
-
-
-dnl search path for includes and libraries
-
-SEARCH_INCLUDE="\
-    ./extra/include	      \
-    /usr/include              \
-    /usr/Motif1.2/include     \
-			      \
-    /usr/X11R6/include        \
-    /usr/X11R5/include        \
-    /usr/X11R4/include        \
-                              \
-    /usr/include/X11R6        \
-    /usr/include/X11R5        \
-    /usr/include/X11R4        \
-                              \
-    /usr/local/X11R6/include  \
-    /usr/local/X11R5/include  \
-    /usr/local/X11R4/include  \
-                              \
-    /usr/local/include/X11R6  \
-    /usr/local/include/X11R5  \
-    /usr/local/include/X11R4  \
-    /usr/local/include        \        
-    /usr/local/src            \        
-    /usr/scratch/tmp          \
-                              \
-    /usr/X11/include          \
-    /usr/include/X11          \
-    /usr/local/X11/include    \
-    /usr/local/include/X11    \
-                              \
-    /usr/X386/include         \
-    /usr/x386/include         \
-    /usr/XFree86/include/X11  \
-                              \
-    /usr/local/include        \
-    /usr/unsupported/include  \
-    /usr/athena/include       \
-    /usr/local/x11r5/include  \
-    /usr/lpp/Xamples/include  \
-                              \
-    /usr/openwin/include      \
-    /usr/openwin/share/include \
-    /opt/include              \
-"
-
-# add additional src directories:
-for p in `pwd`/extra/src/*
-do
-SEARCH_INCLUDE="$p \
-                $SEARCH_INCLUDE"
-done
-
-PWD=`pwd`
-SEARCH_INCLUDE="   \
-$PWD               \
-$PWD/include       \
-$PWD/extra/include \
-$PYTHON_PATH/Include \
-$SEARCH_INCLUDE    \
-"
-
-SEARCH_LIB="`echo "$SEARCH_INCLUDE" | sed s/include/lib/g` \
-    "
-                              \
-SEARCH_LIB="\
-    $SEARCH_LIB \
-    $PYTHON_PATH \
-    /lib \
-"
 
 AC_CONFIG_HEADER(include/config.h)
 
-dnl ###################
-dnl # options         #
-dnl ###################
-
-AC_OVERRIDES(wxXt,wxXt,
---with-wxXt               use wxXt,
-USE_WXXT)
-
-AC_OVERRIDES(wxGTK,wxGTK,
---with-wxGTK              use wxGTK,
-USE_WXGTK)
-
-AC_OVERRIDES(wxString,wxString,
---with-wxString           use wxString,
-USE_WXSTRING)
-
-AC_OVERRIDES(python,python,
---with-python             use python,
-USE_PYTHON)
-
-AC_OVERRIDES(wxConfig,wxConfig,
---with-wxConfig           use wxConfig,
-USE_WXCONFIG)
-
-AC_OVERRIDES(appConf,appConf,
---with-appConf            use appConf,
-USE_APPCONF)
-
-AC_OVERRIDES(efence,efence,
---with-efence             use ElectricFence,
-USE_EFENCE)
-
-AC_OVERRIDES(dmalloc,dmalloc,
---with-dmalloc             use dmalloc library for debugging,
-USE_DMALLOC)
-
-AC_OVERRIDES(threads,threads,
---with-threads            link with libpthread,
-USE_THREADS)
-
-AC_OVERRIDES(debug,debug,
---with-debug              use debug info/code,
-USE_DEBUG)
-
-AC_OVERRIDES(docxx,docxx,
---with-docxx              use doc++,
-USE_DOCXX)
-
-AC_OVERRIDES(kdoc,kdoc,
---with-kdoc               use kdoc,
-USE_KDOC)
-
-AC_OVERRIDES(shadow,shadow,
---with-shadow             use shadow passwd file,
-USE_SHADOW)
-
-AC_OVERRIDES(libc5,libc5,
---with-libc5              compile for old libc5 on Linux,
-USE_OLDLIBC)
-
-AC_OVERRIDES(libintl,libintl,
---with-libintl              compile with libintl (not needed for glibc2),
-USE_LIBINTL)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
-
 
 dnl system check
 
@@ -327,18 +101,6 @@ dnl   defines GCC with yes if using gcc
 dnl   defines GCC empty if not using gcc
 dnl   defines CFLAGS
 
-dnl this should be done for GXX, but we assume CC and CXX to be the same
-CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
-if test "$GCC" = "yes"
-then
-	CFLAGS="$CFLAGS -DCC_GCC -Wall -pedantic "
-	$CC -v | grep -q 2.8
-	if [ $? = 0 ]
-	then
-		CFLAGS="$CFLAGS -fno-exceptions "
-	fi
-fi
-
 dnl does compiler support -c and -o simultaniously
 AC_PROG_CC_C_O
 dnl   defines NO_MINUS_C_MINUS_O if compiler does not accept 
@@ -354,7 +116,6 @@ AC_LANG_SAVE
 
 AC_PROG_INSTALL
 
-
 dnl C++-compiler checks
 dnl ===================
 dnl use what compiler
@@ -368,12 +129,43 @@ AC_PROG_CXXCPP
 dnl   defines CXXCPP with the C++-preprocessor
 
 CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g./ /g'`
-CXXFLAGS="$CXXFLAGS $MYCXXFLAGS"
 
 AC_LANG_RESTORE
 
 AC_PROG_MAKE_SET
 AC_ISC_POSIX
+
+AC_LANG_CPLUSPLUS
+
+AC_PATH_PROG(GREP, grep)
+dnl this should be done for GXX, but we assume CC and CXX to be the same
+CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
+if test "$GCC" = "yes"
+then
+	AC_MSG_CHECKING(for new gcc or egcs)
+	CFLAGS="$CFLAGS -DCC_GCC -Wall -pedantic "
+	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall -pedantic "
+	newgcc=
+	$CC -v 2>&1 | $GREP 2.8 >/dev/null
+	if test $? = 0 ; then newgcc=yes ; fi
+	$CC -v 2>&1 | $GREP egcs >/dev/null
+	if test $? = 0 ; then newgcc=yes ; fi
+	if test "x$newgcc" = "xyes"
+	then
+		CFLAGS="$CFLAGS -fno-exceptions "
+		CXXFLAGS="$CXXFLAGS -fno-exceptions "
+		AC_MSG_RESULT(yes)
+	else
+		AC_MSG_RESULT(no)
+	fi
+fi
+
+dnl some extra paths
+BUILDDIR=`pwd`
+AC_SUBST(BUILDDIR)
+LDFLAGS="$LDFLAGS -L$BUILDDIR/extra/lib"
+CPPFLAGS="$CPPFLAGS -D__WXGTK__ -I$BUILDDIR/extra/include"
+
 
 dnl we use C++ so we always have prototypes
 AC_DEFINE(HAVE_PROTOTYPES)
@@ -402,11 +194,6 @@ AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);], ,
 AC_MSG_RESULT($bad_prototypes)
 fi
 
-dnl find the X11 include and library files
-AC_PATH_XTRA
-dnl   defines x_includes and x_libraries
-XT_LIBS="-lXaw -lXext -lXmu -lXt"
-
 if test "$USE_WXSTRING" = 1; then
   AC_DEFINE(USE_WXSTRING)
 fi
@@ -416,240 +203,18 @@ if test "$USE_WXCONFIG" = 1; then
 fi
 
 
-if test "$USE_WXGTK" = 1; then
-  USE_WXXT=0
-  USE_WXWINDOWS=1  
-  USE_WXWINDOWS2=1
-  AC_DEFINE(USE_WXGTK)
-  AC_DEFINE(USE_WXWINDOWS)
-  AC_DEFINE(USE_WXWINDOWS2)
-  WX_LINK=
-  AC_MSG_CHECKING(for wxWindows(wxGTK) libraries)
-  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wx/wx.h)
-  if test "$ac_find_includes" = "" 
-  then
-    AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxWindows/include/wx/wx.h)
-  fi
-  if test "$ac_find_includes" != "" ; then
-    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,wx_gtk)
-    if test "$ac_find_libraries" != "" ; then
-      AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-      CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-      CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$ac_path_to_link -lwx_gtk"
-      WX_SLINK="$ac_pure_path_to_link/libwx_gtk.a"
-      WX_INCLUDE="$ac_path_to_include/wxWindows/include $ac_path_to_include/wxWindows/setup/${OSTYPE}"
-      WX_DEFS=-D__WXGTK__
-      AC_MSG_RESULT(yes)
-      WX_DEFS=-D__WXGTK__
-      MAKE_LOCAL_LIBS_DEFINE="LOCAL_LIBS=$ac_path_to_link/libwx_gtk.so*"
-      MAKE_LOCAL_LIBS_DEFINE=`echo $MAKE_LOCAL_LIBS_DEFINE | sed "1,$s/^-L//g"`
-  else
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR("Cannot find the wxGtk libraries."
-                   "Make a link to the library files in extra/lib .")
-    fi
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR("Cannot find the wxGtk include files."
-                 "Make a link to the wxWindows/include/wx directory in extra/include .")
-  fi
-  AC_MSG_CHECKING(for gtk libraries)
-  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,gtk/gtk.h)
-  if test "$ac_find_includes" != "" ; then
-    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,gtk)
-    if test "$ac_find_libraries" != "" ; then
-      AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-      CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-      CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk -lglib -lXext"
-      WX_SLINK="$WX_SLINK $ac_path_to_link -lgtk -lgdk -lglib -lXext"
-      WX_INCLUDE="$WX_INCLUDE $ac_path_to_include $ac_path_to_include/gtk $ac_path_to_include/gdk $ac_path_to_include/glib"
-      tmp=`echo $ac_path_to_link/glib/include | sed "1,$ s/-L/-I/g"`
-      WX_INCLUDE="$WX_INCLUDE $tmp"
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR("Cannot find the gtk libraries."
-                   "Make a link to the library files in extra/lib .")
-    fi
-  else
-    AC_MSG_RESULT(no)
-  fi
-else
-  if test "$USE_WXXT" = 1; then
-    USE_WXGTK=0
-    USE_WXWINDOWS=1  
-    USE_WXWINDOWS2=0
-    AC_DEFINE(USE_WXXT)
-    AC_DEFINE(USE_WXWINDOWS)
-    WX_LINK=
-    AC_MSG_CHECKING(for wxWindows(Xt) libraries)
-    AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxxt/wx/wx.h)
-    if test "$ac_find_includes" != "" ; then
-      AC_PATH_FIND_LIBRARIES($SEARCH_LIB,wx_xt)
-      if test "$ac_find_libraries" != "" ; then
-        AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-        AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-        CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-        CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-        WX_LINK="$ac_path_to_link -lwx_xt -lwx_xtwidgets $XT_LIBS $XLIBS"
-        WX_SLINK="$ac_pure_path_to_link/libwx_xt.a $ac_pure_path_to_link/libwx_xtwidgets.a $XT_LIBS $XLIBS"
-	WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
-	AC_MSG_RESULT(yes)
-      else
-        AC_MSG_RESULT(no)
-        AC_MSG_ERROR("Cannot find the wxXt libraries."
-                     "Make a link to the library files in extra/lib .")
-      fi
-    else
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR("Cannot find the wxXt header files.")
-    fi
-  fi
-fi
-AC_SUBST(WX_INCLUDE)
-AC_SUBST(WX_LINK)
-AC_SUBST(WX_SLINK)
-AC_SUBST(WX_DEFS)
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+AC_CHECK_FUNCS(strerror strstr strsep)
 
-
-AC_SUBST(MAKE_LOCAL_LIBS_DEFINE)
-
-dnl Checks for libraries.
-dnl =====================
-
-XPM_LINK=
-AC_MSG_CHECKING(for XPM library)
-AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,X11/xpm.h)
-if test "$ac_find_includes" != "" ; then
-  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,Xpm)
-  if test "$ac_find_libraries" != "" ; then
-    AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-    AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-    CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-    CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-    XPM_LINK="$ac_path_to_link -lXpm"
-    XPM_INCLUDE="$ac_path_to_include"
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-else
-  AC_MSG_RESULT(no)
-fi
-
-AC_SUBST(XPM_LINK)
-AC_SUBST(XPM_INCLUDE)
-
-if test "$USE_PYTHON" = "1" ; then
-  PYTHON_LINK=
-  SWIG=
-  SWIG_LINK=
-  AC_MSG_CHECKING(for Python)
-  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
-  if test "$ac_find_includes" != "" ; then
-    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,$PYTHON_LIB)
-    if test "$ac_find_libraries" != "" ; then
-      AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
-      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-      CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-      CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      PYTHON_LINK="$ac_path_to_link -l$PYTHON_LIB"
-      PYTHON_INCLUDE="$ac_path_to_include"
-      AC_DEFINE(USE_PYTHON)
-      MAKE_USE_PYTHON="USE_PYTHON=1"
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-      USE_PYTHON=0
-      MAKE_USE_PYTHON=
-    fi
-  else
-    AC_MSG_RESULT(no)
-    USE_PYTHON=0
-    MAKE_USE_PYTHON=
-  fi
-fi
-
-AC_SUBST(MAKE_USE_PYTHON)
-AC_SUBST(PYTHON_LINK)
-AC_SUBST(PYTHON_INCLUDE)
-
-HAVE_SWIGLIB=0
-if test "$USE_PYTHON" = "1" ; then
-  AC_PATH_PROG(SWIG,swig)
-  if test -n "$SWIG"; then
-    AC_MSG_CHECKING(for libswigpy)
-    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,swigpy)
-    if test "$ac_find_libraries" != "" ; then
-      AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-      SWIG_LINK="$ac_path_to_link -lswigpy"
-      AC_MSG_RESULT(yes)
-      HAVE_SWIGLIB=1
-      AC_DEFINE(HAVE_SWIGLIB)
-    else
-      AC_MSG_RESULT(no)
-    fi
-  fi
-fi
-AC_SUBST(SWIG_LINK)
-
-
-LIBDL_LINK=
-AC_MSG_CHECKING(for dl library)
-AC_PATH_FIND_LIBRARIES($SEARCH_LIB,dl)
-if test "$ac_find_libraries" != "" ; then
-AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-LIBDL_LINK="$ac_path_to_link -ldl"
-AC_MSG_RESULT(yes)
-else
-AC_MSG_RESULT(no)
-fi
-AC_SUBST(LIBDL_LINK)
-
-
-if  test "x$USE_OLDLIBC" = "x1" ; then USE_LIBINTL=1; fi
-if  test "x$USE_LIBINTL" = "x1"
-then 
-LIBINTL_LINK=
-AC_MSG_CHECKING(for intl library)
-AC_PATH_FIND_LIBRARIES($SEARCH_LIB,intl)
-if test "$ac_find_libraries" != "" ; then
-AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-LIBINTL_LINK="$ac_path_to_link -lintl"
-AC_MSG_RESULT(yes)
-else
-AC_MSG_RESULT(no)
-fi
-AC_SUBST(LIBINTL_LINK)
-fi
-
-AC_MSG_CHECKING(for libintl.h header)
-AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,libintl.h)
-if test "$ac_find_includes" != "" ; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_LIBINTL_H)
-else
-  AC_MSG_RESULT(no)
-fi
-
-
-COMPFACE_LINK=
-AC_MSG_CHECKING(for compface library)
-AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,compface.h)
-if test "$ac_find_includes" != "" ; then
-  AC_MSG_RESULT(yes)
-  COMPFACE_LINK="-lcompface"
-  AC_DEFINE(HAVE_COMPFACE_H)
-else
-  AC_MSG_RESULT(no)
-fi
-AC_SUBST(COMPFACE_LINK)
+AC_HEADER_STDC
+AC_CHECK_HEADERS(strings.h unistd.h)
+AC_CHECK_HEADERS(libintl.h)
+AC_CHECK_HEADERS(stdlib.h)
+AC_CHECK_HEADERS(stdarg.h)
 
 
 dnl extra lib dirs
@@ -657,78 +222,85 @@ EXTRA_SRC_LIB=
 EXTRA_SRC_INC=
 for i in `pwd`/extra/src/*
 do
-	EXTRA_SRC_LIB="$EXTRA_SRC_LIB -L$i"
-	EXTRA_SRC_INC="$EXTRA_SRC_INC -I$i"
+	LIBS="$LIBS -L$i"
+	CPPFLAGS="$CPPFLAGS -I$i"
 done
-AC_SUBST(EXTRA_SRC_LIB)
-AC_SUBST(EXTRA_SRC_INC)
-
-dnl Checks for header files.
-AC_PATH_X
-AC_HEADER_STDC
-AC_CHECK_HEADERS(strings.h unistd.h)
-AC_CHECK_HEADERS(libintl.h)
-AC_CHECK_HEADERS(stdlib.h)
-AC_CHECK_HEADERS(stdarg.h)
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
-AC_TYPE_SIZE_T
-AC_STRUCT_TM
-
-dnl Checks for library functions.
-AC_CHECK_FUNCS(strerror strstr strsep)
-
-EXTRA_LINK=
-dnl glibc2 has crypt in extra library
-AC_CHECK_FUNCS(crypt)
-if test "$HAVE_CRYPT" = ""; then
-	EXTRA_LINK="$EXTRA_LINK -lcrypt"
-fi
 
 dnl electric fence
 if test "$USE_EFENCE" = 1; then
-	EXTRA_LINK="$EXTRA_LINK -lefence"
+	AC_CHECK_LIB(efence,main)
 fi
 
 dnl dmalloc debugging lib
 if test "$USE_DMALLOC" = 1; then
-	EXTRA_LINK="$EXTRA_LINK -ldmalloc"
+	AC_CHECK_LIB(dmalloc,main)
 fi
 
-dnl add pthreads to libraries
-if test "$USE_THREADS" = 1; then
-	EXTRA_LINK="$EXTRA_LINK -lpthread"
+
+
+dnl check for gtk libraries
+AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+if test "$GTK_CONFIG" = yes
+then
+	GTK_CFLAGS=`gtk-config --cflags`
+	GTK_LDFLAGS=`gtk-config --libs`
+else
+	dnl find the X11 include and library files
+	AC_PATH_XTRA
+	GTK_CFLAGS=$X_CFLAGS
+	GTK_LDFLAGS=$X_EXTRA_LIBS
 fi
+LIBS="$LIBS $GTK_LDFLAGS"
+AC_CHECK_LIB(dl,main,,AC_MSG_ERROR("dl library is needed."))
+AC_CHECK_LIB(pthread,main)
+AC_CHECK_LIB(pthreads,main)
 
-AC_SUBST(EXTRA_LINK)
+AC_CHECK_HEADERS(wx/wx.h)
+AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."))
 
 
 
-if test "$USE_WXWINDOWS2" = 1; then
-	MAKE_USE_WXTAB=
+AC_CHECK_LIB(c,crypt,,AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
+
+dnl do we need this?
+AC_CHECK_LIB(shadow,main)
+
+AC_CHECK_HEADERS(libintl.h,
+	AC_CHECK_LIB(c,gettext,AC_DEFINE(HAVE_GETTEXT),
+		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT))
+	)
+)
+
+dnl we test for python last, because setting LIBS like this confuses further tests
+
+MAKE_USE_PYTHON=
+if test "$USE_PYTHON" = 1
+then
+AC_CHECK_HEADERS(python1.5/Python.h
+	,
+ 	AC_CHECK_LIB(python1.5,main,
+		AC_CHECK_LIB(swigpy,main,
+			AC_DEFINE(USE_PYTHON)
+			MAKE_USE_PYTHON="USE_PYTHON=yes"
+			LIBS="$LIBS -lpython -lswigpy"
+			,
+			AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
+			MAKE_USE_PYTHON=
+			,-lpython1.5
+			)
+		)			
+)
+AC_PATH_PROG(SWIG,swig)
 fi
-AC_SUBST(MAKE_USE_WXTAB)
-
-if test "$USE_DOCXX" = 1; then
-	DOCHTML="\$(DOCXXHTML)"
-	DOCTEX="\$(DOCXXTEX)"
-elif test "$USE_KDOC" = 1; then
-	DOCHTML="\$(KDOCHTML)"
-	DOCTEX="\$(KDOCTEX)"
-fi
-AC_SUBST(DOCHTML)
-AC_SUBST(DOCTEX)
+AC_SUBST(MAKE_USE_PYTHON)
 
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf
 DBGFLAGS=
-OPTFLAGS=$CXXFLAGS
 if test "$USE_DEBUG" = 1; then
-	DBGFLAGS="-g3 -DDEBUG"
-	OPTFLAGS="$CXXFLAGS -O0" # turn off all optimisations
+	DBGFLAGS="-O0 -g3 -DDEBUG"
 fi
+AC_SUBST(DBGFLAGS)
 
 dnl we need to set the target for c-client library:
 dnl supported OSTYPE values are linux* and solaris* and freebsd*
@@ -736,21 +308,8 @@ dnl supported OSTYPE values are linux* and solaris* and freebsd*
 AC_MSG_CHECKING(for c-client library OS type)
 CCOSTYPE=
 case "${OSTYPE}" in
-linux*libc5*)
-  CCOSTYPE=lnx
-  if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
-  if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=sl5 ; fi
-  ;;
 linux*)
   CCOSTYPE=slx
-  if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
-  if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=slx ; fi
-  if test "$USE_OLDLIBC" = "1"
-  then
-    CCOSTYPE=lnx
-    if test "$USE_SHADOW" = "0" ; then CCOSTYPE=lnx ; fi
-    if test "$NEED_LIB_CRYPT" = "1" ; then CCOSTYPE=sl5 ; fi
-  fi
   ;;
 solaris*)
   if test "$GCC" = "yes"
@@ -763,6 +322,14 @@ solaris*)
 freebsd*)
   CCOSTYPE=bsf
   ;;
+OSF1*)
+  if test "$GCC" = "yes"
+  then
+    CCOSTYPE=gof
+  else
+    CCOSTYPE=osf
+  fi
+  ;;
 esac
 
 AC_MSG_RESULT($CCOSTYPE)
@@ -770,12 +337,29 @@ if test "x$CCOSTYPE" = "x" ; then
   echo "Cannot determine OS type for c-client library. Supported are linux, solaris, freebsd."
   exit 1
 fi
-
 AC_SUBST(CCOSTYPE)
-AC_SUBST(OPTFLAGS)
-AC_SUBST(DBGFLAGS)
 
-BUILDDIR=`pwd`
-AC_SUBST(BUILDDIR)
+
+DOCHTML="echo \"No doc generator(html) available.\""
+DOCTEX="echo \"No doc generator(tex) available.\""
+
+AC_PATH_PROG(DOCXX,docxx,yes,no)
+if test "x$DOCXX" = "x"
+then
+	AC_PATH_PROG(KDOC,kdoc,yes,no)
+	if test "x$KDOC" != "x"
+	then
+		DOCHTML="\$(KDOCHTML)"
+		DOCTEX="\$(KDOCTEX)"
+	fi
+else
+	DOCHTML="\$(DOCXXHTML)"
+	DOCTEX="\$(DOCXXTEX)"
+fi
+AC_SUBST(DOCHTML)
+AC_SUBST(DOCTEX)
+
+DEFINES="$DEFINES -D__WXGTK__"
+AC_SUBST(DEFINES)
 
 AC_OUTPUT(makeopts)

@@ -53,33 +53,29 @@
 /** Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
+/*@name These are obsolete and always defined. Other configurations
+  are no longer supported.
+*/
+//@{
 /** Define if you use wxWindows. */
-#undef USE_WXWINDOWS
+#define   USE_WXWINDOWS 1
 
 /** Define if you use wxWindows, version 2. */
-#undef USE_WXWINDOWS2
-
-/** Define if you use wxWindows, wxXt port. */
-#undef USE_WXXT
+#define    USE_WXWINDOWS2 1
 
 /** Define if you use wxWindows, wxGTK port. */
-#undef USE_WXGTK
+#define   USE_WXGTK 1
 
 /** Define if you want to use wxString instead of C++ string */
-#undef USE_WXSTRING
+#define   USE_WXSTRING 1
 
 /** Define this if you want to use wxConfig instead of AppConfig.
     Note that this is only available for wxWindows version 2 */
-/* #undef USE_WXCONFIG */
-
-/** Define this if you want to use AppConfig instead of wxConfig. */
-/* #undef USE_APPCONF */
+#define   USE_WXCONFIG 1
+//@}
 
 /** Define if you use Python. */
 #undef USE_PYTHON
-
-/** Define if we have the swigpy library from SWIG. */
-#undef HAVE_SWIGLIB 
 
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */

@@ -7,9 +7,6 @@
 BUILDDIR = @BUILDDIR@
 
 # the c-client library:
-# hard-coded, could be looked up by configure...
-
-#IMAPDIR=$(BUILDDIR)/imap-4.1.BETA
 CCLIENTDIR=$(BUILDDIR)/extra/src/c-client
 CCLIENTINCLUDE=$(CCLIENTDIR)
 CCLIENTLIB=$(CCLIENTDIR)/c-client.a
@@ -18,64 +15,34 @@ CCLIENTOSTYPE=@CCOSTYPE@
 # where we have the Icon xpms:
 ICONDIR=$(BUILDDIR)/src/icons
 
-#gettext:
-
-EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@ @LIBDL_LINK@ @EXTRA_LINK@ 
-
 # compiler flags
-OPT = @OPTFLAGS@
 DBG = @DBGFLAGS@ 
-
-GUI_SLINK=@WX_SLINK@ 
-GUI_INCLUDE=@WX_INCLUDE@ -I$(ICONDIR)
-GUI_LINK=@WX_LINK@
-GUI_DEFS=@WX_DEFS@
-
-
-
-PYTHON_LINK = @PYTHON_LINK@
-PYTHON_INCLUDE = @PYTHON_INCLUDE@ 
+DEF = @DEFINES@
+ODIR=.
 
 # this will be set or unset
 @MAKE_USE_PYTHON@
-@MAKE_USE_WXTAB@
-@MAKE_LOCAL_LIBS_DEFINE@
 
 # canonical host
 CANONICAL_HOST=@host@
 
-# output dir for binaries:
-ODIR = .
-
-# directory for documentation
-DOCDIR = $(BUILDDIR)/doc/
-
-# DOC++
+# DOC++/kdoc
 DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
 DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/M.tex
-
-# kdoc
 KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M  
 KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
-
 DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
 
-# c-compiler stuff
+# compiler stuff
 CC = @CC@
 CPP = @CPP@
-
-# c++-compiler stuff
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 
 # SWIG
 SWIG = @SWIG@
-SWIG_LINK = @SWIG_LINK@
-SWIGFLAGS = -c++ -python -shadow
-ifdef SWIG_LINK
-SWIGFLAGS := $(SWIGFLAGS) -c
-endif
+SWIGFLAGS = -c++ -python -shadow -c
 
 # other stuff
 RM = rm -f
@@ -87,59 +54,23 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 PREFIX=@prefix@
 exec_prefix=@exec_prefix@
-
 # Directory in which to install scripts.
 BINDIR = @bindir@
-
 # Directory in which to install library files.
 DATADIR = @datadir@/M
-
-# Directory in which to install documentation info files.
-#INFODIR = @infodir@/M
-
 # where to install docs
 DOCDIR = @datadir@/doc
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)
 
-X_CFLAGS = @X_CFLAGS@
-X_LIBS = @X_LIBS@
-X_EXTRA_LIBS = @X_EXTRA_LIBS@
-X_PRE_LIBS = @X_PRE_LIBS@
-
-XPM_INCLUDE = @XPM_INCLUDE@
-XPM_LINK = @XPM_LINK@
-
-EXTRA_SRC_INC = @EXTRA_SRC_INC@
-EXTRA_SRC_LIB = @EXTRA_SRC_LIB@
-
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
-DEF = $(GUI_DEFS) -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
+DEF = @DEFINES@ -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
-      $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC)
-CFLAGS   = $(OPT) $(DBG) $(DEF) $(INC)
-CXXFLAGS = $(OPT) $(DBG) $(DEF) $(INC)
-LDFLAGS  = $(OPT) $(GUI_LDFLAGS) 
+      $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC) 
+CFLAGS   = @CFLAGS@ $(DBG) $(DEF) $(INC)
+CXXFLAGS = @CXXFLAGS@ $(DBG) $(DEF) $(INC)
+LDFLAGS = @LDFLAGS@
 
-LIBS= \
-  -L$(BUILDDIR)/extra/lib \
-  $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
-  $(GUI_LINK) \
-  $(XPM_LINK) \
-  $(PYTHON_LINK) $(SWIG_LINK) \
-  $(EXTRALIBS) \
-  $(X_EXTRA_LIBS) \
-  $(X_PRE_LIBS) \
-  $(X_LIBS) -lX11 -lm
-
-SLIBS= \
-  $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
-  $(GUI_SLINK) \
-  $(XPM_LINK) \
-  $(PYTHON_LINK) $(SWIG_LINK) \
-  $(EXTRALIBS) \
-  $(X_EXTRA_LIBS) \
-  $(X_PRE_LIBS) \
-  $(X_LIBS) -lX11 -lm
+LIBS=@LIBS@ $(CCLIENTLIB)

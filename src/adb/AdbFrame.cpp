@@ -2036,7 +2036,7 @@ void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
 // (full and relative paths accepted), returns NULL if path is invalid
 AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 {
-  AdbTreeElement *current = wxIsPathSeparator(strEntry[0u]) ? m_root
+  AdbTreeElement *current = wxIsPathSeparator(strEntry[0]) ? m_root
                                                             : GetCurNode();
 
   wxArrayString aComponents;

@@ -216,7 +216,7 @@ public:
                  &size);
 
    void Select(long index, bool on=true)
-      { SetItemState(index,wxLIST_STATE_SELECTED, on ? wxLIST_STATE_SELECTED : 0); }
+      { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
       
    int GetSelections(wxArrayInt &selections) const;
    bool IsSelected(long index)

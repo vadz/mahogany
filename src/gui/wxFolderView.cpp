@@ -144,13 +144,9 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &date,
                            String const &size)
 {
-   if(index < GetItemCount())
-   {
-      DeleteItem(index);
-      InsertItem(index, status); // column 0, set to something
-   }
-   else
+   if(index >= GetItemCount())
       InsertItem(index, status); // column 0
+   
    SetItem(index, m_columns[WXFLC_STATUS], status);
    SetItem(index, m_columns[WXFLC_FROM], sender);
    SetItem(index, m_columns[WXFLC_DATE], date);
@@ -186,7 +182,7 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    if(m_NumOfMessages > 0)
    {
       m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-      // t   he callback will preview the (just) selected message
+      // the callback will preview the (just) selected message
    }
 }
 
@@ -315,11 +311,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_SELECTALL:
       for(n = 0; n < m_NumOfMessages; n++)
-         m_FolderCtrl->Select(n,true);
+         m_FolderCtrl->Select(n,TRUE);
       break;
    case WXMENU_MSG_DESELECTALL:
       for(n = 0; n < m_NumOfMessages; n++)
-         m_FolderCtrl->Select(n,false);
+         m_FolderCtrl->Select(n,FALSE);
       break;
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
