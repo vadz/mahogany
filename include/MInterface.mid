@@ -44,7 +44,16 @@ ARG(ProfileBase *, parent, =NULL)
  return ProfileBase::CreateModuleProfile(classname,parent);
 ')
 
-FUNCTION(Message, void , (
+FUNCTION(CreateMessage, Message *, (
+ARG(STRING, text),
+ARG(UIDTYPE, uid, = UID_ILLEGAL),
+ARG(ProfileBase *, profile, =NULL)
+),
+`
+ return Message::Create(text, uid, profile);
+')
+
+FUNCTION(MessageDialog, void , (
 ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
 ARG(STRING, title, =MDIALOG_MSGTITLE),
 ARG(STRING, configPath, =NULL) )

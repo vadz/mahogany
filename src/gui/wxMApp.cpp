@@ -580,6 +580,10 @@ wxMApp::OnInit()
    // at this moment) disappears, the app will close.
    SetExitOnFrameDelete(FALSE);
 
+   // create timers -- are accessed by OnStartup()
+   gs_timerAutoSave = new AutoSaveTimer;
+   gs_timerMailCollection = new MailCollectionTimer;
+
    if ( OnStartup() )
    {
       // only now we can use profiles
@@ -656,9 +660,6 @@ wxMApp::OnInit()
 #endif // wxUSE_POSTSCRIPT
 
 
-      // create timers
-      gs_timerAutoSave = new AutoSaveTimer;
-      gs_timerMailCollection = new MailCollectionTimer;
 
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);

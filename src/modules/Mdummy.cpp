@@ -68,7 +68,7 @@ DummyModule::Init(int version_major, int version_minor, int version_release,
 DummyModule::DummyModule()
            : MModule()
 {
-   GetMInterface()->Message(
+   GetMInterface()->MessageDialog(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",

@@ -367,7 +367,7 @@ public:
    virtual void Error(const String &error);
    virtual void Output(const String &msg)
       {
-         m_MInterface->Message(msg,NULL,_("Parser output"));
+         m_MInterface->MessageDialog(msg,NULL,_("Parser output"));
       }
    virtual void Log(const String &imsg, int level)
       {
@@ -1068,7 +1068,7 @@ ParserImpl::Error(const String &error)
    tmp.Printf(_("Parse error at input position %lu:\n  %s\n%s<error> %s"),
               pos, error.c_str(), before.c_str(), after.c_str());
 
-   m_MInterface->Message(tmp,NULL,_("Parse error!"));
+   m_MInterface->MessageDialog(tmp,NULL,_("Parse error!"));
 }
 
 /** Reads the next token from the string and removes it from it.

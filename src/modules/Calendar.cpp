@@ -16,7 +16,6 @@
 #   include "Mconfig.h"
 #   include "Mcommon.h"
 #   include "MDialogs.h"
-#   include "strutil.h"
 #   include "Mdefaults.h"
 #   include "gui/wxMenuDefs.h"
 #   include "MMainFrame.h"
@@ -94,10 +93,10 @@ private:
    bool ProcessMenuEvent(int id);
    void GetConfig(void);
    inline void ErrorMessage(const String &msg)
-      { m_MInterface->Message(msg,NULL,"Calendar module error!");wxYield(); }
+      { m_MInterface->MessageDialog(msg,NULL,"Calendar module error!");wxYield(); }
    inline void Message(const String &msg)
-      { m_MInterface->Message(msg,NULL,"Calendar module"); wxYield(); }
-   inline void StatusMessage(const String &msg)
+      { m_MInterface->MessageDialog(msg,NULL,"Calendar module"); wxYield(); }
+   inline void StatusMessageDialog(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
 
 
@@ -316,7 +315,7 @@ CalendarModule::GetConfig(void)
                                  MP_MOD_CALENDAR_SHOWONSTARTUP_D);
 
    // settings read from folder profile:
-   ProfileBase *fp = ProfileBase::CreateProfile(m_FolderName);
+   ProfileBase *fp = m_MInterface->CreateProfile(m_FolderName);
    m_MyEmail = fp->readEntry(MP_RETURN_ADDRESS,
                              MP_RETURN_ADDRESS_D);
    if(m_MyEmail.Length() == 0)
@@ -452,7 +451,7 @@ CalendarModule::AddReminder(const wxString &itext)
    text.Printf(fmt, timeStr.c_str(),
                MakeDateLine(m_CalCtrl->GetDate()).c_str());
 
-   class Message * msg = Message::Create(text,UID_ILLEGAL,m_Profile);
+   class Message * msg = m_MInterface->CreateMessage(text,UID_ILLEGAL,m_Profile);
    (void) m_Folder->AppendMessage(msg);
    msg->DecRef();
 }

@@ -249,9 +249,9 @@ private:
    void InstallFromDir(wxString directory, bool delFiles);
 
    inline void ErrorMessage(const String &msg)
-      { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
+      { m_MInterface->MessageDialog(msg,NULL,"PalmOS module error!");wxYield(); }
    inline void Message(const String &msg)
-      { m_MInterface->Message(msg,NULL,"PalmOS module"); wxYield(); }
+      { m_MInterface->MessageDialog(msg,NULL,"PalmOS module"); wxYield(); }
    inline void StatusMessage(const String &msg)
       { m_MInterface->StatusMessage(msg);wxYield();}
 

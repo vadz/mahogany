@@ -11,6 +11,7 @@ $2
 
 define(STRING, string)
 define(INT, long)
+define(UIDTYPE, unsigned long)
 define(ARG, in $1 $2)
 define(FUNCTION, $2 $1 $3;)
 
