@@ -15,6 +15,19 @@
 #ifndef   MOBJECT_H
 #define   MOBJECT_H
 
+class WeakRefCounter;
+class MObjectRC;
+
+// ----------------------------------------------------------------------------
+// Private smart pointer helpers
+// ----------------------------------------------------------------------------
+
+extern void RefCounterIncrement(MObjectRC *pointer);
+extern void RefCounterDecrement(MObjectRC *pointer);
+extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
+extern WeakRefCounter *WeakRefAdd(MObjectRC *pointer);
+extern void WeakRefDeleted(WeakRefCounter *counter);
+
 // ----------------------------------------------------------------------------
 // MObject: the mother of all classes
 // ----------------------------------------------------------------------------
@@ -135,7 +148,7 @@ public:
 #ifdef   DEBUG
   MObjectRC();
 #else
-  MObjectRC() { m_nRef = 1; }
+  MObjectRC() { m_nRef = 1; m_weak = 0; }
 #endif
 
   /// debugging support
@@ -172,7 +185,8 @@ public:
 
 protected:
    //// dtor is protected because only DecRef() can delete us
-   virtual ~MObjectRC() { MOcheck(); wxASSERT(m_nRef == 0); }
+   virtual ~MObjectRC()
+      { MOcheck(); wxASSERT(m_nRef == 0); WeakRefDeleted(m_weak); }
    //// return the reference count:
    size_t GetNRef(void) const { return m_nRef; }
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
@@ -180,6 +194,10 @@ private:
 #endif
 
    size_t m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
+
+   // Support for WeakRef
+   friend WeakRefCounter *WeakRefAdd(MObjectRC *pointer);
+   WeakRefCounter *m_weak;
 };
 
 #ifdef   DEBUG

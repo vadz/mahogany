@@ -96,6 +96,7 @@ MObjectRC::MObjectRC()
 {
    gs_aObjects.Add(this);
    m_nRef = 1;
+   m_weak = 0;
 }
 
 void MObjectRC::IncRef()
@@ -172,3 +173,30 @@ extern void RefCounterAssign(MObjectRC *target,MObjectRC *source)
       target->DecRef();
 }
 
+class WeakRefCounter : public MObjectRC
+{
+public:
+   WeakRefCounter() : m_deleted(false) {}
+   bool m_deleted;
+};
+
+extern WeakRefCounter *WeakRefAdd(MObjectRC *pointer)
+{
+   if( !pointer->m_weak )
+      pointer->m_weak = new WeakRefCounter;
+   else
+      pointer->m_weak->IncRef();
+
+   return pointer->m_weak;
+}
+
+extern void WeakRefRemove(WeakRefCounter *counter)
+{
+   counter->DecRef();
+}
+
+extern void WeakRefDeleted(WeakRefCounter *counter)
+{
+   if( counter )
+      counter->m_deleted = true;
+}

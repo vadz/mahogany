@@ -2,6 +2,8 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   pointers.h
 // Purpose:     Memory management, mostly templates and macros
+//              While MObject.h is for *defining* objects, pointers.h
+//              is for *referencing* objects, so keep it short
 // Author:      Robert Vazan
 // Modified by:
 // Created:     2003
@@ -12,6 +14,10 @@
 
 #ifndef M_POINTERS_H
 #define M_POINTERS_H
+
+class WeakRefCounter;
+
+extern void WeakRefRemove(WeakRefCounter *counter);
 
 /**
    An MObjectRC-based smart pointer implementation.
@@ -127,27 +133,35 @@ private:
    T *m_pointer;
 };
 
-#define DECLARE_REF_COUNTER(T) \
-   class T; \
-   extern void RefCounterIncrement(T *pointer); \
-   extern void RefCounterDecrement(T *pointer); \
-   extern void RefCounterAssign(T *target,T *source);
 
-#define DEFINE_REF_COUNTER(T) \
-   extern void RefCounterIncrement(T *pointer) \
-      { RefCounterIncrement(static_cast<MObjectRC *>(pointer)); } \
-   extern void RefCounterDecrement(T *pointer) \
-      { RefCounterDecrement(static_cast<MObjectRC *>(pointer)); } \
-   extern void RefCounterAssign(T *target,T *source) \
-   { \
-      RefCounterAssign(static_cast<MObjectRC *>(target), \
-         static_cast<MObjectRC *>(source)); \
+// Used to resolve cyclic references. RefCounter goes in one direction
+// and WeakRef goes in the opposite direction. WeakRef (seems that it)
+// contains NULL if all RefCounter instances are gone (and the object
+// is deleted).
+template <class ClassName>
+class WeakRef
+{
+public:
+   WeakRef() { InitNull(); }
+   WeakRef(RefCounter<ClassName> pointer) { Init(pointer); }
+   ~WeakRef() { Destroy(); }
+
+private:
+   // not implemented
+   WeakRef<ClassName> operator=(const WeakRef<ClassName> &copy) { return *this; }
+   WeakRef(const WeakRef<ClassName> &copy) {}
+
+   void InitNull() { m_pointer = 0; m_counter = 0; }
+   void Init(RefCounter<ClassName> pointer)
+   {
+      m_pointer = static_cast<ClassName *>(pointer);
+      m_counter = WeakRefAdd(m_pointer);
    }
-
-class MObjectRC;
-extern void RefCounterIncrement(MObjectRC *pointer);
-extern void RefCounterDecrement(MObjectRC *pointer);
-extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
+   void Destroy() { WeakRefRemove(m_counter); }
+   
+   ClassName *m_pointer;
+   WeakRefCounter *m_counter;
+};
 
 
 // Equivalent of auto_ptr, but with private copy constructor and assignment
@@ -180,5 +194,32 @@ private:
    AutoPtr(const AutoPtr<T>& copy) {}
    void operator=(const AutoPtr<T>& copy) {}
 };
+
+
+// Use instead of forward declaration to make RefCounter and WeakRef
+// instantiable without knowledge that ClassName derives from MObjectRC.
+#define DECLARE_REF_COUNTER(T) \
+   class T; \
+   extern void RefCounterIncrement(T *pointer); \
+   extern void RefCounterDecrement(T *pointer); \
+   extern void RefCounterAssign(T *target,T *source); \
+   extern WeakRefCounter *WeakRefAdd(T *pointer);
+
+
+// If DECLARE_REF_COUNTER is used anywhere, DEFINE_REF_COUNTER must be
+// put it some *.cpp file that #includes ClassName's header.
+#define DEFINE_REF_COUNTER(T) \
+   extern void RefCounterIncrement(T *pointer) \
+      { RefCounterIncrement(static_cast<MObjectRC *>(pointer)); } \
+   extern void RefCounterDecrement(T *pointer) \
+      { RefCounterDecrement(static_cast<MObjectRC *>(pointer)); } \
+   extern void RefCounterAssign(T *target,T *source) \
+   { \
+      RefCounterAssign(static_cast<MObjectRC *>(target), \
+         static_cast<MObjectRC *>(source)); \
+   } \
+   extern WeakRefCounter *WeakRefAdd(T *pointer) \
+      { return WeakRefAdd(static_cast<MObjectRC *>(pointer)); }
+
 
 #endif // M_POINTERS_H
