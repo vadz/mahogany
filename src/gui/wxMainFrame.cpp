@@ -780,7 +780,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
    static bool s_hasPreview = true;
    static bool s_hasFolder = true;
 
-   bool hasFolder = m_FolderView->GetFolder();
+   bool hasFolder = m_FolderView->GetFolder() != NULL;
    if ( hasFolder != s_hasFolder )
    {
       EnableMMenu(MMenu_Message, this, hasFolder);
