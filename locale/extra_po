@@ -1,19 +1,19 @@
 #MDialogs.h
 
 msgid "Error"
-msgstr "Fehler"
+msgstr ""
 
 msgid "System Error"
-msgstr "Systemfehler"
+msgstr ""
 
 msgid "Fatal Error"
-msgstr "Nicht behebbarer Fehler"
+msgstr ""
 
 msgid "Information"
-msgstr "Information"
+msgstr ""
 
 msgid "Please choose"
-msgstr "Bitte wählen Sie"
+msgstr ""
 
 #cclient# SOME DESCRIPTIVE TITLE.
 #cclient# Copyright (C) YEAR Free Software Foundation, Inc.
