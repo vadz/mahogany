@@ -164,7 +164,7 @@ protected:
 
 IMPLEMENT_VIEWER_FILTER(UUDecodeFilter,
                         ViewFilter::Priority_High - 5,
-                        true,      // initially disabled
+                        true,      // initially enabled
                         gettext_noop("UUdecode"),
                         _T("(c) 2004 Xavier Nodet <xavier.nodet@free.fr>"));
 
