@@ -688,37 +688,23 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
    // don't process events until we're fully initialized and also only process
    // simple characters here (without Ctrl/Alt)
-   if( !HasFolder() ||
-       !m_FolderView->m_MessagePreview ||
-       event.HasModifiers() )
+   if( !HasFolder() || !m_FolderView->m_MessagePreview )
    {
-      event.Skip();
-      return; // nothing to do
-   }
-
-   long key = event.KeyCode();
-   if ( key == WXK_F1 ) // help
-   {
-      mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
+      // can't process any commands now
       event.Skip();
       return;
    }
 
-   // we can operate either on all selected items
-   const UIdArray& selections = m_FolderView->GetSelections();
+   // which command?
+   // --------------
 
-   // get the focused item
-   long focused = GetFocusedItem();
-
-   // find the next item
-   long newFocus = focused;
-   if ( newFocus == -1 )
-      newFocus = 0;
-   else if ( focused < GetItemCount() - 1 )
-      newFocus++;
-
+   long key = event.KeyCode();
    switch ( key )
    {
+      case WXK_F1:
+         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
+         return;
+
       case WXK_PRIOR:
       case WXK_NEXT:
          // Shift-PageUp/Down have a predefined meaning in the wxListCtrl, so
@@ -766,6 +752,31 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          }
    }
 
+   // we only process unmodified key presses normally - except for Ctrl-Del
+   if ( event.AltDown() ||
+        event.ShiftDown() ||
+        (event.ControlDown() && key != 'D') )
+   {
+      event.Skip();
+      return;
+   }
+
+   // do command
+   // ----------
+
+   // we can operate either on all selected items
+   const UIdArray& selections = m_FolderView->GetSelections();
+
+   // get the focused item
+   long focused = GetFocusedItem();
+
+   // find the next item
+   long newFocus = focused;
+   if ( newFocus == -1 )
+      newFocus = 0;
+   else if ( focused < GetItemCount() - 1 )
+      newFocus++;
+
    MsgCmdProc *msgCmdProc = m_FolderView->m_msgCmdProc;
    switch ( key )
    {
@@ -779,14 +790,22 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
 
       case 'D': // delete
-         msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
-
-         // only move on if we mark as deleted, for trash usage, selection
-         // remains the same:
-         if ( READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) )
+         if ( event.ControlDown() )
          {
-            // don't move focus
+            msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE, selections);
             newFocus = -1;
+         }
+         else // normal delete
+         {
+            msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
+
+            // only move on if we mark as deleted, for trash usage, selection
+            // remains the same:
+            if ( READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) )
+            {
+               // don't move focus
+               newFocus = -1;
+            }
          }
          break;
 

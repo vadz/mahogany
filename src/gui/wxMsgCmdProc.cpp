@@ -131,6 +131,7 @@ protected:
    void PrintPreviewMessages(const UIdArray& selections);
 
    void DeleteOrTrashMessages(const UIdArray& selections);
+   void DeleteAndExpungeMessages(const UIdArray& selections);
    void UndeleteMessages(const UIdArray& selections);
    void ToggleMessages(const UIdArray& messages);
    void MarkRead(const UIdArray& messages, bool read);
@@ -495,6 +496,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          DeleteOrTrashMessages(messages);
          break;
 
+      case WXMENU_MSG_DELETE_EXPUNGE:
+         DeleteAndExpungeMessages(messages);
+         break;
+
       case WXMENU_MSG_FLAG:
          ToggleMessages(messages);
          break;
@@ -621,7 +626,7 @@ MsgCmdProcImpl::PrintPreviewMessages(const UIdArray& selections)
 }
 
 // ----------------------------------------------------------------------------
-// changing message flags
+// [un]deleting messages
 // ----------------------------------------------------------------------------
 
 void
@@ -635,10 +640,24 @@ MsgCmdProcImpl::DeleteOrTrashMessages(const UIdArray& selections)
 }
 
 void
+MsgCmdProcImpl::DeleteAndExpungeMessages(const UIdArray& selections)
+{
+   AsyncStatusHandler *status =
+      new AsyncStatusHandler(this, _("Permanently deleting messages..."));
+
+   status->Monitor(m_asmf->DeleteMessages(&selections, true /* epxunge */, this),
+                   _("Failed to permanently delete messages"));
+}
+
+void
 MsgCmdProcImpl::UndeleteMessages(const UIdArray& selections)
 {
    m_TicketList->Add(m_asmf->UnDeleteMessages(&selections, this));
 }
+
+// ----------------------------------------------------------------------------
+// changing message flags
+// ----------------------------------------------------------------------------
 
 void
 MsgCmdProcImpl::ToggleMessages(const UIdArray& messages)

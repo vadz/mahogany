@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+08.08.01 VZ: added "Zap" (== delete and expunge) command
 03.08.01 VZ: better feedback for dnd, show the target folder name in status bar
 30.07.01 XN: added mark read/unread commands
 11.07.01 VZ: added support for logging messages to a file
