@@ -413,8 +413,10 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 if test "$USE_MAC" = 1; then
-    AC_PATH_PROG(REZ, Rez, true, [$PATH:/Developer/Tools])
     AC_PATH_PROG(SETFILE, SetFile, true, [$PATH:/Developer/Tools])
+
+    REZFLAGS=`$WX_CONFIG_WITH_ARGS --rezflags`
+    AC_SUBNST(REZFLAGS)
 fi
 
 dnl --------------------------------------------------------------------------

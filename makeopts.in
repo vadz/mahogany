@@ -93,7 +93,7 @@ SWIG	:= @SWIG@
 RM	:= rm -f
 M4	:= @M4@ 
 
-REZ	:= @REZ@
+REZFLAGS:= @REZFLAGS@
 SETFILE	:= @SETFILE@
 
 # install stuff
