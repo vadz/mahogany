@@ -18,6 +18,8 @@
 #endif
 
 class WXDLLEXPORT wxArrayString;
+class ASMailFolder;
+class UIdArray;
 
 /**@name Miscellaneous utility functions */
 //@{
@@ -103,7 +105,7 @@ extern void GetColourByName(wxColour *colour,
 extern String GetSequenceString(const UIdArray *sequence);
 
 /// Gets an UIdArray with all message uids in the folder:
-extern UIdArray *GetAllMessagesSequence(class ASMailFolder *mf);
+extern UIdArray *GetAllMessagesSequence(ASMailFolder *mf);
 
 /// Get the user's From mail address from a profile
 extern String miscutil_GetFromAddress(Profile *p,

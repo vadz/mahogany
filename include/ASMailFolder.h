@@ -382,7 +382,6 @@ public:
      */
    virtual Ticket ExpungeMessages(void) = 0;
 
-
 #if defined(EXPERIMENTAL_MARK_READ)
    /** Mark messages read/unread.
        @param selections the message indices which will be converted using the current listing
@@ -519,7 +518,11 @@ public:
 
    //@}
    //@}
-   /**@name Synchronous Access Functions */
+
+   /** @name Synchronous Access Functions
+
+       FIXME: I wonder what are they doing here?
+    */
    //@{
    /**
       Returns the delimiter used to separate the components of the folder
@@ -539,37 +542,16 @@ public:
    */
    virtual String GetName(void) const = 0;
 
-   /** Get number of messages which have a message status of value
-       when combined with the mask. When mask = 0, return total
-       message count.
-       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-       @param value the value of MessageStatus AND mask to be counted
-       @return number of messages
-   */
-   virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
-   /// return the number of deleted messages in the folder
-   unsigned long CountDeletedMessages()
-   {
-      return CountMessages(MailFolder::MSG_STAT_DELETED,
-                           MailFolder::MSG_STAT_DELETED);
-   }
-
    /** Get the profile.
        @return Pointer to the profile.
    */
    virtual Profile *GetProfile(void) const = 0;
 
-   /**@name Functions to get an overview of messages in the folder. */
-   //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
    virtual class HeaderInfoList *GetHeaders(void) const = 0;
-   //@}
+
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;
-   /** Sets a maximum number of messages to retrieve from server.
-       @param nmax maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimit(unsigned long nmax) = 0;
    /// Returns the underlying MailFolder object and increfs it.
    virtual MailFolder *GetMailFolder(void) const = 0;
    //@}

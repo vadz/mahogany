@@ -2576,13 +2576,17 @@ bool PickGlobalPasswdDialog(Profile *profile, wxWindow *parent)
 // ----------------------------------------------------------------------------
 
 extern
-void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
+void CheckExpungeDialog(ASMailFolder *asmf, wxWindow *parent)
 {
    // For all non-NNTP folders, check if the user wants to auto-expunge the
    // messages?
-   if( CanDeleteMessagesInFolder(mf->GetType()) )
+   if ( CanDeleteMessagesInFolder(asmf->GetType()) )
    {
       // are there any messages to expunge?
+      MailFolder *mf = asmf->GetMailFolder();
+      if ( !mf )
+         return;
+
       if ( mf->CountDeletedMessages() )
       {
          String msg;
@@ -2600,6 +2604,8 @@ void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
             (void) mf->ExpungeMessages();
          }
       }
+
+      mf->DecRef();
    }
 }
 

@@ -3077,81 +3077,131 @@ MailFolderCmn::ApplyFilterRules(UIdArray msgs)
    return rc;
 }
 
-/** Checks for new mail and filters if necessary.
-    Returns FilterRule flag combination
-*/
-int
-MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
+// Checks for new mail and filters if necessary.
+bool
+MailFolderCmn::FilterNewMail()
 {
-   CHECK(hil, 0, "FilterNewMail() needs header info list");
-
-   int rc = 0;
-
    // Maybe we are lucky and have nothing to do?
-   size_t count = hil->Count();
-   if ( count > 0 )
+   if ( CountRecentMessages() == 0 )
    {
-      UIdType nRecent = CountRecentMessages();
-      if ( nRecent > 0 )
+      // true as no error
+      return true;
+   }
+
+   // Obtain pointer to the filtering module:
+   MModule_Filters *filterModule = MModule_Filters::GetModule();
+   if ( !filterModule )
+   {
+      wxLogVerbose("Filter module couldn't be loaded.");
+
+      return false;
+   }
+
+   HeaderInfoList_obj hil = GetHeaders();
+   CHECK( hil, false, "FilterNewMail: no headers" );
+
+   // Build an array of NEW message UIds to apply the filters to:
+   UIdArray messages;
+   unsigned long count = GetMessageCount();
+   for ( unsigned long idx = 0; idx < count; idx++ )
+   {
+      HeaderInfo *hi = hil->GetItemByIndex(idx);
+      if ( !hi )
       {
-         // Obtain pointer to the filtering module:
-         MModule_Filters *filterModule = MModule_Filters::GetModule();
-         if(filterModule)
-         {
-            // Build an array of NEW message UIds to apply the filters to:
-            UIdArray messages;
-            for ( size_t idx = 0; idx < count; idx++ )
-            {
-               HeaderInfo *hi = hil->GetItemByIndex(idx);
-               int status = hi->GetStatus();
+         FAIL_MSG( "failed to get HeaderInfo" );
 
-               // only take NEW (== RECENT && !SEEN) and ignore DELETED
-               if ( (status &
-                     (MSG_STAT_RECENT | MSG_STAT_SEEN | MSG_STAT_DELETED))
-                     == MSG_STAT_RECENT )
-               {
-                  messages.Add(hi->GetUId());
-               }
-            }
-
-            // build a single program from all filter rules:
-            String filterString;
-            MFolder_obj folder(GetName());
-            wxArrayString filters;
-            if ( folder )
-               filters = folder->GetFilters();
-            size_t countFilters = filters.GetCount();
-            for ( size_t n = 0; n < countFilters; n++ )
-            {
-               MFilter_obj filter(filters[n]);
-               MFilterDesc fd = filter->GetDesc();
-               filterString += fd.GetRule();
-            }
-            if(filterString[0u]) // not empty
-            {
-               // translate filter program:
-               FilterRule * filterRule = filterModule->GetFilter(filterString);
-               // apply it:
-               if ( filterRule )
-               {
-                  // true here means "ignore deleted"
-                  rc |= filterRule->Apply(this, messages, true);
-
-                  filterRule->DecRef();
-               }
-            }
-            filterModule->DecRef();
-         }
-         else
-         {
-            wxLogVerbose("Filter module couldn't be loaded.");
-
-            rc = FilterRule::Error;
-         }
+         continue;
       }
 
+      int status = hi->GetStatus();
+
+      // only take NEW (== RECENT && !SEEN) and ignore DELETED
+      if ( (status &
+            (MSG_STAT_RECENT | MSG_STAT_SEEN | MSG_STAT_DELETED))
+            == MSG_STAT_RECENT )
+      {
+         messages.Add(hi->GetUId());
+      }
+   }
+
+   if ( !messages.IsEmpty() )
+   {
+      // build a single program from all filter rules:
+      String filterString;
+      MFolder_obj folder(GetName());
+      wxArrayString filters;
+      if ( folder )
+         filters = folder->GetFilters();
+      size_t countFilters = filters.GetCount();
+      for ( size_t n = 0; n < countFilters; n++ )
+      {
+         MFilter_obj filter(filters[n]);
+         MFilterDesc fd = filter->GetDesc();
+         filterString += fd.GetRule();
+      }
+
+      // apply it
+      if ( !filterString.empty() )
+      {
+         // translate filter program:
+         FilterRule *filterRule =
+            filterModule->GetFilter(filterString);
+
+         // apply it:
+         if ( filterRule )
+         {
+            // true here means "ignore deleted"
+            int rc = filterRule->Apply(this, messages, true);
+
+            // avoid doing anything harsh (like expunging the messages) if an
+            // error occurs
+            if ( !(rc & FilterRule::Error) )
+            {
+               // some of the messages might have been deleted by the filters
+               // and, moreover, the filter code could have called
+               // ExpungeMessages() explicitly, so we may have to expunge some
+               // messages from the folder
+
+               // calling ExpungeMessages() from filter code is unconditional
+               // and should always be honoured, so check for it first
+               bool expunge = (rc & FilterRule::Expunged) != 0;
+               if ( !expunge )
+               {
+                  if ( rc & FilterRule::Deleted )
+                  {
+                     // expunging here is dangerous because we can expunge the
+                     // messages which had been deleted by the user manually
+                     // before the filters were applied, so check a special
+                     // option which may be set to prevent us from doing this
+                     expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
+                  }
+               }
+
+               if ( expunge )
+               {
+                  // so be it
+                  ExpungeMessages();
+               }
+            }
+
+            filterRule->DecRef();
+         }
+      }
+   }
+
+   filterModule->DecRef();
+
+   return true;
+}
+
+bool MailFolderCmn::CollectNewMail()
+{
+   // do we have any messages at all?
+   unsigned long count = GetMessageCount();
+   if ( count > 0 )
+   {
       // do we have any messages to move?
-      if ( (GetFlags() & MF_FLAGS_INCOMING) != 0)
+      if ( (GetFlags() & MF_FLAGS_INCOMING) != 0 )
       {
          // where to we move the mails?
          String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
@@ -3159,11 +3209,16 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          {
             ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself."),
                          GetName().c_str()));
+
+            // TODO: reset MF_FLAGS_INCOMING flag
          }
          else // ok, move to another folder
          {
+            HeaderInfoList_obj hil = GetHeaders();
+            CHECK( hil, false, "CollectNewMail: no headers" );
+
             UIdArray messages;
-            for ( size_t idx = 0; idx < count; idx++ )
+            for ( unsigned long idx = 0; idx < count; idx++ )
             {
                // check that the message isn't deleted - avoids getting 2 (or
                // more!) copies of the same "new" message (first normal,
@@ -3184,21 +3239,19 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                {
                   // delete and expunge
                   DeleteMessages(&messages, true);
-
-                  rc |= FilterRule::Expunged;
                }
                else // don't delete them if we failed to move
                {
                   ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+
+                  return false;
                }
             }
          }
       }
    }
 
-   hil->DecRef();
-
-   return rc;
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -28,6 +28,8 @@
 
 #ifndef  USE_PCH
    #include "MailFolder.h"
+
+   #include "Message.h"
 #endif // USE_PCH
 
 #include "HeaderInfoImpl.h"
@@ -141,7 +143,7 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
       // TODO: add SetCount() to wxArray instead
       for ( size_t count = m_headers.GetCount(); count <= n; count++ )
       {
-         wxConstCast(this, HeaderInfoListImpl)->m_headers.Add(NULL);
+         ((HeaderInfoListImpl *)this)->m_headers.Add(NULL); // const_cast
       }
 
       // alloc space for new header

@@ -19,8 +19,6 @@
 
 #include "MObject.h"
 
-#include "HeaderInfo.h"    // for MEventMsgStatusData
-
 /**
    MEvent ids for all kinds of events used in M. The name in the comment is the
    MEventData-derived class which is used with this event
@@ -31,6 +29,8 @@ enum MEventId
    MEventId_Null = -1,
    /// MEventMailData
    MEventId_NewMail = 100,
+   /// MEventFolderOnNewMailData - used by MailFolderCC for private purposes
+   MEventId_FolderOnNewMail = 110,
    /// MEventFolderTreeChangeData - a change in folder tree
    MEventId_FolderTreeChange = 200,
    /// MEventFolderUpdateData - there's a new folder listing
@@ -112,6 +112,14 @@ public:
 
 private:
    MailFolder *m_Folder;
+};
+
+/// MEventFolderOnNewMailData - used by MailFolderCC to update itself
+class MEventFolderOnNewMailData : public MEventWithFolderData
+{
+public:
+   MEventFolderOnNewMailData(MailFolder *folder)
+      : MEventWithFolderData(MEventId_FolderOnNewMail, folder) { }
 };
 
 /// MEventPingData - the event asking the folders to ping
@@ -240,22 +248,20 @@ public:
    // ctor
    MEventMsgStatusData(MailFolder *folder,
                        size_t index,
-                       const HeaderInfo& hi)
-      : MEventWithFolderData(MEventId_MsgStatus, folder), m_hi(hi)
-      {
-         m_index = index;
-      }
+                       const HeaderInfo& hi);
+
    ~MEventMsgStatusData();
 
    /// Get the changed header info
-   const HeaderInfo *GetHeaderInfo() const { return &m_hi; }
+   const HeaderInfo *GetHeaderInfo() const { return m_hi; }
 
    /// Get the index of the changed header in the listing
    size_t GetIndex() const { return m_index; }
 
 private:
-   size_t      m_index;
-   HeaderInfo  m_hi;
+   size_t m_index;
+
+   class HeaderInfo *m_hi;
 };
 
 /**

@@ -2310,7 +2310,9 @@ extern "C"
       HeaderInfoList *hil = p->GetFolder()->GetHeaders();
       if(hil)
       {
+#ifdef USE_HEADER_SCORE
          score = hil->GetEntryUId( msg->GetUId() )->GetScore();
+#endif
          hil->DecRef();
       }
       msg->DecRef();
@@ -2322,12 +2324,13 @@ extern "C"
       if(args->Count() != 1)
          return Value(-1);
       const Value d = args->GetArg(0)->Evaluate();
-      int delta = d.ToNumber();
       Message *msg = p->GetMessage();
       HeaderInfoList *hil = p->GetFolder()->GetHeaders();
       if(hil)
       {
-         hil->GetEntryUId( msg->GetUId() )->AddScore(delta);
+#ifdef USE_HEADER_SCORE
+         hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber());
+#endif
          hil->DecRef();
       }
       msg->DecRef();
@@ -2343,7 +2346,9 @@ extern "C"
       HeaderInfoList *hil = p->GetFolder()->GetHeaders();
       if(hil)
       {
+#ifdef USE_HEADER_COLOUR
          hil->GetEntryUId( msg->GetUId() )->SetColour(col);
+#endif
          hil->DecRef();
       }
       msg->DecRef();

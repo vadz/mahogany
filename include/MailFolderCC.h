@@ -29,11 +29,8 @@
 #include <wx/fontenc.h>    // enum wxFontEncoding can't be fwd declared
 
 // fwd decls
-class HeaderInfoList;
 class MailFolderCC;
 class MMutex;
-struct mail_address;
-struct OVERVIEW_X;
 
 // supported formats for the local file mailboxes (hence MH not counted)
 enum FileMailboxFormat
@@ -162,6 +159,10 @@ public:
 
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
+
+   // capabilities
+   virtual bool CanSort() const;
+   virtual bool CanThread() const;
 
    /** Get the profile.
        @return Pointer to the profile.
@@ -368,6 +369,10 @@ public:
    */
    MAILSTREAM *Stream(void) const { return m_MailStream; }
 
+   /** For use by CCNewMailProcessor only
+   */
+   void OnNewMail();
+
 private:
    /** @name Constructors and such */
    //@{
@@ -435,11 +440,11 @@ private:
    /**
      Called from GetHeaderInfo() to process one header
 
-     @return 0 to abort overview generation, 1 to continue.
+     @return false to abort overview generation, true to continue.
    */
-   int OverviewHeaderEntry(class OverviewData *overviewData,
-                           struct message_cache *elt,
-                           struct mail_envelope *env);
+   bool OverviewHeaderEntry(class OverviewData *overviewData,
+                            struct message_cache *elt,
+                            struct mail_envelope *env);
 
    /** We remember the last folder to enter a critical section, helps
        to find crashes.*/
@@ -475,11 +480,8 @@ private:
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
 
-   /// update the folder status info after getting a new message
-   void UpdateFolderStatus(int status);
-
-   /// Apply filters to the new messages and rebuild the listing
-   void FilterNewMailAndUpdate();
+   /// Apply filters to the new messages
+   virtual bool FilterNewMail();
 
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
@@ -546,8 +548,17 @@ private:
    /// mailstream associated with this folder
    MAILSTREAM *m_MailStream;
 
+   /// the number of messages as we know it
+   MsgnoType m_nMessages;
+
+   /// the number of recent messages as we know it
+   MsgnoType m_nRecent;
+
    /// last seen UID, all messages above this one are new
    UIdType m_LastUId;
+
+   /// true if OnNewMail() must be called
+   bool m_hasNewMail;
    //@}
 
    /** @name Temporary operation parameters */

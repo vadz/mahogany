@@ -979,16 +979,6 @@ public:
    */
    virtual String GetName(void) const
       { AScheck(); return m_MailFolder->GetName(); }
-   /** Get number of messages which have a message status of value
-       when combined with the mask. When mask = 0, return total
-       message count.
-       @param mask is a (combination of) MessageStatus value(s) or 0 to test against
-       @param value the value of MessageStatus AND mask to be counted
-       @return number of messages
-   */
-   virtual unsigned long CountMessages(int mask, int value) const
-      { AScheck(); return m_MailFolder->CountMessages(mask, value); }
-
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -998,17 +988,12 @@ public:
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual class HeaderInfoList *GetHeaders(void) const
+   virtual HeaderInfoList *GetHeaders(void) const
       { AScheck(); return m_MailFolder->GetHeaders(); }
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const
       { AScheck(); return m_MailFolder->GetType(); }
-   /** Sets a maximum number of messages to retrieve from server.
-       @param nmax maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimit(unsigned long nmax)
-      { AScheck(); m_MailFolder->SetRetrievalLimits(nmax, 0); }
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const
       { AScheck(); m_MailFolder->IncRef(); return m_MailFolder;}

@@ -170,10 +170,11 @@ protected:
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }
 
-   /** Checks for new mail and filters if necessary.
-       @return FilterRule flags combination
-   */
-   virtual int FilterNewMail(HeaderInfoList *);
+   /// apply filters to all new mail messages
+   virtual bool FilterNewMail();
+
+   /// move new mail to the incoming folder if necessary
+   virtual bool CollectNewMail();
 
    /// Is the mailfolder still connected to a server or file?
    virtual bool IsAlive(void) const = 0;

@@ -2217,7 +2217,7 @@ wxFolderView::Update()
 
    m_FolderCtrl->SetListing(m_ASMailFolder->GetHeaders());
 
-   m_nDeleted = m_ASMailFolder->CountDeletedMessages();
+   m_nDeleted = m_MailFolder->CountDeletedMessages();
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 }

@@ -481,10 +481,10 @@ public:
    }
 
    /// can we sort messages on server?
-   virtual bool CanSort() const;
+   virtual bool CanSort() const = 0;
 
    /// can we thread messages on server?
-   virtual bool CanThread() const;
+   virtual bool CanThread() const = 0;
    //@}
 
    /** @name Functions working with message headers */
