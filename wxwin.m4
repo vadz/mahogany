@@ -110,8 +110,8 @@ AC_DEFUN(AM_PATH_WXCONFIG,
          WX_CPPFLAGS=$WX_CFLAGS
          WX_CXXFLAGS=$WX_CFLAGS
 
-         WX_CFLAGS_ONLY=
-         WX_CXXFLAGS_ONLY=
+         WX_CFLAGS_ONLY=$WX_CFLAGS
+         WX_CXXFLAGS_ONLY=$WX_CFLAGS
       else
          dnl we have CPPFLAGS included in CFLAGS included in CXXFLAGS
          WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags`
