@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.22  1998/06/22 22:36:57  VZ
+ * config file name fixed for Windows
+ *
  * Revision 1.21  1998/06/19 08:05:15  KB
  * restructured FolderView, menu handling and added toolbars
  *
@@ -61,7 +64,7 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#   pragma implementation "MApplication.h"
+#   pragma implementation "MAppBase.h"
 #endif
 
 // ============================================================================
@@ -182,7 +185,11 @@ MAppBase::OnStartup()
    // initialise the profile
 #  if USE_WXCONFIG
       String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
-      profile = GLOBAL_NEW Profile(strConfFile + "/config");
+#     if OS_UNIX
+         strConfFile += "/config";
+#     endif // Unix
+
+      profile = GLOBAL_NEW Profile(strConfFile);
 
       // FIXME @@@@ do something about recordDefaults
 #  else
