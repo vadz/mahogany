@@ -378,7 +378,7 @@ bool SpamFilter::EditParameters(wxFrame *parent, String *params)
             &filters,
             &states,
             _T("SpamRuleParams"),
-            parent
+            (wxWindow*)parent
          ) )
    {
       return false;
