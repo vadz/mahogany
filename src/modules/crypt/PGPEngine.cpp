@@ -536,8 +536,9 @@ PGPEngine::DoExecCommand(const String& options,
       if ( lenIn )
       {
          const size_t CHUNK_SIZE = 4096;
-         size_t lenChunk = lenIn > CHUNK_SIZE ? CHUNK_SIZE : lenIn;
-         in->Write(ptrIn, lenChunk);
+         in->Write(ptrIn, lenIn > CHUNK_SIZE ? CHUNK_SIZE : lenIn);
+
+         const size_t lenChunk = in->LastWrite();
 
          lenIn -= lenChunk;
          ptrIn += lenChunk;
