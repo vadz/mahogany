@@ -314,8 +314,13 @@ private:
    const SyntaxNode *m_Program; // compiled filter program
 
    UIdType m_MessageUId;
-   size_t m_msgno;
    MailFolder *m_MailFolder;
+
+   // the number of the message being processed
+   size_t m_msgno;
+
+   // and the total number of messages
+   size_t m_msgnoMax;
 
    // this flag is set during evalutation if any filter calls Expunge()
    bool m_expungedMsgs;
@@ -2430,8 +2435,8 @@ String FilterRuleImpl::GetStatusString(Message *msg) const
    if ( msg )
    {
       // only subject is probably enough, no need to have from here
-      text.Printf(_("Filtering message %u (%s)"),
-                  m_msgno, msg->Subject().c_str());
+      text.Printf(_("Filtering message %u/%u (%s)"),
+                  m_msgno + 1, m_msgnoMax, msg->Subject().c_str());
    }
 
    return text;
@@ -2564,7 +2569,8 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
 
    if (msgs) // apply to all messages in list
    {
-      for(size_t idx = 0; idx < msgs->Count(); idx++)
+      m_msgnoMax = msgs->Count();
+      for(size_t idx = 0; idx < m_msgnoMax; idx++)
       {
          const HeaderInfo * hi = hil->GetEntryUId((*msgs)[idx]);
          ASSERT(hi);
@@ -2578,8 +2584,8 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    }
    else // apply to all or all recent messages
    {
-      size_t count = hil->Count();
-      for(size_t i = 0; i < count; ++i)
+      m_msgnoMax = hil->Count();
+      for(size_t i = 0; i < m_msgnoMax; i++)
       {
          const HeaderInfo * hi = hil->GetItemByIndex(i);
          ASSERT(hi);
@@ -2616,7 +2622,9 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
 #endif
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
-   m_msgno = 0;
+
+   m_msgno =
+   m_msgnoMax = 0u;
 }
 
 FilterRuleImpl::~FilterRuleImpl()

@@ -785,7 +785,7 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
                        pEncWordStart);
             out += pEncWordStart;
 
-            continue; // break, in fact
+            break;
          }
 
          if ( encoding == wxFONTENCODING_SYSTEM )
@@ -1822,8 +1822,7 @@ MailFolderCC::PingReopenAll(bool fullPing)
       MailFolderCC *mf = connections[n]->folder;
 
       // don't ping locked folders, they will have to wait for the next time
-      if ( !mf->m_InListingRebuild->IsLocked() &&
-           !mf->m_InFilterCode->IsLocked() )
+      if ( !mf->IsLocked() )
       {
          rc &= fullPing ? mf->PingReopen() : mf->Ping();
       }
@@ -1896,7 +1895,9 @@ MailFolderCC::Lock(void) const
 bool
 MailFolderCC::IsLocked(void) const
 {
-   return m_Mutex->IsLocked();
+   return m_Mutex->IsLocked() ||
+          m_InListingRebuild->IsLocked() ||
+          m_InFilterCode->IsLocked();
 }
 
 void

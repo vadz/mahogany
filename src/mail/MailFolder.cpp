@@ -1295,15 +1295,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
 
    int n = selections->Count();
-
    CHECK( n, true, "SaveMessages(): nothing to save" );
-
-   /* It could be that we are trying to open the very folder we are
-      getting our messages from, so we need to temporarily unlock this
-      folder. */
-   bool locked = IsLocked();
-   if(locked)
-      UnLock(); // release our own lock
 
    MailFolder *mf = MailFolder::OpenFolder(folder);
    if ( !mf )
@@ -1315,7 +1307,14 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   Message *msg;
+   if ( mf->IsLocked() )
+   {
+      FAIL_MSG( "Can't SaveMessages() to locked folder" );
+
+      mf->DecRef();
+
+      return false;
+   }
 
    int updateFlags = mf->GetUpdateFlags();
    mf->SetUpdateFlags( updateCount ? UF_UpdateCount : 0 );
@@ -1324,19 +1323,20 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    int threshold = mf->GetProfile() ?
       READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
       : MP_FOLDERPROGRESS_THRESHOLD_D;
+
    if(n > threshold)
    {
-      String msg;
-      msg.Printf(_("Saving %d messages..."), n);
+      // open a progress window:
       pd = new MProgressDialog(mf->GetName(),
-                                             msg,
-                                             2*n, NULL);// open a status window:
+                               wxString::Format(_("Saving %d messages..."), n),
+                               2*n,
+                               NULL);
    }
 
    bool rc = true;
    for ( int i = 0; i < n; i++ )
    {
-      msg = GetMessage((*selections)[i]);
+      Message *msg = GetMessage((*selections)[i]);
       if(msg)
       {
          if(pd) pd->Update( 2*i + 1 );
@@ -1345,12 +1345,13 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
          msg->DecRef();
       }
    }
+
    mf->Ping(); // with our flags
    mf->SetUpdateFlags(updateFlags); // restore old flags
    mf->DecRef();
-   if(pd) delete pd;
-   if(locked)
-      Lock();
+
+   delete pd;
+
    return rc;
 }
 
@@ -1360,69 +1361,11 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
                             bool isProfile,
                             bool updateCount)
 {
-   int
-      n = selections->Count(),
-      i;
-   MailFolder
-      *mf;
+   // this shouldn't happen any more, use SaveMessages(MFolder)
+   CHECK( isProfile, false, "obsolete version of SaveMessages called" );
 
-   if(strutil_isempty(folderName))
-      return false;
-
-   /* It could be that we are trying to open the very folder we are
-      getting our messages from, so we need to temporarily unlock this
-      folder. */
-   bool locked = IsLocked();
-   if(locked)
-      UnLock(); // release our own lock
-
-
-   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE,
-                               folderName);
-   if(! mf)
-   {
-      String msg;
-      msg.Printf(_("Cannot open folder '%s'."), folderName.c_str());
-      ERRORMESSAGE((msg));
-      return false;
-   }
-   Message *msg;
-
-   int updateFlags = mf->GetUpdateFlags();
-   mf->SetUpdateFlags( updateCount ? UF_UpdateCount : 0 );
-
-   MProgressDialog *pd = NULL;
-   int threshold = mf->GetProfile() ?
-      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : MP_FOLDERPROGRESS_THRESHOLD_D;
-   if(n > threshold)
-   {
-      String msg;
-      msg.Printf(_("Saving %d messages..."), n);
-      pd = new MProgressDialog(mf->GetName(),
-                                             msg,
-                                             2*n, NULL);// open a status window:
-   }
-
-   bool rc = true;
-   for(i = 0; i < n; i++)
-   {
-      msg = GetMessage((*selections)[i]);
-      if(msg)
-      {
-         if(pd) pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg, FALSE);
-         if(pd) pd->Update( 2*i + 2);
-         msg->DecRef();
-      }
-   }
-   mf->Ping(); // with our flags
-   mf->SetUpdateFlags(updateFlags); // restore old flags
-   mf->DecRef();
-   if(pd) delete pd;
-   if(locked)
-      Lock();
-   return rc;
+   MFolder_obj folder(folderName);
+   return SaveMessages(selections, folder, updateCount);
 }
 
 bool

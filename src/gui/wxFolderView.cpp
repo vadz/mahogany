@@ -2062,13 +2062,9 @@ void wxFolderView::ExpungeMessages()
 {
    if ( m_nDeleted )
    {
-      unsigned long nDeletedOld = m_nDeleted;
-
       m_ASMailFolder->ExpungeMessages();
 
-      wxLogStatus(m_Frame,
-                  _("%u deleted messages were expunged"),
-                  m_nDeleted - nDeletedOld);
+      m_nDeleted = 0;
    }
    else
    {
