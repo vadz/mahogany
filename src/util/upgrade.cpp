@@ -1069,7 +1069,7 @@ bool RunInstallWizard()
               );
 
          // VZ: why do it in such complicated way? could use strftime(), too...
-#if 0
+#if 1
          time_t tt;
          time(&tt);
          struct tm *ourtime = localtime(&tt);
