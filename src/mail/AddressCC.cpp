@@ -44,6 +44,17 @@ extern const MOption MP_HOSTNAME;
 extern const MOption MP_PERSONALNAME;
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the max size of the buffer holding the address: this is horribly dangerous
+// as there are *NO* buffer size checks in c-client which means that we just
+// die horribly if the buffer is overflown -- but what to do except
+// complaining to MRC who'd just tell me that he doesn't care about such
+// "minor" problem? #$#$^$%&^%^&!!
+static const size_t MAX_ADDRESS_LEN = 8192;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -158,7 +169,7 @@ String AddressCC::GetEMail() const
    String email;
 
    // FIXME: again, c-client doesn't check size of the buffer!
-   char *buf = email.GetWriteBuf(2048);
+   char *buf = email.GetWriteBuf(MAX_ADDRESS_LEN);
    *buf = '\0';
    rfc822_address(buf, m_adr);
    email.UngetWriteBuf();
@@ -396,7 +407,7 @@ static String Adr2String(ADDRESS *adr, bool all)
 
    // FIXME: there is no way to get the address length from c-client, how to
    //        prevent it from overwriting our buffer??
-   char *buf = address.GetWriteBuf(4096);
+   char *buf = address.GetWriteBuf(MAX_ADDRESS_LEN);
    *buf = '\0';
    rfc822_write_address(buf, adr);
    address.UngetWriteBuf();
