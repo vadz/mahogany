@@ -16,7 +16,7 @@ OBJECTS    = $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
 all:	$(OBJECTS)
 
 swiglib.cpp: swiglib.i
-	$(SWIG) $(SWIGFLAGS) $(ODIR)/$@ $<
+	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
 
 .PHONY: mkswig all
 
