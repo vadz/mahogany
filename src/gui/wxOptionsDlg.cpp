@@ -600,12 +600,15 @@ public:
    // icon names
    static const wxChar *ms_aszImages[];
 
+   // ctor
    wxOptionsNotebook(wxWindow *parent);
 
-   // the profile we use - just the global one here
-   Profile *GetProfile() const { return Profile::CreateProfile(_T("")); }
+   // the profile we use: just the global one here
+   Profile *GetProfile() const { return mApplication->GetProfile(); }
 
 private:
+   Profile *m_profile;
+
    DECLARE_NO_COPY_CLASS(wxOptionsNotebook)
 };
 
@@ -4507,8 +4510,6 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    new wxOptionsPageTest(this, profile);
 #endif // USE_TEST_PAGE
    new wxOptionsPageOthers(this, profile);
-
-   profile->DecRef();
 }
 
 // ----------------------------------------------------------------------------
