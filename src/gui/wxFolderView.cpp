@@ -676,6 +676,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
    m_Parent = parent;
    m_profile = fv->GetProfile();
+   
+   m_PreviewOnSingleClick = false;
+
    m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
    m_SelectionCallbacks = true;
@@ -1052,6 +1055,10 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                      m_settingsCurrent.font,
                                      m_settingsCurrent.size,
                                      m_settingsCurrent.columns);
+         bool previewOnSingleClick = READ_CONFIG(GetProfile(),
+                                             MP_PREVIEW_ON_SELECT) != 0;
+         m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
+
          m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
          delete oldfolderctrl;
       }
@@ -1456,7 +1463,7 @@ wxFolderView::OpenFolder(String const &profilename)
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;
-
+   
    wxEndBusyCursor();
 
    if ( !mf && (mApplication->GetLastError() != M_ERROR_CANCEL) )
