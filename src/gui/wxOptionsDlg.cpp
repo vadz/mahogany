@@ -907,7 +907,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "in case of remote server) them to the central new mail folder\n"
                   "Finally, if any new messages are still left in this folder,\n"
                   "Mahogany may notify you about them either by running an\n"
-                  "external program or by performing an internal action."),
+                  "external program or by performing an internal action.\n"
+                  "\n"
+                  "Please notice that if you select any of these options,\n"
+                  "you probably want to check the \"Permanently monitor this folder\"\n"
+                  "checkbox to detect new mail in it automatically - otherwise\n"
+                  "you'll have to open it manually to do it."
+                  "\n"),
                                                    Field_Message |
                                                    Field_NotApp, -1 },
 
