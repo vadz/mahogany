@@ -143,6 +143,13 @@ wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
    MFolder_obj folder(m_where->GetFolder(x, y));
    if ( folder )
    {
+      if ( !CanCreateMessagesInFolder(folder->GetType()) )
+      {
+         wxLogStatus(m_frame, _("Can't drop messages to this folder."));
+
+         return wxDragNone;
+      }
+
       UIdArray messages = data->GetMessages();
 
       wxFolderView *folderView = data->GetFolderView();
