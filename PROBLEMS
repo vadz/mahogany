@@ -2,6 +2,12 @@
 - doc++ dumps core when generating documentation
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
+  Ignored for now, until wxFText/wxFTCanvas get rewritten.
+
 - paths for PATH and PYTHONPATH get set wrongly in MApplication::OnInit(), why?
 
+- for now, internal scripts directly execute the code passed as the
+  function, this may be changed to loading it from outside. Also,
+  namespace issues need to be sorted out. 
 
+- Script.cc: no input/output redirection for Windows, don't know how to do this.

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/26 16:27:17  KB
+ * changed configure for wxGTK support (not compiling cleanly yet)
+ * did some work on scripting (rudimentary)
+ *
  * Revision 1.2  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -106,8 +110,11 @@ wxMFrame::Create(const String &iname, wxFrame *parent)
    wxFrame::CreateFrame(parent, GetFrameName().c_str(), xpos, ypos, width, height);
    //Show(true);
 
+#if	defined(USE_WXWINDOWS2) && defined(USE_WXGTK)
+   SetIcon(new wxIcon(MFrame_xpm,-1,-1));
+#else
    SetIcon(new wxIcon(MFrame_xpm));
-   
+#endif
    initialised = true;
 }
 
@@ -153,8 +160,11 @@ wxMFrame::~wxMFrame()
    SavePosition();
 }
 
-ON_CLOSE_TYPE
-wxMFrame::OnClose(void)
+#ifdef USE_WXWINDOWS2
+ON_CLOSE_TYPE wxMFrame::OnClose(wxEvent &ignore)
+#else
+ON_CLOSE_TYPE wxMFrame::OnClose(void)
+#endif
 {
    if(this == mApplication.TopLevelFrame())
    {

@@ -55,13 +55,15 @@ public:
 
    /// return true if initialised
    bool	IsInitialised(void) const { return initialised; }
-   /// to be called on closing of window
-   ON_CLOSE_TYPE OnClose(void);
 
    /// make it visible or invisible
 #if     USE_WXWINDOWS2
+   /// to be called on closing of window
+   ON_CLOSE_TYPE OnClose(wxEvent &ignore);
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
 #else
+   /// to be called on closing of window
+   ON_CLOSE_TYPE OnClose(void);
    void	Show(bool visible = true) { wxFrame::Show(visible); }
 #endif
    /// used to set the title of the window class

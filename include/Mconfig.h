@@ -22,12 +22,16 @@
 #elif defined(__WIN__) || defined (__WIN32__)
 #	define	OS_WIN		1
 #	define	OS_TYPE		"windows"
-# ifndef  __WINDOWS__
-#   define  __WINDOWS__     // for wxWindows 2.x
-# endif
+# 	ifndef  __WINDOWS__
+#   		define  __WINDOWS__     // for wxWindows 2.x
+# 	endif
 #else
   // this reminder is important, it won't compile without it anyhow...
 # error   "Unknown platform (forgot to #define unix?)"
+#endif
+
+#ifdef	__WINDOWS__
+#error windows
 #endif
 
 // Are we using GCC?
@@ -109,6 +113,7 @@
 #               define  length() Length()       //FIXME dangerous!
 #       endif
 #       define  String      wxString
+#	include	<wx/string.h>
 #else
 #       include <string>
   typedef std::string String;
@@ -160,9 +165,11 @@
 
 #ifdef	USE_WXWINDOWS
 #       ifdef        USE_WXWINDOWS2
-#               define  WXCPTR  /**/
+#               define  WXCPTR  	/**/
+#		define	WXSTR(str)	str
 #       else
-#               define  WXCPTR  (char *)
+#               define  WXCPTR  	(char *)
+#    		define	WXSTR(str)	((char *)str.c_str())
 #       endif
 #endif
 

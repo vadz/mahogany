@@ -13,7 +13,7 @@ dep depend:
 .depend:
 	touch .depend ; $(MAKE) dep
 
-.PHONY: clean doc dep depend
+.PHONY: clean doc dep depend 
 
 clean:
 	$(RM) $(ODIR)/*.o 

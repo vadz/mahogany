@@ -301,23 +301,24 @@ fi
 if test "$USE_WXGTK" = 1; then
   USE_WXXT=0
   USE_WXWINDOWS=1  
-  USE_WXWINDOWS2=1  
+  USE_WXWINDOWS2=1
+  USE_WXSTRING=1
   AC_DEFINE(USE_WXGTK)
   AC_DEFINE(USE_WXWINDOWS)
   AC_DEFINE(USE_WXWINDOWS2)
-  AC_MSG_RESULT(wxGTK)
+  AC_DEFINE(USE_WXSTRING)
   WX_LINK=
   AC_MSG_CHECKING(for wxWindows(wxGTK) libraries)
-  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxGTK/wx/wx.h)
+  AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxGTK/include/wx/wx.h)
   if test "$ac_find_includes" != "" ; then
-    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,wxgtk)
+    AC_PATH_FIND_LIBRARIES($SEARCH_LIB,wx_gtk)
     if test "$ac_find_libraries" != "" ; then
       AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
       AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$ac_path_to_link -lwxgtk"
-      WX_INCLUDE="$ac_path_to_include/wxGTK $ac_path_to_include/wxGTK/setup/${OSTYPE}"
+      WX_LINK="$ac_path_to_link -lwx_gtk"
+      WX_INCLUDE="$ac_path_to_include/wxGTK/include $ac_path_to_include/wxGTK/setup/${OSTYPE}"
       AC_MSG_RESULT(yes)
     else
       AC_MSG_RESULT(no)
@@ -363,6 +364,7 @@ else
         WX_LINK="$ac_path_to_link -lwx_xt -lwx_xtwidgets $XT_LIBS $XLIBS"
         WX_SLINK="$ac_pure_path_to_link/libwx_xt.a $ac_pure_path_to_link/libwx_xtwidgets.a $XT_LIBS $XLIBS"
 	WX_INCLUDE="$ac_path_to_include/wxxt $ac_path_to_include/wxxt/setup/${OSTYPE}"
+	WX_DEFS=-D__GTK__
 	AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
@@ -375,6 +377,7 @@ fi
 AC_SUBST(WX_INCLUDE)
 AC_SUBST(WX_LINK)
 AC_SUBST(WX_SLINK)
+AC_SUBST(WX_DEFS)
 
 dnl Checks for libraries.
 dnl =====================

@@ -25,7 +25,7 @@ dep depend:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 
-.PHONY: all dep clean doc static
+.PHONY: all dep clean doc static allclean
 
 
 

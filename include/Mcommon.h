@@ -100,7 +100,7 @@
 // LOG_INFO defined in yunchanc-client/.h
 #undef  LOG_INFO
 
-#if     USE_WXWINDOWS2
+#if 0	//FIXME: does not work for wxGTK, use internal logging    USE_WXWINDOWS2
   // wxWindows 2 has built in logging capabilities
 #	include  <wx/log.h>
 

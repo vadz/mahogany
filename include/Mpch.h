@@ -47,6 +47,7 @@ extern "C"
 #include	<MLogFrame.h>
 #include	<Profile.h>
 #include	<MApplication.h>
+#include	"Mdefaults.h"
 
 #endif	// USE_PCH
 #endif  //MPCH_H

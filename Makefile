@@ -17,6 +17,9 @@ program:
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
+allclean:
+	find . -name .depend -exec rm {} \;
+
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
@@ -30,5 +33,5 @@ bak backup:
 	tar cvf M-`date +"%y-%m-%d"`.tar $(SUB_DIRS) $(FILES) $(EXTRA)
 	gzip -9 M-`date +"%y-%m-%d"`.tar
 
-.PHONY: all dep clean bak backup config program
+.PHONY: all dep clean bak backup config program 
 

@@ -11,31 +11,29 @@
 #endif
 
 #include  	"Mpch.h"
-#include	"Mcommon.h"
+#ifndef	USE_PCH
+#	include	"Mcommon.h"
+#	include	"strutil.h"
+#	include	"Profile.h"
+#	include	"MFrame.h"
+#	include	"MLogFrame.h"
+#	include	"MimeList.h"
+#	include	"MimeTypes.h"
+#	include	"Mdefaults.h"
+#	include	"MApplication.h"
+#endif
 
 #include	<locale.h>
 #include	<errno.h>
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
-
-#include	"Mdefaults.h"
-
 #include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
-#include	"strutil.h"
-
-#include	"MApplication.h"
-
 #include	"FolderView.h"
+#include	"Adb.h"
+#include	"Script.h"
 #include	"MailFolder.h"
 #include	"MailFolderCC.h"
 #include	"gui/wxFolderView.h"
 #include	"gui/wxMainFrame.h"
-
-#include	"Adb.h"
 
 #ifdef	USE_PYTHON
 #	include	"Python.h"
@@ -190,8 +188,10 @@ MApplication::OnInit(void)
    PyRun_SimpleString("import sys,os");
    PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");
 #endif
- 
 
+   ExternalScript	echo("echo \"Hello World!\"", "", "");
+   echo.Run("and so on");
+   cout << echo.GetOutput() << endl;
    
    // now the icon is available, so do this again:
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
