@@ -148,7 +148,8 @@ public:
    {
       m_ci = ci;
 
-      SetLabel(m_ci->GetLabel());
+      SetLabel(m_ci->GetType() == ClickableInfo::CI_URL ? m_ci->GetUrl()
+                                                        : m_ci->GetLabel());
    }
 
    // get the real data back
