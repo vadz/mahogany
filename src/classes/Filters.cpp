@@ -514,8 +514,8 @@ ParserImpl::ParseExpression(void)
          t = GetToken();
       }
    }
-   else
-      sn = ParseFunctionOrConstant();
+
+   sn = ParseFunctionOrConstant();
    
    t = PeekToken();
    if(t.GetType() == TT_Char)
