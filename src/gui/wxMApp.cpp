@@ -31,6 +31,11 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 
+   extern "C" {
+#     include <mail.h>
+#     include <osdep.h>  // for sysinbox() &c
+   }
+
 #  include <wx/log.h>
 #endif
 
@@ -109,13 +114,12 @@ wxMApp::OnInit()
 
    if ( OnStartup() ) {
       // now we can create the log window
-      wxLogWindow *log = new wxMLogWindow(m_topLevelFrame,
-                                          _("M Activity Log"));
+      (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
 
       // we want it to be above the log frame
-#ifdef OS_WIN 
-     m_topLevelFrame->Raise();
-#endif
+#     ifndef __WXGTK__      
+         m_topLevelFrame->Raise(); // FIXME: no wxWindow::Raise in wxGTK
+#     endif
 
 #     ifdef  USE_WXWINDOWS2
          return true;
@@ -149,12 +153,12 @@ int wxMApp::OnExit()
  
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-//FIXME
-#ifdef __WXMSW__
-   free(sysinbox());
-   free(myhomedir());
-   free(myusername());
-#endif
+#  ifdef OS_WIN
+      free(sysinbox());
+      free(myhomedir());
+      free(myusername());
+#  endif
+
    return 0;
 }
 

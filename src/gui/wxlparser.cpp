@@ -46,14 +46,13 @@ void wxLayoutImportText(wxLayoutList &list, String const &str)
 
       // check if it's the end of this line
 #ifdef OS_WIN
-      if ( backup == '\r' && *(cptr + 1) == '\n' )
-      {
+      if ( backup == '\r' && *(cptr + 1) == '\n' ) {
          cptr++;  // skip '\r'
-      }
 #else //Unix
-      if ( backup == '\n' )
+      if ( backup == '\n' ) {
 #endif
          list.LineBreak();
+      }
       else if(backup == '\0') // reached end of string
          break;
       cptr++;
@@ -190,8 +189,9 @@ String wxLayoutExportCmdAsHTML(wxLayoutObjectCmd const & cmd,
          *str += '\n';
          break;
       case WXLO_TYPE_CMD:
-         //wxASSERT(mode == WXLO_EXPORT_AS_HTML,"reached cmd object in text mode")
-         assert(mode == WXLO_EXPORT_AS_HTML);
+         wxASSERT_MSG( mode == WXLO_EXPORT_AS_HTML,
+                       "reached cmd object in text mode" );
+         
          *str += wxLayoutExportCmdAsHTML(*(wxLayoutObjectCmd const
                                            *)*from, &s_si);
          break;

@@ -187,7 +187,10 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
 
   if ( prov ) {
     book = prov->CreateBook(name);
-    prov->Unlock();
+    if ( provider == NULL ) {
+      // only if it's the one we created, not the one which was passed in!
+      prov->Unlock();
+    }
   }
 
   if ( book == NULL ) {

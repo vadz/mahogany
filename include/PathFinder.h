@@ -13,6 +13,10 @@
 #   pragma interface "PathFinder.h"
 #endif
 
+#ifndef USE_PCH
+#  include "kbList.h"
+#endif
+
 /**@name PathFinder class for finding files */
 //@{
 

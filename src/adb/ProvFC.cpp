@@ -43,10 +43,12 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#   include "Mcommon.h"
-#   include "guidef.h"
-#   include   "strutil.h"
-#   include   <ctype.h>
+#  include "Mcommon.h"
+#  include "guidef.h"
+
+#  include "strutil.h"
+
+#  include <ctype.h>
 #endif //USE_PCH
 
 // wxWindows

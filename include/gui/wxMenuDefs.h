@@ -1,15 +1,21 @@
-/*-*- c++ -*-********************************************************
- * wxMenuDefs.h : define numeric ids and menu names                 *
- *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxMenuDefs.h - items definitions for menus and toolbars
+// Purpose:     the definitions of all menu (and toolbar, inspite the name)
+//              items are gathered here complemented with some convenience
+//              functions for menu/toolbar creation
+// Author:      Karsten Ballüder
+// Modified by: Vadim Zeitlin
+// Created:     09.08.98
+// CVS-ID:      $Id$
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef  WXMENUDEFS_H
 #define  WXMENUDEFS_H
 
 class wxMenu;
+class wxToolBar;
 
 /// append an item to menu
 extern void AppendToMenu(wxMenu *menu, int n);
@@ -126,5 +132,58 @@ enum
 
    WXMENU_POPUP_MIME_OFFS = 1000
 };
+
+/**
+  Almost the same thing for the toolbars, except that as some toolbar buttons
+  are common to more than one frame we have an extra level of indirection but
+  we don't need _BEGIN/_END stuff
+ */
+enum
+{
+   WXTBAR_SEP,
+
+   WXTBAR_CLOSE,
+   WXTBAR_ADB,
+   WXTBAR_PREFERENCES,
+
+   WXTBAR_MAIN_OPEN,
+   WXTBAR_MAIN_COMPOSE,
+   WXTBAR_MAIN_HELP,
+   WXTBAR_MAIN_EXIT,
+
+   WXTBAR_COMPOSE_PRINT,
+   WXTBAR_COMPOSE_CLEAR,
+   WXTBAR_COMPOSE_INSERT,
+   WXTBAR_COMPOSE_SEND,
+
+   WXTBAR_MSG_OPEN,
+   WXTBAR_MSG_FORWARD,
+   WXTBAR_MSG_REPLY,
+   WXTBAR_MSG_PRINT,
+   WXTBAR_MSG_DELETE,
+   
+   WXTBAR_ADB_OPEN,
+   WXTBAR_ADB_NEW,
+   WXTBAR_ADB_DELETE,
+   WXTBAR_ADB_UNDO,
+   WXTBAR_ADB_FINDNEXT,
+
+   WXTBAR_MAX
+};
+
+/// all frames which have toolbars
+enum wxFrameId
+{
+   WXFRAME_MAIN,
+   WXFRAME_COMPOSE,
+   WXFRAME_FOLDER,
+   WXFRAME_MESSAGE,
+   WXFRAME_ADB,
+   WXFRAME_MAX
+};
+
+// not only it adds the icons, but also calls CreateTools() or
+// Realize()/Layout() hiding MSW/GTK differences
+extern void AddToolbarButtons(wxToolBar *ToolBar, wxFrameId frameId);
 
 #endif

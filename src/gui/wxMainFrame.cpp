@@ -41,9 +41,6 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
-   int width, height;
-   
-   GetClientSize(&width,&height);
    SetIcon(ICON("MainFrame"));
 
    AddFileMenu();
@@ -77,25 +74,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
 
-#ifdef USE_WXWINDOWS2
-   
    m_ToolBar = CreateToolBar();
-   m_ToolBar->SetSize( -1, -1, width-2, 30 );
-   m_ToolBar->SetMargins( 2, 2 );
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_open", WXMENU_FILE_OPEN, "Open Folder");
-   TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose Message");
-   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
-
-#	ifdef OS_WIN
-		m_ToolBar->CreateTools();
-#	endif // Windows
-#endif // wxWin 2
+   AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
    
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();

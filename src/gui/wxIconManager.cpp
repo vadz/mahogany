@@ -37,14 +37,14 @@
 #  define   hlink_xpm       "hlink"
 #  define   ftplink_xpm     "ftplink"
 #  define   MFrame_xpm      "mframe"
-#  define   MainFrame_xpm          "MainFrame"
-#  define   MainFrame_xpm          "MainFrame"
-#  define   tb_exit                "tb_exit"
-#  define   tb_help                "tb_help"
-#  define   tb_open                "tb_open"
-#  define   tb_mail_compose        "tb_mail_compose"
-#  define   tb_book_open           "tb_book_open"
-#  define   tb_preferences         "tb_preferences"
+#  define   MainFrame_xpm   "MainFrame"
+#  define   MainFrame_xpm   "MainFrame"
+#  define   tb_exit         "tb_exit"
+#  define   tb_help         "tb_help"
+#  define   tb_open         "tb_open"
+#  define   tb_mail_compose "tb_mail_compose"
+#  define   tb_book_open    "tb_book_open"
+#  define   tb_preferences  "tb_preferences"
 #else   //real XPMs
 #  include  "../src/icons/unknown.xpm"
 #  include  "../src/icons/hlink.xpm"
@@ -134,28 +134,37 @@ wxIconManager::GetIcon(String const &_iconName)
    String iconName = _iconName;
    
    strutil_tolower(iconName);
-   wxLogTrace("wxIconManager::GetIcon(%s) called.", iconName.c_str());
+   wxLogTrace("wxIconManager::GetIcon(%s) called...", iconName.c_str());
    
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
-      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
+      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0) {
+        wxLogTrace("... icon was in the cache.");
+
         return new wxIcon((*i)->iconPtr);
+      }
    }
 
    // not found, now look for MIME subtype, after '/':
    key = strutil_after(iconName, '/');
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
-      if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
+      if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
+        wxLogTrace("... icon was in the cache.");
+
         return new wxIcon((*i)->iconPtr);
+      }
    }
 
    // not found, now look for iconName without '/':
    key = strutil_before(iconName, '/');
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
-      if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
+      if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
+        wxLogTrace("... icon was in the cache.");
+
         return new wxIcon((*i)->iconPtr);
+      }
    }
 
    // new step: try to load the icon files .png,.xpm,.gif:
@@ -187,10 +196,12 @@ wxIconManager::GetIcon(String const &_iconName)
          id = new IconData;
          id->iconPtr = icn;
          id->iconName = key;
+         wxLogTrace("... icon found in '%s'", name.c_str());
          m_iconList->push_front(id);
          return new wxIcon(icn);
       }
-   }   
+   }
+
 #  ifdef    OS_WIN
    {
       // last, look in the ressources
@@ -204,6 +215,7 @@ wxIconManager::GetIcon(String const &_iconName)
    }
 #  endif  //Windows
 
+   wxLogTrace("... icon not found.");
 
    return new wxIcon(m_unknownIcon);
 }

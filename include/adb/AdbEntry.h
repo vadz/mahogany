@@ -93,7 +93,7 @@ enum
 enum
 {
   AdbLookup_CaseSensitive = 0x0001,
-  AdbLookup_Substring     = 0x0002 // match "foo" as "*foo*"
+  AdbLookup_Substring     = 0x0002  // match "foo" as "*foo*"
 };
 
 // ============================================================================
@@ -186,22 +186,5 @@ public:
     /// find entry by name (returns NULL if not found)
   virtual AdbEntry *FindEntry(const char *szName) = 0;
 };
-
-// ----------------------------------------------------------------------------
-// AdbDataArray: array of AdbEntry
-// ----------------------------------------------------------------------------
-WX_DEFINE_ARRAY(AdbEntry *, AdbDataArrayBase);
-
-class AdbDataArray : public AdbDataArrayBase
-{
-public:
-  // unlock all elements in the array
-  void UnlockAll() { for ( uint n = 0; n < Count(); n++ ) Item(n)->Unlock(); }
-
-  // warning: base class dtor is not virtual, so the dtor only will be called
-  // for non-polymorphic pointers!
-  ~AdbDataArray() { UnlockAll(); }
-};
-
 
 #endif  //_ADBENTRY_H

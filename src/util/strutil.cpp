@@ -344,3 +344,4 @@ strutil_getfilename(const String& path)
 
   return path.Right(path.Len() - nPos1 - 1);
 }
+

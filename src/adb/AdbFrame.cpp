@@ -67,7 +67,6 @@
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
 
-
 // our public interface
 #include "adb/AdbFrame.h"
 
@@ -662,7 +661,6 @@ private:
 
   // child controls
   // --------------
-  wxToolBar     *m_toolbar;
   wxAdbNotebook *m_notebook;
   wxAdbTree     *m_treeAdb;
   wxTextCtrl    *m_textKey;
@@ -1005,7 +1003,6 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   m_notebook = NULL;
   m_textKey = NULL;
   m_current = NULL;
-  m_toolbar = NULL;
   m_clipboard = NULL;
   m_pImageList = NULL;
   m_bFindDone = FALSE;
@@ -1024,47 +1021,9 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // toolbar and status bar
   // ----------------------
 
-  // toolbar buttons data
-  static const struct
-  {
-    const char *bmp;      // image file or ressource name
-    int         id;       // id of the associated command (-1 => separator)
-    const char *tooltip;  // flyby text
-  } aToolBarData[] =
-    {
-      { "open",   WXMENU_ADBBOOK_OPEN,    "Open address book file"  },
-      { "",       -1,                     ""                        },
-      { "new",    WXMENU_ADBEDIT_NEW,     "Create new entry"        },
-      { "delete", WXMENU_ADBEDIT_DELETE,  "Delete"                  },
-      { "undo",   WXMENU_ADBEDIT_UNDO,    "Undo"                    },
-      { "",       -1,                     ""                        },
-      { "lookup", WXMENU_ADBFIND_NEXT,    "Find next"               },
-      { "",       -1,                     ""                        },
-      { "help",   WXMENU_HELP_HELP,       "Help"                    }
-    };
-
-  m_toolbar = new wxToolBar(this, -1);
-  // if the buttons were of other size we'd have to use this function
-  // (standard size is 16x15)
-  // m_toolbar->SetDefaultSize(wxSize(24, 24));
-  for ( uint nButton = 0; nButton < WXSIZEOF(aToolBarData); nButton++ ) {
-    int nId = aToolBarData[nButton].id;
-    if ( nId == -1 )
-      m_toolbar->AddSeparator();
-    else
-      m_toolbar->AddTool(nId,
-                         //new wxBitmap(aToolBarData[nButton].bmp),
-                         BMP(aToolBarData[nButton].bmp),
-                         wxNullBitmap,  // "pushed" bitmap (means use the same)
-                         FALSE,         // can't be toggled
-                         -1, -1,        // position
-                         NULL,          // client data
-                         wxGetTranslation(aToolBarData[nButton].tooltip));
-  }
-
-  #ifdef __WINDOWS__
-    m_toolbar->CreateTools();
-  #endif // Windows
+  // standard M toolbar
+  m_ToolBar = CreateToolBar();
+  AddToolbarButtons(m_ToolBar, WXFRAME_ADB);
 
   // create a status bar with 2 panes
   CreateStatusBar(2);
@@ -1122,13 +1081,6 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
 
   c = new wxLayoutConstraints;
   c->top.SameAs(this, wxTop);
-  c->left.SameAs(this, wxLeft);
-  c->width.AsIs();
-  c->height.AsIs();
-  m_toolbar->SetConstraints(c);
-
-  c = new wxLayoutConstraints;
-  c->top.Below(m_toolbar);
   c->left.SameAs(this, wxLeft);
   c->right.SameAs(this, wxRight);
   c->bottom.SameAs(this, wxBottom);
@@ -2059,7 +2011,7 @@ void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent& event)
 void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent& event)
 {
   // @@ should do it in UpdateUI handler
-//FIXME  m_toolbar->EnableTool(WXMENU_ADBFIND_FIND, !m_textKey->GetValue().IsEmpty());
+  m_ToolBar->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
 }
 
 void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
@@ -2070,7 +2022,7 @@ void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnCancel->Enable(bDoEnable);
-//FIXME  m_toolbar->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
+  m_ToolBar->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdateProp(wxUpdateUIEvent& event)
@@ -2086,7 +2038,7 @@ void wxAdbEditFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnDelete->Enable(bDoEnable);
-//FIXME  m_toolbar->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
+  m_ToolBar->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)

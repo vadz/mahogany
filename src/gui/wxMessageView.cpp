@@ -593,7 +593,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
    if(filename)
    {
-      VAR(filename);
+      VAR(filename.c_str());
       unsigned long len;
       char const *content = mailMessage->GetPartContent(mimeDisplayPart,&len);
       if(! content)
@@ -772,26 +772,8 @@ BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
 
-   int width, height;
-   GetClientSize(&width, &height);
-   m_ToolBar = new wxToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
-   m_ToolBar->SetMargins( 2, 2 );
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_open", WXMENU_MSG_OPEN, "Open message");
-   TB_AddTool(m_ToolBar, "tb_close", WXMENU_FILE_CLOSE, "Close folder");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose message");
-   TB_AddTool(m_ToolBar, "tb_mail_forward", WXMENU_MSG_FORWARD, "Forward message");
-   TB_AddTool(m_ToolBar, "tb_mail_reply", WXMENU_MSG_REPLY, "Reply to message");
-   TB_AddTool(m_ToolBar, "tb_print", WXMENU_MSG_PRINT, "Print message");
-   TB_AddTool(m_ToolBar, "tb_trash", WXMENU_MSG_DELETE, "Delete message");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
+   m_ToolBar = CreateToolBar();
+   AddToolbarButtons(m_ToolBar, WXFRAME_MESSAGE);
 
    Show(true);
    m_MessageView = new wxMessageView(folder, num, fv, this);

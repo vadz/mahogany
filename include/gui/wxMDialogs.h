@@ -14,14 +14,12 @@
 #endif
 
 #ifndef     USE_PCH
-#   include	<MApplication.h>
-#   include	<MFrame.h>
-#   include	<MDialogs.h>
-#else
-  // fwd decl
-  class ProfileBase;
+#   include	"MFrame.h"
+#   include	"MDialogs.h"
 #endif
 
+// fwd decl
+class ProfileBase;
 class ArrayAdbEntries;
 class wxString;
 class MWindow;

@@ -493,7 +493,7 @@ END_EVENT_TABLE()
 wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
                  : MFrame(strutil_getfilename(folderName), parent)
 {
-   VAR(folderName);
+   wxLogDebug("Creating folder view '%s'.", folderName.c_str());
 
    wxString strTitle;
    strTitle.Printf(_("Folder '%s'"), folderName.c_str());
@@ -512,32 +512,8 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
 #ifdef USE_WXWINDOWS2
-   int width, height;
-   GetClientSize(&width, &height);
    m_ToolBar = CreateToolBar();
-   m_ToolBar->SetSize( -1, -1, width, 30 );
-   m_ToolBar->SetMargins( 2, 2 );
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_open", WXMENU_FILE_OPEN, "Open folder");
-   TB_AddTool(m_ToolBar, "tb_mail", WXMENU_MSG_OPEN, "Open message");
-   TB_AddTool(m_ToolBar, "tb_close", WXMENU_FILE_CLOSE, "Close folder");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose message");
-   TB_AddTool(m_ToolBar, "tb_mail_forward", WXMENU_MSG_FORWARD, "Forward message");
-   TB_AddTool(m_ToolBar, "tb_mail_reply", WXMENU_MSG_REPLY, "Reply to message");
-   TB_AddTool(m_ToolBar, "tb_print", WXMENU_MSG_PRINT, "Print message");
-   TB_AddTool(m_ToolBar, "tb_trash", WXMENU_MSG_DELETE, "Delete message");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
-   m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
-
-#	 ifdef OS_WIN
-		  m_ToolBar->CreateTools();
-#	 endif // Windows
+   AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
 #endif
 
    m_FolderView = new wxFolderView(folderName,this);

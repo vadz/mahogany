@@ -3,9 +3,10 @@
 CWD = adb
 SRC = AdbFrame.cpp AdbManager.cpp ProvFC.cpp AdbProvider.cpp
 
-ifdef DEBUG
+# FIXME: DEBUG is not defined here... how should I do it??
+# ifdef DEBUG
 SRC += ProvDummy.cpp
-endif
+# endif
 
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
