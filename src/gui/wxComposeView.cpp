@@ -1241,7 +1241,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
-   m_Profile = parentProfile;
+   // We use an empty profile, so that setting the identity does not
+   // interfere with the parent profile:
+   m_Profile = Profile::CreateEmptyProfile(parentProfile);
    m_Profile->IncRef();
 
    // sometimes this profile had been created before the identity changed:
