@@ -38,6 +38,10 @@ Name: "{app}\locale"
 ; --- program files
 Source: "Release\M.EXE"; DestDir: "{app}"
 
+; --- help
+Source: "doc\Manual\Hlp\Mahogany.hlp"; DestDir: "{app}"
+Source: "doc\Manual\Hlp\Mahogany.cnt"; DestDir: "{app}"
+
 ; --- python support
 ; "python15.dll";   "{app}\python15.dll"; copy_normal; 
 

@@ -1,6 +1,7 @@
-Please consult the various files under the "doc" directory,
-paying special attention to the list of known bugs in
-bugs.txt.
+Please consult files in the doc subdirectory and the help file
+for further details. We also hope that Mahogany interface is simple
+enough that you may start using it right now.
 
-And don't forget that the online documentation is always
-available at http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html!.
+And don't forget that the most up-to-date documentation is always
+available online at M home page: please see
+http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html.

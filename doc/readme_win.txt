@@ -48,8 +48,13 @@ Version: the information in this file applies to alpha 0.23
     distribution and you'll have to fetch them yourself from the WWW page (see
     the address above) and put them into the locale directory to make it work.
 
- b) documentation: sorry, this preliminary Windows version comes without any
-    online help. You may access it, however, at http:// using any Web browser.
+ b) documentation: sorry, this preliminary Windows version comes without
+    context-sensitive help. The help file is included in the distribution
+    though - it's a translation to Windows help format of Mahogany HTML
+    documentation which may always be found at
+       http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html.
+
+    The future versions of the program will include help in MS HTML format.
 
  c) working off-line: there are no special support for off-line mode in
     Mahogany yet, but you may use it as off-line reader too.
@@ -65,7 +70,7 @@ yet implemented under Windows.
  b) this release comes without Python support due to lack of its usefullness
     so far.
 
- c) there is unfortunately no help yet.
+ c) there is unfortunately no context-sensitive help yet.
 
 4. Items from our TODO list
 ---------------------------
