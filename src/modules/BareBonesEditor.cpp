@@ -1223,10 +1223,10 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
 
-   wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
    wxString text;
 
 #if wxUSE_WCHAR_T && defined(OS_WIN)
+   wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
    wxWCharBuffer wbuf = m_textControl->GetUnicodeText();
 
    for ( const wchar_t *pwc = wbuf; *pwc; pwc++ )
