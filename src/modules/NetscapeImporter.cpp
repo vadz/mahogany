@@ -6,7 +6,7 @@
 // Author:      Michele Ravani ( based on Vadim Zeitlin Pine importer)
 // Modified by:
 // Created:     23.03.01
-// CVS-ID:      
+// CVS-ID:
 // Copyright:   (c) 2000 Michele ravani <michele.ravani@bigfoot.com>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,13 +24,12 @@
 // headers
 // ----------------------------------------------------------------------------
 
-
 // TODO
 //  - check superfluos includes
 
-#ifdef EXPERIMENTAL_NSImporter
-
 #include "Mpch.h"
+
+#ifdef EXPERIMENTAL_NSImporter
 
 #ifndef USE_PCH
    #include "Mcommon.h"
@@ -61,16 +60,16 @@
 //   implementation and to put each class in a file by the same name.
 //   It decreased the number of things one has to know and makes the
 //   code browsing simpler.
-//   
+//
 // - find the default location of netscape files on other OS
-// 
+//
 // - import the addressbook. Netscape uses a LDIF(right?), the generic communication
 //   formar for LDAP server and clients. The import of the adb could be a side effect
 //   of an LDAP integration module ('import from file')
-//   
+//
 // - implement the choice between 'sharing' the mail folders or physically move
 //   them to the .M directory.
-//   
+//
 // - using '/' explicitly in the code is not portable
 //
 // - check that the config files is backed up or implement it!
@@ -84,7 +83,7 @@
 // - check error detection and treatment.
 //   (If I hold my breath until I turn blue, can I have exceptions?)
 //
-// - implement a way to log the NS pref keys in the NS 
+// - implement a way to log the NS pref keys in the NS
 
 
 //------------------------------------------
@@ -94,7 +93,7 @@
 
 // this is quite a crude solution, but I guess it'll do for a start,
 // as it simplifies the mapping a bit.
-// 
+//
 // TODO:
 // - ask for help in mapping those settings I've missed
 // - find the complete set of Netscape keys
@@ -113,7 +112,7 @@
 #define NM_IS_STRNIL 5          // empty strings allowed
 
 struct PrefMap {
-  wxString npKey;     // the key in the Netscape pref file 
+  wxString npKey;     // the key in the Netscape pref file
   wxString mpKey;     // the key in the Mahogany congif file
   wxString desc;      // short description
   unsigned int type;  // type of the Mahogany pref
@@ -137,7 +136,7 @@ static  PrefMap g_IdentityPrefMap[] = {
 
 // IDENTITY Preferences
 static  PrefMap g_NetworkPrefMap[] = {
-  
+
  {"mail.smtp_name" , MP_SMTPHOST_LOGIN, "SMTP login name", NM_IS_STRING, FALSE },
  // my guess that netscape uses the same name
  {"mail.smtp_name" , MP_NNTPHOST_LOGIN, "NNTP login name", NM_IS_STRING, FALSE },
@@ -172,7 +171,7 @@ static  PrefMap g_ComposePrefMap[] = {
  {"mail.use_default_cc" , "Special", "No descr", NM_NONE, FALSE },
    // directory where sent mail goes
  {"mail.default_fcc" , MP_OUTGOINGFOLDER, "sent mail folder", NM_IS_STRNIL, FALSE }, //where copied
-   // if true copy mail to def fcc 
+   // if true copy mail to def fcc
  {"mail.use_fcc" , MP_USEOUTGOINGFOLDER, "keep copies of sent mail", NM_IS_BOOL, FALSE },
    // if set, put email addresse in BCC: MP_COMPOSE_BCC
  {"mail.cc_self" , "Special", "No descr", NM_NONE, FALSE },
@@ -189,11 +188,11 @@ static  PrefMap g_ComposePrefMap[] = {
 static  PrefMap g_FolderPrefMap[] = {
   // no pref for the name of the outbox
   {"mail.deliver_immediately" , MP_USE_OUTBOX, "send messages later", NM_IS_NEGATE_BOOL, FALSE },
-	// map this to a very large number if "mail.check_new_mail" false
+   // map this to a very large number if "mail.check_new_mail" false
   {"mail.check_time" , MP_POLLINCOMINGDELAY, "interval between checks for incoming mail", NM_IS_INT, FALSE },
   // AFAIK cannot switch off polling in M. Could set the interval to a veeery large number
   {"mail.check_new_mail" , "Special", "check mail at intervals", NM_IS_BOOL, FALSE },
-	// not sure about this one. I mean ... even less sure than for the others
+   // not sure about this one. I mean ... even less sure than for the others
   {"mail.max_size" , MP_MAX_MESSAGE_SIZE, "max size for downloaded message", NM_IS_INT, FALSE },
   {"END", "Ignored", "End of list record", NM_NONE }   // DO NOT REMOVE, hack to find the end
 };
@@ -217,13 +216,13 @@ static  PrefMap g_ViewerPrefMap[] = {
 static  PrefMap g_RestPrefMap[] = {
   // very specially treated
  {"mail.directory" , "Special", "mail directory", NM_IS_STRING, FALSE },
- 
+
  {"helpers.global_mime_types_file" , MP_MIMETYPES, "global mime types file", NM_IS_STRING, FALSE },
  {"helpers.private_mime_types_file" , MP_MIMETYPES, "private mime types file", NM_IS_STRING, FALSE },
 
  {"helpers.global_mailcap_file" , MP_MAILCAP, "global mailcap file", NM_IS_STRING, FALSE },
  {"helpers.private_mailcap_file" , MP_MAILCAP, "private mailcap file", NM_IS_STRING, FALSE },
- 
+
  {"print.print_command" , MP_PRINT_COMMAND, "print command", NM_IS_STRING, FALSE },
  {"print.print_reversed" , "Ignored", "No descr", NM_NONE, FALSE },
  {"print.print_color" , MP_PRINT_COLOUR, "print color", NM_IS_BOOL, FALSE },
@@ -235,12 +234,12 @@ static  PrefMap g_RestPrefMap[] = {
  {"intl.font_charset" , "Ignored", "No descr", NM_NONE, FALSE },
  {"intl.font_spec_list" , "Ignored", "No descr", NM_NONE, FALSE },
  {"intl.accept_languages" , "Ignored", "No descr", NM_NONE, FALSE },
- 
+
  {"mail.play_sound" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.strictly_mime" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.file_attach_binary" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.addr_book.lastnamefirst" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"mail.signature_date" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.leave_on_server" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.limit_message_size" , "Not mapped", "No descr", NM_NONE, FALSE },
@@ -255,14 +254,14 @@ static  PrefMap g_RestPrefMap[] = {
  {"mail.pane_config" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.sort_by" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.default_html_action" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"mailnews.reuse_message_window" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mailnews.reuse_thread_window" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mailnews.message_in_thread_window" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mailnews.nicknames_only" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mailnews.reply_on_top" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mailnews.reply_with_extra_lines" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"network.ftp.passive" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"network.max_connections" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"network.tcpbufsize" , "Not mapped", "No descr", NM_NONE, FALSE },
@@ -281,12 +280,12 @@ static  PrefMap g_RestPrefMap[] = {
  {"network.proxy.no_proxies_on" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"network.proxy.type" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"network.proxy.autoconfig_url" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"news.default_cc" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.default_fcc" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.cc_self" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.use_fcc" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"news.directory" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.notify.on" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.max_articles" , "Not mapped", "No descr", NM_NONE, FALSE },
@@ -304,14 +303,14 @@ static  PrefMap g_RestPrefMap[] = {
  {"news.remove_bodies.days" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.server_port" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"news.server_is_secure" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"offline.startup_mode" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"offline.news.download.unread_only" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"offline.news.download.by_date" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"offline.news.download.use_days" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"offline.news.download.days" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"offline.news.download.increments" , "Not mapped", "No descr", NM_NONE, FALSE },
- 
+
  {"security.email_as_ftp_password" , "Ignored", "No descr", NM_NONE, FALSE },
  {"security.submit_email_forms" , "Ignored", "No descr", NM_NONE, FALSE },
  {"security.warn_entering_secure" , "Ignored", "No descr", NM_NONE, FALSE },
@@ -349,10 +348,10 @@ static  PrefMap g_RestPrefMap[] = {
  {"editor.publish_save_password" , "Ignored", "No descr", NM_NONE, FALSE },
  {"editor.publish_browse_location" , "Ignored", "No descr", NM_NONE, FALSE },
  {"editor.show_copyright" , "Ignored", "No descr", NM_NONE, FALSE },
- 
+
  {"fortezza.toggle" , "Ignored", "No descr", NM_NONE, FALSE },
  {"fortezza.timeout" , "Ignored", "No descr", NM_NONE, FALSE },
- 
+
  {"general.startup.browser" , "Ignored", "No descr", NM_NONE, FALSE },
  {"general.startup.mail" , "Ignored", "No descr", NM_NONE, FALSE },
  {"general.startup.news" , "Ignored", "No descr", NM_NONE, FALSE },
@@ -365,7 +364,7 @@ static  PrefMap g_RestPrefMap[] = {
  {"general.help_source.url" , "Ignored", "No descr", NM_NONE, FALSE },
  {"images.dither" , "Ignored", "No descr", NM_NONE, FALSE },
  {"images.incremental_display" , "Ignored", "No descr", NM_NONE, FALSE },
- 
+
  {"END", "Ignored", "No descr", NM_NONE }   // DO NOT REMOVE, hack to find the end
  };
 
@@ -387,8 +386,8 @@ const wxChar   g_PathSep       = '/';
 
 // TODO
 // - pile this stuff into header and impl classes in  a modules subdir
-//   nicely one class per file. 
-// - makefile infrastructure to create .so and .a 
+//   nicely one class per file.
+// - makefile infrastructure to create .so and .a
 
 
 // ----------------------------------------------------------------------------
@@ -402,12 +401,12 @@ WX_DEFINE_ARRAY(MFolder *, FolderArray);
 class MyFolderArray: public FolderArray
 {
 public:
-  
+
   ~MyFolderArray()
-	{
-	  for (unsigned k = 0; k < GetCount(); k++ )
-		Item(k)->DecRef();
-	}
+   {
+     for (unsigned k = 0; k < GetCount(); k++ )
+      Item(k)->DecRef();
+   }
 };
 
 
@@ -419,8 +418,8 @@ public:
 class MyHashTable
 {
 public:
-  
-  MyHashTable(); 
+
+  MyHashTable();
   ~MyHashTable();
 
   bool Exist(const wxString& key) const;
@@ -433,7 +432,7 @@ public:
 
 private:
   wxHashTable m_tbl;
-  
+
 };
 
 MyHashTable::MyHashTable()
@@ -450,9 +449,9 @@ MyHashTable::~MyHashTable()
   wxString *tmp = NULL;
   wxNode* node = NULL;
   while ( (node = m_tbl.Next()) != NULL )
-	if ((tmp = (wxString*)node->Data()))
-	  delete tmp;
-  
+   if ((tmp = (wxString*)node->Data()))
+     delete tmp;
+
   //  m_tbl.DeleteContents(FALSE);  // just ot make sure, they are deleted
 
 }
@@ -480,12 +479,12 @@ bool MyHashTable::GetValue(const wxString& key, bool& value) const
   value = FALSE;
   wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
   if ( tmp )
-	{
-	  value = (( *tmp == "true" ) || ( *tmp == "TRUE" ) || ( *tmp == "1"));
-	  return TRUE;
-	}
+   {
+     value = (( *tmp == "true" ) || ( *tmp == "TRUE" ) || ( *tmp == "1"));
+     return TRUE;
+   }
   else
-	return FALSE;
+   return FALSE;
 }
 
 bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
@@ -493,12 +492,12 @@ bool MyHashTable::GetValue(const wxString& key, wxString& value ) const
   value.Empty();
   wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
   if ( tmp )
-	{
-	  value = *tmp;
-	  return TRUE;
-	}
+   {
+     value = *tmp;
+     return TRUE;
+   }
   else
-	return FALSE;
+   return FALSE;
 }
 
 bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
@@ -507,7 +506,7 @@ bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
   wxString* tmp = (wxString *)m_tbl.Get(key.c_str());
 
   if ( tmp && tmp->ToULong(&value) )
-	return TRUE;
+   return TRUE;
 
   return FALSE;
 }
@@ -520,12 +519,12 @@ bool MyHashTable::GetValue(const wxString& key, unsigned long& value ) const
 class MNetscapeImporter : public MImporter
 {
 public:
-  
+
   MNetscapeImporter();
-  
+
   virtual bool Applies() const;
   virtual int  GetFeatures() const;
-  
+
   virtual bool ImportADB();
   virtual bool ImportFolders(MFolder *folderParent, int flags);
   virtual bool ImportSettings();
@@ -534,8 +533,8 @@ public:
   DECLARE_M_IMPORTER();
 
 private:
-  
-  // parses the preferences file to find key-value pairs 
+
+  // parses the preferences file to find key-value pairs
   bool ImportSettingsFromFile( const wxString& prefs );
   bool ImportIdentitySettings ( MyHashTable& tbl );
   bool ImportNetworkSettings ( MyHashTable& tbl );
@@ -549,7 +548,7 @@ private:
   bool WriteProfileEntry(const wxString& key, const wxString& val, const wxString& desc );
   bool WriteProfileEntry(const wxString& key, const int val, const wxString& desc );
   bool WriteProfileEntry(const wxString& key, const bool val, const wxString& desc );
-  
+
   bool CreateFolders( MFolder& parent, wxString& dir );
 
   wxString m_MailDir;    // it is a free user choice, stored in preferences
@@ -568,7 +567,7 @@ private:
 
 MNetscapeImporter::MNetscapeImporter()
   : m_MailDir(wxExpandEnvVars(g_DefNetscapeMailDir)),
- 	m_PrefDir(wxExpandEnvVars(g_DefNetscapePrefDir))
+    m_PrefDir(wxExpandEnvVars(g_DefNetscapePrefDir))
 {}
 
 
@@ -635,51 +634,51 @@ bool MNetscapeImporter::ImportADB()
 bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
 {
   // create a folder for each mbox file
-  
+
   // if the mail dir was found in the preferences, it will be used
   // otherwise the default ($HOME/nsmail) will have to do.
-  
-  if (! wxDir::Exists(m_MailDir.c_str()) ) 
-	{
-	  // TODO
-	  // - ask the user for his Netscape mail dir
-	  //   On the other hand it shoudl ahve been read in prefs
-	  wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"), m_MailDir.c_str());
-	  return FALSE;
-	}
-  
+
+  if (! wxDir::Exists(m_MailDir.c_str()) )
+   {
+     // TODO
+     // - ask the user for his Netscape mail dir
+     //   On the other hand it shoudl ahve been read in prefs
+     wxLogMessage(_("Cannot import folders, directory '%s' doesn't exist"), m_MailDir.c_str());
+     return FALSE;
+   }
+
   wxDir dir(m_MailDir);
   if ( ! dir.IsOpened() )    // if it can't be opened bail out
-	return FALSE;          // looks like the isOpened already logs a message
-								 
+   return FALSE;          // looks like the isOpened already logs a message
+
   // the parent for all folders
   // Vadim, my faith in you, 'cause I have no clue (hey, it rhimes)
   MFolder *parent = (flags & ImportFolder_AllUseParent) == ImportFolder_AllUseParent ? folderParent : NULL;
 
   MFolder *rootFolder = CreateFolderTreeEntry (   // may want to remove it if things go wrong
-											   parent,         // parent may be NULL
-											   "Netscape",     // the folder name
-											   MF_GROUP,        //            type
-											   0,              //            flags
-											   m_MailDir,      //            path
-											   FALSE  );       // don't notify
+                                    parent,         // parent may be NULL
+                                    "Netscape",     // the folder name
+                                    MF_GROUP,        //            type
+                                    0,              //            flags
+                                    m_MailDir,      //            path
+                                    FALSE  );       // don't notify
 
   if ( rootFolder && CreateFolders(*rootFolder, m_MailDir) )
-	{
-	  MEventManager::Send
-		(
-		 new MEventFolderTreeChangeData
-		 (
-		  parent ? parent->GetFullName() : String(""),
-		  MEventFolderTreeChangeData::CreateUnder
-		  )
-		 );
-	}
+   {
+     MEventManager::Send
+      (
+       new MEventFolderTreeChangeData
+       (
+        parent ? parent->GetFullName() : String(""),
+        MEventFolderTreeChangeData::CreateUnder
+        )
+       );
+   }
   // then is ok
   else
-	// TODO
-	// - remove the created folders, something went wrong
-	return FALSE;
+   // TODO
+   // - remove the created folders, something went wrong
+   return FALSE;
 
   return TRUE;
 }
@@ -693,7 +692,7 @@ bool MNetscapeImporter::ImportFolders(MFolder *folderParent, int flags)
 // will be stored.
 // M lacks this functionality, therefore messages in the Netscape FoF will
 // be stored in a subfolder called "Misc"
-  
+
 bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
 {
   // this part is one2one from the Pine importer
@@ -702,37 +701,37 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
   wxDir currDir(dir);
 
   if ( ! currDir.IsOpened() )    // if it can't be opened bail out
-	return FALSE;          // looks like the isOpened already logs a message
+   return FALSE;          // looks like the isOpened already logs a message
 
   // find the folders
   wxString filename;
   wxArrayString fileList;
   bool cont = currDir.GetFirst(&filename, "*", wxDIR_FILES);
   while ( cont )
-	{
-	  fileList.Add(filename);
-	  cont = currDir.GetNext(&filename);
-	}
+   {
+     fileList.Add(filename);
+     cont = currDir.GetNext(&filename);
+   }
 
   // find the Folders of Folders (FoF)
   wxArrayString dirList;
   cont = currDir.GetFirst(&filename, "*.sbd", wxDIR_DIRS); // FoF in Netscape have .sbd extension
   while ( cont )
-	{
-	  dirList.Add(filename);
-	  cont = currDir.GetNext(&filename);
-	}
+   {
+     dirList.Add(filename);
+     cont = currDir.GetNext(&filename);
+   }
 
-  // not really necessary 
+  // not really necessary
   fileList.Sort();
   dirList.Sort();
 
   if ( !fileList.GetCount() && !dirList.GetCount() )
    {
-	 wxLogMessage(_("No folders found in '%s'."), dir.c_str());
-	 
-	 // we can consider the operation successful
-	 return TRUE; 
+    wxLogMessage(_("No folders found in '%s'."), dir.c_str());
+
+    // we can consider the operation successful
+    return TRUE;
    }
 
 
@@ -740,7 +739,7 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
   MFolder *subFolder = NULL;
   MyFolderArray folderList;
   wxString dirFldName;
-  
+
   folderList.Alloc(25);
 
   // loop through the found directories
@@ -749,7 +748,7 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
   // - check if a file with the 'same' name exists
   // - if yes, create a subfolder named "Misc"
   // - call this method for the directory
-  // - create all the 'real' mail folders 
+  // - create all the 'real' mail folders
 
   // TODO
   // - in the case of failure, remove the created folders
@@ -757,85 +756,85 @@ bool MNetscapeImporter::CreateFolders( MFolder& parent, wxString& dir )
   // - find out the type (MF_?) of FoFs
 
   for ( size_t n = 0; n < dirList.GetCount(); n++ )
-	{
-	  const wxString& name = dirList[n];
-	  wxString path;
-	  path << dir << g_PathSep << name;
-	  dirFldName = name.BeforeLast('.');
+   {
+     const wxString& name = dirList[n];
+     wxString path;
+     path << dir << g_PathSep << name;
+     dirFldName = name.BeforeLast('.');
 
-	  folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
-									   dirFldName,      // the folder name
-									   MF_GROUP,   //            type
-									   0,         //            flags
-									   path,      //            path
-									   FALSE      // don't notify
-									   );
+     folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
+                              dirFldName,      // the folder name
+                              MF_GROUP,   //            type
+                              0,         //            flags
+                              path,      //            path
+                              FALSE      // don't notify
+                              );
 
-	  if ( folder )
-		{
-		  folderList.Add(folder);
-		  wxLogMessage(_("Created group folder: %s."),dirFldName.c_str());
-		}
-	  else 
-		return FALSE;      
+     if ( folder )
+      {
+        folderList.Add(folder);
+        wxLogMessage(_("Created group folder: %s."),dirFldName.c_str());
+      }
+     else
+      return FALSE;
 
-	  // check if there is a file matching (without .sbd)
-	  int i = fileList.Index( dirFldName.c_str() );
-	  if ( i != wxNOT_FOUND)
-		{
-		  // TODO
-		  // - ask the user what name does he want to give to the folder
+     // check if there is a file matching (without .sbd)
+     int i = fileList.Index( dirFldName.c_str() );
+     if ( i != wxNOT_FOUND)
+      {
+        // TODO
+        // - ask the user what name does he want to give to the folder
 
-		  wxString tmpPath;
-		  tmpPath << dir << g_PathSep << fileList[i];
-		  subFolder = CreateFolderTreeEntry ( folder,    // parent may be NULL
-											  "Misc",      // the folder name
-											  MF_FILE,   //            type
-											  0,         //            flags
-											  tmpPath,      //            path
-											  FALSE      // don't notify
-											  );
+        wxString tmpPath;
+        tmpPath << dir << g_PathSep << fileList[i];
+        subFolder = CreateFolderTreeEntry ( folder,    // parent may be NULL
+                                   "Misc",      // the folder name
+                                   MF_FILE,   //            type
+                                   0,         //            flags
+                                   tmpPath,      //            path
+                                   FALSE      // don't notify
+                                   );
 
-		  
-		  if ( subFolder )
-			{
-			  folderList.Add(subFolder);
-			  fileList.Remove(i);      // this one has been created, remove from filelist
-			  wxLogMessage(_("Created mail folder: %sin group folder %s."),"Misc",dirFldName.c_str());
-			}
-		  else 
-			return FALSE;      
-		}
-	  
-	  // recursive call
-	  if ( ! CreateFolders( *folder, path ) )
-		return FALSE;      
-	}
+
+        if ( subFolder )
+         {
+           folderList.Add(subFolder);
+           fileList.Remove(i);      // this one has been created, remove from filelist
+           wxLogMessage(_("Created mail folder: %sin group folder %s."),"Misc",dirFldName.c_str());
+         }
+        else
+         return FALSE;
+      }
+
+     // recursive call
+     if ( ! CreateFolders( *folder, path ) )
+      return FALSE;
+   }
 
   // we have created all the directories, etc
   // now create the normal folders
 
   for ( size_t n = 0; n < fileList.GetCount(); n++ )
-	{
-	  const wxString& name = fileList[n];
-	  wxString path;
-	  path << dir << g_PathSep << name;
+   {
+     const wxString& name = fileList[n];
+     wxString path;
+     path << dir << g_PathSep << name;
 
-	  folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
-									   name,      // the folder name
-									   MF_FILE,   //            type
-									   0,         //            flags
-									   path,      //            path
-									   FALSE      // don't notify
-									   );
-	   if ( folder )
-		 {
-		   folderList.Add(folder);
-		   wxLogMessage(_("Created mail folder: %s in group folder %s."),name.c_str(),dirFldName.c_str());
-		 }
-	   else 
-		 return FALSE;      
-	}
+     folder = CreateFolderTreeEntry ( &parent,    // parent may be NULL
+                              name,      // the folder name
+                              MF_FILE,   //            type
+                              0,         //            flags
+                              path,      //            path
+                              FALSE      // don't notify
+                              );
+      if ( folder )
+       {
+         folderList.Add(folder);
+         wxLogMessage(_("Created mail folder: %s in group folder %s."),name.c_str(),dirFldName.c_str());
+       }
+      else
+       return FALSE;
+   }
 
   return TRUE;
 }
@@ -855,22 +854,22 @@ bool MNetscapeImporter::ImportSettings()
   wxString filename = g_GlobalPrefDir + g_PathSep + g_PrefFile;
 
   if ( ! ImportSettingsFromFile(g_GlobalPrefDir))
-	wxLogMessage(_("Couldn't find or open the global preference file: %s."),
-				 g_GlobalPrefDir.c_str(), "NETSCAPE");
+   wxLogMessage(_("Couldn't find or open the global preference file: %s."),
+             g_GlobalPrefDir.c_str(), "NETSCAPE");
 
   // user own preference file
   // entries here will override the global settings
   // TODO
   // - check which one is more recent
   filename = m_PrefDir + g_PathSep + g_PrefFile;
-  
-  if (! wxFile::Exists(filename.c_str()) )
-	{ 
-	  // TODO
-	  // - ask user if he knows where the prefs file is
 
-	  return FALSE;
-	}
+  if (! wxFile::Exists(filename.c_str()) )
+   {
+     // TODO
+     // - ask user if he knows where the prefs file is
+
+     return FALSE;
+   }
 
 
   // TODO
@@ -878,7 +877,7 @@ bool MNetscapeImporter::ImportSettings()
   bool status= ImportSettingsFromFile(filename);
   filename = m_PrefDir + g_PathSep + g_PrefFile2;
   if (status && wxFile::Exists(filename.c_str()) )
-	status= ImportSettingsFromFile(filename);
+   status= ImportSettingsFromFile(filename);
   return status;
 }
 
@@ -896,7 +895,7 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
   wxString msg;
   size_t nLines = file.GetLineCount();
 
-  
+
 
   MyHashTable keyval;   // to keep the key-value pairs
 
@@ -906,12 +905,12 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
 
       // skip empty lines and the comments
       if ( !line || line[0] == g_CommentChar)
-		continue;
+      continue;
 
       // extract variable name and its value
       int nEq = line.Find(g_VarIdent);
 
-	  // lines which do not contain a key-value pair will log a message
+     // lines which do not contain a key-value pair will log a message
       if ( nEq == wxNOT_FOUND )
       {
          wxLogDebug("%s(%u): missing variable identifier ('%s').", filename.c_str(), nLine + 1,g_VarIdent.c_str());
@@ -919,41 +918,41 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
          // skip line
          continue;
       }
-	  
-	  // Very, Very primitive parsing of the prefs line
-	  // TODO
-	  //  - check out alternatives
-	  //    + reuse mozilla code
-	  //    + write a small parser
-	  //    + use regex
 
-	  tkz.SetString(line, "(,)");
-	  token = tkz.GetNextToken();  // get rid of the first part
-	  varName = tkz.GetNextToken();  // the variable name   
-	  value = tkz.GetNextToken();
+     // Very, Very primitive parsing of the prefs line
+     // TODO
+     //  - check out alternatives
+     //    + reuse mozilla code
+     //    + write a small parser
+     //    + use regex
 
-	  // get rid of white space
-	  value.Trim(); value.Trim(FALSE);
-	  varName.Trim(); varName.Trim(FALSE);
+     tkz.SetString(line, "(,)");
+     token = tkz.GetNextToken();  // get rid of the first part
+     varName = tkz.GetNextToken();  // the variable name
+     value = tkz.GetNextToken();
 
-	  // clean away eventual quotes
-	  if (varName[0] == '"' && varName[varName.Len()-1] == '"')
-		varName = varName(1,varName.Len()-2);
-	  
-	  if (value[0] == '"' && value[value.Len()-1] == '"')
-		value = value(1,value.Len()-2);
-	  
-	  // and now the white space again, e.g. " \" the value \"" 
-	  value.Trim(); value.Trim(FALSE);
-	  varName.Trim(); varName.Trim(FALSE);
+     // get rid of white space
+     value.Trim(); value.Trim(FALSE);
+     varName.Trim(); varName.Trim(FALSE);
 
-	  // key-value found (hopefully), add to hashtable
-	  keyval.Put(varName,value);
+     // clean away eventual quotes
+     if (varName[0] == '"' && varName[varName.Len()-1] == '"')
+      varName = varName(1,varName.Len()-2);
+
+     if (value[0] == '"' && value[value.Len()-1] == '"')
+      value = value(1,value.Len()-2);
+
+     // and now the white space again, e.g. " \" the value \""
+     value.Trim(); value.Trim(FALSE);
+     varName.Trim(); varName.Trim(FALSE);
+
+     // key-value found (hopefully), add to hashtable
+     keyval.Put(varName,value);
    }
 
   // a special case
-  if ( keyval.Exist("mail.directory") ) 
-	keyval.GetValue("mail.directory",m_MailDir);
+  if ( keyval.Exist("mail.directory") )
+   keyval.GetValue("mail.directory",m_MailDir);
 
   ImportIdentitySettings( keyval );
   ImportNetworkSettings ( keyval );
@@ -962,7 +961,7 @@ bool MNetscapeImporter::ImportSettingsFromFile(const wxString& filename)
   ImportViewerSettings ( keyval );
   ImportRestSettings ( keyval );
 
-	
+
   return TRUE;
 }
 
@@ -973,18 +972,18 @@ bool MNetscapeImporter::ImportIdentitySettings ( MyHashTable& tbl )
   PrefMap* map = g_IdentityPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
-	 
+
   // do the special stuff (derived settings etc)
 
   for (int i=0; map[i].npKey != "END"; i++)
-	{
-	  // set default domain flag if name has been imported
-	  if ( map[i].npKey == "mail.identity.defaultdomain")
-		WriteProfileEntry(MP_ADD_DEFAULT_HOSTNAME,map[i].procd,"use default domain");
-	}
-  
+   {
+     // set default domain flag if name has been imported
+     if ( map[i].npKey == "mail.identity.defaultdomain")
+      WriteProfileEntry(MP_ADD_DEFAULT_HOSTNAME,map[i].procd,"use default domain");
+   }
+
   return TRUE;
 }
 
@@ -996,20 +995,20 @@ bool MNetscapeImporter::ImportNetworkSettings ( MyHashTable& tbl )
   PrefMap* map = g_NetworkPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
-	 
+
   // do the special stuff (derived settings etc)
- 
+
   // set the imap host to nil (at least until implemented!)
   // Silly, but to insure that the right WriteProfileEntry
   // is called, not the bool one
   wxString tmp = "";
   WriteProfileEntry(MP_IMAPHOST,tmp,"imap server name");
-  
+
   // for (int i=0; map[i].npKey != "END"; i++)
-  // 	{
-  // 	}
+  //    {
+  //    }
 
   return TRUE;
 }
@@ -1020,41 +1019,41 @@ bool MNetscapeImporter::ImportComposeSettings ( MyHashTable& tbl )
 
   wxString lstr;
 
-  // Netscape uses the complete path to the folder instead of the name 
+  // Netscape uses the complete path to the folder instead of the name
   if ( tbl.GetValue("mail.default_fcc",lstr) && !lstr.IsEmpty())
-	{
-	  // if I'm correct, Netscape names the files and the folders the same
-	  // therefore taking the last of the path should be sufficient
-	  lstr = lstr.AfterLast(g_PathSep);
-	  tbl.Delete("mail.default_fcc");     // it isn't a dictionary, multiple entries ok
-	  tbl.Put("mail.default_fcc",lstr);   // change the value in the hashtable
-	}                                     // insertion will be done by ImportSettingList
+   {
+     // if I'm correct, Netscape names the files and the folders the same
+     // therefore taking the last of the path should be sufficient
+     lstr = lstr.AfterLast(g_PathSep);
+     tbl.Delete("mail.default_fcc");     // it isn't a dictionary, multiple entries ok
+     tbl.Put("mail.default_fcc",lstr);   // change the value in the hashtable
+   }                                     // insertion will be done by ImportSettingList
 
   PrefMap* map = g_ComposePrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
   // add additional bcc addresses
-  
+
   bool tmpBool = FALSE;
 
   if ( tbl.GetValue("mail.use_default_cc",tmpBool) && tmpBool) // BCC to others
-	tbl.GetValue("mail.default_cc",lstr); 
+   tbl.GetValue("mail.default_cc",lstr);
 
   wxString lstr2;
   if ( tbl.GetValue("mail.cc_self",tmpBool) && tmpBool )    // BCC to self
-	tbl.GetValue("mail.identity.useremail",lstr2); 
+   tbl.GetValue("mail.identity.useremail",lstr2);
 
   lstr = lstr2 + lstr;
 
   if (! lstr.IsEmpty() )
-	WriteProfileEntry(MP_COMPOSE_BCC,lstr,"blind copy addresses");
+   WriteProfileEntry(MP_COMPOSE_BCC,lstr,"blind copy addresses");
 
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
-  if ( tbl.GetValue("mail.signature_file",lstr) && !lstr.IsEmpty()) 
-	WriteProfileEntry(MP_COMPOSE_USE_SIGNATURE,TRUE,"use signature file");
+  if ( tbl.GetValue("mail.signature_file",lstr) && !lstr.IsEmpty())
+   WriteProfileEntry(MP_COMPOSE_USE_SIGNATURE,TRUE,"use signature file");
 
   return TRUE;
 }
@@ -1067,7 +1066,7 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
   PrefMap* map = g_FolderPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
   bool tmpBool = FALSE;
   wxString lstr;
@@ -1075,7 +1074,7 @@ bool MNetscapeImporter::ImportFolderSettings ( MyHashTable& tbl )
   // pref says not to check for new mail, then set to a very large number
   // otherwise leave it as set.
   if ( tbl.GetValue("mail.check_new_mail",tmpBool) && ! tmpBool )
-	WriteProfileEntry(MP_POLLINCOMINGDELAY,30000,"new mail polling delay");
+   WriteProfileEntry(MP_POLLINCOMINGDELAY,30000,"new mail polling delay");
 
   return TRUE;
 }
@@ -1088,13 +1087,13 @@ bool MNetscapeImporter::ImportViewerSettings ( MyHashTable& tbl )
   PrefMap* map = g_ViewerPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
   wxString lstr;
   // use the fact that these variables are set to infer that they are also
   // used is weak, but it is all I have at the moment
-  if ( tbl.GetValue("mail.citation_color",lstr) && !lstr.IsEmpty()) 
-	WriteProfileEntry(MP_MVIEW_QUOTED_COLOURIZE,TRUE,"use color for quoted messages");
+  if ( tbl.GetValue("mail.citation_color",lstr) && !lstr.IsEmpty())
+   WriteProfileEntry(MP_MVIEW_QUOTED_COLOURIZE,TRUE,"use color for quoted messages");
 
   return TRUE;
 }
@@ -1108,7 +1107,7 @@ bool MNetscapeImporter::ImportRestSettings ( MyHashTable& tbl )
   PrefMap* map = g_RestPrefMap;
 
   if ( ! ImportSettingList(map, tbl) )
-	return FALSE;
+   return FALSE;
 
   return TRUE;
 }
@@ -1120,78 +1119,78 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
   unsigned long lval = -1;
 
   for (int i=0; map[i].npKey != "END"; i++)
-	{
-	  if ( ! tbl.Exist(map[i].npKey) )  // no key
-		{
-		  continue; // next
-		}
-	  
-	  else if (map[i].mpKey == "Not mapped") 
-		{
-		  wxLogMessage(_("Key '%s' hasn't been mapped yet"), map[i].npKey.c_str());
-		  map[i].procd = TRUE; // mark to find out which ones in the file are also in the maps
-		  continue;
-		}
+   {
+     if ( ! tbl.Exist(map[i].npKey) )  // no key
+      {
+        continue; // next
+      }
 
-	  else if (( map[i].mpKey == "Ignored") || ( map[i].mpKey == "Special" ))
-		{
-		  map[i].procd = TRUE;
-		  continue;
-		}
+     else if (map[i].mpKey == "Not mapped")
+      {
+        wxLogMessage(_("Key '%s' hasn't been mapped yet"), map[i].npKey.c_str());
+        map[i].procd = TRUE; // mark to find out which ones in the file are also in the maps
+        continue;
+      }
 
-	  switch (map[i].type) 
-		{
-		case NM_IS_BOOL:
-		case NM_IS_NEGATE_BOOL:
-		  {
-			if ( tbl.GetValue(map[i].npKey,tmp) )
-			  {
-				if (map[i].type == NM_IS_NEGATE_BOOL)
-				  tmp = !tmp;
-				map[i].procd = WriteProfileEntry(map[i].mpKey, tmp, map[i].desc);
-			  }
-			else
-			  wxLogMessage(_("Parsing error for key '%s'"),
-						   map[i].npKey.c_str());
-			break;
-		  }
-		case NM_IS_STRING:
-		case NM_IS_STRNIL:
-		   {
-			 if ( tbl.GetValue(map[i].npKey,value) )
-			   {
-				 if ((map[i].type == NM_IS_STRING) && value.IsEmpty() ) 
-				   {
-					 wxLogMessage(_("Bad value for key '%s': cannot be empty"),
-								  map[i].npKey.c_str());
-					 break;
-				   }
-				 map[i].procd = WriteProfileEntry(map[i].mpKey, value, map[i].desc);
-			   }
-			else
-			  wxLogMessage(_("Parsing error for key '%s'"),
-						   map[i].npKey.c_str());
-			break;
-		  }
-		case NM_IS_INT:
-		  {
-			if ( tbl.GetValue(map[i].npKey,lval) )
-			  {
-				map[i].procd = WriteProfileEntry(map[i].mpKey, (int)lval, map[i].desc);
-			  }
-			else
-			  wxLogMessage(_("Type mismatch for key '%s' ulong expected.'"),
-						   map[i].npKey.c_str());
-			break;
-		  }
-		default:
-		  wxLogMessage(_("Bad type key '%s'"), map[i].npKey.c_str());
-		}
-	  if ( ! map[i].procd )
-		return FALSE;
-	}
+     else if (( map[i].mpKey == "Ignored") || ( map[i].mpKey == "Special" ))
+      {
+        map[i].procd = TRUE;
+        continue;
+      }
+
+     switch (map[i].type)
+      {
+      case NM_IS_BOOL:
+      case NM_IS_NEGATE_BOOL:
+        {
+         if ( tbl.GetValue(map[i].npKey,tmp) )
+           {
+            if (map[i].type == NM_IS_NEGATE_BOOL)
+              tmp = !tmp;
+            map[i].procd = WriteProfileEntry(map[i].mpKey, tmp, map[i].desc);
+           }
+         else
+           wxLogMessage(_("Parsing error for key '%s'"),
+                     map[i].npKey.c_str());
+         break;
+        }
+      case NM_IS_STRING:
+      case NM_IS_STRNIL:
+         {
+          if ( tbl.GetValue(map[i].npKey,value) )
+            {
+             if ((map[i].type == NM_IS_STRING) && value.IsEmpty() )
+               {
+                wxLogMessage(_("Bad value for key '%s': cannot be empty"),
+                          map[i].npKey.c_str());
+                break;
+               }
+             map[i].procd = WriteProfileEntry(map[i].mpKey, value, map[i].desc);
+            }
+         else
+           wxLogMessage(_("Parsing error for key '%s'"),
+                     map[i].npKey.c_str());
+         break;
+        }
+      case NM_IS_INT:
+        {
+         if ( tbl.GetValue(map[i].npKey,lval) )
+           {
+            map[i].procd = WriteProfileEntry(map[i].mpKey, (int)lval, map[i].desc);
+           }
+         else
+           wxLogMessage(_("Type mismatch for key '%s' ulong expected.'"),
+                     map[i].npKey.c_str());
+         break;
+        }
+      default:
+        wxLogMessage(_("Bad type key '%s'"), map[i].npKey.c_str());
+      }
+     if ( ! map[i].procd )
+      return FALSE;
+   }
   return TRUE;
-}  
+}
 
 
 
@@ -1199,18 +1198,18 @@ bool MNetscapeImporter::ImportSettingList( PrefMap* map, const MyHashTable& tbl)
 bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& val, const wxString& desc )
 {
   bool status = FALSE;
-  
+
   // let's make sure that if there are environment variable
   // they are expanded
   wxString tmpVal = wxExpandEnvVars(val);
-  
+
   Profile* l_Profile = mApplication->GetProfile();
 
   if ( status = l_Profile->writeEntry( key, tmpVal) )
-	wxLogMessage(_("Imported '%s' setting from %s: %s."),
-				 desc.c_str(),"NETSCAPE",tmpVal.c_str());
+   wxLogMessage(_("Imported '%s' setting from %s: %s."),
+             desc.c_str(),"NETSCAPE",tmpVal.c_str());
   else
-	wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
 
   return status;
 }
@@ -1218,14 +1217,14 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const wxString& v
 bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const int val, const wxString& desc )
 {
   bool status = FALSE;
-  
+
   Profile* l_Profile = mApplication->GetProfile();
 
   if ( status = l_Profile->writeEntry( key, val) )
-	wxLogMessage(_("Imported '%s' setting from %s: %u."),
-				 desc.c_str(),"NETSCAPE",val);
+   wxLogMessage(_("Imported '%s' setting from %s: %u."),
+             desc.c_str(),"NETSCAPE",val);
   else
-	wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
 
   return status;
 }
@@ -1235,17 +1234,17 @@ bool MNetscapeImporter::WriteProfileEntry(const wxString& key, const bool val, c
   bool status = FALSE;
 
   Profile* l_Profile = mApplication->GetProfile();
-  
-  if ( val )
-	status = l_Profile->writeEntry( key.c_str(), 1L);
-  else
-	status = l_Profile->writeEntry( key.c_str(), 0L);
 
-  if ( status ) 
-	wxLogMessage(_("Imported '%s' setting from %s: %u."), desc.c_str(),"NETSCAPE",val);
+  if ( val )
+   status = l_Profile->writeEntry( key.c_str(), 1L);
   else
-	wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
-  
+   status = l_Profile->writeEntry( key.c_str(), 0L);
+
+  if ( status )
+   wxLogMessage(_("Imported '%s' setting from %s: %u."), desc.c_str(),"NETSCAPE",val);
+  else
+   wxLogWarning(_("Failed to write '%s' entry to profile"), desc.c_str());
+
   return status;
 }
 
@@ -1274,78 +1273,78 @@ bool MNetscapeImporter::ImportFilters()
 /*  {"taskbar.ontop" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"taskbar.x" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"taskbar.y" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Browser.Navigation_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Navigation_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Navigation_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Browser.Location_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Location_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Location_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Browser.Personal_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Personal_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Browser.Personal_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Messenger.Navigation_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messenger.Navigation_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messenger.Navigation_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Messenger.Location_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messenger.Location_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messenger.Location_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Messages.Navigation_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messages.Navigation_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messages.Navigation_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Messages.Location_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messages.Location_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Messages.Location_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Folders.Navigation_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Folders.Navigation_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Folders.Navigation_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Folders.Location_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Folders.Location_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Folders.Location_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Address_Book.Address_Book_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Address_Book.Address_Book_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Address_Book.Address_Book_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Compose_Message.Message_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Compose_Message.Message_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Compose_Message.Message_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Composer.Composition_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Composer.Composition_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Composer.Composition_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"custtoolbar.Composer.Formatting_Toolbar.position" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Composer.Formatting_Toolbar.showing" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"custtoolbar.Composer.Formatting_Toolbar.open" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"browser.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"browser.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"mail.compose.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"mail.compose.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
- 
+
+
 /*  {"editor.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"editor.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"mail.folder.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"mail.folder.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"mail.msg.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"mail.msg.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 /*  {"mail.thread.win_width" , "Ignored", "No descr", NM_NONE, FALSE }, */
 /*  {"mail.thread.win_height" , "Ignored", "No descr", NM_NONE, FALSE }, */
- 
+
 
 
 
