@@ -31,9 +31,9 @@ dep depend:
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-.PHONY: clean doc dep depend tags
+.PHONY: stdclean doc dep depend tags
 
-clean:
+stdclean:
 	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a
 
 doc:

@@ -16,4 +16,4 @@ clean:
 	@$(MAKE) -f Makefile2 $@
 force: ;
 
-,PHONY: clean
+.PHONY: clean all

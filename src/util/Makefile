@@ -10,6 +10,10 @@ TARGETS = $(SRC:.cpp=.o) $(CSRC:.c=.o)
 all:	$(TARGETS)
 strutil.o: strutil.cpp
 
+clean: stdclean
+
+.PHONY: all clean
+
 include ../../makeopts
 include ../../makerules
 include .depend

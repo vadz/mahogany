@@ -15,6 +15,9 @@ install:
 	set -e; for i in $(SUB_DIRS); do $(INSTALL) -d $(DATADIR)/$$i ; done
 	set -e; for i in $(SUB_DIRS); do  $(MAKE) -C $$i ; done
 
+clean:
+
+
 include ../../makerules
 
-.PHONY: all install
+.PHONY: all install clean

@@ -15,6 +15,10 @@ TARGETS = $(SRC:.cpp=.o)
 
 all: $(TARGETS)
 
+clean: stdclean
+
+.PHONY: clean all
+
 include ../../makeopts
 include ../../makerules
 include .depend

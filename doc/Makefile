@@ -16,8 +16,10 @@ install: ps
 
 ps: $(FILES_PS)
 
+clean:
 
-.PHONY: all install ps
+
+.PHONY: all install ps clean
 
 include ../makerules
 

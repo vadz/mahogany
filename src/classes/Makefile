@@ -12,6 +12,10 @@ all: $(TARGETS)
 
 CommonBase.o:
 
+clean: stdclean
+
+.PHONY: clean
+
 include ../../makeopts
 include ../../makerules
 include .depend

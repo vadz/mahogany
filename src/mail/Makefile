@@ -23,5 +23,9 @@ $(LINK):
 	(cd $(CCLIENTDIR); make $(CCCLIENTOSTYPE))
 
 
+clean: stdclean
+
+.PHONY: clean
+
 include ../../makerules
 include .depend
