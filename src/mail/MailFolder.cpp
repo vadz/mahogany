@@ -182,7 +182,7 @@ MailFolder::ConvertMessageStatusToString(int status)
          strstatus << 'U';
       else
          strstatus << ' ';
-      
+
    strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
    strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
    strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
@@ -200,8 +200,8 @@ bool MailFolder::CanExit(String *which)
  * Higher level functionality, nothing else depends on this.
  *-------------------------------------------------------------------*/
 
-
 #include <wx/dynarray.h>
+
 #include "gui/wxComposeView.h"
 #include "wx/persctrl.h"
 #include "MDialogs.h"
@@ -224,6 +224,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
       wxLogError(_("Could not truncate the existing file."));
       return false;
    }
+
    Message *msg;
    MProgressDialog *pd = NULL;
    int threshold = GetProfile() ?
@@ -270,7 +271,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
    }
    if(pd) delete pd;
    return rc;
-   
+
 }
 
 bool
