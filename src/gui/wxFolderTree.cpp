@@ -779,12 +779,15 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 wxTreeItemId
 wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
 {
-   ASSERT_MSG( !!fullname, "folder name can't be empty" );
-
    // tokenize the fullname in components treating subsequent slashes as one
    // delimiter
-   wxStringTokenizer tk(fullname, _T("/"), wxTOKEN_STRTOK);
    wxTreeItemId current = GetRootItem();
+
+   // empty name means root
+   if ( !fullname )
+      return current;
+
+   wxStringTokenizer tk(fullname, _T("/"), wxTOKEN_STRTOK);
 
    // we do breadth-first search in the tree
    while ( tk.HasMoreTokens() )
