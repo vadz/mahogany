@@ -260,7 +260,6 @@ extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
-extern const MOption MP_MSGVIEW_AUTO_ENCODING;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_LAST_CREATED_FOLDER_TYPE;
 extern const MOption MP_FILTER_RULE;
@@ -910,8 +909,6 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 #define   MP_MSGVIEW_HEADERS_NAME     "MsgViewHeaders"
 /// all headers we know about
 #define   MP_MSGVIEW_ALL_HEADERS_NAME     "MsgViewAllHeaders"
-/// should we auto detect the message encoding?
-#define  MP_MSGVIEW_AUTO_ENCODING_NAME   "MsgViewAutoDetectEnc"
 /// the default encoding for the viewer/composer
 #define  MP_MSGVIEW_DEFAULT_ENCODING_NAME   "DefEncoding"
 /// the type of the last created folder
@@ -1889,8 +1886,6 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
           "X-UIDL:" \
           "X-URL:" \
           "X-WM-Posted-At:"
-/// should we auto detect the message encoding?
-#define  MP_MSGVIEW_AUTO_ENCODING_DEFVAL   1
 /// the default encoding for the viewer/composer
 #define  MP_MSGVIEW_DEFAULT_ENCODING_DEFVAL (long)wxFONTENCODING_DEFAULT
 /// the type of the last created folder
