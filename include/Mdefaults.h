@@ -1182,7 +1182,7 @@ enum MFolderIndex
 #define MP_REPLY_DETECT_SIG_D   1
 #if wxUSE_REGEX
 /// a regex to detect signature
-#define MP_REPLY_SIG_SEPARATOR_D "^((_____*)|(-- ?))"
+#define MP_REPLY_SIG_SEPARATOR_D "((_____*)|(-- ?))"
 #endif
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1

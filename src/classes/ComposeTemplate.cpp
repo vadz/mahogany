@@ -277,6 +277,15 @@ protected:
    bool ExpandMessage(const String& name, String *value) const;
    bool ExpandOriginal(const String& name, String *value) const;
 
+   // return the reply prefix to use for message quoting when replying
+   String GetReplyPrefix() const;
+
+   // put the text quoted according to our current quoting options with the
+   // given reply prefix into value
+   void ExpandOriginalText(const String& text,
+                           const String& prefix,
+                           String *value) const;
+
 private:
    // helper used by GetCategory and GetVariable
    static int FindStringInArray(const char *strs[], int max, const String& s);
@@ -930,62 +939,9 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                String prefix;
                if ( name == "quote" )
                {
-                  // prepend the senders initials to the reply prefix (this
-                  // will make reply prefix like "VZ>")
-                  if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
-                  {
-                     // take from address, not reply-to which can be set to
-                     // reply to a mailing list, for example
-                     String name;
-                     m_msg->Address(name, MAT_FROM);
-                     if ( name.empty() )
-                     {
-                        // no from address? try to find anything else
-                        m_msg->Address(name, MAT_REPLYTO);
-                     }
-
-                     // it's (quite) common to have quotes around the personal
-                     // part of the address, remove them if so
-
-                     // remove spaces
-                     name.Trim(TRUE);
-                     name.Trim(FALSE);
-                     if ( !name.empty() )
-                     {
-                        if ( name[0u] == '"' && name.Last() == '"' )
-                        {
-                           name = name.Mid(1, name.length() - 2);
-                        }
-
-                        // take the first letter of each word
-                        wxStringTokenizer tk(name);
-                        while ( tk.HasMoreTokens() )
-                        {
-                           char chInitial = tk.GetNextToken()[0u];
-
-                           if ( chInitial == '<' )
-                           {
-                              // this must be the start of embedded "<...>"
-                              // address, skip it completely
-                              break;
-                           }
-
-                           // only take letters as initials
-                           if ( isalpha(chInitial) )
-                           {
-                              prefix += chInitial;
-                           }
-                        }
-                     }
-                  }
-
-                  // and then the standard reply prefix too
-                  prefix += READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
+                  prefix = GetReplyPrefix();
                }
                //else: name == text, so no reply prefix at all
-
-               // should we quote the empty lines?
-               bool quoteEmpty = READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY) != 0;
 
                // was the last message part a text one?
                bool lastWasPlainText = false;
@@ -1006,81 +962,12 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                         // skip it
                         continue;
                      }
+
                      lastWasPlainText = mimeType == "text/plain";
 
-                     String str = m_msg->GetPartContent(nPart), str2;
-                     const char *cptr = str.c_str();
-                     unsigned int idx = prefix.Len();
-                     int wrap_margin = -1;
-                     if ( READ_CONFIG(m_profile, MP_AUTOMATIC_WORDWRAP) )
-                        wrap_margin = READ_CONFIG(m_profile, MP_WRAPMARGIN);
-                     *value += prefix;
-                     while ( *cptr ) {
-                        if ( *cptr == '\r' ) {
-                           cptr++;
-                           continue;
-                        }
-
-                        // when we quote, if there's a wrap margin defined, we
-                        // must pay attention to the line length, and we want
-                        // to break lines between words.
-                        str2 += *cptr;
-                        idx++;
-                        if ( isspace(*cptr) ) {
-                            // safe to add to current line
-                            *value += str2;
-                            str2.Empty();
-                        }
-                        if ( *cptr++ == '\n' && *cptr )
-			{
-            		   if ( READ_CONFIG(m_profile, MP_REPLY_DETECT_SIG) )
-			   {
-#if wxUSE_REGEX
-                              String sigSeparator = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
-                              if (!sigSeparator.IsEmpty())
-                              {
-                                 sigSeparator += "\r\n";
-                                 wxRegEx regEx(sigSeparator);
-                                 if (regEx.Matches(cptr))
-                                    break;
-                              }
-#else
-                              if (*cptr == '-' &&
-                                  *(cptr+1) == '-' &&
-                                  ((*(cptr+2) == ' ' &&
-                                    *(cptr+3) == '\r') ||
-                                   *(cptr+2) == '\r'))
-                                 // Remaining is a sig. Skip
-                                 break;
-#endif
-			   }
-                           if ( quoteEmpty ||
-                                (*cptr != '\r' && *cptr != '\n') )
-                           {
-                                *value += str2 + prefix;
-                                idx = prefix.Len();
-                                str2.Empty();
-                           }
-                        }
-                        if ( wrap_margin > 0 && 
-                                    idx >= (unsigned int) wrap_margin )
-			{
-                            // break the line.
-                            // if the first word on a new line overflows the
-                            // margin, we just chop it off, else, we put the
-                            // next word on the next, new, line.
-                            if ( prefix.Len() + str2.Len() == idx) {
-                                *value += str2 + '\n' + prefix;
-                                idx = prefix.Len();
-                            } else {
-                                *value += '\n' + prefix + str2;
-                                idx = prefix.Len() + str2.Len();
-                            }
-                            str2.Empty();
-                        }
-                     }
-
-                     *value += str2;
+                     ExpandOriginalText(m_msg->GetPartContent(nPart),
+                                        prefix,
+                                        value);
                   }
                   else
                   {
@@ -1104,6 +991,243 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
    }
 
    return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// ExpandOriginal helpers
+// ----------------------------------------------------------------------------
+
+String VarExpander::GetReplyPrefix() const
+{
+   String prefix;
+
+   // prepend the senders initials to the reply prefix (this
+   // will make reply prefix like "VZ>")
+   if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
+   {
+      // take from address, not reply-to which can be set to
+      // reply to a mailing list, for example
+      String name;
+      m_msg->Address(name, MAT_FROM);
+      if ( name.empty() )
+      {
+         // no from address? try to find anything else
+         m_msg->Address(name, MAT_REPLYTO);
+      }
+
+      // it's (quite) common to have quotes around the personal
+      // part of the address, remove them if so
+
+      // remove spaces
+      name.Trim(TRUE);
+      name.Trim(FALSE);
+      if ( !name.empty() )
+      {
+         if ( name[0u] == '"' && name.Last() == '"' )
+         {
+            name = name.Mid(1, name.length() - 2);
+         }
+
+         // take the first letter of each word
+         wxStringTokenizer tk(name);
+         while ( tk.HasMoreTokens() )
+         {
+            char chInitial = tk.GetNextToken()[0u];
+
+            if ( chInitial == '<' )
+            {
+               // this must be the start of embedded "<...>"
+               // address, skip it completely
+               break;
+            }
+
+            // only take letters as initials
+            if ( isalpha(chInitial) )
+            {
+               prefix += chInitial;
+            }
+         }
+      }
+   }
+
+   // and then the standard reply prefix too
+   prefix += READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
+
+   return prefix;
+}
+
+inline bool IsEndOfLine(const char *p)
+{
+   return p[0] == '\r' && p[1] == '\n';
+}
+
+// length of end of line suffix ("\r\n")
+static const size_t EOL_LEN = 2;
+
+void VarExpander::ExpandOriginalText(const String& text,
+                                     const String& prefix,
+                                     String *value) const
+{
+   // should we quote the empty lines?
+   //
+   // this option is ignore when we're inserting text verbatim (hence without
+   // reply prefix) and not quoting it
+   bool quoteEmpty = !prefix.empty() &&
+                        READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY);
+
+   // where to break lines (if at all)?
+   size_t wrapMargin;
+   if ( READ_CONFIG(m_profile, MP_AUTOMATIC_WORDWRAP) )
+   {
+      wrapMargin = READ_CONFIG(m_profile, MP_WRAPMARGIN);
+      if ( wrapMargin <= prefix.length() )
+      {
+         wxLogError(_("The configured automatic wrap margin (%u) is too "
+                      "small, please increase it.\n"
+                      "\n"
+                      "Disabling automatic wrapping for now."), wrapMargin);
+
+         m_profile->writeEntry(MP_AUTOMATIC_WORDWRAP, false);
+         wrapMargin = 0;
+      }
+   }
+   else
+   {
+      // don't wrap
+      wrapMargin = 0;
+   }
+
+   // should we detect the signature and discard it?
+   bool detectSig = READ_CONFIG(m_profile, MP_REPLY_DETECT_SIG) != 0;
+
+#if wxUSE_REGEX
+   // a RE to detect the start of the signature
+   wxRegEx reSig;
+   if ( detectSig )
+   {
+      String sig = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
+
+      // we implicitly anchor the RE at start/end of line
+      //
+      // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
+      String sigRE;
+      sigRE << '^' << sig << "\r\n";
+
+      if ( !reSig.Compile(sigRE, wxRE_NOSUB) )
+      {
+         wxLogError(_("Regular expression '%s' used for detecting the "
+                       "signature start is invalid, please modify it.\n"
+                       "\n"
+                       "Disabling sinature stripping for now."),
+                    sigRE.c_str());
+
+         m_profile->writeEntry(MP_REPLY_DETECT_SIG, false);
+         detectSig = false;
+      }
+   }
+#endif // wxUSE_REGEX
+
+   // the current line
+   String lineCur;
+
+   for ( const char *cptr = text.c_str(); ; cptr++ )
+   {
+      // start of [real] new line?
+      if ( lineCur.empty() )
+      {
+         if ( detectSig )
+         {
+#if wxUSE_REGEX
+            if ( reSig.Matches(cptr) )
+               break;
+#else // !wxUSE_REGEX
+            // hard coded detection for standard signature separator "--"
+            if ( cptr[0] == '-' && cptr[1] == '-' )
+            {
+               // there may be an optional space after "--"
+               const char *p = cptr + 2;
+               if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
+               {
+                  // the rest is the sig - skip
+                  break;
+               }
+            }
+#endif // wxUSE_REGEX/!wxUSE_REGEX
+         }
+
+         if ( !quoteEmpty && IsEndOfLine(cptr + 1) )
+         {
+            // this line is empty, skip it entirely
+            cptr += EOL_LEN - 1;
+
+            continue;
+         }
+
+         lineCur += prefix;
+      }
+
+      if ( !*cptr || IsEndOfLine(cptr) )
+      {
+         // sanity test
+         ASSERT_MSG( !wrapMargin || lineCur.length() <= wrapMargin,
+                     "logic error in auto wrap code" );
+
+         *value += lineCur;
+
+         if ( !*cptr )
+         {
+            // end of text
+            break;
+         }
+
+         // put just '\n' in output, we don't need "\r\n"
+         *value += '\n';
+
+         lineCur.clear();
+
+         // -1 to compensate for ++ in the loop
+         cptr += EOL_LEN - 1;
+      }
+      else // !EOL
+      {
+         lineCur += *cptr;
+
+         // we don't need to wrap a line if it is its last character anyhow
+         if ( wrapMargin && lineCur.length() >= wrapMargin
+               && !IsEndOfLine(cptr + 1) )
+         {
+            // break the line before the last word
+            size_t n = wrapMargin - 1;
+            while ( n > prefix.length() )
+            {
+               if ( isspace(lineCur[n]) )
+                  break;
+
+               n--;
+            }
+
+            if ( n == prefix.length() )
+            {
+               // no space found in the line or it is in prefix which
+               // we don't want to wrap - so just cut the line right here
+               n = wrapMargin;
+            }
+
+            value->append(lineCur, n);
+            *value += '\n';
+
+            // we don't need to start the new line with spaces so remove them
+            // from the tail
+            while ( n < lineCur.length() && isspace(lineCur[n]) )
+            {
+               n++;
+            }
+
+            lineCur.erase(0, n);
+            lineCur.Prepend(prefix);
+         }
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------
