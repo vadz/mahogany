@@ -8,11 +8,15 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+
+9	KB	Fix PalmExport: 1. strip illegal characters like '
+		                2. find out why "Fax" appears
+
+	KB	add trash/outbox
 9		Add routine to write large headers.
 
 7	KB	group reply misses additional To entries
 
-	KB	add trash/outbox
 	KB	add blinking cursor
 
 	VZ	"hidden" flag for folder treecontrol
