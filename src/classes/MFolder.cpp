@@ -114,6 +114,12 @@ public:
 
       m_format = (FileMailboxFormat)(long)
                   READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER);
+
+      m_ssl = SSLSupport_None;
+      m_cert = SSLCert_SignedOnly;
+
+      // by default, try to create the new folder
+      m_tryToCreate = true;
    }
 
    ~MTempFolder()
@@ -163,9 +169,23 @@ public:
    virtual MFolderType GetType() const { return m_type; }
    virtual String GetClass() const { return GetClassForType(m_type); }
 
-   virtual bool NeedsNetwork(void) const { return false; }
-   virtual SSLSupport GetSSL(SSLCert *) const { return SSLSupport_None; }
-   virtual void SetSSL(SSLSupport, SSLCert) { }
+   virtual bool NeedsNetwork(void) const { return true; }
+   virtual SSLSupport GetSSL(SSLCert *cert) const
+   {
+      if ( cert )
+         *cert = m_cert;
+
+      return m_ssl;
+   }
+
+   virtual void SetSSL(SSLSupport ssl, SSLCert cert)
+   {
+      m_ssl = ssl;
+      m_cert = cert;
+   }
+
+   virtual bool ShouldTryToCreate() const { return m_tryToCreate; }
+   virtual void DontTryToCreate() { m_tryToCreate = false; }
 
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
@@ -213,6 +233,11 @@ private:
    int m_flags;
 
    FileMailboxFormat m_format;
+
+   SSLSupport m_ssl;
+   SSLCert m_cert;
+
+   bool m_tryToCreate;
 
    Profile *m_profile;
 };
@@ -276,6 +301,9 @@ public:
    virtual bool NeedsNetwork() const;
    virtual SSLSupport GetSSL(SSLCert *acceptUnsigned) const;
    virtual void SetSSL(SSLSupport ssl, SSLCert cert);
+
+   virtual bool ShouldTryToCreate() const;
+   virtual void DontTryToCreate();
 
    virtual int GetIcon() const;
    virtual void SetIcon(int icon);
@@ -371,6 +399,11 @@ public:
    virtual bool NeedsNetwork(void) const { return false; }
    virtual SSLSupport GetSSL(SSLCert *) const { return SSLSupport_None; }
    virtual void SetSSL(SSLSupport, SSLCert) { }
+
+   virtual bool ShouldTryToCreate() const
+      { FAIL_MSG(_T("doesn't make sense for root folder")); return false; }
+   virtual void DontTryToCreate()
+      { FAIL_MSG(_T("doesn't make sense for root folder")); }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)
@@ -832,6 +865,19 @@ void MFolderFromProfile::SetSSL(SSLSupport ssl, SSLCert cert)
                             cert == SSLCert_AcceptUnsigned);
    }
    //else: no need to write it there
+}
+
+bool MFolderFromProfile::ShouldTryToCreate() const
+{
+   return m_profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) != 0;
+}
+
+void MFolderFromProfile::DontTryToCreate()
+{
+   if ( m_profile->HasEntry(MP_FOLDER_TRY_CREATE) )
+   {
+      m_profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+   }
 }
 
 int MFolderFromProfile::GetIcon() const

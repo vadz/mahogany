@@ -240,6 +240,19 @@ public:
    virtual SSLSupport GetSSL(SSLCert *acceptUnsigned = NULL) const = 0;
    virtual void SetSSL(SSLSupport ssl, SSLCert cert) = 0;
 
+      /**
+         Get the value of "try to create" flag.
+
+         If we had never tried to access this folder we normally try to create
+         it when we first do it -- this allows to delay the folder creation
+         until it is really needed.
+       */
+   virtual bool ShouldTryToCreate() const = 0;
+
+      /// after first access the try to create flag must be reset, this
+      /// function allows to do it
+   virtual void DontTryToCreate() = 0;
+
    //@}
 
    /**@name Filters */

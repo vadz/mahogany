@@ -152,7 +152,6 @@ extern "C"
 extern const MOption MP_CONN_CLOSE_DELAY;
 extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
-extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_IMAP_LOOKAHEAD;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
@@ -169,8 +168,6 @@ extern const MOption MP_TCP_READTIMEOUT;
 extern const MOption MP_TCP_WRITETIMEOUT;
 extern const MOption MP_TCP_RSHTIMEOUT;
 extern const MOption MP_TCP_SSHTIMEOUT;
-extern const MOption MP_USE_SSL;
-extern const MOption MP_USE_SSL_UNSIGNED;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -1197,10 +1194,10 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
       login = folder->GetLogin();
 
    SSLSupport ssl;
+   SSLCert sslCert;
 
 #ifdef USE_SSL
-   Profile_obj profile(folder->GetProfile());
-   ssl = (SSLSupport)(long)READ_CONFIG(profile, MP_USE_SSL);
+   ssl = folder->GetSSL(&sslCert);
 
    // SSL is valid only for some protocols (NNTP/IMAP/POP)
    if ( (ssl != SSLSupport_None) && !FolderTypeSupportsSSL(type) )
@@ -1218,6 +1215,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
    }
 #else
    ssl = SSLSupport_None;
+   sslCert = SSLCert_AcceptUnsigned; // doesn't matter with SSLSupport_None
 #endif // USE_SSL
 
    if ( ssl != SSLSupport_None )
@@ -1246,7 +1244,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
          case SSLSupport_TLSIfAvailable:
             // nothing to do -- this is the default
 
-            if ( READ_CONFIG(profile, MP_USE_SSL_UNSIGNED) )
+            if ( sslCert == SSLCert_AcceptUnsigned )
             {
                spec << _T("/novalidate-cert");
             }
@@ -1325,10 +1323,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
 
       case MF_POP:
          {
-            // if we use SSL, we already have a profile object in local scope
-#ifndef USE_SSL
             Profile_obj profile(folder->GetProfile());
-#endif
             if ( READ_CONFIG(profile, MP_POP_NO_AUTH) )
             {
                // turn authentification off forcefully
@@ -1802,9 +1797,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    if ( pStream )
       *pStream = NULL;
 
-   Profile_obj profile(folder->GetProfile());
-
-   if ( !profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) )
+   if ( !folder->ShouldTryToCreate() )
    {
       // don't even try
       return true;
@@ -1894,7 +1887,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    }
 
    // don't try any more, whatever the result was
-   profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+   ((MFolder *)folder)->DontTryToCreate();   // const_cast
 
    // restore callbacks
    delete noCallbacks;
@@ -2010,11 +2003,7 @@ void MailFolderCC::CreateFileFolder()
    }
 
    // we either already tried to create it once or it had existed even before
-   Profile_obj profile(m_mfolder->GetProfile());
-   if ( profile->HasEntry(MP_FOLDER_TRY_CREATE) )
-   {
-      profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
-   }
+   m_mfolder->DontTryToCreate();
 }
 
 static String
