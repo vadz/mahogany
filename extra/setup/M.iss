@@ -70,7 +70,7 @@ Source: "m:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{app}"; Com
 ;Source: "w:\winnt40\system32\msvcrt.dll"; DestDir: "{sys}"
 
 ; --- misc stuff
-Source: "extra\setup\autocollect.adb"; DestDir: "{app}"
+Source: "extra\setup\autocollect.adb"; CopyMode: dontoverwrite; DestDir: "{app}"
 Source: "extra\setup\Mahogany.url"; DestDir: "{app}"; Components: misc
 Source: "extra\setup\Bug.url"; DestDir: "{app}"; Components: misc
 
