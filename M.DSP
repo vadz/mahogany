@@ -46,7 +46,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\msw" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\msw" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -73,7 +73,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswd" /I "$(WXWIN)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswd" /I "$(WXWIN)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -102,7 +102,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "\python\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswdlld" /I "$(WXWIN)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswdlld" /I "$(WXWIN)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -130,7 +130,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "\python\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
-# ADD CPP /nologo /MD /W3 /O1 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswdll" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O1 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\lib\mswdll" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(WXWIN)\include" /d "NDEBUG"
@@ -159,7 +159,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(WXWIN)\include" /d "NDEBUG"
@@ -442,6 +442,14 @@ SOURCE=.\src\gui\wxlwindow.cpp
 
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\src\gui\ClickAtt.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\ClickURL.cpp
+# End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\Mdnd.cpp
@@ -1845,6 +1853,10 @@ SOURCE=.\src\modules\viewflt\Signature.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\modules\viewflt\TextMarkup.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\modules\viewflt\Trailer.cpp
 # End Source File
 # End Group
@@ -1918,24 +1930,28 @@ SOURCE=.\src\util\twofish2.c
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# ADD CPP /Od
+# ADD CPP /W1 /Od
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
+# ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
 # SUBTRACT BASE CPP /YX /Yc /Yu
+# ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ENDIF 
