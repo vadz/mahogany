@@ -3276,8 +3276,15 @@ unsigned long wxFolderView::GetDeletedCount() const
    {
       MailFolder_obj mf = GetMailFolder();
 
-      // const_cast
-      ((wxFolderView *)this)->m_nDeleted = mf->CountDeletedMessages();
+      if ( !mf )
+      {
+         FAIL_MSG( _T("no mail folder in wxFolderView::GetDeletedCount") );
+      }
+      else
+      {
+         // const_cast
+         ((wxFolderView *)this)->m_nDeleted = mf->CountDeletedMessages();
+      }
    }
 
    return m_nDeleted;
@@ -3667,12 +3674,15 @@ wxFolderView::DoClear(bool keepTheViewer)
       //     is NULL only when we're in dtor
       if ( m_MessagePreview )
       {
-         if ( GetHeadersCount()-GetDeletedCount() > 0 &&
-             (m_ASMailFolder->GetType() == MF_NNTP ||
-              m_ASMailFolder->GetType() == MF_NEWS) )
+         // before checking if we have any messages to expunge, check that the
+         // folder is still opened: otherwise we'd hit an assert in MailFolder
+         // because we'd call CountDeletedMessages() on a closed folder
+         MailFolder_obj mf = GetMailFolder();
+         if ( !!mf && mf->IsOpened() && mf->CountDeletedMessages() > 0 )
          {
-            MailFolder_obj mf = GetMailFolder();
-            if ( mf && mf->IsOpened() )
+            // optionally "catch up" (i.e. mark all existing articles in a
+            // newsgroup as read) when a news folder is closed
+            if ( mf->GetType() == MF_NNTP || mf->GetType() == MF_NEWS )
             {
                wxString msg;
                msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
@@ -3691,9 +3701,11 @@ wxFolderView::DoClear(bool keepTheViewer)
                   m_ASMailFolder->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
                }
             }
-         }
 
-         CheckExpungeDialog(m_ASMailFolder, m_Frame);
+            // ask if we should expunge all the deleted messages or leave them
+            // there
+            CheckExpungeDialog(m_ASMailFolder, m_Frame);
+         }
       }
 
       // this folder is not associated with our frame any more
