@@ -258,12 +258,6 @@ enum ConfigFields
    ConfigField_ReplyUseXAttr,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
-   ConfigField_ReplyDetectSig,
-#if wxUSE_REGEX
-   ConfigField_ReplySigSeparatorHelp,
-   ConfigField_ReplySigSeparator,
-#endif // wxUSE_REGEX
-
    ConfigField_Signature,
    ConfigField_SignatureFile,
    ConfigField_SignatureSeparator,
@@ -1230,15 +1224,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prepend &sender initials"),     Field_Bool, ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
-   { gettext_noop("Detect and remove &signature when replying"),
-                                                   Field_Bool | Field_Advanced, ConfigField_ReplyQuoteOrig, },
-#if wxUSE_REGEX
-   { gettext_noop("This regular expression is used to detect the beginning\n"
-                  "of the signature of the message replied to."),
-                                                   Field_Message | Field_Advanced, ConfigField_ReplyDetectSig  },
-   { gettext_noop("Signature separator"),          Field_Text | Field_Advanced,    ConfigField_ReplyDetectSig, },
-#endif // wxUSE_REGEX
-
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
@@ -1898,12 +1883,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_XATTR),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
-   CONFIG_ENTRY(MP_REPLY_DETECT_SIG),
-#if wxUSE_REGEX
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_REPLY_SIG_SEPARATOR),
-#endif // wxUSE_REGEX
-
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE_SEPARATOR),

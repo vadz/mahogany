@@ -217,8 +217,6 @@ extern const MOption MP_REPLY_MSGPREFIX;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_XATTR;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
 extern const MOption MP_REPLY_QUOTE_EMPTY;
-extern const MOption MP_REPLY_DETECT_SIG;
-extern const MOption MP_REPLY_SIG_SEPARATOR;
 extern const MOption MP_COMPOSE_USE_SIGNATURE;
 extern const MOption MP_COMPOSE_SIGNATURE;
 extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
@@ -837,12 +835,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_NAME _T("ReplyQuoteUseSender")
 /// quote the empty lines when replying?
 #define   MP_REPLY_QUOTE_EMPTY_NAME      _T("ReplyQuoteEmpty")
-/// detect and remove signature when replying?
-#define MP_REPLY_DETECT_SIG_NAME _T("DetectSig")
-#if wxUSE_REGEX
-/// a regex to detect signature
-#define MP_REPLY_SIG_SEPARATOR_NAME _T("SigSeparator")
-#endif
 /// use signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_NAME   _T("ComposeInsertSignature")
 /// filename of signature file
@@ -1686,12 +1678,6 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 #define   MP_REPLY_MSGPREFIX_FROM_SENDER_DEFVAL 0l
 /// quote the empty lines when replying?
 #define   MP_REPLY_QUOTE_EMPTY_DEFVAL      1l
-/// detect and remove signature when replying?
-#define MP_REPLY_DETECT_SIG_DEFVAL   1
-#if wxUSE_REGEX
-/// a regex to detect signature
-#define MP_REPLY_SIG_SEPARATOR_DEFVAL _T("((_____*)|(-- ?))")
-#endif
 /// use signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_DEFVAL   1
 /// filename of signature file
