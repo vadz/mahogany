@@ -45,10 +45,11 @@
 // define this to do some (expensive!) run-time checks for translation tables
 // consistency
 #undef DEBUG_SORTING
-#define DEBUG_SORTING
+//#define DEBUG_SORTING
 
 #ifdef DEBUG_SORTING
    #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
+   #define CHECK_THREAD_DATA() VerifyThreadData(m_thrData)
    #define DUMP_TABLE(table, msg) \
       printf(#table " (count = %ld) ", m_count); \
       printf msg ; \
@@ -62,6 +63,7 @@
       puts("")
 #else
    #define CHECK_TABLES()
+   #define CHECK_THREAD_DATA()
    #define DUMP_TABLE(table, msg)
    #define DUMP_TRANS_TABLES(msg)
 #endif
@@ -138,6 +140,62 @@ static void VerifyTables(MsgnoType count,
 
    ASSERT_MSG( msgnosFound.GetCount() == count,
                "missing msgnos in translation table!?" );
+}
+
+// do some basic checks on thread data for consitency
+static void VerifyThreadData(const ThreadData *thrData)
+{
+   size_t n,
+          count = thrData->m_count;
+
+   // first check the thread table: it should be a permutation of all messages
+   wxArrayInt msgnosFound;
+   for ( n = 0; n < count; n++ )
+   {
+      MsgnoType msgno = thrData->m_tableThread[n];
+
+      ASSERT_MSG( msgno > 0 && msgno <= count,
+                  "invalid msgno in the thread table" );
+
+      if ( msgnosFound.Index(msgno) != wxNOT_FOUND )
+      {
+         FAIL_MSG( "duplicate msgno in thread table!" );
+      }
+      else
+      {
+         msgnosFound.Add(msgno);
+      }
+   }
+
+   ASSERT_MSG( msgnosFound.GetCount() == count,
+               "missing msgnos in thread table!?" );
+
+   // second check: indents must be positive
+   for ( n = 0; n < count; n++ )
+   {
+      if ( thrData->m_indents[n] > (size_t)1000 )
+      {
+         FAIL_MSG( "suspiciously big indent - overflow?" );
+      }
+   }
+
+   // third check: children must be consistent with the other 2 tables
+   for ( n = 0; n < count; n++ )
+   {
+      MsgnoType idx = thrData->m_tableThread[n] - 1;
+      size_t indent = thrData->m_indents[idx];
+
+      size_t m;
+      for ( m = n + 1; m < count; m++ )
+      {
+         MsgnoType idx2 = thrData->m_tableThread[m] - 1;
+         if ( thrData->m_indents[idx2] <= indent )
+            break;
+      }
+
+      ASSERT_MSG( thrData->m_children[idx] == m - n - 1,
+                  "inconsistent thread data" );
+   }
 }
 
 // dump a table
@@ -528,6 +586,8 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
    // update the threading table
    if ( m_thrData )
    {
+      CHECK_THREAD_DATA();
+
       DUMP_TABLE(m_thrData->m_tableThread,
                  ("before removing msgno %ld", msgnoRemoved));
       DUMP_TABLE((MsgnoType *)m_thrData->m_indents, (" "));
@@ -553,11 +613,13 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
                MsgnoType lastChild = firstChild + m_thrData->m_children[n];
                for ( MsgnoType j = firstChild; j < lastChild; j++ )
                {
+                  MsgnoType idx = m_thrData->m_tableThread[j] - 1;
+
                   // our children must have non zero indents!
-                  ASSERT_MSG( m_thrData->m_indents[j] > 0,
+                  ASSERT_MSG( m_thrData->m_indents[idx] > 0,
                               "error in OnRemove() logic" );
 
-                  m_thrData->m_indents[j]--;
+                  m_thrData->m_indents[idx]--;
                }
             }
 
@@ -632,6 +694,9 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       RemoveElementFromTable(m_thrData->m_indents, n, m_count);
       RemoveElementFromTable(m_thrData->m_children, n, m_count);
 
+      // keep it consistent with us
+      m_thrData->m_count--;
+
 #ifdef DEBUG_SORTING
       // last index is invalid now, don't let CHECK_TABLES() check it
       m_count--;
@@ -639,6 +704,8 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       DUMP_TABLE(m_thrData->m_tableThread, ("after removing"));
       DUMP_TABLE((MsgnoType *)m_thrData->m_indents, (" "));
       DUMP_TABLE(m_thrData->m_children, (" "));
+
+      CHECK_THREAD_DATA();
 
       m_count++;
 #endif // DEBUG_SORTING
@@ -1346,6 +1413,8 @@ void HeaderInfoListImpl::Thread()
    if ( m_mf->ThreadMessages(m_thrData, m_thrParams) )
    {
       DUMP_TABLE(m_thrData->m_tableThread, ("after threading"));
+
+      CHECK_THREAD_DATA();
    }
    else // threading failed
    {
