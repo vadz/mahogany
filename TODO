@@ -8,7 +8,8 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-
+9		if message is quoted-printable unquote it before
+                saving to file (how stupid!) same for encbinary
 9		persistent message boxes are broken, path changes somewhere and the
 		results are written under Profile while read from Settings/MessageBox
 		(the correct location)
@@ -42,13 +43,16 @@ $Id$
 * PRI	WHO	DESCRIPTION
 *********************************************************************
 
-6	KB	Could you please add a file-browse button/dialog to
+9	KB	Write ASMailFolder API for subscription management.
+
+
+6	VZ	Could you please add a file-browse button/dialog to
 		the folder selection dialog and modify its return
 		value to somehow indicate that a file rather than a
 		folder name was selected?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
-
+6	KB	implement temporary/fake Profile mode
 2	KB	add sub-directories support for different icon sets to 
 		wxIconManager, e.g. small/large style
 		More icons needed: INBOX, PopServer, IMAPServer,
@@ -70,8 +74,8 @@ $Id$
 		servers/subscription API
 4	CB	GPG/PGP support
 5	KB	Fix MessageCC(const String &) constructor.
-3	KB	eval wxHTML for help system and as built-in HTML viewer
-
+4	KB	eval wxHTML for help system and as built-in HTML viewer
+4		add option to force wrapping of messages in viewer
 5	VZ	when installing, create a welcome message in "New
 		Mail". Also, create a default address book with
 		m-users/m-developers entries in it. Also add entry for

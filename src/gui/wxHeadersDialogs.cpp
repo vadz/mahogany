@@ -31,6 +31,7 @@
 #  include <wx/stattext.h>
 #  include <wx/checkbox.h>
 #  include <wx/textctrl.h>
+#  include <wx/statbmp.h>
 #endif
 
 #include <wx/layout.h>

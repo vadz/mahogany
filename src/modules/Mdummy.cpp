@@ -20,7 +20,7 @@
 
 #include "MInterface.h"
 
-void DummyFunc(void);
+void DummyFunc(MInterface *interface);
 
 ///------------------------------
 /// MModule interface:
@@ -30,7 +30,8 @@ extern "C"
 {
    int InitMModule(int version_major,
                    int version_minor,
-                   int version_release)
+                   int version_release,
+                   MInterface *interface)
    {
       /* This test is done here rather than in the MModule.cpp loading 
          code, as a module can be more flexible in accepting certain
@@ -43,7 +44,7 @@ extern "C"
 
 
       // Call own initialisation functions here.
-      DummyFunc();
+      DummyFunc(interface);
       
       return MMODULE_ERR_NONE;;
    }
@@ -86,18 +87,20 @@ extern "C"
 ///------------------------------
 
 void
-DummyFunc(void)
+DummyFunc(MInterface *interface)
 {
+#if 0
    typedef void (*FptrT)(const char *msg, void *dummy, const char *title);
 
    FptrT fptr = (FptrT) MModule_GetSymbol("MDialog_Message");
    ASSERT(fptr);
+#endif
    
-   (*fptr)(
+   interface->Message(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",
       NULL,
       "Welcome from DummyModule!");
-
+   
 }

@@ -34,6 +34,7 @@
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
 #include <wx/persctrl.h>
+#include <wx/statbmp.h>
 
 #include "MDialogs.h"
 #include "MFolderDialogs.h"

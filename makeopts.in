@@ -70,7 +70,7 @@ RM = rm -f
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
-M4=@M4@ -s -P 
+M4=@M4@ 
 
 DESTDIR = @prefix@
 # Directory in which to install scripts.

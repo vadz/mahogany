@@ -10,8 +10,9 @@
 
 #ifndef USE_PCH
 #  define   Uses_wxApp
-#  include  <wx/wx.h>
+#  include  <wx/app.h>
 #  include  <wx/help.h>
+#  include  <wx/icon.h>
 #  include  "MApplication.h"
 #endif  //USE_PCH
 
@@ -50,6 +51,8 @@ public:
    virtual int  OnRun();
    virtual int  OnExit();
 
+   /// override wxWindows default icons
+   virtual wxIcon GetStdIcon(int which) const;
    /// OnIdle() handler to process Mahogany-specific MEvents which are 
    // asynchronous.
    void OnIdle(wxIdleEvent &event);

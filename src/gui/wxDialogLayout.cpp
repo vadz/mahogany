@@ -45,6 +45,7 @@
 #include <wx/radiobox.h>
 #include <wx/combobox.h>
 #include <wx/statbox.h>
+#include <wx/statbmp.h>
 
 #include <wx/menuitem.h>
 #include <wx/checklst.h>

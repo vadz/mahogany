@@ -22,6 +22,20 @@
 
 #include <wx/dynlib.h>
 
+
+// ----------------------------------------------------------------------------
+// Implementation of the MInterface 
+// ----------------------------------------------------------------------------
+
+#include "MInterface.h"
+#include "MInterface.cpp"
+
+static MInterface gs_MInterface;
+
+// ----------------------------------------------------------------------------
+// Actual MModule code
+// ----------------------------------------------------------------------------
+
 /** Structure for holding information about a loaded module. */
 struct ModuleEntry
 {
@@ -30,6 +44,7 @@ struct ModuleEntry
    /// Module pointer.
    MModule *m_Module;
 };
+
 
 
 class MModuleImpl : public MModule
@@ -77,7 +92,8 @@ MModuleImpl::Create(wxDllType dll)
    }
    if( (*initModuleFunc)(M_VERSION_MAJOR,
                          M_VERSION_MINOR,
-                         M_VERSION_RELEASE) == MMODULE_ERR_NONE)
+                         M_VERSION_RELEASE,
+                         &gs_MInterface) == MMODULE_ERR_NONE)
    {
       return new MModuleImpl(dll);
    }
@@ -163,9 +179,3 @@ extern "C"
 }
 
 
-// ----------------------------------------------------------------------------
-// Implementation of the MInterface 
-// ----------------------------------------------------------------------------
-
-#define MINTERFACE_IMPLEMENTATION
-#include "MInterface.h"

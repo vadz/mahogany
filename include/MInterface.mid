@@ -3,18 +3,29 @@
  *
  *.mid file for generating IDL and .h files for Mahogany C interface
  */
-m4_include(M4FILE)
+include(M4FILE)
 
 INCLUDE(`"MApplication.h"')
-
+INCLUDE(`"gui/wxMDialogs.h"')
 FILE_HEADER
 
-INTERFACE(MApi,`
+INTERFACE(MInterface,`
 
 FUNCTION(GetGlobalProfile, ProfileBase *, `(void)',
 `
  return mApplication->GetProfile();
 ')
+
+FUNCTION(Message, void , (
+ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
+ARG(STRING, title, =MDIALOG_MSGTITLE),
+ARG(STRING, configPath, =NULL) )
+,
+`
+ MDialog_Message(message,parent,title,configPath);
+')
+
+
 
 ')
 

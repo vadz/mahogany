@@ -70,12 +70,15 @@ extern "C"
        type which will be called to initialise it. That function must
        @param version_major major version number of Mahogany 
        @param version_minor minor version number of Mahogany 
-       @param version_release release version number of Mahogany 
+       @param version_release release version number of Mahogany
+       @param interface pointer to dummy class providing the interface 
+       to Mahogany
        @return 0 if it initialise the module, errno otherwise
    */
    typedef int (* MModule_InitModuleFuncType) (int version_major,
                                                int version_minor,
-                                               int version_release);
+                                               int version_release,
+                                               class MInterface *interface);
    /** Function type for GetName() function.
        @return pointer to a static buffer with the module name
    */

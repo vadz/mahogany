@@ -32,6 +32,7 @@
 #  include <wx/radiobox.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
+#  include <wx/statbmp.h>
 #  include <wx/textctrl.h>
 
 #  include <wx/utils.h>    // for wxStripMenuCodes

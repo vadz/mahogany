@@ -405,15 +405,6 @@ wxMApp::OnInit()
 #endif
 
    m_IconManager = new wxIconManager();
-#if 0
-#ifndef OS_WIN
-   /* Set our icons for the dialogs. */
-   wxGenericMessageDialog::SetIcon(wxICON_HAND,        ICON("msg_error"));
-   wxGenericMessageDialog::SetIcon(wxICON_EXCLAMATION, ICON("msg_warning"));
-   wxGenericMessageDialog::SetIcon(wxICON_QUESTION,    ICON("msg_question"));
-   wxGenericMessageDialog::SetIcon(wxICON_INFORMATION, ICON("msg_info"));
-#endif
-#endif
    
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
@@ -655,7 +646,6 @@ wxMApp::Help(int id, wxWindow *parent)
 void
 wxMApp::LoadModules(void)
 {
-#ifdef EXPERIMENTAL
    wxString
       pathname,
       globalDir,
@@ -710,19 +700,16 @@ wxMApp::LoadModules(void)
 #endif
       }
    }
-#endif // EXPERIMENTAL
 }
 
 void
 wxMApp::UnloadModules(void)
 {
-#ifdef EXPERIMENTAL
    ModulesList::iterator i;
    for(i = gs_GlobalModulesList.begin();
        i != gs_GlobalModulesList.end();
        i++)
       (**i).m_Module->DecRef();
-#endif // EXPERIMENTAL
 }
 
 // ----------------------------------------------------------------------------
@@ -815,3 +802,24 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
    }
 }
 #endif
+
+wxIcon
+wxMApp::GetStdIcon(int which) const
+{
+   /* Set our icons for the dialogs. */
+   switch(which)
+   {
+#ifndef OS_WIN
+   case wxICON_HAND:
+      return ICON("msg_error"); break;
+   case wxICON_EXCLAMATION:
+      return ICON("msg_warning"); break;
+   case wxICON_QUESTION:
+      return ICON("msg_question"); break;
+   case wxICON_INFORMATION:
+      return ICON("msg_info"); break;
+#endif
+   default:
+      return wxApp::GetStdIcon(which);
+   }
+}

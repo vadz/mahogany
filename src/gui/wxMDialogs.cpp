@@ -52,6 +52,7 @@
 #include <wx/persctrl.h>
 #include <wx/gauge.h>
 #include <wx/stattext.h>
+#include <wx/statbmp.h>
 
 #include "MFolderDialogs.h"
 

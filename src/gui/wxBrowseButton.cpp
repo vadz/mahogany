@@ -27,6 +27,10 @@
 #  include "guidef.h"
 
 #  include <wx/cmndata.h>
+#   include <wx/statbmp.h>
+#   include <wx/dcmemory.h>
+#   include <wx/layout.h>
+#   include <wx/statbox.h>
 #endif
 
 #include <wx/colordlg.h>
@@ -231,8 +235,9 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
       if ( (w1 != w2) || (h1 != h2) )
       {
          wxImage image(bmp);
-         bmp = image.Scale(w1, h1);
-      }
+         image.Scale(w1, h1);
+         bmp = image.ConvertToBitmap();
+         }
       //else: the size is already correct
 
       m_staticBitmap->SetBitmap(bmp);
@@ -257,7 +262,8 @@ void wxIconBrowseButton::DoBrowse()
       {
          // must resize the icon
          wxImage image(bmp);
-         bmp = image.Scale(size, size);
+         image.Scale(size, size);
+         bmp = image.ConvertToBitmap();
       }
 
       icons.Add(new wxBitmap(bmp));
@@ -349,10 +355,14 @@ void wxIconView::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 void wxIconView::OnClick(wxMouseEvent& event)
 {
+#ifdef __WXMSW__
    int x;
+#else
+   float x;
+#endif
    CalcUnscrolledPosition(event.GetX(), 0, &x, NULL);
 
-   int selection = x / ms_iconSize;
+   int selection = (int) (x / ms_iconSize);
    if ( selection != m_selection )
    {
       m_selection = selection;
