@@ -179,7 +179,8 @@ CountQuoteLevel(const char *string, int max_white, int max_alpha)
       //
       // TODO: make the string of "quoting characters" configurable
       if ( *c != '>' && *c != '|' && *c != '}' &&
-            ((*c != ')' && *c != '*') || c[1] != ' ') )
+            (*c != ')'  || c[1] != ' ') )
+//            ((*c != ')' && *c != '*') || c[1] != ' ') )  // '* ' still gives too many false positives
       {
          // not quoted (according to our heuristics anyhow)
          break;
