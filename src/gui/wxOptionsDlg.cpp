@@ -1053,7 +1053,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced, -1 },
    { gettext_noop("&Confirm sending mail"),        Field_Bool |
                                                    Field_Advanced,
-                                                  -ConfigField_ComposeConfirm },
+                                                  -ConfigField_ComposePreview },
 
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
