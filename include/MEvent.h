@@ -102,14 +102,21 @@ private:
 
 
 // ----------------------------------------------------------------------------
-/** MEventEmpty Data - Does not carry any data*/
+/** MEventEmpty Data - Does not carry any data apart from pointer to mailfolder.*/
 class MEventFolderUpdateData : public MEventData
 {
 public:
    /** Constructor.
    */
-   MEventFolderUpdateData()
-      : MEventData(MEventId_FolderUpdate) {}
+   MEventFolderUpdateData(MailFolder *folder)
+      : MEventData(MEventId_FolderUpdate)
+      {
+         m_folder = folder;
+      }
+   /// get the folder which changed
+   MailFolder *GetFolder() const { return m_folder; }
+private:
+   MailFolder *m_folder;
 };
 
 // ----------------------------------------------------------------------------
@@ -172,14 +179,14 @@ public:
 
    // register the event receiever for the events "eventId", the returned
    // pointer is NULL if the function failed, otherwise it should be saved for
-   // subsequent call to Unregister()
+   // subsequent call to Deregister()
    static void *Register(MEventReceiver& who, MEventId eventId);
 
    // unregister an event receiever - the "handle" parameter is returned by
    // Register(). If the same object is registered for several different
-   // events, Unregister() should be called for each (successful) call to
+   // events, Deregister() should be called for each (successful) call to
    // Register()
-   static bool Unregister(void *handle);
+   static bool Deregister(void *handle);
 };
 
 #endif // MEVENT_H

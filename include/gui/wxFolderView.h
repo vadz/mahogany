@@ -171,8 +171,9 @@ public:
    /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
-   virtual void OnFolderUpdateEvent(void);
-
+   virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
+   /// return profile name for persistent controls
+   wxString const &GetFullName(void) const { return m_ProfileName; }
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -182,6 +183,8 @@ protected:
    void SaveMessages(wxArrayInt const &messages, String const &file);
 
 private:
+   /// profile name
+   wxString m_ProfileName;
    /// first time constructor
    wxFolderView(wxWindow *parent);
    /// are we to deallocate the folder?

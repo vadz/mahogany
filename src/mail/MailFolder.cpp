@@ -116,3 +116,25 @@ MailFolder::OpenFolder(int typeAndFlags,
 
    return mf;
 }
+
+/* static */ String 
+MailFolder::ConvertMessageStatusToString(MessageStatus status)
+{
+   String strstatus = "";
+   
+   strstatus = "";
+   if(status & MSG_STAT_RECENT)
+   {
+      if(status & MSG_STAT_SEEN)
+         strstatus << 'U'; // seen but not read 
+      else
+         strstatus << 'N'; // not seen yet
+   }
+   else
+      strstatus << ' ';
+   strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
+   strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
+   strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
+
+   return strstatus;
+}

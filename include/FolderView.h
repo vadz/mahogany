@@ -30,8 +30,8 @@ public:
    /// virtual destructor
    virtual ~FolderView()
       {
-         MEventManager::Unregister(m_regCookieTreeChange);
-         MEventManager::Unregister(m_regCookieFolderUpdate);
+         MEventManager::Deregister(m_regCookieTreeChange);
+         MEventManager::Deregister(m_regCookieFolderUpdate);
       }
 
    /// event processing function
@@ -43,19 +43,17 @@ public:
          if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
             OnFolderDeleteEvent(event.GetFolderFullName());
       }
-      else if ( ev.GetId() == MEventId_FolderUpdate )
-      {
-         OnFolderUpdateEvent();
-      }
-
-      return true;
+      else if ( ev.GetId() == MEventId_FolderUpdate)
+         OnFolderUpdateEvent((MEventFolderUpdateData&)ev);
+  
+      return true; // continue evaluating this event
    }
 
 protected:
    /// the derived class should close when our folder is deleted
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;
    /// the derived class should update their display
-   virtual void OnFolderUpdateEvent(void) = 0;
+   virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
 
 private:
    void *m_regCookieTreeChange, *m_regCookieFolderUpdate;

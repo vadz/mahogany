@@ -42,29 +42,40 @@ class FolderView;
 */
 class MailFolder : public MObjectRC
 {
-public:   
+public:
    /** @name Constants and Types */
    //@{
+   // compatibility
+   typedef FolderType Type;
 
-   /// what's the status of a given message in the folder?
-   enum Status
+   /** What is the status of a given message in the folder?
+       Recent messages are those that we never saw in a listing
+       before. Once we open a folder, the messages will no longer be
+       recent when we close it. Seen are only those that we really
+       looked at. */
+   enum MessageStatus
    {
-      /// message is unread
-      MSG_STAT_UNREAD = 1,
+      /// empty message status
+      MSG_STAT_NONE = 0,
+      /// message has been seen
+      MSG_STAT_SEEN = 1,
       /// message is deleted
       MSG_STAT_DELETED = 2,
       /// message has been replied to
-      MSG_STAT_REPLIED = 4,
-      /// message is "recent" (what's this?)
+      MSG_STAT_ANSWERED = 4,
+      /// message is "recent" (see RFC 2060)
       MSG_STAT_RECENT = 8,
       /// message matched a search
-      MSG_STAT_SEARCHED = 16
+      MSG_STAT_SEARCHED = 16,
+      /// message has been flagged for something
+      MSG_STAT_FLAGGED = 64
    };
+
    //@}
-   
+
    /** @name Constructors and destructor */
    //@{
-   
+
    /**
       Opens an existing mail folder of a certain type.
       The path argument is as follows:
@@ -74,44 +85,43 @@ public:
                     profile) or absolute
       <li>MF_POP:   unused
       <li>MF_IMAP:  folder path
-      <li>MF_NNTP:  unused
-      <ul>
+      <li>MF_NNTP:  newgroup
+      </ul>
       @param type one of the supported types
       @param path either a hostname or filename depending on type
       @param profile parent profile
-      @param server
+      @param server hostname
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
       
    */
-   static MailFolder * OpenFolder(MailFolder::Type type,
-                                  String &path,
-                                  ProfileBase *profile = NULL,
-                                  String &server = NULLstring,
-                                  String &login = NULLstring,
-                                  String &password = NULLstring);
+   static MailFolder * OpenFolder(int typeAndFlags,
+                                  const String &path,
+                                  ProfileBase *profile,
+                                  const String &server,
+                                  const String &login,
+                                  const String &password);
 
    // currently we need to Close() and DecRef() it, that's not
    // nice. We need to change that.
    //@}
-   
-   /** Register a FolderView derived class to be notified when
+
+   /** Register a FolderViewBase derived class to be notified when
        folder contents change.
        @param  view the FolderView to register
        @param reg if false, unregister it
    */
    virtual void RegisterView(FolderView *view, bool reg = true);
-   
 
    /** get name of mailbox
        @return the symbolic name of the mailbox
    */
-   virtual String GetName(void);
+   virtual String GetName(void) const;
 
    /** get number of messages
        @return number of messages
    */
-   virtual long CountMessages(void);
+   virtual long CountMessages(void) const;
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void);
@@ -132,57 +142,62 @@ public:
    */
    virtual void UnDeleteMessage(unsigned long index);
 
+   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
+       @param sequence number of the message
+       @param flag flag to be set, e.g. "\\Deleted"
+       @param set if true, set the flag, if false, clear it
+   */
+   virtual void SetMessageFlag(unsigned long msgno,
+                               int flag,
+                               bool set = true);
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetSequenceFlag(String &sequence,
+   virtual void SetSequenceFlag(const String &sequence,
                                 int flag,
-                                bool set);
-
+                                bool set = true);
    /** Appends the message to this folder.
        @param msg the message to append
    */
-   virtual void AppendMessage(Message &msg);
+   virtual void AppendMessage(const Message &msg);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
    */
-   //FIXME virtual void AppendMessage(String &msg);
+   virtual void AppendMessage(const String &msg);
 
    /** Expunge messages.
      */
    virtual void ExpungeMessages(void);
-   
+
    /** Get the profile.
        @return Pointer to the profile.
    */
    inline ProfileBase *GetProfile(void) { return m_Profile; }
 
    /// return class name
-   char *GetClassName(void) const
+   const char *GetClassName(void) const
       { return "MailFolder"; }
+
    /// Get update interval in seconds
-   inline int GetUpdateInterval(void) { return m_UpdateInterval; }
-protected:
-   /**@name Accessor methods */
+   int GetUpdateInterval(void) const { return m_UpdateInterval; }
+
+   /** Utiltiy function to get a textual representation of a message
+       status.
+       @param message status
+       @return string representation
+   */
+   static String ConvertMessageStatusToString(MessageStatus status);
+   
+   /**@name Functions to get an overview of messages in the folder. */
    //@{
-   /// Set update interval in seconds
-   // not yet inline void SetUpdateInterval(void);
-   /// Get authorisation information
-   inline void GetAuthInfo(String *login, String *password) const
-      { *login = m_Login; *password = m_Password; }
-   //@}
-   /**@name Common variables might or might not be used */
-   //@{
-   /// Update interval for checking folder content
-   int m_UpdateInterval;
-   /// Login for password protected mail boxes.
-   String m_Login;
-   /// Password for password protected mail boxes.
-   String m_Password;
-   /// a profile
-   ProfileBase *m_Profile;
+   /// Return a pointer to the first message's header info.
+   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const;
+   /// Return a pointer to the next message's header info.
+   virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const;
    //@}
 };
+   

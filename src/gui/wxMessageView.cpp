@@ -1119,12 +1119,15 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
-   // don't redisplay the already shown message
-   if ( m_seqno == num )
-      return;
+   //FIXME: is this correct? don't redisplay the already shown message
+   //if ( m_seqno == num )
+   //   return;
+
    if(mailMessage) mailMessage->DecRef();
    mailMessage = folder->GetMessage(num);
    m_seqno = num;
+   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, true);
+
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )

@@ -122,7 +122,7 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
    return info;
 }
 
-bool MEventManager::Unregister(void *handle)
+bool MEventManager::Deregister(void *handle)
 {
    int index = gs_receivers.Index((MEventReceiverInfo *)handle);
 

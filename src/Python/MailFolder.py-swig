@@ -9,11 +9,13 @@ from MObject import *
 
 from Message import *
 class MailFolderPtr(MObjectRCPtr):
-    MSG_STAT_UNREAD = MailFolderc.MailFolder_MSG_STAT_UNREAD
+    MSG_STAT_NONE = MailFolderc.MailFolder_MSG_STAT_NONE
+    MSG_STAT_SEEN = MailFolderc.MailFolder_MSG_STAT_SEEN
     MSG_STAT_DELETED = MailFolderc.MailFolder_MSG_STAT_DELETED
-    MSG_STAT_REPLIED = MailFolderc.MailFolder_MSG_STAT_REPLIED
+    MSG_STAT_ANSWERED = MailFolderc.MailFolder_MSG_STAT_ANSWERED
     MSG_STAT_RECENT = MailFolderc.MailFolder_MSG_STAT_RECENT
     MSG_STAT_SEARCHED = MailFolderc.MailFolder_MSG_STAT_SEARCHED
+    MSG_STAT_FLAGGED = MailFolderc.MailFolder_MSG_STAT_FLAGGED
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -41,8 +43,11 @@ class MailFolderPtr(MObjectRCPtr):
     def UnDeleteMessage(self,arg0):
         val = MailFolderc.MailFolder_UnDeleteMessage(self.this,arg0)
         return val
-    def SetSequenceFlag(self,arg0,arg1,arg2):
-        val = MailFolderc.MailFolder_SetSequenceFlag(self.this,arg0.this,arg1,arg2)
+    def SetMessageFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self.this,arg0,arg1,)+args)
+        return val
+    def SetSequenceFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetSequenceFlag,(self.this,arg0.this,arg1,)+args)
         return val
     def AppendMessage(self,arg0):
         val = MailFolderc.MailFolder_AppendMessage(self.this,arg0.this)
@@ -60,6 +65,12 @@ class MailFolderPtr(MObjectRCPtr):
     def GetUpdateInterval(self):
         val = MailFolderc.MailFolder_GetUpdateInterval(self.this)
         return val
+    def GetFirstHeaderInfo(self):
+        val = MailFolderc.MailFolder_GetFirstHeaderInfo(self.this)
+        return val
+    def GetNextHeaderInfo(self,arg0):
+        val = MailFolderc.MailFolder_GetNextHeaderInfo(self.this,arg0)
+        return val
     def __repr__(self):
         return "<C MailFolder instance>"
 class MailFolder(MailFolderPtr):
@@ -73,19 +84,15 @@ class MailFolder(MailFolderPtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-def MailFolder_OpenFolder(arg0,arg1,*args):
-    argl = map(None,args)
-    try: argl[0] = argl[0].this
-    except: pass
-    try: argl[1] = argl[1].this
-    except: pass
-    try: argl[2] = argl[2].this
-    except: pass
-    try: argl[3] = argl[3].this
-    except: pass
-    args = tuple(argl)
-    val = apply(MailFolderc.MailFolder_OpenFolder,(arg0,arg1.this,)+args)
+def MailFolder_OpenFolder(arg0,arg1,arg2,arg3,arg4,arg5):
+    val = MailFolderc.MailFolder_OpenFolder(arg0,arg1.this,arg2.this,arg3.this,arg4.this,arg5.this)
     val = MailFolderPtr(val)
+    return val
+
+def MailFolder_ConvertMessageStatusToString(arg0):
+    val = MailFolderc.MailFolder_ConvertMessageStatusToString(arg0)
+    val = StringPtr(val)
+    val.thisown = 1
     return val
 
 

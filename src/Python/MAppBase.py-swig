@@ -11,7 +11,8 @@ class MAppBasePtr :
         self.this = this
         self.thisown = 0
     def Exit(self):
-        MAppBasec.MAppBase_Exit(self.this)
+        val = MAppBasec.MAppBase_Exit(self.this)
+        return val
     def TopLevelFrame(self):
         val = MAppBasec.MAppBase_TopLevelFrame(self.this)
         return val
@@ -19,18 +20,21 @@ class MAppBasePtr :
         val = MAppBasec.MAppBase_GetText(self.this,arg0)
         return val
     def GetGlobalDir(self):
-        val = StringPtr(MAppBasec.MAppBase_GetGlobalDir(self.this))
+        val = MAppBasec.MAppBase_GetGlobalDir(self.this)
+        val = StringPtr(val)
         val.thisown = 1
         return val
     def GetLocalDir(self):
-        val = StringPtr(MAppBasec.MAppBase_GetLocalDir(self.this))
+        val = MAppBasec.MAppBase_GetLocalDir(self.this)
+        val = StringPtr(val)
         val.thisown = 1
         return val
     def GetMimeManager(self):
         val = MAppBasec.MAppBase_GetMimeManager(self.this)
         return val
     def GetProfile(self):
-        val = ProfileBasePtr(MAppBasec.MAppBase_GetProfile(self.this))
+        val = MAppBasec.MAppBase_GetProfile(self.this)
+        val = ProfileBasePtr(val)
         return val
     def __repr__(self):
         return "<C MAppBase instance>"
@@ -46,7 +50,8 @@ class MAppBase(MAppBasePtr):
 #-------------- FUNCTION WRAPPERS ------------------
 
 def wxGetApp():
-    val = MAppBasePtr(MAppBasec.wxGetApp())
+    val = MAppBasec.wxGetApp()
+    val = MAppBasePtr(val)
     return val
 
 MDialog_ErrorMessage = MAppBasec.MDialog_ErrorMessage

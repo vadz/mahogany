@@ -142,12 +142,17 @@ public:
        @param year to store year (19xx)
        @return flags of message
    */
-   virtual int GetStatus(
+   virtual MailFolder::MessageStatus GetStatus(
       unsigned long *size = NULL,
       unsigned int *day = NULL,
       unsigned int *month = NULL,
       unsigned int *year = NULL) const;
 
+   /** Return message id. */
+   virtual String const &GetId(void) const ;
+       
+   /** Return message references. */
+   virtual String const &GetReferences(void) const;
 
    /** Query the section specification string of body part.
        @param  n part number
@@ -185,7 +190,6 @@ protected:
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
    //@}
-
 protected:
    /// constructor, called by CreateMessageCC()
    MessageCC(MailFolderCC *folder,unsigned long uid, unsigned long msgno);
@@ -197,7 +201,7 @@ private:
    /// text of the mail if not linked to a folder
    char *text; 
    /// unique message id
-   unsigned long  uid;
+   unsigned long  m_uid;
    /// message number, might be outdated!
    unsigned long  m_msgno;
    /// holds the pointer to a text buffer allocated by cclient lib

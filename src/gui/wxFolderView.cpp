@@ -270,9 +270,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    {
       m_timer->Stop();
       delete m_timer;
-      m_MailFolder->RegisterView(this,false);
+//      m_MailFolder->RegisterView(this,false);
       
-      // mark messages as seen
       if(m_NumOfMessages > 0)
       {
          String sequence;
@@ -280,9 +279,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
          else
             sequence = "1";
-         //FIXME: this is wrong, we should only set it when we
-         //actually view the message
-         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
+         // These messages are no longer recent as we've seen their headers.
+         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_RECENT, false);
       }
       m_MailFolder->DecRef();
    }
@@ -307,7 +305,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_MailFolder->GetName();
       m_timer = new wxFVTimer(m_MailFolder);
-      m_MailFolder->RegisterView(this);
+//      m_MailFolder->RegisterView(this);
 
       if ( recreateFolderCtrl )
       {
@@ -353,6 +351,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
+
 }
 
 void
@@ -362,9 +361,7 @@ wxFolderView::Update(void)
       return;
 
    long i;
-   Message  *mptr;
    String   line;
-   int   nstatus;
    unsigned long nsize;
    unsigned day, month, year;
    String dateFormat;
@@ -413,27 +410,32 @@ wxFolderView::Update(void)
       m_NumOfMessages = 0;
    }
 
+   HeaderInfo const *hi;
+   i = 0;
+   for(hi = m_MailFolder->GetFirstHeaderInfo(); hi != NULL;
+       hi = m_MailFolder->GetNextHeaderInfo(hi))
+   {
+      date.Printf(dateFormat, day, month, year);
+      size = strutil_ultoa(nsize);
+
+      selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
+
+      m_FolderCtrl->SetEntry(i,
+                             MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
+                             hi->GetFrom(),
+                             hi->GetSubject(),
+                             hi->GetDate(),
+                             strutil_ultoa(hi->GetSize())
+         );
+      m_FolderCtrl->Select(i,selected);
+      i++;
+   }
+
+#if 0
    for(i = 0; i < n; i++)
    {
       mptr = m_MailFolder->GetMessage(i+1);
-      nstatus = mptr->GetStatus(&nsize,&day,&month,&year);
-      status = "";
-      if(nstatus & MailFolder::MSG_STAT_UNREAD)
-         status += 'U';
-      else
-         status += ' ';
-      if(nstatus & MailFolder::MSG_STAT_RECENT)
-         status += 'N';
-      else
-         status += ' ';
-      if(nstatus & MailFolder::MSG_STAT_DELETED)
-         status += 'D';
-      else
-         status += ' ';
-      if(nstatus & MailFolder::MSG_STAT_REPLIED)
-         status += 'R';
-      else
-         status += ' ';
+      status = MailFolder::ConvertMessageStatusToString(mptr->GetStatus(&nsize,&day,&month,&year));
 
       subject = mptr->Subject();
       sender  = mptr->From();
@@ -445,6 +447,7 @@ wxFolderView::Update(void)
       m_FolderCtrl->Select(i,selected);
       SafeDecRef(mptr);
    }
+#endif
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxYield();
    m_UpdateSemaphore = false;
@@ -460,7 +463,7 @@ wxFolderView::OpenFolder(String const &profilename)
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
    SafeDecRef(mf);
-
+   m_ProfileName = profilename;
    wxEndBusyCursor();
 }
 
@@ -773,6 +776,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
       SafeDecRef(msg);
+      m_MailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
 
@@ -833,9 +837,14 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
 }
 
+/* This function gets called when the folder contents changed */
 void
-wxFolderView::OnFolderUpdateEvent(void)
+wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
+   if(event.GetFolder() == m_MailFolder)
+   {
+      Update();
+   }
 }
 
 

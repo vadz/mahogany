@@ -21,22 +21,6 @@
 class FolderView;
 class ProfileBase;
 
-/** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages. */
-class HeaderInfo
-{
-public:
-   virtual String const &GetSubject(void) const = 0;
-   virtual String const &GetFrom(void) const = 0;
-   virtual String const &GetDate(void) const = 0;
-   virtual String const &GetId(void) const = 0;
-   virtual String const &GetReferences(void) const = 0;
-   virtual String const &GetStatus(void) const = 0;
-   virtual unsigned long const &GetSize(void) const = 0;
-   virtual ~HeaderInfo() {}
-};
-
-
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -63,19 +47,27 @@ public:
    // compatibility
    typedef FolderType Type;
 
-   /// what's the status of a given message in the folder?
-   enum Status
+   /** What is the status of a given message in the folder?
+       Recent messages are those that we never saw in a listing
+       before. Once we open a folder, the messages will no longer be
+       recent when we close it. Seen are only those that we really
+       looked at. */
+   enum MessageStatus
    {
-      /// message is unread
-      MSG_STAT_UNREAD = 1,
+      /// empty message status
+      MSG_STAT_NONE = 0,
+      /// message has been seen
+      MSG_STAT_SEEN = 1,
       /// message is deleted
       MSG_STAT_DELETED = 2,
       /// message has been replied to
-      MSG_STAT_REPLIED = 4,
+      MSG_STAT_ANSWERED = 4,
       /// message is "recent" (see RFC 2060)
       MSG_STAT_RECENT = 8,
       /// message matched a search
-      MSG_STAT_SEARCHED = 16
+      MSG_STAT_SEARCHED = 16,
+      /// message has been flagged for something
+      MSG_STAT_FLAGGED = 64
    };
 
    //@}
@@ -103,11 +95,11 @@ public:
       
    */
    static MailFolder * OpenFolder(int typeAndFlags,
-                                  String const &path,
+                                  const String &path,
                                   ProfileBase *profile = NULL,
-                                  String const &server = NULLstring,
-                                  String const &login = NULLstring,
-                                  String const &password = NULLstring);
+                                  const String &server = NULLstring,
+                                  const String &login = NULLstring,
+                                  const String &password = NULLstring);
 
    // currently we need to Close() and DecRef() it, that's not
    // nice. We need to change that.
@@ -149,23 +141,32 @@ public:
    */
    virtual void UnDeleteMessage(unsigned long index) = 0;
 
+   /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
+       @param sequence number of the message
+       @param flag flag to be set, e.g. "\\Deleted"
+       @param set if true, set the flag, if false, clear it
+   */
+   virtual void SetMessageFlag(unsigned long msgno,
+                               int flag,
+                               bool set = true) = 0;
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetSequenceFlag(String const &sequence,
+   virtual void SetSequenceFlag(const String &sequence,
                                 int flag,
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
    */
-   virtual void AppendMessage(Message const &msg) = 0;
+   virtual void AppendMessage(const Message &msg) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
    */
-   virtual void AppendMessage(String const &msg) = 0;
+   virtual void AppendMessage(const String &msg) = 0;
 
    /** Expunge messages.
      */
@@ -183,12 +184,19 @@ public:
    /// Get update interval in seconds
    int GetUpdateInterval(void) const { return m_UpdateInterval; }
 
+   /** Utiltiy function to get a textual representation of a message
+       status.
+       @param message status
+       @return string representation
+   */
+   static String ConvertMessageStatusToString(MessageStatus status);
+   
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
-   virtual HeaderInfo const *GetFirstHeaderInfo(void) const = 0;
+   virtual const class HeaderInfo *GetFirstHeaderInfo(void) const = 0;
    /// Return a pointer to the next message's header info.
-   virtual HeaderInfo const *GetNextHeaderInfo(HeaderInfo const*) const = 0;
+   virtual const class HeaderInfo *GetNextHeaderInfo(const class HeaderInfo*) const = 0;
    //@}
 
 protected:
@@ -212,4 +220,22 @@ protected:
    ProfileBase *m_Profile;
    //@}
 };
+
+
+/** This class essentially maps to the c-client Overview structure,
+    which holds information for showing lists of messages. */
+class HeaderInfo
+{
+public:
+   virtual const String &GetSubject(void) const = 0;
+   virtual const String &GetFrom(void) const = 0;
+   virtual const String &GetDate(void) const = 0;
+   virtual const String &GetId(void) const = 0;
+   virtual const String &GetReferences(void) const = 0;
+   virtual MailFolder::MessageStatus GetStatus(void) const = 0;
+   virtual unsigned long const &GetSize(void) const = 0;
+   virtual ~HeaderInfo() {}
+};
+
+
 #endif

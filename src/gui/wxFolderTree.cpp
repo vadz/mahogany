@@ -892,7 +892,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
-   MEventManager::Unregister(m_eventReg);
+   MEventManager::Deregister(m_eventReg);
 
    delete GetImageList();
 

@@ -409,7 +409,7 @@ MAppBase::OnShutDown()
    // don't want events any more
    if ( m_eventReg )
    {
-      MEventManager::Unregister(m_eventReg);
+      MEventManager::Deregister(m_eventReg);
       m_eventReg = NULL;
    }
 

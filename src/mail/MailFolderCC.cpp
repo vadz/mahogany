@@ -33,6 +33,10 @@
 
 #include <ctype.h>   // isspace()
 
+
+/*----------------------------------------------------------------------------------------
+ * MailFolderCC code
+ *---------------------------------------------------------------------------------------*/
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
 
@@ -54,10 +58,11 @@ public:
    virtual String const &GetDate(void) const { return m_Date; }
    virtual String const &GetId(void) const { return m_Id; }
    virtual String const &GetReferences(void) const { return m_References; }
-   virtual String const &GetStatus(void) const { return m_Status; }
+   virtual MailFolder::MessageStatus GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
 protected:
-   String m_Subject, m_From, m_Date, m_Id, m_References, m_Status;
+   String m_Subject, m_From, m_Date, m_Id, m_References;
+   MailFolder::MessageStatus m_Status;
    unsigned long m_Size;
    friend class MailFolderCC;
 };
@@ -82,9 +87,10 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_numOfMessages = 0;
    m_Listing = NULL;
    m_GenerateNewMailEvents = false; // for now don't!
+   m_UpdateNeeded = true;
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
-
+   
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 
@@ -257,16 +263,19 @@ MailFolderCC::Open(void)
    // from now on we want to know when new messages appear
    m_GenerateNewMailEvents = true;
 
+#ifdef DEBUG
    // TESTING
    HeaderInfo const *hi;
    for(hi = GetFirstHeaderInfo(); hi != NULL; hi = GetNextHeaderInfo(hi))
    {
       cout << hi->GetSubject() << ' ' << hi->GetFrom() << ' '
            << hi->GetDate() << ' ' << hi->GetId() << endl
-           << "    " << hi->GetReferences() << ' ' << hi->GetStatus()
+           << "    " << hi->GetReferences() << ' '
+           << MailFolder::ConvertMessageStatusToString(hi->GetStatus())
+           << ' '
            << hi->GetSize() << endl;
    }
-   
+#endif   
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
    return true;   // success
 }
@@ -403,14 +412,17 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
 
    switch(flag)
    {
-   case MSG_STAT_UNREAD:
-      flagstr = "\\SEEN"; set = set ? false : true;
+   case MSG_STAT_SEEN:
+      flagstr = "\\SEEN";
       break;
-   case MSG_STAT_REPLIED:
+   case MSG_STAT_ANSWERED:
       flagstr = "\\ANSWERED";
       break;
    case MSG_STAT_DELETED:
       flagstr = "\\DELETED";
+      break;
+   case MSG_STAT_FLAGGED:
+      flagstr = "\\FLAGGED";
       break;
    default:
       return;
@@ -502,18 +514,16 @@ void
 MailFolderCC::UpdateCount(void)
 {
    unsigned long oldnum = m_numOfMessages;
-   m_numOfMessages = n;
 
    UpdateViews();
 
-   if(m_GenerateNewMailEvents && n  > oldnum) // new mail has arrived
+   if(m_GenerateNewMailEvents && m_numOfMessages  > oldnum) // new mail has arrived
    {
-      n = m_numOfMessages - oldnum;
+      unsigned long n = m_numOfMessages - oldnum;
       unsigned long *messageIDs = new unsigned long[n];
 
       // actually these are no IDs, but sequence numbers, which is fine.
-      // KB: I think it should be "New" AND "Unseen"
-      for ( unsigned long i = 0; i < (unsigned long)n; i++ )
+      for ( unsigned long i = 0; i < n; i++ )
          messageIDs[i] = oldnum + i + 1;
 
       MEventNewMailData data(this, messageIDs);
@@ -521,7 +531,7 @@ MailFolderCC::UpdateCount(void)
 
       delete [] messageIDs;
    }
-   oldnum = numOfMessages;
+   oldnum = m_numOfMessages;
 }
 
 extern "C"
@@ -533,17 +543,19 @@ extern "C"
 void
 MailFolderCC::BuildListing(void)
 {
-   //FIXME:MT any use of SetDefaultObj() needs to be protected by a semaphore
-      
-   SetDefaultObj();  // imap4r1 does temporary strings
-   // this will set the number ofmessages
-   mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
-   ProcessEventQueue();
-   SetDefaultObj(false);
+   unsigned long oldNumOfMessages = m_numOfMessages;
+
+   m_numOfMessages = m_MailStream->nmsgs;
    // now we know how many messages there are
 
-   if(m_Listing) delete [] m_Listing;
-   m_Listing = new HeaderInfoCC[m_numOfMessages];
+   if(m_Listing && m_numOfMessages > oldNumOfMessages)
+   {
+      delete [] m_Listing;
+      m_Listing = NULL;
+   }
+      
+   if(! m_Listing)
+      m_Listing = new HeaderInfoCC[m_numOfMessages];
 
    m_BuildNextEntry = 0;
    String sequence = "1:";
@@ -552,7 +564,57 @@ MailFolderCC::BuildListing(void)
    // info on the messages
    /* stream, sequence, header structure to fill */
    mail_fetch_overview_nonuid (m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+
+   /* This can actually happen if no overview information is
+      available, for NNTP sometimes */
+   if(m_BuildNextEntry != m_numOfMessages)
+   {
+      ASSERT(m_folderType == MF_NNTP); // otherwise I misunderstood something
+      ASSERT(m_BuildNextEntry == 0); // otherwise I misunderstood something
+      String dateFormat = READ_APPCONFIG(MP_DATE_FMT);
+
+      /* Now we need to build the list ourselves, that's annoying */
+      Message *msg;
+      unsigned int day, month, year;
+      unsigned long size;
+      for(;m_BuildNextEntry < m_numOfMessages; m_BuildNextEntry++)
+      {
+         HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
+         msg = GetMessage(m_BuildNextEntry+1);
+         entry.m_Status = msg->GetStatus(&size,&day,&month,&year);
+         entry.m_Subject = msg->Subject();
+         entry.m_From  = msg->From();
+         entry.m_Date.Printf(dateFormat, day, month, year);
+         entry.m_Size = size;
+         entry.m_References = msg->GetReferences();
+         entry.m_Id = ((MessageCC *)msg)->GetId();
+         msg->DecRef(); 
+      }
+   }
+   
    ASSERT(m_BuildNextEntry == m_numOfMessages);
+
+   // now we sent an update event to update folderviews etc
+   MEventFolderUpdateData data(this);
+   MEventManager::Send(data);
+
+   /* Now check whether we need to send new mail notifications: */
+
+   if(m_GenerateNewMailEvents && m_numOfMessages  > oldNumOfMessages) // new mail has arrived
+   {
+      unsigned long n = m_numOfMessages - oldNumOfMessages;
+      unsigned long *messageIDs = new unsigned long[n];
+
+      // actually these are no IDs, but sequence numbers, which is fine.
+      for ( unsigned long i = 0; i < n; i++ )
+         messageIDs[i] = oldNumOfMessages + i + 1;
+
+      MEventNewMailData data(this, messageIDs);
+      MEventManager::Send(data);
+
+      delete [] messageIDs;
+   }
+   m_UpdateNeeded = false;
 }
 
 void
@@ -571,12 +633,12 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    MESSAGECACHE selt;
 
    // STATUS:
-   entry.m_Status = "";
-   entry.m_Status << (elt->recent ? (elt->seen ? 'R': 'N') : ' ');
-   entry.m_Status << ((elt->recent | elt->seen) ? ' ' : 'U');
-   entry.m_Status << (elt->flagged ? 'F' : ' ');
-   entry.m_Status << (elt->answered ? 'A' : ' ');
-   entry.m_Status << (elt->deleted ? 'D' : ' ');
+   entry.m_Status = MSG_STAT_NONE;
+   if(elt->recent) entry.m_Status |= MSG_STAT_RECENT;
+   if(elt->seen) entry.m_Status |= MSG_STAT_SEEN;
+   if(elt->flagged) entry.m_Status |= MSG_STAT_FLAGGED;
+   if(elt->answered) entry.m_Status |= MSG_STAT_ANSWERED;
+   if(elt->deleted) entry.m_Status |= MSG_STAT_DELETED;
 
    // DATE
    mail_parse_date (&selt,ov->date);
@@ -593,7 +655,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
          entry.m_From.Printf("%s@%s",adr->mailbox,adr->host);
    else
       entry.m_From = _("<address missing>");
-   
+
 #if 0
    //FIXME: what on earth are user flags?
    if (i = elt->user_flags)
@@ -611,6 +673,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    entry.m_Subject = ov->subject;
    entry.m_Size = ov->optional.octets;
    entry.m_Id = ov->message_id;
+   entry.m_References = ov->references;
 }
 
 
@@ -731,38 +794,12 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-      mf->numOfMessages = number;
+      mf->m_numOfMessages = number;
    }
    else
    {
       FAIL_MSG("new mail in unknown mail folder?");
    }
-}
-
-
-/// this message has been expunged, subsequent numbers changed
-void
-MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
-{
-   String msg = "Expunged message no. " + strutil_ltoa(number);
-   LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
-   {
-      mf->m_numOfMessages--;
-      mf->UpdateViews();
-   }
-}
-
-/// flags have changed for a message
-void
-MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long /* number */)
-{
-   //String msg = "Flags changed for msg no. " + strutil_ltoa(number);
-   //LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
-      mf->UpdateViews();
 }
 
 
@@ -941,33 +978,23 @@ MailFolderCC::mm_fatal(char *str)
 }
 
 
+/* static */
 MailFolderCC::EventQueue MailFolderCC::ms_EventQueue;
 
+/* static */
 void
 MailFolderCC::ProcessEventQueue(void)
 {
    Event *evptr;
-   MailFolderCC *mf;
-   
+
    while(! ms_EventQueue.empty())
    {
       evptr = ms_EventQueue.pop_front();
       switch(evptr->m_type)
       {
+         /* The following events don't have much meaning yet. */
       case Searched:
          MailFolderCC::mm_searched(evptr->m_stream,  evptr->m_args[0].m_ulong);
-         break;
-      case Exists:
-         // the msg count has already been updated, but may need to generate a 
-         // new mail event
-         if((mf = LookupObject(evptr->m_stream)) != NULL)
-            mf->UpdateCount();
-         break;
-      case Expunged:
-         MailFolderCC::mm_expunged(evptr->m_stream,  evptr->m_args[0].m_ulong);
-         break;
-      case Flags:
-         MailFolderCC::mm_flags(evptr->m_stream,  evptr->m_args[0].m_ulong);
          break;
       case Notify:
          MailFolderCC::mm_notify(evptr->m_stream,
@@ -989,16 +1016,6 @@ MailFolderCC::ProcessEventQueue(void)
                                evptr->m_args[2].m_long);
          delete evptr->m_args[1].m_str;
          break;
-      case Status:
-         ASSERT(0); // we should never reach here
-#if 0
-         MailFolderCC::mm_status(evptr->m_stream,
-                                 *(evptr->m_args[0].m_str),
-                                 evptr->m_args[1].m_status);
-         delete evptr->m_args[0].m_str;
-         delete evptr->m_args[1].m_status;
-#endif
-         break;
       case Log:
          MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
                               evptr->m_args[1].m_long);
@@ -1008,9 +1025,48 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC::mm_dlog(*(evptr->m_args[0].m_str));
          delete evptr->m_args[0].m_str;
          break;
+      case Exists:
+         /* The Exists event is ignored here.
+            When the mm_exists() callback is called, the
+            m_NumOfMessages counter is updated immediately,
+            circumvening the event queue. It should never appear. */
+         ASSERT(0);
+         break;
+            /* These three events all notify us of changes to the folder
+            which we need to incorporate into our listing of the
+            folder. So we request an update which marks the folder to
+            be updated and generates an Update event which will be
+            processed later in this loop. */
+      case Status:
+      case Flags:
+      case Expunged:
+      {
+         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
+         ASSERT(mf);
+         mf->RequestUpdate();  // Queues an Update event.
+         break;
       }
+      /* The Update event is not caused by c-cli   ent callbacks but 
+         by this very event handling mechanism itself. It causes
+         BuildListing() to fetch a new listing. */
+      case Update:
+      {
+         MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
+         ASSERT(mf);
+         if(mf->UpdateNeeded())  // only call it once
+            mf->BuildListing();
+         break;
+      }
+      }// switch
       delete evptr;
    }
+}
+
+void
+MailFolderCC::RequestUpdate(void)   
+{
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);   
+   MailFolderCC::QueueEvent(evptr);
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
@@ -1032,29 +1088,32 @@ extern "C"
 
 void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn)
 {
-  if (stream->dtb && !(stream->dtb->overview &&
-		       (*stream->dtb->overview) (stream,sequence,ofn)) &&
-      mail_sequence (stream,sequence) && mail_ping (stream)) {
-    MESSAGECACHE *elt;
-    ENVELOPE *env;
-    OVERVIEW ov;
-    unsigned long i;
-    ov.optional.lines = 0;
-    ov.optional.xref = NIL;
-    for (i = 1; i <= stream->nmsgs; i++)
-      if (((elt = mail_elt (stream,i))->sequence) &&
-	  (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
-	ov.subject = env->subject;
-	ov.from = env->from;
-	ov.date = env->date;
-	ov.message_id = env->message_id;
-	ov.references = env->references;
-	ov.optional.octets = elt->rfc822_size;
-	(*ofn) (stream,mail_uid (stream,i),&ov);
-      }
-  }
+   if (stream->dtb &&
+       !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,ofn)) &&
+       mail_sequence (stream,sequence) &&
+       mail_ping (stream))
+   {
+      MESSAGECACHE *elt;
+      ENVELOPE *env;
+      OVERVIEW ov;
+      unsigned long i;
+      ov.optional.lines = 0;
+      ov.optional.xref = NIL;
+      for (i = 1; i <= stream->nmsgs; i++)
+         if (((elt = mail_elt (stream,i))->sequence) &&
+             (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
+         {
+            ov.subject = env->subject;
+            ov.from = env->from;
+            ov.date = env->date;
+            ov.message_id = env->message_id;
+            ov.references = env->references;
+            ov.optional.octets = elt->rfc822_size;
+            (*ofn) (stream,mail_uid (stream,i),&ov);
+         }
+   }
 }
-}
+} // extern "C"
 
 // the callbacks:
 extern "C"
@@ -1064,17 +1123,6 @@ void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched);
-   evptr->m_args[0].m_ulong = number;
-   MailFolderCC::QueueEvent(evptr);
-}
-
-void
-mm_exists(MAILSTREAM *stream, unsigned long number)
-{
-   // update count immediately to reflect change:
-   MailFolderCC::mm_exists(stream, number);
-   // generate an event to trigger checks for new mail after processing this
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
 }
@@ -1122,27 +1170,21 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
    evptr->m_args[0].m_int = delim;
    evptr->m_args[1].m_str = new String(name);
    evptr->m_args[2].m_long = attrib;
-   MailFolderCC::mm_lsub(stream, delim, name, attrib);
+   MailFolderCC::QueueEvent(evptr);
+}
+
+void
+mm_exists(MAILSTREAM *stream, unsigned long number)
+{
+   // update count immediately to reflect change:
+   MailFolderCC::mm_exists(stream, number);
 }
 
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
-/* All we are using so far is the message about the change in the
-   number of messages, so we just call mm_exists() here which does the 
-   job for us. */
-   if(status->flags & SA_MESSAGES)
-      mm_exists(stream,status->messages);
-/* Handling status changes is non-trivial as the number of messages
-   can have changed when the event is processed. */
-#if 0
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
-   evptr->m_args[0].m_str = new String(mailbox);
-   evptr->m_args[1].m_status = new MAILSTATUS;
-   memcpy(evptr->m_args[1].m_status, status, sizeof (MAILSTATUS));
    MailFolderCC::QueueEvent(evptr);
-//   MailFolderCC::mm_status(stream, mailbox, status);
-#endif
 }
 
 void

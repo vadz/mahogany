@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Message class: entries for message                               *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *
@@ -14,6 +14,7 @@
 
 #include "MObject.h"
 #include "kbList.h"
+#include "MailFolder.h"
 
 // ----------------------------------------------------------------------------
 // C-client compatibility defines
@@ -118,6 +119,12 @@ public:
    */
    virtual const String & Date(void) const = 0;
 
+   /** Return message id. */
+   virtual String const &GetId(void) const = 0;
+       
+   /** Return message references. */
+   virtual String const &GetReferences(void) const = 0;
+
    /** get message text
        @return the uninterpreted message body
    */
@@ -204,7 +211,7 @@ public:
        @param year to store year (19xx)
        @return flags of message
    */
-   virtual int GetStatus(
+   virtual MailFolder::MessageStatus GetStatus(
       unsigned long *size = NULL,
       unsigned int *day = NULL,
       unsigned int *month = NULL,

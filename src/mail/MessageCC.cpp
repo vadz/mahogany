@@ -55,7 +55,7 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid,
    text = NULL;
    folder = ifolder;
    folder->IncRef();
-   uid = iuid;
+   m_uid = iuid;
    m_msgno = msgno;
    Refresh();
 }
@@ -136,7 +136,7 @@ MessageCC::From(void) const
 const char *
 MessageCC::GetHeader(void) const
 {
-   const char *cptr = mail_fetchheader_full(folder->Stream(), uid,
+   const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
                                             NULL, NIL, FT_UID);
    MailFolderCC::ProcessEventQueue();
    return cptr;
@@ -152,7 +152,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),
-                                  uid,
+                                  m_uid,
                                   &slist,
                                   NIL,FT_UID);
    value = rc;
@@ -212,7 +212,7 @@ MessageCC::FetchText(void)
 {
    if(folder)
    {
-      mailText = mail_fetchtext_full(folder->Stream(), uid,
+      mailText = mail_fetchtext_full(folder->Stream(), m_uid,
                                             NIL, FT_UID);
       MailFolderCC::ProcessEventQueue();
       return mailText;
@@ -355,7 +355,7 @@ BODY *
 MessageCC::GetBody(void)
 {
    if(body == NULL && folder)
-      envelope = mail_fetchstructure_full(folder->Stream(),uid, &body,
+      envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &body,
                                           FT_UID);
    MailFolderCC::ProcessEventQueue();
    return body;
@@ -363,7 +363,7 @@ MessageCC::GetBody(void)
 
 
 /** Return the numeric status of message. */
-int
+MailFolder::MessageStatus
 MessageCC::GetStatus(
    unsigned long *size,
    unsigned int *day,
@@ -382,12 +382,13 @@ MessageCC::GetStatus(
    if(month)   *month = mc->month;
    if(year) *year = mc->year + BASEYEAR;
 
-   int status = 0;
-   if(!mc->seen)     status += MailFolder::MSG_STAT_UNREAD;
-   if(mc->answered)  status += MailFolder::MSG_STAT_REPLIED;
-   if(mc->deleted)   status += MailFolder::MSG_STAT_DELETED;
-   if(mc->searched)  status += MailFolder::MSG_STAT_SEARCHED;
-   if(mc->recent)    status += MailFolder::MSG_STAT_RECENT;
+   MailFolder::MessageStatus status = MailFolder::MSG_STAT_NONE;
+   if(mc->seen)      status |= MailFolder::MSG_STAT_SEEN;
+   if(mc->answered)  status |= MailFolder::MSG_STAT_ANSWERED;
+   if(mc->deleted)   status |= MailFolder::MSG_STAT_DELETED;
+   if(mc->searched)  status |= MailFolder::MSG_STAT_SEARCHED;
+   if(mc->recent)    status |= MailFolder::MSG_STAT_RECENT;
+   if(mc->flagged)   status |= MailFolder::MSG_STAT_FLAGGED;
    return status;
 }
    
@@ -434,7 +435,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       & sp = GetPartSpec(n);
 
    char *cptr = mail_fetchbody_full(folder->Stream(),
-                                    uid,
+                                    m_uid,
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
    MailFolderCC::ProcessEventQueue();
@@ -547,6 +548,25 @@ MessageCC::GetPartDesc(int n)
    return partInfos[n].description;
 }
 
+
+String const &
+MessageCC::GetId(void) const
+{
+   if(body == NULL)
+      ((MessageCC *)this)-> GetBody();
+   ASSERT(body);
+   return body->id;
+}
+
+String const &
+MessageCC::GetReferences(void) const
+{
+   if(body == NULL)
+      ((MessageCC *)this)-> GetBody();
+   ASSERT(body);
+   return envelope->references;
+}
+
 void
 MessageCC::WriteToString(String &str, bool headerFlag) const
 {
@@ -559,12 +579,12 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
    {
       if(headerFlag)
       {
-         char *headerPart = mail_fetchheader_full(folder->Stream(),uid,NIL,&len,FT_UID);
+         char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
          str += headerPart;
          fulllen += len;
       }
 
-      char *bodyPart = mail_fetchtext_full(folder->Stream(),uid,&len,FT_UID);
+      char *bodyPart = mail_fetchtext_full(folder->Stream(),m_uid,&len,FT_UID);
       str += bodyPart;
       fulllen += len;
       MailFolderCC::ProcessEventQueue();

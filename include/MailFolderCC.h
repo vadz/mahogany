@@ -150,9 +150,9 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-  void SetMessageFlag(unsigned long msgno,
-                      int flag,
-                      bool set = true);
+  virtual void SetMessageFlag(unsigned long msgno,
+                              int flag,
+                              bool set = true);
    
    /** Appends the message to this folder.
        @param msg the message to append
@@ -226,6 +226,12 @@ private:
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
 
+   /// Do we need to update folder listing?
+   bool m_UpdateNeeded;
+   /// Request update
+   void RequestUpdate(void);
+   /// Do we need an update?
+   bool UpdateNeeded(void) const { return m_UpdateNeeded; }
    /// number of messages in mailbox
    unsigned long m_numOfMessages;
    /** Do we want to generate new mail events?
@@ -304,7 +310,7 @@ public:
    enum EventType
    {
       Searched, Exists, Expunged, Flags, Notify, List,
-      LSub, Status, Log, DLog
+      LSub, Status, Log, DLog, Update
    };
    /// A structure for passing arguments.
    union EventArgument
@@ -329,7 +335,10 @@ public:
       EventArgument m_args[3];
    };
    KBLIST_DEFINE(EventQueue, Event);
-   /// Add an event to the queue, called from (C) mm_ callback routines.
+   /**    Add an event to the queue, called from (C) mm_ callback
+          routines.
+          @param pointer to a new MailFolderCC::Event structure, will be freed by event handling mechanism.
+   */
    static void QueueEvent(Event *evptr)
           { ms_EventQueue.push_back(evptr); }
 protected:
@@ -354,12 +363,6 @@ public:
 
    /// tells program that there are this many messages in the mailbox
    static void mm_exists(MAILSTREAM *stream, unsigned long number);
-
-   /// this message has been expunged, subsequent numbers changed
-   static void mm_expunged(MAILSTREAM *stream, unsigned long number);
-
-   /// flags have changed for a message
-   static void mm_flags(MAILSTREAM *stream, unsigned long number);
 
    /** deliver stream message event
        @param stream mailstream
