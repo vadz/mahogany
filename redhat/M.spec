@@ -2,8 +2,8 @@
 # Version:  $Id$
 
 # version and release
-%define VERSION 0.60
-%define RELEASE 1
+%define VERSION 0.62
+%define RELEASE 0
 
 # default installation directory
 %define prefix /usr/local
@@ -11,20 +11,23 @@
 # we can build 2 different packages from this spec file: a semistatically
 # linked version (only common libs linked dynamically) or a quartstatically
 # one (only wxGTK linked statically, GTK libs dynamically)
+#
+# not used any more
+#
 #%define MAKETARGET semistatic
-%define MAKETARGET quartstatic
+#%define MAKETARGET quartstatic
 
 Summary: Mahogany email and news client
 Name: mahogany
 Version: %VERSION
 Release: %RELEASE
-Copyright: Mahogany Artistic License
+Copyright: Mahogany Artistic License or GPL
 Group: X11/Applications/Networking
-Source: ftp://mahogany.sourceforge.net/pub/%{VERSION}/mahogany-%{VERSION}.tar.gz
+Source: ftp://ftp.sourceforge.net/pub/sourceforge/mahogany/mahogany-%{VERSION}.tar.gz
 URL: http://mahogany.sourceforge.net/
-Packager: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+Packager: Vadim Zeitlin <vadim@wxwindows.org>
 Provides: mua
-Requires: libwx_gtk-2.2.so
+Requires: wxwin
 
 Prefix: %prefix
 BuildRoot: /var/tmp/%{name}-root
@@ -56,15 +59,6 @@ if [ -z $MAKE ]; then
   fi
 fi
 
-# leaving old commands here for now but commenting out
-#(cd include ; make ) || true
-#make -i depend || true
-#make -i clean
-#
-#(make -C include && make all && cd ../src && make %MAKETARGET)
-#
-#(make doc; exit 0)
-
 make
 
 %install
@@ -78,8 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 %post
 
 export MCONF_FILE=%prefix/share/Mahogany/M.conf
-echo "# added by rpm installation" >> $MCONF_FILE
-echo "GlobalDir=$MCONF_FILE" >> $MCONF_FILE
+echo "# added by rpm installation" >> $(MCONF_FILE)
+echo "[M/Profiles]" >> $(MCONF_FILE)
+echo "GlobalDir=$MCONF_FILE" >> $(MCONF_FILE)
 
 %postun
 

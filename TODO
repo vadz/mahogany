@@ -2,28 +2,11 @@
 TODO list for Mahogany
 $Id$
 
-*** going back to using this file temporarily until bug tracker is back online
-
-1. TABs in msg view?
-
-4. folder opened in the main frame is still sometimes leaked on exit!
-
-5. dropping msgs to a newly created folder doesn't show them there
-
-*********************************************************************
-*** BUGS
-*********************************************************************
-*SEV PF WHO	DESCRIPTION
-*********************************************************************
-
-
 *** PLEASE DO NOT USE THIS FILE ANYMORE BUT ADD NEW BUGS
     TO THE BUGTRACKER at http://mahogany.sourceforge.net/bugz/
 
     JUST CONTINUE TO REMOVE BUGS FROM THIS LIST AS THEY ARE 
     FIXED.
-
-
 
 ************ THREADING PROBLEMS:
 
@@ -45,7 +28,11 @@ as the MailFolderCC.cpp code should take care of that itself.
  b) show the progress dialog?
 *** end of VZ section
 
-
+*********************************************************************
+*** BUGS
+*********************************************************************
+*SEV PF WHO	DESCRIPTION
+*********************************************************************
 
 5	VZ	should have a global list of all templates (identified either by
 		name or file name) and a dialog to choose among all of them
