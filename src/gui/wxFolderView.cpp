@@ -215,11 +215,13 @@ public:
    bool SelectNextFlagged(void);
 
    /// goto next message by MessageStatus, return true if found
-   bool SelectNextByStatus(int status);
+   bool SelectNextByStatus(int status, bool condition);
 
-   /// select next unread message after the given one
+   /// select next unread or flagged message after the given one
    UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
-                                 long indexStart = -1, int status = MailFolder::MSG_STAT_SEEN);
+                                 long indexStart = -1,
+                                 int status = MailFolder::MSG_STAT_SEEN,
+                                 bool condition = FALSE);
 
    /// focus the given item and ensure it is visible
    void Focus(long index);
@@ -1499,17 +1501,17 @@ wxFolderListCtrl::SetEntryStatus(long index, const String& status)
 bool
 wxFolderListCtrl::SelectNextUnread()
 {
-   return SelectNextByStatus(MailFolder::MSG_STAT_SEEN);
+   return SelectNextByStatus(MailFolder::MSG_STAT_SEEN, FALSE);
 }
 
 bool
 wxFolderListCtrl::SelectNextFlagged()
 {
-   return SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED);
+   return SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
 }
 
 bool
-wxFolderListCtrl::SelectNextByStatus(int status)
+wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
 {
    HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
    if( !hil || hil->Count() == 0 )
@@ -1519,7 +1521,7 @@ wxFolderListCtrl::SelectNextByStatus(int status)
    }
 
    long idxFocused = GetFocusedItem();
-   UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status);
+   UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status, condition);
    if ( uid != UID_ILLEGAL )
    {
       // always preview the selected message, if we did "Show next unread"
@@ -1534,7 +1536,7 @@ wxFolderListCtrl::SelectNextByStatus(int status)
 
    String msg;
    if ( (idxFocused != -1) &&
-            !(hil[idxFocused]->GetStatus() & status) )
+            (!(hil[idxFocused]->GetStatus() & status) == !condition) )
    {
       // "more" because the one selected previously was unread
       msg = _("No more unread or flagged messages in this folder.");
@@ -1552,7 +1554,8 @@ wxFolderListCtrl::SelectNextByStatus(int status)
 
 
 UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
-                                                long idxFocused, int status)
+                                                long idxFocused, int status,
+                                                bool condition)
 {
    long idx = idxFocused;
    for ( ;; )
@@ -1570,9 +1573,9 @@ UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
          continue;
       }
 
-      // is this one unread?
+      // is this one unread or flagged?
       const HeaderInfo *hi = hil[idx];
-      if( !(hi->GetStatus() & status) )
+      if( !(hi->GetStatus() & status) == !condition )
       {
          Focus(idx);
 
@@ -2454,7 +2457,7 @@ void wxFolderView::SelectAllFlagged()
    size_t count = hil->Count();
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !(hil[n]->GetStatus() & MailFolder::MSG_STAT_FLAGGED) )
+      if ( (hil[n]->GetStatus() & MailFolder::MSG_STAT_FLAGGED) )
       {
          m_FolderCtrl->Select(n, true);
       }
