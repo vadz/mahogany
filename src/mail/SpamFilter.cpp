@@ -26,6 +26,7 @@
    #include "pointers.h"           // for RefCounter
    #include "strutil.h"            // for strutil_restore_array
    #include "Profile.h"            // for Profile_obj
+   #include <wx/frame.h>
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
@@ -378,7 +379,7 @@ bool SpamFilter::EditParameters(wxFrame *parent, String *params)
             &filters,
             &states,
             _T("SpamRuleParams"),
-            (wxWindow*)parent
+            parent
          ) )
    {
       return false;
