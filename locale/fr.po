@@ -964,6 +964,7 @@ msgstr "Configurer l'im&primante"
 #: wxMenuDefs.cpp:209 wxMenuDefs.cpp:210
 msgid "Configure printing"
 msgstr "Configurer les paramètres d'impression"
+
 #: wxComposeView.cpp:1021
 msgid "Failed to pass message to external editor."
 msgstr "Imposible de transmettre le texte du message à l'éditeur externe."
@@ -971,6 +972,7 @@ msgstr "Imposible de transmettre le texte du message à l'éditeur externe."
 #: wxMenuDefs.cpp:213 wxMenuDefs.cpp:214
 msgid "&Print PS Setup"
 msgstr "Configurer l'im&primante PostScript"
+
 #: wxComposeView.cpp:1038
 #, c-format
 msgid "Execution of '%s' failed."
@@ -2026,9 +2028,6 @@ msgstr "Confirmer la &sortie"
 #: wxOptionsDlg.cpp:356 wxOptionsDlg.cpp:367
 msgid "&Click folder to open"
 msgstr "&Cliquer pour ouvrir"
-#: wxMenuDefs.cpp:274 wxMenuDefs.cpp:310
-msgid "&Find..."
-msgstr "&Rechercher..."
 
 #: wxMenuDefs.cpp:274
 msgid "Find text in message"
@@ -4148,16 +4147,16 @@ msgstr ", s'exécutant sur "
 
 # MDialogs.h
 msgid "Error"
-msgstr "Fehler"
+msgstr "Erreur"
 
 msgid "System Error"
 msgstr "Erreur système"
 
 msgid "Fatal Error"
-msgstr "Nicht behebbarer Fehler"
+msgstr "Erreur fatale"
 
 msgid "Information"
 msgstr "Informations"
 
 msgid "Please choose"
-msgstr "Question"
+msgstr "Veuillez choisir"
