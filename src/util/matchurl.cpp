@@ -467,6 +467,7 @@ URLDetector::URLDetector()
    addNewKeyword("https:");
    addNewKeyword("mailto:");
    addNewKeyword("ftp:");
+   addNewKeyword("file:");
    // addNewKeyword("ftps:"); -- does anyone really uses this?
 
    // also detect some common URLs even without the scheme part
