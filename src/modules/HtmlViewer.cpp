@@ -192,6 +192,54 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// HTML_Handler_META: wxHTML handler for the <meta> tag, see EncodingChanger
+// ----------------------------------------------------------------------------
+
+#include "wx/html/m_templ.h"
+#include "wx/html/htmlcell.h"
+
+TAG_HANDLER_BEGIN(META, "META" )
+
+    TAG_HANDLER_PROC(tag)
+    {
+        if (tag.HasParam(_T("HTTP-EQUIV")) &&
+            tag.GetParam(_T("HTTP-EQUIV")) == _T("Content-Type") &&
+            tag.HasParam(_T("CONTENT")))
+        {
+            // strlen("text/html; charset=")
+            static const CHARSET_STRING_LEN = 19;
+
+            wxString content = tag.GetParam(_T("CONTENT"));
+            if (content.Left(CHARSET_STRING_LEN) == _T("text/html; charset="))
+            {
+                wxFontEncoding enc =
+                    wxFontMapper::Get()->CharsetToEncoding(
+                              content.Mid(CHARSET_STRING_LEN));
+
+                if ( enc == wxFONTENCODING_SYSTEM ||
+                     enc == m_WParser->GetInputEncoding() )
+                   return FALSE;
+
+                m_WParser->SetInputEncoding(enc);
+                m_WParser->GetContainer()->InsertCell(
+                    new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
+            }
+        }
+
+        return FALSE;
+    }
+
+TAG_HANDLER_END(META)
+
+
+TAGS_MODULE_BEGIN(MetaTag)
+
+    TAGS_MODULE_ADD(META)
+
+TAGS_MODULE_END(MetaTag)
+
+
+// ----------------------------------------------------------------------------
 // a collection of small classes which add something to the given string in
 // its ctor and something else in its dtor, this is useful for HTML tags as
 // you can't forget to close them like this
@@ -233,9 +281,13 @@ public:
    {
       if ( enc != wxFONTENCODING_SYSTEM )
       {
-         // FIXME: this is a really strange way to change the encoding but
-         //        it is the only one which works with wxHTML - so be it
-         //        [for now]
+         // this is a really strange way to change the encoding but it is the
+         // only one which works with wxHTML
+         //
+         // update: now that meta tag handling was removed from wxHTML itself
+         // its handler moved in this file (see TAG_HANDLER macros) and so we
+         // could change it either to our own custom tag or to something
+         // completely different, but for now leave it as is...
          DoChange(GetMetaString(wxFontMapper::GetEncodingName(enc)),
                   GetMetaString("iso-8859-1"));
       }
