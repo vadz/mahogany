@@ -90,7 +90,9 @@ class FindHeaderHelper
 public:
    FindHeaderHelper(MailFolder *mf, MailFolder::MessageStatus flag, bool set)
    {
-      m_msgnosFound = mf->SearchByFlag(flag, set);
+      m_msgnosFound = mf->SearchByFlag(flag,
+                                       SEARCH_UNDELETED |
+                                       (set ? SEARCH_SET : SEARCH_UNSET));
    }
 
    const MsgnoArray *GetResults() const { return m_msgnosFound; }
@@ -1095,7 +1097,8 @@ MsgnoArray *
 HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                         bool set)
 {
-   return m_mf->SearchByFlag(flag, set);
+   return m_mf->SearchByFlag(flag,
+                             set ? SEARCH_SET : SEARCH_UNSET);
 }
 
 // ----------------------------------------------------------------------------

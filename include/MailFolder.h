@@ -656,16 +656,6 @@ public:
                                     int flags = SEARCH_SET |
                                                 SEARCH_UNDELETED) const = 0;
 
-   /// compatibility wrapper, don't use
-   MsgnoArray *SearchByFlag(MessageStatus flag, bool set)
-   {
-      return SearchByFlag
-             (
-               flag,
-               SEARCH_UNDELETED | (set ? SEARCH_SET : SEARCH_UNSET)
-             );
-   }
-
    /** Search messages for certain criteria.
        @return UIdArray with UIds of matching messages, caller must
        free it
