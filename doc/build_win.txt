@@ -30,8 +30,9 @@ c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
 build the wxMSW library. However, do *not* follow the standard build
 instructions included into wxWindows distribution. For historical reasons I am
 using my own project file to build wxWindows version used by Mahogany: it is
-included in Mahogany cvs and is called wxWindows.dsp. You will also need to
-copy extra\scripts\wxmsw_setup.h to include\wx subdirectory of your wxWindows
+included in Mahogany cvs and is called wxWindows.dsp. You should move this
+file to the directory where you installed wxWindows. You will also need to
+copy extra\scripts\wxmsw_setup.h to include\wx\msw\setup.h of your wxWindows
 installation. Notice that this is mandatory, do *not* try to build wxWindows
 using other settings unless you know what you are doing or you are sure to run
 into trouble.
@@ -65,3 +66,16 @@ otherwise, dependencies will not be handled correctly.
     Finally, just build everything. Before running M.exe, copy the file
 versit.dll produced when building versit project into the root Mahogany
 directory (or elsewhere in your PATH).
+
+3. Common problems
+------------------
+
+Visual C++ 5.0 doesn't understand environment variables in the project
+settings, so you will need to replace the occurences of $(wx) with the value
+of the variable.
+
+If you don't have yacc or bison on your system, you will need to manually copy
+src/wx/vcard/vcc.c-yacc to vcc.c.
+
+If you get problem with PROIO_yywrap being multiply defined in wxWindows,
+comment out the 2nd definition of this function in src/common/y_tab.c.
