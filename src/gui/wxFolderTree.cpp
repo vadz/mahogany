@@ -2462,7 +2462,8 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    ASSERT_MSG( event.GetEventObject() == this, _T("got other treectrls event?") );
 
    wxTreeItemId itemId = event.GetItem();
-   wxFolderTreeNode *newCurrent = GetFolderTreeNode(itemId);
+   wxFolderTreeNode *newCurrent = itemId.IsOk() ? GetFolderTreeNode(itemId)
+                                                : NULL;
 
    MFolder *oldsel = m_current ? m_current->GetFolder() : NULL;
 
