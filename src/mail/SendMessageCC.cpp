@@ -271,6 +271,15 @@ SendMessageCC::SendMessageCC(Profile *profile,
    // other initializations common to all messages
    // --------------------------------------------
 
+   // set up default value for From (Reply-To is set in InitNew() as it isn't
+   // needed for the resent messages)
+   AddressList_obj addrList(AddressList::CreateFromAddress(m_profile));
+   Address *addrFrom = addrList->GetFirst();
+   if ( addrFrom )
+   {
+      m_From = addrFrom->GetAddress();
+   }
+
    // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
 
@@ -303,19 +312,12 @@ SendMessageCC::SendMessageCC(Profile *profile,
 
 void SendMessageCC::InitNew()
 {
+   // FIXME: why do we do it here, it seems to be overwritten in Build()??
    m_Body->type = TYPEMULTIPART;
    m_Body->nested.part = mail_newbody_part();
    m_Body->nested.part->next = NULL;
    m_NextPart = m_Body->nested.part;
    m_LastPart = m_NextPart;
-
-   // set up default values for From/Reply-To headers
-   AddressList_obj addrList(AddressList::CreateFromAddress(m_profile));
-   Address *addrFrom = addrList->GetFirst();
-   if ( addrFrom )
-   {
-      m_From = addrFrom->GetAddress();
-   }
 
    m_ReplyTo = READ_CONFIG_TEXT(m_profile, MP_REPLY_ADDRESS);
 
@@ -399,10 +401,10 @@ void SendMessageCC::InitResent(const Message *message)
 
    m_Envelope->remail = cpystr(hdr.c_str());
 
-   // now copy the body: note that we have to use ENCOTHER here to prevent
+   // now copy the body: note that we have to use ENC7BIT here to prevent
    // c-client from (re)encoding the body
    m_Body->type = TYPETEXT;
-   m_Body->encoding = ENCOTHER;
+   m_Body->encoding = ENC7BIT;
    m_Body->subtype = cpystr("PLAIN");
 
    // FIXME: we potentially copy a lot of data here!
@@ -985,11 +987,13 @@ SendMessageCC::Build(bool forStorage)
 
    m_wasBuilt = true;
 
+   // this must be done for the new as well as resent messages: RFC 2822 says
+   // that Resent-From should be always present (section 3.6.6)
+   SetupFromAddresses();
+
    // don't add any more headers to the message being resent
    if ( !m_Envelope->remail )
    {
-      SetupFromAddresses();
-
       /*
          Is the message supposed to be sent later? In that case, we need
          to store the BCC header as an X-BCC or it will disappear when
