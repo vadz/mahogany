@@ -436,7 +436,8 @@ inline bool IsURLReserved(char c)
 /// checks a character to be a valid part of an URL
 inline bool IsURLChar(char c)
 {
-   return IsAlnum(c) || IsURLMark(c) || IsURLReserved(c) || c == '%' || c == '#';
+   return IsAlnum(c) || IsURLMark(c) || IsURLReserved(c) || c == '%' || c == '#' ||
+          c == '[' || c == ']';
 }
 
 /// check if this is this atext as defined in RFC 2822
@@ -740,7 +741,7 @@ match:
    }
 
    // truncate any punctuation at the end
-   while ( strchr(".:,;)!?", *(p - 1)) )
+   while ( strchr(".:,)!?", *(p - 1)) )
       p--;
 
    // '@' matches may result in false positives, as not every '@' character
