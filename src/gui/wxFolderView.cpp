@@ -231,10 +231,15 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
    MailFolder *mf = m_FolderView->GetFolder();
+   const HeaderInfo *hi;
    while((item = GetNextItem(item,
                              wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-         != -1) 
-      selections.Add(mf->GetHeaderInfo(item++)->GetUId());
+         != -1)
+   {
+      hi = mf->GetHeaderInfo(item++);
+      if(hi)
+         selections.Add(hi->GetUId());
+   }
    return selections.Count();
 }
 

@@ -227,11 +227,12 @@ public:
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
-       @param profile optional profile pointer
+       @param isProfile if true, the folderName will be interpreted as a symbolic folder name, otherwise as a filename
        @return true on success
    */
    bool SaveMessages(const INTARRAY *selections,
-                     String const & folderName);
+                     String const & folderName,
+                     bool isProfile);
 
    /** Mark messages as deleted.   
        @param messages pointer to an array holding the message numbers

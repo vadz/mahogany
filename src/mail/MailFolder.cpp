@@ -180,7 +180,8 @@ MailFolder::ConvertMessageStatusToString(int status)
 
 bool
 MailFolder::SaveMessages(const INTARRAY *selections,
-                         String const & folderName)
+                         String const & folderName,
+                         bool isProfile)
 {
    int
       n = selections->Count(),
@@ -192,7 +193,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
       return false;
 
    Message *msg;
-   mf = MailFolder::OpenFolder(MF_PROFILE, folderName);
+   mf = MailFolder::OpenFolder(isProfile ? MF_PROFILE : MF_FILE, folderName);
    if(! mf)
    {
       String msg;
@@ -240,7 +241,7 @@ MailFolder::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
    MFolder *folder = MDialog_FolderChoose(parent);
    if ( folder )
    {
-      rc = SaveMessages(selections, folder->GetFullName());
+      rc = SaveMessages(selections, folder->GetFullName(), true);
       folder->DecRef();
    }
    return rc;
@@ -263,7 +264,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
       if ( !fd.Create(filename, TRUE /* overwrite */) )
           wxLogError(_("Couldn't truncate the existing file."));
 
-      return SaveMessages(selections,filename);
+      return SaveMessages(selections,filename, false);
    }
    else
       return false;

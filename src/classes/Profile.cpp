@@ -95,6 +95,9 @@ public:
    /// like the constructor, but reuses existing objects
    static ProfileBase * CreateProfile(const String & ipathname,
                                       ProfileBase const *Parent);
+   /// like the constructor, but reuses existing objects
+   static ProfileBase * CreateEmptyProfile(const ProfileBase *Parent);
+      
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
@@ -163,6 +166,8 @@ private:
    /// Destructor, writes back those entries that got changed.
    ~Profile();
    GCC_DTOR_WARN_OFF();
+   /// this is an empty dummy profile, readonly
+   bool     m_IsEmpty;
 };
 //@}
 
@@ -304,7 +309,7 @@ ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
 ProfileBase *
 ProfileBase::CreateEmptyProfile(ProfileBase const *parent)
 {
-   ProfileBase *p = Profile::CreateEmptyProfile(parent);
+   ProfileBase *p =  Profile::CreateEmptyProfile(parent);
    EnforcePolicy(p);
    return p;
 }
@@ -366,6 +371,7 @@ Profile::Profile(const String & iName, ProfileBase const *Parent)
       String(M_PROFILE_CONFIG_SECTION);
    if(iName.Length())
       m_ProfileName << '/' << iName;
+   m_IsEmpty = false;
 }
 
 
@@ -375,6 +381,13 @@ Profile::CreateProfile(const String & iClassName, ProfileBase const *parent)
    return new Profile(iClassName, parent);
 }
 
+ProfileBase *
+Profile::CreateEmptyProfile(ProfileBase const *parent)
+{
+   Profile * p = new Profile("", parent);
+   p->m_IsEmpty = true;
+   return p;
+}
 
 Profile::~Profile()
 {
@@ -385,6 +398,7 @@ bool
 Profile::HasGroup(const String & name) const
 {
    PCHECK();
+   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->HasGroup(name);
 }
@@ -393,6 +407,7 @@ bool
 Profile::HasEntry(const String & key) const
 {
    PCHECK();
+   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->HasEntry(key) || ms_GlobalConfig->HasGroup(key);
 }
@@ -401,6 +416,7 @@ bool
 Profile::Rename(const String& oldName, const String& newName)
 {
    PCHECK();
+   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->RenameGroup(oldName, newName);
 }
@@ -409,6 +425,7 @@ void
 Profile::DeleteGroup(const String & path)
 {
    PCHECK();
+   if(m_IsEmpty) return;
    ms_GlobalConfig->SetPath(GetName());
    ms_GlobalConfig->DeleteGroup(path);
 }
@@ -463,6 +480,7 @@ bool
 Profile::writeEntry(const String & key, const String & value)
 {
    PCHECK();
+   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_ProfilePath.Length())
@@ -475,6 +493,7 @@ bool
 Profile::writeEntry(const String & key, long value)
 {
    PCHECK();
+   if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
    if(m_ProfilePath.Length())

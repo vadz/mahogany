@@ -137,9 +137,9 @@ public:
     */
    void PreviewMessage(long messageno)
       {
-         m_MessagePreview->ShowMessage(
-            m_MailFolder,
-            m_MailFolder->GetHeaderInfo(messageno)->GetUId());
+         const class HeaderInfo *hi = m_MailFolder->GetHeaderInfo(messageno);
+         if(hi)
+            m_MessagePreview->ShowMessage(m_MailFolder,hi->GetUId());
       }
    void SetSize(const int x, const int y, const int width, int height);
 

@@ -612,7 +612,8 @@ MAppBase::OnMEvent(MEventData& event)
          for(i = 0; i < number; i++)
             selections.Add(mailevent.GetNewMessageIndex(i));
          folder->SaveMessages(&selections,
-                              READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+                              READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                              true);
          break;
       }
    }

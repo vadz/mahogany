@@ -349,11 +349,21 @@ MailFolderCC::Ping(void)
    {
       LOGMESSAGE((M_LOG_DEBUG, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
-      if(! Open())
+      bool rc = Open();
+      if(rc == false)
+      {
          ERRORMESSAGE((_("Re-opening folder '%s' failed."),GetName().c_str()));
+      }
       else
+      {
+         RemoveFromMap(m_MailStream);
          m_MailStream = NIL;
+      }
    }
+   if(! m_MailStream)
+      return;
+
+   ProcessEventQueue();
    CCQuiet();
    mail_check(m_MailStream); // update flags, etc, .newsrc
    CCVerbose();
