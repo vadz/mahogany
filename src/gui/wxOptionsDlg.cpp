@@ -3394,7 +3394,7 @@ bool wxOptionsPageNetwork::TransferDataFromWindow()
       }
    }
 
-   return true;
+   return wxOptionsPage::TransferDataFromWindow();
 }
 
 // ----------------------------------------------------------------------------
