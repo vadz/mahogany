@@ -822,13 +822,17 @@ void wxNotebookPageBase::OnChange(wxEvent& event)
 // wxManuallyLaidOutDialog
 // ----------------------------------------------------------------------------
 
+#define DIALOG_STYLE (wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxCLIP_CHILDREN)
+
 wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
                                                  const wxString& title,
                                                  const wxString& profileKey)
-                       : wxPDialog(profileKey,
+                       : wxPDialog(
+                                   profileKey,
                                    parent,
-                                   wxString("Mahogany: ")+title,
-                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+                                   wxString("Mahogany: ") + title,
+                                   DIALOG_STYLE
+                                  )
 {
    // basic unit is the height of a char, from this we fix the sizes of all
    // other controls
@@ -1176,15 +1180,17 @@ bool wxNotebookDialog::DoApply()
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
    ProfileBase *profile = GetProfile();
-   CHECK_RET( profile, "no profile in [Apply] btn handler" );
-
-   profile->Discard();
-   profile->DecRef();
+   if ( profile )
+   {
+      profile->Discard();
+      profile->DecRef();
+   }
 
    m_lastBtn = MEventOptionsChangeData::Cancel;
    SendOptionsChangeEvent();
    // allow the event to be processed before we are gone
    MEventManager::DispatchPending();
+
    EndModal(FALSE);
 }
 

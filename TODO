@@ -19,8 +19,12 @@ $Id$
 		- add HTML import
 	KB	MessageView:
 		 - should show cursor only on demand
+		 - remember focused message not by index but by UID
+		   and find it again after re-sort
 		 - shouldn't preview messages unless configured to do so
                    (currently does preview on delete)
+
+8	KB	no handler found for this image in html help
 
 8	KB	integrate imap 4.7 and recently received patches
 5	KB	let all message sorting use the translation table
@@ -103,7 +107,7 @@ KB		add python hook for filters
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
 
-
+6		support for external hooks (programs, not Python scripts)
 
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???

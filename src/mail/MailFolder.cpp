@@ -908,13 +908,14 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
 
    STATUSMESSAGE((_("Threading %lu messages..."), (unsigned long) hilp->Count()));
    
-   for(size_t i = 0; i < hilp->Count(); i++)
+   size_t i;
+   for(i = 0; i < hilp->Count(); i++)
       (*hilp)[i]->SetIndentation(0);
    
    /* We need a list of dependent messages for each entry. */
    SizeTList  * dependents = new SizeTList[ (*hilp).Count() ];
 
-   for(size_t i = 0; i < (*hilp).Count(); i++)
+   for(i = 0; i < (*hilp).Count(); i++)
    {
       String id = (*hilp)[i]->GetId();
       if(id.Length()) // no Id lines in Outbox!
@@ -936,11 +937,11 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
 
    size_t * indices = new size_t [(*hilp).Count()];
    unsigned * indents = new unsigned [(*hilp).Count()];
-   for(size_t i = 0; i < hilp->Count(); i++)
+   for(i = 0; i < hilp->Count(); i++)
       indents[i] = 0;
    
    size_t idx = 0; // where to store next entry
-   for(size_t i = 0; i < hilp->Count(); i++)
+   for(i = 0; i < hilp->Count(); i++)
    {
       // we mark used indices with a non-0 indentation:
       if((*hilp)[i]->GetIndentation() == 0)
@@ -956,7 +957,7 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    hilp->SetTranslationTable(indices);
    
 
-   for(size_t i = 0; i < hilp->Count(); i++)
+   for(i = 0; i < hilp->Count(); i++)
       (*hilp)[i]->SetIndentation(indents[i]);
 
 
@@ -1068,7 +1069,8 @@ MailFolderCmn::UpdateConfig(void)
                                            MP_MSGS_RESORT_ON_CHANGE) != 0;
    m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(),
                                            MP_UPDATEINTERVAL);
-   m_Config.m_UseThreading = READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING);
+   m_Config.m_UseThreading = READ_CONFIG(GetProfile(),
+                                         MP_MSGS_USE_THREADING) != 0;
 
    m_Timer->Stop();
    m_Timer->Start(m_Config.m_UpdateInterval * 1000);   

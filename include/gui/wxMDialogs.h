@@ -289,6 +289,8 @@ bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent);
 
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL
+
+#  define wxSMDialog wxDialog 
 #else
 #  define USE_SEMIMODAL
 

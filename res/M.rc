@@ -66,6 +66,7 @@ tb_mail_compose	BITMAP	"tb_mail_compose.bmp"
 tb_mail_forward	BITMAP	"tb_mail_forward.bmp"
 tb_mail_reply	BITMAP	"tb_mail_reply.bmp"
 tb_mail_send	BITMAP	"tb_mail_send.bmp"
+tb_next_unread	BITMAP	"tb_next_unread.bmp"
 
 tb_delete	BITMAP	"tb_delete.bmp"
 tb_undo		BITMAP	"tb_undo.bmp"

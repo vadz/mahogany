@@ -92,22 +92,16 @@
 // ----------------------------------------------------------------------------
 
 /// wxAboutFrame: g_pSplashScreen and CloseSplash() further down
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-#ifdef OS_WIN
-#  undef USE_SEMIMODAL
-#else
-#  define USE_SEMIMODAL
-#endif
+#ifdef USE_SEMIMODAL
 
 int
 wxSMDialog::ShowModal()
 {
-#ifndef USE_SEMIMODAL
-   return wxDialog::ShowModal();
-#else // USE_SEMIMODAL
    m_modalShowing = TRUE;
 
 #if wxUSE_HELP && wxUSE_HTML
@@ -136,14 +130,10 @@ wxSMDialog::ShowModal()
 
    wxEnableTopLevelWindows(TRUE);
    return GetReturnCode();
-#endif // !USE_SEMIMODAL/USE_SEMIMODAL
 }
 
 void wxSMDialog::EndModal( int retCode )
 {
-#ifndef USE_SEMIMODAL
-    wxDialog::EndModal(retCode);
-#else // USE_SEMIMODAL
     SetReturnCode( retCode );
 
     if (!IsModal())
@@ -153,9 +143,9 @@ void wxSMDialog::EndModal( int retCode )
     }
     m_modalShowing = FALSE;
     Show( FALSE );
-#endif // !USE_SEMIMODAL/USE_SEMIMODAL
 }
 
+#endif // USE_SEMIMODAL
 
 // better looking and wxConfig-aware wxTextEntryDialog
 class MTextInputDialog : public wxDialog

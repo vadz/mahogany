@@ -134,7 +134,7 @@ private:
   wxString         m_strName;      // our name
   DummyEntryGroup *m_pParent;      // the parent group (never NULL)
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 // our AdbBook implementation: it maps to a disk file here
@@ -199,7 +199,7 @@ private:
 
   DummyEntryGroup *m_pRootGroup; // the ADB_Entries group
 
-  GCC_DTOR_WARN_OFF();
+  GCC_DTOR_WARN_OFF
 };
 
 // our AdbDataProvider implementation

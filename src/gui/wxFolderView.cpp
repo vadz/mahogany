@@ -120,7 +120,8 @@ public:
          // leave it as it is SetForegroundColour( fg );
          // we want to use fg as the default item colour
          SetBackgroundColour( bg );
-         SetFont( * new wxFont( fontSize, fontFamily, wxDEFAULT, wxDEFAULT ) );
+         SetFont( * new wxFont( fontSize, fontFamily,
+                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL ) );
       }
 protected:
    long m_Style;
@@ -437,7 +438,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
    {
       while((item = GetNextItem(item,
                                 wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-            != -1 && item < hil->Count())
+            != -1 && (unsigned long)item < hil->Count())
       {
          hi = (*hil)[item++];
          if(hi)
@@ -448,7 +449,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
       {
          item = -1;
          item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-         if(item != -1 && item < hil->Count())
+         if(item != -1 && (unsigned long)item < hil->Count())
          {
             hi = (*hil)[item++];
             if(hi)
@@ -679,6 +680,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                             wxSP_3D|wxSP_BORDER);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+   ReadProfileSettings(&m_settingsCurrent);
    m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
                                m_settingsCurrent.BgCol,
                                m_settingsCurrent.font,
