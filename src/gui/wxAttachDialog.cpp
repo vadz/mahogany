@@ -176,7 +176,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
    static const wxCoord MARGIN = 2*LAYOUT_X_MARGIN;
 
    m_txtFilename = CreateFileEntry(this, labels[Label_Filename],
-                                   widthMax, NULL, MARGIN);
+                                   widthMax, box, MARGIN);
    m_txtName = CreateTextWithLabel(this, labels[Label_Name],
                                    widthMax, m_txtFilename, MARGIN);
    m_radioDisposition = CreateRadioBox(this,
@@ -187,7 +187,7 @@ wxAttachmentDialog::wxAttachmentDialog(wxWindow *parent,
                                    widthMax, m_radioDisposition, MARGIN);
 
 
-   SetDefaultSize(6*wBtn, 8*hBtn);
+   SetDefaultSize(6*wBtn, 10*hBtn);
 }
 
 // ----------------------------------------------------------------------------
