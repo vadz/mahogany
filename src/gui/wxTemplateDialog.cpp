@@ -4,7 +4,7 @@
 // Purpose:     these dialogs are used mainly by the options dialog, but may be
 //              also used from elsewhere
 // Author:      Vadim Zeitlin
-// Modified by:
+// Modified by: VZ at 09.05.00 to allow editing all templates
 // Created:     16.07.99
 // CVS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -89,14 +89,15 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-// the main dialog for editing templates: it contains a listbox for choosing
-// the template and the text control to edit the selected template
-class wxTemplateDialog : public wxOptionsPageSubdialog
+// the dialog for editing the templates for the given folder (profile): it
+// contains a listbox for choosing the template and the text control to edit
+// the selected template
+class wxFolderTemplatesDialog : public wxOptionsPageSubdialog
 {
 public:
-   wxTemplateDialog(const TemplatePopupMenuItem& menu,
-                    ProfileBase *profile,
-                    wxWindow *parent);
+   wxFolderTemplatesDialog(const TemplatePopupMenuItem& menu,
+                           ProfileBase *profile,
+                           wxWindow *parent);
 
    // did the user really change anything?
    bool WasChanged() const { return m_wasChanged; }
@@ -124,17 +125,74 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// the dialog for choosing/editing all templates of the given kind
+class wxAllTemplatesDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxAllTemplatesDialog(MessageTemplateKind kind,
+                        const TemplatePopupMenuItem& menu,
+                        wxWindow *parent);
+
+   // get the value of the template chosen
+   wxString GetTemplateValue() const;
+
+   // called by wxWindows when [Ok] button was pressed
+   virtual bool TransferDataFromWindow();
+
+   // callbacks
+   void OnAddTemplate(wxCommandEvent& event);
+   void OnDeleteTemplate(wxCommandEvent& event);
+   void OnListboxSelection(wxCommandEvent& event);
+   void OnUpdateUIDelete(wxUpdateUIEvent& event);
+
+private:
+   // helper function to get the correct title for the dialog
+   static wxString GetTemplateTitle(MessageTemplateKind kind);
+
+   // save the changes made to the template being edited
+   void SaveChanges();
+
+   // show the currently chosen template in the text control
+   void UpdateText();
+
+   MessageTemplateKind m_kind;   // the kind of all templates we edit
+   wxString m_name;              // the name of the template being edited
+
+   // controls
+   wxListBox  *m_listbox;
+   wxButton   *m_btnAdd,
+              *m_btnDelete;
+   wxTextCtrl *m_textctrl;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
+
+enum
+{
+   Button_Template_Add = 100,
+   Button_Template_Delete
+};
 
 BEGIN_EVENT_TABLE(TemplateEditor, wxTextCtrl)
    EVT_MENU(-1, TemplateEditor::OnMenu)
    EVT_RIGHT_DOWN(TemplateEditor::OnRClick)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxTemplateDialog, wxOptionsPageSubdialog)
-   EVT_LISTBOX(-1, wxTemplateDialog::OnListboxSelection)
+BEGIN_EVENT_TABLE(wxFolderTemplatesDialog, wxOptionsPageSubdialog)
+   EVT_LISTBOX(-1, wxFolderTemplatesDialog::OnListboxSelection)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxAllTemplatesDialog, wxManuallyLaidOutDialog)
+   EVT_LISTBOX(-1, wxAllTemplatesDialog::OnListboxSelection)
+
+   EVT_BUTTON(Button_Template_Add,    wxAllTemplatesDialog::OnAddTemplate)
+   EVT_BUTTON(Button_Template_Delete, wxAllTemplatesDialog::OnDeleteTemplate)
+
+   EVT_UPDATE_UI(Button_Template_Delete, wxAllTemplatesDialog::OnUpdateUIDelete)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -312,10 +370,10 @@ void TemplateEditor::CreatePopupMenu()
 }
 
 // ----------------------------------------------------------------------------
-// wxTemplateDialog
+// wxFolderTemplatesDialog
 // ----------------------------------------------------------------------------
 
-const char *wxTemplateDialog::ms_templateNames[] =
+const char *wxFolderTemplatesDialog::ms_templateNames[] =
 {
    gettext_noop("New message"),
    gettext_noop("New article"),
@@ -324,7 +382,7 @@ const char *wxTemplateDialog::ms_templateNames[] =
    gettext_noop("Forward")
 };
 
-wxTemplateDialog::wxTemplateDialog(const TemplatePopupMenuItem& menu,
+wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& menu,
                                    ProfileBase *profile,
                                    wxWindow *parent)
                 : wxOptionsPageSubdialog(profile, parent,
@@ -335,7 +393,6 @@ wxTemplateDialog::wxTemplateDialog(const TemplatePopupMenuItem& menu,
    // ------------
    m_kind = MessageTemplate_Max;
    m_profile = profile;
-   m_wasChanged = FALSE;
 
    // layout the controls
    // -------------------
@@ -348,10 +405,9 @@ wxTemplateDialog::wxTemplateDialog(const TemplatePopupMenuItem& menu,
    wxStaticText *msg = new wxStaticText
                            (
                             this, -1,
-                            _("Please select the template to edit in the list "
-                              "first. Then right click the mouse in the text "
-                              "control to get the list of all available "
-                              "macros")
+                            _("Select the template to edit in the list first. "
+                              "Then right click the mouse in the text control "
+                              "to get the list of all available macros.")
                            );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -390,7 +446,7 @@ wxTemplateDialog::wxTemplateDialog(const TemplatePopupMenuItem& menu,
    SetDefaultSize(6*wBtn, 10*hBtn);
 }
 
-void wxTemplateDialog::UpdateText()
+void wxFolderTemplatesDialog::UpdateText()
 {
    String templateValue = GetMessageTemplate(m_kind, m_profile);
 
@@ -398,14 +454,17 @@ void wxTemplateDialog::UpdateText()
    m_textctrl->DiscardEdits();
 }
 
-void wxTemplateDialog::SaveChanges()
+void wxFolderTemplatesDialog::SaveChanges()
 {
    m_wasChanged = TRUE;
 
-   SetMessageTemplate(m_textctrl->GetValue(), m_kind, m_profile);
+   // TODO: give the user the possibility to change the auto generated name
+   wxString name;
+   name << m_profile->GetName() << '_' << _(ms_templateNames[m_kind]);
+   SetMessageTemplate(name, m_textctrl->GetValue(), m_kind, m_profile);
 }
 
-void wxTemplateDialog::OnListboxSelection(wxCommandEvent& event)
+void wxFolderTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
 {
    if ( m_textctrl->IsModified() )
    {
@@ -426,12 +485,235 @@ void wxTemplateDialog::OnListboxSelection(wxCommandEvent& event)
    UpdateText();
 }
 
-bool wxTemplateDialog::TransferDataFromWindow()
+bool wxFolderTemplatesDialog::TransferDataFromWindow()
 {
    if ( m_textctrl->IsModified() )
    {
       // don't ask - if the user pressed ok, he does want to save changes,
       // otherwise he would have chosen cancel
+      SaveChanges();
+   }
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// wxAllTemplatesDialog
+// ----------------------------------------------------------------------------
+
+wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
+                                           const TemplatePopupMenuItem& menu,
+                                           wxWindow *parent)
+                    : wxManuallyLaidOutDialog(parent,
+                                              GetTemplateTitle(kind),
+                                              "AllTemplates")
+{
+   // init member vars
+   // ----------------
+   m_kind = kind;
+
+   // layout the controls
+   // -------------------
+   wxLayoutConstraints *c;
+
+   // first the box around everything
+   wxStaticBox *box = CreateStdButtonsAndBox("All available templates");
+
+   // on the left side is the listbox with all available templates
+   m_listbox = new wxPListBox("AllTemplates", this, -1);
+
+   // fill it now to let it auto adjust the width
+   wxArrayString names = GetMessageTemplateNames(kind);
+   size_t count = names.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_listbox->Append(names[n]);
+   }
+
+   c = new wxLayoutConstraints;
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.Absolute(5*hBtn);
+   m_listbox->SetConstraints(c);
+
+   // put 2 buttons to add/delete templates along the right edge
+   m_btnAdd = new wxButton(this, Button_Template_Add, _("&Add..."));
+   c = new wxLayoutConstraints;
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxCentreY, -2*LAYOUT_Y_MARGIN);
+   m_btnAdd->SetConstraints(c);
+
+   m_btnDelete = new wxButton(this, Button_Template_Delete, _("&Delete"));
+   c = new wxLayoutConstraints;
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(box, wxCentreY, 2*LAYOUT_Y_MARGIN);
+   c->right.SameAs(m_btnAdd, wxRight);
+   m_btnDelete->SetConstraints(c);
+
+   // between the listbox and the buttons there is the text control where
+   // template file can be edited
+   m_textctrl = new TemplateEditor(menu, this);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_listbox, wxTop);
+   c->height.SameAs(m_listbox, wxHeight);
+   c->left.RightOf(m_listbox, LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_btnAdd, 2*LAYOUT_X_MARGIN);
+   m_textctrl->SetConstraints(c);
+
+   SetDefaultSize(6*wBtn, 10*hBtn);
+
+   UpdateText();
+}
+
+wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind)
+{
+   wxString title, what;
+   switch ( kind )
+   {
+      case MessageTemplate_NewMessage:
+         what = _("composing new messages");
+         break;
+
+      case MessageTemplate_NewArticle:
+         what = _("composing newsgroup articles ");
+         break;
+
+      case MessageTemplate_Reply:
+         what = _("replying");
+         break;
+
+      case MessageTemplate_Followup:
+         what = _("writing follow ups");
+         break;
+
+      case MessageTemplate_Forward:
+         what = _("forwarding");
+         break;
+
+      default:
+         FAIL_MSG("unknown template kind");
+   }
+
+   title.Printf(_("Configure templates for %s"), what.c_str());
+
+   return title;
+}
+
+wxString wxAllTemplatesDialog::GetTemplateValue() const
+{
+   wxString value;
+   if ( !!m_name )
+   {
+      value = GetMessageTemplate(m_kind, m_name);
+   }
+
+   return value;
+}
+
+void wxAllTemplatesDialog::SaveChanges()
+{
+   wxASSERT_MSG( !!m_name, "shouldn't try to save" );
+
+   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
+}
+
+void wxAllTemplatesDialog::UpdateText()
+{
+   int sel = m_listbox->GetSelection();
+   if ( sel == -1 )
+   {
+      m_textctrl->Clear();
+      m_textctrl->Enable(FALSE);
+
+      m_name.clear();
+   }
+   else // we have selection
+   {
+      m_name = m_listbox->GetString(sel);
+      String value = GetMessageTemplate(m_kind, m_name);
+
+      m_textctrl->Enable(TRUE);
+      m_textctrl->SetValue(value);
+   }
+
+   // in any case, we changed it, not the user
+   m_textctrl->DiscardEdits();
+}
+
+void wxAllTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
+{
+   if ( m_textctrl->IsModified() )
+   {
+      // save it if the user doesn't veto it
+      String msg;
+      msg.Printf(_("You have modified the template '%s', "
+                   "would you like to save it?"),
+                 m_name.c_str());
+      if ( MDialog_YesNoDialog(msg, this,
+                               MDIALOG_YESNOTITLE, true, "SaveTemplate") )
+      {
+         SaveChanges();
+      }
+   }
+
+   UpdateText();
+}
+
+void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
+{
+   wxASSERT_MSG( !!m_name, "shouldn't try to delete" );
+
+   String msg;
+   msg.Printf(_("Do you realyl want to delete the template '%s'?"),
+              m_name.c_str());
+   if ( MDialog_YesNoDialog(msg, this,
+                            MDIALOG_YESNOTITLE, false, "DeleteTemplate") )
+   {
+      m_listbox->Delete(m_listbox->GetSelection());
+
+      DeleteMessageTemplate(m_kind, m_name);
+   }
+}
+
+void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& event)
+{
+   // get the name for the new template
+   wxString name;
+   if ( !MInputBox(
+                   &name,
+                   _("Create new template"),
+                   _("Name for the new template:"),
+                   this,
+                   "AddTemplate"
+                  ) )
+   {
+      // cancelled
+      return;
+   }
+
+   // append the new string to the listbox and select it
+   m_name = name;
+   m_listbox->Append(name);
+   m_listbox->SetSelection(m_listbox->GetCount() - 1);
+   m_textctrl->Clear();
+   m_textctrl->DiscardEdits();
+}
+
+void wxAllTemplatesDialog::OnUpdateUIDelete(wxUpdateUIEvent& event)
+{
+   // only enable delete button if some template was chosen
+   event.Enable(!!m_name);
+}
+
+bool wxAllTemplatesDialog::TransferDataFromWindow()
+{
+   if ( m_textctrl->IsModified() )
+   {
+      // we were editing something, save the changes
       SaveChanges();
    }
 
@@ -447,7 +729,7 @@ bool ConfigureTemplates(ProfileBase *profile,
                         wxWindow *parent,
                         const TemplatePopupMenuItem& menu)
 {
-   wxTemplateDialog dlg(menu, profile, parent);
+   wxFolderTemplatesDialog dlg(menu, profile, parent);
    if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
    {
       return TRUE;
@@ -460,9 +742,15 @@ bool ConfigureTemplates(ProfileBase *profile,
 
 // select a template from all existing ones
 String ChooseTemplateFor(MessageTemplateKind kind,
-                                wxWindow *parent)
+                         wxWindow *parent,
+                         const TemplatePopupMenuItem& menu)
 {
-    FAIL_MSG("TODO");
+   wxString value;
+   wxAllTemplatesDialog dlg(kind, menu, parent);
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+      value = dlg.GetTemplateValue();
+   }
 
-    return "";
+   return value;
 }

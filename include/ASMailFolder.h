@@ -412,8 +412,8 @@ public:
        @param flags 0, or REPLY_FOLLOWUP
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
+                                const MailFolder::Params& params,
                                 MWindow *parent = NULL,
-                                int flags = 0,
                                 UserData ud = 0) = 0;
 
    /** Forward selected messages.
@@ -421,6 +421,7 @@ public:
        @param parent window for dialog
    */
    virtual Ticket ForwardMessages(const UIdArray *messages,
+                                  const MailFolder::Params& params,
                                   MWindow *parent = NULL,
                                   UserData ud = 0) = 0;
 

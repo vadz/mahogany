@@ -101,6 +101,8 @@ extern bool ConfigureTemplates(ProfileBase *profile,
     @return the chosen template or an empty string
  */
 extern String ChooseTemplateFor(MessageTemplateKind kind,
-                                wxWindow *parent);
+                                wxWindow *parent,
+                                const TemplatePopupMenuItem& menu =
+                                 g_ComposeViewTemplatePopupMenu);
 
 #endif // _TEMPLATEDIALOG_H

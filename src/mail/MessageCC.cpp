@@ -177,6 +177,11 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
          sendMsg.SetFrom(From(), name, reply);
       }
       break;
+
+      // make gcc happy
+      case Prot_Illegal:
+      default:
+         FAIL_MSG("unknown protocol");
    }
    
    for(int i = 0; i < CountParts(); i++)

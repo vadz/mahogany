@@ -114,19 +114,22 @@ public:
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
-   static wxComposeView * CreateReplyMessage(wxWindow *parent,
+   static wxComposeView * CreateReplyMessage(const MailFolder::Params& params,
+                                             wxWindow *parent,
                                              ProfileBase *parentProfile,
                                              Message * original = NULL,
                                              bool hide = false);
 
    /** Constructor for forwarding a message.
 
+       @param templ is the template to use
        @param parent parent window
        @param parentProfile parent profile
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
-   static wxComposeView * CreateFwdMessage(wxWindow *parent,
+   static wxComposeView * CreateFwdMessage(const MailFolder::Params& params,
+                                           wxWindow *parent,
                                            ProfileBase *parentProfile,
                                            bool hide = false);
 
@@ -338,6 +341,7 @@ private:
 
    /// News or smtp?
    Mode m_mode;
+
    /// New article, reply/follow-up or forward?
    MessageKind m_kind;
 
@@ -346,6 +350,10 @@ private:
 
    /// If replying, this is the original message
    Message * m_OriginalMessage;
+
+   /// the template to use or an empty string
+   String m_template;
+
    // external editor support
    // -----------------------
 

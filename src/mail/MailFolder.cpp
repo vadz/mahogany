@@ -405,7 +405,7 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 
 void
 MailFolder::ReplyMessage(class Message *msg,
-                         int flags,
+                         const MailFolder::Params& params,
                          ProfileBase *profile,
                          MWindow *parent)
 {
@@ -413,15 +413,17 @@ MailFolder::ReplyMessage(class Message *msg,
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateReplyMessage(parent,
-                                                         profile, msg);
+   wxComposeView *cv = wxComposeView::CreateReplyMessage(params,
+                                                         parent,
+                                                         profile,
+                                                         msg);
 
          // set the recipient address
    String name;
    String email = msg->Address(name, MAT_REPLYTO);
    email = GetFullEmailAddress(name, email);
    String cc;
-   if(flags & REPLY_FOLLOWUP) // group reply
+   if(params.flags & REPLY_FOLLOWUP) // group reply
    {
       msg->GetHeaderLine("CC", cc);
       String addr = msg->Address(name, MAT_FROM);
@@ -580,6 +582,7 @@ MailFolder::ReplyMessage(class Message *msg,
 /* static */
 void
 MailFolder::ForwardMessage(class Message *msg,
+                           const MailFolder::Params& params,
                            ProfileBase *profile,
                            MWindow *parent)
 {
@@ -587,7 +590,7 @@ MailFolder::ForwardMessage(class Message *msg,
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateFwdMessage(parent, profile);
+   wxComposeView *cv = wxComposeView::CreateFwdMessage(params, parent, profile);
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX)+ msg->Subject());
    cv->InitText(msg);
    cv->Show(TRUE);
@@ -931,8 +934,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections, MWindow *parent)
 
 void
 MailFolderCmn::ReplyMessages(const UIdArray *selections,
-                          MWindow *parent,
-                          int flags)
+                             const MailFolder::Params& params,
+                             MWindow *parent)
 {
    Message *msg;
 
@@ -940,7 +943,7 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
    for( int i = 0; i < n; i++ )
    {
       msg = GetMessage((*selections)[i]);
-      ReplyMessage(msg, flags, GetProfile(), parent);
+      ReplyMessage(msg, params, GetProfile(), parent);
       msg->DecRef();
       //now done by composeView SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
    }
@@ -948,7 +951,9 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
 
 
 void
-MailFolderCmn::ForwardMessages(const UIdArray *selections, MWindow *parent)
+MailFolderCmn::ForwardMessages(const UIdArray *selections,
+                               const MailFolder::Params& params,
+                               MWindow *parent)
 {
    int i;
    Message *msg;
@@ -957,11 +962,10 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections, MWindow *parent)
    for(i = 0; i < n; i++)
    {
       msg = GetMessage((*selections)[i]);
-      ForwardMessage(msg, GetProfile(), parent);
+      ForwardMessage(msg, params, GetProfile(), parent);
       msg->DecRef();
    }
 }
-
 
 static MMutex gs_SortListingMutex;
 

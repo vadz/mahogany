@@ -315,13 +315,13 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'R':
          m_FolderView->GetFolder()->ReplyMessages(
             &selections,
-            GetFrame(this),
             (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
+            GetFrame(this),
             m_FolderView);
          break;
       case 'F':
          m_FolderView->GetFolder()->ForwardMessages(
-            &selections, GetFrame(this), m_FolderView);
+            &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
@@ -1175,11 +1175,13 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          askForTemplate = FALSE;
    }
 
+   String templ;
    if ( askForTemplate )
    {
-      // TODO we really need another dialog here which proposes to choose on
-      //      template among all existing
-      ConfigureTemplates(m_ASMailFolder->GetProfile(), GetFrame(m_Parent));
+      templ = ChooseTemplateFor(cmd == WXMENU_MSG_REPLY
+                                 ? MessageTemplate_Reply
+                                 : MessageTemplate_Forward,
+                                GetFrame(m_Parent));
    }
 
    switch ( cmd )
@@ -1228,15 +1230,26 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                                                 : 0;
 
          GetSelections(selections);
-         m_TicketList->Add(m_ASMailFolder->ReplyMessages(&selections,
-                                                         GetFrame(m_Parent),
-                                                         flags));
+         m_TicketList->Add(
+            m_ASMailFolder->ReplyMessages(
+                                          &selections,
+                                          MailFolder::Params(templ, flags),
+                                          GetFrame(m_Parent)
+                                         )
+         );
       }
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->ForwardMessages(&selections, GetFrame(m_Parent)));
+      m_TicketList->Add(
+            m_ASMailFolder->ForwardMessages(
+                                            &selections,
+                                            MailFolder::Params(templ),
+                                            GetFrame(m_Parent)
+                                           )
+         );
       break;
+
    case WXMENU_MSG_FILTER:
       GetSelections(selections);
       m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));

@@ -657,6 +657,11 @@ SendMessageCC::Send(void)
 #endif
          stream = nntp_open ((char **)hostlist,NIL);
       break;
+
+      // make gcc happy
+      case Prot_Illegal:
+      default:
+         FAIL_MSG("illegal protocol");
    }
 
    if (stream)
@@ -674,6 +679,11 @@ SendMessageCC::Send(void)
          reply = stream->reply;
          nntp_close (stream);
          break;
+
+      // make gcc happy
+      case Prot_Illegal:
+      default:
+         FAIL_MSG("illegal protocol");
       }
       rfc822_setextraheaders(NULL,NULL);
       if(success)

@@ -821,7 +821,8 @@ wxComposeView::CreateNewMessage(wxWindow *parent,
 }
 
 wxComposeView *
-wxComposeView::CreateReplyMessage(wxWindow *parent,
+wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
+                                  wxWindow *parent,
                                   ProfileBase *parentProfile,
                                   Message *original,
                                   bool hide)
@@ -829,19 +830,24 @@ wxComposeView::CreateReplyMessage(wxWindow *parent,
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
 
    cv->m_kind = Message_Reply;
+   cv->m_template = params.templ;
+
    cv->m_OriginalMessage = original;
    SafeIncRef(cv->m_OriginalMessage);
+
    return cv;
 }
 
 wxComposeView *
-wxComposeView::CreateFwdMessage(wxWindow *parent,
+wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
+                                wxWindow *parent,
                                 ProfileBase *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
 
    cv->m_kind = Message_Forward;
+   cv->m_template = params.templ;
 
    return cv;
 }
@@ -852,7 +858,6 @@ wxComposeView::InitText(Message *msg)
    CHECK_RET( (msg != NULL) || (m_kind == Message_New),
               "no message in InitText" );
 
-   // choose the template
    MessageTemplateKind kind;
    switch ( m_kind )
    {
@@ -883,7 +888,8 @@ wxComposeView::InitText(Message *msg)
    do
    {
       // get the template value
-      String templateValue = GetMessageTemplate(kind, m_Profile);
+      String templateValue = !m_template ? GetMessageTemplate(kind, m_Profile)
+                                         : m_template;
 
       if ( !templateValue )
       {
@@ -907,11 +913,7 @@ wxComposeView::InitText(Message *msg)
       {
          // first show any errors which the call to Parse() above could
          // generate
-         wxLog *log = wxLog::GetActiveTarget();
-         if ( log )
-         {
-            log->Flush();
-         }
+         wxLog::FlushActive();
 
          if ( MDialog_YesNoDialog(_("There were errors in the template. Would "
                                     "you like to edit it now?"),
@@ -920,12 +922,30 @@ wxComposeView::InitText(Message *msg)
                                     true,
                                     "FixTemplate") )
          {
-            // invoke the template configuration dialog and if something
-            // changed...
-            if ( ConfigureTemplates(m_Profile, this) )
+            // depending on whether we had the template from the beginning or
+            // whether we use the standard one, we want to propose different
+            // fixes
+
+            if ( !m_template )
             {
-               // ...restart the loop
-               templateChanged = TRUE;
+               // invoke the template configuration dialog and if something
+               // changed...
+               if ( ConfigureTemplates(m_Profile, this) )
+               {
+                  // ...restart the loop
+                  templateChanged = TRUE;
+               }
+            }
+            else
+            {
+               // invoke the dialog for all templates
+               String templNew = ChooseTemplateFor(kind, this);
+               if ( m_template != templNew )
+               {
+                  templateChanged = TRUE;
+
+                  m_template = templNew;
+               }
             }
          }
       }

@@ -201,8 +201,9 @@ MMailFolder::ConvertMessageStatusToString(int status,
 /* static */
 void
 MMailFolder::ForwardMessage(class Message *msg,
-                                ProfileBase *profile = NULL,
-                                MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
+                            const MailFolder::Params& params,
+                            ProfileBase *profile = NULL,
+                            MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
 /** Reply to one message.
     @param message message to reply to
     @param flags 0, or REPLY_FOLLOWUP
@@ -212,9 +213,10 @@ MMailFolder::ForwardMessage(class Message *msg,
 /* static */
 void
 MMailFolder::ReplyMessage(class Message *msg,
-                              int flags = 0,
-                              ProfileBase *profile = NULL,
-                              MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
+                          const MailFolder::Params& params,
+                          ProfileBase *profile = NULL,
+                          MWindow *parent = NULL){ MMAILFOLDER_MISSING(); }
+
 /**@name Subscription management */
 //@{
 /** Subscribe to a given mailbox (related to the

@@ -116,6 +116,7 @@ public:
        @param parent window for dialog
    */
    static void ForwardMessage(class Message *msg,
+                              const Params& params,
                               ProfileBase *profile = NULL,
                               MWindow *parent = NULL);
    /** Reply to one message.
@@ -125,7 +126,7 @@ public:
        @param parent window for dialog
    */
    static void ReplyMessage(class Message *msg,
-                            int flags = 0,
+                            const Params& params,
                             ProfileBase *profile = NULL,
                             MWindow *parent = NULL);
    /**@name Subscription management */

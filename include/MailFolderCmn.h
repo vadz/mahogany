@@ -128,8 +128,8 @@ public:
        @param flags 0, or REPLY_FOLLOWUP
    */
    virtual void ReplyMessages(const UIdArray *messages,
-                              MWindow *parent = NULL,
-                              int flags = 0);
+                              const Params& params,
+                              MWindow *parent = NULL);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -137,6 +137,7 @@ public:
        @param profile pointer for environment
    */
    virtual void ForwardMessages(const UIdArray *messages,
+                                const Params& params,
                                 MWindow *parent = NULL);
 
    //@}

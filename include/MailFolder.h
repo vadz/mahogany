@@ -95,6 +95,16 @@ public:
       NONE = 0,
       REPLY_FOLLOWUP
    };
+
+   /** the structure containing the parameters for some mail operations */
+   struct Params
+   {
+      Params(int f = 0) { flags = f; }
+      Params(const String& t, int f = 0) : templ(t) { flags = f; }
+
+      int flags;        // see Flags enum above
+      String templ;     // the template to use for the new message
+   };
    //@}
 
    /** @name Static functions, implemented in MailFolder.cpp */
@@ -179,20 +189,23 @@ public:
                                               MailFolder *mf = NULL);
    /** Forward one message.
        @param message message to forward
+       @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
    */
    static void ForwardMessage(class Message *msg,
+                              const Params& params,
                               ProfileBase *profile = NULL,
                               MWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
        @param flags 0, or REPLY_FOLLOWUP
+       @param params is the Params struct to use
        @param profile environment
        @param parent window for dialog
    */
    static void ReplyMessage(class Message *msg,
-                            int flags = 0,
+                            const Params& params,
                             ProfileBase *profile = NULL,
                             MWindow *parent = NULL);
    /**@name Subscription management */
@@ -433,14 +446,15 @@ public:
        @param flags 0, or REPLY_FOLLOWUP
    */
    virtual void ReplyMessages(const UIdArray *messages,
-                              MWindow *parent = NULL,
-                              int flags = 0) = 0;
+                              const Params& params,
+                              MWindow *parent = NULL) = 0;
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
    virtual void ForwardMessages(const UIdArray *messages,
+                                const Params& params,
                                 MWindow *parent = NULL) = 0;
 
    //@}

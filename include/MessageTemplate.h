@@ -173,15 +173,27 @@ enum MessageTemplateKind
    MessageTemplate_Max
 };
 
-// get the value of the message template for the given profile (inherits value
-// from the parent profile)
+// get the value of the named template
+extern String
+GetMessageTemplate(MessageTemplateKind kind, const String& name);
+
+// get the value of the message template for the given profile
 extern String
 GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile);
 
-// save the value as the template for the given profile
+// save the value as the template with the given name for the given profile
 extern void
-SetMessageTemplate(const String& value,
+SetMessageTemplate(const String& name,
+                   const String& value,
                    MessageTemplateKind kind,
                    ProfileBase *profile);
+
+// delete the message template
+extern bool
+DeleteMessageTemplate(MessageTemplateKind kind, const String& name);
+
+// return the names of all existing message templates of the given kind
+extern wxArrayString
+GetMessageTemplateNames(MessageTemplateKind kind);
 
 #endif // _MESSAGETEMPLATE_H_

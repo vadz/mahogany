@@ -24,8 +24,9 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Profile.h"
+#   include "MApplication.h"
 
-//#   include <wx/string.h>
+#   include <wx/string.h>
 #   include <wx/intl.h>
 #   include <wx/log.h>
 #endif // USE_PCH
@@ -35,6 +36,13 @@
 #include "Mdefaults.h"
 
 #include "MessageTemplate.h"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the name of the standard template - i.e. the one which is used by default
+#define STANDARD_TEMPLATE_NAME "Standard"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -385,88 +393,6 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
 }
 
 // ----------------------------------------------------------------------------
-// global functions
-// ----------------------------------------------------------------------------
-
-// the helper for Get/SetMessageTemplate
-static String GetMessageTemplateProfilePath(MessageTemplateKind kind)
-{
-   String templateKey = M_TEMPLATE_SECTION;
-
-   switch ( kind )
-   {
-      case MessageTemplate_NewMessage:
-         templateKey += MP_TEMPLATE_NEWMESSAGE;
-         break;
-
-      case MessageTemplate_NewArticle:
-         templateKey += MP_TEMPLATE_NEWARTICLE;
-         break;
-
-      case MessageTemplate_Reply:
-         templateKey += MP_TEMPLATE_REPLY;
-         break;
-
-      case MessageTemplate_Followup:
-         templateKey += MP_TEMPLATE_FOLLOWUP;
-         break;
-
-      case MessageTemplate_Forward:
-         templateKey += MP_TEMPLATE_FORWARD;
-         break;
-
-      default:
-         FAIL_MSG("unknown template kind");
-   }
-
-   return templateKey;
-}
-
-// get the value of the message template for the given profile (inherits value
-// from the parent profile)
-extern String
-GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile)
-{
-   // the templates contain '$'s so disable variable expansion for now
-   ProfileEnvVarSave noEnvVarExpansion(profile);
-
-   String value = profile->readEntry(GetMessageTemplateProfilePath(kind), "");
-   if ( !value )
-   {
-      // we have the default templates for reply, follow-up and forward
-      switch ( kind )
-      {
-         case MessageTemplate_Reply:
-            value = _("On $(ORIGINAL:DATE) you wrote:\n\n$QUOTE\n$CURSOR");
-            break;
-
-         case MessageTemplate_Forward:
-            value = "$CURSOR\n$QUOTE822";
-            break;
-
-         case MessageTemplate_Followup:
-            value = _("On $(ORIGINAL:DATE) $SENDER wrote in "
-                      "$(ORIGINAL:NEWSGROUPS)\n\n$QUOTE\n$CURSOR");
-            break;
-
-         default:
-            // nothing to do, but put it here to slience gcc warnings
-            ;
-      }
-   }
-
-   return value;
-}
-
-extern void
-SetMessageTemplate(const String& value,
-                   MessageTemplateKind kind,
-                   ProfileBase *profile)
-{
-   (void)profile->writeEntry(GetMessageTemplateProfilePath(kind), value);
-}
-
-// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -509,3 +435,170 @@ String ExtractWord(const char **ppc, char endOfWordMarker)
 
    return word;
 }
+// returns the name of profile subgroup for the templates of the given kind
+static String GetTemplateKindPath(MessageTemplateKind kind)
+{
+   String path;
+
+   switch ( kind )
+   {
+      case MessageTemplate_NewMessage:
+         path = MP_TEMPLATE_NEWMESSAGE;
+         break;
+
+      case MessageTemplate_NewArticle:
+         path = MP_TEMPLATE_NEWARTICLE;
+         break;
+
+      case MessageTemplate_Reply:
+         path = MP_TEMPLATE_REPLY;
+         break;
+
+      case MessageTemplate_Followup:
+         path = MP_TEMPLATE_FOLLOWUP;
+         break;
+
+      case MessageTemplate_Forward:
+         path = MP_TEMPLATE_FORWARD;
+         break;
+
+      default:
+         FAIL_MSG("unknown template kind");
+   }
+
+   return path;
+}
+
+// returns the relative profile path for the name of the template of the given
+// kind (Template/<kind>)
+static String GetTemplateNamePath(MessageTemplateKind kind)
+{
+   String path;
+   path << M_TEMPLATE_SECTION << GetTemplateKindPath(kind);
+
+   return path;
+}
+
+// returns the path to the value of the template of the given kind and name in
+// the profile
+static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
+{
+   String path;
+   path << M_TEMPLATES_SECTION << GetTemplateKindPath(kind) << '/' << name;
+
+   return path;
+}
+
+// ----------------------------------------------------------------------------
+// public API
+// ----------------------------------------------------------------------------
+
+// get the value of the message template for the given profile: it looks up
+// Template/<kind> in the given profile and then reads the corresponding
+// template value from /Templates/<kind>
+extern String
+GetMessageTemplate(MessageTemplateKind kind, ProfileBase *profile)
+{
+   // first read the template name
+   String name = profile->readEntry(GetTemplateNamePath(kind), STANDARD_TEMPLATE_NAME);
+
+   return GetMessageTemplate(kind, name);
+}
+
+// read the template value
+extern String
+GetMessageTemplate(MessageTemplateKind kind, const String& name)
+{
+   // the templates contain '$'s so disable variable expansion for now
+   ProfileBase *profile = mApplication->GetProfile();
+   ProfileEnvVarSave noEnvVarExpansion(profile);
+
+   String value = profile->readEntry(GetTemplateValuePath(kind, name), "");
+   if ( !value )
+   {
+      // we have the default templates for reply, follow-up and forward
+      switch ( kind )
+      {
+         case MessageTemplate_Reply:
+            value = _("On $(ORIGINAL:DATE) you wrote:\n\n$QUOTE\n$CURSOR");
+            break;
+
+         case MessageTemplate_Forward:
+            value = "$CURSOR\n$QUOTE822";
+            break;
+
+         case MessageTemplate_Followup:
+            value = _("On $(ORIGINAL:DATE) $SENDER wrote in "
+                      "$(ORIGINAL:NEWSGROUPS)\n\n$QUOTE\n$CURSOR");
+            break;
+
+         default:
+            FAIL_MSG("unknown template kind");
+            // fall through
+
+         case MessageTemplate_NewMessage:
+         case MessageTemplate_NewArticle:
+            // nothing to do, but put it here to slience gcc warnings
+            ;
+      }
+   }
+
+   return value;
+}
+
+extern void
+SetMessageTemplate(const String& name,
+                   const String& value,
+                   MessageTemplateKind kind,
+                   ProfileBase *profile)
+{
+   if ( profile )
+   {
+      (void)profile->writeEntry(GetTemplateNamePath(kind), name);
+   }
+
+   (void)mApplication->GetProfile()->
+      writeEntry(GetTemplateValuePath(kind, name), value);
+}
+
+extern bool
+DeleteMessageTemplate(MessageTemplateKind kind, const String& name)
+{
+   mApplication->GetProfile()->DeleteEntry(GetTemplateValuePath(kind, name));
+
+   return true;
+}
+
+extern wxArrayString
+GetMessageTemplateNames(MessageTemplateKind kind)
+{
+   wxArrayString names;
+
+   // always add the "Standard" template to the list as it is always present
+   names.Add(STANDARD_TEMPLATE_NAME);
+
+   ProfileBase *profile = mApplication->GetProfile();
+
+   wxString path;
+   path << M_TEMPLATES_SECTION << GetTemplateKindPath(kind);
+   profile->SetPath(path);
+
+   wxString name;
+   long cookie;
+   bool cont = profile->GetFirstEntry(name, cookie);
+   while ( cont )
+   {
+      // we already did it for this one above
+      if ( name != STANDARD_TEMPLATE_NAME )
+      {
+         names.Add(name);
+      }
+
+      cont = profile->GetNextEntry(name, cookie);
+   }
+
+   profile->ResetPath();
+
+   return names;
+}
+

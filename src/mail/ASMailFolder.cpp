@@ -485,11 +485,10 @@ public:
                            ASMailFolder::OperationId op,
                            const UIdArray *selections,
                            MWindow *parent,
-                           int flags )
-      : MailThreadSeq(mf, ud, selections)
+                           const MailFolder::Params& params)
+      : MailThreadSeq(mf, ud, selections), m_Params(params)
       {
          m_Parent = parent;
-         m_Flags = flags;
          m_Op = op;
          ASSERT(m_Op == ASMailFolder::Op_ReplyMessages ||
                 m_Op == ASMailFolder::Op_ForwardMessages);
@@ -497,9 +496,9 @@ public:
    virtual void WorkFunction(void)
       {
          if(m_Op == ASMailFolder::Op_ReplyMessages)
-            m_MailFolder->ReplyMessages(m_Seq, m_Parent, m_Flags);
+            m_MailFolder->ReplyMessages(m_Seq, m_Params, m_Parent);
          else
-            m_MailFolder->ForwardMessages(m_Seq, m_Parent);
+            m_MailFolder->ForwardMessages(m_Seq, m_Params, m_Parent);
          delete m_Seq;
 #ifdef DEBUG
          m_Seq = NULL;
@@ -508,7 +507,7 @@ public:
 private:
    ASMailFolder::OperationId m_Op;
    MWindow *m_Parent;
-   int m_Flags;
+   MailFolder::Params m_Params;
 };
 
 class MT_ApplyFilterRules : public MailThreadSeq
@@ -839,14 +838,15 @@ public:
        @param parent window for dialog
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
+                                const MailFolder::Params& params,
                                 MWindow *parent,
-                                int flags,
                                 UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ReplyMessages,
-                                          messages, parent,
-                                          flags))->Start();
+                                          messages,
+                                          parent,
+                                          params))->Start();
    }
 
    /** Forward selected messages.
@@ -854,13 +854,14 @@ public:
        @param parent window for dialog
    */
    virtual Ticket ForwardMessages(const UIdArray *messages,
+                                  const MailFolder::Params& params,
                                   MWindow *parent,
                                   UserData ud)
    {
       return (new MT_ReplyForwardMessages(this, ud,
                                           Op_ForwardMessages,
                                           messages, parent,
-                                          0))->Start();
+                                          params))->Start();
    }
    /** Apply filter rules to the folder.
        Applies the rule to all messages listed in msgs.

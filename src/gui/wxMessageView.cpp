@@ -1454,17 +1454,27 @@ wxMessageView::DoMenuCommand(int id)
       if(m_uid != UID_ILLEGAL)
          Find("");
       break;
+
    case WXMENU_MSG_REPLY:
       if(m_uid != UID_ILLEGAL)
-         MailFolder::ReplyMessage(m_mailMessage,0,m_Profile,GetFrame(this));
+         MailFolder::ReplyMessage(m_mailMessage,
+                                  MailFolder::Params(),
+                                  m_Profile,
+                                  GetFrame(this));
       break;
    case WXMENU_MSG_FOLLOWUP:
       if(m_uid != UID_ILLEGAL)
-         MailFolder::ReplyMessage(m_mailMessage,MailFolder::REPLY_FOLLOWUP,m_Profile,GetFrame(this));
+         MailFolder::ReplyMessage(m_mailMessage,
+                                  MailFolder::Params(MailFolder::REPLY_FOLLOWUP),
+                                  m_Profile,
+                                  GetFrame(this));
       break;
    case WXMENU_MSG_FORWARD:
       if(m_uid != UID_ILLEGAL)
-         MailFolder::ForwardMessage(m_mailMessage,m_Profile,GetFrame(this));
+         MailFolder::ForwardMessage(m_mailMessage,
+                                    MailFolder::Params(),
+                                    m_Profile,
+                                    GetFrame(this));
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
