@@ -57,7 +57,7 @@ static const char *wxFLC_ColumnNames[] =
 {
    "Status","Date","Size","From","Subject"
 };
-   
+
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    m_FolderView->PreviewMessage(event.m_itemIndex);
@@ -68,7 +68,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    :wxListCtrl(parent,-1,wxDefaultPosition,wxSize(500,300),wxLC_REPORT)
 {
    ProfileBase *p = fv->GetProfile();
-      
+
    m_Parent = parent;
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
@@ -92,7 +92,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
          break;
       }
    }
-   
+
    Clear();
 }
 
@@ -116,7 +116,7 @@ wxFolderListCtrl::OnSize( wxSizeEvent & WXUNUSED(event) )
 #  ifndef OS_WIN
       int x,y,i;
       GetClientSize(&x,&y);
-   
+
       if (m_Style & wxLC_REPORT)
          for(i = 0; i < WXFLC_NUMENTRIES; i++)
             SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100*9/10);
@@ -128,11 +128,11 @@ wxFolderListCtrl::Clear(void)
 {
    int x,y;
    GetClientSize(&x,&y);
-   
+
    DeleteAllItems();
    for (int i = 0; i < WXFLC_NUMENTRIES; i++)
       DeleteColumn( i );
-   
+
    if (m_Style & wxLC_REPORT)
    {
       for(int c = 0; c < WXFLC_NUMENTRIES; c++)
@@ -154,7 +154,7 @@ wxFolderListCtrl::SetEntry(long index,
 {
    if(index >= GetItemCount())
       InsertItem(index, status); // column 0
-   
+
    SetItem(index, m_columns[WXFLC_STATUS], status);
    SetItem(index, m_columns[WXFLC_FROM], sender);
    SetItem(index, m_columns[WXFLC_DATE], date);
@@ -183,12 +183,12 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    initialised = mailFolder->IsInitialised();
    int x,y;
    parent->GetClientSize(&x, &y);
-   
+
    m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D,wxSP_BORDER);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,m_MessagePreview, y/3);
-   
+
    mailFolder->RegisterView(this);
    timer = GLOBAL_NEW wxFVTimer(mailFolder);
    m_SplitterWindow->SetMinimumPaneSize(0);
@@ -205,7 +205,7 @@ void
 wxFolderView::Update(void)
 {
    long i;
-   
+
    Message  *mptr;
    String   line;
    int   nstatus;
@@ -219,7 +219,7 @@ wxFolderView::Update(void)
    if(m_UpdateSemaphore == true)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
-   
+
    n = mailFolder->CountMessages();
 
    // mildly annoying, but have to do it in order to prevent the generation of
@@ -228,11 +228,37 @@ wxFolderView::Update(void)
    {
       ProfileEnvVarSuspend suspend(mApplication->GetProfile());
       dateFormat = READ_APPCONFIG(MC_DATE_FMT);
+
+      // should have _exactly_ 3 format specificators, otherwise can't call
+      // Printf()!
+      size_t nFound = 0;
+      for ( const char *p = dateFormat; p != NULL; nFound++ )
+      {
+         p = strstr(p, "%u");
+      }
+
+      if ( nFound != 3 )
+      {
+         static bool s_bErrorMessageGiven = false;
+         if ( s_bErrorMessageGiven )
+         {
+            // don't give it each time - annoying...
+            s_bErrorMessageGiven = true;
+
+            wxLogError(_("Invalid value '%s' for the date format: it should "
+                         "contain exactyly 3 %u format specificators. Default "
+                         "value '%s' "
+                         "will be used instead."),
+                         dateFormat.c_str(), MC_DATE_FMT_D);
+         }
+
+         dateFormat = MC_DATE_FMT_D;
+      }
    }
 
    if(n < m_NumOfMessages)  // messages have been deleted, start over
       m_FolderCtrl->Clear();
-   
+
    for(i = 0; i < n; i++)
    {
       mptr = mailFolder->GetMessage(i+1);
@@ -267,7 +293,7 @@ wxFolderView::~wxFolderView()
          for(int i = 0; i < m_NumOfMessages; i++)
             mailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_UNREAD, false);
       }
-               
+
       timer->Stop();
       GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
@@ -399,10 +425,10 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
    int i;
 
    MailFolder   *mf;
-   
+
    if(strutil_isempty(folderName))
       return;
-   
+
    int n = selections.Count();
    for(i = 0; i < n; i++)
    {
@@ -432,7 +458,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
       filename =
       MDialog_FileRequester(NULLstring, parent, NULLstring,
                             NULLstring, NULLstring, NULLstring, true,
-                            m_Profile);   
+                            m_Profile);
 
    // truncate the file
    wxFile file(filename, wxFile::write);
