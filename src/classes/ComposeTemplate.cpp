@@ -1395,7 +1395,7 @@ void VarExpander::ExpandOriginalText(const String& text,
 {
    // should we quote the empty lines?
    //
-   // this option is ignore when we're inserting text verbatim (hence without
+   // this option is ignored when we're inserting text verbatim (hence without
    // reply prefix) and not quoting it
    bool quoteEmpty = !prefix.empty() &&
                         READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY);
@@ -1426,28 +1426,41 @@ void VarExpander::ExpandOriginalText(const String& text,
    bool detectSig = READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
 
 #if wxUSE_REGEX
+   // will we use the RE?
+   bool useRE;
+
    // a RE to detect the start of the signature
    wxRegEx reSig;
    if ( detectSig )
    {
       String sig = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
 
-      // we implicitly anchor the RE at start/end of line
-      //
-      // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
-      String sigRE;
-      sigRE << '^' << sig << "\r\n";
-
-      if ( !reSig.Compile(sigRE, wxRE_NOSUB) )
+      if ( sig == GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
       {
-         wxLogError(_("Regular expression '%s' used for detecting the "
-                       "signature start is invalid, please modify it.\n"
-                       "\n"
-                       "Disabling sinature stripping for now."),
-                    sigRE.c_str());
+         // use faster manual code
+         useRE = false;
+      }
+      else // use the user-supplied RE
+      {
+         useRE = true;
 
-         m_profile->writeEntry(MP_REPLY_DETECT_SIG, false);
-         detectSig = false;
+         // we implicitly anchor the RE at start/end of line
+         //
+         // VZ: couldn't we just use wxRE_NEWLINE in Compile() instead of "\r\n"?
+         String sigRE;
+         sigRE << '^' << sig << "\r\n";
+
+         if ( !reSig.Compile(sigRE, wxRE_NOSUB) )
+         {
+            wxLogError(_("Regular expression '%s' used for detecting the "
+                         "signature start is invalid, please modify it.\n"
+                         "\n"
+                         "Disabling sinature stripping for now."),
+                       sigRE.c_str());
+
+            m_profile->writeEntry(MP_REPLY_DETECT_SIG, false);
+            detectSig = false;
+         }
       }
    }
 #endif // wxUSE_REGEX
@@ -1458,6 +1471,9 @@ void VarExpander::ExpandOriginalText(const String& text,
    // the current line
    String lineCur;
 
+   // the last detected signature start
+   int posSig = -1;
+
    for ( const char *cptr = text.c_str(); ; cptr++ )
    {
       // start of [real] new line?
@@ -1465,22 +1481,49 @@ void VarExpander::ExpandOriginalText(const String& text,
       {
          if ( detectSig )
          {
+            bool isSig = false;
+
 #if wxUSE_REGEX
-            if ( reSig.Matches(cptr) )
-               break;
-#else // !wxUSE_REGEX
-            // hard coded detection for standard signature separator "--"
-            if ( cptr[0] == '-' && cptr[1] == '-' )
+            if ( useRE )
             {
-               // there may be an optional space after "--"
-               const char *p = cptr + 2;
-               if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
+               isSig = reSig.Matches(cptr);
+            }
+            else
+#endif // wxUSE_REGEX
+            {
+               // hard coded detection for standard signature separator "--"
+               // and the mailing list trailer "____...___"
+               if ( cptr[0] == '-' && cptr[1] == '-' )
                {
-                  // the rest is the sig - skip
-                  break;
+                  // there may be an optional space after "--" (in fact the
+                  // space should be there but some people don't put it)
+                  const char *p = cptr + 2;
+                  if ( IsEndOfLine(p) || (*p == ' ' && IsEndOfLine(p + 1)) )
+                  {
+                     // looks like the start of the sig
+                     isSig = true;
+                  }
+               }
+               else if ( cptr[0] == '_' )
+               {
+                  const char *p = cptr + 1;
+                  while ( *p == '_' )
+                     p++;
+
+                  // consider that there should be at least 5 underscores...
+                  if ( IsEndOfLine(p) && p - cptr >= 5 )
+                  {
+                     // looks like the mailing list trailer
+                     isSig = true;
+                  }
                }
             }
-#endif // wxUSE_REGEX/!wxUSE_REGEX
+
+            if ( isSig )
+            {
+               // remember that the sig apparently starts here
+               posSig = value->length();
+            }
          }
 
          if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) )
@@ -1558,6 +1601,15 @@ void VarExpander::ExpandOriginalText(const String& text,
             lineCur.Prepend(prefix);
          }
       }
+   }
+
+   // if we had a sig, truncate it now: we have to do it like this because
+   // otherwise we risk discarding a too big part of the message, e.g. if it
+   // contains a quoted message with a sig inside it so we want to discard
+   // everything after the last sig detected
+   if ( posSig != -1 )
+   {
+      value->erase(posSig);
    }
 }
 
