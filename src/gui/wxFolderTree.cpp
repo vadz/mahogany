@@ -136,8 +136,7 @@ public:
    // the ctor creates the element and inserts it in the tree
    wxFolderTreeNode(wxTreeCtrl *tree,
                     MFolder *folder,
-                    wxFolderTreeNode *parent = NULL,
-                    size_t nChildren = 0);
+                    wxFolderTreeNode *parent = NULL);
 
    // dtor
    //
@@ -334,6 +333,9 @@ protected:
 
    // new version which will replace the one above eventually
    void ProcessMsgNumberChange(const wxString& folderName);
+
+   // process the folder tree change event
+   void ProcessFolderTreeChange(const MEventFolderTreeChangeData& event);
 
 private:
    class FolderMenu : public wxMenu
@@ -871,8 +873,7 @@ bool wxFolderTree::OnDoubleClick()
 
 wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
                                    MFolder *folder,
-                                   wxFolderTreeNode *parent,
-                                   size_t nChildren)
+                                   wxFolderTreeNode *parent)
 {
    // init member vars
    m_parent = parent;
@@ -1468,7 +1469,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 
          // note that we give subfolder to wxFolderTreeNode: it will DecRef()
          // it later
-         (void)new wxFolderTreeNode(this, subfolder, parent, nSubfolders);
+         (void)new wxFolderTreeNode(this, subfolder, parent);
       }
    }
 }
@@ -1712,62 +1713,17 @@ void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
    }
 }
 
+// ----------------------------------------------------------------------------
+// event processing
+// ----------------------------------------------------------------------------
+
 bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 {
    if ( ev.GetId() == MEventId_FolderTreeChange )
    {
       MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
 
-      String folderName = event.GetFolderFullName();
-      MEventFolderTreeChangeData::ChangeKind kind = event.GetChangeKind();
-
-      if ( kind == MEventFolderTreeChangeData::Rename )
-      {
-         // just rename the item in the tree - if it's not already done as it
-         // would be in the case of in-place label editing
-         wxTreeItemId item = GetTreeItemFromName(folderName);
-         if ( item.IsOk() )
-         {
-            // notice that the event carries the full folder name and we only
-            // want to show the name, i.e. the part after '/' in the tree
-            SetItemText(item, event.GetNewFolderName().AfterLast('/'));
-         }
-      }
-      else
-      {
-         // refresh the branch of the tree with the parent of the folder which
-         // changed for all usual events or this folder itself for CreateUnder
-         // events (which are sent when (possibly) multiple folders were
-         // created under the common parent)
-         String parentName = kind == MEventFolderTreeChangeData::CreateUnder
-                             ? folderName
-                             : folderName.BeforeLast('/');
-
-         // recreate the branch
-         wxTreeItemId parent = GetTreeItemFromName(parentName);
-
-         CHECK(parent.IsOk(), TRUE, "no such item in the tree??");
-
-         ReopenBranch(parent);
-
-         if ( kind == MEventFolderTreeChangeData::CreateUnder )
-         {
-            // always expand the folder in this case, even if it wasn't
-            // expanded before
-            Expand(parent);
-         }
-
-         if ( kind == MEventFolderTreeChangeData::Delete )
-         {
-            // if the deleted folder was either the tree ctrl selection or was
-            // opened (these 2 folders may be different), refresh
-            if ( folderName == m_openFolderName ||
-                 folderName == m_selectedFolderName )
-            {
-               SelectItem(GetRootItem());
-            }
-         }
-      }
+      ProcessFolderTreeChange(event);
    }
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
@@ -1873,6 +1829,94 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
 
    return true;
+}
+
+void
+wxFolderTreeImpl::
+ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
+{
+   wxString folderName = event.GetFolderFullName();
+   MEventFolderTreeChangeData::ChangeKind kind = event.GetChangeKind();
+
+   // find the item in the tree
+   switch ( kind )
+   {
+      case MEventFolderTreeChangeData::Rename:
+         {
+            // just rename the item in the tree - if it's not already done as
+            // it would be in the case of in-place label editing
+            wxTreeItemId item = GetTreeItemFromName(folderName);
+            if ( item.IsOk() )
+            {
+               // notice that the event carries the full folder name and we only
+               // want to show the name, i.e. the part after '/' in the tree
+               SetItemText(item, event.GetNewFolderName().AfterLast('/'));
+            }
+         }
+         break;
+
+      case MEventFolderTreeChangeData::Create:
+         {
+            // if parentName is empty, the root will be returned which is ok
+            wxString parentName = folderName.BeforeLast('/');
+            wxTreeItemId parent = GetTreeItemFromName(parentName);
+            CHECK_RET( parent.IsOk(), "no such item in the tree??" );
+
+            // the folder is given to wxFolderTreeNode, hence no DecRef() here
+            MFolder *folder = MFolder::Get(folderName);
+
+            wxFolderTreeNode *nodeNew =
+               new wxFolderTreeNode(this, folder, GetFolderTreeNode(parent));
+
+            // expand/scroll if necessary to show the newly created item
+            EnsureVisible(nodeNew->GetId());
+         }
+         break;
+
+      case MEventFolderTreeChangeData::CreateUnder:
+         {
+            wxTreeItemId parent = GetTreeItemFromName(folderName);
+            CHECK_RET( parent.IsOk(), "no such item in the tree??" );
+
+            // refresh the branch of the tree with the parent of the folder
+            // which changed for all usual events or this folder itself for
+            // CreateUnder events (which are sent when (possibly) multiple
+            // folders were created under the common parent)
+            ReopenBranch(parent);
+
+            // always expand the branch in this case, even if it wasn't
+            // expanded before - we want to show the newly created folders
+            Expand(parent);
+         }
+         break;
+
+      case MEventFolderTreeChangeData::Delete:
+         {
+            wxTreeItemId item = GetTreeItemFromName(folderName);
+            CHECK_RET( item.IsOk(), "no such item in the tree??" );
+
+            wxTreeItemId parent = GetParent(item);
+
+            // if the deleted folder was either the tree ctrl selection or was
+            // opened (these 2 folders may be different), refresh
+            if ( folderName == m_openFolderName ||
+                 folderName == m_selectedFolderName )
+            {
+               SelectItem(parent);
+            }
+
+            Delete(item);
+
+            // do we need something like this (FIXME)?
+#if 0
+            if ( GetChildrenCount(parent, false /* not recursively */) == 0 )
+            {
+               SetItemHasChildren(parent, );
+            }
+#endif // 0
+         }
+         break;
+   }
 }
 
 // ----------------------------------------------------------------------------

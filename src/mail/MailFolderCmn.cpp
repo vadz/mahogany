@@ -667,30 +667,20 @@ MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections,
                                     MWindow *parent,
                                     MFolder *folder)
 {
+   // it used to be legal to call SaveMessagesToFolder() with NULL folder but
+   // now the caller must call MDialog_FolderChoose() itself if necessary
+   CHECK( folder, false, "no folder in SaveMessagesToFolder" );
+
    bool rc;
-   if ( !folder )
-      folder = MDialog_FolderChoose(parent);
-   else
-      folder->IncRef(); // to match DecRef() below
-
-   if ( folder )
+   if ( CanCreateMessagesInFolder(folder->GetType()) )
    {
-      if ( CanCreateMessagesInFolder(folder->GetType()) )
-      {
-         rc = SaveMessages(selections, folder, true);
-      }
-      else // we can't copy/move the messages there
-      {
-         wxLogError(_("Impossible to copy messages in the folder '%s'.\n"
-                      "You can't create messages in the folders of this type."),
-                    folder->GetFullName().c_str());
-         rc = false;
-      }
-
-      folder->DecRef();
+      rc = SaveMessages(selections, folder, true);
    }
-   else // no folder to save to
+   else // we can't copy/move the messages there
    {
+      wxLogError(_("Impossible to copy messages in the folder '%s'.\n"
+                   "You can't create messages in the folders of this type."),
+                 folder->GetFullName().c_str());
       rc = false;
    }
 

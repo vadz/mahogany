@@ -2878,9 +2878,17 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
    if ( !count )
       return ILLEGAL_TICKET;
 
-   // note that folder can be NULL if it is to be choosed interactively so we
-   // can't use its name in the status message string
-   wxStatusProgress(m_Frame, _("Saving %d message(s)..."), count);
+   if ( !folder )
+   {
+      folder = MDialog_FolderChoose(GetFrame(m_Parent));
+   }
+   else
+   {
+      folder->IncRef(); // to match DecRef() below
+   }
+
+   wxStatusProgress(m_Frame, _("Saving %d message(s) to '%s'..."),
+                    count, folder->GetFullName().c_str());
 
    Ticket t = m_ASMailFolder->SaveMessagesToFolder(&selections,
                                                    m_Frame,
@@ -2892,6 +2900,8 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
       // also don't forget to delete messages once they're successfulyl saved
       m_TicketsToDeleteList->Add(t);
    }
+
+   folder->DecRef();
 
    return t;
 }
@@ -3162,226 +3172,233 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    String msg;
    ASMailFolder::Result *result = event.GetResult();
    const Ticket& t = result->GetTicket();
-   int value = ((ASMailFolder::ResultInt *)result)->GetValue();
 
    if ( m_TicketList->Contains(t) )
    {
-      ASSERT(result->GetUserData() == this);
+      ASSERT_MSG( result->GetUserData() == this, "got unexpected result" );
+
       m_TicketList->Remove(t);
 
-      switch(result->GetOperation())
+      int value = ((ASMailFolder::ResultInt *)result)->GetValue();
+
+      switch ( result->GetOperation() )
       {
-      case ASMailFolder::Op_SaveMessagesToFile:
-         ASSERT(result->GetSequence());
-         if( value )
-            msg.Printf(_("Saved %lu messages."), (unsigned long)
-                       result->GetSequence()->Count());
-         else
-            msg.Printf(_("Saving messages failed."));
-         wxLogStatus(m_Frame, msg);
-         break;
-
-      case ASMailFolder::Op_SaveMessagesToFolder:
-         ASSERT(result->GetSequence());
-
-         // we may have to do a few extra things here:
-         //
-         //  - if the message was marked for deletion (its ticket is in
-         //    m_TicketsToDeleteList), we have to delete it and give a
-         //    message about a successful move and not copy operation
-         //
-         //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
-         //    but we don't know yet if we will have to delete dropped
-         //    messages or not, so just remember those of them which were
-         //    copied successfully
-         {
-            bool toDelete = m_TicketsToDeleteList->Contains(t);
-            bool wasDropped = m_TicketsDroppedList &&
-                                 m_TicketsDroppedList->Contains(t);
-
-            // remove from lists before testing value: this should be done
-            // whether we succeeded or failed
-            if ( toDelete )
+         case ASMailFolder::Op_SaveMessagesToFile:
+            if ( value )
             {
-               m_TicketsToDeleteList->Remove(t);
+               msg.Printf(_("Saved %lu messages."), (unsigned long)
+                          result->GetSequence()->Count());
+            }
+            else
+            {
+               msg.Printf(_("Saving messages failed."));
             }
 
-            if ( wasDropped )
-            {
-               m_TicketsDroppedList->Remove(t);
+            wxLogStatus(m_Frame, msg);
+            break;
 
-               wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
-            }
+         case ASMailFolder::Op_SaveMessagesToFolder:
+            ASSERT(result->GetSequence());
 
-            if ( !value )
+            // we may have to do a few extra things here:
+            //
+            //  - if the message was marked for deletion (its ticket is in
+            //    m_TicketsToDeleteList), we have to delete it and give a
+            //    message about a successful move and not copy operation
+            //
+            //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
+            //    but we don't know yet if we will have to delete dropped
+            //    messages or not, so just remember those of them which were
+            //    copied successfully
             {
-               // something failed - what?
+               bool toDelete = m_TicketsToDeleteList->Contains(t);
+               bool wasDropped = m_TicketsDroppedList &&
+                                    m_TicketsDroppedList->Contains(t);
+
+               // remove from lists before testing value: this should be done
+               // whether we succeeded or failed
                if ( toDelete )
-                  msg = _("Moving messages failed.");
-               else if ( wasDropped )
-                  msg = _("Dragging messages failed.");
-               else
-                  msg = _("Copying messages failed.");
-            }
-            else // success
-            {
-               // message was copied ok, what else to do with it?
-               UIdArray *seq = result->GetSequence();
-               unsigned long count = seq->Count();
+               {
+                  m_TicketsToDeleteList->Remove(t);
+               }
 
                if ( wasDropped )
                {
-                  if ( !toDelete )
+                  m_TicketsDroppedList->Remove(t);
+
+                  wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
+               }
+
+               if ( !value )
+               {
+                  // something failed - what?
+                  if ( toDelete )
+                     msg = _("Moving messages failed.");
+                  else if ( wasDropped )
+                     msg = _("Dragging messages failed.");
+                  else
+                     msg = _("Copying messages failed.");
+               }
+               else // success
+               {
+                  // message was copied ok, what else to do with it?
+                  UIdArray *seq = result->GetSequence();
+                  unsigned long count = seq->Count();
+
+                  if ( wasDropped )
                   {
-                     // remember the UIDs as we may have to delete them later
-                     // even if they are not in m_TicketsToDeleteList yet
-                     WX_APPEND_ARRAY(m_UIdsCopiedOk, (*seq));
+                     if ( !toDelete )
+                     {
+                        // remember the UIDs as we may have to delete them later
+                        // even if they are not in m_TicketsToDeleteList yet
+                        WX_APPEND_ARRAY(m_UIdsCopiedOk, (*seq));
+                     }
+                     //else: dropped and already marked for deletion, delete below
+
+                     msg.Printf(_("Dropped %lu messages."), count);
                   }
-                  //else: dropped and already marked for deletion, delete below
+                  //else: not dropped
 
-                  msg.Printf(_("Dropped %lu messages."), count);
-               }
-               //else: not dropped
-
-               if ( toDelete )
-               {
-                  // delete right now
-                  m_TicketList->Add(
-                        m_ASMailFolder->DeleteOrTrashMessages(seq, this));
-
-                  if ( !wasDropped )
+                  if ( toDelete )
                   {
-                     msg.Printf(_("Moved %lu messages."), count);
-                  }
-                  //else: message already given above
-               }
-               else // simple copy, not move
-               {
-                  msg.Printf(_("Copied %lu messages."), count);
-               }
-            }
-
-            wxLogStatus(m_Frame, msg);
-         }
-         break;
-
-      case ASMailFolder::Op_SearchMessages:
-         ASSERT(result->GetSequence());
-         if( value )
-         {
-            UIdArray *uidsMatching = result->GetSequence();
-            if ( !uidsMatching )
-            {
-               FAIL_MSG( "searched ok but no search results??" );
-               break;
-            }
-
-            unsigned long count = uidsMatching->Count();
-
-            wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
-
-            /*
-               The returned message numbers are UIds which we must map
-               to our listctrl indices via the current HeaderInfo
-               structure.
-
-               VZ: I wonder why do we jump through all these hops - we might
-                   return msgnos from search directly...
-             */
-            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-            for ( unsigned long n = 0; n < uidsMatching->Count(); n++ )
-            {
-               UIdType idx = hil->GetIdxFromUId((*uidsMatching)[n]);
-               if ( idx != UID_ILLEGAL )
-               {
-                  m_FolderCtrl->Select(hil->GetPosFromIdx(idx));
-               }
-               else
-               {
-                  FAIL_MSG( "found inexistent message??" );
-               }
-            }
-
-            msg.Printf(_("Found %lu messages."), count);
-         }
-         else
-         {
-            msg.Printf(_("No matching messages found."));
-         }
-
-         wxLogStatus(m_Frame, msg);
-         break;
-
-      case ASMailFolder::Op_ApplyFilterRules:
-      {
-         ASSERT(result->GetSequence());
-         if ( value == -1 )
-         {
-            wxLogError(_("Filtering messages failed."));
-         }
-         else
-         {
-            msg.Printf(_("Applied filters to %lu messages, "
-                         "see log window for details."),
-                       (unsigned long)result->GetSequence()->Count());
-            wxLogStatus(m_Frame, msg);
-         }
-         break;
-      }
-
-      // these cases don't have return values
-      case ASMailFolder::Op_ReplyMessages:
-      case ASMailFolder::Op_ForwardMessages:
-      case ASMailFolder::Op_DeleteMessages:
-      case ASMailFolder::Op_UnDeleteMessages:
-         break;
-
-      case ASMailFolder::Op_GetMessage:
-         // so far we only use GetMessage() when processing
-         // WXMENU_MSG_QUICK_FILTER
-         {
-            Message *msg = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-            if ( msg )
-            {
-               MFolder_obj folder(m_folderName);
-
-               String to;
-               (void)msg->GetHeaderLine("To", to);
-
-               if ( CreateQuickFilter(folder,
-                                      msg->From(), msg->Subject(), to,
-                                      m_Frame) )
-               {
-                  // ask the user if he doesn't want to test his new filter
-                  // right now
-                  if ( MDialog_YesNoDialog
-                       (
-                        _("Would you like to apply the filter you have just "
-                          "created to this message immediately?"),
-                        m_Frame,
-                        MDIALOG_YESNOTITLE,
-                        true,
-                        GetFullPersistentKey(M_MSGBOX_APPLY_QUICK_FILTER_NOW)
-                       ) )
-                  {
-                     UIdArray selections;
-                     selections.Add(msg->GetUId());
+                     // delete right now
                      m_TicketList->Add(
-                           m_ASMailFolder->ApplyFilterRules(&selections, this)
-                        );
+                           m_ASMailFolder->DeleteOrTrashMessages(seq, this));
+
+                     if ( !wasDropped )
+                     {
+                        msg.Printf(_("Moved %lu messages."), count);
+                     }
+                     //else: message already given above
+                  }
+                  else // simple copy, not move
+                  {
+                     msg.Printf(_("Copied %lu messages."), count);
                   }
                }
-               //else: filter not created, nothing to apply
 
-               msg->DecRef();
+               wxLogStatus(m_Frame, msg);
             }
-         }
-         break;
+            break;
 
-      default:
-         FAIL_MSG( "MEvent handling not implemented yet" );
+         case ASMailFolder::Op_SearchMessages:
+            ASSERT(result->GetSequence());
+            if( value )
+            {
+               UIdArray *uidsMatching = result->GetSequence();
+               if ( !uidsMatching )
+               {
+                  FAIL_MSG( "searched ok but no search results??" );
+                  break;
+               }
+
+               unsigned long count = uidsMatching->Count();
+
+               wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
+
+               /*
+                  The returned message numbers are UIds which we must map
+                  to our listctrl indices via the current HeaderInfo
+                  structure.
+
+                  VZ: I wonder why do we jump through all these hops - we might
+                      return msgnos from search directly...
+                */
+               HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+               for ( unsigned long n = 0; n < uidsMatching->Count(); n++ )
+               {
+                  UIdType idx = hil->GetIdxFromUId((*uidsMatching)[n]);
+                  if ( idx != UID_ILLEGAL )
+                  {
+                     m_FolderCtrl->Select(hil->GetPosFromIdx(idx));
+                  }
+                  else
+                  {
+                     FAIL_MSG( "found inexistent message??" );
+                  }
+               }
+
+               msg.Printf(_("Found %lu messages."), count);
+            }
+            else
+            {
+               msg.Printf(_("No matching messages found."));
+            }
+
+            wxLogStatus(m_Frame, msg);
+            break;
+
+         case ASMailFolder::Op_ApplyFilterRules:
+         {
+            ASSERT(result->GetSequence());
+            if ( value == -1 )
+            {
+               wxLogError(_("Filtering messages failed."));
+            }
+            else
+            {
+               msg.Printf(_("Applied filters to %lu messages, "
+                            "see log window for details."),
+                          (unsigned long)result->GetSequence()->Count());
+               wxLogStatus(m_Frame, msg);
+            }
+            break;
+         }
+
+         // these cases don't have return values
+         case ASMailFolder::Op_ReplyMessages:
+         case ASMailFolder::Op_ForwardMessages:
+         case ASMailFolder::Op_DeleteMessages:
+         case ASMailFolder::Op_UnDeleteMessages:
+            break;
+
+         case ASMailFolder::Op_GetMessage:
+            // so far we only use GetMessage() when processing
+            // WXMENU_MSG_QUICK_FILTER
+            {
+               Message *msg = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+               if ( msg )
+               {
+                  MFolder_obj folder(m_folderName);
+
+                  String to;
+                  (void)msg->GetHeaderLine("To", to);
+
+                  if ( CreateQuickFilter(folder,
+                                         msg->From(), msg->Subject(), to,
+                                         m_Frame) )
+                  {
+                     // ask the user if he doesn't want to test his new filter
+                     // right now
+                     if ( MDialog_YesNoDialog
+                          (
+                           _("Would you like to apply the filter you have just "
+                             "created to this message immediately?"),
+                           m_Frame,
+                           MDIALOG_YESNOTITLE,
+                           true,
+                           GetFullPersistentKey(M_MSGBOX_APPLY_QUICK_FILTER_NOW)
+                          ) )
+                     {
+                        UIdArray selections;
+                        selections.Add(msg->GetUId());
+                        m_TicketList->Add(
+                              m_ASMailFolder->ApplyFilterRules(&selections, this)
+                           );
+                     }
+                  }
+                  //else: filter not created, nothing to apply
+
+                  msg->DecRef();
+               }
+            }
+            break;
+
+         default:
+            FAIL_MSG( "MEvent handling not implemented yet" );
       }
    }
+   //else: not out result at all
 
    result->DecRef();
 }
