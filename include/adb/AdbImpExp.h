@@ -39,6 +39,12 @@ extern bool AdbImport(const String& filename,
                       const String& adbname,
                       AdbImporter *importer = NULL);
 
+// just as AdbImport() but imports the data into an existing group of an
+// existing address book
+extern bool AdbImport(const String& filename,
+                      AdbEntryGroup *group,
+                      AdbImporter *importer = NULL);
+
 // export the given ADB group (recursively) using the specified exporter,
 // returns TRUE on success
 extern bool AdbExport(const AdbEntryGroup& group,

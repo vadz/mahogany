@@ -18,7 +18,7 @@ class wxMenu;
 class wxToolBar;
 
 /// append an item to menu
-extern void AppendToMenu(wxMenu *menu, int n);
+extern void AppendToMenu(wxMenu *menu, int& n);
 
 /// appends all items in the given range (see enum below) to the menu
 extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
@@ -57,6 +57,7 @@ extern void EnableMMenu(MMenuId id, class wxWindow *win, bool enable);
 */
 enum
 {
+   WXMENU_SUBMENU = -2,
    WXMENU_SEPARATOR = -1,
 
    WXMENU_FILE_BEGIN = 0,
@@ -165,6 +166,10 @@ enum
    WXMENU_ADBBOOK_SEP,
    WXMENU_ADBBOOK_EXPORT,
    WXMENU_ADBBOOK_IMPORT,
+   WXMENU_ADBBOOK_VCARD_SUBMENU_START,
+      WXMENU_ADBBOOK_VCARD_IMPORT,
+      WXMENU_ADBBOOK_VCARD_EXPORT,
+   WXMENU_ADBBOOK_VCARD_SUBMENU_END,
    WXMENU_ADBBOOK_SEP3,
 #ifdef DEBUG
    WXMENU_ADBBOOK_FLUSH,

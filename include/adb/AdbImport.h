@@ -159,7 +159,7 @@ private:
    DEFAULT_ENTRY_FUNC
 
 #define IMPLEMENT_ADB_IMPORTER(cname, desc, format, Author)                \
-   MMODULE_BEGIN_IMPLEMENT(cname, _(desc), "AdbImporter", _(desc), "1.00") \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname, "AdbImporter", _(desc), "1.00")  \
       MMODULE_PROP(author, Author)                                         \
       MMODULE_PROP(adbformat, format)                                      \
    MMODULE_END_IMPLEMENT(cname)                                            \

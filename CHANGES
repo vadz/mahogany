@@ -1,6 +1,7 @@
 (next release) on (date of next release)
 17.05.00 VZ: added possibility to attach vCards to outgoing messages
              added vCard import module for the address book editor
+             vCard can also be imported as a single entry, not as entire book
 16.05.00 KB: Calendar module does repeating events (minor glitches still)
 15.05.00 KB: Mahogany now runs as "root", too. Fixes to MailCollector and invocation
              of filters. de.po is up to date.

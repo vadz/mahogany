@@ -108,12 +108,13 @@ MailFolder::OpenFolder(const MFolder *mfolder)
 {
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
 
-#ifdef EXPERIMENTAL
+   // VZ: this doesn't do anything yet anyhow...
+#if 0 //def EXPERIMENTAL
    if( mfolder->GetType() == MF_MFILE
        || mfolder->GetType() == MF_MDIR )
       return MMailFolder::OpenFolder(mfolder);
 #endif
-      
+
    int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
                                                 mfolder->GetFlags());
 

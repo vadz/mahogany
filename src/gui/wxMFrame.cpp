@@ -143,10 +143,15 @@ wxMFrame::AddFileMenu(void)
    wxWindow *parent = GetParent();
 #endif
 
+   int n = WXMENU_FILE_CLOSE;
    if ( parent != NULL )
-      AppendToMenu(fileMenu, WXMENU_FILE_CLOSE);
+   {
+      AppendToMenu(fileMenu, n);
+   }
+
    // +2 because WXMENU_FILE_CLOSE has a separator with it
-   AppendToMenu(fileMenu, WXMENU_FILE_CLOSE + 2, WXMENU_FILE_END);
+   n += 2;
+   AppendToMenu(fileMenu, n, WXMENU_FILE_END);
 
    GetMenuBar()->Append(fileMenu, _("&File"));
 }

@@ -44,13 +44,24 @@
 #endif // USE_ADB_MODULES
 
 // ----------------------------------------------------------------------------
-// private functions
+// function prototypes
 // ----------------------------------------------------------------------------
 
 // recurisive import helper
 static bool AdbImportGroup(AdbImporter   *importer,  // from
                            AdbEntryGroup *group,     // to
                            const String& path);      // starting at
+
+// return the importer for this file (tries all available importers if none is
+// given or just checks that this one can import it otherwise)
+static AdbImporter *FindImporter(const String& filename,
+                                 AdbImporter *importer);
+
+// common part of both AdbImport()
+static bool DoAdbImport(const String& filename,
+                        AdbEntryGroup *group,
+                        AdbImporter *importer,
+                        String *errMsg = NULL);
 
 // ============================================================================
 // implementation
@@ -128,9 +139,7 @@ static bool AdbImportGroup(AdbImporter   *importer,  // from
    return TRUE;
 }
 
-bool AdbImport(const String& filename,
-               const String& adbname,
-               AdbImporter *importer)
+AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
 {
    // first find the importer we will use
    if ( !importer )
@@ -174,11 +183,46 @@ bool AdbImport(const String& filename,
          }
       }
 
-      // to match the DecRef() at the end of the function - it's easier to just
-      // call IncRef() once more than to track if we're using the importer
-      // passed in as argument or the one we found ourselves.
+      // the pointer will be returned to the outside world
       importer->IncRef();
    }
+
+   return importer;
+}
+
+bool DoAdbImport(const String& filename,
+                 AdbEntryGroup *group,
+                 AdbImporter *importer,
+                 String *errMsg)
+{
+   bool ok = importer->StartImport(filename);
+   if ( !ok )
+   {
+      if ( errMsg )
+      {
+         errMsg->Printf(_("couldn't start importing from file '%s'."),
+                        filename.c_str());
+      }
+   }
+   else
+   {
+      // start importing: recursively copy all entries from the foreign ADB into
+      // the native one
+      ok = AdbImportGroup(importer, group, "");
+   }
+
+   return ok;
+}
+
+// ----------------------------------------------------------------------------
+// public API
+// ----------------------------------------------------------------------------
+
+bool AdbImport(const String& filename,
+               const String& adbname,
+               AdbImporter *importer)
+{
+   importer = FindImporter(filename, importer);
 
    AdbBook *adbBook = NULL;
 
@@ -217,18 +261,7 @@ bool AdbImport(const String& filename,
    adbBook->SetUserName(adbBook->GetUserName());
 
    // load the data
-   ok = importer->StartImport(filename);
-   if ( !ok )
-   {
-      errMsg.Printf(_("couldn't start importing from file '%s'."),
-                    filename.c_str());
-
-      goto exit;
-   }
-
-   // start importing: recursively copy all entries from the foreign ADB into
-   // the native one
-   ok = AdbImportGroup(importer, adbBook, "");
+   ok = DoAdbImport(filename, adbBook, importer, &errMsg);
 
 exit:
    if ( !!errMsg )
@@ -271,6 +304,29 @@ exit:
    // if we created it, let it go away - otherwise it matches IncRef() done
    // above
    SafeDecRef(importer);
+
+   return ok;
+}
+
+bool AdbImport(const String& filename,
+               AdbEntryGroup *group,
+               AdbImporter *importer)
+{
+   importer = FindImporter(filename, importer);
+   if ( !importer )
+   {
+      // build the message from the pieces already translated (used above)
+      wxString errImport = _("Import of address book from file '%s' failed");
+      errImport += ": %s";
+
+      wxLogError(errImport, filename.c_str(), _("unsupported format."));
+
+      return false;
+   }
+
+   bool ok = DoAdbImport(filename, group, importer);
+
+   importer->DecRef();
 
    return ok;
 }
@@ -318,10 +374,18 @@ AdbImporter *AdbImporter::GetImporterByName(const String& name)
    {
       importer = info->CreateImporter();
 
-      if ( importer->GetName() == name )
-         break;
+      if ( importer )
+      {
+         if ( importer->GetName() == name )
+            break;
 
-      importer->DecRef();
+         importer->DecRef();
+      }
+      else
+      {
+         wxLogDebug("Failed to load ADB importer '%s'.", info->name);
+      }
+
       importer = NULL;
 
       info = info->next;

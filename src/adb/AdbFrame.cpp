@@ -62,7 +62,9 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
-
+#include "adb/AdbImport.h"
+#include "adb/AdbExport.h"
+#include "adb/AdbImpExp.h"
 #include "adb/AdbDialogs.h"
 
 // our public interface
@@ -89,7 +91,7 @@ TODO: (+ in first column means done)
   3. entry renaming (probably should be supported in wxConfig?)
   4. context-sensitive help
 + 5. lookup (reg exps?)
-  6. import/export
++ 6. import/export
   7. splitter?
 + 8. set the type of lookup (where to look for the match)
 + 9. listbox interface (add/remove items)
@@ -285,6 +287,9 @@ public:
 
     // return FALSE if has no children, TRUE otherwise
   bool ExpandFirstTime(wxTreeCtrl& tree);
+
+    // delete all entries and reload them
+  void Refresh(wxTreeCtrl& tree);
 
     // copy data recursively from another group
   void CopyData(const AdbTreeNode& other);
@@ -617,6 +622,7 @@ public:
   void OnUpdatePaste(wxUpdateUIEvent& event);
   void OnUpdateDelete(wxUpdateUIEvent& event);
   void OnUpdateExport(wxUpdateUIEvent& event);
+  void OnUpdateExportVCard(wxUpdateUIEvent& event);
 
   void OnActivate(wxActivateEvent&);
 
@@ -668,6 +674,11 @@ public:
   void ExportAdb();
     // ask the user for filename and import the ADB from this file
   bool ImportAdb();
+
+    // create a vCard from the current entry
+  void ExportVCardEntry();
+    // create a new entry from a vCard
+  bool ImportVCardEntry();
 
   // show the current ADB statistics
   void DoShowAdbProperties();
@@ -1022,6 +1033,8 @@ BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
   EVT_UPDATE_UI(WXMENU_ADBEDIT_RENAME, wxAdbEditFrame::OnUpdateDelete)
     // exporting is only possible when a group or book is selected
   EVT_UPDATE_UI(WXMENU_ADBBOOK_EXPORT, wxAdbEditFrame::OnUpdateExport)
+    // exporting vCard is only possible when an entry is selected
+  EVT_UPDATE_UI(WXMENU_ADBBOOK_VCARD_EXPORT, wxAdbEditFrame::OnUpdateExportVCard)
 
   // other
     // need to intercept this to prevent default implementation to give the
@@ -1693,6 +1706,14 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       ExportAdb();
       break;
 
+    case WXMENU_ADBBOOK_VCARD_IMPORT:
+      ImportVCardEntry();
+      break;
+
+    case WXMENU_ADBBOOK_VCARD_EXPORT:
+      ExportVCardEntry();
+      break;
+
     case WXMENU_ADBBOOK_PROP:
       DoShowAdbProperties();
       break;
@@ -1981,6 +2002,87 @@ bool wxAdbEditFrame::ImportAdb()
   return ok;
 }
 
+void wxAdbEditFrame::ExportVCardEntry()
+{
+  wxCHECK_RET( !m_current->IsGroup(), "command should be disabled" );
+
+  AdbExporter *exporter = AdbExporter::GetExporterByName("AdbVCardExporter");
+  if ( !exporter )
+  {
+    wxLogError(_("Sorry, vCard exporting is unavailable."));
+
+    return;
+  }
+
+  // ask the user for the file name
+  wxString filename = wxPFileSelector
+                      (
+                        ADB_CONFIG_PATH "/AdbVCardFile",
+                        _("Choose the name of vCard file"),
+                        READ_APPCONFIG(MP_USERDIR),
+                        "vcard.vcf",
+                        "vcf",
+                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
+                        wxHIDE_READONLY,
+                        this
+                      );
+  if ( !!filename )
+  {
+    if ( AdbExport(*(GetCurNode()->AdbGroup()), *exporter) )
+    {
+      wxLogStatus(_("Successfully exported address book data to the file '%s'."),
+                  filename.c_str());
+    }
+    else
+    {
+      wxLogStatus(_("Address book export failed."));
+    }
+  }
+  //else: cancelled by user
+
+  exporter->DecRef();
+}
+
+bool wxAdbEditFrame::ImportVCardEntry()
+{
+  // check that we have the importer for vCards
+  AdbImporter *importer = AdbImporter::GetImporterByName("AdbVCardImporter");
+  if ( !importer )
+  {
+    wxLogError(_("Sorry, importing vCards is unavailable."));
+
+    return FALSE;
+  }
+
+  // choose the file
+  wxString filename = wxPFileSelector
+                      (
+                        ADB_CONFIG_PATH "/AdbVCardFile",
+                        _("Choose the name of vCard file"),
+                        READ_APPCONFIG(MP_USERDIR),
+                        "vcard.vcf",
+                        "vcf",
+                        _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
+                        wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                        this
+                      );
+
+  if ( !!filename )
+  {
+    AdbTreeNode *node = GetCurNode();
+    if ( AdbImport(filename, node->AdbGroup(), importer) )
+    {
+      // refresh the group to show the new entry
+      node->Refresh(*m_treeAdb);
+
+      return TRUE;
+    }
+  }
+  //else: cancelled by user
+
+  return FALSE;
+}
+
 void wxAdbEditFrame::DoShowAdbProperties()
 {
   wxCHECK_RET( m_current->IsBook(), "command should be disabled" );
@@ -2221,6 +2323,12 @@ void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 void wxAdbEditFrame::OnUpdateExport(wxUpdateUIEvent& event)
 {
   event.Enable( m_current->IsGroup() && !m_current->IsRoot() );
+}
+
+// can only export a single entry to vCard
+void wxAdbEditFrame::OnUpdateExportVCard(wxUpdateUIEvent& event)
+{
+  event.Enable( !m_current->IsGroup() );
 }
 
 void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
@@ -3727,6 +3835,14 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 
   // don't do this, the tree will delete the item itself
   //delete child;
+}
+
+void AdbTreeNode::Refresh(wxTreeCtrl& tree)
+{
+  m_children.Empty();
+  tree.DeleteChildren(GetId());
+  m_bWasExpanded = FALSE;
+  ExpandFirstTime(tree);
 }
 
 AdbTreeElement *AdbTreeNode::FindChild(const char *szName)

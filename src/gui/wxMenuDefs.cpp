@@ -324,6 +324,12 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_ADBBOOK_EXPORT,gettext_noop("&Export..."),        gettext_noop("Export address book data to another programs format"), FALSE },
    { WXMENU_ADBBOOK_IMPORT,gettext_noop("&Import..."),        gettext_noop("Import data from an address book in another programs format"), FALSE },
+   { WXMENU_SUBMENU,       gettext_noop("&vCard"), "", FALSE },
+      { WXMENU_ADBBOOK_VCARD_IMPORT, gettext_noop("I&mport vCard file..."),
+                                     gettext_noop("Create an entry from vCard file"), FALSE },
+      { WXMENU_ADBBOOK_VCARD_EXPORT, gettext_noop("E&xport vCard file..."),
+                                     gettext_noop("Export entry to a vCard file"), FALSE },
+   { WXMENU_SUBMENU,       "", "", FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 #ifdef DEBUG
    { WXMENU_ADBBOOK_FLUSH, "&Flush",                           "Save changes to disk"                         , FALSE },
@@ -372,13 +378,30 @@ static const MenuItemInfo g_aMenuItems[] =
 // menu stuff
 // ----------------------------------------------------------------------------
 
-void AppendToMenu(wxMenu *menu, int n)
+void AppendToMenu(wxMenu *menu, int& n)
 {
-   if ( g_aMenuItems[n].idMenu == WXMENU_SEPARATOR ) {
+   int id = g_aMenuItems[n].idMenu;
+   if ( id == WXMENU_SEPARATOR ) {
       menu->AppendSeparator();
    }
+   else if ( id == WXMENU_SUBMENU ) {
+      // append all entries until the next one with id == WXMENU_SUBMENU to a
+      // submenu
+      wxMenu *submenu = new wxMenu();
+
+      int nSubMenu = n;
+      for ( n++; g_aMenuItems[n].idMenu != WXMENU_SUBMENU; n++ )
+      {
+         AppendToMenu(submenu, n);
+      }
+
+      menu->Append(10000, // FIXME
+                   wxGetTranslation(g_aMenuItems[nSubMenu].label),
+                   submenu,
+                   wxGetTranslation(g_aMenuItems[nSubMenu].helpstring));
+   }
    else {
-      menu->Append(g_aMenuItems[n].idMenu,
+      menu->Append(id,
                    wxGetTranslation(g_aMenuItems[n].label),
                    wxGetTranslation(g_aMenuItems[n].helpstring),
                    g_aMenuItems[n].isCheckable);

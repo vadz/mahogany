@@ -95,6 +95,7 @@ enum ConfigFields
    ConfigField_ReturnAddress,
    ConfigField_SetReplyFromTo,
    ConfigField_PersonalName,
+   ConfigField_VCardHelp,
    ConfigField_UseVCard,
    ConfigField_VCardFile,
    ConfigField_UserLevel,
@@ -455,6 +456,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Return/Reply address"),        Field_Text | Field_Vital,   -1, },
    { gettext_noop("Reply return address from &To: field"), Field_Bool, -1, },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
+   { gettext_noop(
+      "You may want to attach your personal information card (vCard)\n"
+      "to all outoing messages. In this case you will need to specify\n"
+      "a file containing it.\n"
+      "Notice that such file can be created by exporting an address\n"
+      "book entry in the vCard format."), Field_Message, -1 },
    { gettext_noop("Attach a v&Card to outgoing messages"), Field_Bool,    -1,                        },
    { gettext_noop("&vCard file"),                  Field_File, ConfigField_UseVCard,                        },
    { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
@@ -683,6 +690,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_RETURN_ADDRESS),
    CONFIG_ENTRY(MP_SET_REPLY_FROM_TO),
    CONFIG_ENTRY(MP_PERSONALNAME),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_USEVCARD),
    CONFIG_ENTRY(MP_VCARD),
    CONFIG_ENTRY(MP_USERLEVEL),
