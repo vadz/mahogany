@@ -921,7 +921,7 @@ wxLayoutList::Delete(CoordType count)
                count -= len;
                erase(i);
                m_CursorObject = i;
-               m_CursorOffset = 0;
+               m_CursorOffset = (**i).CountPositions();
                continue; 
             }
 

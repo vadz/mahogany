@@ -64,17 +64,9 @@ class wxFolderView : public FolderView
 {
 public:
    /** Constructor
-       @param folderName the name of the folder
        @param parent   the parent window
    */
-   static wxFolderView *Create(String const & folderName,
-                               MWindow *parent = NULL);
-
-   /* Constructor, for displaying an already open mail folder
-      @param mf pointer to mailfolder
-      @param parent parent window
-   */
-   static wxFolderView* Create(MailFolder *mf, MWindow *parent = NULL);
+   static wxFolderView *Create(MWindow *parent = NULL);
 
    /// Destructor
    ~wxFolderView();
@@ -82,8 +74,15 @@ public:
    /// update it
    void  Update(void);
 
-   /// return true if initialised
-   bool  IsOk(void) const { return initialised; }
+   /** Set the associated folder.
+       @param folder the folder to display or NULL
+   */
+   void SetFolder(MailFolder *mf);
+   
+   /** Open folder from profile and display.
+       @param profilename the name of the folder profile
+   */
+   void OpenFolder(String const &profilename);
 
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);
@@ -180,14 +179,8 @@ protected:
    void SaveMessages(wxArrayInt const &messages, String const &file);
 
 private:
-   /* Constructor, for displaying an already open mail folder
-      @param mf pointer to mailfolder
-      @param parent parent window
-   */
-   void InternalCreate(MailFolder *mf, MWindow *parent = NULL);
-
-   /// is initialised?
-   bool initialised;
+   /// first time constructor
+   wxFolderView(wxWindow *parent);
    /// are we to deallocate the folder?
    bool ownsFolder;
    /// the mail folder being displayed
@@ -203,7 +196,7 @@ private:
    /// height of window
    int height;
    /// a timer to update information
-   wxFVTimer   *timer;
+   wxFVTimer   *m_timer;
    /// its parent
    MWindow *m_Parent;
    /// either a listctrl or a treectrl
@@ -242,8 +235,6 @@ public:
    void OnCommandEvent(wxCommandEvent& event);
    void OnSize(wxSizeEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
-
-   bool IsOk(void) const { return m_FolderView && m_FolderView->IsOk(); }
 
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);

@@ -370,11 +370,10 @@ MailFolderCC::GetMessage(unsigned long index)
 }
 
 void
-MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
+MailFolderCC::SetSequenceFlag(String const &sequence,
+                              int flag,
+                              bool set)
 {
-   String
-      seq = strutil_ultoa(index);
-
    const char *flagstr;
 
    switch(flag)
@@ -392,19 +391,25 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
       return;
    }
 
-#if 0
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
-
    if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
-                     GetProfile(), "ls", (signed long) index, flagstr),1)  )
-#endif
+                     GetProfile(), "ss", sequence.c_str(), flagstr),1)  )
    {
       if(set)
-         mail_setflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
+         mail_setflag(m_MailStream, (char *)sequence.c_str(), (char *)flagstr);
       else
-         mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
+         mail_clearflag(m_MailStream, (char *)sequence.c_str(), (char *)flagstr);
       ProcessEventQueue();
    }
+}
+
+void
+MailFolderCC::SetMessageFlag(unsigned long msgno,
+                             int flag,
+                             bool set)
+{
+   String sequence = strutil_ultoa(msgno);
+   SetSequenceFlag(sequence,flag,set);
 }
 
 void
@@ -516,17 +521,28 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
 
 /// lookup object in Map
 MailFolderCC *
-MailFolderCC::LookupObject(MAILSTREAM const *stream)
+MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
    StreamConnectionList::iterator i;
-   for(i = streamList.begin(); i != streamList.end(); i++)
+   if(stream)
+   {
+      for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i)->stream == stream )
-    return (*i)->folder;
+         return (*i)->folder;
+   }
+   else // IMAP can cause callbacks with stream==NULL but the path
+        // will match.  One more of the c-client mysteries...
+      if(name)
+         for(i = streamList.begin(); i != streamList.end(); i++)
+            if( (*i)->name == name )  // (*i)->name is of type String,  so we can
+               return (*i)->folder;
+   
    if(streamListDefaultObj)
    {
       LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
       return streamListDefaultObj;
    }
+
    LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox for callback!"));
    return NULL;
 }
@@ -647,10 +663,10 @@ MailFolderCC::mm_lsub(MAILSTREAM * /* stream */,
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream,
-                        String /* mailbox */,
+                        String  mailbox ,
                         MAILSTATUS *status)
 {
-   MailFolderCC *mf = LookupObject(stream);
+   MailFolderCC *mf = LookupObject(stream, mailbox);
    if(mf == NULL)
       return;  // oops?!
 

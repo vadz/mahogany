@@ -224,36 +224,53 @@ wxFolderListCtrl::SetEntry(long index,
    SetItem(index, m_columns[WXFLC_SUBJECT], subject);
 }
 
-
 void
-wxFolderView::InternalCreate(MailFolder *mf, MWindow *iparent)
+wxFolderView::SetFolder(MailFolder *mf)
 {
-   wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
-   wxCHECK_RET(mf,"NULL mail folder in wxFolderView ctor");
-
-   m_MailFolder = mf;
-   m_Parent = iparent;
+   if(m_MailFolder)  // clean up old folder
+   {
+      if(m_MailFolder) // close old mailfolder
+      {
+         m_timer->Stop();
+         delete m_timer;
+         m_MailFolder->RegisterView(this,false);
+         
+         // mark messages as seen
+         if(m_NumOfMessages > 0)
+         {
+            String sequence;
+            if(m_NumOfMessages > 1)
+               sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
+            else
+               sequence = "1";
+            m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
+         }
+         m_MailFolder->DecRef();
+      }
+      m_Profile->DecRef(); 
+   }
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
-   m_SplitterWindow = 0;
-   m_Profile = mf->GetProfile();  // use mail folder profile, no incref as mf will be increfed
    m_MailFolder = mf;
-   initialised = true;
-   int x,y;
-   m_Parent->GetClientSize(&x, &y);
+   m_Profile = NULL;
+   m_timer = NULL;
+   m_Profile = ProfileBase::CreateProfile("FolderView",
+                                          m_MailFolder ?
+                                          m_MailFolder->GetProfile() : NULL);
+   if(m_MailFolder)
+   {
+      m_MailFolder->IncRef();  // make sure it doesn't go away
+      m_folderName = m_MailFolder->GetName();
+      m_timer = new wxFVTimer(m_MailFolder);
+      m_MailFolder->RegisterView(this);
+   }
 
-   m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
-                                            wxDefaultPosition, wxSize(x,y),
-                                            wxSP_3D|wxSP_BORDER);
+   wxWindow *oldfolderctrl = m_FolderCtrl;
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
-   m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
-   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,m_MessagePreview, y/3);
-
-   m_MailFolder->RegisterView(this);
-   timer = GLOBAL_NEW wxFVTimer(m_MailFolder);
-   m_SplitterWindow->SetMinimumPaneSize(0);
-   m_SplitterWindow->SetFocus();
+   m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+   delete oldfolderctrl;
    Update();
+
    if(m_NumOfMessages > 0)
    {
       m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
@@ -262,39 +279,37 @@ wxFolderView::InternalCreate(MailFolder *mf, MWindow *iparent)
 }
 
 wxFolderView *
-wxFolderView::Create(MailFolder *mf, MWindow *parent)
+wxFolderView::Create(MWindow *parent)
 {
-   CHECK( mf, NULL, "NULL folder passed to wxFolderView::Create" );
-
-   mf->IncRef();  // make sure it doesn't go away
-   wxFolderView *fv = new wxFolderView();
-   fv->InternalCreate(mf,parent);
-
+   wxCHECK_MSG(parent, NULL, "NULL parent frame in wxFolderView ctor");
+   wxFolderView *fv = new wxFolderView(parent);
    return fv;
 }
 
-wxFolderView *
-wxFolderView::Create(String const & folderName, MWindow *iparent)
+wxFolderView::wxFolderView(wxWindow *parent)
 {
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-   if ( !mf )
-   {
-      ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
-      return NULL;
-   }
-
-   wxFolderView *fv = new wxFolderView();
-   fv->InternalCreate(mf, iparent);
-   fv->m_folderName = folderName;
-
-   return fv;
+   int x,y;
+   m_Parent = parent;
+   m_MailFolder = NULL;
+   m_Parent->GetClientSize(&x, &y);
+   m_Profile = ProfileBase::CreateProfile("FolderView",NULL);
+   m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
+                                            wxDefaultPosition, wxSize(x,y),
+                                            wxSP_3D|wxSP_BORDER);
+   m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
+   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
+   m_SplitterWindow->SetMinimumPaneSize(0);
+   m_SplitterWindow->SetFocus();
 }
 
 void
 wxFolderView::Update(void)
 {
-   long i;
+   if(! m_MailFolder)
+      return;
 
+   long i;
    Message  *mptr;
    String   line;
    int   nstatus;
@@ -369,21 +384,17 @@ wxFolderView::Update(void)
    m_UpdateSemaphore = false;
 }
 
+
+void
+wxFolderView::OpenFolder(String const &profilename)
+{
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,profilename);
+   SetFolder(mf);
+}
+
 wxFolderView::~wxFolderView()
 {
-   if(initialised)
-   {
-      if(m_MailFolder)
-      { // mark messages as seen
-         for(int i = 1; i <= m_NumOfMessages; i++)
-            m_MailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_UNREAD, false);
-      }
-
-      timer->Stop();
-      GLOBAL_DELETE timer;
-      m_MailFolder->RegisterView(this,false);
-      m_MailFolder->DecRef();
-   }
+   SetFolder(NULL);
 }
 
 void
@@ -767,22 +778,11 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
    m_FolderView = fv;
    SetTitle(String("M: " + m_FolderView->GetFolder()->GetName()));
-
-   if ( m_FolderView->IsOk() )
-   {
-      // add a toolbar to the frame
-      // NB: the buttons must have the same ids as the menu commands
-      m_ToolBar = CreateToolBar();
-      AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
-
-      Show(true);
-   }
-   else
-   {
-      delete m_FolderView;
-      m_FolderView = NULL;
-      Close(true);
-   }
+   // add a toolbar to the frame
+   // NB: the buttons must have the same ids as the menu commands
+   m_ToolBar = CreateToolBar();
+   AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
+   Show(true);
 }
 
 wxFolderViewFrame *
@@ -792,12 +792,8 @@ wxFolderViewFrame::Create(MailFolder *mf, wxMFrame *parent)
    CHECK( mf, NULL, "NULL folder passed to wxFolderViewFrame::Create" );
 
    wxFolderViewFrame *f = new wxFolderViewFrame(mf->GetName(),parent);
-   wxFolderView *fv = wxFolderView::Create(mf,f);
-   if(! fv)
-   {
-      delete fv;
-      return NULL;
-   }
+   wxFolderView *fv = wxFolderView::Create(f);
+   fv->SetFolder(mf);
    f->InternalCreate(fv,parent);
    return f;
 }
@@ -806,12 +802,8 @@ wxFolderViewFrame *
 wxFolderViewFrame::Create(const String &folderName, wxMFrame *parent)
 {
    wxFolderViewFrame *f = new wxFolderViewFrame(folderName, parent);
-   wxFolderView *fv = wxFolderView::Create(folderName,f);
-   if(! fv)
-   {
-      delete f;
-      return NULL;
-   }
+   wxFolderView *fv = wxFolderView::Create(f);
+   fv->OpenFolder(folderName);
    f->InternalCreate(fv,parent);
    return f;
 }

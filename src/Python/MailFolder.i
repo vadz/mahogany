@@ -139,13 +139,14 @@ public:
    */
    virtual void UnDeleteMessage(unsigned long index);
 
-   /** Set a message flag. Possible flag values are MSG_STAT_xxx
-       @param index the sequence number
+   /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
+       @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetMessageFlag(unsigned long index, int flag, bool set =
-                true);
+   virtual void SetSequenceFlag(String const &sequence,
+                                int flag,
+                                bool set = true);
 
    /** Appends the message to this folder.
        @param msg the message to append

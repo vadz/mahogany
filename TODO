@@ -14,8 +14,12 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+wxFolderView:
+- clear MessageView, for this:
+- modify wxMessageView to only temporarily use Profile when needed, so 
+  it doesn't stay with the old folderview profile
+
 - suspected bug in LoadImageXpm in wxIconmanager leading to crashes
-- suspected bug in MEvent code causing lockups/endless memory allocation
 - make wxFolderView::Update() a bit more intelligent. Clicking on
   unread mails changes the flags and therefore resets selection.
   wxListCtrl selection gets reset if message has to be fetched, if it 
@@ -24,17 +28,15 @@ $Id$
   some c-client update event?
   --> No, Update() clever enough but wxListCtrl does not return true
       for IsSelected() -> therefore selection gets reset
+- add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog?
 
- - sending messages takes ages - why? Vadim: can you do some profiling
-   on that?  --> Local network problem? Verify again later.
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).
- - POP3: loading all message contents(why?) and twice(why?)
  - ADB: does not use substring??? (Joen_Doedoe no expansion for
    "doe" or "Doe")
  - folderview listctrl has extra Subject column behind Size field ???
@@ -42,7 +44,7 @@ $Id$
    possibly have a MIME types editor (similar to netscape's?)
  - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
    SendMessageCC::AddPart()
-
+ - POP: find a way to cache messages in MailFolder class
  - wxLayout:
   + Refresh!!
   + undo?
@@ -316,14 +318,15 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
- - make Message use refcount
  - sometimes mailfolders/messages seem empty
- - add message/move to folder
+ - suspected bug in MEvent code causing lockups/endless memory allocation
 
 
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+ - make Message use refcount
+ - add message/move to folder
  - copying to other folder only writes headers, no content 
  - allow '=' in urls and don't allow ' '
  - help fails to find copyright
@@ -415,6 +418,7 @@ classes in the hierarchy.
  - integrate new c-client lib 4.5
  - Profile readEntry() needs interface extension to allow a boolean success
    value, remove hacks like 17 or "illegal value"!
+ - POP3: loading all message contents(why?) and twice(why?)
 
 
  vi: set si tw=80:

@@ -106,7 +106,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    int x,y;
    GetClientSize(&x, &y);
 
-   m_FolderView = NULL;
    m_splitter = new wxPSplitterWindow
                     (
                      "MainSplitter",
@@ -119,12 +118,15 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
+   m_FolderView = wxFolderView::Create(m_splitter);
+   m_splitter->SplitVertically(m_FolderTree->GetWindow(),
+                               m_FolderView->GetWindow());
+
 
    // open the last folder in the main frame by default
    String foldername = READ_APPCONFIG(MP_MAINFOLDER);
    if ( !foldername.IsEmpty() && foldername[0u] != '/' )
       foldername.Prepend('/');
-   bool hasFolderView = false;
    if ( !foldername.IsEmpty() )
    {
       MFolder *folder = MFolder::Get(foldername);
@@ -132,16 +134,11 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
       {
          // make sure it doesn't go away after OpenFolder()
          folder->IncRef();
-         hasFolderView = OpenFolder(folder);
-         if ( hasFolderView )
-            m_FolderTree->SelectFolder(folder);
+         OpenFolder(folder);
+         m_FolderTree->SelectFolder(folder);
          folder->DecRef();
       }
    }
-
-   if ( !hasFolderView )
-      m_splitter->Initialize(m_FolderTree->GetWindow());
-   //else: already split in OpenFolder()
 
 #ifndef HAS_DYNAMIC_MENU_SUPPORT
    AddMessageMenu();
@@ -168,7 +165,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #endif // GTK
 }
 
-bool
+void
 wxMainFrame::OpenFolder(MFolder *folder)
 {
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
@@ -179,7 +176,6 @@ wxMainFrame::OpenFolder(MFolder *folder)
    if ( folder && m_folderName == folder->GetFullName() )
    {
       folder->DecRef();
-
       return true;
    }
    else if ( folder )
@@ -189,83 +185,24 @@ wxMainFrame::OpenFolder(MFolder *folder)
    else
       m_folderName.Empty();
 
-   wxWindow *winOldFolderView;
-   if ( m_FolderView )
-   {
-      winOldFolderView = m_FolderView->GetWindow();
+   m_FolderView->OpenFolder(folder->GetFullName().c_str()+1);
 
-      delete m_FolderView;
-      m_FolderView = NULL;
-   }
-   else
-   {
-      winOldFolderView = NULL;
-   }
-
-   bool hasFolder = true;
-   if ( folder )
-   {
-      m_FolderView = wxFolderView::Create(m_folderName.c_str()+1, m_splitter);
-
-      if ( m_FolderView && m_FolderView->IsOk() )
-      {
-         if ( winOldFolderView )
-         {
-            m_splitter->ReplaceWindow(winOldFolderView,
-                                      m_FolderView->GetWindow());
-         }
-         else
-         {
-            m_splitter->SplitVertically(m_FolderTree->GetWindow(),
-                                        m_FolderView->GetWindow());
-         }
-
+#if 0
+   
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
-         // only add the msg menu once
-         if ( !s_hasMsgMenu )
-         {
-            AddMessageMenu();
-            s_hasMsgMenu = true;
-         }
+   // only add the msg menu once   
+   if ( !s_hasMsgMenu )
+   {
+      AddMessageMenu();
+      s_hasMsgMenu = true;
+   }
 #endif // HAS_DYNAMIC_MENU_SUPPORT
-      }
-      else
-      {
-         hasFolder = false;
-      }
 
-      folder->DecRef();
-   }
-   else
-   {
-      hasFolder = false;
-   }
-
-   if ( !hasFolder )
-   {
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
       // TODO remove the message menu - wxMenuBar::Delete() not implemented
       //      currently in wxGTK and is somewhat broken in wxMSW
 #endif // HAS_DYNAMIC_MENU_SUPPORT
-
-      // no folder view
-      if ( m_splitter->IsSplit() )
-         m_splitter->Unsplit();
-      
-      if ( m_FolderView )
-         delete m_FolderView;
-
-      m_folderName.Empty();
-   }
-
-   if ( winOldFolderView )
-   {
-      // it's not done by Unsplit() nor by ReplaceWindow(), so we must delete
-      // the window ourselves
-      delete winOldFolderView;
-   }
-
-   return hasFolder;
+#endif
 }
 
 void

@@ -47,15 +47,6 @@ class MailFolderPtr(MObjectRCPtr):
     def UnDeleteMessage(self,arg0):
         val = MailFolderc.MailFolder_UnDeleteMessage(self.this,arg0)
         return val
-    def SetMessageFlag(self,arg0,arg1,*args):
-        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self.this,arg0,arg1,)+args)
-        return val
-    def AppendMessage(self,arg0):
-        val = MailFolderc.MailFolder_AppendMessage(self.this,arg0.this)
-        return val
-    def ExpungeMessages(self):
-        val = MailFolderc.MailFolder_ExpungeMessages(self.this)
-        return val
     def GetProfile(self):
         val = MailFolderc.MailFolder_GetProfile(self.this)
         val = ProfileBasePtr(val)

@@ -61,7 +61,7 @@ private:
 /** Reads the next token from the string and removes it from it.
     @param str   string to parse
 */
-Token ReadToken(String &str)
+Token ReadToken(String &str, bool remove = true)
 {
    Token token;
    strutil_delwhitespace(str);
@@ -108,7 +108,80 @@ Token ReadToken(String &str)
    // All other cases: return the character:
    token.SetChar(*(cptr++));
                   
-   str = String(cptr);
+   if(remove)
+      str = String(cptr);
    return token;
 }
 
+/** This class is used to build a syntax tree.
+ */
+class FilterNode
+{
+   
+};
+
+/** A FUNCTIONCALL has a logical value:
+    FUNCTIONCALL:
+       IDENTIFIER ( args )
+*/
+
+class Functioncall : public FilterNode
+{
+public:
+   static Functioncall *Create(Token &token, String &str);
+private:
+   String m_name;
+};
+
+Functioncall *
+Functioncall::Create(Token &token, String &str)
+{
+   ASSERT(token.GetType() == TT_Identifier);
+   Functioncall *i = new Functioncall();
+   i->m_name = token.GetIdentifier();
+
+   // Need to swallow argument list?
+   Token t = ReadToken(str, false);
+   if(t.GetType() == TT_Char && t.GetChar() == '(')
+   {
+      (void) ReadToken(str); // swallow it
+      do
+         t = ReadToken(str);
+      while(! (t.GetType() == TT_Char && t.GetChar() == ')'));
+   }
+   return i;
+}
+
+/** A CONDITION has a logical value:
+    CONDITION:
+       FUNCTIONCALL
+       ( CONDITION )
+       ( CONDITION OPERATOR CONDITION )
+*/
+
+class Condition : public FilterNode
+{
+public:
+   /** Create a condition from token+str */
+   static Condition *Create(Token &token, String str);
+private:
+};
+
+Condition *
+Condition::Create(Token &token, String str)
+{
+   ASSERT(token.GetType() == TT_Identifier ||
+          token.GetType() == TT_Char && token.GetChar() == '(');
+   
+}
+
+/**
+   This function is the actual parser. It parses the string passed as
+   argument and returns a pointer to the root of the tree representing 
+   the expression.
+*/
+FilterNode *ParseString(String &str)
+{
+   Token t = ReadToken(str);
+   return Condition::Create(t,str);
+}

@@ -32,7 +32,7 @@ public:
 
    // open the given folder in the integrated folder view (may be called
    // multiple times)
-   bool OpenFolder(MFolder *folder);
+   void OpenFolder(MFolder *folder);
 
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
