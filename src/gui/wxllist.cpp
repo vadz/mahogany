@@ -3070,6 +3070,7 @@ wxLayoutList::ApplyStyle(wxLayoutStyleInfo const &si, wxDC &dc)
    COPY_SI(style);
    COPY_SI(weight);
    COPY_SI(underline);
+   COPY_SI(enc);
    if(fontChanged)
       dc.SetFont( m_FontCache.GetFont(m_CurrentStyleInfo) );
 
