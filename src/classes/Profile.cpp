@@ -1006,7 +1006,13 @@ void
 Profile::DeleteGlobalConfig()
 {
    if ( ms_GlobalConfig )
+   {
       delete ms_GlobalConfig;
+      ms_GlobalConfig = NULL;
+
+      // we just deleted it, prevent wxWin from deleting it again!
+      wxConfig::Set(NULL);
+   }
 }
 
 String
