@@ -138,6 +138,8 @@ TODO:
 - printer settings seem to have no effect : are persistent, do they get used?
 - MFolder.i
 
+- new mail dialog for "New Mail" folder!!!
+
 for release:
 
 -- disable main frame updates if main frame folder is incoming folder, 
