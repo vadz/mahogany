@@ -36,7 +36,7 @@
     folder profiles (trailing '/' required).
 */
 #ifndef M_FOLDER_CONFIG_SECTION
-#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION M_PROFILE_CONFIG_SECTION 
+#  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION M_PROFILE_CONFIG_SECTION
 #endif
 
 /** The section in the global configuration file used for storing
@@ -238,7 +238,7 @@
 /// show BCC field in message composition?
 #define   MP_SHOWBCC         "ShowBCC"
 /// hostname for mailbox
-#define   MP_FOLDER_HOST      "HostName"
+#define   MP_FOLDER_HOST      "ServerName"
 /// login for mailbox
 #define   MP_FOLDER_LOGIN      "Login"
 /// password for mailbox
@@ -315,7 +315,7 @@
 #define   MP_MVIEW_FGCOLOUR      "MViewFgColour"
 // which background colour for the font
 #define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
-// which colour for URLS 
+// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
 //@}
 /**@name Font settings for compose view */
@@ -395,6 +395,10 @@
 //@}
 /// an entry used for testing
 #define MP_TESTENTRY      "TestEntry"
+/** @name names of obsolete configuration entries, for upgrade routines */
+//@{
+#define MP_OLD_FOLDER_HOST "HostName"
+//@}
 //@}
 
 /** @name default values of configuration entries */
@@ -631,7 +635,7 @@
 #define   MP_MVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_D      "white"
-// which colour for URLS 
+// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_D     "blue"
 //@}
 /**@name Font settings for compose view */

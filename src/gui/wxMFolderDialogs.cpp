@@ -178,10 +178,8 @@ public:
                           ProfileBase *profile,
                           wxFolderCreateDialog *dlg = NULL);
 
-   ~wxFolderPropertiesPage()
-      {
-         m_profile->DecRef();
-      }
+   ~wxFolderPropertiesPage() { m_profile->DecRef(); }
+
    // set the profile path to copy the default values from
    void SetDefaults(const String& profilePath)
       { m_defaultsPath = profilePath; }
@@ -195,11 +193,28 @@ public:
    void OnChange(wxKeyEvent& event);
 
 protected:
-   // fill the fields with the default value for the given folder type
-   // (the current value of the type radiobox) either when the page is created
-   // or when the type of the folder chosen changes
-   void SetDefaultValues(bool firstTime = false);
+   // fill the fields with the default value for the given folder type (the
+   // current value of the type radiobox) when the type of the folder chosen
+   // changes (which happens when the page is created too)
+   void SetDefaultValues();
 
+   // write the entry into the profile but only if it has been changed: we
+   // shouldn't write the unchanged entries because this breaks profile
+   // inheritance (if we have nothing, we read parent's value)
+   enum FolderProperty
+   {
+      Username,   // login name
+      Password,   // password
+      Server,     // server (either POP3, IMAP4 or NNTP)
+      Path,       // path for file based folders, newsgroup for NEWS/NNTP
+      MaxProperty
+   };
+   void WriteEntryIfChanged(FolderProperty entry, const wxString& value);
+
+   // hack: this flag tells whether we're in process of creating the folder or
+   // just showing the properties for it. Ultimately, it shouldn't be
+   // necessary, but for now we use it to adjust our behaviour depending on
+   // what we're doing
    bool m_isCreating;
 
    wxNotebook * m_notebook;
@@ -229,11 +244,14 @@ protected:
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
 
-   // the path to the profile section with the defautl values
+   /// the path to the profile section with the defautl values
    wxString m_defaultsPath;
 
-   // the "create folder dialog" or NULL if we're showing folder properties
+   /// the "create folder dialog" or NULL if we're showing folder properties
    wxFolderCreateDialog *m_dlgCreate;
+
+   /// the array with the initial values of the settings for this folder
+   wxString m_originalValues[MaxProperty];
 
    DECLARE_EVENT_TABLE()
 };
@@ -814,60 +832,107 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 }
 
 void
-wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
+wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
+                                            const wxString& value)
 {
+   static const char *profileKeys[MaxProperty] =
+   {
+      MP_FOLDER_LOGIN,
+      MP_FOLDER_PASSWORD,
+      MP_FOLDER_HOST,
+      MP_FOLDER_PATH
+   };
+
+   if ( value != m_originalValues[property] )
+   {
+      m_profile->writeEntry(profileKeys[property], value);
+   }
+   //else: it didn't change, don't write it back
+}
+
+void
+wxFolderPropertiesPage::SetDefaultValues()
+{
+   // clear the initial values
+   for ( size_t n = 0; n < WXSIZEOF(m_originalValues); n++ )
+   {
+      m_originalValues[n].Empty();
+   }
+
    // we want to read settings from the default section under
    // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
    // is empty (i.e. we have no parent folder)
 
-   ProfileBase *profile = ProfileBase::CreateProfile("");
-   if(m_defaultsPath) profile->SetPath(m_defaultsPath);
+   Profile_obj profile("");
+   if ( m_defaultsPath )
+      profile->SetPath(m_defaultsPath);
 
-   FolderType typeFolder;
-   if ( firstTime )
-   {
-      typeFolder = (FolderType)GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
-      if(typeFolder == FolderInvalid)
-         typeFolder = File;
-      m_radio->SetSelection(typeFolder);
-   }
-   else
-   {
-      typeFolder = (FolderType)m_radio->GetSelection();
-   }
+   FolderType typeFolder = (FolderType)m_radio->GetSelection();
 
+   String value;
    if ( FolderTypeHasUserName(typeFolder) )
    {
-      String value = READ_CONFIG(profile,MP_FOLDER_LOGIN);
+      value = READ_CONFIG(profile, MP_FOLDER_LOGIN);
       if ( !value )
          value = READ_APPCONFIG(MP_USERNAME);
       m_login->SetValue(value);
+      m_originalValues[Username] = value;
 
-      m_password->SetValue(strutil_decrypt(READ_CONFIG(profile,MP_FOLDER_PASSWORD)));
-
-      if ( typeFolder == POP || typeFolder == IMAP )
-         value = READ_CONFIG(profile, MP_FOLDER_HOST);
-      else if ( typeFolder == News )
-         value = READ_CONFIG(profile, MP_NNTPHOST);
-      else
-         value.Empty();
-      m_server->SetValue(value);
+      String pwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
+      m_password->SetValue(pwd);
+      m_originalValues[Password] = pwd;
    }
 
+   if ( FolderTypeHasServer(typeFolder) )
+   {
+      value = READ_CONFIG(profile, MP_FOLDER_HOST);
+      if ( !value )
+      {
+         if ( typeFolder == Nntp )
+         {
+            // take the global NNTP server setting for this
+            value = READ_CONFIG(profile, MP_NNTPHOST);
+         }
+         else
+         {
+            // this host by default
+            value = READ_CONFIG(profile, MP_HOSTNAME);
+         }
+      }
+
+      m_server->SetValue(value);
+      m_originalValues[Server] = value;
+   }
+
+   value = READ_CONFIG(profile, MP_FOLDER_PATH);
    if ( typeFolder == File && !m_isCreating )
-      m_path->SetValue(READ_CONFIG(profile,MP_FOLDER_PATH));
-   else if ( typeFolder == News )
-      m_newsgroup->SetValue(READ_CONFIG(profile,MP_FOLDER_PATH));
+   {
+      m_path->SetValue(value);
+   }
+   else if ( typeFolder == News || typeFolder == Nntp )
+   {
+      m_newsgroup->SetValue(value);
+   }
+
+   m_originalValues[Path] = value;
 
    if ( !m_isCreating )
       m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
-   profile->DecRef();
 }
 
 bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
-   SetDefaultValues(true);
+   Profile_obj profile("");
+   if ( m_defaultsPath )
+      profile->SetPath(m_defaultsPath);
+
+   FolderType typeFolder = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   if ( typeFolder == FolderInvalid )
+      typeFolder = File;
+
+   // this will also call SetDefaultValues()
+   m_radio->SetSelection(typeFolder);
 
    return TRUE;
 }
@@ -926,11 +991,14 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                          "\n"
                          "Would you like to do it now?"),
                        what.c_str());
-            if(keyname == "AskPwd")
+
+            if ( keyname == "AskPwd" )
+            {
                msg << _("\n\n"
                         "Notice that the password will be stored in your configuration with\n"
-                        "very weak encryption. f you are concerned about security, leave it\n"
+                        "very weak encryption. If you are concerned about security, leave it\n"
                         "empty and Mahogany will prompt you for it whenever needed.");
+            }
 
             if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
                                      true, keyname) )
@@ -980,30 +1048,31 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // common for all folders
    if ( hasUsername && !(flags & MF_FLAGS_ANON) )
    {
-      m_profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
-      m_profile->writeEntry(MP_FOLDER_LOGIN, loginName);
+      WriteEntryIfChanged(Username, loginName);
+      WriteEntryIfChanged(Password, strutil_encrypt(password));
    }
 
    m_profile->writeEntry(MP_FOLDER_TYPE, typeFolder | flags);
+
+   if ( FolderTypeHasServer(typeFolder) )
+   {
+      WriteEntryIfChanged(Server, m_server->GetValue());
+   }
 
    switch ( typeFolder )
    {
       case POP:
       case IMAP:
-         m_profile->writeEntry(MP_FOLDER_HOST,m_server->GetValue());
-         m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
+         WriteEntryIfChanged(Path, m_mailboxname->GetValue());
          break;
 
-      case MF_NNTP:
-         m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
-         // fall through
-
+      case Nntp:
       case News:
-         m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
+         WriteEntryIfChanged(Path, m_newsgroup->GetValue());
          break;
 
       case File:
-         m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
+         WriteEntryIfChanged(Path, m_path->GetValue());
          break;
 
       case Inbox:

@@ -87,6 +87,18 @@ inline bool FolderTypeHasUserName(FolderType type)
       return false;
 }
 
+/// is this a folder type for which server field makes sense?
+inline bool FolderTypeHasServer(FolderType type)
+{
+   // currently it's the same as FolderTypeHasUserName(), but it's not
+   // impossible that there are some protocols which don't have
+   // authentification, yet may have the server name associated with them
+   if ( type == POP || type == IMAP || type == Nntp )
+      return true;
+   else
+      return false;
+}
+
 /// combine type and flags into one int
 inline int CombineFolderTypeAndFlags(FolderType type, int flags)
 {

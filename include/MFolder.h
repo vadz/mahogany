@@ -118,6 +118,32 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
+// A smart pointer to MFolder
+// ----------------------------------------------------------------------------
+
+class MFolder_obj
+{
+public:
+   // ctor & dtor
+   MFolder_obj(const String& name) { m_folder = MFolder::Get(name); }
+  ~MFolder_obj() { SafeDecRef(m_folder); }
+
+   // provide access to the real thing via operator->
+   MFolder *operator->() const { return m_folder; }
+
+   // implicit conversion to the real pointer (dangerous, but necessary for
+   // backwards compatibility)
+   operator MFolder *() const { return m_folder; }
+
+private:
+   // no copy ctor/assignment operator
+   MFolder_obj(const MFolder_obj&);
+   MFolder_obj& operator=(const MFolder_obj&);
+
+   MFolder *m_folder;
+};
+
+// ----------------------------------------------------------------------------
 // A simple class which allows to traverse all subfolders of the given folder:
 // any useful action should be done in OnVisitFolder() virtual function
 // ----------------------------------------------------------------------------

@@ -57,6 +57,7 @@ enum MVersion
    Version_None,     // this is the first installation of M on this machine
    Version_Alpha001, // first public version
    Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
+   Version_Alpha020, // folder host name is now ServerName, not HostName
    Version_Unknown   // some unreckognized version
 };
 
@@ -242,7 +243,7 @@ UpgradeFrom010()
 
    /* Encrypt passwords in new location and make sure we have no
       illegal old profiles around. */
-   p->ResetPath(); // to be save
+   p->ResetPath(); // to be safe
    for ( bool ok = p->GetFirstGroup(group, index);
          ok ;
          ok = p->GetNextGroup(group, index))
@@ -256,8 +257,7 @@ UpgradeFrom010()
    {
       group = **i;
       p->SetPath(group);
-      if(p->readEntry(MP_FOLDER_TYPE, MP_FOLDER_TYPE_D) !=
-         MP_FOLDER_TYPE_D)
+      if(p->readEntry(MP_FOLDER_TYPE, MP_FOLDER_TYPE_D) != MP_FOLDER_TYPE_D)
       {
          p2 = ProfileBase::CreateProfile(group);
          pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
@@ -270,7 +270,7 @@ UpgradeFrom010()
       {
          p->ResetPath();
          p->DeleteGroup(group);
-         String msg = _("Deleted illegal folder profile:'");
+         String msg = _("Deleted illegal folder profile: '");
          msg << p->GetName() << '/' << group << '\'';
          wxLogMessage(msg);
       }
@@ -394,6 +394,60 @@ UpgradeFrom010()
 #endif
 }
 
+static bool
+UpgradeFrom020()
+{
+   /* Config structure incompatible changes from 0.20a to 0.21a:
+      in the folder settings, HostName has become ServerName
+    */
+
+   // enumerate all folders recursively
+   MFolder_obj folderRoot("");
+
+   class FolderTraversal : public MFolderTraversal
+   {
+   public:
+      FolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+         { }
+
+      virtual bool OnVisitFolder(const wxString& folderName)
+      {
+         Profile_obj profile(folderName);
+         bool found;
+         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, "", &found);
+         if ( found )
+         {
+            // delete the old entry, create the new one
+            wxConfigBase *config = profile->GetConfig();
+            if ( config )
+            {
+               config->DeleteEntry(MP_OLD_FOLDER_HOST);
+
+               wxLogTrace("Successfully converted folder '%s'",
+                          folderName.c_str());
+            }
+            else
+            {
+               // what can we do? nothing...
+               FAIL_MSG( "profile without config - can't delete entry" );
+            }
+
+            profile->writeEntry(MP_FOLDER_HOST, hostname);
+         }
+
+         return TRUE;
+      }
+   } traverse(folderRoot);
+
+   traverse.Traverse();
+
+   // TODO it would be very nice to purge the redundant settings from config
+   //      because the older versions wrote everything to it and it has only
+   //      been fixed in 0.21a -- but this seems a bit too complicated
+
+   return TRUE;
+}
+
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
@@ -410,12 +464,15 @@ Upgrade(const String& fromVersion)
       oldVersion = Version_Alpha001;
    else if ( fromVersion == "0.02a" || fromVersion == "0.10a")
       oldVersion = Version_Alpha010;
+   else if ( fromVersion == "0.20a" )
+      oldVersion = Version_Alpha020;
    else
       oldVersion = Version_Unknown;
 
    // otherwise it would hide our message box(es)
    CloseSplash();
 
+   bool success = TRUE;
    switch ( oldVersion )
    {
       case Version_None:
@@ -423,17 +480,27 @@ Upgrade(const String& fromVersion)
          break;
 
       case Version_Alpha001:
-         UpgradeFrom001();
+         if ( success )
+            success = UpgradeFrom001();
          // fall through
 
       case Version_Alpha010:
-         if ( UpgradeFrom010() )
+         if ( success )
+            success = UpgradeFrom010();
+         // fall through
+
+      case Version_Alpha020:
+         if ( success && UpgradeFrom020() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
          else
-            wxLogError(_("Configuration information and program files were "
-                           "successfully could not be upgraded from version '%s'."),
+            wxLogError(_("Configuration information and program files "
+                         "could not be upgraded from version '%s', some "
+                         "settings might be lost.\n"
+                         "\n"
+                         "It is recommended that you uninstall and reinstall "
+                         "the program before using it."),
                          fromVersion.c_str());
          break;
 
@@ -442,8 +509,8 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_Unknown:
-         wxLogError(_("The previously installed version of M was probably "
-                      "newer than this one. Cannot upgrade."));
+         wxLogError(_("The previously installed version of Mahogany was "
+                      "probably newer than this one. Cannot upgrade."));
          return FALSE;
    }
 
