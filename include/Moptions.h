@@ -1865,8 +1865,13 @@ extern const MOption MP_AWAY_STATUS;
    #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so"
    #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so"
 #elif defined(OS_WIN)
-   #define MP_SSL_DLL_SSL_DEFVAL   "ssleay32.dll"
-   #define MP_SSL_DLL_CRYPTO_DEFVAL "libeay32.dll"
+   #if defined(__CYGWIN__)
+      #define MP_SSL_DLL_SSL_DEFVAL   "cygssl.dll"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "cygcrypto.dll"
+   #else // !cygwin
+      #define MP_SSL_DLL_SSL_DEFVAL   "ssleay32.dll"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "libeay32.dll"
+   #endif
 #else // !Unix, !Win
    #define MP_SSL_DLL_SSL_DEFVAL   ""
    #define MP_SSL_DLL_CRYPTO_DEFVAL ""
