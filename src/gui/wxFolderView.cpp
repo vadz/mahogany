@@ -52,6 +52,7 @@
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_SIZE              (wxFolderListCtrl::OnSize)
+   EVT_CHAR              (wxFolderListCtrl::OnKey)
 END_EVENT_TABLE()
 
 #define   LCFIX ((wxFolderListCtrl *)this)->
@@ -60,6 +61,25 @@ static const char *wxFLC_ColumnNames[] =
 {
    "Status","Date","Size","From","Subject"
 };
+
+void wxFolderListCtrl::OnKey(wxKeyEvent& event)
+{
+   long keyCode = event.KeyCode();
+   wxArrayInt selections;
+   m_FolderView->GetSelections(selections);
+
+   if(event.ControlDown())
+      keyCode = -1;
+   switch(keyCode)
+   {
+   case 'D':
+      m_FolderView->DeleteMessages(selections);
+      break;
+   default:
+      wxListCtrl::ProcessEvent(event);
+   }
+}
+
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {

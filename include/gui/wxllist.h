@@ -481,6 +481,7 @@ class wxLayoutPrintout: public wxPrintout
                     *selPageTo);
    void OnPreparePrinting(void);
 protected:
+   void ScaleDC(wxDC *dc);
    virtual void DrawHeader(wxDC &dc, wxPoint topleft, wxPoint bottomright, int pageno);
                            
 private:

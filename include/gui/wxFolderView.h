@@ -289,7 +289,7 @@ public:
       { return GetItemState(index,wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED; }
    void OnSelected(wxListEvent& event);
    void OnSize( wxSizeEvent &event );
-
+   void OnKey( wxKeyEvent &event);
    DECLARE_EVENT_TABLE()
 
 protected:

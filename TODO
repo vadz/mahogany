@@ -47,6 +47,8 @@ $Id$
  - new mail dialog:
    + sometimes From: is empty
    + if more than one new mail, info for one of them is duplicated
+   + apparently if mails have been deleted in the meantime, counter
+     must be updated
 
  - wxLayout:
    + printing needs better scaling how does sample do it?

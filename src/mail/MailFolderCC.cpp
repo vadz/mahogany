@@ -86,7 +86,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mboxpath = "INBOX";
       break;
    case MailFolder::MF_FILE:
-      mboxpath = strutil_expandfoldername(name);
+      mboxpath = name;
       break;
    case MailFolder::MF_POP:
       mboxpath << '{' << server << "/pop3}";

@@ -73,13 +73,10 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
       break;
    case MF_FILE:
       if( strutil_isempty(name) )
-      {
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
-         if(name == "INBOX")
-            type = MF_INBOX;
-         else
-            type = (MailFolder::Type) MP_FOLDER_TYPE_D;
-      }
+      if(name == "INBOX")
+         type = MF_INBOX;
+      name = strutil_expandfoldername(name);
       break;
    case MF_POP:
    case MF_IMAP:

@@ -1304,11 +1304,9 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList &llist,
    m_title = title;
 }
 
-bool wxLayoutPrintout::OnPrintPage(int page)
+void
+wxLayoutPrintout::ScaleDC(wxDC *dc)
 {
-   wxDC *dc = GetDC();
-
-
    // The following bit is taken from the printing sample, let's see
    // whether it works for us.
    
@@ -1340,12 +1338,17 @@ bool wxLayoutPrintout::OnPrintPage(int page)
   // change. But w might be the preview bitmap width, so scale down.
   float overallScale = scale * (float)(w/(float)pageWidth);
   dc->SetUserScale(overallScale, overallScale);
+}
 
+bool wxLayoutPrintout::OnPrintPage(int page)
+{
+   wxDC *dc = GetDC();
 
-  
+   ScaleDC(dc);
+   
    if (dc)
    {
-      DrawHeader(*dc,wxPoint(m_Margins.left,m_Margins.top/2),wxPoint(m_Margins.right,m_Margins.top),page);
+      //DrawHeader(*dc,wxPoint(m_Margins.left,m_Margins.top/2),wxPoint(m_Margins.right,m_Margins.top),page);
       int top, bottom;
       top = (page - 1)*m_PrintoutHeight;
       bottom = top + m_PrintoutHeight;
@@ -1382,10 +1385,13 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 #else
    wxPostScriptDC psdc(WXLLIST_TEMPFILE,false);
 #endif
+
+   ScaleDC(&psdc);
+
    psdc.GetSize(&m_PageWidth, &m_PageHeight); // that's all we need it for
 
-   // We do 5% margins on top and bottom, and a 5% high header line.
-   m_Margins.top = m_PageHeight / 10 ;      // 10%, half of it header
+   // We do 5% margins on top and bottom //, and a 5% high header line.
+   m_Margins.top = m_PageHeight / 5; //10 ;      // 10%, half of it header
    m_Margins.bottom = m_PageHeight - m_PageHeight / 20;   // 95%
    // On the sides we reserve 10% each for the margins.
    m_Margins.left = m_PageWidth / 10;
