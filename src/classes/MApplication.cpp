@@ -127,7 +127,7 @@ MAppBase::VerifySettings(void)
       wxGetHostName(buffer,bufsize);
       m_profile->writeEntry(MP_HOSTNAME, buffer);
    }
-
+   
    bool bFirstRun = READ_APPCONFIG(MC_FIRSTRUN) != 0;
    if ( bFirstRun )
    {

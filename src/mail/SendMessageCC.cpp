@@ -113,14 +113,22 @@ SendMessageCC::Create(ProfileBase *iprof,
    env->from->host =
       CPYSTR(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    env->return_path = mail_newaddr ();
-   env->return_path->mailbox =
-      CPYSTR(profile->readEntry(MP_RETURN_USERNAME,
-                                profile->readEntry(MP_USERNAME,MP_USERNAME_D)));
-   env->return_path->host =
-      CPYSTR(profile->readEntry(MP_RETURN_HOSTNAME,
-                                profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
 
-   tmpstr = to;   ExtractFccFolders(tmpstr);
+  tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+  if(strutil_isempty(tmpstr))
+     tmpstr = profile->readEntry(MP_USERNAME,MP_USERNAME_D);
+  else
+     tmpstr = strutil_before(tmpstr,'@');
+  env->return_path->mailbox = CPYSTR(tmpstr);
+
+  tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+  if(strutil_isempty(tmpstr))
+     tmpstr = profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+  else
+     tmpstr = strutil_after(tmpstr,'@');
+  env->return_path->host = CPYSTR(tmpstr);
+
+  tmpstr = to;   ExtractFccFolders(tmpstr);
    tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    rfc822_parse_adrlist (&env->to,tmp,tmp2);
    delete [] tmp; delete [] tmp2;

@@ -209,7 +209,8 @@ wxMFrame::OnMenuCommand(int id)
    }
    case WXMENU_FILE_CREATE:
    {
-      MDialog_FolderCreate(this);
+      ShowFolderCreateDialog(this);
+      //MDialog_FolderCreate(this);
       break;
    }
    case WXMENU_FILE_COMPOSE:

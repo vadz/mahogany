@@ -10,7 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef    __GNUG__
-    #pragma implementation "persctrl.h"
+#   pragma implementation "persctrl.h"
 #endif
 
 // ============================================================================
@@ -25,12 +25,19 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-  #pragma hdrstop
+#   pragma hdrstop
 #endif
 
 // wxWindows
 #ifndef WX_PRECOMP
-  #include  "wx/window.h"
+#   include  "wx/window.h"
+#   include  "wx/dialog.h"
+#   include  "wx/checkbox.h"
+#   include  "wx/utils.h"
+#   include  "wx/layout.h"
+#   include  "wx/button.h"
+#   include  "wx/stattext.h"
+#   include  "wx/intl.h"
 #endif //WX_PRECOMP
 
 #include "wx/log.h"

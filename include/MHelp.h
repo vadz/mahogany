@@ -25,6 +25,7 @@ enum
    MH_FOLDER_VIEW = 2002,
    MH_MESSAGE_VIEW = 2003,
    MH_FOLDER_OPEN_DIALOG = 2004,
+   MH_FOLDER_CREATE_DIALOG = 2005,
    /// help IDs that are hard-coded (i.e. in resource files)
    MH_FIXED = 30000
 };

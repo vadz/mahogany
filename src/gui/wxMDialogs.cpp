@@ -45,7 +45,7 @@
 
 #include <wx/dynarray.h>
 #include <wx/radiobox.h>
-
+#include <wx/confbase.h>
 #include <wx/persctrl.h>
 
 #include "adb/AdbEntry.h"
@@ -361,7 +361,7 @@ MDialog_YesNoDialog(const char *message,
    if ( configPath != NULL )
    {
       bool wontShowAgain;
-      wxString path = configBool ? wxString(configPath).Right('/') : configPath;
+      wxString path = configBool ? wxString(configPath).Right('/') : wxString(configPath);
 
       bool rc = wxPMessageBox(path, message, caption,
                               wxYES_NO | wxICON_QUESTION | wxCENTRE,

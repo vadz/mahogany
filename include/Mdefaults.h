@@ -159,9 +159,7 @@
 /// the user's hostname
 #define   MP_HOSTNAME         "HostName"
 /// the username for returned mail
-#define   MP_RETURN_USERNAME      "ReturnUserName"
-/// the hostname for returned mail
-#define   MP_RETURN_HOSTNAME      "ReturnHostName"
+#define   MP_RETURN_ADDRESS      "ReturnAddress"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
@@ -393,10 +391,8 @@
 #define   MP_SMTPHOST_D         "localhost"
 /// the news server
 #define   MP_NNTPHOST_D         "news"
-// the username for returned mail
-//#define   MP_RETURN_USERNAME_D      "ReturnUserName"
-// the hostname for returned mail
-//#define   MP_RETURN_HOSTNAME_D      "ReturnHostName"
+/// the username for returned mail
+#define   MP_RETURN_ADDRESS_D      ""
 /// show CC field in message composition?
 #define   MP_SHOWCC_D         1
 /// show BCC field in message composition?

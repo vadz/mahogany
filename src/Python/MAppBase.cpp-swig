@@ -218,26 +218,27 @@ static PyObject *_wrap_MDialog_YesNoDialog(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
     char * _arg0;
-    MFrame * _arg1 = NULL;
-    bool  _arg2 = false;
-    char * _arg3 = MDIALOG_YESNOTITLE_C;
-    bool  _arg4 = true;
+    MWindow * _arg1 = NULL;
+    char * _arg2 = MDIALOG_YESNOTITLE_C;
+    bool  _arg3 = true;
+    char * _arg4 = NULL;
+    bool  _arg5 = false;
     char * _argc1 = 0;
-    int tempbool2;
-    int tempbool4;
+    int tempbool3;
+    int tempbool5;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s|sisi:MDialog_YesNoDialog",&_arg0,&_argc1,&tempbool2,&_arg3,&tempbool4)) 
+    if(!PyArg_ParseTuple(args,"s|ssisi:MDialog_YesNoDialog",&_arg0,&_argc1,&_arg2,&tempbool3,&_arg4,&tempbool5)) 
         return NULL;
     if (_argc1) {
-        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_MFrame_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MDialog_YesNoDialog. Expected _MFrame_p.");
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_MWindow_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MDialog_YesNoDialog. Expected _MWindow_p.");
         return NULL;
         }
     }
-    _arg2 = (bool ) tempbool2;
-    _arg4 = (bool ) tempbool4;
-    _result = (bool )MDialog_YesNoDialog(_arg0,_arg1,_arg2,_arg3,_arg4);
+    _arg3 = (bool ) tempbool3;
+    _arg5 = (bool ) tempbool5;
+    _result = (bool )MDialog_YesNoDialog(_arg0,_arg1,_arg2,_arg3,_arg4,_arg5);
     _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
@@ -541,18 +542,24 @@ SWIGEXPORT(void,initMAppBasec)() {
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
 	 SWIG_RegisterMapping("_MAppBase","_class_MAppBase",0);
+	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_unsigned_long","_long",0);
 	 SWIG_RegisterMapping("_signed_int","_int",0);
+	 SWIG_RegisterMapping("_MObject","_class_MObject",0);
 	 SWIG_RegisterMapping("_unsigned_short","_short",0);
 	 SWIG_RegisterMapping("_class_MAppBase","_MAppBase",0);
 	 SWIG_RegisterMapping("_signed_short","_short",0);
+	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
+	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);
 	 SWIG_RegisterMapping("_int","_unsigned_int",0);
 	 SWIG_RegisterMapping("_int","_signed_int",0);
+	 SWIG_RegisterMapping("_class_MObjectRC","_MObjectRC",0);
+	 SWIG_RegisterMapping("_class_MObject","_MObject",0);
 	 SWIG_RegisterMapping("_class_String","_String",0);
 }

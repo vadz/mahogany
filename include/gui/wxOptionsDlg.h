@@ -13,7 +13,9 @@
 #ifndef   _WXOPTIONSDLG_H
 #define   _WXOPTIONSDLG_H
 
-/// creates and shows the modal options dialog
+/// creates and shows the options dialog, returns a pointer to it
 void ShowOptionsDialog(wxFrame *parent = NULL);
+/// creates and shows the folder creation dialog, returns a pointer to it
+void ShowFolderCreateDialog(wxFrame *parent = NULL);
 
 #endif  //_WXOPTIONSDLG_H

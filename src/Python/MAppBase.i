@@ -41,7 +41,7 @@ inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
 %}
 
 %import MString.i
-%import MProfile.i
+%import Profile.i
 
 class MAppBase 
 {
@@ -79,17 +79,13 @@ void  MDialog_Message(const char *message,
 
 void  MDialog_StatusMessage(const char *message, MFrame *frame = NULL);
 
-/*
-    MFrame *parent = NULL,
-    char  *title = MDIALOG_MSGTITLE,
-    bool modal = false);
-*/
 
-bool  MDialog_YesNoDialog(const char  *message,
-                          MFrame *parent = NULL,
-                          bool modal = false,
-                          const char  *title = MDIALOG_YESNOTITLE_C,
-                          bool YesDefault = true);
+bool MDialog_YesNoDialog(const char *message,
+                           MWindow *parent = NULL,
+                           const char *title = MDIALOG_YESNOTITLE_C,
+                           bool YesDefault = true,
+                           const char *configPath = NULL,
+                           bool configBool = false);
 
 char *MDialog_FileRequester(String  &message,
                             MWindow *parent = NULL,
