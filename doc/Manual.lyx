@@ -1,4 +1,4 @@
-#This file was created by <zeitlin> Mon Nov 27 12:27:21 2000
+#This file was created by <zeitlin> Thu Feb 22 16:55:06 2001
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,20 +35,19 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.60
-\newline 
-
+\size larger 
+Version 0.62 
 \begin_inset Quotes eld
 \end_inset 
 
-Redmond
+Mars
 \begin_inset Quotes erd
 \end_inset 
 
 
 \layout Author
 
-Copyright 1997-2000 by The Mahogany Development Team
+Copyright 1997-2001 by The Mahogany Development Team
 \newline 
  Written by Karsten Ballüder, Vadim Zeitlin et.al.
 \newline 
@@ -97,9 +96,93 @@ Changes against the previous version
 
 
 \series bold 
-0.61 against 0.60
+0.62 against 0.61
 \newline 
-New features:
+
+\series default 
+The main changes in this release concern the Mahogany internals: the stability
+ and efficiency have been both greatly improved, in particular it is believed
+ that all fatal crashes using IMAP servers are now gone.
+ Deleting, expunging and changing the status of the messages is now much
+ faster, especially for the folders with a lot of messages.
+ Of course, there are also several new features:
+\layout Itemize
+
+Order of the folders in the folder tree is customizable, the system folders
+ appear at the top (and not scattered through the tree in alphabetical order)
+\layout Itemize
+
+Support for flagging the messages was added, the folders containing flagged
+ messages are shown in a different colour in the folder tree
+\layout Itemize
+
+All folders opened the last time can be remembered and reopened during the
+ next run
+\layout Itemize
+
+
+\family typewriter 
+TEXT/PLAIN 
+\family default 
+attachments can now be optionally shown inline
+\layout Itemize
+
+hard limit on number of retrieved messages was added (see 
+\begin_inset LatexCommand \ref{limitdatatransfer}
+
+\end_inset 
+
+)
+\layout Standard
+
+Many bugs have been fixed:
+\layout Itemize
+
+sending mail with local MDA (sendmail) respects BCC settings
+\layout Itemize
+
+temporary files with mail messages are not created world readable any more
+\layout Itemize
+
+language autodetection fixed
+\layout Itemize
+
+messages with embedded MIME attachments are shown correctly
+\layout Itemize
+
+server side searching on IMAP servers works
+\layout Itemize
+
+renaming folders was fixed
+\layout Itemize
+
+crashes when: viewing messages with incorrect date, deleting some folders
+ and some others were fixed
+\layout Standard
+
+And a few improvements too:
+\layout Itemize
+
+better UI for the filters dialogs
+\layout Itemize
+
+messages can now also be sorted by status and by size
+\layout Itemize
+
+a hard limit on number of the messages retrieved can be set
+\layout Standard
+
+
+\series bold 
+0.61 against 0.60 
+\series default 
+(note: the version 0.61 wasn't officially released)
+\series bold 
+
+\newline 
+
+\series default 
+A couple of new features, most importantly:
 \layout Itemize
 
 Possibility to save (to the address book) all addresses from a message appearing
@@ -487,20 +570,11 @@ Message editor: rich text editing & HTML (Almost complete, but not activated
 A faster mail folder format or support for storing messages in an ODBC database.
 \layout Itemize
 
-A calendar pluginto to add some some time planning, reminder and mail-delay
- functionality (and synchronisation of it with PalmOS handhelds).
-\layout Itemize
-
-Full Drag and Drop between folders and interaction with filemanagers of
- Windows and Gnome/KDE.
-\layout Itemize
-
 Support for PGP and GNU Privacy Guard to encrypt mails.
  
 \layout Itemize
 
-Wide character (Unicode) support and other character sets, currently being
- added to wxWindows.
+Wide character (Unicode) and UTF-8 support (waiting for GTK+ 2.0)
 \layout Subsection
 
 Help Needed
@@ -509,6 +583,9 @@ Help Needed
 As you can see, we have big plans for Mahogany.
  To achieve all this, we need some help.
  Areas where we would use some help are
+\layout Itemize
+
+Updating this manual
 \layout Itemize
 
 Python 
@@ -568,7 +645,7 @@ Artistic License
 
 \end_inset 
 
-.
+ or, alternatively, under GNU General Public License.
  Some part of the source tree distributed with Mahogany is not covered under
  this license.
  These additional sources can be found in the 
@@ -593,8 +670,15 @@ Why not the GPL/BSD/QPL/my favourite license?
 \layout Standard
 
 Recently discussions about which license to chose for which project provoked
- major flamewars in the nix community.
- There is a trend to put everything under the GPL or LGPL.
+ major flamewars in the Unix community.
+ There is a trend to put everything under the GPL or LGPL
+\begin_float footnote 
+\layout Standard
+
+which we recently felt victim of - due to some strong demand, we have decided
+ to allow alternatively licensing Mahogany under GPL
+\end_float 
+.
  We do not want to get involved in this highly emotional and political discussio
 n.
  Our intent is to alllow everyone to use and modify Mahogany while preserving
@@ -906,7 +990,12 @@ When you start Mahogany for the first time, it will present you with a rather
 
 \end_inset 
 
-) and Network () page are correct and ignore the rest for now.
+) and Network (
+\begin_inset LatexCommand \ref{NetworkPage}
+
+\end_inset 
+
+) page are correct and ignore the rest for now.
  The defaults should be suitable for most situations.
 \layout Standard
 
@@ -1086,7 +1175,7 @@ Create new folder
  Then fill in the details: your username and password for accessing the
  account and the hostname of the POP server.
  Optionally you can enter a port number after a colon.
- If you want Mahogany to collect all mail from here and move it to 
+ By default, Mahogany will collect all mail from here and move it to 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -1094,8 +1183,30 @@ New Mail
 \begin_inset Quotes erd
 \end_inset 
 
- automatically, tick the box, otherwise it will leave the messages on the
- server and you can only read them while you are online.
+ automatically.
+ If you don't want this (i.e.
+ you prefer to leave the messages on server or maybe only move some of them
+ to 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ selectively using filters), clear the 
+\begin_inset Quotes eld
+\end_inset 
+
+Collect all mail
+\begin_inset Quotes erd
+\end_inset 
+
+ checkbox.
+ Note that the default behaviour works better in most cases and that it
+ is impossible to remember the status of the messages on a POP3 server so
+ if you do leave on it, they will always appear as new, even if you had
+ already seen them before.
 \layout Subsubsection
 
 IMAP - what's that?
@@ -1122,7 +1233,11 @@ Setting up Mahogany, its configuration files
 User configuration files
 \layout Standard
 
-When run for the first time, Mahogany creates a directory called 
+When run for the first time, 
+\emph on 
+Mahogany
+\emph default 
+ creates a directory called 
 \family typewriter 
 .M
 \family default 
@@ -1133,8 +1248,12 @@ $HOME/.M/config
 \family default 
  will contain the current program configuration for this user.
  Only values different from the default configuration are stored here.
- If you want to obtain a list of all possible options, you can manually
- add the entry
+ If you want to obtain a list of all possible options (although arguably
+ if you are so curious, you'd better read 
+\emph on 
+Mahogany
+\emph default 
+ sources directly), you can manually add the entry
 \layout Quote
 
 
@@ -1162,7 +1281,7 @@ Mahogany
 \family typewriter 
 M.conf
 \family default 
- file in the Mahogany installation directory (e.g.
+ file in the installation directory (e.g.
  
 \family typewriter 
 /usr/share/Mahogany/M.conf
@@ -1172,11 +1291,6 @@ M.conf
  file, so you can just copy a user's file to this location and edit it by
  hand.
  Useful settings for a system wide default are servers or mail return addresses.
- Note though, that Mahogany will not run properly as 
-\family typewriter 
-root
-\family default 
-.
  Entries prefixed with an exclamation mark 
 \begin_inset Quotes eld
 \end_inset 
@@ -1626,7 +1740,7 @@ When the top window, the list of messages, is active, certain keyboard bindings
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
 multicol5
-15 2 0 0 -1 -1 -1 -1
+16 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
 1 0 0 0
@@ -1641,6 +1755,7 @@ multicol5
 1 0 0 0
 1 0 0 0
 1 0 0 0
+1 1 0 0
 1 1 0 0
 8 1 0 "" ""
 8 1 1 "" ""
@@ -1674,8 +1789,10 @@ multicol5
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
-0 8 1 0 0 0 00 8 1 0 0 0 0English
+Key
 \newline 
 Action performed
 \newline 
@@ -1735,6 +1852,10 @@ open messages in separate window
 H
 \newline 
 toggle display of headers
+\newline 
+*
+\newline 
+ flag or unflag the message
 \layout Subsection
 
 Migrating from another mail client
@@ -1745,7 +1866,11 @@ Migrating from another mail client
 
 \end_inset 
 
-Mahogany supports importing the settings from a few other popular mail clients.
+
+\emph on 
+Mahogany
+\emph default 
+ supports importing the settings from a few other popular mail clients.
  The current list includes Pine, XFMail and Eudora.
  Depending on the mail client only part of its settings may be imported
  but in the best case Mahogany can import the address books, the configuration
@@ -1775,9 +1900,12 @@ Even if you don't find your email client in the list proposed in the dialog,
  book editor.
 \layout Standard
 
-Finally, Mahogany can automatically create the entries in the folder tree
- for all MBOX (standard Unix format, also used by Eudora) files under the
- given directory.
+Finally, 
+\emph on 
+Mahogany
+\emph default 
+ can automatically create the entries in the folder tree for all MBOX (standard
+ Unix format, also used by Eudora) files under the given directory.
  To do this, select the folder in the tree which you want the new folders
  to appear under and choose 
 \noun on 
@@ -1914,13 +2042,13 @@ New Mail
 \begin_inset Quotes erd
 \end_inset 
 
- folder, which might be 
+ folder, which usually is 
 \begin_inset Quotes eld
 \end_inset 
 
 
 \family typewriter 
-/home/MyUserName/.M/New Mail
+~/.M/New Mail
 \family default 
 
 \begin_inset Quotes erd
@@ -1956,6 +2084,120 @@ New Mail
  Like this, you can access any mail folder on that machine that you have
  access to locally, making remote access to your mail much more flexible
  than just accessing your new messages.
+\layout Subsection
+
+Limiting Amount of Data Transferred
+\begin_inset LatexCommand \label{limitdatatransfer}
+
+\end_inset 
+
+
+\layout Standard
+
+When using a remote server, especially over a slow link (such as a modem),
+ it may be undesirable to automatically retrieve all messages from the server.
+ Mahogany provides several options to help you with limiting the amount
+ of data transferred.
+\layout Standard
+
+First, you should probably disable the 
+\begin_inset Quotes eld
+\end_inset 
+
+Open folder at single click
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Preview message when selected
+\begin_inset Quotes erd
+\end_inset 
+
+ options from the 
+\begin_inset Quotes eld
+\end_inset 
+
+Message View
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Miscellaneous
+\begin_inset Quotes erd
+\end_inset 
+
+ pages of the options dialog to avoid accidentally open a folder or a message.
+\layout Standard
+
+Second, there are several useful settings in the 
+\begin_inset Quotes eld
+\end_inset 
+
+Folders
+\begin_inset Quotes erd
+\end_inset 
+
+ page.
+ Note that they can be set for each folder separately so you can only choose
+ to change the default values for some slow servers but keep the original
+ values for all the other ones.
+ These options allow you to specify a threshold for message size: before
+ downloading a message of size bigger than the specified (in Kb), you will
+ be asked for the confirmation.
+ They also allow to set a similar threshold for the number of message headers
+ retrieved: you will be asked before retrieving more than the specified
+ number of headers (default is 
+\begin_inset Formula \( 100 \)
+\end_inset 
+
+) from server.
+ This limit is called 
+\begin_inset Quotes eld
+\end_inset 
+
+soft limit
+\begin_inset Quotes erd
+\end_inset 
+
+ and there is, of course, also a 
+\begin_inset Quotes eld
+\end_inset 
+
+hard
+\begin_inset Quotes erd
+\end_inset 
+
+ one which can be set in the same page.
+ The hard limit, if set (it has value 
+\begin_inset Formula \( 0 \)
+\end_inset 
+
+, i.e.
+ disabled, by default) says that at most that many message headers will
+ be downloaded.
+ Unlike the soft limit, it is unconditional and no questions will be asked
+ if it is exceeded.
+\layout Standard
+
+The hard limit is mostly useful for 
+\begin_inset Quotes eld
+\end_inset 
+
+write only
+\begin_inset Quotes erd
+\end_inset 
+
+ folders, such as SentMail.
+ Indeed, Mahogany accesses it very often (each time a message is sent) and
+ it quickly grows big resulting in delays after message sending.
+ Unconditionally limiting the number of messages retrieved from the server
+ helps a lot in this situation.
 \layout Section
 
 Sending Mail
@@ -2107,7 +2349,7 @@ multicol5
 0 8 1 0 0 0 0 "" ""
 0 8 1 0 0 0 0 "" ""
 
-0 8 1 0 0 0 00 8 1 0 0 0 0Key-Combination
+Key
 \newline 
 Function
 \newline 
@@ -3635,6 +3877,11 @@ If this options is on, you will be asked whether you want to leave the program
 
 \series bold 
 Click folder to open
+\begin_inset LatexCommand \label{clicktoopen}
+
+\end_inset 
+
+
 \newline 
 
 \series default 
@@ -5295,6 +5542,9 @@ If you want to help further development of Mahogany, please go to the same
  or how to contact us.
 \layout Chapter
 
+Advanced Usage
+\layout Section
+
 Compiling 
 \shape slanted 
 Mahogany
@@ -5314,8 +5564,7 @@ htmladdnormallinkfoot{online docs}{../HackersGuide/index.html}
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{Mahogany Web page}{http://mahogany.sourceforge.net/docs.htm
-l}
+htmladdnormallinkfoot{Mahogany Web page}{http://mahogany.sourceforge.net/docs.html}
 \latex default 
 .
 \layout Standard
@@ -5327,6 +5576,174 @@ Some quick notes about common compilation problems can be found in the FAQ,
 \end_inset 
 
 .
+\layout Section
+
+Using 
+\shape slanted 
+Mahogany
+\shape default 
+ more efficiently
+\layout Standard
+
+This section contains assorted tips about how you can make 
+\shape slanted 
+Mahogany
+\shape default 
+ run faster.
+\layout Subsection
+
+Speeding up 
+\shape slanted 
+Mahogany
+\shape default 
+ startup
+\layout Standard
+
+Unix users only: 
+\shape slanted 
+Mahogany
+\shape default 
+ accesses the file 
+\noun on 
+~/.M/config 
+\noun default 
+which stores all program options on startup.
+ If this file is located on a slow partition such as a network disk (NFS),
+ the startup time can be reduced just by moving it elsewhere and creating
+ a link to it from 
+\noun on 
+~/.M
+\noun default 
+ directory.
+\layout Standard
+
+You can choose to not open any folders at startup (
+\begin_inset Quotes eld
+\end_inset 
+
+Folders
+\begin_inset Quotes erd
+\end_inset 
+
+ page of the options dialog) if doing this takes too long in your case.
+ Also, remember to close the address book editor window if you don't want
+ it to be reopened the next time you run 
+\shape slanted 
+Mahogany.
+\layout Subsection
+
+Limiting Amount of Data Transferred
+\begin_inset LatexCommand \label{limitdatatransfer}
+
+\end_inset 
+
+
+\layout Standard
+
+When using a remote server, especially over a slow link (such as a modem),
+ it may be undesirable to automatically retrieve all messages from the server.
+ Mahogany provides several options to help you with limiting the amount
+ of data transferred.
+\layout Standard
+
+First, you should probably disable the 
+\begin_inset Quotes eld
+\end_inset 
+
+Open folder at single click
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Preview message when selected
+\begin_inset Quotes erd
+\end_inset 
+
+ options from the 
+\begin_inset Quotes eld
+\end_inset 
+
+Message View
+\begin_inset Quotes erd
+\end_inset 
+
+ and 
+\begin_inset Quotes eld
+\end_inset 
+
+Miscellaneous
+\begin_inset Quotes erd
+\end_inset 
+
+ pages of the options dialog to avoid accidentally open a folder or a message.
+\layout Standard
+
+Second, there are several useful settings in the 
+\begin_inset Quotes eld
+\end_inset 
+
+Folders
+\begin_inset Quotes erd
+\end_inset 
+
+ page.
+ Note that they can be set for each folder separately so you can only choose
+ to change the default values for some slow servers but keep the original
+ values for all the other ones.
+ These options allow you to specify a threshold for message size: before
+ downloading a message of size bigger than the specified (in Kb), you will
+ be asked for the confirmation.
+ They also allow to set a similar threshold for the number of message headers
+ retrieved: you will be asked before retrieving more than the specified
+ number of headers (default is 
+\begin_inset Formula \( 100 \)
+\end_inset 
+
+) from server.
+ This limit is called 
+\begin_inset Quotes eld
+\end_inset 
+
+soft limit
+\begin_inset Quotes erd
+\end_inset 
+
+ and there is, of course, also a 
+\begin_inset Quotes eld
+\end_inset 
+
+hard
+\begin_inset Quotes erd
+\end_inset 
+
+ one which can be set in the same page.
+ The hard limit, if set (it has value 
+\begin_inset Formula \( 0 \)
+\end_inset 
+
+, i.e.
+ disabled, by default) says that at most that many message headers will
+ be downloaded.
+ Unlike the soft limit, it is unconditional and no questions will be asked
+ if it is exceeded.
+\layout Standard
+
+The hard limit is mostly useful for 
+\begin_inset Quotes eld
+\end_inset 
+
+write only
+\begin_inset Quotes erd
+\end_inset 
+
+ folders, such as SentMail.
+ Indeed, Mahogany accesses it very often (each time a message is sent) and
+ it quickly grows big resulting in delays after message sending.
+ Unconditionally limiting the number of messages retrieved from the server
+ helps a lot in this situation.
 \layout Chapter
 
 FAQ - Frequently Asked Questions_1002_
@@ -5572,7 +5989,7 @@ wxGTK has a problem with constraint handling which can cause this dialog
  allow you to enter anything.
 \layout Subsection
 
-How do I access mail downloaded via fetchpop/procmail?
+How to use Mahogany with fetchpop/procmail?
 \layout Standard
 
 
