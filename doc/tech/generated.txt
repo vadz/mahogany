@@ -1,0 +1,15 @@
+Generated files in Cvs
+======================
+
+Script configure
+----------------
+Presumably you have already checked in new configure.in. Following commands
+should be used to regenerate configure script. Replace $MAHOGANY_SOURCE and
+$WX_SOURCE with your settings. You need at least wxWindows 2.5.
+
+cd $MAHOGANY_SOURCE
+mkdir ../configure
+aclocal -I $WX_SOURCE --output=../configure/aclocal.m4
+(cd ../configure; autoconf $MAHOGANY_SOURCE/configure.in >configure)
+cp ../configure/configure ./configure
+cvs commit -m "Regenerated" configure
