@@ -1991,7 +1991,7 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
                i = lineCur->GetLastObject();
          }
 
-         if ( i == lineCur->NULLIT() )
+         if ( !lineCur || i == lineCur->NULLIT() )
          {
             // moved to the end/beginning of text
             return false;

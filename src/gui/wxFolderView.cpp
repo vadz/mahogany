@@ -44,11 +44,12 @@
 #include "XFace.h"
 
 #include <wx/file.h>
-#include "wx/persctrl.h"
+#include <wx/listctrl.h>
 #include <wx/menuitem.h>
 #include <wx/dnd.h>
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
+#include "wx/persctrl.h"
 
 #include "MFolder.h"
 #include "Mdnd.h"

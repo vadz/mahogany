@@ -2624,7 +2624,11 @@ void wxMessageView::EmulateKeyPress(int keycode)
    wxKeyEvent event;
    event.m_keyCode = keycode;
 
+#ifdef __WXGTK__
    wxScrolledWindow::OnChar(event);
+#else
+   wxScrolledWindow::HandleOnChar(event);
+#endif
 }
 
 /// scroll down one line:

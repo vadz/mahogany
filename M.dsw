@@ -26,6 +26,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name versit
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name png
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -42,7 +45,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "compface"=.\extra\src\compface\compface.dsp - Package Owner=<4>
+Project: "compface"=M:\wxWindows\wxWindows\src\msw\extra\src\compface\compface.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -54,7 +57,22 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mtest"="..\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
+Project: "jpeg"=M:\wxWindows\wxWindows\src\jpeg\jpeg.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name zlib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mtest"="M:\wxWindows\wxWindows\src\imap-4.2\mtest\mtest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -69,7 +87,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "png"=L:\wxWindows\src\png\png.dsp - Package Owner=<4>
+Project: "png"=M:\wxWindows\wxWindows\src\png\png.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -81,7 +99,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "python15"=L:\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
+Project: "python15"=m:\wxWindows\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -93,7 +111,37 @@ Package=<4>
 
 ###############################################################################
 
-Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
+Project: "regex"=M:\wxWindows\wxWindows\src\regex\regex.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name tiff
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "tiff"=M:\wxWindows\wxWindows\src\tiff\tiff.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name jpeg
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "versit"=M:\wxWindows\wxWindows\src\msw\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -105,7 +153,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWindows"=l:\wxwindows\wxWindows.dsp - Package Owner=<4>
+Project: "wxWindows"=m:\wxWindows\wxWindows\wxWindows.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -117,19 +165,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "xpm"=L:\wxWindows\src\xpm\xpm.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "zlib"=L:\wxWindows\src\zlib\zlib.dsp - Package Owner=<4>
+Project: "zlib"=M:\wxWindows\wxWindows\src\zlib\zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
