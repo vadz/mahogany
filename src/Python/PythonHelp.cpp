@@ -33,6 +33,7 @@
 #endif   // USE_PCH
 
 #include "MPython.h"
+#include "InitPython.h"
 
 #include "Mdefaults.h"
 
@@ -86,7 +87,7 @@ PythonCallback(const char *name,
                Profile *profile)
 {
    // first check if Python is not disabled
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
+   if ( !IsPythonInitialized() )
       return def;
 
    if ( !profile )
@@ -128,6 +129,13 @@ FindPythonFunction(const char *func, PyObject **module, PyObject **function)
    {
       ERRORMESSAGE(( _("Python support is disabled, please enable it in "
                        "the \"Preferences\" dialog.") ));
+      return false;
+   }
+
+   if ( !IsPythonInitialized() )
+   {
+      ERRORMESSAGE((_("Cannot call Python function because Python interpreter "
+                      "failed to start up.")));
       return false;
    }
 

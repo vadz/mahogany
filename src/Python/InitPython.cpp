@@ -64,6 +64,12 @@ static bool CheckPyError()
 }
 
 extern bool
+IsPythonInitialized()
+{
+   return gs_isPythonInitialized;
+}
+
+extern bool
 InitPython(void)
 {
    // first check if Python is available

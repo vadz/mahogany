@@ -26,6 +26,13 @@
 extern bool InitPython();
 
 /**
+   Check if Python interpreter has been initialized.
+
+   @return true if Python can be used
+ */
+extern bool IsPythonInitialized();
+
+/**
    Shutdown Python interpreter and free memory
 
    Python can't be used after calling this function without successfully
