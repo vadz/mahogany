@@ -646,16 +646,16 @@ protected:
          m_Rule = p->readEntry(MP_FILTER_RULE, "");
          if( !m_Rule.empty() )
          {
-            MFDialogSettingsImpl *control = new MFDialogSettingsImpl;
-            if ( !control->ReadSettingsFromRule(m_Rule) )
+            // try to parse the rule
+            MFDialogSettingsImpl *settings = new MFDialogSettingsImpl;
+            if ( !settings->ReadSettingsFromRule(m_Rule) )
             {
-               wxLogWarning(_("Failed to parse the filter rule '%s'"),
-                            m_Name.c_str());
-
-               m_Rule.clear();
+               settings->DecRef();
             }
-
-            control->DecRef();
+            else
+            {
+               m_Settings = settings;
+            }
          }
 
          if ( m_Rule.empty() )
@@ -681,7 +681,11 @@ protected:
             }
             else
             {
-               (void) m_Profile->DeleteEntry(MP_FILTER_GUIDESC);
+               if ( m_Profile->HasEntry(MP_FILTER_GUIDESC) )
+               {
+                  (void) m_Profile->DeleteEntry(MP_FILTER_GUIDESC);
+               }
+
                m_Profile->writeEntry(MP_FILTER_RULE, m_Rule);
             }
          }
