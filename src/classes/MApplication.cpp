@@ -314,6 +314,8 @@ MAppBase::OnStartup()
    // --------------------
    String tmp;
    m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
+   if(getenv("MAHOGANY_DIR"))
+     m_globalDir = getenv("MAHOGANY_DIR");
    if(strutil_isempty(m_globalDir) || ! PathFinder::IsDir(m_globalDir))
    {
 #ifdef OS_UNIX
