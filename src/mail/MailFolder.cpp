@@ -392,12 +392,16 @@ MailFolder::CreateFolder(const String& name,
    if ( !Init() )
       return false;
 
-   /* So far the drivers do an auto-create when we open a folder, so
-      now we attempt to open the folder to see what happens: */
    MFolder *mfolder = MFolder::Create(name, type);
    if ( !mfolder )
       return false;
 
+   mfolder->SetFlags(flags);
+   mfolder->SetPath(path);
+   mfolder->SetComment(comment);
+
+   // So far the drivers do an auto-create when we open a folder, so now we
+   // attempt to open the folder to see what happens:
    MailFolder_obj mf = MailFolder::OpenFolder(mfolder);
 
    mfolder->DecRef();
