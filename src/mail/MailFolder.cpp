@@ -665,7 +665,19 @@ InitRecipients(Composer *cv,
    // IMHO this does the right thing in all cases, but maybe we need an
    // additional option to handle this ("add unused addresses to composer")?
    if ( replyKind == MailFolder::REPLY_SENDER && explicitReplyKind )
+   {
+      // add all recipients in the composer in the reverse order -- so
+      // that they appear there as we want them
+      n = rcptAddresses.GetCount();
+      CHECK_RET( rcptTypes.GetCount() == n, _T("logic error in InitRecipients") );
+
+      while ( n-- )
+      {
+         cv->AddRecipients(rcptAddresses[n], (Composer::RecipientType)rcptTypes[n]);
+      }
+
       return;
+   }
 
    // now get all other addresses
    wxSortedArrayString otherAddresses;
