@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+05.07.00 VZ: made sending a test message during installation optional
 04.07.00 VZ: added "reverse order" checkboxes to sort dialog, made possible to
              reverse sort by arrival order
 04.07.00 KB: wxOptionsDlg now automatically stores all Field_Password entries

@@ -125,7 +125,9 @@ rpm_prep:
 	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
 	cp redhat/M.spec $$RPM_ROOT/SPECS
 
-rpm:
+rpm: rpm_prep
+	@#export RPM_ROOT=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
+	echo "Building the RPM under $$RPM_ROOT..."; \
 	cd $(RPM_ROOT)/SPECS && rpm --buildroot $(RPM_ROOT)/ROOT -bb M.spec
 
 msgcat:

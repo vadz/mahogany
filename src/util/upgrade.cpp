@@ -138,8 +138,8 @@ struct InstallWizardData
    bool   usePython;
 #endif
    bool   collectAllMail;
-   // dial up page
 
+   // dial up page
 #if defined(OS_WIN)
    String connection;
 #elif defined(OS_UNIX)
@@ -152,6 +152,9 @@ struct InstallWizardData
 
    // did we run the wizard at all?
    bool done;
+
+   // do we want to send a test message?
+   bool sendTestMsg;
 
    // do we have something to import?
    int showImportPage; // logically bool but initially -1
@@ -259,7 +262,8 @@ public:
          // pop.some.where &c - be sure to check that some.where is really a
          // domain and not just a hostname by checking the number of dots in it
          String
-            domain = gs_installWizardData.email.AfterFirst('@').AfterFirst('.'); 
+            domain = Message::GetEMailFromAddress(gs_installWizardData.email).
+                        AfterFirst('@');
          if ( !!domain )
          {
             AddDomain(gs_installWizardData.pop, domain);
@@ -432,6 +436,12 @@ class InstallWizardFinalPage : public InstallWizardPage
 {
 public:
    InstallWizardFinalPage(wxWizard *wizard);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxCheckBox *m_checkboxSendTestMsg;
 };
 
 // ----------------------------------------------------------------------------
@@ -905,10 +915,11 @@ InstallWizardMiscPage::InstallWizardMiscPage(wxWizard *wizard)
 InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
                       : InstallWizardPage(wizard, InstallWizard_FinalPage)
 {
-   (void)new wxStaticText(this, -1, _(
+   wxStaticText *text = new wxStaticText(this, -1, _(
       "Congratulations!\n"
       "You have successfully configured\n"
       "Mahogany and may now start using it.\n"
+/* VZ: this message is too long, there is no place for checkbox below
       "\n"
       "Please remember to consult the online help\n"
       "and the documentaion files included.\n"
@@ -916,6 +927,7 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       "You may want to have a look at the\n"
       "full set of program options, too.\n"
       "\n"
+*/
       "In case of a problem, consult the help\n"
       "system and, if you cannot resolve it,\n"
       "please visit our web site at\n"
@@ -929,6 +941,35 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       "We hope you will enjoy using Mahogany!\n"
       "                    The M-Team"
                                      ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+   wxArrayString labels;
+   labels.Add(_("&Send test message:"));
+
+   long widthMax = GetMaxLabelWidth(labels, panel);
+
+   text = panel->CreateMessage(_(
+      "\n"
+      "Finally, you may want to test your configuration\n"
+      "by sending a test message to yourself."
+                                 ), NULL);
+   m_checkboxSendTestMsg = panel->CreateCheckBox(labels[0], widthMax, text);
+
+   panel->ForceLayout();
+}
+
+bool InstallWizardFinalPage::TransferDataToWindow()
+{
+   m_checkboxSendTestMsg->SetValue(gs_installWizardData.sendTestMsg);
+
+   return TRUE;
+}
+
+bool InstallWizardFinalPage::TransferDataFromWindow()
+{
+   gs_installWizardData.sendTestMsg = m_checkboxSendTestMsg->GetValue();
+
+   return TRUE;
 }
 
 #endif // USE_WIZARD
@@ -979,6 +1020,7 @@ bool RunInstallWizard()
 #ifdef USE_PISOCK
    gs_installWizardData.usePalmOs = TRUE;
 #endif
+   gs_installWizardData.sendTestMsg = TRUE;
 
    gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
@@ -1344,6 +1386,7 @@ UpgradeFromNone()
 {
 #ifdef USE_WIZARD // new code which uses the configuration wizard
    (void)RunInstallWizard();
+   if ( gs_installWizardData.sendTestMsg )
 #else // old code which didn't use the setup wizard
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
@@ -1353,9 +1396,11 @@ UpgradeFromNone()
       log->Flush();
    }
    ShowOptionsDialog();
-#endif
+#endif // USE_WIZARD/!USE_WIZARD
+   {
+      VerifyMailConfig();
+   }
 
-   VerifyMailConfig();
    return true;
 }
 
@@ -2058,35 +2103,35 @@ VerifyInbox(void)
 extern bool
 VerifyMailConfig(void)
 {
-// we send a mail to ourself
+   // we send a mail to ourself
+   Profile *p = mApplication->GetProfile();
+   String me = miscutil_GetFromAddress(p);
 
-   String me;
-   me = READ_APPCONFIG(MP_RETURN_ADDRESS);
-   if(me.Length() == 0)
-      me << READ_APPCONFIG(MP_USERNAME) << '@' << READ_APPCONFIG(MP_HOSTNAME);
-
-// FIXME we should make sure that hostname can be resolved - otherwise this
-// message will stay in sendmail queue _forever_ (at least it does happen
-// here with sendmail 8.8.8 running under Solaris 2.6)
-   // You have a broken sendmail setup. Messages that cannot be sent
-   // do get returned by sendmail if set up properly. It's not our job.
-   String nil;
-   SendMessageCC  sm(mApplication->GetProfile());
+   SendMessageCC  sm(p);
    sm.SetSubject(_("Mahogany Test Message"));
    sm.SetAddresses(me);
    String msg =
       _("If you have received this mail, your Mahogany configuration works.\n"
         "You should also try to reply to this mail and check that your reply arrives.");
    sm.AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
-   sm.SendOrQueue();
-   mApplication->SendOutbox();
-   msg.Empty();
-   msg << _("Sent email message to:\n")
-       << me
-       << _("\n\nPlease check whether it arrives.");
-   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
+   if ( sm.SendOrQueue() )
+   {
+      mApplication->SendOutbox();
+      msg.Empty();
+      msg << _("Sent email message to:\n")
+          << me
+          << _("\n\nPlease check whether it arrives.");
+      MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
 
-   return true; // till we know something better
+      return true; // till we know something better
+   }
+   else
+   {
+      MDialog_ErrorMessage(_("Send the test message failed, please recheck "
+                             "your configuration settings"));
+
+      return false;
+   }
 }
 
 static

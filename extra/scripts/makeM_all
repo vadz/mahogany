@@ -140,7 +140,7 @@ LOGNAME="karsten"
 export LOGNAME
 
 MNAME=mahogany
-MVERSION=0.23a
+MVERSION=0.60
 MTAG="-A"
 
 WXNAME=wxGTK
