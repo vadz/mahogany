@@ -1796,8 +1796,7 @@ wxFolderPropertiesPage::SetDefaultValues()
          wxString mhRoot = MailFolderCC::InitializeMH();
          if ( !value.StartsWith(mhRoot) && !IsAbsPath(value) )
          {
-            value.clear();
-            value << mhRoot << value;
+            value.Prepend(mhRoot);
          }
       }
 
