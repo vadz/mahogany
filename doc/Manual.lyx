@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue May 18 14:55:26 1999
+#This file was created by <karsten> Wed May 19 14:26:15 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -89,6 +89,42 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Subsubsection
+
+0.22a against 0.21a
+\layout Standard
+
+Release 0.22a is mainly a bugfix release against 0.21a.
+\layout Itemize
+
+All know (crash-inducing) bugs fixed.
+ 
+\layout Itemize
+
+Message editor/viewer improvements, adding clipboard support and selections.
+ 
+\layout Itemize
+
+wxGTK layout bug fixes - German, French, Spanish translations 
+\layout Itemize
+
+Text-search in messages 
+\layout Itemize
+
+Several minor usability fixes, sub-folder support fixed.
+ 
+\layout Itemize
+
+Addressbook fixes 
+\layout Itemize
+
+TCP timeouts configurable 
+\layout Itemize
+
+Support for setting the Reply-To: header from To: field in message replies.
+\layout Subsubsection
+
+0.10a to 0.21a
 \layout Standard
 
 First, there are some user-visible changes against the latest version, most
@@ -194,13 +230,6 @@ Full internationalisation support, Mahogany speaks multiple languages.
 \layout Subsection
 
 Known bugs
-\layout Itemize
-
-At present, sometimes dialog boxes appear with minimal size or corrupted
- layout.
- This is likely a bug in the underlying toolkit and difficult to reproduce.
- For now the easiest solution is to resize or simply close the dialog and
- try again.
 \layout Itemize
 
 Newsspool support will not work with newsgroups not listed in the 
