@@ -293,6 +293,9 @@ public:
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
 
+   /** Perform a checkpoint on the folder. */
+   virtual void Checkpoint(void) = 0;
+
    /** get the message with unique id uid
        @param uid message uid
        @return message handler

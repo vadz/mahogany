@@ -201,6 +201,9 @@ public:
    /** Check whether mailbox has changed. */
    void Ping(void);
 
+   /** Perform a checkpoint on the folder. */
+   virtual void Checkpoint(void);
+
    /**@name Semi-public functions, shouldn't usually be called by
       normal code. */
    //@{
@@ -340,9 +343,6 @@ public:
       @return the path to local news spool or empty string on failure
    */
    static const String& InitializeNewsSpool();
-
-   /// VZ: adding this decl as it doesn't compile otherwise
-   void Checkpoint(void);
 
 private:
    /// private constructor, does basic initialisation
