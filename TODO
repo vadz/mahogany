@@ -20,6 +20,7 @@ $Id$
 		- temparily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
 
+9	KB	check password prompt in mailfolder
 5	KB	make MailFolder timer react to options change
 5	KB	(optionally, but on by default) expunge deleted messages when
 		the folder is closed - as noticed in 32bitonline comparison,
@@ -76,7 +77,13 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-		Option to start up iconified.
+5		highlight messages in listing in different colours
+		based on filters?
+
+9	KB	nice dialog for selecting and pre-viewing xface
+8	KB	line-wrap in compose view before sending
+
+Option to start up iconified.
 
 9	KB	Add a "find text in folder" method, too, trivial.
 
