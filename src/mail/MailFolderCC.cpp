@@ -3691,6 +3691,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 
    const String sequence = seq.GetString();
 
+   // let a Python callback veto the flag change
 #if 0
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
