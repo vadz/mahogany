@@ -935,24 +935,7 @@ wxLayoutLine::Draw(wxDC &dc,
       {
          // parts of the line need highlighting
          tempto = xpos+(**i).GetLength();
-#if 0
-         if(tempto >= from && xpos <= to)
-         {
-            tempto = to-xpos;
-            if(tempto > (**i).GetLength())
-               tempto = (**i).GetLength();
-            CoordType tmp = from-xpos;
-            if(tmp < 0) tmp = 0;
-#endif
-            (**i).Draw(dc, pos, llist, from-xpos, to-xpos);
-#if 0
-         }
-         else
-         {
-            llist->EndHighlighting(dc); // FIXME! inefficient
-            (**i).Draw(dc, pos, llist);
-         }
-#endif
+         (**i).Draw(dc, pos, llist, from-xpos, to-xpos);
       }
       else
          (**i).Draw(dc, pos, llist);
@@ -1793,6 +1776,7 @@ wxLayoutList::Draw(wxDC &dc,
    ApplyStyle(&m_DefaultSetting, dc);
    wxBrush brush(m_CurrentSetting.m_bg, wxSOLID);
    dc.SetBrush(brush);
+   dc.SetBackgroundMode(wxTRANSPARENT);
    
    while(line)
    {
