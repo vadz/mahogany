@@ -972,7 +972,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced, ConfigField_MailServerLogin },
 #ifdef USE_SSL
    { "\n\n"
-     gettext_noop("\nMahogany can attempt to use either SSL or TLS to send\n"
+     gettext_noop("\n"
+                  "Mahogany can attempt to use either SSL or TLS to send\n"
                   "mail or news. TLS is used by default if available but\n"
                   "you may disable it if you experience problems because\n"
                   "of this.\n"
@@ -1632,8 +1633,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
 #endif // OS_UNIX
    { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
-   { "\n"
-     gettext_noop("\"Away\", or unattended, state is a special mode in\n"
+   { gettext_noop("\n"
+                  "\"Away\", or unattended, state is a special mode in\n"
                   "which Mahogany tries to avoid any interaction with the user,\n"
                   "e.g. new mail notification is disabled, no progress dialogs\n"
                   "are shown &&c.\n"
