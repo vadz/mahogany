@@ -486,15 +486,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "Leave these fields empty unless told to set it up by your ISP."),
      Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,   -1,           },
-   { gettext_noop("SMTP server &password"),         Field_Text,   -1,           },
-   { gettext_noop("NNTP server &user ID"),         Field_Text,   -1,           },
-   { gettext_noop("NNTP server &password"),         Field_Text,   -1,           },
+   { gettext_noop("SMTP server pa&ssword"),         Field_Passwd,   -1,           },
+   { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
+   { gettext_noop("NNTP server pass&word"),         Field_Passwd,   -1,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
-   { gettext_noop("POP server &uses SSL"), Field_Bool,    -1,                        },
-   { gettext_noop("IMAP server uses &SSL"),Field_Bool,    -1,                        },
+   { gettext_noop("POP server uses SS&L"), Field_Bool,    -1,                        },
+   { gettext_noop("IMAP s&erver uses SSL"),Field_Bool,    -1,                        },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
@@ -919,6 +919,7 @@ void wxOptionsPage::CreateControls()
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
+         case Field_Passwd:
          case Field_Number:
          case Field_File:
          case Field_Color:
@@ -941,6 +942,7 @@ void wxOptionsPage::CreateControls()
    long widthMax = GetMaxLabelWidth(aLabels, this);
 
    // now create the controls
+   int styleText = wxALIGN_RIGHT;
    wxControl *last = NULL; // last control created
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       switch ( GetFieldType(n) ) {
@@ -986,10 +988,18 @@ void wxOptionsPage::CreateControls()
                 last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
             break;
 
+         case Field_Passwd:
+            styleText |= wxTE_PASSWORD;
+            // fall through
+
          case Field_Number:
             // fall through -- for now they're the same as text
          case Field_Text:
-            last = CreateTextWithLabel(_(m_aFields[n].label), widthMax, last);
+            last = CreateTextWithLabel(_(m_aFields[n].label), widthMax, last,
+                                       0, styleText);
+
+            // reset
+            styleText = wxALIGN_RIGHT;
             break;
 
          case Field_List:
@@ -1119,6 +1129,7 @@ void wxOptionsPage::UpdateUI()
                EnableTextWithButton((wxTextCtrl *)control, bEnable);
                break;
 
+            case Field_Passwd:
             case Field_Number:
             case Field_Text:
                wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
@@ -1187,41 +1198,38 @@ bool wxOptionsPage::TransferDataToWindow()
             }
 
             // can only have text value
+         case Field_Passwd:
          case Field_File:
          case Field_Color:
          case Field_Folder:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-
-            ((wxTextCtrl *)control)->SetValue(strValue);
+            wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
             break;
 
          case Field_Bool:
             wxASSERT( m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
-            ((wxCheckBox *)control)->SetValue(lValue != 0);
+            wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
             break;
 
          case Field_Action:
             wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
-            ((wxRadioBox *)control)->SetSelection(lValue);
+            wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
             break;
 
          case Field_Combo:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
-            ((wxComboBox *)control)->SetSelection(lValue);
+            wxStaticCast(control, wxComboBox)->SetSelection(lValue);
             break;
 
          case Field_List:
             wxASSERT( !m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
             // split it (FIXME what if it contains ';'?)
             {
+               wxListBox *lbox = wxStaticCast(control, wxListBox);
                String str;
                for ( size_t m = 0; m < strValue.Len(); m++ ) {
                   if ( strValue[m] == ';' ) {
                      if ( !str.IsEmpty() ) {
-                        ((wxListBox *)control)->Append(str);
+                        lbox->Append(str);
                         str.Empty();
                      }
                      //else: nothing to do, two ';' one after another
@@ -1232,23 +1240,26 @@ bool wxOptionsPage::TransferDataToWindow()
                }
 
                if ( !str.IsEmpty() ) {
-                  ((wxListBox *)control)->Append(str);
+                  lbox->Append(str);
                }
             }
             break;
 
-      case Field_XFace:
-         if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
-            ((wxXFaceButton*)control)->SetFile(
-               READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
-         else
-            ((wxXFaceButton *)control)->SetFile("");
-         break;
+         case Field_XFace:
+            {
+               wxXFaceButton *btnXFace = (wxXFaceButton *)control;
+               if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
+                  btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
+               else
+                  btnXFace->SetFile("");
+            }
+            break;
 
-      case Field_Message:
-      case Field_SubDlg:      // these settings will be read later
-         break;
-      default:
+         case Field_Message:
+         case Field_SubDlg:      // these settings will be read later
+            break;
+
+         default:
             wxFAIL_MSG("unexpected field type");
       }
 
@@ -1273,6 +1284,7 @@ bool wxOptionsPage::TransferDataFromWindow()
       wxControl *control = GetControl(n);
       switch ( GetFieldType(n) )
       {
+         case Field_Passwd:
          case Field_Text:
          case Field_File:
          case Field_Color:

@@ -92,14 +92,15 @@ public:
       Field_SubDlg = 0x0200, // a button invoking another dialog
       Field_XFace  = 0x0400, // a wxXFaceButton invoking another dialog
       Field_Folder = 0x0800, // a text entry with a "Browse for folder" button
-      Field_Type   = 0x0fff  // bit mask selecting the type
+      Field_Passwd = 0x1000, // a masked text entry for the password
+      Field_Type   = 0xffff  // bit mask selecting the type
    };
 
    enum FieldFlags
    {
-      Field_Vital   = 0x1000, // vital setting, test after change
-      Field_Restart = 0x2000, // will only take effect during next run
-      Field_Flags   = 0xf000  // bit mask selecting the flags
+      Field_Vital   = 0x10000000, // vital setting, test after change
+      Field_Restart = 0x20000000, // will only take effect during next run
+      Field_Flags   = 0xf0000000  // bit mask selecting the flags
    };
 
    struct FieldInfo
