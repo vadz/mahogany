@@ -28,7 +28,6 @@
 #  include "kbList.h"
 #  include "Mdefaults.h"
 #  include "MApplication.h"
-#  include "Mpers.h"
 
 #  include  <wx/dynarray.h>
 #endif   // USE_PCH
@@ -50,6 +49,8 @@
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
 #include "adb/AdbFrame.h"     // for ShowAdbFrame
+
+#include "Mpers.h"
 
 #include "Mversion.h"
 #include "Mupgrade.h"
