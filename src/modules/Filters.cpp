@@ -2258,6 +2258,8 @@ extern "C"
          return 0;
    }
 
+   // unused?
+#if 0
    static Value func_getstatus(ArgList *args, FilterRuleImpl *p)
    {
       if(args->Count() != 0)
@@ -2267,6 +2269,7 @@ extern "C"
       msg->DecRef();
       return Value(rc);
    }
+#endif // 0
 
    static Value func_date(ArgList *args, FilterRuleImpl *p)
    {

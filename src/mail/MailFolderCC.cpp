@@ -1482,7 +1482,7 @@ void MailFolderCC::CreateFileFolder()
    {
       exists = wxFileExists(m_ImapSpec);
    }
-   else if ( folderType == MF_MH )
+   else // if ( folderType == MF_MH )
    {
       // construct the filename from MH folder name
       String path;

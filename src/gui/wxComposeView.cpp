@@ -184,7 +184,10 @@ protected:
    ~MimeContent()
       {
          if ( m_Type == MIMECONTENT_DATA )
-            delete [] m_Data;
+         {
+            // FIXME: should be "char *" everywhere!
+            delete [] (char *)m_Data;
+         }
       }
 
 
