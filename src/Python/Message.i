@@ -126,14 +126,14 @@ public:
        @param n part number, if -1, for the top level.
        @return list of parameters, must be freed by caller.
    */
-   virtual MessageParameterList & GetParameters(int n = -1);
+   virtual const MessageParameterList & GetParameters(int n = -1);
    
    /** Get the list of disposition parameters for a given part.
        @param n part number, if -1, for the top level.
        @param disptype string where to store disposition type
        @return list of parameters, must be freed by caller.
    */
-   virtual MessageParameterList & GetDisposition(int n = -1, String *disptype = NULL);
+   virtual const MessageParameterList & GetDisposition(int n = -1, String *disptype = NULL);
    /** Get a parameter value from the list.
        @param list a MessageParameterList
        @param parameter parameter to look up
@@ -148,19 +148,19 @@ public:
        @param  n part number
        @return string describing the Mime type
    */
-   virtual String & GetPartMimeType(int n = 0);
+   virtual const String & GetPartMimeType(int n = 0);
 
    /** Query the description of the part.
        @param  n part number
        @return string describing the part.
    */
-   virtual String & GetPartDesc(int n = 0);
+   virtual const String & GetPartDesc(int n = 0);
 
    /** Query the section specification string of body part.
        @param  n part number
        @return MIME/IMAP4 section specifier #.#.#.#
    */
-   virtual String & GetPartSpec(int n = 0);
+   virtual const String & GetPartSpec(int n = 0);
 
    /** Append the message to a String.
        @param str the string to write message text to
