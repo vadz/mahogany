@@ -60,7 +60,7 @@ Name: "i18n"; Description: "Translations to other languages"; Types: full
 [Files]
 
 ; --- EXEs and DLLs
-Source: "Release\M.EXE"; DestDir: "{app}";
+Source: "ReleaseDebug\M.EXE"; DestDir: "{app}";
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
 ; do we need to include VC++ run time?
