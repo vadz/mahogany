@@ -32,6 +32,8 @@
 #  include "Profile.h"
 #  include "MEvent.h"
 #  include "MApplication.h"
+
+#  include <wx/mimetype.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -1718,7 +1720,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       // we have a handy function in wxFileType which will replace
       // '%s' with the file name or add the file name at the end if
       // there is no '%s'
-      wxFileType::MessageParameters params(tmpFileName.GetName(), "");
+      wxFileType::MessageParameters params(sound, "");
       String command = wxFileType::ExpandCommand(soundCmd, params);
 
       wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(): playing '%s'",
