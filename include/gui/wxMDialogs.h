@@ -258,11 +258,10 @@ void
 MDialog_FolderProfile(const MWindow *parent, const String& folderName);
 
 /// choose a folder from the list of all folders, returns NULL if cancelled
-// TODO store the last folder in config
 MFolder *
-MDialog_FolderChoose(const MWindow *parent);
+MDialog_FolderChoose(const MWindow *parent, MFolder *folder = NULL);
 
-/// test
+/// choose a folder and open a view on it
 void MDialog_FolderOpen(class wxMFrame *parent);
 
 /** show a (modal) dialog with the given text

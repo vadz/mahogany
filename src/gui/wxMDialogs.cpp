@@ -207,11 +207,12 @@ END_EVENT_TABLE()
 class MFolderDialog : public wxManuallyLaidOutDialog
 {
 public:
-   MFolderDialog(wxWindow *parent);
+   MFolderDialog(wxWindow *parent,
+                 MFolder *folder);
    virtual ~MFolderDialog();
 
    // accessors
-   MFolder *GetFolder() const { return m_folder; }
+   MFolder *GetFolder() const { SafeIncRef(m_folder); return m_folder; }
 
    // base class virtuals implemented
    virtual bool TransferDataToWindow();
@@ -1102,11 +1103,14 @@ MDialog_FolderOpen(const MWindow *parent)
 // folder dialog stuff
 // ----------------------------------------------------------------------------
 
-MFolderDialog::MFolderDialog(wxWindow *parent)
+MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
              : wxManuallyLaidOutDialog(parent,
                                        _("Choose folder"),
                                        "FolderSelDlg")
 {
+   m_folder = folder;
+   SafeIncRef(m_folder);
+
    wxLayoutConstraints *c;
 
    // create box and buttons
@@ -1152,6 +1156,8 @@ MFolderDialog::MFolderDialog(wxWindow *parent)
 
 MFolderDialog::~MFolderDialog()
 {
+   SafeDecRef(m_folder);
+
    delete m_tree;
 }
 
@@ -1230,6 +1236,7 @@ bool MFolderDialog::TransferDataFromWindow()
 {
    if ( m_FileName.Length() == 0 )
    {
+      SafeDecRef(m_folder);
       m_folder = m_tree->GetSelection();
       if ( m_folder != NULL )
       {
@@ -1246,6 +1253,7 @@ bool MFolderDialog::TransferDataFromWindow()
       wxSplitPath(m_FileName, NULL, &name, NULL);
 
       // verify that the folder with this name doesn't already exist
+      SafeDecRef(m_folder);
       m_folder = NULL;
       MFolder *folder;
       while ( (folder = MFolder::Get(name)) != NULL )
@@ -1299,9 +1307,10 @@ bool MFolderDialog::TransferDataFromWindow()
 }
 
 MFolder *
-MDialog_FolderChoose(const MWindow *parent)
+MDialog_FolderChoose(const MWindow *parent, MFolder *folder)
 {
-   MFolderDialog dlg((wxWindow *)parent);
+   // TODO store the last folder in config
+   MFolderDialog dlg((wxWindow *)parent, folder);
 
    return dlg.ShowModal() == wxID_OK ? dlg.GetFolder() : NULL;
 }

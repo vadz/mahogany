@@ -457,53 +457,6 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// folder selection dialog: contains the folder tree inside it
-// ----------------------------------------------------------------------------
-
-static const int wxID_FILE_SELECT = 100;
-
-class wxFolderSelectionDialog : public wxDialog
-{
-public:
-   wxFolderSelectionDialog(wxWindow *parent,
-                           MFolder *folder,
-                           bool allowFiles = false);
-   ~wxFolderSelectionDialog() { SafeDecRef(m_folder); }
-
-   // what was selected, a real folder or a filename?
-   bool IsFile() const { return !!m_filename; }
-
-   // get the chosen folder
-   MFolder *GetFolder() const
-   {
-      wxASSERT_MSG( !IsFile(), "file selected but retrieving folder" );
-
-      SafeIncRef(m_folder);
-      return m_folder;
-   }
-
-   // get the chosen file name
-   wxString GetFile() const
-   {
-      wxASSERT_MSG( IsFile(), "folder selected but retrieving file" );
-
-      return m_filename;
-   }
-
-   // callbacks
-   void OnOK(wxCommandEvent& event);
-   void OnCancel(wxCommandEvent& event);
-   void OnFile(wxCommandEvent& event);
-
-private:
-   wxString      m_filename;  // if not empty, file was selected
-   MFolder      *m_folder;
-   wxFolderTree *m_tree;
-
-   DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------------
 // small utility class: a folder icon browse button which makes the dialog
 // containing it dirty when the icon changes
 // ----------------------------------------------------------------------------
@@ -547,12 +500,6 @@ BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnComboBox)
    EVT_CHOICE  (-1, wxFolderPropertiesPage::OnChoice)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
-   EVT_BUTTON(wxID_OK,     wxFolderSelectionDialog::OnOK)
-   EVT_BUTTON(wxID_CANCEL, wxFolderSelectionDialog::OnCancel)
-   EVT_BUTTON(wxID_FILE_SELECT, wxFolderSelectionDialog::OnFile)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -2471,112 +2418,6 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
 }
 
 // -----------------------------------------------------------------------------
-// wxFolderSelectionDialog
-// -----------------------------------------------------------------------------
-
-wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
-                                                 MFolder *folder,
-                                                 bool allowFiles)
-                       : wxDialog(GET_PARENT_OF_CLASS(parent, wxFrame), -1,
-                                  _("Please choose a folder"),
-                                  wxDefaultPosition, wxDefaultSize,
-                                  wxDEFAULT_DIALOG_STYLE |
-                                  wxRESIZE_BORDER |
-                                  wxDIALOG_MODAL)
-{
-   SetAutoLayout(TRUE);
-   m_folder = folder;
-
-   // basic unit is the height of a char, from this we fix the sizes of all
-   // other controls
-   size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
-
-   // layout the controls: the folder tree takes all the dialog except for the
-   // buttons below it
-   wxLayoutConstraints *c;
-
-   if ( allowFiles )
-   {
-      wxButton *btnFile = new wxButton(this, wxID_FILE_SELECT, _("File..."));
-      c = new wxLayoutConstraints;
-      c->left.SameAs(this, wxRight, -3*(LAYOUT_X_MARGIN + wBtn));
-      c->width.Absolute(wBtn);
-      c->height.Absolute(hBtn);
-      c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-      btnFile->SetConstraints(c);
-   }
-
-   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
-   btnOk->SetDefault();
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnOk->SetConstraints(c);
-
-   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnCancel->SetConstraints(c);
-
-   m_tree = new wxFolderTree(this);
-   c = new wxLayoutConstraints();
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
-   m_tree->GetWindow()->SetConstraints(c);
-
-   // set the initial and minimal window size
-   int wDlg = 4*wBtn,
-       hDlg = 10*hBtn;
-
-   if ( allowFiles )
-   {
-      wDlg += 2*wBtn;
-   }
-
-   wxWindow::SetSize(wDlg, hDlg);
-   SetSizeHints(wDlg, hDlg);
-   Centre(wxCENTER_FRAME | wxBOTH);
-}
-
-void wxFolderSelectionDialog::OnFile(wxCommandEvent& /* event */)
-{
-   wxFileDialog dialog(this, "", "", "",
-                       _(wxALL_FILES),
-                       wxHIDE_READONLY | wxFILE_MUST_EXIST);
-
-   if ( dialog.ShowModal() == wxID_OK )
-   {
-      m_filename = dialog.GetPath();
-
-      EndModal(TRUE);
-   }
-}
-
-void wxFolderSelectionDialog::OnOK(wxCommandEvent& /* event */)
-{
-   m_folder = m_tree->GetSelection();
-
-   EndModal(TRUE);
-}
-
-void wxFolderSelectionDialog::OnCancel(wxCommandEvent& /* event */)
-{
-   m_filename.Empty();
-   m_folder = NULL;
-
-   EndModal(FALSE);
-}
-
-// -----------------------------------------------------------------------------
 // our public interface
 // -----------------------------------------------------------------------------
 
@@ -2632,13 +2473,3 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
    }
 }
 
-MFolder *ShowFolderSelectionDialog(MFolder *folder, wxWindow *parent)
-{
-   wxFolderSelectionDialog dlg(parent, folder);
-
-   (void)dlg.ShowModal();
-
-   MFolder *newfolder = dlg.GetFolder();
-
-   return newfolder;
-}

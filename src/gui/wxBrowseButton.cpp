@@ -191,16 +191,16 @@ wxFolderBrowseButton::wxFolderBrowseButton(wxTextCtrl *text,
 
 void wxFolderBrowseButton::DoBrowse()
 {
-   MFolder *folder = ShowFolderSelectionDialog(m_folder, this);
+   MFolder *folder = MDialog_FolderChoose(this, m_folder);
 
-   if ( folder )
+   if ( folder && folder != m_folder )
    {
       SafeDecRef(m_folder);
 
       m_folder = folder;
       SetText(m_folder->GetFullName());
    }
-   //else: nothing changed, user cancelled the dialog
+   //else: nothing changed or user cancelled the dialog
 }
 
 MFolder *wxFolderBrowseButton::GetFolder() const

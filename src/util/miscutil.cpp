@@ -148,17 +148,18 @@ bool ParseColourString(const String& name, wxColour* colour)
       // it's a custom colour
       if ( colour )
          colour->Set(red, green, blue);
-
-      return TRUE;
    }
    else // a colour name
    {
-      wxColour col(name);
-      if ( col.Ok() && colour )
-         *colour = col;
+      wxColour *col = wxTheColourDatabase->FindColour(name);
+      if ( !col )
+         return FALSE;
 
-      return col.Ok();
+      if ( colour )
+         *colour = *col;
    }
+
+   return TRUE;
 }
 
 String GetColourName(const wxColour& colour)
