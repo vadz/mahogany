@@ -809,6 +809,12 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
       return;
    }
 
+   // don't try to delete folders which can't be deleted
+   if ( !removeOnly && CanDeleteFolderOfType(folder->GetType()) )
+   {
+      removeOnly = TRUE;
+   }
+
    if ( m_sink->OnDelete(folder, removeOnly) )
    {
       if ( folder == m_current->GetFolder() )
@@ -971,7 +977,7 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
    }
    else
    {
-       item = wxTreeCtrl::GetSelection();
+      item = wxTreeCtrl::GetSelection();
    }
 
 #if 0
