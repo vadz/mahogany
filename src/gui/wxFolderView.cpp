@@ -4080,11 +4080,11 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          break;
 
       default: // translatable key?
-         // be careful to use isalpha() here before doing toupper() below:
-         // for non alnum chars toupper() can return absolutely anything, in
-         // particular it used to map WXK_INSERT (324) to 'D' so that pressing
-         // Ins could actually delete a message...
-         if ( isalpha(key) )
+         // be careful to check that we have an ASCII key here before doing
+         // toupper() below: for non alnum chars toupper() can return
+         // absolutely anything, in particular it used to map WXK_INSERT (324)
+         // to 'D' so that pressing Ins could actually delete a message...
+         if ( key < 128 )
          {
             /** To allow translations:
 
