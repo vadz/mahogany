@@ -3242,8 +3242,6 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov)
    and must be initialised at runtime as c-client actually links
    against these. */
 
-#include <openssl/ssl.h>
-
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
 extern "C" {
