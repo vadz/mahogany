@@ -30,6 +30,7 @@ enum FolderType
    MF_POP = 2,                   // pop3
    MF_IMAP = 3,                  // imap
    MF_NNTP = 4,                  // newsgroup
+   MF_NEWS = 5,                  // newsgroup in local newsspool
    MF_PROFILE = 10,              // read type etc from profile
    MF_MH,                        // MH folder (directory/files)
    MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
@@ -39,7 +40,8 @@ enum FolderType
    File  = MF_FILE,      // local file (MBOX format)
    POP   = MF_POP,       // POP3 server
    IMAP  = MF_IMAP,      // IMAP4 server
-   News  = MF_NNTP,      // NNTP server
+   Nntp  = MF_NNTP,      // NNTP server
+   News  = MF_NEWS,
 
    // pseudo types
    FolderInvalid = MF_ILLEGAL, // folder not initialized properly

@@ -134,7 +134,14 @@ public:
        @return the number of body parts
    */
    virtual int CountParts(void) = 0;
-   
+
+   /** Returns a pointer to the folder. If the caller needs that
+       folder to stay around, it should IncRef() it. It's existence is 
+       guaranteed for as long as the message exists.
+       @return folder pointer (not incref'ed)
+   */
+   virtual MailFolder * GetFolder(void) = 0;
+
    /**@name Methods accessing individual parts of a message. */
    //@{
    /** Return the content of the part.

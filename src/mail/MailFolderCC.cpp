@@ -150,35 +150,32 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
    switch( type )
    {
-      case MF_INBOX:
-         mboxpath = "INBOX";
-         break;
-
-      case MF_FILE:
-         mboxpath = name;
-         break;
-
-      case MF_MH:
-         mboxpath << "#mh/" << name;
-         break;
-
-      case MF_POP:
-         mboxpath << '{' << server << "/pop3}";
-         break;
-
-      case MF_IMAP:  // do we need /imap flag?
-         if(flags & MF_FLAGS_ANON)
-            mboxpath << '{' << server << "/anonymous}" << name;
-         else
-            mboxpath << '{' << server << "/user=" << login << '}'<< name;
-         break;
-
-      case MF_NNTP:
-         mboxpath << '{' << server << "/nntp}" << name;
-         break;
-
-      default:
-         FAIL_MSG("Unsupported folder type.");
+   case MF_INBOX:
+      mboxpath = "INBOX";
+      break;
+   case MF_FILE:
+      mboxpath = name;
+      break;
+   case MF_MH:
+      mboxpath << "#mh/" << name;
+      break;
+   case MF_POP:
+      mboxpath << '{' << server << "/pop3}";
+      break;
+   case MF_IMAP:  // do we need /imap flag?
+      if(flags & MF_FLAGS_ANON)
+         mboxpath << '{' << server << "/anonymous}" << name;
+      else
+         mboxpath << '{' << server << "/user=" << login << '}'<< name;
+      break;
+   case MF_NEWS:
+      mboxpath << "#news." << name;
+      break;
+   case MF_NNTP:
+      mboxpath << '{' << server << "/nntp}" << name;
+      break;
+   default:
+      FAIL_MSG("Unsupported folder type.");
    }
 
    mf = FindFolder(mboxpath,login);

@@ -188,11 +188,6 @@ public:
    /** Check whether mailbox has changed. */
    void Ping(void);
 
-   /** Creates an Event if new mails have arrived.
-       
-   */
-   void UpdateCount();
-   
    /** Updates the associated FolderViews */
    void UpdateViews(void);
 

@@ -18,6 +18,8 @@ wxGTK bug:
  - listctrl can have no focused element, i.e. the assert in
    wxFolderView.cpp:85 can be triggered
 
+ - treectrl ignores icon sizes
+
 VZ:
 - wxConfig does not like entries like:
   Key=Value
@@ -67,33 +69,37 @@ DONE:
 CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
   done-->  // check whether enc8bit is needed or not
-
-
-BUG:
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
-Is MailfolderCC::UpdateCount() still used anywhere?
-
-TODO:
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.
  --> Clicking ABORT doesn't return false!
 - MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
+
+
+
+- make mailfolders collectable:
+  - have a "collect" flag
+  - have a global "NewMail" folder setting and ensure its existence
+---> done, after merging of profile code, add support for building
+     list of these folders and periodically checking them.
+
+
+TODO:
+
+- add news posting
+- do we really need to scan /var/lib/news/active?
+- more configurability for news
+
+- gtk 1.2 support
 - add auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
 - copying message to non-existing folder gives error message but works
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message. (REALLY REQUIRED?)
-- speed up copy mail to folder by cusing c-client functionality
-  wxComposeView: if replying, only mark message as answered if reply
-  got sent
-
-- make mailfolders collectable:
-  - have a "collect" flag
-  - have a global "NewMail" folder setting and ensure its existence
 
 - support for local news spool
   (Waiting for VZ to support MF_NEWS) then implement /service=news
@@ -116,19 +122,20 @@ TODO:
     x- add setting of background colour and/or image
     x- composeview: after inserting text (reply), update scrollbars
 
-
 - add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()
-
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
+
 - show status dialog while importing graphics into messageview
 - when inserting filetype of unknown MIME type, prompt for it
 
 - implement Compose/Reply templates
 
-
+- speed up copy mail to folder by cusing c-client functionality
+  wxComposeView: if replying, only mark message as answered if reply
+  got sent --> difficult
 
 
 - add a message/delivery-status icon (like message, but with a red 'S' ?)
@@ -138,7 +145,6 @@ TODO:
 
 - occasionally parts of xface header show up in following mail header
   lines (content type/parameters)
-
 
 
 - possibly have a MIME types editor (similar to netscape's?)

@@ -466,7 +466,7 @@ wxMessageView::Update(void)
    llist->SetFontWeight(wxBOLD);
    ftype = mailMessage->GetFolder()->GetType();
    if(ftype == MF_NEWS || ftype == MF_NNTP)
-      llist->Insert(_("Newsgroup: "));
+      llist->Insert(_("Newsgroups: "));
    else
       llist->Insert(_("To: "));      
    llist->SetFontWeight(wxNORMAL);

@@ -74,12 +74,15 @@ public:
        @return the number of body parts
    */
    int CountParts(void);
-#if 0
-   /** return the n-th body part
-       @return the body part
+
+   /** Returns a pointer to the folder. If the caller needs that
+       folder to stay around, it should IncRef() it. It's existence is 
+       guaranteed for as long as the message exists.
+       @return folder pointer (not incref'ed)
    */
-   MessageBodyPart *GetPart(int n);
-#endif
+   virtual MailFolder * GetFolder(void)
+      { return folder; }
+
    /**@name Methods accessing individual parts of a message. */
    //@{
    /** Return the content of the part.
@@ -177,14 +180,6 @@ protected:
    static class MessageCC * CreateMessageCC(
       MailFolderCC *folder,
       unsigned long uid);
-   
-#if 0
-   /** Constructor, creating an object from a text buffer.
-       Incomplete!! There are still references to the folder pointer,
-       so this won't work yet.
-       */
-   MessageCC(const char *itext,  ProfileBase *iprofile);
-#endif
    
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
