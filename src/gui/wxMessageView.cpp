@@ -1530,7 +1530,8 @@ wxMessageView::ShowMessage(Message *mailMessage)
 
    if ( size > maxSize && (mailMessage->GetFolder()
                            &&
-                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE))
+                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE
+                           && GetFolderType(mailMessage->GetFolder()->GetType()) != MF_MH))
    {
       wxString msg;
       msg.Printf(_("The selected message is %u Kbytes long which is "
