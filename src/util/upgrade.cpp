@@ -254,11 +254,12 @@ public:
                          "to send email, please do it!"));
             return FALSE;
          }
+
          // if the email is user@some.where, then suppose that the servers are
          // pop.some.where &c - be sure to check that some.where is really a
          // domain and not just a hostname by checking the number of dots in it
-         wxString domain =
-            gs_installWizardData.email.AfterFirst('@').AfterFirst('.'); 
+         String
+            domain = gs_installWizardData.email.AfterFirst('@').AfterFirst('.'); 
          if ( !!domain )
          {
             AddDomain(gs_installWizardData.pop, domain);
@@ -266,7 +267,8 @@ public:
             AddDomain(gs_installWizardData.imap, domain);
             AddDomain(gs_installWizardData.nntp, domain);
          }
-            return TRUE;
+
+         return TRUE;
       }
 
    virtual bool TransferDataToWindow()
@@ -280,8 +282,11 @@ public:
 
    void AddDomain(wxString& server, const wxString& domain)
       {
-         if ( server.Find('.') != wxNOT_FOUND )
+         // don't add the domain to the host names which already contain it
+         // and for the empty host names
+         if ( !server || server.Find('.') != wxNOT_FOUND )
             return;
+
 #if 0 // VZ: this is annoying! either don't do it all or do without asking
          wxString msg;
          msg.Printf(_("You have no domain specified for the server '%s'.\n"
