@@ -1066,6 +1066,8 @@ void BareBonesEditor::Clear()
       m_textControl->SetBackgroundColour(options.m_bg);
 
    m_textControl->Clear();
+
+   DeleteAllAttachments();
 }
 
 void BareBonesEditor::Enable(bool enable)
