@@ -479,6 +479,17 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
          }
          else if ( event.LeftUp() )
          {
+            // we don't want to count releasing the mouse to finish selecting
+            // something as a click as otherwise we wouldn't be able to select
+            // a link without activating it
+            long from,
+                 to;
+
+            GetSelection(&from, &to);
+            if ( from != to )
+               return false;
+
+
             // the mouse cursor is captured by the text control when we're here
             // and this results in very strange behaviour if we open a window
             // without releasing mouse capture first
