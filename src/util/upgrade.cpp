@@ -2931,7 +2931,7 @@ CheckConfiguration(void)
    // and other M files from it
    VerifyUserDir();
 
-   bool firstRun = READ_APPCONFIG(MP_FIRSTRUN);
+   bool firstRun = READ_APPCONFIG(MP_FIRSTRUN) != 0;
    if ( firstRun != 0 )
    {
       // make sure the essential things have proper values
