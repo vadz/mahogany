@@ -485,7 +485,6 @@ static const MenuItemInfo g_aMenuItems[] =
    // the available accelerators for this menu:
    // JKMQVWXZ
    { WXMENU_LANG_DEFAULT, gettext_noop("De&fault"), gettext_noop("Use the default encoding"), wxITEM_RADIO },
-   { WXMENU_SEPARATOR, wxEmptyString, wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_1, gettext_noop("&Western European (ISO-8859-1)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_2, gettext_noop("Ce&ntral European (ISO-8859-2)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_3, gettext_noop("Es&peranto (ISO-8859-3)"), wxEmptyString, wxITEM_RADIO },
@@ -501,7 +500,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_ISO8859_13, gettext_noop("&Baltic (ISO-8859-13)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_14, gettext_noop("Ce&ltic (ISO-8859-14)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_ISO8859_15, gettext_noop("Western European with &Euro (ISO-8859-15)"), wxEmptyString, wxITEM_RADIO },
-   { WXMENU_SEPARATOR, wxEmptyString, wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_CP1250, gettext_noop("Windows Central European (CP 125&0)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_CP1251, gettext_noop("Windows Cyrillic (CP 125&1)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_CP1252, gettext_noop("Windows Western European (CP 125&2)"), wxEmptyString, wxITEM_RADIO },
@@ -510,9 +508,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_LANG_CP1255, gettext_noop("Windows Hebrew (CP 125&5)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_CP1256, gettext_noop("Windows Arabic (CP 125&6)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_CP1257, gettext_noop("Windows Baltic (CP 125&7)"), wxEmptyString, wxITEM_RADIO },
-   { WXMENU_SEPARATOR, wxEmptyString, wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_KOI8, gettext_noop("Russian (KOI&8-R)"), wxEmptyString, wxITEM_RADIO },
-   { WXMENU_SEPARATOR, wxEmptyString, wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_UTF7, gettext_noop("Uni&code (UTF-7)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_LANG_UTF8, gettext_noop("&Unicode (UTF-8)"), wxEmptyString, wxITEM_RADIO },
    { WXMENU_SEPARATOR, wxEmptyString, wxEmptyString, wxITEM_RADIO },
