@@ -7863,4 +7863,21 @@ Leave mail in this folder
 \end_inset 
 
  checkbox as well.
+\layout Subsection
+
+Can I have 
+\begin_inset Quotes eld
+\end_inset 
+
+subfolders
+\begin_inset Quotes erd
+\end_inset 
+
+ of File type (mbox) folders?
+\layout Standard
+
+Mahogany tries to preserve some sanity by disabling "Create new folder"
+ in the popup menu when you select a folder of a non hierarchical format
+ (such as MBX) but you can still circumvent this by doing "Folder|Create..."
+ and selecting the folder you want as the parent.
 \the_end

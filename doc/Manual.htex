@@ -3126,4 +3126,13 @@ properties and select {}``Collect new mail from this folder{}''.
 This will move all new mail from the POP3 server to the {}``New Mail{}''
 folder. If you want to copy it instead (leave messages on server)
 just check the {}``Leave mail in this folder{}'' checkbox as well.
+
+
+\subsection{Can I have {}``subfolders{}'' of File type (mbox) folders?}
+
+Mahogany tries to preserve some sanity by disabling \char`\"{}Create
+new folder\char`\"{} in the popup menu when you select a folder of
+a non hierarchical format (such as MBX) but you can still circumvent
+this by doing \char`\"{}Folder|Create...\char`\"{} and selecting the
+folder you want as the parent.
 \end{document}
