@@ -525,7 +525,7 @@ String FormattedParagraph::FormatCommon()
 int FormattedParagraph::SizeWithoutNewline(const String &paragraph)
 {
    int contentSize;
-   
+
    if(!paragraph.empty() && paragraph[paragraph.size()-1] == _T('\n'))
       contentSize = paragraph.size()-1;
    else
@@ -538,7 +538,7 @@ int FormattedParagraph::FindLineLength(
    const String &paragraph,int lineStart,int paragraphEnd) const
 {
    int lineLength;
-   
+
    // Try to find at least one space on the line. Pick the last one.
    // Include one character past margin in case it is space.
    size_t findSpace = RFind(paragraph,_T(' '),lineStart+m_margin);
@@ -589,7 +589,7 @@ size_t FormattedParagraph::RFind(
 #else
    size_t result = where.npos;
    int cursor;
-   
+
    for( cursor = start; cursor >= 0; --cursor )
    {
       if( where[cursor] == what )
@@ -611,7 +611,7 @@ size_t FormattedParagraph::FindLastNotOf(
 #else
    size_t result = where.npos;
    int cursor;
-   
+
    for( cursor = start; cursor >= 0; --cursor )
    {
       if( where[cursor] != what )
@@ -631,7 +631,7 @@ void FormattedParagraph::FindSignature()
 
    DetectSignature detector;
    detector.Initialize(m_profile);
-   
+
    for(m_signature = 0; m_signature < count; ++m_signature)
    {
       String line = m_control->GetLineText(m_signature);
@@ -950,13 +950,6 @@ void BareBonesEditor::Create(Composer *composer, wxWindow *parent)
    m_textControl = m_notebook->GetTextControl();
    m_attachments = m_notebook->GetList();
 
-   if ( !GetOptions().m_font.empty() )
-   {
-      wxFont font(GetOptions().GetFont());
-      if ( font.Ok() )
-         m_textControl->SetFont(font);
-   }
-   
    Enable(true);
    Clear();
 }
@@ -1032,6 +1025,19 @@ unsigned long BareBonesEditor::ComputeHash() const
 
 void BareBonesEditor::Clear()
 {
+   const ComposerOptions& options = GetOptions();
+   if ( !options.m_font.empty() )
+   {
+      wxFont font(GetOptions().GetFont());
+      if ( font.Ok() )
+         m_textControl->SetFont(font);
+   }
+
+   if ( options.m_fg.Ok() )
+      m_textControl->SetForegroundColour(options.m_fg);
+   if ( options.m_bg.Ok() )
+      m_textControl->SetBackgroundColour(options.m_bg);
+
    m_textControl->Clear();
 }
 
