@@ -119,9 +119,6 @@ public:
 
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
-
-   /// access the wxDialUpManager directly (wxMApp-specific method)
-   wxDialUpManager *GetDialUpManager() const { return m_OnlineManager; }
 #endif // USE_DIALUP
 
    virtual bool AllowBgProcessing() const;

@@ -2977,7 +2977,7 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
       if ( choice )
       {
          // may be NULL if we don't use dial up manager at all
-         wxDialUpManager *dial = ((wxMApp *)mApplication)->GetDialUpManager();
+          wxDialUpManager *dial = wxDialUpManager::Create();
 
          if ( dial )
          {
@@ -2989,6 +2989,8 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
             {
                choice->Append(aConnections[n]);
             }
+
+            delete dial;
          }
       }
    }

@@ -1106,8 +1106,8 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
       "Mahogany can automatically detect if your\n"
       "network connection is online or offline.\n"
       "It can also connect and disconnect you to the\n"
-      "network, but for this it needs to know which\n"
-      "commands to execute to go online or offline."));
+      "network, but for this you need to specify\n"
+      "the informations below:"));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
@@ -1115,10 +1115,21 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
 
 #if defined(OS_WIN)
    // get all existing RAS connections
-   wxDialUpManager *dial =
-      ((wxMApp *)mApplication)->GetDialUpManager();;
+   wxDialUpManager *dial = wxDialUpManager::Create();
+
    wxArrayString connections;
-   size_t nCount = dial->GetISPNames(connections);
+   size_t nCount;
+   if ( !dial )
+   {
+      FAIL_MSG( "GetDialUpManager() returned NULL?" );
+      nCount = 0;
+   }
+   else
+   {
+      nCount = dial->GetISPNames(connections);
+
+      delete dial;
+   }
 
    // concatenate all connection names into one ':' separated string
    wxString comboChoices = _("&Dial up connection to use");
