@@ -1157,7 +1157,7 @@ bool ConfigureCustomHeader(Profile *profile,
    bool letUserChooseType = type == CustomHeader_Invalid;
    wxCustomHeaderDialog dlg(profile, parent, letUserChooseType);
 
-   if ( dlg.ShowModal() == wxID_OK )
+   if ( dlg.ShowModal() != wxID_OK )
    {
       // cancelled
       return false;
