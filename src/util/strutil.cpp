@@ -76,7 +76,7 @@ void
 strutil_getstrline(istream &istr, String &str)
 {
    char ch;
-   str = "";
+   str = _T("");
    for(;;)
    {
       istr.get(ch);
@@ -90,7 +90,7 @@ void
 strutil_getfoldedline(istream &istr, String &str)
 {
    char ch;
-   str = "";
+   str = _T("");
    for(;;)
    {
       istr.get(ch);
@@ -112,20 +112,20 @@ strutil_getfoldedline(istream &istr, String &str)
 }
 
 String
-strutil_before(const String &str, const char delim)
+strutil_before(const String &str, const wxChar delim)
 {
-   String newstr = "";
-   const char *cptr = str.c_str();
+   String newstr = _T("");
+   const wxChar *cptr = str.c_str();
    while(*cptr && *cptr != delim)
       newstr += *cptr++;
    return newstr;
 }
 
 String
-strutil_after(const String &str, const char delim)
+strutil_after(const String &str, const wxChar delim)
 {
-   String newstr = "";
-   const char *cptr = str.c_str();
+   String newstr = _T("");
+   const wxChar *cptr = str.c_str();
    while(*cptr && *cptr != delim)
       cptr++;
    if(*cptr)
@@ -139,9 +139,9 @@ strutil_after(const String &str, const char delim)
 void
 strutil_delwhitespace(String &str)
 {
-   String newstr = "";
+   String newstr = _T("");
 
-   const char *cptr = str.c_str();
+   const wxChar *cptr = str.c_str();
    while(isspace(*cptr))
       cptr++;
    while(*cptr)
@@ -152,8 +152,8 @@ strutil_delwhitespace(String &str)
 void
 strutil_toupper(String &str)
 {
-   String s = "";
-   const char *cptr = str.c_str();
+   String s = _T("");
+   const wxChar *cptr = str.c_str();
    while(*cptr)
       s += toupper(*cptr++);
    str = s;
@@ -162,8 +162,8 @@ strutil_toupper(String &str)
 void
 strutil_tolower(String &str)
 {
-   String s = "";
-   const char *cptr = str.c_str();
+   String s = _T("");
+   const wxChar *cptr = str.c_str();
    while(*cptr)
       s += tolower(*cptr++);
    str = s;
@@ -173,29 +173,29 @@ bool
 strutil_cmp(String const & str1, String const & str2,
       int offs1, int offs2)
 {
-   return strcmp(str1.c_str()+offs1, str2.c_str()+offs2) == 0;
+   return wxStrcmp(str1.c_str()+offs1, str2.c_str()+offs2) == 0;
 }
 
 bool
 strutil_ncmp(String const &str1, String const &str2, int n, int offs1,
       int offs2)
 {
-   return strncmp(str1.c_str()+offs1, str2.c_str()+offs2, n) == 0;
+   return wxStrncmp(str1.c_str()+offs1, str2.c_str()+offs2, n) == 0;
 }
 
 String
 strutil_ltoa(long i)
 {
-   char buffer[256];   // much longer than any integer
-   sprintf(buffer,"%ld", i);
+   wxChar buffer[256];   // much longer than any integer
+   wxSprintf(buffer, _T("%ld"), i);
    return String(buffer);
 }
 
 String
 strutil_ultoa(unsigned long i)
 {
-   char buffer[256];   // much longer than any integer
-   sprintf(buffer,"%lu", i);
+   wxChar buffer[256];   // much longer than any integer
+   wxSprintf(buffer, _T("%lu"), i);
    return String(buffer);
 }
 
@@ -203,7 +203,7 @@ strutil_ultoa(unsigned long i)
 wxChar *
 strutil_strdup(const wxChar *in)
 {
-   wxChar *cptr = new wxChar[strlen(in)+1];
+   wxChar *cptr = new wxChar[wxStrlen(in)+1];
    wxStrcpy(cptr,in);
    return cptr;
 }
@@ -260,7 +260,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
       found = strsep(&string, delim);
       if(! found || ! *found)
          break;
-      tlist.push_back(new String(found));
+      tlist.push_back(new String(wxConvertMB2WX(found)));
    }
 }
 
@@ -365,13 +365,13 @@ strutil_extract_formatspec(const char *format)
 String
 strutil_getfilename(const String& path)
 {
-   const char *pLast1 = strrchr(path, '/');
+   const wxChar *pLast1 = wxStrrchr(path, '/');
    size_t nPos1 = pLast1 ? pLast1 - path.c_str() : 0;
 
    // under Windows we understand both '/' and '\\' as path separators, but
    // '\\' doesn't count as path separator under Unix
 #ifdef OS_WIN
-   const char *pLast2 = strrchr(path, '\\');
+   const wxChar *pLast2 = wxStrrchr(path, '\\');
    size_t nPos2 = pLast2 ? pLast2 - path.c_str() : 0;
    if ( nPos2 > nPos1 )
       nPos1 = nPos2;
@@ -399,7 +399,7 @@ static void
 strutil_squeeze_slashes(String& path)
 {
    String result;
-   for ( const char *p = path.c_str(); *p != '\0'; p++ )
+   for ( const wxChar *p = path.c_str(); *p != '\0'; p++ )
    {
       if ( *p == '/' )
       {
@@ -447,33 +447,33 @@ strutil_expandpath(const String &ipath)
    String path;
 
    if(strutil_isempty(ipath))
-      return "";
+      return _T("");
 
    if(ipath[0u]=='~')
    {
       if(ipath[1u] == DIR_SEPARATOR)
       {
-         path = getenv("HOME");
+         path = wxGetenv(_T("HOME"));
          path << (ipath.c_str() + 1);
          return path;
       }
       else
       {
          String user =
-            strutil_before(String(ipath.c_str()+1),DIR_SEPARATOR);
+            strutil_before(String(ipath.c_str()+1), DIR_SEPARATOR);
          struct passwd *entry;
          do
          {
             entry = getpwent();
-            if(entry && entry->pw_name == user)
+            if(entry && entry->pw_name == wxConvertWX2MB(user))
                break;
          } while(entry);
          if(entry)
-            path << entry->pw_dir;
+            path << wxConvertMB2WX(entry->pw_dir);
          else
-            path << DIR_SEPARATOR << "home" << DIR_SEPARATOR << user; // improvise!
+            path << DIR_SEPARATOR << _T("home") << DIR_SEPARATOR << user; // improvise!
          path << DIR_SEPARATOR
-              << strutil_after(String(ipath.c_str()+1),DIR_SEPARATOR);
+              << strutil_after(String(ipath.c_str()+1), DIR_SEPARATOR);
          return path;
       }
    }
@@ -489,11 +489,11 @@ strutil_expandpath(const String &ipath)
     @return the parent directory to the one specified
 */
 String
-strutil_path_parent(String const &path, char separator)
+strutil_path_parent(String const &path, wxChar separator)
 {
-   const char *cptr = strrchr(path.c_str(),separator);
+   const wxChar *cptr = wxStrrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
-      return "";
+      return _T("");
 
    return path.Left(cptr - path.c_str());
 }
@@ -505,11 +505,11 @@ strutil_path_parent(String const &path, char separator)
     @return the parent directory to the one specified
 */
 String
-strutil_path_filename(String const &path, char separator)
+strutil_path_filename(String const &path, wxChar separator)
 {
-   const char *cptr = strrchr(path.c_str(),separator);
+   const wxChar *cptr = wxStrrchr(path.c_str(),separator);
    if(cptr == NULL) // not found
-      return "";
+      return _T("");
 
    return String(cptr+1);
 }
@@ -525,11 +525,11 @@ String
 strutil_enforceCRLF(String const &in)
 {
    String out;
-   const char *cptr = in.c_str();
+   const wxChar *cptr = in.c_str();
    bool has_cr =  false;
 
    if(! cptr)
-      return "";
+      return _T("");
    while(*cptr)
    {
       switch(*cptr)
@@ -625,11 +625,11 @@ struct CryptData
 
    String ToHex(void)
       {
-         String to = "";
+         String to = _T("");
          String tmp;
          for(size_t i = 0; i < len; i++)
          {
-            tmp.Printf("%02x", (int) data[i]);
+            tmp.Printf(_T("%02x"), (int) data[i]);
             to << tmp;
          }
          return to;
@@ -639,15 +639,15 @@ struct CryptData
          if(data) free(data);
          len = hexdata.Length() / 2;
          data = (BYTE *)malloc( len );
-         const char *cptr = hexdata.c_str();
+         const wxChar *cptr = hexdata.c_str();
          String tmp;
          int val, idx = 0;
          while(*cptr)
          {
-            tmp = "";
+            tmp = _T("");
             tmp << *cptr << *(cptr+1);
             cptr += 2;
-            sscanf(tmp.c_str(),"%02x", &val);
+            wxSscanf(tmp.c_str(), _T("%02x"), &val);
             data[idx++] = (BYTE)val;
          }
       }
@@ -760,12 +760,12 @@ setup_twofish(void)
       {
          // we hadn't used the global password before
          mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
-               strutil_encrypt_tf("TESTDATA"));
+               strutil_encrypt_tf(_T("TESTDATA")));
 
          return true;
       }
 
-      if ( strutil_decrypt(testdata) == "TESTDATA" )
+      if ( strutil_decrypt(testdata) == _T("TESTDATA") )
       {
          // correct password
          return true;
@@ -793,9 +793,9 @@ strutil_encrypt_tf(const String &original)
 {
    if ( setup_twofish() )
    {
-      CryptData input(original);
+      CryptData input(wxConvertWX2MB(original));
       CryptData output;
-      int rc = TwoFishCrypt(1, 128, gs_GlobalPassword, &input ,&output);
+      int rc = TwoFishCrypt(1, 128, wxConvertWX2MB(gs_GlobalPassword), &input ,&output);
       if(rc)
       {
          String tmp = output.ToHex();
@@ -809,7 +809,7 @@ strutil_encrypt_tf(const String &original)
       ERRORMESSAGE((_("Impossible to use encryption without password.")));
    }
 
-   return "";
+   return _T("");
 }
 
 static String
@@ -818,7 +818,7 @@ strutil_decrypt_tf(const String &original)
    if(! strutil_has_twofish)
    {
       ERRORMESSAGE((_("Strong encryption algorithm not available.")));
-      return "";
+      return _T("");
    }
    if ( !setup_twofish() )
    {
@@ -828,12 +828,12 @@ strutil_decrypt_tf(const String &original)
    CryptData input;
    input.FromHex(original.c_str()+1); // skip initial '-'
    CryptData output;
-   int rc = TwoFishCrypt(0,128,gs_GlobalPassword, &input,&output);
+   int rc = TwoFishCrypt(0, 128, wxConvertWX2MB(gs_GlobalPassword), &input,&output);
    if(rc)
    {
-      return output.data;
+      return wxChar(output.data);
    }
-   return "";
+   return _T("");
 }
 
 /* This is not strictly a string utility function, but somehow it is,
@@ -876,8 +876,8 @@ strutil_encrypt_initialise(void)
    if ( status == -1 )
    {
       String oldPassword = gs_GlobalPassword;
-      gs_GlobalPassword = "testPassword";
-      String test = "This is a test, in cleartext.";
+      gs_GlobalPassword = _T("testPassword");
+      String test = _T("This is a test, in cleartext.");
       String cipher = strutil_encrypt_tf(test);
       strutil_has_twofish = TRUE; // assume or it will fail
       String clearagain = strutil_decrypt_tf(cipher);
@@ -891,7 +891,7 @@ strutil_encrypt_initialise(void)
               "so that we can fix it."),
             NULL,
             _("Missing feature"),
-            "EncryptionAlgoBroken");
+            _T("EncryptionAlgoBroken"));
          strutil_has_twofish = FALSE;
       }
       else
@@ -932,7 +932,7 @@ String
 strutil_encrypt(const String &original)
 {
    if(original.Length() == 0)
-      return "";
+      return _T("");
 
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
@@ -944,7 +944,7 @@ strutil_encrypt(const String &original)
    String
       tmpstr,
       newstr;
-   const char
+   const wxChar
       *cptr = original.c_str();
 
    unsigned char pair[2];
@@ -955,7 +955,7 @@ strutil_encrypt(const String &original)
       strutil_encrypt_pair(pair);
       // now we have the encrypted pair, which could be binary data,
       // so we write hex values instead:
-      tmpstr.Printf("%02x%02x", pair[0], pair[1]);
+      tmpstr.Printf(_T("%02x%02x"), (wxChar)pair[0], (wxChar)pair[1]);
       newstr << tmpstr;
       cptr ++;
       if(*cptr) cptr++;
@@ -968,7 +968,7 @@ strutil_setpasswd(const String &newpasswd)
 {
    gs_GlobalPassword = newpasswd;
    mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
-                                          strutil_encrypt("TESTDATA"));
+                                          strutil_encrypt(_T("TESTDATA")));
 }
 
 String
@@ -992,7 +992,7 @@ strutil_checkpasswd(const String& passwd)
 
    String oldPassword = gs_GlobalPassword;
    gs_GlobalPassword = passwd;
-   bool ok = strutil_decrypt(testdata) == "TESTDATA";
+   bool ok = strutil_decrypt(testdata) == _T("TESTDATA");
    gs_GlobalPassword = oldPassword;
 
    return ok;
@@ -1002,7 +1002,7 @@ String
 strutil_decrypt(const String &original)
 {
    if(original.Length() == 0)
-      return "";
+      return _T("");
 
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
@@ -1015,28 +1015,28 @@ strutil_decrypt(const String &original)
    {
       wxLogWarning(_("Decrypt function called with illegal string."));
 
-      return "";
+      return _T("");
    }
 
    String
       tmpstr,
       newstr;
-   const char
+   const wxChar
       *cptr = original.c_str();
 
    unsigned char pair[2];
    unsigned int i;
    while(*cptr)
    {
-      tmpstr = "";
+      tmpstr = _T("");
       tmpstr << *cptr << *(cptr+1);
       cptr += 2;
-      sscanf(tmpstr.c_str(), "%02x", &i);
+      wxSscanf(tmpstr.c_str(), _T("%02x"), &i);
       pair[0] = (unsigned char) i;
-      tmpstr = "";
+      tmpstr = _T("");
       tmpstr << *cptr << *(cptr+1);
       cptr += 2;
-      sscanf(tmpstr.c_str(), "%02x", &i);
+      wxSscanf(tmpstr.c_str(), _T("%02x"), &i);
       pair[1] = (unsigned char) i;
       strutil_encrypt_pair(pair);
       newstr << (char) pair[0] << (char) pair[1];
@@ -1099,8 +1099,8 @@ strutil_ftime(time_t time, const String & format, bool gmtflag)
    String strTime;
    if ( tmvalue )
    {
-      char buffer[256];
-      strftime(buffer, 256, format.c_str(), tmvalue);
+      wxChar buffer[256];
+      wxStrftime(buffer, 256, format.c_str(), tmvalue);
       strTime = buffer;
    }
    else // this can happen if the message has no valid date header, don't crash!
@@ -1118,7 +1118,7 @@ strutil_readNumber(String& string, bool *success)
    strutil_delwhitespace(string);
 
    String newstr;
-   const char *cptr;
+   const wxChar *cptr;
    for ( cptr = string.c_str();
          *cptr && (isdigit(*cptr) || *cptr == '+' || *cptr == '-');
          cptr++ )
@@ -1147,7 +1147,7 @@ strutil_readString(String &string, bool *success)
 
    bool ok;
 
-   const char *cptr = string.c_str();
+   const wxChar *cptr = string.c_str();
    if ( *cptr != '"' )
    {
       ok = false;
@@ -1187,7 +1187,7 @@ strutil_escapeString(const String& string)
    String newstr;
    newstr.reserve(string.length());
 
-   for ( const char *cptr = string.c_str(); *cptr; cptr++ )
+   for ( const wxChar *cptr = string.c_str(); *cptr; cptr++ )
    {
       if ( *cptr == '"' )
          newstr << '\\';

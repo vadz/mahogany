@@ -101,13 +101,13 @@ protected:
    // supposed to point at the '\t' character which separates the fields.
    bool CheckHasNextField(size_t *index,
                           wxString *line,
-                          const char **ppc) const;
+                          const wxChar **ppc) const;
 
    // another ParsePineADBEntry helper: extracts one field which is supposed to
    // start at the current position
    wxString ExtractField(size_t *index,
                          wxString *line,
-                         const char **ppc) const;
+                         const wxChar **ppc) const;
 
    // the starting lines for the entries and groups
    wxArrayInt m_entriesLineNumbers,
@@ -134,7 +134,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbPineImporter,
                        gettext_noop("PINE address book import module"),
                        gettext_noop("PINE address book"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 
 // ----------------------------------------------------------------------------
@@ -143,10 +143,10 @@ IMPLEMENT_ADB_IMPORTER(AdbPineImporter,
 
 wxString AdbPineImporter::ExtractField(size_t *index,
                                        wxString *line,
-                                       const char **ppc) const
+                                       const wxChar **ppc) const
 {
    wxString field;
-   const char *pc = *ppc;
+   const wxChar *pc = *ppc;
 
    bool cont = TRUE;
 
@@ -186,9 +186,9 @@ wxString AdbPineImporter::ExtractField(size_t *index,
 
 bool AdbPineImporter::CheckHasNextField(size_t *index,
                                         wxString *line,
-                                        const char **ppc) const
+                                        const wxChar **ppc) const
 {
-   const char *pc = *ppc;
+   const wxChar *pc = *ppc;
 
    if ( !*pc )
    {
@@ -213,7 +213,7 @@ bool AdbPineImporter::CheckHasNextField(size_t *index,
 
          // my PINE 4.10 inserts 3 spaces in the beginning of the continued lines
          // but I don't know whether all versions do it
-         if ( strncmp(lineNext, "   ", 3) == 0 )
+         if ( wxStrncmp(lineNext, _T("   "), 3) == 0 )
          {
             // yes, this entry is continued on the next line
             continued = TRUE;
@@ -272,7 +272,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
 
    wxString line = m_textfile[*index];
 
-   const char *pc = line.c_str();
+   const wxChar *pc = line.c_str();
 
    if ( !*pc || isspace(*pc) )
    {
@@ -385,7 +385,7 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
    {
       FAIL_MSG( _T("we may only have simple subgroups in PINE addressbooks") );
 
-      return "";
+      return _T("");
    }
 
    int indexGroup = m_groupNames.Index(components[0u]);
@@ -393,14 +393,14 @@ wxString AdbPineImporter::GetAddressesOfGroup(const wxString& path) const
    {
       FAIL_MSG( _T("unknown group") );
 
-      return "";
+      return _T("");
    }
 
    wxString addresses;
    size_t indexLine = m_groupLineNumbers[(size_t)indexGroup];
    if ( !ParsePineADBEntry(&indexLine, NULL, &addresses) )
    {
-      return "";
+      return _T("");
    }
 
    return addresses;
@@ -425,7 +425,7 @@ size_t AdbPineImporter::SplitMailingListAddresses(const wxString& addresses,
    // extraordinarily smart neither.
 
    wxString address;
-   const char *pc = addresses.c_str() + 1;   // skip '('
+   const wxChar *pc = addresses.c_str() + 1;   // skip '('
    for ( ; ; pc++ )
    {
       if ( *pc == ')' || *pc == ',' )
@@ -636,7 +636,7 @@ String AdbPineImporter::GetDefaultFilename() const
 
 #ifdef OS_UNIX
    // the default location for Unix is $HOME/.addresbook
-   location = wxExpandEnvVars("$HOME/.addresbook");
+   location = wxExpandEnvVars(_T("$HOME/.addresbook"));
 
    if ( !wxFile::Exists(location) )
    {

@@ -122,7 +122,7 @@ enum MimeEncoding
 };
 
 // trace mask for message sending/queuing operations
-#define TRACE_SEND   "send"
+#define TRACE_SEND   _T("send")
 
 // ----------------------------------------------------------------------------
 // prototypes
@@ -366,7 +366,7 @@ void SendMessageCC::InitNew()
    }
 
    if ( READ_CONFIG_BOOL(m_profile, MP_COMPOSE_USE_XFACE) )
-      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, "");
+      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, _T(""));
 
    m_CharSet = READ_CONFIG_TEXT(m_profile,MP_CHARSET);
 }
@@ -389,7 +389,7 @@ void SendMessageCC::InitResent(const Message *message)
    hdr.reserve(hdrOrig.length() + 100);   // slightly more for "X-"s
 
    bool firstHeader = true;
-   for ( const char *p = hdrOrig; *p; p++ )
+   for ( const wxChar *p = hdrOrig; *p; p++ )
    {
       // start of line?
       if ( firstHeader || (p[0] == '\r' && p[1] == '\n') )
@@ -406,13 +406,13 @@ void SendMessageCC::InitResent(const Message *message)
             hdr += *p++;
          }
 
-#define STARTS_WITH(p, what) (!(wxStrnicmp((p), (what), strlen(what))))
+#define STARTS_WITH(p, what) (!(wxStrnicmp((p), (what), wxStrlen(what))))
 
-         if ( STARTS_WITH(p, "Delivered-To:") ||
-               STARTS_WITH(p, "Received:") ||
-                 STARTS_WITH(p, "Resent-") )
+         if ( STARTS_WITH(p, _T("Delivered-To:")) ||
+               STARTS_WITH(p, _T("Received:")) ||
+                 STARTS_WITH(p, _T("Resent-")) )
          {
-            hdr += "X-";
+            hdr += _T("X-");
          }
 
 #undef STARTS_WITH
@@ -421,7 +421,7 @@ void SendMessageCC::InitResent(const Message *message)
       hdr += *p;
    }
 
-   m_Envelope->remail = cpystr(hdr.c_str());
+   m_Envelope->remail = cpystr(wxConvertWX2MB(hdr.c_str()));
 
    // now copy the body: note that we have to use ENC7BIT here to prevent
    // c-client from (re)encoding the body
@@ -431,7 +431,7 @@ void SendMessageCC::InitResent(const Message *message)
 
    // FIXME: we potentially copy a lot of data here!
    String text = message->FetchText();
-   m_Body->contents.text.data = (unsigned char *)cpystr(text.c_str());
+   m_Body->contents.text.data = (unsigned char *)cpystr(wxConvertWX2MB(text.c_str()));
    m_Body->contents.text.size = text.length();
 }
 
@@ -528,7 +528,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
 {
    // if a header contains "=?", encode it anyhow to avoid generating invalid
    // encoded words
-   if ( !strstr(header, "=?") )
+   if ( !wxStrstr(header, _T("=?")) )
    {
       // only encode the strings which contain the characters unallowed in RFC
       // 822 headers
@@ -566,7 +566,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
    {
       FAIL_MSG( _T("should have a valid charset name!") );
 
-      csName = "UNKNOWN";
+      csName = _T("UNKNOWN");
    }
 
    // the entire encoded header
@@ -575,13 +575,13 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
 
    // encode the header splitting it in the chunks such that they will be no
    // longer than 75 characters each
-   const char *s = header.c_str();
+   const wxChar *s = header.c_str();
    while ( *s )
    {
       // if this is not the first line, insert a line break
       if ( !headerEnc.empty() )
       {
-         headerEnc << "\r\n ";
+         headerEnc << _T("\r\n ");
       }
 
       static const size_t RFC2047_MAXWORD_LEN = 75;
@@ -618,7 +618,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
          len = (lenRemaining / 4) * 3 - 2;
 
          // but not more than what we have
-         size_t lenMax = strlen(s);
+         size_t lenMax = wxStrlen(s);
          if ( len > lenMax )
          {
             len = lenMax;
@@ -647,7 +647,8 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
       }
 
       // put into string as we might want to do some more replacements...
-      String encword(textEnc, (size_t)lenEnc);
+      String encword((wxChar*)textEnc, (size_t)lenEnc);
+      //String encword = strutil_strdup(wxConvertMB2WX(textEnc));
 
       // hack: rfc822_8bit() doesn't encode spaces normally but we must
       // do it inside the headers
@@ -659,20 +660,20 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
          encword2.reserve(encword.length());
 
          bool replaced = false;
-         for ( const char *p = encword.c_str(); *p; p++ )
+         for ( const wxChar *p = encword.c_str(); *p; p++ )
          {
             switch ( *p )
             {
                case ' ':
-                  encword2 += "=20";
+                  encword2 += _T("=20");
                   break;
 
                case '\t':
-                  encword2 += "=09";
+                  encword2 += _T("=09");
                   break;
 
                case '?':
-                  encword2 += "=3F";
+                  encword2 += _T("=3F");
                   break;
 
                default:
@@ -692,9 +693,9 @@ SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
       }
 
       // append this word to the header
-      headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
+      headerEnc << _T("=?") << csName << _T('?') << (char)enc2047 << _T('?')
                 << encword
-                << "?=";
+                << _T("?=");
 
       fs_give((void **)&textEnc);
 
@@ -713,7 +714,7 @@ SendMessageCC::EncodeAddress(struct mail_address *adr)
    if ( adr->personal )
    {
       char *tmp = adr->personal;
-      adr->personal = cpystr(EncodeHeaderString(tmp, true /* address field */));
+      adr->personal = cpystr(wxConvertWX2MB(EncodeHeaderString(wxConvertMB2WX(tmp), true /* address field */)));
 
       fs_give((void **)&tmp);
    }
@@ -737,7 +738,7 @@ SendMessageCC::SetSubject(const String &subject)
       fs_give((void **)&m_Envelope->subject);
 
    String subj = EncodeHeaderString(subject);
-   m_Envelope->subject = cpystr(subj.c_str());
+   m_Envelope->subject = cpystr(wxConvertWX2MB(subj.c_str()));
 }
 
 void
@@ -812,7 +813,7 @@ void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
       {
          adrPrev->next = adr->next;
 
-         DBGMESSAGE(("Invalid recipient address '%s' ignored.",
+         DBGMESSAGE((_T("Invalid recipient address '%s' ignored."),
                     AddressCC(adr).GetAddress().c_str()));
 
          // prevent mail_free_address() from freeing the entire list tail
@@ -857,7 +858,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
    if(groups.Length())
    {
       ASSERT(m_Envelope->newsgroups == NIL);
-      m_Envelope->newsgroups = strdup(groups);
+      m_Envelope->newsgroups = strdup(wxConvertWX2MB(groups));
    }
 
 }
@@ -961,24 +962,24 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
 
    strutil_delwhitespace(name);
 
-   if (name == "TO")
+   if (name == _T("TO"))
       ; //TODO: Fix this?SetAddresses(*value);
-   else if(name == "CC")
+   else if(name == _T("CC"))
       ; //SetAddresses("",*value);
-   else if(name == "BCC")
+   else if(name == _T("BCC"))
       ; //SetAddresses("","",*value);
-   else if ( name == "MIME-VERSION" ||
-             name == "CONTENT-TYPE" ||
-             name == "CONTENT-DISPOSITION" ||
-             name == "CONTENT-TRANSFER-ENCODING" ||
-             name == "MESSAGE-ID" )
+   else if ( name == _T("MIME-VERSION") ||
+             name == _T("CONTENT-TYPE") ||
+             name == _T("CONTENT-DISPOSITION") ||
+             name == _T("CONTENT-TRANSFER-ENCODING") ||
+             name == _T("MESSAGE-ID") )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
                     name.c_str()));
 
       return;
    }
-   else if ( name == "SUBJECT" )
+   else if ( name == _T("SUBJECT") )
    {
       SetSubject(value);
    }
@@ -1038,10 +1039,10 @@ String BuildMessageId(const char *hostname)
       s_numInSec = 0;
    }
 
-   return String::Format("<Mahogany-%s-%lu-%s.%02u@%s>",
+   return String::Format(_T("<Mahogany-%s-%lu-%s.%02u@%s>"),
                          M_VERSION,
                          s_pid,
-                         dt.Format("%Y%m%d-%H%M%S").c_str(),
+                         dt.Format(_T("%Y%m%d-%H%M%S")).c_str(),
                          s_numInSec,
                          hostname);
 }
@@ -1072,7 +1073,7 @@ SendMessageCC::Build(bool forStorage)
    //
    // NB: we do allow the user to override the date header because this is
    //     useful when editing a previously postponed message
-   if ( !HasHeaderEntry("Date") )
+   if ( !HasHeaderEntry(_T("Date")) )
    {
       char tmpbuf[MAILTMPLEN];
       rfc822_date (tmpbuf);
@@ -1084,7 +1085,7 @@ SendMessageCC::Build(bool forStorage)
    // is not a FQDN so don't do it in this case
    if ( m_DefaultHost.find('.') != String::npos )
    {
-      m_Envelope->message_id = cpystr(BuildMessageId(m_DefaultHost));
+      m_Envelope->message_id = cpystr(wxConvertWX2MB(BuildMessageId(wxConvertWX2MB(m_DefaultHost))));
    }
 
    // don't add any more headers to the message being resent
@@ -1105,7 +1106,7 @@ SendMessageCC::Build(bool forStorage)
    {
       // The X-BCC will be converted back to BCC by Send()
       if ( m_Envelope->bcc )
-         AddHeaderEntry("X-BCC", m_Bcc);
+         AddHeaderEntry(_T("X-BCC"), m_Bcc);
    }
    else // send, not store
    {
@@ -1114,18 +1115,18 @@ SendMessageCC::Build(bool forStorage)
          might have come from the Outbox queue, so we translate X-BCC
          back to a proper bcc setting:
        */
-      if ( HasHeaderEntry("X-BCC") )
+      if ( HasHeaderEntry(_T("X-BCC")) )
       {
          if ( m_Envelope->bcc )
          {
             mail_free_address(&m_Envelope->bcc);
          }
 
-         SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
+         SetAddressField(&m_Envelope->bcc, GetHeaderEntry(_T("X-BCC")));
 
          // don't send X-BCC field or the recipient would still see the BCC
          // contents (which is highly undesirable!)
-         RemoveHeaderEntry("X-BCC");
+         RemoveHeaderEntry(_T("X-BCC"));
       }
    }
 
@@ -1146,13 +1147,13 @@ SendMessageCC::Build(bool forStorage)
          i != m_extraHeaders.end();
          ++i, ++h )
    {
-      m_headerNames[h] = strutil_strdup(i->m_name);
-      if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
+      m_headerNames[h] = strutil_strdup(wxConvertWX2MB(i->m_name));
+      if ( wxStricmp(wxConvertMB2WX(m_headerNames[h]), _T("Reply-To")) == 0 )
          replyToSet = true;
-      else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
+      else if ( wxStricmp(wxConvertMB2WX(m_headerNames[h]), _T("X-Mailer")) == 0 )
          xmailerSet = true;
 
-      m_headerValues[h] = strutil_strdup(i->m_value);
+      m_headerValues[h] = strutil_strdup(wxConvertWX2MB(i->m_value));
    }
 
    // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
@@ -1166,36 +1167,36 @@ SendMessageCC::Build(bool forStorage)
       //     include 8bit chars (which may - and do - occur in translations) in
       //     headers!
       String version;
-      version << "Mahogany " << M_VERSION_STRING;
+      version << _T("Mahogany ") << M_VERSION_STRING;
 #ifdef OS_UNIX
-      version  << ", compiled for " << M_OSINFO;
+      version  << _T(", compiled for ") << M_OSINFO;
 #else // Windows
-      version << ", running under " << wxGetOsDescription();
+      version << _T(", running under ") << wxGetOsDescription();
 #endif // Unix/Windows
-      m_headerValues[h++] = strutil_strdup(version);
+      m_headerValues[h++] = strutil_strdup(wxConvertWX2MB(version));
    }
 
    // set Reply-To if it hadn't been set by the user as a custom header
    if ( !replyToSet )
    {
-      ASSERT_MSG( !HasHeaderEntry("Reply-To"), _T("logic error") );
+      ASSERT_MSG( !HasHeaderEntry(_T("Reply-To")), _T("logic error") );
 
       if ( !m_ReplyTo.empty() )
       {
          m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(m_ReplyTo);
+         m_headerValues[h++] = strutil_strdup(wxConvertWX2MB(m_ReplyTo));
       }
    }
 
 #ifdef HAVE_XFACES
    // add an XFace?
-   if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
+   if ( !HasHeaderEntry(_T("X-Face")) && !m_XFaceFile.empty() )
    {
       XFace xface;
       if ( xface.CreateFromFile(m_XFaceFile) )
       {
          m_headerNames[h] = strutil_strdup("X-Face");
-         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+         m_headerValues[h] = strutil_strdup(wxConvertWX2MB(xface.GetHeaderLine()));
          if(strlen(m_headerValues[h]))  // paranoid, I know.
          {
             ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', _T("String should have been DOSified") );
@@ -1251,16 +1252,16 @@ SendMessageCC::AddPart(MimeType::Primary type,
    if( subtype.length() == 0 )
    {
       if ( type == TYPETEXT )
-         subtype = "PLAIN";
+         subtype = _T("PLAIN");
       else if ( type == TYPEAPPLICATION )
-         subtype = "OCTET-STREAM";
+         subtype = _T("OCTET-STREAM");
       else
       {
          // shouldn't send message without MIME subtype, but we don't have any
          // and can't find the default!
          ERRORMESSAGE((_("MIME type specified without subtype and\n"
                          "no default subtype for this type.")));
-         subtype = "UNKNOWN";
+         subtype = _T("UNKNOWN");
       }
    }
 
@@ -1351,7 +1352,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
          par = mail_newbody_parameter();
 
          String name = i->name;
-         if ( name.Lower() == "charset" )
+         if ( name.Lower() == _T("charset") )
          {
             if ( hasCharset )
             {
@@ -1362,8 +1363,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
             hasCharset = true;
          }
 
-         par->attribute = strdup(name);
-         par->value     = strdup(i->value);
+         par->attribute = strdup(wxConvertWX2MB(name));
+         par->value     = strdup(wxConvertWX2MB(i->value));
          par->next      = lastpar;
          lastpar = par;
       }
@@ -1377,7 +1378,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       {
          // plain text messages should be in US_ASCII as all clients should be
          // able to show them and some might complain [even] about iso8859-1
-         cs = "US-ASCII";
+         cs = _T("US-ASCII");
       }
       else // 8bit message
       {
@@ -1397,14 +1398,14 @@ SendMessageCC::AddPart(MimeType::Primary type,
       {
          par = mail_newbody_parameter();
          par->attribute = strdup("CHARSET");
-         par->value     = strdup(cs);
+         par->value     = strdup(wxConvertWX2MB(cs));
          par->next      = lastpar;
          lastpar = par;
       }
    }
 
    bdy->parameter = lastpar;
-   bdy->disposition.type = strdup(disposition);
+   bdy->disposition.type = strdup(wxConvertWX2MB(disposition));
    if ( dlist )
    {
       PARAMETER *lastpar = NULL,
@@ -1414,8 +1415,8 @@ SendMessageCC::AddPart(MimeType::Primary type,
       for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
          par = mail_newbody_parameter();
-         par->attribute = strdup(i->name);
-         par->value     = strdup(i->value);
+         par->attribute = strdup(wxConvertWX2MB(i->name));
+         par->value     = strdup(wxConvertWX2MB(i->value));
          par->next      = NULL;
          if(lastpar)
             lastpar->next = par;
@@ -1514,7 +1515,7 @@ void SendMessageCC::Preview(String *text)
 {
    String textTmp;
    WriteToString(textTmp);
-   MDialog_ShowText(m_frame, "Outgoing message text", textTmp, "SendPreview");
+   MDialog_ShowText(m_frame, _T("Outgoing message text"), textTmp, _T("SendPreview"));
 
    if ( text )
       *text = textTmp;
@@ -1551,7 +1552,7 @@ SendMessageCC::Send(int flags)
    // use authentification if the user name is specified
    if ( !m_UserName.empty() )
    {
-      server << "/user=\"" << m_UserName << '"';
+      server << _T("/user=\"") << m_UserName << _T('"');
       MailFolderCC::SetLoginData(m_UserName, m_Password);
    }
 
@@ -1587,7 +1588,7 @@ SendMessageCC::Send(int flags)
          {
             if ( useSSL != SSLSupport_TLSIfAvailable )
             {
-               ERRORMESSAGE(("SSL support is unavailable; try disabling SSL/TLS."));
+               ERRORMESSAGE((_T("SSL support is unavailable; try disabling SSL/TLS.")));
 
                return false;
             }
@@ -1709,8 +1710,8 @@ SendMessageCC::Send(int flags)
             lfOnly = strutil_enforceLF(lfOnly);
 
             // write to temp file:
-#if 0 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now
-            const char *filename = wxGetTempFileName("Mtemp");
+#if 1 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now (NB - maybe not already?)
+            const wxChar *filename = wxGetTempFileName(_T("Mtemp"));
 #else
             // tmpnam() is POSIX, so use it even if mk(s)temp() would be better
             // because here we have a race condition
@@ -1732,15 +1733,15 @@ SendMessageCC::Send(int flags)
                   if ( written == lfOnly.Length() )
                   {
                      String command;
-                     command.Printf("%s < '%s'; exec /bin/rm -f '%s'",
+                     command.Printf(_T("%s < '%s'; exec /bin/rm -f '%s'"),
                                     m_SendmailCmd.c_str(),
                                     filename, filename);
                      // HORRIBLE HACK: this should be `const char *' but wxExecute's
                      // prototype doesn't allow it...
-                     char *argv[4];
-                     argv[0] = (char *)"/bin/sh";
-                     argv[1] = (char *)"-c";
-                     argv[2] = (char *)command.c_str();
+                     wxChar *argv[4];
+                     argv[0] = (wxChar *)"/bin/sh";
+                     argv[1] = (wxChar *)"-c";
+                     argv[2] = (wxChar *)command.c_str();
                      argv[3] = 0;  // NULL
                      success = wxExecute(argv) != 0;
                   }
@@ -1758,7 +1759,7 @@ SendMessageCC::Send(int flags)
                   MDialog_Message(_("Message sent."),
                                   m_frame, // parent window
                                   MDIALOG_MSGTITLE,
-                                  "MailSentMessage");
+                                  _T("MailSentMessage"));
                }
             }
             else
@@ -1786,13 +1787,13 @@ SendMessageCC::Send(int flags)
       {
          case Prot_SMTP:
             success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
-            reply = stream->reply;
+            reply = wxConvertMB2WX(stream->reply);
             smtp_close (stream);
             break;
 
          case Prot_NNTP:
             success = nntp_mail (stream,m_Envelope,m_Body) != 0;
-            reply = stream->reply;
+            reply = wxConvertMB2WX(stream->reply);
             nntp_close (stream);
             break;
 
@@ -1811,7 +1812,7 @@ SendMessageCC::Send(int flags)
                                                     : _("Article posted."),
                             m_frame, // parent window
                             MDIALOG_MSGTITLE,
-                         "MailSentMessage");
+                            _T("MailSentMessage"));
          }
       }
       else // failed to send/post
@@ -1890,7 +1891,7 @@ SendMessageCC::WriteToString(String& output)
 
    if ( !WriteMessage(write_str_output, &output) )
    {
-      ERRORMESSAGE (("Can't write message to string."));
+      ERRORMESSAGE ((_T("Can't write message to string.")));
 
       return false;
    }
@@ -1906,7 +1907,7 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
 {
    // note that we have to repeat ios::out and binary below, otherwise gcc 3.0
    // refuses to compile it as it converts everything to int and then fails
-   ofstream ostr(filename.c_str(),
+   ofstream ostr(filename.fn_str(),
                  append ? ios::out | ios::binary
                         : ios::out | ios::binary | ios::trunc);
 
@@ -1979,7 +1980,7 @@ static long write_stream_output(void *stream, char *string)
 static long write_str_output(void *stream, char *string)
 {
    String *o = (String *)stream;
-   *o << string;
+   *o << wxConvertMB2WX(string);
    return 1;
 }
 

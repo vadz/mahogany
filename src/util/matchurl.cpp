@@ -81,7 +81,7 @@ public:
      This method does not need that computeBackArcs has been called.
      Keywords can be added between calls to this method.
     */
-   int scanAtStart(const char* toBeScanned);
+   int scanAtStart(const wxChar* toBeScanned);
 
    /** Scans the given string to find a keyword.
      Returns the starting position of the first
@@ -91,7 +91,7 @@ public:
      computeBackArcs must have been called before the
      first call to this function.
     */
-   int scan(const char* toBeScanned, int& lng) {
+   int scan(const wxChar* toBeScanned, int& lng) {
       return scan(toBeScanned, lng, _root);
    }
 
@@ -107,10 +107,10 @@ private:
    void addNewKeyword(const char* key,
          KeywordDetectorCell* current,
          int toBeAdded = 1);
-   int scanAtStart(const char* toBeScanned,
+   int scanAtStart(const wxChar* toBeScanned,
          KeywordDetectorCell* current,
          int longueurDejaVue, int lngDernierTrouve);
-   int scan(const char* toBeScanned, int& lng, KeywordDetectorCell* current);
+   int scan(const wxChar* toBeScanned, int& lng, KeywordDetectorCell* current);
 
    KeywordDetectorCell* _root;
 };
@@ -128,7 +128,7 @@ public:
      @param len the length of the match is returned here, no match => len = 0
      @return the position of the first match or -1 if nothing found
     */
-   int FindURL(const char *str, int& len);
+   int FindURL(const wxChar *str, int& len);
 };
 
 // ============================================================================
@@ -196,7 +196,7 @@ void KeywordDetector::addNewKeyword(const char* key,
 
 
 int
-KeywordDetector::scanAtStart(const char* toBeScanned,
+KeywordDetector::scanAtStart(const wxChar* toBeScanned,
                              KeywordDetectorCell* current,
                              int longueurDejaVue,
                              int lngDernierTrouve)
@@ -244,13 +244,13 @@ KeywordDetector::scanAtStart(const char* toBeScanned,
 }
 
 
-int KeywordDetector::scanAtStart(const char* toBeScanned)
+int KeywordDetector::scanAtStart(const wxChar* toBeScanned)
 {
    return scanAtStart(toBeScanned, _root, 0, 0);
 }
 
 
-int KeywordDetector::scan(const char* toBeScanned,
+int KeywordDetector::scan(const wxChar* toBeScanned,
                           int& lng, KeywordDetectorCell* current)
 {
    int currentPosition = 0;
@@ -494,7 +494,7 @@ URLDetector::URLDetector()
    be (almost) sure that the URL continues on the next line. OTOH, if we have
    the full extension here, chances are that the URL is not wrapped.
  */
-static bool CanBeWrapped(const char *p)
+static bool CanBeWrapped(const wxChar *p)
 {
    // first check: if the last character on the previous line is a slash,
    // suppose that it's the trailing slash at the end of URL.
@@ -507,21 +507,21 @@ static bool CanBeWrapped(const char *p)
 
    // we consider any alphanumeric string of 3 characters an extension
    // but we have separate arrays of known extensions of other lengths
-   static const char *extensions1 =
+   static const wxChar *extensions1 =
    {
       // this one is actually a string and not an array as like this we can use
       // strchr() below
-      "cCfhZ",
+      _T("cCfhZ"),
    };
 
-   static const char *extensions2[] =
+   static const wxChar *extensions2[] =
    {
-      "cc", "gz",
+      _T("cc"), _T("gz"),
    };
 
-   static const char *extensions4[] =
+   static const wxChar *extensions4[] =
    {
-      "html", "jpeg", "tiff",
+      _T("html"), _T("jpeg"), _T("tiff"),
    };
 
    if ( !IsAlnum(p[-1]) )
@@ -533,7 +533,7 @@ static bool CanBeWrapped(const char *p)
 
    if ( p[-2] == '.' )
    {
-      if ( strchr(extensions1, p[-1]) )
+      if ( wxStrchr(extensions1, p[-1]) )
       {
          // we seem to have a one letter extension at the end
          return false;
@@ -565,8 +565,8 @@ static bool CanBeWrapped(const char *p)
    {
       for ( size_t n = 0; n < WXSIZEOF(extensions4); n++ )
       {
-         const char * const ext = extensions4[n];
-         if ( strncmp(p - 3, ext, 3) == 0 && p[2] == ext[3] )
+         const wxChar * const ext = extensions4[n];
+         if ( wxStrncmp(p - 3, ext, 3) == 0 && p[2] == ext[3] )
          {
             // looks like a long extension got wrapped
             return true;
@@ -581,7 +581,7 @@ static bool CanBeWrapped(const char *p)
    {
       for ( size_t n = 0; n < WXSIZEOF(extensions4); n++ )
       {
-         if ( strncmp(p - 4, extensions4[n], 4) == 0 )
+         if ( wxStrncmp(p - 4, extensions4[n], 4) == 0 )
          {
             // line ends with an extension, shouldn't wrap normally
             return false;
@@ -601,7 +601,7 @@ static bool CanBeWrapped(const char *p)
    return IsAlnum(p[2]);
 }
 
-int URLDetector::FindURL(const char *text, int& len)
+int URLDetector::FindURL(const wxChar *text, int& len)
 {
    // offset of the current value of text from the initial one
    int offset = 0;
@@ -612,8 +612,8 @@ match:
       return -1;
 
    // the provisional start and end of the URL, will be changed below
-   const char *start = text + pos;
-   const char *p = start + len;
+   const wxChar *start = text + pos;
+   const wxChar *p = start + len;
 
    // there are 2 different cases: a mailto: URL or a mail address and
    // anything else which we need to treat differently
@@ -727,7 +727,7 @@ match:
          // the case... so restrict the wrapped URLs detection to the case
          // when they occur at the beginning of the line, possibly after some
          // white space as this is how people usually format them
-         const char *q = start;
+         const wxChar *q = start;
          while ( q >= text && *q != '\n' )
          {
             if ( !isspace(*q--) )

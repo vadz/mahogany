@@ -119,13 +119,13 @@ private:
 //    format - the ADB format shown in the ADB dialogs
 //    author - the module author/copyright string
 #define IMPLEMENT_ADB_MODULE(modint, cname, desc, format, Author)          \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, modint, "", "1.00")              \
-      MMODULE_PROP("author", Author)                                       \
-      MMODULE_PROP("adbformat", format)                                    \
+   MMODULE_BEGIN_IMPLEMENT(cname, _T(#cname), modint, _T(""), _T("1.00"))  \
+      MMODULE_PROP(_T("author"), Author)                                   \
+      MMODULE_PROP(_T("adbformat"), format)                                \
    MMODULE_END_IMPLEMENT(cname)                                            \
    const wxChar *cname::GetFormatDesc() const                              \
    {                                                                       \
-      return GetMModuleProperty(ms_properties, "adbformat");               \
+      return GetMModuleProperty(ms_properties, _T("adbformat"));           \
    }                                                                       \
    MModule *cname::Init(int /* version_major */,                           \
                         int /* version_minor */,                           \
@@ -145,7 +145,7 @@ private:
    static AdbModuleInfo ms_info
 
 #define IMPLEMENT_ADB_MODULE(modint, name, desc, format, author)           \
-   const wxChar *name::GetName() const { return #name; }                   \
+   const wxChar *name::GetName() const { return _T(#name); }               \
    const wxChar *name::GetFormatDesc() const { return _(format); }         \
    const wxChar *name::GetDescription() const { return _(desc); }          \
    AdbModule *ConstructorFor##name() { return new name; }                  \

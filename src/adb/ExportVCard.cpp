@@ -70,7 +70,7 @@ protected:
 IMPLEMENT_ADB_EXPORTER(AdbVCardExporter,
                        gettext_noop("vCard format address book exporter"),
                        gettext_noop("vCard (.vcf) file"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // AdbVCardExporter helpers
@@ -99,7 +99,7 @@ bool AdbVCardExporter::DoExportEntry(const AdbEntry& entry,
    {
       vcard.SetName(familyName,
                     firstName,
-                    "", // no middle name in the ADB
+                    _T(""), // no middle name in the ADB
                     prefix);
    }
    else
@@ -246,7 +246,7 @@ bool AdbVCardExporter::DoExportGroup(const AdbEntryGroup& group,
    {
       AdbEntryGroup *subgroup = group.GetGroup(names[nGroup]);
 
-      bool ok = DoExportGroup(*subgroup, dirname + '/' + names[nGroup]);
+      bool ok = DoExportGroup(*subgroup, dirname + DIR_SEPARATOR + names[nGroup]);
       subgroup->DecRef();
 
       if ( !ok )
@@ -262,7 +262,7 @@ bool AdbVCardExporter::DoExportGroup(const AdbEntryGroup& group,
       AdbEntry *entry = group.GetEntry(names[nEntry]);
 
       wxString filename;
-      filename << dirname << '/' << names[nEntry] << ".vcf";
+      filename << dirname << DIR_SEPARATOR << names[nEntry] << _T(".vcf");
       bool ok = DoExportEntry(*entry, filename);
       entry->DecRef();
 
@@ -316,7 +316,7 @@ bool AdbVCardExporter::Export(const AdbEntry& entry, const String& dest)
    if ( !filename )
    {
       filename = wxFileSelector(_("Choose the name for vCard file"),
-                                NULL, NULL, ".vcf",
+                                NULL, NULL, _T(".vcf"),
                                 _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
                                 wxSAVE | wxHIDE_READONLY);
       if ( !filename )

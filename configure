@@ -1230,7 +1230,7 @@ cat >> confdefs.h <<EOF
 EOF
 
 cat >> confdefs.h <<EOF
-#define M_OSINFO "`uname -s -r -m`"
+#define M_OSINFO _T("`uname -s -r -m`")
 EOF
 
 cat >> confdefs.h <<EOF

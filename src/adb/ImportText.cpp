@@ -53,7 +53,7 @@ public:
    AdbTextImporter();
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const { return ""; }
+   virtual String GetDefaultFilename() const { return _T(""); }
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
    virtual size_t GetEntryNames(const String& path,
@@ -67,7 +67,7 @@ public:
 protected:
    // split one field from the line, modify the pointer to point at the start
    // of the next field if !NULL
-   wxString SplitField(const char *start, const char **next = NULL) const;
+   wxString SplitField(const wxChar *start, const wxChar **next = NULL) const;
 
    // split the line of the input file into fields using our delimiter, return
    // the number of fields
@@ -76,11 +76,11 @@ protected:
    // try to find the correct delimiter by looking at the first few lines of
    // m_textfile - if we think we found one, return TRUE and set m_chDelimiter,
    // otherwise return FALSE
-   bool TestDelimiter(char chDelimiter);
+   bool TestDelimiter(wxChar chDelimiter);
 
 private:
    // the character delimiting different fields
-   char m_chDelimiter;
+   wxChar m_chDelimiter;
 
    // the textfile containing the text of the file last used by CanImport()
    wxTextFile m_textfile;
@@ -103,7 +103,7 @@ private:
 IMPLEMENT_ADB_IMPORTER(AdbTextImporter,
                        gettext_noop("Comma/TAB separated text format address book import module"),
                        gettext_noop("Comma/TAB separated values"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // AdbTextImporter
@@ -114,11 +114,11 @@ AdbTextImporter::AdbTextImporter()
    m_chDelimiter = 0;
 }
 
-wxString AdbTextImporter::SplitField(const char *start,
-                                     const char **next) const
+wxString AdbTextImporter::SplitField(const wxChar *start,
+                                     const wxChar **next) const
 {
    wxString curField;
-   const char *pc;
+   const wxChar *pc;
    for ( pc = start; ; pc++ )
    {
       if ( *pc == m_chDelimiter || !*pc )
@@ -164,7 +164,7 @@ size_t AdbTextImporter::SplitLine(const wxString& line,
 {
    fields->Empty();
 
-   const char *pc = line.c_str();
+   const wxChar *pc = line.c_str();
    for ( ;; )
    {
       wxString field = SplitField(pc, &pc);
@@ -178,7 +178,7 @@ size_t AdbTextImporter::SplitLine(const wxString& line,
    return fields->GetCount();
 }
 
-bool AdbTextImporter::TestDelimiter(char chDelimiter)
+bool AdbTextImporter::TestDelimiter(wxChar chDelimiter)
 {
    // test first few lines
    size_t nLine, nLines = wxMin(10, m_textfile.GetLineCount());
@@ -189,7 +189,7 @@ bool AdbTextImporter::TestDelimiter(char chDelimiter)
       // count the number of delimiter chars in this line
       size_t nDelimitersInLine = 0;
       wxString line = m_textfile[nLine];
-      for ( const char *pc = line.c_str(); *pc; pc++ )
+      for ( const wxChar *pc = line.c_str(); *pc; pc++ )
       {
          if ( *pc == chDelimiter )
             nDelimitersInLine++;

@@ -94,7 +94,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbMailrcImporter,
                        gettext_noop("Unix .mailrc file import module"),
                        gettext_noop("Unix .mailrc file"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 
 // ----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
                                              wxString *nickname,
                                              wxArrayString *addresses) const
 {
-   const char *pc = line.c_str() + lenAlias;
+   const wxChar *pc = line.c_str() + lenAlias;
    while ( isspace(*pc) )
       pc++;
 
@@ -213,7 +213,7 @@ String AdbMailrcImporter::GetDefaultFilename() const
 
 #ifdef OS_UNIX
    // the default location for Unix is $HOME/.mailrc
-   location = wxExpandEnvVars("$HOME/.mailrc");
+   location = wxExpandEnvVars(_T("$HOME/.mailrc"));
 
    if ( !wxFile::Exists(location) )
    {
@@ -254,10 +254,10 @@ bool AdbMailrcImporter::CanImport(const String& filename)
 
       line.Trim(FALSE /* from left */);
 
-      if ( line.StartsWith("alias ") ||
-           line.StartsWith("ignore ") ||
-           line.StartsWith("set ") ||
-           line.StartsWith("unset ") )
+      if ( line.StartsWith(_T("alias ")) ||
+           line.StartsWith(_T("ignore ")) ||
+           line.StartsWith(_T("set ")) ||
+           line.StartsWith(_T("unset ")) )
       {
          // good line, assume it's ok
          break;
@@ -307,7 +307,7 @@ AdbMailrcImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
 
       line.Trim(FALSE /* from left */);
 
-      if ( strncmp(line, "alias", lenAlias) != 0 )
+      if ( wxStrncmp(line, _T("alias"), lenAlias) != 0 )
       {
          // we're only interested in lines starting with "alias"
          continue;

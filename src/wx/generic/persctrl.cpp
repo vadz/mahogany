@@ -174,7 +174,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // don't allocate memory for static objects
-wxString wxPControls::ms_pathPrefix = "";
+wxString wxPControls::ms_pathPrefix = _T("");
 
 // ----------------------------------------------------------------------------
 // wxPHelper
@@ -481,7 +481,7 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
         realConfigPath += '/';
     }
 
-    m_persist = new wxPHelper(realConfigPath, "", config);
+    m_persist = new wxPHelper(realConfigPath, _T(""), config);
     m_countSaveMax = ms_countSaveDefault;
 
     RestoreStrings();
@@ -504,7 +504,7 @@ bool wxPTextEntry::Create(const wxString& configPath,
                           wxConfigBase *config)
 {
    m_persist->SetConfig(config);
-   m_persist->SetPath(configPath, "");
+   m_persist->SetPath(configPath, _T(""));
 
    if ( wxComboBox::Create(parent, id, value, pos, size, style) ) {
        RestoreStrings();
@@ -525,7 +525,7 @@ void wxPTextEntry::SaveSettings()
         // save it compare later with other strings
         wxString text = GetValue();
         if ( !text.empty() ) {
-            config->Write("0", text);
+            config->Write(_T("0"), text);
         }
 
         size_t count = (size_t)Number();
@@ -542,7 +542,7 @@ void wxPTextEntry::SaveSettings()
         for ( size_t n = 0; n < count; n++ ) {
             value = GetString(n);
             if ( value != text ) {
-                key.Printf("%lu", (unsigned long)numKey++);
+                key.Printf(_T("%lu"), (unsigned long)numKey++);
                 config->Write(key, value);
             }
             //else: don't store duplicates
@@ -560,7 +560,7 @@ void wxPTextEntry::RestoreStrings()
         // read them all
         wxString key, val, text;
         for ( size_t n = 0; ; n++ ) {
-            key.Printf("%lu", (unsigned long)n);
+            key.Printf(_T("%lu"), (unsigned long)n);
             if ( !config->HasEntry(key) )
                 break;
             val = config->Read(key);
@@ -585,7 +585,7 @@ void wxPTextEntry::SetConfigObject(wxConfigBase *config)
 
 void wxPTextEntry::SetConfigPath(const wxString& path)
 {
-    m_persist->SetPath(path, "");
+    m_persist->SetPath(path, _T(""));
 }
 
 // ----------------------------------------------------------------------------
@@ -1950,15 +1950,15 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
 
     if ( configPath[0u] != '/' ) {
         // prepend some common prefix
-        ourPath = "FilePrompts/";
+        ourPath = _T("FilePrompts/");
     }
     //else: absolute path - use as is
 
     ourPath += configPath.BeforeLast('/');
     configValueFile = configPath.AfterLast('/');
-    configValuePath << configValueFile << "Path";
+    configValuePath << configValueFile << _T("Path");
 
-    wxPHelper persist(ourPath, "", config);
+    wxPHelper persist(ourPath, _T(""), config);
 
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();

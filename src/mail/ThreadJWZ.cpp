@@ -64,7 +64,7 @@
 #define MFCMN_INDENT2_MARKER   ((size_t)-2)
 
 /// Used for wxLogTrace calls
-#define TRACE_JWZ "jwz"
+#define TRACE_JWZ _T("jwz")
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -442,7 +442,7 @@ String Threadable::messageThreadID() const
    that->m_id = new String;
 
    // Scan the provided id to remove the garbage
-   const char *s = m_hi->GetId().c_str();
+   const wxChar *s = m_hi->GetId().c_str();
 
    enum State {
       notInRef,
@@ -482,7 +482,7 @@ String Threadable::messageThreadID() const
    }
 
    if (that->m_id->empty()) {
-      *that->m_id = String("<emptyId:") << (int)this << ">";
+      *that->m_id = String(_T("<emptyId:")) << (int)this << _T(">");
    }
 
    return *that->m_id;
@@ -518,7 +518,7 @@ kbStringList *Threadable::messageThreadReferences() const
    if (refs.empty())
       return tmp;
 
-   const char *s = refs.c_str();
+   const wxChar *s = refs.c_str();
 
    enum State {
       notInRef,
@@ -1108,7 +1108,7 @@ void Threader::add(HASHTAB *hTable, const String &str, ThreadContainer *containe
    // XNOFIXME: Is it possible to 'lock' the string until the hash-table
    // is destroyed ?
    char *s = new char[str.Len()+1];
-   strcpy(s, str.c_str());
+   strcpy(s, wxConvertWX2MB(str.c_str()));
    hash_add(hTable, s, container, 0);
 }
 
@@ -1153,7 +1153,7 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    size_t thCount = 0;
    for (; th != 0; th = th->getNext())
    {
-      VERIFY(th->getChild() == 0, "Bad input list in Threader::thread()");
+      VERIFY(th->getChild() == 0, _T("Bad input list in Threader::thread()"));
       thCount++;
    }
 
@@ -1173,13 +1173,13 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    //  - Build their parent/child relations
    for (th = threadableRoot; th != 0; th = th->getNext())
    {
-      VERIFY(th->getIndex() >= 0, "Negative index in Threader::thread()");
-      VERIFY(th->getIndex() < thCount, "Too big in Threader::thread()");
+      VERIFY(th->getIndex() >= 0, _T("Negative index in Threader::thread()"));
+      VERIFY(th->getIndex() < thCount, _T("Too big in Threader::thread()"));
       // As things are now, dummy messages won't get past the algorithm
       // and won't be displayed. Thus we should not get them back when
       // re-threading this folder.
       // When this changes, we will have to take care to skip them.
-      VERIFY(!th->isDummy(), "Dummy message in Threader::thread()");
+      VERIFY(!th->isDummy(), _T("Dummy message in Threader::thread()"));
       buildContainer(th);
    }
 
@@ -1265,7 +1265,7 @@ void Threader::buildContainer(Threadable *th)
          // This must be because we have two messages with
          // the same id. Let's give a new id to this message,
          // and create a container for it.
-         id = String("<bogusId:") << m_bogusIdCount++ << ">";
+         id = String(_T("<bogusId:")) << m_bogusIdCount++ << _T(">");
          container = 0;
       }
    }
@@ -1754,7 +1754,7 @@ size_t Threader::collectSubjects(HASHTAB *subjectTable,
          depth++;
          count += collectSubjects(subjectTable, c, true);
          depth--;
-         VERIFY(depth >= 0, "Negative recursion depth in Threader::collectSubjects()");
+         VERIFY(depth >= 0, _T("Negative recursion depth in Threader::collectSubjects()"));
       }
    }
 
@@ -1827,7 +1827,7 @@ void Threader::breakThreads(ThreadContainer* c)
       depth++;
       breakThreads(kid);
       depth--;
-      VERIFY(depth >= 0, "Negative recursion depth in Threader::breakThreads()");
+      VERIFY(depth >= 0, _T("Negative recursion depth in Threader::breakThreads()"));
 
       kid = next;
    }

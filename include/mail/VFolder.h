@@ -51,7 +51,7 @@ public:
 
    virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const;
 
-   virtual wxChar GetFolderDelimiter() const;
+   virtual char GetFolderDelimiter() const;
 
    //@}
 
@@ -101,9 +101,9 @@ public:
                                     MsgnoType last = 0) const;
 
    virtual void ListFolders(class ASMailFolder *asmf,
-                            const String &pattern = "*",
+                            const String &pattern = _T("*"),
                             bool subscribed_only = false,
-                            const String &reference = "",
+                            const String &reference = _T(""),
                             UserData ud = 0,
                             Ticket ticket = ILLEGAL_TICKET);
    //@}

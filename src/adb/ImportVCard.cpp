@@ -43,7 +43,7 @@ public:
    virtual ~AdbVCardImporter() { DeleteCards(); }
 
    // implement base class pure virtuals
-   virtual String GetDefaultFilename() const { return ""; }
+   virtual String GetDefaultFilename() const { return _T(""); }
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
    virtual size_t GetEntryNames(const String& path,
@@ -82,7 +82,7 @@ private:
 IMPLEMENT_ADB_IMPORTER(AdbVCardImporter,
                        gettext_noop("vCard address book import module"),
                        gettext_noop("vCard (.vcf) files"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // AdbVCardImporter
@@ -220,7 +220,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    {
       // merge them together
       wxString orgfull;
-      orgfull << org << "; " << dept;
+      orgfull << org << _T("; ") << dept;
       entry->SetField(AdbField_Organization, orgfull);
    }
 

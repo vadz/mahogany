@@ -58,12 +58,12 @@ public:
    virtual void SetSubject(const String &subject);
 
    virtual void SetAddresses(const String &To,
-                             const String &CC = "",
-                             const String &BCC = "");
+                             const String &CC = _T(""),
+                             const String &BCC = _T(""));
 
    virtual void SetFrom(const String &from,
-                        const String &replyaddress = "",
-                        const String &sender = "");
+                        const String &replyaddress = _T(""),
+                        const String &sender = _T(""));
 
    virtual void SetNewsgroups(const String &groups);
 
@@ -88,7 +88,7 @@ public:
    virtual void AddPart(MimeType::Primary type,
                         const void *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
-                        const String &disposition = "INLINE",
+                        const String &disposition = _T("INLINE"),
                         MessageParameterList const *dlist = NULL,
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM);

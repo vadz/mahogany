@@ -84,12 +84,12 @@ extern "C" {
    SSL_DEF2(void, name, args, params, (void))
 
 #define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name); \
+      stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(wxConvertMB2WX(#name)); \
       if ( !stub_##name ) \
          goto error
 
 #define CRYPTO_LOOKUP(name) \
-      stub_##name = (name##_TYPE) gs_dllCrypto.GetSymbol(#name); \
+      stub_##name = (name##_TYPE) gs_dllCrypto.GetSymbol(wxConvertMB2WX(#name)); \
       if ( !stub_##name ) \
          goto error
 
@@ -258,8 +258,8 @@ error:
            "if you have these libraries in non default location"
            " or if they have some other names on your system."),
          NULL,
-         "SSL tip",
-         "SSLLibTip"
+         _T("SSL tip"),
+         _T("SSLLibTip")
       );
    }
 

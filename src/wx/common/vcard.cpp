@@ -44,7 +44,7 @@
 
 // - required by vcard parser:
 extern "C" {
-void Parse_Debug(const char * WXUNUSED_UNLESS_DEBUG(s))
+void Parse_Debug(const wxChar * WXUNUSED_UNLESS_DEBUG(s))
 {
 #ifdef DEBUG
     wxLogDebug(s);
@@ -94,7 +94,7 @@ wxVCardObject::wxVCardObject(wxVCardObject *parent, const wxString& name)
 {
     if ( parent )
     {
-        m_vObj = addProp(parent->m_vObj, name);
+        m_vObj = addProp(parent->m_vObj, wxConvertWX2MB(name));
     }
     else
     {
@@ -120,8 +120,10 @@ wxVCard::~wxVCard()
 /* static */ wxArrayCards wxVCard::CreateFromFile(const wxString& filename)
 {
     wxArrayCards vcards;
+    char *filename1 = new char[strlen(filename.fn_str())+1];
+    strcpy(filename1, filename.fn_str());
 
-    VObject *vObj = Parse_MIME_FromFileName((char *)filename.mb_str());
+    VObject *vObj = Parse_MIME_FromFileName(filename1);
     if ( !vObj )
     {
         wxLogError(_("The file '%s' doesn't contain any vCard objects."),
@@ -131,7 +133,7 @@ wxVCard::~wxVCard()
     {
         while ( vObj )
         {
-            if ( wxStricmp(vObjectName(vObj), VCCardProp) == 0 )
+            if ( stricmp(vObjectName(vObj), VCCardProp) == 0 )
             {
                 vcards.Add(new wxVCard(vObj));
             }
@@ -140,7 +142,7 @@ wxVCard::~wxVCard()
             vObj = nextVObjectInList(vObj);
         }
     }
-
+    delete [] filename1;
     return vcards;
 }
 
@@ -171,7 +173,7 @@ wxVCard::wxVCard(const wxString& filename)
 
 wxString wxVCardObject::GetName() const
 {
-    return vObjectName(m_vObj);
+    return wxConvertMB2WX(vObjectName(m_vObj));
 }
 
 wxVCardObject::Type wxVCardObject::GetType() const
@@ -182,7 +184,7 @@ wxVCardObject::Type wxVCardObject::GetType() const
 
 void wxVCardObject::SetValue(const wxString& val)
 {
-    setVObjectStringZValue(m_vObj, val);
+    setVObjectStringZValue(m_vObj, wxConvertWX2MB(val));
 }
 
 void wxVCardObject::SetValue(unsigned int val)
@@ -214,7 +216,7 @@ bool wxVCardObject::GetValue(wxString *val) const
         return FALSE;
 
     char *s = fakeCString(vObjectUStringZValue(m_vObj));
-    *val = s;
+    *val = wxConvertMB2WX(s);
     deleteStr(s);
 #endif // 0/1
 
@@ -244,7 +246,7 @@ bool wxVCardObject::GetValue(unsigned long *val) const
 bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
 {
     wxString value;
-    wxVCardObject *vcObj = GetProperty(name);
+    wxVCardObject *vcObj = GetProperty(wxConvertMB2WX(name));
     if ( vcObj )
     {
         vcObj->GetValue(val);
@@ -298,7 +300,7 @@ wxVCardObject *wxVCardObject::GetNextProp(void **cookie) const
 
 wxVCardObject *wxVCardObject::GetProperty(const wxString& name) const
 {
-    VObject *vObj = isAPropertyOf(m_vObj, name);
+    VObject *vObj = isAPropertyOf(m_vObj, wxConvertWX2MB(name));
 
     return vObj ? new wxVCardObject(vObj) : NULL;
 }
@@ -325,7 +327,7 @@ VObject *wxVCard::GetNextPropOfName(const char *name, void **cookie) const
         while ( moreIteration(iter) )
         {
             VObject *vObj = nextVObject(iter);
-            if ( wxStricmp(vObjectName(vObj), name) == 0 )
+            if ( stricmp(vObjectName(vObj), name) == 0 )
             {
                 // found one with correct name
                 return vObj;
@@ -417,7 +419,7 @@ bool wxVCard::GetName(wxString *familyName,
                       wxString *namePrefix,
                       wxString *nameSuffix) const
 {
-    wxVCardObject *vcobjName = GetProperty(VCNameProp);
+    wxVCardObject *vcobjName = GetProperty(wxConvertMB2WX(VCNameProp));
     if ( !vcobjName )
         return FALSE;
 
@@ -437,7 +439,7 @@ bool wxVCard::GetName(wxString *familyName,
 
 bool wxVCard::GetOrganization(wxString *name, wxString *unit) const
 {
-    wxVCardObject *vcobjOrg = GetProperty(VCOrgProp);
+    wxVCardObject *vcobjOrg = GetProperty(wxConvertMB2WX(VCOrgProp));
     if ( !vcobjOrg )
         return FALSE;
 
@@ -473,12 +475,12 @@ bool wxVCard::GetBirthDay(wxDateTime *datetime) const
 
 void wxVCardObject::AddProperty(const wxString& name)
 {
-    (void)addProp(m_vObj, name);
+    (void)addProp(m_vObj, wxConvertWX2MB(name));
 }
 
 void wxVCardObject::AddProperty(const wxString& name, const wxString& value)
 {
-    VObject *vObj = addPropValue(m_vObj, name, value);
+    VObject *vObj = addPropValue(m_vObj, wxConvertWX2MB(name), wxConvertWX2MB(value));
 
     // mark multiline properties as being encoded in QP
     if ( value.Find(_T('\n')) != wxNOT_FOUND )
@@ -489,7 +491,7 @@ void wxVCardObject::AddProperty(const wxString& name, const wxString& value)
 
 void wxVCardObject::SetProperty(const wxString& name, const wxString& value)
 {
-    VObject *vObj = isAPropertyOf(m_vObj, name);
+    VObject *vObj = isAPropertyOf(m_vObj, wxConvertWX2MB(name));
     if ( vObj )
     {
         wxVCardObject(vObj).SetValue(value);
@@ -502,7 +504,7 @@ void wxVCardObject::SetProperty(const wxString& name, const wxString& value)
 
 bool wxVCardObject::DeleteProperty(const wxString& name)
 {
-    VObject *vObj = isAPropertyOf(m_vObj, name);
+    VObject *vObj = isAPropertyOf(m_vObj, wxConvertWX2MB(name));
     if ( !vObj )
         return FALSE;
 
@@ -516,22 +518,22 @@ bool wxVCardObject::DeleteProperty(const wxString& name)
 
 void wxVCard::ClearAddresses()
 {
-    ClearAllProps(VCAdrProp);
+    ClearAllProps(wxConvertMB2WX(VCAdrProp));
 }
 
 void wxVCard::ClearAddressLabels()
 {
-    ClearAllProps(VCDeliveryLabelProp);
+    ClearAllProps(wxConvertMB2WX(VCDeliveryLabelProp));
 }
 
 void wxVCard::ClearPhoneNumbers()
 {
-    ClearAllProps(VCTelephoneProp);
+    ClearAllProps(wxConvertMB2WX(VCTelephoneProp));
 }
 
 void wxVCard::ClearEMails()
 {
-    ClearAllProps(VCEmailAddressProp);
+    ClearAllProps(wxConvertMB2WX(VCEmailAddressProp));
 }
 
 void wxVCard::ClearAllProps(const wxString& name)
@@ -546,7 +548,7 @@ void wxVCard::ClearAllProps(const wxString& name)
 
 void wxVCard::SetFullName(const wxString& fullName)
 {
-    SetProperty(VCFullNameProp, fullName);
+    SetProperty(wxConvertMB2WX(VCFullNameProp), fullName);
 }
 
 void wxVCard::SetName(const wxString& familyName,
@@ -560,25 +562,25 @@ void wxVCard::SetName(const wxString& familyName,
         prop = addProp(m_vObj, VCNameProp);
 
     if ( !!familyName )
-        addPropValue(prop, VCFamilyNameProp, familyName);
+        addPropValue(prop, VCFamilyNameProp, wxConvertWX2MB(familyName));
     if ( !!givenName )
-        addPropValue(prop, VCGivenNameProp, givenName);
+        addPropValue(prop, VCGivenNameProp, wxConvertWX2MB(givenName));
     if ( !!additionalNames )
-        addPropValue(prop, VCAdditionalNamesProp, additionalNames);
+        addPropValue(prop, VCAdditionalNamesProp, wxConvertWX2MB(additionalNames));
     if ( !!namePrefix )
-        addPropValue(prop, VCNamePrefixesProp, namePrefix);
+        addPropValue(prop, VCNamePrefixesProp, wxConvertWX2MB(namePrefix));
     if ( !!nameSuffix )
-        addPropValue(prop, VCNameSuffixesProp, nameSuffix);
+        addPropValue(prop, VCNameSuffixesProp, wxConvertWX2MB(nameSuffix));
 }
 
 void wxVCard::SetTitle(const wxString& title)
 {
-    SetProperty(VCTitleProp, title);
+    SetProperty(wxConvertMB2WX(VCTitleProp), title);
 }
 
 void wxVCard::SetBusinessRole(const wxString& role)
 {
-    SetProperty(VCBusinessRoleProp, role);
+    SetProperty(wxConvertMB2WX(VCBusinessRoleProp), role);
 }
 
 void wxVCard::SetOrganization(const wxString& name,
@@ -589,29 +591,29 @@ void wxVCard::SetOrganization(const wxString& name,
         prop = addProp(m_vObj, VCOrgProp);
 
     if ( !!name )
-        addPropValue(prop, VCOrgNameProp, name);
+        addPropValue(prop, VCOrgNameProp, wxConvertWX2MB(name));
     if ( !!unit )
-        addPropValue(prop, VCOrgUnitProp, unit);
+        addPropValue(prop, VCOrgUnitProp, wxConvertWX2MB(unit));
 }
 
 void wxVCard::SetComment(const wxString& comment)
 {
-    SetProperty(VCCommentProp, comment);
+    SetProperty(wxConvertMB2WX(VCCommentProp), comment);
 }
 
 void wxVCard::SetURL(const wxString& url)
 {
-    SetProperty(VCURLProp, url);
+    SetProperty(wxConvertMB2WX(VCURLProp), url);
 }
 
 void wxVCard::SetUID(const wxString& uid)
 {
-    SetProperty(VCUniqueStringProp, uid);
+    SetProperty(wxConvertMB2WX(VCUniqueStringProp), uid);
 }
 
 void wxVCard::SetVersion(const wxString& version)
 {
-    SetProperty(VCVersionProp, version);
+    SetProperty(wxConvertMB2WX(VCVersionProp), version);
 }
 
 // ----------------------------------------------------------------------------
@@ -620,7 +622,7 @@ void wxVCard::SetVersion(const wxString& version)
 
 void wxVCard::SetBirthDay(const wxDateTime& datetime)
 {
-    SetProperty(VCBirthDateProp, datetime.FormatISODate());
+    SetProperty(wxConvertMB2WX(VCBirthDateProp), datetime.FormatISODate());
 }
 
 void wxVCard::AddAddress(const wxString& postoffice,
@@ -634,26 +636,26 @@ void wxVCard::AddAddress(const wxString& postoffice,
 {
     VObject *vObj = addProp(m_vObj, VCAdrProp);
     if ( !!postoffice )
-        addPropValue(vObj, VCPostalBoxProp, postoffice);
+        addPropValue(vObj, VCPostalBoxProp, wxConvertWX2MB(postoffice));
     if ( !!extaddr )
-        addPropValue(vObj, VCExtAddressProp, extaddr);
+        addPropValue(vObj, VCExtAddressProp, wxConvertWX2MB(extaddr));
     if ( !!street )
-        addPropValue(vObj, VCStreetAddressProp, street);
+        addPropValue(vObj, VCStreetAddressProp, wxConvertWX2MB(street));
     if ( !!city )
-        addPropValue(vObj, VCCityProp, city);
+        addPropValue(vObj, VCCityProp, wxConvertWX2MB(city));
     if ( !!region )
-        addPropValue(vObj, VCRegionProp, region);
+        addPropValue(vObj, VCRegionProp, wxConvertWX2MB(region));
     if ( !!postalcode )
-        addPropValue(vObj, VCPostalCodeProp, postalcode);
+        addPropValue(vObj, VCPostalCodeProp, wxConvertWX2MB(postalcode));
     if ( !!country )
-        addPropValue(vObj, VCCountryNameProp, country);
+        addPropValue(vObj, VCCountryNameProp, wxConvertWX2MB(country));
 
     wxVCardAddrOrLabel::SetFlags(vObj, flags);
 }
 
 void wxVCard::AddAddressLabel(const wxString& label, int flags)
 {
-    VObject *vObj = addPropValue(m_vObj, VCDeliveryLabelProp, label);
+    VObject *vObj = addPropValue(m_vObj, VCDeliveryLabelProp, wxConvertWX2MB(label));
     addProp(vObj, VCQuotedPrintableProp);
 
     wxVCardAddrOrLabel::SetFlags(vObj, flags);
@@ -661,7 +663,7 @@ void wxVCard::AddAddressLabel(const wxString& label, int flags)
 
 void wxVCard::AddPhoneNumber(const wxString& phone, int flags)
 {
-    VObject *vObj = addPropValue(m_vObj, VCTelephoneProp, phone);
+    VObject *vObj = addPropValue(m_vObj, VCTelephoneProp, wxConvertWX2MB(phone));
 
     wxVCardPhoneNumber::SetFlags(vObj, flags);
 }
@@ -670,7 +672,7 @@ void
 wxVCard::AddEMail(const wxString& email,
                   wxVCardEMail::Type WXUNUSED_UNLESS_DEBUG(type))
 {
-    addPropValue(m_vObj, VCEmailAddressProp, email);
+    addPropValue(m_vObj, VCEmailAddressProp, wxConvertWX2MB(email));
 
     wxASSERT_MSG( type == wxVCardEMail::Internet,
                   _T("support for other email types not implemented") );
@@ -684,7 +686,7 @@ wxVCard::AddEMail(const wxString& email,
 wxString wxVCardObject::Write() const
 {
     char* p = writeMemVObject(NULL, 0, m_vObj);
-    wxString s = p;
+    wxString s = wxConvertMB2WX(p);
     free(p);
 
     return s;
@@ -693,16 +695,24 @@ wxString wxVCardObject::Write() const
 // Write() to a file
 bool wxVCardObject::Write(const wxString& filename) const
 {
-    writeVObjectToFile((char *)filename.mb_str(), m_vObj);
+    char *filename1 = new char[strlen(filename.fn_str())+1];
+    strcpy(filename1, filename.fn_str());
 
+    writeVObjectToFile(filename1, m_vObj);
+
+    delete [] filename1;
     return TRUE; // writeVObjectToFile() is void @#$@#$@!!
 }
 
 // write out the internal representation
 void wxVCardObject::Dump(const wxString& filename)
 {
+    char *filename1 = new char[strlen(filename.fn_str())+1];
+    strcpy(filename1, filename.fn_str());
+
     // it is ok for m_vObj to be NULL
-    printVObjectToFile((char *)filename.mb_str(), m_vObj);
+    printVObjectToFile(filename1, m_vObj);
+    delete [] filename1;
 }
 
 // ============================================================================
@@ -711,12 +721,12 @@ void wxVCardObject::Dump(const wxString& filename)
 
 // a macro which allows to abbreviate GetFlags() methods: to use it, you must
 // have local variables like in wxVCardAddrOrLabel::GetFlags() below
-#define CHECK_FLAG(propname, flag)  \
-    prop = GetProperty(propname);   \
-    if ( prop )                     \
-    {                               \
-        flags |= flag;              \
-        delete prop;                \
+#define CHECK_FLAG(propname, flag)                  \
+    prop = GetProperty(wxConvertMB2WX(propname));   \
+    if ( prop )                                     \
+    {                                               \
+        flags |= flag;                              \
+        delete prop;                                \
     }
 
     // anothero ne to set flags in vObject
@@ -768,7 +778,7 @@ int wxVCardAddrOrLabel::GetFlags() const
 wxVCardAddress::wxVCardAddress(VObject *vObj)
               : wxVCardAddrOrLabel(vObj)
 {
-    wxASSERT_MSG( GetName() == VCAdrProp, _T("this is not a vCard address") );
+    wxASSERT_MSG( GetName() == wxConvertMB2WX(VCAdrProp), _T("this is not a vCard address") );
 }
 
 wxString wxVCardAddress::GetPropValue(const wxString& name) const
@@ -786,37 +796,37 @@ wxString wxVCardAddress::GetPropValue(const wxString& name) const
 
 wxString wxVCardAddress::GetPostOffice() const
 {
-    return GetPropValue(VCPostalBoxProp);
+    return GetPropValue(wxConvertMB2WX(VCPostalBoxProp));
 }
 
 wxString wxVCardAddress::GetExtAddress() const
 {
-    return GetPropValue(VCExtAddressProp);
+    return GetPropValue(wxConvertMB2WX(VCExtAddressProp));
 }
 
 wxString wxVCardAddress::GetStreet() const
 {
-    return GetPropValue(VCStreetAddressProp);
+    return GetPropValue(wxConvertMB2WX(VCStreetAddressProp));
 }
 
 wxString wxVCardAddress::GetLocality() const
 {
-    return GetPropValue(VCCityProp);
+    return GetPropValue(wxConvertMB2WX(VCCityProp));
 }
 
 wxString wxVCardAddress::GetRegion() const
 {
-    return GetPropValue(VCRegionProp);
+    return GetPropValue(wxConvertMB2WX(VCRegionProp));
 }
 
 wxString wxVCardAddress::GetPostalCode() const
 {
-    return GetPropValue(VCPostalCodeProp);
+    return GetPropValue(wxConvertMB2WX(VCPostalCodeProp));
 }
 
 wxString wxVCardAddress::GetCountry() const
 {
-    return GetPropValue(VCCountryNameProp);
+    return GetPropValue(wxConvertMB2WX(VCCountryNameProp));
 }
 
 // ----------------------------------------------------------------------------
@@ -826,7 +836,7 @@ wxString wxVCardAddress::GetCountry() const
 wxVCardAddressLabel::wxVCardAddressLabel(VObject *vObj)
                    : wxVCardAddrOrLabel(vObj)
 {
-    wxASSERT_MSG( GetName() == VCDeliveryLabelProp,
+    wxASSERT_MSG( GetName() == wxConvertMB2WX(VCDeliveryLabelProp),
                   _T("this is not a vCard address label") );
 }
 
@@ -837,7 +847,7 @@ wxVCardAddressLabel::wxVCardAddressLabel(VObject *vObj)
 wxVCardPhoneNumber::wxVCardPhoneNumber(VObject *vObj)
                   : wxVCardObject(vObj)
 {
-    wxASSERT_MSG( GetName() == VCTelephoneProp,
+    wxASSERT_MSG( GetName() == wxConvertMB2WX(VCTelephoneProp),
                   _T("this is not a vCard telephone number") );
 }
 
@@ -893,7 +903,7 @@ int wxVCardPhoneNumber::GetFlags() const
 wxVCardEMail::wxVCardEMail(VObject *vObj)
             : wxVCardObject(vObj)
 {
-    wxASSERT_MSG( GetName() == VCEmailAddressProp,
+    wxASSERT_MSG( GetName() == wxConvertMB2WX(VCEmailAddressProp),
                   _T("this is not a vCard email address") );
 }
 

@@ -28,34 +28,34 @@ bool sysutil_compare_filenames(String const &file1, String const
    struct stat statbuf1, statbuf2;
    int rc;
 
-   rc = stat(file1, &statbuf1);
+   rc = wxStat(file1, &statbuf1);
    if(rc != 0)
       if(rc == ENOENT)
       {
          // using all flags but x, will be modified by umask anyway
-         int fd = creat(file1,S_IWUSR|S_IRUSR|S_IWGRP|S_IWUSR|S_IWOTH|S_IROTH);
+         int fd = creat(file1.fn_str(), S_IWUSR|S_IRUSR|S_IWGRP|S_IWUSR|S_IWOTH|S_IROTH);
          if(fd == -1)
             return strutil_compare_filenames(file1, file2);
          close(fd); //    created the empty file
-         rc = stat(file1, &statbuf1);
-         unlink(file1);
+         rc = wxStat(file1, &statbuf1);
+         unlink(file1.fn_str());
          if(rc != 0)
             return strutil_compare_filenames(file1, file2);
       }
       else
             return strutil_compare_filenames(file1, file2);
    
-   rc = stat(file2, &statbuf2);
+   rc = wxStat(file2, &statbuf2);
    if(rc != 0)
       if(rc == ENOENT)
       {
          // using all flags but x, will be modified by umask anyway
-         int fd = creat(file2,S_IWUSR|S_IRUSR|S_IWGRP|S_IWUSR|S_IWOTH|S_IROTH);
+         int fd = creat(file2.fn_str(), S_IWUSR|S_IRUSR|S_IWGRP|S_IWUSR|S_IWOTH|S_IROTH);
          if(fd == -1)
             return strutil_compare_filenames(file1, file2);
          close(fd); //    created the empty file
-         rc = stat(file2, &statbuf2);
-         unlink(file2);
+         rc = wxStat(file2, &statbuf2);
+         unlink(file2.fn_str());
          if(rc != 0)
             return strutil_compare_filenames(file1, file2);
       }

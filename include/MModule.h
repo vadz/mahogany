@@ -51,32 +51,32 @@ class MInterface;
 // ----------------------------------------------------------------------------
 
 // the name of the module
-#define MMODULE_NAME_PROP "name"
+#define MMODULE_NAME_PROP _T("name")
 
 // the short description of the module shown in the folder dialog (module won't
 // be shown there if it is empty)
-#define MMODULE_DESC_PROP "desc"
+#define MMODULE_DESC_PROP _T("desc")
 
 // the long (multiline) description of the module
-#define MMODULE_DESCRIPTION_PROP "description"
+#define MMODULE_DESCRIPTION_PROP _T("description")
 
 // the interface the module implements (may be empty)
-#define MMODULE_INTERFACE_PROP "interface"
+#define MMODULE_INTERFACE_PROP _T("interface")
 
 // the version of the module
-#define MMODULE_VERSION_PROP "version"
+#define MMODULE_VERSION_PROP _T("version")
 
 // author/copyright string
-#define MMODULE_AUTHOR_PROP "author"
+#define MMODULE_AUTHOR_PROP _T("author")
 
 /**@name Mahogany Module management classes. */
 //@{
 
 /// Name of the function which initialised each DLL
-#define MMODULE_INITMODULE_FUNCTION "InitMModule"
+#define MMODULE_INITMODULE_FUNCTION _T("InitMModule")
 
 /// Name of the function used to retrieve info about the module
-#define MMODULE_GETPROPERTY_FUNCTION "GetMModuleProperties"
+#define MMODULE_GETPROPERTY_FUNCTION _T("GetMModuleProperties")
 
 // ----------------------------------------------------------------------------
 // constants

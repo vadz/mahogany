@@ -75,7 +75,7 @@ protected:
 IMPLEMENT_ADB_IMPORTER(AdbXFMailImporter,
                        gettext_noop("XFMail address book import module"),
                        gettext_noop("XFMail address book"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // AdbXFMailImporter
@@ -87,7 +87,7 @@ String AdbXFMailImporter::GetDefaultFilename() const
 
 #ifdef OS_UNIX
    // the default location for Unix is $HOME/.xfmail/.xfbook
-   location = wxExpandEnvVars("$HOME/.xfmail/.xfbook");
+   location = wxExpandEnvVars(_T("$HOME/.xfmail/.xfbook"));
 
    if ( !wxFile::Exists(location) )
    {
@@ -112,7 +112,7 @@ bool AdbXFMailImporter::CanImport(const String& filename)
    // files named .xfbook.<NAME> (and .xfbook for the default ADB)
    wxString name = filename.AfterLast('/');
 
-   return strncmp(name, ".xfbook", 7) == 0;
+   return wxStrncmp(name, _T(".xfbook"), 7) == 0;
 }
 
 bool AdbXFMailImporter::StartImport(const String& filename)
@@ -172,7 +172,7 @@ AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
          // the format is ' nickname <address>' and the spaces are *not*
          // escaped
          wxString nickname;
-         const char *pc = line;
+         const wxChar *pc = line;
 
          // skip the spaces in the start of line
          while ( isspace(*pc) )

@@ -138,7 +138,7 @@ END_EVENT_TABLE()
 IMPLEMENT_ADB_EXPORTER(AdbTextExporter,
                        gettext_noop("Text format address book exporter"),
                        gettext_noop("Simple text format"),
-                       "Vadim Zeitlin <vadim@wxwindows.org>");
+                       _T("Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // AdbTextExporter
@@ -181,7 +181,7 @@ bool AdbTextExporter::DoExportEntry(const AdbEntry& entry,
    for ( size_t nField = 0; nField < AdbField_Max; nField++ )
    {
       entry.GetField(nField, &val);
-      for ( const char *pc = val.c_str(); *pc; pc++ )
+      for ( const wxChar *pc = val.c_str(); *pc; pc++ )
       {
          if ( !IsValidChar(*pc, delimiter) )
          {
@@ -245,7 +245,7 @@ bool AdbTextExporter::Export(const AdbEntryGroup& group, const String& dest)
    wxString filename = dest;
    if ( !filename )
    {
-      filename << group.GetDescription() << ".txt";
+      filename << group.GetDescription() << _T(".txt");
    }
 
    // get the name of the file to create
@@ -259,7 +259,7 @@ bool AdbTextExporter::Export(const AdbEntryGroup& group, const String& dest)
 
    // create the file
    filename = dialog.GetFilename();
-   wxFFile file(filename, "w");
+   wxFFile file(filename, _T("w"));
    if ( file.IsOpened() )
    {
       // export everything recursively
@@ -299,7 +299,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
                                (
                                 NULL,
                                 _("Mahogany: Exporting address book"),
-                                "AdbTextExport"
+                                _T("AdbTextExport")
                                )
 {
    wxLayoutConstraints *c;
@@ -327,7 +327,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    choices[Delimiter_Tab] = _("Use &tabs");
    choices[Delimiter_Custom] = _("&Use custom character");
 
-   wxRadioBox *radiobox = new wxPRadioBox("AdbTextExportDelim",
+   wxRadioBox *radiobox = new wxPRadioBox(_T("AdbTextExportDelim"),
                                           parent, -1, _("&Delimiter"),
                                           wxDefaultPosition, wxDefaultSize,
                                           WXSIZEOF(choices), choices,
@@ -342,7 +342,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
 
    // a text with a label for entering the custom delimiter
    m_labelCustomSep = new wxStaticText(parent, -1, _("Field &separator:"));
-   m_textCustomSep = new wxPTextEntry("AdbTextExportSep", parent, -1, "");
+   m_textCustomSep = new wxPTextEntry(_T("AdbTextExportSep"), parent, -1, _T(""));
 
    c = new wxLayoutConstraints;
    c->width.Absolute(5*GetCharWidth());
@@ -359,7 +359,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    m_labelCustomSep->SetConstraints(c);
 
    // a hack: create an invisible static to take some place
-   wxStaticText *dummy = new wxStaticText(parent, -1, "");
+   wxStaticText *dummy = new wxStaticText(parent, -1, _T(""));
    c = new wxLayoutConstraints;
    c->top.Below(radiobox, 2*LAYOUT_Y_MARGIN);
    c->left.AsIs();
@@ -380,7 +380,7 @@ wxAdbTextExporterConfigDialog::wxAdbTextExporterConfigDialog
    if ( !filename )
    {
       Profile *appProfile = mApplication->GetProfile();
-      filename = appProfile->readEntry(ms_profilePathLastFile, "mahogany.csv");
+      filename = appProfile->readEntry(ms_profilePathLastFile, _T("mahogany.csv"));
    }
 
    m_textFileName->SetValue(filename);
@@ -405,11 +405,11 @@ bool wxAdbTextExporterConfigDialog::TransferDataFromWindow()
    switch ( m_selection )
    {
       case Delimiter_Comma:
-         m_delim = ",";
+         m_delim = _T(",");
          break;
 
       case Delimiter_Tab:
-         m_delim = "\t";
+         m_delim = _T("\t");
          break;
 
       case Delimiter_Custom:

@@ -153,18 +153,18 @@ extern const MOption MP_VERSION;
 
 #ifdef USE_INBOX
    // the INBOX name is not translated -- should it be?
-   static const char *INBOX_NAME = "INBOX";
+   static const wxChar *INBOX_NAME = _T("INBOX");
 #endif // USE_INBOX
 
 // obsolete config names not used any more but needed here to be able to
 // update the old versions of the config
 
-#define MP_OLD_FOLDER_HOST "HostName"
+#define MP_OLD_FOLDER_HOST _T("HostName")
 
-#define M_TEMPLATES_SECTION "Templates"
-#define M_TEMPLATE_SECTION "Template"
+#define M_TEMPLATES_SECTION _T("Templates")
+#define M_TEMPLATE_SECTION _T("Template")
 
-#define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
+#define M_CUSTOM_HEADERS_CONFIG_SECTION _T("CustomHeaders")
 
 // obsolete folder flags which are not used any more but are needed here for
 // the same reason as above
@@ -1405,7 +1405,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    wxString tmp;
    tmp << labels[Label_MbxFormat]
-       << ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)";
+       << _T(":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)");
    m_FolderTypeChoice = panel->CreateChoice(tmp, widthMax, last);
    last = m_FolderTypeChoice;
 
@@ -1546,22 +1546,22 @@ static wxString GetRFC822Time(void)
    String timeStr;
    switch(ourtime->tm_mon)
    {
-   case  0: timeStr = "Jan"; break;
-   case  1: timeStr = "Feb"; break;
-   case  2: timeStr = "Mar"; break;
-   case  3: timeStr = "Apr"; break;
-   case  4: timeStr = "May"; break;
-   case  5: timeStr = "Jun"; break;
-   case  6: timeStr = "Jul"; break;
-   case  7: timeStr = "Aug"; break;
-   case  8: timeStr = "Sep"; break;
-   case  9: timeStr = "Oct"; break;
-   case 10: timeStr = "Nov"; break;
-   case 11: timeStr = "Dec"; break;
+   case  0: timeStr = _T("Jan"); break;
+   case  1: timeStr = _T("Feb"); break;
+   case  2: timeStr = _T("Mar"); break;
+   case  3: timeStr = _T("Apr"); break;
+   case  4: timeStr = _T("May"); break;
+   case  5: timeStr = _T("Jun"); break;
+   case  6: timeStr = _T("Jul"); break;
+   case  7: timeStr = _T("Aug"); break;
+   case  8: timeStr = _T("Sep"); break;
+   case  9: timeStr = _T("Oct"); break;
+   case 10: timeStr = _T("Nov"); break;
+   case 11: timeStr = _T("Dec"); break;
    default:
       ; // suppress warning
    }
-   timeStr.Printf("%02d %s %d %02d:%02d:%02d",
+   timeStr.Printf(_T("%02d %s %d %02d:%02d:%02d"),
                   ourtime->tm_mday,
                   timeStr.c_str(),
                   ourtime->tm_year+1900,
@@ -1641,7 +1641,7 @@ bool RunInstallWizard(
                         NULL,                         // parent
                         -1,                           // id
                         _("Mahogany Installation"),   // title
-                        iconManager->GetBitmap("install_welcome") // def image
+                        iconManager->GetBitmap(_T("install_welcome")) // def image
 #if wxCHECK_VERSION(2,5,0)
                         ,
                         wxDefaultPosition,
@@ -1694,10 +1694,10 @@ bool RunInstallWizard(
    if ( wizardDone )
    {
       // load all modules by default:
-      wxString modules = "Filters";
+      wxString modules = _T("Filters");
 #ifdef USE_PISOCK
       if(gs_installWizardData.usePalmOs)
-         modules += ":PalmOS";
+         modules += _T(":PalmOS");
 #endif // USE_PISOCK
 
       profile->writeEntry(MP_MODULES, modules);
@@ -1724,7 +1724,7 @@ bool RunInstallWizard(
       // (unwanted) folders, so it doesn't hurt to have the default value
       gs_installWizardData.pop =
       gs_installWizardData.imap =
-      gs_installWizardData.nntp = "";
+      gs_installWizardData.nntp = _T("");
 
       // don't try to send the test message if the SMTP server wasn't
       // configured
@@ -2136,14 +2136,14 @@ UpgradeFrom010()
 
    //FIXME paths need adjustment for windows?
    if ( CopyEntries(mApplication->GetProfile()->GetConfig(),
-                    "/M/Profiles/Folders","/M/Profiles") == -1 )
+                    _T("/M/Profiles/Folders"), _T("/M/Profiles")) == -1 )
       rc = false;
 
    if ( CopyEntries(mApplication->GetProfile()->GetConfig(),
-                    "/AdbEditor","/M/Profiles/AdbEditor") )
+                    _T("/AdbEditor"), _T("/M/Profiles/AdbEditor")) )
       rc = false;
 
-   Profile_obj p("");
+   Profile_obj p(_T(""));
    kbStringList
       folders;
    String
@@ -2164,8 +2164,8 @@ UpgradeFrom010()
    //FIXME paths need adjustment for windows?
    wxConfigBase *c = mApplication->GetProfile()->GetConfig();
    // Delete obsolete groups:
-   c->DeleteGroup("/M/Profiles/Folders");
-   c->DeleteGroup("/AdbEditor");
+   c->DeleteGroup(_T("/M/Profiles/Folders"));
+   c->DeleteGroup(_T("/AdbEditor"));
 
    /* Encrypt passwords in new location and make sure we have no
       illegal old profiles around. */
@@ -2223,7 +2223,7 @@ public:
          Profile_obj profile(folderName);
 
          Profile::ReadResult found;
-         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, "", &found);
+         String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, _T(""), &found);
          if ( found == Profile::Read_FromHere )
          {
             // delete the old entry, create the new one
@@ -2257,7 +2257,7 @@ UpgradeFrom020()
     */
 
    // enumerate all folders recursively
-   MFolder_obj folderRoot("");
+   MFolder_obj folderRoot(_T(""));
    UpgradeFolderFrom020Traversal traverse(folderRoot);
    traverse.Traverse();
 
@@ -2288,7 +2288,7 @@ public:
       String group = M_TEMPLATE_SECTION;
       if ( profile->HasGroup(group) )
       {
-         static const char *templateKinds[] =
+         static const wxChar *templateKinds[] =
          {
             MP_TEMPLATE_NEWMESSAGE,
             MP_TEMPLATE_NEWARTICLE,
@@ -2305,7 +2305,7 @@ public:
             String entry = group + templateKinds[n];
             if ( profile->HasEntry(entry) )
             {
-               String templateValue = profile->readEntry(entry, "");
+               String templateValue = profile->readEntry(entry, _T(""));
 
                String entryNew;
                entryNew << M_TEMPLATES_SECTION << '/'
@@ -2314,9 +2314,9 @@ public:
                Profile *profileApp = mApplication->GetProfile();
                if ( profileApp->HasEntry(entryNew) )
                {
-                  wxLogWarning("A profile entry '%s' already exists, "
+                  wxLogWarning(_T("A profile entry '%s' already exists, "
                                "impossible to upgrade the existing template "
-                               "in '%s/%s/%s'",
+                               "in '%s/%s/%s'"),
                                entryNew.c_str(),
                                folderName.c_str(),
                                group.c_str(),
@@ -2361,7 +2361,7 @@ UpgradeFrom050()
    // name of the template to use and not the contents of it
 
    // enumerate all folders recursively
-   MFolder_obj folderRoot("");
+   MFolder_obj folderRoot(_T(""));
    TemplateFixFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
@@ -2412,16 +2412,16 @@ UpgradeFrom060()
 
    static const struct
    {
-      const char *name;
+      const wxChar *name;
       int pos;
    } SystemFolders[] =
    {
-      { "INBOX",     MFolderIndex_Inbox   },
-      { "New Mail",  MFolderIndex_NewMail },
-      { "SentMail",  MFolderIndex_SentMail},
-      { "Trash",     MFolderIndex_Trash   },
-      { "Outbox",    MFolderIndex_Outbox  },
-      { "Draft",     MFolderIndex_Draft   },
+      { _T("INBOX"),     MFolderIndex_Inbox   },
+      { _T("New Mail"),  MFolderIndex_NewMail },
+      { _T("SentMail"),  MFolderIndex_SentMail},
+      { _T("Trash"),     MFolderIndex_Trash   },
+      { _T("Outbox"),    MFolderIndex_Outbox  },
+      { _T("Draft"),     MFolderIndex_Draft   },
    };
 
    // position the system folders in the tree correctly (we can't reposition
@@ -2451,17 +2451,17 @@ static void
 UpdateCustomHeadersTo064(wxConfigBase *config)
 {
    // from wxHeadersDialogs.cpp
-   static const char *customHeaderSubgroups[] =
+   static const wxChar *customHeaderSubgroups[] =
    {
-      "News",
-      "Mail",
-      "Both"
+      _T("News"),
+      _T("Mail"),
+      _T("Both")
    };
 
    String pathBase = M_CUSTOM_HEADERS_CONFIG_SECTION;
    for ( size_t type = 0; type < WXSIZEOF(customHeaderSubgroups); type++ )
    {
-      String path = pathBase + '/' + customHeaderSubgroups[type];
+      String path = pathBase + _T('/') + customHeaderSubgroups[type];
       if ( config->HasGroup(path) )
       {
          wxArrayString headerNames,
@@ -2476,10 +2476,10 @@ UpdateCustomHeadersTo064(wxConfigBase *config)
                cont = config->GetNextEntry(name, cookie) )
          {
             headerNames.Add(name);
-            headerValues.Add(config->Read(name, ""));
+            headerValues.Add(config->Read(name, _T("")));
          }
 
-         config->SetPath("../..");
+         config->SetPath(_T("../.."));
 
          // write them as ::GetCustomHeaders() expects them to be
          config->Write(pathBase + customHeaderSubgroups[type],
@@ -2514,10 +2514,10 @@ UpdateTemplatesTo064(wxConfigBase *config)
          cont = config->GetNextEntry(name, cookie) )
    {
       names.Add(name);
-      values.Add(config->Read(name, ""));
+      values.Add(config->Read(name, _T("")));
    }
 
-   config->SetPath("..");
+   config->SetPath(_T(".."));
 
    size_t count = names.GetCount();
    for ( size_t n = 0; n < count; n++ )
@@ -2545,7 +2545,7 @@ UpdateNonFolderProfiles(wxConfigBase *config)
 
          deleteGroup = true;
       }
-      else if ( name == "Template" )
+      else if ( name == _T("Template") )
       {
          UpdateTemplatesTo064(config);
 
@@ -2558,7 +2558,7 @@ UpdateNonFolderProfiles(wxConfigBase *config)
          // ~/.M/config there is some junk (maybe left from some very old
          // version?) and if we leave them in config we'd have all kinds of
          // problems with them because they don't represent the real folders
-         deleteGroup = config->Read(name + "/ProfileType", 0l) != 1;
+         deleteGroup = config->Read(name + _T("/ProfileType"), 0l) != 1;
          if ( deleteGroup )
          {
             wxLogWarning(_("Removing invalid config settings group '%s'."),
@@ -2575,11 +2575,11 @@ UpdateNonFolderProfiles(wxConfigBase *config)
       else // valid folder group, descend into it
       {
          // remove obsolete "ProfileType", it's not used nor needed any more
-         config->DeleteEntry(name + "/ProfileType");
+         config->DeleteEntry(name + _T("/ProfileType"));
 
          config->SetPath(name);
          UpdateNonFolderProfiles(config);
-         config->SetPath("..");
+         config->SetPath(_T(".."));
       }
 
       cont = config->GetNextGroup(name, cookie);
@@ -2624,7 +2624,7 @@ UpgradeFrom061()
 
    pathOld.clear();
    pathNew.clear();
-   pathOld << '/' << Profile::GetProfilePath() << "/Templates";
+   pathOld << _T('/') << Profile::GetProfilePath() << _T("/Templates");
    pathNew << Profile::GetTemplatesPath();
    if ( CopyEntries(config, pathOld, pathNew) == -1 )
    {
@@ -2673,7 +2673,7 @@ static bool
 UpgradeFrom064()
 {
    // add MF_FLAGS_MONITOR to all folders with MF_FLAGS_INCOMING flag
-   MFolder_obj folderRoot("");
+   MFolder_obj folderRoot(_T(""));
    UpgradeFolderFrom064Traversal traverse(folderRoot);
 
    return traverse.Traverse();
@@ -2745,7 +2745,7 @@ public:
          // also check SMTP/NNTP server flags: need to replace bools with
          // SSLSupport_XXX values
 
-         const char *key = GetOptionName(MP_SMTPHOST_USE_SSL);
+         const wxChar *key = GetOptionName(MP_SMTPHOST_USE_SSL);
          Profile::ReadResult readFrom;
          bool wasUsingSSL = profile->readEntry(key, false, &readFrom);
 
@@ -2789,7 +2789,7 @@ static bool
 UpgradeFrom064_1()
 {
    // replace SSL flags with SSL profile settings
-   MFolder_obj folderRoot("");
+   MFolder_obj folderRoot(_T(""));
    UpgradeFolderFrom0641Traversal traverse(folderRoot);
 
    // it is important to process the parent before its children because by
@@ -2810,11 +2810,11 @@ UpgradeFrom065()
    // root
    wxConfigBase *config = mApplication->GetProfile()->GetConfig();
 
-   if ( CopyEntries(config, "/M", "/") < 0 )
+   if ( CopyEntries(config, _T("/M"), _T("/")) < 0 )
       return false;
 
-   if ( !config->DeleteGroup("/M") )
-      wxLogDebug("Old data was left in [M] config section.");
+   if ( !config->DeleteGroup(_T("/M")) )
+      wxLogDebug(_T("Old data was left in [M] config section."));
 
 
    // the folder-specific message box settings must be changed as well as
@@ -2826,7 +2826,7 @@ UpgradeFrom065()
    String pathOld = config->GetPath();
 
    String path;
-   path << '/' << M_SETTINGS_CONFIG_SECTION << "MessageBox";
+   path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T("MessageBox");
    config->SetPath(path);
 
    long cookie;
@@ -2836,7 +2836,7 @@ UpgradeFrom065()
          cont;
          cont = config->GetNextGroup(groupOld, cookie) )
    {
-      if ( groupOld.StartsWith("M_Profiles_", &groupNew) )
+      if ( groupOld.StartsWith(_T("M_Profiles_"), &groupNew) )
       {
          config->RenameGroup(groupOld, groupNew);
       }
@@ -2869,26 +2869,26 @@ Upgrade(const String& fromVersion)
       if ( version.Last() == 'a' )
          version.Truncate(version.Len() - 1);
 
-      if ( version == "0.01" )
+      if ( version == _T("0.01") )
          oldVersion = Version_Alpha001;
-      else if ( version == "0.02" || version == "0.10")
+      else if ( version == _T("0.02") || version == _T("0.10"))
          oldVersion = Version_Alpha010;
-      else if ( version == "0.20" )
+      else if ( version == _T("0.20") )
          oldVersion = Version_Alpha020;
-      else if ( version == "0.21" || version == "0.22" ||
-                version == "0.23" || version == "0.50" )
+      else if ( version == _T("0.21") || version == _T("0.22") ||
+                version == _T("0.23") || version == _T("0.50") )
          oldVersion = Version_050;
-      else if ( version == "0.60" )
+      else if ( version == _T("0.60") )
          oldVersion = Version_060;
-      else if ( version == "0.61" || version == "0.62" || version == "0.63" )
+      else if ( version == _T("0.61") || version == _T("0.62") || version == _T("0.63") )
          oldVersion = Version_061;
-      else if ( version == "0.64" )
+      else if ( version == _T("0.64") )
          oldVersion = Version_064;
-      else if ( version == "0.64.1" || version == "0.64.2" )
+      else if ( version == _T("0.64.1") || version == _T("0.64.2") )
          oldVersion = Version_064_1;
-      else if ( version == "0.65" || version == "0.65.0" )
+      else if ( version == _T("0.65") || version == _T("0.65.0") )
          oldVersion = Version_065;
-      else if ( version == "0.66" )
+      else if ( version == _T("0.66") )
          oldVersion = Version_066;
       else
          oldVersion = Version_Unknown;
@@ -3194,7 +3194,7 @@ VerifyStdFolders(void)
            ),
           NULL,
           MDIALOG_MSGTITLE,
-          "WarnInbox"
+          _T("WarnInbox")
          );
       }
 
@@ -3396,7 +3396,7 @@ VerifyEMailSendingWorks(MProgressInfo *proginfo)
    msg << _("Sent email message to:\n")
        << me
        << _("\n\nPlease check whether it arrives.");
-   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
+   MDialog_Message(msg, NULL, _("Testing your configuration"), _T("TestMailSent"));
 
    return true; // till we know something better
 }
@@ -3409,7 +3409,7 @@ static inline MFolder *CreateServerEntry(const String& name,
                                          MFolderType type,
                                          int flags)
 {
-   return CreateFolderTreeEntry(NULL, name, type, flags, "", false);
+   return CreateFolderTreeEntry(NULL, name, type, flags, _T(""), false);
 }
 
 /**
@@ -3578,29 +3578,29 @@ void SetupMinimalConfig(void)
 
    if( strutil_isempty(READ_APPCONFIG(MP_NNTPHOST)) )
    {
-      char *cptr = getenv("NNTPSERVER");
+      wxChar *cptr = wxGetenv(_T("NNTPSERVER"));
       if(!cptr || !*cptr)
-        cptr = "news";
+        cptr = _T("news");
       profile->writeEntry(MP_NNTPHOST, cptr);
    }
 
    if( strutil_isempty(READ_APPCONFIG(MP_SMTPHOST)) )
    {
-      char *cptr = getenv("SMTPSERVER");
+      wxChar *cptr = wxGetenv(_T("SMTPSERVER"));
       if(!cptr || !*cptr)
-        cptr = "localhost";
+        cptr = _T("localhost");
       profile->writeEntry(MP_SMTPHOST, cptr);
    }
 
    if( strutil_isempty(READ_APPCONFIG(MP_POPHOST)) )
    {
-      char *cptr = getenv("POPSERVER");
+      wxChar *cptr = wxGetenv(_T("POPSERVER"));
       if(cptr && *cptr)
          profile->writeEntry(MP_POPHOST, cptr);
    }
    if( strutil_isempty(READ_APPCONFIG(MP_IMAPHOST)) )
    {
-      char *cptr = getenv("IMAPSERVER");
+      wxChar *cptr = wxGetenv(_T("IMAPSERVER"));
       if(cptr && *cptr)
          profile->writeEntry(MP_IMAPHOST, cptr);
    }
@@ -3613,8 +3613,8 @@ void SetupMinimalConfig(void)
  * settings to a file.
  */
 
-#define M_SYNCMAIL_SUBJECT   "DO NOT DELETE! Mahogany remote configuration info"
-#define M_SYNCMAIL_CONFIGSTART "Mahogany configuration info:"
+#define M_SYNCMAIL_SUBJECT   _T("DO NOT DELETE! Mahogany remote configuration info")
+#define M_SYNCMAIL_CONFIGSTART _T("Mahogany configuration info:")
 
 static time_t  gs_RemoteSyncDate = 0;
 
@@ -3694,13 +3694,13 @@ bool RetrieveRemoteConfigSettings(bool confirm)
    mf->DecRef();
 
    msgText = msgText.Mid( msgText.Find(M_SYNCMAIL_CONFIGSTART) +
-                          strlen( M_SYNCMAIL_CONFIGSTART) );
-   wxString filename = wxGetTempFileName("MTemp");
+                          wxStrlen( M_SYNCMAIL_CONFIGSTART) );
+   wxString filename = wxGetTempFileName(_T("MTemp"));
    wxFile tmpfile(filename, wxFile::write);
    tmpfile.Write(msgText, msgText.Length());
    tmpfile.Close();
 
-   wxFileConfig fc("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
+   wxFileConfig fc(_T(""), _T(""), filename, _T(""), wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;
 
@@ -3762,7 +3762,7 @@ bool RetrieveRemoteConfigSettings(bool confirm)
          // refresh all existing folder trees
          MEventData *data = new MEventFolderTreeChangeData
                                 (
-                                 "",
+                                 _T(""),
                                  MEventFolderTreeChangeData::CreateUnder
                                 );
          MEventManager::Send(data);
@@ -3865,8 +3865,8 @@ bool SaveRemoteConfigSettings(bool confirm)
       mf->ExpungeMessages();
    }
 
-   wxString filename = wxGetTempFileName("MTemp");
-   wxFileConfig fc("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
+   wxString filename = wxGetTempFileName(_T("MTemp"));
+   wxFileConfig fc(_T(""), _T(""), filename, _T(""), wxCONFIG_USE_LOCAL_FILE);
 
    bool rc = true;
 
@@ -3912,7 +3912,7 @@ bool SaveRemoteConfigSettings(bool confirm)
    fc.Flush();
 
    wxFile tmpfile(filename, wxFile::read);
-   char * buffer = new char [ tmpfile.Length() + 1];
+   wxChar * buffer = new wxChar [ tmpfile.Length() + 1];
    if(tmpfile.Read(buffer, tmpfile.Length()) != tmpfile.Length())
    {
       wxLogError(_("Cannot read configuration info from temporary file\n"
@@ -3926,12 +3926,12 @@ bool SaveRemoteConfigSettings(bool confirm)
    tmpfile.Close();
 
    wxString msgText;
-   msgText << "From: mahogany-developers@lists.sourceforge.net\n"
-           << "Subject: " << M_SYNCMAIL_SUBJECT << "\n"
-           << "Date: " << GetRFC822Time() << "\n"
-           << "\n"
-           << M_SYNCMAIL_CONFIGSTART << "\n"
-           << buffer << "\n";
+   msgText << _T("From: mahogany-developers@lists.sourceforge.net\n")
+           << _T("Subject: ") << M_SYNCMAIL_SUBJECT << _T("\n")
+           << _T("Date: ") << GetRFC822Time() << _T("\n")
+           << _T("\n")
+           << M_SYNCMAIL_CONFIGSTART << _T("\n")
+           << buffer << _T("\n");
    delete [] buffer;
    if( ! mf->AppendMessage(msgText) )
    {
@@ -3987,7 +3987,7 @@ CheckConfiguration(void)
    }
 
    // do we need to upgrade something?
-   String version = profile->readEntry(MP_VERSION, "");
+   String version = profile->readEntry(MP_VERSION, _T(""));
    if ( version != M_VERSION )
    {
       CloseSplash();

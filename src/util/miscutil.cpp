@@ -70,17 +70,17 @@ void UpdateTitleAndStatusBars(const String& title,
    // TODO: customize this to show "unread mail" icon!
    if ( mfStatus.newmsgs > 0 )
       frame->SetIcon( frame == mApplication->TopLevelFrame() ?
-                      ICON("MainFrameNewMail") : ICON("MFrameNewMail"));
+                      ICON(_T("MainFrameNewMail")) : ICON(_T("MFrameNewMail")));
    else
       frame->SetIcon( frame == mApplication->TopLevelFrame() ?
-                      ICON("MainFrame") : ICON("MFrame"));
+                      ICON(_T("MainFrame")) : ICON(_T("MFrame")));
 }
 
 // ---------------------------------------------------------------------------
 // colour to string conversion
 // ---------------------------------------------------------------------------
 
-static const char *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
+static const wxChar *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
 
 bool ParseColourString(const String& name, wxColour* colour)
 {
@@ -91,7 +91,7 @@ bool ParseColourString(const String& name, wxColour* colour)
 
    // first check if it's a RGB specification
    int red, green, blue;
-   if ( sscanf(name, customColourString, &red, &green, &blue) == 3 )
+   if ( wxSscanf(name, customColourString, &red, &green, &blue) == 3 )
    {
       // it's a custom colour
       if ( colour )

@@ -133,7 +133,7 @@ private:
 IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
                        gettext_noop("PalmOS format address book exporter"),
                        gettext_noop("PalmOS addressbook"),
-                       "Karsten Ballüder <ballueder@gmx.net>");
+                       _T("Karsten Ballüder <ballueder@gmx.net>"));
 
 
 // ----------------------------------------------------------------------------
@@ -141,9 +141,9 @@ IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
 // ----------------------------------------------------------------------------
 
 #undef ADD
-#define ADD(n)       entry.GetField(n, &val); s << '"'<< EscapeQuotes(val) << "\","
+#define ADD(n)       entry.GetField(n, &val); s << _T('"') << EscapeQuotes(val) << _T("\",")
 #define ADDP(prefix,n)  entry.GetField(n, &val); \
-if(strlen(val)) s << prefix; s << '"'<< EscapeQuotes(val) << "\","
+if(wxStrlen(val)) s << prefix; s << _T('"') << EscapeQuotes(val) << _T("\",")
 
 bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
                                     wxFFile& file, const wxString &
@@ -187,20 +187,20 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
       entry.GetField(AdbField_FullName, &val);
       if(val.Length() == 0 && ! includeEmpty) // no name
          return TRUE; // ignore entry
-      s << '"' << EscapeQuotes(val) << "\",\"\",";
+      s << '"' << EscapeQuotes(val) << _T("\",\"\",");
    }
    entry.GetField(AdbField_Prefix, &val);
    entry.GetField(AdbField_Title, &tmp);
    if(tmp.Length()) val << ' ' << tmp;
-   s << '"' << EscapeQuotes(val) << "\",";
+   s << '"' << EscapeQuotes(val) << _T("\",");
    ADD(AdbField_Organization);
 
-   s << "\"\","; // unknown field after company
-   ADDP("\"E-mail\";", AdbField_EMail);
-   ADDP("\"Home\";", AdbField_H_Phone);
-   ADDP("\"Fax\";", AdbField_H_Fax);
-   ADDP("\"Work\";", AdbField_O_Phone);
-   ADDP("\"Fax\";", AdbField_O_Fax);
+   s << _T("\"\","); // unknown field after company
+   ADDP(_T("\"E-mail\";"), AdbField_EMail);
+   ADDP(_T("\"Home\";"), AdbField_H_Phone);
+   ADDP(_T("\"Fax\";"), AdbField_H_Fax);
+   ADDP(_T("\"Work\";"), AdbField_O_Phone);
+   ADDP(_T("\"Fax\";"), AdbField_O_Fax);
 
    entry.GetField(AdbField_H_City, &val);
    if(val.Length()) // has home address?
@@ -211,7 +211,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
          entry.GetField(AdbField_H_StreetNo, &tmp);
          if(tmp) val << ' ' << tmp;
          if(! val) entry.GetField(AdbField_H_POBox, &val);
-         s << '"' << val << "\",";
+         s << '"' << val << _T("\",");
       }
       ADD(AdbField_H_City);
       ADD(AdbField_H_Locality);
@@ -226,7 +226,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
          entry.GetField(AdbField_O_StreetNo, &tmp);
          if(tmp) val << ' ' << tmp;
          if(! val) entry.GetField(AdbField_O_POBox, &val);
-         s << '"' << val << "\",";
+         s << '"' << val << _T("\",");
       }
       ADD(AdbField_O_City);
       ADD(AdbField_O_Locality);
@@ -244,9 +244,9 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
       ADD(AdbField_Comments);
    }
    else
-      s << "\"\","; // empty comment
+      s << _T("\"\","); // empty comment
 
-   s << "\"0\"";
+   s << _T("\"0\"");
    s += wxTextFile::GetEOL();
 
    return file.Write(s);
@@ -302,7 +302,7 @@ bool AdbPalmExporter::Export(const AdbEntryGroup& group, const String& dest)
    wxString filename = dest;
    if ( !filename )
    {
-      filename << group.GetDescription() << ".palm";
+      filename << group.GetDescription() << _T(".palm");
    }
 
    // get the name of the file to create
@@ -316,7 +316,7 @@ bool AdbPalmExporter::Export(const AdbEntryGroup& group, const String& dest)
 
    // create the file
    filename = dialog.GetFileName();
-   wxFFile file(filename, "w");
+   wxFFile file(filename, _T("w"));
    if ( file.IsOpened() )
    {
       // export everything recursively
@@ -365,7 +365,7 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
                                (
                                 NULL,
                                 _("Mahogany: Exporting address book"),
-                                "AdbTextExport"
+                                _T("AdbTextExport")
                                )
 {
    wxLayoutConstraints *c;
@@ -413,16 +413,16 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    if ( !filename )
    {
       Profile *appProfile = mApplication->GetProfile();
-      filename = appProfile->readEntry(ms_profilePathLastFile, "mahogany.txt");
+      filename = appProfile->readEntry(ms_profilePathLastFile, _T("mahogany.txt"));
    }
 
    m_textFileName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastFile,
-                                            ""));
+                                            _T("")));
 
    m_textCategoryName->SetValue(
       mApplication->GetProfile()->readEntry(ms_profilePathLastCategory,
-                                            "Unfiled"));
+                                            _T("Unfiled")));
    m_checkIncludeEmpty->SetValue(
       mApplication->GetProfile()->readEntry(ms_profileIncludeEmpty, 0) != 0);
    m_checkIncludeComments->SetValue(
