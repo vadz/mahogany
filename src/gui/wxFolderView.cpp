@@ -501,8 +501,20 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
+#ifdef __WXGTK__
+   // GTK+ seems to be able to reenter this handler from inside PopupMenu()!
+   // this should never happen, of course
+   if ( m_menuFolders )
+   {
+      wxLogDebug("GTK+ bug detected: unexpected right click, bailing out.");
+
+      return;
+   }
+#endif // __WXGTK__
+
    // create popup menu if not done yet
-   if (m_menu) delete m_menu;
+   if ( m_menu )
+      delete m_menu;
 
    m_menuFolders = wxFolderMenu::Create();
 

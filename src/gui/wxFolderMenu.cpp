@@ -116,7 +116,7 @@ static void AddSubFoldersToMenu(wxString& folderName,
 wxMenu *wxFolderMenu::Create()
 {
    ASSERT_MSG( !gs_menuFolders && gs_folderNames.IsEmpty(),
-               "forgot to call wxFolderMenu::Delete()?" );
+               "forgot to call wxFolderMenu::Remove()?" );
 
    MFolder *folder = MFolder::Get("");
    gs_menuFolders = new wxMenu;
