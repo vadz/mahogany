@@ -726,6 +726,9 @@ public:
                                                m_profile);
    }
 
+protected:
+   Profile *GetProfile() const { return m_profile; }
+
 private:
    // the number and descriptions of the pages we show
    size_t m_nPages;
@@ -752,7 +755,6 @@ public:
       // use the identity profile
       Profile *profile = Profile::CreateIdentity(identity);
       SetProfile(profile);
-      profile->DecRef();   // SetProfile() will hold on it
 
       // set the pages descriptions: we use the standard pages of the options
       // dialog, but not all of them
@@ -776,6 +778,18 @@ public:
    // we're not the global options dialog
    virtual bool IsGlobalOptionsDialog() const { return FALSE; }
 
+protected:
+   // handle button clicks
+   void OnButton(wxCommandEvent& event);
+
+   enum
+   {
+      Page_Ident,
+      Page_Network,
+      Page_Compose,
+      Page_Max
+   };
+
 private:
    // create our pages desc: do it dynamically because they may depend on the
    // user level (which can change) in the future
@@ -788,6 +802,7 @@ private:
    size_t m_nPages;
    wxOptionsPageDesc *m_aPages;
 
+   DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxIdentityOptionsDialog)
 };
 
@@ -861,6 +876,11 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageOthers::OnButton)
+END_EVENT_TABLE()
+
+
+BEGIN_EVENT_TABLE(wxIdentityOptionsDialog, wxCustomOptionsDialog)
+   EVT_BUTTON(-1, wxIdentityOptionsDialog::OnButton)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -3168,49 +3188,60 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
 
 void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 {
-   bool dirty;
+   if ( !HandleButton(m_Profile, event.GetEventObject(), this) )
+      event.Skip();
+}
 
-   wxObject *obj = event.GetEventObject();
-   if ( obj == GetControl(ConfigField_ComposeHeaders) )
+/* static */ bool
+wxOptionsPageCompose::HandleButton(Profile *profile,
+                                   wxObject *obj,
+                                   wxOptionsPage *win)
+{
+   bool dirty = false;
+
+   if ( win->IsControl(obj, ConfigField_ComposeHeaders) )
    {
       // create and show the "outgoing headers" config dialog
-      dirty = ConfigureComposeHeaders(m_Profile, this);
+      dirty = ConfigureComposeHeaders(profile, win);
    }
-   else if ( obj == GetControl(ConfigField_ComposeTemplates) )
+   else if ( win->IsControl(obj, ConfigField_ComposeTemplates) )
    {
-      dirty = ConfigureTemplates(m_Profile, this);
+      dirty = ConfigureTemplates(profile, win);
    }
-   else if ( obj == GetControl(ConfigField_XFaceFile) )
+   else if ( win->IsControl(obj, ConfigField_XFaceFile) )
    {
-      dirty = PickXFaceDialog(m_Profile, this);
-      if(dirty)
+      if ( PickXFaceDialog(profile, win) )
       {
+         dirty = true;
+
          wxXFaceButton *btn = (wxXFaceButton*)obj;
-         // Why doesn't UpdateUI() have the same effect here?
-         if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
-            btn->SetFile(READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
-         else
-            btn->SetFile(_T(""));
+         btn->SetFile(READ_CONFIG_BOOL(profile, MP_COMPOSE_USE_XFACE)
+                        ? READ_CONFIG(profile, MP_COMPOSE_XFACE_FILE)
+                        : String());
       }
    }
-   else
+   else // not our button
    {
-      FAIL_MSG(_T("click from alien button in compose view page"));
-
-      dirty = FALSE;
-
-      event.Skip();
+      return false;
    }
 
    if ( dirty )
    {
       // something changed - make us dirty
-      wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
+      wxOptionsEditDialog *
+         dialog = GET_PARENT_OF_CLASS(win, wxOptionsEditDialog);
 
-      wxCHECK_RET( dialog, _T("options page without a parent dialog?") );
-
-      dialog->SetDirty();
+      if ( dialog )
+      {
+         dialog->SetDirty();
+      }
+      else
+      {
+         FAIL_MSG( _T("options page without a parent dialog?") );
+      }
    }
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -4491,12 +4522,12 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
    //       ones
 
    size_t nOffset;
-   m_nPages = 3;
-   m_aPages = new wxOptionsPageDesc[3];
+   m_nPages = Page_Max;
+   m_aPages = new wxOptionsPageDesc[Page_Max];
 
    // identity page
    nOffset = ConfigField_IdentFirst + 1;
-   m_aPages[0] = wxOptionsPageDesc
+   m_aPages[Page_Ident] = wxOptionsPageDesc
    (
       _("Identity"),
       wxOptionsNotebook::ms_aszImages[OptionsPage_Ident],
@@ -4509,7 +4540,7 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
 
    // network page
    nOffset = ConfigField_NetworkFirst + 1;
-   m_aPages[1] = wxOptionsPageDesc
+   m_aPages[Page_Network] = wxOptionsPageDesc
    (
       _("Network"),
       wxOptionsNotebook::ms_aszImages[OptionsPage_Network],
@@ -4522,7 +4553,7 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
 
    // compose page
    nOffset = ConfigField_ComposeFirst + 1;
-   m_aPages[2] = wxOptionsPageDesc
+   m_aPages[Page_Compose] = wxOptionsPageDesc
    (
       _("Compose"),
       wxOptionsNotebook::ms_aszImages[OptionsPage_Compose],
@@ -4532,7 +4563,23 @@ void wxIdentityOptionsDialog::CreatePagesDesc()
       ConfigField_ComposeLast - ConfigField_ComposeFirst,
       nOffset
    );
-};
+}
+
+void wxIdentityOptionsDialog::OnButton(wxCommandEvent& event)
+{
+   // for now the only buttons we have in this dialog are in the compose page
+   wxObject * const btn = event.GetEventObject();
+   if ( !wxOptionsPageCompose::HandleButton
+         (
+            GetProfile(),
+            btn,
+            (wxOptionsPage *)m_notebook->GetPage(Page_Compose)
+         ) )
+   {
+      // must be one of the std buttons
+      event.Skip();
+   }
+}
 
 // ----------------------------------------------------------------------------
 // wxRestoreDefaultsDialog implementation

@@ -172,6 +172,12 @@ public:
    /// Returns the numeric help id.
    int HelpId(void) const { return m_HelpId; }
 
+   /// only for HandleButton() hack, don't call directly
+   bool IsControl(wxObject *obj, size_t n) const
+   {
+      return GetControl(n) == obj;
+   }
+
 protected:
    /// get the name of the folder we're editing the options of
    String GetFolderName() const;
@@ -442,7 +448,14 @@ class wxOptionsPageCompose : public wxOptionsPageStandard
 public:
    wxOptionsPageCompose(wxNotebook *parent, Profile *profile);
 
-   void OnButton(wxCommandEvent&);
+   void OnButton(wxCommandEvent& event);
+
+   // the meat of OnButton(): also used by the identity dialog
+   //
+   // return true if btn is one of our buttons, false if we didn't handle it
+   static bool HandleButton(Profile *profile,
+                            wxObject *btn,
+                            wxOptionsPage *win);
 
 private:
    DECLARE_EVENT_TABLE()
