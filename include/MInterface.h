@@ -29,7 +29,7 @@ public:
 
 
 
-wxMApp * GetMApplication (void);
+MAppBase * GetMApplication (void);
 
 
 

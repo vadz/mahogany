@@ -269,7 +269,7 @@ public:
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
 
-IMPLEMENET_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
+IMPLEMENT_ADB_PROVIDER(FCDataProvider, TRUE, "Native format", Name_File);
 
 // ============================================================================
 // implementation

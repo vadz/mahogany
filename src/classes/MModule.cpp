@@ -13,13 +13,19 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#include "Mconfig.h"
-#include "Mcommon.h"
-#include "MModule.h"
-#include "MApplication.h"
+
+#include "Mpch.h"
+
+#ifndef  USE_PCH
+   #include "Mconfig.h"
+   #include "Mcommon.h"
+   #include "MApplication.h"
+
+   #include "kbList.h"
+#endif
 
 #include "Mversion.h"
-#include "kbList.h"
+#include "MModule.h"
 
 #include <wx/dynlib.h>
 #include <wx/utils.h>

@@ -54,27 +54,8 @@
 #   define   MAX(a,b) (((a) > (b))?(a):(b))
 #endif
 
-// use icon in msg box? 
+// use icon in msg box?
 #define USE_ICON
-
-// ----------------------------------------------------------------------------
-// icons
-// ----------------------------------------------------------------------------
-
-#ifdef M_PREFIX
-#   include   "Mcommon.h"
-#   include   "kbList.h"
-#   include   "gui/wxIconManager.h"
-#   include   "MApplication.h"
-#else
-// MSW icons are in the ressources, for all other platforms - in XPM files
-#ifndef __WXMSW__
-#      include "wx/generic/info.xpm"
-#      include "wx/generic/question.xpm"
-#      include "wx/generic/warning.xpm"
-#      include "wx/generic/error.xpm"
-#endif // __WXMSW__
-#endif // M_PREFIX
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -487,7 +468,7 @@ wxPSplitterWindow::wxPSplitterWindow(const wxString& configPath,
                  : wxSplitterWindow(parent, id, pos, size, style)
 {
     m_wasSplit = FALSE;
-   
+
     m_persist = new wxPHelper(configPath, ms_path, config);
 }
 
@@ -500,7 +481,7 @@ bool wxPSplitterWindow::Create(const wxString& configPath,
                                wxConfigBase *config)
 {
    m_wasSplit = FALSE;
-   
+
    m_persist->SetConfig(config);
    m_persist->SetPath(configPath, ms_path);
 
@@ -791,70 +772,15 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     wxStaticBox *box = new wxStaticBox(this, -1, "");
 
     // create an icon
-    enum
-    {
-        Icon_Information,
-        Icon_Question,
-        Icon_Warning,
-        Icon_Error
-    } which;
-    
-#ifdef M_PREFIX
-#ifdef __WXMSW__
-    static char *icons[] =
-    {
-        "wxICON_INFO",
-        "wxICON_QUESTION",
-        "wxICON_WARNING",
-        "wxICON_ERROR",
-    };
-#else // XPM icons
-    static char *icons[] =
-    {
-        "msg_info",
-        "msg_question",
-        "msg_warning",
-        "msg_error"
-    };
-#endif
-#else
-#ifdef __WXMSW__
-    static char *icons[] =
-    {
-        "wxICON_INFO",
-        "wxICON_QUESTION",
-        "wxICON_WARNING",
-        "wxICON_ERROR",
-    };
-#else // XPM icons
-    static char **icons[] =
-    {
-        info,
-        question,
-        warning,
-        error,
-    };
-#endif // !XPM/XPM
-#endif // M_PREFIX
-    
-    if ( style & wxICON_EXCLAMATION )
-        which = Icon_Warning;
-    else if ( style & wxICON_HAND )
-        which = Icon_Error;
-    else if ( style & wxICON_QUESTION )
-        which = Icon_Question;
-    else
-        which = Icon_Information;
-
 #ifdef USE_ICON
-#   ifdef M_PREFIX
-    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, ICON(icons[which]));
-#   else
-    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
-#   endif
+    int which = style & wxICON_MASK;
+    wxStaticBitmap *icon = new wxStaticBitmap(this, -1,
+                                              wxTheApp->GetStdIcon(which));
     const int iconSize = icon->GetIcon().GetWidth();
+#else
+    const int iconSize = 0;
 #endif // use icon
-    
+
     // split the message in lines
     // --------------------------
     wxClientDC dc(this);
@@ -1145,7 +1071,7 @@ int wxPMessageBox(const wxString& configPath,
       // use the system standard message box
       wxMessageDialog dlg(parent, message, caption, style);
 #else
-      // if no config path specified, we just work as a normal message 
+      // if no config path specified, we just work as a normal message
       // dialog, but with nicer layout
       wxPMessageDialog dlg(parent, message, caption, style, false);
 #endif
@@ -1167,7 +1093,7 @@ bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
 }
 
 void wxPMessageBoxEnable(const wxString& configPath,
-                         bool enable, 
+                         bool enable,
                          wxConfigBase *config)
 {
     wxPHelper persist(configPath, gs_MessageBoxPath, config);

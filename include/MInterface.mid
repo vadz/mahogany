@@ -11,7 +11,7 @@ FILE_HEADER
 
 INTERFACE(MInterface,`
 
-FUNCTION(GetMApplication, wxMApp *, `(void)',
+FUNCTION(GetMApplication, MAppBase *, `(void)',
 `
  return mApplication;
 ')

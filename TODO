@@ -37,6 +37,8 @@ $Id$
 		dialog, can't TAB to the buttons from the notebook
 		page
 
+2	VZ	default value for "custom header" comboboxes wrong?
+
 *********************************************************************
 *** PROJECTS
 *********************************************************************

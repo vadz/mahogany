@@ -405,7 +405,7 @@ wxMApp::OnInit()
 #endif
 
    m_IconManager = new wxIconManager();
-   
+
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
    // frame - if we don't do it, when the dialog (which is the last app window
@@ -653,7 +653,7 @@ wxMApp::LoadModules(void)
    modulestring = strutil_strdup(READ_APPCONFIG(MP_MODULES));
    strutil_tokenise(modulestring, ":", modules);
    delete [] modulestring;
-   
+
    MModule *module;
    for(i = modules.begin(); i != modules.end(); i++)
    {
@@ -670,7 +670,7 @@ wxMApp::LoadModules(void)
                    module->GetName(),
                    module->GetDescription(),
                    module->GetVersion()));
-         
+
 #endif
       }
    }
@@ -763,7 +763,7 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
       if(enter)
          wxMutexGuiEnter();
       else
-         wxMutexGuiLeave();         
+         wxMutexGuiLeave();
       break;
    case CCLIENT:
       if(enter)
@@ -780,7 +780,12 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
 wxIcon
 wxMApp::GetStdIcon(int which) const
 {
-   /* Set our icons for the dialogs. */
+   // this function may be (and is) called from the persistent controls code
+   // which uses the global config object for its own needs, so avoid changing
+   // its path here
+   ProfilePathChanger changePath(mApplication->GetProfile(), "");
+
+   // Set our icons for the dialogs.
    switch(which)
    {
 #ifndef OS_WIN
@@ -793,6 +798,7 @@ wxMApp::GetStdIcon(int which) const
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
 #endif
+   case wxICON_HAND:    // suppress a warning about missing "case"
    default:
       return wxApp::GetStdIcon(which);
    }

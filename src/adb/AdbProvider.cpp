@@ -51,6 +51,15 @@ AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const char *name,
 // static AdbDataProvider functions
 // ----------------------------------------------------------------------------
 
+AdbDataProvider *AdbDataProvider::GetNativeProvider()
+{
+   AdbDataProvider *provider = GetProviderByName("FCDataProvider");
+
+   ASSERT_MSG( provider, "native ADB data provider not linked in??" );
+
+   return provider;
+}
+
 // return provider by name (currently, this function always creates a new
 // object, but in the future it might maintain a cache of providers...)
 AdbDataProvider *AdbDataProvider::GetProviderByName(const String& name)

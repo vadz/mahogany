@@ -213,7 +213,7 @@ public:
   DECLARE_ADB_PROVIDER(DummyDataProvider);
 };
 
-IMPLEMENET_ADB_PROVIDER(DummyDataProvider, TRUE, "Dummy", Name_String);
+IMPLEMENT_ADB_PROVIDER(DummyDataProvider, TRUE, "Dummy", Name_String);
 
 // ============================================================================
 // implementation

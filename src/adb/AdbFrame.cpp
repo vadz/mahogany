@@ -62,6 +62,7 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
+#include "adb/AdbImport.h"
 
 // our public interface
 #include "adb/AdbFrame.h"
@@ -328,7 +329,7 @@ public:
   virtual ~AdbTreeBook();
 
   // accessors
-    // return the file name (@@ not really always a file name...)
+    // return the file name (NB: not really always a file name...)
   const char *GetFileName() const { return m_pBook->GetName(); }
     // for compatibility with existing code we have these functions instead of
     // directly calling AdbBook methods
@@ -488,7 +489,7 @@ private:
 // dialogs
 // ----------------------------------------------------------------------------
 
-// find dialog (@@ should be modeless...)
+// find dialog (TODO should be modeless...)
 class wxADBFindDialog : public wxDialog
 {
 public:
@@ -619,13 +620,22 @@ public:
   // moves selection to the next item (previously found by DoFind())
   void AdvanceToNextFound();
 
+  // is the given address book already opened (i.e., do we have it in the
+  // book tree)?
+  bool IsAdbOpened(const wxString& strPath) const
+    { return m_astrAdb.Index(strPath) != wxNOT_FOUND; }
+
   // load the data from file and add the ADB to the tree control using
-  // the specified (any in for the default value) provider
+  // the specified (or any for the default NULL value) provider
   bool OpenAdb(const wxString& strPath,
                AdbDataProvider *pProvider = NULL,
                const char *szProvName = NULL);
   // ask the user for filename and create or open the address book
   bool CreateOrOpenAdb(bool bDoCreate);
+
+  // ask the user for filename and import the ADB from this file
+  bool ImportAdb();
+
   // show the current ADB statistics
   void DoShowAdbProperties();
 
@@ -729,7 +739,7 @@ private:
   // persistent data
   // ---------------
 
-  // @@@ should save several last values for text dialog entries
+  // @@PERS should save several last values for text dialog entries
   wxString m_strLastNewEntry,   // last value of "New..." prompt
            m_strSelection;      // the full name of the entry which is selected
   long  m_bLastNewWasGroup;     // kind of last created entry (entry or group)
@@ -1365,7 +1375,7 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
                              const char *szProvName)
 {
   // check that we don't already have it
-  if ( m_astrAdb.Index(strPath) != wxNOT_FOUND ) {
+  if ( IsAdbOpened(strPath) ) {
     wxLogError(_("The address book '%s' is already opened."), strPath.c_str());
 
     return FALSE;
@@ -1481,7 +1491,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
 
   wxString strName, strWhat;
   if ( m_current->IsBook() ) {
-    // @@ should deleting the address book also delete the file??
+    // FIXME should deleting the address book also delete the file??
 
     strWhat = _("Address book");
     strName = ((AdbTreeBook *)m_current)->GetFileName();
@@ -1497,11 +1507,26 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     strName = m_current->GetName();
 
     if ( bAskConfirmation ) {
-      // ask confirmation (@@ do it for a group only?)
+      // ask confirmation
+
+      // if configPath is not empty, the user can disable the message box
+      // (suppressing it completely for the next time). As it's dangerous to
+      // delete groups without confirmation, we only enable this for simple
+      // entries, not groups.
+      wxString configPath;
+      if ( !m_current->IsGroup() ) {
+        // the place where we will store the users answer in config
+        configPath = "AdbDeleteEntry";
+      }
+
+      // construct the message
       wxString msg;
       msg.Printf(_("Really delete the %s '%s'?"),
                  strWhat.c_str(), strName.c_str());
-      if ( !MDialog_YesNoDialog(msg, this) ) {
+      if ( !MDialog_YesNoDialog(msg, this,
+                                _("Address book editor"),
+                                FALSE /* [No] default */,
+                                configPath) ) {
         wxLogStatus(this, _("Cancelled: '%s' not deleted."),
                     m_current->GetName().c_str());
         return;
@@ -1523,7 +1548,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
 
 void wxAdbEditFrame::DoRenameNode()
 {
-  NOT_IMPLEMENTED;  // @@@@ rename: probably must delete and recreate it
+  NOT_IMPLEMENTED;  // TODO rename: probably must delete and recreate it
 }
 
 void wxAdbEditFrame::AdvanceToNextFound()
@@ -1592,7 +1617,7 @@ void wxAdbEditFrame::DoFind(const char *szFindWhat, AdbTreeNode *root)
 }
 
 // pressing cancel button undoes all changes to the current entry
-// @@ perhaps it should undo all changes to the current page only?
+// FIXME perhaps it should undo all changes to the current page only?
 void wxAdbEditFrame::DoUndoChanges()
 {
   wxCHECK_RET( !m_current->IsGroup(), "command should be disabled" );
@@ -1613,6 +1638,10 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
 
     case WXMENU_ADBBOOK_OPEN:
       CreateOrOpenAdb(FALSE /* open */);
+      break;
+
+    case WXMENU_ADBBOOK_IMPORT:
+      ImportAdb();
       break;
 
     case WXMENU_ADBBOOK_PROP:
@@ -1838,6 +1867,63 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
      else {
         wxFAIL_MSG("book should be in the cache if it was created");
      }
+  }
+
+  return ok;
+}
+
+bool wxAdbEditFrame::ImportAdb()
+{
+  // ask the filename
+  wxString filename = wxPFileSelector
+                      (
+                       ADB_CONFIG_PATH "/ImportFile",
+                       _("Select the file to import data from"),
+                       READ_APPCONFIG(MP_USERDIR),
+                       "",
+                       "",
+                       _("All files (*.*)|*.*"),
+                       wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                       this
+                      );
+
+  if ( filename.IsEmpty() ) {
+    // cancelled by user
+    return FALSE;
+  }
+
+  // now get the ADB name (the ADB which will be created during import)
+  wxString adbname;
+  wxSplitPath(filename, NULL, &adbname, NULL);
+  adbname = wxGetTextFromUser(
+                              _("The address book to create: "),
+                              _("Address book editor"),
+                              adbname,
+                              this
+                             );
+
+  if ( !adbname ) {
+    // cancelled
+    return FALSE;
+  }
+
+  // TODO allow the user to choose the importer (by description) as well.
+  //      better yet, combine all three dialogs (choice of filename, adbname
+  //      and importer) into one for convinience
+
+  if ( !AdbImport(filename, adbname) )
+  {
+    // error message already logged
+    return FALSE;
+  }
+
+  // add the newly created ADB to the tree
+  bool ok = TRUE;
+  if ( !IsAdbOpened(adbname) )
+  {
+    AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
+    ok = OpenAdb(adbname, provider, provider->GetProviderName());
+    SafeDecRef(provider);
   }
 
   return ok;
@@ -2128,8 +2214,8 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 }
 
 // move selection to the specified item (full and relative paths accepted)
-// @@ if the path given doesn't exist it will expand all branches that can
-//    be expanded - but not doing so will be much more complicated
+// NB: if the path given doesn't exist it will expand all branches that can
+//     be expanded - but not doing so will be much more complicated
 bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 {
   AdbTreeElement *current = ExpandBranch(strEntry);
@@ -2502,7 +2588,8 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
       widthLabelMax = widthLabel;
   }
 
-  // @@ just don't look at this mess, ok?
+  // TODO just don't look at this mess, ok? should be done using
+  //      wxManuallyLaidOutDialog (but it didn't exist yet when I wrote this)
   size_t widthText = 2*widthLabelMax,
        heightText = TEXT_HEIGHT_FROM_LABEL(heightLabel);
   size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
@@ -2962,7 +3049,7 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
       widthMax = width;
   }
 
-  widthMax += 15; // @@ loks better like this
+  widthMax += 15; // FIXME loks better like this, but why 15?
   for ( nBtn = 0; nBtn < WXSIZEOF(aszLabels); nBtn++ ) {
     c = new wxLayoutConstraints;
     if ( nBtn == 0 )
@@ -3520,8 +3607,8 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 
 AdbTreeElement *AdbTreeNode::FindChild(const char *szName)
 {
-  // @@ we should sort the items in alphabetical order and use binary search
-  //    instead of linear search
+  // TODO we should sort the items in alphabetical order and use binary search
+  //      instead of linear search
   size_t nCount = m_children.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
     if ( m_children[n]->GetName() == szName )

@@ -78,7 +78,7 @@ extern "C"
    typedef int (* MModule_InitModuleFuncType) (int version_major,
                                                int version_minor,
                                                int version_release,
-                                               class MInterface *interface);
+                                               class MInterface *Minterface);
    /** Function type for GetName() function.
        @return pointer to a static buffer with the module name
    */
