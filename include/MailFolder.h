@@ -466,10 +466,6 @@ public:
    const char *GetClassName(void) const
       { return "MailFolder"; }
 
-   /** Get authorisation information
-    */
-   virtual void GetAuthInfo(String *login, String *password) const = 0;
-
    /**
       Returns the delimiter used to separate the components of the folder
       name

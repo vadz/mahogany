@@ -146,9 +146,6 @@ public:
 
    virtual HeaderInfoList *GetHeaders(void) const;
 
-   virtual inline void GetAuthInfo(String *login, String *password) const
-      { *login = m_Login; *password = m_Password; }
-
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
@@ -260,14 +257,6 @@ protected:
 
    /// The last seen new UID, to check for new mails:
    UIdType m_LastNewMsgUId;
-   //@}
-
-   /** @name Auth info */
-   //@{
-   /// Login for password protected mail boxes.
-   String m_Login;
-   /// Password for password protected mail boxes.
-   String m_Password;
    //@}
 
    /// a timer to update information

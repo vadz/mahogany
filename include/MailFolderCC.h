@@ -607,7 +607,7 @@ private:
    static StreamConnectionList ms_StreamList;
 
    /// adds this object to Map
-   void AddToMap(MAILSTREAM const *stream) const;
+   void AddToMap(const MAILSTREAM *stream, const String& login) const;
 
    /// remove this object from Map
    void RemoveFromMap(void) const;

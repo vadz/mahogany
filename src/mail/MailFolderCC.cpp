@@ -1366,9 +1366,6 @@ MailFolderCC::MailFolderCC(const MFolder *mfolder)
 
    m_ImapSpec = ::GetImapSpec(mfolder);
 
-   m_Login = mfolder->GetLogin();
-   m_Password = mfolder->GetPassword();
-
    // do this at the very end as it calls RequestUpdate() and so anything may
    // happen from now on
    UpdateConfig();
@@ -1546,13 +1543,16 @@ MailFolderCC::OpenFolder(const MFolder* mfolder,
       return mf;
    }
 
+   String password = mfolder->GetPassword();
+   int flags = mfolder->GetFlags();
+   FolderType folderType = mfolder->GetType();
+
    // ask the password for the folders which need it but for which it hadn't
    // been specified during creation
    bool userEnteredPwd = false;
-   String password = mfolder->GetPassword();
    if ( !AskPasswordIfNeeded(mfolder->GetFullName(),
-                             mfolder->GetType(),
-                             mfolder->GetFlags(),
+                             folderType,
+                             flags,
                              &login,
                              &password,
                              &userEnteredPwd) )
@@ -1565,6 +1565,11 @@ MailFolderCC::OpenFolder(const MFolder* mfolder,
 
    // create the mail folder and init its members
    mf = new MailFolderCC(mfolder);
+
+   if ( FolderTypeHasUserName(folderType) && !(flags & MF_FLAGS_ANON) )
+   {
+      SetLoginData(login, password);
+   }
 
    bool ok = TRUE;
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
@@ -1819,10 +1824,6 @@ MailFolderCC::Open(OpenMode openmode)
    UpdateTimeoutValues();
 
    FolderType folderType = GetType();
-   if( FolderTypeHasUserName(folderType) )
-   {
-      SetLoginData(m_Login, m_Password);
-   }
 
    // for files, check whether mailbox is locked, c-client library is
    // to dumb to handle this properly
@@ -1950,7 +1951,7 @@ MailFolderCC::Open(OpenMode openmode)
    // folder really opened!
 
    // now we are known
-   AddToMap(m_MailStream);
+   AddToMap(m_MailStream, MF_user);
 
    if ( frame )
    {
@@ -2174,7 +2175,7 @@ MailFolderCC *MailFolderCC::ms_StreamListDefaultObj = NULL;
 
 /// adds this object to Map
 void
-MailFolderCC::AddToMap(MAILSTREAM const *stream) const
+MailFolderCC::AddToMap(const MAILSTREAM *stream, const String& login) const
 {
    wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::AddToMap() for folder %s",
               GetName().c_str());
@@ -2203,7 +2204,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
    conn->name = m_ImapSpec;
-   conn->login = m_Login;
+   conn->login = login;
    ms_StreamList.push_front(conn);
 
    CHECK_STREAM_LIST();
