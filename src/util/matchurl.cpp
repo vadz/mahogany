@@ -37,10 +37,16 @@ class KeywordDetectorCell {
   friend class KeywordDetector;
 
 public:
-  KeywordDetectorCell(char c) : 
-      _c(c), _son(0), _brother(0), _isKey(0), _back(0) {}
+  KeywordDetectorCell(char c) :
+      _c(c), _son(NULL), _brother(NULL), _isKey(0), _back(NULL) {}
 
-private: 
+  ~KeywordDetectorCell()
+  {
+     delete _son;
+     //delete _brother; -- this results in infinite recursion somehow
+  }
+
+private:
   char _c;
   KeywordDetectorCell* _son;
   KeywordDetectorCell* _brother;
@@ -59,8 +65,8 @@ private:
   */
 class KeywordDetector {
 public:
-  KeywordDetector() : _root(0) {};
-  ~KeywordDetector() {};
+  KeywordDetector() : _root(NULL) { }
+  ~KeywordDetector() { delete _root; }
 
 public:
 
@@ -98,10 +104,10 @@ public:
 
 
 private:
-  void addNewKeyword(const char* key, 
+  void addNewKeyword(const char* key,
                      KeywordDetectorCell* current,
                      int toBeAdded = 1);
-  int scanAtStart(const char* toBeScanned, 
+  int scanAtStart(const char* toBeScanned,
                   KeywordDetectorCell* current,
                   int longueurDejaVue, int lngDernierTrouve);
   int scan(const char* toBeScanned, int& lng, KeywordDetectorCell* current);
@@ -138,7 +144,7 @@ void KeywordDetector::addNewKeyword(const char* key) {
 }
 
 
-void KeywordDetector::addNewKeyword(const char* key, 
+void KeywordDetector::addNewKeyword(const char* key,
                                     KeywordDetectorCell* current,
                                     int toBeAdded) {
   if (! current) {
@@ -189,15 +195,15 @@ int KeywordDetector::scanAtStart(const char* toBeScanned, KeywordDetectorCell* c
       // let's try to find a longer one, but do
       // remember that we already saw one, the length
       // of which is longueurDejaVue+1
-      return scanAtStart(toBeScanned+1, 
-                         current->_son, 
-                         longueurDejaVue+1, 
+      return scanAtStart(toBeScanned+1,
+                         current->_son,
+                         longueurDejaVue+1,
                          longueurDejaVue+1);
     } else {
       // This is not the end of a keyword
       // Go on
       assert(current->_son);
-      return scanAtStart(toBeScanned+1, current->_son, longueurDejaVue+1, lngDernierTrouve); 
+      return scanAtStart(toBeScanned+1, current->_son, longueurDejaVue+1, lngDernierTrouve);
     }
   } else {
     // Not a correct cell
@@ -207,7 +213,7 @@ int KeywordDetector::scanAtStart(const char* toBeScanned, KeywordDetectorCell* c
       return lngDernierTrouve;
     } else {
       // There is another cell to try
-      return scanAtStart(toBeScanned, current->_brother, longueurDejaVue, lngDernierTrouve);  
+      return scanAtStart(toBeScanned, current->_brother, longueurDejaVue, lngDernierTrouve);
     }
   }
 }
@@ -232,10 +238,10 @@ int KeywordDetector::scan(const char* toBeScanned, int& lng, KeywordDetectorCell
         // let's try to find a longer one, but do
         // remember that we already saw one, the length
         // of which is longueurDejaVue+1
-        
-        lng =  scanAtStart(toBeScanned+1, 
-                           current->_son, 
-                           lng+1, 
+
+        lng =  scanAtStart(toBeScanned+1,
+                           current->_son,
+                           lng+1,
                            lng+1);
         return currentPosition;
       } else {
