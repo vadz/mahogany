@@ -5,7 +5,11 @@ include ../../makeopts
 
 # Need SRC for translation processing
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/*.cpp))
-TARGETS	:= strutil.o sysutil.o upgrade.o miscutil.o twofish2.o ssl.o
+TARGETS	:= strutil.o sysutil.o upgrade.o miscutil.o twofish2.o
+
+ifdef USE_SSL
+TARGETS += ssl.o
+endif
 
 ifdef USE_LEAKTRACER
 TARGETS	+= LeakTracer.o
