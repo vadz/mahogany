@@ -2009,54 +2009,41 @@ SendMessageCC::Send(int flags)
                             MDIALOG_MSGTITLE,
                             _T("MailSentMessage"));
          }
+
+         return true;
       }
-      else // failed to send/post
-      {
-         MLogCircle& log = MailFolder::GetLogCircle();
-         if ( !reply.empty() )
-         {
-            log.Add(reply);
-         }
-
-         const String explanation = log.GuessError();
-
-         // give the general error message anyhow
-         String err = m_Protocol == Prot_SMTP ? _("Failed to send the message.")
-                                              : _("Failed to post the article.");
-
-         // and then try to give more details about what happened
-         if ( !explanation.empty() )
-         {
-            err << _T("\n\n") << explanation;
-         }
-         else if ( !reply.empty() )
-         {
-            // no explanation, at least show the server error message
-            err << _T("\n\n") << _("Server error: ") << reply;
-         }
-
-         ERRORMESSAGE((_T("%s"), err.c_str()));
-      }
+      //else: failed to send/post
    }
-   else // error in opening stream
+   //else: error in opening stream
+
+   MLogCircle& log = MailFolder::GetLogCircle();
+   if ( !reply.empty() )
    {
-      String err;
-      err.Printf(_("Cannot open connection to the %s server '%s'."),
-               m_Protocol == Prot_SMTP ? "SMTP" : "NNTP",
-                 m_ServerHost.c_str());
+      log.Add(reply);
 
-      String explanation = MailFolder::GetLogCircle().GuessError();
-      if ( !explanation.empty() )
-      {
-         err << _T("\n\n") << explanation;
-      }
-
-      ERRORMESSAGE((_T("%s"), err.c_str()));
-
-      success = false;
+      // always show the server reply but do it first so it's not the top most
+      // message show
+      ERRORMESSAGE((_T("%s"), reply.c_str()));
    }
 
-   return success;
+   // give the general error message anyhow
+   String err = m_Protocol == Prot_SMTP ? _("Failed to send the message")
+                                        : _("Failed to post the article");
+
+   // and then try to give more details about what happened
+   const String explanation = log.GuessError();
+   if ( explanation.empty() )
+   {
+      err += _T(".");
+   }
+   else // have explanation
+   {
+      err += _T(":\n\n") + explanation;
+   }
+
+   ERRORMESSAGE((_T("%s"), err.c_str()));
+
+   return false;
 }
 
 // ----------------------------------------------------------------------------
