@@ -445,6 +445,9 @@ public:
    /// return true if we have either selection or valid focus
    bool HasSelection() const;
 
+   /// return the position of the given UID in the control or -1
+   long GetPosFromUID(UIdType uid);
+
    //@}
 
    /// @name the event handlers
@@ -1253,10 +1256,6 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
-   long item = event.m_itemIndex;
-
-   wxLogTrace(M_TRACE_FV_SELECTION, "%ld was selected", item);
-
    if ( m_enableOnSelect )
    {
       // update it as it is normally only updated in OnIdle() which wasn't
@@ -1604,8 +1603,17 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    CHECK( idx != -1 && uid != UID_ILLEGAL, false,
           "invalid params in SetPreviewMsg" );
 
+   // note that the item which has just been selected for being previewed must
+   // be focused too
+   m_itemFocus =
    m_itemPreviewed = idx;
+
+   m_uidFocus =
    m_uidPreviewed = uid;
+
+   wxLogTrace(M_TRACE_FV_SELECTION,
+              "SetPreviewMsg(): index = %ld, UID = %08x",
+              idx, uid);
 
    // as folder view calls us itself, no need to notify it
    wxFolderListCtrlBlockOnSelect noselect(this);
@@ -1624,11 +1632,25 @@ void wxFolderListCtrl::InvalidatePreview()
 {
    m_itemPreviewed = -1;
    m_uidPreviewed = UID_ILLEGAL;
+
+   wxLogTrace(M_TRACE_FV_SELECTION, "Invalidated preview");
 }
 
 // ----------------------------------------------------------------------------
 // wxFolderListCtrl header info
 // ----------------------------------------------------------------------------
+
+long wxFolderListCtrl::GetPosFromUID(UIdType uid)
+{
+   MLocker lockHeaders(m_mutexHeaders);
+
+   MFInteractiveLock lock(m_FolderView->GetMailFolder(),
+                          (MFrame *)GetFrame(this));
+
+   size_t idx = m_headers->GetIdxFromUId(uid);
+
+   return idx == INDEX_ILLEGAL ? -1 : (long)m_headers->GetPosFromIdx(idx);
+}
 
 void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
 {
@@ -1636,27 +1658,50 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
    {
       CHECK_RET( headers, "wxFolderListCtrl::UpdateListing: NULL listing" );
 
-      // we don't need it
+      // we already have it
       headers->DecRef();
 
       // keep the same item selected if possible: use its UID as its index
       // might have changed if the sort order in the folder changed
+      long posFocus = -1; // the new position of the focused item
       if ( m_uidFocus != UID_ILLEGAL )
       {
-         MLocker lockHeaders(m_mutexHeaders);
-
-         MFInteractiveLock lock(m_FolderView->GetMailFolder(),
-                                (MFrame *)GetFrame(this));
-
-         size_t idx = m_headers->GetIdxFromUId(m_uidFocus);
-         if ( idx != INDEX_ILLEGAL )
+         posFocus = GetPosFromUID(m_uidFocus);
+         if ( posFocus != -1 )
          {
-            Focus(m_headers->GetPosFromIdx(idx));
+            Focus(posFocus);
          }
       }
       else
       {
          ASSERT_MSG( m_itemFocus == -1, "why no focused UID?" );
+      }
+
+      // TODO: should keep the currently selected items selected - but for
+      //       this we need to store UIDs for all of them which we don't do
+      //       currently :-(
+      m_FolderView->SelectAll(false);
+
+      // so for now just make sure that the unique selected message, if any, is
+      // updated correctly
+      if ( m_selIsUnique == 1 && m_uidPreviewed != UID_ILLEGAL )
+      {
+         // a common optimization for the case when the same message is both
+         // focused and previewed
+         long posPreview;
+         if ( m_uidPreviewed == m_uidFocus && posFocus != -1 )
+         {
+            posPreview = posFocus;
+         }
+         else // need to find it out
+         {
+            posPreview = GetPosFromUID(m_uidPreviewed);
+         }
+
+         if ( posPreview != -1 )
+         {
+            Select(posPreview, true);
+         }
       }
 
       // just show the new items
@@ -1739,6 +1784,10 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
          if ( m_uidFocus == UID_ILLEGAL )
          {
             self->m_uidFocus = GetUIdFromIndex(index);
+
+            wxLogTrace(M_TRACE_FV_SELECTION,
+                       "Updated focused UID, now %08x (index = %ld)",
+                       m_uidFocus, index);
          }
       }
 
@@ -1793,6 +1842,10 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
          if ( m_headers->IsInCache(m_itemFocus) )
          {
             m_uidFocus = GetUIdFromIndex(m_itemFocus);
+
+            wxLogTrace(M_TRACE_FV_SELECTION,
+                       "Updated focused UID from OnIdle(), now %08x (index = %ld)",
+                       m_uidFocus, m_itemFocus);
 
             m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
          }
@@ -2014,8 +2067,11 @@ void wxFolderListCtrl::UpdateFocus()
          // retrieve the focused item anyhow
          m_uidFocus = UID_ILLEGAL;
       }
-   }
 
+      wxLogTrace(M_TRACE_FV_SELECTION,
+                 "UpdateFocus(): index = %ld, UID = %08x",
+                 itemFocus, m_uidFocus);
+   }
 }
 
 void wxFolderListCtrl::UpdateUniqueSelFlag()
