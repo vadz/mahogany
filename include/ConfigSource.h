@@ -40,6 +40,8 @@
 
 #include "MObject.h"
 
+#include "MModule.h"
+
 class WXDLLEXPORT wxConfigBase;
 
 /**
@@ -97,6 +99,16 @@ public:
 
    /// Get the (untranslated and hence not user-readable) name of this object
    const String& GetName() const { return m_name; }
+
+   /**
+      Return true if the object was created successfully.
+
+      This is used by ConfigSourceFactory and classes derived from it created
+      by IMPLEMENT_CONFIG_SOURCE().
+
+      @return true if ok, if false the config source object can't be used
+    */
+   virtual bool IsOk() const = 0;
 
    /// Return true if this object may be used without network
    virtual bool IsLocal() const = 0;
@@ -216,7 +228,7 @@ private:
    local file/whatever and this explains its name (and also the fact that
    ConfigSourceConfig would have been really ugly).
  */
-class ConfigSourceDefault
+class ConfigSourceLocal : public ConfigSource
 {
 public:
    /**
@@ -227,10 +239,12 @@ public:
       @sa ConfigSource::CreateDefault()
 
       @param filename the name of config file or empty
+      @param name the name for the ConfigSource object
     */
-   ConfigSourceDefault(const String& filename);
+   ConfigSourceLocal(const String& filename, const String& name = _T(""));
 
    // implement base class pure virtuals
+   virtual bool IsOk() const;
    virtual bool IsLocal() const;
    virtual bool Read(const String& name, String *value);
    virtual bool Read(const String& name, long *value);
@@ -246,6 +260,102 @@ public:
 private:
    wxConfigBase *m_config;
 };
+
+
+/**
+   ConfigSourceFactory creates ConfigSource objects.
+
+   This class is used to create config sources from their types.
+
+   It derives from MModule which means that config source factories can be
+   loaded during run-time as/if needed.
+ */
+class ConfigSourceFactory : public MModule
+{
+public:
+   /**
+      Finds the factory for creating the config sources of given type.
+
+      @param type the config source type ("file", "imap", ...)
+      @return the factory for the objects of this type or NULL if none
+    */
+   static ConfigSourceFactory *Find(const String& type);
+
+   /**
+      Creates the config source object.
+
+      The parameters of the object are read from a section of an existing
+      (normally the default one) config. The last component of the group name
+      also specifies the name to be used for the new config source object.
+
+      @param config the existing config source containing all parameters
+      @param name the config section containing the parameters
+      @return new config source or NULL if creation failed.
+    */
+   virtual ConfigSource *Create(const ConfigSource& config,
+                                const String& name) = 0;
+};
+
+DECLARE_AUTOPTR(ConfigSourceFactory);
+
+/**
+   The config source module interface name.
+
+   ConfigSourceFactory::Find() uses this to find all modules containing
+   ConfigSourceFactory implementations.
+ */
+#define CONIFG_SOURCE_INTERFACE _T("ConfigSource")
+
+/**
+   This macro is used to create ConfigSourceFactory-derived classes.
+
+   The implementation of classes deriving from ConfigSourceFactory is
+   straightforward: we just have to create an object of the specified class in
+   Create() and return it so we provide a macro to automate this.
+
+   This macro relies on cname having a ctor taking the same parameters as our
+   Create().
+
+   @param cname the name of the ConfigSource-derived class
+   @param type config source type supported by this factory, must be a literal
+          constant
+   @param desc the short description shown in the config sources dialog
+   @param cpyright the module author/copyright string
+ */
+#define IMPLEMENT_CONFIG_SOURCE(cname, type, desc, cpyright)               \
+   class cname##Factory : public ConfigSourceFactory                       \
+   {                                                                       \
+   public:                                                                 \
+      virtual const char *GetType() const { return type; }                 \
+                                                                           \
+      virtual ConfigSource *Create(const ConfigSource& config,             \
+                                   const St& name)                         \
+      {                                                                    \
+         cname *configNew = new cname(config, name);                       \
+         if ( !configNew->IsOk() )                                         \
+         {                                                                 \
+            delete configNew;                                              \
+            configNew = NULL;                                              \
+         }                                                                 \
+                                                                           \
+         return configNew;                                                 \
+      }                                                                    \
+                                                                           \
+      MMODULE_DEFINE();                                                    \
+      DEFAULT_ENTRY_FUNC;                                                  \
+   };                                                                      \
+   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
+                           CONIFG_SOURCE_INTERFACE, desc, "1.00")          \
+      MMODULE_PROP("author", cpyright)                                     \
+   MMODULE_END_IMPLEMENT(cname##Factory)                                   \
+   MModule *cname##Factory::Init(int /* version_major */,                  \
+                                 int /* version_minor */,                  \
+                                 int /* version_release */,                \
+                                 MInterface * /* minterface */,            \
+                                 int * /* errorCode */)                    \
+   {                                                                       \
+      return new cname##Factory();                                         \
+   }
 
 #endif // _M_CONFIGSOURCE_H_
 
