@@ -1,5 +1,4 @@
-#This file was created by <karsten> Mon Jan 10 17:30:03 2000
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -58,7 +57,7 @@ Copyright 1997-1999 by Karsten Ballüder
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents
+\begin_inset LatexCommand \tableofcontents{}
 
 \end_inset 
 
@@ -93,22 +92,15 @@ Before you can compile Mahogany, you will need a matching copy of
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/}
+htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/} 
 \latex default 
-, that is, if compiling under Unix, you will need 
+.As wxWindows/wxGTK is under constant development, you should use the same
+ copy of wxGTK that we used to build Mahogany, you can get it from the 
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{wxGTK}{http://www.wxwindows.org/dl_gtk.htm}
-\latex default 
-.
- As wxGTK is under constant development, you should use the same copy of
- wxGTK that we used to build Mahogany, you can get it from the 
-\latex latex 
-
-\backslash 
-htmladdnormallinkfoot{Mahogany download page}{http://www.wxwindows.org/Mahogany/
-download.html}
+htmladdnormallinkfoot{Mahogany download page}{http://mahogany.sourceforge.net/down
+load.html}
 \latex default 
 .
 \layout Subsection
@@ -543,7 +535,8 @@ Any other projects in the workspace shouldn't be used and should be left
 After loading the ones which you need (C-Client is mandatory, all the other
  optional), you may start the build.
  It should succeed :-) If it doesn't, please report the build log with the
- explanation of what happened to mahogany-developers@lists.sourceforge.net mailing list.
+ explanation of what happened to mahogany-developers@lists.sourceforge.net
+ mailing list.
 \layout Enumerate
 
 Notice that the environment variable WX must be set before you launch MSDEV.EXE
@@ -573,7 +566,8 @@ The list of all Mahogany source files can be found by looking at the Makefile
 Add all of the sources to the makefile/project file and also add the resource
  file res/M.rc to the project, choose the same options as for wxWindows compilati
 on and see what happens.
- If it doesn't work, send you questions to the usual place (mahogany-developers@lists.sourceforge.net).
+ If it doesn't work, send you questions to the usual place (mahogany-developers@
+lists.sourceforge.net).
  If it does work, please tell us about it as well so that this file could
  be updated.
 \layout Subsection
@@ -942,8 +936,8 @@ wxWindows is available from
 http://www.wxwindows.org/
 \layout Itemize
 
-The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/
-dl_gtk.htm
+The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/dl_g
+tk.htm
 \layout Standard
 
 In order to compile this alpha release of 

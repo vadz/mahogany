@@ -13,7 +13,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \usepackage{html, epsfig}
 \makeatletter
-
 \makeatother
 
 \begin{document}
@@ -48,10 +47,9 @@ mailing list instead.
 
 \subsection{Prerequisites}
 
-Before you can compile Mahogany, you will need a matching copy of \htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/},
-that is, if compiling under Unix, you will need \htmladdnormallinkfoot{wxGTK}{http://www.wxwindows.org/dl_gtk.htm}.
-As wxGTK is under constant development, you should use the same copy of wxGTK
-that we used to build Mahogany, you can get it from the \htmladdnormallinkfoot{Mahogany download page}{http://www.wxwindows.org/Mahogany/download.html}.
+Before you can compile Mahogany, you will need a matching copy of \htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/} .As
+wxWindows/wxGTK is under constant development, you should use the same copy
+of wxGTK that we used to build Mahogany, you can get it from the \htmladdnormallinkfoot{Mahogany download page}{http://mahogany.sourceforge.net/download.html}.
 
 
 \subsection{Configuring wxGTK}
@@ -267,8 +265,8 @@ files in that directory. \\
 Add all of the sources to the makefile/project file and also add the resource
 file res/M.rc to the project, choose the same options as for wxWindows compilation
 and see what happens. If it doesn't work, send you questions to the usual place
-(mahogany-developers@lists.sourceforge.net). If it does work, please tell us about it as well
-so that this file could be updated.
+(mahogany-developers@lists.sourceforge.net). If it does work, please tell us
+about it as well so that this file could be updated.
 \end{enumerate}
 
 \subsection{DEC Alpha with Digital UNIX 3.2c}
@@ -364,7 +362,7 @@ Further Information
 
 \begin{itemize}
 \item wxWindows is available from \texttt{http://www.wxwindows.org/}
-\item The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/dl_gtk.htm
+\item The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/dl\_gtk.htm
 \end{itemize}
 In order to compile this alpha release of \emph{Mahogany} you will need wxWindows
 2.0 strictly later than beta 3 and so it is probably easier to take the wxWindows
