@@ -3127,13 +3127,6 @@ wxLayoutPrintout::~wxLayoutPrintout()
 float
 wxLayoutPrintout::ScaleDC(wxDC *dc)
 {
-   // The following bit is taken from the printing sample, let's see
-   // whether it works for us.
-
-   /* You might use THIS code to set the printer DC to ROUGHLY reflect
-    * the screen text size. This page also draws lines of actual length 5cm
-    * on the page.
-    */
   // Get the logical pixels per inch of screen and printer
    int ppiScreenX, ppiScreenY;
    GetPPIScreen(&ppiScreenX, &ppiScreenY);
@@ -3172,6 +3165,7 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
   }
   dc->SetUserScale(scale, scale);
   return scale;
+
 }
 
 bool
@@ -3191,18 +3185,20 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 
    if (!dc)
       return false;
-
-   //ScaleDC(dc);
    
    int top, bottom;
+   int marginX = 20;   // HACK ALERT
+   int marginY = 20;   // HACK ALERT
+
+
    top = (page - 1)*m_PrintoutHeight;
-   bottom = top + m_PrintoutHeight; 
+   bottom = top + m_PrintoutHeight;
 
    WXLO_DEBUG(("OnPrintPage(%d) printing from %d to %d", page, top, bottom));
 
    // SetDeviceOrigin() doesn't work here, so we need to manually
    // translate all coordinates.
-   wxPoint translate(0, -top);
+   wxPoint translate(marginX, - top - marginY);  // HACK ALERT
    m_llist->ForceTotalLayout(TRUE);  // for the first time, do all
    m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly */);
 
@@ -3233,6 +3229,10 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 
    // leave margins
    psdc->GetSize(&m_PageWidth, &m_PageHeight);
+
+   // HACK ALERT 
+   m_PageWidth -= 40;
+   m_PageHeight -= 40;
 
    // This is the length of the printable area.
    m_PrintoutHeight = m_PageHeight;
@@ -3314,4 +3314,3 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    dc.SetFont(font);
 }
 #endif // 0
-
