@@ -554,6 +554,9 @@ match:
             break;
          }
 
+         // this test doesn't reduce the number of false positives all that
+         // much, finally, but does result in non recognizing some wrapped URLs
+#if 0
          // even with all the checks below we still get too many false
          // positives so consider that only "long" URLs are wrapped where long
          // URLs are defined as the ones containing the CGI script parameters
@@ -562,6 +565,38 @@ match:
          {
             // no CGI parameters, suppose it can't wrap
             break;
+         }
+#endif // 0
+
+         // heuristic text for end of URL detection: consider that if it ends
+         // with an extension (i.e. ".xyz") then it's the end of the URL
+         if ( p - start > 5 && p[-4] == '.' &&
+               isalnum(p[-3]) && isalnum(p[-2]) && isalnum(p[-1]) )
+         {
+            // some special cases where the URL could still be wrapped: html,
+            // jpeg and tiff are common 4 letter extension
+            static const char *longExtensions[] =
+            {
+               "html", "jpeg", "tiff"
+            };
+
+            size_t n;
+            for ( n = 0; n < WXSIZEOF(longExtensions); n++ )
+            {
+               const char * const ext = longExtensions[n];
+               if ( strncmp(p - 3, ext, 3) == 0 && p[2] == ext[3] )
+               {
+                  // looks like a long extension got wrapped
+                  break;
+               }
+            }
+
+            if ( n == WXSIZEOF(longExtensions) )
+            {
+               // it doesn't look that extension is continued on the next line,
+               // consider this to be the end of the URL
+               break;
+            }
          }
 
          // Check that the beginning of next line is not the start of
@@ -579,7 +614,7 @@ match:
          }
 
          // it might be a wrapped URL but it might be not: it seems like we
-         // get way too many false positives if we suppose that it's already
+         // get way too many false positives if we suppose that it's always
          // the case... so restrict the wrapped URLs detection to the case
          // when they occur at the beginning of the line, possibly after some
          // white space as this is how people usually format them
@@ -595,15 +630,15 @@ match:
          if ( q >= text && *q != '\n' && *q != '<')
             break;
 
-         // it did occur at the start (or after '<'), suppose the URL is wrapped and so
-         // continue on the next line (no need to test the first character,
-         // it had been already done above)
+         // it did occur at the start (or after '<'), suppose the URL is
+         // wrapped and so continue on the next line (no need to test the first
+         // character, it had been already done above)
          p += 3;
       }
    }
 
    // truncate any punctuation at the end
-   while ( strchr(".:,;)", *(p - 1)) )
+   while ( strchr(".:,;)!?", *(p - 1)) )
       p--;
 
    len = p - start;
