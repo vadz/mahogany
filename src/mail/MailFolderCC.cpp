@@ -138,7 +138,16 @@ MailFolderCC::Create(String const & iname)
       if(strutil_isempty(filename)) // assume we are a file
       {
          SetType(MF_FILE);
-         Open(iname);
+         if(iname != DIR_SEPARATOR)
+         {
+            String tmp;
+            tmp = READ_CONFIG(profile,MP_MBOXDIR);
+            tmp += DIR_SEPARATOR;
+            tmp += iname;
+            Open(tmp);
+         }
+         else
+            Open(iname);
       }
       else
       {
@@ -187,18 +196,25 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
       }
 }
 
+
+void
+MailFolderCC::AppendMessage(String const &msg)
+{
+   STRING str;
+
+   INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
+
+   if(! mail_append(NIL,(char *)realName.c_str(),&str))
+      ERRORMESSAGE(("cannot append message"));
+}
+
 void
 MailFolderCC::AppendMessage(Message const &msg)
 {
    String tmp;
-   STRING str;
 
    msg.WriteString(tmp);
-
-   INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
-
-   if(! mail_append(NIL,(char *)realName.c_str(),&str))
-      ERRORMESSAGE(("cannot append message"));
+   AppendMessage(tmp);
 }
 
 void

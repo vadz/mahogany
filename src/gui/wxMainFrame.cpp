@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$           *
+ * $Id$
  *
  *******************************************************************/
 
@@ -32,7 +32,6 @@
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
-//  EVT_SIZE    (wxMFrame::OnSize)
   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 END_EVENT_TABLE()
@@ -49,6 +48,32 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddFileMenu();
    AddEditMenu();
    AddHelpMenu();
+
+#ifndef  USE_WXWINDOWS2
+   CreateStatusLine(1);
+   return;
+#endif
+   CreateStatusBar();
+
+   int x,y;
+   GetClientSize(&x, &y);
+
+   m_FolderView = NULL;
+   m_splitter = new wxSplitterWindow(this,-1,wxPoint(1,31),wxSize(x-1,y-31),wxSP_3D|wxSP_BORDER);
+   const char *foldername = READ_APPCONFIG(MC_MAINFOLDER);
+  //FIXME: insert treectrl here
+   if(! strutil_isempty(foldername))
+   {
+      m_FolderView = new wxFolderView(foldername,m_splitter);
+      //m_splitter->SplitVertically(new wxPanel(m_splitter), //FIXME: insert treectrl
+      //                            m_FolderView->GetWindow(),x/3);
+      // FIXME for now:
+      m_splitter->Initialize(m_FolderView->GetWindow());
+      AddMessageMenu();
+   }
+   else
+      m_splitter->Initialize(new wxPanel(m_splitter));  //FIXME: insert treectrl
+
    SetMenuBar(m_MenuBar);
 
 #ifdef USE_WXWINDOWS2
@@ -71,29 +96,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 #	endif // Windows
 #endif // wxWin 2
    
-
-#ifndef  USE_WXWINDOWS2
-   CreateStatusLine(1);
-   return;
-#endif
-   CreateStatusBar();
-
-   int x,y;
-   GetClientSize(&x, &y);
-
-   m_FolderView = NULL;
-   m_splitter = new wxSplitterWindow(this,-1,wxPoint(1,31),wxSize(x-1,y-31),wxSP_3D);
-   const char *foldername = READ_APPCONFIG(MC_MAINFOLDER);
-  //FIXME: insert treectrl here
-   if(! strutil_isempty(foldername))
-   {
-      m_FolderView = new wxFolderView(foldername,m_splitter);
-      m_splitter->SplitVertically(new wxPanel(m_splitter), //FIXME: insert treectrl
-                                  m_FolderView->GetWindow(),x/3);
-   }
-   else
-      m_splitter->Initialize(new wxPanel(m_splitter));  //FIXME: insert treectrl
-
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
 }
@@ -114,15 +116,3 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       wxMFrame::OnMenuCommand(id);
 }
 
-#if 0
-void
-wxMainFrame::OnSize( wxSizeEvent &event )
-   
-{
-   int x = 0;
-   int y = 0;
-   GetClientSize( &x, &y );
-//   if(m_ToolBar)  m_ToolBar->SetSize( 1, 0, x-2, 30 );
-   if(m_splitter) m_splitter->SetSize(0,0,x,y);
-};
-#endif

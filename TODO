@@ -2,8 +2,10 @@ TODO list for M
 $Id$
 
 *** things to fix/implement next ***
-- "clear" menu in ComposeView?
+
 - toolbar/Send button in ComposeView ?
+
+- new mail callback
 
 - SendMessageCC
   + add folder aliases (trivial)
@@ -83,11 +85,21 @@ $Id$
 
 - creation of separate index files for mail folders
 
+********************* targets for re-write **********************
 
+Clean up MailFolder/Message classes as part of header/class rewrite
+for modularisation. Share common code in
+MessageCC/MailFolderCC/SendMessageCC and somehow integrate SendMessage 
+classes in the hierarchy.
+
+Create a function to expand path names, including ~ or $HOME.
+Create a module to deal with all kinds of pathname lookups and
+expansions. 
 ********************* known wxWindows bugs **********************
 
-- wxWindow position not updated when frame is moved (wxGTK)
 - drawing of transparent icons on wxDC gives undefined background (wxGTK)
+  --> can be fixed by setting a parameter. Is fixed now?
+
 - wxDC::GetTextExtent() does not set descent value (wxGTK)
 - font mess (wxGTK)
 - constraints

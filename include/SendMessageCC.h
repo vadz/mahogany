@@ -61,11 +61,21 @@ public:
                 MessageParameterList const *dlist = NULL,
                 MessageParameterList const *plist = NULL);
 
+   /** Writes the message to a String
+       @param output string to write to
+   */
+   void WriteToString(String  &output);
+
    /** Writes the message to a file
        @param filename file where to write to
        @param append if false, overwrite existing contents
    */
-   void Write(String const &filename, bool append = true);
+   void WriteToFile(String const &filename, bool append = true);
+   
+   /** Writes the message to a folder.
+       @param foldername file where to write to
+   */
+   void WriteToFolder(String const &foldername);
    
    /// Sends the message.
    void Send(void);
@@ -74,11 +84,10 @@ public:
    ~SendMessageCC();
 
 protected:
-   ///Builds the message, i.e. prepare to send it.
+   /// Builds the message, i.e. prepare to send it.
    void Build(void);
-   
 private:
-   /// 2nd stage constructor, see constructor
+/// 2nd stage constructor, see constructor
    void Create(ProfileBase *iprof = NULL);
    /// 2nd stage constructor, see constructor
    void	Create(ProfileBase *iprof, String const &subject,
@@ -91,7 +100,12 @@ private:
    const char **m_headerValues;
    /// a list of all headers
    kbStringList m_headerList;
-   //@}
+
+   /// a list of folders to save copies in
+   kbStringList m_FccList;
+   /// Parses string for folder aliases, removes them and stores them in m_FccList.
+   void ExtractFccFolders(String &addresses);
+//@}
    
 };
 

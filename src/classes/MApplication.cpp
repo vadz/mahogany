@@ -225,6 +225,18 @@ MAppBase::OnStartup()
       wxLogDebug("Opening folder '%s'...", (*i)->c_str());
       (void) new wxFolderViewFrame((**i),topLevelFrame);
    }
+
+   // now that we have the local dir, we can set up a default mail
+   // folder dir
+   profile->GetConfig()->SET_PATH(M_PROFILE_CONFIG_SECTION);
+   tmp = READ_CONFIG(profile,MP_MBOXDIR);
+   if(strutil_isempty(tmp))
+   {
+      tmp = localDir;
+      profile->writeEntry(MP_MBOXDIR, tmp.c_str());
+   }
+   // set the default path for configuration entries
+   profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
    
    return TRUE;
 }

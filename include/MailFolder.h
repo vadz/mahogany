@@ -127,6 +127,11 @@ public:
    */
    virtual void AppendMessage(Message const &msg) = 0;
 
+   /** Appends the message to this folder.
+       @param msg text of the  message to append
+   */
+   virtual void AppendMessage(String const &msg) = 0;
+
    /** Expunge messages.
      */
    virtual void ExpungeMessages(void) = 0;

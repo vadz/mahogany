@@ -120,6 +120,8 @@
 #define   MP_RETURN_HOSTNAME      "ReturnHostName"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
+/// the directory for mbox folders
+#define   MP_MBOXDIR         "FolderDir"
 /// show CC field in message composition?
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
@@ -304,6 +306,8 @@
 #define   MP_HOSTNAME_D         ""
 /// the mail host
 #define   MP_SMTPHOST_D         "localhost"
+/// the directory for mbox folders
+#define   MP_MBOXDIR_D         ""
 // the username for returned mail
 //#define   MP_RETURN_USERNAME_D      "ReturnUserName"
 // the hostname for returned mail

@@ -149,7 +149,7 @@ private:
 
    /// compose menu
    wxMenu *composeMenu;
-
+   
    /**@name Input fields (arranged into an array) */
    //@{
       /// last length of To field (for expansion)

@@ -112,7 +112,7 @@ wxFolderListCtrl::OnSize( wxSizeEvent &event )
    
    if (m_Style & wxLC_REPORT)
       for(i = 0; i < WXFLC_NUMENTRIES; i++)
-         SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100);
+         SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100*9/10);
 }
 
 void
@@ -176,7 +176,7 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    int x,y;
    parent->GetClientSize(&x, &y);
 
-   m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D);
+   m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D,wxSP_BORDER);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,m_MessagePreview, y/3);
@@ -514,7 +514,8 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    m_ToolBar->SetSize( -1, -1, width, 30 );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, "tb_open", WXMENU_MSG_OPEN, "Open message");
+   TB_AddTool(m_ToolBar, "tb_open", WXMENU_FILE_OPEN, "Open folder");
+   TB_AddTool(m_ToolBar, "tb_mail", WXMENU_MSG_OPEN, "Open message");
    TB_AddTool(m_ToolBar, "tb_close", WXMENU_FILE_CLOSE, "Close folder");
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose message");

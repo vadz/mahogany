@@ -43,7 +43,7 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    Refresh();
    if(m_FoundObject)
    {
-      if(m_EventId)
+      if(m_EventId != -1)
       {
          wxCommandEvent commandEvent(wxEVENT_TYPE_MENU_COMMAND, m_EventId);
          commandEvent.SetEventObject( this );

@@ -40,6 +40,7 @@
 #include "MApplication.h"
 #include "Message.h"
 #include "SendMessageCC.h"
+#include "MailFolderCC.h"
 
 extern "C"
 {
@@ -76,13 +77,39 @@ SendMessageCC::Create(ProfileBase *iprof)
    m_headerNames = NULL;
    m_headerValues = NULL;
 }
-      
+
+void
+SendMessageCC::ExtractFccFolders(String &addresses)
+{
+   kbStringList addrList;
+   kbStringList::iterator i;
+   
+   char *buf = strutil_strdup(addresses);
+   // addresses are comma separated:
+   strutil_tokenise(buf, ",", addrList);
+   delete [] buf;
+   addresses = ""; // clear the address list
+   for(i = addrList.begin(); i != addrList.end(); i++)
+   {
+      strutil_delwhitespace(**i);
+      if( *((*i)->c_str()) == '#')  // folder aliases are #foldername
+         m_FccList.push_back(new String((*i)->c_str()+1)); // only the foldername
+      else
+      {
+         if(! strutil_isempty(addresses))
+            addresses += ", ";
+         addresses += **i;
+      }
+   }
+}
+
 void
 SendMessageCC::Create(ProfileBase *iprof,
                       String const &subject,
                       String const &to, String const &cc, String const &bcc)
 {
    char  *tmp, *tmp2;
+   String tmpstr;
    
    Create(iprof);
    env = mail_newenvelope();
@@ -102,15 +129,18 @@ SendMessageCC::Create(ProfileBase *iprof,
       CPYSTR(profile->readEntry(MP_RETURN_HOSTNAME,
                                 profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D)));
 
-   tmp = strutil_strdup(to); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   tmpstr = to;   ExtractFccFolders(tmpstr);
+   tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    rfc822_parse_adrlist (&env->to,tmp,tmp2);
    delete [] tmp; delete [] tmp2;
   
-   tmp = strutil_strdup(cc);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   tmpstr = cc;   ExtractFccFolders(tmpstr);
+   tmp = strutil_strdup(tmpstr);  tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    rfc822_parse_adrlist (&env->cc,tmp,tmp2);
    delete [] tmp; delete [] tmp2;
 
-   tmp = strutil_strdup(bcc); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
+   tmpstr = bcc;   ExtractFccFolders(tmpstr);
+   tmp = strutil_strdup(tmpstr); tmp2 = strutil_strdup(profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D));
    rfc822_parse_adrlist (&env->bcc,tmp,tmp2);
    delete [] tmp; delete [] tmp2;
 
@@ -213,6 +243,10 @@ SendMessageCC::Send(void)
    char
       tmpbuf[MAILTMPLEN];
 
+   kbStringList::iterator i;
+   for(i = m_FccList.begin(); i != m_FccList.end(); i++)
+      WriteToFolder(**i);
+   
    hostlist[0] = profile->readEntry(MP_SMTPHOST, MP_SMTPHOST_D);
    hostlist[1] = NIL;
    if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
@@ -283,11 +317,30 @@ static long write_output(void *stream, char *string)
       return T;
 }
 
+static long write_str_output(void *stream, char *string)
+{
+   String *o = (String *)stream;
+   *o << string;
+   return T;
+}
+
+void
+SendMessageCC::WriteToString(String  &output)
+{
+   Build();
+   
+   char *buffer = new char[HEADERBUFFERSIZE];
+
+   if(! rfc822_output(buffer, env, body, write_str_output,&output,NIL))
+      ERRORMESSAGE (("[Can't write message to string.]"));
+   delete [] buffer;
+}
+
 /** Writes the message to a file
     @param filename file where to write to
     */
 void
-SendMessageCC::Write(String const &filename, bool append)
+SendMessageCC::WriteToFile(String const &filename, bool append)
 {
    Build();
 
@@ -300,6 +353,19 @@ SendMessageCC::Write(String const &filename, bool append)
                      filename.c_str()));
    delete [] buffer;
    delete ostr;
+}
+
+void
+SendMessageCC::WriteToFolder(String const &name)
+{
+   Build();
+
+   String str;
+
+   WriteToString(str);
+   MailFolderCC *mf = MailFolderCC::OpenFolder(name);
+   mf->AppendMessage(str);
+   mf->Close();
 }
 
 SendMessageCC::~SendMessageCC()

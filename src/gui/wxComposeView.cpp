@@ -131,6 +131,26 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
 
+   int x, y;
+   GetClientSize(&x,&y);
+   m_ToolBar = CreateToolBar();
+   m_ToolBar->SetSize( -1, -1, x, 30 );
+   m_ToolBar->SetMargins( 2, 2 );
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, "tb_close", WXMENU_FILE_CLOSE, "Close Window");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, "tb_print", WXMENU_COMPOSE_PRINT, "Print");
+   TB_AddTool(m_ToolBar, "tb_new", WXMENU_COMPOSE_CLEAR, "Clear Window");
+   TB_AddTool(m_ToolBar, "tb_paste", WXMENU_COMPOSE_INSERTFILE,"Insert File");
+   TB_AddTool(m_ToolBar, "tb_mail_send", WXMENU_COMPOSE_SEND, "Send Message");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
+   m_ToolBar->AddSeparator();
+   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
+
    CreateStatusBar();
 
    // create the child controls
@@ -585,7 +605,7 @@ wxComposeView::Send(void)
       if(strutil_isempty(file))
          file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
          
-      sm.Write(file,true/*append*/);
+      sm.WriteToFile(file,true/*append*/);
       mf->Close();
    }
 }

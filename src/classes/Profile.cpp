@@ -140,6 +140,11 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
       appConfig->CHANGE_PATH(profileName.c_str());
       rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
+      if( strutil_isempty(rc))
+      {
+         appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
+         rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
+      }
       appConfig->SET_PATH(tmp.c_str());
    }
 
