@@ -100,9 +100,9 @@ public:
 
       @param msg the message to check
       @param param either empty or contains the stringified options for the
-                   filters of the form "name1=options1;...;nameN=optionsN"
+                   filters of the form "name1[=options1];...;nameN[=optionsN]"
                    where "name"s are the same as GetName() return values and
-                   "options" may be empty
+                   if options are not specified the defaults are used
       @param result place holder for the message explaining why the message was
                     deemed to be spam, if the filter can tell it, ignored if
                     the return value is false (may be NULL)
@@ -115,17 +115,26 @@ public:
    /**
       Show a GUI dialog allowing the user to configure all spam filters.
 
-      This function is a hack because it is used in two cases:
-         - to access the global filter dialog in which case params == NULL
-           and the options are read from and written to profile
-         - to configure a given spam rule (i.e. is_spam() filter function
-           call) in which case the options are contained and returned in params
+      This function shows the global filter dialog.
 
       @param parent the parent frame for the dialog
-      @param params in/out parameters describing the filters options
       @return true if something was changed, false otherwise
     */
-   static bool Configure(wxFrame *parent, String *params = NULL);
+   static bool Configure(wxFrame *parent);
+
+   /**
+      Allow the user to edit the parameters of a spam rule.
+
+      In the future this should allow specifying the options for the spam
+      filters which have any here as well, but for now we only allow to select
+      which filters are used and their order.
+
+      @param parent the parent frame for the dialog
+      @param params in/out parameters describing the filters options (must not
+                    be NULL)
+      @return true if something was changed, false otherwise
+    */
+   static bool EditParameters(wxFrame *parent, String *params);
 
    /**
       Unload all loaded spam filters.
@@ -169,6 +178,22 @@ protected:
       if ( !ms_loaded )
          DoLoadAll();
    }
+
+   /**
+      Find filter by name.
+
+      @param name the (internal) name to look for
+      @return filter with given name or NULL if not found
+    */
+   static SpamFilter *FindByName(const String& name);
+
+   /**
+      Find filter by long name.
+
+      @param lname the long name to look for
+      @return filter with given name or NULL if not found
+    */
+   static SpamFilter *FindByLongName(const String& lname);
 
 
    /**
@@ -223,12 +248,15 @@ protected:
       @param notebook the parent for the page
       @param profile the profile to use for the page settings (no need to
                      Inc/DecRef() it)
-      @param param is the argument passed to Configure()
       @return pointer to the page (which will be deleted by the caller) ot NULL
     */
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
-                                             Profile *profile,
-                                             String *params) const;
+                                             Profile *profile) const;
+
+   /**
+      Return the name of the filter as shown to the user.
+     */
+   virtual String GetLongName() const = 0;
 
    /**
       Return the internal name of this spam filter.
@@ -290,14 +318,16 @@ public:
 
   There should be no semicolon after this macro.
 
-  @param name short name of the filter
+  @param name short name of the filter (internal)
+  @param lname long name of the filter (shown to the user)
   @param cost performance cost of using this filter, from 0 to +infinity
               (cheaper filters are applied first)
  */
-#define DECLARE_SPAM_FILTER(name, cost)                                       \
+#define DECLARE_SPAM_FILTER(name, lname, cost)                                \
    public:                                                                    \
       virtual unsigned int GetCost() const { return cost; }                   \
-      virtual const wxChar *GetName() const { return _T(name); }
+      virtual const wxChar *GetName() const { return _T(name); }              \
+      virtual String GetLongName() const { return lname; }
 
 /**
   This macro must be used in the .cpp file containing the implementation of a

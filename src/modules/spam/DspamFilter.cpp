@@ -167,8 +167,7 @@ protected:
                               String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("dspam"); }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
-                                             Profile *profile,
-                                             String *params) const;
+                                             Profile *profile) const;
 
    // get the context creating it on demand
    DSPAM_CTX *GetCtx() const;
@@ -219,7 +218,7 @@ private:
 
    DspamCtx *m_ctx;
 
-   DECLARE_SPAM_FILTER("dspam", 100);
+   DECLARE_SPAM_FILTER("dspam", _("DSPAM"), 100);
 };
 
 IMPLEMENT_SPAM_FILTER(DspamFilter,
@@ -234,7 +233,6 @@ class DspamOptionsPage : public SpamOptionsPage
 {
 public:
    DspamOptionsPage(DspamFilter *filter,
-                    String *params,
                     wxNotebook *parent,
                     const wxChar *title,
                     Profile *profile,
@@ -242,7 +240,7 @@ public:
                     ConfigValuesArray aDefaults,
                     size_t nFields,
                     int image = -1)
-      : SpamOptionsPage(parent, profile, params)
+      : SpamOptionsPage(parent, profile)
    {
       m_filter = filter;
 
@@ -540,8 +538,7 @@ enum
 
 SpamOptionsPage *
 DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook,
-                              Profile *profile,
-                              String *params) const
+                              Profile *profile) const
 {
    static const wxOptionsPage::FieldInfo s_fields[] =
    {
@@ -596,7 +593,6 @@ DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook,
    return new DspamOptionsPage
               (
                   const_cast<DspamFilter *>(this),
-                  params,
                   notebook,
                   gettext_noop("DSPAM"),
                   profile,

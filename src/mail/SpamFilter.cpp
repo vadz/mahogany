@@ -38,6 +38,13 @@
 #include "SpamFilter.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// separator used between filters in is_spam() arguments
+static const wxChar FILTERS_SEPARATOR = _T(';');
+
+// ----------------------------------------------------------------------------
 // local types
 // ----------------------------------------------------------------------------
 
@@ -47,14 +54,12 @@ public:
    // we must have a non-NULL profile but we don't Inc/DecRef() it at all
    SpamOptionsDialog(wxFrame *parent,
                      Profile *profile,
-                     String *params,
                      wxImageList *imagelist)
       : wxOptionsEditDialog(parent,
                             _("Spam filters options"),
                             _T("SpamDlg"))
    {
       m_profile = profile;
-      m_params = params;
       m_imagelist = imagelist;
 
       CreateAllControls();
@@ -71,7 +76,7 @@ public:
       // now we can put the pages into it
       for ( SpamFilter *p = SpamFilter::ms_first; p; p = p->m_next )
       {
-         p->CreateOptionPage(m_notebook, m_profile, m_params);
+         p->CreateOptionPage(m_notebook, m_profile);
       }
    }
 
@@ -80,9 +85,39 @@ protected:
 
 private:
    Profile *m_profile;
-   String *m_params;
    wxImageList *m_imagelist;
 };
+
+// ----------------------------------------------------------------------------
+// local functions
+// ----------------------------------------------------------------------------
+
+// return the array containing "filter[=options]" strings from a string
+// containing all filters separated by FILTERS_SEPARATOR
+static wxArrayString SplitParams(const String& paramsAll)
+{
+   // backwards compatibility hack: for compatibility with older versions when
+   // there was only one spam filter we treat "xxx:yyy:zzz" as arguments for
+   // that filter but still add dspam
+   String paramsAllReal;
+
+   if ( paramsAll.Find(FILTERS_SEPARATOR) == wxNOT_FOUND &&
+         paramsAll.Find(_T(':')) != wxNOT_FOUND )
+   {
+      paramsAllReal << _T("headers=") << paramsAll << _T(";dspam"); 
+   }
+   else if ( paramsAll.empty() )
+   {
+      // default value, use all
+      paramsAllReal = _T("headers;dspam");
+   }
+   else // normal format already
+   {
+      paramsAllReal = paramsAll;
+   }
+
+   return strutil_restore_array(paramsAllReal, FILTERS_SEPARATOR);
+}
 
 // ----------------------------------------------------------------------------
 // local globals
@@ -97,6 +132,34 @@ static MRunFunctionAtExit gs_runFilterCleanup(SpamFilter::UnloadAll);
 
 SpamFilter *SpamFilter::ms_first = NULL;
 bool SpamFilter::ms_loaded = false;
+
+// ----------------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------------
+
+/* static */
+SpamFilter *SpamFilter::FindByName(const String& name)
+{
+   for ( SpamFilter *filter = ms_first; filter; filter = filter->m_next )
+   {
+      if ( filter->GetName() == name )
+         return filter;
+   }
+
+   return NULL;
+}
+
+/* static */
+SpamFilter *SpamFilter::FindByLongName(const String& lname)
+{
+   for ( SpamFilter *filter = ms_first; filter; filter = filter->m_next )
+   {
+      if ( filter->GetLongName() == lname )
+         return filter;
+   }
+
+   return NULL;
+}
 
 // ----------------------------------------------------------------------------
 // forward the real operations to all filters in the spam chain
@@ -137,29 +200,30 @@ SpamFilter::CheckIfSpam(const Message& msg,
    wxArrayString values;
    if ( !paramsAll.empty() )
    {
-      // hack: for backwards compatibility with older versions when there was
-      // only one spam filter
-      String paramsAllReal(paramsAll.Find(_T(';')) == wxNOT_FOUND
-                              ? _T("headers=") + paramsAll + _T(";dspam=")
-                              : paramsAll);
-
-      wxArrayString params(strutil_restore_array(paramsAllReal, _T(';')));
+      wxArrayString params(SplitParams(paramsAll));
       const size_t count = params.GetCount();
       for ( size_t n = 0; n < count; n++ )
       {
          const wxString& param = params[n];
          int pos = param.Find(_T('='));
-         if ( pos == wxNOT_FOUND )
+
+         wxString name,
+                  val;
+         if ( pos != wxNOT_FOUND )
          {
-            wxLogDebug(_T("Bogus spam function argument \"%s\" ignored."),
-                       param.c_str());
-            continue;
+            name = wxString(param, pos);
+            val = param.c_str() + pos + 1;
          }
+         else // no value, use default options
+         {
+            name = param;
+         }
+
 
          // insert the value in the same position in values array as name is
          // going to have in the names one (as it's sorted we don't know where
          // will it be)
-         values.Insert(param.c_str() + pos + 1, names.Add(wxString(param, pos)));
+         values.Insert(val, names.Add(name));
       }
    }
 
@@ -200,7 +264,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
 // ----------------------------------------------------------------------------
 
 /* static */
-bool SpamFilter::Configure(wxFrame *parent, String *params)
+bool SpamFilter::Configure(wxFrame *parent)
 {
    LoadAll();
 
@@ -230,28 +294,123 @@ bool SpamFilter::Configure(wxFrame *parent, String *params)
 
 
    // now we must select a profile from which the filters options will be read
-   // from and written to: this can be either the "real" profile or a temporary
-   // one populated with the value of *params and deleted after copying all the
-   // changes back to *params
+   // from and written to
    Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
-   if ( params )
-   {
-      // ensure that we can undo any changes later by calling Discard()
-      profile->Suspend();
-   }
 
    // do create the dialog (this will create all the pages inside its
    // CreateNotebook()) and show it
-   SpamOptionsDialog dlg(parent, profile, params, imagelist);
+   SpamOptionsDialog dlg(parent, profile, imagelist);
 
    bool ok = dlg.ShowModal() == wxID_OK;
 
-   if ( params )
+   return ok;
+}
+
+/* static */
+bool SpamFilter::EditParameters(wxFrame *parent, String *params)
+{
+   CHECK( params, false, _T("NULL params parameter") );
+
+   LoadAll();
+
+   // prepare the filter descriptions for MDialog_GetSelectionsInOrder() call
+   wxArrayString filters;
+   wxArrayInt states;
+
+   wxArrayString names = SplitParams(*params);
+   const size_t countNames = names.GetCount();
+   for ( size_t n = 0; n < countNames; n++ )
    {
-      profile->Discard();
+      const String& name = names[n];
+
+      // TODO: currently we allow only selecting filters order, not their
+      //       parameters, in the GUI
+      size_t posEq = name.find('=');
+      if ( posEq != String::npos )
+      {
+         wxLogWarning(_("This filter rule should be edited directly as it "
+                        "contains filter parameters not currently supported "
+                        "by the GUI, sorry."));
+         return false;
+      }
+
+      SpamFilter *filter = FindByName(name);
+      if ( !filter )
+      {
+         wxLogDebug(_T("invalid filter name \"%s\" in isspam()"),
+                    name.c_str());
+         continue;
+      }
+
+      if ( filters.Index(filter->GetLongName()) != wxNOT_FOUND )
+      {
+         wxLogDebug(_T("duplicate filter name \"%s\" in isspam()"),
+                    name.c_str());
+         continue;
+      }
+
+      filters.Add(filter->GetLongName());
+      states.Add(true);
    }
 
-   return ok;
+   for ( SpamFilter *filter = ms_first; filter; filter = filter->m_next )
+   {
+      if ( filters.Index(filter->GetLongName()) == wxNOT_FOUND )
+      {
+         filters.Add(filter->GetLongName());
+
+         states.Add(false);
+      }
+      //else: already added above
+   }
+
+   if ( filters.IsEmpty() )
+   {
+      wxLogWarning(_("No spam filters available, nothing to configure."));
+      return false;
+   }
+
+   // allow the user to select the filters he wants to use
+   if ( !MDialog_GetSelectionsInOrder
+         (
+            _("Please select the spam filters to use for this rule:"),
+            _("Spam Filters Selection"),
+            &filters,
+            &states,
+            _T("SpamRuleParams"),
+            parent
+         ) )
+   {
+      return false;
+   }
+
+   // and now return a string with their names
+   String paramsNew;
+   const size_t countFilters = filters.GetCount();
+   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+   {
+      if ( states[nFilter] )
+      {
+         // we need to find its name from its long name
+         SpamFilter *filter = FindByLongName(filters[nFilter]);
+         CHECK( filter, false, _T("bogus filter long name") );
+
+         if ( !paramsNew.empty() )
+            paramsNew += FILTERS_SEPARATOR;
+         paramsNew += filter->GetName();
+      }
+   }
+
+   if ( paramsNew.empty() )
+   {
+      wxLogWarning(_("At least one spam filter should be used for this rule."));
+
+      return false;
+   }
+
+   *params = paramsNew;
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -334,8 +493,7 @@ void SpamFilter::UnloadAll()
 
 SpamOptionsPage *
 SpamFilter::CreateOptionPage(wxListOrNoteBook * /* notebook */,
-                             Profile * /* profile */,
-                             String * /* params */) const
+                             Profile * /* profile */) const
 {
    return NULL;
 }

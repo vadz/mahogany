@@ -24,48 +24,19 @@
 #include "gui/wxOptionsPage.h"
 
 /**
-   SpamOptionsPage provides additional methods for serialization to/from
-   strings.
+   SpamOptionsPage is currently empty, but it was used before and is left in
+   case it may become useful in the future.
+
+   This class is used for the option pages created by the spam filters in their
+   CreateOptionPage() and shown in the spam filters options dialog.
  */
 class SpamOptionsPage : public wxOptionsPageDynamic
 {
 public:
-   SpamOptionsPage(wxNotebook *parent, Profile *profile, String *params)
+   SpamOptionsPage(wxNotebook *parent, Profile *profile)
       : wxOptionsPageDynamic(parent)
    {
-      m_profile = profile;
-      m_params = params;
    }
-
-   virtual bool TransferDataToWindow()
-   {
-      if ( m_params )
-      {
-         WriteParamsToProfile();
-      }
-
-      return wxOptionsPageDynamic::TransferDataToWindow();
-   }
-
-   virtual bool TransferDataFromWindow()
-   {
-      if ( !wxOptionsPageDynamic::TransferDataFromWindow() )
-         return false;
-
-      if ( m_params )
-      {
-         ReadParamsFromProfile();
-      }
-
-      return true;
-   }
-
-protected:
-   virtual void WriteParamsToProfile() { }
-   virtual void ReadParamsFromProfile() { }
-
-   Profile *m_profile;
-   String *m_params;
 };
 
 #endif // _M_GUI_SPAMOPTIONSPAGE_H_

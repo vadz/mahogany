@@ -48,6 +48,10 @@
    #undef USE_RBL
 #endif
 
+// this code is unfinished and I don't know how it's supposed to work, so don't
+// enable this unless you intend to work on it
+//#define USE_WHITELIST
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -58,41 +62,146 @@ extern const MOption MP_WHITE_LIST;
 // constants
 // ----------------------------------------------------------------------------
 
-/// X-Spam-Status: Yes header?
-#define SPAM_TEST_SPAMASSASSIN _T("spamassassin")
+enum SpamTest
+{
+   Spam_Test_SpamAssasin,
+   Spam_Test_Subject8Bit,
+   Spam_Test_SubjectCapsOnly,
+   Spam_Test_SubjectEndsJunk,
+   Spam_Test_Korean,
+   Spam_Test_XAuthWarn,
+   Spam_Test_Received,
+   Spam_Test_HTML,
+   Spam_Test_BadMIME,
+   Spam_Test_ExeAttachment,
+#ifdef USE_WHITELIST
+   Spam_Test_WhiteList,
+#endif // USE_WHITELIST
+#ifdef USE_RBL
+   Spam_Test_RBL,
+#endif // USE_RBL
 
-/// does the subject contain too many (unencoded) 8 bit chars?
-#define SPAM_TEST_SUBJ8BIT _T("subj8bit")
+   Spam_Test_Max
+};
 
-/// does the subject contain too many capital letters?
-#define SPAM_TEST_SUBJCAPS _T("subjcaps")
+// description of a spam test
+struct SpamTestDesc
+{
+   // the token for this test in the "is_spam()" filter function argument
+   const wxChar *token;
 
-/// is the subject of the "...            xyz-12-foo"?
-#define SPAM_TEST_SUBJENDJUNK _T("subjendjunk")
+   // the name of the key in the profile
+   const wxChar *name;
 
-/// korean charset?
-#define SPAM_TEST_KOREAN _T("korean")
+   // the label for this test in the dialog box
+   const wxChar *label;
 
-/// suspicious X-Authentication-Warning header?
-#define SPAM_TEST_XAUTHWARN _T("xauthwarn")
+   // on/off by default?
+   bool isOnByDefault;
+};
 
-/// suspicious Received: headers?
-#define SPAM_TEST_RECEIVED _T("received")
+static const SpamTestDesc spamTestDescs[] =
+{
+   /// X-Spam-Status: Yes header?
+   {
+      _T("spamassassin"),
+      _T("SpamAssassin"),
+      gettext_noop("Been tagged as spam by Spam&Assassin"),
+      true
+   },
 
-/// HTML contents at top level?
-#define SPAM_TEST_HTML _T("html")
+   /// does the subject contain too many (unencoded) 8 bit chars?
+   {
+      _T("subj8bit"),
+      _T("Spam8BitSubject"),
+      gettext_noop("Too many &8 bit characters in subject"),
+      true
+   },
 
-/// suspicious MIME structure?
-#define SPAM_TEST_MIME _T("badmime")
+   /// does the subject contain too many capital letters?
+   {
+      _T("subjcaps"),
+      _T("SpamCapsSubject"),
+      gettext_noop("Only &capitals in subject"),
+      true
+   },
 
-/// executable attachment?
-#define SPAM_TEST_EXECUTABLE_ATTACHMENT _T("exeattach")
+   /// is the subject of the "...            xyz-12-foo" form?
+   {
+      _T("subjendjunk"),
+      _T("SpamJunkEndSubject"),
+      gettext_noop("&Junk at end of subject"),
+      true
+   },
 
-/// no address in whitelist?
-#define SPAM_TEST_WHITE_LIST _T("whitelist")
+   /// korean charset?
+   {
+      _T("korean"),
+      _T("SpamKoreanCharset"),
+      gettext_noop("&Korean charset"),
+      false
+   },
 
-/// blacklisted by the RBL?
-#define SPAM_TEST_RBL _T("rbl")
+   /// suspicious X-Authentication-Warning header?
+   {
+      _T("xauthwarn"),
+      _T("SpamXAuthWarning"),
+      gettext_noop("X-Authentication-&Warning header"),
+      false
+   },
+
+   /// suspicious Received: headers?
+   {
+      _T("received"),
+      _T("SpamReceived"),
+      gettext_noop("Suspicious \"&Received\" headers"),
+      false
+   },
+
+   /// HTML contents at top level?
+   {
+      _T("html"),
+      _T("SpamHtml"),
+      gettext_noop("Only &HTML content"),
+      false
+   },
+
+   /// suspicious MIME structure?
+   {
+      _T("badmime"),
+      _T("SpamMime"),
+      gettext_noop("Unusual &MIME structure"),
+      false
+   },
+
+   /// executable attachment?
+   {
+      _T("exeattach"),
+      _T("SpamExeAttachment"),
+      gettext_noop("E&xecutable attachment"),
+      false
+   },
+
+#ifdef USE_WHITELIST
+   /// no address in whitelist?
+   {
+      _T("whitelist"),
+      _T("SpameWhiteList"),
+      gettext_noop("No match in &whitelist"),
+      false
+   },
+#endif // USE_WHITELIST
+
+#ifdef USE_RBL
+   /// blacklisted by the RBL?
+   {
+      _T("rbl"),
+      _T("SpamIsInRBL"),
+      gettext_noop("Been &blacklisted by RBL"),
+      false
+   },
+#endif // USE_RBL
+};
 
 // ----------------------------------------------------------------------------
 // HeadersFilter class
@@ -111,11 +220,10 @@ protected:
                               String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("spam"); }
    virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
-                                             Profile *profile,
-                                             String *params) const;
+                                             Profile *profile) const;
 
 
-   DECLARE_SPAM_FILTER("headers", 30);
+   DECLARE_SPAM_FILTER("headers", _("Heuristic headers test"), 30);
 };
 
 IMPLEMENT_SPAM_FILTER(HeadersFilter,
@@ -137,17 +245,31 @@ typedef scoped_array<wxOptionsPage::FieldInfo> ArrayFieldInfo;
 class SpamOption
 {
 public:
+   SpamOption(SpamTest test) : m_test(test) { }
+
    /// Is it on or off by default?
-   virtual bool GetDefaultValue() const = 0;
+   virtual bool GetDefaultValue() const
+   {
+      return spamTestDescs[m_test].isOnByDefault;
+   }
 
    /// The token used in spam filter string for this option
-   virtual const wxChar *Token() const = 0;
+   virtual const wxChar *Token() const
+   {
+      return spamTestDescs[m_test].token;
+   }
 
    /// The name of the profile entry used to pass the value to config dialog
-   virtual const wxChar *GetProfileName() const = 0;
+   virtual const wxChar *GetProfileName() const
+   {
+      return spamTestDescs[m_test].name;
+   }
 
    /// The label of the correponding checkbox in the dialog
-   virtual const wxChar *DialogLabel() const = 0;
+   virtual const wxChar *DialogLabel() const
+   {
+      return spamTestDescs[m_test].label;
+   }
 
    /// The number of entries created by BuildFields()
    virtual size_t GetEntriesCount() const { return 1; }
@@ -165,85 +287,56 @@ public:
 
    /// Is it currently active/checked?
    bool m_active;
+
+private:
+   SpamTest m_test;
 };
 
 
 class SpamOptionAssassin : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_SPAMASSASSIN; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamAssassin"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Been tagged as spam by Spam&Assassin"); }
+   SpamOptionAssassin() : SpamOption(Spam_Test_SpamAssasin) { }
 };
 
 
 class SpamOption8Bit : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_SUBJ8BIT; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("Spam8BitSubject"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Too many &8 bit characters in subject"); }
+   SpamOption8Bit() : SpamOption(Spam_Test_Subject8Bit) { }
 };
 
 
 class SpamOptionCaps : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_SUBJCAPS; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamCapsSubject"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Only &capitals in subject"); }
+   SpamOptionCaps() : SpamOption(Spam_Test_SubjectCapsOnly) { }
 };
 
 
 class SpamOptionJunkSubject : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_SUBJENDJUNK; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamJunkEndSubject"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("&Junk at end of subject"); }
+   SpamOptionJunkSubject() : SpamOption(Spam_Test_SubjectEndsJunk) { }
 };
 
 
 class SpamOptionKorean : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_KOREAN; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamKoreanCharset"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("&Korean charset"); }
+   SpamOptionKorean() : SpamOption(Spam_Test_Korean) { }
 };
 
 class SpamOptionExeAttach : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return true; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_EXECUTABLE_ATTACHMENT; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamExeAttachment"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("E&xecutable attachment"); }
+   SpamOptionExeAttach() : SpamOption(Spam_Test_ExeAttachment) { }
 
-   virtual size_t GetEntriesCount() const { return 2; }
+   virtual size_t GetEntriesCount() const
+   {
+      return SpamOption::GetEntriesCount() + 1;
+   }
+
    virtual size_t BuildFieldInfo(ArrayFieldInfo& fields, size_t n) const
    {
       size_t count = SpamOption::BuildFieldInfo(fields, n);
@@ -260,80 +353,46 @@ public:
 class SpamOptionXAuth : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_XAUTHWARN; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamXAuthWarning"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("X-Authentication-&Warning header"); }
+   SpamOptionXAuth() : SpamOption(Spam_Test_XAuthWarn) { }
 };
 
 
 class SpamOptionReceived : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_RECEIVED; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamReceived"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Suspicious \"&Received\" headers"); }
+   SpamOptionReceived() : SpamOption(Spam_Test_Received) { }
 };
 
 
 class SpamOptionHtml : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_HTML; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamHtml"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Only &HTML content"); }
+   SpamOptionHtml() : SpamOption(Spam_Test_HTML) { }
 };
 
 
 class SpamOptionMime : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_MIME; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamMime"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Unusual &MIME structure"); }
+   SpamOptionMime() : SpamOption(Spam_Test_BadMIME) { }
 };
 
+#ifdef USE_WHITELIST
 
 class SpamOptionWhiteList : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_WHITE_LIST; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpameWhiteList"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("No match in &whitelist"); }
+   SpamOptionWhiteList() : SpamOption(Spam_Test_WhiteList) { }
 };
 
+#endif // USE_WHITELIST
 
 #ifdef USE_RBL
 
 class SpamOptionRbl : public SpamOption
 {
 public:
-   virtual bool GetDefaultValue() const { return false; }
-   virtual const wxChar *Token() const
-      { return SPAM_TEST_RBL; }
-   virtual const wxChar *GetProfileName() const
-      { return _T("SpamIsInRBL"); }
-   virtual const wxChar *DialogLabel() const
-      { return gettext_noop("Been &blacklisted by RBL"); }
+   SpamOptionRbl() : SpamOption(Spam_Test_RBL) { }
 };
 
 #endif // USE_RBL
@@ -345,9 +404,7 @@ public:
 class HeadersOptionsPage : public SpamOptionsPage
 {
 public:
-   HeadersOptionsPage(wxListOrNoteBook *notebook,
-                      Profile *profile,
-                      String *params);
+   HeadersOptionsPage(wxListOrNoteBook *notebook, Profile *profile);
 
    void FromString(const String &source);
    String ToString();
@@ -358,9 +415,6 @@ private:
 
    void SetDefaults();
    void SetFalse();
-
-   void WriteParamsToProfile();
-   void ReadParamsFromProfile();
 
    size_t GetConfigEntryCount();
 
@@ -397,8 +451,10 @@ private:
    SpamOptionMime m_checkMime;
    SpamOption *PickMime() { return &m_checkMime; }
 
+#ifdef USE_WHITELIST
    SpamOptionWhiteList m_whitelist;
    SpamOption *PickWhiteList() { return &m_whitelist; }
+#endif // USE_WHITELIST
 
 #ifdef USE_RBL
    SpamOptionRbl m_checkRBL;
@@ -847,6 +903,34 @@ static bool CheckForHTMLOnly(const Message& msg)
    return false;
 }
 
+// check if we have a message with "suspicious" MIME structure
+static bool CheckForSuspiciousMIME(const Message& msg)
+{
+   // we consider multipart messages with only one part suspicious: although
+   // formally valid, there is really no legitimate reason to send them
+   //
+   // the sole exception is for multipart/mixed messages with a single part:
+   // although they are weird too, there *is* some reason to send them, namely
+   // to protect the Base 64 encoded parts from being corrupted by the mailing
+   // list trailers and although no client known to me does this currently it
+   // may happen in the future
+   const MimePart *part = msg.GetTopMimePart();
+   if ( !part ||
+            part->GetType().GetPrimary() != MimeType::MULTIPART ||
+               part->GetType().GetSubType() == _T("MIXED") )
+   {
+      // either not multipart at all or multipart/mixed which we don't check
+      return false;
+   }
+
+   // only return true if we have exactly one subpart
+   const MimePart *subpart = part->GetNested();
+
+   return subpart && !subpart->GetNext();
+}
+
+#ifdef USE_WHITELIST
+
 static wxArrayString GenerateSuperDomains(const String &domain)
 {
    wxArrayString parts(strutil_restore_array(domain,_T('.')));
@@ -1144,31 +1228,7 @@ static bool CheckWhiteList(const Message& msg)
 #undef RETURN
 }
 
-// check if we have a message with "suspicious" MIME structure
-static bool CheckForSuspiciousMIME(const Message& msg)
-{
-   // we consider multipart messages with only one part suspicious: although
-   // formally valid, there is really no legitimate reason to send them
-   //
-   // the sole exception is for multipart/mixed messages with a single part:
-   // although they are weird too, there *is* some reason to send them, namely
-   // to protect the Base 64 encoded parts from being corrupted by the mailing
-   // list trailers and although no client known to me does this currently it
-   // may happen in the future
-   const MimePart *part = msg.GetTopMimePart();
-   if ( !part ||
-            part->GetType().GetPrimary() != MimeType::MULTIPART ||
-               part->GetType().GetSubType() == _T("MIXED") )
-   {
-      // either not multipart at all or multipart/mixed which we don't check
-      return false;
-   }
-
-   // only return true if we have exactly one subpart
-   const MimePart *subpart = part->GetNested();
-
-   return subpart && !subpart->GetNext();
-}
+#endif // USE_WHITELIST
 
 #ifdef USE_RBL
 
@@ -1293,9 +1353,15 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
    const size_t count = tests.GetCount();
    if ( !count )
    {
-      // use [very conservative] defaults
-      tests.Add(SPAM_TEST_SPAMASSASSIN);
-      tests.Add(SPAM_TEST_RBL);
+      // use defaults
+      Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
+
+      for ( size_t n = 0; n < Spam_Test_Max; n++ )
+      {
+         const SpamTestDesc& desc = spamTestDescs[n];
+         if ( profile->readEntry(desc.name, desc.isOnByDefault) )
+            tests.Add(desc.token);
+      }
    }
 
    String value,
@@ -1303,29 +1369,29 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
    for ( size_t n = 0; n < count && spamResult.empty(); n++ )
    {
       const wxString& test = tests[n];
-      if ( test == SPAM_TEST_SUBJ8BIT )
+      if ( test == spamTestDescs[Spam_Test_Subject8Bit].token )
       {
          if ( CheckSubjectFor8Bit(msg.Subject()) )
             spamResult = _("8 bit subject");
       }
-      else if ( test == SPAM_TEST_SUBJCAPS )
+      else if ( test == spamTestDescs[Spam_Test_SubjectCapsOnly].token )
       {
          if ( CheckSubjectForCapitals(msg.Subject()) )
             spamResult = _("only caps in subject");
       }
-      else if ( test == SPAM_TEST_SUBJENDJUNK )
+      else if ( test == spamTestDescs[Spam_Test_SubjectEndsJunk].token )
       {
          if ( CheckSubjectForJunkAtEnd(msg.Subject()) )
             spamResult = _("junk at end of subject");
       }
-      else if ( test == SPAM_TEST_KOREAN )
+      else if ( test == spamTestDescs[Spam_Test_Korean].token )
       {
          // detect all Korean charsets -- and do it for all MIME parts, not
          // just the top level one
          if ( CheckMimePartForKoreanCSet(msg.GetTopMimePart()) )
             spamResult = _("message in Korean");
       }
-      else if ( test == SPAM_TEST_SPAMASSASSIN )
+      else if ( test == spamTestDescs[Spam_Test_SpamAssasin].token )
       {
          // SpamAssassin adds header "X-Spam-Status: Yes" to all (probably)
          // detected spams
@@ -1335,7 +1401,7 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
             spamResult = _("tagged by SpamAssassin");
          }
       }
-      else if ( test == SPAM_TEST_XAUTHWARN )
+      else if ( test == spamTestDescs[Spam_Test_XAuthWarn].token )
       {
          // unfortunately not only spams have this header but we consider that
          // only spammers change their address in such way
@@ -1345,7 +1411,7 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
             spamResult = _("contains X-Authentication-Warning");
          }
       }
-      else if ( test == SPAM_TEST_RECEIVED )
+      else if ( test == spamTestDescs[Spam_Test_Received].token )
       {
          if ( msg.GetHeaderLine(_T("Received"), value) &&
                   CheckReceivedHeaders(value) )
@@ -1353,28 +1419,30 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
             spamResult = _("suspicious \"Received:\"");
          }
       }
-      else if ( test == SPAM_TEST_MIME )
+      else if ( test == spamTestDescs[Spam_Test_BadMIME].token )
       {
          if ( CheckForSuspiciousMIME(msg) )
             spamResult = _("suspicious MIME structure");
       }
-      else if ( test == SPAM_TEST_HTML )
+      else if ( test == spamTestDescs[Spam_Test_HTML].token )
       {
          if ( CheckForHTMLOnly(msg) )
             spamResult = _("pure HTML content");
       }
-      else if ( test == SPAM_TEST_WHITE_LIST )
-      {
-         if ( CheckWhiteList(msg) )
-            spamResult = _("not in whitelist");
-      }
-      else if ( test == SPAM_TEST_EXECUTABLE_ATTACHMENT )
+      else if ( test == spamTestDescs[Spam_Test_ExeAttachment].token )
       {
          if ( CheckForExeAttach(msg.GetTopMimePart()) )
             spamResult = _("contains Windows executable attachment");
       }
+#ifdef USE_WHITELIST
+      else if ( test == spamTestDescs[Spam_Test_WhiteList].token )
+      {
+         if ( CheckWhiteList(msg) )
+            spamResult = _("not in whitelist");
+      }
+#endif // USE_WHITELIST
 #ifdef USE_RBL
-      else if ( test == SPAM_TEST_RBL )
+      else if ( test == spamTestDescs[Spam_Test_RBL].token )
       {
          msg.GetHeaderLine(_T("Received"), value);
 
@@ -1441,10 +1509,9 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
 
 SpamOptionsPage *
 HeadersFilter::CreateOptionPage(wxListOrNoteBook *notebook,
-                                Profile *profile,
-                                String *params) const
+                                Profile *profile) const
 {
-   return new HeadersOptionsPage(notebook, profile, params);
+   return new HeadersOptionsPage(notebook, profile);
 }
 
 // ============================================================================
@@ -1463,7 +1530,9 @@ const HeadersOptionsPage::PickMember HeadersOptionsPage::ms_members[] =
    &HeadersOptionsPage::PickReceived,
    &HeadersOptionsPage::PickHtml,
    &HeadersOptionsPage::PickMime,
+#ifdef USE_WHITELIST
    &HeadersOptionsPage::PickWhiteList,
+#endif // USE_WHITELIST
 #ifdef USE_RBL
    &HeadersOptionsPage::PickRBL,
 #endif // USE_RBL
@@ -1474,9 +1543,8 @@ const size_t
 
 
 HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook,
-                                       Profile *profile,
-                                       String *params)
-                  : SpamOptionsPage(notebook, profile, params)
+                                       Profile *profile)
+                  : SpamOptionsPage(notebook, profile)
 {
    m_nEntries = 0;
 
@@ -1581,33 +1649,6 @@ String HeadersOptionsPage::ToString()
    }
 
    return result;
-}
-
-void HeadersOptionsPage::WriteParamsToProfile()
-{
-   CHECK_RET( m_params,
-              _T("WriteParamsToProfile() shouldn't be called without params") );
-
-   FromString(*m_params);
-
-   for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
-   {
-      m_profile->writeEntry(option->GetProfileName(), option->m_active);
-   }
-}
-
-void HeadersOptionsPage::ReadParamsFromProfile()
-{
-   CHECK_RET( m_params,
-              _T("ReadParamsFromProfile() shouldn't be called without params") );
-
-   for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
-   {
-      option->m_active =
-         m_profile->readEntry(option->GetProfileName(), 0l) != 0l;
-   }
-
-   *m_params = ToString();
 }
 
 ConfigValueDefault *HeadersOptionsPage::GetConfigValues()

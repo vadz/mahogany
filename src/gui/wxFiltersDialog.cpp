@@ -809,7 +809,7 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 void
 OneCritControl::ShowDetails()
 {
-   if ( SpamFilter::Configure(GetFrame(m_Parent), &m_spamOptions) )
+   if ( SpamFilter::EditParameters(GetFrame(m_Parent), &m_spamOptions) )
    {
       wxOneFilterDialog *dlg =
          GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
