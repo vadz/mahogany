@@ -64,6 +64,10 @@ static wxArrayString BuildListOfModulesDirs();
 // Actual MModule code
 // ----------------------------------------------------------------------------
 
+
+/// #define DLL_EXTENSION wxDllHandler::GetDllExt()
+#define DLL_EXTENSION ".so"
+
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
 
@@ -259,7 +263,7 @@ MModule::LoadModule(const String & name)
       size_t nDirs = dirs.GetCount();
 
 
-      const wxString moduleExt = wxDllLoader::GetDllExt();
+      const wxString moduleExt = DLL_EXTENSION;
 
       wxString pathname;
       for ( size_t i = 0; i < nDirs && ! module; i++ )
@@ -471,7 +475,7 @@ MModule::ListAvailableModules(const String& interfaceName)
    size_t nDirs = dirs.GetCount();
 
    /// First, build list of all .mmd and .so files in module directories
-   wxString extDll = wxDllLoader::GetDllExt();
+   wxString extDll = DLL_EXTENSION;
    wxArrayString moduleNames; // base names, actually
    for( size_t i = 0; i < nDirs ; i++ )
    {
