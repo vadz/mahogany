@@ -81,6 +81,7 @@ extern const MOption MP_REPLY_QUOTE_ORIG;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_CONFIRM_RESEND;
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_ZAP;
 
 // ----------------------------------------------------------------------------
 // MsgCmdProcImpl
@@ -167,7 +168,7 @@ protected:
    void PrintPreviewMessages(const UIdArray& selections);
 
    void DeleteOrTrashMessages(const UIdArray& selections);
-   void DeleteAndExpungeMessages(const UIdArray& selections);
+   bool DeleteAndExpungeMessages(const UIdArray& selections);
    void UndeleteMessages(const UIdArray& selections);
    void ToggleMessages(const UIdArray& messages);
    void MarkRead(const UIdArray& messages, bool read);
@@ -640,6 +641,8 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
    CHECK( !messages.IsEmpty(), false, "no messages to operate on" );
 
+   bool rc = true;
+
    // first process commands which can be reduced to other commands
    MessageTemplateKind templKind;
    switch ( cmd )
@@ -810,7 +813,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 
       case WXMENU_MSG_DELETE_EXPUNGE:
-         DeleteAndExpungeMessages(messages);
+         rc = DeleteAndExpungeMessages(messages);
          break;
 
       case WXMENU_MSG_FLAG:
@@ -869,7 +872,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          }
    }
 
-   return true;
+   return rc;
 }
 
 // ----------------------------------------------------------------------------
@@ -1168,14 +1171,36 @@ MsgCmdProcImpl::DeleteOrTrashMessages(const UIdArray& selections)
                    _("Failed to delete messages"));
 }
 
-void
+bool
 MsgCmdProcImpl::DeleteAndExpungeMessages(const UIdArray& selections)
 {
+   if ( !MDialog_YesNoDialog
+         (
+            String::Format
+            (
+               _("Do you really want to permanently delete "
+                 "the %lu selected messages?\n"
+                 "\n"
+                 "Note that it will be impossible to restore them!"),
+               (unsigned long)selections.Count()
+            ),
+            GetFrame(),
+            MDIALOG_YESNOTITLE,
+            M_DLG_NO_DEFAULT | M_DLG_NOT_ON_NO | M_DLG_DISABLE,
+            M_MSGBOX_CONFIRM_ZAP
+         ) )
+   {
+      // cancelled by user
+      return false;
+   }
+
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, _("Permanently deleting messages..."));
 
    status->Monitor(m_asmf->DeleteMessages(&selections, true /* expunge */, this),
                    _("Failed to permanently delete messages"));
+
+   return true;
 }
 
 void

@@ -155,6 +155,7 @@ static const struct
    { "DraftSaved",               gettext_noop("confirm saving the message as a draft") },
    { "DraftAutoDel",             gettext_noop("show a warning when \"automatically delete drafts\" option is on") },
    { "ConfirmResend",            gettext_noop("confirm resending messages") },
+   { "ConfirmZap",               gettext_noop("confirm permanently deleting messages") },
 };
 
 // ============================================================================
