@@ -106,18 +106,12 @@ void FolderView::OnAppExit()
    // do we want to reopen this folder the next time automatically?
    if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
    {
-      // don't remember the folder opened in the main frame - the main frame
-      // does it itself
-      if ( m_folderName != ((wxMainFrame *)mApplication->TopLevelFrame())
-                             ->GetFolderName() )
-      {
-         String foldersToReopen = READ_APPCONFIG(MP_OPENFOLDERS);
-         if ( !foldersToReopen.empty() )
-            foldersToReopen += ';';
-         foldersToReopen += m_folderName;
+      String foldersToReopen = READ_APPCONFIG(MP_OPENFOLDERS);
+      if ( !foldersToReopen.empty() )
+         foldersToReopen += ';';
+      foldersToReopen += m_folderName;
 
-         mApplication->GetProfile()->writeEntry(MP_OPENFOLDERS, foldersToReopen);
-      }
+      mApplication->GetProfile()->writeEntry(MP_OPENFOLDERS, foldersToReopen);
    }
 }
 

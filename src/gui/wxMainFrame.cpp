@@ -127,6 +127,12 @@ public:
       wxFolderView::SetFolder(mf, recreateFolderCtrl);
    }
 
+   virtual void OnAppExit()
+   {
+      // don't do anything here: the base class version saves this folder name
+      // in MP_OPENFOLDERS config entry but the main frame does it for us
+   }
+
 private:
    wxMainFrame *m_mainFrame;
 };
@@ -299,9 +305,20 @@ wxMainFrame::CanClose() const
    // closing the main frame will close the app so ask the other frames
    // whether it's ok to close them
    bool rc = mApplication->CanClose();
-   // make sure folder is closed before we close the window
-   if(rc == TRUE)
+
+   if ( rc )
+   {
+      // remember the last opened folder name
+      if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
+      {
+         // save the last opened folder if we're going to reopen it
+         mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
+      }
+
+      // make sure folder is closed before we close the window
       m_FolderView->SetFolder(NULL);
+   }
+
    return rc;
 }
 
@@ -477,12 +494,6 @@ wxMainFrame::~wxMainFrame()
 
    delete m_FolderView;
    delete m_FolderTree;
-
-   if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
-   {
-      // save the last opened folder if we're going to reopen it
-      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
-   }
 }
 
 void
