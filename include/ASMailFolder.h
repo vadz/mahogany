@@ -248,11 +248,11 @@ public:
    static ASMailFolder * Create(MailFolder *mf);
    //FIXME: temporary kludge till we have a nicer interface
    static ASMailFolder * OpenFolder(int typeAndFlags,
-                                  const String &path,
-                                  ProfileBase *profile = NULL,
-                                  const String &server = NULLstring,
-                                  const String &login = NULLstring,
-                                  const String &password = NULLstring)
+                                const String &path,
+                                ProfileBase *profile = NULL,
+                                const String &server = NULLstring,
+                                const String &login = NULLstring,
+                                const String &password = NULLstring)
       {
          MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
                                                  profile, server, login,

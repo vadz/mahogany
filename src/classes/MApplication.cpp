@@ -123,6 +123,7 @@ MAppBase::MAppBase()
    m_framesOkToClose = NULL;
    m_MailCollector = NULL;
    m_KeepOpenFolders = new MailFolderList;
+   m_profile = NULL;
 }
 
 MAppBase::~MAppBase()

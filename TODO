@@ -40,24 +40,24 @@ $Id$
 		Auto-Expunge question appears even when we have no
                 deleted messages??
 
-9	KB	message sorting seems buggy -- maybe not
 9	KB	check new mail after startup -- should be done already
+		--> seems problem with first folder listing not
+		    updating listing? CHECK
+
 9               initial dialogs (wxConfig errors) show unknown icon
+
 9	KB	check password prompt in mailfolder
-4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
+4	KB	Nicer icons for some tabs and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
-		Icon subdirectories GNOME/KDE?
+		Tidy up menus/toolbars.
+
 4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
 3	KB	Filters: empty rest expression still causes abort of
 		parsing somehow, try FilterTest="5*4+3"
 
 7      ?        We need a generic way to re-enable disabled pControls
-
-
-		Is wxOptionsDlg WasChange() relative to last
-		TransferDataFromWindow() or to very beginning?
 
 	VZ	trying to create a folder under "All Folders" triggers 
 		assert

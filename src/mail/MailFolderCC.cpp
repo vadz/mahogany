@@ -1174,6 +1174,8 @@ MailFolderCC::BuildListing(void)
       if ( nRetrieve != -1 )
       {
          numMessages = nRetrieve;
+         if(numMessages > m_NumOfMessages)
+            numMessages = m_NumOfMessages;
       }
       //else: cancelled, retrieve all
    }

@@ -1447,7 +1447,7 @@ END_EVENT_TABLE()
 
 #ifdef _MSC_VER
    // 'this' : used in base member initializer list (so what??)
-   #pragma warning(disable:4355)
+#   pragma warning(disable:4355)
 #endif
 
 wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
@@ -1511,10 +1511,12 @@ wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
    m_UseGMT->SetConstraints(c);
 
    SetDefaultSize(380, 240, FALSE /* not minimal */);
+   TransferDataToWindow();
+   m_OldDateFmt = m_DateFmt;
 }
 
 #ifdef _MSC_VER
-   #pragma warning(default:4355)
+#   pragma warning(default:4355)
 #endif
 
 void
@@ -1549,7 +1551,6 @@ wxDateFmtDialog::TransferDataToWindow()
 
    m_DateFmt = READ_CONFIG(GetProfile(), MP_DATE_FMT);
    m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
-   m_OldDateFmt = m_DateFmt;
    m_textctrl->SetValue(m_DateFmt);
 
    // update each second
@@ -1593,7 +1594,6 @@ protected:
    wxString     m_XFace;
    wxString     m_OldXFace;
    
-   wxCheckBox  *m_SetPermanently;
    wxBitmapButton *m_Button;
    bool m_Changed;
    DECLARE_EVENT_TABLE()
@@ -1638,6 +1638,8 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
    m_Changed = FALSE;
    
    SetDefaultSize(380, 220, FALSE /* not minimal */);
+   TransferDataToWindow();
+   m_OldXFace = m_XFace;
 }
 
 
@@ -1668,7 +1670,6 @@ bool
 wxXFaceDialog::TransferDataToWindow()
 {
    m_XFace = READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE);
-   m_OldXFace = m_XFace;
    UpdateButton();
    return TRUE;
 }
@@ -1690,7 +1691,6 @@ bool
 wxXFaceDialog::TransferDataFromWindow()
 {
    GetProfile()->writeEntry(MP_COMPOSE_XFACE_FILE, m_XFace);
-   m_OldXFace = m_XFace;
    return TRUE;
 }
 
