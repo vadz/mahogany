@@ -222,8 +222,9 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                      // stop on some speical chars if not quoted, otherwise
                      // only stop at the closing quote
                      while ( *pc &&
-                             ((quoted && *pc != '"') ||
-                              (!strchr("+-=, ", *pc) && *pc != bracketClose)) )
+                              (quoted ? *pc != '"'
+                                      : !strchr("+-=, ", *pc) &&
+                                          *pc != bracketClose) )
                      {
                         if ( *pc == '\\' )
                         {
