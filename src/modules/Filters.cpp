@@ -2356,7 +2356,6 @@ static bool WhiteListListId(RefCounter<AdbBook> book,const String &id)
 }
 
 // check whether any address field (sender or recipient) matches whitelist
-// FIXME: Match address groups (wx-*@wxwindows.org) and domains
 static bool CheckWhiteList(const Message *msg)
 {
    static const wxChar *headers[] =
@@ -2401,22 +2400,34 @@ static bool CheckWhiteList(const Message *msg)
       NULL
    };
 
-   wxArrayString values = msg->GetHeaderLines(headers);
-   wxString list = strutil_flatten_array(values, ',');
-   RefCounter<AddressList> parser(
-      AddressList::Create(FilterAddressList(list)));
-
    AdbManager *manager = AdbManager::Get();
    manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
    RefCounter<AdbBook> book(
       manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST)));
    manager->Unget();
 
-   for( Address *candidate = parser->GetFirst(); candidate;
-      candidate = parser->GetNext(candidate) )
+#ifdef DEBUG
+   // Go painfully through all headers to debug their format
+   bool result = true;
+#endif
+   wxArrayString values = msg->GetHeaderLines(headers);
+   for( size_t list = 0; list < values.GetCount(); ++list )
    {
-      if( !WhiteListDomain(book,candidate->GetDomain()) )
-         return false;
+      RefCounter<AddressList> parser(
+         AddressList::Create(FilterAddressList(values[list])));
+
+      for( Address *candidate = parser->GetFirst(); candidate;
+         candidate = parser->GetNext(candidate) )
+      {
+         if( !WhiteListDomain(book,candidate->GetDomain()) )
+         {
+#ifdef DEBUG
+            result = false;
+#else
+            return false;
+#endif
+         }
+      }
    }
 
    String id;
@@ -2426,7 +2437,11 @@ static bool CheckWhiteList(const Message *msg)
          return false;
    }
    
+#ifdef DEBUG
+   return result;
+#else
    return true;
+#endif
 }
 
 // check if we have a message with "suspicious" MIME structure
