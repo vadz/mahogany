@@ -93,10 +93,10 @@ public:
    const wxString& GetCategoryName() const { return m_CategoryName; }
 
    // get the include empty flag
-   const bool GetIncludeEmpty() const { return m_IncludeEmpty; }
+   bool GetIncludeEmpty() const { return m_IncludeEmpty; }
 
    // get the include empty flag
-   const bool GetIncludeComments() const { return m_IncludeComments; }
+   bool GetIncludeComments() const { return m_IncludeComments; }
 
    // transfer the data from window
    virtual bool TransferDataFromWindow();
@@ -116,7 +116,7 @@ private:
       m_filename,
       m_CategoryName;
    int m_selection;
-   int m_IncludeEmpty, m_IncludeComments;
+   bool m_IncludeEmpty, m_IncludeComments;
 
    // GUI controls
    wxComboBox *m_textCustomSep;
@@ -423,10 +423,9 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
       mApplication->GetProfile()->readEntry(ms_profilePathLastCategory,
                                             "Unfiled"));
    m_checkIncludeEmpty->SetValue(
-      mApplication->GetProfile()->readEntry(ms_profileIncludeEmpty,
-                                            0));
+      mApplication->GetProfile()->readEntry(ms_profileIncludeEmpty, 0) != 0);
    m_checkIncludeComments->SetValue(
-      mApplication->GetProfile()->readEntry(ms_profileIncludeComments,1));
+      mApplication->GetProfile()->readEntry(ms_profileIncludeComments,1) != 0);
 
    // set the initial and minimal dialog size
    SetDefaultSize(5*wBtn, 8*hBtn);

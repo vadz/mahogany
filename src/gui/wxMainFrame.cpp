@@ -335,7 +335,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
    MFolder_obj folder(pFolder);
 
    // don't do anything if there is nothing to change
-   if ( folder && m_folderName == folder->GetFullName() )
+   if ( folder.IsOk() && (m_folderName == folder->GetFullName()) )
    {
       // ... unless opening the folder previously failed, in which case we'll
       // try to reopen it (may be the user changed some of its settings)

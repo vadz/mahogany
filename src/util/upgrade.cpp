@@ -1675,19 +1675,29 @@ Upgrade(const String& fromVersion)
    MVersion oldVersion;
    if ( fromVersion.IsEmpty() )
       oldVersion = Version_None;
-   else if ( fromVersion == "0.01a" )
-      oldVersion = Version_Alpha001;
-   else if ( fromVersion == "0.02a" || fromVersion == "0.10a")
-      oldVersion = Version_Alpha010;
-   else if ( fromVersion == "0.20a" )
-      oldVersion = Version_Alpha020;
-   else if ( fromVersion == "0.21a" || fromVersion == "0.22a" ||
-             fromVersion == "0.23a" || fromVersion == "0.50" )
-      oldVersion = Version_050;
-   else if ( fromVersion == "0.60" )
-      oldVersion = Version_NoChange;
    else
-      oldVersion = Version_Unknown;
+   {
+      wxString version = fromVersion;
+
+      // terminating 'a' means alpha, just remove it for the purposes of
+      // version comparison
+      if ( version.Last() == 'a' )
+         version.Truncate(version.Len() - 1);
+
+      if ( version == "0.01" )
+         oldVersion = Version_Alpha001;
+      else if ( version == "0.02" || version == "0.10")
+         oldVersion = Version_Alpha010;
+      else if ( version == "0.20" )
+         oldVersion = Version_Alpha020;
+      else if ( version == "0.21" || version == "0.22" ||
+                version == "0.23" || version == "0.50" )
+         oldVersion = Version_050;
+      else if ( version == "0.60" )
+         oldVersion = Version_NoChange;
+      else
+         oldVersion = Version_Unknown;
+   }
 
    bool success = TRUE;
    switch ( oldVersion )
@@ -1735,8 +1745,9 @@ Upgrade(const String& fromVersion)
       // fall through
 
    case Version_Unknown:
-      wxLogError(_("The previously installed version of Mahogany was "
-                   "probably newer than this one. Cannot upgrade."));
+      wxLogError(_("The previously installed version of Mahogany (%s) was "
+                   "probably newer than this one. Cannot upgrade."),
+                 fromVersion.c_str());
       return FALSE;
    }
 

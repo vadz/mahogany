@@ -962,9 +962,8 @@ void wxOptionsPage::CreateControls()
                last = CreateComboBox(connections, widthMax, last);
             }
             else
-#else
-            last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
-#endif
+#endif // OS_WIN
+                last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
             break;
 
          case Field_Number:
@@ -1982,17 +1981,17 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    ProfileBase *profile = GetProfile();
 
    // create and add the pages
-   (new wxOptionsPageIdent(this, profile))->Layout();
-   (new wxOptionsPageNetwork(this, profile))->Layout();
-   (new wxOptionsPageCompose(this, profile))->Layout();
-   (new wxOptionsPageFolders(this, profile))->Layout();
+   new wxOptionsPageIdent(this, profile);
+   new wxOptionsPageNetwork(this, profile);
+   new wxOptionsPageCompose(this, profile);
+   new wxOptionsPageFolders(this, profile);
 #ifdef USE_PYTHON
-   (new wxOptionsPagePython(this, profile))->Layout();
+   new wxOptionsPagePython(this, profile);
 #endif
-   (new wxOptionsPageMessageView(this, profile))->Layout();
-   (new wxOptionsPageAdb(this, profile))->Layout();
-   (new wxOptionsPageHelpers(this, profile))->Layout();
-   (new wxOptionsPageOthers(this, profile))->Layout();
+   new wxOptionsPageMessageView(this, profile);
+   new wxOptionsPageAdb(this, profile);
+   new wxOptionsPageHelpers(this, profile);
+   new wxOptionsPageOthers(this, profile);
 
    profile->DecRef();
 }

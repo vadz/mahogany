@@ -60,13 +60,6 @@
 #define USE_WXWINDOWS2 1
 /* #undef USE_WXWINDOWS2 */
 
-/** Define if you use wxWindows, wxXt port. */
-/*#define USE_WXXT 1*/
-#undef USE_WXXT
-
-/** Define if you use wxWindows, wxGTK port. */
-#undef USE_WXGTK
-
 /** Define if you want to use wxString instead of C++ string */
 #define USE_WXSTRING 1
 
@@ -77,10 +70,6 @@
     does!) - required for Python.h */
 #define HAVE_PROTOTYPES 1
 
-/* Define if your <unistd.h> contains bad prototypes for exec*()
-   (as it does on SGI IRIX 4.x) */
-/* #undef BAD_EXEC_PROTOTYPES */
-
 /* Define if your compiler supports variable length function prototypes
    (e.g. void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
 #define HAVE_STDARG_PROTOTYPES 1
@@ -89,7 +78,6 @@
     precompiling headers */
 #define USE_PCH 1
 
-//#define USE_APPCONF 1
-#define USE_WXCONFIG 1
-
+// always use modules statically under Windows
+#define USE_MODULES_STATIC
 //@}

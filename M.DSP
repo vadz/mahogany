@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo /o"Debug/M.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 $(wx)\Release\wxWindows.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 $(wx)\Release\wxWindows.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
@@ -83,7 +83,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\debug\wxWindows.lib $(wx)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\debug\wxWindows.lib $(wx)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -112,7 +112,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\debug\wxWindows.lib $(wx)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\DebugDll\wxWinDll.lib $(wx)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib $(wx)\DebugDll\wxWinDll.lib $(wx)\src\xpm\debug\xpm.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
@@ -140,7 +140,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 $(wx)\Release\wxWindows.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT BASE LINK32 /debug
-# ADD LINK32 $(wx)\ReleaseDll\wxWinDll.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 $(wx)\ReleaseDll\wxWinDll.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT LINK32 /debug
 
 !ENDIF 
@@ -468,11 +468,23 @@ SOURCE=.\src\adb\AdbManager.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\adb\AdbModule.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\adb\AdbProvider.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\adb\ExportPalm.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\adb\ExportText.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\adb\ExportVCard.cpp
 # End Source File
 # Begin Source File
 
@@ -483,8 +495,6 @@ SOURCE=.\src\adb\ImportEudora.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -509,8 +519,6 @@ SOURCE=.\src\adb\ImportMailrc.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# PROP Exclude_From_Build 1
-
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
@@ -533,8 +541,6 @@ SOURCE=.\src\adb\ImportPine.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -559,8 +565,6 @@ SOURCE=.\src\adb\ImportText.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# PROP Exclude_From_Build 1
-
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
@@ -573,6 +577,10 @@ SOURCE=.\src\adb\ImportText.cpp
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\adb\ImportVCard.cpp
 # End Source File
 # Begin Source File
 
@@ -584,8 +592,6 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# PROP Exclude_From_Build 1
-
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
@@ -601,11 +607,32 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\adb\ProvBbdb.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\adb\ProvDummy.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ProvFC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\adb\ProvPalm.cpp
 # End Source File
 # End Group
 # Begin Group "python"
@@ -972,6 +999,11 @@ SOURCE=.\src\Python\String.i
 # Begin Source File
 
 SOURCE=.\src\wx\generic\persctrl.cpp
+# ADD CPP /Yu"wx/wxprec.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wx\common\vcard.cpp
 # ADD CPP /Yu"wx/wxprec.h"
 # End Source File
 # End Group

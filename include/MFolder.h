@@ -185,6 +185,9 @@ public:
    // implicit conversion to bool to allow testing like in "if ( folder )"
    operator bool() const { return m_folder != NULL; }
 
+   // explicitly test if object is valid
+   bool IsOk() const { return m_folder != NULL; }
+
 private:
    // no copy ctor/assignment operator
    MFolder_obj(const MFolder_obj&);

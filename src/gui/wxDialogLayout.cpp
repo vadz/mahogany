@@ -284,7 +284,7 @@ void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
 
    // a small margin to aviod that the canvas just fits into the panel
    height += 2*LAYOUT_Y_MARGIN;
-   
+
    if ( height > size.y )
    {
       // why 10? well, it seems a reasonable value and changing it doesn't

@@ -90,7 +90,7 @@ static void SplitAddress(const String& addr,
       lastNameStart--;
    }
 
-   if ( isspace(lastNameStart) )
+   if ( isspace(*lastNameStart) )
    {
       lastNameStart++;
    }

@@ -47,6 +47,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name ImportEudora
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name versit
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -115,6 +118,18 @@ Package=<4>
 ###############################################################################
 
 Project: "python15"=L:\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
