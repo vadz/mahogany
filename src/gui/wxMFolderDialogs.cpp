@@ -887,6 +887,7 @@ wxFolderPropertiesPage::SetFolderName(const wxString& name)
 
    dlg->SetFolderName(name);
 
+   // FIXME this should go away as soon as wxGTK changes to wxMSW behaviour
 #ifdef __WXGTK__
    wxEvent event;
    dlg->OnFolderNameChange(event);
@@ -1095,7 +1096,10 @@ wxFolderPropertiesPage::UpdateUI(int sel)
          wxFAIL_MSG("Unexpected folder type.");
    }
 
-   EnableComboBox(m_folderSubtype, m_folderSubtype->Number() > 0);
+   // enable folder subtype combobox only if we're creating because (folder
+   // type can't be changed later) and if there are any subtypes
+   EnableComboBox(m_folderSubtype, m_isCreating &&
+                                   (m_folderSubtype->Number() > 0));
 
    dlg->SetMayEnableOk(TRUE);
 }

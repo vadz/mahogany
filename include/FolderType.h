@@ -54,7 +54,7 @@ enum FolderType
    MF_GROUP,
    FolderGroup = MF_GROUP,     // doesn't contain mail, but other folders
    FolderInvalid = MF_ILLEGAL, // folder not initialized properly
-   FolderRoot = 999,           // this is the the special pseudo-folder
+   FolderRoot,                 // this is the the special pseudo-folder
    MF_ROOT = FolderRoot
 };
 

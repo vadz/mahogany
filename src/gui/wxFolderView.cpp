@@ -508,7 +508,16 @@ wxFolderView::Update(HeaderInfoList *listing)
    m_UpdateSemaphore = true;
 
    if(listing == NULL)
+   {
       listing = m_ASMailFolder->GetHeaders();
+
+      if ( !listing )
+      {
+         m_UpdateSemaphore = false;
+
+         return;
+      }
+   }
    else
       listing->IncRef();
    

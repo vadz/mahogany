@@ -154,8 +154,9 @@ MailFolder::OpenFolder(int typeAndFlags,
       FAIL_MSG("unknown folder type");
    }
 
-   if((type == MF_POP || type == MF_IMAP)
-      && strutil_isempty(passwd))
+   // ask the password for the folders which need but for which it hadn't been
+   // specified during creation
+   if ( FolderTypeHasUserName(type) && !(flags & MF_FLAGS_ANON) && !passwd )
    {
       String prompt;
       prompt.Printf( _("Password for '%s':"),

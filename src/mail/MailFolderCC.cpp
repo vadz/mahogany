@@ -853,6 +853,9 @@ MailFolderCC::CountMessages(int mask, int value) const
    if ( mask )
    {
       HeaderInfoList *hil = GetHeaders();
+      if ( !hil )
+         return 0;
+
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
       for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
