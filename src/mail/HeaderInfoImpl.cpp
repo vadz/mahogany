@@ -315,7 +315,11 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
    //
    // we also don't need them if we are not really sorting but just reveresing
    // the indices
+   //
+   // and neither we need them if don't have at least 2 messages: otherwise the
+   // trans tables are quite useless
    return !HasTransTable() &&
+          m_count >= 2 &&
           (IsThreading() ||
            GetSortCritDirect(m_sortParams.sortOrder) != MSO_NONE);
 }
