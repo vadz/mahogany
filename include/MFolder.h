@@ -67,6 +67,10 @@ public:
    static MFolder *Create(const String& fullname, FolderType type);
 
    // misc accessors
+      // get the folder path (i.e. something by which it's identified by the
+      // mail subsystem)
+   virtual String GetPath() const = 0;
+
       // the folder name must be unique among its siblings
    virtual String GetName() const = 0;
 

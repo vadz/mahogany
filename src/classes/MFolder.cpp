@@ -73,6 +73,7 @@ public:
    static bool Create(const String& fullname);
 
    // implement base class pure virtuals
+   virtual String GetPath() const;
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
@@ -370,6 +371,14 @@ bool MFolderFromProfile::Create(const String& fullname)
 String MFolderFromProfile::GetName() const
 {
    return m_folderName.AfterLast('/');
+}
+
+String MFolderFromProfile::GetPath() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, "", "panic in MFolder: no profile" );
+
+   return READ_CONFIG(profile, MP_FOLDER_PATH);
 }
 
 FolderType MFolderFromProfile::GetType() const

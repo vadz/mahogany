@@ -69,6 +69,8 @@ $Id$
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
+8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
+
 8	VZ	Opening NNTP folders suddenly asks for password - what 
 		happened? --> doesn't do it here, please explain how to
 		reproduce.
