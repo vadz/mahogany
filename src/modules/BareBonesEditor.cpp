@@ -427,7 +427,7 @@ int FormattedParagraph::FindLineLength(
 {
    int lineLength;
    
-   size_t findSpace = FindLastSpace(paragraph,lineStart+m_margin);
+   size_t findSpace = FindLastSpace(paragraph,lineStart+m_margin+1);
    if(findSpace != paragraph.npos && (int)findSpace >= lineStart)
    {
       size_t findNonSpace = paragraph.find_last_not_of(' ',findSpace);
