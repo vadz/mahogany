@@ -69,7 +69,6 @@
 #include <wx/mimetype.h>
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
-#include <wx/encconv.h>
 #include <wx/fontmap.h>
 #include <wx/fontutil.h>      // for wxNativeFontInfo
 // windows.h included from wx/fontutil.h under Windows #defines this
@@ -3940,14 +3939,33 @@ wxComposeView::BuildMessage() const
                // in the "Language" menu or in a different -- but hopefully
                // compatible -- one, in which case we need to translate it
                wxString textConv;
-               const wxString *text wxDUMMY_INITIALIZE(NULL);
+               const wxString *text = &part->GetText();
 
                wxFontEncoding encodingPart = part->GetEncoding();
-               if ( encodingMsg != wxFONTENCODING_SYSTEM &&
-                        encodingPart != encodingMsg )
+               if ( encodingMsg == wxFONTENCODING_SYSTEM )
                {
-                  wxEncodingConverter conv;
-                  if ( !conv.Init(encodingPart, encodingMsg) )
+                  // use the encoding of this part for all the other ones
+                  encodingMsg = encodingPart;
+               }
+
+               if ( encodingPart != encodingMsg )
+               {
+                  // try converting this part to the message encoding
+                  wxCSConv convPart(encodingPart);
+                  wxWCharBuffer wtext(convPart.cMB2WC(*text));
+
+                  bool ok = wtext.data() != NULL;
+
+                  if ( ok )
+                  {
+                     wxCSConv convMsg(encodingMsg);
+                     wxCharBuffer mbtext(convMsg.cWC2MB(wtext));
+                     ok = mbtext.data() != NULL;
+                     if ( ok )
+                        textConv = mbtext;
+                  }
+
+                  if ( !ok )
                   {
                      if ( !MDialog_YesNoDialog
                            (
@@ -3956,8 +3974,8 @@ wxComposeView::BuildMessage() const
                                  _("Text of this message can't be converted to "
                                    "the encoding \"%s\", would you like to "
                                    "send it in encoding \"%s\" instead?"),
-                                 wxFontMapper::GetEncodingName(encodingMsg),
-                                 wxFontMapper::GetEncodingName(encodingPart)
+                                 wxFontMapper::GetEncodingName(encodingMsg).c_str(),
+                                 wxFontMapper::GetEncodingName(encodingPart).c_str()
                               ),
                               this,
                               MDIALOG_YESNOTITLE,
@@ -3973,21 +3991,17 @@ wxComposeView::BuildMessage() const
                      // FIXME: this doesn't work if we have 2 text parts in
                      //        different encodings, we should use UTF8 in this
                      //        case but for this we must do a preliminary
-                     //        iteration over all text parts
+                     //        iteration over all text parts and it's worthless
+                     //        to do it now as we only can have a single text
+                     //        part with the text composer anyhow
                      encodingMsg = encodingPart;
                   }
-                  else // can convert, do it
+                  else
                   {
-                     textConv = conv.Convert(part->GetText());
                      text = &textConv;
                   }
                }
-               else // use the encoding as is
-               {
-                  encodingMsg = encodingPart;
-
-                  text = &part->GetText();
-               }
+               //else: use the encoding as is
 
                msg->AddPart(
                               MimeType::TEXT,
