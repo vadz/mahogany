@@ -62,6 +62,7 @@ IMPLEMENT_VIEWER_FILTER(TextMarkupFilter,
                         _("Trivial Markup"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
+// render all the words surrounded by asterisks/underscores in bold/italic font
 void
 TextMarkupFilter::DoProcess(String& text,
                             MessageViewer *viewer,
@@ -76,22 +77,40 @@ TextMarkupFilter::DoProcess(String& text,
 
    // the '*' or '_' last encountered
    wxChar chLastSpecial = _T('\0'); // unneeded but silence compiler warning
+
+   // are we at the start of a new word?
+   bool atWordStart = true;
+
    String textNormal,
           textSpecial;
    for ( const wxChar *pc = text.c_str(); ; pc++ )
    {
+      bool isSpace = false;
+
       switch ( *pc )
       {
          case _T('*'):
          case _T('_'):
             if ( state == Normal )
             {
-               // output the normal text we had so far
-               m_next->Process(textNormal, viewer, style);
-               textNormal.clear();
+               // is it at start of a word?
+               if ( atWordStart )
+               {
+                  // yes: treat it as a markup character
 
-               chLastSpecial = *pc;
-               state = chLastSpecial == _T('*') ? Bold : Italic;
+                  // output the normal text we had so far
+                  m_next->Process(textNormal, viewer, style);
+                  textNormal.clear();
+
+                  // change state
+                  chLastSpecial = *pc;
+                  state = chLastSpecial == _T('*') ? Bold : Italic;
+               }
+               else // no, it's in the middle of the word
+               {
+                  // treat it as a normal character then;
+                  textNormal += *pc;
+               }
             }
             else // ending markup tag?
             {
@@ -126,9 +145,12 @@ TextMarkupFilter::DoProcess(String& text,
          case _T('\t'):
          case _T('\r'):
          case _T('\n'):
+            isSpace = true;
+            // fall through
+
          case _T('\0'):
-            // as a space can't appear inside the marked up word, we decide
-            // that the last special character wasn't mean to begin the markup
+            // as a space can't appear inside a marked up word, we decide
+            // that the last special character wasn't meant to begin the markup
             // after all
             if ( state != Normal )
             {
@@ -151,6 +173,8 @@ TextMarkupFilter::DoProcess(String& text,
 
          break;
       }
+
+      atWordStart = isSpace;
    }
 }
 
