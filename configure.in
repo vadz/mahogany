@@ -362,6 +362,7 @@ MAKE_DEBUG=
 if test "$USE_WXDEBUG" = 1; then
 	DBGFLAGS="-D__WXDEBUG__"
 	WXCONFIG_NAME="wxgtkd-config"
+	USE_OPT=0
 else
 	WXCONFIG_NAME="wx-config"
 fi
