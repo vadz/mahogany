@@ -285,7 +285,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
                                      _("All files (*.*)|*.*"),
                                      wxSAVE | wxOVERWRITE_PROMPT,
                                      parent);
-   if(filename)
+   if(! filename.IsEmpty())
    {
       // truncate the file
       wxFile fd;
