@@ -48,7 +48,7 @@ public:
    static void SavePosition(const char *name, wxWindow *frame);
 
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
-   wxMFrame() : MFrameBase(M_EMPTYSTRING) { m_initialised = false; }
+   wxMFrame() : MFrameBase(M_EMPTYSTRING) { FAIL_MSG("unreachable"); }
    /// Constructor
    wxMFrame(const String &iname, wxWindow *parent = NULL);
    /// Creates an object

@@ -2627,14 +2627,11 @@ wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
                                        long num,
                                        wxFolderView *fv,
                                        MWindow  *parent,
-                                       const String &iname)
+                                       const String& name)
+                  : wxMFrame(name.empty() ? String(_("Mahogany: Message View"))
+                                          : name, parent)
 {
    m_MessageView = NULL;
-
-   wxString name = iname;
-   if(name.Length() == 0)
-      name = "Mahogany : MessageView";
-   wxMFrame::Create(name, parent);
 
    AddFileMenu();
    AddEditMenu();
