@@ -138,6 +138,7 @@ enum ConfigFields
    ConfigField_HelpBrowserIsNetscape,
    ConfigField_HelpersHelp3,
    ConfigField_ExternalEditor,
+   ConfigField_ImageConverter,
    ConfigField_NewMailCommand,
    ConfigField_HelpersLast = ConfigField_NewMailCommand,
    
@@ -354,7 +355,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
-   { gettext_noop("&External editor"),            Field_Text,    -1                      },
+   { gettext_noop("&External editor"),            Field_File,    -1                      },
+   { gettext_noop("&Image format converter"),     Field_File,    -1                      },
    { gettext_noop("The following line will be executed each time new mail is received:"),       Field_Message, -1                      },
    { gettext_noop("&New Mail Command"),           Field_File,    -1                      },
 
@@ -446,6 +448,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_HELPBROWSER),
    CONFIG_ENTRY(MP_HELPBROWSER_ISNS),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
+   CONFIG_ENTRY(MP_CONVERTPROGRAM),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_NEWMAILCOMMAND),
 

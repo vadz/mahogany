@@ -1073,9 +1073,8 @@ wxComposeView::InsertData(char *data,
    MimeContent *mc = new MimeContent();
 
    if(strutil_isempty(mimetype))
-   {
       mimetype = "APPLICATION/OCTET-STREAM";
-   }
+
 
    mc->SetMimeType(mimetype);
    mc->SetData(data, length, filename);

@@ -16,7 +16,7 @@
 #include "Mversion.h"
 
 /** @name The sections of the configuration file. */
-//@{
+///@{
 
 // The trailing slashes in the following defines are important,
 // otherwise Profile.cpp will get broken!
@@ -180,6 +180,10 @@
 #define   MP_CREATE_PROFILES   "CreateProfileFiles"
 /// umask setting for normal files
 #define   MP_UMASK               "Umask"
+/// automatically show first message in folderview?
+#define   MP_AUTOSHOW_FIRSTMESSAGE "AutoShowFirstMessage"
+/// program used to convert image files?
+#define   MP_CONVERTPROGRAM      "ImageConverter"
 /**@name Printer settings */
 //@{
 /// Command
@@ -464,6 +468,10 @@
 #define   MP_CREATE_PROFILES_D   0
 /// umask setting for normal files
 #define   MP_UMASK_D               022
+/// automatically show first message in folderview?
+#define   MP_AUTOSHOW_FIRSTMESSAGE_D 1
+/// program used to convert image files?
+#define   MP_CONVERTPROGRAM_D      "convert"
 /**@name Printer settings */
 //@{
 /// Command

@@ -28,6 +28,23 @@ $Id$
  - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
    SendMessageCC::AddPart()
  - POP: find a way to cache messages in MailFolder class
+      NO: find out why we read twice and mtest only once
+
+ - we need to handle the RepliedTo flag for messages which isn't used
+   much yet
+
+ - why does c-client library ignore my .newsrc?
+
+ - Things like CopyMessagesToFolder need a return code indicating
+   whether they were successful or not, otherwise MoveMessagesToFolde r
+  deletes them in any case. Trivial to add.
+
+ - folder set message flag update hook takes too long for really large folders
+ ==> code commented out in MailFolderCC.cpp
+
+ - easy to implement but useful features:
+  - "check for new mail now"
+
  - wxLayout:
   + Refresh!!
   + undo?
@@ -57,6 +74,10 @@ $Id$
 
  - somehow allow different configs for different hosts, maybe a
    [M/HOSTNAME/Profiles] section overriding [M/Profiles]?
+
+ - Add a way to query news and imap server for a list of
+   folders/groups, subscribed folders/groups and to subscribe to them
+     --> mainly a GUI issue
 
  - OptionsPanels:
    -add a help button which calls a help id depending on which page we're on
@@ -130,20 +151,6 @@ $Id$
 
 - put number of total/unread/new msgs in the status bar for the selected
   folder in wxMainFrame, also draw the folders with the new mail in bold
-
-- we need to handle the RepliedTo flag for messages which isn't used
-  much yet
-
-- Things like CopyMessagesToFolder need a return code indicating
-  whether they were successful or not, otherwise MoveMessagesToFolder
-  deletes them in any case. Trivial to add.
-
-- folder set message flag update hook takes too long for really large folders
-==> code commented out in MailFolderCC.cpp
-
-- easy to implement but useful features:
-  - "check for new mail now"
-
 - Are wxConfig/Profile GetNextGroup()/GetFirstGroup()  thread-safe??
   I started marking possible problems for multi-threaded code with
   //FIXME:MT

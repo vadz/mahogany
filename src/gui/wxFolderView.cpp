@@ -282,6 +282,8 @@ wxFolderView::SetFolder(MailFolder *mf)
             sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
          else
             sequence = "1";
+         //FIXME: this is wrong, we should only set it when we
+         //actually view the message
          m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_UNREAD, false);
       }
       m_MailFolder->DecRef();
@@ -317,11 +319,12 @@ wxFolderView::SetFolder(MailFolder *mf)
       wxYield(); // display the new folderctrl immediately
       Update();
 
-      if(m_NumOfMessages > 0)
+      if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
       {
          m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
          // the callback will preview the (just) selected message
       }
+      m_FolderCtrl->SetFocus(); // so we can react to keyboard events
    }
 }
 
@@ -414,10 +417,22 @@ wxFolderView::Update(void)
       mptr = m_MailFolder->GetMessage(i+1);
       nstatus = mptr->GetStatus(&nsize,&day,&month,&year);
       status = "";
-      if(nstatus & MailFolder::MSG_STAT_UNREAD)  status += 'U';
-      if(nstatus & MailFolder::MSG_STAT_DELETED) status += 'D';
-      if(nstatus & MailFolder::MSG_STAT_REPLIED) status += 'R';
-      if(nstatus & MailFolder::MSG_STAT_RECENT)  status += 'N';
+      if(nstatus & MailFolder::MSG_STAT_UNREAD)
+         status += 'U';
+      else
+         status += ' ';
+      if(nstatus & MailFolder::MSG_STAT_RECENT)
+         status += 'N';
+      else
+         status += ' ';
+      if(nstatus & MailFolder::MSG_STAT_DELETED)
+         status += 'D';
+      else
+         status += ' ';
+      if(nstatus & MailFolder::MSG_STAT_REPLIED)
+         status += 'R';
+      else
+         status += ' ';
 
       subject = mptr->Subject();
       sender  = mptr->From();

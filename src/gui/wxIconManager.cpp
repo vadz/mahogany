@@ -139,7 +139,7 @@ wxIconManager::LoadImage(String filename, bool *success)
    }
 
    // now old logging is restored
-   if((! loaded) && m_wxBitmapHandlers[0] == 0) // try our own XPM loading code
+   if((! loaded) /*&& m_wxBitmapHandlers[0] == 0*/) // try our own XPM loading code
    {
       char ** cpptr = LoadImageXpm(filename);
       if(cpptr)
@@ -180,7 +180,8 @@ wxIconManager::LoadImageXpm(String filename)
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
       String command;
-      command << "convert " << filename << ' ' << tempfile;
+      command = READ_APPCONFIG(MP_CONVERTPROGRAM);
+      command << ' ' << filename << ' ' << tempfile;
       wxLogTrace(wxTraceIconLoading,
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());
