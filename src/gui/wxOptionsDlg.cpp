@@ -2020,6 +2020,8 @@ void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
                              wxFrame *parent)
 {
    wxCustomOptionsDialog dlg(pageDesc, parent);
+   dlg.CreateAllControls();
+   dlg.Layout();
 
    (void)dlg.ShowModal();
 }
