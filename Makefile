@@ -107,7 +107,7 @@ install_locale:
 
 # prepare the scene for building the RPM
 rpm_prep:
-	@export RPM_ROOT=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
+	if test -z "$$RPM_ROOT" ; then echo "You must set the RPM_ROOT first."; exit 1; fi
 	echo "Preparing to build the RPM under $$RPM_ROOT..."; \
 	cd ..; \
 	mv M $(M); \
@@ -126,8 +126,7 @@ rpm_prep:
 	cp redhat/M.spec $$RPM_ROOT/SPECS
 
 rpm:
-	cd $(RPM_ROOT)/SPECS
-	rpm -bb M.spec
+	cd $(RPM_ROOT)/SPECS && rpm --buildroot $(RPM_ROOT)/ROOT -bb M.spec
 
 msgcat:
 	$(MAKE) -C src msgcat
@@ -137,5 +136,5 @@ locales:
 	$(MAKE) -C locale all
 
 .PHONY: all dep clean bak backup config program doc install install_doc \
-        install_all msgcat locales scandoc install_locale
+        install_all msgcat locales scandoc install_locale rpm_prep rpm
 
