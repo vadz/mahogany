@@ -198,8 +198,8 @@ public: \
    typedef const value_type *const_pointer; \
    typedef value_type &reference; \
    typedef const value_type &const_reference; \
-protected: \
    M_LIST_NODE; \
+protected: \
    ListNodeBase header; \
 public: \
    M_ITERATOR(name); \
