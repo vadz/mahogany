@@ -1299,12 +1299,7 @@ VarExpander::DoQuotePart(const MimePart *mimePart,
    switch ( mimeType.GetPrimary() )
    {
       case MimeType::TEXT:
-         ExpandOriginalText
-         (
-            (const char *)mimePart->GetContent(),
-            prefix,
-            value
-         );
+         ExpandOriginalText(mimePart->GetTextContent(), prefix, value);
 
          quoted = true;
          break;

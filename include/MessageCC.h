@@ -242,17 +242,24 @@ private:
    /// Profile pointer, may be NULL
    Profile *m_Profile;
 
-   /** A temporarily allocated buffer for GetPartContent().
-       It holds the information returned by that function and is only
-       valid until its next call.
-   */
-   void *m_partContentPtr;
-
    /// pointer to the main message MIME part, it links to all others
    MimePartCC *m_mimePartTop;
 
    /// total number of MIME parts in the message
    size_t m_numParts;
+
+   /**
+     A temporarily allocated buffer for GetPartContent().
+
+     It holds the information returned by that function and is only
+     valid until its next call.
+
+     We should free it only if m_ownsPartContent flag is true!
+   */
+   void *m_partContentPtr;
+
+   /// Flag telling whether we should free m_partContentPtr or not
+   bool m_ownsPartContent;
 };
 
 #endif // _MESSAGECC_H

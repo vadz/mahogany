@@ -48,6 +48,7 @@ public:
    // data access
    virtual const void *GetRawContent(unsigned long *len = NULL) const;
    virtual const void *GetContent(unsigned long *len = NULL) const;
+   virtual String GetTextContent() const;
    virtual String GetHeaders() const;
    virtual MimeXferEncoding GetTransferEncoding() const;
    virtual size_t GetSize() const;

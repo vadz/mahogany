@@ -106,6 +106,8 @@ void MessageCC::Init()
    m_partContentPtr = NULL;
    m_msgText = NULL;
 
+   m_ownsPartContent = false;
+
    m_folder = NULL;
    m_Profile = NULL;
    m_uid = UID_ILLEGAL;
@@ -191,7 +193,8 @@ MessageCC::~MessageCC()
 {
    delete m_mimePartTop;
 
-   fs_give(&m_partContentPtr);
+   if ( m_ownsPartContent )
+      fs_give(&m_partContentPtr);
 
    delete [] m_msgText;
 
@@ -944,40 +947,70 @@ MessageCC::GetPartHeaders(const MimePart& mimepart)
 const void *
 MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 {
+   CHECK( lenptr, NULL, _T("MessageCC::GetPartData(): NULL len ptr") );
+
    // first get the raw text
    // ----------------------
 
-   unsigned long len = 0;
-   const char *cptr = GetRawPartData(mimepart, &len);
-
-   if ( !len )
+   const char *cptr = GetRawPartData(mimepart, lenptr);
+   if ( !cptr || !*lenptr )
       return NULL;
 
    // now decode it
    // -------------
 
-   // ensure that lenptr is always valid -- this is simpler than testing it all
-   // the time
-   if ( !lenptr )
-      lenptr = &len;
-
    // free old text
-   fs_give(&m_partContentPtr);
+   if (m_ownsPartContent )
+   {
+      m_ownsPartContent = false;
+
+      fs_give(&m_partContentPtr);
+   }
 
    // total size of this message part
    unsigned long size = mimepart.GetSize();
-
-   // the size of possible extra non Base64 encoded text following a Base64
-   // encoded part
-   const unsigned char *startSlack = NULL;
-   size_t sizeSlack = 0;
 
    // just for convenience...
    unsigned char *text = (unsigned char *)cptr;
 
    switch ( mimepart.GetTransferEncoding() )
    {
+      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
+         m_partContentPtr = rfc822_qprint(text, size, lenptr);
+
+         // some broken mailers sent messages with QP specified as the content
+         // transfer encoding in the headers but don't encode the message
+         // properly - in this case show it as plain text which is better than
+         // not showing it at all
+         if ( m_partContentPtr )
+         {
+            m_ownsPartContent = true;
+
+            break;
+         }
+         //else: treat it as plain text
+
+         // it was overwritten by rfc822_qprint() above
+         *lenptr = size;
+
+         // fall through
+
+      case ENC7BIT:        // 7 bit SMTP semantic data
+      case ENC8BIT:        // 8 bit SMTP semantic data
+      case ENCBINARY:      // 8 bit binary data
+      case ENCOTHER:       // unknown
+      default:
+         // nothing to do
+         m_partContentPtr = text;
+         break;
+
+
       case ENCBASE64:      // base-64 encoded data
+         // the size of possible extra non Base64 encoded text following a
+         // Base64 encoded part
+         const unsigned char *startSlack = NULL;
+         size_t sizeSlack = 0;
+
          // there is a frequent problem with mail list software appending the
          // mailing list footer (i.e. a standard signature containing the
          // instructions about how to [un]subscribe) to the top level part of a
@@ -1046,49 +1079,26 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
          }
 
          m_partContentPtr = rfc822_base64(text, size, lenptr);
-
-         if ( sizeSlack )
+         if ( !m_partContentPtr )
          {
-            fs_resize(&m_partContentPtr, *lenptr + sizeSlack);
-            memcpy((char *)m_partContentPtr + *lenptr, startSlack, sizeSlack);
+            FAIL_MSG( _T("rfc822_base64() failed") );
+
+            m_partContentPtr = text;
          }
-         break;
+         else // ok
+         {
+            // append the non Base64-encoded chunk, if any, to the end of decoded
+            // data
+            if ( sizeSlack )
+            {
+               fs_resize(&m_partContentPtr, *lenptr + sizeSlack);
+               memcpy((char *)m_partContentPtr + *lenptr, startSlack, sizeSlack);
 
-      case  ENCBINARY:     // 8 bit binary data
-         // don't use string functions, string may contain NULs
-         *lenptr = size;
-         m_partContentPtr = fs_get(size + 1);
-         memcpy(m_partContentPtr, cptr, size);
+               *lenptr += sizeSlack;
+            }
 
-         // still NUL terminate it, though
-         ((char *)m_partContentPtr)[size] = '\0';
-         break;
-
-      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-         m_partContentPtr = rfc822_qprint(text, size, lenptr);
-
-         // some broken mailers sent messages with QP specified as the content
-         // transfer encoding in the headers but don't encode the message
-         // properly - in this case show it as plain text which is better than
-         // not showing it at all
-         if ( m_partContentPtr )
-            break;
-         //else: treat it as plain text
-
-         // len was overwritten by rfc822_qprint() above
-         len = size;
-
-         // fall through
-
-      case ENC7BIT:        // 7 bit SMTP semantic data
-      case ENC8BIT:        // 8 bit SMTP semantic data
-      case ENCOTHER:       // unknown
-      default:
-         // string is not NUL-terminated, use the length returned by c-client!
-         *lenptr = len;
-         m_partContentPtr = fs_get(len + 1);
-         memcpy(m_partContentPtr, cptr, len);
-         ((char *)m_partContentPtr)[len] = '\0';
+            m_ownsPartContent = true;
+         }
    }
 
    return m_partContentPtr;
@@ -1107,6 +1117,20 @@ const void *MimePartCC::GetContent(unsigned long *len) const
 String MimePartCC::GetHeaders() const
 {
    return GetMessage()->GetPartHeaders(*this);
+}
+
+String MimePartCC::GetTextContent() const
+{
+   unsigned long len;
+   const char *p = reinterpret_cast<const char *>(GetContent(&len));
+   if ( !p )
+      return wxGetEmptyString();
+
+#if wxUSE_UNICODE
+   #error "We need the original encoding here, TODO"
+#else // ANSI
+   return wxString(p, len);
+#endif // Unicode/ANSI
 }
 
 // ----------------------------------------------------------------------------

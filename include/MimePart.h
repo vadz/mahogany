@@ -178,8 +178,21 @@ public:
    /// get the raw (un-decoded) contents of this part
    virtual const void *GetRawContent(unsigned long *len = NULL) const = 0;
 
-   /// get the decoded contents of this part
-   virtual const void *GetContent(unsigned long *len = NULL) const = 0;
+   /**
+       get the decoded contents of this part
+
+       WARNING: the pointer is not NULL terminated, len must be used!
+    */
+   virtual const void *GetContent(unsigned long *len) const = 0;
+
+   /**
+       get contents of this part as text.
+
+       This function is more expensive than GetContent() as it copies the data
+       one extra time just to append the terminating NUL to it, so it should be
+       avoided if you don't need NUL-terminated data.
+    */
+   virtual String GetTextContent() const = 0;
 
    /// get all headers as one string
    virtual String GetHeaders() const = 0;

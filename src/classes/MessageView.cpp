@@ -1525,10 +1525,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       return;
    }
 
-   // cast is ok - it's a text part
-   String textPart = (const wxChar *)mimepart->GetContent();
-
-   ShowText(textPart, mimepart->GetTextEncoding());
+   ShowText(mimepart->GetTextContent(), mimepart->GetTextEncoding());
 }
 
 void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
@@ -1829,7 +1826,7 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            String s((const wxChar *)data, len);
+            String s((const char *)data, len);
 
             m_viewer->InsertRawContents(s);
          }
@@ -1942,10 +1939,6 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       const char* c = (const char *)signedPart->GetRawContent(&signedTextLength);
       signedText += String(wxConvertMB2WX(c), signedTextLength);
 
-      unsigned long signatureLength = 0;
-      c = (const char *)signaturePart->GetContent(&signatureLength);
-      String signature(wxConvertMB2WX(c), signatureLength);
-
       MCryptoEngineFactory * const factory
          = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
       if ( factory )
@@ -1954,8 +1947,13 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 
          MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
 
-         MCryptoEngine::Status status =
-               pgpEngine->VerifyDetachedSignature(signedText, signature, log);
+         MCryptoEngine::Status
+             status = pgpEngine->VerifyDetachedSignature
+                                 (
+                                    signedText,
+                                    signaturePart->GetTextContent(),
+                                    log
+                                 );
 
          ClickablePGPInfo *pgpInfo = ClickablePGPInfo::CreateFromSigStatusCode
                                      (
@@ -2709,7 +2707,11 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
       {
          // saving the messages is special, we have a separate function for
          // this as it's also done from elsewhere
-         ok = MailFolder::SaveMessageAsMBOX(filename, (const wxChar *)content);
+         ok = MailFolder::SaveMessageAsMBOX
+              (
+                filename,
+                String((const char *)content, len)
+              );
       }
       else // not a message
       {
@@ -2744,8 +2746,8 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
 void
 MessageView::MimeViewText(const MimePart *mimepart)
 {
-   const void *content = mimepart->GetContent();
-   if ( content )
+   const String content = mimepart->GetTextContent();
+   if ( !content.empty() )
    {
       String title;
       title << _("Attachment #") << mimepart->GetPartSpec();
@@ -2757,8 +2759,7 @@ MessageView::MimeViewText(const MimePart *mimepart)
          title << _T(" ('") << filename << _T("')");
       }
 
-      MDialog_ShowText(GetParentFrame(), title,
-                       (const wxChar *)content, _T("MimeView"));
+      MDialog_ShowText(GetParentFrame(), title, content, _T("MimeView"));
    }
    else
    {

@@ -3469,8 +3469,7 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
          break;
 
       case MimeType::TEXT:
-         // cast is ok - it's a text part
-         InsertText((const char *)mimePart->GetContent());
+         InsertText(mimePart->GetTextContent());
          break;
 
       case MimeType::MESSAGE:
@@ -3491,7 +3490,9 @@ wxComposeView::InsertMimePart(const MimePart *mimePart)
             memcpy(data2, data, len);
 
             InsertData(data2, len,
-                       mimePart->GetType().GetFull(), mimePart->GetFilename(), mimePart->GetParam(_T("NAME")));
+                       mimePart->GetType().GetFull(),
+                       mimePart->GetFilename(),
+                       mimePart->GetParam(_T("NAME")));
          }
          break;
 
