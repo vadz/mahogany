@@ -229,8 +229,13 @@ MailCollectorImpl::InternalCreate(void)
       wxLogError(_("Cannot build list of incoming mail folders."));
    m_ReInit = false;
    m_NewMailFolder = NULL;
-   // keep it open all the time to speed things up
-   SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+
+   // keep it open all the time to speed things up if we have any folders to
+   // monitor
+   if ( m_list->size() )
+   {
+      SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+   }
 }
 
 void
@@ -279,7 +284,19 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_Count = 0;
    bool rc = true;
 
-   CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
+   if ( !m_NewMailFolder )
+   {
+      if ( mf || m_list->size() )
+      {
+         // create it now
+         SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+      }
+      else
+      {
+         // nothing to do: no folders to auto collect from
+         return true;
+      }
+   }
 
 #ifdef MC_KEEP_OPEN
    UpdateFolderList();

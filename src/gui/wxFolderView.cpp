@@ -620,23 +620,39 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       return;
    }
 
-   if ( sortOrders.GetCount() == 1 )
+   size_t count = sortOrders.GetCount();
+   if ( count == 0 )
    {
-      // +1 means reverse sort order, so in these tests we toggle the sort
-      // order if we already sort by this column
-      if ( sortOrders[0u] == orderCol )
-         sortOrders[0u] = orderCol + 1;
-      else /* if ( sortOrders[0u] == orderCol + 1 )
-         sortOrders[0u] = orderCol;
-      else -- logically, the code would be like this but commenting it out 
-              doesn't change anything */
-         sortOrders[0u] = orderCol;
+      // no sort rules at all, just add this one
+      sortOrders.Add(orderCol);
    }
-   else
+   else // we already have some sort rules
    {
-      // not exactly one sort order, so just sort on this column pushing the
-      // previous search criteriums one step down
-      sortOrders.Insert(orderCol, 0);
+      // if we are already sorting by this column (directly or not), reverse
+      // the sort order
+      if ( sortOrders[0u] == orderCol )
+      {
+         sortOrders[0u] = orderCol + 1;
+      }
+      else if ( sortOrders[0u] == orderCol + 1 )
+      {
+         sortOrders[0u] = orderCol;
+      }
+      else
+      {
+         // now sort by this column and push back the old sort orders, also
+         // remove the duplicates: we don't need to sort twice on the same
+         // column
+         wxArrayInt sortOrders2;
+         sortOrders2.Add(orderCol);
+         for ( size_t n = 0; n < count; n++ )
+         {
+            if ( sortOrders[n] != orderCol && sortOrders[n] != orderCol + 1 )
+               sortOrders2.Add(sortOrders[n]);
+         }
+
+         sortOrders = sortOrders2;
+      }
    }
 
    // save the new sort order and update everything

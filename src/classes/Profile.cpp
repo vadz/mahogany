@@ -335,10 +335,12 @@ public:
    virtual void Suspend(void)
       {
          PCHECK();
-         ASSERT(! m_Suspended); // for debugging, causes no problems though
-         // as we don't have IsSuspended(), it's not an error to call Suspend()
-         // twice
-         m_Suspended = true;
+
+         // VZ: no, there should be no assert here because it is triggered if
+         //     [Apply] button in the dialog is pressed twice
+         //ASSERT(! m_Suspended); // for debugging, causes no problems though
+
+         m_Suspended++;
       }
 
    /// Commit changes from suspended mode.
@@ -364,7 +366,7 @@ public:
 protected:
    ProfileImpl()
       {
-         m_Suspended = false;
+         m_Suspended = 0;
          m_Identity = NULL;
       }
    /// Destructor, writes back those entries that got changed.
@@ -386,8 +388,8 @@ private:
    /// If not empty, temporarily modified path for this profile.
    String   m_ProfilePath;
    GCC_DTOR_WARN_OFF
-   /// Is the profile operating in suspended mode?
-   bool m_Suspended;
+   /// suspend count: if positive, we're in suspend mode
+   int m_Suspended;
    /// Is this profile using a different Identity at present?
    Profile * m_Identity;
 };
@@ -752,7 +754,7 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
                      : String(GetRootPath());
    if(iName.Length())
       m_ProfileName << '/' << iName;
-   m_Suspended = false;
+   m_Suspended = 0;
    m_Identity = NULL;
 
    String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
@@ -772,8 +774,14 @@ ProfileImpl::~ProfileImpl()
 {
    PCHECK();
    ASSERT(this != mApplication->GetProfile());
-   ASSERT(! m_Suspended); // probably an application error, flag it
-   if(m_Suspended) Discard(); // but we tidy up, no big deal
+
+   if ( m_Suspended )
+   {
+      FAIL_MSG( "deleting a suspended profile" );
+
+      Discard(); // but we tidy up, no big deal
+   }
+
    if(m_Identity) m_Identity->DecRef();
 }
 
@@ -1060,17 +1068,19 @@ ProfileImpl::Discard(void)
       return;
    }
 
-   String path;
-   ms_GlobalConfig->SetPath(GetName());
-   if( m_ProfilePath.length() > 0 )
-      path << m_ProfilePath << '/';
-   path << SUSPEND_PATH;
+   if ( !--m_Suspended )
+   {
+      String path;
+      ms_GlobalConfig->SetPath(GetName());
+      if( m_ProfilePath.length() > 0 )
+         path << m_ProfilePath << '/';
+      path << SUSPEND_PATH;
 #ifdef DEBUG
-   bool success =
+      bool success =
 #endif
-      ms_GlobalConfig->DeleteGroup(path);
-   ASSERT(success);
-   m_Suspended = false;
+         ms_GlobalConfig->DeleteGroup(path);
+      ASSERT(success);
+   }
 }
 
 #ifdef DEBUG

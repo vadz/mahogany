@@ -1205,13 +1205,13 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    int flagInbox, flagNewMail;
    if ( gs_installWizardData.collectAllMail )
    {
-      // hide INBOX, show the other one
-      flagInbox = MF_FLAGS_HIDDEN;
+      // hide INBOX and collect mail from it, show the New Mail folder
+      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_INCOMING;
       flagNewMail = 0;
    }
    else
    {
-      // hide NEW MAIL, show INBOX
+      // hide NEW MAIL, show INBOX but don't collect mail from it
       flagInbox = 0;
       flagNewMail = MF_FLAGS_HIDDEN;
    }
@@ -1219,7 +1219,6 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    // create hidden INBOX
    if(! MailFolder::CreateFolder("INBOX",
                                  MF_INBOX,
-                                 MF_FLAGS_INCOMING |
                                  MF_FLAGS_DONTDELETE |
                                  flagInbox,
                                  "",
