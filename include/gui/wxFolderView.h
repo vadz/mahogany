@@ -72,7 +72,7 @@ public:
    /** Set the associated folder.
        @param folder the folder to display or NULL
    */
-   virtual void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
+   virtual void SetFolder(MailFolder *mf);
 
    /** Open the specified folder
        @param folder the folder to open
@@ -257,6 +257,12 @@ protected:
    /// update the view after new messages appeared in the folder
    void Update();
 
+   /// forget the currently shown folder
+   void Clear();
+
+   /// set the folder to show, can't be NULL (unlike in SetFolder)
+   void ShowFolder(MailFolder *mf);
+
    /// set the currently previewed UID
    void SetPreviewUID(UIdType uid);
 
@@ -296,13 +302,6 @@ private:
 
    /// UId of the focused message, may be different from m_uidPreviewed!
    UIdType m_uidFocused;
-
-   /// semaphore to avoid duplicate calling of Update
-   bool m_UpdateSemaphore;
-   /// semaphore to avoid recursion in SetFolder()
-   bool m_SetFolderSemaphore;
-   /// in deletion semaphore, ugly hack to avoid recursion in destructor
-   bool m_InDeletion;
 
    /// a list of pending tickets from async operations
    ASTicketList *m_TicketList;

@@ -42,8 +42,12 @@ public:
    /// return a profile pointer:
    Profile *GetProfile(void) const { return m_Profile; }
 
-   /// return pointer to folder
-   ASMailFolder * GetFolder(void) const { return m_ASMailFolder; }
+   /// return pointer to async mail folder (NOT IncRef()'d!)
+   ASMailFolder *GetFolder(void) const { return m_ASMailFolder; }
+
+   /// return pointer to associated mail folder (NOT IncRef()'d!)
+   MailFolder *GetMailFolder() const
+      { return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL; }
 
 protected:
    /// the derived class should close when our folder is deleted

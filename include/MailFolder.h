@@ -918,6 +918,13 @@ private:
    friend class HeaderInfoList;
 };
 
+// MailFolder_obj is a smart reference to MailFolder
+DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
+
+// ----------------------------------------------------------------------------
+// Various helper classes
+// ----------------------------------------------------------------------------
+
 /** This class temporarily locks a mailfolder */
 class MailFolderLock
 {

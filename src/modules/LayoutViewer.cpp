@@ -151,6 +151,9 @@ public:
       SetLabel(m_ci->GetLabel());
    }
 
+   // get the real data back
+   ClickableInfo *GetClickableInfo() const { return m_ci; }
+
 private:
    ClickableInfo *m_ci;
 };
@@ -245,8 +248,8 @@ LayoutViewerWindow::LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent)
 void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
 {
    wxLayoutObject *obj = (wxLayoutObject *)event.GetClientData();
-   ClickableInfo *ci = (ClickableInfo *)obj->GetUserData();
-   if ( ci )
+   LayoutUserData *data = (LayoutUserData *)obj->GetUserData();
+   if ( data )
    {
       int id;
       switch ( event.GetId() )
@@ -267,7 +270,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
             break;
       }
 
-      m_viewer->DoMouseCommand(id, ci, GetClickPosition());
+      m_viewer->DoMouseCommand(id, data->GetClickableInfo(), GetClickPosition());
    }
 }
 

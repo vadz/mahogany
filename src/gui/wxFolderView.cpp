@@ -1953,15 +1953,11 @@ wxFolderView::Create(MWindow *parent)
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
-   m_InDeletion = false;
-   m_SetFolderSemaphore = false;
-
    m_Parent = parent;
 
    // cast is harmless as we can only have MFrames in this application
    m_Frame = (MFrame *)GetFrame(m_Parent);
 
-   m_MailFolder = NULL;
    m_ASMailFolder = NULL;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
 
@@ -1993,8 +1989,6 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
 wxFolderView::~wxFolderView()
 {
-   wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
-
    MEventManager::Deregister(m_regOptionsChange);
    DeregisterEvents();
 
@@ -2003,8 +1997,10 @@ wxFolderView::~wxFolderView()
 
    SafeDecRef(m_TicketsDroppedList);
 
-   m_InDeletion = true;
-   SetFolder(NULL, false);
+   delete m_MessagePreview;
+   m_MessagePreview = NULL;
+
+   Clear();
 }
 
 // ----------------------------------------------------------------------------
@@ -2218,161 +2214,180 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 void
 wxFolderView::Update()
 {
-   CHECK_RET( m_MailFolder, "wxFolderView::Update(): no folder" );
+   MailFolder_obj mf = GetMailFolder();
+   CHECK_RET( mf, "wxFolderView::Update(): no folder" );
 
-   m_FolderCtrl->UpdateListing(m_MailFolder->GetHeaders());
+   m_FolderCtrl->UpdateListing(mf->GetHeaders());
 
-   m_nDeleted = m_MailFolder->CountDeletedMessages();
+   m_nDeleted = mf->CountDeletedMessages();
 
-   UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
+   UpdateTitleAndStatusBars("", "", m_Frame, mf);
 }
 
 void
-wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
+wxFolderView::Clear()
 {
-   // this shouldn't happen
-   CHECK_RET(m_SetFolderSemaphore == false,
-             "wxFolderView::SetFolder() called recursively.");
-
-   m_SetFolderSemaphore = true;
-
-   // this shows what's happening:
-   m_MessagePreview->Clear();
+   // really clear the GUI
+   m_FolderCtrl->DeleteAllItems();
+   if ( m_MessagePreview )
+      m_MessagePreview->Clear();
 
    // reset them as they don't make sense for the new folder
    InvalidatePreviewUID();
-
-   if ( recreateFolderCtrl )
-      m_FolderCtrl->DeleteAllItems();
-
-   SafeIncRef(mf);
 
    if ( m_ASMailFolder )
    {
       // clean up old folder
 
-      // NB: the test for m_InDeletion is needed because of wxMSW bug which
-      //     prevents us from showing a dialog box when called from dtor
-      if ( !m_InDeletion )
+      // NB: the test for m_MessagePreview is needed because of wxMSW bug which
+      //     prevents us from showing a dialog box when called from dtor and it
+      //     is NULL only when we're in dtor
+      if ( m_MessagePreview )
       {
-         if( GetHeadersCount() > 0 &&
+         if ( GetHeadersCount() > 0 &&
              (m_ASMailFolder->GetType() == MF_NNTP ||
-              m_ASMailFolder->GetType() == MF_NEWS) &&
-              m_ASMailFolder->GetMailFolder()->IsOpened() )
+              m_ASMailFolder->GetType() == MF_NEWS) )
          {
-            wxString msg;
-            msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
-                       m_ASMailFolder->GetName().c_str());
-
-            if ( MDialog_YesNoDialog
-                 (
-                  msg,
-                  m_Frame,
-                  MDIALOG_YESNOTITLE,
-                  true,
-                  GetFullPersistentKey(M_MSGBOX_MARK_READ)
-                 ) )
+            MailFolder_obj mf = GetMailFolder();
+            if ( mf && mf->IsOpened() )
             {
-               UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
-               m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
-               delete seq;
+               wxString msg;
+               msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
+                          m_ASMailFolder->GetName().c_str());
+
+               if ( MDialog_YesNoDialog
+                    (
+                     msg,
+                     m_Frame,
+                     MDIALOG_YESNOTITLE,
+                     true,
+                     GetFullPersistentKey(M_MSGBOX_MARK_READ)
+                    ) )
+               {
+                  UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
+                  m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
+                  delete seq;
+               }
             }
          }
 
          CheckExpungeDialog(m_ASMailFolder, m_Frame);
       }
 
-      // This little trick makes sure that we don't react to any final
-      // events sent from the MailFolder destructor.
-      MailFolder *mf2 = m_MailFolder;
-      m_MailFolder = NULL;
       m_ASMailFolder->DecRef();
-      m_ASMailFolder = NULL; // shouldn't be needed
-      mf2->DecRef();
+      m_ASMailFolder = NULL;
    }
    //else: no old folder
 
-   SafeDecRef(m_Profile);
-
-   m_MailFolder = mf;
-   m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
-   m_Profile = NULL;
-   SafeDecRef(mf); // now held by m_ASMailFfolder
-
-   if ( m_ASMailFolder )
+   if ( m_Profile )
    {
-      m_Profile = m_ASMailFolder->GetProfile();
-      if(m_Profile)
-         m_Profile->IncRef();
-      else
-         m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
+      m_Profile->DecRef();
 
-      m_MessagePreview->SetFolder(m_ASMailFolder);
-      InvalidatePreviewUID();
-
-      // read in our profile settigns
-      ReadProfileSettings(&m_settings);
-
-      m_MailFolder->IncRef();  // make sure it doesn't go away
-      m_folderName = m_ASMailFolder->GetName();
-
-      if ( recreateFolderCtrl )
-      {
-         // save the columns widths of the old folder view before creating the
-         // new one as the latter might use the former
-         m_FolderCtrl->SaveColWidths();
-
-         wxWindow *oldfolderctrl = m_FolderCtrl;
-
-         m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-         m_FolderCtrl->ApplyOptions( m_settings.FgCol,
-                                     m_settings.BgCol,
-                                     m_settings.font,
-                                     m_settings.size,
-                                     m_settings.columns);
-         m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
-
-         m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
-         delete oldfolderctrl;
-      }
-
-      // TODO: sometimes we already have an UpdateFolder event in the event
-      //       queue and then we could avoid updating the folder view twice,
-      //       but it can also happen that we open a folder which had been
-      //       opened before and then MailFolderCC::Open() we had called
-      //       doesn't produce any update events - currently we have no way to
-      //       test for this, but we should either add a method to MailFolder
-      //       to allow us to detect if the folder is already opened or not,
-      //       or add a method to MEventManager to detect if the event is
-      //       already in the queue
-      //
-      // For now, let it process the event if there is any and if not, update
-      // manually
-      MEventManager::DispatchPending();
-      if ( GetHeadersCount() == 0 )
-      {
-         Update();
-      }
-
-      // the list control is created in "frozen" state, i.e. it doesn't show
-      // anything before we thaw it: this allows us to avoid retrieving the
-      // headers in the start of the folder if we're going to scroll to the
-      // first unread message (which is usually near the end) as the first
-      // thing anyhow
-      SelectInitialMessage(m_ASMailFolder->GetHeaders());
-      m_FolderCtrl->Thaw();
-
-      m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
-      if ( wxWindow::FindFocus() != m_FolderCtrl )
-      {
-         // so we can react to keyboard events
-         m_FolderCtrl->SetFocus();
-      }
+      m_Profile = NULL;
    }
-   //else: no new folder
 
-   EnableMMenu(MMenu_Message, m_FolderCtrl, (m_ASMailFolder != NULL) );
-   m_SetFolderSemaphore = false;
+   // save the columns widths of the old folder view
+   m_FolderCtrl->SaveColWidths();
+
+   // don't delete m_FolderCtrl, this would result in flicker when changing
+   // folder and it's probably preferable to leave an empty older ctrl rather
+   // than deleting it even when there is no new folder
+
+   // disable the message menu as we have no folder
+   EnableMMenu(MMenu_Message, m_FolderCtrl, false);
+}
+
+void
+wxFolderView::ShowFolder(MailFolder *mf)
+{
+   CHECK_RET( mf, "NULL MailFolder in wxFolderView::ShowFolder" );
+
+   m_ASMailFolder = ASMailFolder::Create(mf);
+
+   // this is not supposed to happen, it's an internal operation
+   CHECK_RET( m_ASMailFolder, "ASMailFolder::Create() failed??" );
+
+   m_Profile = m_ASMailFolder->GetProfile();
+   if ( m_Profile )
+      m_Profile->IncRef();
+   else
+      m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
+
+   m_MessagePreview->SetFolder(m_ASMailFolder);
+
+   // read in our new profile settigns
+   ReadProfileSettings(&m_settings);
+
+   m_folderName = m_ASMailFolder->GetName();
+
+   wxWindow *oldfolderctrl = m_FolderCtrl;
+
+   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
+   m_FolderCtrl->ApplyOptions( m_settings.FgCol,
+                               m_settings.BgCol,
+                               m_settings.font,
+                               m_settings.size,
+                               m_settings.columns );
+   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
+
+   m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+   delete oldfolderctrl;
+
+   // TODO: sometimes we already have an UpdateFolder event in the event
+   //       queue and then we could avoid updating the folder view twice,
+   //       but it can also happen that we open a folder which had been
+   //       opened before and then MailFolderCC::Open() we had called
+   //       doesn't produce any update events - currently we have no way to
+   //       test for this, but we should either add a method to MailFolder
+   //       to allow us to detect if the folder is already opened or not,
+   //       or add a method to MEventManager to detect if the event is
+   //       already in the queue
+   //
+   // For now, let it process the event if there is any and if not, update
+   // manually
+   MEventManager::DispatchPending();
+   if ( GetHeadersCount() == 0 )
+   {
+      Update();
+   }
+
+   // the list control is created in "frozen" state, i.e. it doesn't show
+   // anything before we thaw it: this allows us to avoid retrieving the
+   // headers in the start of the folder if we're going to scroll to the
+   // first unread message (which is usually near the end) as the first
+   // thing anyhow
+   SelectInitialMessage(m_ASMailFolder->GetHeaders());
+   m_FolderCtrl->Thaw();
+
+   m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+   if ( wxWindow::FindFocus() != m_FolderCtrl )
+   {
+      // so we can react to keyboard events
+      m_FolderCtrl->SetFocus();
+   }
+
+   EnableMMenu(MMenu_Message, m_FolderCtrl, true);
+}
+
+void
+wxFolderView::SetFolder(MailFolder *mf)
+{
+   // probably not needed, but hold on it to make sure it doesn't go away
+   // before we call ShowFolder()
+   if ( mf )
+   {
+      mf->IncRef();
+   }
+
+   Clear();
+
+   if ( mf )
+   {
+      ShowFolder(mf);
+
+      // to compensate IncRef() above
+      mf->DecRef();
+   }
 }
 
 bool
@@ -2897,9 +2912,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          // and I don't think this operation gains anything from being async
          if ( m_MessagePreview )
          {
-            CHECK_RET( m_ASMailFolder, "message preview without folder?" );
-
-            MailFolder *mf = m_ASMailFolder->GetMailFolder();
+            MailFolder_obj mf = GetMailFolder();
             CHECK_RET( mf, "message preview without folder?" );
 
             const UIdArray& selections = GetSelections();
@@ -2953,8 +2966,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
             delete dlg;
 
-            mf->DecRef();
-
             wxArrayString addresses = strutil_uniq_array(addressesSorted);
             if ( !addresses.IsEmpty() )
             {
@@ -2969,16 +2980,17 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 #ifdef EXPERIMENTAL_show_uid
       case WXMENU_MSG_SHOWUID:
          {
-            MailFolder *mf = m_ASMailFolder->GetMailFolder();
+            MailFolder_obj mf = GetMailFolder();
 
-            String uidString = mf->GetMessageUID(GetFocus());
-            if ( uidString.empty() )
-               wxLogWarning("This message doesn't have a valid UID.");
-            else
-               wxLogMessage("The UID of this message is '%s'.",
-                            uidString.c_str());
-
-            mf->DecRef();
+            if ( mf )
+            {
+               String uidString = mf->GetMessageUID(GetFocus());
+               if ( uidString.empty() )
+                  wxLogWarning("This message doesn't have a valid UID.");
+               else
+                  wxLogMessage("The UID of this message is '%s'.",
+                               uidString.c_str());
+            }
          }
          break;
 #endif // EXPERIMENTAL_show_uid
@@ -3076,9 +3088,12 @@ wxFolderView::GetFocus() const
 void
 wxFolderView::ShowRawText(long uid)
 {
-   // do it synchrnously (FIXME we shouldn't!)
+   // do it synchronously (FIXME should we?)
+   MailFolder_obj mf = GetMailFolder();
+   CHECK_RET( mf, "no folder in wxFolderView::ShowRawText" );
+
    String text;
-   Message *msg = m_MailFolder->GetMessage(uid);
+   Message *msg = mf->GetMessage(uid);
    if ( msg )
    {
       msg->WriteToString(text, true);
@@ -3333,7 +3348,7 @@ wxFolderView::DragAndDropMessages()
    size_t countSel = selections.Count();
    if ( countSel > 0 )
    {
-      MailFolder *mf = GetFolder()->GetMailFolder();
+      MailFolder_obj mf = GetMailFolder();
       CHECK( mf, false, "no mail folder to drag messages from?" );
 
       MMessagesDataObject dropData(this, mf, selections);
@@ -3420,8 +3435,6 @@ wxFolderView::DragAndDropMessages()
       {
          m_UIdsCopiedOk.Empty();
       }
-
-      mf->DecRef();
    }
 
    // did we do anything?
@@ -3434,9 +3447,11 @@ wxFolderView::DragAndDropMessages()
 
 void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 {
-   if ( event.GetFolder() == m_MailFolder )
+   MailFolder_obj mf = GetMailFolder();
+
+   if ( event.GetFolder() == mf )
    {
-      SetFolder(NULL);
+      Clear();
    }
 }
 
@@ -3449,7 +3464,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
                   _("Closing folder '%s' because the underlying mail "
                     "folder was deleted."), m_folderName.c_str());
 
-      SetFolder(NULL);
+      Clear();
    }
 }
 
@@ -3458,7 +3473,9 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
 void
 wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 {
-   if ( event.GetFolder() != m_MailFolder )
+   MailFolder_obj mf = GetMailFolder();
+
+   if ( event.GetFolder() != mf )
       return;
 
    // deal with the special case when we get the expunge notification before
@@ -3529,14 +3546,16 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    // we don't have any deleted messages any more
    m_nDeleted = 0;
 
-   UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
+   UpdateTitleAndStatusBars("", "", m_Frame, mf);
 }
 
 // this function gets called when new mail appears in the folder
 void
 wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
-   if ( event.GetFolder() == m_MailFolder )
+   MailFolder_obj mf = GetMailFolder();
+
+   if ( event.GetFolder() == mf )
    {
       Update();
    }
@@ -3546,7 +3565,9 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 void
 wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {
-   if ( event.GetFolder() == m_MailFolder )
+   MailFolder_obj mf = GetMailFolder();
+
+   if ( event.GetFolder() == mf )
    {
       size_t index = event.GetIndex();
       if ( index < (size_t)m_FolderCtrl->GetItemCount() )
@@ -3567,7 +3588,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
          m_FolderCtrl->RefreshItem(index);
 
          // TODO: should do it only once, after all status changes
-         UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
+         UpdateTitleAndStatusBars("", "", m_Frame, mf);
       }
       //else: this can happen if we didn't have to update the control yet, just
       //      ignore the event then as we will get the message with the

@@ -335,8 +335,7 @@ bool MfStatusCache::Load(const String& filename)
 
          // do add the entry to the cache
          size_t entry = m_folderNames.Add(name);
-         m_folderData.Insert(new MailFolderStatus, entry);
-         *m_folderData[entry] = status;
+         m_folderData.Insert(new MailFolderStatus(status), entry);
       }
    }
 

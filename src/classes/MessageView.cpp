@@ -404,6 +404,8 @@ MessageView::Init()
    m_uid = UID_ILLEGAL;
    m_encodingUser = wxFONTENCODING_SYSTEM;
 
+   m_evtHandlerProc = NULL;
+
    RegisterForEvents();
 }
 
@@ -462,6 +464,8 @@ MessageView::~MessageView()
 
    SafeDecRef(m_mailMessage);
    SafeDecRef(m_asyncFolder);
+
+   m_viewer->DecRef();
 }
 
 // ----------------------------------------------------------------------------
@@ -2451,7 +2455,17 @@ MessageView::SetFolder(ASMailFolder *asmf)
    if ( asmf == m_asyncFolder )
       return;
 
-   SafeDecRef(m_asyncFolder);
+   if ( m_asyncFolder )
+      m_asyncFolder->DecRef();
+
+   m_asyncFolder = asmf;
+
+   if ( m_asyncFolder )
+      m_asyncFolder->IncRef();
+
+   // use the settings for this folder now (or, on the contrary, revert to the
+   // default ones if we don't have any folder any more)
+   UpdateProfileValues();
 
    ResetUserEncoding();
 }

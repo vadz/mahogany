@@ -4021,14 +4021,12 @@ extern bool MailFolderCCInit(void)
 
 extern void MailFolderCCCleanup(void)
 {
-   if ( MailFolderCC::IsInitialized() )
-   {
-      // as c-client lib doesn't seem to think that deallocating memory is
-      // something good to do, do it at it's place...
-      // Do not reverse the ordering: GET_NEWSRC may need GET_HOMEDIR
-      free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
-      free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
-   }
+   // as c-client lib doesn't seem to think that deallocating memory is
+   // something good to do, do it at it's place...
+   //
+   // NB: do not reverse the ordering: GET_NEWSRC may need GET_HOMEDIR
+   free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
+   free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
 
    if ( gs_CCStreamCleaner )
    {

@@ -122,12 +122,12 @@ public:
       m_mainFrame = mainFrame;
    }
 
-   virtual void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE)
+   virtual void SetFolder(MailFolder *mf)
    {
       if ( !mf )
          m_mainFrame->ClearFolderName();
 
-      wxFolderView::SetFolder(mf, recreateFolderCtrl);
+      wxFolderView::SetFolder(mf);
    }
 
    virtual void OnAppExit()

@@ -207,7 +207,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // start auto ptr class declaration
-#define BEGIN_DECLARE_AUTOPTR_0(classname) \
+#define BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname) \
    class classname##_obj \
    { \
    public: \
@@ -230,8 +230,6 @@ private:
  \
       classname *operator->() const { return m_ptr; } \
  \
-      operator bool() const { return m_ptr != NULL; } \
- \
    private: \
       classname *m_ptr;
 
@@ -241,20 +239,39 @@ private:
 // as copying smart pointers *is* illegal (whatever C++ standard says)
 
 #ifndef __GNUG__
-    #define BEGIN_DECLARE_AUTOPTR(classname) \
-            BEGIN_DECLARE_AUTOPTR_0(classname) \
-            classname##_obj(const classname##_obj &); \
+    #define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)   \
+            BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname) \
+            classname##_obj(const classname##_obj &);  \
             classname##_obj& operator=(const classname##_obj &);
 #else // g++
-    #define BEGIN_DECLARE_AUTOPTR(classname) BEGIN_DECLARE_AUTOPTR_0(classname)
+    #define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname) \
+            BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname)
 #endif // !g++/g++
+
+// normally our autoptr class has an implicit conversion to bool fo truth
+// testing but we can't have both conversion to bool and to a pointer type as
+// in DECLARE_AUTOPTR_WITH_CONVERSION() because of ambiguity between them, so
+// we have a separate macro for the part without bool conversion and another
+// one for the whole declaration
+#define BEGIN_DECLARE_AUTOPTR(classname)              \
+   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)           \
+   public:                                            \
+      operator bool() const { return m_ptr != NULL; } \
 
 // finish the class decl
 #define END_DECLARE_AUTOPTR() }
 
 // declare an class which is an auto ptr to the given MObjectRC-derived type
-#define DECLARE_AUTOPTR(classname)  \
-   BEGIN_DECLARE_AUTOPTR(classname) \
+#define DECLARE_AUTOPTR(classname)                    \
+   BEGIN_DECLARE_AUTOPTR(classname)                   \
+   END_DECLARE_AUTOPTR()
+
+// declare an auto ptr with implicit conversion to its real pointer class:
+// dangerous but needed for backwards compatibility
+#define DECLARE_AUTOPTR_WITH_CONVERSION(classname)    \
+   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)           \
+   public:                                            \
+      operator classname *() const { return m_ptr; }  \
    END_DECLARE_AUTOPTR()
 
 // ----------------------------------------------------------------------------
