@@ -611,6 +611,8 @@ MailFolderCmn::MailFolderCmn()
 
    m_frame = NULL;
 
+   m_statusChangeData = NULL;
+
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
 
@@ -618,6 +620,14 @@ MailFolderCmn::~MailFolderCmn()
 {
    ASSERT_MSG( !m_suspendUpdates,
                "mismatch between Suspend/ResumeUpdates()" );
+
+   // this must have been cleared by SendMsgStatusChangeEvent() call earlier
+   if ( m_statusChangeData )
+   {
+      FAIL_MSG( "m_statusChangeData unexpectedly != NULL" );
+
+      delete m_statusChangeData;
+   }
 
    delete m_Timer;
    delete m_MEventReceiver;
@@ -2076,6 +2086,111 @@ bool MailFolderCmn::CountAllMessages(MailFolderStatus *status) const
    }
 
    return status->HasSomething();
+}
+
+// ----------------------------------------------------------------------------
+// MailFolderCmn message status
+// ----------------------------------------------------------------------------
+
+// msg status info
+//
+// NB: name MessageStatus is already taken by MailFolder
+struct MsgStatus
+{
+   bool recent;
+   bool unread;
+   bool newmsgs;
+   bool flagged;
+   bool searched;
+};
+
+// is this message recent/new/unread/...?
+static MsgStatus AnalyzeStatus(int stat)
+{
+   MsgStatus status;
+
+   // deal with recent and new (== recent and !seen)
+   status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
+   status.unread = !(stat & MailFolder::MSG_STAT_SEEN);
+   status.newmsgs = status.recent && status.unread;
+
+   // and also count flagged and searched messages
+   status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
+   status.searched = (stat & MailFolder::MSG_STAT_SEARCHED ) != 0;
+
+   return status;
+}
+
+void
+MailFolderCmn::SendMsgStatusChangeEvent()
+{
+   if ( !m_statusChangeData )
+   {
+      // nothing to do
+      return;
+   }
+
+   // first update the cached status
+   MailFolderStatus status;
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   if ( mfStatusCache->GetStatus(GetName(), &status) )
+   {
+      size_t count = m_statusChangeData->msgnos.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         int statusNew = m_statusChangeData->statusNew[n],
+             statusOld = m_statusChangeData->statusOld[n];
+
+         bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
+              isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
+
+         MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
+                   msgStatusNew = AnalyzeStatus(statusNew);
+
+         // we consider that a message has some flag only if it is not deleted
+         // (which is discussable at least for flagged and searched flags
+         // although, OTOH, why flag a deleted message?)
+
+         #define UPDATE_NUM_OF(what)   \
+            if ( (!isDeleted && msgStatusNew.what) && \
+                 (wasDeleted || !msgStatusOld.what) ) \
+            { \
+               wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "++ (now %lu)", \
+                          GetName().c_str(), status.what + 1); \
+               status.what++; \
+            } \
+            else if ( (!wasDeleted && msgStatusOld.what) && \
+                      (isDeleted || !msgStatusNew.what) ) \
+               if ( status.what > 0 ) \
+               { \
+                  wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
+                             GetName().c_str(), status.what - 1); \
+                  status.what--; \
+               } \
+               else \
+                  FAIL_MSG( "error in msg status change logic" )
+
+         UPDATE_NUM_OF(recent);
+         UPDATE_NUM_OF(unread);
+         UPDATE_NUM_OF(newmsgs);
+         UPDATE_NUM_OF(flagged);
+         UPDATE_NUM_OF(searched);
+
+         #undef UPDATE_NUM_OF
+      }
+
+      mfStatusCache->UpdateStatus(GetName(), status);
+   }
+
+   // next notify everyone else about the status change
+   wxLogTrace(TRACE_MF_EVENTS,
+              "Sending MsgStatus event for %u msgs in folder '%s'",
+              m_statusChangeData->msgnos.GetCount(), GetName().c_str());
+
+   MEventManager::Send(new MEventMsgStatusData(this, m_statusChangeData));
+
+   // MEventMsgStatusData will delete them
+   m_statusChangeData = NULL;
 }
 
 // ----------------------------------------------------------------------------

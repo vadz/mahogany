@@ -458,3 +458,7 @@ bool Message::GetHeaderLine(const String& line,
                        UIdType uid, Profile *iprofile)
 */
 
+Message::~Message()
+{
+}
+

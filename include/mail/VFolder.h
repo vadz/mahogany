@@ -153,6 +153,11 @@ public:
 protected:
    virtual bool DoCountMessages(MailFolderStatus *status) const;
 
+   /// common part of SetMessageFlag and SetSequenceFlag
+   virtual bool DoSetMessageFlag(unsigned long uid,
+                                 int flag,
+                                 bool set = true);
+
    /** @name message store implementation */
    //@{
 

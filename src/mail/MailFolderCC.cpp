@@ -1434,35 +1434,6 @@ int GetMsgStatus(const MESSAGECACHE *elt)
    return status;
 }
 
-// msg status info
-//
-// NB: name MessageStatus is already taken by MailFolder
-struct MsgStatus
-{
-   bool recent;
-   bool unread;
-   bool newmsgs;
-   bool flagged;
-   bool searched;
-};
-
-// is this message recent/new/unread/...?
-static MsgStatus AnalyzeStatus(int stat)
-{
-   MsgStatus status;
-
-   // deal with recent and new (== recent and !seen)
-   status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
-   status.unread = !(stat & MailFolder::MSG_STAT_SEEN);
-   status.newmsgs = status.recent && status.unread;
-
-   // and also count flagged and searched messages
-   status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
-   status.searched = (stat & MailFolder::MSG_STAT_SEARCHED ) != 0;
-
-   return status;
-}
-
 // ----------------------------------------------------------------------------
 // header decoding
 // ----------------------------------------------------------------------------
@@ -1732,10 +1703,7 @@ void MailFolderCC::Init()
    }
 
    m_expungedMsgnos =
-   m_expungedPositions =
-   m_statusChangedMsgnos =
-   m_statusChangedOld =
-   m_statusChangedNew = NULL;
+   m_expungedPositions = NULL;
 
    m_gotUnprocessedNewMail =
    m_InCritical = false;
@@ -1770,16 +1738,6 @@ MailFolderCC::~MailFolderCC()
 
       delete m_expungedMsgnos;
       delete m_expungedPositions;
-   }
-
-   // these arrays must have been cleared by OnMsgStatusChanged() earlier
-   if ( m_statusChangedMsgnos )
-   {
-      FAIL_MSG( "m_statusChangedMsgnos unexpectedly != NULL" );
-
-      delete m_statusChangedMsgnos;
-      delete m_statusChangedOld;
-      delete m_statusChangedNew;
    }
 
    m_Profile->DecRef();
@@ -2445,15 +2403,11 @@ MailFolderCC::Close()
    // FIXME: is this really true, i.e. does it ever happen?
    DiscardExpungeData();
 
-   if ( m_statusChangedMsgnos )
+   if ( m_statusChangeData )
    {
-      delete m_statusChangedMsgnos;
-      delete m_statusChangedOld;
-      delete m_statusChangedNew;
+      delete m_statusChangeData;
 
-      m_statusChangedMsgnos =
-      m_statusChangedOld =
-      m_statusChangedNew = NULL;
+      m_statusChangeData = NULL;
    }
 
    // normally the folder won't be reused any more but reset them just in case
@@ -3690,81 +3644,6 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 }
 
 void
-MailFolderCC::OnMsgStatusChanged()
-{
-   // we only send MEventId_MailFolder_OnMsgStatus events if something really
-   // changed, so this is not suposed to happen
-   CHECK_RET( m_statusChangedMsgnos, "unexpected OnMsgStatusChanged() call" );
-
-   // first update the cached status
-   MailFolderStatus status;
-   MfStatusCache *mfStatusCache = MfStatusCache::Get();
-   if ( mfStatusCache->GetStatus(GetName(), &status) )
-   {
-      size_t count = m_statusChangedMsgnos->GetCount();
-      for ( size_t n = 0; n < count; n++ )
-      {
-         int statusNew = m_statusChangedNew->Item(n),
-             statusOld = m_statusChangedOld->Item(n);
-
-         bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
-              isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
-
-         MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
-                   msgStatusNew = AnalyzeStatus(statusNew);
-
-         // we consider that a message has some flag only if it is not deleted
-         // (which is discussable at least for flagged and searched flags
-         // although, OTOH, why flag a deleted message?)
-
-         #define UPDATE_NUM_OF(what)   \
-            if ( (!isDeleted && msgStatusNew.what) && \
-                 (wasDeleted || !msgStatusOld.what) ) \
-            { \
-               wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "++ (now %lu)", \
-                          GetName().c_str(), status.what + 1); \
-               status.what++; \
-            } \
-            else if ( (!wasDeleted && msgStatusOld.what) && \
-                      (isDeleted || !msgStatusNew.what) ) \
-               if ( status.what > 0 ) \
-               { \
-                  wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
-                             GetName().c_str(), status.what - 1); \
-                  status.what--; \
-               } \
-               else \
-                  FAIL_MSG( "error in msg status change logic" )
-
-         UPDATE_NUM_OF(recent);
-         UPDATE_NUM_OF(unread);
-         UPDATE_NUM_OF(newmsgs);
-         UPDATE_NUM_OF(flagged);
-         UPDATE_NUM_OF(searched);
-
-         #undef UPDATE_NUM_OF
-      }
-
-      mfStatusCache->UpdateStatus(GetName(), status);
-   }
-
-   // next notify everyone else about the status change
-   wxLogTrace(TRACE_MF_EVENTS,
-              "Sending MsgStatus event for %u msgs in folder '%s'",
-              m_statusChangedMsgnos->GetCount(), GetName().c_str());
-
-   MEventManager::Send(new MEventMsgStatusData(this,
-                                               m_statusChangedMsgnos,
-                                               m_statusChangedOld,
-                                               m_statusChangedNew));
-
-   // MEventMsgStatusData will delete them
-   m_statusChangedMsgnos =
-   m_statusChangedOld =
-   m_statusChangedNew = NULL;
-}
-
-void
 MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
    // if we're retrieving the headers right now, we can't use
@@ -3799,11 +3678,9 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          // changed status only once, when we get the first notification - and
          // also when we allocate the arrays for msg status change data
          bool sendEvent;
-         if ( !m_statusChangedMsgnos )
+         if ( !m_statusChangeData )
          {
-            m_statusChangedMsgnos = new wxArrayInt;
-            m_statusChangedOld = new wxArrayInt;
-            m_statusChangedNew = new wxArrayInt;
+            m_statusChangeData = new StatusChangeData;
 
             sendEvent = true;
          }
@@ -3813,9 +3690,9 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          }
 
          // remember who changed and how
-         m_statusChangedMsgnos->Add(msgno);
-         m_statusChangedOld->Add(statusOld);
-         m_statusChangedNew->Add(statusNew);
+         m_statusChangeData->msgnos.Add(msgno);
+         m_statusChangeData->statusOld.Add(statusOld);
+         m_statusChangeData->statusNew.Add(statusNew);
 
          // and schedule call to our OnMsgStatusChanged() if not done yet
          if ( sendEvent )
@@ -3830,6 +3707,15 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       //      them out of sync with the real values
    }
    //else: flags didn't really change
+}
+
+void MailFolderCC::OnMsgStatusChanged()
+{
+   // normally the CCEventReflector event is generated only if the status of
+   // something has really changed...
+   ASSERT_MSG( m_statusChangeData, "unexpected OnMsgStatusChanged() call" );
+
+   SendMsgStatusChangeEvent();
 }
 
 bool MailFolderCC::IsReadOnly(void) const

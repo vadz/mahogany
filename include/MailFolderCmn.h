@@ -199,6 +199,13 @@ protected:
    /// cache the last count messages
    void CacheLastMessages(MsgnoType count);
 
+   /**
+     Send the message status event for the data in m_statusChangeData and clear
+     it afterwards. It is safe to call this method even if m_statusChangeData
+     is NULL, then simply nothing is done.
+   */
+   void SendMsgStatusChangeEvent();
+
    /** @name Config management */
    //@{
    struct MFCmnOptions
@@ -252,6 +259,9 @@ protected:
 
    /// a timer to update information
    class MailFolderTimer *m_Timer;
+
+   /// struct used by SendMsgStatusChangeEvent()
+   StatusChangeData *m_statusChangeData;
 
 private:
    /**

@@ -41,6 +41,7 @@
 
 #include "mail/Driver.h"
 #include "mail/VFolder.h"
+#include "mail/VMessage.h"
 #include "mail/ServerInfo.h"
 
 // ----------------------------------------------------------------------------
@@ -480,23 +481,64 @@ void MailFolderVirt::Checkpoint()
 
 Message *MailFolderVirt::GetMessage(unsigned long uid)
 {
-   const Msg *msg = GetMsgFromUID(uid);
+   Msg *msg = GetMsgFromUID(uid);
+   if ( !msg )
+      return NULL;
 
-   return msg ? msg->mf->GetMessage(msg->uid) : NULL;
+   Message *message = msg->mf->GetMessage(msg->uid);
+   if ( !message )
+      return NULL;
+
+   return MessageVirt::Create(this, uid, &msg->flags, message);
 }
 
 bool
 MailFolderVirt::SetMessageFlag(unsigned long uid, int flag, bool set)
+{
+   if ( !DoSetMessageFlag(uid, flag, set) )
+      return false;
+
+   SendMsgStatusChangeEvent();
+
+   return true;
+}
+
+bool
+MailFolderVirt::DoSetMessageFlag(unsigned long uid, int flag, bool set)
 {
    Msg *msg = GetMsgFromUID(uid);
 
    if ( !msg )
       return false;
 
-   if ( set )
-      msg->flags |= flag;
-   else
-      msg->flags &= ~flag;
+   int flagsOld = msg->flags;
+   int flagsNew = set ? (flagsOld | flag) : (flagsOld & ~flag);
+   if ( flagsOld == flagsNew )
+   {
+      // nothing changed
+      return true;
+   }
+
+   const MsgnoType msgno = uid; // UID == msgno here
+
+   HeaderInfoList_obj headers = GetHeaders();
+   CHECK( headers, false, "SetMessageFlag: couldn't get headers" );
+
+   HeaderInfo *hi = headers->GetItemByMsgno(msgno);
+   CHECK( hi, false, "SetMessageFlag: no header info for the given msgno?" );
+
+   // remember the old and new status of the changed messages
+   if ( !m_statusChangeData )
+   {
+      m_statusChangeData = new StatusChangeData;
+   }
+
+   m_statusChangeData->msgnos.Add(msgno);
+   m_statusChangeData->statusOld.Add(flagsOld);
+   m_statusChangeData->statusNew.Add(flagsNew);
+
+   hi->m_Status =
+   msg->flags = flagsNew;
 
    return true;
 }
@@ -518,6 +560,8 @@ MailFolderVirt::SetSequenceFlag(SequenceKind kind,
       if ( !SetMessageFlag(n, flag, set) )
          rc = false;
    }
+
+   SendMsgStatusChangeEvent();
 
    return rc;
 }

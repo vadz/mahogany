@@ -20,20 +20,10 @@
 #include "FolderType.h"    // for Protocol enum
 
 class WXDLLEXPORT wxArrayString;
+
 class AddressList;
 class MailFolder;
 class Profile;
-
-// ----------------------------------------------------------------------------
-// compatibility defines
-// ----------------------------------------------------------------------------
-
-// c-client needs this
-#ifdef   OS_WIN
-#  define   TEXT_DATA_CAST(x)    ((unsigned char *)x)
-#else
-#  define   TEXT_DATA_CAST(x)    ((char *)x)
-#endif
 
 // ----------------------------------------------------------------------------
 // Message class
@@ -52,8 +42,10 @@ enum MessageAddressType
 };
 
 /**
-   Message class, containing the most commonly used message headers.
-   */
+   Message class represents a message in a mail folder. It provides access to
+   the message headers as well as to the message contents (in conjunction with
+   MimePart class)
+ */
 class Message : public MObjectRC
 {
 public:
@@ -388,8 +380,10 @@ public:
 
 protected:
    /** virtual destructor */
-   virtual ~Message() {}
+   virtual ~Message();
+
    GCC_DTOR_WARN_OFF
+
    MOBJECT_NAME(Message)
 };
 

@@ -208,6 +208,21 @@ public:
 };
 
 /**
+  The struct containing status change information used by MEventMsgStatus
+ */
+struct StatusChangeData
+{
+   /// the msgnos of the message whose status has changed
+   wxArrayInt msgnos;
+
+   /// the old status of the messages with the msgnos from above array
+   wxArrayInt statusOld;
+
+   /// the new status of the messages with the msgnos from above array
+   wxArrayInt statusNew;
+};
+
+/**
    MEventMsgStatus Data - carries folder pointer and HeaderInfo object with
    its index in the folder list
  */
@@ -216,50 +231,40 @@ class HeaderInfo;
 class MEventMsgStatusData : public MEventWithFolderData
 {
 public:
-   /// ctor takes ownership of the arrays passed to it
+   /// ctor takes ownership of the data passed to it
    MEventMsgStatusData(MailFolder *folder,
-                       wxArrayInt *msgnos,
-                       wxArrayInt *statusOld,
-                       wxArrayInt *statusNew)
+                       StatusChangeData *statusChangeData)
       : MEventWithFolderData(MEventId_MsgStatus, folder)
    {
-      ASSERT_MSG( msgnos && statusNew && statusOld &&
-                  msgnos->GetCount() == statusNew->GetCount() &&
-                  msgnos->GetCount() == statusOld->GetCount(),
-                  "invalid parameters for MEventMsgStatus event" );
+      ASSERT_MSG( statusChangeData, "NULL pointer in MEventMsgStatus" );
 
-      m_msgnos = msgnos;
-      m_statusNew = statusNew;
-      m_statusOld = statusOld;
+      m_statusChangeData = statusChangeData;
    }
 
-   /// dtor frees the arrays
+   /// dtor frees the data
    ~MEventMsgStatusData()
    {
-      delete m_msgnos;
-      delete m_statusNew;
-      delete m_statusOld;
+      delete m_statusChangeData;
    }
 
    /// return the number of messages affected
-   size_t GetCount() const { return m_msgnos ? m_msgnos->GetCount() : 0; }
+   size_t GetCount() const
+      { return m_statusChangeData->msgnos.GetCount(); }
 
    /// get the msgno of the n-th changed header
-   MsgnoType GetMsgno(size_t n) const { return m_msgnos->Item(n); }
+   MsgnoType GetMsgno(size_t n) const
+      { return (MsgnoType)m_statusChangeData->msgnos[n]; }
 
    /// get the new status of the n-th changed header
-   int GetStatusNew(MsgnoType n) const { return m_statusNew->Item(n); }
+   int GetStatusNew(MsgnoType n) const
+      { return m_statusChangeData->statusNew[n]; }
 
    /// get the old status of the n-th changed header
-   int GetStatusOld(MsgnoType n) const { return m_statusOld->Item(n); }
+   int GetStatusOld(MsgnoType n) const
+      { return m_statusChangeData->statusOld[n]; }
 
 private:
-   /// the array containing the msgnos of messages whose status changed
-   wxArrayInt *m_msgnos;
-
-   /// the new and previous values of the message status
-   wxArrayInt *m_statusNew,
-              *m_statusOld;
+   StatusChangeData *m_statusChangeData;
 };
 
 /**
