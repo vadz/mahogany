@@ -83,11 +83,7 @@ public:
        @param uid mesage uid
        @return always true UNSUPPORTED!
    */
-   virtual inline bool DeleteMessage(unsigned long uid)
-   {
-     SetMessageFlag(uid,MSG_STAT_DELETED);
-     return true;
-   }
+   virtual bool DeleteMessage(unsigned long uid);
 
    /** UnDelete a message.
        @param uid mesage uid

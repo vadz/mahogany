@@ -12,7 +12,8 @@
 #define MISCUTIL_H
 
 #ifndef  USE_PCH
-#  include  "Mconfig.h"
+#   include "Mconfig.h"
+#   include "FolderType.h"
 #endif
 
 /**@name Miscellaneous utility functions */
@@ -70,6 +71,11 @@ extern void GetColourByName(wxColour *colour,
                             const String& defaultName);
 
 
+/// Converts an INTARRAY to a sequence string (for backward compatibility):
+extern String GetSequenceString(const INTARRAY *sequence);
+
+/// Gets an INTARRAY with all message uids in the folder:
+extern INTARRAY *GetAllMessagesSequence(class ASMailFolder *mf);
 
 //@}
 #endif // MISCUTIL_H

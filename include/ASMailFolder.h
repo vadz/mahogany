@@ -20,12 +20,6 @@
 
 #include "FolderType.h"
 
-/** The INTARRAY define is a class which is an integer array. It needs
-    to provide a int Count() method to return the number of elements
-    and an int operator[int] to access them.
-    We use wxArrayInt for this.
-*/
-#define INTARRAY wxArrayInt
 
 // forward declarations
 class FolderView;
@@ -304,7 +298,7 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const String &sequence,
+   virtual Ticket SetSequenceFlag(const INTARRAY *sequence,
                                 int flag,
                                 bool set = true) = 0;
    /** Appends the message to this folder.

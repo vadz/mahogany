@@ -345,8 +345,6 @@ private:
    bool m_BuildListingSemaphore;
    /// Do we need to update folder listing?
    bool m_UpdateNeeded;
-   /// Request update
-   void RequestUpdate(void);
    /// Do we need an update?
    bool UpdateNeeded(void) const { return m_UpdateNeeded; }
    /// number of messages in mailbox
@@ -416,6 +414,8 @@ private:
    // return the folder type
    FolderType GetType(void) const { return m_folderType; }
 protected:
+   /// Request update
+   virtual void RequestUpdate(void);
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }

@@ -410,6 +410,9 @@ public:
       const = 0;
    //@}
 
+protected:
+   /// Request update
+   virtual void RequestUpdate(void) = 0;
 };
 
 /** This class temporarily locks a mailfolder */

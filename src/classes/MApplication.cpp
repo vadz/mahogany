@@ -677,6 +677,27 @@ MAppBase::CanClose() const
                              TRUE, "SendOutboxOnExit"))
          SendOutbox();
    }
+
+   // Check Trash folder if it contains any messages (only the global
+   // Trash can be checked here!):
+
+   if(READ_APPCONFIG(MP_USE_TRASH_FOLDER)
+      // don´t ask twice:
+      && READ_APPCONFIG(MP_TRASH_FOLDER) != ((wxMainFrame *)m_topLevelFrame)->GetFolderName())
+   {
+      ASMailFolder *mf = ASMailFolder::OpenFolder(MF_PROFILE_OR_FILE,
+                                READ_APPCONFIG(MP_TRASH_FOLDER));
+      if(mf)
+      {
+         // make sure they are all marked as deleted:
+         INTARRAY * ia = GetAllMessagesSequence(mf);
+         mf->SetSequenceFlag(ia, MailFolder::MSG_STAT_DELETED);
+         delete ia;
+         // And now, we can ask if we want to expunge them:
+         CheckExpungeDialog(mf);
+         mf->DecRef();
+      }
+   }
    
    String folders;
    if(! MailFolder::CanExit(&folders) )

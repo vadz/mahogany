@@ -29,7 +29,7 @@
 
 #include "MDialogs.h"
 #include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
-
+#include "ASMailFolder.h"
 #include "miscutil.h"
 
 #include <ctype.h>
@@ -382,3 +382,28 @@ void GetColourByName(wxColour *colour,
 
 
 
+String GetSequenceString(const INTARRAY *array)
+{
+   String sequence;
+   for(size_t i = 0; i < array->Count(); i++)
+   {
+      sequence += strutil_ultoa((*array)[i]);
+      sequence += ',';
+   }
+   sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
+   return sequence;
+}
+
+INTARRAY *GetAllMessagesSequence(ASMailFolder *mf)
+{
+   ASSERT(mf);
+   INTARRAY *sequence = new INTARRAY;
+   HeaderInfoList *hil = mf->GetHeaders();
+   if(hil)
+   {
+      for(size_t i = 0; i < hil->Count(); i++)
+         sequence->Add((*hil)[i]->GetUId());
+      hil->DecRef();
+   }
+   return sequence;
+}

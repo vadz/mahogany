@@ -16,6 +16,7 @@
 #   include "Mcommon.h"
 #   include "guidef.h"    // only for high-level functions
 #   include "strutil.h"
+#   include "miscutil.h"
 #   include "Profile.h"
 #   include "MEvent.h"
 #   include "MApplication.h"
@@ -228,6 +229,27 @@ public:
 protected:
    int m_Flag;
    bool m_Set;
+};
+
+class MT_DeleteMessages : public MailThreadSeq
+{
+public:
+   MT_DeleteMessages(ASMailFolder *mf, UserData ud,
+                     const INTARRAY *sequence)
+      : MailThreadSeq(mf, ud, sequence)
+      {
+      }
+   virtual void WorkFunction(void)
+      {
+         m_MailFolder->DeleteMessages(m_Seq);
+         // we don´t send a result event, so we need to delete it:
+         delete m_Seq;
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
+      }
+protected:
+   String m_Sequence;
 };
 
 class MT_GetMessage : public MailThread
@@ -556,11 +578,12 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const String &sequence,
+   virtual Ticket SetSequenceFlag(const INTARRAY *sequence,
                                   int flag,
                                   bool set)
       {
-         return (new MT_SetSequenceFlag(this, NULL, sequence,flag,set))->Start();
+         return (new MT_SetSequenceFlag(this, NULL,
+                                        GetSequenceString(sequence),flag,set))->Start(); 
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -639,8 +662,10 @@ public:
    virtual void SetMessageFlag(unsigned long uid,
                                int flag, bool set)
       {
-         String sequence; sequence.Printf("%lu", uid);
-         SetSequenceFlag(sequence, flag, set);
+         INTARRAY *ia = new INTARRAY;
+         ia->Add(uid);
+         SetSequenceFlag(ia, flag, set);
+         delete ia;
       }
    //@}
 
@@ -677,7 +702,7 @@ public:
    virtual Ticket DeleteMessages(const INTARRAY *messages,
                                  UserData ud)
       {
-         return SetFlag(messages, MailFolder::MSG_STAT_DELETED,true);
+         return (new MT_DeleteMessages(this, ud, messages))->Start();
       }
 
    /** Mark messages as no longer deleted.

@@ -384,6 +384,10 @@
 #define MP_OUTBOX_NAME       "OutBoxName"
 /// Use outbox?
 #define MP_USE_OUTBOX          "UseOutBox"
+/// Name of Trash folder?
+#define MP_TRASH_FOLDER      "TrashFolder"
+/// Use a trash folder?
+#define MP_USE_TRASH_FOLDER   "UseTrash"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
 /// comment
@@ -815,6 +819,10 @@
 #define MP_OUTBOX_NAME_D         _("Outbox")
 /// Use Outbox?
 #define MP_USE_OUTBOX_D            0l
+/// Name of Trash folder?
+#define MP_TRASH_FOLDER_D      _("Trash")
+/// Use a trash folder?
+#define MP_USE_TRASH_FOLDER_D   1l
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment

@@ -446,38 +446,15 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                    true,
                                    ProfileBase::FilterProfileName(m_Profile->GetName())+"MarkRead"))
          {
-            // build sequence
-            wxString sequence;
-            HeaderInfoList *hil = m_ASMailFolder->GetHeaders();
-            if(hil)
-            {
-               for(size_t i = 0; i < hil->Count(); i++)
-               {
-                  sequence += strutil_ultoa((*hil)[i]->GetUId());
-                  sequence += ',';
-               }
-               hil->DecRef();
-            }
-            sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
-            m_ASMailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
+            INTARRAY *seq = GetAllMessagesSequence(m_ASMailFolder);
+            m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
+            delete seq;
          }
-         /// For all non-NNTP folders, check if the user wants to
-         /// auto-expunge the messages?
-         msg.Printf(_("Do you want to expunge all deleted messages\n"
-                      "in folder '%s'?"),
-                    m_ASMailFolder->GetName().c_str());
-         if(m_ASMailFolder->GetType() != MF_NNTP
-            && m_ASMailFolder->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
-            && MDialog_YesNoDialog(msg,
-                                   m_Parent,
-                                   MDIALOG_YESNOTITLE,
-                                   true,
-                                   ProfileBase::FilterProfileName(m_Profile->GetName())+"_AutoExpunge"))
-         {
-            (void) m_ASMailFolder->ExpungeMessages();
-         }
-      }
 
+
+         CheckExpungeDialog(m_ASMailFolder, m_Parent);
+      }
+      
       // This little trick makes sure that we don't react to any final
       // events sent from the MailFolder destructor.
       MailFolder *mf = m_MailFolder;

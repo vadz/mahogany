@@ -1956,3 +1956,26 @@ bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent)
    wxXFaceDialog dlg(profile, parent);
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
+
+
+
+extern
+void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
+{
+   /// For all non-NNTP folders, check if the user wants to
+   /// auto-expunge the messages?
+   String msg;
+   msg.Printf(_("Do you want to expunge all deleted messages\n"
+                "in folder '%s'?"),
+              mf->GetName().c_str());
+   if(mf->GetType() != MF_NNTP
+      && mf->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
+      && MDialog_YesNoDialog(msg,
+                             parent,
+                             MDIALOG_YESNOTITLE,
+                             true,
+                             ProfileBase::FilterProfileName(mf->GetProfile()->GetName())+"_AutoExpunge"))
+   {
+      (void) mf->ExpungeMessages();
+   }
+}

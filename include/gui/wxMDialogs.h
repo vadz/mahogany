@@ -278,6 +278,10 @@ bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
 extern
 bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent);
 
+/** Asks the user if he wants to expunge the deleted messages. */
+extern
+void CheckExpungeDialog(class ASMailFolder *mf, wxWindow *parent = NULL);
+
 /** Semi-modal dialog to allow pop-up help to work.
     (Yes, I know it's a funny name, but so is the whole Help/Modal 
     problem... :-)

@@ -44,6 +44,9 @@ public:
    /// called by wxMApp after initialisation to deactivate some button 
    /// if needed
    void UpdateToolBar(void);
+
+   /// Returns the name of the currently open folder:
+   wxString GetFolderName(void) const { return m_folderName; }
 protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;

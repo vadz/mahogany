@@ -312,7 +312,7 @@ void wxIconBrowseButton::DoBrowse()
 
       // save some typing
       static const int size = wxIconView::ms_iconSize;
-
+#if 0
       if ( bmp.GetWidth() != size || bmp.GetHeight() != size )
       {
          // must resize the icon
@@ -320,6 +320,7 @@ void wxIconBrowseButton::DoBrowse()
          image.Rescale(size, size);
          bmp = image.ConvertToBitmap();
       }
+#endif
 
       icons.Add(new wxBitmap(bmp));
    }

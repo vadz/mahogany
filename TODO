@@ -13,17 +13,15 @@ $Id$
 
 
 9	KB	wxLayout:
-		- selecting backwards and deleting gets into endless
-		  loop 
 		- cannot type text when NUMLOCK is on
+		- delete in empty line
+		- undo
+		- dead accents dont work
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
-		- scroll to cursor after Find()
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
-		- word wrap occasionally puts space at beginning of
-		  new line
-		- add import of own clipboard format
+		- fix import of own clipboard format
 
 	KB	MessageView:
 		 - should show cursor only on demand
@@ -32,7 +30,7 @@ $Id$
 
 6	KB	clear message view if message got expunged
 
-8	KB	integrate imap 4.6 and recently received patches
+8	KB	integrate imap 4.7 and recently received patches
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
@@ -60,11 +58,6 @@ $Id$
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
 8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
-
-8	VZ	Opening NNTP folders suddenly asks for password - what 
-		happened? --> doesn't do it here, please explain how to
-		reproduce.
-
 
 5	VZ	"hidden" flag for folder treecontrol
 

@@ -589,9 +589,9 @@ MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections,
 
 bool
 MailFolderCmn::SaveMessages(const INTARRAY *selections,
-                         String const & folderName,
-                         bool isProfile,
-                         bool updateCount)
+                            String const & folderName,
+                            bool isProfile,
+                            bool updateCount)
 {
    int
       n = selections->Count(),
@@ -643,20 +643,6 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
    mf->DecRef();
    if(pd) delete pd;
    return rc;
-}
-
-
-bool
-MailFolderCmn::DeleteMessages(const INTARRAY *selections)
-{
-   int n = selections->Count();
-   int i;
-   String sequence;
-   for(i = 0; i < n-1; i++)
-      sequence << strutil_ultoa((*selections)[i]) << ',';
-   if(n)
-      sequence << strutil_ultoa((*selections)[n-1]);
-   return SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
 }
 
 bool
@@ -958,5 +944,47 @@ MailFolderCmn::UpdateConfig(void)
    m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(), MP_UPDATEINTERVAL);
    m_Timer->Stop();
    m_Timer->Start(m_Config.m_UpdateInterval * 1000);   
+}
+
+
+/** Delete a message.
+    @param uid mesage uid
+    @return always true UNSUPPORTED!
+    */
+bool
+MailFolderCmn::DeleteMessage(unsigned long uid)
+{
+   INTARRAY *ia = new INTARRAY;
+   ia->Add(uid);
+   bool rc = DeleteMessages(ia);
+   delete ia;
+   return rc;
+}
+
+
+bool
+MailFolderCmn::DeleteMessages(const INTARRAY *selections)
+{
+   bool reallyDelete = ! READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
+   // If we are the trash folder, we *really* delete.
+   if(!reallyDelete && GetName() == READ_CONFIG(GetProfile(),
+                                                MP_TRASH_FOLDER))
+      reallyDelete = true;
+   
+   if(!reallyDelete)
+   {
+      bool rc = SaveMessages(selections,
+                             READ_CONFIG(GetProfile(), MP_TRASH_FOLDER),
+                             true /* is profile */,
+                             false /* don´t update */);
+      if(rc)
+         SetSequenceFlag(GetSequenceString(selections),MSG_STAT_DELETED);
+      ExpungeMessages();
+      RequestUpdate();
+      Ping();
+      return rc;
+   }
+   else
+      return SetSequenceFlag(GetSequenceString(selections), MailFolder::MSG_STAT_DELETED);
 }
 

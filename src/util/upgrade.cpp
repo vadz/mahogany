@@ -1160,6 +1160,43 @@ VerifyInbox(void)
          ibp->writeEntry(MP_FOLDER_TYPE, flags);
       ibp->DecRef();
    }
+
+   /*
+    * Set up the Trash folder:
+    */
+   if( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
+   {
+      foldername = READ_APPCONFIG(MP_TRASH_FOLDER);
+      strutil_delwhitespace(foldername);
+      if(foldername.Length() == 0)
+      {
+         wxLogError(_("The name for the trash folder was empty, using default '%s'."),
+                    MP_TRASH_FOLDER_D);
+         foldername = MP_TRASH_FOLDER_D;
+      }
+      mApplication->GetProfile()->writeEntry(MP_TRASH_FOLDER, foldername);
+      ProfileBase *p = ProfileBase::CreateProfile(foldername);
+      // Don't overwrite settings if entry already exists:
+      if (!  parent->HasEntry(foldername) )
+      {
+         p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
+         p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
+         p->writeEntry(MP_FOLDER_COMMENT,
+                         _("Folder where Mahogany will store deleted messages."));
+         rc = FALSE;
+      }
+      // Make sure the flags are valid:
+      flags = READ_CONFIG(p,MP_FOLDER_TYPE);
+      oldflags = flags;
+      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
+      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
+      if(flags != oldflags)
+         p->writeEntry(MP_FOLDER_TYPE, flags);
+      // 14=Trash icon from wxFolderTree.cpp:
+      p->writeEntry("Icon", 14l);
+      p->DecRef();
+   }
    return rc;
 }
 
