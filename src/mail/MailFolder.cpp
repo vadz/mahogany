@@ -79,6 +79,21 @@ protected:
 
 /* static */
 MailFolder *
+MailFolder::OpenFolder(const MFolder *mfolder, ProfileBase *profile)
+{
+   ASSERT(mfolder);
+   ASSERT_MSG(0,"OpenFolder(MFolder *) is incomplete and needs access to the server/login/passwd");
+   int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
+                                                mfolder->GetFlags());
+   
+   return OpenFolder( typeAndFlags,
+                      mfolder->GetName(),
+                      profile);
+                      
+}
+
+/* static */
+MailFolder *
 MailFolder::OpenFolder(int folderType,
                        String const &i_name,
                        ProfileBase *parentProfile,
@@ -1099,18 +1114,22 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
             highestId = uid;
       }
    }
-   if(highestId != UID_ILLEGAL && (m_UpdateFlags & UF_UpdateCount) )
-      m_LastNewMsgUId = highestId;
    ASSERT(nextIdx <= n);
-   
-   DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
-               GetName().c_str(), (unsigned long) highestId));
 
-   if( (m_UpdateFlags & UF_DetectNewMail) )
+   if( (m_UpdateFlags & UF_DetectNewMail) // do we want new mail events?
+       && m_LastNewMsgUId != UID_ILLEGAL) // is it not the first time
+      // that we look at this folder?
    {
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
    }
+
+   if(highestId != UID_ILLEGAL && (m_UpdateFlags & UF_UpdateCount) )
+      m_LastNewMsgUId = highestId;
+   
+   DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
+               GetName().c_str(), (unsigned long) highestId));
+
 
    delete [] messageIDs;
 }

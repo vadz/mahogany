@@ -9,7 +9,7 @@
 SUBDIRS=generic common
 
 all:
-	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
+	set -e ; for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
 clean:
 	$(RM) common/*.o generic/*.o

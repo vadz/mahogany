@@ -124,6 +124,10 @@ public:
                                   const String &login = NULLstring,
                                   const String &password = NULLstring);
 
+   /** The same OpenFolder function, but taking all arguments from a
+       MFolder object. */
+   static MailFolder * OpenFolder(const class MFolder *mfolder,
+                                  ProfileBase *profile);
    /**   
          Creates a mailbox profile and checks the settings to be
          sensible.

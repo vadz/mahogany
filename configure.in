@@ -20,7 +20,6 @@ CWD=`pwd`
 AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR($CWD/extra/scripts)
 
-
 dnl --------------------------------------------------------------------------
 dnl overrides, all --with/--without options
 dnl --------------------------------------------------------------------------
@@ -816,6 +815,5 @@ LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
-
 
 AC_OUTPUT(makeopts)

@@ -58,6 +58,9 @@
 #include "gui/wxBrowseButton.h"
 #include "gui/wxFolderTree.h"
 
+// why is this conditional?
+#define USE_LOCAL_CHECKBOX
+
 // ============================================================================
 // private classes
 // ============================================================================

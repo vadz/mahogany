@@ -255,14 +255,23 @@ public:
          MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
                                                  profile, server, login,
                                                  password);
-         if ( !mf )
-            return NULL;
-
+         if ( !mf ) return NULL;
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
          return asmf;
       }
 
+   /** The same OpenFolder function, but taking all arguments from a
+       MFolder object. */
+   static ASMailFolder * OpenFolder(const class MFolder *mfolder,
+                                    ProfileBase *profile)
+      {
+         MailFolder *mf = MailFolder::OpenFolder(mfolder, profile);
+         if ( !mf ) return NULL;
+         ASMailFolder *asmf = Create(mf);
+         mf->DecRef();
+         return asmf;
+      }
 
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{

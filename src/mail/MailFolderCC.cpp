@@ -790,16 +790,6 @@ MailFolderCC::ApplyTimeoutValues(void)
    (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) ms_TcpRshTimeout);
 }
 
-#if 0
-
-#define UPDATE_TO(name, var)    to = READ_CONFIG(p,MP_TCP_##name); \
-                                if (to != var) \
-                                { \
-                                    var = to; \
-                                    (void) mail_parameters(NIL, \
-                                                           SET_##name, (void *) to); \
-                                }
-#endif
 
 
 void
@@ -816,12 +806,6 @@ MailFolderCC::UpdateTimeoutValues(void)
    ms_TcpCloseTimeout = ms_TcpOpenTimeout;
    ms_TcpRshTimeout = ms_TcpOpenTimeout;
    ApplyTimeoutValues();
-#if 0
-   UPDATE_TO(READTIMEOUT, ms_TcpReadTimeout);
-   UPDATE_TO(WRITETIMEOUT, ms_TcpWriteTimeout);
-   UPDATE_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
-   UPDATE_TO(RSHTIMEOUT, ms_TcpRshTimeout);
-#endif
 }
 
 bool
@@ -2008,56 +1992,58 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
    String& name = *pName;
    switch ( folderType )
    {
-      case MF_MH:
-         {
-            static const int lenPrefix = 4;  // strlen("#mh/")
-            if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
-            {
-               FAIL_MSG("invalid MH folder specification - no #mh/ prefix");
+   case MF_MH:
+   {
+      static const int lenPrefix = 4;  // strlen("#mh/")
+      if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
+      {
+         FAIL_MSG("invalid MH folder specification - no #mh/ prefix");
 
-               return FALSE;
-            }
-
-            // make sure that the folder name does not start with s;ash
-            const char *start = specification.c_str() + lenPrefix;
-            while ( wxIsPathSeparator(*start) )
-            {
-               start++;
-            }
-
-            name = start;
-         }
-         break;
-
-      case MF_NNTP:
-      case MF_NEWS:
-         {
-            int startIndex = wxNOT_FOUND;
-            if ( specification[0u] == '{' )
-            {
-               wxString protocol(specification.c_str() + 1, 4);
-               protocol.MakeLower();
-               if ( protocol == "nntp" || protocol == "news" )
-               {
-                  startIndex = specification.Find('}');
-               }
-               //else: leave it to be wxNOT_FOUND
-            }
-
-            if ( startIndex == wxNOT_FOUND )
-            {
-               FAIL_MSG("invalid NNTP folder specification - no {nntp/...}");
-
-               return FALSE;
-            }
-
-            name = specification.c_str() + (size_t)startIndex + 1;
-         }
-         break;
-
-      default:
-         FAIL_MSG("not done yet");
          return FALSE;
+      }
+
+      // make sure that the folder name does not start with s;ash
+      const char *start = specification.c_str() + lenPrefix;
+      while ( wxIsPathSeparator(*start) )
+      {
+         start++;
+      }
+
+      name = start;
+   }
+   break;
+
+   case MF_NNTP:
+   case MF_NEWS:
+   {
+      int startIndex = wxNOT_FOUND;
+      if ( specification[0u] == '{' )
+      {
+         wxString protocol(specification.c_str() + 1, 4);
+         protocol.MakeLower();
+         if ( protocol == "nntp" || protocol == "news" )
+         {
+            startIndex = specification.Find('}');
+         }
+         //else: leave it to be wxNOT_FOUND
+      }
+
+      if ( startIndex == wxNOT_FOUND )
+      {
+         FAIL_MSG("invalid folder specification - no {nntp/...}");
+
+         return FALSE;
+      }
+
+      name = specification.c_str() + (size_t)startIndex + 1;
+   }
+   break;
+   case MF_IMAP:
+      name = specification.AfterFirst('}');
+      return TRUE;
+   default:
+      FAIL_MSG("not done yet");
+      return FALSE;
    }
 
    return TRUE;
@@ -2079,26 +2065,9 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 void
 MailFolderCC::UpdateStatus(void)
 {
-      m_nMessages = m_MailStream->nmsgs;
-      m_nRecent = m_MailStream->recent;
-      m_LastUId = m_MailStream->uid_last;
-   
-#if 0
-   if(nMessages != m_nMessages
-      || nRecent != m_nRecent
-      || lastUId != m_LastUId)
-      //FIXME: sent a folder status change event instead!
-   {
-      // Check if we have new mails:
-      if(lastUId != UID_ILLEGAL && m_LastUId > lastUId)
-      {
-//         MEventManager::Send( new MEventFolderUpdateData (this) );
-         HeaderInfoList *hilp = GetHeaders();
-         CheckForNewMail(hilp);
-         hilp->DecRef();
-      }
-   }
-#endif
+   m_nMessages = m_MailStream->nmsgs;
+   m_nRecent = m_MailStream->recent;
+   m_LastUId = m_MailStream->uid_last;
 }
 
 /* static */
