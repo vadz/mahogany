@@ -897,49 +897,49 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
       nntp = 0;
 
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, outbox);
-   if(! mf)
+   if(mf == NULL)
    {
       String msg;
       msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
       ERRORMESSAGE((msg));
    }
-   else if(mf->Lock())
-   {
-      
-      HeaderInfoList *hil = mf->GetHeaders();
-      if(! hil)
-         mf->DecRef();
-      else
-      {
-         const HeaderInfo *hi;
-         Message *msg;
-         for(UIdType i = 0; i < hil->Count(); i++)
-         {
-            hi = (*hil)[i];
-            ASSERT(hi);
-            msg = mf->GetMessage(hi->GetUId());
-            ASSERT(msg);
-            String newsgroups;
-            msg->GetHeaderLine("Newsgroups", newsgroups);
-            if(newsgroups.Length() > 0)
-               nntp++;
-            else
-               smtp++;
-            SafeDecRef(msg);
-         }
-         SafeDecRef(hil);
-      }
-   }
    else
    {
-      ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
-                    mf->GetName().c_str()));
+      if(mf->Lock())
+      {
+      
+         HeaderInfoList *hil = mf->GetHeaders();
+         if(! hil)
+            mf->DecRef();
+         else
+         {
+            const HeaderInfo *hi;
+            Message *msg;
+            for(UIdType i = 0; i < hil->Count(); i++)
+            {
+               hi = (*hil)[i];
+               ASSERT(hi);
+               msg = mf->GetMessage(hi->GetUId());
+               ASSERT(msg);
+               String newsgroups;
+               msg->GetHeaderLine("Newsgroups", newsgroups);
+               if(newsgroups.Length() > 0)
+                  nntp++;
+               else
+                  smtp++;
+               SafeDecRef(msg);
+            }
+            SafeDecRef(hil);
+         }
+         mf->UnLock();
+      }
+      else
+      {
+         ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
+                       mf->GetName().c_str()));
+      }
+      SafeDecRef(mf);
    }
-   SafeDecRef(mf);
-#if 0
-   smtp = CheckOutbox(outbox);
-   nntp = CheckOutbox(outbox+M_NEWSOUTBOX_POSTFIX);
-#endif
    if(nSMTP) *nSMTP = smtp;
    if(nNNTP) *nNNTP = nntp;
    return smtp != 0 || nntp != 0;
@@ -1059,6 +1059,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                     (unsigned long) count, mf->GetName().c_str());
          STATUSMESSAGE((msg));
       }
+      mf->UnLock();
    }
    else
    {
