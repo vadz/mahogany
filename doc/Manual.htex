@@ -101,7 +101,7 @@ them between different machines/accounts
 \textbf{Known bugs:} 
 
 \begin{itemize}
-\item There are always some, listed on our bugtracker at http://www.wxwindows.org/m-bugs/
+\item There are always some, listed on our bugtracker at http://mahogany.sourceforge.net/bugz/
 and we are working on them.
 \item Version 0.60 suffers from a minor printing bug leading to some overlap between
 strings sometimes, which is due to a bug in wxWindows which will hopefully be

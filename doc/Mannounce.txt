@@ -119,7 +119,7 @@ Known bugs:
 -----------
 
 There are always some, listed on our bugtracker at
-http://www.wxwindows.org/m-bugs/ and we are working on them.
+http://mahogany.sourceforge.net/bugz/ and we are working on them.
 
  Hoping you will find Mahogany usefull,
 

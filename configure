@@ -1859,7 +1859,7 @@ echo "$ac_t""$m_cv_cxx_disableopernames" 1>&6
 	names which your compiler treats as keywords (the new logical
 	operator names: and, or, not, etc.).  We currently don't know a
 	workaround for your compiler.  If it does accept some flag for
-	disabling them, please go to http://www.wxwindows.org/m-bugs
+	disabling them, please go to http://mahogany.sourceforge.net/bugz
 	and submit a bug against the Build component telling us which
 	flag will work." 1>&2; exit 1; } ;;
 		*)	CXXFLAGS="$CXXFLAGS $m_cv_cxx_disableopernames"
@@ -1873,7 +1873,7 @@ yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
 	Dependencies are not supported for this compiler.  If this
 	message appears, then we need to talk---we think we know
 	how to fix this, but we don't have a machine where we can
-	test it.  Please go to http://www.wxwindows.org/m-bugs and
+	test it.  Please go to http://mahogany.sourceforge.net/bugz and
 	submit a bug against the Build component so we can give
 	you some code to try." 1>&2;;
 esac
