@@ -35,9 +35,7 @@
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
 #include "adb/AdbDataProvider.h"
-
-#include "guidef.h"
-#include "MDialogs.h"
+#include "adb/AdbDialogs.h"
 
 // ----------------------------------------------------------------------------
 // types
@@ -242,10 +240,9 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
     // but otherwise use them as well
     if ( aEntries.IsEmpty() ) {
       aEntries = aMoreEntries;
-    }
-    else {
-      // we don't need them at all
-      CLEAR_ADB_ARRAY(aMoreEntries);
+
+      // prevent the dialog below from showing "more matches" button
+      aMoreEntries.Clear();
     }
 
     // merge both arrays into one big one: notice that the order is important,
@@ -277,7 +274,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
     }
 
     // let the user choose the one he wants
-    int rc = MDialog_AdbLookupList(aEverything, frame);
+    int rc = AdbShowExpandDialog(aEverything, aMoreEntries, frame);
 
     if ( rc != -1 ) {
       size_t index = (size_t)rc;
@@ -302,8 +299,10 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
         }
       }
       else {
-        // one entry
-        AdbEntry *entry = (AdbEntry *)aEverything[index];
+        // one entry, but in which array?
+        size_t count = aEverything.GetCount();
+        AdbEntry *entry = index < count ? (AdbEntry *)aEverything[index]
+                                        : aMoreEntries[index - count];
         results.Add(entry->GetDescription());
 
         if ( frame ) {
@@ -317,6 +316,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
     //else: cancelled by user
 
     // free all entries and groups
+    CLEAR_ADB_ARRAY(aMoreEntries);
     CLEAR_ADB_ARRAY(aEverything);
   }
   else {

@@ -37,6 +37,7 @@
 #include "adb/AdbImport.h"
 #include "adb/AdbExport.h"
 #include "adb/AdbImpExp.h"
+#include "adb/AdbManager.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxBrowseButton.h"
@@ -44,25 +45,16 @@
 #include "gui/wxMDialogs.h"
 
 // ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// FIXME there is also one in wxMDialogs.cpp!
-static inline wxFrame *GetDialogParent(wxWindow *parent)
-{
-  return parent == NULL ? mApplication->TopLevelFrame()
-                        : GetFrame(parent);
-}
-
-// ----------------------------------------------------------------------------
 // dialog classes
 // ----------------------------------------------------------------------------
 
+// the dialog allowing the user to choose the file name to import addresses
+// from and the format they are in
 class wxAdbImportDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor & dtor
-   wxAdbImportDialog(wxFrame *parent);
+   wxAdbImportDialog(wxWindow *parent);
    virtual ~wxAdbImportDialog();
 
    // accessors (call them only after ShowModal)
@@ -119,6 +111,28 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// the dialog allowing the user to choose from possibly many ADB expansions
+class wxAdbExpandDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxAdbExpandDialog(ArrayAdbElements& aEverything,
+                     ArrayAdbEntries& aMoreEntries,
+                     wxFrame *parent);
+
+   // get the index of the selected item in the listbox
+   int GetSelection() const { return m_listbox->GetSelection(); }
+
+protected:
+   // event handlers
+   void OnLboxDblClick(wxCommandEvent& /* event */) { EndModal(wxID_OK); }
+
+private:
+   // the listbox containing the expansion possibilities
+   wxListBox *m_listbox;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
@@ -126,6 +140,10 @@ private:
 BEGIN_EVENT_TABLE(wxAdbImportDialog, wxManuallyLaidOutDialog)
    EVT_TEXT(-1, wxAdbImportDialog::OnText)
    EVT_CHECKBOX(-1, wxAdbImportDialog::OnCheckbox)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxAdbExpandDialog, wxManuallyLaidOutDialog)
+   EVT_LISTBOX_DCLICK(-1, wxAdbExpandDialog::OnLboxDblClick)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -136,7 +154,7 @@ END_EVENT_TABLE()
 // wxAdbImportDialog
 // ----------------------------------------------------------------------------
 
-wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
+wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Import address book"),
                                            "AdbImport")
@@ -340,12 +358,56 @@ wxAdbImportDialog::~wxAdbImportDialog()
 }
 
 // ----------------------------------------------------------------------------
+// wxAdbExpandDialog
+// ----------------------------------------------------------------------------
+
+wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
+                                     ArrayAdbEntries& aMoreEntries,
+                                     wxFrame *parent)
+                 : wxManuallyLaidOutDialog(parent,
+                                           _("Expansion options"),
+                                           "AdrListSelect")
+{
+   /*
+      the dialog layout is like this:
+
+      listbox
+      listbox  [more...]
+      listbox  [delete ]
+      listbox
+
+           [ok] [cancel]
+    */
+
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Please choose an entry:"));
+
+   m_listbox = new wxListBox(this, -1);
+
+   // we have to fill the listbox here or it won't have the correct size
+   size_t nEntryCount = aEverything.GetCount();
+   for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
+   {
+      m_listbox->Append(aEverything[nEntry]->GetDescription());
+   }
+
+   wxLayoutConstraints *c;
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_listbox->SetConstraints(c);
+
+   SetDefaultSize(5*wBtn, 10*hBtn);
+}
+
+// ----------------------------------------------------------------------------
 // public interface
 // ----------------------------------------------------------------------------
 
 bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
 {
-   wxFrame *frame = GetDialogParent(parent);
+   wxWindow *frame = GetDialogParent(parent);
    wxAdbImportDialog dlg(frame);
    if ( dlg.ShowModal() != wxID_OK )
    {
@@ -494,3 +556,34 @@ bool AdbShowExportDialog(const AdbEntryGroup& group)
 
    return ok;
 }
+
+int
+AdbShowExpandDialog(ArrayAdbElements& aEverything,
+                    ArrayAdbEntries& aMoreEntries,
+                    wxFrame *parent)
+{
+   int choice;
+
+   size_t count = aEverything.GetCount();
+   switch ( count )
+   {
+      case 0:
+         // nothing to choose from
+         choice = -1;
+         break;
+
+      case 1:
+         // don't ask user to choose among one entry and itself!
+         choice = 0;
+         break;
+
+      default:
+         // do show the dialog
+         wxAdbExpandDialog dialog(aEverything, aMoreEntries, parent);
+
+         choice = dialog.ShowModal() == wxID_OK ? dialog.GetSelection() : -1;
+   }
+
+   return choice;
+}
+

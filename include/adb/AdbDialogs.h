@@ -13,22 +13,41 @@
 #ifndef _ADB_DIALOGS_H
 #define _ADB_DIALOGS_H
 
-class wxWindow;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxFrame;
+
 class AdbEntryGroup;
+class ArrayAdbElements;
+class ArrayAdbEntries;
 
-// ----------------------------------------------------------------------------
-// show dialog allowing the user to import any address book, return the name of
-// the native book used for import in the out parameter and return TRUE if the
-// import succeeded - FALSE and log the error message(s) if it failed.
-// ----------------------------------------------------------------------------
-
+/**
+  Show the dialog allowing the user to import any address book, return the name
+  of the native book used for import in the out parameter and return TRUE if
+  the import succeeded - FALSE and log the error message(s) if it failed.
+ */
 extern bool AdbShowImportDialog(wxWindow *parent = NULL,
                                 String *nameOfNativeAdb = NULL);
 
-// ----------------------------------------------------------------------------
-// export the given address book, returns TRUE on success
-// ----------------------------------------------------------------------------
+/**
+  Show the dialog allowing the user to export the given address book
 
+  @return TRUE on success
+ */
 extern bool AdbShowExportDialog(const AdbEntryGroup& group);
+
+/**
+  Show the ADB expansion dialog allowing the user to choose one of the entries
+  or groups matched by the expansion.
+
+  @param aEverything the array of groups and entries to show initially
+  @param aMoreEntries the array of entries to show if the user chooses
+                      to see all possible matches
+  @param parent the parent frame
+  @return the index in the concatenation of aEverything and aMoreEntries arrays
+          or -1 if the dialog was cancelled
+ */
+extern int AdbShowExpandDialog(ArrayAdbElements& aEverything,
+                               ArrayAdbEntries& aMoreEntries,
+                               wxFrame *parent);
 
 #endif // _ADB_DIALOGS_H

@@ -77,7 +77,10 @@ enum AdbField
   AdbField_O_Fax,
   AdbField_O_AddrPageLast,
 
-  AdbField_Max = AdbField_O_AddrPageLast
+  // priority for expansion
+  AdbField_ExpandPriority,
+
+  AdbField_Max = AdbField_ExpandPriority
 };
 
 // where AdbEntry::Matches() should look for a match

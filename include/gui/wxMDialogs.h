@@ -30,7 +30,6 @@
 
 // fwd decl
 class Profile;
-class ArrayAdbElements;
 class MFolder;
 class MPersMsgBox;
 
@@ -323,15 +322,6 @@ MGetNumberFromUser(const wxString& message,
                    wxWindow *parent = (wxWindow *)NULL,
                    const wxPoint& pos = wxDefaultPosition);
 
-/**
- Let the user choose an element from aEntries. If there is exactly one element
- in the array (and we shouldn't be called with 0), 0 is always returned and
- user is not asked at all. If the dialog is shown, the user may cancel it and
- in this case -1 is returned. Otherwise, it's the index of selected item.
-*/
-int MDialog_AdbLookupList(ArrayAdbElements& aEntries,
-                          const wxWindow *parent = NULL);
-
 /// simple AboutDialog to be displayed at startup
 void
 MDialog_AboutDialog( const wxWindow *parent, bool bCloseOnTimeout = true);
@@ -544,5 +534,12 @@ private:
    wxString m_XFace;
    wxWindow *m_Parent;
 };
+
+/// returns the argument if it's !NULL of the top-level application frame
+inline wxWindow *GetDialogParent(const wxWindow *parent)
+{
+  return parent == NULL ? mApplication->TopLevelFrame()
+                        : GetFrame(parent);
+}
 
 #endif  //WXMDIALOGS_H

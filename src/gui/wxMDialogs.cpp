@@ -437,13 +437,6 @@ private:
 // functions
 // ----------------------------------------------------------------------------
 
-/// returns the argument if it's !NULL of the top-level application frame
-static inline wxWindow *GetDialogParent(const wxWindow *parent)
-{
-  return parent == NULL ? mApplication->TopLevelFrame()
-                        : GetFrame(parent);
-}
-
 // under Windows we don't use wxCENTRE style which uses the generic message box
 // instead of the native one (and thus it doesn't have icons, for example)
 static inline long GetMsgBoxStyle(long style)
@@ -978,68 +971,6 @@ String MDialog_DirRequester(const String& message,
                             const char *confpath)
 {
    return wxPDirSelector(confpath, message, pathOrig, parent);
-}
-
-int
-MDialog_AdbLookupList(ArrayAdbElements& aEntries,
-                      const wxWindow *parent)
-{
-   //MGuiLocker lock;
-   CloseSplash();
-
-   wxArrayString aChoices;
-
-   size_t nEntryCount = aEntries.Count();
-   for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
-   {
-      aChoices.Add(aEntries[nEntry]->GetDescription());
-   }
-
-   static const char *DIALOG_NAME = "AdrListSelect";
-   int x, y, w, h;
-   wxMFrame::RestorePosition(DIALOG_NAME, &x, &y, &w, &h);
-
-   int choice;
-   if ( nEntryCount == 0 ) {
-     // no matches at all
-     choice = -1;
-   }
-   else if ( nEntryCount == 1 ) {
-     // don't ask user to choose among one entry and itself!
-     choice = 0;
-   }
-   else {
-      wxSingleChoiceDialog dialog(
-                                    GetDialogParent(parent),
-                                    _("Please choose an entry:"),
-                                    wxString(M_TITLE_PREFIX) +
-                                       _("Expansion options"),
-                                    nEntryCount,
-                                    &aChoices[0]
-                                 );
-
-      // default width and height are too big for us
-      if ( w == GetNumericDefault(MP_WIDTH) &&
-            h == GetNumericDefault(MP_HEIGHT) ) {
-         w = 300;
-         h = 400;
-      }
-
-      dialog.Move(x, y);
-      dialog.SetSize(w, h);
-
-      if ( dialog.ShowModal() == wxID_OK ) {
-         choice = dialog.GetSelection();
-
-         // if the dialog wasn't cancelled, remember its size/position
-         wxMFrame::SavePosition(DIALOG_NAME, &dialog);
-      }
-      else {
-         choice = -1;
-      }
-   }
-
-   return choice;
 }
 
 // simple AboutDialog to be displayed at startup
