@@ -19,7 +19,9 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-- speed up copy mail to folder by doing them all at once
+- make wxFolderView::Update() a bit more intelligent. Clicking on
+  unread mails changes the flags and therefore resets selection.
+- speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
   Currently, coying emails to another folder produces "New Mail" dialogs.
@@ -131,8 +133,9 @@ $Id$
     it cannot select the entry again
   - copying between address books and groups
   - BBDB: sort entries by surname
-
-  - easy: add support for email-to-fax gateway at www.tpc.int
+  - easy: add support for email-to-fax gateway at www.tpc.int and
+    their coverpage
+  - add "Inline" option for MIME popup on graphics
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app

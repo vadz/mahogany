@@ -28,7 +28,7 @@
 
 #  include <wx/dynarray.h>
 #endif
-
+#include <ctype.h>
 #include <XFace.h>
 
 #include <wx/file.h>
@@ -65,18 +65,48 @@ static const char *wxFLC_ColumnNames[] =
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
    long keyCode = event.KeyCode();
+   if(event.ControlDown())
+      return;
+   
    wxArrayInt selections;
    m_FolderView->GetSelections(selections);
 
-   if(event.ControlDown())
-      keyCode = -1;
-   switch(keyCode)
+   /** To allow translations:
+       Delete, Undelete, eXpunge, Copytofolder, Savetofile,
+       Movetofolder
+   */
+   const char keycodes[] = gettext_noop("DUXCSM");
+   int idx = 0;
+   int key = toupper((int)keyCode);
+   for(;keycodes[idx] && keycodes[idx] != key;idx++)
+      ;
+
+   // extra keys:
+   if(key == '#') idx = 2; // # == expunge for VM compatibility
+   
+   switch(idx)
    {
-   case 'D':
+   case 0:
+      m_FolderView->DeleteMessages(selections);
+      break;
+   case 1:
+      m_FolderView->UnDeleteMessages(selections);
+      break;
+   case 2:
+      m_FolderView->GetFolder()->ExpungeMessages();
+      break;
+   case 3:
+      m_FolderView->SaveMessagesToFolder(selections);
+      break;
+   case 4:
+      m_FolderView->SaveMessagesToFile(selections);
+      break;
+   case 5:
+      m_FolderView->SaveMessagesToFolder(selections);
       m_FolderView->DeleteMessages(selections);
       break;
    default:
-      wxListCtrl::ProcessEvent(event);
+      event.Skip();
    }
 }
 
