@@ -37,6 +37,7 @@ class Message;
 class MEventData;
 class MEventOptionsChangeData;
 class MEventASFolderResultData;
+class MimePart;
 class ProcessEvtHandler;
 class ProcessInfo;
 
@@ -158,19 +159,19 @@ public:
    //@{
 
    /// displays information about the currently selected MIME content
-   void MimeInfo(int numPart);
+   void MimeInfo(const MimePart *part);
 
    /// handles the currently selected MIME content
-   void MimeHandle(int numPart);
+   void MimeHandle(const MimePart *part);
 
    /// "Opens With..." attachment
-   void MimeOpenWith(int numPart);
+   void MimeOpenWith(const MimePart *part);
 
    /// saves the currently selected MIME content
-   bool MimeSave(int numPart, const char *filename = NULL);
+   bool MimeSave(const MimePart *part, const char *filename = NULL);
 
    /// view attachment as text
-   void MimeViewText(int numPart);
+   void MimeViewText(const MimePart *part);
 
    //@}
 
@@ -270,7 +271,7 @@ protected:
    virtual void PopupURLMenu(const String& url, const wxPoint& pt) = 0;
 
    /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(size_t nPart, const wxPoint& pt) = 0;
+   virtual void PopupMIMEMenu(const MimePart *part, const wxPoint& pt) = 0;
 
    //@}
 
@@ -286,17 +287,26 @@ protected:
    /// do show the current message
    void Update();
 
-   /// show all configured headers, returns "main" header encoding
-   wxFontEncoding ShowHeaders();
+   /// show all configured headers
+   void ShowHeaders();
+
+   /// process part and decided what to do with it (call ShowPart or skip)
+   void ProcessPart(const MimePart *part);
+
+   /// call ProcessPart() for all subparts of this part
+   void ProcessAllNestedParts(const MimePart *part);
+
+   /// show part of any kind
+   void ShowPart(const MimePart *part);
 
    /// show a text part
-   void ShowTextPart(wxFontEncoding& encBody, size_t nPart);
+   void ShowTextPart(const MimePart *part);
 
    /// show an attachment
-   void ShowAttachment(size_t nPart, const String& mimeType, size_t partSize);
+   void ShowAttachment(const MimePart *part);
 
    /// show an inline image
-   void ShowImage(size_t nPart, const String& mimeType, size_t partSize);
+   void ShowImage(const MimePart *part);
 
    /// return the quoting level of this line, 0 if unquoted
    size_t GetQuotedLevel(const char *text) const;
@@ -305,10 +315,7 @@ protected:
    wxColour GetQuoteColour(size_t qlevel) const;
 
    /// return the clickable info object (basicly a label) for this part
-   ClickableInfo *GetClickableInfo(size_t nPart,
-                                   const String& mimeType,
-                                   const String& mimeFileName,
-                                   size_t partSize) const;
+   ClickableInfo *GetClickableInfo(const MimePart *part) const;
 
    //@}
 
@@ -372,6 +379,9 @@ private:
 
    /// the encoding specified by the user or wxFONTENCODING_SYSTEM if none
    wxFontEncoding m_encodingUser;
+
+   /// the auto detected encoding for the current message so far
+   wxFontEncoding m_encodingAuto;
 
    //@}
 
@@ -535,7 +545,7 @@ public:
       }
 
    /// ctor for all the rest
-   ClickableInfo(int part, const String &label)
+   ClickableInfo(const MimePart *part, const String& label)
       : m_label(label)
       {
          m_part = part;
@@ -559,8 +569,8 @@ public:
       return m_label;
    }
 
-   /// get the part number (not for URLs)
-   int GetPart() const
+   /// get the MIME part (not for URLs)
+   const MimePart *GetPart() const
    {
       ASSERT_MSG( m_type != CI_URL, "no part number for this ClickableInfo!" );
 
@@ -579,8 +589,8 @@ public:
 
 private:
    Type   m_type;
-   int    m_part;
    String m_label;
+   const MimePart *m_part;
 };
 
 // ----------------------------------------------------------------------------

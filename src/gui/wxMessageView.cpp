@@ -121,10 +121,10 @@ private:
 class MimePopup : public wxMenu
 {
 public:
-   MimePopup(wxMessageView *parent, int partno)
+   MimePopup(wxMessageView *parent, const MimePart *mimepart)
    {
       // init member vars
-      m_PartNo = partno;
+      m_mimepart = mimepart;
       m_MessageView = parent;
 
       // create the menu items
@@ -141,7 +141,8 @@ public:
 
 private:
    wxMessageView *m_MessageView;
-   int m_PartNo;
+
+   const MimePart *m_mimepart;
 
    DECLARE_EVENT_TABLE()
 };
@@ -197,23 +198,23 @@ MimePopup::OnCommandEvent(wxCommandEvent &event)
    switch ( event.GetId() )
    {
       case WXMENU_MIME_INFO:
-         m_MessageView->MimeInfo(m_PartNo);
+         m_MessageView->MimeInfo(m_mimepart);
          break;
 
       case WXMENU_MIME_OPEN:
-         m_MessageView->MimeHandle(m_PartNo);
+         m_MessageView->MimeHandle(m_mimepart);
          break;
 
       case WXMENU_MIME_OPEN_WITH:
-         m_MessageView->MimeOpenWith(m_PartNo);
+         m_MessageView->MimeOpenWith(m_mimepart);
          break;
 
       case WXMENU_MIME_VIEW_AS_TEXT:
-         m_MessageView->MimeViewText(m_PartNo);
+         m_MessageView->MimeViewText(m_mimepart);
          break;
 
       case WXMENU_MIME_SAVE:
-         m_MessageView->MimeSave(m_PartNo);
+         m_MessageView->MimeSave(m_mimepart);
          break;
    }
 }
@@ -280,9 +281,9 @@ void wxMessageView::PopupURLMenu(const String& url, const wxPoint& pt)
    GetWindow()->PopupMenu(&menu, pt);
 }
 
-void wxMessageView::PopupMIMEMenu(size_t nPart, const wxPoint& pt)
+void wxMessageView::PopupMIMEMenu(const MimePart *part, const wxPoint& pt)
 {
-   MimePopup mimePopup(this, nPart);
+   MimePopup mimePopup(this, part);
 
    GetWindow()->PopupMenu(&mimePopup, pt);
 }

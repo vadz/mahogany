@@ -866,6 +866,13 @@ void MessageCC::DecodeMIME(MimePartCC *mimepart, BODY *body)
    }
 }
 
+const MimePart *MessageCC::GetTopMimePart() const
+{
+   CheckMIME();
+
+   return m_mimePartTop;
+}
+
 int
 MessageCC::CountParts(void) const
 {

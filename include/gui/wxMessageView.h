@@ -58,7 +58,7 @@ private:
    virtual void PopupURLMenu(const String& url, const wxPoint& pt);
 
    /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(size_t nPart, const wxPoint& pt);
+   virtual void PopupMIMEMenu(const MimePart *part, const wxPoint& pt);
 };
 
 // ----------------------------------------------------------------------------

@@ -158,7 +158,15 @@ public:
    virtual void Clear();
 
 private:
+   // only Win32 supports URLs in the text control natively so far
+#ifdef __WXMSW__
+   void OnLinkEvent(wxTextUrlEvent& event);
+#else
    void OnMouseEvent(wxMouseEvent& event);
+#endif
+
+   // process the mouse click at the given text position
+   void ProcessMouseEvent(const wxMouseEvent& event, long pos);
 
    TextViewer *m_viewer;
 
@@ -173,15 +181,20 @@ private:
 // ============================================================================
 
 BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
+#ifdef __WXMSW__
+   EVT_TEXT_URL(-1, TextViewerWindow::OnLinkEvent)
+#else
    EVT_RIGHT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_DCLICK(TextViewerWindow::OnMouseEvent)
+#endif
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                 : wxTextCtrl(parent, -1, "",
                              wxDefaultPosition, wxDefaultSize,
-                             wxTE_RICH | wxTE_MULTILINE | wxBORDER_NONE)
+                             wxTE_RICH | wxTE_MULTILINE | wxTE_AUTO_URL |
+                             wxBORDER_NONE)
 {
    m_viewer = viewer;
 }
@@ -214,10 +227,26 @@ void TextViewerWindow::Clear()
    WX_CLEAR_ARRAY(m_clickables);
 }
 
+#ifdef __WXMSW__
+
+void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
+{
+   ProcessMouseEvent(event.GetMouseEvent(), event.GetURLStart());
+}
+
+#else // !__WXMSW__
+
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
-   long pos = GetInsertionPoint();
+   ProcessMouseEvent(event, GetInsertionPoint());
 
+   event.Skip();
+}
+
+#endif // __WXMSW__/!__WXMSW__
+
+void TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
+{
    size_t count = m_clickables.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
@@ -244,8 +273,6 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
                                   event.GetPosition());
       }
    }
-
-   event.Skip();
 }
 
 // ============================================================================

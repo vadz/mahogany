@@ -172,12 +172,11 @@ class MailMessageParameters : public wxFileType::MessageParameters
 {
 public:
    MailMessageParameters(const wxString& filename,
-         const wxString& mimetype,
-         Message *mailMessage,
-         int part)
+                         const wxString& mimetype,
+                         const MimePart *part)
       : wxFileType::MessageParameters(filename, mimetype)
       {
-         m_mimepart = mailMessage->GetMimePart(part);
+         m_mimepart = part;
       }
 
    virtual wxString GetParamValue(const wxString& name) const;
@@ -399,7 +398,8 @@ MessageView::Init()
    m_viewer = NULL;
 
    m_uid = UID_ILLEGAL;
-   m_encodingUser = wxFONTENCODING_SYSTEM;
+   m_encodingUser =
+   m_encodingAuto = wxFONTENCODING_SYSTEM;
 
    m_evtHandlerProc = NULL;
 
@@ -766,7 +766,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 // MessageView headers processing
 // ----------------------------------------------------------------------------
 
-wxFontEncoding
+void
 MessageView::ShowHeaders()
 {
    m_viewer->StartHeaders();
@@ -806,7 +806,7 @@ MessageView::ShowHeaders()
    if ( !countHeaders )
    {
       // no headers at all, don't waste time below
-      return wxFONTENCODING_SYSTEM;
+      return;
    }
 
    // these headers can be taken from the envelope instead of retrieving them
@@ -1064,7 +1064,10 @@ MessageView::ShowHeaders()
 
    m_viewer->EndHeaders();
 
-   return encInHeaders;
+   // NB: some broken mailers don't create correct "Content-Type" header,
+   //     but they may yet give us the necessary info in the other headers so
+   //     we assume the header encoding as the default encoding for the body
+   m_encodingAuto = encInHeaders;
 }
 
 // ----------------------------------------------------------------------------
@@ -1113,8 +1116,7 @@ wxColour MessageView::GetQuoteColour(size_t qlevel) const
    return m_ProfileValues.QuotedCol[qlevel];
 }
 
-void MessageView::ShowTextPart(wxFontEncoding& encBody,
-                               size_t nPart)
+void MessageView::ShowTextPart(const MimePart *mimepart)
 {
    // get the encoding of the text
    wxFontEncoding encPart;
@@ -1125,17 +1127,17 @@ void MessageView::ShowTextPart(wxFontEncoding& encBody,
    }
    else if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
    {
-      encPart = m_mailMessage->GetTextPartEncoding(nPart);
+      encPart = mimepart->GetTextEncoding();
       if ( encPart == wxFONTENCODING_SYSTEM ||
             encPart == wxFONTENCODING_DEFAULT )
       {
          // use the encoding of the last part which had it
-         encPart = encBody;
+         encPart = m_encodingAuto;
       }
-      else if ( encBody == wxFONTENCODING_SYSTEM )
+      else if ( m_encodingAuto == wxFONTENCODING_SYSTEM )
       {
          // remember the encoding for the next parts
-         encBody = encPart;
+         m_encodingAuto = encPart;
       }
    }
    else
@@ -1144,8 +1146,7 @@ void MessageView::ShowTextPart(wxFontEncoding& encBody,
       encPart = wxFONTENCODING_SYSTEM;
    }
 
-   unsigned long len;
-   String textPart = m_mailMessage->GetPartContent(nPart, &len);
+   String textPart = mimepart->GetContent();
 
    TextStyle style;
    if ( encPart != wxFONTENCODING_SYSTEM )
@@ -1237,25 +1238,19 @@ void MessageView::ShowTextPart(wxFontEncoding& encBody,
 // MessageView attachments and images handling
 // ----------------------------------------------------------------------------
 
-void MessageView::ShowAttachment(size_t nPart,
-                                 const String& mimeType,
-                                 size_t partSize)
+void MessageView::ShowAttachment(const MimePart *mimepart)
 {
    // get the icon for the attachment using its MIME type and filename
    // extension (if any)
-   wxString mimeFileName = GetFileNameForMIME(m_mailMessage, nPart);
+   wxString mimeFileName = mimepart->GetFilename();
    wxIcon icon = mApplication->GetIconManager()->
-                     GetIconFromMimeType(mimeType,
+                     GetIconFromMimeType(mimepart->GetType().GetFull(),
                                          mimeFileName.AfterLast('.'));
 
-   m_viewer->InsertAttachment(icon,
-                              GetClickableInfo(nPart, mimeType,
-                                               mimeFileName, partSize));
+   m_viewer->InsertAttachment(icon, GetClickableInfo(mimepart));
 }
 
-void MessageView::ShowImage(size_t nPart,
-                            const String& mimeType,
-                            size_t partSize)
+void MessageView::ShowImage(const MimePart *mimepart)
 {
    // first of all, can we show it inline at all?
    bool showInline = m_viewer->CanInlineImages();
@@ -1267,7 +1262,7 @@ void MessageView::ShowImage(size_t nPart,
          default:
             // check that the size of the image is less than configured
             // maximum
-            if ( partSize > 1024*(size_t)m_ProfileValues.inlineGFX )
+            if ( mimepart->GetSize() > 1024*(size_t)m_ProfileValues.inlineGFX )
             {
                wxString msg;
                msg.Printf
@@ -1324,19 +1319,16 @@ void MessageView::ShowImage(size_t nPart,
       if ( tmpFN.IsOk() )
       {
          String filename = tmpFN.GetName();
-         MimeSave(nPart, filename);
+         MimeSave(mimepart, filename);
 
          wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
 
          if ( ok )
          {
-            wxString mimeFileName = GetFileNameForMIME(m_mailMessage, nPart);
-
             m_viewer->InsertImage
                       (
                         img.ConvertToBitmap(),
-                        GetClickableInfo(nPart, mimeType,
-                                         mimeFileName, partSize)
+                        GetClickableInfo(mimepart)
                       );
          }
       }
@@ -1348,27 +1340,199 @@ void MessageView::ShowImage(size_t nPart,
    if ( !showInline )
    {
       // show as an attachment then
-      ShowAttachment(nPart, mimeType, partSize);
+      ShowAttachment(mimepart);
    }
 }
 
-ClickableInfo *MessageView::GetClickableInfo(size_t nPart,
-                                             const String& mimeType,
-                                             const String& mimeFileName,
-                                             size_t partSize) const
+ClickableInfo *MessageView::GetClickableInfo(const MimePart *mimepart) const
 {
-   wxString label = mimeFileName;
+   wxString label = mimepart->GetFilename();
    if ( !label.empty() )
       label << " : ";
 
-   label << mimeType << ", " << strutil_ultoa(partSize) << _(" bytes");
+   MimeType type = mimepart->GetType();
+   label << type.GetFull() << ", ";
 
-   return new ClickableInfo(nPart, label);
+   size_t lines;
+   if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
+   {
+      label << strutil_ultoa(lines) << _(" lines");
+   }
+   else
+   {
+      label << strutil_ultoa(mimepart->GetSize()) << _(" bytes");
+   }
+
+   return new ClickableInfo(mimepart, label);
 }
 
 // ----------------------------------------------------------------------------
-// MessageView::Update
+// global MIME structure parsing
 // ----------------------------------------------------------------------------
+
+void
+MessageView::ShowPart(const MimePart *mimepart)
+{
+   size_t partSize = mimepart->GetSize();
+   if ( partSize == 0 )
+   {
+      // ignore empty parts but warn user as it might indicate a problem
+      wxLogStatus(GetParentFrame(),
+                  _("Skipping the empty MIME part #%d."),
+                  mimepart->GetPartSpec().c_str());
+
+      return;
+   }
+
+   MimeType type = mimepart->GetType();
+
+   String mimeType = type.GetFull();
+
+   String fileName = mimepart->GetFilename();
+
+   // let's guess a little if we have unknown encoding such as
+   // APPLICATION/OCTET_STREAM
+   MimeType::Primary primaryType = type.GetPrimary();
+   if ( primaryType == MimeType::APPLICATION )
+   {
+      // get the MIME type for the files of this extension
+      wxString ext = fileName.AfterLast('.');
+      if ( !ext.empty() )
+      {
+         wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+         wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
+         if(ft)
+         {
+            wxString mt;
+            ft->GetMimeType(&mt);
+            delete ft;
+
+            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
+               primaryType = MimeType::IMAGE;
+            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
+               primaryType = MimeType::AUDIO;
+            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
+               primaryType = MimeType::VIDEO;
+         }
+      }
+   }
+
+   m_viewer->StartPart();
+
+   // if the disposition is set to attachment we force the part to be shown
+   // as an attachment
+   bool isAttachment = mimepart->GetDisposition().IsSameAs("attachment", false);
+
+   // first check for viewer specific formats, next for text, then for
+   // images and finally show all the rest as generic attachment
+
+   if ( !isAttachment && m_viewer->CanProcess(mimeType) )
+   {
+      String data = mimepart->GetContent();
+
+      m_viewer->InsertRawContents(data);
+   }
+   else if ( !isAttachment &&
+             ((mimeType == "TEXT/PLAIN" &&
+               (fileName.empty() || m_ProfileValues.inlinePlainText)) ||
+              (primaryType == MimeType::MESSAGE &&
+                m_ProfileValues.inlineRFC822)) )
+   {
+      ShowTextPart(mimepart);
+   }
+   else if ( !isAttachment &&
+               (primaryType == MimeType::IMAGE && m_ProfileValues.inlineGFX) )
+   {
+      ShowImage(mimepart);
+   }
+   else // attachment
+   {
+      ShowAttachment(mimepart);
+   }
+
+   m_viewer->EndPart();
+}
+
+void
+MessageView::ProcessAllNestedParts(const MimePart *mimepart)
+{
+   const MimePart *partChild = mimepart->GetNested();
+   while ( partChild )
+   {
+      ProcessPart(partChild);
+
+      partChild = partChild->GetNext();
+   }
+}
+
+void
+MessageView::ProcessPart(const MimePart *mimepart)
+{
+   MimeType type = mimepart->GetType();
+   switch ( type.GetPrimary() )
+   {
+      case MimeType::MULTIPART:
+         {
+            String subtype = type.GetSubType();
+
+            // TODO: support for DIGEST, RELATED and SIGNED
+            if ( subtype == "ALTERNATIVE" )
+            {
+               // find the best subpart we can show
+               //
+               // normally we'd have to iterate from end as the best
+               // representation (i.e. the most faithful) is the last one
+               // according to RFC 2046, but as we only have forward pointers
+               // we iterate from the start - not a big deal
+               const MimePart *partChild = mimepart->GetNested();
+
+               const MimePart *partBest = partChild;
+               while ( partChild )
+               {
+                  String mimetype = partChild->GetType().GetFull();
+
+                  if ( mimetype == "TEXT/PLAIN" ||
+                        m_viewer->CanProcess(mimetype) )
+                  {
+                     // remember this one as the best so far
+                     partBest = partChild;
+                  }
+
+                  partChild = partChild->GetNext();
+               }
+
+               // show just the best one
+               ShowPart(partBest);
+            }
+            else // assume MIXED for all unknown
+            {
+               ProcessAllNestedParts(mimepart);
+            }
+         }
+         break;
+
+      case MimeType::MESSAGE:
+         if ( m_ProfileValues.inlineRFC822 )
+         {
+            ProcessAllNestedParts(mimepart);
+         }
+         //else: fall through and show it as attachment
+
+      case MimeType::TEXT:
+      case MimeType::APPLICATION:
+      case MimeType::AUDIO:
+      case MimeType::IMAGE:
+      case MimeType::VIDEO:
+      case MimeType::MODEL:
+      case MimeType::OTHER:
+         // a simple part, show it (ShowPart() decides how exactly)
+         ShowPart(mimepart);
+         break;
+
+      default:
+         FAIL_MSG( "unknown MIME type" );
+   }
+}
 
 void
 MessageView::Update(void)
@@ -1384,156 +1548,19 @@ MessageView::Update(void)
    m_uid = m_mailMessage->GetUId();
 
    // deal with the headers first
-   //
-   // NB: some broken mailers don't create correct "Content-Type" header,
-   //     but they may yet give us the necessary info in the other headers so
-   //     we assume the header encoding as the default encoding for the body
-   wxFontEncoding encBody = ShowHeaders();
+   ShowHeaders();
 
    m_viewer->StartBody();
 
-   // this var stores the MIME spec of the MESSAGE/RFC822 we're currently in,
-   // it is empty if we're outside any embedded message
-   String specMsg;
-
-   // iterate over all parts
-   int countParts = m_mailMessage->CountParts();
-   for ( int nPart = 0; nPart < countParts; nPart++ )
-   {
-      String spec = m_mailMessage->GetPartSpec(nPart);
-
-      // FIXME: there is a bug with this code as it only remembers the last
-      //        embedded message and so will break if we have 2 embedded
-      //        RFC822s - it will forget about the enclosing one after leaving
-      //        the inner message
-      //
-      //        it's true that it happens rarely enough, but we should still
-      //        maintain a stack of msg specs here instead of having only one
-      //        variable...
-
-      if ( !specMsg.empty() )
-      {
-         // check if this is a part of MULTIPART or MESSAGE message,
-         // distinguish between the 2 as we do show MULTIPART subparts (even
-         // though we should only do it for MIXED and DIGEST, probably, and
-         // only show one part for ALTERNATIVE - TODO), but we don't show
-         // MESSAGE subparts unless we're configured to inline them
-         if ( spec.StartsWith(specMsg) )
-         {
-            // this is a part of embedded message
-            if ( !m_ProfileValues.inlineRFC822 )
-            {
-               // don't show it
-               continue;
-            }
-            //else: still show it as we're configured to do so
-         }
-         else
-         {
-            // we've finished with the embedded message
-            specMsg.clear();
-         }
-      }
-      //else: not part of an embedded message
-
-      int t = m_mailMessage->GetPartType(nPart);
-      if ( t == Message::MSG_TYPEMESSAGE )
-      {
-         // remember the part spec of the last embedded message found, used
-         // above
-         specMsg = spec;
-
-         if ( m_ProfileValues.inlineRFC822 )
-         {
-            // we don't show the message itself, just its subparts
-            continue;
-         }
-         //else: show the embedded message as an icon
-      }
-
-      size_t partSize = m_mailMessage->GetPartSize(nPart);
-      if ( partSize == 0 )
-      {
-         // ignore empty parts but warn user as it might indicate a problem
-         wxLogStatus(GetParentFrame(),
-                     _("Skipping the empty MIME part #%d."), nPart);
-
-         continue;
-      }
-
-      String mimeType = m_mailMessage->GetPartMimeType(nPart);
-      strutil_tolower(mimeType);
-      String fileName = GetFileNameForMIME(m_mailMessage,nPart);
-
-      String disposition;
-      (void) m_mailMessage->GetDisposition(nPart,&disposition);
-      strutil_tolower(disposition);
-
-      // let's guess a little if we have unknown encoding such as
-      // APPLICATION/OCTET_STREAM
-      if ( t == Message::MSG_TYPEAPPLICATION )
-      {
-         wxString ext = fileName.AfterLast('.');
-         wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-         wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
-         if(ft)
-         {
-            wxString mt;
-            ft->GetMimeType(&mt);
-            delete ft;
-            if(wxMimeTypesManager::IsOfType(mt,"image/*"))
-               t = Message::MSG_TYPEIMAGE;
-            else if(wxMimeTypesManager::IsOfType(mt,"audio/*"))
-               t = Message::MSG_TYPEAUDIO;
-            else if(wxMimeTypesManager::IsOfType(mt,"video/*"))
-               t = Message::MSG_TYPEVIDEO;
-         }
-      }
-
-      m_viewer->StartPart();
-
-      // if the disposition is set to attachment we force the part to be shown
-      // as an attachment
-      bool isAttachment = disposition == "attachment";
-
-      // first check for viewer specific formats, next for text, then for
-      // images and finally show all the rest as generic attachment
-
-      if ( !isAttachment && m_viewer->CanProcess(mimeType) )
-      {
-         unsigned long len;
-         String data = m_mailMessage->GetPartContent(nPart, &len);
-
-         m_viewer->InsertRawContents(data);
-      }
-      else if ( !isAttachment &&
-                ((mimeType == "text/plain" &&
-                  (fileName.empty() || m_ProfileValues.inlinePlainText)) ||
-                 (t == Message::MSG_TYPEMESSAGE &&
-                   m_ProfileValues.inlineRFC822)) )
-      {
-         ShowTextPart(encBody, nPart);
-      }
-      else if ( !isAttachment &&
-                  (t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX) )
-      {
-         ShowImage(nPart, mimeType, partSize);
-      }
-      else // attachment
-      {
-         ShowAttachment(nPart, mimeType, partSize);
-      }
-
-      m_viewer->EndPart();
-   }
+   ProcessPart(m_mailMessage->GetTopMimePart());
 
    m_viewer->EndBody();
 
    // update the menu of the frame containing us to show the encoding used
    CheckLanguageInMenu(GetParentFrame(),
-                       encBody == wxFONTENCODING_SYSTEM
+                       m_encodingAuto == wxFONTENCODING_SYSTEM
                         ? wxFONTENCODING_DEFAULT
-                        : encBody);
+                        : m_encodingAuto);
 }
 
 // ----------------------------------------------------------------------------
@@ -1542,34 +1569,35 @@ MessageView::Update(void)
 
 // show information about an attachment
 void
-MessageView::MimeInfo(int mimeDisplayPart)
+MessageView::MimeInfo(const MimePart *mimepart)
 {
-   String message;
-   message << _("MIME type: ")
-           << m_mailMessage->GetPartMimeType(mimeDisplayPart)
-           << '\n';
+   MimeType type = mimepart->GetType();
 
-   String desc = m_mailMessage->GetPartDesc(mimeDisplayPart);
+   String message;
+   message << _("MIME type: ") << type.GetFull() << '\n';
+
+   String desc = mimepart->GetDescription();
    if ( !desc.empty() )
       message << '\n' << _("Description: ") << desc << '\n';
 
-   message << _("Size: ")
-           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart, true));
-
-   // as we passed true to GetPartSize() above, it will return size in lines
-   // for the text messages (and in bytes for everything else)
-   int type = m_mailMessage->GetPartType(mimeDisplayPart);
-   if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
-      message << _(" lines");
+   message << _("Size: ");
+   size_t lines;
+   if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
+   {
+      message << strutil_ltoa(lines) << _(" lines");
+   }
    else
-      message << _(" bytes");
+   {
+      message << strutil_ltoa(mimepart->GetSize()) << _(" bytes");
+   }
+
    message << '\n';
 
    // param name and value (used in 2 loops below)
    wxString name, value;
 
    // debug output with all parameters
-   const MessageParameterList &plist = m_mailMessage->GetParameters(mimeDisplayPart);
+   const MessageParameterList &plist = mimepart->GetParameters();
    MessageParameterList::iterator plist_it;
    if ( !plist.empty() )
    {
@@ -1591,9 +1619,8 @@ MessageView::MimeInfo(int mimeDisplayPart)
    }
 
    // now output disposition parameters too
-   String disposition;
-   const MessageParameterList& dlist =
-      m_mailMessage->GetDisposition(mimeDisplayPart,&disposition);
+   String disposition = mimepart->GetDisposition();
+   const MessageParameterList& dlist = mimepart->GetDispositionParameters();
 
    if ( !strutil_isempty(disposition) )
       message << _("\nDisposition: ") << disposition.Lower() << '\n';
@@ -1617,18 +1644,21 @@ MessageView::MimeInfo(int mimeDisplayPart)
    }
 
    String title;
-   title << _("MIME information for attachment #") << mimeDisplayPart;
+   title << _("MIME information for attachment #") << mimepart->GetPartSpec();
+
    MDialog_Message(message, GetParentFrame(), title);
 }
 
 // open (execute) a message attachment
 void
-MessageView::MimeHandle(int mimeDisplayPart)
+MessageView::MimeHandle(const MimePart *mimepart)
 {
    // we'll need this filename later
-   wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+   wxString filenameOrig = mimepart->GetFilename();
 
-   String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
+   MimeType type = mimepart->GetType();
+
+   String mimetype = type.GetFull();
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
    wxFileType *fileType = NULL;
@@ -1677,11 +1707,11 @@ MessageView::MimeHandle(int mimeDisplayPart)
 #else // 1
       bool ok = false;
       char *filename = wxGetTempFileName("Mtemp");
-      if ( MimeSave(mimeDisplayPart, filename) )
+      if ( MimeSave(mimepart, filename) )
       {
          wxString name;
          name.Printf(_("Attached message '%s'"),
-                     GetFileNameForMIME(m_mailMessage, mimeDisplayPart).c_str());
+                     filenameOrig.c_str());
 
          MFolder_obj mfolder = MFolder::CreateTemp
                                (
@@ -1754,8 +1784,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
       filename << '.' << ext;
    }
 
-   MailMessageParameters params(filename, mimetype,
-                                m_mailMessage, mimeDisplayPart);
+   MailMessageParameters params(filename, mimetype, mimepart);
 
    // We might fake a file, so we need this:
    bool already_saved = false;
@@ -1791,7 +1820,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
       }
 
       if(isfax
-         && MimeSave(mimeDisplayPart,filename))
+         && MimeSave(mimepart, filename))
       {
          wxLogDebug("Detected image/tiff fax content.");
          // use TIFF2PS command to create a postscript file, open that
@@ -1816,9 +1845,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
          if(fileType) delete fileType;
          fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
          // proceed as usual
-         MailMessageParameters new_params(filename, mimetype,
-                                          m_mailMessage,
-                                          mimeDisplayPart);
+         MailMessageParameters new_params(filename, mimetype, part);
          params = new_params;
          already_saved = true; // use this file instead!
       }
@@ -1828,7 +1855,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
    // We must save the file before actually calling GetOpenCommand()
    if( !already_saved )
    {
-      MimeSave(mimeDisplayPart,filename);
+      MimeSave(mimepart, filename);
       already_saved = TRUE;
    }
    String command;
@@ -1873,7 +1900,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
 
    if ( ! command.IsEmpty() )
    {
-      if(already_saved || MimeSave(mimeDisplayPart,filename))
+      if(already_saved || MimeSave(mimepart, filename))
       {
          wxString errmsg;
          errmsg.Printf(_("Error opening attachment: command '%s' failed"),
@@ -1884,12 +1911,14 @@ MessageView::MimeHandle(int mimeDisplayPart)
 }
 
 void
-MessageView::MimeOpenWith(int mimeDisplayPart)
+MessageView::MimeOpenWith(const MimePart *mimepart)
 {
    // we'll need this filename later
-   wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+   wxString filenameOrig = mimepart->GetFilename();
 
-   String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
+   MimeType type = mimepart->GetType();
+
+   String mimetype = type.GetFull();
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
    wxFileType *fileType = NULL;
@@ -1927,8 +1956,7 @@ MessageView::MimeOpenWith(int mimeDisplayPart)
       filename << '.' << ext;
    }
 
-   MailMessageParameters params(filename, mimetype,
-                                m_mailMessage, mimeDisplayPart);
+   MailMessageParameters params(filename, mimetype, mimepart);
 
    String command;
    // ask the user for the command to use
@@ -1964,7 +1992,7 @@ MessageView::MimeOpenWith(int mimeDisplayPart)
 
    if ( ! command.IsEmpty() )
    {
-      if ( MimeSave(mimeDisplayPart,filename) )
+      if ( MimeSave(mimepart, filename) )
       {
          wxString errmsg;
          errmsg.Printf(_("Error opening attachment: command '%s' failed"),
@@ -1975,13 +2003,14 @@ MessageView::MimeOpenWith(int mimeDisplayPart)
 }
 
 bool
-MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
+MessageView::MimeSave(const MimePart *mimepart,const char *ifilename)
 {
    String filename;
 
    if ( strutil_isempty(ifilename) )
    {
-      filename = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+      filename = mimepart->GetFilename();
+
       wxString path, name, ext;
       wxSplitPath(filename, &path, &name, &ext);
 
@@ -2004,7 +2033,7 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
    }
 
    unsigned long len;
-   const char *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+   const char *content = mimepart->GetContent(&len);
    if( !content )
    {
       wxLogError(_("Cannot get attachment content."));
@@ -2018,8 +2047,7 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
          // when saving messages to a file we need to "From stuff" them to
          // make them readable in a standard mail client (including this one)
-         if ( m_mailMessage->GetPartType(mimeDisplayPart) ==
-               Message::MSG_TYPEMESSAGE )
+         if ( mimepart->GetType().GetPrimary() == MimeType::MESSAGE )
          {
             // standard prefix
             String fromLine = "From ";
@@ -2080,17 +2108,16 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 }
 
 void
-MessageView::MimeViewText(int mimeDisplayPart)
+MessageView::MimeViewText(const MimePart *mimepart)
 {
-   unsigned long len;
-   const char *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+   const char *content = mimepart->GetContent();
    if ( content )
    {
       String title;
-      title.Printf(_("Attachment #%d"), mimeDisplayPart);
+      title << _("Attachment #") << mimepart->GetPartSpec();
 
       // add the filename if any
-      String filename = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+      String filename = mimepart->GetFilename();
       if ( !filename.empty() )
       {
          title << " ('" << filename << "')";
@@ -2417,7 +2444,7 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 {
    CHECK_RET( ci, "MessageView::DoMouseCommand(): NULL ClickableInfo" );
 
-   switch( ci->GetType() )
+   switch ( ci->GetType() )
    {
       case ClickableInfo::CI_ICON:
       {

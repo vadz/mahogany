@@ -222,7 +222,7 @@ public:
    //@{
 
    /// get the top level MIME part of the message
-   const MimePart *GetTopMimePart() const { return GetMimePart(0); }
+   virtual const MimePart *GetTopMimePart() const = 0;
 
    /** return the number of body parts in message
        @return the number of body parts

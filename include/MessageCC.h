@@ -90,6 +90,8 @@ public:
    const char *GetPartData(const MimePart& mimepart,
                            unsigned long *len = NULL);
 
+   virtual const MimePart *GetTopMimePart() const;
+
    /** return the number of body parts in message
        @return the number of body parts
    */

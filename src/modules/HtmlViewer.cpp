@@ -695,6 +695,6 @@ bool HtmlViewer::CanInlineImages() const
 bool HtmlViewer::CanProcess(const String& mimetype) const
 {
    // we understand HTML directly
-   return mimetype == "text/html";
+   return mimetype == "TEXT/HTML";
 }
 
