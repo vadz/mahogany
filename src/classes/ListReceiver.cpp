@@ -49,10 +49,23 @@ ListEventReceiver::~ListEventReceiver()
    MEventManager::Deregister(m_regCookie);
 }
 
+bool ListEventReceiver::ListAll(ASMailFolder *asmf)
+{
+   CHECK( asmf, false, _T("NULL ASMailFolder in ListEventReceiver::ListAll") );
+
+   m_specRoot = asmf->GetImapSpec();
+
+   Ticket t = asmf->ListFolders(_T(""), false, _T(""), this);
+   if ( t == ILLEGAL_TICKET )
+      return false;
+
+   return true;
+}
+
 bool ListEventReceiver::OnMEvent(MEventData& event)
 {
    // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+   CHECK( event.GetId() == MEventId_ASFolderResult, false,
           _T("unexpected event type") );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
@@ -63,7 +76,7 @@ bool ListEventReceiver::OnMEvent(MEventData& event)
    if ( result->GetUserData() != this )
    {
       // no: continue with other event handlers
-      return TRUE;
+      return true;
    }
 
    if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
@@ -71,17 +84,39 @@ bool ListEventReceiver::OnMEvent(MEventData& event)
       FAIL_MSG( _T("unexpected operation notification") );
 
       // eat the event - it was for us but we didn't process it...
-      return FALSE;
+      return false;
    }
 
    // is it the special event which signals that there will be no more of
    // folders?
    wxString path = result->GetName();
    if ( path.empty() )
+   {
+      // end of enumeration
       OnNoMoreFolders();
+
+      m_specRoot.clear();
+   }
    else
-      OnListFolder(path, result->GetDelimiter(), result->GetAttributes());
+   {
+      // if our ListAll() was called, make path really just a path from the
+      // full c-client IMAP spec (otherwise m_specRoot is empty and calling
+      // StartsWith() is a NOOP: it just copies path to name)
+      String name;
+      if ( !path.StartsWith(m_specRoot, &name) )
+      {
+         FAIL_MSG( _T("unexpected folder in mm_list()") );
+      }
+
+      const char delim = result->GetDelimiter();
+
+      // we don't want the leading slash, if any
+      if ( !name.empty() && name[0u] == delim )
+         name.erase(0, 1);
+
+      OnListFolder(name, delim, result->GetAttributes());
+   }
 
    // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
+   return false;
 }
