@@ -1246,10 +1246,22 @@ void MAppBase::RemoveStatusField(StatusFields field)
 
       if ( m_statusPanes[n] == field )
       {
+         // remove this field and shift the remaining ones (don't use memmove()
+         // to avoid reading uninitialized memory and provoking Purify ire...)
          for ( size_t m = n + 1; m <= WXSIZEOF(m_statusPanes); m++ )
          {
-            m_statusPanes[m - 1] =
-               m == WXSIZEOF(m_statusPanes) ? SF_ILLEGAL : m_statusPanes[m];
+            if ( m == WXSIZEOF(m_statusPanes) )
+            {
+               m_statusPanes[m - 1] = SF_ILLEGAL;
+            }
+            else
+            {
+               if ( (m_statusPanes[m - 1] = m_statusPanes[m]) == SF_ILLEGAL )
+               {
+                  // no more fields
+                  break;
+               }
+            }
          }
 
          RecreateStatusBar();
