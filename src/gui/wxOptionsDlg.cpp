@@ -1469,7 +1469,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "reports you send us (of course, everybody knows that there\n"
                   "are no bugs in Mahogany, but just in case :-)"),             Field_Message,    -1,                    },
    { gettext_noop("Show &log window"),             Field_Bool,    -1,                    },
-   { gettext_noop("Log to &file"),                 Field_File,    -1,                    },
+   { gettext_noop("Log to &file"),                 Field_File | Field_FileSave,    -1,                    },
    { gettext_noop("Debug server and mailbox access"), Field_Bool, -1                     },
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
@@ -2067,7 +2067,8 @@ void wxOptionsPage::CreateControls()
             break;
 
          case Field_File:
-            last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
+            last = CreateFileEntry(_(m_aFields[n].label), widthMax, last,
+                                   NULL, !(flags & Field_FileSave));
             break;
 
          case Field_Folder:
