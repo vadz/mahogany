@@ -637,6 +637,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -645,6 +646,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -656,6 +658,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -664,25 +667,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
-									ExceptionHandling="FALSE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-						</File>
-						<File
-							RelativePath=".\src\Python\MAppBase_swig.cpp">
-							<FileConfiguration
-								Name="Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="TRUE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -694,6 +679,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -702,6 +688,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -713,6 +700,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -721,6 +709,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -732,6 +721,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -740,6 +730,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -751,6 +742,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -759,63 +751,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
-									ExceptionHandling="FALSE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-						</File>
-						<File
-							RelativePath=".\src\Python\MObject_swig.cpp">
-							<FileConfiguration
-								Name="Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="TRUE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="FALSE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-						</File>
-						<File
-							RelativePath=".\src\Python\MProfile_swig.cpp">
-							<FileConfiguration
-								Name="Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="TRUE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="FALSE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-						</File>
-						<File
-							RelativePath=".\src\Python\MString_swig.cpp">
-							<FileConfiguration
-								Name="Debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ExceptionHandling="TRUE"
-									UsePrecompiledHeader="0"
-									WarningLevel="1"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="Release|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -827,6 +763,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -835,6 +772,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
+									PreprocessorDefinitions="STATIC_LINKED"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -846,7 +784,7 @@
 								Name="Debug|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="SWIG_GLOBAL,STATIC_LINKED"
+									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
 									ExceptionHandling="TRUE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
@@ -855,7 +793,7 @@
 								Name="Release|Win32">
 								<Tool
 									Name="VCCLCompilerTool"
-									PreprocessorDefinitions="SWIG_GLOBAL,STATIC_LINKED"
+									PreprocessorDefinitions="STATIC_LINKED,SWIG_GLOBAL"
 									ExceptionHandling="FALSE"
 									UsePrecompiledHeader="0"
 									WarningLevel="1"/>
