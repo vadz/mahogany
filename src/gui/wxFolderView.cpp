@@ -4103,6 +4103,10 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
             key = keycodes[idx] ? keycodes_en[idx] : 0;
          }
+         else
+         {
+            key = 0;
+         }
    }
 
    // we only process unmodified key presses normally - except for Ctrl-Del
