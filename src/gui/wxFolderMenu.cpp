@@ -56,7 +56,10 @@ static wxArrayString gs_folderNames;
 // ----------------------------------------------------------------------------
 
 // recursive helper for CreateFolderMenu
-static void AddSubFoldersToMenu(wxString& folderName, MFolder *folder, wxMenu *menu, size_t& id)
+static void AddSubFoldersToMenu(wxString& folderName,
+                                MFolder *folder,
+                                wxMenu *menu,
+                                size_t& id)
 {
    size_t nSubfolders = folder->GetSubfolderCount();
    for ( size_t n = 0; n < nSubfolders; n++ )
@@ -67,6 +70,15 @@ static void AddSubFoldersToMenu(wxString& folderName, MFolder *folder, wxMenu *m
          FAIL_MSG( "no subfolder?" );
 
          continue;
+      }
+
+      // to allow moving the messages to the parent folder, create an entry
+      // for it here (but don't do it for the root folder)
+      if ( (n == 0) && (folder->GetType() != MF_ROOT) )
+      {
+         menu->Append(WXMENU_POPUP_FOLDER_MENU + id++, folder->GetName());
+         gs_folderNames.Add(folderName);
+         menu->AppendSeparator();
       }
 
       wxString name = subfolder->GetName();
