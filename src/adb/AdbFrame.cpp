@@ -3608,7 +3608,11 @@ void wxAdbEMailPage::SaveChanges(AdbEntry& data)
   if ( m_bListboxModified ) {
     data.ClearExtraEMails();
     wxListBox *listbox = GetListBox();
+#if wxCHECK_VERSION(2, 3, 2)
+    size_t nCount = listbox->GetCount();
+#else
     size_t nCount = listbox->Number();
+#endif
     for ( size_t n = 0; n < nCount; n++ ) {
       data.AddEMail(listbox->GetString(n));
     }

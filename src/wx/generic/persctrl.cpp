@@ -104,6 +104,10 @@ END_EVENT_TABLE()
 // wxID_FOO -> wxFOO
 static int TranslateBtnIdToMsgBox(int rc);
 
+#if wxCHECK_VERSION(2, 3, 1)
+    #define Number()    GetCount()
+#endif
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
