@@ -127,6 +127,9 @@ Important bug fixes:
 
 * Many fixes to the new mail reporting and processing
 
+* Big improvements in handling of sending and reading messages in charsets
+  other than ASCII
+
 Please see the CHANGES file in the distribution for an even more
 detailed list of changes.
 
