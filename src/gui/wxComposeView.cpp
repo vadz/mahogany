@@ -4174,11 +4174,7 @@ wxComposeView::Send(SendMode mode)
    }
    else // message not sent
    {
-      if ( mApplication->GetLastError() != M_ERROR_CANCEL )
-      {
-         wxLogError(_("The message couldn't be sent."));
-      }
-      //else: cancelled by user, don't give the error
+      // message error already given by SendOrQueue()
 
       wxLogStatus(this, _("Message was not sent."));
    }
