@@ -44,6 +44,7 @@
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
 #include <wx/menu.h>
 #include <wx/statusbr.h>
+#include <wx/fs_mem.h>
 
 #include "wx/dialup.h"
 
@@ -518,6 +519,7 @@ wxMApp::OnInit()
       m_Locale = NULL;
 
    wxInitAllImageHandlers();
+   wxFileSystem::AddHandler(new wxMemoryFSHandler);
 
    m_IconManager = new wxIconManager();
 
