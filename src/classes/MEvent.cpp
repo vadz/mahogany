@@ -110,13 +110,18 @@ MEventManager::DispatchPending(void)
    if(gs_IsDispatching)
       return;
    gs_IsDispatching = true;
+
+   MEventLocker mutex;
+
    MEventData *dataptr = NULL;
-   
    while(! gs_EventList.empty() )
    {
       dataptr = gs_EventList.pop_front();
+      // Dispatch is safe and might cause new events:
+      mutex.Unlock();
       Dispatch(dataptr);
       delete dataptr;
+      mutex.Lock(); // restore locked status
    }
    gs_IsDispatching = false;
 }
@@ -132,15 +137,15 @@ MEventManager::Send(MEventData * data)
 /* static */
 void MEventManager::Dispatch(MEventData * dataptr)
 {
-   MEventLocker mutex;
-
    MEventData & data = *dataptr;
-
    MEventId id = data.GetId();
 
    // make a copy of the array because some event handlers might remove
    // themselves from our list while we send the event
+   MEventLocker mutex;
    MEventReceiverInfoArray receivers = gs_receivers;
+   mutex.Unlock();
+   
    size_t count = receivers.GetCount();
 
    for ( size_t n = 0; n < count; n++ )
@@ -168,8 +173,6 @@ void MEventManager::Dispatch(MEventData * dataptr)
 // (it's opaque for the caller)
 void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 {
-   MEventLocker mutex;
-
    MEventReceiverInfo *info = new MEventReceiverInfo(who, eventId);
 
 #ifdef DEBUG
@@ -186,15 +189,17 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
    }
 #endif
 
-   gs_receivers.Add(info);
-
+   {
+      MEventLocker mutex;
+      gs_receivers.Add(info);
+   }
+   
    return info;
 }
 
 bool MEventManager::Deregister(void *handle)
 {
    MEventLocker mutex;
-
    int index = gs_receivers.Index((MEventReceiverInfo *)handle);
 
    CHECK( index != wxNOT_FOUND, false,

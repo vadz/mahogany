@@ -85,8 +85,8 @@ public:
 
    /** @name Thread control */
    //@{
-   virtual void ThrEnter(SectionId what) { ThrEnterLeave(TRUE, what); }
-   virtual void ThrLeave(SectionId what) { ThrEnterLeave(FALSE, what); }
+   virtual void ThrEnter(SectionId what) { ThrEnterLeave(TRUE, what, FALSE); }
+   virtual void ThrLeave(SectionId what, bool testing) { ThrEnterLeave(FALSE, what, testing); }
    //@}
 
    wxHelpController *GetHelpController(void)
@@ -108,7 +108,7 @@ protected:
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
        otherwise leave.
    */
-   void ThrEnterLeave(bool enter, SectionId what);
+   void ThrEnterLeave(bool enter, SectionId what, bool testing);
    /// Load modules at startup
    virtual void LoadModules(void);
    /// Unload modules loaded at startup

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MApplication class: all non GUI specific application stuff       *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -216,12 +216,15 @@ public:
       /// Un/Lock the GUI
       GUI,
       /// The event subsystem:
-      EVENTS = GUI,     // if changed, change wxMApp.cpp, too!
+      MEVENT,     // if changed, change wxMApp.cpp, too!
       /// UnLock the critical c-client code
       CCLIENT
    };
    virtual void ThrEnter(SectionId what) = 0;
-   virtual void ThrLeave(SectionId what) = 0;
+   /** leave thread, unlock
+       @param testing if true, allow unlock on unlocked thread
+   */
+   virtual void ThrLeave(SectionId what, bool testing = false) = 0;
    //@}
    bool SupportsDialUpNetwork(void) const
       { return m_DialupSupport; }
@@ -316,6 +319,14 @@ public:
       }
    ~MMutexLocker()
       {
+         mApplication->ThrLeave(m_Id, true);
+      }
+   void Lock(void)
+      {
+         mApplication->ThrEnter(m_Id);
+      }
+   void Unlock(void)
+      {
          mApplication->ThrLeave(m_Id);
       }
 private:
@@ -330,7 +341,11 @@ public:
 };
 
 /// lock the events subsystem
-#define MEventLocker MGuiLocker
+class MEventLocker : public MMutexLocker
+{
+public:
+   MEventLocker() : MMutexLocker(MAppBase::MEVENT) {};
+};
 
 /// lock the Cclient critical sections
 class MCclientLocker : public MMutexLocker

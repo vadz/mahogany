@@ -478,7 +478,7 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
-   MGuiLocker lock;
+   //MGuiLocker lock;
    CloseSplash();
    NoBusyCursor no;
    wxMessageBox(msg, wxString("Mahogany : ") + title,
@@ -541,7 +541,7 @@ MDialog_Message(const char *message,
    wxString caption = "Mahogany : ";
    caption += title;
 
-   MGuiLocker lock;
+   //MGuiLocker lock;
    CloseSplash();
    NoBusyCursor no;
    if(configPath)
@@ -576,7 +576,7 @@ MDialog_YesNoDialog(const char *message,
    int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
    if(! yesDefault) style |= wxNO_DEFAULT;
 
-   MGuiLocker lock;
+   //MGuiLocker lock;
    CloseSplash();
    NoBusyCursor no;
    return wxPMessageBox(configPath, message, caption,
@@ -605,7 +605,7 @@ MDialog_FileRequester(String const & message,
                       bool save,
                       ProfileBase * /* profile */)
 {
-   MGuiLocker lock;
+   //MGuiLocker lock;
    CloseSplash();
 
    // VZ: disabling this code because it is almost useless now with the advent
@@ -647,7 +647,7 @@ int
 MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                       const MWindow *parent)
 {
-   MGuiLocker lock;
+   //MGuiLocker lock;
    CloseSplash();
 
    wxArrayString aChoices;
