@@ -1694,11 +1694,20 @@ MessageView::Update(void)
 
    m_viewer->EndBody();
 
+   // if user selects the language from the menu, m_encodingUser is set
+   wxFontEncoding encoding;
+   if ( m_encodingUser != wxFONTENCODING_SYSTEM ) 
+   {
+      encoding = m_encodingUser;
+   }
+   else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
+   {
+      encoding = m_encodingAuto;
+   }
+   else encoding = wxFONTENCODING_DEFAULT;
+
    // update the menu of the frame containing us to show the encoding used
-   CheckLanguageInMenu(GetParentFrame(),
-                       m_encodingAuto == wxFONTENCODING_SYSTEM
-                        ? wxFONTENCODING_DEFAULT
-                        : m_encodingAuto);
+   CheckLanguageInMenu(GetParentFrame(), encoding);
 }
 
 // ----------------------------------------------------------------------------
