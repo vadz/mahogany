@@ -160,6 +160,12 @@ dnl is -traditional needed for correct compilations
 AC_PROG_GCC_TRADITIONAL
 dnl   adds -traditional for gcc if needed
 
+dnl sets RANLIB to ranlib location or nothing
+AC_PROG_RANLIB
+
+dnl sets YACC to yacc location
+AC_PROG_YACC
+
 AC_LANG_SAVE
 
 AC_PROG_INSTALL
