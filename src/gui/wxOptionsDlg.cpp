@@ -591,12 +591,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
    // network config and identity
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
-   { gettext_noop("&E-mail address"),        Field_Text | Field_Vital,   -1, },
+   { gettext_noop("&E-mail address"),              Field_Text | Field_Vital,   -1, },
    { gettext_noop("The following host name can be used as a default host "
                   "name for local mail addresses."),
                                                    Field_Message, -1 },
-   { gettext_noop("&Add this hostname if none specified"), Field_Bool, ConfigField_AddDefaultHostname },
-   { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   -1, },
+   { gettext_noop("&Add this hostname if none specified"), Field_Bool, -1 },
+   { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   ConfigField_AddDefaultHostname, },
    { gettext_noop("Reply return address from &To: field"), Field_Bool, -1, },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
