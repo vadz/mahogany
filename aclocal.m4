@@ -18,10 +18,14 @@ AC_DEFUN(M_OVERRIDES,
 [
 AC_MSG_CHECKING("for $2")
 AC_ARG_WITH($1,$3,
-[if test "x$with_$1" = xyes; then
-  ac_cv_use_$1='$4="1"'
-else
+[if test "x$with_$1" = xno; then
   ac_cv_use_$1='$4="0"'
+else
+  if test "x$with_$1" = xyes; then
+    ac_cv_use_$1='$4="1"'
+  else
+    ac_cv_use_$1='$4="$with_$1"'
+  fi
 fi],
 [
   LINE=`grep "$4" ${OSTYPE}.system.cache`
@@ -33,7 +37,7 @@ fi],
 eval "$ac_cv_use_$1"
 echo $ac_cv_use_$1 >> ${OSTYPE}.system.cache.tmp
 if test "$$4" = 1; then
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT($with_$1)
 else
   AC_MSG_RESULT(no)
 fi
