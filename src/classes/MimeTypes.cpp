@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/08/06 23:32:23  VZ
+ * some headers moved inside #ifndef USE_PCH
+ *
  * Revision 1.7  1998/06/05 16:56:12  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -58,26 +62,22 @@
 #include  "Mcommon.h"
 
 #ifndef USE_PCH
-#   include <strutil.h>
-#   include <string.h>
+#  include <strutil.h>
+#  include <string.h>
 
-extern "C" {
-#   include   <mail.h>
-           }
+   extern "C"
+   {
+#     include   <mail.h>
+   }
 
-#endif
-
-#include   "MFrame.h"
-#include   "MLogFrame.h"
-
-#include   "Mdefaults.h"
-
-#include   "PathFinder.h"
-#include   "MimeList.h"
-#include   "MimeTypes.h"
-#include   "Profile.h"
-
-#include  "MApplication.h"
+#  include "Mdefaults.h"
+#  include "PathFinder.h"
+#  include "MimeList.h"
+#  include "MimeTypes.h"
+#  include "Profile.h"
+#  include "MFrame.h"
+#  include "MApplication.h"
+#endif  // USE_PCH
 
 MimeTEntry::MimeTEntry(void)
 {
