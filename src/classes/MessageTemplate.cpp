@@ -547,7 +547,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
    wxConfigBase *config = profile->GetConfig();
 
    String value = config->Read(GetTemplateValuePath(kind, name), "");
-   if ( !value )
+   if ( value.empty() )
    {
       // we have the default templates for reply, follow-up and forward
       switch ( kind )
@@ -579,9 +579,12 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
 
          case MessageTemplate_NewMessage:
          case MessageTemplate_NewArticle:
-            // nothing to do, but put it here to silence gcc warnings
-            ;
+            // put the cursor before the signature
+            value = "$CURSOR";
       }
+
+      // all default templates include the signature
+      value += "$SIGNATURE";
    }
 
    return value;

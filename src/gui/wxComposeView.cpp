@@ -51,8 +51,8 @@
 #endif
 
 #include <wx/textctrl.h>
+#include <wx/file.h>
 #include <wx/ffile.h>
-#include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
 #include <wx/fontutil.h>
@@ -101,10 +101,7 @@ extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
 extern const MOption MP_AUTOMATIC_WORDWRAP;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
-extern const MOption MP_COMPOSE_SIGNATURE;
 extern const MOption MP_COMPOSE_TO;
-extern const MOption MP_COMPOSE_USE_SIGNATURE;
-extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_CVIEW_BGCOLOUR;
 extern const MOption MP_CVIEW_FGCOLOUR;
@@ -1717,108 +1714,9 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
 void
 wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
 {
-   // first append signature - everything else will be inserted before it
-   if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
-   {
-      wxTextFile fileSig;
+   // NB: the signature is now inserted by the template parser
 
-      bool hasSign = false;
-      while ( !hasSign )
-      {
-         String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
-         if ( !strSignFile.empty() )
-            hasSign = fileSig.Open(strSignFile);
-
-         if ( !hasSign )
-         {
-            // no signature at all or sig file not found, propose to choose or
-            // change it now
-            wxString msg;
-            if ( strSignFile.empty() )
-            {
-               msg = _("You haven't configured your signature file.");
-            }
-            else
-            {
-               // to show message from wxTextFile::Open()
-               wxLog *log = wxLog::GetActiveTarget();
-               if ( log )
-                  log->Flush();
-
-               msg.Printf(_("Signature file '%s' couldn't be opened."),
-                          strSignFile.c_str());
-            }
-
-            msg += _("\n\nWould you like to choose your signature "
-                     "right now (otherwise no signature will be used)?");
-            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                     true, "AskForSig") )
-            {
-               strSignFile = wxPFileSelector("sig",
-                                             _("Choose signature file"),
-                                             NULL, ".signature", NULL,
-                                             _(wxALL_FILES),
-                                             0, this);
-            }
-            else
-            {
-               // user doesn't want to use signature file
-               break;
-            }
-
-            if ( strSignFile.empty() )
-            {
-               // user canceled "choose signature" dialog
-               break;
-            }
-
-            m_Profile->writeEntry(MP_COMPOSE_SIGNATURE, strSignFile);
-         }
-      }
-
-      if ( hasSign )
-      {
-         wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
-
-         // insert separator optionally
-         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
-         {
-            layoutList->LineBreak();
-            layoutList->Insert("--");
-         }
-
-         // read the whole file
-         size_t nLineCount = fileSig.GetLineCount();
-         for ( size_t nLine = 0; nLine < nLineCount; nLine++ )
-         {
-            layoutList->LineBreak();
-            layoutList->Insert(fileSig[nLine]);
-         }
-
-         // let's respect the netiquette
-         static const size_t nMaxSigLines = 4;
-         if ( nLineCount > nMaxSigLines )
-         {
-            wxString msg;
-            msg.Printf(_("Your signature is %stoo long: it should "
-                        "not be more than %d lines."),
-                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
-            MDialog_Message(msg, m_LayoutWindow,
-                            _("Signature is too long"),
-                            GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
-
-         }
-
-         layoutList->MoveCursorTo(wxPoint(0,0));
-      }
-      else
-      {
-         // don't ask the next time
-         m_Profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
-      }
-   }
-
-   // now deal with templates: first decide what kind of template do we need
+   // deal with templates: first decide what kind of template do we need
    MessageTemplateKind kind;
    switch ( m_kind )
    {
@@ -1906,6 +1804,8 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
    } while ( templateChanged );
 
    // finally, attach a vCard if requested
+   //
+   // TODO: this should be handled by the template as well
    if ( READ_CONFIG(m_Profile, MP_USEVCARD) )
    {
       // read the vCard from the file specified in config

@@ -39,12 +39,17 @@
 
 #include "MessageView.h"
 
+#include "Mpers.h"
+
 #include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/file.h>
 #include <wx/ffile.h>
+#include <wx/textfile.h>
 #include <wx/tokenzr.h>
 
 #include <wx/regex.h>
+
+#include "wx/persctrl.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -53,6 +58,9 @@
 extern const MOption MP_AUTOMATIC_WORDWRAP;
 extern const MOption MP_COMPOSETEMPLATEPATH_GLOBAL;
 extern const MOption MP_COMPOSETEMPLATEPATH_USER;
+extern const MOption MP_COMPOSE_SIGNATURE;
+extern const MOption MP_COMPOSE_USE_SIGNATURE;
+extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
 extern const MOption MP_DATE_FMT;
 extern const MOption MP_REPLY_DETECT_SIG;
 extern const MOption MP_REPLY_MSGPREFIX;
@@ -161,20 +169,21 @@ public:
    // the variables in "misc" category
    enum Variable
    {
-      Var_Date,            // insert the date in the default format
-      Var_Cursor,          // position the cursor here after template expansion
-      Var_To,              // the recipient name
-      Var_Subject,         // the message subject (without any "Re"s)
+      MiscVar_Date,        // insert the date in the default format
+      MiscVar_Cursor,      // position the cursor here after template expansion
+      MiscVar_To,          // the recipient name
+      MiscVar_Subject,     // the message subject (without any "Re"s)
 
       // all entries from here only apply to the reply/forward/followup
       // templates because they work with the original message
-      Var_Quote,           // quote the original text
-      Var_Quote822,        // include the original msg as a RFC822 attachment
-      Var_Text,            // include the original text as is
-      Var_Sender,          // the fullname of the sender
+      MiscVar_Quote,       // quote the original text
+      MiscVar_Quote822,    // include the original msg as a RFC822 attachment
+      MiscVar_Text,        // include the original text as is
+      MiscVar_Sender,      // the fullname of the sender
+      MiscVar_Signature,   // the signature
 
-      Var_Invalid,
-      Var_Max = Var_Invalid
+      MiscVar_Invalid,
+      MiscVar_Max = MiscVar_Invalid
    };
 
    // the variables in "message" category
@@ -218,11 +227,11 @@ public:
    }
 
    // get the variable id from the string (works for misc variables only, will
-   // return Var_Invalid if variable is unknown)
+   // return MiscVar_Invalid if variable is unknown)
    static Variable GetVariable(const String& variable)
    {
-      return (Variable)FindStringInArray(ms_templateVarNames,
-                                         Var_Max, variable);
+      return (Variable)FindStringInArray(ms_templateMiscVars,
+                                         MiscVar_Max, variable);
    }
 
    // get the header corresponding to the variable of "message" category
@@ -301,6 +310,9 @@ protected:
    bool ExpandMessage(const String& name, String *value) const;
    bool ExpandOriginal(const String& name, String *value) const;
 
+   // get the signature to use (including the signature separator, if any)
+   String GetSignature() const;
+
    // return the reply prefix to use for message quoting when replying
    String GetReplyPrefix() const;
 
@@ -341,7 +353,7 @@ private:
    static const char *ms_templateVarCategories[Category_Max];
 
    // this array contains the list of all variables without category
-   static const char *ms_templateVarNames[Var_Max];
+   static const char *ms_templateMiscVars[MiscVar_Max];
 
    // this array contains the variable names from "message" category
    static const char *ms_templateMessageVars[MessageHeader_Max];
@@ -363,6 +375,7 @@ private:
 static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 {
    TemplatePopupMenuItem(_("Put &cursor here"), "$cursor"),
+   TemplatePopupMenuItem(_("Insert &signature"), "$signature"),
    TemplatePopupMenuItem(),
    TemplatePopupMenuItem(_("Insert current &date"), "$date"),
    TemplatePopupMenuItem(),
@@ -543,7 +556,7 @@ const char *VarExpander::ms_templateVarCategories[] =
    "original",
 };
 
-const char *VarExpander::ms_templateVarNames[] =
+const char *VarExpander::ms_templateMiscVars[] =
 {
    "date",
    "cursor",
@@ -553,6 +566,7 @@ const char *VarExpander::ms_templateVarNames[] =
    "quote822",
    "text",
    "sender",
+   "signature",
 };
 
 const char *VarExpander::ms_templateMessageVars[] =
@@ -692,7 +706,7 @@ VarExpander::ExpandMisc(const String& name, String *value) const
    // deal with all special cases
    switch ( GetVariable(name.Lower()) )
    {
-      case Var_Date:
+      case MiscVar_Date:
          {
             time_t ltime;
             (void)time(&ltime);
@@ -707,18 +721,22 @@ VarExpander::ExpandMisc(const String& name, String *value) const
          }
          break;
 
-      case Var_Cursor:
+      case MiscVar_Cursor:
          m_sink.RememberCursorPosition();
          break;
 
          // some shortcuts for the values of the "original:" category
-      case Var_To:
-      case Var_Subject:
-      case Var_Quote:
-      case Var_Quote822:
-      case Var_Text:
-      case Var_Sender:
+      case MiscVar_To:
+      case MiscVar_Subject:
+      case MiscVar_Quote:
+      case MiscVar_Quote822:
+      case MiscVar_Text:
+      case MiscVar_Sender:
          return ExpandOriginal(name, value);
+
+      case MiscVar_Signature:
+         *value = GetSignature();
+         break;
 
       default:
          // unknown name
@@ -1077,6 +1095,120 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
    }
 
    return TRUE;
+}
+
+// ----------------------------------------------------------------------------
+// ExpandMisc("signature") helper
+// ----------------------------------------------------------------------------
+
+String VarExpander::GetSignature() const
+{
+   String signature;
+
+   // first check if we want to insert it at all: this setting overrides the
+   // $signature in the template because the latter is there by default and
+   // it's simpler (especially for a novice user who might not know about the
+   // templates at all) to just uncheck the checkbox "Use signature" in the
+   // options dialog instead of editing all templates
+   if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE) )
+   {
+      wxTextFile fileSig;
+
+      // loop until we have a valid file to read the signature from
+      bool hasSign = false;
+      while ( !hasSign )
+      {
+         String strSignFile = READ_CONFIG(m_profile, MP_COMPOSE_SIGNATURE);
+         if ( !strSignFile.empty() )
+            hasSign = fileSig.Open(strSignFile);
+
+         if ( !hasSign )
+         {
+            // no signature at all or sig file not found, propose to choose or
+            // change it now
+            wxString msg;
+            if ( strSignFile.empty() )
+            {
+               msg = _("You haven't configured your signature file.");
+            }
+            else
+            {
+               // to show message from wxTextFile::Open()
+               wxLog *log = wxLog::GetActiveTarget();
+               if ( log )
+                  log->Flush();
+
+               msg.Printf(_("Signature file '%s' couldn't be opened."),
+                          strSignFile.c_str());
+            }
+
+            msg += _("\n\nWould you like to choose your signature "
+                     "right now (otherwise no signature will be used)?");
+            if ( MDialog_YesNoDialog(msg, m_cv.GetFrame(), MDIALOG_YESNOTITLE,
+                                     true, "AskForSig") )
+            {
+               strSignFile = wxPFileSelector("sig",
+                                             _("Choose signature file"),
+                                             NULL, ".signature", NULL,
+                                             _(wxALL_FILES),
+                                             0, m_cv.GetFrame());
+            }
+            else
+            {
+               // user doesn't want to use signature file
+               break;
+            }
+
+            if ( strSignFile.empty() )
+            {
+               // user canceled "choose signature" dialog
+               break;
+            }
+
+            m_profile->writeEntry(MP_COMPOSE_SIGNATURE, strSignFile);
+         }
+      }
+
+      if ( hasSign )
+      {
+         // the signature must be on its own line(s)
+         signature = '\n';
+
+         // insert separator optionally
+         if ( READ_CONFIG(m_profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
+         {
+            signature += "--\n";
+         }
+
+         // read the whole file
+         size_t nLineCount = fileSig.GetLineCount();
+         for ( size_t nLine = 0; nLine < nLineCount; nLine++ )
+         {
+            signature << fileSig[nLine] << '\n';
+         }
+
+         // let's respect the netiquette
+         static const size_t nMaxSigLines = 4;
+         if ( nLineCount > nMaxSigLines )
+         {
+            wxString msg;
+            msg.Printf(_("Your signature is %stoo long: it should "
+                         "not be more than %d lines."),
+                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
+            MDialog_Message(msg, m_cv.GetFrame(),
+                            _("Signature is too long"),
+                            GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
+
+         }
+      }
+      else
+      {
+         // don't ask the next time
+         m_profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
+      }
+   }
+
+   return signature;
 }
 
 // ----------------------------------------------------------------------------
