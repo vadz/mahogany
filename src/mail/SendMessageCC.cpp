@@ -403,11 +403,9 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
 }
 
 // returns true if the character must be encoded in an SMTP [address] header
-static inline bool NeedsEncodingInHeader(unsigned char c, bool isaddr)
+static inline bool NeedsEncodingInHeader(unsigned char c)
 {
-   return iscntrl(c) ||
-          c > 127 ||
-          (isaddr && strchr("()<>@,;:\"/[]?.=", c));
+   return iscntrl(c) || c >= 127;
 }
 
 String
@@ -422,7 +420,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
       const unsigned char *p;
       for ( p = (unsigned char *)header.c_str(); *p; p++ )
       {
-         if ( NeedsEncodingInHeader(*p, isaddr) )
+         if ( NeedsEncodingInHeader(*p) )
             break;
       }
 
@@ -488,7 +486,7 @@ SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
 
             // normal characters stand for themselves in QP, the encoded ones
             // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c, isaddr) || c == ' ')
+            lenRemaining -= (NeedsEncodingInHeader(c) || strchr(" \t=?", c))
                               ? 3 : 1;
 
             if ( lenRemaining <= 0 )
