@@ -894,7 +894,7 @@ wxString wxPFileSelector(const wxString& configPath,
                          const wxString& title,
                          const char *defpath,
                          const char *defname,
-                         const char * /* extension */,
+                         const char *defext,
                          const char *filter,
                          int flags,
                          wxWindow *parent,
@@ -914,13 +914,14 @@ wxString wxPFileSelector(const wxString& configPath,
 
     // use the stored value for the default name/path and fall back to the
     // given one if there is none
-    wxString defaultName, defaultPath;
+    wxString defaultName, defaultPath, defName;
+    defName << defname << '.' << defext;
     if ( config ) {
-        defaultName = config->Read(configValueFile, defname);
+        defaultName = config->Read(configValueFile, defName);
         defaultPath = config->Read(configValuePath, defpath);
     }
     else {
-        defaultName = defname;
+        defaultName = defName;
         defaultPath = defpath;
     }
 
@@ -936,7 +937,8 @@ wxString wxPFileSelector(const wxString& configPath,
         wxString path, name, ext;
         wxSplitPath(filename, &path, &name, &ext);
 
-        config->Write(configValueFile, name + ext);
+        name << '.' << ext;
+        config->Write(configValueFile, name);
         config->Write(configValuePath, path);
     }
 

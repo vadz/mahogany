@@ -808,8 +808,9 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       wxString name, ext;
       wxSplitPath(filename, NULL, &name, &ext);
 
+      name << '.' << ext;
       filename = wxFileSelector(_("Save attachment as:"),
-                                NULLstring, name, ext,
+                                NULLstring, name, NULLstring,
                                 NULLstring, 0, this);
    }
    else
