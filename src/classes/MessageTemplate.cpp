@@ -544,7 +544,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
       switch ( kind )
       {
          case MessageTemplate_Reply:
-            value = _("On $(ORIGINAL:DATE) you wrote:\n\n$QUOTE\n$CURSOR");
+            value = _("On $(ORIGINAL:DATE) $SENDER wrote:\n\n$QUOTE\n$CURSOR");
             break;
 
          case MessageTemplate_Forward:
