@@ -37,7 +37,7 @@ fi],
 eval "$ac_cv_use_$1"
 echo $ac_cv_use_$1 >> ${OSTYPE}.system.cache.tmp
 if test "$$4" != 0; then
-  AC_MSG_RESULT($with_$1)
+  AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
 fi
