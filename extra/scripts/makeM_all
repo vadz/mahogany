@@ -158,8 +158,8 @@ fi
 if [ `hostname` = Sendero.Simon-Shapiro.ORG ]
 then
   BUILDDIR=/home/karsten/src
-  WXPREFIX=$BUILDDIR/WXOPT
-  MPREFIX=$BUILDDIR/MOPT
+  WXPREFIX=/usr/local/wxWindows
+  MPREFIX=/usr/local/Mahogany
   MAKE=gmake
   OSTYPE=FreeBSD
   CC=/usr/local/bin/gcc295
