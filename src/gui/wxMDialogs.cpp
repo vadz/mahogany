@@ -3359,7 +3359,7 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
    c->width.AsIs();
    c->height.AsIs();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
    wxArrayString labels;
@@ -3372,7 +3372,7 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
    c->width.Absolute(widthMax);
    c->height.AsIs();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.Below(label, 2*LAYOUT_Y_MARGIN);
+   c->top.Below(label, 3*LAYOUT_Y_MARGIN);
    label = new wxStaticText(this, -1, labels[0]);
    label->SetConstraints(c);
 
