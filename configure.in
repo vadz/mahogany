@@ -373,6 +373,7 @@ if test "$USE_WXGTK" = 1; then
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
       WX_LINK="$ac_path_to_link -lwx_gtk"
+      WX_SLINK="$ac_pure_path_to_link/libwx_gtk.a"
       WX_INCLUDE="$ac_path_to_include/wxWindows/include $ac_path_to_include/wxWindows/setup/${OSTYPE}"
       WX_DEFS=-D__GTK__
       AC_MSG_RESULT(yes)
@@ -393,6 +394,7 @@ if test "$USE_WXGTK" = 1; then
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
       WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk -lglib -lXext"
+      WX_SLINK="$WX_SLINK $ac_path_to_link -lgtk -lgdk -lglib -lXext"
       WX_INCLUDE="$WX_INCLUDE $ac_path_to_include/gtk"
       AC_MSG_RESULT(yes)
     else

@@ -2,6 +2,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.9  1998/06/22 15:17:00  KB
+# support for "make static", fixed duplicate main()
+#
 # Revision 1.8  1998/06/08 08:19:04  KB
 # Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
 #
@@ -35,7 +38,7 @@ all:
 
 static:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	$(LINK) -o M.static $(LDFLAGS) util/*.o classes/*.o gui/*.o mail/*.o $(SLIBS) 
+	$(LINK) -o M.static $(LDFLAGS) $(MOBJS) $(SLIBS) 
 
 doc:
 	$(MAKE) -C ../include $@
