@@ -184,11 +184,14 @@ static String FilterProfileName(const String& profileName);
 void ProfileBase::FlushAll()
 {
    ASSERT(ms_GlobalConfig);
+
+#ifdef OS_UNIX
    // FIXME! wxFileConfig is too dumb to accept an umaks value or to preserve 
    // one.
    mode_t um = umask(0077);
    ms_GlobalConfig->Flush();
    umask(um);
+#endif // Unix
 }
 
 bool ProfileBase::IsExpandingEnvVars() const
