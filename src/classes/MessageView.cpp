@@ -1200,9 +1200,10 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          // FIXME it won't be needed when full Unicode support is available
          textPart = wxString(textPart.wc_str(wxConvUTF8), wxConvLocal);
          encPart = wxLocale::GetSystemEncoding();
+         // show UTF-8, not env. encoding in Language menu
+         m_encodingAuto = wxFONTENCODING_UTF8;
       }
-
-      if ( encPart == wxFONTENCODING_SYSTEM ||
+      else if ( encPart == wxFONTENCODING_SYSTEM ||
             encPart == wxFONTENCODING_DEFAULT )
       {
          // use the encoding of the last part which had it
