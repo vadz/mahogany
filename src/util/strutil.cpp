@@ -1463,7 +1463,11 @@ extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
          break;
       }
    }
-
+#ifdef DEBUG_nerijus
+   // temporary HACK - Lithuanian input in both Windows and X is
+   // ISO-8859-13 (or Windows-1257), not ISO-8859-4
+   if ( enc == wxFONTENCODING_ISO8859_4 ) enc = wxFONTENCODING_ISO8859_13;
+#endif
    return enc;
 }
 
