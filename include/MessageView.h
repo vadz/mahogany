@@ -472,10 +472,10 @@ protected:
 
    /// call ProcessPart() for all subparts of this part
    void ProcessAllNestedParts(const MimePart *part);
-
+public:
    /// show part of any kind
    void ShowPart(const MimePart *part);
-
+protected:
    /// show a text part
    void ShowTextPart(const MimePart *part);
 
