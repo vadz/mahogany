@@ -1594,6 +1594,9 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 
    MsgnoType idx = GetIdxFromPos(pos);
 
+   CHECK( idx < m_count, false,
+          "HeaderInfoListImpl::IsInCache(): invalid position" );
+
    ExpandToMakeIndexValid(idx);
 
    if ( !m_headers[idx] )
