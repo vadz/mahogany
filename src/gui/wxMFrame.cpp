@@ -651,9 +651,13 @@ wxMFrame::OnMenuCommand(int id)
                ok = config->Flush();
 
             if ( ok )
+            {
                wxLogStatus(this, _("Program preferences successfully saved."));
+            }
             else
+            {
                ERRORMESSAGE((_("Couldn't save preferences.")));
+            }
          }
          break;
 
