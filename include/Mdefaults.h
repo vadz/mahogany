@@ -318,8 +318,6 @@
 #define   MP_NNTPHOST         "NewsHost"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST      "BeaconHost"
-/// the beacon port number
-#define MP_BEACONPORT      "BeaconPort"
 /// the command to go online
 #define MP_NET_ON_COMMAND   "NetOffCommand"
 /// the command to go offline
@@ -741,8 +739,6 @@
 #define   MP_NNTPHOST_D         ""
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""
-/// the beacon port number
-#define MP_BEACONPORT_D      80l
 /// the command to go online
 #define MP_NET_ON_COMMAND_D   "wvdial"
 /// the command to go offline

@@ -119,7 +119,7 @@ private:
    /// timer used to call OnIdle for MEvent handling
    class wxTimer *m_IdleTimer;
    /// online manager
-   class wxOnlineManager *m_OnlineManager;
+   class wxDialUpManager *m_OnlineManager;
    DECLARE_EVENT_TABLE()
 };
 

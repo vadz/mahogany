@@ -96,7 +96,6 @@ enum ConfigFields
    ConfigField_NewsServer,
    ConfigField_DialUpHelp,
    ConfigField_BeaconHost,
-   ConfigField_BeaconPort,
    ConfigField_NetOnCommand,
    ConfigField_NetOffCommand,
    ConfigField_TimeoutInfo,
@@ -412,7 +411,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                   "the web server of your ISP. Leave it empty to use the SMTP"
                   "server for this."), Field_Message, -1 },
    { gettext_noop("&Beacon host"),                 Field_Text,    -1,                        },
-   { gettext_noop("Connect to &port"), Field_Number,    -1,                        },
    { gettext_noop("Command to &activate network"),   Field_Text,    -1,                        },
    { gettext_noop("Command to &deactivate network"), Field_Text,    -1,                        },
    { gettext_noop("The following timeout values are used for TCP connections to\n"
@@ -591,7 +589,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BEACONHOST),
-   CONFIG_ENTRY(MP_BEACONPORT),
    CONFIG_ENTRY(MP_NET_ON_COMMAND),
    CONFIG_ENTRY(MP_NET_OFF_COMMAND),
    CONFIG_NONE(),

@@ -47,7 +47,7 @@
 #include <wx/cmndata.h>  // for wxPageSetupData
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
 
-#include "wx/onlnman.h"
+#include "wx/net.h"
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
@@ -465,7 +465,7 @@ wxMApp::OnInit()
 
    m_IconManager = new wxIconManager();
 
-   m_OnlineManager = wxGetOnlineManager();
+   m_OnlineManager = wxDialUpManager::Create();
    
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
@@ -938,13 +938,11 @@ wxMApp::SetupOnlineManager(void)
    strutil_delwhitespace(beaconhost);
    // If no host configured, use smtp host:
    if(beaconhost.length() > 0)
-      m_OnlineManager->SetBeaconHost(
-         beaconhost,
-         READ_APPCONFIG(MP_BEACONPORT));
+      m_OnlineManager->SetWellKnownHost(beaconhost);
    else
    {
       beaconhost = READ_APPCONFIG(MP_SMTPHOST);
-      m_OnlineManager->SetBeaconHost(beaconhost, 25);
+      m_OnlineManager->SetWellKnownHost(beaconhost, 25);
    }
    m_OnlineManager->SetConnectCommand(
       READ_APPCONFIG(MP_NET_ON_COMMAND),
@@ -967,7 +965,7 @@ wxMApp::GoOnline(void)
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
-   m_OnlineManager->GoOnline();
+   m_OnlineManager->Dial();
 /*
   if(! m_OnlineManager->IsOnline())
    {
@@ -986,7 +984,7 @@ wxMApp::GoOffline(void)
       ERRORMESSAGE((_("Dial-up network is already offline.")));
       return;
    }
-   m_OnlineManager->GoOffline();
+   m_OnlineManager->HangUp();
    if( m_OnlineManager->IsOnline())
    {
       ERRORMESSAGE((_("Attempt to shut down network seems to have failed.")));
