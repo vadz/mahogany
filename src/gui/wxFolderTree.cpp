@@ -195,7 +195,10 @@ public:
    virtual bool OnMEvent(MEventData& event);
 
 #ifdef __WXGTK__
-   void OnMouseMove(wxMouseEvent &event) { if(m_FocusFollowMode) SetFocus(); }
+   void OnMouseMove(wxMouseEvent &event) 
+   { 
+      if(m_FocusFollowMode && FindFocus() != this) SetFocus();
+   }
 #endif // wxGTK
 
    // get the folder tree node object from item id

@@ -107,7 +107,7 @@ public:
 #ifndef OS_WIN
    void OnMouseMove(wxMouseEvent &event)
       {
-         if(m_FolderView->GetFocusFollowMode())
+         if(m_FolderView->GetFocusFollowMode() && (FindFocus() != this))
             SetFocus();
       }
 #endif // wxGTK
@@ -672,7 +672,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       }
 #ifndef OS_WIN
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
-      if(m_FocusFollowMode)
+      if(m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl)
          m_FolderCtrl->SetFocus(); // so we can react to keyboard events
 #endif
    }

@@ -230,10 +230,11 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 {
    wxClientDC dc( this );
    PrepareDC( dc );
-   if ( eventId != WXLOWIN_MENU_MOUSEMOVE
+   if ( (eventId != WXLOWIN_MENU_MOUSEMOVE
 #ifndef __WXMSW__
         || m_FocusFollowMode
 #endif
+        ) && (wxWindow::FindFocus() != this)
       )
       SetFocus();
 
