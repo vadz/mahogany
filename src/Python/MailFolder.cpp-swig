@@ -699,11 +699,9 @@ static swig_type_info *swig_types[31];
 #include "Mcommon.h"
 #include "MailFolder.h"
 
-// SWIG doesn't work with nested classes/constants, this hack at least makes
-// the generated C code compile -- but probably not work...
+// SWIG doesn't supported nested classes, this hack at least makes the
+// generated C code compile -- but probably not work...
 #define Params MailFolder::Params
-#define SEARCH_SET MailFolder::SEARCH_SET
-#define SEARCH_UNDELETED MailFolder::SEARCH_UNDELETED
 
 #ifdef __cplusplus
 extern "C" {
@@ -2079,7 +2077,7 @@ static PyObject *_wrap_MailFolder_SearchByFlag(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg1 = (MailFolder *) 0 ;
     int arg2 ;
-    int arg3 = (int) SEARCH_SET|SEARCH_UNDELETED ;
+    int arg3 = (int) MailFolder::SEARCH_SET|MailFolder::SEARCH_UNDELETED ;
     MsgnoType arg4 = (MsgnoType) 0 ;
     UIdArray *result;
     MsgnoType *argp4 ;
