@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLayoutList.h - a formatted text rendering engine for wxWindows *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (ballueder@gmx.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -845,6 +845,12 @@ public:
        @return true if line got broken
    */
    bool WrapLine(CoordType column);
+
+   /** Wraps the complete buffer.
+       @param column the break position for the line, maximum length
+       @return true if line got broken
+   */
+   bool WrapAll(CoordType column);
    /** This function deletes npos cursor positions.
        @param npos how many positions
        @return true if everything got deleted

@@ -1269,7 +1269,9 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
 
    wxLayoutLine *newLine = new wxLayoutLine(this, llist);
    // split object at i:
-   if((**i).GetType() == WXLO_TYPE_TEXT && offset != 0)
+   if((**i).GetType() == WXLO_TYPE_TEXT
+      && offset != 0
+      && offset != (**i).GetLength() )
    {
       wxString left, right;
       wxLayoutObjectText *tobj = (wxLayoutObjectText *) *i;
@@ -1385,7 +1387,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
       {
          do
          {
-            if( isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+            if(isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
                return column;
             else
             {
@@ -1414,17 +1416,16 @@ wxLayoutLine::GetWrapPosition(CoordType column)
       i++;
    }
    if(i == NULLIT) return -1;  //why should this happen?
+
+   // now we are behind the one long text object and need to find the
+   // first space in it
+   for(offset = 0; offset < (**i).GetLength(); offset++)
+      if( isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+      {
+         return pos+offset;
+      }
    pos += (**i).GetLength();
-   i++;
-   while(i != NULLIT && (**i).GetType() != WXLO_TYPE_TEXT)
-   {
-            pos += (**i).GetLength();
-            i++;
-   }
-   if(i == NULLIT) return -1;  //this is possible, if there is only one text object
-   // now we are at the second text object:
-   pos -= (**i).GetLength();
-   return pos; // in front of it
+   return pos;
 }
 
 
@@ -1742,6 +1743,7 @@ wxLayoutList::MoveCursorVertically(int n)
       {
          n--;
          m_CursorPos.y ++;
+         last = m_CursorLine;
          m_CursorLine = m_CursorLine->GetNextLine();
       }
       if(! m_CursorLine)
@@ -2080,7 +2082,7 @@ wxLayoutList::WrapLine(CoordType column)
       if(xpos == -1)
          return false; // cannot break line
       //else:
-      CoordType newpos = m_CursorPos.x - xpos - 1;
+      CoordType newpos = m_CursorPos.x - xpos;
       m_CursorPos.x = xpos;
 
       AddCursorPosToUpdateRect();
@@ -2095,6 +2097,12 @@ wxLayoutList::WrapLine(CoordType column)
 
       return true;
    }
+}
+
+bool
+wxLayoutList::WrapAll(CoordType column)
+{
+   return false;
 }
 
 bool

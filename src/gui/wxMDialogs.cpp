@@ -78,6 +78,11 @@
 
 #include <errno.h>
 
+
+#define NEW_SPLASH
+
+
+#ifndef NEW_SPLASH
 #ifdef    OS_WIN
 #  define mahogany   "mahogany"
 #  define background "background"
@@ -88,6 +93,7 @@
 #     include "../src/icons/pythonpower.xpm"
 #  endif // USE_PYTHON
 #endif  //Win/Unix
+#endif
 
 // ----------------------------------------------------------------------------
 // global vars and functions
@@ -673,8 +679,6 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
 
 // simple AboutDialog to be displayed at startup
 
-#define NEW_SPLASH
-
 #ifdef NEW_SPLASH
 // timer which calls our DoClose() when it expires
 class LogCloseTimer : public wxTimer
@@ -737,9 +741,6 @@ public:
   // fills the window with some pretty text
   wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout = true);
 
-  // mouse event handler closes the parent window
-  void OnClick(wxMouseEvent&) { DoClose(); }
-
   /// stop the timer
   void StopTimer(void)
   {
@@ -759,8 +760,6 @@ public:
 
 private:
   LogCloseTimer  *m_pTimer;
-
-  DECLARE_EVENT_TABLE();
 };
 
 void
@@ -787,10 +786,40 @@ private:
    wxAboutWindow *m_Window;
 };
 
-BEGIN_EVENT_TABLE(wxAboutWindow, wxWindow)
-  EVT_LEFT_DOWN(wxAboutWindow::OnClick)
-  EVT_MIDDLE_DOWN(wxAboutWindow::OnClick)
-  EVT_RIGHT_DOWN(wxAboutWindow::OnClick)
+class MyHtmlWindow : public wxHtmlWindow
+{
+public:
+   MyHtmlWindow(wxAboutWindow *aw, wxWindow *parent)
+      : wxHtmlWindow(parent, -1)
+      {
+         m_window = aw;
+      }
+   // mouse event handler closes the parent window
+   void OnClick(wxMouseEvent&) { m_window->DoClose(); }
+   void OnChar(wxKeyEvent& ev)
+      {
+         switch(ev.KeyCode())
+         {
+         case WXK_UP:
+         case WXK_DOWN:
+         case WXK_PRIOR:
+         case WXK_NEXT:
+            ev.Skip();
+            break;
+         default:
+            m_window->DoClose();
+         }
+      }
+private:
+   wxAboutWindow *m_window;
+   DECLARE_EVENT_TABLE();
+};
+
+BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
+  EVT_LEFT_DOWN(MyHtmlWindow::OnClick)
+  EVT_MIDDLE_DOWN(MyHtmlWindow::OnClick)
+  EVT_RIGHT_DOWN(MyHtmlWindow::OnClick)
+//  EVT_CHAR(MyHtmlWindow::OnChar)
 END_EVENT_TABLE()
 
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
@@ -801,8 +830,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxSplitterWindow *sp = new wxSplitterWindow(this, -1,
                                                wxDefaultPosition,
                                                GetSize());
-   wxHtmlWindow *top = new wxHtmlWindow(sp,-1);
-   wxHtmlWindow *bottom = new wxHtmlWindow(sp,-1);
+   wxHtmlWindow *top = new MyHtmlWindow(this, sp);
+   wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,200);
 
    top->SetPage("<body text=#ffffff bgcolor=#000000>"
@@ -838,10 +867,12 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<p>"
 #endif
                    "<b>List of contributors:</b><p>"
-                   "Karsten Ball&uuml;der<br>Vadim Zeitlin<br>Vaclav Slavik<br>"
-                   "Daniel Seifert<br>"
-                   "<i>The wxWindows team</i><br><hr><br>"
-                   "<p>This Product includes software developed and Copyrighted "
+                   "Karsten Ball&uuml;der (ballueder@gmx.net)<br>"
+                   "Vadim Zeitlin (vadim@wxwindows.org)<br>"
+                   "Vaclav Slavik (slavik2@czn.cz)<br>"
+                   "Daniel Seifert (dseifert@student.hu-berlin.de)<br>"
+                   "<i>The wxWindows team</i><br><hr>"
+                   "<p>This Product includes software developed and copyright "
                    "by the University of Washington.<br>" 
 #ifdef USE_SSL
                    "<p>"
@@ -849,11 +880,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
                    "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>" 
                    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
-
 #endif
+                   "<p>"
+                   "The Mahogany Team would like to acknowledge the support of "
+                   "Heriot-Watt University, GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
       );
    
 
+   bottom->SetFocus();
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
      m_pTimer = new LogCloseTimer(this);

@@ -1816,6 +1816,8 @@ MailFolderCC::CClientInit(void)
       return;
    // do further initialisation
 #include <linkage.c>
+   // this triggers c-client initialisation via env_init()
+   (void *) myusername();
    cclientInitialisedFlag = true;
    ASSERT(gs_CCStreamCleaner == NULL);
    gs_CCStreamCleaner = new CCStreamCleaner();
