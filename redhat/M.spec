@@ -65,7 +65,7 @@ if [ "x$MAKE" = "x" ]; then
   fi
 fi
 
-$MAKE
+$MAKE quartstatic
 
 %install
 export PATH=/sbin:$PATH

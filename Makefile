@@ -7,8 +7,14 @@ ALL_DIRS := $(SUB_DIRS) doc
 
 include makeopts
 
-all:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+all semistatic quartstatic static:
+	@set -e; for i in $(SUB_DIRS); do \
+		if [ $$i = src ]; then \
+			$(MAKE) -C src $@; \
+		else \
+			$(MAKE) -C $$i all; \
+		fi \
+	done
 
 makeversion: .src/makeversion.in
 	sh -e .src/makeversion.in
@@ -49,8 +55,7 @@ depend:
 	@echo "-------------------------------------------------------------"
 
 bak backup:
-	tar cvf M-`date +"%y-%m-%d"`.tar $(FILES) $(ALL_DIRS)
-	gzip -9 M-`date +"%y-%m-%d"`.tar
+	tar cvf $(FILES) $(ALL_DIRS) | gzip -z9 > M-`date +"%y-%m-%d"`.tar.gz
 
 
 # probably the most complicated target:

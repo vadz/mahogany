@@ -56,22 +56,22 @@ libM.so: $(MOBJS)
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
 quartstatic: $(MOBJS)
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_QUARTSTATIC) $(LIBS)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
 semistatic: $(MOBJS)
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_STATIC) $(LIBS_STATIC)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_SEMISTATIC) $(LIBS)
 
 # build a (completely) statically linked binary
-M.static: $(MOBJS)
-	$(LINK) -o M.static $(MOBJS) $(LDFLAGS) -static $(LIBS)
+static: $(MOBJS)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) -static $(GUI_LIBS_STATIC) $(LIBS)
 
 doc:
 	@true
 
 clean:
-	$(RM) core libM.so M M.static $(CLEAN)
+	$(RM) core libM.so M $(CLEAN)
 	$(RM) $(MOBJS) $(MSOS)
 	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
 
@@ -110,4 +110,4 @@ else
 	false translation tools are not installed
 endif
 
-.PHONY:	all clean doc semistatic static install msgcat
+.PHONY:	all clean doc quartstatic semistatic static install msgcat

@@ -862,12 +862,23 @@ CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
 CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
 
-WX_LDFLAGS="$WX_LIBS"
-AC_SUBST(WX_LDFLAGS)
+dnl normal linking mode is fully dynamic
+GUI_LIBS="$WX_LIBS"
+AC_SUBST(GUI_LIBS)
 
-GUI_LIBS_STATIC=`echo $WX_LDFLAGS | sed '
-s/-lgtk/-Wl,-Bstatic -lgtk/g
-s/-lglib/-lglib -Wl,-Bdynamic/g'`
+dnl 1/4 static means link wxWin statically, the rest dynamically
+GUI_LIBS_QUARTSTATIC="$WX_LIBS_STATIC"
+AC_SUBST(GUI_LIBS_QUARTSTATIC)
+
+dnl 1/2 static means to link GTK+ statically as well
+GUI_LIBS_SEMISTATIC=`echo $GUI_LIBS_QUARTSTATIC | sed '
+    s/-lgtk/-Wl,-Bstatic &/g
+    s/-lglib/& -Wl,-Bdynamic/g
+'`
+AC_SUBST(GUI_LIBS_SEMISTATIC)
+
+dnl finally, fully static
+GUI_LIBS_STATIC=`echo $WX_LIBS_STATIC | sed 's/-rdynamic//g'`
 AC_SUBST(GUI_LIBS_STATIC)
 
 case "$USE_THREADS" in 1)
@@ -1010,7 +1021,7 @@ static|Static|STATIC)
 auto|Auto|AUTO|1)
 	dnl check for wxGTK dynamic linkage
 	echo "int main() { return 0; }" >conftest.c
-	if $CXX -o conftest $WX_LDFLAGS conftest.c && \
+	if $CXX -o conftest $WX_LIBS conftest.c && \
 		ldd conftest | fgrep libwx  >/dev/null
 	then
 		m_cv_USE_MODULES=dynamic
@@ -1131,12 +1142,6 @@ case "$GXX" in yes)
 	esac ;;	
 esac
 AC_SUBST(CXXFLAGS_RELAXED)
-
-dnl Make sure we get statically linked against wxGTK
-LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
-dnl libtool does not like -L.
-LIBS=`echo $LIBS | sed 's/-L\.//g'`
-AC_SUBST(LIBS_STATIC)
 
 OUTPUT="makeopts"
 COPY=Makefile
