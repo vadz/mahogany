@@ -279,6 +279,8 @@ public:
    void OnBeginLabelEdit(wxTreeEvent&);
    void OnEndLabelEdit(wxTreeEvent&);
 
+   void OnIdle(wxIdleEvent& event);
+
    // event processing function
    virtual bool OnMEvent(MEventData& event);
 
@@ -329,6 +331,13 @@ protected:
    void DoToggleHidden();
 
    void DoPopupMenu(const wxPoint& pos);
+
+   // are we editing an item in place?
+   bool IsEditingInPlace() const;
+
+   // restore the suffix showing the number of messages after we're done with
+   // editing the item
+   void RestoreLabel(const wxString& label);
 
    // reexpand branch - called when something in the tree changes
    void ReopenBranch(wxTreeItemId parent);
@@ -458,6 +467,9 @@ private:
    // the bg colour name
    wxString m_colBgName;
 
+   // the id of the item being edited in place
+   wxTreeItemId m_idEditedInPlace;
+
    // the temporarily saved suffix part of the tree item label being edited
    wxString m_suffix;
 
@@ -520,6 +532,8 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
 #ifdef __WXGTK__
    EVT_MOTION (wxFolderTreeImpl::OnMouseMove)
 #endif // wxGTK
+
+   EVT_IDLE(wxFolderTreeImpl::OnIdle)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -1543,6 +1557,10 @@ void wxFolderTreeImpl::DoToggleHidden()
    ReopenBranch(GetRootItem());
 }
 
+// ----------------------------------------------------------------------------
+// label in place editing stuff
+// ----------------------------------------------------------------------------
+
 void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
 {
    // someone clicked the tree, so the user must be back
@@ -1590,6 +1608,9 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
          // what's going on? label is normally composed of name and suffix
          FAIL_MSG( "unexpected tree item label" );
       }
+
+      // this is checked in OnIdle() to detect cancelling the label edit
+      m_idEditedInPlace = item;
    }
 }
 
@@ -1604,19 +1625,70 @@ void wxFolderTreeImpl::OnEndLabelEdit(wxTreeEvent& event)
    }
    else
    {
+      wxTreeItemId id = event.GetItem();
+
       wxString label = event.GetLabel();
       if ( !m_sink->OnRename(folder, label) )
       {
+         label = GetItemText(id);
+
          event.Veto();
       }
 
-      // restore the suffix
-      SetItemText(event.GetItem(), label + m_suffix);
-      m_suffix.clear();
+      // restore the suffix anyhow
+      RestoreLabel(label);
 
       folder->DecRef();
    }
 }
+
+void wxFolderTreeImpl::RestoreLabel(const wxString& label)
+{
+   if ( !m_suffix.empty() )
+   {
+      SetItemText(m_idEditedInPlace, label + m_suffix);
+      m_suffix.clear();
+   }
+
+   m_idEditedInPlace = 0;
+}
+
+void wxFolderTreeImpl::OnIdle(wxIdleEvent& WXUNUSED(event))
+{
+   if ( m_idEditedInPlace )
+   {
+      // check if the editing wasn't cancelled - unfortunately we don't get
+      // OnEndLabelEdit() notification in this case, but we need to know about
+      // it to be able to restore the label
+      if ( !IsEditingInPlace() )
+      {
+         // editing was cancelled
+         RestoreLabel(GetItemText(m_idEditedInPlace));
+      }
+   }
+}
+
+bool wxFolderTreeImpl::IsEditingInPlace() const
+{
+   // FIXME: wxGTK doesn't have GetEditControl() and it doesn't work in wxMSW,
+   //        need to fix wxTreeCtrl instead of this ugliness!
+#ifdef __WXMSW__
+   // argh, hack in a hack: we can't use SendMessage() because it's a name of
+   // our class
+   #define SendMessage SendMessageA
+
+   if ( TreeView_GetEditControl((HWND)GetHWND()) )
+      return TRUE;
+
+   #undef SendMessage
+#endif // MSW
+
+   return FALSE;
+}
+
+// ----------------------------------------------------------------------------
+// tree notifications
+// ----------------------------------------------------------------------------
 
 // add all subfolders of the folder being expanded
 void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
