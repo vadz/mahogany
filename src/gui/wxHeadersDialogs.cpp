@@ -1280,3 +1280,25 @@ size_t GetCustomHeaders(Profile *profile,
    return names->GetCount();
 }
 
+bool ConfigureInReplyToHeader(String *messageid, wxWindow *parent)
+{
+   CHECK( messageid, false, _T("NULL messageid") );
+
+   wxTextEntryDialog dlg
+                     (
+                      parent,
+                      _("Message is a reply to (empty string means that this\n"
+                         "message is a start of new thread and not a reply at "
+                         "all):"),
+                      _("Is this message a reply?"),
+                      *messageid
+                     );
+
+   if ( dlg.ShowModal() != wxID_OK )
+      return false;
+
+   *messageid = dlg.GetValue();
+
+   return true;
+}
+

@@ -80,7 +80,7 @@ extern bool ConfigureMsgViewHeaders(Profile *profile, wxWindow *parent);
     @param headerName [out] the name of the header
     @param headerValue [out] the value of the header
     @param storedInProfile [out] TRUE if the entry was remembered
-    @parent type [in] for which messages should we remember this header?
+    @param type [in] for which messages should we remember this header?
     @return true if Ok button was pressed, false otherwise
  */
 extern bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
@@ -95,5 +95,18 @@ extern bool ConfigureCustomHeader(Profile *profile, wxWindow *parent,
     @return true if Ok button was pressed, false otherwise
  */
 extern bool ConfigureCustomHeaders(Profile *profile, wxWindow *parent);
+
+/**
+   Show the dialog allowing the user to change whether this message is new in
+   its thread or a reply to an existing one.
+
+   @param messageid [in/out] the message id of the message we're or should be
+                    a reply to: on input the current value, on return the value
+                    which the user entered; in both cases empty string means
+                    that this is/should not be a reply at all
+   @param parent the parent window
+   @return true if there were any changes, false otherwise
+ */
+extern bool ConfigureInReplyToHeader(String *messageid, wxWindow *parent);
 
 #endif // _HEADERDIALOGS_H

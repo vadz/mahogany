@@ -3208,6 +3208,10 @@ wxComposeView::OnMenuCommand(int id)
             StartExternalEditor();
          break;
 
+      case WXMENU_COMPOSE_IN_REPLY_TO:
+         ConfigureInReplyTo();
+         break;
+
       case WXMENU_COMPOSE_CUSTOM_HEADERS:
          {
             String headerName, headerValue;
@@ -4161,11 +4165,11 @@ wxComposeView::BuildMessage() const
 
    // add any additional header lines: first for this time only and then also
    // the headers stored in the profile
-   kbStringList::iterator i = m_ExtraHeaderLinesNames.begin();
-   kbStringList::iterator i2 = m_ExtraHeaderLinesValues.begin();
-   for ( ; i != m_ExtraHeaderLinesNames.end(); i++, i2++ )
+   kbStringList::iterator i = m_extraHeadersNames.begin();
+   kbStringList::iterator j = m_extraHeadersValues.begin();
+   for ( ; i != m_extraHeadersNames.end(); ++i, ++j )
    {
-      msg->AddHeaderEntry(**i, **i2);
+      msg->AddHeaderEntry(**i, **j);
    }
 
    wxArrayString headerNames, headerValues;
@@ -4300,15 +4304,148 @@ wxComposeView::Send(SendMode mode)
 }
 
 void
-wxComposeView::AddHeaderEntry(const String &entry,
-                              const String &ivalue)
+wxComposeView::AddHeaderEntry(const String& name, const String& value)
 {
-   String
-      *name = new String(entry),
-      *value = new String(ivalue);
+   // first check if we don't already have a header with this name
+   const kbStringList::iterator end = m_extraHeadersNames.end();
+   kbStringList::iterator i, j;
+   for ( i = m_extraHeadersNames.begin(),
+         j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
+   {
+      if ( **i == name )
+      {
+         if ( value.empty() )
+         {
+            // remove the existing header
+            m_extraHeadersNames.erase(i);
+            m_extraHeadersValues.erase(j);
+         }
+         else // modify the existing header
+         {
+            **j = value;
+         }
+         break;
+      }
+   }
 
-   m_ExtraHeaderLinesNames.push_back(name);
-   m_ExtraHeaderLinesValues.push_back(value);
+   // if we didn't find it, add a new one
+   if ( i == end )
+   {
+      m_extraHeadersNames.push_back(new String(name));
+      m_extraHeadersValues.push_back(new String(value));
+   }
+}
+
+void wxComposeView::ConfigureInReplyTo()
+{
+   kbStringList::iterator end = m_extraHeadersNames.end();
+   kbStringList::iterator i, j;
+   for ( i = m_extraHeadersNames.begin(),
+         j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
+   {
+      if ( **i == _T("In-Reply-To") )
+         break;
+   }
+
+   String messageId;
+   if ( i != end )
+      messageId = **j;
+
+   String messageIdNew = messageId;
+   if ( ConfigureInReplyToHeader(&messageIdNew, this) &&
+            messageIdNew != messageId )
+   {
+      if ( messageIdNew.empty() )
+      {
+         m_extraHeadersNames.erase(i);
+         m_extraHeadersValues.erase(j);
+
+         // also update references header
+         for ( i = m_extraHeadersNames.begin(),
+               end = m_extraHeadersNames.end(),
+               j = m_extraHeadersValues.begin() ; i != end; ++i, ++j )
+         {
+            if ( **i == _T("References") )
+            {
+               String ref = **j;
+               ref.Trim(true).Trim(false);
+
+               if ( ref == messageId )
+               {
+                  // just remove the header completely
+                  m_extraHeadersNames.erase(i);
+                  m_extraHeadersValues.erase(j);
+               }
+               else // need to edit it
+               {
+                  size_t pos = ref.find(messageId);
+                  if ( pos != String::npos )
+                  {
+                     // no need to check for "pos > 0" as the string can't
+                     // start with spaces: we've trimmed it above
+                     size_t n;
+                     for ( n = 1; isspace(ref[pos - n]); n++ )
+                        ;
+
+                     n--; // took one too many: this one is not a space
+
+                     // remove this message id with all preceding space
+                     ref.erase(pos - n, n + messageId.length());
+
+                     **j = ref;
+                  }
+               }
+               break;
+            }
+         }
+      }
+      else // should be a reply
+      {
+         if ( i == end )
+         {
+            AddHeaderEntry(_T("In-Reply-To"), messageIdNew);
+         }
+         else // just modify existing value
+         {
+            **j = messageIdNew;
+         }
+
+         // and add to references
+         for ( i = m_extraHeadersNames.begin(),
+               end = m_extraHeadersNames.begin(),
+               j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
+         {
+            if ( **i == _T("References") )
+            {
+               String ref = **j;
+
+               // if we had a message id already, replace the old one with the
+               // new one
+               if ( messageId.empty() || !ref.Replace(messageId, messageIdNew) )
+               {
+                  // if replacement failed (or if we had nothing to replace),
+                  // just add new message id
+                  if ( !ref.empty() )
+                  {
+                     // continue "References" header on the next line
+                     ref += _T("\015\012 ");
+                  }
+
+                  ref += messageIdNew;
+               }
+
+               **j = ref;
+
+               break;
+            }
+         }
+
+         if ( i == end )
+         {
+            AddHeaderEntry(_T("References"), messageIdNew);
+         }
+      }
+   }
 }
 
 // -----------------------------------------------------------------------------

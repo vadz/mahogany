@@ -346,13 +346,18 @@ protected:
    */
    SendMessage *BuildDraftMessage() const;
 
+   /// Configures whether this message is a reply to another one (menu handler)
+   void ConfigureInReplyTo();
+
+
    /// Destructor
    ~wxComposeView();
 
-   /// A list of all extra headerslines to add to header.
-   kbStringList m_ExtraHeaderLinesNames;
-   /// A list of all extra headerslines to add to header.
-   kbStringList m_ExtraHeaderLinesValues;
+   /// A list of all extra headers to add to header.
+   kbStringList m_extraHeadersNames;
+
+   /// A list of values corresponding to the names above.
+   kbStringList m_extraHeadersValues;
 
 private:
    /// initialize the menubar
