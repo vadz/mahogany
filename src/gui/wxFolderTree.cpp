@@ -2900,30 +2900,41 @@ bool wxFolderTreeImpl::OnDoubleClick()
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 {
-   // for now... see comments near m_suppressSelectionChange declaration
-   m_suppressSelectionChange = true;
-
+   wxTreeItemId item;
    wxPoint pt = event.GetPosition();
-   wxTreeItemId item = HitTest(pt);
-   if ( item.IsOk() )
+   if ( pt == wxDefaultPosition )
    {
-      SelectItem(item);
-   }
-   else
-   {
+      // show the menu for the currently selected item
       item = wxTreeCtrl::GetSelection();
-   }
+      if ( !item.IsOk() )
+      {
+         event.Skip();
+         return;
+      }
 
-#if 0
-   // try to popup the menu in some reasonable position
-   if ( item.IsOk() )
-   {
+      // and position it over it
       wxRect rect;
       GetBoundingRect(item, rect);
-      pt.x = (rect.GetX() + rect.GetWidth())/2;
-      pt.y = (rect.GetY() + rect.GetHeight())/2;
+      pt.x = rect.x + rect.width / 2;
+      pt.y = rect.y + rect.height / 2;
    }
-#endif
+   else // event generated with real mouse click
+   {
+      // show the menu for the item under mouse
+      item = HitTest(pt);
+      if ( !item.IsOk() )
+      {
+         event.Skip();
+         return;
+      }
+
+      // for now... see comments near m_suppressSelectionChange declaration
+      m_suppressSelectionChange = true;
+
+      SelectItem(item);
+
+      m_suppressSelectionChange = false;
+   }
 
    // show menu in any case
    DoPopupMenu(pt);
@@ -2934,8 +2945,6 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 
    SafeDecRef(m_previousFolder); // matches IncRef() in OnTreeSelect()
    m_previousFolder = NULL;
-
-   m_suppressSelectionChange = false;
 }
 
 #ifdef USE_MIDDLE_CLICK_HACK
