@@ -1979,7 +1979,7 @@ fi
 echo "$ac_t""$m_cv_gcc_buggy_fno_operator_names" 1>&6
 			case "$m_cv_gcc_buggy_fno_operator_names" in
 			yes)
-			if test -f /etc/redhat-release && ! grep "7\.0" /etc/redhat-release
+			if test -f /etc/redhat-release -a ! grep "7\.0" /etc/redhat-release
 			then workarroundmsg="
 	It seems you are using Red Hat Linux 7.0. A workaround for your
 	problem is to use egcs to compile wxWindows and Mahogany:
