@@ -78,7 +78,9 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder
       */
-      const char keycodes[] = gettext_noop("DUXCSM");
+      const char keycodes_en[] = "DUXCSMRNFOP ";
+      const char *keycodes = _(keycodes_en);
+      
       int idx = 0;
       int key = toupper((int)keyCode);
       for(;keycodes[idx] && keycodes[idx] != key;idx++)
@@ -87,37 +89,54 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
    // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
    
-      switch(idx)
+      switch(keycodes_en[idx])
       {
-      case 0:
+      case 'D':
          m_FolderView->DeleteMessages(selections);
          break;
-      case 1:
+      case 'U':
          m_FolderView->UnDeleteMessages(selections);
          break;
-      case 2:
+      case 'X':
          m_FolderView->GetFolder()->ExpungeMessages();
          break;
-      case 3:
+      case 'C':
          m_FolderView->SaveMessagesToFolder(selections);
          break;
-      case 4:
+      case 'S':
          m_FolderView->SaveMessagesToFile(selections);
          break;
-      case 5:
+      case 'M':
          m_FolderView->SaveMessagesToFolder(selections);
          m_FolderView->DeleteMessages(selections);
+         break;
+      case 'R':
+         m_FolderView->ReplyMessages(selections);
+         break;
+      case 'F':
+         m_FolderView->ForwardMessages(selections);
+         break;
+      case 'O':
+         m_FolderView->OpenMessages(selections);
+         break;
+      case 'P':
+         m_FolderView->PrintMessages(selections);
+         break;
+      case ' ':
+         if(!event.ShiftDown())
+         {
+            for(int item = 0; item < LCFIX GetItemCount(); item++)
+               LCFIX SetItemState(item,0,wxLIST_STATE_SELECTED);
+         }
+         event.Skip();
          break;
       default:
          event.Skip();
-         SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
       }
    }
    else
-   {
       event.Skip();
-      SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
-   }
+   SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
 }
 
 
