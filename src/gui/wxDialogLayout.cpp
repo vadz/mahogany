@@ -1056,6 +1056,24 @@ bool wxNotebookDialog::TransferDataFromWindow()
    return TRUE;
 }
 
+/*
+   A few words about handling of Ok/Apply/Cancel buttons are in order.
+
+   First, here is what we want to do:
+
+   1. Apply should result in immediate update of all objects which use
+      the options which were changed
+   2. Ok should behave the same as Apply and close the dialog
+   3. Cancel should restore the settings to the state of before the last Apply
+
+   Here is what we do to achieve this:
+
+   1. Apply puts the profile which we use for storing the options into
+      "suspend" mode
+   2. Ok calls Commit() thus making all changes definitive
+   3. Cancel calls Discard() returning the profile to the previous state
+*/
+
 void
 wxNotebookDialog::SendOptionsChangeEvent()
 {
@@ -1070,8 +1088,8 @@ wxNotebookDialog::SendOptionsChangeEvent()
       // this may happen when cancelling the creation of a folder, so
       // just ignore it (nobody can be interested in it anyhow, this
       // event doesn't carry any useful information)
-      wxASSERT_MSG( m_lastBtn == MEventOptionsChangeData::Cancel,
-                    "event from Apply or Ok should have a profile!" );
+      ASSERT_MSG( m_lastBtn == MEventOptionsChangeData::Cancel,
+                  "event from Apply or Ok should have a profile!" );
    }
    else
    {
@@ -1094,6 +1112,9 @@ wxNotebookDialog::SendOptionsChangeEvent()
 
 void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
 {
+   ProfileBase *profile = GetProfile();
+   CHECK_RET( profile, "no profile in [Ok] btn handler" );
+
    m_lastBtn = MEventOptionsChangeData::Ok;
 
    if ( m_bDirty )
@@ -1101,10 +1122,14 @@ void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
 
    if ( !m_bDirty )
    {
+      profile->Commit();
+
       // ok, changes accepted (or there were no changes to begin with)
       EndModal(TRUE);
    }
-   //else: test done from OnApply() failed, don't close the dialog
+   //else: test done from DoApply() failed, don't close the dialog
+
+   profile->DecRef();
 }
 
 void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
@@ -1118,6 +1143,11 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
 
 bool wxNotebookDialog::DoApply()
 {
+   ProfileBase *profile = GetProfile();
+   CHECK( profile, FALSE, "no profile in [Apply] btn handler" );
+
+   profile->Suspend();
+
    if ( TransferDataFromWindow() )
    {
       if ( OnSettingsChange() )
@@ -1127,17 +1157,30 @@ bool wxNotebookDialog::DoApply()
 
          SendOptionsChangeEvent();
 
+         // FIXME what if it is deleted here? then Discard() is called
+         // implicitly
+         profile->DecRef();
+
          return TRUE;
       }
    }
    // If OnSettingsChange() or the Transfer function failed, we
    // don't reset the m_bDirty flag so that OnOk() will know we failed
 
+   profile->Discard();
+   profile->DecRef();
+
    return FALSE;
 }
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
+   ProfileBase *profile = GetProfile();
+   CHECK_RET( profile, "no profile in [Apply] btn handler" );
+
+   profile->Discard();
+   profile->DecRef();
+
    m_lastBtn = MEventOptionsChangeData::Cancel;
    SendOptionsChangeEvent();
    // allow the event to be processed before we are gone

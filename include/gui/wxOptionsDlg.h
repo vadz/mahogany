@@ -16,7 +16,9 @@
 // -----------------------------------------------------------------------------
 // fwd decls
 // -----------------------------------------------------------------------------
+
 class wxFrame;
+struct wxOptionsPageDesc;
 
 // -----------------------------------------------------------------------------
 // constants
@@ -50,5 +52,9 @@ extern void ShowOptionsDialog(wxFrame *parent = NULL,
 
 /// creates and shows the dialog allowing to restore default settings
 extern bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent);
+
+/// creates and shows the options dialog with the given options page
+extern void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                                    wxFrame *parent = NULL);
 
 #endif  //_WXOPTIONSDLG_H

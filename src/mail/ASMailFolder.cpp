@@ -16,7 +16,6 @@
 #   include "Mcommon.h"
 #   include "guidef.h"    // only for high-level functions
 #   include "strutil.h"
-#   include "miscutil.h"
 #   include "Profile.h"
 #   include "MEvent.h"
 #   include "MApplication.h"
@@ -28,6 +27,8 @@
 #include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
+
+#include "miscutil.h"
 
 /// Call this always before using it.
 #ifdef DEBUG

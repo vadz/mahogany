@@ -238,40 +238,10 @@ enum ConfigFields
    ConfigField_IconStyle,
    ConfigField_OthersLast = ConfigField_IconStyle,
 #else
-   ConfigField_OthersLast = ToolbarsFlatButtons,
+   ConfigField_OthersLast = ConfigField_ToolbarsFlatButtons,
 #endif
 // the end
    ConfigField_Max
-};
-
-// a structure giving the name of config key and it's default value which may
-// be either numeric or a string (no special type for boolean values right
-// now)
-struct ConfigValueDefault
-{
-   ConfigValueDefault(const char *name_, long value)
-      { bNumeric = TRUE; name = name_; lValue = value; }
-
-   ConfigValueDefault(const char *name_, const char *value)
-      { bNumeric = FALSE; name = name_; szValue = value; }
-
-   long GetLong() const { wxASSERT( bNumeric ); return lValue; }
-   const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
-
-   bool IsNumeric() const { return bNumeric; }
-
-   const char *name;
-   union
-   {
-      long        lValue;
-      const char *szValue;
-   };
-   bool bNumeric;
-};
-
-struct ConfigValueNone : public ConfigValueDefault
-{
-   ConfigValueNone() : ConfigValueDefault("none",0L) { }
 };
 
 // -----------------------------------------------------------------------------
@@ -289,6 +259,20 @@ public:
 
    // the profile we use - just the global one here
    ProfileBase *GetProfile() const { return ProfileBase::CreateProfile(""); }
+};
+
+// notebook for the given options page
+class wxCustomOptionsNotebook : public wxNotebookWithImages
+{
+public:
+   wxCustomOptionsNotebook(wxWindow *parent,
+                           const wxOptionsPageDesc& pageDesc);
+
+private:
+   const char **GetImagesArray(const char *iconName);
+
+   // the image name and NULL
+   const char *m_aImages[2];
 };
 
 // -----------------------------------------------------------------------------
@@ -332,6 +316,27 @@ private:
          m_bRestartWarning;  // changes will take effect after restart
 
    DECLARE_DYNAMIC_CLASS(wxOptionsDialog)
+};
+
+// just like wxOptionsDialog but uses the given wxOptionsPage and not the
+// standard ones
+class wxCustomOptionsDialog : public wxOptionsDialog
+{
+public:
+   wxCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                         wxFrame *parent)
+      : wxOptionsDialog(parent), m_pageDesc(pageDesc)
+   {
+   }
+
+   virtual void CreateNotebook(wxPanel *panel)
+   {
+      m_notebook = new wxCustomOptionsNotebook(this, m_pageDesc);
+   }
+
+private:
+   // the description of the page we show
+   const wxOptionsPageDesc& m_pageDesc;
 };
 
 class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
@@ -386,7 +391,7 @@ END_EVENT_TABLE()
 //
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
-wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
+const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
    // network config and identity
    { gettext_noop("The user and host names are used to compose "
@@ -435,6 +440,10 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
 
    // compose
+   { gettext_noop("Store outgoing messages and send only when asked to"),
+     Field_Bool, -1 },
+   { gettext_noop("Folder where to store outgoing messages"),
+     Field_Text, ConfigField_UseOutbox },
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
@@ -586,7 +595,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
 // if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
 // there too
-static const ConfigValueDefault gs_aConfigDefaults[] =
+const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 {
    // identity
    CONFIG_NONE(),
@@ -619,7 +628,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
-                                       // messages send 
+                                       // messages send
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
@@ -745,15 +754,19 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 // wxOptionsPage
 // ----------------------------------------------------------------------------
 
-wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
-                             const char *title,
-                             ProfileBase *profile,
+wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
+                             ConfigValuesArray aDefaults,
                              size_t nFirst,
                              size_t nLast,
-                             int helpId)
+                             wxNotebook *notebook,
+                             const char *title,
+                             ProfileBase *profile,
+                             int helpId,
+                             int image)
              : wxNotebookPageBase(notebook)
 {
-   int image = notebook->GetPageCount();
+   m_aFields = aFields;
+   m_aDefaults = aDefaults;
 
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
@@ -761,9 +774,9 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
    m_Profile->IncRef();
 
    m_HelpId = helpId;
-   // see enum ConfigFields for "+1"
-   m_nFirst = nFirst + 1;
-   m_nLast = nLast + 1;
+
+   m_nFirst = nFirst;
+   m_nLast = nLast;
 
    CreateControls();
 }
@@ -777,22 +790,22 @@ void wxOptionsPage::CreateControls()
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
-      case Field_Number:
-      case Field_File:
-      case Field_Color:
-      case Field_Bool:
-         // fall through: for this purpose (finding the longest label)
-         // they're the same as text
-      case Field_Action:
-      case Field_Text:
-         break;
+         case Field_Number:
+         case Field_File:
+         case Field_Color:
+         case Field_Bool:
+            // fall through: for this purpose (finding the longest label)
+            // they're the same as text
+         case Field_Action:
+         case Field_Text:
+            break;
 
-      default:
-         // don't take into account the other types
-         continue;
+         default:
+            // don't take into account the other types
+            continue;
       }
 
-      aLabels.Add(_(ms_aFields[n].label));
+      aLabels.Add(_(m_aFields[n].label));
    }
 
    long widthMax = GetMaxLabelWidth(aLabels, this);
@@ -802,47 +815,47 @@ void wxOptionsPage::CreateControls()
    for ( n = m_nFirst; n < m_nLast; n++ ) {
       switch ( GetFieldType(n) ) {
       case Field_File:
-         last = CreateFileEntry(_(ms_aFields[n].label), widthMax, last);
+         last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_Color:
-         last = CreateColorEntry(_(ms_aFields[n].label), widthMax, last);
+         last = CreateColorEntry(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_Action:
-         last = CreateActionChoice(_(ms_aFields[n].label), widthMax, last);
+         last = CreateActionChoice(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_Combo:
-         last = CreateComboBox(_(ms_aFields[n].label), widthMax, last);
+         last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_Number:
          // fall through -- for now they're the same as text
       case Field_Text:
-         last = CreateTextWithLabel(_(ms_aFields[n].label), widthMax, last);
+         last = CreateTextWithLabel(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_List:
-         last = CreateListbox(_(ms_aFields[n].label), last);
+         last = CreateListbox(_(m_aFields[n].label), last);
          break;
 
       case Field_Bool:
-         last = CreateCheckBox(_(ms_aFields[n].label), widthMax, last);
+         last = CreateCheckBox(_(m_aFields[n].label), widthMax, last);
          break;
 
       case Field_Message:
-         last = CreateMessage(_(ms_aFields[n].label), last);
+         last = CreateMessage(_(m_aFields[n].label), last);
          break;
 
       case Field_SubDlg:
-         last = CreateButton(_(ms_aFields[n].label), last);
+         last = CreateButton(_(m_aFields[n].label), last);
          break;
 
       case Field_XFace:
-         last = CreateXFaceButton(_(ms_aFields[n].label), widthMax, last);
+         last = CreateXFaceButton(_(m_aFields[n].label), widthMax, last);
          break;
-         
+
       default:
          wxFAIL_MSG("unknown field type in CreateControls");
       }
@@ -907,7 +920,7 @@ void wxOptionsPage::OnControlChange(wxEvent& event)
 void wxOptionsPage::UpdateUI()
 {
    for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
-      int nCheckField = ms_aFields[n].enable;
+      int nCheckField = m_aFields[n].enable;
       if ( nCheckField != -1 ) {
          wxASSERT( nCheckField > 0 && nCheckField < ConfigField_Max );
 
@@ -983,24 +996,20 @@ bool wxOptionsPage::TransferDataToWindow()
    // edit the real value stored in the config
    ProfileEnvVarSave suspend(m_Profile, false);
 
-   // check that we didn't forget to update one of the arrays...
-   wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
-   wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
-
    String strValue;
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
-      if ( gs_aConfigDefaults[n].IsNumeric() )
+      if ( m_aDefaults[n].IsNumeric() )
       {
-         lValue = m_Profile->readEntry(gs_aConfigDefaults[n].name,
-                                       (int)gs_aConfigDefaults[n].lValue);
+         lValue = m_Profile->readEntry(m_aDefaults[n].name,
+                                       (int)m_aDefaults[n].lValue);
          strValue.Printf("%ld", lValue);
       }
       else {
          // it's a string
-         strValue = m_Profile->readEntry(gs_aConfigDefaults[n].name,
-                                         gs_aConfigDefaults[n].szValue);
+         strValue = m_Profile->readEntry(m_aDefaults[n].name,
+                                         m_aDefaults[n].szValue);
       }
 
       wxControl *control = GetControl(n);
@@ -1010,12 +1019,12 @@ bool wxOptionsPage::TransferDataToWindow()
          case Field_Color:
          case Field_Number:
             if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+               wxASSERT( m_aDefaults[n].IsNumeric() );
 
                strValue.Printf("%ld", lValue);
             }
             else {
-               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+               wxASSERT( !m_aDefaults[n].IsNumeric() );
             }
             wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
@@ -1023,7 +1032,7 @@ bool wxOptionsPage::TransferDataToWindow()
             break;
 
          case Field_Bool:
-            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
             ((wxCheckBox *)control)->SetValue(lValue != 0);
             break;
@@ -1039,7 +1048,7 @@ bool wxOptionsPage::TransferDataToWindow()
             break;
 
          case Field_List:
-            wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( !m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
             // split it (FIXME what if it contains ';'?)
@@ -1109,38 +1118,38 @@ bool wxOptionsPage::TransferDataFromWindow()
             strValue = ((wxTextCtrl *)control)->GetValue();
 
             if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+               wxASSERT( m_aDefaults[n].IsNumeric() );
 
                lValue = atol(strValue);
             }
             else {
-               wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+               wxASSERT( !m_aDefaults[n].IsNumeric() );
             }
             break;
 
          case Field_Bool:
-            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
             lValue = ((wxCheckBox *)control)->GetValue();
             break;
 
          case Field_Action:
-            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
 
             lValue = ((wxRadioBox *)control)->GetSelection();
             break;
 
          case Field_Combo:
-            wxASSERT( gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
 
             lValue = ((wxComboBox *)control)->GetSelection();
             break;
 
          case Field_List:
-            wxASSERT( !gs_aConfigDefaults[n].IsNumeric() );
+            wxASSERT( !m_aDefaults[n].IsNumeric() );
             wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
             // join it (FIXME what if it contains ';'?)
@@ -1165,14 +1174,14 @@ bool wxOptionsPage::TransferDataFromWindow()
             wxFAIL_MSG("unexpected field type");
       }
 
-      if ( gs_aConfigDefaults[n].IsNumeric() )
+      if ( m_aDefaults[n].IsNumeric() )
       {
-         m_Profile->writeEntry(gs_aConfigDefaults[n].name, (int)lValue);
+         m_Profile->writeEntry(m_aDefaults[n].name, (int)lValue);
       }
       else
       {
          // it's a string
-         m_Profile->writeEntry(gs_aConfigDefaults[n].name, strValue);
+         m_Profile->writeEntry(m_aDefaults[n].name, strValue);
       }
    }
 
@@ -1181,12 +1190,51 @@ bool wxOptionsPage::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageDynamic
+// ----------------------------------------------------------------------------
+
+wxOptionsPageDynamic::wxOptionsPageDynamic(wxNotebook *parent,
+                                           const char *title,
+                                           ProfileBase *profile,
+                                           FieldInfoArray aFields,
+                                           ConfigValuesArray aDefaults,
+                                           size_t nFields,
+                                           int helpId,
+                                           int image)
+                     : wxOptionsPage(aFields, aDefaults, 0, nFields,
+                                     parent, title, profile, helpId, image)
+{
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsPageStandard
+// ----------------------------------------------------------------------------
+
+wxOptionsPageStandard::wxOptionsPageStandard(wxNotebook *notebook,
+                                             const char *title,
+                                             ProfileBase *profile,
+                                             size_t nFirst,
+                                             size_t nLast,
+                                             int helpId)
+                     : wxOptionsPage(ms_aFields, ms_aConfigDefaults,
+                                     // see enum ConfigFields for the
+                                     // explanation of "+1"
+                                     nFirst + 1, nLast + 1,
+                                     notebook, title, profile, helpId,
+                                     notebook->GetPageCount())
+{
+   // check that we didn't forget to update one of the arrays...
+   wxASSERT( WXSIZEOF(ms_aConfigDefaults) == ConfigField_Max );
+   wxASSERT( WXSIZEOF(ms_aFields) == ConfigField_Max );
+}
+
+// ----------------------------------------------------------------------------
 // wxOptionsPageCompose
 // ----------------------------------------------------------------------------
 
 wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
                                            ProfileBase *profile)
-                    : wxOptionsPage(parent,
+                    : wxOptionsPageStandard(parent,
                                     _("Compose"),
                                     profile,
                                     ConfigField_ComposeFirst,
@@ -1220,7 +1268,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
             btn->SetFile(READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
          else
             btn->SetFile("");
-      }   
+      }
    }
    else
    {
@@ -1274,7 +1322,7 @@ bool wxOptionsPageCompose::TransferDataFromWindow()
 
 wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
                                                    ProfileBase *profile)
-   : wxOptionsPage(parent,
+   : wxOptionsPageStandard(parent,
                    _("Message Viewer"),
                    profile,
                    ConfigField_MessageViewFirst,
@@ -1313,7 +1361,7 @@ void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 
 wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
                                        ProfileBase *profile)
-                  : wxOptionsPage(parent,
+                  : wxOptionsPageStandard(parent,
                                   _("Identity"),
                                   profile,
                                   ConfigField_IdentFirst,
@@ -1328,7 +1376,7 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
 
 wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
                                            ProfileBase *profile)
-                    : wxOptionsPage(parent,
+                    : wxOptionsPageStandard(parent,
                                     _("Network"),
                                     profile,
                                     ConfigField_NetworkFirst,
@@ -1345,7 +1393,7 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 
 wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
                                          ProfileBase *profile)
-                   : wxOptionsPage(parent,
+                   : wxOptionsPageStandard(parent,
                                    _("Python"),
                                    profile,
                                    ConfigField_PythonFirst,
@@ -1363,7 +1411,7 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 
 wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                     ProfileBase *profile)
-                : wxOptionsPage(parent,
+                : wxOptionsPageStandard(parent,
                                 _("Addressbook"),
                                 profile,
                                 ConfigField_AdbFirst,
@@ -1379,7 +1427,7 @@ wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
 
 wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                          ProfileBase *profile)
-                   : wxOptionsPage(parent,
+                   : wxOptionsPageStandard(parent,
                                    _("Miscellaneous"),
                                    profile,
                                    ConfigField_OthersFirst,
@@ -1437,7 +1485,7 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 
 wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
                                          ProfileBase *profile)
-   : wxOptionsPage(parent,
+   : wxOptionsPageStandard(parent,
                    _("Helpers"),
                    profile,
                    ConfigField_HelpersFirst,
@@ -1452,7 +1500,7 @@ wxOptionsPageHelpers::wxOptionsPageHelpers(wxNotebook *parent,
 
 wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                                            ProfileBase *profile)
-   : wxOptionsPage(parent,
+   : wxOptionsPageStandard(parent,
                    _("Folders"),
                    profile,
                    ConfigField_FoldersFirst,
@@ -1677,13 +1725,55 @@ void wxOptionsDialog::ResetDirty()
    wxNotebookDialog::ResetDirty();
 
    m_bTest =
-      m_bRestartWarning = FALSE;
+   m_bRestartWarning = FALSE;
 }
 
 wxOptionsDialog::~wxOptionsDialog()
 {
    // save settings
    ProfileBase::FlushAll();
+}
+
+// ----------------------------------------------------------------------------
+// wxCustomOptionsNotebook is a notebook which contains the given page
+// ----------------------------------------------------------------------------
+
+wxCustomOptionsNotebook::wxCustomOptionsNotebook
+                         (
+                          wxWindow *parent,
+                          const wxOptionsPageDesc& pageDesc
+                         )
+                       : wxNotebookWithImages(
+                                              "CustomNotebook",
+                                              parent,
+                                              GetImagesArray(pageDesc.image)
+                                             )
+{
+   ProfileBase *profile = ProfileBase::CreateProfile("");
+
+   // the page ctor will add it to the notebook
+   wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
+                                                         this,
+                                                         pageDesc.title,
+                                                         profile,
+                                                         pageDesc.aFields,
+                                                         pageDesc.aDefaults,
+                                                         pageDesc.nFields,
+                                                         pageDesc.helpId,
+                                                         0  // image index
+                                                        );
+   page->Layout();
+
+   profile->DecRef();
+}
+
+// return the array which should be passed to wxNotebookWithImages ctor
+const char **wxCustomOptionsNotebook::GetImagesArray(const char *iconName)
+{
+   m_aImages[0] = iconName;
+   m_aImages[1] = NULL;
+
+   return m_aImages;
 }
 
 // ----------------------------------------------------------------------------
@@ -1779,7 +1869,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
    // add the items to the checklistbox
    for ( size_t n = 0; n < ConfigField_Max; n++ )
    {
-      switch ( wxOptionsPage::GetFieldType(n) )
+      switch ( wxOptionsPageStandard::GetStandardFieldType(n) )
       {
          case wxOptionsPage::Field_Message:
             // this is not a setting, just some help text
@@ -1798,7 +1888,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
       }
 
       m_checklistBox->Append(
-            wxStripMenuCodes(_(wxOptionsPage::ms_aFields[n].label)));
+            wxStripMenuCodes(_(wxOptionsPageStandard::ms_aFields[n].label)));
    }
 
    // set the initial and minimal size
@@ -1816,7 +1906,8 @@ bool wxRestoreDefaultsDialog::TransferDataFromWindow()
       {
          MarkDirty();
 
-         GetProfile()->GetConfig()->DeleteEntry(gs_aConfigDefaults[n].name);
+         GetProfile()->GetConfig()->DeleteEntry(
+               wxOptionsPageStandard::ms_aConfigDefaults[n].name);
       }
    }
 
@@ -1842,4 +1933,12 @@ bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent)
    (void)dlg.ShowModal();
 
    return dlg.HasChanges();
+}
+
+void ShowCustomOptionsDialog(const wxOptionsPageDesc& pageDesc,
+                             wxFrame *parent)
+{
+   wxCustomOptionsDialog dlg(pageDesc, parent);
+
+   (void)dlg.ShowModal();
 }

@@ -75,6 +75,7 @@ public:
    {
       SafeDecRef(m_newFolder);
       SafeDecRef(m_parentFolder);
+      SafeDecRef(m_profile);
    }
 
    // initialization (should be called before the dialog is shown)
@@ -123,13 +124,21 @@ protected:
    // base class pure virtual - return the profile we're working with
    virtual ProfileBase *GetProfile() const
    {
-      return m_newFolder ? ProfileBase::CreateProfile(m_newFolder->GetFullName())
-                         : (ProfileBase *)NULL;
+      if ( m_newFolder && !m_profile )
+      {
+         ((wxFolderBaseDialog *)this)->m_profile = // const_cast
+            ProfileBase::CreateProfile(m_newFolder->GetFullName());
+      }
+
+      SafeIncRef(m_profile);
+
+      // may be NULL if we're creaing the folder and it hasn't been created yet
+      return m_profile;
    }
 
    // tell all notebook pages (except the first one) which profile we're
    // working with
-   void SetProfile(ProfileBase *profile);
+   void SetPagesProfile(ProfileBase *profile);
 
    wxTextCtrl  *m_folderName,
                *m_parentName;
@@ -138,6 +147,8 @@ protected:
 
    MFolder *m_parentFolder,
            *m_newFolder;
+
+   ProfileBase *m_profile;
 
    // FALSE if at least one of the pages contains incorrect information, if
    // it's TRUE it doesn't mean that the buttons are enabled - the global
@@ -499,6 +510,7 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
    m_parentFolder = NULL;
    m_newFolder = NULL;
    m_mayEnableOk = false;
+   m_profile = NULL;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
@@ -614,7 +626,7 @@ void wxFolderBaseDialog::CreateNotebook(wxPanel *panel)
                     );
 }
 
-void wxFolderBaseDialog::SetProfile(ProfileBase *profile)
+void wxFolderBaseDialog::SetPagesProfile(ProfileBase *profile)
 {
    // we assume that the first page is the "Access" one which is a bit special,
    // this is why we start from the second one
@@ -680,13 +692,14 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
 
    if ( m_newFolder )
    {
+      // we shouldn't have had it yet
+      ASSERT_MSG( !m_profile, "folder just created, but profile exists?" );
+
       // tell the other pages that we now have a folder (and hence a profile)
       String folderName = m_newFolder->GetFullName();
-      ProfileBase *profile = ProfileBase::CreateProfile(folderName);
+      m_profile = ProfileBase::CreateProfile(folderName);
 
-      SetProfile(profile);
-
-      profile->DecRef();
+      SetPagesProfile(m_profile);
    }
 
    return m_newFolder;
@@ -779,7 +792,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    // section corresponding to our folder
    GET_FOLDER_PAGE(m_notebook)->SetFolderPath(folderName);
 
-   SetProfile(profile);
+   SetPagesProfile(profile);
 
    profile->DecRef();
 
@@ -1012,6 +1025,12 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
                   // path has become empty (again), so allow setting it
                   // automatically from the folder name
                   m_userModifiedPath = false;
+               }
+               else
+               {
+                  // this change has been done by the user, don't override the
+                  // value
+                  m_userModifiedPath = true;
                }
 
                SetFolderName(name);

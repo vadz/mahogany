@@ -31,11 +31,48 @@ enum
    wxOptionsPage_BtnDelete
 };
 
+// ----------------------------------------------------------------------------
+// ConfigValue is a default value for an entry of the options page
+// ----------------------------------------------------------------------------
+
+// a structure giving the name of config key and it's default value which may
+// be either numeric or a string (no special type for boolean values right
+// now)
+struct ConfigValueDefault
+{
+   ConfigValueDefault(const char *name_, long value)
+      { bNumeric = TRUE; name = name_; lValue = value; }
+
+   ConfigValueDefault(const char *name_, const char *value)
+      { bNumeric = FALSE; name = name_; szValue = value; }
+
+   long GetLong() const { wxASSERT( bNumeric ); return lValue; }
+   const char *GetString() const { wxASSERT( !bNumeric ); return szValue; }
+
+   bool IsNumeric() const { return bNumeric; }
+
+   const char *name;
+   union
+   {
+      long        lValue;
+      const char *szValue;
+   };
+   bool bNumeric;
+};
+
+struct ConfigValueNone : public ConfigValueDefault
+{
+   ConfigValueNone() : ConfigValueDefault("none",0L) { }
+};
+
+typedef const ConfigValueDefault *ConfigValuesArray;
+
 // -----------------------------------------------------------------------------
 // a page which performs the data transfer between the associated profile
-// section values and the controls in the page (only text fields and
-// checkboxes are currently supported)
+// section values and the controls in the page (text fields, checkboxes,
+// listboxes and sub dialogs are currently supported)
 // -----------------------------------------------------------------------------
+
 class wxOptionsPage : public wxNotebookPageBase
 {
 public:
@@ -71,24 +108,26 @@ public:
       int         enable;  // disable this field if "enable" field is unchecked
    };
 
-   // array of all field descriptions
-   static FieldInfo ms_aFields[];
+   typedef const FieldInfo *FieldInfoArray;
 
    // get the type and the flags of the field
-   static FieldType GetFieldType(size_t n)
-      { return (FieldType)(ms_aFields[n].flags & Field_Type); }
+   FieldType GetFieldType(size_t n) const
+      { return (FieldType)(m_aFields[n].flags & Field_Type); }
 
-   static FieldFlags GetFieldFlags(size_t n)
-      { return (FieldFlags)(ms_aFields[n].flags & Field_Flags); }
+   FieldFlags GetFieldFlags(size_t n) const
+      { return (FieldFlags)(m_aFields[n].flags & Field_Flags); }
 
-   // ctor will add this page to the notebook
-   wxOptionsPage(wxNotebook *parent,
+   // ctor will add this page to the notebook (with the image refering to the
+   // notebook's imagelist)
+   wxOptionsPage(FieldInfoArray aFields,
+                 ConfigValuesArray aDefaults,
+                 size_t nFirst, size_t nLast,
+                 wxNotebook *parent,
                  const char *title,
                  ProfileBase *profile,
-                 size_t nFirst,
-                 size_t nLast,
-                 int helpID = -1);
-   ~wxOptionsPage() { SafeDecRef(m_Profile); }
+                 int helpID = -1,
+                 int image = -1);
+   virtual ~wxOptionsPage() { SafeDecRef(m_Profile); }
 
    // transfer data to/from the controls
    virtual bool TransferDataToWindow();
@@ -115,10 +154,18 @@ public:
    int HelpId(void) const { return m_HelpId; }
 
 protected:
-   void CreateControls();
-
-   // range of our controls in ms_aFields
+   // range of our controls in m_aFields
    size_t m_nFirst, m_nLast;
+
+   // the controls description
+   FieldInfoArray m_aFields;
+
+   // and their default values
+   ConfigValuesArray m_aDefaults;
+
+   // create controls corresponding to the entries from m_nFirst to m_nLast in
+   // the array m_aFields
+   void CreateControls();
 
    // we need a pointer to the profile to write to
    ProfileBase *m_Profile;
@@ -164,8 +211,80 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// ----------------------------------------------------------------------------
+// a page which gets the information about its controls from the static array
+// ms_aFields - this is the base class for all of the standard option pages
+// while wxOptionsPage itself may also be used for run-time construction of the
+// page
+// ----------------------------------------------------------------------------
+
+class wxOptionsPageStandard : public wxOptionsPage
+{
+public:
+   // ctor will create the controls corresponding to the fields from nFirst to
+   // nLast in ms_aFields
+   wxOptionsPageStandard(wxNotebook *parent,
+                         const char *title,
+                         ProfileBase *profile,
+                         size_t nFirst,
+                         size_t nLast,
+                         int helpID = -1);
+
+   // get the type and the flags of one of the standard field
+   static FieldType GetStandardFieldType(size_t n)
+      { return (FieldType)(ms_aFields[n].flags & Field_Type); }
+
+   static FieldFlags GetStandardFieldFlags(size_t n)
+      { return (FieldFlags)(ms_aFields[n].flags & Field_Flags); }
+
+   // array of all field descriptions
+   static const FieldInfo ms_aFields[];
+
+   // and of their default values
+   static const ConfigValueDefault ms_aConfigDefaults[];
+};
+
+// ----------------------------------------------------------------------------
+// a dynamic options page - pages deriving from this class can be configured
+// during run-time or used by external modules
+// ----------------------------------------------------------------------------
+
+class wxOptionsPageDynamic : public wxOptionsPage
+{
+public:
+   // the aFields array contains the controls descriptions
+   wxOptionsPageDynamic(wxNotebook *parent,
+                        const char *title,
+                        ProfileBase *profile,
+                        FieldInfoArray aFields,
+                        ConfigValuesArray aDefaults,
+                        size_t nFields,
+                        int helpID = -1,
+                        int image = -1);
+};
+
+// the data from which wxOptionsPageDynamic may be created by the notebook -
+// using this structure is more convenient than passing all these parameters
+// around separately
+struct wxOptionsPageDesc
+{
+   String title;        // the page title in the notebook
+   String image;        //          image
+
+   int helpId;
+
+   // the fields description
+   wxOptionsPage::FieldInfo *aFields;
+   ConfigValuesArray aDefaults;
+   size_t nFields;
+};
+
+// ----------------------------------------------------------------------------
+// standard pages
+// ----------------------------------------------------------------------------
+
 // settings concerning the compose window
-class wxOptionsPageCompose : public wxOptionsPage
+class wxOptionsPageCompose : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile);
@@ -178,7 +297,7 @@ private:
 };
 
 // settings concerning the message view window
-class wxOptionsPageMessageView : public wxOptionsPage
+class wxOptionsPageMessageView : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageMessageView(wxNotebook *parent, ProfileBase *profile);
@@ -190,14 +309,14 @@ private:
 };
 
 // user identity
-class wxOptionsPageIdent : public wxOptionsPage
+class wxOptionsPageIdent : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageIdent(wxNotebook *parent, ProfileBase *profile);
 };
 
 // network configuration page
-class wxOptionsPageNetwork : public wxOptionsPage
+class wxOptionsPageNetwork : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageNetwork(wxNotebook *parent, ProfileBase *profile);
@@ -205,7 +324,7 @@ public:
 
 // global folder settings (each folder has its own settings which are changed
 // from a separate dialog)
-class wxOptionsPageFolders : public wxOptionsPage
+class wxOptionsPageFolders : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageFolders(wxNotebook *parent, ProfileBase *profile);
@@ -231,7 +350,7 @@ private:
 
 #ifdef USE_PYTHON
 // all python-related settings
-class wxOptionsPagePython : public wxOptionsPage
+class wxOptionsPagePython : public wxOptionsPageStandard
 {
 public:
    wxOptionsPagePython(wxNotebook *parent, ProfileBase *profile);
@@ -239,7 +358,7 @@ public:
 #endif // USE_PYTHON
 
 // all bbdb-related settings
-class wxOptionsPageAdb : public wxOptionsPage
+class wxOptionsPageAdb : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageAdb(wxNotebook *parent, ProfileBase *profile);
@@ -247,14 +366,14 @@ public:
 
 
 // helper apps settings
-class wxOptionsPageHelpers : public wxOptionsPage
+class wxOptionsPageHelpers : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageHelpers(wxNotebook *parent, ProfileBase *profile);
 };
 
 // miscellaneous settings
-class wxOptionsPageOthers : public wxOptionsPage
+class wxOptionsPageOthers : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageOthers(wxNotebook *parent, ProfileBase *profile);

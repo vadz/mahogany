@@ -103,7 +103,7 @@ public:
 
    /// called on mouse click
    void OnMouseEvent(wxCommandEvent & event);
-   
+
    /// called when a process we launched terminates
    void OnProcessTermination(wxProcessEvent& event);
 
@@ -210,9 +210,11 @@ protected:
 #endif // Unix
       /// Show XFaces?
       bool showFaces;
-   } m_ProfileValues, m_oldProfileValue;
 
-   bool m_hasOldValues;
+      bool operator==(const AllProfileValues& other);
+   } m_ProfileValues;
+
+   void ReadAllSettings(AllProfileValues *settings);
 
 private:
    /// array of process info for all external viewers we have launched

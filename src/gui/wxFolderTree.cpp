@@ -570,7 +570,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_menu = NULL;
    m_suppressSelectionChange = FALSE;
    m_previousFolder = NULL;
-   m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE);
+   m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
 
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
@@ -966,7 +966,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
-      m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE);
+      m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
 
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 

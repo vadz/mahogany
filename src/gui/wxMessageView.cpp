@@ -318,6 +318,30 @@ MailMessageParameters::GetParamValue(const wxString& name) const
 }
 
 // ----------------------------------------------------------------------------
+// wxMessageView::AllProfileValues
+// ----------------------------------------------------------------------------
+
+bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
+{
+   #define CMP(x) (x == other.x)
+
+   return CMP(BgCol) && CMP(FgCol) && CMP(UrlCol) &&
+          CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
+          CMP(font) && CMP(size) &&
+          CMP(showHeaders) && CMP(rfc822isText) &&
+          CMP(highlightURLs) && CMP(inlineGFX) &&
+          CMP(browser) && CMP(browserIsNS) &&
+          CMP(autocollect) && CMP(autocollectNamed) &&
+          CMP(autocollectBookName) &&
+#ifdef OS_UNIX
+          CMP(afmpath) &&
+#endif // Unix
+          CMP(showFaces);
+
+   #undef CMP
+}
+
+// ----------------------------------------------------------------------------
 // wxMessageView
 // ----------------------------------------------------------------------------
 
@@ -338,7 +362,6 @@ END_EVENT_TABLE()
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 {
-   m_hasOldValues = false;
    m_mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
@@ -416,7 +439,7 @@ wxMessageView::~wxMessageView()
    if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
    if(m_Profile) m_Profile->DecRef();
    if(m_folder) m_folder->DecRef();
-   
+
    wxDELETE(m_MimePopup);
 }
 
@@ -452,9 +475,15 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
 void
 wxMessageView::UpdateProfileValues()
 {
+   ReadAllSettings(&m_ProfileValues);
+}
+
+void
+wxMessageView::ReadAllSettings(AllProfileValues *settings)
+{
    // We also use this to set all values to be read to speed things up:
    #define GET_COLOUR_FROM_PROFILE(which, name) \
-      GetColourByName(&m_ProfileValues.which, \
+      GetColourByName(&settings->which, \
                       READ_CONFIG(m_Profile, MP_MVIEW_##name), \
                       MP_MVIEW_##name##_D)
 
@@ -466,24 +495,24 @@ wxMessageView::UpdateProfileValues()
 
    #undef GET_COLOUR_FROM_PROFILE
 
-   m_ProfileValues.font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
-   ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <= NUM_FONTS);
+   settings->font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
+   ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
 
-   m_ProfileValues.font = wxFonts[m_ProfileValues.font];
-   m_ProfileValues.size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
-   m_ProfileValues.showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
-   m_ProfileValues.rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
-   m_ProfileValues.highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
-   m_ProfileValues.inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
-   m_ProfileValues.browser = READ_CONFIG(m_Profile, MP_BROWSER);
-   m_ProfileValues.browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
-   m_ProfileValues.autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
-   m_ProfileValues.autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
-   m_ProfileValues.autocollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
-   m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
+   settings->font = wxFonts[settings->font];
+   settings->size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
+   settings->showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
+   settings->rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
+   settings->highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
+   settings->inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
+   settings->browser = READ_CONFIG(m_Profile, MP_BROWSER);
+   settings->browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
+   settings->autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
+   settings->autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
+   settings->autocollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
+   settings->showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
 
 #ifdef OS_UNIX
-   m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
+   settings->afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
 
 #ifndef OS_WIN
@@ -636,7 +665,7 @@ wxMessageView::Update(void)
                t = Message::MSG_TYPEVIDEO;
          }
       }
-         
+
       // insert text:
       if ( (t == Message::MSG_TYPETEXT) ||
            (t == Message::MSG_TYPEMESSAGE &&
@@ -1100,39 +1129,21 @@ wxMessageView::OnMEvent(MEventData& ev)
          return true;
       }
 
+      AllProfileValues settings;
+      ReadAllSettings(&settings);
+      if ( settings == m_ProfileValues )
+      {
+         // nothing changed
+         return true;
+      }
+
       switch ( event.GetChangeKind() )
       {
          case MEventOptionsChangeData::Apply:
-            if ( !m_hasOldValues )
-            {
-               // save the original values
-               m_oldProfileValue = m_ProfileValues;
-            }
-            //else: don't clobber the original values if Apply is pressed for
-            //      the second (or more) time
-
-            UpdateProfileValues();
-
-            m_hasOldValues = true;
-            break;
-
          case MEventOptionsChangeData::Ok:
-            UpdateProfileValues();
-
-            m_hasOldValues = false;
-            break;
-
          case MEventOptionsChangeData::Cancel:
-            // restore the old values
-            if ( !m_hasOldValues )
-            {
-               // don't update
-               return true;
-            }
-
-            m_ProfileValues = m_oldProfileValue;
-
-            m_hasOldValues = FALSE;
+            // update everything
+            m_ProfileValues = settings;
             break;
 
          default:
@@ -1142,7 +1153,10 @@ wxMessageView::OnMEvent(MEventData& ev)
       Update();
    }
    else if( ev.GetId() == MEventId_ASFolderResult )
+   {
       OnASFolderResultEvent((MEventASFolderResultData &) ev);
+   }
+
    return true;
 }
 
@@ -1332,7 +1346,7 @@ wxMessageView::DoMenuCommand(int id)
       break;
    case WXMENU_MSG_FOLLOWUP:
       if(m_uid != UID_ILLEGAL)
-         MailFolder::ReplyMessage(m_mailMessage,MailFolder::REPLY_FOLLOWUP,m_Profile,GetFrame(this)); 
+         MailFolder::ReplyMessage(m_mailMessage,MailFolder::REPLY_FOLLOWUP,m_Profile,GetFrame(this));
       break;
    case WXMENU_MSG_FORWARD:
       if(m_uid != UID_ILLEGAL)
@@ -1431,7 +1445,7 @@ wxMessageView::ShowMessage(Message *mailMessage)
 
    if ( size > maxSize && (mailMessage->GetFolder()
                            &&
-                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE))  
+                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE))
    {
       wxString msg;
       msg.Printf(_("The selected message is %u Kbytes long which is "
@@ -1677,7 +1691,7 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
             if(frame && frame->IsKindOf(CLASSINFO(wxMessageViewFrame)))
             {
                wxString title;
-               title << mptr->Subject() << _(" , from ") << mptr->From(); 
+               title << mptr->Subject() << _(" , from ") << mptr->From();
                frame->SetTitle(title);
             }
          }

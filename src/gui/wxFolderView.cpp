@@ -269,7 +269,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    m_PreviewOnSingleClick = READ_CONFIG(fv->GetProfile(),
                                         MP_PREVIEW_ON_SELECT) != 0;
-   
+
    if(m_PreviewOnSingleClick)
       EnableSelectionCallbacks(true);
    else
@@ -428,7 +428,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
 //   wxSafeYield();
 
-
    if(m_ASMailFolder)  // clean up old folder
    {
       // NB: the test for m_InDeletion is needed because of wxMSW bug which
@@ -454,7 +453,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
          CheckExpungeDialog(m_ASMailFolder, m_Parent);
       }
-      
+
       // This little trick makes sure that we don't react to any final
       // events sent from the MailFolder destructor.
       MailFolder *mf = m_MailFolder;
@@ -483,7 +482,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       // read in our profile settigns
       ReadProfileSettings(&m_settingsCurrent);
-      m_hasOldSettings = FALSE;
 
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_ASMailFolder->GetName();
@@ -573,7 +571,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
    if ( !m_Profile )
    {
-      // can't do nothing useful (but can (and will) crash)
+      // can't do anything useful (but can (and will) crash)
       return;
    }
 
@@ -586,49 +584,22 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       return;
    }
 
+   m_settingsCurrent = settingsNew;
+
    switch ( event.GetChangeKind() )
    {
       case MEventOptionsChangeData::Apply:
-         if ( !m_hasOldSettings )
-         {
-            // save the original values
-            m_settingsOld = m_settingsCurrent;
-         }
-         //else: don't clobber the original values if Apply is pressed for
-         //      the second (or more) time
-
-         m_settingsCurrent = settingsNew;
-
-         m_hasOldSettings = true;
-         break;
-
       case MEventOptionsChangeData::Ok:
-         m_settingsCurrent = settingsNew;
-
-         m_hasOldSettings = false;
-         break;
-
       case MEventOptionsChangeData::Cancel:
-         // restore the old values
-         if ( !m_hasOldSettings )
-         {
-            // don't update
-            return;
-         }
-
-         m_settingsCurrent = m_settingsOld;
-
-         m_hasOldSettings = FALSE;  // no more
+         // need to repopulate the list ctrl because the date format changed
+         m_FolderCtrl->Clear();
+         m_NumOfMessages = 0;
+         Update();
          break;
 
       default:
          FAIL_MSG("unknown options change event");
    }
-
-   // need to repopulate the list ctrl because the date format changed
-   m_FolderCtrl->Clear();
-   m_NumOfMessages = 0;
-   Update();
 }
 
 void
@@ -882,7 +853,7 @@ wxFolderView::GetSelections(wxArrayInt& selections)
 {
    if(! m_ASMailFolder)
       return 0;
-   
+
    // in case there is an event pending:
    if(m_FolderCtrl->GetItemCount() != (int)m_ASMailFolder->CountMessages())
    {

@@ -139,7 +139,7 @@ public:
 
    /// Search messages for certain criteria.
    virtual void SearchMessages(void);
-   
+
    /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
    /// update the folderview
@@ -212,13 +212,10 @@ private:
       }
 
       /// the strftime(3) format for date
-      String dateFormat;      
+      String dateFormat;
       /// TRUE => display time/date in GMT
-      bool dateGMT;           
-   } m_settingsCurrent, m_settingsOld;
-
-   /// if true, m_settingsOld is valid
-   bool m_hasOldSettings;
+      bool dateGMT;
+   } m_settingsCurrent;
 
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);
