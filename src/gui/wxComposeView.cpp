@@ -69,6 +69,8 @@
 #include <wx/mimetype.h>
 #include <wx/tokenzr.h>
 #include <wx/textbuf.h>
+#include <wx/encconv.h>
+#include <wx/fontmap.h>
 #include <wx/fontutil.h>      // for wxNativeFontInfo
 // windows.h included from wx/fontutil.h under Windows #defines this
 #ifdef __CYGWIN__
@@ -146,6 +148,7 @@ extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
 extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
 extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
 extern const MPersMsgBox *M_MSGBOX_ASK_SAVE_HEADERS;
+extern const MPersMsgBox *M_MSGBOX_SEND_DIFF_ENCODING;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -3922,6 +3925,8 @@ wxComposeView::BuildMessage() const
    // compose the body
    // ----------------
 
+   wxFontEncoding encodingMsg = m_encoding;
+
    for ( EditorContentPart *part = m_editor->GetFirstPart();
          part;
          part = m_editor->GetNextPart() )
@@ -3929,16 +3934,71 @@ wxComposeView::BuildMessage() const
       switch ( part->GetType() )
       {
          case EditorContentPart::Type_Text:
-            msg->AddPart(
-                           MimeType::TEXT,
-                           part->GetText(),
-                           part->GetLength(),
-                           _T("PLAIN"),
-                           _T("INLINE"),  // disposition
-                           NULL,          // disposition parameters
-                           NULL,          // other parameters
-                           part->GetEncoding()
-                        );
+            {
+               // the part may be written either in the same encoding as chosen
+               // in the "Language" menu or in a different -- but hopefully
+               // compatible -- one, in which case we need to translate it
+               wxString textConv;
+               const wxString *text wxDUMMY_INITIALIZE(NULL);
+
+               wxFontEncoding encodingPart = part->GetEncoding();
+               if ( encodingMsg != wxFONTENCODING_SYSTEM &&
+                        encodingPart != encodingMsg )
+               {
+                  wxEncodingConverter conv;
+                  if ( !conv.Init(encodingPart, encodingMsg) )
+                  {
+                     if ( !MDialog_YesNoDialog
+                           (
+                              wxString::Format
+                              (
+                                 _("Text of this message can't be converted to "
+                                   "the encoding \"%s\", would you like to "
+                                   "send it in encoding \"%s\" instead?"),
+                                 wxFontMapper::GetEncodingName(encodingMsg),
+                                 wxFontMapper::GetEncodingName(encodingPart)
+                              ),
+                              this,
+                              MDIALOG_YESNOTITLE,
+                              M_DLG_YES_DEFAULT,
+                              M_MSGBOX_SEND_DIFF_ENCODING
+                           ) )
+                     {
+                        // send aborted
+                        part->DecRef();
+                        return NULL;
+                     }
+
+                     // FIXME: this doesn't work if we have 2 text parts in
+                     //        different encodings, we should use UTF8 in this
+                     //        case but for this we must do a preliminary
+                     //        iteration over all text parts
+                     encodingMsg = encodingPart;
+                  }
+                  else // can convert, do it
+                  {
+                     textConv = conv.Convert(part->GetText());
+                     text = &textConv;
+                  }
+               }
+               else // use the encoding as is
+               {
+                  encodingMsg = encodingPart;
+
+                  text = &part->GetText();
+               }
+
+               msg->AddPart(
+                              MimeType::TEXT,
+                              *text,
+                              part->GetLength(),
+                              _T("PLAIN"),
+                              _T("INLINE"),  // disposition
+                              NULL,          // disposition parameters
+                              NULL,          // other parameters
+                              encodingMsg
+                           );
+            }
             break;
 
          case EditorContentPart::Type_File:
@@ -4054,9 +4114,9 @@ wxComposeView::BuildMessage() const
    // setup the headers
    // -----------------
 
-   if ( m_encoding != wxFONTENCODING_DEFAULT )
+   if ( encodingMsg != wxFONTENCODING_DEFAULT )
    {
-      msg->SetHeaderEncoding(m_encoding);
+      msg->SetHeaderEncoding(encodingMsg);
    }
 
    // first the standard ones
