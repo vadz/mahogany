@@ -140,7 +140,12 @@ public:
    MFilterDesc() { m_settings = NULL; }
 
    /// assignment operator
-   MFilterDesc& operator=(const MFilterDesc& o) { DoCopy(o); return *this; }
+   MFilterDesc& operator=(const MFilterDesc& o)
+   {
+      SafeDecRef(m_settings);
+      DoCopy(o);
+      return *this;
+   }
    /// copy ctor
    MFilterDesc(const MFilterDesc& other) { DoCopy(other); }
 

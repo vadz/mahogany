@@ -174,13 +174,23 @@ public:
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);
    void OnButton(wxCommandEvent& event);
-   void OnTextUpdate(wxCommandEvent& event);
+   void OnProgramTextUpdate(wxCommandEvent& event);
+
+   void OnText(wxCommandEvent& event) { UpdateProgram(event); }
+   void OnChoice(wxCommandEvent& event) { UpdateProgram(event); }
+   void OnCheckBox(wxCommandEvent& event) { UpdateProgram(event); }
 
 protected:
    void AddOneControl();
    void RemoveOneControl();
 
    void LayoutControls();
+
+   // helper of TransferDataToWindow() and UpdateProgram()
+   bool DoTransferDataFromWindow(MFilterDesc *filterData);
+
+   // update the program text from the controls values
+   void UpdateProgram(wxCommandEvent& event);
 
    // true if we have a simple (expressed with dialog controls) filter
    bool m_isSimple;
@@ -216,9 +226,18 @@ private:
 };
 
 BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
-   EVT_BUTTON(-1, wxOneFilterDialog::OnButton)
    EVT_UPDATE_UI(-1, wxOneFilterDialog::OnUpdateUI)
-   EVT_TEXT(Text_Program, wxOneFilterDialog::OnTextUpdate)
+
+   // More/Less button
+   EVT_BUTTON(-1, wxOneFilterDialog::OnButton)
+
+   // changes to the program text
+   EVT_TEXT(Text_Program, wxOneFilterDialog::OnProgramTextUpdate)
+
+   // changes to any other controls
+   EVT_TEXT(-1, wxOneFilterDialog::OnText)
+   EVT_CHOICE(-1, wxOneFilterDialog::OnChoice)
+   EVT_CHECKBOX(-1, wxOneFilterDialog::OnCheckBox)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -727,6 +746,27 @@ wxOneFilterDialog::RemoveOneControl()
    delete m_CritControl[m_nControls];
 }
 
+void wxOneFilterDialog::UpdateProgram(wxCommandEvent& event)
+{
+   if ( !m_initializing )
+   {
+      MFilterDesc filterData;
+      if ( DoTransferDataFromWindow(&filterData) && (filterData != *m_FilterData) )
+      {
+         *m_FilterData = filterData;
+         MFDialogSettings *settings = m_FilterData->GetSettings();
+
+         m_initializing = true;
+         m_textProgram->SetValue(settings->WriteRule());
+         m_initializing = false;
+
+         settings->DecRef();
+      }
+   }
+
+   event.Skip();
+}
+
 void
 wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
 {
@@ -746,7 +786,7 @@ wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
 }
 
 void
-wxOneFilterDialog::OnTextUpdate(wxCommandEvent& event)
+wxOneFilterDialog::OnProgramTextUpdate(wxCommandEvent& event)
 {
    // catches the case of SetValue() from TransferDataToWindow()
    if ( m_initializing )
@@ -851,16 +891,16 @@ wxOneFilterDialog::TransferDataToWindow()
 }
 
 bool
-wxOneFilterDialog::TransferDataFromWindow()
+wxOneFilterDialog::DoTransferDataFromWindow(MFilterDesc *filterData)
 {
-   m_FilterData->SetName(m_NameCtrl->GetValue());
+   filterData->SetName(m_NameCtrl->GetValue());
 
    // if the user used the text control to enter the filter program directly,
    // just remember it
    if ( !m_isSimple )
    {
       // TODO try to parse the program here
-      m_FilterData->Set(m_textProgram->GetValue());
+      filterData->Set(m_textProgram->GetValue());
    }
    else // it is a simple (i.e. made from dialog controls) filter
    {
@@ -879,10 +919,16 @@ wxOneFilterDialog::TransferDataFromWindow()
       settings->SetAction(m_ActionControl->GetAction(),
                           m_ActionControl->GetArgument());
 
-      m_FilterData->Set(settings);
+      filterData->Set(settings);
    }
 
    return TRUE;
+}
+
+bool
+wxOneFilterDialog::TransferDataFromWindow()
+{
+   return DoTransferDataFromWindow(m_FilterData);
 }
 
 // ----------------------------------------------------------------------------
