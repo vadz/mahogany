@@ -108,6 +108,7 @@ extern const MOption MP_FLC_FROMCOL;
 extern const MOption MP_FLC_SIZECOL;
 extern const MOption MP_FLC_STATUSCOL;
 extern const MOption MP_FLC_SUBJECTCOL;
+extern const MOption MP_FLC_MSGNOCOL;
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
@@ -197,7 +198,8 @@ static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
    gettext_noop("Date"),
    gettext_noop("Size"),
    gettext_noop("From"),
-   gettext_noop("Subject")
+   gettext_noop("Subject"),
+   gettext_noop("#"),
 };
 
 // the app profile key where the last column widths modified by user are
@@ -215,7 +217,11 @@ static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 
 // the default widths for the columns: the number of entries must be equal to
 // WXFLC_NUMENTRIES and they must be separated by COLUMNS_WIDTHS_SEP
-static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:80:80:200:300";
+//
+// note that the order here is the same as the order of WXFLC_XXX constants,
+// and not the appearance order, i.e. the default width of the subject field is
+// 300, not 80 (even if it appears second by default)
+static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:80:80:200:300:40";
 
 
 // the trace mask for selection/focus handling
@@ -815,9 +821,10 @@ static void ReadColumnsInfo(Profile *profile, int columns[WXFLC_NUMENTRIES])
 {
    columns[WXFLC_STATUS]   = READ_CONFIG(profile, MP_FLC_STATUSCOL);
    columns[WXFLC_DATE]     = READ_CONFIG(profile, MP_FLC_DATECOL);
-   columns[WXFLC_SUBJECT]  = READ_CONFIG(profile, MP_FLC_SUBJECTCOL);
    columns[WXFLC_SIZE]     = READ_CONFIG(profile, MP_FLC_SIZECOL);
    columns[WXFLC_FROM]     = READ_CONFIG(profile, MP_FLC_FROMCOL);
+   columns[WXFLC_SUBJECT]  = READ_CONFIG(profile, MP_FLC_SUBJECTCOL);
+   columns[WXFLC_MSGNO]    = READ_CONFIG(profile, MP_FLC_MSGNOCOL);
 }
 
 // write the columns to profile
@@ -825,9 +832,10 @@ static void WriteColumnsInfo(Profile *profile, const int columns[WXFLC_NUMENTRIE
 {
    profile->writeEntry(MP_FLC_STATUSCOL, columns[WXFLC_STATUS]);
    profile->writeEntry(MP_FLC_DATECOL,   columns[WXFLC_DATE]);
-   profile->writeEntry(MP_FLC_SUBJECTCOL,columns[WXFLC_SUBJECT]);
    profile->writeEntry(MP_FLC_SIZECOL,   columns[WXFLC_SIZE]);
    profile->writeEntry(MP_FLC_FROMCOL,   columns[WXFLC_FROM]);
+   profile->writeEntry(MP_FLC_SUBJECTCOL,columns[WXFLC_SUBJECT]);
+   profile->writeEntry(MP_FLC_MSGNOCOL,  columns[WXFLC_MSGNO]);
 }
 
 // return the name of the n-th columns
@@ -899,6 +907,9 @@ static MessageSortOrder SortOrderFromCol(wxFolderListColumn col)
       case WXFLC_NUMENTRIES: // suppress gcc warning
       default:
          wxFAIL_MSG( "invalid column" );
+         // fall through
+
+      case WXFLC_MSGNO:
          return MSO_NONE;
    }
 }
@@ -1833,6 +1844,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
          FAIL_MSG( "forgot to update the switch after adding a new column?" );
 
       case WXFLC_NONE:
+      case WXFLC_MSGNO:
       case WXFLC_STATUS:
       case WXFLC_SUBJECT:
          // nothing special to do
@@ -2718,6 +2730,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          case WXFLC_DATE:
          case WXFLC_SIZE:
          case WXFLC_STATUS:
+         case WXFLC_MSGNO:
             text = "???";
             break;
 
@@ -2802,6 +2815,11 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          // FIXME: hard coded 3 spaces
          text = wxString(' ', 3*m_headers->GetIndentation((size_t)item))
                   + hi->GetSubject();
+         break;
+
+      case WXFLC_MSGNO:
+         // users, unlike programmers, count from 1, not 0 - hence +1
+         text.Printf("%ld", item + 1);
          break;
 
       default:

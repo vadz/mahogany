@@ -367,6 +367,7 @@ extern const MOption MP_FLC_SUBJECTCOL;
 extern const MOption MP_FLC_FROMCOL;
 extern const MOption MP_FLC_DATECOL;
 extern const MOption MP_FLC_SIZECOL;
+extern const MOption MP_FLC_MSGNOCOL;
 extern const MOption MP_TESTENTRY;
 extern const MOption MP_SYNC_REMOTE;
 extern const MOption MP_SYNC_FOLDER;
@@ -1095,6 +1096,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FLC_DATECOL_NAME   "ColumnDate"
 /// size
 #define   MP_FLC_SIZECOL_NAME   "ColumnSize"
+/// msgno
+#define   MP_FLC_MSGNOCOL_NAME   "ColumnNum"
 //@}
 //@}
 /// an entry used for testing
@@ -2018,6 +2021,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FLC_DATECOL_DEFVAL   3
 /// size
 #define   MP_FLC_SIZECOL_DEFVAL   4
+/// size
+#define   MP_FLC_MSGNOCOL_DEFVAL   -1l
 //@}
 
 /// the wildcard for save dialog
