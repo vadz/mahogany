@@ -794,6 +794,49 @@ static wxString EscapeQuotes(const wxString& text)
    return textSafe;
 }
 
+#ifdef USE_STRIP_TAGS
+
+static wxString StripHtmlTags(const wxString& html)
+{
+   wxString text;
+   text.reserve(html.length());
+
+   bool inTag = false,
+        inQuote = false;
+   for ( const wxChar *p = html.c_str(); *p; p++ )
+   {
+      if ( inTag )
+      {
+         if ( inQuote )
+         {
+            if ( *p == _T('"') )
+               inQuote = false;
+         }
+         else // not inside quoted text
+         {
+            if ( *p == _T('>') )
+               inTag = false;
+            else if ( *p == _T('"') )
+               inQuote = true;
+         }
+      }
+      else // not inside a tag, copy
+      {
+         if ( *p == _T('<') )
+            inTag = true;
+         else
+            text += *p;
+      }
+   }
+
+
+   // finally, replace all entities with their values
+   wxHtmlEntitiesParser entities;
+   return entities.Parse(text);
+}
+
+#endif // 0
+
 void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
 {
    if ( col.Ok() )
@@ -1077,6 +1120,12 @@ void HtmlViewer::InsertRawContents(const String& data)
    {
       m_htmlText += pHtml;
    }
+
+#ifdef USE_STRIP_TAGS
+   // we also have to extract all the text we have so that it could be included
+   // in the reply
+   m_msgView->OnBodyText(StripHtmlTags(data));
+#endif
 }
 
 void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
@@ -1118,7 +1167,11 @@ void HtmlViewer::EndBody()
    m_window->SetPage(m_htmlText);
 
 #if wxCHECK_VERSION(2, 5, 2)
-   m_msgView->OnBodyText(m_window->ToText());
+   String text(m_window->ToText());
+   size_t posEndHeaders = text.find("\n\n");
+   if ( posEndHeaders != String::npos )
+      text.erase(0, posEndHeaders + 2);
+   m_msgView->OnBodyText(text);
 #endif
 }
 
