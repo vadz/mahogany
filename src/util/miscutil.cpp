@@ -23,6 +23,7 @@
 #include "adb/AdbBook.h"
 
 #include "MDialogs.h"
+#include "MailFolder.h"    // UpdateTitleAndStatusBars uses it
 
 #include "miscutil.h"
 
@@ -216,6 +217,73 @@ AutoCollectAddresses(const String &email,
                     "autocollected."), email.c_str());
       }
    }
+}
+
+// show the number of new/unread/total messages in the title and status bars
+void UpdateTitleAndStatusBars(const String& title,
+                              const String& status,
+                              wxFrame *frame,
+                              const MailFolder *mailFolder)
+{
+   unsigned long total = mailFolder->CountMessages(),
+                 recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
+                                                     MailFolder::MSG_STAT_SEEN,
+                                                     MailFolder::MSG_STAT_RECENT |
+                                                     MailFolder::MSG_STAT_SEEN),
+                 // recent & !seen --> new
+                 newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
+                                                     MailFolder::MSG_STAT_SEEN,
+                                                     MailFolder::MSG_STAT_RECENT);
+
+   // contruct the messages
+   wxString tmp; // string we use for numeric => string conversion
+   wxString titleMsg(title), statusMsg(status);
+
+   if ( total > 1 )
+   {
+      tmp.Printf("%lu messages", total);
+   }
+   else if ( total == 1 )
+   {
+      tmp = _("1 message");
+   }
+   else // total == 0
+   {
+      tmp = _("no messages");
+   }
+   statusMsg << " (" << tmp;
+
+   // don't say "0 recent messages", just don't include this part of the
+   // message if there are none of them
+   if ( recent > 0 )
+   {
+      tmp.Printf(_(", %lu recent"), recent);
+
+      statusMsg += tmp;
+   }
+
+   // and the same for new messages. Also, in the title bar we show
+   // either "new/total" or just "total" (or nothing at all if there are
+   // no messages)
+   if ( newmsgs > 0 )
+   {
+      tmp.Printf(_(", %lu new"), newmsgs);
+      statusMsg += tmp;
+
+      tmp.Printf(" (%lu/%lu)", newmsgs, total);
+      titleMsg += tmp;
+   }
+   else if ( total > 0 )
+   {
+      tmp.Printf(" (%lu)", total);
+
+      titleMsg += tmp;
+   }
+
+   statusMsg << ')';
+
+   wxLogStatus(frame, statusMsg);
+   frame->SetTitle(titleMsg);
 }
 
 // ---------------------------------------------------------------------------

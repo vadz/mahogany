@@ -47,6 +47,15 @@ inline String GetFullEmailAddress(const String& name, const String& email)
    return address;
 }
 
+class wxFrame;
+class MailFolder;
+
+/// set the title and statusbar to show the number of messages in folder
+extern void UpdateTitleAndStatusBars(const String& title,
+                                     const String& status,
+                                     wxFrame *frame,
+                                     const MailFolder *folder);
+
 class wxColour;
 
 /// get the colour by name which may be either a colour or RGB specification

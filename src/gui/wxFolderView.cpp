@@ -48,6 +48,7 @@
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
 #include "MHelp.h"
+#include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
@@ -493,18 +494,11 @@ wxFolderView::Update(void)
       i++;
    }
 
-   unsigned long
-      total = m_MailFolder->CountMessages(),
-      recent =  m_MailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
-                                          MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN),
-                                // recent    & !seen --> new      
-      newmsgs = m_MailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
-                                            MailFolder::MSG_STAT_RECENT);
-   wxString title;
-   title.Printf("%s %lu/%lu", m_folderName.c_str(), total, newmsgs);
-   GetFrame(m_Parent)->SetTitle(title);
-   wxLogStatus(GetFrame(m_Parent), _("Folder '%s' (%lu messages, %lu recent, %lu new)"),
-               m_MailFolder->GetName().c_str(), total, recent, newmsgs);
+   String statusMsg;
+   statusMsg.Printf(_("Folder '%s'"), m_folderName.c_str());
+
+   UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
+                            m_MailFolder);
 
    m_NumOfMessages = n;
    wxEndBusyCursor(); //wxSafeYield();

@@ -39,6 +39,7 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderTree.h"
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
+#include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 #include "MHelp.h"
 #include "MDialogs.h"
@@ -241,18 +242,10 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
          // had
          folder->ResetFlags(MF_FLAGS_MODIFIED | MF_FLAGS_UNACCESSIBLE);
 
-         unsigned long
-            total = mailFolder->CountMessages(),
-            recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
-                                                MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN),
-                                // recent & !seen --> new      
-            newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
-                                                MailFolder::MSG_STAT_RECENT);
-         wxLogStatus(this, _("Opened folder '%s' (%lu messages, %lu recent, %lu new)"),
-                     m_folderName.c_str(), total, recent, newmsgs);
-         wxString title;
-         title.Printf("%s %lu/%lu", m_folderName.c_str(), total, newmsgs);
-         SetTitle(title);
+         String statusMsg;
+         statusMsg.Printf(_("Opened folder '%s'"), m_folderName.c_str());
+
+         UpdateTitleAndStatusBars(m_folderName, statusMsg, this, mailFolder);
       }
       else
       {
