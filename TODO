@@ -92,10 +92,14 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - configuration dialog for columns in folderview
   + VZ: will do
 
+- could you please add custom add/delete buttons to the MsgView header 
+  config dialog, to e.g. add X-Url or other headers to show?
+
 *********************************************************************
 *** KB:
 *********************************************************************
 
+- add configurable python search path to configure!!!
 - fix printing overlap
 - test whether dialog for collecting from INBOX works
 
