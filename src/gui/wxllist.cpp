@@ -3182,9 +3182,10 @@ wxLayoutList::Debug(void)
 
 #ifndef USE_PCH
    #include "Profile.h"
-   #include "Mdefaults.h"
    #include "MApplication.h"
 #endif
+
+#include "Mdefaults.h"
 
 extern const MOption MP_PRINT_PREVIEWZOOM;
 
