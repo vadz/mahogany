@@ -488,8 +488,8 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
 
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
    // for everything else), but IMAP INBOX is special and can have a NUL one
-   char chDelimiter = result->GetDelimiter();
-   ASSERT_MSG( chDelimiter == m_chDelimiter || !chDelimiter,
+   ASSERT_MSG( result->GetDelimiter() == m_chDelimiter ||
+               !result->GetDelimiter(),
                "unexpected delimiter returned by ListFolders" );
 
    // is it the special event which signals that there will be no more of

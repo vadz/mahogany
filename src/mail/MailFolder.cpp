@@ -2006,10 +2006,10 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
    }
    else // move to trash
    {
-      bool rc = SaveMessages(selections,
-                             trashFolderName,
-                             true /* is profile */,
-                             false /* don´t update */);
+      rc = SaveMessages(selections,
+                        trashFolderName,
+                        true /* is profile */,
+                        false /* don´t update */);
       if ( rc )
       {
          // delete and expunge
