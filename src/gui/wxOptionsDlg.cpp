@@ -178,8 +178,11 @@ enum ConfigFields
    ConfigField_MailServerPassword,
    ConfigField_NewsServerLogin,
    ConfigField_NewsServerPassword,
+   ConfigField_SenderHelp,
    ConfigField_GuessSender,
    ConfigField_Sender,
+   ConfigField_DisabledAuthsHelp,
+   ConfigField_DisabledAuths,
 #ifdef USE_SSL
    ConfigField_SSLHelp,
    ConfigField_SmtpServerSSL,
@@ -894,7 +897,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1, },
 
-   { gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
+   { "\n"
+     gettext_noop("If your SMTP server supports 8BITMIME ESMTP extension\n"
                   "Mahogany may send 8 bit data without encoding it. If\n"
                   "the server doesn't support it, the data will be encoded\n"
                   "properly, so there is normally no risk in setting this "
@@ -915,13 +919,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    },
 
-   { gettext_noop(
-      "Some SMTP or NNTP servers require a user Id or login.\n"
+   { "\n"
+     gettext_noop(
+      "Some SMTP or NNTP servers require a user name/login.\n"
       "You might need to enter the e-mail address provided by\n"
-      "your ISP here but please only do it if told to do so\n"
-      "by your ISP as it is not usually required and may lead\n"
-      "problems if specified when it is not needed."),
-     Field_Message | Field_AppWide, -1,                        },
+      "your ISP either with or without thep art after '@':\n"
+      "please follow the ISP instructions about this."),
+                                                   Field_Message, -1,                        },
    { gettext_noop("SMTP server &user ID"),         Field_Text,
 #ifdef USE_SENDMAIL
                                                    -ConfigField_UseSendmail,
@@ -933,10 +937,28 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 
+   { "\n"
+     gettext_noop("If you use SMTP authentification, you may also\n"
+                  "have to specify a \"Sender:\" header.\n"
+                  "Mahogany tries to guess it, but if it doesn't work\n"
+                  "you can try to override it."),  Field_Message, ConfigField_MailServerLogin },
    { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
    { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
+
+   { "\n"
+     gettext_noop("Final complication with SMTP authentification is that\n"
+                  "some servers (notably qmail and Exim 3) advertise the\n"
+                  "authentification mechanisms which they don't support.\n"
+                  "To use such broken servers you need to explicitly disable\n"
+                  "the incorrectly implemented methods by entering them below\n"
+                  "(you may enter \"PLAIN\" or \"PLAIN;CRAM-MD5\", for example)"),
+                                                   Field_Message |
+                                                   Field_Advanced, ConfigField_MailServerLogin },
+   { gettext_noop("Methods NOT to use"),           Field_Text |
+                                                   Field_Advanced, ConfigField_MailServerLogin },
 #ifdef USE_SSL
-   { gettext_noop("\nMahogany can attempt to use either SSL or TLS to send\n"
+   { "\n\n"
+     gettext_noop("\nMahogany can attempt to use either SSL or TLS to send\n"
                   "mail or news. TLS is used by default if available but\n"
                   "you may disable it if you experience problems because\n"
                   "of this.\n"
@@ -964,7 +986,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_SSL
 
 #ifdef USE_DIALUP
-   { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
+   { "\n"
+     gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
@@ -980,9 +1003,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // platform
 #endif // USE_DIALUP
 
-   { gettext_noop("The following timeout values are used for TCP connections to\n"
-                  "remote mail or news servers."), Field_Message | Field_Global | Field_Advanced, -1 },
-   { gettext_noop("&Open timeout (in seconds)"),  Field_Number | Field_Global | Field_Advanced,    -1,                        },
+   { "\n"
+    gettext_noop("The following timeout values are used for TCP connections to\n"
+                 "remote mail or news servers.\n"
+                 "Try increasing them if your connection is slow."),
+                                                   Field_Message | Field_Global | Field_Advanced, -1 },
+   { gettext_noop("&Open timeout (in seconds)"),   Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #ifdef USE_TCP_TIMEOUTS
    { gettext_noop("&Read timeout"),                Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
@@ -1652,8 +1678,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SMTPHOST_PASSWORD),
    CONFIG_ENTRY(MP_NNTPHOST_LOGIN),
    CONFIG_ENTRY(MP_NNTPHOST_PASSWORD),
+   CONFIG_NONE(),    // "Sender" help
    CONFIG_ENTRY(MP_GUESS_SENDER),
    CONFIG_ENTRY(MP_SENDER),
+   CONFIG_NONE(),    // disabled auths help
+   CONFIG_NONE(),    // almost CONFIG_ENTRY(MP_SMTP_DISABLED_AUTHS)
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
@@ -3293,10 +3322,22 @@ wxOptionsPageNetwork::wxOptionsPageNetwork(wxNotebook *parent,
 }
 
 // dynamicially fill the RAS connections combo box under Windows
-#ifdef OS_WIN
-
 bool wxOptionsPageNetwork::TransferDataToWindow()
 {
+   m_oldAuthsDisabled = READ_CONFIG_TEXT(m_Profile, MP_SMTP_DISABLED_AUTHS);
+   wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_DisabledAuths),
+                                    wxTextCtrl);
+   if ( text )
+   {
+      // remove the trailing semicolon, it looks odd
+      if ( !m_oldAuthsDisabled.empty() && m_oldAuthsDisabled.Last() == _T(';') )
+      {
+         m_oldAuthsDisabled.Truncate(m_oldAuthsDisabled.length() - 1);
+      }
+
+      text->SetValue(m_oldAuthsDisabled);
+   }
+
    bool bRc = wxOptionsPage::TransferDataToWindow();
 
 #ifdef USE_DIALUP
@@ -3330,7 +3371,31 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
    return bRc;
 }
 
-#endif // OS_WIN
+bool wxOptionsPageNetwork::TransferDataFromWindow()
+{
+   // we need to massage the disabled authentificators string a bit to fit it
+   wxTextCtrl *text = wxDynamicCast(GetControl(ConfigField_DisabledAuths),
+                                    wxTextCtrl);
+   if ( text )
+   {
+      wxString authsDisabled = text->GetValue();
+      if ( authsDisabled.CmpNoCase(m_oldAuthsDisabled) != 0 )
+      {
+         // add back the semicolon, unless there are no disabled auths at all
+         if ( !authsDisabled.empty() && authsDisabled.Last() != _T(';') )
+         {
+            authsDisabled += _T(';');
+         }
+
+         // auth names are case-insensitive
+         authsDisabled.MakeUpper();
+
+         m_Profile->writeEntry(MP_SMTP_DISABLED_AUTHS, authsDisabled);
+      }
+   }
+
+   return true;
+}
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageNewMail
