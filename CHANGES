@@ -15,10 +15,12 @@ Release 0.66 'Clio'
 01.10.03 VZ: added popup menu for the attachments in the composer
 28.09.03 VZ: better UI for disablable dialog boxes
 28.09.03 VZ: added support for using files, not registry, by default under Win
+26.09.03 RV: simple whitelist support
 23.09.03 VZ: respect X-Attribution header when writing replies
 19.09.03 VZ: added "Reply/Forward To" commands to mail address popup menu
 17.09.03 VZ: show UTF-7/8-encoded headers [as] correctly [as possible]
 25.08.03 RV: new text-only composer
+14.08.03 RV: simple one address per line address book support
 
 Release 0.65 'Claire' August 15, 2003
 -------------------------------------
