@@ -260,6 +260,9 @@ public:
    // override some base class virtuals
    virtual void OnSetTitle(const wxString& title);
    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
+   virtual void OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y);
+   virtual void OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
+                              const wxMouseEvent& event);
 
 private:
    // get the clickable info previousy stored by StoreClickable()
@@ -337,22 +340,56 @@ void HtmlViewerWindow::OnSetTitle(const wxString& title)
 
 void HtmlViewerWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
-   String url = link.GetHref();
-   ClickableInfo *ci = GetClickable(url);
+}
 
-   if ( !ci )
+void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y)
+{
+   wxHtmlLinkInfo *link = cell->GetLink();
+   wxFrame *frame = GetFrame(this);
+   CHECK_RET( frame, "no parent frame?" );
+
+   String statText;
+   if ( link )
    {
-      ci = new ClickableInfo(url);
-      StoreClickable(ci, url);
+      ClickableInfo *ci = GetClickable(link->GetHref());
+      if ( !ci || ci->GetType() == ClickableInfo::CI_URL )
+      {
+         // let the base class process it
+         return;
+      }
+
+      statText = ci->GetLabel();
    }
 
-   // left click becomes double click as we want to open the URLs on simple
-   // click
-   m_viewer->DoMouseCommand(link.GetEvent()->LeftDown()
-                              ? WXMENU_LAYOUT_DBLCLICK
-                              : WXMENU_LAYOUT_RCLICK,
-                            ci,
-                            link.GetEvent()->GetPosition());
+   frame->SetStatusText(statText);
+}
+
+void HtmlViewerWindow::OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
+                                     const wxMouseEvent& event)
+{
+   wxHtmlLinkInfo *link = cell->GetLink(x, y);
+   if ( link )
+   {
+      String url = link->GetHref();
+      ClickableInfo *ci = GetClickable(url);
+
+      if ( !ci )
+      {
+         ci = new ClickableInfo(url);
+         StoreClickable(ci, url);
+      }
+
+      // left click becomes double click as we want to open the URLs on simple
+      // click
+      m_viewer->DoMouseCommand(event.LeftDown()
+                                 ? WXMENU_LAYOUT_DBLCLICK
+                                 : WXMENU_LAYOUT_RCLICK,
+                               ci,
+                               event.GetPosition());
+   }
+
+   // don't call the base class version, we don't want it to automatically
+   // load any URLs which may be in the text!
 }
 
 // ============================================================================
@@ -703,8 +740,9 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    wxString url;
    url << "memory:" << CreateImageInMemoryFS(wxImage(icon));
 
-   m_htmlText << "<img alt=\"" << ci->GetLabel() << "\" src=\""
-              << url << "\">";
+   m_htmlText << "<a href=\"" << url << "\">"
+                 "<img alt=\"" << ci->GetLabel() << "\" src=\"" << url
+              << "\"></a>";
 
    m_window->StoreClickable(ci, url);
 }
@@ -714,8 +752,9 @@ void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
    wxString url;
    url << "memory:" << CreateImageInMemoryFS(wxImage(image));
 
-   m_htmlText << "<p><img alt=\"" << ci->GetLabel() << "\" src=\""
-              << url << "\">";
+   m_htmlText << "<a href=\"" << url << "\">"
+                 "<p><img alt=\"" << ci->GetLabel() << "\" "
+                 "src=\"" << url << "\"></a>";
 
    m_window->StoreClickable(ci, url);
 }
