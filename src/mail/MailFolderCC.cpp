@@ -1736,13 +1736,13 @@ MailFolderCC::CheckForFileLock()
 bool
 MailFolderCC::Open(OpenMode openmode)
 {
-   wxLogTrace(TRACE_MF_CALLS, "%s '%s'",
+   wxLogTrace(TRACE_MF_CALLS, "%s \"'%s'\"",
               GetOperationName(openmode).c_str(), GetName().c_str());
 
    MFrame *frame = GetInteractiveFrame();
    if ( frame )
    {
-      STATUSMESSAGE((frame, _("%s mailbox %s..."),
+      STATUSMESSAGE((frame, _("%s mailbox \"%s\"..."),
                      GetOperationName(openmode).c_str(), GetName().c_str()));
    }
 
@@ -1885,15 +1885,15 @@ MailFolderCC::Open(OpenMode openmode)
       switch ( openmode )
       {
          case Normal:
-            msg = _("Mailbox %s opened.");
+            msg = _("Mailbox \"%s\" opened.");
             break;
 
          case ReadOnly:
-            msg = _("Mailbox %s opened in read only mode.");
+            msg = _("Mailbox \"%s\" opened in read only mode.");
             break;
 
          case HalfOpen:
-            msg = _("Successfully connected to %s");
+            msg = _("Successfully connected to \"%s\"");
             break;
 
          default:
