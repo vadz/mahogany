@@ -1965,9 +1965,10 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 #endif
 )
    {
-      // MH folder name is always relative to the MH root path
+      // MH folder name must be relative to MH root, check it
       path = m_path->GetValue();
-      if ( !MailFolderCC::GetMHFolderName(&path) )
+      wxString mhName = path;
+      if ( !MailFolderCC::GetMHFolderName(&mhName) )
       {
          wxLogError(_("Impossible to create MH folder '%s'."),
                     path.c_str());
@@ -2160,7 +2161,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 #ifdef EXPERIMENTAL
    case MF_MDIR:
 #endif
-      // for MH path had been set in thevery beginning
       WriteEntryIfChanged(Path, path);
       break;
 
