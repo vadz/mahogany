@@ -162,6 +162,15 @@ public:
    // for wxFolderView
    wxMenu *GetFolderMenu() const { return m_menuFolders; }
 
+   void MoveFocus(int newFocus)
+      {
+         if(newFocus != -1)
+         {
+            SetItemState(newFocus, wxLIST_STATE_FOCUSED,
+                         wxLIST_STATE_FOCUSED);
+            m_FolderView->UpdateSelectionInfo();
+         }
+      }
 protected:
    long m_NextIndex;
    /// parent window
@@ -393,28 +402,27 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       {
       case 'D':
          m_FolderView->DeleteOrTrashMessages(selections);
-         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
-                                         wxLIST_STATE_FOCUSED);
+         MoveFocus(newFocus);
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
             m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
-         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
-                                         wxLIST_STATE_FOCUSED);
+         MoveFocus(newFocus);
          break;
       case 'X':
             m_FolderView->GetFolder()->ExpungeMessages();
          break;
       case 'C':
          m_FolderView->SaveMessagesToFolder(selections);
+         MoveFocus(newFocus);
          break;
       case 'S':
          m_FolderView->SaveMessagesToFile(selections);
+         MoveFocus(newFocus);
          break;
       case 'M': // move = copy + delete
          m_FolderView->SaveMessagesToFolder(selections, NULL, true);
-         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
-                                         wxLIST_STATE_FOCUSED);
+         MoveFocus(newFocus);
          break;
       case 'G':
       case 'R':
@@ -423,28 +431,31 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
             GetFrame(this),
             m_FolderView);
+         MoveFocus(newFocus);
          break;
       case 'F':
          m_FolderView->GetFolder()->ForwardMessages(
             &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
+         MoveFocus(newFocus);
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
-         if(newFocus != -1) SetItemState(newFocus, wxLIST_STATE_FOCUSED,
-                                         wxLIST_STATE_FOCUSED);
+         MoveFocus(newFocus);
          break;
       case 'P':
          m_FolderView->PrintMessages(selections);
+         MoveFocus(newFocus);
          break;
       case 'H':
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
       case ' ': // mark:
          // should just be the default behaviour
-         break;
+         event.Skip();
+         MoveFocus(newFocus);
+         return;
       }
    }
-
    event.Skip();
 }
 
