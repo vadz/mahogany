@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Apr 27 14:40:34 1998
+#This file was created by <karsten> Fri May  1 15:06:39 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -441,6 +441,47 @@ mylibSIZE(x)
 mSIZE(x)
 \family default 
 .
+\layout Subsection
+
+Indentation
+\layout Subsubsection
+
+Tabulators and Spaces
+\layout Standard
+
+To make cooperation easier we have agreed to 
+\emph on 
+not
+\emph default 
+ to use any tabulator characters in the sources.
+ Instead three spaces should be used.
+ The basic indentation depth is three spaces per level.
+\layout Subsubsection
+
+Braces
+\layout Standard
+
+Braces should always be on a line by themselves.
+ If following a control statement, they should be on the same indentation
+ level as that statement.
+ E.g.
+ the brace after an 
+\family typewriter 
+if()
+\family default 
+ statement should be directly under the 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+i
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+
 \layout Standard
 
 \the_end
