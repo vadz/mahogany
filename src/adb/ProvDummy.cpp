@@ -424,7 +424,7 @@ bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
   return MDialog_YesNoDialog(str);
 #else
   return TRUE;
-#fi
+#endif
 }
 
 bool DummyDataProvider::DeleteBook(AdbBook *book)
