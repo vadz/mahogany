@@ -2156,7 +2156,8 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
    CHECK(hil, FALSE, "NULL HeaderInfoList");
 
    // Maybe we are lucky and have nothing to do?
-   if(hil->Count() == 0)
+   size_t count = hil->Count();
+   if ( count == 0 )
    {
       hil->DecRef();
       return FALSE;
@@ -2164,7 +2165,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
 
    bool changed = FALSE;
    UIdType nRecent = CountRecentMessages();
-   if(nRecent > 0 )
+   if ( nRecent > 0 )
    {
       // Obtain pointer to the filtering module:
       MModule_Filters *filterModule = MModule_Filters::GetModule();
@@ -2172,16 +2173,17 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
       {
          // Build an array of NEW message UIds to apply the filters to:
          UIdArray messages;
-         UIdType count = hil->Count();
-         for(UIdType idx = 0; idx < count; idx++)
+         for ( size_t idx = 0; idx < count; idx++ )
          {
-            // the first two condidions: only take NEW=RECENT&&!SEEN messages
-            if( ( (*hil)[idx]->GetStatus() &  MSG_STAT_RECENT )
-                && (((*hil)[idx]->GetStatus() &  MSG_STAT_SEEN ) == 0)
-                // ignore all deleted messages to avoid duplicate filtering:
-                && (((*hil)[idx]->GetStatus() &  MSG_STAT_DELETED ) == 0)
-               )
-               messages.Add( (*hil)[idx]->GetUId() );
+            HeaderInfo *hi = hil->GetItemByIndex(idx);
+            int status = hi->GetStatus();
+
+            // only take NEW (== RECENT && !SEEN) and ignore DELETED
+            if ( (status & (MSG_STAT_RECENT | MSG_STAT_SEEN | MSG_STAT_DELETED))
+                  == MSG_STAT_RECENT )
+            {
+               messages.Add(hi->GetUId());
+            }
          }
 
          // build a single program from all filter rules:
@@ -2190,8 +2192,8 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          wxArrayString filters;
          if ( folder )
             filters = folder->GetFilters();
-         count = filters.GetCount();
-         for ( size_t n = 0; n < count; n++ )
+         size_t countFilters = filters.GetCount();
+         for ( size_t n = 0; n < countFilters; n++ )
          {
             MFilter_obj filter(filters[n]);
             MFilterDesc fd = filter->GetDesc();
@@ -2213,7 +2215,9 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          filterModule->DecRef();
       }
       else
+      {
          wxLogVerbose("Filter module couldn't be loaded.");
+      }
    }
 
    // do we have any messages to move?

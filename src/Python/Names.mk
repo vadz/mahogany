@@ -13,7 +13,7 @@ MSGSRC	+= $(MSRC)
 
 # common compilation steps
 define M_COMPILE_SWIG
-$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) -DSWIG_NOINCLUDE $*.cpp
+$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $*.cpp
 @rm -f $*.cpp
 @f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
 endef

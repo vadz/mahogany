@@ -388,23 +388,6 @@ private:
    SearchCriterium m_Criterium;
 };
 
-class MT_DeleteDuplicates : public MailThread
-{
-public:
-   MT_DeleteDuplicates(ASMailFolder *mf, UserData ud)
-      : MailThread(mf, ud) {}
-   virtual void WorkFunction(void)
-      {
-         unsigned long rc = m_MailFolder->DeleteDuplicates();
-         SendEvent(ASMailFolder::ResultUIdType::
-                   Create(m_ASMailFolder,
-                          m_Ticket,
-                          ASMailFolder::Op_DeleteDuplicates,
-                          NULL,
-                          rc, m_UserData));
-      }
-};
-
 class MT_SaveMessages : public MailThreadSeq
 {
 public:
@@ -801,14 +784,6 @@ public:
                                  UserData ud)
       {
          return (new MT_DeleteMessages(this, ud, messages, expunge))->Start();
-      }
-
-   /** Delete duplicate messages.
-       @return ResultInt number of messages deleted
-   */
-   virtual Ticket DeleteDuplicates(UserData ud)
-      {
-         return (new MT_DeleteDuplicates(this, ud))->Start();
       }
 
    /** Mark messages as no longer deleted.

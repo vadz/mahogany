@@ -2730,18 +2730,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          break;
       }
 
-      case ASMailFolder::Op_DeleteDuplicates:
-      {
-         UIdType count = ((ASMailFolder::ResultUIdType
-                           *)result)->GetValue();
-         if(count == UID_ILLEGAL)
-            msg = _("An error occured while deleting duplicate messages.");
-         else if (count != 0)
-            msg.Printf(_("%lu duplicate messages removed."),
-                       (unsigned long) count);
-         wxLogStatus(m_Frame, msg);
-         break;
-      }
       // these cases don't have return values
       case ASMailFolder::Op_ReplyMessages:
       case ASMailFolder::Op_ForwardMessages:

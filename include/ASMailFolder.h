@@ -108,8 +108,7 @@ public:
       Op_Subscribe,
       Op_ListFolders,
       Op_SearchMessages,
-      Op_ApplyFilterRules,
-      Op_DeleteDuplicates
+      Op_ApplyFilterRules
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -427,11 +426,6 @@ public:
                                  bool expunge = false,
                                  UserData ud = 0) = 0;
    
-   /** Delete duplicate messages by Message-Id
-       @return (ResultUIdType) number of messages removed or
-       UID_ILLEGAL on error*/
-   virtual Ticket DeleteDuplicates(UserData ud = 0) = 0;
-
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
