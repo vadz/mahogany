@@ -1786,6 +1786,7 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
+#ifdef HAVE_LIBMAL
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
@@ -1795,6 +1796,7 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
+#endif
 };
 
 static wxOptionsPage::FieldInfo gs_FieldInfos[] =
@@ -1819,6 +1821,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
    { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
+#ifdef HAVE_LIBMAL
    { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, // 16
    { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,    16 },
    { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text,    17 },
@@ -1828,6 +1831,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,    16 },//22
    { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,    22 },
    { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  22 },
+#endif
 };
 
 static
