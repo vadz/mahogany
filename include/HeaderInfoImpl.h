@@ -69,8 +69,7 @@ public:
    virtual void OnRemove(size_t n);
    virtual void OnAdd(size_t countNew);
 
-   /// dtor frees memory
-   virtual ~HeaderInfoListImpl();
+   virtual size_t GetIndentation(size_t n) const;
 
 private:
    /// private ctor for use of HeaderInfoList::Create()

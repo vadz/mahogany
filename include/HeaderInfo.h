@@ -225,6 +225,15 @@ public:
    virtual size_t GetPosFromIdx(size_t n) const = 0;
    //@}
 
+   /** @name Appearance parameters */
+   //@{
+   /// get the indentation level of this message in thread (0 for root)
+   virtual size_t GetIndentation(size_t n) const = 0;
+
+   // TODO: possible score and colour settings for individual messages should
+   //       be kept here as well
+   //@}
+
    /** @name Functions called by MailFolder */
    //@{
    /// Called when the given (by index) message is expunged

@@ -160,8 +160,10 @@ public:
          *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
       else if ( name == "size" )
          *value = m_hi->GetSize();
+#ifdef USE_HEADER_SCORE
       else if ( name == "score" )
          *value = m_hi->GetScore();
+#endif // USE_HEADER_SCORE
       else
          return false;
 
@@ -350,6 +352,13 @@ protected:
 
    // the index of m_hi in m_Listing (or -1 if not cached)
    size_t m_indexHI;
+
+   // TODO: we should have the standard attributes for each of the possible
+   //       message states/colours (new/recent/unread/flagged/deleted) and
+   //       reuse them in OnGetItemAttr(), this should be quite faster
+
+   /// cached attribute
+   wxListItemAttr *m_attr;
 
    /// parent window
    wxWindow *m_Parent;
@@ -716,6 +725,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Listing = NULL;
    m_hi = NULL;
    m_indexHI = (size_t)-1;
+   m_attr = NULL;
 
    m_PreviewOnSingleClick = false;
 
@@ -768,6 +778,8 @@ wxFolderListCtrl::~wxFolderListCtrl()
    SaveColWidths();
 
    SafeDecRef(m_Listing);
+
+   delete m_attr;
 
    m_profile->DecRef();
 
@@ -1700,7 +1712,9 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          break;
 
       case WXFLC_SUBJECT:
-         text = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
+         // FIXME: hard coded 3 spaces
+         text = wxString(' ', 3*m_Listing->GetIndentation((size_t)item))
+                  + hi->GetSubject();
          break;
 
       default:
@@ -1760,11 +1774,14 @@ wxColour
 wxFolderListCtrl::GetEntryColour(const HeaderInfo *hi) const
 {
    wxColour col;
+
+#ifdef USE_HEADER_COLOUR
    if ( !hi->GetColour().empty() ) // entry has its own colour setting
    {
       GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
    }
    else // set the colour depending on the status of the message
+#endif // USE_HEADER_COLOUR
    {
       int status = hi->GetStatus();
 
@@ -1796,29 +1813,38 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    HeaderInfo *hi = GetHeaderInfo((size_t)item);
    CHECK( hi, NULL, "no header info in OnGetItemText" );
 
-   wxListItemAttr *attr = NULL;
-
-   wxColour col = GetEntryColour(hi);
-   if ( col.Ok() )
+   if ( !m_attr )
    {
-      if ( !attr )
-         attr = new wxListItemAttr;
-
-      attr->SetTextColour(col);
+      // do it only once, then always reuse the same
+      wxConstCast(this, wxFolderListCtrl)->m_attr = new wxListItemAttr;
    }
 
+   // GetEntryColour() may return invalid colour, but that's ok, it will just
+   // reset the colour to default
+   m_attr->SetTextColour(GetEntryColour(hi));
+
+   // cache the last used encoding as creating new font is an expensive
+   // operation
    wxFontEncoding enc = hi->GetEncoding();
+
    if ( enc != wxFONTENCODING_SYSTEM )
    {
-      if ( !attr )
-         attr = new wxListItemAttr;
-
-      wxFont font = GetFont();
-      font.SetEncoding(enc);
-      attr->SetFont(font);
+      if ( !m_attr->HasFont() || m_attr->GetFont().GetEncoding() != enc )
+      {
+         wxFont font = GetFont();
+         font.SetEncoding(enc);
+         m_attr->SetFont(font);
+      }
+   }
+   else // default encoding now
+   {
+      if ( m_attr->HasFont() && m_attr->GetFont().GetEncoding() != enc )
+      {
+         m_attr->SetFont(GetFont());
+      }
    }
 
-   return attr;
+   return m_attr;
 }
 
 // ----------------------------------------------------------------------------

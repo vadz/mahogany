@@ -102,10 +102,6 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    m_headers.Alloc(m_count);
 }
 
-HeaderInfoListImpl::~HeaderInfoListImpl()
-{
-}
-
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl item access
 // ----------------------------------------------------------------------------
@@ -200,6 +196,20 @@ void HeaderInfoListImpl::OnAdd(size_t countNew)
 
    // we probably don't need to do m_headers.Alloc() as countNew shouldn't be
    // much bigger than old count
+}
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl apperance parameters
+// ----------------------------------------------------------------------------
+
+size_t HeaderInfoListImpl::GetIndentation(size_t n) const
+{
+   // TODO: where to store it? we might either have a hash containing the
+   //       indent (assuming few messages are indented...) or store it in
+   //       HeaderInfo itself but this doesn't seem right as this is a purely
+   //       GUI thing and HeaderInfo lives at mail level of abstraction...
+
+   return 0;
 }
 
 // ----------------------------------------------------------------------------
