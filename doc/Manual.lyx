@@ -1,5 +1,5 @@
-#This file was created by <karsten> Thu Jan  6 21:54:20 2000
-#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Thu Jan 13 17:08:17 2000
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -4760,6 +4760,32 @@ Preferences
 Mahogany
 \shape default 
  automatically check these accounts for new mail and collect it from there.
+\layout Subsection
+
+Can I have multiple identities?
+\layout Standard
+
+
+\shape italic 
+Does Mahogany allow me to send email as different people? That is, if I
+ monitor two IMAP or POP servers, one for my work email, and one for my
+ home email, can I reply to emails and specifiy it to use my home or work
+ email address as the sender?
+\layout Standard
+
+Yes, you can set almost *all* options on a per-folder basis, including your
+ name or return address, even outgoing SMTP servers to make it perfect.
+ To have full access to all these configuration options in the folder properties
+ dialog, you must first set your user level to 
+\begin_inset Quotes eld
+\end_inset 
+
+advanced
+\begin_inset Quotes erd
+\end_inset 
+
+ in the main configuration dialog, otherwise only a small subset of configuratio
+n options is available.
 \layout Subsection
 
 How can I set which language to use?
