@@ -439,7 +439,9 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
                   "GetTreeItemFromName() is buggy"
                 );
 
+      // select the item and also scroll to it
       m_tree->SelectItem(item);
+      m_tree->EnsureVisible(item);
 
       return true;
    }
