@@ -82,7 +82,7 @@ extern const MOption MP_USERNAME;
 // implementation
 // ============================================================================
 
-static MFFactory *MFFactory::ms_factories = NULL;
+MFFactory *MFFactory::ms_factories = NULL;
 
 // ----------------------------------------------------------------------------
 // MailFolder opening
