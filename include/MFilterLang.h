@@ -27,6 +27,9 @@
 /// does the subject contain too many capital letters?
 #define SPAM_TEST_SUBJCAPS "subjcaps"
 
+/// is the subject of the "...            xyz-12-foo"?
+#define SPAM_TEST_SUBJENDJUNK "subjendjunk"
+
 /// korean charset?
 #define SPAM_TEST_KOREAN "korean"
 

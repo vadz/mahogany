@@ -1919,7 +1919,8 @@ static bool CheckSubjectFor8Bit(const String& subject)
 // check if the subject is in capitals
 static bool CheckSubjectForCapitals(const String& subject)
 {
-   for ( const char *pc = subject; *pc; pc++ )
+   size_t len = 0;
+   for ( const char *pc = subject; *pc; pc++, len++ )
    {
       if ( islower(*pc) )
       {
@@ -1928,7 +1929,39 @@ static bool CheckSubjectForCapitals(const String& subject)
       }
    }
 
-   return true;
+   // it is possible to have a short subjectentirely capitalized in a
+   // legitime message if it short enough (e.g. "USA" or "HI"...) but if it's a
+   // long sentence containing only caps, it's probabyl spam
+   return len > 8;
+}
+
+// check if the subject is of the form "...      foo-12-xyz": spammers seem to
+// often tackle a unique alphanumeric tail to the subjects of their messages
+static bool CheckSubjectForJunkAtEnd(const String& subject)
+{
+   // we look for at least that many consecutive spaces before starting looking
+   // for a junk tail
+   static const size_t NUM_SPACES = 6;
+
+   // and the tail should have at least that many symbols
+   static const size_t LEN_TAIL = 8;
+
+   const wxChar *p = wxStrstr(subject, String(_T(' '), NUM_SPACES));
+   if ( !p )
+      return false;
+
+   // skip all whitespace
+   p += NUM_SPACES;
+   while ( isspace(*p) )
+      p++;
+
+   // start of the tail
+   const wxChar * const start = p;
+   while ( *p && (wxIsalnum(*p) || *p == _T('-') || *p == _T('_')) )
+      p++;
+
+   // only junk (and enough of it) until the end?
+   return !*p && p - start > LEN_TAIL;
 }
 
 // check the given MIME part and all of its children for Korean charset, return
@@ -2190,6 +2223,10 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       else if ( test == SPAM_TEST_SUBJCAPS )
       {
          rc = CheckSubjectForCapitals(msg->Subject());
+      }
+      else if ( test == SPAM_TEST_SUBJENDJUNK )
+      {
+         rc = CheckSubjectForJunkAtEnd(msg->Subject());
       }
       else if ( test == SPAM_TEST_KOREAN )
       {

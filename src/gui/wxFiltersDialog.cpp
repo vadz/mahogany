@@ -566,6 +566,7 @@ private:
    bool m_checkSpamAssassin:1;
    bool m_check8bit:1;
    bool m_checkCaps:1;
+   bool m_checkJunkSubj:1;
    bool m_checkKorean:1;
    bool m_checkXAuthWarn:1;
    bool m_checkReceived:1;
@@ -833,6 +834,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 #define MP_SPAM_CAPS_SUBJECT "SpamCapsSubject"
 #define MP_SPAM_CAPS_SUBJECT_D 1l
 
+#define MP_SPAM_JUNK_END_SUBJECT "JunkEndSubject"
+#define MP_SPAM_JUNK_END_SUBJECT_D 1l
+
 #define MP_SPAM_KOREAN_CSET  "SpamKoreanCharset"
 #define MP_SPAM_KOREAN_CSET_D  1l
 
@@ -862,6 +866,7 @@ static const ConfigValueDefault gs_SpamPageConfigValues[] =
    CONFIG_ENTRY(MP_SPAM_SPAM_ASSASSIN),
    CONFIG_ENTRY(MP_SPAM_8BIT_SUBJECT),
    CONFIG_ENTRY(MP_SPAM_CAPS_SUBJECT),
+   CONFIG_ENTRY(MP_SPAM_JUNK_END_SUBJECT),
    CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
    CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
    CONFIG_ENTRY(MP_SPAM_RECEIVED),
@@ -877,24 +882,21 @@ static const ConfigValueDefault gs_SpamPageConfigValues[] =
 
 static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
 {
+   // available accels: 012345679DEFGILNOPQSTUVXYZ
    { gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
                   "Please choose the ones you'd like to be used by checking\n"
                   "the corresponding entries.\n"
                   "\n"
                   "So the message is considered to be spam if it has..."),
                   wxOptionsPage::Field_Message, -1 },
-   { gettext_noop("Been tagged as spam by Spam&Assassin"),
-     wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Too many &8 bit characters in subject"),
-     wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Only &capitals in subject"),
-     wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Only &capitals in subject"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("&Junk at end of subject"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("X-Authentication-&Warning header"),
-     wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Suspicious \"&Received\" headers"),
-     wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Suspicious \"&Received\" headers"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Only &HTML content"), wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("Unusual &MIME structure"), wxOptionsPage::Field_Bool, -1 },
 #ifdef USE_RBL
    { gettext_noop("Been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
@@ -936,6 +938,7 @@ OneCritControl::InitSpamOptions(const String& rule)
       m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
       m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
       m_checkCaps = MP_SPAM_CAPS_SUBJECT_D;
+      m_checkJunkSubj = MP_SPAM_JUNK_END_SUBJECT_D;
       m_checkKorean = MP_SPAM_KOREAN_CSET_D;
 
       m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
@@ -956,6 +959,7 @@ OneCritControl::InitSpamOptions(const String& rule)
       m_checkSpamAssassin =
       m_check8bit =
       m_checkCaps =
+      m_checkJunkSubj =
       m_checkKorean =
 
       m_checkXAuthWarn =
@@ -974,6 +978,8 @@ OneCritControl::InitSpamOptions(const String& rule)
             m_check8bit = true;
          else if ( t == SPAM_TEST_SUBJCAPS )
             m_checkCaps = true;
+         else if ( t == SPAM_TEST_SUBJENDJUNK )
+            m_checkJunkSubj = true;
          else if ( t == SPAM_TEST_KOREAN )
             m_checkKorean = true;
          else if ( t == SPAM_TEST_XAUTHWARN )
@@ -1006,6 +1012,7 @@ OneCritControl::ShowDetails()
    profile->writeEntry(MP_SPAM_SPAM_ASSASSIN, m_checkSpamAssassin);
    profile->writeEntry(MP_SPAM_8BIT_SUBJECT, m_check8bit);
    profile->writeEntry(MP_SPAM_CAPS_SUBJECT, m_checkCaps);
+   profile->writeEntry(MP_SPAM_JUNK_END_SUBJECT, m_checkJunkSubj);
    profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
    profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
    profile->writeEntry(MP_SPAM_RECEIVED, m_checkReceived);
@@ -1020,6 +1027,7 @@ OneCritControl::ShowDetails()
       m_checkSpamAssassin = profile->readEntry(MP_SPAM_SPAM_ASSASSIN, 0l) != 0;
       m_check8bit = profile->readEntry(MP_SPAM_8BIT_SUBJECT, 0l) != 0;
       m_checkCaps = profile->readEntry(MP_SPAM_CAPS_SUBJECT, 0l) != 0;
+      m_checkJunkSubj = profile->readEntry(MP_SPAM_JUNK_END_SUBJECT, 0l) != 0;
       m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
       m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
       m_checkReceived = profile->readEntry(MP_SPAM_RECEIVED, 0l) != 0;
@@ -1071,6 +1079,8 @@ OneCritControl::GetSpamTestArgument() const
       AddToSpamArgument(s, SPAM_TEST_SUBJ8BIT);
    if ( m_checkCaps )
       AddToSpamArgument(s, SPAM_TEST_SUBJCAPS);
+   if ( m_checkJunkSubj )
+      AddToSpamArgument(s, SPAM_TEST_SUBJENDJUNK);
    if ( m_checkKorean )
       AddToSpamArgument(s, SPAM_TEST_KOREAN);
    if ( m_checkXAuthWarn )
