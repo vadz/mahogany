@@ -2191,6 +2191,11 @@ wxComposeView::CanClose() const
    }
    else if ( IsModified() )
    {
+      // bring the frame to the top to show user which window are we asking him
+      // about
+      wxComposeView *self = (wxComposeView *)this;
+      self->GetFrame()->Raise();
+
       // ask the user if he wants to save the changes
       MDlgResult rc = MDialog_YesNoCancel
                       (
