@@ -980,7 +980,7 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
    // ensure that lenptr is always valid
    if ( lenptr == NULL )
    {
-      lenptr  = &len;
+      lenptr = &len;
    }
 
    // have we succeeded in retrieveing anything?
@@ -1013,10 +1013,13 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
 
       case ENC7BIT:        // 7 bit SMTP semantic data
       case ENC8BIT:        // 8 bit SMTP semantic data
-      case ENCOTHER:       //unknown
+      case ENCOTHER:       // unknown
       default:
-         *lenptr = strlen(cptr);
-         m_partContentPtr = cpystr(cptr);
+         // string is not NUL-terminated, use the length returned by c-client!
+         *lenptr = len;
+         m_partContentPtr = fs_get(len + 1);
+         memcpy(m_partContentPtr, cptr, len);
+         ((char *)m_partContentPtr)[len] = '\0';
    }
 
    return m_partContentPtr;
