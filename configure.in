@@ -362,7 +362,7 @@ if test "$USE_WXGTK" = 1; then
       AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
       CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
       CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-      WX_LINK="$WX_LINK $ac_path_to_link -lgtk"
+      WX_LINK="$WX_LINK $ac_path_to_link -lgtk -lgdk"
       WX_INCLUDE="$WX_INCLUDE $ac_path_to_include/gtk"
       AC_MSG_RESULT(yes)
     else

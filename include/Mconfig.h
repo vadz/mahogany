@@ -177,7 +177,7 @@
 
 // use builtin wxConfig by default in wxWin2 and appconf otherwise
 #if !defined(USE_APPCONF) && !defined(USE_WXCONFIG)
-#  if defined(USE_WXWINDOWS2) && ! defined(USE_WXGTK)
+#  if defined(USE_WXWINDOWS2) && defined(OS_WIN)  // for now only for windows
 #     define  USE_WXCONFIG 1
 #  else
 #     define  USE_APPCONF  1
