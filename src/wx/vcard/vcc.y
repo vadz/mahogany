@@ -98,6 +98,9 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 #define _SUPPORT_LINE_FOLDING 1
 #endif
 
+/* give function prototypes to suppress warnings from gcc */
+int yylex();
+
 /* undef below if compile with MFC */
 /* #define INCLUDEMFC 1 */
 
