@@ -117,6 +117,8 @@ public:
    */
    static bool DeleteFolder(const MFolder *mfolder);
 
+   static bool Rename(const MFolder *mfolder, const String& name);
+
    static long ClearFolder(const MFolder *folder);
 
    /// return the directory of the newsspool:

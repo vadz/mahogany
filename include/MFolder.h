@@ -80,29 +80,38 @@ public:
 
    /**@name misc accessors */
    //@{
-   /** get the folder path (i.e. something by which it's identified by the
-       mail subsystem)
-   */
+      /**
+        get the folder path (i.e. something by which it's identified by the
+        mail subsystem)
+      */
    virtual String GetPath() const = 0;
-   /// get the server for the folder:
+
+      /// change the folder path
+   virtual void SetPath(const String& path) = 0;
+
+      /// get the server for the folder:
    virtual String GetServer() const = 0;
-   /// get the login for the folder:
+
+      /// get the login for the folder:
    virtual String GetLogin() const = 0;
-   /// get the password for the folder:
+
+      /// get the password for the folder:
    virtual String GetPassword() const = 0;
 
-   /// the folder name must be unique among its siblings
+      /// the folder name must be unique among its siblings
    virtual String GetName() const = 0;
 
-   /// full folder name (has the same form as a full path name)
+      /// full folder name (has the same form as a full path name)
    virtual wxString GetFullName() const = 0;
 
-   /// folder type can't be changed once it's created
+      /// folder type can't be changed once it's created
    virtual FolderType GetType() const = 0;
 
-      /// the icon index for this folder or -1 if there is no specific icon
-      /// associated to it (the icon index should be used to pass it to
-      /// GetFolderIconName())
+      /**
+        the icon index for this folder or -1 if there is no specific icon
+        associated to it (the icon index should be used to pass it to
+        GetFolderIconName())
+       */
    virtual int GetIcon() const = 0;
       /// set the icon
    virtual void SetIcon(int icon) = 0;

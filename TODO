@@ -16,11 +16,7 @@ $Id$
 
 ************ bugs
 
-1. templates:
- a) upgrading from 0.63
- b) new ones?
-2. custom headers
-3. identities??
+1. find in message view doesn't work, use the new wxWin find dialogs
 
 ************ optimize
 
@@ -47,14 +43,16 @@ We *must* cache the result - the problem is how to update this cache?
 
 Very high priority:
 
-1. decouple wxLayoutWindow from wxMessageView -> use MessageViewWindow
-   interface to separate them and allow using wxHTML instead of the
-   current viewer
+1. mail collection
 
 High priority:
 
-1. processing of commands in "Message" menu in wxFolderView and wxMessageView
-   must use the same code!
+1. split compose classes like the message view ones into the purely GUI
+   module and all the rest
+
+2. multi threading: it's impossible to have deterministic response time
+   with c-client otherwise (it uses blocking DNS lookup, mail_open may
+   take arbitrarily long time with slow server, ...)
 
 Low priority:
 
@@ -85,11 +83,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-
-5	VZ	should have a global list of all templates (identified either by
-		name or file name) and a dialog to choose among all of them
-
-5	VZ	appending to log file (Log Window/Save) fails
 
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
@@ -147,10 +140,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
-2		adb addressbook extension appears twice when new book
-		is created
-5	VZ	custom headers are not inherited
-
 
 ------------------ not release critical:
 
@@ -183,9 +172,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 *********************************************************************
 		add acknowledge/approve button for replying-default
 		text to messages
-
-		Allow MH type folders to have arbitrary message file
-		names, not just 1 2 3 4 ...
 
 9		Add option to import a directory of mailfolder files.
 8		filters import
@@ -291,7 +277,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 
 3		a useful feature: change POP/IMAP password for the folder.
 
-2		fix es.po - many little errors
 2	KB	optionally activate tearoff menus
 
 from 32bitsonline review:
@@ -300,8 +285,6 @@ from 32bitsonline review:
 2		Add code to collect split-up mime content from
 		multiple messages and decode it.
 
-4		Option to hide certain folders in treectrl, e.g. the
-		auto-collect ones
 4		reply unquoted, too
 4		composeview clear should re-insert signature
 

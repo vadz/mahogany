@@ -2624,14 +2624,16 @@ static MFolder *DoShowFolderDialog(wxFolderBaseDialog& dlg,
    dlg.CreateAllControls();
    dlg.SetNotebookPage(page);
 
-   if ( dlg.ShowModal() )
+   if ( dlg.ShowModal() == wxID_OK )
    {
       MFolder *folder = dlg.GetFolder();
 
       return folder;
    }
    else
+   {
       return (MFolder *)NULL;
+   }
 }
 
 MFolder *ShowFolderCreateDialog(wxWindow *parent,

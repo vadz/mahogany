@@ -367,6 +367,9 @@ protected:
       return ::CanOpen(node->GetFolder());
    }
 
+   // return true if this folder can be renamed
+   bool CanRenameFolder(const MFolder *folder) const;
+
    // this is the real handler for double-click and enter events
    bool OnDoubleClick();
 
@@ -1016,32 +1019,39 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    return ok;
 }
 
-bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
+bool wxFolderTree::OnRename(MFolder *folder,
+                            const String& folderNewName,
+                            const String& mboxNewName)
 {
    CHECK( folder, false, "can't rename NULL folder" );
 
-   if ( folder->GetType() == MF_INBOX )
+   bool rc = true;
+   if ( !mboxNewName.empty() )
    {
-      wxLogError(_("INBOX folder is a special folder used by the mail "
-                   "system and can not be renamed."));
-
-      return false;
+      rc = MailFolder::Rename(folder, mboxNewName);
+      if ( rc )
+      {
+         folder->SetPath(mboxNewName);
+      }
    }
 
-   if ( folder->GetType() == MF_ROOT )
+   if ( rc && !folderNewName.empty() )
    {
-      wxLogError(_("The root folder can not be renamed."));
-      return false;
+      rc &= folder->Rename(folderNewName);
    }
 
-   if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
+   if ( rc )
    {
-      wxLogError(_("The folder '%s' is used by Mahogany and cannot be renamed."),
-                 folder->GetName().c_str());
-      return false;
+      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+                  _("Successfully renamed folder '%s'."),
+                  folder->GetFullName().c_str());
+   }
+   else
+   {
+      wxLogError(_("Failed to rename the folder or mailbox."));
    }
 
-   return folder->Rename(folderNewName);
+   return rc;
 }
 
 void wxFolderTree::OnClear(MFolder *folder)
@@ -1746,31 +1756,44 @@ void wxFolderTreeImpl::DoFolderCreate()
    //else: cancelled by user
 }
 
-void wxFolderTreeImpl::DoFolderRename()
+bool wxFolderTreeImpl::CanRenameFolder(const MFolder *folder) const
 {
-   MFolder *folder = m_sink->GetSelection();
    if ( !folder )
    {
       wxLogError(_("Please select the folder to rename first."));
    }
+   else if ( folder->GetType() == MF_INBOX )
+   {
+      wxLogError(_("INBOX folder is a special folder used by the mail "
+                   "system and can not be renamed."));
+   }
+   else if ( folder->GetType() == MF_ROOT )
+   {
+      wxLogError(_("The root folder can not be renamed."));
+   }
+   else if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
+   {
+      wxLogError(_("The folder '%s' is used by Mahogany and cannot be renamed."),
+                 folder->GetName().c_str());
+   }
    else
    {
+      // passed all tests
+      return true;
+   }
+
+   return false;
+}
+
+void wxFolderTreeImpl::DoFolderRename()
+{
+   MFolder *folder = m_sink->GetSelection();
+   if ( CanRenameFolder(folder) )
+   {
       wxFrame *frame = GetFrame(this);
-      wxString folderName = folder->GetName();
 
-      folderName = wxGetTextFromUser
-                   (
-                     wxString::Format
-                     (
-                       _("Enter the new folder name for '%s'"),
-                       folderName.c_str()
-                     ),
-                     _("Mahogany - rename folder"),
-                     folderName,
-                     frame
-                   );
-
-      if ( !folderName )
+      String folderName, mboxName;
+      if ( !ShowFolderRenameDialog(folder, &folderName, &mboxName, frame) )
       {
          wxLogStatus(frame, _("Folder renaming cancelled."));
       }
@@ -1778,11 +1801,12 @@ void wxFolderTreeImpl::DoFolderRename()
       {
          // try to rename (the text will be changed in MEvent handler
          // if OnRename() succeeds)
-         (void)m_sink->OnRename(folder, folderName);
+         (void)m_sink->OnRename(folder, folderName, mboxName);
       }
 
       folder->DecRef();
    }
+   //else: can't rename folder
 }
 
 void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
@@ -1987,22 +2011,17 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
    // someone clicked the tree, so the user must be back
    mApplication->UpdateAwayMode();
 
-   bool allow; // should we allow renaming this item?
-
    MFolder *folder = m_sink->GetSelection();
-   if ( !folder )
-   {
-      wxFAIL_MSG( "how can we edit a label without folder?" );
 
-      allow = false;
+   // should we allow renaming this item?
+   bool allow;
+   {
+      wxLogNull nolog;
+      allow = CanRenameFolder(folder);
    }
-   else
-   {
-      FolderType type = folder->GetType();
-      allow = type != MF_ROOT && type != MF_INBOX;
 
+   if ( folder )
       folder->DecRef();
-   }
 
    if ( !allow )
    {
@@ -2597,12 +2616,27 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
          {
             // just rename the item in the tree - if it's not already done as
             // it would be in the case of in-place label editing
-            wxTreeItemId item = GetTreeItemFromName(folderName);
+            wxString folderNewName = event.GetNewFolderName();
+            wxTreeItemId item = GetTreeItemFromName(folderNewName);
             if ( item.IsOk() )
             {
-               // notice that the event carries the full folder name and we only
-               // want to show the name, i.e. the part after '/' in the tree
-               SetItemText(item, event.GetNewFolderName().AfterLast('/'));
+               // notice that the event carries the full folder name and we
+               // only want to show the name, i.e. the part after '/' in the
+               // tree
+               wxString nameNew = folderNewName.AfterLast('/');
+
+               // keep the old suffix, if any (renaming doesn't normally
+               // change the number of messages in the folder)
+               wxString label = GetItemText(item);
+               wxString name = folderName.AfterLast('/');
+
+               wxString suffix;
+               if ( label.StartsWith(name, &suffix) )
+               {
+                  nameNew += suffix;
+               }
+
+               SetItemText(item, nameNew);
             }
          }
          break;

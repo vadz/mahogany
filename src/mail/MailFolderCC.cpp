@@ -918,7 +918,7 @@ String MailFolder::GetImapSpec(int typeOrig,
 }
 
 static
-wxString GetImapSpecFromFolder(MFolder *folder)
+wxString GetImapSpec(const MFolder *folder)
 {
    return MailFolder::GetImapSpec(folder->GetType(),
                                   folder->GetFlags(),
@@ -1284,7 +1284,6 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &server,
                            String const &login,
                            String const &password)
-            : MailFolderCmn()
 {
    m_Profile = profile;
    if(m_Profile)
@@ -1301,8 +1300,6 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
       m_ImapSpec = path;
    m_Login = login;
    m_Password = password;
-
-   m_chDelimiter = ILLEGAL_DELIMITER;
 
    // do this at the very end as it calls RequestUpdate() and so anything may
    // happen from now on
@@ -1340,6 +1337,8 @@ void MailFolderCC::Init()
    m_expungedPositions = NULL;
 
    m_InCritical = false;
+
+   m_chDelimiter = ILLEGAL_DELIMITER;
 }
 
 MailFolderCC::~MailFolderCC()
@@ -2663,7 +2662,7 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    {
       // they're both IMAP but do they live on the same server?
       // check if host, protocol, user all identical:
-      String specDst = GetImapSpecFromFolder(folder);
+      String specDst = ::GetImapSpec(folder);
       String serverSrc = GetFirstPartFromImapSpec(specDst);
       String serverDst = GetFirstPartFromImapSpec(GetImapSpec());
 
@@ -4939,6 +4938,37 @@ char MailFolderCC::GetFolderDelimiter() const
    ASSERT_MSG( m_chDelimiter != ILLEGAL_DELIMITER, "should have delimiter" );
 
    return m_chDelimiter;
+}
+
+// ----------------------------------------------------------------------------
+// delete folder
+// ----------------------------------------------------------------------------
+
+/* static */
+bool
+MailFolderCC::Rename(const MFolder *mfolder, const String& name)
+{
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Rename(): %s -> %s",
+              mfolder->GetPath().c_str(), name.c_str());
+
+   // I'm unsure if this is needed but I suppose we're going to have problems
+   // if we rename the folder being used - or maybe not?
+   (void)MailFolderCC::CloseFolder(mfolder);
+
+   if ( !mail_rename(NULL,
+                     (char *)::GetImapSpec(mfolder).c_str(),
+                     (char *)name.c_str()) )
+   {
+      wxLogError(_("Failed to rename the mailbox for folder '%s' "
+                   "from '%s' to '%s'."),
+                 mfolder->GetFullName().c_str(),
+                 mfolder->GetPath().c_str(),
+                 name.c_str());
+
+      return false;
+   }
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

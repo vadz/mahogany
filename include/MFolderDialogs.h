@@ -18,6 +18,7 @@
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
+
 class wxWindow;
 class MFolder;
 
@@ -80,5 +81,21 @@ extern bool ShowFolderPropertiesDialog(MFolder *folder,
 */
 extern bool ShowFolderSubfoldersDialog(MFolder *folder,
                                        wxWindow *parent = NULL);
+
+/**
+  asks the user for the new name of the folder: returns new name to show in
+  the tree and the new name for the underlying mailbox; if either of them is
+  empty then it shouldn't be changed
+
+  @param folder folder to rename
+  @param folderName holds the new folder name in the tree on return
+  @param mboxName holds the new mailbox name on return
+  @param parent the parent window
+  @return true if we need to do something, false if the dialog was cancelled
+*/
+extern bool ShowFolderRenameDialog(const MFolder *folder,
+                                   String *folderName,
+                                   String *mboxName,
+                                   wxWindow *parent = NULL);
 
 #endif // _MFOLDERDIALOGS_H

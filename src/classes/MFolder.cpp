@@ -101,6 +101,7 @@ public:
 
    // trivial implementation of base class pure virtuals
    virtual String GetPath() const { return m_path; }
+   virtual void SetPath(const String& path) { m_path = path; }
    virtual String GetServer() const { return m_server; }
    virtual String GetLogin() const { return m_login; }
    virtual String GetPassword() const {return m_password; }
@@ -181,6 +182,7 @@ public:
 
    // implement base class pure virtuals
    virtual String GetPath() const;
+   virtual void SetPath(const String& path);
    virtual String GetServer() const;
    virtual String GetLogin() const;
    virtual String GetPassword() const;
@@ -263,21 +265,16 @@ private:
 };
 
 // a special case of MFolderFromProfile: the root folder
-class MRootFolderFromProfile : public MFolderFromProfile,
-                               public MEventReceiver
+class MRootFolderFromProfile : public MFolderFromProfile
 {
 public:
    // ctor
    MRootFolderFromProfile() : MFolderFromProfile("")
    {
-      m_regCookie = MEventManager::Register(*this, MEventId_FolderTreeChange);
    }
 
    // dtor
-   virtual ~MRootFolderFromProfile()
-   {
-      MEventManager::Deregister(m_regCookie);
-   }
+   virtual ~MRootFolderFromProfile() { }
 
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual FolderType GetType() const { return MF_ROOT; }
@@ -297,12 +294,6 @@ public:
       { FAIL_MSG("can not delete root folder."); }
    virtual bool Rename(const String& /* newName */)
       { FAIL_MSG("can not rename root folder."); return FALSE; }
-
-   // MEventReceiver
-   virtual bool OnMEvent(MEventData& ev);
-
-private:
-   void *m_regCookie;
 };
 
 // ----------------------------------------------------------------------------
@@ -400,23 +391,6 @@ static MFolderCache gs_cache;
 // =============================================================================
 // implementation
 // =============================================================================
-
-// ----------------------------------------------------------------------------
-// MRootFolderFromProfile
-// ----------------------------------------------------------------------------
-
-bool MRootFolderFromProfile::OnMEvent(MEventData& ev)
-{
-   MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
-   if ( event.GetChangeKind() == MEventFolderTreeChangeData::Rename )
-   {
-      MFolderCache::RenameAll(event.GetFolderFullName(),
-                              event.GetNewFolderName());
-   }
-
-   // continue propagating
-   return TRUE;
-}
 
 // -----------------------------------------------------------------------------
 // MFolder
@@ -608,6 +582,11 @@ String MFolderFromProfile::GetName() const
 String MFolderFromProfile::GetPath() const
 {
    return READ_CONFIG(m_profile, MP_FOLDER_PATH);
+}
+
+void MFolderFromProfile::SetPath(const String& path)
+{
+   m_profile->writeEntry(MP_FOLDER_PATH, path);
 }
 
 String MFolderFromProfile::GetServer() const
@@ -911,14 +890,17 @@ bool MFolderFromProfile::Rename(const String& newName)
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
    if ( profile->Rename(name, newName) )
    {
+      String oldName = m_folderName;
+      m_folderName = newFullName;
+
+      MFolderCache::RenameAll(oldName, newFullName);
+
       // notify everybody about the change of the folder name
       MEventManager::Send(
-         new MEventFolderTreeChangeData(m_folderName,
+         new MEventFolderTreeChangeData(oldName,
                                         MEventFolderTreeChangeData::Rename,
                                         newFullName)
          );
-
-      m_folderName = newFullName;
 
       return TRUE;
    }

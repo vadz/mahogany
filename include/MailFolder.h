@@ -343,6 +343,15 @@ public:
    */
    static bool DeleteFolder(const MFolder *mfolder);
 
+   /**
+     Rename the mailbox corresponding to this folder.
+
+     @param mfolder the folder to rename
+     @param name the new name for the mailbox
+     @return true on success  
+   */
+   static bool Rename(const MFolder *mfolder, const String& name);
+
    /** Clear the folder, i.e. delete all messages in it
 
        @return the number of message deleted or -1 on error

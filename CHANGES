@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+26.09.01 VZ: allow renaming folders and mailboxes independently
 24.09.01 VZ: quickly select next unread folder in the tree with Ctrl-Up/Down
 12.09.01 VZ: added "open folder in read only mode" command
 05.09.01 VZ: added support for server side threading

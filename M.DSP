@@ -484,6 +484,10 @@ SOURCE=.\src\gui\wxOptionsDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxRenameDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxSortDialog.cpp
 # End Source File
 # Begin Source File

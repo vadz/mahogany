@@ -91,8 +91,10 @@ public:
    virtual MFolder *OnCreate(MFolder *parent);
       // user wants to delete this folder, return TRUE to allow this
    virtual bool OnDelete(MFolder *folder, bool removeOnly);
-      // user wants to rename this folder to folderNewName, return TRUE to allow
-   virtual bool OnRename(MFolder *folder, const String& folderNewName);
+      // user wants to rename this folder to folderNewName, return TRUE if ok
+   virtual bool OnRename(MFolder *folder,
+                         const String& folderNewName,
+                         const String& mboxNewName = "");
       // user wants to remove all messages from this folder
    virtual void OnClear(MFolder *folder);
       // the folder must be closed, return FALSE to prevent it from closing

@@ -419,6 +419,16 @@ MailFolder::DeleteFolder(const MFolder *mfolder)
 }
 
 /* static */
+bool
+MailFolder::Rename(const MFolder *mfolder, const String& name)
+{
+   if ( !Init() )
+      return false;
+
+   return MailFolderCC::Rename(mfolder, name);
+}
+
+/* static */
 long
 MailFolder::ClearFolder(const MFolder *folder)
 {
@@ -991,14 +1001,14 @@ char MailFolder::GetFolderDelimiter() const
          FAIL_MSG( "Don't call GetFolderDelimiter() for this type" );
          // fall through nevertheless
 
-      case MF_FILE:
-      case MF_MFILE:
       case MF_POP:
          // the folders of this type don't have subfolders at all
          return '\0';
 
+      case MF_FILE:
       case MF_MH:
       case MF_MDIR:
+      case MF_MFILE:
          // the filenames use slash as separator
          return '/';
 
