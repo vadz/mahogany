@@ -370,6 +370,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
                           " while network is offline."),
                           (**i).m_name.c_str()));
             (**i).m_failcount = -1; // shut up
+            mfolder->DecRef();
             continue; // skip to next in list
          }
          MailFolder *imf = MailFolder::OpenFolder( mfolder );

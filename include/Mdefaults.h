@@ -932,7 +932,11 @@
 /// sendmail command
 #define MP_SENDMAILCMD_D "/usr/lib/sendmail -t"
 /// use sendmail?
-#define MP_USE_SENDMAIL_D 0l
+#ifdef OS_UNIX
+#  define MP_USE_SENDMAIL_D 1l
+#else
+#  define MP_USE_SENDMAIL_D 0l
+#endif
 /// tyhe mail server fallback
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server

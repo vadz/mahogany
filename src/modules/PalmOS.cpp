@@ -1688,121 +1688,113 @@ PalmOSModule::StoreEMails(void)
       mf->DecRef();
       return;
    }
-   if(mf->Lock())
+   HeaderInfoList *hil = mf->GetHeaders();
+   if(! hil)
    {
-      HeaderInfoList *hil = mf->GetHeaders();
-      if(! hil)
+      mf->DecRef();
+      return; // nothing to do
+   }
+
+   const HeaderInfo *hi;
+   class Message *msg;
+   for(UIdType i = 0; i < hil->Count(); i++)
+   {
+      hi = (*hil)[i];
+      ASSERT(hi);
+      if((hi->GetStatus() & MailFolder::MSG_STAT_DELETED) != 0)
       {
-         mf->DecRef();
-         return; // nothing to do
+         String tmpstr;
+         tmpstr.Printf(_("Skipping deleted message %lu/%lu"),
+                       (unsigned long)(i+1),
+                       (unsigned long)(hil->Count()));
+         StatusMessage(tmpstr);
       }
-
-      const HeaderInfo *hi;
-      class Message *msg;
-      for(UIdType i = 0; i < hil->Count(); i++)
+      else
       {
-         hi = (*hil)[i];
-         ASSERT(hi);
-         if((hi->GetStatus() & MailFolder::MSG_STAT_DELETED) != 0)
+         struct Mail t;
+         t.to = 0;
+         t.from = 0;
+         t.cc = 0;
+         t.bcc = 0;
+         t.subject = 0;
+         t.replyTo = 0;
+         t.sentTo = 0;
+         t.body = 0;
+         t.dated = 0;
+         
+         msg = mf->GetMessage(hi->GetUId());
+         ASSERT(msg);
+         String tmpstr;
+         tmpstr.Printf( _("Storing message %lu/%lu: %s"),
+                        (unsigned long)(i+1),
+                        (unsigned long)(hil->Count()),
+                        msg->Subject().c_str());
+         StatusMessage(tmpstr);
+         String content;
+         msg->GetHeaderLine("From",content);
+         t.from = strutil_strdup(content);
+         t.subject = strutil_strdup(msg->Subject());
+         msg->GetHeaderLine("To",content);
+         t.to = strutil_strdup(content);
+         msg->Address(content, MAT_REPLYTO);
+         t.replyTo = strutil_strdup(content);
+         t.dated = 1;
+         time_t tt;
+         time(&tt);
+         t.date = *localtime(&tt);
+         
+         content = "";
+         for(int partNo = 0; partNo < msg->CountParts(); partNo++)
          {
-            String tmpstr;
-            tmpstr.Printf(_("Skipping deleted message %lu/%lu"),
-                          (unsigned long)(i+1),
-                          (unsigned long)(hil->Count()));
-            StatusMessage(tmpstr);
+            if(msg->GetPartType(partNo) == Message::MSG_TYPETEXT
+               && ( msg->GetPartMimeType(partNo) == "TEXT/PLAIN"
+                    || msg->GetPartMimeType(partNo) == "TEXT/plain"
+                  )
+               )
+               content << msg->GetPartContent(partNo);
+            else
+               content << '[' << msg->GetPartMimeType(partNo) <<
+                  ']' << '\n';
          }
-         else
+         // msg->WriteToString(content, false /* headers */);
+         String content2;
+         const char *cptr = content.c_str();
+         while(*cptr)
          {
-            struct Mail t;
-            t.to = 0;
-            t.from = 0;
-            t.cc = 0;
-            t.bcc = 0;
-            t.subject = 0;
-            t.replyTo = 0;
-            t.sentTo = 0;
-            t.body = 0;
-            t.dated = 0;
-
-            msg = mf->GetMessage(hi->GetUId());
-            ASSERT(msg);
+            if(*cptr != '\r')
+               content2 << *cptr;
+            cptr++;
+         }
+         strncpy((char *)buffer, content2, 0xffff);
+         buffer[0xfffe] = '\0';
+         t.body = (char *) malloc( strlen((char *)buffer) + 1 );
+         strcpy(t.body, (char *)buffer);
+         int len = pack_Mail(&t,  buffer, 0xffff);
+         if(dlp_WriteRecord(m_PiSocket, m_MailDB, 0, 0, 0, buffer, len, 0) <= 0)
+         {
             String tmpstr;
-            tmpstr.Printf( _("Storing message %lu/%lu: %s"),
+            tmpstr.Printf( _("Could not store message %lu/%lu: %s"),
                            (unsigned long)(i+1),
                            (unsigned long)(hil->Count()),
                            msg->Subject().c_str());
-            StatusMessage(tmpstr);
-            String content;
-            msg->GetHeaderLine("From",content);
-            t.from = strutil_strdup(content);
-            t.subject = strutil_strdup(msg->Subject());
-            msg->GetHeaderLine("To",content);
-            t.to = strutil_strdup(content);
-            msg->Address(content, MAT_REPLYTO);
-            t.replyTo = strutil_strdup(content);
-            t.dated = 1;
-            time_t tt;
-            time(&tt);
-            t.date = *localtime(&tt);
-
-            content = "";
-            for(int partNo = 0; partNo < msg->CountParts(); partNo++)
-            {
-               if(msg->GetPartType(partNo) == Message::MSG_TYPETEXT
-                  && ( msg->GetPartMimeType(partNo) == "TEXT/PLAIN"
-                       || msg->GetPartMimeType(partNo) == "TEXT/plain"
-                     )
-                  )
-                  content << msg->GetPartContent(partNo);
-               else
-                  content << '[' << msg->GetPartMimeType(partNo) <<
-                     ']' << '\n';
-            }
-            // msg->WriteToString(content, false /* headers */);
-            String content2;
-            const char *cptr = content.c_str();
-            while(*cptr)
-            {
-               if(*cptr != '\r')
-                  content2 << *cptr;
-               cptr++;
-            }
-            strncpy((char *)buffer, content2, 0xffff);
-            buffer[0xfffe] = '\0';
-            t.body = (char *) malloc( strlen((char *)buffer) + 1 );
-            strcpy(t.body, (char *)buffer);
-            int len = pack_Mail(&t,  buffer, 0xffff);
-            if(dlp_WriteRecord(m_PiSocket, m_MailDB, 0, 0, 0, buffer, len, 0) <= 0)
-            {
-               String tmpstr;
-               tmpstr.Printf( _("Could not store message %lu/%lu: %s"),
-                              (unsigned long)(i+1),
-                              (unsigned long)(hil->Count()),
-                              msg->Subject().c_str());
-               ErrorMessage(tmpstr);
-               count++;
-            }
-            else
-               mf->DeleteMessage(msg->GetUId());
-            free_Mail(&t);
-            SafeDecRef(msg);
+            ErrorMessage(tmpstr);
+            count++;
          }
+         else
+            mf->DeleteMessage(msg->GetUId());
+         free_Mail(&t);
+         SafeDecRef(msg);
       }
-      if(count > 0)
-      {
-         String tmpstr;
-         tmpstr.Printf(_("Stored %lu/%lu messages on PalmOS device."),
-                       (unsigned long) count,
-                       (unsigned long) hil->Count());
-         StatusMessage((tmpstr));
-      }
-      SafeDecRef(hil);
    }
-   else
+   if(count > 0)
    {
-      ErrorMessage((_("Could not obtain lock for mailbox '%s'."),
-                    mf->GetName().c_str()));
+      String tmpstr;
+      tmpstr.Printf(_("Stored %lu/%lu messages on PalmOS device."),
+                    (unsigned long) count,
+                    (unsigned long) hil->Count());
+      StatusMessage((tmpstr));
    }
+   SafeDecRef(hil);
    SafeDecRef(mf);
 }
 
