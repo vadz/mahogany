@@ -2106,8 +2106,8 @@ bool wxFolderListCtrl::SetPreviewMsg(long idx, UIdType uid)
    m_uidPreviewed = uid;
 
    wxLogTrace(M_TRACE_FV_SELECTION,
-              "SetPreviewMsg(): index = %ld, UID = %08x",
-              idx, uid);
+              "SetPreviewMsg(): index = %ld, UID = %08lx",
+              idx, (unsigned long)uid);
 
    // as folder view calls us itself, no need to notify it
    wxFolderListCtrlBlockOnSelect noselect(this);
@@ -2296,8 +2296,8 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
             self->m_uidFocus = GetUIdFromIndex(index);
 
             wxLogTrace(M_TRACE_FV_SELECTION,
-                       "Updated focused UID, now %08x (index = %ld)",
-                       m_uidFocus, index);
+                       "Updated focused UID, now %08lx (index = %ld)",
+                       (unsigned long)m_uidFocus, index);
          }
       }
 
@@ -2364,8 +2364,9 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
                m_uidFocus = GetUIdFromIndex(m_itemFocus);
 
                wxLogTrace(M_TRACE_FV_SELECTION,
-                          "Updated focused UID from OnIdle(), now %08x (index = %ld)",
-                          m_uidFocus, m_itemFocus);
+                          "Updated focused UID from OnIdle(), now %08lx "
+                          "(index = %ld)",
+                          (unsigned long)m_uidFocus, m_itemFocus);
 
                m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
             }
@@ -2616,8 +2617,8 @@ void wxFolderListCtrl::UpdateFocus()
       }
 
       wxLogTrace(M_TRACE_FV_SELECTION,
-                 "UpdateFocus(): index = %ld, UID = %08x",
-                 itemFocus, m_uidFocus);
+                 "UpdateFocus(): index = %ld, UID = %08lx",
+                 itemFocus, (unsigned long)m_uidFocus);
    }
 }
 
@@ -3500,7 +3501,7 @@ wxFolderView::Update()
 
    m_FolderCtrl->UpdateListing(mf->GetHeaders());
 
-   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Update(): %ld headers.",
+   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Update(): %d headers.",
               m_FolderCtrl->GetItemCount());
 
    m_nDeleted = UID_ILLEGAL;
@@ -4625,8 +4626,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    size_t n,
           count = event.GetCount();
 
-   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge(%u items), now %ld",
-              count, m_FolderCtrl->GetItemCount());
+   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge(%lu items), now %d",
+              (unsigned long)count, m_FolderCtrl->GetItemCount());
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 
@@ -5091,7 +5092,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
       unsigned long w;
       if ( !strWidths[col].ToULong(&w) )
       {
-         wxLogDebug("Invalid width for the column %d", n);
+         wxLogDebug("Invalid width for the column %u", (unsigned)n);
 
          w = 0;
       }
