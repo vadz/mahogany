@@ -19,10 +19,12 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include   "Mpch.h"
+#include "Mpch.h"
 
 #ifndef USE_PCH
-    #include "Mcommon.h"
+   #include "Mcommon.h"
+
+   #include "Message.h"
 #endif
 
 // ============================================================================
