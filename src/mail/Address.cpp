@@ -342,18 +342,34 @@ extern String FilterAddressList(const String& original)
          size_t colon = original.find(_T(':'),each);
          if( colon != String::npos )
          {
-            size_t right = original.find(_T('>'),colon);
-            if( right != String::npos )
+            bool alpha = true;
+            for( size_t word = each+1; word < colon; ++word )
+               alpha &= wxIsalpha(original[word]) != 0;
+            
+            if( alpha )
             {
-               if( original.substr(each+1,colon-(each+1)) == _T("mailto") )
+               size_t right = original.find(_T('>'),colon);
+               if( right != String::npos )
                {
-                  result += _T('<');
-                  result += original.substr(colon+1,right-(colon+1));
-                  result += _T('>');
+                  if( original.substr(each+1,colon-(each+1))
+                     == _T("mailto") )
+                  {
+                     size_t parameters = original.find(_T('?'),colon);
+                     
+                     size_t end;
+                     if( parameters != String::npos && parameters < right )
+                        end = parameters;
+                     else
+                        end = right;
+                        
+                     result += _T('<');
+                     result += original.substr(colon+1,end-(colon+1));
+                     result += _T('>');
+                  }
+   
+                  match = true;
+                  each = right+1;
                }
-
-               match = true;
-               each = right+1;
             }
          }
       }

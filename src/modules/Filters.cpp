@@ -2308,6 +2308,53 @@ static wxArrayString GenerateSuperDomains(const String &domain)
    return result;
 }
 
+static bool WhiteListDomain(RefCounter<AdbBook> book,const String &candidate)
+{
+   wxArrayString domains(GenerateSuperDomains(candidate));
+   
+   for( size_t super = 0; super < domains.GetCount(); ++super )
+   {
+      // FIXME: Grammar without escape sequences
+      if( book->Matches(String(_T("*@"))+domains[super],
+            AdbLookup_EMail,AdbLookup_Match) )
+      {
+         return false;
+      }
+      
+      // Allow whitelisting domain itself
+      if( book->Matches(domains[super],AdbLookup_EMail,AdbLookup_Match) )
+      {
+         return false;
+      }
+   }
+   
+   return true;
+}
+
+static bool WhiteListListId(RefCounter<AdbBook> book,const String &id)
+{
+   size_t left = id.find(_T('<'));
+   if( left != String::npos )
+   {
+      size_t right = id.find(_T('>'),left);
+      if( right != String::npos )
+      {
+         size_t at = id.find(_T('@'),left);
+         
+         size_t begin;
+         if( at != String::npos && at < right )
+            begin = at;
+         else
+            begin = left;
+         
+         if( !WhiteListDomain(book,id.substr(begin+1,right-(begin+1))) )
+            return false;
+      }
+   }
+   
+   return true;
+}
+
 // check whether any address field (sender or recipient) matches whitelist
 // FIXME: Match address groups (wx-*@wxwindows.org) and domains
 static bool CheckWhiteList(const Message *msg)
@@ -2323,7 +2370,7 @@ static bool CheckWhiteList(const Message *msg)
       _T("Cc"),
       _T("Bcc"),
       // List
-      _T("List-Id"),
+      //_T("List-Id"), // List-Id may contain all sorts of garbage (see below)
       _T("List-Help"),
       _T("List-Subscribe"),
       _T("List-Unsubscribe"),
@@ -2368,25 +2415,17 @@ static bool CheckWhiteList(const Message *msg)
    for( Address *candidate = parser->GetFirst(); candidate;
       candidate = parser->GetNext(candidate) )
    {
-      wxArrayString domains(GenerateSuperDomains(candidate->GetDomain()));
-      
-      for( size_t super = 0; super < domains.GetCount(); ++super )
-      {
-         // FIXME: Grammar without escape sequences
-         if( book->Matches(String(_T("*@"))+domains[super],
-               AdbLookup_EMail,AdbLookup_Match) )
-         {
-            return false;
-         }
-         
-         // Allow whitelisting domain itself
-         if( book->Matches(domains[super],AdbLookup_EMail,AdbLookup_Match) )
-         {
-            return false;
-         }
-      }
+      if( !WhiteListDomain(book,candidate->GetDomain()) )
+         return false;
    }
 
+   String id;
+   if( msg->GetHeaderLine(_T("List-Id"),id) )
+   {
+      if( !WhiteListListId(book,id) )
+         return false;
+   }
+   
    return true;
 }
 
