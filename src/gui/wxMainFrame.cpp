@@ -99,8 +99,7 @@ wxMainFrame::OnCloseWindow(wxCloseEvent&)
    // ask the user unless disabled
    if ( MDialog_YesNoDialog(_("Really exit M?"), this,
                             MDIALOG_YESNOTITLE, false,
-                            M_PROFILE_CONFIG_SECTION "/" MC_CONFIRMEXIT,
-                            true) ) {
+                            MC_CONFIRMEXIT) ) {
       delete m_FolderTree;
       delete m_FolderView;
 

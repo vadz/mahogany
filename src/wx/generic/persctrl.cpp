@@ -518,13 +518,15 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     }
 
     // and finally create the check box
+    wxRowColSizer *checkboxSizer = new wxRowColSizer(topSizer, wxSIZER_ROWS);
     c = new wxLayoutConstraints;
     c->width.AsIs();
     c->height.AsIs();
-    c->bottom.SameAs(this, wxBottom);
+    c->bottom.Below(buttonSizer);
     c->centreX.SameAs(buttonSizer, wxCentreX);
     m_checkBox = new wxCheckBox(this, -1, _("Don't show this message again"));
-    m_checkBox->SetConstraints(c);
+    checkboxSizer->SetConstraints(c);
+    checkboxSizer->AddSizerChild(m_checkBox);
 
     Layout();
     Centre(wxBOTH);
@@ -559,27 +561,33 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
     }
 }
 
-int wxPMessageBox(const wxString& configPath,
-                  const wxString& message,
-                  const wxString& caption,
-                  long style,
-                  wxWindow *parent,
-                  bool *wontShowAgain,
-                  wxConfigBase *config)
+// get the path to use
+static void wxPMessageBoxHelper(const wxString& configPath,
+                                wxString& ourPath,
+                                wxString& ourValue)
 {
-    wxString ourPath;
+    ourPath.Empty();
     if ( configPath[0u] != '/' ) {
         // prepend some common prefix
         ourPath = "Messages/";
     }
 
     ourPath += configPath.Before('/');
-    wxString configValue = configPath.Right('/');
+    ourValue = configPath.Right('/');
+}
+
+int wxPMessageBox(const wxString& configPath,
+                  const wxString& message,
+                  const wxString& caption,
+                  long style,
+                  wxWindow *parent,
+                  wxConfigBase *config)
+{
+    wxString ourPath, configValue;
+    wxPMessageBoxHelper(configPath, ourPath, configValue);
 
     wxPHelper persist(ourPath, config);
     persist.ChangePath();
-
-    bool dontShowAgain = false;
 
     long rc; // return code
 
@@ -590,7 +598,6 @@ int wxPMessageBox(const wxString& configPath,
     if ( config && config->Exists(configValue) ) {
         // don't show it, it was disabled
         rc = config->Read(configValue, 0l);
-        dontShowAgain = true;
     }
     else {
         // do show the msg box
@@ -600,14 +607,40 @@ int wxPMessageBox(const wxString& configPath,
         // ignore checkbox value if the dialog was cancelled
         if ( config && rc != wxID_CANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
-            dontShowAgain = true;
             config->Write(configValue, rc);
         }
     }
 
-    if ( wontShowAgain ) {
-       *wontShowAgain = dontShowAgain;
-    }
-
     return rc;
+}
+
+bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
+{
+    wxString ourPath, configValue;
+    wxPMessageBoxHelper(configPath, ourPath, configValue);
+
+    wxPHelper persist(ourPath, config);
+    persist.ChangePath();
+
+    // if config was NULL, wxPHelper already has the global one
+    config = persist.GetConfig();
+
+    return !(config && config->Exists(configValue));
+}
+
+void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
+{
+    wxString ourPath, configValue;
+    wxPMessageBoxHelper(configPath, ourPath, configValue);
+
+    wxPHelper persist(ourPath, config);
+    persist.ChangePath();
+
+    // if config was NULL, wxPHelper already has the global one
+    config = persist.GetConfig();
+
+    if ( config && config->Exists(configValue) ) {
+       // delete stored value
+       config->DeleteEntry(configValue);
+    }
 }

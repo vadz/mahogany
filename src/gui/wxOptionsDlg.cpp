@@ -172,19 +172,13 @@ private:
 class wxOptionsNotebookBase : public wxPNotebook
 {
 public:
-   enum Icon
-   {
-      Icon_Ident,
-      Icon_Compose,
-      Icon_Folders,
-      Icon_Python,
-      Icon_Others,
-      Icon_Max
-   };
+   wxOptionsNotebookBase(const wxString& configPath, wxWindow *parent)
+      : wxPNotebook(configPath, parent, -1) { }
+
    virtual ~wxOptionsNotebookBase();
 };
 
-class wxOptionsNotebook : public wxPNotebook
+class wxOptionsNotebook : public wxOptionsNotebookBase
 {
 public:
    enum Icon
@@ -192,7 +186,9 @@ public:
       Icon_Ident,
       Icon_Compose,
       Icon_Folders,
+#ifdef USE_PYTHON
       Icon_Python,
+#endif
       Icon_Others,
       Icon_Max
    };
@@ -200,7 +196,7 @@ public:
    wxOptionsNotebook(wxWindow *parent);
 };
 
-class wxFolderCreateNotebook : public wxPNotebook
+class wxFolderCreateNotebook : public wxOptionsNotebookBase
 {
 public:
    enum Icon
@@ -221,34 +217,36 @@ public:
       Type_Preferences,
       Type_FolderCreate
    };
-   wxOptionsDialog(wxFrame *parent,
-                   Types type=Type_Preferences);
 
-   //    set dirty flag because our data somehow changed
+   wxOptionsDialog(wxFrame *parent,
+                   Types type = Type_Preferences);
+
+   // set dirty flag because our data somehow changed
    void SetDirty() { m_bDirty = TRUE; m_btnApply->Enable(TRUE); }
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
-   // callback   s
+   // callbacks
    void OnOK(wxCommandEvent& event);
    void OnApply(wxCommandEvent& event);
    void OnCancel(wxCommandEvent& event);
+
 protected:
    /// ask for test
    void DoTest(void);
    
 private:
    /// remember which type of dialog we are
-   Types       m_type;
+   Types        m_type;
    wxPNotebook *m_notebook;
    wxButton    *m_btnOk,
                *m_btnApply;
    wxTextCtrl  *m_folderName; // only used for type Type_FolderCreate
-   bool        m_bDirty;     // any changes?
+   bool         m_bDirty;     // any changes?
 
    DECLARE_EVENT_TABLE()
-      };
+};
 
 
 class wxOptionsPage : public wxPanel
@@ -399,6 +397,9 @@ public:
       : wxOptionsPage(parent, _("Others"),
                       profile,
                       ConfigField_OthersFirst, ConfigField_OthersLast) { }
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
 
 private:
 };
@@ -560,13 +561,17 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              ProfileBase *profile,
                              size_t nFirst,
                              size_t nLast)
-   : wxPanel(notebook, -1)
+             : wxPanel(notebook, -1)
 {
+   int image = notebook->GetPageCount();
+
    // FIXME: Why on earth does wxNotebook increment the GetPageCount()
    // counter before we do AddPage() ? It gets incremented in
    // wxPanel(notebook,-1)!!! This might be different for non-wxGTK!?
-      
-   int image = notebook->GetPageCount()-1;
+#ifdef __WXGTK__
+   image--;
+#endif
+
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
    m_Profile = profile;
@@ -1063,7 +1068,7 @@ bool wxOptionsPage::TransferDataFromWindow()
    return TRUE;
 }
 
-#if 0 // unused now
+#if 0 // unused for now
 // ----------------------------------------------------------------------------
 // wxOptionsPageCompose
 // ----------------------------------------------------------------------------
@@ -1106,20 +1111,36 @@ bool wxOptionsPagePython::TransferDataFromWindow()
 }
 
 #endif // USE_PYTHON
+#endif // 0 (not yet implemented)
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageOthers
 // ----------------------------------------------------------------------------
 bool wxOptionsPageOthers::TransferDataToWindow()
 {
-   return TRUE;
+   // if the user checked "don't ask me again" checkbox in the message box
+   // these setting might be out of date - synchronize
+
+   // TODO this should be table based too probably...
+   if ( !wxPMessageBoxEnabled(MC_CONFIRMEXIT) )
+      m_Profile->writeEntry(MC_CONFIRMEXIT, false);
+
+   return wxOptionsPage::TransferDataToWindow();
 }
 
 bool wxOptionsPageOthers::TransferDataFromWindow()
 {
-   return TRUE;
+   bool rc = wxOptionsPage::TransferDataFromWindow();
+   if ( rc )
+   {
+      // no if the user check "confirm exit" checkbox we must reenable the
+      // message box by erasing the stored answer to it
+      if ( m_Profile->readEntry(MC_CONFIRMEXIT, false) )
+         wxPMessageBoxEnable(MC_CONFIRMEXIT);
+   }
+
+   return rc;
 }
-#endif // 0 (not yet implemented)
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageFolders
@@ -1340,6 +1361,8 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent,
    m_btnApply->SetConstraints(c);
    m_btnApply->Enable(FALSE);  // initially, there is nothing to apply
 
+   Layout();
+
    // set position
    // ------------
    SetSizeHints(wDlg, hDlg);
@@ -1452,7 +1475,7 @@ void wxBrowseButton::DoBrowse()
 
 // create the control and add pages too
 wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
-   : wxPNotebook("OptionsNotebook", parent, -1)
+                 : wxOptionsNotebookBase("OptionsNotebook", parent)
 {
    // create and fill the imagelist
    static const char *aszImages[] =
@@ -1490,7 +1513,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    
 // create the control and add pages too
 wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
-   : wxPNotebook("OptionsNotebook", parent, -1)
+                      : wxOptionsNotebookBase("FolderCreateNotebook", parent)
 {
    // create and fill the imagelist
    static const char *aszImages[] =
@@ -1523,8 +1546,11 @@ wxOptionsNotebookBase::~wxOptionsNotebookBase()
 //----------------------------------------------------------------------------
 // our public interface is just this simple function
 //----------------------------------------------------------------------------
-void ShowOptionsDialog(wxFrame *parent) { wxOptionsDialog dlg(parent);
-(void)dlg.ShowModal(); }
+void ShowOptionsDialog(wxFrame *parent)
+{
+   wxOptionsDialog dlg(parent);
+   (void)dlg.ShowModal();
+}
 
 void ShowFolderCreateDialog(wxFrame *parent)
 {

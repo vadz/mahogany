@@ -352,28 +352,16 @@ MDialog_YesNoDialog(const char *message,
                     MWindow *parent,
                     const char *title,
                     bool /* YesDefault */,
-                    const char *configPath,
-                    bool configBool)
+                    const char *configPath)
 {
    wxString caption = "M: ";
    caption += title;
 
    if ( configPath != NULL )
    {
-      bool wontShowAgain;
-      wxString path = configBool ? wxString(configPath).Right('/') : wxString(configPath);
-
-      bool rc = wxPMessageBox(path, message, caption,
-                              wxYES_NO | wxICON_QUESTION | wxCENTRE,
-                              GetParent(parent), &wontShowAgain) == wxYES;
-
-      if ( configBool && wontShowAgain )
-      {
-         // remember it in other place too
-         wxConfigBase::Get()->Write(configPath, (long)0);
-      }
-
-      return rc;
+      return wxPMessageBox(configPath, message, caption,
+                           wxYES_NO | wxICON_QUESTION | wxCENTRE,
+                           GetParent(parent)) == wxYES;
    }
    else
    {

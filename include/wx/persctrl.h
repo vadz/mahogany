@@ -193,7 +193,15 @@ extern WXDLLEXPORT int wxPMessageBox(const wxString& configPath,
                                      const wxString& caption,
                                      long style = wxYES_NO | wxICON_QUESTION,
                                      wxWindow *parent = NULL,
-                                     bool *wontShowAgain = NULL,
                                      wxConfigBase *config = NULL);
+
+// was the message box disabled?
+extern WXDLLEXPORT bool wxPMessageBoxEnabled(const wxString& configPath,
+                                             wxConfigBase *config = NULL);
+
+// make sure that the next call to wxPMessageBox(configPath) will show the
+// message box (by erasing the stored answer in it)
+extern WXDLLEXPORT void wxPMessageBoxEnable(const wxString& configPath,
+                                            wxConfigBase *config = NULL);
 
 #endif // _WX_PWINDOW_H_

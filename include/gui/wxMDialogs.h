@@ -82,10 +82,6 @@ void   MDialog_Message(char const *message,
        @param title   title for message box window
        @param YesDefault true if Yes button is default, false for No as default
        @param configPath the profile path to use (doesn't use profile if NULL)
-       @param configBool indicates that configPath points to a value which takes
-              boolean values and is useful when configPath can also be set from
-              some other location (options dlg...) - otherwise, don't give this
-              parameters and everything is managed automatically.
 
        @return true if Yes was selected
    */
@@ -93,8 +89,7 @@ bool   MDialog_YesNoDialog(char const *message,
                            MWindow *parent = NULL,
                            char const *title = MDIALOG_YESNOTITLE,
                            bool YesDefault = true,
-                           const char *configPath = NULL,
-                           bool configBool = false);
+                           const char *configPath = NULL);
 
 /** Filerequester
        @param message the text to display
