@@ -342,6 +342,89 @@ static PyObject *_wrap_MailFolder_UnDeleteMessage(PyObject *self, PyObject *args
     return _resultobj;
 }
 
+#define MailFolder_SetSequenceFlag(_swigobj,_swigarg0,_swigarg1,_swigarg2)  (_swigobj->SetSequenceFlag(_swigarg0,_swigarg1,_swigarg2))
+static PyObject *_wrap_MailFolder_SetSequenceFlag(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MailFolder * _arg0;
+    String * _arg1;
+    int  _arg2;
+    bool  _arg3;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+    int tempbool3;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ssii:MailFolder_SetSequenceFlag",&_argc0,&_argc1,&_arg2,&tempbool3)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_SetSequenceFlag. Expected _MailFolder_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MailFolder_SetSequenceFlag. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _arg3 = (bool ) tempbool3;
+    MailFolder_SetSequenceFlag(_arg0,*_arg1,_arg2,_arg3);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define MailFolder_AppendMessage(_swigobj,_swigarg0)  (_swigobj->AppendMessage(_swigarg0))
+static PyObject *_wrap_MailFolder_AppendMessage(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MailFolder * _arg0;
+    Message * _arg1;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ss:MailFolder_AppendMessage",&_argc0,&_argc1)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_AppendMessage. Expected _MailFolder_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MailFolder_AppendMessage. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    MailFolder_AppendMessage(_arg0,*_arg1);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
+#define MailFolder_ExpungeMessages(_swigobj)  (_swigobj->ExpungeMessages())
+static PyObject *_wrap_MailFolder_ExpungeMessages(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MailFolder * _arg0;
+    char * _argc0 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:MailFolder_ExpungeMessages",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_ExpungeMessages. Expected _MailFolder_p.");
+        return NULL;
+        }
+    }
+    MailFolder_ExpungeMessages(_arg0);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
 #define MailFolder_GetProfile(_swigobj)  (_swigobj->GetProfile())
 static PyObject *_wrap_MailFolder_GetProfile(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -411,6 +494,9 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_GetUpdateInterval", _wrap_MailFolder_GetUpdateInterval, 1 },
 	 { "MailFolder_GetClassName", _wrap_MailFolder_GetClassName, 1 },
 	 { "MailFolder_GetProfile", _wrap_MailFolder_GetProfile, 1 },
+	 { "MailFolder_ExpungeMessages", _wrap_MailFolder_ExpungeMessages, 1 },
+	 { "MailFolder_AppendMessage", _wrap_MailFolder_AppendMessage, 1 },
+	 { "MailFolder_SetSequenceFlag", _wrap_MailFolder_SetSequenceFlag, 1 },
 	 { "MailFolder_UnDeleteMessage", _wrap_MailFolder_UnDeleteMessage, 1 },
 	 { "MailFolder_DeleteMessage", _wrap_MailFolder_DeleteMessage, 1 },
 	 { "MailFolder_GetMessage", _wrap_MailFolder_GetMessage, 1 },

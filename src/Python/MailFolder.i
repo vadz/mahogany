@@ -144,9 +144,9 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual void SetSequenceFlag(String const &sequence,
+   virtual void SetSequenceFlag(String &sequence,
                                 int flag,
-                                bool set = true);
+                                bool set);
 
    /** Appends the message to this folder.
        @param msg the message to append

@@ -180,6 +180,24 @@
 #define   MP_CREATE_PROFILES   "CreateProfileFiles"
 /// umask setting for normal files
 #define   MP_UMASK               "Umask"
+/**@name Printer settings */
+//@{
+/// Command
+#define MP_PRINT_COMMAND   "PrintCommand"
+/// Orientation
+#define MP_PRINT_ORIENTATION "PrintOrientation"
+/// Scaling
+#define MP_PRINT_SCALING   "PrintScaling"
+/// Preview command
+#define MP_PRINT_PREVIEWCMD   "PrintPreviewCommand"
+/// Printout file
+#define MP_PRINT_FILE         "PrintFile"
+/// Translation X
+#define MP_PRINT_TRANS_X      "PrintTranslationX"
+/// Translation Y
+#define MP_PRINT_TRANS_Y      "PrintTranslationY"
+/// FIXME What about paper format?
+//@}
 /**@name for BBDB address book support */
 //@{
 /// generate unique names
@@ -346,7 +364,6 @@
 /// size
 #define   MP_FLC_SIZECOL   "ColumnSize"
 //@}
-/// the wildcard for save dialog
 //@}
 //@}
 
@@ -445,6 +462,24 @@
 #define   MP_CREATE_PROFILES_D   0
 /// umask setting for normal files
 #define   MP_UMASK_D               022
+/**@name Printer settings */
+//@{
+/// Command
+#define MP_PRINT_COMMAND   "PrintCommand"
+/// Orientation
+#define MP_PRINT_ORIENTATION "PrintOrientation"
+/// Scaling
+#define MP_PRINT_SCALING   "PrintScaling"
+/// Preview command
+#define MP_PRINT_PREVIEWCMD   "PrintPreviewCommand"
+/// Printout file
+#define MP_PRINT_FILE         "PrintFile"
+/// Translation X
+#define MP_PRINT_TRANS_X      "PrintTranslationX"
+/// Translation Y
+#define MP_PRINT_TRANS_Y      "PrintTranslationY"
+/// FIXME What about paper format?
+//@}
 /**@name for BBDB address book support */
 //@{
 /// generate unique names

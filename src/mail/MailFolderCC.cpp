@@ -229,9 +229,11 @@ MailFolderCC::Open(void)
 
    AddToMap(m_MailStream); // now we are known
 
+   SetDefaultObj();  // imap4r1 does temporary strings
    mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
    ProcessEventQueue();
-
+   SetDefaultObj(false);
+   
 #if 0
    if(numOfMessages > 0)
    {
@@ -524,19 +526,27 @@ MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
    StreamConnectionList::iterator i;
-   if(stream)
-   {
-      for(i = streamList.begin(); i != streamList.end(); i++)
+   for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i)->stream == stream )
          return (*i)->folder;
+   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream 
+      for e.g. mail_status(), that is difficult to handle here, we
+      must compare the name parameter which might not be 100%
+      identical, but we can check the hostname for identity and the
+      path. However, that seems a bit far-fetched for now, so I just
+      make sure that streamListDefaultObj gets set before any call to
+      mail_status(). If that doesn't work, we need to parse the name
+      string for hostname, portnumber and path and compare these.
+      //FIXME: This might be an issue for MT code.
+   */
+   if(name)
+   {
+      for(i = streamList.begin(); i != streamList.end(); i++)
+      {
+         if( (*i)->name == name )  // (*i)->name is of type String,  so we can
+            return (*i)->folder;
+      }
    }
-   else // IMAP can cause callbacks with stream==NULL but the path
-        // will match.  One more of the c-client mysteries...
-      if(name)
-         for(i = streamList.begin(); i != streamList.end(); i++)
-            if( (*i)->name == name )  // (*i)->name is of type String,  so we can
-               return (*i)->folder;
-   
    if(streamListDefaultObj)
    {
       LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));

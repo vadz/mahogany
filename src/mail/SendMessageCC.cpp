@@ -7,6 +7,33 @@
  *                                                                  *
  *******************************************************************/
 
+/*
+  This is just a quick note I put here to remind me how to do the
+  application/remote-printing support for sending faxes via
+  remote-printer.12345@iddd.tpc.int.
+
+      puts $f "Content-Type: application/remote-printing"
+    puts $f ""
+    puts $f "Recipient:    $recipient(name)"
+    puts $f "Title:        "
+    puts $f "Organization: $recipient(organisation)"
+    puts $f "Address:      "
+    puts $f "Telephone:     "
+    puts $f "Facsimile:    +$recipient(country) $recipient(local) $recipient(num
+ber)"
+    puts $f "Email:        $recipient(email)" 
+    puts $f ""
+    puts $f "Originator:   $user(name)"
+    puts $f "Organization: $user(organisation)"
+    puts $f "Telephone:    $user(tel)"
+    puts $f "Facsimile:    $user(fax)"
+    puts $f "Email:        $user(email)" 
+ 
+
+
+
+ */
+
 #ifdef __GNUG__
 #   pragma implementation "SendMessageCC.h"
 #endif
