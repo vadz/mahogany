@@ -222,12 +222,19 @@ dnl set the extra include and lib directories
 LDFLAGS="$LDFLAGS -L$BUILDDIR/extra/lib"
 CPPFLAGS="$CPPFLAGS -D__WXGTK__ -I$BUILDDIR/extra/include"
 
+dnl if the environment variable "wx" is set, it contains the top level
+dnl wxWindows directory - this is used for building with uninstalled copy of
+dnl wxWin, i.e. only when we're not using wx-config
+if test $USE_WXCONFIG != 1; then
+	CPPFLAGS="$CPPFLAGS -I$wx/include -I$wx/gtk/include"
+fi
+
 dnl add all extra/src directories to the search paths
 EXTRA_SRC_LIB=
 EXTRA_SRC_INC=
 for i in `pwd`/extra/src/*
 do
-	if test -d $i ; then
+	if test "x$i" != "xCVS" -a -d $i; then
 		LIBS="$LIBS -L$i"
 		CPPFLAGS="$CPPFLAGS -I$i"
 	fi
