@@ -712,7 +712,9 @@ void wxFolderTreeImpl::DoFolderDelete()
 
    if ( m_sink->OnDelete(folder) )
    {
-     wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
+      if(folder == m_current->GetFolder())
+         m_current = NULL;
+      wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
    }
 
    folder->DecRef();
