@@ -717,6 +717,7 @@ MailFolderCmn::ReplyMessages(const INTARRAY *selections,
    {
       msg = GetMessage((*selections)[i]);
       ReplyMessage(msg, flags, GetProfile(), parent);
+      msg->DecRef();
       SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
@@ -733,6 +734,7 @@ MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
    {
       msg = GetMessage((*selections)[i]);
       ForwardMessage(msg, GetProfile(), parent);
+      msg->DecRef();
    }
 }
 

@@ -476,23 +476,23 @@ MAppBase::OnStartup()
    // create and show the main program window
    CreateTopLevelFrame();
 
-      // it doesn't seem to do anything under Windows (though it should...)
+   // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
-      // extend path for commands, look in M's dirs first
-      tmp = "";
-      tmp += GetLocalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      tmp = GetGlobalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      if(getenv("PATH"))
-         tmp += getenv("PATH");
-      tmp="PATH="+tmp;
-      char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
-      putenv(pathstring);
+   // extend path for commands, look in M's dirs first
+   tmp = "";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   if(getenv("PATH"))
+      tmp += getenv("PATH");
+   tmp="PATH="+tmp;
+   char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
+   putenv(pathstring);
 #  endif //OS_WIN
-
+   
    // initialise python interpreter
 #  ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so

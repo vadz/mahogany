@@ -40,7 +40,7 @@ class FilterRule : public MObjectRC
 {
 public:
    /** Apply the filter to a single message, returns 0 on success. */
-   virtual int Apply(class Message *msg) const = 0;
+   virtual int Apply(class MailFolder *mf, UIdType uid) const = 0;
    /** Apply the filter to the messages in a folder.
        @param folder - the MailFolder object
        @param NewOnly - if true, apply it only to new messages

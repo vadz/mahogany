@@ -16,6 +16,8 @@
 #   include   "strutil.h"
 #   include   "Mcommon.h"
 #   include   "kbList.h"
+#   include   "Message.h"
+#   include   "MailFolder.h"
 #endif
 
 #include "MModule.h"
@@ -27,6 +29,16 @@
 
 #include "modules/Filters.h"
 
+class Value;
+class ArgList;
+class Parser;
+
+/// Type for functions to be called.
+extern "C" {
+   typedef Value (* FunctionPointer)(ArgList *args, Parser *p);
+};
+
+
 /** Parsed representation of a filtering rule to be applied to a
     message.
 */
@@ -34,7 +46,7 @@ class FilterRuleImpl : public FilterRule
 {
 public:
    /** Apply the filter to a single message, returns 0 on success. */
-   virtual int Apply(class Message *msg) const;
+   virtual int Apply(class MailFolder *mf, UIdType uid) const;
    /** Apply the filter to the messages in a folder.
        @param folder - the MailFolder object
        @param NewOnly - if true, apply it only to new messages
@@ -186,6 +198,25 @@ public:
    virtual void Error(const String &error) = 0;
    /// Print out a message.
    virtual void Output(const String &msg) = 0;
+   /** Returns a list of known function definitions. */
+   virtual class FunctionList *GetFunctionList(void) = 0;
+   /// check if a function is already defined
+   virtual class FunctionDefinition *FindFunction(const String &name) = 0;
+   /// Defines a function and overrides a given one
+   virtual class FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr) = 0;
+
+
+   /**@name for runtime information */
+   //@{
+   /// Set the message and folder to operate on:
+   virtual void SetMessage(class MailFolder *folder,
+                           UIdType uid = UID_ILLEGAL) = 0;
+   /// Obtain the mailfolder to operate on:
+   virtual class MailFolder * GetFolder(void) = 0;
+   /// Obtain the message UId to operate on:
+   virtual UIdType GetMessageUId(void) = 0;
+   //@}
+
    /// virtual destructor
    virtual ~Parser(void) {}
    /** Constructor function, returns a valid Parser object.
@@ -281,12 +312,6 @@ private:
 class ParserImpl : public Parser
 {
 public:
-   ParserImpl(const String &input, MInterface *interface)
-      {
-         m_Input = input;
-         Rewind();
-         m_MInterface = interface;
-      }
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
    class Block      * ParseBlock(void);
@@ -308,6 +333,32 @@ public:
       {
          m_MInterface->Message(msg,NULL,_("Parser output"));
       }
+   /// Returns a list of known function definitions. 
+   virtual class FunctionList *GetFunctionList(void)
+      { return m_FunctionList; }
+   /// check if a function is already defined
+   virtual class FunctionDefinition *FindFunction(const String &name);
+   /// Defines a function and overrides a given one
+   virtual class FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr);
+
+
+   /**@name for runtime information */
+   //@{
+   /// Set the message and folder to operate on:
+   virtual void SetMessage(class MailFolder *folder = NULL,
+                           UIdType uid = UID_ILLEGAL)
+      {
+         SafeDecRef(m_MailFolder);
+         m_MailFolder = folder;
+         SafeIncRef(m_MailFolder);
+         m_MessageUId = uid;
+      }
+   /// Obtain the mailfolder to operate on:
+   virtual class MailFolder * GetFolder(void) { SafeIncRef(m_MailFolder); return m_MailFolder; }
+   /// Obtain the message UId to operate on:
+   virtual UIdType GetMessageUId(void) { return m_MessageUId; }
+   //@}
+
 protected:
    inline void EatWhiteSpace(void)
       { while(isspace(m_Input[m_Position])) m_Position++; }
@@ -315,10 +366,20 @@ protected:
       { return m_Input[m_Position]; }
    inline const char CharInc(void)
       { return m_Input[m_Position++]; }
+   ParserImpl(const String &input, MInterface *interface);
+   ~ParserImpl();
+
+   friend class Parser;
 private:
    String m_Input;
    size_t m_Position;
    MInterface *m_MInterface;
+   class FunctionList *m_FunctionList;
+
+   UIdType m_MessageUId;
+   MailFolder *m_MailFolder;
+   
+   GCC_DTOR_WARN_OFF();
 };
 
 // ----------------------------------------------------------------------------
@@ -503,39 +564,66 @@ private:
 
 /** Functioncall handling */
 
-extern "C" {
-   typedef Value (*FunctionPointer)(ArgList *args, Parser *p);
-};
+/** This little class contains the definition of a function,
+    i.e. links its name to a bit of C code and maintains a use
+    count. */
 
-struct FunctionDefinition
+class FunctionDefinition : public MObject
 {
-   String          m_Name;
-   FunctionPointer m_FunctionPtr;
-   size_t          m_UseCount;
+public:
+   static FunctionDefinition * Create(const String &name,
+                                      FunctionPointer fptr)
+      { return new FunctionDefinition(name, fptr); }
 
+   bool DecRef(void)
+      {
+         MOcheck();
+         if(--m_UseCount == 0)
+         {
+            delete this;
+            return true;
+         }
+         else
+            return false;
+      }
+   void IncRef(void)
+      {
+         MOcheck();
+         m_UseCount++;
+      }
+   ~FunctionDefinition()
+      {
+         MOcheck();
+         ASSERT(m_UseCount == 0); // only used by kbList so far
+      }
+
+   inline const String &GetName(void) const { return m_Name; }
+   inline FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
+private:
    FunctionDefinition(const String &name, FunctionPointer fptr)
       {
          m_Name = name; m_FunctionPtr = fptr; m_UseCount = 0;
          ASSERT(m_FunctionPtr);
+         m_UseCount = 1;
       }
-   ~FunctionDefinition()
-      {
-         ASSERT(m_UseCount == 0);
-      }
+   int             m_UseCount;
+   String          m_Name;
+   FunctionPointer m_FunctionPtr;
 };
 
 
 KBLIST_DEFINE(FunctionList, FunctionDefinition);
 
+/** This class represents a function call. It also maintains, via
+    static member functions, a table of known functions. */
 class FunctionCall : public SyntaxNode
 {
 public:
    FunctionCall(const String &name, ArgList *args, Parser *p);
    ~FunctionCall()
       {
-         FunctionDefinition *fd = FindFunction(m_name);
-         ASSERT(fd && fd->m_UseCount > 0);
-         fd->m_UseCount--;// decref the function
+         ASSERT(m_fd);
+         m_fd->DecRef();
          delete m_args;
       }
    virtual Value Evaluate() const;
@@ -544,23 +632,11 @@ public:
       { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
 #endif    
 
-   static bool AddFunction(const String &name, FunctionPointer fptr);
-
 private:
-   static FunctionDefinition *FindFunction(const String &name);
-
-   static FunctionList *GetFunctionList(void)
-      {
-         if(ms_Functions == NULL)
-            ms_Functions = new FunctionList;
-         return ms_Functions;
-      }
-   
    FunctionPointer m_function;
+   FunctionDefinition *m_fd;
    ArgList *m_args;
    String  m_name;
-
-   static FunctionList *ms_Functions;
 };
 
 FunctionCall::FunctionCall(const String &name, ArgList *args,
@@ -569,41 +645,10 @@ FunctionCall::FunctionCall(const String &name, ArgList *args,
 {
    m_name = name;
    m_args = args;
-   FunctionDefinition *fd = FindFunction(name);
-   m_function = fd->m_FunctionPtr;
-   fd->m_UseCount++;
+   m_fd = p->FindFunction(name);
+   m_function = m_fd->GetFPtr();
 }
    
-
-/* static */
-FunctionList * FunctionCall::ms_Functions = NULL;
-
-/* static */
-FunctionDefinition *
-FunctionCall::FindFunction(const String &name)
-{
-   FunctionList *fl = GetFunctionList();
-   
-   for(FunctionList::iterator i = fl->begin();
-       i != fl->end();
-       i++)
-      if(name == (**i).m_Name)
-         return *i;
-   return NULL;
-}
-
-/* static */
-bool
-FunctionCall::AddFunction(const String &name, FunctionPointer fptr)
-{
-   FunctionList *fl = GetFunctionList();
-   FunctionDefinition *fd = FindFunction(name);
-   if(fd)
-      return false; // already exists
-   fd = new FunctionDefinition(name, fptr);
-   fl->push_back(fd);
-   return true;
-}
 
 Value
 FunctionCall::Evaluate() const
@@ -742,6 +787,65 @@ Parser::Create(const String &input, MInterface *i)
 {
    return new ParserImpl(input, i);
 }
+
+
+ParserImpl::ParserImpl(const String &input, MInterface *interface)
+{
+   m_Input = input;
+   Rewind();
+   m_MInterface = interface;
+   m_FunctionList = new FunctionList(false); // must clean up manually
+   m_MailFolder = NULL;
+   m_MessageUId = UID_ILLEGAL;
+}
+
+ParserImpl::~ParserImpl()
+{
+   /* Make sure all function definitions are gone. They are
+      refcounted, so the kbList cannot clean them up properly and
+      would trigger asserts if it tried. */
+   FunctionList *fl = GetFunctionList();
+   for(FunctionList::iterator i = fl->begin();
+       i != fl->end();
+       i++)
+   {
+      ASSERT( (*i)->DecRef() == true );
+      fl->erase(i);
+   }
+   delete m_FunctionList;
+
+   SafeDecRef(m_MailFolder);
+}
+
+
+FunctionDefinition *
+ParserImpl::DefineFunction(const String &name, FunctionPointer fptr)
+{
+   FunctionList *fl = GetFunctionList();
+   FunctionDefinition *fd = FindFunction(name);
+   if(fd)
+   {
+      fd->DecRef();
+      return NULL; // already exists, not overridden
+   }
+   fd = FunctionDefinition::Create(name, fptr);
+   fl->push_back(fd);
+   return fd;
+}
+
+FunctionDefinition *
+ParserImpl::FindFunction(const String &name)
+{
+   FunctionList *fl = GetFunctionList();
+   
+   for(FunctionList::iterator i = fl->begin();
+       i != fl->end();
+       i++)
+      if(name == (**i).GetName())
+         return *i;
+   return NULL;
+}
+
 
 void
 ParserImpl::Error(const String &error)
@@ -1253,20 +1357,26 @@ extern "C"
  * FilterRuleImpl - the class representing a program
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-int FilterRuleImpl::Apply(class Message *msg) const
+int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
 {
-   ASSERT(msg);
-//   m_Parser->SetMessage(msg);
-   Value rc = m_Program->Evaluate();
-//   m_Parser->SetMessage(NULL);
-   return 1; //FIXME
+   ASSERT(mf);
+   ASSERT(uid != UID_ILLEGAL);
+   if(mf->Lock())
+   {
+      m_Parser->SetMessage(mf, uid);
+      Value rc = m_Program->Evaluate();
+      m_Parser->SetMessage(NULL);
+      return (int) rc.GetNumber();
+   }
+   else
+      return 0; //FIXME: error message?
 }
 
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *interface,
                                MModule_Filters *mod) 
 {
-   m_Parser = new ParserImpl(filterrule, interface);
+   m_Parser = Parser::Create(filterrule, interface);
    m_Program = m_Parser->Parse();
    ASSERT(mod);
    m_FilterModule = mod;
@@ -1297,10 +1407,10 @@ int FilterTest(MInterface *interface)
    String program = interface->GetMApplication()->
       GetProfile()->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print(); ");
    
-   FunctionCall::AddFunction("print", echo_func);
-   FunctionCall::AddFunction("Five", func_rFive);
 
    Parser_obj p(program, interface);
+   ASSERT(p->DefineFunction("print", echo_func) != NULL);
+   ASSERT(p->DefineFunction("Five", func_rFive) != NULL);
    String msg;
    if(p)
    {

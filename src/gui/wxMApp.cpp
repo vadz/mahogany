@@ -563,7 +563,7 @@ wxMApp::OnInit()
       }
 #endif
 
-      // restore our preferred printer settings
+      // restore our favourite preferred printer settings
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
     (*m_PrintData) = * wxThePrintSetupData;
 #endif
