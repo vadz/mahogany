@@ -289,6 +289,9 @@ protected:
    void CreateViewerBar();
    void DeleteViewerBar();
 
+   // update the state of the viewer bar
+   void UpdateViewerBar();
+
 private:
    // the associated folder view (never NULL)
    wxFolderView *m_folderView;
@@ -304,6 +307,13 @@ private:
 
    // the event handler to hook the kbd input (NULL initially, !NULL later)
    class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
+
+   // the event table ids
+   enum
+   {
+      Button_Close = 100,
+      Choice_Viewer
+   };
 
    DECLARE_EVENT_TABLE()
 };
@@ -878,8 +888,9 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
    EVT_SIZE(wxFolderMsgWindow::OnSize)
-   EVT_BUTTON(-1, wxFolderMsgWindow::OnButton)
-   EVT_CHOICE(-1, wxFolderMsgWindow::OnChoice)
+
+   EVT_BUTTON(wxFolderMsgWindow::Button_Close, wxFolderMsgWindow::OnButton)
+   EVT_CHOICE(wxFolderMsgWindow::Choice_Viewer, wxFolderMsgWindow::OnChoice)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -971,7 +982,7 @@ void wxFolderMsgWindow::CreateViewerBar()
 
    // create the choice control for actually choosing the viewer and fill it
    // with all the available ones
-   wxChoice *choice = new wxChoice(m_winBar, -1);
+   wxChoice *choice = new wxChoice(m_winBar, Choice_Viewer);
 
    wxArrayString descViewers;
    size_t count = MessageView::GetAllAvailableViewers(&m_namesViewers,
@@ -982,20 +993,9 @@ void wxFolderMsgWindow::CreateViewerBar()
       choice->Append(descViewers[n]);
    }
 
-   Profile_obj profile(m_folderView->GetFolderProfile());
-
-   wxString name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
-   int curViewer = m_namesViewers.Index(name);
-   if ( curViewer != -1 )
-   {
-      choice->SetSelection(curViewer);
-   }
-   else
-   {
-      FAIL_MSG( "current viewer not in the list of all viewers?" );
-   }
-
    choice->SetSize(choice->GetBestSize());
+
+   UpdateViewerBar();
 
    sizer->Add(choice, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
 
@@ -1011,7 +1011,7 @@ void wxFolderMsgWindow::CreateViewerBar()
    wxBitmapButton *btnClose = new wxBitmapButton
                                   (
                                     m_winBar,
-                                    wxID_CLOSE,
+                                    Button_Close,
                                     bmp,
                                     wxDefaultPosition,
                                     wxDefaultSize,
@@ -1036,6 +1036,31 @@ void wxFolderMsgWindow::DeleteViewerBar()
    m_winBar = NULL;
 }
 
+void wxFolderMsgWindow::UpdateViewerBar()
+{
+   Profile_obj profile(m_folderView->GetFolderProfile());
+
+   wxString name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+   int curViewer = m_namesViewers.Index(name);
+   if ( curViewer != -1 )
+   {
+      wxChoice *choice = wxStaticCast(FindWindow(Choice_Viewer), wxChoice);
+
+      if ( choice )
+      {
+         choice->SetSelection(curViewer);
+      }
+      else
+      {
+         FAIL_MSG( "where is out choice control?" );
+      }
+   }
+   else
+   {
+      FAIL_MSG( "current viewer not in the list of all viewers?" );
+   }
+}
+
 void wxFolderMsgWindow::UpdateOptions()
 {
    if ( !m_winViewer )
@@ -1055,6 +1080,12 @@ void wxFolderMsgWindow::UpdateOptions()
          CreateViewerBar();
 
       Resize();
+   }
+
+   // also update the selection
+   if ( m_winBar )
+   {
+      UpdateViewerBar();
    }
 }
 
