@@ -1,16 +1,37 @@
-File:		release.txt
+File:		doc/release.txt
 Summary:	what to do to make a new Mahogany release
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	07.02.01
+Last modified:	22.03.01
 Version:	the information in this file applies to the cvs sources
+
+0. Updating the files
+---------------------
+
+a) Web pages in MahoganyWeb module: at least download.ht4, status.ht4 and
+   ChangeLog.ht4
+
+b) doc/Mannounce.txt
+
+c) README
+
+d) doc/release.txt to add any steps which are not yet in this file :-)
+
+e) redhat/M.spec
+
+f) "cvs rtag" the files
 
 1. Preparing the release
 ------------------------
 
 a) tarball
 
+Just do a fresh checkout, rename the directory to mahogany-%{VERSION} and tar
+gzip.
+
 b) RPM
+
+rpm -ba works without changes
 
 c) DEB
 
@@ -18,6 +39,8 @@ d) Win32 binaries
 
 2. Uploading the files
 ----------------------
+
+To upload.sourceforge.net, then create the release from SF project admin page.
 
 3. Announcing the release
 -------------------------

@@ -33,6 +33,6 @@ html: Manual.aux
 	${LATEX2HTML} -local_icons -info 0 Manual.tex
 
 clean:
-	rm -rf Manual Manual.tex Manual.aux Manual.dvi
+	rm -rf Manual Manual.tex Manual.aux Manual.toc Manual.log Manual.dvi
 
 .PHONY: html clean
