@@ -311,15 +311,31 @@ strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
 
    for (c = string; *c != 0 && *c != '\n'; c++)
    {
-      num_alpha = num_white = 0;
-      while (*c == '\t' || *c == ' ') num_white++, c++;
-      while (*c >= 'A' && *c <= 'Z') num_alpha++, c++;
-      if ((*c == '>' || *c == '|') &&
-          (num_alpha <= max_alpha && num_white <= max_white))
-         levels++;
-      else
-         return levels;
+      num_alpha =
+      num_white = 0;
+      while (*c == '\t' || *c == ' ')
+      {
+         num_white++;
+         c++;
+      }
+
+      while ( isalpha(*c) )
+      {
+         num_alpha++;
+         c++;
+      }
+
+      // start of text?
+      if ( (*c != '>' && *c != '|') ||
+           (num_alpha > max_alpha || num_white > max_white) )
+      {
+         // yes (according to our heuristics anyhow)
+         break;
+      }
+
+      levels++;
    }
+
    return levels;
 }
 
