@@ -13,10 +13,28 @@ echo "makeM_deb running on " `hostname` " date: " `date`
 echo "####################################################################"
 
 DOWXWIN=yes  # no or yes
-
-if [ "x$1" = "x--Monly" ] ; then
-  DOWXWIN=no
-fi
+DOINSTALL=yes
+DEBUG=no
+while [ ! -z "$1" ]
+do
+	case "x$1" in
+	"x--Monly")
+		DOWXWIN=no
+		shift
+	;;
+	"x--debug")
+		DEBUG=yes
+		shift
+	;;
+	"x--noinst")
+		DOINSTALL=no
+		shift
+	;;
+	*)
+	echo "Illegal argument $1"
+	exit 1
+	esac
+done
 
 PATH=$PATH:/usr/bin:/usr/local/bin
     
@@ -153,6 +171,7 @@ echo "MPREFIX=$MPREFIX"
 echo "DESTDIR=$DESTDIR"
 echo "CVSUSERID=$CVSUSERID"
 echo "DOWXWIN=$DOWXWIN"
+echo "DEBUG=$DEBUG"
 
 export OSTYPE
 
@@ -199,6 +218,12 @@ then
   exit 2
 fi
 
+if [ "$DEBUG" = "yes" ] ; then
+	DEBUGOPTS="--enable-debug_flag --enable-debug_info"
+else
+	DEBUGOPTS="--disable-debug_flag --disable-debug_info"
+fi
+
 rm -f wxWindows/*.cache
 cd wxWindows && \
 autoconf && \
@@ -213,8 +238,7 @@ autoconf && \
 	--without-dnd \
         --enable-accel \
 	--with-gtk \
-	--disable-debug_flag \
-	--disable-debug_info \
+	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
 	--disable-optimise >config.output && \
 ($MAKE -k && $MAKE -k install)
@@ -278,12 +302,14 @@ then
   then
     echo "Build of $NAME-$VERSION failed."
   else
-    (cd $NAME-$VERSION && super debi)
-    $SCP mahogany_* $FTPLOCATION
-    #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
-    cd /usr/share/Mahogany/doc && \
-    (cp -r * $HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
-    $SCP -r /usr/share/Mahogany/doc/* karsten@phy.hw.ac.uk:WWW/Mahogany/doc/
+    if [ "$DOINSTALL" = "yes" ] ; then
+        (cd $NAME-$VERSION && super debi)
+        $SCP mahogany_* $FTPLOCATION
+        #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
+        cd /usr/share/Mahogany/doc && \
+        (cp -r * $HOME/WWW/Mahogany/doc ; tar czf $WWWDIR/Mdocs.tar.gz * )
+        $SCP -r /usr/share/Mahogany/doc/* karsten@phy.hw.ac.uk:WWW/Mahogany/doc/
+    fi
     echo "Build of $NAME-$VERSION, debian, successful."
   fi
 fi
@@ -291,10 +317,15 @@ fi
 ###########################
 # .tar.gz
 ###########################
+if [ "$DEBUG" = "yes" ] ; then
+	DEBUGOPTS="--with-debug"
+else
+	DEBUGOPTS="--without-debug"
+fi
 echo "Building tar.gz package."
 cd $BUILDDIR
 ( cd $NAME-$VERSION && ( $MAKE clean >/dev/null 2>&1 ; \
-  autoconf && ./configure --prefix=$MPREFIX $MCONFOPT>config.output && \
+  autoconf && ./configure $DEBUGOPTS --prefix=$MPREFIX $MCONFOPT>config.output && \
   ( $MAKE depend >/dev/null 2>&1 ; $MAKE all) ))
 
 if [ $? = 0 ]
@@ -307,8 +338,9 @@ else
   echo "Build of $NAME-$VERSION.tar.gz, failed."
 fi
 
-#(cd $BUILDDIR; cp * $WWWDIR) 2>/dev/null
-(cd $BUILDDIR; $SCP mahogany* $FTPLOCATION) 
+if [ "$DOINSTALL" = "yes" ] ; then
+	(cd $BUILDDIR; $SCP $NAME-* $FTPLOCATION) 
+fi
 
 ############################
 ## RedHat Linux
@@ -325,11 +357,13 @@ then
   cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
   cd /usr/src/redhat/ && \
   rpm -ba SPECS/M.spec
-  chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
-  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
-  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
-	rm SRPMS/$NAME*.rpm
-#  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
-#  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && \
-#	rm SRPMS/$NAME*.rpm
+  if [ "$DOINSTALL" = "yes" ] ; then
+        chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
+	  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
+	  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
+		rm SRPMS/$NAME*.rpm
+	#  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
+	#  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && \
+	#	rm SRPMS/$NAME*.rpm
+  fi
 fi
