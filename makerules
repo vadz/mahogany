@@ -16,8 +16,8 @@
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
 dep depend:
-	$(CXX) -M $(CXXFLAGS) $(SRC) >.depend
-#	$(CC) -M $(CXXFLAGS) $(CSRC) >>.depend
+	$(CXX) -MM $(CXXFLAGS) $(SRC) >.depend
+#	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend
 
 .depend:
 	touch .depend ; $(MAKE) dep

@@ -3,6 +3,10 @@ $Id$
 
 *** bugs to fix ***
 
+- clean up header inclusion: use <> for system/wxWin files and "xxx" for M
+  headers in order to get "make depend" right
+
+
 - occasional segfaults on exit
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
