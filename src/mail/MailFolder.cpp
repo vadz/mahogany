@@ -782,7 +782,12 @@ MailFolder::ReplyMessage(class Message *msg,
 
    msg->GetAddresses(MAT_CC, otherAddresses);
    msg->GetAddresses(MAT_TO, otherAddresses);
+
+   // this is probably an overkill - you never want to reply to the sender
+   // address, do you?
+#if 0
    msg->GetAddresses(MAT_SENDER, otherAddresses);
+#endif // 0
 
    // remove duplicates
    wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);

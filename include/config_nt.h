@@ -1,65 +1,45 @@
-/* include/config.h.  Generated automatically by configure.  */
-/*-*- c++ -*-********************************************************
- * config.h.in: config.h template file for use with autoconf        *
- *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- *******************************************************************/
-/**@name config.h.in: Defines generated automatically from configure.in by autoheader.  */
-//@{
-/** Define to empty if the keyword does not work.  */
-/* #undef const */
-
-/** Define as __inline if that's what the C compiler calls it.  */
-/* #undef inline */
-
-/** Define if your C compiler doesn't accept -c and -o together.  */
-/* #undef NO_MINUS_C_MINUS_O */
-
-/** Define if you need to in order for stat and other things to work.  */
-/* #undef _POSIX_SOURCE */
-
-/** Define to `unsigned' if <sys/types.h> doesn't define.  */
-/* #undef size_t */
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   config_nt.h - config.h replacement for Win32
+// Purpose:     this file contains hand-generated options for Windows
+// Author:      Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 /** Define if you have the ANSI C header files.  */
-#define STDC_HEADERS 1
+#undef STDC_HEADERS
 
-/** Define if you have the strstr function.  */
-#define HAVE_STRSTR 1
-
-/** Define if you have the strsep function.  */
-#undef HAVE_STRSEP
-
-/** Define if you have the <libintl.h> header file.  */
-#undef HAVE_LIBINTL_H
-
-/** Define if you have the <compface.h> header file.  */
+/** Define if you have the <compface.h> header file.  -- we always have it */
 #define HAVE_COMPFACE_H 1
 
-/** Define if you have the <strings.h> header file.  */
-#undef HAVE_STRINGS_H
+/** Do we have the pisock library and headers? */
+#undef USE_PISOCK
 
-/* Define if you have the <stdarg.h> header file.  */
-#define HAVE_STDARG_H 1
+/** Do we have a pisock library with setmaxspeed? */
+#undef HAVE_PI_SETMAXSPEED
 
-/** Define if you have the <stdlib.h> header file - required for 
-    Python.h .  */
-#define HAVE_STDLIB_H 1
-
-/** Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
-
-/** Define if you use wxWindows. */
-#define USE_WXWINDOWS 1
-
-/** Define if you use wxWindows, version 2. */
-#define USE_WXWINDOWS2 1
-/* #undef USE_WXWINDOWS2 */
-
-/** Define if you want to use wxString instead of C++ string */
-#define USE_WXSTRING 1
+/** Do we have a pisock library with pi_accept_to? */
+#undef HAVE_PI_ACCEPT_TO
 
 /** Define if you use Python. */
 #define USE_PYTHON 1
-//@}
+
+/** Define if you have libswigpy */
+#undef HAVE_SWIGLIB
+
+/** Define this if you want to use RBL to lookup SPAM domains. */
+#undef USE_RBL
+
+/** Define this if you want to compile in SSL support. */
+#undef USE_SSL
+
+/** Define this if you have POSIX.2 regexp suport. */
+#undef HAVE_POSIX_REGEX
+
+/** Define this to use built-in i18n support */
+#undef USE_I18N
+

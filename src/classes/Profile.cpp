@@ -342,6 +342,8 @@ public:
          PCHECK();
 
          m_Suspended++;
+
+         ms_suspendCount++;
       }
 
    /// Commit changes from suspended mode.
@@ -372,6 +374,7 @@ protected:
          m_Suspended = 0;
          m_Identity = NULL;
       }
+
    /// Destructor, writes back those entries that got changed.
    ~ProfileImpl();
 
@@ -388,14 +391,24 @@ private:
 
    */
    ProfileImpl(const String & iClassName, Profile const *Parent);
+
    /// If not empty, temporarily modified path for this profile.
-   String   m_ProfilePath;
-   GCC_DTOR_WARN_OFF
+   String m_ProfilePath;
+
    /// suspend count: if positive, we're in suspend mode
    int m_Suspended;
+
    /// Is this profile using a different Identity at present?
-   Profile * m_Identity;
+   Profile *m_Identity;
+
+   /// the count of all suspended profiles: if 0, nothing is suspended
+   static size_t ms_suspendCount;
+
+   GCC_DTOR_WARN_OFF
 };
+
+size_t ProfileImpl::ms_suspendCount = 0;
+
 //@}
 
 
@@ -561,22 +574,27 @@ bool ProfileImpl::GetFirstGroup(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
+   if(m_ProfilePath.Length())
+      ms_GlobalConfig->SetPath(m_ProfilePath);
+
    bool success = ms_GlobalConfig->GetFirstGroup(s, l);
    if(success && s == SUSPEND_PATH)
-      return GetNextGroup(s,l);
-   else
-      return success;
+      success = GetNextGroup(s,l);
+
+   return success;
 }
 
 bool ProfileImpl::GetNextGroup(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
+   if(m_ProfilePath.Length())
+      ms_GlobalConfig->SetPath(m_ProfilePath);
+
    bool success = ms_GlobalConfig->GetNextGroup(s, l);
    while(success && s == SUSPEND_PATH)
       success = ms_GlobalConfig->GetNextGroup(s, l);
+
    return success;
 }
 
@@ -602,7 +620,9 @@ bool ProfileImpl::GetFirstEntry(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
+   if(m_ProfilePath.Length())
+      ms_GlobalConfig->SetPath(m_ProfilePath);
+
    return ms_GlobalConfig->GetFirstEntry(s, l);
 }
 
@@ -610,7 +630,9 @@ bool ProfileImpl::GetNextEntry(String& s, long& l) const
 {
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
+   if(m_ProfilePath.Length())
+      ms_GlobalConfig->SetPath(m_ProfilePath);
+
    return ms_GlobalConfig->GetNextEntry(s, l);
 }
 
@@ -949,7 +971,11 @@ ProfileImpl::readEntry(const String & key, long def, bool * found) const
 // and if it is it should override the "normal" entry. This is *necessary* for
 // all parent profiles because they may be suspended without us knowing about
 // it.
-
+//
+// Correction: now we look under SUSPEND_PATH only if at least some profile is
+// suspended, this allows us to gain a lot of time during 99% of normal
+// operation when no profiles are suspended which is quite nice according to
+// the profiling results
 void
 ProfileImpl::readEntry(LookupData &ld) const
 {
@@ -962,18 +988,27 @@ ProfileImpl::readEntry(LookupData &ld) const
 
    ms_GlobalConfig->SetPath(pathProfile);
 
-   String keySuspended;
-   keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
-
-   // the value read from profile
+   // the values read from profile
    String strResult;
    long   longResult;
 
+   // did we find the requested value?
    bool foundHere;
-   if( ld.GetType() == LookupData::LD_STRING )
-      foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
+
+   String keySuspended;
+   if ( ms_suspendCount )
+   {
+      keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
+
+      if( ld.GetType() == LookupData::LD_STRING )
+         foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
+      else
+         foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
+   }
    else
-      foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
+   {
+      foundHere = false;
+   }
 
    if ( !foundHere )
    {
@@ -1023,33 +1058,48 @@ ProfileImpl::readEntry(LookupData &ld) const
            (ms_GlobalConfig->GetPath() != GetRootPath()) )
    {
       ms_GlobalConfig->SetPath("..");
+
       // try suspended global profile first:
-      if( ld.GetType() == LookupData::LD_STRING )
+      if ( ms_suspendCount )
       {
-         foundAnywhere = ms_GlobalConfig->Read(keySuspended,
-                                               &strResult,
-                                               ld.GetString());
-         if ( !foundAnywhere )
+         if( ld.GetType() == LookupData::LD_STRING )
+         {
+            foundAnywhere = ms_GlobalConfig->Read(keySuspended,
+                                                  &strResult,
+                                                  ld.GetString());
+         }
+         else
+         {
+            foundAnywhere = ms_GlobalConfig->Read(keySuspended,
+                                                  &longResult,
+                                                  ld.GetLong());
+         }
+      }
+
+      if ( !foundAnywhere )
+      {
+         if( ld.GetType() == LookupData::LD_STRING )
+         {
             foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
                                                   ld.GetString());
-      }
-      else
-      {
-         foundAnywhere = ms_GlobalConfig->Read(keySuspended,
-                                               &longResult,
-                                               ld.GetLong());
-         if ( !foundAnywhere )
+         }
+         else
+         {
             foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
                                                   ld.GetLong());
+         }
       }
    }
-   if(foundAnywhere)
+
+   // did we find it at all?
+   if ( foundAnywhere )
    {
       if( ld.GetType() == LookupData::LD_STRING )
          ld.SetResult(strResult);
       else
          ld.SetResult(longResult);
    }
+
    ld.SetFound(foundHere);
 }
 
@@ -1136,13 +1186,8 @@ ProfileImpl::Commit(void)
 {
    PCHECK();
 
-   if ( !m_Suspended )
-   {
-      // as we don't provide IsSuspended() function, just silently ignore this
-      // call instead of giving an error
-      return;
-   }
-   
+   CHECK_RET( m_Suspended, "calling Commit() without matching Suspend()" );
+
    String truePath = GetName();
    truePath << '/';
 
@@ -1163,12 +1208,7 @@ ProfileImpl::Discard(void)
 {
    PCHECK();
 
-   if ( !m_Suspended )
-   {
-      // as we don't provide IsSuspended() function, just silently ignore this
-      // call instead of giving an error
-      return;
-   }
+   CHECK_RET( m_Suspended, "calling Discard() without matching Suspend()" );
 
    if ( !--m_Suspended )
    {
@@ -1176,13 +1216,20 @@ ProfileImpl::Discard(void)
       ms_GlobalConfig->SetPath(GetName());
       if( m_ProfilePath.length() > 0 )
          path << m_ProfilePath << '/';
+
       path << SUSPEND_PATH;
+
 #ifdef DEBUG
       bool success =
 #endif
          ms_GlobalConfig->DeleteGroup(path);
-      ASSERT(success);
+
+      ASSERT_MSG( success, "failed to delete suspended settings" );
    }
+
+   ASSERT_MSG( ms_suspendCount > 0, "suspend count broken" );
+
+   ms_suspendCount--;
 }
 
 #ifdef DEBUG

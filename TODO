@@ -12,9 +12,9 @@ $Id$
 
 1. wxIconManager::LoadImageXpm() is very slow
 
-2. wxRegConfig::SetPath() takes 15% of program time!!!
++2. wxRegConfig::SetPath() takes 15% of program time!!!
 
-3. wxLogError() &c shouldn't do anything if wxNoLog
++3. wxLogError() &c shouldn't do anything if wxNoLog
 
 4. print data in OnInit() shouldn't be allocated initially, only on demand
 
