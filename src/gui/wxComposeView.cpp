@@ -529,15 +529,16 @@ wxComposeView::InsertFile(void)
    String
       mimeType,
       tmp;
-   
+   MimeContent 
+      *mc = new MimeContent();
    const char
       *filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,profile);
 
    if(! filename)
       return;
 
-   MimeContent *mc = new MimeContent();
-   mc->m_FileName =  String(filename);
+   mc->m_FileName = "";
+   mc->m_FileName += filename;
    mc->m_NumericMimeType = TYPEAPPLICATION;
    if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
       mc->m_MimeType = String("APPLICATION/OCTET-STREAM");

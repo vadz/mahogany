@@ -6,6 +6,9 @@
  * $Id$              *
  *
  * $Log$
+ * Revision 1.10  1998/07/10 09:24:43  KB
+ * minor changes and support for c-client config in configure.in
+ *
  * Revision 1.9  1998/07/05 12:20:05  KB
  * wxMessageView works and handles mime (segfault on deletion)
  * wsIconManager loads files
@@ -224,9 +227,9 @@
 /// shall we record default values in configuration files
 #define   MC_RECORDDEFAULTS_D      1
 /// default window position x
-#define   MC_XPOS_D        0L
+#define   MC_XPOS_D        20L
 /// default window position y
-#define   MC_YPOS_D        0L
+#define   MC_YPOS_D        20L
 /// default window width
 #define   MC_WIDTH_D   600L
 /// default window height

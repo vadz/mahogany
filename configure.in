@@ -60,12 +60,14 @@ else
 fi
 ])
 
+
+
 AC_DEFUN(AC_PATH_FIND_INCLUDES,
 [
 ac_find_includes=
 for ac_dir in $1;
   do
-    if test -f "$ac_dir/$2" || test -L "$ac_dir/lib$2.$ac_extension"; then
+    if test -f "$ac_dir/$2"; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -78,7 +80,7 @@ ac_find_libraries=
 for ac_dir in $1;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/lib$2.$ac_extension" || test -L "$ac_dir/lib$2.$ac_extension"; then
+      if test -f "$ac_dir/lib$2.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -642,6 +644,38 @@ if test "$USE_DEBUG" = 1; then
 	OPTFLAGS="$CXXFLAGS -O0" # turn off all optimisations
 fi
 
+dnl we need to set the target for c-client library:
+dnl supported OSTYPE values are linux* and solaris* and freebsd*
+
+AC_MSG_CHECKING(for c-client library OS type)
+CCOSTYPE=
+case "${OSTYPE}" in
+linux*)
+  CCOSTYPE=lnx
+  AC_MSG_RESULT(lnx)
+  ;;
+solaris*)
+  if test "$GCC" = "yes"
+  then
+    CCOSTYPE=gso
+    AC_MSG_RESULT(gso)
+  else
+    CCOSTYPE=sol
+    AC_MSG_RESULT(sol)
+  fi
+  ;;
+freebsd*)
+  CCOSTYPE=bsf
+  AC_MSG_RESULT(bsf)
+  ;;
+esac
+
+if test "x$CCOSTYPE" = "x" ; then
+  echo "Cannot determine OS type for c-client library. Supported are linux, solaris, freebsd."
+  exit 1
+fi
+
+AC_SUBST(CCOSTYPE)
 AC_SUBST(OPTFLAGS)
 AC_SUBST(DBGFLAGS)
 

@@ -4,6 +4,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.13  1998/07/10 09:24:34  KB
+# minor changes and support for c-client config in configure.in
+#
 # Revision 1.12  1998/07/07 12:41:13  KB
 # No longer mixes debug and optimisation flags.
 # New option (on by default) --with-debug for configure.
@@ -44,7 +47,7 @@ BUILDDIR = @BUILDDIR@
 CCLIENTDIR=$(BUILDDIR)/extra/src/c-client
 CCLIENTINCLUDE=$(CCLIENTDIR)
 CCLIENTLIB=$(CCLIENTDIR)/c-client.a
-CCLIENTOSTYPE=lnx
+CCLIENTOSTYPE=@CCOSTYPE@
 
 # where we have the Icon xpms:
 ICONDIR=$(BUILDDIR)/src/icons

@@ -84,6 +84,7 @@ wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
         : MFrameBase(iname)
 {
    initialised = false;
+   wxASSERT(parent);
    Create(iname,parent);
 }
 
