@@ -49,3 +49,5 @@
 #define MH_OPTIONSNOTEBOOK   4120
 
 #define MH_PYTHON            5000
+
+#endif // MHELP_H
