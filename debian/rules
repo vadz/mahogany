@@ -2,6 +2,8 @@
 # Made with the aid of debmake, by Christoph Lameter,
 # based on the sample debian/rules file for GNU hello by Ian Jackson.
 
+PATH:=$(PATH):/usr/local/bin
+
 package=mahogany
 
 build:
