@@ -155,6 +155,10 @@ LINK32=link.exe
 # PROP Default_Filter "*.cpp"
 # Begin Source File
 
+SOURCE=.\src\classes\ComposeTemplate.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\FolderView.cpp
 # End Source File
 # Begin Source File

@@ -36,8 +36,8 @@
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class wxAddressTextCtrl;
-class wxAddressTypeChoice;
+class wxNewAddressTextCtrl;
+class wxRcptControls;
 class wxComposeView;
 class wxEnhancedPanel;
 
@@ -49,8 +49,7 @@ class WXDLLEXPORT wxTextCtrl;
 
 #include <wx/dynarray.h>
 
-WX_DEFINE_ARRAY(wxAddressTypeChoice *, ChoicesArray);
-WX_DEFINE_ARRAY(wxTextCtrl *, TextsArray);
+WX_DEFINE_ARRAY(wxRcptControls *, ArrayRcptControls);
 
 // ----------------------------------------------------------------------------
 // constants
@@ -249,15 +248,18 @@ public:
 
       /// called when rcpt type is changed
    void OnRcptTypeChange(RecepientType type);
+
+      /// called to remove the recepient with this index
+   void OnRemoveRcpt(size_t index);
    //@}
 
    // for wxAddressTextCtrl usage: remember last focused field
    void SetLastAddressEntry(int field) { m_indexLast = field; }
 
-   // for wxAddressTextCtrl usage: get the profile to use for options
+   // get the profile to use for options
    Profile *GetProfile(void) const { return m_Profile; }
 
-   // for wxAddressTextCtrl usage: is the control with this index enabled?
+   // is the control with this index enabled?
    bool IsRecepientEnabled(size_t index) const;
 
    /** Adds an extra header line.
@@ -372,6 +374,12 @@ private:
                                         wxTextCtrl **ppText = NULL,
                                         TextField tf = TextField_Normal);
 
+   // add a place holder to the recepients sizer
+   void CreatePlaceHolder();
+
+   // delete the controls created by CreatePlaceHolder()
+   void DeletePlaceHolder();
+
    // create the new controls for another recepient
    void AddRecepientControls(const String& value, RecepientType rt);
 
@@ -409,7 +417,7 @@ private:
    wxTextCtrl *m_txtSubject;
 
       /// the address field
-   wxAddressTextCtrl *m_txtRecepient;
+   wxNewAddressTextCtrl *m_txtRecepient;
 
       /// the sizer containing all recepients
    wxSizer *m_sizerRcpts;
@@ -417,11 +425,8 @@ private:
       /// the panel containing already entered addresses
    wxEnhancedPanel *m_panelRecepients;
 
-      /// the additional recepients: array of their types
-   ChoicesArray m_choicesRcpt;
-
-      /// the additional recepients: array of their contents
-   TextsArray m_textsRcpt;
+      /// the additional recepients: array of correpsonding controls
+   ArrayRcptControls m_rcptControls;
 
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;

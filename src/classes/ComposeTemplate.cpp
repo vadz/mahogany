@@ -33,6 +33,7 @@
 
 #include "gui/wxComposeView.h"
 #include "MDialogs.h"
+#include "Mdefaults.h"
 
 #include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/file.h>

@@ -692,24 +692,64 @@ MailFolder::ReplyMessage(class Message *msg,
                                                          profile,
                                                          msg);
 
-         // set the recipient address
-   String name;
-   String email = msg->Address(name, MAT_REPLYTO);
-   email = GetFullEmailAddress(name, email);
-   String cc;
-   if(params.flags & REPLY_FOLLOWUP) // group reply
-   {
-      msg->GetHeaderLine("CC", cc);
-      String addr = msg->Address(name, MAT_FROM);
-      if(! email.Contains(addr))
-         email << ", " << addr;
-      addr = msg->Address(name, MAT_TO);
-      if(! email.Contains(addr))
-         email << ", " << addr;
-   }
-   cv->SetAddresses(email,cc);
+   // set the recipient address: use Reply-To for this
+   wxSortedArrayString replyToAddresses;
+   size_t n,
+          countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
 
-         // construct the new subject
+   if ( !countReplyTo )
+   {
+      // try from address
+      cv->AddTo(msg->From());
+   }
+   else // have Reply-To
+   {
+      for ( n = 0; n < countReplyTo; n++ )
+      {
+         cv->AddTo(replyToAddresses[n]);
+      }
+   }
+
+   // now get all other addresses
+   wxSortedArrayString otherAddresses;
+
+   // use From only if not done already
+   if ( countReplyTo > 0 )
+      otherAddresses.Add(msg->From());
+
+   msg->GetAddresses(MAT_CC, otherAddresses);
+   msg->GetAddresses(MAT_TO, otherAddresses);
+   msg->GetAddresses(MAT_SENDER, otherAddresses);
+
+   // remove duplicates
+   wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
+
+   // and also filter out the addresses used in to
+   for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
+   {
+      if ( replyToAddresses.Index(uniqueAddresses[n]) != wxNOT_FOUND )
+      {
+         uniqueAddresses.Remove(n);
+      }
+   }
+
+   size_t count = uniqueAddresses.GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      // reply to all?
+      if ( params.flags & REPLY_FOLLOWUP )
+      {
+         cv->AddTo(uniqueAddresses[n]);
+      }
+      else // don't reply to all
+      {
+         // but still add addresses  to allow easily adding them to the
+         // recepient list - just disable them by default
+         cv->AddRecepients(uniqueAddresses[n], wxComposeView::Recepient_None);
+      }
+   }
+
+   // construct the new subject
    String newSubject;
    String replyPrefix = READ_CONFIG(profile, MP_REPLY_PREFIX);
    String subject = msg->Subject();
