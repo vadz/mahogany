@@ -228,8 +228,6 @@ const MOption MP_NET_ON_COMMAND;
 const MOption MP_NET_OFF_COMMAND;
 #endif
 
-const MOption MP_SHOWCC;
-const MOption MP_SHOWBCC;
 const MOption MP_FOLDER_LOGIN;
 const MOption MP_FOLDER_PASSWORD;
 const MOption MP_LOGLEVEL;
@@ -590,8 +588,6 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_NET_OFF_COMMAND),
 #endif
 
-    DEFINE_OPTION(MP_SHOWCC),
-    DEFINE_OPTION(MP_SHOWBCC),
     DEFINE_OPTION(MP_FOLDER_LOGIN),
     DEFINE_OPTION(MP_FOLDER_PASSWORD),
     DEFINE_OPTION(MP_LOGLEVEL),

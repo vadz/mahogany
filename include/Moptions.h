@@ -159,8 +159,6 @@ extern const MOption MP_VCARD;
 extern const MOption MP_NET_CONNECTION;
 extern const MOption MP_NET_ON_COMMAND;
 extern const MOption MP_NET_OFF_COMMAND;
-extern const MOption MP_SHOWCC;
-extern const MOption MP_SHOWBCC;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_LOGLEVEL;
@@ -666,10 +664,6 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_NET_OFF_COMMAND_NAME   "NetOffCommand"
 #endif // platform
 
-/// show CC field in message composition?
-#define   MP_SHOWCC_NAME         "ShowCC"
-/// show BCC field in message composition?
-#define   MP_SHOWBCC_NAME         "ShowBCC"
 /// login for mailbox
 #define   MP_FOLDER_LOGIN_NAME      "Login"
 /// password for mailbox
@@ -1418,10 +1412,6 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_NET_OFF_COMMAND_DEFVAL   "killall pppd"
 #endif // platform
 
-/// show CC field in message composition?
-#define   MP_SHOWCC_DEFVAL         1
-/// show BCC field in message composition?
-#define   MP_SHOWBCC_DEFVAL         1
 /// login for mailbox
 #define   MP_FOLDER_LOGIN_DEFVAL      M_EMPTYSTRING
 /// passwor for mailbox
