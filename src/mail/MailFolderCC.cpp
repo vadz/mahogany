@@ -1236,9 +1236,16 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
 
       // if it has server, it should normally have a login as well
       if ( flags & MF_FLAGS_ANON )
-         spec << "/anonymous";
+      {
+         // no, it doesn't -- indicate it for POP and IMAP (cclient can't parse
+         // this for NNTP however)
+         if ( type != MF_NNTP )
+            spec << "/anonymous";
+      }
       else if ( !login.empty() )
+      {
          spec << "/user=" << login;
+      }
       //else: we'll ask the user about his login later
    }
 
