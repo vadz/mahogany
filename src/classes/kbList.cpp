@@ -34,20 +34,19 @@ public:
    */
    static const String DebugIter(iterator *me)
       {
-         char ms_debuginfo[512];
+         String debugInfo;
          if(me->node == NULL)
-            sprintf(ms_debuginfo,
-                    "iterator::Debug(): %p  Node: NULL",
-                    me);
+            debugInfo.Printf(_T("iterator::Debug(): %p  Node: NULL"), me);
          else
-            sprintf(ms_debuginfo,
-                    "iterator::Debug(): %p  Node: %p  "
-                    "Node.next: %p  Node.prev: %p  "
-                    "Node.element: %p",
-                    me, me->node, me->node->next, me->node->prev,
-                    me->node->element);
-         //fprintf(stderr, "%s\n", ms_debuginfo);
-         return wxChar(ms_debuginfo);
+            debugInfo.Printf(_T("iterator::Debug(): %p  Node: %p  "
+                                "Node.next: %p  Node.prev: %p  "
+                                "Node.element: %p"),
+                              me, me->node,
+                              me->node->next,
+                              me->node->prev,
+                              me->node->element);
+
+         return debugInfo;
       }
 };
 
