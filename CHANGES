@@ -7,6 +7,7 @@ Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
 25.04.02 VZ: detect more URLs, including email addresses and wrapped URLs
+24.04.02 XN: implemented much more efficient URL matching algorithm
 22.04.02 VZ: added "--debug" command line option to enable mail debugging
 16.04.02 NB: added UTF-7 support
 14.04.02 VZ: option to use config files under Windows (not only registry)
