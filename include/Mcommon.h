@@ -29,14 +29,14 @@ typedef int coord_t;
 // @@: in both wxGTK/wxMSW 'long' and 'int' are used for the same things in
 //     different contexts
 typedef long int lcoord_t;
-  
+
 // @@@ wxGTK alpha 10 doesn't have validators (yet)
 #  ifdef  USE_WXGTK
 #     define DEFAULT_VALIDATOR
 #  else
-#     define DEFAULT_VALIDATOR wxDefaultValidator, 
+#     define DEFAULT_VALIDATOR wxDefaultValidator,
 #  endif //GTK
-    
+
    // @@@ is this really the same thing
 #  define wxMessage   wxStaticText
 #  define wxCanvas    wxWindow
@@ -103,20 +103,17 @@ typedef long int lcoord_t;
 // message logging macros
 // ----------------------------------------------------------------------------
 
-// LOG_INFO defined in c-client/.h
-#undef  LOG_INFO
-    
 // wxWindows 2 has built in logging capabilities
 #  include <wx/intl.h>
 #  include <wx/log.h>
 
 #  define M_LOG_DEBUG   wxLOG_Debug
-#  define M_LOG_NOISE   wxLOG_Verbose
-#  define M_LOG_DEFAULT wxLOG_Message
+#  define M_LOG_VERBOSE wxLOG_Verbose
+#  define M_LOG_DEFAULT wxLOG_Info
 #  define M_LOG_INFO    wxLOG_Message
-#  define M_LOG_ERROR   wxLOG_Warning 
+#  define M_LOG_ERROR   wxLOG_Warning
 #  define M_LOG_URGENT  wxLOG_Error
-    
+
 #  define ERRORMESSAGE(arg)   wxLogError arg
 #  define SYSERRMESSAGE(arg)  wxLogSysError arg
 #  define FATALERROR(arg)     wxLogFatalError arg
@@ -169,7 +166,7 @@ typedef long int lcoord_t;
 #ifdef   USE_PYTHON
 /** This macro takes three arguments: the callback function name to
     look up in a profile, a default return value, and a profile
-    pointer (can be NULL). 
+    pointer (can be NULL).
     It can only be called from within object member functions and the
     object needs to support the GetClasName() method to get the Python
     class name for the argument.
@@ -184,7 +181,7 @@ typedef long int lcoord_t;
     argument can be a tuple, i.e. the format string can be set to
     something like "(iis)" (two ints and a string) and the arguments
     must follow the format string.
-    
+
 */
 #   define   PY_CALLBACKVA(arg,default)            PythonCallback arg
 #else
@@ -197,4 +194,4 @@ typedef long int lcoord_t;
 /// define a NULL for strings (FIXME: is this valid for std::string ?)
 #define   NULLstring String((const char *)NULL)
 
-#endif	// MCOMMON_H
+#endif // MCOMMON_H

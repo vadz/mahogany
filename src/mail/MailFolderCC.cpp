@@ -39,9 +39,9 @@
 #define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
 #define QPRINT_MIDDLEMARKER "?Q?"
 
-/* Little helper function to convert iso8859 encoded header lines into 
+/* Little helper function to convert iso8859 encoded header lines into
    8 bit. This is a quick fix until wxWindows supports unicode.
-   Modified it now to not look at the charset argument but always do a 
+   Modified it now to not look at the charset argument but always do a
    deoding for "=?xxxxx?Q?.....?=" with arbitrary xxxx. If someone has a
    different character set, he will have different fonts, so it
    should be ok.
@@ -57,7 +57,7 @@ String MailFolderCC::qprint(const String &in)
    int pos2 = in.Find(QPRINT_MIDDLEMARKER);
    if(pos2 == -1 || pos2 < pos)
       return in;
-   
+
    String quoted;
    const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER);
    while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
@@ -89,9 +89,9 @@ static inline void CCVerbose(void) { mm_ignore_errors = false; }
 
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages.
-    The m_uid member is also used to map any access to the n-th message in 
+    The m_uid member is also used to map any access to the n-th message in
     the folder to the correct message. I.e. when requesting
-    GetMessage(5), it will use the message with the m_uid from the 6th 
+    GetMessage(5), it will use the message with the m_uid from the 6th
     entry in the list.
 */
 class HeaderInfoCC : public HeaderInfo
@@ -105,7 +105,7 @@ public:
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
-   
+
 protected:
    String m_Subject, m_From, m_Date, m_Id, m_References;
    int m_Status;
@@ -140,14 +140,14 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_ProgressDialog = 0;
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
-   
+
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 
 }
 
 /*
-  This gets called with a folder path as its name, NOT with a symbolic 
+  This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
 */
 MailFolderCC *
@@ -238,7 +238,7 @@ MailFolderCC::Open(void)
    if(GetType() == MF_FILE
 #ifdef OS_UNIX
       || GetType() == MF_INBOX
-#endif    
+#endif
       )
    {
       String lockfile;
@@ -283,7 +283,7 @@ MailFolderCC::Open(void)
                                  "lock-file exists."));
                return false;
             }
-         }      
+         }
          lockfile = wxFindNextFile();
       }
    }
@@ -294,7 +294,7 @@ MailFolderCC::Open(void)
 
    if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
       mail_create(NIL, (char *)m_MailboxPath.c_str());
-   if(m_MailStream != NIL) 
+   if(m_MailStream != NIL)
       m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                debugFlag ? OP_DEBUG : NIL);
    // if we didn't have a mailstream or the re-use of the old one
@@ -302,7 +302,7 @@ MailFolderCC::Open(void)
    if(m_MailStream == NIL)
       m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
                                debugFlag ? OP_DEBUG : NIL);
-      
+
    ProcessEventQueue();
    SetDefaultObj(false);
    CCVerbose();
@@ -644,13 +644,13 @@ MailFolderCC::BuildListing(void)
 {
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
    m_NumOfMessages = m_MailStream->nmsgs;
-   
+
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
       delete [] m_Listing;
       m_Listing = NULL;
    }
-      
+
    if(! m_Listing && m_NumOfMessages > 0)
       m_Listing = new HeaderInfoCC[m_NumOfMessages];
 
@@ -677,25 +677,25 @@ MailFolderCC::BuildListing(void)
    else
    {
       if(GetType() == MF_NNTP)
-         // FIMXE: no idea why this works for NNTP 
+         // FIMXE: no idea why this works for NNTP
          // but not for the other types
          mail_fetch_overview (m_MailStream, (char *)"1-", mm_overview_header);
       else
          mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
    }
-   
+
    if(m_ProgressDialog != (MProgressDialog *)1)
       delete m_ProgressDialog;
    // We set it to an illegal address here to suppress further
    // updating. This value is checked against in OverviewHeader().
    // The reason is that we only want it the first time that the
-   // folder is being opened.   
+   // folder is being opened.
    m_ProgressDialog = (MProgressDialog *)1;
 
    // for NNTP, it will not show all messages
    //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);
    m_NumOfMessages = m_BuildNextEntry;
-   
+
    // now we sent an update event to update folderviews etc
    MEventFolderUpdateData data(this);
    MEventManager::Send(data);
@@ -746,7 +746,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    /* For NNTP, do not show deleted messages: */
    if(m_folderType == MF_NNTP && elt->deleted)
       return;
-   
+
    // DATE
    mail_parse_date (&selt,ov->date);
    mail_date (tmp,&selt);  //FIXME: is this ok? Use our date format!
@@ -803,7 +803,7 @@ MailFolderCC::GetNextHeaderInfo(HeaderInfo const* last) const
 {
    ASSERT(m_Listing);
    HeaderInfoCC const *lastCC = (HeaderInfoCC *)last;
-   
+
    if(lastCC >= m_Listing+m_NumOfMessages-1) return NULL;
    return (lastCC+1);
 }
@@ -847,7 +847,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
    for(i = streamList.begin(); i != streamList.end(); i++)
       if( (*i)->stream == stream )
          return (*i)->folder;
-   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream 
+   /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
       for e.g. mail_status(), that is difficult to handle here, we
       must compare the name parameter which might not be 100%
       identical, but we can check the hostname for identity and the
@@ -994,7 +994,7 @@ MailFolderCC::mm_log(String str, long errflg )
 #ifdef DEBUG
    msg << _(" error level: ") << strutil_ultoa(errflg);
 #endif
-   LOGMESSAGE((M_LOG_INFO, Str(msg)));
+   LOGMESSAGE((M_LOG_NOISE, Str(msg)));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)
    {
@@ -1039,8 +1039,8 @@ MailFolderCC::mm_dlog(String str)
    {
       msg += str;
    }
-   
-   LOGMESSAGE((M_LOG_DEBUG, Str(msg)));
+
+   LOGMESSAGE((M_LOG_NOISE, Str(msg)));
 }
 
 /** get user name and password
@@ -1135,7 +1135,7 @@ MailFolderCC::ProcessEventQueue(void)
          delete evptr->m_args[1].m_str;
          break;
       case LSub:
-         MailFolderCC::mm_lsub(evptr->m_stream, 
+         MailFolderCC::mm_lsub(evptr->m_stream,
                                evptr->m_args[0].m_int,
                                *(evptr->m_args[1].m_str),
                                evptr->m_args[2].m_long);
@@ -1172,7 +1172,7 @@ MailFolderCC::ProcessEventQueue(void)
          mf->RequestUpdate();  // Queues an Update event.
          break;
       }
-      /* The Update event is not caused by c-client callbacks but 
+      /* The Update event is not caused by c-client callbacks but
          by this very event handling mechanism itself. It causes
          BuildListing() to fetch a new listing. */
       case Update:
@@ -1189,12 +1189,12 @@ MailFolderCC::ProcessEventQueue(void)
 }
 
 void
-MailFolderCC::RequestUpdate(void)   
+MailFolderCC::RequestUpdate(void)
 {
    if(! m_UpdateNeeded)
    {
       // we want only one update event
-      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);   
+      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
       MailFolderCC::QueueEvent(evptr);
       m_UpdateNeeded = true;
    }
@@ -1323,7 +1323,7 @@ mm_log(char *str, long errflg)
 {
    if(mm_ignore_errors)
       return;
-   
+
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
    evptr->m_args[0].m_str = new String(str);
    evptr->m_args[1].m_long = errflg;
