@@ -25,6 +25,9 @@ $Id$
 
 - parent frames should not be NULL
 
+
+- WINDOWS: how to do MIME handling?
+
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M
   headers in order to get "make depend" right
 
