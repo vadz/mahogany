@@ -1081,7 +1081,20 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
    settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile, MP_FVIEW_FONT_SIZE);
-   settings->senderOnlyNames = READ_CONFIG(m_Profile,MP_FVIEW_NAMES_ONLY) != 0;
+   settings->senderOnlyNames = READ_CONFIG(m_Profile, MP_FVIEW_NAMES_ONLY) != 0;
+
+   settings->replaceFromWithTo = READ_CONFIG(m_Profile, MP_FVIEW_FROM_REPLACE) != 0;
+   if ( settings->replaceFromWithTo )
+   {
+      String returnAddrs = READ_CONFIG(m_Profile, MP_FROM_REPLACE_ADDRESSES);
+      if ( returnAddrs == MP_FROM_REPLACE_ADDRESSES_D )
+      {
+         // the default for this option is just the return address
+         returnAddrs = READ_CONFIG(m_Profile, MP_RETURN_ADDRESS);
+      }
+
+      settings->returnAddresses = strutil_restore_array(':', returnAddrs);
+   }
 }
 
 void
@@ -1142,7 +1155,6 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    unsigned day, month, year;
    String sender, subject, size;
    bool selected;
-   bool namesOnly = m_settingsCurrent.senderOnlyNames;
 
    HeaderInfo const *hi = (*listing)[index];
 
@@ -1150,12 +1162,24 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    nsize = day = month = year = 0;
    size = strutil_ultoa(nsize);
    selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
+
    sender = hi->GetFrom();
-   if (namesOnly)
+
+   // optionally replace the "From" with "To: someone" for messages sent by
+   // the user himself
+   if ( m_settingsCurrent.replaceFromWithTo &&
+        m_settingsCurrent.returnAddresses.Index(sender) != wxNOT_FOUND )
    {
-      int pos = sender.Find(" <");
-      if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
+      sender.clear();
+      sender << _("To: ") << hi->GetTo();
    }
+
+   // optionally leave only the name part of the address
+   if ( m_settingsCurrent.senderOnlyNames )
+   {
+      sender = Message::GetNameFromAddress(sender);
+   }
+
    MailFolder *mf = m_ASMailFolder->GetMailFolder();
    m_FolderCtrl->SetEntry(index,
                           MailFolder::ConvertMessageStatusToString(hi->GetStatus(),

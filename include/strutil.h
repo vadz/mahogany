@@ -340,6 +340,7 @@ strutil_getMailAddress(const String &inputline,
                        String * personal = NULL,
                        String * mailbox = NULL,
                        String * hostname = NULL);
+//@}
 
 /** @name regular expression matching */
 //@{
@@ -358,7 +359,10 @@ strutil_matchRegEx(const class strutil_RegEx *regex,
 void
 strutil_freeRegEx(class strutil_RegEx *regex);
 //@}
-//@}
+
+// convert a string array to/from 'ch' separated string
+extern wxArrayString strutil_restore_array(char ch, const String& str);
+extern String strutil_flatten_array(const wxArrayString& array, char ch);
 
 //@}
 #endif

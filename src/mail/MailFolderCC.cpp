@@ -468,6 +468,7 @@ class HeaderInfoCC : public HeaderInfo
 public:
    virtual String const &GetSubject(void) const { return m_Subject; }
    virtual String const &GetFrom(void) const { return m_From; }
+   virtual String const &GetTo(void) const { return m_To; }
    virtual time_t GetDate(void) const { return m_Date; }
    virtual String const &GetId(void) const { return m_Id; }
    virtual unsigned long GetUId(void) const { return m_Uid; }
@@ -496,7 +497,7 @@ public:
 
    HeaderInfoCC();
 protected:
-   String m_Subject, m_From, m_Id, m_References;
+   String m_Subject, m_From, m_To, m_Id, m_References;
    int m_Status;
    unsigned long m_Size;
    unsigned long m_Uid;
@@ -524,6 +525,7 @@ HeaderInfoCC::operator= ( const HeaderInfo &old)
 {
    m_Subject = old.GetSubject();
    m_From = old.GetFrom();
+   m_To = old.GetTo();
    m_Date = old.GetDate();
    m_Id = old.GetUId();
    m_References = old.GetReferences();
@@ -2147,7 +2149,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
       // FROM
       /* get first from address from envelope */
-      for (adr = ov->from; adr && !adr->host; adr = adr->next);
+      for (adr = ov->from; adr && !adr->host; adr = adr->next)
+         ;
       if(adr)
       {
          entry.m_From = "";
@@ -2167,6 +2170,9 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       }
       else
          entry.m_From = _("<address missing>");
+
+      // TO: FIXME how to get it here?
+
       wxFontEncoding encodingFrom;
       entry.m_From = DecodeHeader(entry.m_From, &encodingFrom);
 #if 0

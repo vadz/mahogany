@@ -282,6 +282,10 @@ private:
       bool previewOnSingleClick;
       /// strip e-mail address from sender and display only name?
       bool senderOnlyNames;
+      /// replace "From" with "To" for messages sent from oneself?
+      bool replaceFromWithTo;
+      /// all the addresses corresponding to "oneself"
+      wxArrayString returnAddresses;
    } m_settingsCurrent;
 
    /// read the values from the profile into AllProfileSettings structure

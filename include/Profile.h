@@ -296,9 +296,10 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// two handy functions for savings/restoring arrays of strings to/from config
+// helper functions
 // ----------------------------------------------------------------------------
 
+// functions for savings/restoring arrays of strings to/from config
 void SaveArray(Profile *conf, const wxArrayString& astr, const String & key);
 void RestoreArray(Profile * conf, wxArrayString& astr, const String & key);
 

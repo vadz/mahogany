@@ -99,11 +99,14 @@ public:
       UIdType uid = UID_ILLEGAL,
       class Profile *iprofile = NULL);
 
-   // used by GetAddressFirstName()
+   /// return "Foo" from address of form "Foo Bar <baz>"
    static String GetFirstNameFromAddress(const String& address);
 
-   // used by GetAddressLastName()
+   /// return "Bar" from address of form "Foo Bar <baz>"
    static String GetLastNameFromAddress(const String& address);
+
+   /// return "Foo Bar" from address of form "Foo Bar <baz>"
+   static String GetNameFromAddress(const String& address);
 
    /** get any header line
        @line name of header line

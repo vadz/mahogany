@@ -70,35 +70,65 @@ Message::ExpandParameter(MessageParameterList const & list, String
 // ----------------------------------------------------------------------------
 
 static void SplitAddress(const String& addr,
+                         String *fullname)
+{
+   // handle not only addresses of the form
+   //         B. L. User <foo@bar>
+   // but also the alternative form specified by RFC 822
+   //         foo@bar (B. L. User)
+
+   // first check for the most common form
+   const char *addrStart = strchr(addr, '<');
+   if ( addrStart )
+   {
+      // return the part before '<'
+      *fullname = String(addr.c_str(), addrStart);
+   }
+   else // no '<' in address
+   {
+      const char *namestart = strchr(addr, '(');
+      const char *nameend = namestart ? strchr(++namestart, ')') : NULL;
+      if ( !namestart || !nameend || namestart == nameend )
+      {
+         // take the entire string as we don't which part of it is address and
+         // which is name
+         *fullname = addr;
+      }
+      else
+      {
+         // return the part between '(' and ')'
+         *fullname = String(namestart, nameend - 1);
+      }
+   }
+
+   fullname->Trim();
+
+   if ( fullname->empty() )
+   {
+      *fullname = addr;
+
+      fullname->Trim();
+   }
+}
+
+static void SplitAddress(const String& addr,
                          String *firstName,
                          String *lastName)
 {
-   // assume that in general the email address will have the form "First Last
-   // <address>", but be prepared to handle anything here
+   String fullname;
+   SplitAddress(addr, &fullname);
 
-   // first look whether we have "<address>" part at all
-   const char *addrStart = strchr(addr, '<');
-   if ( !addrStart )
-   {
-      addrStart = addr.c_str() + addr.length();
-   }
+   const char *start = fullname.c_str();
 
    // the last name is the last word in the name part
-   const char *lastNameStart = addrStart;
-   while ( lastNameStart >= addr.c_str() && !isspace(*lastNameStart) )
-   {
-      lastNameStart--;
-   }
-
-   if ( isspace(*lastNameStart) )
-   {
-      lastNameStart++;
-   }
-
-   String last(lastNameStart, addrStart);
+   String last;
+   const char *p = start + fullname.length() - 1;
+   while ( p >= start && !isspace(*p) )
+      last += *p--;
 
    // first name(s) is everything preceding the last name
-   String first(addr.c_str(), lastNameStart);
+   String first(start, p);
+   first.Trim();
 
    if ( firstName )
       *firstName = first;
@@ -120,6 +150,14 @@ static void SplitAddress(const String& addr,
    SplitAddress(address, NULL, &last);
 
    return last;
+}
+
+/* static */ String Message::GetNameFromAddress(const String& address)
+{
+   String name;
+   SplitAddress(address, &name);
+
+   return name;
 }
 
 String Message::GetAddressFirstName(MessageAddressType type) const

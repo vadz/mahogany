@@ -567,6 +567,11 @@
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
 
+/// replace "From" address with "To" in messages from oneself?
+#define MP_FVIEW_FROM_REPLACE "ReplaceFrom"
+/// the ':' separated list of addresses which are "from oneself"
+#define MP_FROM_REPLACE_ADDRESSES "ReplaceFromAdr"
+
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{
 /// ask confirmation before retrieveing messages bigger than this (in Kb)
@@ -1103,6 +1108,11 @@
 //@}
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION_D 1l
+
+/// replace "From" address with "To" in messages from oneself?
+#define MP_FVIEW_FROM_REPLACE_D 0L
+/// the ':' separated list of addresses which are "from oneself"
+#define MP_FROM_REPLACE_ADDRESSES_D ":"
 
 /** @name maximal amounts of data to retrieve from remote servers */
 //@{

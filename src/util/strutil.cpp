@@ -1032,3 +1032,45 @@ strutil_freeRegEx(class strutil_RegEx *regex)
    // nothing
 }
 #endif // WX_HAVE_REGEX
+
+// ----------------------------------------------------------------------------
+// array <-> string
+// ----------------------------------------------------------------------------
+
+wxArrayString strutil_restore_array(char ch, const String& str)
+{
+   wxArrayString array;
+   String s;
+   for ( const char *p = str.c_str(); ; p++ )
+   {
+      if ( *p == ch || *p == '\0' )
+      {
+         array.Add(s);
+         s.clear();
+
+         if ( *p == '\0' )
+            break;
+      }
+      else
+      {
+         s += *p;
+      }
+   }
+
+   return array;
+}
+
+String strutil_flatten_array(const wxArrayString& array, char ch)
+{
+   String s;
+   size_t count = array.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      s += array[n];
+      if ( n < count - 1 )
+         s+= ch;
+   }
+
+   return s;
+}
+
