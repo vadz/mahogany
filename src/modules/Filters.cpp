@@ -1927,20 +1927,25 @@ static bool CheckSubjectFor8Bit(const String& subject)
 // check if the subject is in capitals
 static bool CheckSubjectForCapitals(const String& subject)
 {
-   size_t len = 0;
-   for ( const char *pc = subject; *pc; pc++, len++ )
+   bool hasSpace = false;
+   for ( const char *pc = subject; *pc; pc++ )
    {
       if ( islower(*pc) )
       {
          // not only caps
          return false;
       }
+
+      if ( isspace(*pc) )
+      {
+         // remember that we have more than one word
+         hasSpace = true;
+      }
    }
 
-   // it is possible to have a short subjectentirely capitalized in a
-   // legitime message if it short enough (e.g. "USA" or "HI"...) but if it's a
-   // long sentence containing only caps, it's probabyl spam
-   return len > 8;
+   // message with a single work in all caps can be legitimate but if we have a
+   // sentence (i.e. more than one word here) in all caps it is very suspicious
+   return hasSpace;
 }
 
 // check if the subject is of the form "...      foo-12-xyz": spammers seem to
