@@ -20,6 +20,10 @@
 
 #include "Mpch.h"
 
+#ifndef USE_PCH
+   #include "Mcommon.h"
+#endif // USE_PCH
+
 #include "pointers.h"
 #include "MAtExit.h"
 

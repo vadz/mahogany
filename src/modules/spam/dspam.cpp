@@ -20,6 +20,12 @@
 
 #include "Mpch.h"
 
+#ifndef USE_PCH
+   #include "Mcommon.h"
+
+   #include "MApplication.h"
+#endif //USE_PCH
+
 #include "Message.h"
 
 #include "SpamFilter.h"
