@@ -503,9 +503,9 @@ MailFolderCmn::~MailFolderCmn()
    ASSERT(m_PreCloseCalled == true);
 #endif
    delete m_Timer;
-   delete m_MEventReceiver;
    if(m_Profile)
       m_Profile->DecRef();
+   delete m_MEventReceiver;
 }
 
 void
