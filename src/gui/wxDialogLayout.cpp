@@ -100,7 +100,7 @@ public:
       {
       }
 
-   virtual bool Layout() { return wxPanel::Layout(); }
+   virtual bool Layout() { return wxScrolledWindow::Layout(); }
 };
 
 // ============================================================================
