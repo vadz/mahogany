@@ -34,6 +34,9 @@ $Id$
 		dialog, can't TAB to the buttons from the notebook
 		page
 
+9	VZ	upgrade should translate values in Settings/MessageBox because now
+		wxID_YES is used instead of wxYES &c which causes problems with existing
+		values (you can't exit M any more...)
 
 *********************************************************************
 *** PROJECTS
@@ -52,6 +55,8 @@ $Id$
 		wxIconManager, e.g. small/large style
 		More icons needed: INBOX, PopServer, IMAPServer,
 		FolderGroup 
+
+3	VZ	XFaces under Windows?
 
 5	VZ	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?  Currently
@@ -74,11 +79,16 @@ $Id$
 		m-users/m-developers entries in it. Also add entry for
 		autocollect book. Wait for MessageCC(const String &)
 		constructor.
+4	VZ	add wxWizard for the first time run
+3	VZ	add tips on startup (a wxTipDialog class?)
+
 5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
 		next/previous/goto_next_unread
 4		improve key bindings for message editor, page up/down
 		whole page
+3	VZ	edit existing custom headers, remove them &c (from "Compose" options
+		page probably?
 
 *********************************************************************
 *** TESTS
@@ -92,6 +102,8 @@ $Id$
 5	KB	folder properties for advanced user
 5	KB	POP/IMAP server/localhost default values
 
+3	VZ	dialog to edit message headers in composeview,
+
 *********************************************************************
 *** GENERAL TODO
 *********************************************************************
@@ -102,8 +114,6 @@ $Id$
 - Templates/style-sheets for message composition and flexible reply
   handling
 - Messages sorting, threading, scoring and searching
-- add wxWizard for the first time run
-- add tips on startup (a wxTipDialog class?)
 - there should be no [Expand] button in "Post news message" window,
   or may be there should be [choose newsgroup] one instead.
 -HTML mail
@@ -121,7 +131,6 @@ $Id$
   vadim for this)
 - TUTORIAL, how to keep multiple folders open
 - if time permits: vcard-import
-- add a popup dialog to edit message headers in composeview
 
 - document python callback behaviour for incoming folders, possibly do
   testing for callback results in CollectOneFolder!!

@@ -53,6 +53,7 @@
 #include "SendMessageCC.h"
 
 #include "MDialogs.h"
+#include "HeadersDialogs.h"
 
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
@@ -538,7 +539,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    m_MItemCut = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
    m_MItemCopy = m_MenuBar->FindItem(WXMENU_EDIT_COPY);
    m_MItemPaste = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
-   
+
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_COMPOSE);
 
@@ -1111,6 +1112,28 @@ wxComposeView::OnMenuCommand(int id)
          }
       }
       break;
+
+   case WXMENU_COMPOSE_CUSTOM_HEADERS:
+      {
+         String headerName, headerValue;
+         bool storedInProfile;
+         if ( ConfigureCustomHeader(m_Profile, this,
+                                    &headerName, &headerValue,
+                                    &storedInProfile) )
+         {
+            if ( !storedInProfile )
+            {
+               AddHeaderEntry(headerName, headerValue);
+            }
+            //else: we will take it from the profile when we will send the msg
+
+            wxLogStatus(this, _("Added custom header '%s' to the message."),
+                        headerName.c_str());
+         }
+         //else: cancelled
+      }
+      break;
+
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(
          (m_mode == Mode_NNTP)?
@@ -1395,44 +1418,70 @@ wxComposeView::Send(void)
       delete export;
    }
 
-
-   /* Add additional header lines: */
+   // Add additional header lines: first for this time only and then also the
+   // headers stored in the profile
    kbStringList::iterator
       i, i2;
    i = m_ExtraHeaderLinesNames.begin();
    i2 = m_ExtraHeaderLinesValues.begin();
    for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
       msg->AddHeaderEntry(**i, **i2);
-   
+
+   m_Profile->SetPath(M_CUSTOM_HEADERS_CONFIG_SECTION);
+   String headerName, headerValue;
+   long dummy;
+   bool cont = m_Profile->GetFirstEntry(headerName, dummy);
+   while ( cont )
+   {
+#ifdef DEBUG
+      bool found;
+#endif
+      headerValue = m_Profile->readEntry(headerName, ""
+#ifdef DEBUG
+                                         , &found
+#endif
+                                        );
+
+      ASSERT_MSG( found, "profile entry enumeration broken" );
+
+      msg->AddHeaderEntry(headerName, headerValue);
+      cont = m_Profile->GetNextEntry(headerName, dummy);
+   }
+   m_Profile->ResetPath();
+
    msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
    switch(m_mode)
    {
-   case Mode_SMTP:
-   {
-      // although 'To' field is always present, the others may not be
-      // shown (nor created) at all
-      String to = m_txtFields[Field_To]->GetValue();
-      String cc, bcc;
-      if ( m_txtFields[Field_Cc] )
-         cc = m_txtFields[Field_Cc]->GetValue();
-      if ( m_txtFields[Field_Bcc] )
-         bcc = m_txtFields[Field_Bcc]->GetValue();
+      case Mode_SMTP:
+      {
+         // although 'To' field is always present, the others may not be shown
+         // (nor created) at all
+         String to = m_txtFields[Field_To]->GetValue();
+         String cc, bcc;
+         if ( m_txtFields[Field_Cc] )
+            cc = m_txtFields[Field_Cc]->GetValue();
+         if ( m_txtFields[Field_Bcc] )
+            bcc = m_txtFields[Field_Bcc]->GetValue();
 
-      msg->SetAddresses(to, cc, bcc);
-   }
-   break;
-
-   case Mode_NNTP:
-      msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+         msg->SetAddresses(to, cc, bcc);
+      }
       break;
+
+      case Mode_NNTP:
+         msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+         break;
    }
 
    success = msg->Send();  // true if sent
-   if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
+
+   if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
+   {
       msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
-                           MF_PROFILE_OR_FILE);
+                         MF_PROFILE_OR_FILE);
+   }
 
    delete msg;
+
    return success;
 }
 
@@ -1682,8 +1731,7 @@ wxComposeView::InsertFileAsText(const String& filename,
       //now we move the non-text objects back:
       wxLayoutExportStatus status2(other_list);
       while((export = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) !=
-            NULL)
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
          if(export->type == WXLO_EXPORT_EMPTYLINE)
             layoutList->LineBreak();
          else

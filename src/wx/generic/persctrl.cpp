@@ -792,7 +792,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         Icon_Error
     } which;
     
-#if defined( __WXMSW__ ) && ! defined( M_PREFIX )
+#ifdef M_PREFIX
+#ifdef __WXMSW__
     static char *icons[] =
     {
         "wxICON_INFO",
@@ -800,8 +801,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         "wxICON_WARNING",
         "wxICON_ERROR",
     };
-#else // XPM icons, or names in resource via IconManager
-#ifdef M_PREFIX
+#else // XPM icons
     static char *icons[] =
     {
         "msg_info",
@@ -809,7 +809,17 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         "msg_warning",
         "msg_error"
     };
+#endif
 #else
+#ifdef __WXMSW__
+    static char *icons[] =
+    {
+        "wxICON_INFO",
+        "wxICON_QUESTION",
+        "wxICON_WARNING",
+        "wxICON_ERROR",
+    };
+#else // XPM icons
     static char **icons[] =
     {
         info,
@@ -817,8 +827,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         warning,
         error,
     };
-#endif
 #endif // !XPM/XPM
+#endif // M_PREFIX
     
     if ( style & wxICON_EXCLAMATION )
         which = Icon_Warning;
@@ -1060,15 +1070,9 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
     // which button?
     switch ( event.GetId() ) {
         case wxID_YES:
-            EndModal(wxYES);
-            break;
-
         case wxID_NO:
-            EndModal(wxNO);
-            break;
-
         case wxID_OK:
-            EndModal(wxOK);
+            EndModal(event.GetId());
             break;
 
         default:
@@ -1080,7 +1084,7 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
             // "Yes/No" type dialog
             if ( (m_dialogStyle & wxYES_NO) != wxYES_NO ||
                  (m_dialogStyle & wxCANCEL) ) {
-                EndModal(wxCANCEL);
+                EndModal(wxID_CANCEL);
             }
             break;
     }
@@ -1095,7 +1099,7 @@ int wxPMessageBox(const wxString& configPath,
                   wxWindow *parent,
                   wxConfigBase *config)
 {
-   if(configPath.Length())
+   if ( configPath.Length() )
    {
       wxPHelper persist(configPath, gs_MessageBoxPath, config);
       persist.ChangePath();
@@ -1118,7 +1122,7 @@ int wxPMessageBox(const wxString& configPath,
          rc = dlg.ShowModal();
 
          // ignore checkbox value if the dialog was cancelled
-         if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
+         if ( config && rc != wxID_CANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
             config->Write(configValue, rc);
          }
@@ -1127,9 +1131,15 @@ int wxPMessageBox(const wxString& configPath,
    }
    else
    {
+#ifdef __WXMSW__
+      // use the system standard message box
+      wxMessageDialog dlg(parent, message, caption, style);
+#else
       // if no config path specified, we just work as a normal message 
       // dialog, but with nicer layout
       wxPMessageDialog dlg(parent, message, caption, style, false);
+#endif
+
       return dlg.ShowModal();
    }
 }
@@ -1168,7 +1178,7 @@ void wxPMessageBoxEnable(const wxString& configPath,
        // disable
        if ( config ) {
            // assume it's a Yes/No dialog box
-           config->Write(configValue, (long)wxYES);
+           config->Write(configValue, (long)wxID_YES);
        }
     }
 }

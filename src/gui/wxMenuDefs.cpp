@@ -113,7 +113,7 @@ static const TbarItemInfo g_aToolBarData[] =
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
 // the "Close", "Help" and "Exit" icons are added to all frames (except that
 // "Close" is not added to the main frame because there it's the same as "Exit")
-// @@ should we also add "Edit adb"/"Preferences" to all frames by default?
+// FIXME should we also add "Edit adb"/"Preferences" to all frames by default?
 
 static const int g_aMainTbar[] =
 {
@@ -212,7 +212,7 @@ static const MenuItemInfo g_aMenuItems[] =
 #ifdef USE_PS_PRINTING
    // extra postscript printing
    { WXMENU_FILE_PRINT_SETUP_PS,    gettext_noop("&Print PS Setup"),     gettext_noop("Configure PostScript printing")  },
-//   { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  },
+// { WXMENU_FILE_PAGE_SETUP_PS,    gettext_noop("P&age PS Setup"),     gettext_noop("Configure PostScript page setup")  },
 #endif
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_CREATE,   gettext_noop("Create &Folder..."), gettext_noop("Creates a new folder definition")               },
@@ -280,6 +280,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_COMPOSE_EXTEDIT, gettext_noop("&External editor"),gettext_noop("Invoke alternative editor")},
+   { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_COMPOSE_CUSTOM_HEADERS, gettext_noop("Custom &header..."), gettext_noop("Add/edit header fields not shown on the screen")},
 
    // ADB book management
    { WXMENU_ADBBOOK_NEW,   gettext_noop("&New..."),           gettext_noop("Create a new address book")},

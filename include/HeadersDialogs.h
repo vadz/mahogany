@@ -27,4 +27,17 @@ extern bool ConfigureComposeHeaders(ProfileBase *profile, wxWindow *parent);
  */
 extern bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent);
 
+/** Show the dialog to allow the user change a value for a custom header,
+    returns the header name and value in output variables.
+
+    Also remembers if the user wants this header to always have this value - in
+    this case, the header name/value are remembered in the "Custom header"
+    subgroup of the profile object.
+
+    @return true if Ok button was pressed, false otherwise
+ */
+extern bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
+                                  String *headerName, String *headerValue,
+                                  bool *storedInProfile = (bool *)NULL);
+
 #endif // _HEADERDIALOGS_H

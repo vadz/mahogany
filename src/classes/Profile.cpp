@@ -501,7 +501,7 @@ Profile::writeEntry(const String & key, const String & value)
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
    keypath << key;
-   return ms_GlobalConfig->Write(key, value);
+   return ms_GlobalConfig->Write(keypath, value);
 }
 
 bool

@@ -456,7 +456,7 @@ MDialog_YesNoDialog(const char *message,
    
    return wxPMessageBox(configPath, message, caption,
                         style,
-                        GetDialogParent(parent)) == wxYES;
+                        GetDialogParent(parent)) == wxID_YES;
 }
 
 

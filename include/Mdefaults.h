@@ -63,6 +63,17 @@
 #     define   M_SETTINGS_CONFIG_SECTION    "Settings/"
 #  endif // Unix/Win
 #endif
+
+/// the subgroup for custom headers values
+#define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
+//@}
+
+/** @name User level: novice, intermidiate, expert */
+//@{
+/// minimal user level, prefer simplicity over flexibility
+#define M_USERLEVEL_NOVICE 0L
+/// advanced user
+#define M_USERLEVEL_ADVANCED 1L
 //@}
 
 /** @name Levels of  interaction, do something or not? */
@@ -614,8 +625,8 @@
 //@}
 /// the user's full name
 #define   MP_PERSONALNAME_D      M_EMPTYSTRING
-/// the user's qualification 0=novice,1=advanced
-#define   MP_USERLEVEL_D        0L
+/// the user's qualification (see M_USERLEVEL_XXX)
+#define   MP_USERLEVEL_D        M_USERLEVEL_NOVICE
 /// the username/login
 #define   MP_USERNAME_D         M_EMPTYSTRING
 /// the user's hostname

@@ -127,6 +127,36 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+class wxCustomHeadersDialog : public wxOptionsPageSubdialog
+{
+public:
+   // ctor
+   wxCustomHeadersDialog(ProfileBase *profile, wxWindow *parent);
+
+   // transfer data from window
+   virtual bool TransferDataFromWindow();
+
+   // accessors
+   const wxString& GetHeaderName() const { return m_headerName; }
+   const wxString& GetHeaderValue() const { return m_headerValue; }
+   bool RememberHeader() const { return m_remember; }
+
+   // event handlers
+   void OnUpdateUI(wxUpdateUIEvent& event);
+
+private:
+   wxString m_headerName,
+            m_headerValue;
+   bool     m_remember;
+
+   wxComboBox *m_textctrlName,
+              *m_textctrlValue;
+
+   wxCheckBox *m_checkboxRemember;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -176,6 +206,10 @@ BEGIN_EVENT_TABLE(wxMsgViewHeadersDialog, wxOptionsPageSubdialog)
    EVT_BUTTON(Btn_Down, wxMsgViewHeadersDialog::OnButtonDown)
 
    EVT_UPDATE_UI_RANGE(Btn_Up, Btn_Down, wxMsgViewHeadersDialog::OnUpdateUI)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxCustomHeadersDialog, wxOptionsPageSubdialog)
+   EVT_UPDATE_UI(wxID_OK, wxCustomHeadersDialog::OnUpdateUI)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -413,8 +447,8 @@ wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(ProfileBase *profile,
    c->height.AsIs();
    btnDown->SetConstraints(c);
 
-   // FIXME: we also assume that "Down" is longer than "Up" - which is of course
-   // false after translation
+   // FIXME: we also assume that "Down" is longer than "Up" - which may, of
+   //        course, be false after translation
    wxButton *btnUp = new wxButton(this, Btn_Up, _("&Up"));
    c = new wxLayoutConstraints();
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -547,6 +581,102 @@ void wxMsgViewHeadersDialog::OnButtonMove(bool up)
         //else: out of range, silently ignore
     }
 }
+
+// ----------------------------------------------------------------------------
+// wxCustomHeadersDialog - edit the value of a custom header field
+// ----------------------------------------------------------------------------
+
+wxCustomHeadersDialog::wxCustomHeadersDialog(ProfileBase *profile,
+                                             wxWindow *parent)
+                     : wxOptionsPageSubdialog(profile, parent,
+                                              _("Configure custom header"),
+                                              "CustomHeader")
+{
+   // layout the controls
+   // -------------------
+   wxLayoutConstraints *c;
+
+   // [Ok], [Cancel] and a box around everything else
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Edit header"));
+
+   // calc the max width of the label
+   wxString labelName = _("Header name: "),
+            labelValue = _("Header value: ");
+
+   int widthName, widthValue;
+   GetTextExtent(labelName, &widthName, NULL);
+   GetTextExtent(labelValue, &widthValue, NULL);
+
+   int widthLabel = wxMax(widthName, widthValue);
+
+   // header name
+   wxStaticText *label;
+
+   label = new wxStaticText(this, -1, labelName);
+   m_textctrlName = new wxPTextEntry("CustomHeaderName", this);
+
+   c = new wxLayoutConstraints();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthLabel);
+   c->height.AsIs();
+   c->centreY.SameAs(m_textctrlName, wxTop, 2*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
+
+   c = new wxLayoutConstraints();
+   c->left.RightOf(label, LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   m_textctrlName->SetConstraints(c);
+
+   // header value
+   label = new wxStaticText(this, -1, labelValue);
+   m_textctrlValue = new wxPTextEntry("CustomHeaderValue", this);
+
+   c = new wxLayoutConstraints();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.Absolute(widthLabel);
+   c->height.AsIs();
+   c->centreY.SameAs(m_textctrlValue, wxTop, 2*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
+
+   c = new wxLayoutConstraints();
+   c->left.RightOf(label, LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   c->top.Below(m_textctrlName, 2*LAYOUT_Y_MARGIN);
+   m_textctrlValue->SetConstraints(c);
+
+   // a checkbox (space at the end to workaround wxMSW bug - otherwise, the
+   // caption is truncated)
+   m_checkboxRemember = new wxCheckBox(this, -1, _("Remember these values "));
+   c = new wxLayoutConstraints();
+   c->height.AsIs();
+   c->width.AsIs();
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->centreX.SameAs(box, wxCentreX);
+   m_checkboxRemember->SetConstraints(c);
+
+   // final touch
+   m_textctrlName->SetFocus();
+   SetDefaultSize(4*wBtn, 8*hBtn);
+}
+
+bool wxCustomHeadersDialog::TransferDataFromWindow()
+{
+   m_headerName = m_textctrlName->GetValue();
+   m_headerValue = m_textctrlValue->GetValue();
+   m_remember = m_checkboxRemember->GetValue();
+
+   return TRUE;
+}
+
+void wxCustomHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   // only enable the [Ok] button if the header name is not empty
+   event.Enable( !!m_textctrlName->GetValue() );
+}
+
 // ----------------------------------------------------------------------------
 // our public interface
 // ----------------------------------------------------------------------------
@@ -563,4 +693,36 @@ bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent)
    wxMsgViewHeadersDialog dlg(profile, parent);
 
    return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
+}
+
+bool ConfigureCustomHeader(ProfileBase *profile, wxWindow *parent,
+                           String *headerName, String *headerValue,
+                           bool *storedInProfile)
+{
+   wxCustomHeadersDialog dlg(profile, parent);
+
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+      *headerName = dlg.GetHeaderName();
+      *headerValue = dlg.GetHeaderValue();
+
+      bool remember = dlg.RememberHeader();
+
+      if ( storedInProfile )
+         *storedInProfile = remember;
+
+      if ( remember )
+      {
+         profile->SetPath(M_CUSTOM_HEADERS_CONFIG_SECTION);
+         profile->writeEntry(*headerName, *headerValue);
+         profile->ResetPath();
+      }
+
+      return true;
+   }
+   else
+   {
+      // cancelled
+      return false;
+   }
 }
