@@ -2340,7 +2340,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          {
             wxString what;    // what did the user forget to specify
 
-            const MPersMsgBox *msgbox; // for MDialog_YesNoDialog
+            // the key to use for MDialog_YesNoDialog
+            const MPersMsgBox *msgbox = NULL; // suppress compiler warning
 
             if ( !loginName )
             {

@@ -783,8 +783,12 @@ MDlgResult MDialog_YesNoCancel(char const *message,
          // fall through
 
       case wxCANCEL:
-         return MDlg_Cancel;
+         ;
    }
+
+   // have to put it outside the switch to avoid compilation warnings from some
+   // brain-dead compilers
+   return MDlg_Cancel;
 }
 
 /** simple Yes/No dialog
