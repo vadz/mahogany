@@ -1903,16 +1903,19 @@ static size_t FlushThreadable(Threadable *t,
 //
 // Copy the tree structure to a THREADNODE structure
 //
-static THREADNODE* MapToThreadNode(Threadable* root) {
-   if (!root) return 0;
-   THREADNODE* thrNode = new THREADNODE;
-   if (root->isDummy()) {
-      thrNode->num = 0;
-   } else {
-      thrNode->num = root->getIndex()+1;     // +1 for getting a msgno
-   }
+static THREADNODE *MapToThreadNode(Threadable* root)
+{
+   if ( !root )
+      return NULL;
+
+   // we must allocate THREADNODEs with fs_get() as they're freed by cclient
+   THREADNODE *thrNode = mail_newthreadnode(NULL);
+
+   // +1 for getting a msgno
+   thrNode->num = root->isDummy() ? 0 : root->getIndex()+1;
    thrNode->next = MapToThreadNode(root->getChild());
    thrNode->branch = MapToThreadNode(root->getNext());
+
    return thrNode;
 }
 
@@ -1937,7 +1940,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    if ( threadableRoot )
    {
       // Map to needed output format
-      thrData->m_root =  MapToThreadNode(threadableRoot);
+      thrData->m_root = MapToThreadNode(threadableRoot);
 
       // Clean up
       threadableRoot->destroy();

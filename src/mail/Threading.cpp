@@ -113,22 +113,21 @@ ThreadData::ThreadData(MsgnoType count)
    m_root = 0;
 }
 
-static void DestroyThreadNodes(THREADNODE* n) {
-   if (!n) return;
-   DestroyThreadNodes(n->next);
-   DestroyThreadNodes(n->branch);
-   delete n;
+void ThreadData::killTree()
+{
+   if ( m_root )
+   {
+      mail_free_threadnode(&m_root);
+      m_root = NULL;
+   }
 }
 
 ThreadData::~ThreadData()
 {
    killTree();
+
    delete [] m_tableThread;
    delete [] m_children;
    delete [] m_indents;
 }
 
-void ThreadData::killTree() {
-   DestroyThreadNodes(m_root);
-   m_root = 0;
-}

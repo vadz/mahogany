@@ -80,17 +80,21 @@ struct ThreadData
    /// table containing the total number of children of each message
    MsgnoType *m_children;
 
-   /// Root of the built tree
+   /// Root of the built tree, must be allocated with fs_get()!
    THREADNODE *m_root;
-   
+
+   /// free the existing tree, but not the other tables
+   void killTree();
+
+
    /// ctor reserves memory for holding info about count messages
    ThreadData(MsgnoType count);
 
    /// dtor frees memory
    ~ThreadData();
 
-   /// Kills the tree struture
-   void killTree();
+
+   DECLARE_NO_COPY_CLASS(ThreadData);
 };
 
 /**
