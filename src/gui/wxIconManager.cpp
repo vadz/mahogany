@@ -243,8 +243,8 @@ wxIconManager::LoadImageXpm(String filename)
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
       String command;
-      command = READ_APPCONFIG(MP_CONVERTPROGRAM);
-      command << ' ' << filename << ' ' << tempfile;
+      command.Printf(READ_APPCONFIG(MP_CONVERTPROGRAM),
+                     filename.c_str(), tempfile.c_str());
       wxLogTrace(wxTraceIconLoading,
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());

@@ -195,6 +195,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
 
    wxString *str = new wxString();
    // text must be concatenated
+   int testf = WXLO_EXPORT_WITH_CRLF;
    for(;;)
    {
       while(status->m_iterator == NULLIT)

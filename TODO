@@ -63,11 +63,11 @@ Add choice of intermediary image format:
   Find a clever way to handle this, build a sequence first!
 
 - retrieve messages starting from last one
+- fix bitmap allocation in SetBackgroundBitmap() calls (seems ok now)
+
 
 
 TODO:
-
-- fix bitmap allocation in SetBackgroundBitmap() calls
 
 - modify wxIconManager to recycle last found path for icons first, to
   avoid unnecessary filesystem traversals
@@ -75,21 +75,23 @@ TODO:
 - folderview listctrl has extra Subject column behind Size field ???
 
 = wxLayout:
-  x- add setting of background colour and/or image
+  - fix initial scrollbar sizes
   - update rectangle
-  x- reset scrollbars on Clear()
 
   - fix(simplify) cursor size calculation
   - font optimisations(?)
-  x- composeview: after inserting text (reply), update scrollbars
   - cut&paste (paste is there but broken in wxGTK)
   - copy/cut/selections
   - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
   - occasionally wraps lines wongly (twice)
 
+  x- reset scrollbars on Clear()
+  x- add setting of background colour and/or image
+  x- composeview: after inserting text (reply), update scrollbars
+
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
-
+- add progress indicator to image loading
 - add ext editor icon to toolbar in composeview, nicer icon for insert file
 
 - make mailfolders collectable:
@@ -97,31 +99,25 @@ TODO:
   - have a global "NewMail" folder setting and ensure its existence
     (and the one of SentFolder) in VerifySettings()
 
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
 - speed up copy mail to folder by cusing c-client functionality
 - add references (and In-Reply-To: ?) headers to message replies
   wxComposeView: if replying, only mark message as answered if reply
   got sent
-- when inserting filetype of unknown MIME type, prompt for it,
-  possibly have a MIME types editor (similar to netscape's?)
 - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
-
-- implement Compose/Reply templates
-
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
  - save and restore printer settings in profile
-
----> simplify Profiles on separate branch
-
 - if time permits: vcard-import
 
 - support for local news spool
-
+- implement Compose/Reply templates
 - Let Iconmanager chose handler by format! JPEG crashes program if fed 
   the wrong filetype! Handler can return extension, caller should do
   the same.

@@ -19,14 +19,14 @@
 
 /// version info
 #define   M_VERSION_MAJOR   0
-#define   M_VERSION_MINOR   1
+#define   M_VERSION_MINOR   2
 #define   M_VERSION_RELEASE 0
 #define   M_VERSION_STATUS  "a" // alpha
 
 /// short version string (it should always have this format!)
-#define   M_VERSION         "0.10a"
+#define   M_VERSION         "0.20a"
 
 /// full version string
-#define   M_VERSION_STRING  "0.10a 'Fountainbridge'"
+#define   M_VERSION_STRING  "0.20a 'Polwarth'"
 
 #endif  //_M_VERSION_H

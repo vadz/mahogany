@@ -1141,7 +1141,8 @@ wxComposeView::Send(void)
    wxLayoutExportObject *export;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
    while((export = wxLayoutExport( &status,
-                                   WXLO_EXPORT_AS_TEXT|WXLO_EXPORT_WITH_CRLF)) != NULL) 
+                                   WXLO_EXPORT_AS_TEXT,
+                                   WXLO_EXPORT_WITH_CRLF)) != NULL) 
    {
       if(export->type == WXLO_EXPORT_TEXT)
       {
