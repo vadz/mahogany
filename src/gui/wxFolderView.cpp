@@ -1561,6 +1561,29 @@ void wxFolderListCtrl::Focus(long index)
    m_suppressFocusTracking = false;
 #endif // BROKEN_LISTCTRL
 #endif // wxWin >= 2.2.6
+
+   // we will need the items nearby as well
+   if ( m_headers )
+   {
+      long page = GetCountPerPage(),
+           total = GetItemCount();
+
+      // cache slightly more than the visible page around the current message
+      page *= 3;
+      page /= 2;
+
+      long from = index - page / 2;
+      if ( from < 0 )
+      {
+         from = 0;
+      }
+
+      long to = from + page;
+      if ( to >= total )
+         to = total - 1;
+
+      m_headers->HintCache((size_t)from, (size_t)to);
+   }
 }
 
 long wxFolderListCtrl::GetUniqueSelection() const

@@ -3091,7 +3091,9 @@ MailFolderCmn::FilterNewMail()
    }
 
    // Obtain pointer to the filtering module:
-   MModule_Filters *filterModule = MModule_Filters::GetModule();
+   DECLARE_AUTOPTR(MModule_Filters);
+
+   MModule_Filters_obj filterModule = MModule_Filters::GetModule();
    if ( !filterModule )
    {
       wxLogVerbose("Filter module couldn't be loaded.");
@@ -3103,95 +3105,104 @@ MailFolderCmn::FilterNewMail()
    CHECK( hil, false, "FilterNewMail: no headers" );
 
    // Build an array of NEW message UIds to apply the filters to:
-   UIdArray messages;
-   unsigned long count = GetMessageCount();
-   for ( unsigned long idx = 0; idx < count; idx++ )
+   MsgnoArray *messages = SearchByFlag(MSG_STAT_NEW);
+   if ( !messages )
    {
-      HeaderInfo *hi = hil->GetItemByIndex(idx);
-      if ( !hi )
-      {
-         FAIL_MSG( "failed to get HeaderInfo" );
-
-         continue;
-      }
-
-      int status = hi->GetStatus();
-
-      // only take NEW (== RECENT && !SEEN) and ignore DELETED
-      if ( (status &
-            (MSG_STAT_RECENT | MSG_STAT_SEEN | MSG_STAT_DELETED))
-            == MSG_STAT_RECENT )
-      {
-         messages.Add(hi->GetUId());
-      }
+      // no new messages
+      return true;
    }
 
-   if ( !messages.IsEmpty() )
+   if ( messages->IsEmpty() )
    {
-      // build a single program from all filter rules:
-      String filterString;
-      MFolder_obj folder(GetName());
-      wxArrayString filters;
-      if ( folder )
-         filters = folder->GetFilters();
-      size_t countFilters = filters.GetCount();
-      for ( size_t n = 0; n < countFilters; n++ )
+      delete messages;
+
+      return true;
+   }
+
+   // convert msgnos we got from SearchByFlag() into UIDs
+   //
+   // notice that it isn't really important that we force retrieving all these
+   // headers now (instead of getting UIDs directly from server) as they will
+   // be needed for Apply() below soon anyhow
+   size_t n,
+          count = messages->GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      HeaderInfo *hi = hil->GetItemByMsgno(messages->Item(n));
+      if ( !hi )
       {
-         MFilter_obj filter(filters[n]);
-         MFilterDesc fd = filter->GetDesc();
-         filterString += fd.GetRule();
+         FAIL_MSG( "failed to get header for a new message" );
+
+         messages->Item(n) = UID_ILLEGAL;
       }
-
-      // apply it
-      if ( !filterString.empty() )
+      else
       {
-         // translate filter program:
-         FilterRule *filterRule =
-            filterModule->GetFilter(filterString);
+         messages->Item(n) = hi->GetUId();
+      }
+   }
+   
+   // build a single program from all filter rules:
+   String filterString;
+   MFolder_obj folder(GetName());
+   wxArrayString filters;
+   if ( folder )
+      filters = folder->GetFilters();
+   size_t countFilters = filters.GetCount();
+   for ( n = 0; n < countFilters; n++ )
+   {
+      MFilter_obj filter(filters[n]);
+      MFilterDesc fd = filter->GetDesc();
+      filterString += fd.GetRule();
+   }
 
-         // apply it:
-         if ( filterRule )
+   // apply it
+   if ( !filterString.empty() )
+   {
+      // translate filter program:
+      FilterRule *filterRule = filterModule->GetFilter(filterString);
+
+      // apply it:
+      if ( filterRule )
+      {
+         // true here means "ignore deleted"
+         int rc = filterRule->Apply(this, *messages, true);
+
+         // avoid doing anything harsh (like expunging the messages) if an
+         // error occurs
+         if ( !(rc & FilterRule::Error) )
          {
-            // true here means "ignore deleted"
-            int rc = filterRule->Apply(this, messages, true);
+            // some of the messages might have been deleted by the filters
+            // and, moreover, the filter code could have called
+            // ExpungeMessages() explicitly, so we may have to expunge some
+            // messages from the folder
 
-            // avoid doing anything harsh (like expunging the messages) if an
-            // error occurs
-            if ( !(rc & FilterRule::Error) )
+            // calling ExpungeMessages() from filter code is unconditional
+            // and should always be honoured, so check for it first
+            bool expunge = (rc & FilterRule::Expunged) != 0;
+            if ( !expunge )
             {
-               // some of the messages might have been deleted by the filters
-               // and, moreover, the filter code could have called
-               // ExpungeMessages() explicitly, so we may have to expunge some
-               // messages from the folder
-
-               // calling ExpungeMessages() from filter code is unconditional
-               // and should always be honoured, so check for it first
-               bool expunge = (rc & FilterRule::Expunged) != 0;
-               if ( !expunge )
+               if ( rc & FilterRule::Deleted )
                {
-                  if ( rc & FilterRule::Deleted )
-                  {
-                     // expunging here is dangerous because we can expunge the
-                     // messages which had been deleted by the user manually
-                     // before the filters were applied, so check a special
-                     // option which may be set to prevent us from doing this
-                     expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
-                  }
-               }
-
-               if ( expunge )
-               {
-                  // so be it
-                  ExpungeMessages();
+                  // expunging here is dangerous because we can expunge the
+                  // messages which had been deleted by the user manually
+                  // before the filters were applied, so check a special
+                  // option which may be set to prevent us from doing this
+                  expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
                }
             }
 
-            filterRule->DecRef();
+            if ( expunge )
+            {
+               // so be it
+               ExpungeMessages();
+            }
          }
+
+         filterRule->DecRef();
       }
    }
 
-   filterModule->DecRef();
+   delete messages;
 
    return true;
 }

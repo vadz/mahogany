@@ -201,6 +201,9 @@ private:
 // smart references classes: for an MObjectRC-derived class Foo we provide
 // macros to define a class Foo_obj which is a smart reference to Foo and also
 // more flexible macros to allow adding arbitrary code to Foo_obj declaration
+//
+// in fact, this works for any class which has a DecRef() method, not just
+// MObjectRC
 // ----------------------------------------------------------------------------
 
 // start auto ptr class declaration
@@ -209,7 +212,7 @@ private:
    { \
    public: \
       classname##_obj(classname *ptr = NULL) { m_ptr = ptr; } \
-      ~classname##_obj() { SafeDecRef(m_ptr); } \
+      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); } \
  \
       void Attach(classname *ptr) \
       { \

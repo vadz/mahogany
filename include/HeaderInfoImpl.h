@@ -82,6 +82,9 @@ public:
    virtual LastMod GetLastMod() const;
    virtual bool HasChanged(const LastMod since) const;
 
+   virtual void Cache(size_t idxFrom, size_t idxTo);
+   virtual void HintCache(size_t posFrom, size_t posTo);
+
    virtual ~HeaderInfoListImpl();
 
 private:
@@ -100,6 +103,8 @@ private:
    /// is the given entry valid (i.e. already cached)?
    inline bool IsHeaderValid(size_t n) const;
 
+   /// expand m_headers array so that the given index is valid
+   void ExpandToMakeIndexValid(size_t n);
 
    /// the folder we contain the listinf for
    MailFolder *m_mf;

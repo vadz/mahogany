@@ -313,16 +313,22 @@ public:
     */
    virtual bool HasChanged(const LastMod since) const = 0;
 
-   // currently unused
-#if 0
    /**
-      Prepare to access the items in this range of positions (NOT indices!)
+      Cache all items between the given indices.
+    */
+   virtual void Cache(size_t idxFrom, size_t idxTo) = 0;
+
+   /**
+      Prepare to access the items in this range of positions (NOT indices
+      unlike Cache() above!)
 
       This is supposed to be called from GUI code when it thinks that it is
       going to need these indices soon.
     */
    virtual void HintCache(size_t posFrom, size_t posTo) = 0;
 
+   // currently unused
+#if 0
    /// Is the item with this msgno already cached?
    virtual bool IsInCache(MsgnoType msgno) const = 0;
 #endif // 0

@@ -265,12 +265,12 @@ public:
    // ctor takes the pointer to the start of HeaderInfo buffer and the number
    // of slots in it and the msgno we are going to start retrieving headers
    // from
-   OverviewData(HeaderInfo *hi, size_t nTotal, MsgnoType msgnoFrom)
+   OverviewData(HeaderInfo **headers, size_t nTotal, MsgnoType msgnoFrom)
    {
       m_msgnoStart = msgnoFrom;
       m_nTotal = nTotal;
       m_nRetrieved = 0;
-      m_hi = hi;
+      m_headers = headers;
       m_progdlg = NULL;
    }
 
@@ -301,7 +301,7 @@ public:
    }
 
    // get the current HeaderInfo object
-   HeaderInfo *GetCurrent() const { return m_hi + m_nRetrieved; }
+   HeaderInfo *GetCurrent() const { return *(m_headers + m_nRetrieved); }
 
    // get the number of messages retrieved so far
    size_t GetRetrievedCount() const { return m_nRetrieved; }
@@ -357,7 +357,7 @@ private:
 
    // the buffer in which to store the headers retrieved (in fact, the pointer
    // to the current header as it is incremented inside OverviewHeaderEntry)
-   HeaderInfo *m_hi;
+   HeaderInfo **m_headers;
 
    // the progress dialog if we use one, NULL otherwise
    MProgressDialog *m_progdlg;
@@ -2680,11 +2680,14 @@ unsigned long MailFolderCC::GetMessageCount() const
 
 unsigned long MailFolderCC::CountNewMessages() const
 {
-   MailFolderStatus status;
-   if ( !CountAllMessages(&status) )
+   MsgnoArray *messages = SearchByFlag(MSG_STAT_NEW);
+   if ( !messages )
       return 0;
 
-   return status.newmsgs;
+   unsigned long newmsgs = messages->GetCount();
+   delete messages;
+
+   return newmsgs;
 }
 
 unsigned long MailFolderCC::CountRecentMessages() const
@@ -2729,14 +2732,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 
    if ( status->recent || status->unread )
    {
-      // ok, here is the explanation of this kludge: DoCountMessages() is
-      // supposed to be called very soon after opening the mailbox and never
-      // again because the status is cached and later we just update all
-      // status fields manually
-      //
-      // hence, all recent messages must be new: we didn't have time to read
-      // any of them yet!
-      status->newmsgs = status->recent;
+      status->newmsgs = CountNewMessages();
    }
    else // no recent or no unseen
    {
@@ -2873,7 +2869,9 @@ MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
    return count;
 }
 
-MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, bool set) const
+MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
+                                       bool set,
+                                       bool undeletedOnly) const
 {
    CHECK( m_MailStream, 0, "SearchByFlag: folder is closed" );
 
@@ -2890,7 +2888,12 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, bool set) const
 
       case MSG_STAT_DELETED:
          if ( set )
+         {
+            // we don't risk finding many messages like this!
+            ASSERT_MSG( !undeletedOnly, "deleted and undeleted at once?" );
+
             pgm->deleted = 1;
+         }
          else
             pgm->undeleted = 1;
          break;
@@ -2916,14 +2919,31 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, bool set) const
             pgm->unflagged = 1;
          break;
 
-      case MSG_STAT_NONE:
-      case MSG_STAT_SEARCHED:
+      case MSG_STAT_NEW:
+         if ( set )
+         {
+            pgm->recent = 1;
+            pgm->unseen = 1;
+         }
+         else
+         {
+            // although it is formally possible, this must be an error
+            FAIL_MSG( "do you really want to search for unnew messages??" );
+         }
+         break;
+
+      case MSG_STAT_SEARCHED: // unsupported and unneeded
       default:
          FAIL_MSG( "unexpected flag in SearchByFlag" );
 
          mail_free_searchpgm(&pgm);
 
          return NULL;
+   }
+
+   if ( undeletedOnly )
+   {
+      pgm->undeleted = 1;
    }
 
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
@@ -3405,7 +3425,7 @@ bool MailFolderCC::CanThread() const
 // MailFolderCC working with the headers
 // ----------------------------------------------------------------------------
 
-MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
+MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo **headers,
                                       MsgnoType msgnoFrom, MsgnoType msgnoTo)
 {
    CHECK( msgnoFrom <= msgnoTo, 0, "GetHeaderInfo: msgnos in disorder" );
@@ -3422,7 +3442,7 @@ MsgnoType MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
    // --------------------------------------------------------
 
    MsgnoType nMessages = msgnoTo - msgnoFrom + 1;
-   OverviewData overviewData(arrayHI, nMessages, msgnoFrom);
+   OverviewData overviewData(headers, nMessages, msgnoFrom);
 
    // don't show the progress dialog if we're not in interactive mode
    if ( GetInteractiveFrame() && !mApplication->IsInAwayMode() )

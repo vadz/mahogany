@@ -11,6 +11,11 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+   Look for FIXME-SORTING to see the things which must be changed to implement
+   sorting/threading
+ */
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -153,30 +158,13 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
 
    if ( !IsHeaderValid(n) )
    {
-      // we need to make n a valid index into array and we do this by filling
-      // it up to n with NULLs
-      //
-      // TODO: add SetCount() to wxArray instead
-      size_t count = m_headers.GetCount();
-      if ( count <= n )
-      {
-         HeaderInfoListImpl *self = (HeaderInfoListImpl *)this; // const_cast
-
-         // adding elements to array may need realloc()ing and invalidate the
-         // pointers
-         self->m_lastMod++;
-
-         while ( count++ <= n )
-         {
-            self->m_headers.Add(NULL);
-         }
-      }
+      ((HeaderInfoListImpl *)this)->ExpandToMakeIndexValid(n); // const_cast
 
       // alloc space for new header
       m_headers[n] = new HeaderInfo;
 
       // get header info for the new header
-      m_mf->GetHeaderInfo(m_headers[n], n + 1, n + 1);
+      m_mf->GetHeaderInfo(&m_headers[n], n + 1, n + 1);
    }
 
    return m_headers[n];
@@ -198,7 +186,7 @@ size_t HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 // HeaderInfoListImpl index to/from position mapping
 // ----------------------------------------------------------------------------
 
-// this is trivial without sorting/threading
+// FIXME-SORTING: this is trivial without sorting/threading
 
 size_t HeaderInfoListImpl::GetIdxFromPos(size_t pos) const
 {
@@ -354,6 +342,55 @@ HeaderInfoList::LastMod HeaderInfoListImpl::GetLastMod() const
 bool HeaderInfoListImpl::HasChanged(const HeaderInfoList::LastMod since) const
 {
    return m_lastMod > since;
+}
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl cache control
+// ----------------------------------------------------------------------------
+
+void HeaderInfoListImpl::ExpandToMakeIndexValid(size_t n)
+{
+   // we need to make n a valid index into array and we do this by filling
+   // it up to n with NULLs
+   //
+   // TODO: add SetCount() to wxArray instead
+   size_t count = m_headers.GetCount();
+   if ( count <= n )
+   {
+      // adding elements to array may need realloc()ing and invalidate the
+      // pointers
+      m_lastMod++;
+
+      while ( count++ <= n )
+      {
+         m_headers.Add(NULL);
+      }
+   }
+}
+
+void HeaderInfoListImpl::Cache(size_t idxFrom, size_t idxTo)
+{
+   CHECK_RET( (idxFrom <= idxTo) && (idxTo < m_count),
+              "HeaderInfoListImpl::HintCache(): invalid range" );
+
+   // cache all messages in this range
+   ExpandToMakeIndexValid(idxTo);
+
+   for ( size_t idx = idxFrom; idx <= idxTo; idx++ )
+   {
+      m_headers[idx] = new HeaderInfo;
+   }
+
+   m_mf->GetHeaderInfo(&m_headers[idxFrom], idxFrom + 1, idxTo + 1);
+}
+
+void HeaderInfoListImpl::HintCache(size_t posFrom, size_t posTo)
+{
+   // for now the positions are the same as indices, so we have no problems
+   // here but when we're going to have sorting/threading, what should we do
+   // here? FIXME-SORTING
+
+   Cache(posFrom, posTo);
 }
 
 // ----------------------------------------------------------------------------

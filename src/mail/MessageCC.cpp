@@ -1004,7 +1004,7 @@ MessageCC::GetStatus() const
 {
    MESSAGECACHE *mc = GetCacheElement();
 
-   int status = MailFolder::MSG_STAT_NONE;
+   int status = 0;
    if ( mc )
    {
       if(mc->seen)

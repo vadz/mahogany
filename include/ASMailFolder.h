@@ -53,29 +53,6 @@ class ASMailFolder : public MObjectRC
 public:
    /** @name Constants and Types */
    //@{
-   /** What is the status of a given message in the folder?
-       Recent messages are those that we never saw in a listing
-       before. Once we open a folder, the messages will no longer be
-       recent when we close it. Seen are only those that we really
-       looked at. */
-   enum MessageStatus
-   {
-      /// empty message status
-      MSG_STAT_NONE = 0,
-      /// message has been seen
-      MSG_STAT_SEEN = 1,
-      /// message is deleted
-      MSG_STAT_DELETED = 2,
-      /// message has been replied to
-      MSG_STAT_ANSWERED = 4,
-      /// message is "recent" (see RFC 2060)
-      MSG_STAT_RECENT = 8,
-      /// message matched a search
-      MSG_STAT_SEARCHED = 16,
-      /// message has been flagged for something
-      MSG_STAT_FLAGGED = 64
-   };
-
    // the enum values are the same as cclient LATT_XXX constants
    enum
    {

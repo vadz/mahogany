@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   MailFolder.h: MailFolder class declaration
@@ -235,8 +236,8 @@ public:
        looked at. */
    enum MessageStatus
    {
-      /// empty message status
-      MSG_STAT_NONE = 0,
+      /// message is new (recent and unseen) (NB: this not a real bit flag!)
+      MSG_STAT_NEW = 0,
       /// message has been seen
       MSG_STAT_SEEN = 1,
       /// message is deleted
@@ -516,13 +517,13 @@ public:
       Get the header info for the specified range of headers. This is for
       use of HeaderInfoList only!
 
-      @param arrayHI pointer to a sufficiently big array of HeaderInfos
+      @param headers pointer to a sufficiently big array of HeaderInfos
       @param msgnoFrom starting header to retrieve
       @param msgnoTo last header to retrieve (inclusive)
       @return the number of headers retrieved (may be less than requested if
               cancelled or an error occured)
     */
-   virtual MsgnoType GetHeaderInfo(HeaderInfo *arrayHI,
+   virtual MsgnoType GetHeaderInfo(HeaderInfo **headers,
                                    MsgnoType msgnoFrom,
                                    MsgnoType msgnoTo) = 0;
 
@@ -646,11 +647,13 @@ public:
 
        @param flag one of MSG_STAT_xxx constants
        @param set if true, find all messages with this flag, false - without
+       @param undeletedOnly if true, don't included deleted messages
        @param return array with msgnos (not UIDs!) of messages found to be
               freed by caller
    */
    virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    bool set = true) const = 0;
+                                    bool set = true,
+                                    bool undeletedOnly = true) const = 0;
 
    /** Search messages for certain criteria.
        @return UIdArray with UIds of matching messages, caller must
