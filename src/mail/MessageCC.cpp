@@ -406,7 +406,7 @@ MessageCC::GetNewsgroups(void) const
    {
       if ( !m_Envelope->ngbogus )
       {
-         newsgroups = m_Envelope->references;
+         newsgroups = m_Envelope->newsgroups;
       }
       //else: what does ngbogus really mean??
    }
