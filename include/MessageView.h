@@ -409,7 +409,7 @@ private:
    /// set m_encodingUser to the given encoding and refresh the view
    void SetEncoding(wxFontEncoding encoding);
 
-   /// reset encoding if not configured to keep it
+   /// reset the encoding to the default value
    void ResetUserEncoding();
 
    /// the encoding specified by the user or wxFONTENCODING_SYSTEM if none
