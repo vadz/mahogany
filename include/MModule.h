@@ -190,7 +190,7 @@ static  MModule *Init(int, int, int, MInterface *, int *);
       MMODULE_DEFINE_CMN(ClassName) \
       virtual const char *DebugGetClassName() const { return #ClassName; }
 #else
-      MMODULE_DEFINE_CMN(Classname)
+#   define MMODULE_DEFINE(ClassName)      MMODULE_DEFINE_CMN(ClassName)
 #endif
 
 
