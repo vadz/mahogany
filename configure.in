@@ -125,7 +125,7 @@ M_OVERRIDES(no_rsa,no_rsa,
 --with-no_rsa      use SSL without RSA,
 USE_NO_RSA)
 
-M_OVERRIDES(WXCONFIGPRG,WXCONFIGPRG,
+M_OVERRIDES(wxconfigprg,wxconfigprg,
 --with-wxconfigprg=xxx    use wx-config program named xxx e.g. wxgtkd-config,
 USE_WXCONFIGPRG)
 
@@ -363,7 +363,7 @@ fi
 
 if test "x$USE_WXCONFIGPRG" != "x"; then
 	WXCONFIG_NAME="$USE_WXCONFIGPRG"
-else
+fi
 
 if test "$USE_DEBUG" = 1; then
 	DBGFLAGS="$DBGFLAGS -DDEBUG"
