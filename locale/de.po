@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.50\n"
-"POT-Creation-Date: 2000-10-24 22:28+0100\n"
+"POT-Creation-Date: 2000-10-31 22:38+0000\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <balluder@gmx.net>\n"
 "Language-Team: M-Team <mahogany-developers@lists.sourceforge.net>\n"
@@ -350,120 +350,124 @@ msgstr ""
 msgid "Failed to connect to PalmOS device."
 msgstr "Verbindung mit dem Palm-OS Gerät konnte nicht hergestellt werden."
 
-#: .src/PalmOS.cpp:841
+#: .src/PalmOS.cpp:846
 msgid "Do you want synchronise with your PalmOS device?"
 msgstr "Möchten Sie mit Ihrem Palm-OS Gerät synchronisieren?"
 
-#: .src/PalmOS.cpp:888
+#: .src/PalmOS.cpp:893
 msgid "Reading local directory ..."
 msgstr "Lese lokales Verzeichnis..."
 
-#: .src/PalmOS.cpp:906
+#: .src/PalmOS.cpp:911
 #, c-format
 msgid "Ignoring entry '%s' which is not a regular file."
 msgstr "Eintrag '%s' is keine reguläre Datei - ignoriert."
 
-#: .src/PalmOS.cpp:919
+#: .src/PalmOS.cpp:924
 #, c-format
 msgid "Ignoring file '%s' with unknown extension."
 msgstr "Datei '%s' mit unbekanntem Typ ignoriert."
 
-#: .src/PalmOS.cpp:957 .src/PalmOS.cpp:1017
+#: .src/PalmOS.cpp:962 .src/PalmOS.cpp:1022
 msgid "Reading list of databases ..."
 msgstr "Lese Datenbankliste..."
 
-#: .src/PalmOS.cpp:1001
+#: .src/PalmOS.cpp:1006
 #, c-format
 msgid "Could not access backup directory '%s'."
 msgstr "Konnte Backupverzeichnis '%s' nicht anlegen."
 
-#: .src/PalmOS.cpp:1028
+#: .src/PalmOS.cpp:1033
 msgid "Palm Backup"
 msgstr "Palm-OS Sicherheitskopie"
 
-#: .src/PalmOS.cpp:1028
+#: .src/PalmOS.cpp:1033
 msgid "Backing up files"
 msgstr "Datenbanken werden gesichert"
 
-#: .src/PalmOS.cpp:1035
+#: .src/PalmOS.cpp:1040
 msgid "Backing up..."
 msgstr "Sichere..."
 
-#: .src/PalmOS.cpp:1050
+#: .src/PalmOS.cpp:1055
 msgid "Exiting on cancel, backup process incomplete!"
 msgstr "Abbruch durch Benutzer, Sicherheitskopie ist unvollständig!"
 
-#: .src/PalmOS.cpp:1127
+#: .src/PalmOS.cpp:1132
 #, c-format
 msgid "Unable to create file %s!"
 msgstr "Konnte Datei '%s' nicht anlegen!"
 
-#: .src/PalmOS.cpp:1135
+#: .src/PalmOS.cpp:1140
 #, c-format
 msgid "Unable to backup database %s!"
 msgstr "Konnte Datenbank '%s' nicht sichern."
 
-#: .src/PalmOS.cpp:1205
+#: .src/PalmOS.cpp:1210
 msgid "Checking files to install ..."
 msgstr "Prüfe auf Dateien zum installieren..."
 
-#: .src/PalmOS.cpp:1216
+#: .src/PalmOS.cpp:1221
 #, c-format
 msgid "Could not open file %s or file invalid."
 msgstr "Konnte Datei '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1255
+#: .src/PalmOS.cpp:1260
 msgid "Palm Install"
 msgstr "Palm-OS Installation"
 
-#: .src/PalmOS.cpp:1255
+#: .src/PalmOS.cpp:1260
 msgid "Installing files"
 msgstr "Dateien werden installiert"
 
-#: .src/PalmOS.cpp:1259
+#: .src/PalmOS.cpp:1264
 msgid "Installing Files ..."
 msgstr "Dateien werden installiert"
 
-#: .src/PalmOS.cpp:1268
+#: .src/PalmOS.cpp:1273
 msgid "Exiting on cancel, all data not restored/installed"
 msgstr "Benutzerabbruch, nicht alle Daten wiederhergestellt"
 
-#: .src/PalmOS.cpp:1276
+#: .src/PalmOS.cpp:1281
 #, c-format
 msgid "Could not open file %s or file invalid!"
 msgstr "Konnte Datei '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1321
+#: .src/PalmOS.cpp:1289
+msgid "Installing file '%s'..."
+msgstr "Datei '%s' wird installiert..."
+
+#: .src/PalmOS.cpp:1330
 #, c-format
 msgid "Could not access directory %s!"
 msgstr "Konnte Verzeichnis '%s' nicht öffnen!"
 
-#: .src/PalmOS.cpp:1352
+#: .src/PalmOS.cpp:1361
 msgid "Please pick databases to install"
 msgstr "Bitte wählen Sie die zu installierenden Datenbanken."
 
-#: .src/PalmOS.cpp:1404
+#: .src/PalmOS.cpp:1413
 msgid "Could not open AddressDB."
 msgstr "Konnte Adreßdatenbank nicht öffnen."
 
-#: .src/PalmOS.cpp:1414
+#: .src/PalmOS.cpp:1423
 msgid "ADB not correctly initialized!"
 msgstr "ADB ist nicht korrekt initialisiert!"
 
-#: .src/PalmOS.cpp:1515
+#: .src/PalmOS.cpp:1524
 msgid "Unable to open MailDB"
 msgstr "Kann Maildatenbank nicht öffnen"
 
-#: .src/PalmOS.cpp:1516
+#: .src/PalmOS.cpp:1525
 msgid "Unable to open MailDB.\n"
 msgstr "Kann Maildatenbank nicht öffnen.\n"
 
-#: .src/PalmOS.cpp:1610
+#: .src/PalmOS.cpp:1619
 #, c-format
 msgid "Transferred message %d: \"%s\" for \"%s\"."
 msgstr "Nachricht %d übertragen: \"%s\" an \"%s\"."
 
-#: .src/PalmOS.cpp:1631
+#: .src/PalmOS.cpp:1640
 #, c-format
 msgid ""
 "Failed to transfer message\n"
@@ -474,74 +478,74 @@ msgstr ""
 "\"%s\"\n"
 "an \"%s\"."
 
-#: .src/PalmOS.cpp:1641
+#: .src/PalmOS.cpp:1650
 #, c-format
 msgid "Transferred %d/%d messages."
 msgstr "%d aus %d Nachrichten übertragen."
 
-#: .src/PalmOS.cpp:1648
+#: .src/PalmOS.cpp:1657
 msgid "No messages found in PalmOS-Outbox."
 msgstr "Keine Nachrichten in Palm-OS Outbox."
 
-#: .src/PalmOS.cpp:1672
+#: .src/PalmOS.cpp:1681
 #, c-format
 msgid "Cannot open PalmOS synchronisation mailbox ´%s´"
 msgstr "Kann Synchronisationsmailbox '%s' nicht öffnen."
 
-#: .src/PalmOS.cpp:1700
+#: .src/PalmOS.cpp:1709
 #, c-format
 msgid "Skipping deleted message %lu/%lu"
 msgstr "Gelöschte Nachricht ignoriert %lu/%lu"
 
-#: .src/PalmOS.cpp:1721
+#: .src/PalmOS.cpp:1730
 #, c-format
 msgid "Storing message %lu/%lu: %s"
 msgstr "Sichere Nachricht %lu/%lu: %s"
 
-#: .src/PalmOS.cpp:1769
+#: .src/PalmOS.cpp:1778
 #, c-format
 msgid "Could not store message %lu/%lu: %s"
 msgstr "Konnte Nachricht %lu/%lu nicht sichern: %s"
 
-#: .src/PalmOS.cpp:1785
+#: .src/PalmOS.cpp:1794
 #, c-format
 msgid "Stored %lu/%lu messages on PalmOS device."
 msgstr "%lu/%lu Nachrichten auf Palm-OS Gerät gesichert."
 
-#: .src/PalmOS.cpp:1794
+#: .src/PalmOS.cpp:1803
 #, c-format
 msgid "Could not obtain lock for mailbox '%s'."
 msgstr "Kann keinen alleinigen Zugriff (lock) auf Mailbox '%s' bekommen."
 
-#: .src/PalmOS.cpp:1818
+#: .src/PalmOS.cpp:1827
 msgid "Setting up MAL proxy..."
 msgstr "MAL-Proxy wird aktiviert..."
 
-#: .src/PalmOS.cpp:1828
+#: .src/PalmOS.cpp:1837
 msgid "Setting up SOCKS proxy..."
 msgstr "SOCKS-Proxy wird aktiviert..."
 
-#: .src/PalmOS.cpp:1832
+#: .src/PalmOS.cpp:1841
 msgid "Synchronising MAL server/AvantGo..."
 msgstr "Synchronisiere MAL-Server/AvantGo..."
 
-#: .src/PalmOS.cpp:1876
+#: .src/PalmOS.cpp:1885
 msgid "Synchronise Mail"
 msgstr "Nachrichten synchronisieren"
 
-#: .src/PalmOS.cpp:1878
+#: .src/PalmOS.cpp:1887
 msgid "Synchronise Time"
 msgstr "Zeit synchronisieren"
 
-#: .src/PalmOS.cpp:1881
+#: .src/PalmOS.cpp:1890
 msgid "Always do Backup on sync"
 msgstr "Immer Backup machen"
 
-#: .src/PalmOS.cpp:1883
+#: .src/PalmOS.cpp:1892
 msgid "Sync to MAL server (e.g. AvantGo)"
 msgstr "Synchronisation mit MAL-Server (z.B. AvantGo)"
 
-#: .src/PalmOS.cpp:1885
+#: .src/PalmOS.cpp:1894
 msgid ""
 "The Auto-Install function will automatically\n"
 "install all databases from a given directory\n"
@@ -551,55 +555,55 @@ msgstr ""
 "alle Palm-Datenbanken (.PDB/.PRC Dateien) aus einem\n"
 "gegebenen Verzeichnis auf dem PalmPilot."
 
-#: .src/PalmOS.cpp:1889
+#: .src/PalmOS.cpp:1898
 msgid "Do Auto-Install"
 msgstr "Auto-Installation machen"
 
-#: .src/PalmOS.cpp:1890
+#: .src/PalmOS.cpp:1899
 msgid "Directory for Auto-Install"
 msgstr "Verzeichnis für Auto-Installation"
 
-#: .src/PalmOS.cpp:1891
+#: .src/PalmOS.cpp:1900
 msgid "Pilot device"
 msgstr "Palm-OS Port (device)"
 
-#: .src/PalmOS.cpp:1894
+#: .src/PalmOS.cpp:1903
 msgid "Connection speed:9600:19200:38400:57600:115200"
 msgstr "Portgeschwindigkeit:9600:19200:38400:57600:115200"
 
-#: .src/PalmOS.cpp:1895
+#: .src/PalmOS.cpp:1904
 msgid "Mailbox for exchange"
 msgstr "Mailbox zum Austausch"
 
-#: .src/PalmOS.cpp:1896
+#: .src/PalmOS.cpp:1905
 msgid "Mail disposal mode:keep:delete:file"
 msgstr "Mail auf Palm-OS Gerät:behalten:löschen:ablegen"
 
-#: .src/PalmOS.cpp:1897
+#: .src/PalmOS.cpp:1906
 msgid "Directory for backup files"
 msgstr "Verzeichnis für Sicherheitskopie"
 
-#: .src/PalmOS.cpp:1898
+#: .src/PalmOS.cpp:1907
 msgid "Delete backups of no longer existing databases"
 msgstr "Nicht mehr existente Datenbanken in Backup löschen"
 
-#: .src/PalmOS.cpp:1900
+#: .src/PalmOS.cpp:1909
 msgid "Backup only modified databases"
 msgstr "Nur geänderte Datenbanken sichern"
 
-#: .src/PalmOS.cpp:1901
+#: .src/PalmOS.cpp:1910
 msgid "Force total backup of all databases"
 msgstr "Alle Datenbanken sichern"
 
-#: .src/PalmOS.cpp:1902
+#: .src/PalmOS.cpp:1911
 msgid "Exclude these databases"
 msgstr "Diese Datenbanken nicht sichern"
 
-#: .src/PalmOS.cpp:1928
+#: .src/PalmOS.cpp:1937
 msgid "Try to lock device"
 msgstr "Geräte-lock anlegen"
 
-#: .src/PalmOS.cpp:1929
+#: .src/PalmOS.cpp:1938
 msgid ""
 "The following two settings can run other\n"
 "programs or scripts just before and after\n"
@@ -614,15 +618,15 @@ msgstr ""
 "belegen. Verwenden Sie dies nur, wenn Sie wissen\n"
 "was Sie tun."
 
-#: .src/PalmOS.cpp:1935
+#: .src/PalmOS.cpp:1944
 msgid "Script to run before"
 msgstr "Befehl vor Synch. ausführen"
 
-#: .src/PalmOS.cpp:1936
+#: .src/PalmOS.cpp:1945
 msgid "Script to run after"
 msgstr "Befehl nach Synch. ausführen."
 
-#: .src/PalmOS.cpp:1938
+#: .src/PalmOS.cpp:1947
 msgid ""
 "The following options affect only the\n"
 "MAL/AvantGo synchronisation:"
@@ -630,43 +634,43 @@ msgstr ""
 "Die folgenden Einstellungen betreffen nur die\n"
 "MAL/AvantGo synchronisation:"
 
-#: .src/PalmOS.cpp:1941
+#: .src/PalmOS.cpp:1950
 msgid "Use Proxy host for MAL"
 msgstr "Verwende Proxy-Server für MAL"
 
-#: .src/PalmOS.cpp:1942
+#: .src/PalmOS.cpp:1951
 msgid "  Proxy host"
 msgstr "  Proxy-Server"
 
-#: .src/PalmOS.cpp:1943
+#: .src/PalmOS.cpp:1952
 msgid "  Proxy port number"
 msgstr "  Proxy-Portnummer"
 
-#: .src/PalmOS.cpp:1944
+#: .src/PalmOS.cpp:1953
 msgid "  Proxy login"
 msgstr "  Proxy-Benutzerkennung"
 
-#: .src/PalmOS.cpp:1945
+#: .src/PalmOS.cpp:1954
 msgid "  Proxy password"
 msgstr " Proxy-Paßwort"
 
-#: .src/PalmOS.cpp:1946
+#: .src/PalmOS.cpp:1955
 msgid "Use SOCKS server for MAL access"
 msgstr "SOCKS-Server für MAL/AvantGo verwenden"
 
-#: .src/PalmOS.cpp:1947
+#: .src/PalmOS.cpp:1956
 msgid "  SOCKS host"
 msgstr "  SOCKS-Server"
 
-#: .src/PalmOS.cpp:1948
+#: .src/PalmOS.cpp:1957
 msgid "  SOCKS port number"
 msgstr "  SOCKS-Portnummer"
 
-#: .src/PalmOS.cpp:1956
+#: .src/PalmOS.cpp:1965
 msgid "PalmOS module preferences"
 msgstr "Palm-OS Modul Einstellungen"
 
-#: .src/PalmOS.cpp:1968
+#: .src/PalmOS.cpp:1977
 msgid "Advanced settings"
 msgstr "&Weitere Einstellungen"
 
@@ -2410,20 +2414,20 @@ msgstr "POP3 Server"
 msgid "Sent Mail"
 msgstr "Gesendete Nachrichten"
 
-#: upgrade.cpp:2544
+#: upgrade.cpp:2548
 msgid "Retrieve remote configuration settings now?"
 msgstr "Konfigurationsdaten vom Server holen?"
 
-#: upgrade.cpp:2545
+#: upgrade.cpp:2549
 msgid "Retrieve remote settings?"
 msgstr "Konfigurationsdaten vom Server holen?"
 
-#: upgrade.cpp:2558
+#: upgrade.cpp:2562
 #, c-format
 msgid "Configuration mailbox '%s' does not contain any information."
 msgstr "Konfigurations-Mailbox '%s' enhält keine Daten."
 
-#: upgrade.cpp:2562 upgrade.cpp:2655
+#: upgrade.cpp:2566 upgrade.cpp:2659
 #, c-format
 msgid ""
 "Configuration mailbox '%s' contains more than\n"
@@ -2437,7 +2441,7 @@ msgstr ""
 "entfernen Sie bitte die extra Nachrichten und versuchen\n"
 "es nochmal."
 
-#: upgrade.cpp:2576 upgrade.cpp:2674
+#: upgrade.cpp:2580 upgrade.cpp:2678
 #, c-format
 msgid ""
 "The message in the configuration mailbox '%s' does not\n"
@@ -2446,15 +2450,15 @@ msgstr ""
 "Die Nachricht in der Konfigurations-Mailbox '%s' enhält\n"
 "keine Konfigurationsdaten. Bitte entfernen Sie die Nachricht."
 
-#: upgrade.cpp:2641
+#: upgrade.cpp:2645
 msgid "Store remote configuration settings now?"
 msgstr "Konfigurationsdaten auf Server speichern?"
 
-#: upgrade.cpp:2642
+#: upgrade.cpp:2646
 msgid "Store remote settings?"
 msgstr "Konfigurationsdaten auf Server sichern?"
 
-#: upgrade.cpp:2685
+#: upgrade.cpp:2689
 msgid ""
 "The remotely stored configuration information seems to have changed\n"
 "since it was retrieved.\n"
@@ -2464,11 +2468,11 @@ msgstr ""
 "seit sie abgeholt wurden.\n"
 "Möchten Sie sie wirklich mit den aktuellen Daten überschreiben?"
 
-#: upgrade.cpp:2689
+#: upgrade.cpp:2693
 msgid "Overwrite remote settings?"
 msgstr "Einstellungen auf Server überschreiben?"
 
-#: upgrade.cpp:2701
+#: upgrade.cpp:2705
 #, c-format
 msgid ""
 "Cannot remove old configuration information from\n"
@@ -2477,11 +2481,11 @@ msgstr ""
 "Kann alte Konfigurationsdaten aus Mailbox\n"
 "'%s' nicht entfernen."
 
-#: upgrade.cpp:2746
+#: upgrade.cpp:2750
 msgid "Could not export configuration information."
 msgstr "Kann Konfigurationsdaten nicht exportieren."
 
-#: upgrade.cpp:2754
+#: upgrade.cpp:2758
 #, c-format
 msgid ""
 "Cannot read configuration info from temporary file\n"
@@ -2490,7 +2494,7 @@ msgstr ""
 "Kann Konfigurationsdaten nicht aus temporärer Datei\n"
 "'%s' lesen."
 
-#: upgrade.cpp:2774
+#: upgrade.cpp:2778
 #, c-format
 msgid ""
 "Storing configuration information in mailbox\n"
@@ -2499,12 +2503,20 @@ msgstr ""
 "Konfigurationsdaten konnten nicht in Mailbox\n"
 "'%s' gespeichert werden."
 
-#: upgrade.cpp:2796
+#: upgrade.cpp:2788
+msgid "Successfully stored shared configuration info in folder '%s'."
+msgstr "Konfigurationsdaten erfolgreich in Mailbox '%s' gesichert."
+
+#: upgrade.cpp:2790
+msgid "Saved settings"
+msgstr "Einstellungen gesichert"
+
+#: upgrade.cpp:2810
 msgid "You must accept the license to run Mahogany."
 msgstr ""
 "Sie müssen die Nutzungsbedingungen akzeptieren, um Mahogany zu benutzen."
 
-#: upgrade.cpp:2831
+#: upgrade.cpp:2845
 msgid "Remote configuration information could not be retrieved."
 msgstr ""
 "Auf Server gespeicherte Konfigurationsdaten konnten nicht abgeholt werden."
@@ -3119,7 +3131,7 @@ msgstr ""
 "Es gibt keine existierenden Identitäten.\n"
 "Bitte legen Sie erst eine Identität an."
 
-#: wxMDialogs.cpp:3236 wxMFrame.cpp:496
+#: wxMDialogs.cpp:3238 wxMFrame.cpp:496
 msgid "Default"
 msgstr "Vorgabe"
 
@@ -3599,7 +3611,7 @@ msgstr "Datei '%s' eingefügt."
 msgid "Failed to insert the text file '%s'."
 msgstr "Konte Textdatei '%s' nicht einfügen."
 
-#: MailFolder.cpp:1260 wxComposeView.cpp:1723
+#: MailFolder.cpp:1262 wxComposeView.cpp:1723
 msgid "Choose file to save message to"
 msgstr "Wählen Sie eine Datei zum speichern"
 
@@ -4456,152 +4468,156 @@ msgstr ""
 msgid "Question whether to overwrite newer remote config settings"
 msgstr "Frage, ob Konfiguration auf Server überschrieben werden soll."
 
-#: wxMDialogs.cpp:2545
+#: wxMDialogs.cpp:2517
+msgid "Confirmation that remote config was saved"
+msgstr "Bestätigung, daß Konfigurationsdaten auf Server gesichert wurden"
+
+#: wxMDialogs.cpp:2547
 #, c-format
 msgid "unknown (%s)"
 msgstr "unbekannt (%s)"
 
-#: wxMDialogs.cpp:2577
+#: wxMDialogs.cpp:2579
 msgid "Mahogany"
 msgstr "Mahogany"
 
-#: wxMDialogs.cpp:2585
+#: wxMDialogs.cpp:2587
 msgid "&Settings"
 msgstr "&Einstellungen"
 
-#: wxMDialogs.cpp:2589
+#: wxMDialogs.cpp:2591
 msgid "Select the settings to reset"
 msgstr "Einträge zum Rücksetzen auswählen"
 
-#: wxMDialogs.cpp:2609
+#: wxMDialogs.cpp:2611
 msgid "Setting"
 msgstr "Einstellung"
 
-#: wxHeadersDialogs.cpp:887 wxMDialogs.cpp:2610
+#: wxHeadersDialogs.cpp:887 wxMDialogs.cpp:2612
 msgid "Value"
 msgstr "Wert"
 
-#: wxMDialogs.cpp:2611
+#: wxMDialogs.cpp:2613
 msgid "Folder"
 msgstr "Mailbox"
 
-#: wxMDialogs.cpp:2641
+#: wxMDialogs.cpp:2643
 msgid "yes"
 msgstr "ja"
 
-#: wxMDialogs.cpp:2646
+#: wxMDialogs.cpp:2648
 msgid "no"
 msgstr "nein"
 
-#: wxMDialogs.cpp:2651
+#: wxMDialogs.cpp:2653
 msgid "off"
 msgstr "aus"
 
-#: wxMDialogs.cpp:2659
+#: wxMDialogs.cpp:2661
 msgid "all folders"
 msgstr "Alle Mailboxen"
 
-#: wxMDialogs.cpp:2667
+#: wxMDialogs.cpp:2669
 #, c-format
 msgid "unknown folder '%s'"
 msgstr "Unbekannte Mailbox '%s'"
 
-#: wxMDialogs.cpp:2758
+#: wxMDialogs.cpp:2760
 #, c-format
 msgid "Reenabled %d previously disabled message boxes."
 msgstr "Dialogbox %d wieder aktiviert."
 
-#: wxMDialogs.cpp:2765
+#: wxMDialogs.cpp:2767
 msgid "No message boxes were reenabled."
 msgstr "Es wurden keine Dialogboxen aktiviert."
 
-#: wxMDialogs.cpp:2771
+#: wxMDialogs.cpp:2773
 msgid "No message boxes have been disabled yet."
 msgstr "Bisher sind keine Dialogboxen deaktiviert."
 
-#: wxMDialogs.cpp:2785
+#: wxMDialogs.cpp:2787
 msgid "The server presents the following certificate:\n"
 msgstr "Der Server präsentiert das folgende Zertifikat:\n"
 
-#: wxMDialogs.cpp:2787
+#: wxMDialogs.cpp:2789
 msgid "Name : "
 msgstr "Name : "
 
-#: wxMDialogs.cpp:2788
+#: wxMDialogs.cpp:2790
 msgid "Issuer : "
 msgstr "Aussteller : "
 
-#: wxMDialogs.cpp:2789
+#: wxMDialogs.cpp:2791
 msgid "Fingerprint : "
 msgstr "Fingerprint : "
 
-#: wxMDialogs.cpp:2791
+#: wxMDialogs.cpp:2793
 msgid "Do you accept this certificate?"
 msgstr "Akzeptieren Sie dieses Zertifikat?"
 
-#: wxMDialogs.cpp:2793
+#: wxMDialogs.cpp:2795
 msgid "SSL certificate verification"
 msgstr "SSL-Zertifikatsüberprüfung"
 
-#: wxMDialogs.cpp:2812
+#: wxMDialogs.cpp:2814
 msgid "Mahogany Licensing Conditions"
 msgstr "Mahogany: Nutzungsbedingungen"
 
-#: wxMDialogs.cpp:2815
+#: wxMDialogs.cpp:2817
 msgid "Licensing Conditions"
 msgstr "Nutzungsbedingungen"
 
-#: wxMDialogs.cpp:2837
+#: wxMDialogs.cpp:2839
 msgid "Accept"
 msgstr "Akzeptieren"
 
-#: wxMDialogs.cpp:2840
+#: wxMDialogs.cpp:2842
 msgid "Reject"
 msgstr "Ablehnen"
 
-#: wxMDialogs.cpp:3019
+#: wxMDialogs.cpp:3021
 msgid "&Down"
 msgstr "&Tiefer"
 
-#: wxMDialogs.cpp:3029
+#: wxMDialogs.cpp:3031
 msgid "&Up"
 msgstr "&Höher"
 
-#: wxMDialogs.cpp:3248
+#: wxMDialogs.cpp:3250
 msgid "Change the identity"
 msgstr "Aktuelle Identität wechseln"
 
-#: wxMDialogs.cpp:3263
+#: wxMDialogs.cpp:3265
 msgid "Mahogany: please wait"
 msgstr "Mahogany : bitte warten"
 
-#: wxMDialogs.cpp:3280
+#: wxMDialogs.cpp:3282
 msgid "XXXXXX done"
 msgstr "XXXXXX erledigt"
 
-#: wxMDialogs.cpp:3299
+#: wxMDialogs.cpp:3301
 #, c-format
 msgid "%u done"
 msgstr "%u fertig"
 
-#: MailFolderCC.cpp:3298 wxMDialogs.cpp:3347
+#: MailFolderCC.cpp:3363 wxMDialogs.cpp:3349
 msgid "Password required"
 msgstr "Passwort benötigt "
 
-#: wxMDialogs.cpp:3359
+#: wxMDialogs.cpp:3361
 #, c-format
 msgid "Folder '%s':"
 msgstr "Mailbox '%s':"
 
-#: wxMDialogs.cpp:3363
+#: wxMDialogs.cpp:3365
 msgid "Please enter login/password to access this folder"
 msgstr "Bitte geben Sie Benutzerkennung und Paßwort für diese Mailbox an"
 
-#: wxMDialogs.cpp:3372
+#: wxMDialogs.cpp:3374
 msgid "&Username: "
 msgstr "&Benutzername: "
 
-#: wxMDialogs.cpp:3373 wxMFolderDialogs.cpp:1009
+#: wxMDialogs.cpp:3375 wxMFolderDialogs.cpp:1009
 msgid "&Password: "
 msgstr "&Passwort: "
 
@@ -6168,7 +6184,8 @@ msgstr "Ne&ue Mail Nachricht anzeigen"
 msgid ""
 "\n"
 "The following settings control appearance of the list of messages."
-msgstr "\n"
+msgstr ""
+"\n"
 "Einstellungen für die Liste von Nachrichten"
 
 #: wxOptionsDlg.cpp:840
@@ -8190,39 +8207,39 @@ msgstr ""
 "\n"
 "Die letzten paar Log-Meldungen waren:\n"
 
-#: MailFolder.cpp:813
+#: MailFolder.cpp:815
 msgid "re"
 msgstr "aw"
 
-#: MailFolder.cpp:1031 MailFolder.cpp:1271
+#: MailFolder.cpp:1033 MailFolder.cpp:1273
 msgid "Could not truncate the existing file."
 msgstr "Konnte bestehende Datei nicht verkürzen."
 
-#: MailFolder.cpp:1043 MailFolder.cpp:1126 MailFolder.cpp:1197
+#: MailFolder.cpp:1045 MailFolder.cpp:1128 MailFolder.cpp:1199
 #, c-format
 msgid "Saving %d messages..."
 msgstr "Sichere %d Nachrichten..."
 
-#: MailFolder.cpp:1108
+#: MailFolder.cpp:1110
 #, c-format
 msgid "Cannot save messages to folder '%s'."
 msgstr "Kann Nachrichten nicht in Mailbox '%s' sichern."
 
-#: MailFolder.cpp:1181
+#: MailFolder.cpp:1183
 #, c-format
 msgid "Cannot open folder '%s'."
 msgstr "Kann Mailbox '%s' nicht öffnen."
 
-#: MailFolder.cpp:1262
+#: MailFolder.cpp:1264
 msgid "All files (*.*)|*.*"
 msgstr "Alle Dateien (*.*)|*.*"
 
-#: MailFolder.cpp:1484
+#: MailFolder.cpp:1486
 #, c-format
 msgid "Threading %lu messages..."
 msgstr "Ordne %lu Nachrichten..."
 
-#: MailFolder.cpp:1542
+#: MailFolder.cpp:1544
 #, c-format
 msgid "Threading %lu messages...done."
 msgstr "Sortiere %lu Nachrichten...fertig."
@@ -8246,11 +8263,11 @@ msgstr "SSL-Authentifizierung ist nicht verfügbar."
 msgid "Invalid MH folder name '%s' not under the root MH directory '%s'."
 msgstr "Ungültiger MH-Mailbox Name '%s' - nicht unter dem MH-Verzeichnis '%s'."
 
-#: MailFolderCC.cpp:839 MailFolderCC.cpp:3302
+#: MailFolderCC.cpp:841 MailFolderCC.cpp:3367
 msgid "Cannot access this folder without a password."
 msgstr "Kann diese Mailbox ohne Paßwort nicht öffnen."
 
-#: MailFolderCC.cpp:867
+#: MailFolderCC.cpp:869
 #, c-format
 msgid ""
 "To open the folder '%s', network access is required but it is currently not "
@@ -8261,7 +8278,7 @@ msgstr ""
 "verfügbar.\n"
 "Möchten Sie jetzt die Netzwerkverbindung aufbauen?"
 
-#: MailFolderCC.cpp:881
+#: MailFolderCC.cpp:883
 msgid ""
 "Opening this folder will probably fail!\n"
 "Continue anyway?"
@@ -8269,7 +8286,7 @@ msgstr ""
 "Der Versuch, dise Mailbox zu öffnen wird vermutlich fehlschlagen!\n"
 "Trotzdem versuchen?"
 
-#: MailFolderCC.cpp:931
+#: MailFolderCC.cpp:933
 msgid ""
 "Would you like to remember the password for this folder?\n"
 "(WARNING: don't do it if you are concerned about security)"
@@ -8277,12 +8294,12 @@ msgstr ""
 "Möchten Sie das Paßwort für diese Mailbox speichern?\n"
 "(WARNUNG: Dies ist unsicher, falls andere auf Ihren Computer Zugriff haben!)"
 
-#: MailFolderCC.cpp:1002 MailFolderCC.cpp:1026
+#: MailFolderCC.cpp:1004 MailFolderCC.cpp:1028
 #, c-format
 msgid "Opening mailbox %s..."
 msgstr "Öffne Mailbox '%s'..."
 
-#: MailFolderCC.cpp:1070
+#: MailFolderCC.cpp:1072
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -8295,7 +8312,7 @@ msgstr ""
 "Ein anderes Programm scheint auf die Mailbox\n"
 "zuzugreifen. Trotzdem fortfahren?"
 
-#: MailFolderCC.cpp:1080
+#: MailFolderCC.cpp:1082
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
@@ -8305,32 +8322,32 @@ msgstr ""
 "Das andere Programm ist möglicherweise fertig.\n"
 "Fahre fort."
 
-#: MailFolderCC.cpp:1086
+#: MailFolderCC.cpp:1088
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Kann Mailbox mit '%s' nicht öffen solange lock-Datei besteht."
 
-#: MailFolderCC.cpp:1088 MailFolderCC.cpp:1178
+#: MailFolderCC.cpp:1090 MailFolderCC.cpp:1180
 #, c-format
 msgid "Could not open mailbox %s."
 msgstr "Konnte Mailbox '%s' nicht öffnen."
 
-#: MailFolderCC.cpp:1146
+#: MailFolderCC.cpp:1148
 #, c-format
 msgid "Trying to create folder '%s' in %s format."
 msgstr "Versuche Mailbox '%s' im %s Format anzulegen."
 
-#: MailFolderCC.cpp:1200
+#: MailFolderCC.cpp:1204
 #, c-format
 msgid "Mailbox %s opened."
 msgstr "Mailbox %s geöffnet."
 
-#: MailFolderCC.cpp:1247 MailFolderCC.cpp:1338
+#: MailFolderCC.cpp:1251 MailFolderCC.cpp:1376
 #, c-format
 msgid "System is offline, cannot access mailbox ´%s´"
 msgstr ""
 "Netzwerkverbindung ist getrennt, kan nichtn auf Mailbox '%s' zugreifen."
 
-#: MailFolderCC.cpp:1275
+#: MailFolderCC.cpp:1279
 #, c-format
 msgid ""
 "Dial-Up network is down.\n"
@@ -8339,46 +8356,46 @@ msgstr ""
 "Netzwerkverbindung ist getrennt.\n"
 "Möchten Sie trotzdem versuchen, Mailbox '%s' zu testen?"
 
-#: MailFolderCC.cpp:1293
+#: MailFolderCC.cpp:1297
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Verbindung mit Mailbox '%s' wurde geschlossen. Wird wieder geöffnet."
 
-#: MailFolderCC.cpp:1298
+#: MailFolderCC.cpp:1302
 #, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Konnte Mailbox '%s' nicht wieder öffnen."
 
-#: MailFolderCC.cpp:1306
+#: MailFolderCC.cpp:1310
 #, c-format
 msgid "Folder '%s' is alive."
 msgstr "Mailbox '%s' ist aktiv. "
 
-#: MailFolderCC.cpp:1410
+#: MailFolderCC.cpp:1454
 msgid "Cannot move newly arrived messages."
 msgstr "Kann neu eingetroffene Nachrichten nicht verschieben."
 
-#: MailFolderCC.cpp:1733
+#: MailFolderCC.cpp:1763
 #, c-format
 msgid "Cannot get listing for closed mailbox '%s'."
 msgstr "Kann Eintragsliste für geschlossene Mailbox '%s' nicht bekommen."
 
-#: MailFolderCC.cpp:1903 MailFolderCC.cpp:1958
+#: MailFolderCC.cpp:1933 MailFolderCC.cpp:1988
 #, c-format
 msgid "Searching in %lu messages..."
 msgstr "Suche in %lu Nachrichten..."
 
-#: MailFolderCC.cpp:1964
+#: MailFolderCC.cpp:1994
 #, c-format
 msgid " - %lu matches found."
 msgstr " - %lu gefunden."
 
-#: MailFolderCC.cpp:2142
+#: MailFolderCC.cpp:2190
 #, c-format
 msgid "How many messages to retrieve from folder '%s'?"
 msgstr "Wie viele Nachrichten sollen aus Mailbox '%s' abgeholhlt werden?"
 
-#: MailFolderCC.cpp:2144
+#: MailFolderCC.cpp:2192
 #, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
@@ -8389,41 +8406,41 @@ msgstr ""
 "Begrenzung von %lu (Setzen Sie dies auf 0 um diese Frage zu um-\n"
 "gehen, oder klicken Sie auf [Abbruch] um alle Nachrichten zu holen)"
 
-#: MailFolderCC.cpp:2149
+#: MailFolderCC.cpp:2197
 msgid "How many of them do you want to retrieve?"
 msgstr "Wie viele von denen möchten Sie abholen?"
 
-#: MailFolderCC.cpp:2175
+#: MailFolderCC.cpp:2223
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "Lese %lu Nachrichtenköpfe..."
 
-#: MailFolderCC.cpp:2287
+#: MailFolderCC.cpp:2335
 msgid "<address missing>"
 msgstr "<Adresse fehlt>"
 
-#: MailFolderCC.cpp:2467
+#: MailFolderCC.cpp:2515
 msgid "Cannot set signal handler for SIGPIPE."
 msgstr "Kann keinen Signalhandler für SIGPIPE bekommen."
 
-#: MailFolderCC.cpp:2875
+#: MailFolderCC.cpp:2937
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Mailbox '%s' : "
 
-#: MailFolderCC.cpp:2877
+#: MailFolderCC.cpp:2939
 msgid "Folder Log: "
 msgstr "Mailbox-Log:"
 
-#: MailFolderCC.cpp:2880
+#: MailFolderCC.cpp:2942
 msgid ", error level: "
 msgstr ", Fehlergrad: "
 
-#: MailFolderCC.cpp:2945
+#: MailFolderCC.cpp:3007
 msgid "Mail-debug: "
 msgstr "Mail-debug: "
 
-#: MailFolderCC.cpp:3029
+#: MailFolderCC.cpp:3091
 msgid ""
 "\n"
 "Last folder in a critical section was: "
@@ -8431,12 +8448,12 @@ msgstr ""
 "\n"
 "Letze Mailbox in kritischen Zustand war: "
 
-#: MailFolderCC.cpp:3295
+#: MailFolderCC.cpp:3360
 #, c-format
 msgid "Please enter the password for folder '%s':"
 msgstr "Bitte geben Sie das Paßwort für Mailbox '%s' an:"
 
-#: MailFolderCC.cpp:3491
+#: MailFolderCC.cpp:3556
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -8444,12 +8461,12 @@ msgstr ""
 "\n"
 "Der Versuch, alle Mailboxen wieder zu öffnen, schlug fehl."
 
-#: MailFolderCC.cpp:3676
+#: MailFolderCC.cpp:3741
 #, c-format
 msgid "Trying to load '%s' and '%s'..."
 msgstr "Versuche '%s' und 's' zu laden..."
 
-#: MailFolderCC.cpp:3715
+#: MailFolderCC.cpp:3780
 #, c-format
 msgid "Successfully loaded '%s' and '%s' - SSL authentification now available."
 msgstr ""
