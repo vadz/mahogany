@@ -3,56 +3,8 @@
  *                                                                  *
  * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
- * $Id$          *
+ * $Id$         
  *                                                                  *
- * $Log$
- * Revision 1.10  2000/01/31 17:22:56  KB
- * removed another illegal delete call
- *
- * Revision 1.9  1999/04/05 17:17:50  KB
- * Merged new profile code, TESTING REQUIRED.
- *
- * Revision 1.8.4.1  1999/04/05 15:48:51  KB
- * Apart from AdbEditor, all new settings seem to work.
- *
- * Revision 1.8  1998/09/23 08:57:27  KB
- * changed deletion behaviour
- *
- * Revision 1.7  1998/08/16 21:21:29  VZ
- *
- * 1) fixed config file bug: it was never created (attempt to create ~/.M/config
- *    always failed, must mkdir("~/.M") first)
- * 2) "redesign" of "Folder properties" dialog and bug corrected, small change to
- *    MInputBox (it was too wide)
- * 3) bug in ProvFC when it didn't reckognize the books as being in the correct
- *    format (=> messages "can't reopen book") corrected
- * 4) I tried to enhance MDialog_About(), but it didn't really work... oh well,
- *    I've never said I was an artist
- *
- * Revision 1.6  1998/07/08 11:56:56  KB
- * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
- *
- * Revision 1.5  1998/06/27 20:07:18  KB
- * several bug fixes for kbList
- * started adding my layout stuff
- *
- * Revision 1.1.1.1  1998/06/13 21:51:12  karsten
- * initial code
- *
- * Revision 1.4  1998/05/24 14:48:00  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.3  1998/05/18 17:48:34  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.2  1998/05/14 16:39:31  VZ
- *
- * fixed SIGSEGV in ~kbList if the list is empty
- *
- * Revision 1.1  1998/05/13 19:02:11  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -99,6 +51,7 @@ kbList::iterator::operator*()
 kbList::iterator &
 kbList::iterator::operator++()
 {
+   ASSERT(node != NULL);
    node  = node ? node->next : NULL;
    return *this;
 }
@@ -106,18 +59,21 @@ kbList::iterator::operator++()
 kbList::iterator &
 kbList::iterator::operator--()
 {
+   ASSERT(node != NULL);
    node = node ? node->prev : NULL; 
    return *this;
 }
 kbList::iterator &
 kbList::iterator::operator++(int /* foo */)
 {
+   ASSERT(node != NULL);
    return operator++();
 }
 
 kbList::iterator &
 kbList::iterator::operator--(int /* bar */)
 {
+   ASSERT(node != NULL);
    return operator--();
 }
 
@@ -203,6 +159,7 @@ kbList::pop_front(void)
 void
 kbList::insert(kbList::iterator & i, void *element)
 {   
+   ASSERT(i.Node());
    if(! i.Node())
       return;
    else if(i.Node() == first)
@@ -217,6 +174,7 @@ kbList::insert(kbList::iterator & i, void *element)
 void
 kbList::doErase(kbList::iterator & i)
 {
+   ASSERT(i.Node());
    kbListNode
       *node = i.Node(),
       *prev, *next;
@@ -297,6 +255,12 @@ kbList::size(void) const // inefficient
 }
 
 
+#ifdef   DEBUG
+/** Buffer to hold debug information for systems which haven't
+    got stdout/stderr visible */
+char
+kbList::iterator::ms_debuginfo[512];
+#endif
 
 
 

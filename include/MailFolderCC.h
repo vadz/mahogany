@@ -766,6 +766,11 @@ private:
    // used by InitializeNewsSpool() only
    static String ms_NewsPath;
 
+#ifdef DEBUG
+   /// print a list of all streams
+   static void DebugStreams(void);
+#endif
+
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

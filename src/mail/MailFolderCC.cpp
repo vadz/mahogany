@@ -1193,6 +1193,7 @@ MailFolderCC::Open(void)
 
       mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
 
+      RemoveFromMap();
       return false;
    }
    else // folder really opened
@@ -1425,6 +1426,9 @@ void MailFolderCC::PingAllOpened(void)
 {
    DBGMESSAGE(("Pinging all opened folders."));
 
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
    StreamConnectionList::iterator i;
    for ( const MailFolderCC *mf = MailFolderCC::GetFirstMapEntry(i);
          mf;
@@ -1986,8 +1990,15 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 
 
 #ifdef DEBUG
+
 void
 MailFolderCC::Debug(void) const
+{
+   DebugStreams();
+}
+
+void
+MailFolderCC::DebugStreams(void) 
 {
    char buffer[1024];
 
@@ -2020,6 +2031,9 @@ MailFolderCC::DebugDump() const
 void
 MailFolderCC::RemoveFromMap(void) const
 {
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
@@ -2032,6 +2046,9 @@ MailFolderCC::RemoveFromMap(void) const
          break;
       }
    }
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
 
    if(streamListDefaultObj == this)
       SetDefaultObj(false);
@@ -2055,7 +2072,10 @@ MailFolderCC::GetFirstMapEntry(StreamConnectionList::iterator &i)
 MailFolderCC *
 MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 {
+   ASSERT( i != streamList.end());
+   DBGMESSAGE(( i.Debug() ));
    i++;
+   DBGMESSAGE(( i.Debug() ));
    if( i != streamList.end())
       return (**i).folder;
    else
@@ -2594,12 +2614,18 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
    StreamConnection  *conn = new StreamConnection;
    conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
    conn->name = m_ImapSpec;
    conn->login = m_Login;
    streamList.push_front(conn);
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
 }
 
 

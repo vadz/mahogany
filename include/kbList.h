@@ -22,7 +22,11 @@
 
 #ifndef ASSERT
 #   include   <assert.h>
-#   define   ASSERT(x) assert(0);
+#   define   ASSERT(x) assert(x);
+#endif
+
+#ifdef DEBUG
+#   include <stdio.h>
 #endif
 
 /**@name Double linked list implementation. */
@@ -122,6 +126,31 @@ public:
       */
       inline kbListNode * Node(void) const
          { return node; }
+
+#ifdef   DEBUG
+      /** Buffer to hold debug information for systems which haven't
+          got stdout/stderr visible */
+      static char ms_debuginfo[512];
+      /** Function which prints debug information about the iterator.
+          FIXME-MT : iterator debugging not thread-safe
+      */
+      const char *Debug(void) const
+         {
+            if(node == NULL)
+               sprintf(ms_debuginfo,
+                       "iterator::Debug(): %p  Node: NULL",
+                       this);
+            else
+               sprintf(ms_debuginfo,
+                       "iterator::Debug(): %p  Node: %p  "
+                       "Node.next: %p  Node.prev: %p  "
+                       "Node.element: %p",
+                       this,
+                       node, node->next, node->prev, node->element);
+            //fprintf(stderr, "%s\n", ms_debuginfo);
+            return ms_debuginfo;
+         }
+#endif
    };
 
    /** Constructor.
