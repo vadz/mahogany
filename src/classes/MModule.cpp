@@ -111,8 +111,11 @@ void MAppBase::RemoveModule(MModuleCommon *module)
       for(i = gs_MModuleList->begin();
           i != gs_MModuleList->end();
           i++)
-         if( (**i).m_Module == module )
+      {
+         MModuleListEntry *entry = *i;
+         if( entry->m_Module == module )
             gs_MModuleList->erase(i); // remove our entry
+      }
    }
 }
 
