@@ -1032,7 +1032,7 @@ bool
 wxMessageView::DoMenuCommand(int id)
 {
    wxArrayInt msgs;
-   msgs.Add(m_seqno);
+   msgs.Add(m_seqno-1);  // index in listctrl is seqno in folder -1
    bool handled = true;
    switch(id)
    {
@@ -1097,7 +1097,7 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
-   // don't redisplay the alread yshown message
+   // don't redisplay the already shown message
    if ( m_seqno == num )
       return;
    if(mailMessage) mailMessage->DecRef();
