@@ -246,8 +246,8 @@ public:
 
    // if using a textctrl and not a combobox, this will process the
    // ENTER key
-   void OnEnter(WXUNUSED(wxEvent &))
-      { TransferDataFromWindow(); EndModal(wxID_OK); }
+   void OnEnter(wxEvent&) { TransferDataFromWindow(); EndModal(wxID_OK); }
+
 private:
    wxString      m_strText;
    wxPTextEntry *m_text;
@@ -530,10 +530,14 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 {
   // text is the default value normally read from config and it may be
   // overriden by strDefault parameter if it is not empty
-  if ( !strDefault )
+  if ( strDefault.empty() )
+  {
      m_strText = strText;
-  else
+  }
+  else // the program provided default value, use it
+  {
      m_strText = strDefault;
+  }
 
   // layout
   long widthLabel, heightLabel;
@@ -576,6 +580,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
      m_text->SetFocus();
      m_passwd = NULL; // signal that it's not used
   }
+
   // buttons
   wxButton *btnOk = new
     wxButton(this, wxID_OK, _("OK"),
@@ -595,14 +600,25 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
 
 bool MTextInputDialog::TransferDataToWindow()
 {
-   if(m_passwd == NULL)
+   if ( m_passwd == NULL )
    {
+      if ( m_strText.empty() )
+      {
+         // use the last previously entered value instead
+         if ( m_text->GetCount() )
+         {
+            m_strText = m_text->GetString(0);
+         }
+      }
+
       m_text->SetValue(m_strText);
+
       // select everything so that it's enough to type a single letter to erase
       // the old value (this way it's as unobtrusive as you may get)
       m_text->SetSelection(-1, -1);
    }
-   return TRUE;
+
+   return true;
 }
 
 bool MTextInputDialog::TransferDataFromWindow()
@@ -641,17 +657,15 @@ bool MInputBox(wxString *pstr,
                        strCaption, strPrompt, strConfigPath, def, passwordflag);
 
   // do not allow attempts to store the password:
-  wxASSERT((!passwordflag)||(szKey==NULL && def == NULL));
-  if ( dlg.ShowModal() == wxID_OK )
-  {
-    *pstr = dlg.GetText();
+  wxASSERT_MSG( !passwordflag || (szKey==NULL && def == NULL),
+                "passwords can't be stored!" );
 
-    return TRUE;
-  }
-  else
-  {
-    return FALSE;
-  }
+  if ( dlg.ShowModal() != wxID_OK )
+     return false;
+
+  *pstr = dlg.GetText();
+
+  return true;
 }
 
 // ----------------------------------------------------------------------------
