@@ -17,7 +17,7 @@ doc:
 	set -e; for i in include extra doc ; do $(MAKE) -C $$i doc; done
 
 clean:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) doc; do $(MAKE) -C $$i $@; done
 
 allclean: clean
 	find . -name .depend -exec rm {} \;

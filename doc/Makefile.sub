@@ -3,7 +3,7 @@
 #
 
 CWD = doc
-FILES_TEX=../$(DIR).htex
+FILES_TEX=$(DIR).htex
 FILES_PS=$(FILES_TEX:.htex=.ps)
 
 include ../../makeopts
@@ -13,13 +13,15 @@ all:  wxhelp.map
 install: 
 	$(INSTALL) -d $(DOCDIR)/$(DIR)
 	$(INSTALL_DATA) `find $(DIR) -type f` $(DOCDIR)/$(DIR)/
-	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
+
+$(DIR).htex: ../$(DIR).htex
+	cp ../$(DIR).htex .
 
 ps: $(FILES_PS)
+	cp $(FILES_PS) ..
 
-index: ../$(DIR).htex
-	cp ../$(DIR).aux .
-	$(LATEX2HTML) -debug ../$(DIR).htex
+index: $(DIR).htex
+	$(LATEX2HTML) -debug $(DIR).htex
 
 wxhelp.map: index
 	( cd $(DIR); ../../../extra/scripts/html2wxhelp > ../wxhelp.map)

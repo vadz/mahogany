@@ -41,6 +41,7 @@ install:
 	$(INSTALL) -d $(DATADIR)/scripts
 	for i in *.py Scripts/*.py; do $(INSTALL_DATA) $$i $(DATADIR)/scripts; done
 	$(INSTALL) -d $(DOCDIR)/Python
+	touch dummy.html
 	for i in *.html; do $(INSTALL_DATA) $$i $(DOCDIR)/Python; done
 	$(RM) $(DATADIR)/scripts/dummy.py $(DOCDIR)/Python/dummy.html
 
