@@ -400,8 +400,8 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 if test "$USE_MAC" = 1; then
-    AC_CHECK_PROG(REZ, Rez, Rez, true, [$PATH:/Developer/Tools])
-    AC_CHECK_PROG(SETFILE, SetFile, SetFile, true, [$PATH:/Developer/Tools])
+    AC_PATH_PROG(REZ, Rez, true, [$PATH:/Developer/Tools])
+    AC_PATH_PROG(SETFILE, SetFile, true, [$PATH:/Developer/Tools])
 fi
 
 dnl --------------------------------------------------------------------------
