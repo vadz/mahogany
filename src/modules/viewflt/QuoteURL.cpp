@@ -80,6 +80,8 @@ static const size_t LEVEL_INVALID = (size_t)-1;
     @param prev the start of previous line or NULL if start of text
     @param max_white max number of white characters before quotation mark
     @param max_alpha max number of A-Z characters before quotation mark
+    @param quote the char used by quoting, NUL initially meaning unknown,
+                 should be saved between function calls later
     @return number of quoting levels (0 for unquoted text)
   */
 static int
@@ -87,7 +89,8 @@ CountQuoteLevel(const char *string,
                 const char *prev,
                 int max_white,
                 int max_alpha,
-                bool *nextWrapped);
+                bool *nextWrapped,
+                char& quote);
 
 /**
    Check if there is only whitespace until the end of line.
@@ -166,7 +169,8 @@ protected:
    // get the quote level for the line (prev is for CountQuoteLevel() only)
    size_t GetQuotedLevel(const char *line,
                          const char *prev,
-                         bool *nextWrapped) const;
+                         bool *nextWrapped,
+                         char& quote) const;
 
    // get the colour for the given quote level
    wxColour GetQuoteColour(size_t qlevel) const;
@@ -231,7 +235,8 @@ CountQuoteLevel(const char *string,
                 const char *prev,
                 int max_white,
                 int max_alpha,
-                bool *nextWrapped)
+                bool *nextWrapped,
+                char& quote)
 {
    *nextWrapped = false;
 
@@ -287,10 +292,30 @@ CountQuoteLevel(const char *string,
       // previous line is similar to but not the same as this one
 
       // first check if we have a quote character at all
-      // TODO: make the string of "quoting characters" configurable
-      static const char *QUOTE_CHARS = ">|})*";
-      if ( !strchr(QUOTE_CHARS, *c) )
-         break;
+      if ( !quote )
+      {
+         // detect the quoting character used, and remember it for the rest of
+         // the message
+
+         // TODO: make the string of "quoting characters" configurable
+         static const char *QUOTE_CHARS = ">|})*";
+
+         if ( !strchr(QUOTE_CHARS, *c) )
+            break;
+
+         // '*' is too often used for other purposes, check that we really have
+         // something like a whole paragraph quoted with it before deciding
+         // that we really should accept it as a quoting character
+         if ( *next != *c )
+            break;
+
+         quote = *c;
+      }
+      else // we have already detected the quoting character used in this msg
+      {
+         if ( *c != quote )
+            break;
+      }
 
       // check the previous line: if it was the same so far but differs now, we
       // suppose that we have a numbered list which would be recognized as
@@ -303,9 +328,8 @@ CountQuoteLevel(const char *string,
 
       // if this line has the same prefix as the previous one, it surely must
       // be a continuation of a quoted paragraph
-      // checks in case this is not true
       bool isQuoted = (sameAsPrev == Line_Unknown || sameAsPrev == Line_Same)
-                        && *prev == *c;
+                        && *c == quote;
 
       // next check the next line
       if ( !isQuoted && sameAsNext == Line_Blank )
@@ -462,7 +486,8 @@ bool QuoteURLFilter::UpdateOptions(Profile *profile)
 size_t
 QuoteURLFilter::GetQuotedLevel(const char *line,
                                const char *prev,
-                               bool *nextWrapped) const
+                               bool *nextWrapped,
+                               char& quote) const
 {
    size_t qlevel = CountQuoteLevel
                    (
@@ -470,7 +495,8 @@ QuoteURLFilter::GetQuotedLevel(const char *line,
                      prev,
                      m_options.quotedMaxWhitespace,
                      m_options.quotedMaxAlpha,
-                     nextWrapped
+                     nextWrapped,
+                     quote
                    );
 
    // note that qlevel is counted from 1, really, as 0 means unquoted and that
@@ -520,6 +546,7 @@ QuoteURLFilter::DoProcess(String& text,
           levelBeforeURL = LEVEL_INVALID;
 
    bool nextWrapped = false;
+   char quoteChar = '\0';
 
    do
    {
@@ -552,7 +579,7 @@ QuoteURLFilter::DoProcess(String& text,
             if ( nextWrapped )
                nextWrapped = false;
             else
-               level = GetQuotedLevel(before, NULL, &nextWrapped);
+               level = GetQuotedLevel(before, NULL, &nextWrapped, quoteChar);
          }
 
          style.SetTextColour(GetQuoteColour(level));
@@ -573,7 +600,8 @@ QuoteURLFilter::DoProcess(String& text,
             }
             else
             {
-               size_t levelNew = GetQuotedLevel(lineNext, lineCur, &nextWrapped);
+               size_t levelNew =
+                  GetQuotedLevel(lineNext, lineCur, &nextWrapped, quoteChar);
                if ( levelNew != level )
                {
                   String line(lineCur, lineNext);
