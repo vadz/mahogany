@@ -173,6 +173,8 @@ private:
    friend class wxFolderListCtrl;
    /// in deletion semaphore, ugly hack to avoid recursion in destructor
    bool m_InDeletion;
+   /// a list of pending tickets from async operations
+   class ASTicketList *m_TicketList;
 };
 
 class wxFolderViewFrame : public wxMFrame

@@ -204,11 +204,14 @@ MEventNewMailData::MEventNewMailData(MailFolder *folder,
    m_folder = folder;
    m_folder->IncRef();
    m_number = n;
-   m_messageIDs = messageIDs;
+   m_messageIDs = new unsigned long [n];
+   for(size_t i = 0; i < n; i++)
+      m_messageIDs[i] = messageIDs[i];
 }
 
 MEventNewMailData::~MEventNewMailData()
 {
+   delete [] m_messageIDs;
    m_folder->DecRef();
 }
    

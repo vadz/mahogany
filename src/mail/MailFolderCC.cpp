@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders with c-client lib   *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/

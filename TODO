@@ -8,17 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9		if message is quoted-printable unquote it before
-                saving to file (how stupid!) same for encbinary
-9		persistent message boxes are broken, path changes
-		somewhere and the  results are written under Profile
-		while read from Settings/MessageBox 
-		(the correct location)
 9 		Does wxlwindow something nasty with undefined
 		update rectangles or wxRegion? Crash happened in
 		wxRegion. 
-9		New Mail dialog for non-collected messages shows empty
-		subject and from
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
 7 gtk	VZ?	message boxes have broken icons under wxGTK
@@ -37,7 +29,8 @@ $Id$
 2 win	VZ	keyboard navigation is somewhat strange in the options
 		dialog, can't TAB to the buttons from the notebook
 		page
-
+2		adb addressbook extension appears twice when new book
+		is created
 2	VZ	default value for "custom header" comboboxes wrong?
 
 *********************************************************************
@@ -47,7 +40,7 @@ $Id$
 *********************************************************************
 
 9	KB	Write ASMailFolder API for subscription management.
-		.... working on it right now
+		---> FINISH THE WXFOLDERVIEW WITH ASYNC CODE!!!
 
 9		MEvents need handlers with different priorities --
 		needed to get Filtering and ASMailFolder to work
@@ -60,6 +53,9 @@ $Id$
 		folder name was selected?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
+
+7	KB	Find all possible MT problems in MailFolder.cpp and
+		put mutexes around them.
 6	KB	implement temporary/fake Profile mode
 5	VZ?	Add DND for messages between folders
 5	?	Add DND for MIME content from composeView/messageView
@@ -117,6 +113,9 @@ $Id$
 5	KB	POP/IMAP server/localhost default values
 
 3	VZ	dialog to edit message headers in composeview,
+5	KB	if message is quoted-printable unquote it before
+                saving to file (how stupid!) same for encbinary
+				.... working on it right now
 
 *********************************************************************
 *** GENERAL TODO

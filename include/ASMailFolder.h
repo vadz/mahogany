@@ -122,6 +122,9 @@ public:
       /** Returns a pointer to the ASMailFolder from which this
           event originated.
       */
+      /// Returns the ticket for this operation.
+      virtual Ticket GetTicket(void) const = 0;
+      /// Returns the ASMailFolder issuing this result.
       virtual ASMailFolder *GetFolder(void) const = 0;
       /// Returns an OperationId to tell what happened.
       virtual OperationId GetOperation(void) const = 0;
@@ -309,6 +312,14 @@ public:
                              bool isProfile,
                                bool updateCount = true,
                                UserData ud = 0) = 0;
+   /** Save the messages to a file.
+       @param selections the message indices which will be converted using the current listing
+       @param fileName the name of the folder to save to
+       @return ResultInt boolean
+   */
+   virtual Ticket SaveMessagesToFile(const INTARRAY *selections,
+                                     String const & folderName,
+                                     UserData ud = 0) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
@@ -444,6 +455,17 @@ public:
    virtual void UnLockFolder(void) = 0;
    //@}
 
+};
+
+/** A useful helper function to keep tickets for us. */
+class ASTicketList : public MObjectRC
+{
+public:
+   virtual bool Contains(ASMailFolder::Ticket t) const = 0;
+   virtual void Add(ASMailFolder::Ticket t) = 0;
+   virtual void Remove(ASMailFolder::Ticket t) = 0;
+   virtual void Clear(void) = 0;
+   static ASTicketList * Create(void);
 };
 
 #endif

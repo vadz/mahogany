@@ -208,6 +208,73 @@ bool MailFolder::CanExit(String *which)
 #include "MApplication.h"
 
 bool
+MailFolder::SaveMessagesToFile(const INTARRAY *selections,
+                               String const & fileName0)
+{
+   int
+      n = selections->Count(),
+      i;
+   String fileName = strutil_expandpath(fileName0);
+   if(strutil_isempty(fileName))
+      return false;
+
+   wxFile file;
+   if ( !file.Create(fileName, TRUE /* overwrite */) )
+   {
+      wxLogError(_("Could not truncate the existing file."));
+      return false;
+   }
+   Message *msg;
+   MProgressDialog *pd = NULL;
+   int threshold = GetProfile() ?
+      READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   if(n > threshold)
+   {
+      String msg;
+      msg.Printf(_("Saving %d messages..."), n);
+      pd = new MProgressDialog(mf->GetName(),
+                               msg,
+                               2*n, NULL);// open a status window:
+   }
+   int t,n2,j;
+   size_t size;
+   bool rc = true;
+   const char *cptr;
+   for(i = 0; i < n; i++)
+   {
+      msg = GetMessage((*selections)[i]);
+      if(msg)
+      {
+         if(pd) pd->Update( 2*i + 1 );
+
+            // iterate over all parts
+         n2 = msg->CountParts();
+         for(j = 0; j < n; j++)
+         {
+            t = msg->GetPartType(j);
+            if( ( size = msg->GetPartSize(j)) == 0)
+               continue; //    ignore empty parts
+            if ( (t == Message::MSG_TYPETEXT) ||
+                 (t == Message::MSG_TYPEMESSAGE ))
+            {
+               cptr = msg->GetPartContent(i);
+               if(cptr == NULL)
+                  continue; // error ?
+               rc &= (file.Write(cptr, size) == size);
+            }
+         }
+         if(pd) pd->Update( 2*i + 2);
+         msg->DecRef();
+      }
+   }
+   mf->DecRef();
+   if(pd) delete pd;
+   return rc;
+   
+}
+
+bool
 MailFolder::SaveMessages(const INTARRAY *selections,
                          String const & folderName,
                          bool isProfile,
@@ -320,7 +387,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
       if ( !fd.Create(filename, TRUE /* overwrite */) )
           wxLogError(_("Could not truncate the existing file."));
 
-      return SaveMessages(selections,filename, false);
+      return SaveMessagesToFile(selections,filename);
    }
    else
       return false;

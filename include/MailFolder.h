@@ -279,13 +279,21 @@ public:
        @param isProfile if true, the folderName will be interpreted as
        a symbolic folder name, otherwise as a filename
        @param updateCount If true, the number of messages in the
-       folder is updated. If false, they will be detected as new messages.
+       folder is updated. If false, they will be detected as new
+       messages.
        @return true on success
    */
    bool SaveMessages(const INTARRAY *selections,
                      String const & folderName,
                      bool isProfile,
                      bool updateCount = true);
+   /** Save the messages to a folder.
+       @param selections the message indices which will be converted using the current listing
+       @param fileName the name of the folder to save to
+       @return true on success
+   */
+   bool SaveMessagesToFile(const INTARRAY *selections,
+                           String const & fileName);
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers

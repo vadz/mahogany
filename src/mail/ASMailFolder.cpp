@@ -319,6 +319,27 @@ private:
    bool      m_Update;
 };
 
+class MT_SaveMessagesToFile : public MailThreadSeq
+{
+public:
+   MT_SaveMessagesToFile(ASMailFolder *mf, ASMailFolder::UserData ud,
+                         const INTARRAY *selections,
+                         const String &fileName)
+      : MailThreadSeq(mf, ud, selections)
+      {
+         m_Name = fileName;
+      }
+   virtual void WorkFunction(void)
+      {
+         int rc = m_MailFolder->SaveMessagesToFile(m_Seq, m_Name);
+         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
+                                                   m_Ticket,
+                                                   ASMailFolder::Op_SaveMessagesToFile,
+                                                   rc, m_UserData)); 
+      }
+private:
+   String    m_Name;
+};
 
 class MT_SaveMessagesToFileOrFolder : public MailThreadSeq
 {
@@ -609,6 +630,18 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket SaveMessagesToFile(const INTARRAY *messages,
+                                     const String &fileName, UserData ud)
+      {
+         return (new MT_SaveMessagesToFile(this, ud,
+                                           messages, fileName))->Start();
+      }
+
+   /** Save messages to a file.
+       @param messages pointer to an array holding the message numbers
+       @parent parent window for dialog
+       @return ResultInt boolean
+   */
+   virtual Ticket SaveMessagesToFile(const INTARRAY *messages,
                                      MWindow *parent, UserData ud)
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
@@ -836,5 +869,40 @@ ASMailFolder *
 ASMailFolder::Create(MailFolder *mf)
 {
    return new ASMailFolderImpl(mf);
+}
+
+
+class ASTicketListImpl : public ASTicketList
+{
+public:
+   virtual bool Contains(ASMailFolder::Ticket t) const
+      {
+         for(size_t i = 0; i < m_Tickets.Count(); i++)
+            if( m_Tickets[i] == t)
+               return true;
+         return false;
+      }
+   virtual void Add(ASMailFolder::Ticket t)
+      {
+         ASSERT(!Contains(t));
+         m_Tickets.Add(t);
+      }
+   virtual void Remove(ASMailFolder::Ticket t)
+      {
+         ASSERT(Contains(t));
+         m_Tickets.Remove(t);
+      }
+   virtual void Clear(void)
+      {
+         m_Tickets.Clear();
+      }
+private:
+   INTARRAY m_Tickets;
+};
+
+/* static */
+ASTicketList * ASTicketList::Create(void)
+{
+   return new ASTicketListImpl();
 }
 

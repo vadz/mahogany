@@ -67,6 +67,9 @@ END_EVENT_TABLE()
 #ifdef USE_ASYNC
 #   define m_MF   m_ASMailFolder
 #   define USERDATA   ,this
+
+   
+   
 #else
 #   define m_MF   m_MailFolder
 #   define USERDATA   
@@ -453,6 +456,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
 #ifdef USE_ASYNC
    m_ASMailFolder = NULL;
 #endif
+   m_TicketList =  ASTicketList::Create();
    m_NumOfMessages = 0;
    m_Parent->GetClientSize(&x, &y);
    m_Profile = ProfileBase::CreateProfile("FolderView",NULL);
@@ -471,6 +475,7 @@ wxFolderView::~wxFolderView()
 {
    wxCHECK_RET( !m_InDeletion, "being deleted second time??" );
 
+   m_TicketList->DecRef();
    m_InDeletion = true;
    SetFolder(NULL, FALSE);
 }
@@ -761,7 +766,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
    for(i = 0; i < n; i++)
    {
 #ifdef USE_ASYNC
-      m_MF->GetMessage(selections[i], this);
+      m_TicketList->Add(m_MF->GetMessage(selections[i], this));
 #else
       mptr = m_MF->GetMessage(selections[i]);
       title = mptr->Subject() + " - " + mptr->From();
@@ -886,8 +891,9 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 #else
 
    ASMailFolder::Result *result = event.GetResult();
-   if(result->GetFolder() == m_ASMailFolder)
+   if(m_TicketList->Contains(result->GetTicket()))
    {
+      m_TicketList->Remove(result->GetTicket());
       switch(result->GetOperation())
       {
       case ASMailFolder::Op_GetMessage:
