@@ -1095,8 +1095,9 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 
    m_radio->Enable(m_isCreating);
 
-   ForceLayout(); // make sure wxEnhancedPanel sees an OnSize event
-   // after creating all controls
+   // make sure wxEnhancedPanel sees an OnSize event after creating all
+   // controls
+   ForceLayout(); 
 }
 
 void
@@ -1854,7 +1855,8 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
 
    value = READ_CONFIG(profile, MP_FOLDER_PATH);
-   if ( (selRadio == Radio_File) && !m_isCreating )
+   if ( (selRadio == Radio_Group) ||
+        ((selRadio == Radio_File) && !m_isCreating) )
    {
       // MH complications: must prepend MHROOT to relative paths
       if ( folderType == MF_MH )

@@ -54,8 +54,10 @@
 
 #include "HeaderInfoImpl.h"
 
-// just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
+// just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
+// wxFile::Exists() too
 #include <wx/filefn.h>
+#include <wx/file.h>
 
 // DecodeHeader() uses CharsetToEncoding()
 #include <wx/fontmap.h>
@@ -221,7 +223,7 @@ extern String GetImapSpec(int type, int flags,
 
    String server = iserver;
    strutil_tolower(server);
-   
+
 #ifdef USE_SSL
    bool InitSSL(void);
 
@@ -399,7 +401,7 @@ MailFolderCC::HasInferiors(const String &imapSpec,
 {
    // We lock the complete c-client code as we need to immediately
    // redirect the mm_list() callback to tell us what we want to know.
-   
+
    MCclientLocker lock;
 
    SetLoginData(login, passwd);
@@ -414,7 +416,7 @@ MailFolderCC::HasInferiors(const String &imapSpec,
      gs_mmListRedirect = NULL;
      /* This does happen for for folders where the server does not know
         if they have inferiors, i.e. if they don't exist yet.
-        I.e. -1 is an unknown/undefined status 
+        I.e. -1 is an unknown/undefined status
         ASSERT(gs_HasInferiorsFlag != -1);
      */
      mail_close(mailStream);
@@ -784,7 +786,7 @@ MailFolderCC::~MailFolderCC()
    // we might still be listed, so we better remove ourselves from the
    // list to make sure no more events get routed to this (now dead) object
    RemoveFromMap();
-   
+
 #ifdef USE_THREADS
    delete m_Mutex;
 #endif
@@ -865,7 +867,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    {
       bool inferiors = HasInferiors(mboxpath, login, password);
    }
-*/ 
+*/
    mf = new
       MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
@@ -914,7 +916,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                   NULL /* userdata */, ticket/* Ticket */);
    }
 #endif
-   
+
    // try to really open it
    if ( ok )
    {
@@ -990,7 +992,7 @@ MailFolderCC::UpdateTimeoutValues(void)
    m_TcpWriteTimeout = m_TcpOpenTimeout;
    m_TcpCloseTimeout = m_TcpOpenTimeout;
    m_LookAhead = READ_CONFIG(p, MP_IMAP_LOOKAHEAD);
-   
+
    // but a separate one for rsh timeout to allow enabling/disabling rsh
    // independently of TCP timeout
    m_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
@@ -1135,7 +1137,7 @@ MailFolderCC::Open(void)
          mail_create(NIL, (char *)m_ImapSpec.c_str());
          CCVerbose();
       }
-      
+
       // Make sure the event handling code knows us:
       SetDefaultObj();
 
@@ -1251,6 +1253,17 @@ MailFolderCC::Checkpoint(void)
    if ( m_MailStream->halfopen )
       return;
 
+   // an MBOX file created by wxMessageView::MimeHandle() is deleted
+   // immediately afterwards, so don't try to access it from here
+   if ( (m_folderType == MF_FILE) )
+   {
+      if ( !wxFile::Exists(m_MailStream->mailbox) )
+      {
+         DBGMESSAGE(("MBOX folder '%s' already deleted.", m_MailStream->mailbox));
+         return;
+      }
+   }
+
    DBGMESSAGE(("MailFolderCC::Checkpoint() on %s.", GetName().c_str()));
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
@@ -1365,7 +1378,7 @@ MailFolderCC::Ping(void)
    if( m_ListingFrozen )
       return FALSE;
 
-   
+
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
@@ -1376,7 +1389,7 @@ MailFolderCC::Ping(void)
                GetName().c_str()));
 
    bool rc = FALSE;
-      
+
    if(Lock())
    {
       int ccl = CC_SetLogLevel(M_LOG_WINONLY);
@@ -1409,7 +1422,7 @@ MailFolderCC::Ping(void)
          RequestUpdate();
       UnLock();
       ProcessEventQueue();
-      
+
       // Check if we want to collect all mail from this folder:
       if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
       {
@@ -1725,7 +1738,7 @@ MailFolderCC::GetHeaders(void) const
    {
       ASSERT_MSG(m_Listing,
                  "GetHeaders() returning frozen listing - "
-                 "should be harmless"); 
+                 "should be harmless");
       if(m_Listing) m_Listing->IncRef();
       ASSERT_MSG(m_Listing, "GetHeaders() returning NULL listing - dubious");
       return m_Listing;
@@ -1741,7 +1754,7 @@ MailFolderCC::GetHeaders(void) const
       that->ExpungeMessages();
       that->m_ExpungeRequested = FALSE;
    }
-   
+
    // check if we are still alive:
    if(m_MailStream == NIL)
    {
@@ -1761,7 +1774,7 @@ MailFolderCC::GetHeaders(void) const
       return m_Listing;
    }
 
-   
+
    /*
      OK, we need to rebuild the current folder listing.
      This involves retrieving it, filtering it and re-retrieving it if
@@ -2033,7 +2046,7 @@ MailFolderCC::Debug(void) const
 }
 
 void
-MailFolderCC::DebugStreams(void) 
+MailFolderCC::DebugStreams(void)
 {
    // this produces a *lot* of output, so enable it separately as needed
 #ifdef DEBUG_STREAMS
@@ -2868,7 +2881,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
       gs_mmListRedirect(stream, delim, name, attrib);
       return;
    }
-   
+
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
 
@@ -3143,7 +3156,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 
    MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
    ((HeaderInfoImpl *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
-   
+
    if(m_NeedFreshListing || m_Listing == NULL)
       return; // will be regenerated anyway
 
@@ -3451,14 +3464,14 @@ extern "C"
 
 void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
 {
-   if (stream->dtb 
+   if (stream->dtb
 //
 // We are not using the driver's overview function as we need the
 // OVERVIEW_X structure with the extra To field. This might be
 // a bit inefficient, but the alternative would be to patch all
 // c-client drivers or to check somehow which structure we get.
-//       
-// && !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,(overview_t)ofn)) 
+//
+// && !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,(overview_t)ofn))
        && mail_uid_sequence (stream,sequence) && mail_ping (stream))
    {
     MESSAGECACHE *elt;

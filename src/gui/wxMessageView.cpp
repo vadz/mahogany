@@ -886,11 +886,11 @@ wxMessageView::Update(void)
                      {
                         SET_QUOTING_LEVEL(level, before.c_str() + line_pos + 1)
                         if(isHTML)
-			   wxLayoutImportHTML(llist,
+                           wxLayoutImportHTML(llist,
                            before.Mid(line_from, line_pos - line_from + 1),
                            encPart);
-			else
-			   wxLayoutImportText(llist,
+                        else
+                           wxLayoutImportText(llist,
                            before.Mid(line_from, line_pos - line_from + 1),
                            encPart);
                         SET_QUOTING_COLOUR(level)
@@ -898,13 +898,13 @@ wxMessageView::Update(void)
                      }
                   }
                   if (line_from < line_lng-1)
-		  {
+                  {
                      if(isHTML)
-			wxLayoutImportHTML(llist,
+                        wxLayoutImportHTML(llist,
                                    before.Mid(line_from, line_lng - line_from),
                                    encPart);
-	             else
-	                wxLayoutImportText(llist,
+                     else
+                        wxLayoutImportText(llist,
                                    before.Mid(line_from, line_lng - line_from),
                                    encPart);
                   }
@@ -1354,7 +1354,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
    }
 
    unsigned long len;
-   char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+   const char *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
    if( !content )
    {
       wxLogError(_("Cannot get attachment content."));
@@ -1364,11 +1364,58 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       wxFile out(filename, wxFile::write);
       if ( out.IsOpened() )
       {
-         size_t written = out.Write(content, len);
-         if ( written == len )
+         bool ok = true;
+
+         // when saving messages to a file we need to "From stuff" them to
+         // make them readable in a standard mail client (including this one)
+         if ( m_mailMessage->GetPartType(mimeDisplayPart) ==
+               Message::MSG_TYPEMESSAGE )
+         {
+            // standard prefix
+            String fromLine = "From ";
+
+            // find the from address
+            const MessageParameterList& params =
+               m_mailMessage->GetParameters(mimeDisplayPart);
+            MessageParameterList::iterator i;
+            for ( i = params.begin(); i != params.end(); i++ )
+            {
+               if ( (*i)->name == "From" )
+               {
+                  // found, now extract just the address
+                  fromLine += Message::GetEMailFromAddress((*i)->value);
+               }
+            }
+
+            if ( i == params.end() )
+            {
+               // this shouldn't normally happen, but if it does just make it
+               // up (FIXME: now it always happens!)
+               wxLogDebug("Couldn't find from header in the message");
+
+               fromLine += "MAHOGANY-DUMMY-SENDER";
+            }
+
+            fromLine += ' ';
+
+            // time stamp
+            time_t t;
+            time(&t);
+            fromLine += ctime(&t);
+
+            ok = out.Write(fromLine);
+         }
+
+         if ( ok )
+         {
+            // write the body
+            ok = out.Write(content, len) == len;
+         }
+
+         if ( ok )
          {
             // only display in interactive mode
-            if( strutil_isempty(ifilename) )
+            if ( strutil_isempty(ifilename) )
             {
                wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
                            len, filename.c_str());
