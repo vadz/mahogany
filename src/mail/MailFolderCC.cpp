@@ -507,7 +507,8 @@ MailFolderCC::Create(int typeAndFlags)
    m_BuildListingSemaphore = false;
    m_FolderListing = NULL;
    m_InCritical = false;
-
+   m_ASMailFolder = NULL;
+   
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
 
@@ -1893,6 +1894,10 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    String spec = BuildFolderSpec(host, protocol, mailbox);
    spec += pattern;
 
+   ASSERT(asmf);
+   // temporarily assign us a corresponding ASMailFolder object:
+   m_ASMailFolder = asmf;
+   m_ASMailFolder->IncRef();
    char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
    if ( subscribedOnly )
    {
@@ -1902,6 +1907,8 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    {
       mail_list (NIL, ref, (char *) spec.c_str());
    }
+   m_ASMailFolder->DecRef();
+   m_ASMailFolder = NULL;
 }
 
 
