@@ -390,6 +390,10 @@ enum MFolderIndex
 #define   MP_IMAPHOST          "Imap4Host"
 /// the mail host
 #define   MP_SMTPHOST         "MailHost"
+/// use the specified sender value or guess it automatically?
+#define   MP_GUESS_SENDER       "GuessSender"
+/// the smtp sender value
+#define   MP_SENDER           "Sender"
 /// the smtp host user-id
 #define   MP_SMTPHOST_LOGIN   "MailHostLogin"
 /// the smtp host password
@@ -1005,6 +1009,10 @@ enum MFolderIndex
 #define   MP_IMAPHOST_D          "imap"
 /// the mail host
 #define   MP_SMTPHOST_D         "mail"
+/// use the specified sender value or guess it automatically?
+#define   MP_GUESS_SENDER_D  1l
+/// the smtp sender value
+#define   MP_SENDER_D           ""
 /// the mail host user-id
 #define   MP_SMTPHOST_LOGIN_D   ""
 /// the mail host user-id

@@ -3,6 +3,12 @@
       Please refer to the cvs update list archives for the detailed list of
       all changes.
 
+Release 0.63 '?'
+-------------------------------------------------------------------------------
+
+23.03.01 VZ: added explicit "Sender" setting
+23.03.01 VZ: fixed bug with "Add" button being disabled in template dialog
+
 Release 0.62 'Mars' March 22, 2001
 -------------------------------------------------------------------------------
 

@@ -69,5 +69,6 @@ c) Freshmeat
 
 Update the FM record
 
+d) GNOME app map: http://www.gnome.org/applist/
 
 vi: ts=8 nolist:

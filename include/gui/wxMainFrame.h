@@ -46,7 +46,7 @@ public:
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &event);
    void OnIdentChange(wxCommandEvent &event);
-   void OnUpdateUILangMenu(wxUpdateUIEvent &event);
+   void OnIdle(wxIdleEvent &event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
    /// Appends the menu for a module to the menubar
@@ -73,17 +73,21 @@ protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
 
-   // splitter panes:
-      /// the folder tree
+   /// the folder tree
    wxFolderTree *m_FolderTree;
-      /// the folder view
+
+   /// the folder view
    wxFolderView *m_FolderView;
    
    /// the name of the currently opened folder (empty if none)
    String m_folderName;
 
+   /// true if we have a message preview
+   bool m_hasPreview;
+
    /// the module extension menu if it is set
    class wxMenu *m_ModulesMenu;
+
 private:
    void MakeModulesMenu(void);
    DECLARE_EVENT_TABLE()

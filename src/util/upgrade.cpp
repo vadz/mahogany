@@ -2964,7 +2964,8 @@ bool SaveRemoteConfigSettings(bool confirm)
    }
    mf->DecRef();
 
-   if(rc)
+   // if !confirm, we're in not interactive mode, so don't show anything
+   if(rc && confirm)
    {
       wxString msg;
       msg.Printf(

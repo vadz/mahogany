@@ -113,8 +113,7 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
    EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 
-   EVT_UPDATE_UI_RANGE(WXMENU_LANG_BEGIN + 1, WXMENU_LANG_END,
-                       wxMainFrame::OnUpdateUILangMenu)
+   EVT_IDLE(wxMainFrame::OnIdle)
 
    EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
 END_EVENT_TABLE()
@@ -136,6 +135,11 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
    CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
    GetStatusBar()->SetFieldsCount(3, widths);
+
+   // although we don't have a preview yet, the language menu is created
+   // enabled by default, so setting this to true initially ensures that the
+   // setting is in sync with the real menu state
+   m_hasPreview = true;
 
    // construct the menu and toolbar
    AddFileMenu();
@@ -283,9 +287,29 @@ wxMainFrame::CanClose() const
 // callbacks
 // ----------------------------------------------------------------------------
 
-void wxMainFrame::OnUpdateUILangMenu(wxUpdateUIEvent &event)
+// we use OnIdle() and not OnUpdateUI() as a menu in the menubar doesn't have
+// an id, unfortunately - at least in the current wxWin version
+void wxMainFrame::OnIdle(wxIdleEvent &event)
 {
-   event.Enable( m_FolderView->HasPreview() );
+   event.Skip();
+
+   bool hasPreview = m_FolderView && m_FolderView->HasPreview();
+   if ( hasPreview != m_hasPreview )
+   {
+      wxMenuBar *mbar = GetMenuBar();
+      if ( !mbar )
+         return;
+
+      int idLangMenu = mbar->FindMenu(_("&Language"));
+      if ( idLangMenu == wxNOT_FOUND )
+         return;
+
+      mbar->EnableTop(idLangMenu, hasPreview);
+
+      // only change the internal status now, if we succeeded in
+      // enabling/disabling the menu, otherwise it would get out of sync
+      m_hasPreview = hasPreview;
+   }
 }
 
 void

@@ -126,6 +126,8 @@ enum ConfigFields
    ConfigField_MailServerPassword,
    ConfigField_NewsServerLogin,
    ConfigField_NewsServerPassword,
+   ConfigField_GuessSender,
+   ConfigField_Sender,
 #ifdef USE_SSL
    ConfigField_SSLtext,
    ConfigField_SmtpServerSSL,
@@ -698,6 +700,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP server pa&ssword"),        Field_Passwd, ConfigField_MailServerLogin,           },
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
+
+   { gettext_noop("Try to guess SMTP sender header"), Field_Bool | Field_Advanced, ConfigField_MailServerLogin,           },
+   { gettext_noop("SMTP sender header"), Field_Text | Field_Advanced, -ConfigField_GuessSender,           },
 #ifdef USE_SSL
    { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
@@ -1040,6 +1045,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SMTPHOST_PASSWORD),
    CONFIG_ENTRY(MP_NNTPHOST_LOGIN),
    CONFIG_ENTRY(MP_NNTPHOST_PASSWORD),
+   CONFIG_ENTRY(MP_GUESS_SENDER),
+   CONFIG_ENTRY(MP_SENDER),
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
@@ -1579,10 +1586,10 @@ void wxOptionsPage::UpdateUI()
                // only enable if the text control has something
                bEnable = !text->GetValue().IsEmpty();
             }
-
-            if ( inverseMeaning )
-               bEnable = !bEnable;
          }
+
+         if ( inverseMeaning )
+            bEnable = !bEnable;
 
          control->Enable(bEnable);
 

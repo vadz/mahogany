@@ -170,7 +170,6 @@ SendMessageCC::Create(Protocol protocol,
    m_NextPart = m_Body->nested.part;
    m_LastPart = m_NextPart;
 
-
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
    (void) miscutil_GetFromAddress(prof, &m_FromPersonal, &m_FromAddress);
@@ -178,15 +177,25 @@ SendMessageCC::Create(Protocol protocol,
    m_ReturnAddress = m_FromAddress;
 
    /*
-     Sender:/From: magic:
-      If the Sender setting is not empty *and* differs from From:,
-      then set it, otherwise leave it empty.
+      Sender logic: by default, use the SMTP login if it is set and differs
+      from the "From" valu, otherwise leave it empty. If guessing it is
+      disabled, then we use the sender value specified by user as is instead.
    */
-   m_Sender = READ_CONFIG(prof, MP_SMTPHOST_LOGIN);
-   m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
-   if( m_Sender.Length() == 0
-       || Message::CompareAddresses(m_FromAddress, m_Sender) == TRUE )
-      m_Sender = ""; // leave Sender empty
+   if ( READ_CONFIG(prof, MP_GUESS_SENDER) )
+   {
+      m_Sender = READ_CONFIG(prof, MP_SMTPHOST_LOGIN);
+      m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
+
+      if ( Message::CompareAddresses(m_FromAddress, m_Sender) )
+      {
+         // leave Sender empty if it is the same as From, redundant
+         m_Sender = "";
+      }
+   }
+   else // don't guess, use provided value
+   {
+      m_Sender = READ_CONFIG(prof, MP_SENDER);
+   }
 
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
@@ -218,6 +227,7 @@ SendMessageCC::Create(Protocol protocol,
       m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
       m_Password = strutil_decrypt(READ_CONFIG(prof,MP_NNTPHOST_PASSWORD));
    }
+
 #ifdef USE_SSL
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
 #endif
