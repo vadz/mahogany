@@ -549,8 +549,31 @@ public:
 
    /** @name Accessors */
    //@{
+
    /// is the folder opened
    virtual bool IsOpened(void) const = 0;
+
+   /**
+      Even a folder opened without ReadOnly flag could be opened in read only
+      mode if this is the maximum we can manage (examples: public IMAP servers,
+      file formats using read only files &c).
+
+      In this case, this method may be used to check if we can write to the
+      folder. Note that it's invalid to use it unless IsOpened() is true
+
+      @return true if the folder is opened as read only, false if read/write
+    */
+   virtual bool IsReadOnly(void) const = 0;
+
+   /**
+      An IMAP folder opened in read only mode might still allow setting the
+      flags so this should be used instead of IsReadOnly() to test whether we
+      can do it.
+
+      @param flags the combination of flags we'd like to set or clear
+      @return true if this flag can be set, false otherwise
+    */
+   virtual bool CanSetFlag(int flags) const = 0;
 
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
@@ -582,6 +605,7 @@ public:
       @return character dependind on the folder type and server
     */
    virtual char GetFolderDelimiter() const;
+
    //@}
 
    /** Folder capabilities querying */

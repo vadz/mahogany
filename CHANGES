@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+12.06.02 VZ: fixes for working with read only folders
 11.06.02 VZ: added "Bounce" (a.k.a. redirect) command
 18.05.02 VZ: added a toolbar button to check for new mail
 13.05.02 VZ: added group reply/forwarding feature

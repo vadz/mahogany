@@ -99,6 +99,9 @@ public:
 
    virtual bool IsOpened(void) const { return m_MailStream != NULL; }
 
+   virtual bool IsReadOnly(void) const;
+   virtual bool CanSetFlag(int flags) const;
+
    /** return the full folder name
        @return the folder's name
    */

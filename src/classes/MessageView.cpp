@@ -3007,9 +3007,15 @@ MessageView::DoShowMessage(Message *mailMessage)
    // have we not seen the message before?
    if ( !(m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN) )
    {
-      // mark it as seen
-      m_mailMessage->GetFolder()->
-        SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
+      MailFolder *mf = m_mailMessage->GetFolder();
+      CHECK_RET( mf, "mail message without associated folder?" );
+
+      // mark it as seen if we can
+      if ( mf->CanSetFlag(MailFolder::MSG_STAT_SEEN) )
+      {
+         mf->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
+      }
+      //else: read only folder
 
       // autocollect the addresses from it if configured
       if ( m_ProfileValues.autocollect )

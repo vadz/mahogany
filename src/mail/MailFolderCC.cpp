@@ -4290,6 +4290,14 @@ MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
 
+   if ( !CanSetFlag(flag) )
+   {
+      ERRORMESSAGE((_("Impossible to set this flag for the folder '%s'."),
+                    GetName().c_str()));
+
+      return false;
+   }
+
    String flags = GetImapFlags(flag);
 
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
@@ -4465,6 +4473,47 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       }
    }
    //else: flags didn't really change
+}
+
+bool MailFolderCC::IsReadOnly(void) const
+{
+   CHECK( m_MailStream, true, "MailFolderCC::IsReadOnly(): folder is closed" );
+
+   return m_MailStream->rdonly != 0;
+}
+
+bool MailFolderCC::CanSetFlag(int flags) const
+{
+   CHECK( m_MailStream, false, "MailFolderCC::CanSetFlag(): folder is closed" );
+
+   if ( !IsReadOnly() )
+   {
+      // assume we can set all the flags in a folder opened read/write
+      return true;
+   }
+
+   int canSet = 1;
+   if ( flags & MSG_STAT_SEEN )
+   {
+      canSet &= m_MailStream->perm_seen;
+   }
+
+   if ( flags & MSG_STAT_DELETED )
+   {
+      canSet &= m_MailStream->perm_deleted;
+   }
+
+   if ( flags & MSG_STAT_ANSWERED )
+   {
+      canSet &= m_MailStream->perm_answered;
+   }
+
+   if ( flags & MSG_STAT_FLAGGED )
+   {
+      canSet &= m_MailStream->perm_flagged;
+   }
+
+   return canSet != 0;
 }
 
 // ----------------------------------------------------------------------------
