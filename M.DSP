@@ -148,7 +148,7 @@ LINK32=link.exe
 # ADD BASE LINK32 rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 $(WXWIN)\lib\wxmsw240d.lib extra\src\c-client\Debug\cclient.lib extra\src\compface\Debug\compface.lib src\wx\vcard\debug\versit.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /libpath:"$(WXWIN)\lib"
 
-!IF  "$(CFG)" == "M - Win32 Release Unicode"
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -162,7 +162,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /O2 /D_UNICODE /I "$(WXWIN)\lib\mswu" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O2 /I "$(WXWIN)\lib\mswu" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_UNICODE" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -189,7 +189,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /D_UNICODE /I "$(WXWIN)\lib\mswud" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /I "$(WXWIN)\lib\mswud" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_UNICODE" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -217,7 +217,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "\python\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
-# ADD CPP /nologo /MD /W4 /O1 /D_UNICODE /I "$(WXWIN)\lib\mswudll" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W4 /O1 /I "$(WXWIN)\lib\mswudll" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_UNICODE" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(WXWIN)\include" /d "NDEBUG"
@@ -247,7 +247,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "\python\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /D_UNICODE /I "$(WXWIN)\lib\mswudlld" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W4 /Gm /ZI /Od /I "$(WXWIN)\lib\mswudlld" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(WXWIN)\include" /I "D:\Python\2.3.2\include" /D "_UNICODE" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D M_PREFIX="" /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -506,21 +506,18 @@ SOURCE=.\src\mail\VMessage.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\wxllist.cpp
-
 # ADD BASE CPP /Yu
 # ADD CPP /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\wxlparser.cpp
-
 # ADD BASE CPP /Yu
 # ADD CPP /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\wxlwindow.cpp
-
 # ADD BASE CPP /Yu
 # ADD CPP /Yu
 # End Source File
@@ -825,6 +822,8 @@ SOURCE=.\src\Python\MString.i
 
 SOURCE=".\src\Python\MailFolder.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
@@ -834,46 +833,910 @@ InputPath=".\src\Python\MailFolder.cpp-swig"
 	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
 
 # End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MAppBase.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\Message.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MObject.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MProfile.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MString.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MTest.cpp-swig"
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MTest.cpp-swig"
+
+"$(InputDir)\MTest_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MTest_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\swiglib.cpp-swig"
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File
@@ -883,26 +1746,38 @@ SOURCE=.\src\Python\InitPython.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\MailFolder_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MAppBase_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\Message_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MObject_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MProfile_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MString_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # Begin Source File
 
@@ -915,6 +1790,8 @@ SOURCE=.\src\Python\PythonHelp.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\swiglib_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # End Group
 # Begin Group "wx"
@@ -938,6 +1815,9 @@ SOURCE=.\src\wx\common\vcard.cpp
 
 SOURCE=.\include\MInterface.mid
 
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
 # Begin Custom Build - Creating MInterface.h and .cpp
 InputDir=.\include
 InputPath=.\include\MInterface.mid
@@ -951,6 +1831,145 @@ BuildCmds= \
 "$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Creating MInterface.h and .cpp
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	extra\scripts\m4.bat $(InputDir) $(InputDir)
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "import"
@@ -959,13 +1978,11 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=.\src\modules\PineImport.cpp
-
 # PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\modules\XFMailImport.cpp
-
 # PROP Exclude_From_Build 1
 # End Source File
 # End Group
@@ -1072,7 +2089,6 @@ SOURCE=.\src\util\sysutil.cpp
 # Begin Source File
 
 SOURCE=.\src\util\twofish2.c
-
 # ADD CPP /W1 /Od
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
