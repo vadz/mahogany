@@ -1,0 +1,50 @@
+File:		release.txt
+Summary:	what to do to make a new Mahogany release
+Audience:	Mahogany developers
+Author:		Vadim Zeitlin <vadim@wxwindows.org>
+Last modified:	07.02.01
+Version:	the information in this file applies to the cvs sources
+
+1. Preparing the release
+------------------------
+
+a) tarball
+
+b) RPM
+
+c) DEB
+
+d) Win32 binaries
+
+2. Uploading the files
+----------------------
+
+3. Announcing the release
+-------------------------
+
+a) mailing lists
+
+Edit and send the announcement (doc/Mannounce.txt) to the following addresses:
+
+lg@ssc.com
+lsm@execpc.com
+c-client@u.washington.edu
+linux-announce@news.ornl.gov
+editor@32bitsonline.com
+gnome-announce-list@gnome.org
+mahogany-announce@lists.sourceforge.net
+mahogany-developers@lists.sourceforge.net
+mahogany-users@lists.sourceforge.net
+python-announce-list@python.org
+
+b) IMAP software database
+
+Write to software-list@imap.org to update the information in the IMAP software
+database.
+
+c) Freshmeat
+
+Update the FM record
+
+
+vi: ts=8 nolist:
