@@ -1339,7 +1339,7 @@ wxComposeView::IsReadyToSend() const
                   true /* yes is default */,
                   "ConfigNetFromCompose") )
          {
-            ShowOptionsDialog((wxComposeView *)this, OptionPage_Network);
+            ShowOptionsDialog((wxComposeView *)this, OptionsPage_Network);
          }
          else
          {

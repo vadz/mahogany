@@ -141,6 +141,13 @@ public:
    wxOptionsPageCompose(wxNotebook *parent, ProfileBase *profile);
 };
 
+// settings concerning the message view window
+class wxOptionsPageMessageView : public wxOptionsPage
+{
+public:
+   wxOptionsPageMessageView(wxNotebook *parent, ProfileBase *profile);
+};
+
 // user identity and network configuration page
 class wxOptionsPageIdent : public wxOptionsPage
 {

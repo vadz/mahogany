@@ -92,11 +92,27 @@ $Id$
 - cannot select only message in a folder or first message without
   chosing a different one first
 
+<<<<<<< TODO
+- finish efax support
+- make message view use the new font settings.
+=======
 - improve header support
+>>>>>>> 1.149
 
+<<<<<<< TODO
+- add support for faxing mails via efax
+
+- folderview listctrl has extra Subject column behind Size field ???
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
+- add "double click to open" profile option support to folder list ctrl
+=======
 - add "double click to open" profile option support to folder list
 ctrl
 
+>>>>>>> 1.149
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.

@@ -116,8 +116,20 @@ enum ConfigFields
    ConfigField_PythonLast = ConfigField_FoldersLast,
 #endif // USE_PYTHON
 
+   // message view
+   ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_MessageViewFontFamily,
+   ConfigField_MessageViewFontSize,
+#ifdef OS_UNIX
+   ConfigField_MessageViewFaxSupport,
+   ConfigField_MessageViewFaxDomains,
+   ConfigField_MessageViewLast = ConfigField_MessageViewFaxDomains,
+#else
+   ConfigField_MessageViewLast = ConfigField_MessageViewFontSize,
+#endif
+   
    // autocollecting addresses options
-   ConfigField_AdbFirst = ConfigField_PythonLast,
+   ConfigField_AdbFirst = ConfigField_MessageViewLast,
    ConfigField_AutoCollect_HelpText,
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
@@ -333,6 +345,18 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Flag &clear callback"),         Field_Text,    ConfigField_EnablePython   },
 #endif // USE_PYTHON
 
+   // message views:
+   { gettext_noop("&Font family"
+                  ":Default:Decorative:Roman:Script:Swiss:Modern:Teletype"),
+     Field_Combo,    -1 },
+   { gettext_noop("Font &size"),                Field_Number, -1 },
+#ifdef OS_UNIX
+   { gettext_noop("Support special &fax mailers"), Field_Bool, -1},
+   { gettext_noop("&Domains sending faxes"), Field_Text,
+     ConfigField_MessageViewFaxSupport},
+#endif
+   
+   
    // adb: autocollect and bbdb options
    { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
                   "receive in a special addresss book. This is called 'address "
@@ -431,6 +455,14 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MCB_FOLDERCLEARMSGFLAG),
 #endif // USE_PYTHON
 
+   // message views
+   CONFIG_ENTRY(MP_MV_FONT_FAMILY),
+   CONFIG_ENTRY(MP_MV_FONT_SIZE),
+#ifdef OS_UNIX
+   CONFIG_ENTRY(MP_INCFAX_SUPPORT),
+   CONFIG_ENTRY(MP_INCFAX_DOMAINS),
+#endif
+   
    // autocollect
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOCOLLECT),
@@ -890,6 +922,20 @@ wxOptionsPageCompose::wxOptionsPageCompose(wxNotebook *parent,
 }
 
 // ----------------------------------------------------------------------------
+// wxOptionsPageMessageView
+// ----------------------------------------------------------------------------
+
+wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
+                                                   ProfileBase *profile)
+   : wxOptionsPage(parent,
+                   _("Message Viewer"),
+                   profile,
+                   ConfigField_MessageViewFirst,
+                   ConfigField_MessageViewLast)
+{
+}
+
+// ----------------------------------------------------------------------------
 // wxOptionsPageIdent
 // ----------------------------------------------------------------------------
 
@@ -1210,7 +1256,7 @@ wxOptionsDialog::~wxOptionsDialog()
 // wxOptionsNotebookBase manages its own image list
 // ----------------------------------------------------------------------------
 
-// should be in sync with the enum OptionPage in wxOptionsDlg.h!
+// should be in sync with the enum OptionsPage in wxOptionsDlg.h!
 const char *wxOptionsNotebook::s_aszImages[] =
 {
    "ident",
@@ -1219,6 +1265,7 @@ const char *wxOptionsNotebook::s_aszImages[] =
 #ifdef USE_PYTHON
    "python",
 #endif
+   "msgview",
    "adrbook",
    "helpers",
    "miscopt",
@@ -1230,7 +1277,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    : wxNotebookWithImages("OptionsNotebook", parent, s_aszImages)
 {
    // don't forget to update both the array above and the enum!
-   wxASSERT( WXSIZEOF(s_aszImages) == OptionPage_Max + 1);
+   wxASSERT( WXSIZEOF(s_aszImages) == OptionsPage_Max + 1);
 
    ProfileBase *profile = mApplication->GetProfile();
 
@@ -1241,6 +1288,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 #ifdef USE_PYTHON
    (void)new wxOptionsPagePython(this, profile);
 #endif
+   (void)new wxOptionsPageMessageView(this, profile);
    (void)new wxOptionsPageAdb(this, profile);
    (void)new wxOptionsPageHelpers(this, profile);
    (void)new wxOptionsPageOthers(this, profile);
@@ -1250,7 +1298,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 // our public interface
 // ----------------------------------------------------------------------------
 
-void ShowOptionsDialog(wxFrame *parent, OptionPage page)
+void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
 {
    wxOptionsDialog dlg(parent);
    dlg.CreateAllControls();

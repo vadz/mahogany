@@ -207,10 +207,6 @@ wxMFrame::OnMenuCommand(int id)
       }
       break;
 
-   case WXMENU_FILE_OPENANY:
-      MDialog_FolderOpen(this);
-      break;
-
    case WXMENU_FILE_CLOSE:
       Close();
       break;

@@ -342,6 +342,18 @@
 #define   MP_AUTOCOLLECT_ADB     "AutoCollectAdb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED "AutoCollectNamed"
+/**@name message view settings */
+//@{
+/// which font to use
+#define   MP_MV_FONT_FAMILY         "MessageViewFontFamily"
+/// which font size
+#define   MP_MV_FONT_SIZE         "MessageViewFontSize"
+/// support efax style incoming faxes
+#define MP_INCFAX_SUPPORT      "IncomingFaxSupport"
+/// domains from which to support faxes, semicolon delimited
+#define MP_INCFAX_DOMAINS      "IncomingFaxDomains"
+//@}
+
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
 
@@ -653,6 +665,18 @@
 #define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_D 0l
+
+/**@name message view settings */
+//@{
+/// which font to use
+#define   MP_MV_FONT_FAMILY_D   0L
+/// which font size
+#define   MP_MV_FONT_SIZE_D     12L
+/// support efax style incoming faxes
+#define MP_INCFAX_SUPPORT_D      1L
+/// domains from which to support faxes, semicolon delimited
+#define MP_INCFAX_DOMAINS_D      "efax.com"
+//@}
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION_D 1l
 

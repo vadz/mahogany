@@ -84,7 +84,6 @@ static const TbarItemInfo g_aToolBarData[] =
 
    // main frame
    { "tb_open",          WXMENU_FILE_OPEN,     gettext_noop("Open folder")           },
-   { "tb_openany",       WXMENU_FILE_OPENANY,  gettext_noop("Open any folder")       },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  gettext_noop("Compose a new message") },
    { "tb_help",          WXMENU_HELP_CONTEXT,  gettext_noop("Help")                  },
    { "tb_exit",          WXMENU_FILE_EXIT,     gettext_noop("Exit the program")      },
@@ -118,7 +117,6 @@ static const TbarItemInfo g_aToolBarData[] =
 static const int g_aMainTbar[] =
 {
    WXTBAR_MAIN_OPEN,
-   WXTBAR_MAIN_OPENANY,
    WXTBAR_MAIN_COMPOSE,
    WXTBAR_SEP,
    WXTBAR_ADB,
@@ -203,7 +201,6 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // file
    { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  },
-   { WXMENU_FILE_OPENANY,  gettext_noop("Open &Any Folder..."),   gettext_noop("Open any message folder")             },
    { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_FILE_PRINT_SETUP,    gettext_noop("&Print Setup"),     gettext_noop("Configure printing")  },

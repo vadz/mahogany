@@ -1138,6 +1138,35 @@ MDialog_FolderChoose(const MWindow *parent)
    return selected ? dlg.GetFolder() : NULL;
 }
 
+
+void MDialog_ShowText(MWindow *parent,
+                      const char *title,
+                      const char *text,
+                      const char *configPath)
+{
+   int x = -1, y = -1, w = -1, h = -1;
+   if ( configPath )
+      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
+
+   MTextDialog dlg(parent, title, text,
+                   wxPoint(x, y), wxSize(w, h));
+   (void)dlg.ShowModal();
+
+   if ( configPath )
+      wxMFrame::SavePosition(configPath, &dlg);
+}
+
+
+
+
+
+
+
+
+
+
+#if 0
+/* NO LONGER USED */
 // ----------------------------------------------------------------------------
 // Ressource dialogs
 // ----------------------------------------------------------------------------
@@ -1311,20 +1340,4 @@ MDialog_FolderOpen(wxMFrame *parent)
       dialog->Close(TRUE);
    }
 }
-
-void MDialog_ShowText(MWindow *parent,
-                      const char *title,
-                      const char *text,
-                      const char *configPath)
-{
-   int x = -1, y = -1, w = -1, h = -1;
-   if ( configPath )
-      wxMFrame::RestorePosition(configPath, &x, &y, &w, &h);
-
-   MTextDialog dlg(parent, title, text,
-                   wxPoint(x, y), wxSize(w, h));
-   (void)dlg.ShowModal();
-
-   if ( configPath )
-      wxMFrame::SavePosition(configPath, &dlg);
-}
+#endif

@@ -23,20 +23,21 @@ class wxFrame;
 // -----------------------------------------------------------------------------
 
 /// the ids of option dialogs pages
-enum OptionPage
+enum OptionsPage
 {
-   OptionPage_Default = -1,     // open at default page, must be -1
-   OptionPage_Ident,
-   OptionPage_Network = OptionPage_Ident, // so far...
-   OptionPage_Compose,
-   OptionPage_Folders,
+   OptionsPage_Default = -1,     // open at default page, must be -1
+   OptionsPage_Ident,
+   OptionsPage_Network = OptionsPage_Ident, // so far...
+   OptionsPage_Compose,
+   OptionsPage_Folders,
 #ifdef USE_PYTHON
-   OptionPage_Python,
+   OptionsPage_Python,
 #endif
+   OptionsPage_MessageView,
    OptionsPage_Adb,
-   OptionPage_Helpers,
-   OptionPage_Misc,
-   OptionPage_Max
+   OptionsPage_Helpers,
+   OptionsPage_Misc,
+   OptionsPage_Max
 };
 
 // -----------------------------------------------------------------------------
@@ -45,6 +46,6 @@ enum OptionPage
 
 /// creates and shows the options dialog (dialog is modal)
 void ShowOptionsDialog(wxFrame *parent = NULL,
-                       OptionPage page = OptionPage_Default);
+                       OptionsPage page = OptionsPage_Default);
 
 #endif  //_WXOPTIONSDLG_H
