@@ -935,7 +935,7 @@ HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
          // optimization: if we don't sort messages at all, the first msgno we
          // find will be the first one by position as well (as position is
          // equal to msgno and array is supposed to be sorted)
-         if ( !IsSorting() )
+         if ( !IsSorting() && !IsThreading() )
             break;
       }
 
