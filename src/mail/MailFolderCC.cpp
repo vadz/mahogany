@@ -1989,6 +1989,21 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    {
       mail_list (m_MailStream, ref, (char *) spec.c_str());
    }
+
+   // Send event telling about end of listing:
+   ASMailFolder::ResultFolderExists *result =
+      ASMailFolder::ResultFolderExists::Create
+      (
+         mf->m_ASMailFolder,
+         mf->m_Ticket,
+         "",  // empty name == no more entries
+         0,   // delim == 0 ==> no more entries
+         mf->m_UserData
+      );
+
+   // and send it
+   MEventManager::Send(new MEventASFolderResultData (result) );
+
    m_ASMailFolder->DecRef();
    m_ASMailFolder = NULL;
 }
