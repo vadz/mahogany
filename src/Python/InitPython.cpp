@@ -51,19 +51,15 @@ PyObject *Python_MinitModule = NULL;
 // an appropriate error message is logged.
 static bool CheckPyError()
 {
-   if(PyErr_Occurred())
+   if ( PyErr_Occurred() )
    {
-      String err;
-      PyH_GetErrorMessage(&err);
-      ERRORMESSAGE(("Python error: %s", err.c_str()));
-      PyErr_Print();
+      ERRORMESSAGE((_T("%s"), PyH_GetErrorMessage().c_str()));
 
       return FALSE;
    }
-   else {
-      // no error
-      return TRUE;
-   }
+
+   // no error
+   return TRUE;
 }
 
 bool
