@@ -1289,38 +1289,6 @@ wxMessageView::Update(void)
    ScrollToCursor();
 }
 
-String
-wxMessageView::HighLightURLs(const char *input)
-{
-   String out;
-   const char *cptr = input;
-
-   while(*cptr)
-   {
-
-      if(strncmp(cptr, "http:", 5) == 0 || strncmp(cptr, "ftp:", 4) == 0)
-      {
-         const char *cptr2 = cptr;
-         out << " <a href=\"" << "\"";
-         while(*cptr2 && ! isspace(*cptr2))
-            out += *cptr2++;
-         out += "\"> ";
-      }
-      else
-      {
-         // escape brackets:
-         if(*cptr == '<')
-            out += '<';
-         else
-            if(*cptr == '>')
-               out += '>';
-      }
-      out += *cptr++;
-   }
-
-   return out;
-}
-
 // ----------------------------------------------------------------------------
 // MIME attachments menu commands
 // ----------------------------------------------------------------------------
