@@ -793,10 +793,11 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
       // in this mode we always save the value in the profile, so we don't need
       // the checkbox - but we have instead a radio box allowing the user to
       // choose for which kind of message he wants to use this header
-      m_radioboxType = new wxRadioBox(this, -1, _("Use this header for:"),
-                                      wxDefaultPosition, wxDefaultSize,
-                                      CustomHeader_Max, radioStrings,
-                                      CustomHeader_Max, wxRA_SPECIFY_ROWS);
+      m_radioboxType = new wxPRadioBox("CurstomHeaderType",
+                                       this, -1, _("Use this header for:"),
+                                       wxDefaultPosition, wxDefaultSize,
+                                       CustomHeader_Max, radioStrings,
+                                       1, wxRA_SPECIFY_COLS);
 
       delete [] radioStrings;
 

@@ -6,8 +6,16 @@
  * $Id$
  *******************************************************************/
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
-#pragma implementation "MailFolderCC.h"
+   #pragma implementation "MailFolderCC.h"
 #endif
 
 #include  "Mpch.h"
@@ -32,7 +40,19 @@
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking
 #include <wx/filefn.h>
 
+// including mh.h doesn't seem to work...
+extern "C"
+{
+   int mh_isvalid(char *name, char *tmp, long synonly);
+
+   char *mh_getpath(void);
+}
+
 #include <ctype.h>   // isspace()
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
 
 #define CHECK_DEAD(msg)   if(m_MailStream == NIL && ! PingReopen()) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
 #define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
@@ -41,7 +61,15 @@
 #define QPRINT_MIDDLEMARKER_U "?Q?"
 #define QPRINT_MIDDLEMARKER_L "?q?"
 
+// ----------------------------------------------------------------------------
+// private types
+// ----------------------------------------------------------------------------
+
 typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 /*
  * Small function to translate c-client status flags into ours.
@@ -125,8 +153,73 @@ String MailFolderCC::qprint(const String &in)
       return out;
 }
 
+/* static */
+bool MailFolderCC::CanonicalizeMHPath(String *path)
+{
+   String& name = *path;
 
+   // special convention: return the MH path if the string was empty
+   if ( wxIsAbsolutePath(name) || !name )
+   {
+      // init cclient
+      if ( !cclientInitialisedFlag )
+      {
+         CClientInit();
+      }
 
+      // force cclient to init the MH driver because it may be not inited yet
+      char tmp[MAILTMPLEN];
+      if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
+      {
+         wxLogError(_("Sorry, support for MH folders is disabled."));
+
+         return FALSE;
+      }
+
+      // retrieve the MH path
+
+      // calling mail_parameters doesn't work because of a compiler bug: gcc
+      // mangles mh_parameters function completely and it never returns
+      // anything for GET_MHPATH - I didn't find another workaround
+#if 0
+      (void)mail_parameters(NULL, GET_MHPATH, &tmp);
+
+      String pathMH = tmp;
+#else // 1
+      String pathMH = mh_getpath();
+#endif // 0/1
+
+      if ( !name )
+      {
+         // return the MH path
+         name = pathMH;
+      }
+      else // remove the prefix from absolute path
+      {
+         if ( !!pathMH )
+         {
+            if ( strncmp(name, pathMH, pathMH.length()) == 0 )
+            {
+               // skip MH path (+1 for the '/')
+               name = name.c_str() + pathMH.length() + 1;
+            }
+            else
+            {
+               wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
+                            "be under '%s' directory."),
+                          name.c_str(),
+                          pathMH.c_str());
+
+               return FALSE;
+            }
+         }
+         //else: no MH path, assume it's ok...
+      }
+   }
+   //else: non empty relative path - leave as is
+
+   return TRUE;
+}
 
 
 class FolderListingEntryCC : public FolderListingEntry
@@ -188,31 +281,45 @@ private:
 };
 
 
-/** Builds an IMAP specification */
+/** Builds an folder specification */
 static
-String ImapSpec(const String &host, FolderType protocol, const String
-                &mailbox = "")
+String BuildFolderSpec(const String &host,
+                       FolderType protocol,
+                       const String &mailbox = "")
 {
-   String imap_spec;
+   String spec;
 
-   switch(protocol)
+   switch ( protocol )
    {
-   case MF_INBOX:
-      imap_spec = "INBOX"; break;
-   case MF_IMAP:
-      imap_spec << '{' << host << "/imap}" << mailbox; break;
-   case MF_NNTP:
-      imap_spec << '{' << host << "/nntp}" << mailbox; break;
-   case MF_NEWS:
-      imap_spec << "#news." << mailbox; break;
-   case MF_POP:
-      imap_spec << '{' << host << "/pop}" << mailbox; break;
-   case MF_MH:
-      imap_spec << "#mh/" << mailbox; break;
-   default:
-      ASSERT_MSG(0,"unsupported protocol for folder listing");
+      case MF_INBOX:
+         spec = "INBOX";
+         break;
+
+      case MF_IMAP:
+         spec << '{' << host << "/imap}" << mailbox;
+         break;
+
+      case MF_NNTP:
+         spec << '{' << host << "/nntp}" << mailbox;
+         break;
+
+      case MF_NEWS:
+         spec << "#news." << mailbox;
+         break;
+
+      case MF_POP:
+         spec << '{' << host << "/pop}" << mailbox;
+         break;
+
+      case MF_MH:
+         spec << "#mh/" << mailbox;
+         break;
+
+      default:
+         FAIL_MSG("unsupported protocol for folder listing");
    }
-   return imap_spec;
+
+   return spec;
 }
 
 
@@ -281,7 +388,7 @@ protected:
    int m_Status;
    unsigned long m_Size;
    unsigned long m_Uid;
-   time_t m_Date; 
+   time_t m_Date;
    friend class MailFolderCC;
 };
 
@@ -301,7 +408,7 @@ public:
    ///@name Implementation
    //@{
    /// Returns the n-th entry.
-   virtual HeaderInfo * operator[](size_t n) 
+   virtual HeaderInfo * operator[](size_t n)
       { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
    /// Returns pointer to array of data:
    virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
@@ -356,7 +463,7 @@ MailFolderCC::Create(int typeAndFlags)
 #else // !DEBUG
    debugFlag = false;
 #endif
-   
+
    m_InCritical = false;
 
 #define SET_TO(setting, var) var = MP_TCP_##setting##_D
@@ -379,13 +486,13 @@ MailFolderCC::Create(int typeAndFlags)
    m_BuildListingSemaphore = false;
    m_FolderListing = NULL;
    m_InCritical = false;
-   
+
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
-   
+
    SetType(type);
    m_Timer = NULL;
-   
+
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 #ifdef USE_THREADS
@@ -401,7 +508,7 @@ MailFolderCC::~MailFolderCC()
       m_Timer->Stop();
       delete m_Timer;
    }
-   
+
    Close();
 #ifdef USE_THREADS
    delete m_Mutex;
@@ -537,7 +644,7 @@ MailFolderCC::Open(void)
        they have changed.
    */
    UpdateTimeoutValues();
-   
+
    if(GetType() == MF_POP || GetType() == MF_IMAP)
    {
       MF_user = m_Login;
@@ -621,7 +728,7 @@ MailFolderCC::Open(void)
       if(m_MailStream == NIL)
          m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
                                   (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
-      
+
 
 
       if(m_MailStream != NIL)
@@ -662,7 +769,7 @@ MailFolderCC::FindFolder(String const &path, String const &login)
    StreamConnectionList::iterator i;
    DBGMESSAGE(("Looking for folder to re-use: '%s',login '%s'",
                path.c_str(), login.c_str()));
-              
+
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
       DBGMESSAGE(("  Comparing to entry: '%s',login '%s'",
@@ -690,7 +797,7 @@ MailFolderCC::PingReopen(void) const
 
    // just to circumvene the "const":
    MailFolderCC *t = (MailFolderCC *)this;
-   
+
    t->m_PingReopenSemaphore = true;
    bool rc = true;
 
@@ -718,7 +825,7 @@ MailFolderCC::PingReopen(void) const
    else
       rc = false;
    t->m_PingReopenSemaphore = false;
-   
+
    return rc;
 }
 
@@ -735,7 +842,7 @@ MailFolderCC::PingReopenAll(void)
       rc &= mf->PingReopen();
    return rc;
 }
-   
+
 void
 MailFolderCC::Ping(void)
 {
@@ -745,7 +852,7 @@ MailFolderCC::Ping(void)
                   GetName().c_str()));
 
       int ccl = CC_SetLogLevel(M_LOG_WINONLY);
-   
+
       ProcessEventQueue();
 
       // This is terribly inefficient to do, but needed for some sick
@@ -756,7 +863,7 @@ MailFolderCC::Ping(void)
                      GetName().c_str()));
          Close();
       }
-   
+
       if(PingReopen())
       {
          mail_check(m_MailStream); // update flags, etc, .newsrc
@@ -828,7 +935,7 @@ MailFolderCC::AppendMessage(String const &msg)
 
 //??   PingReopen();
    bool rc = ( mail_append(m_MailStream,
-                           (char *)m_MailboxPath.c_str(),&str) 
+                           (char *)m_MailboxPath.c_str(),&str)
                != 0);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
@@ -1182,7 +1289,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       m_NumOfMessages = m_Listing->Count();
       return 0;
    }
-   
+
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
    ADDRESS *adr;
@@ -1305,8 +1412,11 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
+   {
       if( (*i)->stream == stream )
          return (*i)->folder;
+   }
+
    /* Sometimes the IMAP code (imap4r1.c) allocates a temporary stream
       for e.g. mail_status(), that is difficult to handle here, we
       must compare the name parameter which might not be 100%
@@ -1425,7 +1535,6 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
          mf->m_ASMailFolder, mf->m_Ticket,
          name, delim, mf->m_UserData);
    MEventManager::Send(new MEventASFolderResultData (result) );
-
 }
 
 
@@ -1743,35 +1852,33 @@ MailFolderCC::Subscribe(const String &host,
                         const String &mailboxname,
                         bool subscribe)
 {
-   String imap_spec = ImapSpec(host, protocol, mailboxname);
-   return (subscribe ?
-           mail_subscribe (NIL, (char *)imap_spec.c_str())
-           : mail_unsubscribe (NIL, (char *)imap_spec.c_str()) )
-      != NIL;
+   String spec = BuildFolderSpec(host, protocol, mailboxname);
+   return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
+           : mail_unsubscribe (NIL, (char *)spec.c_str()) ) != NIL;
 }
 
 void
 MailFolderCC::ListFolders(ASMailFolder *asmf,
                           const String &host,
                           FolderType protocol,
+                          const String &mailbox,
                           const String &pattern,
                           bool subscribedOnly,
                           const String &reference,
                           UserData ud,
                           Ticket ticket)
 {
-   m_ASMailFolder = asmf;
-   m_UserData = ud;
-   m_Ticket = ticket;
-   
-   String imap_spec = ImapSpec(host, protocol, pattern);
-   if(subscribedOnly)
+   String spec = BuildFolderSpec(host, protocol, mailbox);
+   spec += pattern;
+
+   char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
+   if ( subscribedOnly )
    {
-      mail_lsub (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
+      mail_lsub (NIL, ref, (char *) spec.c_str());
    }
    else
    {
-      mail_list (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
+      mail_list (NIL, ref, (char *) spec.c_str());
    }
 }
 
@@ -1782,8 +1889,8 @@ extern "C"
 
 /* Mail fetch message overview
  * Accepts: mail stream
- *	    UID sequence to fetch
- *	    pointer to overview return function
+ *            UID sequence to fetch
+ *            pointer to overview return function
 
  -- Modified to evaluate "continue" return code of callback to allow
     user to abort it.
@@ -1793,7 +1900,7 @@ extern "C"
 void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
 {
   if (stream->dtb && !(stream->dtb->overview &&
-		       (*stream->dtb->overview) (stream,sequence,(overview_t)ofn)) &&
+                       (*stream->dtb->overview) (stream,sequence,(overview_t)ofn)) &&
       mail_uid_sequence (stream,sequence) && mail_ping (stream)) {
     MESSAGECACHE *elt;
     ENVELOPE *env;
@@ -1803,20 +1910,20 @@ void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
     ov.optional.xref = NIL;
     for (i = stream->nmsgs; i>= 1; i--)
       if (((elt = mail_elt (stream,i))->sequence) &&
-	  (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
-	ov.subject = env->subject;
-	ov.from = env->from;
-	ov.date = env->date;
-	ov.message_id = env->message_id;
-	ov.references = env->references;
-	ov.optional.octets = elt->rfc822_size;
-	if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+          (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
+        ov.subject = env->subject;
+        ov.from = env->from;
+        ov.date = env->date;
+        ov.message_id = env->message_id;
+        ov.references = env->references;
+        ov.optional.octets = elt->rfc822_size;
+        if(! (*ofn) (stream,mail_uid (stream,i),&ov))
            break;
       }
   }
 }
 
-   
+
 /* Mail fetch message overview using sequence numbers instead of UIDs!
  * Accepts: mail stream
  *    sequence to fetch (no-UIDs but sequence numbers)
@@ -1888,7 +1995,7 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 
 void
 mm_notify(MAILSTREAM *stream, char *str, long errflg)
-{ 
+{
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify);
@@ -1959,7 +2066,7 @@ mm_log(char *str, long errflg)
       delete msg;
       return;
    }
-   
+
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
    evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;

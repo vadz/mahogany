@@ -41,7 +41,7 @@
  that it wants to perform. These MailThread objects run either
  synchronously or asynchronously (derived from wxThread), depending
  on whether Mahogany was configured --with-threads or without.
-                                                                     
+
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -95,7 +95,7 @@ public:
    virtual ~MailThread()
       { if(m_ASMailFolder) m_ASMailFolder->DecRef(); }
 #endif
-   
+
 protected:
    void SendEvent(ASMailFolder::Result *result);
    inline void LockFolder(void)
@@ -120,6 +120,8 @@ protected:
    Ticket   m_Ticket;
    static Ticket ms_Ticket;
 };
+
+Ticket MailThread::ms_Ticket = ILLEGAL_TICKET;
 
 void *
 MailThread::Entry()
@@ -218,7 +220,7 @@ public:
          delete m_Seq;
 #ifdef DEBUG
          m_Seq = NULL;
-#endif 
+#endif
       }
 protected:
    int m_Flag;
@@ -231,7 +233,7 @@ public:
    MT_GetMessage(ASMailFolder *mf,
                  UserData ud,
                  unsigned long uid)
-                 
+
       : MailThread(mf, ud)
       {
          m_UId = uid;
@@ -254,7 +256,7 @@ public:
    MT_AppendMessage(ASMailFolder *mf,
                     UserData ud,
                     const Message *msg)
-                 
+
       : MailThread(mf, ud)
       {
          m_Message = (Message *)msg;
@@ -263,7 +265,7 @@ public:
    MT_AppendMessage(ASMailFolder *mf,
                     UserData ud,
                     const String &msgstr)
-                 
+
       : MailThread(mf, ud)
       {
          m_Message = NULL;
@@ -283,7 +285,7 @@ public:
                    Create(m_ASMailFolder, m_Ticket,
                           ASMailFolder::Op_AppendMessage,  NULL,
                           rc,
-                          m_UserData));  
+                          m_UserData));
       }
 protected:
    Message *m_Message;
@@ -305,7 +307,7 @@ class MT_SaveMessages : public MailThreadSeq
 public:
    MT_SaveMessages(ASMailFolder *mf, UserData ud,
                    const INTARRAY *selections,
-                   const String &folderName, 
+                   const String &folderName,
                    bool isProfile, bool updateCount)
       : MailThreadSeq(mf, ud, selections)
       {
@@ -383,7 +385,7 @@ public:
                                                    rc, m_UserData));
 #ifdef DEBUG
          m_Seq = NULL;
-#endif   
+#endif
       }
 private:
    MWindow *m_Parent;
@@ -460,27 +462,32 @@ public:
                   UserData ud,
                   const String &host,
                   FolderType protocol,
+                  const String &mailbox,
                   const String &pattern,
                   bool sub_only,
                   const String &reference)
-      : MailThread(mf, ud)
+      : MailThread(mf, ud),
+        m_Host(host),
+        m_Mailbox(mailbox),
+        m_Pattern(pattern),
+        m_Reference(reference)
       {
-         m_Host = host;
          m_Prot = protocol;
-         m_Pattern = pattern;
          m_SubOnly = sub_only;
-         m_Reference = reference;
       }
+
    virtual void WorkFunction(void)
       {
          m_MailFolder->ListFolders(m_ASMailFolder,
-                                   m_Host, m_Prot, m_Pattern,
+                                   m_Host, m_Prot,
+                                   m_Mailbox,
+                                   m_Pattern,
                                    m_SubOnly,
                                    m_Reference,
                                    m_UserData, m_Ticket);
       }
 private:
-   String  m_Host;
+   String  m_Host, m_Mailbox;
    FolderType m_Prot;
    String  m_Pattern;
    String  m_Reference;
@@ -758,6 +765,7 @@ public:
     */
    static Ticket ListFolders(const String &host,
                              FolderType protocol,
+                             const String &mailbox,
                              const String &pattern,
                              bool subscribed_only,
                              const String &reference,
@@ -765,13 +773,14 @@ public:
    {
       return (new MT_ListFolders(NULL, ud,
                                  host, protocol,
+                                 mailbox,
                                  pattern,
                                  subscribed_only,
                                  reference))->Start();
    }
    //@}
 
-   //@}   
+   //@}
    //@}
    /**@name Synchronous Access Functions */
    //@{
@@ -789,7 +798,7 @@ public:
    */
    virtual unsigned long CountMessages(int mask, int value) const
       { AScheck(); return m_MailFolder->CountMessages(); }
-   
+
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -813,13 +822,13 @@ public:
    */
    virtual bool SendsNewMailEvents(void) const
       { AScheck(); return m_MailFolder->SendsNewMailEvents(); }
-   
+
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
    virtual class HeaderInfoList *GetHeaders(void) const
       { AScheck(); return m_MailFolder->GetHeaders(); }
-   //@}   
+   //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const
       { AScheck(); return m_MailFolder->GetType(); }
@@ -953,12 +962,13 @@ ASMailFolder::Subscribe(const String &host,
 Ticket
 ASMailFolder::ListFolders(const String &host,
                           FolderType protocol,
+                          const String &mailbox,
                           const String &pattern,
                           bool subscribed_only,
                           const String &reference,
                           UserData ud)
 {
-   return ASMailFolderImpl::ListFolders(host, protocol, pattern,
+   return ASMailFolderImpl::ListFolders(host, protocol, mailbox, pattern,
                                         subscribed_only, reference,
                                         ud);
 }

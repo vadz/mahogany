@@ -243,6 +243,16 @@ void wxEnhancedPanel::OnSize(wxSizeEvent& event)
       return;
    }
 
+#ifdef __WXGTK__
+   // FIXME the notebook pages get some bogus size events under wxGTK...
+   if ( event.GetSize() == wxSize(16, 16) )
+   {
+      event.Skip();
+
+      return;
+   }
+#endif // wxGTK
+
    // find the total height of this panel
    int height = 0;
    for ( wxWindowList::Node *node = GetCanvas()->GetChildren().GetFirst();

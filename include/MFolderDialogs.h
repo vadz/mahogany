@@ -80,4 +80,13 @@ extern bool ShowFolderPropertiesDialog(MFolder *folder,
 extern MFolder *ShowFolderSelectionDialog(MFolder *folder,
                                           wxWindow *parent = NULL);
 
+/**
+  shows all existing subfolders (not in the program, but on the server) of the
+  given folder and allows the user to browse them and create them.
+
+  @return TRUE if any folders were created, FALSE otherwise
+*/
+extern bool ShowFolderSubfoldersDialog(MFolder *folder,
+                                       wxWindow *parent = NULL);
+
 #endif // _MFOLDERDIALOGS_H

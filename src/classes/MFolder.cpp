@@ -336,11 +336,14 @@ bool MFolderFromProfile::Create(const String& fullname)
    Profile_obj profile(fullname);
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
+   // VZ: let me decide about whether this check has to be done - but surely
+   //     not here...
+#if 0
    // check that the name is valid
    if (
-        fullname.Find('/')
+        fullname.Find('/') != wxNOT_FOUND
 #ifdef OS_WIN
-        || fullname.Find('\\')
+        || fullname.Find('\\' != wxNOT_FOUND )
 #endif
       )
    {
@@ -348,6 +351,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
       return FALSE;
    }
+#endif // 0
 
    //PFIXME
    if ( GroupExists(profile, fullname) )

@@ -119,16 +119,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          break;
 
       case MF_MH:
-         // the name should be relative to the MH root directory
-         {
-            // FIXME this code is CC-specific, shouldn't be here
-            String pathMH = (char *)mail_parameters(NULL, GET_MHPATH, NULL);
-            if ( !!pathMH && strncmp(name, pathMH, pathMH.length()) == 0 )
-            {
-               // skip MH path (+1 for the '/')
-               name = name.c_str() + pathMH.length() + 1;
-            }     
-         }
+         // don't change the path
          break;
 
       case MF_POP:
@@ -154,9 +145,9 @@ MailFolder::OpenFolder(int typeAndFlags,
          // nothing special to do
          break;
 
-   default:
-      profile->DecRef();
-      FAIL_MSG("unknown folder type");
+      default:
+         profile->DecRef();
+         FAIL_MSG("unknown folder type");
    }
 
    // ask the password for the folders which need but for which it hadn't been
@@ -232,7 +223,6 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
    return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
 }
 
-/* static */
 void
 MailFolder::ReplyMessage(class Message *msg,
                          int flags,

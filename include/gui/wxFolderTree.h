@@ -50,6 +50,8 @@ public:
    virtual void OnOpenHere(MFolder *folder);
       // folder double clicked/enter pressed
    virtual void OnOpen(MFolder *folder);
+      // "browse subfolders" selected from the popup menu
+   virtual void OnBrowseSubfolders(MFolder *folder);
       // folder properties requested
    virtual void OnProperties(MFolder *folder);
       // user wants to add a new folder under the current one (return the

@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
 // File name:   wxMFolderDialogs.cpp - implementation of functions from
-//              MFolderDialogs.h
+//              MFolderDialogs.h (ShowFolderSubfoldersDialog is in a separate
+//              file wxSubfoldersDialog.cpp)
 // Purpose:
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -18,26 +19,28 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
-#   include "MApplication.h"
-#   include "Profile.h"
-#   include "guidef.h"
-#   include "strutil.h"
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "guidef.h"
+#  include "strutil.h"
+
+#  include <wx/dynarray.h>
+#  include <wx/log.h>
+#  include <wx/layout.h>
+#  include <wx/stattext.h>
+#  include <wx/radiobox.h>
 #endif
 
-#include <wx/dynarray.h>
-#include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
 #include <wx/persctrl.h>
 #include <wx/statbmp.h>
 #include <wx/tooltip.h>
-#include <wx/layout.h>
-#include <wx/stattext.h>
-#include <wx/radiobox.h>
 
 #include "MDialogs.h"
 #include "MFolderDialogs.h"
@@ -46,6 +49,8 @@
 
 #include "Mdefaults.h"
 #include "MailCollector.h"
+
+#include "MailFolderCC.h"        // for CanonicalizeMHPath
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
@@ -78,6 +83,11 @@ public:
    // set the parent folder: if it's !NULL, it can't be changed by user
    void SetParentFolder(MFolder *parentFolder)
       { m_parentFolder = parentFolder; }
+
+   // get the parent folder name
+   wxString GetParentFolderName() const { return m_parentName->GetValue(); }
+   // get the folder name
+   wxString GetFolderName() const { return m_folderName->GetValue(); }
 
    // after the dialog is closed, retrieve the folder which was created or
    // NULL if the user cancelled us without creating anything
@@ -1097,6 +1107,18 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
 
             m_browsePath->BrowseForDirectories();
             m_folderSubtype->SetSelection(FileFolderSubtype_MH);
+
+            MFolder_obj folderParent(dlg->GetParentFolderName());
+            Profile_obj profile(folderParent->GetFullName());
+
+            wxString path;
+            MailFolderCC::CanonicalizeMHPath(&path);
+            path += READ_CONFIG(profile, MP_FOLDER_PATH);
+            if ( !!path && path.Last() != '/' )
+               path += '/';
+            path += dlg->GetFolderName();
+
+            m_path->SetValue(path);
          }
          break;
 
@@ -1467,7 +1489,20 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // 0th step: verify if the settings are self-consistent
 
-   // doesn't the folder by this name already exist?
+   // is the folder name valid?
+   wxString path;
+   if ( folderType == MF_MH )
+   {
+      // MH folder name is always relative to the MH root path
+      path = m_path->GetValue();
+      if ( !MailFolderCC::CanonicalizeMHPath(&path) )
+      {
+         wxLogError(_("Impossible to create MH folder '%s'."),
+                    path.c_str());
+
+         return FALSE;
+      }
+   }
 
    // folder flags
    int flags = 0;
@@ -1603,8 +1638,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          break;
 
       case File:
+         path = m_path->GetValue();
+         // fall through
+
       case MF_MH:
-         WriteEntryIfChanged(Path, m_path->GetValue());
+         // for MH path had been set in thevery beginning
+         WriteEntryIfChanged(Path, path);
          break;
 
       case Inbox:

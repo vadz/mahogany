@@ -61,7 +61,6 @@ class ASMailFolder : public MObjectRC
 {
 public:
    /** @name Constants and Types */
-   
    //@{
    /** What is the status of a given message in the folder?
        Recent messages are those that we never saw in a listing
@@ -161,7 +160,7 @@ public:
       UserData      m_UserData;
       INTARRAY *    m_Seq;
    };
-   /** Holds the result from an operation which can be expressed as an 
+   /** Holds the result from an operation which can be expressed as an
        integer value. Used for all boolean success values.
    */
    class ResultInt : public ResultImpl
@@ -180,7 +179,7 @@ public:
                 Ticket t,
                 OperationId id,
                 INTARRAY * mc,
-                int value, 
+                int value,
                 UserData ud)
          : ResultImpl(mf, t, id, mc, ud)
          { m_Value = value; }
@@ -202,7 +201,7 @@ public:
       Message * GetMessage(void) const { return m_Message; }
       unsigned long GetUId(void) const { return m_uid; }
    protected:
-      ResultMessage(ASMailFolder *mf, Ticket t, 
+      ResultMessage(ASMailFolder *mf, Ticket t,
                     INTARRAY * mc, Message *msg,
                     UIdType uid, UserData ud)
          : ResultImpl(mf, t, Op_GetMessage, mc, ud)
@@ -263,7 +262,7 @@ public:
          return asmf;
       }
 
-   
+
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
    /** Check whether mailbox has changed.
@@ -318,7 +317,7 @@ public:
      */
    virtual Ticket ExpungeMessages(void) = 0;
 
-   
+
 
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
@@ -422,12 +421,13 @@ public:
     */
    static Ticket ListFolders(const String &host,
                              FolderType protocol,
+                             const String &mailbox = "",
                              const String &pattern = "*",
                              bool subscribed_only = false,
                              const String &reference = "",
                              UserData ud = 0);
    //@}
-   //@}   
+   //@}
    //@}
    /**@name Synchronous Access Functions */
    //@{
@@ -446,7 +446,7 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline ProfileBase *GetProfile(void) const = 0;
+   virtual ProfileBase *GetProfile(void) const = 0;
 
    /// Get update interval in seconds
    virtual int GetUpdateInterval(void) const = 0;

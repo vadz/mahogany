@@ -234,6 +234,7 @@ public:
        @param asmf the ASMailFolder initiating the request
        @param host the server host, or empty for local newsspool
        @param protocol MF_IMAP or MF_NNTP or MF_NEWS
+       @param mailbox the mailbox to start listing from
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
@@ -241,11 +242,13 @@ public:
    void ListFolders(class ASMailFolder *asmf,
                     const String &host,
                     FolderType protocol,
+                    const String &mailbox,
                     const String &pattern = "*",
                     bool subscribed_only = false,
                     const String &reference = "",
                     UserData ud = 0,
                     Ticket ticket = ILLEGAL_TICKET);
+
    //@}
    /**@name Access control */
    //@{
@@ -277,6 +280,12 @@ public:
        @return the full 8bit decoded string
    */
    static String qprint(const String &in);
+
+   /** A helper function: remove the MHPATH prefix from the path and return
+       TRUE or return FALSE if the path is absolute but doesn't start with
+       MHPATH. Don't change anything for relative paths.
+   */
+   static bool CanonicalizeMHPath(String *path);
 
 private:
    /// private constructor, does basic initialisation

@@ -208,6 +208,8 @@ protected:
    void DoFolderDelete();
    void DoFolderRename();
 
+   void DoBrowseSubfolders();
+
    void DoFolderProperties();
 
    void DoPopupMenu(const wxPoint& pos);
@@ -223,6 +225,7 @@ private:
          New,
          Delete,
          Rename,
+         BrowseSub,
          Properties
       };
 
@@ -239,6 +242,10 @@ private:
          Append(New, _("Create &new folder..."));
          Append(Delete, _("&Delete folder"));
          Append(Rename, _("&Rename folder..."));
+
+         AppendSeparator();
+
+         Append(BrowseSub, _("Browse &subfolders..."));
 
          AppendSeparator();
 
@@ -438,6 +445,14 @@ void wxFolderTree::OnOpen(MFolder *folder)
    folder->DecRef();
 }
 
+// browse subfolders of this folder
+void wxFolderTree::OnBrowseSubfolders(MFolder *folder)
+{
+   (void)ShowFolderSubfoldersDialog(folder, m_tree);
+
+   folder->DecRef();
+}
+
 // bring up the properties dialog for this profile
 void wxFolderTree::OnProperties(MFolder *folder)
 {
@@ -600,8 +615,11 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       m_menu->Enable(FolderMenu::Delete, !isRoot);
       m_menu->Enable(FolderMenu::Properties, !isRoot);
 
+      // for now, only enable this for MH folders (IMAP and NNTP/News to come)
+      m_menu->Enable(FolderMenu::BrowseSub, folderType == MF_MH);
+
       // only group folders can have subfolders
-      m_menu->Enable(FolderMenu::New, isRoot || isGroup);
+      m_menu->Enable(FolderMenu::New, CanHaveSubfolders(folderType));
 
       PopupMenu(m_menu, pos.x, pos.y);
    }
@@ -693,6 +711,11 @@ void wxFolderTreeImpl::DoFolderDelete()
 void wxFolderTreeImpl::DoFolderRename()
 {
    FAIL_MSG("folder renaming not implemented"); // TODO
+}
+
+void wxFolderTreeImpl::DoBrowseSubfolders()
+{
+   m_sink->OnBrowseSubfolders(m_sink->GetSelection());
 }
 
 void wxFolderTreeImpl::DoFolderProperties()
@@ -844,6 +867,10 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
 
       case FolderMenu::Rename:
          FAIL_MSG("renaming folders not yet implemented");
+         break;
+
+      case FolderMenu::BrowseSub:
+         DoBrowseSubfolders();
          break;
 
       case FolderMenu::Properties:

@@ -129,7 +129,7 @@ public:
        list of folders which are in critical sections.
    */
    static bool CanExit(String *which);
-   
+
    /** Utiltiy function to get a textual representation of a message
        status.
        @param message status
@@ -175,6 +175,7 @@ public:
        @param asmf the ASMailFolder initiating the request
        @param host the server host, or empty for local newsspool
        @param protocol MF_IMAP or MF_NNTP or MF_NEWS
+       @param mailbox the name of the mailbox to start from
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
@@ -182,13 +183,14 @@ public:
    virtual void ListFolders(class ASMailFolder *asmf,
                             const String &host,
                             FolderType protocol,
+                            const String &mailbox,
                             const String &pattern = "*",
                             bool subscribed_only = false,
                             const String &reference = "",
                             UserData ud = 0,
                             Ticket ticket = ILLEGAL_TICKET) = 0;
    //@}
-   //@}   
+   //@}
 
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
@@ -198,7 +200,7 @@ public:
    /** Sets the symbolic name.
     */
    virtual void SetName(const String &name) = 0;
-   
+
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
        message count.
@@ -374,7 +376,7 @@ public:
 
    /**@name Access control */
    //@{
-   /** Locks a mailfolder for exclusive access. In multi-threaded mode 
+   /** Locks a mailfolder for exclusive access. In multi-threaded mode
        it really locks it and always returns true. In single-threaded
        mode it returns false if we cannot get a lock.
        @return TRUE if we have the lock

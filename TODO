@@ -43,9 +43,6 @@ $Id$
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
-8	VZ	mh_parameters provokes a compile bug - what to do?
-		--> rewrite it in MailFolderCC.cpp like I did with the 
-		fetch_overview functions
 8	VZ	Opening NNTP folders suddenly asks for password - what 
 		happened? --> doesn't do it here, please explain how to
 		reproduce.
@@ -122,6 +119,9 @@ Option to start up iconified.
 		the folder selection dialog?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
+
+4	VZ	configure fields and their order when exporting with
+		AdbExportText
 
 4	VZ	templates enhancements:
 		a) take them from files
