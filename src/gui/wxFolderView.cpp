@@ -1,5 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-// Project:     Mahogany
 // File name:   gui/wxFolderView.cpp - window with folder view inside
 // Purpose:     wxFolderView is used to show to the user folder contents
 // Author:      Karsten Ballüder (Ballueder@gmx.net)
@@ -3157,16 +3155,6 @@ void
 wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
    if ( event.GetFolder() == m_MailFolder )
-   {
-      Update();
-   }
-}
-
-// this function gets called when number of messages in this folder changed
-void
-wxFolderView::OnFolderStatusEvent(MEventFolderStatusData &event)
-{
-   if ( event.GetFolderName() == m_folderName )
    {
       Update();
    }

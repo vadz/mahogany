@@ -187,8 +187,6 @@ extern "C"
 // constants
 // ----------------------------------------------------------------------------
 
-#define NO_PROGRESS_DLG ((MProgressDialog *)1)
-
 /// invalid value for MailFolderCC::m_chDelimiter
 #define ILLEGAL_DELIMITER ((char)-1)
 
@@ -1698,9 +1696,6 @@ MailFolderCC::CloseFolder(const MFolder *folder)
       mf->m_Listing->DecRef();
       mf->m_Listing = NULL;
    }
-
-   // show the progress again when opening the folder the next time
-   mf->m_ProgressDialog = NULL;
 
    mf->Init();
 
@@ -3279,10 +3274,8 @@ MailFolderCC::BuildListing(void)
    // set the entry listing we're currently building to 0 in the beginning
    m_BuildNextEntry = 0;
 
-   // don't show the progress dialog if we're not in interactive mode or if it
-   // had been already shown (see below near NO_PROGRESS_DLG assignment for the
-   // explanation of this)
-   if ( m_ProgressDialog == NULL && !mApplication->IsInAwayMode() )
+   // don't show the progress dialog if we're not in interactive mode
+   if ( GetInteractiveFrame() && !mApplication->IsInAwayMode() )
    {
       // show the progress dialog if there are many messages to retrieve,
       // the check for threshold > 0 allows to disable the progress dialog
@@ -3340,10 +3333,11 @@ MailFolderCC::BuildListing(void)
       }
 
       // destroy the progress dialog if it had been shown
-      if ( m_ProgressDialog != NO_PROGRESS_DLG )
+      if ( m_ProgressDialog )
       {
          MGuiLocker locker;
          delete m_ProgressDialog;
+         m_ProgressDialog = NULL;
 
          // ok, it's really ugly to put it here, but it's the only way to do it
          // for now, unfortunately (FIXME)
@@ -3361,14 +3355,6 @@ MailFolderCC::BuildListing(void)
          }
 #endif // OS_WIN
       }
-
-      // We set it to an illegal address here to suppress further updating.
-      // This value is checked against in OverviewHeader() and also when we're
-      // called for the next time. The reason is that we only want it the
-      // first time that the folder is being opened because the subsequent
-      // calls are supposed to be fast as cclient caches the listing
-      // internally
-      m_ProgressDialog = NO_PROGRESS_DLG;
 
       // it is possible that we didn't retrieve all messages if the progress
       // dialog was shown and cancelled, but we shouldn't have retrieved more
@@ -3461,7 +3447,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
    // after the check above this is not supposed to happen
    CHECK( m_BuildNextEntry < m_nMessages, 0, "too many messages" );
 
-   if ( m_ProgressDialog && m_ProgressDialog != NO_PROGRESS_DLG )
+   if ( m_ProgressDialog )
    {
       MGuiLocker locker;
       if(! m_ProgressDialog->Update( m_BuildNextEntry ))
@@ -3577,7 +3563,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       // set the font encoding to be used for displaying this entry
       entry.m_Encoding = encodingMsg;
 
-      if ( m_ProgressDialog && m_ProgressDialog != NO_PROGRESS_DLG )
+      if ( m_ProgressDialog )
       {
          MGuiLocker locker;
          m_ProgressDialog->Update(m_BuildNextEntry);
