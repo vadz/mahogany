@@ -1,11 +1,14 @@
 /*-*- c++ -*-********************************************************
  * kbList.cc : a double linked list                                 *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.10  2000/01/31 17:22:56  KB
+ * removed another illegal delete call
+ *
  * Revision 1.9  1999/04/05 17:17:50  KB
  * Merged new profile code, TESTING REQUIRED.
  *
@@ -250,11 +253,16 @@ kbList::~kbList()
 {
    kbListNode *next;
 
+   if(ownsEntries)
+   {
+      /* The base class handling only void * cannot properly delete
+         anything. This code should never really be called. */
+      ASSERT(0);
+      /* delete first->element; */
+   }
    while ( first != NULL )
    {
       next = first->next;
-      if(ownsEntries)
-         delete first->element;
       delete first;
       first = next;
    }
