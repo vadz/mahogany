@@ -1010,32 +1010,32 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    };
 
    // the remaining unused accel letters (remove one if you add new label):
-   //    DGJQVXZ
+   //    ADGJQVXZ
    static const char *szLabels[Label_Max] =
    {
-      gettext_noop("&User name: "),
-      gettext_noop("&Password: "),
-      gettext_noop("&File name: "),
-      gettext_noop("&Server: "),
-      gettext_noop("&Mailbox: "),
-      gettext_noop("&Newsgroup: "),
-      gettext_noop("&Comment: "),
-      gettext_noop("C&ollect all mail from this folder: "),
-      gettext_noop("&Keep server connection when idle: "),
-      gettext_noop("Force &re-open on ping: "),
-      gettext_noop("Anon&ymous access: "),
+      gettext_noop("&User name"),
+      gettext_noop("&Password"),
+      gettext_noop("&File name"),
+      gettext_noop("&Server"),
+      gettext_noop("&Mailbox"),
+      gettext_noop("&Newsgroup"),
+      gettext_noop("&Comment"),
+      gettext_noop("C&ollect all mail from this folder"),
+      gettext_noop("&Keep server connection when idle"),
+      gettext_noop("Force &re-open on ping"),
+      gettext_noop("Anon&ymous access"),
 #ifdef USE_SSL
-      gettext_noop("Use Secure Sockets Layer (SS&L): "),
-      gettext_noop("&Accept unsigned (self-signed) certificates: "),
+      gettext_noop("Use Secure Sockets Layer (SS&L)"),
+      gettext_noop("Accept unsigned (self-signed) certificates"),
 #endif // USE_SSL
 #ifdef USE_LOCAL_CHECKBOX
-      gettext_noop("Folder can be accessed &without network: "),
+      gettext_noop("Folder can be accessed &without network"),
 #endif // USE_LOCAL_CHECKBOX
       gettext_noop("&Hide folder in tree"),
-      gettext_noop("Can &be opened: "),
-      gettext_noop("Contains subfold&ers: "),
-      gettext_noop("Folder sub&type "),
-      gettext_noop("&Icon for this folder: "),
+      gettext_noop("Can &be opened"),
+      gettext_noop("Contains subfold&ers"),
+      gettext_noop("Folder sub&type"),
+      gettext_noop("&Icon for this folder"),
    };
 
    wxArrayString labels;
