@@ -206,29 +206,51 @@ wxMApp::OnAbnormalTermination()
 bool
 wxMApp::CanClose() const
 {
-    wxNode *node = wxTopLevelWindows.First();
-    while ( node )
-    {
-        wxWindow *win = (wxWindow *)node->Data();
-        node = node->Next();
+   wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
+   while ( node )
+   {
+      wxWindow *win = node->GetData();
+      node = node->GetNext();
 
-        if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
-        {
-           wxMFrame *frame = (wxMFrame *)win;
+      if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
+      {
+         wxMFrame *frame = (wxMFrame *)win;
 
-           if ( !IsOkToClose(frame) )
-           {
-              if ( !frame->CanClose() )
-                 return false;
-           }
-           //else: had been asked before
-        }
-        //else: what to do here? if there is something other than a frame
-        //      opened, it might be a (non modal) dialog or may be the log
-        //      frame?
-    }
+         if ( !IsOkToClose(frame) )
+         {
+            if ( !frame->CanClose() )
+               return false;
+         }
+         //else: had been asked before
+      }
+      //else: what to do here? if there is something other than a frame
+      //      opened, it might be a (non modal) dialog or may be the log
+      //      frame?
+   }
 
-    return MAppBase::CanClose();
+   return MAppBase::CanClose();
+}
+
+// do close the app by closing all frames
+void
+wxMApp::Exit()
+{
+   // in case it's still opened...
+   CloseSplash();
+
+   wxWindowList::Node *node = wxTopLevelWindows.GetFirst();
+   while ( node )
+   {
+      wxWindow *win = node->GetData();
+      node = node->GetNext();
+
+      if ( win->IsKindOf(CLASSINFO(wxMFrame)) )
+      {
+         wxMFrame *frame = (wxMFrame *)win;
+
+         frame->Close();
+      }
+   }
 }
 
 // app initilization
@@ -252,7 +274,7 @@ wxMApp::OnInit()
 #if wxUSE_LIBPNG
    wxImage::AddHandler( new wxPNGHandler );
 #endif
-   
+
 #if wxUSE_LIBJPEG
    wxImage::AddHandler( new wxJPEGHandler );
 #endif
@@ -285,7 +307,7 @@ wxMApp::OnInit()
          }
       }
 #endif
-      
+
       // restore our preferred printer settings
     m_PrintData = new wxPrintData;
     m_PageSetupData = new wxPageSetupDialogData;
@@ -308,7 +330,7 @@ wxMApp::OnInit()
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X),
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
-      
+
       // start a timer to autosave the profile entries
       long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY)*1000;
       if ( delay > 0 )
@@ -318,7 +340,7 @@ wxMApp::OnInit()
       delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
       if ( delay > 0 )
          gs_timerMailCollection.Start(delay);
-      
+
       return true;
    }
    else {

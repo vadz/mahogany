@@ -93,7 +93,7 @@ public:
 
    /** ends the application (unless the user cancels shutdown)
      */
-   void Exit();
+   virtual void Exit() { }
 
    /** Gets help for a specific topic.
        @param id help id from MHelp.h

@@ -178,7 +178,7 @@ MAppBase::VerifySettings(void)
    {
       char *cptr = getenv("NNTPSERVER");
       if(!cptr || !*cptr)
-	cptr = MP_NNTPHOST_FB;
+        cptr = MP_NNTPHOST_FB;
       m_profile->writeEntry(MP_NNTPHOST, cptr);
    }
 
@@ -186,7 +186,7 @@ MAppBase::VerifySettings(void)
    {
       char *cptr = getenv("SMTPSERVER");
       if(!cptr || !*cptr)
-	cptr = MP_SMTPHOST_FB;
+        cptr = MP_SMTPHOST_FB;
       m_profile->writeEntry(MP_SMTPHOST, cptr);
    }
 
@@ -314,7 +314,7 @@ MAppBase::OnStartup()
          wxLogError(msg);
       }
 #endif
-            // NB: although this shouldn't normally be here (it's GUI-dependent code),
+   // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
    //     can be already shown from here and this initialization must be done
    //     before.
@@ -477,7 +477,7 @@ MAppBase::OnStartup()
    }
    else
       m_OutgoingFolder = NULL;
-   
+
    // initialise collector object for incoming mails
    // ----------------------------------------------
    m_MailCollector = new MailCollector();
@@ -517,7 +517,7 @@ MAppBase::OnShutDown()
    }
    if(m_MailCollector) delete m_MailCollector;
    if(m_OutgoingFolder) m_OutgoingFolder->DecRef();
-   
+
    // clean up
    AdbManager::Delete();
    ProfileBase::FlushAll();
@@ -559,34 +559,6 @@ bool
 MAppBase::IsOkToClose(const wxMFrame *frame) const
 {
    return m_framesOkToClose && m_framesOkToClose->Index(frame) != wxNOT_FOUND;
-}
-
-void
-MAppBase::Exit()
-{
-   // attempt to close splash screen first:
-   CloseSplash();
-   
-   if ( m_framesOkToClose )
-   {
-#if 0
-      //FIXME: Is this needed?
-      for(size_t i = 0; i < m_framesOkToClose->Count(); i++)
-      {
-         if( (*m_framesOkToClose)[i] != m_topLevelFrame)
-            ((wxMFrame *)(*m_framesOkToClose)[i])->Close();
-      }
-#endif
-      delete m_framesOkToClose;
-      m_framesOkToClose = NULL;
-   }
-   
-   if ( m_topLevelFrame )
-   {
-      if ( m_topLevelFrame->Close() )
-         m_topLevelFrame = NULL;
-   }
-
 }
 
 bool

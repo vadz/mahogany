@@ -41,6 +41,8 @@ public:
 
    // override this to return true only if all frames can close
    virtual bool CanClose() const;
+   // and this to effectively close all top level frames
+   virtual void Exit();
 
    // wxWin calls these functions to start/run/stop the application
    virtual bool OnInit();
