@@ -254,8 +254,6 @@ public:
    void OnDoubleClick(wxMouseEvent &event);
    void OnMouseMove(wxMouseEvent &event);
 
-   void OnIdle(wxIdleEvent& event);
-
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
 
@@ -383,7 +381,7 @@ protected:
    /// and the folder submenu for it
    wxFolderMenu *m_menuFolders;
 
-   /// flag to prevent reentrance in OnRightClick()
+   /// flag to prevent reentrancy in OnRightClick()
    bool m_isInPopupMenu;
 
 private:
@@ -579,8 +577,6 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
    EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
-
-   EVT_IDLE(wxFolderListCtrl::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1230,24 +1226,6 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
          m_selMaybeChanged = true;
          break;
    }
-
-   event.Skip();
-}
-
-void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
-{
-   // if we suspect that the state of the selection may change without notifying
-   // us about it, we set this flag
-   if ( m_selMaybeChanged )
-   {
-      UpdateUniqueSelFlag();
-
-      m_selMaybeChanged = false;
-   }
-
-   // there is no "focus change" event in wxListCtrl so we have to track it
-   // ourselves
-   UpdateFocus();
 
    event.Skip();
 }
