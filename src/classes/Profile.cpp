@@ -6,7 +6,11 @@
  * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/06/22 22:42:30  VZ
+ * kbList/CHECK/PY_CALLBACK small changes
+ *
  * Revision 1.8  1998/06/05 16:56:13  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -126,7 +130,8 @@ Profile::Profile(String const &iClassName, ProfileBase const *Parent)
    fileConfig = NULL;   // set it before using CHECK()
 
    // the top entry should already exist and we must have a parent
-   CHECK( appConfig != NULL );
+   CHECK_RET( appConfig != NULL, 
+              "appConfig should have been constructed before" );
 
    parentProfile = Parent;
 
@@ -159,7 +164,7 @@ const char *
 Profile::readEntry(const char *szKey, const char *szDefault) const
 {
    // config object must be created
-   CHECK2( fileConfig != NULL, return NULL );
+   CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
    const char *rc = NULL;
 
@@ -219,7 +224,7 @@ Profile::readEntry(const char *szKey, bool Default) const
 bool
 Profile::writeEntry(const char *szKey, int Value)
 {
-   CHECK2( fileConfig != NULL, return FALSE );
+   CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
 
    return fileConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
 }
@@ -227,7 +232,7 @@ Profile::writeEntry(const char *szKey, int Value)
 bool
 Profile::writeEntry(const char *szKey, const char *szValue)
 {
-   CHECK2( fileConfig != NULL, return FALSE );
+   CHECK( fileConfig != NULL, false, "no fileConfig in Profile" );
 
    return fileConfig->WRITE_ENTRY(szKey, szValue) != 0;
 }
@@ -303,7 +308,7 @@ ConfigFileManager::GetConfig(String const &fileName)
 void
 ConfigFileManager::Debug() const
 {
-   FCDataList::iterator i;
+   kbListIterator i;
 
    DBGLOG("------ConfigFileManager------\n");
    for(i = fcList->begin(); i != fcList->end(); i++) {

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.13  1998/06/22 22:42:34  VZ
+ * kbList/CHECK/PY_CALLBACK small changes
+ *
  * Revision 1.12  1998/06/14 21:33:54  KB
  * fixed the menu/callback problem, wxFolderView is now a panel
  *
@@ -136,11 +139,11 @@ MailFolderCC::Open(String const & filename)
    
    okFlag = true;
    if(okFlag)
-      CALLBACK(MCB_FOLDEROPEN, profile,0);
+      PY_CALLBACK(MCB_FOLDEROPEN, profile,0);
    return true;   // success
 }
 
-static MailFolderCC *
+MailFolderCC *
 MailFolderCC::OpenFolder(String const &name)
 {
    StreamConnectionList::iterator i;
@@ -264,7 +267,7 @@ MailFolderCC::UpdateViews(void)
       i;
    for(i = viewList.begin(); i != viewList.end(); i++)
       (*i)->Update();
-   CALLBACK(MCB_FOLDERUPDATE, profile,0);
+   PY_CALLBACK(MCB_FOLDERUPDATE, profile,0);
 }
 
 const String &
@@ -314,14 +317,14 @@ MailFolderCC::DeleteMessage(unsigned long index)
 {
    String
       seq = strutil_ultoa(index);
-   if(CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(), profile, "l", (signed long) index),1)  )
+   if(PY_CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(), profile, "l", (signed long) index),1)  )
       mail_setflag(mailstream, (char *)seq.c_str(), "\\Deleted");
 }
 
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   if(CALLBACK(MCB_FOLDEREXPUNGE,profile,1))
+   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,profile,1))
       mail_expunge (mailstream);
 }
 

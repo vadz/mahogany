@@ -90,7 +90,7 @@ wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
 void
 wxMFrame::Create(const String &iname, wxWindow *parent)
 {
-   wxCHECK( !initialised );
+   wxCHECK_RET( !initialised, "wxMFrame created twice" );
 
    int xpos = MC_XPOS_D,
        ypos = MC_YPOS_D,

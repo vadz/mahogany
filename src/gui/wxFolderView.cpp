@@ -40,29 +40,43 @@
 
 #ifdef USE_WXWINDOWS2
 // toolbar icons
-#   include   "../src/icons/tb_exit.xpm"
-#   include   "../src/icons/tb_close.xpm"
-#   include   "../src/icons/tb_help.xpm"
-#   include   "../src/icons/tb_open.xpm"
-#   include   "../src/icons/tb_mail_compose.xpm"
-#   include   "../src/icons/tb_mail_reply.xpm"
-#   include   "../src/icons/tb_mail_forward.xpm"
-#   include   "../src/icons/tb_print.xpm"
-#   include   "../src/icons/tb_trash.xpm"
-#   include   "../src/icons/tb_book_open.xpm"
-#   include   "../src/icons/tb_preferences.xpm"
+#  ifdef    OS_WIN
+#     define    tb_exit          "tb_exit"
+#     define    tb_close         "tb_close"
+#     define    tb_help          "tb_help"
+#     define    tb_open          "tb_open"
+#     define    tb_mail_compose  "tb_mail_compose"
+#     define    tb_mail_reply    "tb_mail_reply"
+#     define    tb_mail_forward  "tb_mail_forward"
+#     define    tb_print         "tb_print"
+#     define    tb_trash         "tb_trash"
+#     define    tb_book_open     "tb_book_open"
+#     define    tb_preferences   "tb_preferences"
+#  else // Unix: real XPMs
+#     include   "../src/icons/tb_exit.xpm"
+#     include   "../src/icons/tb_close.xpm"
+#     include   "../src/icons/tb_help.xpm"
+#     include   "../src/icons/tb_open.xpm"
+#     include   "../src/icons/tb_mail_compose.xpm"
+#     include   "../src/icons/tb_mail_reply.xpm"
+#     include   "../src/icons/tb_mail_forward.xpm"
+#     include   "../src/icons/tb_print.xpm"
+#     include   "../src/icons/tb_trash.xpm"
+#     include   "../src/icons/tb_book_open.xpm"
+#     include   "../src/icons/tb_preferences.xpm"
+#  endif // Unix/Win
+
 #  include <wx/dynarray.h>
 #endif
  
-   wxFolderView::wxFolderView(String const & folderName,
-                           wxFrame *iparent)
-   : wxPanel(iparent)
+wxFolderView::wxFolderView(String const & folderName, wxFrame *iparent)
+            : wxPanel(iparent)
 {
-   wxCHECK(iparent);
+   wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
 
    mailFolder = MailFolderCC::OpenFolder(folderName);
-   wxCHECK(mailFolder);
+   wxCHECK_RET(mailFolder, "can't open folder in wxFolderView ctor" );
    
    initialised = mailFolder->IsInitialised();
    
@@ -346,6 +360,8 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
    AddMessageMenu();
    SetMenuBar(menuBar);
 
+   // add a toolbar to the frame
+   // NB: the buttons must have the same ids as the menu commands
 #ifdef USE_WXWINDOWS2
    int width, height;
    GetClientSize(&width, &height);
@@ -368,6 +384,7 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, tb_exit, WXMENU_FILE_EXIT, "Exit M");
 #endif
+
    m_FolderView = new wxFolderView(folderName, this);
    Show();
 }
@@ -375,7 +392,7 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
 void
 wxFolderViewFrame::OnMenuCommand(int id)
 {
-   wxCHECK(m_FolderView);
+   wxCHECK_RET(m_FolderView, "no folder view");
 
    if(WXMENU_CONTAINS(MSG,id))
       m_FolderView->OnMenuCommand(id);

@@ -6,7 +6,11 @@
  * $Id$ *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/06/22 22:42:32  VZ
+ * kbList/CHECK/PY_CALLBACK small changes
+ *
  * Revision 1.8  1998/06/05 16:56:23  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -88,7 +92,7 @@
 
 wxIconManager::wxIconManager()
 {
-   iconList = GLOBAL_NEW std::list<IconData>;
+   iconList = GLOBAL_NEW IconDataList;
 
    //AddIcon("unknown", unknown_xpm);
    AddIcon("TEXT", txt_xpm);
@@ -112,30 +116,30 @@ wxIconManager::wxIconManager()
 
 wxIconManager::~wxIconManager()
 {
-   std::list<IconData>::iterator i;
+   IconDataList::iterator i;
 
    for(i = iconList->begin(); i != iconList->end(); i++)
-      GLOBAL_DELETE (*i).iconPtr;
+      GLOBAL_DELETE (*i)->iconPtr;
    GLOBAL_DELETE unknownIcon;
 }
 
 wxIcon *
 wxIconManager::GetIcon(String const &iconName)
 {
-   std::list<IconData>::iterator i;
+   IconDataList::iterator i;
 
    for(i = iconList->begin(); i != iconList->end(); i++)
    {
-      if(strcmp((*i).iconName.c_str(), iconName.c_str())==0)
-        return (*i).iconPtr;
+      if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
+        return (*i)->iconPtr;
    }
 
    // not found, now look for iconName without '/':
    String key = strutil_before(iconName, '/');
    for(i = iconList->begin(); i != iconList->end(); i++)
    {
-      if(strcmp((*i).iconName.c_str(), key.c_str())==0)
-        return (*i).iconPtr;
+      if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
+        return (*i)->iconPtr;
    }
 
    return unknownIcon;
@@ -155,7 +159,7 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
      id.iconPtr = GLOBAL_NEW wxIcon(data);
    #endif
 
-   iconList->push_front(id);
+   iconList->push_front(&id);
 }
 
 
