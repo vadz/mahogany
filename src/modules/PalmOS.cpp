@@ -700,6 +700,8 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
       if(m_Backup)
          Backup();
 
+      if(m_AutoInstallDir)
+
       m_Profile->DecRef();
       m_Profile=NULL;
    }
@@ -890,6 +892,11 @@ PalmOSModule::Backup(void)
                RemoveFromList(name, orig_files, ofile_total);
                continue;
             }
+
+      if (!m_BackupAll && !(info.flags & dlpDBFlagBackup)) {
+         RemoveFromList(name, orig_files, ofile_total);
+         continue;
+      }
 
       // create file
       f = pi_file_create(name, &info);
