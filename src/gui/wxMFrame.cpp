@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/04/30 19:12:35  VZ
+ * (minor) changes needed to make it compile with wxGTK
+ *
  * Revision 1.3  1998/04/26 16:27:17  KB
  * changed configure for wxGTK support (not compiling cleanly yet)
  * did some work on scripting (rudimentary)
@@ -27,7 +30,7 @@
 #include    "Mcommon.h"
 
 #if       !USE_PCH
-  #include	<guidef.h>	
+  #include	<guidef.h>
 #endif
 
 #include	"MFrame.h"
@@ -68,18 +71,17 @@ IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #if     USE_WXWINDOWS2
   BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-	  EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-	  EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-    EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnClose)
-    EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-    EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-    EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+  EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
+  EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
+  EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
+  EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
+  EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
+  EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
   END_EVENT_TABLE()
 #endif
 
 wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
 {
-
    initialised = false;
    Create(iname,parent);
 }
@@ -160,11 +162,7 @@ wxMFrame::~wxMFrame()
    SavePosition();
 }
 
-#ifdef USE_WXWINDOWS2
-ON_CLOSE_TYPE wxMFrame::OnClose(wxEvent &ignore)
-#else
 ON_CLOSE_TYPE wxMFrame::OnClose(void)
-#endif
 {
    if(this == mApplication.TopLevelFrame())
    {
@@ -238,9 +236,11 @@ wxMFrame::OnMenuCommand(int id)
       (void) new wxAdbEditFrame(this);
       break;
    case WXMENU_FILE_CLOSE:
-      OnClose();
-      delete this;
-      break;
+      {
+        OnClose();
+        delete this;
+        break;
+      }
    case WXMENU_FILE_COMPOSE:
    {
       (new wxComposeView("ComposeView", this))->Show();

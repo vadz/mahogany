@@ -122,43 +122,43 @@ public:
 void
 wxMessageView::Create(const String &iname, wxFrame *parent)
 {
-   if(initialised)
-      return; // ERROR!
-   mailMessage = NULL;
-   mimeDisplayPart = 0;
-   xface = NULL;
-   xfaceXpm = NULL;
-   
-   wxMFrame::Create(iname, parent);
+  if(initialised)
+    return; // ERROR!
+  mailMessage = NULL;
+  mimeDisplayPart = 0;
+  xface = NULL;
+  xfaceXpm = NULL;
 
-   AddMenuBar();
-   AddFileMenu();
-       
-   messageMenu = GLOBAL_NEW wxMenu;
-   messageMenu->Append(WXMENU_MSG_REPLY,(char *)_("&Reply"));
-   messageMenu->Append(WXMENU_MSG_FORWARD,(char *)_("&Forward"));
-   messageMenu->Append(WXMENU_MSG_PRINT,(char *)_("&Print"));
-   menuBar->Append(messageMenu, (char *)_("&Message"));
+  wxMFrame::Create(iname, parent);
 
-   AddHelpMenu();
-   SetMenuBar(menuBar);
-   
-   popupMenu = GLOBAL_NEW myPopup(_("MIME Menu"),this, WXMENU_POPUP_MIME_OFFS);
-   popupMenu->Append(WXMENU_MIME_INFO,(char *)_("&Info"));
-   popupMenu->Append(WXMENU_MIME_HANDLE,(char *)_("&Handle"));
-   popupMenu->Append(WXMENU_MIME_SAVE,(char *)_("&Save"));
-   
-   ftoList = GLOBAL_NEW wxFTOList((wxDC *)NULL, folder ?
-                                  folder->GetProfile() : NULL);
-   ftCanvas = GLOBAL_NEW wxMVCanvas(ftoList,this);
+  AddMenuBar();
+  AddFileMenu();
 
-#if USE_WXWINDOWS2
-// @@@@ GetDC
-#else
-   ftoList->SetDC(ftCanvas->GetDC());
-#endif
+  messageMenu = GLOBAL_NEW wxMenu;
+  messageMenu->Append(WXMENU_MSG_REPLY,(char *)_("&Reply"));
+  messageMenu->Append(WXMENU_MSG_FORWARD,(char *)_("&Forward"));
+  messageMenu->Append(WXMENU_MSG_PRINT,(char *)_("&Print"));
+  menuBar->Append(messageMenu, (char *)_("&Message"));
 
-   initialised = true;
+  AddHelpMenu();
+  SetMenuBar(menuBar);
+
+  popupMenu = GLOBAL_NEW myPopup(_("MIME Menu"),this, WXMENU_POPUP_MIME_OFFS);
+  popupMenu->Append(WXMENU_MIME_INFO,(char *)_("&Info"));
+  popupMenu->Append(WXMENU_MIME_HANDLE,(char *)_("&Handle"));
+  popupMenu->Append(WXMENU_MIME_SAVE,(char *)_("&Save"));
+
+  ftoList = GLOBAL_NEW wxFTOList((wxDC *)NULL, folder ?
+      folder->GetProfile() : NULL);
+  ftCanvas = GLOBAL_NEW wxMVCanvas(ftoList,this);
+
+  #if USE_WXWINDOWS2
+    // @@@@ GetDC
+  #else
+    ftoList->SetDC(ftCanvas->GetDC());
+  #endif
+
+  initialised = true;
 }
 
 wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
@@ -190,7 +190,7 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
 void
 wxMessageView::Update(void)
 {
-   float  width, height;
+   coord_t  width, height;
    int i,n,t;
    char const * cptr;
    String tmp,from;

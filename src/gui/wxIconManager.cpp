@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/04/30 19:12:35  VZ
+ * (minor) changes needed to make it compile with wxGTK
+ *
  * Revision 1.5  1998/04/22 19:56:32  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -75,7 +78,12 @@ wxIconManager::wxIconManager()
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
 
-   unknownIcon = GLOBAL_NEW wxIcon(unknown_xpm);
+   #if  USE_WXGTK
+      // @@@@ no appropriate ctor in wxGTK
+      unknownIcon = NULL;
+   #else
+      unknownIcon = GLOBAL_NEW wxIcon(unknown_xpm);
+   #endif 
 }
 
 
@@ -96,7 +104,7 @@ wxIconManager::GetIcon(String const &iconName)
    for(i = iconList->begin(); i != iconList->end(); i++)
    {
       if(strcmp((*i).iconName.c_str(), iconName.c_str())==0)
-	 return (*i).iconPtr;
+        return (*i).iconPtr;
    }
 
    // not found, now look for iconName without '/':
@@ -104,20 +112,25 @@ wxIconManager::GetIcon(String const &iconName)
    for(i = iconList->begin(); i != iconList->end(); i++)
    {
       if(strcmp((*i).iconName.c_str(), key.c_str())==0)
-	 return (*i).iconPtr;
+        return (*i).iconPtr;
    }
-   
+
    return unknownIcon;
 }
 
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
-   IconData	id;
+   IconData id;
 
    id.iconName = iconName;
 
-   id.iconPtr = GLOBAL_NEW wxIcon(data);
+   #if  USE_WXGTK
+     // @@@@ no appropriate ctor in wxGTK
+     id.iconPtr = NULL;
+   #else
+     id.iconPtr = GLOBAL_NEW wxIcon(data);
+   #endif
 
    iconList->push_front(id);
 }

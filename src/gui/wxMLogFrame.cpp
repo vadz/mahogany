@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/30 19:12:35  VZ
+ * (minor) changes needed to make it compile with wxGTK
+ *
  * Revision 1.2  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -38,13 +41,12 @@ wxMLogFrame::wxMLogFrame(void)
 {
    SetTitle(_("M activity log"));
 
-   #ifdef   USE_WXWINDOWS2
+   #if  USE_WXWINDOWS2
       tw = GLOBAL_NEW wxTextWindow(this, -1);
    #else  // wxWin 1
       tw = GLOBAL_NEW wxTextWindow(this);
    #endif // wxWin ver
 
-   
    AddMenuBar();
    AddFileMenu();
    AddHelpMenu();
@@ -56,7 +58,6 @@ wxMLogFrame::wxMLogFrame(void)
 
 wxMLogFrame::~wxMLogFrame()
 {
-   
 }
 
 void

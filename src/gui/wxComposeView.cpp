@@ -49,199 +49,198 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 void
 wxComposeView::Create(const String &iname, wxFrame *parent,
-		      ProfileBase *parentProfile,
-		      String const &to, String const &cc, String const
-   &bcc, bool hide)
+                      ProfileBase *parentProfile,
+                      String const &to, String const &cc, String const &bcc, 
+                      bool hide)
 {
-   if(initialised)
-      return; // ERROR!
+  if(initialised)
+    return; // ERROR!
 
-   const char
-      *cto = NULL,
-      *ccc  = NULL,
-      *cbcc = NULL;
+  const char *cto  = NULL,
+             *ccc  = NULL,
+             *cbcc = NULL;
 
-   ftCanvas = NULL;
-   nextFileID = 0;
-   
-   wxMFrame::Create(iname, parent);
-   
-   if(!parentProfile)
-      parentProfile = mApplication.GetProfile();
-   profile = new Profile(iname,parentProfile);
+  ftCanvas = NULL;
+  nextFileID = 0;
 
-   cto = profile->readEntry(MP_COMPOSE_TO, MP_COMPOSE_TO_D);
-   ccc = profile->readEntry(MP_COMPOSE_CC, MP_COMPOSE_CC_D);
-   cbcc = profile->readEntry(MP_COMPOSE_BCC, MP_COMPOSE_BCC_D);
-   
-   if(to.length())
-      cto = to.c_str();
-   if(cc.length())
-      ccc = cc.c_str();
-   if(bcc.length())
-      cbcc = bcc.c_str();
-   
-   AddMenuBar();
-   AddFileMenu();
-  
-   composeMenu = new wxMenu;
-   composeMenu->Append(WXMENU_COMPOSE_INSERTFILE, WXCPTR _("Insert &File"));
-   composeMenu->Append(WXMENU_COMPOSE_SEND,WXCPTR _("&Send"));
-   composeMenu->Append(WXMENU_COMPOSE_PRINT,WXCPTR _("&Print"));
-   composeMenu->AppendSeparator();
-   composeMenu->Append(WXMENU_COMPOSE_CLEAR,WXCPTR _("&Clear"));
-   menuBar->Append(composeMenu, WXCPTR _("&Compose"));
+  wxMFrame::Create(iname, parent);
 
-   AddHelpMenu();
-   SetMenuBar(menuBar);
+  if(!parentProfile)
+    parentProfile = mApplication.GetProfile();
+  profile = new Profile(iname,parentProfile);
 
-   SetAutoLayout(TRUE);
-   
-   wxItem		*last;
-   wxLayoutConstraints	*c;
-   
-   panel = CreateNamedPanel(this, 0, 0, 1000, 500, "MyPanel");
+  cto = profile->readEntry(MP_COMPOSE_TO, MP_COMPOSE_TO_D);
+  ccc = profile->readEntry(MP_COMPOSE_CC, MP_COMPOSE_CC_D);
+  cbcc = profile->readEntry(MP_COMPOSE_BCC, MP_COMPOSE_BCC_D);
 
-#ifdef USE_WXWINDOWS2
-   // @@ ??
-#else
-   panel->SetLabelPosition(wxVERTICAL);
-#endif
+  if(to.length())
+    cto = to.c_str();
+  if(cc.length())
+    ccc = cc.c_str();
+  if(bcc.length())
+    cbcc = bcc.c_str();
 
-   // Create some panel items
-   txtToLabel = CreateLabel(panel, "To:");
-   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
+  AddMenuBar();
+  AddFileMenu();
 
-   aliasButton = CreateButton(panel, "Expand", "");
-   
-   if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
-   {
-      txtCCLabel = CreateLabel(panel,"CC:");
-      txtCC = CreateText(panel, -1, -1, -1, -1, "");
-   }
-   if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
-   {
-      txtBCCLabel = CreateLabel(panel,"BCC:");
-      txtBCC = CreateText(panel, -1, -1, -1, -1, "");
-   }
-   txtSubjectLabel = CreateLabel(panel,"Subject:");
-   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
+  composeMenu = new wxMenu;
+  composeMenu->Append(WXMENU_COMPOSE_INSERTFILE, WXCPTR _("Insert &File"));
+  composeMenu->Append(WXMENU_COMPOSE_SEND,WXCPTR _("&Send"));
+  composeMenu->Append(WXMENU_COMPOSE_PRINT,WXCPTR _("&Print"));
+  composeMenu->AppendSeparator();
+  composeMenu->Append(WXMENU_COMPOSE_CLEAR,WXCPTR _("&Clear"));
+  menuBar->Append(composeMenu, WXCPTR _("&Compose"));
 
-   // with the constraints, I assume that "Subject" is the longest label
-   c = new wxLayoutConstraints;
-   c->top.SameAs        (panel, wxTop, 5);
-   c->right.SameAs	(txtSubjectLabel, wxRight);
-   c->height.AsIs();
-   c->width.AsIs();
-   txtToLabel->SetConstraints(c);
+  AddHelpMenu();
+  SetMenuBar(menuBar);
 
-   c = new wxLayoutConstraints;
-   c->top.SameAs        (panel, wxTop, 5);
-   c->left.SameAs	(txtSubjectLabel, wxRight, 5);
-   c->right.SameAs	(aliasButton, wxLeft, 5);
-   c->height.AsIs(); 
-   txtTo->SetConstraints(c);
+  SetAutoLayout(TRUE);
 
-   c = new wxLayoutConstraints;
-   c->top.SameAs        (panel, wxTop, 5);
-   c->right.SameAs	(panel, wxRight, 25);
-   c->width.AsIs();
-   c->height.AsIs(); 
-   aliasButton->SetConstraints(c);
+  wxItem *last;
+  wxLayoutConstraints *c;
 
-   last = txtTo;
-   // optional CC line
-   if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
-   {
-      c = new wxLayoutConstraints;
-      c->top.Below  		(txtToLabel);
-      c->right.SameAs	(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtCCLabel->SetConstraints(c);
+  panel = CreateNamedPanel(this, 0, 0, 1000, 500, "MyPanel");
 
-      c = new wxLayoutConstraints;
-      c->top.Below		(txtToLabel);
-      c->left.SameAs		(txtSubjectLabel, wxRight, 5);
-      c->right.SameAs		(panel, wxRight, 5);
-      c->height.AsIs(); 
-      txtCC->SetConstraints(c);
-      last = txtCC;
-   }
+  #ifdef USE_WXWINDOWS2
+    // @@ ??
+  #else
+    panel->SetLabelPosition(wxVERTICAL);
+  #endif
 
-   // optional BCC line
-   if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
-   {
-      c = new wxLayoutConstraints;
-      c = new wxLayoutConstraints;
-      c->top.Below  		(last);
-      c->right.SameAs		(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtBCCLabel->SetConstraints(c);
+  // Create some panel items
+  txtToLabel = CreateLabel(panel, "To:");
+  txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
-      c = new wxLayoutConstraints;
-      c->top.Below		(last);
-      c->left.SameAs		(txtSubjectLabel, wxRight, 5);
-      c->right.SameAs		(panel, wxRight, 5);
-      c->height.AsIs(); 
-      txtBCC->SetConstraints(c);
-      last = txtBCC;
-   }
+  aliasButton = CreateButton(panel, "Expand", "");
 
-   // Subject line
-   c = new wxLayoutConstraints;
-   c->top.SameAs		(last, wxBottom, 5); //Below  		(last);
-   c->left.SameAs		(panel, wxLeft, 5);
-   c->height.AsIs();
-   c->width.AsIs();
-   txtSubjectLabel->SetConstraints(c);
-   c = new wxLayoutConstraints;
-   c->top.Below			(last);
-   c->left.SameAs		(txtSubjectLabel, wxRight, 5);
-   c->right.SameAs		(panel, wxRight, 5);
-   c->height.AsIs(); 
-   txtSubject->SetConstraints(c);
-   last = txtSubjectLabel;
+  if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
+  {
+    txtCCLabel = CreateLabel(panel,"CC:");
+    txtCC = CreateText(panel, -1, -1, -1, -1, "");
+  }
+  if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
+  {
+    txtBCCLabel = CreateLabel(panel,"BCC:");
+    txtBCC = CreateText(panel, -1, -1, -1, -1, "");
+  }
+  txtSubjectLabel = CreateLabel(panel,"Subject:");
+  txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
 
-   // Panel itself
-   c = new wxLayoutConstraints;
-   c->left.SameAs       (this, wxLeft);
-   c->top.SameAs	(this, wxTop);
-   c->right.SameAs	(this, wxRight);
-   c->height.SameAs  	(this, wxHeight);
-   panel->SetConstraints(c);
+  // with the constraints, I assume that "Subject" is the longest label
+  c = new wxLayoutConstraints;
+  c->top.SameAs        (panel, wxTop, 5);
+  c->right.SameAs(txtSubjectLabel, wxRight);
+  c->height.AsIs();
+  c->width.AsIs();
+  txtToLabel->SetConstraints(c);
 
-   CreateFTCanvas();
-   
-   if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE,MP_COMPOSE_USE_SIGNATURE_D))
-   {
-      size_t size;
-      ifstream istr;
-      char *buffer;
-      istr.open(profile->readEntry(MP_COMPOSE_SIGNATURE,MP_COMPOSE_SIGNATURE_D));
-      if(istr)
-      {
-	 istr.seekg(0,ios::end);
-	 size = istr.tellg();
-	 buffer = new char [size+1];
-	 if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE_SEPARATOR,MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D))
-	    ftCanvas->AddFormattedText("--\n");
-	 istr.seekg(0,ios::beg);
-	 istr.read(buffer, size);
-	 buffer[size] = '\0';
-	 if(! istr.fail())
-	    ftCanvas->AddText(buffer);
-	 delete [] buffer;
-	 istr.close();
-	 ftCanvas->MoveCursorTo(0,0);
-      }	
-   }
-   
-   initialised = true;
-   if(! hide)
-      Show(TRUE);
-//   txtTo->SetFocus();
+  c = new wxLayoutConstraints;
+  c->top.SameAs        (panel, wxTop, 5);
+  c->left.SameAs(txtSubjectLabel, wxRight, 5);
+  c->right.SameAs(aliasButton, wxLeft, 5);
+  c->height.AsIs(); 
+  txtTo->SetConstraints(c);
+
+  c = new wxLayoutConstraints;
+  c->top.SameAs        (panel, wxTop, 5);
+  c->right.SameAs(panel, wxRight, 25);
+  c->width.AsIs();
+  c->height.AsIs(); 
+  aliasButton->SetConstraints(c);
+
+  last = txtTo;
+  // optional CC line
+  if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
+  {
+    c = new wxLayoutConstraints;
+    c->top.Below(txtToLabel);
+    c->right.SameAs(txtSubjectLabel, wxRight);
+    c->height.AsIs();
+    c->width.AsIs();
+    txtCCLabel->SetConstraints(c);
+
+    c = new wxLayoutConstraints;
+    c->top.Below(txtToLabel);
+    c->left.SameAs(txtSubjectLabel, wxRight, 5);
+    c->right.SameAs(panel, wxRight, 5);
+    c->height.AsIs(); 
+    txtCC->SetConstraints(c);
+    last = txtCC;
+  }
+
+  // optional BCC line
+  if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
+  {
+    c = new wxLayoutConstraints;
+    c = new wxLayoutConstraints;
+    c->top.Below(last);
+    c->right.SameAs(txtSubjectLabel, wxRight);
+    c->height.AsIs();
+    c->width.AsIs();
+    txtBCCLabel->SetConstraints(c);
+
+    c = new wxLayoutConstraints;
+    c->top.Below(last);
+    c->left.SameAs(txtSubjectLabel, wxRight, 5);
+    c->right.SameAs(panel, wxRight, 5);
+    c->height.AsIs(); 
+    txtBCC->SetConstraints(c);
+    last = txtBCC;
+  }
+
+  // Subject line
+  c = new wxLayoutConstraints;
+  c->top.SameAs(last, wxBottom, 5); //Below  (last);
+  c->left.SameAs(panel, wxLeft, 5);
+  c->height.AsIs();
+  c->width.AsIs();
+  txtSubjectLabel->SetConstraints(c);
+  c = new wxLayoutConstraints;
+  c->top.Below(last);
+  c->left.SameAs(txtSubjectLabel, wxRight, 5);
+  c->right.SameAs(panel, wxRight, 5);
+  c->height.AsIs(); 
+  txtSubject->SetConstraints(c);
+  last = txtSubjectLabel;
+
+  // Panel itself
+  c = new wxLayoutConstraints;
+  c->left.SameAs(this, wxLeft);
+  c->top.SameAs(this, wxTop);
+  c->right.SameAs(this, wxRight);
+  c->height.SameAs  (this, wxHeight);
+  panel->SetConstraints(c);
+
+  CreateFTCanvas();
+
+  if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE,MP_COMPOSE_USE_SIGNATURE_D))
+  {
+    size_t size;
+    ifstream istr;
+    char *buffer;
+    istr.open(profile->readEntry(MP_COMPOSE_SIGNATURE,MP_COMPOSE_SIGNATURE_D));
+    if(istr)
+    {
+      istr.seekg(0,ios::end);
+      size = istr.tellg();
+      buffer = new char [size+1];
+      if(profile->readEntry(MP_COMPOSE_USE_SIGNATURE_SEPARATOR,MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D))
+        ftCanvas->AddFormattedText("--\n");
+      istr.seekg(0,ios::beg);
+      istr.read(buffer, size);
+      buffer[size] = '\0';
+      if(! istr.fail())
+        ftCanvas->AddText(buffer);
+      delete [] buffer;
+      istr.close();
+      ftCanvas->MoveCursorTo(0,0);
+    }
+  }
+
+  initialised = true;
+  if(! hide)
+    Show(TRUE);
+  //   txtTo->SetFocus();
 }
 
 void

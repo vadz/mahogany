@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/04/30 19:12:35  VZ
+ * (minor) changes needed to make it compile with wxGTK
+ *
  * Revision 1.5  1998/04/22 19:56:32  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -32,7 +35,7 @@
 #if       !USE_PCH
   #include	<strutil.h>
 
-  #include	<guidef.h>	
+  #include	<guidef.h>
 #endif
 
 #include	"MFrame.h"
@@ -103,129 +106,136 @@ FTObject::DeleteChar(int offset)
 {
    if(type != LI_TEXT)
       FATALERROR(("FTObject::DeleteChar() on non text object"));
-   
+
    text.erase(offset,1);
 }
 
 FTObjectType
-FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
-		 bool formatFlag, wxDC *dc)
+FTObject::Create(String & str, int &cx, int &cy, coord_t &x, coord_t &y,
+                 bool formatFlag, wxDC *dc)
 {
-   // first, make an empty object
-   Create();
+  // first, make an empty object
+  Create();
 
-   const char *cptr = str.c_str();
-   cursorX2 = cursorX = cx; cursorY = cy;
-   posX2 = posX = x; posY2 = posY = y; 
+  const char *cptr = str.c_str();
+  cursorX2 = cursorX = cx; cursorY = cy;
+  posX2 = posX = x; posY2 = posY = y;
 
-   // interpret formatting code:
-   
-   if(*cptr == '\r' || *cptr == '\n')
-   {
-      type = LI_NEWLINE;
-      x = 0.0;
-      cx = 0; cy += 1;
-      if(*cptr == '\r')	// swallow DOS's \r
-	 cptr++;
-      if(*cptr)
-	 cptr++;
-      str = cptr;
-      isOk = TRUE;
-      return LI_NEWLINE;
-   }
+  // interpret formatting code:
 
-   if(! formatFlag)	// just add string and return
-   {
-      /* normal string */
-      while(*cptr && *cptr != '\r' && *cptr != '\n')
-	 text += *cptr++;
-      cursorX2 = cx + text.length() - 1;
-      cx = cursorX2;	// starting point of next object
-      Update(dc,x,y);
-      // give remaining string back
-      str = cptr;
-      return type;
-   }
-      
-   if(*cptr == delimiter1)
-   {
-      if(*(cptr+1) != delimiter1)
-      {
-	 type = LI_COMMAND;
-	 cptr++;	// skip initial delimiter
-	 while(*cptr && *cptr != delimiter2)
-	    text += *cptr++;
-	 //strutil_toupper(text);
-	 if(*cptr == delimiter2)
-	    cptr++;	// skip ending delimiter
-	 str = cptr;
-	 Update(dc,x,y);
-	 isOk = TRUE;
-	 return LI_COMMAND;
-      }
-      //else
+  if(*cptr == '\r' || *cptr == '\n')
+  {
+    type = LI_NEWLINE;
+    x = 0;
+    cx = 0; cy += 1;
+    if(*cptr == '\r') // swallow DOS's \r
       cptr++;
-      text += *cptr++; // continue as normal string
-   }
-   
-   /* normal string */
-   while(*cptr && *cptr != '\r' && *cptr != '\n'
-	 && !(*cptr == delimiter1 && *(cptr+1) != delimiter1)
-      )
-   {
-      if(*cptr == delimiter2 && *(cptr+1) == delimiter2)
-      {
-	 text += *cptr++;
-	 cptr++;
-	 continue;
-      }else if(*cptr == delimiter1 && *(cptr+1) == delimiter1)
-      {
-	 text += *cptr++;
-	 cptr++;
-	 continue;
-      }
+    if(*cptr)
+      cptr++;
+    str = cptr;
+    isOk = TRUE;
+    return LI_NEWLINE;
+  }
+
+  if(! formatFlag)// just add string and return
+  {
+    /* normal string */
+    while(*cptr && *cptr != '\r' && *cptr != '\n')
       text += *cptr++;
-   }
-   cursorX2 = cx + text.length() - 1;
-   cx += text.length(); // starting point of next object
-   Update(dc,x,y);
+    cursorX2 = cx + text.length() - 1;
+    cx = cursorX2;// starting point of next object
+    Update(dc,x,y);
+    // give remaining string back
+    str = cptr;
+    return type;
+  }
 
-   // give remaining string back
-   str = cptr;
-   return type;
-}
-
-void
-FTObject::Update(wxDC *dc, float &x, float &y, wxFTOList *ftc)
-{
-   float	descent, leading;
-
-   if(dc)
-   {
-      if(type == LI_TEXT)
-      {
-	 dc->GetTextExtent(text.c_str(), &width, &height, &descent, &leading);
-	 height += leading;	// baselinestretch 1.2
-	 posY2 = posY + height;
-	 posX2 = posX + width;
-	 posYdelta = height-descent; // height above baseline
-	 x = posX2; y = posY;
-	 if((!font) && ftc)
-	    font = ftc->GetFont();
-      }
-      else
-	 if(type == LI_COMMAND && ftc != NULL)
-	    ftc->ProcessCommand(text, this);
-	    
+  if(*cptr == delimiter1)
+  {
+    if(*(cptr+1) != delimiter1)
+    {
+      type = LI_COMMAND;
+      cptr++;                     // skip initial delimiter
+      while(*cptr && *cptr != delimiter2)
+        text += *cptr++;
+      //strutil_toupper(text);
+      if(*cptr == delimiter2)
+        cptr++;                   // skip ending delimiter
+      str = cptr;
+      Update(dc,x,y);
       isOk = TRUE;
-   }
-   else
-      isOk = FALSE; // do it later
+      return LI_COMMAND;
+    }
+    //else
+    cptr++;
+    text += *cptr++; // continue as normal string
+  }
+
+  /* normal string */
+  while(*cptr && *cptr != '\r' && *cptr != '\n' &&
+        !(*cptr == delimiter1 && *(cptr+1) != delimiter1)
+        )
+  {
+    if(*cptr == delimiter2 && *(cptr+1) == delimiter2)
+    {
+      text += *cptr++;
+      cptr++;
+      continue;
+    }
+    else if(*cptr == delimiter1 && *(cptr+1) == delimiter1)
+    {
+      text += *cptr++;
+      cptr++;
+      continue;
+    }
+    text += *cptr++;
+  }
+  cursorX2 = cx + text.length() - 1;
+  cx += text.length(); // starting point of next object
+  Update(dc,x,y);
+
+  // give remaining string back
+  str = cptr;
+  return type;
+}
+
+void
+FTObject::Update(wxDC *dc, coord_t &x, coord_t &y, wxFTOList *ftc)
+{
+  coord_t descent, leading;
+
+  if(dc)
+  {
+    if(type == LI_TEXT)
+    {
+      #if USE_WXWINDOWS2
+        dc->GetTextExtent(text, (lcoord_t *)&width, (lcoord_t *)&height,
+                          (lcoord_t *)&descent, (lcoord_t *)&leading);
+      #else  // wxWin 1
+        dc->GetTextExtent(text.c_str(), &width, &height, &descent, &leading);
+      #endif // wxWin 1/2i
+
+      height += leading;          // baselinestretch 1.2
+      posY2 = posY + height;
+      posX2 = posX + width;
+      posYdelta = height-descent; // height above baseline
+      x = posX2; y = posY;
+      if((!font) && ftc)
+        font = ftc->GetFont();
+    }
+    else
+      if(type == LI_COMMAND && ftc != NULL)
+        ftc->ProcessCommand(text, this);
+
+    isOk = TRUE;
+  }
+  else
+    isOk = FALSE; // do it later
 }
 
 
 void
-FTObject::SetHeight(float h, Bool setDelta)
+FTObject::SetHeight(coord_t h, Bool setDelta)
 {
    height = h;
    if(setDelta)
@@ -233,8 +243,8 @@ FTObject::SetHeight(float h, Bool setDelta)
    posY2 = posY + height;
 }
 
-FTObject::FTObject(String & str, int &cx, int &cy, float &x, float &y,
-		   bool formatFlag, wxDC *dc)
+FTObject::FTObject(String & str, int &cx, int &cy, coord_t &x, coord_t &y,
+                   bool formatFlag, wxDC *dc)
 {
    Create(str,cx,cy,x,y,formatFlag,dc);
 }
@@ -257,32 +267,34 @@ FTObject::Debug(void) const
 void
 FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
 {
-   wxDC *dc = ftc.dc;
-   
-   // only interesting for printer/PS output
-   float	pageWidth, pageHeight;
-   dc->GetSize(&pageWidth, &pageHeight);
+  wxDC *dc = ftc.dc;
 
-   float y = posY, x = posX;
+  // only interesting for printer/PS output
+  coord_t pageWidth, pageHeight;
+  dc->GetSize(&pageWidth, &pageHeight);
 
-   if(pageing)
-   {
-      y = posY - 0.9 * (*pageno)*pageHeight + 0.05*pageHeight;
-      // create a border of 5% of the page size
-      x += pageWidth * 0.05;
-      
-      if(y >= pageHeight*0.90)
-      {
-	 dc->EndPage();
-	 (*pageno)++;
-	 y = posY - 0.9 * (*pageno)*pageHeight + pageHeight*0.05;
-	 dc->StartPage();
-      }
-   }
+  coord_t y = posY, x = posX;
 
-   switch(type)
-   {
-   case LI_TEXT:
+  if(pageing)
+  {
+    // @@ VZ: I don't like these 9, 10, 20 everywhere. What do they mean?
+    //        They should be inside some (inline) conversion function or ...
+    y = posY - 9 * (*pageno)*pageHeight/10 + pageHeight/20;
+    // create a border of 5% of the page size
+    x += pageWidth / 20;
+
+    if(y >= 9*pageHeight / 10)
+    {
+      dc->EndPage();
+      (*pageno)++;
+      y = posY - 9*(*pageno)*pageHeight/10 + pageHeight/20;
+      dc->StartPage();
+    }
+  }
+
+  switch(type)
+  {
+    case LI_TEXT:
       #ifndef USE_WXWINDOWS2
         if(!dc->IsExposed(posX, posY, posX2, posY2))
           return;
@@ -292,29 +304,29 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
       dc->SetFont(font);
       dc->DrawText(text.c_str(), x, y+posYdelta);
       break;
-   case LI_ICON:
-   case LI_URL:
+    case LI_ICON:
+    case LI_URL:
       if(icon)
-	 dc->DrawIcon(icon,x, y);
+        dc->DrawIcon(icon,x, y);
       break;
-   case LI_NEWLINE:
-   case LI_COMMAND:
-   case LI_ILLEGAL:
+    case LI_NEWLINE:
+    case LI_COMMAND:
+    case LI_ILLEGAL:
       break;
-   };
+  };
 }
 
-   
+
 
 
 //-------------------------------------------------------------------
 // class DrawInfo
 //-------------------------------------------------------------------
 wxFTOList::DrawInfo::DrawInfo(int size,
-			      int family,
-			      int style,
-			      int weight,
-			      Bool underlined)
+                              int family,
+                              int style,
+                              int weight,
+                              Bool underlined)
 {
    fontDefaultSize = size;
    FontSize(size);
@@ -322,7 +334,7 @@ wxFTOList::DrawInfo::DrawInfo(int size,
    FontStyle(style);
    FontWeight(weight);
    fontUnderline = underlined;
-   
+
    SetFont(NULL);
 }
 
@@ -336,14 +348,16 @@ wxFTOList::DrawInfo::SetFont(wxDC *dc)
 {
    font =
       fontManager.GetFont(fontSize,fontFamily,fontStyle,fontWeight,fontUnderline);
-   
+
    if(dc)
    {
       dc->SetFont(font);
-      float 	w, h, leading;
-      dc->GetTextExtent("Mg", &w, &h, &fontDescent, &leading);
+      coord_t w, h, leading;
+      dc->GetTextExtent("Mg", (lcoord_t *)&w, (lcoord_t *)&h,
+                        (lcoord_t *)&fontDescent, (lcoord_t *)&leading);
       textHeight = fontDescent+leading+h;
-      textHeight *= 1.2;
+      textHeight *= 6; // @@ why 1.2?
+      textHeight /= 5;
    }
    else
    {
@@ -358,12 +372,17 @@ int
 wxFTOList::DrawInfo::ChangeSize(int delta)
 {
    int i;
-   float size = (float) fontDefaultSize;
+   coord_t size = *(coord_t *)fontDefaultSize;
 
-   for(i = 1; i <= delta; i++)
-      size *= 1.2;
-   for(i = -1; i >= delta; i--)
-      size /= 1.2;
+   // @@ again, what does bare 1.2 mean?
+   for(i = 1; i <= delta; i++) {
+      size *= 6;
+      size /= 5;
+   }
+   for(i = -1; i >= delta; i--) {
+      size *= 5;
+      size /= 6;
+   }
    FontSize((int)size);
    return (int)size;
 }
@@ -501,7 +520,7 @@ wxFTOList::SetDC(wxDC *idc, bool isPostScriptflag)
 void
 wxFTOList::SetCanvas(wxCanvas *ic)
 {
-   float width, height;
+   coord_t width, height;
 
 #ifdef  USE_WXWINDOWS2
    // @@@@ GetDC
@@ -599,40 +618,41 @@ wxFTOList::Clear()
 void
 wxFTOList::Draw(void)
 {
-   FTOListType::iterator i;
-   int pagecount = 0;
+  FTOListType::iterator i;
+  int pagecount = 0;
 
-   if(contentChanged)
-   {
-      float width, height;
-      wxFTOList::ReCalculateLines(&width, &height);
-      if(canvas)
-      {
-	 //canvas->SetScrollRange(wxHORIZONTAL,(int)width);
-	 height *= 1.2;
-//	 if(canvas->GetScrollRange(wxVERTICAL) < height)
-//	    canvas->SetScrollRange(wxVERTICAL,(int)(height));
-//	 canvas->SetScrollRange(wxVERTICAL,1000);
-//	 canvas->SetScrollRange(wxHORIZONTAL,1000);
-	 DrawCursor();
-      }
-      dc->Clear();
-   }
+  if(contentChanged)
+  {
+    coord_t width, height;
+    wxFTOList::ReCalculateLines(&width, &height);
+    if(canvas)
+    {
+      //canvas->SetScrollRange(wxHORIZONTAL,(int)width);
+      height *= 6; // @@ magic 1.2 again
+      height /= 5;
+      //	 if(canvas->GetScrollRange(wxVERTICAL) < height)
+      //	    canvas->SetScrollRange(wxVERTICAL,(int)(height));
+      //	 canvas->SetScrollRange(wxVERTICAL,1000);
+      //	 canvas->SetScrollRange(wxHORIZONTAL,1000);
+      DrawCursor();
+    }
+    dc->Clear();
+  }
 
 #if 0
-   /* for some later optimisation, start from last found line and */
-   /* search backwards/forwards for first visible line */
-   if(lastLineFound != listOfLines->end())
-      begin = lastLineFound;
-   else
-      begin = listOfLines->begin();
+  /* for some later optimisation, start from last found line and */
+  /* search backwards/forwards for first visible line */
+  if(lastLineFound != listOfLines->end())
+    begin = lastLineFound;
+  else
+    begin = listOfLines->begin();
 #endif
 
-   dc->StartPage();
-   for(i = listOfLines->begin(); i != listOfLines->end(); i++)
-      (*i).Draw(*this, pageingFlag, &pagecount);
-   dc->EndPage();
-   DrawCursor();
+  dc->StartPage();
+  for(i = listOfLines->begin(); i != listOfLines->end(); i++)
+    (*i).Draw(*this, pageingFlag, &pagecount);
+  dc->EndPage();
+  DrawCursor();
 }
 
 void
@@ -766,7 +786,7 @@ wxFTOList::ProcessCommand(String const &command, FTObject *fto)
 void
 wxFTOList::Debug(void) const
 {
-   FTOListType::const_iterator	i;
+   FTOListType::const_iterator i;
 
    for(i = listOfLines->begin(); i != listOfLines->end(); i++)
    {
@@ -785,25 +805,25 @@ wxFTOList::Debug(void) const
 }
 
 void
-wxFTOList::ReCalculateLines(float *maxW, float *maxY)
+wxFTOList::ReCalculateLines(coord_t *maxW, coord_t *maxY)
 {
-   FTOListType::iterator	i;
-   FTOListType::iterator	first;
+   FTOListType::iterator i;
+   FTOListType::iterator first;
 
    first = listOfLines->begin();
-   float	height;
-   float	ypos = 0.0, xpos = 0.0;
-   float	x,y;
-   float	maxWidth = 0, maxYpos = 0.0;
+   coord_t height;
+   coord_t ypos = 0, xpos = 0;
+   coord_t x,y;
+   coord_t maxWidth = 0, maxYpos = 0;
 
-   int cX, cY;	// cursor coordinates
-   
+   int cX, cY; // cursor coordinates
+
    i = first;
    cX = 0; cY = 0;
-   
-   contentChanged = false; // when we return, all information will be
-			   // up to date
-   
+
+   contentChanged = false;  // when we return, all information will be
+                            // up to date
+
    // empty list as all coordinates will change
    GLOBAL_DELETE listOfClickables;
    listOfClickables = GLOBAL_NEW std::list<FTObject const *>;
@@ -811,114 +831,114 @@ wxFTOList::ReCalculateLines(float *maxW, float *maxY)
    height = drawInfo.TextHeight();
    for(;;)//ever
    {
-      first = i;
-      if((*first).GetType() != LI_NEWLINE)
-	 height = (*first).GetHeight();	// for NEWLINE, keep old height
-      
-      while((*i).GetType() != LI_NEWLINE && i != listOfLines->end())
-      {
-	 (*i).Update(dc,x,y, this);
-	 if((*i).GetHeight() > height)
-	    height = (*i).GetHeight();
-	 i++;
-      }
-      i = first;
-      xpos = 0.0;
-      while((*i).GetType() != LI_NEWLINE && i != listOfLines->end())
-      {
-	 (*i).SetHeight(height,TRUE);
-	 (*i).SetYPos(ypos);
-	 (*i).SetXPos(xpos);
-	 (*i).cursorX = cX;
-	 (*i).cursorY = cY;
-	 xpos += (*i).GetWidth();
-	 switch((*i).GetType())
-	 {
-	 case LI_ICON:
-	 case LI_URL:
-	    AddClickable(&(*i));
-	    (*i).cursorX2 = cX;
-	    cX++;
-	    break;
-	 case LI_TEXT:
-	    cX += (*i).text.length()-1;
-	    (*i).cursorX2 = cX;
-	    cX++;
-	    break;
-	 case LI_COMMAND:
-	 case LI_ILLEGAL:
-	 case LI_NEWLINE:	// keeps compiler happy :-)
-	    break; // eh?
-	 }
-	 i++;
-      }
+     first = i;
+     if((*first).GetType() != LI_NEWLINE)
+       height = (*first).GetHeight();   // for NEWLINE, keep old height
 
-      if(i == listOfLines->end())
-      {
-	 if(maxW)
-	    *maxW = maxWidth;
-	 if(maxY)
-	    *maxY = maxYpos;
-	 cursorMaxX = cX;
-	 cursorMaxY = cY;
-	 listOfLengths[cY] = cX;
-	 return;
-      }
-      else // newline!
-      {
-	 (*i).SetHeight(height);
-	 (*i).SetYPos(ypos);
-	 (*i).SetXPos(xpos);
-	 (*i).cursorX = cX;
-	 (*i).cursorY = cY;
-	 (*i).cursorX2 = cX;
-	 ypos += height;
-	 if(xpos > maxWidth) maxWidth = xpos;
-	 if(ypos > maxYpos) maxYpos = ypos;
-	 listOfLengths[cY] = cX;
-	 cX = 0;
-	 cY ++;
-	 i++;
-      }
+     while((*i).GetType() != LI_NEWLINE && i != listOfLines->end())
+     {
+       (*i).Update(dc,x,y, this);
+       if((*i).GetHeight() > height)
+         height = (*i).GetHeight();
+       i++;
+     }
+     i = first;
+     xpos = 0;
+     while((*i).GetType() != LI_NEWLINE && i != listOfLines->end())
+     {
+       (*i).SetHeight(height,TRUE);
+       (*i).SetYPos(ypos);
+       (*i).SetXPos(xpos);
+       (*i).cursorX = cX;
+       (*i).cursorY = cY;
+       xpos += (*i).GetWidth();
+       switch((*i).GetType())
+       {
+         case LI_ICON:
+         case LI_URL:
+           AddClickable(&(*i));
+           (*i).cursorX2 = cX;
+           cX++;
+           break;
+         case LI_TEXT:
+           cX += (*i).text.length()-1;
+           (*i).cursorX2 = cX;
+           cX++;
+           break;
+         case LI_COMMAND:
+         case LI_ILLEGAL:
+         case LI_NEWLINE: // keeps compiler happy :-)
+           break; // eh?
+       }
+       i++;
+     }
+
+     if(i == listOfLines->end())
+     {
+       if(maxW)
+         *maxW = maxWidth;
+       if(maxY)
+         *maxY = maxYpos;
+       cursorMaxX = cX;
+       cursorMaxY = cY;
+       listOfLengths[cY] = cX;
+       return;
+     }
+     else // newline!
+     {
+       (*i).SetHeight(height);
+       (*i).SetYPos(ypos);
+       (*i).SetXPos(xpos);
+       (*i).cursorX = cX;
+       (*i).cursorY = cY;
+       (*i).cursorX2 = cX;
+       ypos += height;
+       if(xpos > maxWidth) maxWidth = xpos;
+       if(ypos > maxYpos) maxYpos = ypos;
+       listOfLengths[cY] = cX;
+       cX = 0;
+       cY ++;
+       i++;
+     }
    }
 }
 
 String const *
 wxFTOList::GetContent(FTObjectType *ftoType, bool restart)
 {
-   extractContent = "";
-   if(restart)
-      extractIterator = listOfLines->begin();
+  extractContent = "";
+  if(restart)
+    extractIterator = listOfLines->begin();
 
-   if(extractIterator == listOfLines->end())
-   {
-      *ftoType = LI_ILLEGAL;
-      return &extractContent;
-   }
-   
-   *ftoType = (*extractIterator).GetType();
-   if(*ftoType == LI_TEXT || *ftoType == LI_NEWLINE)
-   {
-      *ftoType = LI_TEXT;
-      while(extractIterator != listOfLines->end() &&
-	    ( (*extractIterator).GetType() == LI_TEXT ||
-	      (*extractIterator).GetType() == LI_NEWLINE)
-	    )
-      {
-	 if((*extractIterator).GetType()==LI_TEXT)
-	    extractContent += (*extractIterator).GetText();
-	 else
-	    extractContent += '\n';
-	 extractIterator++;
-      }
-      return &extractContent;
-   }
-   else
-   {
-      extractContent = (*extractIterator).GetText();
-      extractIterator ++;
-      return &extractContent;
-   }
+  if(extractIterator == listOfLines->end())
+  {
+    *ftoType = LI_ILLEGAL;
+    return &extractContent;
+  }
+
+  *ftoType = (*extractIterator).GetType();
+  if(*ftoType == LI_TEXT || *ftoType == LI_NEWLINE)
+  {
+    *ftoType = LI_TEXT;
+    while(extractIterator != listOfLines->end() &&
+        ( (*extractIterator).GetType() == LI_TEXT ||
+          (*extractIterator).GetType() == LI_NEWLINE)
+         )
+    {
+      if((*extractIterator).GetType()==LI_TEXT)
+        extractContent += (*extractIterator).GetText();
+      else
+        extractContent += '\n';
+      extractIterator++;
+    }
+    return &extractContent;
+  }
+  else
+  {
+    extractContent = (*extractIterator).GetText();
+    extractIterator ++;
+    return &extractContent;
+  }
 }
 
 void
@@ -928,11 +948,11 @@ wxFTOList::AddClickable(FTObject const *obj)
 }
 
 FTObject const *
-wxFTOList::FindClickable(float x, float y) const
+wxFTOList::FindClickable(coord_t x, coord_t y) const
 {
-   std::list<FTObject const *>::const_iterator	i;
-   float x1, y1, x2, y2;
-   
+   std::list<FTObject const *>::const_iterator i;
+   coord_t x1, y1, x2, y2;
+
    for(i = listOfClickables->begin(); i != listOfClickables->end(); i++)
    {
       x2 = x1 = (*i)->GetXPos();
@@ -940,7 +960,7 @@ wxFTOList::FindClickable(float x, float y) const
       x2 += (*i)->GetWidth();
       y2 += (*i)->GetHeight();
       if(y1 <= y && y <= y2 && x1 <= x && x <= x2)
-	 return *i;
+        return *i;
    }
    return NULL;
 }
@@ -949,7 +969,7 @@ wxFTOList::FindClickable(float x, float y) const
 wxFTOList::FTOListType::iterator
 wxFTOList::FindCurrentObject(int *xoffset)
 {
-   FTOListType::iterator	i;
+   FTOListType::iterator i;
    int x1, y, x2;
    
    for(i = listOfLines->begin(); i != listOfLines->end(); i++)
@@ -1238,98 +1258,104 @@ wxFTOList::InsertText(String const &str, bool format)
 void
 wxFTOList::DrawCursor(void)
 {
-   if(! dc || ! editable)
-      return;
-   
-   float width, height,x = 0 , y = 0;
-   int 	xoffset;
-   
+  if(! dc || ! editable)
+    return;
 
-   FTOListType::iterator i = FindCurrentObject(&xoffset);
+  coord_t width, height, x = 0, y = 0;
+  int xoffset;
 
-   if(i != listOfLines->end()) // valid object
-   {
-      switch((*i).GetType())
-      {
+  FTOListType::iterator i = FindCurrentObject(&xoffset);
+
+  if(i != listOfLines->end()) // valid object
+  {
+    switch((*i).GetType())
+    {
       case LI_NEWLINE: // we are on an empty line
-	 x = (*i).GetXPos();
-	 y = (*i).GetYPos();
-	 height = (*i).GetHeight();
-	 break;
+        x = (*i).GetXPos();
+        y = (*i).GetYPos();
+        height = (*i).GetHeight();
+        break;
       case LI_TEXT:
-      {
-	 x = (*i).GetXPos();
-	 y = (*i).GetYPos();
-	 height = (*i).GetHeight();
-	 String tmp = (*i).GetText().substr(0,xoffset);
-	 dc->GetTextExtent(tmp.c_str(), &width, &height);
-	 x += width;
-      }
-      break;
+        {
+          x = (*i).GetXPos();
+          y = (*i).GetYPos();
+          height = (*i).GetHeight();
+          String tmp = (*i).GetText().substr(0,xoffset);
+          #if USE_WXWINDOWS2
+            dc->GetTextExtent(tmp, (lcoord_t *)&width, (lcoord_t *)&height);
+          #else  // wxWin 1
+            dc->GetTextExtent(tmp.c_str(), &width, &height);
+          #endif // wxWin 1/2                               
+          x += width;
+        }
+        break;
       default:
-	 break;
-      }
-   }
-   else // no proper object found --> end of text
-   {
-      x = 0; y = 0; height = drawInfo.TextHeight();
-   }
+        break;
+    }
+  }
+  else // no proper object found --> end of text
+  {
+    x = 0;
+    y = 0;
+    height = drawInfo.TextHeight();
+  }
 
-   dc->SetLogicalFunction(wxSRC_INVERT);
-   dc->DrawLine(lastCursor.x,lastCursor.y1,lastCursor.x,lastCursor.y2);
-   dc->SetLogicalFunction(wxCOPY);
-   dc->DrawLine(x,y,x,y+height);
-   lastCursor.x = x;
-   lastCursor.y1 = y;
-   lastCursor.y2 = y+height;
+  dc->SetLogicalFunction(wxSRC_INVERT);
+  dc->DrawLine(lastCursor.x,lastCursor.y1,lastCursor.x,lastCursor.y2);
+  dc->SetLogicalFunction(wxCOPY);
+  dc->DrawLine(x,y,x,y+height);
+  lastCursor.x = x;
+  lastCursor.y1 = y;
+  lastCursor.y2 = y+height;
 }
 
 void
 wxFTOList::ScrollToCursor(void)
 {
-   if(! canvas)
-      return;
+  if(! canvas)
+    return;
 
-   int x1, x2, y1, y2, w, h;
-#ifdef  USE_WXWINDOWS2
-   // @@@@ ViewStart
-#else
-   canvas->ViewStart(&x1,&y1);
-#endif
+  int x1, x2, y1, y2, w, h;
+  #ifdef  USE_WXWINDOWS2
+    // @@@@ ViewStart
+    x1 = y1 = 0;
+  #else
+    canvas->ViewStart(&x1,&y1);
+  #endif
 
-   canvas->GetClientSize(&w,&h);
+  canvas->GetClientSize(&w,&h);
 
-   x1 *= scrollPixelsX; y1 *= scrollPixelsY;
-   x2 = x1; y2 = y1;
-   x2 += (int)(0.75 * w); y2 += (int)(0.75 * h);
+  x1 *= scrollPixelsX; y1 *= scrollPixelsY;
+  x2 = x1; y2 = y1;
+  x2 += (int)(0.75 * w); y2 += (int)(0.75 * h);
 
-//   VAR(lastCursor.x);   VAR(lastCursor.y1); VAR(lastCursor.y2);
-//   VAR(x1); VAR(y1); VAR(x2); VAR(y2);
-   if(lastCursor.x >= x1 && lastCursor.x < x2
+  //   VAR(lastCursor.x);   VAR(lastCursor.y1); VAR(lastCursor.y2);
+  //   VAR(x1); VAR(y1); VAR(x2); VAR(y2);
+  if(lastCursor.x >= x1 && lastCursor.x < x2
       && lastCursor.y1 >= y1 && lastCursor.y2 < y2)
-      return; // cursor is visible
+    return; // cursor is visible
 
-   int
-      xpos = (int) (lastCursor.x / scrollPixelsX),
-      ypos = (int) (lastCursor.y1 / scrollPixelsY);
+  int
+    xpos = (int) (lastCursor.x / scrollPixelsX),
+  ypos = (int) (lastCursor.y1 / scrollPixelsY);
 
-   if(xpos >= scrollLengthX)
-      scrollLengthX += scrollLengthX / 2;
-   if(ypos >= scrollLengthY)
-      scrollLengthY += scrollLengthY / 2;
-   
-   #ifdef USE_WXWINDOWS2
-     canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
-     canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
-     canvas->SetScrollPos(wxHORIZONTAL, xpos);
-     canvas->SetScrollPos(wxVERTICAL,   ypos);
-   #else  // wxWin 1
-     canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
-                           scrollLengthX, scrollLengthY,
-                           WXFTEXT_SCROLLSTEPS_PER_PAGE, 
-                           WXFTEXT_SCROLLSTEPS_PER_PAGE);
-     canvas->Scroll(xpos, ypos);
-   #endif // wxWin ver
+  if(xpos >= scrollLengthX)
+    scrollLengthX += scrollLengthX / 2;
+  if(ypos >= scrollLengthY)
+    scrollLengthY += scrollLengthY / 2;
+
+  #ifdef USE_WXWINDOWS2
+    canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
+    canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
+    canvas->SetScrollPos(wxHORIZONTAL, xpos);
+    canvas->SetScrollPos(wxVERTICAL,   ypos);
+  #else  // wxWin 1
+    canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
+                          scrollLengthX, scrollLengthY,
+                          WXFTEXT_SCROLLSTEPS_PER_PAGE,
+                          WXFTEXT_SCROLLSTEPS_PER_PAGE);
+    canvas->Scroll(xpos, ypos);
+  #endif // wxWin ver
 }
 
 void

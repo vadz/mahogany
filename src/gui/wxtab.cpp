@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include <math.h>
 
+#include "guidef.h"
 #include "gui/wxtab.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabControl, wxObject)
@@ -77,7 +78,7 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
   if (view->GetTabStyle() & wxTAB_STYLE_COLOUR_INTERIOR)
   {
     dc->SetBrush(view->GetBackgroundBrush());
-    dc->DrawRectangle((float)tabX, (float)tabY, (float)GetWidth(), (float)(GetHeight() + tabHeightInc));
+    dc->DrawRectangle((coord_t)tabX, (coord_t)tabY, (coord_t)GetWidth(), (coord_t)(GetHeight() + tabHeightInc));
   }
   
   // Draw highlight and shadow
@@ -94,11 +95,11 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
     
   // Vertical highlight: if first tab, draw to bottom of view
   if (tabX == view->GetViewRect().x && (view->GetTabStyle() & wxTAB_STYLE_DRAW_BOX))
-    dc->DrawLine((float)tabX, (float)tabY, (float)tabX, (float)(view->GetViewRect().y + view->GetViewRect().height));
+    dc->DrawLine((coord_t)tabX, (coord_t)tabY, (coord_t)tabX, (coord_t)(view->GetViewRect().y + view->GetViewRect().height));
   else
-    dc->DrawLine((float)tabX, (float)tabY, (float)tabX, (float)(tabY + GetHeight() + tabHeightInc - subtractThis));
+    dc->DrawLine((coord_t)tabX, (coord_t)tabY, (coord_t)tabX, (coord_t)(tabY + GetHeight() + tabHeightInc - subtractThis));
     
-  dc->DrawLine((float)tabX, (float)tabY, (float)(tabX + GetWidth()), (float)tabY);
+  dc->DrawLine((coord_t)tabX, (coord_t)tabY, (coord_t)(tabX + GetWidth()), (coord_t)tabY);
   dc->SetPen(view->GetShadowPen());
 
   // Test if we're outside the right-hand edge of the view area
@@ -106,25 +107,25 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
   {
     int bottomY = view->GetViewRect().y + view->GetViewRect().height + GetY() + view->GetTabHeight() + view->GetTopMargin();
     // Add a tab height since we wish to draw to the bottom of the view.
-    dc->DrawLine((float)(tabX + GetWidth()), (float)tabY,
-      (float)(tabX + GetWidth()), (float)bottomY);
+    dc->DrawLine((coord_t)(tabX + GetWidth()), (coord_t)tabY,
+      (coord_t)(tabX + GetWidth()), (coord_t)bottomY);
       
     // Calculate the far-right of the view, since we don't wish to
     // draw inside that
     int rightOfView = view->GetViewRect().x + view->GetViewRect().width + 1;
 
     // Draw the horizontal bit to connect to the view rectangle
-    dc->DrawLine((float)(wxMax((tabX + GetWidth() - view->GetHorizontalTabOffset()), rightOfView)), (float)(bottomY-1),
-      (float)(tabX + GetWidth()), (float)(bottomY-1));
+    dc->DrawLine((coord_t)(wxMax((tabX + GetWidth() - view->GetHorizontalTabOffset()), rightOfView)), (coord_t)(bottomY-1),
+      (coord_t)(tabX + GetWidth()), (coord_t)(bottomY-1));
     
     // Draw black line to emphasize shadow
     dc->SetPen(wxBLACK_PEN);
-    dc->DrawLine((float)(tabX + GetWidth() + 1), (float)(tabY+1),
-      (float)(tabX + GetWidth() + 1), (float)bottomY);
+    dc->DrawLine((coord_t)(tabX + GetWidth() + 1), (coord_t)(tabY+1),
+      (coord_t)(tabX + GetWidth() + 1), (coord_t)bottomY);
       
     // Draw the horizontal bit to connect to the view rectangle
-    dc->DrawLine((float)(wxMax((tabX + GetWidth() - view->GetHorizontalTabOffset()), rightOfView)), (float)(bottomY),
-      (float)(tabX + GetWidth() + 1), (float)(bottomY));
+    dc->DrawLine((coord_t)(wxMax((tabX + GetWidth() - view->GetHorizontalTabOffset()), rightOfView)), (coord_t)(bottomY),
+      (coord_t)(tabX + GetWidth() + 1), (coord_t)(bottomY));
   }
   else
   {
@@ -135,11 +136,11 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
       int topY = view->GetViewRect().y - view->GetTopMargin();
       
       // Shadow
-      dc->DrawLine((float)(tabX + GetWidth()), (float)tabY, (float)(tabX + GetWidth()), (float)topY);
+      dc->DrawLine((coord_t)(tabX + GetWidth()), (coord_t)tabY, (coord_t)(tabX + GetWidth()), (coord_t)topY);
       // Draw black line to emphasize shadow
       dc->SetPen(wxBLACK_PEN);
-      dc->DrawLine((float)(tabX + GetWidth() + 1), (float)(tabY+1), (float)(tabX + GetWidth() + 1),
-         (float)topY);
+      dc->DrawLine((coord_t)(tabX + GetWidth() + 1), (coord_t)(tabY+1), (coord_t)(tabX + GetWidth() + 1),
+         (coord_t)topY);
     }
     else
     {
@@ -153,13 +154,13 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
         subtractThis = (view->GetTabSelectionHeight() - view->GetTabHeight());
     
       // Draw only to next tab down.
-      dc->DrawLine((float)(tabX + GetWidth()), (float)tabY,
-         (float)(tabX + GetWidth()), (float)(tabY + GetHeight() + tabHeightInc - subtractThis));
+      dc->DrawLine((coord_t)(tabX + GetWidth()), (coord_t)tabY,
+         (coord_t)(tabX + GetWidth()), (coord_t)(tabY + GetHeight() + tabHeightInc - subtractThis));
 
       // Draw black line to emphasize shadow
       dc->SetPen(wxBLACK_PEN);
-      dc->DrawLine((float)(tabX + GetWidth() + 1), (float)(tabY+1), (float)(tabX + GetWidth() + 1),
-         (float)(tabY + GetHeight() + tabHeightInc - subtractThis));
+      dc->DrawLine((coord_t)(tabX + GetWidth() + 1), (coord_t)(tabY+1), (coord_t)(tabX + GetWidth() + 1),
+         (coord_t)(tabY + GetHeight() + tabHeightInc - subtractThis));
     }
   }
   
@@ -178,23 +179,23 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
   #endif
 
   dc->SetBackgroundMode(wxTRANSPARENT);
-  float textWidth, textHeight;
-  dc->GetTextExtent(GetLabel().GetData(), &textWidth, &textHeight);
+  coord_t textWidth, textHeight;
+  dc->GetTextExtent(GetLabel().GetData(), (lcoord_t *)&textWidth, (lcoord_t *)&textHeight);
   
   int textX = (int)(tabX + (GetWidth() - textWidth)/2.0);
-  dc->DrawText(GetLabel().GetData(), (float)textX, (float)textY);
+  dc->DrawText(GetLabel().GetData(), (coord_t)textX, (coord_t)textY);
   
   if (isSelected)
   {
     dc->SetPen(view->GetHighlightPen());
 
     // Draw white highlight from the tab's left side to the left hand edge of the view
-    dc->DrawLine((float)view->GetViewRect().x, (float)(tabY + GetHeight() + tabHeightInc),
-     (float)tabX, (float)(tabY + GetHeight() + tabHeightInc));
+    dc->DrawLine((coord_t)view->GetViewRect().x, (coord_t)(tabY + GetHeight() + tabHeightInc),
+     (coord_t)tabX, (coord_t)(tabY + GetHeight() + tabHeightInc));
   
     // Draw white highlight from the tab's right side to the right hand edge of the view
-    dc->DrawLine((float)(tabX + GetWidth()), (float)(tabY + GetHeight() + tabHeightInc),
-     (float)view->GetViewRect().x + view->GetViewRect().width, (float)(tabY + GetHeight() + tabHeightInc));
+    dc->DrawLine((coord_t)(tabX + GetWidth()), (coord_t)(tabY + GetHeight() + tabHeightInc),
+     (coord_t)view->GetViewRect().x + view->GetViewRect().width, (coord_t)(tabY + GetHeight() + tabHeightInc));
   }
 }
 
@@ -338,22 +339,22 @@ void wxTabView::Draw(void)
     GetDC()->SetPen(GetShadowPen());
 
     // Draw bottom line
-    GetDC()->DrawLine((float)(GetViewRect().x+1), (float)(GetViewRect().y + GetViewRect().height - 1),
-      (float)(GetViewRect().x + GetViewRect().width), (float)(GetViewRect().y + GetViewRect().height - 1));
+    GetDC()->DrawLine((coord_t)(GetViewRect().x+1), (coord_t)(GetViewRect().y + GetViewRect().height - 1),
+      (coord_t)(GetViewRect().x + GetViewRect().width), (coord_t)(GetViewRect().y + GetViewRect().height - 1));
 
     // Draw right line
-    GetDC()->DrawLine((float)(GetViewRect().x + GetViewRect().width), (float)(GetViewRect().y - GetTopMargin() + 1),
-      (float)(GetViewRect().x + GetViewRect().width), (float)(GetViewRect().y + GetViewRect().height - 1));
+    GetDC()->DrawLine((coord_t)(GetViewRect().x + GetViewRect().width), (coord_t)(GetViewRect().y - GetTopMargin() + 1),
+      (coord_t)(GetViewRect().x + GetViewRect().width), (coord_t)(GetViewRect().y + GetViewRect().height - 1));
 
     GetDC()->SetPen(wxBLACK_PEN);
 
     // Draw bottom line
-    GetDC()->DrawLine((float)(GetViewRect().x), (float)(GetViewRect().y + GetViewRect().height),
-      (float)(GetViewRect().x + GetViewRect().width+1), (float)(GetViewRect().y + GetViewRect().height));
+    GetDC()->DrawLine((coord_t)(GetViewRect().x), (coord_t)(GetViewRect().y + GetViewRect().height),
+      (coord_t)(GetViewRect().x + GetViewRect().width+1), (coord_t)(GetViewRect().y + GetViewRect().height));
 
     // Draw right line
-    GetDC()->DrawLine((float)(GetViewRect().x + GetViewRect().width + 1), (float)(GetViewRect().y - GetTopMargin()),
-      (float)(GetViewRect().x + GetViewRect().width + 1), (float)(GetViewRect().y + GetViewRect().height + 1));
+    GetDC()->DrawLine((coord_t)(GetViewRect().x + GetViewRect().width + 1), (coord_t)(GetViewRect().y - GetTopMargin()),
+      (coord_t)(GetViewRect().x + GetViewRect().width + 1), (coord_t)(GetViewRect().y + GetViewRect().height + 1));
   }
   
   GetDC()->EndDrawing();
@@ -365,8 +366,8 @@ Bool wxTabView::OnEvent(wxMouseEvent& event)
   if (!event.LeftDown())
     return FALSE;
     
-  float x, y;
-  event.Position(&x, &y);
+  coord_t x, y;
+  event.Position((lcoord_t *)&x, (lcoord_t *)&y);
   
   wxTabControl *hitControl = NULL;
   
@@ -594,8 +595,13 @@ wxTabbedDialogBox::wxTabbedDialogBox(wxWindow *parent, const char *title,
                                      Bool modal, int x, int y,
                                      int width, int height, 
                                      long windowStyle, const char *name)
-                 : wxDialogBox(parent, title, modal != 0, 
-                               x, y, width, height, windowStyle, name)
+                 :
+#if USE_WXWINDOWS2
+  wxDialogBox(parent, -1, title, wxPoint(x, y), wxSize(width, height),
+              windowStyle, name)
+#else
+  wxDialogBox(parent, title, modal, x, y, width, height, windowStyle, name)
+#endif
 {
   tabView = NULL;
 }

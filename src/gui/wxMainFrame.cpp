@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/04/30 19:12:35  VZ
+ * (minor) changes needed to make it compile with wxGTK
+ *
  * Revision 1.2  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -56,17 +59,17 @@
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
-   SetIcon(GLOBAL_NEW wxIcon(MainFrame_xpm));
+  SetIcon(GLOBAL_NEW wxIcon(MainFrame_xpm));
 
-   AddMenuBar();
-   AddFileMenu();
-   AddHelpMenu();
-   SetMenuBar(menuBar);
-#ifdef  USE_WXWINDOWS2
-   CreateStatusBar();
-#else   // wxWin1
-   CreateStatusLine(1);
-#endif  // wxWin ver
+  AddMenuBar();
+  AddFileMenu();
+  AddHelpMenu();
+  SetMenuBar(menuBar);
+  #if  USE_WXWINDOWS2
+     CreateStatusBar();
+  #else   // wxWin1
+     CreateStatusLine(1);
+  #endif  // wxWin ver
 }
 
 void
