@@ -2083,6 +2083,27 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
    return false;
 }
 
+// CheckForExeAttach() helper
+static bool IsExeFilename(const String& filename)
+{
+   if ( filename.empty() )
+      return false;
+
+   String ext;
+   wxSplitPath(filename, NULL, NULL, &ext);
+
+   // FIXME: make configurable
+   static wxSortedArrayString extsExe;
+   if ( extsExe.IsEmpty() )
+   {
+      extsExe.Add(_T("scr"));
+      extsExe.Add(_T("pif"));
+      extsExe.Add(_T("hta"));
+   }
+
+   return extsExe.Index(ext.Lower()) != wxNOT_FOUND;
+}
+
 // check if we have any executable attachments in this message
 static bool CheckForExeAttach(const MimePart *part)
 {
@@ -2091,20 +2112,9 @@ static bool CheckForExeAttach(const MimePart *part)
       if ( CheckForExeAttach(part->GetNested()) )
          return true;
 
-      String filename = part->GetParam(_T("filename")).Lower();
-      if ( !filename.empty() )
-      {
-         String ext;
-         wxSplitPath(filename, NULL, NULL, &ext);
-         wxSortedArrayString extsExe;
-         extsExe.Add(_T("scr"));
-         extsExe.Add(_T("pif"));
-         extsExe.Add(_T("hta"));
-         if ( extsExe.Index(ext) != wxNOT_FOUND )
-         {
-            return true;
-         }
-      }
+      if ( IsExeFilename(part->GetParam(_T("filename"))) ||
+               IsExeFilename(part->GetParam(_T("name"))) )
+         return true;
 
       part = part->GetNext();
    }
