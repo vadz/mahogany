@@ -536,7 +536,7 @@ MailFolderCC::BuildListing(void)
    m_NumOfMessages = m_MailStream->nmsgs;
    // now we know how many messages there are
 
-   if(m_Listing && m_NumOfMessages > oldNumOfMessages)
+   if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
       delete [] m_Listing;
       m_Listing = NULL;
@@ -811,6 +811,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
       mf->m_NumOfMessages = number;
+      RequestUpdate();
    }
    else
    {
@@ -1045,7 +1046,8 @@ MailFolderCC::ProcessEventQueue(void)
          /* The Exists event is ignored here.
             When the mm_exists() callback is called, the
             m_NumOfMessages counter is updated immediately,
-            circumvening the event queue. It should never appear. */
+            circumvening the event queue. It should never appear.
+            The mm_exists() callback calls RequestUpdate() though.*/
          ASSERT(0);
          break;
             /* These three events all notify us of changes to the folder
@@ -1062,7 +1064,7 @@ MailFolderCC::ProcessEventQueue(void)
          mf->RequestUpdate();  // Queues an Update event.
          break;
       }
-      /* The Update event is not caused by c-cli   ent callbacks but 
+      /* The Update event is not caused by c-client callbacks but 
          by this very event handling mechanism itself. It causes
          BuildListing() to fetch a new listing. */
       case Update:
@@ -1081,9 +1083,13 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(void)   
 {
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);   
-   MailFolderCC::QueueEvent(evptr);
-   m_UpdateNeeded = true;
+   if(! m_UpdateNeeded)
+   {
+      // we want only one update event
+      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);   
+      MailFolderCC::QueueEvent(evptr);
+      m_UpdateNeeded = true;
+   }
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
