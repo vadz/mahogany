@@ -195,8 +195,6 @@ private:
    bool m_hasWindow;
 };
 
-#ifdef wxHAS_LOG_CHAIN
-
 // a wxLogStderr version which closes the file it logs to
 class MLogFile : public wxLogStderr
 {
@@ -205,8 +203,6 @@ public:
 
    virtual ~MLogFile() { fclose(m_fp); }
 };
-
-#endif // wxHAS_LOG_CHAIN
 
 // a timer used to periodically autosave profile settings
 class AutoSaveTimer : public wxTimer
@@ -481,10 +477,6 @@ wxMApp::wxMApp(void)
 
 wxMApp::~wxMApp()
 {
-#ifdef wxHAS_LOG_CHAIN
-   delete m_logChain;
-#endif // wxHAS_LOG_CHAIN
-
    DoCleanup();
 
    // if the program startup failed it could be not deleted before
@@ -1952,7 +1944,6 @@ wxMApp::SetAwayMode(bool isAway)
 
 void wxMApp::SetLogFile(const String& filename)
 {
-#ifdef wxHAS_LOG_CHAIN
    if ( filename.empty() )
    {
       if ( m_logChain )
@@ -1989,7 +1980,6 @@ void wxMApp::SetLogFile(const String& filename)
                       filename.c_str());
       }
    }
-#endif // wxHAS_LOG_CHAIN
 }
 
 bool wxMApp::IsLogShown() const
