@@ -48,60 +48,13 @@
 #include <wx/intl.h>
 #include <wx/dynarray.h>
 #include <wx/filefn.h>
-#include <wx/utils.h> // wxyield
-#include <wx/gauge.h>
-#include <wx/stattext.h>
 #include <wx/app.h>
+#include <wx/utils.h>
 #include <wx/minifram.h>
 #include "kbList.h"
 #include <fstream.h>
 
 
-class wxProgressDialog : public wxFrame
-{
-public:
-   wxProgressDialog(wxString const &title, wxString const &message,
-                    int maximum = 100,
-                    wxWindow *parent = NULL);
-   void Update(int value)
-      { m_gauge->SetValue(value); }
-
-private:
-   wxGauge *m_gauge;
-};
-
-wxProgressDialog::wxProgressDialog(wxString const &title,
-                                   wxString const &message,
-                                   int maximum,
-                                   wxWindow *parent)
-{
-   if(! parent)
-      parent = wxTheApp->GetTopWindow();
-
-   wxPoint p = wxDefaultPosition;
-   if(parent)
-   {
-      int x,y;
-      p = wxPoint(0,0);
-      parent->GetSize(&x,&y);
-      p = wxPoint((x-220)/2,(y-50)/2);  // approximately centred
-      parent = parent->GetParent();
-      while(parent)
-      {
-         parent->GetSize(&x,&y);
-         p.x += x; p.y += y;
-         parent = parent->GetParent();
-      }
-   }
-
-   wxFrame::Create(parent,-1,_(title),p,
-                       wxSize(220,50), wxCAPTION|wxSTAY_ON_TOP|wxTHICK_FRAME);
-   (void) new wxStaticText(this, -1, _(message),wxPoint(10,10));
-   m_gauge = new wxGauge(this,-1, maximum, wxPoint(10,35),wxSize(200,10));
-   m_gauge->SetValue(0);
-   Fit();
-   Show(TRUE);
-}
 
 /** BBDB Adressbook format:
     Record Vectors
@@ -723,7 +676,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
    else
       wxLogInfo(_("BBDB: file format version '%s'"), version.c_str());
 
-   wxProgressDialog status_frame("M: BBDB import", "Importing...",
+   MProgressDialog status_frame("M: BBDB import", "Importing...",
                                  length, NULL);// open a status window:
    do
    {
@@ -732,7 +685,6 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
       {
          e = BbdbEntry::ParseLine(this, &line);
          status_frame.Update((int)(file.tellg()/1024));
-         wxYield(); // parsing the file takes a while
          if(e)
          {
             m_entries->push_back(e);
@@ -790,10 +742,9 @@ BbdbEntryGroup::~BbdbEntryGroup()
          int length = 0, count = 0;
          for(i = m_entries->begin(); i != m_entries->end(); i++)
             length++;
-         wxProgressDialog status_frame("M: BBDB", "Saving...",
-                                       length, NULL);// open a status window:
+         MProgressDialog status_frame("M: BBDB", "Saving...",
+                                      length, NULL);// open a status window:
 
-         wxYield();
          String str;
          ofstream out(m_strName);
          size_t n,m;
@@ -873,7 +824,6 @@ BbdbEntryGroup::~BbdbEntryGroup()
             out << ") nil nil]" << endl;
          }
          status_frame.Update(++count);
-         wxYield();
       }
    }
    for(i = m_entries->begin(); i != m_entries->end(); i++)

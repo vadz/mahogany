@@ -19,6 +19,8 @@
 
 #include "MDialogs.h"
 
+#include <wx/frame.h>
+
 // fwd decl
 class ProfileBase;
 class ArrayAdbElements;
@@ -29,6 +31,17 @@ class MFolder;
 /**
    Dialog Boxes
 */
+
+class MProgressDialog : public wxFrame
+{
+public:
+   MProgressDialog(wxString const &title, wxString const &message,
+                   int maximum = 100,
+                   wxWindow *parent = NULL);
+   void Update(int value);
+private:
+   class wxGauge *m_gauge;
+};
 
 /** display error message:
        @param message the text to display

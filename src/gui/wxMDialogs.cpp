@@ -49,6 +49,8 @@
 #include <wx/radiobox.h>
 #include <wx/confbase.h>
 #include <wx/persctrl.h>
+#include <wx/gauge.h>
+#include <wx/stattext.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -124,6 +126,52 @@ private:
    MFolder      *m_folder;
    wxFolderTree *m_tree;
 };
+
+
+// ----------------------------------------------------------------------------
+// MProgressDialog : a progress bar dialog box
+// ----------------------------------------------------------------------------
+
+MProgressDialog::MProgressDialog(wxString const &title,
+                                 wxString const &message,
+                                 int maximum,
+                                 wxWindow *parent)
+{
+   if(! parent)
+      parent = wxTheApp->GetTopWindow();
+
+   wxPoint p = wxDefaultPosition;
+   if(parent)
+   {
+      int x,y;
+      p = wxPoint(0,0);
+      parent->GetSize(&x,&y);
+      p = wxPoint((x-220)/2,(y-50)/2);  // approximately centred
+      parent = parent->GetParent();
+      while(parent)
+      {
+         parent->GetSize(&x,&y);
+         p.x += x; p.y += y;
+         parent = parent->GetParent();
+      }
+   }
+
+   wxFrame::Create(parent,-1,_(title),p,
+                       wxSize(220,50), wxCAPTION|wxSTAY_ON_TOP|wxTHICK_FRAME);
+   (void) new wxStaticText(this, -1, _(message),wxPoint(10,10));
+   m_gauge = new wxGauge(this,-1, maximum, wxPoint(10,35),wxSize(200,10));
+   m_gauge->SetValue(0);
+   Fit();
+   Show(TRUE);
+   wxYield();
+}
+
+void
+MProgressDialog::Update(int value)
+{
+   m_gauge->SetValue(value);
+   wxYield();
+}
 
 // ----------------------------------------------------------------------------
 // MTextDialog - a dialog containing a multi-line text control (used to show

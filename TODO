@@ -45,12 +45,13 @@ $Id$
  - we need to handle the RepliedTo flag for messages which isn't used
    much yet
 
- - why does c-client library ignore my .newsrc?
+ - Printout scaling is a bit broken. Does ScaleDC() affect the
+   calculaton of the DC size and number of pages?
 
  - Things like CopyMessagesToFolder need a return code indicating
    whether they were successful or not, otherwise MoveMessagesToFolde r
   deletes them in any case. Trivial to add.
-
+ - allow angle brackets and full name <> in reply-to field.
  - folder set message flag update hook takes too long for really large folders
  ==> code commented out in MailFolderCC.cpp
 

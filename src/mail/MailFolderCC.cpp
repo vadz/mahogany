@@ -546,12 +546,20 @@ MailFolderCC::BuildListing(void)
       m_Listing = new HeaderInfoCC[m_numOfMessages];
 
    m_BuildNextEntry = 0;
+
+   String msg;
+   msg.Printf(_("Reading %lu message headers..."), (unsigned long) m_numOfMessages);
+   m_ProgressDialog = new MProgressDialog(_("M: Progress"),
+                                          msg,
+                                          100, NULL);// open a status window:
    
    // mail_fetch_overview() will now fill the m_Listing array with
    // info on the messages
    /* stream, sequence, header structure to fill */
    mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
 
+   delete m_ProgressDialog;
+   
 #if 0
    /* This can actually happen if no overview information is
       available, for NNTP sometimes. */
@@ -672,6 +680,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    entry.m_References = ov->references;
    entry.m_Uid = uid;
    m_BuildNextEntry++;
+
+   m_ProgressDialog->Update( (100 * m_BuildNextEntry)/m_numOfMessages);
 }
 
 

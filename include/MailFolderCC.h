@@ -284,6 +284,8 @@ private:
    inline MAILSTREAM   *Stream(void) const{  return m_MailStream; }
    friend class MessageCC;
 
+   /// To display progress while reading message headers:
+   class MProgressDialog *m_ProgressDialog;
 protected:
    void SetType(FolderType type) { m_folderType = type; }
    FolderType GetType(void) const { return m_folderType; }
