@@ -299,6 +299,9 @@ protected:
    // given radiobox selection
    void FillSubtypeCombo(RadioIndex sel);
 
+   // clears the fields which don't make sense for the new selection
+   void ClearInvalidFields(RadioIndex sel);
+
    // get the type of the folder chosen from the combination of the current
    // radiobox and combobox values or from the given one (if it's != Radio_Max)
    FolderType GetCurrentFolderType(RadioIndex selRadiobox = Radio_Max,
@@ -795,7 +798,9 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
    // folder names (notice that it's important to use unsigned chars here as
    // we compare them to 127!)
    unsigned char ch = 0;
-   for ( const unsigned char *p = folderName.c_str(); *p; p++ )
+   for ( const unsigned char *p = (const unsigned char *)folderName.c_str();
+         *p;
+         p++ )
    {
       // do *not* use isalpha() here because it returns TRUE for the second
       // half of ASCII table as well in some locales
@@ -1097,49 +1102,53 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    if ( !m_isCreating )
       return;
 
-   // if the path text changed, try to set the folder name
-   if ( objEvent == m_path || objEvent == m_newsgroup )
+   // if the path text changed, try to set the folder name automatically
+   switch ( GetCurrentFolderType() )
    {
-      switch ( GetCurrentFolderType() )
-      {
-         case MF_FILE:
-         case MF_MH:
-            // set the file name as the default folder name
+      case MF_FILE:
+      case MF_MH:
+         // set the file name as the default folder name
+         if ( objEvent == m_path )
+         {
+            wxString name, fullname = m_path->GetValue();
+            wxSplitPath(fullname, NULL, &name, NULL);
+
+            if ( !fullname )
             {
-               wxString name, fullname = m_path->GetValue();
-               wxSplitPath(fullname, NULL, &name, NULL);
-
-               if ( !fullname )
-               {
-                  // path has become empty (again), so allow setting it
-                  // automatically from the folder name
-                  m_userModifiedPath = false;
-               }
-               else
-               {
-                  // this change has been done by the user, don't override the
-                  // value
-                  m_userModifiedPath = true;
-               }
-
-               SetFolderName(name);
+               // path has become empty (again), so allow setting it
+               // automatically from the folder name
+               m_userModifiedPath = false;
             }
-            break;
+            else
+            {
+               // this change has been done by the user, don't override the
+               // value
+               m_userModifiedPath = true;
+            }
 
-         case MF_IMAP:
+            SetFolderName(name);
+         }
+         break;
+
+      case MF_IMAP:
+         if ( objEvent == m_mailboxname )
+         {
             SetFolderName(m_mailboxname->GetValue().AfterLast('/'));
-            break;
+         }
+         break;
 
-         case MF_NEWS:
-         case MF_NNTP:
-            // set the newsgroup name as the default folder name
+      case MF_NEWS:
+      case MF_NNTP:
+         // set the newsgroup name as the default folder name
+         if ( objEvent == m_newsgroup )
+         {
             SetFolderName(m_newsgroup->GetValue());
-            break;
+         }
+         break;
 
-         default:
-            // nothing
-            ;
-      }
+      default:
+         // nothing
+         ;
    }
 }
 
@@ -1224,6 +1233,7 @@ wxFolderPropertiesPage::DoUpdateUI()
       if ( selRadioOld != selRadio )
       {
          FillSubtypeCombo(selRadio);
+         ClearInvalidFields(selRadio);
       }
       //else: the subtype choice contents didn't change
 
@@ -1565,6 +1575,43 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
 }
 
 void
+wxFolderPropertiesPage::ClearInvalidFields(RadioIndex sel)
+{
+   // clear the fields which don't make sense for new selection
+
+   // all fields make sense for groups
+   if ( sel == Radio_Group )
+      return;
+
+   if ( sel != Radio_News )
+   {
+      // this is only for news
+      m_newsgroup->SetValue("");
+   }
+
+   if ( sel != Radio_File )
+   {
+      // this is only for files
+      m_path->SetValue("");
+   }
+
+   if ( sel == Radio_File )
+   {
+      // this is for everything except local folders
+      m_server->SetValue("");
+      m_login->SetValue("");
+      m_password->SetValue("");
+   }
+
+   if ( sel != Radio_Imap )
+   {
+      // this is only for IMAP
+      m_mailboxname->SetValue("");
+   }
+
+}
+
+void
 wxFolderPropertiesPage::SetDefaultValues()
 {
    // clear the initial values
@@ -1572,15 +1619,6 @@ wxFolderPropertiesPage::SetDefaultValues()
    {
       m_originalValues[n].Empty();
    }
-
-   // clear all fields because some of them won't make sense for new
-   // selection
-   m_newsgroup->SetValue("");
-   m_path->SetValue("");
-   m_login->SetValue("");
-   m_password->SetValue("");
-   m_server->SetValue("");
-   m_mailboxname->SetValue("");
 
    // we want to read settings from the default section under
    // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
@@ -1716,18 +1754,15 @@ wxFolderPropertiesPage::IsOk() const
 {
    switch ( GetCurrentFolderType() )
    {
-   case IMAP:
-      // an empty IMAP path is perfectly acceptable and will be the
-      // default user inbox
-         //return !!m_mailboxname->GetValue();
-         return TRUE;
       case Nntp:
       case News:
          // it's valid to have an empty name for the newsgroup hierarchy - the
-         // entry will represent the whole news server
+         // entry will represent the whole news server - but not for a
+         // newsgroup
          return m_isDir->GetValue() || !!m_newsgroup->GetValue();
 
       case File:
+         // file should have a non empty name
          return !!m_path->GetValue();
 
       default:
@@ -1754,7 +1789,8 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    if ( (m_folderType == MF_INBOX) && m_isCreating )
    {
-      FAIL_MSG("how did we manage to create an INBOX folder?");
+      // FAIL_MSG("how did we manage to create an INBOX folder?"); --
+      // obviously by using a corrupted config file... no need to crash though
 
       m_folderType = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
    }
@@ -1774,6 +1810,12 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( selChoice != -1 )
    {
       m_folderSubtype->SetSelection(selChoice);
+   }
+
+   if ( m_isCreating && (selRadio == Radio_File) )
+   {
+      // set the default value for m_path field
+      UpdateOnFolderNameChange();
    }
 
    SetDefaultValues();
