@@ -203,7 +203,7 @@ class MFolderDialog : public wxSMDialog
 {
 public:
    MFolderDialog(wxWindow *parent, const wxPoint& pos, const wxSize& size);
-   ~MFolderDialog() { delete m_tree; }
+   virtual ~MFolderDialog();
 
    // accessors
    MFolder *GetFolder() const { return m_folder; }
@@ -215,7 +215,10 @@ public:
    void OnButton(wxCommandEvent &ev);
 
 private:
-   wxString     m_FileName;
+   // get the config path used for storing the last folders name
+   static wxString GetConfigPath();
+
+   wxString      m_FileName;
    MFolder      *m_folder;
    wxFolderTree *m_tree;
 
@@ -1126,6 +1129,11 @@ MFolderDialog::MFolderDialog(wxWindow *parent,
    Centre(wxCENTER_FRAME | wxBOTH);
 }
 
+MFolderDialog::~MFolderDialog()
+{
+   delete m_tree;
+}
+
 void
 MFolderDialog::OnButton(wxCommandEvent &ev)
 {
@@ -1155,9 +1163,45 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
    }
 }
 
+wxString MFolderDialog::GetConfigPath()
+{
+   wxString path;
+   path << M_SETTINGS_CONFIG_SECTION << "LastPickedFolder";
+   return path;
+}
+
 bool MFolderDialog::TransferDataToWindow()
 {
-   // TODO restore last folder from config
+   // restore last folder from config
+   wxString folderName = mApplication->
+                           GetProfile()->readEntry(GetConfigPath(), "");
+   if ( !!folderName )
+   {
+      // select folder in the tree
+      MFolder *folder = MFolder::Get(folderName);
+      if ( folder )
+      {
+         if ( !m_tree->SelectFolder(folder) )
+         {
+            wxLogDebug("Couldn't restore the last selected folder in the tree.");
+         }
+
+         folder->DecRef();
+      }
+      //else: the folder was probably destroyed since the last time
+
+      // and set the focus to [Ok] button to allow to quickly choose it
+      wxWindow *btnOk = FindWindow(wxID_OK);
+      if ( btnOk )
+      {
+         btnOk->SetFocus();
+      }
+      else
+      {
+         wxFAIL_MSG("no [Ok] button?");
+      }
+   }
+
    return true;
 }
 
@@ -1168,7 +1212,9 @@ bool MFolderDialog::TransferDataFromWindow()
       m_folder = m_tree->GetSelection();
       if ( m_folder != NULL )
       {
-         // TODO save the folder name to config
+         // save the folder name to config
+         mApplication->GetProfile()->
+            writeEntry(GetConfigPath(), m_folder->GetFullName());
       }
    }
    else
