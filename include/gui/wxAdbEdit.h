@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/08/11 15:22:37  KB
+ * fixes
+ *
  * Revision 1.3  1998/06/22 22:32:25  VZ
+ *
  * miscellaneous fixes for Windows compilation
  *
  * Revision 1.2  1998/03/26 23:05:37  VZ
@@ -41,8 +45,8 @@ private:
    // a menu bar
    wxMenuBar   *menuBar;
 
-   wxText   *key;
-   wxText       *formattedName, *strNamePrefix,
+   wxTextCtrl   *key;
+   wxTextCtrl       *formattedName, *strNamePrefix,
       *strNameFirst, *strNameOther,
       *strNameFamily, *strNamePostfix,
       *title, *organisation,

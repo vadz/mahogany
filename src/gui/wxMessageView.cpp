@@ -762,7 +762,7 @@ BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
 
    int width, height;
    GetClientSize(&width, &height);
-   m_ToolBar = new wxMToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
+   m_ToolBar = new wxToolBar( this, /*id*/-1, wxPoint(2,60), wxSize(width-4,26) );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
    TB_AddTool(m_ToolBar, "tb_open", WXMENU_MSG_OPEN, "Open message");

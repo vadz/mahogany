@@ -163,7 +163,7 @@ private:
       Field_Bcc,
       Field_Max
    };
-   wxText *m_txtFields[Field_Max];
+   wxTextCtrl *m_txtFields[Field_Max];
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
       /// the alias expand button
