@@ -2,11 +2,11 @@
 // Project:     M - cross platform e-mail GUI client
 // File name:   mail/MailFolderCC.cpp: implements MailFolderCC class
 // Purpose:     handling of mail folders with c-client lib
-// Author:      Karsten Ballüuder
+// Author:      Karsten Ballüder
 // Modified by: Vadim Zeitlin at 24.01.01: complete rewrite of update logic
 // Created:     1997
 // CVS-ID:      $Id$
-// Copyright:   (C) 1997-2000 by Karsten Ballüuder (ballueder@gmx.net)
+// Copyright:   (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
