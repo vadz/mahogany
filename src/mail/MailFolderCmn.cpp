@@ -2077,7 +2077,8 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent)
    c != 0;
    prev = c, c = next, next = (c == 0 ? 0 : c->getNext()))
    {
-      if ((c->getThreadable() == 0) &&
+      if ((c->getThreadable() == 0 ||
+           c->getThreadable()->isDummy()) &&
           (c->getChild() == 0))
       {
          if (prev == 0)
@@ -2087,7 +2088,8 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent)
          delete c;
          c = prev;
          
-      } else if ((c->getThreadable() == 0) &&
+      } else if ((c->getThreadable() == 0 ||
+                  c->getThreadable()->isDummy()) &&
                  (c->getChild() != 0) &&
                  ((c->getParent() != 0) ||
                   (c->getChild()->getNext() == 0)))
@@ -2376,6 +2378,16 @@ void Threader::breakThreads(ThreadContainer* c)
          }
          m_root->addAsChild(c);
          c->setParent(0);
+
+         // If the parent was a dummy node and c has other siblings, 
+         // we should remove the parent.
+         if (parent->getThreadable()->isDummy())
+         {
+            ThreadContainer *grandParent = parent->getParent();
+            if (grandParent == NULL)
+               grandParent = m_root;
+            pruneEmptyContainers(grandParent);
+         }
       }
    }
 
@@ -2394,7 +2406,7 @@ void Threader::breakThreads(ThreadContainer* c)
    }
 }
 
-// Buld the input struture for the threader: a list
+// Build the input struture for the threader: a list
 // of all the messages to thread.
 static Threadable *BuildThreadableList(HeaderInfoList *hilp)
 {
@@ -2451,7 +2463,8 @@ static void FlushThreadable(Threadable *t,
 }
 
 
-static void ComputeThreadedIndicesWithJWZ(HeaderInfoList *hilp, 
+static void ComputeThreadedIndicesWithJWZ(MailFolder *mf, 
+                                          HeaderInfoList *hilp, 
                                           size_t indices[],
                                           size_t indents[]) 
 {
@@ -2464,10 +2477,18 @@ static void ComputeThreadedIndicesWithJWZ(HeaderInfoList *hilp,
    Threader *threader = new Threader;
    
    // FIXME : get the options from somewhere...
-   bool gatherSubjects = true;
-   bool breakThreadsOnSubjectChange = true;
-   bool indentIfDummyNode = false;
-   bool removeListPrefix = true;
+   bool gatherSubjects = false;
+   bool breakThreadsOnSubjectChange = false;
+   bool indentIfDummyNode = true;
+   bool removeListPrefix = false;
+   Profile *profile = mf->GetProfile();
+   if (profile != NULL)
+   {
+      gatherSubjects = (READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) == 1);
+      breakThreadsOnSubjectChange = (READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) == 1);
+      indentIfDummyNode = (READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) == 1);
+      removeListPrefix = (READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX) == 1);
+   }
 
    threader->setGatherSubjects(gatherSubjects);
    threader->setBreakThreadsOnSubjectChange(breakThreadsOnSubjectChange);
@@ -2580,7 +2601,7 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    size_t *indices = new size_t[count];
    size_t *indents = new size_t[count];
    hilp->IncRef();
-   ComputeThreadedIndicesWithJWZ(hilp, indices, indents);
+   ComputeThreadedIndicesWithJWZ(mf, hilp, indices, indents);
 
    hilp->AddTranslationTable(indices);
 
@@ -2879,6 +2900,12 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    config.m_ReSortOnChange = READ_CONFIG(profile, MP_MSGS_RESORT_ON_CHANGE) != 0;
    config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
    config.m_UseThreading = READ_CONFIG(profile, MP_MSGS_USE_THREADING) != 0;
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+   config.m_GatherSubjects = READ_CONFIG(profile, MP_MSGS_GATHER_SUBJECTS) != 0;
+   config.m_IndentIfDummyNode = READ_CONFIG(profile, MP_MSGS_INDENT_IF_DUMMY) != 0;
+   config.m_RemoveListPrefix = READ_CONFIG(profile, MP_MSGS_REMOVE_LIST_PREFIX) != 0;
+   config.m_BreakThread = READ_CONFIG(profile, MP_MSGS_BREAK_THREAD) != 0;
+#endif // EXPERIMENTAL_JWZ_THREADING
    config.m_replaceFromWithTo = READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) != 0;
    if ( config.m_replaceFromWithTo )
    {

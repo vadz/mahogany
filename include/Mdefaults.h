@@ -649,6 +649,18 @@ enum MFolderIndex
 #define MP_MSGS_RESORT_ON_CHANGE         "ReSortMessagesOnChange"
 /// use threading
 #define MP_MSGS_USE_THREADING  "ThreadMessages"
+
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+/// Gather messages with same subject in one thread
+#define MP_MSGS_GATHER_SUBJECTS "GatherSubjectsWhenThreading"
+/// Remove list prefix when comparin message's subject
+#define MP_MSGS_REMOVE_LIST_PREFIX "RemoveListPrefix"
+/// break thread when subject changes
+#define MP_MSGS_BREAK_THREAD "BreakThreadIfSubjectChanges"
+/// Indent messages when common ancestor is missing
+#define MP_MSGS_INDENT_IF_DUMMY "IndentIfDummy"
+#endif // EXPERIMENTAL_JWZ_THREADING
+
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT   "SearchCriterium"
 /// search argument
@@ -1430,6 +1442,18 @@ enum MFolderIndex
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
 #define MP_MSGS_USE_THREADING_D  1l
+
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+/// Gather messages with same subject in one thread
+#define MP_MSGS_GATHER_SUBJECTS_D 1l
+/// Remove list prefix when comparin message's subject
+#define MP_MSGS_REMOVE_LIST_PREFIX_D 1l
+/// break thread when subject changes
+#define MP_MSGS_BREAK_THREAD_D 1l
+/// Indent messages when common ancestor is missing
+#define MP_MSGS_INDENT_IF_DUMMY_D 0l
+#endif // EXPERIMENTAL_JWZ_THREADING
+
 // how to show the size (MessageSizeShow enum value)
 #define MP_FVIEW_SIZE_FORMAT_D  0l
 /// search criterium for searching in folders

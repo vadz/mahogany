@@ -296,6 +296,12 @@ enum ConfigFields
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
    ConfigField_FolderViewThreadMessages,
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+   ConfigField_FolderViewGatherSubjects,
+   ConfigField_FolderViewRemoveListPrefix,
+   ConfigField_FolderViewBreakThread,
+   ConfigField_FolderViewIndentIfDummy,
+#endif // EXPERIMENTAL_JWZ_THREADING
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders,
    ConfigField_FolderViewSizeUnits,
@@ -951,6 +957,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+   { gettext_noop("Gather messages with same subject"),              Field_Bool,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("Remove list prefix to compare subjects"),         Field_Bool,    ConfigField_FolderViewGatherSubjects},
+   { gettext_noop("B&reak thread when subject changes"),             Field_Bool,    ConfigField_FolderViewThreadMessages},
+   { gettext_noop("Indent messages with missing ancestor"),          Field_Bool,    ConfigField_FolderViewThreadMessages},
+#endif // EXPERIMENTAL_JWZ_THREADING
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
    // combo choices must be in sync with MessageSizeShow enum values
@@ -1284,6 +1296,14 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
+
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+   CONFIG_ENTRY(MP_MSGS_GATHER_SUBJECTS),
+   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX),
+   CONFIG_ENTRY(MP_MSGS_BREAK_THREAD),
+   CONFIG_ENTRY(MP_MSGS_INDENT_IF_DUMMY),
+#endif // EXPERIMENTAL_JWZ_THREADING
+
    CONFIG_NONE(), // sorting subdialog
    CONFIG_NONE(), // columns subdialog
    CONFIG_ENTRY(MP_FVIEW_SIZE_FORMAT),

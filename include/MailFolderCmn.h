@@ -197,6 +197,12 @@ protected:
                 m_ReSortOnChange != other.m_ReSortOnChange ||
                 m_UpdateInterval != other.m_UpdateInterval ||
                 m_UseThreading != other.m_UseThreading ||
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+                m_GatherSubjects != other.m_GatherSubjects ||
+                m_IndentIfDummyNode != other.m_IndentIfDummyNode ||
+                m_RemoveListPrefix != other.m_RemoveListPrefix ||
+                m_BreakThread != other.m_BreakThread ||
+#endif // EXPERIMENTAL_JWZ_THREADING
                 m_replaceFromWithTo != other.m_replaceFromWithTo ||
                 m_ownAddresses != other.m_ownAddresses;
       }
@@ -214,6 +220,16 @@ protected:
       int m_UpdateInterval;
       /// do we want to thread messages?
       bool m_UseThreading;
+#if defined(EXPERIMENTAL_JWZ_THREADING)
+      /// SHould we gather in same thread messages with same subject
+      bool m_GatherSubjects;
+      /// Should we remove list prefix when comparing subjects
+      bool m_RemoveListPrefix;
+      /// Should we indent messages with missing ancestor
+      bool m_IndentIfDummyNode;
+      /// Should we break thread when subject changes
+      bool m_BreakThread;
+#endif // EXPERIMENTAL_JWZ_THREADING
       /// do we use "To" instead of "From" for messages from oneself?
       bool m_replaceFromWithTo;
       /// if m_replaceFromWithTo, the list of our addresses
