@@ -240,8 +240,8 @@ private:
    virtual ~BbdbBook();
 
    wxString m_strName,
-      m_strUserName,
-      m_strDesc;
+            m_strUserName,
+            m_strDesc;
 
    BbdbEntryGroup *m_pRootGroup; // the ADB_Entries group
 
@@ -932,9 +932,14 @@ BbdbEntryGroup::FindEntry(const char *szName)
 // ----------------------------------------------------------------------------
 
 BbdbBook::BbdbBook(const String& name)
-   : m_strName(name), m_strUserName(name), m_strDesc(name)
+        : m_strName(name), m_strDesc(name)
 {
    MOcheck();
+
+   // the user name shouldn't contain slashes - so extract the file name from
+   // the full path
+   wxSplitPath(name, NULL, &m_strUserName, NULL);
+
    // create the root group
    m_pRootGroup = new BbdbEntryGroup(NULL, name); // there is only one group
 }
