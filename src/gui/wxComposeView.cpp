@@ -233,12 +233,16 @@ private:
 // information about the attachments
 struct AttachmentInfo
 {
-   AttachmentInfo(const void *d, size_t l, const String& m) : mimetype(m)
+   AttachmentInfo(const void *d,
+                  size_t l,
+                  const String& m,
+                  const String& f) : mimetype(m), filename(f)
       { data = d; len = l; }
 
    const void *data;
    size_t      len;
-   String      mimetype;
+   String      mimetype,
+               filename;
 };
 
 WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
@@ -264,7 +268,9 @@ public:
    void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
 
    // called by VarExpander to insert an attachment
-   void InsertAttachment(void *data, size_t len, const String& mimetype);
+   void InsertAttachment(void *data, size_t len,
+                         const String& mimetype,
+                         const String& filename);
 
 private:
    // as soon as m_hasCursorPosition becomes TRUE we stop to update the current
@@ -2501,7 +2507,8 @@ ExpansionSink::Output(const String& text)
 void
 ExpansionSink::InsertAttachment(void *data,
                                 size_t len,
-                                const String& mimetype)
+                                const String& mimetype,
+                                const String& filename)
 {
    if ( !m_hasCursorPosition )
    {
@@ -2511,7 +2518,7 @@ ExpansionSink::InsertAttachment(void *data,
 
    // create a new attachment info object (NB: it will be deleted by the array
    // automatically because we pass it by pointer and not by reference)
-   m_attachments.Add(new AttachmentInfo(data, len, mimetype));
+   m_attachments.Add(new AttachmentInfo(data, len, mimetype, filename));
 
    // the last component of text becomes the text before this attachment
    m_texts.Add(m_text);
@@ -2532,7 +2539,9 @@ ExpansionSink::InsertTextInto(wxComposeView& cv) const
       cv.InsertText(m_texts[n]);
 
       AttachmentInfo& attInfo = m_attachments[n];
-      cv.InsertData((char *)attInfo.data, attInfo.len, attInfo.mimetype);
+      cv.InsertData((char *)attInfo.data, attInfo.len,
+                    attInfo.mimetype,
+                    attInfo.filename);
    }
 
    cv.InsertText(m_text);
@@ -2833,7 +2842,8 @@ VarExpander::ExpandAttach(const String& name,
       // guess MIME type from extension
       m_sink.InsertAttachment(strutil_strdup(value->c_str()),
                               value->length(),
-                              GetMimeTypeFromFilename(filename));
+                              GetMimeTypeFromFilename(filename),
+                              filename);
 
       // avoid inserting file as text additionally
       value->Empty();
@@ -3018,7 +3028,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                String str;
                m_msg->WriteToString(str);
                m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
-                     "MESSAGE/RFC822");
+                                       "message/rfc822", "");
             }
             else
             {
