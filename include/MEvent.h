@@ -47,12 +47,9 @@ enum MEventId
    MEventId_Max
 };
 
-// ----------------------------------------------------------------------------
 /** The data associated with an event - more classes can be derived from this
     one.
 */
-// ----------------------------------------------------------------------------
-
 class MEventData : public MObject
 {
 public:
@@ -78,17 +75,12 @@ private:
 //      because this one still has to be modified (to add the id) whenever a
 //      new event is added. Is this a good reason to use string ids?
 
-//forward decl
+// forward decl
 class MailFolder;
 
-///FIXME: this shouldn't be needed! Opaque type?
+// FIXME: this shouldn't be needed! Opaque type?
 #include "ASMailFolder.h"
 
-/** The data associated with an event - more classes can be derived from this
-    one.
-*/
-
-// ----------------------------------------------------------------------------
 /// MEventWithFolderData - an event data object containing a folder pointer
 class MEventWithFolderData : public MEventData
 {
@@ -109,7 +101,7 @@ public:
 private:
    MailFolder *m_Folder;
 };
-// ----------------------------------------------------------------------------
+
 /// MEventPingData - the event asking the folders to ping
 class MEventPingData : public MEventData
 {
@@ -135,7 +127,6 @@ private:
    String m_adbname, m_provname;
 };
 
-// ----------------------------------------------------------------------------
 /// MEventNewMailData - the event notifying the app about "new mail"
 class MEventNewMailData : public MEventWithFolderData
 {
@@ -167,25 +158,22 @@ private:
 };
 
 
-// ----------------------------------------------------------------------------
 /** MEventFolderUpdate Data - Does not carry any data apart from pointer to
- * mailfolder.*/
+    mailfolder.
+ */
 class MEventFolderUpdateData : public MEventWithFolderData
 {
 public:
-   /** Constructor.
-   */
+   // ctor
    MEventFolderUpdateData(MailFolder *folder)
       : MEventWithFolderData(MEventId_FolderUpdate, folder)
       { }
-private:
-   MailFolder           *m_folder;
 };
 
-// ----------------------------------------------------------------------------
-// MEventMsgStatus Data - carries folder pointer and HeaderInfo object with
-// its index in the folder list
-// ----------------------------------------------------------------------------
+/**
+   MEventMsgStatus Data - carries folder pointer and HeaderInfo object with
+   its index in the folder list
+ */
 
 class HeaderInfo;
 class MEventMsgStatusData : public MEventWithFolderData
@@ -213,19 +201,19 @@ private:
    HeaderInfo *m_hi;
 };
 
-// ----------------------------------------------------------------------------
-// MEventOptionsChangeData - this event is generated whenever some of the
-// program options change. It happens when the user clicks either of the
-// buttons in the options dialog: Apply, Cancel or Ok. The program is supposed
-// to apply the changes immediately in response to Apply, but be prepared to
-// undo them if Cancel is received. Ok should do the same as Apply, but it
-// can't be followed by Cancel. The profile pointer is the profile being
-// modified and generally it should be safe to ignore all changes to the
-// profile if it's not a parent of the profile in use.
-//
-// In response to "Apply" event (only) the event handler may prevent it from
-// taking place by calling Veto() on the event object.
-// ----------------------------------------------------------------------------
+/**
+   MEventOptionsChangeData - this event is generated whenever some of the
+   program options change. It happens when the user clicks either of the
+   buttons in the options dialog: Apply, Cancel or Ok. The program is supposed
+   to apply the changes immediately in response to Apply, but be prepared to
+   undo them if Cancel is received. Ok should do the same as Apply, but it
+   can't be followed by Cancel. The profile pointer is the profile being
+   modified and generally it should be safe to ignore all changes to the
+   profile if it's not a parent of the profile in use.
+  
+   In response to "Apply" event (only) the event handler may prevent it from
+   taking place by calling Veto() on the event object.
+ */
 
 class MEventOptionsChangeData : public MEventData
 {
@@ -308,14 +296,12 @@ private:
    ChangeKind  m_what;
 };
 
-// ----------------------------------------------------------------------------
 /** MEventASFolderResult Data - Carries a ASMailFolder::Result object
-    with the result of an asynchronous operation on the folder. */
+    with the result of an asynchronous operation on the folder.
+ */
 class MEventASFolderResultData : public MEventData
 {
 public:
-   /** Constructor.
-   */
    MEventASFolderResultData(MObjectRC *result)
       : MEventData(MEventId_ASFolderResult)
       {
@@ -334,10 +320,9 @@ private:
 };
 
 
-// ----------------------------------------------------------------------------
-// Derive from this class to be able to process events.
-// ----------------------------------------------------------------------------
-
+/**
+   Derive from this class to be able to process events.
+ */
 class MEventReceiver
 {
 public:
@@ -351,11 +336,11 @@ public:
    virtual ~MEventReceiver();
 };
 
-// ----------------------------------------------------------------------------
-// This class allows to send events and forwards them to the receivers waiting
-// for them. There is only one object of this class in the whole program and
-// even this one is never used directly - all functions are static.
-// ----------------------------------------------------------------------------
+/**
+   This class allows to send events and forwards them to the receivers waiting
+   for them. There is only one object of this class in the whole program and
+   even this one is never used directly - all functions are static.
+ */
 
 class MEventManager
 {

@@ -385,6 +385,10 @@ private:
    unsigned long m_msgnoMax;
    /// number or recent messages in mailbox
    unsigned long m_nRecent;
+
+   /// were the messages expunged from this folder since the last update?
+   bool m_expunged;
+
    /// last seen UID
    UIdType m_LastUId;
 

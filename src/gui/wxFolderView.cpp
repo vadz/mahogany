@@ -1829,46 +1829,61 @@ wxFolderView::Update(HeaderInfoList *listing)
 #endif
    }
 
-   long focusedIndex, tmp = -1;
-   focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+   // should we clear the preview window or keep it?
+   bool keepPreview;
+   long focusedIndex;
 
-   if(n < (size_t) m_NumOfMessages)  // messages have been deleted, start over
+   // if the messages have been deleted, we need to start over
+   if ( n < (size_t) m_NumOfMessages )
    {
       m_FolderCtrl->Clear();
       m_NumOfMessages =
       m_nDeleted = 0;
+
+      keepPreview = false; // it might have disappeared
+      focusedIndex = -1;
+   }
+   else
+   {
+      focusedIndex = m_FolderCtrl->GetFocusedItem();
+
+      keepPreview = focusedIndex != -1;
    }
 
-   bool foundFocus = false;
+   // fill the list control
    HeaderInfo const *hi;
    for(size_t i = 0; i < n; i++)
    {
       hi = (*listing)[i];
       SetEntry(hi, i);
-      if(hi->GetUId() == m_FocusedUId)
+      if ( focusedIndex == -1 )
       {
-         foundFocus = true;
-         focusedIndex = i;
+         // try to find the previously focused item if still don't have it
+         if ( hi->GetUId() == m_FocusedUId )
+         {
+            keepPreview = true;
+
+            focusedIndex = i;
+         }
       }
    }
-   if(! foundFocus)
+
+   if ( focusedIndex != -1 )
    {
-      // old focused UId is gone, so we use the list index instead
-      if ( focusedIndex != -1 && focusedIndex < (long) n )
-      {
-         m_FolderCtrl->Focus(focusedIndex);
-      }
+      ASSERT_MSG( focusedIndex < n, "invalid focused index" );
+
+      m_FolderCtrl->Focus(focusedIndex);
+
+      // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
+      // EnsureVisible() results in an assert failure which is harmless but
+      // _very_ annoying as it happens all the time (FIXME: should be 6!!)
+#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,7)
+      if ( focusedIndex != -1 )
+         m_FolderCtrl->EnsureVisible(focusedIndex);
+#endif
    }
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
-
-   // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
-   // EnsureVisible() results in an assert failure which is harmless but
-   // _very_ annoying as it happens all the time (FIXME: should be 6 below!!)
-#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,7)
-   if(focusedIndex != -1 && focusedIndex < (long) n)
-      m_FolderCtrl->EnsureVisible(focusedIndex);
-#endif
 
    if ( n > THRESHOLD )
    {
@@ -1882,8 +1897,8 @@ wxFolderView::Update(HeaderInfoList *listing)
    m_NumOfMessages = n;
    listing->DecRef();
 
-   // the previously focused uid might be gone now:
-   if ( !foundFocus )
+   // clear the preview window if the focused message changed
+   if ( !keepPreview )
    {
       m_MessagePreview->Clear();
       m_previewUId = UID_ILLEGAL;

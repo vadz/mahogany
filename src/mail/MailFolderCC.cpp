@@ -952,11 +952,13 @@ MailFolderCC::Create(int typeAndFlags)
    UpdateTimeoutValues();
 
    SetRetrievalLimits(0, 0); // no limits by default
+
    m_nMessages = 0;
    m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
    m_Listing = NULL;
+   m_expunged = false;
 
    // currently not used, but might be in the future
    m_GotNewMessages = false;
@@ -3195,6 +3197,18 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       // msgno should never be less than m_nMessages because we adjust the
       // latter in mm_expunged immediately when a message is expunged
       ASSERT_MSG( msgno == mf->m_msgnoMax, "msg number unexpected changed" );
+
+      // only request update below if something happened: the only thing which
+      // can happen to us in this case is that messages were expunged from the
+      // folder, so check for this
+      if ( !mf->m_expunged )
+      {
+         // no, they were not - don't refresh everything!
+         return;
+      }
+
+      // as we're going to update it below, we can clear the flag
+      mf->m_expunged = false;
    }
 
    // don't request update if we are only half opened: this will cause another
@@ -3454,12 +3468,14 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
       ASSERT_MSG( mf->m_nMessages > 0,
                   "expunged a message when we don't have any?" );
 
+      mf->m_expunged = true;
+
       mf->m_nMessages--;
       mf->m_msgnoMax--;
 
       // it is not necessary to update the other m_status fields because they
       // were already updated when the message was deleted, but this one must
-      // be kept in sync
+      // be kept in sync manually as it wasn't updated before
       if ( mf->m_status.IsValid() )
          mf->m_status.total--;
    }
