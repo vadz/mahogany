@@ -1304,11 +1304,23 @@ MailFolderCC::CountNewMessages(void) const
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+   // remove const from this:
+   MailFolderCC *that = (MailFolderCC *)this;
+   
+   // check if we are still alive:
+   if(m_MailStream == NIL)
+   {
+      if(! PingReopen())
+      {
+         ERRORMESSAGE((_("Cannot get listing for closed mailbox '%s'."),
+                       GetName().c_str()));
+         return NULL;
+      }
+      that->m_NeedFreshListing = true; // re-build it!
+   }
+   
    if(m_NeedFreshListing)
    {
-      // remove const from this:
-      MailFolderCC *that = (MailFolderCC *)this;
-
       UIdType old_nNewMessages = that->CountNewMessages();
 
       that->UpdateStatus();
@@ -2119,6 +2131,9 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 void
 MailFolderCC::UpdateStatus(void)
 {
+   if(m_MailStream == NIL && ! PingReopen())
+      return; // fail
+   
    if(m_nMessages != m_MailStream->nmsgs ||
       m_nRecent != m_MailStream->recent)
    {
