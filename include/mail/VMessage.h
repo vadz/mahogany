@@ -108,10 +108,6 @@ public:
    virtual bool WriteToString(String& str, bool headerFlag = true) const
       { return m_message->WriteToString(str, headerFlag); }
 
-   virtual bool SendOrQueue(Protocol protocol = Prot_Illegal,
-                            bool send = FALSE)
-      { return m_message->SendOrQueue(protocol, send); }
-
    //@}
 
 private:

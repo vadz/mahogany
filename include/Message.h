@@ -416,15 +416,6 @@ public:
    */
    virtual bool WriteToString(String &str, bool headerFlag = true) const = 0;
 
-   /** Takes this message and tries to send it. Only useful for
-       messages in some kind of Outbox folder.
-       @param protocol how to send the message, or Prot_Illegal to autodetect
-       @param send if true, send, otherwise send or queue depending on setting
-       @return true on success
-   */
-   virtual bool SendOrQueue(Protocol protocol = Prot_Illegal,
-                            bool send = FALSE) = 0;
-
    //@}
 
    // for backwards compatibility only, don't use
