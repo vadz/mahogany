@@ -91,6 +91,8 @@ public:
    */
    void PrintPreviewMessages(wxArrayInt const &messages);
 
+   /** For use by the listctrl: get last previewed uid: */
+   UIdType GetPreviewUId(void) const { return m_previewUId; }
    /** Save messages to a file.
        @param n number of messages
        @messages pointer to an array holding the message numbers
@@ -194,6 +196,8 @@ private:
    wxSplitterWindow *m_SplitterWindow;
    /// the preview window
    wxMessageView *m_MessagePreview;
+   /// UId of last previewed message
+   UIdType m_previewUId;
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
 

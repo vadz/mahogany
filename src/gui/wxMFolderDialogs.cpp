@@ -1294,6 +1294,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
          // this can not be changed for an already existing folder
          EnableTextWithButton(m_path, m_isCreating);
+         m_forceReOpen->SetValue(FALSE);
          m_forceReOpen->Enable(FALSE);
 
 #ifdef USE_LOCAL_CHECKBOX
@@ -1662,8 +1663,8 @@ wxFolderPropertiesPage::SetDefaultValues()
                            (m_isCreating && folderType == MF_NNTP);
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
-#ifdef USE_SSL_AUTH
-   m_originalUseSSL = (flags & MF_FLAGS_SSLAUTH);
+#ifdef USE_SSL
+   m_originalUseSSL = ((flags & MF_FLAGS_SSLAUTH) != 0);
    m_useSSL->SetValue(m_originalUseSSL);
 #endif
    

@@ -879,3 +879,73 @@ strutil_escapeString(const String &string)
    }
    return newstr;
 }
+
+/* **********************************************************
+ *  Regular expression matching, using wxRegEx class
+ * *********************************************************/
+
+
+#ifdef __GNUG__
+#   pragma implementation "wx/regex.h"
+#endif
+#include <wx/regex.h>
+
+#ifdef WX_HAVE_REGEX
+
+class strutil_RegEx : public wxRegEx
+{
+public:
+   strutil_RegEx(const String &pattern):
+      wxRegEx(pattern) { }
+};
+
+
+class strutil_RegEx *
+strutil_compileRegEx(const String &pattern)
+{
+   strutil_RegEx * re = new strutil_RegEx(pattern);
+   if(re->IsValid())
+      return re;
+   else
+   {
+      delete re;
+      return NULL;
+   }
+   return NULL;
+}
+
+bool
+strutil_matchRegEx(const class strutil_RegEx *regex, const String
+                   &pattern, int flags)
+{
+   ASSERT(regex);
+   return regex->Match(pattern, (wxRegExBase::Flags) flags) != 0;
+}
+
+void
+strutil_freeRegEx(class strutil_RegEx *regex)
+{
+   ASSERT(regex);
+   delete regex;
+}
+#else
+class strutil_RegEx *
+strutil_compileRegEx(const String &pattern)
+{
+   ERRORMESSAGE(_("Regular expression matching not implemented."));
+   return NULL;
+}
+
+bool
+strutil_matchRegEx(const class strutil_RegEx *regex, const String
+                   &pattern, int flags)
+{
+   return FALSE;
+}
+
+void
+strutil_freeRegEx(class strutil_RegEx *regex)
+{
+   // nothing
+}
+#endif

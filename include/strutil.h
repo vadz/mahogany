@@ -322,6 +322,24 @@ strutil_readString(String &string, bool *success = NULL);
 /* Return an escaped string. */
 String
 strutil_escapeString(const String &string);
+
+/** @name regular expression matching */
+//@{
+/// compile a string into a regular expression
+class strutil_RegEx *
+strutil_compileRegEx(const String &pattern);
+/** Check if the regex matches the string.
+    @param flags combination of 0, RE_ICASE and RE_EXTENDED
+    @return true if it matches
+*/
+bool
+strutil_matchRegEx(const class strutil_RegEx *regex,
+                   const String &pattern,
+                   int flags = 0);
+/// free the regex
+void
+strutil_freeRegEx(class strutil_RegEx *regex);
+//@}
 //@}
 
 //@}

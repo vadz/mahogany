@@ -65,7 +65,7 @@ KBLIST_DEFINE(MEventList, MEventData);
 /// the list of pending events
 static MEventList gs_EventList;
 
-/// are we currently dispatching events?
+// are we currently dispatching events?
 static bool gs_IsDispatching = false;
 
 // ============================================================================

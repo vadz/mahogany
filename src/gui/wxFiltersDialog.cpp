@@ -196,8 +196,10 @@ private:
 static
 wxString ORC_Types[] =
 { gettext_noop("Always"),
-  gettext_noop("Match"), gettext_noop("Match substring"),
-  gettext_noop("Match RegExp"), gettext_noop("Larger than"),
+  gettext_noop("Match"), gettext_noop("Contains"),
+  gettext_noop("Match Case"), gettext_noop("Contains Case"),
+  gettext_noop("Match RegExp"),
+  gettext_noop("Larger than"),
   gettext_noop("Smaller than"), gettext_noop("Older than"),
   gettext_noop("Is SPAM")
 };
@@ -206,7 +208,9 @@ enum ORC_Types_Enum
 {
    ORC_T_Always = 0,
    ORC_T_Match,
-   ORC_T_MatchSub,
+   ORC_T_Contains,
+   ORC_T_MatchC,
+   ORC_T_ContainsC,
    ORC_T_MatchRegEx,
    ORC_T_LargerThan,
    ORC_T_SmallerThan,
@@ -278,7 +282,9 @@ OneCritControl::UpdateUI()
       );
    m_Where->Enable(
       type == ORC_T_Match
-      || type == ORC_T_MatchSub
+      || type == ORC_T_Contains
+      || type == ORC_T_MatchC
+      || type == ORC_T_ContainsC
       || type == ORC_T_MatchRegEx
       );
 }
@@ -333,8 +339,14 @@ OneCritControl::TranslateToString(const wxString & criterium)
       break;
    case ORC_T_Match:
       program << "matchi("; break;
-   case ORC_T_MatchSub:
+   case ORC_T_Contains:
+      program << "containsi("; break;
+   case ORC_T_MatchC:
+      program << "match("; break;
+   case ORC_T_ContainsC:
+      program << "contains("; break;
    case ORC_T_MatchRegEx:
+      program << "matchregex("; break;
    case ORC_T_LargerThan:
    case ORC_T_SmallerThan:
    case ORC_T_OlderThan:
@@ -864,8 +876,8 @@ wxFiltersDialog::OnButton( wxCommandEvent &event )
       {
          if(idx == Button_New && idx < MAX_FILTERS)
          {
-            m_FilterDataCount++;
-            ConfigureOneFilter(&(m_FilterData[m_FilterDataCount-1]), this);
+            if(ConfigureOneFilter(&(m_FilterData[m_FilterDataCount]), this))
+               m_FilterDataCount++;
          }
          else if(idx == Button_Edit) // edit existing
          {

@@ -607,14 +607,32 @@ SendMessageCC::Send(void)
       host = READ_CONFIG(m_Profile, MP_SMTPHOST);
       hostlist[0] = host;
       DBGMESSAGE(("Trying to open connection to SMTP server '%s'", host.c_str()));
-      stream = smtp_open ((char **)hostlist,NIL);
+#ifdef USE_SSL
+      if(READ_CONFIG(m_Profile, MP_SMTPHOST_USE_SSL) != 0)
+      {
+         STATUSMESSAGE(("Sending message via SSL..."));
+         stream = smtp_open_full
+            (NIL,hostlist,"smtp/ssl",SMTPTCPPORT,NIL);
+      }
+      else
+#endif
+         stream = smtp_open ((char **)hostlist,NIL);
       break;
    case Prot_NNTP:
       // notice that we _must_ assign the result to this string!
       host = READ_CONFIG(m_Profile, MP_NNTPHOST);
       hostlist[0] = host;
       DBGMESSAGE(("Trying to open connection to NNTP server '%s'", host.c_str()));
-      stream = nntp_open ((char **)hostlist,NIL);
+#ifdef USE_SSL
+      if(READ_CONFIG(m_Profile, MP_SMTPHOST_USE_SSL) != 0)
+      {
+         STATUSMESSAGE(("Posting message via SSL..."));
+         stream = nntp_open_full
+            (NIL,hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
+      }
+      else
+#endif
+         stream = nntp_open ((char **)hostlist,NIL);
       break;
    }
 

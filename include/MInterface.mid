@@ -96,6 +96,17 @@ ARG(STRING , path)
 
 FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `::strutil_tolower(str);')
 
+FUNCTION(strutil_compileRegEx, class strutil_RegEx *, ( ARG(const
+String &, pattern)),
+`return ::strutil_compileRegEx(pattern);')
+FUNCTION(strutil_matchRegEx, bool, (
+ARG(const class strutil_RegEx *regex),
+ARG(const String &, str),
+ARG(int, flags)
+),
+`return ::strutil_matchRegEx(regex, str, flags);')
+FUNCTION(strutil_freeRegEx, void, (
+ARG(strutil_RegEx *, re)), `::strutil_freeRegEx(re);')
 
 /* The following line is the end of the MInterface interface definition. */
 ')

@@ -320,6 +320,10 @@
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
+/// the mail host
+#define   MP_SMTPHOST_USE_SSL         "MailHostSSL"
+/// the news server
+#define   MP_NNTPHOST_USE_SSL         "NewsHostSSL"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST      "BeaconHost"
 /// does Mahogany control dial-up networking?
@@ -771,15 +775,19 @@
 /// Add this hostname for addresses without hostname?
 #define   MP_ADD_DEFAULT_HOSTNAME_D 1L
 /// the default POP3 host
-#define   MP_POPHOST_D          ""
+#define   MP_POPHOST_D          "pop"
 /// the default IMAP4 host
-#define   MP_IMAPHOST_D          ""
+#define   MP_IMAPHOST_D          "imap"
 /// the mail host
-#define   MP_SMTPHOST_D         ""
+#define   MP_SMTPHOST_D         "smtp"
+/// the mail host
+#define   MP_SMTPHOST_USE_SSL_D   0l
 /// tyhe mail server fallback
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server
-#define   MP_NNTPHOST_D         ""
+#define   MP_NNTPHOST_D      "news"
+/// the news server
+#define   MP_NNTPHOST_USE_SSL_D   0l
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""
 /// does Mahogany control dial-up networking?

@@ -295,6 +295,16 @@ String GetFilterProgram(ProfileBase *profile);
 extern
 bool ReenablePersistentMessageBoxes(wxWindow *parent = NULL);
 
+#ifdef USE_SSL
+/// Accept or reject certificate
+extern "C"
+{
+   int AcceptCertificateDialog(const char *subject, const char *issuer,
+                               const char *fingerprint);
+}
+#endif
+
+                            
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL
 

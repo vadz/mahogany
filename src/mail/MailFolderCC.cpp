@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders with c-client lib   *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -685,8 +685,9 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    // ask the password for the folders which need it but for which it hadn't been
    // specified during creation
    if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
-        && (GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON == 0)
-        && pword.Length() == 0)
+        && ((GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON) == 0)
+        && (pword.Length() == 0)
+      )
    {
       String prompt, fname;
       fname = name;
@@ -2254,6 +2255,7 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 #ifdef DEBUG
    msg << _(", error level: ") << strutil_ultoa(errflg);
 #endif
+   STATUSMESSAGE((msg));
    if(errflg > 1)
       LOGMESSAGE((CC_GetLogLevel(), msg));
    else

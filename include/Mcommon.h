@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Mcommon.h: common typedefs etc for M                             *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/

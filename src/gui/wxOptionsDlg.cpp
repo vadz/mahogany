@@ -94,6 +94,11 @@ enum ConfigFields
    ConfigField_ImapServer,
    ConfigField_MailServer,
    ConfigField_NewsServer,
+#ifdef USE_SSL
+   ConfigField_SSLtext,
+   ConfigField_PopServerSSL,
+   ConfigField_NewsServerSSL,
+#endif
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
    ConfigField_BeaconHost,
@@ -438,6 +443,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("SMTP (&mail) server"),          Field_Text | Field_Vital,   -1,           },
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,
    },
+#ifdef USE_SSL   
+   { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
+                  "mail or news. Tick the following boxes to activate this.")
+     , Field_Message, -1 },
+   { gettext_noop("POP server &uses SSL"), Field_Bool,    -1,                        },
+   { gettext_noop("IMAP server uses &SSL"),Field_Bool,    -1,                        },
+#endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
@@ -651,6 +663,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_IMAPHOST),
    CONFIG_ENTRY(MP_SMTPHOST),
    CONFIG_ENTRY(MP_NNTPHOST),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
+   CONFIG_ENTRY(MP_NNTPHOST_USE_SSL),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),

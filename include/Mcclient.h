@@ -1,7 +1,18 @@
-/// forgot to check in, temporary fix
-#define private ccprivate
+/*-*- c++ -*-********************************************************
+ * Mc-client.h - c-client header inclusion for Mahogany             *
+ *                                                                  *
+ * (C) 2000 by Karsten Ballüder (Ballueder@gmx.net)                 *
+ *                                                                  *
+ * $Id$
+ *                                                                  *
+ *******************************************************************/
+
+#ifndef   MCCLIENT_H
+#define   MCCLIENT_H
+
 extern "C"
 {
+#   define private   ccprivate
 #     include <stdio.h>
 #     include <mail.h>
 #     include <osdep.h>
@@ -9,6 +20,8 @@ extern "C"
 #     include <smtp.h>
 #     include <nntp.h>
 #     include <misc.h>
-}
-#undef private
+#   undef private   
 
+}
+
+#endif  //MCCLIENT_H

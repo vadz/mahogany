@@ -1804,7 +1804,7 @@ extern "C"
  * Tests for message contents
  *
  * * * * * * * * * * * * * */
-   static Value func_matchi(ArgList *args, Parser *p)
+   static Value func_containsi(ArgList *args, Parser *p)
    {
       if(args->Count() != 2)
          return 0;
@@ -1815,6 +1815,57 @@ extern "C"
       p->GetInterface()->strutil_tolower(haystack);
       p->GetInterface()->strutil_tolower(needle);
       return haystack.Find(needle) != -1;
+   }
+
+   static Value func_contains(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 2)
+         return 0;
+      Value v1 = args->GetArg(0)->Evaluate();
+      Value v2 = args->GetArg(1)->Evaluate();
+      String haystack = v1.ToString();
+      String needle = v2.ToString();
+      return haystack.Find(needle) != -1;
+   }
+
+   static Value func_match(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 2)
+         return 0;
+      Value v1 = args->GetArg(0)->Evaluate();
+      Value v2 = args->GetArg(1)->Evaluate();
+      String haystack = v1.ToString();
+      String needle = v2.ToString();
+      return haystack == needle;
+   }
+
+   static Value func_matchi(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 2)
+         return 0;
+      Value v1 = args->GetArg(0)->Evaluate();
+      Value v2 = args->GetArg(1)->Evaluate();
+      String haystack = v1.ToString();
+      String needle = v2.ToString();
+      p->GetInterface()->strutil_tolower(haystack);
+      p->GetInterface()->strutil_tolower(needle);
+      return haystack == needle;
+   }
+
+   static Value func_matchregex(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 2)
+         return 0;
+      Value v1 = args->GetArg(0)->Evaluate();
+      Value v2 = args->GetArg(1)->Evaluate();
+      String haystack = v1.ToString();
+      String needle = v2.ToString();
+      class strutil_RegEx * re =
+         p->GetInterface()->strutil_compileRegEx(needle);
+      if(! re) return FALSE;
+      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack,0);
+      p->GetInterface()->strutil_freeRegEx(re);
+      return rc;
    }
 
 /* * * * * * * * * * * * * * *
@@ -2017,7 +2068,11 @@ ParserImpl::AddBuiltinFunctions(void)
 {
    DefineFunction("message", func_msgbox);
    DefineFunction("log", func_log);
+   DefineFunction("match", func_match);
+   DefineFunction("contains", func_contains);
    DefineFunction("matchi", func_matchi);
+   DefineFunction("containsi", func_containsi);
+   DefineFunction("matchregex", func_matchregex);
    DefineFunction("subject", func_subject);
    DefineFunction("to", func_to);
    DefineFunction("from", func_from);

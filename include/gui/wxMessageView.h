@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.h: a window displaying a mail message              *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -126,6 +126,11 @@ public:
    UIdType GetUId(void) const { return m_uid; }
    /// the derived class should react to the result to an asynch operation
    void OnASFolderResultEvent(MEventASFolderResultData &event);
+
+   /// scroll down one page:
+   void PageDown(void);
+   /// scroll up one page:
+   void PageUp(void);
 private:
    /// register with MEventManager
    void RegisterForEvents();

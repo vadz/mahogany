@@ -2053,6 +2053,7 @@ static const struct
    { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unreckognized address book files") },
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
+   { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
    //{ "", gettext_noop("") },
 };
 
@@ -2292,3 +2293,28 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
 
    return false;
 }
+
+#ifdef USE_SSL
+/// Accept or reject certificate
+extern "C"
+{
+   int AcceptCertificateDialog(const char *subject, const char *issuer,
+                               const char *fingerprint)
+   {
+      wxString info;
+      info << _("The server presents the following certificate:\n")
+           << '\n'
+           << _("Name : ") << subject << '\n'
+           << _("Issuer : ") << issuer << '\n'
+           << _("Fingerprint: ") << fingerprint << '\n'
+           << '\n'
+           << _("Do you accept this certificate?");
+      return (int) MDialog_YesNoDialog(info,
+                                       NULL, _("SSL certificate verification"),
+                                       true);
+   }
+}
+
+
+#endif
+

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.cc: a window displaying a mail folder               *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -221,7 +221,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
           Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
           View, Group reply (==followup)
       */
-      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHVG ");
+      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG ");
       const char *keycodes = _(keycodes_en);
 
       int idx = 0;
@@ -232,6 +232,14 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
       if(key == WXK_DELETE) idx = 0; // delete
+      // scroll up within the message viewer:
+      if(key == WXK_BACK)
+      {
+         if(m_FolderView->GetPreviewUId() == focused_uid)
+            m_FolderView->m_MessagePreview->PageUp();
+         event.Skip();
+         return;
+      }
       switch(keycodes_en[idx])
       {
       case 'D':
@@ -251,7 +259,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'S':
          m_FolderView->SaveMessagesToFile(selections);
          break;
-      case 'V': // moVe
+      case 'M': // move = copy + delete
          m_FolderView->SaveMessagesToFolder(selections, true);
          break;
       case 'G':
@@ -275,12 +283,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'H':
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
-      case ' ': // space:
-         m_FolderView->PreviewMessage(focused_uid);
-         return; // we don not want the default space behaviour from
-         // the listctrl
-         break;
-      case 'M': // mark:
+      case ' ': // mark:
+         // should just be the default behaviour
+#if 0
          // If shift is not used, deselect all items before having
          // wxListCtrl selects this one.
          if(!event.ShiftDown())
@@ -294,16 +299,12 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
                //new wxGTK semantics idx++;
             }
          }
-         // Our 'm' is supposed to behave like the normal space in a
-         // listctrl, so we modify the event for the listctrl to
-         // process it:
-         event.m_keyCode = ' ';
+#endif
          break;
       default:
          ;
       }
    }
-   //SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
    event.Skip();
 }
 
@@ -336,11 +337,15 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
-
-   //FIXME: is this needed? I thought OnSelected() should do it?
+   // called by RETURN press
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+   ASSERT_RET(hil);
    const HeaderInfo *hi = (*hil)[event.m_itemIndex];
-   m_FolderView->PreviewMessage(hi->GetUId());
+   ASSERT_RET(hi);
+   if(m_FolderView->GetPreviewUId() == hi->GetUId())
+      m_FolderView->m_MessagePreview->PageDown();
+   else
+      m_FolderView->PreviewMessage(hi->GetUId());
    hil->DecRef();
 }
 
@@ -369,11 +374,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Style = wxLC_REPORT;
    m_SelectionCallbacks = true;
    m_Initialised = false;
-
-   if(m_PreviewOnSingleClick)
-      EnableSelectionCallbacks(true);
-   else
-      EnableSelectionCallbacks(false);
 
    int
       w = 500,
@@ -593,6 +593,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    // this shows what's happening:
    m_MessagePreview->Clear();
+   m_previewUId = UID_ILLEGAL;
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
 
@@ -649,6 +650,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                              NULL);
       m_MessagePreview->SetParentProfile(m_Profile);
       m_MessagePreview->Clear(); // again, to reflect profile changes
+      m_previewUId = UID_ILLEGAL;
 
       // read in our profile settigns
       ReadProfileSettings(&m_settingsCurrent);
@@ -702,6 +704,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
    m_TicketList =  ASTicketList::Create();
    m_NumOfMessages = 0;
+   m_previewUId = UID_ILLEGAL;
    m_Parent->GetClientSize(&x, &y);
    m_Profile = ProfileBase::CreateProfile("FolderView",NULL);
    m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
@@ -710,6 +713,10 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
    ReadProfileSettings(&m_settingsCurrent);
+   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
+                                             MP_PREVIEW_ON_SELECT) != 0;
+   
+   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
    m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
                                m_settingsCurrent.BgCol,
                                m_settingsCurrent.font,
@@ -793,6 +800,11 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
    AllProfileSettings settingsNew;
    ReadProfileSettings(&settingsNew);
 
+   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
+                                             MP_PREVIEW_ON_SELECT) != 0;
+
+   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
+
    if ( settingsNew == m_settingsCurrent )
    {
       // we don't care
@@ -820,10 +832,6 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
          FAIL_MSG("unknown options change event");
    }
 
-   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
-                                             MP_PREVIEW_ON_SELECT) != 0;
-
-   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
 }
 
 void
@@ -1167,6 +1175,7 @@ void
 wxFolderView::PreviewMessage(long uid)
 {
    m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
+   m_previewUId = uid;
 }
 
 

@@ -106,6 +106,21 @@ virtual void strutil_tolower ( String & str ) = 0;
 
 
 
+virtual class strutil_RegEx * strutil_compileRegEx ( const
+String & pattern ) = 0;
+
+
+virtual bool strutil_matchRegEx (
+const class strutil_RegEx *regex  ,
+const String & str ,
+int flags 
+) = 0;
+
+
+virtual void strutil_freeRegEx (
+strutil_RegEx * re ) = 0;
+
+
 /* The following line is the end of the MInterface interface definition. */
 
 };

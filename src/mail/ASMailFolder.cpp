@@ -111,7 +111,10 @@ protected:
       { if ( m_ASMailFolder ) m_ASMailFolder->UnLockFolder(); };
 
    static Ticket GetTicket(void)
-      { return ms_Ticket++;}
+      {
+         if(ms_Ticket == ILLEGAL_TICKET) ms_Ticket = 0;
+         return ms_Ticket++;
+      }
 
    virtual void *Entry();
    virtual void Run(void) { Entry(); }

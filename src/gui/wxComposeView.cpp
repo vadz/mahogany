@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxComposeView.cc : a wxWindows look at a message                 *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$   *
  *******************************************************************/
@@ -36,6 +36,7 @@
 #  include <wx/process.h>
 
 #  include <ctype.h>          // for isspace()
+#  include "Mpers.h"
 #endif
 
 #include <wx/textctrl.h>
@@ -1193,10 +1194,16 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
          // let's respect the netiquette
          static const size_t nMaxSigLines = 4;
-         if ( nLineCount > nMaxSigLines ) {
-            wxLogWarning(_("Your signature is %stoo long: it should "
-                           "not be more than %d lines."),
-                         nLineCount > 10 ? _("way ") : "", nMaxSigLines);
+         if ( nLineCount > nMaxSigLines )
+         {
+            wxString msg;
+            msg.Printf(_("Your signature is %stoo long: it should "
+                        "not be more than %d lines."),
+                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
+            MDialog_Message(msg, m_LayoutWindow,
+                            _("Signature is too long"),
+                            GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
+   
          }
 
          layoutList->MoveCursorTo(wxPoint(0,0));

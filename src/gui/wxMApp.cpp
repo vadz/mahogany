@@ -205,7 +205,7 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
    // would float on top of our message boxes
    //CloseSplash(); -- not any more, we have our SplashKillerLog installed
 
-   if ( m_hasWindow && level == wxLOG_User )
+   if ( m_hasWindow ) //&& level == wxLOG_User )
    {
       // this will call wxLogWindow::DoLogString()
       wxLog::DoLog(level, szString, t);

@@ -1748,6 +1748,24 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
    result->DecRef();
 }
 
+
+
+/// scroll down one page:
+void
+wxMessageView::PageDown(void)
+{
+   GetLayoutList()->MoveCursorVertically(20); // FIXME: ugly hard-coded line count
+   ScrollToCursor();
+}
+
+/// scroll up one page:
+void
+wxMessageView::PageUp(void)
+{
+   GetLayoutList()->MoveCursorVertically(-20); // FIXME: ugly hard-coded line count
+   ScrollToCursor();
+}
+
 // ----------------------------------------------------------------------------
 // wxMessageViewFrame
 // ----------------------------------------------------------------------------
