@@ -46,6 +46,9 @@ class TextViewerWindow;
 
 // only Win32 supports URLs in the text control natively so far, define this to
 // use this possibility
+//
+// don't define it any longer because we do it now better than the native
+// control
 //#define USE_AUTO_URL_DETECTION
 
 // ----------------------------------------------------------------------------
@@ -218,7 +221,11 @@ END_EVENT_TABLE()
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                 : wxTextCtrl(parent, -1, "",
                              wxDefaultPosition, wxDefaultSize,
-                             wxTE_RICH | wxTE_MULTILINE | wxTE_AUTO_URL)
+                             wxTE_RICH |
+#ifdef USE_AUTO_URL_DETECTION
+                             wxTE_AUTO_URL |
+#endif // USE_AUTO_URL_DETECTION
+                             wxTE_MULTILINE)
 {
    m_viewer = viewer;
 
