@@ -1451,7 +1451,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    MMessagesDataObject dropData(this, mf, selections);
 
    // setting up the dnd icons can't be done in portable way :-(
-#ifdef __WXMSW__
+#if defined(__WXMSW__) || defined(__WXMAC__)
    wxDropSource dropSource(dropData, m_winForDnd,
                            wxCursor("msg_copy"),
                            wxCursor("msg_move"));

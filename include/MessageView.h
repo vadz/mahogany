@@ -20,11 +20,7 @@
 
 #ifndef USE_PCH
    #include <wx/dynarray.h>
-#ifdef __CYGWIN__
-   #include <wx/fontutil.h>
-   // windows.h included from wx/fontutil.h under Windows #defines this
-   #undef SendMessage
-#endif
+   #include <wx/font.h>
 #endif
 
 #include <wx/colour.h>

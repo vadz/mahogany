@@ -204,7 +204,7 @@ MTextDialog::MTextDialog(wxWindow *parent,
 
    m_text->SetFocus();
 
-   Show();
+   Show(TRUE);
 }
 
 MTextDialog::~MTextDialog()
@@ -252,7 +252,7 @@ void MTextDialog::OnFind(wxCommandEvent&)
                                           &m_dataFind,
                                           _("Mahogany: Find regular expression"),
                                           wxFR_NOUPDOWN);
-      m_dlgFind->Show();
+      m_dlgFind->Show(TRUE);
    }
    else // dialog already exists
    {

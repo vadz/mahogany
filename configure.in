@@ -163,17 +163,22 @@ if test "$USE_OPT" != "1"; then
     IMAP_CPPFLAGS="${IMAP_CPPFLAGS} -O0"
 fi
 IMAP_CFLAGS="${CFLAGS}"
-IMAP_CXXFLAGS="${CXXFLAGS}"
 AC_SUBST(IMAP_CPPFLAGS)
 AC_SUBST(IMAP_CFLAGS)
-AC_SUBST(IMAP_CXXFLAGS)
+
+case "$OSTYPE" in
+    darwin* | Darwin*)
+	# Apple gcc version is buggy and requires this switch to compile
+	# compface sources and twofish.c (at least for 3.1 from Dec 2002 dev
+	# tools)
+	CFLAGS="${CFLAGS} -no-cpp-precomp"
+	;;
+esac
 
 CFACE_CPPFLAGS="${CPPFLAGS}"
 CFACE_CFLAGS="${CFLAGS}"
-CFACE_CXXFLAGS="${CXXFLAGS}"
 AC_SUBST(CFACE_CPPFLAGS)
 AC_SUBST(CFACE_CFLAGS)
-AC_SUBST(CFACE_CXXFLAGS)
 
 LIBMAL_CPPFLAGS="${CPPFLAGS}"
 LIBMAL_CFLAGS="${CFLAGS}"
@@ -233,37 +238,34 @@ dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
 AC_PROG_CXX
 
-dnl disabling this because wx-config now outputs -fno-exceptions -fno-rtti
-dnl for us itself if they are supported
-dnl
-dnl dnl disable support for exceptions if the compiler is g++ and
-dnl dnl new enough to support it.
-dnl case "$GXX" in yes)
-dnl 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
-dnl 		m_cv_gxx_exceptions,
-dnl 		[echo 'void f(){}' >conftest.cc
-dnl 		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
-dnl 		'')	m_cv_gxx_exceptions=yes ;;
-dnl 		*)	m_cv_gxx_exceptions=no ;;
-dnl 		esac
-dnl 		rm -f conftest*])
-dnl 	case "$m_cv_gxx_exceptions" in yes)
-dnl 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
-dnl 	esac
-dnl 
-dnl 	dnl the same for RTTI - we don't use it neither
-dnl 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
-dnl 		m_cv_gxx_rtti,
-dnl 		[echo 'void f(){}' >conftest.cc
-dnl 		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
-dnl 		'')	m_cv_gxx_rtti=yes ;;
-dnl 		*)	m_cv_gxx_rtti=no ;;
-dnl 		esac
-dnl 		rm -f conftest*])
-dnl 	case "$m_cv_gxx_rtti" in yes)
-dnl 		CXXFLAGS="$CXXFLAGS -fno-rtti"
-dnl 	esac
-dnl esac
+dnl disable support for exceptions if the compiler is g++ and
+dnl new enough to support it.
+case "$GXX" in yes)
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
+		m_cv_gxx_exceptions,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_exceptions=yes ;;
+		*)	m_cv_gxx_exceptions=no ;;
+		esac
+		rm -f conftest*])
+	case "$m_cv_gxx_exceptions" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-exceptions"
+	esac
+
+	dnl the same for RTTI - we don't use it neither
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-rtti,
+		m_cv_gxx_rtti,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-rtti -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_rtti=yes ;;
+		*)	m_cv_gxx_rtti=no ;;
+		esac
+		rm -f conftest*])
+	case "$m_cv_gxx_rtti" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-rtti"
+	esac
+esac
 
 dnl check whether the C++ supports the new logical operator names
 dnl c-client library uses some of them as field names
@@ -398,7 +400,8 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 if test "$USE_MAC" = 1; then
-    AC_CHECK_PROG(REZ, Rez, Rez, /Developer/Tools/Rez)
+    AC_CHECK_PROG(REZ, Rez, Rez, true, [$PATH:/Developer/Tools])
+    AC_CHECK_PROG(SETFILE, SetFile, SetFile, true, [$PATH:/Developer/Tools])
 fi
 
 dnl --------------------------------------------------------------------------
@@ -871,23 +874,18 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-dnl check for wx-config
+dnl check for wxWindows installation¤
+AM_PATH_WXCONFIG(2.4.0,wxOK=1)
 
-dnl check for 2.3.2 first as it has separate --cppflags, --cflags and --cxxflags
-dnl and so should work in any case while previous version return switches for
-dnl C++ compiler in --cflags which will lead to compilation errors sometimes
-dnl (i.e. if wxWin was built with --enable-no_rtti, CC can choke on -fno_rtti)
-AM_PATH_WXCONFIG(2.3.2, WX232=1)
-
-if test "$WX232" != 1; then
+if test "$wxOK" != 1; then
    AC_MSG_ERROR([
 	   Mahogany requires wxWindows to be installed on your system
 	   but wx-config script couldn't be found.
 
-	   Please check that wx-config is in path, the directory
+	   Please check that wx-config is in PATH, the directory
 	   where wxWindows libraries are installed (returned by
 	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-	   equivalent variable and wxWindows version is 2.3.2 or above.
+	   equivalent variable and wxWindows version is 2.4.0 or above.
    ])
 fi
 
@@ -983,7 +981,7 @@ case "$USE_CCOSTYPE" in
 			    *) 	  CCOSTYPE=sgi ;;
 			esac
 		esac ;;
-	darwin*)
+	darwin*|Darwin*)
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;

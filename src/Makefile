@@ -40,16 +40,60 @@ endif
 
 include ../makerules
 
+# under Mac OS we need to build a bundle in addition to the main binary
+ifdef USE_MAC
+M_BUNDLE := bundle
+else
+M_BUNDLE :=
+endif
+
 # OK, we've got all the names and the rules to generate them; we can
 # now actually specify the dependencies.
-binary:	M $(MSOS)
+binary:	M $(MSOS) $(M_BUNDLE)
 	@true
 
 M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 ifdef USE_MAC
-	$(REZ) -t APPL Carbon.r -o M
+	$(REZ) -t APPL Carbon.r -o $@
+	$(SETFILE) -a C $@
 endif
+
+ifdef USE_MAC
+
+include ../makeversion
+
+BUNDLE := M.app/Contents
+
+# Targets to build a Mac OS X application bundle
+# (copied from wxWindows makefiles)
+bundle: $(BUNDLE)/MacOS/M \
+        $(BUNDLE)/Info.plist \
+        $(BUNDLE)/PkgInfo \
+        $(BUNDLE)/Resources/M.rsrc \
+        $(BUNDLE)/Resources/M.icns
+
+$(BUNDLE)/Info.plist: $(SOURCEDIR)/macosx/Info.plist.in
+	@$(INSTALL) -d `dirname $@`
+	@sed "s/VERSION/$(M_VERSION_MAJOR).$(M_VERSION_MINOR).$(M_RELEASE)/" $< > $@
+
+$(BUNDLE)/PkgInfo:
+	@$(INSTALL) -d `dirname $@`
+	@echo -n "APPL????" > $@
+
+$(BUNDLE)/MacOS/M: M
+	@$(INSTALL) -d `dirname $@`
+	@cp $< $@
+
+$(BUNDLE)/Resources/M.rsrc: $(SOURCEDIR)/macosx/M.rsrc
+	@$(INSTALL) -d `dirname $@`
+	@cp $< $@
+
+$(BUNDLE)/Resources/M.icns: $(SOURCEDIR)/macosx/Info.plist.in
+	@$(INSTALL) -d `dirname $@`
+	@cp $< $@
+
+endif # USE_MAC
 
 Mdll:	libM.so
 	$(LINK) -o M $(LDFLAGS) libM.so

@@ -1315,7 +1315,7 @@ wxMimeTypesManager& MAppBase::GetMimeManager(void) const
 #ifdef DEBUG
 
 // only used from wxMainFrame.cpp to toggle debug on/off
-extern bool g_debugMailForceOn = false;
+bool g_debugMailForceOn = false;
 
 #endif // DEBUG
 

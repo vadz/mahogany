@@ -1975,8 +1975,8 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
 
    // only junk (and enough of it) until the end?
    return !*p &&
-            p - startTail >= LEN_TAIL &&
-               p - startSpaces >= LEN_SPACES_AND_TAIL;
+            (size_t)(p - startTail) >= LEN_TAIL &&
+               (size_t)(p - startSpaces) >= LEN_SPACES_AND_TAIL;
 }
 
 // check the given MIME part and all of its children for Korean charset, return
