@@ -2,7 +2,8 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	15.06.03
+Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
+Last modified:	23.07.03
 Version:	the information in this file applies to the cvs sources
 
 0. Requirements
@@ -116,5 +117,9 @@ b) Common problems
 
 Linking Mahogany compiled with debug info requires a lot of memory, so please
 disable debugging if you experience out of memory problems.
+
+SSL does not work with cygwin.
+
+IMAP does not work with mingw.
 
 vi: ts=8 nolist nocin ai:
