@@ -33,6 +33,8 @@ $Id$
   + URL highlighting is buggy: I don't know how should we fix it without first
     reading all the docs, but Profile::readEntry() definitely shouldn't be
     highlighted (well, "Pro" is not) :-)
+  + right mouse button on non-Icon should pop up Message menu
+  + formatting menu?
 
 - UI things
   + message-related commands should be disabled if there is no selection
