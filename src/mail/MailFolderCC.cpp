@@ -48,6 +48,7 @@ static
 MailFolder::MessageStatus
 GetMsgStatus(MESSAGECACHE *elt)
 {
+   ASSERT(elt);
    int status = MailFolder::MSG_STAT_NONE;
    if(elt->recent)   status |= MailFolder::MSG_STAT_RECENT;
    if(elt->seen)     status |= MailFolder::MSG_STAT_SEEN;
@@ -1186,6 +1187,13 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
          return;
    }
 
+   // This seems to occasionally happen. Some race condition?
+   if(m_BuildNextEntry >= m_Listing->Count())
+   {
+      m_NumOfMessages = m_Listing->Count();
+      return;
+   }
+   
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
    char tmp[MAILTMPLEN];

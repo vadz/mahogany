@@ -12,6 +12,9 @@ $Id$
 		later say that there are M-N new messages :-(
 		BROKEN COMPLETELY NOW -- FIX IT!
 		CHECK ABORT BUTTON!
+		Add option to re-sort messages on status change.
+9	KB	Group-reply should use old To: field, too if not
+		identical to ourselves
 9	KB	Modify mail_fetch_overview() to work backwards.
 9	KB	-> add date sorting, score sorting and threading
                 -> Do we want to re-sort on flags change?
@@ -32,11 +35,10 @@ $Id$
 8	VZ	mh_parameters provokes a compile bug - what to do?
 
 5	KB	for NNTP only count unread/new messages
-4		Change "only retrieve first X messages" dialog box:
-		1. make it more intuitive (yes/no switch)
-		2. add a [Cancel] button to abort retrieval
-9		changing properties for IMAP folder (auto-collect)
-		occasionally dumps core on [OK] click
+4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
+		message view properties page --> rename to "Viewer?"
+		Rename "File" menu to "Messages" or "Program"?
+		Icon subdirectories GNOME/KDE?
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 

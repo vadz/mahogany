@@ -223,7 +223,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       const HeaderInfo *hi;
       size_t i;
       HeaderInfoList *hil = mf->GetHeaders();
-      if(hil)
+      if(hil && hil->Count() > 0)
       {
          m_Message << _("From folder '") << mf->GetName() << "':\n";
          for(i = 0; i < hil->Count(); i++)
