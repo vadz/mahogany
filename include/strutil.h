@@ -176,8 +176,8 @@ strutil_findurl(String &str, String &url);
 #define strutil_isurlchar(c) \
    (isalnum(c)  || c == '.' || c == '/' || c == ':' \
     || c == '_' || c == '&' || c == '#' || c == '-' \
-    || c == '%' || c == '!' || c == '?' || c == '*' \
-    || c == '+' || c == '$' )
+    || c == '%' || c == '~' || c == '!' || c == '?' \
+    || c == '*' || c == '+' || c == '$' )
 
 
 #ifndef     HAVE_STRSEP
