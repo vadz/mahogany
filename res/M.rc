@@ -170,6 +170,15 @@ migrate		BITMAP	"migrate.bmp"
 msg_copy	CURSOR	"msg_copy.cur"
 msg_move	CURSOR	"msg_move.cur"
 
+
+// PGP icons
+pgpsig_good	BITMAP  "sig_good.bmp"
+pgpsig_exp	BITMAP	"sig_unk.bmp"
+pgpsig_untrust	BITMAP	"sig_unk.bmp"
+pgpsig_bad	BITMAP	"sig_bad.bmp"
+pgpmsg_ok	BITMAP	"sig_good.bmp"
+pgpmsg_bad	BITMAP	"sig_bad.bmp"
+
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows resources
 ///////////////////////////////////////////////////////////////////////////////
