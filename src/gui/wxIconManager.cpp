@@ -161,15 +161,16 @@ wxIconManager::LoadImage(String filename, bool *success)
       int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
       switch(format)
       {
-      case 0: // xpm
-         tempfile += ".xpm"; break;
-      case 1: // png
-         tempfile += ".png"; break;
-      case 2: // bmp
-         tempfile += ".bmp"; break;
-      default: // cannot happen
-         wxASSERT(0);
+         case 0: // xpm
+            tempfile += ".xpm"; break;
+         case 1: // png
+            tempfile += ".png"; break;
+         case 2: // bmp
+            tempfile += ".bmp"; break;
+         default: // cannot happen
+            wxASSERT(0);
       }
+
       // strip leading path
       int i = tempfile.Length();
       while(i && tempfile.c_str()[i] != '/')
@@ -179,9 +180,22 @@ wxIconManager::LoadImage(String filename, bool *success)
          (getenv("TMP") && strlen(getenv("TMP")))
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
+
+      String strConvertProgram = READ_APPCONFIG(MP_CONVERTPROGRAM);
+      String strFormatSpec = strutil_extract_formatspec(strConvertProgram);
+      if ( strFormatSpec != "ss" )
+      {
+         wxLogError(_("The setting for image conversion program should include "
+                      "exactly two '%%s' format specificators.\n"
+                      "The current format specificators are incorrect and "
+                      "the default value will be used instead."));
+
+         strConvertProgram = MP_CONVERTPROGRAM_D;
+      }
+      
       String command;
-      command.Printf(READ_APPCONFIG(MP_CONVERTPROGRAM),
-                     filename.c_str(), tempfile.c_str());
+      command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
+
       wxLogTrace(wxTraceIconLoading,
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());
@@ -199,7 +213,7 @@ wxIconManager::LoadImage(String filename, bool *success)
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);
    }
-#endif
+#endif // OS_UNIX
 
    // if everything else failed, try xpm loading:
    if((! loaded) /*&& m_wxBitmapHandlers[0] == 0*/) // try our own XPM loading code
