@@ -1517,6 +1517,9 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
 {
    PCHECK();
 
+   CHECK( gs_allConfigSources, false,
+               _T("can't call Profile methods before CreateGlobalConfig()") );
+
    // did we find the requested data in this profile?
    bool foundHere = false;
 
