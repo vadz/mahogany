@@ -4167,7 +4167,7 @@ wxComposeView::AutoSave()
       // we need a unique file name during the life time of this object as this
       // file is always going to be deleted if we're destroyed correctly, it
       // can only be left if the program crashes
-      m_filenameAutoSave = name + String::Format("%05d%p", getpid(), this);
+      m_filenameAutoSave = name + String::Format("%05d%p", (int)getpid(), this);
    }
 
    String contents;
