@@ -178,7 +178,7 @@ Contents</A>
 </UL>
 <BR>
 <LI><A NAME="tex2html206"
-  HREF="#SECTION00300000000000000000">Scripting and Extending <I>Mahogany</I></A>
+  HREF="#SECTION00300000000000000000">Scripting and Extending Mahogany</A>
 <UL>
 <LI><A NAME="tex2html207"
   HREF="#SECTION00310000000000000000">Python Scripting</A>
@@ -358,9 +358,11 @@ powerful than the old one as the new one is text-only and not rich text but it
 is also significantly less buggy and simpler to use. Another big internal
 change is that the built in Python interpreter now works again and you can use
 it to write filter functions and do other nifty things (see section
-<A HREF="Manual.html#python"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>). Other than that, the focus of the new release is yet again
-more bug fixing than adding new features. As usual, some of them were still
-added:
+<A HREF="Manual.html#python"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>). Finally, we now have a working version for Mac OS X.
+
+<P>
+Other than that, the focus of the new release is yet again more bug fixing
+than adding new features. As usual, some of them were still added:
 
 <UL>
 <LI>Quick search commands in the folder view (see <A HREF="Manual.html#keybindings"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A> and
@@ -375,6 +377,8 @@ added:
 <LI>``Paste quoted'' command added
 </LI>
 <LI>New command to select all text in the viewer added
+</LI>
+<LI>New <TT>-userdir</TT> command line option
 </LI>
 <LI><TT>isfromme()</TT> (was message sent by myself?) filter test added
 </LI>
@@ -1082,7 +1086,7 @@ Why not the GPL/BSD/QPL/my favourite license?</A>
 Recently discussions about which license to chose for which project
 provoked major flamewars in the Unix community. There is a trend to
 put everything under the GPL or LGPL<A NAME="tex2html3"
-  HREF="#foot142"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
+  HREF="#foot143"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
 discussion. Our intent is to allow everyone to use and modify Mahogany
 while preserving some form of control over its development. That is
 why we chose a modified version of Perl's Artistic License. It is
@@ -1619,6 +1623,12 @@ either <TT>/</TT> or <TT>-</TT> but only <TT>-</TT> can be used for the long one
 </TR>
 <TR><TD ALIGN="CENTER">&nbsp;</TD>
 <TD ALIGN="CENTER">to automatically do something after starting up</TD>
+</TR>
+<TR><TD ALIGN="CENTER">-userdir=dir</TD>
+<TD ALIGN="CENTER">specify a non default directory containing all user</TD>
+</TR>
+<TR><TD ALIGN="CENTER">&nbsp;</TD>
+<TD ALIGN="CENTER">data including, but not limited to, the file mailboxes</TD>
 </TR>
 <TR><TD ALIGN="CENTER">-config=file</TD>
 <TD ALIGN="CENTER">specify the alternate configuration file to use</TD>
@@ -3075,9 +3085,8 @@ Callbacks</A>
 
 <P>
 Callbacks are python functions that can be called from different parts
-of Mahogany's code. See the Scripting and Extending chapter (<A HREF="Manual.html#Scripting"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>)
-and the Hacker's guide (<A HREF="#HackersGuide"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>) for more information
-on this.
+of Mahogany's code. See the section <A HREF="Manual.html#pythonhooks"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A> for more information on
+this.
 
 <P>
 
@@ -3777,7 +3786,7 @@ to download the addressbook again.
 
 <H1><A NAME="SECTION00300000000000000000"></A><A NAME="Scripting"></A>
 <BR>
-Scripting and Extending <I>Mahogany</I>
+Scripting and Extending Mahogany
 </H1>
 
 <P>
@@ -3838,9 +3847,16 @@ the <TT>Message</TT> object which corresponds to the message currently being
 filtered.
 
 <P>
+Please have a look at <TT>spam.py</TT> example included in Mahogany
+distribution (in <TT>Python</TT> directory under Windows and in
+<TT>/usr/share/mahogany/scripts</TT> under Unix) to see a real life example of
+using Python for writing non trivial filters.
 
-<H2><A NAME="SECTION00314000000000000000">
-Callback Functions (Hooks)</A>
+<P>
+
+<H2><A NAME="SECTION00314000000000000000"></A><A NAME="pythonhooks"></A>
+<BR>
+Callback Functions (Hooks)
 </H2>
 
 <P>
@@ -3849,17 +3865,18 @@ different places within <I>Mahogany</I>. These are defined in the
 header file <TT>Mcallbacks.h</TT>. There is no documentation for these
 callbacks yet, but don't hesitate to ask us if you need more information
 about this. All of these callbacks are called with at least one arguments
-which is a pointer to the object from which it was called. E.g. for <TT>FolderOpenHook</TT>,
-this would be a pointer to a <TT>MailFolder</TT> object. This object
-does not carry a useable type with it and needs to be converted in
-the callback, e.g. if the argument is called <TT>arg</TT> and the
-object is a <TT>MailFolder</TT>, the object must either be used as
-<TT>MailFolder.MailFolderPtr(arg)</TT> or be converted as
-<TT>mf = MailFolder.MailFolderPtr(arg)</TT>.
+which is a pointer to the object from which it was called. E.g. for
+<TT>FolderOpenHook</TT>, this would be a <TT>MailFolder</TT> object.
 
 <P>
-Some callbacks have a third argument. This is either a single value
-or a tuple holding several values.
+The callback return value is usually a boolean and indicates whether Mahogany
+should proceed normally (<IMG
+ WIDTH="14" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+ SRC="img3.png"
+ ALT="$1$">) or cancel the operation (<IMG
+ WIDTH="14" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="img4.png"
+ ALT="$0$">).
 
 <P>
 
@@ -4531,12 +4548,10 @@ All Mahogany icons show a question mark</A>
 </H2>
 
 <P>
-<I>I'm a linuxuser (redhat) who just found Mahogany and really
+<I>I'm a linux user (redhat) who just found Mahogany and really
 likes it, but I have a problem, I can't get all the widgets to work,
 the pictures on the buttons and the ones before the mailboxes all
-appear as an questionmark. Do I need some library to make it look
-like your screenshot? If you would assist me in this matter I would
-be very grateful.</I>
+appear as an questionmark?</I>
 
 <P>
 It depends how you installed it. If the icon with the question mark
@@ -4908,6 +4923,10 @@ LANG will be recognised if it is set, but in addition Mahogany will
 automatically detect which language your system is set to use.
 
 <P>
+In addition, there is a <TT>-lang</TT> command line option, see
+<A HREF="Manual.html#cmdlineargs"><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="crossref.png"></A>.
+
+<P>
 
 <H2><A NAME="SECTION006210000000000000000">
 How can I delete messages?</A>
@@ -5041,7 +5060,7 @@ but the to/from fields remain the same.
 <P>
 <BR><HR><H4>Footnotes</H4>
 <DL>
-<DT><A NAME="foot142">... LGPL</A><A NAME="foot142"
+<DT><A NAME="foot143">... LGPL</A><A NAME="foot143"
  HREF="Manual.html#tex2html3"><SUP>1.1</SUP></A>
 <DD>which we recently felt victim of - due to some strong demand, we have
 decided to allow alternatively licensing Mahogany under GPL
@@ -5051,7 +5070,7 @@ decided to allow alternatively licensing Mahogany under GPL
 <BR><HR>
 <ADDRESS>
 Vadim Zeitlin
-2004-01-03
+2004-01-20
 </ADDRESS>
 </BODY>
 </HTML>
