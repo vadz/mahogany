@@ -797,7 +797,7 @@ public:
       {
          if ( m_mf )
          {
-            wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close timed out.",
+            wxLogTrace(TRACE_MF_CLOSE, "Really closing mailfolder '%s'",
                        m_mf->GetName().c_str());
             m_mf->RealDecRef();
          }
@@ -884,8 +884,9 @@ MailFolderCmn::DecRef()
 
          if ( delay > 0 )
          {
-            wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close delayed.",
-                       GetName().c_str());
+            wxLogTrace(TRACE_MF_CLOSE,
+                       "Mailfolder '%s': close delayed for %d seconds.",
+                       GetName().c_str(), delay);
 
             Checkpoint(); // flush data immediately
             gs_MailFolderCloser->Add(this, delay);
@@ -912,7 +913,6 @@ MailFolderCmn::RealDecRef()
 {
    return MObjectRC::DecRef();
 }
-
 
 /* static */
 bool MailFolder::CanExit(String *which)
@@ -1083,7 +1083,7 @@ MailFolder::ReplyMessage(class Message *msg,
 
    cv->SetSubject(newSubject);
 
-   // other header   s
+   // other headers
    String messageid;
    msg->GetHeaderLine("Message-Id", messageid);
    String references;

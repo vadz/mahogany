@@ -206,7 +206,11 @@ typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW_X *ov
 // extended OVERVIEW struct additionally containing the destination address
 struct OVERVIEW_X : public mail_overview
 {
+   // the "To:" header
    ADDRESS *to;
+
+   // the "Newsgroups:" header
+   const char *newsgroups;
 };
 
 // type of the callback for mail_fetch_overview()
@@ -2962,29 +2966,45 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
    // STATUS:
    entry.m_Status = GetMsgStatus(elt);
 
-   /* For NNTP, do not show deleted messages: */
+   // For NNTP, do not show deleted messages - they are marked as "read"
    if(m_folderType == MF_NNTP && elt->deleted)
-      return 1; // ignore but continue
+   {
+      // ignore but continue: don't forget to update the max number of
+      // messages in the folder if we throw away this one!
+      m_msgnoMax--;
+
+      return 1;
+   }
 
    if(ov)
    {
       // DATE
-      mail_parse_date (&selt,ov->date);
+      mail_parse_date(&selt, ov->date);
       entry.m_Date = (time_t) mail_longdate( &selt);
 
       // FROM and TO
       entry.m_From = ParseAddress(ov->from);
-      if(m_folderType == MF_NNTP || m_folderType == MF_NEWS)
+
+      if ( m_folderType == MF_NNTP || m_folderType == MF_NEWS )
       {
-         entry.m_To = ""; // no To: for news postings
+         entry.m_NewsGroups = ov->newsgroups;
       }
       else
       {
          entry.m_To = ParseAddress( ov->to );
       }
 
+      // now deal with encodings
       wxFontEncoding encoding;
-      entry.m_To = DecodeHeader(entry.m_To, &encoding);
+      if ( !entry.m_To.empty() )
+      {
+         entry.m_To = DecodeHeader(entry.m_To, &encoding);
+      }
+      else
+      {
+         encoding = wxFONTENCODING_SYSTEM;
+      }
+
       wxFontEncoding encodingMsg = encoding;
 
       entry.m_From = DecodeHeader(entry.m_From, &encoding);
@@ -3967,6 +3987,7 @@ void mail_fetch_overview_x(MAILSTREAM *stream, char *sequence, overview_x_t ofn)
             ov.subject = env->subject;
             ov.from = env->from;
             ov.to = env->to;
+            ov.newsgroups = env->newsgroups; // no need to strcpy()
             ov.date = env->date;
             ov.message_id = env->message_id;
             ov.references = env->references;
@@ -4004,6 +4025,7 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
             ov.subject = env->subject;
             ov.from = env->from;
             ov.to = env->to;
+            ov.newsgroups = env->newsgroups; // no need to strcpy()
             ov.date = env->date;
             ov.message_id = env->message_id;
             ov.references = env->references;
@@ -4018,22 +4040,35 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
 // ----------------------------------------------------------------------------
 
 // define a macro TRACE_CALLBACKn() for tracing a callback with n + 1 params
-#if 1 // def EXPERIMENTAL_log_callbacks
+#ifdef DEBUG // EXPERIMENTAL_log_callbacks
+   static const char *GetErrorLevel(long errflg)
+   {
+      return errflg == ERROR ? "error"
+                             : errflg == WARN ? "warn"
+                                              : errflg == PARSE ? "parse"
+                                                                : "other";
+   }
+
+   static inline const char *GetStreamMailbox(MAILSTREAM *stream)
+   {
+      return stream ? stream->mailbox : "<no stream>";
+   }
+
    #define TRACE_CALLBACK0(name) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(%s)", \
-                 #name, stream ? stream->mailbox : "<no stream>")
+                 #name, GetStreamMailbox(stream))
 
    #define TRACE_CALLBACK1(name, fmt, parm) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, stream->mailbox, parm)
+                 #name, GetStreamMailbox(stream), parm)
 
    #define TRACE_CALLBACK2(name, fmt, parm1, parm2) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, stream->mailbox, parm1, parm2)
+                 #name, GetStreamMailbox(stream), parm1, parm2)
 
    #define TRACE_CALLBACK3(name, fmt, parm1, parm2, parm3) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(%s, " fmt ")", \
-                 #name, stream->mailbox, parm1, parm2, parm3)
+                 #name, GetStreamMailbox(stream), parm1, parm2, parm3)
 
    #define TRACE_CALLBACK_NOSTREAM_1(name, fmt, parm1) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
@@ -4046,14 +4081,6 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
    #define TRACE_CALLBACK_NOSTREAM_5(name, fmt, parm1, parm2, parm3, parm4, parm5) \
       wxLogTrace(TRACE_MF_CALLBACK, "%s(" fmt ")", \
                  #name, parm1, parm2, parm3, parm4, parm5)
-
-   static const char *GetErrorLevel(long errflg)
-   {
-      return errflg == ERROR ? "error"
-                             : errflg == WARN ? "warn"
-                                              : errflg == PARSE ? "parse"
-                                                                : "other";
-   }
 #else // !EXPERIMENTAL_log_callbacks
    #define TRACE_CALLBACK0(name)
    #define TRACE_CALLBACK0(name)

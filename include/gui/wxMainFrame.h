@@ -44,8 +44,9 @@ public:
    void AddFolderMenu(void);
 
    // wxWindows callbacks
-   void OnCommandEvent(wxCommandEvent &);
-   void OnIdentChange(wxCommandEvent &);
+   void OnCommandEvent(wxCommandEvent &event);
+   void OnIdentChange(wxCommandEvent &event);
+   void OnUpdateUILangMenu(wxUpdateUIEvent &event);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
    /// Appends the menu for a module to the menubar

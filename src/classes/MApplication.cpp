@@ -729,7 +729,7 @@ MAppBase::OnMEvent(MEventData& event)
                {
                   // it seems like a better idea to give this brief message in case
                   // of several messages
-                  message.Printf(_("You have received %lu new messages\n"
+                  message.Printf(_("You have received %lu new messages "
                                    "in folder '%s'."),
                                  number, folder->GetName().c_str());
                   found = number;

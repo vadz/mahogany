@@ -6,6 +6,8 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+16.03.01 VZ: more flexible initial msg selection in the folder viewer
+             reading newsgroups doesn't crash the program and works somehow
 15.03.01 VZ: added "Synchronize" page to the options dialog
 14.03.01 VZ: propose to retrieve all mailboxes from IMAP servers when opening
 12.03.01 VZ: MIME parsing is finally (almost) correct - and more efficient, too

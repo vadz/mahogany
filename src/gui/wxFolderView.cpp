@@ -1484,7 +1484,15 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       Update();
 #endif
 
-      // select some "interesting" message initially
+      // select some "interesting" message initially: the logic here is a bit
+      // hairy, but, hopefully, this does what expected.
+      //
+      // explanations: if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we
+      // just select either the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or
+      // the last one (otherwise). If it is on and we have an unread message,
+      // we always select first unread message, but if there are no unread
+      // messages, we revert to the previous behaviour, i.e. select the first
+      // or the last one
       if ( m_NumOfMessages > 0 )
       {
          HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
@@ -1495,12 +1503,30 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             {
                uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
             }
-            else if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE) )
+            else
             {
-               m_FolderCtrl->Focus(0);
+               uid = UID_ILLEGAL;
+            }
 
-               HeaderInfo *hi = hil[0];
-               uid = hi ? hi->GetUId() : UID_ILLEGAL;
+            if ( uid == UID_ILLEGAL )
+            {
+               // select first unread is off or no unread message
+               unsigned long idx
+                  = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE)
+                     ? 0
+                     : m_NumOfMessages - 1;
+
+               m_FolderCtrl->Focus(idx);
+
+               HeaderInfo *hi = hil[idx];
+               if ( hi )
+               {
+                  uid = hi->GetUId();
+               }
+               else
+               {
+                  wxFAIL_MSG("Failed to get the uid of preselected message");
+               }
             }
 
             // the item is already focused, now preview it automatically too
@@ -1737,7 +1763,15 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
    if ( replaceFromWithTo )
    {
       sender.clear();
-      sender << _("To: ") << hi->GetTo();
+
+      // if there is no "To" address, this must be a newsgroup posting (not
+      // 100% true, but for 99% it is)
+      String to = hi->GetTo(),
+             newsgroups = hi->GetNewsgroups();
+      if ( to.empty() && !newsgroups.empty() )
+         sender << _("Posted to: ") << newsgroups;
+      else
+         sender << _("To: ") << to;
    }
 
    // optionally leave only the name part of the address

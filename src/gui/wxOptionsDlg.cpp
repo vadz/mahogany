@@ -267,9 +267,9 @@ enum ConfigFields
    ConfigField_FolderViewNewMailUseCommand,
    ConfigField_FolderViewNewMailCommand,
    ConfigField_FolderViewNewMailShowMsg,
-   ConfigField_FolderViewHelpText1,
-   ConfigField_AutoShowFirstMessage,
-   ConfigField_AutoShowFirstUnreadMessage,
+   ConfigField_FolderViewShowHelpText,
+   ConfigField_FolderViewShowFirst,
+   ConfigField_FolderViewShowFirstUnread,
    ConfigField_FolderViewPreviewOnSelect,
    ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
@@ -334,6 +334,7 @@ enum ConfigFields
    ConfigField_OpenOnClick,
    ConfigField_ShowHiddenFolders,
    ConfigField_DebugCClient,
+   ConfigField_HelpDir,
 #ifdef USE_SSL
    ConfigField_SslHelp,
    ConfigField_SslDllName,
@@ -878,9 +879,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("E&xecute new mail command"), Field_Bool,    -1 },
    { gettext_noop("New mail &command"), Field_File, ConfigField_FolderViewNewMailUseCommand},
    { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
-   { gettext_noop("\nWhen opening the folder:"), Field_Message,  -1 },
-   { gettext_noop("&Select first message initially"), Field_Bool, -1 },
-   { gettext_noop("Select &first unread message initially"), Field_Bool, -1 },
+   { gettext_noop("\nWhat happens when the folder is opened? If selecting\n"
+                  "unread message is on, Mahogany will select the first or\n"
+                  "last unread message depending on the next option. If there\n"
+                  "are no unread messanes, it will just select first or last\n"
+                  "message."), Field_Message,  -1 },
+   { gettext_noop("&Select first message (or the last one)"), Field_Bool, -1 },
+   { gettext_noop("Select first &unread"), Field_Bool, -1 },
    { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
    { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
@@ -955,8 +960,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
-   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1
-   },
+   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1 },
+
+   { gettext_noop("Directory with the help files"), Field_Dir, -1 },
+
 #ifdef USE_SSL
    /* The two settings are not really Field_Restart, but if one has
       tried to use SSL before setting them correctly, then
@@ -1221,6 +1228,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
    CONFIG_ENTRY(MP_DEBUG_CCLIENT),
+   CONFIG_ENTRY(MP_HELPDIR),
 #ifdef USE_SSL
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_SSL_DLL_SSL),

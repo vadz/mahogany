@@ -92,6 +92,9 @@ public:
    /** For use by the listctrl: get last previewed uid: */
    UIdType GetPreviewUId(void) const { return m_previewUId; }
 
+   /** Are we previewing anything? */
+   bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
+
    /** Save messages to a file.
        @param pointer array holding the message numbers
    */

@@ -32,6 +32,7 @@ public:
    virtual String const &GetSubject(void) const { return m_Subject; }
    virtual String const &GetFrom(void) const { return m_From; }
    virtual String const &GetTo(void) const { return m_To; }
+   virtual const String &GetNewsgroups(void) const { return m_NewsGroups; }
    virtual time_t GetDate(void) const { return m_Date; }
    virtual String const & GetId(void) const { return m_Id; }
    virtual unsigned long GetUId(void) const { return m_UId; }
@@ -72,6 +73,7 @@ protected:
    String m_Subject,
           m_From,
           m_To,
+          m_NewsGroups,
           m_References;
 
    String m_Id;

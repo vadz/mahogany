@@ -35,6 +35,7 @@ public:
    virtual const String &GetSubject(void) const = 0;
    virtual const String &GetFrom(void) const = 0;
    virtual const String &GetTo(void) const = 0;
+   virtual const String &GetNewsgroups(void) const = 0;
    virtual time_t GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;

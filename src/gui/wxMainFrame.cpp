@@ -113,12 +113,19 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
    EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 
+   EVT_UPDATE_UI_RANGE(WXMENU_LANG_BEGIN + 1, WXMENU_LANG_END,
+                       wxMainFrame::OnUpdateUILangMenu)
+
    EVT_CHOICE(IDC_IDENT_COMBO, wxMainFrame::OnIdentChange)
 END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// construction
+// ----------------------------------------------------------------------------
 
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
            : wxMFrame(iname,parent)
@@ -270,6 +277,15 @@ wxMainFrame::CanClose() const
    if(rc == TRUE)
       m_FolderView->SetFolder(NULL);
    return rc;
+}
+
+// ----------------------------------------------------------------------------
+// callbacks
+// ----------------------------------------------------------------------------
+
+void wxMainFrame::OnUpdateUILangMenu(wxUpdateUIEvent &event)
+{
+   event.Enable( m_FolderView->HasPreview() );
 }
 
 void
