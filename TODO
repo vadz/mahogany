@@ -15,11 +15,13 @@ $Id$
 
 4		BBDB save on exit dialog needs "don't show again" box
 
-6		cannot type text when NUMLOCK is on
+4		cannot type text when NUMLOCK is on
+4		TABs in messages don't show (CRAC test message)
 
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
+
 
 9	KB	wxLayout:
 		- speed up by only running Layout() for recalculations 
@@ -83,6 +85,11 @@ $Id$
 
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
+
+8	VZ	ADB fails to expand "CRAC" to the entries of a group
+		with that name "CRAC", because another entry has
+		"crac" in its mail address. Should present the dialog
+		and offer a choice instead of just picking the first.
 
 9	KB	Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
