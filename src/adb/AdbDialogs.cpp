@@ -317,7 +317,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxWindow *parent)
    m_listbox->SetConstraints(c);
 
    // final steps
-   String file = wxConfigBase::Get()->Read(GetFileProfilePath(), "");
+   String file = wxConfigBase::Get()->Read(GetFileProfilePath(), _T(""));
    if ( !file.empty() )
    {
       m_text->SetValue(file);
