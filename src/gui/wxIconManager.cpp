@@ -133,7 +133,7 @@ wxIconManager::LoadImage(String filename, bool *success)
          
       for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
          if(m_wxBitmapHandlers[i])
-            loaded = img->LoadFile(filename, wxBITMAP_TYPE_PNG);
+            loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
    }// normal logging again
 #ifdef OS_UNIX
    if(! loaded) // try to use imageMagick to convert image to PNG
@@ -156,7 +156,7 @@ wxIconManager::LoadImage(String filename, bool *success)
                  "wxIconManager::LoadImage() calling '%s'...",
                  command.c_str());
       if(system(command) == 0)
-         loaded = img->LoadFile(filename, m_wxBitmapHandlers[i]);
+         loaded = img->LoadFile(filename, wxBITMAP_TYPE_PNG);
       if(tempfile.length()) // using a temporary file
          wxRemoveFile(tempfile);
    }
