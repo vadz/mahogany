@@ -2821,11 +2821,11 @@ msgstr "&Mapbestand voor verstuurde berichten"
 # wxMenuDefs.cpp:268
 #: wxMDialogs.cpp:2166
 #, fuzzy
-msgid "show succesful test message"
+msgid "show successful test message"
 msgstr "Bekijk geselecteerd bericht"
 
 #: wxMDialogs.cpp:2167
-msgid "ask for confirmation before deleing the address book entries"
+msgid "ask for confirmation before deleting the address book entries"
 msgstr ""
 
 #: wxMDialogs.cpp:2168

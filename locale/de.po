@@ -2525,11 +2525,11 @@ msgid "show notification for sent messages"
 msgstr "Bestätigung für gesendete Nachrichten"
 
 #: wxMDialogs.cpp:2166
-msgid "show succesful test message"
+msgid "show successful test message"
 msgstr "Erfolgreiche Testnachricht anzeigen"
 
 #: wxMDialogs.cpp:2167
-msgid "ask for confirmation before deleing the address book entries"
+msgid "ask for confirmation before deleting the address book entries"
 msgstr "Bestätigung vor Löschen von Adreßbucheinträgen"
 
 #: wxMDialogs.cpp:2168

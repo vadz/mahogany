@@ -2487,8 +2487,8 @@ static const struct
    { "MailNoNetQueuedMessage",   gettext_noop("show notification if the message is queued in Outbox and not sent out immediately") },
    { "MailQueuedMessage",        gettext_noop("show notification for queued messages") },
    { "MailSentMessage",          gettext_noop("show notification for sent messages") },
-   { "TestMailSent",             gettext_noop("show succesful test message") },
-      { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleing the address book entries") },
+   { "TestMailSent",             gettext_noop("show successful test message") },
+      { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleting the address book entries") },
   { "ModulesWarning",           gettext_noop("Warning that module changes take effect only after restart") },
          
    { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unrecognized address book files") },

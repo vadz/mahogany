@@ -2411,11 +2411,11 @@ msgstr "Ka&nsio lähetetyille viesteille"
 
 #: wxMDialogs.cpp:2166
 #, fuzzy
-msgid "show succesful test message"
+msgid "show successful test message"
 msgstr "Avaa valittu viesti"
 
 #: wxMDialogs.cpp:2167
-msgid "ask for confirmation before deleing the address book entries"
+msgid "ask for confirmation before deleting the address book entries"
 msgstr ""
 
 #: wxMDialogs.cpp:2168
