@@ -1266,11 +1266,14 @@ wxComposeView::CreateMenu()
    AddLanguageMenu();
    AddHelpMenu();
 
-   // FIXME: provide some visual feedback for them, like
-   //        enabling/disabling them. Not used yet.
+   // currently unused
+   //
+   // TODO: provide some visual feedback for them, like enabling/disabling
+#if 0
    m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
    m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
    m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
+#endif // 0
 
    // check if we can schedule messages:
    MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);

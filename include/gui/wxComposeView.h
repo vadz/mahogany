@@ -367,6 +367,8 @@ private:
    /// the panel: all header controls are its children
    wxPanel *m_panel;
 
+   // currently unused
+#if 0
    /// the edit/cut menu item
    wxMenuItem *m_MItemCut;
 
@@ -375,6 +377,7 @@ private:
 
    /// the edit/paste menu item
    wxMenuItem *m_MItemPaste;
+#endif // 0
 
    /**@name Child controls */
    //@{
