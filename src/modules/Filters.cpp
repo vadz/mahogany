@@ -2048,7 +2048,7 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
    // skip all whitespace
    const wxChar * const startSpaces = p;
    p += NUM_SPACES;
-   while ( wxIsspace(*p) )
+   while ( ((unsigned)*p < 128) && wxIsspace(*p) )
       p++;
 
    // start of the tail
