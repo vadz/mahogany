@@ -2879,7 +2879,9 @@ bool wxComposeView::SetEncodingToSameAs(const MimePart *part)
             }
             else // not Unicode
             {
-               encConv = wxFONTENCODING_SYSTEM;
+               encConv = enc;
+               if ( !EnsureAvailableTextEncoding(&encConv) )
+                  encConv = wxFONTENCODING_SYSTEM;
             }
 
             SetEncoding(enc, encConv);
