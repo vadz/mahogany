@@ -1538,9 +1538,9 @@ VarExpander::DoQuotePart(const MimePart *mimePart,
    switch ( mimeType.GetPrimary() )
    {
       case MimeType::TEXT:
-         *value = ExpandOriginalText(mimePart->GetTextContent(),
-                                     prefix,
-                                     m_profile);
+         *value += ExpandOriginalText(mimePart->GetTextContent(),
+                                      prefix,
+                                      m_profile);
 
          quoted = true;
          break;
