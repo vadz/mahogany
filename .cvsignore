@@ -12,4 +12,6 @@ nohup.out
 out
 solaris2.5.system.cache
 solaris2.5.system.cache.tmp
+FreeBSD.system.cache.tmp
+FreeBSD.system.cache
 tmp
