@@ -838,6 +838,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       if ( pd && !pd->Update(2*i + 1) )
       {
          // cancelled
+         rc = false;
          break;
       }
 
@@ -850,6 +851,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
          if ( pd && !pd->Update(2*i + 2) )
          {
             // cancelled
+            rc = false;
             break;
          }
       }
