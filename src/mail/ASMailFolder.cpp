@@ -1092,6 +1092,8 @@ public:
 
 private:
    wxArrayInt m_Tickets;
+
+   MOBJECT_DEBUG(ASTicketListImpl)
 };
 
 /* static */
@@ -1180,6 +1182,11 @@ String ASMailFolder::ResultImpl::DebugDump() const
    s2.Printf("operation id = %d, folder '%s'", m_Id, m_Mf->GetName().c_str());
 
    return s1 + s2;
+}
+
+String ASTicketListImpl::DebugDump() const
+{
+   return ASTicketList::DebugDump() << m_Tickets.GetCount() << " tickets";
 }
 
 #endif // DEBUG
