@@ -3951,7 +3951,7 @@ wxCustomOptionsNotebook::wxCustomOptionsNotebook
       const wxOptionsPageDesc& desc = pageDesc[n];
       wxOptionsPageDynamic *page = new wxOptionsPageDynamic(
                                                             this,
-                                                            desc.title,
+                                                            _(desc.title),
                                                             profile,
                                                             desc.aFields,
                                                             desc.aDefaults,
