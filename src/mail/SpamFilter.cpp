@@ -24,6 +24,7 @@
    #include "Mcommon.h"
    #include "gui/wxIconManager.h"  // for GetBitmap
    #include "pointers.h"           // for RefCounter
+   #include "strutil.h"            // for strutil_restore_array
 #endif // USE_PCH
 
 #include <wx/imaglist.h>
