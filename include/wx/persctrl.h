@@ -299,6 +299,57 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// persistent checkbox remembers its last value
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxPCheckBox : public wxCheckBox
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPCheckBox();
+        // standard ctor
+    wxPCheckBox(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxString& label = "",
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                long style = 0,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+        // pseudo ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxString& label = "",
+                const wxPoint &pos = wxDefaultPosition,
+                const wxSize &size = wxDefaultSize,
+                long style = 0,
+                const wxValidator& validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+
+    // dtor saves the settings
+    virtual ~wxPCheckBox();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+protected:
+    // save and restore value from config
+    void SaveValue();
+    void RestoreValue();
+
+    wxPHelper *m_persist;
+
+private:
+    static const char *ms_path;
+};
+
+// ----------------------------------------------------------------------------
 // Persistent file selector functions: remember the last directory and file
 // name used.
 //

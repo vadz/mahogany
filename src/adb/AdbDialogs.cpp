@@ -27,6 +27,8 @@
 #   include "guidef.h"
 #endif //USE_PCH
 
+#include "Mdefaults.h"
+
 #include "adb/AdbImport.h"
 
 #include "gui/wxIconManager.h"
@@ -52,7 +54,9 @@ static inline wxFrame *GetDialogParent(wxWindow *parent)
 class wxAdbImportDialog : public wxManuallyLaidOutDialog
 {
 public:
+   // ctor & dtor
    wxAdbImportDialog(wxFrame *parent);
+   virtual ~wxAdbImportDialog();
 
    // accessors (call them only after ShowModal)
 
@@ -76,6 +80,12 @@ public:
    void OnCheckbox(wxCommandEvent& WXUNUSED(event)) { DoUpdateUI(); }
 
 private:
+   // return path where we store the last value of the text ctrl
+   static wxString GetFileProfilePath()
+   {
+      return wxString(M_SETTINGS_CONFIG_SECTION) + "AdbImportFile";
+   }
+
    // stored data
    wxString m_importer,
             m_desc;
@@ -192,8 +202,8 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    m_text = m_panel->CreateFileEntry(label, widthMax, msg, &m_browseBtn);
 
    // checkboxes
-   m_autoLocation = new wxCheckBox(m_panel, -1,
-                                   _("Determine the &location automatically"));
+   m_autoLocation = new wxPCheckBox("AdbImportAutoFile", m_panel, -1,
+                                    _("Determine the &location automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_text, LAYOUT_Y_MARGIN);
    c->left.SameAs(m_panel, wxLeft);
@@ -201,8 +211,8 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    c->height.AsIs();
    m_autoLocation->SetConstraints(c);
 
-   m_autoFormat = new wxCheckBox(m_panel, -1,
-                                 _("Determine the &format automatically"));
+   m_autoFormat = new wxPCheckBox("AdbImportAutoFormat", m_panel, -1,
+                                  _("Determine the &format automatically"));
    c = new wxLayoutConstraints;
    c->top.Below(m_autoLocation, LAYOUT_Y_MARGIN);
    c->left.SameAs(m_panel, wxLeft);
@@ -227,6 +237,13 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    }
 
    // final steps
+   String file = mApplication->GetProfile()->readEntry(GetFileProfilePath(),
+                                                       "");
+   if ( !!file )
+   {
+      m_text->SetValue(file);
+   }
+
    SetDefaultSize(4*LAYOUT_X_MARGIN + sizeMsg.x + 32, 12*hBtn);
    Centre();
    DoUpdateUI();
@@ -272,6 +289,13 @@ bool wxAdbImportDialog::TransferDataFromWindow()
    }
 
    return TRUE;
+}
+
+wxAdbImportDialog::~wxAdbImportDialog()
+{
+   // save the file entry zone value in the profile
+   mApplication->GetProfile()->writeEntry(GetFileProfilePath(),
+                                          m_text->GetValue());
 }
 
 // ----------------------------------------------------------------------------
@@ -339,6 +363,9 @@ bool AdbShowImportDialog(wxWindow *parent, String *nameOfNativeAdb)
       // extension (the real name, in fact) as the address book default name
       adbname = ext;
    }
+
+   // the standard suffix for our address books
+   adbname += ".adb";
 
    if ( !MInputBox(&adbname,
                    _("Address book import"),

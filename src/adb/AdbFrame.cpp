@@ -1883,20 +1883,39 @@ bool wxAdbEditFrame::ImportAdb()
 
   if ( ok )
   {
-     // add the newly created ADB to the tree
-     if ( !IsAdbOpened(adbname) )
-     {
-        AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
-        ok = OpenAdb(adbname, provider, provider->GetProviderName());
-        SafeDecRef(provider);
-     }
+    // we need to get the full address book name from the "user name"
+    AdbBook *adbBook = NULL;
+    AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
 
-     wxLogStatus(this, _("Address book successfully imported into book '%s'."),
+    {
+      AdbManager_obj adbManager;
+      if ( adbManager )
+      {
+        adbBook = adbManager->CreateBook(adbname, provider);
+      }
+    }
+
+    if ( adbBook )
+    {
+      adbname = adbBook->GetDescription();
+    }
+
+    SafeDecRef(adbBook);
+
+    // add the newly created ADB to the tree
+    if ( !IsAdbOpened(adbname) )
+    {
+      ok = OpenAdb(adbname, provider, provider->GetProviderName());
+    }
+
+    SafeDecRef(provider);
+
+    wxLogStatus(this, _("Address book successfully imported into book '%s'."),
                 adbname.c_str());
   }
   else
   {
-     wxLogStatus(this, _("Address book import abandoned."));
+    wxLogStatus(this, _("Address book import abandoned."));
   }
 
   return ok;

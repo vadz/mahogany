@@ -727,6 +727,100 @@ void wxPListCtrl::SaveWidths()
 }
 
 // ----------------------------------------------------------------------------
+// persistent checkbox
+// ----------------------------------------------------------------------------
+
+const char *wxPCheckBox::ms_path = "Checkboxes";
+
+// default ctor
+wxPCheckBox::wxPCheckBox()
+{
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPCheckBox::wxPCheckBox(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxString& label,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+           : wxCheckBox(parent, id, label, pos, size, style, validator)
+{
+    m_persist = new wxPHelper(configPath, ms_path, config);
+
+    RestoreValue();
+}
+
+// pseudo ctor
+bool wxPCheckBox::Create(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxString& label,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   if ( !wxCheckBox::Create(parent, id, label, pos, size, style, validator) ) {
+       // failed to create the control
+       return FALSE;
+   }
+
+   RestoreValue();
+
+   return TRUE;
+}
+
+// dtor saves the settings
+wxPCheckBox::~wxPCheckBox()
+{
+    SaveValue();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPCheckBox::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPCheckBox::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+void wxPCheckBox::RestoreValue()
+{
+    if ( m_persist->ChangePath() ) {
+        bool value = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l) != 0;
+        SetValue(value);
+
+        m_persist->RestorePath();
+    }
+}
+
+void wxPCheckBox::SaveValue()
+{
+    if ( m_persist->ChangePath() ) {
+        bool value = GetValue();
+        m_persist->GetConfig()->Write(m_persist->GetKey(), (long)value);
+
+        m_persist->RestorePath();
+    }
+    //else: couldn't change path, probably because there is no config object.
+}
+
+// ----------------------------------------------------------------------------
 // peristent message box stuff
 // ----------------------------------------------------------------------------
 

@@ -126,7 +126,6 @@ $Id$
 2	VZ?	make activity log frame appear on demand only
 
 2	VZ	printing from ADB
-2	VZ	save control values in ImportAdb dialog (wxPCheckBox?)
 3	VZ	LDIF format import
 
 2		fix es.po - many little errors
@@ -231,8 +230,6 @@ from 32bitsonline review:
   + add "add current address to ADB" to compose view
   + should be updated when new entries are created (can't be deleted from
     elsewhere for now...), add an event for this
-  - add ADB support for $HOME/.mailrc
-    ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...")
   - fix remaining BBDB/ADB problems (low priority)
 
 - alternative treecontrol instead of listctrl for folderview
