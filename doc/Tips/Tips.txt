@@ -4,6 +4,7 @@ If you disabled some message box but wish to see it again, go to the last page o
 If you have any problems, please try enabling the mail folder and server debugging in the last page of the preferences dialog.
 If you want to see even more options in the preferences dialog, set your user level to "advanced" in the identity tab. The you will also be set almost all options on a per-folder level.
 If your remote folders (POP, IMAP or NNTP) take a long time to open, you are probably using sorting or threading and it is not supported by the server - try disabling sorting and threading for faster access.
+When composing a message you may press "TAB" to expand an address using the address books
 You can right click the columns of the folder view window to quickly access some useful options.
 You can tell Mahogany to include a little picture of you with every message sent, by setting up an "XFace" in the compose page of the preferences dialog.
 If you need help or support with using Mahogany, you can join the Mahogany users forum by sending a message to mahogany-users-request@lists.sourceforge.net with 'subscribe' in the subject line or in the body of the message. Of course, you can also subscribe to that forum via our web pages at http://mahogany.sourceforge.net/.
@@ -25,3 +26,4 @@ You can right click the attachments shown in the message view to save or open th
 You may always see the full message details using the "Show raw message" command from the "Message" menu (Ctrl-Z). Try also Shift-Ctrl-Z.
 You may preview your messages before sending them to check them for the one last time by enabling the corresponding option in the compose preferences page.
 You can see full message headers by pressing "H".
+If you want to expand an address substring anywhere in the address and not just in the beginning when pressing "TAB" in the composer, prepend it with "*".
