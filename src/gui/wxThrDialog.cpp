@@ -4,7 +4,7 @@
 // Purpose:     implements the dialog for configuring the message threading
 // Author:      Vadim Zeitlin
 // Modified by:
-// m_panel->Created:     06.09.01
+// Created:     06.09.01
 // CVS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin
 // Licence:     M licence
@@ -36,6 +36,12 @@
 #include "Mdefaults.h"
 
 #include "gui/wxDialogLayout.h"
+
+// currently we allow the user to specify the RE to apply for subject
+// simplification but this possibility is going to be disabled as it is much
+// slower than hard coding it (and the speed matters for threading) so we don't
+// show these options any more in the dialog
+#undef USE_EXTRA_THREADING_OPTIONS
 
 // ----------------------------------------------------------------------------
 // options we use
@@ -107,18 +113,22 @@ protected:
 
    bool m_ThrOnServer,
         m_ThrByRefOnly,
-#if !wxUSE_REGEX
-        m_Subject1,
-        m_Subject2,
-#endif // !wxUSE_REGEX
         m_Gather,
-        m_Break,
-        m_Indent;
+        m_Break;
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
 
 #if wxUSE_REGEX
    wxString m_Regex,
             m_RegexRepl;
+#else
+   bool m_Subject1,
+        m_Subject2;
 #endif // wxUSE_REGEX
+
+   bool m_Indent;
+
+#endif // USE_EXTRA_THREADING_OPTIONS
 
    // the dialog controls
    // -------------------
@@ -129,18 +139,22 @@ protected:
    // controls corresponding to the options
    wxCheckBox *m_chkThrOnServer,
               *m_chkThrByRefOnly,
-#if !wxUSE_REGEX
-              *m_chkSubject1,
-              *m_chkSubject2,
-#endif // !wxUSE_REGEX
               *m_chkGather,
-              *m_chkBreak,
-              *m_chkIndent;
+              *m_chkBreak;
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
 
 #if wxUSE_REGEX
    wxTextCtrl *m_txtRegex,
               *m_txtRegexRepl;
+#else // !wxUSE_REGEX
+   wxCheckBox *m_chkSubject1,
+              *m_chkSubject2;
 #endif // wxUSE_REGEX
+
+   wxCheckBox *m_chkIndent;
+
+#endif // USE_EXTRA_THREADING_OPTIONS
 
    DECLARE_EVENT_TABLE()
 };
@@ -216,7 +230,8 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
               "a correct one (threading by reference) and a simple\n"
               "emulation of it (threading by subject). Some servers "
               "only provide the simple version and the second\n"
-              "option allows you to disable it."),
+              "option allows you to disable it if you prefer to always "
+              "thread messages correctly, even if it is slower."),
             last
           );
 
@@ -229,15 +244,33 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    last = m_chkThrByRefOnly;
 
 
+#ifdef USE_EXTRA_THREADING_OPTIONS
    last = m_panel->CreateMessage
           (
             _("The remaining options allow to configure the details "
               "of the threading algorithm used when threading\n"
               "the messages locally (only the last one is also used "
               "with server side threading). You shouldn't have\n"
-	      "to modify them normally."),
+              "to modify them normally."),
             last
           );
+#else // !USE_EXTRA_THREADING_OPTIONS
+   last = m_panel->CreateMessage
+          (
+            _("\n"
+              "\n"
+              "The remaining options allow to configure the details "
+              "of the threading algorithm used when threading\n"
+              "the messages locally only (we don't have such fine"
+              "control over server side threading).\n"
+              "\n"
+              "Disable them if you don't want to consider the subject "
+              "field at all while threading."),
+            last
+          );
+#endif // USE_EXTRA_THREADING_OPTIONS/!USE_EXTRA_THREADING_OPTIONS
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
 
 #if wxUSE_REGEX
    last = m_panel->CreateMessage
@@ -266,6 +299,8 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    last = m_chkSubject2;
 #endif // wxUSE_REGEX/!wxUSE_REGEX
 
+#endif // USE_EXTRA_THREADING_OPTIONS
+
    m_chkGather = m_panel->CreateCheckBox(fieldLabels[Field_GatherSubjects],
                                          widthMax, last);
    last = m_chkGather;
@@ -275,6 +310,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
    last = m_chkBreak;
 
 
+#ifdef USE_EXTRA_THREADING_OPTIONS
    last = m_panel->CreateMessage
           (
             _("What happens if the root of the thread is not present "
@@ -286,6 +322,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
 
    m_chkIndent = m_panel->CreateCheckBox(fieldLabels[Field_IndentMissingRoot],
                                          widthMax, last);
+#endif // USE_EXTRA_THREADING_OPTIONS
 
    SetDefaultSize(8*wBtn, 20*hBtn);
 
@@ -298,10 +335,18 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
 
 bool wxMessageThreadingDialog::TransferDataToWindow()
 {
+   // read the options
    Profile *profile = GetProfile();
 
    m_ThrOnServer = READ_CONFIG_BOOL(profile, MP_MSGS_SERVER_THREAD);
    m_ThrByRefOnly = READ_CONFIG_BOOL(profile, MP_MSGS_SERVER_THREAD_REF_ONLY);
+
+   m_Gather = READ_CONFIG_BOOL(profile, MP_MSGS_GATHER_SUBJECTS);
+   m_Break = READ_CONFIG_BOOL(profile, MP_MSGS_BREAK_THREAD);
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
+
+   m_Indent = READ_CONFIG_BOOL(profile, MP_MSGS_INDENT_IF_DUMMY);
 
 #if wxUSE_REGEX
    m_Regex = READ_CONFIG_TEXT(profile, MP_MSGS_SIMPLIFYING_REGEX);
@@ -311,12 +356,17 @@ bool wxMessageThreadingDialog::TransferDataToWindow()
    m_Subject2 = READ_CONFIG_BOOL(profile, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING);
 #endif // wxUSE_REGEX/!wxUSE_REGEX
 
-   m_Gather = READ_CONFIG_BOOL(profile, MP_MSGS_GATHER_SUBJECTS);
-   m_Break = READ_CONFIG_BOOL(profile, MP_MSGS_BREAK_THREAD);
-   m_Indent = READ_CONFIG_BOOL(profile, MP_MSGS_INDENT_IF_DUMMY);
+#endif // USE_EXTRA_THREADING_OPTIONS
+
+   // populate the dialog with them
 
    m_chkThrOnServer->SetValue(m_ThrOnServer);
    m_chkThrByRefOnly->SetValue(m_ThrByRefOnly);
+
+   m_chkGather->SetValue(m_Gather);
+   m_chkBreak->SetValue(m_Break);
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
 
 #if wxUSE_REGEX
    m_txtRegex->SetValue(m_Regex);
@@ -326,9 +376,9 @@ bool wxMessageThreadingDialog::TransferDataToWindow()
    m_chkSubject2->SetValue(m_Subject2);
 #endif // wxUSE_REGEX/!wxUSE_REGEX
 
-   m_chkGather->SetValue(m_Gather);
-   m_chkBreak->SetValue(m_Break);
    m_chkIndent->SetValue(m_Indent);
+
+#endif // USE_EXTRA_THREADING_OPTIONS
 
    DoUpdateUI();
 
@@ -350,6 +400,11 @@ bool wxMessageThreadingDialog::TransferDataFromWindow()
    WRITE_IF_CHANGE(m_chkThrByRefOnly, m_ThrByRefOnly,
                    MP_MSGS_SERVER_THREAD_REF_ONLY)
 
+   WRITE_IF_CHANGE(m_chkGather, m_Gather, MP_MSGS_GATHER_SUBJECTS)
+   WRITE_IF_CHANGE(m_chkBreak, m_Break, MP_MSGS_BREAK_THREAD)
+
+#ifdef USE_EXTRA_THREADING_OPTIONS
+
 #if wxUSE_REGEX
    WRITE_IF_CHANGE(m_txtRegex, m_Regex, MP_MSGS_SIMPLIFYING_REGEX)
    WRITE_IF_CHANGE(m_txtRegexRepl, m_RegexRepl, MP_MSGS_REPLACEMENT_STRING)
@@ -358,9 +413,9 @@ bool wxMessageThreadingDialog::TransferDataFromWindow()
    WRITE_IF_CHANGE(m_Subject2, m_Subject2, MP_MSGS_REMOVE_LIST_PREFIX_BREAKING)
 #endif // wxUSE_REGEX/!wxUSE_REGEX
 
-   WRITE_IF_CHANGE(m_chkGather, m_Gather, MP_MSGS_GATHER_SUBJECTS)
-   WRITE_IF_CHANGE(m_chkBreak, m_Break, MP_MSGS_BREAK_THREAD)
    WRITE_IF_CHANGE(m_chkIndent, m_Indent, MP_MSGS_INDENT_IF_DUMMY)
+
+#endif // USE_EXTRA_THREADING_OPTIONS
 
 #undef WRITE_IF_CHANGE
 
@@ -377,6 +432,8 @@ void wxMessageThreadingDialog::DoUpdateUI()
 
    m_chkThrByRefOnly->Enable(on);
 
+#ifdef USE_EXTRA_THREADING_OPTIONS
+
 #if wxUSE_REGEX
    m_txtRegex->Enable(!on);
    m_txtRegexRepl->Enable(!on);
@@ -384,6 +441,8 @@ void wxMessageThreadingDialog::DoUpdateUI()
    m_chkSubject1->Enable(!on);
    m_chkSubject2->Enable(!on);
 #endif // wxUSE_REGEX/!wxUSE_REGEX
+
+#endif // USE_EXTRA_THREADING_OPTIONS
 
    m_chkBreak->Enable(!on);
    m_chkGather->Enable(!on);
