@@ -69,7 +69,7 @@ public:
    virtual void SetFolderData(const FolderDataType & fd)
       { m_FolderData = fd; }
 protected:
-   String m_Subject, m_From, m_References;
+   String m_Subject, m_From, m_To, m_References;
    String m_Id;
    int m_Status;
    unsigned long m_Size;

@@ -87,7 +87,7 @@ static const char * cclient_drivers[] =
 { "mbx", "unix", "mmdf", "tenex" };
 #define CCLIENT_MAX_DRIVER 3
 
-typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
+typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW_X *ov);
 
 // extended OVERVIEW struct additionally containing the destination address
 struct OVERVIEW_X : public mail_overview
