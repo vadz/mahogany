@@ -1006,10 +1006,10 @@ MailFolderCmn::IncRef()
 bool
 MailFolderCmn::RealDecRef()
 {
+#ifdef DEBUG_FOLDER_CLOSE
    wxLogTrace(TRACE_MF_REF, "MF(%s)::DecRef(): %u -> %u",
               GetName().c_str(), m_nRef, m_nRef - 1);
 
-#ifdef DEBUG_FOLDER_CLOSE
    // check that the folder is not in the mail folder closer list any more if
    // we're going to delete it
    if ( m_nRef == 1 )
