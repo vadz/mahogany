@@ -3899,7 +3899,7 @@ String
 MailFolderCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << _T("mailbox '") << m_ImapSpec << _T("' of type ") << (int) GetType();
+   str << _T("c-client mailbox '") << m_ImapSpec << _T("'");
 
    return str;
 }
