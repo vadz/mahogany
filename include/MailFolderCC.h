@@ -188,15 +188,17 @@ public:
 
    /** Appends the message to this folder.
        @param msg the message to append
+       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(Message const &msg);
+   virtual bool AppendMessage(Message const &msg, bool update = TRUE);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
+       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(String const &msg);
+   virtual bool AppendMessage(String const &msg, bool update = TRUE);
 
    /** Expunge messages.
      */

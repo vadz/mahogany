@@ -174,7 +174,6 @@ extern "C" {
 };
 #endif
 
-
 // ----------------------------------------------------------------------------
 // Implementation
 // ----------------------------------------------------------------------------
@@ -348,6 +347,48 @@ private:
    class wxDeviceLock *m_Lock;
 };
 
+static MInterface *gs_MInterface = NULL;
+
+#ifdef HAVE_LIBMAL
+
+/* Function prototype missing in current libmal.h */
+extern "C" { int register_printErrorHook (printErrorHook); }
+
+/* Define function to print status messages for MAL synchronisation. */
+static
+int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
+{
+   ASSERT(gs_PalmOSModule != NULL);
+   wxString msg;
+   int rc = msg.PrintfV(format, args);
+   if(errorflag)
+      gs_MInterface->MessageDialog(msg,NULL,"MAL synchronisation error!");
+   else
+   {
+      gs_MInterface->StatusMessage(msg);
+      wxYield();
+   }
+   return rc;
+}
+
+static
+int MAL_PrintStatusFunc(const char *format, ...)
+{
+   va_list ap;
+   va_start(ap, format);
+   return MAL_PrintFunc(FALSE, format, ap);
+}
+
+static
+int MAL_PrintErrorFunc(const char *format, ...)
+{
+   va_list ap;
+   va_start(ap, format);
+   return MAL_PrintFunc(TRUE, format, ap);
+}
+#endif
+
+
 // ----------------------------------------------------------------------------
 // PiConnection - small helper class to automate connection
 // ----------------------------------------------------------------------------
@@ -496,6 +537,10 @@ PalmOSModule::GetConfig(void)
    m_MALProxyPassword = READ_CONFIG(p, MP_MOD_PALMOS_MAL_PROXY_PASSWORD);
    m_MALSocksHost = READ_CONFIG(p, MP_MOD_PALMOS_MAL_SOCKS_HOST);
    m_MALSocksPort = READ_CONFIG(p, MP_MOD_PALMOS_MAL_SOCKS_PORT);
+
+   /* set up MAL status reporting callback */
+   register_printStatusHook (MAL_PrintStatusFunc);
+   register_printErrorHook (MAL_PrintErrorFunc);
 #endif
 
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
@@ -579,6 +624,8 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
                                                           _("Functionality to interact with your PalmOS based palmtop."),
                                                           palmOsMenu,
                                                           -1);
+   ASSERT(gs_MInterface == NULL);
+   gs_MInterface = m_MInterface;
 }
 
 PalmOSModule::~PalmOSModule()
@@ -588,6 +635,8 @@ PalmOSModule::~PalmOSModule()
 
    if(m_Lock) delete m_Lock;
    if(m_Profile) m_Profile->DecRef();
+   ASSERT(gs_MInterface != NULL);
+   gs_MInterface = NULL;
 }
 
 #if 0

@@ -1,5 +1,8 @@
 (next release) on (date of next release)
-07.09.00 KB: Copying messages now uses IMAP server-side copies where available, sooo much faster :-)
+18.09.00 KB: status/error message display for MAL synchronisation, copying
+             messages now preserves status flags
+07.09.00 KB: Copying messages now uses IMAP server-side copies where available,
+             sooo much faster :-)
 05.09.00 KB: added TwoFish encryption/decryption for passwords
 03.09.00 KB: fixed endless recursion in INBOX listing callback which caused IMAP server
              mailbox import to never complete, updated splash screen, finished config sync

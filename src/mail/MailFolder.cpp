@@ -1129,7 +1129,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       if(msg)
       {
          if(pd) pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg);
+         rc &= mf->AppendMessage(*msg, FALSE);
          if(pd) pd->Update( 2*i + 2);
          msg->DecRef();
       }
@@ -1200,7 +1200,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       if(msg)
       {
          if(pd) pd->Update( 2*i + 1 );
-         rc &= mf->AppendMessage(*msg);
+         rc &= mf->AppendMessage(*msg, FALSE);
          if(pd) pd->Update( 2*i + 2);
          msg->DecRef();
       }

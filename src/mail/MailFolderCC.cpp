@@ -175,6 +175,22 @@ void CC_Cleanup(void)
    }
 }
 
+static String GetImapFlags(int flag)
+{
+   String flags;
+   if(flag & MailFolder::MSG_STAT_SEEN)
+      flags <<"\\SEEN ";
+   if(flag & MailFolder::MSG_STAT_RECENT)
+      flags <<"\\RECENT ";
+   if(flag & MailFolder::MSG_STAT_ANSWERED)
+      flags <<"\\ANSWERED ";
+   if(flag & MailFolder::MSG_STAT_DELETED)
+      flags <<"\\DELETED ";
+   if(flag & MailFolder::MSG_STAT_FLAGGED)
+      flags <<"\\FLAGGED ";
+   return flags;
+}
+
 static String GetImapSpec(int type, int flags,
                           const String &name,
                           const String &iserver,
@@ -288,6 +304,7 @@ static String GetImapSpec(int type, int flags,
    return mboxpath;
 }
 
+/*
 static
 String GetHostFromImapSpec(const String &imap)
 {
@@ -298,7 +315,7 @@ String GetHostFromImapSpec(const String &imap)
       host << *cptr++;
    return host;
 }
-
+*/
 // This does not return driver prefixes such as #mh/ which are
 // considered part of the pathname for now.
 static
@@ -369,7 +386,11 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    gs_mmListRedirect = HasInferiorsMMList;
    mail_list (NIL, NULL, (char *) imapSpec.c_str());
    gs_mmListRedirect = NULL;
-   ASSERT(gs_HasInferiorsFlag != -1);
+   /* This does happen for for folders where the server does not know
+      if they have inferiors, i.e. if they don't exist yet.
+      I.e. -1 is an unknown/undefined status 
+      ASSERT(gs_HasInferiorsFlag != -1);
+   */
    return gs_HasInferiorsFlag == 1;
 }
 
@@ -808,11 +829,12 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       userEnteredPwd = true;
    }
 
-   if(type == MF_IMAP)
+/* DEBUG only to test
+  if(type == MF_IMAP)
    {
       bool inferiors = HasInferiors(mboxpath, login, password);
    }
-   
+*/ 
    mf = new
       MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
@@ -1351,10 +1373,10 @@ MailFolderCC::Ping(void)
             // where to we move the mails?
             String newMailFolder = READ_CONFIG(m_Profile,
                                                MP_NEWMAIL_FOLDER);
-            if(! SaveMessages(&selections,
-                              newMailFolder,
-                              true /* isProfile */,
-                              false /* update count */))
+            if(SaveMessages(&selections,
+                            newMailFolder,
+                            true /* isProfile */,
+                            false /* update count */))
             {
                DeleteMessages(&selections);
                ExpungeMessages();
@@ -1451,18 +1473,17 @@ MailFolderCC::UnLock(void) const
 
 
 bool
-MailFolderCC::AppendMessage(String const &msg)
+MailFolderCC::AppendMessage(String const &msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
-   ProcessEventQueue();
+   if(update) ProcessEventQueue();
 
-   bool rc = ( mail_append(
-      m_MailStream, (char *)m_ImapSpec.c_str(), &str)
-               != 0);
+   bool rc = mail_append(
+      m_MailStream, (char *)m_ImapSpec.c_str(), &str);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    else
@@ -1484,13 +1505,16 @@ MailFolderCC::AppendMessage(String const &msg)
       (void) ApplyFilterRules(uidarr);
 #endif
    }
-   ProcessEventQueue();
-   ApplyFilterRules(TRUE);
+   if(update)
+   {
+     ProcessEventQueue();
+     ApplyFilterRules(TRUE);
+   }
    return rc;
 }
 
 bool
-MailFolderCC::AppendMessage(Message const &msg)
+MailFolderCC::AppendMessage(Message const &msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
@@ -1506,7 +1530,7 @@ MailFolderCC::AppendMessage(Message const &msg)
       MailFolder *mf = ((Message &)msg).GetFolder();
       if(mf->GetType() == MF_IMAP)
       {
-         // Now we now mf is MailFolderCC:
+         // Now we know mf is MailFolderCC:
          MAILSTREAM *ms = ((MailFolderCC *)mf)->m_MailStream;
          String tmp1 = GetFirstPartFromImapSpec(mf->GetImapSpec());
          String tmp2 = GetFirstPartFromImapSpec(GetImapSpec());
@@ -1527,13 +1551,17 @@ MailFolderCC::AppendMessage(Message const &msg)
    }
    if(rc == 0) // no success yet, almost "else" :-)
    {
+      String flags = GetImapFlags(msg.GetStatus());
+      String date = msg.Date();
       // different folders, so we actually copy the message around:
       String tmp;
       msg.WriteToString(tmp);
       STRING str;
       INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
-      rc =  mail_append(m_MailStream,
+      rc =  mail_append_full(m_MailStream,
                              (char *)m_ImapSpec.c_str(),
+                             (char *)flags.c_str(),
+                             (char *)date.c_str(),
                              &str);
    }
    if(rc == 0)
@@ -1717,18 +1745,7 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                               bool set)
 {
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", false);
-   String flags;
-
-   if(flag & MSG_STAT_SEEN)
-      flags <<"\\SEEN ";
-   if(flag & MSG_STAT_RECENT)
-      flags <<"\\RECENT ";
-   if(flag & MSG_STAT_ANSWERED)
-      flags <<"\\ANSWERED ";
-   if(flag & MSG_STAT_DELETED)
-      flags <<"\\DELETED ";
-   if(flag & MSG_STAT_FLAGGED)
-      flags <<"\\FLAGGED ";
+   String flags = GetImapFlags(flag);
 
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),

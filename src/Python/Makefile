@@ -10,6 +10,8 @@ SWIGSRC = MAppBase.i MailFolder.i MString.i MProfile.i Message.i\
 	MObject.i #SendMessageCC.i
 CPPSRC = InitPython.cpp PythonHelp.cpp
 
+SRC=$(CPPSRC)
+
 PYTARGETS  := $(SWIGSRC:.i=.py)
 CPPTARGETS := $(SWIGSRC:.i=.cpp) swiglib.cpp
 

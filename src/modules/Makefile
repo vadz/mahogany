@@ -27,6 +27,8 @@ CXXFLAGS:=$(CXXFLAGS_RELAXED)
 MOD :=	$(patsubst .src/%, %, $(wildcard .src/*.cpp))
 MOD :=	$(filter-out PalmOS.cpp, $(MOD))
 
+SRC = $(wildcard .src/*.cpp)
+
 ifdef PISOCK_LIB
 MOD += PalmOS.cpp
 ifdef LIBMAL_SRC

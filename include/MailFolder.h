@@ -358,15 +358,17 @@ public:
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
+       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(const Message &msg) = 0;
+   virtual bool AppendMessage(const Message &msg, bool update = TRUE) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
+       @param update update mailbox status
        @return true on success
    */
-   virtual bool AppendMessage(const String &msg) = 0;
+   virtual bool AppendMessage(const String &msg, bool update = TRUE) = 0;
 
    /** Expunge messages.
      */
