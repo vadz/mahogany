@@ -2,21 +2,25 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under Unix
 Audience:	Mahogany developers and end users
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	04.08.03
-Version:	accurate for 0.65 release
+Last modified:	2004-07-13
+Version:	accurate for 0.67 release
 
 
 Windows users: you shouldn't be reading this file, please refer
                to README or doc/build_win.txt instead
 
 
-The rest of this file is oriented towards Unix users and explains
-how to build the program from sources. Please note that we provide
-some binaries for the Unix platforms as well and it is much simpler
-to use them if you have one of the supported systems. However you do
-need to rebuild the program yourself otherwise, in particular the
-RPMs built for RedHat Linux most probably will *not* work correctly
-on the other Linux distributions even if you manage to install them.
+The rest of this file is oriented towards Unix users (including Mac
+OS X ones) and explains how to build the program from sources.
+Please note that we provide some binaries for the Unix platforms as
+well and it is much simpler to use them if you have one of the
+supported systems. However you do need to rebuild the program
+yourself otherwise, in particular the RPMs built for RedHat Linux
+most probably will *not* work correctly on the other Linux
+distributions even if you manage to install them.
+
+Note: wxWindows name has been changed to wxWidgets recently. Please
+      replace accordingly.
 
 --------------------------------------------------------------------
 Unix compilation instructions
@@ -27,11 +31,13 @@ Unix compilation instructions
 
 Required software:
 
-   - wxGTK (GTK+ port of wxWindows) 2.5.1 or above (note that 2.5.1
-     is not yet released as of time of this writing so you may need to use
-     wxWindows sources from cvs, see below)
+   - wxGTK (GTK+ port of wxWindows) 2.5.2 or above (note that 2.5.3
+     is not yet released as of time of this writing but if it is
+     when you read this, do use it)
 
-   - GTK+ 1.2.3 or above, 1.2.10 recommended
+   - GTK+ 1.2.3 or above, 1.2.10 recommended. Mahogany can also be
+     built with GTK+ 2 but this is still considered to be
+     experimental.
 
    - GNU make: both wxWindows and Mahogany may be compiled with many
      different C++ compilers (i.e. not only g++) but they both
@@ -53,6 +59,15 @@ In addition:
      very useful and may even be brokwn due to lack of interest in
      this functionality.
 
+   - If you want to build integrated dspam statistical spam filter,
+     you need SQlite (http://www.sqlite.org/) library. Please note
+     that you need version 2.x (2.8.13 was successfully used) and
+     not 3.x which is incompatible. For Mac OS X you may get the
+     binaries for SQlite from http://www.c-command.com/tools/sqlite.shtml
+     but please do "ranlib libsqlite.a" after installing it as
+     otherwise Mac OS 10.3+ ld complains about library header and as
+     the result it is not detected by configure.
+
    - To build with Palm support you need pisock library and headers.
 
    - To rebuild the documentation from sources you need Perl, LaTeX,
@@ -64,32 +79,35 @@ In addition:
      you will need to get the libmal.tar.gz library source from the
      Mahogany ftp server and unpack it in the extra/src directory.
 
+Please review configure output and config.log file after running
+configure.
+
+
 1. Compilation of wxWindows
 ---------------------------
 
 Before you can compile Mahogany, you will need to have installed
 wxWindows compiled for the GTK library (wxGTK).
 
-The recommended switches for wxWindows compilation are:
+The recommended way to build wxWindows is (from the directory where
+it was unpacked):
 
-      ./configure --with-gtk --disable-threads --disable-joystick
-
-(you may also use the usual --prefix switch, of course).
+      mkdir build_dir
+      cd build_dir
+      ../configure --with-gtk --disable-threads --disable-joystick \
+                   --disable-shared
 
 After running configure, do "make" (or "gmake" if your make is not
-the GNU make) and "make install".
+the GNU make) but notice that you don't have to do "make install"
+(although you can if you want to, of course).
 
-If you get a message "cannot find wx-config" while compiling Mahogany
-you have to add /usr/local/bin to your PATH.
+If you encounter fatal problems with Mahogany, please try rebuilding
+wxWindows in debug mode:
 
-If you cannot run Mahogany and get an error
+      mkdir debug_build_dir
+      cd debug_build_dir
+      ../configure ...same as above... --enable-debug
 
-    mahogany: error while loading shared libraries:
-    libwx_gtk-2.5.so: cannot open shared object file:
-    No such file or directory
-
-you have to add /usr/local/lib to /etc/ld.so.conf and run
-/sbin/ldconfig.
 
 2. Compilation of Mahogany
 --------------------------
@@ -103,15 +121,22 @@ Mahogany directory:
 
       mkdir build_dir   # name is arbitrary
       cd build_dir
-      ../configure
+      ../configure --with-wxdir=path_to_wx/build_dir
       make    # or "make all" to try to build message catalogs as well
       make doc
       make install
 
+The --with-wxdir allows you to use a not installed version of
+wxWindows. You may also add other configure options, of course.
+If you use --enable-debug please use --with-wxdir=debug_build_dir,
+i.e. always build debug version of Mahogany with debug version of
+wxWindows.
+
 Depending on whether you have installed all required programs in the
 right versions, "make doc" and "make install" might fail. Please
-download the file Mdocs-0.64.tar.gz from the SourceForge download
-server and put it in the build_dir/doc directory, then retry.
+download the file Mdocs-<current version>.tar.gz from the
+SourceForge download server and put it in the build_dir/doc
+directory, then retry.
 
 If you don't want to install the documentation at all, you may do the
 following:
@@ -122,6 +147,11 @@ following:
                          # catalogs
     make install_doc     # this should install the documentation and
                          # online help
+
+Mac OS X users only: you may do "make M_bundle" in build_dir/src
+directory to create a Mac OS application Mahogany.app. You may also
+do "make dmg" to create a disk image containing Mahogany.app.
+
 
 
 vi: ts=8 nolist nocin ai tw=68:
