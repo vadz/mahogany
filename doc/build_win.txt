@@ -1,0 +1,67 @@
+File:		build_win.txt
+Summary:	contains instructions for building Mahogany under MS Windows
+Audience:	Mahogany developers
+Author:		Vadim Zeitlin <vadim@wxwindows.org>
+Last modified:	13.06.00
+Version:	the information in this file applies to the cvs sources
+
+0. Requirments
+--------------
+
+a) a compiler: currently, the only supported compiler for building Mahogany is
+   Visual C++ 6.0. Version 5.0 of it can be used as well. If you are interested
+   in building using another compiler (mingw32, BC++) please contact me and I
+   will try to help you
+
+b) cvs client: you need to have daily access to Mahogany (and so far wxWindows)
+   source tree, and the cvs is the only way to keep up to date. The precompiled
+   cvs binaries for Win32 can be found at http://www.cyclic.com.
+
+c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
+   will not be able to compile *.mid (Mahogany Interface Description) files if
+   you don't have it and so you will have to use the versions already in the
+   cvs. If you don't have m4, build process will fail: to get around it,
+   exclude the file Minterface.mid from build.
+
+1. wxWindows
+------------
+
+   Mahogany depends on wxWindows and priot to compiling Mahogany you need to
+build the wxMSW library. However, do *not* follow the standard build
+instructions included into wxWindows distribution. For historical reasons I am
+using my own project file to build wxWindows version used by Mahogany: it is
+included in Mahogany cvs and is called wxWindows.dsp. You will also need to
+copy extra\scripts\setup.h to include\wx subdirectory of your wxWindows
+installation. Notice that this is mandatory, do *not* try to build wxWindows
+using other settings unless you know what you are doing or you are sure to run
+into trouble.
+
+   Also, please set the environment variable "wx" to contain the location of
+the directory where wxWindows is installed: e.g., "d:\progs\libs\wxWindows".
+
+   Finally, a note about cvs access: currently, you must use "-r WX_2_2_BRANCH"
+switch when you do "cvs co" or "cvs up" wxWindows for the first time to get the
+files from 2.2 branch. It is not necessary to specify this switch subsequently.
+
+2. Build process
+----------------
+
+   Open the project workspace M.dsw inVisual C++ IDE. You will have to load
+(right click the project in the project tree, choose "Load") the following
+projects contained in this workspace if they are not loaded yet:
+
+* cclient - the mail routines support library
+* compface - the library for X-Face handling
+* M - the main Mahogany project
+* versit - vCard handling routines
+* wxWindows - the wxMSW library: when opening this project, specify the correct
+              file location (in Mahogany directory) when asked
+
+    Note that after building everything (successfully) once, you may unload all
+the projects except "M" - this will speed up workspace opening/closing. But if
+you do it, be careful to load them all before rebuilding everything -
+otherwise, dependencies will not be handled correctly.
+
+    Finally, just build everything. Before running M.exe, copy the file
+versit.dll produced when building versit project into the root Mahogany
+directory (or elsewhere in your PATH).

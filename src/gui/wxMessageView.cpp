@@ -61,6 +61,7 @@
 #include <wx/dynarray.h>
 #include <wx/file.h>
 #include <wx/mimetype.h>
+#include <wx/fontmap.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -220,11 +221,11 @@ class MailMessageParameters : public wxFileType::MessageParameters
 public:
    MailMessageParameters(const wxString& filename,
          const wxString& mimetype,
-         Message *m_mailMessage,
+         Message *mailMessage,
          int part)
       : wxFileType::MessageParameters(filename, mimetype)
       {
-         m_mailMessage = m_mailMessage;
+         m_mailMessage = mailMessage;
          m_part = part;
       }
 
@@ -403,6 +404,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_FolderView = fv;
    m_MimePopup = NULL;
    m_uid = UID_ILLEGAL;
+   m_encoding = wxFONTENCODING_SYSTEM;
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 
@@ -576,6 +578,64 @@ wxMessageView::Clear(void)
 }
 
 void
+wxMessageView::SetFontForEncoding(wxFontEncoding enc)
+{
+   wxCHECK_RET( m_mailMessage, "shouldn't be called without message" );
+
+   if ( enc == wxFONTENCODING_SYSTEM )
+   {
+      // find charset name from the headers
+      wxString charsetName;
+      if ( m_mailMessage->GetHeaderLine("Content-Type", charsetName) )
+      {
+         // TODO we don't check that we have "text/..." MIME type here as for
+         //      now this code is used for the entire message, not for each
+         //      part - this will be changed
+         charsetName.MakeUpper();
+         int charsetStart = charsetName.Find("CHARSET=");
+         if ( charsetStart != wxNOT_FOUND )
+         {
+            // strlen("charset=") == 8
+            wxString cs;
+            for ( const char *p = charsetName.c_str() + charsetStart + 8;
+                  isalnum(*p) || *p == '_' || *p == '-';
+                  p++ )
+            {
+               cs += *p;
+            }
+
+            charsetName = cs;
+         }
+         else
+         {
+            charsetName = "";
+         }
+      }
+
+      // convert it to encoding
+      if ( !!charsetName )
+      {
+         enc = wxTheFontMapper->CharsetToEncoding(charsetName);
+         if ( enc == wxFONTENCODING_SYSTEM )
+         {
+            wxLogStatus(GetFrame(this),
+                        _("Unsupport charset '%s', message may be shown incorrectly."));
+         }
+         else
+         {
+            // remember it
+            m_encoding = enc;
+         }
+      }
+   }
+
+   if ( enc != wxFONTENCODING_SYSTEM )
+   {
+      GetLayoutList()->SetFontEncoding(enc);
+   }
+}
+
+void
 wxMessageView::Update(void)
 {
    int i,n,t;
@@ -594,6 +654,11 @@ wxMessageView::Update(void)
 
    m_uid = m_mailMessage->GetUId();
 
+   if ( m_encoding != wxFONTENCODING_SYSTEM )
+   {
+      SetFontForEncoding(m_encoding);
+   }
+
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
@@ -606,8 +671,6 @@ wxMessageView::Update(void)
    }
 
 #ifdef HAVE_XFACES
-   // need real XPM support in windows
-#ifndef OS_WIN
    if(m_ProfileValues.showFaces)
    {
       m_mailMessage->GetHeaderLine("X-Face", tmp);
@@ -622,7 +685,6 @@ wxMessageView::Update(void)
          }
       }
    }
-#endif // !Windows
 #endif // HAVE_XFACES
 
    // show the configurable headers
@@ -1620,6 +1682,9 @@ wxMessageView::ShowMessage(Message *mailMessage)
                            folderName,
                            (MFrame *)GetFrame(this));
    }
+
+   SetFontForEncoding();
+
    Update();
 }
 

@@ -86,7 +86,7 @@ public:
    void ShowMessage(class Message *msg);
 
    /// update it
-   void   Update(void);
+   void Update(void);
 
    /// prints the currently displayed message
    void Print(void);
@@ -191,6 +191,9 @@ protected:
    /// exitcode != 0
    bool RunProcess(const String& command);
 
+   /// set the font encoding for viewing the current message
+   void SetFontForEncoding(wxFontEncoding enc = wxFONTENCODING_SYSTEM);
+
    /// All values read from the profile
    struct AllProfileValues
    {
@@ -227,6 +230,9 @@ protected:
    } m_ProfileValues;
 
    void ReadAllSettings(AllProfileValues *settings);
+
+   /// the current encoding
+   wxFontEncoding m_encoding;
 
 private:
    /// array of process info for all external viewers we have launched

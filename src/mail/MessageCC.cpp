@@ -145,8 +145,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    {
       // autodetect protocol:
       String tmp;
-      GetHeaderLine("Newsgroups", tmp);
-      if( ! strutil_isempty(tmp) )
+      if ( GetHeaderLine("Newsgroups", tmp) )
          protocol = Prot_NNTP;
    }
 
@@ -275,12 +274,12 @@ MessageCC::GetHeader(void) const
    return str;
 }
 
-void
+bool
 MessageCC::GetHeaderLine(const String &line, String &value)
 {
-   CHECK_DEAD();
+   CHECK_DEAD_RC(false);
    if(! folder)
-      return;
+      return false;
 
    STRINGLIST  slist;
    slist.next = NULL;
@@ -288,7 +287,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    slist.text.data = (unsigned char *)strutil_strdup(line);
 
    if(!folder->Lock())
-      return ;
+      return false;
 
    unsigned long len;
    char *
@@ -317,6 +316,8 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    value = MailFolderCC::qprint(value);
    delete [] slist.text.data;
    MailFolderCC::ProcessEventQueue();
+
+   return value.length() != 0;
 }
 
 String const

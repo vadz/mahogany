@@ -564,8 +564,15 @@ private:
 // See wxWindows docs and/or wx/filedlg.h for the meaning of all parameters
 // except the first and the last one. Also, "defname" (default value)
 // parameter is overriden by the last entry saved in the config, so it only
-// matters when the function is called for the very first time.
+// matters when the function is called for the very first time - unless the
+// flag wxFILEDLG_USE_FILENAME is given in flags in which case the name is used
+// if provided.
 // ----------------------------------------------------------------------------
+
+enum
+{
+    wxFILEDLG_USE_FILENAME = 0x2000 // don't override with config setting
+};
 
 extern WXDLLEXPORT wxString wxPFileSelector(const wxString& configPath,
                                             const wxString& title,

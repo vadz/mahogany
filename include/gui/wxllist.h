@@ -361,13 +361,16 @@ struct wxLayoutStyleInfo
                      int iweight = -1,
                      int iul = -1,
                      wxColour *fg = NULL,
-                     wxColour *bg = NULL);
+                     wxColour *bg = NULL,
+                     wxFontEncoding enc = wxFONTENCODING_DEFAULT);
    wxLayoutStyleInfo & operator=(const wxLayoutStyleInfo &right);
 
    wxColour & GetBGColour() { return m_bg; }
 
    /// Font change parameters.
    int  size, family, style, weight, underline;
+   wxFontEncoding enc;
+
    /// Colours
    wxColour m_bg, m_fg;
    int m_fg_valid, m_bg_valid; // bool, but must be int!
@@ -378,19 +381,26 @@ class wxFontCacheEntry
 {
 public:
    wxFontCacheEntry(int family, int size, int style, int weight,
-                    bool underline)
+                    bool underline,
+                    wxFontEncoding encoding)
       {
-         m_Family = family; m_Size = size; m_Style = style;
-         m_Weight = weight; m_Underline = underline;
+         m_Family = family;
+         m_Size = size;
+         m_Style = style;
+         m_Weight = weight;
+         m_Underline = underline;
+         m_Encoding = encoding;
          m_Font = new wxFont(m_Size, m_Family,
-                             m_Style, m_Weight, m_Underline);
+                             m_Style, m_Weight, m_Underline,
+                             wxEmptyString, encoding);
       }
    bool Matches(int family, int size, int style, int weight,
-                bool underline) const
+                bool underline,
+                wxFontEncoding encoding) const
       {
          return size == m_Size && family == m_Family
             && style == m_Style && weight == m_Weight
-            && underline == m_Underline;
+            && underline == m_Underline && encoding == m_Encoding;
       }
    wxFont & GetFont(void) { return *m_Font; }
    ~wxFontCacheEntry()
@@ -400,9 +410,9 @@ public:
 private:
    wxFont *m_Font;
 
-   // VZ: I wonder why it doesn't use wxLayoutStyleInfo instead of those?
    int  m_Family, m_Size, m_Style, m_Weight;
    bool m_Underline;
+   wxFontEncoding m_Encoding;
 };
 
 KBLIST_DEFINE(wxFCEList, wxFontCacheEntry);
@@ -411,11 +421,11 @@ class wxFontCache
 {
 public:
    wxFont & GetFont(int family, int size, int style, int weight,
-                   bool underline);
+                   bool underline, wxFontEncoding encoding);
    wxFont & GetFont(wxLayoutStyleInfo const &si)
       {
          return GetFont(si.family, si.size, si.style, si.weight,
-                        si.underline != 0);
+                        si.underline != 0, si.enc);
       }
 private:
    wxFCEList m_FontList;
@@ -443,7 +453,8 @@ public:
                      int weight = -1,
                      int underline = -1,
                      wxColour *fg = NULL,
-                     wxColour *bg = NULL);
+                     wxColour *bg = NULL,
+                     wxFontEncoding enc = wxFONTENCODING_DEFAULT);
    wxLayoutObjectCmd(const wxLayoutStyleInfo &si);
    ~wxLayoutObjectCmd();
    /** Stores the current style in the styleinfo structure */
@@ -944,12 +955,15 @@ public:
    void SetFont(int family, int size, int style,
                 int weight, int underline,
                 wxColour *fg,
-                wxColour *bg);
+                wxColour *bg,
+                wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
                 char const *fg = NULL,
-                char const *bg = NULL);
+                char const *bg = NULL,
+                wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
+
    /// changes to the next larger font size
    inline void SetFontLarger(void)
       { SetFont(-1,(12*m_CurrentStyleInfo.size)/10); }
@@ -965,8 +979,11 @@ public:
    inline void SetFontStyle(int style) { SetFont(-1,-1,style); }
    /// set font weight
    inline void SetFontWeight(int weight) { SetFont(-1,-1,-1,weight); }
-   /// toggle underline flag
+   /// set underline flag
    inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
+   /// sets the font encoding
+   void SetFontEncoding(wxFontEncoding enc)
+      { SetFont(-1,-1,-1,-1,-1,(wxColour *)NULL,(wxColour *)NULL,enc); }
    /// set font colours by name
    inline void SetFontColour(char const *fg, char const *bg = NULL)
       { SetFont(-1,-1,-1,-1,-1,fg,bg); }

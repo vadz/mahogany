@@ -30,7 +30,7 @@ public:
        @line name of header line
        @value string where result will be stored, or empty string
    */
-   void GetHeaderLine(const String &line, String &value);
+   bool GetHeaderLine(const String &line, String &value);
 
    /** Get a complete header text.
        @return string with multiline text containing the message headers
@@ -76,7 +76,7 @@ public:
    int CountParts(void);
 
    /** Returns a pointer to the folder. If the caller needs that
-       folder to stay around, it should IncRef() it. It's existence is 
+       folder to stay around, it should IncRef() it. It's existence is
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
@@ -115,7 +115,7 @@ public:
        @return list of parameters, must be freed by caller.
    */
    MessageParameterList const & GetParameters(int n = -1);
-      
+
    /** Get the list of disposition parameters for a given part.
        @param n part number, if -1, for the top level.
        @param disptype string where to store disposition type
@@ -152,7 +152,7 @@ public:
 
    /** Return message id. */
    virtual String GetId(void) const ;
-       
+
    /** Return message references. */
    virtual String GetReferences(void) const;
 
@@ -214,7 +214,7 @@ private:
    /// reference to the folder this mail is stored in
    MailFolderCC   *folder;
    /// text of the mail if not linked to a folder
-   char *text; 
+   char *text;
    /// unique message id
    UIdType  m_uid;
    /// holds the pointer to a text buffer allocated by cclient lib
@@ -239,13 +239,13 @@ private:
    BODY * GetBody(void);
    /// Profile pointer, may be NULL
    Profile *m_Profile;
-   
+
    /** A temporarily allocated buffer for GetPartContent().
        It holds the information returned by that function and is only
        valid until its next call.
    */
    char *partContentPtr;
-   
+
    /** Structure holding information about the individual message parts.
      */
    struct PartInfo
@@ -275,10 +275,10 @@ private:
       /// size, either in lines or bytes, depending on type
       long  size_bytes;
    };
- 
+
    /// a vector of all the body part information
    PartInfo *partInfos;
-   
+
    /** A function to recursively collect information about all the
        body parts. It is taken from the IMAP/mtest example.
        @param  body the body part to look at
@@ -287,14 +287,14 @@ private:
        @param   count an integer variable to be used for indexing the partInfos array
        @param  write whether to write data to the partInfos structure or just count the parts
        @param  firsttime an internal flag used to decide if to use prefix
-       
+
    */
    void decode_body(BODY *body, String &pfx,long i, int *count,
           bool write, bool firsttime = true);
 };
 
 #ifndef  MESSAGECC_FROMLEN
-///   the width of the  From: field 
+///   the width of the  From: field
 #  define   MESSAGECC_FROMLEN 40
 #endif
 

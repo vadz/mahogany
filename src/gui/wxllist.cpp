@@ -497,13 +497,15 @@ wxLayoutStyleInfo::wxLayoutStyleInfo(int ifamily,
                                      int iweight,
                                      int iul,
                                      wxColour *fg,
-                                     wxColour *bg)
+                                     wxColour *bg,
+                                     wxFontEncoding ienc)
 {
    family = ifamily;
    size = isize;
    style = istyle;
    weight = iweight;
    underline = iul != 0;
+   enc = ienc;
 
    m_fg_valid = fg != 0;
    m_bg_valid = bg != 0;
@@ -521,6 +523,7 @@ wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &right)
    COPY_SI_(size);
    COPY_SI_(weight);
    COPY_SI_(underline);
+   COPY_SI_(enc);
    if(right.m_fg_valid) m_fg = right.m_fg;
    if(right.m_bg_valid) m_bg = right.m_bg;
    return *this;
@@ -528,10 +531,13 @@ wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &right)
 
 wxLayoutObjectCmd::wxLayoutObjectCmd(int family, int size, int style, int
                                      weight, int underline,
-                                     wxColour *fg, wxColour *bg)
+                                     wxColour *fg, wxColour *bg,
+                                     wxFontEncoding enc)
 
 {
-   m_StyleInfo = new wxLayoutStyleInfo(family, size,style,weight,underline,fg,bg);
+   m_StyleInfo = new wxLayoutStyleInfo(family, size, style, weight, underline,
+                                       fg, bg,
+                                       enc);
 }
 
 wxLayoutObjectCmd::wxLayoutObjectCmd(const wxLayoutStyleInfo &si)
@@ -581,6 +587,7 @@ wxLayoutObjectCmd::Write(wxString &ostr)
            << (int) m_StyleInfo->m_bg.Green() << '\n'
            << (int) m_StyleInfo->m_bg.Blue() << '\n';
    }
+   ostr << (int) m_StyleInfo->enc << '\n';
 }
 /* static */
 wxLayoutObjectCmd *
@@ -603,6 +610,9 @@ wxLayoutObjectCmd::Read(wxString &istr)
    sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->m_fg_valid);
    ReadString(tmp, istr);
    sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->m_bg_valid);
+   ReadString(tmp, istr);
+   sscanf(tmp.c_str(),"%d", &obj->m_StyleInfo->enc);
+
    if(obj->m_StyleInfo->m_fg_valid)
    {
       int red, green, blue;
@@ -1745,8 +1755,8 @@ wxLayoutList::Read(wxString &istr)
 
 void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
-                      int underline, wxColour *fg,
-                      wxColour *bg)
+                      int underline, wxColour *fg, wxColour *bg,
+                      wxFontEncoding enc)
 {
    if(family != -1)    m_CurrentStyleInfo.family = family;
    if(size != -1)      m_CurrentStyleInfo.size = size;
@@ -1755,6 +1765,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if(underline != -1) m_CurrentStyleInfo.underline = underline != 0;
    if(fg) m_CurrentStyleInfo.m_fg = *fg;
    if(bg) m_CurrentStyleInfo.m_bg = *bg;
+   if(enc != wxFONTENCODING_DEFAULT) m_CurrentStyleInfo.enc = enc;
    Insert(
       new wxLayoutObjectCmd(
          m_CurrentStyleInfo.family,
@@ -1762,12 +1773,14 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
          m_CurrentStyleInfo.style,
          m_CurrentStyleInfo.weight,
          m_CurrentStyleInfo.underline,
-         fg, bg));
+         fg, bg,
+         m_CurrentStyleInfo.enc));
 }
 
 void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
-                      int underline, char const *fg, char const *bg)
+                      int underline, char const *fg, char const *bg,
+                      wxFontEncoding encoding)
 
 {
    wxColour
@@ -1779,7 +1792,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if( bg )
       cbg = wxTheColourDatabase->FindColour(bg);
 
-   SetFont(family,size,style,weight,underline,cfg,cbg);
+   SetFont(family, size, style, weight, underline, cfg, cbg, encoding);
 }
 
 void
@@ -3280,15 +3293,15 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
 
 wxFont &
 wxFontCache::GetFont(int family, int size, int style, int weight,
-                     bool underline)
+                     bool underline, wxFontEncoding encoding)
 {
    for(wxFCEList::iterator i = m_FontList.begin();
        i != m_FontList.end(); i++)
-      if( (**i).Matches(family, size, style, weight, underline) )
+      if( (**i).Matches(family, size, style, weight, underline, encoding) )
          return (**i).GetFont();
    // not found:
    wxFontCacheEntry *fce = new wxFontCacheEntry(family, size, style,
-                                                weight, underline);
+                                                weight, underline, encoding);
    m_FontList.push_back(fce);
    return fce->GetFont();
 }

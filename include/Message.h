@@ -98,7 +98,7 @@ public:
       const char * itext,
       UIdType uid = UID_ILLEGAL,
       class Profile *iprofile = NULL);
-   
+
    // used by GetAddressFirstName()
    static String GetFirstNameFromAddress(const String& address);
 
@@ -108,8 +108,9 @@ public:
    /** get any header line
        @line name of header line
        @value string where result will be stored, or empty string
+       @return true if header was found in the headers
    */
-   virtual void GetHeaderLine(const String &line, String &value) = 0;
+   virtual bool GetHeaderLine(const String &line, String &value) = 0;
 
    /** Get the complete header text.
        @return string with multiline text containing the message headers

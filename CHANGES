@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+14.06.00 VZ: viewing messages in non-default charsets
 11.06.00 KB: Filter rules editor shows program code and should check for
              consistency. Manual editing supported.
              Install Wizard fixes, better default values for servers. No more
