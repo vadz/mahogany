@@ -54,10 +54,6 @@ public:
                                         wxArrayInt *encodings = NULL) const
       { return m_message->GetHeaderLines(headers, encodings); }
 
-   virtual size_t GetAllHeaders(wxArrayString *names,
-                                wxArrayString *values) const
-      { return m_message->GetAllHeaders(names, values); }
-
    virtual String GetHeader() const
       { return m_message->GetHeader(); }
 

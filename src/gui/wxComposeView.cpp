@@ -1123,29 +1123,28 @@ Composer::EditMessage(Profile *profile, Message *msg)
    ignoredHeaders.Add("CONTENT-DISPOSITION");
    ignoredHeaders.Add("CONTENT-TRANSFER-ENCODING");
 
-   wxArrayString names, values;
-   size_t count = msg->GetAllHeaders(&names, &values);
-   for ( size_t n = 0; n < count; n++ )
+   wxString nameWithCase, value;
+   HeaderIterator hdrIter = msg->GetHeaderIterator();
+   while ( hdrIter.GetNext(&nameWithCase, &value) )
    {
-      wxString name = names[n].Upper();
+      wxString name = nameWithCase.Upper();
 
       // test for some standard headers which need special treatment
       if ( name == "SUBJECT" )
-         cv->SetSubject(values[n]);
+         cv->SetSubject(value);
       else if ( name == "FROM" )
-         cv->SetFrom(values[n]);
+         cv->SetFrom(value);
       else if ( name == "TO" )
-         cv->AddTo(values[n]);
+         cv->AddTo(value);
       else if ( name == "CC" )
-         cv->AddCc(values[n]);
+         cv->AddCc(value);
       else if ( name == "BCC" )
-         cv->AddBcc(values[n]);
+         cv->AddBcc(value);
       else if ( ignoredHeaders.Index(name) == wxNOT_FOUND )
       {
          // compare case sensitively here as we always write HEADER_IS_DRAFT in
          // the same case
-         name = names[n];
-         if ( name == HEADER_IS_DRAFT )
+         if ( nameWithCase == HEADER_IS_DRAFT )
          {
             cv->SetDraft(msg);
 
@@ -1168,11 +1167,10 @@ Composer::EditMessage(Profile *profile, Message *msg)
                );
             }
          }
-         else if ( name == HEADER_GEOMETRY )
+         else if ( nameWithCase == HEADER_GEOMETRY )
          {
             // restore the composer geometry
             wxFrame *frame = cv->GetFrame();
-            String value = values[n];
             if ( value == GEOMETRY_ICONIZED )
             {
                frame->Iconize();
@@ -1197,7 +1195,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
          }
          else // just another header
          {
-            cv->AddHeaderEntry(names[n], values[n]);
+            cv->AddHeaderEntry(nameWithCase, value);
          }
       }
       //else: we ignore this one

@@ -53,17 +53,6 @@
 #include <ctype.h>
 
 // ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-/**
-   Parse (partial) message header extracting the names and values of each
-   header in it. Returns the number of (valid) headers found.
- */
-static size_t ParseHeader(const char *hdr,
-                          wxArrayString& names, wxArrayString& values);
-
-// ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
 
@@ -488,18 +477,6 @@ String MessageCC::GetHeader(void) const
    return str;
 }
 
-size_t
-MessageCC::GetAllHeaders(wxArrayString *names, wxArrayString *values) const
-{
-   CHECK( names && values, 0, "NULL pointer in MessageCC::GetAllHeaders" );
-
-   String hdr = GetHeader();
-   if ( hdr.empty() )
-      return 0;
-
-   return ParseHeader(hdr, *names, *values);
-}
-
 wxArrayString
 MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
@@ -543,16 +520,16 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 
    if ( rc )
    {
-      // first look at what we got: I don't assume here that the headers are
-      // returned in the order requested - althouh this complicates the code a
-      // bit assuming otherwise would be unsafe
-      wxArrayString names;
-      wxArrayString valuesInDisorder;
+      // note that we can't assume here that the headers are returned in the
+      // order requested!
+      wxArrayString names,
+                    valuesInDisorder;
 
-      // now extract the headers values
-      ParseHeader(rc, names, valuesInDisorder);
+      // extract the headers values
+      HeaderIterator hdrIter(rc);
+      hdrIter.GetAll(&names, &valuesInDisorder);
 
-      // and finally copy the headers in order into the dst array
+      // and then copy the headers in order into the dst array
       wxFontEncoding encoding;
       headers = headersOrig;
       while ( *headers )
@@ -584,133 +561,6 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    }
 
    return values;
-}
-
-static
-size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
-{
-   String s;
-   s.reserve(1024);
-
-   // we are first looking for the name (before ':') and the value (after)
-   bool inName = true;
-
-   // the index of the header name for the current header in names or
-   // wxNOT_FOUND if this is a header we hadn't seen yet
-   int idxName = wxNOT_FOUND;
-
-   // note that we can stop when *pc == 0 as the header must be terminated
-   // by "\r\n" preceding it anyhow
-   for ( const char *pc = hdr; *pc ; pc++ )
-   {
-      switch ( *pc )
-      {
-         case '\r':
-            if ( pc[1] != '\n' )
-            {
-               // this is not supposed to happen in RFC822 headers!
-               wxLogDebug("Bare '\\r' in header ignored");
-               continue;
-            }
-
-            // skip '\n' too
-            pc++;
-
-            if ( inName )
-            {
-               if ( !s.empty() )
-               {
-                  wxLogDebug("Header line '%s' ignored", s.c_str());
-               }
-               else
-               {
-                  // blank line, header must end here
-                  //
-                  // update: apparently, sometimes it doesn't... it's non
-                  // fatal anyhow, but report it as this is weird
-                  if ( pc[1] != '\0' )
-                  {
-                     wxLogDebug("Blank line inside header?");
-                  }
-               }
-            }
-            else // we have a valid header name in this line
-            {
-               if ( s.empty() )
-               {
-                  wxLogDebug("Empty header value?");
-               }
-
-               // this header may continue on the next line if it begins
-               // with a space or tab - check if it does
-               if ( pc[1] != ' ' && pc[1] != '\t' )
-               {
-                  if ( idxName == wxNOT_FOUND )
-                  {
-                     values.Add(s);
-                  }
-                  else // add to the previous value
-                  {
-                     values[(size_t)idxName] << "\r\n" << s;
-                  }
-
-                  inName = true;
-
-                  s.clear();
-               }
-               else
-               {
-                  // continue with the current s but add "\r\n" to the
-                  // header value as it is part of it
-                  s += "\r\n";
-               }
-            }
-            break;
-
-         case ':':
-            if ( inName )
-            {
-               idxName = names.Index(s);
-               if ( idxName == wxNOT_FOUND )
-               {
-                  // a new header
-                  names.Add(s);
-               }
-               //else: will append to the previous value
-
-               if ( *++pc != ' ' )
-               {
-                  // oops... skip back
-                  pc--;
-
-                  // although this is allowed by the RFC 822 (but not
-                  // 822bis), it is quite uncommon and so may indicate a
-                  // problem - log it
-                  wxLogDebug("Header without space after colon?");
-               }
-
-               s.clear();
-
-               inName = false;
-
-               break;
-            }
-            //else: fall through
-
-         default:
-            s += *pc;
-      }
-   }
-
-   if ( !inName )
-   {
-      // make values and names arrays always of the same size
-      wxLogDebug("Last header didn't have a valid value!");
-
-      values.Add("");
-   }
-
-   return names.GetCount();
 }
 
 // ----------------------------------------------------------------------------

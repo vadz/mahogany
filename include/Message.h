@@ -13,6 +13,10 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #include "MObject.h"
 
 #include "MimePart.h"
@@ -26,7 +30,7 @@ class MailFolder;
 class Profile;
 
 // ----------------------------------------------------------------------------
-// Message class
+// constants
 // ----------------------------------------------------------------------------
 
 /// all (standard) address headers
@@ -40,6 +44,64 @@ enum MessageAddressType
    MAT_CC,
    MAT_BCC
 };
+
+// ----------------------------------------------------------------------------
+// HeaderIterator
+// ----------------------------------------------------------------------------
+
+/**
+  HeaderIterator extracts the individual headers from the full message header
+  and returns them to the caller one by one
+ */
+class HeaderIterator
+{
+public:
+   /**
+     Ctor takes the full message header. Normally it is only used by the
+     Message::GetHeaderIterator() function.
+    */
+   HeaderIterator(const String& header);
+
+   /**
+     Fills the provided name and value pointers with the next header from the
+     message
+
+     @param name is the pointer to the header name, can't be NULL
+     @param value is the pointer which receives the header value and may be NULL
+     @return true if ok, false if no more headers
+    */
+   bool GetNext(String *name, String *value);
+
+   /**
+     Get all headers at once. If a header occurs more than once, its values are
+     concatenated together with "\r\n" separating them.
+
+     @param names the array to return the header names in
+     @param values the array to return the header values in
+     @return the number of headers in the arrays
+    */
+   size_t GetAll(wxArrayString *names, wxArrayString *values);
+
+   /**
+     Resets the iterator so that the next call to GetNext() will return the
+     first header of the message (again).
+    */
+   void Reset();
+
+private:
+   /// the full header
+   String m_header;
+
+   /// temp string which we don't realloc all the time for efficiency
+   String m_str;
+
+   /// the pointer to the current position inside m_header
+   const char *m_pcCurrent;
+};
+
+// ----------------------------------------------------------------------------
+// Message
+// ----------------------------------------------------------------------------
 
 /**
    Message class represents a message in a mail folder. It provides access to
@@ -57,7 +119,11 @@ public:
 
    /** @name Headers access
     */
+   //@{
 
+   /**
+     @name Accessing generic headers
+    */
    //@{
 
    /** get any header line
@@ -83,24 +149,39 @@ public:
                                         wxArrayInt *encodings = NULL) const = 0;
 
    /**
+     Return the object which may be used for iterating over the headers.
+
+     @return iterator object
+    */
+   HeaderIterator GetHeaderIterator() const
+      { return HeaderIterator(GetHeader()); }
+
+   /**
+     NB: this method is deprecated because its API is bad and doesn't deal
+         satisfactory with the repeating headers (if some header occurs twice
+         or more the corresponding value will be the concatenation of all of
+         its values which is not always what the caller wants), use
+         HeaderIterator instead of it!
+
      Get the names and values of all headers of the message.
 
      @param names the array to return the header names in
      @param values the array to return the header values in
      @return the number of headers in the arrays
    */
-   virtual size_t GetAllHeaders(wxArrayString *names,
-                                wxArrayString *values) const = 0;
+   size_t GetAllHeaders(wxArrayString *names, wxArrayString *values) const;
 
    /** Get the complete header text.
        @return string with multiline text containing the message headers
    */
    virtual String GetHeader(void) const = 0;
 
-   /** get Subject line
-       @return Subject entry
-   */
-   virtual String Subject(void) const = 0;
+   //@}
+
+   /**
+     @name Headers containing the addresses
+    */
+   //@{
 
    /**
        Get all addresses of the given type (more efficient than GetHeader as it
@@ -130,6 +211,30 @@ public:
     */
    String GetAddressesString(MessageAddressType type) const;
 
+   /**
+       Get the list of all unique addresses appearing in this message headers
+       (including from, to, reply-to, cc, bcc, ...)
+
+       @param [out] array filled with unique addresses
+       @return the number of addresses retrieved
+   */
+   virtual size_t ExtractAddressesFromHeader(wxArrayString& addresses);
+
+   //@}
+
+   /**
+     @name Special accessors for the common headers
+    */
+   //@{
+
+   /**
+     Get the subject (this is more efficient than GetHeaderLine() as it takes
+     the subject from the envelope)
+
+     @return the subject header value
+   */
+   virtual String Subject(void) const = 0;
+
    /** get From line
        @return From entry
    */
@@ -154,15 +259,6 @@ public:
     */
    virtual String GetNewsgroups() const = 0;
 
-   /**
-       Get the list of all unique addresses appearing in this message headers
-       (including from, to, reply-to, cc, bcc, ...)
-
-       @param [out] array filled with unique addresses
-       @return the number of addresses retrieved
-   */
-   virtual size_t ExtractAddressesFromHeader(wxArrayString& addresses);
-
    /** Return the numeric status of message.
        @return flags of message (combination of MailFolder::MSG_STAT_XXX flags)
    */
@@ -176,7 +272,9 @@ public:
 
    //@}
 
-   /** @name Accessors
+   //@}
+
+   /** @name Other accessors
     */
 
    //@{
@@ -354,7 +452,7 @@ public:
 
    /** @name Address stuff
 
-       THESE FUNCTIONS ARE DEPRECATED, USE Address and AddressList INSTEAD!
+       THESE FUNCTIONS ARE DEPRECATED, USE Address AND AddressList INSTEAD!
     */
    //@{
 

@@ -58,7 +58,7 @@ static void ExtractAddress(const String& addr,
 
 
 // ============================================================================
-// implementation
+// implementation of Message methods for working with addresses
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -409,6 +409,20 @@ size_t Message::ExtractAddressesFromHeader(wxArrayString& addresses)
 }
 
 // TODO: write a function to extract addresses from the body as well
+
+// ============================================================================
+// implementation of Message methods for working with headers
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// getting all the headers
+// ----------------------------------------------------------------------------
+
+size_t
+Message::GetAllHeaders(wxArrayString *names, wxArrayString *values) const
+{
+   return GetHeaderIterator().GetAll(names, values);
+}
 
 // ----------------------------------------------------------------------------
 // wrapper around GetHeaderLines

@@ -34,9 +34,6 @@ public:
 
    virtual String GetHeader(void) const;
 
-   virtual size_t GetAllHeaders(wxArrayString *names,
-                                wxArrayString *values) const;
-
    /** @name Envelop headers */
    //@{
    /** get Subject line
