@@ -144,13 +144,13 @@ dnl disable support for exceptions if the compiler is gcc and
 dnl new enough to support it.
 case "$GCC" in yes)
 	AC_CACHE_CHECK(whether ${CC-gcc} accepts -fno-exceptions,
-	m_cv_gcc_exceptions,
-	[echo 'void f(){}' >conftest.c
-	case "`${CC-cc} -fno-exceptions -c conftest.c 2>&1`" in
-	'')	m_cv_gcc_exceptions=yes ;;
-	*)	m_cv_gcc_exceptions=no ;;
-	esac
-	rm -f conftest*])
+		m_cv_gcc_exceptions,
+		[echo 'void f(){}' >conftest.c
+		case "`${CC-cc} -fno-exceptions -c conftest.c 2>&1`" in
+		'')	m_cv_gcc_exceptions=yes ;;
+		*)	m_cv_gcc_exceptions=no ;;
+		esac
+		rm -f conftest*])
 	case "$m_cv_gcc_exceptions" in yes)
 		CFLAGS="$CFLAGS -fno-exceptions"
 	esac
@@ -192,36 +192,77 @@ dnl disable support for exceptions if the compiler is g++ and
 dnl new enough to support it.
 case "$GXX" in yes)
 	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
-	m_cv_gxx_exceptions,
-	[echo 'void f(){}' >conftest.cc
-	case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
-	'')	m_cv_gxx_exceptions=yes ;;
-	*)	m_cv_gxx_exceptions=no ;;
-	esac
-	rm -f conftest*])
+		m_cv_gxx_exceptions,
+		[echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+		'')	m_cv_gxx_exceptions=yes ;;
+		*)	m_cv_gxx_exceptions=no ;;
+		esac
+		rm -f conftest*])
 	case "$m_cv_gxx_exceptions" in yes)
 		CXXFLAGS="$CXXFLAGS -fno-exceptions"
 	esac
 esac
 
-dnl disable support for operator keywords (and, or, not, ...) if
-dnl the compiler is g++ and new enough to offer it.
-case "$GXX" in yes)
-	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-operator-names,
-	m_cv_gxx_oper_names,
-	[echo 'void f(){}' >conftest.cc
-	case "`${CXX-g++} -fno-operator-names -c conftest.cc 2>&1`" in
-	'')	m_cv_gxx_oper_names=yes ;;
-	*)	m_cv_gxx_oper_names=no ;;
-	esac
+dnl check whether the C++ supports the new logical operator names
+dnl c-client library uses some of them as field names
+AC_CACHE_CHECK(if ${CXX} supports logical operator names,
+	m_cv_cxx_opernames,
+	[echo 'int f(int a, int b){return not a or b;}' >conftest.cc
+	if ${CXX} -c conftest.cc >/dev/null 2>&1
+	then	m_cv_cxx_opernames=yes
+	else	m_cv_cxx_opernames=no
+	fi
 	rm -f conftest*])
-	case "$m_cv_gxx_oper_names" in yes)
-		// FIXME: only one of these eventually
-		CXXFLAGS="$CXXFLAGS -fno-operator-names -DNO_OPER_NAMES"
-		OPER_FLAGS="-fno-operator-names -DNO_OPER_NAMES"
+
+dnl really a subroutine to avoid nesting source lines too deeply
+AC_DEFUN([M_OPER_NAMES],
+[AC_CACHE_CHECK(if logical operator names can be disabled,
+	m_cv_cxx_disableopernames,
+	[case "$GXX" in
+	yes)	echo 'void f(){}' >conftest.cc
+		case "`${CXX-g++} -c -fno-operator-names conftest.cc 2>&1`" in
+		'')	m_cv_cxx_disableopernames="-fno-operator-names"
+		esac
+		rm -f conftest* ;;
+	esac
+	### other tests here???
+	case "$m_cv_cxx_disableopernames" in '')
+		m_cv_cxx_disableopernames="none supported"
+	esac])])
+
+dnl if the compiler treats "or" and "not" as keywords, we must to get a
+dnl workaround for compiling the c-client header files
+case "$m_cv_cxx_opernames" in yes)
+	dnl check whether is possible to redefine the logical operator
+	dnl names.  cclient headers will not compile if the compiler
+	dnl understands them as keywords.
+	AC_CACHE_CHECK(if ${CXX} can redefine logical operator names,
+		m_cv_cxx_redefineopernames,
+		[echo '#define or m_or' >conftest.cc
+		if ${CXX} -c conftest.cc >/dev/null 2>&1
+		then	m_cv_cxx_redefineopernames=yes
+		else	m_cv_cxx_redefineopernames=no
+		fi
+		rm -f conftest*])
+	dnl if the operator names can't be redefined try to check
+	dnl whether the compiler accepts some flag to disable them
+	case "$m_cv_cxx_redefineopernames" in
+	yes)	AC_DEFINE(M_LOGICAL_OP_NAMES) ;;
+	no)	M_OPER_NAMES
+		case "$m_cv_cxx_disableopernames" in
+		"none supported") dnl Houston, we have a problem
+	AC_MSG_ERROR([Sorry, the c-client library used by Mahogany uses some
+	names which your compiler treats as keywords (the new logical
+	operator names: and, or, not, etc.).  We currently don't know a
+	workaround for your compiler.  If it does accept some flag for
+	disabling them, please go to http://www.wxwindows.org/m-bugs
+	and submit a bug against the Build component telling us which
+	flag will work.]) ;;
+		*)	CXXFLAGS="$CXXFLAGS $m_cv_cxx_disableopernames"
+		esac ;;
 	esac
 esac
-AC_SUBST(OPER_FLAGS)
 
 dnl how to generate dependencies...
 dnl for now, we just support -MD on g++

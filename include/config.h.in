@@ -43,6 +43,9 @@
 /** Do we have a pisock library with pi_accept_to? */
 #undef HAVE_PI_ACCEPT_TO
 
+/** Do we need to redefine logical operator names for c-client? */
+#undef M_LOGICAL_OP_NAMES
+
 /*@name These are obsolete and always defined. Other configurations
   are no longer supported.
 */
@@ -115,9 +118,6 @@
 
 /** Define this if you want debugging logic included. */
 #undef DEBUG
-
-/** Define this if you want experimental logic included. */
-#undef EXPERIMENTAL
 
 /** This define contains the installation prefix where Mahogany
     is installed.
