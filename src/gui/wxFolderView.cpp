@@ -1573,7 +1573,7 @@ void wxFolderListCtrl::UpdateFocus()
 
    // we have to use tmp var as Select() will reset m_selIsUnique
    bool selIsUnique = m_selIsUnique;
-   if ( selIsUnique && (m_itemFocus != -1) )
+   if ( selIsUnique && (m_itemFocus != -1) && (m_itemFocus < GetItemCount()) )
    {
       Select(m_itemFocus, false);
    }
