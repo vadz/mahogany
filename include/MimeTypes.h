@@ -3,29 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.5  1998/05/24 14:47:12  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.4  1998/05/13 19:01:40  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
- * Revision 1.3  1998/04/22 19:54:47  KB
- * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
- * precompiled headers. Compiles and runs again under Linux/wxXt. Header
- * organisation is not optimal yet and needs further
- * cleanup. Reintroduced some older fixes which apparently got lost
- * before.
- *
- * Revision 1.2  1998/03/26 23:05:37  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:12  karsten
- * first try at a complete archive
+ * $Id$
  *
  *******************************************************************/
 

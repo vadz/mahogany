@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$           *
+ * $Id$
  *******************************************************************/
 #ifndef MCOMMON_H
 #define  MCOMMON_H

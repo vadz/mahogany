@@ -3,13 +3,13 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                *
+ * $Id$
  *******************************************************************/
 
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#ifdef CC_GCC
+#ifdef __GNUG__
 #pragma interface "Script.h"
 #endif
 

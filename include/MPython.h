@@ -4,12 +4,6 @@
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
- ********************************************************************
- * $Log$
- * Revision 1.1  1998/05/24 14:47:10  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
  *
  *******************************************************************/
 

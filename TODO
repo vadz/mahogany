@@ -6,17 +6,11 @@ $Id$
   + extraction of parameter list and filenames for mime handling/saving
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
-  + occasional Xlib error messages from MimePopup/Handle  WHAT's that?
   + fix MessageCC::GetParameters()
   + add a "save as html" option, using wxLayoutWindow functionality
 
-- ComposeView:
-   + extra header lines don't get set, why? Profile bug?
-
 - wxFolderView:
-  + add wxMessageView, use wxSplitter
-  + use ListCtrl and/or TextCtrl
-  + complete ForwardMessages, add InsertData() to wxComposeView
+   + complete ForwardMessages, add InsertData() to wxComposeView
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
@@ -26,12 +20,9 @@ $Id$
 
 - configure: USE_WXCONFIG does not get defined!
 
-- SEGFAULT on  exit if a message was opened, i.e. if Exit is called before closing all windows
+- suppress superfluous message popup-windows (i.e. c-client status messages)
 
 - WINDOWS: how to do MIME handling?
-
-- clean up header inclusion: use <> for system/wxWin files and "xxx" for M
-  headers in order to get "make depend" right
 
 - fix non-ASCII characters in header lines
 

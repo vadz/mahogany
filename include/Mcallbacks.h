@@ -6,12 +6,6 @@
  *                                                                  *
  * $Id$             *
  *
- * $Log$
- * Revision 1.1  1998/05/30 17:55:30  KB
- * Python integration mostly complete, added hooks and sample callbacks.
- * Wrote documentation on how to use it.
- *
- *
  *******************************************************************/
 
 #ifndef MCALLBACKS_H

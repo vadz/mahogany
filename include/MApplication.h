@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$           *
+ * $Id$
  *******************************************************************/
 
 #ifndef MAPPLICATION_H
@@ -14,16 +14,16 @@
 #endif
 
 #ifndef   USE_PCH
-#   include   <Mcommon.h>
-#   include   <Mdefaults.h>
-#   include   <Adb.h>
-#   include   <MFrame.h>
-#   include   <PathFinder.h>
-#   include   <MimeList.h>
-#   include   <MimeTypes.h>
-#   include   <guidef.h>
-#   include   <Profile.h>
-#   include   <MLogFrame.h>
+#   include   "Mcommon.h"
+#   include   "Mdefaults.h"
+#   include   "Adb.h"
+#   include   "MFrame.h"
+#   include   "PathFinder.h"
+#   include   "MimeList.h"
+#   include   "MimeTypes.h"
+#   include   "guidef.h"
+#   include   "Profile.h"
+#   include   "MLogFrame.h"
 #   include   "kbList.h"
 #endif
 

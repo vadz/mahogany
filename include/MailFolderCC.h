@@ -3,44 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$           *
- ********************************************************************
- * $Log$
- * Revision 1.9  1998/07/11 19:13:17  KB
- * wxMessageView works
- *
- * Revision 1.8  1998/06/22 22:32:18  VZ
- *
- * miscellaneous fixes for Windows compilation
- *
- * Revision 1.7  1998/06/14 12:23:59  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.6  1998/05/24 08:22:31  KB
- * changed the creation/destruction of MailFolders, now done through
- * MailFolder::Open/CloseFolder, made constructor/destructor private,
- * this allows multiple view on the same folder
- *
- * Revision 1.5  1998/05/18 17:48:17  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.4  1998/05/12 12:18:54  VZ
- *
- * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
- *
- * Revision 1.3  1998/04/22 19:54:47  KB
- * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
- * precompiled headers. Compiles and runs again under Linux/wxXt. Header
- * organisation is not optimal yet and needs further
- * cleanup. Reintroduced some older fixes which apparently got lost
- * before.
- *
- * Revision 1.2  1998/03/26 23:05:36  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
+ * $Id$
  *
  *******************************************************************/
 

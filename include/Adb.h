@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                    *
+ * $Id$
  *******************************************************************/
 
 #ifndef ADB_H
@@ -14,11 +14,11 @@
 #endif
 
 #ifndef   USE_PCH
-#   include   <Mcommon.h>
+#   include   "Mcommon.h"
 #   include   "kbList.h"
-#   include   <CommonBase.h>
-#   include   <MFrame.h>
-#   include   <guidef.h>
+#   include   "CommonBase.h"
+#   include   "MFrame.h"
+#   include   "guidef.h"
 #   include   "gui/wxMFrame.h"
 #   include   <time.h>
 #   include   <iostream.h>

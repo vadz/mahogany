@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$             *
+ * $Id$
  *******************************************************************/
 
 #ifndef MAILFOLDER_H

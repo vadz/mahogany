@@ -137,10 +137,10 @@ public:
       {
          m_PartNo = partno;
          m_MessageView = parent;
-         new wxButton(this, WXMENU_MIME_INFO, _("Info"),wxPoint(0,0),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         new wxButton(this, WXMENU_MIME_HANDLE, _("Handle"),wxPoint(0,BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         new wxButton(this, WXMENU_MIME_SAVE, _("Save"), wxPoint(0,2*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         new wxButton(this, WXMENU_MIME_DISMISS, _("Dismiss"), wxPoint(0,3*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         (void) new wxButton(this, WXMENU_MIME_INFO, _("Info"),wxPoint(0,0),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         (void) new wxButton(this, WXMENU_MIME_HANDLE, _("Handle"),wxPoint(0,BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         (void) new wxButton(this, WXMENU_MIME_SAVE, _("Save"), wxPoint(0,2*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
+         (void) new wxButton(this, WXMENU_MIME_DISMISS, _("Dismiss"), wxPoint(0,3*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
          Fit();
       }
    void OnCommandEvent(wxCommandEvent &event);
@@ -178,7 +178,7 @@ MimeDialog::OnCommandEvent(wxCommandEvent &event)
 
    
 void
-wxMessageView::Create(wxFolderView *fv, wxMFrame *parent, const String &iname)
+wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 {
   if(initialised)
      return; // ERROR!
@@ -201,7 +201,7 @@ wxMessageView::Create(wxFolderView *fv, wxMFrame *parent, const String &iname)
   initialised = true;
 }
 
-wxMessageView::wxMessageView(wxFolderView *fv, wxMFrame *parent, const String &iname)
+wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent, const String &iname)
    : wxLayoutWindow(parent)
 {
    initialised = false;
@@ -213,7 +213,7 @@ wxMessageView::wxMessageView(wxFolderView *fv, wxMFrame *parent, const String &i
 wxMessageView::wxMessageView(MailFolder *ifolder,
                              long num,
                              wxFolderView *fv,
-                             wxMFrame *parent,
+                             wxWindow *parent,
                              const String &iname)
    : wxLayoutWindow(parent)
 {
@@ -334,7 +334,6 @@ wxMessageView::Update(void)
                wxLayoutImportText(llist,before);
                if(!strutil_isempty(url))
                {
-                  obj->SetUserData(ci); // gets freed by list
                   ci = new ClickableInfo;
                   ci->type = ClickableInfo::CI_URL;
                   ci->url = url;
@@ -695,7 +694,7 @@ wxMessageView::Print(void)
 wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
                                        long num,
                                        wxFolderView *fv,
-                                       wxMFrame  *parent,
+                                       MWindow  *parent,
                                        const String &name)
 {
    m_MessageView = NULL;

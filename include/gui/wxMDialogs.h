@@ -40,7 +40,7 @@
        @param modal	true to make messagebox modal
    */
 void	MDialog_ErrorMessage(char const *message,
-		     MFrame *parent = NULL,
+		     MWindow *parent = NULL,
 			     char const *title = MDIALOG_ERRTITLE,
 		     bool modal = false);
 
@@ -51,7 +51,7 @@ void	MDialog_ErrorMessage(char const *message,
        @param modal	true to make messagebox modal
    */
 void	MDialog_SystemErrorMessage(char const *message,
-			   MFrame *parent = NULL,
+			   MWindow *parent = NULL,
 			   char const *title = MDIALOG_SYSERRTITLE,
 			   bool modal = false);
    
@@ -61,7 +61,7 @@ void	MDialog_SystemErrorMessage(char const *message,
        @param parent	the parent frame
    */
 void	MDialog_FatalErrorMessage(char const *message,
-			  MFrame *parent = NULL,
+			  MWindow *parent = NULL,
 			  char const *title = MDIALOG_FATALERRTITLE
    );
    
@@ -72,7 +72,7 @@ void	MDialog_FatalErrorMessage(char const *message,
        @param modal	true to make messagebox modal
    */
 void	MDialog_Message(char const *message,
-		MFrame *parent = NULL,
+		MWindow *parent = NULL,
 		char const *title = MDIALOG_MSGTITLE,
 		bool modal = false);
 
@@ -85,7 +85,7 @@ void	MDialog_Message(char const *message,
        @return true if Yes was selected
    */
 bool	MDialog_YesNoDialog(char const *message,
-		    MFrame *parent = NULL,
+		    MWindow *parent = NULL,
 		    bool modal = false,
 		    char const *title = MDIALOG_YESNOTITLE,
 		    bool YesDefault = true);
@@ -102,7 +102,7 @@ bool	MDialog_YesNoDialog(char const *message,
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
 const char *MDialog_FileRequester(char const *message,
-				      MFrame *parent = NULL,
+				      MWindow *parent = NULL,
 				      char const *path = NULL,
 				      char const *filename = NULL,
 				      char const *extension = NULL,
@@ -119,17 +119,17 @@ const char *MDialog_FileRequester(char const *message,
     @return true if Yes was selected
   */
 bool MDialog_YesNoDialog(String const &message,
-                         MFrame *parent = NULL,
+                         MWindow *parent = NULL,
                          bool modal = false,
                          bool YesDefault = true);
 
 
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,
-		      MFrame *parent = NULL);
+		      MWindow *parent = NULL);
 
 /// simple AboutDialog to be displayed at startup
 void
-MDialog_AboutDialog( MFrame *parent);
+MDialog_AboutDialog( MWindow *parent);
 
 #endif

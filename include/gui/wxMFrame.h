@@ -59,7 +59,6 @@ public:
    void AddFileMenu(void);
    void AddHelpMenu(void);
    void AddMessageMenu(void);
-   /// handle menu events
    virtual void OnMenuCommand(int id);
 #ifdef     USE_WXWINDOWS2
    void OnSize( wxSizeEvent &WXUNUSED(event) );

@@ -1,10 +1,10 @@
 /*-*- c++ -*-********************************************************
- * Message class: entries for message header                  *
+ * Message class: entries for message header                        *
  *                      implementation for MailFolderCC             *
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$              *
+ * $Id$
  *******************************************************************/
 
 #ifndef MESSAGECC_H

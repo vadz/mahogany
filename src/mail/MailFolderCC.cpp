@@ -130,8 +130,12 @@ MailFolderCC::Create(String const & iname)
    }
    else
    {
-      const char *filename = READ_CONFIG(profile, MP_FOLDER_PATH);
-      if(filename == NULL) // assume we are a file
+      // do not use a const char * here, because the next READ_CONFIG
+      // will overwrite the buffer!
+      String filename = READ_CONFIG(profile, MP_FOLDER_PATH);
+      // Undefined folders don't have a filename config setting, so
+      // they will return an empty string (NULL) here.
+      if(strutil_isempty(filename)) // assume we are a file
       {
          SetType(MF_FILE);
          Open(iname);

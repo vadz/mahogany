@@ -3,18 +3,14 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
+ * $Id$
  *
  *******************************************************************/
 
 #ifndef MGUIAPP_H
 #define MGUIAPP_H
 
-#include	<Mcommon.h>
+#include   "Mcommon.h"
 
 /**
    GUI Application class, defining the interface to the real GUI

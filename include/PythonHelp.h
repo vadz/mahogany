@@ -4,20 +4,7 @@
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
- *
- * $Log$
- * Revision 1.3  1998/06/14 12:24:01  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.2  1998/05/30 17:55:34  KB
- * Python integration mostly complete, added hooks and sample callbacks.
- * Wrote documentation on how to use it.
- *
- * Revision 1.1  1998/05/24 14:47:16  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- *
+
  *******************************************************************/
 
 #ifndef   PYTHONHELP_H

@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$      *
+ * $Id$
  *                                                                  *
  * This reduces to Mconfig.h when no  precompiled headers are used. *
  *******************************************************************/
@@ -19,12 +19,6 @@
 
 #include  <stdio.h>
 #include  <time.h>
-
-// VZ: disabled because it might cause IsKindOf() code generation bug
-#if 0
-#  include  <list>
-#  include  <map>
-#endif
 
 extern "C"
 {

@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$             *
+ * $Id$
  *******************************************************************/
 #ifndef MUNIX_H
 #define	MUNIX_H

@@ -37,7 +37,7 @@ public:
        @param iname  name of windowclass
    */
    void Create(wxFolderView *fv,
-               wxMFrame *parent = NULL,
+               wxWindow *parent = NULL,
                const String &iname = wxString("MessageView"));
 
    /** Constructor
@@ -46,7 +46,7 @@ public:
        @param iname  name of windowclass
    */
    wxMessageView(wxFolderView *fv,
-                 wxMFrame *parent = NULL,
+                 wxWindow *parent = NULL,
                  const String &iname = String("MessageView")
                  );
    
@@ -59,7 +59,7 @@ public:
    wxMessageView(MailFolder *folder,
                  long num,
                  wxFolderView *fv,
-                 wxMFrame  *parent = NULL,
+                 wxWindow  *parent = NULL,
                  const String &iname = String("MessageView")
       );
    /// Destructor
@@ -92,8 +92,8 @@ public:
 private:
    /// is initialised?
    bool initialised;
-   /// the parent frame
-   wxMFrame   *m_Parent;
+   /// the parent window
+   wxWindow   *m_Parent;
    /// number of the message
    long m_uid;
    /// the current message
@@ -132,7 +132,7 @@ public:
    wxMessageViewFrame(MailFolder *folder,
                       long num, 
                       wxFolderView *folderview,
-                      wxMFrame  *parent = NULL,
+                      wxWindow  *parent = NULL,
                       const String &iname = String("MessageViewFrame"));
 
    /// wxWin2 event system

@@ -39,10 +39,68 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
-#include <wx/dynarray.h>
- 
+BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
+	EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
+	EVT_LIST_ITEM_DESELECTED(-1, wxFolderListCtrl::OnDeselected)
+        EVT_SET_FOCUS   (wxFolderListCtrl::OnSetFocus)
+END_EVENT_TABLE()
+
+
+void wxFolderListCtrl::OnSetFocus( wxFocusEvent &event )
+{
+  event.Skip();
+};
+
+void wxFolderListCtrl::OnSelected(wxListEvent& event)
+{
+   m_Selections.Add((int)event.m_itemIndex);
+   m_FolderView->PreviewMessage(event.m_itemIndex);
+}
+
+void wxFolderListCtrl::OnDeselected(wxListEvent& event)
+{
+   m_Selections.Remove((int)event.m_itemIndex);
+}
+
+int
+wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
+{
+   selections = m_Selections;
+   return selections.Count();
+}
+   
+void
+wxFolderListCtrl::Clear(void)
+{
+   DeleteAllItems();
+   m_NextIndex = 0;
+   for (int i = 0; i < 5; i++) DeleteColumn( 0 );
+   if (m_Style & wxLC_REPORT)
+   {
+      InsertColumn( 0, "Status",  wxLIST_FORMAT_LEFT, 50 );
+      InsertColumn( 1, "Sender",  wxLIST_FORMAT_LEFT, 150 );
+      InsertColumn( 2, "Date",    wxLIST_FORMAT_LEFT, 85 );
+      InsertColumn( 3, "Size",    wxLIST_FORMAT_LEFT, 50 );
+      InsertColumn( 4, "Subject", wxLIST_FORMAT_LEFT, 120 );
+   };
+   m_Selections.Empty();
+}
+
+void
+wxFolderListCtrl::AddEntry(String const &status, String const &sender, String
+                                const &subject, String const &date,
+                                String const &size)
+{
+   InsertItem(m_NextIndex, status); // column 0
+   SetItem(m_NextIndex, 1, sender);
+   SetItem(m_NextIndex, 2, date);
+   SetItem(m_NextIndex, 3, size);
+   SetItem(m_NextIndex, 4, subject);
+   m_NextIndex++;
+}
+
+
 wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
-   : wxPanel(iparent)
 {
    wxCHECK_RET(iparent, "NULL parent frame in wxFolderView ctor");
    parent = iparent;
@@ -57,20 +115,18 @@ wxFolderView::wxFolderView(String const & folderName, wxMFrame *iparent)
    
    listBoxEntries = NULL;
 
-   //wxwin2
-   listBox = new wxListBox(this,-1, wxPoint(50,50), wxSize(200,200));
+   int x,y;
+   parent->GetClientSize(&x, &y);
 
-   wxLayoutConstraints *c = new wxLayoutConstraints;
-   c->top.SameAs  (this, wxTop);
-   c->left.SameAs (this, wxLeft);
-   c->right.SameAs   (this, wxRight);
-   c->bottom.SameAs  (this, wxBottom);
-   listBox->SetConstraints(c);
-   listBox->SetAutoLayout(true);
-   this->SetAutoLayout(true);
+   m_SplitterWindow = new wxSplitterWindow(parent,-1,wxDefaultPosition,wxSize(x,y),wxSP_3D);
+   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+   m_MessagePreview = new wxMessageView(this,m_SplitterWindow,"MessagePreview");
+   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview);
    
    mailFolder->RegisterView(this);
    timer = GLOBAL_NEW wxFVTimer(mailFolder);
+   m_SplitterWindow->SetMinimumPaneSize(0);
+   m_SplitterWindow->SetFocus();
    Update();
 }
 
@@ -81,42 +137,41 @@ wxFolderView::Update(void)
    
    Message  *mptr;
    String   line;
-   int   status;
-   unsigned long size;
+   int   nstatus;
+   unsigned long nsize;
    unsigned day, month, year;
    char  buffer[200];
    const char *format;
-   
-#  ifdef USE_APPCONF
-   bool doesExpand = Profile::GetAppConfig()->doesExpandVariables() != 0;
-   Profile::GetAppConfig()->expandVariables(false);
-#  endif
+   int n = mailFolder->CountMessages();
 
    format = READ_APPCONFIG(MC_DATE_FMT);
 
-#  ifdef USE_APPCONF
-   Profile::GetAppConfig()->expandVariables(doesExpand);
-#  endif
+//   listBox->Clear();
+//   listBoxEntriesCount = mailFolder->CountMessages();
+   m_FolderCtrl->Clear();
+   
 
-   listBox->Clear();
-   listBoxEntriesCount = mailFolder->CountMessages();
-   for(i = 0; i < listBoxEntriesCount; i++)
+   String status, sender, subject, date, size;
+   
+   for(i = 0; i < n; i++)
    {
       mptr = mailFolder->GetMessage(i+1);
-      status = mailFolder->GetMessageStatus(i+1,&size,&day,&month,&year);
-      line = "";
-      if(status & MSG_STAT_UNREAD)  line += 'U';
-      if(status & MSG_STAT_DELETED) line += 'D';
-      if(status & MSG_STAT_REPLIED) line += 'R';
-      if(status & MSG_STAT_RECENT)  line += 'N';
-      line += " - ";
-      line += mptr->Subject() + " - " + mptr->From();
+      nstatus = mailFolder->GetMessageStatus(i+1,&nsize,&day,&month,&year);
+      status = "";
+      if(nstatus & MSG_STAT_UNREAD)  status += 'U';
+      if(nstatus & MSG_STAT_DELETED) status += 'D';
+      if(nstatus & MSG_STAT_REPLIED) status += 'R';
+      if(nstatus & MSG_STAT_RECENT)  status += 'N';
+
+      subject = mptr->Subject();
+      sender  = mptr->From();
       sprintf(buffer,format, day, month, year);
-      line += " - ";
-      line += buffer;
-      line += " - ";
-      line += strutil_ultoa(size);
-      listBox->Append((char *) line.c_str());
+      date = buffer;
+      size = strutil_ultoa(nsize);
+
+      m_FolderCtrl->AddEntry(status, sender, subject, date, size);
+
+      //listBox->Append((char *) line.c_str());
    }
 }
 
@@ -179,7 +234,8 @@ wxFolderView::OnMenuCommand(int id)
 int
 wxFolderView::GetSelections(wxArrayInt& selections)
 {
-   return listBox->GetSelections(selections);
+//   return listBox->GetSelections(selections);
+   return m_FolderCtrl->GetSelections(selections);
 }
 
 void
@@ -223,7 +279,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections)
       char *
 #  endif
       folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
-                                     _("Save Message"),"",this);
+                                     _("Save Message"),"",parent);
    MailFolderCC   *mf;
    
    if(! folderName || strlen(folderName) == 0)
@@ -310,44 +366,19 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
 
 }
 
-wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
-{
-   folderView = iFolderView;
-
-#  ifdef USE_WXWINDOWS2
-   Create(folderView, -1);
-#  else
-   Create(folderView);
-#  endif
-}
-
 void
-wxFolderViewPanel::OnDefaultAction(wxItem *item)
+wxFolderView::SetSize(const int x, const int y, const int width, int
+                      height)
 {
-   wxArrayInt selections;
-   folderView->GetSelections(selections);
-   folderView->OpenMessages(selections);
+//   wxPanel::SetSize(x,y,width,height);
+   m_SplitterWindow->SetSize( x, y, width, height );
 }
 
-#ifdef USE_WXWINDOWS2
-// @@@ wxFolderViewPanel::OnCommand() doesn't eixst in wxWin2
-#else // wxWin1
-void
-wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
-{
-}
-#endif // wxWin1/2
-
-
-
-
-
-
-#ifdef USE_WXWINDOWS2
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
-   EVT_SIZE    (    wxFolderViewFrame::OnSize)
-   END_EVENT_TABLE()
-#endif // wxWin2
+   EVT_SIZE(    wxFolderViewFrame::OnSize)
+   EVT_MENU(-1,    wxFolderViewFrame::OnCommandEvent)
+   EVT_TOOL(-1,    wxFolderViewFrame::OnCommandEvent)
+END_EVENT_TABLE()
 
    wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
                                         wxFrame *parent)
@@ -391,8 +422,9 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
 }
    
 void
-wxFolderViewFrame::OnMenuCommand(int id)
+wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
+   int id = event.GetId();
    if(WXMENU_CONTAINS(MSG,id))
       m_FolderView->OnMenuCommand(id);
    else
@@ -409,5 +441,5 @@ wxFolderViewFrame::OnSize( wxSizeEvent &event )
    if(m_ToolBar)
       m_ToolBar->SetSize( 1, 0, x-2, 30 );
    if(m_FolderView)
-      m_FolderView->SetSize(1,30,x-2,y);
+      m_FolderView->SetSize(0,31,x-2,y);
 };

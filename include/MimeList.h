@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$               *
+ * $Id$
  *******************************************************************/
 
 #ifndef MIMELIST_H

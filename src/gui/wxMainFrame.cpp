@@ -49,6 +49,8 @@
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_SIZE    (wxMFrame::OnSize)
+  EVT_MENU(-1,    wxMFrame::OnCommandEvent)
+  EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
 END_EVENT_TABLE()
 #endif // wxWin2
 

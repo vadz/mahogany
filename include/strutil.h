@@ -3,57 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                *
- *                                                                  *
- * $Log$
- * Revision 1.15  1998/07/12 15:05:18  KB
- * some fixes and ugly fix to work with std::string again
- *
- * Revision 1.14  1998/07/11 19:13:18  KB
- * wxMessageView works
- *
- * Revision 1.13  1998/07/08 19:17:43  KB
- * Several fixes for mail display.
- *
- * Revision 1.12  1998/07/05 12:20:06  KB
- * wxMessageView works and handles mime (segfault on deletion)
- * wsIconManager loads files
- * install target
- *
- * Revision 1.11  1998/06/05 16:56:51  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.10  1998/05/24 14:47:18  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.9  1998/05/19 17:02:41  KB
- * several small bugfixes
- *
- * Revision 1.8  1998/05/18 17:48:23  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.7  1998/05/14 11:00:14  KB
- * Code cleanups and conflicts resolved.
- *
- * Revision 1.6  1998/05/14 09:48:31  KB
- * added IsEmpty() to strutil, minor changes
+ * $Id$
  *
  *******************************************************************/
 #ifndef STRUTIL_H

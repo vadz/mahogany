@@ -48,7 +48,7 @@
 
 void  
 MDialog_ErrorMessage(const char *message,
-          MFrame *parent,
+          MWindow *parent,
           const char *title,
           bool modal)
 {
@@ -65,7 +65,7 @@ MDialog_ErrorMessage(const char *message,
    */
 void
 MDialog_SystemErrorMessage(const char *message,
-               MFrame *parent,
+               MWindow *parent,
                const char *title,
                bool modal)
 {
@@ -89,7 +89,7 @@ MDialog_SystemErrorMessage(const char *message,
    */
 void
 MDialog_FatalErrorMessage(const char *message,
-              MFrame *parent,
+              MWindow *parent,
               const char *title)
 {
    String msg = String(message) + _("\nExiting application...");
@@ -110,7 +110,7 @@ MDialog_FatalErrorMessage(const char *message,
    */
 void
 MDialog_Message(const char *message,
-         MFrame *parent,
+         MWindow *parent,
          const char *title,
          bool modal)
 {
@@ -133,7 +133,7 @@ MDialog_Message(const char *message,
    */
 bool
 MDialog_YesNoDialog(const char *message,
-             MFrame *parent,
+             MWindow *parent,
              bool modal,
              const char *title,
              bool YesDefault)
@@ -161,7 +161,7 @@ MDialog_YesNoDialog(const char *message,
    */
 const char *
 MDialog_FileRequester(const char *message,
-          MFrame *parent,
+          MWindow *parent,
           const char *path,
           const char *filename,
           const char *extension,
@@ -199,7 +199,7 @@ MDialog_FileRequester(const char *message,
 // simple "Yes/No" dialog (@@ we'd surely need one with [Cancel] also)
 bool
 MDialog_YesNoDialog(String const &message,
-                    MFrame *parent,
+                    MWindow *parent,
                     bool modal,
                     bool YesDefault)
 {
@@ -220,7 +220,7 @@ MDialog_YesNoDialog(String const &message,
 }
 
 AdbEntry *
-MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
+MDialog_AdbLookupList(AdbExpandListType *adblist, MWindow *parent)
 {
    AdbExpandListType::iterator i;
 
@@ -283,7 +283,7 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
 
 // simple AboutDialog to be displayed at startup
 void
-MDialog_AboutDialog( MFrame *parent)
+MDialog_AboutDialog( MWindow *parent)
 {
 
    wxFrame *frame = new wxFrame();

@@ -15,30 +15,15 @@
 #include "Mdefaults.h"
 #include "wxMFrame.h"
 
+#include   "wxMessageView.h"
+#include   <wx/listctrl.h>
+#include    <wx/dynarray.h>
+
 class wxFolderViewPanel;
 class wxFolderView;
-
-/** a wxWindows panel for the FolderView class */
-class wxFolderViewPanel : public wxPanel
-{
-   /// the wxFolderView:
-   class wxFolderView *folderView;
-public:
-   /** constructor
-       @param parent the parent frame
-   */
-   wxFolderViewPanel(wxFolderView *parent); 
-
-   /** gets called for events happening in the panel
-       @param win the window
-   */
-#ifdef USE_WXWINDOWS2
-#else  // wxWin1
-   void OnCommand(wxWindow &win, wxCommandEvent &ev);
-#endif // wxWin1/2
-
-   void OnDefaultAction(wxItem *item);
-};
+class wxFolderListCtrl;
+class wxMFrame;
+class wxMessageView;
 
 /** a timer class for the FolderView */
 class wxFVTimer : public wxTimer
@@ -63,7 +48,7 @@ public:
 };
 
 /** a wxWindows FolderView class */
-class wxFolderView : public FolderViewBase , public wxPanel
+class wxFolderView : public FolderViewBase 
 {
 public:
    /** Constructor
@@ -82,7 +67,7 @@ public:
    bool  IsInitialised(void) const { return initialised; }
 
    /// called on Menu selection
-   virtual void OnMenuCommand(int id);
+   void OnMenuCommand(int id);
 
 
    /** Open some messages.
@@ -125,6 +110,12 @@ public:
    */
    int   GetSelections(wxArrayInt &selections);
 
+   /** Show a message in the preview window.
+    */
+   void PreviewMessage(long messageno)
+      { m_MessagePreview->ShowMessage(mailFolder,messageno+1); }
+   void SetSize(const int x, const int y, const int width, int height);
+
 private:
    /// is initialised?
    bool initialised;
@@ -132,8 +123,6 @@ private:
    bool ownsFolder;
    /// the mail folder being displayed
    class MailFolder  *mailFolder;
-   /// a panel to fill the frame
-   wxFolderViewPanel *panel;
    /// the listbox with the mail messages
    wxListBox   *listBox;
    /// the number of messages in box
@@ -148,19 +137,78 @@ private:
    wxFVTimer   *timer;
    /// its parent
    wxMFrame *parent;
+   /// either a listctrl or a treectrl
+   wxFolderListCtrl *m_FolderCtrl;
+   /// a splitter window
+   wxSplitterWindow *m_SplitterWindow;
+   /// the preview window
+   wxMessageView *m_MessagePreview;
 }; 
 
 class wxFolderViewFrame : public wxMFrame
 {
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
-   void OnMenuCommand(int id);
-#ifdef USE_WXWINDOWS2
-      void OnSize( wxSizeEvent &WXUNUSED(event) );
-#endif
+   void OnCommandEvent(wxCommandEvent & event);
+   void OnSize( wxSizeEvent &WXUNUSED(event) );
 private:
    wxFolderView *m_FolderView;
    DECLARE_EVENT_TABLE() 
+};
+
+#if 0
+// abc to define interface for listctrl/treectrl interaction
+
+class wxFolderBaseCtrl
+{
+public:
+   virtual void Clear(void) = 0;
+   virtual void AddEntry(String const &status, String const &sender, String
+                         const &subject, String const &date, String
+                         const &size) = 0;
+   virtual int GetSelections(wxArrayInt &selections) const = 0;
+   virtual ~wxFolderBaseCtrl() {}
+   virtual wxControl *GetControl(void) const = 0;;
+protected:
+   /// parent window
+   wxWindow *m_Parent;
+};
+#endif
+
+class wxFolderListCtrl : public wxListCtrl
+{
+public:
+   wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
+      :wxListCtrl(parent,-1,wxDefaultPosition,wxSize(500,300),wxLC_REPORT)
+
+      {
+         m_Parent = parent;
+         m_FolderView = fv;
+         m_Style = wxLC_REPORT;
+         Clear();
+      }
+   void Clear(void);
+   void AddEntry(String const &status, String const &sender, String
+                 const &subject, String const &date, String const
+                 &size);
+
+   int GetSelections(wxArrayInt &selections) const;
+
+   void OnSelected(wxListEvent& event);
+   void OnDeselected(wxListEvent& event);
+   void OnSetFocus( wxFocusEvent &event );
+
+   DECLARE_EVENT_TABLE()
+
+protected:
+   long m_Style;
+   long m_NextIndex;
+   wxListCtrl m_Control;
+   wxArrayInt m_Selections;
+   /// parent window
+   wxWindow *m_Parent;
+   /// the folder view
+   wxFolderView *m_FolderView;
 };
 
 #endif
