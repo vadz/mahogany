@@ -793,9 +793,10 @@ case "$USE_PYTHON" in
 	if test "x$USE_SWIG" = "x1"; then
 	    AC_PATH_PROG(SWIG,swig)
 	    case "$SWIG" in '')
-		AC_MSG_WARN([cannot find SWIG - will try to use intermediate files
-			    to compile Python support.
-			    If possible, please install SWIG.])
+		AC_MSG_WARN([cannot find SWIG - will use precompiled files for
+			    Python support.
+			    If you want to be able to modify the interface files, please
+			    install SWIG >= 1.3.9.])
 		;;
 	    esac
 	fi
