@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Jan 18 11:14:31 2000
+#This file was created by <karsten> Tue Jan 18 11:44:44 2000
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,7 +35,7 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.5+
+for Version 0.5
 \newline 
 
 \begin_inset Quotes eld
@@ -4868,16 +4868,28 @@ You can forward your email to another user, say
 \begin_inset Quotes eld
 \end_inset 
 
+
+\family typewriter 
 user1
+\family default 
+
 \begin_inset Quotes erd
 \end_inset 
 
-, by setting up a /root/.forward file containing that user's name.
+, by creating a 
+\family typewriter 
+/root/.forward 
+\family default 
+file containing that user's name.
  Then, run Mahogany through the 
 \begin_inset Quotes eld
 \end_inset 
 
+
+\family typewriter 
 su
+\family default 
+
 \begin_inset Quotes erd
 \end_inset 
 
@@ -4885,18 +4897,26 @@ su
 \begin_inset Quotes eld
 \end_inset 
 
+
+\family typewriter 
 su user1 -c mahogany
+\family default 
+
 \begin_inset Quotes erd
 \end_inset 
 
 .
  This will work just fine.
- If you cannot get an error message about it being unable to access your
- X11 display, do a 
+ If you get an error message about it being unable to access your X11 display,
+ do a 
 \begin_inset Quotes eld
 \end_inset 
 
+
+\family typewriter 
 xhost localhost
+\family default 
+
 \begin_inset Quotes erd
 \end_inset 
 
