@@ -17,7 +17,7 @@
 #include	"strutil.h"
 #include	<stdio.h>
 
-#if HAVE_COMPFACE_H
+#ifdef HAVE_COMPFACE_H
 extern "C" {
 #include	<compface.h>
 	   };
@@ -41,7 +41,7 @@ XFace::XFace()
 bool
 XFace::CreateFromXpm(const char *xpmdata)
 {
-#if	!HAVE_COMPFACE_H
+#ifndef	HAVE_COMPFACE_H
    return false;
 #else
    if(data)
@@ -140,7 +140,7 @@ XFace::CreateFromXpm(const char *xpmdata)
 bool
 XFace::CreateFromXFace(const char *xfacedata)
 {
-#if !HAVE_COMPFACE_H
+#ifndef HAVE_COMPFACE_H
    return false;
 #else
    if(data) delete [] data;
@@ -166,7 +166,7 @@ XFace::CreateFromXFace(const char *xfacedata)
 bool
 XFace::CreateXpm(String &xpm)
 {
-#if !HAVE_COMPFACE_H
+#ifndef HAVE_COMPFACE_H
    return false;
 #else
    int
@@ -253,7 +253,7 @@ XFace::CreateXpm(String &xpm)
 bool
 XFace::CreateXpm(char ***xpm)
 {
-#if !HAVE_COMPFACE_H
+#ifndef HAVE_COMPFACE_H
    return false;
 #else
    int
