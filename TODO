@@ -12,6 +12,7 @@ $Id$
 		  listing of already previously existing new mails
 		  UID for comparison? CheckNewMail() function?
 		Does it work?
+		The dialog is not working properly, empty message!
 
 9	KB	finish filters dialog
 
