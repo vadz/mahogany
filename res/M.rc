@@ -66,6 +66,7 @@ tb_mail_send	BITMAP	"tb_mail_send.bmp"
 tb_delete	BITMAP "delete.bmp"
 tb_undo		BITMAP "undo.bmp"
 tb_lookup	BITMAP "lookup.bmp"
+tb_editor	BITMAP "editor.bmp"
 
 // ADB tree ctrl image list (16x16) bitmaps
 adb_address	BITMAP "address.bmp"

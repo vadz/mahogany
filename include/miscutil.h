@@ -24,16 +24,42 @@
     @param autocollectFlag the 0,1,2 value whether to do auto collection or not
     @param collectNamed if true, only collect addresses with a name
     @param bookName the address book name for auto collection
+    @param groupName the subgroup name in bookName where to put new entries
     @param frame optional pointer to a frame for displaying status messages
 */
-void AutoCollectAddresses(const String &email,
-                          String name,
-                          int autocollectFlag,
-                          bool collectNamed,
-                          const String& bookName,
-                          const String& groupName,
-                          MFrame *frame = NULL);
+extern void AutoCollectAddresses(const String &email,
+                                 String name,
+                                 int autocollectFlag,
+                                 bool collectNamed,
+                                 const String& bookName,
+                                 const String& groupName,
+                                 MFrame *frame = NULL);
+
+/// construct the full email address of the form "name <email>"
+inline String GetFullEmailAddress(const String& name, const String& email)
+{
+   if ( !name )
+      return email;
+
+   String address(name);
+   address << " <" << email << '>';
+
+   return address;
+}
+
+class wxColour;
+
+/// get the colour by name which may be either a colour or RGB specification
+extern bool ParseColourString(const String& name, wxColour* colour = NULL);
+
+/// get the colour name - pass it to ParseColorString to get the same colour
+extern String GetColourName(const wxColour& color);
+
+/// get the colour by name and fallback to default (warning the user) if failed
+extern void GetColourByName(wxColour *colour,
+                            const String& name,
+                            const String& defaultName);
 
 //@}
-#endif
+#endif // MISCUTIL_H
 

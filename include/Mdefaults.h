@@ -118,6 +118,8 @@
 #define MP_TMPGFXFORMAT      "ConvertGfxFormat"
 /// the user's M directory
 #   define   MP_USERDIR         "UserDirectory"
+/// the complete path to the glocal M directory
+#   define   MP_GLOBALDIR      "GlobalDir"
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -125,8 +127,6 @@
 #   define   MP_PATHLIST         "PathList"
 /// the name of M's root directory
 #   define   MP_ROOTDIRNAME         "RootDirectoryName"
-/// the complete path to the glocal M directory
-#   define   MP_GLOBALDIR      "GlobalDir"
 /// the name of the M directory
 #   define   MP_USER_MDIR         "MDirName"
 /// the path where to find .afm files
@@ -301,6 +301,8 @@
 #define   MP_RFC822_IS_TEXT      "Rfc822IsText"
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX         "ReplyPrefix"
+/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
+#define   MP_REPLY_COLLAPSE_PREFIX "CollapseReplyPrefix"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
 /// prefix for subject in forwards
@@ -309,6 +311,10 @@
 #define   MP_SHOW_XFACES         "ShowXFaces"
 /// show graphics inline
 #define   MP_INLINE_GFX         "InlineGraphics"
+/// which headers to show in the message view?
+#define   MP_MSGVIEW_HEADERS     "MsgViewHeaders"
+/// all headers we know about
+#define   MP_MSGVIEW_ALL_HEADERS     "MsgViewAllHeaders"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
 /**@name  Font settings for message view */
@@ -323,6 +329,10 @@
 #define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
+/// the colour for header names in the message view
+#define   MP_MVIEW_HEADER_NAMES_COLOUR  "MViewHeaderNamesColour"
+/// the colour for header values in the message view
+#define   MP_MVIEW_HEADER_VALUES_COLOUR  "MViewHeaderValuesColour"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -454,20 +464,23 @@
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory
-#define   MP_PATHLIST_D M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+#  define   MP_PATHLIST_D M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
 /// the complete path to the glocal M directory
-#   define   MP_GLOBALDIR_D      M_BASEDIR
+#  define   MP_GLOBALDIR_D      M_BASEDIR
 /// the name of M's root directory
-#define   MP_ROOTDIRNAME_D   "Mahogany"
+#  define   MP_ROOTDIRNAME_D   "Mahogany"
 /// the name of the M directory
-#define   MP_USER_MDIR_D         ".M"
+#  define   MP_USER_MDIR_D         ".M"
 /// the path where to find .afm files
-#define   MP_AFMPATH_D M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+#  define   MP_AFMPATH_D M_BASEDIR "/afm:/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
 /// the path to the /etc directories (configuration files)
-#define   MP_ETCPATH_D "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
+#  define   MP_ETCPATH_D "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc"
 /// the path to the m directory
-#define   MP_PREFIXPATH_D "/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp"
-#endif // Unix
+#  define   MP_PREFIXPATH_D "/usr:/usr/local:/opt:/usr/share:/usr/local/share:/opt/share:/usr/local/opt:/usr/local/opt/share:/tmp"
+#else // !Unix
+/// the complete path to the glocal M directory
+#  define   MP_GLOBALDIR_D  ""
+#endif // Unix/!Unix
 
 /// the locale for translation to national languages
 #define   MP_LOCALE_D               M_EMPTYSTRING
@@ -634,7 +647,9 @@
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0l
 /// prefix for subject in replies
-#define   MP_REPLY_PREFIX_D      "Re:"
+#define   MP_REPLY_PREFIX_D      "Re: "
+/// collapse reply prefixes? 0=no, 1=replace "Re"s with one, 2=use reply level
+#define   MP_REPLY_COLLAPSE_PREFIX_D 2l
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_D      " > "
 /// prefix for subject in forwards
@@ -643,6 +658,10 @@
 #define   MP_SHOW_XFACES_D      1
 // show graphics inline
 #define   MP_INLINE_GFX_D       1
+/// which headers to show in the message view?
+#define   MP_MSGVIEW_HEADERS_D     "From:Newsgroups:To:Subject:Date:"
+/// all headers we know about
+#define   MP_MSGVIEW_ALL_HEADERS_D "From:To:Subject:Date:Newsgroups:Return-Path:Received:Delivered-To:Message-Id:X-Sender:X-Mailer:Mime-Version:Content-Type:Content-Length:Status:X-Status:X-Keywords:X-UID:Approved:"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
 /**@name  Font settings for message view */
@@ -657,6 +676,10 @@
 #define   MP_MVIEW_BGCOLOUR_D      "white"
 // which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_D     "blue"
+/// the colour for header names in the message view
+#define   MP_MVIEW_HEADER_NAMES_COLOUR_D  "blue"
+/// the colour for header values in the message view
+#define   MP_MVIEW_HEADER_VALUES_COLOUR_D "black"
 //@}
 /**@name Font settings for compose view */
 //@{

@@ -17,6 +17,8 @@
 #   include "gui/wxMFrame.h"
 #endif
 
+#include <wx/colour.h>
+
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
 
@@ -90,11 +92,13 @@ AutoCollectAddresses(const String &email,
 
             wxString name;
             entry->GetField(AdbField_NickName, &name);
-            if(frame)
+            if ( frame )
+            {
                wxLogStatus(frame,
                            _("Auto collected e-mail address '%s' "
                              "(added to the entry '%s')."),
                            email.c_str(), name.c_str());
+            }
          }
          else // no such address, no such name - create a new entry
          {
@@ -209,6 +213,69 @@ AutoCollectAddresses(const String &email,
                   _("'%s': the name is missing, address was not "
                     "autocollected."), email.c_str());
       }
+   }
+}
+
+// ---------------------------------------------------------------------------
+// colour to strign conversion
+// ---------------------------------------------------------------------------
+
+static const char *rgbSpecificationString = gettext_noop("RGB(%d, %d, %d)");
+
+bool ParseColourString(const String& name, wxColour* colour)
+{
+   wxString customColourString(wxGetTranslation(rgbSpecificationString));
+
+   // first check if it's a RGB specification
+   int red, green, blue;
+   if ( sscanf(name, customColourString, &red, &green, &blue) == 3 )
+   {
+      // it's a custom colour
+      if ( colour )
+         colour->Set(red, green, blue);
+
+      return TRUE;
+   }
+   else // a colour name
+   {
+      wxColour col(name);
+      if ( col.Ok() && colour )
+         *colour = col;
+
+      return col.Ok();
+   }
+}
+
+String GetColourName(const wxColour& colour)
+{
+   wxString colName(wxTheColourDatabase->FindName(colour));
+   if ( !colName )
+   {
+      // no name for this colour
+      colName.Printf(wxGetTranslation(rgbSpecificationString),
+                     colour.Red(), colour.Green(), colour.Blue());
+   }
+   else
+   {
+      // at least under X the string returned is always capitalized,
+      // convert it to lower case (it doesn't really matter, but capitals
+      // look ugly)
+      colName.MakeLower();
+   }
+
+   return colName;
+}
+
+// get the colour by name and warn the user if it failed
+void GetColourByName(wxColour *colour,
+                     const String& name,
+                     const String& def)
+{
+   if ( !ParseColourString(name, colour) )
+   {
+      wxLogError(_("Cannot find a colour named '%s', using default instead.\n"
+                   "(please check the settings)"), name.c_str());
+      *colour = def;
    }
 }
 

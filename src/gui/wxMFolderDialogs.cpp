@@ -614,7 +614,10 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    radioChoices[2] = _("POP3");
    radioChoices[3] = _("IMAP");
    radioChoices[4] = _("NNTP");
-   radioChoices[5] = _("Newsspool");
+   radioChoices[5] = _("News"); // don't call this newsspool because under
+                                // Windows all items in a radiobox have the
+                                // same width and this one is much wider than
+                                // all the others
 
    m_radio = new wxRadioBox(this,-1,_("Folder Type"),
                             wxDefaultPosition,wxDefaultSize,
@@ -976,6 +979,10 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    // this will also call SetDefaultValues()
    m_radio->SetSelection(typeFolder);
+#ifdef __WXMSW__
+   // the notification is sent automatically under GTK
+   UpdateUI(typeFolder);
+#endif // MSW
 
    return TRUE;
 }
@@ -1311,7 +1318,7 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);
 
-   MFolder *folderNew = DoShowFolderDialog(dlg, FolderCreatePage_Folder);
+   MFolder *folderNew = DoShowFolderDialog(dlg, FolderCreatePage_Default);
    if ( folderNew != NULL )
    {
       // what else can it return?

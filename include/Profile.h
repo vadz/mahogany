@@ -207,9 +207,6 @@ public:
    // provide access to the real thing via operator->
    ProfileBase *operator->() const { return m_profile; }
 
-   // testing for validity
-   operator bool() const { return m_profile != NULL; }
-
    // implicit conversion to the real pointer (dangerous, but necessary for
    // backwards compatibility)
    operator ProfileBase *() const { return m_profile; }

@@ -78,11 +78,13 @@ bool wxMFrame::RestorePosition(const char *name,
       *y = pConf->Read(MP_YPOS,MP_YPOS_D);
       *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
       *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
-      return TRUE;
+
+      // assume that if one entry existed, then the other existed too
+      return pConf->HasEntry(MP_XPOS);
    }
    else
    {
-      wxLogDebug("Can't restore frame '%s' position.", name);
+      wxLogDebug("Can't restore position/size of window '%s'.", name);
       *x = MP_XPOS_D;
       *y = MP_YPOS_D;
       *w = MP_WIDTH_D;

@@ -118,7 +118,7 @@ MAppBase::VerifySettings(void)
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
       wxGetUserId(buffer,bufsize); // contains , delimited fields of info
-      str = strutil_before(str,','); 
+      str = strutil_before(str,',');
       m_profile->writeEntry(MP_USERNAME, buffer);
    }
 
@@ -246,7 +246,7 @@ MAppBase::OnStartup()
          wxLogInfo(_("Created directory '%s' for configuration files."),
                    strConfFile.c_str());
 
-      
+
       //  Also, create an empty config file with the right
       //  permissions:
       String realFile = strConfFile + "/config";
@@ -266,7 +266,7 @@ MAppBase::OnStartup()
       if( (st.st_mode & (S_IWGRP | S_IWOTH)) != 0)
       {
          // No other user must have write access to the config dir.
-         String 
+         String
             msg;
          msg.Printf(_("Configuration directory '%s' was writable for other users.\n"
                       "Passwords may have been compromised, please consider changing them.\n"),
@@ -297,7 +297,7 @@ MAppBase::OnStartup()
       if( (st.st_mode & (S_IRGRP | S_IROTH)) != 0)
       {
          // No other user must have access to the config file.
-         String 
+         String
             msg;
          msg.Printf(_("Configuration file '%s' was readable for other users.\n"
                       "Passwords may have been compromised, please consider changing them.\n"),
@@ -366,7 +366,7 @@ MAppBase::OnStartup()
       ::GetModuleFileName(::GetModuleHandle(NULL),
                           strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
       strPath.UngetWriteBuf();
-      
+
       // extract the dir name
       wxSplitPath(strPath, &m_globalDir, NULL, NULL);
 #endif //Unix
@@ -464,7 +464,7 @@ MAppBase::OnStartup()
    // ----------------------------------------------
    m_MailCollector = new MailCollector();
    m_MailCollector->Collect(); // empty all at beginning
-   
+
    // register with the event subsystem
    // ---------------------------------
    m_eventReg = MEventManager::Register(*this, MEventId_NewMail);
@@ -570,7 +570,7 @@ MAppBase::OnMEvent(MEventData& event)
       if(!m_MailCollector->Collect(folder))
          wxLogError(_("Could not collect mail from incoming folder '%s'."),
                     folder->GetName().c_str());
-      return false; 
+      return false;
    }
 
    // step 1: execute external command if it's configured
@@ -602,7 +602,7 @@ MAppBase::OnMEvent(MEventData& event)
          unsigned long number = mailevent.GetNumber();
          unsigned i;
          if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
-                                                    MP_SHOW_NEWMAILINFO)) 
+                                                    MP_SHOW_NEWMAILINFO))
          {
             for(i = 0; i < number; i++)
             {

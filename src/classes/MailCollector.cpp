@@ -21,11 +21,13 @@
 #  include  "Mcommon.h"
 #  include  "strutil.h"
 #  include  "kbList.h"
-#  include  "Mdefaults.h"
 #  include  "MApplication.h"
-#  include  "MFolder.h"
+
 #  include  <wx/dynarray.h>
 #endif   // USE_PCH
+
+#include "Mdefaults.h"
+#include "MFolder.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"

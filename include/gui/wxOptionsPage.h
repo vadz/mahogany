@@ -179,6 +179,11 @@ class wxOptionsPageMessageView : public wxOptionsPage
 {
 public:
    wxOptionsPageMessageView(wxNotebook *parent, ProfileBase *profile);
+
+   void OnButton(wxCommandEvent&);
+
+private:
+   DECLARE_EVENT_TABLE()
 };
 
 // user identity and network configuration page

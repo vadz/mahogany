@@ -26,13 +26,16 @@
 #  include "guidef.h"
 
 #  include <wx/cmndata.h>
-#  include <wx/colordlg.h>
 #endif
+
+#include <wx/colordlg.h>
 
 #include "MFolder.h"
 #include "MFolderDialogs.h"
 
 #include "gui/wxBrowseButton.h"
+
+#include "miscutil.h" // for ParseColorString and GetColorName
 
 // ============================================================================
 // implementation
@@ -113,8 +116,9 @@ wxFolderBrowseButton::~wxFolderBrowseButton()
 
 void wxColorBrowseButton::DoBrowse()
 {
+   (void)ParseColourString(GetText(), &m_color);
+
    wxColourData colData;
-   m_color = GetText();
    colData.SetColour(m_color);
 
    wxColourDialog dialog(this, &colData);
@@ -124,20 +128,6 @@ void wxColorBrowseButton::DoBrowse()
       colData = dialog.GetColourData();
       m_color = colData.GetColour();
 
-      wxString colName(wxTheColourDatabase->FindName(m_color));
-      if ( !colName )
-      {
-         // no name for this colour
-         colName.Printf("RGB(%d, %d, %d)",
-                        m_color.Red(), m_color.Green(), m_color.Blue());
-      }
-      else
-      {
-         // at least under X the string returned is always capitalized,
-         // convert it to lower case (it doesn't really matter, but capitals
-         // look ugly)
-         colName.MakeLower();
-      }
-      SetText(colName);
+      SetText(GetColourName(m_color));
    }
 }

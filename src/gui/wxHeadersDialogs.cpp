@@ -33,6 +33,9 @@
 #  include <wx/textctrl.h>
 #endif
 
+#include  <wx/menuitem.h>
+#include  <wx/checklst.h>
+
 #include "Mdefaults.h"
 
 // ----------------------------------------------------------------------------
@@ -44,18 +47,24 @@ class wxOptionsPageSubdialog : public wxDialog
 public:
    wxOptionsPageSubdialog(ProfileBase *profile,
                           wxWindow *parent,
-                          const wxString& label)
-      : wxDialog(parent, -1, label,
-                 wxDefaultPosition, wxDefaultSize,
-                 wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
-      { m_profile = profile; }
+                          const wxString& label,
+                          const wxString& windowName);
+
+   virtual ~wxOptionsPageSubdialog();
 
    void OnChange(wxEvent& event);
 
+   bool HasChanges() const { return m_hasChanges; }
+   bool LastSizeRestored() const { return m_didRestoreSize; }
+
 protected:
    ProfileBase *m_profile;
+   bool         m_hasChanges,
+                m_didRestoreSize;
 
 private:
+   wxString m_windowName;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -65,7 +74,7 @@ public:
    // ctor which takes the profile whose settings we will edit
    wxComposeHeadersDialog(ProfileBase *profile, wxWindow *parent);
 
-   // trasnfer data to/from window
+   // transfer data to/from window
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
@@ -98,20 +107,63 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+class wxMsgViewHeadersDialog  : public wxOptionsPageSubdialog
+{
+public:
+   // ctor which takes the profile whose settings we will edit
+   wxMsgViewHeadersDialog(ProfileBase *profile, wxWindow *parent);
+
+   // transfer data to/from window
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+   // update UI: disable the text boxes which shouldn't be edited
+   void OnUpdateUI(wxUpdateUIEvent& event);
+
+   // up/down buttons notifications
+   void OnButtonUp(wxCommandEvent& event) { OnButtonMove(TRUE); }
+   void OnButtonDown(wxCommandEvent& event) { OnButtonMove(FALSE); }
+
+private:
+   // real button events handler
+   void OnButtonMove(bool up);
+
+   wxCheckListBox *m_checklstBox;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
 // the dialog element ids
+
+// for wxComposeHeadersDialog
 enum
 {
    // the text ctrls have the consecutive ids, this is the first one
    TextCtrlId = 1000
 };
 
+// for wxMsgViewHeadersDialog
+enum
+{
+   Btn_Up = 1000,
+   Btn_Down
+};
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
+
+#define EVT_UPDATE_UI_RANGE(id1, id2, func) \
+   {\
+      wxEVT_UPDATE_UI,\
+      id1, id2,\
+      (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)&func,\
+      (wxObject *) NULL\
+   },
 
 BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxDialog)
    EVT_CHECKBOX(-1, wxOptionsPageSubdialog::OnChange)
@@ -120,13 +172,16 @@ BEGIN_EVENT_TABLE(wxOptionsPageSubdialog, wxDialog)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxComposeHeadersDialog, wxOptionsPageSubdialog)
-   {
-      wxEVT_UPDATE_UI,
-      TextCtrlId, TextCtrlId + wxComposeHeadersDialog::Header_Max,
-      (wxObjectEventFunction) (wxEventFunction) (wxUpdateUIEventFunction) &
-         wxComposeHeadersDialog::OnUpdateUI,
-      NULL
-   },
+   EVT_UPDATE_UI_RANGE(TextCtrlId,
+                       TextCtrlId + wxComposeHeadersDialog::Header_Max,
+                       wxComposeHeadersDialog::OnUpdateUI)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxMsgViewHeadersDialog, wxOptionsPageSubdialog)
+   EVT_BUTTON(Btn_Up, wxMsgViewHeadersDialog::OnButtonUp)
+   EVT_BUTTON(Btn_Down, wxMsgViewHeadersDialog::OnButtonDown)
+
+   EVT_UPDATE_UI_RANGE(Btn_Up, Btn_Down, wxMsgViewHeadersDialog::OnUpdateUI)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -137,11 +192,35 @@ END_EVENT_TABLE()
 // wxOptionsPageSubdialog - the common base class for our dialogs
 // ----------------------------------------------------------------------------
 
+wxOptionsPageSubdialog::wxOptionsPageSubdialog(ProfileBase *profile,
+                                               wxWindow *parent,
+                                               const wxString& label,
+                                               const wxString& windowName)
+                      : wxDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
+                                 -1, label,
+                                 wxDefaultPosition, wxDefaultSize,
+                                 wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
+                        m_windowName(windowName)
+{
+   m_profile = profile;
+
+   m_hasChanges = FALSE;
+
+   int x, y, w, h;
+   m_didRestoreSize = wxMFrame::RestorePosition(m_windowName, &x, &y, &w, &h);
+   SetSize(x, y, w, h);
+}
+
 void wxOptionsPageSubdialog::OnChange(wxEvent&)
 {
    // we don't do anything, but just eat these messages - otherwise they will
    // confuse wxOptionsPage which is our parent because it only processes
    // messages from its own controls
+}
+
+wxOptionsPageSubdialog::~wxOptionsPageSubdialog()
+{
+   wxMFrame::SavePosition(m_windowName, this);
 }
 
 // ----------------------------------------------------------------------------
@@ -174,7 +253,8 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
                                                wxWindow *parent)
                       : wxOptionsPageSubdialog(profile, parent,
                                                _("Configure headers for "
-                                                 "message composition"))
+                                                 "message composition"),
+                                               "ComposeHeaders")
 {
    SetAutoLayout(TRUE);
 
@@ -261,7 +341,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
          c->top.Below(last, LAYOUT_Y_MARGIN);
       }
       c->left.RightOf(m_checkboxes[header], 3*LAYOUT_X_MARGIN);
-      c->right.SameAs(box, wxRight, LAYOUT_X_MARGIN);
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
       c->height.AsIs();
 
       last = m_textvalues[header];
@@ -272,9 +352,10 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
    m_checkboxes[Header_To]->SetValue(TRUE);
    m_checkboxes[Header_To]->Enable(FALSE);
 
-   // set the (initial) window size
-   wxWindow::SetSize(4*wBtn, 10*hBtn);
-   Centre(wxCENTER_FRAME | wxBOTH);
+   // set the minimal and initial window size
+   if ( !LastSizeRestored() )
+      SetSize(4*wBtn, 8*hBtn);
+   SetSizeHints(4*wBtn, 8*hBtn);
 }
 
 void wxComposeHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -301,7 +382,7 @@ bool wxComposeHeadersDialog::TransferDataToWindow()
       }
       else
       {
-         show = m_profile->readEntry(ms_profileNamesShow[header], 1);
+         show = m_profile->readEntry(ms_profileNamesShow[header], 1) != 0;
 
          m_checkboxes[header]->SetValue(show != 0);
       }
@@ -336,6 +417,8 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
          show = m_checkboxes[header]->GetValue();
          if ( show != m_oldCheckboxValues[header] )
          {
+            m_hasChanges = TRUE;
+
             m_profile->writeEntry(ms_profileNamesShow[header], show);
          }
       }
@@ -343,6 +426,8 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
       if ( show && m_textvalues[header]->IsModified() )
       {
          def = m_textvalues[header]->GetValue();
+
+         m_hasChanges = TRUE;
 
          m_profile->writeEntry(ms_profileNamesDefault[header], def);
       }
@@ -355,6 +440,198 @@ bool wxComposeHeadersDialog::TransferDataFromWindow()
 // wxMessageHeadersDialog - configure the headers in the message view
 // ----------------------------------------------------------------------------
 
+wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(ProfileBase *profile,
+                                               wxWindow *parent)
+                      : wxOptionsPageSubdialog(profile, parent,
+                                               _("Configure headers to show "
+                                                 "in message view"),
+                                               "MsgViewHeaders")
+{
+   SetAutoLayout(TRUE);
+
+   // basic unit is the height of a char, from this we fix the sizes of all
+   // other controls
+   size_t heightLabel = AdjustCharHeight(GetCharHeight());
+   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+
+   // layout the controls
+   // -------------------
+   wxLayoutConstraints *c;
+
+   // first the 2 buttons in the bottom/right corner
+   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
+   btnOk->SetDefault();
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+   btnOk->SetConstraints(c);
+
+   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+   btnCancel->SetConstraints(c);
+
+   // a box around all the other controls
+   wxStaticBox *box = new wxStaticBox(this, -1, _("&Headers"));
+   c = new wxLayoutConstraints();
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
+   box->SetConstraints(c);
+
+   // buttons to move items up/down
+   wxButton *btn = new wxButton(this, Btn_Down, _("&Down"));
+   c = new wxLayoutConstraints();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   btn->SetConstraints(c);
+
+   // NB: set constraints before creating the btn because we use the width of
+   //     the btn we created previously. We also assume that "Down" is longer
+   //     than "Up" - which is of course false after translation (FIXME)
+   c = new wxLayoutConstraints();
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+   c->width.SameAs(btn, wxWidth);
+   c->height.AsIs();
+   btn = new wxButton(this, Btn_Up, _("&Up"));
+   btn->SetConstraints(c);
+
+   // a checklistbox with headers on the space which is left
+   m_checklstBox = new wxCheckListBox(this, -1);
+   c = new wxLayoutConstraints();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(btn, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_checklstBox->SetConstraints(c);
+
+   // set the minimal window size
+   if ( !LastSizeRestored() )
+      SetSize(4*wBtn, 10*hBtn);
+   wxWindow::SetSizeHints(3*wBtn, 7*hBtn);
+}
+
+bool wxMsgViewHeadersDialog::TransferDataToWindow()
+{
+   // colon separated list of all the headers (even if they're not all shown)
+   wxString allHeaders = READ_CONFIG(m_profile, MP_MSGVIEW_ALL_HEADERS);
+
+   // the headers we do show: prepend ':' in front because it allows us to
+   // check very easily whether the header is shown or not: we just search for
+   // ":<header>:" (of course, without the ':' in front this wouldn't work for
+   // the first header)
+   wxString shownHeaders(':');
+   shownHeaders += READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS);
+
+   size_t n = 0;
+   wxString header;  // accumulator
+   for ( const char *p = allHeaders.c_str(); *p != '\0'; p++ )
+   {
+      if ( *p == ':' )
+      {
+         wxASSERT_MSG( !!header, "header name shouldn't be empty" );
+
+         m_checklstBox->Append(header);
+
+         // check the item only if we show it
+         header.Prepend(':');
+         header.Append(':');
+         if ( shownHeaders.Find(header) != wxNOT_FOUND )
+         {
+            m_checklstBox->Check(n); // the last item we added
+         }
+
+         n++;
+         header.Empty();
+      }
+      else
+      {
+         header += *p;
+      }
+   }
+
+   return TRUE;
+}
+
+bool wxMsgViewHeadersDialog::TransferDataFromWindow()
+{
+   // copy all entries from the checklistbox to the profile
+   wxString shownHeaders, allHeaders, header;
+   size_t count = (size_t)m_checklstBox->Number();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      header = m_checklstBox->GetString(n);
+      header += ':';
+
+      if ( m_checklstBox->IsChecked(n) )
+      {
+         shownHeaders += header;
+      }
+
+      allHeaders += header;
+   }
+
+   // update the headers which we show
+   if ( shownHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_HEADERS) )
+   {
+      m_hasChanges = TRUE;
+
+      m_profile->writeEntry(MP_MSGVIEW_HEADERS, shownHeaders);
+   }
+
+   // update the list of known entries too
+   if ( allHeaders != READ_CONFIG(m_profile, MP_MSGVIEW_ALL_HEADERS) )
+   {
+      // it shouldn't cound as "change" really, so we don't set the flag
+      m_profile->writeEntry(MP_MSGVIEW_ALL_HEADERS, allHeaders);
+   }
+
+   return TRUE;
+}
+
+void wxMsgViewHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   // only enable buttons if there is something selected
+   event.Enable( m_checklstBox->GetSelection() != -1 );
+}
+
+void wxMsgViewHeadersDialog::OnButtonMove(bool up)
+{
+    int selection = m_checklstBox->GetSelection();
+    if ( selection != -1 )
+    {
+        wxString label = m_checklstBox->GetString(selection);
+
+        int positionNew = up ? selection - 1 : selection + 2;
+        if ( positionNew >= 0 && positionNew < m_checklstBox->Number() )
+        {
+            bool wasChecked = m_checklstBox->IsChecked(selection);
+
+            int positionOld = up ? selection + 1 : selection;
+
+            // insert the item
+            m_checklstBox->InsertItems(1, &label, positionNew);
+
+            // and delete the old one
+            m_checklstBox->Delete(positionOld);
+
+            int selectionNew = up ? positionNew : positionNew - 1;
+            m_checklstBox->Check(selectionNew, wasChecked);
+            m_checklstBox->SetSelection(selectionNew);
+        }
+        //else: out of range, silently ignore
+    }
+}
 // ----------------------------------------------------------------------------
 // our public interface
 // ----------------------------------------------------------------------------
@@ -363,17 +640,12 @@ bool ConfigureComposeHeaders(ProfileBase *profile, wxWindow *parent)
 {
    wxComposeHeadersDialog dlg(profile, parent);
 
-   return dlg.ShowModal() == wxID_OK;
+   return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
 }
 
 bool ConfigureMsgViewHeaders(ProfileBase *profile, wxWindow *parent)
 {
-   // TODO
-#if 0
    wxMsgViewHeadersDialog dlg(profile, parent);
 
-   return dlg.ShowModal() == wxID_OK;
-#else
-   return FALSE;
-#endif
+   return (dlg.ShowModal() == wxID_OK) && dlg.HasChanges();
 }

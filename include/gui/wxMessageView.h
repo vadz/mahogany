@@ -168,8 +168,8 @@ protected:
    /// All values read from the profile
    struct AllProfileValues
    {
-      /// Background and foreground colours.
-      wxColour BgCol, FgCol, UrlCol;
+      /// Background and foreground colours, colours for URLs and headers
+      wxColour BgCol, FgCol, UrlCol, HeaderNameCol, HeaderValueCol;
       /// font attributes
       int font, size;
       /// show headers?
@@ -197,6 +197,7 @@ protected:
       /// Show XFaces?
       bool showFaces;
    } m_ProfileValues;
+
 private:
    /// array of process info for all external viewers we have launched
    ArrayProcessInfo m_processes;

@@ -20,6 +20,22 @@ wxGTK bug:
 
  - wxTreeCtrl::HitTest() doesn't work well with non standard icon sizes
 
+wxMSW bugs:
+ - memory leaks (some from cclient, others - not sure)
+ - radiobox doesn't respect constraints, adjusts its size as it thinks is better
+ - in folder create/properties dialog there is missing UpdateUI() right
+   after creation - add it somewhere
+ - lock file checking for INBOX:
+   + it does locking under Windows too, but the lock file names are different
+     Testing for FOLDER.lock* now, is that fine?
+ - wxLayout completely broken:
+   + scrollbars are not updated nor even drawn at all
+   + vertical and horizontal lines across the window
+   + some areas are duplicated (displayed twice with some small shift)
+   + ...
+ - CR/LF problems when replying to the messages
+
+
 VZ:
 - wxConfig does not like entries like:
   Key=Value
@@ -134,7 +150,6 @@ CHECK:
 
 
 TODO:
-- message status etc in title bar
 - printer settings seem to have no effect : are persistent, do they get used?
 - MFolder.i
 
@@ -232,6 +247,9 @@ STRANGE....
 - make message view use the new font settings.
 **************** end of KB priorities :-) *********************
 
+- change of settings in the msg view section of the options dlg should generate
+  an event which would propagete to all open msg views.
+- make [Apply] work too!
 
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
@@ -321,16 +339,6 @@ STRANGE....
   - BBDB: sort entries by surname
   - add ADB support for $HOME/.mailrc
     ( lines: "alias john_doe  john@doe.com, second@xxx.uuu, ...")
-
-
-(Windows)
- - memory leaks (run Purify on it)
- - options dlg layout looks ugly (radiobox is way too big)
- - in folder create/properties dialog there is missing UpdateUI() right
-   after creation - add it somewhere
- - lock file checking for INBOX:
-   + it does locking under Windows too, but the lock file names are different
-     Testing for FOLDER.lock* now, is that fine?
 
 
 *********************************************************************

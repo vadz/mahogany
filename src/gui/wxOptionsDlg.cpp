@@ -84,6 +84,8 @@ enum ConfigFields
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
+   ConfigField_ReplyString,
+   ConfigField_ReplyCollapse,
    ConfigField_ReplyCharacter,
 
    ConfigField_Signature,
@@ -134,6 +136,8 @@ enum ConfigFields
    ConfigField_MessageViewFGColour,
    ConfigField_MessageViewBGColour,
    ConfigField_MessageViewUrlColour,
+   ConfigField_MessageViewHeaderNamesColour,
+   ConfigField_MessageViewHeaderValuesColour,
    ConfigField_MessageViewInlineGraphics,
 #ifdef OS_UNIX
    ConfigField_MessageViewConvertGraphicsFormat,
@@ -143,7 +147,8 @@ enum ConfigFields
    ConfigField_MessageViewMaxHelpText,
    ConfigField_MessageViewMaxMsgSize,
    ConfigField_MessageViewMaxHeadersNum,
-   ConfigField_MessageViewLast = ConfigField_MessageViewMaxHeadersNum,
+   ConfigField_MessageViewHeaders,
+   ConfigField_MessageViewLast = ConfigField_MessageViewHeaders,
 
    // autocollecting addresses options
    ConfigField_AdbFirst = ConfigField_MessageViewLast,
@@ -292,6 +297,11 @@ BEGIN_EVENT_TABLE(wxOptionsPageCompose, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageCompose::OnButton)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxOptionsPageMessageView, wxOptionsPage)
+   // buttons invoke subdialogs
+   EVT_BUTTON(-1, wxOptionsPageMessageView::OnButton)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
    EVT_BUTTON(wxOptionsPage_BtnNew,    wxOptionsPageFolders::OnNewFolder)
    EVT_BUTTON(wxOptionsPage_BtnModify, wxOptionsPageFolders::OnModifyFolder)
@@ -314,7 +324,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 {
    // network config and identity
    { gettext_noop("The user and host names are used to compose the return address, unless\n"
-                  "a differenent return address is explicitly specified."),
+                  "a different return address is explicitly specified."),
                                                    Field_Message, -1 },
    { gettext_noop("&Username"),                    Field_Text,    -1 },
    { gettext_noop("The host name is also used as a default host name for local mail addresses."),
@@ -328,16 +338,21 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
-   { gettext_noop("&Folder file for sent messages"),Field_File,   ConfigField_UseOutgoingFolder        },
+   { gettext_noop("&Folder file for sent messages"),
+                                                   Field_File,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
-   { gettext_noop("&Reply character"),             Field_Text,    -1,                        },
+   { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
+   { gettext_noop("Co&llapse reply markers"
+                  ":no:squeeze:count"),            Field_Combo,   -1,                        },
+   { gettext_noop("Reply &character"),             Field_Text,    -1,                        },
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
    { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
-   { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,  -1,                        },
+   { gettext_noop("Mail alias substring ex&pansion"),
+                                                   Field_Bool,    -1,                        },
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1},
@@ -348,7 +363,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
 
    // folders
-   { gettext_noop("Folders to open on &startup"),  Field_List | Field_Restart, -1,                        },
+   { gettext_noop("Folders to open on &startup"),  Field_List |
+                                                   Field_Restart, -1,           },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("&Poll for new mail delay in seconds"), Field_Number, -1},
@@ -378,13 +394,15 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Foreground c&olour"),           Field_Color,   -1 },
    { gettext_noop("Back&ground colour"),           Field_Color,   -1 },
    { gettext_noop("Colour for &URLs"),             Field_Color,   -1 },
+   { gettext_noop("Colour for header &names"),     Field_Color,   -1 },
+   { gettext_noop("Colour for header &values"),    Field_Color,   -1 },
    { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
 #ifdef OS_UNIX
    { gettext_noop("Conversion &graphics format"
                   ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
-#endif
+#endif // Unix
    { gettext_noop("The following settings allow to limit the amount of data "
                   "retrieved from remote server: if the message size or "
                   "number is greater than the value specified here, you "
@@ -393,6 +411,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Maximum size of &message (in Kb)"),
                                                    Field_Number,   -1 },
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
+   { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
@@ -462,6 +481,8 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
+   CONFIG_ENTRY(MP_REPLY_PREFIX),
+   CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
 
    CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
@@ -501,6 +522,8 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_URLCOLOUR),
+   CONFIG_ENTRY(MP_MVIEW_HEADER_NAMES_COLOUR),
+   CONFIG_ENTRY(MP_MVIEW_HEADER_VALUES_COLOUR),
    CONFIG_ENTRY(MP_INLINE_GFX),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_TMPGFXFORMAT),
@@ -510,6 +533,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
+   CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
 
    // autocollect
    CONFIG_NONE(),
@@ -1038,6 +1062,24 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
 {
 }
 
+void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
+{
+   // FIXME there is only one button for now, but if we had several of them,
+   //       how would we know which one was clicked?
+   wxASSERT_MSG( event.GetEventObject() ==
+                 GetControl(ConfigField_MessageViewHeaders), "alien button" );
+
+   if ( ConfigureMsgViewHeaders(m_Profile, this) )
+   {
+      // something changed - make us dirty
+      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+
+      wxCHECK_RET( dialog, "options page without a parent dialog?" );
+
+      dialog->SetDirty();
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxOptionsPageIdent
 // ----------------------------------------------------------------------------
@@ -1416,4 +1458,4 @@ void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
    (void)dlg.ShowModal();
 }
 
-/* vi: set tw=0 */
+/* vi: set tw=0: */

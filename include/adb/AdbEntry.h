@@ -15,6 +15,8 @@
 
 #include "MObject.h"    // the base class declaration
 
+#include "miscutil.h"   // GetFullEmailAddress
+
 // forward declaration for classes we use
 class AdbElement;
 class AdbEntry;
@@ -162,10 +164,10 @@ public:
 
      // the full form is "FullName <email>", but if the "fullname" is empty,
      // we take "nickname" instead (it can not be empty normally)
-     if ( name.IsEmpty() )
+     if ( !name )
         GetField(AdbField_NickName, &name);
 
-     return name + " <" + address + '>';
+     return GetFullEmailAddress(name, address);
   }
 };
 

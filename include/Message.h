@@ -52,34 +52,34 @@ KBLIST_DEFINE(MessageParameterList, MessageParameter);
    Message class, containing the most commonly used message headers.
    */
 class Message : public MObjectRC
-{   
+{
 public:
    /**@name Constants (correspoding to c-client's mail.h */
    //@{
-   /** Primary body types 
+   /** Primary body types
        If you change any of these you must also change body_types in
-       rfc822.c */ 
+       rfc822.c */
    enum ContentType
    {
       /// unformatted text
       MSG_TYPETEXT = 0,
       /// multipart content
       MSG_TYPEMULTIPART = 1,
-      /// encapsulated message 
+      /// encapsulated message
       MSG_TYPEMESSAGE = 2,
-      /// application data 
+      /// application data
       MSG_TYPEAPPLICATION = 3,
-      /// audio 
+      /// audio
       MSG_TYPEAUDIO = 4,
-      /// static image 
+      /// static image
       MSG_TYPEIMAGE = 5,
-      /// video 
+      /// video
       MSG_TYPEVIDEO = 6,
-      /// model 
+      /// model
       MSG_TYPEMODEL = 7,
-      /// unknown 
+      /// unknown
       MSG_TYPEOTHER = 8,
-      /// maximum type code 
+      /// maximum type code
       MSG_TYPEMAX = 15
    };
    //@}
@@ -108,7 +108,7 @@ public:
    */
    virtual const String Address(String &name,
                                 MessageAddressType type = MAT_REPLYTO) const = 0;
-               
+
    /** get From line
        @return From entry
    */
@@ -121,7 +121,7 @@ public:
 
    /** Return message id. */
    virtual String GetId(void) const = 0;
-       
+
    /** Return message references. */
    virtual String GetReferences(void) const = 0;
 
@@ -136,7 +136,7 @@ public:
    virtual int CountParts(void) = 0;
 
    /** Returns a pointer to the folder. If the caller needs that
-       folder to stay around, it should IncRef() it. It's existence is 
+       folder to stay around, it should IncRef() it. It's existence is
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
@@ -175,7 +175,7 @@ public:
        @return list of parameters, must be freed by caller.
    */
    virtual MessageParameterList const & GetParameters(int n = -1) = 0;
-   
+
    /** Get the list of disposition parameters for a given part.
        @param n part number, if -1, for the top level.
        @param disptype string where to store disposition type
@@ -191,7 +191,7 @@ public:
    bool ExpandParameter(MessageParameterList const & list,
                         String const &parameter,
                         String *value);
-   
+
    /** Query the MimeType of the content.
        @param  n part number
        @return string describing the Mime type
@@ -223,7 +223,7 @@ public:
       unsigned int *day = NULL,
       unsigned int *month = NULL,
       unsigned int *year = NULL) const = 0;
-   
+
    /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header

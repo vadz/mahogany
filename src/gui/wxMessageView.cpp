@@ -359,40 +359,27 @@ wxMessageView::GetFolder(void)
 void
 wxMessageView::SetParentProfile(ProfileBase *profile)
 {
-   if(m_Profile) m_Profile->DecRef();
+   SafeDecRef(m_Profile);
+
    m_Profile = ProfileBase::CreateProfile("MessageView", profile);
 
-   // We also use this to set all values to be read to speed things
-   // up:
-   wxString tmp;
-   wxColour *c;
-   tmp = READ_CONFIG(m_Profile,MP_MVIEW_FGCOLOUR);
-   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
-   {
-      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_ProfileValues.FgCol = *wxTheColourDatabase->FindColour(MP_MVIEW_FGCOLOUR_D);
-   }
-   else
-      m_ProfileValues.FgCol=*c;
-   tmp = READ_CONFIG(m_Profile,MP_MVIEW_BGCOLOUR);
-   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
-   {
-      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_ProfileValues.BgCol = *wxTheColourDatabase->FindColour(MP_MVIEW_BGCOLOUR_D);
-   }
-   else
-      m_ProfileValues.BgCol=*c;
-   tmp = READ_CONFIG(m_Profile,MP_MVIEW_URLCOLOUR);
-   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
-   {
-      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_ProfileValues.UrlCol = *wxTheColourDatabase->FindColour(MP_MVIEW_URLCOLOUR_D);
-   }
-   else
-      m_ProfileValues.UrlCol=*c;
+   // We also use this to set all values to be read to speed things up:
+   #define GET_COLOUR_FROM_PROFILE(which, name) \
+      GetColourByName(&m_ProfileValues.which, \
+                      READ_CONFIG(m_Profile, MP_MVIEW_##name), \
+                      MP_MVIEW_##name##_D)
+
+   GET_COLOUR_FROM_PROFILE(FgCol, FGCOLOUR);
+   GET_COLOUR_FROM_PROFILE(BgCol, BGCOLOUR);
+   GET_COLOUR_FROM_PROFILE(UrlCol, URLCOLOUR);
+   GET_COLOUR_FROM_PROFILE(HeaderNameCol, HEADER_NAMES_COLOUR);
+   GET_COLOUR_FROM_PROFILE(HeaderValueCol, HEADER_VALUES_COLOUR);
+
+   #undef GET_COLOUR_FROM_PROFILE
+
    m_ProfileValues.font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
-   ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <=
-          NUM_FONTS);
+   ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <= NUM_FONTS);
+
    m_ProfileValues.font = wxFonts[m_ProfileValues.font];
    m_ProfileValues.size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
    m_ProfileValues.showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
@@ -486,41 +473,64 @@ wxMessageView::Update(void)
          }
       }
    }
-#endif
-#endif
-   llist->SetFontWeight(wxBOLD);
-   llist->Insert(_("From: "));
-   llist->SetFontWeight(wxNORMAL);
-   from = m_mailMessage->Address(tmp,MAT_FROM);
-   if(tmp.length() > 0)
-      from = tmp + String(" <") + from + '>';
-   llist->Insert(from);
-   llist->LineBreak();
-   //Either To: or Newsgroup: header:
-   llist->SetFontWeight(wxBOLD);
-   FolderType ftype = m_mailMessage->GetFolder()->GetType();
-   if(ftype == MF_NEWS || ftype == MF_NNTP)
-      llist->Insert(_("Newsgroups: "));
-   else
-      llist->Insert(_("To: "));
-   llist->SetFontWeight(wxNORMAL);
-   if( ftype == MF_NEWS || ftype == MF_NNTP )
-      m_mailMessage->GetHeaderLine("Newsgroups",tmp);
-   else
-      m_mailMessage->GetHeaderLine("To",tmp);
-   llist->Insert(tmp);
-   llist->LineBreak();
-   llist->SetFontWeight(wxBOLD);
-   llist->Insert(_("Subject: "));
-   llist->SetFontWeight(wxNORMAL);
-   llist->Insert(m_mailMessage->Subject());
-   llist->LineBreak();
-   llist->SetFontWeight(wxBOLD);
-   llist->Insert(_("Date: "));
-   llist->SetFontWeight(wxNORMAL);
-   llist->Insert(m_mailMessage->Date());
-   llist->LineBreak();
-   llist->LineBreak();
+#endif // !Windows
+#endif // HAVE_XFACES
+
+   // show the configurable headers
+   String headersString(READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
+   String headerName, headerValue;
+   for ( const char *p = headersString.c_str(); *p != '\0'; p++ )
+   {
+      if ( *p == ':' )
+      {
+         // first get the value of this header
+         m_mailMessage->GetHeaderLine(headerName, headerValue);
+
+         // check for several special cases
+         if ( headerName == "From" )
+         {
+            String name;
+            String from = m_mailMessage->Address(name, MAT_FROM);
+            headerValue = GetFullEmailAddress(name, from);
+         }
+         else if ( headerName == "Date" )
+         {
+            // don't read the header line directly because Date() function
+            // might return date in some format different from RFC822 one
+            headerValue = m_mailMessage->Date();
+         }
+
+         // don't show the header if there is no value
+         if ( !!headerValue )
+         {
+            // always terminate the header names with ": " - configurability
+            // cannot be endless neither
+            headerName += ": ";
+
+            // insert the header name
+            llist->SetFontWeight(wxBOLD);
+            llist->SetFontColour(&m_ProfileValues.HeaderNameCol);
+            llist->Insert(headerName);
+
+            // insert the header value
+            llist->SetFontWeight(wxNORMAL);
+            llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
+
+            llist->Insert(headerValue);
+
+            llist->LineBreak();
+         }
+
+         headerName.Empty();
+      }
+      else
+      {
+         headerName += *p;
+      }
+   }
+
+   // restore the normal colour
+   llist->SetFontColour(&m_ProfileValues.FgCol);
 
    // iterate over all parts
    n = m_mailMessage->CountParts();

@@ -174,9 +174,9 @@ public:
       m_id = id;
       m_lastWasTab = FALSE;
       m_lookupMode = (READ_CONFIG(m_composeView->GetProfile(),
-                                  MP_ADB_SUBSTRINGEXPANSION) ) ?
-         AdbLookup_Substring : AdbLookup_StartsWith;
-      
+                                  MP_ADB_SUBSTRINGEXPANSION) )
+                     ? AdbLookup_Substring
+                     : AdbLookup_StartsWith;
    }
 
    // expand the text in the control using the address book(s): returns FALSE
@@ -184,6 +184,7 @@ public:
    bool DoExpand();
 
    // callbacks
+   void OnFocusSet(wxFocusEvent& event);
    void OnChar(wxKeyEvent& event);
    void OnEnter(wxCommandEvent& event);
 
@@ -216,6 +217,7 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
+   EVT_SET_FOCUS(wxAddressTextCtrl::OnFocusSet)
    EVT_CHAR(wxAddressTextCtrl::OnChar)
    EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
@@ -284,6 +286,14 @@ void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
     event.SetEventObject(this);
 
     GetEventHandler()->ProcessEvent(event);
+}
+
+// mark this ctrl as being the last active - so the [Expand] btn will expand us
+void wxAddressTextCtrl::OnFocusSet(wxFocusEvent& event)
+{
+   m_composeView->SetLastAddressEntry(m_id);
+
+   event.Skip();
 }
 
 // expand the address when <TAB> is pressed
@@ -427,7 +437,7 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
    cv->Create(parent,parentProfile);
    return cv;
 }
-   
+
 /** Constructor for sending mail.
     @param parentProfile parent profile
     @param parent parent window
@@ -455,7 +465,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
-   
+
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
    m_Profile = ProfileBase::CreateProfile(m_name,parentProfile);
@@ -468,7 +478,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    case Mode_NNTP:
       m_msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_NNTP);
       break;
-   }      
+   }
 
    // build menu
    // ----------
@@ -530,7 +540,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    }
    else
       bDoShow[Field_Cc] = bDoShow[Field_Bcc] = FALSE; // never for news
-   
+
 
    // first determine the longest label caption
    const char *aszLabels[Field_Max];
@@ -628,11 +638,11 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // -----------------------
 
    // set def values for the headers
-   if(m_txtFields[Field_To]) 
+   if(m_txtFields[Field_To])
       m_txtFields[Field_To]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
-   if(m_txtFields[Field_Cc]) 
+   if(m_txtFields[Field_Cc])
       m_txtFields[Field_Cc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
-   if(m_txtFields[Field_Bcc]) 
+   if(m_txtFields[Field_Bcc])
       m_txtFields[Field_Bcc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
 
    // append signature
@@ -754,37 +764,25 @@ wxComposeView::CreateFTCanvas(void)
 {
    m_LayoutWindow = new wxLayoutWindow(m_panel);
 
-   wxString tmp;
-   wxColour *c;
-   tmp = READ_CONFIG(m_Profile,MP_CVIEW_FGCOLOUR);
-   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
-   {
-      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_fg = *wxTheColourDatabase->FindColour("black");
-   }
-   else
-      m_fg = *c;
-   tmp = READ_CONFIG(m_Profile,MP_CVIEW_BGCOLOUR);
-   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
-   {
-      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_bg = *wxTheColourDatabase->FindColour("white");
-   }
-   else
-      m_bg = *c;
+   wxString colourName;
+
+   GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
+   GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
+
    m_font = READ_CONFIG(m_Profile,MP_CVIEW_FONT);
-   ASSERT(m_font >= 0 && m_font <= NUM_FONTS);
+   ASSERT( m_font >= 0 && m_font <= NUM_FONTS );
+
    m_font = wxFonts[m_font];
    m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
 
    m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    EnableEditing(true);
-   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN)); 
+   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN));
 }
 
 wxComposeView::wxComposeView(const String &iname,
                              wxWindow *parent)
-   : wxMFrame(iname,parent)
+             : wxMFrame(iname,parent)
 {
    initialised = false;
 
@@ -1118,7 +1116,7 @@ wxComposeView::InsertData(char *data,
 
    mc->SetMimeType(mimetype);
    mc->SetData(data, length, filename);
-   
+
    wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mimetype);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
@@ -1210,7 +1208,7 @@ wxComposeView::Send(void)
    {
       while((export = wxLayoutExport( &status,
                                       WXLO_EXPORT_AS_TEXT,
-                                      WXLO_EXPORT_WITH_CRLF)) != NULL) 
+                                      WXLO_EXPORT_WITH_CRLF)) != NULL)
       {
          if(export->type == WXLO_EXPORT_TEXT)
          {
@@ -1320,7 +1318,7 @@ wxComposeView::Send(void)
    }// if(m_sent)
    success = m_msg->Send();  // true if sent
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
-      m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
+      m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
                        MF_PROFILE_OR_FILE);
 
    m_sent = true;
@@ -1347,9 +1345,28 @@ wxComposeView::SetAddresses(const String &to,
                             const String &cc,
                             const String &bcc)
 {
-   m_txtFields[Field_To]->SetValue(WXCPTR to.c_str());
-   m_txtFields[Field_Cc]->SetValue(WXCPTR cc.c_str());
-   m_txtFields[Field_Bcc]->SetValue(WXCPTR bcc.c_str());
+   wxTextCtrl *text;
+
+   if ( !!to )
+   {
+      text = m_txtFields[Field_To];
+      if ( text )
+         text->SetValue(WXCPTR to.c_str());
+   }
+
+   if ( !!cc )
+   {
+      text = m_txtFields[Field_Cc];
+      if ( text )
+         text->SetValue(WXCPTR cc.c_str());
+   }
+
+   if ( !!bcc )
+   {
+      text = m_txtFields[Field_Bcc];
+      if ( text )
+         text->SetValue(WXCPTR bcc.c_str());
+   }
 }
 
 /// sets Subject field
@@ -1586,7 +1603,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
          {
             wxLogError(_("Cannot write message to file '%s'."),
                        filename.c_str());
-            
+
             return false;
          }
    }

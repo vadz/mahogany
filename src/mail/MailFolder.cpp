@@ -28,6 +28,8 @@
 #include "MailFolder.h"
 #include "MailFolderCC.h"
 
+#include "miscutil.h"   // GetFullEmailAddress
+
 #include <wx/file.h>
 
 MailFolder *
@@ -337,14 +339,73 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
          }
       }
       cv->Show(TRUE);
-      String
-         name, email;
-      email = msg->Address(name, MAT_REPLYTO);
-      if(name.length() > 0)
-         email = name + String(" <") + email + String(">");
+
+      // set the recepient address
+      String name;
+      String email = msg->Address(name, MAT_REPLYTO);
+      email = GetFullEmailAddress(name, email);
       cv->SetAddresses(email);
-      cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
-                     + msg->Subject());
+
+      // construct the new subject
+      String newSubject;
+      String replyPrefix = READ_CONFIG(GetProfile(), MP_REPLY_PREFIX);
+      String subject = msg->Subject();
+
+      // we may collapse "Re:"s in the subject if asked for it
+      enum CRP // this is an abbreviation of "collapse reply prefix"
+      {
+         NoCollapse,
+         DumbCollapse,
+         SmartCollapse
+      } collapse = (CRP)READ_CONFIG(GetProfile(), MP_REPLY_COLLAPSE_PREFIX);
+
+      if ( collapse != NoCollapse )
+      {
+         size_t replyLevel = 0;
+         const char *pStart = subject.c_str();
+         for ( ;; )
+         {
+            const char *pMatch = strstr(pStart, replyPrefix);
+            if ( !pMatch )
+               break;
+
+            pStart = pMatch + replyPrefix.length();
+            replyLevel++;
+         }
+
+         subject = pStart; // this is the start of real subject
+
+         if ( collapse == SmartCollapse && replyLevel > 0 )
+         {
+            // the default value of the reply prefix is "Re: ", yet we want to
+            // have something like "Re[2]: " in replies, so hack it a little
+            String replyPrefix2(replyPrefix);
+            replyPrefix2.Trim();
+            if ( replyPrefix2.Last() == ':' )
+            {
+               // throw away last character
+               replyPrefix2.Truncate(replyPrefix2.Len() - 1);
+            }
+
+            // TODO not configurable enough, allow the user to specify the
+            //      format string himself and also decide whether we use powers
+            //      of 2, just multiply by 2 or nothing at all
+            newSubject.Printf("%s[%d]: %s",
+                              replyPrefix2.c_str(),
+                              2*replyLevel,
+                              subject.c_str());
+         }
+      }
+
+      // in cases of {No|Dumb}Collapse we fall here
+      if ( !newSubject )
+      {
+         newSubject = replyPrefix + subject;
+      }
+
+      cv->SetSubject(newSubject);
+
+      // other headers
       String messageid;
       msg->GetHeaderLine("Message-Id", messageid);
       String references;
@@ -353,8 +414,8 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
       if(references.Length() > 0)
          references << ",\015\012 ";
       references << messageid;
-      cv->AddHeaderEntry("In-Reply-To",messageid);
-      cv->AddHeaderEntry("References",references);
+      cv->AddHeaderEntry("In-Reply-To", messageid);
+      cv->AddHeaderEntry("References", references);
 
       SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
       SafeDecRef(msg);

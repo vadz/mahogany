@@ -127,7 +127,7 @@ public:
 // a (unique) autosave timer instance
 static AutoSaveTimer gs_timerAutoSave;
 // a (unique) timer for polling for new mail
-static MailCollectionTimer gs_MailCollectionTimer;
+static MailCollectionTimer gs_timerMailCollection;
 
 // this creates the one and only application object
 IMPLEMENT_APP(wxMApp);
@@ -288,11 +288,9 @@ wxMApp::OnInit()
          gs_timerAutoSave.Start(delay);
 
       // start another timer to poll for new mail:
-      // start a timer to autosave the profile entries
-      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY) * 1000;
+      delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
       if ( delay > 0 )
-         gs_MailCollectionTimer.Start(delay);
-      
+         gs_timerMailCollection.Start(delay);
       
       return true;
    }
@@ -320,8 +318,9 @@ int wxMApp::OnRun()
 
 int wxMApp::OnExit()
 {
-   // disable autosave, won't need it any more
+   // disable timers for autosave and mail collection, won't need them any more
    gs_timerAutoSave.Stop();
+   gs_timerMailCollection.Stop();
 
 #if wxUSE_POSTSCRIPT
    // save our preferred printer settings
