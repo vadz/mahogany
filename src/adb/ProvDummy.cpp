@@ -64,6 +64,8 @@ public:
     // AdbEntry
   virtual AdbEntryGroup *GetGroup() const;
 
+  virtual void GetFieldInternal(size_t n, String *pstr) const
+    { GetField(n, pstr); }
   virtual void GetField(size_t n, String *pstr) const;
 
   virtual size_t GetEMailCount() const           { return m_astrEmails.Count(); }

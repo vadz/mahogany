@@ -475,7 +475,7 @@ MAppBase::OnStartup()
    // must be done before using the network
    SetupOnlineManager();
 
-   m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
+   m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
    
    // create and show the main program window
    CreateTopLevelFrame();
@@ -807,7 +807,7 @@ MAppBase::OnMEvent(MEventData& event)
    }
    else if (event.GetId() == MEventId_OptionsChange)
    {
-      m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
+      m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
       SetupOnlineManager(); // make options change effective
       return TRUE;
    }
