@@ -18,7 +18,7 @@ wxGTK bug:
  - listctrl can have no focused element, i.e. the assert in
    wxFolderView.cpp:85 can be triggered
 
- - treectrl ignores icon sizes
+ - wxTreeCtrl::HitTest() doesn't work well with non standard icon sizes
 
 VZ:
 - wxConfig does not like entries like:
@@ -48,9 +48,10 @@ VZ:
   + VZ: derive your own log target :-) But I think the default order
         is more sensible
 
-- wxComboBox textctrl allows editing!
 - MTempFileName is broken: all files remain in /tmp!!!
-- .mailcap should override /etc/mailcap, not other way round
+  + VZ: sure about it? Files remain when the program crashes, but I don't
+        see it otherwise
+
 - help button and more fields for folder creation dialog
 
 - MailFolder now reads the "RetrievalLimit" config value and will not
@@ -324,10 +325,11 @@ STRANGE....
 *********************************************************************
 *** things to fix/implement next ***
 *********************************************************************
+
 - drag and drop of messages between folders
 - configuration dialog for columns in folderview
+  + VZ: will do
 - alternative treecontrol instead of listctrl for folderview
-- anonymous IMAP access (VZ: I'll do it)
 
 - use wxURL to retrieve remote configuration files and import them,
   maybe even retrieve files to use as folders or address books`?
@@ -440,6 +442,8 @@ STRANGE....
     also used to filter the copies of received mail messages (i.e. if a
     message is sent to the mailing list and cc'd to me I'd like to read it
     only once)
+  + "killfile" features and a special "quick kill" (TM) feature which would kill
+    all articles of the author of the selected one
 
 - wxFolderView assumes that msg numbers are 1...n - change this to use uids instead.
 
@@ -510,6 +514,10 @@ classes in the hierarchy.
  - wxLayout:
    + clicking before begin of line (wrongly) gives assert
 
+ - wxComboBox textctrl allows editing!
+   + VZ: I think RR fixed it
+
+ - .mailcap should override /etc/mailcap, not other way round
 
 *********************************************************************
 *** Fixed and tested:
