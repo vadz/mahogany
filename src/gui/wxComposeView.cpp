@@ -60,6 +60,7 @@
 #include <wx/dir.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
+#include <wx/tokenzr.h>
 
 #include "wx/persctrl.h"
 
@@ -716,6 +717,12 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 
 Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
 {
+   // don't do anything for the newsgroups (TODO-NEWS: expand using .newsrc?)
+   if ( m_composeView->GetMode() == wxComposeView::Mode_News )
+   {
+      return Composer::Recipient_Newsgroup;
+   }
+
    // try to expand the last component
    String text = GetValue();
    text.Trim(FALSE); // trim spaces from both sides
@@ -1432,9 +1439,13 @@ wxSizer *wxComposeView::CreateHeaderFields()
    wxSizer *sizerRcpt = new wxBoxSizer(wxHORIZONTAL);
    sizerRcpt->Add(m_txtRecipient, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
 
-   wxButton *btn = new wxButton(m_panel, IDB_EXPAND, "&Expand");
-   btn->SetToolTip(_("Expand the address using address books"));
-   sizerRcpt->Add(btn, 0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+   // TODO-NEWS: expanding the news groups doesn't work yet
+   if ( m_mode != Mode_News )
+   {
+      wxButton *btn = new wxButton(m_panel, IDB_EXPAND, "&Expand");
+      btn->SetToolTip(_("Expand the address using address books"));
+      sizerRcpt->Add(btn, 0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+   }
 
    sizerHeaders->Add(sizerRcpt, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
 
@@ -1452,7 +1463,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
 
    sizerTop->Add(m_panelRecipients, 1, wxEXPAND);
 
-   // this number is completely arbitrary (FIXME)
+   // this number is completely arbitrary
    sizerTop->SetItemMinSize(m_panelRecipients, 0, 80);
 
    return sizerTop;
@@ -1675,20 +1686,34 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
       addrType = m_rcptTypeLast;
    }
 
-   // split the string in addreses and add all of them
-   AddressList_obj addrList(address, READ_CONFIG(m_Profile, MP_HOSTNAME));
-   if ( addrList )
+   if ( addrType == Recipient_Newsgroup )
    {
-      Address *addr = addrList->GetFirst();
-      while ( addr )
-      {
-         String address = addr->GetAddress();
-         if ( !address.empty() )
-         {
-            AddRecipient(address, addrType);
-         }
+      // tokenize the string possibly containing several newsgroups
+      wxArrayString groups = wxStringTokenize(address, ",; \t", wxTOKEN_STRTOK);
 
-         addr = addrList->GetNext(addr);
+      size_t count = groups.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         AddRecipient(groups[n], Recipient_Newsgroup);
+      }
+   }
+   else // email address
+   {
+      // split the string in addreses and add all of them
+      AddressList_obj addrList(address, READ_CONFIG(m_Profile, MP_HOSTNAME));
+      if ( addrList )
+      {
+         Address *addr = addrList->GetFirst();
+         while ( addr )
+         {
+            String address = addr->GetAddress();
+            if ( !address.empty() )
+            {
+               AddRecipient(address, addrType);
+            }
+
+            addr = addrList->GetNext(addr);
+         }
       }
    }
 }
@@ -3171,7 +3196,8 @@ wxComposeView::Send(bool schedule)
    m_sending = true;
 
    wxBusyCursor bc;
-   wxLogStatus(this, _("Sending message..."));
+   wxLogStatus(this, m_mode == Mode_News ? _("Posting message")
+                                         : _("Sending message..."));
    Disable();
 
    SendMessage *msg = BuildMessage();
@@ -3225,21 +3251,28 @@ wxComposeView::Send(bool schedule)
       mApplication->UpdateOutboxStatus();
 
       // show the recipients of the message
-      //
-      // NB: don't show BCC as the message might be saved in the log file
       String msg;
-      msg.Printf(_("Message has been sent to %s"),
-                 GetRecipients(Recipient_To).c_str());
-
-      String rcptCC = GetRecipients(Recipient_Cc);
-      if ( !rcptCC.empty() )
+      if ( m_mode == Mode_News )
       {
-         msg += String::Format(_(" (with courtesy copy sent to %s)"),
-                               rcptCC.c_str());
+         msg.Printf(_("Message has been posted to %s"),
+                    GetRecipients(Recipient_Newsgroup).c_str());
       }
-      else // no CC
+      else // email message
       {
-         msg += '.';
+         // NB: don't show BCC as the message might be saved in the log file
+         msg.Printf(_("Message has been sent to %s"),
+                    GetRecipients(Recipient_To).c_str());
+
+         String rcptCC = GetRecipients(Recipient_Cc);
+         if ( !rcptCC.empty() )
+         {
+            msg += String::Format(_(" (with courtesy copy sent to %s)"),
+                                  rcptCC.c_str());
+         }
+         else // no CC
+         {
+            msg += '.';
+         }
       }
 
       // avoid crashes if the msg has any stray '%'s
