@@ -803,7 +803,7 @@ wxFolderListCtrl::SelectNextUnread()
    }
    UIdType focusedUId = GetFocusedUId();
 
-   if(focusedUId == -1)
+   if(focusedUId == UID_ILLEGAL)
       return;
    
    long idx = -1;
