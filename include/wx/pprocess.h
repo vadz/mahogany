@@ -6,7 +6,7 @@
 // Modified by:
 // Created:     01.06.1999
 // CVS-ID:      $Id$
-// Copyright:   (c) 1999 Carlos Henrique Bauer <chbauer@acm.org> 
+// Copyright:   (c) 1999 Carlos Henrique Bauer <chbauer@acm.org>
 // Licence:     M license
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -14,24 +14,22 @@
 #ifndef _WX_PPROCESSH__
 #define _WX_PPROCESSH__
 
+#ifdef __GNUG_
+   #pragma interface "pprocess.h"
+#endif
+
 #ifdef EXPERIMENTAL
 
 #include "Mdefaults.h"
 
-#ifndef _WX_PROCESSH__
 #include <wx/process.h>
-#endif
-
-#ifndef   _TEXTFILE_H
 #include <wx/textfile.h>
+
+#if wxUSE_IOSTREAMH
+   #include <fstream.h>
+#else
+   #include <fstream>
 #endif
-
-#include <fstream>
-
-#ifdef __GNUG_
-#pragma interface "pprocess.h"
-#endif
-
 
 WX_DECLARE_LIST(wxString, wxEnvVarList);
 
@@ -44,31 +42,31 @@ class WXDLLEXPORT wxPipedProcess : public wxProcess
 public:
 
     enum {
-	invalid_fd = -1
+    invalid_fd = -1
     };
 
 
     enum {
-	invalid_pid = -1
+    invalid_pid = -1
     };
 
 
-    enum 
+    enum
     {
-	no_child,
-	exited,
-	stoped,
-	running,
-	execution_failed
+    no_child,
+    exited,
+    stoped,
+    running,
+    execution_failed
     };
 
 
 protected:
     enum {
-	READ = 0,
-	WRITE = 1
+    READ = 0,
+    WRITE = 1
     };
-    
+
 
 public:
 
@@ -85,7 +83,7 @@ public:
     int ReadInput(wxChar * buf, int len);
     int ReadInput(wxString & string, int len = -1);
     int ReadInputUntilEof(wxString & string);
-    
+
     bool WriteOutput(const void * buf, int len);
     bool WriteOutput(const wxChar * buf, int len);
     bool WriteOutput(const wxString & string);
@@ -97,13 +95,13 @@ public:
     void CloseInput();
     void CloseOutput();
     void CloseError();
-    
+
     void Kill();
 
     void SetEnv(const wxString & varName, const wxString & value);
     void UnsetEnv(const wxString & varName);
     bool GetEnv(const wxString & varName, wxString value);
-    
+
 
     bool WaitChild();
 
@@ -124,7 +122,7 @@ protected:
     void AfterChildDied();
     void Signal_handler(int signal);
     void InstallSignalHandler();
-    
+
 protected:
     pid_t m_childPid;
     int m_exitValue;
@@ -137,7 +135,7 @@ protected:
     ifstream m_input;
     ofstream m_output;
     ifstream m_error;
-    
+
 private:
     // copy ctor and assignment operator are private because
     // it doesn't make sense to copy files this way:
@@ -198,7 +196,7 @@ inline bool wxPipedProcess::WriteOutput(const void * buf, int len)
 inline bool wxPipedProcess::IsChildAlive()
 {
     return (m_childPid != invalid_pid) ?
-	wxKill(m_childPid, wxSIGNONE) != -1 : false;
+    wxKill(m_childPid, wxSIGNONE) != -1 : false;
 }
 
 
@@ -209,7 +207,7 @@ inline wxPipedProcess & wxPipedProcess::operator <<(const wxString & string)
 }
 
 
-inline wxPipedProcess & wxPipedProcess::operator >>(wxString & string) 
+inline wxPipedProcess & wxPipedProcess::operator >>(wxString & string)
 {
     ReadInput(string);
     return *this;
@@ -217,15 +215,14 @@ inline wxPipedProcess & wxPipedProcess::operator >>(wxString & string)
 
 
 inline long wxExecute(const wxString& command,
-		      wxPipedProcess *handler)
+                      wxPipedProcess *handler)
 {
     return handler->Execute(command);
 }
 
+#endif // EXPERIMENTAL
 
-
-#endif
-#endif
+#endif // _WX_PROCESSH__
 
 
 
