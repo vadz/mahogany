@@ -250,6 +250,10 @@ wxMFrame::SetTitle(String const &title)
 {
    wxString t = _("Mahogany : ") + title;
 
+#ifdef DEBUG
+   t += _(" [debug build]");
+#endif
+
    wxFrame::SetTitle(t.c_str());
 }
 
