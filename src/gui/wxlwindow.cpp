@@ -98,6 +98,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    wxPaintDC dc( this );
    PrepareDC( dc );     
    SetFocus();
+
    
    wxPoint findPos;
    findPos.x = dc.DeviceToLogicalX(event.GetX());
@@ -108,13 +109,13 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 
    if(findPos.x < 0) findPos.x = 0;
    if(findPos.y < 0) findPos.y = 0;
-   
+
+   m_ClickPosition = wxPoint(event.GetX(), event.GetY());
 #ifdef WXLAYOUT_DEBUG
    wxLogDebug("wxLayoutWindow::OnMouse: (%d, %d) -> (%d, %d)",
               event.GetX(), event.GetY(), findPos.x, findPos.y);
 #endif
 
-   m_ClickPosition = findPos;
    wxPoint cursorPos;
    wxLayoutObject *obj = m_llist->FindObjectScreen(dc, findPos, &cursorPos);
 
@@ -141,7 +142,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       && (! obj || (obj && obj->GetUserData() == NULL))
       )
    {
-      PopupMenu(m_PopupMenu, event.GetX(), event.GetY());
+      PopupMenu(m_PopupMenu, m_ClickPosition.x, m_ClickPosition.y);
       return;
    }
    // find the object at this position
