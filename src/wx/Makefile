@@ -29,4 +29,4 @@ depend:
 	$(MAKE) -f Makefile2 $@ 
 force: ;
 
-.PHONY: clean all
+.PHONY: clean all dep depend
