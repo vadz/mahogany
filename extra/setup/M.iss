@@ -94,8 +94,7 @@ Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{a
 Source: "src\Python\MDialogs.py-swig"; DestName: "MDialogs.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
 Source: "src\Python\MimePart.py-swig"; DestName: "MimePart.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MSendMessage.py-swig"; DestName: "MSendMessage.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\SendMessage.py-swig"; DestName: "SendMessage.py"; DestDir: "{app}\Python"; Components: python
 
 ; case is important (should be Minit) or Python complains!!
 Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
