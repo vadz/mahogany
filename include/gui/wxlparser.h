@@ -75,6 +75,11 @@ extern void wxLayoutImportText(wxLayoutList *list,
                                wxString const &str,
                                wxFontEncoding encoding = wxFONTENCODING_SYSTEM);
 
+/// import text in given encoding into a wxLayoutList (including linefeeds):
+extern void wxLayoutImportHTML(wxLayoutList *list,
+                               wxString const &str,
+                               wxFontEncoding encoding = wxFONTENCODING_SYSTEM);
+
 /// export text in a given format
 wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
                                      int mode = WXLO_EXPORT_AS_TEXT,

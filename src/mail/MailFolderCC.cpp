@@ -1504,6 +1504,9 @@ MailFolderCC::GetHeaders(void) const
       // sort/thread listing:
       that->ProcessHeaderListing(m_Listing);
 
+      // enforce consistency:
+      that->m_nMessages = m_Listing->Count();
+
       // check if we need to update our data structures or send new
       // mail events:
       that->CheckForNewMail(m_Listing);
@@ -1515,6 +1518,8 @@ MailFolderCC::GetHeaders(void) const
                               ((MailFolderCC*)this) );
       }
    }
+   // enforce consistency:
+   that->m_nMessages = m_Listing->Count();
 
    m_Listing->IncRef(); // for the caller who uses it
    return m_Listing;

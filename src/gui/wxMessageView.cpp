@@ -798,6 +798,7 @@ wxMessageView::Update(void)
             )
          )
       {
+         bool isHTML = (mimeType == "text/html");
          // get the encoding of the text
          wxFontEncoding encPart;
          if ( m_encodingUser != wxFONTENCODING_SYSTEM )
@@ -881,21 +882,37 @@ wxMessageView::Update(void)
                      if (before[line_pos] == '\n')
                      {
                         SET_QUOTING_LEVEL(level, before.c_str() + line_pos + 1)
-                        wxLayoutImportText(llist,
-                                 before.Mid(line_from, line_pos - line_from + 1),
-                                 encPart);
+                        if(isHTML)
+			   wxLayoutImportHTML(llist,
+                           before.Mid(line_from, line_pos - line_from + 1),
+                           encPart);
+			else
+			   wxLayoutImportText(llist,
+                           before.Mid(line_from, line_pos - line_from + 1),
+                           encPart);
                         SET_QUOTING_COLOUR(level)
                         line_from = line_pos + 1;
                      }
                   }
                   if (line_from < line_lng-1)
-                     wxLayoutImportText(llist,
-                                    before.Mid(line_from, line_lng - line_from),
-                                    encPart);
+		  {
+                     if(isHTML)
+			wxLayoutImportHTML(llist,
+                                   before.Mid(line_from, line_lng - line_from),
+                                   encPart);
+	             else
+	                wxLayoutImportText(llist,
+                                   before.Mid(line_from, line_lng - line_from),
+                                   encPart);
+                  }
                }
                else // no quoted text colourizing
-                  wxLayoutImportText(llist, before, encPart);
-
+               {
+                  if(isHTML)
+                    wxLayoutImportHTML(llist, before, encPart);
+                  else
+                    wxLayoutImportText(llist, before, encPart);
+               }
                if(!strutil_isempty(url) && m_ProfileValues.highlightURLs)
                {
                   ci = new ClickableInfo(url);

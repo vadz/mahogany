@@ -1,1 +1,1 @@
-shlibs:Depends=libc6, libstdc++2.9, xlib6g (>= 3.3.5-1)
+shlibs:Depends=libc6 (>= 2.1.2), libssl09, libstdc++2.10, python-base (>= 1.5.2-2), xlib6g (>= 3.3.6-4)

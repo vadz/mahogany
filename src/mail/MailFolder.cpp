@@ -322,8 +322,11 @@ MailFolder::OpenFolder(int folderType,
          profile = Profile::CreateProfile(i_path, parentProfile);
       else
       {
-         String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
-         profile = Profile::CreateProfile(pname, parentProfile);
+         //String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
+	if(i_path[0] == '/')
+          profile = Profile::CreateEmptyProfile(parentProfile);
+        else
+          profile = Profile::CreateProfile(i_path, parentProfile);
       }
       CHECK(profile, NULL, "can't create profile");   // return if it fails
       int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
@@ -347,8 +350,11 @@ MailFolder::OpenFolder(int folderType,
    }
    else // type != PROFILE
    {
-      String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
-      profile = Profile::CreateProfile(symbolicName, parentProfile);
+      //      String pname = (symbolicName[0] == '/') ? String(symbolicName.c_str()+1) : symbolicName;
+      if(symbolicName[0] == '/')
+        profile = Profile::CreateEmptyProfile(parentProfile);
+      else
+        profile = Profile::CreateProfile(symbolicName, parentProfile);
 
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 

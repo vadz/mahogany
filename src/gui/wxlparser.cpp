@@ -39,17 +39,13 @@ inline static bool IsEndOfLine(const char *p)
    return (*p == '\n') || ((*p == '\r') && (*(p + 1) == '\n'));
 }
 
-void wxLayoutImportText(wxLayoutList *list,
-                        wxString const &str,
-                        wxFontEncoding encoding)
+static void
+SetEncoding(wxLayoutList *list, wxFontEncoding encoding,
+            bool *useConverter, wxEncodingConverter *conv)
 {
-   if ( !str )
-      return;
-
    // check that we have fonts available for this encoding if it is a non
    // default one
-   bool useConverter = FALSE;
-   wxEncodingConverter conv;
+   *useConverter = FALSE;
    if ( encoding != wxFONTENCODING_SYSTEM )
    {
       if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
@@ -58,10 +54,9 @@ void wxLayoutImportText(wxLayoutList *list,
          wxFontEncoding encAlt;
          if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
          {
-            if ( conv.Init(encoding, encAlt) )
+            if ( conv->Init(encoding, encAlt) )
             {
-               useConverter = TRUE;
-
+               *useConverter = TRUE;
                encoding = encAlt;
             }
             else
@@ -81,9 +76,16 @@ void wxLayoutImportText(wxLayoutList *list,
       }
    }
 
-   // we change the string only temporarily inside this function
-   // VZ: I still don't like it... the string data may be shared...
-   char * cptr = (char *)str.c_str(); // const_cast
+}
+
+static void wxLayoutImportTextInternal(wxLayoutList *list,
+			               wxString const &str,
+                                       bool useConverter,
+                                       wxEncodingConverter &conv)
+{
+   char * buffer = new char [ str.Length() + 1 ];
+   char * cptr = buffer;
+   strcpy(buffer, str.c_str());
    const char * begin = cptr;
    char  backup;
 
@@ -112,6 +114,64 @@ void wxLayoutImportText(wxLayoutList *list,
          break;
       cptr++;
    }
+   delete [] buffer;
+}
+
+void wxLayoutImportHTML(wxLayoutList *list,
+                        wxString const &str,
+                        wxFontEncoding encoding)
+{
+  // Strip URLs:
+  wxString filtered;
+  const char *cptr = str.c_str();
+  bool inTag = FALSE;
+  while(*cptr)
+  {
+	if(*cptr == '<') 
+        {
+	  inTag = TRUE;
+          cptr++;
+	  // process known tags
+	  continue;
+	}
+        if(inTag && *cptr == '>')
+	{
+	  inTag = FALSE;
+	  cptr++;
+	  continue;
+	}
+        if(*cptr == '&') // ignore it
+        {
+           if( strncmp(cptr+1,"nbsp;", 5) == 0)
+           {
+              cptr += 6;
+              filtered += ' ';
+              continue;
+           }
+           while(*cptr && *cptr != ';')
+              cptr++;
+           if(*cptr == ';')
+              cptr++;
+           continue;
+        }
+	if(! inTag)
+	  filtered += *cptr;
+        cptr++;
+  }
+  wxLayoutImportText(list, filtered, encoding);
+}
+
+void wxLayoutImportText(wxLayoutList *list,
+                        wxString const &str,
+                        wxFontEncoding encoding)
+{
+   if ( !str )
+      return;
+   
+   bool useConverter = FALSE;
+   wxEncodingConverter conv;
+   SetEncoding(list, encoding, &useConverter, &conv);
+   wxLayoutImportTextInternal(list, str, useConverter, conv);
 }
 
 static
