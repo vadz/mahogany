@@ -593,7 +593,7 @@ wxMApp::OnInit()
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
 
-      m_Locale = new wxLocale(locale, locale, NULL, false);
+      m_Locale = new wxLocale(locale, locale, NULL);
       if ( !m_Locale->IsOk() )
       {
          delete m_Locale;
@@ -619,10 +619,7 @@ wxMApp::OnInit()
 #endif // OS
          m_Locale->AddCatalogLookupPathPrefix(localePath);
 
-         bool ok = m_Locale->AddCatalog("wxstd");
-         ok |= m_Locale->AddCatalog(M_APPLICATIONNAME);
-
-         if ( !ok )
+         if ( !m_Locale->AddCatalog(M_APPLICATIONNAME) )
          {
             // better use English messages if msg catalog was not found
             delete m_Locale;
