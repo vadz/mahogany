@@ -4496,10 +4496,6 @@ MailFolderCC::RequestUpdate()
    wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
               GetName().c_str());
 
-   // the number of unread/marked/... messages may have changed (there could be
-   // some more of them among the new ones), so forget the old values
-   MfStatusCache::Get()->InvalidateStatus(GetName());
-
    // tell all interested that the folder changed
    MEventManager::Send(new MEventFolderUpdateData(this));
 }
@@ -4560,15 +4556,20 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
             //     filtered away, we'd still have to notify the GUI about these
             //     expunged messages
 
-            // our cached idea of the number of messages we have doesn't
-            // correspond to reality any more but don't invalidate it from here
-            // - we will call MfStatusCache::UpdateStatus() soon from
-            // OnNewMail() anyhow
-
             // we want to apply the filtering code but we can't do it from here
             // because we're inside c-client now and it is not reentrant, so we
             // send an event to ourselves to do it slightly later
             MEventManager::Send(new MEventFolderOnNewMailData(this));
+
+            // the number of unread/marked/... messages may have changed (there
+            // could be some more of them among the new ones), so forget the
+            // old values
+            //
+            // NB: we can't assume that the status hasn't changed just because
+            //     all new mail was filtered away because we might have some
+            //     non new messages as well and the flags of the existing ones
+            //     could have been changed from the outside
+            MfStatusCache::Get()->InvalidateStatus(GetName());
          }
       }
       else // empty folder
