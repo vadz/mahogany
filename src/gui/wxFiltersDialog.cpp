@@ -588,13 +588,19 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    // don't create it yet as it might be not needed at all, so postpone it
    m_btnSpam = NULL;
 
+   // only create the logical condition (And/Or) control if we have
+   // something to combine this one with
    if ( previous )
    {
-      // only create the logical condition (And/Or) control if we have
-      // something to combine this one with
-      m_Logical = new wxChoice(parent, -1, wxDefaultPosition,
-                               wxDefaultSize, ORC_LogicalCount,
-                               ORC_Logical);
+      // create a separate array with the translated strings
+      wxString logicTrans[ORC_TypesCount];
+      for ( size_t nLogical = 0; nLogical < ORC_LogicalCount; nLogical++ )
+      {
+         logicTrans[nLogical] = _(ORC_Logical[nLogical]);
+      }
+
+      m_Logical = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
+                               ORC_LogicalCount, logicTrans);
 
       // take the value from the preceding control, if any, instead of default
       // as it is usually more convenient (user usually creates filter of the
@@ -1225,10 +1231,24 @@ OneActionControl::OneActionControl(wxWindow *parent)
 
    m_Parent = parent;
 
+   // create a separate array with the translated strings
+   wxString typesTrans[OAC_TypesCount];
+   for ( size_t nType = 0; nType < OAC_TypesCountS; nType++ )
+   {
+      typesTrans[nType] = _(OAC_Types[nType]);
+   }
+
    m_Type = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
-                         OAC_TypesCountS, OAC_Types);
+                         OAC_TypesCountS, typesTrans);
+
+   wxString msgflagsTrans[OAC_Msg_Flag_Count];
+   for ( size_t nMsgFlag = 0; nMsgFlag < OAC_Msg_Flag_Count; nMsgFlag++ )
+   {
+      msgflagsTrans[nMsgFlag] = _(OAC_Msg_Flag[nMsgFlag]);
+   }
    m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
-                             OAC_Msg_Flag_Count, OAC_Msg_Flag);
+                             OAC_Msg_Flag_Count, msgflagsTrans);
+
    m_Argument = new wxTextCtrl(parent, -1, "");
    m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
