@@ -76,7 +76,7 @@ To upload.sourceforge.net, then create the release from SF project admin page.
 Use doc/relnotes.txt for the release notes and the "Changes" part of
 doc/Mannounce.txt for the change log.
 
-Don't forget to upload Mdocs.tar.gz!
+Don't forget to upload Mdocs.tar.gz (do "make -C doc mdocs_tgz" to create it)!
 
 6. Announcing the release
 -------------------------
@@ -109,7 +109,7 @@ c) Freshmeat
 
 Update the FM record
 
-d) GNOME app map: http://www.gnome.org/applist/
+d) GNOME app map: http://www.gnome.org/softwaremap/projects/mahogany/
 
 e) GNU Free Software Directory: http://www.gnu.org/directory/mahogany.html
 
@@ -122,13 +122,13 @@ Update the following template and send it to lsm@execpc.com:
 Begin4
 Title:          Mahogany
 Version:        0.65
-Entered-date:   2002-01-14
+Entered-date:   2003-08-13
 Description:    A powerful and flexible cross-platform GUI email client
 Keywords:       mail news SMTP POP IMAP NNTP MIME Python vCard Palm
 Author:         Vadim Zeitlin <vadim@wxwindows.org>
                 Karsten Ball|der <ballueder@gmx.net>
-Primary-site:   http://sourceforge.net/project/showfiles.php?group_id=3100&release_id=69878
-Platforms:      Unix/GTK+ and Win32
+Primary-site:   http://sourceforge.net/project/showfiles.php?group_id=3100&release_id=178085
+Platforms:      Unix/GTK+, Win32, Mac OS X
 Copying-policy: Mahogany Artistic License or GPL
 End
 
