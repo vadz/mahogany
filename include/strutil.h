@@ -125,32 +125,16 @@ String strutil_ultoa(unsigned long i);
 /** Duplicate a character string.
 
     @param the string to duplicate
-    @return the newly allocated string, must be deleted by caller
+    @return the newly allocated string, must be deleted[] by caller
 */
 char * strutil_strdup(const char *in);
 
 /** Duplicate a string.
 
     @param the string to duplicate
-    @return the newly allocated string, must be deleted by caller
+    @return the newly allocated string, must be deleted[] by caller
 */
 char *strutil_strdup(String const &in);
-
-/* * Duplicate a string.
-
-    @param the string to duplicate
-    @return the newly allocated string, must be deleted by caller
-
-char *strutil_strdup(String const *in)
-{
-   return in ? strutil_strdup(in->c_str()) : NULL;
-}
-*/
-
-/*
-
-void strutil_splitlist(String const &str, std::map<String,String> &table);
-  */
 
 /**
    This takes the string and splits it into tokens delimited by the
@@ -162,23 +146,16 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
   */
 void strutil_tokenise(char *string, const char *delim, kbStringList &tlist);
 
-/** Check whether string starts with an URL, if so, return URL.
-    @param string the string to check
-    @return either the url or an empty string
-  */
-String strutil_matchurl(const char *string);
+/** Find a next URL in the string.
 
-/** Checks string for next URL
+    Note: this is implemented in matchurl.cpp, not strutil.cpp
+
     @param str the string to examine
     @param url where to store the url
-    @return the component of the string before url, sets str to part
-    after url
+    @return the component of the string before url, sets str to part after url
   */
 String
 strutil_findurl(String &str, String &url);
-
-/// extracts the last path component from a path
-String strutil_getfilename(const String& path);
 
 /** Count levels of quoting on the first line of passed string
     (i.e. before the first \n). It understands standard e-mail
@@ -204,11 +181,8 @@ int strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
  */
 String strutil_extract_formatspec(const char *format);
 
-/// checks a character to be a valid part of an URL
-inline bool strutil_isurlchar(char c)
-{
-   return isalnum(c) || strchr("./:_&#-%~!?*+$@=,;", c);
-}
+/// extracts the last path component from a path
+String strutil_getfilename(const String& path);
 
 /// If path is an absolute path, return true.
 bool strutil_isabsolutepath(const String &path);
