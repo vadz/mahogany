@@ -1759,8 +1759,7 @@ MailFolderCC::PingReopen(void)
       if ( m_MailStream )
       {
          rc = true;
-         LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."),
-                     GetName().c_str()));
+         wxLogDebug("Folder '%s' is alive.", GetName().c_str());
       }
    }
 
@@ -3087,7 +3086,14 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
       ASSERT_MSG( msgno == mf->m_msgnoMax, "msg number unexpected changed" );
    }
 
-   mf->RequestUpdate();
+   // don't request update if we are only half opened: this will cause another
+   // attempt to open the folder (which will fail because it can't be opened)
+   // and so lead to an infinite loop - besides it's plainly not needed as we
+   // don't have any messages in a half open folder anyhow
+   if ( stream && !stream->halfopen )
+   {
+      mf->RequestUpdate();
+   }
 }
 
 /** deliver stream message event
@@ -3329,7 +3335,11 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
       HeaderInfoList_obj hil = mf->GetHeaders();
 
-      mf->m_Listing->Remove(hil->GetIdxFromMsgno(msgno));
+      size_t idx = hil->GetIdxFromMsgno(msgno);
+      CHECK_RET( idx < mf->m_nMessages, "invalid msgno in mm_expunged()" );
+
+      mf->m_Listing->Remove(idx);
+
       mf->m_nMessages--;
       mf->m_msgnoMax--;
    }

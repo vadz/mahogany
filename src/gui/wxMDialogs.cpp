@@ -1035,7 +1035,7 @@ extern void CloseSplash()
    if ( g_pSplashScreen )
    {
       // do close the splash
-      wxFrame *frameSplash = (wxFrame *)g_pSplashScreen;
+      wxAboutFrame *frameSplash = (wxAboutFrame *)g_pSplashScreen;
       frameSplash->Close();
 
 #if !wxCHECK_VERSION(2, 3, 0)
