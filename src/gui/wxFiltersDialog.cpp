@@ -1295,7 +1295,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox("",MH_DIALOG_QUICK_FILTERS);
+   wxStaticBox *box = CreateStdButtonsAndBox("", FALSE, MH_DIALOG_QUICK_FILTERS);
 
    wxStaticText *msg = new wxStaticText
                            (
@@ -1309,7 +1309,6 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->height.AsIs();
    msg->SetConstraints(c);
-
    wxArrayString labels;
    labels.Add(_("the message was sent from"));
    labels.Add(_("the message subject contains"));
@@ -1351,7 +1350,6 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxWindow *last = m_checkSubj;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
-
    SetDefaultSize(4*wBtn, 4*hBtn);
 }
 
