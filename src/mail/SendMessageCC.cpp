@@ -637,9 +637,6 @@ SendMessageCC::Send(void)
 
    String server = m_ServerHost;
 
-   MCclientLocker locker;
-   locker.Unlock(); // not needed for now
-   
    if(m_UserName.Length() > 0) // activate authentication
       server << "/user=\"" << m_UserName << '"';
    
@@ -657,15 +654,10 @@ SendMessageCC::Send(void)
       }
 #endif
       if(m_UserName.Length() > 0)
-      {
-         locker.Lock();
-         MailFolderCC::SetLoginData(m_Username, m_Password);
-      }
+         MailFolderCC::SetLoginData(m_UserName, m_Password);
       stream = smtp_open_full
          (NIL,(char **)hostlist, (char *)service.c_str(),
           SMTPTCPPORT, OP_DEBUG); 
-      if(m_UserName.Length() > 0)
-         locker.Unlock();
       break;
    case Prot_NNTP:
       service = "nntp";
@@ -680,14 +672,9 @@ SendMessageCC::Send(void)
       }
 #endif
       if(m_UserName.Length() > 0)
-      {
-         locker.Lock();
-         MailFolderCC::SetLoginData(m_Username, m_Password);
-      }
+         MailFolderCC::SetLoginData(m_UserName, m_Password);
       stream = nntp_open_full
          (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,NIL);
-      if(m_UserName.Length() > 0)
-         locker.Unlock();
       break;
 
       // make gcc happy
