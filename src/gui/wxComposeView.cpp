@@ -392,13 +392,7 @@ private:
 class wxRcptTypeChoice : public wxChoice
 {
 public:
-   wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent)
-      : wxChoice(parent, -1,
-                 wxDefaultPosition, wxDefaultSize,
-                 WXSIZEOF(ms_addrTypes), ms_addrTypes)
-   {
-      m_rcptControl = rcptControl;
-   }
+   wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent);
 
    // callbacks
    void OnChoice(wxCommandEvent& event);
@@ -407,7 +401,7 @@ private:
    // the back pointer to the entire group of controls
    wxRcptControl *m_rcptControl;
 
-   static const wxString ms_addrTypes[wxComposeView::Recipient_Max];
+   static const wxChar *ms_addrTypes[wxComposeView::Recipient_Max];
 
    DECLARE_EVENT_TABLE()
 };
@@ -988,15 +982,31 @@ wxRcptExtraControl::~wxRcptExtraControl()
 // wxRcptTypeChoice
 // ----------------------------------------------------------------------------
 
-const wxString wxRcptTypeChoice::ms_addrTypes[] =
+const wxChar *wxRcptTypeChoice::ms_addrTypes[] =
 {
-   _("To"),
-   _("Cc"),
-   _("Bcc"),
-   _("Newsgroup"),
-   _("Fcc"),
-   _("None"),
+   gettext_noop("To"),
+   gettext_noop("Cc"),
+   gettext_noop("Bcc"),
+   gettext_noop("Newsgroup"),
+   gettext_noop("Fcc"),
+   gettext_noop("None"),
 };
+
+wxRcptTypeChoice::wxRcptTypeChoice(wxRcptControl *rcptControl, wxWindow *parent)
+{
+   // translate the strings
+   wxString addrTypes[WXSIZEOF(ms_addrTypes)];
+   for ( size_t n = 0; n < WXSIZEOF(ms_addrTypes); n++ )
+   {
+      addrTypes[n] = _(ms_addrTypes[n]);
+   }
+
+   Create(parent, -1,
+          wxDefaultPosition, wxDefaultSize,
+          WXSIZEOF(addrTypes), addrTypes);
+
+   m_rcptControl = rcptControl;
+}
 
 void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 {
